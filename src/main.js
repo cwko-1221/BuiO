@@ -408,7 +408,7 @@ function renderTeacherDashboard() {
     <section class="hero-board teacher">
       <div class="hero-copy">
         <h2>班級學習總覽</h2>
-        <p>快速查看學生狀態、開啟白板課堂，或進入數學數據頁。</p>
+        <p>快速查看學生狀態與開啟白板課堂。</p>
         <div class="action-row">
           ${mySession
             ? `<button class="danger-action" id="endSessionBtn">${renderIcon('door')} 結束白板課堂</button>
