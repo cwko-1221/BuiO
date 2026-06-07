@@ -652,11 +652,6 @@ function renderSettingsPage() {
       <div class="settings-intro">
         <h3>整合狀態</h3>
         <p>所有模組已整合至同一個伺服器，學生帳號統一管理，登入一次即可使用所有功能。</p>
-        <div class="hint-box">
-          <span><strong>帳號資料庫：</strong>data/db.json<br>
-          <strong>新增學生：</strong>老師登入後可在數學面板新增<br>
-          <strong>白板伺服器：</strong>Socket.io (Port ${location.port || 3000})</span>
-        </div>
       </div>
     </div>
   `;
