@@ -228,7 +228,7 @@ function renderLogin() {
           <div class="map-node node-c">中文</div>
           <div class="map-node node-d">英文</div>
         </div>
-        <h1>一個登入入口，連接學生每天需要的學習工具。</h1>
+        <h1>一站式個人化學習平台，連接學生每天需要的學習工具。</h1>
       </section>
 
       <section class="login-panel" aria-label="登入">

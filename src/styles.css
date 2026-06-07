@@ -85,11 +85,12 @@ svg {
 
 .login-visual h1 {
   max-width: 780px;
-  margin: 0;
-  font-size: clamp(2.6rem, 6vw, 5.8rem);
-  line-height: 0.98;
+  margin: 60px auto auto auto;
+  font-size: clamp(2.4rem, 5.5vw, 5.2rem);
+  line-height: 1.1;
   font-weight: 850;
   color: var(--ink);
+  text-align: center;
 }
 
 .login-visual p {
