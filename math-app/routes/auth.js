@@ -59,7 +59,8 @@ router.post('/login', async (req, res) => {
                 id: user.studentid,
                 name: user.name,
                 role: req.session.role,
-                className: user.classname || ''
+                className: user.classname || '',
+                language: user.language || 'zh-HK'
             }
         });
 
@@ -103,17 +104,19 @@ router.get('/me', async (req, res) => {
     }
 
     try {
-        // 從資料庫取得最新名稱、角色與班級
-        const { rows } = await db.query('SELECT Name, Role, ClassName FROM Users WHERE StudentID = $1', [req.session.studentId]);
+        // 從資料庫取得最新名稱、角色、班級與語言
+        const { rows } = await db.query('SELECT Name, Role, ClassName, Language FROM Users WHERE StudentID = $1', [req.session.studentId]);
         
         let currentName = req.session.studentName;
         let currentRole = req.session.role || 'student';
         let currentClassName = '';
+        let currentLanguage = 'zh-HK';
 
         if (rows.length > 0) {
             currentName = rows[0].name;
             currentRole = rows[0].role;
             currentClassName = rows[0].classname || '';
+            currentLanguage = rows[0].language || 'zh-HK';
             
             // 順便更新 Session
             req.session.studentName = currentName;
@@ -126,7 +129,8 @@ router.get('/me', async (req, res) => {
                 id: req.session.studentId,
                 name: currentName,
                 role: currentRole,
-                className: currentClassName
+                className: currentClassName,
+                language: currentLanguage
             }
         });
     } catch (e) {
@@ -140,6 +144,29 @@ router.get('/me', async (req, res) => {
                 role: req.session.role || 'student'
             }
         });
+    }
+});
+
+/**
+ * PUT /api/auth/language
+ * 更新目前使用者的語言偏好
+ */
+router.put('/language', async (req, res) => {
+    if (!req.session.studentId) {
+        return res.status(401).json({ success: false, message: '未登入' });
+    }
+    
+    const { language } = req.body;
+    if (!['zh-HK', 'en-US'].includes(language)) {
+        return res.status(400).json({ success: false, message: '不支援的語言' });
+    }
+
+    try {
+        await db.query('UPDATE Users SET Language = $1 WHERE StudentID = $2', [language, req.session.studentId]);
+        res.json({ success: true, message: '語言設定已更新', language });
+    } catch (error) {
+        console.error('更新語言失敗:', error);
+        res.status(500).json({ success: false, message: '伺服器錯誤' });
     }
 });
 

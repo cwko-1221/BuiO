@@ -11,46 +11,42 @@ const WHITEBOARD_BASE = '/whiteboard';
 const MODULES = [
   {
     id: 'math',
-    name: '數學練習',
+    name: 'module_math_name',
     shortName: 'Math',
-    description: '個人化四則運算練習，根據學生弱項自動出題。',
+    description: 'module_math_desc',
     accent: 'mint',
     icon: 'math',
-    status: '已啟用',
+    status: 'module_math_status',
     roleAccess: ['student', 'teacher']
   },
   {
     id: 'whiteboard',
-    name: '互動白板',
+    name: 'module_wb_name',
     shortName: 'Board',
-    description: '老師開啟課堂後，學生可即時加入書寫協作。',
+    description: 'module_wb_desc',
     accent: 'coral',
     icon: 'board',
-    metric: '課堂房間可即時建立',
-    status: '等待老師開課',
+    metric: 'module_wb_metric',
+    status: 'module_wb_status',
     roleAccess: ['student', 'teacher']
   },
   {
     id: 'chinese',
-    name: '中文學習',
+    name: 'module_chinese_name',
     shortName: 'Chinese',
-    description: '閱讀、詞語、寫作與朗讀練習預留模組。',
+    description: 'module_chinese_desc',
     accent: 'sky',
     icon: 'book',
     url: '',
-    metric: '即將推出',
-    status: '未啟用',
+    metric: 'module_chinese_metric',
+    status: 'module_chinese_status',
     disabled: true,
     roleAccess: ['student', 'teacher']
   },
   {
     id: 'english',
-    name: '英文學習',
+    name: 'module_english_name',
     shortName: 'English',
-    description: '拼讀、聆聽、口說與閱讀任務預留模組。',
-    accent: 'violet',
-    icon: 'spark',
-    url: '',
     metric: '即將推出',
     status: '未啟用',
     disabled: true,
@@ -95,13 +91,75 @@ const I18N = {
     'today_advice': '今日學習建議',
     'student_advice_desc': '先完成數學練習，再查看老師是否開啟白板課堂。',
     'start_math': '開始數學練習',
+    'math_sso_ok': '數學練習已在新分頁開啟（同帳號免登入）',
     'board_class': '白板課堂',
     'board_class_desc': '選擇老師的課堂加入，你的名字會自動帶入，毋需再輸入。',
     'my_modules': '我的學習模組',
     'my_modules_desc': '選擇要進入的 App。預設房間：',
     'no_room': '無',
     'no_teacher_live': '目前沒有老師正在開課',
-    'teacher_board_desc': '老師開啟白板後會自動顯示在這裡'
+    'teacher_board_desc': '老師開啟白板後會自動顯示在這裡',
+    'join_class': '加入課堂',
+    'room': '房間：',
+    'open_class': '開課',
+    'login_title': '登入平台',
+    'login_subtitle': '輸入你的學號／教師號和密碼登入。',
+    'login_id_label': '學號 / 教師號',
+    'login_pwd_label': '密碼',
+    'login_btn_loading': '登入中…',
+    'login_btn': '進入平台',
+    'teacher_welcome_title': '歡迎回來，老師',
+    'teacher_welcome_desc': '請從左側導覽列選擇您要進行的管理項目，或進入模組查看您的教學工具。',
+    'teacher_live_module': '即時教學模組',
+    'students_count_span': '學生',
+    'module_management': '模組管理',
+    'student_mgmt_title': '學生帳號管理',
+    'student_mgmt_desc': '新增、修改或刪除學生與教師帳號。',
+    'add_student_title': '新增學生',
+    'add_teacher_title': '新增老師',
+    'form_name_label': '姓名',
+    'form_class_label': '班級',
+    'form_pwd_label': '預設密碼',
+    'form_add_btn': '新增',
+    'students_list_title': '現有帳號清單',
+    'role_student': '學生',
+    'role_teacher': '老師',
+    'delete_btn': '刪除',
+    'no_students': '無學生資料',
+    'no_teachers': '無老師資料',
+    'all_modules_title': '全部學習模組',
+    'all_modules_desc': '平台以模組方式擴充。新增 App 時只需要加入名稱、描述、連結和權限。',
+    'settings_title': '平台設定',
+    'settings_desc': '深度整合模式：所有 App 運行在同一個伺服器。',
+    'math_app_path': '數學 App 路徑 (math)',
+    'whiteboard_path': '互動白板路徑 (whiteboard)',
+    'default_roomCode': '預設房間號 (roomCode)',
+    'ui_language': '介面語言 (Language)',
+    'lang_zh': '繁體中文',
+    'lang_en': 'English',
+    'save_settings': '儲存設定',
+    'integration_status': '整合狀態',
+    'integration_status_desc': '所有模組已整合至同一個伺服器，學生帳號統一管理，登入一次即可使用所有功能。',
+    'admin_title': '系統管理',
+    'admin_desc': '只有教師或管理員可見的進階設定。',
+    'sync_status': '同步狀態',
+    'sync_desc': '查看與各模組的連線狀態與健康度。',
+    'school_name': '杯澳公立學校',
+    'module_math_name': '數學練習',
+    'module_math_desc': '個人化四則運算練習，根據學生弱項自動出題。',
+    'module_math_status': '已啟用',
+    'module_wb_name': '互動白板',
+    'module_wb_desc': '老師開啟課堂後，學生可即時加入書寫協作。',
+    'module_wb_metric': '課堂房間可即時建立',
+    'module_wb_status': '等待老師開課',
+    'module_chinese_name': '中文學習',
+    'module_chinese_desc': '閱讀、詞語、寫作與朗讀練習預留模組。',
+    'module_chinese_metric': '即將推出',
+    'module_chinese_status': '未啟用',
+    'module_english_name': '英文學習',
+    'module_english_desc': '拼讀、聆聽、口說與閱讀任務預留模組。',
+    'module_english_metric': '開發中',
+    'module_english_status': '未啟用'
   },
   'en-US': {
     'good_morning': 'Good Morning',
@@ -116,18 +174,81 @@ const I18N = {
     'today_advice': 'Today\'s Learning Plan',
     'student_advice_desc': 'Complete math practice first, then check for active whiteboard sessions.',
     'start_math': 'Start Math Practice',
+    'math_sso_ok': 'Math practice opened in a new tab (Auto-login applied)',
     'board_class': 'Whiteboard Sessions',
     'board_class_desc': 'Join a teacher\'s session. Your name will be filled in automatically.',
     'my_modules': 'My Learning Modules',
     'my_modules_desc': 'Select an App to launch. Default Room: ',
     'no_room': 'None',
     'no_teacher_live': 'No active teacher sessions',
-    'teacher_board_desc': 'Sessions will appear here once a teacher opens a whiteboard'
+    'teacher_board_desc': 'Sessions will appear here once a teacher opens a whiteboard',
+    'join_class': 'Join Class',
+    'room': 'Room: ',
+    'open_class': ' Started',
+    'login_title': 'Login to Platform',
+    'login_subtitle': 'Enter your Student/Teacher ID and password to login.',
+    'login_id_label': 'Student / Teacher ID',
+    'login_pwd_label': 'Password',
+    'login_btn_loading': 'Logging in...',
+    'login_btn': 'Enter Platform',
+    'teacher_welcome_title': 'Welcome back, Teacher',
+    'teacher_welcome_desc': 'Select a management item from the sidebar, or enter modules to view your teaching tools.',
+    'teacher_live_module': 'Live Teaching Modules',
+    'students_count_span': 'Students',
+    'module_management': 'Module Management',
+    'student_mgmt_title': 'Student Account Management',
+    'student_mgmt_desc': 'Add, modify, or delete student and teacher accounts.',
+    'add_student_title': 'Add Student',
+    'add_teacher_title': 'Add Teacher',
+    'form_name_label': 'Name',
+    'form_class_label': 'Class',
+    'form_pwd_label': 'Default Password',
+    'form_add_btn': 'Add',
+    'students_list_title': 'Existing Accounts',
+    'role_student': 'Student',
+    'role_teacher': 'Teacher',
+    'delete_btn': 'Delete',
+    'no_students': 'No student data',
+    'no_teachers': 'No teacher data',
+    'all_modules_title': 'All Learning Modules',
+    'all_modules_desc': 'The platform expands through modules. To add an App, provide its name, description, link, and permissions.',
+    'settings_title': 'Platform Settings',
+    'settings_desc': 'Deep integration mode: All apps run on the same server.',
+    'math_app_path': 'Math App Path (math)',
+    'whiteboard_path': 'Whiteboard Path (whiteboard)',
+    'default_roomCode': 'Default Room Code',
+    'ui_language': 'Interface Language',
+    'lang_zh': 'Traditional Chinese',
+    'lang_en': 'English',
+    'save_settings': 'Save Settings',
+    'integration_status': 'Integration Status',
+    'integration_status_desc': 'All modules are integrated on the same server. Unified account management allows access to all features with a single login.',
+    'admin_title': 'System Admin',
+    'admin_desc': 'Advanced settings visible only to teachers or admins.',
+    'sync_status': 'Sync Status',
+    'sync_desc': 'View connection status and health with each module.',
+    'school_name': 'Pui O Public School',
+    'module_math_name': 'Math Practice',
+    'module_math_desc': 'Personalized arithmetic practice, automatically generating questions based on student weaknesses.',
+    'module_math_status': 'Enabled',
+    'module_wb_name': 'Whiteboard',
+    'module_wb_desc': 'After the teacher opens a session, students can join instantly to collaborate.',
+    'module_wb_metric': 'Sessions can be created instantly',
+    'module_wb_status': 'Waiting for teacher',
+    'module_chinese_name': 'Chinese Learning',
+    'module_chinese_desc': 'Reserved module for reading, vocabulary, writing, and speaking practice.',
+    'module_chinese_metric': 'Coming soon',
+    'module_chinese_status': 'Disabled',
+    'module_english_name': 'English Learning',
+    'module_english_desc': 'Reserved module for phonics, listening, speaking, and reading tasks.',
+    'module_english_metric': 'In development',
+    'module_english_status': 'Disabled'
   }
 };
 
 function t(key) {
-  const lang = JSON.parse(localStorage.getItem('buiSettings') || '{}').language || 'zh-HK';
+  // Use state.currentUser.language if available, otherwise fallback to local setting or zh-HK
+  const lang = state.currentUser?.language || JSON.parse(localStorage.getItem('buiSettings') || '{}').language || 'zh-HK';
   return I18N[lang]?.[key] || I18N['zh-HK'][key] || key;
 }
 
@@ -302,20 +423,20 @@ function renderLogin() {
 
       <section class="login-panel" aria-label="登入">
         <div class="panel-topline"></div>
-        <h2>登入平台</h2>
-        <p>輸入你的學號／教師號和密碼登入。</p>
+        <h2>${t('login_title')}</h2>
+        <p>${t('login_subtitle')}</p>
         ${state.loginError ? `<div class="login-error">${renderIcon('lock')} ${state.loginError}</div>` : ''}
         <form id="loginForm" class="login-form">
           <label>
-            學號 / 教師號
+            ${t('login_id_label')}
             <input id="userIdInput" placeholder="" autocomplete="username" required />
           </label>
           <label>
-            密碼
+            ${t('login_pwd_label')}
             <input id="passwordInput" type="password" placeholder="" autocomplete="current-password" required />
           </label>
           <button class="primary-action" type="submit" ${state.loginLoading ? 'disabled' : ''}>
-            ${state.loginLoading ? renderIcon('loader') + ' 登入中…' : renderIcon('door') + ' 進入平台'}
+            ${state.loginLoading ? renderIcon('loader') + ' ' + t('login_btn_loading') : renderIcon('door') + ' ' + t('login_btn')}
           </button>
         </form>
       </section>
@@ -474,8 +595,8 @@ function renderTeacherDashboard() {
   return `
     <section class="hero-board teacher">
       <div class="hero-copy">
-        <h2>班級學習總覽</h2>
-        <p>快速查看學生狀態與開啟白板課堂。</p>
+        <h2>${t('teacher_welcome_title')}</h2>
+        <p>${t('teacher_welcome_desc')}</p>
         <div class="action-row">
           ${mySession
             ? `<button class="danger-action" id="endSessionBtn">${renderIcon('door')} 結束白板課堂</button>
@@ -485,12 +606,12 @@ function renderTeacherDashboard() {
         </div>
         ${mySession ? `
           <div class="active-session-badge">
-            ${renderIcon('check')} 課堂進行中 · 房間：${mySession.roomCode} · ${formatTime(mySession.startTime)} 開始
+            ${renderIcon('check')} 課堂進行中 · ${t('room')}${mySession.roomCode} · ${formatTime(mySession.startTime)} ${t('open_class')}
           </div>
         ` : ''}
       </div>
       <div class="class-snapshot">
-        <div><strong>${state.studentsList.filter(s => s.role !== 'teacher').length}</strong><span>學生</span></div>
+        <div><strong>${state.studentsList.filter(s => s.role !== 'teacher').length}</strong><span>${t('students_count_span')}</span></div>
       </div>
     </section>
 
@@ -498,7 +619,7 @@ function renderTeacherDashboard() {
 
     <section class="section-head" style="margin-top:2rem">
       <div>
-        <h2>模組管理</h2>
+        <h2>${t('module_management')}</h2>
       </div>
     </section>
     <div class="module-grid compact-grid">
@@ -514,8 +635,8 @@ function renderModulesPage() {
   return `
     <section class="section-head">
       <div>
-        <h2>全部學習模組</h2>
-        <p>平台以模組方式擴充。新增 App 時只需要加入名稱、描述、連結和權限。</p>
+        <h2>${t('all_modules_title')}</h2>
+        <p>${t('all_modules_desc')}</p>
       </div>
     </section>
     <div class="module-grid modules-page">
@@ -549,19 +670,19 @@ function renderStudentManagement() {
   return `
     <section class="section-head" style="margin-top:2rem; display:flex; justify-content:space-between; align-items:center;">
       <div>
-        <h2>學生管理</h2>
-        <p>新增或刪除學生帳號，資料將與所有模組同步。</p>
+        <h2>${t('student_mgmt_title')}</h2>
+        <p>${t('student_mgmt_desc')}</p>
       </div>
       <button id="upgradeStudentsBtn" class="primary-action" style="background:var(--violet); color:white;">${renderIcon('spark')} 一鍵升級</button>
     </section>
     
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
-      <h3>新增學生</h3>
+      <h3>${t('add_student_title')}</h3>
       <form id="addStudentForm" class="login-form" style="max-width: 400px; margin-top:1rem;">
-        <label>學號<input id="newStudentId" required placeholder="" autocomplete="off"></label>
-        <label>姓名<input id="newStudentName" required placeholder="" autocomplete="off"></label>
+        <label>${t('login_id_label')}<input id="newStudentId" required placeholder="" autocomplete="off"></label>
+        <label>${t('form_name_label')}<input id="newStudentName" required placeholder="" autocomplete="off"></label>
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
-          <label style="margin-bottom:0">班級<input id="newStudentClass" list="classOptions" placeholder="" autocomplete="off"></label>
+          <label style="margin-bottom:0">${t('form_class_label')}<input id="newStudentClass" list="classOptions" placeholder="" autocomplete="off"></label>
           <label style="margin-bottom:0">中文分組<input id="newStudentChi" list="groupOptions" placeholder="" autocomplete="off"></label>
           <label style="margin-bottom:0">英文分組<input id="newStudentEng" list="groupOptions" placeholder="" autocomplete="off"></label>
           <label style="margin-bottom:0">數學分組<input id="newStudentMath" list="groupOptions" placeholder="" autocomplete="off"></label>
@@ -578,14 +699,14 @@ function renderStudentManagement() {
           <option value="A組">
           <option value="B組">
         </datalist>
-        <label>密碼<input id="newStudentPw" required value="123456" autocomplete="off"></label>
-        <button type="submit" class="primary-action" id="addStudentBtn">${renderIcon('plus')} 確認新增</button>
+        <label>${t('form_pwd_label')}<input id="newStudentPw" required value="123456" autocomplete="off"></label>
+        <button type="submit" class="primary-action" id="addStudentBtn">${renderIcon('plus')} ${t('form_add_btn')}</button>
         <div id="addStudentError" style="color:var(--coral); margin-top:0.5rem; display:none;"></div>
       </form>
     </div>
 
     <section class="work-panel">
-      <h2>學生列表</h2>
+      <h2>${t('students_list_title')}</h2>
       <div class="student-table">
         ${state.studentsList.filter(s => s.role !== 'teacher').map(s => `
           <div class="student-row" style="grid-template-columns: 200px 1fr auto; align-items: center;">
@@ -595,7 +716,7 @@ function renderStudentManagement() {
                 <span style="color:var(--text-muted); font-size:0.9em;">${s.id}</span>
               </div>
               <div style="margin-top:6px;">
-                <span style="background:var(--violet); color:white; padding:3px 8px; border-radius:12px; font-size:0.8em; display:inline-block;">學生</span>
+                <span style="background:var(--violet); color:white; padding:3px 8px; border-radius:12px; font-size:0.8em; display:inline-block;">${t('role_student')}</span>
               </div>
             </div>
             <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap; font-size:0.95em;">
@@ -625,10 +746,10 @@ function renderStudentManagement() {
               </label>
             </div>
             <div>
-              <button class="danger-action delete-student-btn" data-id="${s.id}">刪除</button>
+              <button class="danger-action delete-student-btn" data-id="${s.id}">${t('delete_btn')}</button>
             </div>
           </div>
-        `).join('') || '<div style="padding:1rem; color:var(--text-muted)">無學生資料</div>'}
+        `).join('') || `<div style="padding:1rem; color:var(--text-muted)">${t('no_students')}</div>`}
       </div>
     </section>
   `;
@@ -645,24 +766,24 @@ function renderAdminPage() {
   return `
     <section class="section-head" style="margin-top:2rem; display:flex; justify-content:space-between; align-items:center;">
       <div>
-        <h2>Admin 控制台</h2>
-        <p>管理教師帳號。</p>
+        <h2>${t('admin_title')}</h2>
+        <p>${t('admin_desc')}</p>
       </div>
     </section>
     
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
-      <h3>新增老師</h3>
+      <h3>${t('add_teacher_title')}</h3>
       <form id="addTeacherForm" class="login-form" style="max-width: 400px; margin-top:1rem;">
-        <label>教師編號<input id="newTeacherId" required placeholder="" autocomplete="off"></label>
-        <label>姓名<input id="newTeacherName" required placeholder="" autocomplete="off"></label>
-        <label>密碼<input id="newTeacherPw" required value="123456" autocomplete="off"></label>
-        <button type="submit" class="primary-action" id="addTeacherBtn">${renderIcon('plus')} 確認新增</button>
+        <label>${t('login_id_label')}<input id="newTeacherId" required placeholder="" autocomplete="off"></label>
+        <label>${t('form_name_label')}<input id="newTeacherName" required placeholder="" autocomplete="off"></label>
+        <label>${t('form_pwd_label')}<input id="newTeacherPw" required value="123456" autocomplete="off"></label>
+        <button type="submit" class="primary-action" id="addTeacherBtn">${renderIcon('plus')} ${t('form_add_btn')}</button>
         <div id="addTeacherError" style="color:var(--coral); margin-top:0.5rem; display:none;"></div>
       </form>
     </div>
 
     <section class="work-panel">
-      <h2>老師列表</h2>
+      <h2>${t('students_list_title')}</h2>
       <div class="student-table">
         ${state.studentsList.filter(s => s.role === 'teacher').map(s => `
           <div class="student-row" style="grid-template-columns: 1fr auto;">
@@ -672,14 +793,14 @@ function renderAdminPage() {
                 <span style="color:var(--text-muted); font-size:0.9em;">${s.id}</span>
               </div>
               <div style="margin-top:6px;">
-                <span style="background:var(--teal); color:white; padding:3px 8px; border-radius:12px; font-size:0.8em; display:inline-block;">老師</span>
+                <span style="background:var(--teal); color:white; padding:3px 8px; border-radius:12px; font-size:0.8em; display:inline-block;">${t('role_teacher')}</span>
               </div>
             </div>
             <div>
-              <button class="danger-action delete-student-btn" data-id="${s.id}">刪除</button>
+              <button class="danger-action delete-student-btn" data-id="${s.id}">${t('delete_btn')}</button>
             </div>
           </div>
-        `).join('') || '<div style="padding:1rem; color:var(--text-muted)">無老師資料</div>'}
+        `).join('') || `<div style="padding:1rem; color:var(--text-muted)">${t('no_teachers')}</div>`}
       </div>
     </section>
   `;
@@ -693,38 +814,38 @@ function renderSettingsPage() {
   return `
     <section class="section-head">
       <div>
-        <h2>平台設定</h2>
-        <p>深度整合模式：所有 App 運行在同一個伺服器。</p>
+        <h2>${t('settings_title')}</h2>
+        <p>${t('settings_desc')}</p>
       </div>
     </section>
     <div class="settings-layout">
       <form id="settingsForm" class="settings-form">
         <label>
-          數學 App 路徑 (math)
+          ${t('math_app_path')}
           <input name="math" value="${settings.math || MATH_QUIZ_URL}" />
         </label>
         <label>
-          互動白板路徑 (whiteboard)
+          ${t('whiteboard_path')}
           <input name="whiteboard" value="${settings.whiteboard || WHITEBOARD_BASE}" />
         </label>
         <label>
-          預設房間號 (roomCode)
+          ${t('default_roomCode')}
           <input name="roomCode" value="${settings.roomCode || state.currentUser?.name || 'P4A-2026'}" />
         </label>
         <label>
-          介面語言 (Language)
+          ${t('ui_language')}
           <select name="language" style="padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; background:var(--surface); width:100%; margin-top:8px;">
-            <option value="zh-HK" ${(!settings.language || settings.language === 'zh-HK') ? 'selected' : ''}>繁體中文</option>
-            <option value="en-US" ${settings.language === 'en-US' ? 'selected' : ''}>English</option>
+            <option value="zh-HK" ${(!state.currentUser?.language && !settings.language || (state.currentUser?.language || settings.language) === 'zh-HK') ? 'selected' : ''}>${t('lang_zh')}</option>
+            <option value="en-US" ${(state.currentUser?.language || settings.language) === 'en-US' ? 'selected' : ''}>${t('lang_en')}</option>
           </select>
         </label>
         <button class="primary-action" type="submit">
-          ${renderIcon('check')} 儲存設定
+          ${renderIcon('check')} ${t('save_settings')}
         </button>
       </form>
       <div class="settings-intro">
-        <h3>整合狀態</h3>
-        <p>所有模組已整合至同一個伺服器，學生帳號統一管理，登入一次即可使用所有功能。</p>
+        <h3>${t('integration_status')}</h3>
+        <p>${t('integration_status_desc')}</p>
       </div>
     </div>
   `;
@@ -741,15 +862,15 @@ function renderModuleCard(module) {
       <div class="module-icon">${renderIcon(module.icon)}</div>
       <div class="module-copy">
         <div class="module-kicker">${module.shortName}</div>
-        <h3>${module.name}</h3>
-        <p>${module.description}</p>
+        <h3>${t(module.name)}</h3>
+        <p>${t(module.description)}</p>
       </div>
       <div class="module-meta">
-        ${module.metric ? `<span>${module.metric}</span>` : ''}
-        <strong>${module.status}</strong>
+        ${module.metric ? `<span>${t(module.metric)}</span>` : ''}
+        <strong>${t(module.status)}</strong>
       </div>
       <button class="module-action" ${disabled ? 'disabled' : ''} data-open-module="${module.id}">
-        ${module.disabled ? '即將推出' : '進入模組'}
+        ${module.disabled ? t('module_chinese_metric') : '進入模組'}
       </button>
     </article>
   `;
@@ -989,7 +1110,7 @@ function bindEvents() {
   });
 
   // 儲存設定
-  document.getElementById('settingsForm')?.addEventListener('submit', (e) => {
+  document.getElementById('settingsForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
     const settings = {
@@ -998,7 +1119,24 @@ function bindEvents() {
       roomCode: fd.get('roomCode'),
       language: fd.get('language')
     };
+    
+    // 儲存到本地
     localStorage.setItem('buiSettings', JSON.stringify(settings));
+
+    // 同步語言設定到資料庫
+    if (state.loggedIn) {
+      try {
+        await fetch('/api/auth/language', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ language: settings.language })
+        });
+        state.currentUser.language = settings.language;
+      } catch (err) {
+        console.error('Failed to sync language to server', err);
+      }
+    }
+
     state.activeView = 'dashboard';
     render();
   });

@@ -40,12 +40,14 @@ async function initPostgres() {
         ClassName VARCHAR(20),
         ChineseGroup VARCHAR(20),
         EnglishGroup VARCHAR(20),
-        MathGroup VARCHAR(20)
+        MathGroup VARCHAR(20),
+        Language VARCHAR(20) DEFAULT 'zh-HK'
       );
       ALTER TABLE Users ADD COLUMN IF NOT EXISTS ClassName VARCHAR(20);
       ALTER TABLE Users ADD COLUMN IF NOT EXISTS ChineseGroup VARCHAR(20);
       ALTER TABLE Users ADD COLUMN IF NOT EXISTS EnglishGroup VARCHAR(20);
       ALTER TABLE Users ADD COLUMN IF NOT EXISTS MathGroup VARCHAR(20);
+      ALTER TABLE Users ADD COLUMN IF NOT EXISTS Language VARCHAR(20) DEFAULT 'zh-HK';
 
       CREATE TABLE IF NOT EXISTS StudentStats (
         id SERIAL PRIMARY KEY,
@@ -146,7 +148,7 @@ function seedDefaults() {
   const hash = bcrypt.hashSync('123456', 10);
   for (const u of defaults) {
     if (!d.users.find(x => x.studentid === u.studentid)) {
-      d.users.push({ ...u, passwordhash: hash });
+      d.users.push({ ...u, passwordhash: hash, language: 'zh-HK' });
     }
   }
   const tags = ALL_TAGS;
