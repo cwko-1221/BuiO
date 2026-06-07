@@ -151,39 +151,44 @@ router.post('/register-student', async (req, res) => {
             return res.status(403).json({ success: false, message: '權限不足，僅限教師操作' });
         }
 
-        const { studentId, name, password } = req.body;
+        const { studentId, name, password, role } = req.body;
+        const targetRole = role === 'teacher' ? 'teacher' : 'student';
+
         if (!studentId || !name || !password) {
-            return res.status(400).json({ success: false, message: '請填寫完整資訊 (學號、姓名、密碼)' });
+            return res.status(400).json({ success: false, message: '請填寫完整資訊 (學號/教師編號、姓名、密碼)' });
         }
 
         // 檢查學號是否已存在
         const { rows: existing } = await db.query('SELECT StudentID FROM Users WHERE StudentID = $1', [studentId]);
         if (existing.length > 0) {
-            return res.status(400).json({ success: false, message: '學號已經存在' });
+            return res.status(400).json({ success: false, message: '此帳號已經存在' });
         }
 
         // 加密密碼與寫入
         const hash = bcrypt.hashSync(password, 10);
         await db.query(`
             INSERT INTO Users (StudentID, Name, PasswordHash, Role)
-            VALUES ($1, $2, $3, 'student')
-        `, [studentId, name, hash]);
+            VALUES ($1, $2, $3, $4)
+        `, [studentId, name, hash, targetRole]);
 
-        // 初始化學生統據
-        const allTags = [
-            'add_2d_nc', 'add_2d_c', 'sub_2d_b', 'sub_3d_z_mid',
-            'mul_2x2_nc_nc', 'mul_2x2_c_c', 'div_3d_1d_z0_mid', 'div_3d_1d_z0_end'
-        ];
-        
-        for (const tag of allTags) {
-            await db.query(`
-                INSERT INTO StudentStats (StudentID, Tag, TotalAttempted, TotalCorrect, AccuracyRate)
-                VALUES ($1, $2, 0, 0, 0.0)
-                ON CONFLICT (StudentID, Tag) DO NOTHING
-            `, [studentId, tag]);
+        // 若為學生，初始化學生統計
+        if (targetRole === 'student') {
+            const allTags = [
+                'add_2d_nc', 'add_2d_c', 'sub_2d_b', 'sub_3d_z_mid',
+                'mul_2x2_nc_nc', 'mul_2x2_c_c', 'div_3d_1d_z0_mid', 'div_3d_1d_z0_end',
+                'add_3d_c', 'sub_3d_b', 'mul_3x2_nc', 'mul_3x2_c', 'div_2d_1d_z0', 'div_4d_1d_z0'
+            ];
+            
+            for (const tag of allTags) {
+                await db.query(`
+                    INSERT INTO StudentStats (StudentID, Tag, TotalAttempted, TotalCorrect, AccuracyRate)
+                    VALUES ($1, $2, 0, 0, 0.0)
+                    ON CONFLICT (StudentID, Tag) DO NOTHING
+                `, [studentId, tag]);
+            }
         }
 
-        res.json({ success: true, message: '學生帳號建立成功' });
+        res.json({ success: true, message: '帳號建立成功' });
 
     } catch (error) {
         console.error('新增學生錯誤:', error);

@@ -497,9 +497,15 @@ function renderStudentManagement() {
     </section>
     
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
-      <h3>新增學生</h3>
+      <h3>新增帳號</h3>
       <form id="addStudentForm" class="login-form" style="max-width: 400px; margin-top:1rem;">
-        <label>學號<input id="newStudentId" required placeholder="例如 S006" autocomplete="off"></label>
+        <label>身分
+          <select id="newStudentRole" style="padding:10px; border-radius:6px; border:1px solid rgba(0,0,0,0.1); background:var(--surface);">
+            <option value="student">學生</option>
+            <option value="teacher">教師</option>
+          </select>
+        </label>
+        <label>學號 / 教師編號<input id="newStudentId" required placeholder="例如 S006 或 T002" autocomplete="off"></label>
         <label>姓名<input id="newStudentName" required placeholder="例如 陳大文" autocomplete="off"></label>
         <label>密碼<input id="newStudentPw" required value="123456" autocomplete="off"></label>
         <button type="submit" class="primary-action" id="addStudentBtn">${renderIcon('plus')} 確認新增</button>
@@ -659,6 +665,9 @@ function bindEvents() {
     err.style.display = 'none';
 
     try {
+      const roleSelect = document.getElementById('newStudentRole');
+      const role = roleSelect ? roleSelect.value : 'student';
+
       const res = await fetch('/api/auth/register-student', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -666,12 +675,13 @@ function bindEvents() {
         body: JSON.stringify({
           studentId: document.getElementById('newStudentId').value.trim(),
           name: document.getElementById('newStudentName').value.trim(),
-          password: document.getElementById('newStudentPw').value
+          password: document.getElementById('newStudentPw').value,
+          role: role
         })
       });
       const data = await res.json();
       if (data.success) {
-        alert('🎉 學生新增成功！');
+        alert(role === 'teacher' ? '🎉 教師新增成功！' : '🎉 學生新增成功！');
         fetchStudentsList();
       } else {
         err.textContent = data.message || '新增失敗';
