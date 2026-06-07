@@ -685,7 +685,7 @@ function renderModuleCard(module) {
         <p>${module.description}</p>
       </div>
       <div class="module-meta">
-        <span>${module.metric}</span>
+        ${module.metric ? `<span>${module.metric}</span>` : ''}
         <strong>${module.status}</strong>
       </div>
       <button class="module-action" ${disabled ? 'disabled' : ''} data-open-module="${module.id}">
