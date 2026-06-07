@@ -494,6 +494,12 @@ function renderStudentManagement() {
       <form id="addStudentForm" class="login-form" style="max-width: 400px; margin-top:1rem;">
         <label>學號<input id="newStudentId" required placeholder="例如 S006" autocomplete="off"></label>
         <label>姓名<input id="newStudentName" required placeholder="例如 陳大文" autocomplete="off"></label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <label style="margin-bottom:0">班級<input id="newStudentClass" placeholder="例如 P4A" autocomplete="off"></label>
+          <label style="margin-bottom:0">中文分組<input id="newStudentChi" placeholder="例如 A組" autocomplete="off"></label>
+          <label style="margin-bottom:0">英文分組<input id="newStudentEng" placeholder="例如 B組" autocomplete="off"></label>
+          <label style="margin-bottom:0">數學分組<input id="newStudentMath" placeholder="例如 C組" autocomplete="off"></label>
+        </div>
         <label>密碼<input id="newStudentPw" required value="123456" autocomplete="off"></label>
         <button type="submit" class="primary-action" id="addStudentBtn">${renderIcon('plus')} 確認新增</button>
         <div id="addStudentError" style="color:var(--accent-red); margin-top:0.5rem; display:none;"></div>
@@ -509,6 +515,12 @@ function renderStudentManagement() {
               <strong>${s.name}</strong>
               <span style="background:var(--accent-purple); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">學生</span>
               <span style="color:var(--text-muted); font-size:0.9em; margin-left:8px;">${s.id}</span>
+              <div style="font-size:0.85em; color:var(--text-muted); margin-top:4px;">
+                ${s.className ? `<span style="display:inline-block; border:1px solid rgba(0,0,0,0.1); border-radius:4px; padding:2px 6px; margin-right:4px;">班級: ${s.className}</span>` : ''}
+                ${s.chineseGroup ? `<span style="display:inline-block; border:1px solid rgba(0,0,0,0.1); border-radius:4px; padding:2px 6px; margin-right:4px;">中文: ${s.chineseGroup}</span>` : ''}
+                ${s.englishGroup ? `<span style="display:inline-block; border:1px solid rgba(0,0,0,0.1); border-radius:4px; padding:2px 6px; margin-right:4px;">英文: ${s.englishGroup}</span>` : ''}
+                ${s.mathGroup ? `<span style="display:inline-block; border:1px solid rgba(0,0,0,0.1); border-radius:4px; padding:2px 6px;">數學: ${s.mathGroup}</span>` : ''}
+              </div>
             </div>
             <div>
               <button class="danger-action delete-student-btn" data-id="${s.id}">刪除</button>
@@ -720,6 +732,10 @@ function bindEvents() {
           studentId: document.getElementById('newStudentId').value.trim(),
           name: document.getElementById('newStudentName').value.trim(),
           password: document.getElementById('newStudentPw').value,
+          className: document.getElementById('newStudentClass')?.value.trim() || '',
+          chineseGroup: document.getElementById('newStudentChi')?.value.trim() || '',
+          englishGroup: document.getElementById('newStudentEng')?.value.trim() || '',
+          mathGroup: document.getElementById('newStudentMath')?.value.trim() || '',
           role: 'student'
         })
       });

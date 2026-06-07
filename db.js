@@ -36,8 +36,16 @@ async function initPostgres() {
         StudentID VARCHAR(20) PRIMARY KEY,
         Name VARCHAR(100),
         Role VARCHAR(20),
-        PasswordHash VARCHAR(255)
+        PasswordHash VARCHAR(255),
+        ClassName VARCHAR(20),
+        ChineseGroup VARCHAR(20),
+        EnglishGroup VARCHAR(20),
+        MathGroup VARCHAR(20)
       );
+      ALTER TABLE Users ADD COLUMN IF NOT EXISTS ClassName VARCHAR(20);
+      ALTER TABLE Users ADD COLUMN IF NOT EXISTS ChineseGroup VARCHAR(20);
+      ALTER TABLE Users ADD COLUMN IF NOT EXISTS EnglishGroup VARCHAR(20);
+      ALTER TABLE Users ADD COLUMN IF NOT EXISTS MathGroup VARCHAR(20);
 
       CREATE TABLE IF NOT EXISTS StudentStats (
         id SERIAL PRIMARY KEY,

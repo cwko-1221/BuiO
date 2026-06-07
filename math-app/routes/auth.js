@@ -151,7 +151,7 @@ router.post('/register-student', async (req, res) => {
             return res.status(403).json({ success: false, message: '權限不足，僅限教師操作' });
         }
 
-        const { studentId, name, password, role } = req.body;
+        const { studentId, name, password, role, className, chineseGroup, englishGroup, mathGroup } = req.body;
         const targetRole = role === 'teacher' ? 'teacher' : 'student';
 
         if (!studentId || !name || !password) {
@@ -167,9 +167,9 @@ router.post('/register-student', async (req, res) => {
         // 加密密碼與寫入
         const hash = bcrypt.hashSync(password, 10);
         await db.query(`
-            INSERT INTO Users (StudentID, Name, PasswordHash, Role)
-            VALUES ($1, $2, $3, $4)
-        `, [studentId, name, hash, targetRole]);
+            INSERT INTO Users (StudentID, Name, PasswordHash, Role, ClassName, ChineseGroup, EnglishGroup, MathGroup)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `, [studentId, name, hash, targetRole, className || '', chineseGroup || '', englishGroup || '', mathGroup || '']);
 
         // 若為學生，初始化學生統計
         if (targetRole === 'student') {
