@@ -212,13 +212,13 @@ router.delete('/delete-student/:studentId', async (req, res) => {
             return res.status(400).json({ success: false, message: '無效的學生 ID' });
         }
 
-        // 安全檢查：不允許刪除老師帳號
+        // 安全檢查：防止刪除自己
         const { rows: userCheck } = await db.query("SELECT Role FROM Users WHERE StudentID = $1", [studentId]);
         if (userCheck.length === 0) {
-            return res.status(404).json({ success: false, message: '找不到該學生帳號' });
+            return res.status(404).json({ success: false, message: '找不到該帳號' });
         }
-        if (userCheck[0].role === 'teacher') {
-            return res.status(403).json({ success: false, message: '無法刪除教師帳號' });
+        if (req.session.studentId === studentId) {
+            return res.status(403).json({ success: false, message: '無法刪除自己目前登入的帳號' });
         }
 
         // 依序刪除 (FK 依賴：先刪除 Logs 與 Stats，再刪除 User)
