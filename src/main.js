@@ -525,9 +525,13 @@ function renderStudentManagement() {
         ${state.studentsList.filter(s => s.role !== 'teacher').map(s => `
           <div class="student-row" style="grid-template-columns: 200px 1fr auto; align-items: center;">
             <div>
-              <strong>${s.name}</strong>
-              <span style="background:var(--violet); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">學生</span>
-              <div style="color:var(--text-muted); font-size:0.9em; margin-top:4px;">${s.id}</div>
+              <div style="display:flex; align-items:baseline; gap:8px;">
+                <strong style="font-size:1.05em;">${s.name}</strong>
+                <span style="color:var(--text-muted); font-size:0.9em;">${s.id}</span>
+              </div>
+              <div style="margin-top:6px;">
+                <span style="background:var(--violet); color:white; padding:3px 8px; border-radius:12px; font-size:0.8em; display:inline-block;">學生</span>
+              </div>
             </div>
             <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap; font-size:0.95em;">
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
@@ -598,9 +602,13 @@ function renderAdminPage() {
         ${state.studentsList.filter(s => s.role === 'teacher').map(s => `
           <div class="student-row" style="grid-template-columns: 1fr auto;">
             <div>
-              <strong>${s.name}</strong>
-              <span style="background:var(--teal); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">老師</span>
-              <span style="color:var(--text-muted); font-size:0.9em; margin-left:8px;">${s.id}</span>
+              <div style="display:flex; align-items:baseline; gap:8px;">
+                <strong style="font-size:1.05em;">${s.name}</strong>
+                <span style="color:var(--text-muted); font-size:0.9em;">${s.id}</span>
+              </div>
+              <div style="margin-top:6px;">
+                <span style="background:var(--teal); color:white; padding:3px 8px; border-radius:12px; font-size:0.8em; display:inline-block;">老師</span>
+              </div>
             </div>
             <div>
               <button class="danger-action delete-student-btn" data-id="${s.id}">刪除</button>
