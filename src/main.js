@@ -487,7 +487,7 @@ function renderStudentManagement() {
         <h2>學生管理</h2>
         <p>新增或刪除學生帳號，資料將與所有模組同步。</p>
       </div>
-      <button id="upgradeStudentsBtn" class="primary-action" style="background:var(--accent-purple);">${renderIcon('spark')} 一鍵升級</button>
+      <button id="upgradeStudentsBtn" class="primary-action" style="background:var(--violet); color:white;">${renderIcon('spark')} 一鍵升級</button>
     </section>
     
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
@@ -515,7 +515,7 @@ function renderStudentManagement() {
         </datalist>
         <label>密碼<input id="newStudentPw" required value="123456" autocomplete="off"></label>
         <button type="submit" class="primary-action" id="addStudentBtn">${renderIcon('plus')} 確認新增</button>
-        <div id="addStudentError" style="color:var(--accent-red); margin-top:0.5rem; display:none;"></div>
+        <div id="addStudentError" style="color:var(--coral); margin-top:0.5rem; display:none;"></div>
       </form>
     </div>
 
@@ -526,7 +526,7 @@ function renderStudentManagement() {
           <div class="student-row" style="grid-template-columns: 1fr auto;">
             <div>
               <strong>${s.name}</strong>
-              <span style="background:var(--accent-purple); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">學生</span>
+              <span style="background:var(--violet); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">學生</span>
               <span style="color:var(--text-muted); font-size:0.9em; margin-left:8px;">${s.id}</span>
               <div style="font-size:0.95em; color:var(--text-muted); margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
                 ${s.className ? `<span style="border:1px solid var(--line); border-radius:6px; padding:4px 8px;">班級: ${s.className}</span>` : ''}
@@ -568,7 +568,7 @@ function renderAdminPage() {
         <label>姓名<input id="newTeacherName" required placeholder="例如 王老師" autocomplete="off"></label>
         <label>密碼<input id="newTeacherPw" required value="123456" autocomplete="off"></label>
         <button type="submit" class="primary-action" id="addTeacherBtn">${renderIcon('plus')} 確認新增</button>
-        <div id="addTeacherError" style="color:var(--accent-red); margin-top:0.5rem; display:none;"></div>
+        <div id="addTeacherError" style="color:var(--coral); margin-top:0.5rem; display:none;"></div>
       </form>
     </div>
 
@@ -579,7 +579,7 @@ function renderAdminPage() {
           <div class="student-row" style="grid-template-columns: 1fr auto;">
             <div>
               <strong>${s.name}</strong>
-              <span style="background:var(--accent-teal); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">老師</span>
+              <span style="background:var(--teal); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">老師</span>
               <span style="color:var(--text-muted); font-size:0.9em; margin-left:8px;">${s.id}</span>
             </div>
             <div>
