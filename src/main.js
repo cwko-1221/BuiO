@@ -523,17 +523,37 @@ function renderStudentManagement() {
       <h2>學生列表</h2>
       <div class="student-table">
         ${state.studentsList.filter(s => s.role !== 'teacher').map(s => `
-          <div class="student-row" style="grid-template-columns: 1fr auto;">
+          <div class="student-row" style="grid-template-columns: 200px 1fr auto; align-items: center;">
             <div>
               <strong>${s.name}</strong>
               <span style="background:var(--violet); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">學生</span>
-              <span style="color:var(--text-muted); font-size:0.9em; margin-left:8px;">${s.id}</span>
-              <div style="font-size:0.95em; color:var(--text-muted); margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
-                ${s.className ? `<span style="border:1px solid var(--line); border-radius:6px; padding:4px 8px;">班級: ${s.className}</span>` : ''}
-                ${s.chineseGroup ? `<span style="border:1px solid var(--line); border-radius:6px; padding:4px 8px;">中文: ${s.chineseGroup}</span>` : ''}
-                ${s.englishGroup ? `<span style="border:1px solid var(--line); border-radius:6px; padding:4px 8px;">英文: ${s.englishGroup}</span>` : ''}
-                ${s.mathGroup ? `<span style="border:1px solid var(--line); border-radius:6px; padding:4px 8px;">數學: ${s.mathGroup}</span>` : ''}
-              </div>
+              <div style="color:var(--text-muted); font-size:0.9em; margin-top:4px;">${s.id}</div>
+            </div>
+            <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap; font-size:0.95em;">
+              <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
+                班級 
+                <select class="inline-edit" data-id="${s.id}" data-field="className" style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
+                  ${['', 'P1','P2','P3','P4','P5','P6','Graduated'].map(o => `<option value="${o}" ${s.className === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
+                </select>
+              </label>
+              <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
+                中文 
+                <select class="inline-edit" data-id="${s.id}" data-field="chineseGroup" style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
+                  ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.chineseGroup === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
+                </select>
+              </label>
+              <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
+                英文 
+                <select class="inline-edit" data-id="${s.id}" data-field="englishGroup" style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
+                  ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.englishGroup === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
+                </select>
+              </label>
+              <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
+                數學 
+                <select class="inline-edit" data-id="${s.id}" data-field="mathGroup" style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
+                  ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.mathGroup === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
+                </select>
+              </label>
             </div>
             <div>
               <button class="danger-action delete-student-btn" data-id="${s.id}">刪除</button>
@@ -855,6 +875,42 @@ function bindEvents() {
         btn.disabled = false;
       }
     });
+  });
+  // 學生資料行內編輯
+  document.querySelectorAll('.inline-edit').forEach(select => {
+    select.addEventListener('change', async (e) => {
+      const studentId = e.target.dataset.id;
+      const field = e.target.dataset.field;
+      const value = e.target.value;
+      const originalValue = e.target.getAttribute('data-original-value') || '';
+      
+      e.target.disabled = true;
+      try {
+        const res = await fetch('/api/auth/update-student', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ studentId, field, value })
+        });
+        const data = await res.json();
+        if (data.success) {
+          // 更新本地狀態
+          const student = state.studentsList.find(s => s.id === studentId);
+          if (student) student[field] = value;
+          e.target.setAttribute('data-original-value', value);
+        } else {
+          alert('更新失敗: ' + (data.message || '未知錯誤'));
+          e.target.value = originalValue; // 回復原本的值
+        }
+      } catch (err) {
+        alert('連線錯誤');
+        e.target.value = originalValue; // 回復原本的值
+      } finally {
+        e.target.disabled = false;
+      }
+    });
+    // 儲存原始值以便失敗時回復
+    select.setAttribute('data-original-value', select.value);
   });
 
   // 儲存設定

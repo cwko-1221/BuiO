@@ -235,6 +235,42 @@ router.delete('/delete-student/:studentId', async (req, res) => {
 });
 
 /**
+ * POST /api/auth/update-student
+ * 教師專用：更新學生資料 (班級、分組)
+ */
+router.post('/update-student', async (req, res) => {
+    try {
+        if (req.session.role !== 'teacher') {
+            return res.status(403).json({ success: false, message: '權限不足' });
+        }
+
+        const { studentId, field, value } = req.body;
+        if (!studentId || !field) {
+            return res.status(400).json({ success: false, message: '參數不完整' });
+        }
+
+        const allowedFields = {
+            className: 'ClassName',
+            chineseGroup: 'ChineseGroup',
+            englishGroup: 'EnglishGroup',
+            mathGroup: 'MathGroup'
+        };
+
+        const dbField = allowedFields[field];
+        if (!dbField) {
+            return res.status(400).json({ success: false, message: '不允許更新此欄位' });
+        }
+
+        await db.query(`UPDATE Users SET ${dbField} = $1 WHERE StudentID = $2`, [value || '', studentId]);
+        res.json({ success: true, message: '更新成功' });
+
+    } catch (error) {
+        console.error('更新學生錯誤:', error);
+        res.status(500).json({ success: false, message: '伺服器錯誤' });
+    }
+});
+
+/**
  * POST /api/auth/upgrade-students
  * 教師專用：一鍵升級所有學生班級
  */
