@@ -79,6 +79,59 @@ const iconSvg = {
 };
 
 // =============================================
+// 語言與翻譯 (i18n)
+// =============================================
+const I18N = {
+  'zh-HK': {
+    'good_morning': '早晨',
+    'student_mode': '學生模式',
+    'teacher_mode': '老師模式',
+    'nav_home': '首頁',
+    'nav_students': '學生管理',
+    'nav_modules': '模組',
+    'nav_settings': '設定',
+    'nav_admin': 'Admin',
+    'logout': '登出',
+    'today_advice': '今日學習建議',
+    'student_advice_desc': '先完成數學練習，再查看老師是否開啟白板課堂。',
+    'start_math': '開始數學練習',
+    'board_class': '白板課堂',
+    'board_class_desc': '選擇老師的課堂加入，你的名字會自動帶入，毋需再輸入。',
+    'my_modules': '我的學習模組',
+    'my_modules_desc': '選擇要進入的 App。預設房間：',
+    'no_room': '無',
+    'no_teacher_live': '目前沒有老師正在開課',
+    'teacher_board_desc': '老師開啟白板後會自動顯示在這裡'
+  },
+  'en-US': {
+    'good_morning': 'Good Morning',
+    'student_mode': 'Student Mode',
+    'teacher_mode': 'Teacher Mode',
+    'nav_home': 'Home',
+    'nav_students': 'Students',
+    'nav_modules': 'Modules',
+    'nav_settings': 'Settings',
+    'nav_admin': 'Admin',
+    'logout': 'Logout',
+    'today_advice': 'Today\'s Learning Plan',
+    'student_advice_desc': 'Complete math practice first, then check for active whiteboard sessions.',
+    'start_math': 'Start Math Practice',
+    'board_class': 'Whiteboard Sessions',
+    'board_class_desc': 'Join a teacher\'s session. Your name will be filled in automatically.',
+    'my_modules': 'My Learning Modules',
+    'my_modules_desc': 'Select an App to launch. Default Room: ',
+    'no_room': 'None',
+    'no_teacher_live': 'No active teacher sessions',
+    'teacher_board_desc': 'Sessions will appear here once a teacher opens a whiteboard'
+  }
+};
+
+function t(key) {
+  const lang = JSON.parse(localStorage.getItem('buiSettings') || '{}').language || 'zh-HK';
+  return I18N[lang]?.[key] || I18N['zh-HK'][key] || key;
+}
+
+// =============================================
 // 狀態管理
 // =============================================
 const state = {
@@ -278,8 +331,8 @@ function renderTopbar() {
   return `
     <header class="topbar">
       <div>
-        <h1>${user.name}，早晨</h1>
-        <p>${user.role === 'teacher' ? '' : (user.className ? user.className + ' · ' : '')}${new Date().toLocaleDateString('zh-HK', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+        <h1>${user.name}，${t('good_morning')}</h1>
+        <p>${user.role === 'teacher' ? '' : (user.className ? user.className + ' · ' : '')}${new Date().toLocaleDateString(JSON.parse(localStorage.getItem('buiSettings') || '{}').language === 'en-US' ? 'en-US' : 'zh-HK', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
       </div>
       <div class="profile-chip">
         ${renderIcon('user')}
@@ -305,15 +358,15 @@ function renderShell() {
           </div>
         </div>
         <nav class="side-nav" aria-label="主要功能">
-          <button class="${state.activeView === 'dashboard' ? 'active' : ''}" data-view="dashboard">${renderIcon('math')} 首頁</button>
-          ${user.role === 'teacher' ? `<button class="${state.activeView === 'students' ? 'active' : ''}" data-view="students">${renderIcon('user')} 學生管理</button>` : ''}
-          <button class="${state.activeView === 'modules' ? 'active' : ''}" data-view="modules">${renderIcon('board')} 模組</button>
-          <button class="${state.activeView === 'settings' ? 'active' : ''}" data-view="settings">${renderIcon('settings')} 設定</button>
-          <button id="adminBtn" class="${state.activeView === 'admin' ? 'active' : ''}">${renderIcon('settings')} Admin</button>
+          <button class="${state.activeView === 'dashboard' ? 'active' : ''}" data-view="dashboard">${renderIcon('math')} ${t('nav_home')}</button>
+          ${user.role === 'teacher' ? `<button class="${state.activeView === 'students' ? 'active' : ''}" data-view="students">${renderIcon('user')} ${t('nav_students')}</button>` : ''}
+          <button class="${state.activeView === 'modules' ? 'active' : ''}" data-view="modules">${renderIcon('board')} ${t('nav_modules')}</button>
+          <button class="${state.activeView === 'settings' ? 'active' : ''}" data-view="settings">${renderIcon('settings')} ${t('nav_settings')}</button>
+          <button id="adminBtn" class="${state.activeView === 'admin' ? 'active' : ''}">${renderIcon('settings')} ${t('nav_admin')}</button>
         </nav>
         <div class="sidebar-footer">
-          <span>${user.role === 'teacher' ? '老師模式' : '學生模式'}</span>
-          <button id="logoutBtn">${renderIcon('logout')} 登出</button>
+          <span>${user.role === 'teacher' ? t('teacher_mode') : t('student_mode')}</span>
+          <button id="logoutBtn">${renderIcon('logout')} ${t('logout')}</button>
         </div>
       </aside>
       <main class="main-panel">
@@ -347,27 +400,27 @@ function renderStudentDashboard() {
   return `
     <section class="hero-board">
       <div class="hero-copy">
-        <h2>今日學習建議</h2>
-        <p>先完成數學練習，再查看老師是否開啟白板課堂。</p>
+        <h2>${t('today_advice')}</h2>
+        <p>${t('student_advice_desc')}</p>
         ${mathStatusHtml}
         <div class="action-row">
-          <button class="primary-action" id="openMathBtn">${renderIcon('math')} 開始數學練習</button>
+          <button class="primary-action" id="openMathBtn">${renderIcon('math')} ${t('start_math')}</button>
         </div>
       </div>
     </section>
 
     <section class="section-head">
       <div>
-        <h2>白板課堂</h2>
-        <p>選擇老師的課堂加入，你的名字會自動帶入，毋需再輸入。</p>
+        <h2>${t('board_class')}</h2>
+        <p>${t('board_class_desc')}</p>
       </div>
     </section>
     ${renderStudentSessionPanel(sessions)}
 
     <section class="section-head" style="margin-top:2rem">
       <div>
-        <h2>我的學習模組</h2>
-        <p>選擇要進入的 App。預設房間：${JSON.parse(localStorage.getItem('buiSettings') || '{}').roomCode || state.currentUser?.name || '無'}</p>
+        <h2>${t('my_modules')}</h2>
+        <p>${t('my_modules_desc')}${JSON.parse(localStorage.getItem('buiSettings') || '{}').roomCode || state.currentUser?.name || t('no_room')}</p>
       </div>
     </section>
     <div class="module-grid">
@@ -381,7 +434,7 @@ function renderStudentSessionPanel(sessions) {
     return `
       <div class="session-empty">
         ${renderIcon('clock')}
-        <p>目前沒有老師正在開課<br><span>老師開啟白板後會自動顯示在這裡</span></p>
+        <p>${t('no_teacher_live')}<br><span>${t('teacher_board_desc')}</span></p>
       </div>
     `;
   }
