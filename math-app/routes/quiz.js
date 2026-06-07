@@ -154,7 +154,7 @@ router.post('/submit', async (req, res) => {
                     question.questionText,
                     question.correctAnswer,
                     userAnswer,
-                    isCorrect,
+                    isCorrect === 1,
                     timeTaken
                 ]);
 
@@ -245,11 +245,11 @@ router.post('/answer', async (req, res) => {
         const parsedTime = parseFloat(timeTaken) || 0;
 
         if (process.env.DATABASE_URL) {
-            // 寫入 QuestionLogs
+            // 寫入 QuestionLogs (IsCorrect 需要是 boolean)
             await db.query(`
                 INSERT INTO QuestionLogs (StudentID, Tag, QuestionText, CorrectAnswer, UserAnswer, IsCorrect, TimeTaken)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
-            `, [studentId, question.tag, question.questionText, question.correctAnswer, parsedAnswer, isCorrect, parsedTime]);
+            `, [studentId, question.tag, question.questionText, question.correctAnswer, parsedAnswer, isCorrect === 1, parsedTime]);
 
             // 更新 StudentStats
             await db.query(`
