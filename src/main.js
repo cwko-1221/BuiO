@@ -214,6 +214,12 @@ function renderLogin() {
   return `
     <main class="login-shell">
       <section class="login-visual" aria-label="平台介紹">
+        <!-- 背景裝飾圓圈 -->
+        <div class="lv-blob lv-blob-1" aria-hidden="true"></div>
+        <div class="lv-blob lv-blob-2" aria-hidden="true"></div>
+        <div class="lv-blob lv-blob-3" aria-hidden="true"></div>
+
+        <!-- 校徽品牌 -->
         <div class="brand-lockup">
           <img src="/images/logo.png" class="brand-mark" alt="校徽" />
           <div>
@@ -221,14 +227,24 @@ function renderLogin() {
             <div class="platform-name">個人化學習平台</div>
           </div>
         </div>
-        <div class="learning-map" aria-hidden="true">
-          <div class="map-line"></div>
-          <div class="map-node node-a">數學</div>
-          <div class="map-node node-b">白板</div>
-          <div class="map-node node-c">中文</div>
-          <div class="map-node node-d">英文</div>
+
+        <!-- 主要內容 -->
+        <div class="lv-center-content">
+          <div class="lv-subject-pills" aria-hidden="true">
+            <span class="lv-pill pill-math">📐 數學</span>
+            <span class="lv-pill pill-board">🖊️ 白板</span>
+            <span class="lv-pill pill-chi">📖 中文</span>
+            <span class="lv-pill pill-eng">🔤 英文</span>
+          </div>
+          <h1>一站式個人化學習平台</h1>
+          <p class="lv-subtitle">連接學生每天需要的學習工具</p>
         </div>
-        <h1>一站式個人化學習平台，連接學生每天需要的學習工具。</h1>
+
+        <!-- 底部裝飾 -->
+        <div class="lv-footer-badge">
+          <span class="lv-badge-dot"></span>
+          平台運作中
+        </div>
       </section>
 
       <section class="login-panel" aria-label="登入">

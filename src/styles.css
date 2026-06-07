@@ -72,6 +72,7 @@ svg {
   backdrop-filter: blur(16px);
 }
 
+/* ─── Login visual redesign ─── */
 .login-visual {
   position: relative;
   overflow: hidden;
@@ -80,41 +81,150 @@ svg {
   justify-content: space-between;
   min-height: calc(100vh - 64px);
   padding: 42px;
-  border-radius: 8px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #f0faf9 0%, #eef4fb 40%, #faf0f8 100%);
+  border: 1px solid rgba(219, 227, 238, 0.6);
+  box-shadow: var(--shadow);
 }
 
-.login-visual h1 {
-  max-width: 90%;
-  margin: auto;
-  font-size: clamp(2.2rem, 5vw, 4.8rem);
-  line-height: 1.25;
-  font-weight: 850;
-  color: var(--ink);
+/* blob decorations */
+.lv-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.45;
+  pointer-events: none;
+}
+.lv-blob-1 {
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(15,139,141,0.4), transparent 70%);
+  top: -100px; left: -100px;
+}
+.lv-blob-2 {
+  width: 360px; height: 360px;
+  background: radial-gradient(circle, rgba(239,119,95,0.3), transparent 70%);
+  bottom: -80px; right: -80px;
+}
+.lv-blob-3 {
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(122,107,214,0.25), transparent 70%);
+  top: 50%; right: 15%;
+  transform: translateY(-50%);
+}
+
+/* center content block */
+.lv-center-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
   text-align: center;
   position: relative;
   z-index: 10;
+  gap: 20px;
 }
 
-.login-visual p {
-  max-width: 620px;
-  margin: 24px 0 0;
+/* subject pills row */
+.lv-subject-pills {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.lv-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 100px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  border: 1.5px solid;
+  animation: pill-float 4s ease-in-out infinite;
+}
+.pill-math {
+  background: rgba(53,181,139,0.12);
+  border-color: rgba(53,181,139,0.35);
+  color: #1d9166;
+  animation-delay: 0s;
+}
+.pill-board {
+  background: rgba(239,119,95,0.12);
+  border-color: rgba(239,119,95,0.35);
+  color: #c95534;
+  animation-delay: 0.8s;
+}
+.pill-chi {
+  background: rgba(76,143,220,0.12);
+  border-color: rgba(76,143,220,0.35);
+  color: #2c6db5;
+  animation-delay: 1.6s;
+}
+.pill-eng {
+  background: rgba(122,107,214,0.12);
+  border-color: rgba(122,107,214,0.35);
+  color: #5a47be;
+  animation-delay: 2.4s;
+}
+@keyframes pill-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* main headline */
+.login-visual h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 4rem);
+  font-weight: 900;
+  line-height: 1.2;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+/* subtitle */
+.lv-subtitle {
+  margin: 0;
+  font-size: 1.15rem;
   color: var(--muted);
-  font-size: 1.2rem;
-  line-height: 1.7;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
+/* footer status badge */
+.lv-footer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+  position: relative;
+  z-index: 2;
+}
+.lv-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 0 3px rgba(53,181,139,0.25);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(53,181,139,0.25); }
+  50%       { box-shadow: 0 0 0 7px rgba(53,181,139,0.1); }
+}
+/* brand lockup (shared) */
 .brand-lockup {
   display: flex;
   align-items: center;
   gap: 14px;
   position: relative;
-  z-index: 2;
+  z-index: 10;
 }
-
-.brand-lockup.compact {
-  gap: 10px;
-}
-
+.brand-lockup.compact { gap: 10px; }
 .brand-mark {
   display: block;
   width: 52px;
@@ -122,76 +232,9 @@ svg {
   border-radius: 8px;
   object-fit: contain;
 }
-
-.compact .brand-mark {
-  width: 42px;
-  height: 42px;
-}
-
-.school-name {
-  font-size: 0.92rem;
-  font-weight: 800;
-}
-
-.platform-name {
-  color: var(--muted);
-  font-size: 0.84rem;
-  font-weight: 650;
-}
-
-.learning-map {
-  position: absolute;
-  inset: auto 40px 60px auto;
-  width: 390px;
-  height: 320px;
-  color: var(--teal);
-  opacity: 0.85;
-  z-index: 1;
-}
-
-.map-line {
-  position: absolute;
-  inset: 70px 40px;
-  border: 2px dashed rgba(15, 139, 141, 0.24);
-  border-radius: 50%;
-  transform: rotate(-18deg);
-}
-
-.map-node {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: 84px;
-  height: 84px;
-  border-radius: 8px;
-  background: white;
-  box-shadow: var(--small-shadow);
-  font-weight: 850;
-}
-
-.node-a {
-  left: 8px;
-  top: 70px;
-  color: var(--mint);
-}
-
-.node-b {
-  right: 32px;
-  top: 8px;
-  color: var(--coral);
-}
-
-.node-c {
-  right: 70px;
-  bottom: 32px;
-  color: var(--sky);
-}
-
-.node-d {
-  left: 64px;
-  bottom: 0;
-  color: var(--violet);
-}
+.compact .brand-mark { width: 42px; height: 42px; }
+.school-name { font-size: 0.92rem; font-weight: 800; }
+.platform-name { color: var(--muted); font-size: 0.84rem; font-weight: 650; }
 
 .login-panel {
   align-self: center;
