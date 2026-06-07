@@ -278,6 +278,7 @@ async function checkSession() {
           name: data.student.name,
           role: data.student.role,
           className: data.student.className || '',
+          language: data.student.language || 'zh-HK',
         };
         state.loggedIn = true;
         render();
@@ -907,6 +908,7 @@ function bindEvents() {
           name: data.student.name,
           role: data.student.role,
           className: data.student.className || '',
+          language: data.student.language || 'zh-HK',
         };
         state.loggedIn = true;
         state.loginLoading = false;
