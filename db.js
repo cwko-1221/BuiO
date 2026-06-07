@@ -54,11 +54,13 @@ async function initPostgres() {
         StudentID VARCHAR(20),
         Tag VARCHAR(50),
         Question VARCHAR(255),
+        CorrectAnswer VARCHAR(50),
         UserAnswer VARCHAR(50),
         IsCorrect BOOLEAN,
         TimeSpent INT,
         Timestamp TIMESTAMPTZ DEFAULT NOW()
       );
+      ALTER TABLE QuestionLogs ADD COLUMN IF NOT EXISTS CorrectAnswer VARCHAR(50);
     `);
     
     // Seed defaults if empty
