@@ -266,7 +266,7 @@ function renderTopbar() {
     <header class="topbar">
       <div>
         <h1>${user.name}，早晨</h1>
-        <p>${user.className} · ${new Date().toLocaleDateString('zh-HK', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+        <p>${user.role === 'teacher' ? '' : (user.className ? user.className + ' · ' : '')}${new Date().toLocaleDateString('zh-HK', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
       </div>
       <div class="profile-chip">
         ${renderIcon('user')}
@@ -493,13 +493,13 @@ function renderStudentManagement() {
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
       <h3>新增學生</h3>
       <form id="addStudentForm" class="login-form" style="max-width: 400px; margin-top:1rem;">
-        <label>學號<input id="newStudentId" required placeholder="例如 S006" autocomplete="off"></label>
-        <label>姓名<input id="newStudentName" required placeholder="例如 陳大文" autocomplete="off"></label>
+        <label>學號<input id="newStudentId" required placeholder="S006" autocomplete="off"></label>
+        <label>姓名<input id="newStudentName" required placeholder="陳大文" autocomplete="off"></label>
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
-          <label style="margin-bottom:0">班級<input id="newStudentClass" list="classOptions" placeholder="例如 P4" autocomplete="off"></label>
-          <label style="margin-bottom:0">中文分組<input id="newStudentChi" list="groupOptions" placeholder="例如 P4B" autocomplete="off"></label>
-          <label style="margin-bottom:0">英文分組<input id="newStudentEng" list="groupOptions" placeholder="例如 P4A" autocomplete="off"></label>
-          <label style="margin-bottom:0">數學分組<input id="newStudentMath" list="groupOptions" placeholder="例如 P4B" autocomplete="off"></label>
+          <label style="margin-bottom:0">班級<input id="newStudentClass" list="classOptions" placeholder="P4" autocomplete="off"></label>
+          <label style="margin-bottom:0">中文分組<input id="newStudentChi" list="groupOptions" placeholder="B組" autocomplete="off"></label>
+          <label style="margin-bottom:0">英文分組<input id="newStudentEng" list="groupOptions" placeholder="A組" autocomplete="off"></label>
+          <label style="margin-bottom:0">數學分組<input id="newStudentMath" list="groupOptions" placeholder="B組" autocomplete="off"></label>
         </div>
         <datalist id="classOptions">
           <option value="P1">
@@ -588,8 +588,8 @@ function renderAdminPage() {
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
       <h3>新增老師</h3>
       <form id="addTeacherForm" class="login-form" style="max-width: 400px; margin-top:1rem;">
-        <label>教師編號<input id="newTeacherId" required placeholder="例如 T002" autocomplete="off"></label>
-        <label>姓名<input id="newTeacherName" required placeholder="例如 王老師" autocomplete="off"></label>
+        <label>教師編號<input id="newTeacherId" required placeholder="T002" autocomplete="off"></label>
+        <label>姓名<input id="newTeacherName" required placeholder="王老師" autocomplete="off"></label>
         <label>密碼<input id="newTeacherPw" required value="123456" autocomplete="off"></label>
         <button type="submit" class="primary-action" id="addTeacherBtn">${renderIcon('plus')} 確認新增</button>
         <div id="addTeacherError" style="color:var(--coral); margin-top:0.5rem; display:none;"></div>
