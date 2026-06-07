@@ -103,7 +103,7 @@ async function checkSession() {
           id: data.student.id,
           name: data.student.name,
           role: data.student.role,
-          className: 'P4A',
+          className: data.student.className || '',
         };
         state.loggedIn = true;
         render();
@@ -725,7 +725,7 @@ function bindEvents() {
           id: data.student.id,
           name: data.student.name,
           role: data.student.role,
-          className: 'P4A',
+          className: data.student.className || '',
         };
         state.loggedIn = true;
         state.loginLoading = false;

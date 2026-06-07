@@ -58,7 +58,8 @@ router.post('/login', async (req, res) => {
             student: {
                 id: user.studentid,
                 name: user.name,
-                role: req.session.role
+                role: req.session.role,
+                className: user.classname || ''
             }
         });
 
@@ -102,15 +103,17 @@ router.get('/me', async (req, res) => {
     }
 
     try {
-        // 從資料庫取得最新名稱與角色狀態，避免 Cookie 暫存舊名字
-        const { rows } = await db.query('SELECT Name, Role FROM Users WHERE StudentID = $1', [req.session.studentId]);
+        // 從資料庫取得最新名稱、角色與班級
+        const { rows } = await db.query('SELECT Name, Role, ClassName FROM Users WHERE StudentID = $1', [req.session.studentId]);
         
         let currentName = req.session.studentName;
         let currentRole = req.session.role || 'student';
+        let currentClassName = '';
 
         if (rows.length > 0) {
             currentName = rows[0].name;
             currentRole = rows[0].role;
+            currentClassName = rows[0].classname || '';
             
             // 順便更新 Session
             req.session.studentName = currentName;
@@ -122,7 +125,8 @@ router.get('/me', async (req, res) => {
             student: {
                 id: req.session.studentId,
                 name: currentName,
-                role: currentRole
+                role: currentRole,
+                className: currentClassName
             }
         });
     } catch (e) {
