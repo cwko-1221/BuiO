@@ -12,14 +12,14 @@ const { Pool } = require('pg');
 
 let pool = null;
 
-if (process.env.DATABASE_URL) {
+if (process.env.SUPABASE_DB_URL) {
   // Use Supabase PostgreSQL
   pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.SUPABASE_DB_URL,
     ssl: { rejectUnauthorized: false }
   });
 } else {
-  console.log('⚠️ 未偵測到 DATABASE_URL，將使用本地端 JSON 資料庫模式 (data/db.json)');
+  console.log('⚠️ 未偵測到 SUPABASE_DB_URL，將使用本地端 JSON 資料庫模式 (data/db.json)');
 }
 
 // ================================================================
