@@ -113,20 +113,16 @@ svg {
 }
 
 .brand-mark {
-  display: grid;
-  place-items: center;
+  display: block;
   width: 52px;
   height: 52px;
   border-radius: 8px;
-  background: var(--ink);
-  color: white;
-  font-weight: 850;
+  object-fit: contain;
 }
 
 .compact .brand-mark {
   width: 42px;
   height: 42px;
-  font-size: 0.84rem;
 }
 
 .school-name {

@@ -216,7 +216,7 @@ function renderLogin() {
     <main class="login-shell">
       <section class="login-visual" aria-label="平台介紹">
         <div class="brand-lockup">
-          <div class="brand-mark">BO</div>
+          <img src="/images/logo.png" class="brand-mark" alt="校徽" />
           <div>
             <div class="school-name">杯澳公立學校</div>
             <div class="platform-name">個人化學習平台</div>
@@ -285,7 +285,7 @@ function renderShell() {
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand-lockup compact">
-          <div class="brand-mark">BO</div>
+          <img src="/images/logo.png" class="brand-mark" alt="校徽" />
           <div>
             <div class="school-name">杯澳公立學校</div>
             <div class="platform-name">Learning Hub</div>
