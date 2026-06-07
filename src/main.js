@@ -512,8 +512,6 @@ function renderStudentManagement() {
         <datalist id="groupOptions">
           <option value="A組">
           <option value="B組">
-          <option value="C組">
-          <option value="D組">
         </datalist>
         <label>密碼<input id="newStudentPw" required value="123456" autocomplete="off"></label>
         <button type="submit" class="primary-action" id="addStudentBtn">${renderIcon('plus')} 確認新增</button>
