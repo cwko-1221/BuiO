@@ -177,8 +177,10 @@ router.put('/language', async (req, res) => {
  */
 router.post('/register-student', async (req, res) => {
     try {
-        // 權限驗證
-        if (req.session.role !== 'teacher') {
+        // 權限驗證：是老師或提供安全 Admin 密碼
+        const isTeacher = req.session.role === 'teacher';
+        const isAdmin = req.body.adminPassword === 'Admin';
+        if (!isTeacher && !isAdmin) {
             return res.status(403).json({ success: false, message: '權限不足，僅限教師操作' });
         }
 
@@ -233,8 +235,10 @@ router.post('/register-student', async (req, res) => {
  */
 router.delete('/delete-student/:studentId', async (req, res) => {
     try {
-        // 權限驗證
-        if (req.session.role !== 'teacher') {
+        // 權限驗證：是老師或提供安全 Admin 密碼
+        const isTeacher = req.session.role === 'teacher';
+        const isAdmin = req.query.adminPassword === 'Admin';
+        if (!isTeacher && !isAdmin) {
             return res.status(403).json({ success: false, message: '權限不足，僅限教師操作' });
         }
 

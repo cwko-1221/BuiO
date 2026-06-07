@@ -264,6 +264,7 @@ const state = {
   mathSsoStatus: '',
   studentsList: [],
   studentsLoaded: false,
+  adminUnlocked: false,
 };
 
 // 嘗試從 Session 恢復登入狀態
@@ -927,7 +928,8 @@ function bindEvents() {
     const pw = prompt('請輸入 Admin 密碼：');
     if (pw === 'Admin') {
       state.activeView = 'admin';
-      if (state.activeView === 'admin') state.studentsLoaded = false;
+      state.adminUnlocked = true;
+      state.studentsLoaded = false;
       render();
     } else if (pw !== null) {
       alert('密碼錯誤！');
@@ -1017,7 +1019,8 @@ function bindEvents() {
           studentId: document.getElementById('newTeacherId').value.trim(),
           name: document.getElementById('newTeacherName').value.trim(),
           password: document.getElementById('newTeacherPw').value,
-          role: 'teacher'
+          role: 'teacher',
+          adminPassword: state.adminUnlocked ? 'Admin' : undefined
         })
       });
       const data = await res.json();
@@ -1044,7 +1047,10 @@ function bindEvents() {
       
       btn.disabled = true;
       try {
-        const res = await fetch(`/api/auth/delete-student/${sid}`, {
+        const url = state.adminUnlocked
+          ? `/api/auth/delete-student/${sid}?adminPassword=Admin`
+          : `/api/auth/delete-student/${sid}`;
+        const res = await fetch(url, {
           method: 'DELETE',
           credentials: 'include'
         });
