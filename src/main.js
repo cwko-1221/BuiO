@@ -229,7 +229,6 @@ function renderLogin() {
           <div class="map-node node-d">英文</div>
         </div>
         <h1>一個登入入口，連接學生每天需要的學習工具。</h1>
-        <p>第一版先整合數學練習和互動白板，日後可以繼續加入更多模組。</p>
       </section>
 
       <section class="login-panel" aria-label="登入">
