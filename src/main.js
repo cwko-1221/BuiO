@@ -240,17 +240,16 @@ function renderLogin() {
         <form id="loginForm" class="login-form">
           <label>
             學號 / 教師號
-            <input id="userIdInput" placeholder="例如 S001 或 T001" autocomplete="username" required />
+            <input id="userIdInput" placeholder="" autocomplete="username" required />
           </label>
           <label>
             密碼
-            <input id="passwordInput" type="password" value="123456" placeholder="輸入密碼" autocomplete="current-password" required />
+            <input id="passwordInput" type="password" placeholder="" autocomplete="current-password" required />
           </label>
           <button class="primary-action" type="submit" ${state.loginLoading ? 'disabled' : ''}>
             ${state.loginLoading ? renderIcon('loader') + ' 登入中…' : renderIcon('door') + ' 進入平台'}
           </button>
         </form>
-        <p class="hint-text">學生帳號：S001–S005 ／ 密碼：123456<br>教師帳號：T001 ／ 密碼：123456</p>
       </section>
     </main>
   `;
