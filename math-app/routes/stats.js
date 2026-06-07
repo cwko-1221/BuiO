@@ -336,6 +336,7 @@ router.get('/teacher/students', requireTeacher, async (req, res) => {
             SELECT 
                 u.StudentID as id,
                 u.Name as name,
+                u.Role as role,
                 COALESCE(SUM(s.TotalAttempted), 0) as totalquestions,
                 CASE 
                     WHEN SUM(s.TotalAttempted) > 0 
@@ -344,9 +345,8 @@ router.get('/teacher/students', requireTeacher, async (req, res) => {
                 END as overallaccuracy
             FROM Users u
             LEFT JOIN StudentStats s ON u.StudentID = s.StudentID AND s.Tag = ANY($1::text[])
-            WHERE u.Role = 'student'
-            GROUP BY u.StudentID
-            ORDER BY u.StudentID
+            GROUP BY u.StudentID, u.Role
+            ORDER BY u.Role ASC, u.StudentID ASC
         `, [ALL_TAGS]);
 
         res.json({
@@ -354,6 +354,7 @@ router.get('/teacher/students', requireTeacher, async (req, res) => {
             students: students.map(s => ({
                 id: s.id,
                 name: s.name,
+                role: s.role,
                 totalQuestions: parseInt(s.totalquestions) || 0,
                 overallAccuracy: parseFloat(s.overallaccuracy) || 0
             }))

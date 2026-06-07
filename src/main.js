@@ -505,19 +505,23 @@ function renderStudentManagement() {
     </div>
 
     <section class="work-panel">
-      <h2>學生列表</h2>
+      <h2>帳號列表</h2>
       <div class="student-table">
         ${state.studentsList.map(s => `
           <div class="student-row" style="grid-template-columns: 1fr auto;">
             <div>
               <strong>${s.name}</strong>
+              ${s.role === 'teacher' 
+                ? '<span style="background:var(--accent-teal); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">老師</span>' 
+                : '<span style="background:var(--accent-purple); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">學生</span>'
+              }
               <span style="color:var(--text-muted); font-size:0.9em; margin-left:8px;">${s.id}</span>
             </div>
             <div>
               <button class="danger-action delete-student-btn" data-id="${s.id}">刪除</button>
             </div>
           </div>
-        `).join('') || '<div style="padding:1rem; color:var(--text-muted)">無學生資料</div>'}
+        `).join('') || '<div style="padding:1rem; color:var(--text-muted)">無帳號資料</div>'}
       </div>
     </section>
   `;
