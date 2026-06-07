@@ -487,6 +487,7 @@ function renderStudentManagement() {
         <h2>學生管理</h2>
         <p>新增或刪除學生帳號，資料將與所有模組同步。</p>
       </div>
+      <button id="upgradeStudentsBtn" class="primary-action" style="background:var(--accent-purple);">${renderIcon('spark')} 一鍵升級</button>
     </section>
     
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
@@ -494,12 +495,26 @@ function renderStudentManagement() {
       <form id="addStudentForm" class="login-form" style="max-width: 400px; margin-top:1rem;">
         <label>學號<input id="newStudentId" required placeholder="例如 S006" autocomplete="off"></label>
         <label>姓名<input id="newStudentName" required placeholder="例如 陳大文" autocomplete="off"></label>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-          <label style="margin-bottom:0">班級<input id="newStudentClass" placeholder="例如 P4A" autocomplete="off"></label>
-          <label style="margin-bottom:0">中文分組<input id="newStudentChi" placeholder="例如 A組" autocomplete="off"></label>
-          <label style="margin-bottom:0">英文分組<input id="newStudentEng" placeholder="例如 B組" autocomplete="off"></label>
-          <label style="margin-bottom:0">數學分組<input id="newStudentMath" placeholder="例如 C組" autocomplete="off"></label>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
+          <label style="margin-bottom:0">班級<input id="newStudentClass" list="classOptions" placeholder="例如 P4" autocomplete="off"></label>
+          <label style="margin-bottom:0">中文分組<input id="newStudentChi" list="groupOptions" placeholder="例如 P4B" autocomplete="off"></label>
+          <label style="margin-bottom:0">英文分組<input id="newStudentEng" list="groupOptions" placeholder="例如 P4A" autocomplete="off"></label>
+          <label style="margin-bottom:0">數學分組<input id="newStudentMath" list="groupOptions" placeholder="例如 P4B" autocomplete="off"></label>
         </div>
+        <datalist id="classOptions">
+          <option value="P1">
+          <option value="P2">
+          <option value="P3">
+          <option value="P4">
+          <option value="P5">
+          <option value="P6">
+        </datalist>
+        <datalist id="groupOptions">
+          <option value="A組">
+          <option value="B組">
+          <option value="C組">
+          <option value="D組">
+        </datalist>
         <label>密碼<input id="newStudentPw" required value="123456" autocomplete="off"></label>
         <button type="submit" class="primary-action" id="addStudentBtn">${renderIcon('plus')} 確認新增</button>
         <div id="addStudentError" style="color:var(--accent-red); margin-top:0.5rem; display:none;"></div>
@@ -515,11 +530,11 @@ function renderStudentManagement() {
               <strong>${s.name}</strong>
               <span style="background:var(--accent-purple); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">學生</span>
               <span style="color:var(--text-muted); font-size:0.9em; margin-left:8px;">${s.id}</span>
-              <div style="font-size:0.85em; color:var(--text-muted); margin-top:4px;">
-                ${s.className ? `<span style="display:inline-block; border:1px solid rgba(0,0,0,0.1); border-radius:4px; padding:2px 6px; margin-right:4px;">班級: ${s.className}</span>` : ''}
-                ${s.chineseGroup ? `<span style="display:inline-block; border:1px solid rgba(0,0,0,0.1); border-radius:4px; padding:2px 6px; margin-right:4px;">中文: ${s.chineseGroup}</span>` : ''}
-                ${s.englishGroup ? `<span style="display:inline-block; border:1px solid rgba(0,0,0,0.1); border-radius:4px; padding:2px 6px; margin-right:4px;">英文: ${s.englishGroup}</span>` : ''}
-                ${s.mathGroup ? `<span style="display:inline-block; border:1px solid rgba(0,0,0,0.1); border-radius:4px; padding:2px 6px;">數學: ${s.mathGroup}</span>` : ''}
+              <div style="font-size:0.95em; color:var(--text-muted); margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+                ${s.className ? `<span style="border:1px solid var(--line); border-radius:6px; padding:4px 8px;">班級: ${s.className}</span>` : ''}
+                ${s.chineseGroup ? `<span style="border:1px solid var(--line); border-radius:6px; padding:4px 8px;">中文: ${s.chineseGroup}</span>` : ''}
+                ${s.englishGroup ? `<span style="border:1px solid var(--line); border-radius:6px; padding:4px 8px;">英文: ${s.englishGroup}</span>` : ''}
+                ${s.mathGroup ? `<span style="border:1px solid var(--line); border-radius:6px; padding:4px 8px;">數學: ${s.mathGroup}</span>` : ''}
               </div>
             </div>
             <div>
@@ -712,6 +727,32 @@ function bindEvents() {
       render();
     } else if (pw !== null) {
       alert('密碼錯誤！');
+    }
+  });
+
+  // 學生升級
+  document.getElementById('upgradeStudentsBtn')?.addEventListener('click', async () => {
+    if (!confirm('⚠️ 確定要一鍵升級所有學生班級嗎？(例如 P4 會升級為 P5，P6 會變成 Graduated)。此動作無法復原！')) return;
+    
+    const btn = document.getElementById('upgradeStudentsBtn');
+    btn.disabled = true;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `${renderIcon('loader')} 升級中...`;
+    
+    try {
+      const res = await fetch('/api/auth/upgrade-students', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        alert('🎉 ' + data.message);
+        fetchStudentsList();
+      } else {
+        alert('❌ 升級失敗：' + data.message);
+      }
+    } catch (err) {
+      alert('❌ 連線錯誤');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
     }
   });
 

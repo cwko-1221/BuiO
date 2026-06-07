@@ -234,5 +234,38 @@ router.delete('/delete-student/:studentId', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/auth/upgrade-students
+ * 教師專用：一鍵升級所有學生班級
+ */
+router.post('/upgrade-students', async (req, res) => {
+    try {
+        if (req.session.role !== 'teacher') {
+            return res.status(403).json({ success: false, message: '權限不足' });
+        }
+
+        await db.query(`
+            UPDATE Users
+            SET ClassName = 
+              CASE 
+                WHEN ClassName LIKE 'P6%' THEN 'Graduated'
+                WHEN ClassName LIKE 'P5%' THEN REPLACE(ClassName, 'P5', 'P6')
+                WHEN ClassName LIKE 'P4%' THEN REPLACE(ClassName, 'P4', 'P5')
+                WHEN ClassName LIKE 'P3%' THEN REPLACE(ClassName, 'P3', 'P4')
+                WHEN ClassName LIKE 'P2%' THEN REPLACE(ClassName, 'P2', 'P3')
+                WHEN ClassName LIKE 'P1%' THEN REPLACE(ClassName, 'P1', 'P2')
+                ELSE ClassName
+              END
+            WHERE Role = 'student' AND ClassName IS NOT NULL AND ClassName != ''
+        `);
+
+        res.json({ success: true, message: '學生班級已成功升級' });
+
+    } catch (error) {
+        console.error('升級學生錯誤:', error);
+        res.status(500).json({ success: false, message: '伺服器錯誤' });
+    }
+});
+
 module.exports = router;
 
