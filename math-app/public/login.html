@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="國小四則運算適性學習系統 - 登入頁面">
+    <title>登入 ✦ 杯澳四則特訓</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color var(--transition-base);
+        }
+        .back-btn:hover { color: var(--text-primary); }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="login-wrapper" style="position: relative;">
+            <a href="/" class="back-btn" title="回首頁">⬅️</a>
+            <div class="login-card glass-card-static" id="login-card">
+                <img src="/images/logo.png" alt="校徽" class="login-img">
+                <h1 class="login-title">系統登入</h1>
+                <p class="login-subtitle">請輸入您的學號或教師帳號</p>
+
+                <div class="login-error" id="login-error"></div>
+
+                <form class="login-form" id="login-form">
+                    <div class="form-group">
+                        <label class="form-label" for="student-id">帳號</label>
+                        <input type="text" class="form-input" id="student-id" 
+                               placeholder="請輸入帳號 (例: S001 或 T001)" autocomplete="off" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="password">密碼</label>
+                        <input type="password" class="form-input" id="password" 
+                               placeholder="請輸入密碼" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" id="login-btn">
+                        🚀 登入
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    <p>學生：S001 ~ S005 ｜ 老師：T001 (密碼皆為 123456)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="杯澳四則特訓 - 首頁">
+    <title>杯澳四則特訓 ✦ 適性學習系統</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .home-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+        .qr-card {
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .qr-container {
+            background: white;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin: 24px auto;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform var(--transition-base);
+        }
+        .qr-container:hover {
+            transform: scale(1.05);
+        }
+        .qr-container img {
+            max-width: 100%;
+            display: block;
+        }
+        /* QR Code Modal for large view */
+        .qr-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-base);
+        }
+        .qr-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .qr-modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+        .qr-modal-img {
+            width: 80vmin;
+            max-width: 500px;
+        }
+        .close-modal {
+            margin-top: 24px;
+            color: #333;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="home-wrapper">
+            <div class="qr-card glass-card-static">
+                <img src="/images/logo.png" alt="校徽" class="login-img">
+                <h1 class="login-title">杯澳四則特訓</h1>
+                <p class="login-subtitle">掃描 QR Code 或點擊按鈕進入系統</p>
+
+                <div class="qr-container" id="qr-container" title="點擊放大 QR Code">
+                    <img id="qr-img" src="" alt="登入 QR Code">
+                </div>
+                <div id="lan-ip-hint" style="color:var(--text-muted); font-size: 0.85rem; margin-bottom: 24px;"></div>
+
+                <a href="/" class="btn btn-primary btn-lg btn-block">
+                    👉 前往學習平台
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="qr-modal" id="qr-modal">
+        <div class="qr-modal-content">
+            <img id="qr-modal-img" class="qr-modal-img" src="" alt="放大版 QR Code">
+            <div class="close-modal" id="close-modal">❌ 關閉</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 自動偵測登入跳轉
+            try {
+                const me = await fetch('/api/auth/me').then(r => r.json());
+                if (me.success) {
+                    window.location.href = '/';
+                    return;
+                }
+            } catch (e) {}
+
+            // 從這台電腦的伺服器抓取正確的無線網路小區 IP
+            let loginUrl = window.location.origin + '/';
+            
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                try {
+                    const res = await fetch('/api/network/ip');
+                    const data = await res.json();
+                    if (data.ip && data.ip !== '127.0.0.1') {
+                        loginUrl = `http://${data.ip}:${data.port}/`;
+                        const hintInfo = document.getElementById('lan-ip-hint');
+                        if (hintInfo) {
+                            hintInfo.innerHTML = `請確保 iPad 連上與電腦相同的 Wi-Fi<br>或是輸入網址：<strong style="color:var(--text-primary)">http://${data.ip}:${data.port}</strong>`;
+                        }
+                    }
+                } catch (e) {
+                    console.log('Fetching network ip failed, using origin.', e);
+                }
+            }
+
+            // 動態產生 QR code
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(loginUrl)}`;
+            
+            document.getElementById('qr-img').src = qrUrl;
+            document.getElementById('qr-modal-img').src = qrUrl;
+
+            // Modal 邏輯
+            const modal = document.getElementById('qr-modal');
+            const qrContainer = document.getElementById('qr-container');
+            const closeBtn = document.getElementById('close-modal');
+
+            qrContainer.addEventListener('click', () => {
+                modal.classList.add('active');
+            });
+
+            closeBtn.addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) modal.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

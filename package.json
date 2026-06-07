@@ -1,0 +1,20 @@
+{
+  "name": "bui-o-learning-platform",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-session": "^2.1.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0"
+  }
+}

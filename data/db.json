@@ -1,0 +1,442 @@
+{
+  "users": [
+    {
+      "studentid": "S001",
+      "name": "王小明",
+      "role": "student",
+      "passwordhash": "$2b$10$3dKTivOnJxYbfa7QyJHsiufGjS4SgPnf270UCjyA9pI01eiagAhOS"
+    },
+    {
+      "studentid": "S002",
+      "name": "李小華",
+      "role": "student",
+      "passwordhash": "$2b$10$3dKTivOnJxYbfa7QyJHsiufGjS4SgPnf270UCjyA9pI01eiagAhOS"
+    },
+    {
+      "studentid": "S003",
+      "name": "張小美",
+      "role": "student",
+      "passwordhash": "$2b$10$3dKTivOnJxYbfa7QyJHsiufGjS4SgPnf270UCjyA9pI01eiagAhOS"
+    },
+    {
+      "studentid": "S004",
+      "name": "陳大偉",
+      "role": "student",
+      "passwordhash": "$2b$10$3dKTivOnJxYbfa7QyJHsiufGjS4SgPnf270UCjyA9pI01eiagAhOS"
+    },
+    {
+      "studentid": "S005",
+      "name": "林小芬",
+      "role": "student",
+      "passwordhash": "$2b$10$3dKTivOnJxYbfa7QyJHsiufGjS4SgPnf270UCjyA9pI01eiagAhOS"
+    },
+    {
+      "studentid": "T001",
+      "name": "陳老師",
+      "role": "teacher",
+      "passwordhash": "$2b$10$3dKTivOnJxYbfa7QyJHsiufGjS4SgPnf270UCjyA9pI01eiagAhOS"
+    },
+    {
+      "studentid": "S006",
+      "name": "abc",
+      "passwordhash": "$2b$10$/Gu9RdkLN2AkzEx23/cNneXzHCUfnr/4h2tL8wxVA79tu54sEJk6C",
+      "role": "student"
+    }
+  ],
+  "studentStats": [
+    {
+      "studentid": "S001",
+      "tag": "add_2d_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S001",
+      "tag": "add_2d_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S001",
+      "tag": "sub_2d_b",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S001",
+      "tag": "sub_3d_z_mid",
+      "totalattempted": 2,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S001",
+      "tag": "mul_2x2_nc_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S001",
+      "tag": "mul_2x2_c_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S001",
+      "tag": "div_3d_1d_z0_mid",
+      "totalattempted": 2,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S001",
+      "tag": "div_3d_1d_z0_end",
+      "totalattempted": 1,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S002",
+      "tag": "add_2d_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S002",
+      "tag": "add_2d_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S002",
+      "tag": "sub_2d_b",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S002",
+      "tag": "sub_3d_z_mid",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S002",
+      "tag": "mul_2x2_nc_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S002",
+      "tag": "mul_2x2_c_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S002",
+      "tag": "div_3d_1d_z0_mid",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S002",
+      "tag": "div_3d_1d_z0_end",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S003",
+      "tag": "add_2d_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S003",
+      "tag": "add_2d_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S003",
+      "tag": "sub_2d_b",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S003",
+      "tag": "sub_3d_z_mid",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S003",
+      "tag": "mul_2x2_nc_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S003",
+      "tag": "mul_2x2_c_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S003",
+      "tag": "div_3d_1d_z0_mid",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S003",
+      "tag": "div_3d_1d_z0_end",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S004",
+      "tag": "add_2d_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S004",
+      "tag": "add_2d_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S004",
+      "tag": "sub_2d_b",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S004",
+      "tag": "sub_3d_z_mid",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S004",
+      "tag": "mul_2x2_nc_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S004",
+      "tag": "mul_2x2_c_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S004",
+      "tag": "div_3d_1d_z0_mid",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S004",
+      "tag": "div_3d_1d_z0_end",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S005",
+      "tag": "add_2d_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S005",
+      "tag": "add_2d_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S005",
+      "tag": "sub_2d_b",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S005",
+      "tag": "sub_3d_z_mid",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S005",
+      "tag": "mul_2x2_nc_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S005",
+      "tag": "mul_2x2_c_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S005",
+      "tag": "div_3d_1d_z0_mid",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S005",
+      "tag": "div_3d_1d_z0_end",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S006",
+      "tag": "add_2d_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S006",
+      "tag": "add_2d_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S006",
+      "tag": "sub_2d_b",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S006",
+      "tag": "sub_3d_z_mid",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S006",
+      "tag": "mul_2x2_nc_nc",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S006",
+      "tag": "mul_2x2_c_c",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S006",
+      "tag": "div_3d_1d_z0_mid",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    },
+    {
+      "studentid": "S006",
+      "tag": "div_3d_1d_z0_end",
+      "totalattempted": 0,
+      "totalcorrect": 0,
+      "accuracyrate": 0
+    }
+  ],
+  "questionLogs": [
+    {
+      "logid": 1,
+      "studentid": "S001",
+      "tag": "div_3d_1d_z0_mid",
+      "questiontext": "604 ÷ 2",
+      "correctanswer": 302,
+      "useranswer": 123,
+      "iscorrect": 0,
+      "timetaken": 7,
+      "timestamp": "2026-06-07T06:36:08.451Z"
+    },
+    {
+      "logid": 2,
+      "studentid": "S001",
+      "tag": "div_3d_1d_z0_mid",
+      "questiontext": "428 ÷ 4",
+      "correctanswer": 107,
+      "useranswer": 1123,
+      "iscorrect": 0,
+      "timetaken": 0.7,
+      "timestamp": "2026-06-07T06:36:09.950Z"
+    },
+    {
+      "logid": 3,
+      "studentid": "S001",
+      "tag": "sub_3d_z_mid",
+      "questiontext": "309 - 289",
+      "correctanswer": 20,
+      "useranswer": 123,
+      "iscorrect": 0,
+      "timetaken": 0.6,
+      "timestamp": "2026-06-07T06:36:11.331Z"
+    },
+    {
+      "logid": 4,
+      "studentid": "S001",
+      "tag": "sub_3d_z_mid",
+      "questiontext": "703 - 229",
+      "correctanswer": 474,
+      "useranswer": 123,
+      "iscorrect": 0,
+      "timetaken": 0.5,
+      "timestamp": "2026-06-07T06:36:12.681Z"
+    },
+    {
+      "logid": 5,
+      "studentid": "S001",
+      "tag": "div_3d_1d_z0_end",
+      "questiontext": "120 ÷ 3",
+      "correctanswer": 40,
+      "useranswer": 123,
+      "iscorrect": 0,
+      "timetaken": 0.5,
+      "timestamp": "2026-06-07T06:36:13.985Z"
+    }
+  ],
+  "_logId": 5
+}
