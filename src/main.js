@@ -822,18 +822,6 @@ function renderSettingsPage() {
     <div class="settings-layout">
       <form id="settingsForm" class="settings-form">
         <label>
-          ${t('math_app_path')}
-          <input name="math" value="${settings.math || MATH_QUIZ_URL}" />
-        </label>
-        <label>
-          ${t('whiteboard_path')}
-          <input name="whiteboard" value="${settings.whiteboard || WHITEBOARD_BASE}" />
-        </label>
-        <label>
-          ${t('default_roomCode')}
-          <input name="roomCode" value="${settings.roomCode || state.currentUser?.name || 'P4A-2026'}" />
-        </label>
-        <label>
           ${t('ui_language')}
           <select name="language" style="padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; background:var(--surface); width:100%; margin-top:8px;">
             <option value="zh-HK" ${(!state.currentUser?.language && !settings.language || (state.currentUser?.language || settings.language) === 'zh-HK') ? 'selected' : ''}>${t('lang_zh')}</option>
@@ -1116,9 +1104,6 @@ function bindEvents() {
     e.preventDefault();
     const fd = new FormData(e.target);
     const settings = {
-      math: fd.get('math'),
-      whiteboard: fd.get('whiteboard'),
-      roomCode: fd.get('roomCode'),
       language: fd.get('language')
     };
     
