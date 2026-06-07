@@ -16,7 +16,6 @@ const MODULES = [
     description: '個人化四則運算練習，根據學生弱項自動出題。',
     accent: 'mint',
     icon: 'math',
-    metric: '今日完成 8 / 10 題',
     status: '已啟用',
     roleAccess: ['student', 'teacher']
   },
@@ -424,7 +423,7 @@ function renderTeacherDashboard() {
         ` : ''}
       </div>
       <div class="class-snapshot">
-        <div><strong>${state.studentsList.length}</strong><span>學生</span></div>
+        <div><strong>${state.studentsList.filter(s => s.role !== 'teacher').length}</strong><span>學生</span></div>
       </div>
     </section>
 
