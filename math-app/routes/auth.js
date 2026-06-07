@@ -226,7 +226,7 @@ router.delete('/delete-student/:studentId', async (req, res) => {
         await db.query("DELETE FROM StudentStats WHERE StudentID = $1", [studentId]);
         await db.query("DELETE FROM Users WHERE StudentID = $1", [studentId]);
 
-        res.json({ success: true, message: '學生已成功刪除' });
+        res.json({ success: true, message: '帳號已成功刪除' });
 
     } catch (error) {
         console.error('刪除學生錯誤:', error);

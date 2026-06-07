@@ -871,7 +871,7 @@ function bindEvents() {
         });
         const data = await res.json();
         if (data.success) {
-          alert('✅ 學生已刪除');
+          alert('✅ 帳號已刪除');
           fetchStudentsList();
         } else {
           alert('刪除失敗: ' + (data.message || '未知錯誤'));
