@@ -231,10 +231,10 @@ function renderLogin() {
         <!-- 主要內容 -->
         <div class="lv-center-content">
           <div class="lv-subject-pills" aria-hidden="true">
-            <span class="lv-pill pill-math">📐 數學</span>
-            <span class="lv-pill pill-board">🖊️ 白板</span>
             <span class="lv-pill pill-chi">📖 中文</span>
             <span class="lv-pill pill-eng">🔤 英文</span>
+            <span class="lv-pill pill-math">📐 數學</span>
+            <span class="lv-pill pill-board">🖊️ 白板</span>
           </div>
           <h1>一站式個人化學習平台</h1>
           <p class="lv-subtitle">連接學生每天需要的學習工具</p>
