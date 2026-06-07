@@ -430,7 +430,6 @@ function renderTeacherDashboard() {
     <section class="section-head" style="margin-top:2rem">
       <div>
         <h2>模組管理</h2>
-        <p>第一版先保留數學和白板，之後可在同一位置加入更多學習 App。</p>
       </div>
     </section>
     <div class="module-grid compact-grid">
