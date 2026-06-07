@@ -296,6 +296,7 @@ function renderShell() {
           ${user.role === 'teacher' ? `<button class="${state.activeView === 'students' ? 'active' : ''}" data-view="students">${renderIcon('user')} 學生管理</button>` : ''}
           <button class="${state.activeView === 'modules' ? 'active' : ''}" data-view="modules">${renderIcon('board')} 模組</button>
           <button class="${state.activeView === 'settings' ? 'active' : ''}" data-view="settings">${renderIcon('settings')} 設定</button>
+          <button id="adminBtn" class="${state.activeView === 'admin' ? 'active' : ''}">${renderIcon('settings')} Admin</button>
         </nav>
         <div class="sidebar-footer">
           <span>${user.role === 'teacher' ? '老師模式' : '學生模式'}</span>
@@ -308,6 +309,7 @@ function renderShell() {
         ${state.activeView === 'students' && state.currentUser.role === 'teacher' ? renderStudentManagement() : ''}
         ${state.activeView === 'modules' ? renderModulesPage() : ''}
         ${state.activeView === 'settings' ? renderSettingsPage() : ''}
+        ${state.activeView === 'admin' ? renderAdminPage() : ''}
       </main>
     </div>
   `;
@@ -488,15 +490,9 @@ function renderStudentManagement() {
     </section>
     
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
-      <h3>新增帳號</h3>
+      <h3>新增學生</h3>
       <form id="addStudentForm" class="login-form" style="max-width: 400px; margin-top:1rem;">
-        <label>身分
-          <select id="newStudentRole" style="padding:10px; border-radius:6px; border:1px solid rgba(0,0,0,0.1); background:var(--surface);">
-            <option value="student">學生</option>
-            <option value="teacher">教師</option>
-          </select>
-        </label>
-        <label>學號 / 教師編號<input id="newStudentId" required placeholder="例如 S006 或 T002" autocomplete="off"></label>
+        <label>學號<input id="newStudentId" required placeholder="例如 S006" autocomplete="off"></label>
         <label>姓名<input id="newStudentName" required placeholder="例如 陳大文" autocomplete="off"></label>
         <label>密碼<input id="newStudentPw" required value="123456" autocomplete="off"></label>
         <button type="submit" class="primary-action" id="addStudentBtn">${renderIcon('plus')} 確認新增</button>
@@ -505,23 +501,67 @@ function renderStudentManagement() {
     </div>
 
     <section class="work-panel">
-      <h2>帳號列表</h2>
+      <h2>學生列表</h2>
       <div class="student-table">
-        ${state.studentsList.map(s => `
+        ${state.studentsList.filter(s => s.role !== 'teacher').map(s => `
           <div class="student-row" style="grid-template-columns: 1fr auto;">
             <div>
               <strong>${s.name}</strong>
-              ${s.role === 'teacher' 
-                ? '<span style="background:var(--accent-teal); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">老師</span>' 
-                : '<span style="background:var(--accent-purple); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">學生</span>'
-              }
+              <span style="background:var(--accent-purple); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">學生</span>
               <span style="color:var(--text-muted); font-size:0.9em; margin-left:8px;">${s.id}</span>
             </div>
             <div>
               <button class="danger-action delete-student-btn" data-id="${s.id}">刪除</button>
             </div>
           </div>
-        `).join('') || '<div style="padding:1rem; color:var(--text-muted)">無帳號資料</div>'}
+        `).join('') || '<div style="padding:1rem; color:var(--text-muted)">無學生資料</div>'}
+      </div>
+    </section>
+  `;
+}
+
+// =============================================
+// 渲染：Admin 頁面 (教師管理)
+// =============================================
+function renderAdminPage() {
+  if (!state.studentsLoaded) {
+    fetchStudentsList();
+  }
+  
+  return `
+    <section class="section-head" style="margin-top:2rem; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h2>Admin 控制台</h2>
+        <p>管理教師帳號。</p>
+      </div>
+    </section>
+    
+    <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
+      <h3>新增老師</h3>
+      <form id="addTeacherForm" class="login-form" style="max-width: 400px; margin-top:1rem;">
+        <label>教師編號<input id="newTeacherId" required placeholder="例如 T002" autocomplete="off"></label>
+        <label>姓名<input id="newTeacherName" required placeholder="例如 王老師" autocomplete="off"></label>
+        <label>密碼<input id="newTeacherPw" required value="123456" autocomplete="off"></label>
+        <button type="submit" class="primary-action" id="addTeacherBtn">${renderIcon('plus')} 確認新增</button>
+        <div id="addTeacherError" style="color:var(--accent-red); margin-top:0.5rem; display:none;"></div>
+      </form>
+    </div>
+
+    <section class="work-panel">
+      <h2>老師列表</h2>
+      <div class="student-table">
+        ${state.studentsList.filter(s => s.role === 'teacher').map(s => `
+          <div class="student-row" style="grid-template-columns: 1fr auto;">
+            <div>
+              <strong>${s.name}</strong>
+              <span style="background:var(--accent-teal); color:white; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-left:8px;">老師</span>
+              <span style="color:var(--text-muted); font-size:0.9em; margin-left:8px;">${s.id}</span>
+            </div>
+            <div>
+              <button class="danger-action delete-student-btn" data-id="${s.id}">刪除</button>
+            </div>
+          </div>
+        `).join('') || '<div style="padding:1rem; color:var(--text-muted)">無老師資料</div>'}
       </div>
     </section>
   `;
@@ -651,7 +691,19 @@ function bindEvents() {
     });
   });
 
-  // 學生管理：新增
+  // Admin 按鈕
+  document.getElementById('adminBtn')?.addEventListener('click', () => {
+    const pw = prompt('請輸入 Admin 密碼：');
+    if (pw === 'Admin') {
+      state.activeView = 'admin';
+      if (state.activeView === 'admin') state.studentsLoaded = false;
+      render();
+    } else if (pw !== null) {
+      alert('密碼錯誤！');
+    }
+  });
+
+  // 學生管理：新增學生
   document.getElementById('addStudentForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('addStudentBtn');
@@ -660,9 +712,6 @@ function bindEvents() {
     err.style.display = 'none';
 
     try {
-      const roleSelect = document.getElementById('newStudentRole');
-      const role = roleSelect ? roleSelect.value : 'student';
-
       const res = await fetch('/api/auth/register-student', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -671,12 +720,48 @@ function bindEvents() {
           studentId: document.getElementById('newStudentId').value.trim(),
           name: document.getElementById('newStudentName').value.trim(),
           password: document.getElementById('newStudentPw').value,
-          role: role
+          role: 'student'
         })
       });
       const data = await res.json();
       if (data.success) {
-        alert(role === 'teacher' ? '🎉 教師新增成功！' : '🎉 學生新增成功！');
+        alert('🎉 學生新增成功！');
+        fetchStudentsList();
+      } else {
+        err.textContent = data.message || '新增失敗';
+        err.style.display = 'block';
+        btn.disabled = false;
+      }
+    } catch (error) {
+      err.textContent = '連線錯誤';
+      err.style.display = 'block';
+      btn.disabled = false;
+    }
+  });
+
+  // Admin 管理：新增老師
+  document.getElementById('addTeacherForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('addTeacherBtn');
+    const err = document.getElementById('addTeacherError');
+    btn.disabled = true;
+    err.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/auth/register-student', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          studentId: document.getElementById('newTeacherId').value.trim(),
+          name: document.getElementById('newTeacherName').value.trim(),
+          password: document.getElementById('newTeacherPw').value,
+          role: 'teacher'
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('🎉 教師新增成功！');
         fetchStudentsList();
       } else {
         err.textContent = data.message || '新增失敗';
