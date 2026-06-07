@@ -218,19 +218,14 @@ function handleUsers(sql, params) {
     return { rows: u ? [u] : [] };
   }
 
-  if (s.startsWith('select studentid from users where studentid = $1')) {
+  // Handle generic SELECT ... FROM users WHERE studentid = $1
+  if (s.startsWith('select ') && s.includes('from users where studentid = $1')) {
     const u = d.users.find(u => u.studentid === params[0]);
-    return { rows: u ? [{ studentid: u.studentid }] : [] };
-  }
-
-  if (s.startsWith('select role from users where studentid = $1')) {
-    const u = d.users.find(u => u.studentid === params[0]);
-    return { rows: u ? [{ role: u.role }] : [] };
-  }
-
-  if (s.startsWith('select name, role from users where studentid = $1')) {
-    const u = d.users.find(u => u.studentid === params[0]);
-    return { rows: u ? [{ name: u.name, role: u.role }] : [] };
+    if (!u) return { rows: [] };
+    
+    // If it's a specific select (not *), we return the full user anyway since it's just JS objects.
+    // The caller will only pick the fields they need.
+    return { rows: [u] };
   }
 
   if (s.startsWith('select studentid, name from users')) {
