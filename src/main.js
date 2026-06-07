@@ -658,6 +658,13 @@ function renderSettingsPage() {
           預設房間號 (roomCode)
           <input name="roomCode" value="${settings.roomCode || state.currentUser?.name || 'P4A-2026'}" />
         </label>
+        <label>
+          介面語言 (Language)
+          <select name="language" style="padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; background:var(--surface); width:100%; margin-top:8px;">
+            <option value="zh-HK" ${(!settings.language || settings.language === 'zh-HK') ? 'selected' : ''}>繁體中文</option>
+            <option value="en-US" ${settings.language === 'en-US' ? 'selected' : ''}>English</option>
+          </select>
+        </label>
         <button class="primary-action" type="submit">
           ${renderIcon('check')} 儲存設定
         </button>
@@ -935,7 +942,8 @@ function bindEvents() {
     const settings = {
       math: fd.get('math'),
       whiteboard: fd.get('whiteboard'),
-      roomCode: fd.get('roomCode')
+      roomCode: fd.get('roomCode'),
+      language: fd.get('language')
     };
     localStorage.setItem('buiSettings', JSON.stringify(settings));
     state.activeView = 'dashboard';

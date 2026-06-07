@@ -429,6 +429,7 @@ input:focus {
   display: grid;
   gap: 22px;
   min-width: 0;
+  align-content: start;
 }
 
 .topbar,
