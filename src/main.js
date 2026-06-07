@@ -339,15 +339,6 @@ function renderStudentDashboard() {
           <button class="primary-action" id="openMathBtn">${renderIcon('math')} 開始數學練習</button>
         </div>
       </div>
-      <div class="progress-board" aria-label="今日進度">
-        <div class="progress-ring" style="--value: 76">
-          <span>76%</span>
-        </div>
-        <div>
-          <strong>本週數學正確率</strong>
-          <p>需要加強：三位數除法</p>
-        </div>
-      </div>
     </section>
 
     <section class="section-head">
