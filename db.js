@@ -180,8 +180,23 @@ function handleUsers(sql, params) {
   }
 
   if (s.startsWith('update')) {
-    const u = d.users.find(x => x.studentid === 'T001' && x.name === '孔子老師');
-    if (u) { u.name = '老師'; save(); }
+    // UPDATE Users SET Field = $1 WHERE StudentID = $2
+    const setMatch = s.match(/set\s+([a-z0-9_]+)\s*=\s*\$1/i);
+    const whereMatch = s.match(/where\s+studentid\s*=\s*\$2/i);
+    if (setMatch && whereMatch && params.length >= 2) {
+      const field = setMatch[1].toLowerCase();
+      const value = params[0];
+      const studentId = params[1];
+      const u = d.users.find(x => x.studentid === studentId);
+      if (u) {
+        u[field] = value;
+        save();
+      }
+    } else {
+      // Legacy hardcoded update just in case
+      const u = d.users.find(x => x.studentid === 'T001' && x.name === '孔子老師');
+      if (u) { u.name = '老師'; save(); }
+    }
     return { rows: [] };
   }
 
