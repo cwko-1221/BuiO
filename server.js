@@ -123,6 +123,27 @@ app.get('/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'math
 // Math App 首頁 (QR Code 頁) — 掛在 /math
 app.get('/math', (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'index.html')));
 
+// ========================================
+// 考評報告模組（僅限老師）
+// ========================================
+
+// 靜態資源（CSS、JS 等）
+app.use('/report-app', express.static(path.join(__dirname, 'report-app')));
+
+// 老師專屬頁面保護
+app.get('/report.html', (req, res) => {
+  // 未登入
+  if (!req.session || !req.session.studentId) {
+    return res.redirect('/');
+  }
+  // 非老師
+  if (req.session.role !== 'teacher') {
+    return res.redirect('/quiz.html');
+  }
+  // 老師 → 提供頁面
+  res.sendFile(path.join(__dirname, 'report-app', 'report.html'));
+});
+
 // Whiteboard 前端 (已編譯的 React 靜態檔案)
 const whiteboardDist = path.join(__dirname, 'whiteboard-app', 'client', 'dist');
 app.use('/whiteboard', express.static(whiteboardDist));
@@ -305,6 +326,7 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   console.log('🚀  ├─ Portal:    /');
   console.log('🚀  ├─ 數學練習:  /quiz.html');
   console.log('🚀  ├─ 教師面板:  /dashboard.html');
+  console.log('🚀  ├─ 考評報告:  /report.html  (老師限定)');
   console.log('🚀  ├─ 互動白板:  /whiteboard/');
   console.log('🚀  └─ API:       /api/*');
   console.log('🚀 =========================================');

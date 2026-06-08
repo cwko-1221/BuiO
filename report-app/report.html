@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考評報告分析 ✦ 杯澳學習平台</title>
+    <meta name="description" content="學生考評數據可視化分析系統 — 個別學生、全班、科目分析（教師專用）">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/report-app/css/style.css">
+    <style>
+        /* ── BuiO Teacher Topbar ── */
+        .buio-topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 52px;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 200;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+        }
+        .buio-topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .buio-back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            color: #a5b4fc;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .buio-back-btn:hover {
+            background: rgba(99, 102, 241, 0.25);
+            color: #c7d2fe;
+        }
+        .buio-topbar-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .buio-topbar-title span {
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .buio-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .buio-user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .buio-user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .buio-logout-btn {
+            padding: 5px 12px;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 6px;
+            color: #fca5a5;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .buio-logout-btn:hover {
+            background: rgba(239, 68, 68, 0.22);
+        }
+
+        /* Shift body and sidebar for topbar */
+        body {
+            padding-top: 52px;
+        }
+        .sidebar {
+            top: 52px !important;
+            height: calc(100vh - 52px) !important;
+        }
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BuiO Teacher Topbar -->
+    <div class="buio-topbar">
+        <div class="buio-topbar-left">
+            <a href="/dashboard.html" class="buio-back-btn">← 返回儀表板</a>
+            <span class="buio-topbar-title">📊 <span>考評報告分析系統</span></span>
+        </div>
+        <div class="buio-topbar-right">
+            <div class="buio-user-badge">
+                <div class="buio-user-avatar" id="topbar-avatar">T</div>
+                <span id="topbar-name">載入中...</span>
+            </div>
+            <button class="buio-logout-btn" id="topbar-logout-btn">🚪 登出</button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon">📊</div>
+            <h1 class="logo-text">考評分析</h1>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item active" data-view="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">數據管理</span>
+            </li>
+            <li class="nav-item" data-view="student">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">個別學生</span>
+            </li>
+            <li class="nav-item" data-view="class">
+                <span class="nav-icon">👥</span>
+                <span class="nav-label">全班分析</span>
+            </li>
+            <li class="nav-item" data-view="subject">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">按科目</span>
+            </li>
+            <li class="nav-item" data-view="compare">
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">趨勢對比</span>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="btn-export-pdf" class="btn-export" title="導出PDF">
+                <span>📄</span> 導出 PDF
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+
+        <!-- ═══ VIEW: HOME (數據管理) ═══ -->
+        <div id="view-home" class="view active">
+            <div class="view-header">
+                <h2 class="view-title">📁 數據管理</h2>
+                <p class="view-subtitle">匯入考績報告 (.xls / .xlsx)，系統將自動解析並整合數據</p>
+            </div>
+
+            <!-- Preloaded Data Banner -->
+            <div id="preload-banner" class="info-banner" style="display:none;">
+                <span class="info-icon">✅</span>
+                <span id="preload-msg">已預載示範數據</span>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="upload-card">
+                <div id="upload-area" class="upload-area">
+                    <div class="upload-icon">📥</div>
+                    <div class="upload-title">拖放 XLS 檔案到此處</div>
+                    <div class="upload-subtitle">或點擊選擇檔案 · 支援 .xls 和 .xlsx 格式</div>
+                    <button id="btn-choose-files" class="btn-primary">
+                        <span>📂</span> 選擇檔案
+                    </button>
+                    <input type="file" id="file-input" multiple accept=".xls,.xlsx" style="display:none;">
+                </div>
+                <div id="upload-progress" class="upload-progress hidden">
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+                    </div>
+                    <div id="progress-text" class="progress-text">解析中...</div>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div id="data-overview" class="stats-grid hidden">
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value" id="stat-files">0</div>
+                    <div class="stat-mini-label">已載入檔案</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value" id="stat-students">0</div>
+                    <div class="stat-mini-label">學生人數</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value" id="stat-grades">0</div>
+                    <div class="stat-mini-label">年級數</div>
+                </div>
+                <div class="stat-mini-card">
+                    <div class="stat-mini-value" id="stat-years">0</div>
+                    <div class="stat-mini-label">學年數</div>
+                </div>
+            </div>
+
+            <!-- Loaded Files List -->
+            <div id="files-list-section" class="files-section hidden">
+                <div class="section-header">
+                    <h3>已載入的檔案</h3>
+                    <button id="btn-clear-data" class="btn-danger-sm">🗑 清除全部</button>
+                </div>
+                <div id="files-list" class="files-list"></div>
+            </div>
+        </div>
+
+        <!-- ═══ VIEW: STUDENT ═══ -->
+        <div id="view-student" class="view">
+            <div class="view-header">
+                <h2 class="view-title">👤 個別學生分析</h2>
+                <p class="view-subtitle">查看單一學生在各學年、各科目的成績表現</p>
+            </div>
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>選擇學生</label>
+                    <select id="student-select"><option value="">-- 選擇學生 --</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>考績期</label>
+                    <select id="student-term-select"><option value="all">全部</option></select>
+                </div>
+            </div>
+            <div id="student-content" class="content-area hidden">
+                <div id="student-stats" class="stats-grid"></div>
+                <div class="charts-grid-2">
+                    <div class="chart-card">
+                        <div class="chart-title">📈 成績趨勢</div>
+                        <div class="chart-wrap"><canvas id="student-trend-chart"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">🕸 能力雷達</div>
+                        <div class="chart-wrap"><canvas id="student-radar-chart"></canvas></div>
+                    </div>
+                </div>
+                <div class="chart-card full-width">
+                    <div class="chart-title-row">
+                        <div class="chart-title">📊 與班別比較</div>
+                        <select id="student-vs-subject-select" class="inline-select"></select>
+                    </div>
+                    <div class="chart-wrap chart-wrap-tall"><canvas id="student-vs-chart"></canvas></div>
+                </div>
+                <div class="chart-card full-width">
+                    <div class="chart-title">📋 詳細成績表</div>
+                    <div id="student-detail-table" class="table-scroll"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ VIEW: CLASS ═══ -->
+        <div id="view-class" class="view">
+            <div class="view-header">
+                <h2 class="view-title">👥 全班分析</h2>
+                <p class="view-subtitle">查看指定年級、學年及考績期的全班成績分布</p>
+            </div>
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>年級</label>
+                    <select id="class-grade-select"><option value="">-- 選擇年級 --</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>學年</label>
+                    <select id="class-year-select"><option value="">-- 學年 --</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>考績期</label>
+                    <select id="class-term-select"><option value="">-- 考績期 --</option></select>
+                </div>
+            </div>
+            <div id="class-content" class="content-area hidden">
+                <div id="class-stats" class="stats-grid"></div>
+                <div class="charts-grid-2">
+                    <div class="chart-card">
+                        <div class="chart-title">📊 各科平均分</div>
+                        <div class="chart-wrap"><canvas id="class-avg-chart"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">✅ 各科及格率</div>
+                        <div class="chart-wrap"><canvas id="class-pass-chart"></canvas></div>
+                    </div>
+                </div>
+                <div class="chart-card full-width">
+                    <div class="chart-title-row">
+                        <div class="chart-title">📉 成績分布</div>
+                        <select id="class-dist-subject-select" class="inline-select"></select>
+                    </div>
+                    <div class="chart-wrap"><canvas id="class-dist-chart"></canvas></div>
+                </div>
+                <div class="chart-card full-width">
+                    <div class="chart-title">🏆 班級排名</div>
+                    <div id="class-ranking-table" class="table-scroll"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ VIEW: SUBJECT ═══ -->
+        <div id="view-subject" class="view">
+            <div class="view-header">
+                <h2 class="view-title">📚 按科目分析</h2>
+                <p class="view-subtitle">橫跨多個學年，分析各科目的整體表現趨勢</p>
+            </div>
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>科目</label>
+                    <select id="subject-select"><option value="">-- 選擇科目 --</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>年級篩選</label>
+                    <select id="subject-grade-select"><option value="">全部年級</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>學年</label>
+                    <select id="subject-year-select"></select>
+                </div>
+            </div>
+            <div id="subject-content" class="content-area hidden">
+                <div id="subject-stats" class="stats-grid"></div>
+                <div class="charts-grid-2">
+                    <div class="chart-card">
+                        <div class="chart-title">📈 歷年平均趨勢</div>
+                        <div class="chart-wrap"><canvas id="subject-trend-chart"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">✅ 及格率趨勢</div>
+                        <div class="chart-wrap"><canvas id="subject-pass-chart"></canvas></div>
+                    </div>
+                </div>
+                <div class="chart-card full-width">
+                    <div class="chart-title">📊 各年級對比</div>
+                    <div class="chart-wrap"><canvas id="subject-grade-chart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ VIEW: COMPARE ═══ -->
+        <div id="view-compare" class="view">
+            <div class="view-header">
+                <h2 class="view-title">📈 趨勢對比</h2>
+                <p class="view-subtitle">多學生或多科目橫向對比，掌握成績變化趨勢</p>
+            </div>
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>對比模式</label>
+                    <select id="compare-mode">
+                        <option value="students">多學生比較</option>
+                        <option value="subjects">多科目比較</option>
+                    </select>
+                </div>
+                <div id="compare-students-filters" class="filter-group">
+                    <label>選擇學生（可多選）</label>
+                    <select id="compare-student-select" multiple style="height:100px;"></select>
+                </div>
+                <div id="compare-subject-filter" class="filter-group">
+                    <label>比較科目</label>
+                    <select id="compare-subject-select"></select>
+                </div>
+            </div>
+            <div id="compare-content" class="content-area">
+                <div class="chart-card full-width">
+                    <div class="chart-title">📈 成績趨勢對比</div>
+                    <div class="chart-wrap chart-wrap-tall"><canvas id="compare-chart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Toast -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- CDN Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Report Module Scripts -->
+    <script src="/report-app/js/preloadData.js"></script>
+    <script src="/report-app/js/dataManager.js"></script>
+    <script src="/report-app/js/studentView.js"></script>
+    <script src="/report-app/js/classView.js"></script>
+    <script src="/report-app/js/subjectView.js"></script>
+    <script src="/report-app/js/compareView.js"></script>
+    <script src="/report-app/js/app.js"></script>
+
+    <!-- BuiO Auth Integration -->
+    <script>
+    (async function() {
+        // Check teacher session
+        try {
+            const res = await fetch('/api/auth/me', { credentials: 'include' });
+            if (!res.ok) { window.location.href = '/'; return; }
+            const data = await res.json();
+            if (data.student.role !== 'teacher') {
+                window.location.href = '/quiz.html';
+                return;
+            }
+            // Show user info
+            const name = data.student.name || '老師';
+            document.getElementById('topbar-name').textContent = name;
+            document.getElementById('topbar-avatar').textContent = name[0] || 'T';
+        } catch(e) {
+            window.location.href = '/';
+        }
+
+        // Logout
+        document.getElementById('topbar-logout-btn').addEventListener('click', async () => {
+            try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch(e) {}
+            window.location.href = '/';
+        });
+    })();
+    </script>
+</body>
+</html>

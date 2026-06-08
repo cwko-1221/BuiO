@@ -349,8 +349,9 @@ router.get('/teacher/students', requireTeacher, async (req, res) => {
                 END as overallaccuracy
             FROM Users u
             LEFT JOIN StudentStats s ON u.StudentID = s.StudentID AND s.Tag = ANY($1::text[])
+            WHERE u.Role != 'teacher'
             GROUP BY u.StudentID, u.Role, u.ClassName, u.ChineseGroup, u.EnglishGroup, u.MathGroup
-            ORDER BY u.Role ASC, u.StudentID ASC
+            ORDER BY u.StudentID ASC
         `, [ALL_TAGS]);
 
         res.json({
