@@ -72,12 +72,15 @@
             });
 
             selector.addEventListener('change', async (e) => {
+                const deleteBtn = document.getElementById('btn-delete-student');
                 if (e.target.value) {
                     currentStudentId = e.target.value;
+                    if (deleteBtn) deleteBtn.style.display = 'inline-flex';
                     document.getElementById('dashboard-content').style.display = 'block';
                     await reloadAllStats();
                 } else {
                     currentStudentId = '';
+                    if (deleteBtn) deleteBtn.style.display = 'none';
                     document.getElementById('dashboard-content').style.display = 'none';
                 }
             });
@@ -139,18 +142,7 @@
         const ctx = document.getElementById('radar-chart');
         if (!ctx) return;
 
-        const labels = stats.map(s => {
-            let name = s.tagName.replace(/數/g, ''); // 兩位數加法 -> 兩位加法
-            if (name.includes(' (')) {
-                let [main, sub] = name.split(' (');
-                sub = '(' + sub;
-                if (sub.includes('，')) {
-                    sub = sub.split('，')[0] + ')'; // 縮短超長括號
-                }
-                return [main, sub];
-            }
-            return name;
-        });
+        const labels = stats.map(s => s.tagName.replace(/\(.*\)/, '').trim());
         const values = stats.map(s => s.accuracyRate);
 
         if (radarChartObj) {
@@ -210,7 +202,7 @@
                         },
                         pointLabels: {
                             color: '#94a3b8',
-                            font: { size: 9, weight: 400 }
+                            font: { size: 11, weight: 500 }
                         }
                     }
                 }
@@ -395,7 +387,124 @@
         });
     }
 
+    // ========================================
+    // Add Student Modal Logic
+    // ========================================
+    const modal = document.getElementById('add-student-modal');
+    const btnAddStudent = document.getElementById('btn-add-student');
+    const btnCancelAdd = document.getElementById('btn-cancel-add');
+    const addStudentForm = document.getElementById('add-student-form');
+    const errorDiv = document.getElementById('add-student-error');
 
+    if (btnAddStudent && modal) {
+        btnAddStudent.addEventListener('click', () => {
+            addStudentForm.reset();
+            errorDiv.style.display = 'none';
+            modal.classList.add('active');
+        });
+
+        btnCancelAdd.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+
+        addStudentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('btn-submit-add');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '新增中...';
+            errorDiv.style.display = 'none';
+
+            const payload = {
+                studentId: document.getElementById('new-student-id').value.trim(),
+                name: document.getElementById('new-student-name').value.trim(),
+                password: document.getElementById('new-student-password').value
+            };
+
+            try {
+                const res = await fetch('/api/auth/register-student', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    modal.classList.remove('active');
+                    alert('🎉 學生新增成功！');
+                    
+                    document.getElementById('student-selector').innerHTML = '<option value="">請選擇學生...</option>';
+                    await loadStudentList();
+                    
+                    const selector = document.getElementById('student-selector');
+                    selector.value = payload.studentId;
+                    currentStudentId = payload.studentId;
+                    await reloadAllStats();
+                } else {
+                    errorDiv.textContent = data.message || '新增失敗';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errorDiv.textContent = '網路連線錯誤，請重試。';
+                errorDiv.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '確認新增';
+            }
+        });
+    }
+
+    // ========================================
+    // Delete Student Logic
+    // ========================================
+    const btnDeleteStudent = document.getElementById('btn-delete-student');
+    if (btnDeleteStudent) {
+        btnDeleteStudent.addEventListener('click', async () => {
+            if (!currentStudentId) return;
+            
+            // 彈出確認視窗
+            const confirmed = confirm(`⚠️ 警告：確定要刪除學生 ${currentStudentId} 嗎？\n\n這將會【永久刪除】該學生的所有作答紀錄與統計報表，動作無法復原！`);
+            if (!confirmed) return;
+
+            // 執行刪除
+            btnDeleteStudent.disabled = true;
+            btnDeleteStudent.textContent = '刪除中...';
+
+            try {
+                const res = await fetch(`/api/auth/delete-student/${currentStudentId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    alert('✅ 學生已成功刪除');
+                    currentStudentId = '';
+                    btnDeleteStudent.style.display = 'none';
+                    
+                    // 重新載入列表並重置下拉選單
+                    document.getElementById('student-selector').innerHTML = '<option value="">請選擇學生...</option>';
+                    await loadStudentList();
+                    
+                    // 清空儀表板資料畫面 (可簡單隱藏)
+                    document.getElementById('dashboard-content').style.display = 'none';
+                } else {
+                    alert('刪除失敗: ' + (data.message || '未知錯誤'));
+                }
+            } catch (err) {
+                alert('網路連線錯誤，無法刪除學生');
+            } finally {
+                btnDeleteStudent.disabled = false;
+                btnDeleteStudent.textContent = '🗑️ 刪除學生';
+            }
+        });
+    }
 
     // ========================================
     // Logout

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="?�澳?��??��? - 學�??�表板，查?��??�學習進度?�弱點�???>
-    <title>學�??�表板 ???�澳?��??��?</title>
+    <meta name="description" content="杯澳四則特訓 - 學習儀表板，查看你的學習進度與弱點分析">
+    <title>學習儀表板 ✦ 杯澳四則特訓</title>
     <link rel="stylesheet" href="/math-app/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
@@ -13,32 +13,35 @@
         <!-- Navigation -->
         <nav class="navbar">
             <div class="navbar-brand">
-                <img src="/math-app/images/logo.png" alt="?�徽" class="logo-img">
-                <span>?�澳?��??��?</span>
+                <img src="/math-app/images/logo.png" alt="校徽" class="logo-img">
+                <span>杯澳四則特訓</span>
             </div>
             <ul class="navbar-nav">
-                <li><a href="/dashboard.html" class="active">?? ?�師?�表板</a></li>
-                <li><a href="/report.html">?? ?��??��?</a></li>
-                <li><button id="logout-btn" style="color:var(--accent-red); background:none; border:none; cursor:pointer;">?�� ?�出</button></li>
+                <li><a href="/dashboard.html" class="active">📊 教師儀表板</a></li>
+                <li><button id="logout-btn" style="color:var(--accent-red); background:none; border:none; cursor:pointer;">🚪 登出</button></li>
             </ul>
             <div class="navbar-user">
-                <span id="student-name">載入�?..</span>
+                <span id="student-name">載入中...</span>
                 <div class="avatar" id="student-avatar">?</div>
             </div>
         </nav>
 
         <div class="main-content">
-            <h1 style="font-size:1.6rem; font-weight:800; margin-bottom:8px;">?��?��???�師?�表板</h1>
-            <p style="color:var(--text-muted); margin-bottom:16px; font-size:0.9rem;">?��??��?學�??�學習進度?�弱點�???/p>
+            <h1 style="font-size:1.6rem; font-weight:800; margin-bottom:8px;">👨‍🏫 教師儀表板</h1>
+            <p style="color:var(--text-muted); margin-bottom:16px; font-size:0.9rem;">查看班上學生的學習進度與弱點分析</p>
 
             <div style="margin-bottom: 24px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
                 <div>
-                    <label for="student-selector" style="font-weight: bold; margin-right: 12px;">?��?學�?�?/label>
+                    <label for="student-selector" style="font-weight: bold; margin-right: 12px;">選擇學生：</label>
                     <select id="student-selector" style="padding: 8px; border-radius: 4px; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-subtle); display:none;">
-                        <option value="">請選?�學??..</option>
+                        <option value="">請選擇學生...</option>
                         <!-- Options filled by JS -->
                     </select>
-                    <span id="student-loading" style="color: var(--text-muted); font-size: 0.9rem;">載入?�單�?..</span>
+                    <span id="student-loading" style="color: var(--text-muted); font-size: 0.9rem;">載入名單中...</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button id="btn-delete-student" class="btn btn-danger" style="padding: 8px 16px; font-size: 0.9rem; display: none;">🗑️ 刪除學生</button>
+                    <button id="btn-add-student" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">➕ 新增學生</button>
                 </div>
             </div>
 
@@ -51,24 +54,24 @@
                 <!-- Overview Stats -->
                 <div class="dashboard-grid" id="overview-cards">
                     <div class="stat-card glass-card blue">
-                        <div class="stat-card-icon">??</div>
+                        <div class="stat-card-icon">📝</div>
                         <div class="stat-card-value" id="total-questions">0</div>
-                        <div class="stat-card-label">總�?答�???/div>
+                        <div class="stat-card-label">總作答題數</div>
                     </div>
                     <div class="stat-card glass-card purple">
-                        <div class="stat-card-icon">?��</div>
+                        <div class="stat-card-icon">🎯</div>
                         <div class="stat-card-value" id="overall-accuracy">0%</div>
-                        <div class="stat-card-label">總正確�?</div>
+                        <div class="stat-card-label">總正確率</div>
                     </div>
                     <div class="stat-card glass-card green">
-                        <div class="stat-card-icon">??/div>
+                        <div class="stat-card-icon">✅</div>
                         <div class="stat-card-value" id="total-correct">0</div>
-                        <div class="stat-card-label">答�?題數</div>
+                        <div class="stat-card-label">答對題數</div>
                     </div>
                     <div class="stat-card glass-card amber">
-                        <div class="stat-card-icon">?��?</div>
+                        <div class="stat-card-icon">⏱️</div>
                         <div class="stat-card-value" id="avg-time">0s</div>
-                        <div class="stat-card-label">今日平�??��?</div>
+                        <div class="stat-card-label">今日平均用時</div>
                     </div>
                 </div>
 
@@ -76,8 +79,8 @@
                 <div class="chart-section">
                     <!-- Radar Chart -->
                     <div class="chart-card glass-card-static">
-                        <div class="chart-card-title">?���??��??��???/div>
-                        <div class="chart-card-subtitle">?�微?��??��??��??��?�?/div>
+                        <div class="chart-card-title">🕸️ 能力雷達圖</div>
+                        <div class="chart-card-subtitle">各微能力指標的掌握程度</div>
                         <div class="chart-container">
                             <canvas id="radar-chart"></canvas>
                         </div>
@@ -85,8 +88,8 @@
 
                     <!-- Bar Chart -->
                     <div class="chart-card glass-card-static">
-                        <div class="chart-card-title">?? ?��?籤正確�?</div>
-                        <div class="chart-card-subtitle">依照題�??��??�正確�?統�?</div>
+                        <div class="chart-card-title">📊 各標籤正確率</div>
+                        <div class="chart-card-subtitle">依照題型分類的正確率統計</div>
                         <div class="tag-bars" id="tag-bars">
                             <!-- Filled by JS -->
                         </div>
@@ -97,8 +100,8 @@
                 <div class="chart-section">
                     <!-- Weakness Analysis -->
                     <div class="chart-card glass-card-static">
-                        <div class="chart-card-title">?��? 弱�??��?</div>
-                        <div class="chart-card-subtitle">�?��?��???70% ?��??��?要�?強練�?/div>
+                        <div class="chart-card-title">⚠️ 弱點分析</div>
+                        <div class="chart-card-subtitle">正確率低於 70% 的題型需要加強練習</div>
                         <div class="weakness-list" id="weakness-list">
                             <!-- Filled by JS -->
                         </div>
@@ -106,8 +109,8 @@
 
                     <!-- Time Chart -->
                     <div class="chart-card glass-card-static">
-                        <div class="chart-card-title">?��? 作�??��??��?</div>
-                        <div class="chart-card-subtitle">?��??�平?��?答�???/div>
+                        <div class="chart-card-title">⏱️ 作答時間分析</div>
+                        <div class="chart-card-subtitle">各題型平均作答秒數</div>
                         <div class="chart-container" id="time-chart-container">
                             <canvas id="time-chart"></canvas>
                         </div>
@@ -118,6 +121,33 @@
         </div>
     </div>
 
+    <!-- Add Student Modal -->
+    <div id="add-student-modal" class="modal-overlay">
+        <div class="modal-content glass-card-static">
+            <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 16px;">新增學生</h2>
+            <div id="add-student-error" class="login-error" style="display: none;"></div>
+            
+            <form id="add-student-form">
+                <div class="form-group">
+                    <label class="form-label">學號</label>
+                    <input type="text" id="new-student-id" class="form-input" placeholder="例如: S006" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">姓名</label>
+                    <input type="text" id="new-student-name" class="form-input" placeholder="例如: 新學生" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">登入密碼</label>
+                    <input type="password" id="new-student-password" class="form-input" placeholder="設定初始密碼" required>
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
+                    <button type="button" id="btn-cancel-add" class="btn btn-ghost">取消</button>
+                    <button type="submit" id="btn-submit-add" class="btn btn-primary">確認新增</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script src="/math-app/js/dashboard.js"></script>
 </body>
