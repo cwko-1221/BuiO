@@ -47,7 +47,7 @@ async function openModule(moduleId, mode) {
   } else if (moduleId === 'whiteboard') {
     if (role === 'teacher') {
       saveTeacherSession(user);
-      const url = `${WHITEBOARD_BASE}/teacher?room=${encodeURIComponent(user.name)}`;
+      const url = `${WHITEBOARD_BASE}/class-teacher?room=${encodeURIComponent(user.name)}`;
       window.open(url, '_blank');
       render();
     } else {
@@ -56,7 +56,7 @@ async function openModule(moduleId, mode) {
         alert('目前沒有老師正在開課，請稍後再試。');
       } else {
         const s = sessions[0];
-        const url = `${WHITEBOARD_BASE}/student?room=${encodeURIComponent(s.roomCode)}&name=${encodeURIComponent(user.name)}`;
+        const url = `${WHITEBOARD_BASE}/class-student?room=${encodeURIComponent(s.roomCode)}&name=${encodeURIComponent(user.name)}`;
         window.open(url, '_blank');
       }
     }
@@ -65,7 +65,7 @@ async function openModule(moduleId, mode) {
 
 function joinTeacherSession(session) {
   const user = state.currentUser;
-  const url = `${WHITEBOARD_BASE}/student?room=${encodeURIComponent(session.roomCode)}&name=${encodeURIComponent(user.name)}`;
+  const url = `${WHITEBOARD_BASE}/class-student?room=${encodeURIComponent(session.roomCode)}&name=${encodeURIComponent(user.name)}`;
   window.open(url, '_blank');
 }
 
@@ -349,7 +349,7 @@ function bindEvents() {
   // 老師：重新進入白板
   document.getElementById('rejoinBoardBtn')?.addEventListener('click', () => {
     const user = state.currentUser;
-    const url = `${WHITEBOARD_BASE}/teacher?room=${encodeURIComponent(user.name)}`;
+    const url = `${WHITEBOARD_BASE}/class-teacher?room=${encodeURIComponent(user.name)}`;
     window.open(url, '_blank');
   });
 
