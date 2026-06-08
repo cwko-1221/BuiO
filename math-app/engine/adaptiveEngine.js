@@ -41,7 +41,7 @@ async function getStudentStats(studentId) {
         totalAttempted: parseInt(r.totalattempted) || 0,
         totalCorrect: parseInt(r.totalcorrect) || 0,
         accuracyRate: parseFloat(r.accuracyrate) || 0
-    }));
+    })).filter(s => ALL_TAGS.includes(s.tag));
 }
 
 /**
