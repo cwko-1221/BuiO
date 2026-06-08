@@ -242,7 +242,7 @@ router.post('/answer', async (req, res) => {
 
         const parsedAnswer = parseFloat(userAnswer);
         const isCorrect = (parsedAnswer === question.correctAnswer) ? 1 : 0;
-        const parsedTime = parseFloat(timeTaken) || 0;
+        const parsedTime = Math.round(parseFloat(timeTaken)) || 0;
 
         if (process.env.DATABASE_URL) {
             // 寫入 QuestionLogs (IsCorrect 需要是 boolean)

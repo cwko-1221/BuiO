@@ -247,13 +247,13 @@ function handleStats(sql, params) {
   }
 
   if (s.startsWith('insert into studentstats') && s.includes('on conflict')) {
-    const [sid, tag, incA, incC, acc] = params;
+    const [sid, tag, incC] = params;
     let st = d.studentStats.find(x => x.studentid === sid && x.tag === tag);
     if (!st) {
       st = { studentid: sid, tag, totalattempted: 0, totalcorrect: 0, accuracyrate: 0 };
       d.studentStats.push(st);
     }
-    st.totalattempted += incA;
+    st.totalattempted += 1;
     st.totalcorrect += incC;
     st.accuracyrate = st.totalattempted > 0 ? round(st.totalcorrect / st.totalattempted * 100, 1) : 0;
     save();
@@ -300,13 +300,14 @@ function handleLogs(sql, params) {
 
   if (s.startsWith('insert')) {
     d._logId++;
-    const [sid, tag, q, ans, isC, ts] = params;
+    const [sid, tag, q, correctAns, userAns, isC, ts] = params;
     d.questionLogs.push({
       id: d._logId,
       studentid: sid,
       tag,
       question: q,
-      useranswer: ans,
+      correctanswer: correctAns,
+      useranswer: userAns,
       iscorrect: isC,
       timespent: ts,
       timestamp: new Date().toISOString()
