@@ -366,21 +366,37 @@ export default function ClassTeacher() {
 
         const reader = new FileReader();
         reader.onload = (event) => {
-            const base64 = event.target.result;
-            setUploadedImage(base64);
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                // Compress image to JPG (70% quality)
+                const canvas = document.createElement('canvas');
+                canvas.width = tempImg.width;
+                canvas.height = tempImg.height;
+                const ctx = canvas.getContext('2d');
+                
+                // Fill background with white in case of transparent PNG
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(tempImg, 0, 0);
 
-            // Create image element and cache it for the render loop
-            const img = new Image();
-            img.onload = () => {
-                bgImageRef.current = img;
-                // No need to repaint offscreen canvases — bg is composited in render loop
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                
+                setUploadedImage(compressedBase64);
+
+                // Create image element and cache it for the render loop
+                const img = new Image();
+                img.onload = () => {
+                    bgImageRef.current = img;
+                    // No need to repaint offscreen canvases — bg is composited in render loop
+                };
+                img.src = compressedBase64;
+
+                // Send to server
+                if (socketRef.current) {
+                    socketRef.current.emit('upload-image', compressedBase64);
+                }
             };
-            img.src = base64;
-
-            // Send to server
-            if (socketRef.current) {
-                socketRef.current.emit('upload-image', base64);
-            }
+            tempImg.src = event.target.result;
         };
         reader.readAsDataURL(file);
 
