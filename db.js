@@ -72,6 +72,40 @@ async function initPostgres() {
       );
       ALTER TABLE QuestionLogs ADD COLUMN IF NOT EXISTS CorrectAnswer VARCHAR(50);
     `);
+
+    console.log('🧹 執行 Supabase 資料清理與優化...');
+    
+    // 1. Delete orphaned records (students that don't exist in Users)
+    await client.query(`DELETE FROM StudentStats WHERE StudentID NOT IN (SELECT StudentID FROM Users)`);
+    await client.query(`DELETE FROM QuestionLogs WHERE StudentID NOT IN (SELECT StudentID FROM Users)`);
+
+    // 2. Delete legacy tags (tags not in ALL_TAGS)
+    const validTagsPlaceholders = ALL_TAGS.map((_, i) => `$${i + 1}`).join(', ');
+    if (ALL_TAGS.length > 0) {
+      await client.query(`DELETE FROM StudentStats WHERE Tag NOT IN (${validTagsPlaceholders})`, ALL_TAGS);
+      await client.query(`DELETE FROM QuestionLogs WHERE Tag NOT IN (${validTagsPlaceholders})`, ALL_TAGS);
+    }
+
+    // 3. Add Foreign Keys (ON DELETE CASCADE)
+    await client.query(`
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_studentstats_user') THEN
+          ALTER TABLE StudentStats ADD CONSTRAINT fk_studentstats_user FOREIGN KEY (StudentID) REFERENCES Users(StudentID) ON DELETE CASCADE;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_questionlogs_user') THEN
+          ALTER TABLE QuestionLogs ADD CONSTRAINT fk_questionlogs_user FOREIGN KEY (StudentID) REFERENCES Users(StudentID) ON DELETE CASCADE;
+        END IF;
+      END $$;
+    `);
+
+    // 4. Create Performance Indices
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_questionlogs_studentid ON QuestionLogs(StudentID);
+      CREATE INDEX IF NOT EXISTS idx_questionlogs_tag ON QuestionLogs(Tag);
+      CREATE INDEX IF NOT EXISTS idx_questionlogs_timestamp ON QuestionLogs(Timestamp);
+      CREATE INDEX IF NOT EXISTS idx_studentstats_studentid ON StudentStats(StudentID);
+      CREATE INDEX IF NOT EXISTS idx_users_role ON Users(Role);
+    `);
     
     // Seed defaults if empty
     const { rows } = await client.query('SELECT COUNT(*) FROM Users');
