@@ -400,13 +400,14 @@ export default function ClassStudent() {
                             placeholder="Your full name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
+                            disabled={!!error}
                             autoFocus
                         />
                         {error && <p style={{ color: '#ef4444', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>}
                         <button
                             type="submit"
                             className={styles.joinBtn}
-                            disabled={!name.trim()}
+                            disabled={!name.trim() || !!error}
                         >
                             Start Writing
                         </button>
