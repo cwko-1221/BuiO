@@ -1,20 +1,18 @@
 import { MATH_QUIZ_URL, MATH_DASHBOARD_URL, WHITEBOARD_BASE, MODULES, iconSvg } from './config.js';
 import { state, updateState } from './store.js';
 import { t, I18N } from './i18n.js';
-import { checkSession, clearSession, fetchActiveSessions, endTeacherSession, fetchStudentsList, loginApi, addStudentApi, deleteStudentApi } from './services.js';
-
-let activeSessionsCache = [];
-
-function getActiveSessions() {
-  return activeSessionsCache;
-}
+import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, loginApi, addStudentApi, deleteStudentApi } from './services.js';
+import { renderTopbar, renderShell } from './views/Shell.js';
+import { renderDashboard } from './views/Dashboard.js';
+import { renderModulesPage } from './views/Modules.js';
+import { renderStudentManagement, renderAdminPage } from './views/Admin.js';
+import { renderLogin, renderIcon } from './views/Login.js';
 
 function saveTeacherSession(teacher) {
   fetchActiveSessions(sessions => {
     const newStr = JSON.stringify(sessions);
-    const oldStr = JSON.stringify(activeSessionsCache);
+    const oldStr = JSON.stringify(getActiveSessions());
     if (newStr !== oldStr) {
-      activeSessionsCache = sessions;
       if (state.loggedIn) render(); // 有更新時重新渲染畫面
     }
   });
@@ -25,9 +23,8 @@ setInterval(() => {
   if (state.loggedIn) {
     fetchActiveSessions(sessions => {
       const newStr = JSON.stringify(sessions);
-      const oldStr = JSON.stringify(activeSessionsCache);
+      const oldStr = JSON.stringify(getActiveSessions());
       if (newStr !== oldStr) {
-        activeSessionsCache = sessions;
         if (state.loggedIn) render();
       }
     });
@@ -78,113 +75,6 @@ function joinTeacherSession(session) {
   const user = state.currentUser;
   const url = `${WHITEBOARD_BASE}/student?room=${encodeURIComponent(session.roomCode)}&name=${encodeURIComponent(user.name)}`;
   window.open(url, '_blank');
-}
-
-import { renderTopbar, renderShell } from './views/Shell.js';
-import { renderDashboard } from './views/Dashboard.js';
-import { renderModulesPage } from './views/Modules.js';
-import { renderStudentManagement, renderAdminPage } from './views/Admin.js';
-
-// =============================================
-// 渲染：設定頁
-// =============================================
-function renderSettingsPage() {
-  const settings = JSON.parse(localStorage.getItem('buiSettings') || '{}');
-  return `
-    <section class="section-head">
-      <div>
-        <h2>${t('settings_title')}</h2>
-        <p>${t('settings_desc')}</p>
-      </div>
-    </section>
-    <div class="settings-layout">
-      <form id="settingsForm" class="settings-form">
-        <label>
-          ${t('ui_language')}
-          <select name="language" style="padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; background:var(--surface); width:100%; margin-top:8px;">
-            <option value="zh-HK" ${(!state.currentUser?.language && !settings.language || (state.currentUser?.language || settings.language) === 'zh-HK') ? 'selected' : ''}>${t('lang_zh')}</option>
-            <option value="en-US" ${(state.currentUser?.language || settings.language) === 'en-US' ? 'selected' : ''}>${t('lang_en')}</option>
-          </select>
-        </label>
-        <button class="primary-action" type="submit">
-          ${renderIcon('check')} ${t('save_settings')}
-        </button>
-      </form>
-      <div class="settings-intro">
-        <h3>${t('integration_status')}</h3>
-        <p>${t('integration_status_desc')}</p>
-      </div>
-    </div>
-  `;
-}le="background:var(--teal); color:white; padding:3px 8px; border-radius:12px; font-size:0.8em; display:inline-block;">${t('role_teacher')}</span>
-              </div>
-            </div>
-            <div>
-              <button class="danger-action delete-student-btn" data-id="${s.id}">${t('delete_btn')}</button>
-            </div>
-          </div>
-        `).join('') || `<div style="padding:1rem; color:var(--text-muted)">${t('no_teachers')}</div>`}
-      </div>
-    </section>
-  `;
-}
-
-// =============================================
-// 渲染：設定頁
-// =============================================
-function renderSettingsPage() {
-  const settings = JSON.parse(localStorage.getItem('buiSettings') || '{}');
-  return `
-    <section class="section-head">
-      <div>
-        <h2>${t('settings_title')}</h2>
-        <p>${t('settings_desc')}</p>
-      </div>
-    </section>
-    <div class="settings-layout">
-      <form id="settingsForm" class="settings-form">
-        <label>
-          ${t('ui_language')}
-          <select name="language" style="padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; background:var(--surface); width:100%; margin-top:8px;">
-            <option value="zh-HK" ${(!state.currentUser?.language && !settings.language || (state.currentUser?.language || settings.language) === 'zh-HK') ? 'selected' : ''}>${t('lang_zh')}</option>
-            <option value="en-US" ${(state.currentUser?.language || settings.language) === 'en-US' ? 'selected' : ''}>${t('lang_en')}</option>
-          </select>
-        </label>
-        <button class="primary-action" type="submit">
-          ${renderIcon('check')} ${t('save_settings')}
-        </button>
-      </form>
-      <div class="settings-intro">
-        <h3>${t('integration_status')}</h3>
-        <p>${t('integration_status_desc')}</p>
-      </div>
-    </div>
-  `;
-}
-
-// =============================================
-// 渲染：模組卡片
-// =============================================
-function renderModuleCard(module) {
-  const user = state.currentUser;
-  const disabled = module.disabled || !module.roleAccess.includes(user.role);
-  return `
-    <article class="module-card ${module.accent} ${disabled ? 'disabled' : ''}">
-      <div class="module-icon">${renderIcon(module.icon)}</div>
-      <div class="module-copy">
-        <div class="module-kicker">${module.shortName}</div>
-        <h3>${t(module.name)}</h3>
-        <p>${t(module.description)}</p>
-      </div>
-      <div class="module-meta">
-        ${module.metric ? `<span>${t(module.metric)}</span>` : ''}
-        <strong>${t(module.status)}</strong>
-      </div>
-      <button class="module-action" ${disabled ? 'disabled' : ''} data-open-module="${module.id}">
-        ${module.disabled ? t('module_chinese_metric') : '進入模組'}
-      </button>
-    </article>
-  `;
 }
 
 // =============================================

@@ -1,5 +1,11 @@
 import { state, updateState } from './store.js';
 
+let activeSessionsCache = [];
+
+export function getActiveSessions() {
+  return activeSessionsCache;
+}
+
 export async function checkSession() {
   try {
     const res = await fetch('/api/auth/me', { credentials: 'include' });
@@ -32,7 +38,8 @@ export async function fetchActiveSessions(onUpdate) {
     const res = await fetch('/api/whiteboard/sessions');
     const data = await res.json();
     if (data.success) {
-      onUpdate(data.sessions);
+      activeSessionsCache = data.sessions;
+      if (onUpdate) onUpdate(data.sessions);
     }
   } catch (e) {}
 }
@@ -65,7 +72,7 @@ export async function loginApi(id, password) {
   const res = await fetch('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, password })
+    body: JSON.stringify({ studentId: id, password })
   });
   return await res.json();
 }
