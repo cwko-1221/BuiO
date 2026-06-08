@@ -216,7 +216,7 @@
         showState('loading');
 
         try {
-            const res = await fetch('/api/quiz/questions?count=5', { credentials: 'include' });
+            const res = await fetch('/api/quiz/questions?count=10', { credentials: 'include' });
             const data = await res.json();
 
             if (!data.success) {

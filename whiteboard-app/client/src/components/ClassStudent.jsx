@@ -9,9 +9,10 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 export default function ClassStudent() {
     const [searchParams] = useSearchParams();
     const roomId = searchParams.get('room');
+    const urlName = searchParams.get('name') || '';
 
-    const [name, setName] = useState('');
-    const [joined, setJoined] = useState(false);
+    const [name, setName] = useState(urlName);
+    const [joined, setJoined] = useState(!!urlName);
     const [error, setError] = useState('');
     const [locked, setLocked] = useState(false);
 
