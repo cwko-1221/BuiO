@@ -8,123 +8,101 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/report-app/css/style.css">
+
+    <!-- BuiO 頂部欄樣式 -->
     <style>
-        /* ── BuiO Teacher Topbar ── */
         .buio-topbar {
             position: fixed;
             top: 0; left: 0; right: 0;
-            height: 52px;
+            height: 48px;
             background: rgba(15, 23, 42, 0.98);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255,255,255,0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
-            z-index: 200;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.4);
-        }
-        .buio-topbar-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
+            padding: 0 16px;
+            z-index: 300;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
         }
         .buio-back-btn {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 14px;
-            background: rgba(99, 102, 241, 0.15);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 8px;
+            gap: 6px;
+            padding: 5px 12px;
+            background: rgba(99,102,241,0.15);
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 7px;
             color: #a5b4fc;
             text-decoration: none;
             font-size: 13px;
             font-weight: 500;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
             cursor: pointer;
         }
-        .buio-back-btn:hover {
-            background: rgba(99, 102, 241, 0.25);
-            color: #c7d2fe;
-        }
-        .buio-topbar-title {
-            font-size: 15px;
+        .buio-back-btn:hover { background: rgba(99,102,241,0.28); color: #c7d2fe; }
+        .buio-title {
+            font-size: 14px;
             font-weight: 700;
             color: #f1f5f9;
+            margin-left: 12px;
         }
-        .buio-topbar-title span {
-            background: linear-gradient(135deg, #6366f1, #06b6d4);
+        .buio-title span {
+            background: linear-gradient(135deg,#6366f1,#06b6d4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .buio-topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .buio-left { display: flex; align-items: center; gap: 0; }
+        .buio-right { display: flex; align-items: center; gap: 10px; }
+        .buio-user { font-size: 12px; color: #94a3b8; }
+        .buio-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg,#6366f1,#8b5cf6);
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; color: #fff;
+            margin-right: 6px;
         }
-        .buio-user-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: #94a3b8;
-        }
-        .buio-user-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-            color: #fff;
-        }
-        .buio-logout-btn {
-            padding: 5px 12px;
-            background: rgba(239, 68, 68, 0.12);
-            border: 1px solid rgba(239, 68, 68, 0.25);
+        .buio-logout {
+            padding: 4px 10px;
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.25);
             border-radius: 6px;
             color: #fca5a5;
             font-size: 12px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
-        .buio-logout-btn:hover {
-            background: rgba(239, 68, 68, 0.22);
-        }
+        .buio-logout:hover { background: rgba(239,68,68,0.22); }
 
-        /* Shift body and sidebar for topbar */
-        body {
-            padding-top: 52px;
-        }
-        .sidebar {
-            top: 52px !important;
-            height: calc(100vh - 52px) !important;
-        }
-        .main-content {
-            margin-left: var(--sidebar-width);
-            margin-top: 0;
-        }
+        /* 把 sidebar 和 main 往下推 48px */
+        body { padding-top: 48px; }
+        .sidebar { top: 48px !important; height: calc(100vh - 48px) !important; }
     </style>
 </head>
 <body>
 
-    <!-- BuiO Teacher Topbar -->
+    <!-- BuiO 頂部欄 -->
     <div class="buio-topbar">
-        <div class="buio-topbar-left">
-            <a href="/dashboard.html" class="buio-back-btn">← 返回儀表板</a>
-            <span class="buio-topbar-title">📊 <span>考評報告分析系統</span></span>
+        <div class="buio-left">
+            <a href="/dashboard.html" class="buio-back-btn">← 教師儀表板</a>
+            <span class="buio-title">&nbsp;&nbsp;📊 <span>考評報告分析</span></span>
         </div>
-        <div class="buio-topbar-right">
-            <div class="buio-user-badge">
-                <div class="buio-user-avatar" id="topbar-avatar">T</div>
-                <span id="topbar-name">載入中...</span>
-            </div>
-            <button class="buio-logout-btn" id="topbar-logout-btn">🚪 登出</button>
+        <div class="buio-right">
+            <span class="buio-user"><span class="buio-avatar" id="buio-avatar">T</span><span id="buio-name">老師</span></span>
+            <button class="buio-logout" id="buio-logout">登出</button>
+        </div>
+    </div>
+
+    <!-- 原版 auth-overlay：保留 DOM 結構讓 app.js 不出錯，但設成隱藏 -->
+    <div id="auth-overlay" class="auth-overlay" style="display:none !important; visibility:hidden !important;">
+        <div class="auth-box">
+            <form id="auth-form" class="auth-form">
+                <input type="password" id="auth-password" class="auth-input">
+                <button type="submit" class="auth-btn">解鎖</button>
+            </form>
+            <div id="auth-error" class="auth-error"></div>
         </div>
     </div>
 
@@ -166,17 +144,31 @@
     <!-- Main Content -->
     <main id="main-content" class="main-content">
 
-        <!-- ═══ VIEW: HOME (數據管理) ═══ -->
+        <!-- ═══ VIEW: HOME ═══ -->
         <div id="view-home" class="view active">
             <div class="view-header">
                 <h2 class="view-title">📁 數據管理</h2>
                 <p class="view-subtitle">匯入考績報告 (.xls / .xlsx)，系統將自動解析並整合數據</p>
             </div>
 
-            <!-- Preloaded Data Banner -->
-            <div id="preload-banner" class="info-banner" style="display:none;">
-                <span class="info-icon">✅</span>
-                <span id="preload-msg">已預載示範數據</span>
+            <!-- Stats Overview -->
+            <div id="data-overview" class="stats-grid hidden">
+                <div class="stat-card" id="stat-files">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">已載入檔案</div>
+                </div>
+                <div class="stat-card" id="stat-students">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">學生人數</div>
+                </div>
+                <div class="stat-card" id="stat-grades">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">年級數</div>
+                </div>
+                <div class="stat-card" id="stat-years">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">學年數</div>
+                </div>
             </div>
 
             <!-- Upload Area -->
@@ -198,33 +190,28 @@
                 </div>
             </div>
 
-            <!-- Stats Overview -->
-            <div id="data-overview" class="stats-grid hidden">
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" id="stat-files">0</div>
-                    <div class="stat-mini-label">已載入檔案</div>
-                </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" id="stat-students">0</div>
-                    <div class="stat-mini-label">學生人數</div>
-                </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" id="stat-grades">0</div>
-                    <div class="stat-mini-label">年級數</div>
-                </div>
-                <div class="stat-mini-card">
-                    <div class="stat-mini-value" id="stat-years">0</div>
-                    <div class="stat-mini-label">學年數</div>
-                </div>
-            </div>
-
-            <!-- Loaded Files List -->
-            <div id="files-list-section" class="files-section hidden">
-                <div class="section-header">
-                    <h3>已載入的檔案</h3>
+            <!-- Data Table -->
+            <div id="data-table-section" class="data-table-section hidden">
+                <div class="section-header-row">
+                    <h3>已載入的數據</h3>
                     <button id="btn-clear-data" class="btn-danger-sm">🗑 清除全部</button>
                 </div>
-                <div id="files-list" class="files-list"></div>
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>檔案名稱</th>
+                                <th>學年</th>
+                                <th>年級</th>
+                                <th>班別</th>
+                                <th>考績期</th>
+                                <th>學生數</th>
+                                <th>科目數</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -389,14 +376,19 @@
     </main>
 
     <!-- Toast -->
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast" class="toast hidden"></div>
 
     <!-- CDN Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-    <!-- Report Module Scripts -->
+    <!-- 關鍵：在 app.js 執行前，預設「已通過認證」，繞過密碼鎖 -->
+    <script>
+        sessionStorage.setItem('authenticated', 'true');
+    </script>
+
+    <!-- Report Module Scripts (與原版完全相同) -->
     <script src="/report-app/js/preloadData.js"></script>
     <script src="/report-app/js/dataManager.js"></script>
     <script src="/report-app/js/studentView.js"></script>
@@ -405,28 +397,24 @@
     <script src="/report-app/js/compareView.js"></script>
     <script src="/report-app/js/app.js"></script>
 
-    <!-- BuiO Auth Integration -->
+    <!-- BuiO Session 驗證（頁面已完全載入後執行，不影響主程式） -->
     <script>
     (async function() {
-        // Check teacher session
         try {
             const res = await fetch('/api/auth/me', { credentials: 'include' });
             if (!res.ok) { window.location.href = '/'; return; }
             const data = await res.json();
-            if (data.student.role !== 'teacher') {
-                window.location.href = '/quiz.html';
+            if (!data.success || data.student.role !== 'teacher') {
+                window.location.href = data.success ? '/quiz.html' : '/';
                 return;
             }
-            // Show user info
             const name = data.student.name || '老師';
-            document.getElementById('topbar-name').textContent = name;
-            document.getElementById('topbar-avatar').textContent = name[0] || 'T';
+            document.getElementById('buio-name').textContent = name;
+            document.getElementById('buio-avatar').textContent = name[0] || 'T';
         } catch(e) {
             window.location.href = '/';
         }
-
-        // Logout
-        document.getElementById('topbar-logout-btn').addEventListener('click', async () => {
+        document.getElementById('buio-logout').addEventListener('click', async () => {
             try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch(e) {}
             window.location.href = '/';
         });
