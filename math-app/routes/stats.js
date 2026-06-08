@@ -374,4 +374,51 @@ router.get('/teacher/students', requireTeacher, async (req, res) => {
     }
 });
 
+// ========================================
+// GET /api/stats/teacher/all-users
+// 取得全部用戶（含老師）列表 - 供 Portal Admin 頁面使用
+// ========================================
+router.get('/teacher/all-users', requireTeacher, async (req, res) => {
+    try {
+        const { rows: users } = await db.query(`
+            SELECT 
+                u.StudentID as id,
+                u.Name as name,
+                u.Role as role,
+                u.ClassName as classname,
+                u.ChineseGroup as chinesegroup,
+                u.EnglishGroup as englishgroup,
+                u.MathGroup as mathgroup,
+                COALESCE(SUM(s.TotalAttempted), 0) as totalquestions,
+                CASE 
+                    WHEN SUM(s.TotalAttempted) > 0 
+                    THEN ROUND(CAST(SUM(s.TotalCorrect) AS NUMERIC) / SUM(s.TotalAttempted) * 100, 1)
+                    ELSE 0 
+                END as overallaccuracy
+            FROM Users u
+            LEFT JOIN StudentStats s ON u.StudentID = s.StudentID AND s.Tag = ANY($1::text[])
+            GROUP BY u.StudentID, u.Role, u.ClassName, u.ChineseGroup, u.EnglishGroup, u.MathGroup
+            ORDER BY u.Role ASC, u.StudentID ASC
+        `, [ALL_TAGS]);
+
+        res.json({
+            success: true,
+            students: users.map(s => ({
+                id: s.id,
+                name: s.name,
+                role: s.role,
+                className: s.classname || '',
+                chineseGroup: s.chinesegroup || '',
+                englishGroup: s.englishgroup || '',
+                mathGroup: s.mathgroup || '',
+                totalQuestions: parseInt(s.totalquestions) || 0,
+                overallAccuracy: parseFloat(s.overallaccuracy) || 0
+            }))
+        });
+    } catch (error) {
+        console.error('取得全部用戶錯誤:', error);
+        res.status(500).json({ success: false, message: '伺服器錯誤' });
+    }
+});
+
 module.exports = router;

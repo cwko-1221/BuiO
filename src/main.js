@@ -31,6 +31,16 @@ const MODULES = [
     roleAccess: ['student', 'teacher']
   },
   {
+    id: 'report',
+    name: 'module_report_name',
+    shortName: 'Report',
+    description: 'module_report_desc',
+    accent: 'sky',
+    icon: 'report',
+    status: 'module_report_status',
+    roleAccess: ['teacher']
+  },
+  {
     id: 'chinese',
     name: 'module_chinese_name',
     shortName: 'Chinese',
@@ -61,6 +71,7 @@ const iconSvg = {
   math: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10M7 12h10M7 17h6"/><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg>`,
   board: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H4z"/><path d="M8 21h8M12 16v5"/><path d="m8 12 3-3 2 2 3-4"/></svg>`,
   book: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M8 4v13a3 3 0 0 0 3 3"/></svg>`,
+  report: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>`,
   spark: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 9.8 8.8 4 11l5.8 2.2L12 19l2.2-5.8L20 11l-5.8-2.2z"/><path d="M19 3v4M21 5h-4"/></svg>`,
   user: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>`,
   door: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M10 12h11m-4-4 4 4-4 4"/></svg>`,
@@ -145,6 +156,9 @@ const I18N = {
     'sync_status': '同步狀態',
     'sync_desc': '查看與各模組的連線狀態與健康度。',
     'school_name': '杯澳公立學校',
+    'module_report_name': '考評報告',
+    'module_report_desc': '上載 Excel 考績檔案，自動解析學生成績與班別表現。',
+    'module_report_status': '考評分析',
     'module_math_name': '數學練習',
     'module_math_desc': '個人化四則運算練習，根據學生弱項自動出題。',
     'module_math_status': '已啟用',
@@ -228,6 +242,9 @@ const I18N = {
     'sync_status': 'Sync Status',
     'sync_desc': 'View connection status and health with each module.',
     'school_name': 'Pui O Public School',
+    'module_report_name': 'Report Analysis',
+    'module_report_desc': 'Upload Excel grade files for automatic student performance analysis.',
+    'module_report_status': 'Grade Analytics',
     'module_math_name': 'Math Practice',
     'module_math_desc': 'Personalized arithmetic practice, automatically generating questions based on student weaknesses.',
     'module_math_status': 'Enabled',
@@ -350,6 +367,10 @@ async function openModule(moduleId, mode) {
       window.open(MATH_QUIZ_URL, '_blank');
     }
     setTimeout(() => { state.mathSsoStatus = ''; render(); }, 2000);
+
+  } else if (moduleId === 'report') {
+    // 考評報告模組（老師專用）
+    window.open('/report.html', '_blank');
 
   } else if (moduleId === 'whiteboard') {
     if (role === 'teacher') {
@@ -653,7 +674,7 @@ function renderModulesPage() {
 async function fetchStudentsList() {
   state.studentsLoaded = true;
   try {
-    const res = await fetch('/api/stats/teacher/students', { credentials: 'include' });
+    const res = await fetch('/api/stats/teacher/all-users', { credentials: 'include' });
     const data = await res.json();
     if (data.success) {
       state.studentsList = data.students || [];
