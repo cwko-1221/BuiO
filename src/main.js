@@ -142,7 +142,10 @@ function bindEvents() {
     btn.innerHTML = `${renderIcon('loader')} 升級中...`;
     
     try {
-      const res = await fetch('/api/auth/upgrade-students', { method: 'POST' });
+      const res = await fetch('/api/auth/upgrade-students', { 
+        method: 'POST',
+        credentials: 'include'
+      });
       const data = await res.json();
       if (data.success) {
         alert('🎉 ' + data.message);
