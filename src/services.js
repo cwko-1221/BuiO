@@ -38,8 +38,12 @@ export async function fetchActiveSessions(onUpdate) {
     const res = await fetch('/api/whiteboard/sessions');
     const data = await res.json();
     if (data.success) {
-      activeSessionsCache = data.sessions;
-      if (onUpdate) onUpdate(data.sessions);
+      const oldStr = JSON.stringify(activeSessionsCache);
+      const newStr = JSON.stringify(data.sessions);
+      if (oldStr !== newStr) {
+        activeSessionsCache = data.sessions;
+        if (onUpdate) onUpdate(data.sessions);
+      }
     }
   } catch (e) {}
 }

@@ -10,11 +10,7 @@ import { renderLogin, renderIcon } from './views/Login.js';
 
 function saveTeacherSession(teacher) {
   fetchActiveSessions(sessions => {
-    const newStr = JSON.stringify(sessions);
-    const oldStr = JSON.stringify(getActiveSessions());
-    if (newStr !== oldStr) {
-      if (state.loggedIn) render(); // 有更新時重新渲染畫面
-    }
+    if (state.loggedIn) render(); // 有更新時重新渲染畫面
   });
 }
 
@@ -22,11 +18,7 @@ function saveTeacherSession(teacher) {
 setInterval(() => {
   if (state.loggedIn) {
     fetchActiveSessions(sessions => {
-      const newStr = JSON.stringify(sessions);
-      const oldStr = JSON.stringify(getActiveSessions());
-      if (newStr !== oldStr) {
-        if (state.loggedIn) render();
-      }
+      if (state.loggedIn) render();
     });
   }
 }, 3000);
