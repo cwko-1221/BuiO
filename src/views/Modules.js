@@ -19,7 +19,8 @@ export function renderModulesPage() {
 
 export function renderModuleCard(module) {
   const user = state.currentUser;
-  const disabled = module.disabled || !module.roleAccess.includes(user.role);
+  if (!module.roleAccess.includes(user.role)) return '';
+  const disabled = module.disabled;
   return `
     <article class="module-card ${module.accent} ${disabled ? 'disabled' : ''}">
       <div class="module-icon">${renderIcon(module.icon)}</div>

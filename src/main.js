@@ -149,7 +149,8 @@ function bindEvents() {
       const data = await res.json();
       if (data.success) {
         alert('🎉 ' + data.message);
-        fetchStudentsList();
+        await fetchStudentsList();
+        render();
       } else {
         alert('❌ 升級失敗：' + data.message);
       }
@@ -188,7 +189,8 @@ function bindEvents() {
       const data = await res.json();
       if (data.success) {
         alert('🎉 學生新增成功！');
-        fetchStudentsList();
+        await fetchStudentsList();
+        render();
       } else {
         err.textContent = data.message || '新增失敗';
         err.style.display = 'block';
@@ -225,7 +227,8 @@ function bindEvents() {
       const data = await res.json();
       if (data.success) {
         alert('🎉 教師新增成功！');
-        fetchStudentsList();
+        await fetchStudentsList();
+        render();
       } else {
         err.textContent = data.message || '新增失敗';
         err.style.display = 'block';
@@ -256,7 +259,8 @@ function bindEvents() {
         const data = await res.json();
         if (data.success) {
           alert('✅ 帳號已刪除');
-          fetchStudentsList();
+          await fetchStudentsList();
+        render();
         } else {
           alert('刪除失敗: ' + (data.message || '未知錯誤'));
           btn.disabled = false;
