@@ -379,6 +379,13 @@
       "totalattempted": 0,
       "totalcorrect": 0,
       "accuracyrate": 0
+    },
+    {
+      "studentid": "S001",
+      "tag": "加法",
+      "totalattempted": 1,
+      "totalcorrect": 1,
+      "accuracyrate": 100
     }
   ],
   "questionLogs": [
@@ -436,7 +443,28 @@
       "iscorrect": 0,
       "timetaken": 0.5,
       "timestamp": "2026-06-07T06:36:13.985Z"
+    },
+    {
+      "id": 6,
+      "studentid": "S001",
+      "tag": "加法",
+      "question": "1+1",
+      "useranswer": 2,
+      "iscorrect": 2,
+      "timespent": true,
+      "timestamp": "2026-06-08T15:16:25.419Z"
+    },
+    {
+      "id": 7,
+      "studentid": "S001",
+      "tag": "加法",
+      "question": "1+1",
+      "correctanswer": 2,
+      "useranswer": 2,
+      "iscorrect": true,
+      "timespent": 5,
+      "timestamp": "2026-06-08T15:21:39.314Z"
     }
   ],
-  "_logId": 5
+  "_logId": 7
 }
