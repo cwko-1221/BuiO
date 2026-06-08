@@ -39,10 +39,6 @@
                     </select>
                     <span id="student-loading" style="color: var(--text-muted); font-size: 0.9rem;">載入名單中...</span>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button id="btn-delete-student" class="btn btn-danger" style="padding: 8px 16px; font-size: 0.9rem; display: none;">🗑️ 刪除學生</button>
-                    <button id="btn-add-student" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">➕ 新增學生</button>
-                </div>
             </div>
 
             <!-- Loading -->
@@ -121,32 +117,6 @@
         </div>
     </div>
 
-    <!-- Add Student Modal -->
-    <div id="add-student-modal" class="modal-overlay">
-        <div class="modal-content glass-card-static">
-            <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 16px;">新增學生</h2>
-            <div id="add-student-error" class="login-error" style="display: none;"></div>
-            
-            <form id="add-student-form">
-                <div class="form-group">
-                    <label class="form-label">學號</label>
-                    <input type="text" id="new-student-id" class="form-input" placeholder="例如: S006" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">姓名</label>
-                    <input type="text" id="new-student-name" class="form-input" placeholder="例如: 新學生" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">登入密碼</label>
-                    <input type="password" id="new-student-password" class="form-input" placeholder="設定初始密碼" required>
-                </div>
-                
-                <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
-                    <button type="button" id="btn-cancel-add" class="btn btn-ghost">取消</button>
-                    <button type="submit" id="btn-submit-add" class="btn btn-primary">確認新增</button>
-                </div>
-            </form>
-        </div>
     </div>
 
     <script src="/math-app/js/dashboard.js"></script>
