@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="杯澳四則特訓 - 首頁">
-    <title>杯澳四則特訓 ✦ 適性學習系統</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <meta name="description" content="?�澳?��??��? - 首�?">
+    <title>?�澳?��??��? ???�性學習系�?/title>
+    <link rel="stylesheet" href="/math-app/css/style.css">
     <style>
         .home-wrapper {
             display: flex;
@@ -82,17 +82,17 @@
     <div class="page-container">
         <div class="home-wrapper">
             <div class="qr-card glass-card-static">
-                <img src="/images/logo.png" alt="校徽" class="login-img">
-                <h1 class="login-title">杯澳四則特訓</h1>
-                <p class="login-subtitle">掃描 QR Code 或點擊按鈕進入系統</p>
+                <img src="/math-app/images/logo.png" alt="?�徽" class="login-img">
+                <h1 class="login-title">?�澳?��??��?</h1>
+                <p class="login-subtitle">?��? QR Code ?��??��??�進入系統</p>
 
-                <div class="qr-container" id="qr-container" title="點擊放大 QR Code">
-                    <img id="qr-img" src="" alt="登入 QR Code">
+                <div class="qr-container" id="qr-container" title="點�??�大 QR Code">
+                    <img id="qr-img" src="" alt="?�入 QR Code">
                 </div>
                 <div id="lan-ip-hint" style="color:var(--text-muted); font-size: 0.85rem; margin-bottom: 24px;"></div>
 
                 <a href="/" class="btn btn-primary btn-lg btn-block">
-                    👉 前往學習平台
+                    ?? ?��?學�?平台
                 </a>
             </div>
         </div>
@@ -101,14 +101,14 @@
     <!-- Modal -->
     <div class="qr-modal" id="qr-modal">
         <div class="qr-modal-content">
-            <img id="qr-modal-img" class="qr-modal-img" src="" alt="放大版 QR Code">
-            <div class="close-modal" id="close-modal">❌ 關閉</div>
+            <img id="qr-modal-img" class="qr-modal-img" src="" alt="?�大??QR Code">
+            <div class="close-modal" id="close-modal">???��?</div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // 自動偵測登入跳轉
+            // ?��??�測?�入跳�?
             try {
                 const me = await fetch('/api/auth/me').then(r => r.json());
                 if (me.success) {
@@ -117,7 +117,7 @@
                 }
             } catch (e) {}
 
-            // 從這台電腦的伺服器抓取正確的無線網路小區 IP
+            // 從這台?�腦?�伺?�器?��?�?��?�無線網路�??� IP
             let loginUrl = window.location.origin + '/';
             
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -128,7 +128,7 @@
                         loginUrl = `http://${data.ip}:${data.port}/`;
                         const hintInfo = document.getElementById('lan-ip-hint');
                         if (hintInfo) {
-                            hintInfo.innerHTML = `請確保 iPad 連上與電腦相同的 Wi-Fi<br>或是輸入網址：<strong style="color:var(--text-primary)">http://${data.ip}:${data.port}</strong>`;
+                            hintInfo.innerHTML = `請確�?iPad ????�電?�相?��? Wi-Fi<br>?�是輸入網�?�?strong style="color:var(--text-primary)">http://${data.ip}:${data.port}</strong>`;
                         }
                     }
                 } catch (e) {
@@ -136,13 +136,13 @@
                 }
             }
 
-            // 動態產生 QR code
+            // ?��??��? QR code
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(loginUrl)}`;
             
             document.getElementById('qr-img').src = qrUrl;
             document.getElementById('qr-modal-img').src = qrUrl;
 
-            // Modal 邏輯
+            // Modal ?�輯
             const modal = document.getElementById('qr-modal');
             const qrContainer = document.getElementById('qr-container');
             const closeBtn = document.getElementById('close-modal');

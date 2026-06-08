@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考評報告分析系統</title>
+    <meta name="description" content="學生考評數據可視化分析系統 — 個別學生、全班、科目分析">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=18">
+</head>
+<body>
+    <!-- Auth Overlay -->
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-box">
+            <div class="auth-icon">🔒</div>
+            <h2 class="auth-title">系統已鎖定</h2>
+            <p class="auth-desc">請輸入密碼以存取學生成績數據</p>
+            <form id="auth-form" class="auth-form">
+                <input type="password" id="auth-password" class="auth-input" placeholder="請輸入密碼..." autocomplete="off">
+                <button type="submit" class="auth-btn">解鎖</button>
+            </form>
+            <div id="auth-error" class="auth-error">密碼錯誤，請重新輸入</div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon">📊</div>
+            <h1 class="logo-text">考評分析</h1>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item active" data-view="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">數據管理</span>
+            </li>
+            <li class="nav-item" data-view="student">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">個別學生</span>
+            </li>
+            <li class="nav-item" data-view="class">
+                <span class="nav-icon">👥</span>
+                <span class="nav-label">全班分析</span>
+            </li>
+            <li class="nav-item" data-view="subject">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">按科目</span>
+            </li>
+            <li class="nav-item" data-view="compare">
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">趨勢對比</span>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <button id="btn-export-pdf" class="btn-export" title="導出PDF">
+                <span>📄</span> 導出 PDF
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+        <!-- ===== HOME VIEW ===== -->
+        <section id="view-home" class="view active">
+            <div class="view-header">
+                <h2>數據管理</h2>
+                <p class="view-subtitle">匯入學生考評數據，開始分析</p>
+            </div>
+            <div id="upload-area" class="upload-area">
+                <div class="upload-icon">📁</div>
+                <h3>拖放 XLS 檔案到此處</h3>
+                <p>或點擊選擇檔案（支援多選）</p>
+                <input type="file" id="file-input" multiple accept=".xls,.xlsx" hidden>
+                <button id="btn-choose-files" class="btn-primary">選擇檔案</button>
+            </div>
+            <div id="upload-progress" class="upload-progress hidden">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <p id="progress-text">正在解析...</p>
+            </div>
+            <div id="data-overview" class="data-overview hidden">
+                <div class="stats-row">
+                    <div class="stat-card" id="stat-files"><div class="stat-value">0</div><div class="stat-label">已匯入檔案</div></div>
+                    <div class="stat-card" id="stat-students"><div class="stat-value">0</div><div class="stat-label">學生總數</div></div>
+                    <div class="stat-card" id="stat-grades"><div class="stat-value">0</div><div class="stat-label">年級數</div></div>
+                    <div class="stat-card" id="stat-years"><div class="stat-value">0</div><div class="stat-label">學年數</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>已匯入數據</h3>
+                        <button id="btn-clear-data" class="btn-danger-sm">清除全部</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="data-table" class="data-table">
+                            <thead><tr><th>檔案</th><th>學年</th><th>年級</th><th>班別</th><th>考績期</th><th>學生數</th><th>科目數</th></tr></thead>
+                            <tbody id="data-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== STUDENT VIEW ===== -->
+        <section id="view-student" class="view">
+            <div class="view-header">
+                <h2>個別學生分析</h2>
+                <p class="view-subtitle">追蹤學生的各科成績趨勢</p>
+            </div>
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>選擇學生</label>
+                    <select id="student-select" class="select"><option value="">-- 請先匯入數據 --</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>考績期</label>
+                    <select id="student-term-select" class="select"><option value="all">全部</option></select>
+                </div>
+            </div>
+            <div id="student-content" class="hidden">
+                <div class="stats-row" id="student-stats"></div>
+                <div class="charts-grid">
+                    <div class="card chart-card large"><div class="card-header"><h3>各科成績趨勢</h3></div><div class="chart-container"><canvas id="chart-student-trend"></canvas></div></div>
+                    <div class="card chart-card"><div class="card-header"><h3>科目強弱分佈</h3></div><div class="chart-container"><canvas id="chart-student-radar"></canvas></div></div>
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3>與全班平均對比</h3>
+                            <select id="student-vs-subject-select" class="select" style="min-width: 100px; padding: 4px 24px 4px 8px; font-size: 11px;"></select>
+                        </div>
+                        <div class="chart-container"><canvas id="chart-student-vs-class"></canvas></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>詳細成績表</h3></div>
+                    <div class="table-wrap"><table id="student-detail-table" class="data-table"></table></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CLASS VIEW ===== -->
+        <section id="view-class" class="view">
+            <div class="view-header">
+                <h2>全班分析</h2>
+                <p class="view-subtitle">綜覽全班表現與分佈</p>
+            </div>
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>年級</label>
+                    <select id="class-grade-select" class="select"><option value="">-- 請先匯入數據 --</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>學年</label>
+                    <select id="class-year-select" class="select"></select>
+                </div>
+                <div class="filter-group">
+                    <label>考績期</label>
+                    <select id="class-term-select" class="select"></select>
+                </div>
+            </div>
+            <div id="class-content" class="hidden">
+                <div class="stats-row" id="class-stats"></div>
+                <div class="charts-grid">
+                    <div class="card chart-card large"><div class="card-header"><h3>各科平均分</h3></div><div class="chart-container"><canvas id="chart-class-avg"></canvas></div></div>
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3>分數分佈</h3>
+                            <select id="class-dist-subject-select" class="select" style="min-width: 100px; padding: 4px 24px 4px 8px; font-size: 11px;"></select>
+                        </div>
+                        <div class="chart-container"><canvas id="chart-class-dist"></canvas></div>
+                    </div>
+                    <div class="card chart-card"><div class="card-header"><h3>及格率</h3></div><div class="chart-container"><canvas id="chart-class-pass"></canvas></div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>全班排名</h3></div>
+                    <div class="table-wrap"><table id="class-ranking-table" class="data-table"></table></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SUBJECT VIEW ===== -->
+        <section id="view-subject" class="view">
+            <div class="view-header">
+                <h2>按科目分析</h2>
+                <p class="view-subtitle">深入分析單一科目的全班表現</p>
+            </div>
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>選擇科目</label>
+                    <select id="subject-select" class="select"><option value="">-- 請先匯入數據 --</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>年級</label>
+                    <select id="subject-grade-select" class="select"></select>
+                </div>
+                <div class="filter-group">
+                    <label>學年</label>
+                    <select id="subject-year-select" class="select"></select>
+                </div>
+            </div>
+            <div id="subject-content" class="hidden">
+                <div class="stats-row" id="subject-stats"></div>
+                <div class="charts-grid">
+                    <div class="card chart-card"><div class="card-header"><h3>分數段分佈</h3></div><div class="chart-container"><canvas id="chart-subject-dist"></canvas></div></div>
+                    <div class="card chart-card"><div class="card-header"><h3>平均分趨勢</h3></div><div class="chart-container"><canvas id="chart-subject-avg"></canvas></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== COMPARE VIEW ===== -->
+        <section id="view-compare" class="view">
+            <div class="view-header">
+                <h2>趨勢對比</h2>
+                <p class="view-subtitle">跨學生、跨科目的對比分析</p>
+            </div>
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>對比模式</label>
+                    <select id="compare-mode" class="select">
+                        <option value="students">學生 vs 學生</option>
+                        <option value="subjects">科目 vs 科目</option>
+                    </select>
+                </div>
+                <div id="compare-students-filters" class="filter-group">
+                    <label>選擇學生（可多選）</label>
+                    <select id="compare-student-select" class="select" multiple></select>
+                </div>
+                <div id="compare-subject-filter" class="filter-group">
+                    <label>比較科目</label>
+                    <select id="compare-subject-select" class="select"></select>
+                </div>
+            </div>
+            <div id="compare-content" class="hidden">
+                <div class="charts-grid">
+                    <div class="card chart-card large"><div class="card-header"><h3 id="compare-chart-title">對比圖表</h3></div><div class="chart-container"><canvas id="chart-compare"></canvas></div></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="js/preloadData.js?v=18"></script>
+    <script src="js/dataManager.js?v=18"></script>
+    <script src="js/studentView.js?v=18"></script>
+    <script src="js/classView.js?v=18"></script>
+    <script src="js/subjectView.js?v=18"></script>
+    <script src="js/compareView.js?v=18"></script>
+    <script src="js/app.js?v=18"></script>
+</body>
+</html>
