@@ -1,7 +1,7 @@
 import { MATH_QUIZ_URL, MATH_DASHBOARD_URL, WHITEBOARD_BASE, MODULES, iconSvg } from './config.js';
 import { state, updateState } from './store.js';
 import { t, I18N } from './i18n.js';
-import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, loginApi, addStudentApi, deleteStudentApi } from './services.js';
+import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, loginApi } from './services.js';
 import { renderTopbar, renderShell } from './views/Shell.js';
 import { renderDashboard } from './views/Dashboard.js';
 import { renderModulesPage } from './views/Modules.js';

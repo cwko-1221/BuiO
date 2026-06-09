@@ -57,8 +57,8 @@ export const MODULES = [
     id: 'english',
     name: 'module_english_name',
     shortName: 'English',
-    metric: '即將推出',
-    status: '未啟用',
+    metric: 'module_english_metric',
+    status: 'module_english_status',
     disabled: true,
     roleAccess: ['student', 'teacher']
   }

@@ -9,11 +9,14 @@ for (const file of requiredFiles) {
   }
 }
 
-const app = await readFile('src/main.js', 'utf8');
-for (const marker of ['數學練習', '互動白板', 'renderDashboard', 'settingsForm']) {
-  if (!app.includes(marker)) {
-    throw new Error(`Missing expected marker: ${marker}`);
-  }
-}
+const i18n = await readFile('src/i18n.js', 'utf8');
+const shell = await readFile('src/views/Shell.js', 'utf8');
+const dashboard = await readFile('src/views/Dashboard.js', 'utf8');
+const settings = await readFile('src/views/Settings.js', 'utf8');
+
+if (!i18n.includes('數學練習')) throw new Error(`Missing expected marker: 數學練習`);
+if (!i18n.includes('互動白板')) throw new Error(`Missing expected marker: 互動白板`);
+if (!dashboard.includes('renderDashboard')) throw new Error(`Missing expected marker: renderDashboard`);
+if (!settings.includes('settingsForm')) throw new Error(`Missing expected marker: settingsForm`);
 
 console.log('Static app check passed.');

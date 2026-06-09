@@ -206,13 +206,9 @@ router.post('/register-student', async (req, res) => {
 
         // 若為學生，初始化學生統計
         if (targetRole === 'student') {
-            const allTags = [
-                'add_2d_nc', 'add_2d_c', 'sub_2d_b', 'sub_3d_z_mid',
-                'mul_2x2_nc_nc', 'mul_2x2_c_c', 'div_3d_1d_z0_mid', 'div_3d_1d_z0_end',
-                'add_3d_c', 'sub_3d_b', 'mul_3x2_nc', 'mul_3x2_c', 'div_2d_1d_z0', 'div_4d_1d_z0'
-            ];
+            const { ALL_TAGS } = require('../engine/questionGenerator');
             
-            for (const tag of allTags) {
+            for (const tag of ALL_TAGS) {
                 await db.query(`
                     INSERT INTO StudentStats (StudentID, Tag, TotalAttempted, TotalCorrect, AccuracyRate)
                     VALUES ($1, $2, 0, 0, 0.0)
