@@ -294,14 +294,6 @@ function handleStats(sql, params) {
     return { rows: [] };
   }
 
-  if (s.startsWith('select * from studentstats')) {
-    return { rows: d.studentStats.filter(st => st.studentid === params[0]) };
-  }
-
-  if (s.startsWith('select tag, accuracyrate from studentstats')) {
-    return { rows: d.studentStats.filter(st => st.studentid === params[0]).map(x => ({ tag: x.tag, accuracyrate: x.accuracyrate })) };
-  }
-
   if (s.startsWith('select coalesce(sum(totalattempted), 0) as totalquestions')) {
     let stats = d.studentStats;
     if (params && params[0]) {
@@ -310,12 +302,32 @@ function handleStats(sql, params) {
         stats = stats.filter(st => p1.includes(st.tag));
       } else {
         stats = stats.filter(st => st.studentid === p1);
+        if (params[1] && Array.isArray(params[1])) {
+          stats = stats.filter(st => params[1].includes(st.tag));
+        }
       }
     }
     const tq = stats.reduce((a, b) => a + b.totalattempted, 0);
     const tc = stats.reduce((a, b) => a + b.totalcorrect, 0);
     const acc = tq > 0 ? round(tc / tq * 100, 1) : 0;
     return { rows: [{ totalquestions: tq, totalcorrect: tc, overallaccuracy: acc }] };
+  }
+
+  // Matches /stats/tags and /stats/weaknesses
+  if (s.startsWith('select tag as tag, totalattempted as totalattempted, totalcorrect as totalcorrect, accuracyrate as accuracyrate from studentstats')) {
+    let stats = d.studentStats.filter(st => st.studentid === params[0]);
+    if (params[1] && Array.isArray(params[1])) {
+      stats = stats.filter(st => params[1].includes(st.tag));
+    }
+    if (s.includes('accuracyrate < 70')) {
+      stats = stats.filter(st => st.totalattempted > 0 && st.accuracyrate < 70);
+    }
+    return { rows: stats.map(x => ({ tag: x.tag, totalattempted: x.totalattempted, totalcorrect: x.totalcorrect, accuracyrate: x.accuracyrate })) };
+  }
+
+  // Fallback for simple selects
+  if (s.startsWith('select * from studentstats')) {
+    return { rows: d.studentStats.filter(st => st.studentid === params[0]) };
   }
 
   return { rows: [] };
@@ -351,9 +363,17 @@ function handleLogs(sql, params) {
   }
 
   if (s.startsWith('select count(*) as count from questionlogs')) {
-    return { rows: [{ count: d.questionLogs.length }] };
+    let logs = d.questionLogs;
+    if (params && params[0]) {
+      logs = logs.filter(l => l.studentid === params[0]);
+      if (params[1] && Array.isArray(params[1])) {
+        logs = logs.filter(l => params[1].includes(l.tag));
+      }
+    }
+    return { rows: [{ count: logs.length }] };
   }
 
+  // Matches today's overview stats
   if (s.startsWith('select count(*) as todayquestions')) {
     const today = todayStr();
     let logs = d.questionLogs.filter(l => l.timestamp.startsWith(today));
@@ -362,66 +382,83 @@ function handleLogs(sql, params) {
         logs = logs.filter(l => params[0].includes(l.tag));
       } else {
         logs = logs.filter(l => l.studentid === params[0]);
-        if (params[1]) logs = logs.filter(l => params[1].includes(l.tag));
+        if (params[1] && Array.isArray(params[1])) {
+           logs = logs.filter(l => params[1].includes(l.tag));
+        }
       }
     }
     const tq = logs.length;
     const tc = logs.filter(l => l.iscorrect).length;
     const acc = tq > 0 ? round(tc / tq * 100, 1) : 0;
-    return { rows: [{ todayquestions: tq, todaycorrect: tc, todayaccuracy: acc }] };
+    const avgT = tq > 0 ? round(logs.reduce((sum, l) => sum + (l.timespent || 0), 0) / tq, 1) : 0;
+    return { rows: [{ todayquestions: tq, todaycorrect: tc, todayaccuracy: acc, avgtime: avgT }] };
   }
 
-  if (s.startsWith('select count(*) as incorrectcount')) {
-    let logs = d.questionLogs.filter(l => l.studentid === params[0] && !l.iscorrect);
-    if (params[1]) logs = logs.filter(l => params[1].includes(l.tag));
-    
-    const countMap = {};
-    for (const l of logs) {
-      countMap[l.tag] = (countMap[l.tag] || 0) + 1;
-    }
-    const sorted = Object.entries(countMap)
-      .map(([tag, count]) => ({ tag, incorrectcount: count }))
-      .sort((a, b) => b.incorrectcount - a.incorrectcount)
-      .slice(0, 3);
-    return { rows: sorted };
-  }
-
-  if (s.startsWith('select tag, avg(timespent) as avgtime')) {
+  // Matches /stats/time-analysis
+  if (s.startsWith('select tag as tag, count(*) as count, round(cast(avg(timetaken) as numeric), 1) as avgtime') || 
+      s.startsWith('select tag, avg(timespent) as avgtime')) {
     let logs = d.questionLogs;
     if (params && params[0]) {
       if (Array.isArray(params[0])) {
         logs = logs.filter(l => params[0].includes(l.tag));
       } else {
         logs = logs.filter(l => l.studentid === params[0]);
-        if (params[1]) logs = logs.filter(l => params[1].includes(l.tag));
+        if (params[1] && Array.isArray(params[1])) {
+           logs = logs.filter(l => params[1].includes(l.tag));
+        }
       }
     }
     
     const tagMap = {};
     for (const l of logs) {
-      if (!tagMap[l.tag]) tagMap[l.tag] = { sum: 0, count: 0 };
-      tagMap[l.tag].sum += l.timespent;
+      if (!tagMap[l.tag]) tagMap[l.tag] = { sum: 0, count: 0, min: 999999, max: 0 };
+      const ts = l.timespent || 0;
+      tagMap[l.tag].sum += ts;
       tagMap[l.tag].count += 1;
+      if (ts < tagMap[l.tag].min) tagMap[l.tag].min = ts;
+      if (ts > tagMap[l.tag].max) tagMap[l.tag].max = ts;
     }
     
     const res = Object.entries(tagMap).map(([tag, data]) => ({
       tag,
-      avgtime: round(data.sum / data.count, 1)
+      count: data.count,
+      avgtime: round(data.sum / data.count, 1),
+      mintime: data.min === 999999 ? 0 : data.min,
+      maxtime: data.max
     }));
-    return { rows: res };
+    // sort by avgtime desc
+    return { rows: res.sort((a, b) => b.avgtime - a.avgtime) };
   }
 
-  if (s.startsWith('select q.timestamp')) {
+  // Matches /stats/history
+  if (s.startsWith('select logid as logid, tag as tag') || s.startsWith('select q.timestamp')) {
     let logs = d.questionLogs;
     if (params && params[0] && !Array.isArray(params[0])) {
       logs = logs.filter(l => l.studentid === params[0]);
-      if (params[1]) logs = logs.filter(l => params[1].includes(l.tag));
+      if (params[1] && Array.isArray(params[1])) logs = logs.filter(l => params[1].includes(l.tag));
     } else if (params && Array.isArray(params[0])) {
       logs = logs.filter(l => params[0].includes(l.tag));
     }
     logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    logs = logs.slice(0, 10);
-    return { rows: logs.map(l => ({ ...l, iscorrect: l.iscorrect })) };
+    
+    // Attempt to extract LIMIT and OFFSET from params
+    let limit = 50;
+    let offset = 0;
+    if (params.length >= 3 && typeof params[params.length - 2] === 'number') {
+      limit = params[params.length - 2];
+      offset = params[params.length - 1];
+    }
+    logs = logs.slice(offset, offset + limit);
+    return { rows: logs.map(l => ({ 
+      logid: l.id, 
+      tag: l.tag, 
+      questiontext: l.question, 
+      correctanswer: l.correctanswer, 
+      useranswer: l.useranswer, 
+      iscorrect: l.iscorrect, 
+      timetaken: l.timespent, 
+      timestamp: l.timestamp 
+    })) };
   }
 
   return { rows: [] };
