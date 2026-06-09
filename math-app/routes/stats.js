@@ -73,13 +73,13 @@ router.get('/overview', async (req, res) => {
         const { rows: todayRows } = await db.query(`
             SELECT 
                 COUNT(*) as todayquestions,
-                COALESCE(SUM(IsCorrect), 0) as todaycorrect,
+                COALESCE(SUM(CAST(IsCorrect AS INT)), 0) as todaycorrect,
                 CASE 
                     WHEN COUNT(*) > 0 
-                    THEN ROUND(CAST(SUM(IsCorrect) AS NUMERIC) / COUNT(*) * 100, 1)
+                    THEN ROUND(CAST(SUM(CAST(IsCorrect AS INT)) AS NUMERIC) / COUNT(*) * 100, 1)
                     ELSE 0 
                 END as todayaccuracy,
-                COALESCE(ROUND(CAST(AVG(TimeTaken) AS NUMERIC), 1), 0) as avgtime
+                COALESCE(ROUND(CAST(AVG(TimeSpent) AS NUMERIC), 1), 0) as avgtime
             FROM QuestionLogs
             WHERE StudentID = $1 AND CAST(Timestamp AS DATE) = CURRENT_DATE ${tagFilterSql}
         `, [studentId, ALL_TAGS]);
@@ -179,7 +179,7 @@ router.get('/history', async (req, res) => {
                 CorrectAnswer as correctanswer,
                 UserAnswer as useranswer,
                 IsCorrect as iscorrect,
-                TimeTaken as timetaken,
+                TimeSpent as timetaken,
                 Timestamp as timestamp
             FROM QuestionLogs
             WHERE StudentID = $1 ${tagFilterSql}
@@ -285,11 +285,11 @@ router.get('/time-analysis', async (req, res) => {
             SELECT 
                 Tag as tag,
                 COUNT(*) as count,
-                ROUND(CAST(AVG(TimeTaken) AS NUMERIC), 1) as avgtime,
-                ROUND(CAST(MIN(TimeTaken) AS NUMERIC), 1) as mintime,
-                ROUND(CAST(MAX(TimeTaken) AS NUMERIC), 1) as maxtime
+                ROUND(CAST(AVG(TimeSpent) AS NUMERIC), 1) as avgtime,
+                ROUND(CAST(MIN(TimeSpent) AS NUMERIC), 1) as mintime,
+                ROUND(CAST(MAX(TimeSpent) AS NUMERIC), 1) as maxtime
             FROM QuestionLogs
-            WHERE StudentID = $1 AND TimeTaken > 0 ${tagFilterSql}
+            WHERE StudentID = $1 AND TimeSpent > 0 ${tagFilterSql}
             GROUP BY Tag
             ORDER BY avgtime DESC
         `, [studentId, ALL_TAGS]);

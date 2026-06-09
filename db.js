@@ -395,7 +395,8 @@ function handleLogs(sql, params) {
   }
 
   // Matches /stats/time-analysis
-  if (s.startsWith('select tag as tag, count(*) as count, round(cast(avg(timetaken) as numeric), 1) as avgtime') || 
+  if (s.startsWith('select tag as tag, count(*) as count, round(cast(avg(timespent) as numeric), 1) as avgtime') || 
+      s.startsWith('select tag as tag, count(*) as count, round(cast(avg(timetaken) as numeric), 1) as avgtime') ||
       s.startsWith('select tag, avg(timespent) as avgtime')) {
     let logs = d.questionLogs;
     if (params && params[0]) {
