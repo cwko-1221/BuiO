@@ -27,8 +27,10 @@ router.post('/login', async (req, res) => {
             });
         }
 
+        const normalizedStudentId = String(studentId).trim().toUpperCase();
+
         // 查詢學生
-        const { rows } = await db.query('SELECT * FROM Users WHERE StudentID = $1', [studentId]);
+        const { rows } = await db.query('SELECT * FROM Users WHERE StudentID = $1', [normalizedStudentId]);
         const user = rows.length > 0 ? rows[0] : null;
 
         if (!user) {
@@ -191,8 +193,10 @@ router.post('/register-student', async (req, res) => {
             return res.status(400).json({ success: false, message: '請填寫完整資訊 (學號/教師編號、姓名、密碼)' });
         }
 
+        const normalizedStudentId = String(studentId).trim().toUpperCase();
+
         // 檢查學號是否已存在
-        const { rows: existing } = await db.query('SELECT StudentID FROM Users WHERE StudentID = $1', [studentId]);
+        const { rows: existing } = await db.query('SELECT StudentID FROM Users WHERE StudentID = $1', [normalizedStudentId]);
         if (existing.length > 0) {
             return res.status(400).json({ success: false, message: '此帳號已經存在' });
         }
@@ -202,7 +206,7 @@ router.post('/register-student', async (req, res) => {
         await db.query(`
             INSERT INTO Users (StudentID, Name, PasswordHash, Role, ClassName, ChineseGroup, EnglishGroup, MathGroup)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        `, [studentId, name, hash, targetRole, className || '', chineseGroup || '', englishGroup || '', mathGroup || '']);
+        `, [normalizedStudentId, name, hash, targetRole, className || '', chineseGroup || '', englishGroup || '', mathGroup || '']);
 
         // 若為學生，初始化學生統計
         if (targetRole === 'student') {
@@ -213,7 +217,7 @@ router.post('/register-student', async (req, res) => {
                     INSERT INTO StudentStats (StudentID, Tag, TotalAttempted, TotalCorrect, AccuracyRate)
                     VALUES ($1, $2, 0, 0, 0.0)
                     ON CONFLICT (StudentID, Tag) DO NOTHING
-                `, [studentId, tag]);
+                `, [normalizedStudentId, tag]);
             }
         }
 
