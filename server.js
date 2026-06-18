@@ -109,6 +109,7 @@ app.get('/api/network/ip', (req, res) => {
 
 // Portal 前端 (src/main.js, src/styles.css)
 app.use('/src', express.static(path.join(__dirname, 'src')));
+app.use('/vendor', express.static(path.join(__dirname, 'node_modules', 'exceljs', 'dist')));
 
 // Math App 靜態資源 (css, js, images, HTML pages)
 app.use('/math-app/css', express.static(path.join(__dirname, 'math-app', 'public', 'css')));

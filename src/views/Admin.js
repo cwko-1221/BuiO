@@ -31,7 +31,7 @@ export function renderStudentManagement() {
       <form id="addStudentForm" class="login-form" style="max-width: 400px; margin-top:1rem;">
         <label>${t('login_id_label')}<input id="newStudentId" required placeholder="" autocomplete="off"></label>
         <label>${t('form_name_label')}<input id="newStudentName" required placeholder="" autocomplete="off"></label>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
+        <div class="student-fields-grid">
           <label style="margin-bottom:0">${t('form_class_label')}<input id="newStudentClass" list="classOptions" placeholder="" autocomplete="off"></label>
           <label style="margin-bottom:0">中文分組<input id="newStudentChi" list="groupOptions" placeholder="" autocomplete="off"></label>
           <label style="margin-bottom:0">英文分組<input id="newStudentEng" list="groupOptions" placeholder="" autocomplete="off"></label>
@@ -55,11 +55,32 @@ export function renderStudentManagement() {
       </form>
     </div>
 
+    <div class="glass-card batch-import-card">
+      <div class="batch-import-head">
+        <div>
+          <h3>Excel 批量新增學生</h3>
+          <p>支援 .xlsx 及 .csv。學號和姓名為必填；空白密碼會使用 123456。</p>
+        </div>
+        <button type="button" id="downloadStudentTemplateBtn" class="secondary-action">下載 Excel 範本</button>
+      </div>
+      <div class="batch-import-controls">
+        <label class="file-picker">
+          <span>選擇學生名單</span>
+          <input type="file" id="studentExcelInput" accept=".xlsx,.csv" />
+        </label>
+        <button type="button" id="importStudentsBtn" class="primary-action" disabled>
+          ${renderIcon('plus')} 匯入學生
+        </button>
+      </div>
+      <div id="batchImportMessage" class="batch-import-message" hidden></div>
+      <div id="batchImportPreview" class="batch-import-preview" hidden></div>
+    </div>
+
     <section class="work-panel">
       <h2>${t('students_list_title')}</h2>
       <div class="student-table">
         ${state.studentsList.filter(s => s.role !== 'teacher').map(s => `
-          <div class="student-row" style="grid-template-columns: 200px 1fr auto; align-items: center;">
+          <div class="student-row management-student-row">
             <div>
               <div style="display:flex; align-items:baseline; gap:8px;">
                 <strong style="font-size:1.05em;">${s.name}</strong>
@@ -69,7 +90,7 @@ export function renderStudentManagement() {
                 <span style="background:var(--violet); color:white; padding:3px 8px; border-radius:12px; font-size:0.8em; display:inline-block;">${t('role_student')}</span>
               </div>
             </div>
-            <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap; font-size:0.95em;">
+            <div class="student-edit-fields">
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
                 班級 
                 <select class="inline-edit" data-id="${s.id}" data-field="className" style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">

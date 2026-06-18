@@ -230,6 +230,132 @@ router.post('/register-student', async (req, res) => {
 });
 
 /**
+ * POST /api/auth/register-students-batch
+ * 教師專用：批量新增學生
+ * Body: { students: [{ studentId, name, password, className, chineseGroup, englishGroup, mathGroup }] }
+ */
+router.post('/register-students-batch', async (req, res) => {
+    let client;
+    try {
+        if (req.session.role !== 'teacher') {
+            return res.status(403).json({ success: false, message: '權限不足，僅限教師操作' });
+        }
+
+        const { students } = req.body;
+        if (!Array.isArray(students) || students.length === 0) {
+            return res.status(400).json({ success: false, message: '請提供學生資料' });
+        }
+        if (students.length > 200) {
+            return res.status(400).json({ success: false, message: '每次最多匯入 200 名學生' });
+        }
+
+        const validStudents = [];
+        const skipped = [];
+        const seenIds = new Set();
+
+        for (let index = 0; index < students.length; index++) {
+            const row = students[index] || {};
+            const rowNumber = Number(row.rowNumber) || index + 2;
+            const studentId = String(row.studentId || '').trim().toUpperCase();
+            const name = String(row.name || '').trim();
+            const password = String(row.password || '123456').trim();
+
+            if (!studentId || !name) {
+                skipped.push({ rowNumber, studentId, reason: '缺少學號或姓名' });
+                continue;
+            }
+            if (!/^[A-Z0-9_-]{1,20}$/.test(studentId)) {
+                skipped.push({ rowNumber, studentId, reason: '學號格式不正確' });
+                continue;
+            }
+            if (password.length < 6) {
+                skipped.push({ rowNumber, studentId, reason: '密碼最少需要 6 個字元' });
+                continue;
+            }
+            if (seenIds.has(studentId)) {
+                skipped.push({ rowNumber, studentId, reason: 'Excel 內有重複學號' });
+                continue;
+            }
+
+            seenIds.add(studentId);
+            validStudents.push({
+                rowNumber,
+                studentId,
+                name,
+                password,
+                className: String(row.className || '').trim(),
+                chineseGroup: String(row.chineseGroup || '').trim(),
+                englishGroup: String(row.englishGroup || '').trim(),
+                mathGroup: String(row.mathGroup || '').trim(),
+            });
+        }
+
+        const newStudents = [];
+        for (const student of validStudents) {
+            const { rows } = await db.query('SELECT StudentID FROM Users WHERE StudentID = $1', [student.studentId]);
+            if (rows.length > 0) {
+                skipped.push({
+                    rowNumber: student.rowNumber,
+                    studentId: student.studentId,
+                    reason: '學號已存在'
+                });
+            } else {
+                newStudents.push(student);
+            }
+        }
+
+        if (newStudents.length > 0) {
+            const { ALL_TAGS } = require('../engine/questionGenerator');
+            client = await db.connect();
+            await client.query('BEGIN');
+
+            for (const student of newStudents) {
+                const hash = await bcrypt.hash(student.password, 10);
+                await client.query(`
+                    INSERT INTO Users (StudentID, Name, PasswordHash, Role, ClassName, ChineseGroup, EnglishGroup, MathGroup)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                `, [
+                    student.studentId,
+                    student.name,
+                    hash,
+                    'student',
+                    student.className,
+                    student.chineseGroup,
+                    student.englishGroup,
+                    student.mathGroup
+                ]);
+
+                for (const tag of ALL_TAGS) {
+                    await client.query(`
+                        INSERT INTO StudentStats (StudentID, Tag, TotalAttempted, TotalCorrect, AccuracyRate)
+                        VALUES ($1, $2, 0, 0, 0.0)
+                        ON CONFLICT (StudentID, Tag) DO NOTHING
+                    `, [student.studentId, tag]);
+                }
+            }
+
+            await client.query('COMMIT');
+        }
+
+        res.json({
+            success: true,
+            message: `成功新增 ${newStudents.length} 名學生`,
+            created: newStudents.map(student => ({
+                studentId: student.studentId,
+                name: student.name
+            })),
+            skipped
+        });
+    } catch (error) {
+        if (client) await client.query('ROLLBACK');
+        console.error('批量新增學生錯誤:', error);
+        res.status(500).json({ success: false, message: '批量匯入失敗，未能完成新增' });
+    } finally {
+        if (client) client.release();
+    }
+});
+
+/**
  * DELETE /api/auth/delete-student/:studentId
  * 教師專用：刪除學生
  */

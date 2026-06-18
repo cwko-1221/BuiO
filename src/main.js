@@ -8,6 +8,195 @@ import { renderModulesPage } from './views/Modules.js';
 import { renderStudentManagement, renderAdminPage } from './views/Admin.js';
 import { renderLogin, renderIcon } from './views/Login.js';
 
+let pendingBatchStudents = [];
+
+const STUDENT_COLUMN_ALIASES = {
+  studentId: ['學號', '學生編號', '帳號', 'studentid', 'student id', 'id'],
+  name: ['姓名', '學生姓名', 'name', 'student name'],
+  password: ['密碼', '預設密碼', 'password'],
+  className: ['班級', '班別', 'class', 'classname', 'class name'],
+  chineseGroup: ['中文分組', '中文組別', 'chinesegroup', 'chinese group'],
+  englishGroup: ['英文分組', '英文組別', 'englishgroup', 'english group'],
+  mathGroup: ['數學分組', '數學組別', 'mathgroup', 'math group'],
+};
+
+function normalizeHeader(value) {
+  return String(value ?? '').replace(/^\uFEFF/, '').trim().toLowerCase().replace(/[_-]+/g, ' ');
+}
+
+function getStudentField(header) {
+  const normalized = normalizeHeader(header);
+  return Object.entries(STUDENT_COLUMN_ALIASES)
+    .find(([, aliases]) => aliases.some(alias => normalizeHeader(alias) === normalized))?.[0];
+}
+
+function rowsToStudents(rows) {
+  if (!rows.length) throw new Error('檔案沒有資料');
+
+  const headers = rows[0].map(getStudentField);
+  if (!headers.includes('studentId') || !headers.includes('name')) {
+    throw new Error('找不到「學號」和「姓名」欄位，請使用下載範本');
+  }
+
+  return rows.slice(1)
+    .map((row, index) => {
+      const student = { rowNumber: index + 2 };
+      headers.forEach((field, columnIndex) => {
+        if (field) student[field] = String(row[columnIndex] ?? '').trim();
+      });
+      student.studentId = String(student.studentId || '').trim().toUpperCase();
+      student.password = String(student.password || '123456').trim() || '123456';
+      return student;
+    })
+    .filter(student => [
+      student.studentId,
+      student.name,
+      student.className,
+      student.chineseGroup,
+      student.englishGroup,
+      student.mathGroup
+    ].some(value => String(value || '').trim()));
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let quoted = false;
+
+  for (let index = 0; index < text.length; index++) {
+    const char = text[index];
+    const next = text[index + 1];
+    if (char === '"' && quoted && next === '"') {
+      cell += '"';
+      index++;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === ',' && !quoted) {
+      row.push(cell);
+      cell = '';
+    } else if ((char === '\n' || char === '\r') && !quoted) {
+      if (char === '\r' && next === '\n') index++;
+      row.push(cell);
+      if (row.some(value => value.trim())) rows.push(row);
+      row = [];
+      cell = '';
+    } else {
+      cell += char;
+    }
+  }
+
+  row.push(cell);
+  if (row.some(value => value.trim())) rows.push(row);
+  return rows;
+}
+
+async function parseStudentFile(file) {
+  const extension = file.name.split('.').pop()?.toLowerCase();
+  if (extension === 'csv') {
+    return rowsToStudents(parseCsv(await file.text()));
+  }
+  if (extension !== 'xlsx') {
+    throw new Error('只支援 .xlsx 或 .csv；請把舊式 .xls 另存為 .xlsx');
+  }
+  if (!window.ExcelJS) {
+    throw new Error('Excel 解析工具未能載入，請重新整理頁面');
+  }
+
+  const workbook = new window.ExcelJS.Workbook();
+  await workbook.xlsx.load(await file.arrayBuffer());
+  const worksheet = workbook.worksheets[0];
+  if (!worksheet) throw new Error('Excel 沒有工作表');
+
+  const rows = [];
+  worksheet.eachRow({ includeEmpty: false }, row => {
+    const values = [];
+    for (let column = 1; column <= row.cellCount; column++) {
+      const value = row.getCell(column).value;
+      values.push(value && typeof value === 'object' && 'text' in value ? value.text : value ?? '');
+    }
+    rows.push(values);
+  });
+  return rowsToStudents(rows);
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function showBatchMessage(message, isError = false) {
+  const element = document.getElementById('batchImportMessage');
+  if (!element) return;
+  element.hidden = false;
+  element.classList.toggle('error', isError);
+  element.textContent = message;
+}
+
+function renderBatchPreview(students) {
+  const preview = document.getElementById('batchImportPreview');
+  const importButton = document.getElementById('importStudentsBtn');
+  if (!preview || !importButton) return;
+
+  preview.hidden = students.length === 0;
+  importButton.disabled = students.length === 0;
+  if (!students.length) {
+    preview.innerHTML = '';
+    return;
+  }
+
+  preview.innerHTML = `
+    <table>
+      <thead>
+        <tr><th>列</th><th>學號</th><th>姓名</th><th>班級</th><th>中文</th><th>英文</th><th>數學</th></tr>
+      </thead>
+      <tbody>
+        ${students.slice(0, 50).map(student => `
+          <tr>
+            <td>${student.rowNumber}</td>
+            <td>${escapeHtml(student.studentId)}</td>
+            <td>${escapeHtml(student.name)}</td>
+            <td>${escapeHtml(student.className)}</td>
+            <td>${escapeHtml(student.chineseGroup)}</td>
+            <td>${escapeHtml(student.englishGroup)}</td>
+            <td>${escapeHtml(student.mathGroup)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+async function downloadStudentTemplate() {
+  if (!window.ExcelJS) {
+    alert('Excel 工具未能載入，請重新整理頁面。');
+    return;
+  }
+  const workbook = new window.ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('學生名單');
+  worksheet.addRow(['學號', '姓名', '密碼', '班級', '中文分組', '英文分組', '數學分組']);
+  worksheet.addRow(['S007', '陳小文', '123456', 'P4', 'A組', 'B組', 'A組']);
+  worksheet.getRow(1).font = { bold: true };
+  worksheet.columns = [
+    { width: 14 }, { width: 16 }, { width: 14 }, { width: 10 },
+    { width: 14 }, { width: 14 }, { width: 14 }
+  ];
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const url = URL.createObjectURL(new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = '學生批量匯入範本.xlsx';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 function saveTeacherSession(teacher) {
   fetchActiveSessions(sessions => {
     if (state.loggedIn) render(); // 有更新時重新渲染畫面
@@ -200,6 +389,58 @@ function bindEvents() {
       err.textContent = '連線錯誤';
       err.style.display = 'block';
       btn.disabled = false;
+    }
+  });
+
+  document.getElementById('downloadStudentTemplateBtn')?.addEventListener('click', downloadStudentTemplate);
+
+  document.getElementById('studentExcelInput')?.addEventListener('change', async (event) => {
+    const file = event.target.files?.[0];
+    pendingBatchStudents = [];
+    renderBatchPreview([]);
+    if (!file) return;
+
+    showBatchMessage(`正在讀取 ${file.name}...`);
+    try {
+      pendingBatchStudents = await parseStudentFile(file);
+      if (!pendingBatchStudents.length) {
+        throw new Error('檔案內沒有可匯入的學生資料');
+      }
+      renderBatchPreview(pendingBatchStudents);
+      showBatchMessage(`已讀取 ${pendingBatchStudents.length} 筆資料，請確認預覽後按「匯入學生」。`);
+    } catch (error) {
+      showBatchMessage(error.message || '無法讀取檔案', true);
+    }
+  });
+
+  document.getElementById('importStudentsBtn')?.addEventListener('click', async () => {
+    if (!pendingBatchStudents.length) return;
+    const button = document.getElementById('importStudentsBtn');
+    button.disabled = true;
+    showBatchMessage(`正在匯入 ${pendingBatchStudents.length} 名學生...`);
+
+    try {
+      const response = await fetch('/api/auth/register-students-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ students: pendingBatchStudents })
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || '匯入失敗');
+      }
+
+      const skippedSummary = data.skipped?.length
+        ? `；略過 ${data.skipped.length} 筆：${data.skipped.slice(0, 3).map(item => `第 ${item.rowNumber} 列 ${item.reason}`).join('、')}`
+        : '';
+      alert(`${data.message}${skippedSummary}`);
+      pendingBatchStudents = [];
+      await fetchStudentsList();
+      render();
+    } catch (error) {
+      showBatchMessage(error.message || '匯入失敗', true);
+      button.disabled = false;
     }
   });
 

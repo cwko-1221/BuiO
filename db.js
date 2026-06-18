@@ -235,10 +235,20 @@ function handleUsers(sql, params) {
   }
 
   if (s.startsWith('insert')) {
-    const id = params[0];
+    const [id, name, passwordhash, role, classname = '', chinesegroup = '', englishgroup = '', mathgroup = ''] = params;
     const existing = d.users.find(u => u.studentid === id);
     if (existing) throw new Error('duplicate key value violates unique constraint');
-    d.users.push({ studentid: id, name: params[1], role: params[2], passwordhash: params[3] });
+    d.users.push({
+      studentid: id,
+      name,
+      passwordhash,
+      role,
+      classname,
+      chinesegroup,
+      englishgroup,
+      mathgroup,
+      language: 'zh-HK'
+    });
     save();
     return { rows: [] };
   }
@@ -287,9 +297,11 @@ function handleStats(sql, params) {
       st = { studentid: sid, tag, totalattempted: 0, totalcorrect: 0, accuracyrate: 0 };
       d.studentStats.push(st);
     }
-    st.totalattempted += 1;
-    st.totalcorrect += incC;
-    st.accuracyrate = st.totalattempted > 0 ? round(st.totalcorrect / st.totalattempted * 100, 1) : 0;
+    if (params.length >= 3) {
+      st.totalattempted += 1;
+      st.totalcorrect += Number(incC) || 0;
+      st.accuracyrate = st.totalattempted > 0 ? round(st.totalcorrect / st.totalattempted * 100, 1) : 0;
+    }
     save();
     return { rows: [] };
   }
@@ -468,15 +480,28 @@ function handleLogs(sql, params) {
 // JOIN handler (teacher students overview)
 function handleJoin(sql, params) {
   const d = load();
+  const s = lo(sql);
   const tagArray = params && params[0] ? params[0] : null;
-  const students = d.users.filter(u => u.role === 'student');
-  const rows = students.map(u => {
+  const users = s.includes("where u.role != 'teacher'")
+    ? d.users.filter(u => u.role !== 'teacher')
+    : d.users;
+  const rows = users.map(u => {
     let stats = d.studentStats.filter(s => s.studentid === u.studentid);
     if (tagArray && Array.isArray(tagArray)) stats = stats.filter(s => tagArray.includes(s.tag));
     const totalq = stats.reduce((a, s) => a + s.totalattempted, 0);
     const totalc = stats.reduce((a, s) => a + s.totalcorrect, 0);
     const acc = totalq > 0 ? round(totalc / totalq * 100, 1) : 0;
-    return { id: u.studentid, name: u.name, totalquestions: totalq, overallaccuracy: acc };
+    return {
+      id: u.studentid,
+      name: u.name,
+      role: u.role,
+      classname: u.classname || '',
+      chinesegroup: u.chinesegroup || '',
+      englishgroup: u.englishgroup || '',
+      mathgroup: u.mathgroup || '',
+      totalquestions: totalq,
+      overallaccuracy: acc
+    };
   }).sort((a, b) => a.id.localeCompare(b.id));
   return { rows };
 }

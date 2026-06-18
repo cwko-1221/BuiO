@@ -777,6 +777,107 @@ input:focus {
   line-height: 1.55;
 }
 
+.batch-import-card {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+}
+
+.batch-import-head,
+.batch-import-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.batch-import-head h3,
+.batch-import-head p {
+  margin: 0;
+}
+
+.batch-import-head p {
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.batch-import-controls {
+  margin-top: 18px;
+  justify-content: flex-start;
+}
+
+.file-picker {
+  min-width: min(100%, 380px);
+}
+
+.batch-import-message {
+  margin-top: 16px;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #eef8f6;
+  border: 1px solid #cce9e4;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.batch-import-message.error {
+  background: #fff0ed;
+  border-color: #f5c7bd;
+  color: #973b2b;
+}
+
+.batch-import-preview {
+  margin-top: 16px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+}
+
+.batch-import-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.batch-import-preview th,
+.batch-import-preview td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.batch-import-preview th {
+  background: #f4f8fa;
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.batch-import-preview tr:last-child td {
+  border-bottom: 0;
+}
+
+.student-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.management-student-row {
+  grid-template-columns: 200px minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.student-edit-fields {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 0.95rem;
+}
+
 @media (max-width: 1100px) {
   .login-shell,
   .app-shell,
@@ -837,7 +938,39 @@ input:focus {
     grid-template-columns: 1fr;
   }
 
+  .student-fields-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .management-student-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .student-edit-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .student-edit-fields label,
+  .student-edit-fields select {
+    width: 100%;
+  }
+
+  .batch-import-head,
+  .batch-import-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .side-nav {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .student-fields-grid,
+  .student-edit-fields {
     grid-template-columns: 1fr;
   }
 }
@@ -1015,4 +1148,3 @@ input:focus {
   font-weight: 800;
   font-size: 0.9rem;
 }
-
