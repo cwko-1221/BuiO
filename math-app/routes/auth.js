@@ -62,6 +62,7 @@ router.post('/login', async (req, res) => {
                 name: user.name,
                 role: req.session.role,
                 className: user.classname || '',
+                classNo: user.classno || null,
                 language: user.language || 'zh-HK'
             }
         });
@@ -107,17 +108,19 @@ router.get('/me', async (req, res) => {
 
     try {
         // 從資料庫取得最新名稱、角色、班級與語言
-        const { rows } = await db.query('SELECT Name, Role, ClassName, Language FROM Users WHERE StudentID = $1', [req.session.studentId]);
+        const { rows } = await db.query('SELECT Name, Role, ClassName, ClassNo, Language FROM Users WHERE StudentID = $1', [req.session.studentId]);
         
         let currentName = req.session.studentName;
         let currentRole = req.session.role || 'student';
         let currentClassName = '';
+        let currentClassNo = null;
         let currentLanguage = 'zh-HK';
 
         if (rows.length > 0) {
             currentName = rows[0].name;
             currentRole = rows[0].role;
             currentClassName = rows[0].classname || '';
+            currentClassNo = rows[0].classno || null;
             currentLanguage = rows[0].language || 'zh-HK';
             
             // 順便更新 Session
@@ -132,6 +135,7 @@ router.get('/me', async (req, res) => {
                 name: currentName,
                 role: currentRole,
                 className: currentClassName,
+                classNo: currentClassNo,
                 language: currentLanguage
             }
         });
@@ -186,7 +190,7 @@ router.post('/register-student', async (req, res) => {
             return res.status(403).json({ success: false, message: '權限不足，僅限教師操作' });
         }
 
-        const { studentId, name, password, role, className, chineseGroup, englishGroup, mathGroup } = req.body;
+        const { studentId, name, password, role, className, classNo, chineseGroup, englishGroup, mathGroup } = req.body;
         const targetRole = role === 'teacher' ? 'teacher' : 'student';
 
         if (!studentId || !name || !password) {
@@ -203,10 +207,15 @@ router.post('/register-student', async (req, res) => {
 
         // 加密密碼與寫入
         const hash = bcrypt.hashSync(password, 10);
+        const normalizedClassNo = classNo === '' || classNo == null ? null : Number(classNo);
+        if (normalizedClassNo !== null && (!Number.isInteger(normalizedClassNo) || normalizedClassNo < 1 || normalizedClassNo > 99)) {
+            return res.status(400).json({ success: false, message: '班號必須是 1 至 99 的整數' });
+        }
+
         await db.query(`
-            INSERT INTO Users (StudentID, Name, PasswordHash, Role, ClassName, ChineseGroup, EnglishGroup, MathGroup)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        `, [normalizedStudentId, name, hash, targetRole, className || '', chineseGroup || '', englishGroup || '', mathGroup || '']);
+            INSERT INTO Users (StudentID, Name, PasswordHash, Role, ClassName, ClassNo, ChineseGroup, EnglishGroup, MathGroup)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `, [normalizedStudentId, name, hash, targetRole, className || '', normalizedClassNo, chineseGroup || '', englishGroup || '', mathGroup || '']);
 
         // 若為學生，初始化學生統計
         if (targetRole === 'student') {
@@ -232,7 +241,7 @@ router.post('/register-student', async (req, res) => {
 /**
  * POST /api/auth/register-students-batch
  * 教師專用：批量新增學生
- * Body: { students: [{ studentId, name, password, className, chineseGroup, englishGroup, mathGroup }] }
+ * Body: { students: [{ studentId, name, password, className, classNo, chineseGroup, englishGroup, mathGroup }] }
  */
 router.post('/register-students-batch', async (req, res) => {
     let client;
@@ -259,6 +268,7 @@ router.post('/register-students-batch', async (req, res) => {
             const studentId = String(row.studentId || '').trim().toUpperCase();
             const name = String(row.name || '').trim();
             const password = String(row.password || '123456').trim();
+            const classNo = row.classNo === '' || row.classNo == null ? null : Number(row.classNo);
 
             if (!studentId || !name) {
                 skipped.push({ rowNumber, studentId, reason: '缺少學號或姓名' });
@@ -270,6 +280,10 @@ router.post('/register-students-batch', async (req, res) => {
             }
             if (password.length < 6) {
                 skipped.push({ rowNumber, studentId, reason: '密碼最少需要 6 個字元' });
+                continue;
+            }
+            if (classNo !== null && (!Number.isInteger(classNo) || classNo < 1 || classNo > 99)) {
+                skipped.push({ rowNumber, studentId, reason: '班號必須是 1 至 99 的整數' });
                 continue;
             }
             if (seenIds.has(studentId)) {
@@ -284,6 +298,7 @@ router.post('/register-students-batch', async (req, res) => {
                 name,
                 password,
                 className: String(row.className || '').trim(),
+                classNo,
                 chineseGroup: String(row.chineseGroup || '').trim(),
                 englishGroup: String(row.englishGroup || '').trim(),
                 mathGroup: String(row.mathGroup || '').trim(),
@@ -312,14 +327,15 @@ router.post('/register-students-batch', async (req, res) => {
             for (const student of newStudents) {
                 const hash = await bcrypt.hash(student.password, 10);
                 await client.query(`
-                    INSERT INTO Users (StudentID, Name, PasswordHash, Role, ClassName, ChineseGroup, EnglishGroup, MathGroup)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                    INSERT INTO Users (StudentID, Name, PasswordHash, Role, ClassName, ClassNo, ChineseGroup, EnglishGroup, MathGroup)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 `, [
                     student.studentId,
                     student.name,
                     hash,
                     'student',
                     student.className,
+                    student.classNo,
                     student.chineseGroup,
                     student.englishGroup,
                     student.mathGroup
@@ -412,6 +428,7 @@ router.post('/update-student', async (req, res) => {
 
         const allowedFields = {
             className: 'ClassName',
+            classNo: 'ClassNo',
             chineseGroup: 'ChineseGroup',
             englishGroup: 'EnglishGroup',
             mathGroup: 'MathGroup'
@@ -422,7 +439,15 @@ router.post('/update-student', async (req, res) => {
             return res.status(400).json({ success: false, message: '不允許更新此欄位' });
         }
 
-        await db.query(`UPDATE Users SET ${dbField} = $1 WHERE StudentID = $2`, [value || '', studentId]);
+        let normalizedValue = value || '';
+        if (field === 'classNo') {
+            normalizedValue = value === '' || value == null ? null : Number(value);
+            if (normalizedValue !== null && (!Number.isInteger(normalizedValue) || normalizedValue < 1 || normalizedValue > 99)) {
+                return res.status(400).json({ success: false, message: '班號必須是 1 至 99 的整數' });
+            }
+        }
+
+        await db.query(`UPDATE Users SET ${dbField} = $1 WHERE StudentID = $2`, [normalizedValue, studentId]);
         res.json({ success: true, message: '更新成功' });
 
     } catch (error) {

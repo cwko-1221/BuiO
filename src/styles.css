@@ -860,7 +860,7 @@ input:focus {
 
 .student-fields-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 15px;
 }
@@ -876,6 +876,15 @@ input:focus {
   flex-wrap: wrap;
   gap: 15px;
   font-size: 0.95rem;
+}
+
+.class-number-input {
+  width: 68px;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
 }
 
 @media (max-width: 1100px) {

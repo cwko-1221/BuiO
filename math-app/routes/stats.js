@@ -338,6 +338,7 @@ router.get('/teacher/students', requireTeacher, async (req, res) => {
                 u.Name as name,
                 u.Role as role,
                 u.ClassName as classname,
+                u.ClassNo as classno,
                 u.ChineseGroup as chinesegroup,
                 u.EnglishGroup as englishgroup,
                 u.MathGroup as mathgroup,
@@ -350,8 +351,15 @@ router.get('/teacher/students', requireTeacher, async (req, res) => {
             FROM Users u
             LEFT JOIN StudentStats s ON u.StudentID = s.StudentID AND s.Tag = ANY($1::text[])
             WHERE u.Role != 'teacher'
-            GROUP BY u.StudentID, u.Role, u.ClassName, u.ChineseGroup, u.EnglishGroup, u.MathGroup
-            ORDER BY u.StudentID ASC
+            GROUP BY u.StudentID, u.Role, u.ClassName, u.ClassNo, u.ChineseGroup, u.EnglishGroup, u.MathGroup
+            ORDER BY
+                CASE
+                    WHEN u.ClassName ~ '^P[1-6]$' THEN CAST(SUBSTRING(u.ClassName FROM 2) AS INT)
+                    WHEN u.ClassName = 'Graduated' THEN 98
+                    ELSE 99
+                END,
+                COALESCE(u.ClassNo, 999),
+                u.StudentID ASC
         `, [ALL_TAGS]);
 
         res.json({
@@ -361,6 +369,7 @@ router.get('/teacher/students', requireTeacher, async (req, res) => {
                 name: s.name,
                 role: s.role,
                 className: s.classname || '',
+                classNo: parseInt(s.classno) || null,
                 chineseGroup: s.chinesegroup || '',
                 englishGroup: s.englishgroup || '',
                 mathGroup: s.mathgroup || '',
@@ -386,6 +395,7 @@ router.get('/teacher/all-users', requireTeacher, async (req, res) => {
                 u.Name as name,
                 u.Role as role,
                 u.ClassName as classname,
+                u.ClassNo as classno,
                 u.ChineseGroup as chinesegroup,
                 u.EnglishGroup as englishgroup,
                 u.MathGroup as mathgroup,
@@ -397,8 +407,16 @@ router.get('/teacher/all-users', requireTeacher, async (req, res) => {
                 END as overallaccuracy
             FROM Users u
             LEFT JOIN StudentStats s ON u.StudentID = s.StudentID AND s.Tag = ANY($1::text[])
-            GROUP BY u.StudentID, u.Role, u.ClassName, u.ChineseGroup, u.EnglishGroup, u.MathGroup
-            ORDER BY u.Role ASC, u.StudentID ASC
+            GROUP BY u.StudentID, u.Role, u.ClassName, u.ClassNo, u.ChineseGroup, u.EnglishGroup, u.MathGroup
+            ORDER BY
+                u.Role ASC,
+                CASE
+                    WHEN u.ClassName ~ '^P[1-6]$' THEN CAST(SUBSTRING(u.ClassName FROM 2) AS INT)
+                    WHEN u.ClassName = 'Graduated' THEN 98
+                    ELSE 99
+                END,
+                COALESCE(u.ClassNo, 999),
+                u.StudentID ASC
         `, [ALL_TAGS]);
 
         res.json({
@@ -408,6 +426,7 @@ router.get('/teacher/all-users', requireTeacher, async (req, res) => {
                 name: s.name,
                 role: s.role,
                 className: s.classname || '',
+                classNo: parseInt(s.classno) || null,
                 chineseGroup: s.chinesegroup || '',
                 englishGroup: s.englishgroup || '',
                 mathGroup: s.mathgroup || '',

@@ -38,12 +38,14 @@ async function initPostgres() {
         Role VARCHAR(20),
         PasswordHash VARCHAR(255),
         ClassName VARCHAR(20),
+        ClassNo INT,
         ChineseGroup VARCHAR(20),
         EnglishGroup VARCHAR(20),
         MathGroup VARCHAR(20),
         Language VARCHAR(20) DEFAULT 'zh-HK'
       );
       ALTER TABLE Users ADD COLUMN IF NOT EXISTS ClassName VARCHAR(20);
+      ALTER TABLE Users ADD COLUMN IF NOT EXISTS ClassNo INT;
       ALTER TABLE Users ADD COLUMN IF NOT EXISTS ChineseGroup VARCHAR(20);
       ALTER TABLE Users ADD COLUMN IF NOT EXISTS EnglishGroup VARCHAR(20);
       ALTER TABLE Users ADD COLUMN IF NOT EXISTS MathGroup VARCHAR(20);
@@ -235,7 +237,17 @@ function handleUsers(sql, params) {
   }
 
   if (s.startsWith('insert')) {
-    const [id, name, passwordhash, role, classname = '', chinesegroup = '', englishgroup = '', mathgroup = ''] = params;
+    const [
+      id,
+      name,
+      passwordhash,
+      role,
+      classname = '',
+      classno = null,
+      chinesegroup = '',
+      englishgroup = '',
+      mathgroup = ''
+    ] = params;
     const existing = d.users.find(u => u.studentid === id);
     if (existing) throw new Error('duplicate key value violates unique constraint');
     d.users.push({
@@ -244,6 +256,7 @@ function handleUsers(sql, params) {
       passwordhash,
       role,
       classname,
+      classno: Number(classno) || null,
       chinesegroup,
       englishgroup,
       mathgroup,
@@ -496,13 +509,24 @@ function handleJoin(sql, params) {
       name: u.name,
       role: u.role,
       classname: u.classname || '',
+      classno: Number(u.classno) || null,
       chinesegroup: u.chinesegroup || '',
       englishgroup: u.englishgroup || '',
       mathgroup: u.mathgroup || '',
       totalquestions: totalq,
       overallaccuracy: acc
     };
-  }).sort((a, b) => a.id.localeCompare(b.id));
+  }).sort((a, b) => {
+    const classRank = value => {
+      const match = String(value || '').match(/^P([1-6])$/i);
+      if (match) return Number(match[1]);
+      if (value === 'Graduated') return 98;
+      return 99;
+    };
+    return classRank(a.classname) - classRank(b.classname)
+      || (a.classno || 999) - (b.classno || 999)
+      || a.id.localeCompare(b.id);
+  });
   return { rows };
 }
 

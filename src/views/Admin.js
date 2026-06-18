@@ -33,6 +33,7 @@ export function renderStudentManagement() {
         <label>${t('form_name_label')}<input id="newStudentName" required placeholder="" autocomplete="off"></label>
         <div class="student-fields-grid">
           <label style="margin-bottom:0">${t('form_class_label')}<input id="newStudentClass" list="classOptions" placeholder="" autocomplete="off"></label>
+          <label style="margin-bottom:0">班號<input id="newStudentClassNo" type="number" min="1" max="99" inputmode="numeric" placeholder="" autocomplete="off"></label>
           <label style="margin-bottom:0">中文分組<input id="newStudentChi" list="groupOptions" placeholder="" autocomplete="off"></label>
           <label style="margin-bottom:0">英文分組<input id="newStudentEng" list="groupOptions" placeholder="" autocomplete="off"></label>
           <label style="margin-bottom:0">數學分組<input id="newStudentMath" list="groupOptions" placeholder="" autocomplete="off"></label>
@@ -92,10 +93,14 @@ export function renderStudentManagement() {
             </div>
             <div class="student-edit-fields">
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
-                班級 
+                班級
                 <select class="inline-edit" data-id="${s.id}" data-field="className" style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
                   ${['', 'P1','P2','P3','P4','P5','P6','Graduated'].map(o => `<option value="${o}" ${s.className === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
                 </select>
+              </label>
+              <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
+                班號
+                <input class="inline-edit class-number-input" data-id="${s.id}" data-field="classNo" type="number" min="1" max="99" inputmode="numeric" value="${s.classNo || ''}" placeholder="--">
               </label>
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
                 中文 

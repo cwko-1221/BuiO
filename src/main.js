@@ -15,6 +15,7 @@ const STUDENT_COLUMN_ALIASES = {
   name: ['姓名', '學生姓名', 'name', 'student name'],
   password: ['密碼', '預設密碼', 'password'],
   className: ['班級', '班別', 'class', 'classname', 'class name'],
+  classNo: ['班號', '座號', 'classno', 'class no', 'class number'],
   chineseGroup: ['中文分組', '中文組別', 'chinesegroup', 'chinese group'],
   englishGroup: ['英文分組', '英文組別', 'englishgroup', 'english group'],
   mathGroup: ['數學分組', '數學組別', 'mathgroup', 'math group'],
@@ -52,6 +53,7 @@ function rowsToStudents(rows) {
       student.studentId,
       student.name,
       student.className,
+      student.classNo,
       student.chineseGroup,
       student.englishGroup,
       student.mathGroup
@@ -152,7 +154,7 @@ function renderBatchPreview(students) {
   preview.innerHTML = `
     <table>
       <thead>
-        <tr><th>列</th><th>學號</th><th>姓名</th><th>班級</th><th>中文</th><th>英文</th><th>數學</th></tr>
+        <tr><th>列</th><th>學號</th><th>姓名</th><th>班級</th><th>班號</th><th>中文</th><th>英文</th><th>數學</th></tr>
       </thead>
       <tbody>
         ${students.slice(0, 50).map(student => `
@@ -161,6 +163,7 @@ function renderBatchPreview(students) {
             <td>${escapeHtml(student.studentId)}</td>
             <td>${escapeHtml(student.name)}</td>
             <td>${escapeHtml(student.className)}</td>
+            <td>${escapeHtml(student.classNo)}</td>
             <td>${escapeHtml(student.chineseGroup)}</td>
             <td>${escapeHtml(student.englishGroup)}</td>
             <td>${escapeHtml(student.mathGroup)}</td>
@@ -178,12 +181,12 @@ async function downloadStudentTemplate() {
   }
   const workbook = new window.ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('學生名單');
-  worksheet.addRow(['學號', '姓名', '密碼', '班級', '中文分組', '英文分組', '數學分組']);
-  worksheet.addRow(['S007', '陳小文', '123456', 'P4', 'A組', 'B組', 'A組']);
+  worksheet.addRow(['學號', '姓名', '密碼', '班級', '班號', '中文分組', '英文分組', '數學分組']);
+  worksheet.addRow(['S007', '陳小文', '123456', 'P4', '7', 'A組', 'B組', 'A組']);
   worksheet.getRow(1).font = { bold: true };
   worksheet.columns = [
     { width: 14 }, { width: 16 }, { width: 14 }, { width: 10 },
-    { width: 14 }, { width: 14 }, { width: 14 }
+    { width: 10 }, { width: 14 }, { width: 14 }, { width: 14 }
   ];
 
   const buffer = await workbook.xlsx.writeBuffer();
@@ -283,6 +286,7 @@ function bindEvents() {
             name: data.student.name,
             role: data.student.role,
             className: data.student.className || '',
+            classNo: data.student.classNo || null,
             language: data.student.language || 'zh-HK',
           },
           loggedIn: true,
@@ -369,6 +373,7 @@ function bindEvents() {
           name: document.getElementById('newStudentName').value.trim(),
           password: document.getElementById('newStudentPw').value,
           className: document.getElementById('newStudentClass')?.value.trim() || '',
+          classNo: document.getElementById('newStudentClassNo')?.value.trim() || '',
           chineseGroup: document.getElementById('newStudentChi')?.value.trim() || '',
           englishGroup: document.getElementById('newStudentEng')?.value.trim() || '',
           mathGroup: document.getElementById('newStudentMath')?.value.trim() || '',
@@ -534,6 +539,11 @@ function bindEvents() {
           const student = state.studentsList.find(s => s.id === studentId);
           if (student) student[field] = value;
           e.target.setAttribute('data-original-value', value);
+          if (field === 'className' || field === 'classNo') {
+            await fetchStudentsList();
+            render();
+            return;
+          }
         } else {
           alert('更新失敗: ' + (data.message || '未知錯誤'));
           e.target.value = originalValue; // 回復原本的值
