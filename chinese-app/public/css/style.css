@@ -115,7 +115,8 @@ tr.row-clickable:hover { background: var(--surface-2); }
 .practice-progress .step.current { background: var(--primary); }
 
 #hanzi-writer-target { width: 280px; height: 280px; margin: 16px auto; border: 2px dashed var(--border);
-  border-radius: var(--radius); display: flex; align-items: center; justify-content: center; }
+  border-radius: var(--radius); background: #fff; overflow: hidden; }
+#hanzi-writer-target svg { display: block; }
 
 .char-display { font-size: 3rem; text-align: center; padding: 24px 0;
   font-family: 'Noto Serif TC', 'Songti TC', serif; }

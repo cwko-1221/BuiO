@@ -14,17 +14,31 @@ function lazyLoad() {
   }
 }
 
+function apiKeyFromEnv() {
+  if (process.env.GOOGLE_API_KEY) return process.env.GOOGLE_API_KEY.trim();
+  // Tolerate users pasting an API key into GOOGLE_CREDENTIALS_JSON by mistake.
+  const raw = (process.env.GOOGLE_CREDENTIALS_JSON || '').trim();
+  if (raw && !raw.startsWith('{') && /^AIza[\w-]{20,}$/.test(raw)) return raw;
+  return null;
+}
+
 function isGoogleConfigured() {
-  return !!(process.env.GOOGLE_CREDENTIALS_JSON || process.env.GOOGLE_APPLICATION_CREDENTIALS);
+  return !!apiKeyFromEnv()
+      || !!process.env.GOOGLE_CREDENTIALS_JSON
+      || !!process.env.GOOGLE_APPLICATION_CREDENTIALS;
 }
 
 function googleClientOptions() {
+  const apiKey = apiKeyFromEnv();
+  if (apiKey) return { apiKey };
   if (process.env.GOOGLE_CREDENTIALS_JSON) {
-    return { credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON) };
+    try {
+      return { credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON) };
+    } catch (e) {
+      throw new Error('GOOGLE_CREDENTIALS_JSON is not valid JSON. If you pasted an API key (starting with "AIza..."), set it in GOOGLE_API_KEY instead.');
+    }
   }
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    return {};
-  }
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) return {};
   throw new Error('Google Cloud credentials are not configured.');
 }
 

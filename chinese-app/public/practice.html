@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>練習 ・ 粵語學習</title>
   <link rel="stylesheet" href="/chinese/css/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.7.2/dist/hanzi-writer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3/dist/hanzi-writer.min.js"></script>
 </head>
 <body>
   <div id="root"></div>
@@ -411,8 +411,12 @@
     let hwCancelled = false;
     let hwCurrentKey = '';
     function mountHanziWriter(text) {
+      const container = document.getElementById('hanzi-writer-target');
+      if (!container) return;
       const key = `${state.phase}-${state.index}-${text}`;
-      if (key === hwCurrentKey) return;        // avoid re-init when DOM updates
+      // Re-mount whenever the question changes OR the container was wiped by a
+      // re-render (vanilla rebuild blows away the previous SVG).
+      if (key === hwCurrentKey && container.children.length > 0) return;
       hwCurrentKey = key;
       hwCancelled = true;
       setTimeout(() => { hwCancelled = false; runQuiz(text); }, 50);
@@ -420,7 +424,11 @@
 
     function runQuiz(text) {
       const container = document.getElementById('hanzi-writer-target');
-      if (!container || !window.HanziWriter) return;
+      if (!container) return;
+      if (typeof HanziWriter === 'undefined') {
+        container.textContent = '⚠️ Hanzi Writer 載入失敗（CDN 被擋？）';
+        return;
+      }
       container.innerHTML = '';
       const chars = Array.from(text.trim());
       let idx = 0;
@@ -434,8 +442,13 @@
           strokeColor: '#334155', radicalColor: '#6366f1', outlineColor: '#e2e8f0',
           drawingColor: '#38bdf8', showHintAfterMisses: 2, highlightOnComplete: true,
           highlightColor: '#34d399',
-          charDataLoader: (c, on) => fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2/${c}.json`)
-            .then(r => r.json()).then(on),
+          charDataLoader: (c, on, onErr) => fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2/${encodeURIComponent(c)}.json`)
+            .then(r => { if (!r.ok) throw new Error('char data ' + r.status); return r.json(); })
+            .then(on)
+            .catch(e => {
+              container.textContent = `⚠️ 找不到「${c}」的筆順資料`;
+              if (typeof onErr === 'function') onErr(e);
+            }),
         });
         writer.quiz({
           onComplete: () => {
