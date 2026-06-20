@@ -206,13 +206,14 @@ function saveTeacherSession(teacher) {
   });
 }
 
-// 每 3 秒輪詢一次目前進行中的課堂，確保學生畫面即時更新
+// Poll active whiteboard sessions only on views that show them, and only when tab visible.
 setInterval(() => {
-  if (state.loggedIn) {
-    fetchActiveSessions(sessions => {
-      if (state.loggedIn) render();
-    });
-  }
+  if (!state.loggedIn) return;
+  if (document.visibilityState !== 'visible') return;
+  if (state.activeView !== 'dashboard' && state.activeView !== 'modules') return;
+  fetchActiveSessions(() => {
+    if (state.loggedIn) render();
+  });
 }, 3000);
 
 // =============================================
@@ -312,17 +313,11 @@ function bindEvents() {
     });
   });
 
-  // Admin 按鈕
+  // Admin tab — backend already enforces teacher role on every admin endpoint
   document.getElementById('adminBtn')?.addEventListener('click', () => {
-    const pw = prompt('請輸入 Admin 密碼：');
-    if (pw === 'Admin') {
-      state.activeView = 'admin';
-      state.adminUnlocked = true;
-      state.studentsLoaded = false;
-      render();
-    } else if (pw !== null) {
-      alert('密碼錯誤！');
-    }
+    state.activeView = 'admin';
+    state.studentsLoaded = false;
+    render();
   });
 
   // 學生升級
@@ -466,8 +461,7 @@ function bindEvents() {
           studentId: document.getElementById('newTeacherId').value.trim(),
           name: document.getElementById('newTeacherName').value.trim(),
           password: document.getElementById('newTeacherPw').value,
-          role: 'teacher',
-          adminPassword: state.adminUnlocked ? 'Admin' : undefined
+          role: 'teacher'
         })
       });
       const data = await res.json();
@@ -495,10 +489,7 @@ function bindEvents() {
       
       btn.disabled = true;
       try {
-        const url = state.adminUnlocked
-          ? `/api/auth/delete-student/${sid}?adminPassword=Admin`
-          : `/api/auth/delete-student/${sid}`;
-        const res = await fetch(url, {
+        const res = await fetch(`/api/auth/delete-student/${sid}`, {
           method: 'DELETE',
           credentials: 'include'
         });

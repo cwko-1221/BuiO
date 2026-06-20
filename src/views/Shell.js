@@ -39,7 +39,7 @@ export function renderShell() {
           ${user.role === 'teacher' ? `<button class="${state.activeView === 'students' ? 'active' : ''}" data-view="students">${renderIcon('user')} ${t('nav_students')}</button>` : ''}
           <button class="${state.activeView === 'modules' ? 'active' : ''}" data-view="modules">${renderIcon('board')} ${t('nav_modules')}</button>
           <button class="${state.activeView === 'settings' ? 'active' : ''}" data-view="settings">${renderIcon('settings')} ${t('nav_settings')}</button>
-          <button id="adminBtn" class="${state.activeView === 'admin' ? 'active' : ''}">${renderIcon('settings')} ${t('nav_admin')}</button>
+          ${user.role === 'teacher' ? `<button id="adminBtn" class="${state.activeView === 'admin' ? 'active' : ''}">${renderIcon('settings')} ${t('nav_admin')}</button>` : ''}
         </nav>
         <div class="sidebar-footer">
           <span>${user.role === 'teacher' ? t('teacher_mode') : t('student_mode')}</span>

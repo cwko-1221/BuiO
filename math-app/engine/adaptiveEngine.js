@@ -12,7 +12,7 @@
  * 6. 每次練習出 10 題
  */
 
-const db = require('../db/database');
+const statsRepo = require('../repositories/stats.repo');
 const { generateQuestion, ALL_TAGS } = require('./questionGenerator');
 
 const WEAKNESS_THRESHOLD = 70;  // 正確率低於此值視為弱點
@@ -26,22 +26,13 @@ const DEFAULT_QUIZ_SIZE = 5;    // 每次練習題數
  * @returns {Array} 各標籤統計
  */
 async function getStudentStats(studentId) {
-    if (!process.env.DATABASE_URL) {
-        return []; // [Local Testing Mock] 如果沒有資料庫，假設完全沒有作答紀錄（全隨機分配）
-    }
-
-    const { rows } = await db.query(`
-        SELECT Tag as tag, TotalAttempted as totalattempted, 
-               TotalCorrect as totalcorrect, AccuracyRate as accuracyrate
-        FROM StudentStats
-        WHERE StudentID = $1
-    `, [studentId]);
+    const rows = await statsRepo.tagBreakdown(studentId, ALL_TAGS);
     return rows.map(r => ({
         tag: r.tag,
         totalAttempted: parseInt(r.totalattempted) || 0,
         totalCorrect: parseInt(r.totalcorrect) || 0,
-        accuracyRate: parseFloat(r.accuracyrate) || 0
-    })).filter(s => ALL_TAGS.includes(s.tag));
+        accuracyRate: parseFloat(r.accuracyrate) || 0,
+    }));
 }
 
 /**

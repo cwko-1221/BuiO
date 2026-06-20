@@ -7,7 +7,6 @@ export const state = {
   mathSsoStatus: '',
   studentsList: [],
   studentsLoaded: false,
-  adminUnlocked: false,
 };
 
 export function updateState(newState) {
