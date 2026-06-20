@@ -2,16 +2,22 @@
 
 let _client = null;
 
+function supabaseUrl() {
+  return process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+}
+function supabaseSecret() {
+  return process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+}
+
 function isStorageConfigured() {
-  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
-      || !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return !!(supabaseUrl() && supabaseSecret());
 }
 
 function client() {
   if (_client) return _client;
   const { createClient } = require('@supabase/supabase-js');
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = supabaseUrl();
+  const key = supabaseSecret();
   if (!url || !key) throw new Error('Supabase Storage credentials are not configured.');
   _client = createClient(url, key, { auth: { persistSession: false } });
   return _client;
