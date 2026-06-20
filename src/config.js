@@ -47,10 +47,9 @@ export const MODULES = [
     description: 'module_chinese_desc',
     accent: 'sky',
     icon: 'book',
-    url: '',
+    url: '/chinese',
     metric: 'module_chinese_metric',
     status: 'module_chinese_status',
-    disabled: true,
     roleAccess: ['student', 'teacher']
   },
   {

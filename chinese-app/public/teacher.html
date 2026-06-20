@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>教師後台 ・ 粵語學習</title>
+  <link rel="stylesheet" href="/chinese/css/style.css" />
+</head>
+<body>
+  <div id="root"></div>
+  <script src="/chinese/js/common.js"></script>
+  <script>
+    const { api, el, toast, fmtDate, renderTopbar, ensureAuth } = ChineseApp;
+    const root = document.getElementById('root');
+
+    let me = null;
+    let state = { tab: 'classes', classes: [], assignments: [], selectedClass: null, selectedAssignment: null, attempts: [], attemptDetail: null };
+
+    function setTab(tab) { state.tab = tab; state.selectedAssignment = null; state.attemptDetail = null; render(); }
+
+    async function loadAll() {
+      const [c, a] = await Promise.all([api(`/api/chinese/teacher/classes`), api(`/api/chinese/teacher/assignments`)]);
+      state.classes = c.classes; state.assignments = a.assignments;
+    }
+
+    async function init() {
+      me = await ensureAuth('teacher'); if (!me) return;
+      await loadAll();
+      render();
+    }
+
+    function render() {
+      root.innerHTML = '';
+      root.appendChild(renderTopbar({ title: '粵語學習・教師後台', user: me }));
+      const container = el('div', { class: 'container' });
+      container.appendChild(el('div', { class: 'tabbar' },
+        tabBtn('classes', '班級'),
+        tabBtn('assignments', '作業'),
+      ));
+      if (state.tab === 'classes') container.appendChild(renderClasses());
+      else container.appendChild(renderAssignments());
+      root.appendChild(container);
+    }
+
+    function tabBtn(id, label) {
+      return el('button', { class: `tab ${state.tab === id ? 'active' : ''}`, onclick: () => setTab(id) }, label);
+    }
+
+    // ============== Classes tab ==============
+    function renderClasses() {
+      const wrap = el('div');
+      wrap.appendChild(renderCreateClassCard());
+      if (!state.classes.length) {
+        wrap.appendChild(el('div', { class: 'card empty' }, '尚未建立任何班級。'));
+        return wrap;
+      }
+      for (const c of state.classes) {
+        const card = el('div', { class: 'card' },
+          el('div', { class: 'row between' },
+            el('div', {},
+              el('h3', { style: { margin: 0 } }, c.name),
+              el('div', { class: 'muted' }, `${c.studentCount} 位學生 ・ ${fmtDate(c.createdAt)}`)
+            ),
+            el('div', { class: 'row' },
+              el('button', { class: 'btn btn-ghost', onclick: () => openClassStudents(c) }, '管理學生'),
+              el('button', { class: 'btn btn-danger', onclick: () => deleteClass(c) }, '刪除')
+            )
+          )
+        );
+        if (state.selectedClass?.id === c.id) {
+          card.appendChild(el('div', { id: `class-students-${c.id}`, style: { marginTop: '12px' } }));
+        }
+        wrap.appendChild(card);
+      }
+      return wrap;
+    }
+
+    function renderCreateClassCard() {
+      let nameInput;
+      const onCreate = async () => {
+        const name = nameInput.value.trim();
+        if (!name) return toast('請輸入班級名稱', 'error');
+        try {
+          await api('/api/chinese/teacher/classes', { method: 'POST', body: { name } });
+          nameInput.value = '';
+          await loadAll(); render();
+          toast('已建立班級', 'success');
+        } catch (e) { toast(e.message, 'error'); }
+      };
+      return el('div', { class: 'card' },
+        el('h2', {}, '建立新班級'),
+        el('div', { class: 'row' },
+          (nameInput = el('input', { type: 'text', placeholder: '例如：P5A 粵語班' })),
+          el('button', { class: 'btn btn-primary', onclick: onCreate }, '建立')
+        )
+      );
+    }
+
+    async function deleteClass(c) {
+      if (!confirm(`確定要刪除「${c.name}」？學生作業紀錄也會被刪除。`)) return;
+      try {
+        await api(`/api/chinese/teacher/classes/${c.id}`, { method: 'DELETE' });
+        await loadAll(); render();
+        toast('已刪除', 'success');
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    async function openClassStudents(c) {
+      state.selectedClass = state.selectedClass?.id === c.id ? null : c;
+      render();
+      if (!state.selectedClass) return;
+      const slot = document.getElementById(`class-students-${c.id}`);
+      slot.innerHTML = '<p class="muted">載入中…</p>';
+      try {
+        const [{ students }, { users }] = await Promise.all([
+          api(`/api/chinese/teacher/classes/${c.id}/students`),
+          api(`/api/chinese/teacher/users?role=student`),
+        ]);
+        slot.innerHTML = '';
+        slot.appendChild(renderClassStudents(c, students, users));
+      } catch (e) { slot.innerHTML = `<p class="muted">${e.message}</p>`; }
+    }
+
+    function renderClassStudents(c, students, allStudents) {
+      const wrap = el('div');
+      const enrolled = new Set(students.map(s => s.id));
+      const available = allStudents.filter(u => !enrolled.has(u.id));
+      const pick = el('select', { multiple: true, size: 8 },
+        ...available.map(u => el('option', { value: u.id }, `${u.id} ・ ${u.name} (${u.className || '未分班'})`))
+      );
+      wrap.appendChild(el('div', { class: 'form-row' },
+        el('label', {}, '加入學生（按住 Ctrl/⌘ 可複選）'), pick,
+        el('button', { class: 'btn btn-primary', style: { marginTop: '8px' }, onclick: async () => {
+          const ids = [...pick.selectedOptions].map(o => o.value);
+          if (!ids.length) return toast('請選擇學生', 'error');
+          try {
+            const r = await api(`/api/chinese/teacher/classes/${c.id}/students`, { method: 'POST', body: { studentIds: ids } });
+            toast(`已新增 ${r.added} 位（略過 ${r.skipped} 位）`, 'success');
+            openClassStudents(c);
+            await loadAll();
+          } catch (e) { toast(e.message, 'error'); }
+        } }, '加入所選')
+      ));
+      const table = el('table', {},
+        el('thead', {}, el('tr', {},
+          el('th', {}, '學號'), el('th', {}, '姓名'), el('th', {}, '班級'), el('th', {}, '')
+        )),
+        el('tbody', {},
+          ...students.map(s => el('tr', {},
+            el('td', {}, s.id),
+            el('td', {}, s.name),
+            el('td', {}, `${s.className || ''} ${s.classNo || ''}`),
+            el('td', {}, el('button', { class: 'btn btn-ghost', onclick: async () => {
+              if (!confirm(`移除 ${s.name}？`)) return;
+              try {
+                await api(`/api/chinese/teacher/classes/${c.id}/students/${s.id}`, { method: 'DELETE' });
+                openClassStudents(c); await loadAll();
+                toast('已移除', 'success');
+              } catch (e) { toast(e.message, 'error'); }
+            } }, '移除'))
+          ))
+        )
+      );
+      wrap.appendChild(table);
+      return wrap;
+    }
+
+    // ============== Assignments tab ==============
+    function renderAssignments() {
+      const wrap = el('div');
+      if (state.selectedAssignment) {
+        wrap.appendChild(renderAssignmentDetail(state.selectedAssignment));
+        return wrap;
+      }
+      wrap.appendChild(renderCreateAssignmentCard());
+      if (!state.assignments.length) {
+        wrap.appendChild(el('div', { class: 'card empty' }, '尚未建立任何作業。'));
+        return wrap;
+      }
+      for (const a of state.assignments) {
+        wrap.appendChild(el('div', { class: 'assignment-card', onclick: () => openAssignmentDetail(a) },
+          el('div', {},
+            el('div', { class: 'title' }, a.title),
+            el('div', { class: 'sub' }, `${a.className} ・ ${fmtDate(a.createdAt)} ・ ${a.attemptCount} 嘗試`)
+          ),
+          el('span', { class: `badge ${a.status === 'published' ? 'success' : 'warn'}` }, a.status === 'published' ? '已發佈' : '草稿')
+        ));
+      }
+      return wrap;
+    }
+
+    function renderCreateAssignmentCard() {
+      const card = el('div', { class: 'card' });
+      card.appendChild(el('h2', {}, '建立新作業（5 個項目）'));
+      let titleInput, classSelect;
+      const items = Array.from({ length: 5 }, () => ({ traditionalText: '', jyutping: '', englishMeaning: '' }));
+      card.appendChild(el('div', { class: 'form-grid' },
+        el('div', {},
+          el('label', {}, '作業標題'),
+          (titleInput = el('input', { type: 'text', placeholder: '例如：第一課' }))
+        ),
+        el('div', {},
+          el('label', {}, '指派班級'),
+          (classSelect = el('select', {}, ...state.classes.map(c => el('option', { value: c.id }, c.name))))
+        )
+      ));
+      card.appendChild(el('h3', {}, '練習項目'));
+      const itemsWrap = el('div');
+      items.forEach((it, i) => {
+        const row = el('div', { class: 'assignment-item-form' });
+        row.appendChild(el('div', { class: 'muted', style: { marginBottom: '6px' } }, `第 ${i + 1} 項`));
+        const grid = el('div', { class: 'form-grid' });
+        const c = el('input', { type: 'text', placeholder: '繁體字（例：學）', oninput: e => it.traditionalText = e.target.value });
+        const j = el('input', { type: 'text', placeholder: 'Jyutping（選填，例：hok6）', oninput: e => it.jyutping = e.target.value });
+        const m = el('input', { type: 'text', placeholder: '英文意義（例：learn）', oninput: e => it.englishMeaning = e.target.value });
+        grid.appendChild(c); grid.appendChild(j); grid.appendChild(m);
+        row.appendChild(grid);
+        itemsWrap.appendChild(row);
+      });
+      card.appendChild(itemsWrap);
+      card.appendChild(el('div', { class: 'row', style: { marginTop: '12px' } },
+        el('button', { class: 'btn btn-primary', onclick: async () => {
+          const title = titleInput.value.trim();
+          if (!title) return toast('請輸入標題', 'error');
+          if (!classSelect.value) return toast('請選擇班級', 'error');
+          if (items.some(it => !it.traditionalText.trim() || !it.englishMeaning.trim())) {
+            return toast('每個項目都需要繁體字與英文', 'error');
+          }
+          try {
+            await api('/api/chinese/teacher/assignments', { method: 'POST', body: {
+              classId: classSelect.value, title, status: 'published', items,
+            } });
+            await loadAll(); render();
+            toast('已建立作業', 'success');
+          } catch (e) { toast(e.message, 'error'); }
+        } }, '發佈作業'),
+        el('button', { class: 'btn btn-ghost', onclick: async () => {
+          const title = titleInput.value.trim();
+          if (!title) return toast('請輸入標題', 'error');
+          try {
+            await api('/api/chinese/teacher/assignments', { method: 'POST', body: {
+              classId: classSelect.value, title, status: 'draft', items,
+            } });
+            await loadAll(); render();
+            toast('已存為草稿', 'success');
+          } catch (e) { toast(e.message, 'error'); }
+        } }, '存為草稿')
+      ));
+      return card;
+    }
+
+    async function openAssignmentDetail(a) {
+      try {
+        const [{ assignment }, { attempts }] = await Promise.all([
+          api(`/api/chinese/teacher/assignments/${a.id}`),
+          api(`/api/chinese/teacher/assignments/${a.id}/attempts`),
+        ]);
+        state.selectedAssignment = assignment;
+        state.attempts = attempts;
+        render();
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    function renderAssignmentDetail(a) {
+      const wrap = el('div');
+      wrap.appendChild(el('button', { class: 'btn btn-ghost', onclick: () => { state.selectedAssignment = null; state.attemptDetail = null; render(); } }, '← 回作業列表'));
+      const card = el('div', { class: 'card', style: { marginTop: '12px' } },
+        el('div', { class: 'row between' },
+          el('div', {},
+            el('h2', {}, a.title),
+            el('div', { class: 'muted' }, `${a.className} ・ ${a.status === 'published' ? '已發佈' : '草稿'}`)
+          ),
+          el('div', { class: 'row' },
+            el('button', { class: 'btn btn-ghost', onclick: async () => {
+              const nextStatus = a.status === 'published' ? 'draft' : 'published';
+              try {
+                await api(`/api/chinese/teacher/assignments/${a.id}`, { method: 'PATCH', body: { status: nextStatus } });
+                openAssignmentDetail(a); await loadAll();
+                toast('已更新', 'success');
+              } catch (e) { toast(e.message, 'error'); }
+            } }, a.status === 'published' ? '收回為草稿' : '發佈'),
+            el('button', { class: 'btn btn-danger', onclick: async () => {
+              if (!confirm(`刪除作業「${a.title}」？所有嘗試紀錄會一併刪除。`)) return;
+              try {
+                await api(`/api/chinese/teacher/assignments/${a.id}`, { method: 'DELETE' });
+                await loadAll(); state.selectedAssignment = null; render();
+                toast('已刪除', 'success');
+              } catch (e) { toast(e.message, 'error'); }
+            } }, '刪除作業')
+          )
+        )
+      );
+      const itemsCard = el('div', { class: 'card' },
+        el('h3', {}, '練習項目'),
+        el('table', {}, el('thead', {}, el('tr', {},
+          el('th', {}, '#'), el('th', {}, '繁體'), el('th', {}, 'Jyutping'), el('th', {}, '英文意義'),
+        )), el('tbody', {}, ...a.items.map(it => el('tr', {},
+          el('td', {}, it.orderIndex),
+          el('td', { style: { fontSize: '1.3rem' } }, it.traditionalText),
+          el('td', {}, it.jyutping),
+          el('td', {}, it.englishMeaning),
+        ))))
+      );
+      const attemptsCard = el('div', { class: 'card' },
+        el('h3', {}, `學生嘗試（${state.attempts.length}）`),
+        state.attempts.length === 0
+          ? el('p', { class: 'muted' }, '尚未有學生嘗試。')
+          : el('table', {}, el('thead', {}, el('tr', {},
+              el('th', {}, '學生'), el('th', {}, '班級'), el('th', {}, '狀態'), el('th', {}, '分數'),
+              el('th', {}, '開始'), el('th', {}, '完成'), el('th', {}, ''),
+            )), el('tbody', {}, ...state.attempts.map(at => el('tr', {},
+              el('td', {}, `${at.studentName} (${at.studentId})`),
+              el('td', {}, `${at.className} ${at.classNo || ''}`),
+              el('td', {}, el('span', { class: `badge ${at.status === 'completed' ? 'success' : 'warn'}` },
+                at.status === 'completed' ? '已完成' : '進行中')),
+              el('td', {}, `${at.score} / 5`),
+              el('td', {}, fmtDate(at.startedAt)),
+              el('td', {}, at.completedAt ? fmtDate(at.completedAt) : '—'),
+              el('td', {}, el('button', { class: 'btn btn-ghost', onclick: () => openAttemptDetail(at.id) }, '詳情'))
+            ))))
+      );
+      wrap.appendChild(card);
+      wrap.appendChild(itemsCard);
+      wrap.appendChild(attemptsCard);
+      if (state.attemptDetail) wrap.appendChild(renderAttemptDetail(state.attemptDetail));
+      return wrap;
+    }
+
+    async function openAttemptDetail(attemptId) {
+      try {
+        const { attempt } = await api(`/api/chinese/teacher/attempts/${attemptId}`);
+        state.attemptDetail = attempt;
+        render();
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    function renderAttemptDetail(d) {
+      return el('div', { class: 'card' },
+        el('h3', {}, `${d.studentName}（${d.studentId}） ・ ${d.score}/5`),
+        ...d.items.map(it => el('div', { class: 'assignment-item-form' },
+          el('div', { class: 'row between' },
+            el('div', {},
+              el('strong', { style: { fontSize: '1.3rem' } }, it.traditionalText),
+              el('span', { class: 'muted' }, `  ${it.jyutping} ・ ${it.englishMeaning}`)
+            ),
+            el('div', { class: 'row' },
+              el('span', { class: `badge ${it.handwritingCorrect ? 'success' : 'danger'}` }, '寫'),
+              el('span', { class: `badge ${it.speechCorrect ? 'success' : 'danger'}` }, '練讀'),
+              el('span', { class: `badge ${it.assessmentCorrect ? 'success' : 'danger'}` }, '評核'),
+            )
+          ),
+          it.speechTranscript ? el('div', { class: 'muted', style: { marginTop: '6px' } }, `練讀逐字稿：${it.speechTranscript}`) : null,
+          it.speechRecordingUrl ? el('audio', { controls: true, src: it.speechRecordingUrl, style: { width: '100%', marginTop: '4px' } }) : null,
+          it.assessmentTranscript ? el('div', { class: 'muted', style: { marginTop: '6px' } }, `評核逐字稿：${it.assessmentTranscript}`) : null,
+          it.assessmentRecordingUrl ? el('audio', { controls: true, src: it.assessmentRecordingUrl, style: { width: '100%', marginTop: '4px' } }) : null,
+        ))
+      );
+    }
+
+    init().catch(e => { toast(e.message, 'error'); });
+  </script>
+</body>
+</html>

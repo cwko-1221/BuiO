@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>粵語學習 ・ 載入中</title>
+  <link rel="stylesheet" href="/chinese/css/style.css" />
+</head>
+<body>
+  <div class="container narrow" style="padding-top: 80px; text-align: center;">
+    <p class="muted">載入中…</p>
+  </div>
+  <script src="/chinese/js/common.js"></script>
+  <script>
+    (async () => {
+      const me = await ChineseApp.getMe();
+      if (!me) { location.replace('/login.html'); return; }
+      if (me.role === 'teacher') location.replace('/chinese/teacher');
+      else location.replace('/chinese/student');
+    })();
+  </script>
+</body>
+</html>

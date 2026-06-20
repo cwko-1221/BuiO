@@ -237,6 +237,9 @@ async function openModule(moduleId, mode) {
     // 考評報告模組（老師專用）
     window.open('/report.html', '_blank');
 
+  } else if (moduleId === 'chinese') {
+    window.open('/chinese', '_blank');
+
   } else if (moduleId === 'whiteboard') {
     if (role === 'teacher') {
       saveTeacherSession(user);

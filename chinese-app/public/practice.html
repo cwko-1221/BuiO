@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>練習 ・ 粵語學習</title>
+  <link rel="stylesheet" href="/chinese/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.7.2/dist/hanzi-writer.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="/chinese/js/common.js"></script>
+  <script>
+    const { api, el, toast, renderTopbar, ensureAuth } = ChineseApp;
+    const root = document.getElementById('root');
+
+    const params = new URLSearchParams(location.search);
+    const assignmentId = params.get('assignmentId');
+
+    const state = {
+      me: null, assignment: null, items: [], attemptId: '',
+      attemptItems: new Map(),                  // assignmentItemId -> attempt item row
+      index: 0, phase: 'practice',              // 'practice' | 'assessment' | 'done'
+      hwDone: false, recording: false, submitting: false,
+      sttAvailable: true, finalScore: 0, message: '',
+    };
+
+    // ------------------- audio helpers -------------------
+    function pickMediaRecorderMimeType() {
+      if (typeof MediaRecorder === 'undefined') return '';
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) return 'audio/webm;codecs=opus';
+      if (MediaRecorder.isTypeSupported('audio/webm')) return 'audio/webm';
+      if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) return 'audio/ogg;codecs=opus';
+      return '';
+    }
+    function extForMime(m) {
+      m = String(m || '').toLowerCase();
+      if (m.includes('wav')) return 'wav';
+      if (m.includes('ogg')) return 'ogg';
+      return 'webm';
+    }
+    function mergeFloat32(chunks) {
+      const len = chunks.reduce((s, c) => s + c.length, 0);
+      const out = new Float32Array(len);
+      let off = 0;
+      for (const c of chunks) { out.set(c, off); off += c.length; }
+      return out;
+    }
+    function encodeWav(samples, sampleRate) {
+      const buf = new ArrayBuffer(44 + samples.length * 2);
+      const v = new DataView(buf);
+      const wstr = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+      wstr(0, 'RIFF'); v.setUint32(4, 36 + samples.length * 2, true);
+      wstr(8, 'WAVE'); wstr(12, 'fmt ');
+      v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+      v.setUint32(24, sampleRate, true); v.setUint32(28, sampleRate * 2, true);
+      v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+      wstr(36, 'data'); v.setUint32(40, samples.length * 2, true);
+      let o = 44;
+      for (const s of samples) {
+        const c = Math.max(-1, Math.min(1, s));
+        v.setInt16(o, c < 0 ? c * 0x8000 : c * 0x7fff, true);
+        o += 2;
+      }
+      return new Blob([buf], { type: 'audio/wav' });
+    }
+    function browserSpeak(text) {
+      if (!window.speechSynthesis) return false;
+      const u = new SpeechSynthesisUtterance(text);
+      const voices = speechSynthesis.getVoices();
+      const cant = voices.find(v => v.lang.startsWith('zh-HK') || v.lang.startsWith('yue'));
+      const zh = voices.find(v => v.lang.startsWith('zh'));
+      if (cant) u.voice = cant; else if (zh) u.voice = zh;
+      u.lang = 'zh-HK'; u.rate = 0.85;
+      speechSynthesis.speak(u);
+      return true;
+    }
+
+    // ------------------- recording state (refs) -------------------
+    const rec = { mediaRecorder: null, pcm: null, requested: false, chunks: [], ttsAudio: null, ttsUrl: null };
+
+    function stopTts() {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (rec.ttsAudio) { rec.ttsAudio.pause(); rec.ttsAudio.removeAttribute('src'); rec.ttsAudio.load(); rec.ttsAudio = null; }
+      if (rec.ttsUrl) { URL.revokeObjectURL(rec.ttsUrl); rec.ttsUrl = null; }
+    }
+
+    // ------------------- core flow -------------------
+    async function init() {
+      state.me = await ensureAuth('student'); if (!state.me) return;
+      if (!assignmentId) { root.innerHTML = '<p class="muted" style="padding:24px">缺少 assignmentId</p>'; return; }
+      try {
+        const { assignment } = await api(`/api/chinese/student/assignments/${assignmentId}`);
+        state.assignment = assignment;
+        state.items = (assignment.items || []).slice().sort((a, b) => a.orderIndex - b.orderIndex);
+        const { attempt } = await api(`/api/chinese/student/attempts/ensure`, { method: 'POST', body: { assignmentId } });
+        state.attemptId = attempt.id;
+        for (const it of attempt.items || []) state.attemptItems.set(it.assignmentItemId, it);
+        if (attempt.status === 'completed') { state.phase = 'done'; state.finalScore = attempt.score; }
+        render();
+      } catch (e) {
+        root.innerHTML = `<p class="muted" style="padding:24px">${e.message}</p>`;
+      }
+    }
+
+    function currentItem() { return state.items[state.index]; }
+    function currentAttemptItem() {
+      const it = currentItem();
+      return it ? state.attemptItems.get(it.id) : null;
+    }
+
+    async function patchAttemptItem(patch) {
+      const it = currentItem(); const at = currentAttemptItem();
+      if (!it || !at) return;
+      try {
+        await api(`/api/chinese/student/attempts/${state.attemptId}/items/${it.id}`, { method: 'POST', body: patch });
+        state.attemptItems.set(it.id, { ...at, ...patch });
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    async function uploadRecording(blob, mimeType) {
+      const it = currentItem(); if (!it) return null;
+      const form = new FormData();
+      form.append('file', blob, `recording.${extForMime(mimeType)}`);
+      form.append('assignmentId', assignmentId);
+      form.append('itemId', it.id);
+      form.append('phase', state.phase);
+      try {
+        const res = await fetch('/api/chinese/upload', { method: 'POST', body: form, credentials: 'same-origin' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (res.status === 501) return null; // storage not configured — soft fail
+          throw new Error(data.message || '錄音上傳失敗');
+        }
+        return data.publicUrl || null;
+      } catch (e) { console.warn('upload skipped:', e.message); return null; }
+    }
+
+    async function playTts() {
+      const it = currentItem(); if (!it) return;
+      stopTts();
+      state.message = '';
+      try {
+        const res = await fetch('/api/chinese/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+          body: JSON.stringify({ text: it.traditionalText }),
+          credentials: 'same-origin',
+        });
+        if (res.status === 501) {
+          if (browserSpeak(it.traditionalText)) state.message = 'ℹ️ 使用瀏覽器語音（Google TTS 未設定）';
+          else state.message = '此瀏覽器不支援語音播放。';
+          render(); return;
+        }
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          state.message = d.message || '朗讀失敗';
+          render(); return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        rec.ttsUrl = url;
+        const audio = new Audio(url);
+        rec.ttsAudio = audio;
+        audio.onended = stopTts; audio.onerror = stopTts;
+        await audio.play();
+      } catch (e) { state.message = e.message; render(); }
+    }
+
+    async function startRecording() {
+      if (!state.sttAvailable || state.submitting) return;
+      rec.requested = true;
+      stopTts();
+      await new Promise(r => setTimeout(r, 150));
+      state.message = '';
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (!rec.requested) { stream.getTracks().forEach(t => t.stop()); return; }
+        rec.chunks = [];
+        const mime = pickMediaRecorderMimeType();
+        if (mime) {
+          const mr = new MediaRecorder(stream, { mimeType: mime });
+          rec.mediaRecorder = mr;
+          mr.ondataavailable = e => { if (e.data && e.data.size > 0) rec.chunks.push(e.data); };
+          mr.onstop = () => stream.getTracks().forEach(t => t.stop());
+          mr.start(100);
+        } else {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) { stream.getTracks().forEach(t => t.stop()); throw new Error('AudioContext is not supported.'); }
+          const ctx = new AC();
+          if (ctx.state === 'suspended') await ctx.resume();
+          if (!rec.requested) { stream.getTracks().forEach(t => t.stop()); ctx.close(); return; }
+          const src = ctx.createMediaStreamSource(stream);
+          const proc = ctx.createScriptProcessor(4096, 1, 1);
+          const chunks = [];
+          proc.onaudioprocess = e => {
+            chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+            e.outputBuffer.getChannelData(0).fill(0);
+          };
+          src.connect(proc); proc.connect(ctx.destination);
+          rec.pcm = { ctx, src, proc, stream, chunks, sampleRate: ctx.sampleRate };
+        }
+        state.recording = true; render();
+      } catch (e) {
+        rec.requested = false;
+        state.message = '❌ 無法存取麥克風，請檢查瀏覽器權限。';
+        render();
+      }
+    }
+
+    async function stopRecording() {
+      rec.requested = false;
+      if (rec.pcm) {
+        const p = rec.pcm; rec.pcm = null;
+        state.recording = false; render();
+        p.proc.disconnect(); p.src.disconnect();
+        p.stream.getTracks().forEach(t => t.stop()); p.ctx.close();
+        if (!p.chunks.length) { state.message = '❌ 錄音失敗，請再試一次。'; render(); return; }
+        const blob = encodeWav(mergeFloat32(p.chunks), p.sampleRate);
+        await submitRecording(blob, 'audio/wav', p.sampleRate);
+        return;
+      }
+      const mr = rec.mediaRecorder;
+      if (!mr || mr.state !== 'recording') { state.recording = false; render(); return; }
+      mr.stop(); state.recording = false; render();
+      await new Promise(r => setTimeout(r, 500));
+      if (!rec.chunks.length) { state.message = '❌ 錄音失敗，請再試一次。'; render(); return; }
+      const mime = mr.mimeType || rec.chunks[0]?.type || 'audio/webm';
+      await submitRecording(new Blob(rec.chunks, { type: mime }), mime, 48000);
+    }
+
+    async function submitRecording(blob, mimeType, sampleRate) {
+      const it = currentItem(); if (!it) return;
+      if (blob.size < 50) { state.message = '❌ 錄音時間太短。'; render(); return; }
+      state.submitting = true; render();
+      try {
+        const url = await uploadRecording(blob, mimeType);
+        if (url) {
+          await patchAttemptItem(state.phase === 'practice'
+            ? { speechRecordingUrl: url } : { assessmentRecordingUrl: url });
+        }
+        const form = new FormData();
+        form.append('audio', blob, `recording.${extForMime(mimeType)}`);
+        form.append('expected', it.traditionalText);
+        if (sampleRate) form.append('sampleRate', String(sampleRate));
+        const res = await fetch('/api/chinese/stt', { method: 'POST', body: form, credentials: 'same-origin' });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 501) {
+          state.sttAvailable = false;
+          state.message = `ℹ️ ${data.message || 'Google STT 未設定，請使用下方按鈕自我評估。'}`;
+          render(); return;
+        }
+        if (!res.ok) { state.message = data.message || '語音辨識失敗'; render(); return; }
+        const scoreTxt = typeof data.score === 'number' ? `相似度：${data.score}%` : '';
+        if (state.phase === 'practice') {
+          await patchAttemptItem({ speechTranscript: data.transcript || '', speechCorrect: !!data.correct });
+        } else {
+          await patchAttemptItem({ assessmentTranscript: data.transcript || '', assessmentCorrect: !!data.correct });
+        }
+        state.message = data.correct ? `✅ 通過 ${scoreTxt}` : `❌ 再試：${data.transcript || '未能辨識'} ${scoreTxt}`;
+      } catch (e) { state.message = e.message || '語音處理失敗'; }
+      state.submitting = false; render();
+    }
+
+    async function selfAssess(correct) {
+      if (state.phase === 'practice') {
+        await patchAttemptItem({ speechTranscript: '(self-assessed)', speechCorrect: correct });
+      } else {
+        await patchAttemptItem({ assessmentTranscript: '(self-assessed)', assessmentCorrect: correct });
+      }
+      state.message = correct ? '✅ 已標記為通過' : '已標記為未通過';
+      render();
+    }
+
+    async function next() {
+      if (state.phase === 'practice') {
+        if (state.index < state.items.length - 1) { state.index++; state.hwDone = false; state.message = ''; render(); return; }
+        state.phase = 'assessment'; state.index = 0; state.hwDone = false; state.message = '進入小評估';
+        render(); return;
+      }
+      if (state.index < state.items.length - 1) { state.index++; state.hwDone = false; state.message = ''; render(); return; }
+      try {
+        const r = await api(`/api/chinese/student/attempts/${state.attemptId}/complete`, { method: 'POST' });
+        state.phase = 'done'; state.finalScore = r.score; state.message = `完成！總分 ${r.score}/5`;
+        render();
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    // ------------------- rendering -------------------
+    function render() {
+      root.innerHTML = '';
+      root.appendChild(renderTopbar({ title: state.assignment?.title || '練習', user: state.me, backUrl: '/chinese/student' }));
+      const container = el('div', { class: 'container narrow' });
+
+      if (state.phase === 'done') {
+        container.appendChild(el('div', { class: 'card', style: { textAlign: 'center' } },
+          el('h1', { style: { fontSize: '3rem', margin: 0 } }, '🎉'),
+          el('h2', {}, '練習完成'),
+          el('div', { style: { fontSize: '3rem', fontWeight: '700', color: 'var(--primary)', margin: '12px 0' } }, `${state.finalScore} / 5`),
+          el('p', { class: 'muted' }, state.message),
+          el('a', { class: 'btn btn-primary btn-block', style: { marginTop: '12px' }, href: '/chinese/student' }, '返回作業列表')
+        ));
+        root.appendChild(container);
+        return;
+      }
+
+      const it = currentItem();
+      if (!it) { container.appendChild(el('p', { class: 'muted' }, '載入中…')); root.appendChild(container); return; }
+
+      const totalSteps = state.items.length * 2;
+      const cur = state.phase === 'practice' ? state.index + 1 : state.items.length + state.index + 1;
+      const progress = el('div', { class: 'practice-progress' });
+      for (let i = 1; i <= totalSteps; i++) {
+        progress.appendChild(el('div', { class: `step ${i < cur ? 'done' : i === cur ? 'current' : ''}` }));
+      }
+      container.appendChild(progress);
+      container.appendChild(el('div', { class: 'muted', style: { textAlign: 'right', marginBottom: '8px' } },
+        `${state.phase === 'practice' ? '互動練習' : '課後評估'} ${state.index + 1} / ${state.items.length}`));
+
+      // Item card
+      const itemCard = el('div', { class: 'practice-stage' },
+        el('div', { class: 'muted', style: { fontWeight: '500' } },
+          `${state.phase === 'practice' ? '互動練習' : '課後小評估'} · ${state.index + 1} / ${state.items.length}`)
+      );
+      if (state.phase === 'practice') {
+        itemCard.appendChild(el('div', { class: 'char-display' }, it.traditionalText));
+        if (it.jyutping) itemCard.appendChild(el('div', { class: 'jyutping-display' }, it.jyutping));
+      }
+      itemCard.appendChild(el('div', { class: 'meaning-display' }, it.englishMeaning));
+      if (state.phase === 'practice') {
+        itemCard.appendChild(el('button', { class: 'btn btn-primary btn-block', onclick: playTts }, '🔊 朗讀'));
+      }
+      container.appendChild(itemCard);
+
+      // Handwriting (practice only)
+      if (state.phase === 'practice') {
+        const hwCard = el('div', { class: 'card' },
+          el('h3', { style: { margin: 0 } }, '手寫練習'),
+          el('p', { class: 'muted', style: { margin: '4px 0 0' } }, '請逐筆畫書寫每個字。'),
+          el('div', { id: 'hanzi-writer-target' })
+        );
+        hwCard.appendChild(el('p', { class: state.hwDone ? '' : 'muted', style: { textAlign: 'center', marginTop: '8px', color: state.hwDone ? 'var(--success)' : '' } },
+          state.hwDone ? '✓ 手寫完成！' : '寫錯 2 次會自動提示正確筆畫'));
+        container.appendChild(hwCard);
+      }
+
+      // Speech section
+      const speechCard = el('div', { class: 'card' },
+        el('h3', { style: { margin: 0 } }, state.phase === 'practice' ? '讀音練習' : '用粵語讀出答案')
+      );
+      if (state.sttAvailable) {
+        const btn = el('button', {
+          class: `record-btn ${state.recording ? 'recording' : ''}`,
+          disabled: state.submitting,
+        }, state.submitting ? '⋯' : (state.recording ? '🛑' : '🎤'));
+        const onDown = ev => { ev.preventDefault(); startRecording(); };
+        const onUp = ev => { ev.preventDefault(); if (!state.submitting) stopRecording(); };
+        btn.addEventListener('pointerdown', onDown);
+        btn.addEventListener('pointerup', onUp);
+        btn.addEventListener('pointerleave', () => { if (state.recording) stopRecording(); });
+        btn.addEventListener('pointercancel', () => { if (state.recording) stopRecording(); });
+        btn.addEventListener('contextmenu', e => e.preventDefault());
+        speechCard.appendChild(btn);
+        speechCard.appendChild(el('p', { class: 'muted', style: { textAlign: 'center' } },
+          state.submitting ? '請稍候…' : (state.recording ? '放手送出' : '按住麥克風開始錄音')));
+      } else {
+        speechCard.appendChild(el('p', { class: 'muted' }, '⚠️ Google 語音辨識未設定。請大聲朗讀後自我評估：'));
+        speechCard.appendChild(el('p', { style: { textAlign: 'center', fontSize: '1.5rem', fontWeight: '600', margin: '8px 0' } },
+          state.phase === 'assessment' ? it.traditionalText : `請讀出「${it.traditionalText}」`));
+        speechCard.appendChild(el('div', { class: 'row', style: { gap: '8px' } },
+          el('button', { class: 'btn btn-success', style: { flex: 1 }, onclick: () => selfAssess(true) }, '✅ 我讀對了'),
+          el('button', { class: 'btn btn-ghost', style: { flex: 1 }, onclick: () => selfAssess(false) }, '❌ 再試一次')
+        ));
+      }
+      container.appendChild(speechCard);
+
+      // Message
+      if (state.message) {
+        const m = state.message;
+        const cls = m.startsWith('✅') ? 'success' : m.startsWith('❌') ? 'danger' : 'info';
+        container.appendChild(el('div', { class: `card`, style: {
+          background: cls === 'success' ? 'var(--success-soft)' : cls === 'danger' ? 'var(--danger-soft)' : 'var(--primary-soft)',
+          color: cls === 'success' ? 'var(--success)' : cls === 'danger' ? 'var(--danger)' : 'var(--primary)',
+          padding: '12px', marginTop: '0',
+        } }, m));
+      }
+
+      // Next button
+      const at = currentAttemptItem();
+      const canNext = state.phase === 'practice'
+        ? (state.hwDone && !!at?.speechCorrect)
+        : !!at?.assessmentCorrect;
+      container.appendChild(el('button', {
+        class: 'btn btn-primary btn-block',
+        style: { marginTop: '12px', height: '48px', fontSize: '1.05rem' },
+        disabled: !canNext,
+        onclick: next,
+      },
+        state.phase === 'practice'
+          ? (state.index < state.items.length - 1 ? '下一題' : '進入評估')
+          : (state.index < state.items.length - 1 ? '下一題' : '提交評估')
+      ));
+
+      root.appendChild(container);
+
+      // Mount hanzi-writer after DOM is attached
+      if (state.phase === 'practice') mountHanziWriter(it.traditionalText);
+    }
+
+    // ------------------- hanzi-writer -------------------
+    let hwCancelled = false;
+    let hwCurrentKey = '';
+    function mountHanziWriter(text) {
+      const key = `${state.phase}-${state.index}-${text}`;
+      if (key === hwCurrentKey) return;        // avoid re-init when DOM updates
+      hwCurrentKey = key;
+      hwCancelled = true;
+      setTimeout(() => { hwCancelled = false; runQuiz(text); }, 50);
+    }
+
+    function runQuiz(text) {
+      const container = document.getElementById('hanzi-writer-target');
+      if (!container || !window.HanziWriter) return;
+      container.innerHTML = '';
+      const chars = Array.from(text.trim());
+      let idx = 0;
+      const initChar = () => {
+        if (hwCancelled || !container) return;
+        if (idx >= chars.length) { state.hwDone = true; patchAttemptItem({ handwritingCorrect: true }); render(); return; }
+        container.innerHTML = '';
+        const writer = HanziWriter.create(container, chars[idx], {
+          width: 280, height: 280, padding: 20,
+          showOutline: true, strokeAnimationSpeed: 1.5, delayBetweenStrokes: 200,
+          strokeColor: '#334155', radicalColor: '#6366f1', outlineColor: '#e2e8f0',
+          drawingColor: '#38bdf8', showHintAfterMisses: 2, highlightOnComplete: true,
+          highlightColor: '#34d399',
+          charDataLoader: (c, on) => fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2/${c}.json`)
+            .then(r => r.json()).then(on),
+        });
+        writer.quiz({
+          onComplete: () => {
+            if (hwCancelled) return;
+            idx++;
+            if (idx < chars.length) setTimeout(initChar, 400);
+            else { state.hwDone = true; patchAttemptItem({ handwritingCorrect: true }); render(); }
+          },
+        });
+      };
+      initChar();
+    }
+
+    init().catch(e => toast(e.message, 'error'));
+  </script>
+</body>
+</html>

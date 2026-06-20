@@ -46,6 +46,11 @@ app.use('/api/auth', require('./math-app/routes/auth'));
 app.use('/api/quiz', require('./math-app/routes/quiz'));
 app.use('/api/stats', require('./math-app/routes/stats'));
 
+// Chinese module
+app.use('/api/chinese/teacher', require('./chinese-app/routes/teacher'));
+app.use('/api/chinese/student', require('./chinese-app/routes/student'));
+app.use('/api/chinese', require('./chinese-app/routes/media'));
+
 // ----------------------------------------------------------------
 // Health / debug
 // ----------------------------------------------------------------
@@ -97,6 +102,24 @@ app.use('/vendor', express.static(path.join(__dirname, 'node_modules', 'exceljs'
 app.use('/math-app/css', express.static(path.join(__dirname, 'math-app', 'public', 'css')));
 app.use('/math-app/js', express.static(path.join(__dirname, 'math-app', 'public', 'js')));
 app.use('/math-app/images', express.static(path.join(__dirname, 'math-app', 'public', 'images')));
+
+// Chinese module static + page routes
+app.use('/chinese/css', express.static(path.join(__dirname, 'chinese-app', 'public', 'css')));
+app.use('/chinese/js', express.static(path.join(__dirname, 'chinese-app', 'public', 'js')));
+
+function requireSession(req, res, next) {
+  if (!req.session || !req.session.studentId) return res.redirect('/login.html');
+  next();
+}
+function requireTeacherPage(req, res, next) {
+  if (!req.session || !req.session.studentId) return res.redirect('/login.html');
+  if (req.session.role !== 'teacher') return res.redirect('/chinese/student');
+  next();
+}
+app.get('/chinese', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'chinese-app', 'public', 'index.html')));
+app.get('/chinese/teacher', requireTeacherPage, (req, res) => res.sendFile(path.join(__dirname, 'chinese-app', 'public', 'teacher.html')));
+app.get('/chinese/student', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'chinese-app', 'public', 'student.html')));
+app.get('/chinese/practice', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'chinese-app', 'public', 'practice.html')));
 
 app.get('/login.html',     (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'login.html')));
 app.get('/quiz.html',      (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'quiz.html')));
@@ -155,6 +178,7 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   console.log('🚀  ├─ 教師面板:  /dashboard.html');
   console.log('🚀  ├─ 考評報告:  /report.html  (老師限定)');
   console.log('🚀  ├─ 互動白板:  /whiteboard/');
+  console.log('🚀  ├─ 粵語學習:  /chinese');
   console.log('🚀  └─ API:       /api/*');
   console.log('🚀 =========================================');
   console.log('');
