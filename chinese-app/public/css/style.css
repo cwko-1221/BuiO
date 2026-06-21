@@ -133,7 +133,7 @@ tr.row-clickable:hover { background: var(--surface-2); }
 
 .assignment-item-form { background: var(--surface-2); padding: 12px; border-radius: var(--radius-sm);
   margin-bottom: 8px; }
-.assignment-item-form .form-grid { grid-template-columns: 2fr 2fr 3fr; }
+.assignment-item-form .form-grid { grid-template-columns: 1fr 2fr; }
 
 @media (max-width: 640px) {
   .form-grid { grid-template-columns: 1fr; }

@@ -4,8 +4,14 @@ const express = require('express');
 const router = express.Router();
 
 const { requireTeacher } = require('../../math-app/middleware/auth');
+const { getJyutping } = require('to-jyutping');
 const assignments = require('../repositories/assignments.repo');
 const attempts = require('../repositories/attempts.repo');
+
+function autoJyutping(text) {
+  try { return String(getJyutping(text) || '').replace(/\s+/g, ' ').trim(); }
+  catch { return ''; }
+}
 
 router.use(requireTeacher);
 
@@ -46,12 +52,16 @@ router.post('/assignments', async (req, res) => {
     if (!Array.isArray(items) || items.length !== 5) {
       return res.status(400).json({ success: false, message: '必須提供 5 個練習項目' });
     }
-    const normalized = items.map((it, i) => ({
-      traditionalText: String(it.traditionalText || '').trim(),
-      jyutping: String(it.jyutping || '').trim(),
-      englishMeaning: String(it.englishMeaning || '').trim(),
-      orderIndex: i + 1,
-    }));
+    const normalized = items.map((it, i) => {
+      const text = String(it.traditionalText || '').trim();
+      const explicit = String(it.jyutping || '').trim();
+      return {
+        traditionalText: text,
+        jyutping: explicit || autoJyutping(text),
+        englishMeaning: String(it.englishMeaning || '').trim(),
+        orderIndex: i + 1,
+      };
+    });
     if (normalized.some(it => !it.traditionalText || !it.englishMeaning)) {
       return res.status(400).json({ success: false, message: '每個項目都需要中文與英文翻譯' });
     }

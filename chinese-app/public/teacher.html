@@ -44,7 +44,7 @@
       const card = el('div', { class: 'card' });
       card.appendChild(el('h2', {}, '建立新作業（5 個項目）'));
       let titleInput, groupSelect;
-      const items = Array.from({ length: 5 }, () => ({ traditionalText: '', jyutping: '', englishMeaning: '' }));
+      const items = Array.from({ length: 5 }, () => ({ traditionalText: '', englishMeaning: '' }));
       const groupOpts = state.groups.length
         ? state.groups.map(g => el('option', { value: `${g.classname}|${g.group}` }, `${g.label} （${g.count} 位學生）`))
         : [el('option', { value: '', disabled: true }, '尚未有學生分組')];
@@ -65,7 +65,6 @@
         row.appendChild(el('div', { class: 'muted', style: { marginBottom: '6px' } }, `第 ${i + 1} 項`));
         const grid = el('div', { class: 'form-grid' });
         grid.appendChild(el('input', { type: 'text', placeholder: '繁體字（例：學）', oninput: e => it.traditionalText = e.target.value }));
-        grid.appendChild(el('input', { type: 'text', placeholder: 'Jyutping（選填，例：hok6）', oninput: e => it.jyutping = e.target.value }));
         grid.appendChild(el('input', { type: 'text', placeholder: '英文意義（例：learn）', oninput: e => it.englishMeaning = e.target.value }));
         row.appendChild(grid);
         itemsWrap.appendChild(row);
