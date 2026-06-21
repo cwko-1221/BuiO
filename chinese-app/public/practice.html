@@ -408,36 +408,39 @@
     }
 
     // ------------------- hanzi-writer -------------------
-    // Cache the completed SVG so render() (triggered by recording/message
-    // state changes) doesn't wipe the user's drawing. Cache key is
-    // phase+index+text so it invalidates when the question changes.
+    // After the quiz completes, swap the SVG for a clean static character
+    // glyph — avoids hanzi-writer's leftover hint/stroke artifacts and
+    // survives later re-renders without re-running the quiz.
     let hwCancelled = false;
     let hwCurrentKey = '';
-    let _hwSvgCache = null;
-    let _hwSvgKey = '';
+    let _hwDoneKey = '';
 
     function mountHanziWriter(text) {
       const container = document.getElementById('hanzi-writer-target');
       if (!container) return;
       const key = `${state.phase}-${state.index}-${text}`;
 
-      // If we have a cached completed SVG for this exact question, re-attach
-      // it instead of starting a fresh quiz.
-      if (_hwSvgCache && _hwSvgKey === key) {
-        container.innerHTML = '';
-        container.appendChild(_hwSvgCache.cloneNode(true));
-        return;
-      }
-
+      if (_hwDoneKey === key) { showCompletedCharacter(container, text); return; }
       if (key === hwCurrentKey && container.children.length > 0) return;
       hwCurrentKey = key;
       hwCancelled = true;
       setTimeout(() => { hwCancelled = false; runQuiz(text, key); }, 50);
     }
 
-    function snapshotCanvas(container, key) {
-      const svg = container.querySelector('svg');
-      if (svg) { _hwSvgCache = svg.cloneNode(true); _hwSvgKey = key; }
+    function showCompletedCharacter(container, text) {
+      container.innerHTML = '';
+      const div = document.createElement('div');
+      div.style.cssText =
+        "font-family:'Noto Serif TC','Songti TC','PingFang TC',serif;" +
+        "color:#16a34a;font-weight:700;line-height:1;" +
+        "width:100%;height:100%;display:flex;align-items:center;justify-content:center;";
+      // Scale so a single char fills the box; multiple chars shrink proportionally.
+      const chars = Array.from(text.trim());
+      div.style.fontSize = chars.length === 1 ? '200px'
+        : chars.length === 2 ? '120px'
+        : '80px';
+      div.textContent = text;
+      container.appendChild(div);
     }
 
     function runQuiz(text, key) {
@@ -453,7 +456,7 @@
       const initChar = () => {
         if (hwCancelled || !container) return;
         if (idx >= chars.length) {
-          snapshotCanvas(container, key);
+          _hwDoneKey = key; showCompletedCharacter(container, text);
           state.hwDone = true; patchAttemptItem({ handwritingCorrect: true }); render();
           return;
         }
@@ -478,7 +481,7 @@
             idx++;
             if (idx < chars.length) setTimeout(initChar, 400);
             else {
-              snapshotCanvas(container, key);
+              _hwDoneKey = key; showCompletedCharacter(container, text);
               state.hwDone = true; patchAttemptItem({ handwritingCorrect: true }); render();
             }
           },
