@@ -3,10 +3,14 @@
 const express = require('express');
 const router = express.Router();
 
+const multer = require('multer');
 const { requireTeacher } = require('../../math-app/middleware/auth');
 const { getJyutping } = require('to-jyutping');
 const assignments = require('../repositories/assignments.repo');
 const attempts = require('../repositories/attempts.repo');
+const storage = require('../lib/storage');
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
 
 function autoJyutping(text) {
   try { return String(getJyutping(text) || '').replace(/\s+/g, ' ').trim(); }
@@ -21,6 +25,27 @@ function handle(res, err) {
   if (status >= 500) console.error('[chinese]', err);
   res.status(status).json({ success: false, message: err.message || 'Server error' });
 }
+
+// Upload image for an assignment item — returns the public URL the teacher
+// stores on the item before submitting the assignment.
+router.post('/upload-image', upload.single('file'), async (req, res) => {
+  try {
+    if (!storage.isStorageConfigured()) {
+      return res.status(501).json({ success: false, message: 'Supabase Storage 尚未設定。' });
+    }
+    if (!req.file) return res.status(400).json({ success: false, message: '缺少 file' });
+    if (!String(req.file.mimetype || '').startsWith('image/')) {
+      return res.status(400).json({ success: false, message: '只接受圖片檔' });
+    }
+    const out = await storage.uploadItemImage({
+      teacherId: teacherId(req),
+      buffer: req.file.buffer,
+      contentType: req.file.mimetype,
+      originalName: req.file.originalname,
+    });
+    res.json({ success: true, ...out });
+  } catch (e) { handle(res, e); }
+});
 
 // Dropdown source: every (classname, chinesegroup) that has students.
 router.get('/groups', async (req, res) => {
@@ -59,6 +84,7 @@ router.post('/assignments', async (req, res) => {
         traditionalText: text,
         jyutping: explicit || autoJyutping(text),
         englishMeaning: String(it.englishMeaning || '').trim(),
+        imageUrl: it.imageUrl ? String(it.imageUrl) : null,
         orderIndex: i + 1,
       };
     });

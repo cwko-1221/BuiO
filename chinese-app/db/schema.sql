@@ -44,9 +44,13 @@ create table if not exists public.ncs_assignment_items (
   traditional_text text not null,
   jyutping text not null,
   english_meaning text not null,
+  image_url text,
   order_index integer not null check (order_index between 1 and 5),
   unique (assignment_id, order_index)
 );
+
+-- For existing installs:
+alter table public.ncs_assignment_items add column if not exists image_url text;
 
 create table if not exists public.ncs_attempts (
   id uuid primary key default gen_random_uuid(),

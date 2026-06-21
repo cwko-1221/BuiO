@@ -14,7 +14,12 @@
     const root = document.getElementById('root');
 
     let me = null;
-    const state = { groups: [], assignments: [], selected: null, attempts: [], attemptDetail: null };
+    const state = {
+      groups: [], assignments: [],
+      expandedClass: null,          // e.g. "1A"
+      selected: null,               // assignment object
+      attempts: [], attemptDetail: null,
+    };
 
     async function loadAll() {
       const [g, a] = await Promise.all([
@@ -40,15 +45,19 @@
         el('p', {}, '建立練習作業並追蹤學生表現。')
       ));
       if (state.selected) container.appendChild(renderDetail(state.selected));
-      else { container.appendChild(renderCreateCard()); container.appendChild(renderList()); }
+      else { container.appendChild(renderCreateCard()); container.appendChild(renderClassList()); }
       root.appendChild(container);
     }
 
+    // ------------------ Create assignment ------------------
     function renderCreateCard() {
       const card = el('div', { class: 'card' });
       card.appendChild(el('h2', {}, '建立新作業（5 個項目）'));
       let titleInput, groupSelect;
-      const items = Array.from({ length: 5 }, () => ({ traditionalText: '', englishMeaning: '' }));
+      const items = Array.from({ length: 5 }, () => ({
+        traditionalText: '', englishMeaning: '', imageUrl: '',
+      }));
+
       const groupOpts = state.groups.length
         ? state.groups.map(g => el('option', { value: `${g.classname}|${g.group}` }, `${g.label} （${g.count} 位學生）`))
         : [el('option', { value: '', disabled: true }, '尚未有學生分組')];
@@ -64,15 +73,7 @@
       ));
       card.appendChild(el('h3', {}, '練習項目'));
       const itemsWrap = el('div');
-      items.forEach((it, i) => {
-        const row = el('div', { class: 'assignment-item-form' });
-        row.appendChild(el('div', { class: 'muted', style: { marginBottom: '6px' } }, `第 ${i + 1} 項`));
-        const grid = el('div', { class: 'form-grid' });
-        grid.appendChild(el('input', { type: 'text', placeholder: '繁體字（例：學）', oninput: e => it.traditionalText = e.target.value }));
-        grid.appendChild(el('input', { type: 'text', placeholder: '英文意義（例：learn）', oninput: e => it.englishMeaning = e.target.value }));
-        row.appendChild(grid);
-        itemsWrap.appendChild(row);
-      });
+      items.forEach((it, i) => itemsWrap.appendChild(renderItemRow(it, i)));
       card.appendChild(itemsWrap);
 
       const submit = async (status) => {
@@ -91,30 +92,127 @@
           toast(status === 'published' ? '已發佈作業' : '已存為草稿', 'success');
         } catch (e) { toast(e.message, 'error'); }
       };
-      card.appendChild(el('div', { class: 'row', style: { marginTop: '12px' } },
+      card.appendChild(el('div', { class: 'row', style: { marginTop: '14px' } },
         el('button', { class: 'btn btn-primary', onclick: () => submit('published') }, '發佈作業'),
         el('button', { class: 'btn btn-ghost', onclick: () => submit('draft') }, '存為草稿'),
       ));
       return card;
     }
 
-    function renderList() {
+    function renderItemRow(it, i) {
+      const row = el('div', { class: 'assignment-item-form' });
+      row.appendChild(el('div', { class: 'muted', style: { marginBottom: '8px' } }, `第 ${i + 1} 項`));
+
+      const grid = el('div', { class: 'form-grid' });
+      grid.appendChild(el('input', {
+        type: 'text', placeholder: '繁體字（例：學）',
+        oninput: e => it.traditionalText = e.target.value,
+      }));
+      grid.appendChild(el('input', {
+        type: 'text', placeholder: '英文意義（例：learn）',
+        oninput: e => it.englishMeaning = e.target.value,
+      }));
+      row.appendChild(grid);
+
+      // Image upload area
+      const imgWrap = el('div', { class: 'row', style: { marginTop: '10px', gap: '12px' } });
+      const preview = el('div', {
+        class: 'item-image-preview',
+        style: { width: '64px', height: '64px', borderRadius: '10px',
+                 background: 'rgba(255,255,255,0.05)', border: '1px dashed var(--border)',
+                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                 color: 'var(--text-dim)', fontSize: '0.75rem', flexShrink: '0',
+                 backgroundSize: 'cover', backgroundPosition: 'center' },
+      }, '無圖');
+      const fileInput = el('input', { type: 'file', accept: 'image/*', style: { display: 'none' } });
+      fileInput.addEventListener('change', async () => {
+        const f = fileInput.files?.[0]; if (!f) return;
+        const fd = new FormData(); fd.append('file', f);
+        const btn = imgWrap.querySelector('button');
+        btn.disabled = true; btn.textContent = '上傳中…';
+        try {
+          const res = await fetch('/api/chinese/teacher/upload-image', {
+            method: 'POST', body: fd, credentials: 'same-origin',
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || '上傳失敗');
+          it.imageUrl = data.publicUrl;
+          preview.style.backgroundImage = `url("${data.publicUrl}")`;
+          preview.textContent = '';
+        } catch (e) { toast(e.message, 'error'); }
+        finally { btn.disabled = false; btn.textContent = '匯入圖片'; }
+      });
+      const uploadBtn = el('button', {
+        class: 'btn btn-ghost', type: 'button',
+        onclick: () => fileInput.click(),
+      }, '匯入圖片');
+      const removeBtn = el('button', {
+        class: 'btn btn-ghost', type: 'button',
+        onclick: () => { it.imageUrl = ''; preview.style.backgroundImage = ''; preview.textContent = '無圖'; },
+      }, '移除');
+      imgWrap.appendChild(preview);
+      imgWrap.appendChild(uploadBtn);
+      imgWrap.appendChild(removeBtn);
+      imgWrap.appendChild(fileInput);
+      row.appendChild(imgWrap);
+
+      return row;
+    }
+
+    // ------------------ Class-grouped list ------------------
+    function renderClassList() {
       const wrap = el('div');
+      wrap.appendChild(el('h2', { style: { margin: '20px 0 12px', fontSize: '1.1rem' } }, '已發佈練習'));
+
       if (!state.assignments.length) {
         wrap.appendChild(el('div', { class: 'card empty' }, '尚未建立任何作業。'));
         return wrap;
       }
-      wrap.appendChild(el('h2', { style: { margin: '16px 0 8px' } }, '所有作業'));
+
+      // Group assignments by targetLabel
+      const byClass = new Map();
       for (const a of state.assignments) {
-        wrap.appendChild(el('div', { class: 'assignment-card', onclick: () => openDetail(a) },
+        if (!byClass.has(a.targetLabel)) byClass.set(a.targetLabel, []);
+        byClass.get(a.targetLabel).push(a);
+      }
+      // Sort class labels ('1A','1B','2A',...)
+      const labels = [...byClass.keys()].sort();
+      for (const label of labels) {
+        wrap.appendChild(renderClassRow(label, byClass.get(label)));
+      }
+      return wrap;
+    }
+
+    function renderClassRow(label, list) {
+      const isOpen = state.expandedClass === label;
+      const head = el('div', {
+        class: 'assignment-card',
+        onclick: () => { state.expandedClass = isOpen ? null : label; render(); },
+      },
+        el('div', {},
+          el('div', { class: 'title' }, `班級 ${label}`),
+          el('div', { class: 'sub' }, `${list.length} 份作業`)
+        ),
+        el('span', { class: 'badge info' }, isOpen ? '▾ 收合' : '▸ 展開')
+      );
+      if (!isOpen) return head;
+      const items = el('div', { style: { marginLeft: '12px', marginTop: '8px' } });
+      for (const a of list) {
+        items.appendChild(el('div', {
+          class: 'assignment-card', onclick: () => openDetail(a),
+          style: { background: 'rgba(255,255,255,0.04)' },
+        },
           el('div', {},
             el('div', { class: 'title' }, a.title),
-            el('div', { class: 'sub' }, `${a.targetLabel} ・ ${fmtDate(a.createdAt)} ・ ${a.attemptCount}/${a.targetCount} 已嘗試`)
+            el('div', { class: 'sub' }, `${fmtDate(a.createdAt)} ・ ${a.attemptCount}/${a.targetCount} 已嘗試`)
           ),
           el('span', { class: `badge ${a.status === 'published' ? 'success' : 'warn'}` },
             a.status === 'published' ? '已發佈' : '草稿')
         ));
       }
+      const wrap = el('div');
+      wrap.appendChild(head);
+      wrap.appendChild(items);
       return wrap;
     }
 
@@ -130,16 +228,18 @@
       } catch (e) { toast(e.message, 'error'); }
     }
 
+    // ------------------ Detail view ------------------
     function renderDetail(a) {
       const wrap = el('div');
       wrap.appendChild(el('button', {
-        class: 'btn btn-ghost', onclick: () => { state.selected = null; state.attemptDetail = null; render(); }
+        class: 'btn-back', onclick: () => { state.selected = null; state.attemptDetail = null; render(); }
       }, '← 回作業列表'));
       wrap.appendChild(el('div', { class: 'card', style: { marginTop: '12px' } },
         el('div', { class: 'row between' },
           el('div', {},
-            el('h2', {}, a.title),
-            el('div', { class: 'muted' }, `${a.targetLabel} ・ ${a.status === 'published' ? '已發佈' : '草稿'}`)
+            el('h2', { style: { margin: 0 } }, a.title),
+            el('div', { class: 'muted', style: { marginTop: '4px' } },
+              `${a.targetLabel} ・ ${a.status === 'published' ? '已發佈' : '草稿'}`)
           ),
           el('div', { class: 'row' },
             el('button', { class: 'btn btn-ghost', onclick: async () => {
@@ -164,12 +264,17 @@
       wrap.appendChild(el('div', { class: 'card' },
         el('h3', {}, '練習項目'),
         el('table', {}, el('thead', {}, el('tr', {},
-          el('th', {}, '#'), el('th', {}, '繁體'), el('th', {}, 'Jyutping'), el('th', {}, '英文意義'),
+          el('th', {}, '#'), el('th', {}, '繁體'), el('th', {}, 'Jyutping'),
+          el('th', {}, '英文意義'), el('th', {}, '圖片'),
         )), el('tbody', {}, ...a.items.map(it => el('tr', {},
           el('td', {}, it.orderIndex),
           el('td', { style: { fontSize: '1.3rem' } }, it.traditionalText),
           el('td', {}, it.jyutping),
           el('td', {}, it.englishMeaning),
+          el('td', {}, it.imageUrl
+            ? el('img', { src: it.imageUrl, style: { width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px' } })
+            : el('span', { class: 'muted' }, '—')
+          ),
         ))))
       ));
       wrap.appendChild(el('div', { class: 'card' },
@@ -177,8 +282,8 @@
         state.attempts.length === 0
           ? el('p', { class: 'muted' }, '尚未有學生嘗試。')
           : el('table', {}, el('thead', {}, el('tr', {},
-              el('th', {}, '學生'), el('th', {}, '班級'), el('th', {}, '狀態'), el('th', {}, '分數'),
-              el('th', {}, '開始'), el('th', {}, '完成'), el('th', {}, ''),
+              el('th', {}, '學生'), el('th', {}, '班級'), el('th', {}, '狀態'),
+              el('th', {}, '分數'), el('th', {}, '開始'), el('th', {}, '完成'), el('th', {}, ''),
             )), el('tbody', {}, ...state.attempts.map(at => el('tr', {},
               el('td', {}, `${at.studentName} (${at.studentId})`),
               el('td', {}, `${at.className} ${at.classNo || ''}`),
@@ -218,9 +323,9 @@
             )
           ),
           it.speechTranscript ? el('div', { class: 'muted', style: { marginTop: '6px' } }, `練讀逐字稿：${it.speechTranscript}`) : null,
-          it.speechRecordingUrl ? el('audio', { controls: true, src: it.speechRecordingUrl, style: { width: '100%', marginTop: '4px' } }) : null,
+          it.speechRecordingUrl ? el('audio', { controls: true, src: it.speechRecordingUrl }) : null,
           it.assessmentTranscript ? el('div', { class: 'muted', style: { marginTop: '6px' } }, `評核逐字稿：${it.assessmentTranscript}`) : null,
-          it.assessmentRecordingUrl ? el('audio', { controls: true, src: it.assessmentRecordingUrl, style: { width: '100%', marginTop: '4px' } }) : null,
+          it.assessmentRecordingUrl ? el('audio', { controls: true, src: it.assessmentRecordingUrl }) : null,
         ))
       );
     }

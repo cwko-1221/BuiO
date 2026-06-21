@@ -327,6 +327,13 @@
         if (it.jyutping) itemCard.appendChild(el('div', { class: 'jyutping-display' }, it.jyutping));
       }
       itemCard.appendChild(el('div', { class: 'meaning-display' }, it.englishMeaning));
+      if (it.imageUrl && state.phase === 'practice') {
+        itemCard.appendChild(el('img', {
+          src: it.imageUrl,
+          style: { maxWidth: '100%', maxHeight: '200px', borderRadius: '12px',
+                   marginBottom: '12px', display: 'block' },
+        }));
+      }
       if (state.phase === 'practice') {
         itemCard.appendChild(el('button', { class: 'tts-btn', onclick: playTts }, '🔊 朗讀'));
       }

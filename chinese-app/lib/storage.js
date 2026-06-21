@@ -36,4 +36,18 @@ async function uploadRecording({ studentId, assignmentId, itemId, phase, buffer,
   return { path, publicUrl: data.publicUrl };
 }
 
-module.exports = { isStorageConfigured, uploadRecording };
+async function uploadItemImage({ teacherId, buffer, contentType, originalName }) {
+  const ext = (originalName && (originalName.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, ''))
+    || (contentType && contentType.split('/')[1]) || 'jpg';
+  const stamp = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const path = `items/${teacherId}/${stamp}.${ext}`;
+  const c = client();
+  // Re-use the public `recordings` bucket so we don't need a second one.
+  const { error } = await c.storage.from('recordings')
+    .upload(path, buffer, { contentType: contentType || 'image/jpeg', upsert: false });
+  if (error) throw error;
+  const { data } = c.storage.from('recordings').getPublicUrl(path);
+  return { path, publicUrl: data.publicUrl };
+}
+
+module.exports = { isStorageConfigured, uploadRecording, uploadItemImage };

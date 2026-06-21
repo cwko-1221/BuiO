@@ -18,6 +18,7 @@ function mapItem(r) {
     traditionalText: r.traditional_text,
     jyutping: r.jyutping,
     englishMeaning: r.english_meaning,
+    imageUrl: r.image_url || null,
     orderIndex: r.order_index,
   };
 }
@@ -79,7 +80,7 @@ async function getOne({ assignmentId }) {
       FROM ncs_assignments WHERE id = $1`, [assignmentId]);
   if (!aRows[0]) return null;
   const { rows: iRows } = await pool.query(`
-    SELECT id, traditional_text, jyutping, english_meaning, order_index
+    SELECT id, traditional_text, jyutping, english_meaning, image_url, order_index
       FROM ncs_assignment_items
      WHERE assignment_id = $1
      ORDER BY order_index`, [assignmentId]);
@@ -104,9 +105,9 @@ async function create({ teacherId, targetClassname, targetGroup, title, status, 
     for (const it of items) {
       await client.query(
         `INSERT INTO ncs_assignment_items
-           (assignment_id, traditional_text, jyutping, english_meaning, order_index)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [assignmentId, it.traditionalText, it.jyutping, it.englishMeaning, it.orderIndex]
+           (assignment_id, traditional_text, jyutping, english_meaning, image_url, order_index)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [assignmentId, it.traditionalText, it.jyutping, it.englishMeaning, it.imageUrl || null, it.orderIndex]
       );
     }
     return { id: assignmentId, createdAt: aRows[0].created_at };
