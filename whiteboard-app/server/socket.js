@@ -131,19 +131,24 @@ module.exports = function(io, app) {
 
     socket.on('disconnect', () => {
       const roomId = socket.data.roomId;
-      if (roomId) {
-        const room = rooms.get(roomId);
-        if (room) {
-          if (socket.data.isTeacher) {
-            room.teacherSocket = null;
-          } else {
-            room.students.delete(socket.id);
-            emitStudentList(roomId);
-          }
-          if (!room.teacherSocket && room.students.size === 0) rooms.delete(roomId);
-        }
-        socket.to(roomId).emit('user-left', { name: socket.data.name });
+      if (!roomId) return;
+      const room = rooms.get(roomId);
+      if (!room) return;
+
+      if (socket.data.isTeacher && room.teacherSocket === socket.id) {
+        // Closing the teacher tab ends the lesson: clear the room, evict
+        // students, and tell anyone polling /api/whiteboard/sessions that
+        // there is no active session anymore.
+        rooms.delete(roomId);
+        io.to(roomId).emit('clear-board');
+        io.to(roomId).emit('error', '老師已結束課堂');
+        return;
       }
+
+      room.students.delete(socket.id);
+      emitStudentList(roomId);
+      if (!room.teacherSocket && room.students.size === 0) rooms.delete(roomId);
+      socket.to(roomId).emit('user-left', { name: socket.data.name });
     });
   });
 };
