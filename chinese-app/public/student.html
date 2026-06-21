@@ -16,8 +16,12 @@
     async function init() {
       const me = await ensureAuth('student');
       if (!me) return;
-      root.appendChild(renderTopbar({ title: '粵語學習', user: me }));
+      root.appendChild(renderTopbar({ title: '粵語繁中學習平台', user: me }));
       const container = el('div', { class: 'container narrow' });
+      container.appendChild(el('div', { class: 'page-head' },
+        el('h1', {}, `你好，${me.name}`),
+        el('p', {}, '選擇下方的練習開始。')
+      ));
       root.appendChild(container);
 
       container.appendChild(el('p', { class: 'muted' }, '載入作業中…'));

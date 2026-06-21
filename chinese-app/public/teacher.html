@@ -33,8 +33,12 @@
 
     function render() {
       root.innerHTML = '';
-      root.appendChild(renderTopbar({ title: '粵語學習・教師後台', user: me }));
+      root.appendChild(renderTopbar({ title: '粵語繁中學習平台', user: me }));
       const container = el('div', { class: 'container' });
+      container.appendChild(el('div', { class: 'page-head' },
+        el('h1', {}, '教師儀表板'),
+        el('p', {}, '建立練習作業並追蹤學生表現。')
+      ));
       if (state.selected) container.appendChild(renderDetail(state.selected));
       else { container.appendChild(renderCreateCard()); container.appendChild(renderList()); }
       root.appendChild(container);

@@ -319,7 +319,7 @@
 
       // Item card
       const itemCard = el('div', { class: 'practice-stage' },
-        el('div', { class: 'muted', style: { fontWeight: '500' } },
+        el('div', { class: 'stage-kicker' },
           `${state.phase === 'practice' ? '互動練習' : '課後小評估'} · ${state.index + 1} / ${state.items.length}`)
       );
       if (state.phase === 'practice') {
@@ -328,7 +328,7 @@
       }
       itemCard.appendChild(el('div', { class: 'meaning-display' }, it.englishMeaning));
       if (state.phase === 'practice') {
-        itemCard.appendChild(el('button', { class: 'btn btn-primary btn-block', onclick: playTts }, '🔊 朗讀'));
+        itemCard.appendChild(el('button', { class: 'tts-btn', onclick: playTts }, '🔊 朗讀'));
       }
       container.appendChild(itemCard);
 
@@ -349,10 +349,11 @@
         el('h3', { style: { margin: 0 } }, state.phase === 'practice' ? '讀音練習' : '用粵語讀出答案')
       );
       if (state.sttAvailable) {
+        const label = state.submitting ? '請稍候' : (state.recording ? '放手送出' : '按住說話');
         const btn = el('button', {
           class: `record-btn ${state.recording ? 'recording' : ''}`,
           disabled: state.submitting,
-        }, state.submitting ? '⋯' : (state.recording ? '🛑' : '🎤'));
+        }, `🎤  ${label}`);
         const onDown = ev => { ev.preventDefault(); startRecording(); };
         const onUp = ev => { ev.preventDefault(); if (!state.submitting) stopRecording(); };
         btn.addEventListener('pointerdown', onDown);
@@ -361,8 +362,8 @@
         btn.addEventListener('pointercancel', () => { if (state.recording) stopRecording(); });
         btn.addEventListener('contextmenu', e => e.preventDefault());
         speechCard.appendChild(btn);
-        speechCard.appendChild(el('p', { class: 'muted', style: { textAlign: 'center' } },
-          state.submitting ? '請稍候…' : (state.recording ? '放手送出' : '按住麥克風開始錄音')));
+        speechCard.appendChild(el('p', { class: 'muted', style: { marginTop: '10px' } },
+          '按住錄音，放開後由 Google STT 檢查粵語讀音。'));
       } else {
         speechCard.appendChild(el('p', { class: 'muted' }, '⚠️ Google 語音辨識未設定。請大聲朗讀後自我評估：'));
         speechCard.appendChild(el('p', { style: { textAlign: 'center', fontSize: '1.5rem', fontWeight: '600', margin: '8px 0' } },
@@ -378,11 +379,7 @@
       if (state.message) {
         const m = state.message;
         const cls = m.startsWith('✅') ? 'success' : m.startsWith('❌') ? 'danger' : 'info';
-        container.appendChild(el('div', { class: `card`, style: {
-          background: cls === 'success' ? 'var(--success-soft)' : cls === 'danger' ? 'var(--danger-soft)' : 'var(--primary-soft)',
-          color: cls === 'success' ? 'var(--success)' : cls === 'danger' ? 'var(--danger)' : 'var(--primary)',
-          padding: '12px', marginTop: '0',
-        } }, m));
+        container.appendChild(el('div', { class: `message-card ${cls}` }, m));
       }
 
       // Next button
@@ -391,8 +388,8 @@
         ? (state.hwDone && !!at?.speechCorrect)
         : !!at?.assessmentCorrect;
       container.appendChild(el('button', {
-        class: 'btn btn-primary btn-block',
-        style: { marginTop: '12px', height: '48px', fontSize: '1.05rem' },
+        class: 'btn btn-primary btn-block btn-lg',
+        style: { marginTop: '12px' },
         disabled: !canNext,
         onclick: next,
       },
