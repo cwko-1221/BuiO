@@ -163,7 +163,16 @@ app.use((err, req, res, _next) => {
 // ----------------------------------------------------------------
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: { origin: config.isProd ? config.cors.origins : '*', methods: ['GET', 'POST'] },
+  cors: {
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);                     // same-origin / curl
+      if (!config.isProd) return cb(null, true);              // dev: anything
+      if (config.cors.origins.includes(origin)) return cb(null, true);
+      cb(new Error(`Socket.IO CORS: origin ${origin} not allowed`));
+    },
+    credentials: true,
+    methods: ['GET', 'POST'],
+  },
   maxHttpBufferSize: 10 * 1024 * 1024,
 });
 require('./whiteboard-app/server/socket')(io, app);
