@@ -318,24 +318,28 @@
         `${state.phase === 'practice' ? '互動練習' : '課後評估'} ${state.index + 1} / ${state.items.length}`));
 
       // Item card
-      const itemCard = el('div', { class: 'practice-stage' },
-        el('div', { class: 'stage-kicker' },
-          `${state.phase === 'practice' ? '互動練習' : '課後小評估'} · ${state.index + 1} / ${state.items.length}`)
-      );
+      const itemCard = el('div', { class: 'practice-stage' });
+      itemCard.appendChild(el('div', { class: 'stage-kicker' },
+        `${state.phase === 'practice' ? '互動練習' : '課後小評估'} · ${state.index + 1} / ${state.items.length}`));
+
+      const textCol = el('div', { class: 'stage-text' });
       if (state.phase === 'practice') {
-        itemCard.appendChild(el('div', { class: 'char-display' }, it.traditionalText));
-        if (it.jyutping) itemCard.appendChild(el('div', { class: 'jyutping-display' }, it.jyutping));
+        textCol.appendChild(el('div', { class: 'char-display' }, it.traditionalText));
+        if (it.jyutping) textCol.appendChild(el('div', { class: 'jyutping-display' }, it.jyutping));
       }
-      itemCard.appendChild(el('div', { class: 'meaning-display' }, it.englishMeaning));
+      textCol.appendChild(el('div', { class: 'meaning-display' }, it.englishMeaning));
+      if (state.phase === 'practice') {
+        textCol.appendChild(el('button', { class: 'tts-btn', onclick: playTts }, '🔊 朗讀'));
+      }
+
       if (it.imageUrl && state.phase === 'practice') {
-        itemCard.appendChild(el('img', {
-          src: it.imageUrl,
-          style: { maxWidth: '100%', maxHeight: '200px', borderRadius: '12px',
-                   marginBottom: '12px', display: 'block' },
-        }));
-      }
-      if (state.phase === 'practice') {
-        itemCard.appendChild(el('button', { class: 'tts-btn', onclick: playTts }, '🔊 朗讀'));
+        const body = el('div', { class: 'stage-body has-image' });
+        body.appendChild(textCol);
+        body.appendChild(el('div', { class: 'stage-image' },
+          el('img', { src: it.imageUrl, alt: it.englishMeaning })));
+        itemCard.appendChild(body);
+      } else {
+        itemCard.appendChild(textCol);
       }
       container.appendChild(itemCard);
 

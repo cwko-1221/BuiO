@@ -156,13 +156,24 @@ tr.row-clickable:hover { background: rgba(255,255,255,0.03); }
 .practice-progress .step.current { background: var(--grad-cool); }
 
 .practice-stage { background: var(--grad-emerald); border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: var(--radius); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  border-radius: var(--radius); padding: 22px 24px; margin-bottom: 16px; box-shadow: var(--shadow); }
 .practice-stage .stage-kicker { color: var(--gold); font-weight: 700; font-size: 0.85rem;
-  text-transform: uppercase; letter-spacing: 0.06em; }
-.char-display { font-size: 4.5rem; text-align: left; padding: 14px 0 4px; font-weight: 800;
-  font-family: 'Noto Serif TC', 'Songti TC', 'PingFang TC', serif; line-height: 1.05; color: #fff; }
-.jyutping-display { color: #fff; font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
-.meaning-display { color: #fde68a; font-size: 1.05rem; margin-bottom: 14px; }
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+
+/* Two-column when image is present, single column otherwise */
+.stage-body { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: center; }
+.stage-body.has-image { grid-template-columns: minmax(0, 1fr) minmax(120px, 200px); }
+.stage-text { min-width: 0; }
+.stage-image { display: flex; align-items: center; justify-content: center; }
+.stage-image img { width: 100%; max-width: 200px; aspect-ratio: 1 / 1;
+  object-fit: cover; border-radius: 14px; box-shadow: 0 10px 24px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.10); }
+
+.char-display { font-size: 4.5rem; text-align: left; padding: 8px 0 2px; font-weight: 800;
+  font-family: 'Noto Serif TC', 'Songti TC', 'PingFang TC', serif; line-height: 1; color: #fff; }
+.jyutping-display { color: #fff; font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+.meaning-display { color: #fde68a; font-size: 1.6rem; font-weight: 700;
+  letter-spacing: 0.01em; margin-bottom: 14px; line-height: 1.15; }
 
 #hanzi-writer-target { width: 280px; height: 280px; margin: 18px auto;
   border: 1px solid var(--border); border-radius: 16px;
@@ -211,5 +222,8 @@ audio { width: 100%; margin-top: 6px; filter: invert(0.85) hue-rotate(180deg); }
   .card { padding: 16px; }
   .page-head h1 { font-size: 1.6rem; }
   .char-display { font-size: 3.5rem; }
+  .meaning-display { font-size: 1.3rem; }
   #hanzi-writer-target { width: 260px; height: 260px; }
+  .stage-body.has-image { grid-template-columns: minmax(0, 1fr) 110px; gap: 14px; }
+  .stage-image img { max-width: 110px; }
 }
