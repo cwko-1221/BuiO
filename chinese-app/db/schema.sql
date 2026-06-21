@@ -1,6 +1,7 @@
 -- NCS Cantonese Lab — schema for BuiO integration.
--- Foreign-keys into the existing BuiO `users` table (text studentid),
--- so a single login covers the math module and this Chinese module.
+-- Assignments target a (classname, chinese_group) pair directly — for example
+-- ('P1', 'A組'). No separate class table; students see assignments whose
+-- target matches their own users.classname + users.chinesegroup.
 
 create extension if not exists "pgcrypto";
 
@@ -18,25 +19,19 @@ exception
   when duplicate_object then null;
 end $$;
 
-create table if not exists public.ncs_classes (
-  id uuid primary key default gen_random_uuid(),
-  teacher_id text not null references public.users(studentid) on delete cascade,
-  name text not null,
-  created_at timestamptz not null default now(),
-  unique (teacher_id, name)
-);
-
-create table if not exists public.ncs_class_students (
-  id uuid primary key default gen_random_uuid(),
-  class_id uuid not null references public.ncs_classes(id) on delete cascade,
-  student_id text not null references public.users(studentid) on delete cascade,
-  created_at timestamptz not null default now(),
-  unique (class_id, student_id)
-);
+-- If you previously ran the older schema (with ncs_classes/ncs_class_students),
+-- run these DROPs first so the assignment column rename below succeeds:
+--   drop table if exists public.ncs_attempt_items cascade;
+--   drop table if exists public.ncs_attempts cascade;
+--   drop table if exists public.ncs_assignment_items cascade;
+--   drop table if exists public.ncs_assignments cascade;
+--   drop table if exists public.ncs_class_students cascade;
+--   drop table if exists public.ncs_classes cascade;
 
 create table if not exists public.ncs_assignments (
   id uuid primary key default gen_random_uuid(),
-  class_id uuid not null references public.ncs_classes(id) on delete cascade,
+  target_classname text not null,
+  target_group text not null,
   title text not null,
   status public.ncs_assignment_status not null default 'published',
   created_by text not null references public.users(studentid) on delete cascade,
@@ -82,9 +77,9 @@ create table if not exists public.ncs_attempt_items (
 create index if not exists ncs_attempts_student_idx on public.ncs_attempts(student_id);
 create index if not exists ncs_attempt_items_attempt_idx on public.ncs_attempt_items(attempt_id);
 create index if not exists ncs_assignment_items_assignment_idx on public.ncs_assignment_items(assignment_id);
-create index if not exists ncs_class_students_class_idx on public.ncs_class_students(class_id);
+create index if not exists ncs_assignments_target_idx on public.ncs_assignments(target_classname, target_group);
 
--- Supabase Storage bucket for recordings (run only on the Supabase project, harmless elsewhere).
+-- Supabase Storage bucket for recordings.
 do $$
 begin
   insert into storage.buckets (id, name, public)

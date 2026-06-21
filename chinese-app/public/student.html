@@ -49,7 +49,7 @@
       },
         el('div', {},
           el('div', { class: 'title' }, a.title),
-          el('div', { class: 'sub' }, `${a.className} ・ ${fmtDate(a.createdAt)}`)
+          el('div', { class: 'sub' }, `${a.targetLabel} ・ ${fmtDate(a.createdAt)}`)
         ),
         el('div', { class: 'score' }, score)
       );

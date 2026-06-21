@@ -137,9 +137,8 @@ async function listForAssignment({ assignmentId, teacherId }) {
            at.student_id, u.name AS student_name, u.classname, u.classno
       FROM ncs_attempts at
       JOIN ncs_assignments a ON a.id = at.assignment_id
-      JOIN ncs_classes c ON c.id = a.class_id
       JOIN users u ON u.studentid = at.student_id
-     WHERE at.assignment_id = $1 AND c.teacher_id = $2
+     WHERE at.assignment_id = $1 AND a.created_by = $2
      ORDER BY u.classname, u.classno, u.studentid`,
     [assignmentId, teacherId]);
   return rows.map(r => ({
@@ -158,9 +157,8 @@ async function getAttemptDetail({ attemptId, teacherId }) {
            at.assignment_id, a.title AS assignment_title
       FROM ncs_attempts at
       JOIN ncs_assignments a ON a.id = at.assignment_id
-      JOIN ncs_classes c ON c.id = a.class_id
       JOIN users u ON u.studentid = at.student_id
-     WHERE at.id = $1 AND c.teacher_id = $2`,
+     WHERE at.id = $1 AND a.created_by = $2`,
     [attemptId, teacherId]);
   if (!aRows[0]) return null;
   const { rows: iRows } = await pool.query(`
@@ -193,9 +191,8 @@ async function remove({ attemptId, teacherId }) {
   const pool = requirePg();
   const { rowCount } = await pool.query(`
     DELETE FROM ncs_attempts at
-     USING ncs_assignments a, ncs_classes c
-     WHERE at.assignment_id = a.id AND a.class_id = c.id
-       AND at.id = $1 AND c.teacher_id = $2`,
+     USING ncs_assignments a
+     WHERE at.assignment_id = a.id AND at.id = $1 AND a.created_by = $2`,
     [attemptId, teacherId]);
   return rowCount > 0;
 }

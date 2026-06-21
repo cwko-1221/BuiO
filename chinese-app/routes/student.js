@@ -4,7 +4,6 @@ const express = require('express');
 const router = express.Router();
 
 const { requireAuth } = require('../../math-app/middleware/auth');
-const classes = require('../repositories/classes.repo');
 const assignments = require('../repositories/assignments.repo');
 const attempts = require('../repositories/attempts.repo');
 
@@ -16,11 +15,6 @@ function handle(res, err) {
   if (status >= 500) console.error('[chinese]', err);
   res.status(status).json({ success: false, message: err.message || 'Server error' });
 }
-
-router.get('/classes', async (req, res) => {
-  try { res.json({ success: true, classes: await classes.listForStudent(studentId(req)) }); }
-  catch (e) { handle(res, e); }
-});
 
 router.get('/assignments', async (req, res) => {
   try { res.json({ success: true, assignments: await assignments.listForStudent(studentId(req)) }); }
@@ -35,7 +29,7 @@ router.get('/assignments/:assignmentId', async (req, res) => {
     const a = await assignments.getOne({ assignmentId: req.params.assignmentId });
     if (!a) return res.status(404).json({ success: false, message: '找不到作業' });
     res.json({ success: true, assignment: {
-      id: a.id, title: a.title, status: a.status, classId: a.classId, className: a.className, items: a.items,
+      id: a.id, title: a.title, status: a.status, targetLabel: a.targetLabel, items: a.items,
     } });
   } catch (e) { handle(res, e); }
 });
