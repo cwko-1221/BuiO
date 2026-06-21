@@ -34,7 +34,7 @@
 
   async function logout() {
     try { await api('/api/auth/logout', { method: 'POST' }); } catch {}
-    window.location.href = '/login.html';
+    window.location.href = '/';
   }
 
   function toast(message, type = '') {
@@ -76,13 +76,12 @@
       el('button', { class: 'btn-back', onclick: () => location.href = backUrl }, '← 返回'),
       el('h1', {}, title),
       user ? el('span', { class: 'user' }, `${user.name}（${user.role === 'teacher' ? '教師' : '學生'}）`) : null,
-      el('button', { class: 'btn-back', onclick: logout, style: { marginLeft: '8px' } }, '登出')
     );
   }
 
   async function ensureAuth(requireRole) {
     const me = await getMe();
-    if (!me) { window.location.href = '/login.html'; return null; }
+    if (!me) { window.location.href = '/'; return null; }
     if (requireRole && me.role !== requireRole) {
       if (me.role === 'teacher') window.location.href = '/chinese/teacher';
       else window.location.href = '/chinese/student';

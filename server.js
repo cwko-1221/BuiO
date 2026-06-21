@@ -108,11 +108,11 @@ app.use('/chinese/css', express.static(path.join(__dirname, 'chinese-app', 'publ
 app.use('/chinese/js', express.static(path.join(__dirname, 'chinese-app', 'public', 'js')));
 
 function requireSession(req, res, next) {
-  if (!req.session || !req.session.studentId) return res.redirect('/login.html');
+  if (!req.session || !req.session.studentId) return res.redirect('/');
   next();
 }
 function requireTeacherPage(req, res, next) {
-  if (!req.session || !req.session.studentId) return res.redirect('/login.html');
+  if (!req.session || !req.session.studentId) return res.redirect('/');
   if (req.session.role !== 'teacher') return res.redirect('/chinese/student');
   next();
 }
