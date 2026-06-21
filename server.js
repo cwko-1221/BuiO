@@ -51,6 +51,25 @@ app.use('/api/chinese/teacher', require('./chinese-app/routes/teacher'));
 app.use('/api/chinese/student', require('./chinese-app/routes/student'));
 app.use('/api/chinese', require('./chinese-app/routes/media'));
 
+// Whiteboard — HTTP + Socket.io. Build httpServer/io now so the whiteboard
+// module can register its /api/whiteboard/* routes BEFORE the catch-all
+// /api 404 handler at the bottom of this file matches them first.
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);                     // same-origin / curl
+      if (!config.isProd) return cb(null, true);              // dev: anything
+      if (config.cors.origins.includes(origin)) return cb(null, true);
+      cb(new Error(`Socket.IO CORS: origin ${origin} not allowed`));
+    },
+    credentials: true,
+    methods: ['GET', 'POST'],
+  },
+  maxHttpBufferSize: 10 * 1024 * 1024,
+});
+require('./whiteboard-app/server/socket')(io, app);
+
 // ----------------------------------------------------------------
 // Health / debug
 // ----------------------------------------------------------------
@@ -159,24 +178,8 @@ app.use((err, req, res, _next) => {
 });
 
 // ----------------------------------------------------------------
-// HTTP + Socket.io
+// Start server
 // ----------------------------------------------------------------
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true);                     // same-origin / curl
-      if (!config.isProd) return cb(null, true);              // dev: anything
-      if (config.cors.origins.includes(origin)) return cb(null, true);
-      cb(new Error(`Socket.IO CORS: origin ${origin} not allowed`));
-    },
-    credentials: true,
-    methods: ['GET', 'POST'],
-  },
-  maxHttpBufferSize: 10 * 1024 * 1024,
-});
-require('./whiteboard-app/server/socket')(io, app);
-
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('🚀 =========================================');
