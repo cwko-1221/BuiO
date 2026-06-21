@@ -103,33 +103,21 @@
       const row = el('div', { class: 'assignment-item-form' });
       row.appendChild(el('div', { class: 'muted', style: { marginBottom: '8px' } }, `第 ${i + 1} 項`));
 
-      const grid = el('div', { class: 'form-grid' });
-      grid.appendChild(el('input', {
-        type: 'text', placeholder: '繁體字（例：學）',
-        oninput: e => it.traditionalText = e.target.value,
-      }));
-      grid.appendChild(el('input', {
-        type: 'text', placeholder: '英文意義（例：learn）',
-        oninput: e => it.englishMeaning = e.target.value,
-      }));
-      row.appendChild(grid);
-
-      // Image upload area
-      const imgWrap = el('div', { class: 'row', style: { marginTop: '10px', gap: '12px' } });
+      // Preview doubles as the upload trigger — click to pick.
       const preview = el('div', {
         class: 'item-image-preview',
-        style: { width: '64px', height: '64px', borderRadius: '10px',
+        title: '點擊上傳圖片',
+        style: { width: '56px', height: '56px', borderRadius: '10px',
                  background: 'rgba(255,255,255,0.05)', border: '1px dashed var(--border)',
                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                 color: 'var(--text-dim)', fontSize: '0.75rem', flexShrink: '0',
-                 backgroundSize: 'cover', backgroundPosition: 'center' },
-      }, '無圖');
+                 color: 'var(--text-dim)', fontSize: '1.1rem', flexShrink: '0',
+                 backgroundSize: 'cover', backgroundPosition: 'center', cursor: 'pointer' },
+      }, '📷');
       const fileInput = el('input', { type: 'file', accept: 'image/*', style: { display: 'none' } });
       fileInput.addEventListener('change', async () => {
         const f = fileInput.files?.[0]; if (!f) return;
         const fd = new FormData(); fd.append('file', f);
-        const btn = imgWrap.querySelector('button');
-        btn.disabled = true; btn.textContent = '上傳中…';
+        preview.textContent = '…';
         try {
           const res = await fetch('/api/chinese/teacher/upload-image', {
             method: 'POST', body: fd, credentials: 'same-origin',
@@ -139,23 +127,42 @@
           it.imageUrl = data.publicUrl;
           preview.style.backgroundImage = `url("${data.publicUrl}")`;
           preview.textContent = '';
-        } catch (e) { toast(e.message, 'error'); }
-        finally { btn.disabled = false; btn.textContent = '匯入圖片'; }
+          removeBtn.style.display = '';
+        } catch (e) { toast(e.message, 'error'); preview.textContent = '📷'; }
       });
-      const uploadBtn = el('button', {
-        class: 'btn btn-ghost', type: 'button',
-        onclick: () => fileInput.click(),
-      }, '匯入圖片');
-      const removeBtn = el('button', {
-        class: 'btn btn-ghost', type: 'button',
-        onclick: () => { it.imageUrl = ''; preview.style.backgroundImage = ''; preview.textContent = '無圖'; },
-      }, '移除');
-      imgWrap.appendChild(preview);
-      imgWrap.appendChild(uploadBtn);
-      imgWrap.appendChild(removeBtn);
-      imgWrap.appendChild(fileInput);
-      row.appendChild(imgWrap);
+      preview.addEventListener('click', () => fileInput.click());
 
+      const removeBtn = el('button', {
+        class: 'btn-back', type: 'button',
+        style: { display: 'none', padding: '4px 8px', fontSize: '0.75rem' },
+        onclick: (e) => {
+          e.stopPropagation();
+          it.imageUrl = ''; preview.style.backgroundImage = ''; preview.textContent = '📷';
+          fileInput.value = ''; removeBtn.style.display = 'none';
+        },
+      }, '移除');
+
+      const imgCol = el('div', {
+        style: { display: 'flex', flexDirection: 'column', alignItems: 'center',
+                 gap: '4px', flexShrink: '0' },
+      }, preview, removeBtn, fileInput);
+
+      const inputsRow = el('div', {
+        style: { display: 'flex', gap: '10px', alignItems: 'flex-start', width: '100%' },
+      },
+        el('input', {
+          type: 'text', placeholder: '繁體字（例：學）',
+          style: { flex: '1 1 0', minWidth: '0' },
+          oninput: e => it.traditionalText = e.target.value,
+        }),
+        el('input', {
+          type: 'text', placeholder: '英文意義（例：learn）',
+          style: { flex: '2 1 0', minWidth: '0' },
+          oninput: e => it.englishMeaning = e.target.value,
+        }),
+        imgCol,
+      );
+      row.appendChild(inputsRow);
       return row;
     }
 
