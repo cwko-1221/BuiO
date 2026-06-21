@@ -216,6 +216,16 @@ setInterval(() => {
   });
 }, 3000);
 
+// When the portal tab regains focus (e.g. after opening the whiteboard in a
+// new tab), fetch immediately so the teacher's "開啟白板課堂" button flips to
+// "結束白板課堂" without waiting for the next 3s tick.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (!state.loggedIn) return;
+  if (state.activeView !== 'dashboard' && state.activeView !== 'modules') return;
+  fetchActiveSessions(() => { if (state.loggedIn) render(); });
+});
+
 // =============================================
 // 開啟模組（深度整合版）
 // =============================================
@@ -242,10 +252,16 @@ async function openModule(moduleId, mode) {
 
   } else if (moduleId === 'whiteboard') {
     if (role === 'teacher') {
-      saveTeacherSession(user);
       const url = `${WHITEBOARD_BASE}/class-teacher?room=${encodeURIComponent(user.name)}`;
       window.open(url, '_blank');
       render();
+      // The whiteboard tab takes a moment to connect via WebSocket and register
+      // the session server-side. Probe a few times so the dashboard button flips
+      // to "結束白板課堂" without waiting for the 3s polling tick.
+      [600, 1500, 3000].forEach(ms => setTimeout(() => {
+        if (!state.loggedIn) return;
+        fetchActiveSessions(() => { if (state.loggedIn) render(); });
+      }, ms));
     } else {
       const sessions = getActiveSessions();
       if (sessions.length === 0) {
