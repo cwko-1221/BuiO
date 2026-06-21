@@ -67,6 +67,24 @@ export default function ClassTeacher() {
         teacherOffscreenRef.current = { canvas, ctx };
     }, []);
 
+    // End the class on tab close so the portal flips back to 開啟白板課堂
+    // immediately instead of waiting for the WebSocket ping timeout.
+    useEffect(() => {
+        if (!roomId) return;
+        const end = () => {
+            try {
+                const blob = new Blob([JSON.stringify({ roomId })], { type: 'application/json' });
+                navigator.sendBeacon('/api/whiteboard/sessions/end', blob);
+            } catch (e) { /* ignore */ }
+        };
+        window.addEventListener('pagehide', end);
+        window.addEventListener('beforeunload', end);
+        return () => {
+            window.removeEventListener('pagehide', end);
+            window.removeEventListener('beforeunload', end);
+        };
+    }, [roomId]);
+
     // Socket setup
     useEffect(() => {
         if (!roomId) return;

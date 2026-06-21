@@ -67,6 +67,11 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST'],
   },
   maxHttpBufferSize: 10 * 1024 * 1024,
+  // Fast disconnect detection: ping every 4s, declare dead after 6s of silence.
+  // Matters when the teacher closes the tab without an explicit "end class"
+  // click — default 20s pingTimeout left students stuck for too long.
+  pingInterval: 4000,
+  pingTimeout: 6000,
 });
 require('./whiteboard-app/server/socket')(io, app);
 
