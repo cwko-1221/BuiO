@@ -94,18 +94,21 @@ async function transcribeCantonese(audio, expectedText, metadata) {
   return { ...score, transcript, confidence: best?.confidence ?? score.confidence };
 }
 
-// Pay the module-load + client-construction cost at server boot so the
-// first user-facing TTS/STT call doesn't sit for ~5 seconds waiting for
-// `@google-cloud/text-to-speech` to parse and the gRPC/REST client to spin up.
-function warmup() {
+// Pay the full first-call cost at server boot — not just the lazy require()
+// and client construction, but also the first DNS + TLS + HTTP/2 handshake
+// against texttospeech.googleapis.com and whatever discovery metadata the
+// client fetches on its first request. We discard the audio.
+// Single tiny request per boot ≈ a fraction of a cent.
+async function warmup() {
   if (!isGoogleConfigured()) return;
   try {
     lazyLoad();
     ttsClient();
     sttClient();
-    console.log('[chinese] Google TTS/STT clients pre-warmed');
+    await synthesize('a', { languageCode: 'en-US', speakingRate: 1 });
+    console.log('[chinese] Google TTS pre-warmed (connection pool live)');
   } catch (e) {
-    console.warn('[chinese] Google warmup skipped:', e.message);
+    console.warn('[chinese] Google warmup failed:', e.message);
   }
 }
 
