@@ -204,6 +204,10 @@ app.use((err, req, res, _next) => {
 // ----------------------------------------------------------------
 // Start server
 // ----------------------------------------------------------------
+// Warm Google TTS/STT clients so the first user-facing 朗讀 isn't a 5-10 s
+// cold load of the @google-cloud/* libraries + REST client.
+setImmediate(() => { try { require('./chinese-app/lib/google').warmup(); } catch {} });
+
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('🚀 =========================================');

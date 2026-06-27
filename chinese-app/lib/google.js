@@ -94,4 +94,19 @@ async function transcribeCantonese(audio, expectedText, metadata) {
   return { ...score, transcript, confidence: best?.confidence ?? score.confidence };
 }
 
-module.exports = { isGoogleConfigured, synthesize, synthesizeCantonese, transcribeCantonese };
+// Pay the module-load + client-construction cost at server boot so the
+// first user-facing TTS/STT call doesn't sit for ~5 seconds waiting for
+// `@google-cloud/text-to-speech` to parse and the gRPC/REST client to spin up.
+function warmup() {
+  if (!isGoogleConfigured()) return;
+  try {
+    lazyLoad();
+    ttsClient();
+    sttClient();
+    console.log('[chinese] Google TTS/STT clients pre-warmed');
+  } catch (e) {
+    console.warn('[chinese] Google warmup skipped:', e.message);
+  }
+}
+
+module.exports = { isGoogleConfigured, synthesize, synthesizeCantonese, transcribeCantonese, warmup };
