@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>英文拼字 ・ 載入中</title>
+  <link rel="stylesheet" href="/chinese/css/style.css" />
+  <style>
+    .topbar::before { content: 'E'; background: linear-gradient(135deg, #f59e0b, #ef4444); }
+  </style>
+</head>
+<body>
+  <div class="container narrow" style="padding-top: 80px; text-align: center;">
+    <p class="muted">載入中…</p>
+  </div>
+  <script src="/english/js/common.js"></script>
+  <script>
+    (async () => {
+      const me = await EnglishApp.getMe();
+      if (!me) { location.replace('/'); return; }
+      if (me.role === 'teacher') location.replace('/english/teacher');
+      else location.replace('/english/student');
+    })();
+  </script>
+</body>
+</html>

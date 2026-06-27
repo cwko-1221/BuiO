@@ -56,9 +56,12 @@ export const MODULES = [
     id: 'english',
     name: 'module_english_name',
     shortName: 'English',
+    description: 'module_english_desc',
+    accent: 'amber',
+    icon: 'book',
+    url: '/english',
     metric: 'module_english_metric',
     status: 'module_english_status',
-    disabled: true,
     roleAccess: ['student', 'teacher']
   }
 ];

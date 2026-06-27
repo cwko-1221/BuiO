@@ -250,6 +250,9 @@ async function openModule(moduleId, mode) {
   } else if (moduleId === 'chinese') {
     window.open('/chinese', '_blank');
 
+  } else if (moduleId === 'english') {
+    window.open('/english', '_blank');
+
   } else if (moduleId === 'whiteboard') {
     if (role === 'teacher') {
       const url = `${WHITEBOARD_BASE}/class-teacher?room=${encodeURIComponent(user.name)}`;

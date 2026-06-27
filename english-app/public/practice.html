@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>拼字遊戲 ・ 英文</title>
+  <link rel="stylesheet" href="/chinese/css/style.css" />
+  <style>
+    .topbar::before { content: 'E'; background: linear-gradient(135deg, #f59e0b, #ef4444); }
+
+    .spell-stage { background: linear-gradient(180deg, #1e3a8a, #0c4a6e);
+      border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius);
+      padding: 22px; margin-bottom: 16px; box-shadow: var(--shadow); text-align: center; }
+    .spell-stage .item-image { width: 200px; height: 200px; margin: 0 auto 14px;
+      object-fit: cover; border-radius: 18px; box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.15); display: block; }
+    .spell-stage .item-hint { color: #fbbf24; font-size: 1rem; margin: 4px 0 0; font-weight: 600; }
+    .spell-stage .tts-btn { margin-top: 12px; }
+
+    .hearts { font-size: 1.4rem; letter-spacing: 6px; margin: 8px 0; }
+    .hearts .lost { opacity: 0.18; filter: grayscale(1); }
+
+    .word-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;
+      margin: 14px 0 18px; }
+    .word-slot { width: 48px; height: 56px; border-radius: 10px;
+      background: rgba(255,255,255,0.92); color: #1e3a8a;
+      font-size: 1.7rem; font-weight: 800; text-transform: uppercase;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,0.08);
+      transition: transform 0.12s, background 0.2s; }
+    .word-slot.filled { background: #fde047; transform: scale(1.04); }
+    .word-slot.reveal { background: #fca5a5; color: #7f1d1d; }
+
+    .tile-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;
+      margin-top: 12px; }
+    .tile { width: 48px; height: 56px; border-radius: 10px; border: 0; cursor: pointer;
+      background: linear-gradient(180deg, #f1f5f9, #cbd5e1); color: #b91c1c;
+      font-size: 1.4rem; font-weight: 800; text-transform: lowercase;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
+      transition: transform 0.08s, opacity 0.18s, background 0.18s; }
+    .tile:hover:not(:disabled) { transform: translateY(-2px); }
+    .tile:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.18); }
+    .tile.used { opacity: 0.2; pointer-events: none; }
+    .tile.wrong { animation: shake 0.35s; background: linear-gradient(180deg,#fecaca,#f87171); color: #7f1d1d; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="/english/js/common.js"></script>
+  <script>
+    const { api, el, toast, renderTopbar, ensureAuth } = EnglishApp;
+    const root = document.getElementById('root');
+
+    const params = new URLSearchParams(location.search);
+    const assignmentId = params.get('assignmentId');
+
+    const MAX_HEARTS = 3;
+    const MIN_TILES = 10;
+    const DECOY_POOL = 'abcdefghijklmnopqrstuvwxyz';
+
+    const state = {
+      me: null, assignment: null, items: [], attemptId: '',
+      attemptItems: new Map(),
+      index: 0,
+      // per-item runtime
+      slots: [],              // array of {letter, filled, tileIdx?}
+      tiles: [],              // array of {letter, used, wrong}
+      heartsLeft: MAX_HEARTS,
+      revealed: false,        // true if out of hearts
+      message: '',
+      phase: 'play',          // 'play' | 'done'
+      finalScore: 0,
+    };
+
+    async function init() {
+      state.me = await ensureAuth('student'); if (!state.me) return;
+      if (!assignmentId) { root.innerHTML = '<p class="muted" style="padding:24px">缺少 assignmentId</p>'; return; }
+      try {
+        const { assignment } = await api(`/api/english/student/assignments/${assignmentId}`);
+        state.assignment = assignment;
+        state.items = (assignment.items || []).slice().sort((a, b) => a.orderIndex - b.orderIndex);
+        const { attempt } = await api('/api/english/student/attempts/ensure', { method: 'POST', body: { assignmentId } });
+        state.attemptId = attempt.id;
+        for (const it of attempt.items || []) state.attemptItems.set(it.assignmentItemId, it);
+        if (attempt.status === 'completed') {
+          state.phase = 'done'; state.finalScore = attempt.score;
+        } else {
+          // skip already-correct items, start at the first unanswered
+          state.index = state.items.findIndex(it => {
+            const at = state.attemptItems.get(it.id);
+            return !at || (!at.correct && at.heartsLeft > 0);
+          });
+          if (state.index === -1) state.index = state.items.length - 1;
+          setupItem();
+        }
+        render();
+      } catch (e) {
+        root.innerHTML = `<p class="muted" style="padding:24px">${e.message}</p>`;
+      }
+    }
+
+    function currentItem() { return state.items[state.index]; }
+    function currentAttemptItem() {
+      const it = currentItem();
+      return it ? state.attemptItems.get(it.id) : null;
+    }
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function buildTilesFor(word) {
+      const letters = word.toLowerCase().split('');
+      const need = Math.max(MIN_TILES, letters.length + 4);
+      const decoyCount = need - letters.length;
+      const decoys = [];
+      while (decoys.length < decoyCount) {
+        const c = DECOY_POOL[Math.floor(Math.random() * DECOY_POOL.length)];
+        decoys.push(c);
+      }
+      return shuffle([...letters, ...decoys]).map(letter => ({ letter, used: false, wrong: false }));
+    }
+
+    function setupItem() {
+      const it = currentItem(); if (!it) return;
+      const word = it.word.toLowerCase();
+      state.slots = word.split('').map(letter => ({ letter, filled: false }));
+      state.tiles = buildTilesFor(word);
+      state.heartsLeft = MAX_HEARTS;
+      state.revealed = false;
+      state.message = '';
+    }
+
+    async function pressTile(tileIdx) {
+      if (state.revealed) return;
+      const tile = state.tiles[tileIdx];
+      if (!tile || tile.used) return;
+      // Find leftmost unfilled slot matching this letter.
+      const slotIdx = state.slots.findIndex(s => !s.filled && s.letter === tile.letter);
+      if (slotIdx >= 0) {
+        state.slots[slotIdx] = { ...state.slots[slotIdx], filled: true };
+        state.tiles[tileIdx] = { ...tile, used: true };
+        // word complete?
+        if (state.slots.every(s => s.filled)) {
+          state.message = '✅ 正確！';
+          await savePatch({ correct: true, heartsLeft: state.heartsLeft });
+          render();
+          setTimeout(advance, 900);
+          return;
+        }
+      } else {
+        // wrong letter
+        state.tiles[tileIdx] = { ...tile, wrong: true };
+        state.heartsLeft = Math.max(0, state.heartsLeft - 1);
+        render();
+        setTimeout(() => {
+          state.tiles[tileIdx] = { letter: tile.letter, used: false, wrong: false };
+          render();
+        }, 350);
+        if (state.heartsLeft === 0) {
+          state.revealed = true;
+          state.message = `❌ 答案是 "${currentItem().word}"`;
+          for (const s of state.slots) { s.filled = true; s.reveal = true; }
+          await savePatch({ correct: false, heartsLeft: 0 });
+          render();
+          setTimeout(advance, 2200);
+          return;
+        }
+      }
+      render();
+    }
+
+    async function savePatch(patch) {
+      const it = currentItem(); if (!it) return;
+      try {
+        await api(`/api/english/student/attempts/${state.attemptId}/items/${it.id}`, {
+          method: 'POST', body: patch,
+        });
+      } catch (e) { console.warn('savePatch failed', e); }
+    }
+
+    async function advance() {
+      if (state.index < state.items.length - 1) {
+        state.index++;
+        setupItem();
+        render();
+        return;
+      }
+      try {
+        const r = await api(`/api/english/student/attempts/${state.attemptId}/complete`, { method: 'POST' });
+        state.phase = 'done'; state.finalScore = r.score;
+        render();
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    async function playTts() {
+      const it = currentItem(); if (!it) return;
+      try {
+        const res = await fetch('/api/english/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+          body: JSON.stringify({ text: it.word }),
+          credentials: 'same-origin',
+        });
+        if (res.status === 501) { toast('Google TTS 尚未設定', 'error'); return; }
+        if (!res.ok) { const d = await res.json().catch(()=>({})); toast(d.message || '朗讀失敗', 'error'); return; }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.onended = () => URL.revokeObjectURL(url);
+        audio.play();
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    function render() {
+      root.innerHTML = '';
+      root.appendChild(renderTopbar({ title: state.assignment?.title || '練習', user: state.me, backUrl: '/english/student' }));
+      const container = el('div', { class: 'container narrow' });
+
+      if (state.phase === 'done') {
+        container.appendChild(el('div', { class: 'card', style: { textAlign: 'center' } },
+          el('h1', { style: { fontSize: '3rem', margin: 0 } }, '🎉'),
+          el('h2', {}, '練習完成'),
+          el('div', { style: { fontSize: '3rem', fontWeight: '700', color: 'var(--primary)', margin: '12px 0' } }, `${state.finalScore} / 5`),
+          el('a', { class: 'btn btn-primary btn-block', style: { marginTop: '12px' }, href: '/english/student' }, '返回練習列表')
+        ));
+        root.appendChild(container);
+        return;
+      }
+
+      const it = currentItem();
+      if (!it) { container.appendChild(el('p', { class: 'muted' }, '載入中…')); root.appendChild(container); return; }
+
+      // Progress bar
+      const progress = el('div', { class: 'practice-progress' });
+      for (let i = 1; i <= state.items.length; i++) {
+        progress.appendChild(el('div', { class: `step ${i < state.index + 1 ? 'done' : i === state.index + 1 ? 'current' : ''}` }));
+      }
+      container.appendChild(progress);
+      container.appendChild(el('div', { class: 'muted', style: { textAlign: 'right', marginBottom: '8px' } },
+        `第 ${state.index + 1} / ${state.items.length} 題`));
+
+      // Stage
+      const stage = el('div', { class: 'spell-stage' });
+      if (it.imageUrl) stage.appendChild(el('img', { class: 'item-image', src: it.imageUrl, alt: it.hint || '' }));
+      else stage.appendChild(el('div', { class: 'item-image', style: { background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' } }, '🖼 No image'));
+      if (it.hint) stage.appendChild(el('div', { class: 'item-hint' }, it.hint));
+
+      // Hearts
+      const heartsRow = el('div', { class: 'hearts' });
+      for (let i = 0; i < MAX_HEARTS; i++) {
+        heartsRow.appendChild(el('span', { class: i < state.heartsLeft ? '' : 'lost' }, '❤'));
+      }
+      stage.appendChild(heartsRow);
+
+      // Word slots
+      const wordRow = el('div', { class: 'word-row' });
+      state.slots.forEach(s => {
+        wordRow.appendChild(el('div', { class: `word-slot ${s.filled ? 'filled' : ''} ${s.reveal ? 'reveal' : ''}` },
+          s.filled ? s.letter : ''));
+      });
+      stage.appendChild(wordRow);
+
+      // TTS
+      stage.appendChild(el('button', { class: 'tts-btn', onclick: playTts }, '🔊 朗讀'));
+      container.appendChild(stage);
+
+      // Tile pool
+      const tileRow = el('div', { class: 'tile-row' });
+      state.tiles.forEach((t, i) => {
+        tileRow.appendChild(el('button', {
+          class: `tile ${t.used ? 'used' : ''} ${t.wrong ? 'wrong' : ''}`,
+          disabled: t.used || state.revealed,
+          onclick: () => pressTile(i),
+        }, t.letter));
+      });
+      container.appendChild(tileRow);
+
+      // Message
+      if (state.message) {
+        const m = state.message;
+        const cls = m.startsWith('✅') ? 'success' : m.startsWith('❌') ? 'danger' : 'info';
+        container.appendChild(el('div', { class: `message-card ${cls}`, style: { marginTop: '12px' } }, m));
+      }
+
+      root.appendChild(container);
+    }
+
+    init().catch(e => toast(e.message, 'error'));
+  </script>
+</body>
+</html>

@@ -51,6 +51,11 @@ app.use('/api/chinese/teacher', require('./chinese-app/routes/teacher'));
 app.use('/api/chinese/student', require('./chinese-app/routes/student'));
 app.use('/api/chinese', require('./chinese-app/routes/media'));
 
+// English module
+app.use('/api/english/teacher', require('./english-app/routes/teacher'));
+app.use('/api/english/student', require('./english-app/routes/student'));
+app.use('/api/english', require('./english-app/routes/media'));
+
 // Whiteboard — HTTP + Socket.io. Build httpServer/io now so the whiteboard
 // module can register its /api/whiteboard/* routes BEFORE the catch-all
 // /api 404 handler at the bottom of this file matches them first.
@@ -145,6 +150,20 @@ app.get('/chinese/teacher', requireTeacherPage, (req, res) => res.sendFile(path.
 app.get('/chinese/student', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'chinese-app', 'public', 'student.html')));
 app.get('/chinese/practice', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'chinese-app', 'public', 'practice.html')));
 
+// English module static + page routes
+app.use('/english/css', express.static(path.join(__dirname, 'english-app', 'public', 'css')));
+app.use('/english/js', express.static(path.join(__dirname, 'english-app', 'public', 'js')));
+
+function requireTeacherPageEn(req, res, next) {
+  if (!req.session || !req.session.studentId) return res.redirect('/');
+  if (req.session.role !== 'teacher') return res.redirect('/english/student');
+  next();
+}
+app.get('/english', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'index.html')));
+app.get('/english/teacher', requireTeacherPageEn, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'teacher.html')));
+app.get('/english/student', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'student.html')));
+app.get('/english/practice', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'practice.html')));
+
 app.get('/login.html',     (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'login.html')));
 app.get('/quiz.html',      (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'quiz.html')));
 app.get('/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'dashboard.html')));
@@ -196,6 +215,7 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   console.log('🚀  ├─ 考評報告:  /report.html  (老師限定)');
   console.log('🚀  ├─ 互動白板:  /whiteboard/');
   console.log('🚀  ├─ 粵語學習:  /chinese');
+  console.log('🚀  ├─ 英文拼字:  /english');
   console.log('🚀  └─ API:       /api/*');
   console.log('🚀 =========================================');
   console.log('');

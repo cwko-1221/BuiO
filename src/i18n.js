@@ -82,10 +82,10 @@ export const I18N = {
     'module_chinese_desc': '手寫筆順、朗讀練習與小評估，搭配粵語語音辨識。',
     'module_chinese_metric': '可即時練習',
     'module_chinese_status': '已啟用',
-    'module_english_name': '英文學習',
-    'module_english_desc': '拼讀、聆聽、口說與閱讀任務預留模組。',
-    'module_english_metric': '開發中',
-    'module_english_status': '未啟用'
+    'module_english_name': '英文拼字',
+    'module_english_desc': '看圖拼字遊戲，三條命，搭配英文 TTS 朗讀。',
+    'module_english_metric': '可即時練習',
+    'module_english_status': '已啟用'
   },
   'en-US': {
     'good_morning': 'Good Morning',
@@ -168,10 +168,10 @@ export const I18N = {
     'module_chinese_desc': 'Handwriting practice, TTS playback, and assessment with Cantonese speech recognition.',
     'module_chinese_metric': 'Ready to practice',
     'module_chinese_status': 'Enabled',
-    'module_english_name': 'English Learning',
-    'module_english_desc': 'Reserved module for phonics, listening, speaking, and reading tasks.',
-    'module_english_metric': 'In development',
-    'module_english_status': 'Disabled'
+    'module_english_name': 'Spelling Game',
+    'module_english_desc': 'Picture-based spelling with 3 hearts and English TTS playback.',
+    'module_english_metric': 'Ready to play',
+    'module_english_status': 'Enabled'
   }
 };
 
