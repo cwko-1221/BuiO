@@ -160,14 +160,24 @@
       });
       for (const item of b.items) {
         const isPicked = b.picked.has(item.id);
-        const tile = el('label', {
+        const row = el('div', {
           style: {
             display: 'flex', alignItems: 'center', gap: '10px', padding: '10px',
             border: `1px solid ${isPicked ? 'var(--primary)' : 'var(--border)'}`,
-            borderRadius: '10px', cursor: 'pointer',
+            borderRadius: '10px',
             background: isPicked ? 'var(--primary-soft)' : 'transparent',
             transition: 'background 0.12s, border-color 0.12s',
           },
+        });
+
+        // Thumb: sibling of the label so clicking it triggers the image
+        // picker instead of toggling the checkbox.
+        row.appendChild(renderBankThumb(item));
+
+        // Label wraps just the checkbox + text → clicking text toggles select.
+        const label = el('label', {
+          style: { display: 'flex', alignItems: 'center', gap: '10px',
+                   flex: 1, minWidth: 0, cursor: 'pointer' },
         });
         const checkbox = el('input', {
           type: 'checkbox', checked: isPicked,
@@ -185,13 +195,13 @@
           }
           render();
         });
-        tile.appendChild(checkbox);
-        tile.appendChild(renderBankThumb(item));
-        tile.appendChild(el('div', { style: { minWidth: 0, flex: 1 } },
+        label.appendChild(checkbox);
+        label.appendChild(el('div', { style: { minWidth: 0, flex: 1 } },
           el('div', { style: { fontSize: '1.1rem', fontWeight: '700' } }, item.traditionalText),
           el('div', { class: 'muted', style: { fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, item.englishMeaning),
         ));
-        grid.appendChild(tile);
+        row.appendChild(label);
+        grid.appendChild(row);
       }
       wrap.appendChild(grid);
       return wrap;
