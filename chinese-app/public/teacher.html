@@ -345,12 +345,12 @@
       const card = el('div', { class: 'card' });
       card.appendChild(el('h3', { style: { margin: 0 } }, '新增題目'));
       card.appendChild(el('p', { class: 'muted', style: { margin: '4px 0 10px' } },
-        `加入到「${category}」類別。可以直接上傳圖片，或留白先用 emoji。`));
+        `加入到「${category}」類別。點擊右側方框上傳圖片。`));
 
-      let charInput, meaningInput, emojiInput;
+      let charInput, meaningInput;
       let stagedFile = null;
 
-      // Clickable image preview (same pattern as the assignment item form).
+      // Clickable image preview on the right (matches assignment-item form).
       const preview = el('div', {
         title: '點擊上傳圖片',
         style: { width: '56px', height: '56px', borderRadius: '10px',
@@ -373,43 +373,33 @@
       });
       preview.addEventListener('click', () => stagedFileInput.click());
 
-      const inputs = el('div', {
-        style: { display: 'flex', gap: '8px', flex: 1, minWidth: 0, flexWrap: 'wrap' },
+      const row = el('div', {
+        style: { display: 'flex', gap: '10px', alignItems: 'center' },
       },
         (charInput = el('input', {
           type: 'text', placeholder: '繁體字（例：橙）',
-          style: { flex: '1 1 120px', minWidth: '100px' },
+          style: { flex: '1 1 0', minWidth: '0' },
         })),
         (meaningInput = el('input', {
           type: 'text', placeholder: '英文意義（例：orange）',
-          style: { flex: '2 1 180px', minWidth: '140px' },
+          style: { flex: '2 1 0', minWidth: '0' },
         })),
-        (emojiInput = el('input', {
-          type: 'text', placeholder: '備用 emoji（可空 🍊）',
-          maxlength: '8',
-          style: { flex: '1 1 120px', minWidth: '100px' },
-        })),
+        preview,
+        stagedFileInput,
       );
-
-      const row = el('div', {
-        style: { display: 'flex', gap: '12px', alignItems: 'center' },
-      }, preview, stagedFileInput, inputs);
 
       const addBtn = el('button', {
         class: 'btn btn-primary',
         onclick: async () => {
           const tt = charInput.value.trim();
           const em = meaningInput.value.trim();
-          const emoji = emojiInput.value.trim() || null;
           if (!tt || !em) return toast('請填寫繁體字與英文意義', 'error');
           addBtn.disabled = true;
           try {
-            // Step 1: create the item (text + optional emoji).
             const { item } = await api('/api/chinese/teacher/bank/items', {
               method: 'POST',
-              body: { category, traditionalText: tt, englishMeaning: em, emoji },
+              body: { category, traditionalText: tt, englishMeaning: em },
             });
-            // Step 2: if the teacher staged an image, upload it.
             if (stagedFile) {
               const fd = new FormData(); fd.append('file', stagedFile);
               const r = await fetch(`/api/chinese/teacher/bank/items/${item.id}/image`, {
@@ -422,7 +412,7 @@
             state.bankAdmin.items = [...state.bankAdmin.items, item]
               .sort((a, b) => a.traditionalText.localeCompare(b.traditionalText));
             await refreshCategories();
-            charInput.value = ''; meaningInput.value = ''; emojiInput.value = '';
+            charInput.value = ''; meaningInput.value = '';
             stagedFile = null;
             preview.style.backgroundImage = ''; preview.textContent = '📷';
             stagedFileInput.value = '';
