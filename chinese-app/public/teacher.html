@@ -19,6 +19,8 @@
       expandedClass: null,          // e.g. "1A"
       selected: null,               // assignment object
       attempts: [], attemptDetail: null,
+      // browse-and-pick from question bank
+      browse: null,                 // { category, items, picked: Set, title, group }
     };
 
     async function loadAll() {
@@ -47,6 +49,7 @@
         el('p', {}, '建立練習作業並追蹤學生表現。')
       ));
       if (state.selected) container.appendChild(renderDetail(state.selected));
+      else if (state.browse) container.appendChild(renderBrowsePicker());
       else {
         container.appendChild(renderBankCard());
         container.appendChild(renderCreateCard());
@@ -99,11 +102,116 @@
           toast(status === 'published' ? '已隨機產生並發佈' : '已存為草稿', 'success');
         } catch (e) { toast(e.message, 'error'); }
       };
+      const openBrowse = async () => {
+        if (!categorySelect.value) return toast('請先選擇題庫類別', 'error');
+        if (!groupSelect.value) return toast('請先選擇班級', 'error');
+        const title = titleInput.value.trim();
+        if (!title) return toast('請輸入標題', 'error');
+        try {
+          const { items } = await api(`/api/chinese/teacher/bank/items?category=${encodeURIComponent(categorySelect.value)}`);
+          state.browse = {
+            category: categorySelect.value,
+            items, picked: new Set(),
+            title, group: groupSelect.value,
+          };
+          render();
+        } catch (e) { toast(e.message, 'error'); }
+      };
+
       card.appendChild(el('div', { class: 'row', style: { marginTop: '12px' } },
         el('button', { class: 'btn btn-primary', onclick: () => submit('published') }, '🎲 隨機產生並發佈'),
+        el('button', { class: 'btn btn-ghost', onclick: openBrowse }, '🔍 瀏覽題庫挑 5 題'),
         el('button', { class: 'btn btn-ghost', onclick: () => submit('draft') }, '存為草稿'),
       ));
       return card;
+    }
+
+    // ------------------ Browse & pick from bank ------------------
+    function renderBrowsePicker() {
+      const b = state.browse;
+      const wrap = el('div');
+
+      const statusBar = el('div', { class: 'card', style: { display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' } },
+        el('button', { class: 'btn-back', onclick: () => { state.browse = null; render(); } }, '← 取消'),
+        el('div', { style: { flex: 1, minWidth: '160px' } },
+          el('h2', { style: { margin: 0 } }, `題庫：${b.category}`),
+          el('div', { class: 'muted', style: { marginTop: '4px' } },
+            `「${b.title}」 ・ ${b.group.replace('|', '')} ・ 已選 `,
+            el('strong', { id: 'pickedCount', style: { color: 'var(--primary)' } }, String(b.picked.size)),
+            ` / 5`)
+        ),
+        el('button', {
+          class: 'btn btn-primary', id: 'createFromPickBtn',
+          disabled: b.picked.size !== 5,
+          onclick: () => submitPick('published'),
+        }, '建立並發佈'),
+        el('button', {
+          class: 'btn btn-ghost',
+          disabled: b.picked.size !== 5,
+          onclick: () => submitPick('draft'),
+        }, '存為草稿'),
+      );
+      wrap.appendChild(statusBar);
+
+      const grid = el('div', {
+        class: 'card',
+        style: { display: 'grid', gap: '8px',
+                 gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' },
+      });
+      for (const item of b.items) {
+        const isPicked = b.picked.has(item.id);
+        const tile = el('label', {
+          style: {
+            display: 'flex', alignItems: 'center', gap: '10px', padding: '10px',
+            border: `1px solid ${isPicked ? 'var(--primary)' : 'var(--border)'}`,
+            borderRadius: '10px', cursor: 'pointer',
+            background: isPicked ? 'var(--primary-soft)' : 'transparent',
+            transition: 'background 0.12s, border-color 0.12s',
+          },
+        });
+        const checkbox = el('input', {
+          type: 'checkbox', checked: isPicked,
+          style: { width: '18px', height: '18px', flexShrink: '0', accentColor: 'var(--primary)' },
+        });
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            if (b.picked.size >= 5) {
+              checkbox.checked = false;
+              return toast('最多只可選 5 題', 'error');
+            }
+            b.picked.add(item.id);
+          } else {
+            b.picked.delete(item.id);
+          }
+          render();
+        });
+        tile.appendChild(checkbox);
+        if (item.emoji) {
+          tile.appendChild(el('span', { style: { fontSize: '1.4rem' } }, item.emoji));
+        }
+        tile.appendChild(el('div', { style: { minWidth: 0, flex: 1 } },
+          el('div', { style: { fontSize: '1.1rem', fontWeight: '700' } }, item.traditionalText),
+          el('div', { class: 'muted', style: { fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, item.englishMeaning),
+        ));
+        grid.appendChild(tile);
+      }
+      wrap.appendChild(grid);
+      return wrap;
+    }
+
+    async function submitPick(status) {
+      const b = state.browse; if (!b) return;
+      if (b.picked.size !== 5) return toast('請選 5 題', 'error');
+      const [targetClassname, targetGroup] = b.group.split('|');
+      try {
+        await api('/api/chinese/teacher/assignments/from-bank', { method: 'POST', body: {
+          targetClassname, targetGroup, title: b.title, status,
+          itemIds: [...b.picked],
+        } });
+        state.browse = null;
+        await loadAll(); render();
+        toast(status === 'published' ? '已建立並發佈' : '已存為草稿', 'success');
+      } catch (e) { toast(e.message, 'error'); }
     }
 
     // ------------------ Create assignment ------------------

@@ -54,33 +54,58 @@ router.get('/bank/categories', async (req, res) => {
   catch (e) { handle(res, e); }
 });
 
+router.get('/bank/items', async (req, res) => {
+  try {
+    const category = String(req.query.category || '').trim();
+    if (!category) return res.status(400).json({ success: false, message: '缺少 category' });
+    res.json({ success: true, items: await bank.listItems(category) });
+  } catch (e) { handle(res, e); }
+});
+
+function buildItemsFromPicked(picked) {
+  return picked.map((p, i) => ({
+    traditionalText: p.traditionalText,
+    jyutping: autoJyutping(p.traditionalText),
+    englishMeaning: p.englishMeaning,
+    imageUrl: bank.emojiToImageUrl(p.emoji),
+    orderIndex: i + 1,
+  }));
+}
+
 router.post('/assignments/from-bank', async (req, res) => {
   try {
-    const { targetClassname, targetGroup, title, status, category, count } = req.body || {};
-    if (!targetClassname || !targetGroup || !title || !category) {
-      return res.status(400).json({ success: false, message: '缺少 targetClassname / targetGroup / title / category' });
+    const { targetClassname, targetGroup, title, status, category, count, itemIds } = req.body || {};
+    if (!targetClassname || !targetGroup || !title) {
+      return res.status(400).json({ success: false, message: '缺少 targetClassname / targetGroup / title' });
     }
-    const n = Math.min(5, Math.max(1, Number(count) || 5));
-    const picked = await bank.randomItems(category, n);
-    if (picked.length < n) {
-      return res.status(400).json({ success: false, message: `題庫「${category}」少於 ${n} 題` });
+
+    let picked;
+    if (Array.isArray(itemIds) && itemIds.length) {
+      if (itemIds.length !== 5) {
+        return res.status(400).json({ success: false, message: '請剛好選擇 5 題' });
+      }
+      picked = await bank.itemsByIds(itemIds.map(String));
+      if (picked.length !== 5) {
+        return res.status(400).json({ success: false, message: '部分題目找不到' });
+      }
+    } else {
+      if (!category) return res.status(400).json({ success: false, message: '缺少 category 或 itemIds' });
+      const n = Math.min(5, Math.max(1, Number(count) || 5));
+      picked = await bank.randomItems(category, n);
+      if (picked.length < n) {
+        return res.status(400).json({ success: false, message: `題庫「${category}」少於 ${n} 題` });
+      }
     }
-    const items = picked.map((p, i) => ({
-      traditionalText: p.traditionalText,
-      jyutping: autoJyutping(p.traditionalText),
-      englishMeaning: p.englishMeaning,
-      imageUrl: bank.emojiToImageUrl(p.emoji),
-      orderIndex: i + 1,
-    }));
+
     const created = await assignments.create({
       teacherId: teacherId(req),
       targetClassname: String(targetClassname).trim(),
       targetGroup: String(targetGroup).trim(),
       title: String(title).trim(),
       status: status === 'draft' ? 'draft' : 'published',
-      items,
+      items: buildItemsFromPicked(picked),
     });
-    res.status(201).json({ success: true, assignment: created, items });
+    res.status(201).json({ success: true, assignment: created });
   } catch (e) { handle(res, e); }
 });
 
