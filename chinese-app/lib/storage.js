@@ -36,6 +36,20 @@ async function uploadRecording({ studentId, assignmentId, itemId, phase, buffer,
   return { path, publicUrl: data.publicUrl };
 }
 
+async function uploadBankImage({ bankItemId, buffer, contentType, originalName }) {
+  const ext = (originalName && (originalName.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, ''))
+    || (contentType && contentType.split('/')[1]) || 'jpg';
+  // Cache-bust filename per upload so the public URL changes on overwrite.
+  const stamp = Date.now().toString(36);
+  const path = `bank/${bankItemId}-${stamp}.${ext}`;
+  const c = client();
+  const { error } = await c.storage.from('recordings')
+    .upload(path, buffer, { contentType: contentType || 'image/jpeg', upsert: false });
+  if (error) throw error;
+  const { data } = c.storage.from('recordings').getPublicUrl(path);
+  return { path, publicUrl: data.publicUrl };
+}
+
 async function uploadItemImage({ teacherId, buffer, contentType, originalName }) {
   const ext = (originalName && (originalName.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, ''))
     || (contentType && contentType.split('/')[1]) || 'jpg';
@@ -50,4 +64,4 @@ async function uploadItemImage({ teacherId, buffer, contentType, originalName })
   return { path, publicUrl: data.publicUrl };
 }
 
-module.exports = { isStorageConfigured, uploadRecording, uploadItemImage };
+module.exports = { isStorageConfigured, uploadRecording, uploadItemImage, uploadBankImage };

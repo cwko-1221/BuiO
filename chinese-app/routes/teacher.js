@@ -67,10 +67,39 @@ function buildItemsFromPicked(picked) {
     traditionalText: p.traditionalText,
     jyutping: autoJyutping(p.traditionalText),
     englishMeaning: p.englishMeaning,
-    imageUrl: bank.emojiToImageUrl(p.emoji),
+    imageUrl: bank.resolveImageUrl(p),
     orderIndex: i + 1,
   }));
 }
+
+router.post('/bank/items/:itemId/image', upload.single('file'), async (req, res) => {
+  try {
+    if (!storage.isStorageConfigured()) {
+      return res.status(501).json({ success: false, message: 'Supabase Storage 尚未設定。' });
+    }
+    if (!req.file) return res.status(400).json({ success: false, message: '缺少 file' });
+    if (!String(req.file.mimetype || '').startsWith('image/')) {
+      return res.status(400).json({ success: false, message: '只接受圖片檔' });
+    }
+    const { publicUrl } = await storage.uploadBankImage({
+      bankItemId: req.params.itemId,
+      buffer: req.file.buffer,
+      contentType: req.file.mimetype,
+      originalName: req.file.originalname,
+    });
+    const item = await bank.updateImageUrl(req.params.itemId, publicUrl);
+    if (!item) return res.status(404).json({ success: false, message: '找不到該題目' });
+    res.json({ success: true, item, publicUrl });
+  } catch (e) { handle(res, e); }
+});
+
+router.delete('/bank/items/:itemId/image', async (req, res) => {
+  try {
+    const item = await bank.updateImageUrl(req.params.itemId, null);
+    if (!item) return res.status(404).json({ success: false, message: '找不到該題目' });
+    res.json({ success: true, item });
+  } catch (e) { handle(res, e); }
+});
 
 router.post('/assignments/from-bank', async (req, res) => {
   try {

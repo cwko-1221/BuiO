@@ -12,12 +12,17 @@ create table if not exists public.ncs_question_bank (
   traditional_text text not null,
   english_meaning text not null,
   emoji text,
+  image_url text,                        -- teacher override; falls back to emoji
   created_at timestamptz not null default now(),
   unique (category, traditional_text)
 );
 
 create index if not exists ncs_question_bank_category_idx
   on public.ncs_question_bank(category);
+
+-- For existing installs that ran the earlier version of this file:
+alter table public.ncs_question_bank
+  add column if not exists image_url text;
 
 -- --------------------------------------------------------------------------
 -- 日常用語 — 50 entries

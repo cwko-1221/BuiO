@@ -22,11 +22,12 @@ async function listCategories() {
   return rows.map(r => ({ category: r.category, count: r.count }));
 }
 
+const COLS = 'id, traditional_text, english_meaning, emoji, image_url';
+
 async function randomItems(category, count) {
   const pool = requirePg();
   const { rows } = await pool.query(`
-    SELECT id, traditional_text, english_meaning, emoji
-      FROM ncs_question_bank
+    SELECT ${COLS} FROM ncs_question_bank
      WHERE category = $1
      ORDER BY random()
      LIMIT $2`, [category, count]);
@@ -36,8 +37,7 @@ async function randomItems(category, count) {
 async function listItems(category) {
   const pool = requirePg();
   const { rows } = await pool.query(`
-    SELECT id, traditional_text, english_meaning, emoji
-      FROM ncs_question_bank
+    SELECT ${COLS} FROM ncs_question_bank
      WHERE category = $1
      ORDER BY traditional_text`, [category]);
   return rows.map(mapRow);
@@ -47,12 +47,19 @@ async function itemsByIds(ids) {
   const pool = requirePg();
   if (!ids.length) return [];
   const { rows } = await pool.query(`
-    SELECT id, traditional_text, english_meaning, emoji
-      FROM ncs_question_bank
+    SELECT ${COLS} FROM ncs_question_bank
      WHERE id = ANY($1::uuid[])`, [ids]);
   // Preserve the order the teacher selected them in.
   const byId = new Map(rows.map(r => [r.id, mapRow(r)]));
   return ids.map(id => byId.get(id)).filter(Boolean);
+}
+
+async function updateImageUrl(id, imageUrl) {
+  const pool = requirePg();
+  const { rows } = await pool.query(`
+    UPDATE ncs_question_bank SET image_url = $2 WHERE id = $1
+    RETURNING ${COLS}`, [id, imageUrl || null]);
+  return rows[0] ? mapRow(rows[0]) : null;
 }
 
 function mapRow(r) {
@@ -61,7 +68,15 @@ function mapRow(r) {
     traditionalText: r.traditional_text,
     englishMeaning: r.english_meaning,
     emoji: r.emoji || null,
+    imageUrl: r.image_url || null,
   };
+}
+
+// Resolve the visible image for an item: an explicit override wins over
+// the emoji-derived GitHub CDN URL.
+function resolveImageUrl(item) {
+  if (item.imageUrl) return item.imageUrl;
+  return emojiToImageUrl(item.emoji);
 }
 
 // Convert an emoji like '🍎' to a GitHub-hosted PNG URL.
@@ -77,4 +92,7 @@ function emojiToImageUrl(emoji) {
   return `https://github.githubassets.com/images/icons/emoji/unicode/${codepoints}.png?v8`;
 }
 
-module.exports = { listCategories, randomItems, listItems, itemsByIds, emojiToImageUrl };
+module.exports = {
+  listCategories, randomItems, listItems, itemsByIds, updateImageUrl,
+  emojiToImageUrl, resolveImageUrl,
+};
