@@ -62,6 +62,30 @@ async function updateImageUrl(id, imageUrl) {
   return rows[0] ? mapRow(rows[0]) : null;
 }
 
+async function createItem({ category, traditionalText, englishMeaning, emoji, imageUrl }) {
+  const pool = requirePg();
+  const { rows } = await pool.query(`
+    INSERT INTO ncs_question_bank (category, traditional_text, english_meaning, emoji, image_url)
+    VALUES ($1, $2, $3, $4, $5)
+    ON CONFLICT (category, traditional_text) DO NOTHING
+    RETURNING ${COLS}`,
+    [category, traditionalText, englishMeaning, emoji || null, imageUrl || null]
+  );
+  if (!rows[0]) {
+    const err = new Error('該類別已存在相同的題目');
+    err.statusCode = 409;
+    throw err;
+  }
+  return mapRow(rows[0]);
+}
+
+async function deleteItem(id) {
+  const pool = requirePg();
+  const { rowCount } = await pool.query(
+    'DELETE FROM ncs_question_bank WHERE id = $1', [id]);
+  return rowCount > 0;
+}
+
 function mapRow(r) {
   return {
     id: r.id,
@@ -93,6 +117,7 @@ function emojiToImageUrl(emoji) {
 }
 
 module.exports = {
-  listCategories, randomItems, listItems, itemsByIds, updateImageUrl,
+  listCategories, randomItems, listItems, itemsByIds,
+  createItem, deleteItem, updateImageUrl,
   emojiToImageUrl, resolveImageUrl,
 };

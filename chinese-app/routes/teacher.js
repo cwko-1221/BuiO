@@ -72,6 +72,28 @@ function buildItemsFromPicked(picked) {
   }));
 }
 
+router.post('/bank/items', async (req, res) => {
+  try {
+    const category = String(req.body?.category || '').trim();
+    const traditionalText = String(req.body?.traditionalText || '').trim();
+    const englishMeaning = String(req.body?.englishMeaning || '').trim();
+    const emoji = req.body?.emoji ? String(req.body.emoji).trim() : null;
+    if (!category || !traditionalText || !englishMeaning) {
+      return res.status(400).json({ success: false, message: '缺少 category / traditionalText / englishMeaning' });
+    }
+    const item = await bank.createItem({ category, traditionalText, englishMeaning, emoji });
+    res.status(201).json({ success: true, item });
+  } catch (e) { handle(res, e); }
+});
+
+router.delete('/bank/items/:itemId', async (req, res) => {
+  try {
+    const ok = await bank.deleteItem(req.params.itemId);
+    if (!ok) return res.status(404).json({ success: false, message: '找不到該題目' });
+    res.json({ success: true });
+  } catch (e) { handle(res, e); }
+});
+
 router.post('/bank/items/:itemId/image', upload.single('file'), async (req, res) => {
   try {
     if (!storage.isStorageConfigured()) {

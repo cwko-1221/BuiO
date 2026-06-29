@@ -298,26 +298,102 @@
         return wrap;
       }
 
+      // New-item form for the current category
+      wrap.appendChild(renderNewItemCard(state.bankAdmin.category));
+
       // Items grid for the selected category
       const grid = el('div', {
         class: 'card',
         style: { display: 'grid', gap: '8px',
-                 gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' },
+                 gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' },
       });
       for (const item of state.bankAdmin.items) {
         grid.appendChild(el('div', {
           style: { display: 'flex', alignItems: 'center', gap: '10px', padding: '10px',
-                   border: '1px solid var(--border)', borderRadius: '10px' },
+                   border: '1px solid var(--border)', borderRadius: '10px', position: 'relative' },
         },
           renderBankThumb(item),
           el('div', { style: { minWidth: 0, flex: 1 } },
             el('div', { style: { fontSize: '1.1rem', fontWeight: '700' } }, item.traditionalText),
             el('div', { class: 'muted', style: { fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, item.englishMeaning),
           ),
+          el('button', {
+            title: '刪除題目',
+            style: {
+              background: 'transparent', border: '1px solid var(--border)',
+              color: 'var(--danger)', borderRadius: '8px',
+              padding: '4px 8px', fontSize: '0.8rem', cursor: 'pointer', flexShrink: '0',
+            },
+            onclick: async () => {
+              if (!confirm(`刪除題目「${item.traditionalText}」？已建立的作業不受影響。`)) return;
+              try {
+                await api(`/api/chinese/teacher/bank/items/${item.id}`, { method: 'DELETE' });
+                state.bankAdmin.items = state.bankAdmin.items.filter(x => x.id !== item.id);
+                await refreshCategories();
+                render();
+                toast('已刪除', 'success');
+              } catch (e) { toast(e.message, 'error'); }
+            },
+          }, '刪除'),
         ));
       }
       wrap.appendChild(grid);
       return wrap;
+    }
+
+    function renderNewItemCard(category) {
+      const card = el('div', { class: 'card' });
+      card.appendChild(el('h3', { style: { margin: 0 } }, '新增題目'));
+      card.appendChild(el('p', { class: 'muted', style: { margin: '4px 0 10px' } },
+        `加入到「${category}」類別。圖示稍後可在列表中點擊更換。`));
+      let charInput, meaningInput, emojiInput;
+      const row = el('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap' } });
+      row.appendChild((charInput = el('input', {
+        type: 'text', placeholder: '繁體字（例：橙）',
+        style: { flex: '1 1 140px', minWidth: '120px' },
+      })));
+      row.appendChild((meaningInput = el('input', {
+        type: 'text', placeholder: '英文意義（例：orange）',
+        style: { flex: '2 1 200px', minWidth: '160px' },
+      })));
+      row.appendChild((emojiInput = el('input', {
+        type: 'text', placeholder: '圖示 emoji（可空，例：🍊）',
+        maxlength: '8',
+        style: { flex: '1 1 120px', minWidth: '100px' },
+      })));
+      const addBtn = el('button', {
+        class: 'btn btn-primary',
+        onclick: async () => {
+          const tt = charInput.value.trim();
+          const em = meaningInput.value.trim();
+          const emoji = emojiInput.value.trim() || null;
+          if (!tt || !em) return toast('請填寫繁體字與英文意義', 'error');
+          addBtn.disabled = true;
+          try {
+            const { item } = await api('/api/chinese/teacher/bank/items', {
+              method: 'POST',
+              body: { category, traditionalText: tt, englishMeaning: em, emoji },
+            });
+            state.bankAdmin.items = [...state.bankAdmin.items, item]
+              .sort((a, b) => a.traditionalText.localeCompare(b.traditionalText));
+            await refreshCategories();
+            charInput.value = ''; meaningInput.value = ''; emojiInput.value = '';
+            render();
+            toast('已新增題目', 'success');
+          } catch (e) { toast(e.message, 'error'); }
+          finally { addBtn.disabled = false; }
+        },
+      }, '＋ 新增');
+      card.appendChild(row);
+      card.appendChild(el('div', { style: { marginTop: '10px' } }, addBtn));
+      return card;
+    }
+
+    async function refreshCategories() {
+      try {
+        const { categories } = await api('/api/chinese/teacher/bank/categories');
+        state.categories = categories;
+      } catch {}
     }
 
     async function openCategoryAdmin(category) {
