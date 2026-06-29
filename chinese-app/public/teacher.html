@@ -19,8 +19,10 @@
       expandedClass: null,          // e.g. "1A"
       selected: null,               // assignment object
       attempts: [], attemptDetail: null,
-      // browse-and-pick from question bank
+      // browse-and-pick from question bank (selection only, exactly 5)
       browse: null,                 // { category, items, picked: Set, title, group }
+      // bank admin (view categories + edit per-item image)
+      bankAdmin: null,              // { category, items }
     };
 
     async function loadAll() {
@@ -50,7 +52,9 @@
       ));
       if (state.selected) container.appendChild(renderDetail(state.selected));
       else if (state.browse) container.appendChild(renderBrowsePicker());
+      else if (state.bankAdmin) container.appendChild(renderBankAdmin());
       else {
+        container.appendChild(renderBankAdminEntry());
         container.appendChild(renderBankCard());
         container.appendChild(renderCreateCard());
         container.appendChild(renderClassList());
@@ -170,9 +174,9 @@
           },
         });
 
-        // Thumb: sibling of the label so clicking it triggers the image
-        // picker instead of toggling the checkbox.
-        row.appendChild(renderBankThumb(item));
+        // Thumb is display-only in the pick flow — image editing lives in
+        // the dedicated 瀏覽題庫 admin view.
+        row.appendChild(renderStaticThumb(item));
 
         // Label wraps just the checkbox + text → clicking text toggles select.
         const label = el('label', {
@@ -215,6 +219,113 @@
         .map(c => c.toString(16))
         .join('-');
       return cp ? `https://github.githubassets.com/images/icons/emoji/unicode/${cp}.png?v8` : null;
+    }
+
+    function renderStaticThumb(item) {
+      const wrap = el('div', {
+        style: { width: '36px', height: '36px', borderRadius: '8px',
+                 background: 'rgba(255,255,255,0.06)', overflow: 'hidden',
+                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: '0' },
+      });
+      const url = item.imageUrl || emojiCodepointUrl(item.emoji);
+      if (url) wrap.appendChild(el('img', { src: url, alt: item.englishMeaning,
+        style: { width: '100%', height: '100%', objectFit: 'cover' } }));
+      else wrap.appendChild(el('span', { class: 'muted' }, '?'));
+      return wrap;
+    }
+
+    // ------------------ Bank admin (browse + edit images) ------------------
+    function renderBankAdminEntry() {
+      return el('div', {
+        class: 'card',
+        style: { display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' },
+        onclick: () => { state.bankAdmin = { category: null, items: [] }; render(); },
+      },
+        el('div', { style: { fontSize: '1.6rem' } }, '🔍'),
+        el('div', { style: { flex: 1 } },
+          el('h2', { style: { margin: 0 } }, '瀏覽題庫'),
+          el('p', { class: 'muted', style: { margin: '4px 0 0' } },
+            '查看所有類別與題目，點擊圖示即可更換圖片。')
+        ),
+        el('span', { class: 'badge info' }, '進入 →')
+      );
+    }
+
+    function renderBankAdmin() {
+      const wrap = el('div');
+      wrap.appendChild(el('button', {
+        class: 'btn-back',
+        onclick: () => {
+          if (state.bankAdmin?.category) {
+            state.bankAdmin = { category: null, items: [] };
+          } else {
+            state.bankAdmin = null;
+          }
+          render();
+        },
+      }, state.bankAdmin.category ? '← 回類別列表' : '← 返回'));
+
+      wrap.appendChild(el('div', { class: 'page-head', style: { marginTop: '12px', marginBottom: '8px' } },
+        el('h1', { style: { fontSize: '1.5rem' } },
+          state.bankAdmin.category ? `題庫 ・ ${state.bankAdmin.category}` : '瀏覽題庫'),
+        el('p', {}, state.bankAdmin.category
+          ? '點擊任一圖示更換成自訂圖片。'
+          : '選擇類別以查看與編輯題目。')
+      ));
+
+      if (!state.bankAdmin.category) {
+        // Category grid
+        const grid = el('div', {
+          style: { display: 'grid', gap: '12px',
+                   gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' },
+        });
+        if (!state.categories.length) {
+          grid.appendChild(el('div', { class: 'card empty' }, '題庫為空。'));
+        }
+        for (const c of state.categories) {
+          grid.appendChild(el('div', {
+            class: 'assignment-card',
+            onclick: () => openCategoryAdmin(c.category),
+          },
+            el('div', {},
+              el('div', { class: 'title' }, c.category),
+              el('div', { class: 'sub' }, `${c.count} 題`)
+            ),
+            el('span', { class: 'badge info' }, '查看 →')
+          ));
+        }
+        wrap.appendChild(grid);
+        return wrap;
+      }
+
+      // Items grid for the selected category
+      const grid = el('div', {
+        class: 'card',
+        style: { display: 'grid', gap: '8px',
+                 gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' },
+      });
+      for (const item of state.bankAdmin.items) {
+        grid.appendChild(el('div', {
+          style: { display: 'flex', alignItems: 'center', gap: '10px', padding: '10px',
+                   border: '1px solid var(--border)', borderRadius: '10px' },
+        },
+          renderBankThumb(item),
+          el('div', { style: { minWidth: 0, flex: 1 } },
+            el('div', { style: { fontSize: '1.1rem', fontWeight: '700' } }, item.traditionalText),
+            el('div', { class: 'muted', style: { fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, item.englishMeaning),
+          ),
+        ));
+      }
+      wrap.appendChild(grid);
+      return wrap;
+    }
+
+    async function openCategoryAdmin(category) {
+      try {
+        const { items } = await api(`/api/chinese/teacher/bank/items?category=${encodeURIComponent(category)}`);
+        state.bankAdmin = { category, items };
+        render();
+      } catch (e) { toast(e.message, 'error'); }
     }
 
     function renderBankThumb(item) {
