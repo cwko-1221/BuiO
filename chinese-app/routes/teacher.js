@@ -10,6 +10,7 @@ const assignments = require('../repositories/assignments.repo');
 const attempts = require('../repositories/attempts.repo');
 const bank = require('../repositories/questionBank.repo');
 const storage = require('../lib/storage');
+const { compressForUpload } = require('../lib/imageCompress');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
 
@@ -38,10 +39,11 @@ router.post('/upload-image', upload.single('file'), async (req, res) => {
     if (!String(req.file.mimetype || '').startsWith('image/')) {
       return res.status(400).json({ success: false, message: '只接受圖片檔' });
     }
+    const compressed = await compressForUpload(req.file.buffer, req.file.mimetype);
     const out = await storage.uploadItemImage({
       teacherId: teacherId(req),
-      buffer: req.file.buffer,
-      contentType: req.file.mimetype,
+      buffer: compressed.buffer,
+      contentType: compressed.contentType,
       originalName: req.file.originalname,
     });
     res.json({ success: true, ...out });
@@ -103,10 +105,11 @@ router.post('/bank/items/:itemId/image', upload.single('file'), async (req, res)
     if (!String(req.file.mimetype || '').startsWith('image/')) {
       return res.status(400).json({ success: false, message: '只接受圖片檔' });
     }
+    const compressed = await compressForUpload(req.file.buffer, req.file.mimetype);
     const { publicUrl } = await storage.uploadBankImage({
       bankItemId: req.params.itemId,
-      buffer: req.file.buffer,
-      contentType: req.file.mimetype,
+      buffer: compressed.buffer,
+      contentType: compressed.contentType,
       originalName: req.file.originalname,
     });
     const item = await bank.updateImageUrl(req.params.itemId, publicUrl);
