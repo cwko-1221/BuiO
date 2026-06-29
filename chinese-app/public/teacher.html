@@ -15,19 +15,21 @@
 
     let me = null;
     const state = {
-      groups: [], assignments: [],
+      groups: [], assignments: [], categories: [],
       expandedClass: null,          // e.g. "1A"
       selected: null,               // assignment object
       attempts: [], attemptDetail: null,
     };
 
     async function loadAll() {
-      const [g, a] = await Promise.all([
+      const [g, a, c] = await Promise.all([
         api('/api/chinese/teacher/groups'),
         api('/api/chinese/teacher/assignments'),
+        api('/api/chinese/teacher/bank/categories'),
       ]);
       state.groups = g.groups;
       state.assignments = a.assignments;
+      state.categories = c.categories;
     }
 
     async function init() {
@@ -45,8 +47,63 @@
         el('p', {}, '建立練習作業並追蹤學生表現。')
       ));
       if (state.selected) container.appendChild(renderDetail(state.selected));
-      else { container.appendChild(renderCreateCard()); container.appendChild(renderClassList()); }
+      else {
+        container.appendChild(renderBankCard());
+        container.appendChild(renderCreateCard());
+        container.appendChild(renderClassList());
+      }
       root.appendChild(container);
+    }
+
+    // ------------------ Quick-create from question bank ------------------
+    function renderBankCard() {
+      const card = el('div', { class: 'card' });
+      card.appendChild(el('h2', {}, '從題庫快速建立（5 個項目）'));
+      card.appendChild(el('p', { class: 'muted', style: { marginTop: '-4px' } },
+        '選擇題庫，系統會隨機抽 5 題並自動配上圖示。'));
+
+      let titleInput, categorySelect, groupSelect;
+      const catOpts = state.categories.length
+        ? state.categories.map(c => el('option', { value: c.category }, `${c.category}（${c.count} 題）`))
+        : [el('option', { value: '', disabled: true }, '題庫為空（請執行 question_bank.sql）')];
+      const groupOpts = state.groups.length
+        ? state.groups.map(g => el('option', { value: `${g.classname}|${g.group}` }, `${g.label} （${g.count} 位學生）`))
+        : [el('option', { value: '', disabled: true }, '尚未有學生分組')];
+
+      card.appendChild(el('div', { class: 'form-grid', style: { marginTop: '8px' } },
+        el('div', {},
+          el('label', {}, '作業標題'),
+          (titleInput = el('input', { type: 'text', placeholder: '例如：日常用語 ・ 第 1 課' }))
+        ),
+        el('div', {},
+          el('label', {}, '題庫類別'),
+          (categorySelect = el('select', {}, ...catOpts))
+        ),
+      ));
+      card.appendChild(el('div', { class: 'form-row' },
+        el('label', {}, '指派班級'),
+        (groupSelect = el('select', {}, ...groupOpts))
+      ));
+
+      const submit = async (status) => {
+        const title = titleInput.value.trim();
+        if (!title) return toast('請輸入標題', 'error');
+        if (!categorySelect.value) return toast('請選擇題庫類別', 'error');
+        if (!groupSelect.value) return toast('請選擇班級', 'error');
+        const [targetClassname, targetGroup] = groupSelect.value.split('|');
+        try {
+          await api('/api/chinese/teacher/assignments/from-bank', { method: 'POST', body: {
+            targetClassname, targetGroup, title, status, category: categorySelect.value, count: 5,
+          } });
+          await loadAll(); render();
+          toast(status === 'published' ? '已隨機產生並發佈' : '已存為草稿', 'success');
+        } catch (e) { toast(e.message, 'error'); }
+      };
+      card.appendChild(el('div', { class: 'row', style: { marginTop: '12px' } },
+        el('button', { class: 'btn btn-primary', onclick: () => submit('published') }, '🎲 隨機產生並發佈'),
+        el('button', { class: 'btn btn-ghost', onclick: () => submit('draft') }, '存為草稿'),
+      ));
+      return card;
     }
 
     // ------------------ Create assignment ------------------

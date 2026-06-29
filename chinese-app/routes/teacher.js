@@ -8,6 +8,7 @@ const { requireTeacher } = require('../../math-app/middleware/auth');
 const { getJyutping } = require('to-jyutping');
 const assignments = require('../repositories/assignments.repo');
 const attempts = require('../repositories/attempts.repo');
+const bank = require('../repositories/questionBank.repo');
 const storage = require('../lib/storage');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
@@ -44,6 +45,42 @@ router.post('/upload-image', upload.single('file'), async (req, res) => {
       originalName: req.file.originalname,
     });
     res.json({ success: true, ...out });
+  } catch (e) { handle(res, e); }
+});
+
+// ------------------ Question bank ------------------
+router.get('/bank/categories', async (req, res) => {
+  try { res.json({ success: true, categories: await bank.listCategories() }); }
+  catch (e) { handle(res, e); }
+});
+
+router.post('/assignments/from-bank', async (req, res) => {
+  try {
+    const { targetClassname, targetGroup, title, status, category, count } = req.body || {};
+    if (!targetClassname || !targetGroup || !title || !category) {
+      return res.status(400).json({ success: false, message: '缺少 targetClassname / targetGroup / title / category' });
+    }
+    const n = Math.min(5, Math.max(1, Number(count) || 5));
+    const picked = await bank.randomItems(category, n);
+    if (picked.length < n) {
+      return res.status(400).json({ success: false, message: `題庫「${category}」少於 ${n} 題` });
+    }
+    const items = picked.map((p, i) => ({
+      traditionalText: p.traditionalText,
+      jyutping: autoJyutping(p.traditionalText),
+      englishMeaning: p.englishMeaning,
+      imageUrl: bank.emojiToImageUrl(p.emoji),
+      orderIndex: i + 1,
+    }));
+    const created = await assignments.create({
+      teacherId: teacherId(req),
+      targetClassname: String(targetClassname).trim(),
+      targetGroup: String(targetGroup).trim(),
+      title: String(title).trim(),
+      status: status === 'draft' ? 'draft' : 'published',
+      items,
+    });
+    res.status(201).json({ success: true, assignment: created, items });
   } catch (e) { handle(res, e); }
 });
 
