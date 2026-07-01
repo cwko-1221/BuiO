@@ -7,6 +7,7 @@ const users = require('../repositories/users.repo');
 const stats = require('../repositories/stats.repo');
 const logs = require('../repositories/logs.repo');
 const { ALL_TAGS, TAG_INFO } = require('../engine/questionGenerator');
+const { tagsForClass } = require('../engine/classTags');
 const { requireAuth, requireTeacher } = require('../middleware/auth');
 
 router.use(requireAuth);
@@ -14,6 +15,13 @@ router.use(requireAuth);
 function targetStudent(req) {
   if (req.session.role === 'teacher' && req.query.studentId) return req.query.studentId;
   return req.session.studentId;
+}
+
+// Restrict a student's dashboard to the tags in their grade's curriculum.
+// Falls back to ALL_TAGS for unknown classes / staff / graduated.
+async function tagsForStudentId(studentId) {
+  const u = await users.findByIdSummary(studentId);
+  return tagsForClass(u?.classname || '');
 }
 
 function suggestionFor(rate) {
@@ -40,8 +48,9 @@ function enrichTag(row) {
 router.get('/overview', async (req, res, next) => {
   try {
     const studentId = targetStudent(req);
-    const ov = await stats.overview(studentId, ALL_TAGS);
-    const td = await logs.todayOverview(studentId, ALL_TAGS);
+    const tags = await tagsForStudentId(studentId);
+    const ov = await stats.overview(studentId, tags);
+    const td = await logs.todayOverview(studentId, tags);
     const totalQuestions = parseInt(ov.totalquestions) || 0;
     res.json({
       success: true,
@@ -67,9 +76,10 @@ router.get('/overview', async (req, res, next) => {
 router.get('/tags', async (req, res, next) => {
   try {
     const studentId = targetStudent(req);
-    const rows = await stats.tagBreakdown(studentId, ALL_TAGS);
+    const tags = await tagsForStudentId(studentId);
+    const rows = await stats.tagBreakdown(studentId, tags);
     const byTag = new Map(rows.map(r => [r.tag, r]));
-    const enriched = ALL_TAGS.map(tag => enrichTag(byTag.get(tag) || { tag }));
+    const enriched = tags.map(tag => enrichTag(byTag.get(tag) || { tag }));
     res.json({ success: true, stats: enriched });
   } catch (e) { next(e); }
 });
@@ -83,10 +93,11 @@ router.get('/history', async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 50;
     const offset = parseInt(req.query.offset) || 0;
     const tag = req.query.tag || null;
+    const tags = await tagsForStudentId(studentId);
 
     const [rows, total] = await Promise.all([
-      logs.history(studentId, ALL_TAGS, { limit, offset, tag }),
-      logs.historyCount(studentId, ALL_TAGS, { tag }),
+      logs.history(studentId, tags, { limit, offset, tag }),
+      logs.historyCount(studentId, tags, { tag }),
     ]);
 
     res.json({
@@ -114,7 +125,8 @@ router.get('/history', async (req, res, next) => {
 router.get('/weaknesses', async (req, res, next) => {
   try {
     const studentId = targetStudent(req);
-    const rows = await stats.weaknesses(studentId, ALL_TAGS);
+    const tags = await tagsForStudentId(studentId);
+    const rows = await stats.weaknesses(studentId, tags);
     const enriched = rows.map(r => ({
       ...enrichTag(r),
       suggestion: suggestionFor(Number(r.accuracyrate) || 0),
@@ -129,7 +141,8 @@ router.get('/weaknesses', async (req, res, next) => {
 router.get('/time-analysis', async (req, res, next) => {
   try {
     const studentId = targetStudent(req);
-    const rows = await logs.timeAnalysis(studentId, ALL_TAGS);
+    const tags = await tagsForStudentId(studentId);
+    const rows = await logs.timeAnalysis(studentId, tags);
     res.json({
       success: true,
       timeAnalysis: rows.map(t => ({
