@@ -5,6 +5,7 @@ const router = express.Router();
 
 const logs = require('../repositories/logs.repo');
 const stats = require('../repositories/stats.repo');
+const users = require('../repositories/users.repo');
 const { withTransaction } = require('../db/database');
 const { generateAdaptiveQuiz } = require('../engine/adaptiveEngine');
 const { requireAuth } = require('../middleware/auth');
@@ -19,7 +20,14 @@ router.get('/questions', async (req, res, next) => {
     const count = parseInt(req.query.count) || 10;
     const studentId = req.session.studentId;
 
-    const { questions: full, distribution } = await generateAdaptiveQuiz(studentId, count);
+    // Look up the student's classname so the adaptive engine can restrict
+    // the tag pool to their grade (P1 gets easier tags than P6).
+    const userSummary = await users.findByIdSummary(studentId);
+    const classname = userSummary?.classname || null;
+
+    const { questions: full, distribution } = await generateAdaptiveQuiz(
+      studentId, count, { classname }
+    );
 
     req.session.currentQuiz = full.map((q, idx) => ({
       index: idx + 1,

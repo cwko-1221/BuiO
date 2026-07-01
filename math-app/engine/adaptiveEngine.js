@@ -14,6 +14,7 @@
 
 const statsRepo = require('../repositories/stats.repo');
 const { generateQuestion, ALL_TAGS } = require('./questionGenerator');
+const { tagsForClass } = require('./classTags');
 
 const WEAKNESS_THRESHOLD = 70;  // 正確率低於此值視為弱點
 const WEAK_RATIO = 0.6;         // 弱點標籤佔比 60%
@@ -40,7 +41,8 @@ async function getStudentStats(studentId) {
  * @param {string} studentId
  * @returns {{ weakTags: string[], strongTags: string[], stats: Object }}
  */
-async function analyzeWeaknesses(studentId) {
+async function analyzeWeaknesses(studentId, allowedTags = ALL_TAGS) {
+    const allowSet = new Set(allowedTags);
     const stats = await getStudentStats(studentId);
 
     const weakTags = [];
@@ -48,9 +50,9 @@ async function analyzeWeaknesses(studentId) {
     const statsMap = {};
 
     for (const s of stats) {
+        if (!allowSet.has(s.tag)) continue;    // outside this student's grade
         statsMap[s.tag] = s;
 
-        // 只有做過題目的標籤才能判斷弱點
         if (s.totalAttempted > 0 && s.accuracyRate < WEAKNESS_THRESHOLD) {
             weakTags.push(s.tag);
         } else {
@@ -58,9 +60,7 @@ async function analyzeWeaknesses(studentId) {
         }
     }
 
-    // 如果學生還沒做過任何題目，所有標籤都視為「其他」
-    // 確保未作答的標籤也包含在內
-    for (const tag of ALL_TAGS) {
+    for (const tag of allowedTags) {
         if (!statsMap[tag]) {
             strongTags.push(tag);
             statsMap[tag] = { tag, totalAttempted: 0, totalCorrect: 0, accuracyRate: 0 };
@@ -114,8 +114,11 @@ function weightedPick(tags, statsMap) {
  * @param {number} count - 題目數量 (預設 10)
  * @returns {{ questions: Array, distribution: Object }}
  */
-async function generateAdaptiveQuiz(studentId, count = DEFAULT_QUIZ_SIZE) {
-    const { weakTags, strongTags, stats } = await analyzeWeaknesses(studentId);
+async function generateAdaptiveQuiz(studentId, count = DEFAULT_QUIZ_SIZE, opts = {}) {
+    const allowedTags = opts.classname
+      ? tagsForClass(opts.classname)
+      : (opts.allowedTags || ALL_TAGS);
+    const { weakTags, strongTags, stats } = await analyzeWeaknesses(studentId, allowedTags);
 
     const questions = [];
     const distribution = {
@@ -153,7 +156,7 @@ async function generateAdaptiveQuiz(studentId, count = DEFAULT_QUIZ_SIZE) {
 
     // 生成其他標籤題目（隨機選取）
     for (let i = 0; i < strongCount; i++) {
-        const pool = weakTags.length === 0 ? ALL_TAGS : strongTags;
+        const pool = weakTags.length === 0 ? allowedTags : strongTags;
         const tag = randomPick(pool);
         const q = generateQuestion(tag);
         questions.push(q);
