@@ -13,6 +13,32 @@
     let radarChartObj = null;
     let timeChartObj = null;
 
+    // Build a compact tag label for radar / time-analysis charts.
+    // The full tag name is like "2個數加法 (2位數、有進位、和<100)". Stripping
+    // parens completely made 3 tags all show as "2個數加法" (collision).
+    // Keep both the category prefix and the distinguishing hint(s) inside
+    // the parens, cap the total length so the label still fits.
+    function shortLabel(name, max = 16) {
+        if (!name) return '';
+        const m = name.match(/^([^(（]+)\s*[（(]([^）)]+)[）)]/);
+        if (!m) return name.length > max ? name.slice(0, max - 1) + '…' : name;
+        const prefix = m[1].trim();
+        let hints = m[2].split(/[、,]/).map(h => h.trim()).filter(Boolean);
+        // Drop range-cap noise like 和<100 / 結果<1000 — not defining traits.
+        hints = hints.filter(h => !/^(和|結果)\s*[<≤]/.test(h));
+        if (!hints.length) return prefix;
+        // Keep first hint (usually the range: 18以內 / 2位數 / 有退位) and
+        // last hint (usually the carry / borrow / remainder marker) — that
+        // combo is what actually distinguishes sibling tags.
+        const paren = hints.length <= 2
+            ? hints.join('、')
+            : `${hints[0]}、${hints[hints.length - 1]}`;
+        const label = `${prefix}(${paren})`;
+        if (label.length <= max) return label;
+        const budget = Math.max(2, max - prefix.length - 3);
+        return `${prefix}(${paren.slice(0, budget)}…)`;
+    }
+
     // ========================================
     // Initialize
     // ========================================
@@ -139,7 +165,7 @@
         const ctx = document.getElementById('radar-chart');
         if (!ctx) return;
 
-        const labels = stats.map(s => s.tagName.replace(/\(.*\)/, '').trim());
+        const labels = stats.map(s => shortLabel(s.tagName));
         const values = stats.map(s => s.accuracyRate);
 
         if (radarChartObj) {
@@ -326,7 +352,7 @@
         container.innerHTML = '<canvas id="time-chart"></canvas>';
         const ctx = document.getElementById('time-chart');
 
-        const labels = timeData.map(t => t.tagName.replace(/\(.*\)/, '').trim());
+        const labels = timeData.map(t => shortLabel(t.tagName));
         const values = timeData.map(t => t.avgTime);
 
         // Color gradient based on time
