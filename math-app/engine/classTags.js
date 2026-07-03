@@ -31,18 +31,35 @@ const CLASS_TAGS = {
     'sub_2d_nc',        // 2個數減法 (2位數、無退位)
   ],
   P2: [
-    // Full +/- including 3-digit with carry/borrow, plus 基本 × ÷.
-    'add_2d_nc', 'add_2d_c', 'add_3d_nc', 'add_3d_c',
-    'sub_2d_nc', 'sub_2d_b', 'sub_3d_b',
-    'mul_2x1',
-    'div_2d_1d',
+    // 1000以內三位數加減
+    'add_2n_3d_c',      // 2個數加法 (3位數、有進位)
+    'add_3n_3d_c',      // 3個數加法 (3位數、有進位)
+    'sub_2n_3d_nb',     // 2個數減法 (3位數、無退位)
+    'sub_2n_3d_b',      // 2個數減法 (3位數、有退位)
+    'mix_3n_3d_lr',     // 3個數加減混合 (3位數、由左至右)
+    // 基本表內乘除
+    'mul_1x1_easy',     // 2/3/4/5/10 乘法表
+    'mul_1x1_hard',     // 6/7/8/9 乘法表
+    'div_table_nr',     // 表內除法 (無餘數)
+    'div_table_r',      // 表內除法 (有餘數)
   ],
   P3: [
-    // Adds mul_3x1 (三位×一位) and three-digit ÷ one-digit variants.
-    'add_2d_nc', 'add_2d_c', 'add_3d_nc', 'add_3d_c',
-    'sub_2d_nc', 'sub_2d_b', 'sub_3d_b', 'sub_3d_z_mid',
-    'mul_2x1', 'mul_3x1',
-    'div_2d_1d', 'div_3d_1d_z0_mid', 'div_3d_1d_z0_end',
+    // 整數乘法進階
+    'mul_2d_1d_nc',     // 2位×1位 (無進位)
+    'mul_2d_1d_c',      // 2位×1位 (有進位)
+    'mul_3d_1d_nc',     // 3位×1位 (無進位)
+    'mul_3d_1d_c',      // 3位×1位 (有進位)
+    'mul_3n',           // 3個數連乘
+    // 整數一位數除法
+    'div_2d_1d',        // 2位÷1位 (無餘數) — reuse existing
+    'div_2d_1d_r',      // 2位÷1位 (有餘數)
+    'div_3d_1d_nr',     // 3位÷1位 (無餘數)
+    'div_3d_1d_r',      // 3位÷1位 (有餘數)
+    'div_3d_1d_z0_mid', // 商中間有 0 — reuse existing
+    'div_3d_1d_z0_end', // 商末尾有 0 — reuse existing
+    // 基本整數混合四則
+    'mix_3n_no_paren',  // 3個數四則混合 (無括號)
+    'mix_3n_paren',     // 3個數四則混合 (有小括號)
   ],
   P4: [
     // 乘法(二) + 除法(二): 2×2, 3-digit ÷ 2-digit — every integer tag now.
