@@ -34,6 +34,14 @@ function digits(n) {
 // 標籤定義：中文名稱與類別
 // ========================================
 const TAG_INFO = {
+    // ----- P1 tags -----
+    add_wi18_nc:     { name: '2個數加法 (18以內、無進位)', category: '加法', symbol: '+' },
+    add_wi18_c:      { name: '2個數加法 (18以內、有進位)', category: '加法', symbol: '+' },
+    sub_wi18_nb:     { name: '2個數減法 (18以內、無退位)', category: '減法', symbol: '-' },
+    add_2d_c_p1:     { name: '2個數加法 (2位數、有進位、和<100)', category: '加法', symbol: '+' },
+    add_3n_2d_nc:    { name: '3個數加法 (2位數、無進位、和<100)', category: '加法', symbol: '+' },
+    add_3n_2d_c:     { name: '3個數加法 (2位數、有進位、和<100)', category: '加法', symbol: '+' },
+    // ----- Existing tags -----
     add_2d_nc:       { name: '兩位數加法 (無進位)', category: '加法', symbol: '+' },
     add_2d_c:        { name: '兩位數加法 (有進位)', category: '加法', symbol: '+' },
     add_3d_nc:       { name: '三位數加法 (無進位)', category: '加法', symbol: '+' },
@@ -53,6 +61,88 @@ const TAG_INFO = {
 };
 
 const ALL_TAGS = Object.keys(TAG_INFO);
+
+// ========================================
+// P1 出題邏輯
+// ========================================
+
+/** 2個數加法 (18以內、無進位) — 兩個個位數，和不進位 (和 ≤ 9) */
+function generate_add_wi18_nc() {
+    const a = randInt(1, 8);
+    const b = randInt(1, 9 - a);
+    return { a, b, answer: a + b, text: `${a} + ${b}`, symbol: '+' };
+}
+
+/** 2個數加法 (18以內、有進位) — 兩個個位數，和進位 (10 ≤ 和 ≤ 18) */
+function generate_add_wi18_c() {
+    const a = randInt(2, 9);
+    const b = randInt(Math.max(1, 10 - a), 9);
+    return { a, b, answer: a + b, text: `${a} + ${b}`, symbol: '+' };
+}
+
+/** 2個數減法 (18以內、無退位) — 被減數 ≤ 18，個位不退位 */
+function generate_sub_wi18_nb() {
+    // Mix of pure single-digit and (10-18)−(1-digit no-borrow) subtractions.
+    if (Math.random() < 0.4) {
+        const a = randInt(2, 9);
+        const b = randInt(1, a);
+        return { a, b, answer: a - b, text: `${a} - ${b}`, symbol: '-' };
+    }
+    const a = randInt(11, 18);
+    const ones = a % 10;
+    const b = randInt(1, Math.max(1, ones));
+    return { a, b, answer: a - b, text: `${a} - ${b}`, symbol: '-' };
+}
+
+/** 2個數加法 (2位數、有進位、和<100) */
+function generate_add_2d_c_p1() {
+    for (let i = 0; i < 100; i++) {
+        const a = randInt(10, 89);
+        const b = randInt(10, 89);
+        const da = digits(a), db = digits(b);
+        if (da.ones + db.ones >= 10 && da.tens + db.tens <= 8 && a + b < 100) {
+            return { a, b, answer: a + b, text: `${a} + ${b}`, symbol: '+' };
+        }
+    }
+    // Fallback: hand-build a valid pair.
+    const tensA = randInt(1, 3), tensB = randInt(1, 8 - tensA);
+    const onesA = randInt(5, 9);
+    const onesB = randInt(10 - onesA, 9);
+    const a = tensA * 10 + onesA;
+    const b = tensB * 10 + onesB;
+    return { a, b, answer: a + b, text: `${a} + ${b}`, symbol: '+' };
+}
+
+/** 3個數加法 (2位數、無進位、和<100) */
+function generate_add_3n_2d_nc() {
+    // Split "10 across ones" and "10 across tens" budgets among 3 addends.
+    const tensA = randInt(1, 7);
+    const tensB = randInt(1, Math.max(1, 8 - tensA));
+    const tensC = randInt(1, Math.max(1, 9 - tensA - tensB));
+    const onesA = randInt(0, 7);
+    const onesB = randInt(0, Math.max(0, 8 - onesA));
+    const onesC = randInt(0, Math.max(0, 9 - onesA - onesB));
+    const a = tensA * 10 + onesA;
+    const b = tensB * 10 + onesB;
+    const c = tensC * 10 + onesC;
+    return { a, b, c, answer: a + b + c, text: `${a} + ${b} + ${c}`, symbol: '+' };
+}
+
+/** 3個數加法 (2位數、有進位、和<100) */
+function generate_add_3n_2d_c() {
+    for (let i = 0; i < 200; i++) {
+        const a = randInt(10, 79);
+        const b = randInt(10, 79);
+        const c = randInt(10, 79);
+        const da = digits(a), db = digits(b), dc = digits(c);
+        const sum = a + b + c;
+        if (sum < 100 && (da.ones + db.ones + dc.ones) >= 10) {
+            return { a, b, c, answer: sum, text: `${a} + ${b} + ${c}`, symbol: '+' };
+        }
+    }
+    // Fallback: 15 + 26 + 37 = 78 (ones 5+6+7=18 carry)
+    return { a: 15, b: 26, c: 37, answer: 78, text: '15 + 26 + 37', symbol: '+' };
+}
 
 // ========================================
 // 出題邏輯：加法
@@ -473,6 +563,14 @@ function generate_div_3d_2d() {
 // ========================================
 
 const GENERATORS = {
+    // P1
+    add_wi18_nc: generate_add_wi18_nc,
+    add_wi18_c: generate_add_wi18_c,
+    sub_wi18_nb: generate_sub_wi18_nb,
+    add_2d_c_p1: generate_add_2d_c_p1,
+    add_3n_2d_nc: generate_add_3n_2d_nc,
+    add_3n_2d_c: generate_add_3n_2d_c,
+    // Existing
     add_2d_nc: generate_add_2d_nc,
     add_2d_c: generate_add_2d_c,
     add_3d_nc: generate_add_3d_nc,

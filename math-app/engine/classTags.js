@@ -19,10 +19,16 @@
 // 想加這些題型的話，需要在 questionGenerator.js 新增對應的 tag / 產生器。
 const CLASS_TAGS = {
   P1: [
-    // Only two smallest tags — really still too hard for P1's <=18 spec,
-    // but this is the smallest we have. Add single-digit tags to fully match.
-    'add_2d_nc',
-    'sub_2d_nc',
+    // 基本加減口算
+    'add_wi18_nc',      // 2個數加法 (18以內、無進位)
+    'add_wi18_c',       // 2個數加法 (18以內、有進位)
+    'sub_wi18_nb',      // 2個數減法 (18以內、無退位)
+    // 100以內筆算加減
+    'add_2d_nc',        // 2個數加法 (2位數、無進位)
+    'add_2d_c_p1',      // 2個數加法 (2位數、有進位、和<100)
+    'add_3n_2d_nc',     // 3個數加法 (2位數、無進位、和<100)
+    'add_3n_2d_c',      // 3個數加法 (2位數、有進位、和<100)
+    'sub_2d_nc',        // 2個數減法 (2位數、無退位)
   ],
   P2: [
     // Full +/- including 3-digit with carry/borrow, plus 基本 × ÷.
