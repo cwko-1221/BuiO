@@ -62,6 +62,17 @@ const TAG_INFO = {
     div_3d_1d_r:     { name: '3位數÷1位數 (有餘數，只寫商)', category: '除法', symbol: '÷' },
     mix_3n_no_paren: { name: '3個數四則混合 (先乘除後加減、無括號)', category: '混合', symbol: '?' },
     mix_3n_paren:    { name: '3個數四則混合 (有小括號)', category: '混合', symbol: '?' },
+    // ----- P4 tags -----
+    mul_2d_2d_nc:    { name: '2位數乘2位數 (無進位)', category: '乘法', symbol: '×' },
+    mul_2d_2d_c:     { name: '2位數乘2位數 (有進位)', category: '乘法', symbol: '×' },
+    mul_3d_2d_nc:    { name: '3位數乘2位數 (無進位)', category: '乘法', symbol: '×' },
+    mul_3d_2d_c:     { name: '3位數乘2位數 (有進位)', category: '乘法', symbol: '×' },
+    div_2d_2d_b_nr:  { name: '2位數÷2位數 (有退位、無餘數)', category: '除法', symbol: '÷' },
+    div_2d_2d_b_r:   { name: '2位數÷2位數 (有退位、有餘數，只寫商)', category: '除法', symbol: '÷' },
+    div_3d_2d_b_nr:  { name: '3位數÷2位數 (有退位、無餘數)', category: '除法', symbol: '÷' },
+    div_3d_2d_b_r:   { name: '3位數÷2位數 (有退位、有餘數，只寫商)', category: '除法', symbol: '÷' },
+    mix_4n_paren:    { name: '4個數四則混合 (含小括號)', category: '混合', symbol: '?' },
+    mix_4n_brackets: { name: '4個數四則混合 (含中括號)', category: '混合', symbol: '?' },
     // ----- Existing tags -----
     add_2d_nc:       { name: '兩位數加法 (無進位)', category: '加法', symbol: '+' },
     add_2d_c:        { name: '兩位數加法 (有進位)', category: '加法', symbol: '+' },
@@ -423,6 +434,165 @@ function generate_mix_3n_paren() {
         }
     }
     return { a: 5, b: 3, c: 4, answer: 32, text: '(5 + 3) × 4', symbol: '?' };
+}
+
+// ========================================
+// P4 出題邏輯
+// ========================================
+
+/** 2位數乘2位數 (無進位) — 所有部分積 < 10, 相加不進位 */
+function generate_mul_2d_2d_nc() {
+    for (let i = 0; i < 300; i++) {
+        const a = randInt(11, 99);
+        const b = randInt(11, 99);
+        const da = digits(a), db = digits(b);
+        if (da.ones * db.ones < 10 &&
+            da.ones * db.tens < 10 &&
+            da.tens * db.ones < 10 &&
+            da.tens * db.tens < 10) {
+            return { a, b, answer: a * b, text: `${a} × ${b}`, symbol: '×' };
+        }
+    }
+    return { a: 12, b: 13, answer: 156, text: '12 × 13', symbol: '×' };
+}
+
+/** 2位數乘2位數 (有進位) */
+function generate_mul_2d_2d_c() {
+    for (let i = 0; i < 100; i++) {
+        const a = randInt(11, 99);
+        const b = randInt(11, 99);
+        const da = digits(a), db = digits(b);
+        if (da.ones * db.ones >= 10 ||
+            da.tens * db.ones >= 10 ||
+            da.ones * db.tens >= 10) {
+            return { a, b, answer: a * b, text: `${a} × ${b}`, symbol: '×' };
+        }
+    }
+    return { a: 48, b: 25, answer: 1200, text: '48 × 25', symbol: '×' };
+}
+
+/** 3位數乘2位數 (無進位) */
+function generate_mul_3d_2d_nc() {
+    for (let i = 0; i < 300; i++) {
+        const a = randInt(101, 999);
+        const b = randInt(11, 99);
+        const da = digits(a), db = digits(b);
+        if (da.ones * db.ones < 10 && da.tens * db.ones < 10 && da.hundreds * db.ones < 10 &&
+            da.ones * db.tens < 10 && da.tens * db.tens < 10 && da.hundreds * db.tens < 10) {
+            return { a, b, answer: a * b, text: `${a} × ${b}`, symbol: '×' };
+        }
+    }
+    return { a: 123, b: 12, answer: 1476, text: '123 × 12', symbol: '×' };
+}
+
+/** 3位數乘2位數 (有進位) */
+function generate_mul_3d_2d_c() {
+    for (let i = 0; i < 100; i++) {
+        const a = randInt(101, 999);
+        const b = randInt(11, 99);
+        const da = digits(a), db = digits(b);
+        if (da.ones * db.ones >= 10 || da.tens * db.ones >= 10 ||
+            da.hundreds * db.ones >= 10 || da.ones * db.tens >= 10 ||
+            da.tens * db.tens >= 10 || da.hundreds * db.tens >= 10) {
+            return { a, b, answer: a * b, text: `${a} × ${b}`, symbol: '×' };
+        }
+    }
+    return { a: 456, b: 78, answer: 35568, text: '456 × 78', symbol: '×' };
+}
+
+/** 2位數÷2位數 (有退位、無餘數) — 商 2..9 */
+function generate_div_2d_2d_b_nr() {
+    const b = randInt(11, 49);
+    const quotient = randInt(2, Math.min(9, Math.floor(99 / b)));
+    const a = b * quotient;
+    return { a, b, answer: quotient, text: `${a} ÷ ${b}`, symbol: '÷' };
+}
+
+/** 2位數÷2位數 (有退位、有餘數，只寫商) */
+function generate_div_2d_2d_b_r() {
+    const b = randInt(11, 49);
+    const quotient = randInt(2, Math.min(9, Math.floor(99 / b)));
+    const remainder = randInt(1, b - 1);
+    const a = b * quotient + remainder;
+    if (a > 99) return { a: 87, b: 13, answer: 6, remainder: 9, text: '87 ÷ 13 (只寫商)', symbol: '÷' };
+    return { a, b, answer: quotient, remainder, text: `${a} ÷ ${b} (只寫商)`, symbol: '÷' };
+}
+
+/** 3位數÷2位數 (有退位、無餘數) */
+function generate_div_3d_2d_b_nr() {
+    for (let i = 0; i < 100; i++) {
+        const b = randInt(11, 99);
+        const quotient = randInt(10, Math.floor(999 / b));
+        const a = b * quotient;
+        if (a >= 100 && a <= 999) {
+            return { a, b, answer: quotient, text: `${a} ÷ ${b}`, symbol: '÷' };
+        }
+    }
+    return { a: 552, b: 24, answer: 23, text: '552 ÷ 24', symbol: '÷' };
+}
+
+/** 3位數÷2位數 (有退位、有餘數，只寫商) */
+function generate_div_3d_2d_b_r() {
+    for (let i = 0; i < 100; i++) {
+        const b = randInt(11, 99);
+        const quotient = randInt(10, Math.floor(999 / b));
+        const remainder = randInt(1, b - 1);
+        const a = b * quotient + remainder;
+        if (a >= 100 && a <= 999) {
+            return { a, b, answer: quotient, remainder,
+                     text: `${a} ÷ ${b} (只寫商)`, symbol: '÷' };
+        }
+    }
+    return { a: 555, b: 24, answer: 23, remainder: 3, text: '555 ÷ 24 (只寫商)', symbol: '÷' };
+}
+
+/** 4個數四則混合 (含小括號) */
+function generate_mix_4n_paren() {
+    const templates = [
+        // (a + b) × c - d
+        () => { const a=randInt(3,20), b=randInt(3,20), c=randInt(2,9), d=randInt(5,50);
+                return { text: `(${a} + ${b}) × ${c} - ${d}`, answer: (a+b)*c - d }; },
+        // (a - b) × c + d
+        () => { const b=randInt(2,10), a=b+randInt(2,15), c=randInt(2,9), d=randInt(5,30);
+                return { text: `(${a} - ${b}) × ${c} + ${d}`, answer: (a-b)*c + d }; },
+        // a × (b + c) - d
+        () => { const a=randInt(2,9), b=randInt(3,15), c=randInt(3,15), d=randInt(5,30);
+                return { text: `${a} × (${b} + ${c}) - ${d}`, answer: a*(b+c) - d }; },
+        // (a + b) × (c - d)
+        () => { const a=randInt(3,15), b=randInt(3,15), d=randInt(2,7), c=d+randInt(2,7);
+                return { text: `(${a} + ${b}) × (${c} - ${d})`, answer: (a+b)*(c-d) }; },
+        // a + b × (c + d)
+        () => { const a=randInt(5,30), b=randInt(2,9), c=randInt(3,15), d=randInt(3,15);
+                return { text: `${a} + ${b} × (${c} + ${d})`, answer: a + b*(c+d) }; },
+    ];
+    for (let i = 0; i < 30; i++) {
+        const res = templates[randInt(0, templates.length - 1)]();
+        if (res.answer > 0 && res.answer < 1000) return { ...res, symbol: '?' };
+    }
+    return { text: '(5 + 3) × 4 - 8', answer: 24, symbol: '?' };
+}
+
+/** 4個數四則混合 (含中括號) */
+function generate_mix_4n_brackets() {
+    const templates = [
+        // [(a + b) × c] - d
+        () => { const a=randInt(3,15), b=randInt(3,15), c=randInt(2,9), d=randInt(5,50);
+                return { text: `[(${a} + ${b}) × ${c}] - ${d}`, answer: (a+b)*c - d }; },
+        // [a × (b + c)] + d
+        () => { const a=randInt(2,9), b=randInt(3,15), c=randInt(3,15), d=randInt(5,30);
+                return { text: `[${a} × (${b} + ${c})] + ${d}`, answer: a*(b+c) + d }; },
+        // [a + b × c] - d  (bracket wraps precedence)
+        () => { const a=randInt(5,30), b=randInt(2,9), c=randInt(2,9), d=randInt(5,30);
+                return { text: `[${a} + ${b} × ${c}] - ${d}`, answer: (a + b*c) - d }; },
+        // [(a - b) × c] + d
+        () => { const b=randInt(2,10), a=b+randInt(2,15), c=randInt(2,9), d=randInt(5,30);
+                return { text: `[(${a} - ${b}) × ${c}] + ${d}`, answer: (a-b)*c + d }; },
+    ];
+    for (let i = 0; i < 30; i++) {
+        const res = templates[randInt(0, templates.length - 1)]();
+        if (res.answer > 0 && res.answer < 1000) return { ...res, symbol: '?' };
+    }
+    return { text: '[(5 + 3) × 4] - 8', answer: 24, symbol: '?' };
 }
 
 // ========================================
@@ -872,6 +1042,17 @@ const GENERATORS = {
     div_3d_1d_r: generate_div_3d_1d_r,
     mix_3n_no_paren: generate_mix_3n_no_paren,
     mix_3n_paren: generate_mix_3n_paren,
+    // P4
+    mul_2d_2d_nc: generate_mul_2d_2d_nc,
+    mul_2d_2d_c: generate_mul_2d_2d_c,
+    mul_3d_2d_nc: generate_mul_3d_2d_nc,
+    mul_3d_2d_c: generate_mul_3d_2d_c,
+    div_2d_2d_b_nr: generate_div_2d_2d_b_nr,
+    div_2d_2d_b_r: generate_div_2d_2d_b_r,
+    div_3d_2d_b_nr: generate_div_3d_2d_b_nr,
+    div_3d_2d_b_r: generate_div_3d_2d_b_r,
+    mix_4n_paren: generate_mix_4n_paren,
+    mix_4n_brackets: generate_mix_4n_brackets,
     // Existing
     add_2d_nc: generate_add_2d_nc,
     add_2d_c: generate_add_2d_c,
