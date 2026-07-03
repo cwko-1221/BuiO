@@ -7,34 +7,54 @@
 //
 // Tags come from math-app/engine/questionGenerator.js.
 
+// Mapping is based on the HK primary math curriculum:
+//   P1 — 加減法 (18以內)   [口算為主，我們的 2-digit 標籤已算超前]
+//   P2 — 加減法擴展至三位數 (含進退位) + 基本乘除法
+//   P3 — 乘法(一)、除法(一)、四則運算(一)；三位數乘一位數；三位數÷一位數
+//   P4 — 乘法(二)、除法(二)：兩位×兩位、三位×兩位，除數擴至兩位數
+//   P5 — 分數/小數為主；整數運算保持完整
+//   P6 — 深化小數運算；整數運算保持完整
+//
+// NOTE: 現有題型只涵蓋兩位起的整數，未有單位數口算、分數、小數的題型。
+// 想加這些題型的話，需要在 questionGenerator.js 新增對應的 tag / 產生器。
 const CLASS_TAGS = {
   P1: [
+    // Only two smallest tags — really still too hard for P1's <=18 spec,
+    // but this is the smallest we have. Add single-digit tags to fully match.
     'add_2d_nc',
     'sub_2d_nc',
   ],
   P2: [
-    'add_2d_nc', 'add_2d_c',
-    'sub_2d_nc', 'sub_2d_b',
-  ],
-  P3: [
-    'add_2d_nc', 'add_2d_c', 'add_3d_nc',
+    // Full +/- including 3-digit with carry/borrow, plus 基本 × ÷.
+    'add_2d_nc', 'add_2d_c', 'add_3d_nc', 'add_3d_c',
     'sub_2d_nc', 'sub_2d_b', 'sub_3d_b',
     'mul_2x1',
+    'div_2d_1d',
   ],
-  P4: [
+  P3: [
+    // Adds mul_3x1 (三位×一位) and three-digit ÷ one-digit variants.
     'add_2d_nc', 'add_2d_c', 'add_3d_nc', 'add_3d_c',
     'sub_2d_nc', 'sub_2d_b', 'sub_3d_b', 'sub_3d_z_mid',
     'mul_2x1', 'mul_3x1',
-    'div_2d_1d',
-  ],
-  P5: [
-    'add_2d_nc', 'add_2d_c', 'add_3d_nc', 'add_3d_c',
-    'sub_2d_nc', 'sub_2d_b', 'sub_3d_b', 'sub_3d_z_mid',
-    'mul_2x1', 'mul_3x1', 'mul_2x2_nc_nc',
     'div_2d_1d', 'div_3d_1d_z0_mid', 'div_3d_1d_z0_end',
   ],
+  P4: [
+    // 乘法(二) + 除法(二): 2×2, 3-digit ÷ 2-digit — every integer tag now.
+    'add_2d_nc', 'add_2d_c', 'add_3d_nc', 'add_3d_c',
+    'sub_2d_nc', 'sub_2d_b', 'sub_3d_b', 'sub_3d_z_mid',
+    'mul_2x1', 'mul_3x1', 'mul_2x2_nc_nc', 'mul_2x2_c_c',
+    'div_2d_1d', 'div_3d_1d_z0_mid', 'div_3d_1d_z0_end', 'div_3d_2d',
+  ],
+  P5: [
+    // Curriculum focus shifts to fractions & decimals (not yet in generator).
+    // Keep all integer tags active for revision.
+    'add_2d_nc', 'add_2d_c', 'add_3d_nc', 'add_3d_c',
+    'sub_2d_nc', 'sub_2d_b', 'sub_3d_b', 'sub_3d_z_mid',
+    'mul_2x1', 'mul_3x1', 'mul_2x2_nc_nc', 'mul_2x2_c_c',
+    'div_2d_1d', 'div_3d_1d_z0_mid', 'div_3d_1d_z0_end', 'div_3d_2d',
+  ],
   P6: [
-    // All tags — full curriculum
+    // Same as P5 for now — decimals will land here once tags exist.
     'add_2d_nc', 'add_2d_c', 'add_3d_nc', 'add_3d_c',
     'sub_2d_nc', 'sub_2d_b', 'sub_3d_b', 'sub_3d_z_mid',
     'mul_2x1', 'mul_3x1', 'mul_2x2_nc_nc', 'mul_2x2_c_c',
