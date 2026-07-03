@@ -7,7 +7,7 @@ const users = require('../repositories/users.repo');
 const stats = require('../repositories/stats.repo');
 const logs = require('../repositories/logs.repo');
 const { ALL_TAGS, TAG_INFO } = require('../engine/questionGenerator');
-const { tagsForClass } = require('../engine/classTags');
+const { tagsForClass, tierForTag, TIER_ORDER } = require('../engine/classTags');
 const { requireAuth, requireTeacher } = require('../middleware/auth');
 
 router.use(requireAuth);
@@ -39,6 +39,7 @@ function enrichTag(row) {
     accuracyRate: Number(row.accuracyrate) || 0,
     tagName: TAG_INFO[row.tag]?.name || row.tag,
     category: TAG_INFO[row.tag]?.category || '未知',
+    tier: tierForTag(row.tag),
   };
 }
 
@@ -73,6 +74,11 @@ router.get('/overview', async (req, res, next) => {
 // ----------------------------------------------------------------
 // GET /tags
 // ----------------------------------------------------------------
+router.get('/tiers', async (req, res, next) => {
+  try { res.json({ success: true, tiers: TIER_ORDER }); }
+  catch (e) { next(e); }
+});
+
 router.get('/tags', async (req, res, next) => {
   try {
     const studentId = targetStudent(req);

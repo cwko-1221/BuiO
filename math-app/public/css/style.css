@@ -898,6 +898,67 @@ a { color: var(--accent-blue); text-decoration: none; }
     max-height: 300px;
 }
 
+/* Radar tier grid — up to 4 mini radars (P1..P4 tiers) */
+.radar-tier-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+.radar-tier-cell {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 14px 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+.radar-tier-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+.radar-tier-badge {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.9rem; color: #0d0f1d;
+    background: linear-gradient(135deg, #c58c2f, #f0c26e);
+    box-shadow: 0 4px 12px rgba(197, 140, 47, 0.30);
+}
+.radar-tier-cell.silver  .radar-tier-badge {
+    background: linear-gradient(135deg, #9aa5b3, #d0d7e0);
+    box-shadow: 0 4px 12px rgba(154, 165, 179, 0.30);
+}
+.radar-tier-cell.gold    .radar-tier-badge {
+    background: linear-gradient(135deg, #d4a020, #f5d76e);
+    box-shadow: 0 4px 12px rgba(212, 160, 32, 0.35);
+}
+.radar-tier-cell.diamond .radar-tier-badge {
+    background: linear-gradient(135deg, #38bdf8, #a855f7);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35);
+}
+.radar-tier-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-left: auto;
+}
+.radar-tier-canvas-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-height: 320px;
+}
+.radar-tier-empty {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 60px 10px;
+}
+
 /* Tag accuracy bars */
 .tag-bars {
     display: flex;

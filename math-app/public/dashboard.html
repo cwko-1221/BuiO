@@ -73,13 +73,11 @@
 
                 <!-- Charts Row -->
                 <div class="chart-section">
-                    <!-- Radar Chart -->
-                    <div class="chart-card glass-card-static">
+                    <!-- Radar Charts (one per tier) -->
+                    <div class="chart-card glass-card-static" id="radar-tier-card">
                         <div class="chart-card-title">🕸️ 能力雷達圖</div>
-                        <div class="chart-card-subtitle">各微能力指標的掌握程度</div>
-                        <div class="chart-container">
-                            <canvas id="radar-chart"></canvas>
-                        </div>
+                        <div class="chart-card-subtitle">各微能力指標的掌握程度（依等級分組）</div>
+                        <div id="radar-tier-grid" class="radar-tier-grid"></div>
                     </div>
 
                     <!-- Bar Chart -->

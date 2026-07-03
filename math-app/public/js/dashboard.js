@@ -10,33 +10,34 @@
     // State
     // ========================================
     let currentStudentId = '';
-    let radarChartObj = null;
+    let radarChartObjs = {};             // { bronze: Chart, silver: Chart, ... }
     let timeChartObj = null;
+    let tierOrder = [                    // fallback; refreshed from /api/stats/tiers
+        { id: 'bronze',  name: '銅' },
+        { id: 'silver',  name: '銀' },
+        { id: 'gold',    name: '金' },
+        { id: 'diamond', name: '鑽' },
+    ];
 
     // Build a compact tag label for radar / time-analysis charts.
     // The full tag name is like "2個數加法 (2位數、有進位、和<100)". Stripping
     // parens completely made 3 tags all show as "2個數加法" (collision).
     // Keep both the category prefix and the distinguishing hint(s) inside
     // the parens, cap the total length so the label still fits.
-    function shortLabel(name, max = 16) {
+    // Chart.js radar accepts an array of strings for multi-line labels —
+    // return [prefix, "(hints)"] so nothing is truncated.
+    function shortLabel(name) {
         if (!name) return '';
         const m = name.match(/^([^(（]+)\s*[（(]([^）)]+)[）)]/);
-        if (!m) return name.length > max ? name.slice(0, max - 1) + '…' : name;
+        if (!m) return name;
         const prefix = m[1].trim();
         let hints = m[2].split(/[、,]/).map(h => h.trim()).filter(Boolean);
-        // Drop range-cap noise like 和<100 / 結果<1000 — not defining traits.
         hints = hints.filter(h => !/^(和|結果)\s*[<≤]/.test(h));
         if (!hints.length) return prefix;
-        // Keep first hint (usually the range: 18以內 / 2位數 / 有退位) and
-        // last hint (usually the carry / borrow / remainder marker) — that
-        // combo is what actually distinguishes sibling tags.
         const paren = hints.length <= 2
             ? hints.join('、')
             : `${hints[0]}、${hints[hints.length - 1]}`;
-        const label = `${prefix}(${paren})`;
-        if (label.length <= max) return label;
-        const budget = Math.max(2, max - prefix.length - 3);
-        return `${prefix}(${paren.slice(0, budget)}…)`;
+        return [prefix, `(${paren})`];
     }
 
     // ========================================
@@ -150,48 +151,90 @@
     async function loadTagStats() {
         if (!currentStudentId) return;
         try {
+            // Refresh tier metadata once per dashboard load (cached after).
+            if (!loadTagStats._tiersFetched) {
+                try {
+                    const r = await fetch('/api/stats/tiers', { credentials: 'include' });
+                    const d = await r.json();
+                    if (d.success && Array.isArray(d.tiers) && d.tiers.length) tierOrder = d.tiers;
+                } catch {}
+                loadTagStats._tiersFetched = true;
+            }
             const res = await fetch(`/api/stats/tags?studentId=${currentStudentId}`, { credentials: 'include' });
             const data = await res.json();
             if (!data.success) return;
 
-            renderRadarChart(data.stats);
+            renderTierRadars(data.stats);
             renderTagBars(data.stats);
         } catch (e) {
             console.error('載入標籤統計失敗:', e);
         }
     }
 
-    function renderRadarChart(stats) {
-        const ctx = document.getElementById('radar-chart');
-        if (!ctx) return;
+    // Render one small radar per tier the student actually has tags in.
+    // A P1 kid gets 銅 only; a P4 kid gets 銅/銀/金/鑽.
+    function renderTierRadars(stats) {
+        const grid = document.getElementById('radar-tier-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        // Kill any old chart instances first.
+        for (const key of Object.keys(radarChartObjs)) {
+            try { radarChartObjs[key].destroy(); } catch {}
+        }
+        radarChartObjs = {};
 
-        const labels = stats.map(s => shortLabel(s.tagName));
-        const values = stats.map(s => s.accuracyRate);
-
-        if (radarChartObj) {
-            radarChartObj.destroy();
+        // Group stats by tier.
+        const byTier = new Map();
+        for (const s of stats) {
+            const t = s.tier || 'other';
+            if (!byTier.has(t)) byTier.set(t, []);
+            byTier.get(t).push(s);
         }
 
-        radarChartObj = new Chart(ctx, {
+        const emojiFor = { bronze: '🥉', silver: '🥈', gold: '🥇', diamond: '💎' };
+
+        for (const tier of tierOrder) {
+            const list = byTier.get(tier.id) || [];
+            if (!list.length) continue;                    // grade doesn't have this tier
+
+            const cell = document.createElement('div');
+            cell.className = `radar-tier-cell ${tier.id}`;
+            cell.innerHTML = `
+                <div class="radar-tier-head">
+                    <span class="radar-tier-badge">${emojiFor[tier.id] || tier.name}</span>
+                    <span>${tier.name} 等級</span>
+                    <span class="radar-tier-subtitle">${list.length} 個能力</span>
+                </div>
+                <div class="radar-tier-canvas-wrap"><canvas></canvas></div>
+            `;
+            grid.appendChild(cell);
+            const canvas = cell.querySelector('canvas');
+            radarChartObjs[tier.id] = new Chart(canvas, radarConfigFor(list));
+        }
+    }
+
+    function radarConfigFor(list) {
+        return {
             type: 'radar',
             data: {
-                labels,
+                labels: list.map(s => shortLabel(s.tagName)),
                 datasets: [{
                     label: '正確率 (%)',
-                    data: values,
+                    data: list.map(s => s.accuracyRate),
                     backgroundColor: 'rgba(139, 92, 246, 0.15)',
                     borderColor: 'rgba(139, 92, 246, 0.8)',
                     borderWidth: 2,
                     pointBackgroundColor: 'rgba(139, 92, 246, 1)',
                     pointBorderColor: '#fff',
                     pointBorderWidth: 1,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                }]
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                }],
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
+                layout: { padding: 14 },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -200,12 +243,16 @@
                         bodyColor: '#94a3b8',
                         borderColor: 'rgba(255,255,255,0.1)',
                         borderWidth: 1,
-                        padding: 12,
+                        padding: 10,
                         cornerRadius: 8,
                         callbacks: {
-                            label: (ctx) => `正確率: ${ctx.raw}%`
-                        }
-                    }
+                            title: (items) => {
+                                const raw = list[items[0].dataIndex]?.tagName || '';
+                                return raw;
+                            },
+                            label: (ctx) => `正確率: ${ctx.raw}%`,
+                        },
+                    },
                 },
                 scales: {
                     r: {
@@ -215,22 +262,18 @@
                             stepSize: 20,
                             color: '#64748b',
                             backdropColor: 'transparent',
-                            font: { size: 10 }
+                            font: { size: 10 },
                         },
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.06)',
-                        },
-                        angleLines: {
-                            color: 'rgba(255, 255, 255, 0.06)',
-                        },
+                        grid:       { color: 'rgba(255, 255, 255, 0.06)' },
+                        angleLines: { color: 'rgba(255, 255, 255, 0.06)' },
                         pointLabels: {
-                            color: '#94a3b8',
-                            font: { size: 11, weight: 500 }
-                        }
-                    }
-                }
-            }
-        });
+                            color: '#cbd5e1',
+                            font: { size: 10, weight: 500 },
+                        },
+                    },
+                },
+            },
+        };
     }
 
     function renderTagBars(stats) {

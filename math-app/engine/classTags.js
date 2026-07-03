@@ -80,4 +80,21 @@ function tagsForClass(classname) {
   return ALL_TAGS;
 }
 
-module.exports = { CLASS_TAGS, tagsForClass, normalizeClassname };
+// Tier metadata for grouping stats on the dashboard.
+// Bronze = the P1 skills, Silver = P2 additions, Gold = P3 additions,
+// Diamond = P4 additions. Higher grades inherit lower tiers.
+const TIERS = [
+  { id: 'bronze',  name: '銅',   tags: new Set(P1_ONLY) },
+  { id: 'silver',  name: '銀',   tags: new Set(P2_ONLY) },
+  { id: 'gold',    name: '金',   tags: new Set(P3_ONLY) },
+  { id: 'diamond', name: '鑽',   tags: new Set(P4_ONLY) },
+];
+
+function tierForTag(tag) {
+  for (const t of TIERS) if (t.tags.has(tag)) return t.id;
+  return null;
+}
+
+const TIER_ORDER = TIERS.map(t => ({ id: t.id, name: t.name }));
+
+module.exports = { CLASS_TAGS, tagsForClass, normalizeClassname, tierForTag, TIER_ORDER };
