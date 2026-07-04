@@ -218,9 +218,12 @@
         try {
             const params = new URLSearchParams(location.search);
             const tag = params.get('tag');
+            const paramCount = parseInt(params.get('count'), 10);
+            const count = Number.isFinite(paramCount) && paramCount > 0
+                ? Math.min(paramCount, 20) : 10;
             const url = tag
-                ? `/api/quiz/questions?count=10&tag=${encodeURIComponent(tag)}`
-                : '/api/quiz/questions?count=10';
+                ? `/api/quiz/questions?count=${count}&tag=${encodeURIComponent(tag)}`
+                : `/api/quiz/questions?count=${count}`;
             const res = await fetch(url, { credentials: 'include' });
             const data = await res.json();
 

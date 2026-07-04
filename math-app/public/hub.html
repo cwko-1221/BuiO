@@ -70,13 +70,7 @@
             <a class="hub-card" id="card-dashboard" href="/dashboard.html">
                 <span class="icon">📊</span>
                 <h3>查看能力雷達圖</h3>
-                <p>查看自己每個題型的正確率、弱點分析和過往紀錄。</p>
-            </a>
-
-            <a class="hub-card" id="card-picker" href="/tag-picker.html">
-                <span class="icon">🎯</span>
-                <h3>選擇特定題型練習</h3>
-                <p>從你的年級題庫中挑一個題型集中練習 10 條。</p>
+                <p>看到弱點在哪？點擊雷達圖上的題型即可即時做 3 條練習。</p>
             </a>
         </div>
     </div>
@@ -102,7 +96,6 @@
                 heroStatus.innerHTML =
                     `📝 今日已完成 <strong>${st.todayCount}</strong> / ${st.need} 題 — 完成隨機練習後即解鎖下方功能。`;
                 document.getElementById('card-dashboard').classList.add('locked');
-                document.getElementById('card-picker').classList.add('locked');
                 for (const el of document.querySelectorAll('.hub-card.locked')) {
                     el.addEventListener('click', e => { e.preventDefault();
                         alert(`請先完成今天的隨機練習（${st.todayCount}/${st.need}）。`); });

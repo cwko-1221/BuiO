@@ -10,6 +10,7 @@
     // State
     // ========================================
     let currentStudentId = '';
+    let currentUserRole = '';            // 'teacher' | 'student'
     let radarChartObjs = {};             // { bronze: Chart, silver: Chart, ... }
     let timeChartObj = null;
     let tierOrder = [                    // fallback; refreshed from /api/stats/tiers
@@ -60,6 +61,7 @@
 
             document.getElementById('student-name').textContent = data.student.name;
             document.getElementById('student-avatar').textContent = data.student.name[0];
+            currentUserRole = data.student.role;
 
             if (data.student.role === 'teacher') {
                 // Teacher: existing student-picker flow.
@@ -238,6 +240,29 @@
         const n = list.length;
         const compact = false;
         const fontSize = n >= 12 ? 8 : n >= 9 ? 9 : 10;
+        // Students can click a label to practice that specific tag (3 questions).
+        // Teachers viewing a student's dashboard shouldn't trigger navigation.
+        const clickable = currentUserRole === 'student';
+
+        function findLabelHit(chart, evt) {
+            const scale = chart.scales?.r;
+            if (!scale) return -1;
+            const x = evt.offsetX, y = evt.offsetY;
+            // Chart.js draws pointLabels at radius = drawingArea + a small pad
+            // (~15 px). Try a couple radii to be tolerant of the exact number.
+            const radii = [scale.drawingArea + 12, scale.drawingArea + 24, scale.drawingArea + 36];
+            let best = -1, bestD = 40;   // 40 px hit tolerance
+            for (let i = 0; i < list.length; i++) {
+                for (const r of radii) {
+                    const p = scale.getPointPosition(i, r);
+                    const dx = x - p.x, dy = y - p.y;
+                    const d = Math.hypot(dx, dy);
+                    if (d < bestD) { bestD = d; best = i; }
+                }
+            }
+            return best;
+        }
+
         return {
             type: 'radar',
             data: {
@@ -259,6 +284,19 @@
                 responsive: true,
                 maintainAspectRatio: true,
                 layout: { padding: 40 },
+                onHover: !clickable ? undefined : (evt, _els, chart) => {
+                    const i = findLabelHit(chart, evt);
+                    chart.canvas.style.cursor = i >= 0 ? 'pointer' : 'default';
+                },
+                onClick: !clickable ? undefined : (evt, _els, chart) => {
+                    const i = findLabelHit(chart, evt);
+                    if (i < 0) return;
+                    const tag = list[i].tag;
+                    const name = list[i].tagName || tag;
+                    if (confirm(`練習「${name}」（3 條題目）？`)) {
+                        location.href = `/quiz.html?tag=${encodeURIComponent(tag)}&count=3`;
+                    }
+                },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -272,7 +310,7 @@
                         callbacks: {
                             title: (items) => {
                                 const raw = list[items[0].dataIndex]?.tagName || '';
-                                return raw;
+                                return raw + (clickable ? '（點選標籤練習 3 題）' : '');
                             },
                             label: (ctx) => `正確率: ${ctx.raw}%`,
                         },

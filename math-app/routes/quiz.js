@@ -59,7 +59,8 @@ router.get('/grade-tags', async (req, res, next) => {
 
 router.get('/questions', async (req, res, next) => {
   try {
-    const count = parseInt(req.query.count) || 10;
+    const rawCount = parseInt(req.query.count, 10);
+    const count = Number.isFinite(rawCount) && rawCount > 0 ? Math.min(rawCount, 20) : 10;
     const studentId = req.session.studentId;
     const { classname, tags: allowedTags } = await studentGradeTags(studentId);
     const requestedTag = req.query.tag ? String(req.query.tag) : null;
