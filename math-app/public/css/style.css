@@ -901,14 +901,14 @@ a { color: var(--accent-blue); text-decoration: none; }
 /* Radar tier grid — up to 4 mini radars (P1..P4 tiers) */
 .radar-tier-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 24px;
 }
 .radar-tier-cell {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
-    padding: 14px 12px 8px;
+    padding: 16px 18px 12px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -950,7 +950,8 @@ a { color: var(--accent-blue); text-decoration: none; }
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
-    max-height: 320px;
+    max-height: 420px;
+    min-height: 340px;
 }
 .radar-tier-empty {
     color: var(--text-muted);

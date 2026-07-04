@@ -25,8 +25,11 @@
     // Keep both the category prefix and the distinguishing hint(s) inside
     // the parens, cap the total length so the label still fits.
     // Chart.js radar accepts an array of strings for multi-line labels —
-    // return [prefix, "(hints)"] so nothing is truncated.
-    function shortLabel(name) {
+    // return [prefix, "(hints)"] so nothing is truncated. In `compact`
+    // mode (used when a tier has many tags and 2-line labels would collide
+    // between neighbours) we squash to a single line and drop redundant
+    // hints, still keeping the pair that makes sibling tags distinct.
+    function shortLabel(name, opts = {}) {
         if (!name) return '';
         const m = name.match(/^([^(（]+)\s*[（(]([^）)]+)[）)]/);
         if (!m) return name;
@@ -37,6 +40,7 @@
         const paren = hints.length <= 2
             ? hints.join('、')
             : `${hints[0]}、${hints[hints.length - 1]}`;
+        if (opts.compact) return `${prefix}(${paren})`;
         return [prefix, `(${paren})`];
     }
 
@@ -214,10 +218,16 @@
     }
 
     function radarConfigFor(list) {
+        // Tighten labels + font as the tier gets crowded so neighbours don't
+        // overlap. 12+ tags → single-line label + 9-px font;
+        // 9–11 tags → 2-line label + 9-px font; 8 or fewer → 2-line + 10 px.
+        const n = list.length;
+        const compact = n >= 12;
+        const fontSize = n >= 9 ? 9 : 10;
         return {
             type: 'radar',
             data: {
-                labels: list.map(s => shortLabel(s.tagName)),
+                labels: list.map(s => shortLabel(s.tagName, { compact })),
                 datasets: [{
                     label: '正確率 (%)',
                     data: list.map(s => s.accuracyRate),
@@ -234,7 +244,7 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                layout: { padding: 14 },
+                layout: { padding: 40 },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -268,7 +278,7 @@
                         angleLines: { color: 'rgba(255, 255, 255, 0.06)' },
                         pointLabels: {
                             color: '#cbd5e1',
-                            font: { size: 10, weight: 500 },
+                            font: { size: fontSize, weight: 500 },
                         },
                     },
                 },
