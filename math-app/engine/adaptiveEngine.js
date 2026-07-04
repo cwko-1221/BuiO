@@ -19,7 +19,7 @@ const { tagsForClass } = require('./classTags');
 const WEAKNESS_THRESHOLD = 70;  // 正確率低於此值視為弱點
 const WEAK_RATIO = 0.6;         // 弱點標籤佔比 60%
 const STRONG_RATIO = 0.4;       // 其他標籤佔比 40%
-const DEFAULT_QUIZ_SIZE = 5;    // 每次練習題數
+const DEFAULT_QUIZ_SIZE = 10;   // 每次練習題數
 
 /**
  * 取得學生各標籤的統計資料
