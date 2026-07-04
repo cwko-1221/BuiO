@@ -50,7 +50,6 @@
     init();
 
     async function init() {
-        // 檢查登入
         try {
             const res = await fetch('/api/auth/me', { credentials: 'include' });
             if (!res.ok) {
@@ -58,18 +57,31 @@
                 return;
             }
             const data = await res.json();
-            
-            // 權限檢查：只有老師可以看 dashboard
-            if (data.student.role !== 'teacher') {
-                window.location.href = '/quiz.html';
-                return;
-            }
 
             document.getElementById('student-name').textContent = data.student.name;
             document.getElementById('student-avatar').textContent = data.student.name[0];
-            
-            // 載入學生清單
-            await loadStudentList();
+
+            if (data.student.role === 'teacher') {
+                // Teacher: existing student-picker flow.
+                await loadStudentList();
+            } else {
+                // Student: skip the picker, show own stats immediately.
+                document.getElementById('student-loading').style.display = 'none';
+                const label = document.querySelector('label[for="student-selector"]');
+                if (label) label.style.display = 'none';
+                const title = document.querySelector('.main-content h1');
+                if (title) title.textContent = '📊 我的學習進度';
+                const subtitle = title?.nextElementSibling;
+                if (subtitle && subtitle.tagName === 'P') {
+                    subtitle.textContent = '查看你自己每個題型的正確率和弱點分析。';
+                }
+                // Hide the teacher-only "📊 教師儀表板" nav link label so students
+                // don't see a mismatched title in the top bar.
+                const navActive = document.querySelector('.navbar a.active');
+                if (navActive) navActive.textContent = '📊 我的學習';
+                currentStudentId = data.student.id;
+                await reloadAllStats();
+            }
 
         } catch {
             window.location.href = '/';
