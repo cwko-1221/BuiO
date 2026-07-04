@@ -167,7 +167,15 @@ app.get('/english/practice', requireSession, (req, res) => res.sendFile(path.joi
 app.get('/login.html',     (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'login.html')));
 app.get('/quiz.html',      (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'quiz.html')));
 app.get('/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'dashboard.html')));
-app.get('/math',           (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'index.html')));
+app.get('/tag-picker.html',(req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'tag-picker.html')));
+app.get('/math',           (req, res) => {
+  // Students land on the hub with the daily-random gate; teachers go
+  // straight to the dashboard.
+  if (req.session?.role === 'teacher') {
+    return res.sendFile(path.join(__dirname, 'math-app', 'public', 'dashboard.html'));
+  }
+  res.sendFile(path.join(__dirname, 'math-app', 'public', 'hub.html'));
+});
 
 // Report (teacher only)
 app.use('/report-app', express.static(path.join(__dirname, 'report-app')));

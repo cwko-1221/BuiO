@@ -17,6 +17,25 @@ function targetStudent(req) {
   return req.session.studentId;
 }
 
+// Students may only view their own analytics after completing today's
+// random practice. Teachers always pass (they're viewing someone else).
+async function requireDailyRandomForStudent(req, res) {
+  if (req.session.role === 'teacher') return true;
+  const uid = req.session.studentId;
+  const u = await users.findByIdSummary(uid);
+  const tags = tagsForClass(u?.classname || '');
+  const t = await logs.todayOverview(uid, tags);
+  const n = Number(t.todayquestions) || 0;
+  if (n < 10) {
+    res.status(403).json({
+      success: false, gated: true,
+      message: `請先完成今天的隨機練習（${n}/10）。`,
+    });
+    return false;
+  }
+  return true;
+}
+
 // Restrict a student's dashboard to the tags in their grade's curriculum.
 // Falls back to ALL_TAGS for unknown classes / staff / graduated.
 async function tagsForStudentId(studentId) {
@@ -48,6 +67,7 @@ function enrichTag(row) {
 // ----------------------------------------------------------------
 router.get('/overview', async (req, res, next) => {
   try {
+    if (!(await requireDailyRandomForStudent(req, res))) return;
     const studentId = targetStudent(req);
     const tags = await tagsForStudentId(studentId);
     const ov = await stats.overview(studentId, tags);
@@ -81,6 +101,7 @@ router.get('/tiers', async (req, res, next) => {
 
 router.get('/tags', async (req, res, next) => {
   try {
+    if (!(await requireDailyRandomForStudent(req, res))) return;
     const studentId = targetStudent(req);
     const tags = await tagsForStudentId(studentId);
     const rows = await stats.tagBreakdown(studentId, tags);
@@ -95,6 +116,7 @@ router.get('/tags', async (req, res, next) => {
 // ----------------------------------------------------------------
 router.get('/history', async (req, res, next) => {
   try {
+    if (!(await requireDailyRandomForStudent(req, res))) return;
     const studentId = targetStudent(req);
     const limit = parseInt(req.query.limit) || 50;
     const offset = parseInt(req.query.offset) || 0;
@@ -130,6 +152,7 @@ router.get('/history', async (req, res, next) => {
 // ----------------------------------------------------------------
 router.get('/weaknesses', async (req, res, next) => {
   try {
+    if (!(await requireDailyRandomForStudent(req, res))) return;
     const studentId = targetStudent(req);
     const tags = await tagsForStudentId(studentId);
     const rows = await stats.weaknesses(studentId, tags);
@@ -146,6 +169,7 @@ router.get('/weaknesses', async (req, res, next) => {
 // ----------------------------------------------------------------
 router.get('/time-analysis', async (req, res, next) => {
   try {
+    if (!(await requireDailyRandomForStudent(req, res))) return;
     const studentId = targetStudent(req);
     const tags = await tagsForStudentId(studentId);
     const rows = await logs.timeAnalysis(studentId, tags);

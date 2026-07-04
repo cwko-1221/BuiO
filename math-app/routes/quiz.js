@@ -8,26 +8,83 @@ const stats = require('../repositories/stats.repo');
 const users = require('../repositories/users.repo');
 const { withTransaction } = require('../db/database');
 const { generateAdaptiveQuiz } = require('../engine/adaptiveEngine');
+const { generateQuestion, TAG_INFO } = require('../engine/questionGenerator');
+const { tagsForClass } = require('../engine/classTags');
 const { requireAuth } = require('../middleware/auth');
+
+// A "random" (adaptive) practice session is 10 questions; if the student's
+// today log count is >= this, they've finished at least one random session
+// today and the tag-picker / dashboard are unlocked.
+const DAILY_RANDOM_THRESHOLD = 10;
+
+async function studentGradeTags(studentId) {
+  const u = await users.findByIdSummary(studentId);
+  return { classname: u?.classname || null, tags: tagsForClass(u?.classname || '') };
+}
+
+async function todayRandomDone(studentId, tags) {
+  const t = await logs.todayOverview(studentId, tags);
+  const n = Number(t.todayquestions) || 0;
+  return { done: n >= DAILY_RANDOM_THRESHOLD, todayCount: n, need: DAILY_RANDOM_THRESHOLD };
+}
 
 router.use(requireAuth);
 
 // ----------------------------------------------------------------
 // GET /questions  — adaptive quiz
 // ----------------------------------------------------------------
+// GET /today-status  — used by the math hub to unlock/lock advanced options.
+router.get('/today-status', async (req, res, next) => {
+  try {
+    const { tags } = await studentGradeTags(req.session.studentId);
+    const status = await todayRandomDone(req.session.studentId, tags);
+    res.json({ success: true, ...status });
+  } catch (e) { next(e); }
+});
+
+// GET /grade-tags  — hub uses this to render the tag picker.
+router.get('/grade-tags', async (req, res, next) => {
+  try {
+    const { tags } = await studentGradeTags(req.session.studentId);
+    res.json({
+      success: true,
+      tags: tags.map(t => ({
+        tag: t,
+        tagName: TAG_INFO[t]?.name || t,
+        category: TAG_INFO[t]?.category || '',
+      })),
+    });
+  } catch (e) { next(e); }
+});
+
 router.get('/questions', async (req, res, next) => {
   try {
     const count = parseInt(req.query.count) || 10;
     const studentId = req.session.studentId;
+    const { classname, tags: allowedTags } = await studentGradeTags(studentId);
+    const requestedTag = req.query.tag ? String(req.query.tag) : null;
 
-    // Look up the student's classname so the adaptive engine can restrict
-    // the tag pool to their grade (P1 gets easier tags than P6).
-    const userSummary = await users.findByIdSummary(studentId);
-    const classname = userSummary?.classname || null;
-
-    const { questions: full, distribution } = await generateAdaptiveQuiz(
-      studentId, count, { classname }
-    );
+    let full;
+    if (requestedTag) {
+      // Tag-specific practice — gated by "random must be done today".
+      if (!allowedTags.includes(requestedTag)) {
+        return res.status(403).json({ success: false, message: '此題型不在你的年級範圍。' });
+      }
+      const status = await todayRandomDone(studentId, allowedTags);
+      if (!status.done) {
+        return res.status(403).json({
+          success: false,
+          message: `請先完成今天的隨機練習（${status.todayCount}/${status.need}）。`,
+          gated: true,
+        });
+      }
+      full = Array.from({ length: count }, () => generateQuestion(requestedTag));
+    } else {
+      // Random / adaptive practice.
+      const result = await generateAdaptiveQuiz(studentId, count, { classname });
+      full = result.questions;
+      res.locals._distribution = result.distribution;
+    }
 
     req.session.currentQuiz = full.map((q, idx) => ({
       index: idx + 1,
@@ -38,6 +95,8 @@ router.get('/questions', async (req, res, next) => {
 
     res.json({
       success: true,
+      mode: requestedTag ? 'tag' : 'random',
+      requestedTag,
       count: full.length,
       questions: full.map((q, idx) => ({
         index: idx + 1,
@@ -47,7 +106,7 @@ router.get('/questions', async (req, res, next) => {
         questionText: q.questionText,
         symbol: q.symbol,
       })),
-      distribution,
+      distribution: res.locals._distribution || null,
     });
   } catch (e) { next(e); }
 });

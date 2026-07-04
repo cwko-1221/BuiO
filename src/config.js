@@ -1,7 +1,9 @@
 // =============================================
 // 本地路徑（所有 App 整合在同一個伺服器）
 // =============================================
-export const MATH_QUIZ_URL = '/quiz.html';
+// Students land on the hub (with the daily-random gate) instead of jumping
+// straight into the quiz. Teachers still go to the dashboard.
+export const MATH_QUIZ_URL = '/math';
 export const MATH_DASHBOARD_URL = '/dashboard.html';
 export const WHITEBOARD_BASE = '/whiteboard';
 

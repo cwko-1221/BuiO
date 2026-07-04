@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>杯澳四則特訓 ✦ 學生首頁</title>
+    <link rel="stylesheet" href="/math-app/css/style.css">
+    <style>
+        body { min-height: 100vh; display: flex; flex-direction: column; }
+        .hub-wrap { max-width: 900px; margin: 0 auto; padding: 24px 20px 60px; width: 100%; }
+        .hub-topbar { display: flex; align-items: center; gap: 12px; padding: 14px 0 24px; }
+        .hub-topbar h1 { margin: 0; font-size: 1.15rem; flex: 1; }
+        .hub-topbar .btn-back { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary); padding: 8px 14px; border-radius: 10px; cursor: pointer;
+            font-size: 0.9rem; text-decoration: none; }
+        .hub-hero { padding: 26px 24px; border-radius: 18px;
+            background: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(56,189,248,0.10));
+            border: 1px solid rgba(139,92,246,0.25); margin-bottom: 24px; }
+        .hub-hero h2 { margin: 0 0 4px; font-size: 1.4rem; }
+        .hub-hero p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+
+        .hub-cards { display: grid; gap: 16px; grid-template-columns: 1fr; }
+        @media (min-width: 720px) { .hub-cards { grid-template-columns: 1fr 1fr; } }
+        .hub-cards .primary { grid-column: 1 / -1; }
+
+        .hub-card { position: relative; padding: 22px 24px; border-radius: 16px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+            display: flex; flex-direction: column; gap: 10px;
+            transition: transform 0.15s, border-color 0.2s, background 0.2s;
+            cursor: pointer; color: inherit; text-decoration: none; }
+        .hub-card:not(.locked):hover { transform: translateY(-2px); border-color: rgba(139,92,246,0.5);
+            background: rgba(255,255,255,0.08); }
+        .hub-card .icon { font-size: 2rem; }
+        .hub-card h3 { margin: 0; font-size: 1.15rem; }
+        .hub-card p { margin: 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+        .hub-card.locked { cursor: not-allowed; opacity: 0.55; filter: grayscale(0.35); }
+        .hub-card.locked::after { content: '🔒 需先完成今日隨機練習';
+            position: absolute; top: 12px; right: 14px; font-size: 0.7rem;
+            color: #fca5a5; background: rgba(220,38,38,0.15);
+            border: 1px solid rgba(220,38,38,0.3); padding: 3px 8px; border-radius: 999px; }
+
+        .hub-card.primary { background: linear-gradient(135deg, #7c3aed, #2563eb); border: none; }
+        .hub-card.primary h3, .hub-card.primary p { color: white; }
+        .hub-card.primary p { opacity: 0.9; }
+
+        .status-line { margin-top: 4px; font-size: 0.85rem; color: #fbbf24; font-weight: 500; }
+        .status-line.done { color: #34d399; }
+    </style>
+</head>
+<body>
+    <div class="hub-wrap">
+        <header class="hub-topbar">
+            <a class="btn-back" href="/">← 返回主頁</a>
+            <h1>🧮 杯澳四則特訓</h1>
+            <span id="user-tag" style="font-size:0.85rem;color:var(--text-muted)"></span>
+        </header>
+
+        <section class="hub-hero">
+            <h2 id="greeting">今日練習</h2>
+            <p id="hero-status">載入中…</p>
+        </section>
+
+        <div class="hub-cards">
+            <a class="hub-card primary" href="/quiz.html">
+                <span class="icon">🎲</span>
+                <h3>隨機練習（每日必做）</h3>
+                <p>系統會根據你的弱點自動配題 10 條 — 完成後即可解鎖下方選項。</p>
+            </a>
+
+            <a class="hub-card" id="card-dashboard" href="/dashboard.html">
+                <span class="icon">📊</span>
+                <h3>查看能力雷達圖</h3>
+                <p>查看自己每個題型的正確率、弱點分析和過往紀錄。</p>
+            </a>
+
+            <a class="hub-card" id="card-picker" href="/tag-picker.html">
+                <span class="icon">🎯</span>
+                <h3>選擇特定題型練習</h3>
+                <p>從你的年級題庫中挑一個題型集中練習 10 條。</p>
+            </a>
+        </div>
+    </div>
+
+    <script>
+    (async () => {
+        try {
+            const meRes = await fetch('/api/auth/me', { credentials: 'include' });
+            const meData = await meRes.json();
+            if (!meData.success) { location.href = '/'; return; }
+            const student = meData.student;
+            document.getElementById('user-tag').textContent =
+                `${student.name}（${student.className || student.classname || ''}）`;
+            document.getElementById('greeting').textContent = `你好，${student.name}！`;
+
+            const stRes = await fetch('/api/quiz/today-status', { credentials: 'include' });
+            const st = await stRes.json();
+            const heroStatus = document.getElementById('hero-status');
+            if (st.done) {
+                heroStatus.innerHTML = `✅ 今日已完成隨機練習（${st.todayCount} 題）— 其他練習已解鎖。`;
+                heroStatus.style.color = '#34d399';
+            } else {
+                heroStatus.innerHTML =
+                    `📝 今日已完成 <strong>${st.todayCount}</strong> / ${st.need} 題 — 完成隨機練習後即解鎖下方功能。`;
+                document.getElementById('card-dashboard').classList.add('locked');
+                document.getElementById('card-picker').classList.add('locked');
+                for (const el of document.querySelectorAll('.hub-card.locked')) {
+                    el.addEventListener('click', e => { e.preventDefault();
+                        alert(`請先完成今天的隨機練習（${st.todayCount}/${st.need}）。`); });
+                }
+            }
+        } catch (e) {
+            document.getElementById('hero-status').textContent = '載入失敗，請重新整理。';
+        }
+    })();
+    </script>
+</body>
+</html>
