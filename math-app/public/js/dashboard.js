@@ -218,12 +218,14 @@
     }
 
     function radarConfigFor(list) {
-        // Tighten labels + font as the tier gets crowded so neighbours don't
-        // overlap. 12+ tags → single-line label + 9-px font;
-        // 9–11 tags → 2-line label + 9-px font; 8 or fewer → 2-line + 10 px.
+        // Always keep 2-line labels; just shrink the font when the tier
+        // gets crowded so neighbours don't overlap.
+        //   ≤8 tags   → 10 px    (bronze)
+        //   9–11 tags → 9  px    (silver / diamond)
+        //   12+ tags  → 8  px    (gold)
         const n = list.length;
-        const compact = n >= 12;
-        const fontSize = n >= 9 ? 9 : 10;
+        const compact = false;
+        const fontSize = n >= 12 ? 8 : n >= 9 ? 9 : 10;
         return {
             type: 'radar',
             data: {
