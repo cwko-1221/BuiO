@@ -38,6 +38,19 @@ create table if not exists public.eng_assignment_items (
   unique (assignment_id, order_index)
 );
 
+create table if not exists public.eng_question_bank (
+  id uuid primary key default gen_random_uuid(),
+  category text not null,
+  word text not null,
+  hint text,
+  emoji text,
+  image_url text,
+  created_at timestamptz not null default now(),
+  unique (category, word),
+  check (word = lower(word)),
+  check (word ~ '^[a-z]{2,12}$')
+);
+
 create table if not exists public.eng_attempts (
   id uuid primary key default gen_random_uuid(),
   assignment_id uuid not null references public.eng_assignments(id) on delete cascade,
@@ -64,3 +77,37 @@ create index if not exists eng_attempts_student_idx on public.eng_attempts(stude
 create index if not exists eng_attempt_items_attempt_idx on public.eng_attempt_items(attempt_id);
 create index if not exists eng_assignment_items_assignment_idx on public.eng_assignment_items(assignment_id);
 create index if not exists eng_assignments_target_idx on public.eng_assignments(target_classname, target_group);
+create index if not exists eng_question_bank_category_idx on public.eng_question_bank(category);
+
+insert into public.eng_question_bank (category, word, hint, emoji) values
+  ('Animals', 'cat', '貓', '🐱'),
+  ('Animals', 'dog', '狗', '🐶'),
+  ('Animals', 'bird', '鳥', '🐦'),
+  ('Animals', 'fish', '魚', '🐟'),
+  ('Animals', 'horse', '馬', '🐴'),
+  ('Animals', 'rabbit', '兔', '🐰'),
+  ('Animals', 'tiger', '老虎', '🐯'),
+  ('Animals', 'lion', '獅子', '🦁'),
+  ('Food', 'apple', '蘋果', '🍎'),
+  ('Food', 'bread', '麵包', '🍞'),
+  ('Food', 'cake', '蛋糕', '🍰'),
+  ('Food', 'rice', '飯', '🍚'),
+  ('Food', 'milk', '牛奶', '🥛'),
+  ('Food', 'egg', '蛋', '🥚'),
+  ('Food', 'corn', '粟米', '🌽'),
+  ('Food', 'grape', '提子', '🍇'),
+  ('Home', 'bed', '床', '🛏️'),
+  ('Home', 'door', '門', '🚪'),
+  ('Home', 'lamp', '燈', '💡'),
+  ('Home', 'chair', '椅子', '🪑'),
+  ('Home', 'table', '桌子', null),
+  ('Home', 'clock', '時鐘', '🕒'),
+  ('Home', 'book', '書', '📘'),
+  ('School', 'pen', '筆', '🖊️'),
+  ('School', 'ruler', '尺', '📏'),
+  ('School', 'paper', '紙', '📄'),
+  ('School', 'desk', '書桌', null),
+  ('School', 'class', '課室', '🏫'),
+  ('School', 'music', '音樂', '🎵'),
+  ('School', 'paint', '畫畫', '🎨')
+on conflict (category, word) do nothing;
