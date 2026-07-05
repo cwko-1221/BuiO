@@ -462,8 +462,12 @@
             return;
         }
 
-        // 重新建立 canvas 確保不會因為之前的空狀態而消失
-        container.innerHTML = '<canvas id="time-chart"></canvas>';
+        // 重新建立 canvas 確保不會因為之前的空狀態而消失。
+        // 高度 = 每列 46 px（含間距），最少 320 px；讓 bar 與標籤有呼吸空間。
+        const rowHeight = 46;
+        const canvasHeight = Math.max(320, timeData.length * rowHeight + 60);
+        container.innerHTML = `<canvas id="time-chart" style="height:${canvasHeight}px"></canvas>`;
+        container.style.height = canvasHeight + 'px';
         const ctx = document.getElementById('time-chart');
 
         const labels = timeData.map(t => shortLabel(t.tagName));
@@ -487,11 +491,15 @@
                     borderColor: colors.map(c => c.replace('0.7', '1')),
                     borderWidth: 1,
                     borderRadius: 6,
+                    barThickness: 22,
+                    maxBarThickness: 26,
+                    categoryPercentage: 0.85,
+                    barPercentage: 0.9,
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 indexAxis: 'y',
                 plugins: {
                     legend: { display: false },

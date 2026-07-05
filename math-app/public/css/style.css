@@ -897,6 +897,13 @@ a { color: var(--accent-blue); text-decoration: none; }
     width: 100%;
     max-height: 300px;
 }
+/* Time-analysis chart grows vertically with the number of tags so bars
+   and labels stay legible even with the full P4 tag list. Height is
+   assigned inline from renderTimeChart. */
+#time-chart-container {
+    max-height: none;
+    height: auto;
+}
 
 /* Radar tier grid — up to 4 mini radars (P1..P4 tiers) */
 .radar-tier-grid {
