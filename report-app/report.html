@@ -85,12 +85,11 @@
     <!-- BuiO 頂部欄 -->
     <div class="buio-topbar">
         <div class="buio-left">
-            <a href="/dashboard.html" class="buio-back-btn">← 教師儀表板</a>
-            <span class="buio-title">&nbsp;&nbsp;📊 <span>考評報告分析</span></span>
+            <span class="buio-title">📊 <span>考評報告分析</span></span>
         </div>
         <div class="buio-right">
             <span class="buio-user"><span class="buio-avatar" id="buio-avatar">T</span><span id="buio-name">老師</span></span>
-            <button class="buio-logout" id="buio-logout">登出</button>
+            <a class="buio-logout" id="buio-logout" href="/" style="text-decoration:none;">🏠 回主頁</a>
         </div>
     </div>
 
@@ -359,10 +358,7 @@
         } catch(e) {
             window.location.href = '/';
         }
-        document.getElementById('buio-logout').addEventListener('click', async () => {
-            try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch(e) {}
-            window.location.href = '/';
-        });
+        // buio-logout is now a plain <a href="/"> — no listener needed.
     })();
     </script>
 </body>
