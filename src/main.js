@@ -237,34 +237,27 @@ async function openModule(moduleId, mode) {
     updateState({ mathSsoStatus: 'ok' });
     render();
     if (role === 'teacher') {
-      window.open(MATH_DASHBOARD_URL, '_blank');
+      window.location.href = MATH_DASHBOARD_URL;
     } else {
-      window.open(MATH_QUIZ_URL, '_blank');
+      window.location.href = MATH_QUIZ_URL;
     }
     setTimeout(() => { updateState({ mathSsoStatus: '' }); render(); }, 2000);
 
   } else if (moduleId === 'report') {
     // 考評報告模組（老師專用）
-    window.open('/report.html', '_blank');
+    window.location.href = '/report.html';
 
   } else if (moduleId === 'chinese') {
-    window.open('/chinese', '_blank');
+    window.location.href = '/chinese';
 
   } else if (moduleId === 'english') {
-    window.open('/english', '_blank');
+    window.location.href = '/english';
 
   } else if (moduleId === 'whiteboard') {
     if (role === 'teacher') {
       const url = `${WHITEBOARD_BASE}/class-teacher?room=${encodeURIComponent(user.name)}`;
-      window.open(url, '_blank');
-      render();
-      // The whiteboard tab takes a moment to connect via WebSocket and register
-      // the session server-side. Probe a few times so the dashboard button flips
-      // to "結束白板課堂" without waiting for the 3s polling tick.
-      [600, 1500, 3000].forEach(ms => setTimeout(() => {
-        if (!state.loggedIn) return;
-        fetchActiveSessions(() => { if (state.loggedIn) render(); });
-      }, ms));
+      // Same-tab nav — teachers leave the portal until they close the class.
+      window.location.href = url;
     } else {
       const sessions = getActiveSessions();
       if (sessions.length === 0) {
@@ -272,7 +265,7 @@ async function openModule(moduleId, mode) {
       } else {
         const s = sessions[0];
         const url = `${WHITEBOARD_BASE}/class-student?room=${encodeURIComponent(s.roomCode)}&name=${encodeURIComponent(user.name)}`;
-        window.open(url, '_blank');
+        window.location.href = url;
       }
     }
   }
@@ -281,7 +274,7 @@ async function openModule(moduleId, mode) {
 function joinTeacherSession(session) {
   const user = state.currentUser;
   const url = `${WHITEBOARD_BASE}/class-student?room=${encodeURIComponent(session.roomCode)}&name=${encodeURIComponent(user.name)}`;
-  window.open(url, '_blank');
+  window.location.href = url;
 }
 
 // =============================================
@@ -621,7 +614,7 @@ function bindEvents() {
   document.getElementById('rejoinBoardBtn')?.addEventListener('click', () => {
     const user = state.currentUser;
     const url = `${WHITEBOARD_BASE}/class-teacher?room=${encodeURIComponent(user.name)}`;
-    window.open(url, '_blank');
+    window.location.href = url;
   });
 
   // 老師：結束課堂
