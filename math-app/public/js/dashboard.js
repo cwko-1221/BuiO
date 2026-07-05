@@ -508,6 +508,7 @@
                         }
                     }
                 },
+                layout: { padding: { left: 4, right: 16, top: 8, bottom: 8 } },
                 scales: {
                     x: {
                         beginAtZero: true,
@@ -516,9 +517,18 @@
                         grid: { color: 'rgba(255,255,255,0.04)' }
                     },
                     y: {
-                        ticks: { color: '#94a3b8', font: { size: 11 } },
-                        grid: { display: false }
-                    }
+                        // Reserve a fixed-width column for the tick labels so
+                        // multi-line tag names line up neatly on the right edge.
+                        afterFit: (scale) => { scale.width = 220; },
+                        ticks: {
+                            color: '#cbd5e1',
+                            font: { size: 11 },
+                            padding: 12,
+                            autoSkip: false,
+                            align: 'end',
+                        },
+                        grid: { display: false },
+                    },
                 }
             }
         });
