@@ -247,11 +247,20 @@
         function findLabelHit(chart, evt) {
             const scale = chart.scales?.r;
             if (!scale) return -1;
-            const x = evt.offsetX, y = evt.offsetY;
-            // Chart.js draws pointLabels at radius = drawingArea + a small pad
-            // (~15 px). Try a couple radii to be tolerant of the exact number.
-            const radii = [scale.drawingArea + 12, scale.drawingArea + 24, scale.drawingArea + 36];
-            let best = -1, bestD = 40;   // 40 px hit tolerance
+            // Chart.js v4 ChartEvent exposes x/y; fall back to native.offset*
+            // for older builds.
+            const x = evt.x ?? evt.native?.offsetX;
+            const y = evt.y ?? evt.native?.offsetY;
+            if (x == null || y == null) return -1;
+            // Chart.js draws pointLabels at ~drawingArea + a small pad; try
+            // a range of radii so we tolerate the exact padding number.
+            const radii = [
+                scale.drawingArea + 8,
+                scale.drawingArea + 22,
+                scale.drawingArea + 36,
+                scale.drawingArea + 50,
+            ];
+            let best = -1, bestD = 55;   // 55 px hit tolerance
             for (let i = 0; i < list.length; i++) {
                 for (const r of radii) {
                     const p = scale.getPointPosition(i, r);
