@@ -63,6 +63,14 @@
             document.getElementById('student-avatar').textContent = data.student.name[0];
             currentUserRole = data.student.role;
 
+            // Teachers don't have the math hub — return them straight to the
+            // BuiO learning-hub portal instead of bouncing them to /math
+            // (which just serves this dashboard back to them).
+            if (data.student.role === 'teacher') {
+                const backLink = document.getElementById('back-home-link');
+                if (backLink) backLink.href = '/';
+            }
+
             if (data.student.role === 'teacher') {
                 // Teacher: existing student-picker flow.
                 await loadStudentList();
