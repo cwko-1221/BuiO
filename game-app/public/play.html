@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>唔好望落嚟 | BuiO 遊戲</title>
+  <link rel="stylesheet" href="/game/css/game.css">
+</head>
+<body>
+
+  <!-- ============ JOIN ============ -->
+  <div id="joinScreen" class="screen active">
+    <div class="panel-center">
+      <div class="card">
+        <div class="game-logo">🏔️</div>
+        <h1>唔好望落嚟</h1>
+        <p class="sub">答問題儲能量，一路跳上山頂！千祈唔好望落嚟……</p>
+        <div class="field">
+          <label>房間代碼</label>
+          <input id="codeInput" class="code-input" type="text" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>名字</label>
+          <input id="nameInput" type="text" maxlength="20" placeholder="你的名字">
+        </div>
+        <button id="joinBtn" class="btn">加入遊戲</button>
+        <div id="joinError" class="error-msg"></div>
+        <button class="btn secondary" style="margin-top:8px" onclick="location.href='/'">🏠 回主頁</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LOBBY ============ -->
+  <div id="lobbyScreen" class="screen">
+    <div class="panel-center">
+      <div class="card">
+        <div class="game-logo">⛺</div>
+        <h1 id="lobbySetTitle">準備中</h1>
+        <p class="sub" id="lobbyHostName"></p>
+        <p class="lobby-wait"><span class="pulse-dot"></span>等緊老師開始遊戲…</p>
+        <div style="margin-top:20px; font-size:14px; color:#6b7690; text-align:left; background:#f5f8fc; border-radius:12px; padding:14px;">
+          <b>玩法：</b><br>
+          🕹️ 左右移動 + 跳躍會消耗 ⚡能量<br>
+          📝 隨時撳「答題」，答啱補充能量<br>
+          🏔️ 最快爬上山頂就贏！跌落嚟要再爬過…
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ GAME ============ -->
+  <div id="gameScreen" class="screen">
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="hud">
+      <div class="energy-wrap">
+        <span>⚡</span>
+        <div class="energy-bar"><div id="energyFill" class="energy-fill"></div></div>
+      </div>
+      <div class="hud-pill" id="heightPill">0%</div>
+      <div class="spacer"></div>
+      <div class="hud-pill" id="streakPill" style="display:none">🔥 0</div>
+      <div class="hud-pill" id="timerPill">--:--</div>
+    </div>
+
+    <div id="toasts"></div>
+
+    <button id="answerBtn" class="answer-btn-float"><span class="zap">⚡</span>答題</button>
+
+    <div class="touch-controls">
+      <div class="cluster">
+        <button class="tbtn" id="btnLeft">◀</button>
+        <button class="tbtn" id="btnRight">▶</button>
+      </div>
+      <div class="cluster">
+        <button class="tbtn" id="btnJump">⬆</button>
+      </div>
+    </div>
+
+    <!-- question modal -->
+    <div id="qOverlay" class="q-overlay">
+      <div class="q-box">
+        <div id="qText" class="q-text"></div>
+        <div id="qChoices" class="q-choices"></div>
+        <div id="qFeedback" class="q-feedback"></div>
+        <button id="qClose" class="btn secondary q-close" style="display:none">繼續爬山 🧗</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RESULTS ============ -->
+  <div id="resultScreen" class="screen">
+    <div class="panel-center">
+      <div class="card" style="max-width:540px">
+        <div class="game-logo" id="resultEmoji">🏁</div>
+        <h1>遊戲結束</h1>
+        <p class="sub" id="resultSub"></p>
+        <div id="resultsList" class="results-list"></div>
+        <button class="btn" onclick="location.href='/'">🏠 回主頁</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/game/js/map.js"></script>
+  <script src="/game/js/play.js"></script>
+</body>
+</html>

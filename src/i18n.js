@@ -85,7 +85,11 @@ export const I18N = {
     'module_english_name': '英文拼字',
     'module_english_desc': '看圖拼字遊戲，三條命，搭配英文 TTS 朗讀。',
     'module_english_metric': '可即時練習',
-    'module_english_status': '已啟用'
+    'module_english_status': '已啟用',
+    'module_game_name': '唔好望落嚟',
+    'module_game_desc': '答題儲能量，爬山大作戰！全班實時比賽，鬥快登頂。',
+    'module_game_metric': '全班實時對戰',
+    'module_game_status': '已啟用'
   },
   'en-US': {
     'good_morning': 'Good Morning',
@@ -171,7 +175,11 @@ export const I18N = {
     'module_english_name': 'Spelling Game',
     'module_english_desc': 'Picture-based spelling with 3 hearts and English TTS playback.',
     'module_english_metric': 'Ready to play',
-    'module_english_status': 'Enabled'
+    'module_english_status': 'Enabled',
+    'module_game_name': "Don't Look Down",
+    'module_game_desc': 'Answer questions to earn energy and race the whole class up the mountain.',
+    'module_game_metric': 'Live class battle',
+    'module_game_status': 'Enabled'
   }
 };
 

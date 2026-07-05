@@ -56,6 +56,9 @@ app.use('/api/english/teacher', require('./english-app/routes/teacher'));
 app.use('/api/english/student', require('./english-app/routes/student'));
 app.use('/api/english', require('./english-app/routes/media'));
 
+// Game module (唔好望落嚟)
+app.use('/api/game/teacher', require('./game-app/routes/teacher'));
+
 // Whiteboard — HTTP + Socket.io. Build httpServer/io now so the whiteboard
 // module can register its /api/whiteboard/* routes BEFORE the catch-all
 // /api 404 handler at the bottom of this file matches them first.
@@ -79,6 +82,7 @@ const io = new Server(httpServer, {
   pingTimeout: 6000,
 });
 require('./whiteboard-app/server/socket')(io, app);
+require('./game-app/server/socket')(io, app);   // namespace /game
 
 // ----------------------------------------------------------------
 // Health / debug
@@ -163,6 +167,20 @@ app.get('/english', requireSession, (req, res) => res.sendFile(path.join(__dirna
 app.get('/english/teacher', requireTeacherPageEn, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'teacher.html')));
 app.get('/english/student', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'student.html')));
 app.get('/english/practice', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'practice.html')));
+
+// Game module static + page routes
+app.use('/game/css', express.static(path.join(__dirname, 'game-app', 'public', 'css')));
+app.use('/game/js', express.static(path.join(__dirname, 'game-app', 'public', 'js')));
+app.get('/game', requireSession, (req, res) => {
+  if (req.session.role === 'teacher') {
+    return res.sendFile(path.join(__dirname, 'game-app', 'public', 'host.html'));
+  }
+  res.sendFile(path.join(__dirname, 'game-app', 'public', 'play.html'));
+});
+app.get('/game/host', requireSession, (req, res) => {
+  if (req.session.role !== 'teacher') return res.redirect('/game');
+  res.sendFile(path.join(__dirname, 'game-app', 'public', 'host.html'));
+});
 
 app.get('/login.html',     (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'login.html')));
 app.get('/quiz.html',      (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'quiz.html')));
