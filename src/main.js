@@ -663,8 +663,6 @@ function render() {
   bindEvents();
 }
 
-// 啟動時先渲染登入頁，session 檢查完成後強制再 render 一次
-// （updateState 只寫入 state，不會自動觸發 re-render，所以無論成功或失
-//  敗都要重跑 render，否則已登入的學生會停在登入頁）
-render();
+// index.html 已預先顯示 boot splash；等 checkSession 回來才 render，
+// 避免已登入的學生先看到閃過的登入頁再切換到首頁。
 checkSession().finally(() => render());
