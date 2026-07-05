@@ -542,16 +542,4 @@
         });
     }
 
-    // ========================================
-    // Logout
-    // ========================================
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-        try {
-            await fetch('/api/auth/logout', {
-                method: 'POST',
-                credentials: 'include'
-            });
-        } catch (e) {}
-        window.location.href = '/';
-    });
 })();
