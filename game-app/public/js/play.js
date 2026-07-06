@@ -12,6 +12,7 @@
   const GRAVITY = 2300;          // u/s^2
   const MOVE_SPEED = 265;        // u/s
   const JUMP_VEL = 860;          // u/s  (max jump height ≈ 160 > max layer gap)
+  const SPRING_VEL = 1300;       // u/s  auto-bounce off spring pads (free)
   const PLAYER_W = 30, PLAYER_H = 40;
   const ENERGY_MAX = 100;
   const MOVE_COST = 5;           // energy per second while moving
@@ -30,6 +31,7 @@
   let game = null;               // live game state
   let ghosts = new Map();        // key -> {x,y,tx,ty,name,color}
   let myColor = PALETTE[0];
+  let myAcc = null;
 
   // ---------------- screens ----------------
   function show(screenId) {
@@ -102,6 +104,7 @@
       }
       clearInterval(roomsTimer);
       myColor = PALETTE[Math.abs(hashCode(name)) % PALETTE.length];
+      myAcc = accessoriesFor(name);
       $('lobbySetTitle').textContent = res.setTitle || '準備中';
       $('lobbyHostName').textContent = `${teacherLabel(res.hostName)}嘅遊戲房間`;
       if (res.phase === 'playing') {
@@ -110,6 +113,17 @@
         show('lobbyScreen');
       }
     });
+  }
+
+  // Deterministic per-name look: every client derives the same colour,
+  // hat and eyewear from the player's name, so nothing extra goes over the wire.
+  function accessoriesFor(name) {
+    const h = Math.abs(hashCode(name));
+    return {
+      hat: Math.floor(h / 7) % 6,        // 0 none · 1 cap · 2 party · 3 beanie · 4 bow · 5 grad cap
+      face: Math.floor(h / 31) % 3,      // 0 none · 1 glasses · 2 sunglasses
+      accent: PALETTE[Math.floor(h / 13) % PALETTE.length],
+    };
   }
 
   function teacherLabel(name) {
@@ -135,7 +149,7 @@
       if (myKey ? p.id === myKey : p.name === me.name) continue;   // skip own echo
       let g = ghosts.get(p.id);
       if (!g) {
-        g = { x: p.x, y: p.y, tx: p.x, ty: p.y, name: p.name, color: PALETTE[Math.abs(hashCode(p.name)) % PALETTE.length] };
+        g = { x: p.x, y: p.y, tx: p.x, ty: p.y, name: p.name, color: PALETTE[Math.abs(hashCode(p.name)) % PALETTE.length], acc: accessoriesFor(p.name) };
         ghosts.set(p.id, g);
       }
       g.tx = p.x; g.ty = p.y; g.finished = p.f;
@@ -175,14 +189,15 @@
 
   function startGame(seed, durationSec, startedAt, resume) {
     map = GameMap.generateMap(seed);
+    map.movers = map.platforms.filter(p => p.type === 'move');
     ghosts = new Map();
-    // Spread spawn points across the middle of the world so players don't stack.
+    // Spread spawn points around the route start so players don't stack.
     const spread = (Math.abs(hashCode(me.name + (me.studentId || ''))) % 100) / 100;
     game = {
       running: true,
       startedAt: startedAt || Date.now(),
       durationSec,
-      x: map.worldW * (0.3 + spread * 0.4) - PLAYER_W / 2,
+      x: Math.max(40, map.startX - 280 + spread * 560) - PLAYER_W / 2,
       y: 40,                       // standing on ground platform (h=40)
       vx: 0, vy: 0,
       onGround: true,
@@ -227,17 +242,20 @@
     $('timerPill').textContent = `⏱ ${String(Math.floor(left / 60)).padStart(1, '0')}:${String(Math.floor(left % 60)).padStart(2, '0')}`;
 
     if (!g.frozen && !g.finished) {
-      // horizontal
+      // horizontal — ice platforms have momentum instead of instant speed
       const canMove = g.energy > 0;
       let dir = 0;
       if (input.left) dir -= 1;
       if (input.right) dir += 1;
+      const targetVx = (dir !== 0 && canMove) ? dir * MOVE_SPEED : 0;
       if (dir !== 0 && canMove) {
-        g.vx = dir * MOVE_SPEED;
         g.facing = dir;
         g.energy = Math.max(0, g.energy - MOVE_COST * dt);
+      }
+      if (g.onGround && g.plat?.type === 'ice') {
+        g.vx += (targetVx - g.vx) * Math.min(1, dt * 2.2);   // slippery!
       } else {
-        g.vx = 0;
+        g.vx = targetVx;
       }
 
       // jump
@@ -253,6 +271,13 @@
       g.vx = 0;
     }
 
+    // moving platforms follow the shared game clock so every client agrees
+    const gt = (Date.now() - g.startedAt) / 1000;
+    for (const p of map.movers) {
+      p.prevCx = p.cx ?? p.x;
+      p.cx = p.x + Math.sin(gt * p.spd + p.ph) * p.amp;
+    }
+
     // physics (y up)
     g.vy -= GRAVITY * dt;
     const prevY = g.y;
@@ -265,11 +290,17 @@
     if (g.vy <= 0) {
       for (const p of map.platforms) {
         const top = p.y + p.h;
+        const px = p.cx ?? p.x;
         if (prevY >= top - 1 && g.y < top &&
-            g.x + PLAYER_W > p.x && g.x < p.x + p.w) {
+            g.x + PLAYER_W > px && g.x < px + p.w) {
           g.y = top;
+          if (p.type === 'spring') {
+            g.vy = SPRING_VEL;           // free super-bounce
+            break;
+          }
           g.vy = 0;
           g.onGround = true;
+          g.plat = p;
           g.coyote = COYOTE;
           if (p.summit && !g.finished) {
             g.finished = true;
@@ -279,6 +310,10 @@
           break;
         }
       }
+    }
+    // riding a moving platform carries you sideways
+    if (g.onGround && g.plat?.type === 'move') {
+      g.x += g.plat.cx - g.plat.prevCx;
     }
     if (!g.onGround) g.coyote = Math.max(0, g.coyote - dt);
     if (g.y < 40 && g.vy < 0) { g.y = 40; g.vy = 0; g.onGround = true; } // ground safety net
@@ -321,12 +356,6 @@
   }
 
   // ---------------- render (Gimkit-style) ----------------
-  const HINTS = [
-    { fx: 0.50, y: 330,  rot: -0.06, text: '邊跑邊跳，飛得更遠！' },
-    { fx: 0.32, y: 1050, rot: 0.05,  text: '答問題儲能量 ⚡' },
-    { fx: 0.55, y: 4500, rot: -0.05, text: '就快到頂喇，唔好望落嚟！' },
-  ];
-
   function render() {
     const g = game;
     const scale = (canvas.height / VIEW_H);
@@ -357,6 +386,21 @@
       ctx.fillRect(0, toSY(wy) - bandH, viewW, bandH);
     }
 
+    // tiled mini-cloud wallpaper (Gimkit background pattern)
+    ctx.fillStyle = 'rgba(255,255,255,.14)';
+    const TX = 280, TY = 180;
+    for (let wy = Math.floor(camY / TY) * TY - TY; wy < camY + VIEW_H + TY; wy += TY) {
+      const ox = (Math.abs(Math.round(wy / TY)) % 2) * (TX / 2);
+      for (let wx = Math.floor(camX / TX) * TX - TX; wx < camX + viewW + TX; wx += TX) {
+        const sx = toSX(wx + ox), sy = toSY(wy);
+        ctx.beginPath();
+        ctx.ellipse(sx, sy, 22, 8, 0, 0, Math.PI * 2);
+        ctx.ellipse(sx - 14, sy + 3, 12, 6, 0, 0, Math.PI * 2);
+        ctx.ellipse(sx + 14, sy + 3, 13, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
     // tiny confetti specks
     const SPECK_COLORS = ['rgba(255,255,255,.55)', 'rgba(255,224,130,.5)', 'rgba(255,170,200,.45)'];
     for (let i = 0; i < 70; i++) {
@@ -382,8 +426,8 @@
     }
 
     // floating tips (bold yellow with dark outline, like Gimkit's tutorial text)
-    for (const h of HINTS) {
-      const sx = toSX(map.worldW * h.fx), sy = toSY(h.y);
+    for (const h of map.hints) {
+      const sx = toSX(h.x), sy = toSY(h.y);
       if (sy < -80 || sy > VIEW_H + 80) continue;
       ctx.save();
       ctx.translate(sx, sy);
@@ -403,7 +447,7 @@
     for (const p of map.platforms) {
       const sy = toSY(p.y + p.h);
       if (sy > VIEW_H + 80 || sy < -80) continue;
-      const sx = toSX(p.x);
+      const sx = toSX(p.cx ?? p.x);
       if (sx > viewW + 60 || sx + p.w < -60) continue;
       if (p.summit) {
         drawBricks(sx, sy, p.w, p.h + 14, '#e8c04a', '#b8922e', 'rgba(255,214,90,.25)');
@@ -418,20 +462,51 @@
         ctx.fill();
       } else if (p.ground) {
         drawBricks(sx, sy, p.w, p.h + 260, '#454c63', '#333949', null);
+      } else if (p.type === 'spring') {
+        // dark base with a red bouncy pad on top
+        ctx.fillStyle = '#525c70';
+        rrFill(sx + 6, sy + 10, p.w - 12, p.h - 10, 4);
+        ctx.fillStyle = '#e84c4c';
+        rrFill(sx, sy, p.w, 14, 7);
+        rrPath(sx, sy, p.w, 14, 7);
+        ctx.strokeStyle = 'rgba(40,48,68,.8)';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,.8)';
+        for (let dx = 12; dx < p.w - 8; dx += 22) {
+          ctx.beginPath(); ctx.arc(sx + dx, sy + 7, 3, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (p.type === 'ice') {
+        drawBricks(sx, sy, p.w, p.h, '#cfe9fb', 'rgba(120,170,215,.55)', 'rgba(255,255,255,.18)');
+        ctx.strokeStyle = 'rgba(255,255,255,.65)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(sx + p.w * 0.18, sy + 6); ctx.lineTo(sx + p.w * 0.18 + 16, sy + 6); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx + p.w * 0.6, sy + 13); ctx.lineTo(sx + p.w * 0.6 + 22, sy + 13); ctx.stroke();
+      } else if (p.type === 'wood' || p.type === 'move') {
+        drawPlanks(sx, sy, p.w, p.h, p.type === 'move');
       } else {
         drawBricks(sx, sy, p.w, p.h, '#a8b0bf', '#8891a3', GameMap.zoneAt(p.y / map.summitY).tint);
       }
+    }
+
+    // decorations sitting on platform tops
+    ctx.font = '34px sans-serif';
+    ctx.textAlign = 'center';
+    for (const d of map.deco) {
+      const sx = toSX(d.x), sy = toSY(d.y);
+      if (sy < -60 || sy > VIEW_H + 60 || sx < -40 || sx > viewW + 40) continue;
+      ctx.fillText(d.e, sx, sy - 3);
     }
 
     // ghosts (other players, semi-transparent)
     for (const gh of ghosts.values()) {
       const sx = toSX(gh.x + PLAYER_W / 2), sy = toSY(gh.y);
       if (sy < -60 || sy > VIEW_H + 60 || sx < -60 || sx > viewW + 60) continue;
-      drawBlob(sx, sy, gh.color, gh.name, 0.6, t, Math.abs(gh.tx - gh.x) > 1, gh.finished);
+      drawBlob(sx, sy, gh.color, gh.name, 0.6, t, Math.abs(gh.tx - gh.x) > 1, gh.finished, gh.acc);
     }
 
     // me
-    drawBlob(toSX(g.x + PLAYER_W / 2), toSY(g.y), myColor, me.name, 1, t, g.vx !== 0 && g.onGround, g.finished);
+    drawBlob(toSX(g.x + PLAYER_W / 2), toSY(g.y), myColor, me.name, 1, t, g.vx !== 0 && g.onGround, g.finished, myAcc);
 
     ctx.restore();
 
@@ -486,8 +561,39 @@
       ctx.stroke();
     }
 
+    // Wooden plank slab; moving platforms get little direction arrows.
+    function drawPlanks(x, y, w, h, moving) {
+      rrPath(x, y, w, h, 5);
+      ctx.fillStyle = '#b07a3e';
+      ctx.fill();
+      ctx.save();
+      rrPath(x, y, w, h, 5);
+      ctx.clip();
+      ctx.strokeStyle = '#8a5a28';
+      ctx.lineWidth = 2;
+      for (let xx = x + 34; xx < x + w; xx += 34) {
+        ctx.beginPath(); ctx.moveTo(xx, y); ctx.lineTo(xx, y + h); ctx.stroke();
+      }
+      ctx.restore();
+      ctx.fillStyle = 'rgba(255,255,255,.3)';
+      rrFill(x, y, w, 6, 4);
+      rrPath(x, y, w, h, 5);
+      ctx.strokeStyle = 'rgba(70,45,20,.85)';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      if (moving) {
+        ctx.fillStyle = 'rgba(255,255,255,.85)';
+        ctx.beginPath();
+        ctx.moveTo(x + 6, y + h / 2); ctx.lineTo(x + 16, y + h / 2 - 6); ctx.lineTo(x + 16, y + h / 2 + 6);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(x + w - 6, y + h / 2); ctx.lineTo(x + w - 16, y + h / 2 - 6); ctx.lineTo(x + w - 16, y + h / 2 + 6);
+        ctx.fill();
+      }
+    }
+
     // Gimkit-style blob: rounded body, two oval eyes, stubby feet, name below.
-    function drawBlob(cx, footY, color, name, alpha, time, moving, finished) {
+    function drawBlob(cx, footY, color, name, alpha, time, moving, finished, acc) {
       const w = 44, h = 40;
       const bounce = moving ? Math.abs(Math.sin(time * 9)) * 3.5 : 0;
       const by = footY - bounce;
@@ -518,10 +624,28 @@
       ctx.beginPath(); ctx.ellipse(cx - 8, eyeY, 3.6, 6.2, 0, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(cx + 8, eyeY, 3.6, 6.2, 0, 0, Math.PI * 2); ctx.fill();
 
+      // eyewear
+      if (acc && acc.face === 1) {           // round glasses
+        ctx.strokeStyle = '#1c2230';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(cx - 8, eyeY, 6.5, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + 8, eyeY, 6.5, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx - 1.5, eyeY); ctx.lineTo(cx + 1.5, eyeY); ctx.stroke();
+      } else if (acc && acc.face === 2) {    // sunglasses
+        ctx.fillStyle = '#1c2230';
+        rrFill(cx - 15, eyeY - 5, 13, 10, 3);
+        rrFill(cx + 2, eyeY - 5, 13, 10, 3);
+        ctx.fillRect(cx - 3, eyeY - 3, 6, 2.5);
+      }
+
+      // hat — the summit crown always wins
+      const topY = by - h - 5;
       if (finished) {
         ctx.font = '20px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('👑', cx, by - h - 12);
+        ctx.fillText('👑', cx, topY - 7);
+      } else if (acc && acc.hat) {
+        drawHat(acc, cx, topY);
       }
 
       // name plate under the feet
@@ -535,6 +659,50 @@
       ctx.fillText(name, cx, footY + 18);
 
       ctx.globalAlpha = 1;
+    }
+
+    // topY = top edge of the blob body.
+    function drawHat(acc, cx, topY) {
+      const a = acc.accent;
+      if (acc.hat === 1) {           // baseball cap
+        ctx.fillStyle = a;
+        ctx.beginPath(); ctx.arc(cx, topY + 5, 13, Math.PI, 0); ctx.fill();
+        rrFill(cx - 1, topY + 1, 19, 5, 2.5);   // brim
+      } else if (acc.hat === 2) {    // party hat
+        ctx.fillStyle = a;
+        ctx.beginPath();
+        ctx.moveTo(cx, topY - 17); ctx.lineTo(cx - 10, topY + 4); ctx.lineTo(cx + 10, topY + 4);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(cx, topY - 17, 3.2, 0, Math.PI * 2); ctx.fill();
+      } else if (acc.hat === 3) {    // beanie
+        ctx.fillStyle = a;
+        ctx.beginPath(); ctx.arc(cx, topY + 4, 13, Math.PI, 0); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,.55)';
+        rrFill(cx - 13, topY + 1, 26, 4, 2);
+        ctx.fillStyle = a;
+        ctx.beginPath(); ctx.arc(cx, topY - 10, 3.5, 0, Math.PI * 2); ctx.fill();
+      } else if (acc.hat === 4) {    // bow
+        ctx.fillStyle = a;
+        ctx.beginPath();
+        ctx.moveTo(cx + 8, topY + 2); ctx.lineTo(cx - 1, topY - 4); ctx.lineTo(cx - 1, topY + 8);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(cx + 8, topY + 2); ctx.lineTo(cx + 17, topY - 4); ctx.lineTo(cx + 17, topY + 8);
+        ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + 8, topY + 2, 2.6, 0, Math.PI * 2); ctx.fill();
+      } else if (acc.hat === 5) {    // graduation cap
+        ctx.fillStyle = '#252b3a';
+        ctx.beginPath(); ctx.arc(cx, topY + 5, 10, Math.PI, 0); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(cx, topY - 8); ctx.lineTo(cx + 17, topY - 1); ctx.lineTo(cx, topY + 6); ctx.lineTo(cx - 17, topY - 1);
+        ctx.fill();
+        ctx.strokeStyle = '#f3c53d';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx + 15, topY); ctx.lineTo(cx + 15, topY + 9); ctx.stroke();
+        ctx.fillStyle = '#f3c53d';
+        ctx.beginPath(); ctx.arc(cx + 15, topY + 10, 2.5, 0, Math.PI * 2); ctx.fill();
+      }
     }
 
     function shade(hex, amt) {
