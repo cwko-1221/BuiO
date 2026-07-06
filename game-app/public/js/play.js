@@ -206,6 +206,9 @@
       bestHeight: 0,
       streak: 0,
       finished: false,
+      airJump: 1,                  // one extra mid-air jump (double jump)
+      stageReached: 0,
+      bannerUntil: 0, bannerMain: '', bannerSub: '',
       lastNetSend: 0,
       facing: 1,
       frozen: false,               // while question modal open
@@ -217,6 +220,7 @@
       game.energy = resume.energy ?? game.energy;
       game.bestHeight = resume.bestHeight || 0;
       game.finished = !!resume.finished;
+      game.stageReached = Math.floor((resume.bestHeight || 0) * (map.stageCount || 6));
     }
     resize();
     show('gameScreen');
@@ -258,8 +262,10 @@
         g.vx = targetVx;
       }
 
-      // jump
-      if (input.jumpBuffer > 0 && (g.onGround || g.coyote > 0) && g.energy >= JUMP_COST) {
+      // jump (ground jump or one double jump in the air)
+      const canGroundJump = g.onGround || g.coyote > 0;
+      if (input.jumpBuffer > 0 && g.energy >= JUMP_COST && (canGroundJump || g.airJump > 0)) {
+        if (!canGroundJump) g.airJump--;
         g.vy = JUMP_VEL;
         g.onGround = false;
         g.coyote = 0;
@@ -302,6 +308,15 @@
           g.onGround = true;
           g.plat = p;
           g.coyote = COYOTE;
+          g.airJump = 1;
+          if (p.checkpoint && p.stage > g.stageReached) {
+            g.stageReached = p.stage;
+            g.energy = Math.min(ENERGY_MAX, g.energy + 15);
+            g.bannerSub = `⛳ 山頂 ${p.stage} / ${map.stageCount}`;
+            g.bannerMain = `下一站：${map.stages[p.stage]}`;
+            g.bannerUntil = performance.now() + 2800;
+            toast(`⛳ 到達第 ${p.stage} 個山頂！+15⚡`, true);
+          }
           if (p.summit && !g.finished) {
             g.finished = true;
             socket.emit('player:summit');
@@ -321,7 +336,7 @@
     // height tracking (HUD shows metres, Gimkit-style; server keeps the fraction)
     const frac = Math.min(Math.max((g.y - 40) / (map.summitY - 40), 0), 1);
     if (frac > g.bestHeight) g.bestHeight = frac;
-    $('heightPill').textContent = `🏔️ 高度 ${Math.max(0, Math.round((g.y - 40) / 10))}m`;
+    $('heightPill').textContent = `🏔️ 高度 ${Math.max(0, Math.round((g.y - 40) / 5))}m`;
 
     // smooth tracking camera
     const scale = canvas.height / VIEW_H;
@@ -484,6 +499,12 @@
         ctx.beginPath(); ctx.moveTo(sx + p.w * 0.6, sy + 13); ctx.lineTo(sx + p.w * 0.6 + 22, sy + 13); ctx.stroke();
       } else if (p.type === 'wood' || p.type === 'move') {
         drawPlanks(sx, sy, p.w, p.h, p.type === 'move');
+      } else if (p.type === 'grass') {
+        drawGrass(sx, sy, p.w, p.h, p.checkpoint, p.stage);
+      } else if (p.type === 'hay') {
+        drawHay(sx, sy, p.w, p.h);
+      } else if (p.type === 'metal') {
+        drawMetal(sx, sy, p.w, p.h);
       } else {
         drawBricks(sx, sy, p.w, p.h, '#a8b0bf', '#8891a3', GameMap.zoneAt(p.y / map.summitY).tint);
       }
@@ -507,6 +528,23 @@
 
     // me
     drawBlob(toSX(g.x + PLAYER_W / 2), toSY(g.y), myColor, me.name, 1, t, g.vx !== 0 && g.onGround, g.finished, myAcc);
+
+    // stage-summit celebration banner
+    if (g.bannerUntil && performance.now() < g.bannerUntil) {
+      ctx.textAlign = 'center';
+      ctx.lineJoin = 'round';
+      ctx.font = '800 22px "Segoe UI", sans-serif';
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = 'rgba(30,35,60,.85)';
+      ctx.strokeText(g.bannerSub, viewW / 2, VIEW_H * 0.24);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(g.bannerSub, viewW / 2, VIEW_H * 0.24);
+      ctx.font = '900 44px "Segoe UI", sans-serif';
+      ctx.lineWidth = 9;
+      ctx.strokeText(g.bannerMain, viewW / 2, VIEW_H * 0.24 + 50);
+      ctx.fillStyle = '#7ef77e';
+      ctx.fillText(g.bannerMain, viewW / 2, VIEW_H * 0.24 + 50);
+    }
 
     ctx.restore();
 
@@ -659,6 +697,84 @@
       ctx.fillText(name, cx, footY + 18);
 
       ctx.globalAlpha = 1;
+    }
+
+    // Grass-topped soil slab; checkpoints get a flag with the stage number.
+    function drawGrass(x, y, w, h, checkpoint, stage) {
+      rrPath(x, y, w, h, 6);
+      ctx.fillStyle = '#8a5a2e';
+      ctx.fill();
+      ctx.fillStyle = 'rgba(60,38,16,.35)';
+      for (let xx = x + 12; xx < x + w - 8; xx += 28) {
+        ctx.beginPath(); ctx.arc(xx, y + h * 0.65, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = '#57c14f';
+      rrFill(x - 2, y, w + 4, 10, 5);
+      rrPath(x, y, w, h, 6);
+      ctx.strokeStyle = 'rgba(60,38,16,.85)';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      if (checkpoint) {
+        const fx = x + w / 2;
+        ctx.fillStyle = '#5d6678';
+        ctx.fillRect(fx - 2, y - 40, 4, 40);
+        ctx.fillStyle = '#3db4f2';
+        ctx.beginPath();
+        ctx.moveTo(fx + 2, y - 40); ctx.lineTo(fx + 34, y - 32); ctx.lineTo(fx + 2, y - 24);
+        ctx.fill();
+        ctx.font = '800 13px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(String(stage), fx + 13, y - 28);
+      }
+    }
+
+    // Hay bale: golden block with diagonal cross-hatching.
+    function drawHay(x, y, w, h) {
+      rrPath(x, y, w, h, 6);
+      ctx.fillStyle = '#e7c04f';
+      ctx.fill();
+      ctx.save();
+      rrPath(x, y, w, h, 6);
+      ctx.clip();
+      ctx.strokeStyle = 'rgba(150,105,30,.5)';
+      ctx.lineWidth = 1.5;
+      for (let xx = x - h; xx < x + w; xx += 16) {
+        ctx.beginPath(); ctx.moveTo(xx, y + h); ctx.lineTo(xx + h, y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(xx, y); ctx.lineTo(xx + h, y + h); ctx.stroke();
+      }
+      ctx.restore();
+      ctx.fillStyle = 'rgba(255,255,255,.3)';
+      rrFill(x, y, w, 6, 4);
+      rrPath(x, y, w, h, 6);
+      ctx.strokeStyle = '#96702a';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
+
+    // Industrial metal panel with seams and rivets.
+    function drawMetal(x, y, w, h) {
+      rrPath(x, y, w, h, 4);
+      ctx.fillStyle = '#7b8494';
+      ctx.fill();
+      ctx.save();
+      rrPath(x, y, w, h, 4);
+      ctx.clip();
+      ctx.strokeStyle = '#5b6373';
+      ctx.lineWidth = 2;
+      ctx.fillStyle = 'rgba(25,30,45,.55)';
+      for (let xx = x + 48; xx < x + w; xx += 48) {
+        ctx.beginPath(); ctx.moveTo(xx, y); ctx.lineTo(xx, y + h); ctx.stroke();
+        ctx.beginPath(); ctx.arc(xx - 8, y + 6, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(xx + 8, y + h - 6, 2, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      ctx.fillStyle = 'rgba(255,255,255,.22)';
+      rrFill(x, y, w, 5, 3);
+      rrPath(x, y, w, h, 4);
+      ctx.strokeStyle = '#39404f';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
     }
 
     // topY = top edge of the blob body.
