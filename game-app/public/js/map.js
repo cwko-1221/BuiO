@@ -20,7 +20,7 @@
   }
 
   // Big Gimkit-style map: the route winds diagonally from the bottom-left
-  // to a summit at the top-right, with varied platform types on the way.
+  // to a summit at the top-right, through 6 themed stages.
   const WORLD_W = 4800;
   const SUMMIT_Y = 5200;
 
@@ -37,31 +37,56 @@
     return ZONES[ZONES.length - 1];
   }
 
-  // The mountain is split into 6 themed stages, Gimkit DLD style. Each stage
-  // ends in a wide grass checkpoint "summit". Platform types per stage:
-  //   brick · wood · grass · hay · ice (slippery) · metal ·
-  //   spring (auto super-bounce) · move (slides, carries the player).
+  // ------------------------------------------------------------------
+  // 6 themed stages. `phys` picks the physics behaviour, `skins` the prop
+  // look of normal platforms, `structures` the set pieces, `deco` sits on
+  // platform tops and `air` floats in the sky.
+  //   physics: normal · ice (slippery) · spring (auto-bounce) · move (slides)
+  // ------------------------------------------------------------------
   const STAGE_COUNT = 6;
   const STAGES = [
-    { name: '城堡', deco: ['📦', '🏺', '🌿'],         types: [['brick', 6], ['wood', 2], ['move', 1.3], ['spring', 0.7]] },
-    { name: '市集', deco: ['🍞', '🧺', '🍎'],         types: [['wood', 5], ['move', 2.5], ['brick', 1.5], ['spring', 0.8]] },
-    { name: '森林', deco: ['🌲', '🌳', '🍄', '🌼'],   types: [['grass', 5.5], ['wood', 2.5], ['move', 1.2], ['spring', 0.8]] },
-    { name: '農場', deco: ['🌾', '🎃', '🐓', '🪵'],   types: [['hay', 5.5], ['wood', 2], ['move', 1.5], ['spring', 0.8]] },
-    { name: '雪山', deco: ['⛄', '❄️', '🎄'],         types: [['ice', 5.5], ['brick', 2], ['move', 1.5], ['spring', 0.8]] },
-    { name: '工廠', deco: ['⚙️', '🔩', '🛢️'],        types: [['metal', 6], ['move', 2.5], ['spring', 0.8]] },
+    { name: '城堡', mound: 'earth',
+      phys: [['normal', 8], ['move', 1.2], ['spring', 0.7]],
+      skins: [['brick', 5], ['crate', 2.5], ['barrel', 1.5]],
+      structures: ['arch', 'tower', 'stairs'],
+      deco: ['📦', '🏺', '🌿', '🛡️'], air: ['🗝️', '🕯️'] },
+    { name: '市集', mound: 'earth',
+      phys: [['normal', 7], ['move', 2.2], ['spring', 0.8]],
+      skins: [['stall', 3], ['plank', 3.5], ['barrel', 2], ['crate', 1.5]],
+      structures: ['bridge', 'stairs'],
+      deco: ['🍞', '🧺', '🍎', '🧀'], air: ['🍞', '🍎'] },
+    { name: '森林', mound: 'earth',
+      phys: [['normal', 8], ['move', 1.2], ['spring', 0.8]],
+      skins: [['rock', 3.5], ['log', 3], ['mound', 3]],
+      structures: ['hill', 'stairs'],
+      deco: ['🌲', '🌳', '🍄', '🌼'], air: ['🍃', '🦋'] },
+    { name: '農場', mound: 'earth',
+      phys: [['normal', 7.5], ['move', 1.7], ['spring', 0.8]],
+      skins: [['hay', 4], ['fence', 2], ['log', 2], ['plank', 2]],
+      structures: ['hill', 'bridge'],
+      deco: ['🌾', '🎃', '🐓', '🪵'], air: ['🌽', '🥕'] },
+    { name: '雪山', mound: 'snow',
+      phys: [['normal', 3.5], ['ice', 4.5], ['move', 1.5], ['spring', 0.8]],
+      skins: [['snowrock', 4], ['brick', 1.5], ['log', 1]],
+      structures: ['hill', 'stairs'],
+      deco: ['⛄', '❄️', '🎄'], air: ['❄️'] },
+    { name: '工廠', mound: 'earth',
+      phys: [['normal', 7], ['move', 2.4], ['spring', 0.8]],
+      skins: [['metal', 4], ['machine', 2.5], ['pipe', 2]],
+      structures: ['tower', 'bridge'],
+      deco: ['⚙️', '🔩', '🛢️'], air: ['🔧', '⚙️'] },
   ];
 
   function stageAt(y) {
     return Math.min(STAGE_COUNT - 1, Math.floor(y / (SUMMIT_Y / STAGE_COUNT)));
   }
 
-  function pickType(rnd, stage) {
-    const types = STAGES[stage].types;
+  function pickWeighted(rnd, list) {
     let total = 0;
-    for (const [, w] of types) total += w;
+    for (const [, w] of list) total += w;
     let r = rnd() * total;
-    for (const [t, w] of types) { if ((r -= w) <= 0) return t; }
-    return 'brick';
+    for (const [v, w] of list) { if ((r -= w) <= 0) return v; }
+    return list[0][0];
   }
 
   function pickDeco(rnd, stage) {
@@ -69,19 +94,96 @@
     return list[Math.floor(rnd() * list.length)];
   }
 
-  const DECORATED = new Set(['brick', 'wood', 'grass', 'hay']);
+  // Slight visual tilt for beam-like props (collision stays axis-aligned,
+  // so keep it subtle).
+  const TILTABLE = new Set(['plank', 'log', 'fence']);
+  const DECORATED = new Set(['brick', 'plank', 'crate', 'hay', 'rock', 'mound', 'log', 'snowrock', 'metal']);
 
+  function makePlatform(rnd, x, y, w, stage) {
+    const st = STAGES[stage];
+    const type = pickWeighted(rnd, st.phys);
+    const p = { x: x - w / 2, y, w, h: 26, type, skin: type };
+    if (type === 'normal') {
+      p.skin = pickWeighted(rnd, st.skins);
+      if (TILTABLE.has(p.skin) && rnd() < 0.3) p.tilt = (rnd() * 2 - 1) * 0.07;
+    } else if (type === 'move') {
+      p.amp = 60 + rnd() * 80; p.spd = 0.7 + rnd() * 0.6; p.ph = rnd() * 6.283;
+    } else if (type === 'spring') {
+      p.w = Math.min(p.w, 96);
+    }
+    return p;
+  }
+
+  // ------------------------------------------------------------------
+  // Set pieces. Each returns the y/x of its top walkable surface so the
+  // route continues from there.
+  // ------------------------------------------------------------------
+  function buildStructure(kind, rnd, x, y, stage, platforms) {
+    const st = STAGES[stage];
+    const clampX = (v, w) => Math.min(Math.max(v, 60 + w / 2), WORLD_W - 60 - w / 2);
+
+    if (kind === 'arch') {                    // walkable lintel on two pillars
+      const w = 300 + rnd() * 60;
+      const cx = clampX(x, w);
+      platforms.push({ x: cx - w / 2, y, w, h: 26, type: 'normal', skin: 'brick', pillars: 130 + rnd() * 50 });
+      return { x: cx, y };
+    }
+
+    if (kind === 'tower') {                   // 3 stacked ledges, connected
+      const skin = stage === 5 ? 'metal' : 'brick';
+      const cx = clampX(x, 240);
+      let ty = y;
+      for (let i = 0; i < 3; i++) {
+        const w = 240 - i * 62;
+        platforms.push({ x: cx - w / 2, y: ty, w, h: 26, type: 'normal', skin, column: i > 0 ? 96 : 0 });
+        if (i < 2) ty += 96;
+      }
+      return { x: cx, y: ty };
+    }
+
+    if (kind === 'hill') {                    // climbable solid mound
+      const mound = st.mound === 'snow' ? 'snowmound' : 'mound';
+      let ty = y, cx = x;
+      const tiers = [400 + rnd() * 80, 260 + rnd() * 60, 150 + rnd() * 40];
+      for (let i = 0; i < tiers.length; i++) {
+        const w = tiers[i];
+        cx = clampX(cx + (rnd() * 2 - 1) * 60, w);
+        platforms.push({ x: cx - w / 2, y: ty, w, h: 26, type: 'normal', skin: mound, mass: i === 0 ? 150 : 86 });
+        if (i < tiers.length - 1) ty += 76;
+      }
+      return { x: cx, y: ty };
+    }
+
+    if (kind === 'stairs') {                  // walk-jump staircase
+      const dir = rnd() < 0.5 ? -1 : 1;
+      const skin = pickWeighted(rnd, st.skins);
+      let ty = y, cx = x;
+      for (let i = 0; i < 4; i++) {
+        cx = clampX(x + dir * i * 95, 92);
+        platforms.push({ x: cx - 46, y: ty, w: 92, h: 26, type: 'normal', skin });
+        if (i < 3) ty += 62;
+      }
+      return { x: cx, y: ty };
+    }
+
+    // bridge: long plank span on support posts
+    const w = 380 + rnd() * 80;
+    const cx = clampX(x, w);
+    platforms.push({ x: cx - w / 2, y, w, h: 20, type: 'normal', skin: 'plank', posts: 60 + rnd() * 30 });
+    return { x: cx, y };
+  }
+
+  // ------------------------------------------------------------------
   function generateMap(seed) {
     const rnd = mulberry32(seed);
     const platforms = [];
     const deco = [];
+    const air = [];
     const hints = [];
 
     // Ground
-    platforms.push({ x: 0, y: 0, w: WORLD_W, h: 40, ground: true, type: 'brick' });
+    platforms.push({ x: 0, y: 0, w: WORLD_W, h: 40, ground: true, type: 'normal', skin: 'brick' });
 
-    // Main route: bounded random walk that drifts diagonally toward the
-    // summit on the right, like Gimkit's Don't Look Down maps.
     const startX = 320 + rnd() * 320;
     const endX = WORLD_W - 520;
     const stageH = SUMMIT_Y / STAGE_COUNT;
@@ -89,6 +191,7 @@
     let x = startX;
     let y = 0;
     let layer = 0;
+    let lastStruct = 0;
 
     while (y < SUMMIT_Y - 160) {
       const dy = 82 + rnd() * 36;
@@ -104,17 +207,28 @@
       if (y >= nextCp && nextCp < SUMMIT_Y - 200) {
         // Stage summit: a wide grass checkpoint platform on the route.
         const k = Math.round(nextCp / stageH);
-        platforms.push({ x: Math.min(Math.max(x - 210, 60), WORLD_W - 480), y, w: 420, h: 30, type: 'grass', checkpoint: true, stage: k });
+        platforms.push({ x: Math.min(Math.max(x - 210, 60), WORLD_W - 480), y, w: 420, h: 30, type: 'normal', skin: 'grass', checkpoint: true, stage: k });
         nextCp += stageH;
+      } else if (layer - lastStruct >= 6 && rnd() < 0.5 && y < SUMMIT_Y - 500) {
+        // Set piece: arch / tower / hill / stairs / bridge.
+        lastStruct = layer;
+        const kind = STAGES[stage].structures[Math.floor(rnd() * STAGES[stage].structures.length)];
+        const top = buildStructure(kind, rnd, x, y, stage, platforms);
+        x = top.x;
+        y = top.y;
       } else {
         const w = Math.max(96, 150 + rnd() * 110 - (y / SUMMIT_Y) * 40);
-        const p = { x: x - w / 2, y, w, h: 26, type: pickType(rnd, stage) };
-        if (p.type === 'move') { p.amp = 60 + rnd() * 80; p.spd = 0.7 + rnd() * 0.6; p.ph = rnd() * 6.283; }
-        if (p.type === 'spring') p.w = Math.min(p.w, 96);
+        const p = makePlatform(rnd, x, y, w, stage);
         platforms.push(p);
-        if (DECORATED.has(p.type) && rnd() < 0.45 && p.w > 110) {
+        if (DECORATED.has(p.skin) && !p.tilt && rnd() < 0.45 && p.w > 110) {
           deco.push({ x: p.x + 24 + rnd() * (p.w - 48), y: y + p.h, e: pickDeco(rnd, stage) });
         }
+      }
+
+      // Floating air items between platforms.
+      if (rnd() < 0.3) {
+        const list = STAGES[stage].air;
+        air.push({ x: Math.min(Math.max(x + (rnd() * 2 - 1) * 420, 60), WORLD_W - 60), y: y + 30 + rnd() * 40, e: list[Math.floor(rnd() * list.length)] });
       }
 
       // Record a few route points for the floating tip texts.
@@ -126,26 +240,25 @@
       if (rnd() < 0.55) {
         const bw = 90 + rnd() * 110;
         const side = rnd() < 0.5 ? -1 : 1;
-        const bx = Math.min(Math.max(x + side * (200 + rnd() * 240) - bw / 2, 100), WORLD_W - 100 - bw);
-        const bp = { x: bx, y: y + rnd() * 30 - 15, w: bw, h: 26, type: pickType(rnd, stage) };
-        if (bp.type === 'move') { bp.amp = 60 + rnd() * 70; bp.spd = 0.7 + rnd() * 0.6; bp.ph = rnd() * 6.283; }
+        const bx = Math.min(Math.max(x + side * (200 + rnd() * 240), 100 + bw / 2), WORLD_W - 100 - bw / 2);
+        const bp = makePlatform(rnd, bx, y + rnd() * 30 - 15, bw, stage);
         platforms.push(bp);
-        if (DECORATED.has(bp.type) && rnd() < 0.35 && bp.w > 110) {
+        if (DECORATED.has(bp.skin) && !bp.tilt && rnd() < 0.35 && bp.w > 110) {
           deco.push({ x: bp.x + 24 + rnd() * (bp.w - 48), y: bp.y + bp.h, e: pickDeco(rnd, stage) });
         }
       }
     }
 
     // Summit platform + flag, at the end of the diagonal.
-    platforms.push({ x: endX - 260, y: SUMMIT_Y, w: 520, h: 30, summit: true, type: 'brick' });
+    platforms.push({ x: endX - 260, y: SUMMIT_Y, w: 520, h: 30, summit: true, type: 'normal', skin: 'brick' });
 
     // Trees and rocks scattered along the ground near the start.
     for (let i = 0; i < 14; i++) {
-      deco.push({ x: 60 + rnd() * (WORLD_W - 120), y: 40, e: pickDeco(rnd, 0) });
+      deco.push({ x: 60 + rnd() * (WORLD_W - 120), y: 40, e: pickDeco(rnd, i < 10 ? 0 : 2) });
     }
 
     return {
-      seed, worldW: WORLD_W, summitY: SUMMIT_Y, startX, platforms, deco, hints,
+      seed, worldW: WORLD_W, summitY: SUMMIT_Y, startX, platforms, deco, air, hints,
       stages: STAGES.map(s => s.name), stageCount: STAGE_COUNT,
     };
   }

@@ -458,12 +458,22 @@
       ctx.restore();
     }
 
-    // platforms
+    // floating themed air items (behind platforms, gentle bob)
+    ctx.font = '30px sans-serif';
+    ctx.textAlign = 'center';
+    for (const a of map.air) {
+      const asx = toSX(a.x), asy = toSY(a.y) + Math.sin(t * 1.6 + a.x * 0.013) * 6;
+      if (asy < -50 || asy > VIEW_H + 50 || asx < -40 || asx > viewW + 40) continue;
+      ctx.fillText(a.e, asx, asy);
+    }
+
+    // platforms (support bodies first, then the prop skin on top)
     for (const p of map.platforms) {
       const sy = toSY(p.y + p.h);
-      if (sy > VIEW_H + 80 || sy < -80) continue;
+      if (sy > VIEW_H + 380 || sy < -80) continue;
       const sx = toSX(p.cx ?? p.x);
-      if (sx > viewW + 60 || sx + p.w < -60) continue;
+      if (sx > viewW + 80 || sx + p.w < -80) continue;
+
       if (p.summit) {
         drawBricks(sx, sy, p.w, p.h + 14, '#e8c04a', '#b8922e', 'rgba(255,214,90,.25)');
         // flag
@@ -475,39 +485,32 @@
         ctx.lineTo(sx + p.w / 2 + 46, sy - 47);
         ctx.lineTo(sx + p.w / 2 + 3, sy - 36);
         ctx.fill();
-      } else if (p.ground) {
-        drawBricks(sx, sy, p.w, p.h + 260, '#454c63', '#333949', null);
-      } else if (p.type === 'spring') {
-        // dark base with a red bouncy pad on top
-        ctx.fillStyle = '#525c70';
-        rrFill(sx + 6, sy + 10, p.w - 12, p.h - 10, 4);
-        ctx.fillStyle = '#e84c4c';
-        rrFill(sx, sy, p.w, 14, 7);
-        rrPath(sx, sy, p.w, 14, 7);
-        ctx.strokeStyle = 'rgba(40,48,68,.8)';
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-        ctx.fillStyle = 'rgba(255,255,255,.8)';
-        for (let dx = 12; dx < p.w - 8; dx += 22) {
-          ctx.beginPath(); ctx.arc(sx + dx, sy + 7, 3, 0, Math.PI * 2); ctx.fill();
-        }
-      } else if (p.type === 'ice') {
-        drawBricks(sx, sy, p.w, p.h, '#cfe9fb', 'rgba(120,170,215,.55)', 'rgba(255,255,255,.18)');
-        ctx.strokeStyle = 'rgba(255,255,255,.65)';
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(sx + p.w * 0.18, sy + 6); ctx.lineTo(sx + p.w * 0.18 + 16, sy + 6); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(sx + p.w * 0.6, sy + 13); ctx.lineTo(sx + p.w * 0.6 + 22, sy + 13); ctx.stroke();
-      } else if (p.type === 'wood' || p.type === 'move') {
-        drawPlanks(sx, sy, p.w, p.h, p.type === 'move');
-      } else if (p.type === 'grass') {
-        drawGrass(sx, sy, p.w, p.h, p.checkpoint, p.stage);
-      } else if (p.type === 'hay') {
-        drawHay(sx, sy, p.w, p.h);
-      } else if (p.type === 'metal') {
-        drawMetal(sx, sy, p.w, p.h);
-      } else {
-        drawBricks(sx, sy, p.w, p.h, '#a8b0bf', '#8891a3', GameMap.zoneAt(p.y / map.summitY).tint);
+        continue;
       }
+      if (p.ground) {
+        drawBricks(sx, sy, p.w, p.h + 260, '#454c63', '#333949', null);
+        continue;
+      }
+
+      if (p.pillars) {
+        drawPillar(sx + 8, sy + p.h - 2, 36, p.pillars);
+        drawPillar(sx + p.w - 44, sy + p.h - 2, 36, p.pillars);
+      }
+      if (p.column) drawPillar(sx + p.w / 2 - 18, sy + p.h - 2, 36, p.column);
+      if (p.posts) {
+        drawPost(sx + 14, sy + p.h - 2, p.posts);
+        drawPost(sx + p.w - 21, sy + p.h - 2, p.posts);
+      }
+      if (p.mass) drawMass(sx, sy + p.h - 3, p.w, p.mass, p.skin === 'snowmound');
+
+      if (p.tilt) {
+        ctx.save();
+        ctx.translate(sx + p.w / 2, sy + p.h / 2);
+        ctx.rotate(p.tilt);
+        ctx.translate(-(sx + p.w / 2), -(sy + p.h / 2));
+      }
+      drawSkin(p, sx, sy);
+      if (p.tilt) ctx.restore();
     }
 
     // decorations sitting on platform tops
@@ -697,6 +700,272 @@
       ctx.fillText(name, cx, footY + 18);
 
       ctx.globalAlpha = 1;
+    }
+
+    // Prop skin dispatcher — physics type and visual skin are separate.
+    function drawSkin(p, sx, sy) {
+      switch (p.skin) {
+        case 'spring': {
+          ctx.fillStyle = '#525c70';
+          rrFill(sx + 6, sy + 10, p.w - 12, p.h - 10, 4);
+          ctx.fillStyle = '#e84c4c';
+          rrFill(sx, sy, p.w, 14, 7);
+          rrPath(sx, sy, p.w, 14, 7);
+          ctx.strokeStyle = 'rgba(40,48,68,.8)';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+          ctx.fillStyle = 'rgba(255,255,255,.8)';
+          for (let dx = 12; dx < p.w - 8; dx += 22) {
+            ctx.beginPath(); ctx.arc(sx + dx, sy + 7, 3, 0, Math.PI * 2); ctx.fill();
+          }
+          break;
+        }
+        case 'ice': {
+          drawBricks(sx, sy, p.w, p.h, '#cfe9fb', 'rgba(120,170,215,.55)', 'rgba(255,255,255,.18)');
+          ctx.strokeStyle = 'rgba(255,255,255,.65)';
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(sx + p.w * 0.18, sy + 6); ctx.lineTo(sx + p.w * 0.18 + 16, sy + 6); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(sx + p.w * 0.6, sy + 13); ctx.lineTo(sx + p.w * 0.6 + 22, sy + 13); ctx.stroke();
+          break;
+        }
+        case 'move':  drawPlanks(sx, sy, p.w, p.h, true); break;
+        case 'plank': drawPlanks(sx, sy, p.w, p.h, false); break;
+        case 'grass': drawGrass(sx, sy, p.w, p.h, p.checkpoint, p.stage); break;
+        case 'mound': drawGrass(sx, sy, p.w, p.h, false, 0); break;
+        case 'snowmound': {
+          rrPath(sx, sy, p.w, p.h, 6);
+          ctx.fillStyle = '#b9cfe2';
+          ctx.fill();
+          ctx.fillStyle = '#f4f9ff';
+          rrFill(sx - 2, sy, p.w + 4, 10, 5);
+          rrPath(sx, sy, p.w, p.h, 6);
+          ctx.strokeStyle = 'rgba(70,90,120,.85)';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+          break;
+        }
+        case 'hay':   drawHay(sx, sy, p.w, p.h); break;
+        case 'metal': drawMetal(sx, sy, p.w, p.h); break;
+        case 'crate': drawCrates(sx, sy, p.w, p.h); break;
+        case 'barrel': drawBarrels(sx, sy, p.w, p.h); break;
+        case 'stall': drawStall(sx, sy, p.w, p.h); break;
+        case 'log':   drawLog(sx, sy, p.w, p.h); break;
+        case 'rock':  drawRock(sx, sy, p.w, p.h, false); break;
+        case 'snowrock': drawRock(sx, sy, p.w, p.h, true); break;
+        case 'fence': drawFence(sx, sy, p.w, p.h); break;
+        case 'machine': drawMachine(sx, sy, p.w, p.h); break;
+        case 'pipe':  drawPipe(sx, sy, p.w, p.h); break;
+        default:
+          drawBricks(sx, sy, p.w, p.h, '#a8b0bf', '#8891a3', GameMap.zoneAt(p.y / map.summitY).tint);
+      }
+    }
+
+    // ---- structure support bodies ----
+    function drawPillar(x, yTop, w, hgt) {
+      ctx.fillStyle = '#99a2b1';
+      ctx.fillRect(x, yTop, w, hgt);
+      ctx.strokeStyle = 'rgba(70,80,100,.4)';
+      ctx.lineWidth = 1.5;
+      for (let yy = yTop + 14; yy < yTop + hgt; yy += 14) {
+        ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x + w, yy); ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(45,53,72,.75)';
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(x, yTop, w, hgt);
+    }
+
+    function drawPost(x, yTop, hgt) {
+      ctx.fillStyle = '#8a5a28';
+      ctx.fillRect(x, yTop, 7, hgt);
+      ctx.strokeStyle = 'rgba(70,45,20,.8)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x, yTop, 7, hgt);
+    }
+
+    function drawMass(x, yTop, w, depth, snow) {
+      ctx.beginPath();
+      ctx.moveTo(x + 4, yTop);
+      ctx.lineTo(x + w - 4, yTop);
+      ctx.lineTo(x + w - 4 - w * 0.12, yTop + depth);
+      ctx.lineTo(x + 4 + w * 0.12, yTop + depth);
+      ctx.closePath();
+      ctx.fillStyle = snow ? '#c6d9ea' : '#7a4f27';
+      ctx.fill();
+      ctx.fillStyle = snow ? 'rgba(90,120,160,.25)' : 'rgba(50,30,12,.3)';
+      for (let i = 0; i < Math.floor(w / 34); i++) {
+        ctx.beginPath();
+        ctx.arc(x + 20 + i * 34, yTop + 16 + ((i * 29) % Math.max(10, depth - 24)), 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.strokeStyle = snow ? 'rgba(70,95,130,.7)' : 'rgba(50,30,12,.7)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // ---- prop skins ----
+    function drawCrates(x, y, w, h) {
+      for (let cx0 = x; cx0 < x + w; cx0 += 46) {
+        const cw = Math.min(44, x + w - cx0);
+        rrPath(cx0, y, cw, h, 3);
+        ctx.fillStyle = '#c08a4a';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(90,55,20,.55)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx0 + 3, y + 3); ctx.lineTo(cx0 + cw - 3, y + h - 3); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx0 + cw - 3, y + 3); ctx.lineTo(cx0 + 3, y + h - 3); ctx.stroke();
+        rrPath(cx0, y, cw, h, 3);
+        ctx.strokeStyle = '#7a4c1e';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      }
+    }
+
+    function drawBarrels(x, y, w, h) {
+      for (let cx0 = x; cx0 + 30 <= x + w + 6; cx0 += 36) {
+        rrPath(cx0, y, 32, h, 9);
+        ctx.fillStyle = '#a86f36';
+        ctx.fill();
+        ctx.strokeStyle = '#5f3d17';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx0 + 2, y + h * 0.3); ctx.lineTo(cx0 + 30, y + h * 0.3); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx0 + 2, y + h * 0.7); ctx.lineTo(cx0 + 30, y + h * 0.7); ctx.stroke();
+        rrPath(cx0, y, 32, h, 9);
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      }
+    }
+
+    function drawStall(x, y, w, h) {
+      drawPlanks(x, y, w, h, false);
+      // striped awning floating above the counter
+      const ax = x - 4, aw = w + 8, ay = y - 30;
+      ctx.save();
+      rrPath(ax, ay, aw, 20, 6);
+      ctx.clip();
+      for (let i = 0; i * 18 < aw; i++) {
+        ctx.fillStyle = i % 2 ? '#ffffff' : '#e84c4c';
+        ctx.fillRect(ax + i * 18, ay, 18, 20);
+      }
+      ctx.restore();
+      rrPath(ax, ay, aw, 20, 6);
+      ctx.strokeStyle = 'rgba(120,40,40,.8)';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      // corner supports
+      ctx.strokeStyle = '#8a5a28';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(x + 6, y); ctx.lineTo(ax + 8, ay + 20); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + w - 6, y); ctx.lineTo(ax + aw - 8, ay + 20); ctx.stroke();
+    }
+
+    function drawLog(x, y, w, h) {
+      const r = h / 2;
+      rrPath(x, y, w, h, r);
+      ctx.fillStyle = '#9a6b3a';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(70,45,20,.4)';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.moveTo(x + r, y + h * 0.35); ctx.lineTo(x + w - r, y + h * 0.35); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + r, y + h * 0.68); ctx.lineTo(x + w - r, y + h * 0.68); ctx.stroke();
+      // cut end
+      ctx.fillStyle = '#c89a66';
+      ctx.beginPath(); ctx.ellipse(x + r, y + r, r * 0.7, r * 0.85, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(120,80,40,.7)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.ellipse(x + r, y + r, r * 0.4, r * 0.5, 0, 0, Math.PI * 2); ctx.stroke();
+      rrPath(x, y, w, h, r);
+      ctx.strokeStyle = '#5f3d17';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
+
+    function drawRock(x, y, w, h, snow) {
+      ctx.beginPath();
+      ctx.moveTo(x + 6, y + 2);
+      ctx.lineTo(x + w - 8, y);
+      ctx.lineTo(x + w - 1, y + h * 0.55);
+      ctx.lineTo(x + w * 0.72, y + h + 7);
+      ctx.lineTo(x + w * 0.32, y + h + 4);
+      ctx.lineTo(x + 1, y + h * 0.65);
+      ctx.closePath();
+      ctx.fillStyle = '#98a1ad';
+      ctx.fill();
+      ctx.fillStyle = 'rgba(60,70,90,.25)';
+      ctx.beginPath();
+      ctx.ellipse(x + w * 0.62, y + h * 0.62, w * 0.16, h * 0.24, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + 6, y + 2);
+      ctx.lineTo(x + w - 8, y);
+      ctx.lineTo(x + w - 1, y + h * 0.55);
+      ctx.lineTo(x + w * 0.72, y + h + 7);
+      ctx.lineTo(x + w * 0.32, y + h + 4);
+      ctx.lineTo(x + 1, y + h * 0.65);
+      ctx.closePath();
+      ctx.strokeStyle = '#4e5666';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      if (snow) {
+        ctx.beginPath();
+        ctx.moveTo(x + 6, y + 2);
+        ctx.lineTo(x + w - 8, y);
+        ctx.lineTo(x + w - 6, y + 8);
+        ctx.quadraticCurveTo(x + w / 2, y + 14, x + 8, y + 10);
+        ctx.closePath();
+        ctx.fillStyle = '#f4f9ff';
+        ctx.fill();
+      }
+    }
+
+    function drawFence(x, y, w, h) {
+      ctx.fillStyle = '#a9743c';
+      ctx.fillRect(x, y, w, 6);
+      ctx.fillRect(x, y + h - 9, w, 6);
+      for (let px = x + 4; px < x + w - 6; px += 34) {
+        ctx.fillStyle = '#8a5a28';
+        ctx.fillRect(px, y - 4, 8, h + 6);
+        ctx.strokeStyle = 'rgba(70,45,20,.8)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(px, y - 4, 8, h + 6);
+      }
+      ctx.strokeStyle = 'rgba(70,45,20,.7)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x, y, w, 6);
+      ctx.strokeRect(x, y + h - 9, w, 6);
+    }
+
+    function drawMachine(x, y, w, h) {
+      drawMetal(x, y, w, h);
+      const mx = x + w * 0.22;
+      ctx.fillStyle = '#2c3242';
+      rrFill(mx, y + 5, w * 0.3, h - 10, 3);
+      ctx.fillStyle = '#3fd0a4';
+      rrFill(mx + 4, y + 8, w * 0.3 - 8, 5, 2);
+      const colors = ['#e84c4c', '#f3c53d', '#4caf50'];
+      for (let i = 0; i < 3; i++) {
+        ctx.fillStyle = colors[i];
+        ctx.beginPath();
+        ctx.arc(x + w * 0.62 + i * 12, y + h / 2, 3.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawPipe(x, y, w, h) {
+      const r = h / 2;
+      rrPath(x, y, w, h, r);
+      ctx.fillStyle = '#8d97a8';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.45)';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x + r, y + 6); ctx.lineTo(x + w - r, y + 6); ctx.stroke();
+      ctx.fillStyle = '#6f7889';
+      for (let px = x + 56; px < x + w - 20; px += 64) {
+        rrFill(px, y - 2, 10, h + 4, 3);
+      }
+      rrPath(x, y, w, h, r);
+      ctx.strokeStyle = '#454e60';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
     }
 
     // Grass-topped soil slab; checkpoints get a flag with the stage number.
