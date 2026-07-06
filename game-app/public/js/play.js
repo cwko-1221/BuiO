@@ -20,15 +20,16 @@
   const VIEW_H = 780;            // world units visible vertically
   const NET_SEND_MS = 120;
 
-  const AVATARS = ['🐸','🐧','🦊','🐼','🐯','🐨','🐰','🦁','🐷','🐻','🐹','🦄'];
+  // Gimkit-style blob colours; each player gets one from their name hash.
+  const PALETTE = ['#2f6df6', '#e8468c', '#00b06f', '#f39c12', '#8e5cf7', '#e74c3c', '#00bcd4', '#ff7043'];
 
   // ---------------- state ----------------
   const socket = io('/game');
   let me = { name: '', studentId: null };
   let map = null;
   let game = null;               // live game state
-  let ghosts = new Map();        // key -> {x,y,tx,ty,name,avatar}
-  let myAvatar = '🐸';
+  let ghosts = new Map();        // key -> {x,y,tx,ty,name,color}
+  let myColor = PALETTE[0];
 
   // ---------------- screens ----------------
   function show(screenId) {
@@ -36,44 +37,84 @@
     $(screenId).classList.add('active');
   }
 
-  // Prefill name from the session (students arrive logged in from the portal).
-  fetch('/api/auth/me', { credentials: 'include' })
+  // The student's name comes from their login session — no manual entry.
+  const meReady = fetch('/api/auth/me', { credentials: 'include' })
     .then(r => r.ok ? r.json() : null)
     .then(data => {
       const u = data?.student;
-      if (u?.name) { $('nameInput').value = u.name; me.studentId = u.id || null; }
-      // Join code passed in the URL (e.g. QR / portal link)
-      const code = new URLSearchParams(location.search).get('code');
-      if (code) $('codeInput').value = code.replace(/\D/g, '').slice(0, 6);
+      if (u?.name) { me.name = u.name; me.studentId = u.id || null; }
     })
     .catch(() => {});
 
-  // ---------------- join flow ----------------
-  $('joinBtn').addEventListener('click', join);
-  $('codeInput').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
-  $('nameInput').addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
+  // ---------------- join flow: live room list ----------------
+  let roomsTimer = null;
+  let joining = false;
 
-  function join() {
-    const code = $('codeInput').value.trim();
-    const name = $('nameInput').value.trim();
-    if (code.length !== 6) return $('joinError').textContent = '請輸入 6 位數房間代碼';
-    if (!name) return $('joinError').textContent = '請輸入名字';
+  function startRoomPolling() {
+    loadRooms();
+    clearInterval(roomsTimer);
+    roomsTimer = setInterval(loadRooms, 3000);
+  }
+
+  async function loadRooms() {
+    if (joining) return;
+    let rooms = [];
+    try {
+      const res = await fetch('/api/game/sessions', { credentials: 'include' });
+      rooms = (await res.json()).sessions.filter(r => r.phase !== 'ended');
+    } catch { /* keep last render on transient errors */ return; }
+
+    const el = $('roomList');
+    if (!rooms.length) {
+      el.innerHTML = '<p class="muted"><span class="pulse-dot"></span>而家未有老師開遊戲，等一陣先…</p>';
+      return;
+    }
+    el.innerHTML = '';
+    rooms.forEach(r => {
+      const row = document.createElement('button');
+      row.className = 'room-row';
+      row.innerHTML = `
+        <span class="room-emoji">${r.phase === 'lobby' ? '⛺' : '🏔️'}</span>
+        <span class="room-info">
+          <b>${escapeHtml(teacherLabel(r.hostName))}</b>
+          <small>${escapeHtml(r.setTitle || '')} · ${r.players} 人</small>
+        </span>
+        <span class="room-phase ${r.phase === 'lobby' ? 'waiting' : 'playing'}">${r.phase === 'lobby' ? '等待開始' : '進行中'}</span>`;
+      row.addEventListener('click', () => join(r.code));
+      el.appendChild(row);
+    });
+  }
+  startRoomPolling();
+
+  async function join(code) {
+    if (joining) return;
+    joining = true;
     $('joinError').textContent = '';
-    $('joinBtn').disabled = true;
-    me.name = name;
+    await meReady;
+    const name = me.name || '玩家';
 
     socket.emit('player:join', { code, name, studentId: me.studentId }, (res) => {
-      $('joinBtn').disabled = false;
-      if (!res?.ok) return $('joinError').textContent = res?.message || '加入失敗';
-      myAvatar = AVATARS[Math.abs(hashCode(name)) % AVATARS.length];
+      joining = false;
+      if (!res?.ok) {
+        $('joinError').textContent = res?.message || '加入失敗';
+        loadRooms();
+        return;
+      }
+      clearInterval(roomsTimer);
+      myColor = PALETTE[Math.abs(hashCode(name)) % PALETTE.length];
       $('lobbySetTitle').textContent = res.setTitle || '準備中';
-      $('lobbyHostName').textContent = `${res.hostName} 的遊戲房間 · ${code}`;
+      $('lobbyHostName').textContent = `${teacherLabel(res.hostName)}嘅遊戲房間`;
       if (res.phase === 'playing') {
         startGame(res.seed, res.durationSec, res.startedAt, res.resume);
       } else {
         show('lobbyScreen');
       }
     });
+  }
+
+  function teacherLabel(name) {
+    const n = String(name || '老師');
+    return n.includes('老師') ? n : `${n} 老師`;
   }
 
   function hashCode(s) {
@@ -94,7 +135,7 @@
       if (myKey ? p.id === myKey : p.name === me.name) continue;   // skip own echo
       let g = ghosts.get(p.id);
       if (!g) {
-        g = { x: p.x, y: p.y, tx: p.x, ty: p.y, name: p.name, avatar: AVATARS[Math.abs(hashCode(p.name)) % AVATARS.length] };
+        g = { x: p.x, y: p.y, tx: p.x, ty: p.y, name: p.name, color: PALETTE[Math.abs(hashCode(p.name)) % PALETTE.length] };
         ghosts.set(p.id, g);
       }
       g.tx = p.x; g.ty = p.y; g.finished = p.f;
@@ -109,9 +150,15 @@
   socket.on('game:over', ({ leaderboard }) => showResults(leaderboard));
 
   socket.on('room:closed', ({ message }) => {
-    if (game) { game.running = false; }
-    alert(message || '房間已關閉');
-    location.href = '/';
+    if (game) {
+      game.running = false;
+      alert(message || '房間已關閉');
+      location.href = '/';
+      return;
+    }
+    // Kicked out before the game started — back to the room list.
+    show('joinScreen');
+    startRoomPolling();
   });
 
   // ---------------- game engine ----------------
@@ -129,11 +176,13 @@
   function startGame(seed, durationSec, startedAt, resume) {
     map = GameMap.generateMap(seed);
     ghosts = new Map();
+    // Spread spawn points across the middle of the world so players don't stack.
+    const spread = (Math.abs(hashCode(me.name + (me.studentId || ''))) % 100) / 100;
     game = {
       running: true,
       startedAt: startedAt || Date.now(),
       durationSec,
-      x: map.worldW / 2 - PLAYER_W / 2,
+      x: map.worldW * (0.3 + spread * 0.4) - PLAYER_W / 2,
       y: 40,                       // standing on ground platform (h=40)
       vx: 0, vy: 0,
       onGround: true,
@@ -145,6 +194,7 @@
       lastNetSend: 0,
       facing: 1,
       frozen: false,               // while question modal open
+      camX: null, camY: null,      // smoothed camera (snaps on first frame)
     };
     if (resume) {
       game.x = resume.x || game.x;
@@ -233,10 +283,22 @@
     if (!g.onGround) g.coyote = Math.max(0, g.coyote - dt);
     if (g.y < 40 && g.vy < 0) { g.y = 40; g.vy = 0; g.onGround = true; } // ground safety net
 
-    // height tracking
+    // height tracking (HUD shows metres, Gimkit-style; server keeps the fraction)
     const frac = Math.min(Math.max((g.y - 40) / (map.summitY - 40), 0), 1);
     if (frac > g.bestHeight) g.bestHeight = frac;
-    $('heightPill').textContent = `🏔️ ${Math.round(frac * 100)}%`;
+    $('heightPill').textContent = `🏔️ 高度 ${Math.max(0, Math.round((g.y - 40) / 10))}m`;
+
+    // smooth tracking camera
+    const scale = canvas.height / VIEW_H;
+    const viewW = canvas.width / scale;
+    let tCamY = Math.max(g.y - VIEW_H * 0.42, -60);
+    let tCamX = g.x + PLAYER_W / 2 - viewW / 2;
+    tCamX = Math.min(Math.max(tCamX, -40), map.worldW + 40 - viewW);
+    if (viewW >= map.worldW + 80) tCamX = (map.worldW - viewW) / 2;
+    if (g.camX === null) { g.camX = tCamX; g.camY = tCamY; }
+    const k = 1 - Math.exp(-7 * dt);
+    g.camX += (tCamX - g.camX) * k;
+    g.camY += (tCamY - g.camY) * k;
 
     // energy HUD
     const fill = $('energyFill');
@@ -258,23 +320,24 @@
     }
   }
 
-  // ---------------- render ----------------
+  // ---------------- render (Gimkit-style) ----------------
+  const HINTS = [
+    { fx: 0.50, y: 330,  rot: -0.06, text: '邊跑邊跳，飛得更遠！' },
+    { fx: 0.32, y: 1050, rot: 0.05,  text: '答問題儲能量 ⚡' },
+    { fx: 0.55, y: 4500, rot: -0.05, text: '就快到頂喇，唔好望落嚟！' },
+  ];
+
   function render() {
     const g = game;
     const scale = (canvas.height / VIEW_H);
     const viewW = canvas.width / scale;
-
-    // camera: player ~42% up from bottom; clamp x
-    let camY = g.y - VIEW_H * 0.42;
-    camY = Math.max(camY, -60);
-    let camX = g.x + PLAYER_W / 2 - viewW / 2;
-    camX = Math.min(Math.max(camX, -40), map.worldW + 40 - viewW);
-    if (viewW >= map.worldW + 80) camX = (map.worldW - viewW) / 2;
+    const camX = g.camX ?? 0, camY = g.camY ?? 0;
+    const t = performance.now() / 1000;
 
     const frac = Math.min(Math.max((g.y - 40) / (map.summitY - 40), 0), 1);
     const zone = GameMap.zoneAt(frac);
 
-    // sky
+    // sky gradient
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     grad.addColorStop(0, zone.sky1);
     grad.addColorStop(1, zone.sky0);
@@ -287,82 +350,199 @@
     const toSX = wx => wx - camX;
     const toSY = wy => VIEW_H - (wy - camY);
 
-    // decorative clouds (parallax, deterministic from map seed)
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle = '#ffffff';
-    for (let i = 0; i < 10; i++) {
-      const cy = ((i * 617 + map.seed % 97) % map.summitY);
-      const cx = ((i * 263) % map.worldW);
-      const sy = toSY(cy + camY * 0.25);
-      if (sy > -60 && sy < VIEW_H + 60) {
-        ctx.beginPath();
-        ctx.ellipse(toSX(cx), sy, 55, 18, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
+    // subtle horizontal wave bands (Gimkit sky texture)
+    ctx.fillStyle = 'rgba(255,255,255,.05)';
+    const bandH = 46, bandGap = 110;
+    for (let wy = Math.floor(camY / bandGap) * bandGap; wy < camY + VIEW_H + bandGap; wy += bandGap) {
+      ctx.fillRect(0, toSY(wy) - bandH, viewW, bandH);
     }
-    ctx.globalAlpha = 1;
+
+    // tiny confetti specks
+    const SPECK_COLORS = ['rgba(255,255,255,.55)', 'rgba(255,224,130,.5)', 'rgba(255,170,200,.45)'];
+    for (let i = 0; i < 70; i++) {
+      const wx = (i * 379.7) % map.worldW;
+      const wy = (i * 613.3) % map.summitY;
+      const sx = toSX(wx), sy = toSY(wy);
+      if (sx < -10 || sx > viewW + 10 || sy < -10 || sy > VIEW_H + 10) continue;
+      ctx.fillStyle = SPECK_COLORS[i % 3];
+      ctx.fillRect(sx, sy, 3, 3);
+    }
+
+    // fluffy clouds (parallax, deterministic)
+    for (let i = 0; i < 14; i++) {
+      const cy = ((i * 617 + map.seed % 97) % (map.summitY + 600));
+      const cx = ((i * 811) % map.worldW);
+      const sx = toSX(cx - camX * -0.35);       // drift slower than the world
+      const sy = toSY(cy + camY * 0.3);
+      if (sy < -80 || sy > VIEW_H + 80 || sx < -160 || sx > viewW + 160) continue;
+      ctx.globalAlpha = 0.75;
+      ctx.fillStyle = '#ffffff';
+      cloud(sx, sy, 1 + (i % 3) * 0.35);
+      ctx.globalAlpha = 1;
+    }
+
+    // floating tips (bold yellow with dark outline, like Gimkit's tutorial text)
+    for (const h of HINTS) {
+      const sx = toSX(map.worldW * h.fx), sy = toSY(h.y);
+      if (sy < -80 || sy > VIEW_H + 80) continue;
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(h.rot);
+      ctx.font = 'italic 900 30px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.lineWidth = 7;
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = 'rgba(30,35,60,.85)';
+      ctx.strokeText(h.text, 0, 0);
+      ctx.fillStyle = '#ffd94d';
+      ctx.fillText(h.text, 0, 0);
+      ctx.restore();
+    }
 
     // platforms
     for (const p of map.platforms) {
       const sy = toSY(p.y + p.h);
-      if (sy > VIEW_H + 60 || sy < -60) continue;
-      const z = GameMap.zoneAt(p.y / map.summitY);
+      if (sy > VIEW_H + 80 || sy < -80) continue;
       const sx = toSX(p.x);
+      if (sx > viewW + 60 || sx + p.w < -60) continue;
       if (p.summit) {
-        ctx.fillStyle = '#ffd24d';
-        rr(sx, sy, p.w, p.h, 8);
+        drawBricks(sx, sy, p.w, p.h + 14, '#e8c04a', '#b8922e', 'rgba(255,214,90,.25)');
         // flag
-        ctx.fillStyle = '#e85555';
-        ctx.fillRect(sx + p.w / 2, sy - 54, 4, 54);
+        ctx.fillStyle = '#5d6678';
+        ctx.fillRect(sx + p.w / 2 - 2, sy - 58, 5, 58);
+        ctx.fillStyle = '#e84c4c';
         ctx.beginPath();
-        ctx.moveTo(sx + p.w / 2 + 4, sy - 54);
-        ctx.lineTo(sx + p.w / 2 + 40, sy - 44);
-        ctx.lineTo(sx + p.w / 2 + 4, sy - 34);
+        ctx.moveTo(sx + p.w / 2 + 3, sy - 58);
+        ctx.lineTo(sx + p.w / 2 + 46, sy - 47);
+        ctx.lineTo(sx + p.w / 2 + 3, sy - 36);
         ctx.fill();
       } else if (p.ground) {
-        ctx.fillStyle = '#8b5a2b';
-        ctx.fillRect(sx, sy, p.w, p.h + 200);
-        ctx.fillStyle = '#7ec850';
-        ctx.fillRect(sx, sy, p.w, 10);
+        drawBricks(sx, sy, p.w, p.h + 260, '#454c63', '#333949', null);
       } else {
-        ctx.fillStyle = z.body;
-        rr(sx, sy, p.w, p.h, 6);
-        ctx.fillStyle = z.top;
-        rr(sx, sy, p.w, 6, 6);
+        drawBricks(sx, sy, p.w, p.h, '#a8b0bf', '#8891a3', GameMap.zoneAt(p.y / map.summitY).tint);
       }
     }
 
-    // ghosts
-    ctx.font = '28px sans-serif';
-    ctx.textAlign = 'center';
+    // ghosts (other players, semi-transparent)
     for (const gh of ghosts.values()) {
       const sx = toSX(gh.x + PLAYER_W / 2), sy = toSY(gh.y);
-      if (sy < -40 || sy > VIEW_H + 40) continue;
-      ctx.globalAlpha = 0.55;
-      ctx.fillText(gh.avatar, sx, sy - 6);
-      ctx.font = 'bold 13px sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,.9)';
-      ctx.fillText(gh.name, sx, sy - 42);
-      ctx.font = '28px sans-serif';
-      ctx.globalAlpha = 1;
+      if (sy < -60 || sy > VIEW_H + 60 || sx < -60 || sx > viewW + 60) continue;
+      drawBlob(sx, sy, gh.color, gh.name, 0.6, t, Math.abs(gh.tx - gh.x) > 1, gh.finished);
     }
 
     // me
-    const psx = toSX(g.x + PLAYER_W / 2), psy = toSY(g.y);
-    ctx.font = '34px sans-serif';
-    ctx.fillText(myAvatar, psx, psy - 4);
-    ctx.font = 'bold 14px sans-serif';
-    ctx.fillStyle = '#fff';
-    ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 4;
-    ctx.fillText(me.name, psx, psy - 48);
-    ctx.shadowBlur = 0;
+    drawBlob(toSX(g.x + PLAYER_W / 2), toSY(g.y), myColor, me.name, 1, t, g.vx !== 0 && g.onGround, g.finished);
 
     ctx.restore();
 
-    function rr(x, y, w, h, r) {
+    // ---- drawing helpers (screen space, inside scale) ----
+    function rrPath(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+    function rrFill(x, y, w, h, r) { rrPath(x, y, w, h, r); ctx.fill(); }
+
+    function cloud(x, y, s) {
       ctx.beginPath();
-      ctx.roundRect(x, y, w, h, r);
+      ctx.ellipse(x, y, 52 * s, 20 * s, 0, 0, Math.PI * 2);
+      ctx.ellipse(x - 34 * s, y + 6 * s, 30 * s, 14 * s, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + 36 * s, y + 5 * s, 32 * s, 15 * s, 0, 0, Math.PI * 2);
+      ctx.ellipse(x + 4 * s, y - 12 * s, 34 * s, 16 * s, 0, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    // Brick slab with mortar joints, lighter top cap and dark outline.
+    function drawBricks(x, y, w, h, base, joint, tint) {
+      rrPath(x, y, w, h, 5);
+      ctx.fillStyle = base;
+      ctx.fill();
+      ctx.save();
+      rrPath(x, y, w, h, 5);
+      ctx.clip();
+      ctx.strokeStyle = joint;
+      ctx.lineWidth = 2;
+      const rowH = 14, brickW = 42;
+      let row = 0;
+      for (let yy = y; yy < y + h; yy += rowH, row++) {
+        if (row > 0) { ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x + w, yy); ctx.stroke(); }
+        const off = (row % 2) * (brickW / 2);
+        for (let xx = x + off; xx < x + w; xx += brickW) {
+          ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx, Math.min(yy + rowH, y + h)); ctx.stroke();
+        }
+        // a few deterministic darker bricks for texture
+        for (let xx = x + off; xx < x + w; xx += brickW) {
+          if (((Math.floor(xx) * 7 + Math.floor(yy) * 13) % 11) === 0) {
+            ctx.fillStyle = 'rgba(0,0,0,.10)';
+            ctx.fillRect(xx, yy, Math.min(brickW, x + w - xx), Math.min(rowH, y + h - yy));
+          }
+        }
+      }
+      ctx.restore();
+      // top highlight cap
+      ctx.fillStyle = 'rgba(255,255,255,.35)';
+      rrFill(x, y, w, 6, 4);
+      if (tint) { ctx.fillStyle = tint; rrFill(x, y, w, h, 5); }
+      // outline
+      rrPath(x, y, w, h, 5);
+      ctx.strokeStyle = 'rgba(40,48,68,.8)';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
+
+    // Gimkit-style blob: rounded body, two oval eyes, stubby feet, name below.
+    function drawBlob(cx, footY, color, name, alpha, time, moving, finished) {
+      const w = 44, h = 40;
+      const bounce = moving ? Math.abs(Math.sin(time * 9)) * 3.5 : 0;
+      const by = footY - bounce;
+      ctx.globalAlpha = alpha;
+
+      // feet
+      ctx.fillStyle = shade(color, -38);
+      ctx.beginPath(); ctx.ellipse(cx - 10, by - 4, 8, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 10, by - 4, 8, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+
+      // body
+      rrPath(cx - w / 2, by - h - 5, w, h, 19);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = shade(color, -45);
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // gloss
+      ctx.fillStyle = 'rgba(255,255,255,.28)';
+      ctx.beginPath();
+      ctx.ellipse(cx - 9, by - h + 6, 10, 5.5, -0.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // eyes
+      ctx.fillStyle = '#12161c';
+      const eyeY = by - h + 13;
+      ctx.beginPath(); ctx.ellipse(cx - 8, eyeY, 3.6, 6.2, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 8, eyeY, 3.6, 6.2, 0, 0, Math.PI * 2); ctx.fill();
+
+      if (finished) {
+        ctx.font = '20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('👑', cx, by - h - 12);
+      }
+
+      // name plate under the feet
+      ctx.font = '800 14px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.lineWidth = 4;
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = 'rgba(20,26,40,.85)';
+      ctx.strokeText(name, cx, footY + 18);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(name, cx, footY + 18);
+
+      ctx.globalAlpha = 1;
+    }
+
+    function shade(hex, amt) {
+      const n = parseInt(hex.slice(1), 16);
+      const r = Math.min(255, Math.max(0, (n >> 16) + amt));
+      const gg = Math.min(255, Math.max(0, ((n >> 8) & 255) + amt));
+      const b = Math.min(255, Math.max(0, (n & 255) + amt));
+      return `rgb(${r},${gg},${b})`;
     }
   }
 

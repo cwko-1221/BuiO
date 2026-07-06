@@ -184,7 +184,6 @@
       $('createRoomBtn').disabled = false;
       if (!res?.ok) { $('setupError').textContent = res?.message || '建立失敗'; return; }
       roomCode = res.code;
-      $('bigCode').textContent = res.code;
       $('lobbyInfo').textContent = `題庫：${res.setTitle} · ${res.questionCount} 題 · ${Math.round(res.durationSec / 60)} 分鐘`;
       $('lobbyRoster').innerHTML = '<span class="muted">等待學生加入…</span>';
       $('startGameBtn').disabled = true;

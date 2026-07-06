@@ -19,15 +19,17 @@
     };
   }
 
-  const WORLD_W = 960;
+  // Wide world so widescreen displays see plenty of mountain, with two
+  // independent climbing routes so the class spreads out.
+  const WORLD_W = 2400;
   const SUMMIT_Y = 5200;
 
-  // Altitude zones drive platform look + background colours.
+  // Altitude zones drive the sky colours + a subtle tint on the bricks.
   const ZONES = [
-    { until: 0.25, top: '#7ec850', body: '#8b5a2b', sky0: '#aee3ff', sky1: '#7fc8f8' }, // grassland
-    { until: 0.55, top: '#b0b7c3', body: '#6d6875', sky0: '#8fd0f0', sky1: '#5aa7d6' }, // rock
-    { until: 0.85, top: '#eef4fb', body: '#9db4c9', sky0: '#6a9ec9', sky1: '#3d6a9e' }, // snow
-    { until: 1.01, top: '#fff6d5', body: '#c9a86a', sky0: '#2e4a7a', sky1: '#131c33' }, // golden summit / night sky
+    { until: 0.30, tint: 'rgba(126,200,80,.16)',  sky0: '#8fe0ff', sky1: '#4fc3f7' }, // fresh blue
+    { until: 0.60, tint: 'rgba(120,130,160,.14)', sky0: '#7fd0f4', sky1: '#3f9fd8' }, // deeper sky
+    { until: 0.88, tint: 'rgba(230,240,255,.22)', sky0: '#5f9fd0', sky1: '#2f5f9e' }, // thin cold air
+    { until: 1.01, tint: 'rgba(255,214,90,.20)',  sky0: '#2e4a7a', sky1: '#141d36' }, // golden summit / night
   ];
 
   function zoneAt(frac) {
@@ -42,32 +44,35 @@
     // Ground
     platforms.push({ x: 0, y: 0, w: WORLD_W, h: 40, ground: true });
 
-    let pathX = WORLD_W / 2;
+    // Two guaranteed climbable routes (bounded random walks) + bonus ledges.
+    const paths = [WORLD_W * 0.3, WORLD_W * 0.7];
     let y = 0;
     while (y < SUMMIT_Y - 160) {
       const frac = y / SUMMIT_Y;
-      // Higher = slightly bigger gaps and narrower ledges.
-      const dy = 88 + rnd() * (26 + frac * 14);
+      const dy = 88 + rnd() * (26 + frac * 12);
       y += dy;
-      const w = Math.max(88, 200 - frac * 95 - rnd() * 30);
 
-      // Guaranteed climbable path: random walk with bounded step.
-      const step = (rnd() * 2 - 1) * 150;
-      pathX = Math.min(Math.max(pathX + step, 70), WORLD_W - 70);
-      platforms.push({ x: pathX - w / 2, y, w, h: 16 });
-
-      // Optional bonus ledge away from the main path.
-      if (rnd() < 0.45) {
-        const bw = Math.max(80, w * (0.7 + rnd() * 0.5));
-        let bx = rnd() * (WORLD_W - bw);
-        if (Math.abs(bx + bw / 2 - pathX) > 120) {
-          platforms.push({ x: bx, y: y + (rnd() * 30 - 15), w: bw, h: 16 });
+      for (let i = 0; i < paths.length; i++) {
+        const w = Math.max(100, 230 - frac * 100 - rnd() * 40);
+        const step = (rnd() * 2 - 1) * 160;
+        paths[i] = Math.min(Math.max(paths[i] + step, 90), WORLD_W - 90);
+        // Keep the two routes from merging into one.
+        if (i === 1 && Math.abs(paths[1] - paths[0]) < 260) {
+          paths[1] = Math.min(Math.max(paths[0] + (paths[1] >= paths[0] ? 260 : -260), 90), WORLD_W - 90);
         }
+        platforms.push({ x: paths[i] - w / 2, y: y + (i ? rnd() * 24 - 12 : 0), w, h: 26 });
+      }
+
+      // Bonus ledges scattered between/outside the routes.
+      if (rnd() < 0.6) {
+        const bw = 90 + rnd() * 120;
+        const bx = rnd() * (WORLD_W - bw);
+        platforms.push({ x: bx, y: y + rnd() * 36 - 18, w: bw, h: 26 });
       }
     }
 
     // Summit platform + flag
-    platforms.push({ x: WORLD_W / 2 - 170, y: SUMMIT_Y, w: 340, h: 22, summit: true });
+    platforms.push({ x: WORLD_W / 2 - 260, y: SUMMIT_Y, w: 520, h: 30, summit: true });
 
     return { seed, worldW: WORLD_W, summitY: SUMMIT_Y, platforms };
   }

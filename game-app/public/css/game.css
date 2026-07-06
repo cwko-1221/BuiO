@@ -69,6 +69,25 @@ input, select, textarea { font-family: inherit; }
 
 .error-msg { color: var(--coral); font-size: 14px; min-height: 20px; margin-top: 10px; font-weight: 600; }
 
+/* ---------- room list (player join) ---------- */
+.room-list { margin-bottom: 6px; min-height: 60px; }
+.room-list .muted { padding: 16px 0; }
+.room-row {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  border: 2px solid var(--line); background: #fff; border-radius: 14px;
+  padding: 14px; margin-bottom: 10px; text-align: left;
+  transition: border-color .15s, transform .08s;
+}
+.room-row:hover { border-color: var(--mint); }
+.room-row:active { transform: scale(.98); }
+.room-emoji { font-size: 30px; }
+.room-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.room-info b { font-size: 17px; }
+.room-info small { color: #6b7690; font-size: 13px; }
+.room-phase { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 4px 10px; }
+.room-phase.waiting { background: #d9f7ec; color: var(--mint-dark); }
+.room-phase.playing { background: #fff3cf; color: #8a6400; }
+
 /* ---------- lobby (player) ---------- */
 .lobby-wait { font-size: 15px; color: #6b7690; }
 .pulse-dot {
