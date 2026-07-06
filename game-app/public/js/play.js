@@ -728,6 +728,19 @@
           ctx.beginPath(); ctx.moveTo(sx + p.w * 0.6, sy + 13); ctx.lineTo(sx + p.w * 0.6 + 22, sy + 13); ctx.stroke();
           break;
         }
+        case 'obj': {
+          // Row of big emoji props — the platform IS the object.
+          ctx.font = `${p.s}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const step = p.s * 0.8;
+          for (let i = 0; i < p.n; i++) {
+            const ocx = p.n === 1 ? sx + p.w / 2 : sx + step * i + step / 2;
+            ctx.fillText(p.e, ocx, sy + p.h * 0.62);
+          }
+          ctx.textBaseline = 'alphabetic';
+          break;
+        }
         case 'move':  drawPlanks(sx, sy, p.w, p.h, true); break;
         case 'plank': drawPlanks(sx, sy, p.w, p.h, false); break;
         case 'grass': drawGrass(sx, sy, p.w, p.h, p.checkpoint, p.stage); break;

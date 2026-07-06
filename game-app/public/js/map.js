@@ -44,38 +44,50 @@
   //   physics: normal · ice (slippery) · spring (auto-bounce) · move (slides)
   // ------------------------------------------------------------------
   const STAGE_COUNT = 6;
+  // `objs` are walk-on-able object platforms: [emoji, glyph size]. Rendered
+  // huge, with the collision box wrapped around the glyph — Gimkit-style
+  // "stand on a giant pumpkin" props. Sizes >= 80 are single big objects.
   const STAGES = [
     { name: '城堡', mound: 'earth',
       phys: [['normal', 8], ['move', 1.2], ['spring', 0.7]],
       skins: [['brick', 5], ['crate', 2.5], ['barrel', 1.5]],
+      objs: [['📦', 52], ['🏺', 56], ['🪨', 56], ['🛡️', 54]],
       structures: ['arch', 'tower', 'stairs'],
       deco: ['📦', '🏺', '🌿', '🛡️'], air: ['🗝️', '🕯️'] },
     { name: '市集', mound: 'earth',
       phys: [['normal', 7], ['move', 2.2], ['spring', 0.8]],
       skins: [['stall', 3], ['plank', 3.5], ['barrel', 2], ['crate', 1.5]],
+      objs: [['🍉', 58], ['🍞', 54], ['🧺', 58], ['🧀', 56], ['📦', 50]],
       structures: ['bridge', 'stairs'],
       deco: ['🍞', '🧺', '🍎', '🧀'], air: ['🍞', '🍎'] },
     { name: '森林', mound: 'earth',
       phys: [['normal', 8], ['move', 1.2], ['spring', 0.8]],
       skins: [['rock', 3.5], ['log', 3], ['mound', 3]],
+      objs: [['🍄', 60], ['🪵', 58], ['🪨', 58], ['🛶', 96], ['🐢', 62]],
       structures: ['hill', 'stairs'],
       deco: ['🌲', '🌳', '🍄', '🌼'], air: ['🍃', '🦋'] },
     { name: '農場', mound: 'earth',
       phys: [['normal', 7.5], ['move', 1.7], ['spring', 0.8]],
       skins: [['hay', 4], ['fence', 2], ['log', 2], ['plank', 2]],
+      objs: [['🎃', 58], ['🧺', 54], ['🚜', 96], ['🪵', 56], ['🛖', 88]],
       structures: ['hill', 'bridge'],
       deco: ['🌾', '🎃', '🐓', '🪵'], air: ['🌽', '🥕'] },
     { name: '雪山', mound: 'snow',
       phys: [['normal', 3.5], ['ice', 4.5], ['move', 1.5], ['spring', 0.8]],
       skins: [['snowrock', 4], ['brick', 1.5], ['log', 1]],
+      objs: [['🧊', 56], ['🛷', 88], ['🪨', 56], ['⛄', 64]],
       structures: ['hill', 'stairs'],
       deco: ['⛄', '❄️', '🎄'], air: ['❄️'] },
     { name: '工廠', mound: 'earth',
       phys: [['normal', 7], ['move', 2.4], ['spring', 0.8]],
       skins: [['metal', 4], ['machine', 2.5], ['pipe', 2]],
+      objs: [['🗄️', 60], ['🧰', 56], ['🛢️', 58], ['📺', 60], ['🚋', 104]],
       structures: ['tower', 'bridge'],
       deco: ['⚙️', '🔩', '🛢️'], air: ['🔧', '⚙️'] },
   ];
+
+  // Absurd anywhere-objects, Gimkit style (classroom furniture in the sky).
+  const GLOBAL_OBJS = [['🪑', 56], ['🛋️', 92], ['🛏️', 96], ['📚', 50], ['🪣', 52]];
 
   function stageAt(y) {
     return Math.min(STAGE_COUNT - 1, Math.floor(y / (SUMMIT_Y / STAGE_COUNT)));
@@ -104,6 +116,17 @@
     const type = pickWeighted(rnd, st.phys);
     const p = { x: x - w / 2, y, w, h: 26, type, skin: type };
     if (type === 'normal') {
+      if (rnd() < 0.5) {
+        // Object platform: a row (or one big) of walk-on-able emoji props.
+        const pool = rnd() < 0.18 ? GLOBAL_OBJS : st.objs;
+        const [e, s] = pool[Math.floor(rnd() * pool.length)];
+        const step = s * 0.8;
+        const n = s >= 80 ? 1 : Math.max(1, Math.min(5, Math.round(w / step)));
+        const ow = s >= 80 ? s * 0.92 : n * step;
+        const op = { x: x - ow / 2, y, w: ow, h: Math.round(s * 0.62), type, skin: 'obj', e, s, n };
+        if (rnd() < 0.2) op.tilt = (rnd() * 2 - 1) * 0.09;
+        return op;
+      }
       p.skin = pickWeighted(rnd, st.skins);
       if (TILTABLE.has(p.skin) && rnd() < 0.3) p.tilt = (rnd() * 2 - 1) * 0.07;
     } else if (type === 'move') {
