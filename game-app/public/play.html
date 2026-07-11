@@ -47,19 +47,25 @@
     <canvas id="gameCanvas"></canvas>
 
     <div class="hud">
-      <div class="energy-wrap">
-        <span>⚡</span>
-        <div class="energy-bar"><div id="energyFill" class="energy-fill"></div></div>
+      <div class="hud-cluster hud-cluster-primary">
+        <div class="energy-wrap" aria-label="能量">
+          <span class="energy-icon">⚡</span>
+          <div class="energy-copy"><small>能量</small><strong id="energyText">40</strong></div>
+          <div class="energy-bar"><div id="energyFill" class="energy-fill"></div></div>
+        </div>
+        <div class="hud-pill altitude-pill" id="heightPill">🏔️ 高度 0m</div>
+        <div class="hud-pill stage-pill" id="stagePill">01 · 城堡</div>
       </div>
-      <div class="hud-pill" id="heightPill">0%</div>
       <div class="spacer"></div>
-      <div class="hud-pill" id="streakPill" style="display:none">🔥 0</div>
-      <div class="hud-pill" id="timerPill">--:--</div>
+      <div class="hud-cluster hud-cluster-secondary">
+        <div class="hud-pill streak-pill" id="streakPill" style="display:none">🔥 0</div>
+        <div class="hud-pill timer-pill" id="timerPill">--:--</div>
+      </div>
     </div>
 
     <div id="toasts"></div>
 
-    <button id="answerBtn" class="answer-btn-float"><span class="zap">⚡</span>答題</button>
+    <button id="answerBtn" class="answer-btn-float" aria-label="答題補充能量"><span class="zap">⚡</span><span>答題</span><small>補充能量</small></button>
 
     <div class="touch-controls">
       <div class="cluster">

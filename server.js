@@ -171,6 +171,7 @@ app.get('/english/practice', requireSession, (req, res) => res.sendFile(path.joi
 // Game module static + page routes
 app.use('/game/css', express.static(path.join(__dirname, 'game-app', 'public', 'css')));
 app.use('/game/js', express.static(path.join(__dirname, 'game-app', 'public', 'js')));
+app.use('/game/images', express.static(path.join(__dirname, 'game-app', 'public', 'images')));
 app.get('/game', requireSession, (req, res) => {
   if (req.session.role === 'teacher') {
     return res.sendFile(path.join(__dirname, 'game-app', 'public', 'host.html'));

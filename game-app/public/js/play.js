@@ -178,6 +178,9 @@
   // ---------------- game engine ----------------
   const canvas = $('gameCanvas');
   const ctx = canvas.getContext('2d');
+  const skyAsset = new Image();
+  skyAsset.decoding = 'async';
+  skyAsset.src = '/game/images/game/sky-panorama.webp';
 
   function resize() {
     canvas.width = window.innerWidth * devicePixelRatio;
@@ -337,6 +340,8 @@
     const frac = Math.min(Math.max((g.y - 40) / (map.summitY - 40), 0), 1);
     if (frac > g.bestHeight) g.bestHeight = frac;
     $('heightPill').textContent = `🏔️ 高度 ${Math.max(0, Math.round((g.y - 40) / 5))}m`;
+    const stageIndex = Math.min(map.stageCount - 1, Math.max(0, Math.floor(frac * map.stageCount)));
+    $('stagePill').textContent = `${String(stageIndex + 1).padStart(2, '0')} · ${map.stages[stageIndex]}`;
 
     // smooth tracking camera
     const scale = canvas.height / VIEW_H;
@@ -354,6 +359,7 @@
     const fill = $('energyFill');
     fill.style.width = `${g.energy}%`;
     fill.classList.toggle('low', g.energy < 20);
+    $('energyText').textContent = Math.round(g.energy);
     if (g.energy <= 0 && !g.frozen) pulseAnswerBtn();
 
     // ghost interpolation
@@ -381,12 +387,25 @@
     const frac = Math.min(Math.max((g.y - 40) / (map.summitY - 40), 0), 1);
     const zone = GameMap.zoneAt(frac);
 
-    // sky gradient
+    // Generated painterly panorama plus altitude tint. It gives the world one
+    // coherent art direction while gameplay geometry stays crisp and code-driven.
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     grad.addColorStop(0, zone.sky1);
     grad.addColorStop(1, zone.sky0);
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (skyAsset.complete && skyAsset.naturalWidth) {
+      const cover = Math.max(canvas.width / skyAsset.naturalWidth, canvas.height / skyAsset.naturalHeight);
+      const dw = skyAsset.naturalWidth * cover;
+      const dh = skyAsset.naturalHeight * cover;
+      const pan = Math.sin((camX / map.worldW) * Math.PI * 2) * canvas.width * .025;
+      const lift = (frac - .35) * canvas.height * .08;
+      ctx.globalAlpha = .9 - frac * .28;
+      ctx.drawImage(skyAsset, (canvas.width - dw) / 2 - pan, (canvas.height - dh) / 2 + lift, dw, dh);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = frac > .62 ? `rgba(19,35,75,${(frac - .62) * .58})` : 'rgba(54,188,226,.08)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     ctx.save();
     ctx.scale(scale, scale);
@@ -394,15 +413,15 @@
     const toSX = wx => wx - camX;
     const toSY = wy => VIEW_H - (wy - camY);
 
-    // subtle horizontal wave bands (Gimkit sky texture)
-    ctx.fillStyle = 'rgba(255,255,255,.05)';
+    // Subtle atmospheric bands keep fast camera movement readable.
+    ctx.fillStyle = 'rgba(255,255,255,.035)';
     const bandH = 46, bandGap = 110;
     for (let wy = Math.floor(camY / bandGap) * bandGap; wy < camY + VIEW_H + bandGap; wy += bandGap) {
       ctx.fillRect(0, toSY(wy) - bandH, viewW, bandH);
     }
 
-    // tiled mini-cloud wallpaper (Gimkit background pattern)
-    ctx.fillStyle = 'rgba(255,255,255,.14)';
+    // Distant mini-cloud pattern.
+    ctx.fillStyle = 'rgba(255,255,255,.09)';
     const TX = 280, TY = 180;
     for (let wy = Math.floor(camY / TY) * TY - TY; wy < camY + VIEW_H + TY; wy += TY) {
       const ox = (Math.abs(Math.round(wy / TY)) % 2) * (TX / 2);
@@ -458,13 +477,12 @@
       ctx.restore();
     }
 
-    // floating themed air items (behind platforms, gentle bob)
-    ctx.font = '30px sans-serif';
-    ctx.textAlign = 'center';
+    // Floating collectible-like set dressing, rendered with the same ink and
+    // material language as the platforms instead of OS-dependent emoji.
     for (const a of map.air) {
       const asx = toSX(a.x), asy = toSY(a.y) + Math.sin(t * 1.6 + a.x * 0.013) * 6;
       if (asy < -50 || asy > VIEW_H + 50 || asx < -40 || asx > viewW + 40) continue;
-      ctx.fillText(a.e, asx, asy);
+      drawAirRelic(a.e, asx, asy, 18, t);
     }
 
     // platforms (support bodies first, then the prop skin on top)
@@ -503,6 +521,10 @@
       }
       if (p.mass) drawMass(sx, sy + p.h - 3, p.w, p.mass, p.skin === 'snowmound');
 
+      // A soft contact shadow makes every jump surface immediately legible.
+      ctx.fillStyle = 'rgba(28,35,57,.18)';
+      rrFill(sx + 5, sy + 7, p.w, Math.max(14, p.h), 7);
+
       if (p.tilt) {
         ctx.save();
         ctx.translate(sx + p.w / 2, sy + p.h / 2);
@@ -513,13 +535,11 @@
       if (p.tilt) ctx.restore();
     }
 
-    // decorations sitting on platform tops
-    ctx.font = '34px sans-serif';
-    ctx.textAlign = 'center';
+    // Decorations sitting on platform tops use original vector prop models.
     for (const d of map.deco) {
       const sx = toSX(d.x), sy = toSY(d.y);
       if (sy < -60 || sy > VIEW_H + 60 || sx < -40 || sx > viewW + 40) continue;
-      ctx.fillText(d.e, sx, sy - 3);
+      drawSceneryProp(d.e, sx, sy, 32);
     }
 
     // ghosts (other players, semi-transparent)
@@ -729,16 +749,13 @@
           break;
         }
         case 'obj': {
-          // Row of big emoji props — the platform IS the object.
-          ctx.font = `${p.s}px sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
+          // Semantic emoji values from the map are IDs only; the renderer turns
+          // them into consistent chunky toy props on every device.
           const step = p.s * 0.8;
           for (let i = 0; i < p.n; i++) {
             const ocx = p.n === 1 ? sx + p.w / 2 : sx + step * i + step / 2;
-            ctx.fillText(p.e, ocx, sy + p.h * 0.62);
+            drawPropModel(p.e, ocx, sy + p.h, Math.max(30, p.h * .95));
           }
-          ctx.textBaseline = 'alphabetic';
           break;
         }
         case 'move':  drawPlanks(sx, sy, p.w, p.h, true); break;
@@ -771,6 +788,99 @@
         default:
           drawBricks(sx, sy, p.w, p.h, '#a8b0bf', '#8891a3', GameMap.zoneAt(p.y / map.summitY).tint);
       }
+    }
+
+    function propKind(e) {
+      if ('📦🧺📚🧰🗄️'.includes(e)) return 'crate';
+      if ('🏺🪣🛢️'.includes(e)) return 'vessel';
+      if ('🪨🧊❄️'.includes(e)) return 'rock';
+      if ('🍉🍞🧀🍎🎃🍄'.includes(e)) return 'round';
+      if ('🌲🌳🌿🌾🌼🎄'.includes(e)) return 'plant';
+      if ('⚙️🔩🔧📺'.includes(e)) return 'machine';
+      if ('🪑🛋️🛏️🛶🚜🛷🚋🛖'.includes(e)) return 'furniture';
+      return 'relic';
+    }
+
+    function propPalette(e) {
+      const sets = [
+        ['#e89d4f', '#9b552d', '#ffe2a1'],
+        ['#63c8a4', '#287a71', '#d6fff0'],
+        ['#f06b62', '#9b3943', '#ffd2b8'],
+        ['#7aa9e8', '#405a99', '#d8eeff'],
+        ['#c786dd', '#70468f', '#f0d7ff'],
+      ];
+      return sets[Math.abs(hashCode(e)) % sets.length];
+    }
+
+    function drawPropModel(e, cx, baseY, size) {
+      const kind = propKind(e);
+      const [base, dark, light] = propPalette(e);
+      const w = size * (kind === 'furniture' ? 1.45 : .95);
+      const h = size;
+      ctx.save();
+      ctx.translate(cx, baseY);
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.lineWidth = Math.max(2, size * .07);
+      ctx.strokeStyle = '#2e354d';
+      ctx.fillStyle = base;
+      if (kind === 'crate') {
+        rrPath(-w/2, -h, w, h, h*.12); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = dark; ctx.lineWidth *= .65;
+        ctx.beginPath(); ctx.moveTo(-w*.34,-h*.8); ctx.lineTo(w*.34,-h*.2); ctx.moveTo(w*.34,-h*.8); ctx.lineTo(-w*.34,-h*.2); ctx.stroke();
+        ctx.fillStyle = light; rrFill(-w*.36,-h*.88,w*.72,h*.12,h*.04);
+      } else if (kind === 'vessel') {
+        ctx.beginPath();
+        ctx.moveTo(-w*.22,-h); ctx.bezierCurveTo(-w*.1,-h*.84,-w*.44,-h*.65,-w*.35,-h*.3);
+        ctx.quadraticCurveTo(0,h*.06,w*.35,-h*.3); ctx.bezierCurveTo(w*.44,-h*.65,w*.1,-h*.84,w*.22,-h); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = light; rrFill(-w*.28,-h,w*.56,h*.12,h*.05);
+        ctx.strokeStyle = dark; ctx.lineWidth *= .6; ctx.beginPath(); ctx.arc(0,-h*.48,w*.22,0,Math.PI); ctx.stroke();
+      } else if (kind === 'rock') {
+        ctx.beginPath(); ctx.moveTo(-w*.48,0); ctx.lineTo(-w*.42,-h*.55); ctx.lineTo(-w*.14,-h); ctx.lineTo(w*.28,-h*.82); ctx.lineTo(w*.5,-h*.34); ctx.lineTo(w*.4,0); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = light; ctx.beginPath(); ctx.moveTo(-w*.27,-h*.57); ctx.lineTo(-w*.12,-h*.82); ctx.lineTo(w*.1,-h*.7); ctx.lineTo(-w*.02,-h*.45); ctx.closePath(); ctx.fill();
+      } else if (kind === 'round') {
+        ctx.beginPath(); ctx.ellipse(0,-h*.45,w*.46,h*.48,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = light; ctx.beginPath(); ctx.ellipse(-w*.13,-h*.68,w*.13,h*.12,-.5,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle = dark; ctx.lineWidth *= .65; ctx.beginPath(); ctx.moveTo(0,-h*.94); ctx.quadraticCurveTo(w*.15,-h*1.12,w*.23,-h*.94); ctx.stroke();
+      } else if (kind === 'plant') {
+        ctx.fillStyle = dark; rrFill(-w*.1,-h*.55,w*.2,h*.55,h*.06);
+        ctx.fillStyle = base;
+        for (const [dx,dy,r] of [[0,-.82,.3],[-.25,-.63,.25],[.25,-.62,.25]]) { ctx.beginPath(); ctx.arc(w*dx,h*dy,w*r,0,Math.PI*2); ctx.fill(); ctx.stroke(); }
+        ctx.fillStyle = light; ctx.beginPath(); ctx.arc(-w*.1,-h*.85,w*.1,0,Math.PI*2); ctx.fill();
+      } else if (kind === 'machine') {
+        rrPath(-w/2,-h,w,h,h*.12); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = dark; rrFill(-w*.34,-h*.76,w*.68,h*.4,h*.08);
+        ctx.fillStyle = light; ctx.beginPath(); ctx.arc(-w*.18,-h*.56,h*.09,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ffcf4a'; ctx.beginPath(); ctx.arc(w*.16,-h*.56,h*.09,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = dark; rrFill(-w*.34,-h*.16,w*.68,h*.11,h*.04);
+      } else if (kind === 'furniture') {
+        rrPath(-w/2,-h*.72,w,h*.58,h*.14); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = light; rrFill(-w*.38,-h*.6,w*.76,h*.17,h*.07);
+        ctx.fillStyle = dark; rrFill(-w*.4,-h*.15,w*.12,h*.15,h*.03); rrFill(w*.28,-h*.15,w*.12,h*.15,h*.03);
+      } else {
+        ctx.beginPath(); ctx.arc(0,-h*.5,w*.42,0,Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = light; ctx.beginPath(); ctx.moveTo(0,-h*.8); ctx.lineTo(w*.18,-h*.45); ctx.lineTo(-w*.18,-h*.45); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawSceneryProp(e, cx, baseY, size) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(30,38,58,.22)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 4;
+      drawPropModel(e, cx, baseY, size);
+      ctx.restore();
+    }
+
+    function drawAirRelic(e, cx, cy, size, time) {
+      const [base, dark, light] = propPalette(e);
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(Math.sin(time * 1.2 + cx) * .08);
+      ctx.shadowColor = 'rgba(28,38,65,.22)'; ctx.shadowBlur = 7; ctx.shadowOffsetY = 4;
+      ctx.fillStyle = base; ctx.strokeStyle = '#30374f'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(0,0,size,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = light; ctx.beginPath(); ctx.arc(-size*.28,-size*.3,size*.22,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle = dark; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(-size*.45,0); ctx.lineTo(size*.45,0); ctx.moveTo(0,-size*.45); ctx.lineTo(0,size*.45); ctx.stroke();
+      ctx.restore();
     }
 
     // ---- structure support bodies ----
@@ -1158,6 +1268,19 @@
     $('qText').textContent = '';
     $('qOverlay').classList.add('open');
 
+    if (preview) {
+      $('qText').textContent = '6 × 7 等於多少？';
+      $('qChoices').innerHTML = '';
+      ['36', '42', '48', '54'].forEach((c, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'q-choice';
+        btn.textContent = c;
+        btn.addEventListener('click', () => answer(i));
+        $('qChoices').appendChild(btn);
+      });
+      return;
+    }
+
     socket.emit('player:question', (res) => {
       if (!res?.ok) { closeQuestion(); return; }
       $('qText').textContent = res.question;
@@ -1175,6 +1298,22 @@
   function answer(choice) {
     const btns = [...$('qChoices').children];
     btns.forEach(b => b.disabled = true);
+
+    if (preview) {
+      const correct = choice === 1;
+      btns[choice].classList.add(correct ? 'correct' : 'wrong');
+      if (!correct) btns[1].classList.add('correct');
+      const fb = $('qFeedback');
+      fb.textContent = correct ? '答啱喇！能量 +30 ⚡' : '差少少，正確答案係 42';
+      fb.classList.add(correct ? 'good' : 'bad');
+      if (correct) {
+        game.energy = Math.min(100, game.energy + 30);
+        setTimeout(closeQuestion, 850);
+      } else {
+        $('qClose').style.display = '';
+      }
+      return;
+    }
 
     socket.emit('player:answer', { choice }, (res) => {
       if (!res?.ok) { closeQuestion(); return; }
@@ -1246,5 +1385,17 @@
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // Local-only art/physics preview for deterministic browser QA. It never
+  // exists on deployed hosts and does not create or join a live classroom.
+  const preview = new URLSearchParams(location.search).has('preview')
+    && (location.hostname === '127.0.0.1' || location.hostname === 'localhost');
+  if (preview) {
+    clearInterval(roomsTimer);
+    me = { name: 'Koko', studentId: 'preview' };
+    myColor = PALETTE[Math.abs(hashCode(me.name)) % PALETTE.length];
+    myAcc = accessoriesFor(me.name);
+    startGame(20260711, 480, Date.now(), null);
   }
 })();

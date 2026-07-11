@@ -44,9 +44,9 @@
   //   physics: normal · ice (slippery) · spring (auto-bounce) · move (slides)
   // ------------------------------------------------------------------
   const STAGE_COUNT = 6;
-  // `objs` are walk-on-able object platforms: [emoji, glyph size]. Rendered
-  // huge, with the collision box wrapped around the glyph — Gimkit-style
-  // "stand on a giant pumpkin" props. Sizes >= 80 are single big objects.
+  // `objs` are semantic IDs for walk-on-able toy props. The renderer converts
+  // them into original vector models, so appearance is consistent across OSes.
+  // Sizes >= 80 are single landmark objects.
   const STAGES = [
     { name: '城堡', mound: 'earth',
       phys: [['normal', 8], ['move', 1.2], ['spring', 0.7]],
@@ -86,7 +86,7 @@
       deco: ['⚙️', '🔩', '🛢️'], air: ['🔧', '⚙️'] },
   ];
 
-  // Absurd anywhere-objects, Gimkit style (classroom furniture in the sky).
+  // Whimsical anywhere-objects: classroom furniture floating in the sky.
   const GLOBAL_OBJS = [['🪑', 56], ['🛋️', 92], ['🛏️', 96], ['📚', 50], ['🪣', 52]];
 
   function stageAt(y) {
@@ -116,8 +116,8 @@
     const type = pickWeighted(rnd, st.phys);
     const p = { x: x - w / 2, y, w, h: 26, type, skin: type };
     if (type === 'normal') {
-      if (rnd() < 0.5) {
-        // Object platform: a row (or one big) of walk-on-able emoji props.
+      if (rnd() < 0.34) {
+        // Object platform: a row (or one big) of walk-on-able toy props.
         const pool = rnd() < 0.18 ? GLOBAL_OBJS : st.objs;
         const [e, s] = pool[Math.floor(rnd() * pool.length)];
         const step = s * 0.8;
@@ -232,7 +232,7 @@
         const k = Math.round(nextCp / stageH);
         platforms.push({ x: Math.min(Math.max(x - 210, 60), WORLD_W - 480), y, w: 420, h: 30, type: 'normal', skin: 'grass', checkpoint: true, stage: k });
         nextCp += stageH;
-      } else if (layer - lastStruct >= 6 && rnd() < 0.5 && y < SUMMIT_Y - 500) {
+      } else if (layer - lastStruct >= 4 && rnd() < 0.7 && y < SUMMIT_Y - 500) {
         // Set piece: arch / tower / hill / stairs / bridge.
         lastStruct = layer;
         const kind = STAGES[stage].structures[Math.floor(rnd() * STAGES[stage].structures.length)];
@@ -249,7 +249,7 @@
       }
 
       // Floating air items between platforms.
-      if (rnd() < 0.3) {
+      if (rnd() < 0.42) {
         const list = STAGES[stage].air;
         air.push({ x: Math.min(Math.max(x + (rnd() * 2 - 1) * 420, 60), WORLD_W - 60), y: y + 30 + rnd() * 40, e: list[Math.floor(rnd() * list.length)] });
       }
@@ -260,7 +260,7 @@
       if (layer === 44) hints.push({ x, y: y + 200, rot: -0.05, text: '就快到頂喇，唔好望落嚟！' });
 
       // Side branches / bonus ledges beside the route.
-      if (rnd() < 0.55) {
+      if (rnd() < 0.72) {
         const bw = 90 + rnd() * 110;
         const side = rnd() < 0.5 ? -1 : 1;
         const bx = Math.min(Math.max(x + side * (200 + rnd() * 240), 100 + bw / 2), WORLD_W - 100 - bw / 2);
