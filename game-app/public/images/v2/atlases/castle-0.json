@@ -1,0 +1,495 @@
+{
+  "frames": {
+    "battlement": {
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 240,
+        "h": 215
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 215
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 215
+      }
+    },
+    "castle-tower": {
+      "frame": {
+        "x": 248,
+        "y": 4,
+        "w": 115,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 240
+      }
+    },
+    "castle-arch": {
+      "frame": {
+        "x": 367,
+        "y": 4,
+        "w": 240,
+        "h": 198
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 198
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 198
+      }
+    },
+    "drawbridge": {
+      "frame": {
+        "x": 611,
+        "y": 4,
+        "w": 240,
+        "h": 122
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 122
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 122
+      }
+    },
+    "shield": {
+      "frame": {
+        "x": 855,
+        "y": 4,
+        "w": 186,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 186,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 186,
+        "h": 240
+      }
+    },
+    "sword": {
+      "frame": {
+        "x": 1045,
+        "y": 4,
+        "w": 85,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 85,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 85,
+        "h": 240
+      }
+    },
+    "helmet": {
+      "frame": {
+        "x": 1134,
+        "y": 4,
+        "w": 156,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 156,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 156,
+        "h": 240
+      }
+    },
+    "giant-key": {
+      "frame": {
+        "x": 1294,
+        "y": 4,
+        "w": 240,
+        "h": 173
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 173
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 173
+      }
+    },
+    "treasure-chest": {
+      "frame": {
+        "x": 1538,
+        "y": 4,
+        "w": 236,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 236,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 236,
+        "h": 240
+      }
+    },
+    "throne": {
+      "frame": {
+        "x": 1778,
+        "y": 4,
+        "w": 177,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 177,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 177,
+        "h": 240
+      }
+    },
+    "castle-banner": {
+      "frame": {
+        "x": 4,
+        "y": 248,
+        "w": 181,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 181,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 181,
+        "h": 240
+      }
+    },
+    "chandelier": {
+      "frame": {
+        "x": 189,
+        "y": 248,
+        "w": 168,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 168,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 168,
+        "h": 240
+      }
+    },
+    "cannon": {
+      "frame": {
+        "x": 361,
+        "y": 248,
+        "w": 224,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 224,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 224,
+        "h": 240
+      }
+    },
+    "catapult": {
+      "frame": {
+        "x": 589,
+        "y": 248,
+        "w": 240,
+        "h": 219
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 219
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 219
+      }
+    },
+    "armor-stand": {
+      "frame": {
+        "x": 833,
+        "y": 248,
+        "w": 170,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 170,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 170,
+        "h": 240
+      }
+    },
+    "gargoyle": {
+      "frame": {
+        "x": 1007,
+        "y": 248,
+        "w": 141,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 141,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 141,
+        "h": 240
+      }
+    },
+    "column": {
+      "frame": {
+        "x": 1152,
+        "y": 248,
+        "w": 112,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 112,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 112,
+        "h": 240
+      }
+    },
+    "broken-column": {
+      "frame": {
+        "x": 1268,
+        "y": 248,
+        "w": 119,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 119,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 119,
+        "h": 240
+      }
+    },
+    "scroll": {
+      "frame": {
+        "x": 1391,
+        "y": 248,
+        "w": 209,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 209,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 209,
+        "h": 240
+      }
+    },
+    "potion-cauldron": {
+      "frame": {
+        "x": 1604,
+        "y": 248,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "bookcase": {
+      "frame": {
+        "x": 1848,
+        "y": 248,
+        "w": 180,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 180,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 180,
+        "h": 240
+      }
+    },
+    "round-table": {
+      "frame": {
+        "x": 4,
+        "y": 492,
+        "w": 240,
+        "h": 172
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 172
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 172
+      }
+    },
+    "castle-vase": {
+      "frame": {
+        "x": 248,
+        "y": 492,
+        "w": 207,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 207,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 207,
+        "h": 240
+      }
+    },
+    "grand-clock": {
+      "frame": {
+        "x": 459,
+        "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    }
+  },
+  "meta": {
+    "app": "BuiO atlas builder",
+    "version": "2",
+    "image": "castle-0.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 2048
+    },
+    "scale": "1"
+  }
+}

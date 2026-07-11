@@ -240,13 +240,13 @@
   function renderLiveList() {
     const el = $('liveList');
     if (!latestPositions.length) { el.innerHTML = '<p class="muted">等待玩家數據…</p>'; return; }
-    const sorted = [...latestPositions].sort((a, b) => (b.f - a.f) || (b.h - a.h));
+    const sorted = [...latestPositions].sort((a, b) => (b.f - a.f) || ((b.progress ?? b.h) - (a.progress ?? a.h)));
     el.innerHTML = sorted.map((p, i) => `
       <div class="live-row${p.f ? ' finished' : ''}">
         <div class="rank">${['🥇', '🥈', '🥉'][i] || (i + 1)}</div>
         <div class="name">${escapeHtml(p.name)}${p.f ? ' 🏔️' : ''}</div>
-        <div class="bar"><div style="width:${Math.round(p.h * 100)}%"></div></div>
-        <div class="pct">${Math.round(p.h * 100)}%</div>
+        <div class="bar"><div style="width:${Math.round((p.progress ?? p.h) * 100)}%"></div></div>
+        <div class="pct">${Math.round((p.progress ?? p.h) * 100)}%</div>
       </div>`).join('');
   }
 
@@ -275,7 +275,7 @@
     ctx.fillText('🚩', W / 2, 22);
     // player dots
     for (const p of latestPositions) {
-      const y = H - 14 - p.h * (H - 44);
+      const y = H - 14 - (p.progress ?? p.h) * (H - 44);
       const x = W / 2 + ((hash(p.name) % 60) - 30);
       ctx.font = '15px sans-serif';
       ctx.fillText(p.f ? '🏆' : '🔵', x, y);
@@ -299,7 +299,7 @@
         <div class="rank">${['🥇', '🥈', '🥉'][row.rank - 1] || row.rank}</div>
         <div class="name">${escapeHtml(row.name)}${row.finished ? ' 🏔️' : ''}</div>
         <div class="stat">✅${row.correct} ❌${row.wrong}</div>
-        <div class="height">${Math.round(row.bestHeight * 100)}%</div>
+        <div class="height">${Math.round((row.bestProgress ?? row.bestHeight) * 100)}%</div>
       </div>`).join('');
     show('resultScreen');
   });

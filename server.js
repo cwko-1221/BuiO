@@ -172,6 +172,11 @@ app.get('/english/practice', requireSession, (req, res) => res.sendFile(path.joi
 app.use('/game/css', express.static(path.join(__dirname, 'game-app', 'public', 'css')));
 app.use('/game/js', express.static(path.join(__dirname, 'game-app', 'public', 'js')));
 app.use('/game/images', express.static(path.join(__dirname, 'game-app', 'public', 'images')));
+app.use('/game/vendor/phaser', express.static(path.join(__dirname, 'node_modules', 'phaser', 'dist')));
+app.get('/game/preview', (req, res, next) => {
+  if (config.isProd) return next();
+  res.sendFile(path.join(__dirname, 'game-app', 'public', 'play.html'));
+});
 app.get('/game', requireSession, (req, res) => {
   if (req.session.role === 'teacher') {
     return res.sendFile(path.join(__dirname, 'game-app', 'public', 'host.html'));

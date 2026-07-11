@@ -1,0 +1,495 @@
+{
+  "frames": {
+    "giant-gear": {
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 240,
+        "h": 127
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 127
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 127
+      }
+    },
+    "gear-pair": {
+      "frame": {
+        "x": 248,
+        "y": 4,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "straight-pipe": {
+      "frame": {
+        "x": 492,
+        "y": 4,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "elbow-pipe": {
+      "frame": {
+        "x": 736,
+        "y": 4,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "boiler": {
+      "frame": {
+        "x": 980,
+        "y": 4,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "piston": {
+      "frame": {
+        "x": 1224,
+        "y": 4,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "factory-conveyor": {
+      "frame": {
+        "x": 1468,
+        "y": 4,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "steel-beam": {
+      "frame": {
+        "x": 1712,
+        "y": 4,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "crane-arm": {
+      "frame": {
+        "x": 4,
+        "y": 248,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "factory-toolbox": {
+      "frame": {
+        "x": 248,
+        "y": 248,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "filing-cabinet": {
+      "frame": {
+        "x": 492,
+        "y": 248,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "factory-monitor": {
+      "frame": {
+        "x": 736,
+        "y": 248,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "cable-spool": {
+      "frame": {
+        "x": 980,
+        "y": 248,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "oil-drum": {
+      "frame": {
+        "x": 1224,
+        "y": 248,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "rail-cart": {
+      "frame": {
+        "x": 1468,
+        "y": 248,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "forklift": {
+      "frame": {
+        "x": 1712,
+        "y": 248,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "vent-fan": {
+      "frame": {
+        "x": 4,
+        "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "coil-spring": {
+      "frame": {
+        "x": 248,
+        "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "magnet": {
+      "frame": {
+        "x": 492,
+        "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "valve-wheel": {
+      "frame": {
+        "x": 736,
+        "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "platform-lift": {
+      "frame": {
+        "x": 980,
+        "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "generator": {
+      "frame": {
+        "x": 1224,
+        "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "battery": {
+      "frame": {
+        "x": 1468,
+        "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "robot-arm": {
+      "frame": {
+        "x": 1712,
+        "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    }
+  },
+  "meta": {
+    "app": "BuiO atlas builder",
+    "version": "2",
+    "image": "factory-0.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 2048
+    },
+    "scale": "1"
+  }
+}

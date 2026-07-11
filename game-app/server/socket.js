@@ -48,13 +48,15 @@ module.exports = function (io, app) {
       if (a.finishedAt && b.finishedAt) return a.finishedAt - b.finishedAt;
       if (a.finishedAt) return -1;
       if (b.finishedAt) return 1;
-      return b.bestHeight - a.bestHeight;
+      return (b.bestProgress ?? b.bestHeight) - (a.bestProgress ?? a.bestHeight);
     });
     return players.map((p, i) => ({
       rank: i + 1,
       name: p.name,
       studentId: p.studentId,
-      bestHeight: Math.round(p.bestHeight * 1000) / 1000,
+      bestProgress: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
+      bestHeight: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
+      altitude: Math.round((p.altitude || 0) * 10) / 10,
       finished: !!p.finishedAt,
       correct: p.correct,
       wrong: p.wrong,
@@ -157,7 +159,14 @@ module.exports = function (io, app) {
         const positions = [];
         for (const p of room.players.values()) {
           if (!p.connected) continue;
-          positions.push({ id: p.key, name: p.name, x: p.x, y: p.y, h: Math.round(p.bestHeight * 1000) / 1000, f: !!p.finishedAt });
+          positions.push({
+            id: p.key, name: p.name, x: p.x, y: p.y,
+            vx: p.vx || 0, vy: p.vy || 0, facing: p.facing || 1, animation: p.animation || 'idle',
+            progress: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
+            h: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
+            altitude: Math.round((p.altitude || 0) * 10) / 10,
+            f: !!p.finishedAt
+          });
         }
         nsp.to(room.code).volatile.emit('game:positions', positions);
       }, POSITION_BROADCAST_MS);
@@ -195,6 +204,13 @@ module.exports = function (io, app) {
           studentId: studentId || null,
           x: 0, y: 0,
           bestHeight: 0,
+          bestProgress: 0,
+          altitude: 0,
+          vx: 0,
+          vy: 0,
+          facing: 1,
+          animation: 'idle',
+          checkpoint: null,
           energy: 40,
           correct: 0,
           wrong: 0,
@@ -226,7 +242,14 @@ module.exports = function (io, app) {
         durationSec: room.durationSec,
         startedAt: room.startedAt,
         resume: room.phase === 'playing'
-          ? { x: player.x, y: player.y, energy: player.energy, bestHeight: player.bestHeight, finished: !!player.finishedAt }
+          ? {
+              x: player.x, y: player.y, energy: player.energy,
+              bestProgress: player.bestProgress ?? player.bestHeight,
+              bestHeight: player.bestProgress ?? player.bestHeight,
+              altitude: player.altitude || 0,
+              checkpoint: player.checkpoint,
+              finished: !!player.finishedAt
+            }
           : null,
       });
     });
@@ -281,13 +304,20 @@ module.exports = function (io, app) {
     // Client physics is authoritative for position (fine for a classroom);
     // the server just clamps energy to what it has granted and tracks the
     // best height for the leaderboard.
-    socket.on('player:state', ({ x, y, energy, height }) => {
+    socket.on('player:state', ({ x, y, velocityX, velocityY, energy, progress, altitude, animation, facing, height, checkpoint }) => {
       const room = rooms.get(socket.data.code);
       const player = room?.players.get(socket.data.playerKey);
       if (!room || !player || room.phase !== 'playing') return;
       player.x = Number(x) || 0;
       player.y = Number(y) || 0;
-      const h = Math.min(Math.max(Number(height) || 0, 0), 1);
+      player.vx = Number(velocityX) || 0;
+      player.vy = Number(velocityY) || 0;
+      player.facing = Number(facing) < 0 ? -1 : 1;
+      player.animation = ['idle','run','jump','fall','land','celebrate'].includes(animation) ? animation : 'idle';
+      player.altitude = Math.max(0, Number(altitude) || 0);
+      if (checkpoint && typeof checkpoint === 'object') player.checkpoint = checkpoint;
+      const h = Math.min(Math.max(Number(progress ?? height) || 0, 0), 1);
+      if (h > player.bestProgress) player.bestProgress = h;
       if (h > player.bestHeight) player.bestHeight = h;
       const e = Number(energy);
       if (Number.isFinite(e)) player.energy = Math.min(Math.max(e, 0), Math.max(player.energy, 100));
@@ -299,6 +329,7 @@ module.exports = function (io, app) {
       if (!room || !player || room.phase !== 'playing' || player.finishedAt) return;
       player.finishedAt = Date.now();
       player.bestHeight = 1;
+      player.bestProgress = 1;
       const place = [...room.players.values()].filter(p => p.finishedAt).length;
       nsp.to(room.code).emit('game:summit', { name: player.name, place });
       // Everyone made it — no reason to keep the clock running.

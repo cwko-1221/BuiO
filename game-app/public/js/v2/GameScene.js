@@ -1,0 +1,320 @@
+import { ASSET_BY_ID, ZONE_NAMES } from './assets.js';
+import { AVAILABLE_ASSETS } from './available-assets.js';
+import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js';
+
+const CAT_WORLD = 0x0002;
+const CAT_PLAYER = 0x0004;
+
+export class GameScene extends Phaser.Scene {
+  constructor(course, hooks = {}) {
+    super({ key: 'GameScene' });
+    this.course = course;
+    this.hooks = hooks;
+    this.actions = { left:false, right:false, down:false, jumpQueued:0 };
+    this.energy = hooks.energy ?? 40;
+    this.progress = hooks.progress ?? 0;
+    this.checkpoint = course.checkpoints.filter(c => c.progress <= this.progress).at(-1) || course.checkpoints[0];
+    this.airJump = 1;
+    this.coyote = 0;
+    this.grounded = false;
+    this.dropUntil = 0;
+    this.lastNet = 0;
+    this.dynamicObjects = [];
+    this.ghosts = new Map();
+    this.finished = false;
+  }
+
+  preload() {
+    this.load.image('sky-v2', '/game/images/game/sky-panorama.webp');
+    this.load.image('player-v2', '/game/images/v2/characters/player-idle.webp');
+    for (const page of ATLAS_PAGES) this.load.atlas(page.key,page.image,page.json);
+    const strips = { idle:['idle-strip-4',4], run:['run-strip-8',8], air:['air-strip-6',6], land:['fall-land-strip-4',4], celebrate:['celebrate-strip-4',4] };
+    for (const [name,[dir,count]] of Object.entries(strips)) {
+      for (let i=1;i<=count;i++) this.load.image(`player-${name}-${i}`,`/game/images/v2/characters/frames/${dir}/${String(i).padStart(2,'0')}.png`);
+    }
+    for (const id of this.course.usedAssets) {
+      if (AVAILABLE_ASSETS.includes(id) && !ATLAS_INDEX[id]) this.load.image(id, ASSET_BY_ID.get(id).file);
+    }
+  }
+
+  create() {
+    this.matter.world.setBounds(0, 0, this.course.world.width, this.course.world.height + 500, 120, true, true, true, false);
+    this.matter.world.engine.positionIterations = 8;
+    this.matter.world.engine.velocityIterations = 6;
+
+    this.sky = this.add.image(0, 0, 'sky-v2').setOrigin(.5).setScrollFactor(0).setDepth(-1000);
+    this.resizeSky();
+    this.scale.on('resize', () => this.resizeSky());
+
+    for (const id of this.course.usedAssets) if (!ATLAS_INDEX[id] && !this.textures.exists(id)) this.makeFallbackTexture(ASSET_BY_ID.get(id));
+    this.makePlayerTexture();
+    this.createPlayerAnimations();
+
+    this.objectSprites = this.course.objects.map(obj => this.createCourseObject(obj));
+    this.createProgressSensors();
+    this.createCheckpoints();
+    this.createSummit();
+    this.createPlayer();
+    this.bindInputs();
+    this.bindCollisions();
+
+    const camera = this.cameras.main;
+    camera.setBounds(0, 0, this.course.world.width, this.course.world.height);
+    camera.startFollow(this.player, true, .08, .08, 0, 80);
+    camera.setDeadzone(Math.min(260, camera.width * .28), Math.min(190, camera.height * .26));
+    camera.setZoom(Math.max(.82, Math.min(1.05, camera.height / 780)));
+    this.resizeSky();
+    camera.fadeIn(280, 255, 255, 255);
+    this.hooks.onReady?.(this);
+  }
+
+  resizeSky() {
+    if (!this.sky) return;
+    const w = this.scale.width, h = this.scale.height;
+    const zoom = this.cameras.main?.zoom || 1;
+    const vw = w / zoom + 120, vh = h / zoom + 120;
+    const cover = Math.max(vw / this.sky.texture.getSourceImage().width, vh / this.sky.texture.getSourceImage().height);
+    this.sky.setScale(cover).setPosition(w / (2 * zoom), h / (2 * zoom));
+  }
+
+  makeFallbackTexture(asset) {
+    const w = Math.max(96, Math.round(asset.renderSize.w));
+    const h = Math.max(64, Math.round(asset.renderSize.h));
+    const g = this.make.graphics({ x:0, y:0, add:false });
+    const [base, dark, light] = asset.palette;
+    g.lineStyle(7, 0x293149, 1);
+    g.fillStyle(Phaser.Display.Color.HexStringToColor(base).color, 1);
+    const type = asset.body.type;
+    if (type === 'circle') {
+      g.fillCircle(w/2, h/2, Math.min(w,h)*.42); g.strokeCircle(w/2,h/2,Math.min(w,h)*.42);
+    } else if (type === 'trapezoid') {
+      const p = [new Phaser.Math.Vector2(w*.08,h*.78),new Phaser.Math.Vector2(w*.2,h*.12),new Phaser.Math.Vector2(w*.78,h*.08),new Phaser.Math.Vector2(w*.94,h*.75)];
+      g.fillPoints(p,true); g.strokePoints(p,true);
+    } else if (type === 'polygon' || type === 'compound') {
+      const p = [new Phaser.Math.Vector2(w*.06,h*.72),new Phaser.Math.Vector2(w*.12,h*.28),new Phaser.Math.Vector2(w*.36,h*.06),new Phaser.Math.Vector2(w*.75,h*.13),new Phaser.Math.Vector2(w*.94,h*.52),new Phaser.Math.Vector2(w*.82,h*.82)];
+      g.fillPoints(p,true); g.strokePoints(p,true);
+    } else {
+      g.fillRoundedRect(4,8,w-8,h-14,Math.min(16,h*.2)); g.strokeRoundedRect(4,8,w-8,h-14,Math.min(16,h*.2));
+    }
+    g.fillStyle(Phaser.Display.Color.HexStringToColor(light).color,.75);
+    g.fillRoundedRect(w*.18,h*.18,w*.42,Math.max(6,h*.1),4);
+    g.lineStyle(3, Phaser.Display.Color.HexStringToColor(dark).color,.8);
+    g.lineBetween(w*.22,h*.66,w*.78,h*.34);
+    g.generateTexture(asset.id,w,h); g.destroy();
+  }
+
+  makePlayerTexture() {
+    if (this.textures.exists('player-v2')) return;
+    const g = this.make.graphics({ add:false });
+    g.lineStyle(6,0x232c4b,1); g.fillStyle(0x386ff5,1);
+    g.fillCircle(34,34,27); g.strokeCircle(34,34,27);
+    g.fillStyle(0xffffff,1); g.fillCircle(25,29,6); g.fillCircle(43,29,6);
+    g.fillStyle(0x15213b,1); g.fillCircle(26,30,3); g.fillCircle(42,30,3);
+    g.fillRoundedRect(24,45,20,5,2); g.generateTexture('player-v2',68,70); g.destroy();
+  }
+
+  createPlayerAnimations() {
+    const create = (key, prefix, count, frameRate, repeat = -1) => {
+      if (this.anims.exists(key)) return;
+      this.anims.create({ key, frames:Array.from({length:count},(_,i)=>({key:`player-${prefix}-${i+1}`})), frameRate, repeat });
+    };
+    create('idle','idle',4,4); create('run','run',8,12); create('jump','air',2,10,0);
+    if (!this.anims.exists('doubleJump')) this.anims.create({key:'doubleJump',frames:[{key:'player-air-3'},{key:'player-air-4'}],frameRate:12,repeat:0});
+    if (!this.anims.exists('fall')) this.anims.create({key:'fall',frames:[{key:'player-air-5'},{key:'player-air-6'}],frameRate:5,repeat:-1});
+    create('land','land',4,12,0); create('celebrate','celebrate',4,8,-1);
+  }
+
+  bodyOptions(asset, w, h, override) {
+    const body = override || asset.body;
+    const common = { isStatic:true, friction:.6, restitution: body.material === 'rubber' ? .62 : .05, label:'world' };
+    if (body.type === 'circle') return { ...common, shape:{ type:'circle', radius:Math.min(w,h)*(body.radius || .45) } };
+    if (body.type === 'trapezoid') return { ...common, shape:{ type:'trapezoid', slope:.28 } };
+    if (body.type === 'polygon') return { ...common, shape:{ type:'polygon', sides:6, radius:Math.min(w,h)*.48 } };
+    if (body.type === 'compound') return { ...common, chamfer:{ radius:Math.min(14,h*.18) } };
+    return { ...common, chamfer:{ radius:Math.min(12,h*.16) } };
+  }
+
+  createCourseObject(obj) {
+    const texture=ATLAS_INDEX[obj.assetId];
+    const sprite = this.matter.add.image(obj.x, obj.y, texture?.key||obj.assetId, texture?.frame||null, this.bodyOptions(obj.asset, obj.w, obj.h, obj.bodyOverride));
+    sprite.setDisplaySize(obj.w, obj.h).setAngle(Phaser.Math.RadToDeg(obj.angle || 0));
+    sprite.setStatic(true).setDepth(10);
+    sprite.body.collisionFilter.category = CAT_WORLD;
+    sprite.body.collisionFilter.mask = CAT_PLAYER;
+    sprite.body.gameObject = sprite;
+    sprite.courseObject = obj;
+    if (obj.behavior.type === 'move' || obj.behavior.type === 'rotate') {
+      sprite.setStatic(false); sprite.setIgnoreGravity(true); sprite.setFixedRotation(obj.behavior.type !== 'rotate');
+      sprite.body.isSleeping = false;
+      this.dynamicObjects.push({ sprite, obj, startX:obj.x, startY:obj.y, phase:(obj.x+obj.y)%6.28 });
+    }
+    return sprite;
+  }
+
+  createProgressSensors() {
+    this.sensorBodies = this.course.sensors.map(sensor => {
+      const body = this.matter.add.rectangle(sensor.x,sensor.y,150,180,{isStatic:true,isSensor:true,label:'progress'});
+      body.progressSensor = sensor; return body;
+    });
+  }
+
+  createCheckpoints() {
+    for (const cp of this.course.checkpoints) {
+      const pole = this.add.rectangle(cp.x,cp.y-35,7,70,0x4e5870).setDepth(9);
+      const tex=ATLAS_INDEX['checkpoint-flag'];
+      const flag = this.add.image(cp.x+22,cp.y-58,tex?.key||'checkpoint-flag',tex?.frame||null).setDisplaySize(54,54).setDepth(9);
+      this.add.text(cp.x,cp.y+14,cp.zoneName,{fontFamily:'Microsoft JhengHei',fontSize:'16px',fontStyle:'bold',color:'#ffffff',stroke:'#20263a',strokeThickness:5}).setOrigin(.5).setDepth(20);
+      pole.setAlpha(.9); flag.setAlpha(.95);
+    }
+  }
+
+  createSummit() {
+    const s = this.course.summit;
+    this.summitBody = this.matter.add.rectangle(s.x,s.y,220,220,{isStatic:true,isSensor:true,label:'summit'});
+    this.add.rectangle(s.x,s.y+80,330,42,0xe6bd4c).setStrokeStyle(6,0x313950).setDepth(8);
+    this.add.rectangle(s.x,s.y-25,8,170,0x515c72).setDepth(9);
+    const tex=ATLAS_INDEX['summit-flag'];
+    this.add.image(s.x+48,s.y-90,tex?.key||'summit-flag',tex?.frame||null).setDisplaySize(110,110).setDepth(9);
+  }
+
+  createPlayer() {
+    const { Bodies, Body } = Phaser.Physics.Matter.Matter;
+    const main = Bodies.circle(0,-5,24,{label:'player-main',friction:0,frictionAir:.02,restitution:0});
+    const foot = Bodies.rectangle(0,22,24,8,{label:'player-foot',isSensor:true});
+    const compound = Body.create({parts:[main,foot],friction:0,frictionStatic:0,restitution:0,label:'player'});
+    this.player = this.add.sprite(this.course.start.x,this.course.start.y-55,'player-idle-1').setDisplaySize(68,70).setDepth(100);
+    this.matter.add.gameObject(this.player,compound);
+    this.player.setPosition(this.course.start.x,this.course.start.y-55);
+    this.player.setFixedRotation().setFriction(0).setFrictionAir(.02);
+    this.player.body.collisionFilter.category = CAT_PLAYER;
+    this.player.body.collisionFilter.mask = CAT_WORLD;
+    this.playerName = this.add.text(this.player.x,this.player.y+42,this.hooks.name || '玩家',{fontFamily:'Microsoft JhengHei',fontSize:'17px',fontStyle:'bold',color:'#fff',stroke:'#222a42',strokeThickness:6}).setOrigin(.5).setDepth(110);
+  }
+
+  bindInputs() {
+    this.keys = this.input.keyboard.addKeys({left:'LEFT',right:'RIGHT',a:'A',d:'D',jump:'SPACE',up:'UP',w:'W',down:'DOWN',s:'S'});
+    this.input.keyboard.on('keydown-SPACE', () => this.queueJump());
+    this.input.keyboard.on('keydown-UP', () => this.queueJump());
+    this.input.keyboard.on('keydown-W', () => this.queueJump());
+  }
+
+  bindCollisions() {
+    this.matter.world.on('collisionstart', event => {
+      for (const pair of event.pairs) {
+        const bodies = [pair.bodyA,pair.bodyB];
+        if (bodies.includes(this.summitBody) && bodies.some(b => b === this.player.body || b.parent === this.player.body)) this.finish();
+        for (const body of bodies) {
+          if (body.progressSensor && bodies.some(b => b === this.player.body || b.parent === this.player.body)) this.reachProgress(body.progressSensor);
+          const obj = body.gameObject?.courseObject;
+          if (obj?.behavior?.type === 'bounce' && bodies.some(b => b === this.player.body || b.parent === this.player.body)) {
+            this.player.setVelocityY(-obj.behavior.power); this.airJump = 1; this.hooks.onEffect?.('bounce',this.player.x,this.player.y);
+          }
+        }
+      }
+    });
+  }
+
+  queueJump() { this.actions.jumpQueued = 130; }
+  setAction(action, value) { if (action === 'jump' && value) this.queueJump(); else this.actions[action] = value; }
+  setEnergy(value) { this.energy = Phaser.Math.Clamp(value,0,100); }
+
+  update(time, deltaMs) {
+    if (!this.player || this.finished || this.hooks.isFrozen?.()) return;
+    const dt = Math.min(deltaMs,34)/1000;
+    const leftHeld = this.actions.left || this.keys.left.isDown || this.keys.a.isDown;
+    const rightHeld = this.actions.right || this.keys.right.isDown || this.keys.d.isDown;
+    const downHeld = this.actions.down || this.keys.down.isDown || this.keys.s.isDown;
+    this.actions.jumpQueued = Math.max(0,this.actions.jumpQueued-deltaMs);
+
+    const vy = this.player.body.velocity.y;
+    const probe = { min:{x:this.player.x-18,y:this.player.y+22}, max:{x:this.player.x+18,y:this.player.y+33} };
+    const under = Phaser.Physics.Matter.Matter.Query.region(this.matter.world.localWorld.bodies,probe).filter(b => b !== this.player.body && !b.isSensor);
+    this.grounded = under.length > 0 && vy >= -1;
+    this.coyote = this.grounded ? .11 : Math.max(0,this.coyote-dt);
+    if (this.grounded) this.airJump = 1;
+
+    const dir = (rightHeld?1:0)-(leftHeld?1:0);
+    const target = dir * 5.6;
+    const nextVx = Phaser.Math.Linear(this.player.body.velocity.x,target,this.grounded?.2:.085);
+    this.player.setVelocityX(nextVx);
+    const conveyorBody = under.find(b => b.gameObject?.courseObject?.behavior?.type === 'conveyor');
+    if (conveyorBody && this.grounded) this.player.setVelocityX(nextVx + conveyorBody.gameObject.courseObject.behavior.speed);
+    if (dir && this.energy > 0) this.energy = Math.max(0,this.energy-4.3*dt);
+    this.player.setFlipX(dir < 0);
+
+    if (this.actions.jumpQueued > 0 && this.energy >= 8) {
+      if (downHeld && this.grounded) {
+        this.dropUntil = time + 240; this.player.body.isSensor = true; this.player.setVelocityY(2.2); this.actions.jumpQueued = 0;
+      } else if (this.coyote > 0 || this.airJump > 0) {
+        const air = this.coyote <= 0;
+        this.player.setVelocityY(air ? -10.8 : -12.2);
+        if (air) this.airJump--;
+        this.energy -= 8; this.actions.jumpQueued = 0; this.coyote = 0;
+        this.player.play(air ? 'doubleJump' : 'jump',true);
+        this.hooks.onEffect?.(air?'doubleJump':'jump',this.player.x,this.player.y);
+      }
+    }
+    if (this.player.body.isSensor && time > this.dropUntil) this.player.body.isSensor = false;
+
+    for (const item of this.dynamicObjects) {
+      const { sprite,obj,startX,startY,phase } = item;
+      if (obj.behavior.type === 'move') {
+        const wave = Math.sin(time*.001*obj.behavior.speed*Math.PI*2+phase);
+        Phaser.Physics.Matter.Matter.Body.setPosition(sprite.body,{x:startX+obj.behavior.dx*wave,y:startY+obj.behavior.dy*wave});
+      } else {
+        Phaser.Physics.Matter.Matter.Body.setAngle(sprite.body,(obj.angle||0)+time*.001*obj.behavior.speed);
+      }
+    }
+
+    this.playerName.setPosition(this.player.x,this.player.y+44);
+    const motion = vy < -1 ? 'jump' : vy > 2 ? 'fall' : Math.abs(nextVx)>1 ? 'run' : 'idle';
+    if (!['jump','doubleJump'].includes(this.player.anims.currentAnim?.key) || !this.player.anims.isPlaying) this.player.play(motion,true);
+    for (const ghost of this.ghosts.values()) {
+      ghost.x = Phaser.Math.Linear(ghost.x,ghost.tx,.14); ghost.y = Phaser.Math.Linear(ghost.y,ghost.ty,.14);
+      ghost.sprite.setPosition(ghost.x,ghost.y); ghost.label.setPosition(ghost.x,ghost.y+40);
+    }
+
+    if (this.player.y > this.course.world.height + 180 || this.player.x < -100 || this.player.x > this.course.world.width+100) this.respawn();
+    const altitude = Math.max(0,(this.course.startAltitudeY-this.player.y)/5);
+    const zoneIndex = Math.min(5,Math.floor(this.progress*6));
+    this.hooks.onFrame?.({
+      x:this.player.x,y:this.player.y,velocityX:this.player.body.velocity.x,velocityY:this.player.body.velocity.y,
+      energy:this.energy,progress:this.progress,altitude,animation:motion,
+      facing:this.player.flipX?-1:1,zoneIndex,zoneName:Object.values(ZONE_NAMES)[zoneIndex]
+    });
+  }
+
+  reachProgress(sensor) {
+    if (sensor.progress <= this.progress) return;
+    this.progress = sensor.progress;
+    const reached = this.course.checkpoints.filter(c => c.progress <= this.progress);
+    if (reached.length) this.checkpoint = reached[reached.length-1];
+    this.hooks.onProgress?.(this.progress,this.checkpoint);
+  }
+
+  respawn() {
+    const cp = this.checkpoint || this.course.checkpoints[0];
+    this.player.setPosition(cp.x,cp.y-80).setVelocity(0,0);
+    this.energy = Math.max(25,this.energy); this.player.setAlpha(.55);
+    this.time.delayedCall(1200,() => this.player?.setAlpha(1));
+    this.cameras.main.flash(200,255,255,255); this.hooks.onEffect?.('respawn',cp.x,cp.y);
+  }
+
+  finish() { if (this.finished) return; this.finished = true; this.progress = 1; this.hooks.onFinish?.(); }
+
+  updateGhosts(list, myId) {
+    const seen = new Set();
+    for (const row of list) {
+      if (row.id === myId) continue; seen.add(row.id);
+      let ghost = this.ghosts.get(row.id);
+      if (!ghost) {
+        const sprite = this.add.sprite(row.x,row.y,'player-idle-1').setDisplaySize(68,70).setAlpha(.45).setTint(0x8bdcff).setDepth(80);
+        const label = this.add.text(row.x,row.y+40,row.name,{fontFamily:'Microsoft JhengHei',fontSize:'14px',fontStyle:'bold',color:'#dff8ff',stroke:'#24314d',strokeThickness:4}).setOrigin(.5).setDepth(90);
+        ghost = {sprite,label,x:row.x,y:row.y,tx:row.x,ty:row.y}; this.ghosts.set(row.id,ghost);
+      }
+      ghost.tx=row.x; ghost.ty=row.y; ghost.sprite.setFlipX(row.facing<0);
+      if (this.anims.exists(row.animation || 'idle')) ghost.sprite.play(row.animation || 'idle',true);
+    }
+    for (const [id,ghost] of this.ghosts) if (!seen.has(id)) { ghost.sprite.destroy(); ghost.label.destroy(); this.ghosts.delete(id); }
+  }
+}

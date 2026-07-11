@@ -44,7 +44,7 @@
 
   <!-- ============ GAME ============ -->
   <div id="gameScreen" class="screen">
-    <canvas id="gameCanvas"></canvas>
+    <div id="gameCanvas" aria-label="唔好望落嚟遊戲世界"></div>
 
     <div class="hud">
       <div class="hud-cluster hud-cluster-primary">
@@ -70,6 +70,7 @@
     <div class="touch-controls">
       <div class="cluster">
         <button class="tbtn" id="btnLeft">◀</button>
+        <button class="tbtn tbtn-down" id="btnDown">▼</button>
         <button class="tbtn" id="btnRight">▶</button>
       </div>
       <div class="cluster">
@@ -102,7 +103,7 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/game/js/map.js"></script>
-  <script src="/game/js/play.js"></script>
+  <script src="/game/vendor/phaser/phaser.min.js"></script>
+  <script type="module" src="/game/js/v2/main.js"></script>
 </body>
 </html>

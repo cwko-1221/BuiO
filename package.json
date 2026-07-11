@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "check": "node scripts/check.mjs",
+    "check": "node scripts/check.mjs && node scripts/validate-game-v2.mjs",
+    "check:game": "node scripts/validate-game-v2.mjs",
+    "build:game-assets": "node scripts/build-game-assets.mjs && node scripts/pack-game-atlases.mjs",
     "postinstall": "cd whiteboard-app/client && npm install && npm run build"
   },
   "dependencies": {
@@ -20,6 +22,7 @@
     "express": "^5.2.1",
     "multer": "^2.2.0",
     "pg": "^8.21.0",
+    "phaser": "^4.2.1",
     "sharp": "^0.35.2",
     "socket.io": "^4.8.3",
     "to-jyutping": "^3.1.1"
