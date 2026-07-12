@@ -1,8 +1,48 @@
 {
   "frames": {
-    "tree-stump": {
+    "grass-ledge": {
       "frame": {
         "x": 4,
+        "y": 4,
+        "w": 240,
+        "h": 98
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 98
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 98
+      }
+    },
+    "stone-ledge": {
+      "frame": {
+        "x": 248,
+        "y": 4,
+        "w": 240,
+        "h": 82
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 82
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 82
+      }
+    },
+    "tree-stump": {
+      "frame": {
+        "x": 492,
         "y": 4,
         "w": 240,
         "h": 240
@@ -22,7 +62,7 @@
     },
     "forest-log": {
       "frame": {
-        "x": 248,
+        "x": 736,
         "y": 4,
         "w": 240,
         "h": 240
@@ -42,7 +82,7 @@
     },
     "log-bridge": {
       "frame": {
-        "x": 492,
+        "x": 980,
         "y": 4,
         "w": 240,
         "h": 240
@@ -62,7 +102,7 @@
     },
     "red-mushroom": {
       "frame": {
-        "x": 736,
+        "x": 1224,
         "y": 4,
         "w": 240,
         "h": 240
@@ -82,7 +122,7 @@
     },
     "blue-mushroom": {
       "frame": {
-        "x": 980,
+        "x": 1468,
         "y": 4,
         "w": 240,
         "h": 240
@@ -102,7 +142,7 @@
     },
     "giant-leaf": {
       "frame": {
-        "x": 1224,
+        "x": 1712,
         "y": 4,
         "w": 240,
         "h": 240
@@ -122,8 +162,8 @@
     },
     "vine-arch": {
       "frame": {
-        "x": 1468,
-        "y": 4,
+        "x": 4,
+        "y": 248,
         "w": 240,
         "h": 240
       },
@@ -142,8 +182,8 @@
     },
     "hollow-tree": {
       "frame": {
-        "x": 1712,
-        "y": 4,
+        "x": 248,
+        "y": 248,
         "w": 240,
         "h": 240
       },
@@ -162,7 +202,7 @@
     },
     "tree-branch": {
       "frame": {
-        "x": 4,
+        "x": 492,
         "y": 248,
         "w": 240,
         "h": 240
@@ -182,7 +222,7 @@
     },
     "forest-boulder": {
       "frame": {
-        "x": 248,
+        "x": 736,
         "y": 248,
         "w": 240,
         "h": 240
@@ -202,7 +242,7 @@
     },
     "moss-boulder": {
       "frame": {
-        "x": 492,
+        "x": 980,
         "y": 248,
         "w": 240,
         "h": 179
@@ -222,7 +262,7 @@
     },
     "fallen-tree": {
       "frame": {
-        "x": 736,
+        "x": 1224,
         "y": 248,
         "w": 240,
         "h": 240
@@ -242,7 +282,7 @@
     },
     "beehive": {
       "frame": {
-        "x": 980,
+        "x": 1468,
         "y": 248,
         "w": 240,
         "h": 240
@@ -262,7 +302,7 @@
     },
     "wood-lookout": {
       "frame": {
-        "x": 1224,
+        "x": 1712,
         "y": 248,
         "w": 240,
         "h": 240
@@ -282,8 +322,8 @@
     },
     "canoe": {
       "frame": {
-        "x": 1468,
-        "y": 248,
+        "x": 4,
+        "y": 492,
         "w": 240,
         "h": 240
       },
@@ -301,46 +341,6 @@
       }
     },
     "lily-pad": {
-      "frame": {
-        "x": 1712,
-        "y": 248,
-        "w": 240,
-        "h": 240
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 240,
-        "h": 240
-      },
-      "sourceSize": {
-        "w": 240,
-        "h": 240
-      }
-    },
-    "treehouse": {
-      "frame": {
-        "x": 4,
-        "y": 492,
-        "w": 240,
-        "h": 225
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 240,
-        "h": 225
-      },
-      "sourceSize": {
-        "w": 240,
-        "h": 225
-      }
-    },
-    "root-ramp": {
       "frame": {
         "x": 248,
         "y": 492,
@@ -360,12 +360,12 @@
         "h": 240
       }
     },
-    "forest-bush": {
+    "treehouse": {
       "frame": {
         "x": 492,
         "y": 492,
         "w": 240,
-        "h": 240
+        "h": 225
       },
       "rotated": false,
       "trimmed": false,
@@ -373,14 +373,14 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 225
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 225
       }
     },
-    "pine-tree": {
+    "root-ramp": {
       "frame": {
         "x": 736,
         "y": 492,
@@ -400,7 +400,7 @@
         "h": 240
       }
     },
-    "oak-canopy": {
+    "forest-bush": {
       "frame": {
         "x": 980,
         "y": 492,
@@ -420,7 +420,7 @@
         "h": 240
       }
     },
-    "butterflies": {
+    "pine-tree": {
       "frame": {
         "x": 1224,
         "y": 492,
@@ -440,7 +440,7 @@
         "h": 240
       }
     },
-    "giant-acorn": {
+    "oak-canopy": {
       "frame": {
         "x": 1468,
         "y": 492,
@@ -460,10 +460,50 @@
         "h": 240
       }
     },
-    "flower-patch": {
+    "butterflies": {
       "frame": {
         "x": 1712,
         "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "giant-acorn": {
+      "frame": {
+        "x": 4,
+        "y": 736,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "flower-patch": {
+      "frame": {
+        "x": 248,
+        "y": 736,
         "w": 240,
         "h": 240
       },

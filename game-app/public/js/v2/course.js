@@ -71,11 +71,13 @@ function snapStackedProps(instanceObjects) {
 }
 
 export function buildCourse(seed) {
-  const rnd = mulberry32(seed >>> 0);
   const selected = selectChunks(seed);
-  const world = { width: 5000, height: selected.length * 550 + 1250 };
-  const start = { x: 1050 + rnd() * 450, y: world.height - 520 };
+  // Wide world: the route serpentines left and right as it climbs, so the
+  // camera sweeps horizontally instead of the course stacking in a column.
+  const world = { width: 6800, height: selected.length * 550 + 1250 };
+  const start = { x: 950, y: world.height - 520 };
   let anchor = { ...start };
+  let travelDir = 1;
   const instances = [];
   const objects = [];
   const sensors = [];
@@ -83,20 +85,17 @@ export function buildCourse(seed) {
   const usedAssets = new Set();
 
   selected.forEach((chunk, slot) => {
-    let mirror;
-    if (anchor.x < 1450) mirror = false;
-    else if (anchor.x > 3550) mirror = true;
-    else mirror = rnd() < .5;
+    // Serpentine: keep travelling one way until near the world edge, then
+    // turn around. Deterministic, so the stable map reads as a designed
+    // zig-zag ascent.
+    if (anchor.x > world.width - 1750) travelDir = -1;
+    else if (anchor.x < 1150) travelDir = 1;
+    const mirror = travelDir < 0;
 
     const entryX = txX(chunk.entry.x, mirror);
     const origin = { x: anchor.x - entryX, y: anchor.y - chunk.entry.y };
     const exit = chunk.exits[0];
     const exitWorld = { x: origin.x + txX(exit.x, mirror), y: origin.y + exit.y };
-    if (exitWorld.x < 500 || exitWorld.x > world.width - 500) {
-      mirror = !mirror;
-      origin.x = anchor.x - txX(chunk.entry.x, mirror);
-      exitWorld.x = origin.x + txX(exit.x, mirror);
-    }
 
     const instance = {
       id: `${chunk.id}-${slot}`,

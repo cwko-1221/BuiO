@@ -369,6 +369,14 @@ export const ATLAS_INDEX={
     "key": "atlas-market-0",
     "frame": "carpet-rack"
   },
+  "grass-ledge": {
+    "key": "atlas-forest-0",
+    "frame": "grass-ledge"
+  },
+  "stone-ledge": {
+    "key": "atlas-forest-0",
+    "frame": "stone-ledge"
+  },
   "tree-stump": {
     "key": "atlas-forest-0",
     "frame": "tree-stump"
@@ -464,6 +472,14 @@ export const ATLAS_INDEX={
   "flower-patch": {
     "key": "atlas-forest-0",
     "frame": "flower-patch"
+  },
+  "wood-deck": {
+    "key": "atlas-farm-0",
+    "frame": "wood-deck"
+  },
+  "hay-block": {
+    "key": "atlas-farm-0",
+    "frame": "hay-block"
   },
   "hay-bale": {
     "key": "atlas-farm-0",
@@ -561,6 +577,14 @@ export const ATLAS_INDEX={
     "key": "atlas-farm-0",
     "frame": "farm-shed"
   },
+  "ice-slab": {
+    "key": "atlas-snow-0",
+    "frame": "ice-slab"
+  },
+  "snow-ledge": {
+    "key": "atlas-snow-0",
+    "frame": "snow-ledge"
+  },
   "ice-crystal": {
     "key": "atlas-snow-0",
     "frame": "ice-crystal"
@@ -656,6 +680,14 @@ export const ATLAS_INDEX={
   "snow-lantern": {
     "key": "atlas-snow-0",
     "frame": "snow-lantern"
+  },
+  "metal-deck": {
+    "key": "atlas-factory-0",
+    "frame": "metal-deck"
+  },
+  "metal-bracket": {
+    "key": "atlas-factory-0",
+    "frame": "metal-bracket"
   },
   "giant-gear": {
     "key": "atlas-factory-0",

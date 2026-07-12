@@ -11,7 +11,7 @@ let maxPlain = 0;
 let minIrregular = 100;
 let minAssets = Infinity;
 
-if (ASSETS.length !== 179) failures.push(`asset catalog expected 179, got ${ASSETS.length}`);
+if (ASSETS.length !== 187) failures.push(`asset catalog expected 187, got ${ASSETS.length}`);
 if (CHUNKS.length !== 48) failures.push(`chunk library expected 48, got ${CHUNKS.length}`);
 for (const chunk of CHUNKS) {
   if (chunk.objects.filter(object=>object.role==='support').length<6) failures.push(`${chunk.id}: fewer than 6 readable support surfaces`);

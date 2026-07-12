@@ -60,9 +60,13 @@ socket.on('game:summit',({name,place})=>toast(`🏁 ${name} 第 ${place} 位登�
 socket.on('game:over',({leaderboard})=>showResults(leaderboard));
 socket.on('room:closed',({message})=>{if(phaserGame)phaserGame.destroy(true);alert(message||'房間已關閉');location.href='/';});
 
+// One stable, hand-tuned map for every room (a "season" course, like the
+// real DLD). Bump the constant to ship a new map for all rooms at once.
+const STABLE_MAP_SEED=20260712;
+
 function startGame(seed,durationSec,startedAt,resume){
   clearInterval(roomsTimer); show('gameScreen');
-  const course=buildCourse(seed); const report=validateCourse(course);
+  const course=buildCourse(STABLE_MAP_SEED); const report=validateCourse(course);
   if(!report.ok) console.error('[game-v2] invalid course',report);
   startMeta={...(startMeta||{}),seed,durationSec,startedAt:startedAt||Date.now(),course};
   if(phaserGame)phaserGame.destroy(true);

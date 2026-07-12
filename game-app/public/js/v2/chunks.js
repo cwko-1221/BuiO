@@ -20,12 +20,14 @@ function themed(zone, index) {
 // Walkable surfaces per zone — finished illustrations only. Art-poor zones
 // borrow big furniture/food/mechanism pieces, DLD's trademark absurdism.
 const zoneSurfaces = {
-  castle: { long:'castle-brick-long', medium:'castle-brick-medium', step:'castle-brick-step', thick:'castle-brick-thick', corner:'castle-brick-corner' },
+  // castle-brick-step/thick/corner have isometric top faces that clash with
+  // the 2D side view — keep to the flat-front pieces.
+  castle: { long:'castle-brick-long', medium:'castle-brick-medium', step:'column', thick:'battlement', corner:'castle-tower' },
   market: { long:'picnic-table', medium:'market-awning', step:'barrel-stack', thick:'market-stall', corner:'market-wagon' },
-  forest: { long:'plank', medium:'stone-slab', step:'moss-boulder', thick:'treehouse', corner:'stone-arch' },
-  farm: { long:'sack-pile', medium:'potato-crate', step:'apple-crate', thick:'tractor', corner:'bread-cart' },
-  snow: { long:'bed', medium:'sofa', step:'crate', thick:'ice-arch', corner:'grand-clock' },
-  factory: { long:'conveyor', medium:'table', step:'book-stack', thick:'bookcase', corner:'giant-gear' }
+  forest: { long:'grass-ledge', medium:'stone-ledge', step:'moss-boulder', thick:'treehouse', corner:'stone-arch' },
+  farm: { long:'grass-ledge', medium:'wood-deck', step:'hay-block', thick:'tractor', corner:'bread-cart' },
+  snow: { long:'snow-ledge', medium:'ice-slab', step:'crate', thick:'ice-arch', corner:'grand-clock' },
+  factory: { long:'metal-deck', medium:'metal-deck', step:'metal-bracket', thick:'bookcase', corner:'giant-gear' }
 };
 
 const surface = (zone, kind, x, y, w, h, extra = {}) => platform(zoneSurfaces[zone][kind], x, y, w, h, { role:'support', ...extra });
@@ -36,11 +38,11 @@ const layouts = [
     name: 'gentle-start', difficulty: 1, tags: ['traverse','recovery','grounded','easy'],
     build: z => [
       surface(z,'long',100,660,360,76), surface(z,'long',410,660,360,76), surface(z,'long',720,660,360,76),
-      surface(z,'corner',980,620,330,130), surface(z,'medium',850,500,330,104),
-      surface(z,'step',610,445,310,160), surface(z,'long',750,280,330,86),
-      surface(z,'medium',970,185,320,100), surface(z,'long',1040,70,300,82),
-      prop(z,8,180,590,120,100), prop(z,10,430,590,120,100), prop(z,13,885,420,135,105),
-      prop(z,4,1040,555,105,90), platform('arrow-sign',705,595,90,90,{role:'stacked'})
+      surface(z,'corner',980,664,330,130), surface(z,'medium',850,476,330,104),
+      surface(z,'medium',610,368,260,72), surface(z,'long',750,267,330,86),
+      surface(z,'medium',970,183,320,100), surface(z,'long',1040,70,300,82),
+      prop(z,8,180,590,120,100), prop(z,13,885,420,135,105),
+      platform('arrow-sign',705,595,90,90,{role:'stacked'})
     ]
   },
   {
@@ -51,7 +53,7 @@ const layouts = [
       surface(z,'step',1060,500,180,120), oneWay(zoneSurfaces[z].long,790,400,300,62),
       surface(z,'corner',520,330,230,115), oneWay(zoneSurfaces[z].medium,270,250,240,62,-.06),
       surface(z,'step',520,150,190,120), surface(z,'long',930,75,320,72),
-      prop(z,11,930,535,120,100), prop(z,14,525,260,110,90), prop(z,18,270,180,100,84),
+      prop(z,11,930,535,120,100), prop(z,14,525,260,110,90),
       platform('arrow-sign',700,630,84,84,{role:'stacked',angle:Math.PI})
     ]
   },

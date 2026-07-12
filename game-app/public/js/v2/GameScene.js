@@ -71,7 +71,9 @@ export class GameScene extends Phaser.Scene {
     camera.setBounds(0, 0, this.course.world.width, this.course.world.height);
     camera.startFollow(this.player, true, .08, .08, 0, 80);
     camera.setDeadzone(Math.min(260, camera.width * .28), Math.min(190, camera.height * .26));
-    camera.setZoom(Math.max(.82, Math.min(1.05, camera.height / 780)));
+    // Wider framing, matched to DLD footage: character ≈ 8% of screen height
+    // with generous sky around the route.
+    camera.setZoom(Math.max(.68, Math.min(1, camera.height / 900)));
     this.resizeSky();
     camera.fadeIn(280, 255, 255, 255);
     this.hooks.onReady?.(this);
@@ -156,6 +158,11 @@ export class GameScene extends Phaser.Scene {
     const depth = obj.role === 'stacked' ? 14 : obj.role === 'support' ? 10 : 12;
     const sprite = this.add.image(obj.x, obj.y, texture?.key || obj.assetId, texture?.frame || null)
       .setDisplaySize(size.w, size.h).setDepth(depth).setRotation(obj.angle || 0);
+    // Stacked props are pure scenery — no body, so they never block the route.
+    if (obj.role === 'stacked') {
+      sprite.courseObject = obj;
+      return sprite;
+    }
     const Matter = Phaser.Physics.Matter.Matter;
     const body = createAlphaBody(Matter, obj, size);
     body.collisionFilter.category = CAT_WORLD;

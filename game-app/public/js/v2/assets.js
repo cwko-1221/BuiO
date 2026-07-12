@@ -23,6 +23,7 @@ const catalog = {
     ['giant-baguette','巨型法包'],['giant-donut','巨型甜甜圈'],['market-teapot','茶壺'],['carpet-rack','地毯架']
   ],
   forest: [
+    ['grass-ledge','草地平台'],['stone-ledge','石台'],
     ['tree-stump','樹樁'],['forest-log','原木'],['log-bridge','木橋'],['red-mushroom','紅蘑菇'],['blue-mushroom','藍蘑菇'],
     ['giant-leaf','巨葉'],['vine-arch','藤拱'],['hollow-tree','樹洞'],['tree-branch','樹枝'],['forest-boulder','巨石'],
     ['moss-boulder','青苔巨石'],['fallen-tree','倒樹'],['beehive','蜂巢'],['wood-lookout','瞭望台'],['canoe','獨木舟'],
@@ -30,6 +31,7 @@ const catalog = {
     ['oak-canopy','橡樹冠'],['butterflies','蝴蝶群'],['giant-acorn','橡果'],['flower-patch','花叢']
   ],
   farm: [
+    ['wood-deck','木平台'],['hay-block','乾草磚'],
     ['hay-bale','草捆'],['hay-cart','草車'],['tractor','拖拉機'],['barn-roof','穀倉屋頂'],['barn-loft','穀倉閣樓'],
     ['farm-fence','圍欄'],['chicken-coop','雞舍'],['water-trough','水槽'],['giant-pumpkin','南瓜'],['giant-corn','巨型粟米'],
     ['vegetable-crate','蔬菜箱'],['milk-can','奶罐'],['wheelbarrow','手推車'],['scarecrow','稻草人'],['windmill-blade','風車葉'],
@@ -37,6 +39,7 @@ const catalog = {
     ['wagon-wheel','車輪'],['stable-door','馬房門'],['watering-can','澆水壺'],['farm-shed','木棚']
   ],
   snow: [
+    ['ice-slab','冰台'],['snow-ledge','雪台'],
     ['ice-crystal','冰晶'],['ice-bridge','冰橋'],['snow-mound','雪丘'],['snowman','雪人'],['sled','雪橇'],['ski-ramp','滑雪坡'],
     ['cable-car','纜車'],['snow-pine','雪松'],['igloo','冰屋'],['frozen-barrel','冰桶'],['ice-arch','冰拱'],['giant-snowflake','巨型雪花'],
     ['hockey-puck','冰球'],['hockey-stick','球棍'],['curling-stone','冰壺石'],['gift-stack','禮物堆'],['chimney','煙囪'],
@@ -44,6 +47,7 @@ const catalog = {
     ['aurora-crystal','極光水晶'],['snow-lantern','雪燈']
   ],
   factory: [
+    ['metal-deck','鋼平台'],['metal-bracket','鋼托架'],
     ['giant-gear','巨齒輪'],['gear-pair','齒輪組'],['straight-pipe','直管'],['elbow-pipe','彎管'],['boiler','鍋爐'],['piston','活塞'],
     ['factory-conveyor','工業輸送帶'],['steel-beam','鋼樑'],['crane-arm','吊臂'],['factory-toolbox','工具箱'],['filing-cabinet','文件櫃'],
     ['factory-monitor','螢幕'],['cable-spool','線纜卷'],['oil-drum','油桶'],['rail-cart','礦車'],['forklift','叉車'],

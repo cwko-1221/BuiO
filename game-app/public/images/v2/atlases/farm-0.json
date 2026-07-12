@@ -1,8 +1,48 @@
 {
   "frames": {
-    "hay-bale": {
+    "wood-deck": {
       "frame": {
         "x": 4,
+        "y": 4,
+        "w": 240,
+        "h": 79
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 79
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 79
+      }
+    },
+    "hay-block": {
+      "frame": {
+        "x": 248,
+        "y": 4,
+        "w": 240,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 168
+      }
+    },
+    "hay-bale": {
+      "frame": {
+        "x": 492,
         "y": 4,
         "w": 240,
         "h": 240
@@ -22,7 +62,7 @@
     },
     "hay-cart": {
       "frame": {
-        "x": 248,
+        "x": 736,
         "y": 4,
         "w": 240,
         "h": 240
@@ -42,7 +82,7 @@
     },
     "tractor": {
       "frame": {
-        "x": 492,
+        "x": 980,
         "y": 4,
         "w": 240,
         "h": 166
@@ -62,7 +102,7 @@
     },
     "barn-roof": {
       "frame": {
-        "x": 736,
+        "x": 1224,
         "y": 4,
         "w": 240,
         "h": 240
@@ -82,7 +122,7 @@
     },
     "barn-loft": {
       "frame": {
-        "x": 980,
+        "x": 1468,
         "y": 4,
         "w": 240,
         "h": 240
@@ -102,7 +142,7 @@
     },
     "farm-fence": {
       "frame": {
-        "x": 1224,
+        "x": 1712,
         "y": 4,
         "w": 240,
         "h": 240
@@ -122,8 +162,8 @@
     },
     "chicken-coop": {
       "frame": {
-        "x": 1468,
-        "y": 4,
+        "x": 4,
+        "y": 248,
         "w": 240,
         "h": 240
       },
@@ -142,8 +182,8 @@
     },
     "water-trough": {
       "frame": {
-        "x": 1712,
-        "y": 4,
+        "x": 248,
+        "y": 248,
         "w": 240,
         "h": 240
       },
@@ -162,7 +202,7 @@
     },
     "giant-pumpkin": {
       "frame": {
-        "x": 4,
+        "x": 492,
         "y": 248,
         "w": 240,
         "h": 240
@@ -182,7 +222,7 @@
     },
     "giant-corn": {
       "frame": {
-        "x": 248,
+        "x": 736,
         "y": 248,
         "w": 240,
         "h": 240
@@ -202,7 +242,7 @@
     },
     "vegetable-crate": {
       "frame": {
-        "x": 492,
+        "x": 980,
         "y": 248,
         "w": 240,
         "h": 240
@@ -222,7 +262,7 @@
     },
     "milk-can": {
       "frame": {
-        "x": 736,
+        "x": 1224,
         "y": 248,
         "w": 240,
         "h": 240
@@ -242,7 +282,7 @@
     },
     "wheelbarrow": {
       "frame": {
-        "x": 980,
+        "x": 1468,
         "y": 248,
         "w": 240,
         "h": 240
@@ -262,7 +302,7 @@
     },
     "scarecrow": {
       "frame": {
-        "x": 1224,
+        "x": 1712,
         "y": 248,
         "w": 240,
         "h": 240
@@ -282,46 +322,6 @@
     },
     "windmill-blade": {
       "frame": {
-        "x": 1468,
-        "y": 248,
-        "w": 240,
-        "h": 240
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 240,
-        "h": 240
-      },
-      "sourceSize": {
-        "w": 240,
-        "h": 240
-      }
-    },
-    "silo-pipe": {
-      "frame": {
-        "x": 1712,
-        "y": 248,
-        "w": 240,
-        "h": 240
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 240,
-        "h": 240
-      },
-      "sourceSize": {
-        "w": 240,
-        "h": 240
-      }
-    },
-    "grain-sacks": {
-      "frame": {
         "x": 4,
         "y": 492,
         "w": 240,
@@ -340,7 +340,7 @@
         "h": 240
       }
     },
-    "wood-pallet": {
+    "silo-pipe": {
       "frame": {
         "x": 248,
         "y": 492,
@@ -360,7 +360,7 @@
         "h": 240
       }
     },
-    "farm-ladder": {
+    "grain-sacks": {
       "frame": {
         "x": 492,
         "y": 492,
@@ -380,7 +380,7 @@
         "h": 240
       }
     },
-    "feed-bin": {
+    "wood-pallet": {
       "frame": {
         "x": 736,
         "y": 492,
@@ -400,7 +400,7 @@
         "h": 240
       }
     },
-    "wagon-wheel": {
+    "farm-ladder": {
       "frame": {
         "x": 980,
         "y": 492,
@@ -420,7 +420,7 @@
         "h": 240
       }
     },
-    "stable-door": {
+    "feed-bin": {
       "frame": {
         "x": 1224,
         "y": 492,
@@ -440,7 +440,7 @@
         "h": 240
       }
     },
-    "watering-can": {
+    "wagon-wheel": {
       "frame": {
         "x": 1468,
         "y": 492,
@@ -460,10 +460,50 @@
         "h": 240
       }
     },
-    "farm-shed": {
+    "stable-door": {
       "frame": {
         "x": 1712,
         "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "watering-can": {
+      "frame": {
+        "x": 4,
+        "y": 736,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "farm-shed": {
+      "frame": {
+        "x": 248,
+        "y": 736,
         "w": 240,
         "h": 240
       },

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 179,
+  "count": 187,
   "generatedAt": "2026-07-11",
   "assets": [
     {
@@ -3467,6 +3467,85 @@
       "source": "procedural-master"
     },
     {
+      "id": "grass-ledge",
+      "label": "草地平台",
+      "zone": "forest",
+      "file": "/game/images/v2/props/grass-ledge.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 115,
+        "h": 131
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#54b879",
+        "#236646",
+        "#c6f3ad"
+      ],
+      "tags": [
+        "forest",
+        "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "stone-ledge",
+      "label": "石台",
+      "zone": "forest",
+      "file": "/game/images/v2/props/stone-ledge.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 176,
+        "h": 66
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#54b879",
+        "#236646",
+        "#c6f3ad"
+      ],
+      "tags": [
+        "forest",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
       "id": "tree-stump",
       "label": "樹樁",
       "zone": "forest",
@@ -3635,7 +3714,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": false,
+        "oneWay": true,
         "material": "solid"
       },
       "palette": [
@@ -4105,7 +4184,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": true,
+        "oneWay": false,
         "material": "solid"
       },
       "palette": [
@@ -4135,7 +4214,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": false,
+        "oneWay": true,
         "material": "solid"
       },
       "palette": [
@@ -4356,7 +4435,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": true,
+        "oneWay": false,
         "material": "solid"
       },
       "palette": [
@@ -4445,6 +4524,94 @@
       ],
       "available": true,
       "source": "procedural-master"
+    },
+    {
+      "id": "wood-deck",
+      "label": "木平台",
+      "zone": "farm",
+      "file": "/game/images/v2/props/wood-deck.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 148,
+        "h": 90
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#e5ad43",
+        "#8d5f2e",
+        "#fff0a8"
+      ],
+      "tags": [
+        "farm",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "hay-block",
+      "label": "乾草磚",
+      "zone": "farm",
+      "file": "/game/images/v2/props/hay-block.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 173,
+        "h": 75
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#e5ad43",
+        "#8d5f2e",
+        "#fff0a8"
+      ],
+      "tags": [
+        "farm",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
     },
     {
       "id": "hay-bale",
@@ -4636,7 +4803,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": false,
+        "oneWay": true,
         "material": "solid"
       },
       "palette": [
@@ -4837,7 +5004,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": true,
+        "oneWay": false,
         "material": "solid"
       },
       "palette": [
@@ -4971,7 +5138,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": true,
+        "oneWay": false,
         "material": "solid"
       },
       "palette": [
@@ -5268,7 +5435,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": false,
+        "oneWay": true,
         "material": "solid"
       },
       "palette": [
@@ -5446,6 +5613,84 @@
       "source": "procedural-master"
     },
     {
+      "id": "ice-slab",
+      "label": "冰台",
+      "zone": "snow",
+      "file": "/game/images/v2/props/ice-slab.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 151,
+        "h": 77
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#94d9f4",
+        "#4777a5",
+        "#f4fdff"
+      ],
+      "tags": [
+        "snow",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "snow-ledge",
+      "label": "雪台",
+      "zone": "snow",
+      "file": "/game/images/v2/props/snow-ledge.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 114,
+        "h": 78
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#94d9f4",
+        "#4777a5",
+        "#f4fdff"
+      ],
+      "tags": [
+        "snow",
+        "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
       "id": "ice-crystal",
       "label": "冰晶",
       "zone": "snow",
@@ -5508,7 +5753,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": false,
+        "oneWay": true,
         "material": "solid"
       },
       "palette": [
@@ -6114,7 +6359,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": true,
+        "oneWay": false,
         "material": "solid"
       },
       "palette": [
@@ -6232,7 +6477,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": true,
+        "oneWay": false,
         "material": "solid"
       },
       "palette": [
@@ -6481,6 +6726,85 @@
       ],
       "available": true,
       "source": "procedural-master"
+    },
+    {
+      "id": "metal-deck",
+      "label": "鋼平台",
+      "zone": "factory",
+      "file": "/game/images/v2/props/metal-deck.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 186,
+        "h": 82
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#718093",
+        "#343d52",
+        "#e7b94d"
+      ],
+      "tags": [
+        "factory",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "metal-bracket",
+      "label": "鋼托架",
+      "zone": "factory",
+      "file": "/game/images/v2/props/metal-bracket.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 125,
+        "h": 115
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#718093",
+        "#343d52",
+        "#e7b94d"
+      ],
+      "tags": [
+        "factory",
+        "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
     },
     {
       "id": "giant-gear",
@@ -6958,7 +7282,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": true,
+        "oneWay": false,
         "material": "solid"
       },
       "palette": [
@@ -7181,7 +7505,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": true,
+        "oneWay": false,
         "material": "solid"
       },
       "palette": [
@@ -7409,7 +7733,7 @@
       "original design"
     ]
   },
-  "availableCount": 179,
-  "imagegenCount": 86,
+  "availableCount": 187,
+  "imagegenCount": 94,
   "proceduralCount": 93
 }
