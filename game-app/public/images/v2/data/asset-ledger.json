@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 174,
+  "count": 179,
   "generatedAt": "2026-07-11",
   "assets": [
     {
@@ -2271,6 +2271,258 @@
       "tags": [
         "castle",
         "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "castle-brick-long",
+      "label": "城堡長磚台",
+      "zone": "castle",
+      "file": "/game/images/v2/props/castle-brick-long.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 156,
+        "h": 130
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "castle-brick-medium",
+      "label": "城堡中磚台",
+      "zone": "castle",
+      "file": "/game/images/v2/props/castle-brick-medium.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 147,
+        "h": 73
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "castle-brick-step",
+      "label": "城堡石階",
+      "zone": "castle",
+      "file": "/game/images/v2/props/castle-brick-step.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 132,
+        "h": 90
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "castle-brick-thick",
+      "label": "城堡厚牆",
+      "zone": "castle",
+      "file": "/game/images/v2/props/castle-brick-thick.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 181,
+        "h": 111
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "castle-brick-corner",
+      "label": "城堡轉角台",
+      "zone": "castle",
+      "file": "/game/images/v2/props/castle-brick-corner.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 123,
+        "h": 87
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "compound"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -7157,7 +7409,7 @@
       "original design"
     ]
   },
-  "availableCount": 174,
-  "imagegenCount": 81,
+  "availableCount": 179,
+  "imagegenCount": 86,
   "proceduralCount": 93
 }

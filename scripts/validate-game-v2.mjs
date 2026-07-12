@@ -11,7 +11,7 @@ let maxPlain = 0;
 let minIrregular = 100;
 let minAssets = Infinity;
 
-if (ASSETS.length !== 174) failures.push(`asset catalog expected 174, got ${ASSETS.length}`);
+if (ASSETS.length !== 179) failures.push(`asset catalog expected 179, got ${ASSETS.length}`);
 if (CHUNKS.length !== 48) failures.push(`chunk library expected 48, got ${CHUNKS.length}`);
 if (SKY_BANDS.length !== 6) failures.push(`background expected 6 height bands, got ${SKY_BANDS.length}`);
 for (let i=1;i<SKY_BANDS.length;i++) if (SKY_BANDS[i].at <= SKY_BANDS[i-1].at) failures.push('background height bands are not ordered');

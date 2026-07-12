@@ -22,11 +22,11 @@ const layouts = [
   {
     name: 'gentle-start', difficulty: 1, tags: ['traverse','recovery','grounded','easy'],
     build: z => [
-      platform('plank',110,660,360,70), platform('plank',430,660,360,70), platform('plank',750,660,360,70),
-      platform('plank',1010,580,300,70), platform('plank',800,480,300,70),
-      platform('plank',570,380,300,70), platform('plank',760,280,300,70),
-      platform('plank',970,180,300,70), platform('plank',1040,90,300,70),
-      platform(themed(z,0),300,715,220,54)
+      platform('castle-brick-long',110,660,360,70), platform('castle-brick-long',430,660,360,70), platform('castle-brick-long',750,660,360,70),
+      platform('castle-brick-corner',1010,610,340,120), platform('castle-brick-medium',800,485,320,100),
+      platform('castle-brick-step',570,425,300,150), platform('castle-brick-long',760,255,320,90),
+      platform('castle-brick-medium',970,160,320,100), platform('castle-brick-long',1040,70,280,80),
+      platform('castle-brick-thick',300,735,230,120)
     ]
   },
   {

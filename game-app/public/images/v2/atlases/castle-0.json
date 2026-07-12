@@ -479,6 +479,106 @@
         "w": 240,
         "h": 240
       }
+    },
+    "castle-brick-long": {
+      "frame": {
+        "x": 703,
+        "y": 492,
+        "w": 240,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 32
+      }
+    },
+    "castle-brick-medium": {
+      "frame": {
+        "x": 947,
+        "y": 492,
+        "w": 240,
+        "h": 53
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 53
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 53
+      }
+    },
+    "castle-brick-step": {
+      "frame": {
+        "x": 1191,
+        "y": 492,
+        "w": 240,
+        "h": 132
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 132
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 132
+      }
+    },
+    "castle-brick-thick": {
+      "frame": {
+        "x": 1435,
+        "y": 492,
+        "w": 240,
+        "h": 123
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 123
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 123
+      }
+    },
+    "castle-brick-corner": {
+      "frame": {
+        "x": 1679,
+        "y": 492,
+        "w": 240,
+        "h": 81
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 81
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 81
+      }
     }
   },
   "meta": {

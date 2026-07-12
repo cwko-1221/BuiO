@@ -11,7 +11,9 @@ const catalog = {
     ['battlement','城垛'],['castle-tower','城塔'],['castle-arch','城堡拱門'],['drawbridge','吊橋'],['shield','盾牌'],['sword','劍'],
     ['helmet','頭盔'],['giant-key','巨匙'],['treasure-chest','寶箱'],['throne','王座'],['castle-banner','旗幟'],['chandelier','吊燈'],
     ['cannon','大炮'],['catapult','投石器'],['armor-stand','盔甲架'],['gargoyle','石像'],['column','石柱'],['broken-column','破裂石柱'],
-    ['scroll','卷軸'],['potion-cauldron','藥鍋'],['bookcase','書架'],['round-table','圓桌'],['castle-vase','陶瓶'],['grand-clock','大鐘']
+    ['scroll','卷軸'],['potion-cauldron','藥鍋'],['bookcase','書架'],['round-table','圓桌'],['castle-vase','陶瓶'],['grand-clock','大鐘'],
+    ['castle-brick-long','城堡長磚台'],['castle-brick-medium','城堡中磚台'],['castle-brick-step','城堡石階'],
+    ['castle-brick-thick','城堡厚牆'],['castle-brick-corner','城堡轉角台']
   ],
   market: [
     ['market-stall','市集攤檔'],['apple-crate','蘋果箱'],['orange-crate','橙箱'],['lemon-crate','檸檬箱'],['grape-crate','提子箱'],

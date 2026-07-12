@@ -253,6 +253,26 @@ export const ATLAS_INDEX={
     "key": "atlas-castle-0",
     "frame": "grand-clock"
   },
+  "castle-brick-long": {
+    "key": "atlas-castle-0",
+    "frame": "castle-brick-long"
+  },
+  "castle-brick-medium": {
+    "key": "atlas-castle-0",
+    "frame": "castle-brick-medium"
+  },
+  "castle-brick-step": {
+    "key": "atlas-castle-0",
+    "frame": "castle-brick-step"
+  },
+  "castle-brick-thick": {
+    "key": "atlas-castle-0",
+    "frame": "castle-brick-thick"
+  },
+  "castle-brick-corner": {
+    "key": "atlas-castle-0",
+    "frame": "castle-brick-corner"
+  },
   "market-stall": {
     "key": "atlas-market-0",
     "frame": "market-stall"
