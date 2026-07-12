@@ -2,7 +2,7 @@ import { ASSET_BY_ID, ZONE_NAMES } from './assets.js';
 import { AVAILABLE_ASSETS } from './available-assets.js';
 import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js';
 import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js';
-import { createPlayerCompound } from './playerPhysics.js';
+import { createPlayerCompound, wakePlayer } from './playerPhysics.js';
 
 const CAT_WORLD = 0x0002;
 const CAT_PLAYER = 0x0004;
@@ -227,8 +227,16 @@ export class GameScene extends Phaser.Scene {
     this.matter.world.on('collisionend', event => trackContacts(event, false));
   }
 
-  queueJump() { this.actions.jumpQueued = 130; }
-  setAction(action, value) { if (action === 'jump' && value) this.queueJump(); else this.actions[action] = value; }
+  wakePlayer() { wakePlayer(Phaser.Physics.Matter.Matter, this.player?.body); }
+  resumeControl() {
+    this.actions.left = false; this.actions.right = false; this.actions.down = false; this.actions.jumpQueued = 0;
+    this.wakePlayer();
+  }
+  queueJump() { this.wakePlayer(); this.actions.jumpQueued = 130; }
+  setAction(action, value) {
+    if (value) this.wakePlayer();
+    if (action === 'jump' && value) this.queueJump(); else this.actions[action] = value;
+  }
   setEnergy(value) { this.energy = Phaser.Math.Clamp(value,0,100); }
 
   update(time, deltaMs) {

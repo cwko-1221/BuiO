@@ -5,5 +5,12 @@ export function createPlayerCompound(Matter) {
   const left = Bodies.rectangle(-24,-3,6,29,{label:'player-left',isSensor:true});
   const right = Bodies.rectangle(24,-3,6,29,{label:'player-right',isSensor:true});
   const body = Body.create({parts:[main,foot,left,right],friction:0,frictionStatic:0,frictionAir:.018,restitution:0,label:'player',slop:.08});
+  body.sleepThreshold = Infinity;
   return { body, parts:{ main, foot, left, right } };
+}
+
+export function wakePlayer(Matter, body) {
+  if (!body) return;
+  Matter.Sleeping.set(body, false);
+  body.sleepCounter = 0;
 }

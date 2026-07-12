@@ -102,7 +102,7 @@ bindHold('btnLeft','left');bindHold('btnDown','down');bindHold('btnRight','right
 
 $('answerBtn').addEventListener('click',openQuestion);$('qClose').addEventListener('click',closeQuestion);
 function openQuestion(){
-  if(!scene||frozen||scene.finished)return;frozen=true;scene.setAction('left',false);scene.setAction('right',false);
+  if(!scene||frozen||scene.finished)return;frozen=true;scene.resumeControl();
   $('qFeedback').textContent='';$('qFeedback').className='q-feedback';$('qClose').style.display='none';$('qOverlay').classList.add('open');
   if(preview)return renderQuestion({question:'7 × 8 等於多少？',choices:['48','54','56','64']});
   $('qText').textContent='';$('qChoices').innerHTML='<div class="muted" style="grid-column:1/-1;text-align:center">載入中…</div>';
@@ -121,7 +121,11 @@ function applyAnswer(res,choice,buttons){
   const fb=$('qFeedback');fb.textContent=res.correct?`答啱喇！能量 +${res.gain} ⚡`:'差少少，再試下一題！';fb.classList.add(res.correct?'good':'bad');scene.setEnergy(res.energy);
   if(res.correct)setTimeout(closeQuestion,800);else $('qClose').style.display='';
 }
-function closeQuestion(){$('qOverlay').classList.remove('open');frozen=false;}
+function closeQuestion(){
+  $('qOverlay').classList.remove('open');frozen=false;scene?.resumeControl();
+  if(document.activeElement instanceof HTMLElement)document.activeElement.blur();
+  $('gameCanvas').focus({preventScroll:true});
+}
 
 function toast(message,gold=false){const el=document.createElement('div');el.className=`toast${gold?' gold':''}`;el.textContent=message;$('toasts').appendChild(el);setTimeout(()=>el.remove(),2700);}
 function showResults(leaderboard){

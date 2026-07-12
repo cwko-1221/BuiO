@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { ASSET_BY_ID } from '../game-app/public/js/v2/assets.js';
 import { createAlphaBody, fittedSize } from '../game-app/public/js/v2/colliders.js';
-import { createPlayerCompound } from '../game-app/public/js/v2/playerPhysics.js';
+import { createPlayerCompound, wakePlayer } from '../game-app/public/js/v2/playerPhysics.js';
 
 const require = createRequire(import.meta.url);
 const Engine = require('../node_modules/phaser/src/physics/matter-js/lib/core/Engine');
@@ -9,7 +9,8 @@ const Bodies = require('../node_modules/phaser/src/physics/matter-js/lib/factory
 const Body = require('../node_modules/phaser/src/physics/matter-js/lib/body/Body');
 const Composite = require('../node_modules/phaser/src/physics/matter-js/lib/body/Composite');
 const Events = require('../node_modules/phaser/src/physics/matter-js/lib/core/Events');
-const Matter = { Bodies, Body };
+const Sleeping = require('../node_modules/phaser/src/physics/matter-js/lib/core/Sleeping');
+const Matter = { Bodies, Body, Sleeping };
 
 const failures = [];
 const makeObject = (assetId, x=0, y=100, w=260, h=100) => ({
@@ -42,9 +43,21 @@ for (const assetId of ASSET_BY_ID.keys()) {
   if (player.position.x < 100) failures.push(`player failed horizontal glide (${player.position.x.toFixed(2)})`);
 }
 
+{
+  const engine = Engine.create({ enableSleeping:true });
+  const floor = Bodies.rectangle(0,100,420,30,{isStatic:true});
+  const { body:player } = createPlayerCompound(Matter);
+  Body.setPosition(player,{x:0,y:0});
+  Composite.add(engine.world,[floor,player]);
+  for(let i=0;i<600;i++) Engine.update(engine,1000/60);
+  if (player.isSleeping) failures.push('player fell asleep while question overlay was open');
+  Sleeping.set(player,true); wakePlayer(Matter,player);
+  if (player.isSleeping || player.sleepCounter !== 0) failures.push('resume control did not wake player');
+}
+
 if (failures.length) {
   console.error(`Game physics test failed (${failures.length})`);
   failures.slice(0,20).forEach(failure => console.error(`- ${failure}`));
   process.exit(1);
 }
-console.log(`Game physics test passed: ${ASSET_BY_ID.size} alpha compound bodies, foot sensor landing, and horizontal glide.`);
+console.log(`Game physics test passed: ${ASSET_BY_ID.size} alpha compound bodies, foot sensor landing, horizontal glide, and question-resume wake.`);
