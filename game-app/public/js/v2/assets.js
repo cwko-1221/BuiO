@@ -86,6 +86,20 @@ export const ASSETS = Object.entries(catalog).flatMap(([zone, list]) => list.map
 
 export const ASSET_BY_ID = new Map(ASSETS.map(asset => [asset.id, asset]));
 export const ZONE_ASSET_IDS = Object.fromEntries(Object.keys(catalog).map(zone => [zone, catalog[zone].map(([id]) => id)]));
+
+// Curated per-zone prop pools containing only finished illustrations —
+// a large part of the catalog still ships flat placeholder polygons, and
+// those must never appear on a course. Zones short on themed art borrow
+// furniture/food/mechanism props, which is exactly Gimkit DLD's absurdist
+// style (desks and sofas floating at 400m).
+export const ZONE_PROP_IDS = {
+  castle: ['treasure-chest','castle-banner','catapult','shield','armor-stand','cannon','gargoyle','castle-vase','sword','helmet','throne','chandelier','scroll','potion-cauldron','broken-column','giant-key','round-table','street-lamp'],
+  market: ['market-basket','market-scale','market-signboard','cash-chest','cheese-wheel','giant-baguette','giant-watermelon','giant-donut','apple-crate','orange-crate','lemon-crate','grape-crate','cabbage-crate','balloons','lantern-string','barrel'],
+  forest: ['bench','ladder','hanging-ring','moss-boulder','beach-ball','street-lamp','giant-key','scroll'],
+  farm: ['sack-pile','potato-crate','cabbage-crate','cheese-wheel','barrel','bread-cart','apple-crate','market-basket'],
+  snow: ['book-stack','chair','street-lamp','cash-chest','giant-key','bench'],
+  factory: ['fan','giant-gear','crate','cash-chest','book-stack','cannon'],
+};
 export const ZONES = ['castle','market','forest','farm','snow','factory'];
 export const ZONE_NAMES = { castle:'城堡', market:'市集', forest:'森林', farm:'農場', snow:'雪山', factory:'工廠' };
 

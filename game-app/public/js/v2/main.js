@@ -69,13 +69,13 @@ function startGame(seed,durationSec,startedAt,resume){
   const hooks={
     name:me.name||'Koko', energy:resume?.energy??40, progress:resume?.bestProgress??resume?.bestHeight??0,
     isFrozen:()=>frozen,
-    onReady:s=>{scene=s; if(resume?.x&&resume?.y)s.player.setPosition(resume.x,resume.y); toast(`🧭 24 段路線 · 地圖 ${course.courseHash}`,true);},
+    onReady:s=>{scene=s; if(resume?.x&&resume?.y)s.setPlayerPosition(resume.x,resume.y); toast(`🧭 24 段路線 · 地圖 ${course.courseHash}`,true);},
     onFrame:updateHudAndNetwork,
     onProgress:(progress,cp)=>{if(cp&&Math.abs(progress-cp.progress)<.06)toast(`⛳ ${cp.zoneName}檢查點`,true);},
     onFinish:()=>{socket.emit('player:summit');toast('🏆 登頂成功！',true);},
     onEffect:(type)=>{if(type==='doubleJump')toast('✨ 二段跳');if(type==='respawn')toast('↩️ 返回最近檢查點');}
   };
-  phaserGame=new Phaser.Game({
+  phaserGame=window.__game=new Phaser.Game({
     type:Phaser.AUTO,parent:'gameCanvas',transparent:true,
     scale:{mode:Phaser.Scale.RESIZE,width:window.innerWidth,height:window.innerHeight,autoCenter:Phaser.Scale.CENTER_BOTH},
     render:{antialias:true,roundPixels:false,pixelArt:false},

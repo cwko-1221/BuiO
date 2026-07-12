@@ -10,9 +10,11 @@ const outputFile = path.join(root, 'game-app', 'public', 'js', 'v2', 'asset-geom
 function occupiedRows(alpha, width, height, x0, x1) {
   const rows = [];
   const required = Math.max(1, Math.ceil((x1 - x0) * 0.25));
+  // Alpha 96+ ignores anti-aliased fringes so the collider top hugs the
+  // solid painted edge — the player should stand exactly on the artwork.
   for (let y = 0; y < height; y++) {
     let count = 0;
-    for (let x = x0; x < x1; x++) if (alpha[y * width + x] >= 64) count++;
+    for (let x = x0; x < x1; x++) if (alpha[y * width + x] >= 96) count++;
     rows.push(count >= required);
   }
   return rows;
@@ -35,27 +37,57 @@ async function analyze(asset) {
   const file = path.join(propsDir, `${asset.id}.webp`);
   const { data, info } = await sharp(file)
     .ensureAlpha()
-    .resize({ width: 72, height: 72, fit: 'inside', withoutEnlargement: true })
+    .resize({ width: 128, height: 128, fit: 'inside', withoutEnlargement: true })
     .raw()
     .toBuffer({ resolveWithObject: true });
   const alpha = new Uint8Array(info.width * info.height);
   for (let i = 0; i < alpha.length; i++) alpha[i] = data[i * 4 + 3];
 
-  const columns = Math.min(28, Math.max(10, Math.round(info.width / 3)));
-  const parts = [];
-  for (let column = 0; column < columns; column++) {
-    const x0 = Math.floor(column * info.width / columns);
-    const x1 = Math.max(x0 + 1, Math.floor((column + 1) * info.width / columns));
-    for (const [y0, y1] of runs(occupiedRows(alpha, info.width, info.height, x0, x1))) {
-      const padX = 0.001, padY = 0.003;
-      parts.push({
-        x: (x0 + x1) / (2 * info.width),
-        y: (y0 + y1) / (2 * info.height),
-        w: Math.min(1, (x1 - x0) / info.width + padX),
-        h: Math.min(1, (y1 - y0) / info.height + padY)
-      });
+  function extract(columns, mergeTolerance) {
+    // Per-column vertical runs in pixel space...
+    const columnRuns = [];
+    for (let column = 0; column < columns; column++) {
+      const x0 = Math.floor(column * info.width / columns);
+      const x1 = Math.max(x0 + 1, Math.floor((column + 1) * info.width / columns));
+      for (const [y0, y1] of runs(occupiedRows(alpha, info.width, info.height, x0, x1))) {
+        columnRuns.push({ x0, x1, y0, y1 });
+      }
     }
+    // ...then merge horizontally adjacent runs with near-identical vertical
+    // extents into single wide rectangles. Flat platform tops collapse to a
+    // handful of parts while stairs/lattices keep their true contour.
+    const merged = [];
+    for (const run of columnRuns) {
+      const previous = merged.find(m => m.x1 === run.x0 && Math.abs(m.y0 - run.y0) <= mergeTolerance && Math.abs(m.y1 - run.y1) <= mergeTolerance);
+      if (previous) {
+        previous.x1 = run.x1;
+        previous.y0 = Math.min(previous.y0, run.y0);
+        previous.y1 = Math.max(previous.y1, run.y1);
+      } else {
+        merged.push({ ...run });
+      }
+    }
+    return merged;
   }
+
+  // Ornate silhouettes (fans, clocks, treehouses) can exceed the 56-part
+  // budget at full resolution — retry coarser until they fit.
+  const attempts = [
+    [Math.min(48, Math.max(12, Math.round(info.width / 3))), 1],
+    [24, 2], [16, 3], [10, 5],
+  ];
+  let merged = [];
+  for (const [columns, tolerance] of attempts) {
+    merged = extract(columns, tolerance);
+    if (merged.length <= 52) break;
+  }
+  const padX = 0.001, padY = 0.003;
+  const parts = merged.map(m => ({
+    x: (m.x0 + m.x1) / (2 * info.width),
+    y: (m.y0 + m.y1) / (2 * info.height),
+    w: Math.min(1, (m.x1 - m.x0) / info.width + padX),
+    h: Math.min(1, (m.y1 - m.y0) / info.height + padY)
+  }));
 
   return {
     source: { w: info.width, h: info.height },

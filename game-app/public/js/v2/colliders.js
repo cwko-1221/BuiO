@@ -21,26 +21,20 @@ export function fittedSize(object) {
   return size;
 }
 
+// All geometry maths lives in IMAGE-CENTRE space: coordinates are offsets
+// from the centre of the full sprite image. Sprites are drawn with their
+// centre at (object.x, object.y), and bodies are translated so the image
+// centre lands exactly there too. What you see is what you collide with.
 export function alphaBounds(assetId, size) {
   const geometry = ASSET_GEOMETRY[assetId];
   const parts = geometry?.parts?.length ? geometry.parts : [{ x:.5, y:.5, w:1, h:1 }];
-  let area = 0, centreX = 0, centreY = 0;
-  for (const part of parts) {
-    const partArea = Math.max(3,part.w*size.w) * Math.max(3,part.h*size.h);
-    area += partArea;
-    centreX += (part.x-.5)*size.w*partArea;
-    centreY += (part.y-.5)*size.h*partArea;
-  }
-  centreX /= area || 1;
-  centreY /= area || 1;
-  const bounds=parts.reduce((result,part) => {
-    const halfW=Math.max(3,part.w*size.w)/2, halfH=Math.max(3,part.h*size.h)/2;
-    const x=(part.x-.5)*size.w-centreX, y=(part.y-.5)*size.h-centreY;
-    result.minX=Math.min(result.minX,x-halfW); result.maxX=Math.max(result.maxX,x+halfW);
-    result.minY=Math.min(result.minY,y-halfH); result.maxY=Math.max(result.maxY,y+halfH);
+  return parts.reduce((result, part) => {
+    const halfW = Math.max(3, part.w * size.w) / 2, halfH = Math.max(3, part.h * size.h) / 2;
+    const x = (part.x - .5) * size.w, y = (part.y - .5) * size.h;
+    result.minX = Math.min(result.minX, x - halfW); result.maxX = Math.max(result.maxX, x + halfW);
+    result.minY = Math.min(result.minY, y - halfH); result.maxY = Math.max(result.maxY, y + halfH);
     return result;
-  },{minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity});
-  return { ...bounds, centreX, centreY };
+  }, { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
 }
 
 export function createAlphaBody(Matter, object, size) {
@@ -68,21 +62,20 @@ export function createAlphaBody(Matter, object, size) {
     restitution: rubber ? 0.58 : 0.02,
     label: 'world'
   });
-  // Phaser derives a compound body's sprite origin from these offsets plus the
-  // body's centre-of-mass offset. Matter defaults them to zero, which makes an
-  // asymmetrical image render away from its alpha-derived collision parts.
-  // Our geometry coordinates are authored from the centre of the full image,
-  // so the matching sprite reference point is the image centre as well.
-  body.render.sprite.xOffset = .5;
-  body.render.sprite.yOffset = .5;
-  Body.translate(body, { x: object.x - body.position.x, y: object.y - body.position.y });
+  // Parts were authored relative to the image centre (origin 0,0), so moving
+  // everything by (object.x, object.y) puts the image centre — not the centre
+  // of mass — at the object position, matching the sprite exactly.
+  Body.translate(body, { x: object.x, y: object.y });
   if (object.angle) Body.rotate(body, object.angle, { x: object.x, y: object.y });
+  Body.setStatic(body, true);
   return body;
 }
 
-export function bindBodyToSprite(sprite, object) {
+export function bindBodyToSprite(body, sprite, object) {
   sprite.courseObject = object;
-  for (const part of sprite.body.parts) {
+  body.gameObject = sprite;
+  body.courseObject = object;
+  for (const part of body.parts) {
     part.gameObject = sprite;
     part.courseObject = object;
   }

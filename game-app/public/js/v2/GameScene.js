@@ -2,7 +2,7 @@ import { ASSET_BY_ID, ZONE_NAMES } from './assets.js';
 import { AVAILABLE_ASSETS } from './available-assets.js';
 import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js';
 import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js';
-import { createPlayerCompound, wakePlayer } from './playerPhysics.js';
+import { createPlayerCompound, wakePlayer, PLAYER_SPRITE_DY } from './playerPhysics.js';
 import { sampleSky } from './background.js';
 
 const CAT_WORLD = 0x0002;
@@ -147,20 +147,29 @@ export class GameScene extends Phaser.Scene {
   }
 
   createCourseObject(obj) {
+    // Sprite and body are deliberately NOT linked through Phaser's matter
+    // game object. The sprite (image centre at obj.x/y) is the ground truth
+    // and the body is placed at the same point by construction, so the
+    // player stands exactly on the visible artwork.
     const texture = ATLAS_INDEX[obj.assetId];
     const size = fittedSize(obj);
     const depth = obj.role === 'stacked' ? 14 : obj.role === 'support' ? 10 : 12;
-    const sprite = this.add.image(obj.x, obj.y, texture?.key || obj.assetId, texture?.frame || null).setDisplaySize(size.w, size.h).setDepth(depth);
-    const body = createAlphaBody(Phaser.Physics.Matter.Matter, obj, size);
-    this.matter.add.gameObject(sprite, body);
-    sprite.setStatic(true).setRotation(obj.angle || 0);
-    sprite.body.collisionFilter.category = CAT_WORLD;
-    sprite.body.collisionFilter.mask = CAT_PLAYER;
-    bindBodyToSprite(sprite, obj);
+    const sprite = this.add.image(obj.x, obj.y, texture?.key || obj.assetId, texture?.frame || null)
+      .setDisplaySize(size.w, size.h).setDepth(depth).setRotation(obj.angle || 0);
+    const Matter = Phaser.Physics.Matter.Matter;
+    const body = createAlphaBody(Matter, obj, size);
+    body.collisionFilter.category = CAT_WORLD;
+    body.collisionFilter.mask = CAT_PLAYER;
+    bindBodyToSprite(body, sprite, obj);
+    Matter.Composite.add(this.matter.world.localWorld, body);
     if (obj.behavior.type === 'move' || obj.behavior.type === 'rotate') {
-      sprite.setStatic(false); sprite.setIgnoreGravity(true); sprite.setFixedRotation(obj.behavior.type !== 'rotate');
-      sprite.body.isSleeping = false;
-      this.dynamicObjects.push({ sprite, obj, startX:obj.x, startY:obj.y, phase:(obj.x+obj.y)%6.28 });
+      this.dynamicObjects.push({
+        sprite, body, obj,
+        startX: obj.x, startY: obj.y, baseAngle: obj.angle || 0,
+        // where the centre of mass sits relative to the image centre
+        centerOff: { x: body.position.x - obj.x, y: body.position.y - obj.y },
+        phase: (obj.x + obj.y) % 6.28
+      });
     }
     return sprite;
   }
@@ -192,16 +201,36 @@ export class GameScene extends Phaser.Scene {
   }
 
   createPlayer() {
-    const playerPhysics = createPlayerCompound(Phaser.Physics.Matter.Matter);
-    const compound = playerPhysics.body;
+    // Like course objects, the player sprite is detached from the physics
+    // body and synced manually with a fixed offset, so the feet pixels sit
+    // exactly on the collider bottom.
+    const Matter = Phaser.Physics.Matter.Matter;
+    const playerPhysics = createPlayerCompound(Matter);
+    this.playerBody = playerPhysics.body;
     this.playerParts = playerPhysics.parts;
-    this.player = this.add.sprite(this.course.start.x,this.course.start.y-55,'player-idle-1').setDisplaySize(68,70).setDepth(100);
-    this.matter.add.gameObject(this.player,compound);
-    this.player.setPosition(this.course.start.x,this.course.start.y-55);
-    this.player.setFixedRotation().setFriction(0).setFrictionAir(.02);
-    this.player.body.collisionFilter.category = CAT_PLAYER;
-    this.player.body.collisionFilter.mask = CAT_WORLD;
+    this.playerBody.collisionFilter.category = CAT_PLAYER;
+    this.playerBody.collisionFilter.mask = CAT_WORLD;
+    Matter.Body.setPosition(this.playerBody,{x:this.course.start.x,y:this.course.start.y-38});
+    Matter.Composite.add(this.matter.world.localWorld,this.playerBody);
+    this.player = this.add.sprite(0,0,'player-idle-1').setDisplaySize(68,70).setDepth(100);
+    this.syncPlayerSprite();
     this.playerName = this.add.text(this.player.x,this.player.y+42,this.hooks.name || '玩家',{fontFamily:'Microsoft JhengHei',fontSize:'17px',fontStyle:'bold',color:'#fff',stroke:'#222a42',strokeThickness:6}).setOrigin(.5).setDepth(110);
+  }
+
+  syncPlayerSprite() {
+    this.player.setPosition(this.playerBody.position.x,this.playerBody.position.y+PLAYER_SPRITE_DY);
+  }
+
+  setPlayerPosition(x,y) {
+    const Body = Phaser.Physics.Matter.Matter.Body;
+    Body.setPosition(this.playerBody,{x,y});
+    Body.setVelocity(this.playerBody,{x:0,y:0});
+    this.syncPlayerSprite();
+  }
+
+  setPlayerVelocity(x,y) {
+    const v = this.playerBody.velocity;
+    Phaser.Physics.Matter.Matter.Body.setVelocity(this.playerBody,{x:x ?? v.x,y:y ?? v.y});
   }
 
   bindInputs() {
@@ -219,7 +248,7 @@ export class GameScene extends Phaser.Scene {
           const index = bodies.indexOf(sensor);
           if (index < 0) return;
           const other = bodies[1 - index];
-          if (other.isSensor || other.parent === this.player.body) return;
+          if (other.isSensor || other.parent === this.playerBody) return;
           if (active) contacts.set(other.id, other); else contacts.delete(other.id);
         };
         track(this.playerParts.foot, this.groundContacts);
@@ -231,12 +260,13 @@ export class GameScene extends Phaser.Scene {
       trackContacts(event, true);
       for (const pair of event.pairs) {
         const bodies = [pair.bodyA,pair.bodyB];
-        if (bodies.includes(this.summitBody) && bodies.some(b => b === this.player.body || b.parent === this.player.body)) this.finish();
+        const involvesPlayer = bodies.some(b => b === this.playerBody || b.parent === this.playerBody);
+        if (bodies.includes(this.summitBody) && involvesPlayer) this.finish();
         for (const body of bodies) {
-          if (body.progressSensor && bodies.some(b => b === this.player.body || b.parent === this.player.body)) this.reachProgress(body.progressSensor);
-          const obj = body.gameObject?.courseObject;
-          if (obj?.behavior?.type === 'bounce' && bodies.some(b => b === this.player.body || b.parent === this.player.body)) {
-            this.player.setVelocityY(-obj.behavior.power); this.airJump = 1; this.hooks.onEffect?.('bounce',this.player.x,this.player.y);
+          if (body.progressSensor && involvesPlayer) this.reachProgress(body.progressSensor);
+          const obj = body.courseObject;
+          if (obj?.behavior?.type === 'bounce' && involvesPlayer) {
+            this.setPlayerVelocity(null,-obj.behavior.power); this.airJump = 1; this.hooks.onEffect?.('bounce',this.player.x,this.player.y);
           }
         }
       }
@@ -244,7 +274,7 @@ export class GameScene extends Phaser.Scene {
     this.matter.world.on('collisionend', event => trackContacts(event, false));
   }
 
-  wakePlayer() { wakePlayer(Phaser.Physics.Matter.Matter, this.player?.body); }
+  wakePlayer() { wakePlayer(Phaser.Physics.Matter.Matter, this.playerBody); }
   resumeControl() {
     this.actions.left = false; this.actions.right = false; this.actions.down = false; this.actions.jumpQueued = 0;
     this.wakePlayer();
@@ -264,7 +294,7 @@ export class GameScene extends Phaser.Scene {
     const downHeld = this.actions.down || this.keys.down.isDown || this.keys.s.isDown;
     this.actions.jumpQueued = Math.max(0,this.actions.jumpQueued-deltaMs);
 
-    const vy = this.player.body.velocity.y;
+    const vy = this.playerBody.velocity.y;
     const under = [...this.groundContacts.values()].filter(body => !body.isSensor);
     this.grounded = under.length > 0 && vy >= -1.5;
     this.coyote = this.grounded ? .11 : Math.max(0,this.coyote-dt);
@@ -272,28 +302,28 @@ export class GameScene extends Phaser.Scene {
 
     const dir = (rightHeld?1:0)-(leftHeld?1:0);
     const target = dir * 5.6;
-    const nextVx = Phaser.Math.Linear(this.player.body.velocity.x,target,this.grounded?.2:.085);
-    this.player.setVelocityX(nextVx);
-    const conveyorBody = under.find(b => b.gameObject?.courseObject?.behavior?.type === 'conveyor');
-    if (conveyorBody && this.grounded) this.player.setVelocityX(nextVx + conveyorBody.gameObject.courseObject.behavior.speed);
+    const nextVx = Phaser.Math.Linear(this.playerBody.velocity.x,target,this.grounded?.2:.085);
+    this.setPlayerVelocity(nextVx,null);
+    const conveyorBody = under.find(b => b.courseObject?.behavior?.type === 'conveyor');
+    if (conveyorBody && this.grounded) this.setPlayerVelocity(nextVx + conveyorBody.courseObject.behavior.speed,null);
     if (dir && this.energy > 0) this.energy = Math.max(0,this.energy-4.3*dt);
     this.player.setFlipX(dir < 0);
 
     const blocked = (dir < 0 && this.leftContacts.size) || (dir > 0 && this.rightContacts.size);
-    if (dir && blocked && Math.abs(this.player.body.velocity.x) < .22 && Math.abs(vy) < 1.2) this.stuckMs += deltaMs;
+    if (dir && blocked && Math.abs(this.playerBody.velocity.x) < .22 && Math.abs(vy) < 1.2) this.stuckMs += deltaMs;
     else this.stuckMs = 0;
     if (this.stuckMs > 110 && this.grounded) {
-      Phaser.Physics.Matter.Matter.Body.translate(this.player.body,{x:dir * 1.5,y:-2.5});
-      this.player.setVelocityX(dir * 2.6);
+      Phaser.Physics.Matter.Matter.Body.translate(this.playerBody,{x:dir * 1.5,y:-2.5});
+      this.setPlayerVelocity(dir * 2.6,null);
       this.stuckMs = 0;
     }
 
     if (this.actions.jumpQueued > 0 && this.energy >= 8) {
       if (downHeld && this.grounded) {
-        this.dropUntil = time + 240; this.playerParts.main.isSensor = true; this.groundContacts.clear(); this.player.setVelocityY(2.2); this.actions.jumpQueued = 0;
+        this.dropUntil = time + 240; this.playerParts.main.isSensor = true; this.groundContacts.clear(); this.setPlayerVelocity(null,2.2); this.actions.jumpQueued = 0;
       } else if (this.coyote > 0 || this.airJump > 0) {
         const air = this.coyote <= 0;
-        this.player.setVelocityY(air ? -10.8 : -12.2);
+        this.setPlayerVelocity(null,air ? -10.8 : -12.2);
         if (air) this.airJump--;
         this.energy -= 8; this.actions.jumpQueued = 0; this.coyote = 0;
         this.player.play(air ? 'doubleJump' : 'jump',true);
@@ -303,17 +333,31 @@ export class GameScene extends Phaser.Scene {
     if (this.playerParts.main.isSensor && time > this.dropUntil) this.playerParts.main.isSensor = false;
 
     for (const item of this.dynamicObjects) {
-      const { sprite,obj,startX,startY,phase } = item;
+      const { sprite,body,obj,startX,startY,baseAngle,centerOff,phase } = item;
+      const Body = Phaser.Physics.Matter.Matter.Body;
       if (obj.behavior.type === 'move') {
         const wave = Math.sin(time*.001*obj.behavior.speed*Math.PI*2+phase);
-        Phaser.Physics.Matter.Matter.Body.setPosition(sprite.body,{x:startX+obj.behavior.dx*wave,y:startY+obj.behavior.dy*wave});
+        const cx = startX+obj.behavior.dx*wave, cy = startY+obj.behavior.dy*wave;
+        Body.setPosition(body,{x:cx+centerOff.x,y:cy+centerOff.y},true);
+        sprite.setPosition(cx,cy);
       } else {
-        Phaser.Physics.Matter.Matter.Body.setAngle(sprite.body,(obj.angle||0)+time*.001*obj.behavior.speed);
+        // Spin about the image centre: rotate the centre-of-mass offset along
+        // with the angle so the artwork pivots around its visual middle.
+        const angle = baseAngle + time*.001*obj.behavior.speed;
+        const spin = angle - baseAngle;
+        const cos = Math.cos(spin), sin = Math.sin(spin);
+        Body.setPosition(body,{
+          x: startX + centerOff.x*cos - centerOff.y*sin,
+          y: startY + centerOff.x*sin + centerOff.y*cos
+        });
+        Body.setAngle(body, angle);
+        sprite.setRotation(angle);
       }
     }
 
     this.updateBackground();
 
+    this.syncPlayerSprite();
     this.playerName.setPosition(this.player.x,this.player.y+44);
     const motion = vy < -1 ? 'jump' : vy > 2 ? 'fall' : Math.abs(nextVx)>1 ? 'run' : 'idle';
     if (!['jump','doubleJump'].includes(this.player.anims.currentAnim?.key) || !this.player.anims.isPlaying) this.player.play(motion,true);
@@ -326,7 +370,7 @@ export class GameScene extends Phaser.Scene {
     const altitude = Math.max(0,(this.course.startAltitudeY-this.player.y)/5);
     const zoneIndex = Math.min(5,Math.floor(this.progress*6));
     this.hooks.onFrame?.({
-      x:this.player.x,y:this.player.y,velocityX:this.player.body.velocity.x,velocityY:this.player.body.velocity.y,
+      x:this.player.x,y:this.player.y,velocityX:this.playerBody.velocity.x,velocityY:this.playerBody.velocity.y,
       energy:this.energy,progress:this.progress,altitude,animation:motion,
       facing:this.player.flipX?-1:1,zoneIndex,zoneName:Object.values(ZONE_NAMES)[zoneIndex]
     });
@@ -343,7 +387,7 @@ export class GameScene extends Phaser.Scene {
   respawn() {
     const cp = this.checkpoint || this.course.checkpoints[0];
     this.groundContacts.clear(); this.leftContacts.clear(); this.rightContacts.clear(); this.stuckMs = 0;
-    this.player.setPosition(cp.x,cp.y-80).setVelocity(0,0);
+    this.setPlayerPosition(cp.x,cp.y-80);
     this.energy = Math.max(25,this.energy); this.player.setAlpha(.55);
     this.time.delayedCall(1200,() => this.player?.setAlpha(1));
     this.cameras.main.flash(200,255,255,255); this.hooks.onEffect?.('respawn',cp.x,cp.y);

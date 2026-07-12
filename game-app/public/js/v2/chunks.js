@@ -1,4 +1,4 @@
-import { ZONES, ZONE_ASSET_IDS } from './assets.js';
+import { ZONES, ZONE_PROP_IDS } from './assets.js';
 
 const W = 1200, H = 760;
 
@@ -13,17 +13,19 @@ const oneWay = (assetId, x, y, w, h, angle = 0) => platform(assetId, x, y, w, h,
 });
 
 function themed(zone, index) {
-  const ids = ZONE_ASSET_IDS[zone];
+  const ids = ZONE_PROP_IDS[zone];
   return ids[index % ids.length];
 }
 
+// Walkable surfaces per zone — finished illustrations only. Art-poor zones
+// borrow big furniture/food/mechanism pieces, DLD's trademark absurdism.
 const zoneSurfaces = {
   castle: { long:'castle-brick-long', medium:'castle-brick-medium', step:'castle-brick-step', thick:'castle-brick-thick', corner:'castle-brick-corner' },
-  market: { long:'picnic-table', medium:'carpet-rack', step:'barrel-stack', thick:'market-stall', corner:'market-wagon' },
-  forest: { long:'log-bridge', medium:'fallen-tree', step:'tree-stump', thick:'hollow-tree', corner:'root-ramp' },
-  farm: { long:'wood-pallet', medium:'barn-roof', step:'hay-bale', thick:'farm-shed', corner:'hay-cart' },
-  snow: { long:'ice-bridge', medium:'cabin-roof', step:'frozen-log', thick:'snow-mound', corner:'ice-arch' },
-  factory: { long:'steel-beam', medium:'factory-conveyor', step:'oil-drum', thick:'platform-lift', corner:'elbow-pipe' }
+  market: { long:'picnic-table', medium:'market-awning', step:'barrel-stack', thick:'market-stall', corner:'market-wagon' },
+  forest: { long:'plank', medium:'stone-slab', step:'moss-boulder', thick:'treehouse', corner:'stone-arch' },
+  farm: { long:'sack-pile', medium:'potato-crate', step:'apple-crate', thick:'tractor', corner:'bread-cart' },
+  snow: { long:'bed', medium:'sofa', step:'crate', thick:'ice-arch', corner:'grand-clock' },
+  factory: { long:'conveyor', medium:'table', step:'book-stack', thick:'bookcase', corner:'giant-gear' }
 };
 
 const surface = (zone, kind, x, y, w, h, extra = {}) => platform(zoneSurfaces[zone][kind], x, y, w, h, { role:'support', ...extra });

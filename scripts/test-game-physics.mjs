@@ -25,17 +25,17 @@ for (const assetId of ASSET_BY_ID.keys()) {
   const predictedBounds=alphaBounds(assetId,size);
   if (!Number.isFinite(body.position.x + body.position.y + body.area)) failures.push(`${assetId}: invalid body numbers`);
   if (body.parts.length < 2) failures.push(`${assetId}: missing compound parts`);
-  if (Math.abs((body.bounds.minX ?? body.bounds.min.x)-(body.position.x+predictedBounds.minX))>.1 ||
-      Math.abs((body.bounds.maxX ?? body.bounds.max.x)-(body.position.x+predictedBounds.maxX))>.1 ||
-      Math.abs((body.bounds.minY ?? body.bounds.min.y)-(body.position.y+predictedBounds.minY))>.1 ||
-      Math.abs((body.bounds.maxY ?? body.bounds.max.y)-(body.position.y+predictedBounds.maxY))>.1) {
+  // Bodies are aligned to IMAGE-CENTRE space: the image centre sits exactly
+  // at (object.x, object.y), which is also where the sprite centre is drawn.
+  if (Math.abs((body.bounds.minX ?? body.bounds.min.x)-(object.x+predictedBounds.minX))>.1 ||
+      Math.abs((body.bounds.maxX ?? body.bounds.max.x)-(object.x+predictedBounds.maxX))>.1 ||
+      Math.abs((body.bounds.minY ?? body.bounds.min.y)-(object.y+predictedBounds.minY))>.1 ||
+      Math.abs((body.bounds.maxY ?? body.bounds.max.y)-(object.y+predictedBounds.maxY))>.1) {
     failures.push(`${assetId}: authored alpha bounds do not match Matter bounds`);
   }
   const geometryParts = ASSET_GEOMETRY[assetId]?.parts || [{ x:.5, y:.5, w:1, h:1 }];
-  const originX = body.render.sprite.xOffset + body.centerOffset.x / size.w;
-  const originY = body.render.sprite.yOffset + body.centerOffset.y / size.h;
-  const visualLeft = body.position.x - originX * size.w;
-  const visualTop = body.position.y - originY * size.h;
+  const visualLeft = object.x - size.w / 2;
+  const visualTop = object.y - size.h / 2;
   body.parts.slice(1).forEach((part, index) => {
     const source = geometryParts[index];
     const expectedX = visualLeft + source.x * size.w;
@@ -49,6 +49,7 @@ for (const assetId of ASSET_BY_ID.keys()) {
       body.bounds.min.y < visualTop - tolerance || body.bounds.max.y > visualTop + size.h + tolerance) {
     failures.push(`${assetId}: collider exceeds visible sprite`);
   }
+  if (!body.isStatic) failures.push(`${assetId}: course body should be created static`);
 }
 
 {
