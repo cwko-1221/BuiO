@@ -20,17 +20,17 @@ function themed(zone, index) {
 
 const layouts = [
   {
-    name: 'switchback', tags: ['traverse','branch','recovery'],
+    name: 'gentle-start', difficulty: 1, tags: ['traverse','recovery','grounded','easy'],
     build: z => [
-      oneWay(themed(z,0),100,620,210,54), oneWay(themed(z,1),360,520,180,56,-.08),
-      platform(themed(z,2),650,590,260,90,{ angle:.08 }), oneWay(themed(z,3),920,450,190,60),
-      platform(themed(z,4),650,350,210,100), oneWay(themed(z,5),380,250,180,56,.07),
-      platform(themed(z,6),760,160,250,82), oneWay(themed(z,7),1000,90,180,54),
-      oneWay('rope-bridge',260,690,380,36), oneWay('crate',780,690,230,52)
+      platform('plank',110,660,360,70), platform('plank',430,660,360,70), platform('plank',750,660,360,70),
+      platform('plank',1010,580,300,70), platform('plank',800,480,300,70),
+      platform('plank',570,380,300,70), platform('plank',760,280,300,70),
+      platform('plank',970,180,300,70), platform('plank',1040,90,300,70),
+      platform(themed(z,0),300,715,220,54)
     ]
   },
   {
-    name: 'down-and-around', tags: ['descent','underpass','recovery','traverse'],
+    name: 'down-and-around', difficulty: 2, tags: ['descent','underpass','recovery','traverse'],
     build: z => [
       platform(themed(z,8),110,570,220,78), oneWay(themed(z,9),330,650,180,54),
       oneWay(themed(z,10),560,700,180,54,.08), platform(themed(z,11),810,620,250,94),
@@ -40,7 +40,7 @@ const layouts = [
     ]
   },
   {
-    name: 'long-traverse', tags: ['traverse','branch','recovery'],
+    name: 'long-traverse', difficulty: 2, tags: ['traverse','branch','recovery'],
     build: z => [
       platform(themed(z,18),90,620,190,100), conveyor(300,560,260,1.7),
       platform(themed(z,19),600,520,170,120), oneWay(themed(z,20),820,470,210,58,.1),
@@ -51,7 +51,7 @@ const layouts = [
     ]
   },
   {
-    name: 'moving-machines', tags: ['dynamic','traverse','recovery'],
+    name: 'moving-machines', difficulty: 3, tags: ['dynamic','traverse','recovery'],
     build: z => [
       platform(themed(z,2),100,620,190,90), moving('moving-lift',330,560,170,48,180,0,.75),
       rotating('rotating-beam',600,480,250,34,.5), moving(themed(z,3),880,410,170,68,0,-150,.65),
@@ -61,7 +61,7 @@ const layouts = [
     ]
   },
   {
-    name: 'bounce-chain', tags: ['bounce','descent','recovery'],
+    name: 'bounce-chain', difficulty: 3, tags: ['bounce','descent','recovery'],
     build: z => [
       platform(themed(z,8),100,620,210,90), bounce('trampoline',330,675,150,38,15),
       platform(themed(z,9),530,520,130,105), bounce('basketball',720,570,92,92,13),
@@ -72,7 +72,7 @@ const layouts = [
     ]
   },
   {
-    name: 'split-routes', tags: ['branch','dynamic','recovery'],
+    name: 'split-routes', difficulty: 3, tags: ['branch','dynamic','recovery'],
     build: z => [
       platform(themed(z,14),100,620,220,94), oneWay(themed(z,15),320,520,170,52),
       moving('moving-lift',540,430,150,46,0,-130,.85), oneWay(themed(z,16),780,350,190,54),
@@ -83,7 +83,7 @@ const layouts = [
     ]
   },
   {
-    name: 'underpass-return', tags: ['descent','underpass','traverse','recovery'],
+    name: 'underpass-return', difficulty: 3, tags: ['descent','underpass','traverse','recovery'],
     build: z => [
       platform(themed(z,22),100,590,210,92), oneWay(themed(z,23),330,670,170,54),
       platform(themed(z,0),570,705,210,90), oneWay('plank',790,610,220,34,.12),
@@ -94,7 +94,7 @@ const layouts = [
     ]
   },
   {
-    name: 'freeform-finale', tags: ['dynamic','bounce','branch','descent','recovery'],
+    name: 'freeform-finale', difficulty: 4, tags: ['dynamic','bounce','branch','descent','recovery'],
     build: z => [
       platform(themed(z,7),100,620,210,100), rotating('seesaw',330,650,230,36,.32),
       bounce('spring-pad',530,620,120,34,15), platform(themed(z,8),700,490,180,118,{angle:-.1}),
@@ -110,6 +110,7 @@ export const CHUNKS = ZONES.flatMap(zone => layouts.map((layout, index) => ({
   id: `${zone}-${layout.name}`,
   zone,
   index,
+  difficulty: layout.difficulty,
   size: { w: W, h: H },
   entry: { x: 100, y: 620 },
   exits: [{ x: 1040, y: 70, facing: 1 }],

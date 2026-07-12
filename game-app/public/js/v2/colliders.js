@@ -13,9 +13,10 @@ export function fittedSize(object) {
     const w = Math.min(boxH * aspect, boxW * 2.4);
     size = { w, h:w / aspect };
   }
-  if (size.w < 42) {
-    const scale = 42 / size.w;
-    size = { w:42, h:size.h * scale };
+  const minimumWidth = object.difficulty <= 1 ? 120 : object.difficulty <= 2 ? 88 : 72;
+  if (size.w < minimumWidth) {
+    const scale = minimumWidth / size.w;
+    size = { w:minimumWidth, h:size.h * scale };
   }
   return size;
 }

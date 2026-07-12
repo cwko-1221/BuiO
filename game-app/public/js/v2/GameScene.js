@@ -3,6 +3,7 @@ import { AVAILABLE_ASSETS } from './available-assets.js';
 import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js';
 import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js';
 import { createPlayerCompound, wakePlayer } from './playerPhysics.js';
+import { sampleSky } from './background.js';
 
 const CAT_WORLD = 0x0002;
 const CAT_PLAYER = 0x0004;
@@ -49,6 +50,8 @@ export class GameScene extends Phaser.Scene {
     this.matter.world.engine.velocityIterations = 6;
 
     this.sky = this.add.image(0, 0, 'sky-v2').setOrigin(.5).setScrollFactor(0).setDepth(-1000);
+    this.skyWash = this.add.rectangle(0,0,10,10,0x8edcff,.08).setOrigin(.5).setScrollFactor(0).setDepth(-999);
+    this.horizonGlow = this.add.rectangle(0,0,10,10,0xe9fbff,.13).setOrigin(.5).setScrollFactor(0).setDepth(-998);
     this.resizeSky();
     this.scale.on('resize', () => this.resizeSky());
 
@@ -81,6 +84,19 @@ export class GameScene extends Phaser.Scene {
     const vw = w / zoom + 120, vh = h / zoom + 120;
     const cover = Math.max(vw / this.sky.texture.getSourceImage().width, vh / this.sky.texture.getSourceImage().height);
     this.sky.setScale(cover).setPosition(w / (2 * zoom), h / (2 * zoom));
+    this.skyWash?.setPosition(w/(2*zoom),h/(2*zoom)).setDisplaySize(vw,vh);
+    this.horizonGlow?.setPosition(w/(2*zoom),h*.78/zoom).setDisplaySize(vw,vh*.44);
+  }
+
+  updateBackground() {
+    const totalRise = Math.max(1,this.course.startAltitudeY-this.course.summit.y);
+    const ratio = Phaser.Math.Clamp((this.course.startAltitudeY-this.player.y)/totalRise,0,1);
+    if (Math.abs(ratio-(this.lastSkyRatio ?? -1)) < .002) return;
+    this.lastSkyRatio = ratio;
+    const sky = sampleSky(ratio);
+    this.sky.setTint(sky.tint);
+    this.skyWash.setFillStyle(sky.wash,.08+.08*ratio);
+    this.horizonGlow.setFillStyle(sky.horizon,.13+.07*ratio);
   }
 
   makeFallbackTexture(asset) {
@@ -294,6 +310,8 @@ export class GameScene extends Phaser.Scene {
         Phaser.Physics.Matter.Matter.Body.setAngle(sprite.body,(obj.angle||0)+time*.001*obj.behavior.speed);
       }
     }
+
+    this.updateBackground();
 
     this.playerName.setPosition(this.player.x,this.player.y+44);
     const motion = vy < -1 ? 'jump' : vy > 2 ? 'fall' : Math.abs(nextVx)>1 ? 'run' : 'idle';

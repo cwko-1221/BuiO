@@ -30,7 +30,16 @@ function selectChunks(seed) {
   const rnd = mulberry32(seed ^ 0x5f3759df);
   let selected = [];
   for (let attempt = 0; attempt < 500; attempt++) {
-    selected = ZONES.flatMap(zone => shuffled(CHUNKS.filter(c => c.zone === zone), rnd).slice(0, 4));
+    selected = ZONES.flatMap(zone => {
+      const pool = CHUNKS.filter(c => c.zone === zone);
+      if (zone === 'castle') {
+        const opener = pool.find(c => c.id === 'castle-gentle-start');
+        const second = shuffled(pool.filter(c => c !== opener && c.difficulty <= 2), rnd)[0];
+        const rest = shuffled(pool.filter(c => c !== opener && c !== second), rnd).slice(0, 2);
+        return [opener,second,...rest].sort((a,b)=>a.difficulty-b.difficulty);
+      }
+      return shuffled(pool, rnd).slice(0, 4).sort((a,b)=>a.difficulty-b.difficulty);
+    });
     const c = tagCounts(selected);
     if ((c.descent || 0) >= 5 && (c.traverse || 0) >= 5 && (c.dynamic || 0) >= 4 &&
         (c.bounce || 0) >= 4 && (c.branch || 0) >= 3 && ZONES.every(zone => selected.filter(x => x.zone === zone).some(x => x.tags.includes('recovery')))) {
@@ -73,6 +82,7 @@ export function buildCourse(seed) {
     const instance = {
       id: `${chunk.id}-${slot}`,
       chunkId: chunk.id, zone: chunk.zone, zoneName: ZONE_NAMES[chunk.zone], slot,
+      difficulty: chunk.difficulty,
       origin, mirror, bounds: { x: origin.x, y: origin.y, w: chunk.size.w, h: chunk.size.h },
       recoveryY: origin.y + chunk.recoveryBounds.y
     };
@@ -86,6 +96,7 @@ export function buildCourse(seed) {
         ...obj,
         id: `${instance.id}-${objects.length}`,
         zone: chunk.zone,
+        difficulty: chunk.difficulty, courseSlot: slot,
         x: origin.x + txX(obj.x, mirror), y: origin.y + obj.y,
         angle: (obj.angle || 0) * (mirror ? -1 : 1),
         mirror,
