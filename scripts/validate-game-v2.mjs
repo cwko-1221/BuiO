@@ -2,7 +2,7 @@ import { ASSETS } from '../game-app/public/js/v2/assets.js';
 import { CHUNKS } from '../game-app/public/js/v2/chunks.js';
 import { buildCourse, validateCourse } from '../game-app/public/js/v2/course.js';
 import { ASSET_GEOMETRY } from '../game-app/public/js/v2/asset-geometry.js';
-import { fittedSize } from '../game-app/public/js/v2/colliders.js';
+import { alphaBounds, fittedSize } from '../game-app/public/js/v2/colliders.js';
 import { SKY_BANDS, sampleSky } from '../game-app/public/js/v2/background.js';
 
 const failures = [];
@@ -13,6 +13,10 @@ let minAssets = Infinity;
 
 if (ASSETS.length !== 179) failures.push(`asset catalog expected 179, got ${ASSETS.length}`);
 if (CHUNKS.length !== 48) failures.push(`chunk library expected 48, got ${CHUNKS.length}`);
+for (const chunk of CHUNKS) {
+  if (chunk.objects.filter(object=>object.role==='support').length<6) failures.push(`${chunk.id}: fewer than 6 readable support surfaces`);
+  if (chunk.objects.filter(object=>object.role==='stacked').length<2) failures.push(`${chunk.id}: fewer than 2 stacked scene objects`);
+}
 if (SKY_BANDS.length !== 6) failures.push(`background expected 6 height bands, got ${SKY_BANDS.length}`);
 for (let i=1;i<SKY_BANDS.length;i++) if (SKY_BANDS[i].at <= SKY_BANDS[i-1].at) failures.push('background height bands are not ordered');
 if (new Set(SKY_BANDS.map(b=>sampleSky(b.at).wash)).size !== 6) failures.push('background height bands are not visually distinct');
@@ -42,6 +46,16 @@ for (let seed = 1; seed <= 500; seed++) {
     const expectedWidth = object.difficulty <= 1 ? 120 : object.difficulty <= 2 ? 88 : 72;
     if (size.w < expectedWidth-.01) failures.push(`seed ${seed * 7919}: ${object.assetId} is narrower than difficulty ${object.difficulty} foothold`);
     if (Math.abs(size.w / size.h - geometry.aspect) > .001) failures.push(`seed ${seed * 7919}: ${object.assetId} placement distorts aspect`);
+    if (object.role==='stacked') {
+      const support=course.objects.find(candidate=>candidate.id===object.stackedOn);
+      if (!support) failures.push(`seed ${seed * 7919}: ${object.assetId} is not placed on a support`);
+      else {
+        const objectBounds=alphaBounds(object.assetId,size);
+        const supportBounds=alphaBounds(support.assetId,fittedSize(support));
+        const gap=Math.abs((object.y+objectBounds.maxY)-(support.y+supportBounds.minY));
+        if (gap>3.1) failures.push(`seed ${seed * 7919}: ${object.assetId} floats ${gap.toFixed(1)}px above its support`);
+      }
+    }
   }
   const repeat = buildCourse(seed * 7919);
   if (repeat.courseHash !== course.courseHash) failures.push(`seed ${seed * 7919}: non-deterministic course hash`);
@@ -59,6 +73,8 @@ else {
     if(Math.abs(topB-topA)>112)failures.push(`beginner opening step ${i} is too high (${Math.abs(topB-topA).toFixed(1)})`);
   }
 }
+const openingGround=beginner?.objects.slice(0,3).map(object=>object.assetId) || [];
+if (new Set(openingGround).size!==1) failures.push('beginner opening does not reuse one continuous ground style');
 
 if (hashes.size < 450) failures.push(`course diversity too low: ${hashes.size}/500 unique hashes`);
 if (failures.length) {

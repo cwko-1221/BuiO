@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module';
 import { ASSET_BY_ID } from '../game-app/public/js/v2/assets.js';
-import { createAlphaBody, fittedSize } from '../game-app/public/js/v2/colliders.js';
+import { ASSET_GEOMETRY } from '../game-app/public/js/v2/asset-geometry.js';
+import { alphaBounds, createAlphaBody, fittedSize } from '../game-app/public/js/v2/colliders.js';
 import { createPlayerCompound, wakePlayer } from '../game-app/public/js/v2/playerPhysics.js';
 
 const require = createRequire(import.meta.url);
@@ -21,9 +22,33 @@ for (const assetId of ASSET_BY_ID.keys()) {
   const object = makeObject(assetId);
   const size = fittedSize(object);
   const body = createAlphaBody(Matter, object, size);
+  const predictedBounds=alphaBounds(assetId,size);
   if (!Number.isFinite(body.position.x + body.position.y + body.area)) failures.push(`${assetId}: invalid body numbers`);
   if (body.parts.length < 2) failures.push(`${assetId}: missing compound parts`);
-  if (body.bounds.max.x - body.bounds.min.x > size.w + 3 || body.bounds.max.y - body.bounds.min.y > size.h + 3) failures.push(`${assetId}: collider exceeds visible sprite`);
+  if (Math.abs((body.bounds.minX ?? body.bounds.min.x)-(body.position.x+predictedBounds.minX))>.1 ||
+      Math.abs((body.bounds.maxX ?? body.bounds.max.x)-(body.position.x+predictedBounds.maxX))>.1 ||
+      Math.abs((body.bounds.minY ?? body.bounds.min.y)-(body.position.y+predictedBounds.minY))>.1 ||
+      Math.abs((body.bounds.maxY ?? body.bounds.max.y)-(body.position.y+predictedBounds.maxY))>.1) {
+    failures.push(`${assetId}: authored alpha bounds do not match Matter bounds`);
+  }
+  const geometryParts = ASSET_GEOMETRY[assetId]?.parts || [{ x:.5, y:.5, w:1, h:1 }];
+  const originX = body.render.sprite.xOffset + body.centerOffset.x / size.w;
+  const originY = body.render.sprite.yOffset + body.centerOffset.y / size.h;
+  const visualLeft = body.position.x - originX * size.w;
+  const visualTop = body.position.y - originY * size.h;
+  body.parts.slice(1).forEach((part, index) => {
+    const source = geometryParts[index];
+    const expectedX = visualLeft + source.x * size.w;
+    const expectedY = visualTop + source.y * size.h;
+    if (Math.abs(part.position.x - expectedX) > .05 || Math.abs(part.position.y - expectedY) > .05) {
+      failures.push(`${assetId}: collision part ${index} is detached from the sprite`);
+    }
+  });
+  const tolerance = 2;
+  if (body.bounds.min.x < visualLeft - tolerance || body.bounds.max.x > visualLeft + size.w + tolerance ||
+      body.bounds.min.y < visualTop - tolerance || body.bounds.max.y > visualTop + size.h + tolerance) {
+    failures.push(`${assetId}: collider exceeds visible sprite`);
+  }
 }
 
 {
@@ -60,4 +85,4 @@ if (failures.length) {
   failures.slice(0,20).forEach(failure => console.error(`- ${failure}`));
   process.exit(1);
 }
-console.log(`Game physics test passed: ${ASSET_BY_ID.size} alpha compound bodies, foot sensor landing, horizontal glide, and question-resume wake.`);
+console.log(`Game physics test passed: ${ASSET_BY_ID.size} sprite-aligned alpha compound bodies, foot sensor landing, horizontal glide, and question-resume wake.`);

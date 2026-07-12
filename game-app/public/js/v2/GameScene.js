@@ -149,7 +149,8 @@ export class GameScene extends Phaser.Scene {
   createCourseObject(obj) {
     const texture = ATLAS_INDEX[obj.assetId];
     const size = fittedSize(obj);
-    const sprite = this.add.image(obj.x, obj.y, texture?.key || obj.assetId, texture?.frame || null).setDisplaySize(size.w, size.h).setDepth(10);
+    const depth = obj.role === 'stacked' ? 14 : obj.role === 'support' ? 10 : 12;
+    const sprite = this.add.image(obj.x, obj.y, texture?.key || obj.assetId, texture?.frame || null).setDisplaySize(size.w, size.h).setDepth(depth);
     const body = createAlphaBody(Phaser.Physics.Matter.Matter, obj, size);
     this.matter.add.gameObject(sprite, body);
     sprite.setStatic(true).setRotation(obj.angle || 0);

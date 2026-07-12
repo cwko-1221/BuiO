@@ -1,5 +1,6 @@
 import { CHUNKS, CHUNK_SIZE } from './chunks.js';
 import { ASSET_BY_ID, ZONES, ZONE_NAMES } from './assets.js';
+import { alphaBounds, fittedSize } from './colliders.js';
 
 function mulberry32(seed) {
   let a = seed >>> 0;
@@ -51,6 +52,24 @@ function selectChunks(seed) {
 
 function txX(x, mirror) { return mirror ? CHUNK_SIZE.w - x : x; }
 
+function snapStackedProps(instanceObjects) {
+  const supports=instanceObjects.filter(object=>object.role==='support' && object.behavior.type==='static');
+  for (const object of instanceObjects.filter(object=>object.role==='stacked')) {
+    const size=fittedSize(object), bounds=alphaBounds(object.assetId,size);
+    const left=object.x+bounds.minX, right=object.x+bounds.maxX;
+    const candidates=supports.map(support=>{
+      const supportSize=fittedSize(support), supportBounds=alphaBounds(support.assetId,supportSize);
+      const overlap=Math.min(right,support.x+supportBounds.maxX)-Math.max(left,support.x+supportBounds.minX);
+      return { support, supportBounds, overlap, distance:(support.y+supportBounds.minY)-(object.y+bounds.maxY) };
+    }).filter(candidate=>candidate.overlap>Math.min(28,(right-left)*.25) && candidate.support.y>object.y)
+      .sort((a,b)=>Math.abs(a.distance)-Math.abs(b.distance));
+    const target=candidates[0];
+    if (!target) continue;
+    object.y=target.support.y+target.supportBounds.minY-bounds.maxY+3;
+    object.stackedOn=target.support.id;
+  }
+}
+
 export function buildCourse(seed) {
   const rnd = mulberry32(seed >>> 0);
   const selected = selectChunks(seed);
@@ -88,11 +107,12 @@ export function buildCourse(seed) {
     };
     instances.push(instance);
 
+    const instanceObjects=[];
     for (const obj of chunk.objects) {
       const asset = ASSET_BY_ID.get(obj.assetId);
       if (!asset) continue;
       usedAssets.add(obj.assetId);
-      objects.push({
+      const courseObject={
         ...obj,
         id: `${instance.id}-${objects.length}`,
         zone: chunk.zone,
@@ -101,8 +121,11 @@ export function buildCourse(seed) {
         angle: (obj.angle || 0) * (mirror ? -1 : 1),
         mirror,
         asset
-      });
+      };
+      objects.push(courseObject);
+      instanceObjects.push(courseObject);
     }
+    snapStackedProps(instanceObjects);
 
     for (const sensor of chunk.progressSensors) sensors.push({
       id: `${instance.id}-p${sensor.progress}`,
@@ -151,12 +174,17 @@ export function validateCourse(course) {
   const irregular = course.objects.length - plain;
   if (plain / course.objects.length > .25) errors.push(`plain rectangles ${(plain/course.objects.length*100).toFixed(1)}%`);
   if (irregular / course.objects.length < .65) errors.push(`irregular bodies ${(irregular/course.objects.length*100).toFixed(1)}%`);
+  const stacked=course.objects.filter(object=>object.role==='stacked');
+  const reusedInstances=course.objects.length-course.usedAssets.length;
+  if (stacked.some(object=>!object.stackedOn)) errors.push('stacked scenery is missing a physical support');
+  if (reusedInstances<course.objects.length*.4) errors.push(`object reuse too low (${reusedInstances})`);
   for (let i = 1; i < course.instances.length; i++) {
     const a = course.instances[i - 1], b = course.instances[i];
     if (Math.abs((a.origin.y - b.origin.y) - 550) > 2) errors.push(`chunk ${i} vertical socket mismatch`);
   }
   return { ok: errors.length === 0, errors, stats: {
     chunks: course.instances.length, objects: course.objects.length, assets: course.usedAssets.length,
+    stacked: stacked.length, reusedInstances,
     plainRectPct: Math.round(plain / course.objects.length * 100), irregularPct: Math.round(irregular / course.objects.length * 100),
     tags: course.tagCounts, hash: course.courseHash
   }};

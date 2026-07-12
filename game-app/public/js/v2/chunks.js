@@ -1,15 +1,14 @@
 import { ZONES, ZONE_ASSET_IDS } from './assets.js';
 
 const W = 1200, H = 760;
-const globalMechanics = ['crate','barrel','plank','stone-slab','rope-bridge','trampoline','spring-pad','conveyor','seesaw','rotating-beam','moving-lift','cloud-pad','basketball','beach-ball','balloons','fan','arrow-sign'];
 
-const platform = (assetId, x, y, w, h, extra = {}) => ({ assetId, x, y, w, h, angle: 0, behavior: { type: 'static' }, ...extra });
+const platform = (assetId, x, y, w, h, extra = {}) => ({ assetId, x, y, w, h, angle: 0, role: 'route', behavior: { type: 'static' }, ...extra });
 const moving = (assetId, x, y, w, h, dx, dy, speed = .8) => platform(assetId, x, y, w, h, { behavior: { type: 'move', dx, dy, speed } });
 const rotating = (assetId, x, y, w, h, speed = .45) => platform(assetId, x, y, w, h, { behavior: { type: 'rotate', speed } });
 const bounce = (assetId, x, y, w, h, power = 14) => platform(assetId, x, y, w, h, { behavior: { type: 'bounce', power } });
-const conveyor = (x, y, w, speed = 1.8) => platform('conveyor', x, y, w, 48, { behavior: { type: 'conveyor', speed } });
+const conveyor = (x, y, w, speed = 1.8) => platform('conveyor', x, y, w, 48, { role:'support', behavior: { type: 'conveyor', speed } });
 const oneWay = (assetId, x, y, w, h, angle = 0) => platform(assetId, x, y, w, h, {
-  angle,
+  angle, role:'support',
   bodyOverride: { type: Math.abs([...assetId].reduce((n,c)=>n+c.charCodeAt(0),0)) % 3 ? 'trapezoid' : 'polygon', oneWay: true, material: 'solid' }
 });
 
@@ -18,90 +17,109 @@ function themed(zone, index) {
   return ids[index % ids.length];
 }
 
+const zoneSurfaces = {
+  castle: { long:'castle-brick-long', medium:'castle-brick-medium', step:'castle-brick-step', thick:'castle-brick-thick', corner:'castle-brick-corner' },
+  market: { long:'picnic-table', medium:'carpet-rack', step:'barrel-stack', thick:'market-stall', corner:'market-wagon' },
+  forest: { long:'log-bridge', medium:'fallen-tree', step:'tree-stump', thick:'hollow-tree', corner:'root-ramp' },
+  farm: { long:'wood-pallet', medium:'barn-roof', step:'hay-bale', thick:'farm-shed', corner:'hay-cart' },
+  snow: { long:'ice-bridge', medium:'cabin-roof', step:'frozen-log', thick:'snow-mound', corner:'ice-arch' },
+  factory: { long:'steel-beam', medium:'factory-conveyor', step:'oil-drum', thick:'platform-lift', corner:'elbow-pipe' }
+};
+
+const surface = (zone, kind, x, y, w, h, extra = {}) => platform(zoneSurfaces[zone][kind], x, y, w, h, { role:'support', ...extra });
+const prop = (zone, index, x, y, w, h, extra = {}) => platform(themed(zone,index),x,y,w,h,{ role:'stacked', ...extra });
+
 const layouts = [
   {
     name: 'gentle-start', difficulty: 1, tags: ['traverse','recovery','grounded','easy'],
     build: z => [
-      platform('castle-brick-long',110,660,360,70), platform('castle-brick-long',430,660,360,70), platform('castle-brick-long',750,660,360,70),
-      platform('castle-brick-corner',1010,610,340,120), platform('castle-brick-medium',800,485,320,100),
-      platform('castle-brick-step',570,425,300,150), platform('castle-brick-long',760,255,320,90),
-      platform('castle-brick-medium',970,160,320,100), platform('castle-brick-long',1040,70,280,80),
-      platform('castle-brick-thick',300,735,230,120)
+      surface(z,'long',100,660,360,76), surface(z,'long',410,660,360,76), surface(z,'long',720,660,360,76),
+      surface(z,'corner',980,620,330,130), surface(z,'medium',850,500,330,104),
+      surface(z,'step',610,445,310,160), surface(z,'long',750,280,330,86),
+      surface(z,'medium',970,185,320,100), surface(z,'long',1040,70,300,82),
+      prop(z,8,180,590,120,100), prop(z,10,430,590,120,100), prop(z,13,885,420,135,105),
+      prop(z,4,1040,555,105,90), platform('arrow-sign',705,595,90,90,{role:'stacked'})
     ]
   },
   {
     name: 'down-and-around', difficulty: 2, tags: ['descent','underpass','recovery','traverse'],
     build: z => [
-      platform(themed(z,8),110,570,220,78), oneWay(themed(z,9),330,650,180,54),
-      oneWay(themed(z,10),560,700,180,54,.08), platform(themed(z,11),810,620,250,94),
-      oneWay(themed(z,12),1010,500,160,52), platform(themed(z,13),790,390,180,96),
-      oneWay(themed(z,14),520,310,190,50,-.08), platform(themed(z,15),270,210,220,92),
-      oneWay(themed(z,16),570,120,180,50), oneWay(themed(z,17),950,70,210,54)
+      surface(z,'long',120,590,300,74), surface(z,'medium',390,650,230,70),
+      surface(z,'medium',650,700,230,70), surface(z,'thick',920,630,260,120),
+      surface(z,'step',1060,500,180,120), oneWay(zoneSurfaces[z].long,790,400,300,62),
+      surface(z,'corner',520,330,230,115), oneWay(zoneSurfaces[z].medium,270,250,240,62,-.06),
+      surface(z,'step',520,150,190,120), surface(z,'long',930,75,320,72),
+      prop(z,11,930,535,120,100), prop(z,14,525,260,110,90), prop(z,18,270,180,100,84),
+      platform('arrow-sign',700,630,84,84,{role:'stacked',angle:Math.PI})
     ]
   },
   {
     name: 'long-traverse', difficulty: 2, tags: ['traverse','branch','recovery'],
     build: z => [
-      platform(themed(z,18),90,620,190,100), conveyor(300,560,260,1.7),
-      platform(themed(z,19),600,520,170,120), oneWay(themed(z,20),820,470,210,58,.1),
-      platform(themed(z,21),1040,390,210,110), oneWay('rope-bridge',680,310,410,36),
-      platform(themed(z,22),350,250,210,104), oneWay(themed(z,23),100,160,170,56),
-      oneWay(themed(z,0),420,95,190,54), oneWay(themed(z,1),930,75,240,56),
-      oneWay('crate',470,690,160,50), oneWay('barrel',770,690,150,56)
+      surface(z,'long',120,620,310,76), surface(z,'long',405,620,310,76), conveyor(670,595,250,1.5),
+      surface(z,'thick',900,540,230,120), surface(z,'step',1080,430,180,120),
+      oneWay('rope-bridge',790,340,390,38), surface(z,'medium',460,300,260,72),
+      surface(z,'corner',220,220,210,110), oneWay(zoneSurfaces[z].medium,500,125,250,60),
+      surface(z,'long',930,72,320,70), prop(z,2,405,545,110,95), prop(z,6,900,445,120,100),
+      prop(z,15,220,145,105,90), platform('barrel',610,680,115,90), platform('barrel',720,680,115,90)
     ]
   },
   {
     name: 'moving-machines', difficulty: 3, tags: ['dynamic','traverse','recovery'],
     build: z => [
-      platform(themed(z,2),100,620,190,90), moving('moving-lift',330,560,170,48,180,0,.75),
-      rotating('rotating-beam',600,480,250,34,.5), moving(themed(z,3),880,410,170,68,0,-150,.65),
-      platform(themed(z,4),1030,300,200,100), rotating('seesaw',760,250,260,38,-.38),
-      moving(themed(z,5),460,180,170,64,-150,0,.8), platform(themed(z,6),180,100,210,96),
-      oneWay(themed(z,7),930,70,220,52), oneWay('stone-slab',450,690,280,48)
+      surface(z,'long',120,620,300,74), moving('moving-lift',380,560,190,48,150,0,.65),
+      surface(z,'thick',630,510,210,118), rotating('rotating-beam',850,450,250,36,.42),
+      surface(z,'step',1060,350,180,118), moving('moving-lift',820,260,180,48,-150,0,.7),
+      surface(z,'medium',520,220,250,72), rotating('seesaw',280,170,250,38,-.34),
+      surface(z,'long',930,72,320,70), oneWay('stone-slab',530,690,300,48),
+      prop(z,3,630,415,110,90), prop(z,5,520,145,110,90), platform('fan',1060,260,100,100,{role:'stacked'})
     ]
   },
   {
     name: 'bounce-chain', difficulty: 3, tags: ['bounce','descent','recovery'],
     build: z => [
-      platform(themed(z,8),100,620,210,90), bounce('trampoline',330,675,150,38,15),
-      platform(themed(z,9),530,520,130,105), bounce('basketball',720,570,92,92,13),
-      bounce('beach-ball',910,500,112,112,14), platform(themed(z,10),1080,380,170,100),
-      bounce('spring-pad',850,350,130,34,16), oneWay(themed(z,11),620,210,180,56),
-      bounce('cloud-pad',390,240,180,48,14), platform(themed(z,12),190,120,190,98),
-      oneWay(themed(z,13),930,70,220,54), oneWay('crate',560,700,180,50)
+      surface(z,'long',120,620,300,74), bounce('trampoline',350,665,170,40,14),
+      surface(z,'thick',540,540,190,118), bounce('basketball',720,570,108,108,13),
+      bounce('basketball',870,500,108,108,13), bounce('beach-ball',1020,430,125,125,14),
+      surface(z,'medium',1060,320,220,70), bounce('spring-pad',820,310,145,36,15),
+      oneWay(zoneSurfaces[z].medium,590,225,230,58), bounce('cloud-pad',350,245,190,50,14),
+      surface(z,'corner',150,150,210,110), surface(z,'long',930,72,320,70),
+      prop(z,9,540,445,105,90), prop(z,12,150,75,100,85)
     ]
   },
   {
     name: 'split-routes', difficulty: 3, tags: ['branch','dynamic','recovery'],
     build: z => [
-      platform(themed(z,14),100,620,220,94), oneWay(themed(z,15),320,520,170,52),
-      moving('moving-lift',540,430,150,46,0,-130,.85), oneWay(themed(z,16),780,350,190,54),
-      platform(themed(z,17),1040,270,220,100), oneWay(themed(z,18),850,170,170,52),
-      oneWay(themed(z,19),1040,75,200,52), bounce('spring-pad',300,610,120,32,15),
-      oneWay(themed(z,20),470,330,160,48,-.1), rotating('rotating-beam',260,230,220,32,.45),
-      platform(themed(z,21),100,120,180,90), oneWay('rope-bridge',540,690,440,34)
+      surface(z,'long',120,620,300,74), surface(z,'step',360,540,180,118),
+      moving('moving-lift',590,455,170,46,0,-115,.72), surface(z,'medium',820,370,250,68),
+      surface(z,'thick',1050,280,220,120), oneWay(zoneSurfaces[z].medium,850,180,220,58),
+      surface(z,'long',1030,72,300,70), bounce('spring-pad',300,610,130,34,14),
+      oneWay('rope-bridge',540,690,420,36), oneWay(zoneSurfaces[z].medium,510,325,220,58,-.08),
+      rotating('rotating-beam',270,245,230,34,.4), surface(z,'corner',120,150,200,110),
+      prop(z,17,1050,185,110,90), prop(z,20,120,75,100,84)
     ]
   },
   {
     name: 'underpass-return', difficulty: 3, tags: ['descent','underpass','traverse','recovery'],
     build: z => [
-      platform(themed(z,22),100,590,210,92), oneWay(themed(z,23),330,670,170,54),
-      platform(themed(z,0),570,705,210,90), oneWay('plank',790,610,220,34,.12),
-      platform(themed(z,1),1040,540,220,96), oneWay(themed(z,2),820,420,170,52),
-      platform(themed(z,3),580,330,210,100), oneWay(themed(z,4),320,245,170,52),
-      platform(themed(z,5),100,160,190,94), moving('moving-lift',500,125,150,44,180,0,.7),
-      oneWay(themed(z,6),930,70,230,54)
+      surface(z,'long',120,590,300,74), surface(z,'medium',380,680,240,68),
+      surface(z,'thick',650,705,230,118), oneWay('plank',860,620,240,36,.1),
+      surface(z,'corner',1060,540,210,110), surface(z,'step',840,430,180,118),
+      surface(z,'medium',590,350,250,68), oneWay(zoneSurfaces[z].medium,340,270,220,58),
+      surface(z,'thick',130,190,210,118), moving('moving-lift',500,135,170,46,170,0,.62),
+      surface(z,'long',930,72,320,70), prop(z,0,650,610,110,90), prop(z,3,130,95,105,88)
     ]
   },
   {
     name: 'freeform-finale', difficulty: 4, tags: ['dynamic','bounce','branch','descent','recovery'],
     build: z => [
-      platform(themed(z,7),100,620,210,100), rotating('seesaw',330,650,230,36,.32),
-      bounce('spring-pad',530,620,120,34,15), platform(themed(z,8),700,490,180,118,{angle:-.1}),
-      moving(themed(z,9),940,430,160,62,-140,0,.8), oneWay(themed(z,10),1070,310,170,52),
-      rotating('rotating-beam',820,240,240,32,-.5), bounce('cloud-pad',570,280,170,46,14),
-      platform(themed(z,11),350,180,180,105), oneWay(themed(z,12),100,100,180,52),
-      oneWay(themed(z,13),930,70,220,54), oneWay('rope-bridge',420,705,390,34)
+      surface(z,'long',120,620,300,74), rotating('seesaw',360,650,240,36,.3),
+      bounce('spring-pad',560,620,130,34,15), surface(z,'corner',720,500,200,112,{angle:-.08}),
+      moving('moving-lift',950,430,170,48,-130,0,.72), surface(z,'step',1080,320,170,115),
+      rotating('rotating-beam',830,245,240,34,-.44), bounce('cloud-pad',580,280,185,48,14),
+      surface(z,'thick',350,190,200,118), oneWay(zoneSurfaces[z].medium,120,110,210,58),
+      surface(z,'long',930,72,320,70), oneWay('rope-bridge',430,705,390,36),
+      prop(z,7,720,405,105,88), prop(z,11,350,95,105,88)
     ]
   }
 ];
