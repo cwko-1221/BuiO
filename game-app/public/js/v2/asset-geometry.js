@@ -5586,6 +5586,132 @@ export const ASSET_GEOMETRY={
       }
     ]
   },
+  "flat-brick-a": {
+    "source": {
+      "w": 128,
+      "h": 80
+    },
+    "aspect": 1.6,
+    "parts": [
+      {
+        "x": 0.0078125,
+        "y": 0.5,
+        "w": 0.016625,
+        "h": 0.953
+      },
+      {
+        "x": 0.5078125,
+        "y": 0.5,
+        "w": 0.985375,
+        "h": 1
+      }
+    ]
+  },
+  "flat-brick-b": {
+    "source": {
+      "w": 128,
+      "h": 80
+    },
+    "aspect": 1.6,
+    "parts": [
+      {
+        "x": 0.5,
+        "y": 0.5,
+        "w": 1,
+        "h": 1
+      }
+    ]
+  },
+  "flat-brick-c": {
+    "source": {
+      "w": 128,
+      "h": 80
+    },
+    "aspect": 1.6,
+    "parts": [
+      {
+        "x": 0.5,
+        "y": 0.5,
+        "w": 1,
+        "h": 1
+      }
+    ]
+  },
+  "flat-brick-strip-2": {
+    "source": {
+      "w": 128,
+      "h": 40
+    },
+    "aspect": 3.2,
+    "parts": [
+      {
+        "x": 0.5,
+        "y": 0.5,
+        "w": 1,
+        "h": 1
+      }
+    ]
+  },
+  "flat-brick-strip-4": {
+    "source": {
+      "w": 128,
+      "h": 20
+    },
+    "aspect": 6.4,
+    "parts": [
+      {
+        "x": 0.5,
+        "y": 0.5,
+        "w": 1,
+        "h": 1
+      }
+    ]
+  },
+  "flat-brick-wall-2": {
+    "source": {
+      "w": 128,
+      "h": 40
+    },
+    "aspect": 3.2,
+    "parts": [
+      {
+        "x": 0.5,
+        "y": 0.5,
+        "w": 1,
+        "h": 1
+      }
+    ]
+  },
+  "flat-brick-pillar-4": {
+    "source": {
+      "w": 51,
+      "h": 128
+    },
+    "aspect": 0.3984375,
+    "parts": [
+      {
+        "x": 0.5,
+        "y": 0.5,
+        "w": 1,
+        "h": 1
+      }
+    ]
+  },
+  "flat-brick-wall-4": {
+    "source": {
+      "w": 128,
+      "h": 80
+    },
+    "aspect": 1.6,
+    "parts": [
+      {
+        "x": 0.5,
+        "y": 0.5,
+        "w": 1,
+        "h": 1
+      }
+    ]
+  },
   "battlement": {
     "source": {
       "w": 128,

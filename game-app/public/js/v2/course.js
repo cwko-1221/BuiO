@@ -1,190 +1,110 @@
-import { CHUNKS, CHUNK_SIZE } from './chunks.js';
 import { ASSET_BY_ID, ZONES, ZONE_NAMES } from './assets.js';
+import { ASSET_GEOMETRY } from './asset-geometry.js';
 import { alphaBounds, fittedSize } from './colliders.js';
+import { FIXED_MAP, MAP_VERSION } from './fixed-map.js';
 
-function mulberry32(seed) {
-  let a = seed >>> 0;
-  return () => {
-    a |= 0; a = (a + 0x6D2B79F5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
+function hashString(value) {
+  let h=2166136261;
+  for (let i=0;i<value.length;i++) h=Math.imul(h^value.charCodeAt(i),16777619);
+  return (h>>>0).toString(16).padStart(8,'0');
 }
 
-function shuffled(items, rnd) {
-  const out = items.slice();
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rnd() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
-
-function tagCounts(chunks) {
-  const counts = {};
-  for (const chunk of chunks) for (const tag of chunk.tags) counts[tag] = (counts[tag] || 0) + 1;
-  return counts;
-}
-
-function selectChunks(seed) {
-  const rnd = mulberry32(seed ^ 0x5f3759df);
-  let selected = [];
-  for (let attempt = 0; attempt < 500; attempt++) {
-    selected = ZONES.flatMap(zone => {
-      const pool = CHUNKS.filter(c => c.zone === zone);
-      if (zone === 'castle') {
-        const opener = pool.find(c => c.id === 'castle-gentle-start');
-        const second = shuffled(pool.filter(c => c !== opener && c.difficulty <= 2), rnd)[0];
-        const rest = shuffled(pool.filter(c => c !== opener && c !== second), rnd).slice(0, 2);
-        return [opener,second,...rest].sort((a,b)=>a.difficulty-b.difficulty);
-      }
-      return shuffled(pool, rnd).slice(0, 4).sort((a,b)=>a.difficulty-b.difficulty);
-    });
-    const c = tagCounts(selected);
-    if ((c.descent || 0) >= 5 && (c.traverse || 0) >= 5 && (c.dynamic || 0) >= 4 &&
-        (c.bounce || 0) >= 4 && (c.branch || 0) >= 3 && ZONES.every(zone => selected.filter(x => x.zone === zone).some(x => x.tags.includes('recovery')))) {
-      return selected;
-    }
-  }
-  return selected;
-}
-
-function txX(x, mirror) { return mirror ? CHUNK_SIZE.w - x : x; }
-
-function snapStackedProps(instanceObjects) {
-  const supports=instanceObjects.filter(object=>object.role==='support' && object.behavior.type==='static');
-  for (const object of instanceObjects.filter(object=>object.role==='stacked')) {
-    const size=fittedSize(object), bounds=alphaBounds(object.assetId,size);
-    const left=object.x+bounds.minX, right=object.x+bounds.maxX;
-    const candidates=supports.map(support=>{
-      const supportSize=fittedSize(support), supportBounds=alphaBounds(support.assetId,supportSize);
-      const overlap=Math.min(right,support.x+supportBounds.maxX)-Math.max(left,support.x+supportBounds.minX);
-      return { support, supportBounds, overlap, distance:(support.y+supportBounds.minY)-(object.y+bounds.maxY) };
-    }).filter(candidate=>candidate.overlap>Math.min(28,(right-left)*.25) && candidate.support.y>object.y)
-      .sort((a,b)=>Math.abs(a.distance)-Math.abs(b.distance));
-    const target=candidates[0];
-    if (!target) continue;
-    object.y=target.support.y+target.supportBounds.minY-bounds.maxY+3;
-    object.stackedOn=target.support.id;
+function snapObstacles(objects) {
+  const byId=new Map(objects.map(object=>[object.id,object]));
+  for (const object of objects.filter(object=>object.role==='obstacle' && object.supportId)) {
+    const support=byId.get(object.supportId);
+    if (!support) continue;
+    const size=fittedSize(object), supportSize=fittedSize(support);
+    const bounds=alphaBounds(object.assetId,size), supportBounds=alphaBounds(support.assetId,supportSize);
+    object.y=support.y+supportBounds.minY-bounds.maxY+1;
   }
 }
 
-export function buildCourse(seed) {
-  const selected = selectChunks(seed);
-  // Wide world: the route serpentines left and right as it climbs, so the
-  // camera sweeps horizontally instead of the course stacking in a column.
-  const world = { width: 6800, height: selected.length * 550 + 1250 };
-  const start = { x: 950, y: world.height - 520 };
-  let anchor = { ...start };
-  let travelDir = 1;
-  const instances = [];
-  const objects = [];
-  const sensors = [];
-  const checkpoints = [];
-  const usedAssets = new Set();
-
-  selected.forEach((chunk, slot) => {
-    // Serpentine: keep travelling one way until near the world edge, then
-    // turn around. Deterministic, so the stable map reads as a designed
-    // zig-zag ascent.
-    if (anchor.x > world.width - 1750) travelDir = -1;
-    else if (anchor.x < 1150) travelDir = 1;
-    const mirror = travelDir < 0;
-
-    const entryX = txX(chunk.entry.x, mirror);
-    const origin = { x: anchor.x - entryX, y: anchor.y - chunk.entry.y };
-    const exit = chunk.exits[0];
-    const exitWorld = { x: origin.x + txX(exit.x, mirror), y: origin.y + exit.y };
-
-    const instance = {
-      id: `${chunk.id}-${slot}`,
-      chunkId: chunk.id, zone: chunk.zone, zoneName: ZONE_NAMES[chunk.zone], slot,
-      difficulty: chunk.difficulty,
-      origin, mirror, bounds: { x: origin.x, y: origin.y, w: chunk.size.w, h: chunk.size.h },
-      recoveryY: origin.y + chunk.recoveryBounds.y
-    };
-    instances.push(instance);
-
-    const instanceObjects=[];
-    for (const obj of chunk.objects) {
-      const asset = ASSET_BY_ID.get(obj.assetId);
-      if (!asset) continue;
-      usedAssets.add(obj.assetId);
-      const courseObject={
-        ...obj,
-        id: `${instance.id}-${objects.length}`,
-        zone: chunk.zone,
-        difficulty: chunk.difficulty, courseSlot: slot,
-        x: origin.x + txX(obj.x, mirror), y: origin.y + obj.y,
-        angle: (obj.angle || 0) * (mirror ? -1 : 1),
-        mirror,
-        asset
-      };
-      objects.push(courseObject);
-      instanceObjects.push(courseObject);
-    }
-    snapStackedProps(instanceObjects);
-
-    for (const sensor of chunk.progressSensors) sensors.push({
-      id: `${instance.id}-p${sensor.progress}`,
-      x: origin.x + txX(sensor.x, mirror), y: origin.y + sensor.y,
-      progress: (slot + sensor.progress) / selected.length,
-      slot
-    });
-
-    if (slot % 4 === 0) checkpoints.push({
-      id: `${instance.id}-checkpoint`, x: anchor.x, y: anchor.y - 70,
-      progress: slot / selected.length, zone: chunk.zone, zoneName: ZONE_NAMES[chunk.zone]
-    });
-
-    anchor = exitWorld;
+// Compatibility entry point: seed is deliberately ignored. The server may
+// continue storing it, but every value returns this exact authored map.
+export function buildCourse(seed=0) {
+  const objects=FIXED_MAP.objects.map(source=>{
+    const asset=ASSET_BY_ID.get(source.assetId);
+    if (!asset) throw new Error(`Fixed map references missing asset ${source.assetId}`);
+    return {...source,asset,difficulty:source.zone==='factory'?4:source.zone==='snow'?3:2,behavior:{...(source.behavior||{type:'static'})}};
   });
-
-  const summit = { x: anchor.x, y: anchor.y - 90, progress: 1 };
-  usedAssets.add('summit-flag');
-  usedAssets.add('checkpoint-flag');
-
+  snapObstacles(objects);
+  const nodes=FIXED_MAP.nodes.map(node=>({...node}));
+  const nodeByAltitude=altitude=>nodes.filter(node=>node.route==='main').sort((a,b)=>Math.abs(a.altitude-altitude)-Math.abs(b.altitude-altitude))[0];
+  const sensors=FIXED_MAP.progressSensors.map(sensor=>({...sensor}));
+  const checkpoints=FIXED_MAP.checkpoints.map(source=>{
+    const node=nodeByAltitude(source.altitude);
+    const zone=FIXED_MAP.zones.find(item=>source.altitude>=item.min && source.altitude<=item.max)?.id || 'castle';
+    return {...source,x:node.x,y:node.y-12,progress:source.altitude/1000,zone,zoneName:ZONE_NAMES[zone]};
+  });
+  const instances=FIXED_MAP.zones.map((zone,index)=>({id:`fixed-zone-${zone.id}`,chunkId:`fixed-${zone.id}`,zone:zone.id,zoneName:ZONE_NAMES[zone.id],slot:index,difficulty:index+1,bounds:{x:0,y:FIXED_MAP.world.startY-zone.max*5,w:FIXED_MAP.world.width,h:(zone.max-zone.min)*5}}));
+  const transformText=objects.map(object=>`${object.id}:${object.assetId}:${object.x}:${object.y}:${object.w}:${object.h}:${object.angle}:${object.role}:${object.supportId||''}`).join('|');
+  const routeText=Object.values(FIXED_MAP.routes).flat().map(edge=>`${edge.type}:${edge.from}>${edge.to}`).join('|');
+  const colliderText=objects.filter(object=>object.role!=='decor').map(object=>`${object.id}:${JSON.stringify(ASSET_GEOMETRY[object.assetId]?.parts||[])}`).join('|');
+  const courseHash=hashString(`${MAP_VERSION}|${transformText}|${routeText}`);
+  const colliderHash=hashString(`${MAP_VERSION}|${colliderText}`);
   return {
-    seed, world, start, summit, instances, objects, sensors, checkpoints,
-    usedAssets: [...usedAssets],
-    tagCounts: tagCounts(selected),
-    stageCount: ZONES.length,
-    stages: ZONES.map(z => ZONE_NAMES[z]),
-    startAltitudeY: start.y,
-    courseHash: hashCourse(selected, objects)
+    seed, mapVersion:MAP_VERSION,
+    world:{width:FIXED_MAP.world.width,height:FIXED_MAP.world.height},
+    start:{...FIXED_MAP.start}, summit:{...FIXED_MAP.summit}, startAltitudeY:FIXED_MAP.start.y,
+    objects,nodes,routes:{main:FIXED_MAP.routes.main.map(edge=>({...edge})),shortcut:FIXED_MAP.routes.shortcut.map(edge=>({...edge})),recovery:FIXED_MAP.routes.recovery.map(edge=>({...edge}))},
+    sensors,checkpoints,instances,
+    recoveryBounds:FIXED_MAP.recoveryBounds.map(item=>({...item})), hazards:FIXED_MAP.hazards.map(item=>({...item})),
+    usedAssets:[...new Set([...objects.map(object=>object.assetId),'checkpoint-flag','summit-flag'])],
+    stageCount:ZONES.length,stages:ZONES.map(zone=>ZONE_NAMES[zone]),courseHash,colliderHash
   };
-}
-
-function hashCourse(chunks, objects) {
-  let h = 2166136261;
-  const s = chunks.map(c => c.id).join('|') + objects.map(o => `${o.assetId}:${Math.round(o.x)}:${Math.round(o.y)}:${o.angle}`).join('|');
-  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
-  return (h >>> 0).toString(16).padStart(8, '0');
 }
 
 export function validateCourse(course) {
-  const errors = [];
-  if (course.instances.length !== 24) errors.push(`expected 24 chunks, got ${course.instances.length}`);
-  for (const zone of ZONES) if (course.instances.filter(i => i.zone === zone).length !== 4) errors.push(`${zone} does not have 4 chunks`);
-  const required = { descent: 5, traverse: 5, dynamic: 4, bounce: 4, branch: 3 };
-  for (const [tag, minimum] of Object.entries(required)) if ((course.tagCounts[tag] || 0) < minimum) errors.push(`${tag} below ${minimum}`);
-  const plain = course.objects.filter(o => (o.bodyOverride?.type || o.asset.body.type) === 'rect' && !o.angle && o.behavior.type === 'static').length;
-  const irregular = course.objects.length - plain;
-  if (plain / course.objects.length > .25) errors.push(`plain rectangles ${(plain/course.objects.length*100).toFixed(1)}%`);
-  if (irregular / course.objects.length < .65) errors.push(`irregular bodies ${(irregular/course.objects.length*100).toFixed(1)}%`);
-  const stacked=course.objects.filter(object=>object.role==='stacked');
-  const reusedInstances=course.objects.length-course.usedAssets.length;
-  if (stacked.some(object=>!object.stackedOn)) errors.push('stacked scenery is missing a physical support');
-  if (reusedInstances<course.objects.length*.4) errors.push(`object reuse too low (${reusedInstances})`);
-  for (let i = 1; i < course.instances.length; i++) {
-    const a = course.instances[i - 1], b = course.instances[i];
-    if (Math.abs((a.origin.y - b.origin.y) - 550) > 2) errors.push(`chunk ${i} vertical socket mismatch`);
+  const errors=[];
+  if (course.mapVersion!==MAP_VERSION) errors.push('unexpected map version');
+  if (course.world.width!==5600 || course.world.height!==6200) errors.push('fixed world must be 5600x6200');
+  if (course.instances.length!==6) errors.push(`expected 6 authored zones, got ${course.instances.length}`);
+  if (course.checkpoints.map(item=>item.altitude).join(',')!=='0,210,274,448,573,704,820,930') errors.push('checkpoint altitudes changed');
+  const nodes=new Map(course.nodes.map(node=>[node.id,node]));
+  const objects=new Map(course.objects.map(object=>[object.id,object]));
+  for (const [name,edges] of Object.entries(course.routes)) for (const edge of edges) {
+    if (!nodes.has(edge.from)||!nodes.has(edge.to)) errors.push(`${name} edge references a missing node`);
   }
-  return { ok: errors.length === 0, errors, stats: {
-    chunks: course.instances.length, objects: course.objects.length, assets: course.usedAssets.length,
-    stacked: stacked.length, reusedInstances,
-    plainRectPct: Math.round(plain / course.objects.length * 100), irregularPct: Math.round(irregular / course.objects.length * 100),
-    tags: course.tagCounts, hash: course.courseHash
-  }};
+  let minMainMargin=1;
+  let mainDescents=0;
+  for (const edge of course.routes.main) {
+    const a=nodes.get(edge.from), b=nodes.get(edge.to);
+    if (!a||!b) continue;
+    if (b.altitude<a.altitude) mainDescents++;
+    const ao=objects.get(a.objectId), bo=objects.get(b.objectId);
+    const aw=fittedSize(ao).w, bw=fittedSize(bo).w;
+    const gap=Math.max(0,Math.abs(b.x-a.x)-(aw+bw)/2);
+    const rise=Math.max(0,a.y-b.y);
+    const horizontalMargin=1-gap/360;
+    const verticalMargin=1-rise/165;
+    const margin=Math.min(horizontalMargin,verticalMargin);
+    minMainMargin=Math.min(minMainMargin,margin);
+    if (margin<.18) errors.push(`main edge ${edge.from}>${edge.to} has only ${(margin*100).toFixed(1)}% margin`);
+  }
+  if (mainDescents<3) errors.push(`fixed route needs at least 3 deliberate descents, got ${mainDescents}`);
+  let minRecoveryMargin=1;
+  for (const edge of course.routes.recovery) {
+    const a=nodes.get(edge.from), b=nodes.get(edge.to);
+    if (!a||!b) continue;
+    const ao=objects.get(a.objectId), bo=objects.get(b.objectId);
+    const aw=fittedSize(ao).w, bw=fittedSize(bo).w;
+    const gap=Math.max(0,Math.abs(b.x-a.x)-(aw+bw)/2);
+    const rise=Math.max(0,a.y-b.y);
+    const margin=Math.min(1-gap/360,1-rise/165);
+    minRecoveryMargin=Math.min(minRecoveryMargin,margin);
+    if (margin<.18) errors.push(`recovery edge ${edge.from}>${edge.to} has only ${(margin*100).toFixed(1)}% margin`);
+  }
+  const obstacles=course.objects.filter(object=>object.role==='obstacle'&&object.supportId);
+  for (const object of obstacles) {
+    const support=objects.get(object.supportId);
+    if (!support) { errors.push(`${object.id} support missing`); continue; }
+    const bounds=alphaBounds(object.assetId,fittedSize(object));
+    const supportBounds=alphaBounds(support.assetId,fittedSize(support));
+    const gap=Math.abs((object.y+bounds.maxY)-(support.y+supportBounds.minY));
+    if (gap>2.1) errors.push(`${object.id} floats ${gap.toFixed(1)}px above support`);
+  }
+  if (course.objects.some(object=>object.role==='decor'&&object.supportId)) errors.push('decor must not own collision support');
+  if (course.hazards.length<3) errors.push('factory laser maze is missing');
+  return {ok:errors.length===0,errors,stats:{mapVersion:course.mapVersion,objects:course.objects.length,assets:course.usedAssets.length,nodes:course.nodes.length,mainEdges:course.routes.main.length,recoveryEdges:course.routes.recovery.length,obstacles:obstacles.length,mainDescents,minMainMarginPct:Math.round(minMainMargin*100),minRecoveryMarginPct:Math.round(minRecoveryMargin*100),hash:course.courseHash,colliderHash:course.colliderHash}};
 }

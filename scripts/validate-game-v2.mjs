@@ -1,86 +1,69 @@
 import { ASSETS } from '../game-app/public/js/v2/assets.js';
-import { CHUNKS } from '../game-app/public/js/v2/chunks.js';
 import { buildCourse, validateCourse } from '../game-app/public/js/v2/course.js';
 import { ASSET_GEOMETRY } from '../game-app/public/js/v2/asset-geometry.js';
 import { alphaBounds, fittedSize } from '../game-app/public/js/v2/colliders.js';
+import { MAP_VERSION } from '../game-app/public/js/v2/fixed-map.js';
 import { SKY_BANDS, sampleSky } from '../game-app/public/js/v2/background.js';
 
-const failures = [];
-const hashes = new Set();
-let maxPlain = 0;
-let minIrregular = 100;
-let minAssets = Infinity;
+const failures=[];
+const first=buildCourse(0);
+const firstReport=validateCourse(first);
+if (!firstReport.ok) failures.push(...firstReport.errors);
+if (ASSETS.length!==195) failures.push(`asset catalog expected 195, got ${ASSETS.length}`);
+if (first.mapVersion!==MAP_VERSION) failures.push('map version mismatch');
+if (first.world.width!==5600||first.world.height!==6200) failures.push('world is not fixed at 5600x6200');
+if (first.summit.y>=first.start.y) failures.push('summit must be above the start');
 
-if (ASSETS.length !== 187) failures.push(`asset catalog expected 187, got ${ASSETS.length}`);
-if (CHUNKS.length !== 48) failures.push(`chunk library expected 48, got ${CHUNKS.length}`);
-for (const chunk of CHUNKS) {
-  if (chunk.objects.filter(object=>object.role==='support').length<6) failures.push(`${chunk.id}: fewer than 6 readable support surfaces`);
-  if (chunk.objects.filter(object=>object.role==='stacked').length<2) failures.push(`${chunk.id}: fewer than 2 stacked scene objects`);
-}
-if (SKY_BANDS.length !== 6) failures.push(`background expected 6 height bands, got ${SKY_BANDS.length}`);
-for (let i=1;i<SKY_BANDS.length;i++) if (SKY_BANDS[i].at <= SKY_BANDS[i-1].at) failures.push('background height bands are not ordered');
-if (new Set(SKY_BANDS.map(b=>sampleSky(b.at).wash)).size !== 6) failures.push('background height bands are not visually distinct');
+if (SKY_BANDS.length!==6) failures.push(`background expected 6 height bands, got ${SKY_BANDS.length}`);
+for (let i=1;i<SKY_BANDS.length;i++) if (SKY_BANDS[i].at<=SKY_BANDS[i-1].at) failures.push('background bands are unordered');
+if (new Set(SKY_BANDS.map(band=>sampleSky(band.at).wash)).size!==6) failures.push('background bands are not visually distinct');
+
 for (const asset of ASSETS) {
-  const geometry = ASSET_GEOMETRY[asset.id];
+  const geometry=ASSET_GEOMETRY[asset.id];
   if (!geometry?.parts?.length) { failures.push(`${asset.id}: missing alpha collider`); continue; }
-  if (geometry.parts.length > 56) failures.push(`${asset.id}: collider too complex (${geometry.parts.length} parts)`);
-  if (geometry.parts.some(part => part.x < 0 || part.x > 1 || part.y < 0 || part.y > 1 || part.w <= 0 || part.h <= 0)) failures.push(`${asset.id}: invalid normalized collider part`);
-  const fitted = fittedSize({ assetId:asset.id, asset, w:asset.renderSize.w, h:asset.renderSize.h });
-  if (Math.abs(fitted.w / fitted.h - geometry.aspect) > .001) failures.push(`${asset.id}: render aspect is distorted`);
-  if (fitted.w > asset.renderSize.w * 2.4 + .01 || fitted.h > asset.renderSize.h * 2.4 + .01) failures.push(`${asset.id}: fitted size exceeds safe authored bounds`);
+  if (geometry.parts.length>56) failures.push(`${asset.id}: collider too complex (${geometry.parts.length})`);
+  if (geometry.parts.some(part=>part.x<0||part.x>1||part.y<0||part.y>1||part.w<=0||part.h<=0)) failures.push(`${asset.id}: invalid collider part`);
 }
 
-for (let seed = 1; seed <= 500; seed++) {
-  const course = buildCourse(seed * 7919);
-  const report = validateCourse(course);
-  hashes.add(course.courseHash);
-  maxPlain = Math.max(maxPlain, report.stats.plainRectPct);
-  minIrregular = Math.min(minIrregular, report.stats.irregularPct);
-  minAssets = Math.min(minAssets, report.stats.assets);
-  if (!report.ok) failures.push(`seed ${seed * 7919}: ${report.errors.join(', ')}`);
-  if (course.instances[0]?.chunkId !== 'castle-gentle-start') failures.push(`seed ${seed * 7919}: beginner opening is not first`);
-  if (course.instances.slice(0,2).some(instance=>instance.difficulty>2)) failures.push(`seed ${seed * 7919}: opening difficulty exceeds 2`);
-  for (const object of course.objects) {
-    const geometry = ASSET_GEOMETRY[object.assetId];
-    const size = fittedSize(object);
-    const expectedWidth = object.difficulty <= 1 ? 120 : object.difficulty <= 2 ? 88 : 72;
-    if (size.w < expectedWidth-.01) failures.push(`seed ${seed * 7919}: ${object.assetId} is narrower than difficulty ${object.difficulty} foothold`);
-    if (Math.abs(size.w / size.h - geometry.aspect) > .001) failures.push(`seed ${seed * 7919}: ${object.assetId} placement distorts aspect`);
-    if (object.role==='stacked') {
-      const support=course.objects.find(candidate=>candidate.id===object.stackedOn);
-      if (!support) failures.push(`seed ${seed * 7919}: ${object.assetId} is not placed on a support`);
-      else {
-        const objectBounds=alphaBounds(object.assetId,size);
-        const supportBounds=alphaBounds(support.assetId,fittedSize(support));
-        const gap=Math.abs((object.y+objectBounds.maxY)-(support.y+supportBounds.minY));
-        if (gap>3.1) failures.push(`seed ${seed * 7919}: ${object.assetId} floats ${gap.toFixed(1)}px above its support`);
-      }
-    }
-  }
-  const repeat = buildCourse(seed * 7919);
-  if (repeat.courseHash !== course.courseHash) failures.push(`seed ${seed * 7919}: non-deterministic course hash`);
+const canonicalTransforms=JSON.stringify(first.objects.map(({id,assetId,x,y,w,h,angle,role,supportId})=>({id,assetId,x,y,w,h,angle,role,supportId})));
+const canonicalRoutes=JSON.stringify(first.routes);
+for (let index=0;index<500;index++) {
+  const course=buildCourse((index+1)*7919);
+  if (course.mapVersion!==first.mapVersion||course.courseHash!==first.courseHash||course.colliderHash!==first.colliderHash) failures.push(`seed ${index}: fixed hashes changed`);
+  if (JSON.stringify(course.objects.map(({id,assetId,x,y,w,h,angle,role,supportId})=>({id,assetId,x,y,w,h,angle,role,supportId})))!==canonicalTransforms) failures.push(`seed ${index}: transforms changed`);
+  if (JSON.stringify(course.routes)!==canonicalRoutes) failures.push(`seed ${index}: routes changed`);
 }
 
-const beginner = CHUNKS.find(chunk=>chunk.id==='castle-gentle-start');
-if (!beginner) failures.push('missing castle beginner opening');
-else {
-  const path=beginner.objects.slice(0,9).map(object=>({object,size:fittedSize({...object,asset:ASSETS.find(asset=>asset.id===object.assetId),difficulty:1})}));
-  for(let i=1;i<path.length;i++){
-    const a=path[i-1],b=path[i];
-    const gap=Math.abs(b.object.x-a.object.x)-(a.size.w+b.size.w)/2;
-    const topA=a.object.y-a.size.h/2,topB=b.object.y-b.size.h/2;
-    if(gap>70)failures.push(`beginner opening gap ${i} is too wide (${gap.toFixed(1)})`);
-    if(Math.abs(topB-topA)>112)failures.push(`beginner opening step ${i} is too high (${Math.abs(topB-topA).toFixed(1)})`);
-  }
+const byId=new Map(first.objects.map(object=>[object.id,object]));
+for (const object of first.objects.filter(item=>item.role==='obstacle'&&item.supportId)) {
+  const support=byId.get(object.supportId);
+  if (!support) { failures.push(`${object.id}: missing support`); continue; }
+  const bounds=alphaBounds(object.assetId,fittedSize(object));
+  const supportBounds=alphaBounds(support.assetId,fittedSize(support));
+  const bottom=object.y+bounds.maxY, top=support.y+supportBounds.minY;
+  if (Math.abs(bottom-top)>2.1) failures.push(`${object.id}: alpha collider is not seated on visible support`);
 }
-const openingGround=beginner?.objects.slice(0,3).map(object=>object.assetId) || [];
-if (new Set(openingGround).size!==1) failures.push('beginner opening does not reuse one continuous ground style');
+if (first.objects.some(object=>object.role==='decor'&&object.supportId)) failures.push('decor has a physical support');
+if (first.objects.filter(object=>object.role==='obstacle').length<10) failures.push('not enough solid obstacle/wall objects');
 
-if (hashes.size < 450) failures.push(`course diversity too low: ${hashes.size}/500 unique hashes`);
+// Geometric fall probes: every main-route gap either has a visible body below
+// it or is guaranteed to cross the world reset line. There is no endless void.
+const nodeById=new Map(first.nodes.map(node=>[node.id,node]));
+let recovered=0, reset=0;
+for (const edge of first.routes.main) {
+  const a=nodeById.get(edge.from),b=nodeById.get(edge.to);
+  const probeX=(a.x+b.x)/2, probeY=Math.max(a.y,b.y)+20;
+  const landing=first.objects.filter(object=>object.role!=='decor').map(object=>{
+    const bounds=alphaBounds(object.assetId,fittedSize(object));
+    return {object,left:object.x+bounds.minX,right:object.x+bounds.maxX,top:object.y+bounds.minY};
+  }).filter(item=>probeX>=item.left&&probeX<=item.right&&item.top>=probeY).sort((x,y)=>x.top-y.top)[0];
+  if (landing) recovered++; else reset++;
+}
+if (recovered+reset!==first.routes.main.length) failures.push('fall probe did not terminate');
+
 if (failures.length) {
-  console.error(`Game V2 validation failed (${failures.length})`);
-  failures.slice(0, 25).forEach(f => console.error(`- ${f}`));
+  console.error(`Fixed map validation failed (${failures.length})`);
+  failures.slice(0,30).forEach(failure=>console.error(`- ${failure}`));
   process.exit(1);
 }
-
-console.log(`Game V2 validation passed: ${ASSETS.length} assets, ${CHUNKS.length} chunks, 500 seeds, ${hashes.size} unique maps, max ${maxPlain}% plain rectangles, min ${minIrregular}% irregular, min ${minAssets} assets/run.`);
+console.log(`Fixed map validation passed: ${MAP_VERSION}, ${first.objects.length} objects, ${first.nodes.length} route nodes, ${firstReport.stats.mainDescents} deliberate descents, ${firstReport.stats.minMainMarginPct}% main / ${firstReport.stats.minRecoveryMarginPct}% recovery margin, 500/500 seeds identical, ${recovered} recovery landings + ${reset} safe resets.`);

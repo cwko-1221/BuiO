@@ -136,6 +136,13 @@ input, select, textarea { font-family: inherit; }
 .stage-pill { color: #fff2b8; letter-spacing: .03em; }
 .timer-pill { font-variant-numeric: tabular-nums; min-width: 72px; text-align: center; }
 .streak-pill { background: linear-gradient(180deg, rgba(195,74,45,.94), rgba(139,45,33,.92)); }
+.reset-position-btn {
+  border: 2px solid rgba(255,255,255,.52); border-radius: 12px; padding: 8px 12px;
+  color: #fff; background: rgba(31,42,68,.88); box-shadow: 0 4px 10px rgba(22,31,53,.2);
+  font: 800 12px/1 "Microsoft JhengHei", sans-serif; cursor: pointer; backdrop-filter: blur(8px);
+}
+.reset-position-btn:hover { background: #394968; transform: translateY(-1px); }
+.reset-position-btn:active { transform: translateY(1px); }
 
 .answer-btn-float {
   position: absolute; right: 16px; bottom: 120px; z-index: 5;
@@ -170,6 +177,7 @@ input, select, textarea { font-family: inherit; }
 }
 
 @media (max-width: 760px) {
+  .reset-position-btn { padding: 8px; font-size: 11px; }
   .hud { padding-left: 10px; padding-right: 10px; }
   .hud-cluster-primary { gap: 5px; }
   .energy-wrap { grid-template-columns: 26px 76px; min-width: 115px; }

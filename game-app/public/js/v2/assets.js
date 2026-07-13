@@ -8,6 +8,9 @@ const catalog = {
     ['street-lamp','路燈'],['stone-arch','石拱門'],['jump-ramp','跳台']
   ],
   castle: [
+    ['flat-brick-a','Front brick A'],['flat-brick-b','Front brick B'],['flat-brick-c','Front brick C'],
+    ['flat-brick-strip-2','Front brick strip 2'],['flat-brick-strip-4','Front brick strip 4'],
+    ['flat-brick-wall-2','Front brick wall 2'],['flat-brick-pillar-4','Front brick pillar 4'],['flat-brick-wall-4','Front brick wall 4'],
     ['battlement','城垛'],['castle-tower','城塔'],['castle-arch','城堡拱門'],['drawbridge','吊橋'],['shield','盾牌'],['sword','劍'],
     ['helmet','頭盔'],['giant-key','巨匙'],['treasure-chest','寶箱'],['throne','王座'],['castle-banner','旗幟'],['chandelier','吊燈'],
     ['cannon','大炮'],['catapult','投石器'],['armor-stand','盔甲架'],['gargoyle','石像'],['column','石柱'],['broken-column','破裂石柱'],
@@ -108,5 +111,5 @@ export const ZONES = ['castle','market','forest','farm','snow','factory'];
 export const ZONE_NAMES = { castle:'城堡', market:'市集', forest:'森林', farm:'農場', snow:'雪山', factory:'工廠' };
 
 export function assetLedger() {
-  return { version: 2, count: ASSETS.length, generatedAt: '2026-07-11', assets: ASSETS };
+  return { version: 2, count: ASSETS.length, generatedAt: '2026-07-13', assets: ASSETS };
 }

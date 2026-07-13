@@ -157,6 +157,38 @@ export const ATLAS_INDEX={
     "key": "atlas-global-0",
     "frame": "jump-ramp"
   },
+  "flat-brick-a": {
+    "key": "atlas-castle-0",
+    "frame": "flat-brick-a"
+  },
+  "flat-brick-b": {
+    "key": "atlas-castle-0",
+    "frame": "flat-brick-b"
+  },
+  "flat-brick-c": {
+    "key": "atlas-castle-0",
+    "frame": "flat-brick-c"
+  },
+  "flat-brick-strip-2": {
+    "key": "atlas-castle-0",
+    "frame": "flat-brick-strip-2"
+  },
+  "flat-brick-strip-4": {
+    "key": "atlas-castle-0",
+    "frame": "flat-brick-strip-4"
+  },
+  "flat-brick-wall-2": {
+    "key": "atlas-castle-0",
+    "frame": "flat-brick-wall-2"
+  },
+  "flat-brick-pillar-4": {
+    "key": "atlas-castle-0",
+    "frame": "flat-brick-pillar-4"
+  },
+  "flat-brick-wall-4": {
+    "key": "atlas-castle-0",
+    "frame": "flat-brick-wall-4"
+  },
   "battlement": {
     "key": "atlas-castle-0",
     "frame": "battlement"

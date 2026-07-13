@@ -28,6 +28,11 @@ export class GameScene extends Phaser.Scene {
     this.leftContacts = new Map();
     this.rightContacts = new Map();
     this.stuckMs = 0;
+    this.stuckAnchor = null;
+    this.stuckNudged = false;
+    this.lastSafePose = { x:course.start.x, y:course.start.y-38, progress:this.progress };
+    this.lastSafeAt = 0;
+    this.invulnerableUntil = 0;
     this.finished = false;
   }
 
@@ -61,6 +66,7 @@ export class GameScene extends Phaser.Scene {
 
     this.objectSprites = this.course.objects.map(obj => this.createCourseObject(obj));
     this.createProgressSensors();
+    this.createHazards();
     this.createCheckpoints();
     this.createSummit();
     this.createPlayer();
@@ -155,11 +161,11 @@ export class GameScene extends Phaser.Scene {
     // player stands exactly on the visible artwork.
     const texture = ATLAS_INDEX[obj.assetId];
     const size = fittedSize(obj);
-    const depth = obj.role === 'stacked' ? 14 : obj.role === 'support' ? 10 : 12;
+    const depth = obj.role === 'decor' ? 14 : obj.role === 'support' ? 10 : 12;
     const sprite = this.add.image(obj.x, obj.y, texture?.key || obj.assetId, texture?.frame || null)
       .setDisplaySize(size.w, size.h).setDepth(depth).setRotation(obj.angle || 0);
     // Stacked props are pure scenery — no body, so they never block the route.
-    if (obj.role === 'stacked') {
+    if (obj.role === 'decor') {
       sprite.courseObject = obj;
       return sprite;
     }
@@ -185,6 +191,16 @@ export class GameScene extends Phaser.Scene {
     this.sensorBodies = this.course.sensors.map(sensor => {
       const body = this.matter.add.rectangle(sensor.x,sensor.y,150,180,{isStatic:true,isSensor:true,label:'progress'});
       body.progressSensor = sensor; return body;
+    });
+  }
+
+  createHazards() {
+    this.hazardBodies = this.course.hazards.map(hazard => {
+      this.add.rectangle(hazard.x,hazard.y,hazard.w,hazard.h,0xff4967,.92).setStrokeStyle(5,0x7b1432).setDepth(18);
+      this.add.rectangle(hazard.x,hazard.y,hazard.w,Math.max(4,hazard.h*.28),0xffd8df,.95).setDepth(19);
+      const body=this.matter.add.rectangle(hazard.x,hazard.y,hazard.w,hazard.h+10,{isStatic:true,isSensor:true,label:'hazard'});
+      body.hazard=hazard;
+      return body;
     });
   }
 
@@ -232,6 +248,7 @@ export class GameScene extends Phaser.Scene {
     const Body = Phaser.Physics.Matter.Matter.Body;
     Body.setPosition(this.playerBody,{x,y});
     Body.setVelocity(this.playerBody,{x:0,y:0});
+    this.wakePlayer();
     this.syncPlayerSprite();
   }
 
@@ -271,6 +288,7 @@ export class GameScene extends Phaser.Scene {
         if (bodies.includes(this.summitBody) && involvesPlayer) this.finish();
         for (const body of bodies) {
           if (body.progressSensor && involvesPlayer) this.reachProgress(body.progressSensor);
+          if (body.hazard && involvesPlayer) this.hitHazard(body.hazard);
           const obj = body.courseObject;
           if (obj?.behavior?.type === 'bounce' && involvesPlayer) {
             this.setPlayerVelocity(null,-obj.behavior.power); this.airJump = 1; this.hooks.onEffect?.('bounce',this.player.x,this.player.y);
@@ -284,6 +302,7 @@ export class GameScene extends Phaser.Scene {
   wakePlayer() { wakePlayer(Phaser.Physics.Matter.Matter, this.playerBody); }
   resumeControl() {
     this.actions.left = false; this.actions.right = false; this.actions.down = false; this.actions.jumpQueued = 0;
+    this.stuckAnchor = null; this.stuckMs = 0; this.stuckNudged = false;
     this.wakePlayer();
   }
   queueJump() { this.wakePlayer(); this.actions.jumpQueued = 130; }
@@ -316,14 +335,24 @@ export class GameScene extends Phaser.Scene {
     if (dir && this.energy > 0) this.energy = Math.max(0,this.energy-4.3*dt);
     this.player.setFlipX(dir < 0);
 
-    const blocked = (dir < 0 && this.leftContacts.size) || (dir > 0 && this.rightContacts.size);
-    if (dir && blocked && Math.abs(this.playerBody.velocity.x) < .22 && Math.abs(vy) < 1.2) this.stuckMs += deltaMs;
-    else this.stuckMs = 0;
-    if (this.stuckMs > 110 && this.grounded) {
-      Phaser.Physics.Matter.Matter.Body.translate(this.playerBody,{x:dir * 1.5,y:-2.5});
-      this.setPlayerVelocity(dir * 2.6,null);
-      this.stuckMs = 0;
+    // Stable ground continuously refreshes the manual/automatic recovery pose.
+    if (this.grounded && Math.abs(vy)<.7 && Math.abs(this.playerBody.velocity.x)<1.2 && time-this.lastSafeAt>260) {
+      this.lastSafePose={x:this.playerBody.position.x,y:this.playerBody.position.y,progress:this.progress,checkpointId:this.checkpoint?.id};
+      this.lastSafeAt=time;
     }
+    // Direction held without meaningful travel: nudge at 1.6s, restore at 3s.
+    if (dir) {
+      if (!this.stuckAnchor) this.stuckAnchor={x:this.playerBody.position.x,y:this.playerBody.position.y};
+      const travelled=Math.hypot(this.playerBody.position.x-this.stuckAnchor.x,this.playerBody.position.y-this.stuckAnchor.y);
+      if (travelled>=12) {
+        this.stuckAnchor={x:this.playerBody.position.x,y:this.playerBody.position.y}; this.stuckMs=0; this.stuckNudged=false;
+      } else this.stuckMs+=deltaMs;
+      if (this.stuckMs>=1600 && !this.stuckNudged) {
+        Phaser.Physics.Matter.Matter.Body.translate(this.playerBody,{x:dir*12,y:-10});
+        this.setPlayerVelocity(dir*3,-1.2); this.stuckNudged=true;
+      }
+      if (this.stuckMs>=3000) this.resetToSafePose('stuck');
+    } else { this.stuckAnchor=null; this.stuckMs=0; this.stuckNudged=false; }
 
     if (this.actions.jumpQueued > 0 && this.energy >= 8) {
       if (downHeld && this.grounded) {
@@ -375,7 +404,8 @@ export class GameScene extends Phaser.Scene {
 
     if (this.player.y > this.course.world.height + 180 || this.player.x < -100 || this.player.x > this.course.world.width+100) this.respawn();
     const altitude = Math.max(0,(this.course.startAltitudeY-this.player.y)/5);
-    const zoneIndex = Math.min(5,Math.floor(this.progress*6));
+    const limits=[210,274,448,573,704,Infinity];
+    const zoneIndex=Math.max(0,limits.findIndex(limit=>altitude<=limit));
     this.hooks.onFrame?.({
       x:this.player.x,y:this.player.y,velocityX:this.playerBody.velocity.x,velocityY:this.playerBody.velocity.y,
       energy:this.energy,progress:this.progress,altitude,animation:motion,
@@ -393,11 +423,34 @@ export class GameScene extends Phaser.Scene {
 
   respawn() {
     const cp = this.checkpoint || this.course.checkpoints[0];
-    this.groundContacts.clear(); this.leftContacts.clear(); this.rightContacts.clear(); this.stuckMs = 0;
+    this.clearContacts();
     this.setPlayerPosition(cp.x,cp.y-80);
+    this.lastSafePose={x:cp.x,y:cp.y-80,progress:this.progress,checkpointId:cp.id};
     this.energy = Math.max(25,this.energy); this.player.setAlpha(.55);
     this.time.delayedCall(1200,() => this.player?.setAlpha(1));
     this.cameras.main.flash(200,255,255,255); this.hooks.onEffect?.('respawn',cp.x,cp.y);
+  }
+
+  clearContacts() {
+    this.groundContacts.clear(); this.leftContacts.clear(); this.rightContacts.clear();
+    this.stuckMs=0; this.stuckAnchor=null; this.stuckNudged=false;
+  }
+
+  resetToSafePose(reason='manual') {
+    const cp=this.checkpoint||this.course.checkpoints[0];
+    const pose=this.lastSafePose||{x:cp.x,y:cp.y-80};
+    this.clearContacts(); this.setPlayerPosition(pose.x,pose.y);
+    this.energy=Math.max(25,this.energy); this.invulnerableUntil=this.time.now+1200;
+    this.player.setAlpha(.55); this.time.delayedCall(1200,()=>this.player?.setAlpha(1));
+    this.cameras.main.flash(150,180,240,255); this.hooks.onEffect?.(reason,pose.x,pose.y);
+  }
+
+  hitHazard(hazard) {
+    if (this.time.now<this.invulnerableUntil) return;
+    const cp=this.course.checkpoints.filter(item=>item.altitude<=hazard.checkpointAltitude).at(-1)||this.checkpoint;
+    if (cp) this.checkpoint=cp;
+    this.lastSafePose=cp?{x:cp.x,y:cp.y-80,progress:this.progress,checkpointId:cp.id}:this.lastSafePose;
+    this.resetToSafePose('laser');
   }
 
   finish() { if (this.finished) return; this.finished = true; this.progress = 1; this.hooks.onFinish?.(); }

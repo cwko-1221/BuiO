@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "count": 187,
-  "generatedAt": "2026-07-11",
+  "count": 195,
+  "generatedAt": "2026-07-13",
   "assets": [
     {
       "id": "crate",
@@ -1264,6 +1264,312 @@
       "source": "imagegen-master"
     },
     {
+      "id": "flat-brick-a",
+      "label": "Front brick A",
+      "zone": "castle",
+      "file": "/game/images/v2/props/flat-brick-a.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 146,
+        "h": 96
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "flat-brick-b",
+      "label": "Front brick B",
+      "zone": "castle",
+      "file": "/game/images/v2/props/flat-brick-b.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 143,
+        "h": 107
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "flat-brick-c",
+      "label": "Front brick C",
+      "zone": "castle",
+      "file": "/game/images/v2/props/flat-brick-c.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 144,
+        "h": 130
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "flat-brick-strip-2",
+      "label": "Front brick strip 2",
+      "zone": "castle",
+      "file": "/game/images/v2/props/flat-brick-strip-2.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 144,
+        "h": 106
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": true,
+        "material": "solid"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "flat-brick-strip-4",
+      "label": "Front brick strip 4",
+      "zone": "castle",
+      "file": "/game/images/v2/props/flat-brick-strip-4.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 150,
+        "h": 72
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "flat-brick-wall-2",
+      "label": "Front brick wall 2",
+      "zone": "castle",
+      "file": "/game/images/v2/props/flat-brick-wall-2.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 160,
+        "h": 102
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "flat-brick-pillar-4",
+      "label": "Front brick pillar 4",
+      "zone": "castle",
+      "file": "/game/images/v2/props/flat-brick-pillar-4.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 186,
+        "h": 88
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "flat-brick-wall-4",
+      "label": "Front brick wall 4",
+      "zone": "castle",
+      "file": "/game/images/v2/props/flat-brick-wall-4.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 158,
+        "h": 100
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#8293ad",
+        "#46536d",
+        "#dbe5f4"
+      ],
+      "tags": [
+        "castle",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
       "id": "battlement",
       "label": "城垛",
       "zone": "castle",
@@ -1309,7 +1615,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": false,
+        "oneWay": true,
         "material": "solid"
       },
       "palette": [
@@ -1414,7 +1720,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": false,
+        "oneWay": true,
         "material": "solid"
       },
       "palette": [
@@ -1474,7 +1780,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": true,
+        "oneWay": false,
         "material": "solid"
       },
       "palette": [
@@ -7733,7 +8039,7 @@
       "original design"
     ]
   },
-  "availableCount": 187,
-  "imagegenCount": 94,
+  "availableCount": 195,
+  "imagegenCount": 102,
   "proceduralCount": 93
 }

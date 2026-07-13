@@ -62,18 +62,16 @@ socket.on('room:closed',({message})=>{if(phaserGame)phaserGame.destroy(true);ale
 
 // One stable, hand-tuned map for every room (a "season" course, like the
 // real DLD). Bump the constant to ship a new map for all rooms at once.
-const STABLE_MAP_SEED=20260712;
-
 function startGame(seed,durationSec,startedAt,resume){
   clearInterval(roomsTimer); show('gameScreen');
-  const course=buildCourse(STABLE_MAP_SEED); const report=validateCourse(course);
+  const course=buildCourse(seed); const report=validateCourse(course);
   if(!report.ok) console.error('[game-v2] invalid course',report);
   startMeta={...(startMeta||{}),seed,durationSec,startedAt:startedAt||Date.now(),course};
   if(phaserGame)phaserGame.destroy(true);
   const hooks={
     name:me.name||'Koko', energy:resume?.energy??40, progress:resume?.bestProgress??resume?.bestHeight??0,
     isFrozen:()=>frozen,
-    onReady:s=>{scene=s; if(resume?.x&&resume?.y)s.setPlayerPosition(resume.x,resume.y); toast(`🧭 24 段路線 · 地圖 ${course.courseHash}`,true);},
+    onReady:s=>{scene=s; if(Number.isFinite(resume?.x)&&Number.isFinite(resume?.y))s.setPlayerPosition(resume.x,resume.y); toast(`固定 1000m 地圖 ${course.mapVersion} · ${course.courseHash}`,true);},
     onFrame:updateHudAndNetwork,
     onProgress:(progress,cp)=>{if(cp&&Math.abs(progress-cp.progress)<.06)toast(`⛳ ${cp.zoneName}檢查點`,true);},
     onFinish:()=>{socket.emit('player:summit');toast('🏆 登頂成功！',true);},
@@ -103,6 +101,7 @@ function bindHold(id,action){
   el.addEventListener('pointerdown',on);el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('pointerleave',off);
 }
 bindHold('btnLeft','left');bindHold('btnDown','down');bindHold('btnRight','right');bindHold('btnJump','jump');
+$('resetBtn').addEventListener('click',()=>scene?.resetToSafePose('manual'));
 
 $('answerBtn').addEventListener('click',openQuestion);$('qClose').addEventListener('click',closeQuestion);
 function openQuestion(){
