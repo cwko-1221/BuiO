@@ -12,7 +12,9 @@ let joining = false;
 let lastNet = 0;
 let lastFrame = null;
 let startMeta = null;
-const preview = new URLSearchParams(location.search).has('preview') && ['127.0.0.1','localhost'].includes(location.hostname);
+const previewParams = new URLSearchParams(location.search);
+const preview = previewParams.has('preview') && ['127.0.0.1','localhost'].includes(location.hostname);
+const previewAltitude = previewParams.has('altitude') ? Number(previewParams.get('altitude')) : NaN;
 
 function show(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -71,7 +73,15 @@ function startGame(seed,durationSec,startedAt,resume){
   const hooks={
     name:me.name||'Koko', energy:resume?.energy??40, progress:resume?.bestProgress??resume?.bestHeight??0,
     isFrozen:()=>frozen,
-    onReady:s=>{scene=s; if(Number.isFinite(resume?.x)&&Number.isFinite(resume?.y))s.setPlayerPosition(resume.x,resume.y); toast(`固定 1000m 地圖 ${course.mapVersion} · ${course.courseHash}`,true);},
+    onReady:s=>{
+      scene=s;
+      if(Number.isFinite(resume?.x)&&Number.isFinite(resume?.y))s.setPlayerPosition(resume.x,resume.y);
+      else if(preview&&Number.isFinite(previewAltitude)) {
+        const node=course.nodes.filter(item=>item.route==='main').sort((a,b)=>Math.abs(a.altitude-previewAltitude)-Math.abs(b.altitude-previewAltitude))[0];
+        if(node)s.setPlayerPosition(node.x,node.y-60);
+      }
+      toast(`固定 1000m 地圖 ${course.mapVersion} · ${course.courseHash}`,true);
+    },
     onFrame:updateHudAndNetwork,
     onProgress:(progress,cp)=>{if(cp&&Math.abs(progress-cp.progress)<.06)toast(`⛳ ${cp.zoneName}檢查點`,true);},
     onFinish:()=>{socket.emit('player:summit');toast('🏆 登頂成功！',true);},

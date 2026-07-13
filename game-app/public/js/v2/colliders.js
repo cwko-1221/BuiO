@@ -7,10 +7,13 @@ export function fittedSize(object) {
   const boxH = Math.max(24, object.h || object.asset.renderSize.h);
   let size;
   if (aspect >= 1) {
-    const h = Math.min(boxW / aspect, boxH * 2.4);
+    // w/h are a real render box, not loose hints. Preserve the source aspect
+    // while fitting inside both limits so a square prop cannot silently grow
+    // to 2.4x the authored height and block a different route row.
+    const h = Math.min(boxW / aspect, boxH);
     size = { w:h * aspect, h };
   } else {
-    const w = Math.min(boxH * aspect, boxW * 2.4);
+    const w = Math.min(boxH * aspect, boxW);
     size = { w, h:w / aspect };
   }
   const minimumWidth = object.difficulty <= 1 ? 120 : object.difficulty <= 2 ? 88 : 72;

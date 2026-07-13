@@ -106,5 +106,47 @@ export function validateCourse(course) {
   }
   if (course.objects.some(object=>object.role==='decor'&&object.supportId)) errors.push('decor must not own collision support');
   if (course.hazards.length<3) errors.push('factory laser maze is missing');
-  return {ok:errors.length===0,errors,stats:{mapVersion:course.mapVersion,objects:course.objects.length,assets:course.usedAssets.length,nodes:course.nodes.length,mainEdges:course.routes.main.length,recoveryEdges:course.routes.recovery.length,obstacles:obstacles.length,mainDescents,minMainMarginPct:Math.round(minMainMargin*100),minRecoveryMarginPct:Math.round(minRecoveryMargin*100),hash:course.courseHash,colliderHash:course.colliderHash}};
+
+  // A reachable graph is not enough: two unrelated alpha bodies must never
+  // occupy the same world space. That was the source of solid props appearing
+  // inside bricks and of invisible dead ends between route rows.
+  const solids=course.objects.filter(object=>object.role!=='decor').map(object=>{
+    const bounds=alphaBounds(object.assetId,fittedSize(object));
+    return {object,left:object.x+bounds.minX,right:object.x+bounds.maxX,top:object.y+bounds.minY,bottom:object.y+bounds.maxY};
+  });
+  let solidOverlaps=0;
+  for (let i=0;i<solids.length;i++) for (let j=i+1;j<solids.length;j++) {
+    const a=solids[i], b=solids[j];
+    if (a.object.supportId===b.object.id||b.object.supportId===a.object.id) continue;
+    if (a.object.tags?.includes('ground-chain')&&b.object.tags?.includes('ground-chain')) continue;
+    const overlapX=Math.min(a.right,b.right)-Math.max(a.left,b.left);
+    const overlapY=Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top);
+    if (overlapX>4&&overlapY>4) {
+      solidOverlaps++;
+      if (solidOverlaps<=8) errors.push(`${a.object.id} overlaps ${b.object.id} by ${overlapX.toFixed(0)}x${overlapY.toFixed(0)}px`);
+    }
+  }
+
+  // Every main support needs at least one full player-sized standing column.
+  // Search the actual alpha AABB instead of assuming the node centre is clear.
+  const solidById=new Map(solids.map(solid=>[solid.object.id,solid]));
+  let unsafeStandNodes=0;
+  for (const node of course.nodes.filter(item=>item.route==='main')) {
+    const own=solidById.get(node.objectId);
+    if (!own) continue;
+    const start=Math.min(own.right-29,own.left+29), end=Math.max(own.left+29,own.right-29);
+    let safe=false;
+    for (let x=start;x<=end+1;x+=10) {
+      const left=x-29,right=x+29,top=own.top-76,bottom=own.top-4;
+      const blocked=solids.some(solid=>solid.object.id!==node.objectId
+        &&Math.min(right,solid.right)-Math.max(left,solid.left)>2
+        &&Math.min(bottom,solid.bottom)-Math.max(top,solid.top)>2);
+      if (!blocked) { safe=true; break; }
+    }
+    if (!safe) {
+      unsafeStandNodes++;
+      if (unsafeStandNodes<=8) errors.push(`${node.id} has no 58x72px safe standing column`);
+    }
+  }
+  return {ok:errors.length===0,errors,stats:{mapVersion:course.mapVersion,objects:course.objects.length,assets:course.usedAssets.length,nodes:course.nodes.length,mainEdges:course.routes.main.length,recoveryEdges:course.routes.recovery.length,obstacles:obstacles.length,mainDescents,minMainMarginPct:Math.round(minMainMargin*100),minRecoveryMarginPct:Math.round(minRecoveryMargin*100),solidOverlaps,unsafeStandNodes,hash:course.courseHash,colliderHash:course.colliderHash}};
 }

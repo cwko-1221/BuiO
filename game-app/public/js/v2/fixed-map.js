@@ -1,6 +1,7 @@
-// One authored course for every room. Coordinates are immutable; altitude is
-// five world pixels per metre, measured up from the start floor.
-export const MAP_VERSION = 'fixed-1000m-2026.07';
+// One authored course for every room. The route is laid out in distinct rows:
+// long traversals are separated by open turn-stairs, so no platform can become
+// an accidental ceiling over the route below it.
+export const MAP_VERSION = 'fixed-1000m-2026.07b';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -12,11 +13,15 @@ const hazards=[];
 let serial=0;
 
 const yAt = altitude => WORLD.startY - altitude * WORLD.pixelsPerMetre;
-const behavior = { type:'static' };
+const staticBehavior = { type:'static' };
 
-function support(zone, assetId, x, altitude, w, h=96, extra={}) {
+function support(zone,assetId,x,altitude,w,h=96,extra={}) {
   const id=extra.id || `fixed-${String(++serial).padStart(3,'0')}`;
-  const object={ id,assetId,zone,x,y:yAt(altitude),w,h,angle:extra.angle||0,role:'support',behavior:extra.behavior||behavior,routeNode:`node-${id}`,tags:extra.tags||[] };
+  const object={
+    id,assetId,zone,x,y:yAt(altitude),w,h,angle:extra.angle||0,
+    role:'support',behavior:extra.behavior||staticBehavior,
+    routeNode:`node-${id}`,tags:extra.tags||[]
+  };
   objects.push(object);
   const node={id:object.routeNode,objectId:id,x,y:object.y-h/2-8,altitude,route:extra.route||'main',safe:extra.safe!==false};
   nodes.push(node);
@@ -25,108 +30,255 @@ function support(zone, assetId, x, altitude, w, h=96, extra={}) {
 
 function obstacle(zone,assetId,supportRef,xOffset,w,h,extra={}) {
   const id=extra.id || `fixed-obstacle-${String(++serial).padStart(3,'0')}`;
-  objects.push({id,assetId,zone,x:supportRef.object.x+xOffset,y:supportRef.object.y-120,w,h,angle:extra.angle||0,role:'obstacle',behavior:extra.behavior||behavior,supportId:supportRef.object.id,tags:extra.tags||['obstacle']});
+  objects.push({
+    id,assetId,zone,x:supportRef.object.x+xOffset,y:supportRef.object.y-120,w,h,
+    angle:extra.angle||0,role:'obstacle',behavior:extra.behavior||staticBehavior,
+    supportId:supportRef.object.id,tags:extra.tags||['obstacle']
+  });
 }
 
 function decor(zone,assetId,x,altitude,w,h,extra={}) {
-  objects.push({id:`fixed-decor-${String(++serial).padStart(3,'0')}`,assetId,zone,x,y:yAt(altitude),w,h,angle:extra.angle||0,role:'decor',behavior, tags:['decor']});
+  objects.push({
+    id:`fixed-decor-${String(++serial).padStart(3,'0')}`,assetId,zone,x,y:yAt(altitude),w,h,
+    angle:extra.angle||0,role:'decor',behavior:staticBehavior,tags:['decor']
+  });
 }
 
 let previous=null;
 function mainSupport(zone,assetId,x,altitude,w,h=96,extra={}) {
   const result=support(zone,assetId,x,altitude,w,h,extra);
-  if(previous) main.push({from:previous.node.id,to:result.node.id,type:'main'});
+  if (previous) main.push({from:previous.node.id,to:result.node.id,type:'main'});
   previous=result;
   return result;
 }
 
-// 0-45m: continuous front-facing brick floor and broad, readable steps.
-const castle=[];
-for (const x of [420,1050,1680,2310,2940]) castle.push(mainSupport('castle','flat-brick-strip-4',x,0,680,106));
-for (const [x,a,w,id] of [[3540,10,560,'flat-brick-strip-4'],[3990,22,470,'flat-brick-strip-2'],[4400,34,430,'flat-brick-strip-2'],[4850,45,560,'flat-brick-strip-4']]) castle.push(mainSupport('castle',id,x,a,w,104));
-
-// 45-110m: solid props sit on the bricks and must be jumped over.
-const c45=mainSupport('castle','flat-brick-strip-4',4300,58,620,104); obstacle('castle','crate',c45,-90,105,105);
-const c60=mainSupport('castle','flat-brick-strip-4',3650,70,620,104); obstacle('castle','barrel',c60,80,100,112);
-const c75=mainSupport('castle','flat-brick-wall-2',3000,84,560,150); obstacle('castle','castle-banner',c75,-70,120,145);
-const c90=mainSupport('castle','flat-brick-strip-4',2350,98,620,104); obstacle('castle','treasure-chest',c90,85,135,105);
-const c110=mainSupport('castle','flat-brick-wall-2',1700,110,560,150); obstacle('castle','armor-stand',c110,20,120,175);
-
-// 110-210m: brick islands mix with broad objects and a lower recovery shelf.
-for (const [x,a,w,id] of [[1150,124,500,'flat-brick-strip-2'],[650,140,430,'flat-brick-wall-2'],[1120,154,460,'flat-brick-strip-2'],[1700,166,500,'drawbridge'],[2320,178,500,'round-table'],[2980,188,520,'flat-brick-strip-4'],[3650,198,520,'stone-arch'],[4300,210,680,'flat-brick-strip-4']]) mainSupport('castle',id,x,a,w,id==='stone-arch'?210:118);
-const castleExit=previous;
-const castleRecovery=support('castle','flat-brick-strip-4',2100,132,1700,100,{route:'recovery',tags:['recovery']});
-recovery.push(
-  {from:nodes.find(node=>node.altitude===178).id,to:castleRecovery.node.id,type:'recovery'},
-  {from:castleRecovery.node.id,to:nodes.find(node=>node.altitude===154).id,type:'recovery'}
-);
-decor('castle','catapult',4850,166,250,190); decor('castle','chandelier',850,190,180,180);
-
-// 211-274m market: short transition made from large forgiving silhouettes.
-for (const [x,a,w,id,h] of [[3820,220,650,'market-wagon',220],[3100,232,620,'market-stall',230],[2380,244,620,'picnic-table',190],[1660,255,600,'giant-watermelon',280],[980,265,560,'bread-cart',210],[580,274,520,'flat-brick-strip-4',104]]) mainSupport('market',id,x,a,w,h);
-obstacle('market','apple-crate',previous,110,110,100);
-decor('market','lantern-string',2750,270,360,160); decor('market','market-signboard',900,242,150,170);
-
-// 275-448m forest: wide furniture/stone chain, then a return sweep.
-for (const [x,a,w,id,h] of [[1100,290,540,'bench',150],[1680,306,500,'tree-stump',210],[2260,323,540,'round-table',210],[2870,342,500,'moss-boulder',240],[3470,360,560,'picnic-table',190],[4100,380,570,'sofa',220],[4700,398,500,'bed',220],[4250,414,520,'forest-log',190],[3600,428,500,'table',190],[2920,438,500,'stone-ledge',170],[2200,448,620,'grass-ledge',190]]) mainSupport('forest',id,x,a,w,h);
-const forestExit=previous;
-const forestRecovery=support('forest','grass-ledge',2400,386,600,100,{route:'recovery',tags:['recovery']});
-const forestRecoveryStep=support('forest','grass-ledge',2950,400,600,100,{route:'recovery',tags:['recovery']});
-const forestRecoveryStep2=support('forest','stone-ledge',3500,414,520,100,{route:'recovery',tags:['recovery']});
-recovery.push(
-  {from:forestExit.node.id,to:forestRecovery.node.id,type:'recovery'},
-  {from:forestRecovery.node.id,to:forestRecoveryStep.node.id,type:'recovery'},
-  {from:forestRecoveryStep.node.id,to:forestRecoveryStep2.node.id,type:'recovery'},
-  {from:forestRecoveryStep2.node.id,to:nodes.find(node=>node.altitude===428).id,type:'recovery'}
-);
-decor('forest','treehouse',900,380,280,280); decor('forest','butterflies',4900,440,230,150);
-
-// 449-573m farm: three deliberate descents create a down/across/up route.
-for (const [x,a,w,id,h] of [[1600,460,560,'grass-ledge',180],[980,478,520,'hay-block',240],[560,466,430,'wood-deck',150],[1120,486,500,'hay-cart',210],[1800,512,560,'wood-deck',160],[2560,500,620,'grass-ledge',180],[3340,522,600,'hay-block',230],[4100,544,580,'farm-shed',250],[4660,536,470,'farm-ladder',260],[4200,555,620,'grass-ledge',180],[3500,573,600,'wood-deck',160]]) mainSupport('farm',id,x,a,w,h);
-const farmExit=previous;
-const farmRecovery=support('farm','grass-ledge',3200,460,600,100,{route:'recovery',tags:['recovery']});
-const farmRecovery2=support('farm','wood-deck',3750,482,600,100,{route:'recovery',tags:['recovery']});
-const farmRecovery3=support('farm','wood-deck',3450,504,520,100,{route:'recovery',tags:['recovery']});
-const farmRecovery4=support('farm','wood-deck',4100,526,500,100,{route:'recovery',tags:['recovery']});
-const farmRecovery5=support('farm','wood-deck',3500,542,500,100,{route:'recovery',tags:['recovery']});
-recovery.push(
-  {from:farmExit.node.id,to:farmRecovery.node.id,type:'recovery'},
-  {from:farmRecovery.node.id,to:farmRecovery2.node.id,type:'recovery'},
-  {from:farmRecovery2.node.id,to:farmRecovery3.node.id,type:'recovery'},
-  {from:farmRecovery3.node.id,to:farmRecovery4.node.id,type:'recovery'},
-  {from:farmRecovery4.node.id,to:farmRecovery5.node.id,type:'recovery'},
-  {from:farmRecovery5.node.id,to:nodes.find(node=>node.altitude===544).id,type:'recovery'}
-);
-decor('farm','tractor',4900,520,300,220); decor('farm','scarecrow',600,545,170,220);
-
-// 574-704m snow: narrower but still generous static footholds.
-for (const [x,a,w,id,h] of [[3550,588,560,'snow-ledge',190],[2890,605,500,'ice-slab',180],[2250,622,480,'snow-mound',190],[1650,640,450,'frozen-log',170],[1080,658,430,'ice-slab',170],[600,676,400,'snowman',220],[1120,690,450,'snow-ledge',180],[1780,704,600,'ice-slab',180]]) mainSupport('snow',id,x,a,w,h);
-const snowExit=previous;
-const snowRecovery=support('snow','snow-ledge',2100,645,1700,100,{route:'recovery',tags:['recovery']});
-const snowRecoveryStep=support('snow','ice-slab',1550,658,420,100,{route:'recovery',tags:['recovery']});
-const snowRecoveryStep2=support('snow','ice-slab',1050,670,420,100,{route:'recovery',tags:['recovery']});
-recovery.push(
-  {from:snowExit.node.id,to:snowRecovery.node.id,type:'recovery'},
-  {from:snowRecovery.node.id,to:snowRecoveryStep.node.id,type:'recovery'},
-  {from:snowRecoveryStep.node.id,to:snowRecoveryStep2.node.id,type:'recovery'},
-  {from:snowRecoveryStep2.node.id,to:nodes.find(node=>node.altitude===676).id,type:'recovery'}
-);
-decor('snow','cable-car',4300,650,300,220); decor('snow','aurora-crystal',5000,700,230,250);
-
-// 705-1000m factory: front-on rooms, door openings and a deterministic laser maze.
-for (const [x,a,w,id,h] of [[2380,718,620,'metal-deck',160],[3020,735,560,'metal-deck',160],[3650,752,520,'metal-bracket',150],[4260,770,560,'metal-deck',160],[4700,790,520,'metal-deck',160],[4180,810,520,'metal-bracket',150],[3540,820,680,'metal-deck',160],[2920,840,520,'metal-deck',160],[2350,860,500,'metal-bracket',150],[1800,880,500,'metal-deck',160],[1250,900,500,'metal-deck',160],[750,920,480,'metal-bracket',150],[1150,930,560,'metal-deck',160],[1750,944,500,'metal-bracket',150],[2350,958,520,'metal-deck',160],[3000,972,540,'metal-deck',160],[3700,984,600,'metal-deck',160],[4450,994,700,'metal-deck',160],[4900,1000,880,'metal-deck',170]]) mainSupport('factory',id,x,a,w,h);
-
-// Fixed wall pieces frame the tech rooms without becoming invisible platforms.
-for (const [x,a] of [[3300,780],[3900,850],[1450,885],[2700,950]]) {
-  objects.push({id:`factory-wall-${a}`,assetId:'flat-brick-pillar-4',zone:'factory',x,y:yAt(a)-120,w:128,h:320,angle:0,role:'obstacle',behavior,supportId:null,tags:['wall','clearance-84']});
+function mainRow(zone,altitude,entries,tags=['row']) {
+  return entries.map(([x,assetId,w,h=110])=>mainSupport(zone,assetId,x,altitude,w,h,{tags}));
 }
-for (const [x,a,w] of [[3240,830,280],[2580,905,260],[2050,968,280]]) hazards.push({id:`laser-${a}`,zone:'factory',x,y:yAt(a)-60,w,h:16,checkpointAltitude:a<900?820:930,type:'laser'});
-decor('factory','giant-gear',5100,850,290,290); decor('factory','generator',600,970,300,240);
 
-// A safe, static shortcut is never required by the main route.
-const shortcutA=support('forest','hanging-ring',4720,432,150,150,{route:'shortcut',safe:false});
-const shortcutB=support('forest','hanging-ring',5000,448,150,150,{route:'shortcut',safe:false});
-shortcut.push({from:forestExit.node.id,to:shortcutA.node.id,type:'shortcut'},{from:shortcutA.node.id,to:shortcutB.node.id,type:'shortcut'},{from:shortcutB.node.id,to:forestExit.node.id,type:'shortcut'});
+// Large silhouettes stay large, but a small themed foothold is authored in
+// genuinely wide gaps. This keeps the route readable without inflating the
+// large object's art or its collider beyond the declared render box.
+function mainObjectChain(zone,entries,connectorAsset) {
+  const result=[];
+  for (let index=0;index<entries.length;index++) {
+    const [x,altitude,assetId,w,h,options={}]=entries[index];
+    result.push(mainSupport(zone,assetId,x,altitude,w,h,{tags:['object-row']}));
+    const next=entries[index+1];
+    if (next&&!options.skipConnector) mainSupport(zone,connectorAsset,(x+next[0])/2,(altitude+next[1])/2,130,50,{tags:['gap-connector']});
+  }
+  return result;
+}
+
+function mainObjectRow(zone,altitude,entries,connectorAsset) {
+  return mainObjectChain(zone,entries.map(([x,assetId,w,h,options])=>[x,altitude,assetId,w,h,options]),connectorAsset);
+}
+
+function turnRight(zone,fromAltitude,toAltitude) {
+  const rise=toAltitude-fromAltitude;
+  const stepW=rise<40?220:260, stepH=rise<40?40:58;
+  const one=mainSupport(zone,'flat-brick-strip-2',4800,fromAltitude+rise*.3,stepW,stepH,{tags:['turn-step']});
+  const two=mainSupport(zone,'flat-brick-strip-2',5150,fromAltitude+rise*.6,stepW,stepH,{tags:['turn-step']});
+  const three=mainSupport(zone,'flat-brick-strip-2',5400,fromAltitude+rise*.9,stepW,stepH,{tags:['turn-step']});
+  return [one,two,three];
+}
+
+function turnLeft(zone,fromAltitude,toAltitude) {
+  const rise=toAltitude-fromAltitude;
+  const stepW=rise<40?220:260, stepH=rise<40?40:58;
+  const one=mainSupport(zone,'flat-brick-strip-2',300,fromAltitude+rise*.42,stepW,stepH,{tags:['turn-step']});
+  const two=mainSupport(zone,'flat-brick-strip-2',50,fromAltitude+rise*.68,stepW,stepH,{tags:['turn-step']});
+  const three=mainSupport(zone,'flat-brick-strip-2',500,fromAltitude+rise*.9,stepW,stepH,{tags:['turn-step']});
+  return [one,two,three];
+}
+
+// CASTLE 0-210m -------------------------------------------------------------
+// 0-45m: a continuous flat road followed by broad, readable brick steps.
+const castleGround=mainRow('castle',0,[
+  [400,'flat-brick-strip-4',680,106],[1050,'flat-brick-strip-4',680,106],
+  [1700,'flat-brick-strip-4',680,106],[2350,'flat-brick-strip-4',680,106],
+  [3000,'flat-brick-strip-4',680,106]
+],['ground-chain']);
+for (const [x,a] of [[3500,10],[3825,22],[4150,34],[4475,45],[4800,60],[5200,75]]) mainSupport('castle','flat-brick-strip-2',x,a,300,62,{tags:['intro-step']});
+
+// 45m row: obstacles sit on their own visible support, with a clear centre lane.
+const castleObstacleRow=mainRow('castle',90,[
+  [4900,'flat-brick-strip-4',520,104],[4300,'flat-brick-strip-4',520,104],
+  [3700,'flat-brick-strip-4',520,104],[3100,'flat-brick-strip-4',520,104],
+  [2500,'flat-brick-strip-4',520,104],[1900,'flat-brick-strip-4',520,104],
+  [1300,'flat-brick-strip-4',520,104],[700,'flat-brick-strip-4',520,104]
+]);
+obstacle('castle','crate',castleObstacleRow[1],-185,105,105);
+obstacle('castle','barrel',castleObstacleRow[2],185,100,112);
+obstacle('castle','treasure-chest',castleObstacleRow[3],-180,135,105);
+obstacle('castle','barrel',castleObstacleRow[6],0,90,80);
+turnLeft('castle',90,130);
+
+// 90m row: bricks give way to large but forgiving silhouettes.
+const castleMixedA=mainObjectRow('castle',130,[
+  [850,'flat-brick-wall-2',500,100],[1650,'drawbridge',500,118],
+  [2250,'round-table',500,160],[2850,'flat-brick-strip-4',500,100],
+  [3450,'stone-arch',500,120,{skipConnector:true}],[3850,'flat-brick-strip-4',500,100],
+  [4450,'flat-brick-wall-2',500,100]
+],'flat-brick-a');
+obstacle('castle','crate',castleMixedA[3],-170,90,80);
+turnRight('castle',130,170);
+mainSupport('castle','flat-brick-strip-2',5000,170,260,58,{tags:['turn-top']});
+
+const castleUpperMiddle=mainObjectRow('castle',170,[
+  [4500,'flat-brick-strip-4',500,100],[3900,'shield',430,110],
+  [3300,'drawbridge',500,118],[2700,'round-table',480,120],
+  [2100,'flat-brick-strip-2',480,100],[1500,'stone-arch',480,120],
+  [900,'flat-brick-strip-4',500,100,{skipConnector:true}],[500,'flat-brick-strip-2',260,58]
+],'flat-brick-a');
+turnLeft('castle',170,210);
+
+const castleTop=mainObjectRow('castle',210,[
+  [850,'flat-brick-strip-4',500,100],[1450,'drawbridge',500,118],
+  [2050,'round-table',480,120],[2650,'flat-brick-strip-4',500,100],
+  [3250,'stone-arch',480,120],[3850,'drawbridge',500,118],
+  [4450,'flat-brick-strip-4',500,100]
+],'flat-brick-a');
+const castleExit=castleTop.at(-1);
+decor('castle','catapult',5150,150,250,190);
+decor('castle','chandelier',650,112,180,180);
+
+// MARKET 211-274m -----------------------------------------------------------
+turnRight('market',210,250);
+mainSupport('market','flat-brick-strip-2',5000,260,260,58,{tags:['turn-top']});
+const marketRow=mainObjectChain('market',[
+  [4500,260,'market-wagon',500,200],[3900,262,'market-stall',500,200],
+  [3300,264,'picnic-table',500,170],[2700,266,'giant-watermelon',420,220],
+  [2100,268,'bread-cart',480,190],[1500,270,'cheese-wheel',420,190],
+  [1000,272,'market-stall',480,190,{skipConnector:true}],[550,274,'flat-brick-strip-4',440,90]
+],'flat-brick-a');
+obstacle('market','apple-crate',marketRow[1],-175,110,100);
+decor('market','lantern-string',2850,270,360,160);
+decor('market','market-signboard',650,245,150,170);
+
+// FOREST 275-448m -----------------------------------------------------------
+turnLeft('forest',274,325);
+mainObjectRow('forest',325,[
+  [850,'bench',480,150],[1450,'tree-stump',430,190],[2050,'round-table',480,180],
+  [2650,'moss-boulder',450,200],[3250,'picnic-table',480,170],
+  [3850,'sofa',500,190],[4450,'bed',480,190]
+],'wood-deck');
+turnRight('forest',325,385);
+const forestMiddle=mainObjectRow('forest',385,[
+  [4900,'wood-deck',480,130],[4300,'table',450,170],[3700,'stone-ledge',500,150],
+  [3100,'grass-ledge',500,160],[2500,'bench',450,150],[1900,'tree-stump',420,190],
+  [1300,'moss-boulder',430,190],[700,'wood-deck',480,130]
+],'wood-deck');
+turnLeft('forest',385,445);
+const forestTop=mainObjectRow('forest',445,[
+  [850,'grass-ledge',480,160],[1450,'forest-log',420,170],[2050,'stone-ledge',480,150],
+  [2650,'table',440,170],[3250,'moss-boulder',430,190],[3850,'picnic-table',480,170],
+  [4450,'grass-ledge',500,160]
+],'wood-deck');
+const forestExit=forestTop.at(-1);
+decor('forest','treehouse',600,390,280,280);
+decor('forest','butterflies',5000,400,230,150);
+
+// FARM 449-573m -------------------------------------------------------------
+// The lower sweep deliberately drops three times before climbing to row two.
+turnRight('farm',445,500);
+const farmLower=mainObjectChain('farm',[
+  [4900,500,'grass-ledge',500,160],[4300,516,'hay-block',450,190],
+  [3700,504,'wood-deck',480,130],[3100,518,'hay-cart',430,180],
+  [2500,506,'grass-ledge',500,160],[1900,520,'hay-block',450,190],
+  [1300,508,'wood-deck',480,130],[700,522,'grass-ledge',480,160]
+],'wood-deck');
+turnLeft('farm',522,573);
+const farmUpper=mainObjectRow('farm',573,[
+  [850,'wood-deck',480,130],[1450,'hay-cart',430,180],[2050,'grass-ledge',500,160],
+  [2650,'farm-shed',450,210],[3250,'hay-block',450,190],
+  [3850,'farm-ladder',410,210],[4450,'grass-ledge',500,160]
+],'wood-deck');
+const farmExit=farmUpper.at(-1);
+decor('farm','tractor',5000,500,300,220);
+decor('farm','scarecrow',650,535,170,220);
+
+// SNOW 574-704m -------------------------------------------------------------
+turnRight('snow',573,635);
+const snowLower=mainObjectRow('snow',635,[
+  [4900,'snow-ledge',500,160],[4300,'ice-slab',480,150],[3700,'snow-mound',430,180],
+  [2950,'frozen-log',420,160],[2350,'ice-slab',460,150],[1750,'snowman',410,190],
+  [1150,'snow-ledge',480,160],[600,'ice-slab',440,150]
+],'ice-slab');
+turnLeft('snow',635,690);
+const snowUpper=mainObjectRow('snow',690,[
+  [850,'snow-ledge',480,160],[1450,'frozen-log',420,160],[2050,'ice-slab',460,150],
+  [2650,'snow-mound',430,180],[3250,'ice-slab',460,150],
+  [3850,'snowman',410,190],[4450,'snow-ledge',480,160]
+],'ice-slab');
+const snowExit=snowUpper.at(-1);
+decor('snow','cable-car',5200,620,300,220);
+decor('snow','aurora-crystal',600,690,230,250);
+
+// FACTORY 705-1000m ---------------------------------------------------------
+turnRight('factory',704,755);
+const factoryRow1=mainRow('factory',755,[
+  [4900,'metal-deck',500,150],[4300,'metal-bracket',430,140],[3700,'metal-deck',500,150],
+  [3100,'metal-bracket',430,140],[2500,'metal-deck',500,150],
+  [1900,'metal-bracket',430,140],[1300,'metal-deck',500,150],[700,'metal-bracket',430,140]
+]);
+turnLeft('factory',755,805);
+const factoryRow2=mainRow('factory',805,[
+  [850,'metal-deck',480,150],[1450,'metal-bracket',430,140],[2050,'metal-deck',500,150],
+  [2650,'metal-bracket',430,140],[3250,'metal-deck',500,150],
+  [3850,'metal-bracket',430,140],[4450,'metal-deck',500,150]
+]);
+turnRight('factory',805,855);
+const factoryRow3=mainRow('factory',855,[
+  [4900,'metal-deck',480,150],[4300,'metal-bracket',430,140],[3700,'metal-deck',500,150],
+  [3100,'metal-bracket',430,140],[2500,'metal-deck',500,150],
+  [1900,'metal-bracket',430,140],[1300,'metal-deck',500,150],[700,'metal-bracket',430,140]
+]);
+turnLeft('factory',855,905);
+const factoryRow4=mainRow('factory',905,[
+  [850,'metal-deck',480,150],[1450,'metal-bracket',430,140],[2050,'metal-deck',500,150],
+  [2650,'metal-bracket',430,140],[3250,'metal-deck',500,150],
+  [3850,'metal-bracket',430,140],[4450,'metal-deck',500,150]
+]);
+turnRight('factory',905,955);
+const factoryRow5=mainRow('factory',955,[
+  [4900,'metal-deck',480,150],[4300,'metal-bracket',430,140],[3700,'metal-deck',500,150],
+  [3100,'metal-bracket',430,140],[2500,'metal-deck',500,150],
+  [1900,'metal-bracket',430,140],[1300,'metal-deck',500,150],[700,'metal-bracket',430,140]
+]);
+turnLeft('factory',955,1000);
+mainObjectRow('factory',1000,[
+  [850,'metal-deck',480,120],[1450,'metal-bracket',430,110],[2050,'metal-deck',500,120],
+  [2650,'metal-bracket',430,110],[3250,'metal-deck',500,120],
+  [3850,'metal-bracket',430,110],[4450,'metal-deck',500,120]
+],'metal-bracket');
+mainSupport('factory','metal-deck',4900,1000,700,160,{tags:['summit-platform']});
+
+// Solid room pillars sit beside, never across, the route. Lasers are visible,
+// non-lethal jump obstacles placed above broad factory decks.
+for (const [x,a] of [[5700,790],[-100,850],[5700,905],[-100,960]]) {
+  objects.push({
+    id:`factory-wall-${a}`,assetId:'flat-brick-pillar-4',zone:'factory',x,y:yAt(a),
+    w:60,h:270,angle:0,role:'obstacle',behavior:staticBehavior,supportId:null,
+    tags:['wall','route-edge']
+  });
+}
+for (const [x,a,w] of [[3250,805,190],[2500,855,190],[3250,905,190],[2500,955,190]]) {
+  hazards.push({id:`laser-${a}`,zone:'factory',x,y:yAt(a)-105,w,h:16,checkpointAltitude:a<880?704:a<935?820:930,type:'laser'});
+}
+decor('factory','giant-gear',5200,840,260,260);
+decor('factory','generator',500,975,280,220);
+
+// Natural recovery: a miss from an upper sweep lands on the broad row below.
+recovery.push(
+  {from:castleExit.node.id,to:castleUpperMiddle[1].node.id,type:'recovery'},
+  {from:forestTop[3].node.id,to:forestMiddle[3].node.id,type:'recovery'},
+  {from:farmUpper[3].node.id,to:farmLower[3].node.id,type:'recovery'},
+  {from:snowUpper[3].node.id,to:snowLower[3].node.id,type:'recovery'},
+  {from:factoryRow3[3].node.id,to:factoryRow2[3].node.id,type:'recovery'},
+  {from:factoryRow4[3].node.id,to:factoryRow3[3].node.id,type:'recovery'},
+  {from:factoryRow5[3].node.id,to:factoryRow4[3].node.id,type:'recovery'}
+);
 
 export const FIXED_MAP = {
   mapVersion:MAP_VERSION,
@@ -137,13 +289,16 @@ export const FIXED_MAP = {
   ],
   objects,nodes,
   routes:{main,shortcut,recovery},
-  progressSensors:nodes.filter(node=>node.route==='main').map((node,index,all)=>({id:`progress-${index}`,x:node.x,y:node.y,progress:index/(all.length-1),altitude:node.altitude})),
+  progressSensors:nodes.filter(node=>node.route==='main').map((node,index,all)=>({
+    id:`progress-${index}`,x:node.x,y:node.y,progress:index/(all.length-1),altitude:node.altitude
+  })),
   checkpoints:[0,210,274,448,573,704,820,930].map(altitude=>({id:`checkpoint-${altitude}`,altitude})),
   recoveryBounds:[
-    {id:'recovery-castle',minAltitude:108,maxAltitude:200,resetAltitude:110},
-    {id:'recovery-forest',minAltitude:350,maxAltitude:445,resetAltitude:342},
-    {id:'recovery-farm',minAltitude:470,maxAltitude:570,resetAltitude:460},
-    {id:'recovery-snow',minAltitude:610,maxAltitude:703,resetAltitude:588}
+    {id:'recovery-castle',minAltitude:35,maxAltitude:210,resetAltitude:0},
+    {id:'recovery-forest',minAltitude:290,maxAltitude:448,resetAltitude:274},
+    {id:'recovery-farm',minAltitude:460,maxAltitude:573,resetAltitude:448},
+    {id:'recovery-snow',minAltitude:588,maxAltitude:704,resetAltitude:573},
+    {id:'recovery-factory',minAltitude:718,maxAltitude:1000,resetAltitude:704}
   ],
   hazards,
   summit:{x:4900,y:yAt(1000)-90,progress:1},
