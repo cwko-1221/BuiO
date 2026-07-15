@@ -71,7 +71,10 @@ export function validateCourse(course) {
   for (const edge of course.routes.main) {
     const a=nodes.get(edge.from), b=nodes.get(edge.to);
     if (!a||!b) continue;
-    if (b.altitude<a.altitude) mainDescents++;
+    if (b.altitude<a.altitude) {
+      mainDescents++;
+      errors.push(`main edge ${edge.from}>${edge.to} descends; the authored route must keep climbing`);
+    }
     const ao=objects.get(a.objectId), bo=objects.get(b.objectId);
     const aw=fittedSize(ao).w, bw=fittedSize(bo).w;
     const gap=Math.max(0,Math.abs(b.x-a.x)-(aw+bw)/2);
@@ -82,7 +85,10 @@ export function validateCourse(course) {
     minMainMargin=Math.min(minMainMargin,margin);
     if (margin<.18) errors.push(`main edge ${edge.from}>${edge.to} has only ${(margin*100).toFixed(1)}% margin`);
   }
-  if (mainDescents<3) errors.push(`fixed route needs at least 3 deliberate descents, got ${mainDescents}`);
+  // Recovery paths may fall back, but the visible main line is deliberately
+  // one continuous ascent.  This prevents a future edit from quietly turning
+  // the map back into stacked horizontal rows.
+  if (mainDescents>0) errors.push(`fixed route has ${mainDescents} descending main edges`);
   let minRecoveryMargin=1;
   for (const edge of course.routes.recovery) {
     const a=nodes.get(edge.from), b=nodes.get(edge.to);
