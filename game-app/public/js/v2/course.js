@@ -50,6 +50,7 @@ export function buildCourse(seed=0) {
     objects,nodes,routes:{main:FIXED_MAP.routes.main.map(edge=>({...edge})),shortcut:FIXED_MAP.routes.shortcut.map(edge=>({...edge})),recovery:FIXED_MAP.routes.recovery.map(edge=>({...edge}))},
     sensors,checkpoints,instances,
     recoveryBounds:FIXED_MAP.recoveryBounds.map(item=>({...item})), hazards:FIXED_MAP.hazards.map(item=>({...item})),
+    annotations:(FIXED_MAP.annotations||[]).map(item=>({...item,arrow:item.arrow?{...item.arrow}:undefined})),
     usedAssets:[...new Set([...objects.map(object=>object.assetId),'checkpoint-flag','summit-flag'])],
     stageCount:ZONES.length,stages:ZONES.map(zone=>ZONE_NAMES[zone]),courseHash,colliderHash
   };
@@ -84,6 +85,12 @@ export function validateCourse(course) {
     const margin=Math.min(horizontalMargin,verticalMargin);
     minMainMargin=Math.min(minMainMargin,margin);
     if (margin<.18) errors.push(`main edge ${edge.from}>${edge.to} has only ${(margin*100).toFixed(1)}% margin`);
+    // The broad theoretical envelope above includes a fully accelerated
+    // double-jump. Main-route edges must also be comfortable from rest, which
+    // is the situation after a player stops to answer a question. The safe
+    // airborne gap shrinks as the destination rises.
+    const restStartGap=Math.max(120,260-rise);
+    if (gap>restStartGap) errors.push(`main edge ${edge.from}>${edge.to} cannot be cleared from rest (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise)`);
   }
   // Recovery paths may fall back, but the visible main line is deliberately
   // one continuous ascent.  This prevents a future edit from quietly turning

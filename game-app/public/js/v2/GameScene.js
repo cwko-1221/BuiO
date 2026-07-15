@@ -65,6 +65,7 @@ export class GameScene extends Phaser.Scene {
     this.createPlayerAnimations();
 
     this.objectSprites = this.course.objects.map(obj => this.createCourseObject(obj));
+    this.createAnnotations();
     this.createProgressSensors();
     this.createHazards();
     this.createCheckpoints();
@@ -192,6 +193,27 @@ export class GameScene extends Phaser.Scene {
       const body = this.matter.add.rectangle(sensor.x,sensor.y,150,180,{isStatic:true,isSensor:true,label:'progress'});
       body.progressSensor = sensor; return body;
     });
+  }
+
+  createAnnotations() {
+    for (const note of this.course.annotations || []) {
+      const summit = note.type === 'summit';
+      const turn = note.type === 'turn';
+      const color = summit ? '#50e879' : turn ? '#ffffff' : '#ffd743';
+      const size = summit ? '26px' : turn ? '20px' : '22px';
+      this.add.text(note.x,note.y,note.text,{
+        fontFamily:'Arial, Microsoft JhengHei',fontSize:size,fontStyle:'bold',
+        color,stroke:'#18243d',strokeThickness:summit?8:7,
+        align:'center',wordWrap:{width:360}
+      }).setOrigin(.5).setDepth(60).setAngle(turn?-4:0);
+      if (!note.arrow) continue;
+      const x2=note.x+note.arrow.dx, y2=note.y+note.arrow.dy;
+      const angle=Math.atan2(note.arrow.dy,note.arrow.dx);
+      const g=this.add.graphics().setDepth(59);
+      g.lineStyle(10,summit?0x50e879:0x41c85a,1).beginPath().moveTo(note.x,note.y+34).lineTo(x2,y2).strokePath();
+      g.fillStyle(summit?0x50e879:0x41c85a,1);
+      g.fillTriangle(x2,y2,x2-24*Math.cos(angle-.55),y2-24*Math.sin(angle-.55),x2-24*Math.cos(angle+.55),y2-24*Math.sin(angle+.55));
+    }
   }
 
   createHazards() {
