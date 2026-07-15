@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07o';
+export const MAP_VERSION = 'fixed-1000m-2026.07p';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -149,11 +149,11 @@ const farmRun=authoredRoute('farm',[
   ['hay-block',1210,476,220,114],
   ['ref-barrel-cart',1470,490,360,215,{tags:['landmark-base','turn-pad','reference-frame-05','barrel-cart']}],
   ['ref-barrel-front',1730,504,170,185,{tags:['reference-frame-06','barrel-step']}],
-  ['wood-deck',1990,518,270,92],
+  ['ref-stone-pillar-front',1990,518,280,260,{tags:['reference-frame-05','stone-pillar']}],
   ['ref-stone-ramp-front',2250,532,295,84,{angle:0.10,tags:['reference-frame-06','stone-ramp']}],
   ['ref-barrel-cart',2510,546,300,185,{tags:['reference-frame-05','barrel-cart']}],
   ['picnic-table',2770,558,275,122],
-  ['flat-brick-strip-2',3040,566,200,72],
+  ['ref-stone-pillar-front',3040,566,280,260,{tags:['reference-frame-05','stone-pillar']}],
   ['ref-stone-ramp-front',3360,573,330,88,{angle:-0.08,tags:['zone-landing','landmark-base','reference-frame-04','stone-ramp']}]
 ],['authored-farm','rising-right']);
 obstacle('farm','potato-crate',farmRun[3],-76,76,72);

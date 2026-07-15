@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 208,
+  "count": 209,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -511,6 +511,62 @@
       "renderSize": {
         "w": 192,
         "h": 114
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-stone-pillar-front",
+      "label": "Reference front stone pillar",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-stone-pillar-front.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 167,
+        "h": 69
       },
       "body": {
         "type": "polygon",
@@ -8591,7 +8647,7 @@
       "original design"
     ]
   },
-  "availableCount": 208,
-  "imagegenCount": 115,
+  "availableCount": 209,
+  "imagegenCount": 116,
   "proceduralCount": 93
 }
