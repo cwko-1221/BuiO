@@ -4,7 +4,8 @@ const catalog = {
     ['ref-jump-arrow','Reference jump arrow'],
     ['ref-run-jump-sign','Reference running-jump sign'],
     ['ref-double-jump-sign','Reference double-jump sign'],
-    ['ref-zone-title','Reference zone title']
+    ['ref-zone-title','Reference zone title'],
+    ['ref-market-stall-red','Reference red market stall']
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],
@@ -67,7 +68,7 @@ const catalog = {
 };
 
 const zoneColors = {
-  reference: ['#4fd52d','#17233f','#fff7c7'],
+  reference: ['#d84a3d','#17233f','#fff7c7'],
   global: ['#c88a43','#80502d','#ffe0a0'], castle: ['#8293ad','#46536d','#dbe5f4'],
   market: ['#e96358','#9b3b43','#ffe09a'], forest: ['#54b879','#236646','#c6f3ad'],
   farm: ['#e5ad43','#8d5f2e','#fff0a8'], snow: ['#94d9f4','#4777a5','#f4fdff'],

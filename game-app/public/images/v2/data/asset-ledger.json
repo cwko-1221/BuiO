@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 200,
+  "count": 201,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -40,7 +40,7 @@
         "material": "solid"
       },
       "palette": [
-        "#4fd52d",
+        "#d84a3d",
         "#17233f",
         "#fff7c7"
       ],
@@ -88,7 +88,7 @@
         "material": "solid"
       },
       "palette": [
-        "#4fd52d",
+        "#d84a3d",
         "#17233f",
         "#fff7c7"
       ],
@@ -132,7 +132,7 @@
         "material": "solid"
       },
       "palette": [
-        "#4fd52d",
+        "#d84a3d",
         "#17233f",
         "#fff7c7"
       ],
@@ -162,7 +162,7 @@
         "material": "solid"
       },
       "palette": [
-        "#4fd52d",
+        "#d84a3d",
         "#17233f",
         "#fff7c7"
       ],
@@ -192,13 +192,44 @@
         "material": "solid"
       },
       "palette": [
-        "#4fd52d",
+        "#d84a3d",
         "#17233f",
         "#fff7c7"
       ],
       "tags": [
         "reference",
         "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-market-stall-red",
+      "label": "Reference red market stall",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-market-stall-red.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 110,
+        "h": 64
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "circle"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -8239,7 +8270,7 @@
       "original design"
     ]
   },
-  "availableCount": 200,
-  "imagegenCount": 107,
+  "availableCount": 201,
+  "imagegenCount": 108,
   "proceduralCount": 93
 }

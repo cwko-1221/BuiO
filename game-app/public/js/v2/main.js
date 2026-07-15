@@ -77,8 +77,10 @@ function startGame(seed,durationSec,startedAt,resume){
       scene=s;
       if(Number.isFinite(resume?.x)&&Number.isFinite(resume?.y))s.setPlayerPosition(resume.x,resume.y);
       else if(preview&&Number.isFinite(previewAltitude)) {
+        const checkpoint=course.checkpoints.sort((a,b)=>Math.abs(a.altitude-previewAltitude)-Math.abs(b.altitude-previewAltitude))[0];
         const node=course.nodes.filter(item=>item.route==='main').sort((a,b)=>Math.abs(a.altitude-previewAltitude)-Math.abs(b.altitude-previewAltitude))[0];
-        if(node)s.setPlayerPosition(node.x,node.y-60);
+        const spawn=Math.abs((checkpoint?.altitude??Infinity)-previewAltitude)<=1?checkpoint:node;
+        if(spawn)s.setPlayerPosition(spawn.x,spawn.y-60);
       }
       toast(`固定 1000m 地圖 ${course.mapVersion} · ${course.courseHash}`,true);
     },

@@ -107,9 +107,10 @@ const marketRun=authoredRoute('market',[
   ['market-basket',3930,241,225,112],
   ['market-wagon',4160,252,300,142],
   ['picnic-table',4390,263,270,122],
-  ['market-stall',4620,274,390,190,{tags:['zone-landing','landmark-base']}]
+  ['flat-brick-strip-4',4850,274,500,106,{tags:['zone-landing','landmark-base','reference-frame-02']}]
 ],['authored-market','rising-right']);
 obstacle('market','lemon-crate',marketRun[3],-72,76,72);
+obstacle('market','ref-market-stall-red',marketRun[5],0,300,300,{tags:['reference-frame-02']});
 decor('market','lantern-string',2740,274,340,150);
 recoverLast(marketRun,3);
 
@@ -117,10 +118,10 @@ recoverLast(marketRun,3);
 // Chairs, logs, stumps and broad natural landmarks create a readable leftward
 // climb. A final short right turn avoids a mechanical straight diagonal.
 const forestRun=authoredRoute('forest',[
-  ['bench',4300,286,320,100],
-  ['picnic-table',4000,299,420,128,{tags:['landmark-base','turn-pad']}],
-  ['round-table',3760,313,300,118],
-  ['drawbridge',3520,328,280,106,{angle:-0.07}],
+  ['bench',4540,286,320,100],
+  ['picnic-table',4250,299,420,128,{tags:['landmark-base','turn-pad']}],
+  ['round-table',3960,313,300,118],
+  ['drawbridge',3600,328,280,106,{angle:-0.07}],
   ['chair',3280,343,180,112],
   ['market-basket',3040,358,210,108],
   ['barrel',2800,373,190,116],
@@ -243,7 +244,10 @@ export const FIXED_MAP = {
   progressSensors:nodes.filter(node=>node.route==='main').map((node,index,all)=>({
     id:`progress-${index}`,x:node.x,y:node.y,progress:index/(all.length-1),altitude:node.altitude
   })),
-  checkpoints:[0,210,274,448,573,704,820,930].map(altitude=>({id:`checkpoint-${altitude}`,altitude})),
+  checkpoints:[
+    {altitude:0},{altitude:210},{altitude:274,x:4660},{altitude:448},
+    {altitude:573},{altitude:704},{altitude:820},{altitude:930}
+  ].map(item=>({id:`checkpoint-${item.altitude}`,...item})),
   recoveryBounds:[
     {id:'recovery-castle',minAltitude:35,maxAltitude:210,resetAltitude:0},
     {id:'recovery-forest',minAltitude:290,maxAltitude:448,resetAltitude:274},

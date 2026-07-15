@@ -62,6 +62,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-zone-title"
   },
+  "ref-market-stall-red": {
+    "key": "atlas-reference-0",
+    "frame": "ref-market-stall-red"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"
