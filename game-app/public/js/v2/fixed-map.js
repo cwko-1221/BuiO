@@ -1,7 +1,7 @@
 // One authored course for every room.  Apart from the forgiving first floor,
 // the main route is a succession of rising diagonals: the player is always
 // climbing, with a few wide turns that alternate between left and right.
-export const MAP_VERSION = 'fixed-1000m-2026.07d';
+export const MAP_VERSION = 'fixed-1000m-2026.07e';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -65,19 +65,19 @@ const marketStyles=[
   ['barrel',205,120],['market-scale',230,118],['flat-brick-strip-2',260,72]
 ];
 const forestStyles=[
-  ['tree-stump',225,125],['moss-boulder',245,128],['stone-ledge',260,82],
+  ['tree-stump',225,125],['stone-ledge',260,82],['stone-ledge',260,82],
   ['bench',255,104],['giant-leaf',225,112],['stone-ledge',250,82]
 ];
 const farmStyles=[
-  ['hay-bale',205,118],['wood-pallet',230,92],['milk-can',170,120],
+  ['hay-block',220,118],['wood-pallet',230,92],['milk-can',170,120],
   ['wheelbarrow',220,112],['feed-bin',210,126],['watering-can',190,110]
 ];
 const snowStyles=[
-  ['snow-ledge',250,100],['ice-crystal',185,138],['frozen-barrel',185,124],
+  ['snow-ledge',250,100],['ice-slab',220,108],['frozen-barrel',185,124],
   ['sled',230,108],['curling-stone',190,110],['ice-slab',240,98]
 ];
 const factoryStyles=[
-  ['oil-drum',175,125],['cable-spool',195,116],['metal-deck',260,82],
+  ['oil-drum',175,125],['cable-spool',195,116],['conveyor',260,82],
   ['battery',175,126],['valve-wheel',185,122],['metal-bracket',230,96]
 ];
 
@@ -109,8 +109,8 @@ decor('market','lantern-string',2450,260,300,140);
 
 // FOREST 275-448m -----------------------------------------------------------
 const forestRun=risingRun('forest',{x:2800,altitude:295,direction:-1,count:9,stepX:275,stepAltitude:19.125,styles:forestStyles});
-obstacle('forest','red-mushroom',forestRun[6],54,74,82);
-obstacle('forest','blue-mushroom',forestRun[8],-54,74,82);
+obstacle('forest','red-mushroom',forestRun[2],54,74,82);
+obstacle('forest','blue-mushroom',forestRun[5],-54,74,82);
 decor('forest','treehouse',4800,365,300,300);
 decor('forest','butterflies',380,420,210,150);
 
@@ -133,7 +133,7 @@ decor('snow','aurora-crystal',420,680,230,250);
 const factoryRiseA=risingRun('factory',{x:1000,altitude:724,direction:1,count:6,stepX:280,stepAltitude:18,styles:factoryStyles});
 const factoryRiseB=risingRun('factory',{x:2700,altitude:834,direction:-1,count:6,stepX:280,stepAltitude:18,styles:factoryStyles});
 const factoryRiseC=risingRun('factory',{x:1600,altitude:944,direction:1,count:4,stepX:300,stepAltitude:18,styles:factoryStyles});
-const summitBase=mainSupport('factory','metal-deck',2800,1000,420,150,{tags:['summit-platform']});
+const summitBase=mainSupport('factory','conveyor',2800,1000,420,150,{tags:['summit-platform']});
 obstacle('factory','factory-monitor',factoryRiseA[4],54,78,70);
 obstacle('factory','vent-fan',factoryRiseB[5],-54,76,76);
 decor('factory','giant-gear',5050,850,250,250);

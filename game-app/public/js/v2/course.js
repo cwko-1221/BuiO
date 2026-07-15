@@ -1,4 +1,4 @@
-import { ASSET_BY_ID, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js';
+import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js';
 import { ASSET_GEOMETRY } from './asset-geometry.js';
 import { alphaBounds, fittedSize } from './colliders.js';
 import { FIXED_MAP, MAP_VERSION } from './fixed-map.js';
@@ -114,6 +114,8 @@ export function validateCourse(course) {
   if (course.hazards.length<3) errors.push('factory laser maze is missing');
   const sideViewBlocks=course.objects.filter(object=>SIDE_VIEW_BLOCK_IDS.has(object.assetId));
   if (sideViewBlocks.length) errors.push(`front-facing course contains side-view blocks: ${sideViewBlocks.map(object=>object.assetId).join(', ')}`);
+  const rejectedStyle=course.objects.filter(object=>REJECTED_STYLE_ASSET_IDS.has(object.assetId));
+  if (rejectedStyle.length) errors.push(`course contains rejected placeholder art: ${rejectedStyle.map(object=>object.assetId).join(', ')}`);
 
   // A reachable graph is not enough: two unrelated alpha bodies must never
   // occupy the same world space. That was the source of solid props appearing

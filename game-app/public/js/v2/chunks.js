@@ -27,7 +27,7 @@ const zoneSurfaces = {
   forest: { long:'grass-ledge', medium:'stone-ledge', step:'moss-boulder', thick:'treehouse', corner:'stone-arch' },
   farm: { long:'grass-ledge', medium:'wood-deck', step:'hay-block', thick:'tractor', corner:'bread-cart' },
   snow: { long:'snow-ledge', medium:'ice-slab', step:'crate', thick:'ice-arch', corner:'grand-clock' },
-  factory: { long:'metal-deck', medium:'metal-deck', step:'metal-bracket', thick:'bookcase', corner:'giant-gear' }
+  factory: { long:'conveyor', medium:'conveyor', step:'oil-drum', thick:'bookcase', corner:'giant-gear' }
 };
 
 const surface = (zone, kind, x, y, w, h, extra = {}) => platform(zoneSurfaces[zone][kind], x, y, w, h, { role:'support', ...extra });

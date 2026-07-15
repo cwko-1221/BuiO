@@ -101,6 +101,12 @@ export const SIDE_VIEW_BLOCK_IDS = new Set([
   'castle-brick-thick','castle-brick-corner'
 ]);
 
+// Flat prototype silhouettes rejected during visual review. Keep the files
+// only so old atlases remain readable; authored maps must use finished art.
+export const REJECTED_STYLE_ASSET_IDS = new Set([
+  'forest-boulder','hay-bale','ice-crystal','metal-deck'
+]);
+
 // Curated per-zone prop pools containing only finished illustrations —
 // a large part of the catalog still ships flat placeholder polygons, and
 // those must never appear on a course. Zones short on themed art borrow
