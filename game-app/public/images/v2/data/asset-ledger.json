@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 210,
+  "count": 211,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -637,6 +637,62 @@
       "tags": [
         "reference",
         "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-feast-table",
+      "label": "Reference flat feast table",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-feast-table.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 177,
+        "h": 79
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "polygon"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -8677,7 +8733,7 @@
       "original design"
     ]
   },
-  "availableCount": 210,
-  "imagegenCount": 117,
+  "availableCount": 211,
+  "imagegenCount": 118,
   "proceduralCount": 93
 }

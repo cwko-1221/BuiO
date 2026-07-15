@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07q';
+export const MAP_VERSION = 'fixed-1000m-2026.07r';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -123,7 +123,7 @@ recoverLast(marketRun,3);
 // climb. A final short right turn avoids a mechanical straight diagonal.
 const forestRun=authoredRoute('forest',[
   ['bench',4540,295,320,100],
-  ['picnic-table',4250,310,420,128,{tags:['landmark-base','turn-pad']}],
+  ['ref-feast-table',4250,310,430,165,{tags:['landmark-base','turn-pad','reference-frame-05','feast-table']}],
   ['round-table',3960,325,300,118],
   ['ref-stone-ramp-front',3700,340,300,84,{angle:-0.16,tags:['reference-frame-04','stone-ramp']}],
   ['ref-chair-front',3500,354,240,200,{tags:['reference-frame-05','chair-step']}],
@@ -132,7 +132,7 @@ const forestRun=authoredRoute('forest',[
   ['ref-chair-front',2780,396,240,200,{tags:['reference-frame-05','chair-step']}],
   ['market-wagon',2540,410,280,136],
   ['ref-barrel-front',2300,423,160,180,{tags:['reference-frame-04','barrel-step']}],
-  ['picnic-table',2060,435,270,122],
+  ['ref-feast-table',2060,435,330,150,{tags:['reference-frame-06','feast-table']}],
   ['ref-stone-ramp-front',1810,442,285,84,{angle:0.10,tags:['reference-frame-06','stone-ramp']}],
   ['round-table',1560,448,280,118,{tags:['zone-landing']}]
 ],['authored-forest']);
@@ -152,7 +152,7 @@ const farmRun=authoredRoute('farm',[
   ['ref-stone-pillar-front',1990,518,280,260,{tags:['reference-frame-05','stone-pillar']}],
   ['ref-stone-ramp-front',2250,532,295,84,{angle:0.10,tags:['reference-frame-06','stone-ramp']}],
   ['ref-barrel-cart',2510,546,300,185,{tags:['reference-frame-05','barrel-cart']}],
-  ['picnic-table',2770,558,275,122],
+  ['ref-feast-table',2770,558,300,145,{tags:['reference-frame-05','feast-table']}],
   ['ref-stone-pillar-front',3040,566,280,260,{tags:['reference-frame-05','stone-pillar']}],
   ['ref-stone-ramp-front',3360,573,330,88,{angle:-0.08,tags:['zone-landing','landmark-base','reference-frame-04','stone-ramp']}]
 ],['authored-farm','rising-right']);
