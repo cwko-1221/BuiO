@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 209,
+  "count": 210,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -607,6 +607,36 @@
       "tags": [
         "reference",
         "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-chair-front",
+      "label": "Reference front wooden chair",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-chair-front.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 164,
+        "h": 84
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "rect"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -8647,7 +8677,7 @@
       "original design"
     ]
   },
-  "availableCount": 209,
-  "imagegenCount": 116,
+  "availableCount": 210,
+  "imagegenCount": 117,
   "proceduralCount": 93
 }

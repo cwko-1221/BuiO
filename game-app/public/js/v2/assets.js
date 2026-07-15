@@ -13,7 +13,8 @@ const catalog = {
     ['ref-lamp-post','Reference wooden lamp post'],
     ['ref-stone-ramp-front','Reference flat stone ramp'],
     ['ref-barrel-cart','Reference front barrel cart'],
-    ['ref-stone-pillar-front','Reference front stone pillar']
+    ['ref-stone-pillar-front','Reference front stone pillar'],
+    ['ref-chair-front','Reference front wooden chair']
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],

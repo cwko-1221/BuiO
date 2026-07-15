@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07p';
+export const MAP_VERSION = 'fixed-1000m-2026.07q';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -126,10 +126,10 @@ const forestRun=authoredRoute('forest',[
   ['picnic-table',4250,310,420,128,{tags:['landmark-base','turn-pad']}],
   ['round-table',3960,325,300,118],
   ['ref-stone-ramp-front',3700,340,300,84,{angle:-0.16,tags:['reference-frame-04','stone-ramp']}],
-  ['chair',3500,354,180,112],
+  ['ref-chair-front',3500,354,240,200,{tags:['reference-frame-05','chair-step']}],
   ['market-basket',3260,368,220,108],
   ['ref-barrel-front',3020,382,160,180,{tags:['reference-frame-03','barrel-step']}],
-  ['chair',2780,396,180,112],
+  ['ref-chair-front',2780,396,240,200,{tags:['reference-frame-05','chair-step']}],
   ['market-wagon',2540,410,280,136],
   ['ref-barrel-front',2300,423,160,180,{tags:['reference-frame-04','barrel-step']}],
   ['picnic-table',2060,435,270,122],

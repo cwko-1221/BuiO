@@ -279,6 +279,26 @@
         "w": 240,
         "h": 240
       }
+    },
+    "ref-chair-front": {
+      "frame": {
+        "x": 1468,
+        "y": 248,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
     }
   },
   "meta": {
