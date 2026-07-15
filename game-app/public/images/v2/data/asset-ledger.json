@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 203,
+  "count": 204,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -334,6 +334,37 @@
       "tags": [
         "reference",
         "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-barrel-front",
+      "label": "Reference front wooden barrel",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-barrel-front.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 115,
+        "h": 77
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "circle"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -8374,7 +8405,7 @@
       "original design"
     ]
   },
-  "availableCount": 203,
-  "imagegenCount": 110,
+  "availableCount": 204,
+  "imagegenCount": 111,
   "proceduralCount": 93
 }

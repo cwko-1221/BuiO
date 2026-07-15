@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07i';
+export const MAP_VERSION = 'fixed-1000m-2026.07j';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -124,10 +124,10 @@ const forestRun=authoredRoute('forest',[
   ['drawbridge',3600,340,280,106,{angle:-0.07}],
   ['chair',3280,354,180,112],
   ['market-basket',3040,368,210,108],
-  ['barrel',2800,382,190,116],
+  ['ref-barrel-front',2800,382,160,180,{tags:['reference-frame-03','barrel-step']}],
   ['chair',2560,396,180,112],
   ['market-wagon',2320,410,280,136],
-  ['barrel',2080,423,190,116],
+  ['ref-barrel-front',2080,423,160,180,{tags:['reference-frame-04','barrel-step']}],
   ['picnic-table',1840,435,270,122],
   ['drawbridge',1600,442,265,104],
   ['round-table',1360,448,280,118,{tags:['zone-landing']}]
@@ -140,18 +140,19 @@ recoverLast(forestRun,4);
 // Small barrels/pallets lead into paired carts and farm furniture. The route
 // stays rising while the direction changes naturally around each set-piece.
 const farmRun=authoredRoute('farm',[
-  ['barrel',1650,464,210,116],
-  ['hay-block',1890,470,220,114],
-  ['market-wagon',2130,484,350,148,{tags:['landmark-base','turn-pad']}],
-  ['barrel',2370,498,220,116],
-  ['wood-deck',2610,512,270,92],
-  ['drawbridge',2850,526,270,104,{angle:0.06}],
-  ['market-wagon',3090,540,285,136],
-  ['picnic-table',3330,553,275,122],
-  ['flat-brick-strip-2',3560,564,180,72],
-  ['drawbridge',3810,573,320,110,{tags:['zone-landing','landmark-base']}]
+  ['flat-brick-strip-2',1050,452,190,72,{tags:['zone-transition']}],
+  ['ref-barrel-front',800,464,170,185,{tags:['reference-frame-05','barrel-step']}],
+  ['hay-block',1140,476,220,114],
+  ['market-wagon',1380,490,350,148,{tags:['landmark-base','turn-pad']}],
+  ['ref-barrel-front',1620,504,170,185,{tags:['reference-frame-06','barrel-step']}],
+  ['wood-deck',1860,518,270,92],
+  ['drawbridge',2100,532,270,104,{angle:0.06}],
+  ['market-wagon',2340,546,285,136],
+  ['picnic-table',2580,558,275,122],
+  ['flat-brick-strip-2',2860,566,180,72],
+  ['drawbridge',3160,573,320,110,{tags:['zone-landing','landmark-base']}]
 ],['authored-farm','rising-right']);
-obstacle('farm','potato-crate',farmRun[2],-76,76,72);
+obstacle('farm','potato-crate',farmRun[3],-76,76,72);
 decor('farm','tractor',4950,520,300,225);
 decor('farm','scarecrow',470,520,155,215);
 recoverLast(farmRun,3);
@@ -159,15 +160,15 @@ recoverLast(farmRun,3);
 // SNOW 574-704m -------------------------------------------------------------
 // The snow route reverses left through ice slabs, a sled and a cabin landmark.
 const snowRun=authoredRoute('snow',[
-  ['snow-ledge',4140,584,260,102],
-  ['ice-slab',3900,598,230,108],
-  ['gift-stack',3660,613,240,128],
-  ['sled',3420,629,235,110],
-  ['curling-stone',3180,645,195,112],
-  ['ice-slab',2940,661,245,104],
-  ['gift-stack',2700,676,225,128],
-  ['snow-ledge',2460,690,270,102],
-  ['snow-ledge',2040,704,500,130,{tags:['zone-landing','landmark-base']}]
+  ['snow-ledge',3600,584,260,102],
+  ['ice-slab',3360,598,230,108],
+  ['gift-stack',3120,613,240,128],
+  ['sled',2880,629,235,110],
+  ['curling-stone',2640,645,195,112],
+  ['ice-slab',2400,661,245,104],
+  ['gift-stack',2160,676,225,128],
+  ['snow-ledge',1920,690,270,102],
+  ['snow-ledge',1500,704,500,130,{tags:['zone-landing','landmark-base']}]
 ],['authored-snow','rising-left']);
 obstacle('snow','snowman',snowRun[2],-62,78,104);
 obstacle('snow','hockey-puck',snowRun[5],70,68,52);
@@ -182,23 +183,23 @@ recoverLast(snowRun,3);
 // intentional: it gives the final ascent the playful found-object rhythm of the
 // reference map without letting temporary geometric art leak into the course.
 const factoryA=authoredRoute('factory',[
-  ['barrel',1650,718,184,128],
-  ['conveyor',1890,736,238,96],
-  ['giant-gear',2130,754,176,98],
-  ['crate',2370,772,178,132],
-  ['cannon',2610,790,226,126],
-  ['round-table',2850,808,204,114,{tags:['landmark-base']}],
-  ['conveyor',3090,826,236,96],
-  ['bench',3330,844,216,102]
+  ['ref-barrel-front',1850,718,160,180,{tags:['reference-frame-04','barrel-step']}],
+  ['conveyor',2090,736,238,96],
+  ['giant-gear',2330,754,176,98],
+  ['crate',2570,772,178,132],
+  ['cannon',2810,790,226,126],
+  ['round-table',3050,808,204,114,{tags:['landmark-base']}],
+  ['conveyor',3290,826,236,96],
+  ['bench',3530,844,216,102]
 ],['authored-factory','factory-room-a','rising-right']);
 const factoryB=authoredRoute('factory',[
-  ['giant-gear',3570,862,196,108],
-  ['market-wagon',3810,884,224,126],
-  ['barrel',4050,906,184,128],
-  ['picnic-table',4290,928,204,108],
-  ['conveyor',4530,952,232,94],
-  ['flat-brick-strip-2',4740,976,320,90,{tags:['landmark-base']}],
-  ['conveyor',5110,1000,430,90,{tags:['summit-platform','landmark-base']}]
+  ['giant-gear',3770,862,196,108],
+  ['market-wagon',4010,884,224,126],
+  ['ref-barrel-front',4200,904,160,180,{tags:['reference-frame-06','barrel-step']}],
+  ['picnic-table',4490,928,204,108],
+  ['conveyor',4730,952,232,94],
+  ['flat-brick-strip-2',4940,976,320,90,{tags:['landmark-base']}],
+  ['conveyor',5310,1000,430,90,{tags:['summit-platform','landmark-base']}]
 ],['authored-factory','factory-room-b','rising-right']);
 obstacle('factory','book-stack',factoryA[2],-72,82,72);
 obstacle('factory','market-basket',factoryA[6],72,78,76);

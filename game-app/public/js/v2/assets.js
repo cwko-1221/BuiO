@@ -7,7 +7,8 @@ const catalog = {
     ['ref-zone-title','Reference zone title'],
     ['ref-market-stall-red','Reference red market stall'],
     ['ref-produce-crate','Reference produce crate'],
-    ['ref-oven-front','Reference front bakery oven']
+    ['ref-oven-front','Reference front bakery oven'],
+    ['ref-barrel-front','Reference front wooden barrel']
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],
