@@ -104,7 +104,13 @@ export const SIDE_VIEW_BLOCK_IDS = new Set([
 // Flat prototype silhouettes rejected during visual review. Keep the files
 // only so old atlases remain readable; authored maps must use finished art.
 export const REJECTED_STYLE_ASSET_IDS = new Set([
-  'forest-boulder','hay-bale','ice-crystal','metal-deck'
+  'forest-boulder','hay-bale','ice-crystal','metal-deck',
+  'forest-log','root-ramp','giant-leaf','tree-stump','fallen-tree','canoe','log-bridge','stone-ledge','frozen-log',
+  'red-mushroom','blue-mushroom','wood-pallet','hay-cart','water-trough','farm-ladder',
+  'wheelbarrow','feed-bin','farm-shed','milk-can',
+  'metal-bracket','gear-pair','straight-pipe','elbow-pipe','boiler','piston','factory-conveyor','steel-beam',
+  'crane-arm','factory-toolbox','filing-cabinet','factory-monitor','cable-spool','oil-drum','rail-cart','forklift',
+  'vent-fan','coil-spring','magnet','valve-wheel','platform-lift','generator','battery','robot-arm'
 ]);
 
 // Curated per-zone prop pools containing only finished illustrations —

@@ -1,7 +1,8 @@
-// One authored course for every room.  Apart from the forgiving first floor,
-// the main route is a succession of rising diagonals: the player is always
-// climbing, with a few wide turns that alternate between left and right.
-export const MAP_VERSION = 'fixed-1000m-2026.07e';
+// One fixed, hand-authored course for every room. The route grammar follows
+// the supplied reference sequence: a forgiving brick tutorial, landmark
+// bases, short prop chains, large set-pieces, and alternating rising turns.
+// Art and object identities remain original to this project.
+export const MAP_VERSION = 'fixed-1000m-2026.07f';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -41,123 +42,187 @@ function obstacle(zone,assetId,supportRef,xOffset,w,h,extra={}) {
 
 function decor(zone,assetId,x,altitude,w,h,extra={}) {
   objects.push({id:`fixed-decor-${String(++serial).padStart(3,'0')}`,assetId,zone,x,y:yAt(altitude),w,h,
-    angle:extra.angle||0,role:'decor',behavior:staticBehavior,tags:['decor']});
+    angle:extra.angle||0,role:'decor',behavior:staticBehavior,tags:['decor',...(extra.tags||[])]});
 }
 
-// Keep individual landings small enough to read as a diagonal route rather
-// than a horizontal shelf.  Width and height vary per asset on purpose: these
-// are real objects, not a flattened, invisible platform collection.
-function risingRun(zone,{x,altitude,direction,count,stepX,stepAltitude,styles,tags=['diagonal-main']}) {
-  const run=[];
-  for (let index=0;index<count;index++) {
-    const [assetId,w,h,extra={}] = styles[index%styles.length];
-    run.push(mainSupport(zone,assetId,x+direction*stepX*index,altitude+stepAltitude*index,w,h,{...extra,tags}));
+// Every entry is deliberately positioned rather than repeated by a generator.
+// This makes the silhouette and route pacing match the supplied map references.
+function authoredRoute(zone,entries,tags=[]) {
+  return entries.map(([assetId,x,altitude,w,h,extra={}])=>mainSupport(
+    zone,assetId,x,altitude,w,h,{...extra,tags:[...tags,...(extra.tags||[])]}
+  ));
+}
+
+function recoverLast(run,count=2) {
+  for (let index=Math.max(1,run.length-count);index<run.length;index++) {
+    recovery.push({from:run[index].node.id,to:run[index-1].node.id,type:'recovery'});
   }
-  return run;
 }
-
-const castleStyles=[
-  ['flat-brick-a',190,92],['flat-brick-strip-2',230,66],['flat-brick-wall-2',205,90],
-  ['drawbridge',250,105],['round-table',220,118],['flat-brick-wall-2',205,96]
-];
-const marketStyles=[
-  ['market-basket',220,112],['apple-crate',220,108],['cheese-wheel',210,112],
-  ['barrel',205,120],['market-scale',230,118],['flat-brick-strip-2',260,72]
-];
-const forestStyles=[
-  ['tree-stump',225,125],['stone-ledge',260,82],['stone-ledge',260,82],
-  ['bench',255,104],['giant-leaf',225,112],['stone-ledge',250,82]
-];
-const farmStyles=[
-  ['hay-block',220,118],['wood-pallet',230,92],['milk-can',170,120],
-  ['wheelbarrow',220,112],['feed-bin',210,126],['watering-can',190,110]
-];
-const snowStyles=[
-  ['snow-ledge',250,100],['ice-slab',220,108],['frozen-barrel',185,124],
-  ['sled',230,108],['curling-stone',190,110],['ice-slab',240,98]
-];
-const factoryStyles=[
-  ['oil-drum',175,125],['cable-spool',195,116],['conveyor',260,82],
-  ['battery',175,126],['valve-wheel',185,122],['metal-bracket',230,96]
-];
 
 // CASTLE 0-210m -------------------------------------------------------------
-// The one deliberately horizontal area: a continuous spawn floor and broad
-// brick steps.  Everything above it immediately becomes a rising diagonal.
+// The opening mirrors the reference pacing: long floor, low gates, forgiving
+// brick steps, then a left-climbing sequence of castle props and landmarks.
 const castleGround=[];
 for (const x of [360,930,1500,2070,2640]) {
-  castleGround.push(mainSupport('castle','flat-brick-strip-4',x,0,600,106,{tags:['ground-chain']}));
+  castleGround.push(mainSupport('castle','flat-brick-strip-4',x,0,600,106,{tags:['ground-chain','tutorial-floor']}));
 }
-const castleSteps=[];
-castleSteps.push(mainSupport('castle','flat-brick-strip-2',3100,4.5,220,70,{tags:['intro-step']}));
-for (let index=0;index<5;index++) {
-  castleSteps.push(mainSupport('castle','flat-brick-strip-2',3360+index*285,9+index*9,index===4?300:225,72,{tags:['intro-step']}));
-}
-const castleLead=mainSupport('castle','flat-brick-wall-2',4850,65,220,92,{tags:['intro-step']});
-const castleRun=risingRun('castle',{x:4550,altitude:80,direction:-1,count:10,stepX:280,stepAltitude:14.45,styles:castleStyles});
-obstacle('castle','barrel',castleRun[4],56,72,90);
-obstacle('castle','treasure-chest',castleRun[6],-54,92,78);
-decor('castle','castle-tower',5150,130,240,260);
-decor('castle','chandelier',600,160,170,180);
+obstacle('castle','checkpoint-flag',castleGround[0],-120,92,128);
+obstacle('castle','castle-banner',castleGround[2],90,88,132);
+obstacle('castle','treasure-chest',castleGround[4],110,112,88);
+decor('castle','castle-arch',1040,25,300,250,{tags:['tutorial-gate']});
+decor('castle','castle-arch',2100,35,340,285,{tags:['tutorial-gate']});
+
+const castleIntro=authoredRoute('castle',[
+  ['flat-brick-a',3100,4,190,82],
+  ['flat-brick-strip-2',3370,9,230,68],
+  ['flat-brick-wall-2',3640,16,225,92],
+  ['flat-brick-strip-2',3910,24,245,70],
+  ['flat-brick-wall-2',4180,34,225,96],
+  ['flat-brick-strip-2',4450,46,250,72],
+  ['drawbridge',4720,59,285,110],
+  ['flat-brick-a',5000,73,205,90],
+  ['round-table',5270,88,250,124],
+  ['flat-brick-wall-2',4820,103,215,94],
+  ['catapult',4540,119,270,140],
+  ['flat-brick-strip-2',4260,135,245,72],
+  ['drawbridge',3980,151,285,112],
+  ['flat-brick-wall-2',3700,166,220,98],
+  ['round-table',3420,181,250,122],
+  ['flat-brick-strip-2',3140,195,245,72],
+  ['flat-brick-wall-2',2860,210,250,102,{tags:['zone-landing']}]
+],['authored-castle','rising-left']);
+obstacle('castle','barrel',castleIntro[8],-64,74,90);
+obstacle('castle','shield',castleIntro[11],58,82,92);
+obstacle('castle','throne',castleIntro[14],-58,82,104);
+decor('castle','castle-tower',5200,110,260,285);
+decor('castle','chandelier',720,165,170,180);
+recoverLast(castleIntro,4);
 
 // MARKET 211-274m -----------------------------------------------------------
-// A short rightward climb made of generous market props, not a flat transit row.
-const marketRun=risingRun('market',{x:2250,altitude:230,direction:1,count:4,stepX:300,stepAltitude:14.7,styles:marketStyles});
-obstacle('market','orange-crate',marketRun[1],48,70,70);
-decor('market','market-stall',4650,250,300,220);
-decor('market','lantern-string',2450,260,300,140);
+// A compact market ascent: crates lead to a broad stall/wagon landing, then
+// another short item chain. Objects sit on or become the route, as in reference.
+const marketRun=authoredRoute('market',[
+  ['apple-crate',3130,220,220,108],
+  ['orange-crate',3400,230,220,108],
+  ['market-basket',3670,241,225,112],
+  ['market-wagon',3940,252,300,142],
+  ['picnic-table',4210,263,285,128],
+  ['market-stall',4480,274,450,210,{tags:['zone-landing','landmark-base']}]
+],['authored-market','rising-right']);
+obstacle('market','lemon-crate',marketRun[3],-72,76,72);
+decor('market','lantern-string',2740,274,340,150);
+recoverLast(marketRun,3);
 
 // FOREST 275-448m -----------------------------------------------------------
-const forestRun=risingRun('forest',{x:2800,altitude:295,direction:-1,count:9,stepX:275,stepAltitude:19.125,styles:forestStyles});
-obstacle('forest','red-mushroom',forestRun[2],54,74,82);
-obstacle('forest','blue-mushroom',forestRun[5],-54,74,82);
-decor('forest','treehouse',4800,365,300,300);
-decor('forest','butterflies',380,420,210,150);
+// Chairs, logs, stumps and broad natural landmarks create a readable leftward
+// climb. A final short right turn avoids a mechanical straight diagonal.
+const forestRun=authoredRoute('forest',[
+  ['bench',4800,286,360,106],
+  ['picnic-table',5150,299,500,134,{tags:['landmark-base','turn-pad']}],
+  ['round-table',4900,313,400,124],
+  ['drawbridge',4585,328,300,110,{angle:-0.07}],
+  ['chair',4270,343,190,116],
+  ['market-basket',3955,358,225,112],
+  ['barrel',3640,373,205,120],
+  ['chair',3325,388,190,116],
+  ['market-wagon',3010,403,300,142],
+  ['barrel',2695,418,205,120],
+  ['picnic-table',2380,432,290,128],
+  ['drawbridge',2065,441,285,108],
+  ['round-table',1750,448,300,124,{tags:['zone-landing']}]
+],['authored-forest']);
+decor('forest','treehouse',5000,370,320,310);
+decor('forest','butterflies',430,390,200,145);
+recoverLast(forestRun,4);
 
 // FARM 449-573m -------------------------------------------------------------
-const farmRun=risingRun('farm',{x:900,altitude:465,direction:1,count:7,stepX:290,stepAltitude:18,styles:farmStyles});
-obstacle('farm','potato-crate',farmRun[3],56,76,74);
-obstacle('farm','cabbage-crate',farmRun[5],-56,76,74);
-decor('farm','tractor',4950,520,290,220);
-decor('farm','scarecrow',430,510,150,210);
+// Small barrels/pallets lead into paired carts and farm furniture. The route
+// stays rising while the direction changes naturally around each set-piece.
+const farmRun=authoredRoute('farm',[
+  ['barrel',1450,458,220,120],
+  ['hay-block',1100,470,225,118],
+  ['tractor',750,484,700,240,{tags:['landmark-base','turn-pad']}],
+  ['barrel',1150,498,260,120],
+  ['wood-deck',1470,512,285,96],
+  ['drawbridge',1790,526,285,108,{angle:0.06}],
+  ['market-wagon',2110,540,300,142],
+  ['picnic-table',2430,553,290,128],
+  ['wood-deck',2750,564,285,96],
+  ['tractor',3070,573,330,210,{tags:['zone-landing','landmark-base']}]
+],['authored-farm','rising-right']);
+obstacle('farm','potato-crate',farmRun[2],-76,76,72);
+decor('farm','tractor',4950,520,300,225);
+decor('farm','scarecrow',470,520,155,215);
+recoverLast(farmRun,3);
 
 // SNOW 574-704m -------------------------------------------------------------
-const snowRun=risingRun('snow',{x:2400,altitude:592,direction:-1,count:7,stepX:275,stepAltitude:18.67,styles:snowStyles});
-obstacle('snow','hockey-puck',snowRun[5],54,68,54);
-decor('snow','cable-car',5100,650,300,220);
-decor('snow','aurora-crystal',420,680,230,250);
+// The snow route reverses left through ice slabs, a sled and a cabin landmark.
+const snowRun=authoredRoute('snow',[
+  ['snow-ledge',3450,584,260,102],
+  ['ice-slab',3720,598,230,108],
+  ['gift-stack',3950,613,240,128],
+  ['sled',4180,629,235,110],
+  ['curling-stone',4410,645,195,112],
+  ['ice-slab',4640,661,245,104],
+  ['gift-stack',4870,676,225,128],
+  ['snow-ledge',5100,690,270,102],
+  ['cabin-roof',5330,704,560,150,{tags:['zone-landing','landmark-base']}]
+],['authored-snow','rising-left']);
+obstacle('snow','snowman',snowRun[2],-62,78,104);
+obstacle('snow','hockey-puck',snowRun[5],70,68,52);
+decor('snow','cable-car',5000,650,310,225);
+decor('snow','aurora-crystal',450,680,230,250);
+recoverLast(snowRun,3);
 
 // FACTORY 705-1000m ---------------------------------------------------------
-// Three tall chevrons keep the final zone moving upward while making the
-// direction changes visually obvious.  No factory row is a continuous shelf.
-const factoryRiseA=risingRun('factory',{x:1000,altitude:724,direction:1,count:6,stepX:280,stepAltitude:18,styles:factoryStyles});
-const factoryRiseB=risingRun('factory',{x:2700,altitude:834,direction:-1,count:6,stepX:280,stepAltitude:18,styles:factoryStyles});
-const factoryRiseC=risingRun('factory',{x:1600,altitude:944,direction:1,count:4,stepX:300,stepAltitude:18,styles:factoryStyles});
-const summitBase=mainSupport('factory','conveyor',2800,1000,420,150,{tags:['summit-platform']});
-obstacle('factory','factory-monitor',factoryRiseA[4],54,78,70);
-obstacle('factory','vent-fan',factoryRiseB[5],-54,76,76);
-decor('factory','giant-gear',5050,850,250,250);
-decor('factory','generator',440,970,270,220);
+// The first pass still referenced the old grey prototype silhouettes.  The
+// finished route deliberately reuses the illustrated props already established
+// elsewhere in the climb, mixed with the finished gear/conveyor art.  Reuse is
+// intentional: it gives the final ascent the playful found-object rhythm of the
+// reference map without letting temporary geometric art leak into the course.
+const factoryA=authoredRoute('factory',[
+  ['barrel',4930,718,184,128],
+  ['conveyor',4720,733,238,96],
+  ['giant-gear',4510,749,176,98],
+  ['crate',4300,765,178,132],
+  ['cannon',4090,781,226,126],
+  ['round-table',3880,798,204,114,{tags:['landmark-base']}],
+  ['conveyor',3670,815,236,96],
+  ['bench',3460,830,216,102]
+],['authored-factory','factory-room-a','rising-right']);
+const factoryB=authoredRoute('factory',[
+  ['giant-gear',3250,846,196,108],
+  ['market-wagon',3040,862,224,126],
+  ['barrel',2830,878,184,128],
+  ['picnic-table',2620,894,204,108],
+  ['conveyor',2410,910,232,94],
+  ['tractor',2200,927,218,128,{tags:['landmark-base']}],
+  ['drawbridge',1990,943,232,108]
+],['authored-factory','factory-room-b','rising-left']);
+const factoryC=authoredRoute('factory',[
+  ['market-stall',1780,956,178,132],
+  ['giant-gear',1570,968,190,106],
+  ['conveyor',1360,979,232,94],
+  ['barrel',1150,989,184,128],
+  ['conveyor',850,1000,430,150,{tags:['summit-platform','landmark-base']}]
+],['authored-factory','factory-room-c','rising-right']);
+obstacle('factory','book-stack',factoryA[2],-72,82,72);
+obstacle('factory','market-basket',factoryA[6],72,78,76);
+obstacle('factory','cash-chest',factoryB[4],36,80,72);
+obstacle('factory','giant-key',factoryC[2],72,74,82);
+decor('factory','giant-gear',5000,850,260,260);
+decor('factory','summit-flag',470,960,220,250);
+recoverLast(factoryA,3);
+recoverLast(factoryB,3);
+recoverLast(factoryC,3);
 
-// Non-lethal laser gates live beside the diagonal run. They reset to a nearby
-// checkpoint rather than sealing a corridor, so every factory approach stays
-// passable even while a player is learning the route.
+// Non-lethal laser gates reset to the nearest room entrance and never form
+// part of the required main path.
 for (const [id,x,altitude,checkpointAltitude] of [
-  ['laser-a',2520,760,704],['laser-b',2430,865,820],['laser-c',2500,970,930]
+  ['laser-a',3380,770,704],['laser-b',2260,875,820],['laser-c',2520,970,930]
 ]) hazards.push({id,zone:'factory',x,y:yAt(altitude)-88,w:145,h:16,checkpointAltitude,type:'laser'});
 
-// A missed landing naturally goes to the preceding diagonal object.  These
-// explicit edges are also used by the offline verifier and recovery probes.
-recovery.push(
-  {from:castleRun[9].node.id,to:castleRun[8].node.id,type:'recovery'},
-  {from:marketRun[3].node.id,to:marketRun[2].node.id,type:'recovery'},
-  {from:forestRun[8].node.id,to:forestRun[7].node.id,type:'recovery'},
-  {from:farmRun[5].node.id,to:farmRun[4].node.id,type:'recovery'},
-  {from:snowRun[5].node.id,to:snowRun[4].node.id,type:'recovery'},
-  {from:factoryRiseB[5].node.id,to:factoryRiseB[4].node.id,type:'recovery'},
-  {from:factoryRiseC[3].node.id,to:factoryRiseC[2].node.id,type:'recovery'}
-);
-
+const summitBase=factoryC[factoryC.length-1];
 export const FIXED_MAP = {
   mapVersion:MAP_VERSION,
   world:WORLD,
