@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 204,
+  "count": 205,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -365,6 +365,36 @@
       "tags": [
         "reference",
         "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-shield-rack",
+      "label": "Reference heraldic shield rack",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-shield-rack.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 184,
+        "h": 100
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": true,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "rect"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -8405,7 +8435,7 @@
       "original design"
     ]
   },
-  "availableCount": 204,
-  "imagegenCount": 111,
+  "availableCount": 205,
+  "imagegenCount": 112,
   "proceduralCount": 93
 }

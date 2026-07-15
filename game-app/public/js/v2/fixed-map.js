@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07j';
+export const MAP_VERSION = 'fixed-1000m-2026.07k';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -82,9 +82,9 @@ const castleIntro=authoredRoute('castle',[
   ['flat-brick-strip-2',4450,46,250,72],
   ['drawbridge',4720,59,285,110],
   ['flat-brick-a',4930,73,205,90],
-  ['flat-brick-strip-2',5230,88,260,76],
+  ['flat-brick-strip-2',5230,88,260,76,{safe:false,tags:['underpass-step']}],
   ['flat-brick-wall-2',5520,103,190,90],
-  ['flat-brick-strip-2',5230,119,270,76],
+  ['ref-shield-rack',5200,112,280,180,{tags:['reference-frame-03','shield-step']}],
   ['flat-brick-strip-2',4920,135,245,72],
   ['drawbridge',4680,151,250,102],
   ['flat-brick-wall-2',4440,166,220,98],
@@ -92,7 +92,7 @@ const castleIntro=authoredRoute('castle',[
   ['flat-brick-strip-2',3960,195,245,72],
   ['flat-brick-wall-2',3720,210,250,102,{tags:['zone-landing']}]
 ],['authored-castle','rising-left']);
-obstacle('castle','shield',castleIntro[11],58,82,92);
+obstacle('castle','ref-shield-rack',castleIntro[11],52,180,125,{tags:['reference-frame-10']});
 obstacle('castle','throne',castleIntro[14],-58,82,104);
 obstacle('castle','catapult',castleIntro[12],34,190,110);
 decor('castle','chandelier',720,165,170,180);

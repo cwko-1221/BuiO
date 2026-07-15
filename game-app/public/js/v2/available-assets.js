@@ -153,6 +153,7 @@ export const AVAILABLE_ASSETS = [
   "ref-oven-front",
   "ref-produce-crate",
   "ref-run-jump-sign",
+  "ref-shield-rack",
   "ref-zone-title",
   "robot-arm",
   "root-ramp",

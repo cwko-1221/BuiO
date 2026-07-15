@@ -78,6 +78,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-barrel-front"
   },
+  "ref-shield-rack": {
+    "key": "atlas-reference-0",
+    "frame": "ref-shield-rack"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"
