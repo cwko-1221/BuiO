@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07h';
+export const MAP_VERSION = 'fixed-1000m-2026.07i';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -106,7 +106,7 @@ const marketRun=authoredRoute('market',[
   ['ref-produce-crate',3700,230,220,132,{tags:['reference-frame-02','produce-step']}],
   ['ref-produce-crate',3930,241,220,132,{tags:['reference-frame-02','produce-step']}],
   ['market-wagon',4160,252,300,142],
-  ['picnic-table',4390,263,270,122],
+  ['ref-oven-front',4425,263,270,220,{tags:['reference-frame-03','landmark-base']}],
   ['flat-brick-strip-4',4850,274,500,106,{tags:['zone-landing','landmark-base','reference-frame-02']}]
 ],['authored-market','rising-right']);
 obstacle('market','lemon-crate',marketRun[3],-72,76,72);
@@ -118,18 +118,18 @@ recoverLast(marketRun,3);
 // Chairs, logs, stumps and broad natural landmarks create a readable leftward
 // climb. A final short right turn avoids a mechanical straight diagonal.
 const forestRun=authoredRoute('forest',[
-  ['bench',4540,286,320,100],
-  ['picnic-table',4250,299,420,128,{tags:['landmark-base','turn-pad']}],
-  ['round-table',3960,313,300,118],
-  ['drawbridge',3600,328,280,106,{angle:-0.07}],
-  ['chair',3280,343,180,112],
-  ['market-basket',3040,358,210,108],
-  ['barrel',2800,373,190,116],
-  ['chair',2560,388,180,112],
-  ['market-wagon',2320,403,280,136],
-  ['barrel',2080,418,190,116],
-  ['picnic-table',1840,428,270,122],
-  ['drawbridge',1600,434,265,104],
+  ['bench',4540,295,320,100],
+  ['picnic-table',4250,310,420,128,{tags:['landmark-base','turn-pad']}],
+  ['round-table',3960,325,300,118],
+  ['drawbridge',3600,340,280,106,{angle:-0.07}],
+  ['chair',3280,354,180,112],
+  ['market-basket',3040,368,210,108],
+  ['barrel',2800,382,190,116],
+  ['chair',2560,396,180,112],
+  ['market-wagon',2320,410,280,136],
+  ['barrel',2080,423,190,116],
+  ['picnic-table',1840,435,270,122],
+  ['drawbridge',1600,442,265,104],
   ['round-table',1360,448,280,118,{tags:['zone-landing']}]
 ],['authored-forest']);
 decor('forest','treehouse',5000,370,320,310);
@@ -140,7 +140,7 @@ recoverLast(forestRun,4);
 // Small barrels/pallets lead into paired carts and farm furniture. The route
 // stays rising while the direction changes naturally around each set-piece.
 const farmRun=authoredRoute('farm',[
-  ['barrel',1650,458,210,116],
+  ['barrel',1650,464,210,116],
   ['hay-block',1890,470,220,114],
   ['market-wagon',2130,484,350,148,{tags:['landmark-base','turn-pad']}],
   ['barrel',2370,498,220,116],

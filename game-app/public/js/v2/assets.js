@@ -6,7 +6,8 @@ const catalog = {
     ['ref-double-jump-sign','Reference double-jump sign'],
     ['ref-zone-title','Reference zone title'],
     ['ref-market-stall-red','Reference red market stall'],
-    ['ref-produce-crate','Reference produce crate']
+    ['ref-produce-crate','Reference produce crate'],
+    ['ref-oven-front','Reference front bakery oven']
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],

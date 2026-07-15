@@ -70,6 +70,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-produce-crate"
   },
+  "ref-oven-front": {
+    "key": "atlas-reference-0",
+    "frame": "ref-oven-front"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"
