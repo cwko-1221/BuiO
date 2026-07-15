@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07l';
+export const MAP_VERSION = 'fixed-1000m-2026.07o';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -82,21 +82,23 @@ const castleIntro=authoredRoute('castle',[
   ['flat-brick-strip-2',3910,24,245,70],
   ['flat-brick-wall-2',4180,34,225,96],
   ['flat-brick-strip-2',4450,46,250,72],
-  ['drawbridge',4720,59,285,110],
+  ['ref-stone-ramp-front',4720,59,300,84,{angle:-0.16,tags:['reference-frame-04','stone-ramp']}],
   ['flat-brick-a',4930,73,205,90],
   ['flat-brick-strip-2',5230,88,260,76,{safe:false,tags:['underpass-step']}],
   ['flat-brick-wall-2',5520,103,190,90],
   ['ref-shield-rack',5200,112,280,180,{tags:['reference-frame-03','shield-step']}],
   ['flat-brick-strip-2',4920,135,245,72],
-  ['drawbridge',4680,151,250,102],
-  ['flat-brick-wall-2',4440,166,220,98],
+  ['ref-stone-ramp-front',4680,151,280,84,{angle:0,tags:['reference-frame-06','stone-ramp']}],
+  ['flat-brick-wall-2',4440,166,240,98],
   ['round-table',4200,181,250,122],
   ['flat-brick-strip-2',3960,195,245,72],
   ['flat-brick-wall-2',3720,210,250,102,{tags:['zone-landing']}]
 ],['authored-castle','rising-left']);
-obstacle('castle','ref-shield-rack',castleIntro[11],52,180,125,{tags:['reference-frame-10']});
-obstacle('castle','throne',castleIntro[14],-58,82,104);
-obstacle('castle','catapult',castleIntro[12],34,190,110);
+// Large landmarks must never consume the only safe standing column. They sit
+// beside the main line as scenery; smaller props remain true obstacles.
+decor('castle','ref-shield-rack',5140,142,180,125,{tags:['reference-frame-10']});
+decor('castle','throne',4250,193,118,150,{tags:['reference-landmark']});
+decor('castle','catapult',4660,174,190,110,{tags:['reference-landmark']});
 decor('castle','chandelier',720,165,170,180);
 recoverLast(castleIntro,4);
 
@@ -123,16 +125,16 @@ const forestRun=authoredRoute('forest',[
   ['bench',4540,295,320,100],
   ['picnic-table',4250,310,420,128,{tags:['landmark-base','turn-pad']}],
   ['round-table',3960,325,300,118],
-  ['drawbridge',3600,340,280,106,{angle:-0.07}],
-  ['chair',3280,354,180,112],
-  ['market-basket',3040,368,210,108],
-  ['ref-barrel-front',2800,382,160,180,{tags:['reference-frame-03','barrel-step']}],
-  ['chair',2560,396,180,112],
-  ['market-wagon',2320,410,280,136],
-  ['ref-barrel-front',2080,423,160,180,{tags:['reference-frame-04','barrel-step']}],
-  ['picnic-table',1840,435,270,122],
-  ['drawbridge',1600,442,265,104],
-  ['round-table',1360,448,280,118,{tags:['zone-landing']}]
+  ['ref-stone-ramp-front',3700,340,300,84,{angle:-0.16,tags:['reference-frame-04','stone-ramp']}],
+  ['chair',3500,354,180,112],
+  ['market-basket',3260,368,220,108],
+  ['ref-barrel-front',3020,382,160,180,{tags:['reference-frame-03','barrel-step']}],
+  ['chair',2780,396,180,112],
+  ['market-wagon',2540,410,280,136],
+  ['ref-barrel-front',2300,423,160,180,{tags:['reference-frame-04','barrel-step']}],
+  ['picnic-table',2060,435,270,122],
+  ['ref-stone-ramp-front',1810,442,285,84,{angle:0.10,tags:['reference-frame-06','stone-ramp']}],
+  ['round-table',1560,448,280,118,{tags:['zone-landing']}]
 ],['authored-forest']);
 decor('forest','treehouse',5000,370,320,310);
 decor('forest','butterflies',430,390,200,145);
@@ -142,17 +144,17 @@ recoverLast(forestRun,4);
 // Small barrels/pallets lead into paired carts and farm furniture. The route
 // stays rising while the direction changes naturally around each set-piece.
 const farmRun=authoredRoute('farm',[
-  ['flat-brick-strip-2',1050,452,190,72,{tags:['zone-transition']}],
-  ['ref-barrel-front',800,464,170,185,{tags:['reference-frame-05','barrel-step']}],
-  ['hay-block',1140,476,220,114],
-  ['market-wagon',1380,490,350,148,{tags:['landmark-base','turn-pad']}],
-  ['ref-barrel-front',1620,504,170,185,{tags:['reference-frame-06','barrel-step']}],
-  ['wood-deck',1860,518,270,92],
-  ['drawbridge',2100,532,270,104,{angle:0.06}],
-  ['market-wagon',2340,546,285,136],
-  ['picnic-table',2580,558,275,122],
-  ['flat-brick-strip-2',2860,566,180,72],
-  ['drawbridge',3160,573,320,110,{tags:['zone-landing','landmark-base']}]
+  ['flat-brick-strip-2',1250,452,210,72,{tags:['zone-transition']}],
+  ['ref-barrel-front',1000,464,170,185,{tags:['reference-frame-05','barrel-step']}],
+  ['hay-block',1210,476,220,114],
+  ['ref-barrel-cart',1470,490,360,215,{tags:['landmark-base','turn-pad','reference-frame-05','barrel-cart']}],
+  ['ref-barrel-front',1730,504,170,185,{tags:['reference-frame-06','barrel-step']}],
+  ['wood-deck',1990,518,270,92],
+  ['ref-stone-ramp-front',2250,532,295,84,{angle:0.10,tags:['reference-frame-06','stone-ramp']}],
+  ['ref-barrel-cart',2510,546,300,185,{tags:['reference-frame-05','barrel-cart']}],
+  ['picnic-table',2770,558,275,122],
+  ['flat-brick-strip-2',3040,566,200,72],
+  ['ref-stone-ramp-front',3360,573,330,88,{angle:-0.08,tags:['zone-landing','landmark-base','reference-frame-04','stone-ramp']}]
 ],['authored-farm','rising-right']);
 obstacle('farm','potato-crate',farmRun[3],-76,76,72);
 decor('farm','tractor',4950,520,300,225);

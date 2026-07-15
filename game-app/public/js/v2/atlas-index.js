@@ -86,6 +86,14 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-lamp-post"
   },
+  "ref-stone-ramp-front": {
+    "key": "atlas-reference-0",
+    "frame": "ref-stone-ramp-front"
+  },
+  "ref-barrel-cart": {
+    "key": "atlas-reference-0",
+    "frame": "ref-barrel-cart"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"

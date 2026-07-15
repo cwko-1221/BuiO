@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 206,
+  "count": 208,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -411,6 +411,106 @@
       "renderSize": {
         "w": 112,
         "h": 68
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-stone-ramp-front",
+      "label": "Reference flat stone ramp",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-stone-ramp-front.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 173,
+        "h": 89
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-barrel-cart",
+      "label": "Reference front barrel cart",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-barrel-cart.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 192,
+        "h": 114
       },
       "body": {
         "type": "polygon",
@@ -8491,7 +8591,7 @@
       "original design"
     ]
   },
-  "availableCount": 206,
-  "imagegenCount": 113,
+  "availableCount": 208,
+  "imagegenCount": 115,
   "proceduralCount": 93
 }
