@@ -1,7 +1,7 @@
 // One authored course for every room.  Apart from the forgiving first floor,
 // the main route is a succession of rising diagonals: the player is always
 // climbing, with a few wide turns that alternate between left and right.
-export const MAP_VERSION = 'fixed-1000m-2026.07c';
+export const MAP_VERSION = 'fixed-1000m-2026.07d';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -57,8 +57,8 @@ function risingRun(zone,{x,altitude,direction,count,stepX,stepAltitude,styles,ta
 }
 
 const castleStyles=[
-  ['castle-brick-step',210,70],['flat-brick-strip-2',230,66],['castle-brick-thick',205,90],
-  ['drawbridge',250,105],['round-table',220,118],['castle-brick-corner',205,96]
+  ['flat-brick-a',190,92],['flat-brick-strip-2',230,66],['flat-brick-wall-2',205,90],
+  ['drawbridge',250,105],['round-table',220,118],['flat-brick-wall-2',205,96]
 ];
 const marketStyles=[
   ['market-basket',220,112],['apple-crate',220,108],['cheese-wheel',210,112],
@@ -89,11 +89,11 @@ for (const x of [360,930,1500,2070,2640]) {
   castleGround.push(mainSupport('castle','flat-brick-strip-4',x,0,600,106,{tags:['ground-chain']}));
 }
 const castleSteps=[];
-castleSteps.push(mainSupport('castle','castle-brick-step',3100,4.5,220,70,{tags:['intro-step']}));
+castleSteps.push(mainSupport('castle','flat-brick-strip-2',3100,4.5,220,70,{tags:['intro-step']}));
 for (let index=0;index<5;index++) {
-  castleSteps.push(mainSupport('castle','castle-brick-step',3360+index*285,9+index*9,index===4?300:225,72,{tags:['intro-step']}));
+  castleSteps.push(mainSupport('castle','flat-brick-strip-2',3360+index*285,9+index*9,index===4?300:225,72,{tags:['intro-step']}));
 }
-const castleLead=mainSupport('castle','castle-brick-thick',4850,65,220,92,{tags:['intro-step']});
+const castleLead=mainSupport('castle','flat-brick-wall-2',4850,65,220,92,{tags:['intro-step']});
 const castleRun=risingRun('castle',{x:4550,altitude:80,direction:-1,count:10,stepX:280,stepAltitude:14.45,styles:castleStyles});
 obstacle('castle','barrel',castleRun[4],56,72,90);
 obstacle('castle','treasure-chest',castleRun[6],-54,92,78);

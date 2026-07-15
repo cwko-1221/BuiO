@@ -22,7 +22,7 @@ function themed(zone, index) {
 const zoneSurfaces = {
   // castle-brick-step/thick/corner have isometric top faces that clash with
   // the 2D side view — keep to the flat-front pieces.
-  castle: { long:'castle-brick-long', medium:'castle-brick-medium', step:'column', thick:'battlement', corner:'castle-tower' },
+  castle: { long:'flat-brick-strip-4', medium:'flat-brick-strip-2', step:'flat-brick-wall-2', thick:'flat-brick-wall-2', corner:'flat-brick-wall-4' },
   market: { long:'picnic-table', medium:'market-awning', step:'barrel-stack', thick:'market-stall', corner:'market-wagon' },
   forest: { long:'grass-ledge', medium:'stone-ledge', step:'moss-boulder', thick:'treehouse', corner:'stone-arch' },
   farm: { long:'grass-ledge', medium:'wood-deck', step:'hay-block', thick:'tractor', corner:'bread-cart' },

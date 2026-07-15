@@ -94,6 +94,13 @@ export const ASSETS = Object.entries(catalog).flatMap(([zone, list]) => list.map
 export const ASSET_BY_ID = new Map(ASSETS.map(asset => [asset.id, asset]));
 export const ZONE_ASSET_IDS = Object.fromEntries(Object.keys(catalog).map(zone => [zone, catalog[zone].map(([id]) => id)]));
 
+// These legacy masters show a top/side face. They are archive assets only:
+// the playable course uses an orthographic, front-facing brick kit.
+export const SIDE_VIEW_BLOCK_IDS = new Set([
+  'castle-brick-long','castle-brick-medium','castle-brick-step',
+  'castle-brick-thick','castle-brick-corner'
+]);
+
 // Curated per-zone prop pools containing only finished illustrations —
 // a large part of the catalog still ships flat placeholder polygons, and
 // those must never appear on a course. Zones short on themed art borrow
