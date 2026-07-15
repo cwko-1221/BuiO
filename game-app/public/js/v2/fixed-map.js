@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07k';
+export const MAP_VERSION = 'fixed-1000m-2026.07l';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -38,7 +38,7 @@ function mainSupport(zone,assetId,x,altitude,w,h=96,extra={}) {
 function obstacle(zone,assetId,supportRef,xOffset,w,h,extra={}) {
   const id=extra.id || `fixed-obstacle-${String(++serial).padStart(3,'0')}`;
   objects.push({id,assetId,zone,x:supportRef.object.x+xOffset,y:supportRef.object.y-120,w,h,
-    angle:extra.angle||0,role:'obstacle',behavior:staticBehavior,supportId:supportRef.object.id,tags:['obstacle']});
+    angle:extra.angle||0,role:'obstacle',behavior:staticBehavior,supportId:supportRef.object.id,tags:['obstacle',...(extra.tags||[])]});
 }
 
 function decor(zone,assetId,x,altitude,w,h,extra={}) {
@@ -69,6 +69,8 @@ for (const x of [360,930,1500,2070,2640]) {
 }
 for (const x of [560,760,960]) decor('castle','ref-go-pennant',x,14,88,132,{tags:['reference-frame-01','tutorial-flag']});
 obstacle('castle','castle-banner',castleGround[2],90,88,132);
+obstacle('castle','ref-lamp-post',castleGround[3],-80,110,250,{tags:['reference-frame-03','lamp-obstacle']});
+obstacle('castle','ref-lamp-post',castleGround[4],-140,110,250,{tags:['reference-frame-11','lamp-obstacle']});
 obstacle('castle','treasure-chest',castleGround[4],110,112,88);
 decor('castle','castle-arch',1280,25,300,250,{tags:['tutorial-gate']});
 decor('castle','castle-arch',2100,35,340,285,{tags:['tutorial-gate']});

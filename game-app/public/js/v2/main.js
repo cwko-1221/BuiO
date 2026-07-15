@@ -15,6 +15,7 @@ let startMeta = null;
 const previewParams = new URLSearchParams(location.search);
 const preview = previewParams.has('preview') && ['127.0.0.1','localhost'].includes(location.hostname);
 const previewAltitude = previewParams.has('altitude') ? Number(previewParams.get('altitude')) : NaN;
+const previewX = previewParams.has('x') ? Number(previewParams.get('x')) : NaN;
 
 function show(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -78,8 +79,11 @@ function startGame(seed,durationSec,startedAt,resume){
       if(Number.isFinite(resume?.x)&&Number.isFinite(resume?.y))s.setPlayerPosition(resume.x,resume.y);
       else if(preview&&Number.isFinite(previewAltitude)) {
         const checkpoint=course.checkpoints.sort((a,b)=>Math.abs(a.altitude-previewAltitude)-Math.abs(b.altitude-previewAltitude))[0];
-        const node=course.nodes.filter(item=>item.route==='main').sort((a,b)=>Math.abs(a.altitude-previewAltitude)-Math.abs(b.altitude-previewAltitude))[0];
-        const spawn=Math.abs((checkpoint?.altitude??Infinity)-previewAltitude)<=1?checkpoint:node;
+        const node=course.nodes.filter(item=>item.route==='main').sort((a,b)=>{
+          const score=item=>Math.abs(item.altitude-previewAltitude)*10000+(Number.isFinite(previewX)?Math.abs(item.x-previewX):0);
+          return score(a)-score(b);
+        })[0];
+        const spawn=!Number.isFinite(previewX)&&Math.abs((checkpoint?.altitude??Infinity)-previewAltitude)<=1?checkpoint:node;
         if(spawn)s.setPlayerPosition(spawn.x,spawn.y-60);
       }
       toast(`固定 1000m 地圖 ${course.mapVersion} · ${course.courseHash}`,true);
