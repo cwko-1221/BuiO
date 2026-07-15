@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 211,
+  "count": 212,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -693,6 +693,37 @@
       "tags": [
         "reference",
         "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-stone-column-front",
+      "label": "Reference plain front stone column",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-stone-column-front.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 145,
+        "h": 135
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "circle"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -8733,7 +8764,7 @@
       "original design"
     ]
   },
-  "availableCount": 211,
-  "imagegenCount": 118,
+  "availableCount": 212,
+  "imagegenCount": 119,
   "proceduralCount": 93
 }
