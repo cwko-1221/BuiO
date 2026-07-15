@@ -66,6 +66,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-market-stall-red"
   },
+  "ref-produce-crate": {
+    "key": "atlas-reference-0",
+    "frame": "ref-produce-crate"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"

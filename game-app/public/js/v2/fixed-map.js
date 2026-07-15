@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07g';
+export const MAP_VERSION = 'fixed-1000m-2026.07h';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -102,9 +102,9 @@ recoverLast(castleIntro,4);
 // A compact market ascent: crates lead to a broad stall/wagon landing, then
 // another short item chain. Objects sit on or become the route, as in reference.
 const marketRun=authoredRoute('market',[
-  ['apple-crate',3470,220,220,108],
-  ['orange-crate',3700,230,220,108],
-  ['market-basket',3930,241,225,112],
+  ['ref-produce-crate',3470,220,220,132,{tags:['reference-frame-02','produce-step']}],
+  ['ref-produce-crate',3700,230,220,132,{tags:['reference-frame-02','produce-step']}],
+  ['ref-produce-crate',3930,241,220,132,{tags:['reference-frame-02','produce-step']}],
   ['market-wagon',4160,252,300,142],
   ['picnic-table',4390,263,270,122],
   ['flat-brick-strip-4',4850,274,500,106,{tags:['zone-landing','landmark-base','reference-frame-02']}]

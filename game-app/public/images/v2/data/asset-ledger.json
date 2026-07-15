@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 201,
+  "count": 202,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -230,6 +230,62 @@
       "tags": [
         "reference",
         "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-produce-crate",
+      "label": "Reference produce crate",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-produce-crate.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 157,
+        "h": 135
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "polygon"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -8270,7 +8326,7 @@
       "original design"
     ]
   },
-  "availableCount": 201,
-  "imagegenCount": 108,
+  "availableCount": 202,
+  "imagegenCount": 109,
   "proceduralCount": 93
 }
