@@ -110,6 +110,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-stone-column-front"
   },
+  "ref-bed-front": {
+    "key": "atlas-reference-0",
+    "frame": "ref-bed-front"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"

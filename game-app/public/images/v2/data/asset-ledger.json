@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 212,
+  "count": 213,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -724,6 +724,50 @@
       "tags": [
         "reference",
         "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-bed-front",
+      "label": "Reference flat blue bed",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-bed-front.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 168,
+        "h": 82
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "compound"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -8764,7 +8808,7 @@
       "original design"
     ]
   },
-  "availableCount": 212,
-  "imagegenCount": 119,
+  "availableCount": 213,
+  "imagegenCount": 120,
   "proceduralCount": 93
 }

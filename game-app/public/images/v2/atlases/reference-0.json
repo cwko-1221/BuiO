@@ -339,6 +339,26 @@
         "w": 240,
         "h": 240
       }
+    },
+    "ref-bed-front": {
+      "frame": {
+        "x": 248,
+        "y": 492,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
     }
   },
   "meta": {
