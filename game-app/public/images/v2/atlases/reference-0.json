@@ -1,0 +1,115 @@
+{
+  "frames": {
+    "ref-go-pennant": {
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
+    },
+    "ref-jump-arrow": {
+      "frame": {
+        "x": 248,
+        "y": 4,
+        "w": 240,
+        "h": 120
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 120
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 120
+      }
+    },
+    "ref-run-jump-sign": {
+      "frame": {
+        "x": 492,
+        "y": 4,
+        "w": 240,
+        "h": 120
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 120
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 120
+      }
+    },
+    "ref-double-jump-sign": {
+      "frame": {
+        "x": 736,
+        "y": 4,
+        "w": 240,
+        "h": 120
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 120
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 120
+      }
+    },
+    "ref-zone-title": {
+      "frame": {
+        "x": 980,
+        "y": 4,
+        "w": 240,
+        "h": 120
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 120
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 120
+      }
+    }
+  },
+  "meta": {
+    "app": "BuiO atlas builder",
+    "version": "2",
+    "image": "reference-0.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 2048
+    },
+    "scale": "1"
+  }
+}

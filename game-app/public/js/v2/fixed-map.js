@@ -67,10 +67,10 @@ const castleGround=[];
 for (const x of [360,930,1500,2070,2640]) {
   castleGround.push(mainSupport('castle','flat-brick-strip-4',x,0,600,106,{tags:['ground-chain','tutorial-floor']}));
 }
-obstacle('castle','checkpoint-flag',castleGround[0],-120,92,128);
+for (const x of [560,760,960]) decor('castle','ref-go-pennant',x,14,88,132,{tags:['reference-frame-01','tutorial-flag']});
 obstacle('castle','castle-banner',castleGround[2],90,88,132);
 obstacle('castle','treasure-chest',castleGround[4],110,112,88);
-decor('castle','castle-arch',1040,25,300,250,{tags:['tutorial-gate']});
+decor('castle','castle-arch',1280,25,300,250,{tags:['tutorial-gate']});
 decor('castle','castle-arch',2100,35,340,285,{tags:['tutorial-gate']});
 
 const castleIntro=authoredRoute('castle',[
@@ -209,11 +209,11 @@ recoverLast(factoryB,3);
 // World-space tutorial and wayfinding annotations. These are deliberately
 // separate from collision objects so signs can never create invisible walls.
 annotations.push(
-  {id:'guide-jump',type:'guide',x:3260,y:yAt(9)-125,text:'跳！',arrow:{dx:65,dy:-85}},
-  {id:'guide-run-jump',type:'guide',x:4130,y:yAt(38)-150,text:'跑動時起跳，跳得更遠！',arrow:{dx:85,dy:-55}},
-  {id:'guide-double',type:'guide',x:4970,y:yAt(72)-145,text:'二段跳！',arrow:{dx:60,dy:-90}},
+  {id:'guide-jump',type:'guide',x:3260,y:yAt(9)-165,text:'跳！',assetId:'ref-jump-arrow',renderSize:{w:120,h:120}},
+  {id:'guide-run-jump',type:'guide',x:4130,y:yAt(38)-175,text:'跑動時起跳，跳得更遠！',assetId:'ref-run-jump-sign',renderSize:{w:330,h:126},showText:false},
+  {id:'guide-double',type:'guide',x:4970,y:yAt(72)-175,text:'二段跳！',assetId:'ref-double-jump-sign',renderSize:{w:230,h:150},showText:false},
   {id:'turn-castle',type:'turn',x:5200,y:yAt(94)-120,text:'← 繼續向左上'},
-  {id:'summit-castle',type:'summit',x:3460,y:yAt(210)-150,text:'高峰 1/6・熔城攀登'},
+  {id:'summit-castle',type:'summit',x:3460,y:yAt(210)-165,text:'高峰 1/6・熔城攀登',assetId:'ref-zone-title',renderSize:{w:330,h:130},showText:false},
   {id:'turn-market',type:'turn',x:4500,y:yAt(276)-165,text:'↙ 下一段'},
   {id:'summit-market',type:'summit',x:4460,y:yAt(274)-170,text:'高峰 2/6・市集飛躍'},
   {id:'turn-forest',type:'turn',x:4980,y:yAt(304)-165,text:'← 沿物件向左上'},

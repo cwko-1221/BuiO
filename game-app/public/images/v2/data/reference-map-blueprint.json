@@ -1,0 +1,139 @@
+{
+  "version": "gimkit-reference-14-frame-v1",
+  "source": "14 user-supplied screenshots",
+  "artDirection": {
+    "projection": "front-facing-2d",
+    "outline": "dark-navy-heavy",
+    "lighting": "soft-upper-left",
+    "background": "transparent",
+    "branding": "original-unbranded"
+  },
+  "frames": [
+    {
+      "id": "ref-01-tutorial-runway",
+      "image": "image-1.png",
+      "altitude": [0, 55],
+      "direction": "right",
+      "route": ["long-brick-floor", "low-brick-step", "brick-arch", "stair-bridge"],
+      "props": ["ref-go-pennant", "ref-jump-arrow", "ref-run-jump-sign"],
+      "text": ["出發！", "跳！", "跑動時起跳，跳得更遠！"]
+    },
+    {
+      "id": "ref-02-market-threshold",
+      "image": "image-2.png",
+      "altitude": [55, 115],
+      "direction": "right",
+      "route": ["brick-arch", "brick-floor", "short-brick-column"],
+      "props": ["ref-double-jump-sign", "ref-market-stall-red", "ref-produce-crate", "ref-zone-title"],
+      "text": ["二段跳！", "高峰 1/6・熔城攀登"]
+    },
+    {
+      "id": "ref-03-oven-crate-ascent",
+      "image": "image-3.png",
+      "altitude": [115, 190],
+      "direction": "right-up",
+      "route": ["brick-floor", "produce-crate-steps", "shield-rack-landing", "barrel-chain", "stone-ramp"],
+      "props": ["ref-oven-front", "ref-lamp-post", "ref-produce-crate", "ref-shield-rack", "ref-barrel-front"]
+    },
+    {
+      "id": "ref-04-barrel-ramp-turn",
+      "image": "image-4.png",
+      "altitude": [190, 260],
+      "direction": "right-up",
+      "route": ["barrel-chain", "stone-ramp", "stone-step-pair"],
+      "props": ["ref-barrel-front", "ref-stone-ramp-front", "ref-shield-rack"]
+    },
+    {
+      "id": "ref-05-feast-hall-ascent",
+      "image": "image-5.png",
+      "altitude": [260, 335],
+      "direction": "right-up",
+      "route": ["barrel-cart", "stone-pillar-chain", "chair-chain", "feast-table"],
+      "props": ["ref-barrel-cart", "ref-stone-pillar-front", "ref-chair-front", "ref-feast-table"]
+    },
+    {
+      "id": "ref-06-ramp-gallery",
+      "image": "image-6.png",
+      "altitude": [335, 405],
+      "direction": "right-up",
+      "route": ["chair-chain", "feast-table", "barrel", "stone-ramp-triple", "stone-column-chain"],
+      "props": ["ref-chair-front", "ref-feast-table", "ref-barrel-front", "ref-stone-ramp-front", "ref-stone-column-front"]
+    },
+    {
+      "id": "ref-07-bed-lantern-climb",
+      "image": "image-7.png",
+      "altitude": [405, 475],
+      "direction": "right-up",
+      "route": ["stone-column-chain", "bed-gallery", "lantern-step", "bed-tilt", "catapult"],
+      "props": ["ref-bed-front", "ref-hanging-lantern", "ref-catapult-front"]
+    },
+    {
+      "id": "ref-08-oven-workshop",
+      "image": "image-8.png",
+      "altitude": [475, 545],
+      "direction": "right-up",
+      "route": ["bed-gallery", "lantern-step", "catapult", "log-steps", "oven", "bellows", "brick-landing"],
+      "props": ["ref-bed-front", "ref-hanging-lantern", "ref-catapult-front", "ref-log-step", "ref-oven-front", "ref-bellows-front"]
+    },
+    {
+      "id": "ref-09-banner-pot-ascent",
+      "image": "image-9.png",
+      "altitude": [545, 615],
+      "direction": "right-up",
+      "route": ["oven-workbench", "cookpot-chain", "log-step", "banner-landing"],
+      "props": ["ref-cookpot", "ref-castle-banner-blue", "ref-castle-banner-red"]
+    },
+    {
+      "id": "ref-10-armory-finale",
+      "image": "image-10.png",
+      "altitude": [615, 690],
+      "direction": "right-up",
+      "route": ["banner-chain", "brick-column-chain", "armory-platform"],
+      "props": ["ref-castle-banner-blue", "ref-castle-banner-red", "ref-knight-stand", "ref-shield-rack"]
+    },
+    {
+      "id": "ref-11-library-wall",
+      "image": "image-11.png",
+      "altitude": [690, 755],
+      "direction": "right-up",
+      "route": ["shield-step", "book-step-chain", "brick-u-wall", "upper-lamp-landing"],
+      "props": ["ref-book-step", "ref-scroll-step", "ref-lamp-post"]
+    },
+    {
+      "id": "ref-12-coral-boats",
+      "image": "image-12.png",
+      "altitude": [755, 830],
+      "direction": "left-up",
+      "route": ["upper-lamp-landing", "sand-ledge", "fishing-boat-pair", "sand-summit"],
+      "props": ["ref-sand-ledge", "ref-fishing-boat", "ref-zone-title"],
+      "text": ["高峰 2/6・珊瑚攀登"]
+    },
+    {
+      "id": "ref-13-curio-table",
+      "image": "image-13.png",
+      "altitude": [830, 910],
+      "direction": "left-up",
+      "route": ["sand-ledge", "round-table", "bowl-chain", "monitor-chain", "plant-chain"],
+      "props": ["ref-round-table-front", "ref-bowl-front", "ref-monitor-front", "ref-potted-plant"]
+    },
+    {
+      "id": "ref-14-office-summit",
+      "image": "image-14.png",
+      "altitude": [910, 1000],
+      "direction": "right-up",
+      "route": ["monitor-chain", "office-desk", "safe-chain", "office-chair-chain", "basketball-hoop", "summit-floor"],
+      "props": ["ref-monitor-front", "ref-potted-plant", "ref-office-safe", "ref-office-desk", "ref-office-chair", "ref-basketball-hoop", "ref-summit-flag"],
+      "text": ["山頂！"]
+    }
+  ],
+  "requiredAssetIds": [
+    "ref-go-pennant", "ref-jump-arrow", "ref-run-jump-sign", "ref-double-jump-sign", "ref-zone-title",
+    "ref-market-stall-red", "ref-produce-crate", "ref-oven-front", "ref-lamp-post", "ref-shield-rack",
+    "ref-barrel-front", "ref-stone-ramp-front", "ref-barrel-cart", "ref-stone-pillar-front", "ref-chair-front",
+    "ref-feast-table", "ref-stone-column-front", "ref-bed-front", "ref-hanging-lantern", "ref-catapult-front",
+    "ref-log-step", "ref-bellows-front", "ref-cookpot", "ref-castle-banner-blue", "ref-castle-banner-red",
+    "ref-knight-stand", "ref-book-step", "ref-scroll-step", "ref-sand-ledge", "ref-fishing-boat",
+    "ref-round-table-front", "ref-bowl-front", "ref-monitor-front", "ref-potted-plant", "ref-office-safe",
+    "ref-office-desk", "ref-office-chair", "ref-basketball-hoop", "ref-summit-flag"
+  ]
+}

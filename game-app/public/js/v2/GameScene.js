@@ -201,11 +201,18 @@ export class GameScene extends Phaser.Scene {
       const turn = note.type === 'turn';
       const color = summit ? '#50e879' : turn ? '#ffffff' : '#ffd743';
       const size = summit ? '26px' : turn ? '20px' : '22px';
-      this.add.text(note.x,note.y,note.text,{
-        fontFamily:'Arial, Microsoft JhengHei',fontSize:size,fontStyle:'bold',
-        color,stroke:'#18243d',strokeThickness:summit?8:7,
-        align:'center',wordWrap:{width:360}
-      }).setOrigin(.5).setDepth(60).setAngle(turn?-4:0);
+      if (note.assetId) {
+        const texture=ATLAS_INDEX[note.assetId];
+        this.add.image(note.x,note.y,texture?.key||note.assetId,texture?.frame||null)
+          .setDisplaySize(note.renderSize?.w||220,note.renderSize?.h||110).setDepth(60);
+      }
+      if (note.showText!==false) {
+        this.add.text(note.x,note.y+(note.assetId?(note.renderSize?.h||110)*.58:0),note.text,{
+          fontFamily:'Arial, Microsoft JhengHei',fontSize:size,fontStyle:'bold',
+          color,stroke:'#18243d',strokeThickness:summit?8:7,
+          align:'center',wordWrap:{width:360}
+        }).setOrigin(.5).setDepth(61).setAngle(turn?-4:0);
+      }
       if (!note.arrow) continue;
       const x2=note.x+note.arrow.dx, y2=note.y+note.arrow.dy;
       const angle=Math.atan2(note.arrow.dy,note.arrow.dx);

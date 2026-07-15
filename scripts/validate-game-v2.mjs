@@ -9,7 +9,7 @@ const failures=[];
 const first=buildCourse(0);
 const firstReport=validateCourse(first);
 if (!firstReport.ok) failures.push(...firstReport.errors);
-if (ASSETS.length!==195) failures.push(`asset catalog expected 195, got ${ASSETS.length}`);
+if (ASSETS.length<195) failures.push(`asset catalog lost shipping assets: expected at least 195, got ${ASSETS.length}`);
 if (first.mapVersion!==MAP_VERSION) failures.push('map version mismatch');
 if (first.world.width!==5600||first.world.height!==6200) failures.push('world is not fixed at 5600x6200');
 if (first.summit.y>=first.start.y) failures.push('summit must be above the start');

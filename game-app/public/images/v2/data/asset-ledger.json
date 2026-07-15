@@ -1,8 +1,208 @@
 {
   "version": 2,
-  "count": 195,
+  "count": 200,
   "generatedAt": "2026-07-13",
   "assets": [
+    {
+      "id": "ref-go-pennant",
+      "label": "Reference GO pennant",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-go-pennant.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 136,
+        "h": 102
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#4fd52d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-jump-arrow",
+      "label": "Reference jump arrow",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-jump-arrow.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 151,
+        "h": 135
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#4fd52d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-run-jump-sign",
+      "label": "Reference running-jump sign",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-run-jump-sign.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 173,
+        "h": 99
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#4fd52d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-double-jump-sign",
+      "label": "Reference double-jump sign",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-double-jump-sign.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 159,
+        "h": 93
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": true,
+        "material": "solid"
+      },
+      "palette": [
+        "#4fd52d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-zone-title",
+      "label": "Reference zone title",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-zone-title.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 124,
+        "h": 80
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#4fd52d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
     {
       "id": "crate",
       "label": "木箱",
@@ -8039,7 +8239,7 @@
       "original design"
     ]
   },
-  "availableCount": 195,
-  "imagegenCount": 102,
+  "availableCount": 200,
+  "imagegenCount": 107,
   "proceduralCount": 93
 }

@@ -51,7 +51,11 @@ export function buildCourse(seed=0) {
     sensors,checkpoints,instances,
     recoveryBounds:FIXED_MAP.recoveryBounds.map(item=>({...item})), hazards:FIXED_MAP.hazards.map(item=>({...item})),
     annotations:(FIXED_MAP.annotations||[]).map(item=>({...item,arrow:item.arrow?{...item.arrow}:undefined})),
-    usedAssets:[...new Set([...objects.map(object=>object.assetId),'checkpoint-flag','summit-flag'])],
+    usedAssets:[...new Set([
+      ...objects.map(object=>object.assetId),
+      ...(FIXED_MAP.annotations||[]).map(item=>item.assetId).filter(Boolean),
+      'checkpoint-flag','summit-flag'
+    ])],
     stageCount:ZONES.length,stages:ZONES.map(zone=>ZONE_NAMES[zone]),courseHash,colliderHash
   };
 }
