@@ -194,6 +194,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-basketball-hoop"
   },
+  "ref-summit-flag": {
+    "key": "atlas-reference-0",
+    "frame": "ref-summit-flag"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"

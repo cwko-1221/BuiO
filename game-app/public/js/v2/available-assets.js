@@ -182,6 +182,7 @@ export const AVAILABLE_ASSETS = [
   "ref-stone-column-front",
   "ref-stone-pillar-front",
   "ref-stone-ramp-front",
+  "ref-summit-flag",
   "ref-zone-title",
   "robot-arm",
   "root-ramp",

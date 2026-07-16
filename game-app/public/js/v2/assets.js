@@ -37,7 +37,8 @@ const catalog = {
     ['ref-office-safe','Reference front office safe'],
     ['ref-office-desk','Reference low office drawer step'],
     ['ref-office-chair','Reference front office chair'],
-    ['ref-basketball-hoop','Reference flat basketball hoop']
+    ['ref-basketball-hoop','Reference flat basketball hoop'],
+    ['ref-summit-flag','Reference original summit flag']
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],

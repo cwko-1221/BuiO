@@ -54,7 +54,7 @@ export function buildCourse(seed=0) {
     usedAssets:[...new Set([
       ...objects.map(object=>object.assetId),
       ...(FIXED_MAP.annotations||[]).map(item=>item.assetId).filter(Boolean),
-      'checkpoint-flag','summit-flag'
+      'checkpoint-flag','ref-summit-flag'
     ])],
     stageCount:ZONES.length,stages:ZONES.map(zone=>ZONE_NAMES[zone]),courseHash,colliderHash
   };

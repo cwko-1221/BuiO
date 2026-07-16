@@ -246,10 +246,8 @@ export class GameScene extends Phaser.Scene {
   createSummit() {
     const s = this.course.summit;
     this.summitBody = this.matter.add.rectangle(s.x,s.y,220,220,{isStatic:true,isSensor:true,label:'summit'});
-    this.add.rectangle(s.x,s.y+80,330,42,0xe6bd4c).setStrokeStyle(6,0x313950).setDepth(8);
-    this.add.rectangle(s.x,s.y-25,8,170,0x515c72).setDepth(9);
-    const tex=ATLAS_INDEX['summit-flag'];
-    this.add.image(s.x+48,s.y-90,tex?.key||'summit-flag',tex?.frame||null).setDisplaySize(110,110).setDepth(9);
+    const tex=ATLAS_INDEX['ref-summit-flag'];
+    this.add.image(s.x,s.y-90,tex?.key||'ref-summit-flag',tex?.frame||null).setDisplaySize(174,280).setDepth(9);
   }
 
   createPlayer() {

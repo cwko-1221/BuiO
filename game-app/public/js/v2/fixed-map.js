@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07ap';
+export const MAP_VERSION = 'fixed-1000m-2026.07aq';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -228,7 +228,7 @@ annotations.push(
   {id:'turn-farm',type:'turn',x:1500,y:yAt(486)-165,text:'→ 轉向右上'},
   {id:'turn-snow',type:'turn',x:4160,y:yAt(706)-175,text:'← 進入最後攀登'},
   {id:'factory-warning',type:'guide',x:3320,y:yAt(842)-150,text:'雷射不致命・失誤會回到房間入口',arrow:{dx:-60,dy:-60}},
-  {id:'summit-final',type:'summit',x:4290,y:yAt(1000)-190,text:'山頂！'}
+  {id:'summit-final-label',type:'summit',x:4100,y:yAt(1000)-118,text:'山頂！'}
 );
 
 // Non-lethal laser gates reset to the nearest room entrance and never form

@@ -759,6 +759,26 @@
         "w": 184,
         "h": 240
       }
+    },
+    "ref-summit-flag": {
+      "frame": {
+        "x": 1359,
+        "y": 980,
+        "w": 149,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 149,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 149,
+        "h": 240
+      }
     }
   },
   "meta": {

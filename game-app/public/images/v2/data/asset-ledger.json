@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 233,
+  "count": 234,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1587,6 +1587,62 @@
       "tags": [
         "reference",
         "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-summit-flag",
+      "label": "Reference original summit flag",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-summit-flag.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 187,
+        "h": 97
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "polygon"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9627,7 +9683,7 @@
       "original design"
     ]
   },
-  "availableCount": 233,
-  "imagegenCount": 140,
+  "availableCount": 234,
+  "imagegenCount": 141,
   "proceduralCount": 93
 }
