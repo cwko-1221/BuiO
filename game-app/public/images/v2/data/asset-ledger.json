@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 223,
+  "count": 224,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1152,6 +1152,36 @@
       "tags": [
         "reference",
         "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-sand-ledge",
+      "label": "Reference front sand ledge",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-sand-ledge.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 139,
+        "h": 121
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "rect"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9192,7 +9222,7 @@
       "original design"
     ]
   },
-  "availableCount": 223,
-  "imagegenCount": 130,
+  "availableCount": 224,
+  "imagegenCount": 131,
   "proceduralCount": 93
 }

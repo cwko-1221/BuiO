@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07af';
+export const MAP_VERSION = 'fixed-1000m-2026.07ag';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -190,21 +190,21 @@ const factoryA=authoredRoute('factory',[
   ['ref-book-step',1980,736,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
   ['ref-book-step',2200,754,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
   ['ref-scroll-step',2440,770,190,82,{tags:['reference-frame-09','scroll-step']}],
-  ['cannon',2680,788,226,126],
-  ['round-table',2920,806,204,114,{tags:['landmark-base']}],
-  ['conveyor',3160,824,236,96],
-  ['bench',3400,842,216,102]
+  ['ref-sand-ledge',2580,788,220,160,{tags:['reference-frame-10','reference-frame-12','sand-ledge']}],
+  ['ref-sand-ledge',2760,806,260,190,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop','landmark-base']}],
+  ['ref-sand-ledge',2940,824,230,168,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop']}],
+  ['ref-sand-ledge',3120,842,300,220,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop']}]
 ],['authored-factory','factory-room-a','rising-right']);
 const factoryB=authoredRoute('factory',[
-  ['giant-gear',3620,858,196,108],
-  ['ref-book-step',3830,875,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
-  ['market-wagon',4040,892,224,126],
-  ['ref-barrel-front',4250,909,160,180,{tags:['reference-frame-06','barrel-step']}],
-  ['picnic-table',4460,926,204,108],
-  ['conveyor',4670,943,232,94],
-  ['flat-brick-strip-2',4880,960,320,90,{tags:['landmark-base']}],
-  ['conveyor',5090,978,250,90],
-  ['conveyor',5310,1000,430,90,{tags:['summit-platform','landmark-base']}]
+  ['giant-gear',3320,858,196,108],
+  ['ref-book-step',3520,875,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
+  ['market-wagon',3730,892,224,126],
+  ['ref-barrel-front',3940,909,160,180,{tags:['reference-frame-06','barrel-step']}],
+  ['picnic-table',4150,926,204,108],
+  ['conveyor',4360,943,232,94],
+  ['flat-brick-strip-2',4570,960,320,90,{tags:['landmark-base']}],
+  ['conveyor',4780,978,250,90],
+  ['conveyor',5090,1000,430,90,{tags:['summit-platform','landmark-base']}]
 ],['authored-factory','factory-room-b','rising-right']);
 recoverLast(factoryA,3);
 recoverLast(factoryB,3);

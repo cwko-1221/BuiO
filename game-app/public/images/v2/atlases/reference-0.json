@@ -559,6 +559,26 @@
         "w": 203,
         "h": 240
       }
+    },
+    "ref-sand-ledge": {
+      "frame": {
+        "x": 922,
+        "y": 736,
+        "w": 203,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 203,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 203,
+        "h": 240
+      }
     }
   },
   "meta": {

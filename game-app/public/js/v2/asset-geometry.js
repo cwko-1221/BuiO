@@ -2808,6 +2808,21 @@ export const ASSET_GEOMETRY={
       }
     ]
   },
+  "ref-sand-ledge": {
+    "source": {
+      "w": 108,
+      "h": 128
+    },
+    "aspect": 0.84375,
+    "parts": [
+      {
+        "x": 0.5,
+        "y": 0.5,
+        "w": 0.8898888888888888,
+        "h": 0.15925
+      }
+    ]
+  },
   "crate": {
     "source": {
       "w": 128,

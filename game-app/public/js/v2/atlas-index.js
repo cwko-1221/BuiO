@@ -154,6 +154,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-scroll-step"
   },
+  "ref-sand-ledge": {
+    "key": "atlas-reference-0",
+    "frame": "ref-sand-ledge"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"
