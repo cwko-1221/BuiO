@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07ae';
+export const MAP_VERSION = 'fixed-1000m-2026.07af';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -189,7 +189,7 @@ const factoryA=authoredRoute('factory',[
   ['ref-book-step',1760,718,170,104,{tags:['reference-frame-09','book-step']}],
   ['ref-book-step',1980,736,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
   ['ref-book-step',2200,754,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
-  ['crate',2440,770,178,132],
+  ['ref-scroll-step',2440,770,190,82,{tags:['reference-frame-09','scroll-step']}],
   ['cannon',2680,788,226,126],
   ['round-table',2920,806,204,114,{tags:['landmark-base']}],
   ['conveyor',3160,824,236,96],

@@ -167,6 +167,7 @@ export const AVAILABLE_ASSETS = [
   "ref-oven-front",
   "ref-produce-crate",
   "ref-run-jump-sign",
+  "ref-scroll-step",
   "ref-shield-rack",
   "ref-stone-column-front",
   "ref-stone-pillar-front",

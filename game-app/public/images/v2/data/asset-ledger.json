@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 222,
+  "count": 223,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1104,6 +1104,54 @@
       "tags": [
         "reference",
         "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-scroll-step",
+      "label": "Reference paired parchment step",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-scroll-step.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 161,
+        "h": 127
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "trapezoid"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9144,7 +9192,7 @@
       "original design"
     ]
   },
-  "availableCount": 222,
-  "imagegenCount": 129,
+  "availableCount": 223,
+  "imagegenCount": 130,
   "proceduralCount": 93
 }
