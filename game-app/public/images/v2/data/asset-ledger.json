@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 230,
+  "count": 231,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1421,6 +1421,54 @@
       "renderSize": {
         "w": 181,
         "h": 95
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-office-desk",
+      "label": "Reference low office drawer step",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-office-desk.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 111,
+        "h": 75
       },
       "body": {
         "type": "trapezoid",
@@ -9493,7 +9541,7 @@
       "original design"
     ]
   },
-  "availableCount": 230,
-  "imagegenCount": 137,
+  "availableCount": 231,
+  "imagegenCount": 138,
   "proceduralCount": 93
 }

@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07am';
+export const MAP_VERSION = 'fixed-1000m-2026.07an';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -187,24 +187,27 @@ recoverLast(snowRun,3);
 // reference map without letting temporary geometric art leak into the course.
 const factoryA=authoredRoute('factory',[
   ['ref-book-step',1760,718,170,104,{tags:['reference-frame-09','book-step']}],
-  ['ref-book-step',1980,736,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
-  ['ref-book-step',2200,754,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
-  ['ref-scroll-step',2440,770,190,82,{tags:['reference-frame-09','scroll-step']}],
-  ['ref-sand-ledge',2580,788,220,160,{tags:['reference-frame-10','reference-frame-12','sand-ledge']}],
-  ['ref-sand-ledge',2760,806,260,190,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop','landmark-base']}],
-  ['ref-sand-ledge',2940,824,230,168,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop']}],
-  ['ref-sand-ledge',3120,842,300,220,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop']}]
+  ['ref-book-step',1980,728,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
+  ['ref-book-step',2200,738,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
+  ['ref-scroll-step',2440,748,190,82,{tags:['reference-frame-09','scroll-step']}],
+  ['ref-sand-ledge',2580,758,220,160,{tags:['reference-frame-10','reference-frame-12','sand-ledge']}],
+  ['ref-sand-ledge',2760,768,260,190,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop','landmark-base']}],
+  ['ref-sand-ledge',2940,778,230,168,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop']}],
+  ['ref-sand-ledge',3120,788,300,220,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop']}]
 ],['authored-factory','factory-room-a','rising-right']);
 const factoryB=authoredRoute('factory',[
-  ['ref-fishing-boat',3320,858,270,200,{tags:['reference-frame-10','reference-frame-12','boat-step']}],
-  ['ref-fishing-boat',3560,875,270,200,{tags:['reference-frame-10','reference-frame-12','boat-step','repeated-prop']}],
-  ['ref-sand-ledge',3820,892,260,190,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop']}],
-  ['ref-round-table-front',4110,909,300,240,{tags:['reference-frame-11','reference-frame-13','round-table-step']}],
-  ['ref-bowl-front',4400,926,154,104,{tags:['reference-frame-11','bowl-step']}],
-  ['ref-monitor-front',4640,943,230,170,{tags:['reference-frame-13','reference-frame-14','monitor-step']}],
-  ['ref-potted-plant',4880,960,150,150,{tags:['reference-frame-13','reference-frame-14','plant-step']}],
-  ['ref-office-safe',5120,978,250,190,{tags:['reference-frame-14','office-safe-step']}],
-  ['conveyor',5380,1000,430,90,{tags:['summit-platform','landmark-base']}]
+  ['ref-fishing-boat',3320,805,270,200,{tags:['reference-frame-10','reference-frame-12','boat-step']}],
+  ['ref-fishing-boat',3560,825,270,200,{tags:['reference-frame-10','reference-frame-12','boat-step','repeated-prop']}],
+  ['ref-sand-ledge',3820,845,260,190,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop']}],
+  ['ref-round-table-front',4110,865,300,240,{tags:['reference-frame-11','reference-frame-13','round-table-step']}],
+  ['ref-bowl-front',4400,885,154,104,{tags:['reference-frame-11','bowl-step']}],
+  ['ref-monitor-front',4640,905,230,170,{tags:['reference-frame-13','reference-frame-14','monitor-step']}],
+  ['ref-potted-plant',4880,925,150,150,{tags:['reference-frame-13','reference-frame-14','plant-step']}],
+  ['ref-office-safe',5120,945,230,160,{tags:['reference-frame-14','office-safe-step']}],
+  ['ref-office-desk',5400,960,340,96,{tags:['reference-frame-14','office-desk-step']}],
+  ['conveyor',5300,975,160,78,{tags:['office-chair-placeholder']}],
+  ['conveyor',5000,988,190,82,{tags:['basketball-hoop-placeholder']}],
+  ['ref-office-desk',4750,1000,280,100,{tags:['reference-frame-14','summit-platform','landmark-base','repeated-prop']}]
 ],['authored-factory','factory-room-b','rising-right']);
 recoverLast(factoryA,3);
 recoverLast(factoryB,3);
@@ -224,7 +227,7 @@ annotations.push(
   {id:'turn-farm',type:'turn',x:1500,y:yAt(486)-165,text:'→ 轉向右上'},
   {id:'turn-snow',type:'turn',x:4160,y:yAt(706)-175,text:'← 進入最後攀登'},
   {id:'factory-warning',type:'guide',x:3320,y:yAt(842)-150,text:'雷射不致命・失誤會回到房間入口',arrow:{dx:-60,dy:-60}},
-  {id:'summit-final',type:'summit',x:5110,y:yAt(1000)-190,text:'山頂！'}
+  {id:'summit-final',type:'summit',x:4750,y:yAt(1000)-190,text:'山頂！'}
 );
 
 // Non-lethal laser gates reset to the nearest room entrance and never form

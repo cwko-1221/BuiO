@@ -699,6 +699,26 @@
         "w": 240,
         "h": 240
       }
+    },
+    "ref-office-desk": {
+      "frame": {
+        "x": 736,
+        "y": 980,
+        "w": 240,
+        "h": 89
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 89
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 89
+      }
     }
   },
   "meta": {
