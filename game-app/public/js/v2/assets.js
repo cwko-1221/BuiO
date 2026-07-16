@@ -31,7 +31,8 @@ const catalog = {
     ['ref-sand-ledge','Reference front sand ledge'],
     ['ref-fishing-boat','Reference white fishing boat'],
     ['ref-round-table-front','Reference broad round wooden table'],
-    ['ref-bowl-front','Reference small ceramic bowl step']
+    ['ref-bowl-front','Reference small ceramic bowl step'],
+    ['ref-monitor-front','Reference front display monitor']
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],

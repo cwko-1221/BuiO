@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 227,
+  "count": 228,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1305,6 +1305,62 @@
       "tags": [
         "reference",
         "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-monitor-front",
+      "label": "Reference front display monitor",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-monitor-front.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 127,
+        "h": 137
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "polygon"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9345,7 +9401,7 @@
       "original design"
     ]
   },
-  "availableCount": 227,
-  "imagegenCount": 134,
+  "availableCount": 228,
+  "imagegenCount": 135,
   "proceduralCount": 93
 }
