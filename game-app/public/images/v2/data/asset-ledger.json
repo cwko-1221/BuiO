@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 229,
+  "count": 230,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1405,6 +1405,54 @@
       "tags": [
         "reference",
         "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-office-safe",
+      "label": "Reference front office safe",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-office-safe.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 181,
+        "h": 95
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "trapezoid"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9445,7 +9493,7 @@
       "original design"
     ]
   },
-  "availableCount": 229,
-  "imagegenCount": 136,
+  "availableCount": 230,
+  "imagegenCount": 137,
   "proceduralCount": 93
 }

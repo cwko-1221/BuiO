@@ -178,6 +178,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-potted-plant"
   },
+  "ref-office-safe": {
+    "key": "atlas-reference-0",
+    "frame": "ref-office-safe"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"
