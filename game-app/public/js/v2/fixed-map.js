@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07ar';
+export const MAP_VERSION = 'fixed-1000m-2026.07at';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -245,7 +245,7 @@ export const FIXED_MAP = {
   })),
   checkpoints:[
     {altitude:0},{altitude:210},{altitude:274,x:4660},{altitude:448},
-    {altitude:573},{altitude:704},{altitude:820},{altitude:930}
+    {altitude:573,x:3600,y:yAt(584)-59},{altitude:704},{altitude:820},{altitude:930}
   ].map(item=>({id:`checkpoint-${item.altitude}`,...item})),
   recoveryBounds:[
     {id:'recovery-castle',minAltitude:35,maxAltitude:210,resetAltitude:0},
