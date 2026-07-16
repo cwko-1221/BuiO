@@ -659,6 +659,26 @@
         "w": 240,
         "h": 240
       }
+    },
+    "ref-potted-plant": {
+      "frame": {
+        "x": 248,
+        "y": 980,
+        "w": 240,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 240
+      }
     }
   },
   "meta": {

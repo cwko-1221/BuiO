@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 228,
+  "count": 229,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1361,6 +1361,50 @@
       "tags": [
         "reference",
         "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-potted-plant",
+      "label": "Reference compact potted plant step",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-potted-plant.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 163,
+        "h": 99
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "compound"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9401,7 +9445,7 @@
       "original design"
     ]
   },
-  "availableCount": 228,
-  "imagegenCount": 135,
+  "availableCount": 229,
+  "imagegenCount": 136,
   "proceduralCount": 93
 }
