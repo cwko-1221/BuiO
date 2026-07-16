@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 221,
+  "count": 222,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1073,6 +1073,37 @@
       "tags": [
         "reference",
         "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-book-step",
+      "label": "Reference paired spellbook step",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-book-step.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 175,
+        "h": 111
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "circle"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9113,7 +9144,7 @@
       "original design"
     ]
   },
-  "availableCount": 221,
-  "imagegenCount": 128,
+  "availableCount": 222,
+  "imagegenCount": 129,
   "proceduralCount": 93
 }

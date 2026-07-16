@@ -146,6 +146,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-knight-stand"
   },
+  "ref-book-step": {
+    "key": "atlas-reference-0",
+    "frame": "ref-book-step"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"

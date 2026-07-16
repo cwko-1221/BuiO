@@ -519,6 +519,26 @@
         "w": 240,
         "h": 220
       }
+    },
+    "ref-book-step": {
+      "frame": {
+        "x": 492,
+        "y": 736,
+        "w": 219,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 219,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 219,
+        "h": 240
+      }
     }
   },
   "meta": {

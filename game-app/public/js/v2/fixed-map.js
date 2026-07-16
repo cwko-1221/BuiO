@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07ad';
+export const MAP_VERSION = 'fixed-1000m-2026.07ae';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -186,28 +186,26 @@ recoverLast(snowRun,3);
 // intentional: it gives the final ascent the playful found-object rhythm of the
 // reference map without letting temporary geometric art leak into the course.
 const factoryA=authoredRoute('factory',[
-  ['ref-barrel-front',1850,718,160,180,{tags:['reference-frame-04','barrel-step']}],
-  ['conveyor',2090,736,238,96],
-  ['giant-gear',2330,754,176,98],
-  ['crate',2570,772,178,132],
-  ['cannon',2810,790,226,126],
-  ['round-table',3050,808,204,114,{tags:['landmark-base']}],
-  ['conveyor',3290,826,236,96],
-  ['bench',3530,844,216,102]
+  ['ref-book-step',1760,718,170,104,{tags:['reference-frame-09','book-step']}],
+  ['ref-book-step',1980,736,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
+  ['ref-book-step',2200,754,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
+  ['crate',2440,770,178,132],
+  ['cannon',2680,788,226,126],
+  ['round-table',2920,806,204,114,{tags:['landmark-base']}],
+  ['conveyor',3160,824,236,96],
+  ['bench',3400,842,216,102]
 ],['authored-factory','factory-room-a','rising-right']);
 const factoryB=authoredRoute('factory',[
-  ['giant-gear',3770,862,196,108],
-  ['market-wagon',4010,884,224,126],
-  ['ref-barrel-front',4200,904,160,180,{tags:['reference-frame-06','barrel-step']}],
-  ['picnic-table',4490,928,204,108],
-  ['conveyor',4730,952,232,94],
-  ['flat-brick-strip-2',4940,976,320,90,{tags:['landmark-base']}],
+  ['giant-gear',3620,858,196,108],
+  ['ref-book-step',3830,875,170,104,{tags:['reference-frame-09','book-step','repeated-prop']}],
+  ['market-wagon',4040,892,224,126],
+  ['ref-barrel-front',4250,909,160,180,{tags:['reference-frame-06','barrel-step']}],
+  ['picnic-table',4460,926,204,108],
+  ['conveyor',4670,943,232,94],
+  ['flat-brick-strip-2',4880,960,320,90,{tags:['landmark-base']}],
+  ['conveyor',5090,978,250,90],
   ['conveyor',5310,1000,430,90,{tags:['summit-platform','landmark-base']}]
 ],['authored-factory','factory-room-b','rising-right']);
-obstacle('factory','book-stack',factoryA[2],-72,82,72);
-obstacle('factory','market-basket',factoryA[6],72,78,76);
-obstacle('factory','cash-chest',factoryB[4],-90,80,72);
-decor('factory','giant-gear',5000,850,260,260);
 recoverLast(factoryA,3);
 recoverLast(factoryB,3);
 
