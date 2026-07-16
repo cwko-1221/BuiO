@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 220,
+  "count": 221,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1025,6 +1025,54 @@
       "tags": [
         "reference",
         "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-knight-stand",
+      "label": "Reference front armour stand",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-knight-stand.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 131,
+        "h": 87
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "trapezoid"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9065,7 +9113,7 @@
       "original design"
     ]
   },
-  "availableCount": 220,
-  "imagegenCount": 127,
+  "availableCount": 221,
+  "imagegenCount": 128,
   "proceduralCount": 93
 }

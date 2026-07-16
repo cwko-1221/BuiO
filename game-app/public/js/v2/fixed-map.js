@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07ac';
+export const MAP_VERSION = 'fixed-1000m-2026.07ad';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -172,8 +172,11 @@ const snowRun=authoredRoute('snow',[
   ['ref-castle-banner-blue',2400,646,220,300,{tags:['reference-frame-09','reference-frame-10','banner-step']}],
   ['ref-castle-banner-red',2160,660,220,300,{tags:['reference-frame-09','reference-frame-10','banner-step']}],
   ['snow-ledge',1920,690,270,102],
-  ['snow-ledge',1500,704,500,130,{tags:['zone-landing','landmark-base']}]
+  ['flat-brick-strip-4',1500,704,500,90,{tags:['zone-landing','landmark-base','reference-frame-10','armory-platform']}]
 ],['authored-snow','rising-left']);
+obstacle('snow','ref-knight-stand',snowRun[8],-135,112,158,{tags:['reference-frame-10','knight-stand']});
+obstacle('snow','ref-knight-stand',snowRun[8],-20,112,158,{tags:['reference-frame-10','knight-stand','repeated-prop']});
+obstacle('snow','ref-shield-rack',snowRun[8],150,150,112,{tags:['reference-frame-10','armory-rack']});
 recoverLast(snowRun,3);
 
 // FACTORY 705-1000m ---------------------------------------------------------

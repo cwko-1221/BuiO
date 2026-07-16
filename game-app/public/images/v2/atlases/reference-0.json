@@ -499,6 +499,26 @@
         "w": 240,
         "h": 240
       }
+    },
+    "ref-knight-stand": {
+      "frame": {
+        "x": 248,
+        "y": 736,
+        "w": 240,
+        "h": 220
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 220
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 220
+      }
     }
   },
   "meta": {
