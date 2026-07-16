@@ -118,6 +118,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-hanging-lantern"
   },
+  "ref-catapult-front": {
+    "key": "atlas-reference-0",
+    "frame": "ref-catapult-front"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"

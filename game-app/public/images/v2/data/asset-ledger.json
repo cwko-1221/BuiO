@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 214,
+  "count": 215,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -799,6 +799,54 @@
       "tags": [
         "reference",
         "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-catapult-front",
+      "label": "Reference flat medieval catapult",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-catapult-front.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 171,
+        "h": 129
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "trapezoid"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -8839,7 +8887,7 @@
       "original design"
     ]
   },
-  "availableCount": 214,
-  "imagegenCount": 121,
+  "availableCount": 215,
+  "imagegenCount": 122,
   "proceduralCount": 93
 }
