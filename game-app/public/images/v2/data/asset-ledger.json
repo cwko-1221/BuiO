@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 224,
+  "count": 225,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1182,6 +1182,54 @@
       "tags": [
         "reference",
         "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-fishing-boat",
+      "label": "Reference white fishing boat",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-fishing-boat.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 166,
+        "h": 114
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "trapezoid"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9222,7 +9270,7 @@
       "original design"
     ]
   },
-  "availableCount": 224,
-  "imagegenCount": 131,
+  "availableCount": 225,
+  "imagegenCount": 132,
   "proceduralCount": 93
 }
