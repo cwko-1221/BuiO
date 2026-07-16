@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 218,
+  "count": 219,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -964,6 +964,37 @@
       "tags": [
         "reference",
         "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-castle-banner-blue",
+      "label": "Reference blue castle banner",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-castle-banner-blue.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 195,
+        "h": 127
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "circle"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9004,7 +9035,7 @@
       "original design"
     ]
   },
-  "availableCount": 218,
-  "imagegenCount": 125,
+  "availableCount": 219,
+  "imagegenCount": 126,
   "proceduralCount": 93
 }
