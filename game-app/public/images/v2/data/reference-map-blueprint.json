@@ -62,67 +62,67 @@
     {
       "id": "ref-07-bed-lantern-climb",
       "image": "image-7.png",
-      "altitude": [405, 475],
+      "altitude": [405, 545],
       "direction": "right-up",
-      "route": ["stone-column-chain", "bed-gallery", "lantern-step", "bed-tilt", "catapult"],
-      "props": ["ref-bed-front", "ref-hanging-lantern", "ref-catapult-front"]
+      "route": ["stone-column-chain", "bed-gallery", "lantern-step", "bed-tilt", "catapult", "log-steps", "oven-workshop"],
+      "props": ["ref-bed-front", "ref-hanging-lantern", "ref-catapult-front", "ref-log-step", "ref-oven-front", "ref-bellows-front", "ref-cookpot"]
     },
     {
       "id": "ref-08-oven-workshop",
       "image": "image-8.png",
-      "altitude": [475, 545],
+      "altitude": [545, 615],
       "direction": "right-up",
-      "route": ["bed-gallery", "lantern-step", "catapult", "log-steps", "oven", "bellows", "brick-landing"],
-      "props": ["ref-bed-front", "ref-hanging-lantern", "ref-catapult-front", "ref-log-step", "ref-oven-front", "ref-bellows-front"]
+      "route": ["market-stall", "brick-u-wall", "produce-crate-u", "floating-catapult", "banner-transition"],
+      "props": ["ref-market-stall-blue", "ref-market-stall-red", "ref-produce-crate", "ref-catapult-front", "ref-stone-column-front", "ref-castle-banner-blue", "ref-castle-banner-red"]
     },
     {
       "id": "ref-09-banner-pot-ascent",
       "image": "image-9.png",
-      "altitude": [545, 615],
+      "altitude": [615, 690],
       "direction": "right-up",
-      "route": ["oven-workbench", "cookpot-chain", "log-step", "banner-landing"],
-      "props": ["ref-cookpot", "ref-castle-banner-blue", "ref-castle-banner-red"]
+      "route": ["banner-chain", "brick-column-chain", "armory-platform", "book-chain", "library-u-wall"],
+      "props": ["ref-castle-banner-blue", "ref-castle-banner-red", "ref-knight-stand", "ref-shield-rack", "ref-book-step", "ref-scroll-step", "ref-lamp-post"]
     },
     {
       "id": "ref-10-armory-finale",
       "image": "image-10.png",
-      "altitude": [615, 690],
+      "altitude": [690, 755],
       "direction": "right-up",
-      "route": ["banner-chain", "brick-column-chain", "armory-platform"],
-      "props": ["ref-castle-banner-blue", "ref-castle-banner-red", "ref-knight-stand", "ref-shield-rack"]
+      "route": ["sand-ledge", "fishing-boat-pair", "round-table", "bowl-chain"],
+      "props": ["ref-sand-ledge", "ref-fishing-boat", "ref-round-table-front", "ref-bowl-front", "ref-coral-cluster"]
     },
     {
       "id": "ref-11-library-wall",
       "image": "image-11.png",
-      "altitude": [690, 755],
+      "altitude": [755, 825],
       "direction": "right-up",
-      "route": ["shield-step", "book-step-chain", "brick-u-wall", "upper-lamp-landing"],
-      "props": ["ref-book-step", "ref-scroll-step", "ref-lamp-post"]
+      "route": ["sand-ledge", "reef-rock", "tree", "wood-sign", "plant-chain", "monitor-chain"],
+      "props": ["ref-sand-ledge", "ref-reef-rock", "ref-round-tree", "ref-wood-sign", "ref-potted-plant", "ref-monitor-front"]
     },
     {
       "id": "ref-12-coral-boats",
       "image": "image-12.png",
-      "altitude": [755, 830],
+      "altitude": [825, 878],
       "direction": "left-up",
-      "route": ["upper-lamp-landing", "sand-ledge", "fishing-boat-pair", "sand-summit"],
-      "props": ["ref-sand-ledge", "ref-fishing-boat", "ref-zone-title"],
+      "route": ["reef-rock", "sand-ledge", "fishing-boat-pair", "coral-chain"],
+      "props": ["ref-reef-rock", "ref-sand-ledge", "ref-fishing-boat", "ref-coral-cluster", "ref-zone-title"],
       "text": ["高峰 2/6・珊瑚攀登"]
     },
     {
       "id": "ref-13-curio-table",
       "image": "image-13.png",
-      "altitude": [830, 910],
+      "altitude": [878, 930],
       "direction": "left-up",
-      "route": ["sand-ledge", "round-table", "bowl-chain", "monitor-chain", "plant-chain"],
-      "props": ["ref-round-table-front", "ref-bowl-front", "ref-monitor-front", "ref-potted-plant"]
+      "route": ["sand-ledge", "telescope", "split-platform", "door-panels", "round-tables"],
+      "props": ["ref-sand-ledge", "ref-telescope", "ref-split-platform", "ref-door-panel", "ref-white-table", "ref-charcoal-table", "ref-potted-plant"]
     },
     {
       "id": "ref-14-office-summit",
       "image": "image-14.png",
       "altitude": [910, 1000],
       "direction": "right-up",
-      "route": ["monitor-chain", "office-desk", "safe-chain", "office-chair-chain", "basketball-hoop", "summit-floor"],
-      "props": ["ref-monitor-front", "ref-potted-plant", "ref-office-safe", "ref-office-desk", "ref-office-chair", "ref-basketball-hoop", "ref-summit-flag"],
+      "route": ["safe", "office-drawer-chain", "round-table-pair", "office-chair", "basketball-hoop", "summit-floor"],
+      "props": ["ref-potted-plant", "ref-office-safe", "ref-office-desk", "ref-white-table", "ref-charcoal-table", "ref-office-chair", "ref-basketball-hoop", "ref-summit-flag"],
       "text": ["山頂！"]
     }
   ],
@@ -134,6 +134,8 @@
     "ref-log-step", "ref-bellows-front", "ref-cookpot", "ref-castle-banner-blue", "ref-castle-banner-red",
     "ref-knight-stand", "ref-book-step", "ref-scroll-step", "ref-sand-ledge", "ref-fishing-boat",
     "ref-round-table-front", "ref-bowl-front", "ref-monitor-front", "ref-potted-plant", "ref-office-safe",
-    "ref-office-desk", "ref-office-chair", "ref-basketball-hoop", "ref-summit-flag"
+    "ref-office-desk", "ref-office-chair", "ref-basketball-hoop", "ref-market-stall-blue",
+    "ref-reef-rock", "ref-coral-cluster", "ref-round-tree", "ref-wood-sign", "ref-telescope",
+    "ref-door-panel", "ref-white-table", "ref-charcoal-table", "ref-split-platform", "ref-summit-flag"
   ]
 }

@@ -38,6 +38,16 @@ const catalog = {
     ['ref-office-desk','Reference low office drawer step'],
     ['ref-office-chair','Reference front office chair'],
     ['ref-basketball-hoop','Reference flat basketball hoop'],
+    ['ref-market-stall-blue','Reference blue market stall'],
+    ['ref-reef-rock','Reference pale reef rock platform'],
+    ['ref-coral-cluster','Reference coral cluster'],
+    ['ref-round-tree','Reference rounded tree platform'],
+    ['ref-wood-sign','Reference blank wooden sign'],
+    ['ref-telescope','Reference brass telescope'],
+    ['ref-door-panel','Reference floating door panel'],
+    ['ref-white-table','Reference white circular table'],
+    ['ref-charcoal-table','Reference charcoal circular table'],
+    ['ref-split-platform','Reference split monochrome platform'],
     ['ref-summit-flag','Reference original summit flag']
   ],
   global: [

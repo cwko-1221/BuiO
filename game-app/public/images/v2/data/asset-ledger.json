@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 234,
+  "count": 244,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1587,6 +1587,426 @@
       "tags": [
         "reference",
         "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-market-stall-blue",
+      "label": "Reference blue market stall",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-market-stall-blue.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 137,
+        "h": 119
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-reef-rock",
+      "label": "Reference pale reef rock platform",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-reef-rock.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 169,
+        "h": 117
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": true,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-coral-cluster",
+      "label": "Reference coral cluster",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-coral-cluster.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 179,
+        "h": 135
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-round-tree",
+      "label": "Reference rounded tree platform",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-round-tree.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 132,
+        "h": 130
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-wood-sign",
+      "label": "Reference blank wooden sign",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-wood-sign.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 122,
+        "h": 110
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-telescope",
+      "label": "Reference brass telescope",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-telescope.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 133,
+        "h": 125
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-door-panel",
+      "label": "Reference floating door panel",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-door-panel.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 178,
+        "h": 70
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-white-table",
+      "label": "Reference white circular table",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-white-table.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 179,
+        "h": 81
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": true,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-charcoal-table",
+      "label": "Reference charcoal circular table",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-charcoal-table.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 179,
+        "h": 117
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-split-platform",
+      "label": "Reference split monochrome platform",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-split-platform.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 143,
+        "h": 135
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "compound"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9683,7 +10103,7 @@
       "original design"
     ]
   },
-  "availableCount": 234,
-  "imagegenCount": 141,
+  "availableCount": 244,
+  "imagegenCount": 151,
   "proceduralCount": 93
 }

@@ -7,7 +7,7 @@
     "start": "node server.js",
     "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-game-physics.mjs",
     "check:game": "node scripts/validate-game-v2.mjs",
-    "build:game-assets": "node scripts/build-game-assets.mjs && node scripts/generate-fixed-bricks.mjs && node scripts/analyze-game-geometry.mjs && node scripts/pack-game-atlases.mjs",
+    "build:game-assets": "node scripts/generate-reference-extensions.mjs && node scripts/generate-fixed-bricks.mjs && node scripts/build-game-assets.mjs && node scripts/analyze-game-geometry.mjs && node scripts/pack-game-atlases.mjs",
     "postinstall": "cd whiteboard-app/client && npm install && npm run build"
   },
   "dependencies": {

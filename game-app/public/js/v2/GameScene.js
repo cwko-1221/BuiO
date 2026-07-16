@@ -37,9 +37,15 @@ export class GameScene extends Phaser.Scene {
   }
 
   preload() {
+    const assetVersion = encodeURIComponent(this.course.mapVersion);
+    const versioned = url => `${url}${url.includes('?')?'&':'?'}v=${assetVersion}`;
     this.load.image('sky-v2', '/game/images/game/sky-panorama.webp');
     this.load.image('player-v2', '/game/images/v2/characters/player-idle.webp');
-    for (const page of ATLAS_PAGES) this.load.atlas(page.key,page.image,page.json);
+    // Atlas filenames are stable so existing rooms can reconnect cleanly. The
+    // fixed map version is therefore appended to force browsers to fetch the
+    // matching atlas after an art/map deployment instead of showing retired
+    // blue slab frames from an older cache.
+    for (const page of ATLAS_PAGES) this.load.atlas(page.key,versioned(page.image),versioned(page.json));
     const strips = { idle:['idle-strip-4',4], run:['run-strip-8',8], air:['air-strip-6',6], land:['fall-land-strip-4',4], celebrate:['celebrate-strip-4',4] };
     for (const [name,[dir,count]] of Object.entries(strips)) {
       for (let i=1;i<=count;i++) this.load.image(`player-${name}-${i}`,`/game/images/v2/characters/frames/${dir}/${String(i).padStart(2,'0')}.png`);

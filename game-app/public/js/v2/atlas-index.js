@@ -194,6 +194,46 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-basketball-hoop"
   },
+  "ref-market-stall-blue": {
+    "key": "atlas-reference-0",
+    "frame": "ref-market-stall-blue"
+  },
+  "ref-reef-rock": {
+    "key": "atlas-reference-0",
+    "frame": "ref-reef-rock"
+  },
+  "ref-coral-cluster": {
+    "key": "atlas-reference-0",
+    "frame": "ref-coral-cluster"
+  },
+  "ref-round-tree": {
+    "key": "atlas-reference-0",
+    "frame": "ref-round-tree"
+  },
+  "ref-wood-sign": {
+    "key": "atlas-reference-0",
+    "frame": "ref-wood-sign"
+  },
+  "ref-telescope": {
+    "key": "atlas-reference-0",
+    "frame": "ref-telescope"
+  },
+  "ref-door-panel": {
+    "key": "atlas-reference-0",
+    "frame": "ref-door-panel"
+  },
+  "ref-white-table": {
+    "key": "atlas-reference-0",
+    "frame": "ref-white-table"
+  },
+  "ref-charcoal-table": {
+    "key": "atlas-reference-0",
+    "frame": "ref-charcoal-table"
+  },
+  "ref-split-platform": {
+    "key": "atlas-reference-0",
+    "frame": "ref-split-platform"
+  },
   "ref-summit-flag": {
     "key": "atlas-reference-0",
     "frame": "ref-summit-flag"

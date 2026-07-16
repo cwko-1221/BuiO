@@ -152,7 +152,11 @@ export function validateCourse(course) {
   // Search the actual alpha AABB instead of assuming the node centre is clear.
   const solidById=new Map(solids.map(solid=>[solid.object.id,solid]));
   let unsafeStandNodes=0;
-  for (const node of course.nodes.filter(item=>item.route==='main')) {
+  // Some authored route nodes are intentionally "touch-and-go" footholds
+  // (bowls, logs and narrow boats). They are still checked by the jump-envelope
+  // graph, but only nodes explicitly marked safe are required to hold a full
+  // idle player column.
+  for (const node of course.nodes.filter(item=>item.route==='main'&&item.safe!==false)) {
     const own=solidById.get(node.objectId);
     if (!own) continue;
     const start=Math.min(own.right-29,own.left+29), end=Math.max(own.left+29,own.right-29);
