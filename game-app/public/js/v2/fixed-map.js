@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07at';
+export const MAP_VERSION = 'fixed-1000m-2026.07au';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -42,6 +42,16 @@ function obstacle(zone,assetId,supportRef,xOffset,w,h,extra={}) {
     angle:extra.angle||0,role:'obstacle',behavior:staticBehavior,supportId:supportRef.object.id,tags:['obstacle',...(extra.tags||[])]});
 }
 
+// Tutorial masonry is assembled from independent front-facing pieces.  Unlike
+// a decorative arch image, every visible brick piece owns its exact collider,
+// so the open doorway remains open and there is no invisible platform.
+function placedObstacle(zone,assetId,x,y,w,h,extra={}) {
+  const id=extra.id || `fixed-obstacle-${String(++serial).padStart(3,'0')}`;
+  objects.push({id,assetId,zone,x,y,w,h,angle:extra.angle||0,role:'obstacle',
+    behavior:staticBehavior,tags:['obstacle','tutorial-masonry',...(extra.tags||[])]});
+  return id;
+}
+
 function decor(zone,assetId,x,altitude,w,h,extra={}) {
   objects.push({id:`fixed-decor-${String(++serial).padStart(3,'0')}`,assetId,zone,x,y:yAt(altitude),w,h,
     angle:extra.angle||0,role:'decor',behavior:staticBehavior,tags:['decor',...(extra.tags||[])]});
@@ -65,19 +75,29 @@ function recoverLast(run,count=2) {
 // The opening mirrors the reference pacing: long floor, low gates, forgiving
 // brick steps, then a left-climbing sequence of castle props and landmarks.
 const castleGround=[];
-for (const x of [360,930,1500,2070,2640]) {
-  castleGround.push(mainSupport('castle','flat-brick-strip-4',x,0,600,106,{tags:['ground-chain','tutorial-floor']}));
+for (let x=128;x<=2944;x+=256) {
+  castleGround.push(mainSupport('castle','flat-brick-strip-4',x,0,260,78,{tags:['ground-chain','tutorial-floor']}));
 }
-for (const x of [560,760,960]) decor('castle','ref-go-pennant',x,14,88,132,{tags:['reference-frame-01','tutorial-flag']});
-obstacle('castle','castle-banner',castleGround[2],90,88,132);
-obstacle('castle','ref-lamp-post',castleGround[3],-80,110,250,{tags:['reference-frame-03','lamp-obstacle']});
-obstacle('castle','ref-lamp-post',castleGround[4],-140,110,250,{tags:['reference-frame-11','lamp-obstacle']});
-obstacle('castle','treasure-chest',castleGround[4],110,112,88);
-decor('castle','castle-arch',1280,25,300,250,{tags:['tutorial-gate']});
-decor('castle','castle-arch',2100,35,340,285,{tags:['tutorial-gate']});
+for (const x of [300,500,700]) decor('castle','ref-go-pennant',x,11,66,100,{tags:['reference-frame-01','tutorial-flag']});
+
+const tutorialFloorTop=yAt(0)-78/2;
+// Low hop: a short open bench, matching the first reference teaching beat.
+placedObstacle('castle','flat-brick-a',930,yAt(0)-48.8125,70,70,{tags:['reference-frame-01','low-gate']});
+placedObstacle('castle','flat-brick-a',930,yAt(0)-104.8125,70,70,{tags:['reference-frame-01','low-gate']});
+placedObstacle('castle','flat-brick-a',1110,yAt(0)-48.8125,70,70,{tags:['reference-frame-01','low-gate']});
+placedObstacle('castle','flat-brick-a',1110,yAt(0)-104.8125,70,70,{tags:['reference-frame-01','low-gate']});
+placedObstacle('castle','flat-brick-strip-2',1020,yAt(0)-157.3125,230,48,{tags:['reference-frame-01','low-gate-top']});
+// A readable two-step rise before the taller run-and-jump frame.
+placedObstacle('castle','flat-brick-a',1450,tutorialFloorTop-32.25,100,80,{tags:['reference-frame-01','tutorial-step']});
+placedObstacle('castle','flat-brick-a',1570,tutorialFloorTop-88,100,80,{tags:['reference-frame-01','tutorial-step']});
+placedObstacle('castle','flat-brick-a',1690,tutorialFloorTop-143.75,100,80,{tags:['reference-frame-01','tutorial-step']});
+// Tall but completely open doorway: the player can pass beneath it or climb it.
+placedObstacle('castle','flat-brick-pillar-4',2180,tutorialFloorTop-111.4314,52,220,{tags:['reference-frame-01','tall-gate']});
+placedObstacle('castle','flat-brick-pillar-4',2460,tutorialFloorTop-111.4314,52,220,{tags:['reference-frame-01','tall-gate']});
+placedObstacle('castle','flat-brick-strip-2',2320,tutorialFloorTop-247.8628,340,52,{tags:['reference-frame-01','tall-gate-top']});
 
 const castleIntro=authoredRoute('castle',[
-  ['flat-brick-a',3100,4,190,82],
+  ['flat-brick-a',3170,4,190,82],
   ['flat-brick-strip-2',3370,9,230,68],
   ['flat-brick-wall-2',3640,16,225,92],
   ['flat-brick-strip-2',3910,24,245,70],

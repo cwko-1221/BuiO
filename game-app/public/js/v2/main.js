@@ -86,7 +86,9 @@ function startGame(seed,durationSec,startedAt,resume){
         const spawn=!Number.isFinite(previewX)&&Math.abs((checkpoint?.altitude??Infinity)-previewAltitude)<=1?checkpoint:node;
         if(spawn)s.setPlayerPosition(spawn.x,spawn.y-60);
       }
-      toast(`固定 1000m 地圖 ${course.mapVersion} · ${course.courseHash}`,true);
+      // Keep map/version diagnostics in DevTools.  A debug toast covered the
+      // mobile HUD and was visible in every reference-comparison screenshot.
+      console.info(`[game-v2] ${course.mapVersion} · ${course.courseHash}`);
     },
     onFrame:updateHudAndNetwork,
     onProgress:(progress,cp)=>{if(cp&&Math.abs(progress-cp.progress)<.06)toast(`⛳ ${cp.zoneName}檢查點`,true);},
