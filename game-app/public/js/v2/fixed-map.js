@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07ao';
+export const MAP_VERSION = 'fixed-1000m-2026.07ap';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -207,7 +207,7 @@ const factoryB=authoredRoute('factory',[
   ['ref-office-desk',5400,960,340,96,{tags:['reference-frame-14','office-desk-step']}],
   ['ref-office-desk',5000,968,190,76,{tags:['reference-frame-14','office-desk-step','repeated-prop']}],
   ['ref-office-chair',4770,978,150,170,{tags:['reference-frame-14','office-chair-step']}],
-  ['conveyor',4540,989,190,82,{tags:['basketball-hoop-placeholder']}],
+  ['ref-basketball-hoop',4540,989,190,245,{angle:-0.08,tags:['reference-frame-14','basketball-hoop-step']}],
   ['ref-office-desk',4290,1000,280,100,{tags:['reference-frame-14','summit-platform','landmark-base','repeated-prop']}]
 ],['authored-factory','factory-room-b','rising-right']);
 recoverLast(factoryA,3);

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 232,
+  "count": 233,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1557,6 +1557,36 @@
       "tags": [
         "reference",
         "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-basketball-hoop",
+      "label": "Reference flat basketball hoop",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-basketball-hoop.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 139,
+        "h": 129
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "rect"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9597,7 +9627,7 @@
       "original design"
     ]
   },
-  "availableCount": 232,
-  "imagegenCount": 139,
+  "availableCount": 233,
+  "imagegenCount": 140,
   "proceduralCount": 93
 }

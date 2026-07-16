@@ -190,6 +190,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-office-chair"
   },
+  "ref-basketball-hoop": {
+    "key": "atlas-reference-0",
+    "frame": "ref-basketball-hoop"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"

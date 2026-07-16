@@ -147,6 +147,7 @@ export const AVAILABLE_ASSETS = [
   "red-mushroom",
   "ref-barrel-cart",
   "ref-barrel-front",
+  "ref-basketball-hoop",
   "ref-bed-front",
   "ref-bellows-front",
   "ref-book-step",
