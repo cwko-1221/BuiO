@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07t';
+export const MAP_VERSION = 'fixed-1000m-2026.07v';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -137,7 +137,6 @@ const forestRun=authoredRoute('forest',[
   ['round-table',1560,448,280,118,{tags:['zone-landing']}]
 ],['authored-forest']);
 decor('forest','treehouse',5000,370,320,310);
-decor('forest','butterflies',430,390,200,145);
 recoverLast(forestRun,4);
 
 // FARM 449-573m -------------------------------------------------------------
@@ -145,7 +144,7 @@ recoverLast(forestRun,4);
 // stays rising while the direction changes naturally around each set-piece.
 const farmRun=authoredRoute('farm',[
   ['flat-brick-strip-2',1250,452,210,72,{tags:['zone-transition']}],
-  ['ref-barrel-front',1000,464,170,185,{tags:['reference-frame-05','barrel-step']}],
+  ['ref-hanging-lantern',1000,464,280,220,{tags:['reference-frame-07','lantern-step']}],
   ['ref-bed-front',1210,476,330,175,{tags:['reference-frame-07','bed-step']}],
   ['ref-barrel-cart',1470,490,360,215,{tags:['landmark-base','turn-pad','reference-frame-05','barrel-cart']}],
   ['ref-bed-front',1730,504,320,170,{tags:['reference-frame-07','bed-step']}],
@@ -158,7 +157,6 @@ const farmRun=authoredRoute('farm',[
 ],['authored-farm','rising-right']);
 obstacle('farm','potato-crate',farmRun[3],-76,76,72);
 decor('farm','tractor',4950,520,300,225);
-decor('farm','scarecrow',470,520,155,215);
 recoverLast(farmRun,3);
 
 // SNOW 574-704m -------------------------------------------------------------

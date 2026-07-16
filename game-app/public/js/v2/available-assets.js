@@ -152,6 +152,7 @@ export const AVAILABLE_ASSETS = [
   "ref-double-jump-sign",
   "ref-feast-table",
   "ref-go-pennant",
+  "ref-hanging-lantern",
   "ref-jump-arrow",
   "ref-lamp-post",
   "ref-market-stall-red",
