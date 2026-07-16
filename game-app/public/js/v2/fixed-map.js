@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07an';
+export const MAP_VERSION = 'fixed-1000m-2026.07ao';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -205,9 +205,10 @@ const factoryB=authoredRoute('factory',[
   ['ref-potted-plant',4880,925,150,150,{tags:['reference-frame-13','reference-frame-14','plant-step']}],
   ['ref-office-safe',5120,945,230,160,{tags:['reference-frame-14','office-safe-step']}],
   ['ref-office-desk',5400,960,340,96,{tags:['reference-frame-14','office-desk-step']}],
-  ['conveyor',5300,975,160,78,{tags:['office-chair-placeholder']}],
-  ['conveyor',5000,988,190,82,{tags:['basketball-hoop-placeholder']}],
-  ['ref-office-desk',4750,1000,280,100,{tags:['reference-frame-14','summit-platform','landmark-base','repeated-prop']}]
+  ['ref-office-desk',5000,968,190,76,{tags:['reference-frame-14','office-desk-step','repeated-prop']}],
+  ['ref-office-chair',4770,978,150,170,{tags:['reference-frame-14','office-chair-step']}],
+  ['conveyor',4540,989,190,82,{tags:['basketball-hoop-placeholder']}],
+  ['ref-office-desk',4290,1000,280,100,{tags:['reference-frame-14','summit-platform','landmark-base','repeated-prop']}]
 ],['authored-factory','factory-room-b','rising-right']);
 recoverLast(factoryA,3);
 recoverLast(factoryB,3);
@@ -227,7 +228,7 @@ annotations.push(
   {id:'turn-farm',type:'turn',x:1500,y:yAt(486)-165,text:'→ 轉向右上'},
   {id:'turn-snow',type:'turn',x:4160,y:yAt(706)-175,text:'← 進入最後攀登'},
   {id:'factory-warning',type:'guide',x:3320,y:yAt(842)-150,text:'雷射不致命・失誤會回到房間入口',arrow:{dx:-60,dy:-60}},
-  {id:'summit-final',type:'summit',x:4750,y:yAt(1000)-190,text:'山頂！'}
+  {id:'summit-final',type:'summit',x:4290,y:yAt(1000)-190,text:'山頂！'}
 );
 
 // Non-lethal laser gates reset to the nearest room entrance and never form

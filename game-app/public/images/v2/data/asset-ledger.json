@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 231,
+  "count": 232,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1501,6 +1501,62 @@
       "tags": [
         "reference",
         "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-office-chair",
+      "label": "Reference front office chair",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-office-chair.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 127,
+        "h": 75
+      },
+      "body": {
+        "type": "polygon",
+        "vertices": [
+          [
+            -0.5,
+            0.35
+          ],
+          [
+            -0.45,
+            -0.2
+          ],
+          [
+            -0.15,
+            -0.5
+          ],
+          [
+            0.28,
+            -0.42
+          ],
+          [
+            0.5,
+            0.05
+          ],
+          [
+            0.38,
+            0.42
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "polygon"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9541,7 +9597,7 @@
       "original design"
     ]
   },
-  "availableCount": 231,
-  "imagegenCount": 138,
+  "availableCount": 232,
+  "imagegenCount": 139,
   "proceduralCount": 93
 }

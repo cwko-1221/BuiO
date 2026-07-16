@@ -186,6 +186,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-office-desk"
   },
+  "ref-office-chair": {
+    "key": "atlas-reference-0",
+    "frame": "ref-office-chair"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"

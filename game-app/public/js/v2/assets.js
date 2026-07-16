@@ -35,7 +35,8 @@ const catalog = {
     ['ref-monitor-front','Reference front display monitor'],
     ['ref-potted-plant','Reference compact potted plant step'],
     ['ref-office-safe','Reference front office safe'],
-    ['ref-office-desk','Reference low office drawer step']
+    ['ref-office-desk','Reference low office drawer step'],
+    ['ref-office-chair','Reference front office chair']
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],
