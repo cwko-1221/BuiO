@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07aq';
+export const MAP_VERSION = 'fixed-1000m-2026.07ar';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -227,15 +227,8 @@ annotations.push(
   {id:'summit-forest',type:'summit',x:1700,y:yAt(448)-165,text:'高峰 3/6・奇物冒險'},
   {id:'turn-farm',type:'turn',x:1500,y:yAt(486)-165,text:'→ 轉向右上'},
   {id:'turn-snow',type:'turn',x:4160,y:yAt(706)-175,text:'← 進入最後攀登'},
-  {id:'factory-warning',type:'guide',x:3320,y:yAt(842)-150,text:'雷射不致命・失誤會回到房間入口',arrow:{dx:-60,dy:-60}},
   {id:'summit-final-label',type:'summit',x:4100,y:yAt(1000)-118,text:'山頂！'}
 );
-
-// Non-lethal laser gates reset to the nearest room entrance and never form
-// part of the required main path.
-for (const [id,x,altitude,checkpointAltitude] of [
-  ['laser-a',3380,770,704],['laser-b',2260,875,820],['laser-c',2520,970,930]
-]) hazards.push({id,zone:'factory',x,y:yAt(altitude)-88,w:145,h:16,checkpointAltitude,type:'laser'});
 
 const summitBase=factoryB[factoryB.length-1];
 export const FIXED_MAP = {

@@ -122,7 +122,7 @@ export function validateCourse(course) {
     if (gap>2.1) errors.push(`${object.id} floats ${gap.toFixed(1)}px above support`);
   }
   if (course.objects.some(object=>object.role==='decor'&&object.supportId)) errors.push('decor must not own collision support');
-  if (course.hazards.length<3) errors.push('factory laser maze is missing');
+  if (course.hazards.length) errors.push('reference course contains legacy laser hazards');
   const sideViewBlocks=course.objects.filter(object=>SIDE_VIEW_BLOCK_IDS.has(object.assetId));
   if (sideViewBlocks.length) errors.push(`front-facing course contains side-view blocks: ${sideViewBlocks.map(object=>object.assetId).join(', ')}`);
   const rejectedStyle=course.objects.filter(object=>REJECTED_STYLE_ASSET_IDS.has(object.assetId));
