@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07z';
+export const MAP_VERSION = 'fixed-1000m-2026.07aa';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -166,9 +166,9 @@ recoverLast(farmRun,3);
 const snowRun=authoredRoute('snow',[
   ['snow-ledge',3600,584,260,102],
   ['ice-slab',3360,598,230,108],
-  ['ref-barrel-front',3120,613,170,190,{tags:['reference-frame-04','barrel-step']}],
-  ['ref-stone-ramp-front',2880,629,270,86,{angle:-0.10,tags:['reference-frame-06','stone-ramp']}],
-  ['ref-log-step',2640,645,240,98,{tags:['reference-frame-08','log-step']}],
+  ['ref-cookpot',3120,613,180,145,{tags:['reference-frame-09','cookpot-step']}],
+  ['ref-cookpot',2880,629,180,145,{tags:['reference-frame-09','cookpot-step','repeated-prop']}],
+  ['ref-cookpot',2640,645,180,145,{tags:['reference-frame-09','cookpot-step','repeated-prop']}],
   ['ice-slab',2400,661,245,104],
   ['ref-chair-front',2160,676,220,220,{tags:['reference-frame-05','chair-step']}],
   ['snow-ledge',1920,690,270,102],

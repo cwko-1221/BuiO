@@ -151,6 +151,7 @@ export const AVAILABLE_ASSETS = [
   "ref-bellows-front",
   "ref-catapult-front",
   "ref-chair-front",
+  "ref-cookpot",
   "ref-double-jump-sign",
   "ref-feast-table",
   "ref-go-pennant",

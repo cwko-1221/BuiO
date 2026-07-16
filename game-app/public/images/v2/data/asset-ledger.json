@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 217,
+  "count": 218,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -934,6 +934,36 @@
       "tags": [
         "reference",
         "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-cookpot",
+      "label": "Reference small iron cooking pot",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-cookpot.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 124,
+        "h": 136
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "rect"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -8974,7 +9004,7 @@
       "original design"
     ]
   },
-  "availableCount": 217,
-  "imagegenCount": 124,
+  "availableCount": 218,
+  "imagegenCount": 125,
   "proceduralCount": 93
 }

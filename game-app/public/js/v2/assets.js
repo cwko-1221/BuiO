@@ -21,7 +21,8 @@ const catalog = {
     ['ref-hanging-lantern','Reference front hanging lantern'],
     ['ref-catapult-front','Reference flat medieval catapult'],
     ['ref-log-step','Reference paired firewood step'],
-    ['ref-bellows-front','Reference flat forge bellows']
+    ['ref-bellows-front','Reference flat forge bellows'],
+    ['ref-cookpot','Reference small iron cooking pot']
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],
