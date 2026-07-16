@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 226,
+  "count": 227,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -1261,6 +1261,50 @@
       "tags": [
         "reference",
         "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-bowl-front",
+      "label": "Reference small ceramic bowl step",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-bowl-front.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 123,
+        "h": 125
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "compound"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -9301,7 +9345,7 @@
       "original design"
     ]
   },
-  "availableCount": 226,
-  "imagegenCount": 133,
+  "availableCount": 227,
+  "imagegenCount": 134,
   "proceduralCount": 93
 }
