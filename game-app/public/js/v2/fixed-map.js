@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07ah';
+export const MAP_VERSION = 'fixed-1000m-2026.07ai';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -199,12 +199,12 @@ const factoryB=authoredRoute('factory',[
   ['ref-fishing-boat',3320,858,270,200,{tags:['reference-frame-10','reference-frame-12','boat-step']}],
   ['ref-fishing-boat',3560,875,270,200,{tags:['reference-frame-10','reference-frame-12','boat-step','repeated-prop']}],
   ['ref-sand-ledge',3820,892,260,190,{tags:['reference-frame-10','reference-frame-12','sand-ledge','repeated-prop']}],
-  ['ref-barrel-front',4070,909,160,180,{tags:['reference-frame-06','barrel-step']}],
-  ['picnic-table',4310,926,204,108],
-  ['conveyor',4550,943,232,94],
-  ['flat-brick-strip-2',4790,960,320,90,{tags:['landmark-base']}],
-  ['conveyor',5030,978,250,90],
-  ['conveyor',5310,1000,430,90,{tags:['summit-platform','landmark-base']}]
+  ['ref-round-table-front',4110,909,300,240,{tags:['reference-frame-11','reference-frame-13','round-table-step']}],
+  ['picnic-table',4400,926,204,108],
+  ['conveyor',4640,943,232,94],
+  ['flat-brick-strip-2',4880,960,320,90,{tags:['landmark-base']}],
+  ['conveyor',5120,978,250,90],
+  ['conveyor',5380,1000,430,90,{tags:['summit-platform','landmark-base']}]
 ],['authored-factory','factory-room-b','rising-right']);
 recoverLast(factoryA,3);
 recoverLast(factoryB,3);

@@ -162,6 +162,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-fishing-boat"
   },
+  "ref-round-table-front": {
+    "key": "atlas-reference-0",
+    "frame": "ref-round-table-front"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"

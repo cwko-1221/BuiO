@@ -29,7 +29,8 @@ const catalog = {
     ['ref-book-step','Reference paired spellbook step'],
     ['ref-scroll-step','Reference paired parchment step'],
     ['ref-sand-ledge','Reference front sand ledge'],
-    ['ref-fishing-boat','Reference white fishing boat']
+    ['ref-fishing-boat','Reference white fishing boat'],
+    ['ref-round-table-front','Reference broad round wooden table']
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],
