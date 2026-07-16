@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 216,
+  "count": 217,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -903,6 +903,37 @@
       "tags": [
         "reference",
         "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "ref-bellows-front",
+      "label": "Reference flat forge bellows",
+      "zone": "reference",
+      "file": "/game/images/v2/props/ref-bellows-front.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 125,
+        "h": 123
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#d84a3d",
+        "#17233f",
+        "#fff7c7"
+      ],
+      "tags": [
+        "reference",
+        "circle"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -8943,7 +8974,7 @@
       "original design"
     ]
   },
-  "availableCount": 216,
-  "imagegenCount": 123,
+  "availableCount": 217,
+  "imagegenCount": 124,
   "proceduralCount": 93
 }

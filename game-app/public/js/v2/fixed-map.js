@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07y';
+export const MAP_VERSION = 'fixed-1000m-2026.07z';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -37,7 +37,8 @@ function mainSupport(zone,assetId,x,altitude,w,h=96,extra={}) {
 
 function obstacle(zone,assetId,supportRef,xOffset,w,h,extra={}) {
   const id=extra.id || `fixed-obstacle-${String(++serial).padStart(3,'0')}`;
-  objects.push({id,assetId,zone,x:supportRef.object.x+xOffset,y:supportRef.object.y-120,w,h,
+  const supportTop=supportRef.object.y-supportRef.object.h/2;
+  objects.push({id,assetId,zone,x:supportRef.object.x+xOffset,y:supportTop-h/2,w,h,
     angle:extra.angle||0,role:'obstacle',behavior:staticBehavior,supportId:supportRef.object.id,tags:['obstacle',...(extra.tags||[])]});
 }
 
@@ -111,10 +112,11 @@ const marketRun=authoredRoute('market',[
   ['ref-produce-crate',3930,241,220,132,{tags:['reference-frame-02','produce-step']}],
   ['market-wagon',4160,252,300,142],
   ['ref-oven-front',4425,263,270,220,{tags:['reference-frame-03','landmark-base']}],
-  ['flat-brick-strip-4',4850,274,500,106,{tags:['zone-landing','landmark-base','reference-frame-02']}]
+  ['flat-brick-strip-4',4950,274,680,106,{tags:['zone-landing','landmark-base','reference-frame-02','workshop-landing']}]
 ],['authored-market','rising-right']);
 obstacle('market','lemon-crate',marketRun[3],-72,76,72);
-obstacle('market','ref-market-stall-red',marketRun[5],0,300,300,{tags:['reference-frame-02']});
+obstacle('market','ref-bellows-front',marketRun[5],-180,280,105,{tags:['reference-frame-08','bellows-obstacle']});
+obstacle('market','ref-market-stall-red',marketRun[5],190,260,280,{tags:['reference-frame-02']});
 decor('market','lantern-string',2740,274,340,150);
 recoverLast(marketRun,3);
 

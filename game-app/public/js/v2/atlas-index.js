@@ -126,6 +126,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-log-step"
   },
+  "ref-bellows-front": {
+    "key": "atlas-reference-0",
+    "frame": "ref-bellows-front"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"
