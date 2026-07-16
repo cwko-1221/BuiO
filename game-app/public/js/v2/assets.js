@@ -23,7 +23,8 @@ const catalog = {
     ['ref-log-step','Reference paired firewood step'],
     ['ref-bellows-front','Reference flat forge bellows'],
     ['ref-cookpot','Reference small iron cooking pot'],
-    ['ref-castle-banner-blue','Reference blue castle banner']
+    ['ref-castle-banner-blue','Reference blue castle banner'],
+    ['ref-castle-banner-red','Reference red castle banner']
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],

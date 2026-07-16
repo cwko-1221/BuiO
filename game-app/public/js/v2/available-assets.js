@@ -150,6 +150,7 @@ export const AVAILABLE_ASSETS = [
   "ref-bed-front",
   "ref-bellows-front",
   "ref-castle-banner-blue",
+  "ref-castle-banner-red",
   "ref-catapult-front",
   "ref-chair-front",
   "ref-cookpot",

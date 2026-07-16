@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07ab';
+export const MAP_VERSION = 'fixed-1000m-2026.07ac';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -170,7 +170,7 @@ const snowRun=authoredRoute('snow',[
   ['ref-cookpot',2880,629,180,145,{tags:['reference-frame-09','cookpot-step','repeated-prop']}],
   ['ref-cookpot',2640,645,180,145,{tags:['reference-frame-09','cookpot-step','repeated-prop']}],
   ['ref-castle-banner-blue',2400,646,220,300,{tags:['reference-frame-09','reference-frame-10','banner-step']}],
-  ['ref-chair-front',2160,676,220,220,{tags:['reference-frame-05','chair-step']}],
+  ['ref-castle-banner-red',2160,660,220,300,{tags:['reference-frame-09','reference-frame-10','banner-step']}],
   ['snow-ledge',1920,690,270,102],
   ['snow-ledge',1500,704,500,130,{tags:['zone-landing','landmark-base']}]
 ],['authored-snow','rising-left']);

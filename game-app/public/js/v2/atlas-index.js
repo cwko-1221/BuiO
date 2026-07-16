@@ -138,6 +138,10 @@ export const ATLAS_INDEX={
     "key": "atlas-reference-0",
     "frame": "ref-castle-banner-blue"
   },
+  "ref-castle-banner-red": {
+    "key": "atlas-reference-0",
+    "frame": "ref-castle-banner-red"
+  },
   "crate": {
     "key": "atlas-global-0",
     "frame": "crate"
