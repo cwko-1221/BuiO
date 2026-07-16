@@ -19,7 +19,8 @@ const catalog = {
     ['ref-stone-column-front','Reference plain front stone column'],
     ['ref-bed-front','Reference flat blue bed'],
     ['ref-hanging-lantern','Reference front hanging lantern'],
-    ['ref-catapult-front','Reference flat medieval catapult']
+    ['ref-catapult-front','Reference flat medieval catapult'],
+    ['ref-log-step','Reference paired firewood step']
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],

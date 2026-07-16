@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07w';
+export const MAP_VERSION = 'fixed-1000m-2026.07y';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -150,9 +150,9 @@ const farmRun=authoredRoute('farm',[
   ['ref-bed-front',1730,504,320,170,{tags:['reference-frame-07','bed-step']}],
   ['ref-stone-pillar-front',1990,518,280,260,{tags:['reference-frame-05','stone-pillar']}],
   ['ref-catapult-front',2250,532,330,214,{tags:['reference-frame-07','reference-frame-08','catapult-step']}],
-  ['ref-barrel-cart',2510,546,300,185,{tags:['reference-frame-05','barrel-cart']}],
-  ['ref-feast-table',2770,558,300,145,{tags:['reference-frame-05','feast-table']}],
-  ['ref-stone-pillar-front',3040,566,280,260,{tags:['reference-frame-05','stone-pillar']}],
+  ['ref-log-step',2510,546,250,100,{tags:['reference-frame-08','log-step']}],
+  ['ref-log-step',2770,558,250,100,{tags:['reference-frame-08','log-step','repeated-prop']}],
+  ['ref-feast-table',3040,566,300,145,{tags:['reference-frame-05','feast-table','wide-safety-pad']}],
   ['ref-stone-ramp-front',3360,573,330,88,{angle:-0.08,tags:['zone-landing','landmark-base','reference-frame-04','stone-ramp']}]
 ],['authored-farm','rising-right']);
 obstacle('farm','potato-crate',farmRun[3],-76,76,72);
@@ -164,18 +164,14 @@ recoverLast(farmRun,3);
 const snowRun=authoredRoute('snow',[
   ['snow-ledge',3600,584,260,102],
   ['ice-slab',3360,598,230,108],
-  ['gift-stack',3120,613,240,128],
-  ['sled',2880,629,235,110],
-  ['curling-stone',2640,645,195,112],
+  ['ref-barrel-front',3120,613,170,190,{tags:['reference-frame-04','barrel-step']}],
+  ['ref-stone-ramp-front',2880,629,270,86,{angle:-0.10,tags:['reference-frame-06','stone-ramp']}],
+  ['ref-log-step',2640,645,240,98,{tags:['reference-frame-08','log-step']}],
   ['ice-slab',2400,661,245,104],
-  ['gift-stack',2160,676,225,128],
+  ['ref-chair-front',2160,676,220,220,{tags:['reference-frame-05','chair-step']}],
   ['snow-ledge',1920,690,270,102],
   ['snow-ledge',1500,704,500,130,{tags:['zone-landing','landmark-base']}]
 ],['authored-snow','rising-left']);
-obstacle('snow','snowman',snowRun[2],-62,78,104);
-obstacle('snow','hockey-puck',snowRun[5],70,68,52);
-decor('snow','cable-car',5000,650,310,225);
-decor('snow','aurora-crystal',450,680,230,250);
 recoverLast(snowRun,3);
 
 // FACTORY 705-1000m ---------------------------------------------------------
