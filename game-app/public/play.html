@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>唔好望落嚟 | BuiO 遊戲</title>
-  <link rel="stylesheet" href="/game/css/game.css">
+  <link rel="stylesheet" href="/game/css/game.css?v=20260717-recovery-audio">
 </head>
 <body>
 
@@ -58,7 +58,8 @@
       </div>
       <div class="spacer"></div>
       <div class="hud-cluster hud-cluster-secondary">
-        <button class="reset-position-btn" id="resetBtn" type="button" aria-label="返回最近安全位置">↻ 復位</button>
+        <button class="audio-toggle-btn" id="audioBtn" type="button" aria-label="關閉遊戲聲音" aria-pressed="false">🔊</button>
+        <button class="reset-position-btn" id="resetBtn" type="button" aria-label="返回最近檢查點">↻ 復位</button>
         <div class="hud-pill streak-pill" id="streakPill" style="display:none">🔥 0</div>
         <div class="hud-pill timer-pill" id="timerPill">--:--</div>
       </div>
@@ -105,6 +106,6 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/game/vendor/phaser/phaser.min.js"></script>
-  <script type="module" src="/game/js/v2/main.js"></script>
+  <script type="module" src="/game/js/v2/main.js?v=20260717-audio4"></script>
 </body>
 </html>

@@ -1,7 +1,10 @@
 import { buildCourse, validateCourse } from './course.js';
 import { GameScene } from './GameScene.js';
+import { GameAudio } from './GameAudio.js?v=20260717-audio';
 
 const $ = id => document.getElementById(id);
+const gameAudio = new GameAudio();
+window.__gameAudio = gameAudio;
 const socket = io('/game');
 let me = { name:'', studentId:null };
 let phaserGame = null;
@@ -74,6 +77,13 @@ function startGame(seed,durationSec,startedAt,resume){
   const hooks={
     name:me.name||'Koko', energy:resume?.energy??40, progress:resume?.bestProgress??resume?.bestHeight??0,
     isFrozen:()=>frozen,
+    onSound:type=>gameAudio.play(type),
+    onCheckpoint:cp=>toast(`🏁 已到達${cp.zoneName}檢查點`,true),
+    onRecovery:type=>{
+      if(type==='rapidFall')toast('↩ 下降超過 100 米，返回最近檢查點');
+      else if(type==='laser')toast('⚡ 已返回目前區域檢查點');
+      else toast('↩ 已返回最近檢查點');
+    },
     onReady:s=>{
       scene=s;
       if(Number.isFinite(resume?.x)&&Number.isFinite(resume?.y))s.setPlayerPosition(resume.x,resume.y);
@@ -91,9 +101,9 @@ function startGame(seed,durationSec,startedAt,resume){
       console.info(`[game-v2] ${course.mapVersion} · ${course.courseHash}`);
     },
     onFrame:updateHudAndNetwork,
-    onProgress:(progress,cp)=>{if(cp&&Math.abs(progress-cp.progress)<.06)toast(`⛳ ${cp.zoneName}檢查點`,true);},
+    onProgress:()=>{},
     onFinish:()=>{socket.emit('player:summit');toast('🏆 登頂成功！',true);},
-    onEffect:(type)=>{if(type==='doubleJump')toast('✨ 二段跳');if(type==='respawn')toast('↩️ 返回最近檢查點');}
+    onEffect:(type)=>{if(type==='doubleJump')toast('✨ 二段跳');}
   };
   phaserGame=window.__game=new Phaser.Game({
     type:Phaser.AUTO,parent:'gameCanvas',transparent:true,
@@ -119,7 +129,20 @@ function bindHold(id,action){
   el.addEventListener('pointerdown',on);el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('pointerleave',off);
 }
 bindHold('btnLeft','left');bindHold('btnDown','down');bindHold('btnRight','right');bindHold('btnJump','jump');
-$('resetBtn').addEventListener('click',()=>scene?.resetToSafePose('manual'));
+$('resetBtn').addEventListener('click',()=>scene?.resetToCheckpoint('manual'));
+const audioBtn=$('audioBtn');
+function refreshAudioButton(){
+  audioBtn.textContent=gameAudio.muted?'🔇':'🔊';
+  audioBtn.setAttribute('aria-pressed',String(gameAudio.muted));
+  audioBtn.setAttribute('aria-label',gameAudio.muted?'開啟遊戲聲音':'關閉遊戲聲音');
+}
+audioBtn.addEventListener('click',()=>{
+  const muted=gameAudio.toggleMuted();
+  refreshAudioButton();
+  if(!muted)void gameAudio.unlock();
+});
+for(const eventName of ['pointerdown','keydown','touchstart']) window.addEventListener(eventName,()=>gameAudio.unlock(),{once:true,capture:true});
+refreshAudioButton();
 
 $('answerBtn').addEventListener('click',openQuestion);$('qClose').addEventListener('click',closeQuestion);
 function openQuestion(){
@@ -138,6 +161,7 @@ function answer(choice){
   socket.emit('player:answer',{choice},res=>{if(!res?.ok)return closeQuestion();applyAnswer(res,choice,buttons);});
 }
 function applyAnswer(res,choice,buttons){
+  gameAudio.play(res.correct?'correct':'wrong');
   buttons[choice]?.classList.add(res.correct?'correct':'wrong');if(!res.correct)buttons[res.correctChoice]?.classList.add('correct');
   const fb=$('qFeedback');fb.textContent=res.correct?`答啱喇！能量 +${res.gain} ⚡`:'差少少，再試下一題！';fb.classList.add(res.correct?'good':'bad');scene.setEnergy(res.energy);
   if(res.correct)setTimeout(closeQuestion,800);else $('qClose').style.display='';

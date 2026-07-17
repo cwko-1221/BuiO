@@ -4,6 +4,7 @@ import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js';
 import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js';
 import { createPlayerCompound, wakePlayer, PLAYER_SPRITE_DY } from './playerPhysics.js';
 import { sampleSky } from './background.js';
+import { RapidFallTracker } from './recovery.js';
 
 const CAT_WORLD = 0x0002;
 const CAT_PLAYER = 0x0004;
@@ -33,6 +34,10 @@ export class GameScene extends Phaser.Scene {
     this.lastSafePose = { x:course.start.x, y:course.start.y-38, progress:this.progress };
     this.lastSafeAt = 0;
     this.invulnerableUntil = 0;
+    this.rapidFallTracker = new RapidFallTracker();
+    this.rapidFallTracker.reset(0,0);
+    this.peakFallSpeed = 0;
+    this.nextStepAt = 0;
     this.finished = false;
   }
 
@@ -283,6 +288,8 @@ export class GameScene extends Phaser.Scene {
     Body.setVelocity(this.playerBody,{x:0,y:0});
     this.wakePlayer();
     this.syncPlayerSprite();
+    const altitude=Math.max(0,(this.course.startAltitudeY-(y+PLAYER_SPRITE_DY))/5);
+    this.rapidFallTracker.reset(this.time?.now||0,altitude);
   }
 
   setPlayerVelocity(x,y) {
@@ -325,6 +332,7 @@ export class GameScene extends Phaser.Scene {
           const obj = body.courseObject;
           if (obj?.behavior?.type === 'bounce' && involvesPlayer) {
             this.setPlayerVelocity(null,-obj.behavior.power); this.airJump = 1; this.hooks.onEffect?.('bounce',this.player.x,this.player.y);
+            this.hooks.onSound?.('bounce');
           }
         }
       }
@@ -354,8 +362,14 @@ export class GameScene extends Phaser.Scene {
     this.actions.jumpQueued = Math.max(0,this.actions.jumpQueued-deltaMs);
 
     const vy = this.playerBody.velocity.y;
+    const wasGrounded = this.grounded;
     const under = [...this.groundContacts.values()].filter(body => !body.isSensor);
     this.grounded = under.length > 0 && vy >= -1.5;
+    if (!this.grounded) this.peakFallSpeed=Math.max(this.peakFallSpeed,vy);
+    if (this.grounded&&!wasGrounded) {
+      if (this.peakFallSpeed>2.8) this.hooks.onSound?.('land');
+      this.peakFallSpeed=0;
+    }
     this.coyote = this.grounded ? .11 : Math.max(0,this.coyote-dt);
     if (this.grounded) this.airJump = 1;
 
@@ -367,6 +381,10 @@ export class GameScene extends Phaser.Scene {
     if (conveyorBody && this.grounded) this.setPlayerVelocity(nextVx + conveyorBody.courseObject.behavior.speed,null);
     if (dir && this.energy > 0) this.energy = Math.max(0,this.energy-4.3*dt);
     this.player.setFlipX(dir < 0);
+    if (this.grounded&&dir&&Math.abs(nextVx)>1.25&&time>=this.nextStepAt) {
+      this.nextStepAt=time+Phaser.Math.Clamp(285-Math.abs(nextVx)*14,185,255);
+      this.hooks.onSound?.('step');
+    }
 
     // Stable ground continuously refreshes the manual/automatic recovery pose.
     if (this.grounded && Math.abs(vy)<.7 && Math.abs(this.playerBody.velocity.x)<1.2 && time-this.lastSafeAt>260) {
@@ -397,6 +415,7 @@ export class GameScene extends Phaser.Scene {
         this.energy -= 8; this.actions.jumpQueued = 0; this.coyote = 0;
         this.player.play(air ? 'doubleJump' : 'jump',true);
         this.hooks.onEffect?.(air?'doubleJump':'jump',this.player.x,this.player.y);
+        this.hooks.onSound?.(air?'doubleJump':'jump');
       }
     }
     if (this.playerParts.main.isSensor && time > this.dropUntil) this.playerParts.main.isSensor = false;
@@ -437,6 +456,10 @@ export class GameScene extends Phaser.Scene {
 
     if (this.player.y > this.course.world.height + 180 || this.player.x < -100 || this.player.x > this.course.world.width+100) this.respawn();
     const altitude = Math.max(0,(this.course.startAltitudeY-this.player.y)/5);
+    if (this.rapidFallTracker.update(time,altitude)) {
+      this.resetToCheckpoint('rapidFall');
+      return;
+    }
     const limits=[210,274,448,573,704,Infinity];
     const zoneIndex=Math.max(0,limits.findIndex(limit=>altitude<=limit));
     this.hooks.onFrame?.({
@@ -448,20 +471,24 @@ export class GameScene extends Phaser.Scene {
 
   reachProgress(sensor) {
     if (sensor.progress <= this.progress) return;
+    const previousCheckpointId=this.checkpoint?.id;
     this.progress = sensor.progress;
     const reached = this.course.checkpoints.filter(c => c.progress <= this.progress);
     if (reached.length) this.checkpoint = reached[reached.length-1];
     this.hooks.onProgress?.(this.progress,this.checkpoint);
+    if (this.checkpoint?.id!==previousCheckpointId) {
+      this.lastSafePose=this.checkpointPose(this.checkpoint);
+      this.hooks.onCheckpoint?.(this.checkpoint);
+      this.hooks.onSound?.('checkpoint');
+    }
+  }
+
+  checkpointPose(checkpoint=this.checkpoint||this.course.checkpoints[0]) {
+    return {x:checkpoint.x,y:checkpoint.y-20,progress:this.progress,checkpointId:checkpoint.id};
   }
 
   respawn() {
-    const cp = this.checkpoint || this.course.checkpoints[0];
-    this.clearContacts();
-    this.setPlayerPosition(cp.x,cp.y-80);
-    this.lastSafePose={x:cp.x,y:cp.y-80,progress:this.progress,checkpointId:cp.id};
-    this.energy = Math.max(25,this.energy); this.player.setAlpha(.55);
-    this.time.delayedCall(1200,() => this.player?.setAlpha(1));
-    this.cameras.main.flash(200,255,255,255); this.hooks.onEffect?.('respawn',cp.x,cp.y);
+    this.resetToCheckpoint('respawn');
   }
 
   clearContacts() {
@@ -470,6 +497,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   resetToSafePose(reason='manual') {
+    if (reason==='manual'||reason==='rapidFall'||reason==='respawn'||reason==='laser') {
+      this.resetToCheckpoint(reason);
+      return;
+    }
     const cp=this.checkpoint||this.course.checkpoints[0];
     const pose=this.lastSafePose||{x:cp.x,y:cp.y-80};
     this.clearContacts(); this.setPlayerPosition(pose.x,pose.y);
@@ -478,15 +509,31 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.flash(150,180,240,255); this.hooks.onEffect?.(reason,pose.x,pose.y);
   }
 
+  resetToCheckpoint(reason='manual') {
+    const cp=this.checkpoint||this.course.checkpoints[0];
+    const pose=this.checkpointPose(cp);
+    this.clearContacts();
+    this.setPlayerPosition(pose.x,pose.y);
+    this.lastSafePose=pose;
+    this.energy=Math.max(25,this.energy);
+    this.invulnerableUntil=this.time.now+1200;
+    this.player.setAlpha(.55);
+    this.time.delayedCall(1200,()=>this.player?.setAlpha(1));
+    this.cameras.main.flash(180,180,240,255);
+    this.hooks.onEffect?.(reason,pose.x,pose.y);
+    this.hooks.onSound?.(reason);
+    this.hooks.onRecovery?.(reason,cp);
+  }
+
   hitHazard(hazard) {
     if (this.time.now<this.invulnerableUntil) return;
     const cp=this.course.checkpoints.filter(item=>item.altitude<=hazard.checkpointAltitude).at(-1)||this.checkpoint;
     if (cp) this.checkpoint=cp;
-    this.lastSafePose=cp?{x:cp.x,y:cp.y-80,progress:this.progress,checkpointId:cp.id}:this.lastSafePose;
-    this.resetToSafePose('laser');
+    this.lastSafePose=cp?this.checkpointPose(cp):this.lastSafePose;
+    this.resetToCheckpoint('laser');
   }
 
-  finish() { if (this.finished) return; this.finished = true; this.progress = 1; this.hooks.onFinish?.(); }
+  finish() { if (this.finished) return; this.finished = true; this.progress = 1; this.hooks.onSound?.('finish'); this.hooks.onFinish?.(); }
 
   updateGhosts(list, myId) {
     const seen = new Set();
