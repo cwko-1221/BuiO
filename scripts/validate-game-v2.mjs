@@ -66,4 +66,4 @@ if (failures.length) {
   failures.slice(0,30).forEach(failure=>console.error(`- ${failure}`));
   process.exit(1);
 }
-console.log(`Fixed map validation passed: ${MAP_VERSION}, ${first.objects.length} objects, ${first.nodes.length} route nodes, ${firstReport.stats.mainDescents} descending main edges, ${firstReport.stats.minMainMarginPct}% main / ${firstReport.stats.minRecoveryMarginPct}% recovery margin, ${firstReport.stats.solidOverlaps} unintended overlaps, ${firstReport.stats.unsafeStandNodes} unsafe stands, 500/500 seeds identical, ${recovered} recovery landings + ${reset} safe resets.`);
+console.log(`Fixed map validation passed: ${MAP_VERSION}, ${first.objects.length} objects, ${first.nodes.length} route nodes, ${firstReport.stats.mainDescents} descending main edges, ${firstReport.stats.minMainMarginPct}% main / ${firstReport.stats.minRecoveryMarginPct}% recovery margin, ${firstReport.stats.solidOverlaps} unintended overlaps, ${firstReport.stats.unsafeStandNodes} unsafe stands, ${firstReport.stats.blockedOverheads} blocked overheads, 500/500 seeds identical, ${recovered} recovery landings + ${reset} safe resets.`);

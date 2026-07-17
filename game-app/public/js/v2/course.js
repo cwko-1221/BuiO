@@ -175,5 +175,26 @@ export function validateCourse(course) {
       if (unsafeStandNodes<=8) errors.push(`${node.id} has no 58x72px safe standing column`);
     }
   }
-  return {ok:errors.length===0,errors,stats:{mapVersion:course.mapVersion,objects:course.objects.length,assets:course.usedAssets.length,nodes:course.nodes.length,mainEdges:course.routes.main.length,recoveryEdges:course.routes.recovery.length,obstacles:obstacles.length,mainDescents,minMainMarginPct:Math.round(minMainMargin*100),minRecoveryMarginPct:Math.round(minRecoveryMargin*100),solidOverlaps,unsafeStandNodes,hash:course.courseHash,colliderHash:course.colliderHash}};
+
+  // In the floating-object section, a later support must never hang less than
+  // one full player-height above an earlier support. Ordinary overlap checks
+  // miss this because there can still be empty pixels between the bodies, yet
+  // that narrow slot blocks the player's jump arc (the former table/tree bug).
+  const highMainIds=new Set(course.nodes
+    .filter(node=>node.route==='main'&&node.altitude>=700)
+    .map(node=>node.objectId));
+  const highMainSolids=solids.filter(solid=>highMainIds.has(solid.object.id));
+  let blockedOverheads=0;
+  for (let i=0;i<highMainSolids.length;i++) for (let j=0;j<highMainSolids.length;j++) {
+    if (i===j) continue;
+    const lower=highMainSolids[i], upper=highMainSolids[j];
+    if (upper.bottom>=lower.top) continue;
+    const overlapX=Math.min(lower.right,upper.right)-Math.max(lower.left,upper.left);
+    const clearance=lower.top-upper.bottom;
+    if (overlapX>20&&clearance<90) {
+      blockedOverheads++;
+      if (blockedOverheads<=8) errors.push(`${lower.object.id} has only ${clearance.toFixed(0)}px clearance below ${upper.object.id}`);
+    }
+  }
+  return {ok:errors.length===0,errors,stats:{mapVersion:course.mapVersion,objects:course.objects.length,assets:course.usedAssets.length,nodes:course.nodes.length,mainEdges:course.routes.main.length,recoveryEdges:course.routes.recovery.length,obstacles:obstacles.length,mainDescents,minMainMarginPct:Math.round(minMainMargin*100),minRecoveryMarginPct:Math.round(minRecoveryMargin*100),solidOverlaps,unsafeStandNodes,blockedOverheads,hash:course.courseHash,colliderHash:course.colliderHash}};
 }

@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07ax';
+export const MAP_VERSION = 'fixed-1000m-2026.07ay';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -186,38 +186,42 @@ placedObstacle('snow','flat-brick-pillar-4',2980,frame09LibraryBottom+122,82,240
 const frame10=authoredRoute('snow',[
   ['ref-sand-ledge',3000,700,320,112],['ref-fishing-boat',3270,710,320,135],
   ['ref-fishing-boat',3540,720,320,135],['ref-sand-ledge',3810,730,320,118],
-  ['ref-round-table-front',4100,740,330,215],['ref-bowl-front',4350,748,150,102,{safe:false}],
-  ['ref-bowl-front',4540,755,150,102,{safe:false}]
+  ['ref-round-table-front',4100,740,330,215],['ref-bowl-front',4440,748,150,102,{safe:false}],
+  ['ref-bowl-front',4750,755,150,102,{safe:false}]
 ],['reference-frame-10','coral-table-chain']);
 decor('snow','ref-coral-cluster',3880,742,125,125,{tags:['reference-frame-10','coral-detail']});
 
 const frame11=authoredRoute('factory',[
-  ['ref-sand-ledge',4810,758,300,112],['ref-reef-rock',4510,770,330,150],
-  ['ref-round-tree',4210,782,245,245],['ref-wood-sign',3930,793,280,140],
-  ['ref-potted-plant',3660,804,145,145],['ref-monitor-front',3390,815,225,168],
-  ['ref-monitor-front',3120,825,225,168]
+  ['ref-sand-ledge',5050,758,300,112],['ref-reef-rock',5330,770,330,150],
+  // Finish the right-climbing chain before making one clean, well-separated
+  // left turn. Short props lift the route first; the tall tree only appears
+  // after there is more than a full jump of clearance above the bowl chain.
+  ['ref-potted-plant',5550,785,145,145],['ref-monitor-front',5260,807,225,168],
+  ['ref-wood-sign',4900,822,280,140],['ref-round-tree',4620,837,245,245],
+  ['ref-monitor-front',4270,849,225,168],['ref-monitor-front',3950,857,225,168]
 ],['reference-frame-11','nature-monitor-chain','rising-left']);
 
 const frame12=authoredRoute('factory',[
-  ['ref-reef-rock',2810,837,340,155],['ref-sand-ledge',2530,845,300,112],
-  ['ref-fishing-boat',2230,853,300,132],['ref-fishing-boat',1930,861,300,132,{safe:false}],
-  ['ref-sand-ledge',1630,870,300,118,{safe:false}],['ref-reef-rock',1330,878,340,155]
+  ['ref-reef-rock',3620,865,340,155],['ref-sand-ledge',3310,868,300,112],
+  ['ref-fishing-boat',3000,871,300,132],['ref-fishing-boat',2690,874,300,132,{safe:false}],
+  ['ref-sand-ledge',2380,877,300,118,{safe:false}],['ref-bowl-front',2070,880,150,102,{safe:false}],
+  ['ref-sand-ledge',1760,883,300,112,{safe:false}],['ref-reef-rock',1450,885,340,155]
 ],['reference-frame-12','reef-boat-climb','rising-left']);
-decor('factory','ref-coral-cluster',2690,850,135,135,{tags:['reference-frame-12','reef-detail']});
-decor('factory','ref-coral-cluster',1490,886,125,125,{tags:['reference-frame-12','reef-detail']});
+decor('factory','ref-coral-cluster',3500,866,135,135,{tags:['reference-frame-12','reef-detail']});
+decor('factory','ref-coral-cluster',1610,886,125,125,{tags:['reference-frame-12','reef-detail']});
 
 const frame13=authoredRoute('factory',[
-  ['ref-sand-ledge',1680,885,300,115],['ref-telescope',1980,894,220,205],
-  ['ref-split-platform',2370,902,500,105],['ref-door-panel',2710,910,145,245],
-  ['ref-door-panel',3000,918,145,245],['ref-white-table',3290,925,330,145],
-  ['ref-charcoal-table',3670,930,330,145]
+  ['ref-sand-ledge',1750,907,300,115],['ref-sand-ledge',2000,912,300,112],
+  ['ref-telescope',2250,919,220,205],['ref-split-platform',2550,927,360,105],
+  ['ref-door-panel',2850,935,145,245],['ref-door-panel',3140,943,145,245],
+  ['ref-white-table',3430,950,330,145],['ref-charcoal-table',3730,956,240,145]
 ],['reference-frame-13','agent-adventure','rising-right']);
-decor('factory','ref-potted-plant',3500,934,125,125,{tags:['reference-frame-13','agent-plant']});
+decor('factory','ref-potted-plant',3470,954,125,125,{tags:['reference-frame-13','agent-plant']});
 
 const frame14=authoredRoute('factory',[
-  ['ref-office-safe',3920,936,230,160],['ref-office-desk',4170,946,285,96],
-  ['ref-white-table',4520,956,320,145],['ref-charcoal-table',4880,966,320,145],
-  ['ref-office-chair',5200,976,175,185,{safe:false}],
+  ['ref-office-safe',3990,962,230,160],['ref-office-desk',4220,970,285,96],
+  ['ref-white-table',4520,978,320,145],['ref-charcoal-table',4880,986,320,145],
+  ['ref-office-chair',5200,992,175,185,{safe:false}],
   ['ref-office-desk',5450,1000,260,102,{tags:['summit-platform','landmark-base']}]
 ],['reference-frame-14','office-summit','rising-right']);
 decor('factory','ref-potted-plant',5000,990,140,140,{tags:['reference-frame-14','office-plant']});
