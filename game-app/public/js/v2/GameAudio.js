@@ -1,6 +1,6 @@
 const NOTE = 440;
 const semitone = value => NOTE * 2 ** (value / 12);
-export const AUDIO_LEVELS = Object.freeze({master:.95,music:.48,effects:.95});
+export const AUDIO_LEVELS = Object.freeze({master:1,music:.7,effects:1.12});
 
 export class GameAudio {
   constructor() {
@@ -8,6 +8,7 @@ export class GameAudio {
     this.master=null;
     this.music=null;
     this.effects=null;
+    this.compressor=null;
     this.musicTimer=null;
     this.musicStep=0;
     this.nextMusicTime=0;
@@ -31,12 +32,19 @@ export class GameAudio {
     this.master=this.context.createGain();
     this.music=this.context.createGain();
     this.effects=this.context.createGain();
+    this.compressor=this.context.createDynamicsCompressor();
     this.master.gain.value=this.muted?0:AUDIO_LEVELS.master;
     this.music.gain.value=AUDIO_LEVELS.music;
     this.effects.gain.value=AUDIO_LEVELS.effects;
+    this.compressor.threshold.value=-12;
+    this.compressor.knee.value=16;
+    this.compressor.ratio.value=5;
+    this.compressor.attack.value=.004;
+    this.compressor.release.value=.18;
     this.music.connect(this.master);
     this.effects.connect(this.master);
-    this.master.connect(this.context.destination);
+    this.master.connect(this.compressor);
+    this.compressor.connect(this.context.destination);
   }
 
   setMuted(value) {

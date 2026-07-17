@@ -6,6 +6,7 @@ import { createPlayerCompound, wakePlayer, PLAYER_SPRITE_DY } from './playerPhys
 import { sampleSky } from './background.js';
 import { RapidFallTracker } from './recovery.js';
 import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js';
+import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -15,7 +16,11 @@ export class GameScene extends Phaser.Scene {
     this.actions = { left:false, right:false, down:false, jumpQueued:0 };
     this.energy = hooks.energy ?? 40;
     this.progress = hooks.progress ?? 0;
-    this.checkpoint = course.checkpoints.filter(c => c.progress <= this.progress).at(-1) || course.checkpoints[0];
+    this.checkpoint = resolveCheckpoint(course.checkpoints, {
+      progress:this.progress,
+      altitude:hooks.altitude,
+      checkpoint:hooks.checkpoint
+    });
     this.airJump = 1;
     this.coyote = 0;
     this.grounded = false;
@@ -458,6 +463,12 @@ export class GameScene extends Phaser.Scene {
 
     if (this.player.y > this.course.world.height + 180 || this.player.x < -100 || this.player.x > this.course.world.width+100) this.respawn();
     const altitude = Math.max(0,(this.course.startAltitudeY-this.player.y)/5);
+    const reachedCheckpoint=resolveCheckpoint(this.course.checkpoints,{
+      progress:this.progress,
+      altitude,
+      checkpoint:this.checkpoint
+    });
+    if (reachedCheckpoint?.altitude>(this.checkpoint?.altitude??-1)) this.unlockCheckpoint(reachedCheckpoint);
     if (this.rapidFallTracker.update(time,altitude)) {
       this.resetToCheckpoint('rapidFall');
       return;
@@ -467,7 +478,8 @@ export class GameScene extends Phaser.Scene {
     this.hooks.onFrame?.({
       x:this.player.x,y:this.player.y,velocityX:this.playerBody.velocity.x,velocityY:this.playerBody.velocity.y,
       energy:this.energy,progress:this.progress,altitude,animation:motion,
-      facing:this.player.flipX?-1:1,zoneIndex,zoneName:Object.values(ZONE_NAMES)[zoneIndex]
+      facing:this.player.flipX?-1:1,zoneIndex,zoneName:Object.values(ZONE_NAMES)[zoneIndex],
+      checkpoint:checkpointPayload(this.checkpoint)
     });
   }
 

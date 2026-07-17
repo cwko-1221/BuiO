@@ -1,6 +1,6 @@
 import { buildCourse, validateCourse } from './course.js?v=20260717-checkpoint';
-import { GameScene } from './GameScene.js?v=20260717-checkpoint';
-import { GameAudio } from './GameAudio.js?v=20260717-louder';
+import { GameScene } from './GameScene.js?v=20260717-checkpoint-sync';
+import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 
 const $ = id => document.getElementById(id);
 const gameAudio = new GameAudio();
@@ -76,6 +76,7 @@ function startGame(seed,durationSec,startedAt,resume){
   if(phaserGame)phaserGame.destroy(true);
   const hooks={
     name:me.name||'Koko', energy:resume?.energy??40, progress:resume?.bestProgress??resume?.bestHeight??0,
+    altitude:resume?.altitude, checkpoint:resume?.checkpoint,
     isFrozen:()=>frozen,
     onSound:type=>gameAudio.play(type),
     onCheckpoint:cp=>toast(`🏁 已到達${cp.zoneName}檢查點`,true),
