@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { RapidFallTracker, RAPID_FALL_METRES, RAPID_FALL_WINDOW_MS } from '../game-app/public/js/v2/recovery.js';
 import { buildCourse } from '../game-app/public/js/v2/course.js';
-import { AUDIO_LEVELS } from '../game-app/public/js/v2/GameAudio.js';
+import { AUDIO_LEVELS, MUSIC_PROFILE } from '../game-app/public/js/v2/GameAudio.js';
 import { checkpointPayload, resolveCheckpoint } from '../game-app/public/js/v2/checkpoint-state.js';
 
 const tracker=new RapidFallTracker();
@@ -15,8 +15,10 @@ assert.equal(tracker.update(2000+RAPID_FALL_WINDOW_MS+1,399),false,'old peak out
 assert.equal(RAPID_FALL_METRES,100);
 assert.equal(RAPID_FALL_WINDOW_MS,2400);
 assert.ok(AUDIO_LEVELS.master>=.9,'master volume should be clearly audible');
-assert.ok(AUDIO_LEVELS.music>=.65,'background music should use the louder mix');
+assert.ok(AUDIO_LEVELS.music>=.75,'background music should use the louder mix');
 assert.ok(AUDIO_LEVELS.effects>=1,'movement and jump effects should use the louder mix');
+assert.ok(MUSIC_PROFILE.bpm>=136,'background music should keep an energetic climbing tempo');
+assert.equal(MUSIC_PROFILE.feel,'bright-adventure');
 
 const course=buildCourse(1);
 let previousProgress=-Infinity;

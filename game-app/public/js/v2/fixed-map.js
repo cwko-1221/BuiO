@@ -1,9 +1,13 @@
+import { alphaBounds, fittedSize } from './colliders.js';
+
 // One fixed, hand-authored course for every room. The route grammar follows
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07az';
+export const MAP_VERSION = 'fixed-1000m-2026.07bf';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
+export const PLAYER_VISUAL_HEIGHT = 70;
+export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
 
 const objects=[];
 const nodes=[];
@@ -19,11 +23,18 @@ const yAt = altitude => WORLD.startY - altitude * WORLD.pixelsPerMetre;
 const staticBehavior = { type:'static' };
 
 function support(zone,assetId,x,altitude,w,h=96,extra={}) {
+  // A route prop may be wide, but never visually towers over the player.
+  // Oversized landmarks belong in decor; every physical foothold is capped at
+  // 1.2x the 70px player sprite so it remains readable and easy to clear.
+  w=Math.min(w,MAX_ROUTE_OBJECT_HEIGHT);
+  h=Math.min(h,MAX_ROUTE_OBJECT_HEIGHT);
   const id=extra.id || `fixed-${String(++serial).padStart(3,'0')}`;
   const object={id,assetId,zone,x,y:yAt(altitude),w,h,angle:extra.angle||0,
     role:'support',behavior:extra.behavior||staticBehavior,routeNode:`node-${id}`,tags:extra.tags||[]};
   objects.push(object);
-  const node={id:object.routeNode,objectId:id,x,y:object.y-h/2-8,altitude,route:extra.route||'main',safe:extra.safe!==false};
+  const canIdle=fittedSize(object).w>=58;
+  const node={id:object.routeNode,objectId:id,x,y:object.y-h/2-8,altitude,route:extra.route||'main',
+    safe:extra.safe!==false&&canIdle&&!object.tags.includes('ground-chain')};
   nodes.push(node);
   return {object,node};
 }
@@ -36,10 +47,15 @@ function mainSupport(zone,assetId,x,altitude,w,h=96,extra={}) {
 }
 
 function obstacle(zone,assetId,supportRef,xOffset,w,h,extra={}) {
+  w=Math.min(w,MAX_ROUTE_OBJECT_HEIGHT);
+  h=Math.min(h,MAX_ROUTE_OBJECT_HEIGHT);
   const id=extra.id || `fixed-obstacle-${String(++serial).padStart(3,'0')}`;
   const supportTop=supportRef.object.y-supportRef.object.h/2;
+  // Once route pieces are capped at 84px there is no safe room for a second
+  // collider on the same foothold. Retain these landmarks visually, but the
+  // small route support itself owns the only physical body.
   objects.push({id,assetId,zone,x:supportRef.object.x+xOffset,y:supportTop-h/2,w,h,
-    angle:extra.angle||0,role:'obstacle',behavior:staticBehavior,supportId:supportRef.object.id,tags:['obstacle',...(extra.tags||[])]});
+    angle:extra.angle||0,role:'decor',behavior:staticBehavior,tags:['decor','mounted-landmark',...(extra.tags||[])]});
 }
 
 // Tutorial masonry is assembled from independent front-facing pieces.  Unlike
@@ -47,8 +63,9 @@ function obstacle(zone,assetId,supportRef,xOffset,w,h,extra={}) {
 // so the open doorway remains open and there is no invisible platform.
 function placedObstacle(zone,assetId,x,y,w,h,extra={}) {
   const id=extra.id || `fixed-obstacle-${String(++serial).padStart(3,'0')}`;
-  objects.push({id,assetId,zone,x,y,w,h,angle:extra.angle||0,role:'obstacle',
-    behavior:staticBehavior,tags:['obstacle','tutorial-masonry',...(extra.tags||[])]});
+  const physical=(extra.tags||[]).includes('reference-frame-01');
+  objects.push({id,assetId,zone,x,y,w,h,angle:extra.angle||0,role:physical?'obstacle':'decor',
+    behavior:staticBehavior,tags:[physical?'obstacle':'decor','tutorial-masonry',...(extra.tags||[])]});
   return id;
 }
 
@@ -66,8 +83,9 @@ function authoredRoute(zone,entries,tags=[]) {
 }
 
 function recoverLast(run,count=2) {
-  for (let index=Math.max(1,run.length-count);index<run.length;index++) {
-    recovery.push({from:run[index].node.id,to:run[index-1].node.id,type:'recovery'});
+  const available=run.filter(item=>item.node.route==='main');
+  for (let index=Math.max(1,available.length-count);index<available.length;index++) {
+    recovery.push({from:available[index].node.id,to:available[index-1].node.id,type:'recovery'});
   }
 }
 
@@ -75,7 +93,7 @@ function recoverLast(run,count=2) {
 // The opening mirrors the reference pacing: long floor, low gates, forgiving
 // brick steps, then a left-climbing sequence of castle props and landmarks.
 const castleGround=[];
-for (let x=128;x<=2944;x+=256) {
+for (let x=48;x<=3088;x+=80) {
   castleGround.push(mainSupport('castle','flat-brick-strip-4',x,0,260,78,{tags:['ground-chain','tutorial-floor']}));
 }
 for (const x of [300,500,700]) decor('castle','ref-go-pennant',x,11,66,100,{tags:['reference-frame-01','tutorial-flag']});
@@ -117,87 +135,94 @@ obstacle('castle','ref-market-stall-red',marketStallBase,0,180,195,{tags:['refer
 obstacle('castle','ref-produce-crate',frame02[4],0,92,78,{tags:['reference-frame-02','market-threshold-crate']});
 
 const frame03=authoredRoute('castle',[
-  ['ref-produce-crate',4300,137,210,128],['ref-produce-crate',4600,149,210,128],
-  ['ref-produce-crate',4880,161,210,128],['ref-shield-rack',5180,173,300,175],
-  ['ref-barrel-front',5390,184,155,165],['ref-stone-ramp-front',5050,195,340,105,{angle:-0.12}]
+  ['ref-produce-crate',4300,137,180,108],['ref-produce-crate',4580,149,180,108],
+  ['ref-produce-crate',4860,161,180,108],['ref-shield-rack',5100,171,200,110],
+  ['ref-barrel-front',5310,182,110,105],['ref-stone-ramp-front',5050,203,300,88,{angle:-0.12}]
 ],['reference-frame-03','oven-crate-ascent']);
 obstacle('castle','ref-oven-front',frame02[5],-180,250,198,{tags:['reference-frame-03','oven-obstacle']});
 decor('castle','ref-lamp-post',4050,142,108,250,{tags:['reference-frame-03','oven-lamp']});
 
 const frame04=authoredRoute('market',[
-  ['ref-barrel-front',4780,202,150,165],['ref-barrel-front',4530,215,150,165],
-  ['ref-barrel-front',4250,228,150,165],['ref-stone-ramp-front',4000,242,340,105,{angle:-0.16}],
-  ['ref-shield-rack',3700,256,270,115]
+  ['ref-barrel-front',4780,209,110,105],['ref-barrel-front',4550,222,110,105],
+  ['ref-barrel-front',4320,235,110,105],['ref-stone-ramp-front',4000,248,300,88,{angle:-0.16}],
+  ['ref-shield-rack',3700,258,190,110]
 ],['reference-frame-04','barrel-ramp-turn']);
 
 const frame05=authoredRoute('market',[
-  ['ref-barrel-cart',4050,274,330,160],['ref-barrel-cart',4350,286,330,160],
-  ['ref-stone-pillar-front',4600,304,180,240],['ref-stone-pillar-front',4800,316,180,240],
-  ['ref-chair-front',5020,326,170,150,{tags:['reference-frame-06']}],
-  ['ref-feast-table',5300,335,330,140,{tags:['reference-frame-06']}]
+  ['ref-barrel-cart',3980,274,200,95],['ref-barrel-cart',4230,286,200,95],
+  ['ref-stone-ramp-front',4540,300,230,80,{angle:-0.08}],
+  ['ref-stone-ramp-front',4770,312,230,80,{angle:0.08}],
+  ['ref-chair-front',4980,323,140,105,{tags:['reference-frame-06']}],
+  ['ref-feast-table',5200,333,260,105,{tags:['reference-frame-06']}]
 ],['reference-frame-05','feast-hall-ascent']);
+decor('market','ref-stone-pillar-front',4630,317,105,150,{tags:['reference-frame-05','off-route-landmark']});
 
 const frame06=authoredRoute('forest',[
-  ['ref-barrel-front',5530,350,140,140],
-  ['ref-stone-ramp-front',5200,368,420,150,{angle:-0.14}],
-  ['ref-stone-ramp-front',4800,382,420,150,{angle:0.12}],
-  ['ref-stone-column-front',4430,386,235,240]
+  ['ref-barrel-front',5440,346,110,105],
+  ['ref-stone-ramp-front',5180,360,300,80,{angle:-0.14}],
+  ['ref-stone-ramp-front',4880,370,300,80,{angle:0.12}],
+  ['ref-barrel-front',4620,382,110,105]
 ],['reference-frame-06','ramp-gallery']);
+decor('forest','ref-stone-column-front',4380,382,120,155,{tags:['reference-frame-06','off-route-landmark']});
 
 const frame07=authoredRoute('forest',[
-  ['ref-bed-front',4630,410,360,100],['ref-hanging-lantern',4760,434,270,120],
-  ['ref-bed-front',5000,448,430,140,{angle:-0.12}],
-  ['ref-catapult-front',5350,462,320,205],['ref-log-step',5050,475,205,88],
-  ['ref-log-step',4750,488,205,88],['ref-oven-front',4470,493,300,220],
-  ['ref-bellows-front',4150,512,300,115],['ref-cookpot',3850,524,180,145],
-  ['ref-cookpot',3600,535,180,145],['ref-log-step',3370,545,205,88,{safe:false}]
+  ['ref-bed-front',4800,402,300,85],['ref-hanging-lantern',4960,420,240,100],
+  ['ref-bed-front',5160,438,320,105,{angle:-0.12}],
+  ['ref-catapult-front',5400,452,195,120],['ref-log-step',5160,469,185,78],
+  ['ref-log-step',4920,482,185,78],['ref-oven-front',4660,495,155,120],
+  ['ref-bellows-front',4400,508,240,95],['ref-cookpot',4160,521,150,115],
+  ['ref-cookpot',3850,534,150,115,{tags:['double-jump-gap']}],['ref-log-step',3700,547,185,78,{safe:false}]
 ],['reference-frame-07','bed-lantern-climb']);
 
 const frame08=authoredRoute('farm',[
-  ['ref-log-step',3150,552,205,88,{safe:false}],
+  ['ref-log-step',3480,556,205,88,{safe:false}],
   ['flat-brick-strip-4',3070,570,660,88,{tags:['market-lower-landing','u-wall']}],
-  ['ref-produce-crate',2660,580,205,126],
-  ['ref-catapult-front',2360,590,280,170,{safe:false}],
-  ['ref-stone-column-front',2110,596,120,240],
-  ['ref-produce-crate',1870,606,205,126],
+  ['ref-produce-crate',2690,580,180,108],
+  ['ref-catapult-front',2440,590,180,115,{safe:false}],
+  ['ref-produce-crate',2210,601,180,108],
+  ['ref-produce-crate',1950,606,180,108],
   ['flat-brick-strip-4',1450,615,700,90,{tags:['market-upper-landing']}]
 ],['reference-frame-08','market-u-climb']);
 obstacle('farm','ref-market-stall-blue',frame08[1],-135,225,220,{tags:['reference-frame-08']});
 obstacle('farm','ref-market-stall-red',frame08[6],65,225,220,{tags:['reference-frame-08']});
 const frame08WallBottom=frame08[1].object.y+frame08[1].object.h/2;
 placedObstacle('farm','flat-brick-pillar-4',2805,frame08WallBottom+112,82,220,{tags:['reference-frame-08','u-wall-side']});
+decor('farm','ref-stone-column-front',2180,604,105,145,{tags:['reference-frame-08','off-route-landmark']});
 
 const frame09=authoredRoute('snow',[
-  ['ref-castle-banner-blue',1100,628,145,215,{tags:['reference-frame-08']}],
-  ['ref-castle-banner-red',980,642,145,215,{tags:['reference-frame-08']}],
+  ['flat-brick-a',1100,628,120,80,{tags:['reference-frame-08']}],
+  ['flat-brick-a',980,646,120,80,{tags:['reference-frame-08']}],
+  ['flat-brick-a',1100,662,120,80,{tags:['reference-frame-08']}],
   ['flat-brick-strip-4',1400,678,650,90,{tags:['armory-platform']}],
   ['ref-book-step',1900,680,175,108],['ref-scroll-step',2160,686,190,84],
-  ['flat-brick-strip-4',2710,690,650,90,{tags:['library-u-top']}]
+  ['flat-brick-strip-4',2670,690,650,90,{tags:['library-u-top']}]
 ],['reference-frame-09','armory-library']);
-obstacle('snow','ref-knight-stand',frame09[2],-190,112,158,{tags:['reference-frame-09']});
-obstacle('snow','ref-knight-stand',frame09[2],-45,112,158,{tags:['reference-frame-09']});
-obstacle('snow','ref-shield-rack',frame09[2],150,170,120,{tags:['reference-frame-09']});
-obstacle('snow','ref-lamp-post',frame09[5],0,100,230,{tags:['reference-frame-09']});
-const frame09LibraryBottom=frame09[5].object.y+frame09[5].object.h/2;
+decor('snow','ref-castle-banner-blue',1000,638,95,145,{tags:['reference-frame-08','reference-frame-09']});
+decor('snow','ref-castle-banner-red',1180,655,95,145,{tags:['reference-frame-08','reference-frame-09']});
+obstacle('snow','ref-knight-stand',frame09[3],-190,112,158,{tags:['reference-frame-09']});
+obstacle('snow','ref-knight-stand',frame09[3],-45,112,158,{tags:['reference-frame-09']});
+obstacle('snow','ref-shield-rack',frame09[3],150,170,120,{tags:['reference-frame-09']});
+obstacle('snow','ref-lamp-post',frame09[6],0,100,230,{tags:['reference-frame-09']});
+const frame09LibraryBottom=frame09[6].object.y+frame09[6].object.h/2;
 placedObstacle('snow','flat-brick-pillar-4',2440,frame09LibraryBottom+122,82,240,{tags:['reference-frame-09','library-u-wall']});
 placedObstacle('snow','flat-brick-pillar-4',2980,frame09LibraryBottom+122,82,240,{tags:['reference-frame-09','library-u-wall']});
 
 const frame10=authoredRoute('snow',[
-  ['ref-sand-ledge',3180,700,320,112],['ref-fishing-boat',3480,710,320,135],
-  ['ref-fishing-boat',3780,720,320,135],['ref-sand-ledge',4080,730,320,118],
-  ['ref-round-table-front',4410,740,330,215],['ref-bowl-front',4700,748,150,102,{safe:false}],
-  ['ref-bowl-front',4850,755,150,102,{safe:false}]
+  ['ref-sand-ledge',3180,700,300,105],['ref-fishing-boat',3620,710,285,120,{tags:['double-jump-gap']}],
+  ['ref-fishing-boat',3880,720,285,120],['ref-sand-ledge',4140,730,300,105],
+  ['ref-round-table-front',4410,740,230,110],['ref-bowl-front',4650,748,130,86,{safe:false}],
+  ['ref-bowl-front',4800,755,130,86,{safe:false}]
 ],['reference-frame-10','coral-table-chain']);
 decor('snow','ref-coral-cluster',3880,742,125,125,{tags:['reference-frame-10','coral-detail']});
 
 const frame11=authoredRoute('factory',[
-  ['ref-sand-ledge',5100,758,300,112],['ref-reef-rock',5430,770,330,150],
+  ['ref-sand-ledge',4950,758,280,100],['ref-reef-rock',5220,770,280,125],
   // Finish the right-climbing chain before making one clean, well-separated
   // left turn. Short props lift the route first; the tall tree only appears
   // after there is more than a full jump of clearance above the bowl chain.
-  ['ref-potted-plant',5200,793,145,100],['ref-monitor-front',4900,807,225,168],
-  ['ref-wood-sign',4600,822,280,140],['ref-monitor-front',4300,837,225,168],
-  ['ref-monitor-front',4000,849,225,168]
+  ['ref-potted-plant',5450,785,125,90],['ref-monitor-front',4715,807,165,110,{tags:['double-jump-gap']}],
+  ['ref-wood-sign',4520,822,240,105],['ref-monitor-front',4280,837,165,110],
+  ['ref-monitor-front',4040,849,165,110]
 ],['reference-frame-11','nature-monitor-chain','rising-left']);
 // The large tree is retained as a reference landmark only. It is deliberately
 // outside the jumping line and has no body, so its canopy can never cap the
@@ -205,40 +230,174 @@ const frame11=authoredRoute('factory',[
 decor('factory','ref-round-tree',5550,837,180,205,{tags:['reference-frame-11','off-route-landmark']});
 
 const frame12=authoredRoute('factory',[
-  ['ref-reef-rock',3620,865,340,155],['ref-sand-ledge',3295,868,300,112],
-  ['ref-fishing-boat',3000,871,300,132],['ref-fishing-boat',2690,874,300,132,{safe:false}],
-  ['ref-sand-ledge',2380,877,300,118,{safe:false}],['ref-bowl-front',2070,880,150,102,{safe:false}],
-  ['ref-sand-ledge',1760,883,300,112,{safe:false}],['ref-reef-rock',1435,890,340,155]
+  ['ref-reef-rock',3770,865,290,125],['ref-sand-ledge',3480,868,280,100],
+  ['ref-fishing-boat',3210,871,275,115],['ref-fishing-boat',2820,874,275,115,{safe:false,tags:['double-jump-gap']}],
+  ['ref-sand-ledge',2650,877,280,100,{safe:false}],['ref-bowl-front',2420,880,130,86,{safe:false}],
+  ['ref-sand-ledge',2190,883,280,100,{safe:false}],['ref-reef-rock',1900,906,290,125]
 ],['reference-frame-12','reef-boat-climb','rising-left']);
 decor('factory','ref-coral-cluster',3500,866,135,135,{tags:['reference-frame-12','reef-detail']});
 decor('factory','ref-coral-cluster',1610,886,125,125,{tags:['reference-frame-12','reef-detail']});
 
 const frame13=authoredRoute('factory',[
-  ['ref-sand-ledge',1780,914,300,115],['ref-sand-ledge',2085,920,300,112],
-  ['ref-telescope',2350,927,220,205],['ref-split-platform',2650,935,360,105],
-  ['ref-door-panel',2940,943,145,180],['ref-door-panel',3190,951,145,180],
-  ['ref-white-table',3450,960,330,145],['ref-charcoal-table',3750,968,240,145]
+  ['ref-sand-ledge',2200,914,280,100],['ref-sand-ledge',2485,920,280,100],
+  ['ref-telescope',2730,927,140,115],['ref-split-platform',2980,935,300,90],
+  ['ref-sand-ledge',3260,943,260,95],['ref-sand-ledge',3525,951,260,95],
+  ['ref-white-table',3800,960,280,120],['ref-charcoal-table',4050,968,220,120]
 ],['reference-frame-13','agent-adventure','rising-right']);
 decor('factory','ref-potted-plant',3470,954,125,125,{tags:['reference-frame-13','agent-plant']});
+decor('factory','ref-door-panel',3230,947,95,140,{tags:['reference-frame-13','off-route-landmark']});
+decor('factory','ref-door-panel',3490,955,95,140,{tags:['reference-frame-13','off-route-landmark']});
 
 const frame14=authoredRoute('factory',[
-  ['ref-office-safe',3990,976,230,160],['ref-office-desk',4245,982,285,96],
-  ['ref-white-table',4560,990,320,145],['ref-charcoal-table',4880,996,320,145],
-  ['ref-office-chair',5200,998,175,185,{safe:false}],
-  ['ref-office-desk',5450,1000,260,102,{tags:['summit-platform','landmark-base']}]
+  ['ref-office-safe',4250,976,160,110],['ref-office-desk',4460,982,210,80],
+  ['ref-white-table',4690,990,230,105],['ref-charcoal-table',4920,996,230,105],
+  ['ref-office-desk',5150,998,210,80,{safe:false}],
+  ['ref-office-desk',5380,1000,220,84,{tags:['summit-platform','landmark-base']}]
 ],['reference-frame-14','office-summit','rising-right']);
 decor('factory','ref-potted-plant',5000,990,140,140,{tags:['reference-frame-14','office-plant']});
+decor('factory','ref-office-chair',5190,994,130,145,{tags:['reference-frame-14','off-route-landmark']});
 decor('factory','ref-basketball-hoop',5350,988,210,260,{angle:-0.08,tags:['reference-frame-14','office-hoop']});
+
+// Reflow the authored route after applying the 84x84px hard size cap. The
+// original left/right rhythm is retained. Ordinary footholds remain friendly,
+// while regular milestones introduce a clearly wider double-jump gap. Attached
+// obstacles follow their support during the reflow.
+function compactPhysicalRoute() {
+  const objectById=new Map(objects.map(object=>[object.id,object]));
+  // Deliberately remove redundant middle footholds from five dense chains.
+  // This creates the same readable "missing rung" challenge seen in the
+  // reference map instead of merely placing many tiny objects close together.
+  const removedAltitudes=new Set([149,222,606,720,920,982,990]);
+  for (const node of nodes.filter(item=>item.route==='main'&&removedAltitudes.has(item.altitude))) {
+    const object=objectById.get(node.objectId);
+    node.route='removed';
+    object.role='decor';
+    object.tags.push('removed-route-rung');
+  }
+  const routeNodes=nodes.filter(node=>node.route==='main');
+  main.length=0;
+  for (let index=1;index<routeNodes.length;index++) {
+    main.push({from:routeNodes[index-1].id,to:routeNodes[index].id,type:'main'});
+  }
+  const attachedBySupport=new Map();
+  for (const object of objects.filter(item=>item.supportId)) {
+    if (!attachedBySupport.has(object.supportId)) attachedBySupport.set(object.supportId,[]);
+    attachedBySupport.get(object.supportId).push(object);
+  }
+  const visibleBox=(object,x=object.x)=>{
+    const bounds=alphaBounds(object.assetId,fittedSize(object));
+    return {left:x+bounds.minX,right:x+bounds.maxX,top:object.y+bounds.minY,bottom:object.y+bounds.maxY};
+  };
+  const clearsEarlierRoute=(object,x,index)=>{
+    const upper=visibleBox(object,x);
+    for (let earlierIndex=0;earlierIndex<index-1;earlierIndex++) {
+      const earlierObject=objectById.get(routeNodes[earlierIndex].objectId);
+      const lower=visibleBox(earlierObject);
+      if (upper.bottom>=lower.top) continue;
+      const overlapX=Math.min(upper.right,lower.right)-Math.max(upper.left,lower.left);
+      const clearance=lower.top-upper.bottom;
+      if (overlapX>4&&clearance<120) return false;
+    }
+    return true;
+  };
+  // The ground is a continuous tutorial runway. Above it, alternate long
+  // diagonal sweeps with a few compact switchbacks, so some sequences require
+  // jumping right and then immediately climbing back left.
+  let direction=1;
+  let doubleJumpChallenges=0;
+  const doubleJumpMilestones=[150,180,210,235,275,320,340,390,410,435,495,550,615,660,700,730,790,840,865,927];
+  const forcedTurnMilestones=[300,370,520,580,822,906];
+  let milestoneIndex=0;
+  let forcedTurnIndex=0;
+  let spacingDebt=0;
+  for (const node of routeNodes) {
+    const object=objectById.get(node.objectId);
+    object.tags=object.tags.filter(tag=>tag!=='double-jump-gap');
+  }
+  for (let index=1;index<routeNodes.length;index++) {
+    const previousNode=routeNodes[index-1], node=routeNodes[index];
+    const previousObject=objectById.get(previousNode.objectId), object=objectById.get(node.objectId);
+    if (previousObject.tags.includes('ground-chain')&&object.tags.includes('ground-chain')) continue;
+    if (forcedTurnIndex<forcedTurnMilestones.length&&node.altitude>=forcedTurnMilestones[forcedTurnIndex]) {
+      direction*=-1;
+      object.tags.push('switchback-turn');
+      forcedTurnIndex++;
+      spacingDebt=0;
+    }
+    const halfWidths=(fittedSize(previousObject).w+fittedSize(object).w)/2;
+    const wantsDoubleJump=milestoneIndex<doubleJumpMilestones.length
+      &&node.altitude>=doubleJumpMilestones[milestoneIndex];
+    const routeRise=previousNode.y-node.y;
+    const preferredDoubleGaps=routeRise<=70?[245,240,235]:routeRise<=105?[240,235,230]:[235,230];
+    const doubleChoice=wantsDoubleJump
+      ? preferredDoubleGaps.map(gap=>({gap,candidate:previousObject.x+direction*(halfWidths+gap)}))
+        .find(choice=>choice.candidate>=250&&choice.candidate<=5350&&clearsEarlierRoute(object,choice.candidate,index))
+      : undefined;
+    let target=doubleChoice?.candidate;
+    if (target!==undefined) {
+      object.tags.push('double-jump-gap');
+      doubleJumpChallenges++;
+      milestoneIndex++;
+      spacingDebt+=Math.max(0,doubleChoice.gap-88);
+    }
+    const baseOrdinaryGaps=node.altitude<120?[34,48,62,76]:[88,104,120,136,72];
+    const repayment=Math.min(40,spacingDebt);
+    const ordinaryGaps=baseOrdinaryGaps.map(gap=>Math.max(32,gap-repayment));
+    if (target===undefined) {
+      target=ordinaryGaps
+        .map(gap=>previousObject.x+direction*(halfWidths+gap))
+        .find(candidate=>candidate>=42&&candidate<=5558&&clearsEarlierRoute(object,candidate,index));
+      if (target!==undefined) spacingDebt=Math.max(0,spacingDebt-repayment);
+    }
+    if (target===undefined) {
+      direction*=-1;
+      const turnGaps=[235,240,245,230];
+      target=turnGaps
+        .map(gap=>previousObject.x+direction*(halfWidths+gap))
+        .find(candidate=>candidate>=42&&candidate<=5558&&clearsEarlierRoute(object,candidate,index));
+      if (target!==undefined) {
+        object.tags.push('double-jump-gap');
+        doubleJumpChallenges++;
+        if (wantsDoubleJump) milestoneIndex++;
+        spacingDebt=0;
+      }
+    }
+    if (target===undefined) {
+      const candidate=previousObject.x+direction*(halfWidths+210);
+      const upper=visibleBox(object,candidate);
+      const conflicts=routeNodes.slice(0,index-1).map(earlierNode=>{
+        const earlierObject=objectById.get(earlierNode.objectId),lower=visibleBox(earlierObject);
+        return {id:earlierObject.id,x:earlierObject.x,altitude:earlierNode.altitude,
+          overlap:Math.min(upper.right,lower.right)-Math.max(upper.left,lower.left),
+          clearance:lower.top-upper.bottom};
+      }).filter(item=>item.overlap>4&&item.clearance<120);
+      throw new Error(`No clear authored route position for ${object.id} at ${node.altitude}m from x=${previousObject.x.toFixed(1)} direction=${direction}; candidate=${candidate.toFixed(1)} conflicts=${JSON.stringify(conflicts)}`);
+    }
+    const shift=target-object.x;
+    object.x=target;
+    node.x=target;
+    for (const attached of attachedBySupport.get(object.id)||[]) attached.x+=shift;
+  }
+  if (doubleJumpChallenges<18||doubleJumpChallenges>24) throw new Error(`Expected 18-24 double-jump challenges, got ${doubleJumpChallenges}`);
+}
+compactPhysicalRoute();
+
+// Decorative stand-ins caused visible objects that the player could walk
+// through and could also overlap the real route after it was reflowed. Keep
+// them in referenceObjects for the asset audit, but never ship them into the
+// playable world. Every visible world prop is now a physical body.
+const referenceObjects=objects.slice();
+const runtimeObjects=objects.filter(object=>object.role!=='decor');
 
 for (const run of [frame01,frame02,frame03,frame04,frame05,frame06,frame07,frame08,frame09,frame10,frame11,frame12,frame13,frame14]) recoverLast(run,3);
 
 // World-space tutorial and wayfinding annotations. These are deliberately
 // separate from collision objects so signs can never create invisible walls.
 annotations.push(
-  {id:'guide-jump',type:'guide',x:3260,y:yAt(9)-165,text:'跳！',assetId:'ref-jump-arrow',renderSize:{w:120,h:120}},
-  {id:'guide-run-jump',type:'guide',x:4130,y:yAt(38)-175,text:'跑動時跳得更遠！',assetId:'ref-run-jump-sign',renderSize:{w:330,h:126},showText:false},
-  {id:'guide-double',type:'guide',x:5010,y:yAt(72)-175,text:'二段跳！',assetId:'ref-double-jump-sign',renderSize:{w:230,h:150},showText:false},
-  {id:'summit-castle',type:'summit',x:3890,y:yAt(112)-175,text:'高峰 1/6・熔城攀登',assetId:'ref-zone-title',renderSize:{w:330,h:130},showText:false},
+  {id:'guide-jump',type:'guide',x:3260,y:yAt(9)-255,text:'跳！',assetId:'ref-jump-arrow',renderSize:{w:54,h:54}},
+  {id:'guide-run-jump',type:'guide',x:4000,y:yAt(38)-300,text:'跑動時跳得更遠！',assetId:'ref-run-jump-sign',renderSize:{w:120,h:46},showText:false},
+  {id:'guide-double',type:'guide',x:5070,y:yAt(72)-285,text:'二段跳！',assetId:'ref-double-jump-sign',renderSize:{w:96,h:63},showText:false},
+  {id:'summit-castle',type:'summit',x:3890,y:yAt(112)-280,text:'高峰 1/6・熔城攀登',assetId:'ref-zone-title',renderSize:{w:150,h:59},showText:false},
   {id:'turn-oven',type:'turn',x:5050,y:yAt(188)-145,text:'← 沿木桶轉向'},
   {id:'turn-ramp',type:'turn',x:3280,y:yAt(258)-155,text:'→ 登上宴會廳'},
   {id:'turn-workshop',type:'turn',x:3210,y:yAt(543)-155,text:'→ 沿工場物件攀升'},
@@ -255,7 +414,7 @@ export const FIXED_MAP = {
     {id:'castle',min:0,max:210},{id:'market',min:211,max:274},{id:'forest',min:275,max:448},
     {id:'farm',min:449,max:573},{id:'snow',min:574,max:704},{id:'factory',min:705,max:1000}
   ],
-  objects,nodes,
+  objects:runtimeObjects,referenceObjects,nodes,
   routes:{main,shortcut,recovery},
   progressSensors:nodes.filter(node=>node.route==='main').map((node,index,all)=>({
     id:`progress-${index}`,x:node.x,y:node.y,progress:index/(all.length-1),altitude:node.altitude

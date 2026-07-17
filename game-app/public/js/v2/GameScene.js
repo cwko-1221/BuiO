@@ -7,6 +7,7 @@ import { sampleSky } from './background.js';
 import { RapidFallTracker } from './recovery.js';
 import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js';
 import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js';
+import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -42,6 +43,7 @@ export class GameScene extends Phaser.Scene {
     this.peakFallSpeed = 0;
     this.nextStepAt = 0;
     this.finished = false;
+    this.routeAutoplay = hooks.autoplay ? new RouteAutoplay(course, hooks.onAutoplay) : null;
   }
 
   preload() {
@@ -98,6 +100,7 @@ export class GameScene extends Phaser.Scene {
     this.resizeSky();
     camera.fadeIn(280, 255, 255, 255);
     this.hooks.onReady?.(this);
+    this.routeAutoplay?.start(this.time.now);
   }
 
   resizeSky() {
@@ -213,7 +216,7 @@ export class GameScene extends Phaser.Scene {
       const summit = note.type === 'summit';
       const turn = note.type === 'turn';
       const color = summit ? '#50e879' : turn ? '#ffffff' : '#ffd743';
-      const size = summit ? '26px' : turn ? '20px' : '22px';
+      const size = summit ? '13px' : turn ? '11px' : '12px';
       if (note.assetId) {
         const texture=ATLAS_INDEX[note.assetId];
         this.add.image(note.x,note.y,texture?.key||note.assetId,texture?.frame||null)
@@ -222,8 +225,8 @@ export class GameScene extends Phaser.Scene {
       if (note.showText!==false) {
         this.add.text(note.x,note.y+(note.assetId?(note.renderSize?.h||110)*.58:0),note.text,{
           fontFamily:'Arial, Microsoft JhengHei',fontSize:size,fontStyle:'bold',
-          color,stroke:'#18243d',strokeThickness:summit?8:7,
-          align:'center',wordWrap:{width:360}
+          color,stroke:'#18243d',strokeThickness:summit?4:3,
+          align:'center',wordWrap:{width:180}
         }).setOrigin(.5).setDepth(61).setAngle(turn?-4:0);
       }
       if (!note.arrow) continue;
@@ -380,13 +383,16 @@ export class GameScene extends Phaser.Scene {
     this.coyote = this.grounded ? .11 : Math.max(0,this.coyote-dt);
     if (this.grounded) this.airJump = 1;
 
+    this.routeAutoplay?.update(this, time);
+
     const dir = (rightHeld?1:0)-(leftHeld?1:0);
     const target = dir * 5.6;
     const nextVx = Phaser.Math.Linear(this.playerBody.velocity.x,target,this.grounded?.2:.085);
     this.setPlayerVelocity(nextVx,null);
     const conveyorBody = under.find(b => b.courseObject?.behavior?.type === 'conveyor');
     if (conveyorBody && this.grounded) this.setPlayerVelocity(nextVx + conveyorBody.courseObject.behavior.speed,null);
-    if (dir && this.energy > 0) this.energy = Math.max(0,this.energy-4.3*dt);
+    if (this.hooks.infiniteEnergy) this.energy=100;
+    else if (dir && this.energy > 0) this.energy = Math.max(0,this.energy-4.3*dt);
     this.player.setFlipX(dir < 0);
     if (this.grounded&&dir&&Math.abs(nextVx)>1.25&&time>=this.nextStepAt) {
       this.nextStepAt=time+Phaser.Math.Clamp(285-Math.abs(nextVx)*14,185,255);
@@ -419,7 +425,8 @@ export class GameScene extends Phaser.Scene {
         const air = this.coyote <= 0;
         this.setPlayerVelocity(null,air ? -10.8 : -12.2);
         if (air) this.airJump--;
-        this.energy -= 8; this.actions.jumpQueued = 0; this.coyote = 0;
+        if (!this.hooks.infiniteEnergy) this.energy -= 8;
+        this.actions.jumpQueued = 0; this.coyote = 0;
         this.player.play(air ? 'doubleJump' : 'jump',true);
         this.hooks.onEffect?.(air?'doubleJump':'jump',this.player.x,this.player.y);
         this.hooks.onSound?.(air?'doubleJump':'jump');
@@ -529,6 +536,7 @@ export class GameScene extends Phaser.Scene {
 
   resetToCheckpoint(reason='manual') {
     const cp=this.checkpoint||this.course.checkpoints[0];
+    this.routeAutoplay?.noteReset(cp);
     const pose=this.checkpointPose(cp);
     this.clearContacts();
     this.setPlayerPosition(pose.x,pose.y);
@@ -551,7 +559,14 @@ export class GameScene extends Phaser.Scene {
     this.resetToCheckpoint('laser');
   }
 
-  finish() { if (this.finished) return; this.finished = true; this.progress = 1; this.hooks.onSound?.('finish'); this.hooks.onFinish?.(); }
+  finish() {
+    if (this.finished) return;
+    this.finished = true;
+    this.progress = 1;
+    this.routeAutoplay?.finish(this.time.now);
+    this.hooks.onSound?.('finish');
+    this.hooks.onFinish?.();
+  }
 
   updateGhosts(list, myId) {
     const seen = new Set();

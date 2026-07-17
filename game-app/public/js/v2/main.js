@@ -1,5 +1,5 @@
-import { buildCourse, validateCourse } from './course.js?v=20260717-checkpoint';
-import { GameScene } from './GameScene.js?v=20260717-checkpoint-sync';
+import { buildCourse, validateCourse } from './course.js?v=20260717-tight-double-jumps';
+import { GameScene } from './GameScene.js?v=20260717-switchback-playtest';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 
 const $ = id => document.getElementById(id);
@@ -19,6 +19,8 @@ const previewParams = new URLSearchParams(location.search);
 const preview = previewParams.has('preview') && ['127.0.0.1','localhost'].includes(location.hostname);
 const previewAltitude = previewParams.has('altitude') ? Number(previewParams.get('altitude')) : NaN;
 const previewX = previewParams.has('x') ? Number(previewParams.get('x')) : NaN;
+const previewInfiniteEnergy = preview && previewParams.get('infiniteEnergy') === '1';
+const previewAutoplay = preview && previewParams.get('autoplay') === '1';
 
 function show(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -75,8 +77,14 @@ function startGame(seed,durationSec,startedAt,resume){
   startMeta={...(startMeta||{}),seed,durationSec,startedAt:startedAt||Date.now(),course};
   if(phaserGame)phaserGame.destroy(true);
   const hooks={
-    name:me.name||'Koko', energy:resume?.energy??40, progress:resume?.bestProgress??resume?.bestHeight??0,
+    name:me.name||'Koko', energy:previewInfiniteEnergy?100:(resume?.energy??40), progress:resume?.bestProgress??resume?.bestHeight??0,
     altitude:resume?.altitude, checkpoint:resume?.checkpoint,
+    infiniteEnergy:previewInfiniteEnergy,
+    autoplay:previewAutoplay,
+    onAutoplay:result=>{
+      window.__routeAutoplay=result;
+      document.documentElement.dataset.routeAutoplay=JSON.stringify(result);
+    },
     isFrozen:()=>frozen,
     onSound:type=>gameAudio.play(type),
     onCheckpoint:cp=>toast(`🏁 已到達${cp.zoneName}檢查點`,true),

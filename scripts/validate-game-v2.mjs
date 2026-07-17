@@ -2,7 +2,7 @@ import { ASSETS } from '../game-app/public/js/v2/assets.js';
 import { buildCourse, validateCourse } from '../game-app/public/js/v2/course.js';
 import { ASSET_GEOMETRY } from '../game-app/public/js/v2/asset-geometry.js';
 import { alphaBounds, fittedSize } from '../game-app/public/js/v2/colliders.js';
-import { MAP_VERSION } from '../game-app/public/js/v2/fixed-map.js';
+import { MAP_VERSION, MAX_ROUTE_OBJECT_HEIGHT, PLAYER_VISUAL_HEIGHT } from '../game-app/public/js/v2/fixed-map.js';
 import { SKY_BANDS, sampleSky } from '../game-app/public/js/v2/background.js';
 
 const failures=[];
@@ -13,6 +13,7 @@ if (ASSETS.length<195) failures.push(`asset catalog lost shipping assets: expect
 if (first.mapVersion!==MAP_VERSION) failures.push('map version mismatch');
 if (first.world.width!==5600||first.world.height!==6200) failures.push('world is not fixed at 5600x6200');
 if (first.summit.y>=first.start.y) failures.push('summit must be above the start');
+if (first.objects.some(object=>object.role==='decor')) failures.push('runtime map contains pass-through decor');
 
 if (SKY_BANDS.length!==6) failures.push(`background expected 6 height bands, got ${SKY_BANDS.length}`);
 for (let i=1;i<SKY_BANDS.length;i++) if (SKY_BANDS[i].at<=SKY_BANDS[i-1].at) failures.push('background bands are unordered');
@@ -35,6 +36,51 @@ for (let index=0;index<500;index++) {
 }
 
 const byId=new Map(first.objects.map(object=>[object.id,object]));
+const nodeById=new Map(first.nodes.map(node=>[node.id,node]));
+
+// The first prop climb must remain a compact, forgiving introduction. Large
+// side faces can be mathematically reachable yet stop the player before their
+// feet ever reach the top (the former crate/shield/barrel dead end).
+for (const node of first.nodes.filter(item=>item.route==='main'&&item.altitude>=137&&item.altitude<=258)) {
+  const object=byId.get(node.objectId);
+  const size=fittedSize(object);
+  if (size.h>130.1) failures.push(`${object.id}: early-climb prop is too tall (${size.h.toFixed(0)}px)`);
+}
+for (const edge of first.routes.main) {
+  const a=nodeById.get(edge.from), b=nodeById.get(edge.to);
+  if (!a||!b||a.altitude<137||b.altitude>274) continue;
+  const ao=byId.get(a.objectId), bo=byId.get(b.objectId);
+  const rise=Math.max(0,a.y-b.y);
+  const gap=Math.max(0,Math.abs(b.x-a.x)-(fittedSize(ao).w+fittedSize(bo).w)/2);
+  const doubleJump=bo.tags?.includes('double-jump-gap');
+  if (rise>(doubleJump?135:110)) failures.push(`${edge.from}>${edge.to}: early-climb rise is ${rise.toFixed(0)}px`);
+  if (gap>(doubleJump?260:180)) failures.push(`${edge.from}>${edge.to}: early-climb gap is ${gap.toFixed(0)}px`);
+}
+
+// The entire main route is a chain of compact footholds, not isolated
+// oversized set-pieces. Every physical support is at most 1.2 player-heights.
+// Most airborne gaps stay below 140px, while a small
+// authored set of clearly tagged challenges deliberately requires a double
+// jump without approaching the theoretical maximum.
+if (MAX_ROUTE_OBJECT_HEIGHT!==PLAYER_VISUAL_HEIGHT*1.2) failures.push('route height limit is not 1.2x the player height');
+for (const node of first.nodes.filter(item=>item.route==='main')) {
+  const object=byId.get(node.objectId);
+  const size=fittedSize(object);
+  if (size.h>MAX_ROUTE_OBJECT_HEIGHT+.1) failures.push(`${object.id}: route prop is too tall (${size.h.toFixed(0)}px > ${MAX_ROUTE_OBJECT_HEIGHT}px)`);
+  if (size.w>MAX_ROUTE_OBJECT_HEIGHT+.1) failures.push(`${object.id}: route prop is too wide (${size.w.toFixed(0)}px > ${MAX_ROUTE_OBJECT_HEIGHT}px)`);
+}
+for (const edge of first.routes.main) {
+  const a=nodeById.get(edge.from), b=nodeById.get(edge.to);
+  if (!a||!b||b.altitude<120) continue;
+  const ao=byId.get(a.objectId), bo=byId.get(b.objectId);
+  const gap=Math.max(0,Math.abs(b.x-a.x)-(fittedSize(ao).w+fittedSize(bo).w)/2);
+  const doubleJump=bo.tags?.includes('double-jump-gap');
+  if (doubleJump&&(gap<230||gap>255)) failures.push(`${edge.from}>${edge.to}: double-jump gap is ${gap.toFixed(0)}px`);
+  if (!doubleJump&&gap>140.1) failures.push(`${edge.from}>${edge.to}: compact-route gap is ${gap.toFixed(0)}px`);
+}
+const doubleJumpCount=first.objects.filter(object=>object.tags?.includes('double-jump-gap')).length;
+if (doubleJumpCount<18||doubleJumpCount>24) failures.push(`fixed course must contain 18-24 double-jump gaps, got ${doubleJumpCount}`);
+
 for (const object of first.objects.filter(item=>item.role==='obstacle'&&item.supportId)) {
   const support=byId.get(object.supportId);
   if (!support) { failures.push(`${object.id}: missing support`); continue; }
@@ -44,11 +90,10 @@ for (const object of first.objects.filter(item=>item.role==='obstacle'&&item.sup
   if (Math.abs(bottom-top)>2.1) failures.push(`${object.id}: alpha collider is not seated on visible support`);
 }
 if (first.objects.some(object=>object.role==='decor'&&object.supportId)) failures.push('decor has a physical support');
-if (first.objects.filter(object=>object.role==='obstacle').length<10) failures.push('not enough solid obstacle/wall objects');
+if (first.objects.filter(object=>object.role==='obstacle').length<8) failures.push('not enough solid tutorial masonry objects');
 
 // Geometric fall probes: every main-route gap either has a visible body below
 // it or is guaranteed to cross the world reset line. There is no endless void.
-const nodeById=new Map(first.nodes.map(node=>[node.id,node]));
 let recovered=0, reset=0;
 for (const edge of first.routes.main) {
   const a=nodeById.get(edge.from),b=nodeById.get(edge.to);

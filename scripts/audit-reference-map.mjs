@@ -24,7 +24,7 @@ const annotationAssets=new Set(FIXED_MAP.annotations.map(annotation=>annotation.
 const runtimeSpecial=new Set(['ref-summit-flag']);
 const mapFrameCoverage=blueprint.frames.map((frame,index)=>{
   const tag=`reference-frame-${String(index+1).padStart(2,'0')}`;
-  const used=new Set(FIXED_MAP.objects
+  const used=new Set((FIXED_MAP.referenceObjects||FIXED_MAP.objects)
     .filter(object=>object.tags?.includes(tag))
     .map(object=>object.assetId));
   const missingFromMap=frame.props.filter(id=>

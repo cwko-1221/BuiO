@@ -1,6 +1,7 @@
 const NOTE = 440;
 const semitone = value => NOTE * 2 ** (value / 12);
-export const AUDIO_LEVELS = Object.freeze({master:1,music:.7,effects:1.12});
+export const AUDIO_LEVELS = Object.freeze({master:1,music:.82,effects:1.12});
+export const MUSIC_PROFILE = Object.freeze({bpm:142,scale:'A-major',feel:'bright-adventure'});
 
 export class GameAudio {
   constructor() {
@@ -73,18 +74,36 @@ export class GameAudio {
 
   scheduleMusic() {
     if (!this.context||this.context.state!=='running'||this.muted) return;
-    const sixteenth=60/112/2;
-    const melody=[0,4,7,11,7,4,2,7,0,4,9,7,4,2,-1,2];
-    const bass=[-24,-24,-19,-19,-21,-21,-17,-17];
+    const sixteenth=60/MUSIC_PROFILE.bpm/4;
+    // Four-bar I-V-vi-IV adventure loop. The lead skips between chord tones,
+    // while a compact kick/snare/hat pattern keeps the climb lively without
+    // masking footsteps and jump cues.
+    const roots=[0,7,9,5];
+    const thirds=[4,4,3,4];
+    const leadPattern=[0,'third',7,12,9,7,'third',7];
     while (this.nextMusicTime<this.context.currentTime+.7) {
       const step=this.musicStep++;
       const at=this.nextMusicTime;
-      const pitch=melody[step%melody.length];
-      if (step%2===0) this.tone(semitone(pitch),at,sixteenth*1.45,.055,'triangle',this.music);
-      if (step%4===0) this.tone(semitone(bass[(step/4)%bass.length|0]),at,sixteenth*3.5,.065,'sine',this.music);
-      if (step%8===0) {
-        for (const chord of [pitch-12,pitch-5,pitch]) this.tone(semitone(chord),at,sixteenth*7,.014,'sine',this.music);
+      const chordIndex=Math.floor(step/16)%roots.length;
+      const root=roots[chordIndex], third=thirds[chordIndex];
+      if (step%2===0) {
+        const value=leadPattern[(step/2)%leadPattern.length];
+        const pitch=root+(value==='third'?third:value);
+        this.tone(semitone(pitch),at,sixteenth*1.7,.046,'square',this.music);
+        this.tone(semitone(pitch+12),at,sixteenth*1.3,.018,'triangle',this.music);
       }
+      if (step%4===0) {
+        const bassPitch=root-24+(step%16===8?7:0);
+        this.tone(semitone(bassPitch),at,sixteenth*3.2,.072,'triangle',this.music);
+      }
+      if (step%16===0) {
+        for (const note of [root-12,root+third-12,root-5]) {
+          this.tone(semitone(note),at,sixteenth*14,.013,'sine',this.music);
+        }
+      }
+      if (step%2===0) this.noise(at,sixteenth*.42,.0065,5200,this.music);
+      if (step%8===0) this.tone(105,at,sixteenth*1.5,.052,'sine',this.music,48);
+      if (step%8===4) this.noise(at,sixteenth*1.25,.024,900,this.music);
       this.nextMusicTime+=sixteenth;
     }
   }
@@ -103,7 +122,7 @@ export class GameAudio {
     oscillator.start(at); oscillator.stop(at+duration+.025);
   }
 
-  noise(at,duration,volume,highpass=180) {
+  noise(at,duration,volume,highpass=180,destination=this.effects) {
     if (!this.context) return;
     const length=Math.max(1,Math.floor(this.context.sampleRate*duration));
     const buffer=this.context.createBuffer(1,length,this.context.sampleRate);
@@ -114,7 +133,7 @@ export class GameAudio {
     const gain=this.context.createGain();
     source.buffer=buffer; filter.type='highpass'; filter.frequency.value=highpass;
     gain.gain.setValueAtTime(volume,at); gain.gain.exponentialRampToValueAtTime(.0001,at+duration);
-    source.connect(filter); filter.connect(gain); gain.connect(this.effects);
+    source.connect(filter); filter.connect(gain); gain.connect(destination);
     source.start(at); source.stop(at+duration+.01);
   }
 

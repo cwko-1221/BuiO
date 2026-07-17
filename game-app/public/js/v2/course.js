@@ -104,7 +104,8 @@ export function validateCourse(course) {
     // double-jump. Main-route edges must also be comfortable from rest, which
     // is the situation after a player stops to answer a question. The safe
     // airborne gap shrinks as the destination rises.
-    const restStartGap=Math.max(120,260-rise);
+    const authoredDoubleJump=bo.tags?.includes('double-jump-gap');
+    const restStartGap=authoredDoubleJump?260:Math.max(120,260-rise);
     if (gap>restStartGap) errors.push(`main edge ${edge.from}>${edge.to} cannot be cleared from rest (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise)`);
   }
   // Recovery paths may fall back, but the visible main line is deliberately
@@ -132,7 +133,7 @@ export function validateCourse(course) {
     const gap=Math.abs((object.y+bounds.maxY)-(support.y+supportBounds.minY));
     if (gap>2.1) errors.push(`${object.id} floats ${gap.toFixed(1)}px above support`);
   }
-  if (course.objects.some(object=>object.role==='decor'&&object.supportId)) errors.push('decor must not own collision support');
+  if (course.objects.some(object=>object.role==='decor')) errors.push('playable course must not contain pass-through decor objects');
   if (course.hazards.length) errors.push('reference course contains legacy laser hazards');
   const sideViewBlocks=course.objects.filter(object=>SIDE_VIEW_BLOCK_IDS.has(object.assetId));
   if (sideViewBlocks.length) errors.push(`front-facing course contains side-view blocks: ${sideViewBlocks.map(object=>object.assetId).join(', ')}`);
@@ -185,22 +186,19 @@ export function validateCourse(course) {
     }
   }
 
-  // In the floating-object section, a later support must never hang less than
-  // one full player-height above an earlier support. Ordinary overlap checks
-  // miss this because there can still be empty pixels between the bodies, yet
-  // that narrow slot blocks the player's jump arc (the former table/tree bug).
-  const highMainIds=new Set(course.nodes
-    .filter(node=>node.route==='main'&&node.altitude>=700)
-    .map(node=>node.objectId));
-  const highMainSolids=solids.filter(solid=>highMainIds.has(solid.object.id));
+  // Across the full 1000m route, a later support must never become a low
+  // ceiling over an earlier foothold. Reserve 120px (well above the 70px
+  // character) so normal and double-jump arcs both have breathing room.
+  const mainIds=new Set(course.nodes.filter(node=>node.route==='main').map(node=>node.objectId));
+  const mainSolids=solids.filter(solid=>mainIds.has(solid.object.id));
   let blockedOverheads=0;
-  for (let i=0;i<highMainSolids.length;i++) for (let j=0;j<highMainSolids.length;j++) {
+  for (let i=0;i<mainSolids.length;i++) for (let j=0;j<mainSolids.length;j++) {
     if (i===j) continue;
-    const lower=highMainSolids[i], upper=highMainSolids[j];
+    const lower=mainSolids[i], upper=mainSolids[j];
     if (upper.bottom>=lower.top) continue;
     const overlapX=Math.min(lower.right,upper.right)-Math.max(lower.left,upper.left);
     const clearance=lower.top-upper.bottom;
-    if (overlapX>20&&clearance<90) {
+    if (overlapX>4&&clearance<120) {
       blockedOverheads++;
       if (blockedOverheads<=8) errors.push(`${lower.object.id} has only ${clearance.toFixed(0)}px clearance below ${upper.object.id}`);
     }
