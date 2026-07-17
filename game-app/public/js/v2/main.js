@@ -1,5 +1,5 @@
 import { buildCourse, validateCourse } from './course.js?v=20260717-crumble';
-import { GameScene } from './GameScene.js?v=20260717-crumble';
+import { GameScene } from './GameScene.js?v=20260717-network';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 
 const $ = id => document.getElementById(id);
@@ -56,7 +56,7 @@ async function joinRoom(code){
   socket.emit('player:join',{code,name:me.name||'玩家',studentId:me.studentId},res=>{
     joining=false;
     if(!res?.ok){$('joinError').textContent=res?.message||'加入失敗';loadRooms();return;}
-    clearInterval(roomsTimer); startMeta={code,playerKey:`s:${me.studentId}`};
+    clearInterval(roomsTimer); startMeta={code,playerKey:res.playerKey||`s:${me.studentId}`};
     $('lobbySetTitle').textContent=res.setTitle||'準備中'; $('lobbyHostName').textContent=`${teacherLabel(res.hostName)}嘅遊戲房間`;
     if(res.phase==='playing')startGame(res.seed,res.durationSec,res.startedAt,res.resume); else show('lobbyScreen');
   });
@@ -132,7 +132,7 @@ function updateHudAndNetwork(state){
   $('heightPill').textContent=`🏔️ 高度 ${Math.round(state.altitude)}m`;
   $('stagePill').textContent=`${String(state.zoneIndex+1).padStart(2,'0')} · ${state.zoneName}`;
   $('energyFill').style.width=`${state.energy}%`; $('energyFill').classList.toggle('low',state.energy<20); $('energyText').textContent=Math.round(state.energy);
-  if(!preview&&now-lastNet>120){lastNet=now;socket.volatile.emit('player:state',state);}
+  if(!preview&&now-lastNet>=75){lastNet=now;socket.volatile.emit('player:state',state);}
 }
 
 function bindHold(id,action){

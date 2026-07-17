@@ -18,7 +18,7 @@ const demoSet = require('../lib/demoSet');
 const ENERGY_BASE_GAIN = 25;      // energy per correct answer
 const ENERGY_STREAK_BONUS = 5;    // extra per consecutive correct (cap below)
 const ENERGY_MAX_GAIN = 45;
-const POSITION_BROADCAST_MS = 200;
+const POSITION_BROADCAST_MS = 80;
 
 function makeCode(existing) {
   for (let i = 0; i < 100; i++) {
@@ -131,6 +131,7 @@ module.exports = function (io, app) {
           questions: set.questions,
           players: new Map(),                   // playerKey -> player state
           crumbles: new Map(),                  // object id -> next allowed trigger time
+          positionSeq: 0,
         };
         rooms.set(code, room);
         socket.data.role = 'host';
@@ -157,12 +158,15 @@ module.exports = function (io, app) {
       // Position fan-out on a fixed tick keeps traffic bounded regardless of
       // how fast individual clients report.
       room.posTimer = setInterval(() => {
+        const now=Date.now();
+        const sequence=++room.positionSeq;
         const positions = [];
         for (const p of room.players.values()) {
           if (!p.connected) continue;
           positions.push({
             id: p.key, name: p.name, x: p.x, y: p.y,
             vx: p.vx || 0, vy: p.vy || 0, facing: p.facing || 1, animation: p.animation || 'idle',
+            seq: sequence, ageMs: Math.max(0,now-(p.stateAt||now)),
             progress: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
             h: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
             altitude: Math.round((p.altitude || 0) * 10) / 10,
@@ -220,6 +224,7 @@ module.exports = function (io, app) {
           pendingQuestion: null,
           connected: true,
           socketId: socket.id,
+          stateAt: Date.now(),
         };
         room.players.set(key, player);
       } else {
@@ -236,6 +241,7 @@ module.exports = function (io, app) {
       nsp.to(room.hostSocket).emit('lobby:roster', roster(room));
       ack?.({
         ok: true,
+        playerKey: key,
         phase: room.phase,
         hostName: room.hostName,
         setTitle: room.setTitle,
@@ -316,6 +322,7 @@ module.exports = function (io, app) {
       player.facing = Number(facing) < 0 ? -1 : 1;
       player.animation = ['idle','run','jump','fall','land','celebrate'].includes(animation) ? animation : 'idle';
       player.altitude = Math.max(0, Number(altitude) || 0);
+      player.stateAt = Date.now();
       if (checkpoint && typeof checkpoint === 'object') player.checkpoint = checkpoint;
       const h = Math.min(Math.max(Number(progress ?? height) || 0, 0), 1);
       if (h > player.bestProgress) player.bestProgress = h;

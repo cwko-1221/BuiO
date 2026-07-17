@@ -9,6 +9,7 @@ import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js'
 import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js';
 import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest';
 import { CrumblePlatformState } from './CrumblePlatform.js?v=20260717-crumble';
+import { RemoteGhostState } from './RemoteGhostState.js?v=20260717-network';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -535,8 +536,8 @@ export class GameScene extends Phaser.Scene {
     const motion = vy < -1 ? 'jump' : vy > 2 ? 'fall' : Math.abs(nextVx)>1 ? 'run' : 'idle';
     if (!['jump','doubleJump'].includes(this.player.anims.currentAnim?.key) || !this.player.anims.isPlaying) this.player.play(motion,true);
     for (const ghost of this.ghosts.values()) {
-      ghost.x = Phaser.Math.Linear(ghost.x,ghost.tx,.14); ghost.y = Phaser.Math.Linear(ghost.y,ghost.ty,.14);
-      ghost.sprite.setPosition(ghost.x,ghost.y); ghost.label.setPosition(ghost.x,ghost.y+40);
+      const pose=ghost.state.sample(time,deltaMs);
+      ghost.sprite.setPosition(pose.x,pose.y); ghost.label.setPosition(pose.x,pose.y+40);
     }
 
     if (this.player.y > this.course.world.height + 180 || this.player.x < -100 || this.player.x > this.course.world.width+100) this.respawn();
@@ -647,9 +648,9 @@ export class GameScene extends Phaser.Scene {
       if (!ghost) {
         const sprite = this.add.sprite(row.x,row.y,'player-idle-1').setDisplaySize(68,70).setAlpha(.45).setTint(0x8bdcff).setDepth(80);
         const label = this.add.text(row.x,row.y+40,row.name,{fontFamily:'Microsoft JhengHei',fontSize:'14px',fontStyle:'bold',color:'#dff8ff',stroke:'#24314d',strokeThickness:4}).setOrigin(.5).setDepth(90);
-        ghost = {sprite,label,x:row.x,y:row.y,tx:row.x,ty:row.y}; this.ghosts.set(row.id,ghost);
+        ghost = {sprite,label,state:new RemoteGhostState(row,this.time.now)}; this.ghosts.set(row.id,ghost);
       }
-      ghost.tx=row.x; ghost.ty=row.y; ghost.sprite.setFlipX(row.facing<0);
+      ghost.state.push(row,this.time.now); ghost.sprite.setFlipX(row.facing<0);
       if (this.anims.exists(row.animation || 'idle')) ghost.sprite.play(row.animation || 'idle',true);
     }
     for (const [id,ghost] of this.ghosts) if (!seen.has(id)) { ghost.sprite.destroy(); ghost.label.destroy(); this.ghosts.delete(id); }
