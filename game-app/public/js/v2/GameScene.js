@@ -9,7 +9,7 @@ import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js'
 import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js';
 import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest';
 import { CrumblePlatformState } from './CrumblePlatform.js?v=20260717-crumble';
-import { RemoteGhostState } from './RemoteGhostState.js?v=20260717-network';
+import { RemoteGhostState } from './RemoteGhostState.js?v=20260717-network-2';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -643,16 +643,25 @@ export class GameScene extends Phaser.Scene {
   updateGhosts(list, myId) {
     const seen = new Set();
     for (const row of list) {
-      if (row.id === myId) continue; seen.add(row.id);
-      let ghost = this.ghosts.get(row.id);
-      if (!ghost) {
-        const sprite = this.add.sprite(row.x,row.y,'player-idle-1').setDisplaySize(68,70).setAlpha(.45).setTint(0x8bdcff).setDepth(80);
-        const label = this.add.text(row.x,row.y+40,row.name,{fontFamily:'Microsoft JhengHei',fontSize:'14px',fontStyle:'bold',color:'#dff8ff',stroke:'#24314d',strokeThickness:4}).setOrigin(.5).setDepth(90);
-        ghost = {sprite,label,state:new RemoteGhostState(row,this.time.now)}; this.ghosts.set(row.id,ghost);
-      }
-      ghost.state.push(row,this.time.now); ghost.sprite.setFlipX(row.facing<0);
-      if (this.anims.exists(row.animation || 'idle')) ghost.sprite.play(row.animation || 'idle',true);
+      if (row.id === myId) continue;
+      seen.add(row.id);
+      this.updateGhost(row,myId);
     }
     for (const [id,ghost] of this.ghosts) if (!seen.has(id)) { ghost.sprite.destroy(); ghost.label.destroy(); this.ghosts.delete(id); }
+  }
+
+  updateGhost(row,myId) {
+    if (!row||row.id===myId) return;
+    let ghost=this.ghosts.get(row.id);
+    let accepted=true;
+    if (!ghost) {
+      const sprite=this.add.sprite(row.x,row.y,'player-idle-1').setDisplaySize(68,70).setAlpha(.45).setTint(0x8bdcff).setDepth(80);
+      const label=this.add.text(row.x,row.y+40,row.name,{fontFamily:'Microsoft JhengHei',fontSize:'14px',fontStyle:'bold',color:'#dff8ff',stroke:'#24314d',strokeThickness:4}).setOrigin(.5).setDepth(90);
+      ghost={sprite,label,state:new RemoteGhostState(row,this.time.now)};
+      this.ghosts.set(row.id,ghost);
+    } else accepted=ghost.state.push(row,this.time.now);
+    if (!accepted) return;
+    ghost.sprite.setFlipX(row.facing<0);
+    if (this.anims.exists(row.animation||'idle')) ghost.sprite.play(row.animation||'idle',true);
   }
 }

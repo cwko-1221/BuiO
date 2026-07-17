@@ -18,7 +18,18 @@ const demoSet = require('../lib/demoSet');
 const ENERGY_BASE_GAIN = 25;      // energy per correct answer
 const ENERGY_STREAK_BONUS = 5;    // extra per consecutive correct (cap below)
 const ENERGY_MAX_GAIN = 45;
-const POSITION_BROADCAST_MS = 80;
+const POSITION_BROADCAST_MS = 20;
+const HOST_POSITION_DIVISOR = 5;
+
+const playerRoom = code => `${code}:players`;
+
+function realtimePosition(p) {
+  return {
+    id: p.key, name: p.name, x: p.x, y: p.y,
+    facing: p.facing || 1, animation: p.animation || 'idle',
+    seq: p.stateSeq || 0, f: !!p.finishedAt
+  };
+}
 
 function makeCode(existing) {
   for (let i = 0; i < 100; i++) {
@@ -131,7 +142,7 @@ module.exports = function (io, app) {
           questions: set.questions,
           players: new Map(),                   // playerKey -> player state
           crumbles: new Map(),                  // object id -> next allowed trigger time
-          positionSeq: 0,
+          positionTick: 0,
         };
         rooms.set(code, room);
         socket.data.role = 'host';
@@ -155,25 +166,27 @@ module.exports = function (io, app) {
         durationSec: room.durationSec,
         startedAt: room.startedAt,
       });
-      // Position fan-out on a fixed tick keeps traffic bounded regardless of
-      // how fast individual clients report.
+      // Players receive one compact room snapshot every 20ms. This keeps a
+      // 20-player room at 50 Socket.IO callbacks per client instead of
+      // relaying up to 1,200 individual callbacks every second.
       room.posTimer = setInterval(() => {
-        const now=Date.now();
-        const sequence=++room.positionSeq;
-        const positions = [];
+        const positions=[];
         for (const p of room.players.values()) {
           if (!p.connected) continue;
-          positions.push({
-            id: p.key, name: p.name, x: p.x, y: p.y,
-            vx: p.vx || 0, vy: p.vy || 0, facing: p.facing || 1, animation: p.animation || 'idle',
-            seq: sequence, ageMs: Math.max(0,now-(p.stateAt||now)),
+          positions.push(realtimePosition(p));
+        }
+        nsp.to(playerRoom(room.code)).volatile.emit('game:positions',positions);
+        // The teacher board needs ranking fields but not a 50Hz refresh.
+        if (++room.positionTick%HOST_POSITION_DIVISOR===0) {
+          const hostPositions=positions.map(position=>{
+            const p=room.players.get(position.id);
+            return {...position,
             progress: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
             h: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
-            altitude: Math.round((p.altitude || 0) * 10) / 10,
-            f: !!p.finishedAt
+            altitude: Math.round((p.altitude || 0) * 10) / 10};
           });
+          nsp.to(room.hostSocket).volatile.emit('game:positions',hostPositions);
         }
-        nsp.to(room.code).volatile.emit('game:positions', positions);
       }, POSITION_BROADCAST_MS);
       room.endTimer = setTimeout(() => endGame(room, 'time'), room.durationSec * 1000);
       ack?.({ ok: true });
@@ -225,6 +238,7 @@ module.exports = function (io, app) {
           connected: true,
           socketId: socket.id,
           stateAt: Date.now(),
+          stateSeq: 0,
         };
         room.players.set(key, player);
       } else {
@@ -237,6 +251,7 @@ module.exports = function (io, app) {
       socket.data.code = room.code;
       socket.data.playerKey = key;
       socket.join(room.code);
+      socket.join(playerRoom(room.code));
 
       nsp.to(room.hostSocket).emit('lobby:roster', roster(room));
       ack?.({
@@ -315,6 +330,8 @@ module.exports = function (io, app) {
       const room = rooms.get(socket.data.code);
       const player = room?.players.get(socket.data.playerKey);
       if (!room || !player || room.phase !== 'playing') return;
+      const previousAnimation=player.animation;
+      const previousFacing=player.facing;
       player.x = Number(x) || 0;
       player.y = Number(y) || 0;
       player.vx = Number(velocityX) || 0;
@@ -323,12 +340,19 @@ module.exports = function (io, app) {
       player.animation = ['idle','run','jump','fall','land','celebrate'].includes(animation) ? animation : 'idle';
       player.altitude = Math.max(0, Number(altitude) || 0);
       player.stateAt = Date.now();
+      player.stateSeq=(player.stateSeq||0)+1;
       if (checkpoint && typeof checkpoint === 'object') player.checkpoint = checkpoint;
       const h = Math.min(Math.max(Number(progress ?? height) || 0, 0), 1);
       if (h > player.bestProgress) player.bestProgress = h;
       if (h > player.bestHeight) player.bestHeight = h;
       const e = Number(energy);
       if (Number.isFinite(e)) player.energy = Math.min(Math.max(e, 0), Math.max(player.energy, 100));
+      // Jump, landing and direction changes bypass the next 20ms aggregate
+      // tick. They are rare, so this improves responsiveness without turning
+      // a 20-player room into hundreds of per-player events every frame.
+      if (player.animation!==previousAnimation||player.facing!==previousFacing) {
+        socket.to(playerRoom(room.code)).volatile.emit('game:position',realtimePosition(player));
+      }
     });
 
     // Crumbling supports are shared room state: when one player steps on one,

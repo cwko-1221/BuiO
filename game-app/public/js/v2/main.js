@@ -1,5 +1,5 @@
 import { buildCourse, validateCourse } from './course.js?v=20260717-crumble';
-import { GameScene } from './GameScene.js?v=20260717-network';
+import { GameScene } from './GameScene.js?v=20260717-network-2';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 
 const $ = id => document.getElementById(id);
@@ -13,6 +13,9 @@ let frozen = false;
 let roomsTimer = null;
 let joining = false;
 let lastNet = 0;
+let lastNetworkMotion = null;
+let lastNetworkFacing = null;
+let lastNetworkPose = null;
 let lastFrame = null;
 let startMeta = null;
 const previewParams = new URLSearchParams(location.search);
@@ -64,6 +67,7 @@ async function joinRoom(code){
 
 socket.on('game:start',({seed,durationSec,startedAt})=>startGame(seed,durationSec,startedAt,null));
 socket.on('game:positions',list=>scene?.updateGhosts(list,startMeta?.playerKey));
+socket.on('game:position',row=>scene?.updateGhost(row,startMeta?.playerKey));
 socket.on('game:crumble',({id})=>scene?.triggerCrumble(id,false));
 socket.on('game:summit',({name,place})=>toast(`🏁 ${name} 第 ${place} 位登頂！`,true));
 socket.on('game:over',({leaderboard})=>showResults(leaderboard));
@@ -132,7 +136,20 @@ function updateHudAndNetwork(state){
   $('heightPill').textContent=`🏔️ 高度 ${Math.round(state.altitude)}m`;
   $('stagePill').textContent=`${String(state.zoneIndex+1).padStart(2,'0')} · ${state.zoneName}`;
   $('energyFill').style.width=`${state.energy}%`; $('energyFill').classList.toggle('low',state.energy<20); $('energyText').textContent=Math.round(state.energy);
-  if(!preview&&now-lastNet>=75){lastNet=now;socket.volatile.emit('player:state',state);}
+  if(!preview){
+    const motionChanged=state.animation!==lastNetworkMotion;
+    const facingChanged=state.facing!==lastNetworkFacing;
+    const moved=!lastNetworkPose||Math.hypot(state.x-lastNetworkPose.x,state.y-lastNetworkPose.y)>.2;
+    const active=moved||state.animation!=='idle';
+    const due=now-lastNet>=(active?16:100);
+    if(due||motionChanged||facingChanged){
+      lastNet=now;
+      lastNetworkMotion=state.animation;
+      lastNetworkFacing=state.facing;
+      lastNetworkPose={x:state.x,y:state.y};
+      socket.volatile.emit('player:state',state);
+    }
+  }
 }
 
 function bindHold(id,action){

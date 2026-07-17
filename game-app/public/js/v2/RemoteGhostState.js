@@ -1,17 +1,18 @@
-const MATTER_VELOCITY_TO_PX_PER_MS = 60 / 1000;
-
 const finite = (value, fallback=0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
-const clamp = (value,min,max) => Math.max(min,Math.min(max,value));
 
 // Network state stays independent from Phaser. The scene only renders the
-// sampled pose, which makes latency compensation deterministic and testable.
+// sampled pose, which makes smoothing deterministic and testable. Never
+// extrapolate velocity here: a landing packet must never be rendered below
+// the real platform just because an older packet was still falling.
 export class RemoteGhostState {
   constructor(snapshot,receivedAt=0) {
     this.x=finite(snapshot.x);
     this.y=finite(snapshot.y);
-    this.snapshot=null;
+    this.targetX=this.x;
+    this.targetY=this.y;
     this.sequence=-1;
     this.receivedAt=receivedAt;
+    this.animation=snapshot.animation||'idle';
     this.push(snapshot,receivedAt);
   }
 
@@ -20,31 +21,27 @@ export class RemoteGhostState {
     if (this.sequence>=0&&sequence>0&&sequence<=this.sequence) return false;
     this.sequence=sequence;
     this.receivedAt=receivedAt;
-    this.snapshot={
-      x:finite(snapshot.x,this.x),y:finite(snapshot.y,this.y),
-      vx:finite(snapshot.vx),vy:finite(snapshot.vy),
-      ageMs:clamp(finite(snapshot.ageMs),0,180)
-    };
+    this.targetX=finite(snapshot.x,this.x);
+    this.targetY=finite(snapshot.y,this.y);
+    this.animation=snapshot.animation||this.animation;
+    if (Math.hypot(this.targetX-this.x,this.targetY-this.y)>220) {
+      // Checkpoint resets and reconnects should appear at the true position
+      // immediately, rather than travelling through the course.
+      this.x=this.targetX;
+      this.y=this.targetY;
+    }
     return true;
   }
 
-  sample(now,deltaMs) {
-    if (!this.snapshot) return {x:this.x,y:this.y};
-    const sinceReceipt=clamp(now-this.receivedAt,0,140);
-    // Half a packet of lead compensates for the next snapshot still being in
-    // flight. The cap prevents a dropped packet from sending a ghost away.
-    const predictionMs=clamp(this.snapshot.ageMs+sinceReceipt+35,0,180);
-    const targetX=this.snapshot.x+this.snapshot.vx*predictionMs*MATTER_VELOCITY_TO_PX_PER_MS;
-    const targetY=this.snapshot.y+this.snapshot.vy*predictionMs*MATTER_VELOCITY_TO_PX_PER_MS;
-    const error=Math.hypot(targetX-this.x,targetY-this.y);
-    if (error>260) {
-      // Respawns and checkpoint resets should never glide through the map.
-      this.x=targetX; this.y=targetY;
-    } else {
-      const alpha=1-Math.exp(-clamp(deltaMs,0,50)/48);
-      this.x+=(targetX-this.x)*alpha;
-      this.y+=(targetY-this.y)*alpha;
-    }
-    return {x:this.x,y:this.y,targetX,targetY,predictionMs};
+  sample(_now,deltaMs) {
+    // A short exponential approach fills the visual gap between 50 Hz network
+    // snapshots on a 60/120 Hz display. It cannot overshoot the latest real
+    // coordinate, so ground penetration from prediction is impossible.
+    const alpha=1-Math.exp(-Math.max(0,Math.min(Number(deltaMs)||0,50))/12);
+    this.x+=(this.targetX-this.x)*alpha;
+    this.y+=(this.targetY-this.y)*alpha;
+    if (Math.abs(this.targetX-this.x)<.05) this.x=this.targetX;
+    if (Math.abs(this.targetY-this.y)<.05) this.y=this.targetY;
+    return {x:this.x,y:this.y,targetX:this.targetX,targetY:this.targetY};
   }
 }
