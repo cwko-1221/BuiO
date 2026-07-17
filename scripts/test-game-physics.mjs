@@ -3,6 +3,7 @@ import { ASSET_BY_ID } from '../game-app/public/js/v2/assets.js';
 import { ASSET_GEOMETRY } from '../game-app/public/js/v2/asset-geometry.js';
 import { alphaBounds, createAlphaBody, fittedSize } from '../game-app/public/js/v2/colliders.js';
 import { createPlayerCompound, wakePlayer } from '../game-app/public/js/v2/playerPhysics.js';
+import { CAT_PLAYER, CAT_WORLD, collideWithPlayer } from '../game-app/public/js/v2/collisionFilters.js';
 
 const require = createRequire(import.meta.url);
 const Engine = require('../node_modules/phaser/src/physics/matter-js/lib/core/Engine');
@@ -81,9 +82,25 @@ for (const assetId of ASSET_BY_ID.keys()) {
   if (player.isSleeping || player.sleepCounter !== 0) failures.push('resume control did not wake player');
 }
 
+{
+  const engine=Engine.create();
+  const trigger=collideWithPlayer(Bodies.rectangle(0,0,180,180,{isStatic:true,isSensor:true}));
+  const { body:player }=createPlayerCompound(Matter);
+  player.collisionFilter.category=CAT_PLAYER;
+  player.collisionFilter.mask=CAT_WORLD;
+  Body.setPosition(player,{x:0,y:0});
+  let triggered=false;
+  Events.on(engine,'collisionStart',event=>{
+    triggered=event.pairs.some(pair=>pair.bodyA===trigger||pair.bodyB===trigger);
+  });
+  Composite.add(engine.world,[trigger,player]);
+  Engine.update(engine,1000/60);
+  if (!triggered) failures.push('checkpoint/progress sensor collision filter does not reach player');
+}
+
 if (failures.length) {
   console.error(`Game physics test failed (${failures.length})`);
   failures.slice(0,20).forEach(failure => console.error(`- ${failure}`));
   process.exit(1);
 }
-console.log(`Game physics test passed: ${ASSET_BY_ID.size} sprite-aligned alpha compound bodies, foot sensor landing, horizontal glide, and question-resume wake.`);
+console.log(`Game physics test passed: ${ASSET_BY_ID.size} sprite-aligned alpha compound bodies, foot sensor landing, horizontal glide, player sensors, and question-resume wake.`);

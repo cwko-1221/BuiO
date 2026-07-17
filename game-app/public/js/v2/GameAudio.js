@@ -1,5 +1,6 @@
 const NOTE = 440;
 const semitone = value => NOTE * 2 ** (value / 12);
+export const AUDIO_LEVELS = Object.freeze({master:.95,music:.48,effects:.95});
 
 export class GameAudio {
   constructor() {
@@ -30,9 +31,9 @@ export class GameAudio {
     this.master=this.context.createGain();
     this.music=this.context.createGain();
     this.effects=this.context.createGain();
-    this.master.gain.value=this.muted?0:.78;
-    this.music.gain.value=.24;
-    this.effects.gain.value=.66;
+    this.master.gain.value=this.muted?0:AUDIO_LEVELS.master;
+    this.music.gain.value=AUDIO_LEVELS.music;
+    this.effects.gain.value=AUDIO_LEVELS.effects;
     this.music.connect(this.master);
     this.effects.connect(this.master);
     this.master.connect(this.context.destination);
@@ -45,7 +46,7 @@ export class GameAudio {
     if (this.master&&this.context) {
       try {
         this.master.gain.cancelScheduledValues(this.context.currentTime);
-        this.master.gain.setTargetAtTime(this.muted?0:.78,this.context.currentTime,.025);
+        this.master.gain.setTargetAtTime(this.muted?0:AUDIO_LEVELS.master,this.context.currentTime,.025);
       } catch { /* Keep the HUD responsive if an audio backend is unavailable. */ }
     }
     if (!this.muted) this.unlock();

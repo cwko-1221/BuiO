@@ -1,6 +1,6 @@
-import { buildCourse, validateCourse } from './course.js';
-import { GameScene } from './GameScene.js';
-import { GameAudio } from './GameAudio.js?v=20260717-audio';
+import { buildCourse, validateCourse } from './course.js?v=20260717-checkpoint';
+import { GameScene } from './GameScene.js?v=20260717-checkpoint';
+import { GameAudio } from './GameAudio.js?v=20260717-louder';
 
 const $ = id => document.getElementById(id);
 const gameAudio = new GameAudio();

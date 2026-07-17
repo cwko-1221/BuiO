@@ -5,9 +5,7 @@ import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js';
 import { createPlayerCompound, wakePlayer, PLAYER_SPRITE_DY } from './playerPhysics.js';
 import { sampleSky } from './background.js';
 import { RapidFallTracker } from './recovery.js';
-
-const CAT_WORLD = 0x0002;
-const CAT_PLAYER = 0x0004;
+import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -183,8 +181,7 @@ export class GameScene extends Phaser.Scene {
     }
     const Matter = Phaser.Physics.Matter.Matter;
     const body = createAlphaBody(Matter, obj, size);
-    body.collisionFilter.category = CAT_WORLD;
-    body.collisionFilter.mask = CAT_PLAYER;
+    collideWithPlayer(body);
     bindBodyToSprite(body, sprite, obj);
     Matter.Composite.add(this.matter.world.localWorld, body);
     if (obj.behavior.type === 'move' || obj.behavior.type === 'rotate') {
@@ -201,7 +198,7 @@ export class GameScene extends Phaser.Scene {
 
   createProgressSensors() {
     this.sensorBodies = this.course.sensors.map(sensor => {
-      const body = this.matter.add.rectangle(sensor.x,sensor.y,150,180,{isStatic:true,isSensor:true,label:'progress'});
+      const body = collideWithPlayer(this.matter.add.rectangle(sensor.x,sensor.y,150,180,{isStatic:true,isSensor:true,label:'progress'}));
       body.progressSensor = sensor; return body;
     });
   }
@@ -238,25 +235,29 @@ export class GameScene extends Phaser.Scene {
     this.hazardBodies = this.course.hazards.map(hazard => {
       this.add.rectangle(hazard.x,hazard.y,hazard.w,hazard.h,0xff4967,.92).setStrokeStyle(5,0x7b1432).setDepth(18);
       this.add.rectangle(hazard.x,hazard.y,hazard.w,Math.max(4,hazard.h*.28),0xffd8df,.95).setDepth(19);
-      const body=this.matter.add.rectangle(hazard.x,hazard.y,hazard.w,hazard.h+10,{isStatic:true,isSensor:true,label:'hazard'});
+      const body=collideWithPlayer(this.matter.add.rectangle(hazard.x,hazard.y,hazard.w,hazard.h+10,{isStatic:true,isSensor:true,label:'hazard'}));
       body.hazard=hazard;
       return body;
     });
   }
 
   createCheckpoints() {
+    this.checkpointBodies=[];
     for (const cp of this.course.checkpoints) {
       const pole = this.add.rectangle(cp.x,cp.y-35,7,70,0x4e5870).setDepth(9);
       const tex=ATLAS_INDEX['checkpoint-flag'];
       const flag = this.add.image(cp.x+22,cp.y-58,tex?.key||'checkpoint-flag',tex?.frame||null).setDisplaySize(54,54).setDepth(9);
       this.add.text(cp.x,cp.y+14,cp.zoneName,{fontFamily:'Microsoft JhengHei',fontSize:'16px',fontStyle:'bold',color:'#ffffff',stroke:'#20263a',strokeThickness:5}).setOrigin(.5).setDepth(20);
       pole.setAlpha(.9); flag.setAlpha(.95);
+      const trigger=collideWithPlayer(this.matter.add.rectangle(cp.x,cp.y-35,240,230,{isStatic:true,isSensor:true,label:'checkpoint'}));
+      trigger.checkpointTrigger=cp;
+      this.checkpointBodies.push(trigger);
     }
   }
 
   createSummit() {
     const s = this.course.summit;
-    this.summitBody = this.matter.add.rectangle(s.x,s.y,220,220,{isStatic:true,isSensor:true,label:'summit'});
+    this.summitBody = collideWithPlayer(this.matter.add.rectangle(s.x,s.y,220,220,{isStatic:true,isSensor:true,label:'summit'}));
     const tex=ATLAS_INDEX['ref-summit-flag'];
     this.add.image(s.x,s.y-90,tex?.key||'ref-summit-flag',tex?.frame||null).setDisplaySize(174,280).setDepth(9);
   }
@@ -328,6 +329,7 @@ export class GameScene extends Phaser.Scene {
         if (bodies.includes(this.summitBody) && involvesPlayer) this.finish();
         for (const body of bodies) {
           if (body.progressSensor && involvesPlayer) this.reachProgress(body.progressSensor);
+          if (body.checkpointTrigger && involvesPlayer) this.unlockCheckpoint(body.checkpointTrigger);
           if (body.hazard && involvesPlayer) this.hitHazard(body.hazard);
           const obj = body.courseObject;
           if (obj?.behavior?.type === 'bounce' && involvesPlayer) {
@@ -471,16 +473,20 @@ export class GameScene extends Phaser.Scene {
 
   reachProgress(sensor) {
     if (sensor.progress <= this.progress) return;
-    const previousCheckpointId=this.checkpoint?.id;
     this.progress = sensor.progress;
     const reached = this.course.checkpoints.filter(c => c.progress <= this.progress);
-    if (reached.length) this.checkpoint = reached[reached.length-1];
+    if (reached.length) this.unlockCheckpoint(reached[reached.length-1]);
     this.hooks.onProgress?.(this.progress,this.checkpoint);
-    if (this.checkpoint?.id!==previousCheckpointId) {
-      this.lastSafePose=this.checkpointPose(this.checkpoint);
-      this.hooks.onCheckpoint?.(this.checkpoint);
-      this.hooks.onSound?.('checkpoint');
-    }
+  }
+
+  unlockCheckpoint(checkpoint) {
+    if (!checkpoint||checkpoint.altitude<=(this.checkpoint?.altitude??-1)) return false;
+    this.checkpoint=checkpoint;
+    this.progress=Math.max(this.progress,checkpoint.progress);
+    this.lastSafePose=this.checkpointPose(checkpoint);
+    this.hooks.onCheckpoint?.(checkpoint);
+    this.hooks.onSound?.('checkpoint');
+    return true;
   }
 
   checkpointPose(checkpoint=this.checkpoint||this.course.checkpoints[0]) {

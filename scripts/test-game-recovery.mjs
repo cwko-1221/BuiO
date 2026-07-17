@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { RapidFallTracker, RAPID_FALL_METRES, RAPID_FALL_WINDOW_MS } from '../game-app/public/js/v2/recovery.js';
 import { buildCourse } from '../game-app/public/js/v2/course.js';
+import { AUDIO_LEVELS } from '../game-app/public/js/v2/GameAudio.js';
 
 const tracker=new RapidFallTracker();
 tracker.reset(0,420);
@@ -12,6 +13,9 @@ tracker.reset(2000,500);
 assert.equal(tracker.update(2000+RAPID_FALL_WINDOW_MS+1,399),false,'old peak outside the window must expire');
 assert.equal(RAPID_FALL_METRES,100);
 assert.equal(RAPID_FALL_WINDOW_MS,2400);
+assert.ok(AUDIO_LEVELS.master>=.9,'master volume should be clearly audible');
+assert.ok(AUDIO_LEVELS.music>=.45,'background music should use the louder mix');
+assert.ok(AUDIO_LEVELS.effects>=.9,'movement and jump effects should use the louder mix');
 
 const course=buildCourse(1);
 let previousProgress=-Infinity;
