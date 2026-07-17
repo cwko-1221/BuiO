@@ -5,7 +5,7 @@
         "x": 4,
         "y": 4,
         "w": 240,
-        "h": 79
+        "h": 68
       },
       "rotated": false,
       "trimmed": false,
@@ -13,11 +13,11 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 79
+        "h": 68
       },
       "sourceSize": {
         "w": 240,
-        "h": 79
+        "h": 68
       }
     },
     "hay-block": {
@@ -25,7 +25,7 @@
         "x": 248,
         "y": 4,
         "w": 240,
-        "h": 168
+        "h": 158
       },
       "rotated": false,
       "trimmed": false,
@@ -33,11 +33,11 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 168
+        "h": 158
       },
       "sourceSize": {
         "w": 240,
-        "h": 168
+        "h": 158
       }
     },
     "hay-bale": {
@@ -45,7 +45,7 @@
         "x": 492,
         "y": 4,
         "w": 240,
-        "h": 240
+        "h": 217
       },
       "rotated": false,
       "trimmed": false,
@@ -53,11 +53,11 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 217
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 217
       }
     },
     "hay-cart": {
@@ -65,7 +65,7 @@
         "x": 736,
         "y": 4,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "rotated": false,
       "trimmed": false,
@@ -73,11 +73,11 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 208
       }
     },
     "tractor": {
@@ -105,7 +105,7 @@
         "x": 1224,
         "y": 4,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "rotated": false,
       "trimmed": false,
@@ -113,11 +113,11 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 208
       }
     },
     "barn-loft": {
@@ -125,7 +125,7 @@
         "x": 1468,
         "y": 4,
         "w": 240,
-        "h": 240
+        "h": 157
       },
       "rotated": false,
       "trimmed": false,
@@ -133,11 +133,11 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 157
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 157
       }
     },
     "farm-fence": {
@@ -145,7 +145,7 @@
         "x": 1712,
         "y": 4,
         "w": 240,
-        "h": 240
+        "h": 197
       },
       "rotated": false,
       "trimmed": false,
@@ -153,19 +153,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 197
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 197
       }
     },
     "chicken-coop": {
       "frame": {
         "x": 4,
-        "y": 248,
+        "y": 225,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "rotated": false,
       "trimmed": false,
@@ -173,19 +173,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 208
       }
     },
     "water-trough": {
       "frame": {
         "x": 248,
-        "y": 248,
+        "y": 225,
         "w": 240,
-        "h": 240
+        "h": 197
       },
       "rotated": false,
       "trimmed": false,
@@ -193,19 +193,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 197
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 197
       }
     },
     "giant-pumpkin": {
       "frame": {
         "x": 492,
-        "y": 248,
+        "y": 225,
         "w": 240,
-        "h": 240
+        "h": 239
       },
       "rotated": false,
       "trimmed": false,
@@ -213,19 +213,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 239
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 239
       }
     },
     "giant-corn": {
       "frame": {
         "x": 736,
-        "y": 248,
+        "y": 225,
         "w": 240,
-        "h": 240
+        "h": 194
       },
       "rotated": false,
       "trimmed": false,
@@ -233,19 +233,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 194
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 194
       }
     },
     "vegetable-crate": {
       "frame": {
         "x": 980,
-        "y": 248,
+        "y": 225,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "rotated": false,
       "trimmed": false,
@@ -253,19 +253,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 208
       }
     },
     "milk-can": {
       "frame": {
         "x": 1224,
-        "y": 248,
+        "y": 225,
         "w": 240,
-        "h": 240
+        "h": 197
       },
       "rotated": false,
       "trimmed": false,
@@ -273,19 +273,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 197
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 197
       }
     },
     "wheelbarrow": {
       "frame": {
         "x": 1468,
-        "y": 248,
+        "y": 225,
         "w": 240,
-        "h": 240
+        "h": 157
       },
       "rotated": false,
       "trimmed": false,
@@ -293,19 +293,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 157
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 157
       }
     },
     "scarecrow": {
       "frame": {
         "x": 1712,
-        "y": 248,
+        "y": 225,
         "w": 240,
-        "h": 240
+        "h": 197
       },
       "rotated": false,
       "trimmed": false,
@@ -313,19 +313,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 197
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 197
       }
     },
     "windmill-blade": {
       "frame": {
         "x": 4,
-        "y": 492,
+        "y": 468,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "rotated": false,
       "trimmed": false,
@@ -333,19 +333,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 208
       }
     },
     "silo-pipe": {
       "frame": {
         "x": 248,
-        "y": 492,
+        "y": 468,
         "w": 240,
-        "h": 240
+        "h": 222
       },
       "rotated": false,
       "trimmed": false,
@@ -353,19 +353,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 222
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 222
       }
     },
     "grain-sacks": {
       "frame": {
         "x": 492,
-        "y": 492,
+        "y": 468,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "rotated": false,
       "trimmed": false,
@@ -373,19 +373,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 208
       }
     },
     "wood-pallet": {
       "frame": {
         "x": 736,
-        "y": 492,
+        "y": 468,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "rotated": false,
       "trimmed": false,
@@ -393,19 +393,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 208
       }
     },
     "farm-ladder": {
       "frame": {
         "x": 980,
-        "y": 492,
+        "y": 468,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "rotated": false,
       "trimmed": false,
@@ -413,19 +413,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 208
       }
     },
     "feed-bin": {
       "frame": {
         "x": 1224,
-        "y": 492,
+        "y": 468,
         "w": 240,
-        "h": 240
+        "h": 173
       },
       "rotated": false,
       "trimmed": false,
@@ -433,19 +433,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 173
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 173
       }
     },
     "wagon-wheel": {
       "frame": {
         "x": 1468,
-        "y": 492,
+        "y": 468,
         "w": 240,
-        "h": 240
+        "h": 196
       },
       "rotated": false,
       "trimmed": false,
@@ -453,18 +453,18 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 196
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 196
       }
     },
     "stable-door": {
       "frame": {
         "x": 1712,
-        "y": 492,
-        "w": 240,
+        "y": 468,
+        "w": 220,
         "h": 240
       },
       "rotated": false,
@@ -472,20 +472,20 @@
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 240,
+        "w": 220,
         "h": 240
       },
       "sourceSize": {
-        "w": 240,
+        "w": 220,
         "h": 240
       }
     },
     "watering-can": {
       "frame": {
         "x": 4,
-        "y": 736,
+        "y": 712,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "rotated": false,
       "trimmed": false,
@@ -493,19 +493,19 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 208
       }
     },
     "farm-shed": {
       "frame": {
         "x": 248,
-        "y": 736,
+        "y": 712,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "rotated": false,
       "trimmed": false,
@@ -513,11 +513,11 @@
         "x": 0,
         "y": 0,
         "w": 240,
-        "h": 240
+        "h": 208
       },
       "sourceSize": {
         "w": 240,
-        "h": 240
+        "h": 208
       }
     }
   },

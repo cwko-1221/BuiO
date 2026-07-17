@@ -16,11 +16,9 @@ export function fittedSize(object) {
     const w = Math.min(boxH * aspect, boxW);
     size = { w, h:w / aspect };
   }
-  const minimumWidth = object.difficulty <= 1 ? 120 : object.difficulty <= 2 ? 88 : 72;
-  if (size.w < minimumWidth) {
-    const scale = minimumWidth / size.w;
-    size = { w:minimumWidth, h:size.h * scale };
-  }
+  // The authored box is a hard limit. Narrow columns and small props may be
+  // narrow by design; silently enlarging them also enlarged their height past
+  // the box and created invisible walls across neighbouring route rows.
   return size;
 }
 

@@ -2,7 +2,7 @@
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07ay';
+export const MAP_VERSION = 'fixed-1000m-2026.07az';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 
 const objects=[];
@@ -117,61 +117,60 @@ obstacle('castle','ref-market-stall-red',marketStallBase,0,180,195,{tags:['refer
 obstacle('castle','ref-produce-crate',frame02[4],0,92,78,{tags:['reference-frame-02','market-threshold-crate']});
 
 const frame03=authoredRoute('castle',[
-  ['ref-produce-crate',4300,132,210,128],['ref-produce-crate',4550,144,210,128],
-  ['ref-produce-crate',4800,156,210,128],['ref-shield-rack',5100,168,300,175],
-  ['ref-barrel-front',5350,179,155,165],['ref-stone-ramp-front',5050,190,340,105,{angle:-0.12}]
+  ['ref-produce-crate',4300,137,210,128],['ref-produce-crate',4600,149,210,128],
+  ['ref-produce-crate',4880,161,210,128],['ref-shield-rack',5180,173,300,175],
+  ['ref-barrel-front',5390,184,155,165],['ref-stone-ramp-front',5050,195,340,105,{angle:-0.12}]
 ],['reference-frame-03','oven-crate-ascent']);
 obstacle('castle','ref-oven-front',frame02[5],-180,250,198,{tags:['reference-frame-03','oven-obstacle']});
 decor('castle','ref-lamp-post',4050,142,108,250,{tags:['reference-frame-03','oven-lamp']});
 
 const frame04=authoredRoute('market',[
   ['ref-barrel-front',4780,202,150,165],['ref-barrel-front',4530,215,150,165],
-  ['ref-barrel-front',4250,228,150,165],['ref-stone-ramp-front',4020,242,340,105,{angle:-0.16}],
-  ['ref-shield-rack',3800,256,270,115]
+  ['ref-barrel-front',4250,228,150,165],['ref-stone-ramp-front',4000,242,340,105,{angle:-0.16}],
+  ['ref-shield-rack',3700,256,270,115]
 ],['reference-frame-04','barrel-ramp-turn']);
 
 const frame05=authoredRoute('market',[
   ['ref-barrel-cart',4050,274,330,160],['ref-barrel-cart',4350,286,330,160],
-  ['ref-stone-pillar-front',4650,304,180,180],['ref-stone-pillar-front',4900,316,180,180],
-  ['ref-chair-front',5200,326,170,150,{tags:['reference-frame-06']}],
-  ['ref-feast-table',5450,335,330,140,{tags:['reference-frame-06']}]
+  ['ref-stone-pillar-front',4600,304,180,240],['ref-stone-pillar-front',4800,316,180,240],
+  ['ref-chair-front',5020,326,170,150,{tags:['reference-frame-06']}],
+  ['ref-feast-table',5300,335,330,140,{tags:['reference-frame-06']}]
 ],['reference-frame-05','feast-hall-ascent']);
 
 const frame06=authoredRoute('forest',[
-  ['ref-stone-ramp-front',5350,350,420,150,{angle:-0.14}],
-  ['ref-stone-ramp-front',5200,372,420,150,{angle:0.12}],
-  ['ref-stone-column-front',4950,398,235,100]
+  ['ref-barrel-front',5530,350,140,140],
+  ['ref-stone-ramp-front',5200,368,420,150,{angle:-0.14}],
+  ['ref-stone-ramp-front',4800,382,420,150,{angle:0.12}],
+  ['ref-stone-column-front',4430,386,235,240]
 ],['reference-frame-06','ramp-gallery']);
-decor('forest','ref-barrel-front',5550,390,150,150,{tags:['reference-frame-06','ramp-gallery-barrel']});
 
 const frame07=authoredRoute('forest',[
-  ['ref-bed-front',4850,420,360,60],['ref-hanging-lantern',5000,434,270,120],
-  ['ref-bed-front',5200,448,430,140,{angle:-0.12}],
-  ['ref-catapult-front',5450,462,320,205],['ref-log-step',5200,475,205,88],
-  ['ref-log-step',4950,488,205,88],['ref-oven-front',4670,500,300,220],
-  ['ref-bellows-front',4370,512,300,115],['ref-cookpot',4100,524,180,145],
-  ['ref-cookpot',3850,535,180,145],['ref-log-step',3600,545,205,88,{safe:false}]
+  ['ref-bed-front',4630,410,360,100],['ref-hanging-lantern',4760,434,270,120],
+  ['ref-bed-front',5000,448,430,140,{angle:-0.12}],
+  ['ref-catapult-front',5350,462,320,205],['ref-log-step',5050,475,205,88],
+  ['ref-log-step',4750,488,205,88],['ref-oven-front',4470,493,300,220],
+  ['ref-bellows-front',4150,512,300,115],['ref-cookpot',3850,524,180,145],
+  ['ref-cookpot',3600,535,180,145],['ref-log-step',3370,545,205,88,{safe:false}]
 ],['reference-frame-07','bed-lantern-climb']);
 
 const frame08=authoredRoute('farm',[
-  ['ref-log-step',3550,552,205,88,{safe:false}],
+  ['ref-log-step',3150,552,205,88,{safe:false}],
   ['flat-brick-strip-4',3070,570,660,88,{tags:['market-lower-landing','u-wall']}],
-  ['ref-produce-crate',2730,580,205,126],['ref-produce-crate',2490,589,205,126],
-  ['ref-produce-crate',2250,598,205,126],['ref-produce-crate',2010,607,205,126],
-  ['flat-brick-strip-4',1640,615,700,90,{tags:['market-upper-landing']}]
+  ['ref-produce-crate',2660,580,205,126],
+  ['ref-catapult-front',2360,590,280,170,{safe:false}],
+  ['ref-stone-column-front',2110,596,120,240],
+  ['ref-produce-crate',1870,606,205,126],
+  ['flat-brick-strip-4',1450,615,700,90,{tags:['market-upper-landing']}]
 ],['reference-frame-08','market-u-climb']);
 obstacle('farm','ref-market-stall-blue',frame08[1],-135,225,220,{tags:['reference-frame-08']});
 obstacle('farm','ref-market-stall-red',frame08[6],65,225,220,{tags:['reference-frame-08']});
-decor('farm','ref-catapult-front',2570,602,260,170,{tags:['reference-frame-08','floating-catapult']});
-decor('farm','ref-stone-column-front',2300,610,150,210,{tags:['reference-frame-08','floating-column']});
 const frame08WallBottom=frame08[1].object.y+frame08[1].object.h/2;
 placedObstacle('farm','flat-brick-pillar-4',2805,frame08WallBottom+112,82,220,{tags:['reference-frame-08','u-wall-side']});
-placedObstacle('farm','flat-brick-pillar-4',3335,frame08WallBottom+112,82,220,{tags:['reference-frame-08','u-wall-side']});
 
 const frame09=authoredRoute('snow',[
-  ['ref-castle-banner-blue',1200,628,145,215,{tags:['reference-frame-08']}],
+  ['ref-castle-banner-blue',1100,628,145,215,{tags:['reference-frame-08']}],
   ['ref-castle-banner-red',980,642,145,215,{tags:['reference-frame-08']}],
-  ['flat-brick-strip-4',1450,678,650,90,{tags:['armory-platform']}],
+  ['flat-brick-strip-4',1400,678,650,90,{tags:['armory-platform']}],
   ['ref-book-step',1900,680,175,108],['ref-scroll-step',2160,686,190,84],
   ['flat-brick-strip-4',2710,690,650,90,{tags:['library-u-top']}]
 ],['reference-frame-09','armory-library']);
@@ -184,44 +183,48 @@ placedObstacle('snow','flat-brick-pillar-4',2440,frame09LibraryBottom+122,82,240
 placedObstacle('snow','flat-brick-pillar-4',2980,frame09LibraryBottom+122,82,240,{tags:['reference-frame-09','library-u-wall']});
 
 const frame10=authoredRoute('snow',[
-  ['ref-sand-ledge',3000,700,320,112],['ref-fishing-boat',3270,710,320,135],
-  ['ref-fishing-boat',3540,720,320,135],['ref-sand-ledge',3810,730,320,118],
-  ['ref-round-table-front',4100,740,330,215],['ref-bowl-front',4440,748,150,102,{safe:false}],
-  ['ref-bowl-front',4750,755,150,102,{safe:false}]
+  ['ref-sand-ledge',3180,700,320,112],['ref-fishing-boat',3480,710,320,135],
+  ['ref-fishing-boat',3780,720,320,135],['ref-sand-ledge',4080,730,320,118],
+  ['ref-round-table-front',4410,740,330,215],['ref-bowl-front',4700,748,150,102,{safe:false}],
+  ['ref-bowl-front',4850,755,150,102,{safe:false}]
 ],['reference-frame-10','coral-table-chain']);
 decor('snow','ref-coral-cluster',3880,742,125,125,{tags:['reference-frame-10','coral-detail']});
 
 const frame11=authoredRoute('factory',[
-  ['ref-sand-ledge',5050,758,300,112],['ref-reef-rock',5330,770,330,150],
+  ['ref-sand-ledge',5100,758,300,112],['ref-reef-rock',5430,770,330,150],
   // Finish the right-climbing chain before making one clean, well-separated
   // left turn. Short props lift the route first; the tall tree only appears
   // after there is more than a full jump of clearance above the bowl chain.
-  ['ref-potted-plant',5550,785,145,145],['ref-monitor-front',5260,807,225,168],
-  ['ref-wood-sign',4900,822,280,140],['ref-round-tree',4620,837,245,245],
-  ['ref-monitor-front',4270,849,225,168],['ref-monitor-front',3950,857,225,168]
+  ['ref-potted-plant',5200,793,145,100],['ref-monitor-front',4900,807,225,168],
+  ['ref-wood-sign',4600,822,280,140],['ref-monitor-front',4300,837,225,168],
+  ['ref-monitor-front',4000,849,225,168]
 ],['reference-frame-11','nature-monitor-chain','rising-left']);
+// The large tree is retained as a reference landmark only. It is deliberately
+// outside the jumping line and has no body, so its canopy can never cap the
+// player above the table/sign route again.
+decor('factory','ref-round-tree',5550,837,180,205,{tags:['reference-frame-11','off-route-landmark']});
 
 const frame12=authoredRoute('factory',[
-  ['ref-reef-rock',3620,865,340,155],['ref-sand-ledge',3310,868,300,112],
+  ['ref-reef-rock',3620,865,340,155],['ref-sand-ledge',3295,868,300,112],
   ['ref-fishing-boat',3000,871,300,132],['ref-fishing-boat',2690,874,300,132,{safe:false}],
   ['ref-sand-ledge',2380,877,300,118,{safe:false}],['ref-bowl-front',2070,880,150,102,{safe:false}],
-  ['ref-sand-ledge',1760,883,300,112,{safe:false}],['ref-reef-rock',1450,885,340,155]
+  ['ref-sand-ledge',1760,883,300,112,{safe:false}],['ref-reef-rock',1435,890,340,155]
 ],['reference-frame-12','reef-boat-climb','rising-left']);
 decor('factory','ref-coral-cluster',3500,866,135,135,{tags:['reference-frame-12','reef-detail']});
 decor('factory','ref-coral-cluster',1610,886,125,125,{tags:['reference-frame-12','reef-detail']});
 
 const frame13=authoredRoute('factory',[
-  ['ref-sand-ledge',1750,907,300,115],['ref-sand-ledge',2000,912,300,112],
-  ['ref-telescope',2250,919,220,205],['ref-split-platform',2550,927,360,105],
-  ['ref-door-panel',2850,935,145,245],['ref-door-panel',3140,943,145,245],
-  ['ref-white-table',3430,950,330,145],['ref-charcoal-table',3730,956,240,145]
+  ['ref-sand-ledge',1780,914,300,115],['ref-sand-ledge',2085,920,300,112],
+  ['ref-telescope',2350,927,220,205],['ref-split-platform',2650,935,360,105],
+  ['ref-door-panel',2940,943,145,180],['ref-door-panel',3190,951,145,180],
+  ['ref-white-table',3450,960,330,145],['ref-charcoal-table',3750,968,240,145]
 ],['reference-frame-13','agent-adventure','rising-right']);
 decor('factory','ref-potted-plant',3470,954,125,125,{tags:['reference-frame-13','agent-plant']});
 
 const frame14=authoredRoute('factory',[
-  ['ref-office-safe',3990,962,230,160],['ref-office-desk',4220,970,285,96],
-  ['ref-white-table',4520,978,320,145],['ref-charcoal-table',4880,986,320,145],
-  ['ref-office-chair',5200,992,175,185,{safe:false}],
+  ['ref-office-safe',3990,976,230,160],['ref-office-desk',4245,982,285,96],
+  ['ref-white-table',4560,990,320,145],['ref-charcoal-table',4880,996,320,145],
+  ['ref-office-chair',5200,998,175,185,{safe:false}],
   ['ref-office-desk',5450,1000,260,102,{tags:['summit-platform','landmark-base']}]
 ],['reference-frame-14','office-summit','rising-right']);
 decor('factory','ref-potted-plant',5000,990,140,140,{tags:['reference-frame-14','office-plant']});

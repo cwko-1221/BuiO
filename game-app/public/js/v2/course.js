@@ -29,7 +29,16 @@ export function buildCourse(seed=0) {
     return {...source,asset,difficulty:source.zone==='factory'?4:source.zone==='snow'?3:2,behavior:{...(source.behavior||{type:'static'})}};
   });
   snapObstacles(objects);
-  const nodes=FIXED_MAP.nodes.map(node=>({...node}));
+  const objectById=new Map(objects.map(object=>[object.id,object]));
+  const nodes=FIXED_MAP.nodes.map(source=>{
+    const object=objectById.get(source.objectId);
+    if (!object) return {...source};
+    const size=fittedSize(object);
+    const bounds=alphaBounds(object.assetId,size);
+    // Route sensors, checkpoints and validation all use the real painted top
+    // of the support instead of the loose authoring box.
+    return {...source,x:object.x,y:object.y+bounds.minY-8};
+  });
   const nodeByAltitude=altitude=>nodes.filter(node=>node.route==='main').sort((a,b)=>Math.abs(a.altitude-altitude)-Math.abs(b.altitude-altitude))[0];
   const sensors=FIXED_MAP.progressSensors.map(sensor=>({...sensor}));
   const sensorByAltitude=altitude=>sensors.slice().sort((a,b)=>Math.abs(a.altitude-altitude)-Math.abs(b.altitude-altitude))[0];

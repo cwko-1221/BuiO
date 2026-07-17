@@ -15,7 +15,13 @@ for(const zone of [...new Set(available.map(a=>a.zone))]){
   const items=[];
   for(const asset of available.filter(a=>a.zone===zone)){
     const input=path.join(propsDir,`${asset.id}.webp`);
-    const buf=await sharp(input).resize({width:240,height:240,fit:'inside',withoutEnlargement:true}).png().toBuffer();
+    // Atlas frames contain only painted pixels. Keeping the transparent
+    // image-generation canvas made visible platforms several times smaller
+    // than their authored render box and separated art from its collider.
+    const buf=await sharp(input)
+      .trim({background:{r:0,g:0,b:0,alpha:0}})
+      .resize({width:240,height:240,fit:'inside',withoutEnlargement:true})
+      .png().toBuffer();
     const meta=await sharp(buf).metadata(); items.push({asset,buf,w:meta.width,h:meta.height});
   }
   let pageNo=0,x=4,y=4,rowH=0,placed=[];

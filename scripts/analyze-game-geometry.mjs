@@ -36,6 +36,10 @@ function runs(rows) {
 async function analyze(asset) {
   const file = path.join(propsDir, `${asset.id}.webp`);
   const { data, info } = await sharp(file)
+    // Image-generated masters deliberately keep a transparent safety canvas.
+    // Collision/render geometry must be based on the painted silhouette,
+    // otherwise a 5:1 ledge is incorrectly analysed as a near-square sprite.
+    .trim({ background:{ r:0, g:0, b:0, alpha:0 } })
     .ensureAlpha()
     .resize({ width: 128, height: 128, fit: 'inside', withoutEnlargement: true })
     .raw()
