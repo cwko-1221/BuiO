@@ -130,6 +130,7 @@ module.exports = function (io, app) {
           setTitle: set.title,
           questions: set.questions,
           players: new Map(),                   // playerKey -> player state
+          crumbles: new Map(),                  // object id -> next allowed trigger time
         };
         rooms.set(code, room);
         socket.data.role = 'host';
@@ -321,6 +322,24 @@ module.exports = function (io, app) {
       if (h > player.bestHeight) player.bestHeight = h;
       const e = Number(energy);
       if (Number.isFinite(e)) player.energy = Math.min(Math.max(e, 0), Math.max(player.energy, 100));
+    });
+
+    // Crumbling supports are shared room state: when one player steps on one,
+    // every client sees the same fall/disappear/restore cycle. The fixed map
+    // uses stable `fixed-###` ids, and the cooldown rejects duplicate contact
+    // events from the same landing.
+    socket.on('game:crumble', ({ id } = {}) => {
+      const room = rooms.get(socket.data.code);
+      if (!room || room.phase !== 'playing' || socket.data.role !== 'player') return;
+      const objectId = String(id || '');
+      if (!/^fixed-\d{3}$/.test(objectId)) return;
+      const now = Date.now();
+      if ((room.crumbles.get(objectId) || 0) > now) return;
+      room.crumbles.set(objectId, now + 4790);
+      nsp.to(room.code).emit('game:crumble', { id: objectId });
+      setTimeout(() => {
+        if ((room.crumbles.get(objectId) || 0) <= Date.now()) room.crumbles.delete(objectId);
+      }, 4900);
     });
 
     socket.on('player:summit', () => {

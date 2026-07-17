@@ -26,12 +26,12 @@ for (const asset of ASSETS) {
   if (geometry.parts.some(part=>part.x<0||part.x>1||part.y<0||part.y>1||part.w<=0||part.h<=0)) failures.push(`${asset.id}: invalid collider part`);
 }
 
-const canonicalTransforms=JSON.stringify(first.objects.map(({id,assetId,x,y,w,h,angle,role,supportId})=>({id,assetId,x,y,w,h,angle,role,supportId})));
+const canonicalTransforms=JSON.stringify(first.objects.map(({id,assetId,x,y,w,h,angle,role,supportId,behavior})=>({id,assetId,x,y,w,h,angle,role,supportId,behavior})));
 const canonicalRoutes=JSON.stringify(first.routes);
 for (let index=0;index<500;index++) {
   const course=buildCourse((index+1)*7919);
   if (course.mapVersion!==first.mapVersion||course.courseHash!==first.courseHash||course.colliderHash!==first.colliderHash) failures.push(`seed ${index}: fixed hashes changed`);
-  if (JSON.stringify(course.objects.map(({id,assetId,x,y,w,h,angle,role,supportId})=>({id,assetId,x,y,w,h,angle,role,supportId})))!==canonicalTransforms) failures.push(`seed ${index}: transforms changed`);
+  if (JSON.stringify(course.objects.map(({id,assetId,x,y,w,h,angle,role,supportId,behavior})=>({id,assetId,x,y,w,h,angle,role,supportId,behavior})))!==canonicalTransforms) failures.push(`seed ${index}: transforms changed`);
   if (JSON.stringify(course.routes)!==canonicalRoutes) failures.push(`seed ${index}: routes changed`);
 }
 
@@ -80,6 +80,27 @@ for (const edge of first.routes.main) {
 }
 const doubleJumpCount=first.objects.filter(object=>object.tags?.includes('double-jump-gap')).length;
 if (doubleJumpCount<18||doubleJumpCount>24) failures.push(`fixed course must contain 18-24 double-jump gaps, got ${doubleJumpCount}`);
+
+// Crumbling supports begin only after 300m and average one per ten route
+// objects. They never replace checkpoints, double-jump landings or authored
+// switchback pivots, and their timing is a stable part of the map manifest.
+const crumbleEligible=first.nodes.filter(node=>node.route==='main'&&node.altitude>=300&&node.altitude<970);
+const crumbleNodes=crumbleEligible.filter(node=>byId.get(node.objectId)?.behavior?.type==='crumble');
+const expectedCrumbleCount=Math.floor(crumbleEligible.length/10);
+if (crumbleNodes.length!==expectedCrumbleCount) failures.push(`expected ${expectedCrumbleCount} crumble supports, got ${crumbleNodes.length}`);
+let previousCrumbleIndex=-1;
+for (const node of crumbleNodes) {
+  const object=byId.get(node.objectId);
+  const behavior=object.behavior;
+  if (node.altitude<300) failures.push(`${object.id}: crumble support appears before 300m`);
+  if (!object.tags?.includes('crumble-platform')) failures.push(`${object.id}: crumble tag missing`);
+  if (object.tags?.includes('double-jump-gap')||object.tags?.includes('switchback-turn')) failures.push(`${object.id}: crumble support replaced a protected challenge`);
+  if (behavior.triggerDelayMs!==140||behavior.fallDurationMs!==650||behavior.respawnMs!==4000) failures.push(`${object.id}: crumble timing changed`);
+  if ([448,573,704,820,930].some(altitude=>Math.abs(node.altitude-altitude)<=8)) failures.push(`${object.id}: crumble support is too close to a checkpoint`);
+  const index=crumbleEligible.indexOf(node);
+  if (previousCrumbleIndex>=0&&(index-previousCrumbleIndex<7||index-previousCrumbleIndex>13)) failures.push(`${object.id}: crumble interval is ${index-previousCrumbleIndex}, expected about 10`);
+  previousCrumbleIndex=index;
+}
 
 for (const object of first.objects.filter(item=>item.role==='obstacle'&&item.supportId)) {
   const support=byId.get(object.supportId);

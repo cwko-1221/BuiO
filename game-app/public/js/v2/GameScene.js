@@ -8,6 +8,7 @@ import { RapidFallTracker } from './recovery.js';
 import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js';
 import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js';
 import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest';
+import { CrumblePlatformState } from './CrumblePlatform.js?v=20260717-crumble';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -28,6 +29,7 @@ export class GameScene extends Phaser.Scene {
     this.dropUntil = 0;
     this.lastNet = 0;
     this.dynamicObjects = [];
+    this.crumbleObjects = new Map();
     this.ghosts = new Map();
     this.groundContacts = new Map();
     this.leftContacts = new Map();
@@ -192,7 +194,16 @@ export class GameScene extends Phaser.Scene {
     collideWithPlayer(body);
     bindBodyToSprite(body, sprite, obj);
     Matter.Composite.add(this.matter.world.localWorld, body);
-    if (obj.behavior.type === 'move' || obj.behavior.type === 'rotate') {
+    if (obj.behavior?.type === 'crumble') {
+      this.crumbleObjects.set(obj.id,{
+        sprite,body,obj,
+        state:new CrumblePlatformState(obj.behavior),
+        startX:obj.x,startY:obj.y,baseAngle:obj.angle||0,
+        startBodyPosition:{x:body.position.x,y:body.position.y},
+        centerOff:{x:body.position.x-obj.x,y:body.position.y-obj.y},
+        removed:false
+      });
+    } else if (obj.behavior?.type === 'move' || obj.behavior?.type === 'rotate') {
       this.dynamicObjects.push({
         sprite, body, obj,
         startX: obj.x, startY: obj.y, baseAngle: obj.angle || 0,
@@ -334,12 +345,14 @@ export class GameScene extends Phaser.Scene {
       for (const pair of event.pairs) {
         const bodies = [pair.bodyA,pair.bodyB];
         const involvesPlayer = bodies.some(b => b === this.playerBody || b.parent === this.playerBody);
+        const footContact = bodies.includes(this.playerParts.foot);
         if (bodies.includes(this.summitBody) && involvesPlayer) this.finish();
         for (const body of bodies) {
           if (body.progressSensor && involvesPlayer) this.reachProgress(body.progressSensor);
           if (body.checkpointTrigger && involvesPlayer) this.unlockCheckpoint(body.checkpointTrigger);
           if (body.hazard && involvesPlayer) this.hitHazard(body.hazard);
           const obj = body.courseObject;
+          if (footContact && obj?.behavior?.type === 'crumble') this.triggerCrumble(obj.id,true);
           if (obj?.behavior?.type === 'bounce' && involvesPlayer) {
             this.setPlayerVelocity(null,-obj.behavior.power); this.airJump = 1; this.hooks.onEffect?.('bounce',this.player.x,this.player.y);
             this.hooks.onSound?.('bounce');
@@ -362,6 +375,62 @@ export class GameScene extends Phaser.Scene {
     if (action === 'jump' && value) this.queueJump(); else this.actions[action] = value;
   }
   setEnergy(value) { this.energy = Phaser.Math.Clamp(value,0,100); }
+
+  triggerCrumble(id,broadcast=true) {
+    const item=this.crumbleObjects.get(id);
+    if (!item||!item.state.trigger(this.time.now)) return false;
+    item.sprite.setTint(0xffd36a);
+    if (broadcast) this.hooks.onCrumble?.(id);
+    return true;
+  }
+
+  clearCrumbleContacts(objectId) {
+    for (const contacts of [this.groundContacts,this.leftContacts,this.rightContacts]) {
+      for (const [id,body] of contacts) if (body.courseObject?.id===objectId) contacts.delete(id);
+    }
+  }
+
+  restoreCrumbleBody(item) {
+    const Matter=Phaser.Physics.Matter.Matter;
+    const {Body,Composite}=Matter;
+    Body.setVelocity(item.body,{x:0,y:0});
+    Body.setAngularVelocity(item.body,0);
+    Body.setPosition(item.body,item.startBodyPosition);
+    Body.setAngle(item.body,item.baseAngle);
+    Body.setStatic(item.body,true);
+    if (item.removed) {
+      Composite.add(this.matter.world.localWorld,item.body);
+      item.removed=false;
+    }
+    item.sprite.setPosition(item.startX,item.startY).setRotation(item.baseAngle).setVisible(true).clearTint();
+  }
+
+  updateCrumblePlatforms(time) {
+    const Matter=Phaser.Physics.Matter.Matter;
+    const {Body,Composite}=Matter;
+    for (const item of this.crumbleObjects.values()) {
+      const result=item.state.update(time);
+      if (result.changed&&result.phase==='falling') {
+        item.sprite.setPosition(item.startX,item.startY).clearTint();
+        Body.setStatic(item.body,false);
+        Body.setVelocity(item.body,{x:0,y:.8});
+        Body.setAngularVelocity(item.body,(item.obj.x%2?1:-1)*.015);
+      } else if (result.changed&&result.phase==='hidden') {
+        this.clearCrumbleContacts(item.obj.id);
+        Composite.remove(this.matter.world.localWorld,item.body,true);
+        item.removed=true;
+        item.sprite.setVisible(false);
+      } else if (result.changed&&result.phase==='ready') {
+        this.restoreCrumbleBody(item);
+      }
+      if (result.phase==='warning') {
+        item.sprite.setX(item.startX+Math.sin(time*.095)*2.4);
+      } else if (result.phase==='falling') {
+        item.sprite.setPosition(item.body.position.x-item.centerOff.x,item.body.position.y-item.centerOff.y)
+          .setRotation(item.body.angle);
+      }
+    }
+  }
 
   update(time, deltaMs) {
     if (!this.player || this.finished || this.hooks.isFrozen?.()) return;
@@ -433,6 +502,8 @@ export class GameScene extends Phaser.Scene {
       }
     }
     if (this.playerParts.main.isSensor && time > this.dropUntil) this.playerParts.main.isSensor = false;
+
+    this.updateCrumblePlatforms(time);
 
     for (const item of this.dynamicObjects) {
       const { sprite,body,obj,startX,startY,baseAngle,centerOff,phase } = item;

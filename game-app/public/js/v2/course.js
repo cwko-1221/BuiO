@@ -49,7 +49,7 @@ export function buildCourse(seed=0) {
     return {...source,x:source.x??node.x,y:source.y??node.y,progress:sensor.progress,zone,zoneName:ZONE_NAMES[zone]};
   });
   const instances=FIXED_MAP.zones.map((zone,index)=>({id:`fixed-zone-${zone.id}`,chunkId:`fixed-${zone.id}`,zone:zone.id,zoneName:ZONE_NAMES[zone.id],slot:index,difficulty:index+1,bounds:{x:0,y:FIXED_MAP.world.startY-zone.max*5,w:FIXED_MAP.world.width,h:(zone.max-zone.min)*5}}));
-  const transformText=objects.map(object=>`${object.id}:${object.assetId}:${object.x}:${object.y}:${object.w}:${object.h}:${object.angle}:${object.role}:${object.supportId||''}`).join('|');
+  const transformText=objects.map(object=>`${object.id}:${object.assetId}:${object.x}:${object.y}:${object.w}:${object.h}:${object.angle}:${object.role}:${object.supportId||''}:${JSON.stringify(object.behavior)}`).join('|');
   const routeText=Object.values(FIXED_MAP.routes).flat().map(edge=>`${edge.type}:${edge.from}>${edge.to}`).join('|');
   const colliderText=objects.filter(object=>object.role!=='decor').map(object=>`${object.id}:${JSON.stringify(ASSET_GEOMETRY[object.assetId]?.parts||[])}`).join('|');
   const courseHash=hashString(`${MAP_VERSION}|${transformText}|${routeText}`);

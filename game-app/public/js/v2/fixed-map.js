@@ -4,7 +4,7 @@ import { alphaBounds, fittedSize } from './colliders.js';
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07bf';
+export const MAP_VERSION = 'fixed-1000m-2026.07bg';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
@@ -381,6 +381,33 @@ function compactPhysicalRoute() {
   if (doubleJumpChallenges<18||doubleJumpChallenges>24) throw new Error(`Expected 18-24 double-jump challenges, got ${doubleJumpChallenges}`);
 }
 compactPhysicalRoute();
+
+// From 300m onward, roughly every tenth main-route foothold becomes a
+// temporary crumble platform. Keep them away from double-jump landings,
+// switchback pivots, checkpoints and the summit so a disappearing support is
+// surprising without ever becoming a mandatory soft-lock.
+function markCrumblePlatforms() {
+  const routeNodes=nodes.filter(node=>node.route==='main'&&node.altitude>=300&&node.altitude<970);
+  const objectById=new Map(objects.map(object=>[object.id,object]));
+  const protectedAltitudes=[448,573,704,820,930];
+  for (let targetIndex=9;targetIndex<routeNodes.length;targetIndex+=10) {
+    const offsets=[0,1,-1,2,-2,3,-3];
+    const node=offsets.map(offset=>routeNodes[targetIndex+offset]).find(candidate=>{
+      if (!candidate || protectedAltitudes.some(altitude=>Math.abs(candidate.altitude-altitude)<=8)) return false;
+      const object=objectById.get(candidate.objectId);
+      return object?.role==='support'
+        && object.behavior?.type==='static'
+        && !object.tags.includes('double-jump-gap')
+        && !object.tags.includes('switchback-turn')
+        && !object.tags.includes('crumble-platform');
+    });
+    if (!node) continue;
+    const object=objectById.get(node.objectId);
+    object.behavior={type:'crumble',triggerDelayMs:140,fallDurationMs:650,respawnMs:4000};
+    object.tags.push('crumble-platform');
+  }
+}
+markCrumblePlatforms();
 
 // Decorative stand-ins caused visible objects that the player could walk
 // through and could also overlap the real route after it was reflowed. Keep

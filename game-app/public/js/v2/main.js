@@ -1,5 +1,5 @@
-import { buildCourse, validateCourse } from './course.js?v=20260717-tight-double-jumps';
-import { GameScene } from './GameScene.js?v=20260717-switchback-playtest';
+import { buildCourse, validateCourse } from './course.js?v=20260717-crumble';
+import { GameScene } from './GameScene.js?v=20260717-crumble';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 
 const $ = id => document.getElementById(id);
@@ -64,6 +64,7 @@ async function joinRoom(code){
 
 socket.on('game:start',({seed,durationSec,startedAt})=>startGame(seed,durationSec,startedAt,null));
 socket.on('game:positions',list=>scene?.updateGhosts(list,startMeta?.playerKey));
+socket.on('game:crumble',({id})=>scene?.triggerCrumble(id,false));
 socket.on('game:summit',({name,place})=>toast(`🏁 ${name} 第 ${place} 位登頂！`,true));
 socket.on('game:over',({leaderboard})=>showResults(leaderboard));
 socket.on('room:closed',({message})=>{if(phaserGame)phaserGame.destroy(true);alert(message||'房間已關閉');location.href='/';});
@@ -87,6 +88,7 @@ function startGame(seed,durationSec,startedAt,resume){
     },
     isFrozen:()=>frozen,
     onSound:type=>gameAudio.play(type),
+    onCrumble:id=>{if(!preview)socket.emit('game:crumble',{id});},
     onCheckpoint:cp=>toast(`🏁 已到達${cp.zoneName}檢查點`,true),
     onRecovery:type=>{
       if(type==='rapidFall')toast('↩ 下降超過 100 米，返回最近檢查點');
