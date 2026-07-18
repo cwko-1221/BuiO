@@ -207,6 +207,7 @@ export const AVAILABLE_ASSETS = [
   "silo-pipe",
   "ski-ramp",
   "sled",
+  "slingshot-platform",
   "snow-lantern",
   "snow-ledge",
   "snow-mound",

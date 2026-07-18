@@ -274,6 +274,10 @@ export const ATLAS_INDEX={
     "key": "atlas-global-0",
     "frame": "spring-pad"
   },
+  "slingshot-platform": {
+    "key": "atlas-global-0",
+    "frame": "slingshot-platform"
+  },
   "conveyor": {
     "key": "atlas-global-0",
     "frame": "conveyor"

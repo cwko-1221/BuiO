@@ -1,10 +1,10 @@
-import { alphaBounds, fittedSize } from './colliders.js';
+import { alphaBounds, fittedSize } from './colliders.js?v=20260718-launcher';
 
 // One fixed, hand-authored course for every room. The route grammar follows
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07bg';
+export const MAP_VERSION = 'fixed-1000m-2026.07bh';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
@@ -85,6 +85,10 @@ function authoredRoute(zone,entries,tags=[]) {
 function recoverLast(run,count=2) {
   const available=run.filter(item=>item.node.route==='main');
   for (let index=Math.max(1,available.length-count);index<available.length;index++) {
+    // A launcher crossing is intentionally one-way. Falling behind it should
+    // use the checkpoint recovery system, not require an impossible reverse
+    // jump across the launcher-sized gap.
+    if (available[index-1].object.behavior?.type==='launcher') continue;
     recovery.push({from:available[index].node.id,to:available[index-1].node.id,type:'recovery'});
   }
 }
@@ -382,6 +386,64 @@ function compactPhysicalRoute() {
 }
 compactPhysicalRoute();
 
+// Four launcher crossings replace redundant footholds above 300m. Their
+// visible edge-to-edge gaps exceed the ordinary double-jump envelope, so the
+// slingshot is a required route mechanic rather than optional decoration.
+function installSlingshotCrossings() {
+  const objectById=new Map(objects.map(object=>[object.id,object]));
+  const nodeAt=altitude=>nodes.find(node=>node.route==='main'&&node.altitude===altitude);
+  const specs=[
+    {from:370,remove:[382],to:402,landingX:4300},
+    {from:580,remove:[590,601],to:615,landingX:3150},
+    {from:837,remove:[849],to:865,landingX:1330},
+    {from:914,remove:[927,935],to:943,landingX:1170}
+  ];
+  const attachedBySupport=new Map();
+  for (const object of objects.filter(item=>item.supportId)) {
+    if (!attachedBySupport.has(object.supportId)) attachedBySupport.set(object.supportId,[]);
+    attachedBySupport.get(object.supportId).push(object);
+  }
+  for (const spec of specs) {
+    const fromNode=nodeAt(spec.from), landingNode=nodeAt(spec.to);
+    if (!fromNode||!landingNode) throw new Error(`Missing slingshot crossing ${spec.from}m>${spec.to}m`);
+    const launcher=objectById.get(fromNode.objectId), landing=objectById.get(landingNode.objectId);
+    launcher.assetId='slingshot-platform';
+    launcher.tags=launcher.tags.filter(tag=>tag!=='crumble-platform');
+    launcher.tags.push('slingshot-launcher');
+    landing.tags.push('slingshot-landing');
+    if (Number.isFinite(spec.landingX)) {
+      const shift=spec.landingX-landing.x;
+      landing.x=spec.landingX;
+      landingNode.x=spec.landingX;
+      for (const attached of attachedBySupport.get(landing.id)||[]) attached.x+=shift;
+    }
+    launcher.behavior={type:'launcher',power:30,velocityX:Math.sign(landing.x-launcher.x)*16.8,targetX:landing.x};
+    for (const altitude of spec.remove) {
+      const node=nodeAt(altitude);
+      if (!node) throw new Error(`Missing removable slingshot rung at ${altitude}m`);
+      const object=objectById.get(node.objectId);
+      node.route='removed';
+      object.role='decor';
+      object.tags.push('removed-for-slingshot-gap');
+    }
+  }
+  // Moving the first launcher landing shortened its immediate follow-up, so
+  // it is no longer labelled as a double-jump challenge.
+  const shortenedFollowUp=nodeAt(420);
+  if (shortenedFollowUp) {
+    const object=objectById.get(shortenedFollowUp.objectId);
+    object.tags=object.tags.filter(tag=>tag!=='double-jump-gap');
+  }
+  const routeNodes=nodes.filter(node=>node.route==='main');
+  main.length=0;
+  for (let index=1;index<routeNodes.length;index++) {
+    const from=routeNodes[index-1],to=routeNodes[index];
+    const launcher=objectById.get(from.objectId);
+    main.push({from:from.id,to:to.id,type:launcher.behavior?.type==='launcher'?'launcher':'main'});
+  }
+}
+installSlingshotCrossings();
+
 // From 300m onward, roughly every tenth main-route foothold becomes a
 // temporary crumble platform. Keep them away from double-jump landings,
 // switchback pivots, checkpoints and the summit so a disappearing support is
@@ -390,10 +452,14 @@ function markCrumblePlatforms() {
   const routeNodes=nodes.filter(node=>node.route==='main'&&node.altitude>=300&&node.altitude<970);
   const objectById=new Map(objects.map(object=>[object.id,object]));
   const protectedAltitudes=[448,573,704,820,930];
-  for (let targetIndex=9;targetIndex<routeNodes.length;targetIndex+=10) {
-    const offsets=[0,1,-1,2,-2,3,-3];
+  let previousChosenIndex=-Infinity;
+  const desiredCount=Math.floor(routeNodes.length/10);
+  for (let slot=1;slot<=desiredCount;slot++) {
+    const targetIndex=Math.round(slot*routeNodes.length/(desiredCount+1));
+    const offsets=[0,1,-1,2,-2,3,-3,4,-4,5,-5,6,-6];
     const node=offsets.map(offset=>routeNodes[targetIndex+offset]).find(candidate=>{
       if (!candidate || protectedAltitudes.some(altitude=>Math.abs(candidate.altitude-altitude)<=8)) return false;
+      if (routeNodes.indexOf(candidate)-previousChosenIndex<7) return false;
       const object=objectById.get(candidate.objectId);
       return object?.role==='support'
         && object.behavior?.type==='static'
@@ -405,7 +471,10 @@ function markCrumblePlatforms() {
     const object=objectById.get(node.objectId);
     object.behavior={type:'crumble',triggerDelayMs:140,fallDurationMs:650,respawnMs:4000};
     object.tags.push('crumble-platform');
+    previousChosenIndex=routeNodes.indexOf(node);
   }
+  const marked=routeNodes.filter(node=>objectById.get(node.objectId)?.behavior?.type==='crumble').length;
+  if (marked!==desiredCount) throw new Error(`Expected ${desiredCount} crumble platforms after launcher layout, got ${marked}`);
 }
 markCrumblePlatforms();
 

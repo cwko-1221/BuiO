@@ -52,6 +52,7 @@ for (const edge of first.routes.main) {
   const ao=byId.get(a.objectId), bo=byId.get(b.objectId);
   const rise=Math.max(0,a.y-b.y);
   const gap=Math.max(0,Math.abs(b.x-a.x)-(fittedSize(ao).w+fittedSize(bo).w)/2);
+  if (edge.type==='launcher') continue;
   const doubleJump=bo.tags?.includes('double-jump-gap');
   if (rise>(doubleJump?135:110)) failures.push(`${edge.from}>${edge.to}: early-climb rise is ${rise.toFixed(0)}px`);
   if (gap>(doubleJump?260:180)) failures.push(`${edge.from}>${edge.to}: early-climb gap is ${gap.toFixed(0)}px`);
@@ -74,12 +75,30 @@ for (const edge of first.routes.main) {
   if (!a||!b||b.altitude<120) continue;
   const ao=byId.get(a.objectId), bo=byId.get(b.objectId);
   const gap=Math.max(0,Math.abs(b.x-a.x)-(fittedSize(ao).w+fittedSize(bo).w)/2);
+  if (edge.type==='launcher') continue;
   const doubleJump=bo.tags?.includes('double-jump-gap');
   if (doubleJump&&(gap<230||gap>255)) failures.push(`${edge.from}>${edge.to}: double-jump gap is ${gap.toFixed(0)}px`);
   if (!doubleJump&&gap>140.1) failures.push(`${edge.from}>${edge.to}: compact-route gap is ${gap.toFixed(0)}px`);
 }
 const doubleJumpCount=first.objects.filter(object=>object.tags?.includes('double-jump-gap')).length;
-if (doubleJumpCount<18||doubleJumpCount>24) failures.push(`fixed course must contain 18-24 double-jump gaps, got ${doubleJumpCount}`);
+if (doubleJumpCount<17||doubleJumpCount>24) failures.push(`fixed course must contain 17-24 normal double-jump gaps, got ${doubleJumpCount}`);
+
+// Launcher crossings are deliberately outside the normal two-jump envelope.
+// They must be authored, powerful, above 300m, and never share crumble logic.
+const launcherEdges=first.routes.main.filter(edge=>edge.type==='launcher');
+if (launcherEdges.length!==4) failures.push(`expected 4 launcher crossings, got ${launcherEdges.length}`);
+for (const edge of launcherEdges) {
+  const a=nodeById.get(edge.from),b=nodeById.get(edge.to);
+  const ao=byId.get(a.objectId),bo=byId.get(b.objectId);
+  const gap=Math.max(0,Math.abs(b.x-a.x)-(fittedSize(ao).w+fittedSize(bo).w)/2);
+  if (a.altitude<300) failures.push(`${ao.id}: launcher appears before 300m`);
+  if (ao.assetId!=='slingshot-platform'||ao.behavior?.type!=='launcher') failures.push(`${ao.id}: launcher art/behavior mismatch`);
+  if (ao.behavior?.power!==30) failures.push(`${ao.id}: launcher power changed`);
+  if (Math.abs(ao.behavior?.velocityX)!==16.8) failures.push(`${ao.id}: launcher horizontal impulse changed`);
+  if (ao.behavior?.targetX!==b.x) failures.push(`${ao.id}: launcher target is detached from its landing`);
+  if (gap<=480||gap>585) failures.push(`${edge.from}>${edge.to}: launcher gap ${gap.toFixed(0)}px is not safely outside the measured double-jump envelope`);
+  if (ao.tags?.includes('crumble-platform')) failures.push(`${ao.id}: launcher cannot crumble`);
+}
 
 // Crumbling supports begin only after 300m and average one per ten route
 // objects. They never replace checkpoints, double-jump landings or authored
@@ -132,4 +151,4 @@ if (failures.length) {
   failures.slice(0,30).forEach(failure=>console.error(`- ${failure}`));
   process.exit(1);
 }
-console.log(`Fixed map validation passed: ${MAP_VERSION}, ${first.objects.length} objects, ${first.nodes.length} route nodes, ${firstReport.stats.mainDescents} descending main edges, ${firstReport.stats.minMainMarginPct}% main / ${firstReport.stats.minRecoveryMarginPct}% recovery margin, ${firstReport.stats.solidOverlaps} unintended overlaps, ${firstReport.stats.unsafeStandNodes} unsafe stands, ${firstReport.stats.blockedOverheads} blocked overheads, 500/500 seeds identical, ${recovered} recovery landings + ${reset} safe resets.`);
+console.log(`Fixed map validation passed: ${MAP_VERSION}, ${first.objects.length} objects, ${first.nodes.length} route nodes, ${firstReport.stats.launcherEdges} launcher crossings, ${firstReport.stats.mainDescents} descending main edges, ${firstReport.stats.minMainMarginPct}% main / ${firstReport.stats.minRecoveryMarginPct}% recovery margin, ${firstReport.stats.solidOverlaps} unintended overlaps, ${firstReport.stats.unsafeStandNodes} unsafe stands, ${firstReport.stats.blockedOverheads} blocked overheads, 500/500 seeds identical, ${recovered} recovery landings + ${reset} safe resets.`);

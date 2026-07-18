@@ -1,7 +1,7 @@
-import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js';
-import { ASSET_GEOMETRY } from './asset-geometry.js';
-import { alphaBounds, fittedSize } from './colliders.js';
-import { FIXED_MAP, MAP_VERSION } from './fixed-map.js';
+import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js?v=20260718-launcher';
+import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260718-launcher';
+import { alphaBounds, fittedSize } from './colliders.js?v=20260718-launcher';
+import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260718-launcher';
 
 function hashString(value) {
   let h=2166136261;
@@ -83,6 +83,8 @@ export function validateCourse(course) {
     if (!nodes.has(edge.from)||!nodes.has(edge.to)) errors.push(`${name} edge references a missing node`);
   }
   let minMainMargin=1;
+  let minLauncherMargin=1;
+  let launcherEdges=0;
   let mainDescents=0;
   for (const edge of course.routes.main) {
     const a=nodes.get(edge.from), b=nodes.get(edge.to);
@@ -95,6 +97,15 @@ export function validateCourse(course) {
     const aw=fittedSize(ao).w, bw=fittedSize(bo).w;
     const gap=Math.max(0,Math.abs(b.x-a.x)-(aw+bw)/2);
     const rise=Math.max(0,a.y-b.y);
+    const launcherEdge=edge.type==='launcher'&&ao.behavior?.type==='launcher';
+    if (launcherEdge) {
+      launcherEdges++;
+      const margin=Math.min(1-gap/700,1-rise/240);
+      minLauncherMargin=Math.min(minLauncherMargin,margin);
+      if (gap<=460) errors.push(`launcher edge ${edge.from}>${edge.to} is too close to guarantee launcher-only traversal (${gap.toFixed(0)}px)`);
+      if (gap>585||rise>215||ao.behavior.power<28) errors.push(`launcher edge ${edge.from}>${edge.to} exceeds the launcher envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise)`);
+      continue;
+    }
     const horizontalMargin=1-gap/360;
     const verticalMargin=1-rise/165;
     const margin=Math.min(horizontalMargin,verticalMargin);
@@ -203,5 +214,5 @@ export function validateCourse(course) {
       if (blockedOverheads<=8) errors.push(`${lower.object.id} has only ${clearance.toFixed(0)}px clearance below ${upper.object.id}`);
     }
   }
-  return {ok:errors.length===0,errors,stats:{mapVersion:course.mapVersion,objects:course.objects.length,assets:course.usedAssets.length,nodes:course.nodes.length,mainEdges:course.routes.main.length,recoveryEdges:course.routes.recovery.length,obstacles:obstacles.length,mainDescents,minMainMarginPct:Math.round(minMainMargin*100),minRecoveryMarginPct:Math.round(minRecoveryMargin*100),solidOverlaps,unsafeStandNodes,blockedOverheads,hash:course.courseHash,colliderHash:course.colliderHash}};
+  return {ok:errors.length===0,errors,stats:{mapVersion:course.mapVersion,objects:course.objects.length,assets:course.usedAssets.length,nodes:course.nodes.length,mainEdges:course.routes.main.length,launcherEdges,minLauncherMarginPct:Math.round(minLauncherMargin*100),recoveryEdges:course.routes.recovery.length,obstacles:obstacles.length,mainDescents,minMainMarginPct:Math.round(minMainMargin*100),minRecoveryMarginPct:Math.round(minRecoveryMargin*100),solidOverlaps,unsafeStandNodes,blockedOverheads,hash:course.courseHash,colliderHash:course.colliderHash}};
 }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 244,
+  "count": 245,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -2442,6 +2442,37 @@
       "source": "imagegen-master"
     },
     {
+      "id": "slingshot-platform",
+      "label": "彈弓發射台",
+      "zone": "global",
+      "file": "/game/images/v2/props/slingshot-platform.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 120,
+        "h": 122
+      },
+      "body": {
+        "type": "compound",
+        "parts": [],
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#c88a43",
+        "#80502d",
+        "#ffe0a0"
+      ],
+      "tags": [
+        "global",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
       "id": "conveyor",
       "label": "輸送帶",
       "zone": "global",
@@ -2823,7 +2854,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": false,
+        "oneWay": true,
         "material": "solid"
       },
       "palette": [
@@ -3312,7 +3343,7 @@
       },
       "body": {
         "type": "rect",
-        "oneWay": false,
+        "oneWay": true,
         "material": "solid"
       },
       "palette": [
@@ -10103,7 +10134,7 @@
       "original design"
     ]
   },
-  "availableCount": 244,
-  "imagegenCount": 151,
+  "availableCount": 245,
+  "imagegenCount": 152,
   "proceduralCount": 93
 }

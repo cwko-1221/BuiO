@@ -52,7 +52,7 @@ const catalog = {
   ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],
-    ['hanging-ring','吊環'],['trampoline','彈床'],['spring-pad','彈簧墊'],['conveyor','輸送帶'],['seesaw','蹺蹺板'],
+    ['hanging-ring','吊環'],['trampoline','彈床'],['spring-pad','彈簧墊'],['slingshot-platform','彈弓發射台'],['conveyor','輸送帶'],['seesaw','蹺蹺板'],
     ['rotating-beam','旋轉樑'],['moving-lift','移動升降台'],['cloud-pad','雲墊'],['basketball','籃球'],
     ['beach-ball','沙灘球'],['balloons','氣球'],['fan','風扇'],['arrow-sign','方向牌'],['checkpoint-flag','檢查點旗'],
     ['summit-flag','山頂旗'],['bench','長椅'],['chair','椅'],['sofa','梳化'],['bed','床'],['table','桌'],['book-stack','書堆'],
@@ -125,6 +125,7 @@ function hash(id) {
 }
 
 function bodyFor(id, index) {
+  if (id === 'slingshot-platform') return { type:'compound', parts:[], oneWay:false, material:'rubber' };
   const n = hash(id) % 5;
   if (n === 0) return { type: 'circle', radius: .46, oneWay: false, material: 'rubber' };
   if (n === 1) return { type: 'trapezoid', vertices: [[-.5,.4],[-.38,-.42],[.32,-.5],[.5,.35]], oneWay: false, material: 'solid' };

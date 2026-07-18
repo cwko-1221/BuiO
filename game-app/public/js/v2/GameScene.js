@@ -1,7 +1,7 @@
-import { ASSET_BY_ID, ZONE_NAMES } from './assets.js';
-import { AVAILABLE_ASSETS } from './available-assets.js';
-import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js';
-import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js';
+import { ASSET_BY_ID, ZONE_NAMES } from './assets.js?v=20260718-launcher';
+import { AVAILABLE_ASSETS } from './available-assets.js?v=20260718-launcher';
+import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js?v=20260718-launcher';
+import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js?v=20260718-launcher';
 import { createPlayerCompound, wakePlayer, PLAYER_SPRITE_DY } from './playerPhysics.js';
 import { sampleSky } from './background.js';
 import { RapidFallTracker } from './recovery.js';
@@ -31,6 +31,7 @@ export class GameScene extends Phaser.Scene {
     this.lastNet = 0;
     this.dynamicObjects = [];
     this.crumbleObjects = new Map();
+    this.launcherCooldowns = new Map();
     this.ghosts = new Map();
     this.groundContacts = new Map();
     this.leftContacts = new Map();
@@ -192,6 +193,12 @@ export class GameScene extends Phaser.Scene {
     }
     const Matter = Phaser.Physics.Matter.Matter;
     const body = createAlphaBody(Matter, obj, size);
+    // The cradle must detect the player without its fork/elastic geometry
+    // cancelling the upward impulse on the very next Matter step.
+    if (obj.behavior?.type === 'launcher') {
+      body.isSensor=true;
+      for (const part of body.parts) part.isSensor=true;
+    }
     collideWithPlayer(body);
     bindBodyToSprite(body, sprite, obj);
     Matter.Composite.add(this.matter.world.localWorld, body);
@@ -354,6 +361,26 @@ export class GameScene extends Phaser.Scene {
           if (body.hazard && involvesPlayer) this.hitHazard(body.hazard);
           const obj = body.courseObject;
           if (footContact && obj?.behavior?.type === 'crumble') this.triggerCrumble(obj.id,true);
+          const landsOnLauncher=involvesPlayer&&obj?.behavior?.type==='launcher'
+            &&this.playerBody.velocity.y>=-1.5&&this.playerBody.position.y<obj.y-4;
+          if (landsOnLauncher) {
+            const readyAt=this.launcherCooldowns.get(obj.id)||0;
+            if (this.time.now>=readyAt) {
+              this.launcherCooldowns.set(obj.id,this.time.now+500);
+              this.setPlayerVelocity(obj.behavior.velocityX,-obj.behavior.power);
+              this.airJump=1; this.coyote=0;
+              this.launcherTargetX=obj.behavior.targetX;
+              this.launcherMaxSpeed=Math.abs(obj.behavior.velocityX)||16.8;
+              this.launcherBoostUntil=this.time.now+3500;
+              const sprite=body.gameObject;
+              if (sprite) {
+                const baseScaleY=sprite.scaleY;
+                this.tweens.add({targets:sprite,scaleY:baseScaleY*.78,duration:65,yoyo:true,ease:'Quad.easeOut'});
+              }
+              this.hooks.onEffect?.('bounce',this.player.x,this.player.y);
+              this.hooks.onSound?.('bounce');
+            }
+          }
           if (obj?.behavior?.type === 'bounce' && involvesPlayer) {
             this.setPlayerVelocity(null,-obj.behavior.power); this.airJump = 1; this.hooks.onEffect?.('bounce',this.player.x,this.player.y);
             this.hooks.onSound?.('bounce');
@@ -445,6 +472,17 @@ export class GameScene extends Phaser.Scene {
     const wasGrounded = this.grounded;
     const under = [...this.groundContacts.values()].filter(body => !body.isSensor);
     this.grounded = under.length > 0 && vy >= -1.5;
+    if (this.grounded && time<(this.launcherBoostUntil||0)) {
+      // A launcher crossing ends on a deliberately small prop. Centre the
+      // player once the feet make contact so residual flight speed cannot
+      // carry them straight off the far edge.
+      if (Number.isFinite(this.launcherTargetX)&&Math.abs(this.playerBody.position.x-this.launcherTargetX)<100) {
+        Phaser.Physics.Matter.Matter.Body.setPosition(this.playerBody,{x:this.launcherTargetX,y:this.playerBody.position.y});
+      }
+      this.setPlayerVelocity(0,null);
+      this.launcherBoostUntil=0;
+      this.launcherTargetX=null;
+    }
     if (!this.grounded) this.peakFallSpeed=Math.max(this.peakFallSpeed,vy);
     if (this.grounded&&!wasGrounded) {
       if (this.peakFallSpeed>2.8) this.hooks.onSound?.('land');
@@ -456,8 +494,13 @@ export class GameScene extends Phaser.Scene {
     this.routeAutoplay?.update(this, time);
 
     const dir = (rightHeld?1:0)-(leftHeld?1:0);
-    const target = dir * 5.6;
-    const nextVx = Phaser.Math.Linear(this.playerBody.velocity.x,target,this.grounded?.2:.085);
+    const launcherActive=time<(this.launcherBoostUntil||0)&&Number.isFinite(this.launcherTargetX);
+    const launcherDx=launcherActive?this.launcherTargetX-this.playerBody.position.x:0;
+    const launcherTarget=launcherActive
+      ? Math.sign(launcherDx)*Phaser.Math.Clamp(Math.abs(launcherDx)*.045,1.4,this.launcherMaxSpeed||16.8)
+      : 0;
+    const target = launcherActive ? launcherTarget + dir*.7 : dir * 5.6;
+    const nextVx = Phaser.Math.Linear(this.playerBody.velocity.x,target,launcherActive?.16:(this.grounded?.2:.085));
     this.setPlayerVelocity(nextVx,null);
     const conveyorBody = under.find(b => b.courseObject?.behavior?.type === 'conveyor');
     if (conveyorBody && this.grounded) this.setPlayerVelocity(nextVx + conveyorBody.courseObject.behavior.speed,null);
@@ -493,7 +536,8 @@ export class GameScene extends Phaser.Scene {
         this.dropUntil = time + 240; this.playerParts.main.isSensor = true; this.groundContacts.clear(); this.setPlayerVelocity(null,2.2); this.actions.jumpQueued = 0;
       } else if (this.coyote > 0 || this.airJump > 0) {
         const air = this.coyote <= 0;
-        this.setPlayerVelocity(null,air ? -10.8 : -12.2);
+        // A second-jump input must never cancel a stronger slingshot launch.
+        this.setPlayerVelocity(null,Math.min(vy,air ? -10.8 : -12.2));
         if (air) this.airJump--;
         if (!this.hooks.infiniteEnergy) this.energy -= 8;
         this.actions.jumpQueued = 0; this.coyote = 0;

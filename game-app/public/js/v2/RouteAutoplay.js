@@ -123,7 +123,8 @@ export class RouteAutoplay {
       const airborneFor = time - this.lastGroundedAt;
       const targetObject = this.objectById.get(target.objectId);
       const demandingEdge = targetObject?.tags?.includes('double-jump-gap') || dy < -45 || Math.abs(dx) > 205;
-      const needsSecondJump = demandingEdge && scene.airJump > 0 && airborneFor > 210 && (
+      const launcherStillBoosting=time<(scene.launcherBoostUntil||0);
+      const needsSecondJump = !launcherStillBoosting && demandingEdge && scene.airJump > 0 && airborneFor > 210 && (
         scene.playerBody.velocity.y > -3.2 || dy < -72 || Math.abs(dx) > 150
       );
       if (needsSecondJump && time - this.lastJumpAt > 190) {
