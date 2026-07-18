@@ -9,7 +9,7 @@ import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js'
 import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js';
 import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest';
 import { CrumblePlatformState } from './CrumblePlatform.js?v=20260717-crumble';
-import { RemoteGhostState } from './RemoteGhostState.js?v=20260718-network-3';
+import { RemoteGhostState, SURFACE_TOLERANCE } from './RemoteGhostState.js?v=20260718-network-4';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -536,7 +536,7 @@ export class GameScene extends Phaser.Scene {
     const motion = vy < -1 ? 'jump' : vy > 2 ? 'fall' : Math.abs(nextVx)>1 ? 'run' : 'idle';
     if (!['jump','doubleJump'].includes(this.player.anims.currentAnim?.key) || !this.player.anims.isPlaying) this.player.play(motion,true);
     for (const ghost of this.ghosts.values()) {
-      const pose=ghost.state.sample(time,deltaMs);
+      const pose=ghost.state.sample(time,deltaMs,this.ghostFloorY(ghost.state));
       ghost.sprite.setPosition(pose.x,pose.y); ghost.label.setPosition(pose.x,pose.y+40);
     }
 
@@ -638,6 +638,28 @@ export class GameScene extends Phaser.Scene {
     this.routeAutoplay?.finish(this.time.now);
     this.hooks.onSound?.('finish');
     this.hooks.onFinish?.();
+  }
+
+  // Highest standable surface under a ghost, as a sprite-centre y limit.
+  // The player compound's collider bottom sits 41px below the sprite centre
+  // at rest (centre-of-mass offset + contact slop, measured empirically).
+  // Downward prediction is clamped against the real course geometry, so a
+  // falling ghost lands on the platform it is actually heading for instead
+  // of trailing the fall or sinking into artwork, and a sender's
+  // landing-penetration frames are lifted back to the surface. Crumbled
+  // platforms turn dynamic while falling and drop out of the static filter
+  // automatically.
+  ghostFloorY(state) {
+    const feetY=state.snapY+41;
+    let floor=Infinity;
+    for (const body of Phaser.Physics.Matter.Matter.Composite.allBodies(this.matter.world.localWorld)) {
+      if (!body.isStatic||body.isSensor) continue;
+      const b=body.bounds;
+      if (state.snapX<b.min.x-2||state.snapX>b.max.x+2) continue;
+      if (b.min.y<feetY-SURFACE_TOLERANCE||b.min.y>=floor) continue;   // tops above the feet are walls beside the ghost
+      floor=b.min.y;
+    }
+    return floor-41;
   }
 
   updateGhosts(list, myId) {

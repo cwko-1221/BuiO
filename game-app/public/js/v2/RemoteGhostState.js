@@ -6,14 +6,21 @@ const finite = (value, fallback=0) => Number.isFinite(Number(value)) ? Number(va
 // The ghost leads the latest snapshot with a small, bounded amount of dead
 // reckoning so remote players read as live instead of trailing the whole
 // send-throttle + broadcast-tick + render-frame pipeline (~40ms before any
-// real network latency is added). Prediction is asymmetric on purpose:
-// horizontal and upward motion may lead, but a falling or grounded snapshot
-// is never projected downward, so a landing can never be rendered below the
-// real platform.
+// real network latency is added). Airborne motion is predicted in every
+// direction — including falls — but the scene passes a floor limit computed
+// from the real course geometry, so a falling ghost lands on the platform it
+// is actually heading for and can never be rendered inside one. Grounded
+// snapshots are never projected vertically at all.
 const STEP_MS = 1000/60;   // Matter velocities are px per 60Hz physics step
 const BASE_LEAD_MS = 40;   // hides send throttle + server tick + render frame
 const MAX_LEAD_MS = 120;   // on packet loss the ghost holds instead of flying on
 const AIRBORNE = new Set(['jump','fall']);
+// Hard landings penetrate the platform for a frame on the sender before the
+// physics solver pushes the body back out, and that penetrated position is
+// what gets broadcast. The floor limit may lift such frames back to the
+// surface, but never by more than this, so a mistaken floor estimate cannot
+// make the ghost visibly hover above the course.
+export const SURFACE_TOLERANCE = 14;
 
 export class RemoteGhostState {
   constructor(snapshot,receivedAt=0) {
@@ -48,11 +55,17 @@ export class RemoteGhostState {
     return true;
   }
 
-  sample(now,deltaMs) {
+  isFalling() {
+    return this.vy>0&&AIRBORNE.has(this.animation);
+  }
+
+  sample(now,deltaMs,floorY=Infinity) {
     const lead=Math.min(Math.max(0,finite(now)-this.receivedAt)+BASE_LEAD_MS,MAX_LEAD_MS)/STEP_MS;
     const targetX=this.snapX+this.vx*lead;
-    const rising=this.vy<0&&AIRBORNE.has(this.animation);
-    const targetY=rising?this.snapY+this.vy*lead:this.snapY;
+    let targetY=AIRBORNE.has(this.animation)?this.snapY+this.vy*lead:this.snapY;
+    // Cap at the real course floor: predicted falls stop on the platform, and
+    // sender-side landing penetration frames are lifted back to the surface.
+    targetY=Math.min(targetY,Math.max(floorY,this.snapY-SURFACE_TOLERANCE));
     // A short exponential approach absorbs both the gaps between 50Hz
     // snapshots and dead-reckoning corrections without visible snapping.
     const alpha=1-Math.exp(-Math.max(0,Math.min(finite(deltaMs),50))/12);

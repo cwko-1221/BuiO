@@ -28,12 +28,24 @@ assert.equal(led.targetY,200,'grounded motion must never lead vertically');
 const stalled=runner.sample(5000,16);
 assert.ok(stalled.targetX-100<=5.6*120/(1000/60)+1e-9,'extrapolation must cap at the maximum lead');
 
-// Falling must never be projected downward, even with a large fall velocity.
+// Falls are predicted too, but a floor limit from the course geometry caps
+// them so the ghost lands on the platform instead of sinking through it.
 const faller=new RemoteGhostState({x:0,y:80,seq:1,animation:'fall',vx:0,vy:11},0);
-assert.equal(faller.sample(30,16).targetY,80,'a falling player must not be predicted below its snapshot');
+assert.ok(faller.sample(30,16).targetY>80,'a falling player should lead downward when unobstructed');
+const capped=new RemoteGhostState({x:0,y:80,seq:1,animation:'fall',vx:0,vy:11},0);
+assert.equal(capped.sample(30,16,92).targetY,92,'a predicted fall must stop exactly at the floor limit');
+const oddFloor=new RemoteGhostState({x:0,y:80,seq:1,animation:'fall',vx:0,vy:11},0);
+assert.equal(oddFloor.sample(30,16,60).targetY,66,'a floor estimate may lift the ghost at most the 14px surface tolerance above its snapshot');
+assert.equal(faller.isFalling(),true);
+
+// Hard landings briefly broadcast a platform-penetrating position from the
+// sender's physics solver; the floor limit lifts those back to the surface.
+const penetrated=new RemoteGhostState({x:0,y:105.7,seq:1,animation:'land',vx:0,vy:0},0);
+assert.equal(penetrated.sample(10,16,100).targetY,100,'sender landing penetration must be lifted back to the surface');
 
 // Rising players lead upward so remote jumps read immediately.
 const jumper=new RemoteGhostState({x:0,y:300,seq:1,animation:'jump',vx:0,vy:-12},0);
 assert.ok(jumper.sample(10,16).targetY<300,'a rising jump should lead upward');
+assert.equal(jumper.isFalling(),false);
 
-console.log('Remote ghost network state passed: bounded lead, ground-safe landings, stale-packet rejection and teleport snap.');
+console.log('Remote ghost network state passed: bounded lead, floor-clamped falls, stale-packet rejection and teleport snap.');
