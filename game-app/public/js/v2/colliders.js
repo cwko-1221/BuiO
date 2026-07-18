@@ -1,4 +1,4 @@
-import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260718-launcher';
+import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260718-launcher-vertical';
 
 export function fittedSize(object) {
   const geometry = ASSET_GEOMETRY[object.assetId];

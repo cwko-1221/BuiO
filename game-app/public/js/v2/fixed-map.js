@@ -1,10 +1,10 @@
-import { alphaBounds, fittedSize } from './colliders.js?v=20260718-launcher';
+import { alphaBounds, fittedSize } from './colliders.js?v=20260718-launcher-vertical';
 
 // One fixed, hand-authored course for every room. The route grammar follows
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07bh';
+export const MAP_VERSION = 'fixed-1000m-2026.07bi';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
@@ -417,7 +417,8 @@ function installSlingshotCrossings() {
       landingNode.x=spec.landingX;
       for (const attached of attachedBySupport.get(landing.id)||[]) attached.x+=shift;
     }
-    launcher.behavior={type:'launcher',power:30,velocityX:Math.sign(landing.x-launcher.x)*16.8,targetX:landing.x};
+    launcher.angle=0;
+    launcher.behavior={type:'launcher',power:30};
     for (const altitude of spec.remove) {
       const node=nodeAt(altitude);
       if (!node) throw new Error(`Missing removable slingshot rung at ${altitude}m`);

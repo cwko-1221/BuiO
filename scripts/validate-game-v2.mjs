@@ -94,8 +94,8 @@ for (const edge of launcherEdges) {
   if (a.altitude<300) failures.push(`${ao.id}: launcher appears before 300m`);
   if (ao.assetId!=='slingshot-platform'||ao.behavior?.type!=='launcher') failures.push(`${ao.id}: launcher art/behavior mismatch`);
   if (ao.behavior?.power!==30) failures.push(`${ao.id}: launcher power changed`);
-  if (Math.abs(ao.behavior?.velocityX)!==16.8) failures.push(`${ao.id}: launcher horizontal impulse changed`);
-  if (ao.behavior?.targetX!==b.x) failures.push(`${ao.id}: launcher target is detached from its landing`);
+  if ('velocityX' in ao.behavior||'targetX' in ao.behavior) failures.push(`${ao.id}: launcher must not steer toward its landing`);
+  if (ao.angle!==0) failures.push(`${ao.id}: launcher is not vertically aligned`);
   if (gap<=480||gap>585) failures.push(`${edge.from}>${edge.to}: launcher gap ${gap.toFixed(0)}px is not safely outside the measured double-jump envelope`);
   if (ao.tags?.includes('crumble-platform')) failures.push(`${ao.id}: launcher cannot crumble`);
 }

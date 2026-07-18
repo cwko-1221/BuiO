@@ -1,7 +1,7 @@
-import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js?v=20260718-launcher';
-import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260718-launcher';
-import { alphaBounds, fittedSize } from './colliders.js?v=20260718-launcher';
-import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260718-launcher';
+import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js?v=20260718-launcher-vertical';
+import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260718-launcher-vertical';
+import { alphaBounds, fittedSize } from './colliders.js?v=20260718-launcher-vertical';
+import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260718-launcher-vertical';
 
 function hashString(value) {
   let h=2166136261;

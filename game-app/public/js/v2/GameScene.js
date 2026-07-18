@@ -1,7 +1,7 @@
-import { ASSET_BY_ID, ZONE_NAMES } from './assets.js?v=20260718-launcher';
-import { AVAILABLE_ASSETS } from './available-assets.js?v=20260718-launcher';
-import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js?v=20260718-launcher';
-import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js?v=20260718-launcher';
+import { ASSET_BY_ID, ZONE_NAMES } from './assets.js?v=20260718-launcher-vertical';
+import { AVAILABLE_ASSETS } from './available-assets.js?v=20260718-launcher-vertical';
+import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js?v=20260718-launcher-vertical';
+import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js?v=20260718-launcher-vertical';
 import { createPlayerCompound, wakePlayer, PLAYER_SPRITE_DY } from './playerPhysics.js';
 import { sampleSky } from './background.js';
 import { RapidFallTracker } from './recovery.js';
@@ -367,10 +367,10 @@ export class GameScene extends Phaser.Scene {
             const readyAt=this.launcherCooldowns.get(obj.id)||0;
             if (this.time.now>=readyAt) {
               this.launcherCooldowns.set(obj.id,this.time.now+500);
-              this.setPlayerVelocity(obj.behavior.velocityX,-obj.behavior.power);
+              // The slingshot contributes vertical force only. Horizontal
+              // momentum and all in-air steering remain player-controlled.
+              this.setPlayerVelocity(null,-obj.behavior.power);
               this.airJump=1; this.coyote=0;
-              this.launcherTargetX=obj.behavior.targetX;
-              this.launcherMaxSpeed=Math.abs(obj.behavior.velocityX)||16.8;
               this.launcherBoostUntil=this.time.now+3500;
               const sprite=body.gameObject;
               if (sprite) {
@@ -472,17 +472,7 @@ export class GameScene extends Phaser.Scene {
     const wasGrounded = this.grounded;
     const under = [...this.groundContacts.values()].filter(body => !body.isSensor);
     this.grounded = under.length > 0 && vy >= -1.5;
-    if (this.grounded && time<(this.launcherBoostUntil||0)) {
-      // A launcher crossing ends on a deliberately small prop. Centre the
-      // player once the feet make contact so residual flight speed cannot
-      // carry them straight off the far edge.
-      if (Number.isFinite(this.launcherTargetX)&&Math.abs(this.playerBody.position.x-this.launcherTargetX)<100) {
-        Phaser.Physics.Matter.Matter.Body.setPosition(this.playerBody,{x:this.launcherTargetX,y:this.playerBody.position.y});
-      }
-      this.setPlayerVelocity(0,null);
-      this.launcherBoostUntil=0;
-      this.launcherTargetX=null;
-    }
+    if (this.grounded && time<(this.launcherBoostUntil||0)) this.launcherBoostUntil=0;
     if (!this.grounded) this.peakFallSpeed=Math.max(this.peakFallSpeed,vy);
     if (this.grounded&&!wasGrounded) {
       if (this.peakFallSpeed>2.8) this.hooks.onSound?.('land');
@@ -494,13 +484,11 @@ export class GameScene extends Phaser.Scene {
     this.routeAutoplay?.update(this, time);
 
     const dir = (rightHeld?1:0)-(leftHeld?1:0);
-    const launcherActive=time<(this.launcherBoostUntil||0)&&Number.isFinite(this.launcherTargetX);
-    const launcherDx=launcherActive?this.launcherTargetX-this.playerBody.position.x:0;
-    const launcherTarget=launcherActive
-      ? Math.sign(launcherDx)*Phaser.Math.Clamp(Math.abs(launcherDx)*.045,1.4,this.launcherMaxSpeed||16.8)
-      : 0;
-    const target = launcherActive ? launcherTarget + dir*.7 : dir * 5.6;
-    const nextVx = Phaser.Math.Linear(this.playerBody.velocity.x,target,launcherActive?.16:(this.grounded?.2:.085));
+    // A launched player gets stronger air authority, but never an automatic
+    // direction: with no left/right input the horizontal target is exactly 0.
+    const launcherFlight=!this.grounded&&time<(this.launcherBoostUntil||0);
+    const target = dir * (launcherFlight?8.4:5.6);
+    const nextVx = Phaser.Math.Linear(this.playerBody.velocity.x,target,launcherFlight?.11:(this.grounded?.2:.085));
     this.setPlayerVelocity(nextVx,null);
     const conveyorBody = under.find(b => b.courseObject?.behavior?.type === 'conveyor');
     if (conveyorBody && this.grounded) this.setPlayerVelocity(nextVx + conveyorBody.courseObject.behavior.speed,null);
