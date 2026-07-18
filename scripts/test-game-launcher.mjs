@@ -13,7 +13,7 @@ const course=buildCourse('launcher-test');
 const nodes=new Map(course.nodes.map(node=>[node.id,node]));
 const objects=new Map(course.objects.map(object=>[object.id,object]));
 const edges=course.routes.main.filter(edge=>edge.type==='launcher');
-assert.equal(edges.length,4,'the fixed route must contain four launcher crossings');
+assert.equal(edges.length,10,'the fixed route must contain ten launcher crossings');
 
 function flight({direction,vy,targetY,secondJumpAt=-1,launcher=false}) {
   const engine=Engine.create();

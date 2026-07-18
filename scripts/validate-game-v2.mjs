@@ -81,12 +81,14 @@ for (const edge of first.routes.main) {
   if (!doubleJump&&gap>140.1) failures.push(`${edge.from}>${edge.to}: compact-route gap is ${gap.toFixed(0)}px`);
 }
 const doubleJumpCount=first.objects.filter(object=>object.tags?.includes('double-jump-gap')).length;
-if (doubleJumpCount<17||doubleJumpCount>24) failures.push(`fixed course must contain 17-24 normal double-jump gaps, got ${doubleJumpCount}`);
+if (doubleJumpCount<12||doubleJumpCount>24) failures.push(`fixed course must contain 12-24 normal double-jump gaps alongside launchers, got ${doubleJumpCount}`);
 
 // Launcher crossings are deliberately outside the normal two-jump envelope.
 // They must be authored, powerful, above 300m, and never share crumble logic.
 const launcherEdges=first.routes.main.filter(edge=>edge.type==='launcher');
-if (launcherEdges.length!==4) failures.push(`expected 4 launcher crossings, got ${launcherEdges.length}`);
+if (launcherEdges.length!==10) failures.push(`expected 10 launcher crossings, got ${launcherEdges.length}`);
+const launcherGuides=first.annotations.filter(note=>note.type==='launcher-guide');
+if (launcherGuides.length!==launcherEdges.length) failures.push(`expected one direction arrow per launcher, got ${launcherGuides.length}/${launcherEdges.length}`);
 for (const edge of launcherEdges) {
   const a=nodeById.get(edge.from),b=nodeById.get(edge.to);
   const ao=byId.get(a.objectId),bo=byId.get(b.objectId);
@@ -96,6 +98,9 @@ for (const edge of launcherEdges) {
   if (ao.behavior?.power!==30) failures.push(`${ao.id}: launcher power changed`);
   if ('velocityX' in ao.behavior||'targetX' in ao.behavior) failures.push(`${ao.id}: launcher must not steer toward its landing`);
   if (ao.angle!==0) failures.push(`${ao.id}: launcher is not vertically aligned`);
+  const guide=launcherGuides.find(note=>note.id===`launcher-arrow-${a.altitude}`);
+  if (!guide||guide.assetId!=='ref-jump-arrow'||guide.showText!==false) failures.push(`${ao.id}: missing launcher direction arrow`);
+  if (guide&&guide.flipX!==(b.x<a.x)) failures.push(`${ao.id}: launcher arrow points in the wrong direction`);
   if (gap<=480||gap>585) failures.push(`${edge.from}>${edge.to}: launcher gap ${gap.toFixed(0)}px is not safely outside the measured double-jump envelope`);
   if (ao.tags?.includes('crumble-platform')) failures.push(`${ao.id}: launcher cannot crumble`);
 }

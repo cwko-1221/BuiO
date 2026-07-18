@@ -1,5 +1,5 @@
-import { buildCourse, validateCourse } from './course.js?v=20260718-launcher-vertical';
-import { GameScene } from './GameScene.js?v=20260718-launcher-vertical';
+import { buildCourse, validateCourse } from './course.js?v=20260718-session-launchers';
+import { GameScene } from './GameScene.js?v=20260718-session-launchers';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 
 const $ = id => document.getElementById(id);
@@ -117,7 +117,14 @@ function startGame(seed,durationSec,startedAt,resume){
     },
     onFrame:updateHudAndNetwork,
     onProgress:()=>{},
-    onFinish:()=>{socket.emit('player:summit');toast('🏆 登頂成功！',true);},
+    onFinish:()=>{
+      if(preview){toast('🏆 登頂成功！',true);return;}
+      socket.emit('player:summit',res=>{
+        if(!res?.ok)return;
+        toast(`🏆 第 ${res.place} 位登頂！`,true);
+        setTimeout(()=>showResults(res.leaderboard,{personal:true,place:res.place}),650);
+      });
+    },
     onEffect:(type)=>{if(type==='doubleJump')toast('✨ 二段跳');}
   };
   phaserGame=window.__game=new Phaser.Game({
@@ -201,10 +208,12 @@ function closeQuestion(){
 }
 
 function toast(message,gold=false){const el=document.createElement('div');el.className=`toast${gold?' gold':''}`;el.textContent=message;$('toasts').appendChild(el);setTimeout(()=>el.remove(),2700);}
-function showResults(leaderboard){
+function showResults(leaderboard,{personal=false,place=null}={}){
   phaserGame?.destroy(true);phaserGame=null;scene=null;const list=$('resultsList');list.innerHTML='';
   leaderboard.forEach(row=>{const d=document.createElement('div');d.className=`result-row${row.rank<=3?` top${row.rank}`:''}`;d.innerHTML=`<div class="rank">${['🥇','🥈','🥉'][row.rank-1]||row.rank}</div><div class="name">${escapeHtml(row.name)}${row.finished?' 🏁':''}</div><div class="stat">✓${row.correct} ✗${row.wrong}</div><div class="height">${Math.round((row.bestProgress??row.bestHeight??0)*100)}%</div>`;list.appendChild(d);});
-  $('resultEmoji').textContent='🏆';$('resultSub').textContent='今次攀登完成！';show('resultScreen');
+  $('resultEmoji').textContent=personal?'🏆':'🏁';
+  $('resultSub').textContent=personal?`你以第 ${place} 位登頂，其他玩家仍可繼續挑戰。`:'今次攀登完成！';
+  show('resultScreen');
 }
 
 if(preview){me={name:'Koko',studentId:'preview'};startGame(20260711,480,Date.now(),null);}else startRoomPolling();

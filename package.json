@@ -8,6 +8,8 @@
     "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-game-physics.mjs && node scripts/test-game-recovery.mjs && node scripts/test-game-crumble.mjs && node scripts/test-game-launcher.mjs && node scripts/test-game-network.mjs",
     "check:game": "node scripts/validate-game-v2.mjs",
     "check:network-live": "node scripts/test-game-network-live.mjs",
+    "check:session-live": "node scripts/test-game-session-live.mjs",
+    "check:launchers-live": "node scripts/test-game-launchers-live.mjs",
     "build:game-assets": "node scripts/generate-reference-extensions.mjs && node scripts/generate-fixed-bricks.mjs && node scripts/build-game-assets.mjs && node scripts/analyze-game-geometry.mjs && node scripts/pack-game-atlases.mjs",
     "postinstall": "cd whiteboard-app/client && npm install && npm run build"
   },

@@ -1,10 +1,10 @@
-import { alphaBounds, fittedSize } from './colliders.js?v=20260718-launcher-vertical';
+import { alphaBounds, fittedSize } from './colliders.js?v=20260718-session-launchers';
 
 // One fixed, hand-authored course for every room. The route grammar follows
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07bi';
+export const MAP_VERSION = 'fixed-1000m-2026.07bj';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
@@ -386,39 +386,75 @@ function compactPhysicalRoute() {
 }
 compactPhysicalRoute();
 
-// Four launcher crossings replace redundant footholds above 300m. Their
+// Ten launcher crossings replace redundant footholds from 300m onward. Their
 // visible edge-to-edge gaps exceed the ordinary double-jump envelope, so the
 // slingshot is a required route mechanic rather than optional decoration.
 function installSlingshotCrossings() {
   const objectById=new Map(objects.map(object=>[object.id,object]));
   const nodeAt=altitude=>nodes.find(node=>node.route==='main'&&node.altitude===altitude);
   const specs=[
+    {from:300,remove:[312,323],to:333,landingX:4695},
     {from:370,remove:[382],to:402,landingX:4300},
+    {from:469,remove:[482,495],to:508,landingX:2940,moves:[{altitude:521,x:3264,doubleJump:true},{altitude:547,x:3680,doubleJump:true},{altitude:556,x:3861,removeDoubleJump:true}]},
     {from:580,remove:[590,601],to:615,landingX:3150},
+    {from:646,remove:[662],to:678,landingX:2200,moves:[{altitude:680,x:2326}]},
+    {from:710,remove:[730,740],to:748,landingX:900},
     {from:837,remove:[849],to:865,landingX:1330},
-    {from:914,remove:[927,935],to:943,landingX:1170}
+    {from:868,remove:[871,874,877,880],to:883,landingX:2180},
+    {from:914,remove:[927,935],to:943,landingX:1170},
+    {from:951,remove:[960],to:968,landingX:500,moves:[{altitude:996,x:390}]}
   ];
   const attachedBySupport=new Map();
   for (const object of objects.filter(item=>item.supportId)) {
     if (!attachedBySupport.has(object.supportId)) attachedBySupport.set(object.supportId,[]);
     attachedBySupport.get(object.supportId).push(object);
   }
+  const moveNode=(node,x)=>{
+    const object=objectById.get(node.objectId);
+    const shift=x-object.x;
+    object.x=x;
+    node.x=x;
+    for (const attached of attachedBySupport.get(object.id)||[]) attached.x+=shift;
+  };
   for (const spec of specs) {
     const fromNode=nodeAt(spec.from), landingNode=nodeAt(spec.to);
     if (!fromNode||!landingNode) throw new Error(`Missing slingshot crossing ${spec.from}m>${spec.to}m`);
     const launcher=objectById.get(fromNode.objectId), landing=objectById.get(landingNode.objectId);
+    if (Number.isFinite(spec.fromX)) moveNode(fromNode,spec.fromX);
     launcher.assetId='slingshot-platform';
     launcher.tags=launcher.tags.filter(tag=>tag!=='crumble-platform');
     launcher.tags.push('slingshot-launcher');
     landing.tags.push('slingshot-landing');
     if (Number.isFinite(spec.landingX)) {
-      const shift=spec.landingX-landing.x;
-      landing.x=spec.landingX;
-      landingNode.x=spec.landingX;
-      for (const attached of attachedBySupport.get(landing.id)||[]) attached.x+=shift;
+      moveNode(landingNode,spec.landingX);
+    }
+    for (const move of spec.moves||[]) {
+      const node=nodeAt(move.altitude);
+      if (!node) throw new Error(`Missing slingshot follow-up at ${move.altitude}m`);
+      moveNode(node,move.x);
+      if (move.doubleJump) {
+        const object=objectById.get(node.objectId);
+        if (!object.tags.includes('double-jump-gap')) object.tags.push('double-jump-gap');
+      }
+      if (move.removeDoubleJump) {
+        const object=objectById.get(node.objectId);
+        object.tags=object.tags.filter(tag=>tag!=='double-jump-gap');
+      }
     }
     launcher.angle=0;
     launcher.behavior={type:'launcher',power:30};
+    const direction=landing.x>=launcher.x?1:-1;
+    launcher.tags.push(direction>0?'launcher-steer-right':'launcher-steer-left');
+    annotations.push({
+      id:`launcher-arrow-${spec.from}`,
+      type:'launcher-guide',
+      x:launcher.x,
+      y:launcher.y-105,
+      assetId:'ref-jump-arrow',
+      renderSize:{w:58,h:58},
+      showText:false,
+      flipX:direction<0
+    });
     for (const altitude of spec.remove) {
       const node=nodeAt(altitude);
       if (!node) throw new Error(`Missing removable slingshot rung at ${altitude}m`);

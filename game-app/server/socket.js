@@ -174,7 +174,10 @@ module.exports = function (io, app) {
       room.posTimer = setInterval(() => {
         const positions=[];
         for (const p of room.players.values()) {
-          if (!p.connected) continue;
+          // A player who joins after the round starts has not sent a world
+          // position yet. Do not briefly render the placeholder (0, 0),
+          // which is beside the summit on this fixed map.
+          if (!p.connected || !p.stateSeq) continue;
           positions.push(realtimePosition(p));
         }
         nsp.to(playerRoom(room.code)).volatile.emit('game:positions',positions);
@@ -217,6 +220,7 @@ module.exports = function (io, app) {
       // to the same in-game progress instead of duplicating the player.
       const key = studentId ? `s:${studentId}` : `a:${socket.id}`;
       let player = room.players.get(key);
+      const isNewPlayer = !player;
       if (!player) {
         player = {
           key,
@@ -265,7 +269,9 @@ module.exports = function (io, app) {
         seed: room.seed,
         durationSec: room.durationSec,
         startedAt: room.startedAt,
-        resume: room.phase === 'playing'
+        // Only a genuine reconnect resumes saved coordinates. A student who
+        // joins an already-running room must let the client use course.start.
+        resume: room.phase === 'playing' && !isNewPlayer
           ? {
               x: player.x, y: player.y, energy: player.energy,
               bestProgress: player.bestProgress ?? player.bestHeight,
@@ -375,18 +381,22 @@ module.exports = function (io, app) {
       }, 4900);
     });
 
-    socket.on('player:summit', () => {
+    socket.on('player:summit', (ack) => {
       const room = rooms.get(socket.data.code);
       const player = room?.players.get(socket.data.playerKey);
-      if (!room || !player || room.phase !== 'playing' || player.finishedAt) return;
+      if (!room || !player || room.phase !== 'playing') return ack?.({ ok: false });
+      if (player.finishedAt) {
+        const finished=[...room.players.values()].filter(p=>p.finishedAt).sort((a,b)=>a.finishedAt-b.finishedAt);
+        return ack?.({ok:true,place:finished.indexOf(player)+1,leaderboard:buildLeaderboard(room)});
+      }
       player.finishedAt = Date.now();
       player.bestHeight = 1;
       player.bestProgress = 1;
       const place = [...room.players.values()].filter(p => p.finishedAt).length;
       nsp.to(room.code).emit('game:summit', { name: player.name, place });
-      // Everyone made it — no reason to keep the clock running.
-      const allDone = [...room.players.values()].every(p => p.finishedAt || !p.connected);
-      if (allDone) endGame(room, 'all-finished');
+      // Finishing is individual. The room remains playable until the teacher
+      // ends it or the timer expires, even if all connected students finish.
+      ack?.({ok:true,place,leaderboard:buildLeaderboard(room)});
     });
 
     // ---------------- Disconnects ----------------

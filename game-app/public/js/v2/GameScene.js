@@ -1,7 +1,7 @@
-import { ASSET_BY_ID, ZONE_NAMES } from './assets.js?v=20260718-launcher-vertical';
-import { AVAILABLE_ASSETS } from './available-assets.js?v=20260718-launcher-vertical';
-import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js?v=20260718-launcher-vertical';
-import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js?v=20260718-launcher-vertical';
+import { ASSET_BY_ID, ZONE_NAMES } from './assets.js?v=20260718-session-launchers';
+import { AVAILABLE_ASSETS } from './available-assets.js?v=20260718-session-launchers';
+import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js?v=20260718-session-launchers';
+import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js?v=20260718-session-launchers';
 import { createPlayerCompound, wakePlayer, PLAYER_SPRITE_DY } from './playerPhysics.js';
 import { sampleSky } from './background.js';
 import { RapidFallTracker } from './recovery.js';
@@ -239,7 +239,8 @@ export class GameScene extends Phaser.Scene {
       if (note.assetId) {
         const texture=ATLAS_INDEX[note.assetId];
         this.add.image(note.x,note.y,texture?.key||note.assetId,texture?.frame||null)
-          .setDisplaySize(note.renderSize?.w||220,note.renderSize?.h||110).setDepth(60);
+          .setDisplaySize(note.renderSize?.w||220,note.renderSize?.h||110)
+          .setFlipX(!!note.flipX).setAngle(note.angle||0).setDepth(60);
       }
       if (note.showText!==false) {
         this.add.text(note.x,note.y+(note.assetId?(note.renderSize?.h||110)*.58:0),note.text,{
@@ -580,7 +581,13 @@ export class GameScene extends Phaser.Scene {
       checkpoint:this.checkpoint
     });
     if (reachedCheckpoint?.altitude>(this.checkpoint?.altitude??-1)) this.unlockCheckpoint(reachedCheckpoint);
-    if (this.rapidFallTracker.update(time,altitude)) {
+    // A launcher deliberately creates a >100m descent from its high arc.
+    // Keep refreshing the fall baseline during that authored flight so it is
+    // not mistaken for falling off the course. Ordinary falls still use the
+    // same 100m / 2.4s recovery rule as soon as the boost ends or lands.
+    if (time<(this.launcherBoostUntil||0)) {
+      this.rapidFallTracker.reset(time,altitude);
+    } else if (this.rapidFallTracker.update(time,altitude)) {
       this.resetToCheckpoint('rapidFall');
       return;
     }
