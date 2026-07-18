@@ -29,7 +29,7 @@ for (const checkpoint of course.checkpoints) {
   previousProgress=checkpoint.progress;
 }
 const marketCheckpoint=course.checkpoints.find(checkpoint=>checkpoint.altitude===274);
-assert.equal(resolveCheckpoint(course.checkpoints,{altitude:276}).id,marketCheckpoint.id,'crossing a checkpoint altitude must unlock it even if the Matter sensor misses one frame');
-assert.equal(resolveCheckpoint(course.checkpoints,{progress:marketCheckpoint.progress}).id,marketCheckpoint.id,'route progress must restore the latest checkpoint');
+assert.equal(resolveCheckpoint(course.checkpoints,{altitude:276}).id,course.checkpoints[0].id,'crossing a checkpoint altitude must not unlock its flag');
+assert.equal(resolveCheckpoint(course.checkpoints,{progress:marketCheckpoint.progress}).id,course.checkpoints[0].id,'route progress must not unlock a checkpoint');
 assert.equal(resolveCheckpoint(course.checkpoints,{checkpoint:checkpointPayload(marketCheckpoint)}).id,marketCheckpoint.id,'server checkpoint payload must survive reconnect');
 console.log('Rapid-fall recovery test passed: 100m / 2.4s rolling window.');

@@ -86,7 +86,7 @@ if (doubleJumpCount<12||doubleJumpCount>24) failures.push(`fixed course must con
 // Launcher crossings are deliberately outside the normal two-jump envelope.
 // They must be authored, powerful, above 300m, and never share crumble logic.
 const launcherEdges=first.routes.main.filter(edge=>edge.type==='launcher');
-if (launcherEdges.length!==10) failures.push(`expected 10 launcher crossings, got ${launcherEdges.length}`);
+if (launcherEdges.length!==6) failures.push(`expected 6 launcher crossings, got ${launcherEdges.length}`);
 const launcherGuides=first.annotations.filter(note=>note.type==='launcher-guide');
 if (launcherGuides.length!==launcherEdges.length) failures.push(`expected one direction arrow per launcher, got ${launcherGuides.length}/${launcherEdges.length}`);
 for (const edge of launcherEdges) {
@@ -95,7 +95,7 @@ for (const edge of launcherEdges) {
   const gap=Math.max(0,Math.abs(b.x-a.x)-(fittedSize(ao).w+fittedSize(bo).w)/2);
   if (a.altitude<300) failures.push(`${ao.id}: launcher appears before 300m`);
   if (ao.assetId!=='slingshot-platform'||ao.behavior?.type!=='launcher') failures.push(`${ao.id}: launcher art/behavior mismatch`);
-  if (ao.behavior?.power!==30) failures.push(`${ao.id}: launcher power changed`);
+  if (ao.behavior?.power<8||ao.behavior?.power>18||ao.behavior?.airSpeed<9||ao.behavior?.airSpeed>32) failures.push(`${ao.id}: launcher tuning is outside the safe range`);
   if ('velocityX' in ao.behavior||'targetX' in ao.behavior) failures.push(`${ao.id}: launcher must not steer toward its landing`);
   if (ao.angle!==0) failures.push(`${ao.id}: launcher is not vertically aligned`);
   const guide=launcherGuides.find(note=>note.id===`launcher-arrow-${a.altitude}`);

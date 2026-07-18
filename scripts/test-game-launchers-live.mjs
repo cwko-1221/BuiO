@@ -26,23 +26,28 @@ try {
   const crossings=await page.evaluate(()=>{
     const scene=window.__game.scene.getScene('GameScene');
     const nodes=new Map(scene.course.nodes.map(node=>[node.id,node]));
-    return scene.course.routes.main.filter(edge=>edge.type==='launcher').map(edge=>{
+    return scene.course.routes.main.map((edge,index)=>{
+      if(edge.type!=='launcher')return null;
       const from=nodes.get(edge.from),to=nodes.get(edge.to);
-      return {fromAltitude:from.altitude,toAltitude:to.altitude,fromX:from.x,fromY:from.y,toX:to.x,toY:to.y,direction:Math.sign(to.x-from.x)};
-    });
+      const after=nodes.get(scene.course.routes.main[index+1]?.to);
+      const afterObject=scene.course.objects.find(object=>object.id===after?.objectId);
+      const afterTop=afterObject?afterObject.y-afterObject.h/2:after?.y;
+      return {fromAltitude:from.altitude,toAltitude:to.altitude,afterAltitude:after?.altitude,fromX:from.x,fromY:from.y,toX:to.x,toY:to.y,afterY:after?.y,afterTop,direction:Math.sign(to.x-from.x)};
+    }).filter(Boolean);
   });
-  if(crossings.length!==10)throw new Error(`expected 10 launcher crossings, got ${crossings.length}`);
+  if(crossings.length!==6)throw new Error(`expected 6 launcher crossings, got ${crossings.length}`);
   const selectedCrossings=process.env.LAUNCHER_ALTITUDE
     ? crossings.filter(item=>item.fromAltitude===Number(process.env.LAUNCHER_ALTITUDE))
     : crossings;
 
   const results=[];
   for(const crossing of selectedCrossings){
-    let landed=false,last=null,usedHoldMs=null;
-    const trace=[];
+    let landed=false,last=null,usedHoldMs=null,minY=Infinity;
+    const trace=[],attempts=[];
     // A human may correct the timing after one miss. Try a few ordinary
     // counter-steer timings through the same action map as keyboard and touch.
-    for(const holdMs of [1250,1330,1170,1410]){
+    const holdOptions=process.env.LAUNCHER_HOLD?[Number(process.env.LAUNCHER_HOLD)]:[180,240,300,360,420,480,560,650,750];
+    for(const holdMs of holdOptions){
       await page.evaluate(({fromX,fromY})=>{
         const scene=window.__game.scene.getScene('GameScene');
         scene.setAction('left',false);scene.setAction('right',false);scene.clearContacts();
@@ -55,13 +60,19 @@ try {
         return scene.launcherBoostUntil>scene.time.now;
       },null,{timeout:3500});
       const launchedAt=Date.now();
-      let held=null;
+      let held=null,jumpChecked=false,closest=null;
       while(Date.now()-launchedAt<3900){
         last=await page.evaluate(()=>{
           const scene=window.__game.scene.getScene('GameScene');
           return {x:scene.player.x,y:scene.player.y,vx:scene.playerBody.velocity.x,vy:scene.playerBody.velocity.y,grounded:scene.grounded,boostMs:scene.launcherBoostUntil-scene.time.now,left:scene.actions.left,right:scene.actions.right};
         });
         if(process.env.DEBUG_LAUNCHER&&trace.length<80)trace.push({t:Date.now()-launchedAt,...last});
+        minY=Math.min(minY,last.y);
+        if(last.vy>0&&Math.abs(last.y-crossing.toY)<150&&(!closest||Math.abs(last.x-crossing.toX)<Math.abs(closest.x-crossing.toX))) closest={x:last.x,y:last.y,vy:last.vy};
+        if(!jumpChecked&&Date.now()-launchedAt>250){
+          await page.evaluate(()=>window.__game.scene.getScene('GameScene').queueJump());
+          jumpChecked=true;
+        }
         const desired=Date.now()-launchedAt<holdMs?(crossing.direction>0?'right':'left'):null;
         if(desired!==held){
           await page.evaluate(({previous,next})=>{
@@ -76,10 +87,12 @@ try {
         await page.waitForTimeout(20);
       }
       if(held)await page.evaluate(action=>window.__game.scene.getScene('GameScene').setAction(action,false),held);
+      attempts.push({holdMs,closest});
       if(landed)break;
     }
-    results.push({from:crossing.fromAltitude,to:crossing.toAltitude,landed,holdMs:usedHoldMs,x:Number(last?.x.toFixed(1)),targetX:Number(crossing.toX.toFixed(1))});
-    if(!landed)throw new Error(`${crossing.fromAltitude}m launcher did not land on ${crossing.toAltitude}m target: ${JSON.stringify(last)} trace=${JSON.stringify(trace)}`);
+    results.push({from:crossing.fromAltitude,to:crossing.toAltitude,after:crossing.afterAltitude,landed,holdMs:usedHoldMs,x:Number(last?.x.toFixed(1)),targetX:Number(crossing.toX.toFixed(1)),apexY:Number(minY.toFixed(1)),followingStandY:Number((crossing.afterTop-32).toFixed(1))});
+    if(!landed)throw new Error(`${crossing.fromAltitude}m launcher did not land on ${crossing.toAltitude}m target: ${JSON.stringify(last)} attempts=${JSON.stringify(attempts)} trace=${JSON.stringify(trace)}`);
+    if(minY<=crossing.afterTop-32)throw new Error(`${crossing.fromAltitude}m launcher can reach the following ${crossing.afterAltitude}m platform: ${minY.toFixed(1)} <= ${(crossing.afterTop-32).toFixed(1)}`);
   }
 
   // Leave the camera on a launcher so the captured frame also verifies that
@@ -87,7 +100,7 @@ try {
   const sample=crossings[5];
   await page.evaluate(({fromX,fromY})=>window.__game.scene.getScene('GameScene').setPlayerPosition(fromX,fromY-55),sample);
   await page.waitForTimeout(500);
-  const screenshot=join(tmpdir(),'buio-ten-launcher-arrows.png');
+  const screenshot=join(tmpdir(),'buio-six-launcher-arrows.png');
   await page.screenshot({path:screenshot});
   if(errors.length)throw new Error(`browser errors: ${errors.join(' | ')}`);
   console.log(JSON.stringify({results,screenshot},null,2));

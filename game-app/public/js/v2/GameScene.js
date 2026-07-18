@@ -1,12 +1,12 @@
-import { ASSET_BY_ID, ZONE_NAMES } from './assets.js?v=20260718-session-launchers';
-import { AVAILABLE_ASSETS } from './available-assets.js?v=20260718-session-launchers';
-import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js?v=20260718-session-launchers';
-import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js?v=20260718-session-launchers';
+import { ASSET_BY_ID, ZONE_NAMES } from './assets.js?v=20260719-six-launchers';
+import { AVAILABLE_ASSETS } from './available-assets.js?v=20260719-six-launchers';
+import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js?v=20260719-six-launchers';
+import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js?v=20260719-six-launchers';
 import { createPlayerCompound, wakePlayer, PLAYER_SPRITE_DY } from './playerPhysics.js';
 import { sampleSky } from './background.js';
 import { RapidFallTracker } from './recovery.js';
 import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js';
-import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js';
+import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js?v=20260719-flag-checkpoints';
 import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest';
 import { CrumblePlatformState } from './CrumblePlatform.js?v=20260717-crumble';
 import { RemoteGhostState, SURFACE_TOLERANCE } from './RemoteGhostState.js?v=20260718-network-4';
@@ -19,11 +19,7 @@ export class GameScene extends Phaser.Scene {
     this.actions = { left:false, right:false, down:false, jumpQueued:0 };
     this.energy = hooks.energy ?? 40;
     this.progress = hooks.progress ?? 0;
-    this.checkpoint = resolveCheckpoint(course.checkpoints, {
-      progress:this.progress,
-      altitude:hooks.altitude,
-      checkpoint:hooks.checkpoint
-    });
+    this.checkpoint = resolveCheckpoint(course.checkpoints, {checkpoint:hooks.checkpoint});
     this.airJump = 1;
     this.coyote = 0;
     this.grounded = false;
@@ -277,7 +273,9 @@ export class GameScene extends Phaser.Scene {
       const flag = this.add.image(cp.x+22,cp.y-58,tex?.key||'checkpoint-flag',tex?.frame||null).setDisplaySize(54,54).setDepth(9);
       this.add.text(cp.x,cp.y+14,cp.zoneName,{fontFamily:'Microsoft JhengHei',fontSize:'16px',fontStyle:'bold',color:'#ffffff',stroke:'#20263a',strokeThickness:5}).setOrigin(.5).setDepth(20);
       pole.setAlpha(.9); flag.setAlpha(.95);
-      const trigger=collideWithPlayer(this.matter.add.rectangle(cp.x,cp.y-35,240,230,{isStatic:true,isSensor:true,label:'checkpoint'}));
+      // Match the painted flag and pole instead of using a generous invisible
+      // area. Players must physically touch this visible marker to unlock it.
+      const trigger=collideWithPlayer(this.matter.add.rectangle(cp.x+20,cp.y-43,64,90,{isStatic:true,isSensor:true,label:'checkpoint-flag'}));
       trigger.checkpointTrigger=cp;
       this.checkpointBodies.push(trigger);
     }
@@ -371,8 +369,9 @@ export class GameScene extends Phaser.Scene {
               // The slingshot contributes vertical force only. Horizontal
               // momentum and all in-air steering remain player-controlled.
               this.setPlayerVelocity(null,-obj.behavior.power);
-              this.airJump=1; this.coyote=0;
-              this.launcherBoostUntil=this.time.now+3500;
+              this.airJump=0; this.coyote=0;
+              this.launcherAirSpeed=obj.behavior.airSpeed||8.4;
+              this.launcherBoostUntil=this.time.now+(obj.behavior.flightMs||1600);
               const sprite=body.gameObject;
               if (sprite) {
                 const baseScaleY=sprite.scaleY;
@@ -488,7 +487,7 @@ export class GameScene extends Phaser.Scene {
     // A launched player gets stronger air authority, but never an automatic
     // direction: with no left/right input the horizontal target is exactly 0.
     const launcherFlight=!this.grounded&&time<(this.launcherBoostUntil||0);
-    const target = dir * (launcherFlight?8.4:5.6);
+    const target = dir * (launcherFlight?(this.launcherAirSpeed||8.4):5.6);
     const nextVx = Phaser.Math.Linear(this.playerBody.velocity.x,target,launcherFlight?.11:(this.grounded?.2:.085));
     this.setPlayerVelocity(nextVx,null);
     const conveyorBody = under.find(b => b.courseObject?.behavior?.type === 'conveyor');
@@ -520,7 +519,12 @@ export class GameScene extends Phaser.Scene {
       if (this.stuckMs>=3000) this.resetToSafePose('stuck');
     } else { this.stuckAnchor=null; this.stuckMs=0; this.stuckNudged=false; }
 
-    if (this.actions.jumpQueued > 0 && this.energy >= 8) {
+    // The authored launcher arc is deliberately capped below the following
+    // route platform. Consuming jump input during that short flight prevents
+    // a late second jump from adding height and bypassing several platforms.
+    if (launcherFlight && this.actions.jumpQueued > 0) {
+      this.actions.jumpQueued=0;
+    } else if (this.actions.jumpQueued > 0 && this.energy >= 8) {
       if (downHeld && this.grounded) {
         this.dropUntil = time + 240; this.playerParts.main.isSensor = true; this.groundContacts.clear(); this.setPlayerVelocity(null,2.2); this.actions.jumpQueued = 0;
       } else if (this.coyote > 0 || this.airJump > 0) {
@@ -575,12 +579,6 @@ export class GameScene extends Phaser.Scene {
 
     if (this.player.y > this.course.world.height + 180 || this.player.x < -100 || this.player.x > this.course.world.width+100) this.respawn();
     const altitude = Math.max(0,(this.course.startAltitudeY-this.player.y)/5);
-    const reachedCheckpoint=resolveCheckpoint(this.course.checkpoints,{
-      progress:this.progress,
-      altitude,
-      checkpoint:this.checkpoint
-    });
-    if (reachedCheckpoint?.altitude>(this.checkpoint?.altitude??-1)) this.unlockCheckpoint(reachedCheckpoint);
     // A launcher deliberately creates a >100m descent from its high arc.
     // Keep refreshing the fall baseline during that authored flight so it is
     // not mistaken for falling off the course. Ordinary falls still use the
@@ -604,8 +602,6 @@ export class GameScene extends Phaser.Scene {
   reachProgress(sensor) {
     if (sensor.progress <= this.progress) return;
     this.progress = sensor.progress;
-    const reached = this.course.checkpoints.filter(c => c.progress <= this.progress);
-    if (reached.length) this.unlockCheckpoint(reached[reached.length-1]);
     this.hooks.onProgress?.(this.progress,this.checkpoint);
   }
 
@@ -664,9 +660,6 @@ export class GameScene extends Phaser.Scene {
 
   hitHazard(hazard) {
     if (this.time.now<this.invulnerableUntil) return;
-    const cp=this.course.checkpoints.filter(item=>item.altitude<=hazard.checkpointAltitude).at(-1)||this.checkpoint;
-    if (cp) this.checkpoint=cp;
-    this.lastSafePose=cp?this.checkpointPose(cp):this.lastSafePose;
     this.resetToCheckpoint('laser');
   }
 

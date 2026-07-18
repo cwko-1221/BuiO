@@ -1,5 +1,5 @@
-import { buildCourse, validateCourse } from './course.js?v=20260718-session-launchers';
-import { GameScene } from './GameScene.js?v=20260718-session-launchers';
+import { buildCourse, validateCourse } from './course.js?v=20260719-six-launchers';
+import { GameScene } from './GameScene.js?v=20260719-flag-checkpoints';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 
 const $ = id => document.getElementById(id);

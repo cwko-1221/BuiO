@@ -1,10 +1,10 @@
-import { alphaBounds, fittedSize } from './colliders.js?v=20260718-session-launchers';
+import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers';
 
 // One fixed, hand-authored course for every room. The route grammar follows
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07bj';
+export const MAP_VERSION = 'fixed-1000m-2026.07bk';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
@@ -386,23 +386,21 @@ function compactPhysicalRoute() {
 }
 compactPhysicalRoute();
 
-// Ten launcher crossings replace redundant footholds from 300m onward. Their
+// Six launcher crossings replace redundant footholds from 300m onward. Their
 // visible edge-to-edge gaps exceed the ordinary double-jump envelope, so the
 // slingshot is a required route mechanic rather than optional decoration.
+// Power and air authority are tuned per crossing: each arc clears its named
+// landing, while its apex remains below the platform after that landing.
 function installSlingshotCrossings() {
   const objectById=new Map(objects.map(object=>[object.id,object]));
   const nodeAt=altitude=>nodes.find(node=>node.route==='main'&&node.altitude===altitude);
   const specs=[
-    {from:300,remove:[312,323],to:333,landingX:4695},
-    {from:370,remove:[382],to:402,landingX:4300},
-    {from:469,remove:[482,495],to:508,landingX:2940,moves:[{altitude:521,x:3264,doubleJump:true},{altitude:547,x:3680,doubleJump:true},{altitude:556,x:3861,removeDoubleJump:true}]},
-    {from:580,remove:[590,601],to:615,landingX:3150},
-    {from:646,remove:[662],to:678,landingX:2200,moves:[{altitude:680,x:2326}]},
-    {from:710,remove:[730,740],to:748,landingX:900},
-    {from:837,remove:[849],to:865,landingX:1330},
-    {from:868,remove:[871,874,877,880],to:883,landingX:2180},
-    {from:914,remove:[927,935],to:943,landingX:1170},
-    {from:951,remove:[960],to:968,landingX:500,moves:[{altitude:996,x:390}]}
+    {from:300,remove:[312,323],to:333,landingX:4695,power:14.75,airSpeed:23,flightMs:1350},
+    {from:469,remove:[482,495],to:508,landingX:2940,power:15.25,airSpeed:32,flightMs:1400,moves:[{altitude:521,x:2800,removeDoubleJump:true},{altitude:534,x:3120,doubleJump:true},{altitude:547,x:3340},{altitude:556,x:3560,removeDoubleJump:true},{altitude:570,x:3895,doubleJump:true}]},
+    {from:580,remove:[590,601],to:615,landingX:3150,power:14.5,airSpeed:24,flightMs:1350},
+    {from:710,remove:[730,740],to:748,landingX:900,power:14.5,airSpeed:28,flightMs:1250},
+    {from:868,remove:[871,874,877,880],to:883,landingX:2180,power:10,airSpeed:30,flightMs:1100},
+    {from:951,remove:[960],to:968,landingX:500,power:10,airSpeed:26,flightMs:1100,moves:[{altitude:976,x:300},{altitude:996,x:620,doubleJump:true},{altitude:998,x:840},{altitude:1000,x:1060}]}
   ];
   const attachedBySupport=new Map();
   for (const object of objects.filter(item=>item.supportId)) {
@@ -442,7 +440,7 @@ function installSlingshotCrossings() {
       }
     }
     launcher.angle=0;
-    launcher.behavior={type:'launcher',power:30};
+    launcher.behavior={type:'launcher',power:spec.power,airSpeed:spec.airSpeed,flightMs:spec.flightMs};
     const direction=landing.x>=launcher.x?1:-1;
     launcher.tags.push(direction>0?'launcher-steer-right':'launcher-steer-left');
     annotations.push({
@@ -463,13 +461,6 @@ function installSlingshotCrossings() {
       object.role='decor';
       object.tags.push('removed-for-slingshot-gap');
     }
-  }
-  // Moving the first launcher landing shortened its immediate follow-up, so
-  // it is no longer labelled as a double-jump challenge.
-  const shortenedFollowUp=nodeAt(420);
-  if (shortenedFollowUp) {
-    const object=objectById.get(shortenedFollowUp.objectId);
-    object.tags=object.tags.filter(tag=>tag!=='double-jump-gap');
   }
   const routeNodes=nodes.filter(node=>node.route==='main');
   main.length=0;

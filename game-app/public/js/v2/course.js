@@ -1,7 +1,7 @@
-import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js?v=20260718-session-launchers';
-import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260718-session-launchers';
-import { alphaBounds, fittedSize } from './colliders.js?v=20260718-session-launchers';
-import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260718-session-launchers';
+import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js?v=20260719-six-launchers';
+import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260719-six-launchers';
+import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers';
+import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260719-six-launchers';
 
 function hashString(value) {
   let h=2166136261;
@@ -103,7 +103,19 @@ export function validateCourse(course) {
       const margin=Math.min(1-gap/700,1-rise/240);
       minLauncherMargin=Math.min(minLauncherMargin,margin);
       if (gap<=460) errors.push(`launcher edge ${edge.from}>${edge.to} is too close to guarantee launcher-only traversal (${gap.toFixed(0)}px)`);
-      if (gap>585||rise>215||ao.behavior.power<28) errors.push(`launcher edge ${edge.from}>${edge.to} exceeds the launcher envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise)`);
+      const {power,airSpeed,flightMs}=ao.behavior;
+      if (gap>585||rise>215||power<8||power>18||airSpeed<9||airSpeed>32||flightMs<900||flightMs>1600) {
+        errors.push(`launcher edge ${edge.from}>${edge.to} exceeds its tuned envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise, ${power} power, ${airSpeed} air speed)`);
+      }
+      // Matter's measured apex is just under 0.98 * power² for this player.
+      // It must clear the named landing but remain below the next route node,
+      // otherwise a player can sail over the landing and skip a route tier.
+      const estimatedApex=power*power*.98;
+      const edgeIndex=course.routes.main.indexOf(edge);
+      const following=course.routes.main[edgeIndex+1];
+      const after=following?nodes.get(following.to):null;
+      if (estimatedApex<rise+16) errors.push(`launcher edge ${edge.from}>${edge.to} has insufficient apex clearance`);
+      if (after&&estimatedApex>=a.y-after.y-2) errors.push(`launcher edge ${edge.from}>${edge.to} can rise past the following platform`);
       continue;
     }
     const horizontalMargin=1-gap/360;
