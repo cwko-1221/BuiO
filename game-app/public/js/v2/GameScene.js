@@ -9,7 +9,7 @@ import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js'
 import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js';
 import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest';
 import { CrumblePlatformState } from './CrumblePlatform.js?v=20260717-crumble';
-import { RemoteGhostState } from './RemoteGhostState.js?v=20260717-network-2';
+import { RemoteGhostState } from './RemoteGhostState.js?v=20260718-network-3';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {

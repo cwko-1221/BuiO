@@ -149,9 +149,9 @@ try {
     screenshot
   };
   console.log(JSON.stringify(report,null,2));
-  if (!steady.length||average>25||maximum>55) throw new Error(`remote ghost latency exceeds budget: average=${average.toFixed(1)}px max=${maximum.toFixed(1)}px`);
+  if (!steady.length||average>12||maximum>35) throw new Error(`remote ghost latency exceeds budget: average=${average.toFixed(1)}px max=${maximum.toFixed(1)}px`);
   if (stalledSteps>movementPairs.length*.25) throw new Error(`remote walking visibly stalls on ${stalledSteps}/${movementPairs.length} moving samples`);
-  if (!Number.isFinite(jumpReactionMs)||jumpReactionMs>80) throw new Error(`remote jump reaction is too slow: ${jumpReactionMs}ms`);
+  if (!Number.isFinite(jumpReactionMs)||jumpReactionMs>50) throw new Error(`remote jump reaction is too slow: ${jumpReactionMs}ms`);
   if (minimumGhostY>remoteGround-45) throw new Error('remote ghost did not visibly jump');
   if (maximumGhostY>remoteGround+3) throw new Error(`remote ghost rendered below ground by ${(maximumGhostY-remoteGround).toFixed(1)}px`);
   if (loadReport.playersSeen<20) throw new Error(`20-player room only broadcast ${loadReport.playersSeen} players`);

@@ -26,6 +26,8 @@ const playerRoom = code => `${code}:players`;
 function realtimePosition(p) {
   return {
     id: p.key, name: p.name, x: p.x, y: p.y,
+    vx: Math.round((p.vx || 0) * 100) / 100,
+    vy: Math.round((p.vy || 0) * 100) / 100,
     facing: p.facing || 1, animation: p.animation || 'idle',
     seq: p.stateSeq || 0, f: !!p.finishedAt
   };
