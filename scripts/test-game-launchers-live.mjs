@@ -26,16 +26,16 @@ try {
   const crossings=await page.evaluate(()=>{
     const scene=window.__game.scene.getScene('GameScene');
     const nodes=new Map(scene.course.nodes.map(node=>[node.id,node]));
-    return scene.course.routes.main.map((edge,index)=>{
+    const objects=new Map(scene.course.objects.map(object=>[object.id,object]));
+    return scene.course.routes.main.map(edge=>{
       if(edge.type!=='launcher')return null;
       const from=nodes.get(edge.from),to=nodes.get(edge.to);
-      const after=nodes.get(scene.course.routes.main[index+1]?.to);
-      const afterObject=scene.course.objects.find(object=>object.id===after?.objectId);
-      const afterTop=afterObject?afterObject.y-afterObject.h/2:after?.y;
-      return {fromAltitude:from.altitude,toAltitude:to.altitude,afterAltitude:after?.altitude,fromX:from.x,fromY:from.y,toX:to.x,toY:to.y,afterY:after?.y,afterTop,direction:Math.sign(to.x-from.x)};
+      const launcher=objects.get(from.objectId);
+      return {fromAltitude:from.altitude,toAltitude:to.altitude,fromX:from.x,fromY:from.y,toX:to.x,toY:to.y,power:launcher.behavior.power,hasAirSpeed:'airSpeed' in launcher.behavior,direction:Math.sign(to.x-from.x)};
     }).filter(Boolean);
   });
   if(crossings.length!==6)throw new Error(`expected 6 launcher crossings, got ${crossings.length}`);
+  if(crossings.some(item=>item.power!==30||item.hasAirSpeed))throw new Error(`launchers must use power 30 without faster air control: ${JSON.stringify(crossings)}`);
   const selectedCrossings=process.env.LAUNCHER_ALTITUDE
     ? crossings.filter(item=>item.fromAltitude===Number(process.env.LAUNCHER_ALTITUDE))
     : crossings;
@@ -46,7 +46,7 @@ try {
     const trace=[],attempts=[];
     // A human may correct the timing after one miss. Try a few ordinary
     // counter-steer timings through the same action map as keyboard and touch.
-    const holdOptions=process.env.LAUNCHER_HOLD?[Number(process.env.LAUNCHER_HOLD)]:[180,240,300,360,420,480,560,650,750];
+    const holdOptions=process.env.LAUNCHER_HOLD?[Number(process.env.LAUNCHER_HOLD)]:[500,700,900,1100,1300,1500,1800,2100];
     for(const holdMs of holdOptions){
       await page.evaluate(({fromX,fromY})=>{
         const scene=window.__game.scene.getScene('GameScene');
@@ -61,10 +61,10 @@ try {
       },null,{timeout:3500});
       const launchedAt=Date.now();
       let held=null,jumpChecked=false,closest=null;
-      while(Date.now()-launchedAt<3900){
+      while(Date.now()-launchedAt<5200){
         last=await page.evaluate(()=>{
           const scene=window.__game.scene.getScene('GameScene');
-          return {x:scene.player.x,y:scene.player.y,vx:scene.playerBody.velocity.x,vy:scene.playerBody.velocity.y,grounded:scene.grounded,boostMs:scene.launcherBoostUntil-scene.time.now,left:scene.actions.left,right:scene.actions.right};
+          return {x:scene.player.x,y:scene.player.y,vx:scene.playerBody.velocity.x,vy:scene.playerBody.velocity.y,grounded:scene.grounded,finished:scene.finished,boostMs:scene.launcherBoostUntil-scene.time.now,left:scene.actions.left,right:scene.actions.right};
         });
         if(process.env.DEBUG_LAUNCHER&&trace.length<80)trace.push({t:Date.now()-launchedAt,...last});
         minY=Math.min(minY,last.y);
@@ -82,7 +82,7 @@ try {
           },{previous:held,next:desired});
           held=desired;
         }
-        if(Date.now()-launchedAt>650&&last.grounded&&Math.abs(last.x-crossing.toX)<75){landed=true;usedHoldMs=holdMs;break;}
+        if(Date.now()-launchedAt>650&&((last.grounded&&Math.abs(last.x-crossing.toX)<75)||(crossing.toAltitude===1000&&last.finished))){landed=true;usedHoldMs=holdMs;break;}
         if(Date.now()-launchedAt>900&&last.y>Math.max(crossing.fromY,crossing.toY)+320)break;
         await page.waitForTimeout(20);
       }
@@ -90,9 +90,8 @@ try {
       attempts.push({holdMs,closest});
       if(landed)break;
     }
-    results.push({from:crossing.fromAltitude,to:crossing.toAltitude,after:crossing.afterAltitude,landed,holdMs:usedHoldMs,x:Number(last?.x.toFixed(1)),targetX:Number(crossing.toX.toFixed(1)),apexY:Number(minY.toFixed(1)),followingStandY:Number((crossing.afterTop-32).toFixed(1))});
+    results.push({from:crossing.fromAltitude,to:crossing.toAltitude,power:crossing.power,normalAirControl:!crossing.hasAirSpeed,landed,holdMs:usedHoldMs,x:Number(last?.x.toFixed(1)),targetX:Number(crossing.toX.toFixed(1)),apexY:Number(minY.toFixed(1))});
     if(!landed)throw new Error(`${crossing.fromAltitude}m launcher did not land on ${crossing.toAltitude}m target: ${JSON.stringify(last)} attempts=${JSON.stringify(attempts)} trace=${JSON.stringify(trace)}`);
-    if(minY<=crossing.afterTop-32)throw new Error(`${crossing.fromAltitude}m launcher can reach the following ${crossing.afterAltitude}m platform: ${minY.toFixed(1)} <= ${(crossing.afterTop-32).toFixed(1)}`);
   }
 
   // Leave the camera on a launcher so the captured frame also verifies that

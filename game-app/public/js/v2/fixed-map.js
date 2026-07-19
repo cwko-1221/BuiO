@@ -4,7 +4,7 @@ import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07bk';
+export const MAP_VERSION = 'fixed-1000m-2026.07bl';
 export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
@@ -389,18 +389,43 @@ compactPhysicalRoute();
 // Six launcher crossings replace redundant footholds from 300m onward. Their
 // visible edge-to-edge gaps exceed the ordinary double-jump envelope, so the
 // slingshot is a required route mechanic rather than optional decoration.
-// Power and air authority are tuned per crossing: each arc clears its named
-// landing, while its apex remains below the platform after that landing.
+// Every slingshot uses the original power 30 launch. The route is reflowed so
+// its full vertical column stays clear. Horizontal air control remains exactly
+// the same as an ordinary jump; the player chooses when to steer toward the
+// named landing.
 function installSlingshotCrossings() {
   const objectById=new Map(objects.map(object=>[object.id,object]));
   const nodeAt=altitude=>nodes.find(node=>node.route==='main'&&node.altitude===altitude);
   const specs=[
-    {from:300,remove:[312,323],to:333,landingX:4695,power:14.75,airSpeed:23,flightMs:1350},
-    {from:469,remove:[482,495],to:508,landingX:2940,power:15.25,airSpeed:32,flightMs:1400,moves:[{altitude:521,x:2800,removeDoubleJump:true},{altitude:534,x:3120,doubleJump:true},{altitude:547,x:3340},{altitude:556,x:3560,removeDoubleJump:true},{altitude:570,x:3895,doubleJump:true}]},
-    {from:580,remove:[590,601],to:615,landingX:3150,power:14.5,airSpeed:24,flightMs:1350},
-    {from:710,remove:[730,740],to:748,landingX:900,power:14.5,airSpeed:28,flightMs:1250},
-    {from:868,remove:[871,874,877,880],to:883,landingX:2180,power:10,airSpeed:30,flightMs:1100},
-    {from:951,remove:[960],to:968,landingX:500,power:10,airSpeed:26,flightMs:1100,moves:[{altitude:976,x:300},{altitude:996,x:620,doubleJump:true},{altitude:998,x:840},{altitude:1000,x:1060}]}
+    {
+      from:300,to:420,landingX:4330,power:30,flightMs:2400,
+      remove:[312,323,333,346,360,370,382,402],
+      moves:[{altitude:438,x:4648,doubleJump:true},{altitude:452,x:4528},{altitude:469,x:4396}]
+    },
+    {
+      from:469,to:570,landingX:4660,power:30,flightMs:2400,
+      remove:[482,495,508,521,534,547,556],
+      moves:[{altitude:580,x:4990,doubleJump:true}]
+    },
+    {
+      from:580,to:678,landingX:4726,power:30,flightMs:2400,
+      remove:[590,601,615,628,646,662],
+      moves:[{altitude:680,x:4396,doubleJump:true},{altitude:686,x:4264},{altitude:690,x:4132},{altitude:700,x:3802},{altitude:710,x:3670}]
+    },
+    {
+      from:710,to:807,landingX:3934,power:30,flightMs:2400,
+      remove:[730,740,748,755,758,770,785],
+      moves:[{altitude:822,x:4264,doubleJump:true},{altitude:837,x:4396},{altitude:849,x:4726},{altitude:865,x:5056},{altitude:868,x:5188}]
+    },
+    {
+      from:868,to:943,landingX:4924,power:30,flightMs:2400,
+      remove:[871,874,877,880,883,906,914,927,935],
+      moves:[{altitude:951,x:4792}]
+    },
+    {
+      from:951,to:1000,landingX:4300,power:30,flightMs:2400,
+      remove:[960,968,976,996,998]
+    }
   ];
   const attachedBySupport=new Map();
   for (const object of objects.filter(item=>item.supportId)) {
@@ -440,7 +465,7 @@ function installSlingshotCrossings() {
       }
     }
     launcher.angle=0;
-    launcher.behavior={type:'launcher',power:spec.power,airSpeed:spec.airSpeed,flightMs:spec.flightMs};
+    launcher.behavior={type:'launcher',power:spec.power,flightMs:spec.flightMs};
     const direction=landing.x>=launcher.x?1:-1;
     launcher.tags.push(direction>0?'launcher-steer-right':'launcher-steer-left');
     annotations.push({

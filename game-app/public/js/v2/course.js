@@ -1,7 +1,7 @@
 import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js?v=20260719-six-launchers';
 import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260719-six-launchers';
 import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers';
-import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260719-six-launchers';
+import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260719-power30-launchers';
 
 function hashString(value) {
   let h=2166136261;
@@ -100,22 +100,23 @@ export function validateCourse(course) {
     const launcherEdge=edge.type==='launcher'&&ao.behavior?.type==='launcher';
     if (launcherEdge) {
       launcherEdges++;
-      const margin=Math.min(1-gap/700,1-rise/240);
+      const margin=Math.min(1-gap/420,1-rise/700);
       minLauncherMargin=Math.min(minLauncherMargin,margin);
-      if (gap<=460) errors.push(`launcher edge ${edge.from}>${edge.to} is too close to guarantee launcher-only traversal (${gap.toFixed(0)}px)`);
-      const {power,airSpeed,flightMs}=ao.behavior;
-      if (gap>585||rise>215||power<8||power>18||airSpeed<9||airSpeed>32||flightMs<900||flightMs>1600) {
-        errors.push(`launcher edge ${edge.from}>${edge.to} exceeds its tuned envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise, ${power} power, ${airSpeed} air speed)`);
+      if (gap<110||gap>480) errors.push(`launcher edge ${edge.from}>${edge.to} has an unsafe ordinary-control landing gap (${gap.toFixed(0)}px)`);
+      const {power,flightMs}=ao.behavior;
+      if (rise<200||rise>700||power!==30||'airSpeed' in ao.behavior||flightMs<1800||flightMs>3000) {
+        errors.push(`launcher edge ${edge.from}>${edge.to} exceeds its normal-control envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise, ${power} power)`);
       }
       // Matter's measured apex is just under 0.98 * power² for this player.
-      // It must clear the named landing but remain below the next route node,
-      // otherwise a player can sail over the landing and skip a route tier.
+      // A full-height launch is intentional; instead of lowering the force,
+      // keep its vertical column free of later route platforms.
       const estimatedApex=power*power*.98;
-      const edgeIndex=course.routes.main.indexOf(edge);
-      const following=course.routes.main[edgeIndex+1];
-      const after=following?nodes.get(following.to):null;
       if (estimatedApex<rise+16) errors.push(`launcher edge ${edge.from}>${edge.to} has insufficient apex clearance`);
-      if (after&&estimatedApex>=a.y-after.y-2) errors.push(`launcher edge ${edge.from}>${edge.to} can rise past the following platform`);
+      const overhead=course.nodes.filter(node=>node.route==='main'&&node.id!==a.id&&node.y<a.y-20&&node.y>a.y-estimatedApex-60).find(node=>{
+        const object=objects.get(node.objectId);
+        return object&&Math.abs(node.x-a.x)<fittedSize(object).w/2+34;
+      });
+      if (overhead) errors.push(`launcher edge ${edge.from}>${edge.to} has ${overhead.id} directly above its flight column`);
       continue;
     }
     const horizontalMargin=1-gap/360;

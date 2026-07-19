@@ -15,18 +15,16 @@ const objects=new Map(course.objects.map(object=>[object.id,object]));
 const edges=course.routes.main.filter(edge=>edge.type==='launcher');
 assert.equal(edges.length,6,'the fixed route must contain six launcher crossings');
 
-function flight({direction,vy,targetY,secondJumpAt=-1,launcher=false,airSpeed=8.4}) {
+function flight({direction,vy,targetY,secondJumpAt=-1}) {
   const engine=Engine.create();
   engine.gravity.y=1.45;
   const player=Bodies.circle(0,0,25,{frictionAir:.01});
   Composite.add(engine.world,player);
-  // Enter at normal running speed. A slingshot flight allows stronger air
-  // steering, but the sign still comes exclusively from the player's input.
+  // Enter at normal running speed. Slingshots use ordinary air steering.
   Body.setVelocity(player,{x:direction*5.6,y:vy});
   let previousY=0, apex=0;
   for (let frame=0;frame<260;frame++) {
-    const speed=launcher?airSpeed:5.6, blend=launcher?.11:.085;
-    const controlledX=player.velocity.x+(direction*speed-player.velocity.x)*blend;
+    const controlledX=player.velocity.x+(direction*5.6-player.velocity.x)*.085;
     Body.setVelocity(player,{x:controlledX,y:player.velocity.y});
     if (frame===secondJumpAt) Body.setVelocity(player,{x:controlledX,y:Math.min(player.velocity.y,-10.8)});
     Engine.update(engine,1000/60);
@@ -47,17 +45,18 @@ for (const [edgeIndex,edge] of edges.entries()) {
   const required=Math.abs(nearEdge-from.x)-25;
 
   assert.equal(launcher.angle,0,`${from.altitude}m launcher is not upright`);
+  assert.equal(launcher.behavior.power,30,`${from.altitude}m launcher does not use the original power 30`);
+  assert.equal('airSpeed' in launcher.behavior,false,`${from.altitude}m launcher changes ordinary air-control speed`);
   assert.equal('velocityX' in launcher.behavior,false,`${from.altitude}m launcher adds horizontal force`);
   assert.equal('targetX' in launcher.behavior,false,`${from.altitude}m launcher targets the landing`);
-  const launched=flight({direction,vy:-launcher.behavior.power,targetY,launcher:true,airSpeed:launcher.behavior.airSpeed});
+  const launched=flight({direction,vy:-launcher.behavior.power,targetY});
   assert.notEqual(launched,null,`${from.altitude}m launcher never descends to its landing height`);
   assert.ok(Math.abs(launched.x)>=required,`${from.altitude}m launcher falls short: ${Math.abs(launched.x).toFixed(1)}px < ${required.toFixed(1)}px`);
-  const routeIndex=course.routes.main.indexOf(edge);
-  const followingEdge=course.routes.main[routeIndex+1];
-  const followingNode=followingEdge&&nodes.get(followingEdge.to);
-  assert.ok(followingNode,`${from.altitude}m launcher has no following route platform`);
-  const followingRise=from.y-followingNode.y;
-  assert.ok(launched.apex<followingRise,`${from.altitude}m launcher apex ${launched.apex.toFixed(1)}px can skip over the following ${followingNode.altitude}m platform (${followingRise.toFixed(1)}px)`);
+  const overhead=course.nodes.filter(node=>node.route==='main'&&node.id!==from.id&&node.y<from.y-20&&node.y>from.y-launched.apex-60).find(node=>{
+    const object=objects.get(node.objectId);
+    return object&&Math.abs(node.x-from.x)<fittedSize(object).w/2+34;
+  });
+  assert.equal(overhead,undefined,`${from.altitude}m launcher has ${overhead?.objectId} directly above it`);
 
   let bestDoubleJump=0;
   for (let secondJumpAt=1;secondJumpAt<=75;secondJumpAt++) {
@@ -67,4 +66,4 @@ for (const [edgeIndex,edge] of edges.entries()) {
   assert.ok(bestDoubleJump<required,`${from.altitude}m crossing is reachable without the launcher: ${bestDoubleJump.toFixed(1)}px >= ${required.toFixed(1)}px`);
 }
 
-console.log(`Launcher physics passed: ${edges.length} tuned upright launchers reach only their next route tier; normal double jump cannot cross their gaps.`);
+console.log(`Launcher physics passed: ${edges.length} upright power-30 launchers have clear vertical columns, ordinary air steering, and launcher-only gaps.`);

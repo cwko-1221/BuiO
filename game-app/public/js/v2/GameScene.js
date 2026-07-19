@@ -370,7 +370,6 @@ export class GameScene extends Phaser.Scene {
               // momentum and all in-air steering remain player-controlled.
               this.setPlayerVelocity(null,-obj.behavior.power);
               this.airJump=0; this.coyote=0;
-              this.launcherAirSpeed=obj.behavior.airSpeed||8.4;
               this.launcherBoostUntil=this.time.now+(obj.behavior.flightMs||1600);
               const sprite=body.gameObject;
               if (sprite) {
@@ -484,11 +483,11 @@ export class GameScene extends Phaser.Scene {
     this.routeAutoplay?.update(this, time);
 
     const dir = (rightHeld?1:0)-(leftHeld?1:0);
-    // A launched player gets stronger air authority, but never an automatic
-    // direction: with no left/right input the horizontal target is exactly 0.
+    // A launch changes vertical velocity only. Horizontal speed and air
+    // steering use the exact same values as an ordinary jump.
     const launcherFlight=!this.grounded&&time<(this.launcherBoostUntil||0);
-    const target = dir * (launcherFlight?(this.launcherAirSpeed||8.4):5.6);
-    const nextVx = Phaser.Math.Linear(this.playerBody.velocity.x,target,launcherFlight?.11:(this.grounded?.2:.085));
+    const target = dir * 5.6;
+    const nextVx = Phaser.Math.Linear(this.playerBody.velocity.x,target,this.grounded?.2:.085);
     this.setPlayerVelocity(nextVx,null);
     const conveyorBody = under.find(b => b.courseObject?.behavior?.type === 'conveyor');
     if (conveyorBody && this.grounded) this.setPlayerVelocity(nextVx + conveyorBody.courseObject.behavior.speed,null);

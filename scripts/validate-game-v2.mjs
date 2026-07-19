@@ -81,7 +81,7 @@ for (const edge of first.routes.main) {
   if (!doubleJump&&gap>140.1) failures.push(`${edge.from}>${edge.to}: compact-route gap is ${gap.toFixed(0)}px`);
 }
 const doubleJumpCount=first.objects.filter(object=>object.tags?.includes('double-jump-gap')).length;
-if (doubleJumpCount<12||doubleJumpCount>24) failures.push(`fixed course must contain 12-24 normal double-jump gaps alongside launchers, got ${doubleJumpCount}`);
+if (doubleJumpCount<10||doubleJumpCount>24) failures.push(`fixed course must contain 10-24 normal double-jump gaps alongside launchers, got ${doubleJumpCount}`);
 
 // Launcher crossings are deliberately outside the normal two-jump envelope.
 // They must be authored, powerful, above 300m, and never share crumble logic.
@@ -95,14 +95,21 @@ for (const edge of launcherEdges) {
   const gap=Math.max(0,Math.abs(b.x-a.x)-(fittedSize(ao).w+fittedSize(bo).w)/2);
   if (a.altitude<300) failures.push(`${ao.id}: launcher appears before 300m`);
   if (ao.assetId!=='slingshot-platform'||ao.behavior?.type!=='launcher') failures.push(`${ao.id}: launcher art/behavior mismatch`);
-  if (ao.behavior?.power<8||ao.behavior?.power>18||ao.behavior?.airSpeed<9||ao.behavior?.airSpeed>32) failures.push(`${ao.id}: launcher tuning is outside the safe range`);
+  if (ao.behavior?.power!==30||'airSpeed' in ao.behavior) failures.push(`${ao.id}: launcher must use power 30 and ordinary air steering`);
   if ('velocityX' in ao.behavior||'targetX' in ao.behavior) failures.push(`${ao.id}: launcher must not steer toward its landing`);
   if (ao.angle!==0) failures.push(`${ao.id}: launcher is not vertically aligned`);
   const guide=launcherGuides.find(note=>note.id===`launcher-arrow-${a.altitude}`);
   if (!guide||guide.assetId!=='ref-jump-arrow'||guide.showText!==false) failures.push(`${ao.id}: missing launcher direction arrow`);
   if (guide&&guide.flipX!==(b.x<a.x)) failures.push(`${ao.id}: launcher arrow points in the wrong direction`);
-  if (gap<=480||gap>585) failures.push(`${edge.from}>${edge.to}: launcher gap ${gap.toFixed(0)}px is not safely outside the measured double-jump envelope`);
+  const rise=a.y-b.y;
+  if (gap<110||gap>480||rise<200||rise>700) failures.push(`${edge.from}>${edge.to}: launcher landing is outside the power-30 normal-control envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise)`);
   if (ao.tags?.includes('crumble-platform')) failures.push(`${ao.id}: launcher cannot crumble`);
+  const apex=ao.behavior.power*ao.behavior.power*.98;
+  const overhead=first.nodes.filter(node=>node.route==='main'&&node.id!==a.id&&node.y<a.y-20&&node.y>a.y-apex-60).find(node=>{
+    const object=byId.get(node.objectId);
+    return object&&Math.abs(node.x-a.x)<fittedSize(object).w/2+34;
+  });
+  if (overhead) failures.push(`${ao.id}: ${overhead.objectId} is directly above the power-30 flight column`);
 }
 
 // Crumbling supports begin only after 300m and average one per ten route
