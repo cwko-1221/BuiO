@@ -35,30 +35,40 @@ try {
     }).filter(Boolean);
   });
   if(crossings.length!==6)throw new Error(`expected 6 launcher crossings, got ${crossings.length}`);
-  if(crossings.some(item=>item.power!==15||item.hasAirSpeed))throw new Error(`launchers must use power 15 without faster air control: ${JSON.stringify(crossings)}`);
+  if(crossings.some(item=>item.power!==20||item.hasAirSpeed))throw new Error(`launchers must use power 20 without faster air control: ${JSON.stringify(crossings)}`);
   const selectedCrossings=process.env.LAUNCHER_ALTITUDE
     ? crossings.filter(item=>item.fromAltitude===Number(process.env.LAUNCHER_ALTITUDE))
     : crossings;
 
   const results=[];
   for(const crossing of selectedCrossings){
+    if(results.length){
+      await page.reload({waitUntil:'networkidle'});
+      await page.waitForSelector('#gameScreen.active canvas',{timeout:10000});
+    }
     let landed=false,last=null,usedHoldMs=null,minY=Infinity;
     const trace=[],attempts=[];
     // A human may correct the timing after one miss. Try a few ordinary
     // counter-steer timings through the same action map as keyboard and touch.
     const holdOptions=process.env.LAUNCHER_HOLD?[Number(process.env.LAUNCHER_HOLD)]:[300,450,600,750,900,1050,1200,1400];
     for(const holdMs of holdOptions){
-      await page.evaluate(({fromX,fromY})=>{
+      await page.evaluate(({fromX,fromY,fromAltitude})=>{
         const scene=window.__game.scene.getScene('GameScene');
         scene.setAction('left',false);scene.setAction('right',false);scene.clearContacts();
         scene.launcherBoostUntil=0;
+        scene.invulnerableUntil=scene.time.now+500;
+        scene.rapidFallTracker.reset(scene.time.now,fromAltitude);
         scene.setPlayerPosition(fromX,fromY-125);
         scene.setPlayerVelocity(0,5);
       },crossing);
-      await page.waitForFunction(()=>{
-        const scene=window.__game.scene.getScene('GameScene');
-        return scene.launcherBoostUntil>scene.time.now;
-      },null,{timeout:3500});
+      try {
+        await page.waitForFunction(()=>{
+          const scene=window.__game.scene.getScene('GameScene');
+          return scene.launcherBoostUntil>scene.time.now;
+        },null,{timeout:3500});
+      } catch (error) {
+        throw new Error(`${crossing.fromAltitude}m launcher did not trigger: ${error.message}`);
+      }
       const launchedAt=Date.now();
       let held=null,closest=null;
       while(Date.now()-launchedAt<3600){

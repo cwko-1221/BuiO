@@ -4,7 +4,7 @@ import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1500m-2026.07a';
+export const MAP_VERSION = 'fixed-1500m-2026.07b';
 export const WORLD = { width:5600, height:8700, startY:8200, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
@@ -388,11 +388,16 @@ function compactPhysicalRoute() {
     }
     const baseOrdinaryGaps=node.altitude<120?[34,48,62,76]:[88,104,120,136,72];
     const repayment=Math.min(40,spacingDebt);
-    const ordinaryGaps=baseOrdinaryGaps.map(gap=>Math.max(32,gap-repayment));
+    // Once the course reaches the more technical upper half, never repay a
+    // previous double-jump gap by squeezing the following props together.
+    // A 96px visible gap keeps switchbacks readable while remaining a very
+    // comfortable ordinary jump.
+    const minimumOrdinaryGap=node.altitude>=700?96:32;
+    const ordinaryGaps=baseOrdinaryGaps.map(gap=>Math.max(minimumOrdinaryGap,gap-repayment));
     if (target===undefined) {
       target=ordinaryGaps
         .map(gap=>previousObject.x+direction*(halfWidths+gap))
-        .find(candidate=>candidate>=42&&candidate<=5558&&clearsEarlierRoute(object,candidate,index));
+        .find(candidate=>candidate>=42&&candidate<=5480&&clearsEarlierRoute(object,candidate,index));
       if (target!==undefined) spacingDebt=Math.max(0,spacingDebt-repayment);
     }
     if (target===undefined) {
@@ -400,7 +405,7 @@ function compactPhysicalRoute() {
       const turnGaps=[235,240,245,230];
       target=turnGaps
         .map(gap=>previousObject.x+direction*(halfWidths+gap))
-        .find(candidate=>candidate>=42&&candidate<=5558&&clearsEarlierRoute(object,candidate,index));
+        .find(candidate=>candidate>=42&&candidate<=5480&&clearsEarlierRoute(object,candidate,index));
       if (target!==undefined) {
         object.tags.push('double-jump-gap');
         doubleJumpChallenges++;
@@ -428,16 +433,16 @@ function compactPhysicalRoute() {
 }
 compactPhysicalRoute();
 
-// Six compact launcher crossings replace one foothold apiece. Power 15 gives a
-// useful lift without forcing the surrounding map to become sparse. Moving the
-// complete route suffix together preserves the original density after every
-// launcher landing. Horizontal air control remains identical to a normal jump.
+// Six launcher crossings replace one foothold apiece. Power 20 gives a clear
+// vertical launch without changing ordinary horizontal air control. Each
+// launcher receives its own approach space and a single, unambiguous landing;
+// moving the complete suffix preserves the course rhythm after the crossing.
 function installSlingshotCrossings() {
   const objectById=new Map(objects.map(object=>[object.id,object]));
   const nodeAt=altitude=>nodes.find(node=>node.route==='main'&&node.altitude===altitude);
   const specs=[
     {from:300,remove:[312],to:323,direction:1},
-    {from:469,remove:[482],to:495,direction:1,followupShift:264},
+    {from:469,remove:[482],to:495,direction:1},
     {from:580,remove:[590],to:601,direction:-1},
     {from:710,remove:[730],to:740,direction:-1},
     {from:868,remove:[871],to:874,direction:1},
@@ -459,28 +464,32 @@ function installSlingshotCrossings() {
     const fromNode=nodeAt(spec.from), landingNode=nodeAt(spec.to);
     if (!fromNode||!landingNode) throw new Error(`Missing slingshot crossing ${spec.from}m>${spec.to}m`);
     const launcher=objectById.get(fromNode.objectId), landing=objectById.get(landingNode.objectId);
+    const routeNodes=nodes.filter(node=>node.route==='main');
+    const launcherIndex=routeNodes.indexOf(fromNode);
+    const approachNode=routeNodes[launcherIndex-1];
+    const approach=approachNode&&objectById.get(approachNode.objectId);
+    if (!approach) throw new Error(`Missing slingshot approach before ${spec.from}m`);
+    // The screenshot problem was caused by comparing object centres: the
+    // painted edges could still nearly touch. Measure the physical widths and
+    // leave a full 160px of air before every launcher.
+    const approachDirection=Math.sign(launcher.x-approach.x)||spec.direction;
+    const approachHalfWidths=(fittedSize(approach).w+fittedSize(launcher).w)/2;
+    moveNode(fromNode,approach.x+approachDirection*(approachHalfWidths+160));
     launcher.assetId='slingshot-platform';
     launcher.tags=launcher.tags.filter(tag=>tag!=='crumble-platform');
-    launcher.tags.push('slingshot-launcher');
+    launcher.tags.push('slingshot-launcher','launcher-approach-gap');
     landing.tags.push('slingshot-landing');
     // Move the landing and every later main node by the same amount. This
     // keeps the approach/exit gaps compact instead of creating an empty arc.
-    const routeNodes=nodes.filter(node=>node.route==='main');
     const landingIndex=routeNodes.indexOf(landingNode);
-    // The measured Matter trajectory at power 15 only has about 106px of
-    // horizontal travel before reaching a 26m-higher landing. A compact 160px
-    // centre distance leaves normal air steering enough collision overlap and
-    // avoids the sparse launcher-only voids from the earlier map.
-    const desiredLandingX=launcher.x+spec.direction*160;
+    // Power 20 supports a longer but still local crossing. A 240px centre
+    // distance produces about 158px of visible air between capped 84px props:
+    // clearly separated, yet the intended next platform remains on-screen.
+    const desiredLandingX=launcher.x+spec.direction*240;
     const suffixShift=desiredLandingX-landing.x;
     for (const node of routeNodes.slice(landingIndex)) moveNode(node,node.x+suffixShift);
-    // Keep the platform after the landing outside the vertical launch column;
-    // otherwise a player could ignore the arrow and skip the intended target.
-    if (spec.followupShift) {
-      for (const node of routeNodes.slice(landingIndex+1)) moveNode(node,node.x+spec.followupShift);
-    }
     launcher.angle=0;
-    launcher.behavior={type:'launcher',power:15,flightMs:1600};
+    launcher.behavior={type:'launcher',power:20,flightMs:2000};
     const direction=landing.x>=launcher.x?1:-1;
     launcher.tags.push(direction>0?'launcher-steer-right':'launcher-steer-left');
     annotations.push({
@@ -503,6 +512,26 @@ function installSlingshotCrossings() {
     }
   }
   const routeNodes=nodes.filter(node=>node.route==='main');
+  // Launcher suffix shifts can accumulate near the right world edge. Ease any
+  // overflow back into the 900-1000m run instead of clamping one platform and
+  // creating a cramped corner. The small distributed correction is visually
+  // imperceptible and preserves every authored jump margin.
+  const maxRight=Math.max(...routeNodes.map(node=>{
+    const object=objectById.get(node.objectId);
+    return object.x+fittedSize(object).w/2;
+  }));
+  const overflow=Math.max(0,maxRight-(WORLD.width-4));
+  if (overflow>0) {
+    for (const node of routeNodes) {
+      const t=Math.max(0,Math.min(1,(node.altitude-900)/100));
+      if (t>0) moveNode(node,node.x-overflow*t);
+    }
+    for (const note of annotations.filter(item=>item.type==='launcher-guide')) {
+      const altitude=Number(note.id.replace('launcher-arrow-',''));
+      const launcherNode=nodeAt(altitude);
+      if (launcherNode) note.x=launcherNode.x;
+    }
+  }
   main.length=0;
   for (let index=1;index<routeNodes.length;index++) {
     const from=routeNodes[index-1],to=routeNodes[index];
@@ -511,6 +540,50 @@ function installSlingshotCrossings() {
   }
 }
 installSlingshotCrossings();
+
+// Five red timing gates appear only in the factory half of the climb. The
+// beam is active for two seconds, then the passage is open for two seconds.
+// Each gate sits in the actual air gap between two consecutive main supports;
+// there is no hidden platform or collider around the visual beam.
+function installTimedLaserPassages() {
+  const objectById=new Map(objects.map(object=>[object.id,object]));
+  const nodeAt=altitude=>nodes.find(node=>node.route==='main'&&node.altitude===altitude);
+  const specs=[
+    {from:748,to:755,phaseMs:0},
+    {from:906,to:914,phaseMs:800},
+    {from:1040,to:1058,phaseMs:1600},
+    {from:1212,to:1226,phaseMs:2400},
+    {from:1408,to:1422,phaseMs:3200}
+  ];
+  for (const [index,spec] of specs.entries()) {
+    const from=nodeAt(spec.from),to=nodeAt(spec.to);
+    if (!from||!to) throw new Error(`Missing timed laser passage ${spec.from}m>${spec.to}m`);
+    const fromObject=objectById.get(from.objectId),toObject=objectById.get(to.objectId);
+    const fromSize=fittedSize(fromObject),toSize=fittedSize(toObject);
+    const direction=Math.sign(to.x-from.x)||1;
+    const fromEdge=from.x+direction*fromSize.w/2;
+    const toEdge=to.x-direction*toSize.w/2;
+    const gap=Math.abs(toEdge-fromEdge);
+    if (gap<72) throw new Error(`Timed laser passage ${spec.from}m has only ${gap.toFixed(1)}px of air`);
+    const surfaceY=(from.y+to.y)/2;
+    hazards.push({
+      id:`timed-laser-${index+1}`,
+      type:'timed-laser',
+      x:(fromEdge+toEdge)/2,
+      y:surfaceY-150,
+      w:14,
+      h:400,
+      altitude:Math.round((spec.from+spec.to)/2),
+      fromAltitude:spec.from,
+      toAltitude:spec.to,
+      cycleMs:4000,
+      activeMs:2000,
+      phaseMs:spec.phaseMs,
+      tags:['factory-laser','timed-passage']
+    });
+  }
+}
+installTimedLaserPassages();
 
 // From 300m onward, roughly every tenth main-route foothold becomes a
 // temporary crumble platform. Keep them away from double-jump landings,

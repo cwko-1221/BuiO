@@ -77,14 +77,16 @@ for (const edge of first.routes.main) {
   const gap=Math.max(0,Math.abs(b.x-a.x)-(fittedSize(ao).w+fittedSize(bo).w)/2);
   if (edge.type==='launcher') continue;
   const doubleJump=bo.tags?.includes('double-jump-gap');
+  const launcherApproach=bo.tags?.includes('launcher-approach-gap');
   if (doubleJump&&(gap<230||gap>255)) failures.push(`${edge.from}>${edge.to}: double-jump gap is ${gap.toFixed(0)}px`);
-  if (!doubleJump&&gap>140.1) failures.push(`${edge.from}>${edge.to}: compact-route gap is ${gap.toFixed(0)}px`);
+  if (!doubleJump&&!launcherApproach&&gap>140.1) failures.push(`${edge.from}>${edge.to}: compact-route gap is ${gap.toFixed(0)}px`);
+  if (launcherApproach&&(gap<150||gap>175)) failures.push(`${edge.from}>${edge.to}: launcher approach gap is ${gap.toFixed(0)}px`);
 }
 const doubleJumpCount=first.objects.filter(object=>object.tags?.includes('double-jump-gap')).length;
 if (doubleJumpCount<18||doubleJumpCount>34) failures.push(`fixed course must contain 18-34 normal double-jump gaps alongside launchers, got ${doubleJumpCount}`);
 
 // Launcher crossings are short, dense authored boosts. They must use the same
-// normal air steering, power 15, and never share crumble logic.
+// normal air steering, power 20, and never share crumble logic.
 const launcherEdges=first.routes.main.filter(edge=>edge.type==='launcher');
 if (launcherEdges.length!==6) failures.push(`expected 6 launcher crossings, got ${launcherEdges.length}`);
 const launcherGuides=first.annotations.filter(note=>note.type==='launcher-guide');
@@ -95,21 +97,48 @@ for (const edge of launcherEdges) {
   const gap=Math.max(0,Math.abs(b.x-a.x)-(fittedSize(ao).w+fittedSize(bo).w)/2);
   if (a.altitude<300) failures.push(`${ao.id}: launcher appears before 300m`);
   if (ao.assetId!=='slingshot-platform'||ao.behavior?.type!=='launcher') failures.push(`${ao.id}: launcher art/behavior mismatch`);
-  if (ao.behavior?.power!==15||'airSpeed' in ao.behavior) failures.push(`${ao.id}: launcher must use power 15 and ordinary air steering`);
+  if (ao.behavior?.power!==20||'airSpeed' in ao.behavior) failures.push(`${ao.id}: launcher must use power 20 and ordinary air steering`);
   if ('velocityX' in ao.behavior||'targetX' in ao.behavior) failures.push(`${ao.id}: launcher must not steer toward its landing`);
   if (ao.angle!==0) failures.push(`${ao.id}: launcher is not vertically aligned`);
   const guide=launcherGuides.find(note=>note.id===`launcher-arrow-${a.altitude}`);
   if (!guide||guide.assetId!=='ref-jump-arrow'||guide.showText!==false) failures.push(`${ao.id}: missing launcher direction arrow`);
   if (guide&&guide.flipX!==(b.x<a.x)) failures.push(`${ao.id}: launcher arrow points in the wrong direction`);
   const rise=a.y-b.y;
-  if (gap<45||gap>145||rise<0||rise>190) failures.push(`${edge.from}>${edge.to}: launcher landing is outside the compact power-15 envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise)`);
+  if (gap<130||gap>190||rise<0||rise>190) failures.push(`${edge.from}>${edge.to}: launcher landing is outside the power-20 envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise)`);
   if (ao.tags?.includes('crumble-platform')) failures.push(`${ao.id}: launcher cannot crumble`);
   const apex=ao.behavior.power*ao.behavior.power*.98;
   const overhead=first.nodes.filter(node=>node.route==='main'&&node.id!==a.id&&node.y<a.y-20&&node.y>a.y-apex-60).find(node=>{
     const object=byId.get(node.objectId);
     return object&&Math.abs(node.x-a.x)<fittedSize(object).w/2+34;
   });
-  if (overhead) failures.push(`${ao.id}: ${overhead.objectId} is directly above the power-15 flight column`);
+  if (overhead) failures.push(`${ao.id}: ${overhead.objectId} is directly above the power-20 flight column`);
+}
+
+// Five visible laser gates begin above 700m. Each blocks for two seconds and
+// then becomes fully non-colliding for two seconds. The beam must occupy only
+// the air gap between its declared consecutive route supports.
+if (first.hazards.length!==5) failures.push(`expected 5 timed laser passages, got ${first.hazards.length}`);
+for (const hazard of first.hazards) {
+  if (hazard.type!=='timed-laser'||hazard.altitude<=700) failures.push(`${hazard.id}: invalid laser type/altitude`);
+  if (hazard.cycleMs!==4000||hazard.activeMs!==2000) failures.push(`${hazard.id}: laser must use a 2s blocked / 2s open cycle`);
+  const from=first.nodes.find(node=>node.route==='main'&&node.altitude===hazard.fromAltitude);
+  const to=first.nodes.find(node=>node.route==='main'&&node.altitude===hazard.toAltitude);
+  if (!from||!to) { failures.push(`${hazard.id}: route anchors are missing`); continue; }
+  const edge=first.routes.main.find(item=>item.from===from.id&&item.to===to.id);
+  if (!edge||edge.type!=='main') failures.push(`${hazard.id}: laser is not inside a normal main-route edge`);
+  const fromObject=byId.get(from.objectId),toObject=byId.get(to.objectId);
+  const fromSize=fittedSize(fromObject),toSize=fittedSize(toObject);
+  const left=from.x<to.x?from.x+fromSize.w/2:to.x+toSize.w/2;
+  const right=from.x<to.x?to.x-toSize.w/2:from.x-fromSize.w/2;
+  if (hazard.x<=left+hazard.w/2||hazard.x>=right-hazard.w/2) failures.push(`${hazard.id}: beam is not centred in its visible route gap`);
+  const overlapsSolid=first.objects.some(object=>{
+    const size=fittedSize(object),bounds=alphaBounds(object.assetId,size);
+    const objectLeft=object.x+bounds.minX,objectRight=object.x+bounds.maxX;
+    const objectTop=object.y+bounds.minY,objectBottom=object.y+bounds.maxY;
+    return Math.min(hazard.x+hazard.w/2,objectRight)-Math.max(hazard.x-hazard.w/2,objectLeft)>2
+      &&Math.min(hazard.y+hazard.h/2,objectBottom)-Math.max(hazard.y-hazard.h/2,objectTop)>2;
+  });
+  if (overlapsSolid) failures.push(`${hazard.id}: laser beam overlaps a solid route object`);
 }
 
 // Crumbling supports begin only after 300m and average one per ten route

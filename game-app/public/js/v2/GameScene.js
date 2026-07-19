@@ -10,6 +10,7 @@ import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js?v=20
 import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest';
 import { CrumblePlatformState } from './CrumblePlatform.js?v=20260717-crumble';
 import { RemoteGhostState, SURFACE_TOLERANCE } from './RemoteGhostState.js?v=20260718-network-4';
+import { timedHazardState } from './timed-hazards.js?v=20260719-power20-lasers';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -257,12 +258,40 @@ export class GameScene extends Phaser.Scene {
 
   createHazards() {
     this.hazardBodies = this.course.hazards.map(hazard => {
-      this.add.rectangle(hazard.x,hazard.y,hazard.w,hazard.h,0xff4967,.92).setStrokeStyle(5,0x7b1432).setDepth(18);
-      this.add.rectangle(hazard.x,hazard.y,hazard.w,Math.max(4,hazard.h*.28),0xffd8df,.95).setDepth(19);
+      const glow=this.add.rectangle(hazard.x,hazard.y,hazard.w+18,hazard.h,0xff294f,.2).setDepth(17);
+      const beam=this.add.rectangle(hazard.x,hazard.y,hazard.w,hazard.h,0xff2448,.92).setDepth(18);
+      const core=this.add.rectangle(hazard.x,hazard.y,Math.max(3,hazard.w*.28),hazard.h,0xffe7ec,.98).setDepth(19);
+      const capWidth=62,capHeight=18;
+      const topEmitter=this.add.rectangle(hazard.x,hazard.y-hazard.h/2,capWidth,capHeight,0xa51231,1)
+        .setStrokeStyle(4,0x301329).setDepth(20);
+      const bottomEmitter=this.add.rectangle(hazard.x,hazard.y+hazard.h/2,capWidth,capHeight,0xa51231,1)
+        .setStrokeStyle(4,0x301329).setDepth(20);
       const body=collideWithPlayer(this.matter.add.rectangle(hazard.x,hazard.y,hazard.w,hazard.h+10,{isStatic:true,isSensor:true,label:'hazard'}));
       body.hazard=hazard;
-      return body;
+      const runtime={hazard,body,glow,beam,core,emitters:[topEmitter,bottomEmitter],active:null};
+      body.hazardRuntime=runtime;
+      return runtime;
     });
+    this.updateHazards(0);
+  }
+
+  updateHazards(time) {
+    for (const item of this.hazardBodies||[]) {
+      const state=timedHazardState(item.hazard,time);
+      if (state.active!==item.active) {
+        item.active=state.active;
+        item.body.collisionFilter.mask=state.active?CAT_PLAYER:0;
+        item.beam.setVisible(state.active);
+        item.core.setVisible(state.active);
+        item.glow.setVisible(state.active);
+        for (const emitter of item.emitters) emitter.setFillStyle(state.active?0xd91f42:0x546174,1);
+      }
+      if (state.active) {
+        const pulse=.72+.22*Math.sin(time*.018);
+        item.beam.setAlpha(pulse);
+        item.glow.setAlpha(.16+.1*Math.sin(time*.014));
+      }
+    }
   }
 
   createCheckpoints() {
@@ -357,7 +386,7 @@ export class GameScene extends Phaser.Scene {
         for (const body of bodies) {
           if (body.progressSensor && involvesPlayer) this.reachProgress(body.progressSensor);
           if (body.checkpointTrigger && involvesPlayer) this.unlockCheckpoint(body.checkpointTrigger);
-          if (body.hazard && involvesPlayer) this.hitHazard(body.hazard);
+          if (body.hazard && involvesPlayer) this.hitHazard(body.hazard,body.hazardRuntime);
           const obj = body.courseObject;
           if (footContact && obj?.behavior?.type === 'crumble') this.triggerCrumble(obj.id,true);
           const landsOnLauncher=involvesPlayer&&obj?.behavior?.type==='launcher'
@@ -460,6 +489,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time, deltaMs) {
+    this.updateHazards(time);
     if (!this.player || this.finished || this.hooks.isFrozen?.()) return;
     const dt = Math.min(deltaMs,34)/1000;
     const leftHeld = this.actions.left || this.keys.left.isDown || this.keys.a.isDown;
@@ -657,7 +687,8 @@ export class GameScene extends Phaser.Scene {
     this.hooks.onRecovery?.(reason,cp);
   }
 
-  hitHazard(hazard) {
+  hitHazard(hazard, runtime) {
+    if (runtime&&!runtime.active) return;
     if (this.time.now<this.invulnerableUntil) return;
     this.resetToCheckpoint('laser');
   }

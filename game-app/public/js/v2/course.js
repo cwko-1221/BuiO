@@ -1,7 +1,7 @@
 import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js?v=20260719-six-launchers';
 import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260719-six-launchers';
 import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers';
-import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260719-1500m-power15';
+import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260719-power20-lasers';
 
 function hashString(value) {
   let h=2166136261;
@@ -51,9 +51,10 @@ export function buildCourse(seed=0) {
   const instances=FIXED_MAP.zones.map((zone,index)=>({id:`fixed-zone-${zone.id}`,chunkId:`fixed-${zone.id}`,zone:zone.id,zoneName:ZONE_NAMES[zone.id],slot:index,difficulty:index+1,bounds:{x:0,y:FIXED_MAP.world.startY-zone.max*5,w:FIXED_MAP.world.width,h:(zone.max-zone.min)*5}}));
   const transformText=objects.map(object=>`${object.id}:${object.assetId}:${object.x}:${object.y}:${object.w}:${object.h}:${object.angle}:${object.role}:${object.supportId||''}:${JSON.stringify(object.behavior)}`).join('|');
   const routeText=Object.values(FIXED_MAP.routes).flat().map(edge=>`${edge.type}:${edge.from}>${edge.to}`).join('|');
+  const hazardText=FIXED_MAP.hazards.map(hazard=>`${hazard.id}:${hazard.type}:${hazard.x}:${hazard.y}:${hazard.w}:${hazard.h}:${hazard.cycleMs}:${hazard.activeMs}:${hazard.phaseMs}`).join('|');
   const colliderText=objects.filter(object=>object.role!=='decor').map(object=>`${object.id}:${JSON.stringify(ASSET_GEOMETRY[object.assetId]?.parts||[])}`).join('|');
-  const courseHash=hashString(`${MAP_VERSION}|${transformText}|${routeText}`);
-  const colliderHash=hashString(`${MAP_VERSION}|${colliderText}`);
+  const courseHash=hashString(`${MAP_VERSION}|${transformText}|${routeText}|${hazardText}`);
+  const colliderHash=hashString(`${MAP_VERSION}|${colliderText}|${hazardText}`);
   return {
     seed, mapVersion:MAP_VERSION,
     world:{width:FIXED_MAP.world.width,height:FIXED_MAP.world.height},
@@ -79,6 +80,10 @@ export function validateCourse(course) {
   if (course.checkpoints.map(item=>item.altitude).join(',')!=='0,210,274,448,573,704,820,930,1058,1198,1324,1464') errors.push('checkpoint altitudes changed');
   const nodes=new Map(course.nodes.map(node=>[node.id,node]));
   const objects=new Map(course.objects.map(object=>[object.id,object]));
+  for (const object of course.objects.filter(item=>item.role!=='decor')) {
+    const size=fittedSize(object);
+    if (object.x-size.w/2<-4||object.x+size.w/2>course.world.width+4) errors.push(`${object.id} extends beyond the fixed world width`);
+  }
   for (const [name,edges] of Object.entries(course.routes)) for (const edge of edges) {
     if (!nodes.has(edge.from)||!nodes.has(edge.to)) errors.push(`${name} edge references a missing node`);
   }
@@ -100,11 +105,11 @@ export function validateCourse(course) {
     const launcherEdge=edge.type==='launcher'&&ao.behavior?.type==='launcher';
     if (launcherEdge) {
       launcherEdges++;
-      const margin=Math.min(1-gap/300,1-rise/240);
+      const margin=Math.min(1-gap/400,1-rise/300);
       minLauncherMargin=Math.min(minLauncherMargin,margin);
-      if (gap<45||gap>145) errors.push(`launcher edge ${edge.from}>${edge.to} has an unsafe compact landing gap (${gap.toFixed(0)}px)`);
+      if (gap<130||gap>190) errors.push(`launcher edge ${edge.from}>${edge.to} has an unsafe power-20 landing gap (${gap.toFixed(0)}px)`);
       const {power,flightMs}=ao.behavior;
-      if (rise<0||rise>190||power!==15||'airSpeed' in ao.behavior||flightMs<1200||flightMs>2000) {
+      if (rise<0||rise>190||power!==20||'airSpeed' in ao.behavior||flightMs<1600||flightMs>2200) {
         errors.push(`launcher edge ${edge.from}>${edge.to} exceeds its normal-control envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise, ${power} power)`);
       }
       // Matter's measured apex is just under 0.98 * power² for this player.
@@ -129,7 +134,8 @@ export function validateCourse(course) {
     // is the situation after a player stops to answer a question. The safe
     // airborne gap shrinks as the destination rises.
     const authoredDoubleJump=bo.tags?.includes('double-jump-gap');
-    const restStartGap=authoredDoubleJump?260:Math.max(120,260-rise);
+    const launcherApproach=bo.tags?.includes('launcher-approach-gap');
+    const restStartGap=authoredDoubleJump?260:launcherApproach?180:Math.max(120,260-rise);
     if (gap>restStartGap) errors.push(`main edge ${edge.from}>${edge.to} cannot be cleared from rest (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise)`);
   }
   // Recovery paths may fall back, but the visible main line is deliberately
@@ -158,7 +164,14 @@ export function validateCourse(course) {
     if (gap>2.1) errors.push(`${object.id} floats ${gap.toFixed(1)}px above support`);
   }
   if (course.objects.some(object=>object.role==='decor')) errors.push('playable course must not contain pass-through decor objects');
-  if (course.hazards.length) errors.push('reference course contains legacy laser hazards');
+  const timedLasers=course.hazards.filter(hazard=>hazard.type==='timed-laser');
+  if (course.hazards.length!==5||timedLasers.length!==5) errors.push(`fixed course must contain exactly 5 timed lasers, got ${timedLasers.length}/${course.hazards.length}`);
+  for (const hazard of timedLasers) {
+    if (hazard.altitude<=700) errors.push(`${hazard.id} appears below the 700m laser section`);
+    if (hazard.cycleMs!==4000||hazard.activeMs!==2000) errors.push(`${hazard.id} must alternate 2 seconds blocked / 2 seconds open`);
+    if (hazard.w<8||hazard.w>20||hazard.h<320) errors.push(`${hazard.id} has an invalid passage beam size`);
+    if (hazard.x-hazard.w/2<0||hazard.x+hazard.w/2>course.world.width) errors.push(`${hazard.id} extends beyond the fixed world width`);
+  }
   const sideViewBlocks=course.objects.filter(object=>SIDE_VIEW_BLOCK_IDS.has(object.assetId));
   if (sideViewBlocks.length) errors.push(`front-facing course contains side-view blocks: ${sideViewBlocks.map(object=>object.assetId).join(', ')}`);
   const rejectedStyle=course.objects.filter(object=>REJECTED_STYLE_ASSET_IDS.has(object.assetId));
