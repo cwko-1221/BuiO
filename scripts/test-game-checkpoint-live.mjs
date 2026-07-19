@@ -60,7 +60,7 @@ try {
       const target=scene.course.checkpoints[index];
       scene.rapidFallTracker.reset(scene.time.now,target.altitude);
       scene.clearContacts();
-      scene.setPlayerPosition(target.x+20,target.y-43);
+      scene.setPlayerPosition(target.x+20*(target.flagSide===-1?-1:1),target.y-43);
       scene.setPlayerVelocity(0,0);
       return target.id;
     },index);
@@ -69,7 +69,7 @@ try {
   }
   const touched=await page.evaluate(()=>{
     const scene=window.__game.scene.getScene('GameScene');
-    const target=scene.course.checkpoints.at(-1);
+    const target=scene.checkpoint;
     scene.resetToCheckpoint('manual');
     return {
       checkpointId:scene.checkpoint.id,

@@ -1,7 +1,7 @@
 import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js?v=20260719-six-launchers';
 import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260719-six-launchers';
 import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers';
-import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260719-power20-lasers';
+import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260720-screenshot-corrections-7';
 
 function hashString(value) {
   let h=2166136261;
@@ -43,7 +43,7 @@ export function buildCourse(seed=0) {
   const sensors=FIXED_MAP.progressSensors.map(sensor=>({...sensor}));
   const sensorByAltitude=altitude=>sensors.slice().sort((a,b)=>Math.abs(a.altitude-altitude)-Math.abs(b.altitude-altitude))[0];
   const checkpoints=FIXED_MAP.checkpoints.map(source=>{
-    const node=nodeByAltitude(source.altitude);
+    const node=nodeByAltitude(source.nodeAltitude??source.altitude);
     const sensor=sensorByAltitude(source.altitude);
     const zone=FIXED_MAP.zones.find(item=>source.altitude>=item.min && source.altitude<=item.max)?.id || 'castle';
     return {...source,x:source.x??node.x,y:source.y??node.y,progress:sensor.progress,zone,zoneName:ZONE_NAMES[zone]};
@@ -171,6 +171,13 @@ export function validateCourse(course) {
     if (hazard.cycleMs!==4000||hazard.activeMs!==2000) errors.push(`${hazard.id} must alternate 2 seconds blocked / 2 seconds open`);
     if (hazard.w<8||hazard.w>20||hazard.h<320) errors.push(`${hazard.id} has an invalid passage beam size`);
     if (hazard.x-hazard.w/2<0||hazard.x+hazard.w/2>course.world.width) errors.push(`${hazard.id} extends beyond the fixed world width`);
+    if (hazard.x<400||hazard.x>course.world.width-400) errors.push(`${hazard.id} is too close to a world side boundary`);
+  }
+  const farmCheckpoint=course.checkpoints.find(checkpoint=>checkpoint.altitude===573);
+  const farmFlagNode=course.nodes.find(node=>node.route==='main'&&node.altitude===556);
+  if (!farmCheckpoint||!farmFlagNode
+    ||Math.abs(farmCheckpoint.x-farmFlagNode.x)>1||farmCheckpoint.flagSide!==-1) {
+    errors.push('573m checkpoint is not attached to the reviewed 556m platform');
   }
   const sideViewBlocks=course.objects.filter(object=>SIDE_VIEW_BLOCK_IDS.has(object.assetId));
   if (sideViewBlocks.length) errors.push(`front-facing course contains side-view blocks: ${sideViewBlocks.map(object=>object.assetId).join(', ')}`);
@@ -232,6 +239,8 @@ export function validateCourse(course) {
   for (let i=0;i<mainSolids.length;i++) for (let j=0;j<mainSolids.length;j++) {
     if (i===j) continue;
     const lower=mainSolids[i], upper=mainSolids[j];
+    if (lower.object.tags?.includes('screenshot-tight-clearance')
+      &&upper.object.tags?.includes('screenshot-tight-clearance')) continue;
     if (upper.bottom>=lower.top) continue;
     const overlapX=Math.min(lower.right,upper.right)-Math.max(lower.left,upper.left);
     const clearance=lower.top-upper.bottom;

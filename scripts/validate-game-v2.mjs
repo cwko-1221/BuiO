@@ -38,6 +38,25 @@ for (let index=0;index<500;index++) {
 const byId=new Map(first.objects.map(object=>[object.id,object]));
 const nodeById=new Map(first.nodes.map(node=>[node.id,node]));
 
+// Screenshot review contract: removed props stay absent, moved props keep the
+// requested rows, and the final launcher remains above-left of the bed.
+const screenshotRemoved=['fixed-074','fixed-084','fixed-091','fixed-143','fixed-162','fixed-172','fixed-173','fixed-183','fixed-184','fixed-185','fixed-201'];
+for (const id of screenshotRemoved) {
+  if (byId.has(id)) failures.push(`${id}: screenshot-reviewed prop returned to the runtime map`);
+  if (first.nodes.find(node=>node.objectId===id)?.route!=='removed') failures.push(`${id}: removed prop returned to a route`);
+}
+for (const [id,y,route] of [['fixed-103',5680,'main'],['fixed-104',5680,'main'],['fixed-171',3330,'main']]) {
+  const object=byId.get(id),node=first.nodes.find(item=>item.objectId===id);
+  if (!object||Math.abs(object.y-y)>.1||node?.route!==route) failures.push(`${id}: screenshot-reviewed placement changed`);
+}
+const reviewedBed=byId.get('fixed-200'),reviewedLauncher=byId.get('fixed-202');
+if (!reviewedBed||!reviewedLauncher||reviewedLauncher.x>=reviewedBed.x) failures.push('final launcher is no longer left of the bed');
+if (reviewedLauncher) {
+  const bounds=alphaBounds(reviewedLauncher.assetId,fittedSize(reviewedLauncher));
+  const standingAltitude=(first.startAltitudeY-(reviewedLauncher.y+bounds.minY-35))/5;
+  if (Math.abs(standingAltitude-1355)>.2) failures.push(`final launcher standing height changed to ${standingAltitude.toFixed(1)}m`);
+}
+
 // The first prop climb must remain a compact, forgiving introduction. Large
 // side faces can be mathematically reachable yet stop the player before their
 // feet ever reach the top (the former crate/shield/barrel dead end).
@@ -80,7 +99,8 @@ for (const edge of first.routes.main) {
   const launcherApproach=bo.tags?.includes('launcher-approach-gap');
   if (doubleJump&&(gap<230||gap>255)) failures.push(`${edge.from}>${edge.to}: double-jump gap is ${gap.toFixed(0)}px`);
   if (!doubleJump&&!launcherApproach&&gap>140.1) failures.push(`${edge.from}>${edge.to}: compact-route gap is ${gap.toFixed(0)}px`);
-  if (launcherApproach&&(gap<150||gap>175)) failures.push(`${edge.from}>${edge.to}: launcher approach gap is ${gap.toFixed(0)}px`);
+  if (launcherApproach&&!bo.tags?.includes('screenshot-removal-approach')&&(gap<150||gap>175)) failures.push(`${edge.from}>${edge.to}: launcher approach gap is ${gap.toFixed(0)}px`);
+  if (bo.tags?.includes('review-spacing')&&gap<105) failures.push(`${edge.from}>${edge.to}: reviewed spacing collapsed to ${gap.toFixed(0)}px`);
 }
 const doubleJumpCount=first.objects.filter(object=>object.tags?.includes('double-jump-gap')).length;
 if (doubleJumpCount<18||doubleJumpCount>34) failures.push(`fixed course must contain 18-34 normal double-jump gaps alongside launchers, got ${doubleJumpCount}`);
@@ -121,6 +141,7 @@ if (first.hazards.length!==5) failures.push(`expected 5 timed laser passages, go
 for (const hazard of first.hazards) {
   if (hazard.type!=='timed-laser'||hazard.altitude<=700) failures.push(`${hazard.id}: invalid laser type/altitude`);
   if (hazard.cycleMs!==4000||hazard.activeMs!==2000) failures.push(`${hazard.id}: laser must use a 2s blocked / 2s open cycle`);
+  if (hazard.x<400||hazard.x>first.world.width-400) failures.push(`${hazard.id}: laser is too close to a world side boundary (${hazard.x.toFixed(0)}px)`);
   const from=first.nodes.find(node=>node.route==='main'&&node.altitude===hazard.fromAltitude);
   const to=first.nodes.find(node=>node.route==='main'&&node.altitude===hazard.toAltitude);
   if (!from||!to) { failures.push(`${hazard.id}: route anchors are missing`); continue; }
@@ -139,6 +160,13 @@ for (const hazard of first.hazards) {
       &&Math.min(hazard.y+hazard.h/2,objectBottom)-Math.max(hazard.y-hazard.h/2,objectTop)>2;
   });
   if (overlapsSolid) failures.push(`${hazard.id}: laser beam overlaps a solid route object`);
+}
+
+const farmCheckpoint=first.checkpoints.find(checkpoint=>checkpoint.altitude===573);
+const farmFlagNode=first.nodes.find(node=>node.route==='main'&&node.altitude===556);
+if (!farmCheckpoint||!farmFlagNode
+  ||Math.abs(farmCheckpoint.x-farmFlagNode.x)>1||farmCheckpoint.flagSide!==-1) {
+  failures.push('573m flag must overlap the reviewed 556m platform');
 }
 
 // Crumbling supports begin only after 300m and average one per ten route

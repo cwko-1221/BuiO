@@ -4,7 +4,7 @@ import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1500m-2026.07b';
+export const MAP_VERSION = 'fixed-1500m-2026.07j';
 export const WORLD = { width:5600, height:8700, startY:8200, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
@@ -541,6 +541,231 @@ function installSlingshotCrossings() {
 }
 installSlingshotCrossings();
 
+// Final hand-tuned passes for the four route sections called out during the
+// full-map review. Keep this separate from the broad spacing grammar above:
+// these are authored compositions, not another procedural layout pass.
+function applyReviewReflow() {
+  const objectById=new Map(objects.map(object=>[object.id,object]));
+  const routeNodes=nodes.filter(node=>node.route==='main');
+  const nodeAt=altitude=>routeNodes.find(node=>node.altitude===altitude);
+  const attachedBySupport=new Map();
+  for (const object of objects.filter(item=>item.supportId)) {
+    if (!attachedBySupport.has(object.supportId)) attachedBySupport.set(object.supportId,[]);
+    attachedBySupport.get(object.supportId).push(object);
+  }
+  const moveNode=(node,x)=>{
+    const object=objectById.get(node.objectId);
+    const shift=x-object.x;
+    object.x=x;
+    node.x=x;
+    for (const attached of attachedBySupport.get(object.id)||[]) attached.x+=shift;
+  };
+  const placeAfter=(fromAltitude,toAltitude,gap,direction)=>{
+    const from=nodeAt(fromAltitude),to=nodeAt(toAltitude);
+    if (!from||!to) throw new Error(`Missing review reflow node ${fromAltitude}m>${toAltitude}m`);
+    const fromObject=objectById.get(from.objectId),toObject=objectById.get(to.objectId);
+    const halfWidths=(fittedSize(fromObject).w+fittedSize(toObject).w)/2;
+    moveNode(to,from.x+direction*(halfWidths+gap));
+  };
+  const moveSuffix=(altitude,shift)=>{
+    for (const node of routeNodes.filter(item=>item.altitude>=altitude)) moveNode(node,node.x+shift);
+  };
+
+  // 493m review: retain the zig-zag, but give the small oven, bellows, pots
+  // and logs 110-125px of visible air instead of compressing them into one
+  // dense silhouette. The launcher approach and landing keep their measured
+  // power-20 gaps.
+  placeAfter(495,508,115,1);
+  placeAfter(508,521,125,1);
+  placeAfter(521,534,115,1);
+  placeAfter(534,547,115,1);
+  placeAfter(547,556,245,-1);
+  placeAfter(556,570,110,-1);
+  placeAfter(570,580,160,-1);
+  placeAfter(580,601,158,-1);
+  placeAfter(601,615,245,-1);
+  const node615=nodeAt(615),node628=nodeAt(628);
+  const object615=objectById.get(node615.objectId),object628=objectById.get(node628.objectId);
+  const target628=node615.x+(fittedSize(object615).w+fittedSize(object628).w)/2+110;
+  moveSuffix(628,target628-node628.x);
+  for (const altitude of [508,521,534,547,570]) objectById.get(nodeAt(altitude).objectId).tags.push('review-spacing');
+
+  // 1051m review: fold this local run inward before authoring the laser. The
+  // following double-jump reconnects to the unchanged upper route, moving the
+  // third gate almost half a screen away from the hard right world boundary.
+  placeAfter(1022,1040,110,-1);
+  placeAfter(1040,1058,240,-1);
+  placeAfter(1058,1072,110,-1);
+  placeAfter(1072,1086,110,-1);
+  placeAfter(1086,1100,120,-1);
+  placeAfter(1100,1114,120,-1);
+  const node1114=nodeAt(1114),node1128=nodeAt(1128);
+  const object1114=objectById.get(node1114.objectId),object1128=objectById.get(node1128.objectId);
+  const target1128=node1114.x+(fittedSize(object1114).w+fittedSize(object1128).w)/2+245;
+  moveSuffix(1128,target1128-node1128.x);
+
+  // 1301m review: open the compact left-hand turn into a readable staircase.
+  // Ordinary landings use 120-130px gaps; the tagged double-jumps and the
+  // launcher retain their exact challenge envelopes.
+  placeAfter(1268,1282,120,-1);
+  placeAfter(1282,1296,130,-1);
+  placeAfter(1296,1310,125,-1);
+  placeAfter(1310,1324,130,-1);
+  placeAfter(1324,1338,125,-1);
+  placeAfter(1338,1352,245,1);
+  placeAfter(1352,1366,160,1);
+  placeAfter(1366,1394,158,-1);
+  placeAfter(1394,1408,245,1);
+  placeAfter(1408,1422,120,1);
+  const node1422=nodeAt(1422),node1436=nodeAt(1436);
+  const object1422=objectById.get(node1422.objectId),object1436=objectById.get(node1436.objectId);
+  const target1436=node1422.x+(fittedSize(object1422).w+fittedSize(object1436).w)/2+120;
+  moveSuffix(1436,target1436-node1436.x);
+  for (const altitude of [1282,1296,1310,1324,1338,1422]) objectById.get(nodeAt(altitude).objectId).tags.push('review-spacing');
+
+  // Launcher arrows are authored before this pass, so keep them attached to
+  // the launcher bodies after all targeted moves.
+  for (const note of annotations.filter(item=>item.type==='launcher-guide')) {
+    const altitude=Number(note.id.replace('launcher-arrow-',''));
+    const launcherNode=nodeAt(altitude);
+    if (launcherNode) note.x=launcherNode.x;
+  }
+}
+applyReviewReflow();
+
+// Screenshot corrections requested for the reviewed route. These edits run
+// after the broad spacing passes so the named props keep their exact authored
+// relationship even if the general route grammar changes later.
+function applyScreenshotCorrections() {
+  const objectById=new Map(objects.map(object=>[object.id,object]));
+  const nodeByObjectId=new Map(nodes.map(node=>[node.objectId,node]));
+  const attachedBySupport=new Map();
+  for (const object of objects.filter(item=>item.supportId)) {
+    if (!attachedBySupport.has(object.supportId)) attachedBySupport.set(object.supportId,[]);
+    attachedBySupport.get(object.supportId).push(object);
+  }
+  const removeSupport=id=>{
+    const object=objectById.get(id),node=nodeByObjectId.get(id);
+    if (!object||!node) throw new Error(`Missing screenshot correction support ${id}`);
+    object.role='decor';
+    object.tags.push('removed-by-screenshot-review');
+    node.route='removed';
+  };
+  const moveObject=(id,{x,y})=>{
+    const object=objectById.get(id),node=nodeByObjectId.get(id);
+    if (!object||!node) throw new Error(`Missing screenshot correction object ${id}`);
+    const shiftX=(x??object.x)-object.x;
+    object.x=x??object.x;
+    object.y=y??object.y;
+    node.x=object.x;
+    node.y=object.y;
+    for (const attached of attachedBySupport.get(id)||[]) attached.x+=shiftX;
+  };
+
+  // 180m barrel, 281m barrel cart, 361m ramp, 803m monitor,
+  // 943m sand ledge, 1098m planter, 1106m ledge and 1350m lantern.
+  for (const id of ['fixed-074','fixed-084','fixed-091','fixed-143','fixed-162','fixed-172','fixed-173','fixed-183','fixed-184','fixed-185','fixed-201']) {
+    removeSupport(id);
+  }
+
+  // The two cookpots shown at 518m and 531m share the requested 501m row.
+  moveObject('fixed-103',{y:yAt(504)});
+  moveObject('fixed-104',{y:yAt(504)});
+
+  // Keep the lower white oval at the reviewed 972m position.
+  const whiteOval=objectById.get('fixed-171');
+  const whiteOvalNode=nodeByObjectId.get('fixed-171');
+  whiteOval.role='support';
+  whiteOval.tags=whiteOval.tags.filter(tag=>tag!=='removed-route-rung');
+  whiteOval.tags.push('moved-by-screenshot-review');
+  whiteOvalNode.route='main';
+  moveObject('fixed-171',{y:yAt(974)});
+
+  // Removing a foothold joins its two neighbours directly. Keep those new
+  // joins inside the existing double-jump envelope without restoring any of
+  // the deleted art or collision bodies.
+  const makeReachable=(fromId,toId,{maxRise=135,maxGap=255,doubleJump=false}={})=>{
+    const from=objectById.get(fromId),to=objectById.get(toId);
+    const toNode=nodeByObjectId.get(toId);
+    const fromBounds=alphaBounds(from.assetId,fittedSize(from));
+    const toBounds=alphaBounds(to.assetId,fittedSize(to));
+    const fromTop=from.y+fromBounds.minY-8;
+    const toTop=to.y+toBounds.minY-8;
+    const rise=fromTop-toTop;
+    if (rise>maxRise) moveObject(toId,{y:to.y+(rise-maxRise)});
+    const halfWidths=(fittedSize(from).w+fittedSize(to).w)/2;
+    const direction=Math.sign(to.x-from.x)||1;
+    const gap=Math.max(0,Math.abs(to.x-from.x)-halfWidths);
+    if (gap>maxGap||(doubleJump&&gap<230)) {
+      moveObject(toId,{x:from.x+direction*(halfWidths+maxGap)});
+    }
+    if (doubleJump&&!to.tags.includes('double-jump-gap')) to.tags.push('double-jump-gap');
+    toNode.x=to.x;
+    toNode.y=to.y;
+  };
+  const earlyLanding=objectById.get('fixed-075');
+  const earlyNext=objectById.get('fixed-078');
+  const earlyDoubleHalf=(fittedSize(earlyLanding).w+fittedSize(earlyNext).w)/2;
+  moveObject('fixed-075',{x:earlyNext.x+earlyDoubleHalf+235});
+  const earlyApproach=objectById.get('fixed-073');
+  const earlyHalf=(fittedSize(earlyApproach).w+fittedSize(earlyLanding).w)/2;
+  moveObject('fixed-073',{x:earlyLanding.x-earlyHalf-120});
+  makeReachable('fixed-073','fixed-075',{maxRise:109,maxGap:120});
+  makeReachable('fixed-083','fixed-085');
+  objectById.get('fixed-085').tags.push('screenshot-removal-approach');
+  makeReachable('fixed-104','fixed-105');
+  makeReachable('fixed-142','fixed-144');
+  makeReachable('fixed-161','fixed-163',{doubleJump:true});
+  makeReachable('fixed-171','fixed-174',{doubleJump:true});
+  makeReachable('fixed-182','fixed-186',{maxGap:240,doubleJump:true});
+  makeReachable('fixed-186','fixed-187',{maxGap:240,doubleJump:true});
+  makeReachable('fixed-187','fixed-188');
+  objectById.get('fixed-186').tags.push('screenshot-tight-clearance');
+  objectById.get('fixed-187').tags.push('screenshot-tight-clearance');
+
+  // Move the final launcher to the bed's upper-left at a standing height of
+  // about 1355m. Shift the landing and summit suffix together so the power-20
+  // arc and the following route remain compact and readable.
+  const bed=objectById.get('fixed-200');
+  const launcher=objectById.get('fixed-202');
+  const launcherNode=nodeByObjectId.get('fixed-202');
+  const landing=objectById.get('fixed-204');
+  const landingNode=nodeByObjectId.get('fixed-204');
+  const approachGap=160;
+  const launcherX=bed.x-(fittedSize(bed).w+fittedSize(launcher).w)/2-approachGap;
+  const launcherBounds=alphaBounds(launcher.assetId,fittedSize(launcher));
+  const hudStartY=yAt(0)-92;
+  const launcherY=hudStartY-1355*WORLD.pixelsPerMetre-launcherBounds.minY+35;
+  moveObject('fixed-202',{x:launcherX,y:launcherY});
+  const landingGap=158;
+  const landingX=launcher.x-(fittedSize(launcher).w+fittedSize(landing).w)/2-landingGap;
+  const suffixShift=landingX-landing.x;
+  for (const node of nodes.filter(item=>item.route==='main'&&item.altitude>=1394)) {
+    moveObject(node.objectId,{x:objectById.get(node.objectId).x+suffixShift});
+  }
+  // Keep the landing within the launcher's tested vertical envelope.
+  moveObject('fixed-204',{y:launcher.y-209.6});
+  launcher.tags=launcher.tags.filter(tag=>tag!=='launcher-steer-left');
+  launcher.tags.push('launcher-steer-left','moved-by-screenshot-review');
+  const launcherArrow=annotations.find(item=>item.id==='launcher-arrow-1366');
+  if (launcherArrow) {
+    launcherArrow.x=launcherNode.x;
+    launcherArrow.y=launcher.y-105;
+    launcherArrow.flipX=landingNode.x<launcherNode.x;
+  }
+
+  // Rebuild the main chain after removing the requested footholds. Side-route
+  // props remain physical but do not receive progress sensors.
+  const routeNodes=nodes.filter(node=>node.route==='main');
+  main.length=0;
+  for (let index=1;index<routeNodes.length;index++) {
+    const from=routeNodes[index-1],to=routeNodes[index];
+    const fromObject=objectById.get(from.objectId);
+    main.push({from:from.id,to:to.id,type:fromObject.behavior?.type==='launcher'?'launcher':'main'});
+  }
+}
+applyScreenshotCorrections();
+
 // Five red timing gates appear only in the factory half of the climb. The
 // beam is active for two seconds, then the passage is open for two seconds.
 // Each gate sits in the actual air gap between two consecutive main supports;
@@ -659,7 +884,9 @@ export const FIXED_MAP = {
   })),
   checkpoints:[
     {altitude:0},{altitude:210},{altitude:274},{altitude:448},
-    {altitude:573},{altitude:704},{altitude:820},{altitude:930},
+    // The farm flag was moved back to the preceding platform shown around
+    // 561m in the HUD, before the mandatory 580m launcher.
+    {altitude:573,nodeAltitude:556,flagSide:-1},{altitude:704},{altitude:820},{altitude:930},
     {altitude:1058},{altitude:1198},{altitude:1324},{altitude:1464}
   ].map(item=>({id:`checkpoint-${item.altitude}`,...item})),
   recoveryBounds:[

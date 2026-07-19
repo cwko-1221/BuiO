@@ -1,5 +1,5 @@
-import { buildCourse, validateCourse } from './course.js?v=20260719-power20-lasers';
-import { GameScene } from './GameScene.js?v=20260719-power20-lasers';
+import { buildCourse, validateCourse } from './course.js?v=20260720-screenshot-corrections-7';
+import { GameScene } from './GameScene.js?v=20260719-review-reflow';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 
 const $ = id => document.getElementById(id);
