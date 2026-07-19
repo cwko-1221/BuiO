@@ -35,7 +35,7 @@ try {
     }).filter(Boolean);
   });
   if(crossings.length!==6)throw new Error(`expected 6 launcher crossings, got ${crossings.length}`);
-  if(crossings.some(item=>item.power!==30||item.hasAirSpeed))throw new Error(`launchers must use power 30 without faster air control: ${JSON.stringify(crossings)}`);
+  if(crossings.some(item=>item.power!==15||item.hasAirSpeed))throw new Error(`launchers must use power 15 without faster air control: ${JSON.stringify(crossings)}`);
   const selectedCrossings=process.env.LAUNCHER_ALTITUDE
     ? crossings.filter(item=>item.fromAltitude===Number(process.env.LAUNCHER_ALTITUDE))
     : crossings;
@@ -46,7 +46,7 @@ try {
     const trace=[],attempts=[];
     // A human may correct the timing after one miss. Try a few ordinary
     // counter-steer timings through the same action map as keyboard and touch.
-    const holdOptions=process.env.LAUNCHER_HOLD?[Number(process.env.LAUNCHER_HOLD)]:[500,700,900,1100,1300,1500,1800,2100];
+    const holdOptions=process.env.LAUNCHER_HOLD?[Number(process.env.LAUNCHER_HOLD)]:[300,450,600,750,900,1050,1200,1400];
     for(const holdMs of holdOptions){
       await page.evaluate(({fromX,fromY})=>{
         const scene=window.__game.scene.getScene('GameScene');
@@ -60,8 +60,8 @@ try {
         return scene.launcherBoostUntil>scene.time.now;
       },null,{timeout:3500});
       const launchedAt=Date.now();
-      let held=null,jumpChecked=false,closest=null;
-      while(Date.now()-launchedAt<5200){
+      let held=null,closest=null;
+      while(Date.now()-launchedAt<3600){
         last=await page.evaluate(()=>{
           const scene=window.__game.scene.getScene('GameScene');
           return {x:scene.player.x,y:scene.player.y,vx:scene.playerBody.velocity.x,vy:scene.playerBody.velocity.y,grounded:scene.grounded,finished:scene.finished,boostMs:scene.launcherBoostUntil-scene.time.now,left:scene.actions.left,right:scene.actions.right};
@@ -69,10 +69,6 @@ try {
         if(process.env.DEBUG_LAUNCHER&&trace.length<80)trace.push({t:Date.now()-launchedAt,...last});
         minY=Math.min(minY,last.y);
         if(last.vy>0&&Math.abs(last.y-crossing.toY)<150&&(!closest||Math.abs(last.x-crossing.toX)<Math.abs(closest.x-crossing.toX))) closest={x:last.x,y:last.y,vy:last.vy};
-        if(!jumpChecked&&Date.now()-launchedAt>250){
-          await page.evaluate(()=>window.__game.scene.getScene('GameScene').queueJump());
-          jumpChecked=true;
-        }
         const desired=Date.now()-launchedAt<holdMs?(crossing.direction>0?'right':'left'):null;
         if(desired!==held){
           await page.evaluate(({previous,next})=>{
@@ -82,7 +78,7 @@ try {
           },{previous:held,next:desired});
           held=desired;
         }
-        if(Date.now()-launchedAt>650&&((last.grounded&&Math.abs(last.x-crossing.toX)<75)||(crossing.toAltitude===1000&&last.finished))){landed=true;usedHoldMs=holdMs;break;}
+        if(Date.now()-launchedAt>500&&((last.grounded&&Math.abs(last.x-crossing.toX)<75)||(crossing.toAltitude===1500&&last.finished))){landed=true;usedHoldMs=holdMs;break;}
         if(Date.now()-launchedAt>900&&last.y>Math.max(crossing.fromY,crossing.toY)+320)break;
         await page.waitForTimeout(20);
       }

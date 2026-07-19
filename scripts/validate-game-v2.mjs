@@ -11,7 +11,7 @@ const firstReport=validateCourse(first);
 if (!firstReport.ok) failures.push(...firstReport.errors);
 if (ASSETS.length<195) failures.push(`asset catalog lost shipping assets: expected at least 195, got ${ASSETS.length}`);
 if (first.mapVersion!==MAP_VERSION) failures.push('map version mismatch');
-if (first.world.width!==5600||first.world.height!==6200) failures.push('world is not fixed at 5600x6200');
+if (first.world.width!==5600||first.world.height!==8700) failures.push('world is not fixed at 5600x8700');
 if (first.summit.y>=first.start.y) failures.push('summit must be above the start');
 if (first.objects.some(object=>object.role==='decor')) failures.push('runtime map contains pass-through decor');
 
@@ -81,10 +81,10 @@ for (const edge of first.routes.main) {
   if (!doubleJump&&gap>140.1) failures.push(`${edge.from}>${edge.to}: compact-route gap is ${gap.toFixed(0)}px`);
 }
 const doubleJumpCount=first.objects.filter(object=>object.tags?.includes('double-jump-gap')).length;
-if (doubleJumpCount<10||doubleJumpCount>24) failures.push(`fixed course must contain 10-24 normal double-jump gaps alongside launchers, got ${doubleJumpCount}`);
+if (doubleJumpCount<18||doubleJumpCount>34) failures.push(`fixed course must contain 18-34 normal double-jump gaps alongside launchers, got ${doubleJumpCount}`);
 
-// Launcher crossings are deliberately outside the normal two-jump envelope.
-// They must be authored, powerful, above 300m, and never share crumble logic.
+// Launcher crossings are short, dense authored boosts. They must use the same
+// normal air steering, power 15, and never share crumble logic.
 const launcherEdges=first.routes.main.filter(edge=>edge.type==='launcher');
 if (launcherEdges.length!==6) failures.push(`expected 6 launcher crossings, got ${launcherEdges.length}`);
 const launcherGuides=first.annotations.filter(note=>note.type==='launcher-guide');
@@ -95,27 +95,27 @@ for (const edge of launcherEdges) {
   const gap=Math.max(0,Math.abs(b.x-a.x)-(fittedSize(ao).w+fittedSize(bo).w)/2);
   if (a.altitude<300) failures.push(`${ao.id}: launcher appears before 300m`);
   if (ao.assetId!=='slingshot-platform'||ao.behavior?.type!=='launcher') failures.push(`${ao.id}: launcher art/behavior mismatch`);
-  if (ao.behavior?.power!==30||'airSpeed' in ao.behavior) failures.push(`${ao.id}: launcher must use power 30 and ordinary air steering`);
+  if (ao.behavior?.power!==15||'airSpeed' in ao.behavior) failures.push(`${ao.id}: launcher must use power 15 and ordinary air steering`);
   if ('velocityX' in ao.behavior||'targetX' in ao.behavior) failures.push(`${ao.id}: launcher must not steer toward its landing`);
   if (ao.angle!==0) failures.push(`${ao.id}: launcher is not vertically aligned`);
   const guide=launcherGuides.find(note=>note.id===`launcher-arrow-${a.altitude}`);
   if (!guide||guide.assetId!=='ref-jump-arrow'||guide.showText!==false) failures.push(`${ao.id}: missing launcher direction arrow`);
   if (guide&&guide.flipX!==(b.x<a.x)) failures.push(`${ao.id}: launcher arrow points in the wrong direction`);
   const rise=a.y-b.y;
-  if (gap<110||gap>480||rise<200||rise>700) failures.push(`${edge.from}>${edge.to}: launcher landing is outside the power-30 normal-control envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise)`);
+  if (gap<45||gap>145||rise<0||rise>190) failures.push(`${edge.from}>${edge.to}: launcher landing is outside the compact power-15 envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise)`);
   if (ao.tags?.includes('crumble-platform')) failures.push(`${ao.id}: launcher cannot crumble`);
   const apex=ao.behavior.power*ao.behavior.power*.98;
   const overhead=first.nodes.filter(node=>node.route==='main'&&node.id!==a.id&&node.y<a.y-20&&node.y>a.y-apex-60).find(node=>{
     const object=byId.get(node.objectId);
     return object&&Math.abs(node.x-a.x)<fittedSize(object).w/2+34;
   });
-  if (overhead) failures.push(`${ao.id}: ${overhead.objectId} is directly above the power-30 flight column`);
+  if (overhead) failures.push(`${ao.id}: ${overhead.objectId} is directly above the power-15 flight column`);
 }
 
 // Crumbling supports begin only after 300m and average one per ten route
 // objects. They never replace checkpoints, double-jump landings or authored
 // switchback pivots, and their timing is a stable part of the map manifest.
-const crumbleEligible=first.nodes.filter(node=>node.route==='main'&&node.altitude>=300&&node.altitude<970);
+const crumbleEligible=first.nodes.filter(node=>node.route==='main'&&node.altitude>=300&&node.altitude<1470);
 const crumbleNodes=crumbleEligible.filter(node=>byId.get(node.objectId)?.behavior?.type==='crumble');
 const expectedCrumbleCount=Math.floor(crumbleEligible.length/10);
 if (crumbleNodes.length!==expectedCrumbleCount) failures.push(`expected ${expectedCrumbleCount} crumble supports, got ${crumbleNodes.length}`);
@@ -127,9 +127,9 @@ for (const node of crumbleNodes) {
   if (!object.tags?.includes('crumble-platform')) failures.push(`${object.id}: crumble tag missing`);
   if (object.tags?.includes('double-jump-gap')||object.tags?.includes('switchback-turn')) failures.push(`${object.id}: crumble support replaced a protected challenge`);
   if (behavior.triggerDelayMs!==140||behavior.fallDurationMs!==650||behavior.respawnMs!==4000) failures.push(`${object.id}: crumble timing changed`);
-  if ([448,573,704,820,930].some(altitude=>Math.abs(node.altitude-altitude)<=8)) failures.push(`${object.id}: crumble support is too close to a checkpoint`);
+  if ([448,573,704,820,930,1058,1198,1324,1464].some(altitude=>Math.abs(node.altitude-altitude)<=8)) failures.push(`${object.id}: crumble support is too close to a checkpoint`);
   const index=crumbleEligible.indexOf(node);
-  if (previousCrumbleIndex>=0&&(index-previousCrumbleIndex<7||index-previousCrumbleIndex>13)) failures.push(`${object.id}: crumble interval is ${index-previousCrumbleIndex}, expected about 10`);
+  if (previousCrumbleIndex>=0&&(index-previousCrumbleIndex<7||index-previousCrumbleIndex>14)) failures.push(`${object.id}: crumble interval is ${index-previousCrumbleIndex}, expected about 10`);
   previousCrumbleIndex=index;
 }
 

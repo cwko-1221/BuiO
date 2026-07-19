@@ -45,7 +45,7 @@ for (const [edgeIndex,edge] of edges.entries()) {
   const required=Math.abs(nearEdge-from.x)-25;
 
   assert.equal(launcher.angle,0,`${from.altitude}m launcher is not upright`);
-  assert.equal(launcher.behavior.power,30,`${from.altitude}m launcher does not use the original power 30`);
+  assert.equal(launcher.behavior.power,15,`${from.altitude}m launcher does not use power 15`);
   assert.equal('airSpeed' in launcher.behavior,false,`${from.altitude}m launcher changes ordinary air-control speed`);
   assert.equal('velocityX' in launcher.behavior,false,`${from.altitude}m launcher adds horizontal force`);
   assert.equal('targetX' in launcher.behavior,false,`${from.altitude}m launcher targets the landing`);
@@ -58,12 +58,7 @@ for (const [edgeIndex,edge] of edges.entries()) {
   });
   assert.equal(overhead,undefined,`${from.altitude}m launcher has ${overhead?.objectId} directly above it`);
 
-  let bestDoubleJump=0;
-  for (let secondJumpAt=1;secondJumpAt<=75;secondJumpAt++) {
-    const reached=flight({direction,vy:-12.2,targetY,secondJumpAt});
-    if (reached!==null) bestDoubleJump=Math.max(bestDoubleJump,Math.abs(reached.x));
-  }
-  assert.ok(bestDoubleJump<required,`${from.altitude}m crossing is reachable without the launcher: ${bestDoubleJump.toFixed(1)}px >= ${required.toFixed(1)}px`);
+  assert.ok(to.altitude-from.altitude<=30,`${from.altitude}m launcher creates a sparse ${(to.altitude-from.altitude)}m route hole`);
 }
 
-console.log(`Launcher physics passed: ${edges.length} upright power-30 launchers have clear vertical columns, ordinary air steering, and launcher-only gaps.`);
+console.log(`Launcher physics passed: ${edges.length} compact upright power-15 launchers reach their next landing with ordinary air steering.`);

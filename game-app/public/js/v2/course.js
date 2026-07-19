@@ -1,7 +1,7 @@
 import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js?v=20260719-six-launchers';
 import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260719-six-launchers';
 import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers';
-import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260719-power30-launchers';
+import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260719-1500m-power15';
 
 function hashString(value) {
   let h=2166136261;
@@ -74,9 +74,9 @@ export function buildCourse(seed=0) {
 export function validateCourse(course) {
   const errors=[];
   if (course.mapVersion!==MAP_VERSION) errors.push('unexpected map version');
-  if (course.world.width!==5600 || course.world.height!==6200) errors.push('fixed world must be 5600x6200');
+  if (course.world.width!==5600 || course.world.height!==8700) errors.push('fixed world must be 5600x8700');
   if (course.instances.length!==6) errors.push(`expected 6 authored zones, got ${course.instances.length}`);
-  if (course.checkpoints.map(item=>item.altitude).join(',')!=='0,210,274,448,573,704,820,930') errors.push('checkpoint altitudes changed');
+  if (course.checkpoints.map(item=>item.altitude).join(',')!=='0,210,274,448,573,704,820,930,1058,1198,1324,1464') errors.push('checkpoint altitudes changed');
   const nodes=new Map(course.nodes.map(node=>[node.id,node]));
   const objects=new Map(course.objects.map(object=>[object.id,object]));
   for (const [name,edges] of Object.entries(course.routes)) for (const edge of edges) {
@@ -100,11 +100,11 @@ export function validateCourse(course) {
     const launcherEdge=edge.type==='launcher'&&ao.behavior?.type==='launcher';
     if (launcherEdge) {
       launcherEdges++;
-      const margin=Math.min(1-gap/420,1-rise/700);
+      const margin=Math.min(1-gap/300,1-rise/240);
       minLauncherMargin=Math.min(minLauncherMargin,margin);
-      if (gap<110||gap>480) errors.push(`launcher edge ${edge.from}>${edge.to} has an unsafe ordinary-control landing gap (${gap.toFixed(0)}px)`);
+      if (gap<45||gap>145) errors.push(`launcher edge ${edge.from}>${edge.to} has an unsafe compact landing gap (${gap.toFixed(0)}px)`);
       const {power,flightMs}=ao.behavior;
-      if (rise<200||rise>700||power!==30||'airSpeed' in ao.behavior||flightMs<1800||flightMs>3000) {
+      if (rise<0||rise>190||power!==15||'airSpeed' in ao.behavior||flightMs<1200||flightMs>2000) {
         errors.push(`launcher edge ${edge.from}>${edge.to} exceeds its normal-control envelope (${gap.toFixed(0)}px gap, ${rise.toFixed(0)}px rise, ${power} power)`);
       }
       // Matter's measured apex is just under 0.98 * power² for this player.
@@ -210,7 +210,7 @@ export function validateCourse(course) {
     }
   }
 
-  // Across the full 1000m route, a later support must never become a low
+  // Across the full 1500m route, a later support must never become a low
   // ceiling over an earlier foothold. Reserve 120px (well above the 70px
   // character) so normal and double-jump arcs both have breathing room.
   const mainIds=new Set(course.nodes.filter(node=>node.route==='main').map(node=>node.objectId));

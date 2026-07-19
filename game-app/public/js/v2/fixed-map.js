@@ -4,8 +4,8 @@ import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1000m-2026.07bl';
-export const WORLD = { width:5600, height:6200, startY:5700, summitY:700, pixelsPerMetre:5 };
+export const MAP_VERSION = 'fixed-1500m-2026.07a';
+export const WORLD = { width:5600, height:8700, startY:8200, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
 
@@ -256,11 +256,45 @@ const frame14=authoredRoute('factory',[
   ['ref-office-safe',4250,976,160,110],['ref-office-desk',4460,982,210,80],
   ['ref-white-table',4690,990,230,105],['ref-charcoal-table',4920,996,230,105],
   ['ref-office-desk',5150,998,210,80,{safe:false}],
-  ['ref-office-desk',5380,1000,220,84,{tags:['summit-platform','landmark-base']}]
-],['reference-frame-14','office-summit','rising-right']);
+  ['ref-office-desk',5380,1000,220,84,{tags:['office-bridge','landmark-base']}]
+],['reference-frame-14','office-bridge','rising-right']);
 decor('factory','ref-potted-plant',5000,990,140,140,{tags:['reference-frame-14','office-plant']});
 decor('factory','ref-office-chair',5190,994,130,145,{tags:['reference-frame-14','off-route-landmark']});
 decor('factory','ref-basketball-hoop',5350,988,210,260,{angle:-0.08,tags:['reference-frame-14','office-hoop']});
+
+// FACTORY EXTENSION 1000-1500m ---------------------------------------------
+// A dense final climb continues the same front-facing prop language. These
+// short runs deliberately reuse readable supports rather than stretching a
+// handful of objects across the extra 500 metres.
+const frame15=authoredRoute('factory',[
+  ['ref-monitor-front',5200,1022,150,92,{tags:['vertical-bridge']}],['ref-office-safe',4960,1040,150,100],
+  ['ref-office-desk',4720,1058,210,80],['ref-white-table',4470,1072,220,88],
+  ['ref-charcoal-table',4210,1086,210,88],['ref-potted-plant',3980,1100,120,86],
+  ['ref-sand-ledge',3710,1114,260,86],['ref-reef-rock',3440,1128,250,92]
+],['reference-frame-14','factory-extension-a','rising-left']);
+
+const frame16=authoredRoute('factory',[
+  ['ref-bowl-front',3200,1142,120,82],['ref-monitor-front',2960,1156,150,92],
+  ['ref-wood-sign',2720,1170,210,90],['ref-split-platform',2470,1184,230,84],
+  ['ref-telescope',2230,1198,135,96],['ref-book-step',1990,1212,165,88],
+  ['ref-scroll-step',1750,1226,170,84],['ref-shield-rack',1510,1240,175,92]
+],['reference-frame-14','factory-extension-b','rising-left']);
+
+const frame17=authoredRoute('factory',[
+  ['ref-log-step',1270,1254,175,78],['ref-cookpot',1030,1268,135,90],
+  ['ref-barrel-front',790,1282,105,92],['ref-produce-crate',550,1296,165,92],
+  ['ref-stone-ramp-front',790,1310,230,80,{angle:-0.1}],['ref-catapult-front',1030,1324,170,96],
+  ['ref-bed-front',1270,1338,240,84],['ref-hanging-lantern',1510,1352,190,88]
+],['reference-frame-14','factory-extension-c','switchback-climb']);
+
+const frame18=authoredRoute('factory',[
+  ['ref-office-safe',1750,1366,150,100],['ref-office-desk',1990,1380,205,80],
+  ['ref-white-table',2230,1394,220,88],['ref-charcoal-table',2470,1408,210,88],
+  ['ref-monitor-front',2710,1422,150,92],['ref-potted-plant',2950,1436,120,86],
+  ['ref-split-platform',3190,1450,230,84],['ref-telescope',3430,1464,135,96],
+  ['ref-office-safe',3670,1478,150,100],['ref-office-desk',3910,1489,205,80],
+  ['ref-white-table',4150,1500,230,84,{tags:['summit-platform','landmark-base']}]
+],['reference-frame-14','factory-extension-d','summit-run']);
 
 // Reflow the authored route after applying the 84x84px hard size cap. The
 // original left/right rhythm is retained. Ordinary footholds remain friendly,
@@ -309,8 +343,8 @@ function compactPhysicalRoute() {
   // jumping right and then immediately climbing back left.
   let direction=1;
   let doubleJumpChallenges=0;
-  const doubleJumpMilestones=[150,180,210,235,275,320,340,390,410,435,495,550,615,660,700,730,790,840,865,927];
-  const forcedTurnMilestones=[300,370,520,580,822,906];
+  const doubleJumpMilestones=[150,180,210,235,275,320,340,390,410,435,495,550,615,660,700,730,790,840,865,927,1050,1120,1190,1260,1330,1400,1470];
+  const forcedTurnMilestones=[300,370,520,580,822,906,1050,1150,1250,1350,1450];
   let milestoneIndex=0;
   let forcedTurnIndex=0;
   let spacingDebt=0;
@@ -337,8 +371,16 @@ function compactPhysicalRoute() {
       ? preferredDoubleGaps.map(gap=>({gap,candidate:previousObject.x+direction*(halfWidths+gap)}))
         .find(choice=>choice.candidate>=250&&choice.candidate<=5350&&clearsEarlierRoute(object,choice.candidate,index))
       : undefined;
-    let target=doubleChoice?.candidate;
-    if (target!==undefined) {
+    // At the 1000m seam, climb almost vertically first. This keeps the first
+    // extension jump comfortably reachable without placing it beneath the
+    // final supports of the original route.
+    const bridgeCandidate=previousObject.x+82;
+    const verticalTarget=object.tags.includes('vertical-bridge')
+      &&bridgeCandidate>=42&&clearsEarlierRoute(object,bridgeCandidate,index)
+      ? bridgeCandidate
+      : undefined;
+    let target=verticalTarget??doubleChoice?.candidate;
+    if (verticalTarget===undefined&&target!==undefined) {
       object.tags.push('double-jump-gap');
       doubleJumpChallenges++;
       milestoneIndex++;
@@ -382,50 +424,24 @@ function compactPhysicalRoute() {
     node.x=target;
     for (const attached of attachedBySupport.get(object.id)||[]) attached.x+=shift;
   }
-  if (doubleJumpChallenges<18||doubleJumpChallenges>24) throw new Error(`Expected 18-24 double-jump challenges, got ${doubleJumpChallenges}`);
+  if (doubleJumpChallenges<24||doubleJumpChallenges>34) throw new Error(`Expected 24-34 double-jump challenges, got ${doubleJumpChallenges}`);
 }
 compactPhysicalRoute();
 
-// Six launcher crossings replace redundant footholds from 300m onward. Their
-// visible edge-to-edge gaps exceed the ordinary double-jump envelope, so the
-// slingshot is a required route mechanic rather than optional decoration.
-// Every slingshot uses the original power 30 launch. The route is reflowed so
-// its full vertical column stays clear. Horizontal air control remains exactly
-// the same as an ordinary jump; the player chooses when to steer toward the
-// named landing.
+// Six compact launcher crossings replace one foothold apiece. Power 15 gives a
+// useful lift without forcing the surrounding map to become sparse. Moving the
+// complete route suffix together preserves the original density after every
+// launcher landing. Horizontal air control remains identical to a normal jump.
 function installSlingshotCrossings() {
   const objectById=new Map(objects.map(object=>[object.id,object]));
   const nodeAt=altitude=>nodes.find(node=>node.route==='main'&&node.altitude===altitude);
   const specs=[
-    {
-      from:300,to:420,landingX:4330,power:30,flightMs:2400,
-      remove:[312,323,333,346,360,370,382,402],
-      moves:[{altitude:438,x:4648,doubleJump:true},{altitude:452,x:4528},{altitude:469,x:4396}]
-    },
-    {
-      from:469,to:570,landingX:4660,power:30,flightMs:2400,
-      remove:[482,495,508,521,534,547,556],
-      moves:[{altitude:580,x:4990,doubleJump:true}]
-    },
-    {
-      from:580,to:678,landingX:4726,power:30,flightMs:2400,
-      remove:[590,601,615,628,646,662],
-      moves:[{altitude:680,x:4396,doubleJump:true},{altitude:686,x:4264},{altitude:690,x:4132},{altitude:700,x:3802},{altitude:710,x:3670}]
-    },
-    {
-      from:710,to:807,landingX:3934,power:30,flightMs:2400,
-      remove:[730,740,748,755,758,770,785],
-      moves:[{altitude:822,x:4264,doubleJump:true},{altitude:837,x:4396},{altitude:849,x:4726},{altitude:865,x:5056},{altitude:868,x:5188}]
-    },
-    {
-      from:868,to:943,landingX:4924,power:30,flightMs:2400,
-      remove:[871,874,877,880,883,906,914,927,935],
-      moves:[{altitude:951,x:4792}]
-    },
-    {
-      from:951,to:1000,landingX:4300,power:30,flightMs:2400,
-      remove:[960,968,976,996,998]
-    }
+    {from:300,remove:[312],to:323,direction:1},
+    {from:469,remove:[482],to:495,direction:1,followupShift:264},
+    {from:580,remove:[590],to:601,direction:-1},
+    {from:710,remove:[730],to:740,direction:-1},
+    {from:868,remove:[871],to:874,direction:1},
+    {from:1366,remove:[1380],to:1394,direction:-1}
   ];
   const attachedBySupport=new Map();
   for (const object of objects.filter(item=>item.supportId)) {
@@ -443,29 +459,28 @@ function installSlingshotCrossings() {
     const fromNode=nodeAt(spec.from), landingNode=nodeAt(spec.to);
     if (!fromNode||!landingNode) throw new Error(`Missing slingshot crossing ${spec.from}m>${spec.to}m`);
     const launcher=objectById.get(fromNode.objectId), landing=objectById.get(landingNode.objectId);
-    if (Number.isFinite(spec.fromX)) moveNode(fromNode,spec.fromX);
     launcher.assetId='slingshot-platform';
     launcher.tags=launcher.tags.filter(tag=>tag!=='crumble-platform');
     launcher.tags.push('slingshot-launcher');
     landing.tags.push('slingshot-landing');
-    if (Number.isFinite(spec.landingX)) {
-      moveNode(landingNode,spec.landingX);
-    }
-    for (const move of spec.moves||[]) {
-      const node=nodeAt(move.altitude);
-      if (!node) throw new Error(`Missing slingshot follow-up at ${move.altitude}m`);
-      moveNode(node,move.x);
-      if (move.doubleJump) {
-        const object=objectById.get(node.objectId);
-        if (!object.tags.includes('double-jump-gap')) object.tags.push('double-jump-gap');
-      }
-      if (move.removeDoubleJump) {
-        const object=objectById.get(node.objectId);
-        object.tags=object.tags.filter(tag=>tag!=='double-jump-gap');
-      }
+    // Move the landing and every later main node by the same amount. This
+    // keeps the approach/exit gaps compact instead of creating an empty arc.
+    const routeNodes=nodes.filter(node=>node.route==='main');
+    const landingIndex=routeNodes.indexOf(landingNode);
+    // The measured Matter trajectory at power 15 only has about 106px of
+    // horizontal travel before reaching a 26m-higher landing. A compact 160px
+    // centre distance leaves normal air steering enough collision overlap and
+    // avoids the sparse launcher-only voids from the earlier map.
+    const desiredLandingX=launcher.x+spec.direction*160;
+    const suffixShift=desiredLandingX-landing.x;
+    for (const node of routeNodes.slice(landingIndex)) moveNode(node,node.x+suffixShift);
+    // Keep the platform after the landing outside the vertical launch column;
+    // otherwise a player could ignore the arrow and skip the intended target.
+    if (spec.followupShift) {
+      for (const node of routeNodes.slice(landingIndex+1)) moveNode(node,node.x+spec.followupShift);
     }
     launcher.angle=0;
-    launcher.behavior={type:'launcher',power:spec.power,flightMs:spec.flightMs};
+    launcher.behavior={type:'launcher',power:15,flightMs:1600};
     const direction=landing.x>=launcher.x?1:-1;
     launcher.tags.push(direction>0?'launcher-steer-right':'launcher-steer-left');
     annotations.push({
@@ -502,9 +517,9 @@ installSlingshotCrossings();
 // switchback pivots, checkpoints and the summit so a disappearing support is
 // surprising without ever becoming a mandatory soft-lock.
 function markCrumblePlatforms() {
-  const routeNodes=nodes.filter(node=>node.route==='main'&&node.altitude>=300&&node.altitude<970);
+  const routeNodes=nodes.filter(node=>node.route==='main'&&node.altitude>=300&&node.altitude<1470);
   const objectById=new Map(objects.map(object=>[object.id,object]));
-  const protectedAltitudes=[448,573,704,820,930];
+  const protectedAltitudes=[448,573,704,820,930,1058,1198,1324,1464];
   let previousChosenIndex=-Infinity;
   const desiredCount=Math.floor(routeNodes.length/10);
   for (let slot=1;slot<=desiredCount;slot++) {
@@ -538,7 +553,7 @@ markCrumblePlatforms();
 const referenceObjects=objects.slice();
 const runtimeObjects=objects.filter(object=>object.role!=='decor');
 
-for (const run of [frame01,frame02,frame03,frame04,frame05,frame06,frame07,frame08,frame09,frame10,frame11,frame12,frame13,frame14]) recoverLast(run,3);
+for (const run of [frame01,frame02,frame03,frame04,frame05,frame06,frame07,frame08,frame09,frame10,frame11,frame12,frame13,frame14,frame15,frame16,frame17,frame18]) recoverLast(run,3);
 
 // World-space tutorial and wayfinding annotations. These are deliberately
 // separate from collision objects so signs can never create invisible walls.
@@ -552,16 +567,17 @@ annotations.push(
   {id:'turn-workshop',type:'turn',x:3210,y:yAt(543)-155,text:'→ 沿工場物件攀升'},
   {id:'summit-coral',type:'summit',x:3660,y:yAt(830)-175,text:'高峰 2/6・珊瑚攀登'},
   {id:'turn-office',type:'turn',x:1690,y:yAt(910)-155,text:'→ 進入最後攀登'},
-  {id:'summit-final-label',type:'summit',x:4050,y:yAt(1000)-145,text:'登頂！'}
+  {id:'milestone-1000',type:'turn',x:4050,y:yAt(1000)-145,text:'繼續向上！'},
+  {id:'summit-final-label',type:'summit',x:4050,y:yAt(1500)-145,text:'登頂！'}
 );
 
-const summitBase=frame14[frame14.length-1];
+const summitBase=frame18[frame18.length-1];
 export const FIXED_MAP = {
   mapVersion:MAP_VERSION,
   world:WORLD,
   zones:[
     {id:'castle',min:0,max:210},{id:'market',min:211,max:274},{id:'forest',min:275,max:448},
-    {id:'farm',min:449,max:573},{id:'snow',min:574,max:704},{id:'factory',min:705,max:1000}
+    {id:'farm',min:449,max:573},{id:'snow',min:574,max:704},{id:'factory',min:705,max:1500}
   ],
   objects:runtimeObjects,referenceObjects,nodes,
   routes:{main,shortcut,recovery},
@@ -570,17 +586,18 @@ export const FIXED_MAP = {
   })),
   checkpoints:[
     {altitude:0},{altitude:210},{altitude:274},{altitude:448},
-    {altitude:573},{altitude:704},{altitude:820},{altitude:930}
+    {altitude:573},{altitude:704},{altitude:820},{altitude:930},
+    {altitude:1058},{altitude:1198},{altitude:1324},{altitude:1464}
   ].map(item=>({id:`checkpoint-${item.altitude}`,...item})),
   recoveryBounds:[
     {id:'recovery-castle',minAltitude:35,maxAltitude:210,resetAltitude:0},
     {id:'recovery-forest',minAltitude:290,maxAltitude:448,resetAltitude:274},
     {id:'recovery-farm',minAltitude:460,maxAltitude:573,resetAltitude:448},
     {id:'recovery-snow',minAltitude:588,maxAltitude:704,resetAltitude:573},
-    {id:'recovery-factory',minAltitude:718,maxAltitude:1000,resetAltitude:704}
+    {id:'recovery-factory',minAltitude:718,maxAltitude:1500,resetAltitude:704}
   ],
   hazards,
   annotations,
-  summit:{x:summitBase.object.x,y:yAt(1000)-100,progress:1},
+  summit:{x:summitBase.object.x,y:yAt(1500)-100,progress:1},
   start:{x:360,y:yAt(0)-92}
 };

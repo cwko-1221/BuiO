@@ -1,4 +1,4 @@
-import { buildCourse, validateCourse } from './course.js?v=20260719-power30-launchers';
+import { buildCourse, validateCourse } from './course.js?v=20260719-1500m-power15';
 import { GameScene } from './GameScene.js?v=20260719-flag-checkpoints';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 
