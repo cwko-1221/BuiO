@@ -11,6 +11,7 @@ import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest
 import { CrumblePlatformState } from './CrumblePlatform.js?v=20260717-crumble';
 import { RemoteGhostState, SURFACE_TOLERANCE } from './RemoteGhostState.js?v=20260718-network-4';
 import { timedHazardState } from './timed-hazards.js?v=20260719-power20-lasers';
+import { accessoryGlyph, avatarTint, normaliseAvatar } from './avatar.js?v=20260725-avatar-1';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -18,7 +19,9 @@ export class GameScene extends Phaser.Scene {
     this.course = course;
     this.hooks = hooks;
     this.actions = { left:false, right:false, down:false, jumpQueued:0 };
-    this.energy = hooks.energy ?? 40;
+    this.maxEnergy = Math.max(1, Number(hooks.maxEnergy) || 100);
+    this.energy = Phaser.Math.Clamp(hooks.energy ?? Math.min(40, this.maxEnergy), 0, this.maxEnergy);
+    this.avatar = normaliseAvatar(hooks.avatar);
     this.progress = hooks.progress ?? 0;
     this.checkpoint = resolveCheckpoint(course.checkpoints, {checkpoint:hooks.checkpoint});
     this.airJump = 1;
@@ -331,12 +334,21 @@ export class GameScene extends Phaser.Scene {
     Matter.Body.setPosition(this.playerBody,{x:this.course.start.x,y:this.course.start.y-38});
     Matter.Composite.add(this.matter.world.localWorld,this.playerBody);
     this.player = this.add.sprite(0,0,'player-idle-1').setDisplaySize(68,70).setDepth(100);
+    const tint=avatarTint(this.avatar);
+    if (tint!==0xffffff) this.player.setTint(tint);
+    this.playerAccessory = this.add.text(0,0,accessoryGlyph(this.avatar),{
+      fontFamily:'"Segoe UI Emoji","Apple Color Emoji",sans-serif',
+      fontSize:'24px',
+      stroke:'#20263a',
+      strokeThickness:3,
+    }).setOrigin(.5).setDepth(105);
     this.syncPlayerSprite();
     this.playerName = this.add.text(this.player.x,this.player.y+42,this.hooks.name || '玩家',{fontFamily:'Microsoft JhengHei',fontSize:'17px',fontStyle:'bold',color:'#fff',stroke:'#222a42',strokeThickness:6}).setOrigin(.5).setDepth(110);
   }
 
   syncPlayerSprite() {
     this.player.setPosition(this.playerBody.position.x,this.playerBody.position.y+PLAYER_SPRITE_DY);
+    this.playerAccessory?.setPosition(this.player.x,this.player.y-39);
   }
 
   setPlayerPosition(x,y) {
@@ -431,7 +443,7 @@ export class GameScene extends Phaser.Scene {
     if (value) this.wakePlayer();
     if (action === 'jump' && value) this.queueJump(); else this.actions[action] = value;
   }
-  setEnergy(value) { this.energy = Phaser.Math.Clamp(value,0,100); }
+  setEnergy(value) { this.energy = Phaser.Math.Clamp(value,0,this.maxEnergy); }
 
   triggerCrumble(id,broadcast=true) {
     const item=this.crumbleObjects.get(id);
@@ -522,7 +534,7 @@ export class GameScene extends Phaser.Scene {
     this.setPlayerVelocity(nextVx,null);
     const conveyorBody = under.find(b => b.courseObject?.behavior?.type === 'conveyor');
     if (conveyorBody && this.grounded) this.setPlayerVelocity(nextVx + conveyorBody.courseObject.behavior.speed,null);
-    if (this.hooks.infiniteEnergy) this.energy=100;
+    if (this.hooks.infiniteEnergy) this.energy=this.maxEnergy;
     else if (dir && this.energy > 0) this.energy = Math.max(0,this.energy-4.3*dt);
     this.player.setFlipX(dir < 0);
     if (this.grounded&&dir&&Math.abs(nextVx)>1.25&&time>=this.nextStepAt) {
@@ -604,7 +616,9 @@ export class GameScene extends Phaser.Scene {
     if (!['jump','doubleJump'].includes(this.player.anims.currentAnim?.key) || !this.player.anims.isPlaying) this.player.play(motion,true);
     for (const ghost of this.ghosts.values()) {
       const pose=ghost.state.sample(time,deltaMs,this.ghostFloorY(ghost.state));
-      ghost.sprite.setPosition(pose.x,pose.y); ghost.label.setPosition(pose.x,pose.y+40);
+      ghost.sprite.setPosition(pose.x,pose.y);
+      ghost.accessory.setPosition(pose.x,pose.y-39);
+      ghost.label.setPosition(pose.x,pose.y+40);
     }
 
     if (this.player.y > this.course.world.height + 180 || this.player.x < -100 || this.player.x > this.course.world.width+100) this.respawn();
@@ -624,6 +638,7 @@ export class GameScene extends Phaser.Scene {
     this.hooks.onFrame?.({
       x:this.player.x,y:this.player.y,velocityX:this.playerBody.velocity.x,velocityY:this.playerBody.velocity.y,
       energy:this.energy,progress:this.progress,altitude,animation:motion,
+      avatar:this.avatar,
       facing:this.player.flipX?-1:1,zoneIndex,zoneName:Object.values(ZONE_NAMES)[zoneIndex],
       checkpoint:checkpointPayload(this.checkpoint)
     });
@@ -666,7 +681,7 @@ export class GameScene extends Phaser.Scene {
     const cp=this.checkpoint||this.course.checkpoints[0];
     const pose=this.lastSafePose||{x:cp.x,y:cp.y-80};
     this.clearContacts(); this.setPlayerPosition(pose.x,pose.y);
-    this.energy=Math.max(25,this.energy); this.invulnerableUntil=this.time.now+1200;
+    this.energy=Math.max(Math.min(25,this.maxEnergy),this.energy); this.invulnerableUntil=this.time.now+1200;
     this.player.setAlpha(.55); this.time.delayedCall(1200,()=>this.player?.setAlpha(1));
     this.cameras.main.flash(150,180,240,255); this.hooks.onEffect?.(reason,pose.x,pose.y);
   }
@@ -678,7 +693,7 @@ export class GameScene extends Phaser.Scene {
     this.clearContacts();
     this.setPlayerPosition(pose.x,pose.y);
     this.lastSafePose=pose;
-    this.energy=Math.max(25,this.energy);
+    this.energy=Math.max(Math.min(25,this.maxEnergy),this.energy);
     this.invulnerableUntil=this.time.now+1200;
     this.player.setAlpha(.55);
     this.time.delayedCall(1200,()=>this.player?.setAlpha(1));
@@ -732,7 +747,12 @@ export class GameScene extends Phaser.Scene {
       seen.add(row.id);
       this.updateGhost(row,myId);
     }
-    for (const [id,ghost] of this.ghosts) if (!seen.has(id)) { ghost.sprite.destroy(); ghost.label.destroy(); this.ghosts.delete(id); }
+    for (const [id,ghost] of this.ghosts) if (!seen.has(id)) {
+      ghost.sprite.destroy();
+      ghost.accessory.destroy();
+      ghost.label.destroy();
+      this.ghosts.delete(id);
+    }
   }
 
   updateGhost(row,myId) {
@@ -740,12 +760,26 @@ export class GameScene extends Phaser.Scene {
     let ghost=this.ghosts.get(row.id);
     let accepted=true;
     if (!ghost) {
-      const sprite=this.add.sprite(row.x,row.y,'player-idle-1').setDisplaySize(68,70).setAlpha(.45).setTint(0x8bdcff).setDepth(80);
+      const avatar=normaliseAvatar(row.avatar);
+      const sprite=this.add.sprite(row.x,row.y,'player-idle-1').setDisplaySize(68,70).setAlpha(.55).setDepth(80);
+      sprite.setTint(avatarTint(avatar));
+      const accessory=this.add.text(row.x,row.y-39,accessoryGlyph(avatar),{
+        fontFamily:'"Segoe UI Emoji","Apple Color Emoji",sans-serif',
+        fontSize:'22px',
+        stroke:'#24314d',
+        strokeThickness:3,
+      }).setOrigin(.5).setAlpha(.72).setDepth(85);
       const label=this.add.text(row.x,row.y+40,row.name,{fontFamily:'Microsoft JhengHei',fontSize:'14px',fontStyle:'bold',color:'#dff8ff',stroke:'#24314d',strokeThickness:4}).setOrigin(.5).setDepth(90);
-      ghost={sprite,label,state:new RemoteGhostState(row,this.time.now)};
+      ghost={sprite,accessory,label,state:new RemoteGhostState(row,this.time.now),avatar};
       this.ghosts.set(row.id,ghost);
     } else accepted=ghost.state.push(row,this.time.now);
     if (!accepted) return;
+    const avatar=normaliseAvatar(row.avatar);
+    if (avatar.character!==ghost.avatar.character||avatar.accessory!==ghost.avatar.accessory) {
+      ghost.avatar=avatar;
+      ghost.sprite.setTint(avatarTint(avatar));
+      ghost.accessory.setText(accessoryGlyph(avatar));
+    }
     ghost.sprite.setFlipX(row.facing<0);
     if (this.anims.exists(row.animation||'idle')) ghost.sprite.play(row.animation||'idle',true);
   }

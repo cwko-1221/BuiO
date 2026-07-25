@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>遊戲主持台 | BuiO</title>
-  <link rel="stylesheet" href="/game/css/game.css">
+  <link rel="stylesheet" href="/game/css/game.css?v=20260725-host-settings-excel-avatar-2">
 </head>
 <body>
 
@@ -32,6 +32,26 @@
               <option value="900">15 分鐘</option>
             </select>
           </div>
+          <div class="settings-pair">
+            <div class="field">
+              <label for="maxEnergyInput">最高能量</label>
+              <input id="maxEnergyInput" type="number" min="20" max="500" step="5" value="100">
+            </div>
+            <div class="field">
+              <label for="energyPerCorrectInput">每題增加能量</label>
+              <input id="energyPerCorrectInput" type="number" min="1" max="100" step="1" value="25">
+            </div>
+          </div>
+          <label class="toggle-row" for="infiniteEnergyToggle">
+            <span>
+              <strong>無限能量</strong>
+              <small>玩家移動及跳躍時不會消耗能量</small>
+            </span>
+            <span class="toggle-control">
+              <input id="infiniteEnergyToggle" type="checkbox">
+              <span class="toggle-track" aria-hidden="true"></span>
+            </span>
+          </label>
           <button id="createRoomBtn" class="btn" disabled>🚀 建立遊戲房間</button>
           <div id="setupError" class="error-msg"></div>
           <div style="margin-top:16px; font-size:14px; color:#6b7690; background:#f5f8fc; border-radius:12px; padding:14px;">
@@ -54,6 +74,12 @@
         <div class="field">
           <label>題庫名稱</label>
           <input id="editorSetTitle" type="text" maxlength="60" placeholder="例如：三年級數學 第二課">
+        </div>
+        <div class="excel-toolbar">
+          <input id="excelImportInput" type="file" accept=".xlsx" hidden>
+          <button id="excelImportBtn" class="btn secondary small" type="button">📥 Excel 匯入</button>
+          <button id="excelTemplateBtn" class="btn secondary small" type="button">⬇️ 下載 Excel 範本</button>
+          <span id="excelImportStatus" class="muted">支援 .xlsx，每列一題</span>
         </div>
         <div id="editorQuestions"></div>
         <div class="editor-actions">
@@ -114,6 +140,7 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/game/js/host.js"></script>
+  <script src="/vendor/exceljs.min.js"></script>
+  <script src="/game/js/host.js?v=20260725-host-settings-excel-avatar-1"></script>
 </body>
 </html>

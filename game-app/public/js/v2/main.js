@@ -1,6 +1,7 @@
 import { buildCourse, validateCourse } from './course.js?v=20260720-screenshot-corrections-7';
-import { GameScene } from './GameScene.js?v=20260719-review-reflow';
+import { GameScene } from './GameScene.js?v=20260725-room-settings-avatar-1';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
+import { ACCESSORY_GLYPHS, normaliseAvatar } from './avatar.js?v=20260725-avatar-1';
 
 const $ = id => document.getElementById(id);
 const gameAudio = new GameAudio();
@@ -18,6 +19,8 @@ let lastNetworkFacing = null;
 let lastNetworkPose = null;
 let lastFrame = null;
 let startMeta = null;
+let selectedAvatar = normaliseAvatar();
+let gameSettings = { maxEnergy:100, energyPerCorrect:25, infiniteEnergy:false };
 const previewParams = new URLSearchParams(location.search);
 const preview = previewParams.has('preview') && ['127.0.0.1','localhost'].includes(location.hostname);
 const previewAltitude = previewParams.has('altitude') ? Number(previewParams.get('altitude')) : NaN;
@@ -36,6 +39,11 @@ const meReady = fetch('/api/auth/me',{credentials:'include'}).then(r=>r.ok?r.jso
 
 function teacherLabel(name) { const n=String(name||'老師'); return n.endsWith('老師')?n:`${n}老師`; }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function normaliseGameSettings(raw = {}) {
+  const maxEnergy=Math.min(Math.max(Math.round(Number(raw.maxEnergy)||100),20),500);
+  const energyPerCorrect=Math.min(Math.max(Math.round(Number(raw.energyPerCorrect)||25),1),maxEnergy);
+  return {maxEnergy,energyPerCorrect,infiniteEnergy:raw.infiniteEnergy===true};
+}
 
 async function loadRooms() {
   if(joining||preview)return;
@@ -56,16 +64,18 @@ function startRoomPolling(){loadRooms();clearInterval(roomsTimer);roomsTimer=set
 
 async function joinRoom(code){
   if(joining)return; joining=true; $('joinError').textContent=''; await meReady;
-  socket.emit('player:join',{code,name:me.name||'玩家',studentId:me.studentId},res=>{
+  socket.emit('player:join',{code,name:me.name||'玩家',studentId:me.studentId,avatar:selectedAvatar},res=>{
     joining=false;
     if(!res?.ok){$('joinError').textContent=res?.message||'加入失敗';loadRooms();return;}
     clearInterval(roomsTimer); startMeta={code,playerKey:res.playerKey||`s:${me.studentId}`};
+    selectedAvatar=normaliseAvatar(res.avatar||selectedAvatar);
+    renderAvatarPicker();
     $('lobbySetTitle').textContent=res.setTitle||'準備中'; $('lobbyHostName').textContent=`${teacherLabel(res.hostName)}嘅遊戲房間`;
-    if(res.phase==='playing')startGame(res.seed,res.durationSec,res.startedAt,res.resume); else show('lobbyScreen');
+    if(res.phase==='playing')startGame(res.seed,res.durationSec,res.startedAt,res.resume,res.settings); else show('lobbyScreen');
   });
 }
 
-socket.on('game:start',({seed,durationSec,startedAt})=>startGame(seed,durationSec,startedAt,null));
+socket.on('game:start',({seed,durationSec,startedAt,settings})=>startGame(seed,durationSec,startedAt,null,settings));
 socket.on('game:positions',list=>scene?.updateGhosts(list,startMeta?.playerKey));
 socket.on('game:position',row=>scene?.updateGhost(row,startMeta?.playerKey));
 socket.on('game:crumble',({id})=>scene?.triggerCrumble(id,false));
@@ -75,16 +85,23 @@ socket.on('room:closed',({message})=>{if(phaserGame)phaserGame.destroy(true);ale
 
 // One stable, hand-tuned map for every room (a "season" course, like the
 // real DLD). Bump the constant to ship a new map for all rooms at once.
-function startGame(seed,durationSec,startedAt,resume){
+function startGame(seed,durationSec,startedAt,resume,settings){
   clearInterval(roomsTimer); show('gameScreen');
+  gameSettings=normaliseGameSettings(settings||gameSettings);
+  const infiniteEnergy=previewInfiniteEnergy||gameSettings.infiniteEnergy;
+  const startingEnergy=infiniteEnergy
+    ? gameSettings.maxEnergy
+    : Math.min(resume?.energy??40,gameSettings.maxEnergy);
   const course=buildCourse(seed); const report=validateCourse(course);
   if(!report.ok) console.error('[game-v2] invalid course',report);
   startMeta={...(startMeta||{}),seed,durationSec,startedAt:startedAt||Date.now(),course};
   if(phaserGame)phaserGame.destroy(true);
   const hooks={
-    name:me.name||'Koko', energy:previewInfiniteEnergy?100:(resume?.energy??40), progress:resume?.bestProgress??resume?.bestHeight??0,
+    name:me.name||'Koko', energy:startingEnergy, maxEnergy:gameSettings.maxEnergy,
+    avatar:selectedAvatar,
+    progress:resume?.bestProgress??resume?.bestHeight??0,
     altitude:resume?.altitude, checkpoint:resume?.checkpoint,
-    infiniteEnergy:previewInfiniteEnergy,
+    infiniteEnergy,
     autoplay:previewAutoplay,
     onAutoplay:result=>{
       window.__routeAutoplay=result;
@@ -142,7 +159,10 @@ function updateHudAndNetwork(state){
   $('timerPill').textContent=`⏱ ${Math.floor(left/60)}:${String(Math.floor(left%60)).padStart(2,'0')}`;
   $('heightPill').textContent=`🏔️ 高度 ${Math.round(state.altitude)}m`;
   $('stagePill').textContent=`${String(state.zoneIndex+1).padStart(2,'0')} · ${state.zoneName}`;
-  $('energyFill').style.width=`${state.energy}%`; $('energyFill').classList.toggle('low',state.energy<20); $('energyText').textContent=Math.round(state.energy);
+  const energyPercent=Math.min(100,Math.max(0,state.energy/gameSettings.maxEnergy*100));
+  $('energyFill').style.width=`${energyPercent}%`;
+  $('energyFill').classList.toggle('low',energyPercent<20);
+  $('energyText').textContent=gameSettings.infiniteEnergy?'∞':Math.round(state.energy);
   if(!preview){
     const motionChanged=state.animation!==lastNetworkMotion;
     const facingChanged=state.facing!==lastNetworkFacing;
@@ -192,13 +212,26 @@ function renderQuestion(res){
 }
 function answer(choice){
   const buttons=[...$('qChoices').children];buttons.forEach(b=>b.disabled=true);
-  if(preview)return applyAnswer({correct:choice===2,correctChoice:2,gain:30,energy:Math.min(100,(lastFrame?.energy||40)+30),streak:1},choice,buttons);
+  if(preview)return applyAnswer({
+    correct:choice===2,
+    correctChoice:2,
+    gain:gameSettings.infiniteEnergy?0:gameSettings.energyPerCorrect,
+    energy:gameSettings.infiniteEnergy
+      ? gameSettings.maxEnergy
+      : Math.min(gameSettings.maxEnergy,(lastFrame?.energy||40)+gameSettings.energyPerCorrect),
+    streak:1,
+    infiniteEnergy:gameSettings.infiniteEnergy,
+  },choice,buttons);
   socket.emit('player:answer',{choice},res=>{if(!res?.ok)return closeQuestion();applyAnswer(res,choice,buttons);});
 }
 function applyAnswer(res,choice,buttons){
   gameAudio.play(res.correct?'correct':'wrong');
   buttons[choice]?.classList.add(res.correct?'correct':'wrong');if(!res.correct)buttons[res.correctChoice]?.classList.add('correct');
-  const fb=$('qFeedback');fb.textContent=res.correct?`答啱喇！能量 +${res.gain} ⚡`:'差少少，再試下一題！';fb.classList.add(res.correct?'good':'bad');scene.setEnergy(res.energy);
+  const fb=$('qFeedback');
+  fb.textContent=res.correct
+    ? (res.infiniteEnergy?'答啱喇！無限能量保持開啟 ⚡':`答啱喇！能量 +${res.gain} ⚡`)
+    :'差少少，再試下一題！';
+  fb.classList.add(res.correct?'good':'bad');scene.setEnergy(res.energy);
   if(res.correct)setTimeout(closeQuestion,800);else $('qClose').style.display='';
 }
 function closeQuestion(){
@@ -208,6 +241,37 @@ function closeQuestion(){
 }
 
 function toast(message,gold=false){const el=document.createElement('div');el.className=`toast${gold?' gold':''}`;el.textContent=message;$('toasts').appendChild(el);setTimeout(()=>el.remove(),2700);}
+
+function renderAvatarPicker(){
+  const previewImage=$('avatarPreviewImage');
+  const previewAccessory=$('avatarPreviewAccessory');
+  if(!previewImage||!previewAccessory)return;
+  previewImage.className=`avatar-preview-image character-${selectedAvatar.character}`;
+  previewAccessory.textContent=ACCESSORY_GLYPHS[selectedAvatar.accessory];
+  document.querySelectorAll('[data-character]').forEach(button=>{
+    button.setAttribute('aria-pressed',String(button.dataset.character===selectedAvatar.character));
+  });
+  document.querySelectorAll('[data-accessory]').forEach(button=>{
+    button.setAttribute('aria-pressed',String(button.dataset.accessory===selectedAvatar.accessory));
+  });
+}
+
+function updateAvatar(next){
+  selectedAvatar=normaliseAvatar({...selectedAvatar,...next});
+  renderAvatarPicker();
+  if(startMeta?.code&&!preview)socket.emit('player:avatar',selectedAvatar,res=>{
+    if(res?.ok)selectedAvatar=normaliseAvatar(res.avatar);
+  });
+}
+
+document.querySelectorAll('[data-character]').forEach(button=>{
+  button.addEventListener('click',()=>updateAvatar({character:button.dataset.character}));
+});
+document.querySelectorAll('[data-accessory]').forEach(button=>{
+  button.addEventListener('click',()=>updateAvatar({accessory:button.dataset.accessory}));
+});
+renderAvatarPicker();
+
 function showResults(leaderboard,{personal=false,place=null}={}){
   phaserGame?.destroy(true);phaserGame=null;scene=null;const list=$('resultsList');list.innerHTML='';
   leaderboard.forEach(row=>{const d=document.createElement('div');d.className=`result-row${row.rank<=3?` top${row.rank}`:''}`;d.innerHTML=`<div class="rank">${['🥇','🥈','🥉'][row.rank-1]||row.rank}</div><div class="name">${escapeHtml(row.name)}${row.finished?' 🏁':''}</div><div class="stat">✓${row.correct} ✗${row.wrong}</div><div class="height">${Math.round((row.bestProgress??row.bestHeight??0)*100)}%</div>`;list.appendChild(d);});
@@ -216,4 +280,8 @@ function showResults(leaderboard,{personal=false,place=null}={}){
   show('resultScreen');
 }
 
-if(preview){me={name:'Koko',studentId:'preview'};startGame(20260711,480,Date.now(),null);}else startRoomPolling();
+if(preview){
+  me={name:'Koko',studentId:'preview'};
+  gameSettings=normaliseGameSettings({maxEnergy:100,energyPerCorrect:25,infiniteEnergy:previewInfiniteEnergy});
+  startGame(20260711,480,Date.now(),null,gameSettings);
+}else startRoomPolling();

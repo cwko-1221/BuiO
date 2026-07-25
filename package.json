@@ -9,6 +9,8 @@
     "check:game": "node scripts/validate-game-v2.mjs",
     "check:network-live": "node scripts/test-game-network-live.mjs",
     "check:session-live": "node scripts/test-game-session-live.mjs",
+    "check:settings-live": "node scripts/test-game-settings-live.mjs",
+    "check:host-ui-live": "node scripts/test-game-host-ui-live.mjs",
     "check:launchers-live": "node scripts/test-game-launchers-live.mjs",
     "check:lasers-live": "node scripts/test-game-lasers-live.mjs",
     "check:checkpoint-live": "node scripts/test-game-checkpoint-live.mjs",

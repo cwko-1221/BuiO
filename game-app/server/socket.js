@@ -15,9 +15,13 @@
 const setsRepo = require('../repositories/questionSets.repo');
 const demoSet = require('../lib/demoSet');
 
-const ENERGY_BASE_GAIN = 25;      // energy per correct answer
-const ENERGY_STREAK_BONUS = 5;    // extra per consecutive correct (cap below)
-const ENERGY_MAX_GAIN = 45;
+const DEFAULT_GAME_SETTINGS = Object.freeze({
+  maxEnergy: 100,
+  energyPerCorrect: 25,
+  infiniteEnergy: false,
+});
+const CHARACTER_IDS = new Set(['blue', 'mint', 'coral', 'violet']);
+const ACCESSORY_IDS = new Set(['none', 'cap', 'crown', 'star']);
 const POSITION_BROADCAST_MS = 20;
 const HOST_POSITION_DIVISOR = 5;
 
@@ -29,8 +33,40 @@ function realtimePosition(p) {
     vx: Math.round((p.vx || 0) * 100) / 100,
     vy: Math.round((p.vy || 0) * 100) / 100,
     facing: p.facing || 1, animation: p.animation || 'idle',
-    seq: p.stateSeq || 0, f: !!p.finishedAt
+    seq: p.stateSeq || 0, f: !!p.finishedAt,
+    avatar: p.avatar,
   };
+}
+
+function clampInteger(value, min, max, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(Math.max(Math.round(parsed), min), max);
+}
+
+function normaliseSettings(raw = {}) {
+  const maxEnergy = clampInteger(raw.maxEnergy, 20, 500, DEFAULT_GAME_SETTINGS.maxEnergy);
+  const energyPerCorrect = clampInteger(
+    raw.energyPerCorrect,
+    1,
+    maxEnergy,
+    Math.min(DEFAULT_GAME_SETTINGS.energyPerCorrect, maxEnergy),
+  );
+  return {
+    maxEnergy,
+    energyPerCorrect,
+    infiniteEnergy: raw.infiniteEnergy === true,
+  };
+}
+
+function normaliseAvatar(raw = {}) {
+  const character = CHARACTER_IDS.has(raw.character) ? raw.character : 'blue';
+  const accessory = ACCESSORY_IDS.has(raw.accessory) ? raw.accessory : 'none';
+  return { character, accessory };
+}
+
+function initialEnergy(settings) {
+  return settings.infiniteEnergy ? settings.maxEnergy : Math.min(40, settings.maxEnergy);
 }
 
 function makeCode(existing) {
@@ -80,7 +116,7 @@ module.exports = function (io, app) {
   function roster(room) {
     return [...room.players.values()]
       .filter(p => p.connected)
-      .map(p => ({ name: p.name, studentId: p.studentId }));
+      .map(p => ({ name: p.name, studentId: p.studentId, avatar: p.avatar }));
   }
 
   function endGame(room, reason) {
@@ -109,6 +145,7 @@ module.exports = function (io, app) {
         phase: room.phase,
         players: room.players.size,
         setTitle: room.setTitle,
+        settings: room.settings,
       });
     }
     res.json({ success: true, sessions });
@@ -117,7 +154,7 @@ module.exports = function (io, app) {
   nsp.on('connection', (socket) => {
 
     // ---------------- Teacher: host a game ----------------
-    socket.on('host:create', async ({ setId, durationSec, hostName }, ack) => {
+    socket.on('host:create', async ({ setId, durationSec, hostName, settings }, ack) => {
       try {
         let set;
         if (!setId || setId === demoSet.id) {
@@ -130,6 +167,7 @@ module.exports = function (io, app) {
         }
         const code = makeCode(rooms);
         const duration = Math.min(Math.max(Number(durationSec) || 480, 120), 1800);
+        const gameSettings = normaliseSettings(settings);
         const room = {
           code,
           hostSocket: socket.id,
@@ -142,6 +180,7 @@ module.exports = function (io, app) {
           posTimer: null,
           setTitle: set.title,
           questions: set.questions,
+          settings: gameSettings,
           players: new Map(),                   // playerKey -> player state
           crumbles: new Map(),                  // object id -> next allowed trigger time
           positionTick: 0,
@@ -150,7 +189,14 @@ module.exports = function (io, app) {
         socket.data.role = 'host';
         socket.data.code = code;
         socket.join(code);
-        ack?.({ ok: true, code, setTitle: set.title, questionCount: set.questions.length, durationSec: duration });
+        ack?.({
+          ok: true,
+          code,
+          setTitle: set.title,
+          questionCount: set.questions.length,
+          durationSec: duration,
+          settings: gameSettings,
+        });
       } catch (e) {
         console.error('[game] host:create', e);
         ack?.({ ok: false, message: e.message || '建立房間失敗' });
@@ -167,6 +213,7 @@ module.exports = function (io, app) {
         seed: room.seed,
         durationSec: room.durationSec,
         startedAt: room.startedAt,
+        settings: room.settings,
       });
       // Players receive one compact room snapshot every 20ms. This keeps a
       // 20-player room at 50 Socket.IO callbacks per client instead of
@@ -210,7 +257,7 @@ module.exports = function (io, app) {
     });
 
     // ---------------- Student: join & play ----------------
-    socket.on('player:join', ({ code, name, studentId }, ack) => {
+    socket.on('player:join', ({ code, name, studentId, avatar }, ack) => {
       const room = rooms.get(String(code || '').trim());
       if (!room) return ack?.({ ok: false, message: '搵唔到呢個房間，請檢查代碼。' });
       if (room.phase === 'ended') return ack?.({ ok: false, message: '遊戲已經結束。' });
@@ -235,12 +282,13 @@ module.exports = function (io, app) {
           facing: 1,
           animation: 'idle',
           checkpoint: null,
-          energy: 40,
+          energy: initialEnergy(room.settings),
           correct: 0,
           wrong: 0,
           streak: 0,
           finishedAt: null,
           pendingQuestion: null,
+          avatar: normaliseAvatar(avatar),
           connected: true,
           socketId: socket.id,
           stateAt: Date.now(),
@@ -251,6 +299,7 @@ module.exports = function (io, app) {
         player.connected = true;
         player.socketId = socket.id;
         player.name = cleanName;
+        player.avatar = normaliseAvatar(avatar || player.avatar);
       }
 
       socket.data.role = 'player';
@@ -269,6 +318,8 @@ module.exports = function (io, app) {
         seed: room.seed,
         durationSec: room.durationSec,
         startedAt: room.startedAt,
+        settings: room.settings,
+        avatar: player.avatar,
         // Only a genuine reconnect resumes saved coordinates. A student who
         // joins an already-running room must let the client use course.start.
         resume: room.phase === 'playing' && !isNewPlayer
@@ -282,6 +333,15 @@ module.exports = function (io, app) {
             }
           : null,
       });
+    });
+
+    socket.on('player:avatar', (avatar, ack) => {
+      const room = rooms.get(socket.data.code);
+      const player = room?.players.get(socket.data.playerKey);
+      if (!room || !player || room.phase === 'ended') return ack?.({ ok: false });
+      player.avatar = normaliseAvatar(avatar);
+      nsp.to(room.hostSocket).emit('lobby:roster', roster(room));
+      ack?.({ ok: true, avatar: player.avatar });
     });
 
     // Serve the next question: choices shuffled per request, the correct
@@ -315,8 +375,10 @@ module.exports = function (io, app) {
       if (correct) {
         player.correct++;
         player.streak++;
-        gain = Math.min(ENERGY_BASE_GAIN + (player.streak - 1) * ENERGY_STREAK_BONUS, ENERGY_MAX_GAIN);
-        player.energy = Math.min(player.energy + gain, 100);
+        gain = room.settings.infiniteEnergy ? 0 : room.settings.energyPerCorrect;
+        player.energy = room.settings.infiniteEnergy
+          ? room.settings.maxEnergy
+          : Math.min(player.energy + gain, room.settings.maxEnergy);
       } else {
         player.wrong++;
         player.streak = 0;
@@ -327,6 +389,8 @@ module.exports = function (io, app) {
         gain,
         energy: player.energy,
         streak: player.streak,
+        maxEnergy: room.settings.maxEnergy,
+        infiniteEnergy: room.settings.infiniteEnergy,
         correctChoice: pending.order.indexOf(pending.qRef.correctIndex),
       });
     });
@@ -354,7 +418,11 @@ module.exports = function (io, app) {
       if (h > player.bestProgress) player.bestProgress = h;
       if (h > player.bestHeight) player.bestHeight = h;
       const e = Number(energy);
-      if (Number.isFinite(e)) player.energy = Math.min(Math.max(e, 0), Math.max(player.energy, 100));
+      if (room.settings.infiniteEnergy) {
+        player.energy = room.settings.maxEnergy;
+      } else if (Number.isFinite(e)) {
+        player.energy = Math.min(Math.max(e, 0), room.settings.maxEnergy);
+      }
       // Jump, landing and direction changes bypass the next 20ms aggregate
       // tick. They are rare, so this improves responsiveness without turning
       // a 20-player room into hundreds of per-player events every frame.

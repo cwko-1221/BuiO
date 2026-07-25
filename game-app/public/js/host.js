@@ -15,6 +15,8 @@
   let liveTimerHandle = null;
   let gameEndsAt = null;
   let latestPositions = [];
+  const setDetailsCache = new Map();
+  const accessoryGlyphs = { none: '', cap: '🎓', crown: '👑', star: '⭐' };
 
   function show(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -44,30 +46,39 @@
       if (!data.success) throw new Error(data.message);
       el.innerHTML = '';
       data.sets.forEach(set => {
+        const item = document.createElement('div');
+        item.className = 'set-item';
         const row = document.createElement('div');
         row.className = 'set-row' + (set.id === selectedSetId ? ' selected' : '');
         row.innerHTML = `
           ${set.builtin ? '<span class="tag">內置</span>' : ''}
           <span class="title">${escapeHtml(set.title)}</span>
           <span class="count">${set.questionCount} 題</span>
+          <button class="btn secondary small set-expand-btn" type="button" data-expand="${set.id}" aria-expanded="false">▾ 展開</button>
           ${set.builtin ? '' : `<button class="btn secondary small" data-edit="${set.id}">✏️</button>
           <button class="btn secondary small" data-del="${set.id}" style="color:var(--coral)">🗑</button>`}
         `;
+        const preview = document.createElement('div');
+        preview.className = 'set-preview';
+        preview.hidden = true;
         row.addEventListener('click', (e) => {
-          if (e.target.closest('[data-edit],[data-del]')) return;
+          if (e.target.closest('button')) return;
           selectedSetId = set.id;
           document.querySelectorAll('.set-row').forEach(r => r.classList.remove('selected'));
           row.classList.add('selected');
           $('createRoomBtn').disabled = false;
         });
+        row.querySelector('[data-expand]')?.addEventListener('click', () => toggleSetPreview(set, preview, row.querySelector('[data-expand]')));
         row.querySelector('[data-edit]')?.addEventListener('click', () => openEditor(set.id));
         row.querySelector('[data-del]')?.addEventListener('click', async () => {
           if (!confirm(`確定刪除「${set.title}」？`)) return;
           await fetch(`/api/game/teacher/sets/${set.id}`, { method: 'DELETE', credentials: 'include' });
           if (selectedSetId === set.id) { selectedSetId = null; $('createRoomBtn').disabled = true; }
+          setDetailsCache.delete(set.id);
           loadSets();
         });
-        el.appendChild(row);
+        item.append(row, preview);
+        el.appendChild(item);
       });
       if (!data.dbAvailable) {
         const note = document.createElement('p');
@@ -81,6 +92,42 @@
     }
   }
   loadSets();
+
+  async function toggleSetPreview(set, preview, button) {
+    const opening = preview.hidden;
+    document.querySelectorAll('.set-preview').forEach(panel => { panel.hidden = true; });
+    document.querySelectorAll('.set-expand-btn').forEach(control => {
+      control.setAttribute('aria-expanded', 'false');
+      control.textContent = '▾ 展開';
+    });
+    if (!opening) return;
+    preview.hidden = false;
+    button.setAttribute('aria-expanded', 'true');
+    button.textContent = '▴ 收起';
+    preview.innerHTML = '<p class="muted">載入題目中…</p>';
+    try {
+      let detail = setDetailsCache.get(set.id);
+      if (!detail) {
+        const res = await fetch(`/api/game/teacher/sets/${set.id}`, { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || '載入失敗');
+        detail = data.set;
+        setDetailsCache.set(set.id, detail);
+      }
+      preview.innerHTML = detail.questions.map((q, index) => `
+        <div class="set-preview-question">
+          <strong>${index + 1}. ${escapeHtml(q.question)}</strong>
+          <div class="set-preview-choices">
+            ${q.choices.map((choice, choiceIndex) => `
+              <span class="${choiceIndex === q.correctIndex ? 'correct' : ''}">
+                ${['A', 'B', 'C', 'D'][choiceIndex]}. ${escapeHtml(choice)}
+              </span>`).join('')}
+          </div>
+        </div>`).join('');
+    } catch (e) {
+      preview.innerHTML = `<p class="error-msg">${escapeHtml(e.message || '載入失敗')}</p>`;
+    }
+  }
 
   // ---------------- set editor ----------------
   function questionBlock(q = {}) {
@@ -116,6 +163,7 @@
   async function openEditor(setId) {
     editingSetId = setId || null;
     $('editorError').textContent = '';
+    $('excelImportStatus').textContent = '支援 .xlsx，每列一題';
     $('editorQuestions').innerHTML = '';
     if (setId) {
       $('editorTitle').textContent = '✏️ 編輯題庫';
@@ -135,6 +183,113 @@
   $('newSetBtn').addEventListener('click', () => openEditor(null));
   $('addQuestionBtn').addEventListener('click', () => addQuestion());
   $('editorBackBtn').addEventListener('click', () => { loadSets(); show('setupScreen'); });
+  $('excelImportBtn').addEventListener('click', () => $('excelImportInput').click());
+  $('excelImportInput').addEventListener('change', importExcelQuestions);
+  $('excelTemplateBtn').addEventListener('click', downloadExcelTemplate);
+
+  function excelCellText(cell) {
+    const value = cell?.value;
+    if (value == null) return '';
+    if (typeof value === 'object') {
+      if (Array.isArray(value.richText)) return value.richText.map(part => part.text || '').join('').trim();
+      if (value.text != null) return String(value.text).trim();
+      if (value.result != null) return String(value.result).trim();
+    }
+    return String(value).trim();
+  }
+
+  async function importExcelQuestions(event) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    $('editorError').textContent = '';
+    $('excelImportStatus').textContent = `正在讀取 ${file.name}…`;
+    try {
+      if (!window.ExcelJS) throw new Error('Excel 元件未載入，請重新整理頁面。');
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(await file.arrayBuffer());
+      const sheet = workbook.worksheets[0];
+      if (!sheet) throw new Error('Excel 內沒有工作表。');
+      const firstValue = excelCellText(sheet.getCell(1, 1)).toLowerCase();
+      const firstDataRow = firstValue === 'question' ? 2 : 1;
+      const questions = [];
+      for (let rowNumber = firstDataRow; rowNumber <= sheet.rowCount; rowNumber++) {
+        const row = sheet.getRow(rowNumber);
+        const values = Array.from({ length: 6 }, (_, index) => excelCellText(row.getCell(index + 1)));
+        if (values.every(value => !value)) continue;
+        const [question, ...rest] = values;
+        const choices = rest.slice(0, 4);
+        const correctAnswer = rest[4].toUpperCase();
+        if (!question) throw new Error(`第 ${rowNumber} 列缺少 question。`);
+        if (choices.some(choice => !choice)) throw new Error(`第 ${rowNumber} 列必須填寫選項 A、B、C、D。`);
+        if (!['A', 'B', 'C', 'D'].includes(correctAnswer)) {
+          throw new Error(`第 ${rowNumber} 列 correctAnswer 必須是 A、B、C 或 D。`);
+        }
+        questions.push({ question, choices, correctIndex: correctAnswer.charCodeAt(0) - 65 });
+      }
+      if (!questions.length) throw new Error('Excel 內沒有可匯入的題目。');
+      $('editorQuestions').innerHTML = '';
+      questions.forEach(addQuestion);
+      if (!$('editorSetTitle').value.trim()) {
+        $('editorSetTitle').value = file.name.replace(/\.xlsx$/i, '').slice(0, 60);
+      }
+      $('excelImportStatus').textContent = `已匯入 ${questions.length} 題`;
+    } catch (e) {
+      $('excelImportStatus').textContent = '匯入失敗';
+      $('editorError').textContent = e.message || '無法讀取 Excel';
+    }
+  }
+
+  async function downloadExcelTemplate() {
+    $('editorError').textContent = '';
+    try {
+      if (!window.ExcelJS) throw new Error('Excel 元件未載入，請重新整理頁面。');
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'BuiO';
+      const sheet = workbook.addWorksheet('Questions', { views: [{ state: 'frozen', ySplit: 1 }] });
+      sheet.columns = [
+        { header: 'question', key: 'question', width: 42 },
+        { header: 'optionA', key: 'optionA', width: 22 },
+        { header: 'optionB', key: 'optionB', width: 22 },
+        { header: 'optionC', key: 'optionC', width: 22 },
+        { header: 'optionD', key: 'optionD', width: 22 },
+        { header: 'correctAnswer', key: 'correctAnswer', width: 18 },
+      ];
+      sheet.addRow({
+        question: '7 × 8 等於多少？',
+        optionA: '48',
+        optionB: '54',
+        optionC: '56',
+        optionD: '64',
+        correctAnswer: 'C',
+      });
+      const header = sheet.getRow(1);
+      header.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      header.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F8F70' } };
+      header.alignment = { vertical: 'middle', horizontal: 'center' };
+      header.height = 24;
+      sheet.autoFilter = 'A1:F1';
+      sheet.getColumn(6).eachCell((cell, rowNumber) => {
+        if (rowNumber > 1) cell.dataValidation = {
+          type: 'list',
+          allowBlank: false,
+          formulae: ['"A,B,C,D"'],
+        };
+      });
+      const buffer = await workbook.xlsx.writeBuffer();
+      const url = URL.createObjectURL(new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'BuiO-question-bank-template.xlsx';
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      $('excelImportStatus').textContent = 'Excel 範本已下載';
+    } catch (e) {
+      $('editorError').textContent = e.message || '無法建立 Excel 範本';
+    }
+  }
 
   $('saveSetBtn').addEventListener('click', async () => {
     const title = $('editorSetTitle').value.trim();
@@ -165,6 +320,7 @@
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
+      setDetailsCache.clear();
       loadSets();
       show('setupScreen');
     } catch (e) {
@@ -173,18 +329,56 @@
   });
 
   // ---------------- create room / lobby ----------------
+  function readGameSettings() {
+    const maxEnergy = Number($('maxEnergyInput').value);
+    const energyPerCorrect = Number($('energyPerCorrectInput').value);
+    if (!Number.isInteger(maxEnergy) || maxEnergy < 20 || maxEnergy > 500) {
+      throw new Error('最高能量必須是 20 至 500 的整數。');
+    }
+    if (!Number.isInteger(energyPerCorrect) || energyPerCorrect < 1 || energyPerCorrect > maxEnergy) {
+      throw new Error(`每題能量必須是 1 至 ${maxEnergy} 的整數。`);
+    }
+    return {
+      maxEnergy,
+      energyPerCorrect,
+      infiniteEnergy: $('infiniteEnergyToggle').checked,
+    };
+  }
+
+  function syncEnergyControls() {
+    const maxEnergy = Math.min(Math.max(Number($('maxEnergyInput').value) || 100, 20), 500);
+    $('energyPerCorrectInput').max = String(maxEnergy);
+    const infinite = $('infiniteEnergyToggle').checked;
+    $('energyPerCorrectInput').disabled = infinite;
+    $('energyPerCorrectInput').closest('.field').classList.toggle('control-disabled', infinite);
+  }
+  $('maxEnergyInput').addEventListener('input', syncEnergyControls);
+  $('infiniteEnergyToggle').addEventListener('change', syncEnergyControls);
+  syncEnergyControls();
+
   $('createRoomBtn').addEventListener('click', () => {
     $('setupError').textContent = '';
+    let settings;
+    try {
+      settings = readGameSettings();
+    } catch (e) {
+      $('setupError').textContent = e.message;
+      return;
+    }
     $('createRoomBtn').disabled = true;
     socket.emit('host:create', {
       setId: selectedSetId,
       durationSec: Number($('durationSelect').value),
       hostName: teacherName,
+      settings,
     }, (res) => {
       $('createRoomBtn').disabled = false;
       if (!res?.ok) { $('setupError').textContent = res?.message || '建立失敗'; return; }
       roomCode = res.code;
-      $('lobbyInfo').textContent = `題庫：${res.setTitle} · ${res.questionCount} 題 · ${Math.round(res.durationSec / 60)} 分鐘`;
+      const energyLabel = res.settings.infiniteEnergy
+        ? `無限能量（顯示上限 ${res.settings.maxEnergy}）`
+        : `最高 ${res.settings.maxEnergy} 能量 · 每題 +${res.settings.energyPerCorrect}`;
+      $('lobbyInfo').textContent = `題庫：${res.setTitle} · ${res.questionCount} 題 · ${Math.round(res.durationSec / 60)} 分鐘 · ${energyLabel}`;
       $('lobbyRoster').innerHTML = '<span class="muted">等待學生加入…</span>';
       $('startGameBtn').disabled = true;
       show('lobbyScreen');
@@ -198,7 +392,10 @@
       $('startGameBtn').disabled = true;
       return;
     }
-    el.innerHTML = players.map(p => `<span class="chip">${escapeHtml(p.name)}</span>`).join('');
+    el.innerHTML = players.map(p => {
+      const accessory = accessoryGlyphs[p.avatar?.accessory] || '';
+      return `<span class="chip">${accessory}<span class="roster-dot character-${escapeHtml(p.avatar?.character || 'blue')}"></span>${escapeHtml(p.name)}</span>`;
+    }).join('');
     $('startGameBtn').disabled = false;
     // keep the live list in sync with joins during the game too
     renderLiveList();
