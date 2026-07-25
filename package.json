@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-game-physics.mjs && node scripts/test-game-recovery.mjs && node scripts/test-game-crumble.mjs && node scripts/test-game-launcher.mjs && node scripts/test-game-lasers.mjs && node scripts/test-game-network.mjs",
+    "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-checkpoint-themes.mjs && node scripts/test-game-physics.mjs && node scripts/test-game-recovery.mjs && node scripts/test-game-crumble.mjs && node scripts/test-game-launcher.mjs && node scripts/test-game-lasers.mjs && node scripts/test-game-network.mjs",
     "check:game": "node scripts/validate-game-v2.mjs",
+    "check:checkpoint-themes": "node scripts/test-checkpoint-themes.mjs",
     "check:network-live": "node scripts/test-game-network-live.mjs",
     "check:session-live": "node scripts/test-game-session-live.mjs",
     "check:settings-live": "node scripts/test-game-settings-live.mjs",

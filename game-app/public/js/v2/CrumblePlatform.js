@@ -5,6 +5,15 @@ export const DEFAULT_CRUMBLE_BEHAVIOR = Object.freeze({
   respawnMs: 4000
 });
 
+export function beginCrumbleFall(Matter, body, angularVelocity = 0) {
+  const { Body, Sleeping } = Matter;
+  Body.setStatic(body, false);
+  Sleeping.set(body, false);
+  body.sleepCounter = 0;
+  Body.setVelocity(body, { x:0, y:.8 });
+  Body.setAngularVelocity(body, angularVelocity);
+}
+
 export class CrumblePlatformState {
   constructor(behavior = DEFAULT_CRUMBLE_BEHAVIOR) {
     this.behavior = { ...DEFAULT_CRUMBLE_BEHAVIOR, ...behavior, type:'crumble' };

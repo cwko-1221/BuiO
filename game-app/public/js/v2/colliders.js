@@ -1,6 +1,7 @@
-import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260719-six-launchers';
+import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260725-checkpoint-themes-2';
+import { ASSET_BY_ID } from './assets.js?v=20260725-checkpoint-themes-2';
 
-export function fittedSize(object) {
+function fitInsideAuthoredBox(object) {
   const geometry = ASSET_GEOMETRY[object.assetId];
   const aspect = geometry?.aspect || (object.asset.renderSize.w / object.asset.renderSize.h) || 1;
   const boxW = Math.max(24, object.w || object.asset.renderSize.w);
@@ -22,10 +23,17 @@ export function fittedSize(object) {
   return size;
 }
 
+export function fittedSize(object) {
+  return object.renderSizeOverride ? { ...object.renderSizeOverride } : fitInsideAuthoredBox(object);
+}
+
+export function visualSize(object) {
+  return fitInsideAuthoredBox(object);
+}
+
 // All geometry maths lives in IMAGE-CENTRE space: coordinates are offsets
-// from the centre of the full sprite image. Sprites are drawn with their
-// centre at (object.x, object.y), and bodies are translated so the image
-// centre lands exactly there too. What you see is what you collide with.
+// from the centre of the full sprite image. Bodies are translated so the
+// authored collider centre lands exactly at the object position.
 export function alphaBounds(assetId, size) {
   const geometry = ASSET_GEOMETRY[assetId];
   const parts = geometry?.parts?.length ? geometry.parts : [{ x:.5, y:.5, w:1, h:1 }];
@@ -40,8 +48,9 @@ export function alphaBounds(assetId, size) {
 
 export function createAlphaBody(Matter, object, size) {
   const { Bodies, Body } = Matter;
-  const geometry = ASSET_GEOMETRY[object.assetId];
-  const rubber = (object.bodyOverride || object.asset.body).material === 'rubber';
+  const geometry = ASSET_GEOMETRY[object.themeSourceAssetId || object.assetId];
+  const sourceAsset=ASSET_BY_ID.get(object.themeSourceAssetId);
+  const rubber = (object.bodyOverride || sourceAsset?.body || object.asset.body).material === 'rubber';
   const partOptions = {
     friction: 0.18,
     frictionStatic: 0,

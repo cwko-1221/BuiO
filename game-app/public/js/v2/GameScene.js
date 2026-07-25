@@ -1,14 +1,14 @@
-import { ASSET_BY_ID, ZONE_NAMES } from './assets.js?v=20260719-six-launchers';
-import { AVAILABLE_ASSETS } from './available-assets.js?v=20260719-six-launchers';
-import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js?v=20260719-six-launchers';
-import { bindBodyToSprite, createAlphaBody, fittedSize } from './colliders.js?v=20260719-six-launchers';
+import { ASSET_BY_ID, ZONE_NAMES } from './assets.js?v=20260725-checkpoint-themes-2';
+import { AVAILABLE_ASSETS } from './available-assets.js?v=20260725-checkpoint-themes-2';
+import { ATLAS_INDEX, ATLAS_PAGES } from './atlas-index.js?v=20260725-checkpoint-themes-2';
+import { alphaBounds, bindBodyToSprite, createAlphaBody, fittedSize, visualSize } from './colliders.js?v=20260725-checkpoint-themes-2';
 import { createPlayerCompound, wakePlayer, PLAYER_SPRITE_DY } from './playerPhysics.js';
 import { sampleSky } from './background.js';
 import { RapidFallTracker } from './recovery.js';
 import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js';
 import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js?v=20260719-flag-checkpoints';
 import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest';
-import { CrumblePlatformState } from './CrumblePlatform.js?v=20260717-crumble';
+import { beginCrumbleFall, CrumblePlatformState } from './CrumblePlatform.js?v=20260725-crumble-wake';
 import { RemoteGhostState, SURFACE_TOLERANCE } from './RemoteGhostState.js?v=20260718-network-4';
 import { timedHazardState } from './timed-hazards.js?v=20260719-power20-lasers';
 import { accessoryGlyph, avatarTint, normaliseAvatar } from './avatar.js?v=20260725-avatar-1';
@@ -55,6 +55,9 @@ export class GameScene extends Phaser.Scene {
     const versioned = url => `${url}${url.includes('?')?'&':'?'}v=${assetVersion}`;
     this.load.image('sky-v2', '/game/images/game/sky-panorama.webp');
     this.load.image('player-v2', '/game/images/v2/characters/player-idle.webp');
+    for (const cp of this.course.checkpoints) {
+      if (cp.background) this.load.image(cp.background.key,versioned(cp.background.file));
+    }
     // Atlas filenames are stable so existing rooms can reconnect cleanly. The
     // fixed map version is therefore appended to force browsers to fetch the
     // matching atlas after an art/map deployment instead of showing retired
@@ -177,14 +180,17 @@ export class GameScene extends Phaser.Scene {
   }
 
   createCourseObject(obj) {
-    // Sprite and body are deliberately NOT linked through Phaser's matter
-    // game object. The sprite (image centre at obj.x/y) is the ground truth
-    // and the body is placed at the same point by construction, so the
-    // player stands exactly on the visible artwork.
+    // The collider keeps the original route footprint. The themed artwork
+    // may have a different aspect ratio, so align its visible top to the
+    // original standing surface while keeping the authored object position.
     const texture = ATLAS_INDEX[obj.assetId];
-    const size = fittedSize(obj);
+    const colliderSize = fittedSize(obj);
+    const size = visualSize(obj);
+    const sourceBounds = alphaBounds(obj.themeSourceAssetId || obj.assetId,colliderSize);
+    const visualBounds = alphaBounds(obj.assetId,size);
+    const spriteY = obj.y + sourceBounds.minY - visualBounds.minY;
     const depth = obj.role === 'decor' ? 14 : obj.role === 'support' ? 10 : 12;
-    const sprite = this.add.image(obj.x, obj.y, texture?.key || obj.assetId, texture?.frame || null)
+    const sprite = this.add.image(obj.x, spriteY, texture?.key || obj.assetId, texture?.frame || null)
       .setDisplaySize(size.w, size.h).setDepth(depth).setRotation(obj.angle || 0);
     // Stacked props are pure scenery — no body, so they never block the route.
     if (obj.role === 'decor') {
@@ -192,7 +198,7 @@ export class GameScene extends Phaser.Scene {
       return sprite;
     }
     const Matter = Phaser.Physics.Matter.Matter;
-    const body = createAlphaBody(Matter, obj, size);
+    const body = createAlphaBody(Matter, obj, colliderSize);
     // The cradle must detect the player without its fork/elastic geometry
     // cancelling the upward impulse on the very next Matter step.
     if (obj.behavior?.type === 'launcher') {
@@ -299,11 +305,23 @@ export class GameScene extends Phaser.Scene {
 
   createCheckpoints() {
     this.checkpointBodies=[];
+    this.checkpointBackgrounds=[];
     for (const cp of this.course.checkpoints) {
       const flagSide=cp.flagSide===-1?-1:1;
+      const flagX=cp.x+22*flagSide;
+      const flagY=cp.y-58;
+      if (cp.background&&this.textures.exists(cp.background.key)) {
+        const source=this.textures.get(cp.background.key).getSourceImage();
+        const scale=Math.min(680/source.width,430/source.height);
+        const backgroundW=Math.round(source.width*scale);
+        const backgroundH=Math.round(source.height*scale);
+        const image=this.add.image(flagX,flagY,cp.background.key)
+          .setDisplaySize(backgroundW,backgroundH).setDepth(5).setAlpha(.82);
+        this.checkpointBackgrounds.push({checkpointId:cp.id,image});
+      }
       const pole = this.add.rectangle(cp.x,cp.y-35,7,70,0x4e5870).setDepth(9);
       const tex=ATLAS_INDEX['checkpoint-flag'];
-      const flag = this.add.image(cp.x+22*flagSide,cp.y-58,tex?.key||'checkpoint-flag',tex?.frame||null).setDisplaySize(54,54).setDepth(9);
+      const flag = this.add.image(flagX,flagY,tex?.key||'checkpoint-flag',tex?.frame||null).setDisplaySize(54,54).setDepth(9);
       this.add.text(cp.x,cp.y+14,cp.name||cp.zoneName,{fontFamily:'Microsoft JhengHei',fontSize:'16px',fontStyle:'bold',color:'#ffffff',stroke:'#20263a',strokeThickness:5}).setOrigin(.5).setDepth(20);
       pole.setAlpha(.9); flag.setAlpha(.95);
       // Match the painted flag and pole instead of using a generous invisible
@@ -476,14 +494,12 @@ export class GameScene extends Phaser.Scene {
 
   updateCrumblePlatforms(time) {
     const Matter=Phaser.Physics.Matter.Matter;
-    const {Body,Composite}=Matter;
+    const {Composite}=Matter;
     for (const item of this.crumbleObjects.values()) {
       const result=item.state.update(time);
       if (result.changed&&result.phase==='falling') {
         item.sprite.setPosition(item.startX,item.startY).clearTint();
-        Body.setStatic(item.body,false);
-        Body.setVelocity(item.body,{x:0,y:.8});
-        Body.setAngularVelocity(item.body,(item.obj.x%2?1:-1)*.015);
+        beginCrumbleFall(Matter,item.body,(item.obj.x%2?1:-1)*.015);
       } else if (result.changed&&result.phase==='hidden') {
         this.clearCrumbleContacts(item.obj.id);
         Composite.remove(this.matter.world.localWorld,item.body,true);

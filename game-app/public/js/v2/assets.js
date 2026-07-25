@@ -50,6 +50,20 @@ const catalog = {
     ['ref-split-platform','Reference split monochrome platform'],
     ['ref-summit-flag','Reference original summit flag']
   ],
+  checkpoint: [
+    ['cp-start-royal-crate','Start royal supply chest platform'],
+    ['cp-castle-drawbridge-winch','Castle drawbridge winch platform'],
+    ['cp-market-spice-cart','Market spice cart platform'],
+    ['cp-forest-mushroom-log','Forest mushroom log platform'],
+    ['cp-farm-windmill-gear','Farm windmill gearbox platform'],
+    ['cp-snow-ice-sled','Snow pass ice sled platform'],
+    ['cp-factory-gate-console','Factory entrance console platform'],
+    ['cp-observatory-astrolabe','Observation deck astrolabe platform'],
+    ['cp-vault-lockbox','Vault lockbox platform'],
+    ['cp-workshop-toolbench','Sky workshop toolbench platform'],
+    ['cp-office-typewriter-desk','Office typewriter desk platform'],
+    ['cp-summit-beacon-plinth','Summit beacon plinth platform']
+  ],
   global: [
     ['crate','木箱'],['barrel','木桶'],['plank','木板'],['stone-slab','石板'],['ladder','梯'],['rope-bridge','繩橋'],
     ['hanging-ring','吊環'],['trampoline','彈床'],['spring-pad','彈簧墊'],['slingshot-platform','彈弓發射台'],['conveyor','輸送帶'],['seesaw','蹺蹺板'],
@@ -112,6 +126,7 @@ const catalog = {
 
 const zoneColors = {
   reference: ['#d84a3d','#17233f','#fff7c7'],
+  checkpoint: ['#31588c','#17233f','#e7b94d'],
   global: ['#c88a43','#80502d','#ffe0a0'], castle: ['#8293ad','#46536d','#dbe5f4'],
   market: ['#e96358','#9b3b43','#ffe09a'], forest: ['#54b879','#236646','#c6f3ad'],
   farm: ['#e5ad43','#8d5f2e','#fff0a8'], snow: ['#94d9f4','#4777a5','#f4fdff'],

@@ -1,5 +1,5 @@
-import { buildCourse, validateCourse } from './course.js?v=20260725-unique-checkpoints-1';
-import { GameScene } from './GameScene.js?v=20260725-unique-checkpoints-1';
+import { buildCourse, validateCourse } from './course.js?v=20260725-checkpoint-backgrounds-1';
+import { GameScene } from './GameScene.js?v=20260725-checkpoint-backgrounds-1';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 import { ACCESSORY_GLYPHS, normaliseAvatar } from './avatar.js?v=20260725-avatar-1';
 

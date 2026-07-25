@@ -13,6 +13,9 @@ data/*.json
 *.log
 npm-debug.log*
 
+# Generated image work files
+tmp/imagegen/
+
 # OS
 .DS_Store
 Thumbs.db

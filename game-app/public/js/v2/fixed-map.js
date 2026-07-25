@@ -1,13 +1,41 @@
-import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers';
+import { alphaBounds, fittedSize } from './colliders.js?v=20260725-checkpoint-themes-2';
 
 // One fixed, hand-authored course for every room. The route grammar follows
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1500m-2026.07k';
+export const MAP_VERSION = 'fixed-1500m-2026.07n';
 export const WORLD = { width:5600, height:8700, startY:8200, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
+export const CHECKPOINT_THEME_REPLACEMENTS=[
+  {altitude:0,name:'起點',assetId:'cp-start-royal-crate',objectIds:['fixed-054','fixed-055','fixed-056']},
+  {altitude:210,name:'城堡城門',assetId:'cp-castle-drawbridge-winch',objectIds:['fixed-067','fixed-070','fixed-078']},
+  {altitude:274,name:'市集廣場',assetId:'cp-market-spice-cart',objectIds:['fixed-080','fixed-092']},
+  {altitude:448,name:'森林營地',assetId:'cp-forest-mushroom-log',objectIds:['fixed-095','fixed-103']},
+  {altitude:573,name:'農場風車',assetId:'cp-farm-windmill-gear',objectIds:['fixed-105','fixed-107']},
+  {altitude:704,name:'雪山山口',assetId:'cp-snow-ice-sled',objectIds:['fixed-117','fixed-118','fixed-120']},
+  {altitude:820,name:'工廠入口',assetId:'cp-factory-gate-console',objectIds:['fixed-137','fixed-145']},
+  {altitude:930,name:'觀測台',assetId:'cp-observatory-astrolabe',objectIds:['fixed-152','fixed-155','fixed-158']},
+  {altitude:1058,name:'金庫',assetId:'cp-vault-lockbox',objectIds:['fixed-174','fixed-178','fixed-179']},
+  {altitude:1198,name:'高空工坊',assetId:'cp-workshop-toolbench',objectIds:['fixed-187','fixed-188','fixed-189']},
+  {altitude:1324,name:'辦公室',assetId:'cp-office-typewriter-desk',objectIds:['fixed-196','fixed-197','fixed-198']},
+  {altitude:1464,name:'山巔',assetId:'cp-summit-beacon-plinth',objectIds:['fixed-204','fixed-205','fixed-206']}
+];
+export const CHECKPOINT_BACKGROUNDS=[
+  {altitude:0,key:'checkpoint-bg-start',file:'/game/images/v2/checkpoint-backgrounds/start.webp'},
+  {altitude:210,key:'checkpoint-bg-castle-gate',file:'/game/images/v2/checkpoint-backgrounds/castle-gate.webp'},
+  {altitude:274,key:'checkpoint-bg-market-square',file:'/game/images/v2/checkpoint-backgrounds/market-square.webp'},
+  {altitude:448,key:'checkpoint-bg-forest-camp',file:'/game/images/v2/checkpoint-backgrounds/forest-camp.webp'},
+  {altitude:573,key:'checkpoint-bg-farm-windmill',file:'/game/images/v2/checkpoint-backgrounds/farm-windmill.webp'},
+  {altitude:704,key:'checkpoint-bg-snow-pass',file:'/game/images/v2/checkpoint-backgrounds/snow-pass.webp'},
+  {altitude:820,key:'checkpoint-bg-factory-entrance',file:'/game/images/v2/checkpoint-backgrounds/factory-entrance.webp'},
+  {altitude:930,key:'checkpoint-bg-observatory',file:'/game/images/v2/checkpoint-backgrounds/observatory.webp'},
+  {altitude:1058,key:'checkpoint-bg-vault',file:'/game/images/v2/checkpoint-backgrounds/vault.webp'},
+  {altitude:1198,key:'checkpoint-bg-sky-workshop',file:'/game/images/v2/checkpoint-backgrounds/sky-workshop.webp'},
+  {altitude:1324,key:'checkpoint-bg-office',file:'/game/images/v2/checkpoint-backgrounds/office.webp'},
+  {altitude:1464,key:'checkpoint-bg-summit',file:'/game/images/v2/checkpoint-backgrounds/summit.webp'}
+];
 
 const objects=[];
 const nodes=[];
@@ -766,6 +794,24 @@ function applyScreenshotCorrections() {
 }
 applyScreenshotCorrections();
 
+// Give every checkpoint interval a distinct visual landmark without moving or
+// resizing any authored route object. Only the art identity changes here; the
+// exact transforms remain locked by test-checkpoint-themes.mjs.
+function installCheckpointThemes() {
+  const objectById=new Map(objects.map(object=>[object.id,object]));
+  for (const theme of CHECKPOINT_THEME_REPLACEMENTS) {
+    for (const id of theme.objectIds) {
+      const object=objectById.get(id);
+      if (!object||object.role!=='support') throw new Error(`Missing checkpoint theme support ${id}`);
+      object.themeSourceAssetId=object.assetId;
+      object.renderSizeOverride=fittedSize(object);
+      object.assetId=theme.assetId;
+      object.tags.push('checkpoint-theme',`checkpoint-theme-${theme.altitude}`);
+    }
+  }
+}
+installCheckpointThemes();
+
 // Five red timing gates appear only in the factory half of the climb. The
 // beam is active for two seconds, then the passage is open for two seconds.
 // Each gate sits in the actual air gap between two consecutive main supports;
@@ -883,7 +929,7 @@ export const FIXED_MAP = {
     id:`progress-${index}`,x:node.x,y:node.y,progress:index/(all.length-1),altitude:node.altitude
   })),
   checkpoints:[
-    {altitude:0,name:'起點'},
+    {altitude:0,x:340,name:'起點'},
     {altitude:210,name:'城堡城門'},
     {altitude:274,name:'市集廣場'},
     {altitude:448,name:'森林營地'},

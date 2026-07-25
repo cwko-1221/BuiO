@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 245,
+  "count": 257,
   "generatedAt": "2026-07-13",
   "assets": [
     {
@@ -2063,6 +2063,518 @@
       "tags": [
         "reference",
         "polygon"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-start-royal-crate",
+      "label": "Start royal supply chest platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-start-royal-crate.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 171,
+        "h": 129
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-castle-drawbridge-winch",
+      "label": "Castle drawbridge winch platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-castle-drawbridge-winch.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 121,
+        "h": 65
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-market-spice-cart",
+      "label": "Market spice cart platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-market-spice-cart.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 123,
+        "h": 65
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-forest-mushroom-log",
+      "label": "Forest mushroom log platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-forest-mushroom-log.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 118,
+        "h": 66
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-farm-windmill-gear",
+      "label": "Farm windmill gearbox platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-farm-windmill-gear.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 170,
+        "h": 96
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-snow-ice-sled",
+      "label": "Snow pass ice sled platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-snow-ice-sled.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 189,
+        "h": 139
+      },
+      "body": {
+        "type": "rect",
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "rect"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-factory-gate-console",
+      "label": "Factory entrance console platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-factory-gate-console.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 181,
+        "h": 101
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-observatory-astrolabe",
+      "label": "Observation deck astrolabe platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-observatory-astrolabe.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 171,
+        "h": 85
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-vault-lockbox",
+      "label": "Vault lockbox platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-vault-lockbox.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 110,
+        "h": 106
+      },
+      "body": {
+        "type": "circle",
+        "radius": 0.46,
+        "oneWay": false,
+        "material": "rubber"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "circle"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-workshop-toolbench",
+      "label": "Sky workshop toolbench platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-workshop-toolbench.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 133,
+        "h": 107
+      },
+      "body": {
+        "type": "compound",
+        "parts": [
+          [
+            -0.3,
+            0,
+            0.62,
+            0.72
+          ],
+          [
+            0.26,
+            0.13,
+            0.45,
+            0.45
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "compound"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-office-typewriter-desk",
+      "label": "Office typewriter desk platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-office-typewriter-desk.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 141,
+        "h": 113
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "trapezoid"
+      ],
+      "available": true,
+      "source": "imagegen-master"
+    },
+    {
+      "id": "cp-summit-beacon-plinth",
+      "label": "Summit beacon plinth platform",
+      "zone": "checkpoint",
+      "file": "/game/images/v2/props/cp-summit-beacon-plinth.webp",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.82
+      },
+      "renderSize": {
+        "w": 111,
+        "h": 133
+      },
+      "body": {
+        "type": "trapezoid",
+        "vertices": [
+          [
+            -0.5,
+            0.4
+          ],
+          [
+            -0.38,
+            -0.42
+          ],
+          [
+            0.32,
+            -0.5
+          ],
+          [
+            0.5,
+            0.35
+          ]
+        ],
+        "oneWay": false,
+        "material": "solid"
+      },
+      "palette": [
+        "#31588c",
+        "#17233f",
+        "#e7b94d"
+      ],
+      "tags": [
+        "checkpoint",
+        "trapezoid"
       ],
       "available": true,
       "source": "imagegen-master"
@@ -10134,7 +10646,7 @@
       "original design"
     ]
   },
-  "availableCount": 245,
-  "imagegenCount": 152,
+  "availableCount": 257,
+  "imagegenCount": 164,
   "proceduralCount": 93
 }

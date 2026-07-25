@@ -6,6 +6,11 @@ export const ATLAS_PAGES=[
     "json": "/game/images/v2/atlases/reference-0.json"
   },
   {
+    "key": "atlas-checkpoint-0",
+    "image": "/game/images/v2/atlases/checkpoint-0.webp",
+    "json": "/game/images/v2/atlases/checkpoint-0.json"
+  },
+  {
     "key": "atlas-global-0",
     "image": "/game/images/v2/atlases/global-0.webp",
     "json": "/game/images/v2/atlases/global-0.json"
@@ -237,6 +242,54 @@ export const ATLAS_INDEX={
   "ref-summit-flag": {
     "key": "atlas-reference-0",
     "frame": "ref-summit-flag"
+  },
+  "cp-start-royal-crate": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-start-royal-crate"
+  },
+  "cp-castle-drawbridge-winch": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-castle-drawbridge-winch"
+  },
+  "cp-market-spice-cart": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-market-spice-cart"
+  },
+  "cp-forest-mushroom-log": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-forest-mushroom-log"
+  },
+  "cp-farm-windmill-gear": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-farm-windmill-gear"
+  },
+  "cp-snow-ice-sled": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-snow-ice-sled"
+  },
+  "cp-factory-gate-console": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-factory-gate-console"
+  },
+  "cp-observatory-astrolabe": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-observatory-astrolabe"
+  },
+  "cp-vault-lockbox": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-vault-lockbox"
+  },
+  "cp-workshop-toolbench": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-workshop-toolbench"
+  },
+  "cp-office-typewriter-desk": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-office-typewriter-desk"
+  },
+  "cp-summit-beacon-plinth": {
+    "key": "atlas-checkpoint-0",
+    "frame": "cp-summit-beacon-plinth"
   },
   "crate": {
     "key": "atlas-global-0",
