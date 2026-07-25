@@ -304,7 +304,7 @@ export class GameScene extends Phaser.Scene {
       const pole = this.add.rectangle(cp.x,cp.y-35,7,70,0x4e5870).setDepth(9);
       const tex=ATLAS_INDEX['checkpoint-flag'];
       const flag = this.add.image(cp.x+22*flagSide,cp.y-58,tex?.key||'checkpoint-flag',tex?.frame||null).setDisplaySize(54,54).setDepth(9);
-      this.add.text(cp.x,cp.y+14,cp.zoneName,{fontFamily:'Microsoft JhengHei',fontSize:'16px',fontStyle:'bold',color:'#ffffff',stroke:'#20263a',strokeThickness:5}).setOrigin(.5).setDepth(20);
+      this.add.text(cp.x,cp.y+14,cp.name||cp.zoneName,{fontFamily:'Microsoft JhengHei',fontSize:'16px',fontStyle:'bold',color:'#ffffff',stroke:'#20263a',strokeThickness:5}).setOrigin(.5).setDepth(20);
       pole.setAlpha(.9); flag.setAlpha(.95);
       // Match the painted flag and pole instead of using a generous invisible
       // area. Players must physically touch this visible marker to unlock it.

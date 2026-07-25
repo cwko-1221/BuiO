@@ -1,5 +1,5 @@
-import { buildCourse, validateCourse } from './course.js?v=20260720-screenshot-corrections-7';
-import { GameScene } from './GameScene.js?v=20260725-room-settings-avatar-1';
+import { buildCourse, validateCourse } from './course.js?v=20260725-unique-checkpoints-1';
+import { GameScene } from './GameScene.js?v=20260725-unique-checkpoints-1';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 import { ACCESSORY_GLYPHS, normaliseAvatar } from './avatar.js?v=20260725-avatar-1';
 
@@ -110,7 +110,7 @@ function startGame(seed,durationSec,startedAt,resume,settings){
     isFrozen:()=>frozen,
     onSound:type=>gameAudio.play(type),
     onCrumble:id=>{if(!preview)socket.emit('game:crumble',{id});},
-    onCheckpoint:cp=>toast(`🏁 已到達${cp.zoneName}檢查點`,true),
+    onCheckpoint:cp=>toast(`🏁 已到達${cp.name||cp.zoneName}檢查點`,true),
     onRecovery:type=>{
       if(type==='rapidFall')toast('↩ 下降超過 100 米，返回最近檢查點');
       else if(type==='laser')toast('⚡ 已返回目前區域檢查點');

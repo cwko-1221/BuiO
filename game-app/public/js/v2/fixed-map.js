@@ -4,7 +4,7 @@ import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1500m-2026.07j';
+export const MAP_VERSION = 'fixed-1500m-2026.07k';
 export const WORLD = { width:5600, height:8700, startY:8200, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
@@ -883,11 +883,20 @@ export const FIXED_MAP = {
     id:`progress-${index}`,x:node.x,y:node.y,progress:index/(all.length-1),altitude:node.altitude
   })),
   checkpoints:[
-    {altitude:0},{altitude:210},{altitude:274},{altitude:448},
+    {altitude:0,name:'起點'},
+    {altitude:210,name:'城堡城門'},
+    {altitude:274,name:'市集廣場'},
+    {altitude:448,name:'森林營地'},
     // The farm flag was moved back to the preceding platform shown around
     // 561m in the HUD, before the mandatory 580m launcher.
-    {altitude:573,nodeAltitude:556,flagSide:-1},{altitude:704},{altitude:820},{altitude:930},
-    {altitude:1058},{altitude:1198},{altitude:1324},{altitude:1464}
+    {altitude:573,nodeAltitude:556,flagSide:-1,name:'農場風車'},
+    {altitude:704,name:'雪山山口'},
+    {altitude:820,name:'工廠入口'},
+    {altitude:930,name:'觀測台'},
+    {altitude:1058,name:'金庫'},
+    {altitude:1198,name:'高空工坊'},
+    {altitude:1324,name:'辦公室'},
+    {altitude:1464,name:'山巔'}
   ].map(item=>({id:`checkpoint-${item.altitude}`,...item})),
   recoveryBounds:[
     {id:'recovery-castle',minAltitude:35,maxAltitude:210,resetAltitude:0},

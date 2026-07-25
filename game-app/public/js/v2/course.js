@@ -1,7 +1,7 @@
 import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js?v=20260719-six-launchers';
 import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260719-six-launchers';
 import { alphaBounds, fittedSize } from './colliders.js?v=20260719-six-launchers';
-import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260720-screenshot-corrections-7';
+import { FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260725-unique-checkpoints-1';
 
 function hashString(value) {
   let h=2166136261;
@@ -78,6 +78,9 @@ export function validateCourse(course) {
   if (course.world.width!==5600 || course.world.height!==8700) errors.push('fixed world must be 5600x8700');
   if (course.instances.length!==6) errors.push(`expected 6 authored zones, got ${course.instances.length}`);
   if (course.checkpoints.map(item=>item.altitude).join(',')!=='0,210,274,448,573,704,820,930,1058,1198,1324,1464') errors.push('checkpoint altitudes changed');
+  const checkpointNames=course.checkpoints.map(item=>item.name);
+  if (checkpointNames.some(name=>typeof name!=='string'||!name.trim())) errors.push('every checkpoint must have a name');
+  if (new Set(checkpointNames).size!==checkpointNames.length) errors.push('checkpoint names must be unique');
   const nodes=new Map(course.nodes.map(node=>[node.id,node]));
   const objects=new Map(course.objects.map(object=>[object.id,object]));
   for (const object of course.objects.filter(item=>item.role!=='decor')) {
