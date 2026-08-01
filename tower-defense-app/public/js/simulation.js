@@ -395,7 +395,7 @@ export class TowerDefenseSimulation {
       if (projectile.slow) this.applySlow(enemy,projectile.slow,projectile.slowDuration);
       if (projectile.freezeChance&&this.random()<projectile.freezeChance) enemy.freezeTime=definitionBoss(enemy) ? .45 : 1.1;
     }
-    this.emit('impact',{ type:projectile.type,x:target.x,y:target.y,radius:projectile.splash||22,color:projectile.color });
+    this.emit('impact',{ impactType:projectile.type,x:target.x,y:target.y,radius:projectile.splash||22,color:projectile.color });
   }
 
   applySlow(enemy,factor,duration) {

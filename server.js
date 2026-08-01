@@ -210,6 +210,7 @@ app.get('/game/host', requireSession, (req, res) => {
 // Tower defense module
 app.use('/tower-defense/css', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'css')));
 app.use('/tower-defense/js', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'js')));
+app.use('/tower-defense/assets', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'assets'), { maxAge: process.env.NODE_ENV === 'production' ? '30d' : 0 }));
 app.use('/tower-defense/vendor/phaser', express.static(path.join(__dirname, 'node_modules', 'phaser', 'dist')));
 app.get('/tower-defense/preview', (req, res, next) => {
   if (config.isProd) return next();

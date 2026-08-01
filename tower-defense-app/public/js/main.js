@@ -1,7 +1,8 @@
 import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, towerStats } from './content.js';
 import { TowerDefenseSimulation } from './simulation.js';
-import { BattleScene } from './BattleScene.js';
+import { BattleScene } from './BattleScene.js?v=20260802-3';
 import { CrystalAudio } from './audio.js';
+import { MAP_ART, TOWER_ART, atlasPosition } from './assets.js?v=20260802-1';
 
 const $=id=>document.getElementById(id);
 const preview=location.pathname.endsWith('/preview');
@@ -38,7 +39,7 @@ function renderMenu(){
   const unlocked=preview?mapOrder:profile.unlocked;
   $('mapSelector').innerHTML=mapOrder.map((id,index)=>{
     const map=MAPS[id],locked=!unlocked.includes(id),color=`#${map.palette.accent.toString(16).padStart(6,'0')}`;
-    return `<button class="map-card ${selectedMap===id?'selected':''} ${locked?'locked':''}" data-map="${id}" ${locked?'disabled':''} style="--map-color:${color}33"><span class="map-number">CHAPTER ${String(index+1).padStart(2,'0')}</span>${locked?'<span class="lock-badge">⌁</span>':''}<b>${map.name}</b><small>${map.subtitle}</small></button>`;
+    return `<button class="map-card ${selectedMap===id?'selected':''} ${locked?'locked':''}" data-map="${id}" ${locked?'disabled':''} style="--map-color:${color}33;--map-image:url('${MAP_ART[id]}')"><span class="map-number">CHAPTER ${String(index+1).padStart(2,'0')}</span>${locked?'<span class="lock-badge">⌁</span>':''}<b>${map.name}</b><small>${map.subtitle}</small></button>`;
   }).join('');
   const best=Object.values(profile.bestScores);const highest=best.length?Math.max(...best):0;
   $('campaignRecord').innerHTML=`戰役進度 <b>${profile.completed.length}/3</b> · 最高分 <b>${highest.toLocaleString('zh-HK')}</b> · 累積答對 <b>${profile.totalCorrect}</b>`;
@@ -56,7 +57,7 @@ async function loadQuestionSets(){
 function escapeHtml(value){return String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');}
 
 function renderTowerDock(){
-  $('towerCards').innerHTML=towerOrder.map((id,index)=>{const tower=TOWERS[id],color=`#${tower.color.toString(16).padStart(6,'0')}`;return `<button class="tower-card" data-tower="${id}" style="--tower-color:${color}" title="${tower.description}"><kbd>${index+1}</kbd><span class="tower-symbol">${tower.icon}</span><b>${tower.name}</b><small><span>${tower.role}</span><strong>● ${tower.cost}</strong></small></button>`;}).join('');
+  $('towerCards').innerHTML=towerOrder.map((id,index)=>{const tower=TOWERS[id],color=`#${tower.color.toString(16).padStart(6,'0')}`,position=atlasPosition(TOWER_ART.frames[id],TOWER_ART.columns,TOWER_ART.rows);return `<button class="tower-card" data-tower="${id}" style="--tower-color:${color}" title="${tower.description}"><kbd>${index+1}</kbd><span class="tower-portrait" style="--sprite-x:${position.x}%;--sprite-y:${position.y}%"></span><b>${tower.name}</b><small><span>${tower.role}</span><strong>● ${tower.cost}</strong></small></button>`;}).join('');
   document.querySelectorAll('[data-tower]').forEach(button=>button.addEventListener('click',()=>selectBuildTower(button.dataset.tower)));
 }
 
@@ -127,9 +128,9 @@ function renderTowerPanel(tower,force=false){
   if(!tower){panel.classList.remove('open');panelSignature='';return;}
   const definition=TOWERS[tower.type],stats=towerStats(tower),maxed=tower.level>=definition.levels.length,nextCost=maxed?0:definition.upgradeCosts[tower.level-1];
   const signature=[tower.id,tower.level,tower.targetMode,Math.floor(simulation.state.gold),Math.floor(tower.damage),tower.kills].join(':');if(!force&&signature===panelSignature)return;panelSignature=signature;
-  const color=`#${definition.color.toString(16).padStart(6,'0')}`;
+  const color=`#${definition.color.toString(16).padStart(6,'0')}`,spritePosition=atlasPosition(TOWER_ART.frames[tower.type],TOWER_ART.columns,TOWER_ART.rows);
   panel.style.setProperty('--tower-color',color);panel.classList.add('open');
-  panel.innerHTML=`<div class="tower-panel-head"><span class="tower-panel-icon">${definition.icon}</span><div><b>${definition.name}</b><small>Lv.${tower.level} · ${stats.name}</small></div><button class="panel-close" id="towerPanelClose">×</button></div><p class="tower-description">${definition.description}</p><div class="tower-stats"><div><span>傷害</span><b>${Math.round(stats.damage)}</b></div><div><span>射程</span><b>${Math.round(stats.range)}</b></div><div><span>攻速</span><b>${(1/stats.cooldown).toFixed(1)}/s</b></div></div><label class="target-field">目標優先<select id="targetModeSelect">${Object.entries(targetNames).map(([id,name])=>`<option value="${id}" ${tower.targetMode===id?'selected':''}>${name}</option>`).join('')}</select></label><div class="tower-actions"><button class="upgrade-button" id="upgradeTowerBtn" ${maxed||simulation.state.gold<nextCost?'disabled':''}>${maxed?'已達最高級':`升級 · ● ${nextCost}`}</button><button class="sell-button" id="sellTowerBtn">出售 · ● ${Math.floor(tower.totalSpent*.7)}</button></div><div class="tower-record"><span>擊破 ${tower.kills}</span><span>總傷害 ${Math.floor(tower.damage).toLocaleString('zh-HK')}</span></div>`;
+  panel.innerHTML=`<div class="tower-panel-head"><span class="tower-panel-icon tower-panel-render" style="--sprite-x:${spritePosition.x}%;--sprite-y:${spritePosition.y}%"></span><div><b>${definition.name}</b><small>Lv.${tower.level} · ${stats.name}</small></div><button class="panel-close" id="towerPanelClose">×</button></div><p class="tower-description">${definition.description}</p><div class="tower-stats"><div><span>傷害</span><b>${Math.round(stats.damage)}</b></div><div><span>射程</span><b>${Math.round(stats.range)}</b></div><div><span>攻速</span><b>${(1/stats.cooldown).toFixed(1)}/s</b></div></div><label class="target-field">目標優先<select id="targetModeSelect">${Object.entries(targetNames).map(([id,name])=>`<option value="${id}" ${tower.targetMode===id?'selected':''}>${name}</option>`).join('')}</select></label><div class="tower-actions"><button class="upgrade-button" id="upgradeTowerBtn" ${maxed||simulation.state.gold<nextCost?'disabled':''}>${maxed?'已達最高級':`升級 · ● ${nextCost}`}</button><button class="sell-button" id="sellTowerBtn">出售 · ● ${Math.floor(tower.totalSpent*.7)}</button></div><div class="tower-record"><span>擊破 ${tower.kills}</span><span>總傷害 ${Math.floor(tower.damage).toLocaleString('zh-HK')}</span></div>`;
   $('towerPanelClose').onclick=()=>scene?.selectTower(null);
   $('targetModeSelect').onchange=event=>simulation.setTargetMode(tower.id,event.target.value);
   $('upgradeTowerBtn').onclick=()=>handleActionResult(simulation.upgradeTower(tower.id));
@@ -231,7 +232,16 @@ function bindUi(){
     else if(event.key.toLowerCase()==='f')cycleSpeed();
     else if(event.key==='Escape'){scene?.setPlacement(null);scene?.setAbilityTarget(null);scene?.selectTower(null);document.querySelectorAll('[data-tower],[data-ability]').forEach(button=>button.classList.remove('selected','targeting'));}
   });
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden||!simulation||!$('gameScreen').classList.contains('active')||['won','lost'].includes(simulation.state.phase))return;
+    if(!simulation.state.paused){simulation.togglePause(true);updateHud(simulation.state,true);showToast('已自動暫停，返回後按播放繼續。');}
+  });
 }
 
 renderMenu();renderTowerDock();bindUi();loadQuestionSets();
-window.__towerDefense={get simulation(){return simulation;},get scene(){return scene;},startCampaign,openQuestion,profile,preview};
+window.__towerDefense={
+  get simulation(){return simulation;},
+  get scene(){return scene;},
+  get audioState(){return {contextState:audio.context?.state||'unavailable',muted:audio.muted,musicActive:!!audio.musicTimer};},
+  startCampaign,openQuestion,profile,preview,
+};
