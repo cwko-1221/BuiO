@@ -1,35 +1,54 @@
-# 杯澳個人化學習平台 Prototype
+# 杯澳個人化學習平台 V2
 
-一站式學習入口的第一版前端 prototype。學生登入後可在同一個 Dashboard 選擇不同模組，目前預留：
+杯澳學校的整合式教學平台。學生與教師可從同一入口使用數學、中文、英文、互動白板、學習報告及多人闖關遊戲。
 
-- 數學練習
-- 互動白板
-- 中文學習（未啟用）
-- 英文學習（未啟用）
+## 現有模組
 
-## 使用方式
+- 數學練習：`/math`
+- 互動白板：`/whiteboard`
+- 教師學習報告：`/report.html`
+- 中文學習：`/chinese`
+- 英文學習：`/english`
+- 多人闖關遊戲：`/game`
+
+Mario Kart／Quiz Kart 實驗模組已移除，`/kart/*` 不再是有效路由。
+
+## 本機啟動
+
+需要 Node.js 及 npm。首次使用先安裝依賴：
 
 ```bash
+npm install
 npm run dev
 ```
 
-打開 `http://127.0.0.1:3000`。
+然後開啟 <http://127.0.0.1:3000>。
 
-如果這部機未安裝 npm，也可以直接用 Node 執行：
+## 設定
+
+主要環境變數由 `config.js` 讀取：
+
+- `PORT`：HTTP 連接埠，預設為 `3000`
+- `NODE_ENV`：`development` 或 `production`
+- `SESSION_SECRET`：正式環境必須設定的 session 密鑰
+- `SUPABASE_DB_URL`：設定後使用 PostgreSQL；未設定時使用本機 JSON 資料庫
+- `CORS_ORIGINS`：正式環境允許的來源，以逗號分隔
+- `MOCK_AUTH`：只供非正式環境測試登入
+
+## 驗證
+
+執行完整靜態與遊戲回歸測試：
 
 ```bash
-node server.js
+npm run check
 ```
 
-## 模組連結
+檢查生產依賴安全性：
 
-進入平台後到「設定」頁，把現有 Math 和 Whiteboard 的部署網址貼上。白板只需要填前端根網址，平台會根據學生/老師身份自動加上 `/student` 或 `/teacher` 和 `room` 參數。
+```bash
+npm run check:security
+```
 
-## 下一階段可接入
+服務狀態可由 `/health` 或 `/api/health` 查詢，回應包含版本、環境、運行時間及資料庫模式。
 
-- 真正帳號登入
-- 班級與學生資料庫
-- Math 學習進度 API
-- Whiteboard 房間建立 API
-- 老師指派任務
-- 更多學科模組
+需要已啟動伺服器的整合測試，可分別執行 `check:network-live`、`check:session-live`、`check:settings-live`、`check:host-ui-live`、`check:launchers-live`、`check:lasers-live` 及 `check:checkpoint-live`。

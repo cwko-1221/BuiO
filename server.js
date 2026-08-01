@@ -7,6 +7,7 @@ const path = require('path');
 const os = require('os');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const { version: APP_VERSION } = require('./package.json');
 
 const config = require('./config');
 const db = require('./db');                  // JSON seed-on-boot side effect (json mode only)
@@ -87,16 +88,31 @@ require('./game-app/server/socket')(io, app);   // namespace /game
 // ----------------------------------------------------------------
 // Health / debug
 // ----------------------------------------------------------------
-app.get('/api/health', (req, res) => {
+const healthHandler = (req, res) => {
   try {
     const summary = config.db.mode === 'json'
       ? { connected: true, type: 'json-local', userCount: db._load().users.length }
       : { connected: true, type: 'postgres' };
-    res.json({ status: 'ok', database: summary, timestamp: new Date().toISOString() });
+    res.json({
+      status: 'ok',
+      service: 'bui-o-learning-platform',
+      version: APP_VERSION,
+      environment: config.env,
+      uptimeSeconds: Math.floor(process.uptime()),
+      database: summary,
+      timestamp: new Date().toISOString(),
+    });
   } catch (e) {
-    res.status(500).json({ status: 'error', message: e.message });
+    res.status(500).json({
+      status: 'error',
+      service: 'bui-o-learning-platform',
+      version: APP_VERSION,
+      timestamp: new Date().toISOString(),
+    });
   }
-});
+};
+
+app.get(['/health', '/api/health'], healthHandler);
 
 if (!config.isProd) {
   app.get('/api/db-status', (req, res) => {

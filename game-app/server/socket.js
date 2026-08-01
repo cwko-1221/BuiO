@@ -22,8 +22,8 @@ const DEFAULT_GAME_SETTINGS = Object.freeze({
 });
 const CHARACTER_IDS = new Set(['blue', 'mint', 'coral', 'violet']);
 const ACCESSORY_IDS = new Set(['none', 'cap', 'crown', 'star']);
-const POSITION_BROADCAST_MS = 20;
-const HOST_POSITION_DIVISOR = 5;
+const POSITION_BROADCAST_MS = 16;
+const HOST_POSITION_DIVISOR = 6;
 
 const playerRoom = code => `${code}:players`;
 
@@ -215,8 +215,8 @@ module.exports = function (io, app) {
         startedAt: room.startedAt,
         settings: room.settings,
       });
-      // Players receive one compact room snapshot every 20ms. This keeps a
-      // 20-player room at 50 Socket.IO callbacks per client instead of
+      // Players receive one compact room snapshot every 16ms. This keeps a
+      // 20-player room near 60 Socket.IO callbacks per client instead of
       // relaying up to 1,200 individual callbacks every second.
       room.posTimer = setInterval(() => {
         const positions=[];
