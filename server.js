@@ -60,6 +60,9 @@ app.use('/api/english', require('./english-app/routes/media'));
 // Game module (唔好望落嚟)
 app.use('/api/game/teacher', require('./game-app/routes/teacher'));
 
+// Crystal Bastion tower-defense question economy
+app.use('/api/tower-defense', require('./tower-defense-app/routes/questions'));
+
 // Whiteboard — HTTP + Socket.io. Build httpServer/io now so the whiteboard
 // module can register its /api/whiteboard/* routes BEFORE the catch-all
 // /api 404 handler at the bottom of this file matches them first.
@@ -202,6 +205,18 @@ app.get('/game', requireSession, (req, res) => {
 app.get('/game/host', requireSession, (req, res) => {
   if (req.session.role !== 'teacher') return res.redirect('/game');
   res.sendFile(path.join(__dirname, 'game-app', 'public', 'host.html'));
+});
+
+// Tower defense module
+app.use('/tower-defense/css', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'css')));
+app.use('/tower-defense/js', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'js')));
+app.use('/tower-defense/vendor/phaser', express.static(path.join(__dirname, 'node_modules', 'phaser', 'dist')));
+app.get('/tower-defense/preview', (req, res, next) => {
+  if (config.isProd) return next();
+  res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'index.html'));
+});
+app.get('/tower-defense', requireSession, (_req, res) => {
+  res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'index.html'));
 });
 
 app.get('/login.html',     (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'login.html')));

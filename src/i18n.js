@@ -90,6 +90,10 @@ export const I18N = {
     'module_game_desc': '答題儲能量，爬山大作戰！全班實時比賽，鬥快登頂。',
     'module_game_metric': '全班實時對戰',
     'module_game_status': '已啟用'
+    ,'module_td_name': '晶核守衛戰'
+    ,'module_td_desc': '回答四選一題目賺取晶幣，建塔升級並完成三章十五波戰役。'
+    ,'module_td_metric': '單人策略戰役'
+    ,'module_td_status': '已啟用'
   },
   'en-US': {
     'good_morning': 'Good Morning',
@@ -180,6 +184,10 @@ export const I18N = {
     'module_game_desc': 'Answer questions to earn energy and race the whole class up the mountain.',
     'module_game_metric': 'Live class battle',
     'module_game_status': 'Enabled'
+    ,'module_td_name': 'Crystal Bastion'
+    ,'module_td_desc': 'Answer four-choice questions for coins, build and upgrade towers, and clear three 15-wave campaigns.'
+    ,'module_td_metric': 'Solo strategy campaign'
+    ,'module_td_status': 'Enabled'
   }
 };
 

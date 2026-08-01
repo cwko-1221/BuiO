@@ -10,6 +10,7 @@
 - 中文學習：`/chinese`
 - 英文學習：`/english`
 - 多人闖關遊戲：`/game`
+- 晶核守衛塔防：`/tower-defense`
 
 Mario Kart／Quiz Kart 實驗模組已移除，`/kart/*` 不再是有效路由。
 

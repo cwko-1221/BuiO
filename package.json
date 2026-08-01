@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-checkpoint-themes.mjs && node scripts/test-game-physics.mjs && node scripts/test-game-recovery.mjs && node scripts/test-game-crumble.mjs && node scripts/test-game-launcher.mjs && node scripts/test-game-lasers.mjs && node scripts/test-game-network.mjs",
+    "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-checkpoint-themes.mjs && node scripts/test-game-physics.mjs && node scripts/test-game-recovery.mjs && node scripts/test-game-crumble.mjs && node scripts/test-game-launcher.mjs && node scripts/test-game-lasers.mjs && node scripts/test-game-network.mjs && node scripts/test-tower-defense.mjs",
     "check:game": "node scripts/validate-game-v2.mjs",
     "check:checkpoint-themes": "node scripts/test-checkpoint-themes.mjs",
     "check:network-live": "node scripts/test-game-network-live.mjs",
@@ -16,6 +16,8 @@
     "check:lasers-live": "node scripts/test-game-lasers-live.mjs",
     "check:checkpoint-live": "node scripts/test-game-checkpoint-live.mjs",
     "check:security": "npm audit --omit=dev --audit-level=low",
+    "check:tower-defense": "node scripts/test-tower-defense.mjs",
+    "check:tower-defense-live": "node scripts/test-tower-defense-live.mjs",
     "build:game-assets": "node scripts/generate-reference-extensions.mjs && node scripts/generate-fixed-bricks.mjs && node scripts/build-game-assets.mjs && node scripts/analyze-game-geometry.mjs && node scripts/pack-game-atlases.mjs",
     "postinstall": "cd whiteboard-app/client && npm install && npm run build"
   },
