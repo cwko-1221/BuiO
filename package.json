@@ -1,6 +1,6 @@
 {
   "name": "bui-o-learning-platform",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "node server.js",
@@ -15,6 +15,7 @@
     "check:launchers-live": "node scripts/test-game-launchers-live.mjs",
     "check:lasers-live": "node scripts/test-game-lasers-live.mjs",
     "check:checkpoint-live": "node scripts/test-game-checkpoint-live.mjs",
+    "check:security": "npm audit --omit=dev --audit-level=low",
     "build:game-assets": "node scripts/generate-reference-extensions.mjs && node scripts/generate-fixed-bricks.mjs && node scripts/build-game-assets.mjs && node scripts/analyze-game-geometry.mjs && node scripts/pack-game-atlases.mjs",
     "postinstall": "cd whiteboard-app/client && npm install && npm run build"
   },
@@ -37,5 +38,10 @@
   },
   "devDependencies": {
     "playwright": "^1.52.0"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
   }
 }

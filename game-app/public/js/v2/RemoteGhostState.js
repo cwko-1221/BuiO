@@ -5,14 +5,14 @@ const finite = (value, fallback=0) => Number.isFinite(Number(value)) ? Number(va
 //
 // The ghost leads the latest snapshot with a small, bounded amount of dead
 // reckoning so remote players read as live instead of trailing the whole
-// send-throttle + broadcast-tick + render-frame pipeline (~40ms before any
+// send-throttle + broadcast-tick + render-frame pipeline (~24ms before any
 // real network latency is added). Airborne motion is predicted in every
 // direction — including falls — but the scene passes a floor limit computed
 // from the real course geometry, so a falling ghost lands on the platform it
 // is actually heading for and can never be rendered inside one. Grounded
 // snapshots are never projected vertically at all.
 const STEP_MS = 1000/60;   // Matter velocities are px per 60Hz physics step
-const BASE_LEAD_MS = 40;   // hides send throttle + server tick + render frame
+const BASE_LEAD_MS = 24;   // hides the 16ms send/broadcast cadence without overshooting
 const MAX_LEAD_MS = 120;   // on packet loss the ghost holds instead of flying on
 const AIRBORNE = new Set(['jump','fall']);
 // Hard landings penetrate the platform for a frame on the sender before the
