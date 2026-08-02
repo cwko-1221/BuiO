@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#071726">
   <title>BuiO 晶核守衛戰</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%2358ead6' d='M32 2 57 16 52 49 32 62 12 49 7 16z'/%3E%3Cpath fill='%23071926' d='m32 12 15 9-3 21-12 9-12-9-3-21z'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="/tower-defense/css/tower-defense.css?v=20260802-2">
+  <link rel="stylesheet" href="/tower-defense/css/tower-defense.css?v=20260802-classroom-1">
 </head>
 <body>
   <div id="rotateNotice" class="rotate-notice" aria-live="polite">
@@ -14,7 +14,21 @@
   </div>
 
   <main id="app">
-    <section id="menuScreen" class="screen menu-screen active">
+    <section id="joinScreen" class="screen classroom-join active">
+      <header class="menu-topbar">
+        <a href="/" class="brand-link"><span class="brand-crystal">◇</span><span>BuiO <b>晶核守衛戰</b></span></a>
+        <a class="ghost-button" href="/">返回平台</a>
+      </header>
+      <div class="classroom-shell">
+        <div class="eyebrow">STUDENT DEPLOYMENT</div>
+        <h1>選擇老師的塔防課堂</h1>
+        <p>加入後只需選擇戰場；題庫和開始時間均由老師設定。</p>
+        <div id="roomList" class="classroom-room-list"><div class="room-empty"><i></i>正在尋找開放中的房間…</div></div>
+        <div id="joinError" class="classroom-error" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="menuScreen" class="screen menu-screen">
       <header class="menu-topbar">
         <a href="/" class="brand-link" aria-label="返回 BuiO 平台"><span class="brand-crystal">◇</span><span>BuiO <b>晶核守衛戰</b></span></a>
         <div class="topbar-actions">
@@ -25,28 +39,25 @@
 
       <div class="menu-layout">
         <section class="campaign-intro">
-          <div class="eyebrow">CRYSTAL BASTION · 完整戰役</div>
+          <div class="eyebrow">CRYSTAL BASTION · 學生部署</div>
           <h1>讓知識成為<br><em>守住世界的力量</em></h1>
-          <p>從三張多路線地圖選擇戰場，建造六種晶核防禦塔；每波必須答對四選一題目取得知識鑰匙與晶幣，才能啟動防線迎戰專屬首領。</p>
+          <p>老師已選好題庫。你只需選擇自己的戰場，等待老師統一開始，再以答題取得知識鑰匙與晶幣守住晶核。</p>
+          <div class="classroom-meta">
+            <span><small>課堂</small><b id="classroomHost">預覽模式</b></span>
+            <span><small>題庫</small><b id="classroomSet">晶核學院綜合題庫</b></span>
+            <span><small>級別</small><b>守衛級</b></span>
+          </div>
           <div class="feature-row">
             <span><b>3</b> 戰役地圖</span><span><b>45</b> 精心編排波次</span><span><b>6</b> 防禦塔</span><span><b>12</b> 敵軍</span>
           </div>
           <div class="campaign-record" id="campaignRecord"></div>
         </section>
 
-        <section class="mission-console" aria-label="戰役設定">
-          <div class="console-heading"><span>01</span><div><b>自由選擇戰場</b><small>每張地圖擁有不同數量的入口與分流路線</small></div></div>
+        <section class="mission-console" aria-label="選擇戰場">
+          <div class="console-heading"><span>01</span><div><b>選擇你的戰場</b><small>學生只需作出這項選擇；題庫由老師負責</small></div></div>
           <div class="map-selector" id="mapSelector"></div>
-
-          <div class="console-heading compact"><span>02</span><div><b>守衛難度</b></div></div>
-          <div class="difficulty-selector" id="difficultySelector">
-            <button data-difficulty="explorer"><b>探索</b><small>每波答對 1 題 · 25 核心</small></button>
-            <button class="selected" data-difficulty="guardian"><b>守衛</b><small>每波答對 2 題 · 20 核心</small></button>
-            <button data-difficulty="legend"><b>傳奇</b><small>每波答對 3 題 · 15 核心</small></button>
-          </div>
-
-          <label class="question-set-field" for="questionSetSelect"><span>題目能量源</span><select id="questionSetSelect"><option value="crystal-academy">晶核學院綜合題庫</option></select></label>
-          <button class="launch-button" id="startCampaignBtn"><span>啟動防線</span><small>開始 15 波完整戰役</small></button>
+          <div class="guardian-rule"><span>02</span><div><b>固定守衛級</b><small>20 核心 · 每波必須答對 2 題 · 30 秒整備</small></div></div>
+          <button class="launch-button classroom-wait" id="startCampaignBtn" disabled><span>等待老師開始</span><small id="deploymentStatus">先選擇一個戰場</small></button>
         </section>
       </div>
 
@@ -132,7 +143,8 @@
     </section>
   </main>
 
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/tower-defense/vendor/phaser/phaser.min.js"></script>
-  <script type="module" src="/tower-defense/js/main.js?v=20260802-5"></script>
+  <script type="module" src="/tower-defense/js/main.js?v=20260802-classroom-1"></script>
 </body>
 </html>

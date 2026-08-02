@@ -14,6 +14,7 @@
 
 const setsRepo = require('../repositories/questionSets.repo');
 const demoSet = require('../lib/demoSet');
+const crystalSet = require('../../tower-defense-app/lib/defaultQuestions');
 
 const DEFAULT_GAME_SETTINGS = Object.freeze({
   maxEnergy: 100,
@@ -159,6 +160,8 @@ module.exports = function (io, app) {
         let set;
         if (!setId || setId === demoSet.id) {
           set = demoSet;
+        } else if (setId === crystalSet.id) {
+          set = crystalSet;
         } else {
           set = await setsRepo.getSetWithQuestions(setId);
           if (!set || !set.questions.length) {

@@ -1,15 +1,11 @@
 export const WORLD = Object.freeze({ width: 1280, height: 720, pathWidth: 62 });
 
 export const DIFFICULTIES = Object.freeze({
-  explorer: { id: 'explorer', name: '探索', enemyHp: .82, enemySpeed: .92, reward: 1.12, lives: 25, startingGold: 420, score: .8 },
   guardian: { id: 'guardian', name: '守衛', enemyHp: 1, enemySpeed: 1, reward: 1, lives: 20, startingGold: 360, score: 1 },
-  legend: { id: 'legend', name: '傳奇', enemyHp: 1.28, enemySpeed: 1.08, reward: .92, lives: 15, startingGold: 320, score: 1.35 },
 });
 
 export const QUIZ_RULES = Object.freeze({
-  explorer: Object.freeze({ answersPerWave:1, killGoldRate:.10, quizGoldMultiplier:1.35 }),
   guardian: Object.freeze({ answersPerWave:2, killGoldRate:.06, quizGoldMultiplier:1.65 }),
-  legend: Object.freeze({ answersPerWave:3, killGoldRate:.03, quizGoldMultiplier:1.85 }),
 });
 
 export const MAPS = Object.freeze({

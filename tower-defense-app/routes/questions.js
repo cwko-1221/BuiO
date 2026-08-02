@@ -5,6 +5,7 @@ const express = require('express');
 const config = require('../../config');
 const setsRepo = require('../../game-app/repositories/questionSets.repo');
 const defaultSet = require('../lib/defaultQuestions');
+const { findPlayerForOwner, rooms } = require('../lib/classrooms');
 
 const router = express.Router();
 const sessions = new Map();
@@ -41,32 +42,18 @@ function shuffledQuestion(question) {
   };
 }
 
-async function loadSet(req, setId) {
-  if (!setId || setId === defaultSet.id) return defaultSet;
-  if (req.session?.role !== 'teacher' || !setsRepo.pgAvailable()) {
-    const error = new Error('只有教師可以選用自訂題庫。');
-    error.statusCode = 403;
-    throw error;
-  }
-  const set = await setsRepo.getSetWithQuestions(setId);
-  if (!set || set.createdBy !== req.session.studentId) {
-    const error = new Error('找不到這個題庫。');
-    error.statusCode = 404;
-    throw error;
-  }
-  if (set.questions.some(question => question.choices.length !== 4)) {
-    const error = new Error('塔防題庫的每條題目必須有四個選項。');
-    error.statusCode = 400;
-    throw error;
-  }
-  return set;
-}
-
 function getSession(req, res) {
   const gameSession = sessions.get(String(req.body?.sessionId || ''));
   if (!gameSession || gameSession.owner !== ownerOf(req)) {
     res.status(404).json({ success: false, message: '遊戲答題連線已失效，請重新開始。' });
     return null;
+  }
+  if (gameSession.roomCode) {
+    const room = rooms.get(gameSession.roomCode);
+    if (!room || room.phase !== 'playing') {
+      res.status(410).json({ success: false, message: '老師已結束這個課堂。' });
+      return null;
+    }
   }
   gameSession.touchedAt = Date.now();
   return gameSession;
@@ -86,7 +73,21 @@ router.get('/sets', async (req, res, next) => {
 
 router.post('/session', async (req, res, next) => {
   try {
-    const set = await loadSet(req, String(req.body?.setId || defaultSet.id));
+    const roomCode = String(req.body?.roomCode || '').trim();
+    let set = defaultSet;
+    if (roomCode) {
+      const room = rooms.get(roomCode);
+      if (!room || room.phase !== 'playing') {
+        return res.status(409).json({ success: false, message: '老師尚未開始，或課堂已經結束。' });
+      }
+      const player = findPlayerForOwner(room, ownerOf(req));
+      if (!player && !isPreview(req)) {
+        return res.status(403).json({ success: false, message: '你尚未加入這個塔防房間。' });
+      }
+      set = room.set;
+    } else if (!isPreview(req)) {
+      return res.status(400).json({ success: false, message: '請先加入老師建立的塔防房間。' });
+    }
     const id = crypto.randomUUID();
     const order = set.questions.map((_, index) => index);
     for (let index = order.length - 1; index > 0; index--) {
@@ -96,6 +97,7 @@ router.post('/session', async (req, res, next) => {
     sessions.set(id, {
       id,
       owner: ownerOf(req),
+      roomCode: roomCode || null,
       set,
       order,
       cursor: 0,

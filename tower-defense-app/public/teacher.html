@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071726">
+  <title>晶核守衛戰 · 老師控制台 | BuiO</title>
+  <link rel="stylesheet" href="/tower-defense/css/tower-defense.css?v=20260802-classroom-1">
+</head>
+<body class="teacher-body">
+  <main class="teacher-app">
+    <header class="teacher-topbar">
+      <a href="/" class="brand-link"><span class="brand-crystal">◇</span><span>BuiO <b>晶核守衛戰</b></span></a>
+      <span class="teacher-badge">老師控制台</span>
+      <a class="ghost-button" href="/">返回平台</a>
+    </header>
+
+    <section id="teacherSetup" class="teacher-screen active">
+      <div class="teacher-hero">
+        <div><div class="eyebrow">CLASSROOM DEFENCE COMMAND</div><h1>建立守衛級塔防課堂</h1><p>老師選擇題庫；學生加入後只選戰場。全部學生準備好後，由你統一開始。</p></div>
+        <div class="guardian-lock"><span>◆</span><small>固定規則</small><b>守衛級</b><em>每波答對 2 題</em></div>
+      </div>
+      <div class="teacher-grid">
+        <section class="teacher-card question-bank-card">
+          <div class="teacher-card-head"><span>01</span><div><h2>選擇課堂題庫</h2><p>學生無法查看或更改這項設定</p></div></div>
+          <div id="teacherSetList" class="teacher-set-list"><div class="room-empty"><i></i>正在載入題庫…</div></div>
+          <p class="teacher-note">需要新增或匯入 Excel 題庫，可前往「唔好望落嚟」遊戲老師介面的題庫管理。</p>
+        </section>
+        <section class="teacher-card create-card">
+          <div class="teacher-card-head"><span>02</span><div><h2>開放課堂</h2><p>建立後學生會在房間清單看到你</p></div></div>
+          <div class="rule-summary">
+            <div><small>難度</small><b>守衛級</b></div><div><small>戰場</small><b>學生自選</b></div><div><small>波次</small><b>15 波</b></div><div><small>整備</small><b>30 秒</b></div>
+          </div>
+          <button id="createClassroomBtn" class="launch-button" disabled><span>建立塔防課堂</span><small>先選擇題庫</small></button>
+          <div id="teacherError" class="classroom-error" aria-live="polite"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="teacherLobby" class="teacher-screen">
+      <div class="room-command-head">
+        <div><div class="eyebrow">ROOM READY</div><h1>等待守衛部署</h1><p id="roomSummary"></p></div>
+        <div class="room-code"><small>房間代碼</small><b id="roomCode">------</b></div>
+      </div>
+      <section class="teacher-card roster-card">
+        <div class="roster-heading"><div><h2>學生準備狀態</h2><p>所有學生選好戰場後才能開始</p></div><span id="readyCount">0 / 0 已準備</span></div>
+        <div id="teacherRoster" class="teacher-roster"><div class="room-empty"><i></i>等待學生加入…</div></div>
+        <div class="teacher-actions"><button id="closeClassroomBtn" class="secondary-button">關閉房間</button><button id="startClassroomBtn" class="launch-button" disabled><span>開始全班戰役</span><small>等待學生選擇戰場</small></button></div>
+        <div id="lobbyError" class="classroom-error"></div>
+      </section>
+    </section>
+
+    <section id="teacherLive" class="teacher-screen">
+      <div class="room-command-head compact">
+        <div><div class="eyebrow">LIVE CLASSROOM</div><h1>全班晶核戰況</h1><p id="liveSummary"></p></div>
+        <button id="endClassroomBtn" class="danger-button">結束課堂</button>
+      </div>
+      <section class="teacher-card roster-card">
+        <div class="roster-heading"><div><h2>即時進度</h2><p>分數、波次及答題表現會自動更新</p></div><span id="livePlayerCount">0 位守衛</span></div>
+        <div id="teacherLiveRoster" class="teacher-roster live"></div>
+      </section>
+    </section>
+
+    <section id="teacherResults" class="teacher-screen">
+      <div class="teacher-result-card">
+        <span class="result-crystal">◇</span><div class="eyebrow">CLASS COMPLETE</div><h1>本次守衛課堂已結束</h1><p>以下為學生在各自戰場的最終成績。</p>
+        <div id="teacherResultsList" class="teacher-results-list"></div>
+        <button id="newClassroomBtn" class="launch-button"><span>建立新課堂</span></button>
+      </div>
+    </section>
+  </main>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="/tower-defense/js/teacher.js?v=20260802-classroom-1"></script>
+</body>
+</html>

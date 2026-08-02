@@ -1,18 +1,26 @@
-import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, towerStats } from './content.js?v=20260802-2';
-import { TowerDefenseSimulation } from './simulation.js?v=20260802-2';
+import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, towerStats } from './content.js?v=20260802-classroom-1';
+import { TowerDefenseSimulation } from './simulation.js?v=20260802-classroom-1';
 import { BattleScene } from './BattleScene.js?v=20260802-4';
 import { CrystalAudio } from './audio.js?v=20260802-2';
 import { MAP_ART, TOWER_ART, atlasPosition } from './assets.js?v=20260802-1';
 
 const $=id=>document.getElementById(id);
-const preview=location.pathname.endsWith('/preview');
+const previewRoute=location.pathname.endsWith('/preview');
+const launchParams=new URLSearchParams(location.search);
+const classroomPreview=previewRoute&&launchParams.has('classroom');
+const autoJoinRoom=launchParams.get('autojoin')==='1'?launchParams.get('room'):null;
+const preview=previewRoute&&!classroomPreview;
+const socket=preview?null:io('/tower-defense');
 const audio=new CrystalAudio();
 const towerOrder=['bolt','cannon','frost','storm','prism','beacon'];
 const mapOrder=['starport','moonwood','embercore'];
 const targetNames={first:'最前',last:'最後',strongest:'最強',weakest:'最弱'};
 const profileKey='buio-crystal-bastion-profile-v1';
 let profile=loadProfile();
-let selectedMap='starport',selectedDifficulty='guardian';
+let selectedMap=null;
+let me={name:'學生',studentId:null};
+let classroom=preview?{code:null,hostName:'預覽模式',setTitle:'晶核學院綜合題庫',phase:'preview'}:null;
+let roomsTimer=null,joining=false,classroomStarted=false,lastClassroomStateAt=0;
 let simulation=null,scene=null,phaserGame=null,questionSessionId=null;
 let selectedTowerId=null,panelSignature='',questionTimer=null,questionDeadline=0,activeQuestion=null,answering=false,quizWasPaused=false;
 let lastHudSignature='',lastSoundAt=new Map(),modalWasPaused=false;
@@ -26,7 +34,7 @@ function loadProfile(){
 
 function saveProfile(){localStorage.setItem(profileKey,JSON.stringify(profile));}
 function showScreen(id){document.querySelectorAll('.screen').forEach(screen=>screen.classList.toggle('active',screen.id===id));}
-function requestHeaders(){return preview?{'x-buio-preview':'1'}:{};}
+function requestHeaders(){return previewRoute?{'x-buio-preview':'1'}:{};}
 
 async function api(path,{method='GET',body}={}){
   const response=await fetch(`/api/tower-defense${path}`,{method,credentials:'include',headers:{...requestHeaders(),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
@@ -42,18 +50,63 @@ function renderMenu(){
   }).join('');
   const best=Object.values(profile.bestScores);const highest=best.length?Math.max(...best):0;
   $('campaignRecord').innerHTML=`戰役進度 <b>${profile.completed.length}/3</b> · 最高分 <b>${highest.toLocaleString('zh-HK')}</b> · 累積答對 <b>${profile.totalCorrect}</b>`;
-  document.querySelectorAll('[data-map]').forEach(button=>button.addEventListener('click',()=>{selectedMap=button.dataset.map;renderMenu();audio.sfx('ui');}));
-  document.querySelectorAll('[data-difficulty]').forEach(button=>button.classList.toggle('selected',button.dataset.difficulty===selectedDifficulty));
+  document.querySelectorAll('[data-map]').forEach(button=>button.addEventListener('click',()=>selectBattlefield(button.dataset.map)));
 }
 
-async function loadQuestionSets(){
+async function loadIdentity(){
   try{
-    const data=await api('/sets');
-    $('questionSetSelect').innerHTML=data.sets.map(set=>`<option value="${escapeHtml(set.id)}">${escapeHtml(set.title)} · ${set.questionCount} 題</option>`).join('');
-  }catch(error){showToast(error.message,'error');}
+    const response=await fetch('/api/auth/me',{credentials:'include'});
+    if(!response.ok)return;
+    const user=(await response.json())?.student;
+    if(user?.name)me={name:user.name,studentId:user.id||null};
+  }catch{}
 }
 
 function escapeHtml(value){return String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');}
+
+function teacherLabel(name){const value=String(name||'老師');return value.endsWith('老師')?value:`${value}老師`;}
+
+async function loadRooms(){
+  if(preview||joining)return;
+  try{
+    const response=await fetch('/api/tower-defense/sessions',{credentials:'include',headers:requestHeaders()});
+    const data=await response.json();
+    const list=$('roomList');
+    if(!data.sessions?.length){list.innerHTML='<div class="room-empty"><i></i>目前未有老師開放塔防課堂，請稍候…</div>';return;}
+    list.innerHTML=data.sessions.map(room=>`<button class="classroom-room" data-room="${room.code}"><span class="room-sigil">◇</span><span><b>${escapeHtml(teacherLabel(room.hostName))}</b><small>${escapeHtml(room.setTitle)} · ${room.players} 人 · 固定守衛級</small></span><em>${room.phase==='lobby'?'等待開始':'進行中'}</em></button>`).join('');
+    document.querySelectorAll('[data-room]').forEach(button=>button.addEventListener('click',()=>joinRoom(button.dataset.room)));
+  }catch{$('roomList').innerHTML='<div class="room-empty error">無法載入房間，請重新整理。</div>';}
+}
+
+async function joinRoom(code){
+  if(joining||!socket)return;joining=true;$('joinError').textContent='';await loadIdentity();
+  socket.emit('player:join',{code,name:me.name,studentId:me.studentId},response=>{
+    joining=false;
+    if(!response?.ok){$('joinError').textContent=response?.message||'加入失敗。';loadRooms();return;}
+    clearInterval(roomsTimer);
+    classroom={code:response.code,hostName:response.hostName,setTitle:response.setTitle,phase:response.phase};
+    classroomStarted=response.phase==='playing';selectedMap=response.mapId||null;
+    $('classroomHost').textContent=teacherLabel(response.hostName);$('classroomSet').textContent=response.setTitle;
+    $('deploymentStatus').textContent=classroomStarted?'選擇戰場後立即部署':'先選擇一個戰場';
+    showScreen('menuScreen');renderMenu();
+    if(classroomStarted&&selectedMap)startCampaign();
+  });
+}
+
+function selectBattlefield(mapId){
+  if(!MAPS[mapId]||simulation)return;
+  selectedMap=mapId;renderMenu();audio.sfx('ui');
+  if(preview){
+    const button=$('startCampaignBtn');button.disabled=false;button.classList.remove('classroom-wait');button.querySelector('span').textContent='預覽此戰場';$('deploymentStatus').textContent='開始 15 波守衛級戰役';
+    return;
+  }
+  $('deploymentStatus').textContent='正在同步戰場選擇…';
+  socket.emit('player:select-map',{mapId},response=>{
+    if(!response?.ok){selectedMap=null;renderMenu();$('deploymentStatus').textContent=response?.message||'無法選擇戰場。';return;}
+    $('deploymentStatus').textContent=response.shouldStart?'正在部署防線…':'已準備，等待老師開始';
+    if(response.shouldStart)startCampaign();
+  });
+}
 
 function renderTowerDock(){
   $('towerCards').innerHTML=towerOrder.map((id,index)=>{const tower=TOWERS[id],color=`#${tower.color.toString(16).padStart(6,'0')}`,position=atlasPosition(TOWER_ART.frames[id],TOWER_ART.columns,TOWER_ART.rows);return `<button class="tower-card" data-tower="${id}" style="--tower-color:${color}" title="${tower.description}"><kbd>${index+1}</kbd><span class="tower-portrait" style="--sprite-x:${position.x}%;--sprite-y:${position.y}%"></span><b>${tower.name}</b><small><span>${tower.role}</span><strong>● ${tower.cost}</strong></small></button>`;}).join('');
@@ -61,15 +114,16 @@ function renderTowerDock(){
 }
 
 async function startCampaign(){
+  if(!selectedMap||(!preview&&!classroomStarted))return;
   const button=$('startCampaignBtn');button.disabled=true;button.querySelector('span').textContent='正在同步題庫…';
   try{
     await audio.unlock();
-    const response=await api('/session',{method:'POST',body:{setId:$('questionSetSelect').value}});
+    const response=await api('/session',{method:'POST',body:{roomCode:classroom?.code||undefined}});
     questionSessionId=response.sessionId;
     teardownGame();
-    simulation=new TowerDefenseSimulation({mapId:selectedMap,difficulty:selectedDifficulty,seed:Date.now()});
+    simulation=new TowerDefenseSimulation({mapId:selectedMap,seed:Date.now()});
     showScreen('gameScreen');
-    $('mapChapter').textContent=`第${MAPS[selectedMap].chapter}章 · ${DIFFICULTIES[selectedDifficulty].name}`;
+    $('mapChapter').textContent=`第${MAPS[selectedMap].chapter}章 · ${DIFFICULTIES.guardian.name}級`;
     $('mapName').textContent=MAPS[selectedMap].name;
     const battleScene=new BattleScene(simulation,{
       onReady:readyScene=>{scene=readyScene;},
@@ -84,9 +138,10 @@ async function startCampaign(){
       render:{antialias:true,roundPixels:false,pixelArt:false},scene:[battleScene],fps:{target:60,min:30},
     });
     audio.startMusic(MAPS[selectedMap].weather);
+    emitClassroomState('playing',true);
     updateHud(simulation.state,true);showBanner(`${MAPS[selectedMap].name} · ${MAPS[selectedMap].paths.length} 路入侵 · 30 秒整備`);showToast(`題庫：${response.set.title}`,'success');
   }catch(error){console.error('[tower-defense] unable to start campaign',error);window.__towerDefense.lastError=error.message;showToast(error.message,'error');showScreen('menuScreen');}
-  finally{button.disabled=false;button.querySelector('span').textContent='啟動防線';}
+  finally{if(preview){button.disabled=false;button.querySelector('span').textContent='預覽此戰場';}}
 }
 
 function teardownGame(){
@@ -101,6 +156,13 @@ function selectBuildTower(id){
   const selecting=scene.placementType===id?null:id;scene.setPlacement(selecting);
   document.querySelectorAll('[data-tower]').forEach(button=>button.classList.toggle('selected',button.dataset.tower===selecting));
   if(selecting){audio.sfx('ui');showToast(`選擇空地建造「${TOWERS[id].name}」`);}
+}
+
+function emitClassroomState(status='playing',force=false){
+  if(!socket||!simulation)return;
+  const now=performance.now();if(!force&&now-lastClassroomStateAt<750)return;lastClassroomStateAt=now;
+  const state=simulation.state;
+  socket.emit('player:state',{status,wave:state.wave,score:state.score,quizCorrect:state.stats.quizCorrect,quizAnswered:state.stats.quizAnswered});
 }
 
 function updateHud(state,force=false){
@@ -123,6 +185,7 @@ function updateHud(state,force=false){
     button.querySelector('b').textContent=cooldown>0?`${Math.ceil(cooldown)}s`:ability.cost;
   }
   const tower=state.towers.find(item=>item.id===selectedTowerId);if(tower)renderTowerPanel(tower);
+  emitClassroomState(['won','lost'].includes(state.phase)?state.phase:'playing');
 }
 
 function renderTowerPanel(tower,force=false){
@@ -212,17 +275,21 @@ function finishCampaign(won){
   const scoreKey=`${state.mapId}:${state.difficulty}`;profile.bestScores[scoreKey]=Math.max(profile.bestScores[scoreKey]||0,state.score);saveProfile();
   $('endSeal').textContent=won?'◇':'◆';$('endSeal').style.filter=won?'none':'hue-rotate(140deg) saturate(1.4)';$('endEyebrow').textContent=won?'戰役完成':'防線崩潰';$('endTitle').textContent=won?'晶核安全！':'晶核已失守';$('endDescription').textContent=won?`你成功守住「${map.name}」，完整抵擋 15 波敵軍。`:`敵軍在第 ${state.wave} 波突破防線。調整塔種組合，再次挑戰。`;
   $('resultStats').innerHTML=`<div><b>${state.score.toLocaleString('zh-HK')}</b><span>戰役分數</span></div><div><b>${state.stats.kills}</b><span>擊破敵軍</span></div><div><b>${state.stats.quizCorrect}/${state.stats.quizAnswered}</b><span>答題正確</span></div><div><b>${Math.floor(state.stats.damage).toLocaleString('zh-HK')}</b><span>總傷害</span></div>`;
+  emitClassroomState(won?'won':'lost',true);
   $('endModal').classList.add('open');
 }
 
-function returnToCampaign(){teardownGame();showScreen('menuScreen');renderMenu();loadQuestionSets();}
+function returnToCampaign(){
+  teardownGame();
+  if(!preview){location.href='/';return;}
+  showScreen('menuScreen');renderMenu();
+}
 
 function bindUi(){
   $('startCampaignBtn').addEventListener('click',startCampaign);$('nextWaveBtn').addEventListener('click',beginWave);$('pauseBtn').addEventListener('click',togglePause);$('speedBtn').addEventListener('click',cycleSpeed);$('quizBtn').addEventListener('click',openQuestion);$('helpBtn').addEventListener('click',()=>{modalWasPaused=!!simulation?.state.paused;$('helpModal').classList.add('open');simulation?.togglePause(true);});
   $('exitBtn').addEventListener('click',()=>{if(confirm('退出目前戰役？這一局的進度不會保留。'))returnToCampaign();});
-  $('retryBtn').addEventListener('click',()=>{selectedMap=simulation.state.mapId;selectedDifficulty=simulation.state.difficulty;startCampaign();});$('campaignBtn').addEventListener('click',returnToCampaign);
+  $('retryBtn').addEventListener('click',()=>{selectedMap=simulation.state.mapId;startCampaign();});$('campaignBtn').addEventListener('click',returnToCampaign);
   document.querySelectorAll('[data-close-modal]').forEach(button=>button.addEventListener('click',()=>{const modal=$(button.dataset.closeModal);modal.classList.remove('open');if(simulation&&!modalWasPaused)simulation.togglePause(false);}));
-  document.querySelectorAll('[data-difficulty]').forEach(button=>button.addEventListener('click',()=>{selectedDifficulty=button.dataset.difficulty;document.querySelectorAll('[data-difficulty]').forEach(item=>item.classList.toggle('selected',item===button));audio.sfx('ui');}));
   document.querySelectorAll('[data-ability]').forEach(button=>button.addEventListener('click',()=>useAbility(button.dataset.ability)));
   const toggleAudio=async()=>{await audio.unlock();const muted=audio.toggle();$('audioBtn').textContent=$('menuAudioBtn').textContent=muted?'×':'♪';};$('audioBtn').addEventListener('click',toggleAudio);$('menuAudioBtn').addEventListener('click',toggleAudio);
   document.addEventListener('keydown',event=>{
@@ -241,10 +308,33 @@ function bindUi(){
   });
 }
 
-renderMenu();renderTowerDock();bindUi();loadQuestionSets();
+if(socket){
+  socket.on('classroom:start',payload=>{
+    classroomStarted=true;if(classroom)classroom.phase='playing';
+    if(selectedMap)startCampaign();else $('deploymentStatus').textContent='老師已開始，選擇戰場後立即部署';
+  });
+  socket.on('classroom:ended',()=>{
+    if(!simulation){location.href='/';return;}
+    simulation.togglePause(true);emitClassroomState(simulation.state.phase==='won'?'won':'playing',true);
+    $('endEyebrow').textContent='課堂結束';$('endTitle').textContent='老師已結束本次戰役';$('endDescription').textContent='你的戰場進度已送到老師介面。';
+    $('endModal').classList.add('open');
+  });
+  socket.on('classroom:closed',({message})=>{alert(message||'房間已關閉。');location.href='/';});
+}
+
+renderMenu();renderTowerDock();bindUi();
+if(preview){
+  showScreen('menuScreen');$('retryBtn').hidden=false;
+}else{
+  $('retryBtn').hidden=true;
+  loadIdentity().then(()=>{
+    if(autoJoinRoom)joinRoom(autoJoinRoom);
+    else{loadRooms();roomsTimer=setInterval(loadRooms,3000);}
+  });
+}
 window.__towerDefense={
   get simulation(){return simulation;},
   get scene(){return scene;},
   get audioState(){return {contextState:audio.context?.state||'unavailable',muted:audio.muted,musicActive:!!audio.musicTimer};},
-  startCampaign,openQuestion,profile,preview,
+  startCampaign,openQuestion,profile,preview,classroomPreview,get classroom(){return classroom;},selectBattlefield,
 };

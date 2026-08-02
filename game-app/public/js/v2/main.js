@@ -22,6 +22,7 @@ let startMeta = null;
 let selectedAvatar = normaliseAvatar();
 let gameSettings = { maxEnergy:100, energyPerCorrect:25, infiniteEnergy:false };
 const previewParams = new URLSearchParams(location.search);
+const autoJoinRoom = previewParams.get('autojoin') === '1' ? previewParams.get('room') : null;
 const preview = previewParams.has('preview') && ['127.0.0.1','localhost'].includes(location.hostname);
 const previewAltitude = previewParams.has('altitude') ? Number(previewParams.get('altitude')) : NaN;
 const previewX = previewParams.has('x') ? Number(previewParams.get('x')) : NaN;
@@ -284,4 +285,5 @@ if(preview){
   me={name:'Koko',studentId:'preview'};
   gameSettings=normaliseGameSettings({maxEnergy:100,energyPerCorrect:25,infiniteEnergy:previewInfiniteEnergy});
   startGame(20260711,480,Date.now(),null,gameSettings);
-}else startRoomPolling();
+}else if(autoJoinRoom)meReady.then(()=>joinRoom(autoJoinRoom));
+else startRoomPolling();

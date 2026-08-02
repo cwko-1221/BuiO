@@ -57,11 +57,11 @@ export const MODULES = [
   {
     id: 'game',
     name: 'module_game_name',
-    shortName: 'Game',
+    shortName: 'Quiz Games',
     description: 'module_game_desc',
-    accent: 'coral',
+    accent: 'violet',
     icon: 'game',
-    url: '/game',
+    url: '/games',
     metric: 'module_game_metric',
     status: 'module_game_status',
     roleAccess: ['student', 'teacher']
@@ -78,18 +78,6 @@ export const MODULES = [
     status: 'module_english_status',
     roleAccess: ['student', 'teacher']
   },
-  {
-    id: 'towerDefense',
-    name: 'module_td_name',
-    shortName: 'Defense',
-    description: 'module_td_desc',
-    accent: 'mint',
-    icon: 'tower',
-    url: '/tower-defense',
-    metric: 'module_td_metric',
-    status: 'module_td_status',
-    roleAccess: ['student', 'teacher']
-  }
 ];
 
 // =============================================

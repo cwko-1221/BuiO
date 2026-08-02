@@ -254,10 +254,7 @@ async function openModule(moduleId, mode) {
     window.location.href = '/english';
 
   } else if (moduleId === 'game') {
-    window.location.href = '/game';
-
-  } else if (moduleId === 'towerDefense') {
-    window.location.href = '/tower-defense';
+    window.location.href = '/games';
 
   } else if (moduleId === 'whiteboard') {
     if (role === 'teacher') {

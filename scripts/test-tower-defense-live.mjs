@@ -25,10 +25,9 @@ async function gotoMenu(){
   await page.waitForSelector('#menuScreen.active');
 }
 
-async function startMap(mapId,difficulty='guardian'){
+async function startMap(mapId){
   await gotoMenu();
   await page.locator(`[data-map="${mapId}"]`).click();
-  await page.locator(`[data-difficulty="${difficulty}"]`).click();
   await page.locator('#startCampaignBtn').click();
   await page.waitForSelector('#gameScreen.active canvas',{timeout:15000});
   await page.waitForFunction(id=>window.__towerDefense?.simulation?.state?.mapId===id,mapId);
@@ -112,10 +111,47 @@ async function answerQuestion({correct=true,capturePath=null}={}){
 }
 
 try{
+  const teacherPage=await context.newPage();
+  const studentPage=await context.newPage();
+  await teacherPage.goto(`${base}/tower-defense/teacher/preview`,{waitUntil:'networkidle'});
+  await teacherPage.waitForSelector('#teacherSetup.active [data-set]');
+  await teacherPage.locator('[data-set]').first().click();
+  await teacherPage.locator('#createClassroomBtn').click();
+  await teacherPage.waitForSelector('#teacherLobby.active');
+  const classroomCode=(await teacherPage.locator('#roomCode').textContent()).trim();
+  await studentPage.goto(`${base}/tower-defense/preview?classroom=1`,{waitUntil:'networkidle'});
+  await studentPage.waitForSelector(`#joinScreen.active [data-room="${classroomCode}"]`);
+  await studentPage.locator(`[data-room="${classroomCode}"]`).click();
+  await studentPage.waitForSelector('#menuScreen.active');
+  const studentControls=await studentPage.evaluate(()=>(
+    {maps:document.querySelectorAll('[data-map]').length,difficulties:document.querySelectorAll('[data-difficulty]').length,questionSets:document.querySelectorAll('#questionSetSelect').length}
+  ));
+  assert(studentControls.maps===3&&studentControls.difficulties===0&&studentControls.questionSets===0,`classroom student controls are incorrect: ${JSON.stringify(studentControls)}`);
+  await studentPage.locator('[data-map="moonwood"]').click();
+  await teacherPage.waitForFunction(()=>document.querySelector('#teacherRoster')?.textContent.includes('月影森徑'));
+  await teacherPage.waitForFunction(()=>!document.querySelector('#startClassroomBtn').disabled);
+  screenshots.teacher=join(tmpdir(),'buio-crystal-bastion-teacher.png');
+  screenshots.studentLobby=join(tmpdir(),'buio-crystal-bastion-student-lobby.png');
+  await teacherPage.screenshot({path:screenshots.teacher,fullPage:true});
+  await studentPage.screenshot({path:screenshots.studentLobby,fullPage:true});
+  await teacherPage.locator('#startClassroomBtn').click();
+  await teacherPage.waitForSelector('#teacherLive.active');
+  await studentPage.waitForSelector('#gameScreen.active canvas',{timeout:15000});
+  const classroomReport=await studentPage.evaluate(()=>(
+    {code:window.__towerDefense.classroom.code,map:window.__towerDefense.simulation.state.mapId,difficulty:window.__towerDefense.simulation.state.difficulty,answersRequired:window.__towerDefense.simulation.state.answersRequired}
+  ));
+  assert(classroomReport.code===classroomCode&&classroomReport.map==='moonwood'&&classroomReport.difficulty==='guardian'&&classroomReport.answersRequired===2,`classroom launch failed: ${JSON.stringify(classroomReport)}`);
+  teacherPage.once('dialog',dialog=>dialog.accept());
+  await teacherPage.locator('#endClassroomBtn').click();
+  await teacherPage.waitForSelector('#teacherResults.active');
+  await studentPage.waitForSelector('#endModal.open');
+  await studentPage.close();
+  await teacherPage.close();
+
   await gotoMenu();
   const apiShape=await page.evaluate(async()=>{
     const headers={'Content-Type':'application/json','x-buio-preview':'1'};
-    const session=await fetch('/api/tower-defense/session',{method:'POST',headers,body:JSON.stringify({setId:'crystal-academy'})}).then(response=>response.json());
+    const session=await fetch('/api/tower-defense/session',{method:'POST',headers,body:'{}'}).then(response=>response.json());
     const question=await fetch('/api/tower-defense/question',{method:'POST',headers,body:JSON.stringify({sessionId:session.sessionId})}).then(response=>response.json());
     return {sessionOk:session.success,questionOk:question.success,questionKeys:Object.keys(question.question||{})};
   });
@@ -123,10 +159,11 @@ try{
   const menuCounts=await page.evaluate(()=>({
     maps:document.querySelectorAll('[data-map]').length,
     difficulties:document.querySelectorAll('[data-difficulty]').length,
+    questionSetControls:document.querySelectorAll('#questionSetSelect').length,
     disabledMaps:document.querySelectorAll('[data-map]:disabled').length,
     entrances:[...document.querySelectorAll('.route-badge')].map(node=>node.textContent.trim()),
   }));
-  assert(menuCounts.maps===3&&menuCounts.difficulties===3&&menuCounts.disabledMaps===0,`incomplete campaign selector: ${JSON.stringify(menuCounts)}`);
+  assert(menuCounts.maps===3&&menuCounts.difficulties===0&&menuCounts.questionSetControls===0&&menuCounts.disabledMaps===0,`student selector exposes forbidden settings: ${JSON.stringify(menuCounts)}`);
   assert(menuCounts.entrances.join(',')==='2 個入口,3 個入口,2 個入口',`map entrance badges are incorrect: ${JSON.stringify(menuCounts.entrances)}`);
   screenshots.menu=join(tmpdir(),'buio-crystal-bastion-menu.png');
   await page.screenshot({path:screenshots.menu,fullPage:true});
@@ -383,6 +420,7 @@ try{
   assert(errors.length===0,`browser errors: ${errors.join(' | ')}`);
   console.log(JSON.stringify({
     menu:menuCounts,
+    classroom:classroomReport,
     starport:starportReport,
     maps:mapReports,
     compactLayout,

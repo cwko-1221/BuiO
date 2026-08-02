@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11142a">
+  <title>遊戲問答 | BuiO</title>
+  <link rel="stylesheet" href="/games/css/game-hub.css?v=20260802-1">
+</head>
+<body>
+  <main class="hub-app">
+    <header class="hub-topbar">
+      <a class="hub-brand" href="/"><span class="brand-mark">B</span><span>BuiO <b>遊戲問答</b></span></a>
+      <span id="roleBadge" class="role-badge">載入中</span>
+      <a class="back-link" href="/">返回平台</a>
+    </header>
+
+    <section id="loadingView" class="hub-view active loading-view"><span class="loader"></span><p>正在準備遊戲問答大堂…</p></section>
+
+    <section id="teacherView" class="hub-view teacher-view">
+      <div class="hub-hero">
+        <div><div class="eyebrow">QUIZ GAME STUDIO</div><h1>一個題庫，<em>兩種冒險</em></h1><p>依次選擇題庫、遊戲和課堂規則，然後進入該遊戲原有老師等待室。</p></div>
+        <div class="hero-orbits" aria-hidden="true"><i></i><i></i><span>?</span></div>
+      </div>
+
+      <div class="teacher-flow">
+        <section class="flow-card bank-card">
+          <header><span>01</span><div><h2>選擇題庫</h2><p>這個題庫會由所選遊戲派發給學生</p></div></header>
+          <div id="hubSetList" class="hub-set-list"><div class="empty-state"><i></i>正在載入題庫…</div></div>
+        </section>
+
+        <section class="flow-card game-card-panel locked" id="gameStep">
+          <header><span>02</span><div><h2>選擇遊戲</h2><p>兩款遊戲沿用各自的等待和遊玩介面</p></div></header>
+          <div class="game-choice-grid">
+            <button class="game-choice climb" data-game="climb" disabled>
+              <span class="game-art"><i class="mountain"></i><i class="climber">↑</i></span>
+              <span class="game-copy"><small>CLASS RACE</small><b>唔好望落嚟</b><em>全班同步攀登競速</em></span><strong>選擇</strong>
+            </button>
+            <button class="game-choice defence" data-game="tower-defense" disabled>
+              <span class="game-art"><i class="crystal">◇</i><i class="turret">⌁</i></span>
+              <span class="game-copy"><small>TACTICAL DEFENCE</small><b>晶核守衛戰</b><em>各自選地圖守住 15 波</em></span><strong>選擇</strong>
+            </button>
+          </div>
+          <p id="compatibilityNote" class="compatibility-note"></p>
+        </section>
+
+        <section class="flow-card settings-card locked" id="settingsStep">
+          <header><span>03</span><div><h2>遊戲設定</h2><p id="settingsDescription">選擇遊戲後顯示設定</p></div></header>
+          <div id="climbSettings" class="settings-panel" hidden>
+            <label><span>遊戲時間</span><select id="durationSelect"><option value="300">5 分鐘</option><option value="480" selected>8 分鐘</option><option value="600">10 分鐘</option><option value="900">15 分鐘</option></select></label>
+            <label><span>最高能量</span><input id="maxEnergyInput" type="number" min="20" max="500" step="5" value="100"></label>
+            <label><span>答對能量</span><input id="energyPerCorrectInput" type="number" min="1" max="100" value="25"></label>
+            <label class="toggle-setting"><span><b>無限能量</b><small>學生毋須答題補充能量</small></span><input id="infiniteEnergyToggle" type="checkbox"></label>
+          </div>
+          <div id="towerSettings" class="tower-rules" hidden>
+            <div><small>難度</small><b>固定守衛級</b></div><div><small>戰場</small><b>學生自行選擇</b></div><div><small>規則</small><b>每波答對 2 題</b></div><div><small>戰役</small><b>15 波 · 30 秒整備</b></div>
+          </div>
+          <button id="createGameBtn" class="create-game-button" disabled><span>建立遊戲房間</span><small>完成以上三個步驟</small></button>
+          <div id="teacherHubError" class="hub-error"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="studentView" class="hub-view student-view">
+      <div class="student-hero"><div><div class="eyebrow">LIVE QUIZ ROOMS</div><h1>選擇老師的<br><em>遊戲房間</em></h1><p>加入後會直接進入該遊戲原有學生等待介面。</p></div><div class="live-chip"><i></i><span>自動更新</span></div></div>
+      <div class="room-filter" role="group" aria-label="篩選遊戲"><button class="selected" data-filter="all">全部房間</button><button data-filter="climb">唔好望落嚟</button><button data-filter="tower-defense">晶核守衛戰</button></div>
+      <div id="unifiedRoomList" class="unified-room-list"><div class="empty-state"><i></i>正在搜尋老師開啟的房間…</div></div>
+      <div id="studentHubError" class="hub-error"></div>
+    </section>
+  </main>
+  <script type="module" src="/games/js/game-hub.js?v=20260802-1"></script>
+</body>
+</html>

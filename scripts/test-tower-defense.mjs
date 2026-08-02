@@ -18,8 +18,8 @@ assert.equal(Object.keys(MAPS).length,3,'campaign must ship three maps');
 assert.equal(Object.keys(TOWERS).length,6,'game must ship six tower types');
 assert.ok(Object.keys(ENEMIES).length>=12,'game must ship at least twelve enemy definitions including bosses');
 assert.equal(Object.keys(ABILITIES).length,3,'game must ship three battlefield abilities');
-assert.equal(Object.keys(DIFFICULTIES).length,3,'game must ship three difficulty modes');
-assert.deepEqual(Object.fromEntries(Object.entries(QUIZ_RULES).map(([id,rule])=>[id,rule.answersPerWave])),{explorer:1,guardian:2,legend:3},'difficulty must scale the mandatory quiz gate');
+assert.deepEqual(Object.keys(DIFFICULTIES),['guardian'],'the only playable difficulty must be guardian');
+assert.deepEqual(Object.fromEntries(Object.entries(QUIZ_RULES).map(([id,rule])=>[id,rule.answersPerWave])),{guardian:2},'guardian must require two correct answers per wave');
 assert.ok(defaultQuestions.questions.length>=40,'built-in bank must provide at least forty questions');
 
 for(const [mapId,src] of Object.entries(MAP_ART)){
@@ -84,6 +84,9 @@ function strategicBuildPoints(simulation){
 }
 
 const economy=new TowerDefenseSimulation({mapId:'starport',difficulty:'guardian',seed:7});
+const forcedGuardian=new TowerDefenseSimulation({mapId:'starport',difficulty:'legend',seed:70});
+assert.equal(forcedGuardian.state.difficulty,'guardian','legacy difficulty overrides must be ignored');
+assert.equal(forcedGuardian.state.lives,20,'all campaigns must use guardian lives');
 assert.equal(economy.canBuild('bolt',190,170).ok,false,'path must reject tower placement');
 const point=validBuildPoints(economy)[0];
 const initialGold=economy.state.gold;
@@ -123,7 +126,7 @@ scrapEconomy.state.phase='wave';scrapEconomy.state.gold=0;
 const scrapTarget=scrapEconomy.spawnEnemy('guard',{progress:100,pathIndex:1});scrapEconomy.damageEnemy(scrapTarget,99999);
 assert.ok(scrapEconomy.state.gold<=2,'enemy scrap rewards must be far smaller than one correct-answer reward');
 
-const loss=new TowerDefenseSimulation({mapId:'starport',difficulty:'legend',seed:9});
+const loss=new TowerDefenseSimulation({mapId:'starport',seed:9});
 loss.state.lives=1;
 loss.state.phase='wave';
 const escapee=loss.spawnEnemy('guard',{progress:loss.pathLength+1});

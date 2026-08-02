@@ -18,10 +18,10 @@ function seededRandom(seed = 0x6d2b79f5) {
 }
 
 export class TowerDefenseSimulation {
-  constructor({ mapId='starport', difficulty='guardian', seed=Date.now() } = {}) {
+  constructor({ mapId='starport', seed=Date.now() } = {}) {
     this.map = MAPS[mapId] || MAPS.starport;
-    this.difficulty = DIFFICULTIES[difficulty] || DIFFICULTIES.guardian;
-    this.quizRules = QUIZ_RULES[this.difficulty.id] || QUIZ_RULES.guardian;
+    this.difficulty = DIFFICULTIES.guardian;
+    this.quizRules = QUIZ_RULES.guardian;
     this.paths = mapPaths(this.map);
     this.pathLengths = this.paths.map(pathLength);
     this.laneBalance = 1-Math.min(.18,(this.paths.length-1)*.09);

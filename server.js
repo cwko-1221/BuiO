@@ -59,6 +59,7 @@ app.use('/api/english', require('./english-app/routes/media'));
 
 // Game module (唔好望落嚟)
 app.use('/api/game/teacher', require('./game-app/routes/teacher'));
+app.use('/api/games', require('./game-hub-app/routes/hub'));
 
 // Crystal Bastion tower-defense question economy
 app.use('/api/tower-defense', require('./tower-defense-app/routes/questions'));
@@ -87,6 +88,7 @@ const io = new Server(httpServer, {
 });
 require('./whiteboard-app/server/socket')(io, app);
 require('./game-app/server/socket')(io, app);   // namespace /game
+require('./tower-defense-app/server/socket')(io, app); // namespace /tower-defense
 
 // ----------------------------------------------------------------
 // Health / debug
@@ -206,6 +208,21 @@ app.get('/game/host', requireSession, (req, res) => {
   if (req.session.role !== 'teacher') return res.redirect('/game');
   res.sendFile(path.join(__dirname, 'game-app', 'public', 'host.html'));
 });
+app.get('/game/host/preview', (req, res, next) => {
+  if (config.isProd) return next();
+  res.sendFile(path.join(__dirname, 'game-app', 'public', 'host.html'));
+});
+
+// Unified quiz-game lobby
+app.use('/games/css', express.static(path.join(__dirname, 'game-hub-app', 'public', 'css')));
+app.use('/games/js', express.static(path.join(__dirname, 'game-hub-app', 'public', 'js')));
+app.get('/games/preview', (req, res, next) => {
+  if (config.isProd) return next();
+  res.sendFile(path.join(__dirname, 'game-hub-app', 'public', 'index.html'));
+});
+app.get('/games', requireSession, (_req, res) => {
+  res.sendFile(path.join(__dirname, 'game-hub-app', 'public', 'index.html'));
+});
 
 // Tower defense module
 app.use('/tower-defense/css', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'css')));
@@ -216,8 +233,19 @@ app.get('/tower-defense/preview', (req, res, next) => {
   if (config.isProd) return next();
   res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'index.html'));
 });
-app.get('/tower-defense', requireSession, (_req, res) => {
+app.get('/tower-defense/teacher/preview', (req, res, next) => {
+  if (config.isProd) return next();
+  res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'teacher.html'));
+});
+app.get('/tower-defense', requireSession, (req, res) => {
+  if (req.session.role === 'teacher') {
+    return res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'teacher.html'));
+  }
   res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'index.html'));
+});
+app.get('/tower-defense/teacher', requireSession, (req, res) => {
+  if (req.session.role !== 'teacher') return res.redirect('/tower-defense');
+  res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'teacher.html'));
 });
 
 app.get('/login.html',     (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'login.html')));

@@ -7,6 +7,7 @@
 (function () {
   const $ = id => document.getElementById(id);
   const socket = io('/game');
+  const launchParams = new URLSearchParams(location.search);
 
   let teacherName = '老師';
   let selectedSetId = null;
@@ -28,7 +29,7 @@
   }
 
   // ---------------- session ----------------
-  fetch('/api/auth/me', { credentials: 'include' })
+  const teacherReady = fetch('/api/auth/me', { credentials: 'include' })
     .then(r => r.ok ? r.json() : null)
     .then(data => {
       const u = data?.student;
@@ -356,7 +357,7 @@
   $('infiniteEnergyToggle').addEventListener('change', syncEnergyControls);
   syncEnergyControls();
 
-  $('createRoomBtn').addEventListener('click', () => {
+  function createRoom() {
     $('setupError').textContent = '';
     let settings;
     try {
@@ -383,7 +384,8 @@
       $('startGameBtn').disabled = true;
       show('lobbyScreen');
     });
-  });
+  }
+  $('createRoomBtn').addEventListener('click', createRoom);
 
   socket.on('lobby:roster', (players) => {
     const el = $('lobbyRoster');
@@ -514,4 +516,18 @@
   });
 
   socket.on('room:closed', () => { /* host initiated; nothing to do */ });
+
+  async function autoCreateFromHub() {
+    if (launchParams.get('autocreate') !== '1' || !launchParams.get('setId')) return;
+    await teacherReady;
+    selectedSetId = launchParams.get('setId');
+    $('durationSelect').value = launchParams.get('durationSec') || '480';
+    $('maxEnergyInput').value = launchParams.get('maxEnergy') || '100';
+    $('energyPerCorrectInput').value = launchParams.get('energyPerCorrect') || '25';
+    $('infiniteEnergyToggle').checked = launchParams.get('infiniteEnergy') === '1';
+    syncEnergyControls();
+    $('createRoomBtn').disabled = false;
+    createRoom();
+  }
+  autoCreateFromHub();
 })();
