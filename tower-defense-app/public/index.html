@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#071726">
   <title>BuiO 晶核守衛戰</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%2358ead6' d='M32 2 57 16 52 49 32 62 12 49 7 16z'/%3E%3Cpath fill='%23071926' d='m32 12 15 9-3 21-12 9-12-9-3-21z'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="/tower-defense/css/tower-defense.css?v=20260802-1">
+  <link rel="stylesheet" href="/tower-defense/css/tower-defense.css?v=20260802-2">
 </head>
 <body>
   <div id="rotateNotice" class="rotate-notice" aria-live="polite">
@@ -27,7 +27,7 @@
         <section class="campaign-intro">
           <div class="eyebrow">CRYSTAL BASTION · 完整戰役</div>
           <h1>讓知識成為<br><em>守住世界的力量</em></h1>
-          <p>建造六種晶核防禦塔，破解十五波敵軍組合；回答四選一題目賺取晶幣，升級你的防線，迎戰地圖專屬首領。</p>
+          <p>從三張多路線地圖選擇戰場，建造六種晶核防禦塔；每波必須答對四選一題目取得知識鑰匙與晶幣，才能啟動防線迎戰專屬首領。</p>
           <div class="feature-row">
             <span><b>3</b> 戰役地圖</span><span><b>45</b> 精心編排波次</span><span><b>6</b> 防禦塔</span><span><b>12</b> 敵軍</span>
           </div>
@@ -35,14 +35,14 @@
         </section>
 
         <section class="mission-console" aria-label="戰役設定">
-          <div class="console-heading"><span>01</span><div><b>選擇防線</b><small>完成戰役會解鎖下一地區</small></div></div>
+          <div class="console-heading"><span>01</span><div><b>自由選擇戰場</b><small>每張地圖擁有不同數量的入口與分流路線</small></div></div>
           <div class="map-selector" id="mapSelector"></div>
 
           <div class="console-heading compact"><span>02</span><div><b>守衛難度</b></div></div>
           <div class="difficulty-selector" id="difficultySelector">
-            <button data-difficulty="explorer"><b>探索</b><small>25 核心 · 資源較多</small></button>
-            <button class="selected" data-difficulty="guardian"><b>守衛</b><small>20 核心 · 標準平衡</small></button>
-            <button data-difficulty="legend"><b>傳奇</b><small>15 核心 · 敵軍強化</small></button>
+            <button data-difficulty="explorer"><b>探索</b><small>每波答對 1 題 · 25 核心</small></button>
+            <button class="selected" data-difficulty="guardian"><b>守衛</b><small>每波答對 2 題 · 20 核心</small></button>
+            <button data-difficulty="legend"><b>傳奇</b><small>每波答對 3 題 · 15 核心</small></button>
           </div>
 
           <label class="question-set-field" for="questionSetSelect"><span>題目能量源</span><select id="questionSetSelect"><option value="crystal-academy">晶核學院綜合題庫</option></select></label>
@@ -52,7 +52,7 @@
 
       <section class="field-guide-preview">
         <article><span>✦</span><div><b>建立交叉火力</b><p>點選塔後在道路外部署；炮塔、冰塔和雷鏈能組合出不同控場策略。</p></div></article>
-        <article><span>?</span><div><b>答題補充晶幣</b><p>戰鬥期間可隨時開啟四選一題目，連續答對會提高每題獎勵。</p></div></article>
+        <article><span>?</span><div><b>答題才能開戰</b><p>每波整備時間為 30 秒；取得足夠知識鑰匙後可手動開始，倒數結束亦會自動開戰。</p></div></article>
         <article><span>ϟ</span><div><b>釋放戰場技能</b><p>答對題目也會累積專注能量，用於隕石、停滯與全塔超載。</p></div></article>
       </section>
     </section>
@@ -81,7 +81,7 @@
         <div class="focus-label"><span>專注</span><b id="focusValue">0</b></div><div class="focus-track"><i id="focusFill"></i></div>
       </div>
 
-      <button class="quiz-fab" id="quizBtn"><span class="quiz-orb">?</span><span><b>知識補給</b><small>答題賺取晶幣</small></span><i id="quizStreak"></i></button>
+      <button class="quiz-fab" id="quizBtn"><span class="quiz-orb">?</span><span><b>知識補給</b><small>本波必須答題</small></span><i id="quizStreak"></i></button>
 
       <div class="ability-dock" id="abilityDock">
         <button data-ability="meteor" title="晶隕轟擊"><span>☄</span><b>40</b><i></i></button>
@@ -115,9 +115,9 @@
           <div class="eyebrow">FIELD MANUAL</div><h2 id="helpTitle">晶核守衛手冊</h2>
           <div class="help-grid">
             <article><b>建造與升級</b><p>選擇下方防禦塔，再點擊道路以外的空地。點擊已建塔可升級、出售或改變目標優先。</p></article>
-            <article><b>敵軍特性</b><p>飛行怪需要可對空的塔；潛行者需要燈塔揭露。護盾、治療、分裂和裝甲需要不同組合應對。</p></article>
-            <article><b>知識經濟</b><p>按 Q 開啟題目。20 秒內答對會得到晶幣與專注能量，連勝最多額外增加 40 晶幣。</p></article>
-            <article><b>快捷鍵</b><p>1–6 選塔、Space 開始波次、Q 答題、P 暫停、F 切換倍速、Esc 取消建造。</p></article>
+            <article><b>敵軍特性</b><p>敵軍會從多個入口分流進攻；火箭適合密集裝甲、星焰清理群怪、雪花霜域可範圍減速。</p></article>
+            <article><b>知識經濟</b><p>按 Q 開啟題目。每波必須答對指定題數才可開始；擊破敵人只會掉落少量殘骸晶幣，無法取代答題。</p></article>
+            <article><b>自動開戰</b><p>整備倒數為 30 秒。知識鑰匙足夠時可按 Space 提早開始；倒數歸零會自動開戰，未達門檻則等待答題。</p></article>
           </div>
         </section>
       </div>
@@ -133,6 +133,6 @@
   </main>
 
   <script src="/tower-defense/vendor/phaser/phaser.min.js"></script>
-  <script type="module" src="/tower-defense/js/main.js?v=20260802-4"></script>
+  <script type="module" src="/tower-defense/js/main.js?v=20260802-5"></script>
 </body>
 </html>

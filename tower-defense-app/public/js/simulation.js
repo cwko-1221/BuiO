@@ -1,7 +1,7 @@
 import {
-  ABILITIES, DIFFICULTIES, ENEMIES, MAPS, TOWERS, WORLD,
-  buildWave, distanceToPath, pathLength, pointAlongPath, towerStats,
-} from './content.js';
+  ABILITIES, DIFFICULTIES, ENEMIES, MAPS, QUIZ_RULES, TOWERS, WORLD,
+  buildWave, distanceToPaths, mapPaths, pathLength, pointAlongPath, towerStats,
+} from './content.js?v=20260802-2';
 
 const clamp = (value,min,max) => Math.max(min,Math.min(max,value));
 const distance = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
@@ -21,8 +21,12 @@ export class TowerDefenseSimulation {
   constructor({ mapId='starport', difficulty='guardian', seed=Date.now() } = {}) {
     this.map = MAPS[mapId] || MAPS.starport;
     this.difficulty = DIFFICULTIES[difficulty] || DIFFICULTIES.guardian;
+    this.quizRules = QUIZ_RULES[this.difficulty.id] || QUIZ_RULES.guardian;
+    this.paths = mapPaths(this.map);
+    this.pathLengths = this.paths.map(pathLength);
+    this.laneBalance = 1-Math.min(.18,(this.paths.length-1)*.09);
     this.random = seededRandom(seed);
-    this.pathLength = pathLength(this.map.path);
+    this.pathLength = Math.max(...this.pathLengths);
     this.nextId = 1;
     this.accumulator = 0;
     this.events = [];
@@ -40,6 +44,10 @@ export class TowerDefenseSimulation {
       paused:false,
       elapsed:0,
       waveTime:0,
+      buildCountdown:30,
+      quizKeys:0,
+      answersRequired:this.quizRules.answersPerWave,
+      autoStartWaiting:false,
       towers:[],
       enemies:[],
       projectiles:[],
@@ -65,7 +73,7 @@ export class TowerDefenseSimulation {
     if (this.state.phase==='won'||this.state.phase==='lost') return { ok:false,reason:'戰役已經結束。' };
     if (this.state.gold<definition.cost) return { ok:false,reason:'晶幣不足。' };
     if (x<42||x>WORLD.width-42||y<72||y>WORLD.height-42) return { ok:false,reason:'不能建在地圖邊緣。' };
-    if (distanceToPath(x,y,this.map.path)<WORLD.pathWidth*.5+27) return { ok:false,reason:'不能阻塞怪物路線。' };
+    if (distanceToPaths(x,y,this.paths)<WORLD.pathWidth*.5+27) return { ok:false,reason:'不能阻塞怪物路線。' };
     if (this.map.noBuild.some(zone => x>zone.x-30&&x<zone.x+zone.w+30&&y>zone.y-30&&y<zone.y+zone.h+30)) {
       return { ok:false,reason:'這裡是場景保留區。' };
     }
@@ -132,22 +140,29 @@ export class TowerDefenseSimulation {
     return this.state.paused;
   }
 
-  startWave() {
+  startWave({ auto=false }={}) {
     if (this.state.phase!=='build'||this.state.wave>=this.state.maxWaves) return { ok:false,reason:'現在不能開始下一波。' };
+    if (this.state.quizKeys<this.state.answersRequired) {
+      return { ok:false,reason:`開始下一波前，必須答對 ${this.state.answersRequired} 題（目前 ${this.state.quizKeys}/${this.state.answersRequired}）。` };
+    }
     this.state.wave++;
     this.state.phase='wave';
     this.state.waveTime=0;
+    this.state.quizKeys=0;
+    this.state.autoStartWaiting=false;
     this.waveQueue=[];
     let cursor=.7;
+    let spawnNumber=this.state.wave-1;
     for (const group of buildWave(this.map.id,this.state.wave)) {
       cursor+=group.delay||0;
       for (let index=0;index<group.count;index++) {
-        this.waveQueue.push({ at:cursor,type:group.type });
+        const pathIndex=spawnNumber++%this.paths.length;
+        this.waveQueue.push({ at:cursor,type:group.type,pathIndex });
         cursor+=group.interval;
       }
     }
-    this.emit('waveStarted',{ wave:this.state.wave,total:this.waveQueue.length });
-    return { ok:true,wave:this.state.wave };
+    this.emit('waveStarted',{ wave:this.state.wave,total:this.waveQueue.length,auto,entrances:this.paths.length });
+    return { ok:true,wave:this.state.wave,auto };
   }
 
   grantQuizReward({ correct,reward=0,streak=0 }={}) {
@@ -156,13 +171,15 @@ export class TowerDefenseSimulation {
       this.emit('quizResult',{ correct:false,reward:0,streak:0 });
       return 0;
     }
-    const amount=Math.max(0,Math.floor(Number(reward)||0));
+    const amount=Math.max(0,Math.floor((Number(reward)||0)*this.quizRules.quizGoldMultiplier));
     this.state.gold+=amount;
+    this.state.quizKeys=Math.min(this.state.answersRequired,this.state.quizKeys+1);
+    if (this.state.quizKeys>=this.state.answersRequired) this.state.autoStartWaiting=false;
     this.state.focus=clamp(this.state.focus+12+Math.min(12,streak*2),0,100);
     this.state.stats.quizCorrect++;
     this.state.stats.goldFromQuiz+=amount;
     this.state.score+=amount*4;
-    this.emit('quizResult',{ correct:true,reward:amount,streak });
+    this.emit('quizResult',{ correct:true,reward:amount,streak,quizKeys:this.state.quizKeys,answersRequired:this.state.answersRequired });
     return amount;
   }
 
@@ -205,29 +222,44 @@ export class TowerDefenseSimulation {
     for (const id of Object.keys(this.state.abilities)) this.state.abilities[id]=Math.max(0,this.state.abilities[id]-dt);
     this.state.stasisTime=Math.max(0,this.state.stasisTime-dt);
     this.state.overdriveTime=Math.max(0,this.state.overdriveTime-dt);
+    if (this.state.phase==='build') {
+      this.state.buildCountdown=Math.max(0,this.state.buildCountdown-dt);
+      if (this.state.buildCountdown<=0) {
+        if (this.state.quizKeys>=this.state.answersRequired) this.startWave({auto:true});
+        else if (!this.state.autoStartWaiting) {
+          this.state.autoStartWaiting=true;
+          this.emit('quizRequired',{ wave:this.state.wave+1,quizKeys:this.state.quizKeys,answersRequired:this.state.answersRequired });
+        }
+      }
+      return;
+    }
     if (this.state.phase!=='wave') return;
     this.state.waveTime+=dt;
-    while (this.waveQueue.length&&this.waveQueue[0].at<=this.state.waveTime) this.spawnEnemy(this.waveQueue.shift().type);
+    while (this.waveQueue.length&&this.waveQueue[0].at<=this.state.waveTime) {
+      const queued=this.waveQueue.shift();this.spawnEnemy(queued.type,{pathIndex:queued.pathIndex});
+    }
     this.updateEnemies(dt);
     this.updateTowers(dt);
     this.updateProjectiles(dt);
     if (!this.waveQueue.length&&!this.state.enemies.length&&this.state.phase==='wave') this.finishWave();
   }
 
-  spawnEnemy(type,{ progress=0 }={}) {
+  spawnEnemy(type,{ progress=0,pathIndex=0 }={}) {
     const definition=ENEMIES[type];
     if (!definition) return null;
-    const hpScale=this.difficulty.enemyHp*(1+(this.state.wave-1)*.075)*(1+(this.map.chapter-1)*.09);
+    const hpScale=this.difficulty.enemyHp*this.laneBalance*(1+(this.state.wave-1)*.075)*(1+(this.map.chapter-1)*.09);
     const maxHp=Math.round(definition.hp*hpScale);
     const shield=Math.round((definition.shield||0)*hpScale);
-    const pose=pointAlongPath(this.map.path,progress);
+    const safePathIndex=clamp(Math.floor(Number(pathIndex)||0),0,this.paths.length-1),path=this.paths[safePathIndex],enemyPathLength=this.pathLengths[safePathIndex];
+    const pose=pointAlongPath(path,progress);
     const enemy={
       id:`e${this.nextId++}`,type,x:pose.x,y:pose.y,distance:progress,maxHp,hp:maxHp,
+      pathIndex:safePathIndex,pathLength:enemyPathLength,progressRatio:enemyPathLength?progress/enemyPathLength:0,
       maxShield:shield,shield,slowFactor:0,slowTime:0,freezeTime:0,abilityTime:2+this.random()*2,
       escaped:false,dead:false,angle:pose.angle,
     };
     this.state.enemies.push(enemy);
-    this.emit('enemySpawned',{ enemyId:enemy.id,enemyType:type,x:enemy.x,y:enemy.y });
+    this.emit('enemySpawned',{ enemyId:enemy.id,enemyType:type,x:enemy.x,y:enemy.y,pathIndex:safePathIndex });
     return enemy;
   }
 
@@ -259,8 +291,8 @@ export class TowerDefenseSimulation {
       const bossResist=definition.boss?.55:1;
       const slow=clamp(Math.max(localSlow,globalSlow)*bossResist,0,.8);
       enemy.distance+=definition.speed*this.difficulty.enemySpeed*(1-slow)*dt;
-      const pose=pointAlongPath(this.map.path,enemy.distance);
-      enemy.x=pose.x; enemy.y=pose.y; enemy.angle=pose.angle;
+      const pose=pointAlongPath(this.paths[enemy.pathIndex],enemy.distance);
+      enemy.x=pose.x; enemy.y=pose.y; enemy.angle=pose.angle;enemy.progressRatio=enemy.pathLength?enemy.distance/enemy.pathLength:0;
       if (pose.done) this.escapeEnemy(enemy);
     }
   }
@@ -311,7 +343,7 @@ export class TowerDefenseSimulation {
   }
 
   isRevealed(enemy) {
-    return this.state.towers.some(tower=>tower.type==='beacon'&&distance(tower,enemy)<=towerStats(tower).range)||enemy.distance>this.pathLength-180;
+    return this.state.towers.some(tower=>tower.type==='beacon'&&distance(tower,enemy)<=towerStats(tower).range)||enemy.distance>enemy.pathLength-180;
   }
 
   beaconAuraFor(tower) {
@@ -326,10 +358,10 @@ export class TowerDefenseSimulation {
 
   sortTargets(targets,mode) {
     return [...targets].sort((a,b)=>{
-      if (mode==='last') return a.distance-b.distance;
+      if (mode==='last') return a.progressRatio-b.progressRatio;
       if (mode==='strongest') return b.hp-a.hp;
       if (mode==='weakest') return a.hp-b.hp;
-      return b.distance-a.distance;
+      return b.progressRatio-a.progressRatio;
     });
   }
 
@@ -337,7 +369,23 @@ export class TowerDefenseSimulation {
     const baseDamage=stats.damage*damageBuff;
     const sameTarget=tower.targetId===target.id;
     tower.targetId=target.id;
-    if (definition.attack==='chain') {
+    if (definition.attack==='flame') {
+      const direction=Math.atan2(target.y-tower.y,target.x-tower.x),halfAngle=(stats.flameWidth||.5)*.5;
+      const hit=this.targetsFor(tower,stats).filter(enemy=>{
+        const angle=Math.atan2(enemy.y-tower.y,enemy.x-tower.x),difference=Math.abs(Math.atan2(Math.sin(angle-direction),Math.cos(angle-direction)));
+        return difference<=halfAngle;
+      });
+      for (const enemy of hit) this.damageEnemy(enemy,baseDamage,{ tower,armorPierce:stats.armorPierce||0 });
+      this.emit('flame',{ towerId:tower.id,from:{x:tower.x,y:tower.y},angle:direction,range:stats.range,width:stats.flameWidth||.5,targets:hit.length });
+    } else if (definition.attack==='frostField') {
+      const radius=stats.fieldRadius||64,victims=this.state.enemies.filter(enemy=>!enemy.dead&&distance(target,enemy)<=radius);
+      for (const enemy of victims) {
+        this.damageEnemy(enemy,baseDamage,{ tower,armorPierce:1 });
+        this.applySlow(enemy,stats.slow,stats.slowDuration);
+        if (stats.freezeChance&&this.random()<stats.freezeChance) enemy.freezeTime=definitionBoss(enemy)?.45:1.1;
+      }
+      this.emit('frostField',{ towerId:tower.id,x:target.x,y:target.y,radius,targets:victims.map(enemy=>enemy.id) });
+    } else if (definition.attack==='chain') {
       const hit=[];
       let current=target;
       for (let index=0;current&&index<stats.chains;index++) {
@@ -432,15 +480,15 @@ export class TowerDefenseSimulation {
     if (enemy.dead) return;
     enemy.dead=true;
     const definition=ENEMIES[enemy.type];
-    const reward=Math.max(1,Math.round(definition.reward*this.difficulty.reward));
+    const reward=Math.max(0,Math.floor(definition.reward*this.difficulty.reward*this.quizRules.killGoldRate));
     this.state.gold+=reward;
     this.state.score+=Math.round((definition.reward*12+enemy.maxHp*.08)*this.difficulty.score);
     this.state.stats.kills++;
     if (tower) tower.kills++;
     this.removeEnemy(enemy);
     if (definition.ability==='split') {
-      this.spawnEnemy('shard',{progress:Math.max(0,enemy.distance-10)});
-      this.spawnEnemy('shard',{progress:Math.max(0,enemy.distance+8)});
+      this.spawnEnemy('shard',{progress:Math.max(0,enemy.distance-10),pathIndex:enemy.pathIndex});
+      this.spawnEnemy('shard',{progress:Math.max(0,enemy.distance+8),pathIndex:enemy.pathIndex});
     }
     this.emit('enemyKilled',{ enemyType:enemy.type,x:enemy.x,y:enemy.y,reward,boss:!!definition.boss });
   }
@@ -464,8 +512,9 @@ export class TowerDefenseSimulation {
       return;
     }
     this.state.phase='build';
-    const bonus=32+this.state.wave*5;
-    this.state.gold+=bonus;
+    this.state.buildCountdown=30;
+    this.state.autoStartWaiting=false;
+    const bonus=0;
     this.state.focus=clamp(this.state.focus+8,0,100);
     this.emit('waveComplete',{ wave:this.state.wave,bonus });
   }

@@ -83,6 +83,8 @@ export class CrystalAudio {
       sell:()=>this.tone({frequency:680,endFrequency:260,duration:.24,type:'triangle',gain:.12}),
       bolt:()=>this.tone({frequency:760,endFrequency:1180,duration:.07,type:'square',gain:.06}),
       cannon:()=>{this.tone({frequency:110,endFrequency:46,duration:.28,type:'sawtooth',gain:.22});this.noise({duration:.18,gain:.15,highpass:120});},
+      rocket:()=>{this.tone({frequency:190,endFrequency:58,duration:.32,type:'sawtooth',gain:.16});this.noise({duration:.24,gain:.12,highpass:180});},
+      flame:()=>{this.noise({duration:.16,gain:.075,highpass:420});this.tone({frequency:145,endFrequency:82,duration:.16,type:'sawtooth',gain:.045});},
       frost:()=>{this.tone({frequency:980,endFrequency:540,duration:.2,type:'sine',gain:.08});this.noise({duration:.12,gain:.035,highpass:2600});},
       chain:()=>{this.tone({frequency:140,endFrequency:920,duration:.12,type:'sawtooth',gain:.09});this.noise({duration:.08,gain:.05,highpass:1900});},
       beam:()=>this.tone({frequency:440,endFrequency:660,duration:.10,type:'sine',gain:.04}),

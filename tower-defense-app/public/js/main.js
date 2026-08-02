@@ -1,7 +1,7 @@
-import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, towerStats } from './content.js';
-import { TowerDefenseSimulation } from './simulation.js';
-import { BattleScene } from './BattleScene.js?v=20260802-3';
-import { CrystalAudio } from './audio.js';
+import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, towerStats } from './content.js?v=20260802-2';
+import { TowerDefenseSimulation } from './simulation.js?v=20260802-2';
+import { BattleScene } from './BattleScene.js?v=20260802-4';
+import { CrystalAudio } from './audio.js?v=20260802-2';
 import { MAP_ART, TOWER_ART, atlasPosition } from './assets.js?v=20260802-1';
 
 const $=id=>document.getElementById(id);
@@ -36,10 +36,9 @@ async function api(path,{method='GET',body}={}){
 }
 
 function renderMenu(){
-  const unlocked=preview?mapOrder:profile.unlocked;
   $('mapSelector').innerHTML=mapOrder.map((id,index)=>{
-    const map=MAPS[id],locked=!unlocked.includes(id),color=`#${map.palette.accent.toString(16).padStart(6,'0')}`;
-    return `<button class="map-card ${selectedMap===id?'selected':''} ${locked?'locked':''}" data-map="${id}" ${locked?'disabled':''} style="--map-color:${color}33;--map-image:url('${MAP_ART[id]}')"><span class="map-number">CHAPTER ${String(index+1).padStart(2,'0')}</span>${locked?'<span class="lock-badge">⌁</span>':''}<b>${map.name}</b><small>${map.subtitle}</small></button>`;
+    const map=MAPS[id],color=`#${map.palette.accent.toString(16).padStart(6,'0')}`;
+    return `<button class="map-card ${selectedMap===id?'selected':''}" data-map="${id}" style="--map-color:${color}33;--map-image:url('${MAP_ART[id]}')"><span class="map-number">SECTOR ${String(index+1).padStart(2,'0')}</span><span class="route-badge">${map.paths.length} 個入口</span><b>${map.name}</b><small>${map.subtitle}</small></button>`;
   }).join('');
   const best=Object.values(profile.bestScores);const highest=best.length?Math.max(...best):0;
   $('campaignRecord').innerHTML=`戰役進度 <b>${profile.completed.length}/3</b> · 最高分 <b>${highest.toLocaleString('zh-HK')}</b> · 累積答對 <b>${profile.totalCorrect}</b>`;
@@ -85,7 +84,7 @@ async function startCampaign(){
       render:{antialias:true,roundPixels:false,pixelArt:false},scene:[battleScene],fps:{target:60,min:30},
     });
     audio.startMusic(MAPS[selectedMap].weather);
-    updateHud(simulation.state,true);showBanner(`${MAPS[selectedMap].name} · 防線部署`);showToast(`題庫：${response.set.title}`,'success');
+    updateHud(simulation.state,true);showBanner(`${MAPS[selectedMap].name} · ${MAPS[selectedMap].paths.length} 路入侵 · 30 秒整備`);showToast(`題庫：${response.set.title}`,'success');
   }catch(error){console.error('[tower-defense] unable to start campaign',error);window.__towerDefense.lastError=error.message;showToast(error.message,'error');showScreen('menuScreen');}
   finally{button.disabled=false;button.querySelector('span').textContent='啟動防線';}
 }
@@ -105,14 +104,17 @@ function selectBuildTower(id){
 }
 
 function updateHud(state,force=false){
-  const signature=[state.lives,Math.floor(state.gold),state.wave,state.score,Math.floor(state.focus),state.phase,state.paused,state.speed,state.enemies.length,state.stasisTime.toFixed(1),state.overdriveTime.toFixed(1),...Object.values(state.abilities).map(value=>value.toFixed(1))].join(':');
+  const signature=[state.lives,Math.floor(state.gold),state.wave,state.score,Math.floor(state.focus),state.phase,state.paused,state.speed,state.enemies.length,Math.ceil(state.buildCountdown),state.quizKeys,state.answersRequired,state.autoStartWaiting,state.stasisTime.toFixed(1),state.overdriveTime.toFixed(1),...Object.values(state.abilities).map(value=>value.toFixed(1))].join(':');
   if(!force&&signature===lastHudSignature)return;lastHudSignature=signature;
   $('livesValue').textContent=state.lives;$('goldValue').textContent=Math.floor(state.gold);$('waveValue').textContent=state.wave;$('scoreValue').textContent=Math.floor(state.score).toLocaleString('zh-HK');$('focusValue').textContent=Math.floor(state.focus);$('focusFill').style.width=`${state.focus}%`;
   $('pauseBtn').textContent=state.paused?'▶':'Ⅱ';$('speedBtn').textContent=`${state.speed}×`;
   const waveButton=$('nextWaveBtn');
-  if(state.phase==='build'){waveButton.disabled=false;waveButton.querySelector('b').textContent=`開始第 ${state.wave+1} 波`;waveButton.querySelector('span').textContent='▶';}
+  const quizReady=state.quizKeys>=state.answersRequired,seconds=Math.ceil(state.buildCountdown);
+  waveButton.classList.toggle('quiz-required',state.phase==='build'&&!quizReady);
+  if(state.phase==='build'){waveButton.disabled=!quizReady;waveButton.querySelector('b').textContent=quizReady?`開始第 ${state.wave+1} 波`:`先答對 ${state.quizKeys}/${state.answersRequired} 題`;waveButton.querySelector('span').textContent=seconds>0?`${seconds}`:'!';waveButton.querySelector('small').textContent=seconds>0?'秒後自動開始':state.autoStartWaiting?'等待知識鑰匙':'Space';}
   else if(state.phase==='wave'){waveButton.disabled=true;waveButton.querySelector('b').textContent=`敵軍來襲 · ${state.enemies.length+simulation.waveQueue.length}`;waveButton.querySelector('span').textContent='⚔';}
   else{waveButton.disabled=true;waveButton.querySelector('b').textContent=state.phase==='won'?'戰役完成':'晶核失守';}
+  const quizButton=$('quizBtn');quizButton.classList.toggle('required',state.phase==='build'&&!quizReady);quizButton.querySelector('small').textContent=quizReady?'知識鑰匙已充能':`本波必須答對 ${state.quizKeys}/${state.answersRequired}`;
   document.querySelectorAll('[data-tower]').forEach(button=>button.classList.toggle('unaffordable',state.gold<TOWERS[button.dataset.tower].cost));
   for(const button of document.querySelectorAll('[data-ability]')){
     const id=button.dataset.ability,ability=ABILITIES[id],cooldown=state.abilities[id];
@@ -145,11 +147,12 @@ function handleActionResult(result){
 
 function handleGameEvent(event){
   const soundMap={towerBuilt:'build',towerUpgraded:'upgrade',towerSold:'sell',enemyKilled:'kill',enemyEscaped:'leak',waveStarted:'wave',waveComplete:'waveClear'};
-  if(event.type==='shot')playThrottled(TOWERS[event.towerType].attack==='splash'?'cannon':TOWERS[event.towerType].attack,65);
-  else if(event.type==='chain')playThrottled('chain',90);else if(event.type==='beam')playThrottled('beam',100);else if(event.type==='pulse')playThrottled('pulse',180);
+  if(event.type==='shot')playThrottled(TOWERS[event.towerType].attack==='rocket'?'rocket':TOWERS[event.towerType].attack,65);
+  else if(event.type==='flame')playThrottled('flame',130);else if(event.type==='frostField')playThrottled('frost',140);else if(event.type==='chain')playThrottled('chain',90);else if(event.type==='beam')playThrottled('beam',100);else if(event.type==='pulse')playThrottled('pulse',180);
   else if(soundMap[event.type])audio.sfx(soundMap[event.type]);
-  if(event.type==='waveStarted')showBanner(`第 ${event.wave} 波 · 敵軍來襲`);
-  if(event.type==='waveComplete'){showBanner(`第 ${event.wave} 波完成 · 獎勵 ${event.bonus} 晶幣`);showToast('防線獲得短暫整備時間','success');}
+  if(event.type==='waveStarted')showBanner(`第 ${event.wave} 波 · ${event.entrances} 路敵軍${event.auto?' · 自動開戰':''}`);
+  if(event.type==='waveComplete'){showBanner(`第 ${event.wave} 波完成 · 30 秒知識整備`);showToast('下一波必須取得足夠知識鑰匙','success');}
+  if(event.type==='quizRequired'){showBanner(`第 ${event.wave} 波等待答題 · ${event.quizKeys}/${event.answersRequired}`);showToast(`必須再答對 ${event.answersRequired-event.quizKeys} 題才能開戰`,'error');}
   if(event.type==='enemyEscaped')showToast(`晶核受損 −${event.damage}`,'error');
   if(event.type==='ability')audio.sfx(event.id);
   if(event.type==='ability')document.querySelectorAll('[data-ability]').forEach(button=>button.classList.remove('targeting'));
@@ -170,7 +173,7 @@ async function openQuestion(){
   await audio.unlock();quizWasPaused=simulation.state.paused;simulation.togglePause(true);$('questionPanel').classList.add('open');$('questionPrompt').textContent='正在取得題目…';$('questionChoices').innerHTML='';$('questionFeedback').textContent='';answering=false;
   try{
     const data=await api('/question',{method:'POST',body:{sessionId:questionSessionId}});activeQuestion=data.question;questionDeadline=activeQuestion.expiresAt;
-    $('questionPrompt').textContent=activeQuestion.prompt;$('questionReward').textContent=`答對 +${activeQuestion.baseReward} 晶幣起`;
+    $('questionPrompt').textContent=activeQuestion.prompt;$('questionReward').textContent=`答對 +${Math.floor(activeQuestion.baseReward*simulation.quizRules.quizGoldMultiplier)} 晶幣起`;
     $('questionChoices').innerHTML=activeQuestion.choices.map((choice,index)=>`<button class="choice-button" data-choice="${index}"><span>${String.fromCharCode(65+index)}</span>${escapeHtml(choice)}</button>`).join('');
     document.querySelectorAll('[data-choice]').forEach(button=>button.addEventListener('click',()=>answerQuestion(Number(button.dataset.choice))));
     clearInterval(questionTimer);questionTimer=setInterval(updateQuestionTimer,100);updateQuestionTimer();
@@ -187,7 +190,7 @@ async function answerQuestion(index){
     const data=await api('/answer',{method:'POST',body:{sessionId:questionSessionId,token:activeQuestion.token,answerIndex:index}});
     document.querySelectorAll('[data-choice]').forEach((button,choiceIndex)=>{if(choiceIndex===data.correctIndex)button.classList.add('correct');else if(choiceIndex===index)button.classList.add('wrong');});
     const feedback=$('questionFeedback');feedback.className=`question-feedback ${data.correct?'correct':'wrong'}`;
-    if(data.correct){simulation.grantQuizReward(data);profile.totalCorrect++;saveProfile();feedback.textContent=`答對！獲得 ${data.reward} 晶幣 · ${data.streak} 連勝`;audio.sfx('correct');$('quizStreak').textContent=data.streak>1?`${data.streak} 連勝`:'';}
+    if(data.correct){const granted=simulation.grantQuizReward(data);profile.totalCorrect++;saveProfile();feedback.textContent=`答對！獲得 ${granted} 晶幣 · 知識鑰匙 ${simulation.state.quizKeys}/${simulation.state.answersRequired}`;audio.sfx('correct');$('quizStreak').textContent=data.streak>1?`${data.streak} 連勝`:'';}
     else{simulation.grantQuizReward(data);feedback.textContent=data.timedOut?'時間到！這次沒有獎勵。':'答錯了，看看綠色的正確答案。';audio.sfx('wrong');$('quizStreak').textContent='';}
     setTimeout(closeQuestion,1250);
   }catch(error){showToast(error.message,'error');setTimeout(closeQuestion,500);}

@@ -6,12 +6,21 @@ export const DIFFICULTIES = Object.freeze({
   legend: { id: 'legend', name: '傳奇', enemyHp: 1.28, enemySpeed: 1.08, reward: .92, lives: 15, startingGold: 320, score: 1.35 },
 });
 
+export const QUIZ_RULES = Object.freeze({
+  explorer: Object.freeze({ answersPerWave:1, killGoldRate:.10, quizGoldMultiplier:1.35 }),
+  guardian: Object.freeze({ answersPerWave:2, killGoldRate:.06, quizGoldMultiplier:1.65 }),
+  legend: Object.freeze({ answersPerWave:3, killGoldRate:.03, quizGoldMultiplier:1.85 }),
+});
+
 export const MAPS = Object.freeze({
   starport: {
     id: 'starport', chapter: 1, name: '星港迴廊', subtitle: '守住浮空港的最後一枚航行晶核',
     palette: { sky: 0x071b34, ground: 0x123b50, ground2: 0x1b5966, path: 0xc49462, edge: 0xf4d49a, water: 0x0c7893, accent: 0x57e8d2 },
     weather: 'stars', boss: 'leviathan',
-    path: [[-40,170],[190,170],[190,330],[430,330],[430,130],[690,130],[690,520],[920,520],[920,270],[1120,270],[1120,390],[1280,390]],
+    paths: [
+      [[-40,120],[160,120],[160,310],[350,310],[350,80],[570,80],[570,470],[760,470],[760,180],[980,180],[980,500],[1160,500],[1160,360],[1280,360]],
+      [[-40,610],[130,610],[130,400],[310,400],[310,640],[510,640],[510,350],[700,350],[700,620],[900,620],[900,410],[1080,410],[1080,560],[1190,560],[1190,360],[1280,360]],
+    ],
     noBuild: [{ x: 535, y: 250, w: 120, h: 150, kind: 'dock' }, { x: 1010, y: 70, w: 120, h: 110, kind: 'hangar' }],
     decor: [[70,82,'crystal'],[330,550,'crate'],[535,620,'ship'],[790,70,'antenna'],[1040,620,'crystal'],[1210,90,'antenna']],
   },
@@ -19,7 +28,11 @@ export const MAPS = Object.freeze({
     id: 'moonwood', chapter: 2, name: '月影森徑', subtitle: '古樹根脈正在被虛空孢子侵蝕',
     palette: { sky: 0x11152e, ground: 0x193d3a, ground2: 0x28574a, path: 0x7c6757, edge: 0xb7d79b, water: 0x315b80, accent: 0xa8f06a },
     weather: 'fireflies', boss: 'ancient',
-    path: [[-40,540],[180,540],[180,370],[360,370],[360,600],[590,600],[590,250],[790,250],[790,480],[1010,480],[1010,160],[1280,160]],
+    paths: [
+      [[-40,120],[200,120],[200,260],[410,260],[410,90],[650,90],[650,330],[850,330],[850,170],[1070,170],[1070,350],[1280,350]],
+      [[-40,570],[170,570],[170,410],[360,410],[360,610],[590,610],[590,470],[760,470],[760,610],[970,610],[970,450],[1120,450],[1120,350],[1280,350]],
+      [[940,-40],[940,100],[800,100],[800,255],[615,255],[615,405],[825,405],[825,545],[1040,545],[1040,350],[1280,350]],
+    ],
     noBuild: [{ x: 35, y: 240, w: 120, h: 150, kind: 'pond' }, { x: 430, y: 70, w: 120, h: 130, kind: 'tree' }, { x: 1080, y: 520, w: 140, h: 110, kind: 'ruin' }],
     decor: [[80,110,'tree'],[280,210,'mushroom'],[485,145,'tree'],[690,650,'mushroom'],[900,95,'ruin'],[1160,600,'tree']],
   },
@@ -27,7 +40,10 @@ export const MAPS = Object.freeze({
     id: 'embercore', chapter: 3, name: '熔火核心', subtitle: '在鑄星爐爆發前擊退機械軍團',
     palette: { sky: 0x210d1b, ground: 0x3c2028, ground2: 0x5b2d2b, path: 0x77645d, edge: 0xffb45c, water: 0xb83d28, accent: 0xffca56 },
     weather: 'embers', boss: 'colossus',
-    path: [[-40,150],[230,150],[230,470],[470,470],[470,220],[650,220],[650,580],[870,580],[870,330],[1060,330],[1060,160],[1280,160]],
+    paths: [
+      [[-40,135],[235,135],[235,315],[455,315],[455,110],[690,110],[690,365],[900,365],[900,185],[1090,185],[1090,350],[1280,350]],
+      [[-40,595],[205,595],[205,455],[425,455],[425,625],[650,625],[650,500],[845,500],[845,620],[1045,620],[1045,455],[1160,455],[1160,350],[1280,350]],
+    ],
     noBuild: [{ x: 40, y: 550, w: 140, h: 105, kind: 'forge' }, { x: 520, y: 340, w: 90, h: 110, kind: 'lava' }, { x: 1110, y: 500, w: 120, h: 120, kind: 'gear' }],
     decor: [[90,590,'forge'],[340,70,'pipe'],[560,390,'lava'],[740,100,'gear'],[970,650,'pipe'],[1180,560,'gear']],
   },
@@ -43,15 +59,15 @@ export const TOWERS = Object.freeze({
     upgradeCosts: [85,145,225],
   },
   cannon: {
-    id: 'cannon', name: '磁軌炮台', role: '範圍爆破', icon: '⬢', color: 0xffa95e, cost: 165, target: 'ground', attack: 'splash', projectileSpeed: 430,
-    description: '重型炮彈造成範圍傷害，適合密集裝甲群。',
+    id: 'cannon', name: '星梭火箭塔', role: '追蹤爆破', icon: '⬢', color: 0xffa95e, cost: 165, target: 'ground', attack: 'rocket', projectileSpeed: 390,
+    description: '發射帶煙尾的追蹤火箭，命中後轟炸密集裝甲群。',
     levels: [level('脈衝彈',46,145,1.38,{splash:58}),level('震盪彈',72,155,1.25,{splash:66}),level('聚變炮',112,170,1.10,{splash:75,armorPierce:5}),level('超新星炮',178,188,.92,{splash:90,armorPierce:10})],
     upgradeCosts: [135,210,315],
   },
   frost: {
-    id: 'frost', name: '霜環塔', role: '減速控場', icon: '❄', color: 0x76c9ff, cost: 135, target: 'both', attack: 'frost', projectileSpeed: 520,
-    description: '寒霜彈降低移速，升級後可短暫凍結。',
-    levels: [level('冷凝環',8,138,.82,{slow:.28,slowDuration:1.5}),level('霜脈環',13,150,.72,{slow:.36,slowDuration:1.8}),level('極地環',22,164,.62,{slow:.45,slowDuration:2.2,freezeChance:.08}),level('永冬之眼',34,182,.50,{slow:.55,slowDuration:2.8,freezeChance:.16})],
+    id: 'frost', name: '霜環塔', role: '範圍減速', icon: '❄', color: 0x76c9ff, cost: 135, target: 'both', attack: 'frostField', projectileSpeed: 0,
+    description: '在目標周圍綻放雪花霜域，降低整個範圍內敵人的速度。',
+    levels: [level('冷凝環',8,138,.82,{slow:.28,slowDuration:1.5,fieldRadius:58}),level('霜脈環',13,150,.72,{slow:.36,slowDuration:1.8,fieldRadius:68}),level('極地環',22,164,.62,{slow:.45,slowDuration:2.2,freezeChance:.08,fieldRadius:80}),level('永冬之眼',34,182,.50,{slow:.55,slowDuration:2.8,freezeChance:.16,fieldRadius:94})],
     upgradeCosts: [110,175,260],
   },
   storm: {
@@ -67,9 +83,9 @@ export const TOWERS = Object.freeze({
     upgradeCosts: [185,275,400],
   },
   beacon: {
-    id: 'beacon', name: '共鳴燈塔', role: '支援增幅', icon: '◉', color: 0xffe27a, cost: 180, target: 'ground', attack: 'pulse', projectileSpeed: 0,
-    description: '定時震盪附近敵人，並強化範圍內其他防禦塔。',
-    levels: [level('共鳴',12,132,1.8,{aura:.12,reveal:true}),level('協奏',20,145,1.6,{aura:.17,reveal:true}),level('戰歌',32,160,1.35,{aura:.23,reveal:true,slow:.15,slowDuration:.8}),level('晨星號角',51,180,1.08,{aura:.30,reveal:true,slow:.22,slowDuration:1.1})],
+    id: 'beacon', name: '熾焰噴塔', role: '扇形灼燒', icon: '◉', color: 0xffe27a, cost: 180, target: 'ground', attack: 'flame', projectileSpeed: 0,
+    description: '持續向前噴射扇形星焰，同時灼燒路線上的整群敵人。',
+    levels: [level('星火噴流',7,128,.20,{flameWidth:.48}),level('聚焰噴流',11,140,.18,{flameWidth:.56}),level('日冕洪流',17,154,.16,{flameWidth:.64,armorPierce:3}),level('恆星吐息',26,172,.13,{flameWidth:.74,armorPierce:6})],
     upgradeCosts: [145,220,330],
   },
 });
@@ -122,6 +138,15 @@ export function buildWave(mapId, waveNumber) {
 export function towerStats(tower) {
   const definition = TOWERS[tower.type];
   return definition.levels[Math.max(0, Math.min(definition.levels.length - 1, tower.level - 1))];
+}
+
+export function mapPaths(map) {
+  if (Array.isArray(map?.paths) && map.paths.length) return map.paths;
+  return Array.isArray(map?.path) ? [map.path] : [];
+}
+
+export function distanceToPaths(x,y,paths) {
+  return Math.min(...paths.map(points=>distanceToPath(x,y,points)));
 }
 
 export function pointAlongPath(points, distance) {

@@ -1,4 +1,4 @@
-import { ENEMIES, TOWERS, WORLD, towerStats } from './content.js';
+import { ENEMIES, TOWERS, WORLD, towerStats } from './content.js?v=20260802-2';
 import { BOSS_ART, ENEMY_ART, MAP_ART, TOWER_ART } from './assets.js?v=20260802-1';
 const MAP_SURFACES={
   starport:{outer:0x020a12,rail:0x3ad8d0,surface:0x1c2e3b,inner:0x263d4a},
@@ -55,6 +55,7 @@ export class BattleScene extends Phaser.Scene {
     g.generateTexture('td-soft-particle',24,24);g.clear();
     g.fillStyle(0xffffff,1).fillPoints([{x:8,y:0},{x:15,y:12},{x:8,y:22},{x:1,y:12}],true);g.generateTexture('td-shard-particle',16,24);g.clear();
     g.fillStyle(0xffffff,.18).fillRoundedRect(0,2,32,8,4);g.fillStyle(0xffffff,1).fillRoundedRect(8,4,24,4,2);g.generateTexture('td-streak-particle',32,12);g.destroy();
+    const snow=this.make.graphics({x:0,y:0,add:false});snow.lineStyle(2,0xffffff,1);snow.lineBetween(12,1,12,23);snow.lineBetween(2,6,22,18);snow.lineBetween(2,18,22,6);snow.lineStyle(1,0xffffff,.8);for(const angle of [0,Math.PI/3,Math.PI*2/3]){const dx=Math.cos(angle)*8,dy=Math.sin(angle)*8,nx=-Math.sin(angle)*3,ny=Math.cos(angle)*3;snow.lineBetween(12+dx,12+dy,12+dx*.65+nx,12+dy*.65+ny);snow.lineBetween(12-dx,12-dy,12-dx*.65-nx,12-dy*.65-ny);}snow.generateTexture('td-snowflake-particle',24,24);snow.destroy();
   }
 
   cleanup() {
@@ -110,9 +111,9 @@ export class BattleScene extends Phaser.Scene {
     this.add.image(WORLD.width*.5,WORLD.height*.5,`td-map-${map.id}`).setDisplaySize(WORLD.width,WORLD.height).setDepth(0);
     const vignette=this.add.graphics().setDepth(1);
     vignette.fillStyle(0x02070d,.12).fillRect(0,0,WORLD.width,WORLD.height);
-    const route=this.add.graphics().setDepth(4);this.drawPath(route,map.path,map.id);
+    const route=this.add.graphics().setDepth(4);for(const path of map.paths)this.drawPath(route,path,map.id);
     const pads=this.add.graphics().setDepth(5);for(const zone of map.noBuild)this.drawNoBuild(pads,zone,p);
-    this.drawPortals(this.add.graphics().setDepth(8),map.path,p);
+    this.drawPortals(this.add.graphics().setDepth(8),map.paths,p);
   }
 
   drawPath(g,points,mapId) {
@@ -149,10 +150,14 @@ export class BattleScene extends Phaser.Scene {
     }
   }
 
-  drawPortals(g,points,p) {
-    const [rawSx,sy]=points[0],[rawEx,ey]=points.at(-1),sx=Math.max(30,rawSx+34),ex=Math.min(WORLD.width-34,rawEx-34);
-    for(let index=0;index<4;index++)g.lineStyle(8-index*1.4,p.accent,.16+index*.14).strokeCircle(sx,sy,43-index*8);
-    g.fillStyle(p.accent,.16).fillCircle(sx,sy,25);g.fillStyle(0xffffff,.72).fillCircle(sx,sy,5);
+  drawPortals(g,paths,p) {
+    for(const [pathIndex,points] of paths.entries()){
+      const [rawSx,rawSy]=points[0],sx=Phaser.Math.Clamp(rawSx,-10,WORLD.width+10),sy=Phaser.Math.Clamp(rawSy,-10,WORLD.height+10);
+      for(let index=0;index<4;index++)g.lineStyle(8-index*1.4,p.accent,.16+index*.14).strokeCircle(sx,sy,43-index*8);
+      g.fillStyle(p.accent,.16).fillCircle(sx,sy,25);g.fillStyle(0xffffff,.72).fillCircle(sx,sy,5);
+      g.lineStyle(2,0xffffff,.34).strokeCircle(sx,sy,48+pathIndex*2);
+    }
+    const [rawEx,rawEy]=paths[0].at(-1),ex=Math.min(WORLD.width-34,rawEx-34),ey=Phaser.Math.Clamp(rawEy,34,WORLD.height-34);
     g.fillStyle(0x03080e,.94).fillCircle(ex,ey,43);g.lineStyle(7,p.accent,.78).strokeCircle(ex,ey,37);g.lineStyle(2,0xffffff,.48).strokeCircle(ex,ey,29);
     g.fillStyle(p.accent,.9).fillPoints([{x:ex,y:ey-25},{x:ex+18,y:ey+12},{x:ex,y:ey+27},{x:ex-18,y:ey+12}],true);
     g.fillStyle(0xffffff,.55).fillTriangle(ex,ey-18,ex-4,ey+5,ex+5,ey-1);
@@ -222,6 +227,7 @@ export class BattleScene extends Phaser.Scene {
       view.sprite.setScale(view.baseScaleX*(1+pulse),view.baseScaleY*(1-pulse*.25));
       view.sprite.setAlpha(definition.stealth&&!this.sim.isRevealed(enemy)?.58:1);
       view.glow.setAlpha((definition.boss?.25:.12)+(Math.sin(phase)*.5+.5)*.05);
+      view.snowflake.setVisible(enemy.slowTime>0||enemy.freezeTime>0).setRotation(-phase*.55).setAlpha(enemy.freezeTime>0?1:.62+Math.sin(phase*2)*.2);
       if(enemy.hp<view.lastHp-.5)this.flashEnemy(view,definition.color);view.lastHp=enemy.hp;
       const signature=`${Math.ceil(enemy.hp)}:${Math.ceil(enemy.shield)}:${enemy.slowTime>0}:${enemy.freezeTime>0}`;
       if(view.signature!==signature){view.signature=signature;this.drawEnemyStatus(view,enemy);}
@@ -237,8 +243,9 @@ export class BattleScene extends Phaser.Scene {
     const shadow=this.add.ellipse(0,definition.size*.92,displaySize*.72,Math.max(10,displaySize*.20),0x000000,definition.air?.18:.42);
     const glow=this.add.image(0,0,'td-soft-particle').setTint(definition.color).setBlendMode(Phaser.BlendModes.ADD).setDisplaySize(displaySize*.9,displaySize*.9).setAlpha(definition.boss?.26:.14);
     const sprite=this.add.sprite(0,0,this.enemyTexture(enemy.type),this.enemyFrame(enemy.type)).setDisplaySize(displaySize,displaySize);
-    const status=this.add.graphics();container.add([shadow,glow,sprite,status]);
-    const view={container,shadow,glow,sprite,status,baseScaleX:sprite.scaleX,baseScaleY:sprite.scaleY,signature:'',lastHp:enemy.hp,displaySize};
+    const snowflake=this.add.image(0,-displaySize*.42,'td-snowflake-particle').setTint(0xb8efff).setBlendMode(Phaser.BlendModes.ADD).setDisplaySize(definition.boss?34:21,definition.boss?34:21).setVisible(false);
+    const status=this.add.graphics();container.add([shadow,glow,sprite,snowflake,status]);
+    const view={container,shadow,glow,sprite,snowflake,status,baseScaleX:sprite.scaleX,baseScaleY:sprite.scaleY,signature:'',lastHp:enemy.hp,displaySize};
     this.drawEnemyStatus(view,enemy);return view;
   }
 
@@ -263,13 +270,13 @@ export class BattleScene extends Phaser.Scene {
       if(!view){view=this.createProjectileView(projectile);this.projectileViews.set(projectile.id,view);}
       const dx=projectile.x-view.lastX,dy=projectile.y-view.lastY;view.container.setPosition(projectile.x,projectile.y);
       if(Math.hypot(dx,dy)>.5)view.container.setRotation(Math.atan2(dy,dx));
-      if(this.time.now-view.lastTrail>36){view.lastTrail=this.time.now;this.trailParticle(projectile.x,projectile.y,projectile.color,projectile.type==='splash'?13:8);}
+      if(this.time.now-view.lastTrail>36){view.lastTrail=this.time.now;if(projectile.type==='rocket'){this.trailParticle(projectile.x,projectile.y,0xff7a35,16);this.smokeParticle(projectile.x,projectile.y);}else this.trailParticle(projectile.x,projectile.y,projectile.color,8);}
       view.lastX=projectile.x;view.lastY=projectile.y;
     }
   }
 
   createProjectileView(projectile) {
-    const container=this.add.container(projectile.x,projectile.y).setDepth(60),large=projectile.type==='splash';
+    const container=this.add.container(projectile.x,projectile.y).setDepth(60),large=projectile.type==='rocket'||projectile.type==='splash';
     const halo=this.add.image(0,0,'td-soft-particle').setTint(projectile.color).setBlendMode(Phaser.BlendModes.ADD).setDisplaySize(large?30:20,large?30:20).setAlpha(.72);
     const core=this.add.image(large?1:4,0,large?'td-shard-particle':'td-streak-particle').setTint(projectile.color).setBlendMode(Phaser.BlendModes.ADD).setDisplaySize(large?14:25,large?19:8);
     container.add([halo,core]);return{container,halo,core,lastX:projectile.x,lastY:projectile.y,lastTrail:0};
@@ -278,6 +285,11 @@ export class BattleScene extends Phaser.Scene {
   trailParticle(x,y,color,size=8) {
     const particle=this.add.image(x,y,'td-soft-particle').setTint(color).setBlendMode(Phaser.BlendModes.ADD).setDepth(58).setDisplaySize(size,size).setAlpha(.62);
     this.tweens.add({targets:particle,alpha:0,scale:.15,duration:180,ease:'Quad.Out',onComplete:()=>particle.destroy()});
+  }
+
+  smokeParticle(x,y) {
+    const particle=this.add.image(x,y,'td-soft-particle').setTint(0x73808c).setDepth(57).setDisplaySize(13,13).setAlpha(.42);
+    this.tweens.add({targets:particle,y:y-5,alpha:0,scaleX:1.75,scaleY:1.75,duration:360,ease:'Quad.Out',onComplete:()=>particle.destroy()});
   }
 
   drawSelection() {
@@ -299,6 +311,8 @@ export class BattleScene extends Phaser.Scene {
   renderEvent(event) {
     if(event.type==='shot'){this.animateTowerAttack(event.towerId,event.towerType==='cannon'?2:1);}
     else if(event.type==='impact')this.impact(event);
+    else if(event.type==='flame'){this.animateTowerAttack(event.towerId,.65);this.flameJet(event);}
+    else if(event.type==='frostField'){this.animateTowerAttack(event.towerId,1.2);this.frostFieldEffect(event);}
     else if(event.type==='chain'){this.animateTowerAttack(event.towerId,1.4);this.energyLine(event.points,0xc9a0ff,5,.2);}
     else if(event.type==='beam'){this.animateTowerAttack(event.towerId,event.power);this.energyLine([event.from,event.to],0xff65c2,3+event.power,.13);}
     else if(event.type==='pulse'){this.animateTowerAttack(event.towerId,1.1);this.ring(event.x,event.y,event.range,0xffdf72,.36);this.particleBurst(event.x,event.y,0xffdf72,12,{distance:event.range*.55,duration:420,size:.42});}
@@ -313,12 +327,35 @@ export class BattleScene extends Phaser.Scene {
   }
 
   impact(event) {
-    const type=event.impactType||'bolt',splash=type==='splash',frost=type==='frost',color=event.color||0xffffff,radius=Math.max(20,event.radius||22);
+    const type=event.impactType||'bolt',splash=type==='splash'||type==='rocket',frost=type==='frost'||type==='frostField',color=event.color||0xffffff,radius=Math.max(20,event.radius||22);
     const flash=this.add.image(event.x,event.y,'td-soft-particle').setTint(color).setBlendMode(Phaser.BlendModes.ADD).setDepth(74).setDisplaySize(splash?76:44,splash?76:44).setAlpha(.95);
     this.tweens.add({targets:flash,scale:splash?1.8:1.35,alpha:0,duration:splash?360:220,ease:'Quad.Out',onComplete:()=>flash.destroy()});
     this.ring(event.x,event.y,splash?radius*1.2:radius*.9,color,splash?.42:.24);
     this.particleBurst(event.x,event.y,color,splash?28:frost?18:12,{distance:splash?radius*1.3:44,duration:splash?520:340,size:splash?.72:.48,shards:splash||frost});
     if(splash)this.cameras.main.shake(120,.0028);
+  }
+
+  flameJet(event) {
+    const spread=event.width||.5;
+    const left=event.angle-spread*.5,right=event.angle+spread*.5,cone=this.add.graphics().setDepth(72).setBlendMode(Phaser.BlendModes.ADD);
+    cone.fillStyle(0xff6b2f,.13).fillTriangle(event.from.x,event.from.y,event.from.x+Math.cos(left)*event.range,event.from.y+Math.sin(left)*event.range,event.from.x+Math.cos(right)*event.range,event.from.y+Math.sin(right)*event.range);
+    cone.lineStyle(2,0xffc25f,.34).lineBetween(event.from.x,event.from.y,event.from.x+Math.cos(left)*event.range,event.from.y+Math.sin(left)*event.range).lineBetween(event.from.x,event.from.y,event.from.x+Math.cos(right)*event.range,event.from.y+Math.sin(right)*event.range);
+    this.tweens.add({targets:cone,alpha:0,duration:190,ease:'Quad.Out',onComplete:()=>cone.destroy()});
+    for(let index=0;index<6;index++){
+      const angle=event.angle+(Math.random()-.5)*spread,distance=event.range*(.62+Math.random()*.38),color=index%3===0?0xfff0a3:index%2===0?0xff9b3d:0xff4f2f;
+      const particle=this.add.image(event.from.x+Math.cos(angle)*20,event.from.y+Math.sin(angle)*20,index%2?'td-streak-particle':'td-soft-particle').setTint(color).setBlendMode(Phaser.BlendModes.ADD).setDepth(75).setDisplaySize(20+Math.random()*14,10+Math.random()*13).setRotation(angle).setAlpha(.9);
+      this.tweens.add({targets:particle,x:event.from.x+Math.cos(angle)*distance,y:event.from.y+Math.sin(angle)*distance,alpha:0,scaleX:particle.scaleX*1.65,scaleY:particle.scaleY*.45,duration:170+Math.random()*120,ease:'Cubic.Out',onComplete:()=>particle.destroy()});
+    }
+  }
+
+  frostFieldEffect(event) {
+    this.ring(event.x,event.y,event.radius,0x87ddff,.48);
+    const haze=this.add.image(event.x,event.y,'td-soft-particle').setTint(0x8bdfff).setBlendMode(Phaser.BlendModes.ADD).setDepth(70).setDisplaySize(event.radius*1.4,event.radius*1.4).setAlpha(.34);
+    this.tweens.add({targets:haze,scaleX:1.55,scaleY:1.55,alpha:0,duration:520,ease:'Quad.Out',onComplete:()=>haze.destroy()});
+    for(let index=0;index<16;index++){
+      const angle=index/16*Math.PI*2+Math.random()*.25,distance=event.radius*(.28+Math.random()*.78),flake=this.add.image(event.x,event.y,'td-snowflake-particle').setTint(index%3?0xbaf3ff:0xffffff).setBlendMode(Phaser.BlendModes.ADD).setDepth(77).setScale(.38+Math.random()*.38).setRotation(angle).setAlpha(.92);
+      this.tweens.add({targets:flake,x:event.x+Math.cos(angle)*distance,y:event.y+Math.sin(angle)*distance,rotation:angle+(index%2?2:-2),alpha:0,scaleX:flake.scaleX*.35,scaleY:flake.scaleY*.35,duration:430+Math.random()*260,ease:'Quad.Out',onComplete:()=>flake.destroy()});
+    }
   }
 
   ring(x,y,radius,color,duration=.3) {

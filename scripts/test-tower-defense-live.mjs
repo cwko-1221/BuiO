@@ -42,6 +42,33 @@ async function worldClick(x,y){
   await page.mouse.click(box.x+x/1280*box.width,box.y+y/720*box.height);
 }
 
+async function buildTower(type){
+  const before=await page.evaluate(()=>window.__towerDefense.simulation.state.towers.length);
+  await page.locator(`[data-tower="${type}"]`).click();
+  const point=await page.evaluate(towerType=>{
+    const simulation=window.__towerDefense.simulation;
+    const segmentDistance=(x,y,path)=>{
+      let best=Infinity;
+      for(let index=0;index<path.length-1;index++){
+        const [ax,ay]=path[index],[bx,by]=path[index+1],dx=bx-ax,dy=by-ay,t=Math.max(0,Math.min(1,((x-ax)*dx+(y-ay)*dy)/(dx*dx+dy*dy||1)));
+        best=Math.min(best,Math.hypot(x-(ax+dx*t),y-(ay+dy*t)));
+      }
+      return best;
+    };
+    const candidates=[];
+    for(let y=90;y<=650;y+=35)for(let x=65;x<=1215;x+=38){
+      if(!simulation.canBuild(towerType,x,y).ok)continue;
+      candidates.push({x,y,distance:Math.min(...simulation.paths.map(path=>segmentDistance(x,y,path)))});
+    }
+    candidates.sort((a,b)=>a.distance-b.distance);
+    return candidates[0]||null;
+  },type);
+  assert(point,`no valid build point for ${type}`);
+  await worldClick(point.x,point.y);
+  await page.waitForFunction(expected=>window.__towerDefense.simulation.state.towers.length===expected,before+1);
+  return point;
+}
+
 async function answerQuestion({correct=true,capturePath=null}={}){
   await page.locator('#quizBtn').click();
   await page.waitForFunction(()=>document.querySelectorAll('[data-choice]').length===4);
@@ -96,8 +123,11 @@ try{
   const menuCounts=await page.evaluate(()=>({
     maps:document.querySelectorAll('[data-map]').length,
     difficulties:document.querySelectorAll('[data-difficulty]').length,
+    disabledMaps:document.querySelectorAll('[data-map]:disabled').length,
+    entrances:[...document.querySelectorAll('.route-badge')].map(node=>node.textContent.trim()),
   }));
-  assert(menuCounts.maps===3&&menuCounts.difficulties===3,`incomplete campaign selector: ${JSON.stringify(menuCounts)}`);
+  assert(menuCounts.maps===3&&menuCounts.difficulties===3&&menuCounts.disabledMaps===0,`incomplete campaign selector: ${JSON.stringify(menuCounts)}`);
+  assert(menuCounts.entrances.join(',')==='2 個入口,3 個入口,2 個入口',`map entrance badges are incorrect: ${JSON.stringify(menuCounts.entrances)}`);
   screenshots.menu=join(tmpdir(),'buio-crystal-bastion-menu.png');
   await page.screenshot({path:screenshots.menu,fullPage:true});
 
@@ -106,8 +136,12 @@ try{
     towers:document.querySelectorAll('[data-tower]').length,
     abilities:document.querySelectorAll('[data-ability]').length,
     audio:window.__towerDefense.audioState,
+    answersRequired:window.__towerDefense.simulation.state.answersRequired,
+    countdown:window.__towerDefense.simulation.state.buildCountdown,
+    waveEnabled:!document.querySelector('#nextWaveBtn').disabled,
   }));
   assert(battleCounts.towers===6&&battleCounts.abilities===3,`incomplete battle UI: ${JSON.stringify(battleCounts)}`);
+  assert(battleCounts.answersRequired===2&&battleCounts.countdown<=30&&battleCounts.countdown>0&&!battleCounts.waveEnabled,`guardian quiz gate or countdown is not active: ${JSON.stringify(battleCounts)}`);
   assert(battleCounts.audio.contextState!=='unavailable'&&battleCounts.audio.musicActive,`audio engine did not start: ${JSON.stringify(battleCounts.audio)}`);
 
   const mutedBefore=battleCounts.audio.muted;
@@ -136,9 +170,7 @@ try{
   await page.locator('[data-close-modal="helpModal"]').click();
   await page.waitForFunction(()=>!window.__towerDefense.simulation.state.paused);
 
-  await page.locator('[data-tower="bolt"]').click();
-  await worldClick(330,90);
-  await page.waitForFunction(()=>window.__towerDefense.simulation.state.towers.length===1);
+  await buildTower('bolt');
   assert(await page.locator('#towerPanel').evaluate(panel=>panel.classList.contains('open')),'built tower did not open its management panel');
 
   screenshots.question=join(tmpdir(),'buio-crystal-bastion-question.png');
@@ -168,21 +200,21 @@ try{
   const afterSellGold=await page.evaluate(()=>window.__towerDefense.simulation.state.gold);
   assert(afterSellGold===beforeSell.gold+beforeSell.refund,`tower sell refund failed: ${JSON.stringify({beforeSell,afterSellGold})}`);
 
-  for(const [type,x,y] of [['bolt',330,90],['cannon',90,300],['frost',330,450]]){
-    await page.locator(`[data-tower="${type}"]`).click();
-    await worldClick(x,y);
-  }
+  for(const type of ['bolt','cannon','frost'])await buildTower(type);
   await page.waitForFunction(()=>window.__towerDefense.simulation.state.towers.length===3);
   await answerQuestion({correct:false});
 
   await page.evaluate(()=>{
     const scene=window.__towerDefense.scene;
     scene.__qaRenderedEvents=[];
+    scene.__qaAutoStart=false;
     const original=scene.renderEvent.bind(scene);
-    scene.renderEvent=event=>{scene.__qaRenderedEvents.push(event.type);return original(event);};
+    scene.renderEvent=event=>{scene.__qaRenderedEvents.push(event.type);if(event.type==='waveStarted')scene.__qaAutoStart=event.auto===true;return original(event);};
   });
-  await page.locator('#nextWaveBtn').click();
+  assert(await page.locator('#nextWaveBtn').isEnabled(),'wave button should be enabled after satisfying the quiz gate');
+  await page.evaluate(()=>{window.__towerDefense.simulation.state.buildCountdown=.02;});
   await page.waitForFunction(()=>window.__towerDefense.simulation.state.phase==='wave');
+  await page.waitForFunction(()=>window.__towerDefense.scene.__qaAutoStart===true);
   await page.waitForFunction(()=>window.__towerDefense.simulation.state.enemies.length>0,{timeout:5000});
 
   await page.evaluate(()=>{window.__towerDefense.simulation.state.focus=100;});
@@ -226,6 +258,26 @@ try{
     renderedEvents:[...new Set(window.__towerDefense.scene.__qaRenderedEvents)],
     canvas:{width:document.querySelector('#gameCanvas canvas').width,height:document.querySelector('#gameCanvas canvas').height},
   }));
+
+  await page.evaluate(()=>{window.__towerDefense.simulation.state.gold=5000;});
+  await buildTower('beacon');
+  const effectReport=await page.evaluate(async()=>{
+    const {TOWERS,towerStats}=await import('/tower-defense/js/content.js');
+    const simulation=window.__towerDefense.simulation,scene=window.__towerDefense.scene;
+    simulation.togglePause(true);simulation.waveQueue=[];simulation.state.enemies=[];scene.selectTower(null);
+    const frost=simulation.state.towers.find(tower=>tower.type==='frost'),flame=simulation.state.towers.find(tower=>tower.type==='beacon');
+    const frostTargets=[0,1,2].map((_,index)=>{const enemy=simulation.spawnEnemy(index===2?'guard':'drone',{pathIndex:index%simulation.paths.length});enemy.x=frost.x+52+index*12;enemy.y=frost.y+(index-1)*13;return enemy;});
+    const flameDirection=flame.x>850?-1:1;
+    const flameTargets=[0,1,2,3].map((_,index)=>{const enemy=simulation.spawnEnemy('drone',{pathIndex:index%simulation.paths.length});enemy.x=flame.x+flameDirection*(55+index*15);enemy.y=flame.y+(index-1.5)*5;return enemy;});
+    simulation.drainEvents();simulation.attack(frost,frostTargets[0],TOWERS.frost,towerStats(frost),1);simulation.attack(flame,flameTargets[0],TOWERS.beacon,towerStats(flame),1);
+    const events=simulation.drainEvents();for(const event of events)scene.renderEvent(event);
+    scene.renderEvent({type:'impact',impactType:'rocket',x:flame.x-90,y:flame.y-25,radius:72,color:TOWERS.cannon.color});
+    return {events:events.map(event=>event.type),slowed:frostTargets.filter(enemy=>enemy.slowTime>0).length,flameDamaged:flameTargets.filter(enemy=>enemy.hp<enemy.maxHp).length};
+  });
+  assert(effectReport.events.includes('frostField')&&effectReport.events.includes('flame')&&effectReport.slowed>=2&&effectReport.flameDamaged>=2,`specialized tower effects failed: ${JSON.stringify(effectReport)}`);
+  screenshots.effects=join(tmpdir(),'buio-crystal-bastion-effects.png');
+  await page.waitForTimeout(45);
+  await page.screenshot({path:screenshots.effects,fullPage:true});
 
   await page.evaluate(()=>{
     const simulation=window.__towerDefense.simulation;
@@ -291,21 +343,22 @@ try{
   screenshots.loss=join(tmpdir(),'buio-crystal-bastion-loss.png');
   await page.screenshot({path:screenshots.loss,fullPage:true});
 
-  const mapReports=[{id:'starport',name:starportReport.mapName,weather:'stars'}];
-  for(const [mapId,expectedName,weather] of [['moonwood','月影森徑','fireflies'],['embercore','熔火核心','embers']]){
+  const mapReports=[{id:'starport',name:starportReport.mapName,weather:'stars',entrances:2}];
+  for(const [mapId,expectedName,weather,entrances] of [['moonwood','月影森徑','fireflies',3],['embercore','熔火核心','embers',2]]){
     await startMap(mapId);
     const runtime=await page.evaluate(()=>({
       id:window.__towerDefense.simulation.state.mapId,
       name:document.querySelector('#mapName').textContent,
       weather:window.__towerDefense.simulation.map.weather,
+      entrances:window.__towerDefense.simulation.paths.length,
       audio:window.__towerDefense.audioState,
       canvasReady:!!document.querySelector('#gameCanvas canvas')?.getBoundingClientRect().width,
     }));
-    assert(runtime.id===mapId&&runtime.name===expectedName&&runtime.weather===weather&&runtime.canvasReady,`${mapId} runtime failed: ${JSON.stringify(runtime)}`);
+    assert(runtime.id===mapId&&runtime.name===expectedName&&runtime.weather===weather&&runtime.entrances===entrances&&runtime.canvasReady,`${mapId} runtime failed: ${JSON.stringify(runtime)}`);
     assert(runtime.audio.musicActive,`${mapId} music theme did not start`);
     screenshots[mapId]=join(tmpdir(),`buio-crystal-bastion-${mapId}.png`);
     await page.screenshot({path:screenshots[mapId],fullPage:true});
-    mapReports.push({id:runtime.id,name:runtime.name,weather:runtime.weather});
+    mapReports.push({id:runtime.id,name:runtime.name,weather:runtime.weather,entrances:runtime.entrances});
   }
 
   await page.evaluate(()=>{

@@ -16,6 +16,10 @@ No third-party game models, franchise characters, logos, or audio are used.
 The maps deliberately contain no painted route or interface. The route, portal,
 core, no-build zones, weather, highlights, projectiles, damage feedback, and
 particles are rendered at runtime, so gameplay remains readable and responsive.
+The shipped encounters use two Starport routes, three Moonwood routes, and two
+Embercore routes. Every route has its own animated entrance and converges on the
+same map core, allowing enemy waves to distribute across genuinely independent
+lanes rather than duplicating sprites on one painted road.
 
 ## Reproduction prompts
 
