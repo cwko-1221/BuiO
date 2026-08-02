@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#11142a">
   <title>遊戲問答 | BuiO</title>
-  <link rel="stylesheet" href="/games/css/game-hub.css?v=20260802-1">
+  <link rel="stylesheet" href="/games/css/game-hub.css?v=20260802-2">
+  <link rel="stylesheet" href="/games/css/question-bank-editor.css?v=20260802-1">
 </head>
 <body>
   <main class="hub-app">
@@ -27,6 +28,10 @@
         <section class="flow-card bank-card">
           <header><span>01</span><div><h2>選擇題庫</h2><p>這個題庫會由所選遊戲派發給學生</p></div></header>
           <div id="hubSetList" class="hub-set-list"><div class="empty-state"><i></i>正在載入題庫…</div></div>
+          <div class="bank-footer">
+            <button id="newSetBtn" class="new-set-button" type="button"><span>＋</span><b>新增題庫</b><small>手動輸入或 Excel 匯入</small></button>
+            <p id="bankAvailabilityNote" class="bank-availability-note"></p>
+          </div>
         </section>
 
         <section class="flow-card game-card-panel locked" id="gameStep">
@@ -68,6 +73,33 @@
       <div id="studentHubError" class="hub-error"></div>
     </section>
   </main>
-  <script type="module" src="/games/js/game-hub.js?v=20260802-1"></script>
+
+  <div id="questionBankModal" class="bank-modal" hidden>
+    <section class="bank-editor" role="dialog" aria-modal="true" aria-labelledby="bankEditorTitle">
+      <header class="bank-editor-head">
+        <div><div class="eyebrow">QUESTION BANK BUILDER</div><h2 id="bankEditorTitle">新增題庫</h2><p>所有題目均使用四選一格式，兩款遊戲都可直接使用。</p></div>
+        <button id="closeEditorBtn" class="editor-close" type="button" aria-label="關閉題庫編輯器">✕</button>
+      </header>
+      <div class="bank-editor-body">
+        <label class="set-title-field"><span>題庫名稱</span><input id="editorSetTitle" type="text" maxlength="60" placeholder="例如：中一數學溫習"></label>
+        <div class="excel-toolbar">
+          <input id="excelImportInput" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+          <button id="excelImportBtn" class="editor-tool-button primary" type="button">匯入 Excel</button>
+          <button id="excelTemplateBtn" class="editor-tool-button" type="button">下載 Excel 範本</button>
+          <span id="excelImportStatus">支援 .xlsx，每列一題</span>
+        </div>
+        <div id="editorQuestions" class="editor-questions"></div>
+        <button id="addQuestionBtn" class="add-question-button" type="button">＋ 新增一題</button>
+        <div id="editorError" class="editor-error" role="alert"></div>
+      </div>
+      <footer class="bank-editor-actions">
+        <button id="cancelEditorBtn" class="editor-cancel" type="button">取消</button>
+        <button id="saveSetBtn" class="editor-save" type="button"><span>儲存題庫</span><small>儲存後可立即選用</small></button>
+      </footer>
+    </section>
+  </div>
+
+  <script src="/vendor/exceljs.min.js"></script>
+  <script type="module" src="/games/js/game-hub.js?v=20260802-2"></script>
 </body>
 </html>

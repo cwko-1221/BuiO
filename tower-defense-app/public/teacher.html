@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#071726">
   <title>晶核守衛戰 · 老師控制台 | BuiO</title>
+  <script>if(new URLSearchParams(location.search).get('hub')==='1')document.documentElement.classList.add('hub-launch');</script>
+  <style>html.hub-launch #teacherSetup{display:none!important}html.hub-launch #teacherLobby{display:block!important}</style>
   <link rel="stylesheet" href="/tower-defense/css/tower-defense.css?v=20260802-classroom-1">
 </head>
 <body class="teacher-body">
@@ -24,7 +26,7 @@
         <section class="teacher-card question-bank-card">
           <div class="teacher-card-head"><span>01</span><div><h2>選擇課堂題庫</h2><p>學生無法查看或更改這項設定</p></div></div>
           <div id="teacherSetList" class="teacher-set-list"><div class="room-empty"><i></i>正在載入題庫…</div></div>
-          <p class="teacher-note">需要新增或匯入 Excel 題庫，可前往「唔好望落嚟」遊戲老師介面的題庫管理。</p>
+          <p class="teacher-note">需要新增、編輯或匯入 Excel 題庫，請前往「遊戲問答」主頁的題庫管理。</p>
         </section>
         <section class="teacher-card create-card">
           <div class="teacher-card-head"><span>02</span><div><h2>開放課堂</h2><p>建立後學生會在房間清單看到你</p></div></div>
@@ -39,7 +41,7 @@
 
     <section id="teacherLobby" class="teacher-screen">
       <div class="room-command-head">
-        <div><div class="eyebrow">ROOM READY</div><h1>等待守衛部署</h1><p id="roomSummary"></p></div>
+        <div><div class="eyebrow">ROOM READY</div><h1 id="teacherLobbyTitle">等待守衛部署</h1><p id="roomSummary">正在建立房間…</p></div>
         <div class="room-code"><small>房間代碼</small><b id="roomCode">------</b></div>
       </div>
       <section class="teacher-card roster-card">
@@ -70,6 +72,6 @@
     </section>
   </main>
   <script src="/socket.io/socket.io.js"></script>
-  <script type="module" src="/tower-defense/js/teacher.js?v=20260802-classroom-1"></script>
+  <script type="module" src="/tower-defense/js/teacher.js?v=20260802-unified-launch-1"></script>
 </body>
 </html>

@@ -8,6 +8,8 @@
   const $ = id => document.getElementById(id);
   const socket = io('/game');
   const launchParams = new URLSearchParams(location.search);
+  const fromHub = launchParams.get('hub') === '1';
+  const hubUrl = location.pathname.endsWith('/preview') ? '/games/preview?role=teacher' : '/games';
 
   let teacherName = '老師';
   let selectedSetId = null;
@@ -374,7 +376,18 @@
       settings,
     }, (res) => {
       $('createRoomBtn').disabled = false;
-      if (!res?.ok) { $('setupError').textContent = res?.message || '建立失敗'; return; }
+      if (!res?.ok) {
+        const message = res?.message || '建立失敗';
+        $('setupError').textContent = message;
+        if (fromHub) {
+          document.documentElement.classList.remove('hub-launch');
+          $('lobbyTitle').textContent = '未能建立房間';
+          $('lobbyInfo').textContent = message;
+          $('lobbyError').textContent = '請返回遊戲問答重新設定。';
+          show('lobbyScreen');
+        }
+        return;
+      }
       roomCode = res.code;
       const energyLabel = res.settings.infiniteEnergy
         ? `無限能量（顯示上限 ${res.settings.maxEnergy}）`
@@ -382,6 +395,8 @@
       $('lobbyInfo').textContent = `題庫：${res.setTitle} · ${res.questionCount} 題 · ${Math.round(res.durationSec / 60)} 分鐘 · ${energyLabel}`;
       $('lobbyRoster').innerHTML = '<span class="muted">等待學生加入…</span>';
       $('startGameBtn').disabled = true;
+      document.documentElement.classList.remove('hub-launch');
+      $('lobbyTitle').textContent = '房間已建立';
       show('lobbyScreen');
     });
   }
@@ -406,7 +421,8 @@
   $('cancelRoomBtn').addEventListener('click', () => {
     socket.emit('host:close');
     roomCode = null;
-    show('setupScreen');
+    if (fromHub) location.href = hubUrl;
+    else show('setupScreen');
   });
 
   $('startGameBtn').addEventListener('click', () => {
@@ -511,8 +527,8 @@
     socket.emit('host:close');
     roomCode = null;
     latestPositions = [];
-    loadSets();
-    show('setupScreen');
+    if (fromHub) location.href = hubUrl;
+    else { loadSets(); show('setupScreen'); }
   });
 
   socket.on('room:closed', () => { /* host initiated; nothing to do */ });

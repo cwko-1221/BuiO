@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>遊戲主持台 | BuiO</title>
+  <script>if(new URLSearchParams(location.search).get('hub')==='1')document.documentElement.classList.add('hub-launch');</script>
+  <style>html.hub-launch #setupScreen{display:none!important}html.hub-launch #lobbyScreen{display:flex!important}</style>
   <link rel="stylesheet" href="/game/css/game.css?v=20260725-host-settings-excel-avatar-2">
 </head>
 <body>
@@ -97,9 +99,9 @@
     <div class="panel-center">
       <div class="card" style="max-width:620px">
         <div class="game-logo">⛺</div>
-        <h1>房間已建立</h1>
+        <h1 id="lobbyTitle">房間已建立</h1>
         <p class="join-hint">學生入 <b>主頁 → 遊戲</b> 就會見到你嘅房間，撳一下就加入</p>
-        <p class="sub" id="lobbyInfo"></p>
+        <p class="sub" id="lobbyInfo">正在建立房間…</p>
         <div class="roster" id="lobbyRoster"><span class="muted">等待學生加入…</span></div>
         <button id="startGameBtn" class="btn" disabled>▶️ 開始遊戲</button>
         <button id="cancelRoomBtn" class="btn secondary" style="margin-top:8px">取消房間</button>
@@ -141,6 +143,6 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/vendor/exceljs.min.js"></script>
-  <script src="/game/js/host.js?v=20260725-host-settings-excel-avatar-1"></script>
+  <script src="/game/js/host.js?v=20260802-unified-launch-1"></script>
 </body>
 </html>

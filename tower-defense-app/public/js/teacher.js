@@ -2,6 +2,8 @@ const $=id=>document.getElementById(id);
 const socket=io('/tower-defense');
 const launchParams=new URLSearchParams(location.search);
 const preview=location.pathname.endsWith('/preview');
+const fromHub=launchParams.get('hub')==='1';
+const hubUrl=preview?'/games/preview?role=teacher':'/games';
 const previewHeaders=preview?{'x-buio-preview':'1'}:{};
 const mapNames={starport:'星港迴廊',moonwood:'月影森徑',embercore:'熔火核心'};
 const statusNames={choosing:'選擇中',ready:'已準備',deploying:'部署中',playing:'守衛中',won:'成功守住',lost:'晶核失守'};
@@ -31,10 +33,14 @@ async function createClassroom(){
   if(!selectedSet)return;await loadIdentity();$('teacherError').textContent='';$('createClassroomBtn').disabled=true;
   socket.emit('host:create',{setId:selectedSet.id,hostName:teacherName},response=>{
     $('createClassroomBtn').disabled=false;
-    if(!response?.ok){$('teacherError').textContent=response?.message||'建立失敗。';return;}
+    if(!response?.ok){
+      const message=response?.message||'建立失敗。';$('teacherError').textContent=message;
+      if(fromHub){document.documentElement.classList.remove('hub-launch');$('teacherLobbyTitle').textContent='未能建立房間';$('roomSummary').textContent=message;$('lobbyError').textContent='請返回遊戲問答重新設定。';show('teacherLobby');}
+      return;
+    }
     room={code:response.code,setTitle:response.setTitle,questionCount:response.questionCount};
     $('roomCode').textContent=room.code;$('roomSummary').textContent=`題庫：${room.setTitle} · ${room.questionCount} 題 · 固定守衛級`;
-    latestRoster=[];renderLobbyRoster();show('teacherLobby');
+    latestRoster=[];renderLobbyRoster();document.documentElement.classList.remove('hub-launch');$('teacherLobbyTitle').textContent='等待守衛部署';show('teacherLobby');
   });
 }
 $('createClassroomBtn').addEventListener('click',createClassroom);
@@ -69,7 +75,7 @@ $('startClassroomBtn').addEventListener('click',()=>{
   });
 });
 
-$('closeClassroomBtn').addEventListener('click',()=>{if(!confirm('確定關閉這個房間？'))return;socket.emit('host:close');room=null;show('teacherSetup');});
+$('closeClassroomBtn').addEventListener('click',()=>{if(room&&!confirm('確定關閉這個房間？'))return;socket.emit('host:close');room=null;if(fromHub)location.href=hubUrl;else show('teacherSetup');});
 $('endClassroomBtn').addEventListener('click',()=>{if(!confirm('確定結束全班戰役？'))return;socket.emit('host:end',response=>{if(response?.ok)showResults(response.results||[]);});});
 socket.on('classroom:ended',({results})=>showResults(results||[]));
 
@@ -79,7 +85,7 @@ function showResults(results){
   show('teacherResults');
 }
 
-$('newClassroomBtn').addEventListener('click',()=>{room=null;selectedSet=null;document.querySelectorAll('[data-set]').forEach(item=>item.classList.remove('selected'));$('createClassroomBtn').disabled=true;show('teacherSetup');});
+$('newClassroomBtn').addEventListener('click',()=>{if(fromHub){location.href=hubUrl;return;}room=null;selectedSet=null;document.querySelectorAll('[data-set]').forEach(item=>item.classList.remove('selected'));$('createClassroomBtn').disabled=true;show('teacherSetup');});
 socket.on('classroom:closed',()=>{});
 
 async function init(){
