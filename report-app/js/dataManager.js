@@ -145,7 +145,7 @@ const DataManager = {
         const grades = this.getGrades();
         const years = new Set(this.records.map(r => r.schoolYear));
         return {
-            fileCount: files.size,
+            fileCount: this.imports.length || files.size,
             studentCount: students.length,
             gradeCount: grades.length,
             yearCount: years.size,
@@ -171,8 +171,8 @@ const DataManager = {
             termLabel: r.termLabel,
             studentCount: r.students.length,
             subjectCount: r.subjects.length,
-            importId: this.imports.find(item => item.filename === r.filename)?.id || '',
-            originalAvailable: Boolean(this.imports.find(item => item.filename === r.filename)?.originalAvailable),
+            importId: r.sourceImportId || '',
+            originalAvailable: Boolean(r.sourceOriginalAvailable),
         }));
     },
 

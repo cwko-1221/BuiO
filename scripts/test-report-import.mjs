@@ -62,13 +62,14 @@ async function login(studentId) {
   return cookie;
 }
 
-function record(filename, score = 88) {
+function record(filename, score = 88, termCode = 'T1A1') {
+  const termNumber = Number(termCode.match(/A(\d+)$/)?.[1] || 1);
   return {
     filename,
-    sheetName: 'ASR_Score_List_by_Class_1',
+    sheetName: `ASR_Score_List_by_Class_${termNumber}`,
     schoolYear: '2025/2026',
-    termCode: 'T1A1',
-    termLabel: 'Term 1',
+    termCode,
+    termLabel: `Term ${termNumber}`,
     grade: 'P4',
     gradeNum: 4,
     className: '4A',
@@ -88,12 +89,12 @@ async function makeWorkbook() {
   return Buffer.from(await workbook.xlsx.writeBuffer());
 }
 
-async function uploadWorkbook(cookie, workbookBuffer, score = 88) {
+async function uploadWorkbook(cookie, workbookBuffer, score = 88, termCode = 'T1A1') {
   const form = new FormData();
   form.append('file', new Blob([workbookBuffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   }), '四年級_2025.xlsx');
-  form.append('records', JSON.stringify([record('四年級_2025.xlsx', score)]));
+  form.append('records', JSON.stringify([record('四年級_2025.xlsx', score, termCode)]));
   return fetch(`${base}/api/report/imports`, { method: 'POST', headers: { Cookie: cookie }, body: form });
 }
 
@@ -136,10 +137,22 @@ try {
   assert.equal(response.status, 200);
   assert.deepEqual(Buffer.from(await response.arrayBuffer()), workbookBuffer, 'downloaded original must match upload bytes');
 
-  response = await uploadWorkbook(teacherCookie, workbookBuffer, 93);
+  response = await uploadWorkbook(teacherCookie, workbookBuffer, 91, 'T1A2');
   payload = await response.json();
-  assert.equal(payload.imports.length, 1, 're-uploading the same filename must replace, not duplicate');
-  assert.equal(payload.records[0].students[0].scores['數學'].total, 93);
+  assert.equal(payload.imports.length, 2, 'the same filename may have separate source uploads for different terms');
+  assert.equal(payload.records.length, 2);
+  assert.equal(payload.records.find(item => item.termCode === 'T1A1').students[0].scores['數學'].total, 88);
+  assert.equal(payload.records.find(item => item.termCode === 'T1A2').students[0].scores['數學'].total, 91);
+  const term2ImportId = payload.records.find(item => item.termCode === 'T1A2').sourceImportId;
+
+  response = await uploadWorkbook(teacherCookie, workbookBuffer, 93, 'T1A1');
+  payload = await response.json();
+  assert.equal(payload.imports.length, 2, 're-uploading one term replaces only that term source import');
+  assert.equal(payload.records.length, 2, 'updating Term 1 must preserve Term 2');
+  assert.equal(payload.records.find(item => item.termCode === 'T1A1').students[0].scores['數學'].total, 93);
+  assert.equal(payload.records.find(item => item.termCode === 'T1A2').students[0].scores['數學'].total, 91);
+  assert.equal(payload.records.find(item => item.termCode === 'T1A2').sourceImportId, term2ImportId,
+    'updating Term 1 must keep the Term 2 original file link');
 
   response = await fetch(`${base}/api/report/data`, { method: 'DELETE', headers: { Cookie: teacherCookie } });
   assert.equal(response.status, 200);

@@ -34,8 +34,19 @@ function publicPayload(imports) {
   return {
     success: true,
     imports: imports.map(({ records, ...item }) => item),
-    records: imports.flatMap(item => item.records),
+    records: imports.flatMap(item => item.records.map(record => ({
+      ...record,
+      sourceImportId: item.id,
+      sourceOriginalAvailable: item.originalAvailable,
+      sourceUploadedAt: item.uploadedAt,
+    }))),
   };
+}
+
+function recordIdentity(record) {
+  return [record?.schoolYear, record?.grade, record?.className, record?.termCode || record?.termLabel]
+    .map(value => String(value || '').trim().toUpperCase())
+    .join('\u001f');
 }
 
 function validateRecords(value, filename) {
@@ -48,6 +59,7 @@ function validateRecords(value, filename) {
   if (!Array.isArray(records) || records.length === 0 || records.length > 500) {
     throw Object.assign(new Error('Excel 內沒有可用的考評工作表'), { status: 400 });
   }
+  const seenIdentities = new Set();
   return records.map((record, index) => {
     if (!record || typeof record !== 'object' || Array.isArray(record)) {
       throw Object.assign(new Error(`第 ${index + 1} 個工作表資料格式不正確`), { status: 400 });
@@ -63,6 +75,11 @@ function validateRecords(value, filename) {
         throw Object.assign(new Error(`第 ${index + 1} 個工作表缺少 ${key}`), { status: 400 });
       }
     }
+    const identity = recordIdentity(record);
+    if (seenIdentities.has(identity)) {
+      throw Object.assign(new Error(`第 ${index + 1} 個工作表與同一檔案內另一工作表的學年、年級、班別及考績期重複`), { status: 400 });
+    }
+    seenIdentities.add(identity);
     return { ...record, filename };
   });
 }

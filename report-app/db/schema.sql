@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS AssessmentImports (
   UploadedAt TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_assessment_imports_filename_ci
+DROP INDEX IF EXISTS idx_assessment_imports_filename_ci;
+CREATE INDEX IF NOT EXISTS idx_assessment_imports_filename
   ON AssessmentImports (LOWER(Filename));
 CREATE INDEX IF NOT EXISTS idx_assessment_imports_uploaded_at
   ON AssessmentImports (UploadedAt DESC);

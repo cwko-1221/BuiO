@@ -22,7 +22,8 @@ async function ensureSchema() {
         UploadedBy VARCHAR(20),
         UploadedAt TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_assessment_imports_filename_ci
+      DROP INDEX IF EXISTS idx_assessment_imports_filename_ci;
+      CREATE INDEX IF NOT EXISTS idx_assessment_imports_filename
         ON AssessmentImports (LOWER(Filename));
       CREATE INDEX IF NOT EXISTS idx_assessment_imports_uploaded_at
         ON AssessmentImports (UploadedAt DESC);
@@ -55,6 +56,17 @@ function normalizeImport(row) {
   };
 }
 
+function recordKey(record) {
+  return [record?.schoolYear, record?.grade, record?.className, record?.termCode || record?.termLabel]
+    .map(value => String(value || '').trim().toUpperCase())
+    .join('\u001f');
+}
+
+function retainUnmatchedRecords(existingRecords, incomingKeys) {
+  return (Array.isArray(existingRecords) ? existingRecords : [])
+    .filter(record => !incomingKeys.has(recordKey(record)));
+}
+
 async function listImports() {
   await ensureSchema();
   if (config.db.mode === 'postgres') {
@@ -81,12 +93,27 @@ async function replaceImport({ filename, mimeType = '', fileBuffer = null, recor
   const id = crypto.randomUUID();
   const uploadedAt = new Date().toISOString();
   const fileSize = fileBuffer ? fileBuffer.length : 0;
+  const incomingKeys = new Set(records.map(recordKey));
 
   if (config.db.mode === 'postgres') {
     const client = await getPool().connect();
     try {
       await client.query('BEGIN');
-      await client.query('DELETE FROM AssessmentImports WHERE LOWER(Filename)=LOWER($1)', [filename]);
+      // Serialize record-level merges so concurrent uploads cannot create two
+      // rows for the same year + grade + class + term identity.
+      await client.query("SELECT pg_advisory_xact_lock(hashtext('assessment-import-record-merge'))");
+      const { rows: existingImports } = await client.query(
+        'SELECT ID AS id, Records AS records FROM AssessmentImports FOR UPDATE'
+      );
+      for (const existing of existingImports) {
+        const retained = retainUnmatchedRecords(existing.records, incomingKeys);
+        if (retained.length === existing.records.length) continue;
+        if (retained.length === 0) {
+          await client.query('DELETE FROM AssessmentImports WHERE ID=$1', [existing.id]);
+        } else {
+          await client.query('UPDATE AssessmentImports SET Records=$1::jsonb WHERE ID=$2', [JSON.stringify(retained), existing.id]);
+        }
+      }
       await client.query(`
         INSERT INTO AssessmentImports
           (ID, Filename, MimeType, FileSize, FileData, Records, Source, UploadedBy, UploadedAt)
@@ -101,9 +128,10 @@ async function replaceImport({ filename, mimeType = '', fileBuffer = null, recor
     }
   } else {
     const data = jsonData();
-    data.assessmentImports = data.assessmentImports.filter(
-      row => String(row.filename).toLocaleLowerCase() !== String(filename).toLocaleLowerCase()
-    );
+    data.assessmentImports = data.assessmentImports.flatMap(row => {
+      const retained = retainUnmatchedRecords(row.records, incomingKeys);
+      return retained.length > 0 ? [{ ...row, records: retained }] : [];
+    });
     data.assessmentImports.push({
       id,
       filename,
