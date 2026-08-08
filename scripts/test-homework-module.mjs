@@ -131,15 +131,31 @@ try {
   assert.equal(result.response.status, 201, 'monitor creates today record');
   assert.equal(result.data.record.homeworks.length, 2, 'multiple homeworks can be saved for one date');
   assert.equal(result.data.record.homeworks[1].statuses[0].status, 'absent', 'Absent status is persisted');
-  assert.equal((await request(monitor, '/api/homework/records', { method: 'POST', body: recordBody })).response.status, 409, 'saved record is immutable to monitor');
+  const monitorUpdate = structuredClone(result.data.record);
+  monitorUpdate.homeworks[0].title = '工作紙（一）修訂';
+  monitorUpdate.homeworks.push({
+    id: 'hw-3', title: '補充練習',
+    statuses: ['S001', 'S002', 'S003'].map(studentId => ({ studentId, status: 'complete' })),
+  });
+  result = await request(monitor, '/api/homework/records', { method: 'PUT', body: monitorUpdate });
+  assert.equal(result.response.status, 200, 'monitor can update today record');
+  assert.equal(result.data.record.homeworks.length, 3, 'monitor can add homework after saving');
+  assert.equal(result.data.record.homeworks[0].title, '工作紙（一）修訂', 'monitor edits saved homework');
+  assert.equal((await request(monitor, '/api/homework/records', { method: 'PUT', body: { ...monitorUpdate, date: '2020-01-01' } })).response.status, 400, 'past record stays read-only');
+  assert.equal((await request(monitor, '/api/homework/records', { method: 'POST', body: recordBody })).response.status, 409, 'duplicate create is rejected');
 
   result = await request(nonMonitor, '/api/homework/pending');
   assert.equal(result.data.pending.length, 1, 'homepage reminder sees outstanding homework');
+  assert.equal(result.data.pending[0].subjectName, '中文 A組', 'homepage reminder includes the subject and group');
+  assert.equal((await request(nonMonitor, '/api/homework/records', { method: 'PUT', body: monitorUpdate })).response.status, 403, 'non-monitor cannot update record');
   const teacherRecord = await request(teacher, `/api/homework/records?academicYear=${year}&className=P4&subject=chinese-a&date=${today}`);
-  teacherRecord.data.record.homeworks[0].statuses.find(row => row.studentId === 'S003').status = 'made_up';
+  teacherRecord.data.record.homeworks[0].statuses.find(row => row.studentId === 'S003').madeUp = true;
   teacherRecord.data.record.homeworks[1].title = '默書改正（老師修訂）';
   result = await request(teacher, '/api/homework/records', { method: 'PUT', body: { ...recordBody, homeworks: teacherRecord.data.record.homeworks } });
   assert.equal(result.response.status, 200, 'teacher marks made up');
+  const madeUpRow = result.data.record.homeworks[0].statuses.find(row => row.studentId === 'S003');
+  assert.equal(madeUpRow.status, 'missing', 'made-up flag does not change the primary status');
+  assert.equal(madeUpRow.madeUp, true, 'made-up flag is stored independently');
   assert.equal(result.data.record.homeworks[1].title, '默書改正（老師修訂）', 'teacher can edit any homework record');
   const pdf = await fetch(`${base}/api/homework/records-pdf?academicYear=${year}&className=P4&subject=chinese-a&date=${today}`, { headers: { Cookie: teacher } });
   assert.equal(pdf.status, 200);
@@ -150,7 +166,13 @@ try {
   assert.ok(pdfBuffer.toString('latin1').includes('5DE54F5C7D19'), 'PDF contains the homework title 工作紙');
   assert.equal((await request(nonMonitor, '/api/homework/pending')).data.pending.length, 0, 'made-up item leaves reminder');
   result = await request(teacher, `/api/homework/analysis?academicYear=${year}&className=P4&studentId=S003`);
-  assert.equal(result.data.rows[0].status, 'made_up', 'analysis retains made-up history');
+  assert.equal(result.data.rows[0].status, 'missing', 'analysis retains the original missing status');
+  assert.equal(result.data.rows[0].madeUp, true, 'analysis shows the independent made-up flag');
+  result = await request(teacher, `/api/homework/class-analysis?academicYear=${year}&className=P4&dateFrom=${today}&dateTo=${today}`);
+  assert.equal(result.response.status, 200, 'teacher can run class analysis');
+  assert.equal(result.data.totalMissing, 1, 'class analysis counts historical missing work even after made up');
+  assert.equal(result.data.rows.find(row => row.id === 'S003').missingCount, 1, 'class analysis counts per student');
+  assert.equal(result.data.rows.find(row => row.id === 'S002').missingCount, 0, 'class analysis includes students with zero missing work');
 
   console.log('✅ Homework module API tests passed (isolated fixture).');
 } finally {

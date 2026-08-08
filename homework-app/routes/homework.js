@@ -166,14 +166,14 @@ router.get('/records-pdf', requireTeacher, async (req, res, next) => {
     const [record, roster] = await Promise.all([repo.findRecord({ ...assignment, date }), repo.listStudents(assignment.className, assignment.subject)]);
     if (!record) return fail(res, 404, '找不到記錄');
     const names = new Map(roster.map(student => [student.id, `${student.name} (${student.id})`]));
-    const labels = { complete: '完成', missing: '欠交', absent: 'Absent', made_up: '已補做' };
+    const labels = { complete: '完成', missing: '欠交', absent: 'Absent' };
     const subject = subjectById(assignment.subject);
     const lines = ['杯澳公立學校　欠交功課記錄', `${assignment.academicYear}　${assignment.className}　${subject.name}　${date}`, ''];
     record.homeworks.forEach((homework, index) => {
       lines.push(`${index + 1}. ${homework.title}`);
       const exceptions = homework.statuses.filter(item => item.status !== 'complete');
       if (!exceptions.length) lines.push('　全班完成');
-      else exceptions.forEach(item => lines.push(`　${names.get(item.studentId) || item.studentId}：${labels[item.status] || item.status}`));
+      else exceptions.forEach(item => lines.push(`　${names.get(item.studentId) || item.studentId}：${labels[item.status] || item.status}${item.madeUp ? '（已補做）' : ''}`));
       lines.push('');
     });
     const filename = `homework-${date}-${assignment.className}-${assignment.subject}.pdf`;
@@ -182,12 +182,17 @@ router.get('/records-pdf', requireTeacher, async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-function normalizeHomeworks(homeworks, rosterIds, statuses) {
+function normalizeHomeworks(homeworks, rosterIds, statuses, { allowMadeUp = false, preservedHomeworks = [] } = {}) {
   if (!Array.isArray(homeworks) || homeworks.length < 1 || homeworks.length > 12) return { error: '請新增 1 至 12 份功課' };
   const allowedStatuses = new Set(statuses);
   const allowedStudents = new Set(rosterIds);
+  const preservedMadeUp = new Map();
+  for (const homework of preservedHomeworks) for (const row of homework.statuses || []) {
+    preservedMadeUp.set(`${homework.id}:${row.studentId}`, Boolean(row.madeUp));
+  }
   const normalized = [];
   for (let index = 0; index < homeworks.length; index++) {
+    const id = text(homeworks[index]?.id, 50) || `hw-${Date.now()}-${index + 1}`;
     const title = text(homeworks[index]?.title, 150);
     if (!title) return { error: `請填寫第 ${index + 1} 份功課名稱` };
     const incoming = Array.isArray(homeworks[index].statuses) ? homeworks[index].statuses : [];
@@ -199,7 +204,17 @@ function normalizeHomeworks(homeworks, rosterIds, statuses) {
       statusMap.set(studentId, status);
     }
     if (statusMap.size !== rosterIds.length) return { error: '請為所有學生選擇狀態' };
-    normalized.push({ id: text(homeworks[index]?.id, 50) || `hw-${Date.now()}-${index + 1}`, title, statuses: rosterIds.map(studentId => ({ studentId, status: statusMap.get(studentId) })) });
+    normalized.push({
+      id,
+      title,
+      statuses: rosterIds.map(studentId => {
+        const incoming = homeworks[index].statuses.find(row => text(row.studentId, 20) === studentId);
+        const madeUp = allowMadeUp
+          ? Boolean(incoming?.madeUp)
+          : Boolean(preservedMadeUp.get(`${id}:${studentId}`));
+        return { studentId, status: statusMap.get(studentId), madeUp };
+      }),
+    });
   }
   return { homeworks: normalized };
 }
@@ -215,7 +230,7 @@ router.post('/records', async (req, res, next) => {
     if (!subjectsForGrade(assignment.className).some(item => item.id === assignment.subject)) return fail(res, 400, '該年級沒有此科目');
     if (date !== todayHongKong()) return fail(res, 400, '科長只可填報今天的記錄；過去日期只供查閱');
     if (!(await isMonitor(req.session.studentId, assignment.academicYear, assignment.className, assignment.subject))) return fail(res, 403, '你未獲委任為此科科長');
-    if (await repo.findRecord({ ...assignment, date })) return fail(res, 409, '此日期的記錄已儲存，學生不可再更改');
+    if (await repo.findRecord({ ...assignment, date })) return fail(res, 409, '此日期的記錄已建立，請使用修改功能');
     const roster = await repo.listStudents(assignment.className, assignment.subject);
     const result = normalizeHomeworks(req.body.homeworks, roster.map(student => student.id), STUDENT_STATUSES);
     if (result.error) return fail(res, 400, result.error);
@@ -227,7 +242,7 @@ router.post('/records', async (req, res, next) => {
   }
 });
 
-router.put('/records', requireTeacher, async (req, res, next) => {
+router.put('/records', async (req, res, next) => {
   try {
     const assignment = {
       academicYear: text(req.body.academicYear, 10), className: text(req.body.className, 10), subject: text(req.body.subject, 40),
@@ -235,11 +250,22 @@ router.put('/records', requireTeacher, async (req, res, next) => {
     const date = text(req.body.date, 10);
     if (!isAcademicYear(assignment.academicYear) || !/^P[1-6]$/.test(assignment.className) || !subjectById(assignment.subject) || !isIsoDate(date)) return fail(res, 400, '篩選資料不正確');
     if (!subjectsForGrade(assignment.className).some(item => item.id === assignment.subject)) return fail(res, 400, '該年級沒有此科目');
+    const isTeacher = req.session.role === 'teacher';
+    if (!isTeacher) {
+      if (date !== todayHongKong()) return fail(res, 400, '科長只可修改今天的記錄；過往日期只供查看');
+      if (!(await isMonitor(req.session.studentId, assignment.academicYear, assignment.className, assignment.subject))) return fail(res, 403, '你沒有此班別及科目的科長權限');
+    }
+    const existing = await repo.findRecord({ ...assignment, date });
+    if (!existing) return fail(res, 404, '找不到記錄');
     const roster = await repo.listStudents(assignment.className, assignment.subject);
-    const result = normalizeHomeworks(req.body.homeworks, roster.map(student => student.id), TEACHER_STATUSES);
+    const result = normalizeHomeworks(
+      req.body.homeworks,
+      roster.map(student => student.id),
+      isTeacher ? TEACHER_STATUSES : STUDENT_STATUSES,
+      { allowMadeUp: isTeacher, preservedHomeworks: isTeacher ? [] : existing.homeworks },
+    );
     if (result.error) return fail(res, 400, result.error);
     const record = await repo.updateRecord({ ...assignment, date, homeworks: result.homeworks, updatedBy: req.session.studentId });
-    if (!record) return fail(res, 404, '找不到記錄');
     res.json({ success: true, message: '記錄已更新', record });
   } catch (error) { next(error); }
 });
@@ -255,8 +281,8 @@ router.get('/analysis', requireTeacher, async (req, res, next) => {
     const records = await repo.listRecords({ academicYear, className });
     const rows = [];
     for (const record of records) for (const homework of record.homeworks) {
-      const status = homework.statuses.find(item => item.studentId === studentId)?.status;
-      if (status === 'missing' || status === 'made_up') rows.push({ date: record.date, subject: record.subject, homework: homework.title, status });
+      const item = homework.statuses.find(entry => entry.studentId === studentId);
+      if (item?.status === 'missing') rows.push({ date: record.date, subject: record.subject, homework: homework.title, status: item.status, madeUp: Boolean(item.madeUp) });
     }
     res.json({ success: true, student: { id: studentId, name: user.name }, rows });
   } catch (error) { next(error); }
@@ -270,11 +296,37 @@ router.get('/pending', async (req, res, next) => {
     const records = await repo.listRecords({ className: user.classname || '' });
     const pending = [];
     for (const record of records) for (const homework of record.homeworks) {
-      if (homework.statuses.find(item => item.studentId === req.session.studentId)?.status === 'missing') {
-        pending.push({ date: record.date, subject: record.subject, homework: homework.title });
+      const item = homework.statuses.find(entry => entry.studentId === req.session.studentId);
+      if (item?.status === 'missing' && !item.madeUp) {
+        pending.push({ date: record.date, subject: record.subject, subjectName: subjectById(record.subject)?.name || record.subject, homework: homework.title });
       }
     }
     res.json({ success: true, pending });
+  } catch (error) { next(error); }
+});
+
+router.get('/class-analysis', requireTeacher, async (req, res, next) => {
+  try {
+    const academicYear = text(req.query.academicYear, 10);
+    const className = text(req.query.className, 10);
+    const dateFrom = text(req.query.dateFrom, 10);
+    const dateTo = text(req.query.dateTo, 10);
+    if (!isAcademicYear(academicYear) || !/^P[1-6]$/.test(className) || !isIsoDate(dateFrom) || !isIsoDate(dateTo) || dateFrom > dateTo) {
+      return fail(res, 400, '請選擇正確的學年、班級及日期範圍');
+    }
+    const [students, records] = await Promise.all([
+      repo.listClassStudents(className),
+      repo.listRecords({ academicYear, className, dateFrom, dateTo }),
+    ]);
+    const counts = new Map(students.map(student => [student.id, 0]));
+    for (const record of records) for (const homework of record.homeworks) for (const item of homework.statuses || []) {
+      if (item.status === 'missing' && counts.has(item.studentId)) counts.set(item.studentId, counts.get(item.studentId) + 1);
+    }
+    res.json({
+      success: true,
+      rows: students.map(student => ({ ...student, missingCount: counts.get(student.id) || 0 })),
+      totalMissing: [...counts.values()].reduce((sum, count) => sum + count, 0),
+    });
   } catch (error) { next(error); }
 });
 

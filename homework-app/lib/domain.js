@@ -18,7 +18,8 @@ const SUBJECTS = Object.freeze([
 ]);
 
 const STUDENT_STATUSES = Object.freeze(['complete', 'missing', 'absent']);
-const TEACHER_STATUSES = Object.freeze([...STUDENT_STATUSES, 'made_up']);
+// "Made up" is an independent follow-up flag, not a fourth attendance status.
+const TEACHER_STATUSES = Object.freeze([...STUDENT_STATUSES]);
 
 function subjectById(id) {
   return SUBJECTS.find(subject => subject.id === String(id || '')) || null;

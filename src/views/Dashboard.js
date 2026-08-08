@@ -55,7 +55,7 @@ function renderHomeworkReminder() {
   }
   return `<div class="homework-reminder">
     <strong>你有 ${pending.length} 份功課需要補做</strong>
-    <ul>${pending.slice(0, 5).map(item => `<li>${escapeReminder(item.date)} · ${escapeReminder(item.homework)}</li>`).join('')}</ul>
+    <ul>${pending.slice(0, 5).map(item => `<li>${escapeReminder(item.date)} · ${escapeReminder(item.subjectName || item.subject)} · ${escapeReminder(item.homework)}</li>`).join('')}</ul>
     ${pending.length > 5 ? `<span>另有 ${pending.length - 5} 份…</span>` : ''}
   </div>`;
 }

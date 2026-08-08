@@ -47,6 +47,32 @@ function mapUser(user) {
   };
 }
 
+function normalizeStoredHomeworks(homeworks) {
+  if (!Array.isArray(homeworks)) return [];
+  return homeworks.map(homework => ({
+    ...homework,
+    statuses: (Array.isArray(homework.statuses) ? homework.statuses : []).map(row => (
+      row.status === 'made_up'
+        ? { ...row, status: 'missing', madeUp: true }
+        : { ...row, madeUp: Boolean(row.madeUp) }
+    )),
+  }));
+}
+
+async function listClassStudents(className) {
+  if (config.db.mode === 'postgres') {
+    const { rows } = await getPool().query(`
+      SELECT StudentID AS studentid, Name AS name, Role AS role, ClassName AS classname,
+        ClassNo AS classno, ChineseGroup AS chinesegroup, EnglishGroup AS englishgroup, MathGroup AS mathgroup
+      FROM Users WHERE Role <> 'teacher' AND ClassName = $1
+      ORDER BY COALESCE(ClassNo, 999), StudentID`, [className]);
+    return rows.map(mapUser);
+  }
+  return jsonData().users.filter(row => row.role !== 'teacher' && row.classname === className)
+    .sort((a, b) => (Number(a.classno) || 999) - (Number(b.classno) || 999) || a.studentid.localeCompare(b.studentid))
+    .map(mapUser);
+}
+
 async function listStudents(className, subject) {
   if (config.db.mode === 'postgres') {
     const { rows } = await getPool().query(`
@@ -117,7 +143,7 @@ function mapRecord(row) {
   return {
     id: Number(row.id), academicYear: row.academicYear || row.academicyear,
     className: row.className || row.classname, subject: row.subject,
-    date: String(row.date || row.recorddate).slice(0, 10), homeworks: row.homeworks || [],
+    date: String(row.date || row.recorddate).slice(0, 10), homeworks: normalizeStoredHomeworks(row.homeworks),
     createdBy: row.createdBy || row.createdby, submittedAt: row.submittedAt || row.submittedat,
     updatedBy: row.updatedBy || row.updatedby, updatedAt: row.updatedAt || row.updatedat,
   };
@@ -195,4 +221,4 @@ async function listRecords(filters = {}) {
     .sort((a, b) => b.date.localeCompare(a.date) || a.subject.localeCompare(b.subject)).map(mapRecord);
 }
 
-module.exports = { ensureSchema, listStudents, findUser, listMonitors, replaceMonitors, findRecord, createRecord, updateRecord, listRecords };
+module.exports = { ensureSchema, listStudents, listClassStudents, findUser, listMonitors, replaceMonitors, findRecord, createRecord, updateRecord, listRecords };
