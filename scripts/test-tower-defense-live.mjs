@@ -41,9 +41,8 @@ async function worldClick(x,y){
   await page.mouse.click(box.x+x/1280*box.width,box.y+y/720*box.height);
 }
 
-async function buildTower(type){
+async function buildTower(type,{drag=false}={}){
   const before=await page.evaluate(()=>window.__towerDefense.simulation.state.towers.length);
-  await page.locator(`[data-tower="${type}"]`).click();
   const point=await page.evaluate(towerType=>{
     const simulation=window.__towerDefense.simulation;
     const segmentDistance=(x,y,path)=>{
@@ -54,8 +53,8 @@ async function buildTower(type){
       }
       return best;
     };
-    const candidates=[];
-    for(let y=90;y<=650;y+=35)for(let x=65;x<=1215;x+=38){
+    const candidates=[],gridSize=72;
+    for(let y=gridSize*.5;y<720;y+=gridSize)for(let x=gridSize*.5;x<1280;x+=gridSize){
       if(!simulation.canBuild(towerType,x,y).ok)continue;
       candidates.push({x,y,distance:Math.min(...simulation.paths.map(path=>segmentDistance(x,y,path)))});
     }
@@ -63,7 +62,13 @@ async function buildTower(type){
     return candidates[0]||null;
   },type);
   assert(point,`no valid build point for ${type}`);
-  await worldClick(point.x,point.y);
+  if(drag){
+    const canvas=page.locator('#gameCanvas canvas'),box=await canvas.boundingBox();assert(box,'game canvas has no bounding box');
+    await page.locator(`[data-tower="${type}"]`).dragTo(canvas,{targetPosition:{x:point.x/1280*box.width,y:point.y/720*box.height}});
+  }else{
+    await page.locator(`[data-tower="${type}"]`).click();
+    await worldClick(point.x,point.y);
+  }
   await page.waitForFunction(expected=>window.__towerDefense.simulation.state.towers.length===expected,before+1);
   return point;
 }
@@ -207,7 +212,7 @@ try{
   await page.locator('[data-close-modal="helpModal"]').click();
   await page.waitForFunction(()=>!window.__towerDefense.simulation.state.paused);
 
-  await buildTower('bolt');
+  await buildTower('bolt',{drag:true});
   assert(await page.locator('#towerPanel').evaluate(panel=>panel.classList.contains('open')),'built tower did not open its management panel');
 
   screenshots.question=join(tmpdir(),'buio-crystal-bastion-question.png');
@@ -253,6 +258,26 @@ try{
   await page.waitForFunction(()=>window.__towerDefense.simulation.state.phase==='wave');
   await page.waitForFunction(()=>window.__towerDefense.scene.__qaAutoStart===true);
   await page.waitForFunction(()=>window.__towerDefense.simulation.state.enemies.length>0,{timeout:5000});
+
+  await page.locator('#quizBtn').click();
+  await page.waitForSelector('#questionPanel.open [data-choice]');
+  const movingQuestionPrompt=await page.locator('#questionPrompt').textContent();
+  const movingQuestionAnswer=answerByPrompt.get(movingQuestionPrompt);
+  assert(movingQuestionAnswer,`unknown built-in question: ${movingQuestionPrompt}`);
+  const movementBefore=await page.evaluate(()=>({
+    paused:window.__towerDefense.simulation.state.paused,
+    elapsed:window.__towerDefense.simulation.state.elapsed,
+    distance:window.__towerDefense.simulation.state.enemies[0]?.distance,
+  }));
+  await page.waitForTimeout(500);
+  const movementAfter=await page.evaluate(()=>({
+    paused:window.__towerDefense.simulation.state.paused,
+    elapsed:window.__towerDefense.simulation.state.elapsed,
+    distance:window.__towerDefense.simulation.state.enemies[0]?.distance,
+  }));
+  assert(!movementBefore.paused&&!movementAfter.paused&&movementAfter.elapsed>movementBefore.elapsed+.3&&movementAfter.distance>movementBefore.distance,`question panel paused combat: ${JSON.stringify({movementBefore,movementAfter})}`);
+  await page.locator('[data-choice]').filter({hasText:movingQuestionAnswer}).click();
+  await page.waitForFunction(()=>!document.querySelector('#questionPanel').classList.contains('open'));
 
   await page.evaluate(()=>{window.__towerDefense.simulation.state.focus=100;});
   await page.waitForFunction(()=>!document.querySelector('[data-ability="stasis"]').disabled);

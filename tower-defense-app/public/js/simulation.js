@@ -1,7 +1,7 @@
 import {
   ABILITIES, DIFFICULTIES, ENEMIES, MAPS, QUIZ_RULES, TOWERS, WORLD,
   buildWave, distanceToPaths, mapPaths, pathLength, pointAlongPath, towerStats,
-} from './content.js?v=20260802-2';
+} from './content.js?v=20260809-path-grid-1';
 
 const clamp = (value,min,max) => Math.max(min,Math.min(max,value));
 const distance = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
@@ -72,6 +72,10 @@ export class TowerDefenseSimulation {
     if (!definition) return { ok:false,reason:'未知的防禦塔。' };
     if (this.state.phase==='won'||this.state.phase==='lost') return { ok:false,reason:'戰役已經結束。' };
     if (this.state.gold<definition.cost) return { ok:false,reason:'晶幣不足。' };
+    return this.canOccupy(x,y);
+  }
+
+  canOccupy(x,y) {
     if (x<42||x>WORLD.width-42||y<72||y>WORLD.height-42) return { ok:false,reason:'不能建在地圖邊緣。' };
     if (distanceToPaths(x,y,this.paths)<WORLD.pathWidth*.5+27) return { ok:false,reason:'不能阻塞怪物路線。' };
     if (this.map.noBuild.some(zone => x>zone.x-30&&x<zone.x+zone.w+30&&y>zone.y-30&&y<zone.y+zone.h+30)) {

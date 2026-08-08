@@ -101,7 +101,7 @@
       </div>
 
       <section class="tower-dock" aria-label="防禦塔建造列">
-        <div class="tower-dock-label"><span>防線</span><small>按 1–6 快速選塔</small></div>
+        <div class="tower-dock-label"><span>防線</span><small>點選或拖到格子建塔</small></div>
         <div id="towerCards" class="tower-cards"></div>
         <button id="nextWaveBtn" class="wave-button"><span>▶</span><b>開始第 1 波</b><small>Space</small></button>
       </section>
@@ -125,7 +125,7 @@
           <button class="modal-close" data-close-modal="helpModal">×</button>
           <div class="eyebrow">FIELD MANUAL</div><h2 id="helpTitle">晶核守衛手冊</h2>
           <div class="help-grid">
-            <article><b>建造與升級</b><p>選擇下方防禦塔，再點擊道路以外的空地。點擊已建塔可升級、出售或改變目標優先。</p></article>
+            <article><b>建造與升級</b><p>點選防禦塔或把它拖到地圖；格子會標示可建位置，紅色預覽代表不能放置。點擊已建塔可升級、出售或改變目標優先。</p></article>
             <article><b>敵軍特性</b><p>敵軍會從多個入口分流進攻；火箭適合密集裝甲、星焰清理群怪、雪花霜域可範圍減速。</p></article>
             <article><b>知識經濟</b><p>按 Q 開啟題目。每波必須答對指定題數才可開始；擊破敵人只會掉落少量殘骸晶幣，無法取代答題。</p></article>
             <article><b>自動開戰</b><p>整備倒數為 30 秒。知識鑰匙足夠時可按 Space 提早開始；倒數歸零會自動開戰，未達門檻則等待答題。</p></article>
@@ -145,6 +145,6 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/tower-defense/vendor/phaser/phaser.min.js"></script>
-  <script type="module" src="/tower-defense/js/main.js?v=20260802-classroom-1"></script>
+  <script type="module" src="/tower-defense/js/main.js?v=20260809-path-grid-1"></script>
 </body>
 </html>

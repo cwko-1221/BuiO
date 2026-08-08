@@ -1,6 +1,6 @@
-import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, towerStats } from './content.js?v=20260802-classroom-1';
-import { TowerDefenseSimulation } from './simulation.js?v=20260802-classroom-1';
-import { BattleScene } from './BattleScene.js?v=20260802-4';
+import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, WORLD, towerStats } from './content.js?v=20260809-path-grid-1';
+import { TowerDefenseSimulation } from './simulation.js?v=20260809-path-grid-1';
+import { BattleScene } from './BattleScene.js?v=20260809-path-grid-1';
 import { CrystalAudio } from './audio.js?v=20260802-2';
 import { MAP_ART, TOWER_ART, atlasPosition } from './assets.js?v=20260802-1';
 
@@ -22,7 +22,7 @@ let me={name:'學生',studentId:null};
 let classroom=preview?{code:null,hostName:'預覽模式',setTitle:'晶核學院綜合題庫',phase:'preview'}:null;
 let roomsTimer=null,joining=false,classroomStarted=false,lastClassroomStateAt=0;
 let simulation=null,scene=null,phaserGame=null,questionSessionId=null;
-let selectedTowerId=null,panelSignature='',questionTimer=null,questionDeadline=0,activeQuestion=null,answering=false,quizWasPaused=false;
+let selectedTowerId=null,panelSignature='',questionTimer=null,questionDeadline=0,activeQuestion=null,answering=false;
 let lastHudSignature='',lastSoundAt=new Map(),modalWasPaused=false;
 
 function loadProfile(){
@@ -110,7 +110,52 @@ function selectBattlefield(mapId){
 
 function renderTowerDock(){
   $('towerCards').innerHTML=towerOrder.map((id,index)=>{const tower=TOWERS[id],color=`#${tower.color.toString(16).padStart(6,'0')}`,position=atlasPosition(TOWER_ART.frames[id],TOWER_ART.columns,TOWER_ART.rows);return `<button class="tower-card" data-tower="${id}" style="--tower-color:${color}" title="${tower.description}"><kbd>${index+1}</kbd><span class="tower-portrait" style="--sprite-x:${position.x}%;--sprite-y:${position.y}%"></span><b>${tower.name}</b><small><span>${tower.role}</span><strong>● ${tower.cost}</strong></small></button>`;}).join('');
-  document.querySelectorAll('[data-tower]').forEach(button=>button.addEventListener('click',()=>selectBuildTower(button.dataset.tower)));
+  document.querySelectorAll('[data-tower]').forEach(bindTowerCard);
+}
+
+function clientToWorld(clientX,clientY){
+  const canvas=$('gameCanvas').querySelector('canvas');if(!canvas)return null;
+  const rect=canvas.getBoundingClientRect();
+  if(clientX<rect.left||clientX>rect.right||clientY<rect.top||clientY>rect.bottom)return null;
+  return {x:(clientX-rect.left)*WORLD.width/rect.width,y:(clientY-rect.top)*WORLD.height/rect.height};
+}
+
+function bindTowerCard(button){
+  let drag=null,suppressClick=false;
+  button.draggable=true;
+  button.addEventListener('click',()=>{if(suppressClick){suppressClick=false;return;}selectBuildTower(button.dataset.tower);});
+  button.addEventListener('dragstart',event=>{
+    if(!simulation||!scene){event.preventDefault();return;}
+    scene.setPlacement(button.dataset.tower);
+    document.querySelectorAll('[data-tower]').forEach(card=>card.classList.toggle('selected',card===button));
+    event.dataTransfer?.setData('text/plain',button.dataset.tower);if(event.dataTransfer)event.dataTransfer.effectAllowed='copy';
+  });
+  button.addEventListener('dragend',()=>scene?.setPlacementPointer(0,0,false));
+  button.addEventListener('pointerdown',event=>{
+    if(event.button!==0||!simulation||!scene)return;
+    drag={pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,active:false};
+    button.setPointerCapture?.(event.pointerId);
+  });
+  button.addEventListener('pointermove',event=>{
+    if(!drag||drag.pointerId!==event.pointerId)return;
+    if(!drag.active&&Math.hypot(event.clientX-drag.startX,event.clientY-drag.startY)>7){
+      drag.active=true;scene.setPlacement(button.dataset.tower);
+      document.querySelectorAll('[data-tower]').forEach(card=>card.classList.toggle('selected',card===button));
+    }
+    if(!drag.active)return;
+    const point=clientToWorld(event.clientX,event.clientY);scene.setPlacementPointer(point?.x||0,point?.y||0,!!point);
+  });
+  button.addEventListener('pointerup',event=>{
+    if(!drag||drag.pointerId!==event.pointerId)return;
+    if(drag.active){
+      suppressClick=true;const point=clientToWorld(event.clientX,event.clientY);
+      if(point){scene.setPlacementPointer(point.x,point.y,true);scene.handleWorldClick(point.x,point.y);}
+      else scene.setPlacementPointer(0,0,false);
+      setTimeout(()=>{suppressClick=false;},0);
+    }
+    drag=null;
+  });
+  button.addEventListener('pointercancel',()=>{if(drag?.active)scene?.setPlacementPointer(0,0,false);drag=null;});
 }
 
 async function startCampaign(){
@@ -233,7 +278,7 @@ function cycleSpeed(){if(!simulation)return;simulation.setSpeed(simulation.state
 
 async function openQuestion(){
   if(!simulation||!questionSessionId||$('questionPanel').classList.contains('open'))return;
-  await audio.unlock();quizWasPaused=simulation.state.paused;simulation.togglePause(true);$('questionPanel').classList.add('open');$('questionPrompt').textContent='正在取得題目…';$('questionChoices').innerHTML='';$('questionFeedback').textContent='';answering=false;
+  await audio.unlock();$('questionPanel').classList.add('open');$('questionPrompt').textContent='正在取得題目…';$('questionChoices').innerHTML='';$('questionFeedback').textContent='';answering=false;
   try{
     const data=await api('/question',{method:'POST',body:{sessionId:questionSessionId}});activeQuestion=data.question;questionDeadline=activeQuestion.expiresAt;
     $('questionPrompt').textContent=activeQuestion.prompt;$('questionReward').textContent=`答對 +${Math.floor(activeQuestion.baseReward*simulation.quizRules.quizGoldMultiplier)} 晶幣起`;
@@ -259,7 +304,7 @@ async function answerQuestion(index){
   }catch(error){showToast(error.message,'error');setTimeout(closeQuestion,500);}
 }
 
-function closeQuestion(){clearInterval(questionTimer);questionTimer=null;activeQuestion=null;answering=false;$('questionPanel').classList.remove('open');if(simulation&&!quizWasPaused)simulation.togglePause(false);}
+function closeQuestion(){clearInterval(questionTimer);questionTimer=null;activeQuestion=null;answering=false;$('questionPanel').classList.remove('open');}
 
 function useAbility(id){
   if(!simulation||!scene)return;
@@ -291,6 +336,16 @@ function bindUi(){
   $('retryBtn').addEventListener('click',()=>{selectedMap=simulation.state.mapId;startCampaign();});$('campaignBtn').addEventListener('click',returnToCampaign);
   document.querySelectorAll('[data-close-modal]').forEach(button=>button.addEventListener('click',()=>{const modal=$(button.dataset.closeModal);modal.classList.remove('open');if(simulation&&!modalWasPaused)simulation.togglePause(false);}));
   document.querySelectorAll('[data-ability]').forEach(button=>button.addEventListener('click',()=>useAbility(button.dataset.ability)));
+  $('gameCanvas').addEventListener('dragover',event=>{
+    if(!scene?.placementType)return;event.preventDefault();
+    if(event.dataTransfer)event.dataTransfer.dropEffect='copy';
+    const point=clientToWorld(event.clientX,event.clientY);scene.setPlacementPointer(point?.x||0,point?.y||0,!!point);
+  });
+  $('gameCanvas').addEventListener('drop',event=>{
+    if(!scene?.placementType)return;event.preventDefault();
+    const point=clientToWorld(event.clientX,event.clientY);
+    if(point){scene.setPlacementPointer(point.x,point.y,true);scene.handleWorldClick(point.x,point.y);}
+  });
   const toggleAudio=async()=>{await audio.unlock();const muted=audio.toggle();$('audioBtn').textContent=$('menuAudioBtn').textContent=muted?'×':'♪';};$('audioBtn').addEventListener('click',toggleAudio);$('menuAudioBtn').addEventListener('click',toggleAudio);
   document.addEventListener('keydown',event=>{
     if(!$('gameScreen').classList.contains('active'))return;

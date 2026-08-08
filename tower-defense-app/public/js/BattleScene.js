@@ -1,4 +1,4 @@
-import { ENEMIES, TOWERS, WORLD, towerStats } from './content.js?v=20260802-2';
+import { ENEMIES, TOWERS, WORLD, towerStats } from './content.js?v=20260809-path-grid-1';
 import { BOSS_ART, ENEMY_ART, MAP_ART, TOWER_ART } from './assets.js?v=20260802-1';
 const MAP_SURFACES={
   starport:{outer:0x020a12,rail:0x3ad8d0,surface:0x1c2e3b,inner:0x263d4a},
@@ -35,6 +35,7 @@ export class BattleScene extends Phaser.Scene {
     this.drawMap();
     this.weatherGraphics=this.add.graphics().setDepth(12);
     this.weather=this.createWeather();
+    this.gridGraphics=this.add.graphics().setDepth(79);
     this.selectionGraphics=this.add.graphics().setDepth(80);
     this.previewGraphics=this.add.graphics().setDepth(82);
     this.placementSprite=this.add.sprite(0,0,TOWER_ART.key,0).setDepth(81).setAlpha(.62).setVisible(false).setDisplaySize(76,76);
@@ -65,18 +66,18 @@ export class BattleScene extends Phaser.Scene {
   setPlacement(type) {
     this.placementType=type&&TOWERS[type]?type:null;
     this.abilityTarget=null;this.selectedTowerId=null;
-    this.drawSelection();this.drawPlacementPreview();
+    this.drawSelection();this.drawPlacementGrid();this.drawPlacementPreview();
   }
 
   setAbilityTarget(id) {
     this.abilityTarget=id==='meteor'?id:null;
     this.placementType=null;this.selectedTowerId=null;
-    this.drawSelection();this.drawPlacementPreview();
+    this.drawSelection();this.drawPlacementGrid();this.drawPlacementPreview();
   }
 
   selectTower(id) {
     this.selectedTowerId=id;this.placementType=null;this.abilityTarget=null;
-    this.drawSelection();this.drawPlacementPreview();
+    this.drawSelection();this.drawPlacementGrid();this.drawPlacementPreview();
     const tower=this.sim.state.towers.find(item=>item.id===id)||null;
     this.hooks.onTowerSelected?.(tower);
   }
@@ -87,7 +88,8 @@ export class BattleScene extends Phaser.Scene {
       if(result.ok)this.abilityTarget=null;this.drawPlacementPreview();return;
     }
     if(this.placementType){
-      const result=this.sim.buildTower(this.placementType,x,y);this.hooks.onActionResult?.(result);
+      const point=this.snapToGrid(x,y);
+      const result=this.sim.buildTower(this.placementType,point.x,point.y);this.hooks.onActionResult?.(result);
       if(result.ok)this.selectTower(result.tower.id);return;
     }
     const tower=[...this.sim.state.towers]
@@ -111,25 +113,33 @@ export class BattleScene extends Phaser.Scene {
     this.add.image(WORLD.width*.5,WORLD.height*.5,`td-map-${map.id}`).setDisplaySize(WORLD.width,WORLD.height).setDepth(0);
     const vignette=this.add.graphics().setDepth(1);
     vignette.fillStyle(0x02070d,.12).fillRect(0,0,WORLD.width,WORLD.height);
-    const route=this.add.graphics().setDepth(4);for(const path of map.paths)this.drawPath(route,path,map.id);
+    const route=this.add.graphics().setDepth(4);this.drawPaths(route,map.paths,map.id);
     const pads=this.add.graphics().setDepth(5);for(const zone of map.noBuild)this.drawNoBuild(pads,zone,p);
     this.drawPortals(this.add.graphics().setDepth(8),map.paths,p);
   }
 
-  drawPath(g,points,mapId) {
+  drawPaths(g,paths,mapId) {
     const style=MAP_SURFACES[mapId];
+    const segments=new Map(),nodes=new Map();
+    const pointKey=point=>point.join(',');
+    const segmentKey=(a,b)=>[pointKey(a),pointKey(b)].sort().join('|');
+    for(const points of paths){
+      for(let index=0;index<points.length-1;index++)segments.set(segmentKey(points[index],points[index+1]),[points[index],points[index+1]]);
+      for(const point of points.slice(1,-1))nodes.set(pointKey(point),point);
+    }
     const drawSegments=(width,color,alpha)=>{
       g.lineStyle(width,color,alpha);
-      for(let index=0;index<points.length-1;index++)g.lineBetween(...points[index],...points[index+1]);
-      for(const [x,y] of points.slice(1,-1))g.fillStyle(color,alpha).fillCircle(x,y,width*.5);
+      for(const [a,b] of segments.values())g.lineBetween(...a,...b);
+      for(const [x,y] of nodes.values())g.fillStyle(color,alpha).fillCircle(x,y,width*.5);
     };
-    drawSegments(WORLD.pathWidth+22,style.outer,.92);
-    drawSegments(WORLD.pathWidth+14,style.rail,.58);
-    drawSegments(WORLD.pathWidth+7,style.surface,.99);
-    drawSegments(WORLD.pathWidth-7,style.inner,.98);
-    for(let index=0;index<points.length-1;index++){
-      const [ax,ay]=points[index],[bx,by]=points[index+1],length=Math.hypot(bx-ax,by-ay)||1,dx=(bx-ax)/length,dy=(by-ay)/length,nx=-dy,ny=dx;
-      g.lineStyle(2,style.rail,.34).lineBetween(ax+nx*25,ay+ny*25,bx+nx*25,by+ny*25).lineBetween(ax-nx*25,ay-ny*25,bx-nx*25,by-ny*25);
+    drawSegments(WORLD.pathWidth+18,style.outer,.92);
+    drawSegments(WORLD.pathWidth+11,style.rail,.58);
+    drawSegments(WORLD.pathWidth+5,style.surface,.99);
+    drawSegments(WORLD.pathWidth-5,style.inner,.98);
+    const railOffset=WORLD.pathWidth*.34;
+    for(const [a,b] of segments.values()){
+      const [ax,ay]=a,[bx,by]=b,length=Math.hypot(bx-ax,by-ay)||1,dx=(bx-ax)/length,dy=(by-ay)/length,nx=-dy,ny=dx;
+      g.lineStyle(2,style.rail,.34).lineBetween(ax+nx*railOffset,ay+ny*railOffset,bx+nx*railOffset,by+ny*railOffset).lineBetween(ax-nx*railOffset,ay-ny*railOffset,bx-nx*railOffset,by-ny*railOffset);
       for(let distance=32;distance<length;distance+=58){
         const x=ax+dx*distance,y=ay+dy*distance;
         g.lineStyle(2,style.rail,.20).lineBetween(x-nx*7,y-ny*7,x+nx*7,y+ny*7);
@@ -298,12 +308,38 @@ export class BattleScene extends Phaser.Scene {
     g.fillStyle(color,.045).fillCircle(tower.x,tower.y,stats.range);g.lineStyle(2,color,.46).strokeCircle(tower.x,tower.y,stats.range);g.lineStyle(3,0xffffff,.9).strokeCircle(tower.x,tower.y,39);
   }
 
+  snapToGrid(x,y) {
+    const size=WORLD.gridSize;
+    return {x:Math.floor(x/size)*size+size*.5,y:Math.floor(y/size)*size+size*.5};
+  }
+
+  setPlacementPointer(x,y,visible=true) {
+    this.previewPoint={x,y,visible};
+    this.drawPlacementPreview();
+  }
+
+  drawPlacementGrid() {
+    const g=this.gridGraphics;g.clear();
+    if(!this.placementType)return;
+    const size=WORLD.gridSize,accent=this.sim.map.palette.accent;
+    for(let top=0;top<WORLD.height;top+=size){
+      for(let left=0;left<WORLD.width;left+=size){
+        const x=left+size*.5,y=top+size*.5,valid=this.sim.canOccupy(x,y).ok;
+        g.fillStyle(valid?accent:0xff5268,valid?.055:.012).fillRoundedRect(left+3,top+3,size-6,size-6,8);
+        g.lineStyle(1,valid?accent:0xff5268,valid?.20:.055).strokeRoundedRect(left+3.5,top+3.5,size-7,size-7,8);
+      }
+    }
+  }
+
   drawPlacementPreview() {
     const g=this.previewGraphics;g.clear();this.placementSprite?.setVisible(false);if(!this.previewPoint.visible)return;
-    const {x,y}=this.previewPoint;
+    let {x,y}=this.previewPoint;
     if(this.abilityTarget){g.fillStyle(0xff744d,.10).fillCircle(x,y,150);g.lineStyle(3,0xffae62,.9).strokeCircle(x,y,150);g.lineStyle(2,0xffffff,.48).strokeCircle(x,y,25);g.lineBetween(x-17,y,x+17,y);g.lineBetween(x,y-17,x,y+17);return;}
     if(!this.placementType)return;
+    ({x,y}=this.snapToGrid(x,y));
     const preview=this.sim.getBuildPreview(this.placementType,x,y),color=preview.ok?TOWERS[this.placementType].color:0xff5364;
+    const size=WORLD.gridSize;
+    g.fillStyle(color,preview.ok?.16:.24).fillRoundedRect(x-size*.5+4,y-size*.5+4,size-8,size-8,9);g.lineStyle(3,color,.9).strokeRoundedRect(x-size*.5+4,y-size*.5+4,size-8,size-8,9);
     g.fillStyle(color,.055).fillCircle(x,y,preview.range);g.lineStyle(2,color,.52).strokeCircle(x,y,preview.range);g.lineStyle(3,color,.95).strokeCircle(x,y,39);
     this.placementSprite.setFrame(TOWER_ART.frames[this.placementType]).setPosition(x,y).setTint(preview.ok?0xffffff:0xff5268).setVisible(true);
   }
