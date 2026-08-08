@@ -128,7 +128,7 @@
                 // Fallback for initial state or if hidden
                 const rect = canvas.parentElement.getBoundingClientRect();
                 canvas.width = rect.width || 800;
-                canvas.height = 350; // Use the fixed height from CSS as default
+                canvas.height = 600; // Fallback until the responsive CSS height can be measured
                 
                 if (ctx) {
                     ctx.lineJoin = 'round';

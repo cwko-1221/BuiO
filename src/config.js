@@ -40,7 +40,7 @@ export const MODULES = [
     icon: 'board',
     metric: 'module_wb_metric',
     status: 'module_wb_status',
-    roleAccess: ['student', 'teacher']
+    roleAccess: ['teacher']
   },
   {
     id: 'report',

@@ -87,6 +87,24 @@ module.exports = function(io, app) {
       }
     });
 
+    socket.on('teacher-board-sync', (data) => {
+      const roomId = socket.data.roomId;
+      const room = roomId ? rooms.get(roomId) : null;
+      const isPngSnapshot = typeof data?.imageData === 'string'
+        && data.imageData.startsWith('data:image/png;base64,')
+        && data.imageData.length <= 5_000_000;
+      const canSyncStudent = socket.data.isTeacher
+        && room?.teacherSocket === socket.id
+        && room.students.has(data?.studentId);
+
+      if (canSyncStudent && isPngSnapshot) {
+        socket.to(data.studentId).emit('teacher-board-sync', {
+          version: data.version,
+          imageData: data.imageData
+        });
+      }
+    });
+
     socket.on('student-clear', () => {
       const roomId = socket.data.roomId;
       if (roomId && !socket.data.isTeacher) {

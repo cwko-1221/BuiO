@@ -22,6 +22,7 @@ export default function ClassStudent() {
     const activeToolRef = useRef(activeTool);
     const studentLastPos = useRef({ x: 0, y: 0 });
     const teacherLastPos = useRef({ x: 0, y: 0 });
+    const latestTeacherSync = useRef(0);
 
     const bgCanvasRef = useRef(null);   // Background image layer (bottom)
     const canvasRef = useRef(null);      // Drawing layer (top, transparent)
@@ -141,6 +142,34 @@ export default function ClassStudent() {
             }
             
             ctx.restore();
+        });
+
+        // Reconcile the complete stroke layer after every teacher gesture. This
+        // removes any residue caused by rapid erasing, event batching or the
+        // teacher and student canvases having different aspect ratios.
+        socket.on('teacher-board-sync', ({ imageData }) => {
+            if (typeof imageData !== 'string' || !imageData.startsWith('data:image/png;base64,')) return;
+
+            const syncToken = latestTeacherSync.current + 1;
+            latestTeacherSync.current = syncToken;
+            const image = new Image();
+
+            image.onload = () => {
+                if (syncToken !== latestTeacherSync.current) return;
+
+                const ctx = contextRef.current;
+                const canvas = canvasRef.current;
+                if (!ctx || !canvas) return;
+
+                ctx.save();
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+            };
+
+            image.src = imageData;
         });
 
         // Setup DRAWING Canvas (transparent — strokes only)

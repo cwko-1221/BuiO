@@ -29,6 +29,7 @@ export default function ClassTeacher() {
     const [teacherActiveTool, setTeacherActiveTool] = useState('pen');
     const isTeacherDrawing = useRef(false);
     const teacherLastPos = useRef({ normX: 0, normY: 0 });
+    const teacherSyncVersion = useRef(0);
 
     // Special offscreen canvas for the Teacher Board
     const teacherOffscreenRef = useRef(null);
@@ -268,6 +269,20 @@ export default function ClassTeacher() {
         }
     }, [teacherActiveTool]);
 
+    // Pointer events provide smooth live feedback, while a lossless snapshot at
+    // the end of each erase gesture guarantees that differently sized student
+    // canvases finish with exactly the same pixels as the teacher's board.
+    const syncTeacherBoard = useCallback((studentId, offscreen) => {
+        if (studentId === 'teacher' || !offscreen?.canvas || !socketRef.current) return;
+
+        teacherSyncVersion.current += 1;
+        socketRef.current.emit('teacher-board-sync', {
+            studentId,
+            version: teacherSyncVersion.current,
+            imageData: offscreen.canvas.toDataURL('image/png')
+        });
+    }, []);
+
     const getZoomNormCoords = (e) => {
         const canvas = zoomCanvasRef.current;
         const rect = canvas.getBoundingClientRect();
@@ -363,6 +378,9 @@ export default function ClassTeacher() {
         const coords = getZoomNormCoords(e);
         if (coords) {
             emitTeacherDraw(zoomedStudent, 'end', coords.normX, coords.normY);
+            if (teacherActiveTool === 'eraser') {
+                syncTeacherBoard(zoomedStudent, coords.offscreen);
+            }
         }
     };
 
