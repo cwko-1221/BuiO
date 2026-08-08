@@ -16,6 +16,7 @@ function snapshotFromUser(user, academicYear) {
   return {
     academicYear,
     studentId: user.studentid,
+    name: user.name || user.studentid,
     className: user.classname || '',
     classNo: user.classno == null ? null : Number(user.classno),
     chineseGroup: user.chinesegroup || '',
@@ -38,6 +39,7 @@ async function ensureSchema() {
       CREATE TABLE IF NOT EXISTS StudentAcademicYears (
         AcademicYear VARCHAR(10) NOT NULL,
         StudentID VARCHAR(20) NOT NULL REFERENCES Users(StudentID) ON DELETE CASCADE,
+        Name VARCHAR(120) NOT NULL DEFAULT '',
         ClassName VARCHAR(20) NOT NULL DEFAULT '',
         ClassNo INTEGER,
         ChineseGroup VARCHAR(20) NOT NULL DEFAULT '',
@@ -49,14 +51,17 @@ async function ensureSchema() {
       );
       CREATE INDEX IF NOT EXISTS idx_student_academic_year_class
         ON StudentAcademicYears(AcademicYear, ClassName, ClassNo);
+      ALTER TABLE StudentAcademicYears ADD COLUMN IF NOT EXISTS Name VARCHAR(120) NOT NULL DEFAULT '';
+      UPDATE StudentAcademicYears e SET Name=u.Name
+        FROM Users u WHERE e.StudentID=u.StudentID AND e.Name='';
     `);
     const initialized = await pool.query(`INSERT INTO PlatformSettings (SettingKey, SettingValue)
       VALUES ('currentAcademicYear', $1) ON CONFLICT (SettingKey) DO NOTHING
       RETURNING SettingKey`, [INITIAL_ACADEMIC_YEAR]);
     if (initialized.rowCount > 0) {
       await pool.query(`INSERT INTO StudentAcademicYears
-        (AcademicYear, StudentID, ClassName, ClassNo, ChineseGroup, EnglishGroup, MathGroup)
-        SELECT $1, StudentID, COALESCE(ClassName, ''), ClassNo,
+        (AcademicYear, StudentID, Name, ClassName, ClassNo, ChineseGroup, EnglishGroup, MathGroup)
+        SELECT $1, StudentID, Name, COALESCE(ClassName, ''), ClassNo,
           COALESCE(ChineseGroup, ''), COALESCE(EnglishGroup, ''), COALESCE(MathGroup, '')
         FROM Users WHERE Role <> 'teacher'
         ON CONFLICT (AcademicYear, StudentID) DO NOTHING`, [INITIAL_ACADEMIC_YEAR]);
@@ -89,6 +94,13 @@ function ensureJsonData() {
         data.studentAcademicYears.push(snapshotFromUser(user, INITIAL_ACADEMIC_YEAR));
         changed = true;
       }
+    }
+  }
+  const userNames = new Map(data.users.map(user => [user.studentid, user.name]));
+  for (const row of data.studentAcademicYears) {
+    if (!row.name) {
+      row.name = userNames.get(row.studentId) || row.studentId;
+      changed = true;
     }
   }
   if (changed) store.save();
@@ -124,7 +136,7 @@ async function listEnrollments(academicYear) {
   if (config.db.mode === 'postgres') {
     const { rows } = await getPool().query(`
       SELECT e.AcademicYear AS "academicYear", e.StudentID AS "studentId",
-        u.Name AS name, u.Role AS role, e.ClassName AS "className", e.ClassNo AS "classNo",
+        COALESCE(NULLIF(e.Name, ''), u.Name) AS name, u.Role AS role, e.ClassName AS "className", e.ClassNo AS "classNo",
         e.ChineseGroup AS "chineseGroup", e.EnglishGroup AS "englishGroup", e.MathGroup AS "mathGroup"
       FROM StudentAcademicYears e JOIN Users u ON u.StudentID=e.StudentID
       WHERE e.AcademicYear=$1 ORDER BY COALESCE(e.ClassNo, 999), e.StudentID`, [academicYear]);
@@ -134,7 +146,7 @@ async function listEnrollments(academicYear) {
   const names = new Map(data.users.map(user => [user.studentid, user]));
   return data.studentAcademicYears.filter(row => row.academicYear === academicYear).map(row => ({
     ...row,
-    name: names.get(row.studentId)?.name || row.studentId,
+    name: row.name || names.get(row.studentId)?.name || row.studentId,
     role: names.get(row.studentId)?.role || 'student',
   }));
 }
@@ -149,20 +161,21 @@ async function upsertCurrentStudent(user, opts = {}) {
   if (config.db.mode === 'postgres') {
     const runner = opts.client || getPool();
     await runner.query(`INSERT INTO StudentAcademicYears
-      (AcademicYear, StudentID, ClassName, ClassNo, ChineseGroup, EnglishGroup, MathGroup)
-      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      (AcademicYear, StudentID, Name, ClassName, ClassNo, ChineseGroup, EnglishGroup, MathGroup)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       ON CONFLICT (AcademicYear, StudentID) DO UPDATE SET
-        ClassName=EXCLUDED.ClassName, ClassNo=EXCLUDED.ClassNo,
+        Name=EXCLUDED.Name, ClassName=EXCLUDED.ClassName, ClassNo=EXCLUDED.ClassNo,
         ChineseGroup=EXCLUDED.ChineseGroup, EnglishGroup=EXCLUDED.EnglishGroup,
         MathGroup=EXCLUDED.MathGroup, UpdatedAt=NOW()`, [
-      academicYear, user.studentId, user.className || '', user.classNo,
+      academicYear, user.studentId, user.name || user.studentId, user.className || '', user.classNo,
       user.chineseGroup || '', user.englishGroup || '', user.mathGroup || '',
     ]);
     return;
   }
   const data = ensureJsonData();
   const snapshot = {
-    academicYear, studentId: user.studentId, className: user.className || '', classNo: user.classNo,
+    academicYear, studentId: user.studentId, name: user.name || user.studentId,
+    className: user.className || '', classNo: user.classNo,
     chineseGroup: user.chineseGroup || '', englishGroup: user.englishGroup || '', mathGroup: user.mathGroup || '',
   };
   const index = data.studentAcademicYears.findIndex(row => row.academicYear === academicYear && row.studentId === user.studentId);
@@ -202,8 +215,8 @@ async function promoteAllStudents() {
         WHEN ClassName ~ '^P[1-5]$' THEN 'P' || (SUBSTRING(ClassName FROM 2)::int + 1)::text
         ELSE ClassName END WHERE Role='student'`);
       await client.query(`INSERT INTO StudentAcademicYears
-        (AcademicYear, StudentID, ClassName, ClassNo, ChineseGroup, EnglishGroup, MathGroup)
-        SELECT $1, StudentID, COALESCE(ClassName, ''), ClassNo,
+        (AcademicYear, StudentID, Name, ClassName, ClassNo, ChineseGroup, EnglishGroup, MathGroup)
+        SELECT $1, StudentID, Name, COALESCE(ClassName, ''), ClassNo,
           COALESCE(ChineseGroup, ''), COALESCE(EnglishGroup, ''), COALESCE(MathGroup, '')
         FROM Users WHERE Role <> 'teacher'
         ON CONFLICT (AcademicYear, StudentID) DO NOTHING`, [next]);

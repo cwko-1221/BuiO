@@ -124,6 +124,37 @@ async function insert(user, opts = {}) {
   store.save();
 }
 
+async function updateStudentProfile(user, opts = {}) {
+  const passwordHash = user.passwordHash || null;
+  if (config.db.mode === 'postgres') {
+    const runner = opts.client || getPool();
+    await runner.query(`UPDATE Users SET
+      Name=$1, ClassName=$2, ClassNo=$3, ChineseGroup=$4, EnglishGroup=$5, MathGroup=$6,
+      PasswordHash=COALESCE($7, PasswordHash)
+      WHERE StudentID=$8 AND Role <> 'teacher'`, [
+      user.name,
+      user.className || '',
+      user.classNo,
+      user.chineseGroup || '',
+      user.englishGroup || '',
+      user.mathGroup || '',
+      passwordHash,
+      user.studentId,
+    ]);
+    return;
+  }
+  const existing = store.load().users.find(row => row.studentid === user.studentId && row.role !== 'teacher');
+  if (!existing) return;
+  existing.name = user.name;
+  existing.classname = user.className || '';
+  existing.classno = user.classNo;
+  existing.chinesegroup = user.chineseGroup || '';
+  existing.englishgroup = user.englishGroup || '';
+  existing.mathgroup = user.mathGroup || '';
+  if (passwordHash) existing.passwordhash = passwordHash;
+  store.save();
+}
+
 const ALLOWED_UPDATE_FIELDS = {
   className: 'ClassName',
   classNo: 'ClassNo',
@@ -252,6 +283,7 @@ module.exports = {
   findByIdSummary,
   exists,
   insert,
+  updateStudentProfile,
   updateField,
   updateLanguage,
   deleteById,

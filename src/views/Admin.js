@@ -70,8 +70,8 @@ export function renderStudentManagement() {
     <div class="glass-card batch-import-card">
       <div class="batch-import-head">
         <div>
-          <h3>Excel 批量新增學生</h3>
-          <p>支援 .xlsx 及 .csv。學號和姓名為必填；空白密碼會使用 123456。</p>
+          <h3>Excel 批量新增／更新學生</h3>
+          <p>以學號為準：新學號會新增帳戶，相同學號會更新姓名、班級、班號及中英數分組。現有學生如沒有填寫密碼，會保留原密碼。</p>
         </div>
         <button type="button" id="downloadStudentTemplateBtn" class="secondary-action">下載 Excel 範本</button>
       </div>
@@ -81,7 +81,7 @@ export function renderStudentManagement() {
           <input type="file" id="studentExcelInput" accept=".xlsx,.csv" />
         </label>
         <button type="button" id="importStudentsBtn" class="primary-action" disabled>
-          ${renderIcon('plus')} 匯入學生
+          ${renderIcon('plus')} 匯入並更新
         </button>
       </div>
       <div id="batchImportMessage" class="batch-import-message" hidden></div>

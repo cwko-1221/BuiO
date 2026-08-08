@@ -46,7 +46,8 @@ function rowsToStudents(rows) {
         if (field) student[field] = String(row[columnIndex] ?? '').trim();
       });
       student.studentId = String(student.studentId || '').trim().toUpperCase();
-      student.password = String(student.password || '123456').trim() || '123456';
+      student.password = String(student.password || '').trim();
+      student.passwordProvided = Boolean(student.password);
       return student;
     })
     .filter(student => [

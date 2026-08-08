@@ -207,6 +207,54 @@ try {
   );
   assert.equal((await request(monitor, '/api/homework/meta')).data.canAccess, false, 'old monitor assignment does not leak into the new academic year');
 
+  result = await request(teacher, '/api/auth/register-students-batch', {
+    method: 'POST',
+    body: {
+      students: [
+        {
+          rowNumber: 2, studentId: 'S001', name: '四甲一更新', password: '', passwordProvided: false,
+          className: 'P5', classNo: 18, chineseGroup: 'B組', englishGroup: 'A組', mathGroup: 'B組',
+        },
+        {
+          rowNumber: 3, studentId: 'S777', name: '批量新增生', password: '', passwordProvided: false,
+          className: 'P5', classNo: 7, chineseGroup: 'A組', englishGroup: 'B組', mathGroup: 'A組',
+        },
+        {
+          rowNumber: 4, studentId: 'T001', name: '不可覆蓋老師', password: '', passwordProvided: false,
+          className: 'P5', classNo: 99, chineseGroup: 'A組', englishGroup: 'A組', mathGroup: 'A組',
+        },
+      ],
+    },
+  });
+  assert.equal(result.response.status, 200, 'Excel batch upsert succeeds');
+  assert.equal(result.data.created.length, 1, 'new student ID creates an account');
+  assert.equal(result.data.updated.length, 1, 'existing student ID updates the account');
+  assert.equal(result.data.skipped[0].studentId, 'T001', 'teacher account cannot be overwritten by student import');
+
+  const oldYearAfterImport = await request(teacher, '/api/stats/teacher/all-users?academicYear=2025-26');
+  const newYearAfterImport = await request(teacher, '/api/stats/teacher/all-users?academicYear=2026-27');
+  const oldS001 = oldYearAfterImport.data.students.find(row => row.id === 'S001');
+  const currentS001 = newYearAfterImport.data.students.find(row => row.id === 'S001');
+  assert.equal(oldS001.name, '四甲一', 'historical academic-year name is preserved');
+  assert.equal(oldS001.classNo, 1, 'historical academic-year class number is preserved');
+  assert.equal(oldS001.chineseGroup, 'A組', 'historical academic-year groups are preserved');
+  assert.equal(currentS001.name, '四甲一更新', 'matching ID updates the current student name');
+  assert.equal(currentS001.classNo, 18, 'matching ID updates the current class number');
+  assert.equal(currentS001.chineseGroup, 'B組', 'matching ID updates current subject groups');
+  assert.equal(newYearAfterImport.data.students.find(row => row.id === 'S777').classNo, 7, 'new ID is added to the current academic year');
+  assert.ok(await login('S001'), 'blank imported password preserves an existing student password');
+  assert.ok(await login('S777'), 'blank password for a new student uses the default password');
+  assert.deepEqual(
+    (await request(teacher, '/api/homework/students?academicYear=2025-26&className=P4&subject=chinese-a')).data.students.map(row => row.id),
+    ['S001', 'S002', 'S003'],
+    'historical homework roster keeps the old group assignment',
+  );
+  assert.deepEqual(
+    (await request(teacher, '/api/homework/students?academicYear=2026-27&className=P5&subject=chinese-a')).data.students.map(row => row.id),
+    ['S002', 'S003', 'S777'],
+    'current homework roster follows Excel-updated groups',
+  );
+
   console.log('✅ Homework and academic-year integration API tests passed (isolated fixture).');
 } finally {
   server.kill('SIGTERM');

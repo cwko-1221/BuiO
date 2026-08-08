@@ -179,7 +179,7 @@ router.post('/register-student', requireTeacher, async (req, res, next) => {
     });
     if (targetRole === 'student') {
       await academicYears.upsertCurrentStudent({
-        studentId: id, className: className || '', classNo: classNoNum,
+        studentId: id, name, className: className || '', classNo: classNoNum,
         chineseGroup: chineseGroup || '', englishGroup: englishGroup || '', mathGroup: mathGroup || '',
       });
       await stats.ensureTagsForStudent(id, ALL_TAGS);
@@ -209,18 +209,19 @@ router.post('/register-students-batch', requireTeacher, async (req, res, next) =
       const rowNumber = Number(row.rowNumber) || index + 2;
       const id = normalizeStudentId(row.studentId);
       const name = String(row.name || '').trim();
-      const password = String(row.password || '123456').trim();
+      const password = String(row.password || '').trim();
+      const passwordProvided = Boolean(row.passwordProvided || password);
       const classNo = normalizeClassNo(row.classNo);
 
       if (!id || !name) return skipped.push({ rowNumber, studentId: id, reason: '缺少學號或姓名' });
       if (!isValidStudentId(id)) return skipped.push({ rowNumber, studentId: id, reason: '學號格式不正確' });
-      if (password.length < 6) return skipped.push({ rowNumber, studentId: id, reason: '密碼最少需要 6 個字元' });
+      if (passwordProvided && password.length < 6) return skipped.push({ rowNumber, studentId: id, reason: '密碼最少需要 6 個字元' });
       if (!isValidClassNo(classNo)) return skipped.push({ rowNumber, studentId: id, reason: '班號必須是 1 至 99 的整數' });
       if (seen.has(id)) return skipped.push({ rowNumber, studentId: id, reason: 'Excel 內有重複學號' });
 
       seen.add(id);
       valid.push({
-        rowNumber, studentId: id, name, password,
+        rowNumber, studentId: id, name, password, passwordProvided,
         className: String(row.className || '').trim(),
         classNo,
         chineseGroup: String(row.chineseGroup || '').trim(),
@@ -230,29 +231,36 @@ router.post('/register-students-batch', requireTeacher, async (req, res, next) =
     });
 
     const toCreate = [];
+    const toUpdate = [];
     for (const s of valid) {
-      if (await users.exists(s.studentId)) {
-        skipped.push({ rowNumber: s.rowNumber, studentId: s.studentId, reason: '學號已存在' });
-      } else {
-        toCreate.push(s);
-      }
+      const existing = await users.findById(s.studentId);
+      if (!existing) toCreate.push(s);
+      else if ((existing.role || 'student') === 'teacher') {
+        skipped.push({ rowNumber: s.rowNumber, studentId: s.studentId, reason: '學號屬於教師帳戶' });
+      } else toUpdate.push(s);
     }
 
-    if (toCreate.length > 0) {
+    if (toCreate.length > 0 || toUpdate.length > 0) {
       await withTransaction(async client => {
         for (const s of toCreate) {
-          const passwordHash = await bcrypt.hash(s.password, 10);
+          const passwordHash = await bcrypt.hash(s.password || '123456', 10);
           await users.insert({ ...s, passwordHash, role: 'student' }, { client });
           await academicYears.upsertCurrentStudent({ ...s }, { client });
           await stats.ensureTagsForStudent(s.studentId, ALL_TAGS, { client });
+        }
+        for (const s of toUpdate) {
+          const passwordHash = s.passwordProvided ? await bcrypt.hash(s.password, 10) : null;
+          await users.updateStudentProfile({ ...s, passwordHash }, { client });
+          await academicYears.upsertCurrentStudent({ ...s }, { client });
         }
       });
     }
 
     res.json({
       success: true,
-      message: `成功新增 ${toCreate.length} 名學生`,
+      message: `成功新增 ${toCreate.length} 名學生，更新 ${toUpdate.length} 名學生`,
       created: toCreate.map(s => ({ studentId: s.studentId, name: s.name })),
+      updated: toUpdate.map(s => ({ studentId: s.studentId, name: s.name })),
       skipped,
     });
   } catch (e) { next(e); }
