@@ -5,12 +5,14 @@
 const DataManager = {
     // All parsed records
     records: [],
+    // Server-side import metadata (original file availability, upload time, etc.)
+    imports: [],
     // Unique student names across all data
     _studentCache: null,
 
     /* ---------- PUBLIC API ---------- */
 
-    /** Parse an XLS/XLSX file and add to records */
+    /** Parse an XLS/XLSX file locally before sending it to the server */
     async parseFile(file) {
         const data = await file.arrayBuffer();
         const workbook = XLSX.read(data, { type: 'array' });
@@ -27,19 +29,15 @@ const DataManager = {
             }
         }
 
-        if (results.length > 0) {
-            // Remove duplicates (same file+sheet)
-            for (const r of results) {
-                const idx = this.records.findIndex(
-                    x => x.filename === r.filename && x.termCode === r.termCode && x.grade === r.grade && x.schoolYear === r.schoolYear
-                );
-                if (idx >= 0) this.records.splice(idx, 1);
-                this.records.push(r);
-            }
-            this._studentCache = null;
-            this.saveToStorage();
-        }
         return results;
+    },
+
+    /** Replace the in-memory view with the shared server database state. */
+    setServerData(payload = {}) {
+        this.records = Array.isArray(payload.records) ? payload.records : [];
+        this.imports = Array.isArray(payload.imports) ? payload.imports : [];
+        this._studentCache = null;
+        localStorage.removeItem('assessmentData');
     },
 
     /** Get all unique student names */
@@ -173,12 +171,15 @@ const DataManager = {
             termLabel: r.termLabel,
             studentCount: r.students.length,
             subjectCount: r.subjects.length,
+            importId: this.imports.find(item => item.filename === r.filename)?.id || '',
+            originalAvailable: Boolean(this.imports.find(item => item.filename === r.filename)?.originalAvailable),
         }));
     },
 
     /** Clear all data */
     clearAll() {
         this.records = [];
+        this.imports = [];
         this._studentCache = null;
         localStorage.removeItem('assessmentData');
     },

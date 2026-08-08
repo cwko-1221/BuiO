@@ -18,6 +18,7 @@
     "check:security": "npm audit --omit=dev --audit-level=low",
     "check:tower-defense": "node scripts/test-tower-defense.mjs",
     "check:homework": "node scripts/test-homework-module.mjs",
+    "check:report": "node scripts/test-report-import.mjs",
     "dev:homework-fixture": "node scripts/start-homework-fixture.mjs",
     "check:tower-defense-live": "node scripts/test-tower-defense-live.mjs",
     "check:game-hub-live": "node scripts/test-game-hub-live.mjs",

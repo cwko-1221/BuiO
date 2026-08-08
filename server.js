@@ -50,6 +50,9 @@ app.use('/api/stats', require('./math-app/routes/stats'));
 // Missing-homework module
 app.use('/api/homework', require('./homework-app/routes/homework'));
 
+// Assessment report data (teacher-only, server-persisted Excel imports)
+app.use('/api/report', require('./report-app/routes/assessment'));
+
 // Chinese module
 app.use('/api/chinese/teacher', require('./chinese-app/routes/teacher'));
 app.use('/api/chinese/student', require('./chinese-app/routes/student'));

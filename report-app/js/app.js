@@ -85,18 +85,22 @@ function initUpload() {
     });
 
     // Clear data button
-    document.getElementById('btn-clear-data')?.addEventListener('click', () => {
-        if (confirm('確定要清除所有已匯入的數據嗎？')) {
-            DataManager.clearAll();
+    document.getElementById('btn-clear-data')?.addEventListener('click', async () => {
+        if (!confirm('確定要刪除伺服器內全部考評數據及已上傳的 Excel 原檔嗎？')) return;
+        try {
+            const payload = await ReportAPI.clearAll();
+            DataManager.setServerData(payload);
             refreshHomeView();
-            showToast('已清除所有數據', 'info');
+            showToast('已刪除伺服器內全部考評數據', 'info');
+        } catch (error) {
+            showToast(error.message || '未能刪除數據', 'error');
         }
     });
 }
 
 async function handleFiles(fileList) {
     const files = [...fileList].filter(f =>
-        f.name.endsWith('.xls') || f.name.endsWith('.xlsx')
+        f.name.toLowerCase().endsWith('.xls') || f.name.toLowerCase().endsWith('.xlsx')
     );
 
     if (files.length === 0) {
@@ -114,12 +118,14 @@ async function handleFiles(fileList) {
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        progressText.textContent = `正在解析 ${file.name}... (${i + 1}/${files.length})`;
+        progressText.textContent = `正在解析及上傳 ${file.name}... (${i + 1}/${files.length})`;
         progressFill.style.width = ((i + 1) / files.length * 100) + '%';
 
         try {
             const results = await DataManager.parseFile(file);
             if (results.length > 0) {
+                const payload = await ReportAPI.uploadFile(file, results);
+                DataManager.setServerData(payload);
                 successCount++;
             } else {
                 errorCount++;
@@ -138,9 +144,9 @@ async function handleFiles(fileList) {
     progressFill.style.width = '0%';
 
     if (successCount > 0) {
-        showToast(`成功匯入 ${successCount} 個檔案` + (errorCount > 0 ? `，${errorCount} 個失敗` : ''), 'success');
+        showToast(`已上傳 ${successCount} 個 Excel 到伺服器` + (errorCount > 0 ? `，${errorCount} 個失敗` : ''), 'success');
     } else {
-        showToast(`匯入失敗，請檢查檔案格式`, 'error');
+        showToast('上傳失敗，請檢查 Excel 格式', 'error');
     }
 
     refreshHomeView();
@@ -175,13 +181,22 @@ function refreshHomeView() {
         return a.termLabel.localeCompare(b.termLabel);
     });
 
+    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    })[char]);
+
     tbody.innerHTML = files.map(f => `
         <tr>
-            <td>${f.filename}</td>
-            <td>${f.schoolYear}</td>
-            <td>${f.grade}</td>
-            <td>${f.className}</td>
-            <td>${f.termLabel}</td>
+            <td>
+                ${escapeHtml(f.filename)}
+                ${f.originalAvailable
+                    ? `<a class="file-source-link" href="/api/report/imports/${encodeURIComponent(f.importId)}/file">下載原檔</a>`
+                    : '<span class="file-source-note">歷史預載資料</span>'}
+            </td>
+            <td>${escapeHtml(f.schoolYear)}</td>
+            <td>${escapeHtml(f.grade)}</td>
+            <td>${escapeHtml(f.className)}</td>
+            <td>${escapeHtml(f.termLabel)}</td>
             <td class="num">${f.studentCount}</td>
             <td class="num">${f.subjectCount}</td>
         </tr>
@@ -318,7 +333,11 @@ function initAuth() {
 }
 
 /** Preload Data & Core Startup */
-function loadInitialData() {
+let reportAppInitialized = false;
+
+async function loadInitialData() {
+    if (reportAppInitialized) return;
+    reportAppInitialized = true;
     initUpload();
     initExport();
 
@@ -327,21 +346,38 @@ function loadInitialData() {
     SubjectView.init();
     CompareView.init();
 
-    if (DataManager.loadFromStorage()) {
-        refreshHomeView();
-        showToast(`已載入 ${DataManager.records.length} 筆緩存數據`, 'info');
-    }
+    try {
+        let payload = await ReportAPI.loadData();
 
-    if (typeof PRELOAD_DATA !== 'undefined' && PRELOAD_DATA.length > 0) {
-        if (DataManager.records.length === 0) {
-            console.time('Preload data parsing');
-            const count = DataManager.parsePreloadData(PRELOAD_DATA);
-            console.timeEnd('Preload data parsing');
-            if (count > 0) {
-                refreshHomeView();
-                showToast(`已自動載入 ${count} 筆預設數據（${DataManager.getAllStudents().length} 位學生）`, 'success');
+        // One-time migration: preserve an existing browser-only import first;
+        // otherwise seed the historical embedded reports into the server DB.
+        if (payload.records.length === 0) {
+            let legacyRecords = [];
+            if (DataManager.loadFromStorage()) {
+                legacyRecords = [...DataManager.records];
+            } else if (typeof PRELOAD_DATA !== 'undefined' && PRELOAD_DATA.length > 0) {
+                DataManager.parsePreloadData(PRELOAD_DATA);
+                legacyRecords = [...DataManager.records];
+            }
+
+            if (legacyRecords.length > 0) {
+                const grouped = new Map();
+                for (const record of legacyRecords) {
+                    if (!grouped.has(record.filename)) grouped.set(record.filename, []);
+                    grouped.get(record.filename).push(record);
+                }
+                payload = await ReportAPI.migrateBrowserData(
+                    [...grouped].map(([filename, records]) => ({ filename, records }))
+                );
+                showToast('歷史考評數據已遷移到伺服器資料庫', 'success');
             }
         }
+
+        DataManager.setServerData(payload);
+        refreshHomeView();
+    } catch (error) {
+        console.error('Assessment server data load failed:', error);
+        showToast(error.message || '未能從伺服器載入考評數據', 'error');
     }
     
     // Auto switch to student view on load exactly like the root behavior!

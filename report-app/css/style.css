@@ -402,6 +402,18 @@ a { color: var(--accent-cyan); text-decoration: none; }
 
 /* --- Utility --- */
 .hidden { display: none !important; }
+
+.file-source-link,
+.file-source-note {
+    display: block;
+    width: fit-content;
+    margin-top: 4px;
+    font-size: 11px;
+}
+
+.file-source-link { color: var(--primary-light); text-decoration: none; }
+.file-source-link:hover { text-decoration: underline; }
+.file-source-note { color: var(--text-muted); }
 .text-center { text-align: center; }
 .text-muted { color: var(--text-muted); }
 .mt-2 { margin-top: 8px; }
