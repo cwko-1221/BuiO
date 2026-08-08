@@ -271,7 +271,9 @@ app.get('/homework', requireSession, async (req, res, next) => {
   try {
     if (req.session.role !== 'teacher') {
       const homework = require('./homework-app/repositories/homework.repo');
-      const assignments = await homework.listMonitors({ studentId: req.session.studentId });
+      const academicYears = require('./math-app/repositories/academic-years.repo');
+      const academicYear = await academicYears.getCurrentAcademicYear();
+      const assignments = await homework.listMonitors({ studentId: req.session.studentId, academicYear });
       if (!assignments.length) return res.status(403).send('你未獲委任為科長，無權進入欠交功課模組。');
     }
     res.sendFile(path.join(__dirname, 'homework-app', 'public', 'index.html'));

@@ -3,6 +3,7 @@
 const config = require('../../config');
 const store = require('../../db/jsonStore');
 const { getPool } = require('../db/database');
+const academicYears = require('./academic-years.repo');
 
 const classRank = name => {
   const m = String(name || '').match(/^P([1-6])$/i);
@@ -136,12 +137,14 @@ async function updateField(studentId, field, value) {
   if (!col) throw new Error(`Field not updatable: ${field}`);
   if (config.db.mode === 'postgres') {
     await getPool().query(`UPDATE Users SET ${col} = $1 WHERE StudentID = $2`, [value, studentId]);
+    await academicYears.updateCurrentEnrollment(studentId, field, value);
     return;
   }
   const u = store.load().users.find(x => x.studentid === studentId);
   if (u) {
     u[col.toLowerCase()] = value;
     store.save();
+    await academicYears.updateCurrentEnrollment(studentId, field, value);
   }
 }
 
@@ -163,39 +166,37 @@ async function deleteById(studentId) {
   }
   const d = store.load();
   d.users = d.users.filter(u => u.studentid !== studentId);
+  if (Array.isArray(d.studentAcademicYears)) {
+    d.studentAcademicYears = d.studentAcademicYears.filter(row => row.studentId !== studentId);
+  }
   d.studentStats = d.studentStats.filter(s => s.studentid !== studentId);
   d.questionLogs = d.questionLogs.filter(l => l.studentid !== studentId);
   store.save();
 }
 
 async function upgradeAllStudents() {
-  if (config.db.mode === 'postgres') {
-    await getPool().query(`
-      UPDATE Users SET ClassName =
-        CASE
-          WHEN ClassName LIKE 'P6%' THEN 'Graduated'
-          WHEN ClassName LIKE 'P5%' THEN REPLACE(ClassName, 'P5', 'P6')
-          WHEN ClassName LIKE 'P4%' THEN REPLACE(ClassName, 'P4', 'P5')
-          WHEN ClassName LIKE 'P3%' THEN REPLACE(ClassName, 'P3', 'P4')
-          WHEN ClassName LIKE 'P2%' THEN REPLACE(ClassName, 'P2', 'P3')
-          WHEN ClassName LIKE 'P1%' THEN REPLACE(ClassName, 'P1', 'P2')
-          ELSE ClassName END
-      WHERE Role = 'student' AND ClassName IS NOT NULL AND ClassName != ''`);
-    return;
-  }
-  const d = store.load();
-  for (const u of d.users) {
-    if (u.role !== 'student' || !u.classname) continue;
-    if (u.classname.startsWith('P6')) u.classname = 'Graduated';
-    else if (/^P[1-5]/.test(u.classname)) {
-      const next = Number(u.classname[1]) + 1;
-      u.classname = u.classname.replace(/^P[1-5]/, `P${next}`);
-    }
-  }
-  store.save();
+  return academicYears.promoteAllStudents();
 }
 
-async function listForTeacher(allTags, { includeTeachers = false } = {}) {
+async function listForTeacher(allTags, { includeTeachers = false, academicYear = '' } = {}) {
+  if (academicYear) {
+    const enrollments = await academicYears.listEnrollments(academicYear);
+    const students = enrollments.map(row => ({
+      id: row.studentId,
+      name: row.name,
+      role: 'student',
+      className: row.className || '',
+      classNo: row.classNo == null ? null : Number(row.classNo),
+      chineseGroup: row.chineseGroup || '',
+      englishGroup: row.englishGroup || '',
+      mathGroup: row.mathGroup || '',
+      totalQuestions: 0,
+      overallAccuracy: 0,
+    }));
+    if (!includeTeachers) return sortStudents(students);
+    const teachers = (await listForTeacher(allTags, { includeTeachers: true })).filter(user => user.role === 'teacher');
+    return [...teachers, ...sortStudents(students)];
+  }
   if (config.db.mode === 'postgres') {
     const where = includeTeachers ? '' : `WHERE u.Role != 'teacher'`;
     const groupBy = `GROUP BY u.StudentID, u.Role, u.ClassName, u.ClassNo, u.ChineseGroup, u.EnglishGroup, u.MathGroup`;

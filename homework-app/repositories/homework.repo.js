@@ -3,6 +3,7 @@
 const config = require('../../config');
 const store = require('../../db/jsonStore');
 const { getPool } = require('../../math-app/db/database');
+const academicYears = require('../../math-app/repositories/academic-years.repo');
 const { studentMatchesSubject } = require('../lib/domain');
 
 let schemaPromise;
@@ -59,34 +60,45 @@ function normalizeStoredHomeworks(homeworks) {
   }));
 }
 
-async function listClassStudents(className) {
+async function listClassStudents(academicYear, className) {
+  await academicYears.ensureSchema();
   if (config.db.mode === 'postgres') {
     const { rows } = await getPool().query(`
-      SELECT StudentID AS studentid, Name AS name, Role AS role, ClassName AS classname,
-        ClassNo AS classno, ChineseGroup AS chinesegroup, EnglishGroup AS englishgroup, MathGroup AS mathgroup
-      FROM Users WHERE Role <> 'teacher' AND ClassName = $1
-      ORDER BY COALESCE(ClassNo, 999), StudentID`, [className]);
+      SELECT e.StudentID AS studentid, u.Name AS name, u.Role AS role, e.ClassName AS classname,
+        e.ClassNo AS classno, e.ChineseGroup AS chinesegroup, e.EnglishGroup AS englishgroup, e.MathGroup AS mathgroup
+      FROM StudentAcademicYears e JOIN Users u ON u.StudentID=e.StudentID
+      WHERE e.AcademicYear=$1 AND u.Role <> 'teacher' AND e.ClassName=$2
+      ORDER BY COALESCE(e.ClassNo, 999), e.StudentID`, [academicYear, className]);
     return rows.map(mapUser);
   }
-  return jsonData().users.filter(row => row.role !== 'teacher' && row.classname === className)
-    .sort((a, b) => (Number(a.classno) || 999) - (Number(b.classno) || 999) || a.studentid.localeCompare(b.studentid))
-    .map(mapUser);
+  return (await academicYears.listEnrollments(academicYear))
+    .filter(row => row.role !== 'teacher' && row.className === className)
+    .sort((a, b) => (Number(a.classNo) || 999) - (Number(b.classNo) || 999) || a.studentId.localeCompare(b.studentId))
+    .map(row => ({
+      id: row.studentId, name: row.name, role: row.role, className: row.className,
+      classNo: row.classNo, chineseGroup: row.chineseGroup, englishGroup: row.englishGroup, mathGroup: row.mathGroup,
+    }));
 }
 
-async function listStudents(className, subject) {
-  if (config.db.mode === 'postgres') {
-    const { rows } = await getPool().query(`
-      SELECT StudentID AS studentid, Name AS name, Role AS role, ClassName AS classname,
-        ClassNo AS classno, ChineseGroup AS chinesegroup, EnglishGroup AS englishgroup, MathGroup AS mathgroup
-      FROM Users WHERE Role <> 'teacher' AND ClassName = $1 ORDER BY COALESCE(ClassNo, 999), StudentID`, [className]);
-    return rows.filter(row => studentMatchesSubject(row, className, subject)).map(mapUser);
+async function listStudents(academicYear, className, subject) {
+  const students = await listClassStudents(academicYear, className);
+  return students.filter(student => studentMatchesSubject({
+    studentid: student.id, name: student.name, role: student.role,
+    classname: student.className, classno: student.classNo,
+    chinesegroup: student.chineseGroup, englishgroup: student.englishGroup, mathgroup: student.mathGroup,
+  }, className, subject));
+}
+
+async function findUser(studentId, academicYear = '') {
+  if (academicYear) {
+    const enrollment = await academicYears.findEnrollment(academicYear, studentId);
+    if (!enrollment) return null;
+    return {
+      studentid: enrollment.studentId, name: enrollment.name, role: enrollment.role,
+      classname: enrollment.className, classno: enrollment.classNo,
+      chinesegroup: enrollment.chineseGroup, englishgroup: enrollment.englishGroup, mathgroup: enrollment.mathGroup,
+    };
   }
-  return jsonData().users.filter(row => studentMatchesSubject(row, className, subject))
-    .sort((a, b) => (Number(a.classno) || 999) - (Number(b.classno) || 999) || a.studentid.localeCompare(b.studentid))
-    .map(mapUser);
-}
-
-async function findUser(studentId) {
   if (config.db.mode === 'postgres') {
     const { rows } = await getPool().query(`SELECT StudentID AS studentid, Name AS name, Role AS role,
       ClassName AS classname, ClassNo AS classno, ChineseGroup AS chinesegroup,

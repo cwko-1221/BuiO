@@ -17,15 +17,26 @@ export function renderStudentManagement() {
     fetchStudentsListWrapper();
   }
   
+  const selectedYear = state.studentManagementYear || state.currentAcademicYear;
+  const isCurrentYear = selectedYear === state.currentAcademicYear;
+
   return `
     <section class="section-head" style="margin-top:2rem; display:flex; justify-content:space-between; align-items:center;">
       <div>
         <h2>${t('student_mgmt_title')}</h2>
-        <p>${t('student_mgmt_desc')}</p>
+        <p>${t('student_mgmt_desc')} · 現時學年：<strong>${state.currentAcademicYear}</strong></p>
       </div>
-      <button id="upgradeStudentsBtn" class="primary-action" style="background:var(--violet); color:white;">${renderIcon('spark')} 一鍵升級</button>
+      <label style="display:grid; gap:6px; color:var(--muted); font-weight:700;">
+        查看學年
+        <select id="studentAcademicYear" style="min-width:150px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--surface);">
+          ${state.academicYears.map(year => `<option value="${year}" ${year === selectedYear ? 'selected' : ''}>${year}${year === state.currentAcademicYear ? '（現時）' : ''}</option>`).join('')}
+        </select>
+      </label>
     </section>
-    
+
+    ${!isCurrentYear ? `<div class="glass-card" style="margin-bottom:1.25rem; padding:1rem 1.25rem; color:var(--muted);">正在查看 ${selectedYear} 歷史名冊；舊學年資料只供查閱。</div>` : ''}
+
+    ${isCurrentYear ? `
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
       <h3>${t('add_student_title')}</h3>
       <form id="addStudentForm" class="login-form" style="max-width: 400px; margin-top:1rem;">
@@ -76,6 +87,7 @@ export function renderStudentManagement() {
       <div id="batchImportMessage" class="batch-import-message" hidden></div>
       <div id="batchImportPreview" class="batch-import-preview" hidden></div>
     </div>
+    ` : ''}
 
     <section class="work-panel">
       <h2>${t('students_list_title')}</h2>
@@ -94,36 +106,34 @@ export function renderStudentManagement() {
             <div class="student-edit-fields">
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
                 班級
-                <select class="inline-edit" data-id="${s.id}" data-field="className" style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
+                <select class="inline-edit" data-id="${s.id}" data-field="className" ${isCurrentYear ? '' : 'disabled'} style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
                   ${['', 'P1','P2','P3','P4','P5','P6','Graduated'].map(o => `<option value="${o}" ${s.className === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
                 </select>
               </label>
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
                 班號
-                <input class="inline-edit class-number-input" data-id="${s.id}" data-field="classNo" type="number" min="1" max="99" inputmode="numeric" value="${s.classNo || ''}" placeholder="--">
+                <input class="inline-edit class-number-input" data-id="${s.id}" data-field="classNo" type="number" min="1" max="99" inputmode="numeric" value="${s.classNo || ''}" placeholder="--" ${isCurrentYear ? '' : 'disabled'}>
               </label>
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
                 中文 
-                <select class="inline-edit" data-id="${s.id}" data-field="chineseGroup" style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
+                <select class="inline-edit" data-id="${s.id}" data-field="chineseGroup" ${isCurrentYear ? '' : 'disabled'} style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
                   ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.chineseGroup === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
                 </select>
               </label>
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
                 英文 
-                <select class="inline-edit" data-id="${s.id}" data-field="englishGroup" style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
+                <select class="inline-edit" data-id="${s.id}" data-field="englishGroup" ${isCurrentYear ? '' : 'disabled'} style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
                   ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.englishGroup === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
                 </select>
               </label>
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
                 數學 
-                <select class="inline-edit" data-id="${s.id}" data-field="mathGroup" style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
+                <select class="inline-edit" data-id="${s.id}" data-field="mathGroup" ${isCurrentYear ? '' : 'disabled'} style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
                   ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.mathGroup === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
                 </select>
               </label>
             </div>
-            <div>
-              <button class="danger-action delete-student-btn" data-id="${s.id}">${t('delete_btn')}</button>
-            </div>
+            <div>${isCurrentYear ? `<button class="danger-action delete-student-btn" data-id="${s.id}">${t('delete_btn')}</button>` : ''}</div>
           </div>
         `).join('') || `<div style="padding:1rem; color:var(--text-muted)">${t('no_students')}</div>`}
       </div>
@@ -132,6 +142,20 @@ export function renderStudentManagement() {
 }
 
 export function renderAdminPage() {
+  if (!state.adminUnlocked) {
+    return `
+      <section class="section-head" style="margin-top:2rem;">
+        <div><h2>${t('admin_title')}</h2><p>請輸入 Admin 密碼才能進入系統管理。</p></div>
+      </section>
+      <div class="glass-card" style="max-width:460px; padding:1.75rem;">
+        <form id="adminUnlockForm" class="login-form">
+          <label>Admin 密碼<input id="adminPassword" type="password" inputmode="numeric" maxlength="6" required autocomplete="current-password"></label>
+          <button type="submit" id="adminUnlockBtn" class="primary-action">解鎖 Admin</button>
+          <div id="adminUnlockError" style="color:var(--coral); margin-top:0.5rem; display:none;"></div>
+        </form>
+      </div>`;
+  }
+
   if (!state.studentsLoaded) {
     fetchStudentsListWrapper();
   }
@@ -143,6 +167,14 @@ export function renderAdminPage() {
         <p>${t('admin_desc')}</p>
       </div>
     </section>
+
+    <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+      <div>
+        <h3 style="margin:0 0 0.35rem;">學年升級</h3>
+        <p style="margin:0; color:var(--muted);">現時學年：<strong>${state.currentAcademicYear}</strong>。升級會保留舊學年名冊，並把所有學生班級提升一級。</p>
+      </div>
+      <button id="upgradeStudentsBtn" class="primary-action" style="background:var(--violet); color:white;">${renderIcon('spark')} 一鍵升級</button>
+    </div>
     
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
       <h3>${t('add_teacher_title')}</h3>

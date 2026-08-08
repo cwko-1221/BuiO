@@ -69,7 +69,7 @@ async function request(cookie, url, { method = 'GET', body } = {}) {
 
 try {
   await waitForServer();
-  const teacher = await login('T001');
+  let teacher = await login('T001');
   const teacherMeta = await request(teacher, '/api/homework/meta');
   const year = teacherMeta.data.currentAcademicYear;
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
@@ -79,18 +79,18 @@ try {
     'general-studies', 'humanities', 'science', 'visual-arts', 'music', 'pe', 'computer', 'putonghua',
   ], 'complete subject catalogue');
 
-  let result = await request(teacher, '/api/homework/students?className=P4&subject=chinese-a');
+  let result = await request(teacher, `/api/homework/students?academicYear=${year}&className=P4&subject=chinese-a`);
   assert.deepEqual(result.data.students.map(row => row.id), ['S001', 'S002', 'S003'], 'A組 roster filtering');
-  result = await request(teacher, '/api/homework/students?className=P4&subject=chinese-b');
+  result = await request(teacher, `/api/homework/students?academicYear=${year}&className=P4&subject=chinese-b`);
   assert.deepEqual(result.data.students.map(row => row.id), ['S004'], 'B組 roster filtering');
-  assert.deepEqual((await request(teacher, '/api/homework/students?className=P4&subject=english-a')).data.students.map(row => row.id), ['S001', 'S003'], 'English A roster');
-  assert.deepEqual((await request(teacher, '/api/homework/students?className=P4&subject=math-a')).data.students.map(row => row.id), ['S001', 'S002'], 'Math A roster');
-  assert.equal((await request(teacher, '/api/homework/students?className=P4&subject=music')).data.students.length, 4, 'common subject roster');
-  assert.equal((await request(teacher, '/api/homework/students?className=P1&subject=humanities')).response.status, 200);
-  assert.equal((await request(teacher, '/api/homework/students?className=P3&subject=general-studies')).response.status, 200);
-  assert.equal((await request(teacher, '/api/homework/students?className=P6&subject=general-studies')).response.status, 200);
-  assert.equal((await request(teacher, '/api/homework/students?className=P4&subject=general-studies')).response.status, 400);
-  assert.equal((await request(teacher, '/api/homework/students?className=P3&subject=humanities')).response.status, 400);
+  assert.deepEqual((await request(teacher, `/api/homework/students?academicYear=${year}&className=P4&subject=english-a`)).data.students.map(row => row.id), ['S001', 'S003'], 'English A roster');
+  assert.deepEqual((await request(teacher, `/api/homework/students?academicYear=${year}&className=P4&subject=math-a`)).data.students.map(row => row.id), ['S001', 'S002'], 'Math A roster');
+  assert.equal((await request(teacher, `/api/homework/students?academicYear=${year}&className=P4&subject=music`)).data.students.length, 4, 'common subject roster');
+  assert.equal((await request(teacher, `/api/homework/students?academicYear=${year}&className=P1&subject=humanities`)).response.status, 200);
+  assert.equal((await request(teacher, `/api/homework/students?academicYear=${year}&className=P3&subject=general-studies`)).response.status, 200);
+  assert.equal((await request(teacher, `/api/homework/students?academicYear=${year}&className=P6&subject=general-studies`)).response.status, 200);
+  assert.equal((await request(teacher, `/api/homework/students?academicYear=${year}&className=P4&subject=general-studies`)).response.status, 400);
+  assert.equal((await request(teacher, `/api/homework/students?academicYear=${year}&className=P3&subject=humanities`)).response.status, 400);
   assert.equal((await fetch(`${base}/api/homework/meta`)).status, 401, 'unauthenticated API blocked');
 
   result = await request(teacher, '/api/homework/monitors', { method: 'PUT', body: { academicYear: year, className: 'P4', subject: 'chinese-a', studentIds: ['S001', 'S002'] } });
@@ -174,7 +174,40 @@ try {
   assert.equal(result.data.rows.find(row => row.id === 'S003').missingCount, 1, 'class analysis counts per student');
   assert.equal(result.data.rows.find(row => row.id === 'S002').missingCount, 0, 'class analysis includes students with zero missing work');
 
-  console.log('✅ Homework module API tests passed (isolated fixture).');
+  result = await request(teacher, '/api/auth/upgrade-students', { method: 'POST' });
+  assert.equal(result.response.status, 403, 'academic-year upgrade requires an unlocked Admin session');
+  result = await request(teacher, '/api/auth/unlock-admin', { method: 'POST', body: { password: '123456' } });
+  assert.equal(result.response.status, 401, 'wrong Admin password is rejected');
+  result = await request(teacher, '/api/auth/unlock-admin', { method: 'POST', body: { password: '999999' } });
+  assert.equal(result.response.status, 200, 'Admin password unlocks the session');
+  teacher = (typeof result.response.headers.getSetCookie === 'function'
+    ? result.response.headers.getSetCookie()
+    : [result.response.headers.get('set-cookie')].filter(Boolean))
+    .map(value => value.split(';')[0]).join('; ');
+  result = await request(teacher, '/api/auth/upgrade-students', { method: 'POST' });
+  assert.equal(result.response.status, 200, 'Admin can upgrade the academic year');
+  assert.equal(result.data.previousAcademicYear, '2025-26');
+  assert.equal(result.data.currentAcademicYear, '2026-27');
+
+  const oldYearUsers = await request(teacher, '/api/stats/teacher/all-users?academicYear=2025-26');
+  const newYearUsers = await request(teacher, '/api/stats/teacher/all-users?academicYear=2026-27');
+  assert.equal(oldYearUsers.data.students.find(row => row.id === 'S001').className, 'P4', 'old academic-year class is preserved');
+  assert.equal(newYearUsers.data.students.find(row => row.id === 'S001').className, 'P5', 'new academic-year class is promoted');
+  assert.deepEqual(newYearUsers.data.academicYears, ['2026-27', '2025-26'], 'student management can select current and previous years');
+  assert.equal((await request(teacher, '/api/homework/meta')).data.currentAcademicYear, '2026-27', 'homework module follows platform academic year');
+  assert.deepEqual(
+    (await request(teacher, '/api/homework/students?academicYear=2025-26&className=P4&subject=chinese-a')).data.students.map(row => row.id),
+    ['S001', 'S002', 'S003'],
+    'homework module uses the historical academic-year roster',
+  );
+  assert.deepEqual(
+    (await request(teacher, '/api/homework/students?academicYear=2026-27&className=P5&subject=chinese-a')).data.students.map(row => row.id),
+    ['S001', 'S002', 'S003'],
+    'homework module uses the promoted current-year roster',
+  );
+  assert.equal((await request(monitor, '/api/homework/meta')).data.canAccess, false, 'old monitor assignment does not leak into the new academic year');
+
+  console.log('✅ Homework and academic-year integration API tests passed (isolated fixture).');
 } finally {
   server.kill('SIGTERM');
   await new Promise(resolve => server.once('exit', resolve));

@@ -312,7 +312,8 @@ function bindEvents() {
             language: data.student.language || 'zh-HK',
           },
           loggedIn: true,
-          loginLoading: false
+          loginLoading: false,
+          adminUnlocked: false
         });
         await fetchHomeworkInfo();
         render();
@@ -335,10 +336,47 @@ function bindEvents() {
     });
   });
 
-  // Admin tab — backend already enforces teacher role on every admin endpoint
-  document.getElementById('adminBtn')?.addEventListener('click', () => {
+  document.getElementById('adminBtn')?.addEventListener('click', async () => {
     state.activeView = 'admin';
     state.studentsLoaded = false;
+    render();
+    try {
+      const response = await fetch('/api/auth/admin-status', { credentials: 'include' });
+      const data = await response.json();
+      updateState({ adminUnlocked: Boolean(response.ok && data.unlocked) });
+      render();
+    } catch {
+      updateState({ adminUnlocked: false });
+      render();
+    }
+  });
+
+  document.getElementById('adminUnlockForm')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const button = document.getElementById('adminUnlockBtn');
+    const error = document.getElementById('adminUnlockError');
+    button.disabled = true;
+    error.style.display = 'none';
+    try {
+      const response = await fetch('/api/auth/unlock-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ password: document.getElementById('adminPassword').value }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || 'Admin 密碼不正確');
+      updateState({ adminUnlocked: true, studentsLoaded: false });
+      render();
+    } catch (unlockError) {
+      error.textContent = unlockError.message || '無法解鎖 Admin';
+      error.style.display = 'block';
+      button.disabled = false;
+    }
+  });
+
+  document.getElementById('studentAcademicYear')?.addEventListener('change', event => {
+    updateState({ studentManagementYear: event.target.value, studentsLoaded: false });
     render();
   });
 
@@ -359,7 +397,12 @@ function bindEvents() {
       const data = await res.json();
       if (data.success) {
         alert('🎉 ' + data.message);
-        await fetchStudentsList();
+        updateState({
+          currentAcademicYear: data.currentAcademicYear,
+          studentManagementYear: data.currentAcademicYear,
+          studentsLoaded: false,
+        });
+        await fetchStudentsList(data.currentAcademicYear);
         render();
       } else {
         alert('❌ 升級失敗：' + data.message);
@@ -610,6 +653,8 @@ function bindEvents() {
     state.homeworkAccess = false;
     state.homeworkPending = [];
     state.homeworkPendingLoaded = false;
+    state.adminUnlocked = false;
+    state.studentsLoaded = false;
     clearSession();
     render();
   });

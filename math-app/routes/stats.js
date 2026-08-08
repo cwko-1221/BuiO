@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 
 const users = require('../repositories/users.repo');
+const academicYears = require('../repositories/academic-years.repo');
 const stats = require('../repositories/stats.repo');
 const logs = require('../repositories/logs.repo');
 const { ALL_TAGS, TAG_INFO } = require('../engine/questionGenerator');
@@ -193,8 +194,9 @@ router.get('/time-analysis', async (req, res, next) => {
 // ----------------------------------------------------------------
 router.get('/teacher/students', requireTeacher, async (req, res, next) => {
   try {
+    const currentAcademicYear = await academicYears.getCurrentAcademicYear();
     const rows = await users.listForTeacher(ALL_TAGS, { includeTeachers: false });
-    res.json({ success: true, students: rows });
+    res.json({ success: true, students: rows, currentAcademicYear });
   } catch (e) { next(e); }
 });
 
@@ -203,8 +205,22 @@ router.get('/teacher/students', requireTeacher, async (req, res, next) => {
 // ----------------------------------------------------------------
 router.get('/teacher/all-users', requireTeacher, async (req, res, next) => {
   try {
-    const rows = await users.listForTeacher(ALL_TAGS, { includeTeachers: true });
-    res.json({ success: true, students: rows });
+    const [currentAcademicYear, years] = await Promise.all([
+      academicYears.getCurrentAcademicYear(),
+      academicYears.listAcademicYears(),
+    ]);
+    const requestedYear = String(req.query.academicYear || currentAcademicYear);
+    if (!/^20\d{2}-\d{2}$/.test(requestedYear) || !years.includes(requestedYear)) {
+      return res.status(400).json({ success: false, message: '學年不正確' });
+    }
+    const rows = await users.listForTeacher(ALL_TAGS, { includeTeachers: true, academicYear: requestedYear });
+    res.json({
+      success: true,
+      students: rows,
+      academicYear: requestedYear,
+      academicYears: years,
+      currentAcademicYear,
+    });
   } catch (e) { next(e); }
 });
 

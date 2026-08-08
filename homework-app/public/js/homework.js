@@ -59,7 +59,7 @@ async function loadMonitorRoster() {
   const f = filterState.monitors;
   try {
     const [students, monitors] = await Promise.all([
-      api(`/students?className=${encodeURIComponent(f.className)}&subject=${encodeURIComponent(f.subject)}`),
+      api(`/students?academicYear=${encodeURIComponent(f.academicYear)}&className=${encodeURIComponent(f.className)}&subject=${encodeURIComponent(f.subject)}`),
       api(`/monitors?academicYear=${encodeURIComponent(f.academicYear)}&className=${encodeURIComponent(f.className)}&subject=${encodeURIComponent(f.subject)}`),
     ]);
     state.roster = students.students.map(student => ({ ...student, selected: monitors.monitors.some(monitor => monitor.studentId === student.id) }));
@@ -125,7 +125,8 @@ function renderRecords() {
 
 async function loadAnalysisStudents() {
   try {
-    const result = await fetch('/api/stats/teacher/students', { credentials: 'include' }).then(response => response.json());
+    const year = encodeURIComponent(filterState.analysis.academicYear);
+    const result = await fetch(`/api/stats/teacher/all-users?academicYear=${year}`, { credentials: 'include' }).then(response => response.json());
     state.analysisStudents = (result.students || []).filter(student => student.className === filterState.analysis.className);
     if (!state.analysisStudents.some(student => student.id === filterState.analysis.studentId)) filterState.analysis.studentId = state.analysisStudents[0]?.id || '';
     state.analysisRows = [];
@@ -271,7 +272,7 @@ function bindTeacher() {
       } catch (error) { setMessage(error.message, 'error'); }
     });
   } else if (state.view === 'analysis') {
-    analysisYear.onchange = () => { filterState.analysis.academicYear = analysisYear.value; state.analysisRows = []; render(); };
+    analysisYear.onchange = () => { filterState.analysis.academicYear = analysisYear.value; loadAnalysisStudents(); };
     analysisClass.onchange = () => { filterState.analysis.className = analysisClass.value; loadAnalysisStudents(); };
     analysisStudent.onchange = () => { filterState.analysis.studentId = analysisStudent.value; state.analysisRows = []; render(); };
     runAnalysis.onclick = loadAnalysis;

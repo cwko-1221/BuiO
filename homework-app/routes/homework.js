@@ -3,10 +3,11 @@
 const express = require('express');
 const router = express.Router();
 const repo = require('../repositories/homework.repo');
+const academicYearsRepo = require('../../math-app/repositories/academic-years.repo');
 const { requireAuth, requireTeacher } = require('../../math-app/middleware/auth');
 const {
   SUBJECTS, STUDENT_STATUSES, TEACHER_STATUSES, subjectById, subjectsForGrade,
-  currentAcademicYear, academicYears, isAcademicYear, isIsoDate, todayHongKong,
+  isAcademicYear, isIsoDate, todayHongKong,
 } = require('../lib/domain');
 
 router.use(requireAuth);
@@ -87,14 +88,21 @@ async function requireAssignment(req, res) {
 
 router.get('/meta', async (req, res, next) => {
   try {
-    const assignments = req.session.role === 'teacher' ? [] : await repo.listMonitors({ studentId: req.session.studentId });
+    const [currentAcademicYear, academicYears] = await Promise.all([
+      academicYearsRepo.getCurrentAcademicYear(),
+      academicYearsRepo.listAcademicYears(),
+    ]);
+    const assignments = req.session.role === 'teacher' ? [] : await repo.listMonitors({
+      studentId: req.session.studentId,
+      academicYear: currentAcademicYear,
+    });
     res.json({
       success: true,
       role: req.session.role,
       canAccess: req.session.role === 'teacher' || assignments.length > 0,
       subjects: SUBJECTS,
-      academicYears: academicYears(),
-      currentAcademicYear: currentAcademicYear(),
+      academicYears,
+      currentAcademicYear,
       assignments,
     });
   } catch (error) { next(error); }
@@ -102,10 +110,10 @@ router.get('/meta', async (req, res, next) => {
 
 router.get('/students', requireTeacher, async (req, res, next) => {
   try {
-    const { className, subject } = req.query;
-    if (!/^P[1-6]$/.test(className || '') || !subjectById(subject)) return fail(res, 400, '班別或科目不正確');
+    const { academicYear, className, subject } = req.query;
+    if (!isAcademicYear(academicYear) || !/^P[1-6]$/.test(className || '') || !subjectById(subject)) return fail(res, 400, '學年、班別或科目不正確');
     if (!subjectsForGrade(className).some(item => item.id === subject)) return fail(res, 400, '該年級沒有此科目');
-    res.json({ success: true, students: await repo.listStudents(className, subject) });
+    res.json({ success: true, students: await repo.listStudents(academicYear, className, subject) });
   } catch (error) { next(error); }
 });
 
@@ -122,7 +130,7 @@ router.put('/monitors', requireTeacher, async (req, res, next) => {
     const studentIds = [...new Set((Array.isArray(req.body.studentIds) ? req.body.studentIds : []).map(id => text(id, 20)).filter(Boolean))];
     if (!isAcademicYear(academicYear) || !/^P[1-6]$/.test(className) || !subjectById(subject)) return fail(res, 400, '學年、班別或科目不正確');
     if (!subjectsForGrade(className).some(item => item.id === subject)) return fail(res, 400, '該年級沒有此科目');
-    const eligible = await repo.listStudents(className, subject);
+    const eligible = await repo.listStudents(academicYear, className, subject);
     const allowed = new Set(eligible.map(student => student.id));
     if (studentIds.some(id => !allowed.has(id))) return fail(res, 400, '科長必須來自所選班別及科目組別');
     const monitors = await repo.replaceMonitors({ academicYear, className, subject, studentIds, createdBy: req.session.studentId });
@@ -133,7 +141,8 @@ router.put('/monitors', requireTeacher, async (req, res, next) => {
 router.get('/assignments', async (req, res, next) => {
   try {
     if (req.session.role === 'teacher') return res.json({ success: true, assignments: [] });
-    res.json({ success: true, assignments: await repo.listMonitors({ studentId: req.session.studentId }) });
+    const academicYear = await academicYearsRepo.getCurrentAcademicYear();
+    res.json({ success: true, assignments: await repo.listMonitors({ studentId: req.session.studentId, academicYear }) });
   } catch (error) { next(error); }
 });
 
@@ -141,7 +150,7 @@ router.get('/roster', async (req, res, next) => {
   try {
     const assignment = await requireAssignment(req, res);
     if (!assignment) return;
-    res.json({ success: true, students: await repo.listStudents(assignment.className, assignment.subject) });
+    res.json({ success: true, students: await repo.listStudents(assignment.academicYear, assignment.className, assignment.subject) });
   } catch (error) { next(error); }
 });
 
@@ -163,7 +172,7 @@ router.get('/records-pdf', requireTeacher, async (req, res, next) => {
     if (!assignment) return;
     const date = text(req.query.date, 10);
     if (!isIsoDate(date)) return fail(res, 400, '日期不正確');
-    const [record, roster] = await Promise.all([repo.findRecord({ ...assignment, date }), repo.listStudents(assignment.className, assignment.subject)]);
+    const [record, roster] = await Promise.all([repo.findRecord({ ...assignment, date }), repo.listStudents(assignment.academicYear, assignment.className, assignment.subject)]);
     if (!record) return fail(res, 404, '找不到記錄');
     const names = new Map(roster.map(student => [student.id, `${student.name} (${student.id})`]));
     const labels = { complete: '完成', missing: '欠交', absent: 'Absent' };
@@ -231,7 +240,7 @@ router.post('/records', async (req, res, next) => {
     if (date !== todayHongKong()) return fail(res, 400, '科長只可填報今天的記錄；過去日期只供查閱');
     if (!(await isMonitor(req.session.studentId, assignment.academicYear, assignment.className, assignment.subject))) return fail(res, 403, '你未獲委任為此科科長');
     if (await repo.findRecord({ ...assignment, date })) return fail(res, 409, '此日期的記錄已建立，請使用修改功能');
-    const roster = await repo.listStudents(assignment.className, assignment.subject);
+    const roster = await repo.listStudents(assignment.academicYear, assignment.className, assignment.subject);
     const result = normalizeHomeworks(req.body.homeworks, roster.map(student => student.id), STUDENT_STATUSES);
     if (result.error) return fail(res, 400, result.error);
     const record = await repo.createRecord({ ...assignment, date, homeworks: result.homeworks, createdBy: req.session.studentId });
@@ -257,7 +266,7 @@ router.put('/records', async (req, res, next) => {
     }
     const existing = await repo.findRecord({ ...assignment, date });
     if (!existing) return fail(res, 404, '找不到記錄');
-    const roster = await repo.listStudents(assignment.className, assignment.subject);
+    const roster = await repo.listStudents(assignment.academicYear, assignment.className, assignment.subject);
     const result = normalizeHomeworks(
       req.body.homeworks,
       roster.map(student => student.id),
@@ -276,7 +285,7 @@ router.get('/analysis', requireTeacher, async (req, res, next) => {
     const className = text(req.query.className, 10);
     const studentId = text(req.query.studentId, 20);
     if (!isAcademicYear(academicYear) || !/^P[1-6]$/.test(className) || !studentId) return fail(res, 400, '請選擇學年、年級及學生');
-    const user = await repo.findUser(studentId);
+    const user = await repo.findUser(studentId, academicYear);
     if (!user || user.role === 'teacher' || user.classname !== className) return fail(res, 404, '找不到該學生');
     const records = await repo.listRecords({ academicYear, className });
     const rows = [];
@@ -291,9 +300,10 @@ router.get('/analysis', requireTeacher, async (req, res, next) => {
 router.get('/pending', async (req, res, next) => {
   try {
     if (req.session.role === 'teacher') return res.json({ success: true, pending: [] });
-    const user = await repo.findUser(req.session.studentId);
+    const academicYear = await academicYearsRepo.getCurrentAcademicYear();
+    const user = await repo.findUser(req.session.studentId, academicYear);
     if (!user) return fail(res, 404, '找不到學生');
-    const records = await repo.listRecords({ className: user.classname || '' });
+    const records = await repo.listRecords({ academicYear, className: user.classname || '' });
     const pending = [];
     for (const record of records) for (const homework of record.homeworks) {
       const item = homework.statuses.find(entry => entry.studentId === req.session.studentId);
@@ -315,7 +325,7 @@ router.get('/class-analysis', requireTeacher, async (req, res, next) => {
       return fail(res, 400, '請選擇正確的學年、班級及日期範圍');
     }
     const [students, records] = await Promise.all([
-      repo.listClassStudents(className),
+      repo.listClassStudents(academicYear, className),
       repo.listRecords({ academicYear, className, dateFrom, dateTo }),
     ]);
     const counts = new Map(students.map(student => [student.id, 0]));

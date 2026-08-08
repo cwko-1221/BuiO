@@ -76,13 +76,20 @@ export function endTeacherSession(roomId) {
   });
 }
 
-export async function fetchStudentsList() {
+export async function fetchStudentsList(academicYear = state.studentManagementYear || '') {
   try {
-    const res = await fetch('/api/stats/teacher/all-users', { credentials: 'include' });
+    const query = academicYear ? `?academicYear=${encodeURIComponent(academicYear)}` : '';
+    const res = await fetch(`/api/stats/teacher/all-users${query}`, { credentials: 'include' });
     if (res.ok) {
       const data = await res.json();
       if (data.success) {
-        updateState({ studentsList: data.students, studentsLoaded: true });
+        updateState({
+          studentsList: data.students,
+          studentsLoaded: true,
+          academicYears: data.academicYears || state.academicYears,
+          currentAcademicYear: data.currentAcademicYear || state.currentAcademicYear,
+          studentManagementYear: data.academicYear || academicYear || data.currentAcademicYear,
+        });
         return true;
       }
     }

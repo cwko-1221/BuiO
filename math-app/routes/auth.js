@@ -2,10 +2,12 @@
 
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const router = express.Router();
 
 const config = require('../../config');
 const users = require('../repositories/users.repo');
+const academicYears = require('../repositories/academic-years.repo');
 const stats = require('../repositories/stats.repo');
 const { withTransaction } = require('../db/database');
 const { ALL_TAGS } = require('../engine/questionGenerator');
@@ -15,6 +17,21 @@ const {
   normalizeClassNo, isValidClassNo,
   isSupportedLanguage,
 } = require('../validators');
+
+const ADMIN_PASSWORD = '999999';
+
+function adminPasswordMatches(value) {
+  const received = Buffer.from(String(value || ''));
+  const expected = Buffer.from(ADMIN_PASSWORD);
+  return received.length === expected.length && crypto.timingSafeEqual(received, expected);
+}
+
+function requireAdminUnlocked(req, res, next) {
+  if (!req.session?.adminUnlocked) {
+    return res.status(403).json({ success: false, message: '請先輸入 Admin 密碼' });
+  }
+  next();
+}
 
 // ----------------------------------------------------------------
 // POST /login
@@ -36,6 +53,7 @@ router.post('/login', async (req, res, next) => {
     req.session.studentId = user.studentid;
     req.session.studentName = user.name;
     req.session.role = user.role || 'student';
+    req.session.adminUnlocked = false;
 
     res.json({
       success: true,
@@ -58,6 +76,19 @@ router.post('/login', async (req, res, next) => {
 router.post('/logout', (req, res) => {
   req.session = null;
   res.json({ success: true, message: '已登出' });
+});
+
+router.get('/admin-status', requireTeacher, (req, res) => {
+  res.json({ success: true, unlocked: Boolean(req.session.adminUnlocked) });
+});
+
+router.post('/unlock-admin', requireTeacher, (req, res) => {
+  if (!adminPasswordMatches(req.body?.password)) {
+    req.session.adminUnlocked = false;
+    return res.status(401).json({ success: false, message: 'Admin 密碼不正確' });
+  }
+  req.session.adminUnlocked = true;
+  res.json({ success: true, message: 'Admin 已解鎖' });
 });
 
 // ----------------------------------------------------------------
@@ -134,6 +165,9 @@ router.post('/register-student', requireTeacher, async (req, res, next) => {
       return res.status(400).json({ success: false, message: '此帳號已經存在' });
     }
     const targetRole = role === 'teacher' ? 'teacher' : 'student';
+    if (targetRole === 'teacher' && !req.session.adminUnlocked) {
+      return res.status(403).json({ success: false, message: '請先輸入 Admin 密碼' });
+    }
     const passwordHash = bcrypt.hashSync(password, 10);
 
     await users.insert({
@@ -144,6 +178,10 @@ router.post('/register-student', requireTeacher, async (req, res, next) => {
       mathGroup: mathGroup || '',
     });
     if (targetRole === 'student') {
+      await academicYears.upsertCurrentStudent({
+        studentId: id, className: className || '', classNo: classNoNum,
+        chineseGroup: chineseGroup || '', englishGroup: englishGroup || '', mathGroup: mathGroup || '',
+      });
       await stats.ensureTagsForStudent(id, ALL_TAGS);
     }
     res.json({ success: true, message: '帳號建立成功' });
@@ -205,6 +243,7 @@ router.post('/register-students-batch', requireTeacher, async (req, res, next) =
         for (const s of toCreate) {
           const passwordHash = await bcrypt.hash(s.password, 10);
           await users.insert({ ...s, passwordHash, role: 'student' }, { client });
+          await academicYears.upsertCurrentStudent({ ...s }, { client });
           await stats.ensureTagsForStudent(s.studentId, ALL_TAGS, { client });
         }
       });
@@ -233,6 +272,10 @@ router.delete('/delete-student/:studentId', requireTeacher, async (req, res, nex
     }
     if (!await users.exists(studentId)) {
       return res.status(404).json({ success: false, message: '找不到該帳號' });
+    }
+    const target = await users.findById(studentId);
+    if ((target?.role || '').toLowerCase() === 'teacher' && !req.session.adminUnlocked) {
+      return res.status(403).json({ success: false, message: '請先輸入 Admin 密碼' });
     }
     await users.deleteById(studentId);
     res.json({ success: true, message: '帳號已成功刪除' });
@@ -266,10 +309,14 @@ router.post('/update-student', requireTeacher, async (req, res, next) => {
 // ----------------------------------------------------------------
 // POST /upgrade-students
 // ----------------------------------------------------------------
-router.post('/upgrade-students', requireTeacher, async (req, res, next) => {
+router.post('/upgrade-students', requireTeacher, requireAdminUnlocked, async (req, res, next) => {
   try {
-    await users.upgradeAllStudents();
-    res.json({ success: true, message: '學生班級已成功升級' });
+    const result = await users.upgradeAllStudents();
+    res.json({
+      success: true,
+      message: `所有學生已升級；現時學年為 ${result.currentAcademicYear}`,
+      ...result,
+    });
   } catch (e) { next(e); }
 });
 
