@@ -1,7 +1,7 @@
 import { MATH_QUIZ_URL, MATH_DASHBOARD_URL, WHITEBOARD_BASE, MODULES, iconSvg } from './config.js';
 import { state, updateState } from './store.js';
 import { t, I18N } from './i18n.js';
-import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, loginApi } from './services.js';
+import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, loginApi, fetchHomeworkInfo } from './services.js';
 import { renderTopbar, renderShell } from './views/Shell.js';
 import { renderDashboard } from './views/Dashboard.js';
 import { renderModulesPage } from './views/Modules.js';
@@ -243,6 +243,9 @@ async function openModule(moduleId, mode) {
     }
     setTimeout(() => { updateState({ mathSsoStatus: '' }); render(); }, 2000);
 
+  } else if (moduleId === 'homework') {
+    window.location.href = '/homework';
+
   } else if (moduleId === 'report') {
     // 考評報告模組（老師專用）
     window.location.href = '/report.html';
@@ -311,6 +314,7 @@ function bindEvents() {
           loggedIn: true,
           loginLoading: false
         });
+        await fetchHomeworkInfo();
         render();
       } else {
         updateState({ loginError: data.message || '登入失敗', loginLoading: false });
@@ -603,6 +607,9 @@ function bindEvents() {
     state.currentUser = null;
     state.activeView = 'dashboard';
     state.mathSsoStatus = '';
+    state.homeworkAccess = false;
+    state.homeworkPending = [];
+    state.homeworkPendingLoaded = false;
     clearSession();
     render();
   });

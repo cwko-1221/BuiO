@@ -534,6 +534,28 @@ input:focus {
   line-height: 1.75;
 }
 
+.homework-reminder {
+  margin: 18px 0 0;
+  max-width: 620px;
+  padding: 14px 16px;
+  border: 1px solid #f5c7bd;
+  border-radius: 8px;
+  background: #fff0ed;
+  color: #973b2b;
+  line-height: 1.55;
+}
+.homework-reminder strong { display: block; }
+.homework-reminder.clear {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-color: #bce6d7;
+  background: #e6f6f1;
+  color: #16825f;
+}
+.homework-reminder.clear svg { width: 18px; height: 18px; }
+.homework-reminder ul { margin: 8px 0 0; padding-left: 1.2rem; }
+
 .action-row {
   display: flex;
   flex-wrap: wrap;

@@ -4,13 +4,17 @@ const fs = require('fs');
 const path = require('path');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
-const DB_FILE = path.join(DATA_DIR, 'db.json');
+// Tests may point at an isolated fixture without touching the real local data.
+const DB_FILE = process.env.BUIO_JSON_DB_FILE
+  ? path.resolve(process.env.BUIO_JSON_DB_FILE)
+  : path.join(DATA_DIR, 'db.json');
 
 let _data = null;
 
 function load() {
   if (_data) return _data;
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  const targetDir = path.dirname(DB_FILE);
+  if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
   if (fs.existsSync(DB_FILE)) {
     _data = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
   } else {

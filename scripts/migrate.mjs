@@ -54,6 +54,30 @@ const SCHEMA_SQL = `
     Timestamp TIMESTAMPTZ DEFAULT NOW()
   );
   ALTER TABLE QuestionLogs ADD COLUMN IF NOT EXISTS CorrectAnswer VARCHAR(50);
+
+  CREATE TABLE IF NOT EXISTS HomeworkMonitors (
+    ID BIGSERIAL PRIMARY KEY,
+    AcademicYear VARCHAR(10) NOT NULL,
+    ClassName VARCHAR(20) NOT NULL,
+    Subject VARCHAR(40) NOT NULL,
+    StudentID VARCHAR(20) NOT NULL REFERENCES Users(StudentID) ON DELETE CASCADE,
+    CreatedBy VARCHAR(20),
+    CreatedAt TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (AcademicYear, ClassName, Subject, StudentID)
+  );
+  CREATE TABLE IF NOT EXISTS HomeworkRecords (
+    ID BIGSERIAL PRIMARY KEY,
+    AcademicYear VARCHAR(10) NOT NULL,
+    ClassName VARCHAR(20) NOT NULL,
+    Subject VARCHAR(40) NOT NULL,
+    RecordDate DATE NOT NULL,
+    Homeworks JSONB NOT NULL DEFAULT '[]'::jsonb,
+    CreatedBy VARCHAR(20),
+    SubmittedAt TIMESTAMPTZ DEFAULT NOW(),
+    UpdatedBy VARCHAR(20),
+    UpdatedAt TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (AcademicYear, ClassName, Subject, RecordDate)
+  );
 `;
 
 const CONSTRAINTS_SQL = `
@@ -75,6 +99,8 @@ const INDICES_SQL = `
   CREATE INDEX IF NOT EXISTS idx_questionlogs_timestamp ON QuestionLogs(Timestamp);
   CREATE INDEX IF NOT EXISTS idx_studentstats_studentid ON StudentStats(StudentID);
   CREATE INDEX IF NOT EXISTS idx_users_role ON Users(Role);
+  CREATE INDEX IF NOT EXISTS idx_homework_monitors_student ON HomeworkMonitors(StudentID);
+  CREATE INDEX IF NOT EXISTS idx_homework_records_filter ON HomeworkRecords(AcademicYear, ClassName, Subject, RecordDate);
 `;
 
 async function main() {

@@ -22,11 +22,31 @@ export async function checkSession() {
           },
           loggedIn: true
         });
+        await fetchHomeworkInfo();
         return true;
       }
     }
   } catch { /* not logged in */ }
   return false;
+}
+
+export async function fetchHomeworkInfo() {
+  try {
+    const metaResponse = await fetch('/api/homework/meta', { credentials: 'include' });
+    const meta = await metaResponse.json();
+    const homeworkAccess = Boolean(metaResponse.ok && meta.success && meta.canAccess);
+    let homeworkPending = [];
+    if (state.currentUser?.role === 'student') {
+      const pendingResponse = await fetch('/api/homework/pending', { credentials: 'include' });
+      const pending = await pendingResponse.json();
+      if (pendingResponse.ok && pending.success) homeworkPending = pending.pending || [];
+    }
+    updateState({ homeworkAccess, homeworkPending, homeworkPendingLoaded: true });
+    return homeworkAccess;
+  } catch {
+    updateState({ homeworkAccess: false, homeworkPending: [], homeworkPendingLoaded: true });
+    return false;
+  }
 }
 
 export function clearSession() {

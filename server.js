@@ -47,6 +47,9 @@ app.use('/api/auth', require('./math-app/routes/auth'));
 app.use('/api/quiz', require('./math-app/routes/quiz'));
 app.use('/api/stats', require('./math-app/routes/stats'));
 
+// Missing-homework module
+app.use('/api/homework', require('./homework-app/routes/homework'));
+
 // Chinese module
 app.use('/api/chinese/teacher', require('./chinese-app/routes/teacher'));
 app.use('/api/chinese/student', require('./chinese-app/routes/student'));
@@ -259,6 +262,20 @@ app.get('/math',           (req, res) => {
     return res.sendFile(path.join(__dirname, 'math-app', 'public', 'dashboard.html'));
   }
   res.sendFile(path.join(__dirname, 'math-app', 'public', 'hub.html'));
+});
+
+// Missing-homework module (teachers and appointed subject monitors only).
+app.use('/homework/css', express.static(path.join(__dirname, 'homework-app', 'public', 'css')));
+app.use('/homework/js', express.static(path.join(__dirname, 'homework-app', 'public', 'js')));
+app.get('/homework', requireSession, async (req, res, next) => {
+  try {
+    if (req.session.role !== 'teacher') {
+      const homework = require('./homework-app/repositories/homework.repo');
+      const assignments = await homework.listMonitors({ studentId: req.session.studentId });
+      if (!assignments.length) return res.status(403).send('你未獲委任為科長，無權進入欠交功課模組。');
+    }
+    res.sendFile(path.join(__dirname, 'homework-app', 'public', 'index.html'));
+  } catch (error) { next(error); }
 });
 
 // Report (teacher only)

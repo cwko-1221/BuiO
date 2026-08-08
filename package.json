@@ -17,6 +17,8 @@
     "check:checkpoint-live": "node scripts/test-game-checkpoint-live.mjs",
     "check:security": "npm audit --omit=dev --audit-level=low",
     "check:tower-defense": "node scripts/test-tower-defense.mjs",
+    "check:homework": "node scripts/test-homework-module.mjs",
+    "dev:homework-fixture": "node scripts/start-homework-fixture.mjs",
     "check:tower-defense-live": "node scripts/test-tower-defense-live.mjs",
     "check:game-hub-live": "node scripts/test-game-hub-live.mjs",
     "build:game-assets": "node scripts/generate-reference-extensions.mjs && node scripts/generate-fixed-bricks.mjs && node scripts/build-game-assets.mjs && node scripts/analyze-game-geometry.mjs && node scripts/pack-game-atlases.mjs",

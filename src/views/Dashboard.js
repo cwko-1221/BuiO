@@ -20,6 +20,7 @@ function renderStudentDashboard() {
       <div class="hero-copy">
         <h2>${t('today_advice')}</h2>
         <p>${t('student_advice_desc')}</p>
+        ${renderHomeworkReminder()}
         ${mathStatusHtml}
         <div class="action-row">
           <button class="primary-action" id="openMathBtn">${renderIcon('math')} ${t('start_math')}</button>
@@ -45,6 +46,22 @@ function renderStudentDashboard() {
       ${MODULES.map(renderModuleCard).join('')}
     </div>
   `;
+}
+
+function renderHomeworkReminder() {
+  const pending = state.homeworkPending || [];
+  if (!pending.length) {
+    return `<div class="homework-reminder clear">${renderIcon('check')} 今天沒有待補做的欠交功課。</div>`;
+  }
+  return `<div class="homework-reminder">
+    <strong>你有 ${pending.length} 份功課需要補做</strong>
+    <ul>${pending.slice(0, 5).map(item => `<li>${escapeReminder(item.date)} · ${escapeReminder(item.homework)}</li>`).join('')}</ul>
+    ${pending.length > 5 ? `<span>另有 ${pending.length - 5} 份…</span>` : ''}
+  </div>`;
+}
+
+function escapeReminder(value) {
+  return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
 
 function renderStudentSessionPanel(sessions) {
