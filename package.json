@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-checkpoint-themes.mjs && node scripts/test-game-physics.mjs && node scripts/test-game-recovery.mjs && node scripts/test-game-crumble.mjs && node scripts/test-game-launcher.mjs && node scripts/test-game-lasers.mjs && node scripts/test-game-network.mjs && node scripts/test-tower-defense.mjs",
+    "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-checkpoint-themes.mjs && node scripts/test-game-physics.mjs && node scripts/test-game-recovery.mjs && node scripts/test-game-crumble.mjs && node scripts/test-game-launcher.mjs && node scripts/test-game-lasers.mjs && node scripts/test-game-network.mjs && node scripts/test-tower-defense.mjs && node scripts/test-phonics-module.mjs",
     "check:game": "node scripts/validate-game-v2.mjs",
     "check:checkpoint-themes": "node scripts/test-checkpoint-themes.mjs",
     "check:network-live": "node scripts/test-game-network-live.mjs",
@@ -18,6 +18,8 @@
     "check:security": "npm audit --omit=dev --audit-level=low",
     "check:tower-defense": "node scripts/test-tower-defense.mjs",
     "check:homework": "node scripts/test-homework-module.mjs",
+    "check:phonics": "node scripts/test-phonics-module.mjs",
+    "check:phonics-browser": "node scripts/test-phonics-browser.mjs",
     "check:report": "node scripts/test-report-import.mjs",
     "dev:homework-fixture": "node scripts/start-homework-fixture.mjs",
     "check:tower-defense-live": "node scripts/test-tower-defense-live.mjs",

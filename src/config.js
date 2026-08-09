@@ -88,6 +88,18 @@ export const MODULES = [
     status: 'module_english_status',
     roleAccess: ['student', 'teacher']
   },
+  {
+    id: 'phonics',
+    name: 'module_phonics_name',
+    shortName: 'Phonics',
+    description: 'module_phonics_desc',
+    accent: 'coral',
+    icon: 'train',
+    url: '/phonics',
+    metric: 'module_phonics_metric',
+    status: 'module_phonics_status',
+    roleAccess: ['student', 'teacher']
+  },
 ];
 
 // =============================================
@@ -100,6 +112,7 @@ export const iconSvg = {
   report: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>`,
   spark: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 9.8 8.8 4 11l5.8 2.2L12 19l2.2-5.8L20 11l-5.8-2.2z"/><path d="M19 3v4M21 5h-4"/></svg>`,
   game: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11h4M8 9v4"/><path d="M15.5 11.5h.01M17.5 9.5h.01"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.6L2 14.5A2.5 2.5 0 0 0 4.5 17c.9 0 1.74-.4 2.3-1.1L8.5 14h7l1.7 1.9c.56.7 1.4 1.1 2.3 1.1a2.5 2.5 0 0 0 2.5-2.5l-.7-5.9A4 4 0 0 0 17.32 5Z"/></svg>`,
+  train: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16V7a3 3 0 0 1 3-3h5a3 3 0 0 1 3 3v9"/><path d="M3 16h17l-2 4H6zM16 10h3a2 2 0 0 1 2 2v4M8 8h5M8 12h5"/><circle cx="8" cy="20" r="1.5"/><circle cx="16" cy="20" r="1.5"/></svg>`,
   tower: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21h14M7 21V10h10v11M9 10V6h6v4M8 6V3M12 6V3M16 6V3"/><path d="M10 14h4M10 18h4"/></svg>`,
   user: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>`,
   door: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M10 12h11m-4-4 4 4-4 4"/></svg>`,

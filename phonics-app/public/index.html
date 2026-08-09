@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f8b8d" />
+  <title>音素列車・BuiO</title>
+  <link rel="stylesheet" href="/phonics/css/phonics.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="icon-button" href="/" aria-label="返回平台">←</a>
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">🚂</span>
+      <div><strong>音素列車</strong><span>Phonics Express</span></div>
+    </div>
+    <div class="user-chip" id="userChip">載入中…</div>
+  </header>
+
+  <main>
+    <section class="accent-compare panel hidden" id="accentPreviewPanel" aria-label="口音比較">
+      <div><strong>老師口音比較</strong><span>同一句：Rain falls on a red car by the hot water.</span></div>
+      <button class="secondary-button" type="button" data-preview-audio="en-gb">🔊 英式</button>
+      <button class="secondary-button" type="button" data-preview-audio="en-us">🔊 美式</button>
+    </section>
+    <section id="levelScreen" class="screen">
+      <div class="hero panel">
+        <div>
+          <span class="eyebrow">LISTEN · CONNECT · BLEND</span>
+          <h1>逐節聽音，開動拼讀列車！</h1>
+          <p>由左至右辨認音素並接上車廂；接成完整單字後，列車會播放自然完整詞音。</p>
+        </div>
+        <div class="hero-train" aria-hidden="true"><span>🚂</span><span>🔤</span><span>⭐</span></div>
+      </div>
+      <div class="summary-row" id="summaryRow"></div>
+      <div class="section-heading">
+        <div><span class="eyebrow">CHOOSE A JOURNEY</span><h2>選擇學習路線</h2></div>
+        <p>原創校本補充練習，按累進式 SSP 原則編排；不取代學校選用的完整教材。</p>
+      </div>
+      <div class="level-grid" id="levelGrid" aria-live="polite"></div>
+    </section>
+
+    <section id="gameScreen" class="screen hidden" aria-live="polite">
+      <div class="game-toolbar">
+        <button class="secondary-button" id="backToLevels">← 返回路線</button>
+        <div class="journey-progress"><span id="journeyLabel"></span><div class="progress-track"><span id="progressBar"></span></div></div>
+        <div class="star-counter" id="starCounter">☆ 0</div>
+      </div>
+
+      <section class="play-card panel">
+        <div class="sky-scene" aria-hidden="true">
+          <span class="cloud cloud-one">☁</span><span class="cloud cloud-two">☁</span>
+          <span class="hill hill-one"></span><span class="hill hill-two"></span>
+        </div>
+        <div class="target-card">
+          <div class="target-emoji" id="targetEmoji"></div>
+          <div>
+            <span class="eyebrow" id="wordMode"></span>
+            <h2 id="targetHint"></h2>
+            <button class="sound-button" id="listenWord">🔊 聽完整單字</button>
+          </div>
+        </div>
+
+        <div class="track-zone" id="trackZone">
+          <div class="locomotive" aria-hidden="true"><span>🚂</span></div>
+          <div class="joined-train" id="joinedTrain" aria-label="已接駁的車廂"></div>
+          <div class="drop-hint" id="dropHint">把下一節車廂拖到這裡，或直接按車廂</div>
+          <div class="rail" aria-hidden="true"></div>
+        </div>
+
+        <div class="blend-readout" id="blendReadout">
+          <span>目前拼合</span><strong>—</strong><small>接上第一節車廂開始</small>
+        </div>
+
+        <div class="carriage-bank" id="carriageBank" aria-label="可選車廂"></div>
+
+        <div class="game-actions">
+          <button class="secondary-button" id="resetWord">↺ 重新接駁</button>
+          <button class="primary-button" id="slowBlend">▶ 播放自然完整詞</button>
+        </div>
+        <p class="audio-note" id="audioStatus">正在載入班級發音設定…</p>
+      </section>
+    </section>
+  </main>
+
+  <div class="celebration hidden" id="celebration" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="result-card panel">
+      <div class="result-emoji">🎉</div>
+      <span class="eyebrow">JOURNEY COMPLETE</span>
+      <h2 id="resultTitle">列車到站！</h2>
+      <p id="resultText"></p>
+      <div class="result-stars" id="resultStars"></div>
+      <div class="result-actions">
+        <button class="secondary-button" id="replayLevel">再玩一次</button>
+        <button class="primary-button" id="chooseAnother">選擇其他路線</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script type="module" src="/phonics/js/game.js?v=google-tts-1"></script>
+</body>
+</html>

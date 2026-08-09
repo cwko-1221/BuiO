@@ -257,6 +257,9 @@ async function openModule(moduleId, mode) {
   } else if (moduleId === 'english') {
     window.location.href = '/english';
 
+  } else if (moduleId === 'phonics') {
+    window.location.href = '/phonics';
+
   } else if (moduleId === 'game') {
     window.location.href = '/games';
 

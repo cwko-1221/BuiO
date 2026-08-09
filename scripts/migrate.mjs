@@ -78,6 +78,16 @@ const SCHEMA_SQL = `
     UpdatedAt TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE (AcademicYear, ClassName, Subject, RecordDate)
   );
+
+  CREATE TABLE IF NOT EXISTS PhonicsClassSettings (
+    AcademicYear VARCHAR(10) NOT NULL,
+    ClassName VARCHAR(20) NOT NULL,
+    Accent VARCHAR(10) NOT NULL DEFAULT 'en-gb'
+      CHECK (Accent IN ('en-gb', 'en-us')),
+    UpdatedBy VARCHAR(20),
+    UpdatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (AcademicYear, ClassName)
+  );
 `;
 
 const CONSTRAINTS_SQL = `

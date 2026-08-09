@@ -4,7 +4,9 @@
       "studentid": "S001",
       "name": "王小明",
       "role": "student",
-      "passwordhash": "$2b$10$3dKTivOnJxYbfa7QyJHsiufGjS4SgPnf270UCjyA9pI01eiagAhOS"
+      "passwordhash": "$2b$10$3dKTivOnJxYbfa7QyJHsiufGjS4SgPnf270UCjyA9pI01eiagAhOS",
+      "classname": "P3",
+      "englishgroup": "B組"
     },
     {
       "studentid": "S002",
@@ -28,7 +30,9 @@
       "studentid": "S005",
       "name": "林小芬",
       "role": "student",
-      "passwordhash": "$2b$10$3dKTivOnJxYbfa7QyJHsiufGjS4SgPnf270UCjyA9pI01eiagAhOS"
+      "passwordhash": "$2b$10$3dKTivOnJxYbfa7QyJHsiufGjS4SgPnf270UCjyA9pI01eiagAhOS",
+      "englishgroup": "A組",
+      "classname": "P2"
     },
     {
       "studentid": "T001",
@@ -466,5 +470,87 @@
       "timestamp": "2026-06-08T15:21:39.314Z"
     }
   ],
-  "_logId": 7
+  "_logId": 7,
+  "platformSettings": {
+    "currentAcademicYear": "2025-26"
+  },
+  "studentAcademicYears": [
+    {
+      "academicYear": "2025-26",
+      "studentId": "S001",
+      "name": "王小明",
+      "className": "P3",
+      "classNo": null,
+      "chineseGroup": "",
+      "englishGroup": "B組",
+      "mathGroup": ""
+    },
+    {
+      "academicYear": "2025-26",
+      "studentId": "S002",
+      "name": "李小華",
+      "className": "",
+      "classNo": null,
+      "chineseGroup": "",
+      "englishGroup": "",
+      "mathGroup": ""
+    },
+    {
+      "academicYear": "2025-26",
+      "studentId": "S003",
+      "name": "張小美",
+      "className": "",
+      "classNo": null,
+      "chineseGroup": "",
+      "englishGroup": "",
+      "mathGroup": ""
+    },
+    {
+      "academicYear": "2025-26",
+      "studentId": "S004",
+      "name": "陳大偉",
+      "className": "",
+      "classNo": null,
+      "chineseGroup": "",
+      "englishGroup": "",
+      "mathGroup": ""
+    },
+    {
+      "academicYear": "2025-26",
+      "studentId": "S005",
+      "name": "林小芬",
+      "className": "P2",
+      "classNo": null,
+      "chineseGroup": "",
+      "englishGroup": "A組",
+      "mathGroup": ""
+    },
+    {
+      "academicYear": "2025-26",
+      "studentId": "S006",
+      "name": "abc",
+      "className": "",
+      "classNo": null,
+      "chineseGroup": "",
+      "englishGroup": "",
+      "mathGroup": ""
+    }
+  ],
+  "phonicsAttempts": [],
+  "phonicsClassSettings": [
+    {
+      "academicYear": "2025-26",
+      "className": "P2",
+      "accent": "en-us",
+      "updatedBy": "T900",
+      "updatedAt": "2026-08-09T10:10:30.969Z"
+    },
+    {
+      "academicYear": "2025-26",
+      "className": "P3",
+      "accent": "en-us",
+      "updatedBy": "T900",
+      "updatedAt": "2026-08-09T10:10:49.644Z"
+    }
+  ]
 }

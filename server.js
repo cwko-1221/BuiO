@@ -63,6 +63,9 @@ app.use('/api/english/teacher', require('./english-app/routes/teacher'));
 app.use('/api/english/student', require('./english-app/routes/student'));
 app.use('/api/english', require('./english-app/routes/media'));
 
+// Phonics Express (built-in curriculum, Google Cloud British/American English TTS)
+app.use('/api/phonics', require('./phonics-app/routes/phonics'));
+
 // Game module (唔好望落嚟)
 app.use('/api/game/teacher', require('./game-app/routes/teacher'));
 app.use('/api/games', require('./game-hub-app/routes/hub'));
@@ -194,6 +197,21 @@ app.get('/english', requireSession, (req, res) => res.sendFile(path.join(__dirna
 app.get('/english/teacher', requireTeacherPageEn, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'teacher.html')));
 app.get('/english/student', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'student.html')));
 app.get('/english/practice', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'practice.html')));
+
+// Phonics Express static assets + role-aware pages
+app.use('/phonics/css', express.static(path.join(__dirname, 'phonics-app', 'public', 'css')));
+app.use('/phonics/js', express.static(path.join(__dirname, 'phonics-app', 'public', 'js')));
+app.get('/phonics', requireSession, (req, res) => {
+  const page = req.session.role === 'teacher' ? 'teacher.html' : 'index.html';
+  res.sendFile(path.join(__dirname, 'phonics-app', 'public', page));
+});
+app.get('/phonics/student', requireSession, (_req, res) => {
+  res.sendFile(path.join(__dirname, 'phonics-app', 'public', 'index.html'));
+});
+app.get('/phonics/teacher', requireSession, (req, res) => {
+  if (req.session.role !== 'teacher') return res.redirect('/phonics');
+  res.sendFile(path.join(__dirname, 'phonics-app', 'public', 'teacher.html'));
+});
 
 // Game module static + page routes
 app.use('/game/css', express.static(path.join(__dirname, 'game-app', 'public', 'css')));
@@ -334,6 +352,7 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   console.log('🚀  ├─ 互動白板:  /whiteboard/');
   console.log('🚀  ├─ 粵語學習:  /chinese');
   console.log('🚀  ├─ 英文拼字:  /english');
+  console.log('🚀  ├─ 音素列車:  /phonics');
   console.log('🚀  └─ API:       /api/*');
   console.log('🚀 =========================================');
   console.log('');
