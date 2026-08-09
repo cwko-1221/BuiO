@@ -8,6 +8,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcryptjs');
+const { buildAudioSpec } = require('../phonics-app/lib/audio-spec');
 
 const temp = await mkdtemp(path.join(tmpdir(), 'buio-phonics-'));
 const dbFile = path.join(temp, 'fixture.json');
@@ -87,6 +88,16 @@ try {
   const cat = result.data.levels.find(level => level.id === 'more-sounds').words.find(item => item.id === 'cat');
   assert.deepEqual(cat.segments.map(item => item.text), ['c', 'a', 't'], 'CVC carriages');
   assert.deepEqual(cat.segments.map(item => item.ipa), ['k', 'æ', 't'], 'phoneme labels');
+  const rawCat = require('../phonics-app/data/curriculum').getWord('cat');
+  assert.match(buildAudioSpec(rawCat, 'en-gb', { audioType: 'segment', segmentIndex: 0 }).ssml, /ph="k"/, 'single sound uses IPA SSML');
+  assert.match(buildAudioSpec(rawCat, 'en-gb', { audioType: 'blend', blendLength: 2 }).ssml, /ph="kæ"/, 'partial blend uses cumulative IPA SSML');
+  assert.equal(buildAudioSpec(rawCat, 'en-us', { audioType: 'word' }).text, 'cat', 'complete word remains natural text TTS');
+  const rawDog = require('../phonics-app/data/curriculum').getWord('dog');
+  assert.match(buildAudioSpec(rawDog, 'en-gb', { audioType: 'blend', blendLength: 3 }).ssml, /ph="dɒɡ"/, 'British blend keeps British short o');
+  assert.match(buildAudioSpec(rawDog, 'en-us', { audioType: 'blend', blendLength: 3 }).ssml, /ph="dɑɡ"/, 'American blend keeps American short o');
+  assert.throws(() => buildAudioSpec(rawCat, 'en-gb', { audioType: 'segment', segmentIndex: 9 }), /segmentIndex/, 'invalid segment rejected');
+  assert.throws(() => buildAudioSpec(rawCat, 'en-gb', { audioType: 'segment' }), /segmentIndex/, 'missing segment rejected');
+  assert.throws(() => buildAudioSpec(rawCat, 'en-gb', { audioType: 'blend', blendLength: 9 }), /blendLength/, 'invalid blend rejected');
   const cupcake = result.data.levels.at(-1).words.find(item => item.id === 'cupcake');
   assert.equal(cupcake.mode, 'syllable');
   assert.deepEqual(cupcake.segments.map(item => item.text), ['cup', 'cake'], 'long word uses syllable train');

@@ -67,6 +67,19 @@ async function synthesize(text, opts = {}) {
   return Buffer.from(response.audioContent);
 }
 
+async function synthesizeSsml(ssml, opts = {}) {
+  const languageCode = opts.languageCode || 'en-GB';
+  const ssmlGender = opts.ssmlGender || 'FEMALE';
+  const speakingRate = opts.speakingRate || 0.9;
+  const [response] = await ttsClient().synthesizeSpeech({
+    input: { ssml },
+    voice: { languageCode, ssmlGender },
+    audioConfig: { audioEncoding: 'MP3', speakingRate },
+  });
+  if (!response.audioContent) throw new Error('Google TTS did not return audio.');
+  return Buffer.from(response.audioContent);
+}
+
 async function synthesizeCantonese(text) {
   return synthesize(text, { languageCode: 'yue-HK', ssmlGender: 'FEMALE', speakingRate: 0.9 });
 }
@@ -112,4 +125,4 @@ async function warmup() {
   }
 }
 
-module.exports = { isGoogleConfigured, synthesize, synthesizeCantonese, transcribeCantonese, warmup };
+module.exports = { isGoogleConfigured, synthesize, synthesizeSsml, synthesizeCantonese, transcribeCantonese, warmup };

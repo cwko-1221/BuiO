@@ -8,9 +8,10 @@ const progress = require('../repositories/progress.repo');
 const accentSettings = require('../repositories/accent-settings.repo');
 const { getWord, publicCatalog } = require('../data/curriculum');
 const google = require('../../chinese-app/lib/google');
+const { buildAudioSpec } = require('../lib/audio-spec');
 
 const ttsCache = new Map();
-const MAX_TTS_CACHE_ENTRIES = 128;
+const MAX_TTS_CACHE_ENTRIES = 1024;
 
 router.use(requireAuth);
 
@@ -63,7 +64,7 @@ router.post('/tts', async (req, res, next) => {
     const academicYear = await academicYears.getCurrentAcademicYear();
     const isPreview = req.body?.preview === true;
     let accent;
-    let text;
+    let audioSpec;
     let cacheId;
 
     if (isPreview) {
@@ -74,7 +75,7 @@ router.post('/tts', async (req, res, next) => {
       accent = Object.hasOwn(accentSettings.ACCENTS, requestedAccent)
         ? requestedAccent
         : accentSettings.DEFAULT_ACCENT;
-      text = 'Rain falls on a red car by the hot water.';
+      audioSpec = { text: 'Rain falls on a red car by the hot water.', speakingRate: 0.9, audioType: 'preview' };
       cacheId = 'teacher-preview';
     } else {
       const entry = getWord(req.body?.wordId);
@@ -92,18 +93,26 @@ router.post('/tts', async (req, res, next) => {
           ? await accentSettings.getClassAccent(academicYear, enrollment.className)
           : accentSettings.DEFAULT_ACCENT;
       }
-      text = entry.spelling;
-      cacheId = entry.id;
+      try {
+        audioSpec = buildAudioSpec(entry, accent, req.body);
+      } catch (error) {
+        if (error.statusCode === 400) return res.status(400).json({ success: false, message: error.message });
+        throw error;
+      }
+      cacheId = audioSpec.cacheId;
     }
 
     const cacheKey = `${accent}:${cacheId}`;
     let audio = ttsCache.get(cacheKey);
     if (!audio) {
-      audio = google.synthesize(text, {
+      const options = {
         languageCode: accent === 'en-us' ? 'en-US' : 'en-GB',
         ssmlGender: 'FEMALE',
-        speakingRate: 0.9,
-      });
+        speakingRate: audioSpec.speakingRate,
+      };
+      audio = audioSpec.ssml
+        ? google.synthesizeSsml(audioSpec.ssml, options)
+        : google.synthesize(audioSpec.text, options);
       ttsCache.set(cacheKey, audio);
       if (ttsCache.size > MAX_TTS_CACHE_ENTRIES) ttsCache.delete(ttsCache.keys().next().value);
     }
@@ -118,6 +127,7 @@ router.post('/tts', async (req, res, next) => {
       'Content-Type': 'audio/mpeg',
       'Cache-Control': 'private, max-age=86400',
       'X-Phonics-Accent': accent,
+      'X-Phonics-Audio-Type': audioSpec.audioType,
     }).send(audio);
   } catch (error) { next(error); }
 });

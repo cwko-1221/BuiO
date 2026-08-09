@@ -75,14 +75,14 @@ function playAudio(url) {
   });
 }
 
-async function googleTtsUrl({ wordId = '', accent = state.accent, preview = false }) {
-  const key = preview ? `preview:${accent}` : `${accent}:${wordId}`;
+async function googleTtsUrl({ wordId = '', accent = state.accent, preview = false, audioType = 'word', segmentIndex, blendLength }) {
+  const key = preview ? `preview:${accent}` : `${accent}:${wordId}:${audioType}:${segmentIndex ?? ''}:${blendLength ?? ''}`;
   if (state.ttsUrls.has(key)) return state.ttsUrls.get(key);
   const response = await fetch('/api/phonics/tts', {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ wordId, accent, preview }),
+    body: JSON.stringify({ wordId, accent, preview, audioType, segmentIndex, blendLength }),
   });
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
@@ -93,12 +93,12 @@ async function googleTtsUrl({ wordId = '', accent = state.accent, preview = fals
   return url;
 }
 
-async function speakWord(entry, accent = state.accent) {
+async function speakEntryAudio(entry, options = {}) {
   if (!state.ttsAvailable) return false;
   stopAudio();
   const requestSequence = state.audioSequence;
   try {
-    const url = await googleTtsUrl({ wordId: entry.id, accent });
+    const url = await googleTtsUrl({ wordId: entry.id, accent: state.accent, ...options });
     if (requestSequence !== state.audioSequence) return false;
     return await playAudio(url);
   } catch (error) {
@@ -107,6 +107,22 @@ async function speakWord(entry, accent = state.accent) {
     toast(error.message);
     return false;
   }
+}
+
+function speakWord(entry, accent = state.accent) {
+  return speakEntryAudio(entry, { accent, audioType: 'word' });
+}
+
+function speakSegment(entry, segmentIndex) {
+  return speakEntryAudio(entry, { audioType: 'segment', segmentIndex });
+}
+
+function speakCurrentBlend(entry = currentWord()) {
+  const blendLength = state.joined.length;
+  if (!blendLength) return Promise.resolve(false);
+  return blendLength === 1
+    ? speakSegment(entry, state.joined[0])
+    : speakEntryAudio(entry, { audioType: 'blend', blendLength });
 }
 
 async function speakPreview(accent) {
@@ -182,7 +198,8 @@ function renderWord() {
   $('#listenWord').onclick = () => speakWord(entry);
   $('#listenWord').disabled = !state.ttsAvailable;
   $('#listenWord').textContent = state.ttsAvailable ? '🔊 聽完整單字' : '🔇 Google TTS 尚未設定';
-  $('#slowBlend').disabled = !state.ttsAvailable;
+  $('#slowBlend').disabled = true;
+  $('#slowBlend').textContent = '🔊 聽目前拼合';
   $('#trackZone').className = 'track-zone';
   renderTrain();
   renderBank();
@@ -199,6 +216,7 @@ function renderTrain() {
   const blendIpa = entry.segments.slice(0, state.joined.length).map(item => item.ipa).join('');
   $('#blendReadout').innerHTML = `<span>已連接 ${state.joined.length || 0} 個${unitLabel}</span><strong>${escapeHtml(text || '—')}</strong><small>${state.joined.length ? `音素次序：/${escapeHtml(blendIpa)}/；接完整後播放自然單字` : '接上第一節車廂開始'}</small>`;
   $('#dropHint').classList.toggle('hidden', state.joined.length > 0);
+  $('#slowBlend').disabled = !state.ttsAvailable || state.joined.length === 0;
 }
 
 function renderBank() {
@@ -206,8 +224,11 @@ function renderBank() {
   const indices = shuffle(entry.segments.map((_item, index) => index));
   $('#carriageBank').innerHTML = indices.map(index => {
     const item = entry.segments[index];
-    return `<div class="carriage ${state.joined.includes(index) ? 'used' : ''}" role="button" tabindex="0" aria-label="接駁 ${escapeHtml(item.text)}" draggable="true" data-segment="${index}">
-      <span class="letters">${escapeHtml(item.text.replace('_', '·'))}</span><span class="ipa">/${escapeHtml(item.ipa)}/</span>
+    return `<div class="carriage-slot ${state.joined.includes(index) ? 'used' : ''}">
+      <div class="carriage" role="button" tabindex="0" aria-label="接駁 ${escapeHtml(item.text)}" draggable="true" data-segment="${index}">
+        <span class="letters">${escapeHtml(item.text.replace('_', '·'))}</span><span class="ipa">/${escapeHtml(item.ipa)}/</span>
+      </div>
+      <button class="mini-sound" type="button" data-sound-segment="${index}" aria-label="聆聽 ${escapeHtml(item.text)} 的單音" ${state.ttsAvailable ? '' : 'disabled'}>🔊</button>
     </div>`;
   }).join('');
   document.querySelectorAll('.carriage').forEach(button => {
@@ -218,6 +239,13 @@ function renderBank() {
       connectSegment(Number(button.dataset.segment));
     });
     button.addEventListener('dragstart', event => event.dataTransfer.setData('text/plain', button.dataset.segment));
+  });
+  document.querySelectorAll('[data-sound-segment]').forEach(button => {
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      speakSegment(entry, Number(button.dataset.soundSegment));
+    });
+    button.addEventListener('keydown', event => event.stopPropagation());
   });
 }
 
@@ -241,6 +269,7 @@ async function connectSegment(index) {
   renderBank();
   if (state.joined.length < entry.segments.length) {
     state.busy = false;
+    if (state.ttsAvailable) void speakCurrentBlend(entry);
     return;
   }
 
@@ -295,7 +324,7 @@ $('#trackZone').addEventListener('drop', event => {
   $('#trackZone').classList.remove('drag-over');
   connectSegment(Number(event.dataTransfer.getData('text/plain')));
 });
-$('#slowBlend').addEventListener('click', () => speakWord(currentWord()));
+$('#slowBlend').addEventListener('click', () => speakCurrentBlend());
 $('#resetWord').addEventListener('click', renderWord);
 $('#backToLevels').addEventListener('click', returnToLevels);
 $('#chooseAnother').addEventListener('click', returnToLevels);
@@ -323,8 +352,8 @@ async function init() {
     state.ttsAvailable = catalog.ttsAvailable === true;
     $('#accentPreviewPanel').classList.toggle('hidden', state.me.role !== 'teacher' || !state.ttsAvailable);
     $('#audioStatus').textContent = state.ttsAvailable
-      ? `完整單字使用 Google Cloud TTS（${state.accentLabel}）；單音及半詞不使用合成語音。`
-      : 'Google TTS 尚未設定，完整單字朗讀暫時停用。';
+      ? `Google Cloud TTS（${state.accentLabel}）會按 IPA 播放單音、目前拼合及完整單字。`
+      : 'Google TTS 尚未設定，單音、拼合音及完整單字暫時停用。';
     $('#audioStatus').classList.remove('error');
     state.levels = catalog.levels;
     state.progress = progress.progress;

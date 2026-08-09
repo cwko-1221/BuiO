@@ -85,7 +85,8 @@ try {
   assert.equal(await page.locator('.level-card').count(), 8, 'student sees eight journeys');
 
   await page.getByRole('button', { name: /First Sounds/ }).click();
-  assert.equal(await page.locator('.mini-sound').count(), 0, 'unreliable synthesized isolated-sound controls are not shown');
+  assert.equal(await page.locator('.mini-sound').count(), 3, 'each carriage exposes an IPA single-sound control');
+  assert.equal(await page.locator('.mini-sound:disabled').count(), 3, 'sound controls disable cleanly without Google credentials');
   const track = page.locator('#trackZone');
   await page.locator('.carriage[data-segment="0"]').dragTo(track);
   await page.waitForFunction(() => document.querySelector('#blendReadout strong')?.textContent !== '—');
