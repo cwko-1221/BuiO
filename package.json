@@ -20,6 +20,7 @@
     "check:homework": "node scripts/test-homework-module.mjs",
     "check:phonics": "node scripts/test-phonics-module.mjs",
     "check:phonics-browser": "node scripts/test-phonics-browser.mjs",
+    "check:chinese-recording": "node scripts/test-chinese-recording-gesture.mjs",
     "check:report": "node scripts/test-report-import.mjs",
     "dev:homework-fixture": "node scripts/start-homework-fixture.mjs",
     "check:tower-defense-live": "node scripts/test-tower-defense-live.mjs",

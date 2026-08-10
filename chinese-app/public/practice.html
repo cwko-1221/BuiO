@@ -85,6 +85,14 @@
       if (rec.ttsUrl) { URL.revokeObjectURL(rec.ttsUrl); rec.ttsUrl = null; }
     }
 
+    function syncRecordingButton() {
+      const btn = document.querySelector('.record-btn');
+      if (!btn) return;
+      btn.classList.toggle('recording', state.recording);
+      btn.setAttribute('aria-pressed', String(state.recording));
+      btn.textContent = `🎤  ${state.recording ? '放手送出' : '按住說話'}`;
+    }
+
     // ------------------- core flow -------------------
     async function init() {
       state.me = await ensureAuth('student'); if (!state.me) return;
@@ -172,6 +180,7 @@
       rec.requested = true;
       stopTts();
       await new Promise(r => setTimeout(r, 150));
+      if (!rec.requested) return;
       state.message = '';
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -200,7 +209,10 @@
           src.connect(proc); proc.connect(ctx.destination);
           rec.pcm = { ctx, src, proc, stream, chunks, sampleRate: ctx.sampleRate };
         }
-        state.recording = true; render();
+        // Keep the pressed button in the DOM so iPad retains pointer capture
+        // until the user's finger is genuinely lifted.
+        state.recording = true;
+        syncRecordingButton();
       } catch (e) {
         rec.requested = false;
         state.message = '❌ 無法存取麥克風，請檢查瀏覽器權限。';
@@ -222,11 +234,30 @@
       }
       const mr = rec.mediaRecorder;
       if (!mr || mr.state !== 'recording') { state.recording = false; render(); return; }
+      rec.mediaRecorder = null;
       mr.stop(); state.recording = false; render();
       await new Promise(r => setTimeout(r, 500));
       if (!rec.chunks.length) { state.message = '❌ 錄音失敗，請再試一次。'; render(); return; }
       const mime = mr.mimeType || rec.chunks[0]?.type || 'audio/webm';
       await submitRecording(new Blob(rec.chunks, { type: mime }), mime, 48000);
+    }
+
+    function cancelRecording() {
+      rec.requested = false;
+      if (rec.pcm) {
+        const p = rec.pcm; rec.pcm = null;
+        p.proc.disconnect(); p.src.disconnect();
+        p.stream.getTracks().forEach(t => t.stop());
+        p.ctx.close();
+      }
+      const mr = rec.mediaRecorder; rec.mediaRecorder = null;
+      if (mr && mr.state === 'recording') {
+        mr.ondataavailable = null;
+        mr.stop();
+      }
+      rec.chunks = [];
+      state.recording = false;
+      render();
     }
 
     async function submitRecording(blob, mimeType, sampleRate) {
@@ -362,15 +393,33 @@
       if (state.sttAvailable) {
         const label = state.submitting ? '請稍候' : (state.recording ? '放手送出' : '按住說話');
         const btn = el('button', {
+          type: 'button',
           class: `record-btn ${state.recording ? 'recording' : ''}`,
           disabled: state.submitting,
+          'aria-pressed': String(state.recording),
         }, `🎤  ${label}`);
-        const onDown = ev => { ev.preventDefault(); startRecording(); };
-        const onUp = ev => { ev.preventDefault(); if (!state.submitting) stopRecording(); };
+        let activePointerId = null;
+        const onDown = ev => {
+          if (!ev.isPrimary || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
+          ev.preventDefault();
+          activePointerId = ev.pointerId;
+          try { btn.setPointerCapture(ev.pointerId); } catch (_) { /* Older Safari may not support capture. */ }
+          startRecording();
+        };
+        const onUp = ev => {
+          if (ev.pointerId !== activePointerId) return;
+          ev.preventDefault();
+          activePointerId = null;
+          if (!state.submitting) stopRecording();
+        };
+        const onCancel = ev => {
+          if (ev.pointerId !== activePointerId) return;
+          activePointerId = null;
+          cancelRecording();
+        };
         btn.addEventListener('pointerdown', onDown);
         btn.addEventListener('pointerup', onUp);
-        btn.addEventListener('pointerleave', () => { if (state.recording) stopRecording(); });
-        btn.addEventListener('pointercancel', () => { if (state.recording) stopRecording(); });
+        btn.addEventListener('pointercancel', onCancel);
         btn.addEventListener('contextmenu', e => e.preventDefault());
         speechCard.appendChild(btn);
         speechCard.appendChild(el('p', { class: 'muted', style: { marginTop: '10px' } },
