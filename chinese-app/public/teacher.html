@@ -792,6 +792,19 @@
       } catch (e) { toast(e.message, 'error'); }
     }
 
+    function pronunciationBadge(label, correct, score, status) {
+      const cls = status === 'inconclusive' ? 'warn' : (correct ? 'success' : 'danger');
+      const value = typeof score === 'number' ? ` ${Math.round(score)}%` : '';
+      return el('span', { class: `badge ${cls}` }, `${label}${value}`);
+    }
+
+    function qualitySummary(label, quality) {
+      const q = quality?.metrics;
+      if (!q) return null;
+      return el('div', { class: 'muted', style: { marginTop: '4px' } },
+        `${label}收音：${quality.ok ? '合格' : quality.reason} ・ ${q.durationMs}ms ・ SNR ${q.snrDb}dB`);
+    }
+
     function renderAttemptDetail(d) {
       return el('div', { class: 'card' },
         el('h3', {}, `${d.studentName}（${d.studentId}） ・ ${d.score}/5`),
@@ -803,13 +816,15 @@
             ),
             el('div', { class: 'row' },
               el('span', { class: `badge ${it.handwritingCorrect ? 'success' : 'danger'}` }, '寫'),
-              el('span', { class: `badge ${it.speechCorrect ? 'success' : 'danger'}` }, '練讀'),
-              el('span', { class: `badge ${it.assessmentCorrect ? 'success' : 'danger'}` }, '評核'),
+              pronunciationBadge('練讀', it.speechCorrect, it.speechPronunciationScore, it.speechPronunciationStatus),
+              pronunciationBadge('評核', it.assessmentCorrect, it.assessmentPronunciationScore, it.assessmentPronunciationStatus),
             )
           ),
           it.speechTranscript ? el('div', { class: 'muted', style: { marginTop: '6px' } }, `練讀逐字稿：${it.speechTranscript}`) : null,
+          qualitySummary('練讀', it.speechAudioQuality),
           it.speechRecordingUrl ? el('audio', { controls: true, src: it.speechRecordingUrl }) : null,
           it.assessmentTranscript ? el('div', { class: 'muted', style: { marginTop: '6px' } }, `評核逐字稿：${it.assessmentTranscript}`) : null,
+          qualitySummary('評核', it.assessmentAudioQuality),
           it.assessmentRecordingUrl ? el('audio', { controls: true, src: it.assessmentRecordingUrl }) : null,
         ))
       );

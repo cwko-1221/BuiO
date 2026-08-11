@@ -9,7 +9,9 @@ const [practiceHtml, commonJs] = await Promise.all([
 ]);
 
 const mocks = String.raw`
-  window.__sttRequests = 0;
+  window.__pronunciationRequests = 0;
+  window.__recordingStarts = [];
+  window.__recordingStops = [];
   const jsonResponse = (body, status = 200) => new Response(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json' },
@@ -26,9 +28,12 @@ const mocks = String.raw`
       id: 'at1', status: 'in_progress', items: [{ assignmentItemId: 'i1' }],
     } });
     if (url === '/api/chinese/upload') return jsonResponse({ message: 'Storage disabled' }, 501);
-    if (url === '/api/chinese/stt') {
-      window.__sttRequests += 1;
-      return jsonResponse({ transcript: '好', correct: true, score: 100 });
+    if (url === '/api/chinese/pronunciation') {
+      window.__pronunciationRequests += 1;
+      return jsonResponse({
+        transcript: '好', status: 'pass', correct: true, score: 88,
+        provider: 'azure-pronunciation-zh-HK', quality: { ok: true, metrics: { snrDb: 18 } },
+      });
     }
     return jsonResponse({});
   };
@@ -38,21 +43,39 @@ const mocks = String.raw`
     configurable: true,
     value: { getUserMedia: async () => ({ getTracks: () => [fakeTrack] }) },
   });
-  class FakeMediaRecorder {
-    static isTypeSupported() { return true; }
-    constructor(stream, options = {}) {
-      this.stream = stream;
-      this.mimeType = options.mimeType || 'audio/webm';
-      this.state = 'inactive';
+  class FakeAudioContext {
+    constructor() {
+      this.sampleRate = 48000;
+      this.state = 'running';
+      this.destination = {};
     }
-    start() { this.state = 'recording'; }
-    stop() {
-      this.state = 'inactive';
-      this.ondataavailable?.({ data: new Blob([new Uint8Array(100)], { type: this.mimeType }) });
-      this.onstop?.();
+    createMediaStreamSource() { return { connect() {}, disconnect() {} }; }
+    createScriptProcessor() {
+      const processor = {
+        onaudioprocess: null,
+        timer: null,
+        connect() {
+          window.__recordingStarts.push(performance.now());
+          this.timer = setInterval(() => {
+            const samples = new Float32Array(4096);
+            for (let i = 0; i < samples.length; i++) samples[i] = Math.sin(i / 8) * 0.2;
+            this.onaudioprocess?.({
+              inputBuffer: { getChannelData: () => samples },
+              outputBuffer: { getChannelData: () => new Float32Array(4096) },
+            });
+          }, 30);
+        },
+        disconnect() {
+          clearInterval(this.timer);
+          window.__recordingStops.push(performance.now());
+        },
+      };
+      return processor;
     }
+    close() {}
   }
-  window.MediaRecorder = FakeMediaRecorder;
+  window.AudioContext = FakeAudioContext;
+  window.webkitAudioContext = FakeAudioContext;
 `;
 
 const testHtml = practiceHtml
@@ -80,29 +103,30 @@ try {
   await page.goto(testUrl, { waitUntil: 'domcontentloaded' });
   const button = page.locator('.record-btn');
   await button.waitFor();
+  assert.match(await button.textContent(), /開始錄音/, 'idle button must offer to start recording');
 
-  const pointer = { pointerId: 7, pointerType: 'touch', isPrimary: true, button: 0 };
-  await button.dispatchEvent('pointerdown', pointer);
-  await assert.doesNotReject(() => button.waitFor({ state: 'attached', timeout: 500 }));
+  await button.click();
   await page.waitForFunction(() => document.querySelector('.record-btn')?.getAttribute('aria-pressed') === 'true');
+  assert.match(await button.textContent(), /正在錄音/, 'active button must show the recording state');
+  await page.waitForTimeout(250);
+  assert.equal(await page.evaluate(() => window.__pronunciationRequests), 0, 'the first tap must not submit audio');
 
-  await button.dispatchEvent('pointerleave', pointer);
-  await page.waitForTimeout(100);
-  assert.equal(await button.getAttribute('aria-pressed'), 'true', 'moving outside must keep recording active');
-  assert.equal(await page.evaluate(() => window.__sttRequests), 0, 'moving outside must not submit audio');
+  await button.click();
+  await page.waitForFunction(() => window.__pronunciationRequests === 1);
+  await page.waitForFunction(() => {
+    const current = document.querySelector('.record-btn');
+    return current && !current.disabled && current.getAttribute('aria-pressed') === 'false';
+  });
 
-  await button.dispatchEvent('pointerup', pointer);
-  await page.waitForFunction(() => window.__sttRequests === 1);
-
-  const nextButton = page.locator('.record-btn');
-  const cancelledPointer = { pointerId: 8, pointerType: 'touch', isPrimary: true, button: 0 };
-  await nextButton.dispatchEvent('pointerdown', cancelledPointer);
+  await page.locator('.record-btn').click();
   await page.waitForFunction(() => document.querySelector('.record-btn')?.getAttribute('aria-pressed') === 'true');
-  await nextButton.dispatchEvent('pointercancel', cancelledPointer);
-  await page.waitForTimeout(650);
-  assert.equal(await page.evaluate(() => window.__sttRequests), 1, 'cancelled gestures must discard audio');
+  await page.waitForFunction(() => window.__recordingStops.length === 2, null, { timeout: 6000 });
+  const automaticDuration = await page.evaluate(() => window.__recordingStops[1] - window.__recordingStarts[1]);
+  assert.ok(automaticDuration >= 4900 && automaticDuration <= 5300,
+    `automatic recording duration must be about 5 seconds (was ${automaticDuration}ms)`);
+  await page.waitForFunction(() => window.__pronunciationRequests === 2);
 
-  console.log('✅ Cantonese recording hold gesture test passed.');
+  console.log('✅ Cantonese tap-to-record and five-second auto-send test passed.');
 } finally {
   await browser.close();
 }

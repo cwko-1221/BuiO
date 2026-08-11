@@ -6,7 +6,10 @@ const router = express.Router();
 
 const { requireAuth } = require('../../math-app/middleware/auth');
 const google = require('../lib/google');
+const pronunciation = require('../lib/pronunciation');
+const { analyzeWavQuality } = require('../lib/audioQuality');
 const storage = require('../lib/storage');
+const assignments = require('../repositories/assignments.repo');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
@@ -30,21 +33,43 @@ router.post('/tts', async (req, res) => {
   } catch (e) { handle(res, e); }
 });
 
-router.post('/stt', upload.single('audio'), async (req, res) => {
-  if (!google.isGoogleConfigured()) {
-    return res.status(501).json({ success: false, message: 'Google STT 尚未設定。' });
+async function assessPronunciation(req, res) {
+  if (!pronunciation.isConfigured()) {
+    return res.status(501).json({ success: false, message: 'Azure 粵語發音評估尚未設定。' });
   }
   try {
     if (!req.file) return res.status(400).json({ success: false, message: '缺少音檔' });
-    const expected = String(req.body?.expected || '').trim();
-    const sampleRate = Number(req.body?.sampleRate) || 0;
-    const out = await google.transcribeCantonese(
-      req.file.buffer, expected,
-      { mimeType: req.file.mimetype, sampleRateHertz: sampleRate }
-    );
-    res.json({ success: true, ...out });
+    const assignmentId = String(req.body?.assignmentId || '');
+    const itemId = String(req.body?.itemId || '');
+    if (!assignmentId || !itemId) return res.status(400).json({ success: false, message: '缺少作業或題目資料' });
+    if (!await assignments.studentHasAccess({ assignmentId, studentId: req.session.studentId })) {
+      return res.status(404).json({ success: false, message: '找不到作業' });
+    }
+    const assignment = await assignments.getOne({ assignmentId });
+    const item = assignment?.items?.find(candidate => String(candidate.id) === itemId);
+    if (!item) return res.status(404).json({ success: false, message: '找不到題目' });
+    const expected = String(item.traditionalText || '').trim();
+
+    const quality = analyzeWavQuality(req.file.buffer);
+    if (!quality.ok) {
+      return res.json({
+        success: true,
+        status: 'inconclusive',
+        correct: false,
+        score: null,
+        transcript: '',
+        provider: 'audio-quality-gate',
+        quality,
+        message: quality.message,
+      });
+    }
+
+    const out = await pronunciation.assessPronunciation(req.file.buffer, expected);
+    res.json({ success: true, ...out, quality });
   } catch (e) { handle(res, e, 400); }
-});
+}
+
+router.post('/pronunciation', upload.single('audio'), assessPronunciation);
 
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {

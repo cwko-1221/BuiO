@@ -20,9 +20,17 @@ function mapAttemptItem(r) {
     speechTranscript: r.speech_transcript,
     speechCorrect: r.speech_correct,
     speechRecordingUrl: r.speech_recording_url,
+    speechPronunciationScore: r.speech_pronunciation_score == null ? null : Number(r.speech_pronunciation_score),
+    speechPronunciationStatus: r.speech_pronunciation_status,
+    speechAudioQuality: r.speech_audio_quality,
+    speechPronunciationProvider: r.speech_pronunciation_provider,
     assessmentTranscript: r.assessment_transcript,
     assessmentCorrect: r.assessment_correct,
     assessmentRecordingUrl: r.assessment_recording_url,
+    assessmentPronunciationScore: r.assessment_pronunciation_score == null ? null : Number(r.assessment_pronunciation_score),
+    assessmentPronunciationStatus: r.assessment_pronunciation_status,
+    assessmentAudioQuality: r.assessment_audio_quality,
+    assessmentPronunciationProvider: r.assessment_pronunciation_provider,
   };
 }
 
@@ -36,7 +44,11 @@ async function ensure({ assignmentId, studentId }) {
     if (existing[0]) {
       const { rows: items } = await client.query(
         `SELECT id, assignment_item_id, handwriting_correct, speech_transcript, speech_correct,
-                speech_recording_url, assessment_transcript, assessment_correct, assessment_recording_url
+                speech_recording_url, speech_pronunciation_score, speech_pronunciation_status,
+                speech_audio_quality, speech_pronunciation_provider,
+                assessment_transcript, assessment_correct, assessment_recording_url,
+                assessment_pronunciation_score, assessment_pronunciation_status,
+                assessment_audio_quality, assessment_pronunciation_provider
            FROM ncs_attempt_items WHERE attempt_id = $1`,
         [existing[0].id]
       );
@@ -63,7 +75,11 @@ async function ensure({ assignmentId, studentId }) {
         `INSERT INTO ncs_attempt_items (attempt_id, assignment_item_id)
          VALUES ($1, $2)
          RETURNING id, assignment_item_id, handwriting_correct, speech_transcript, speech_correct,
-                   speech_recording_url, assessment_transcript, assessment_correct, assessment_recording_url`,
+                   speech_recording_url, speech_pronunciation_score, speech_pronunciation_status,
+                   speech_audio_quality, speech_pronunciation_provider,
+                   assessment_transcript, assessment_correct, assessment_recording_url,
+                   assessment_pronunciation_score, assessment_pronunciation_status,
+                   assessment_audio_quality, assessment_pronunciation_provider`,
         [attemptId, ai.id]
       );
       items.push(mapAttemptItem(ins[0]));
@@ -77,9 +93,17 @@ const ALLOWED_ITEM_FIELDS = {
   speechTranscript: 'speech_transcript',
   speechCorrect: 'speech_correct',
   speechRecordingUrl: 'speech_recording_url',
+  speechPronunciationScore: 'speech_pronunciation_score',
+  speechPronunciationStatus: 'speech_pronunciation_status',
+  speechAudioQuality: 'speech_audio_quality',
+  speechPronunciationProvider: 'speech_pronunciation_provider',
   assessmentTranscript: 'assessment_transcript',
   assessmentCorrect: 'assessment_correct',
   assessmentRecordingUrl: 'assessment_recording_url',
+  assessmentPronunciationScore: 'assessment_pronunciation_score',
+  assessmentPronunciationStatus: 'assessment_pronunciation_status',
+  assessmentAudioQuality: 'assessment_audio_quality',
+  assessmentPronunciationProvider: 'assessment_pronunciation_provider',
 };
 
 async function updateItem({ attemptId, studentId, assignmentItemId, patch }) {
@@ -165,7 +189,11 @@ async function getAttemptDetail({ attemptId, teacherId }) {
     SELECT ai.id AS aitem_id, ai.traditional_text, ai.jyutping, ai.english_meaning, ai.order_index,
            ati.id, ati.assignment_item_id,
            ati.handwriting_correct, ati.speech_transcript, ati.speech_correct, ati.speech_recording_url,
-           ati.assessment_transcript, ati.assessment_correct, ati.assessment_recording_url
+           ati.speech_pronunciation_score, ati.speech_pronunciation_status,
+           ati.speech_audio_quality, ati.speech_pronunciation_provider,
+           ati.assessment_transcript, ati.assessment_correct, ati.assessment_recording_url,
+           ati.assessment_pronunciation_score, ati.assessment_pronunciation_status,
+           ati.assessment_audio_quality, ati.assessment_pronunciation_provider
       FROM ncs_attempt_items ati
       JOIN ncs_assignment_items ai ON ai.id = ati.assignment_item_id
      WHERE ati.attempt_id = $1

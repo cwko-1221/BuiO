@@ -21,6 +21,7 @@
     "check:phonics": "node scripts/test-phonics-module.mjs",
     "check:phonics-browser": "node scripts/test-phonics-browser.mjs",
     "check:chinese-recording": "node scripts/test-chinese-recording-gesture.mjs",
+    "check:chinese-pronunciation": "node scripts/test-chinese-pronunciation.mjs",
     "check:report": "node scripts/test-report-import.mjs",
     "dev:homework-fixture": "node scripts/start-homework-fixture.mjs",
     "check:tower-defense-live": "node scripts/test-tower-defense-live.mjs",
@@ -29,7 +30,6 @@
     "postinstall": "cd whiteboard-app/client && npm install && npm run build"
   },
   "dependencies": {
-    "@google-cloud/speech": "^7.4.0",
     "@google-cloud/text-to-speech": "^6.4.1",
     "@supabase/supabase-js": "^2.107.0",
     "bcryptjs": "^3.0.3",
@@ -38,6 +38,7 @@
     "dotenv": "^17.4.2",
     "exceljs": "^4.4.0",
     "express": "^5.2.1",
+    "microsoft-cognitiveservices-speech-sdk": "^1.51.0",
     "multer": "^2.2.0",
     "pg": "^8.21.0",
     "phaser": "^4.2.1",

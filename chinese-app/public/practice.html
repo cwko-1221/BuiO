@@ -22,17 +22,10 @@
       attemptItems: new Map(),                  // assignmentItemId -> attempt item row
       index: 0, phase: 'practice',              // 'practice' | 'assessment' | 'done'
       hwDone: false, recording: false, submitting: false,
-      sttAvailable: true, finalScore: 0, message: '',
+      pronunciationAvailable: true, finalScore: 0, message: '',
     };
 
     // ------------------- audio helpers -------------------
-    function pickMediaRecorderMimeType() {
-      if (typeof MediaRecorder === 'undefined') return '';
-      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) return 'audio/webm;codecs=opus';
-      if (MediaRecorder.isTypeSupported('audio/webm')) return 'audio/webm';
-      if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) return 'audio/ogg;codecs=opus';
-      return '';
-    }
     function extForMime(m) {
       m = String(m || '').toLowerCase();
       if (m.includes('wav')) return 'wav';
@@ -45,6 +38,32 @@
       let off = 0;
       for (const c of chunks) { out.set(c, off); off += c.length; }
       return out;
+    }
+    async function resampleForAssessment(samples, sourceRate) {
+      const targetRate = 16000;
+      if (sourceRate === targetRate) return samples;
+      const OfflineAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      if (OfflineAC) {
+        const length = Math.max(1, Math.ceil(samples.length * targetRate / sourceRate));
+        const ctx = new OfflineAC(1, length, targetRate);
+        const input = ctx.createBuffer(1, samples.length, sourceRate);
+        input.copyToChannel(samples, 0);
+        const source = ctx.createBufferSource();
+        source.buffer = input; source.connect(ctx.destination); source.start();
+        const rendered = await ctx.startRendering();
+        return new Float32Array(rendered.getChannelData(0));
+      }
+      const length = Math.max(1, Math.round(samples.length * targetRate / sourceRate));
+      const output = new Float32Array(length);
+      const ratio = sourceRate / targetRate;
+      for (let i = 0; i < length; i++) {
+        const position = i * ratio;
+        const left = Math.floor(position);
+        const right = Math.min(samples.length - 1, left + 1);
+        const mix = position - left;
+        output[i] = samples[left] * (1 - mix) + samples[right] * mix;
+      }
+      return output;
     }
     function encodeWav(samples, sampleRate) {
       const buf = new ArrayBuffer(44 + samples.length * 2);
@@ -77,7 +96,10 @@
     }
 
     // ------------------- recording state (refs) -------------------
-    const rec = { mediaRecorder: null, pcm: null, requested: false, chunks: [], ttsAudio: null, ttsUrl: null };
+    const rec = {
+      pcm: null, requested: false, stopping: false,
+      autoStopTimer: null, ttsAudio: null, ttsUrl: null,
+    };
 
     function stopTts() {
       if (window.speechSynthesis) window.speechSynthesis.cancel();
@@ -90,7 +112,13 @@
       if (!btn) return;
       btn.classList.toggle('recording', state.recording);
       btn.setAttribute('aria-pressed', String(state.recording));
-      btn.textContent = `🎤  ${state.recording ? '放手送出' : '按住說話'}`;
+      btn.textContent = state.recording ? '🔴  正在錄音・按一下送出' : '🎙️  開始錄音';
+    }
+
+    function clearAutoStopTimer() {
+      if (!rec.autoStopTimer) return;
+      clearTimeout(rec.autoStopTimer);
+      rec.autoStopTimer = null;
     }
 
     // ------------------- core flow -------------------
@@ -176,91 +204,75 @@
     }
 
     async function startRecording() {
-      if (!state.sttAvailable || state.submitting) return;
+      if (!state.pronunciationAvailable || state.submitting || rec.requested || state.recording) return;
       rec.requested = true;
       stopTts();
       await new Promise(r => setTimeout(r, 150));
       if (!rec.requested) return;
       state.message = '';
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            channelCount: { ideal: 1 },
+            echoCancellation: { ideal: true },
+            noiseSuppression: { ideal: false },
+            autoGainControl: { ideal: false },
+          },
+        });
         if (!rec.requested) { stream.getTracks().forEach(t => t.stop()); return; }
-        rec.chunks = [];
-        const mime = pickMediaRecorderMimeType();
-        if (mime) {
-          const mr = new MediaRecorder(stream, { mimeType: mime });
-          rec.mediaRecorder = mr;
-          mr.ondataavailable = e => { if (e.data && e.data.size > 0) rec.chunks.push(e.data); };
-          mr.onstop = () => stream.getTracks().forEach(t => t.stop());
-          mr.start(100);
-        } else {
-          const AC = window.AudioContext || window.webkitAudioContext;
-          if (!AC) { stream.getTracks().forEach(t => t.stop()); throw new Error('AudioContext is not supported.'); }
-          const ctx = new AC();
-          if (ctx.state === 'suspended') await ctx.resume();
-          if (!rec.requested) { stream.getTracks().forEach(t => t.stop()); ctx.close(); return; }
-          const src = ctx.createMediaStreamSource(stream);
-          const proc = ctx.createScriptProcessor(4096, 1, 1);
-          const chunks = [];
-          proc.onaudioprocess = e => {
-            chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-            e.outputBuffer.getChannelData(0).fill(0);
-          };
-          src.connect(proc); proc.connect(ctx.destination);
-          rec.pcm = { ctx, src, proc, stream, chunks, sampleRate: ctx.sampleRate };
-        }
-        // Keep the pressed button in the DOM so iPad retains pointer capture
-        // until the user's finger is genuinely lifted.
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) { stream.getTracks().forEach(t => t.stop()); throw new Error('AudioContext is not supported.'); }
+        const ctx = new AC();
+        if (ctx.state === 'suspended') await ctx.resume();
+        if (!rec.requested) { stream.getTracks().forEach(t => t.stop()); ctx.close(); return; }
+        const src = ctx.createMediaStreamSource(stream);
+        const proc = ctx.createScriptProcessor(4096, 1, 1);
+        const chunks = [];
+        proc.onaudioprocess = e => {
+          chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+          e.outputBuffer.getChannelData(0).fill(0);
+        };
+        src.connect(proc); proc.connect(ctx.destination);
+        rec.pcm = { ctx, src, proc, stream, chunks, sampleRate: ctx.sampleRate };
         state.recording = true;
         syncRecordingButton();
+        clearAutoStopTimer();
+        rec.autoStopTimer = setTimeout(() => stopRecording(), 5000);
       } catch (e) {
         rec.requested = false;
+        clearAutoStopTimer();
         state.message = '❌ 無法存取麥克風，請檢查瀏覽器權限。';
         render();
       }
     }
 
     async function stopRecording() {
+      if (rec.stopping) return;
+      rec.stopping = true;
       rec.requested = false;
-      if (rec.pcm) {
+      clearAutoStopTimer();
+      try {
         const p = rec.pcm; rec.pcm = null;
+        if (!p) { state.recording = false; render(); return; }
         state.recording = false; render();
         p.proc.disconnect(); p.src.disconnect();
         p.stream.getTracks().forEach(t => t.stop()); p.ctx.close();
         if (!p.chunks.length) { state.message = '❌ 錄音失敗，請再試一次。'; render(); return; }
-        const blob = encodeWav(mergeFloat32(p.chunks), p.sampleRate);
-        await submitRecording(blob, 'audio/wav', p.sampleRate);
-        return;
+        const samples = await resampleForAssessment(mergeFloat32(p.chunks), p.sampleRate);
+        const blob = encodeWav(samples, 16000);
+        await submitRecording(blob, 'audio/wav');
+      } finally {
+        rec.stopping = false;
       }
-      const mr = rec.mediaRecorder;
-      if (!mr || mr.state !== 'recording') { state.recording = false; render(); return; }
-      rec.mediaRecorder = null;
-      mr.stop(); state.recording = false; render();
-      await new Promise(r => setTimeout(r, 500));
-      if (!rec.chunks.length) { state.message = '❌ 錄音失敗，請再試一次。'; render(); return; }
-      const mime = mr.mimeType || rec.chunks[0]?.type || 'audio/webm';
-      await submitRecording(new Blob(rec.chunks, { type: mime }), mime, 48000);
     }
 
-    function cancelRecording() {
-      rec.requested = false;
-      if (rec.pcm) {
-        const p = rec.pcm; rec.pcm = null;
-        p.proc.disconnect(); p.src.disconnect();
-        p.stream.getTracks().forEach(t => t.stop());
-        p.ctx.close();
-      }
-      const mr = rec.mediaRecorder; rec.mediaRecorder = null;
-      if (mr && mr.state === 'recording') {
-        mr.ondataavailable = null;
-        mr.stop();
-      }
-      rec.chunks = [];
-      state.recording = false;
-      render();
+    function toggleRecording() {
+      if (state.submitting || rec.stopping) return;
+      if (state.recording || rec.requested) stopRecording();
+      else startRecording();
     }
 
-    async function submitRecording(blob, mimeType, sampleRate) {
+    async function submitRecording(blob, mimeType) {
       const it = currentItem(); if (!it) return;
       if (blob.size < 50) { state.message = '❌ 錄音時間太短。'; render(); return; }
       state.submitting = true; render();
@@ -272,32 +284,54 @@
         }
         const form = new FormData();
         form.append('audio', blob, `recording.${extForMime(mimeType)}`);
-        form.append('expected', it.traditionalText);
-        if (sampleRate) form.append('sampleRate', String(sampleRate));
-        const res = await fetch('/api/chinese/stt', { method: 'POST', body: form, credentials: 'same-origin' });
+        form.append('assignmentId', assignmentId);
+        form.append('itemId', it.id);
+        const res = await fetch('/api/chinese/pronunciation', { method: 'POST', body: form, credentials: 'same-origin' });
         const data = await res.json().catch(() => ({}));
         if (res.status === 501) {
-          state.sttAvailable = false;
-          state.message = `ℹ️ ${data.message || 'Google STT 未設定，請使用下方按鈕自我評估。'}`;
-          render(); return;
+          state.pronunciationAvailable = false;
+          state.message = `ℹ️ ${data.message || 'Azure 粵語發音評估未設定，請使用下方按鈕自我評估。'}`;
+          return;
         }
-        if (!res.ok) { state.message = data.message || '語音辨識失敗'; render(); return; }
-        const scoreTxt = typeof data.score === 'number' ? `相似度：${data.score}%` : '';
-        if (state.phase === 'practice') {
-          await patchAttemptItem({ speechTranscript: data.transcript || '', speechCorrect: !!data.correct });
-        } else {
-          await patchAttemptItem({ assessmentTranscript: data.transcript || '', assessmentCorrect: !!data.correct });
+        if (!res.ok) { state.message = data.message || '發音評估失敗'; return; }
+        const scoreTxt = typeof data.score === 'number' ? `發音準確度：${data.score}%` : '';
+        const resultPatch = state.phase === 'practice'
+          ? {
+              speechTranscript: data.transcript || '', speechCorrect: !!data.correct,
+              speechPronunciationScore: data.score, speechPronunciationStatus: data.status,
+              speechAudioQuality: data.quality || null, speechPronunciationProvider: data.provider || '',
+            }
+          : {
+              assessmentTranscript: data.transcript || '', assessmentCorrect: !!data.correct,
+              assessmentPronunciationScore: data.score, assessmentPronunciationStatus: data.status,
+              assessmentAudioQuality: data.quality || null, assessmentPronunciationProvider: data.provider || '',
+            };
+        await patchAttemptItem(resultPatch);
+        if (data.status === 'inconclusive') {
+          state.message = `⚠️ ${data.message || '今次錄音未能可靠評分，請靠近咪高峰再試。'} ${scoreTxt}`;
+          return;
         }
-        state.message = data.correct ? `✅ 通過 ${scoreTxt}` : `❌ 再試：${data.transcript || '未能辨識'} ${scoreTxt}`;
-      } catch (e) { state.message = e.message || '語音處理失敗'; }
-      state.submitting = false; render();
+        state.message = data.correct ? `✅ 發音通過 ${scoreTxt}` : `❌ 發音需要再練習 ${scoreTxt}`;
+      } catch (e) {
+        state.message = e.message || '語音處理失敗';
+      } finally {
+        state.submitting = false; render();
+      }
     }
 
     async function selfAssess(correct) {
       if (state.phase === 'practice') {
-        await patchAttemptItem({ speechTranscript: '(self-assessed)', speechCorrect: correct });
+        await patchAttemptItem({
+          speechTranscript: '(self-assessed)', speechCorrect: correct,
+          speechPronunciationScore: null, speechPronunciationStatus: 'self-assessed',
+          speechPronunciationProvider: 'self-assessment',
+        });
       } else {
-        await patchAttemptItem({ assessmentTranscript: '(self-assessed)', assessmentCorrect: correct });
+        await patchAttemptItem({
+          assessmentTranscript: '(self-assessed)', assessmentCorrect: correct,
+          assessmentPronunciationScore: null, assessmentPronunciationStatus: 'self-assessed',
+          assessmentPronunciationProvider: 'self-assessment',
+        });
       }
       state.message = correct ? '✅ 已標記為通過' : '已標記為未通過';
       render();
@@ -390,42 +424,21 @@
       const speechCard = el('div', { class: 'card' },
         el('h3', { style: { margin: 0 } }, state.phase === 'practice' ? '讀音練習' : '用粵語讀出答案')
       );
-      if (state.sttAvailable) {
-        const label = state.submitting ? '請稍候' : (state.recording ? '放手送出' : '按住說話');
+      if (state.pronunciationAvailable) {
+        const label = state.submitting ? '請稍候' : (state.recording ? '正在錄音・按一下送出' : '開始錄音');
         const btn = el('button', {
           type: 'button',
           class: `record-btn ${state.recording ? 'recording' : ''}`,
           disabled: state.submitting,
           'aria-pressed': String(state.recording),
-        }, `🎤  ${label}`);
-        let activePointerId = null;
-        const onDown = ev => {
-          if (!ev.isPrimary || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
-          ev.preventDefault();
-          activePointerId = ev.pointerId;
-          try { btn.setPointerCapture(ev.pointerId); } catch (_) { /* Older Safari may not support capture. */ }
-          startRecording();
-        };
-        const onUp = ev => {
-          if (ev.pointerId !== activePointerId) return;
-          ev.preventDefault();
-          activePointerId = null;
-          if (!state.submitting) stopRecording();
-        };
-        const onCancel = ev => {
-          if (ev.pointerId !== activePointerId) return;
-          activePointerId = null;
-          cancelRecording();
-        };
-        btn.addEventListener('pointerdown', onDown);
-        btn.addEventListener('pointerup', onUp);
-        btn.addEventListener('pointercancel', onCancel);
+        }, `${state.recording ? '🔴' : '🎙️'}  ${label}`);
+        btn.addEventListener('click', toggleRecording);
         btn.addEventListener('contextmenu', e => e.preventDefault());
         speechCard.appendChild(btn);
         speechCard.appendChild(el('p', { class: 'muted', style: { marginTop: '10px' } },
-          '按住錄音，放開後由 Google STT 檢查粵語讀音。'));
+          '按一下開始錄音，再按一下送出；最長 5 秒。系統會檢查發音及收音品質。'));
       } else {
-        speechCard.appendChild(el('p', { class: 'muted' }, '⚠️ Google 語音辨識未設定。請大聲朗讀後自我評估：'));
+        speechCard.appendChild(el('p', { class: 'muted' }, '⚠️ Azure 粵語發音評估未設定。請大聲朗讀後自我評估：'));
         speechCard.appendChild(el('p', { style: { textAlign: 'center', fontSize: '1.5rem', fontWeight: '600', margin: '8px 0' } },
           state.phase === 'assessment' ? it.traditionalText : `請讀出「${it.traditionalText}」`));
         speechCard.appendChild(el('div', { class: 'row', style: { gap: '8px' } },
@@ -465,8 +478,8 @@
     }
 
     // ------------------- hanzi-writer -------------------
-    // render() blows away the entire DOM on every state change (recording,
-    // submitting, message, etc). Keep a single live reference to the SVG
+    // render() blows away the entire DOM on state changes such as submitting
+    // and messages. Keep a single live reference to the SVG
     // hanzi-writer is currently using and re-attach it across re-renders
     // instead of restarting the quiz — this preserves both an in-progress
     // quiz and a completed character.

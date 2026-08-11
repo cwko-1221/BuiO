@@ -71,12 +71,30 @@ create table if not exists public.ncs_attempt_items (
   speech_transcript text,
   speech_correct boolean not null default false,
   speech_recording_url text,
+  speech_pronunciation_score numeric(5,2),
+  speech_pronunciation_status text,
+  speech_audio_quality jsonb,
+  speech_pronunciation_provider text,
   assessment_transcript text,
   assessment_correct boolean not null default false,
   assessment_recording_url text,
+  assessment_pronunciation_score numeric(5,2),
+  assessment_pronunciation_status text,
+  assessment_audio_quality jsonb,
+  assessment_pronunciation_provider text,
   created_at timestamptz not null default now(),
   unique (attempt_id, assignment_item_id)
 );
+
+-- Safe upgrade path for databases created before pronunciation assessment.
+alter table public.ncs_attempt_items add column if not exists speech_pronunciation_score numeric(5,2);
+alter table public.ncs_attempt_items add column if not exists speech_pronunciation_status text;
+alter table public.ncs_attempt_items add column if not exists speech_audio_quality jsonb;
+alter table public.ncs_attempt_items add column if not exists speech_pronunciation_provider text;
+alter table public.ncs_attempt_items add column if not exists assessment_pronunciation_score numeric(5,2);
+alter table public.ncs_attempt_items add column if not exists assessment_pronunciation_status text;
+alter table public.ncs_attempt_items add column if not exists assessment_audio_quality jsonb;
+alter table public.ncs_attempt_items add column if not exists assessment_pronunciation_provider text;
 
 create index if not exists ncs_attempts_student_idx on public.ncs_attempts(student_id);
 create index if not exists ncs_attempt_items_attempt_idx on public.ncs_attempt_items(attempt_id);
