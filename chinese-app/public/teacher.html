@@ -801,8 +801,12 @@
     function qualitySummary(label, quality) {
       const q = quality?.metrics;
       if (!q) return null;
+      const assessment = quality?.assessment;
+      const scoring = assessment?.hasPhonemeEvidence
+        ? ` ・ Azure 整體 ${Math.round(assessment.fullTextAccuracyScore)}% ・ 音素相似 ${Math.round(assessment.phonemeSimilarityScore)}%`
+        : '';
       return el('div', { class: 'muted', style: { marginTop: '4px' } },
-        `${label}收音：${quality.ok ? '合格' : quality.reason} ・ ${q.durationMs}ms ・ SNR ${q.snrDb}dB`);
+        `${label}收音：${quality.ok ? '合格' : quality.reason} ・ ${q.durationMs}ms ・ SNR ${q.snrDb}dB${scoring}`);
     }
 
     function renderAttemptDetail(d) {

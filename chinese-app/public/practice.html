@@ -294,17 +294,20 @@
           return;
         }
         if (!res.ok) { state.message = data.message || '發音評估失敗'; return; }
-        const scoreTxt = typeof data.score === 'number' ? `發音準確度：${data.score}%` : '';
+        const scoreTxt = typeof data.score === 'number' ? `發音相似度：${data.score}%` : '';
+        const storedQuality = data.quality
+          ? { ...data.quality, assessment: data.diagnostics || null, timing: data.timing || null }
+          : null;
         const resultPatch = state.phase === 'practice'
           ? {
               speechTranscript: data.transcript || '', speechCorrect: !!data.correct,
               speechPronunciationScore: data.score, speechPronunciationStatus: data.status,
-              speechAudioQuality: data.quality || null, speechPronunciationProvider: data.provider || '',
+              speechAudioQuality: storedQuality, speechPronunciationProvider: data.provider || '',
             }
           : {
               assessmentTranscript: data.transcript || '', assessmentCorrect: !!data.correct,
               assessmentPronunciationScore: data.score, assessmentPronunciationStatus: data.status,
-              assessmentAudioQuality: data.quality || null, assessmentPronunciationProvider: data.provider || '',
+              assessmentAudioQuality: storedQuality, assessmentPronunciationProvider: data.provider || '',
             };
         await patchAttemptItem(resultPatch);
         if (data.status === 'inconclusive') {

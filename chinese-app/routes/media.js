@@ -64,7 +64,11 @@ async function assessPronunciation(req, res) {
       });
     }
 
-    const out = await pronunciation.assessPronunciation(req.file.buffer, expected);
+    const out = await pronunciation.evaluatePronunciation(
+      req.file.buffer,
+      expected,
+      String(item.jyutping || '').trim(),
+    );
     res.json({ success: true, ...out, quality });
   } catch (e) { handle(res, e, 400); }
 }

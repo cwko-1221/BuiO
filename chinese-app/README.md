@@ -51,8 +51,10 @@ chinese-app/
    AZURE_SPEECH_REGION=eastasia
 
    # Optional calibration thresholds (defaults shown).
-   AZURE_PRONUNCIATION_PASS_SCORE=75
-   AZURE_PRONUNCIATION_RETRY_SCORE=55
+   AZURE_PRONUNCIATION_PASS_SCORE=85
+   AZURE_PRONUNCIATION_RETRY_SCORE=65
+   # F0 allows one concurrent real-time Speech request. Raise this only after moving to S0.
+   AZURE_SPEECH_MAX_CONCURRENT=1
 
    # Supabase Storage (for student recording uploads — optional).
    # Re-uses the same creds the project already uses.
@@ -81,8 +83,12 @@ chinese-app/
   `inconclusive`; these recordings do not count as incorrect attempts.
 - Valid recordings use Azure Speech scripted Pronunciation Assessment with locale `zh-HK`
   and the assignment text as the reference text.
-- `AccuracyScore` determines `pass`, `retry`, or `inconclusive`. The transcript is stored
-  only for teacher context and does not determine the score.
+- The server first performs reference-free Azure `zh-HK` recognition. A confident different
+  reading is rejected; an uncertain reading is inconclusive and never receives a random score.
+- Only matched or phonetically near content proceeds to phoneme-granularity assessment. The
+  displayed similarity score blends the mean phoneme accuracy with the weakest third. Full-text,
+  word, and completeness aggregates are diagnostic only and never set the displayed percentage.
+- The content transcript is a gate, not the pronunciation score. Google STT is not used.
 - Practice and assessment scores, status, provider, and audio-quality metrics are stored
   on each attempt item for auditing and later threshold calibration.
 
