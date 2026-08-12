@@ -30,7 +30,61 @@
       m = String(m || '').toLowerCase();
       if (m.includes('wav')) return 'wav';
       if (m.includes('ogg')) return 'ogg';
+      if (m.includes('mp4') || m.includes('m4a')) return 'mp4';
       return 'webm';
+    }
+
+    function startCompressedRecording(stream) {
+      if (typeof MediaRecorder === 'undefined') return null;
+      const candidates = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4'];
+      const mimeType = candidates.find(type => !MediaRecorder.isTypeSupported
+        || MediaRecorder.isTypeSupported(type)) || '';
+      try {
+        let recorder;
+        try {
+          recorder = new MediaRecorder(stream, {
+            ...(mimeType ? { mimeType } : {}),
+            audioBitsPerSecond: 24000,
+          });
+        } catch {
+          // Older iPadOS versions support MediaRecorder but can reject the
+          // bitrate hint. Keep their native compressed AAC/MP4 encoder.
+          recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+        }
+        const chunks = [];
+        let settled = false;
+        let finish;
+        const done = new Promise(resolve => { finish = resolve; });
+        const complete = value => {
+          if (settled) return;
+          settled = true;
+          finish(value);
+        };
+        recorder.ondataavailable = event => {
+          if (event.data?.size) chunks.push(event.data);
+        };
+        recorder.onerror = () => complete(null);
+        recorder.onstop = () => {
+          const type = recorder.mimeType || mimeType || chunks[0]?.type || 'audio/webm';
+          complete(chunks.length ? { blob: new Blob(chunks, { type }), mimeType: type } : null);
+        };
+        recorder.start();
+        return { recorder, done };
+      } catch (error) {
+        console.warn('compressed recording unavailable:', error.message);
+        return null;
+      }
+    }
+
+    async function stopCompressedRecording(capture) {
+      if (!capture) return null;
+      try {
+        if (capture.recorder.state !== 'inactive') capture.recorder.stop();
+        return await Promise.race([
+          capture.done,
+          new Promise(resolve => setTimeout(() => resolve(null), 1500)),
+        ]);
+      } catch { return null; }
     }
     function mergeFloat32(chunks) {
       const len = chunks.reduce((s, c) => s + c.length, 0);
@@ -145,22 +199,23 @@
       return it ? state.attemptItems.get(it.id) : null;
     }
 
-    async function patchAttemptItem(patch) {
-      const it = currentItem(); const at = currentAttemptItem();
-      if (!it || !at) return;
+    async function patchAttemptItem(patch, itemId = currentItem()?.id) {
+      const at = itemId ? state.attemptItems.get(itemId) : null;
+      if (!itemId || !at) return;
       try {
-        await api(`/api/chinese/student/attempts/${state.attemptId}/items/${it.id}`, { method: 'POST', body: patch });
-        state.attemptItems.set(it.id, { ...at, ...patch });
+        await api(`/api/chinese/student/attempts/${state.attemptId}/items/${itemId}`, { method: 'POST', body: patch });
+        const latest = state.attemptItems.get(itemId) || at;
+        state.attemptItems.set(itemId, { ...latest, ...patch });
       } catch (e) { toast(e.message, 'error'); }
     }
 
-    async function uploadRecording(blob, mimeType) {
-      const it = currentItem(); if (!it) return null;
+    async function uploadRecording(blob, mimeType, itemId, phase) {
+      if (!itemId) return null;
       const form = new FormData();
       form.append('file', blob, `recording.${extForMime(mimeType)}`);
       form.append('assignmentId', assignmentId);
-      form.append('itemId', it.id);
-      form.append('phase', state.phase);
+      form.append('itemId', itemId);
+      form.append('phase', phase);
       try {
         const res = await fetch('/api/chinese/upload', { method: 'POST', body: form, credentials: 'same-origin' });
         const data = await res.json().catch(() => ({}));
@@ -228,12 +283,13 @@
         const src = ctx.createMediaStreamSource(stream);
         const proc = ctx.createScriptProcessor(4096, 1, 1);
         const chunks = [];
+        const compressed = startCompressedRecording(stream);
         proc.onaudioprocess = e => {
           chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
           e.outputBuffer.getChannelData(0).fill(0);
         };
         src.connect(proc); proc.connect(ctx.destination);
-        rec.pcm = { ctx, src, proc, stream, chunks, sampleRate: ctx.sampleRate };
+        rec.pcm = { ctx, src, proc, stream, chunks, sampleRate: ctx.sampleRate, compressed };
         state.recording = true;
         syncRecordingButton();
         clearAutoStopTimer();
@@ -255,12 +311,19 @@
         const p = rec.pcm; rec.pcm = null;
         if (!p) { state.recording = false; render(); return; }
         state.recording = false; render();
+        const compressedPromise = stopCompressedRecording(p.compressed);
         p.proc.disconnect(); p.src.disconnect();
         p.stream.getTracks().forEach(t => t.stop()); p.ctx.close();
         if (!p.chunks.length) { state.message = '❌ 錄音失敗，請再試一次。'; render(); return; }
         const samples = await resampleForAssessment(mergeFloat32(p.chunks), p.sampleRate);
         const blob = encodeWav(samples, 16000);
-        await submitRecording(blob, 'audio/wav');
+        const compressed = await compressedPromise;
+        await submitRecording(
+          blob,
+          'audio/wav',
+          compressed?.blob || blob,
+          compressed?.mimeType || 'audio/wav',
+        );
       } finally {
         rec.stopping = false;
       }
@@ -272,20 +335,22 @@
       else startRecording();
     }
 
-    async function submitRecording(blob, mimeType) {
+    async function submitRecording(blob, mimeType, storageBlob = blob, storageMimeType = mimeType) {
       const it = currentItem(); if (!it) return;
       if (blob.size < 50) { state.message = '❌ 錄音時間太短。'; render(); return; }
+      const itemId = it.id;
+      const phase = state.phase;
       state.submitting = true; render();
       try {
-        const url = await uploadRecording(blob, mimeType);
-        if (url) {
-          await patchAttemptItem(state.phase === 'practice'
-            ? { speechRecordingUrl: url } : { assessmentRecordingUrl: url });
-        }
+        uploadRecording(storageBlob, storageMimeType, itemId, phase).then(url => {
+          if (!url) return;
+          return patchAttemptItem(phase === 'practice'
+            ? { speechRecordingUrl: url } : { assessmentRecordingUrl: url }, itemId);
+        }).catch(error => console.warn('recording archive skipped:', error.message));
         const form = new FormData();
         form.append('audio', blob, `recording.${extForMime(mimeType)}`);
         form.append('assignmentId', assignmentId);
-        form.append('itemId', it.id);
+        form.append('itemId', itemId);
         const res = await fetch('/api/chinese/pronunciation', { method: 'POST', body: form, credentials: 'same-origin' });
         const data = await res.json().catch(() => ({}));
         if (res.status === 501) {
@@ -293,8 +358,12 @@
           state.message = `ℹ️ ${data.message || 'Azure 粵語發音評估未設定，請使用下方按鈕自我評估。'}`;
           return;
         }
-        if (!res.ok) { state.message = data.message || '發音評估失敗'; return; }
-        const scoreTxt = typeof data.score === 'number' ? `發音相似度：${data.score}%` : '';
+        if (!res.ok) {
+          console.warn('pronunciation assessment failed:', data.message || res.status);
+          state.message = '❌ 發音標準度：未能評分，請再試一次。';
+          return;
+        }
+        const scoreTxt = typeof data.score === 'number' ? `${data.score}%` : '未能評分';
         const storedQuality = data.quality
           ? { ...data.quality, assessment: data.diagnostics || null, timing: data.timing || null }
           : null;
@@ -309,17 +378,13 @@
               assessmentPronunciationScore: data.score, assessmentPronunciationStatus: data.status,
               assessmentAudioQuality: storedQuality, assessmentPronunciationProvider: data.provider || '',
             };
-        await patchAttemptItem(resultPatch);
-        if (data.status === 'inconclusive') {
-          state.message = `⚠️ ${data.message || '今次錄音未能可靠評分，請靠近咪高峰再試。'} ${scoreTxt}`;
-          return;
-        }
-        const feedback = data.message ? ` ・ ${data.message}` : '';
+        await patchAttemptItem(resultPatch, itemId);
         state.message = data.correct
-          ? `✅ 發音通過 ${scoreTxt}${feedback}`
-          : `❌ 發音需要再練習 ${scoreTxt}${feedback}`;
+          ? `✅ 發音標準度：${scoreTxt}`
+          : `❌ 發音標準度：${scoreTxt}，請再試一次。`;
       } catch (e) {
-        state.message = e.message || '語音處理失敗';
+        console.warn('pronunciation request failed:', e.message);
+        state.message = '❌ 發音標準度：未能評分，請再試一次。';
       } finally {
         state.submitting = false; render();
       }
@@ -469,7 +534,7 @@
       container.appendChild(el('button', {
         class: 'btn btn-primary btn-block btn-lg',
         style: { marginTop: '12px' },
-        disabled: !canNext,
+        disabled: !canNext || state.submitting,
         onclick: next,
       },
         state.phase === 'practice'
@@ -519,16 +584,17 @@
     }
 
     function runQuiz(text, key) {
-      const container = document.getElementById('hanzi-writer-target');
-      if (!container) return;
+      const initialContainer = document.getElementById('hanzi-writer-target');
+      if (!initialContainer) return;
       if (typeof HanziWriter === 'undefined') {
-        container.textContent = '⚠️ Hanzi Writer 載入失敗（CDN 被擋？）';
+        initialContainer.textContent = '⚠️ Hanzi Writer 載入失敗（CDN 被擋？）';
         return;
       }
-      container.innerHTML = '';
+      initialContainer.innerHTML = '';
       const chars = Array.from(text.trim());
       let idx = 0;
       const initChar = () => {
+        const container = document.getElementById('hanzi-writer-target');
         if (_hwCancelled || _hwKey !== key || !container) return;
         if (idx >= chars.length) {
           captureSvg(container);
@@ -559,8 +625,12 @@
             idx++;
             if (idx < chars.length) setTimeout(initChar, 400);
             else {
-              setTimeout(() => { captureSvg(container);
-                state.hwDone = true; patchAttemptItem({ handwritingCorrect: true }); render(); }, 600);
+              setTimeout(() => {
+                const activeContainer = document.getElementById('hanzi-writer-target');
+                if (!activeContainer || _hwCancelled || _hwKey !== key) return;
+                captureSvg(activeContainer);
+                state.hwDone = true; patchAttemptItem({ handwritingCorrect: true }); render();
+              }, 600);
             }
           },
         });

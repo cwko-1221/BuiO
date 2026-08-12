@@ -43,6 +43,7 @@ async function uploadRecording({ studentId, assignmentId, itemId, phase, buffer,
   }
   const ext = contentType && contentType.includes('wav') ? 'wav'
     : contentType && contentType.includes('ogg') ? 'ogg'
+    : contentType && (contentType.includes('mp4') || contentType.includes('m4a')) ? 'mp4'
     : 'webm';
   const path = `${studentId}/${assignmentId}/${itemId}/${phase}.${ext}`;
   const c = client();

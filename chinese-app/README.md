@@ -83,6 +83,9 @@ chinese-app/
 ## Pronunciation assessment
 
 - Student audio is captured as mono PCM, resampled to 16 kHz, and sent as lossless WAV.
+- The lossless WAV is used only for Azure assessment. A separate `MediaRecorder` copy is
+  archived to Supabase at a 24 kbps target bitrate (Opus/WebM where supported, AAC/MP4 on
+  iPad Safari). Archiving runs in parallel and doesn't block the score from appearing.
 - The server marks recordings that are too short, too quiet, clipped, or too noisy as
   `inconclusive`; these recordings do not count as incorrect attempts.
 - The server fetches exactly the current `assignmentId + itemId`. The current item's Chinese
