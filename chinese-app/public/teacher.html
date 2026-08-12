@@ -802,8 +802,9 @@
       const q = quality?.metrics;
       if (!q) return null;
       const assessment = quality?.assessment;
-      const scoring = assessment?.hasPhonemeEvidence
-        ? ` ・ Azure 整體 ${Math.round(assessment.fullTextAccuracyScore)}% ・ 音素相似 ${Math.round(assessment.phonemeSimilarityScore)}%`
+      const combined = assessment?.combined;
+      const scoring = combined
+        ? ` ・ Azure 音素 ${Math.round(combined.acousticScore)}% ・ 粵拼配對 ${Math.round(combined.recognizedPronunciationScore)}% ・ 最終 ${Math.round(combined.score)}%`
         : '';
       return el('div', { class: 'muted', style: { marginTop: '4px' } },
         `${label}收音：${quality.ok ? '合格' : quality.reason} ・ ${q.durationMs}ms ・ SNR ${q.snrDb}dB${scoring}`);

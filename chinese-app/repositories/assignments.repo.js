@@ -143,6 +143,23 @@ async function studentHasAccess({ assignmentId, studentId }) {
   return rows.length > 0;
 }
 
+async function getAccessibleItem({ assignmentId, itemId, studentId }) {
+  const pool = requirePg();
+  const { rows } = await pool.query(`
+    SELECT i.id, i.traditional_text, i.jyutping, i.english_meaning, i.image_url, i.order_index
+      FROM ncs_assignment_items i
+      JOIN ncs_assignments a ON a.id = i.assignment_id
+      JOIN users u
+        ON u.classname = a.target_classname
+       AND u.chinesegroup = a.target_group
+     WHERE u.studentid = $1
+       AND a.id = $2
+       AND i.id = $3
+       AND a.status = 'published'`,
+  [studentId, assignmentId, itemId]);
+  return rows[0] ? mapItem(rows[0]) : null;
+}
+
 async function teacherOwns({ assignmentId, teacherId }) {
   const pool = requirePg();
   const { rows } = await pool.query(
@@ -178,6 +195,7 @@ module.exports = {
   updateStatus,
   remove,
   studentHasAccess,
+  getAccessibleItem,
   teacherOwns,
   listGroupSummary,
   groupLabel,

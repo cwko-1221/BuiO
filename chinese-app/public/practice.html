@@ -314,7 +314,10 @@
           state.message = `⚠️ ${data.message || '今次錄音未能可靠評分，請靠近咪高峰再試。'} ${scoreTxt}`;
           return;
         }
-        state.message = data.correct ? `✅ 發音通過 ${scoreTxt}` : `❌ 發音需要再練習 ${scoreTxt}`;
+        const feedback = data.message ? ` ・ ${data.message}` : '';
+        state.message = data.correct
+          ? `✅ 發音通過 ${scoreTxt}${feedback}`
+          : `❌ 發音需要再練習 ${scoreTxt}${feedback}`;
       } catch (e) {
         state.message = e.message || '語音處理失敗';
       } finally {

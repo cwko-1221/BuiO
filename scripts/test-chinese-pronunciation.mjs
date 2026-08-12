@@ -1,12 +1,15 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 
 const require = createRequire(import.meta.url);
 const { analyzeWavQuality } = require('../chinese-app/lib/audioQuality');
 const {
   classifyAccuracy,
+  scoreCantonesePronunciation,
   strictScoreFromDetails,
   compareRecognizedContent,
+  combinePronunciationEvidence,
   assessPronunciation,
   evaluatePronunciation,
 } = require('../chinese-app/lib/pronunciation');
@@ -55,6 +58,16 @@ assert.equal(classifyAccuracy(62).status, 'retry');
 assert.equal(classifyAccuracy(75).status, 'inconclusive');
 assert.equal(classifyAccuracy(Number.NaN).status, 'inconclusive');
 
+const mediaRouteSource = readFileSync(new URL('../chinese-app/routes/media.js', import.meta.url), 'utf8');
+const assignmentRepositorySource = readFileSync(
+  new URL('../chinese-app/repositories/assignments.repo.js', import.meta.url), 'utf8');
+assert.match(mediaRouteSource, /assignments\.getAccessibleItem\(/,
+  'pronunciation assessment must fetch the current item directly');
+assert.doesNotMatch(mediaRouteSource, /assignment\?\.items\?\.find/,
+  'pronunciation assessment must not search or score against the full assignment item list');
+assert.match(assignmentRepositorySource, /AND i\.id = \$3/,
+  'the current assignment item id must be part of the database lookup');
+
 const strictSingleCharacter = strictScoreFromDetails({
   accuracyScore: 100,
   completenessScore: 100,
@@ -93,13 +106,32 @@ const unstableAggregates = strictScoreFromDetails({
 assert.equal(unstableAggregates.score, 80,
   'unstable aggregate scores must not override direct phoneme similarity');
 
+const toneMistake = scoreCantonesePronunciation('hoi2 tyun4', 'hoi1 tyun4');
+assert.equal(toneMistake.score, 87.5,
+  '海豚 read as 開豚 must be close, but must never receive 100');
+assert.deepEqual(toneMistake.alignment, [
+  { expected: 'hoi2', heard: 'hoi1', score: 75 },
+  { expected: 'tyun4', heard: 'tyun4', score: 100 },
+]);
+assert.equal(combinePronunciationEvidence(100, { pronunciationScore: 87.5 }).score, 87.5,
+  'Azure forced alignment must be capped by the independently heard Cantonese pronunciation');
+assert.equal(combinePronunciationEvidence(100, { pronunciationScore: 100 }).score, 98,
+  'zh-HK cannot expose spoken phoneme identities, so one automatic sample cannot claim perfect certainty');
+
 const wrongPhrase = compareRecognizedContent(
   { transcript: '你好', confidence: 0.96 },
   '企鵝',
   'kei5 ngo2',
 );
 assert.equal(wrongPhrase.status, 'wrong-content');
-assert.equal(wrongPhrase.pronunciationSimilarity, 0.5);
+assert.equal(wrongPhrase.pronunciationScore, 58.7);
+const nearTonePhrase = compareRecognizedContent(
+  { transcript: '開豚', confidence: 0.96 },
+  '海豚',
+  'hoi2 tyun4',
+);
+assert.equal(nearTonePhrase.status, 'phonetic-near');
+assert.equal(nearTonePhrase.pronunciationScore, 87.5);
 assert.equal(compareRecognizedContent(
   { transcript: '企鵝', confidence: 0.5 }, '企鵝', 'kei5 ngo2').status, 'matched');
 assert.equal(compareRecognizedContent(
@@ -120,7 +152,16 @@ class FakeRecognizer {
       resolve({ reason: 1, text: currentAssessmentTranscript });
       return;
     }
-    resolve({ reason: 1, text: currentRecognition.transcript, confidence: currentRecognition.confidence });
+    const result = { reason: 1, text: currentRecognition.transcript, confidence: currentRecognition.confidence };
+    if (currentRecognition.candidates) {
+      result.properties = { getProperty: () => JSON.stringify({
+        NBest: currentRecognition.candidates.map(candidate => ({
+          Display: candidate.transcript,
+          Confidence: candidate.confidence,
+        })),
+      }) };
+    }
+    resolve(result);
   }
   close() {}
 }
@@ -206,7 +247,7 @@ currentRecognition = { transcript: '你好', confidence: 0.96 };
 const gatedWrongPhrase = await evaluatePronunciation(
   wav(clearSpeech), '企鵝', 'kei5 ngo2', fakeSdk);
 assert.equal(gatedWrongPhrase.status, 'retry');
-assert.equal(gatedWrongPhrase.score, 0);
+assert.equal(gatedWrongPhrase.score, 58.7);
 assert.equal(gatedWrongPhrase.transcript, '你好');
 assert.equal(assessmentCalls, 0, 'clearly wrong content must not receive a pronunciation score');
 
@@ -217,6 +258,46 @@ assert.equal(uncertainPhrase.status, 'inconclusive');
 assert.equal(uncertainPhrase.score, null);
 assert.equal(assessmentCalls, 0, 'uncertain content must not receive a random score');
 
+assessmentCalls = 0;
+currentRecognition = {
+  transcript: '開豚',
+  confidence: 0.96,
+  candidates: [
+    { transcript: '開豚', confidence: 0.96 },
+    { transcript: '海豚', confidence: 0.31 },
+  ],
+};
+currentAssessmentTranscript = '海豚';
+currentAssessment = {
+  accuracyScore: 100,
+  pronunciationScore: 100,
+  completenessScore: 100,
+  fluencyScore: 100,
+  detailResult: {
+    Words: [{
+      Word: '海豚',
+      PronunciationAssessment: { AccuracyScore: 100, ErrorType: 'None' },
+      Phonemes: [
+        { PronunciationAssessment: { AccuracyScore: 100 } },
+        { PronunciationAssessment: { AccuracyScore: 100 } },
+        { PronunciationAssessment: { AccuracyScore: 100 } },
+      ],
+    }],
+  },
+};
+const currentItemToneMistake = await evaluatePronunciation(
+  wav(clearSpeech), '海豚', 'hoi2 tyun4', fakeSdk, { assignmentId: 'assignment-1', itemId: 'item-sea' });
+assert.equal(currentItemToneMistake.score, 87.5,
+  '海豚 read as 開豚 must remain below 100 even when scripted Azure returns all 100');
+assert.equal(currentItemToneMistake.diagnostics.reference.text, '海豚');
+assert.equal(currentItemToneMistake.diagnostics.reference.itemId, 'item-sea');
+assert.equal(currentItemToneMistake.diagnostics.combined.acousticScore, 100);
+assert.equal(currentItemToneMistake.diagnostics.combined.recognizedPronunciationScore, 87.5);
+assert.equal(currentItemToneMistake.contentCheck.candidates.length, 2,
+  'the detailed Azure NBest response must be preserved for auditing');
+assert.equal(assessmentCalls, 1);
+
+assessmentCalls = 0;
 currentRecognition = { transcript: '企鵝', confidence: 0.94 };
 currentAssessmentTranscript = '企鵝';
 currentAssessment = {

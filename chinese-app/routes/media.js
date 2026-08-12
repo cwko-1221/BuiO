@@ -42,11 +42,11 @@ async function assessPronunciation(req, res) {
     const assignmentId = String(req.body?.assignmentId || '');
     const itemId = String(req.body?.itemId || '');
     if (!assignmentId || !itemId) return res.status(400).json({ success: false, message: '缺少作業或題目資料' });
-    if (!await assignments.studentHasAccess({ assignmentId, studentId: req.session.studentId })) {
-      return res.status(404).json({ success: false, message: '找不到作業' });
-    }
-    const assignment = await assignments.getOne({ assignmentId });
-    const item = assignment?.items?.find(candidate => String(candidate.id) === itemId);
+    const item = await assignments.getAccessibleItem({
+      assignmentId,
+      itemId,
+      studentId: req.session.studentId,
+    });
     if (!item) return res.status(404).json({ success: false, message: '找不到題目' });
     const expected = String(item.traditionalText || '').trim();
 
@@ -68,6 +68,8 @@ async function assessPronunciation(req, res) {
       req.file.buffer,
       expected,
       String(item.jyutping || '').trim(),
+      null,
+      { assignmentId, itemId },
     );
     res.json({ success: true, ...out, quality });
   } catch (e) { handle(res, e, 400); }

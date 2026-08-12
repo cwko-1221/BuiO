@@ -32,13 +32,13 @@ function normalizeText(value) {
   return String(value || '').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 }
 
-function normalizeJyutping(value) {
-  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+function jyutpingSyllables(value) {
+  return String(value || '').toLowerCase().match(/[a-z]+[1-6]/g) || [];
 }
 
-function jyutpingFor(value) {
-  try { return normalizeJyutping(getJyutpingText(normalizeText(value))); }
-  catch { return ''; }
+function jyutpingForText(value) {
+  try { return jyutpingSyllables(getJyutpingText(normalizeText(value))); }
+  catch { return []; }
 }
 
 function levenshtein(a, b) {
@@ -58,6 +58,103 @@ function levenshtein(a, b) {
 function similarity(a, b) {
   if (!a || !b) return 0;
   return Math.max(0, 1 - levenshtein(a, b) / Math.max(a.length, b.length));
+}
+
+const JYUTPING_ONSETS = [
+  'gw', 'kw', 'ng', 'b', 'p', 'm', 'f', 'd', 't', 'n', 'l',
+  'g', 'k', 'h', 'w', 'z', 'c', 's', 'j',
+];
+
+const SIMILAR_ONSETS = [
+  new Set(['b', 'p']), new Set(['d', 't']), new Set(['g', 'k']),
+  new Set(['gw', 'kw']), new Set(['z', 'c', 's']), new Set(['n', 'l']),
+];
+
+function splitJyutpingSyllable(value) {
+  const match = String(value || '').toLowerCase().match(/^([a-z]+)([1-6])$/);
+  if (!match) return null;
+  const body = match[1];
+  const onset = JYUTPING_ONSETS.find(candidate => body.startsWith(candidate)) || '';
+  return { syllable: match[0], onset, final: body.slice(onset.length), tone: match[2] };
+}
+
+function onsetSimilarity(a, b) {
+  if (a === b) return 1;
+  if (!a || !b) return 0;
+  return SIMILAR_ONSETS.some(group => group.has(a) && group.has(b)) ? 0.5 : 0;
+}
+
+function toneSimilarity(a, b) {
+  if (a === b) return 1;
+  if ((a === '2' && b === '5') || (a === '5' && b === '2')) return 0.5;
+  if ((a === '4' && b === '6') || (a === '6' && b === '4')) return 0.5;
+  if (new Set([a, b]).size === 2 && ['1', '3', '6'].includes(a) && ['1', '3', '6'].includes(b)) return 0.25;
+  return 0;
+}
+
+function syllableSimilarity(expected, heard) {
+  const a = splitJyutpingSyllable(expected);
+  const b = splitJyutpingSyllable(heard);
+  if (!a || !b) return 0;
+  const finalSimilarity = similarity(a.final, b.final);
+  return onsetSimilarity(a.onset, b.onset) * 0.3
+    + finalSimilarity * 0.45
+    + toneSimilarity(a.tone, b.tone) * 0.25;
+}
+
+function alignJyutping(expected, heard) {
+  const rows = expected.length + 1;
+  const columns = heard.length + 1;
+  const costs = Array.from({ length: rows }, () => Array(columns).fill(0));
+  const paths = Array.from({ length: rows }, () => Array(columns).fill(null));
+  for (let i = 1; i < rows; i += 1) {
+    costs[i][0] = i;
+    paths[i][0] = 'delete';
+  }
+  for (let j = 1; j < columns; j += 1) {
+    costs[0][j] = j;
+    paths[0][j] = 'insert';
+  }
+  for (let i = 1; i < rows; i += 1) {
+    for (let j = 1; j < columns; j += 1) {
+      const choices = [
+        { cost: costs[i - 1][j - 1] + 1 - syllableSimilarity(expected[i - 1], heard[j - 1]), path: 'match' },
+        { cost: costs[i - 1][j] + 1, path: 'delete' },
+        { cost: costs[i][j - 1] + 1, path: 'insert' },
+      ].sort((left, right) => left.cost - right.cost);
+      costs[i][j] = choices[0].cost;
+      paths[i][j] = choices[0].path;
+    }
+  }
+
+  const alignment = [];
+  let i = expected.length;
+  let j = heard.length;
+  while (i > 0 || j > 0) {
+    const path = paths[i][j];
+    if (path === 'match') {
+      const score = syllableSimilarity(expected[i - 1], heard[j - 1]);
+      alignment.unshift({ expected: expected[i - 1], heard: heard[j - 1], score: Math.round(score * 1000) / 10 });
+      i -= 1;
+      j -= 1;
+    } else if (path === 'delete') {
+      alignment.unshift({ expected: expected[i - 1], heard: null, score: 0 });
+      i -= 1;
+    } else {
+      alignment.unshift({ expected: null, heard: heard[j - 1], score: 0 });
+      j -= 1;
+    }
+  }
+  const length = Math.max(expected.length, heard.length, 1);
+  const score = Math.max(0, (1 - costs[expected.length][heard.length] / length) * 100);
+  return { score: Math.round(score * 10) / 10, alignment };
+}
+
+function scoreCantonesePronunciation(expectedJyutping, heardJyutping) {
+  const expected = Array.isArray(expectedJyutping) ? expectedJyutping : jyutpingSyllables(expectedJyutping);
+  const heard = Array.isArray(heardJyutping) ? heardJyutping : jyutpingSyllables(heardJyutping);
+  if (!expected.length || !heard.length) return { score: null, expected, heard, alignment: [] };
+  return { ...alignJyutping(expected, heard), expected, heard };
 }
 
 function classifyAccuracy(score) {
@@ -120,7 +217,7 @@ function strictScoreFromDetails({ accuracyScore, completenessScore, details }) {
     score: strictScore === null ? null : Math.round(strictScore * 10) / 10,
     words,
     diagnostics: {
-      algorithm: 'content-gated-phoneme-similarity-v3',
+      algorithm: 'azure-scripted-phoneme-evidence-v4',
       fullTextAccuracyScore: finiteScore(accuracyScore),
       completenessScore: finiteScore(completenessScore),
       weakestWordScore,
@@ -137,42 +234,82 @@ function strictScoreFromDetails({ accuracyScore, completenessScore, details }) {
 
 function compareRecognizedContent(recognition, expectedText, expectedJyutping = '') {
   const expected = normalizeText(expectedText);
-  const transcript = normalizeText(recognition?.transcript);
-  const confidence = finiteScore(recognition?.confidence);
-  const expectedPronunciation = normalizeJyutping(expectedJyutping) || jyutpingFor(expected);
-  const heardPronunciation = jyutpingFor(transcript);
-  const pronunciationSimilarity = similarity(expectedPronunciation, heardPronunciation);
+  const expectedPronunciation = jyutpingSyllables(expectedJyutping);
+  const expectedSyllables = expectedPronunciation.length ? expectedPronunciation : jyutpingForText(expected);
+  const candidates = (Array.isArray(recognition?.candidates) && recognition.candidates.length
+    ? recognition.candidates
+    : [{ transcript: recognition?.transcript || '', confidence: recognition?.confidence }])
+    .map(candidate => {
+      const transcript = normalizeText(candidate.transcript);
+      const heardSyllables = jyutpingForText(transcript);
+      const comparison = scoreCantonesePronunciation(expectedSyllables, heardSyllables);
+      return {
+        transcript,
+        confidence: finiteScore(candidate.confidence),
+        jyutping: heardSyllables.join(' '),
+        pronunciationScore: comparison.score,
+        alignment: comparison.alignment,
+      };
+    });
+  const top = candidates[0];
   const diagnostics = {
     expected,
-    transcript,
-    confidence,
-    expectedJyutping: expectedPronunciation,
-    transcriptJyutping: heardPronunciation,
-    pronunciationSimilarity: Math.round(pronunciationSimilarity * 1000) / 1000,
+    transcript: top?.transcript || '',
+    confidence: top?.confidence ?? null,
+    expectedJyutping: expectedSyllables.join(' '),
+    transcriptJyutping: top?.jyutping || '',
+    pronunciationScore: top?.pronunciationScore ?? null,
+    alignment: top?.alignment || [],
+    candidates,
   };
 
-  if (!transcript) {
+  if (!expectedSyllables.length) {
+    return { status: 'inconclusive', ...diagnostics, message: '題目的粵拼資料不完整，今次不評分。' };
+  }
+  if (!top?.transcript || !Number.isFinite(top.pronunciationScore)) {
     return { status: 'inconclusive', ...diagnostics, message: '未能清楚辨識讀音，請再錄一次。' };
   }
-  if (transcript === expected) return { status: 'matched', ...diagnostics };
-
-  const nearThreshold = numericEnv('AZURE_CONTENT_NEAR_SIMILARITY', 0.7);
-  if (pronunciationSimilarity >= nearThreshold) {
-    return { status: 'phonetic-near', ...diagnostics };
+  const minimumConfidence = numericEnv('AZURE_CONTENT_MIN_SCORING_CONFIDENCE', 0.35);
+  if (top.confidence !== null && top.confidence < minimumConfidence) {
+    return { status: 'inconclusive', ...diagnostics, message: '辨識信心太低，今次不評分，請在較近咪高峰的位置再錄。' };
   }
+  if (top.transcript === expected) return { status: 'matched', ...diagnostics };
 
   const confidenceThreshold = numericEnv('AZURE_CONTENT_MIN_CONFIDENCE', 0.55);
-  const wrongThreshold = numericEnv('AZURE_CONTENT_WRONG_SIMILARITY', 0.6);
-  if (confidence !== null && confidence >= confidenceThreshold
-      && pronunciationSimilarity <= wrongThreshold) {
+  const wrongThreshold = numericEnv('AZURE_CONTENT_WRONG_SCORE', 65);
+  if (top.confidence !== null && top.confidence >= confidenceThreshold
+      && top.pronunciationScore < wrongThreshold) {
     return {
       status: 'wrong-content',
       ...diagnostics,
-      message: `系統聽到「${recognition.transcript}」，與題目「${expectedText}」的讀音不同。`,
+      message: `系統聽到「${top.transcript}」，與當前題目「${expectedText}」的讀音不同。`,
     };
   }
 
-  return { status: 'inconclusive', ...diagnostics, message: '辨識結果不穩定，今次不評分，請再錄一次。' };
+  return {
+    status: 'phonetic-near',
+    ...diagnostics,
+    message: `系統聽到「${top.transcript}」，已按它與「${expectedText}」的粵拼差異扣分。`,
+  };
+}
+
+function combinePronunciationEvidence(assessmentScore, contentCheck) {
+  const acousticScore = finiteScore(assessmentScore);
+  const recognizedPronunciationScore = finiteScore(contentCheck?.pronunciationScore);
+  if (acousticScore === null || recognizedPronunciationScore === null) {
+    return { score: null, acousticScore, recognizedPronunciationScore, maximumScore: null };
+  }
+  // zh-HK returns an accuracy score for each expected phoneme, but it does not
+  // expose which phoneme was actually spoken. Independent reference-free STT
+  // supplies that missing evidence. The result may never exceed either signal.
+  const maximumScore = Math.min(100, Math.max(0, numericEnv('AZURE_PRONUNCIATION_MAX_SCORE', 98)));
+  const score = Math.min(acousticScore, recognizedPronunciationScore, maximumScore);
+  return {
+    score: Math.round(score * 10) / 10,
+    acousticScore,
+    recognizedPronunciationScore,
+    maximumScore,
+  };
 }
 
 function azureConcurrency() {
@@ -237,15 +374,22 @@ function cancellationError(azure, result, fallback) {
   return error;
 }
 
-function detailedConfidence(azure, result) {
-  const direct = finiteScore(result?.confidence);
-  if (direct !== null) return direct;
+function detailedRecognition(azure, result) {
+  const fallback = {
+    transcript: result?.text || '',
+    confidence: finiteScore(result?.confidence),
+  };
   try {
     const property = azure.PropertyId?.SpeechServiceResponse_JsonResult;
     const raw = property && result.properties?.getProperty?.(property);
     const parsed = raw ? JSON.parse(raw) : null;
-    return finiteScore(parsed?.NBest?.[0]?.Confidence);
-  } catch { return null; }
+    const candidates = (parsed?.NBest || []).map(candidate => ({
+      transcript: candidate.Display || candidate.Lexical || candidate.ITN || '',
+      confidence: finiteScore(candidate.Confidence),
+    })).filter(candidate => candidate.transcript);
+    if (candidates.length) return { ...candidates[0], candidates };
+  } catch {}
+  return { ...fallback, candidates: fallback.transcript ? [fallback] : [] };
 }
 
 function recognizeContent(audio, sdkOverride = null) {
@@ -263,11 +407,11 @@ function recognizeContent(audio, sdkOverride = null) {
   const audioConfig = azure.AudioConfig.fromWavFileInput(audio, 'recording.wav');
   const recognizer = new azure.SpeechRecognizer(speechConfig, audioConfig);
   return recognizeOnce(recognizer, result => {
-    if (result.reason === azure.ResultReason.NoMatch) return { transcript: '', confidence: null };
+    if (result.reason === azure.ResultReason.NoMatch) return { transcript: '', confidence: null, candidates: [] };
     if (result.reason !== azure.ResultReason.RecognizedSpeech) {
       throw cancellationError(azure, result, 'Azure 內容辨識失敗。');
     }
-    return { transcript: result.text || '', confidence: detailedConfidence(azure, result) };
+    return detailedRecognition(azure, result);
   });
 }
 
@@ -299,7 +443,7 @@ function assessPronunciation(audio, referenceText, sdkOverride = null) {
     if (result.reason === azure.ResultReason.NoMatch) {
       return {
         status: 'inconclusive', correct: false, score: null,
-        transcript: '', provider: 'azure-phoneme-similarity-zh-HK-v3', words: [],
+        transcript: '', provider: 'azure-scripted-phoneme-zh-HK-v4', words: [],
       };
     }
     if (result.reason !== azure.ResultReason.RecognizedSpeech) {
@@ -322,14 +466,20 @@ function assessPronunciation(audio, referenceText, sdkOverride = null) {
       completenessScore,
       fluencyScore: finiteScore(assessment.fluencyScore),
       transcript: result.text || '',
-      provider: 'azure-phoneme-similarity-zh-HK-v3',
+      provider: 'azure-scripted-phoneme-zh-HK-v4',
       words: strict.words,
       diagnostics: strict.diagnostics,
     };
   });
 }
 
-async function evaluatePronunciation(audio, referenceText, expectedJyutping = '', sdkOverride = null) {
+async function evaluatePronunciation(
+  audio,
+  referenceText,
+  expectedJyutping = '',
+  sdkOverride = null,
+  referenceContext = {},
+) {
   const queuedAt = Date.now();
   return withAzureSlot(async () => {
     const queueWaitMs = Date.now() - queuedAt;
@@ -337,13 +487,21 @@ async function evaluatePronunciation(audio, referenceText, expectedJyutping = ''
     const recognition = await recognizeContent(audio, sdkOverride);
     const contentRecognitionMs = Date.now() - contentStartedAt;
     const contentCheck = compareRecognizedContent(recognition, referenceText, expectedJyutping);
-    const provider = 'azure-content-gated-phoneme-similarity-zh-HK-v3';
+    const provider = 'azure-current-item-cantonese-phonetic-v4';
+    const reference = {
+      assignmentId: referenceContext.assignmentId || null,
+      itemId: referenceContext.itemId || null,
+      text: String(referenceText || '').trim(),
+      jyutping: contentCheck.expectedJyutping,
+    };
 
     if (contentCheck.status === 'wrong-content') {
+      const classification = classifyAccuracy(contentCheck.pronunciationScore);
       return {
-        status: 'retry', correct: false, score: 0,
+        ...classification,
+        score: contentCheck.pronunciationScore,
         transcript: recognition.transcript, provider, contentCheck,
-        diagnostics: { algorithm: 'content-gate-v3', contentCheck },
+        diagnostics: { algorithm: 'current-item-phonetic-comparison-v4', reference, contentCheck },
         timing: { queueWaitMs, contentRecognitionMs, assessmentMs: 0 },
         message: contentCheck.message,
       };
@@ -352,7 +510,7 @@ async function evaluatePronunciation(audio, referenceText, expectedJyutping = ''
       return {
         status: 'inconclusive', correct: false, score: null,
         transcript: recognition.transcript, provider, contentCheck,
-        diagnostics: { algorithm: 'content-gate-v3', contentCheck },
+        diagnostics: { algorithm: 'current-item-phonetic-comparison-v4', reference, contentCheck },
         timing: { queueWaitMs, contentRecognitionMs, assessmentMs: 0 },
         message: contentCheck.message,
       };
@@ -361,17 +519,25 @@ async function evaluatePronunciation(audio, referenceText, expectedJyutping = ''
     const assessmentStartedAt = Date.now();
     const assessment = await assessPronunciation(audio, referenceText, sdkOverride);
     const assessmentMs = Date.now() - assessmentStartedAt;
+    const combined = combinePronunciationEvidence(assessment.score, contentCheck);
+    const classification = classifyAccuracy(combined.score);
     return {
       ...assessment,
+      ...classification,
+      score: combined.score,
       transcript: recognition.transcript,
       provider,
       contentCheck,
       diagnostics: {
         ...assessment.diagnostics,
+        algorithm: 'azure-current-item-cantonese-phonetic-v4',
+        reference,
         contentCheck,
+        combined,
         assessmentTranscript: assessment.transcript,
       },
       timing: { queueWaitMs, contentRecognitionMs, assessmentMs },
+      message: contentCheck.status === 'phonetic-near' ? contentCheck.message : assessment.message,
     };
   });
 }
@@ -379,8 +545,10 @@ async function evaluatePronunciation(audio, referenceText, expectedJyutping = ''
 module.exports = {
   isConfigured,
   classifyAccuracy,
+  scoreCantonesePronunciation,
   strictScoreFromDetails,
   compareRecognizedContent,
+  combinePronunciationEvidence,
   recognizeContent,
   assessPronunciation,
   evaluatePronunciation,

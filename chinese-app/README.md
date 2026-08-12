@@ -53,6 +53,10 @@ chinese-app/
    # Optional calibration thresholds (defaults shown).
    AZURE_PRONUNCIATION_PASS_SCORE=85
    AZURE_PRONUNCIATION_RETRY_SCORE=65
+   # A confident reading below this current-item Jyutping score is clearly different.
+   AZURE_CONTENT_WRONG_SCORE=65
+   # zh-HK does not return the identity of the phoneme actually spoken. Avoid false 100s.
+   AZURE_PRONUNCIATION_MAX_SCORE=98
    # F0 allows one concurrent real-time Speech request. Raise this only after moving to S0.
    AZURE_SPEECH_MAX_CONCURRENT=1
 
@@ -81,14 +85,18 @@ chinese-app/
 - Student audio is captured as mono PCM, resampled to 16 kHz, and sent as lossless WAV.
 - The server marks recordings that are too short, too quiet, clipped, or too noisy as
   `inconclusive`; these recordings do not count as incorrect attempts.
-- Valid recordings use Azure Speech scripted Pronunciation Assessment with locale `zh-HK`
-  and the assignment text as the reference text.
-- The server first performs reference-free Azure `zh-HK` recognition. A confident different
-  reading is rejected; an uncertain reading is inconclusive and never receives a random score.
-- Only matched or phonetically near content proceeds to phoneme-granularity assessment. The
-  displayed similarity score blends the mean phoneme accuracy with the weakest third. Full-text,
-  word, and completeness aggregates are diagnostic only and never set the displayed percentage.
-- The content transcript is a gate, not the pronunciation score. Google STT is not used.
+- The server fetches exactly the current `assignmentId + itemId`. The current item's Chinese
+  text is the only `ReferenceText` sent to Azure scripted Pronunciation Assessment; the question
+  bank and other assignment items are never included in that assessment.
+- Azure `zh-HK` returns an accuracy score for each expected phoneme, but doesn't return the
+  identity of the phoneme actually spoken. The server therefore also performs independent,
+  reference-free Azure `zh-HK` recognition and converts its top result to Jyutping.
+- Expected and heard Jyutping are aligned syllable by syllable. Each syllable compares onset
+  (30%), final (45%), and tone (25%). For example, `海豚 hoi2 tyun4` versus
+  `開豚 hoi1 tyun4` scores 87.5 for this evidence, not 100.
+- The displayed percentage is the lower of (a) Azure's current-item phoneme evidence and
+  (b) the heard Jyutping score, with a default automatic ceiling of 98. Full-text, word, and
+  completeness aggregates remain diagnostic only. Google STT is not used.
 - Practice and assessment scores, status, provider, and audio-quality metrics are stored
   on each attempt item for auditing and later threshold calibration.
 
