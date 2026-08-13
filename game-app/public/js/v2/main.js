@@ -181,8 +181,27 @@ function updateHudAndNetwork(state){
 }
 
 function bindHold(id,action){
-  const el=$(id); const on=e=>{e.preventDefault();scene?.setAction(action,true);}; const off=e=>{e?.preventDefault();scene?.setAction(action,false);};
-  el.addEventListener('pointerdown',on);el.addEventListener('pointerup',off);el.addEventListener('pointercancel',off);el.addEventListener('pointerleave',off);
+  const el=$(id);
+  let activePointer=null;
+  const on=e=>{
+    e.preventDefault();
+    if(activePointer!==null)return;
+    activePointer=e.pointerId;
+    el.classList.add('is-pressed');
+    try{el.setPointerCapture(e.pointerId);}catch{}
+    scene?.setAction(action,true);
+  };
+  const off=e=>{
+    if(activePointer===null||(e?.pointerId!==undefined&&e.pointerId!==activePointer))return;
+    e?.preventDefault();
+    activePointer=null;
+    el.classList.remove('is-pressed');
+    scene?.setAction(action,false);
+  };
+  el.addEventListener('pointerdown',on);
+  el.addEventListener('pointerup',off);
+  el.addEventListener('pointercancel',off);
+  el.addEventListener('lostpointercapture',off);
 }
 bindHold('btnLeft','left');bindHold('btnDown','down');bindHold('btnRight','right');bindHold('btnJump','jump');
 $('resetBtn').addEventListener('click',()=>scene?.resetToCheckpoint('manual'));
