@@ -1,0 +1,5962 @@
+[
+  {
+    "id": "lab-safety",
+    "early": {
+      "goggles": {
+        "pose": {
+          "position": {
+            "x": -2.6500000953674316,
+            "y": 2.074496030807495,
+            "z": 0.3400000035762787
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 1.6999899751790615e-12,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.6500000953674316,
+              "y": 2.074496030807495,
+              "z": 0.3400000035762787
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 1.6999899751790615e-12,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "goggle-rack-tray"
+          ],
+          "socket": null
+        }
+      },
+      "scientist": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "bag": {
+        "pose": {
+          "position": {
+            "x": -0.20000000298023224,
+            "y": -0.07361787557601929,
+            "z": 2.1500000953674316
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 2.249098685069839e-10,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -0.20000000298023224,
+              "y": -0.07361787557601929,
+              "z": 2.1500000953674316
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 2.249098685069839e-10,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "storage": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "splash-card": {
+        "pose": {
+          "position": {
+            "x": -4.150000095367432,
+            "y": 0.1655833125114441,
+            "z": -1.7000000476837158
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.150000095367432,
+              "y": 0.1655833125114441,
+              "z": -1.7000000476837158
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "hazard-card-shelf"
+          ],
+          "socket": null
+        }
+      },
+      "eyewash": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "fire-card": {
+        "pose": {
+          "position": {
+            "x": -3.25,
+            "y": 0.1655833125114441,
+            "z": -1.7000000476837158
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.25,
+              "y": 0.1655833125114441,
+              "z": -1.7000000476837158
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "hazard-card-shelf"
+          ],
+          "socket": null
+        }
+      },
+      "fire-blanket": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "safety-button": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "goggles": {
+        "pose": {
+          "position": {
+            "x": -2.6500000953674316,
+            "y": 2.074496030807495,
+            "z": 0.3400000035762787
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.6500000953674316,
+              "y": 2.074496030807495,
+              "z": 0.3400000035762787
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "goggle-rack-tray"
+          ],
+          "socket": null
+        }
+      },
+      "scientist": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "bag": {
+        "pose": {
+          "position": {
+            "x": -0.20000000298023224,
+            "y": -0.07361787557601929,
+            "z": 2.1500000953674316
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -0.20000000298023224,
+              "y": -0.07361787557601929,
+              "z": 2.1500000953674316
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "storage": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "splash-card": {
+        "pose": {
+          "position": {
+            "x": -4.150000095367432,
+            "y": 0.1655833125114441,
+            "z": -1.7000000476837158
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.150000095367432,
+              "y": 0.1655833125114441,
+              "z": -1.7000000476837158
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "hazard-card-shelf"
+          ],
+          "socket": null
+        }
+      },
+      "eyewash": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "fire-card": {
+        "pose": {
+          "position": {
+            "x": -3.25,
+            "y": 0.1655833125114441,
+            "z": -1.7000000476837158
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.25,
+              "y": 0.1655833125114441,
+              "z": -1.7000000476837158
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "hazard-card-shelf"
+          ],
+          "socket": null
+        }
+      },
+      "fire-blanket": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "safety-button": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 952.4375,
+        "top": 98,
+        "right": 1422,
+        "bottom": 1050.4375,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "goggles": {
+          "e": {
+            "x": 435.0745848874394,
+            "y": 352.1647393643097,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "scientist": {
+          "e": {
+            "x": 1016.1866409405835,
+            "y": 423.3940180386227,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 1044.6026342767605,
+            "y": 324.6335812509635,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "bag": {
+          "e": {
+            "x": 730.242493161554,
+            "y": 621.0150302605198,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "storage": {
+          "e": null,
+          "t": {
+            "x": 275.82057854612316,
+            "y": 632.5135959600864,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "splash-card": {
+          "e": {
+            "x": 389.1794877125748,
+            "y": 416.31878009423673,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "eyewash": {
+          "e": {
+            "x": 631.180828899943,
+            "y": 399.0554864867216,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 630.9622623892477,
+            "y": 478.91685888719843,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "fire-card": {
+          "e": {
+            "x": 465.11868348111165,
+            "y": 415.60393881175406,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "fire-blanket": {
+          "e": {
+            "x": 821.9034234037539,
+            "y": 368.8749004655963,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 821.8958299233628,
+            "y": 413.38324187163033,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "safety-button": {
+          "e": {
+            "x": 1090.063374099633,
+            "y": 411.1610538292448,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 3,
+      "environmentChildren": 21,
+      "background": "#0d6070",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 20,
+        "colliders": 20,
+        "interactiveBodies": 4,
+        "targetSensors": 4,
+        "grabbed": 0,
+        "contactPairs": 4
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": {
+        "experiment": "lab-safety",
+        "completedChecks": 0,
+        "gogglesEquipped": false,
+        "passageClear": false,
+        "eyewashActive": false,
+        "fireBlanketDeployed": false
+      },
+      "lastInteraction": null
+    }
+  },
+  {
+    "id": "transmission",
+    "early": {
+      "tracer": {
+        "pose": {
+          "position": {
+            "x": -4.21999979019165,
+            "y": -0.12339484691619873,
+            "z": -0.9499998688697815
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 1.097650175775882e-14,
+            "y": -3.3789276931983636e-11,
+            "z": 1.2780093247512139e-14
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.21999979019165,
+              "y": -0.12339484691619873,
+              "z": -0.9499998688697815
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 1.097650175775882e-14,
+              "y": -3.3789276931983636e-11,
+              "z": 1.2780093247512139e-14
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "hands": {
+        "pose": {
+          "position": {
+            "x": 0.550000011920929,
+            "y": 0.1702604740858078,
+            "z": 0.050000011920928955
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": 0.550000011920929,
+              "y": 0.1702604740858078,
+              "z": 0.050000011920928955
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "wash-counter",
+            "target:hands"
+          ],
+          "socket": null
+        }
+      },
+      "soap": {
+        "pose": {
+          "position": {
+            "x": -2.9200000762939453,
+            "y": -0.12339484691619873,
+            "z": -0.9500000476837158
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": -1.7572129917178695e-19,
+            "z": 7.882525876598198e-15
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.9200000762939453,
+              "y": -0.12339484691619873,
+              "z": -0.9500000476837158
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": -1.7572129917178695e-19,
+              "z": 7.882525876598198e-15
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "water": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "uv-lamp": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "tracer": {
+        "pose": {
+          "position": {
+            "x": -4.21999979019165,
+            "y": -0.12339663505554199,
+            "z": -0.9499998688697815
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.21999979019165,
+              "y": -0.12339663505554199,
+              "z": -0.9499998688697815
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "hands": {
+        "pose": {
+          "position": {
+            "x": 0.550000011920929,
+            "y": 0.1702604740858078,
+            "z": 0.050000011920928955
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": 0.550000011920929,
+              "y": 0.1702604740858078,
+              "z": 0.050000011920928955
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "wash-counter",
+            "target:hands"
+          ],
+          "socket": null
+        }
+      },
+      "soap": {
+        "pose": {
+          "position": {
+            "x": -2.9200000762939453,
+            "y": -0.12339663505554199,
+            "z": -0.9500000476837158
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.9200000762939453,
+              "y": -0.12339663505554199,
+              "z": -0.9500000476837158
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "water": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "uv-lamp": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 976.5,
+        "top": 98,
+        "right": 1422,
+        "bottom": 1074.5,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "tracer": {
+          "e": {
+            "x": 321.7181513507654,
+            "y": 402.5510262883395,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "hands": {
+          "e": {
+            "x": 730.4402592576728,
+            "y": 538.7377953386251,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 748.8337940166298,
+            "y": 505.5324957584603,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "soap": {
+          "e": {
+            "x": 442.0301485557259,
+            "y": 400.36049794871894,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "water": {
+          "e": null,
+          "t": {
+            "x": 989.5314804976131,
+            "y": 440.25733482075367,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "uv-lamp": {
+          "e": {
+            "x": 536.0232281203052,
+            "y": 553.2874110471812,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 3,
+      "environmentChildren": 21,
+      "background": "#0d6070",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 8,
+        "colliders": 8,
+        "interactiveBodies": 3,
+        "targetSensors": 2,
+        "grabbed": 0,
+        "contactPairs": 4
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": {
+        "experiment": "transmission",
+        "rubCoverage": 0,
+        "rinseActive": false,
+        "visibleTracerSpots": 0,
+        "uvInspectionActive": false
+      },
+      "lastInteraction": null
+    }
+  },
+  {
+    "id": "root-viewer",
+    "early": {
+      "seedling": {
+        "pose": {
+          "position": {
+            "x": -4.119999885559082,
+            "y": 1.5899611711502075,
+            "z": -0.3499999940395355
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": -4.1140543772863057e-16,
+            "y": -4.803622700848067e-22,
+            "z": 2.0064076135980047e-19
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.119999885559082,
+              "y": 1.5899611711502075,
+              "z": -0.3499999940395355
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": -4.1140543772863057e-16,
+              "y": -4.803622700848067e-22,
+              "z": 2.0064076135980047e-19
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "seedling-nursery"
+          ],
+          "socket": null
+        }
+      },
+      "root-box": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "water-cup": {
+        "pose": {
+          "position": {
+            "x": -3.0306382179260254,
+            "y": 1.1243301630020142,
+            "z": 1.3393467664718628
+          },
+          "rotation": {
+            "x": 0.0000024499063329130877,
+            "y": 7.525294165589003e-8,
+            "z": -0.0000016682259911249275,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.0306382179260254,
+              "y": 1.1243301630020142,
+              "z": 1.3393467664718628
+            },
+            "rotation": {
+              "x": 0.0000024499063329130877,
+              "y": 7.525294165589003e-8,
+              "z": -0.0000016682259911249275,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "water-cup-shelf"
+          ],
+          "socket": null
+        }
+      },
+      "wet-zone": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "time-dial": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "magnifier": {
+        "pose": {
+          "position": {
+            "x": -4.320000171661377,
+            "y": 0.8563237190246582,
+            "z": 2.349797248840332
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 1.499720802206002e-16
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.320000171661377,
+              "y": 0.8563237190246582,
+              "z": 2.349797248840332
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 1.499720802206002e-16
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "magnifier-rack",
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "root-tip": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "seedling": {
+        "pose": {
+          "position": {
+            "x": -4.119999885559082,
+            "y": 1.5899637937545776,
+            "z": -0.3499999940395355
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.119999885559082,
+              "y": 1.5899637937545776,
+              "z": -0.3499999940395355
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "seedling-nursery"
+          ],
+          "socket": null
+        }
+      },
+      "root-box": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "water-cup": {
+        "pose": {
+          "position": {
+            "x": -3.0306382179260254,
+            "y": 1.1243301630020142,
+            "z": 1.3393467664718628
+          },
+          "rotation": {
+            "x": 0.0000024499063329130877,
+            "y": 7.525294165589003e-8,
+            "z": -0.0000016682259911249275,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.0306382179260254,
+              "y": 1.1243301630020142,
+              "z": 1.3393467664718628
+            },
+            "rotation": {
+              "x": 0.0000024499063329130877,
+              "y": 7.525294165589003e-8,
+              "z": -0.0000016682259911249275,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "water-cup-shelf"
+          ],
+          "socket": null
+        }
+      },
+      "wet-zone": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "time-dial": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "magnifier": {
+        "pose": {
+          "position": {
+            "x": -4.320000171661377,
+            "y": 0.8726535439491272,
+            "z": 2.3497984409332275
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.320000171661377,
+              "y": 0.8726535439491272,
+              "z": 2.3497984409332275
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "magnifier-rack",
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "root-tip": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 982.125,
+        "top": 98,
+        "right": 1422,
+        "bottom": 1080.125,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "seedling": {
+          "e": {
+            "x": 282.30406461335883,
+            "y": 368.53501755322037,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "root-box": {
+          "e": null,
+          "t": {
+            "x": 753.2931756397405,
+            "y": 377.39528872661833,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "water-cup": {
+          "e": {
+            "x": 361.19786761760537,
+            "y": 472.10858814327065,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "wet-zone": {
+          "e": null,
+          "t": {
+            "x": 593.0815611939987,
+            "y": 321.2815413153686,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "time-dial": {
+          "e": {
+            "x": 1122.817861917773,
+            "y": 555.858031037566,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "magnifier": {
+          "e": {
+            "x": 219.48697606854248,
+            "y": 633.3768556196825,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "root-tip": {
+          "e": null,
+          "t": {
+            "x": 589.7642678035352,
+            "y": 506.704392184837,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 3,
+      "environmentChildren": 21,
+      "background": "#0d6070",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 14,
+        "colliders": 14,
+        "interactiveBodies": 3,
+        "targetSensors": 3,
+        "grabbed": 0,
+        "contactPairs": 4
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": {
+        "experiment": "root-viewer",
+        "growthFraction": 0,
+        "targetGrowthFraction": 0,
+        "watered": false,
+        "magnified": false,
+        "focusDistance": 0.48
+      },
+      "lastInteraction": null
+    }
+  },
+  {
+    "id": "food-web",
+    "early": {
+      "sun": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "plant": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "snail": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "fish": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "heron": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "remove-fish": {
+        "pose": {
+          "position": {
+            "x": -3.9200000762939453,
+            "y": 0.6529802083969116,
+            "z": 1.8799999952316284
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.9200000762939453,
+              "y": 0.6529802083969116,
+              "z": 1.8799999952316284
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "landing-net-rack"
+          ],
+          "socket": null
+        }
+      },
+      "pond": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "sun": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "plant": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "snail": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "fish": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "heron": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "remove-fish": {
+        "pose": {
+          "position": {
+            "x": -3.9200000762939453,
+            "y": 0.6529802083969116,
+            "z": 1.8799999952316284
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.9200000762939453,
+              "y": 0.6529802083969116,
+              "z": 1.8799999952316284
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "landing-net-rack"
+          ],
+          "socket": null
+        }
+      },
+      "pond": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 977.8125,
+        "top": 98,
+        "right": 1422,
+        "bottom": 1075.8125,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "sun": {
+          "e": {
+            "x": 345.1078345872065,
+            "y": 252.21316139410544,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "plant": {
+          "e": {
+            "x": 533.9117944579185,
+            "y": 494.03724805363794,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 529.1145539293689,
+            "y": 480.52069334741896,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "snail": {
+          "e": {
+            "x": 686.2348093808043,
+            "y": 517.254452581176,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 670.3947006386431,
+            "y": 522.7676390815463,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "fish": {
+          "e": {
+            "x": 806.5293072289144,
+            "y": 472.40370326333044,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 826.206439848495,
+            "y": 482.56681475824877,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "heron": {
+          "e": {
+            "x": 1067.8382565436161,
+            "y": 374.2390217630837,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 1077.2864158573582,
+            "y": 326.4943084207098,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "remove-fish": {
+          "e": {
+            "x": 317.36099497578635,
+            "y": 571.1476321347063,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "pond": {
+          "e": null,
+          "t": {
+            "x": 813.9896934465689,
+            "y": 521.0260988635775,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 3,
+      "environmentChildren": 21,
+      "background": "#0d6070",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 11,
+        "colliders": 11,
+        "interactiveBodies": 1,
+        "targetSensors": 5,
+        "grabbed": 0,
+        "contactPairs": 1
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": {
+        "experiment": "food-web",
+        "activeLinks": 0,
+        "fishPopulation": 1,
+        "fishInstances": 9,
+        "samplingInProgress": false
+      },
+      "lastInteraction": null
+    }
+  },
+  {
+    "id": "density-column",
+    "early": {
+      "honey": {
+        "pose": {
+          "position": {
+            "x": -4.5500006675720215,
+            "y": -0.1315152645111084,
+            "z": -1.2500001192092896
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 3.931600409953296e-15,
+            "y": -2.382144204116088e-10,
+            "z": 5.546826595313834e-15
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.5500006675720215,
+              "y": -0.1315152645111084,
+              "z": -1.2500001192092896
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 3.931600409953296e-15,
+              "y": -2.382144204116088e-10,
+              "z": 5.546826595313834e-15
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "column": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "water": {
+        "pose": {
+          "position": {
+            "x": -3.249999761581421,
+            "y": -0.1315152645111084,
+            "z": -1.2499996423721313
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": -3.245922368711493e-15,
+            "y": -6.757867269252538e-12,
+            "z": 1.8748053612772497e-15
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.249999761581421,
+              "y": -0.1315152645111084,
+              "z": -1.2499996423721313
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": -3.245922368711493e-15,
+              "y": -6.757867269252538e-12,
+              "z": 1.8748053612772497e-15
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "oil": {
+        "pose": {
+          "position": {
+            "x": -1.9499999284744263,
+            "y": -0.13151514530181885,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": -2.4387096685053906e-14,
+            "y": 2.8720885045241396e-11,
+            "z": 1.0517902026489345e-14
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -1.9499999284744263,
+              "y": -0.13151514530181885,
+              "z": -1.25
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": -2.4387096685053906e-14,
+              "y": 2.8720885045241396e-11,
+              "z": 1.0517902026489345e-14
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "cork": {
+        "pose": {
+          "position": {
+            "x": -3.948568820953369,
+            "y": 0.20994818210601807,
+            "z": 1.646841049194336
+          },
+          "rotation": {
+            "x": 2.9487631536539993e-7,
+            "y": -1.3049105973550468e-7,
+            "z": 4.491917309223936e-7,
+            "w": 1
+          },
+          "velocity": {
+            "x": 2.2807934385582485e-7,
+            "y": 2.8773976623597264e-7,
+            "z": -1.0003112294043603e-7
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.948568820953369,
+              "y": 0.20994818210601807,
+              "z": 1.646841049194336
+            },
+            "rotation": {
+              "x": 2.9487631536539993e-7,
+              "y": -1.3049105973550468e-7,
+              "z": 4.491917309223936e-7,
+              "w": 1
+            },
+            "velocity": {
+              "x": 2.2807934385582485e-7,
+              "y": 2.8773976623597264e-7,
+              "z": -1.0003112294043603e-7
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "bead": {
+        "pose": {
+          "position": {
+            "x": -2.75,
+            "y": 0.2399308979511261,
+            "z": 1.649999976158142
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.75,
+              "y": 0.2399308979511261,
+              "z": 1.649999976158142
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "honey": {
+        "pose": {
+          "position": {
+            "x": -4.5500006675720215,
+            "y": -0.13151657581329346,
+            "z": -1.2500001192092896
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.5500006675720215,
+              "y": -0.13151657581329346,
+              "z": -1.2500001192092896
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "column": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "water": {
+        "pose": {
+          "position": {
+            "x": -3.249999761581421,
+            "y": -0.13151657581329346,
+            "z": -1.2499996423721313
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.249999761581421,
+              "y": -0.13151657581329346,
+              "z": -1.2499996423721313
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "oil": {
+        "pose": {
+          "position": {
+            "x": -1.9499999284744263,
+            "y": -0.13151651620864868,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -1.9499999284744263,
+              "y": -0.13151651620864868,
+              "z": -1.25
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "cork": {
+        "pose": {
+          "position": {
+            "x": -3.948568820953369,
+            "y": 0.20994818210601807,
+            "z": 1.646841049194336
+          },
+          "rotation": {
+            "x": 1.9052014010867424e-7,
+            "y": -1.3048561697814876e-7,
+            "z": 2.901406617183966e-7,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.948568820953369,
+              "y": 0.20994818210601807,
+              "z": 1.646841049194336
+            },
+            "rotation": {
+              "x": 1.9052014010867424e-7,
+              "y": -1.3048561697814876e-7,
+              "z": 2.901406617183966e-7,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "bead": {
+        "pose": {
+          "position": {
+            "x": -2.75,
+            "y": 0.2399308979511261,
+            "z": 1.649999976158142
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.75,
+              "y": 0.2399308979511261,
+              "z": 1.649999976158142
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 846.4375,
+        "top": 98,
+        "right": 1422,
+        "bottom": 944.4375,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "honey": {
+          "e": {
+            "x": 302.43077895601965,
+            "y": 434.3034873352172,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "column": {
+          "e": {
+            "x": 842.2006207987562,
+            "y": 388.92400163187625,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 851.0206007970269,
+            "y": 214.72474412679045,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "water": {
+          "e": {
+            "x": 416.50708299451765,
+            "y": 432.73891473643175,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "oil": {
+          "e": {
+            "x": 530.0523571205234,
+            "y": 431.1815873124864,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "cork": {
+          "e": {
+            "x": 296.9293872159076,
+            "y": 623.1789478204256,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "bead": {
+          "e": {
+            "x": 421.0724970896662,
+            "y": 619.6624984826112,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 3,
+      "environmentChildren": 21,
+      "background": "#0d6070",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 16,
+        "colliders": 16,
+        "interactiveBodies": 5,
+        "targetSensors": 1,
+        "grabbed": 0,
+        "contactPairs": 5
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": null,
+      "lastInteraction": null
+    }
+  },
+  {
+    "id": "water-filter",
+    "early": {
+      "cotton": {
+        "pose": {
+          "position": {
+            "x": -4.451717853546143,
+            "y": 0.12502728402614594,
+            "z": -1.4203033447265625
+          },
+          "rotation": {
+            "x": -1.2029339302443987e-7,
+            "y": 1.0682321516242155e-7,
+            "z": -7.455580686155372e-8,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.451717853546143,
+              "y": 0.12502728402614594,
+              "z": -1.4203033447265625
+            },
+            "rotation": {
+              "x": -1.2029339302443987e-7,
+              "y": 1.0682321516242155e-7,
+              "z": -7.455580686155372e-8,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "filter": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "sand": {
+        "pose": {
+          "position": {
+            "x": -3.25,
+            "y": -0.06491687893867493,
+            "z": -1.4199999570846558
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": -1.6064595487197408e-10,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.25,
+              "y": -0.06491687893867493,
+              "z": -1.4199999570846558
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": -1.6064595487197408e-10,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "gravel": {
+        "pose": {
+          "position": {
+            "x": -2.0799999237060547,
+            "y": -0.06491687893867493,
+            "z": -1.4199999570846558
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": -3.716820254351383e-11,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.0799999237060547,
+              "y": -0.06491687893867493,
+              "z": -1.4199999570846558
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": -3.716820254351383e-11,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "muddy-water": {
+        "pose": {
+          "position": {
+            "x": -3.8499999046325684,
+            "y": -0.08727943897247314,
+            "z": 1.4800000190734863
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 1.3998977893775813e-14,
+            "y": -3.4634006773615056e-10,
+            "z": 3.681553319308511e-15
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.8499999046325684,
+              "y": -0.08727943897247314,
+              "z": 1.4800000190734863
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 1.3998977893775813e-14,
+              "y": -3.4634006773615056e-10,
+              "z": 3.681553319308511e-15
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "sensor": {
+        "pose": {
+          "position": {
+            "x": -2.2499992847442627,
+            "y": 0.014966011047363281,
+            "z": 1.519999623298645
+          },
+          "rotation": {
+            "x": 1.0542973427618563e-7,
+            "y": 1.8098827422657546e-14,
+            "z": 5.170554686628748e-7,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.2499992847442627,
+              "y": 0.014966011047363281,
+              "z": 1.519999623298645
+            },
+            "rotation": {
+              "x": 1.0542973427618563e-7,
+              "y": 1.8098827422657546e-14,
+              "z": 5.170554686628748e-7,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "filtered-water": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "cotton": {
+        "pose": {
+          "position": {
+            "x": -4.451717853546143,
+            "y": 0.12502728402614594,
+            "z": -1.4203033447265625
+          },
+          "rotation": {
+            "x": -1.2029339302443987e-7,
+            "y": 1.0682321516242155e-7,
+            "z": -7.455580686155372e-8,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.451717853546143,
+              "y": 0.12502728402614594,
+              "z": -1.4203033447265625
+            },
+            "rotation": {
+              "x": -1.2029339302443987e-7,
+              "y": 1.0682321516242155e-7,
+              "z": -7.455580686155372e-8,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "filter": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "sand": {
+        "pose": {
+          "position": {
+            "x": -3.25,
+            "y": -0.06491464376449585,
+            "z": -1.4199999570846558
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.25,
+              "y": -0.06491464376449585,
+              "z": -1.4199999570846558
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "gravel": {
+        "pose": {
+          "position": {
+            "x": -2.0799999237060547,
+            "y": -0.06491464376449585,
+            "z": -1.4199999570846558
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.0799999237060547,
+              "y": -0.06491464376449585,
+              "z": -1.4199999570846558
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "muddy-water": {
+        "pose": {
+          "position": {
+            "x": -3.8499999046325684,
+            "y": -0.08727967739105225,
+            "z": 1.4800000190734863
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.8499999046325684,
+              "y": -0.08727967739105225,
+              "z": 1.4800000190734863
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "sensor": {
+        "pose": {
+          "position": {
+            "x": -2.2499992847442627,
+            "y": 0.014966011047363281,
+            "z": 1.519999623298645
+          },
+          "rotation": {
+            "x": 1.0542973427618563e-7,
+            "y": 1.8098827422657546e-14,
+            "z": 5.170554686628748e-7,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.2499992847442627,
+              "y": 0.014966011047363281,
+              "z": 1.519999623298645
+            },
+            "rotation": {
+              "x": 1.0542973427618563e-7,
+              "y": 1.8098827422657546e-14,
+              "z": 5.170554686628748e-7,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "filtered-water": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 775.75,
+        "top": 98,
+        "right": 1422,
+        "bottom": 873.75,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "cotton": {
+          "e": {
+            "x": 312.69351805196476,
+            "y": 484.77402976813016,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "filter": {
+          "e": {
+            "x": 817.3953626922024,
+            "y": 374.25302439357796,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 821.8060415893544,
+            "y": 261.6328835353749,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "sand": {
+          "e": {
+            "x": 410.47258885685545,
+            "y": 467.85580621134835,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "gravel": {
+          "e": {
+            "x": 510.10782600380065,
+            "y": 466.0593537019406,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "muddy-water": {
+          "e": {
+            "x": 291.5582691143452,
+            "y": 589.4148776386699,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "sensor": {
+          "e": {
+            "x": 456.81153120113646,
+            "y": 578.7868551434459,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "filtered-water": {
+          "e": null,
+          "t": {
+            "x": 842.8022266227442,
+            "y": 483.24058969776183,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 3,
+      "environmentChildren": 21,
+      "background": "#0d6070",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 21,
+        "colliders": 21,
+        "interactiveBodies": 5,
+        "targetSensors": 2,
+        "grabbed": 0,
+        "contactPairs": 5
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": null,
+      "lastInteraction": null
+    }
+  },
+  {
+    "id": "eco-house",
+    "early": {
+      "thermometer": {
+        "pose": {
+          "position": {
+            "x": -4.25,
+            "y": -0.10201418399810791,
+            "z": -0.949999988079071
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 3.8181882655585753e-10,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.25,
+              "y": -0.10201418399810791,
+              "z": -0.949999988079071
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 3.8181882655585753e-10,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "house": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "metal-panel": {
+        "pose": {
+          "position": {
+            "x": -2.8499999046325684,
+            "y": 0.9300000071525574,
+            "z": -0.8500000238418579
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.8499999046325684,
+              "y": 0.9300000071525574,
+              "z": -0.8500000238418579
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "wall": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "house-timer": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "foam-panel": {
+        "pose": {
+          "position": {
+            "x": -1.2000000476837158,
+            "y": 0.9300000071525574,
+            "z": 1.8200000524520874
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -1.2000000476837158,
+              "y": 0.9300000071525574,
+              "z": 1.8200000524520874
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "house-run": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "thermometer": {
+        "pose": {
+          "position": {
+            "x": -4.25,
+            "y": -0.10201650857925415,
+            "z": -0.949999988079071
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.25,
+              "y": -0.10201650857925415,
+              "z": -0.949999988079071
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "house": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "metal-panel": {
+        "pose": {
+          "position": {
+            "x": -2.8499999046325684,
+            "y": 0.9300000071525574,
+            "z": -0.8500000238418579
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.8499999046325684,
+              "y": 0.9300000071525574,
+              "z": -0.8500000238418579
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "wall": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "house-timer": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "foam-panel": {
+        "pose": {
+          "position": {
+            "x": -1.2000000476837158,
+            "y": 0.9300000071525574,
+            "z": 1.8200000524520874
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -1.2000000476837158,
+              "y": 0.9300000071525574,
+              "z": 1.8200000524520874
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "house-run": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 1120.4375,
+        "top": 98,
+        "right": 1422,
+        "bottom": 1218.4375,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "thermometer": {
+          "e": {
+            "x": 304.0860776254057,
+            "y": 451.3677812274184,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "house": {
+          "e": {
+            "x": 783.7832488523088,
+            "y": 405.2250589418872,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 751.262825929104,
+            "y": 534.2894707693242,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "metal-panel": {
+          "e": {
+            "x": 429.7952840599419,
+            "y": 437.6866253643968,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "wall": {
+          "e": null,
+          "t": {
+            "x": 829.8707593702171,
+            "y": 387.7840176041832,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "house-timer": {
+          "e": {
+            "x": 1140.535979058482,
+            "y": 593.8786187719285,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "foam-panel": {
+          "e": {
+            "x": 564.5856786081221,
+            "y": 568.2657107171005,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "house-run": {
+          "e": {
+            "x": 1071.5127178957332,
+            "y": 480.56545961286184,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 3,
+      "environmentChildren": 21,
+      "background": "#0d6070",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 12,
+        "colliders": 12,
+        "interactiveBodies": 3,
+        "targetSensors": 2,
+        "grabbed": 0,
+        "contactPairs": 1
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": {
+        "experiment": "eco-house",
+        "installedPanel": null,
+        "thermometerInstalled": false,
+        "timerMinutes": 0,
+        "runSeconds": 0,
+        "temperatureC": 24,
+        "comparisonReady": false,
+        "comparison": {
+          "controlledVariables": [
+            "initialTemperature",
+            "ambientTemperature",
+            "duration",
+            "panelSize"
+          ],
+          "independentVariable": "wallMaterial",
+          "metalTemperatureC": null,
+          "foamTemperatureC": null,
+          "differenceC": null
+        },
+        "thermal": {
+          "version": 1,
+          "elapsed": 0,
+          "bodies": [
+            {
+              "id": "metal",
+              "temperature": 24,
+              "ambientTemperature": 8,
+              "heatCapacity": 510,
+              "conductance": 0.702,
+              "heaterPower": 0,
+              "metadata": {}
+            },
+            {
+              "id": "foam",
+              "temperature": 24,
+              "ambientTemperature": 8,
+              "heatCapacity": 930,
+              "conductance": 0.322,
+              "heaterPower": 0,
+              "metadata": {}
+            }
+          ]
+        }
+      },
+      "lastInteraction": null
+    }
+  },
+  {
+    "id": "light-lab",
+    "early": {
+      "torch": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "mirror": {
+        "pose": {
+          "position": {
+            "x": -2.9200000762939453,
+            "y": 0.6323842406272888,
+            "z": -1.6200000047683716
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 2.500406270922184e-10,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.9200000762939453,
+              "y": 0.6323842406272888,
+              "z": -1.6200000047683716
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 2.500406270922184e-10,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "mirror-stand": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "prism": {
+        "pose": {
+          "position": {
+            "x": -1.4199999570846558,
+            "y": 0.5909847617149353,
+            "z": -1.7799999713897705
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 4.713603951600476e-10,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -1.4199999570846558,
+              "y": 0.5909847617149353,
+              "z": -1.7799999713897705
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 4.713603951600476e-10,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "beam-zone": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "torch": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "mirror": {
+        "pose": {
+          "position": {
+            "x": -2.9200000762939453,
+            "y": 0.632383406162262,
+            "z": -1.6200000047683716
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.9200000762939453,
+              "y": 0.632383406162262,
+              "z": -1.6200000047683716
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "mirror-stand": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "prism": {
+        "pose": {
+          "position": {
+            "x": -1.4199999570846558,
+            "y": 0.5909834504127502,
+            "z": -1.7799999713897705
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -1.4199999570846558,
+              "y": 0.5909834504127502,
+              "z": -1.7799999713897705
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "beam-zone": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 757.4375,
+        "top": 98,
+        "right": 1422,
+        "bottom": 855.4375,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "torch": {
+          "e": {
+            "x": 274.70971914539956,
+            "y": 474.0804796837113,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "mirror": {
+          "e": {
+            "x": 448.43573549770485,
+            "y": 448.8925052097237,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "mirror-stand": {
+          "e": null,
+          "t": {
+            "x": 672.576576820801,
+            "y": 441.1673222064365,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "prism": {
+          "e": {
+            "x": 581.3865713555865,
+            "y": 453.48314397903096,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "beam-zone": {
+          "e": null,
+          "t": {
+            "x": 911.1314163189313,
+            "y": 400.1828978347684,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 3,
+      "environmentChildren": 21,
+      "background": "#0d6070",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 9,
+        "colliders": 9,
+        "interactiveBodies": 2,
+        "targetSensors": 2,
+        "grabbed": 0,
+        "contactPairs": 2
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": {
+        "experiment": "light-lab",
+        "torchOn": false,
+        "mirrorInstalled": false,
+        "mirrorAngle": 0,
+        "prismInstalled": false,
+        "prismAngle": 24,
+        "spectrumVisible": false,
+        "reflectionHitsScreen": false,
+        "spectrumHitCount": 0,
+        "fixedScreen": [
+          4.45,
+          1.48,
+          -1.6
+        ],
+        "optics": {
+          "version": 1,
+          "mirrors": [],
+          "prisms": [],
+          "sensors": [
+            {
+              "id": "fixed-screen",
+              "point": [
+                4.45,
+                1.53,
+                -1.6
+              ],
+              "normal": [
+                -1,
+                0,
+                0
+              ],
+              "uAxis": [
+                0,
+                0,
+                1
+              ],
+              "vAxis": [
+                0,
+                1,
+                0
+              ],
+              "shape": "rectangle",
+              "width": 2.1,
+              "height": 1.68,
+              "radius": 1.05,
+              "metadata": {}
+            }
+          ]
+        }
+      },
+      "lastInteraction": null
+    }
+  },
+  {
+    "id": "sound-vacuum",
+    "early": {
+      "mallet": {
+        "pose": {
+          "position": {
+            "x": -4.249443531036377,
+            "y": 0.19991488754749298,
+            "z": -0.2797122895717621
+          },
+          "rotation": {
+            "x": -0.000012695452824118547,
+            "y": -7.071257357438299e-9,
+            "z": 0.000003848881078738486,
+            "w": 1
+          },
+          "velocity": {
+            "x": -0.00001709394018689636,
+            "y": -0.00006144907092675567,
+            "z": -5.27239592429396e-7
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.249443531036377,
+              "y": 0.19991488754749298,
+              "z": -0.2797122895717621
+            },
+            "rotation": {
+              "x": -0.000012695452824118547,
+              "y": -7.071257357438299e-9,
+              "z": 0.000003848881078738486,
+              "w": 1
+            },
+            "velocity": {
+              "x": -0.00001709394018689636,
+              "y": -0.00006144907092675567,
+              "z": -5.27239592429396e-7
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "fork-strike": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "fork": {
+        "pose": {
+          "position": {
+            "x": -2.346672773361206,
+            "y": -0.05642545223236084,
+            "z": -1.4511022567749023
+          },
+          "rotation": {
+            "x": 0.000012873306332039647,
+            "y": -0.000003585593276511645,
+            "z": 2.7898622079192137e-7,
+            "w": 1
+          },
+          "velocity": {
+            "x": -0.0000123122254080954,
+            "y": -0.00012843444710597396,
+            "z": 0.0017117206007242203
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.346672773361206,
+              "y": -0.05642545223236084,
+              "z": -1.4511022567749023
+            },
+            "rotation": {
+              "x": 0.000012873306332039647,
+              "y": -0.000003585593276511645,
+              "z": 2.7898622079192137e-7,
+              "w": 1
+            },
+            "velocity": {
+              "x": -0.0000123122254080954,
+              "y": -0.00012843444710597396,
+              "z": 0.0017117206007242203
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "target:fork-strike",
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "water-tray": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "bell-jar": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "vacuum-pump": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "sealed-striker": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "mallet": {
+        "pose": {
+          "position": {
+            "x": -4.249443531036377,
+            "y": 0.19991356134414673,
+            "z": -0.2797124683856964
+          },
+          "rotation": {
+            "x": -0.00000446481499238871,
+            "y": -7.0283023845263415e-9,
+            "z": 0.0000018086418549501104,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.249443531036377,
+              "y": 0.19991356134414673,
+              "z": -0.2797124683856964
+            },
+            "rotation": {
+              "x": -0.00000446481499238871,
+              "y": -7.0283023845263415e-9,
+              "z": 0.0000018086418549501104,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "fork-strike": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "fork": {
+        "pose": {
+          "position": {
+            "x": -2.3466739654541016,
+            "y": -0.05642068386077881,
+            "z": -1.4511067867279053
+          },
+          "rotation": {
+            "x": 0.000002318450242455583,
+            "y": -0.0000035857960938301403,
+            "z": -2.010974782251651e-7,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.3466739654541016,
+              "y": -0.05642068386077881,
+              "z": -1.4511067867279053
+            },
+            "rotation": {
+              "x": 0.000002318450242455583,
+              "y": -0.0000035857960938301403,
+              "z": -2.010974782251651e-7,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "target:fork-strike",
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "water-tray": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "bell-jar": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "vacuum-pump": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "sealed-striker": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 915.75,
+        "top": 98,
+        "right": 1422,
+        "bottom": 1013.75,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "mallet": {
+          "e": {
+            "x": 339.4698460795003,
+            "y": 526.8115010828452,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "fork-strike": {
+          "e": null,
+          "t": {
+            "x": 517.8693448110823,
+            "y": 332.7751448173465,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "fork": {
+          "e": {
+            "x": 501.20900162963164,
+            "y": 438.01396622214565,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "water-tray": {
+          "e": {
+            "x": 332.0092317528369,
+            "y": 626.5392497592131,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 329.090366601171,
+            "y": 608.888986076713,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "bell-jar": {
+          "e": {
+            "x": 797.0207862201972,
+            "y": 427.70262379430136,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 793.8047765922036,
+            "y": 533.9693895901544,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "vacuum-pump": {
+          "e": {
+            "x": 995.6704877865773,
+            "y": 381.32474090138294,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "sealed-striker": {
+          "e": {
+            "x": 662.5416733538674,
+            "y": 613.9292573953132,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 3,
+      "environmentChildren": 21,
+      "background": "#0d6070",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 9,
+        "colliders": 9,
+        "interactiveBodies": 2,
+        "targetSensors": 3,
+        "grabbed": 0,
+        "contactPairs": 3
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": {
+        "experiment": "sound-vacuum",
+        "pressureKPa": 100,
+        "soundDb": 58,
+        "frequencyHz": 440,
+        "forkLocation": "bench",
+        "jarSealed": false,
+        "hoseConnected": true,
+        "strikeCount": 0,
+        "manualStrikeCount": 0,
+        "sealedStrikeCount": 0,
+        "toneEmissionCount": 0,
+        "vibrating": false,
+        "vibrationRemainingMs": 0,
+        "vibrationDurationMs": 9000,
+        "waterWaveActive": false,
+        "waterWaveCount": 0,
+        "lastWaterContactWasVibrating": false,
+        "lastJarPlacementWasVibrating": false,
+        "lastExcitationSource": null,
+        "comparisonReady": false,
+        "comparison": {
+          "controlledVariables": [
+            "tuningFork",
+            "frequencyHz",
+            "sealedJar"
+          ],
+          "independentVariable": "airPressureKPa",
+          "openAir": null,
+          "lowPressure": null,
+          "differenceDb": null
+        }
+      },
+      "lastInteraction": null
+    }
+  },
+  {
+    "id": "electric-crane",
+    "early": {
+      "coil": {
+        "pose": {
+          "position": {
+            "x": -3.0499961376190186,
+            "y": 0.5699999928474426,
+            "z": -1.2599999904632568
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": -4.462851421749292e-8,
+            "y": -0.000005553168648475548,
+            "z": 6.894005765561984e-13
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.0499961376190186,
+              "y": 0.5699999928474426,
+              "z": -1.2599999904632568
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": -4.462851421749292e-8,
+              "y": -0.000005553168648475548,
+              "z": 6.894005765561984e-13
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "target:coil-in",
+            "target:coil-out",
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "iron-core": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "battery-positive": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "switch-in": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "switch-out": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "coil-in": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "coil-out": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "bulb-in": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "bulb-out": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "battery-negative": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "switch": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "crane-lift": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "coil": {
+        "pose": {
+          "position": {
+            "x": -3.0499961376190186,
+            "y": 0.5699999928474426,
+            "z": -1.2599999904632568
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -3.0499961376190186,
+              "y": 0.5699999928474426,
+              "z": -1.2599999904632568
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "target:coil-in",
+            "target:coil-out",
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "iron-core": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "battery-positive": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "switch-in": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "switch-out": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "coil-in": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "coil-out": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "bulb-in": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "bulb-out": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "battery-negative": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "switch": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "crane-lift": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 888.8125,
+        "top": 98,
+        "right": 1422,
+        "bottom": 986.8125,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "coil": {
+          "e": {
+            "x": 434.92222082668354,
+            "y": 459.54547530810476,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "iron-core": {
+          "e": {
+            "x": 841.4283359295123,
+            "y": 332.9411102318696,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 841.4283359295123,
+            "y": 332.9411102318696,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "battery-positive": {
+          "e": {
+            "x": 310.67869482946764,
+            "y": 547.0783142015268,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "switch-in": {
+          "e": {
+            "x": 479.7369751025057,
+            "y": 624.3556969647251,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 479.02930092443387,
+            "y": 627.6047876763366,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "switch-out": {
+          "e": {
+            "x": 606.2155931039609,
+            "y": 621.1324931387602,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "coil-in": {
+          "e": {
+            "x": 480.477852935952,
+            "y": 429.10123080494697,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 479.8888762962763,
+            "y": 431.1614416785051,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "coil-out": {
+          "e": {
+            "x": 489.4603109057858,
+            "y": 505.4301782706153,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "bulb-in": {
+          "e": {
+            "x": 772.4962660769969,
+            "y": 624.1831451272518,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 772.9634631590285,
+            "y": 627.4261958327136,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "bulb-out": {
+          "e": {
+            "x": 891.4744114660014,
+            "y": 621.1235181360503,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "battery-negative": {
+          "e": {
+            "x": 219.69291643439965,
+            "y": 549.1644418715834,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": {
+            "x": 217.92151751022553,
+            "y": 552.1443186345638,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "switch": {
+          "e": {
+            "x": 496.89272189963975,
+            "y": 602.8478082219013,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "crane-lift": {
+          "e": {
+            "x": 1046.0359265747525,
+            "y": 453.7882715376109,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 3,
+      "environmentChildren": 21,
+      "background": "#0d6070",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 27,
+        "colliders": 27,
+        "interactiveBodies": 7,
+        "targetSensors": 10,
+        "grabbed": 0,
+        "contactPairs": 16
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": {
+        "experiment": "electric-crane",
+        "coilInstalled": false,
+        "switchClosed": false,
+        "powered": false,
+        "liftCommanded": false,
+        "attachedClipCount": 0,
+        "currentAmps": 0,
+        "coilTemperature": 24,
+        "connectedEdges": [],
+        "magneticModel": "current-scaled-distance-force",
+        "magneticForceNewtons": {},
+        "clips": [
+          {
+            "id": "clip-1",
+            "pose": {
+              "position": {
+                "x": 1.0044670104980469,
+                "y": 0.31452348828315735,
+                "z": -1.2009737491607666
+              },
+              "rotation": {
+                "x": 0.999464750289917,
+                "y": -0.00001703120142337866,
+                "z": -0.032714102417230606,
+                "w": -0.0001271931832889095
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "dynamic": true,
+              "sleeping": true
+            }
+          },
+          {
+            "id": "clip-2",
+            "pose": {
+              "position": {
+                "x": 1.8006207942962646,
+                "y": 0.32284918427467346,
+                "z": -1.727477788925171
+              },
+              "rotation": {
+                "x": -0.000001154412984760711,
+                "y": -0.17238005995750427,
+                "z": -0.000010734645002230536,
+                "w": 0.9850305914878845
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "dynamic": true,
+              "sleeping": true
+            }
+          },
+          {
+            "id": "clip-3",
+            "pose": {
+              "position": {
+                "x": 2.4779553413391113,
+                "y": 0.6336855888366699,
+                "z": -1.6232552528381348
+              },
+              "rotation": {
+                "x": 0.7070344090461731,
+                "y": 0.010002553462982178,
+                "z": -0.010002224706113338,
+                "w": 0.7070377469062805
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "dynamic": true,
+              "sleeping": true
+            }
+          },
+          {
+            "id": "clip-4",
+            "pose": {
+              "position": {
+                "x": 1.0724009275436401,
+                "y": 0.46038082242012024,
+                "z": -0.7450054287910461
+              },
+              "rotation": {
+                "x": 0.12834852933883667,
+                "y": -0.19160591065883636,
+                "z": -0.0341082401573658,
+                "w": 0.9724456071853638
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "dynamic": true,
+              "sleeping": true
+            }
+          },
+          {
+            "id": "clip-5",
+            "pose": {
+              "position": {
+                "x": 1.7252405881881714,
+                "y": 0.6336840987205505,
+                "z": -0.6136094927787781
+              },
+              "rotation": {
+                "x": 0.7070459127426147,
+                "y": 0.009160995483398438,
+                "z": -0.009161100722849369,
+                "w": 0.7070489525794983
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "dynamic": true,
+              "sleeping": true
+            }
+          },
+          {
+            "id": "clip-6",
+            "pose": {
+              "position": {
+                "x": 2.526876926422119,
+                "y": 0.29675978422164917,
+                "z": -0.7924337983131409
+              },
+              "rotation": {
+                "x": -3.596521480631054e-7,
+                "y": -0.1098269522190094,
+                "z": -3.1017381729725457e-7,
+                "w": 0.9939507842063904
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "dynamic": true,
+              "sleeping": true
+            }
+          }
+        ],
+        "circuit": {
+          "version": 1,
+          "elapsed": 3.166799999999997,
+          "ports": [
+            {
+              "id": "battery-positive",
+              "kind": "terminal",
+              "metadata": {}
+            },
+            {
+              "id": "battery-negative",
+              "kind": "terminal",
+              "metadata": {}
+            },
+            {
+              "id": "switch-in",
+              "kind": "terminal",
+              "metadata": {}
+            },
+            {
+              "id": "switch-out",
+              "kind": "terminal",
+              "metadata": {}
+            },
+            {
+              "id": "coil-in",
+              "kind": "terminal",
+              "metadata": {}
+            },
+            {
+              "id": "coil-out",
+              "kind": "terminal",
+              "metadata": {}
+            },
+            {
+              "id": "bulb-in",
+              "kind": "terminal",
+              "metadata": {}
+            },
+            {
+              "id": "bulb-out",
+              "kind": "terminal",
+              "metadata": {}
+            }
+          ],
+          "edges": [
+            {
+              "id": "switch-internal",
+              "from": "switch-in",
+              "to": "switch-out",
+              "resistance": 0.08,
+              "enabled": true,
+              "switchId": "main-switch",
+              "metadata": {}
+            },
+            {
+              "id": "bulb-internal",
+              "from": "bulb-in",
+              "to": "bulb-out",
+              "resistance": 12,
+              "enabled": true,
+              "switchId": null,
+              "metadata": {}
+            }
+          ],
+          "switches": [
+            {
+              "id": "main-switch",
+              "closed": false,
+              "metadata": {}
+            }
+          ],
+          "sources": [
+            {
+              "id": "battery",
+              "positive": "battery-positive",
+              "negative": "battery-negative",
+              "voltage": 6,
+              "internalResistance": 0.45,
+              "enabled": true,
+              "metadata": {}
+            }
+          ],
+          "loads": [
+            {
+              "id": "electromagnet",
+              "a": "coil-in",
+              "b": "coil-out",
+              "resistance": 4.2,
+              "minimumCurrent": 0.05,
+              "enabled": true,
+              "metadata": {},
+              "heatJoules": 0
+            }
+          ]
+        }
+      },
+      "lastInteraction": null
+    }
+  },
+  {
+    "id": "force-coaster",
+    "early": {
+      "ramp-angle": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "cart": {
+        "pose": {
+          "position": {
+            "x": -4.206209182739258,
+            "y": -0.0696556568145752,
+            "z": 1.5499999523162842
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": -5.485662200044317e-7,
+            "w": 1
+          },
+          "velocity": {
+            "x": -0.000002748317911027698,
+            "y": -0.000005061463070887839,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.206209182739258,
+              "y": -0.0696556568145752,
+              "z": 1.5499999523162842
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -5.485662200044317e-7,
+              "w": 1
+            },
+            "velocity": {
+              "x": -0.000002748317911027698,
+              "y": -0.000005061463070887839,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "target:cart-hook",
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "ramp-start": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "release": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "rough-track": {
+        "pose": {
+          "position": {
+            "x": 2.25,
+            "y": -0.05275995284318924,
+            "z": 1.6200000047683716
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 8.593650097088457e-11,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": 2.25,
+              "y": -0.05275995284318924,
+              "z": 1.6200000047683716
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 8.593650097088457e-11,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "runout": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "spring-scale": {
+        "pose": {
+          "position": {
+            "x": -2.7200000286102295,
+            "y": -0.17801180481910706,
+            "z": 2.5
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": -1.7434403920546515e-10,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.7200000286102295,
+              "y": -0.17801180481910706,
+              "z": 2.5
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": -1.7434403920546515e-10,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "cart-hook": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "pull-end": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "ramp-angle": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "cart": {
+        "pose": {
+          "position": {
+            "x": -4.2062087059021,
+            "y": -0.06965714693069458,
+            "z": 1.5499999523162842
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": -1.3112131114212389e-7,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -4.2062087059021,
+              "y": -0.06965714693069458,
+              "z": 1.5499999523162842
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -1.3112131114212389e-7,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "target:cart-hook",
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "ramp-start": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "release": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "rough-track": {
+        "pose": {
+          "position": {
+            "x": 2.25,
+            "y": -0.052761759608983994,
+            "z": 1.6200000047683716
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": 2.25,
+              "y": -0.052761759608983994,
+              "z": 1.6200000047683716
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "runout": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "spring-scale": {
+        "pose": {
+          "position": {
+            "x": -2.7200000286102295,
+            "y": -0.17801645398139954,
+            "z": 2.5
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "debug": {
+          "pose": {
+            "position": {
+              "x": -2.7200000286102295,
+              "y": -0.17801645398139954,
+              "z": 2.5
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": null
+        }
+      },
+      "cart-hook": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "pull-end": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 962.125,
+        "top": 98,
+        "right": 1422,
+        "bottom": 1060.125,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "ramp-angle": {
+          "e": {
+            "x": 334.89286914176984,
+            "y": 440.9311379660109,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "cart": {
+          "e": {
+            "x": 315.4947520457198,
+            "y": 589.5075809896152,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "ramp-start": {
+          "e": null,
+          "t": {
+            "x": 343.56986504940687,
+            "y": 456.6493614385284,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "release": {
+          "e": {
+            "x": 301.5909471559721,
+            "y": 499.23975853310617,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "rough-track": {
+          "e": {
+            "x": 916.7472138238539,
+            "y": 602.3687256822705,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "runout": {
+          "e": null,
+          "t": {
+            "x": 901.0970947400922,
+            "y": 476.8932673751695,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "spring-scale": {
+          "e": {
+            "x": 433.4511600041216,
+            "y": 643.881368506502,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "cart-hook": {
+          "e": null,
+          "t": {
+            "x": 378.2781578952232,
+            "y": 585.1997956404396,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        },
+        "pull-end": {
+          "e": null,
+          "t": {
+            "x": 1071.9976355366969,
+            "y": 461.452523076602,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          }
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 3,
+      "environmentChildren": 21,
+      "background": "#0d6070",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 15,
+        "colliders": 15,
+        "interactiveBodies": 3,
+        "targetSensors": 4,
+        "grabbed": 0,
+        "contactPairs": 4
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": {
+        "experiment": "force-coaster",
+        "angleDeg": 5,
+        "roughInstalled": false,
+        "running": false,
+        "scaleAttached": false,
+        "pulling": false,
+        "pullReleased": false,
+        "springReadingN": 0,
+        "peakSpringReadingN": 0,
+        "springExtension": 0,
+        "pullDistance": 0,
+        "cartSpeed": 0,
+        "comparisonReady": false,
+        "comparison": {
+          "controlledVariables": [
+            "cart",
+            "rampAngle",
+            "startPosition"
+          ],
+          "independentVariable": "surfaceRoughness",
+          "smoothTravelWorldUnits": null,
+          "roughTravelWorldUnits": null,
+          "roughStopsSooner": null
+        }
+      },
+      "lastInteraction": null
+    }
+  },
+  {
+    "id": "earth-moon-sun",
+    "early": {
+      "sun-switch": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "earth-rotation": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "moon-orbit": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "orbit-tilt": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "late": {
+      "sun-switch": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "earth-rotation": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "moon-orbit": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      },
+      "orbit-tilt": {
+        "pose": null,
+        "debug": {
+          "pose": null,
+          "contacts": [],
+          "socket": null
+        }
+      }
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "x": 1420,
+        "y": 98,
+        "width": 2,
+        "height": 917.125,
+        "top": 98,
+        "right": 1422,
+        "bottom": 1015.125,
+        "left": 1420
+      },
+      "collapsed": true,
+      "points": {
+        "sun-switch": {
+          "e": {
+            "x": 302.5786963487846,
+            "y": 640.0350283795837,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "earth-rotation": {
+          "e": {
+            "x": 784.8772018185634,
+            "y": 435.91595746061324,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "moon-orbit": {
+          "e": {
+            "x": 584.0064409781501,
+            "y": 422.94019509618965,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        },
+        "orbit-tilt": {
+          "e": {
+            "x": 1110.2720202957316,
+            "y": 627.2411428817303,
+            "inside": true,
+            "top": "labCanvas",
+            "covered": false
+          },
+          "t": null
+        }
+      }
+    },
+    "debug": {
+      "mode": "lab",
+      "worldChildren": 83,
+      "environmentChildren": 21,
+      "background": "#071522",
+      "physics": {
+        "enabled": true,
+        "rigidBodies": 1,
+        "colliders": 1,
+        "interactiveBodies": 0,
+        "targetSensors": 0,
+        "grabbed": 0,
+        "contactPairs": 0
+      },
+      "assets": {
+        "loaded": 16,
+        "expected": 16,
+        "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+      },
+      "science": {
+        "orbitAngle": 0,
+        "orbitTilt": 5,
+        "eclipse": false,
+        "phaseFraction": 0
+      },
+      "lastInteraction": null
+    }
+  }
+]

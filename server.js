@@ -73,6 +73,9 @@ app.use('/api/games', require('./game-hub-app/routes/hub'));
 // Crystal Bastion tower-defense question economy
 app.use('/api/tower-defense', require('./tower-defense-app/routes/questions'));
 
+// Persistent pet raising, room decoration and teacher-issued currency
+app.use('/api/pet', require('./pet-app/routes/pet'));
+
 // Whiteboard — HTTP + Socket.io. Build httpServer/io now so the whiteboard
 // module can register its /api/whiteboard/* routes BEFORE the catch-all
 // /api 404 handler at the bottom of this file matches them first.
@@ -270,6 +273,73 @@ app.get('/tower-defense', requireSession, (req, res) => {
 app.get('/tower-defense/teacher', requireSession, (req, res) => {
   if (req.session.role !== 'teacher') return res.redirect('/tower-defense');
   res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'teacher.html'));
+});
+
+// Pet Paradise: hashed build assets are public; the application document is
+// protected by the platform session and switches UI according to the role.
+const petDist = path.join(__dirname, 'pet-app', 'dist');
+const setPetHeaders = (res, { document = false } = {}) => {
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.set('Referrer-Policy', 'same-origin');
+  res.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if (document) {
+    res.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; media-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
+  }
+};
+app.use('/pet/assets', (req, res, next) => {
+  const isHashedBuildFile = /-[A-Za-z0-9_-]{8,}\.(?:js|css|webp)$/i.test(req.path);
+  if (!isHashedBuildFile) return res.status(404).end();
+  next();
+}, express.static(path.join(petDist, 'assets'), {
+  maxAge: config.isProd ? '1y' : 0,
+  immutable: config.isProd,
+  setHeaders: (res) => setPetHeaders(res),
+}));
+app.get('/pet/preview', (req, res, next) => {
+  if (config.isProd) return next();
+  if (config.mockAuth && !req.session?.studentId) {
+    req.session.studentId = 'S001';
+    req.session.studentName = '預覽學生';
+    req.session.role = 'student';
+  }
+  setPetHeaders(res, { document: true });
+  res.set('Cache-Control', 'no-store');
+  res.sendFile(path.join(petDist, 'index.html'));
+});
+app.get(['/pet', '/pet/'], requireSession, (_req, res) => {
+  setPetHeaders(res, { document: true });
+  res.set('Cache-Control', 'no-store');
+  res.sendFile(path.join(petDist, 'index.html'));
+});
+
+// Wonder Lab: only versioned build assets are public. The HTML entry remains
+// behind the existing login session so /science-lab/index.html cannot bypass it.
+const scienceLabDist = path.join(__dirname, 'science-lab-app', 'dist');
+const setScienceLabHeaders = (res, { document = false } = {}) => {
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.set('Referrer-Policy', 'same-origin');
+  res.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if (document) {
+    // Rapier compiles its bundled WebAssembly module locally. The narrowly
+    // scoped wasm token permits that without enabling JavaScript eval.
+    res.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; media-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
+  }
+};
+app.use('/science-lab/assets', express.static(path.join(scienceLabDist, 'assets'), {
+  maxAge: config.isProd ? '1y' : 0,
+  immutable: config.isProd,
+  setHeaders: (res) => setScienceLabHeaders(res),
+}));
+app.get('/science-lab/preview', (req, res, next) => {
+  if (config.isProd) return next();
+  setScienceLabHeaders(res, { document: true });
+  res.set('Cache-Control', 'no-store');
+  res.sendFile(path.join(scienceLabDist, 'index.html'));
+});
+app.get(['/science-lab', '/science-lab/'], requireSession, (_req, res) => {
+  setScienceLabHeaders(res, { document: true });
+  res.set('Cache-Control', 'no-store');
+  res.sendFile(path.join(scienceLabDist, 'index.html'));
 });
 
 app.get('/login.html',     (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'login.html')));

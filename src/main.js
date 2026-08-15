@@ -260,6 +260,12 @@ async function openModule(moduleId, mode) {
   } else if (moduleId === 'phonics') {
     window.location.href = '/phonics';
 
+  } else if (moduleId === 'science-lab') {
+    window.location.href = '/science-lab';
+
+  } else if (moduleId === 'pet') {
+    window.location.href = '/pet';
+
   } else if (moduleId === 'game') {
     window.location.href = '/games';
 

@@ -1,0 +1,1092 @@
+[
+  {
+    "vp": {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    "id": "root-viewer",
+    "subject": "magnifier",
+    "early": {
+      "pose": {
+        "position": {
+          "x": -4.320000171661377,
+          "y": 2.2100000381469727,
+          "z": 2.0399999618530273
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": false
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "late": {
+      "pose": {
+        "position": {
+          "x": -4.320000171661377,
+          "y": 2.2100000381469727,
+          "z": 2.0399999618530273
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": true
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "rect": {
+          "x": 1420,
+          "y": 98,
+          "width": 2,
+          "height": 46,
+          "top": 98,
+          "right": 1422,
+          "bottom": 144,
+          "left": 1420
+        },
+        "pointerEvents": "none",
+        "height": "46px",
+        "width": "2px",
+        "collapsed": true
+      },
+      "toggle": {
+        "x": 1166,
+        "y": 99,
+        "width": 255,
+        "height": 58,
+        "top": 99,
+        "right": 1421,
+        "bottom": 157,
+        "left": 1166
+      },
+      "subject": {
+        "x": 201.34294407554984,
+        "y": 479.9125970599113,
+        "inside": true,
+        "top": "labCanvas",
+        "underToggle": false
+      },
+      "points": {
+        "seedling": {
+          "e": {
+            "x": 282.30406461335883,
+            "y": 368.53501755322037,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "root-box": {
+          "e": null,
+          "t": {
+            "x": 753.2931756397405,
+            "y": 377.39528872661833,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "water-cup": {
+          "e": {
+            "x": 361.19786761760537,
+            "y": 472.10858814327065,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "wet-zone": {
+          "e": null,
+          "t": {
+            "x": 593.0815611939987,
+            "y": 321.2815413153686,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "time-dial": {
+          "e": {
+            "x": 1122.817861917773,
+            "y": 555.858031037566,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "magnifier": {
+          "e": {
+            "x": 201.34294407554984,
+            "y": 479.9125970599113,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "root-tip": {
+          "e": null,
+          "t": {
+            "x": 589.7642678035352,
+            "y": 506.704392184837,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        }
+      }
+    },
+    "assets": {
+      "loaded": 16,
+      "expected": 16,
+      "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+    }
+  },
+  {
+    "vp": {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    "id": "eco-house",
+    "subject": "thermometer",
+    "early": {
+      "pose": {
+        "position": {
+          "x": -5.099999904632568,
+          "y": 0.15000000596046448,
+          "z": 1.600000023841858
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": true
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "late": {
+      "pose": {
+        "position": {
+          "x": -5.099999904632568,
+          "y": 0.15000000596046448,
+          "z": 1.600000023841858
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": true
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900,
+        "left": 0
+      },
+      "mission": {
+        "rect": {
+          "x": 1420,
+          "y": 98,
+          "width": 2,
+          "height": 46,
+          "top": 98,
+          "right": 1422,
+          "bottom": 144,
+          "left": 1420
+        },
+        "pointerEvents": "none",
+        "height": "46px",
+        "width": "2px",
+        "collapsed": true
+      },
+      "toggle": {
+        "x": 1166,
+        "y": 99,
+        "width": 255,
+        "height": 58,
+        "top": 99,
+        "right": 1421,
+        "bottom": 157,
+        "left": 1166
+      },
+      "subject": {
+        "x": 135.61148664410047,
+        "y": 558.5916673574822,
+        "inside": true,
+        "top": "labCanvas",
+        "underToggle": false
+      },
+      "points": {
+        "thermometer": {
+          "e": {
+            "x": 135.61148664410047,
+            "y": 558.5916673574822,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "house": {
+          "e": {
+            "x": 783.7832488523088,
+            "y": 405.2250589418872,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": {
+            "x": 751.262825929104,
+            "y": 534.2894707693242,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "metal-panel": {
+          "e": {
+            "x": 429.7952840599419,
+            "y": 437.6866253643968,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "wall": {
+          "e": null,
+          "t": {
+            "x": 829.8707593702171,
+            "y": 387.7840176041832,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "house-timer": {
+          "e": {
+            "x": 1140.535979058482,
+            "y": 593.8786187719285,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "foam-panel": {
+          "e": {
+            "x": 564.5856786081221,
+            "y": 568.2657107171005,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "house-run": {
+          "e": {
+            "x": 1071.5127178957332,
+            "y": 480.56545961286184,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        }
+      }
+    },
+    "assets": {
+      "loaded": 16,
+      "expected": 16,
+      "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+    }
+  },
+  {
+    "vp": {
+      "name": "portrait",
+      "width": 390,
+      "height": 844
+    },
+    "id": "root-viewer",
+    "subject": "magnifier",
+    "early": {
+      "pose": {
+        "position": {
+          "x": -4.320000171661377,
+          "y": 2.2100000381469727,
+          "z": 2.0399999618530273
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": false
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "late": {
+      "pose": {
+        "position": {
+          "x": -4.320000171661377,
+          "y": 2.2100000381469727,
+          "z": 2.0399999618530273
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": true
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "top": 0,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "mission": {
+        "rect": {
+          "x": 376,
+          "y": 184,
+          "width": 2,
+          "height": 2,
+          "top": 184,
+          "right": 378,
+          "bottom": 186,
+          "left": 376
+        },
+        "pointerEvents": "none",
+        "height": "2px",
+        "width": "2px",
+        "collapsed": true
+      },
+      "toggle": {
+        "x": 143,
+        "y": 185,
+        "width": 234,
+        "height": 56,
+        "top": 185,
+        "right": 377,
+        "bottom": 241,
+        "left": 143
+      },
+      "subject": {
+        "x": 14.006357739084033,
+        "y": 432.4384772741726,
+        "inside": true,
+        "top": "labCanvas",
+        "underToggle": false
+      },
+      "points": {
+        "seedling": {
+          "e": {
+            "x": 24.229247399273476,
+            "y": 390.2157515336478,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "root-box": {
+          "e": null,
+          "t": {
+            "x": 207.64082092019183,
+            "y": 394.43329494608105,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "water-cup": {
+          "e": {
+            "x": 64.03863967219377,
+            "y": 430.0695472987999,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "wet-zone": {
+          "e": null,
+          "t": {
+            "x": 147.60642395826545,
+            "y": 373.9342648945626,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "time-dial": {
+          "e": {
+            "x": 349.57554161172044,
+            "y": 462.6214918168706,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "magnifier": {
+          "e": {
+            "x": 14.006357739084033,
+            "y": 432.4384772741726,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "root-tip": {
+          "e": null,
+          "t": {
+            "x": 145.5303129222056,
+            "y": 443.5390084580534,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        }
+      }
+    },
+    "assets": {
+      "loaded": 16,
+      "expected": 16,
+      "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+    }
+  },
+  {
+    "vp": {
+      "name": "portrait",
+      "width": 390,
+      "height": 844
+    },
+    "id": "eco-house",
+    "subject": "thermometer",
+    "early": {
+      "pose": {
+        "position": {
+          "x": -5.099999904632568,
+          "y": 0.15000000596046448,
+          "z": 1.600000023841858
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": false
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "late": {
+      "pose": {
+        "position": {
+          "x": -5.099999904632568,
+          "y": 0.15000000596046448,
+          "z": 1.600000023841858
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": true
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "top": 0,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "mission": {
+        "rect": {
+          "x": 376,
+          "y": 184,
+          "width": 2,
+          "height": 2,
+          "top": 184,
+          "right": 378,
+          "bottom": 186,
+          "left": 376
+        },
+        "pointerEvents": "none",
+        "height": "2px",
+        "width": "2px",
+        "collapsed": true
+      },
+      "toggle": {
+        "x": 143,
+        "y": 185,
+        "width": 234,
+        "height": 56,
+        "top": 185,
+        "right": 377,
+        "bottom": 241,
+        "left": 143
+      },
+      "subject": {
+        "x": -17.325232783080004,
+        "y": 461.4544905025167,
+        "inside": false,
+        "underToggle": false
+      },
+      "points": {
+        "thermometer": {
+          "e": {
+            "x": -17.325232783080004,
+            "y": 461.4544905025167,
+            "inside": false,
+            "underToggle": false
+          },
+          "t": null
+        },
+        "house": {
+          "e": {
+            "x": 219.85935728018717,
+            "y": 404.5490818202082,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": {
+            "x": 207.33975248392667,
+            "y": 455.2699036438144,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "metal-panel": {
+          "e": {
+            "x": 77.0682771825015,
+            "y": 416.9961616586069,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "wall": {
+          "e": null,
+          "t": {
+            "x": 240.14521418796892,
+            "y": 396.4358383679706,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "house-timer": {
+          "e": {
+            "x": 355.46004905024324,
+            "y": 476.8984424046494,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "foam-panel": {
+          "e": {
+            "x": 138.30181025683694,
+            "y": 465.1456486525485,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "house-run": {
+          "e": {
+            "x": 341.58797094532326,
+            "y": 434.7464199090222,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        }
+      }
+    },
+    "assets": {
+      "loaded": 16,
+      "expected": 16,
+      "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+    }
+  },
+  {
+    "vp": {
+      "name": "landscape",
+      "width": 667,
+      "height": 375
+    },
+    "id": "root-viewer",
+    "subject": "magnifier",
+    "early": {
+      "pose": {
+        "position": {
+          "x": -4.320000171661377,
+          "y": 2.2100000381469727,
+          "z": 2.0399999618530273
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": false
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "late": {
+      "pose": {
+        "position": {
+          "x": -4.320000171661377,
+          "y": 2.2100000381469727,
+          "z": 2.0399999618530273
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": true
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 667,
+        "height": 375,
+        "top": 0,
+        "right": 667,
+        "bottom": 375,
+        "left": 0
+      },
+      "mission": {
+        "rect": {
+          "x": 665,
+          "y": 62,
+          "width": 2,
+          "height": 113.09375,
+          "top": 62,
+          "right": 667,
+          "bottom": 175.09375,
+          "left": 665
+        },
+        "pointerEvents": "none",
+        "height": "113.094px",
+        "width": "2px",
+        "collapsed": true
+      },
+      "toggle": {
+        "x": 433,
+        "y": 67,
+        "width": 225,
+        "height": 50,
+        "top": 67,
+        "right": 658,
+        "bottom": 117,
+        "left": 433
+      },
+      "subject": {
+        "x": 117.39289336481247,
+        "y": 199.96358210829638,
+        "inside": true,
+        "top": "labCanvas",
+        "underToggle": false
+      },
+      "points": {
+        "seedling": {
+          "e": {
+            "x": 151.1266935888995,
+            "y": 153.55625731384183,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "root-box": {
+          "e": null,
+          "t": {
+            "x": 347.3721565165585,
+            "y": 157.2480369694243,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "water-cup": {
+          "e": {
+            "x": 183.99911150733558,
+            "y": 196.71191172636276,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "wet-zone": {
+          "e": null,
+          "t": {
+            "x": 280.6173171641661,
+            "y": 133.86730888140357,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "time-dial": {
+          "e": {
+            "x": 501.3407757990721,
+            "y": 231.60751293231917,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "magnifier": {
+          "e": {
+            "x": 117.39289336481247,
+            "y": 199.96358210829638,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "root-tip": {
+          "e": null,
+          "t": {
+            "x": 279.2351115848063,
+            "y": 211.1268300770154,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        }
+      }
+    },
+    "assets": {
+      "loaded": 16,
+      "expected": 16,
+      "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+    }
+  },
+  {
+    "vp": {
+      "name": "landscape",
+      "width": 667,
+      "height": 375
+    },
+    "id": "eco-house",
+    "subject": "thermometer",
+    "early": {
+      "pose": {
+        "position": {
+          "x": -5.099999904632568,
+          "y": 0.15000000596046448,
+          "z": 1.600000023841858
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": false
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "late": {
+      "pose": {
+        "position": {
+          "x": -5.099999904632568,
+          "y": 0.15000000596046448,
+          "z": 1.600000023841858
+        },
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "w": 1
+        },
+        "velocity": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "dynamic": false,
+        "sleeping": true
+      },
+      "contacts": [],
+      "socket": null
+    },
+    "ui": {
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 667,
+        "height": 375,
+        "top": 0,
+        "right": 667,
+        "bottom": 375,
+        "left": 0
+      },
+      "mission": {
+        "rect": {
+          "x": 665,
+          "y": 62,
+          "width": 2,
+          "height": 113.09375,
+          "top": 62,
+          "right": 667,
+          "bottom": 175.09375,
+          "left": 665
+        },
+        "pointerEvents": "none",
+        "height": "113.094px",
+        "width": "2px",
+        "collapsed": true
+      },
+      "toggle": {
+        "x": 433,
+        "y": 67,
+        "width": 225,
+        "height": 50,
+        "top": 67,
+        "right": 658,
+        "bottom": 117,
+        "left": 433
+      },
+      "subject": {
+        "x": 90.00478610170852,
+        "y": 232.74652806561755,
+        "inside": true,
+        "top": "labCanvas",
+        "underToggle": false
+      },
+      "points": {
+        "thermometer": {
+          "e": {
+            "x": 90.00478610170852,
+            "y": 232.74652806561755,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "house": {
+          "e": {
+            "x": 360.076353688462,
+            "y": 168.84377455911968,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": {
+            "x": 346.52617747046,
+            "y": 222.62061282055177,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "metal-panel": {
+          "e": {
+            "x": 212.58136835830913,
+            "y": 182.36942723516532,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "wall": {
+          "e": null,
+          "t": {
+            "x": 379.2794830709238,
+            "y": 161.576674001743,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          }
+        },
+        "house-timer": {
+          "e": {
+            "x": 508.7233246077008,
+            "y": 247.44942448830352,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "foam-panel": {
+          "e": {
+            "x": 268.7440327533842,
+            "y": 236.77737946545858,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        },
+        "house-run": {
+          "e": {
+            "x": 479.9636324565555,
+            "y": 200.2356081720258,
+            "inside": true,
+            "top": "labCanvas",
+            "underToggle": false
+          },
+          "t": null
+        }
+      }
+    },
+    "assets": {
+      "loaded": 16,
+      "expected": 16,
+      "url": "http://127.0.0.1:3000/science-lab/assets/science-lab-kit-D7t3rD8B.glb"
+    }
+  }
+]

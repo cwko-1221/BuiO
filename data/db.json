@@ -552,5 +552,213 @@
       "updatedBy": "T900",
       "updatedAt": "2026-08-09T10:10:49.644Z"
     }
+  ],
+  "homeworkMonitors": [],
+  "homeworkRecords": [],
+  "_homeworkMonitorId": 0,
+  "_homeworkRecordId": 0,
+  "petProfiles": [
+    {
+      "studentId": "S001",
+      "activePetId": "8947b57f-8805-4a00-b898-563447615a57",
+      "starterEggClaimed": true,
+      "eggPity": 1,
+      "stardust": 0,
+      "createdAt": "2026-08-13T13:03:28.012Z",
+      "updatedAt": "2026-08-13T13:03:36.358Z"
+    }
+  ],
+  "petWallets": [
+    {
+      "studentId": "S001",
+      "balance": 0,
+      "updatedAt": "2026-08-13T13:03:28.012Z"
+    }
+  ],
+  "petCurrencyLedger": [],
+  "petInstances": [
+    {
+      "petId": "8947b57f-8805-4a00-b898-563447615a57",
+      "studentId": "S001",
+      "speciesId": "pudding-pig",
+      "xp": 0,
+      "stage": 1,
+      "dailyXp": 0,
+      "dailyXpDate": "",
+      "equippedSkills": [],
+      "equippedWearables": [],
+      "createdAt": "2026-08-13T13:03:36.358Z",
+      "updatedAt": "2026-08-13T13:03:36.358Z"
+    }
+  ],
+  "petSkills": [],
+  "petInventory": [
+    {
+      "studentId": "S001",
+      "itemId": "room:sunny-oak",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "map:clover-meadow",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "sunny-oak-furniture-1",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "sunny-oak-furniture-2",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "sunny-oak-furniture-3",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "sunny-oak-furniture-4",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "sunny-oak-furniture-5",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "sunny-oak-furniture-6",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "sunny-oak-furniture-7",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "sunny-oak-furniture-8",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "sunny-oak-furniture-9",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "sunny-oak-furniture-10",
+      "quantity": 1
+    }
+  ],
+  "petRoomLayouts": [
+    {
+      "studentId": "S001",
+      "themeId": "sunny-oak",
+      "visibility": "private",
+      "placements": [
+        {
+          "id": "23a59b32-c688-42a4-9a28-1358420baccc",
+          "itemId": "sunny-oak-furniture-1",
+          "x": 2,
+          "y": 6,
+          "rotation": 0,
+          "layer": "furniture"
+        },
+        {
+          "id": "9ea29696-2f99-4d2f-a83e-baa4d4a7d904",
+          "itemId": "sunny-oak-furniture-2",
+          "x": 4,
+          "y": 7,
+          "rotation": 0,
+          "layer": "rug"
+        },
+        {
+          "id": "3735b20e-b824-492f-8a2d-23c5c03ae550",
+          "itemId": "sunny-oak-furniture-3",
+          "x": 7,
+          "y": 6,
+          "rotation": 0,
+          "layer": "furniture"
+        },
+        {
+          "id": "f01eb275-f85b-473c-a66c-b19628934d0c",
+          "itemId": "sunny-oak-furniture-5",
+          "x": 9,
+          "y": 3,
+          "rotation": 0,
+          "layer": "furniture"
+        },
+        {
+          "id": "93aa5953-b400-443e-8b2a-3acb92e5ceee",
+          "itemId": "sunny-oak-furniture-7",
+          "x": 6,
+          "y": 1,
+          "rotation": 0,
+          "layer": "wall"
+        },
+        {
+          "id": "9f938f59-c54e-487b-af6d-14b997930a03",
+          "itemId": "sunny-oak-furniture-9",
+          "x": 8,
+          "y": 7,
+          "rotation": 0,
+          "layer": "furniture"
+        }
+      ],
+      "updatedAt": "2026-08-13T13:03:28.012Z"
+    }
+  ],
+  "petMapProgress": [],
+  "petRoomReactions": [],
+  "petRunTickets": [
+    {
+      "runId": "6ccd32df-f32c-44ab-b3c7-b5785ed4f63f",
+      "studentId": "S001",
+      "mapId": "clover-meadow",
+      "seed": 1015202828,
+      "startedAt": "2026-08-13T13:04:50.181Z",
+      "completedAt": null,
+      "success": null
+    },
+    {
+      "runId": "b9cf1308-8b04-43e2-a538-dab47434330b",
+      "studentId": "S001",
+      "mapId": "clover-meadow",
+      "seed": 1262943083,
+      "startedAt": "2026-08-13T13:16:18.862Z",
+      "completedAt": "2026-08-13T13:16:57.395Z",
+      "success": false
+    }
+  ],
+  "petIdempotency": [
+    {
+      "actorId": "S001",
+      "key": "f2b328b6-0326-4528-93a6-894e359a7048",
+      "kind": "starter_egg",
+      "response": {
+        "speciesId": "pudding-pig",
+        "rarity": "common",
+        "pet": {
+          "id": "8947b57f-8805-4a00-b898-563447615a57",
+          "speciesId": "pudding-pig",
+          "xp": 0,
+          "stage": 1,
+          "dailyXp": 0,
+          "dailyXpDate": "",
+          "equippedSkills": [],
+          "equippedWearables": [],
+          "ownedSkills": []
+        },
+        "duplicateDust": 0,
+        "balance": 0,
+        "stardust": 0,
+        "eggPity": 1
+      },
+      "createdAt": "2026-08-13T13:03:36.358Z"
+    }
   ]
 }

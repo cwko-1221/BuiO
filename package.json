@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-checkpoint-themes.mjs && node scripts/test-game-physics.mjs && node scripts/test-game-recovery.mjs && node scripts/test-game-crumble.mjs && node scripts/test-game-launcher.mjs && node scripts/test-game-lasers.mjs && node scripts/test-game-network.mjs && node scripts/test-tower-defense.mjs && node scripts/test-phonics-module.mjs",
+    "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-checkpoint-themes.mjs && node scripts/test-game-physics.mjs && node scripts/test-game-recovery.mjs && node scripts/test-game-crumble.mjs && node scripts/test-game-launcher.mjs && node scripts/test-game-lasers.mjs && node scripts/test-game-network.mjs && node scripts/test-tower-defense.mjs && node scripts/test-phonics-module.mjs && node scripts/test-science-lab.mjs && node scripts/test-pet-module.mjs",
     "check:game": "node scripts/validate-game-v2.mjs",
     "check:checkpoint-themes": "node scripts/test-checkpoint-themes.mjs",
     "check:network-live": "node scripts/test-game-network-live.mjs",
@@ -23,11 +23,19 @@
     "check:chinese-recording": "node scripts/test-chinese-recording-gesture.mjs",
     "check:chinese-pronunciation": "node scripts/test-chinese-pronunciation.mjs",
     "check:report": "node scripts/test-report-import.mjs",
+    "build:science-lab": "npm --prefix science-lab-app run build",
+    "check:science-lab": "node scripts/test-science-lab.mjs",
+    "check:science-lab-live": "node scripts/test-science-lab-live.mjs",
+    "check:science-lab-physics": "node scripts/test-science-lab-physics-live.mjs",
+    "build:pet": "npm --prefix pet-app run build",
+    "generate:pet-assets": "node scripts/generate-pet-assets.mjs",
+    "check:pet": "node scripts/test-pet-module.mjs",
+    "check:pet-live": "node scripts/test-pet-live.mjs",
     "dev:homework-fixture": "node scripts/start-homework-fixture.mjs",
     "check:tower-defense-live": "node scripts/test-tower-defense-live.mjs",
     "check:game-hub-live": "node scripts/test-game-hub-live.mjs",
     "build:game-assets": "node scripts/generate-reference-extensions.mjs && node scripts/generate-fixed-bricks.mjs && node scripts/build-game-assets.mjs && node scripts/analyze-game-geometry.mjs && node scripts/pack-game-atlases.mjs",
-    "postinstall": "cd whiteboard-app/client && npm install && npm run build"
+    "postinstall": "npm --prefix whiteboard-app/client install && npm --prefix whiteboard-app/client run build && npm --prefix science-lab-app install && npm --prefix science-lab-app run build && npm --prefix pet-app install && npm --prefix pet-app run build"
   },
   "dependencies": {
     "@google-cloud/text-to-speech": "^6.4.1",

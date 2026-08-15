@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#082f3d" />
+    <meta name="description" content="奇趣科學島 - 小學生3D互動模擬實驗室" />
+    <title>奇趣科學島｜3D 模擬實驗室</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%235de0b4'/%3E%3Cpath d='M25 12h14M28 12v17L17 49c-2 4 1 7 5 7h20c4 0 7-3 5-7L36 29V12M23 43h18' fill='none' stroke='%23082f3d' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/css/science-lab.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#mainContent">跳到主要內容</a>
+    <canvas id="labCanvas" aria-label="互動式 3D 科學實驗場景"></canvas>
+
+    <div id="bootScreen" class="boot-screen" role="status" aria-live="polite">
+      <div class="boot-orbit" aria-hidden="true">
+        <span class="boot-planet"></span>
+        <span class="boot-moon"></span>
+      </div>
+      <p class="eyebrow">WONDER LAB</p>
+      <h1>奇趣科學島</h1>
+      <p id="bootMessage">正在準備 3D 實驗室…</p>
+      <div class="boot-meter"><span id="bootMeterFill"></span></div>
+    </div>
+
+    <header id="topbar" class="topbar" hidden>
+      <button id="homeButton" class="brand-button" type="button" aria-label="返回實驗目錄">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M17 6h14v4l-3 7v5l10 16a3 3 0 0 1-3 4H13a3 3 0 0 1-3-4l10-16v-5l-3-7z"/><path d="M15 34c6-5 11 5 18-2"/></svg>
+        </span>
+        <span><b>奇趣科學島</b><small>WONDER LAB</small></span>
+      </button>
+      <div class="topbar-actions">
+        <div id="progressChip" class="progress-chip" aria-label="完成進度">
+          <span class="progress-ring"><i id="progressRing"></i></span>
+          <span><b id="progressCount">0 / 5</b><small>已完成</small></span>
+        </div>
+        <button id="notebookButton" class="icon-button" type="button" aria-label="打開科學筆記" title="科學筆記">
+          <svg viewBox="0 0 24 24"><path d="M5 3h12a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2z"/><path d="M8 3v16M11 8h5M11 12h5"/></svg>
+        </button>
+        <button id="soundButton" class="icon-button" type="button" aria-label="關閉聲音" aria-pressed="true" title="聲音">
+          <svg class="sound-on" viewBox="0 0 24 24"><path d="M5 9v6h4l5 4V5L9 9z"/><path d="M17 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>
+          <svg class="sound-off" viewBox="0 0 24 24"><path d="M5 9v6h4l5 4V5L9 9zM18 9l4 4M22 9l-4 4"/></svg>
+        </button>
+        <button id="settingsButton" class="icon-button" type="button" aria-label="設定" title="設定">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.6-1H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4H21a1.7 1.7 0 0 0-1.6 1z"/></svg>
+        </button>
+        <a class="portal-link" href="/" aria-label="返回學習平台">離開實驗室</a>
+      </div>
+    </header>
+
+    <main id="mainContent" hidden>
+      <section id="catalogScreen" class="catalog-screen" aria-labelledby="catalogTitle">
+        <div class="catalog-hero">
+          <p class="eyebrow"><span>●</span> PRIMARY SCIENCE · 3D INQUIRY</p>
+          <h1 id="catalogTitle">動手探索，<br /><em>讓發現發生。</em></h1>
+          <p>走進 5 個安全的模擬實驗，親手拖動、連接、加入、攪拌和調節器材，從現象找出科學規律。</p>
+          <div class="hero-actions">
+            <button id="continueButton" class="primary-button" type="button">
+              <span>開始第一個實驗</span><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <button id="tourButton" class="text-button" type="button">30 秒使用導覽</button>
+          </div>
+          <div class="hero-proof" aria-label="模組特色">
+            <span><b>5</b> 個完整探究</span><i></i><span><b>5</b> 大科學範疇</span><i></i><span><b>100%</b> 安全模擬</span>
+          </div>
+        </div>
+
+        <div class="catalog-panel">
+          <div class="catalog-toolbar">
+            <div>
+              <p class="section-kicker">EXPERIMENT MAP</p>
+              <h2>選擇探究站</h2>
+            </div>
+            <div class="filter-row" role="group" aria-label="篩選實驗">
+              <button class="filter-chip active" data-filter="all" type="button" aria-pressed="true">全部</button>
+              <button class="filter-chip" data-filter="物質" type="button" aria-pressed="false">物質</button>
+              <button class="filter-chip" data-filter="環境" type="button" aria-pressed="false">環境</button>
+              <button class="filter-chip" data-filter="能量" type="button" aria-pressed="false">能量</button>
+              <button class="filter-chip" data-filter="生命與健康" type="button" aria-pressed="false">生命</button>
+              <button class="filter-chip" data-filter="力與運動" type="button" aria-pressed="false">力與運動</button>
+            </div>
+          </div>
+          <div id="experimentGrid" class="experiment-grid"></div>
+        </div>
+      </section>
+
+      <section id="labScreen" class="lab-screen" hidden aria-labelledby="labTitle">
+        <div class="lab-heading">
+          <button id="backToCatalogButton" class="back-button" type="button">
+            <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>實驗地圖
+          </button>
+          <div class="lab-title-block">
+            <span id="labNumber" class="lab-number">01</span>
+            <div><p id="labMeta">物質 · 小三至小六</p><h1 id="labTitle">密度彩虹塔</h1></div>
+          </div>
+        </div>
+
+        <aside id="missionPanel" class="mission-panel collapsed" aria-live="polite">
+          <button id="missionPanelToggle" class="mission-panel-toggle" type="button" aria-expanded="false" aria-controls="missionPanelBody" aria-label="展開任務卡">
+            <span class="mission-toggle-arrow" aria-hidden="true">‹</span>
+            <span class="mission-toggle-copy" aria-hidden="true">
+              <small id="missionPeekStep">步驟 1 / 5</small>
+              <b id="missionPeekTitle">查看今步任務</b>
+            </span>
+          </button>
+          <div id="missionPanelBody" class="mission-panel-body">
+          <div class="mission-progress">
+            <span id="stepLabel">步驟 1 / 5</span>
+            <div><i id="stepProgress"></i></div>
+          </div>
+          <p id="missionVerb" class="mission-verb">加入</p>
+          <h2 id="missionTitle">先加入密度最大的蜂蜜</h2>
+          <p id="missionInstruction">把蜂蜜瓶拖到量筒上，放開便會倒入。</p>
+          <div id="missionCue" class="mission-cue">
+            <span class="cue-hand" aria-hidden="true">☝</span><span>拖動有光圈的器材</span>
+          </div>
+          <div class="mission-actions">
+            <button id="hintButton" class="hint-button" type="button">
+              <svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M8.5 14.5A6 6 0 1 1 15.5 14c-.8.7-1.5 1.6-1.5 2.5h-4c0-.8-.7-1.5-1.5-2z"/></svg>提示
+            </button>
+            <button id="accessibleActionButton" class="accessible-action-button" type="button">按鈕操作</button>
+            <button id="resetButton" class="reset-button" type="button">重新開始</button>
+          </div>
+          <div id="hintBox" class="hint-box" hidden></div>
+          </div>
+        </aside>
+
+        <div id="variableControl" class="variable-control" hidden>
+          <label id="variableLabel" for="variableSlider">角度</label>
+          <output id="variableValue">0°</output>
+          <input id="variableSlider" type="range" min="0" max="100" value="0" />
+        </div>
+
+        <div id="observationStrip" class="observation-strip" hidden aria-live="polite">
+          <span class="observation-icon" aria-hidden="true">◎</span>
+          <div><b>觀察到甚麼？</b><p id="observationText"></p></div>
+        </div>
+
+        <div id="interactionLabel" class="interaction-label" hidden></div>
+        <div class="view-controls" aria-label="3D 視角控制">
+          <button id="cameraLeftButton" type="button" aria-label="視角向左轉">↶</button>
+          <button id="cameraResetButton" type="button" aria-label="重設視角">⌂</button>
+          <button id="cameraRightButton" type="button" aria-label="視角向右轉">↷</button>
+        </div>
+
+        <section id="phenomenonStage" class="phenomenon-stage" role="status" aria-live="assertive" hidden>
+          <div class="phenomenon-focus" aria-hidden="true"></div>
+          <div class="phenomenon-caption">
+            <span class="phenomenon-mark" aria-hidden="true">◎</span>
+            <div class="phenomenon-copy">
+              <p class="section-kicker">先看現象 · OBSERVE</p>
+              <h2 id="phenomenonTitle">留心觀看實驗結果</h2>
+              <p id="phenomenonText"></p>
+              <div id="phenomenonComparison" class="phenomenon-comparison" hidden></div>
+            </div>
+            <div class="phenomenon-actions">
+              <span id="phenomenonCountdown">5 秒後顯示解釋</span>
+              <button id="phenomenonExplainButton" type="button">立即看解釋</button>
+            </div>
+            <i id="phenomenonTimerBar" class="phenomenon-timer" aria-hidden="true"></i>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="predictionDialog" class="glass-dialog prediction-dialog" aria-labelledby="predictionTitle">
+      <div class="dialog-icon">?</div>
+      <p class="section-kicker">先想一想 · PREDICT</p>
+      <h2 id="predictionTitle">你預計會發生甚麼？</h2>
+      <p id="predictionPrompt"></p>
+      <div id="predictionOptions" class="prediction-options" role="radiogroup" aria-label="選擇你的預測"></div>
+      <button id="predictionSubmit" class="primary-button" type="button" disabled>帶着預測開始實驗</button>
+    </dialog>
+
+    <dialog id="resultDialog" class="glass-dialog result-dialog" aria-labelledby="resultTitle">
+      <div class="result-burst" aria-hidden="true"><span>★</span></div>
+      <p class="section-kicker">探究完成 · DISCOVERY MADE</p>
+      <h2 id="resultTitle">發現密度的秘密！</h2>
+      <div class="result-score"><span id="resultStars">★★★</span><small id="resultScoreText">獨立完成</small></div>
+      <div class="result-grid">
+        <section><span class="result-label">你的預測</span><p id="resultPrediction"></p></section>
+        <section><span class="result-label">實驗觀察</span><p id="resultObservation"></p></section>
+        <section id="resultComparison" class="result-comparison" hidden>
+          <span class="result-label">對照比較</span>
+          <div class="comparison-values">
+            <div><small id="comparisonLeftLabel"></small><b id="comparisonLeftValue"></b></div>
+            <span aria-hidden="true">↔</span>
+            <div><small id="comparisonRightLabel"></small><b id="comparisonRightValue"></b></div>
+          </div>
+          <p id="comparisonConclusion"></p>
+        </section>
+        <section class="result-explain"><span class="result-label">科學解釋</span><p id="resultExplanation"></p></section>
+      </div>
+      <div class="curriculum-link"><b id="resultCodes"></b><span>本模組原創實驗，參考建議教具表的相關編碼；並非完整課程或評核清單。</span></div>
+      <div class="result-actions">
+        <button id="replayButton" class="secondary-button" type="button">再做一次</button>
+        <button id="nextExperimentButton" class="primary-button" type="button">前往下一站</button>
+      </div>
+    </dialog>
+
+    <dialog id="notebookDialog" class="drawer-dialog" aria-labelledby="notebookTitle">
+      <div class="drawer-head">
+        <div><p class="section-kicker">MY SCIENCE LOG</p><h2 id="notebookTitle">我的科學筆記</h2></div>
+        <button class="dialog-close" data-close-dialog type="button" aria-label="關閉">×</button>
+      </div>
+      <div id="notebookSummary" class="notebook-summary"></div>
+      <div id="notebookEntries" class="notebook-entries"></div>
+    </dialog>
+
+    <dialog id="settingsDialog" class="glass-dialog settings-dialog" aria-labelledby="settingsTitle">
+      <button class="dialog-close" data-close-dialog type="button" aria-label="關閉">×</button>
+      <p class="section-kicker">LAB SETTINGS</p>
+      <h2 id="settingsTitle">實驗室設定</h2>
+      <label class="toggle-row"><span><b>音效</b><small>操作、成功和環境聲音</small></span><input id="soundToggle" type="checkbox" checked /><i></i></label>
+      <label class="toggle-row"><span><b>減少動態</b><small>減少非必要鏡頭和粒子動畫</small></span><input id="motionToggle" type="checkbox" /><i></i></label>
+      <label class="toggle-row"><span><b>高對比提示</b><small>加強可操作器材的輪廓</small></span><input id="contrastToggle" type="checkbox" /><i></i></label>
+      <div class="quality-row"><label for="qualitySelect"><b>3D 畫質</b><small>低階平板建議選「流暢」</small></label><select id="qualitySelect"><option value="auto">自動</option><option value="high">精緻</option><option value="low">流暢</option></select></div>
+    </dialog>
+
+    <dialog id="tourDialog" class="glass-dialog tour-dialog" aria-labelledby="tourTitle">
+      <button class="dialog-close" data-close-dialog type="button" aria-label="關閉">×</button>
+      <div class="tour-visual" aria-hidden="true"><span class="tour-object"></span><span class="tour-target"></span><span class="tour-line"></span></div>
+      <p class="section-kicker">HOW TO PLAY</p>
+      <h2 id="tourTitle">像真的實驗一樣操作</h2>
+      <div class="tour-steps">
+        <div><b>1</b><span><strong>看清任務</strong>每次只需要完成一個動作。</span></div>
+        <div><b>2</b><span><strong>直接動手</strong>拖動、連接、轉動或點按發光器材。</span></div>
+        <div><b>3</b><span><strong>留心觀察</strong>現象會在 3D 場景中即時出現。</span></div>
+      </div>
+      <p class="keyboard-note">鍵盤：Tab 選取器材，Enter 操作；左右方向鍵可調節。</p>
+      <button class="primary-button" data-close-dialog type="button">我準備好了</button>
+    </dialog>
+
+    <div id="toastRegion" class="toast-region" aria-live="assertive"></div>
+    <div id="screenFlash" class="screen-flash" aria-hidden="true"></div>
+    <script type="module" src="/js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,4880 @@
+{
+  "generatedAt": "2026-08-13T11:56:00.544Z",
+  "base": "http://127.0.0.1:3000",
+  "viewport": {
+    "width": 1280,
+    "height": 720,
+    "deviceScaleFactor": 1
+  },
+  "timing": {
+    "duringMsAfterRelease": 720,
+    "afterMsAfterRelease": 2300
+  },
+  "records": [
+    {
+      "experiment": "transmission",
+      "experimentTitle": "看不見的傳播路線",
+      "step": 1,
+      "stepTitle": "塗上安全示蹤乳液",
+      "subject": "tracer",
+      "target": "hands",
+      "nextSubject": "soap",
+      "realPointerGesture": true,
+      "accepted": true,
+      "stepAdvanced": true,
+      "before": {
+        "timestamp": 2102.0999999940395,
+        "state": {
+          "version": 1,
+          "experimentId": "transmission",
+          "currentStep": 0,
+          "completedSteps": [],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [],
+          "actionHistory": [],
+          "startedAt": 1786622077420,
+          "updatedAt": 1786622078246,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 316.8954797186985,
+          "y": 338.5213741289428
+        },
+        "screenBounds": {
+          "left": 257.63844072582685,
+          "right": 369.29229883190715,
+          "top": 261.78590936602217,
+          "bottom": 415.0257412920031,
+          "width": 111.65385810608029,
+          "height": 153.23983192598092
+        },
+        "homePose": {
+          "position": {
+            "x": -4.22,
+            "y": 0.07,
+            "z": -0.95
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -4.21999979019165,
+            "y": -0.04321873188018799,
+            "z": -0.949999988079071
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -4.21999979019165,
+              "y": -0.04321873188018799,
+              "z": -0.949999988079071
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": {
+            "contact": false,
+            "distance": 4.8967749788279225,
+            "angleErrorDeg": 0,
+            "targetRadius": 1.02
+          }
+        },
+        "targetPoint": {
+          "x": 663.0670352133038,
+          "y": 404.4259966067682
+        },
+        "nextSubject": {
+          "id": "soap",
+          "point": {
+            "x": 412.3850484546806,
+            "y": 336.7257841402684
+          },
+          "bounds": {
+            "left": 359.57543952207163,
+            "right": 459.10088822042354,
+            "top": 260.25478764624114,
+            "bottom": 412.9672789465572,
+            "width": 99.52544869835191,
+            "height": 152.71249130031606
+          }
+        },
+        "science": {
+          "experiment": "transmission",
+          "rubCoverage": 0,
+          "rinseActive": false,
+          "visibleTracerSpots": 0,
+          "uvInspectionActive": false
+        },
+        "lastInteraction": null
+      },
+      "during": {
+        "timestamp": 6415.899999991059,
+        "state": {
+          "version": 1,
+          "experimentId": "transmission",
+          "currentStep": 1,
+          "completedSteps": [
+            "transmission-1"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "普通光下看似乾淨，但 UV 檢查會顯示許多發光點。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622081842,
+              "stepId": "transmission-1",
+              "action": {
+                "type": "pour",
+                "subject": "tracer",
+                "target": "hands",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.9466113581235756,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 1.02,
+                  "tiltDeg": 63.99999999999855
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622077420,
+          "updatedAt": 1786622081842,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 623.7637951794345,
+          "y": 384.82895116068363
+        },
+        "screenBounds": {
+          "left": 582.7078274034762,
+          "right": 665.6264771322952,
+          "top": 304.7082447219871,
+          "bottom": 464.69818574726156,
+          "width": 82.91864972881899,
+          "height": 159.98994102527445
+        },
+        "homePose": {
+          "position": {
+            "x": -4.22,
+            "y": 0.07,
+            "z": -0.95
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -0.03999999910593033,
+            "y": -0.3100000023841858,
+            "z": 0.05000000074505806
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": false
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -0.03999999910593033,
+              "y": -0.3100000023841858,
+              "z": 0.05000000074505806
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": false
+          },
+          "contacts": [
+            "hands"
+          ],
+          "socket": {
+            "contact": true,
+            "distance": 0.9309135310883198,
+            "angleErrorDeg": 0,
+            "targetRadius": 1.02
+          }
+        },
+        "targetPoint": {
+          "x": 663.0670352133038,
+          "y": 404.4259966067682
+        },
+        "nextSubject": {
+          "id": "soap",
+          "point": {
+            "x": 465.4587366769456,
+            "y": 370.34870517680463
+          },
+          "bounds": {
+            "left": 412.6602522576374,
+            "right": 511.79091871153776,
+            "top": 288.9255162460677,
+            "bottom": 451.51158415176576,
+            "width": 99.13066645390035,
+            "height": 162.5860679056981
+          }
+        },
+        "science": {
+          "experiment": "transmission",
+          "rubCoverage": 0,
+          "rinseActive": false,
+          "visibleTracerSpots": 0,
+          "uvInspectionActive": false
+        },
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "tracer",
+          "hit": "tracer",
+          "action": {
+            "type": "pour",
+            "subject": "tracer",
+            "target": "hands",
+            "evidence": {
+              "contact": true,
+              "distance": 1.9466113581235756,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 1.02,
+              "tiltDeg": 63.99999999999855
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 5680.0999999940395
+        }
+      },
+      "after": {
+        "timestamp": 8099.699999988079,
+        "state": {
+          "version": 1,
+          "experimentId": "transmission",
+          "currentStep": 1,
+          "completedSteps": [
+            "transmission-1"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "普通光下看似乾淨，但 UV 檢查會顯示許多發光點。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622081842,
+              "stepId": "transmission-1",
+              "action": {
+                "type": "pour",
+                "subject": "tracer",
+                "target": "hands",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.9466113581235756,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 1.02,
+                  "tiltDeg": 63.99999999999855
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622077420,
+          "updatedAt": 1786622081842,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 315.6637008317713,
+          "y": 331.11571491897865
+        },
+        "screenBounds": {
+          "left": 256.084941066425,
+          "right": 368.3202271386415,
+          "top": 254.07603834466934,
+          "bottom": 407.9224945503593,
+          "width": 112.23528607221647,
+          "height": 153.84645620568998
+        },
+        "homePose": {
+          "position": {
+            "x": -4.22,
+            "y": 0.07,
+            "z": -0.95
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -4.21999979019165,
+            "y": 0.07000000029802322,
+            "z": -0.949999988079071
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -4.21999979019165,
+              "y": 0.07000000029802322,
+              "z": -0.949999988079071
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": {
+            "contact": false,
+            "distance": 4.887596339116545,
+            "angleErrorDeg": 0,
+            "targetRadius": 1.02
+          }
+        },
+        "targetPoint": {
+          "x": 663.0670352133038,
+          "y": 404.4259966067682
+        },
+        "nextSubject": {
+          "id": "soap",
+          "point": {
+            "x": 460.53141711815556,
+            "y": 374.74649300463443
+          },
+          "bounds": {
+            "left": 406.9328728266372,
+            "right": 507.5162744875955,
+            "top": 292.67630936613824,
+            "bottom": 456.5521972511401,
+            "width": 100.58340166095832,
+            "height": 163.87588788500187
+          }
+        },
+        "science": {
+          "experiment": "transmission",
+          "rubCoverage": 0,
+          "rinseActive": false,
+          "visibleTracerSpots": 0,
+          "uvInspectionActive": false
+        },
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "tracer",
+          "hit": "tracer",
+          "action": {
+            "type": "pour",
+            "subject": "tracer",
+            "target": "hands",
+            "evidence": {
+              "contact": true,
+              "distance": 1.9466113581235756,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 1.02,
+              "tiltDeg": 63.99999999999855
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 5680.0999999940395
+        }
+      },
+      "metrics": {
+        "returnDistancePx": 7.51,
+        "screenAreaRatioAfterVsBefore": 1.0092,
+        "overlapWithNextSubjectPx2": 0,
+        "overlapShareOfNextSubject": 0,
+        "nextSubjectPickability": {
+          "pickable": true,
+          "point": {
+            "x": 460.53141711815556,
+            "y": 374.74649300463443
+          }
+        }
+      },
+      "evidence": {
+        "during": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\transmission-step-1-tracer-during.png",
+        "after": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\transmission-step-1-tracer-after.png"
+      }
+    },
+    {
+      "experiment": "transmission",
+      "experimentTitle": "看不見的傳播路線",
+      "step": 2,
+      "stepTitle": "使用梘液",
+      "subject": "soap",
+      "target": "hands",
+      "nextSubject": "hands",
+      "realPointerGesture": true,
+      "accepted": true,
+      "stepAdvanced": true,
+      "before": {
+        "timestamp": 10875.29999999702,
+        "state": {
+          "version": 1,
+          "experimentId": "transmission",
+          "currentStep": 1,
+          "completedSteps": [
+            "transmission-1"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "普通光下看似乾淨，但 UV 檢查會顯示許多發光點。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622081842,
+              "stepId": "transmission-1",
+              "action": {
+                "type": "pour",
+                "subject": "tracer",
+                "target": "hands",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.9466113581235756,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 1.02,
+                  "tiltDeg": 63.99999999999855
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622077420,
+          "updatedAt": 1786622081842,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 460.53141711815556,
+          "y": 374.74649300463443
+        },
+        "screenBounds": {
+          "left": 406.9328728266372,
+          "right": 507.5162744875955,
+          "top": 292.67630936613824,
+          "bottom": 456.5521972511401,
+          "width": 100.58340166095832,
+          "height": 163.87588788500187
+        },
+        "homePose": {
+          "position": {
+            "x": -2.92,
+            "y": 0.07,
+            "z": -0.95
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -2.134197235107422,
+            "y": -0.04301762580871582,
+            "z": 0.17361073195934296
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -2.134197235107422,
+              "y": -0.04301762580871582,
+              "z": 0.17361073195934296
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": {
+            "contact": false,
+            "distance": 2.7245269616335293,
+            "angleErrorDeg": 0,
+            "targetRadius": 1.02
+          }
+        },
+        "targetPoint": {
+          "x": 663.0670352133038,
+          "y": 404.4259966067682
+        },
+        "nextSubject": {
+          "id": "hands",
+          "point": {
+            "x": 654.79254229515,
+            "y": 430.84577522068383
+          },
+          "bounds": {
+            "left": 553.8052396601637,
+            "right": 793.204472097695,
+            "top": 344.328483451434,
+            "bottom": 454.7959925097883,
+            "width": 239.39923243753128,
+            "height": 110.46750905835427
+          }
+        },
+        "science": {
+          "experiment": "transmission",
+          "rubCoverage": 0,
+          "rinseActive": false,
+          "visibleTracerSpots": 0,
+          "uvInspectionActive": false
+        },
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "tracer",
+          "hit": "tracer",
+          "action": {
+            "type": "pour",
+            "subject": "tracer",
+            "target": "hands",
+            "evidence": {
+              "contact": true,
+              "distance": 1.9466113581235756,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 1.02,
+              "tiltDeg": 63.99999999999855
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 5680.0999999940395
+        }
+      },
+      "during": {
+        "timestamp": 15032.699999988079,
+        "state": {
+          "version": 1,
+          "experimentId": "transmission",
+          "currentStep": 2,
+          "completedSteps": [
+            "transmission-1",
+            "transmission-2"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "普通光下看似乾淨，但 UV 檢查會顯示許多發光點。",
+            "梘液已覆蓋手掌，還要搓洗難到的位置。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622081842,
+              "stepId": "transmission-1",
+              "action": {
+                "type": "pour",
+                "subject": "tracer",
+                "target": "hands",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.9466113581235756,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 1.02,
+                  "tiltDeg": 63.99999999999855
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622090458,
+              "stepId": "transmission-2",
+              "action": {
+                "type": "pour",
+                "subject": "soap",
+                "target": "hands",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.950249978066455,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 1.02,
+                  "tiltDeg": 63.99999999999855
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622077420,
+          "updatedAt": 1786622090458,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 623.7637960107911,
+          "y": 384.8290482560538
+        },
+        "screenBounds": {
+          "left": 582.7078336732122,
+          "right": 665.6264743364251,
+          "top": 304.70844743632426,
+          "bottom": 464.69818574726156,
+          "width": 82.91864066321284,
+          "height": 159.9897383109373
+        },
+        "homePose": {
+          "position": {
+            "x": -2.92,
+            "y": 0.07,
+            "z": -0.95
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -0.03999999910593033,
+            "y": -0.3100000023841858,
+            "z": 0.05000000074505806
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": false
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -0.03999999910593033,
+              "y": -0.3100000023841858,
+              "z": 0.05000000074505806
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": false
+          },
+          "contacts": [
+            "hands"
+          ],
+          "socket": {
+            "contact": true,
+            "distance": 0.9309135310883198,
+            "angleErrorDeg": 0,
+            "targetRadius": 1.02
+          }
+        },
+        "targetPoint": {
+          "x": 663.0670352133038,
+          "y": 404.4259966067682
+        },
+        "nextSubject": {
+          "id": "hands",
+          "point": {
+            "x": 742.467771248681,
+            "y": 431.8430548877356
+          },
+          "bounds": {
+            "left": 636.5309428887066,
+            "right": 882.9872427973396,
+            "top": 343.0351219775987,
+            "bottom": 455.84701235399314,
+            "width": 246.456299908633,
+            "height": 112.81189037639444
+          }
+        },
+        "science": {
+          "experiment": "transmission",
+          "rubCoverage": 0,
+          "rinseActive": false,
+          "visibleTracerSpots": 0,
+          "uvInspectionActive": false
+        },
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "soap",
+          "hit": "soap",
+          "action": {
+            "type": "pour",
+            "subject": "soap",
+            "target": "hands",
+            "evidence": {
+              "contact": true,
+              "distance": 1.950249978066455,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 1.02,
+              "tiltDeg": 63.99999999999855
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 14295.09999999404
+        }
+      },
+      "after": {
+        "timestamp": 16703.39999999106,
+        "state": {
+          "version": 1,
+          "experimentId": "transmission",
+          "currentStep": 2,
+          "completedSteps": [
+            "transmission-1",
+            "transmission-2"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "普通光下看似乾淨，但 UV 檢查會顯示許多發光點。",
+            "梘液已覆蓋手掌，還要搓洗難到的位置。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622081842,
+              "stepId": "transmission-1",
+              "action": {
+                "type": "pour",
+                "subject": "tracer",
+                "target": "hands",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.9466113581235756,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 1.02,
+                  "tiltDeg": 63.99999999999855
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622090458,
+              "stepId": "transmission-2",
+              "action": {
+                "type": "pour",
+                "subject": "soap",
+                "target": "hands",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.950249978066455,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 1.02,
+                  "tiltDeg": 63.99999999999855
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622077420,
+          "updatedAt": 1786622090458,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 411.5203348215605,
+          "y": 329.3391468816662
+        },
+        "screenBounds": {
+          "left": 358.44033676650315,
+          "right": 458.4534415974871,
+          "top": 252.5660367610204,
+          "bottom": 405.88097461583436,
+          "width": 100.01310483098393,
+          "height": 153.31493785481396
+        },
+        "homePose": {
+          "position": {
+            "x": -2.92,
+            "y": 0.07,
+            "z": -0.95
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -2.9200000762939453,
+            "y": 0.07000000029802322,
+            "z": -0.949999988079071
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -2.9200000762939453,
+              "y": 0.07000000029802322,
+              "z": -0.949999988079071
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": {
+            "contact": false,
+            "distance": 3.629958747037913,
+            "angleErrorDeg": 0,
+            "targetRadius": 1.02
+          }
+        },
+        "targetPoint": {
+          "x": 663.0670352133038,
+          "y": 404.4259966067682
+        },
+        "nextSubject": {
+          "id": "hands",
+          "point": {
+            "x": 743.789424166052,
+            "y": 431.8130813684704
+          },
+          "bounds": {
+            "left": 637.7086198747954,
+            "right": 884.3847114656069,
+            "top": 342.6193151400937,
+            "bottom": 455.81543188358853,
+            "width": 246.67609159081144,
+            "height": 113.19611674349483
+          }
+        },
+        "science": {
+          "experiment": "transmission",
+          "rubCoverage": 0,
+          "rinseActive": false,
+          "visibleTracerSpots": 0,
+          "uvInspectionActive": false
+        },
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "soap",
+          "hit": "soap",
+          "action": {
+            "type": "pour",
+            "subject": "soap",
+            "target": "hands",
+            "evidence": {
+              "contact": true,
+              "distance": 1.950249978066455,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 1.02,
+              "tiltDeg": 63.99999999999855
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 14295.09999999404
+        }
+      },
+      "metrics": {
+        "returnDistancePx": 66.81,
+        "screenAreaRatioAfterVsBefore": 0.9303,
+        "overlapWithNextSubjectPx2": 0,
+        "overlapShareOfNextSubject": 0,
+        "nextSubjectPickability": {
+          "pickable": true,
+          "point": {
+            "x": 743.789424166052,
+            "y": 431.8130813684704
+          }
+        }
+      },
+      "evidence": {
+        "during": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\transmission-step-2-soap-during.png",
+        "after": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\transmission-step-2-soap-after.png"
+      }
+    },
+    {
+      "experiment": "root-viewer",
+      "experimentTitle": "根往哪裏生長？",
+      "step": 2,
+      "stepTitle": "只在左側加入水",
+      "subject": "water-cup",
+      "target": "wet-zone",
+      "nextSubject": "time-dial",
+      "realPointerGesture": true,
+      "accepted": true,
+      "stepAdvanced": true,
+      "before": {
+        "timestamp": 2269.2000000029802,
+        "state": {
+          "version": 1,
+          "experimentId": "root-viewer",
+          "currentStep": 1,
+          "completedSteps": [
+            "root-viewer-1"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {},
+          "observations": [
+            "幼苗固定在中央，準備觀察根在模型中的生長方向。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622097756,
+              "stepId": "root-viewer-1",
+              "action": {
+                "type": "place",
+                "subject": "seedling",
+                "target": "root-box"
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622095992,
+          "updatedAt": 1786622097756,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 352.9486376753198,
+          "y": 376.6114140635785
+        },
+        "screenBounds": {
+          "left": 293.53465742049605,
+          "right": 405.588577476191,
+          "top": 314.97755669111405,
+          "bottom": 440.44623803696237,
+          "width": 112.05392005569496,
+          "height": 125.46868134584832
+        },
+        "homePose": {
+          "position": {
+            "x": -3.03,
+            "y": 1.18,
+            "z": 1.34
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -3.0289876461029053,
+            "y": 1.13796067237854,
+            "z": 1.3392928838729858
+          },
+          "rotation": {
+            "x": 4.696057942510379e-8,
+            "y": -1.976936303549337e-8,
+            "z": 1.5638629946579385e-8,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -3.0289876461029053,
+              "y": 1.13796067237854,
+              "z": 1.3392928838729858
+            },
+            "rotation": {
+              "x": 4.696057942510379e-8,
+              "y": -1.976936303549337e-8,
+              "z": 1.5638629946579385e-8,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "water-cup-shelf"
+          ],
+          "socket": {
+            "contact": false,
+            "distance": 2.771929364540868,
+            "angleErrorDeg": 0.000006389056940260397,
+            "targetRadius": 0.42
+          }
+        },
+        "targetPoint": {
+          "x": 538.465248955199,
+          "y": 257.0252330522949
+        },
+        "nextSubject": {
+          "id": "time-dial",
+          "point": {
+            "x": 962.2542895342184,
+            "y": 444.6864248300528
+          },
+          "bounds": {
+            "left": 897.033258351205,
+            "right": 1032.6005207465485,
+            "top": 399.2795550404819,
+            "bottom": 491.0550369724753,
+            "width": 135.5672623953435,
+            "height": 91.7754819319934
+          }
+        },
+        "science": {
+          "experiment": "root-viewer",
+          "growthFraction": 0,
+          "targetGrowthFraction": 0,
+          "watered": false,
+          "magnified": false,
+          "focusDistance": 0.48
+        },
+        "lastInteraction": null
+      },
+      "during": {
+        "timestamp": 6463.70000000298,
+        "state": {
+          "version": 1,
+          "experimentId": "root-viewer",
+          "currentStep": 2,
+          "completedSteps": [
+            "root-viewer-1",
+            "root-viewer-2"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {
+            "time-dial": 0
+          },
+          "observations": [
+            "幼苗固定在中央，準備觀察根在模型中的生長方向。",
+            "左側土壤顏色變深，表示水分較多。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622097756,
+              "stepId": "root-viewer-1",
+              "action": {
+                "type": "place",
+                "subject": "seedling",
+                "target": "root-box"
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622101247,
+              "stepId": "root-viewer-2",
+              "action": {
+                "type": "pour",
+                "subject": "water-cup",
+                "target": "wet-zone",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.1079978732255924,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.42,
+                  "tiltDeg": 63.99999999998519
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622095992,
+          "updatedAt": 1786622101249,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 505.1288393434899,
+          "y": 222.24377105439808
+        },
+        "screenBounds": {
+          "left": 442.3291111055968,
+          "right": 560.7429136291,
+          "top": 159.72604345970387,
+          "bottom": 286.52022646691887,
+          "width": 118.41380252350325,
+          "height": 126.794183007215
+        },
+        "homePose": {
+          "position": {
+            "x": -3.03,
+            "y": 1.18,
+            "z": 1.34
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -1.8391097784042358,
+            "y": 2.7496373653411865,
+            "z": -0.07000000029802322
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": -0.5311862230300903,
+            "w": 0.8472551107406616
+          },
+          "velocity": {
+            "x": 0.00000687745887262281,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": false
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -1.8391097784042358,
+              "y": 2.7496373653411865,
+              "z": -0.07000000029802322
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -0.5311862230300903,
+              "w": 0.8472551107406616
+            },
+            "velocity": {
+              "x": 0.00000687745887262281,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": false
+          },
+          "contacts": [],
+          "socket": {
+            "contact": true,
+            "distance": 1.0202459627313385,
+            "angleErrorDeg": 64.17127686092752,
+            "targetRadius": 0.42
+          }
+        },
+        "targetPoint": {
+          "x": 538.465248955199,
+          "y": 257.0252330522949
+        },
+        "nextSubject": {
+          "id": "time-dial",
+          "point": {
+            "x": 962.2542895342184,
+            "y": 444.6864248300528
+          },
+          "bounds": {
+            "left": 897.033258351205,
+            "right": 1032.6005207465485,
+            "top": 399.2795550404819,
+            "bottom": 491.0550369724753,
+            "width": 135.5672623953435,
+            "height": 91.7754819319934
+          }
+        },
+        "science": {
+          "experiment": "root-viewer",
+          "growthFraction": 0,
+          "targetGrowthFraction": 0,
+          "watered": true,
+          "magnified": false,
+          "focusDistance": 0.48
+        },
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "water-cup",
+          "hit": "water-cup",
+          "action": {
+            "type": "pour",
+            "subject": "water-cup",
+            "target": "wet-zone",
+            "evidence": {
+              "contact": true,
+              "distance": 1.1079978732255924,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.42,
+              "tiltDeg": 63.99999999998519
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 5724.300000011921
+        }
+      },
+      "after": {
+        "timestamp": 8145.4000000059605,
+        "state": {
+          "version": 1,
+          "experimentId": "root-viewer",
+          "currentStep": 2,
+          "completedSteps": [
+            "root-viewer-1",
+            "root-viewer-2"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {
+            "time-dial": 0
+          },
+          "observations": [
+            "幼苗固定在中央，準備觀察根在模型中的生長方向。",
+            "左側土壤顏色變深，表示水分較多。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622097756,
+              "stepId": "root-viewer-1",
+              "action": {
+                "type": "place",
+                "subject": "seedling",
+                "target": "root-box"
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622101247,
+              "stepId": "root-viewer-2",
+              "action": {
+                "type": "pour",
+                "subject": "water-cup",
+                "target": "wet-zone",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.1079978732255924,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.42,
+                  "tiltDeg": 63.99999999998519
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622095992,
+          "updatedAt": 1786622101249,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 352.35145595752545,
+          "y": 373.33786970761594
+        },
+        "screenBounds": {
+          "left": 292.7866823791572,
+          "right": 405.1136265147247,
+          "top": 311.65299742276596,
+          "bottom": 437.229511548682,
+          "width": 112.32694413556749,
+          "height": 125.57651412591605
+        },
+        "homePose": {
+          "position": {
+            "x": -3.03,
+            "y": 1.18,
+            "z": 1.34
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -3.0299999713897705,
+            "y": 1.1799999475479126,
+            "z": 1.340000033378601
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -3.0299999713897705,
+              "y": 1.1799999475479126,
+              "z": 1.340000033378601
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": {
+            "contact": false,
+            "distance": 2.748999837092024,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.42
+          }
+        },
+        "targetPoint": {
+          "x": 538.465248955199,
+          "y": 257.0252330522949
+        },
+        "nextSubject": {
+          "id": "time-dial",
+          "point": {
+            "x": 962.2542895342184,
+            "y": 444.6864248300528
+          },
+          "bounds": {
+            "left": 897.033258351205,
+            "right": 1032.6005207465485,
+            "top": 399.2795550404819,
+            "bottom": 491.0550369724753,
+            "width": 135.5672623953435,
+            "height": 91.7754819319934
+          }
+        },
+        "science": {
+          "experiment": "root-viewer",
+          "growthFraction": 0,
+          "targetGrowthFraction": 0,
+          "watered": true,
+          "magnified": false,
+          "focusDistance": 0.48
+        },
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "water-cup",
+          "hit": "water-cup",
+          "action": {
+            "type": "pour",
+            "subject": "water-cup",
+            "target": "wet-zone",
+            "evidence": {
+              "contact": true,
+              "distance": 1.1079978732255924,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.42,
+              "tiltDeg": 63.99999999998519
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 5724.300000011921
+        }
+      },
+      "metrics": {
+        "returnDistancePx": 3.33,
+        "screenAreaRatioAfterVsBefore": 1.0033,
+        "overlapWithNextSubjectPx2": 0,
+        "overlapShareOfNextSubject": 0,
+        "nextSubjectPickability": {
+          "pickable": true,
+          "point": {
+            "x": 962.2542895342184,
+            "y": 444.6864248300528
+          }
+        }
+      },
+      "evidence": {
+        "during": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\root-viewer-step-2-water-cup-during.png",
+        "after": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\root-viewer-step-2-water-cup-after.png"
+      }
+    },
+    {
+      "experiment": "density-column",
+      "experimentTitle": "密度彩虹塔",
+      "step": 1,
+      "stepTitle": "先加入蜂蜜",
+      "subject": "honey",
+      "target": "column",
+      "nextSubject": "water",
+      "realPointerGesture": true,
+      "accepted": true,
+      "stepAdvanced": true,
+      "before": {
+        "timestamp": 998.4000000059605,
+        "state": {
+          "version": 1,
+          "experimentId": "density-column",
+          "currentStep": 0,
+          "completedSteps": [],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {},
+          "observations": [],
+          "actionHistory": [],
+          "startedAt": 1786622106859,
+          "updatedAt": 1786622107390,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 304.99907094591845,
+          "y": 342.0801501965641
+        },
+        "screenBounds": {
+          "left": 250.22229199668368,
+          "right": 353.8414584196982,
+          "top": 275.3872907082013,
+          "bottom": 409.2942995157516,
+          "width": 103.61916642301452,
+          "height": 133.9070088075503
+        },
+        "homePose": {
+          "position": {
+            "x": -4.55,
+            "y": 0.05,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -4.550000190734863,
+            "y": -0.045012474060058594,
+            "z": -1.2499998807907104
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": -2.601005077550872e-14,
+            "y": 9.123105049191338e-11,
+            "z": 1.5049866260445806e-14
+          },
+          "dynamic": true,
+          "sleeping": false
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -4.550000190734863,
+              "y": -0.045012474060058594,
+              "z": -1.2499998807907104
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": -2.601005077550872e-14,
+              "y": 9.123105049191338e-11,
+              "z": 1.5049866260445806e-14
+            },
+            "dynamic": true,
+            "sleeping": false
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": {
+            "contact": false,
+            "distance": 7.231916889366607,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.73
+          }
+        },
+        "targetPoint": {
+          "x": 744.8164806376215,
+          "y": 171.77979530143236
+        },
+        "nextSubject": {
+          "id": "water",
+          "point": {
+            "x": 396.5199901788244,
+            "y": 340.8374831937824
+          },
+          "bounds": {
+            "left": 347.4252506432092,
+            "right": 440.30768675038706,
+            "top": 274.30483572252894,
+            "bottom": 407.88894701940285,
+            "width": 92.88243610717785,
+            "height": 133.5841112968739
+          }
+        },
+        "science": null,
+        "lastInteraction": null
+      },
+      "during": {
+        "timestamp": 5199,
+        "state": {
+          "version": 1,
+          "experimentId": "density-column",
+          "currentStep": 1,
+          "completedSteps": [
+            "density-column-1"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {},
+          "observations": [
+            "蜂蜜形成最底的一層。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622110856,
+              "stepId": "density-column-1",
+              "action": {
+                "type": "pour",
+                "subject": "honey",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.7795352056022946,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622106859,
+          "updatedAt": 1786622110856,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 675.0823460758197,
+          "y": 171.4231484559848
+        },
+        "screenBounds": {
+          "left": 598.0881549894166,
+          "right": 759.0921519815445,
+          "top": 101.77664197466339,
+          "bottom": 242.50762824089992,
+          "width": 161.0039969921279,
+          "height": 140.73098626623653
+        },
+        "homePose": {
+          "position": {
+            "x": -4.55,
+            "y": 0.05,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -0.16566023230552673,
+            "y": 3.4650864601135254,
+            "z": 0.10000000149011612
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": -0.5311862230300903,
+            "w": 0.8472551107406616
+          },
+          "velocity": {
+            "x": 0,
+            "y": -0.00001375491774524562,
+            "z": -4.2984117953892564e-7
+          },
+          "dynamic": false,
+          "sleeping": false
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -0.16566023230552673,
+              "y": 3.4650864601135254,
+              "z": 0.10000000149011612
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -0.5311862230300903,
+              "w": 0.8472551107406616
+            },
+            "velocity": {
+              "x": 0,
+              "y": -0.00001375491774524562,
+              "z": -4.2984117953892564e-7
+            },
+            "dynamic": false,
+            "sleeping": false
+          },
+          "contacts": [],
+          "socket": {
+            "contact": true,
+            "distance": 1.6423556199136409,
+            "angleErrorDeg": 64.17127686092752,
+            "targetRadius": 0.73
+          }
+        },
+        "targetPoint": {
+          "x": 744.8164806376215,
+          "y": 171.77979530143236
+        },
+        "nextSubject": {
+          "id": "water",
+          "point": {
+            "x": 396.52002286914455,
+            "y": 340.83773844398814
+          },
+          "bounds": {
+            "left": 347.4252923056014,
+            "right": 440.30771211252477,
+            "top": 274.30509888352833,
+            "bottom": 407.88919422719783,
+            "width": 92.8824198069234,
+            "height": 133.5840953436695
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "honey",
+          "hit": "honey",
+          "action": {
+            "type": "pour",
+            "subject": "honey",
+            "target": "column",
+            "evidence": {
+              "contact": false,
+              "distance": 1.7795352056022946,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.73,
+              "tiltDeg": 63.999999999994024
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 4459.9000000059605
+        }
+      },
+      "after": {
+        "timestamp": 6878.79999999702,
+        "state": {
+          "version": 1,
+          "experimentId": "density-column",
+          "currentStep": 1,
+          "completedSteps": [
+            "density-column-1"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {},
+          "observations": [
+            "蜂蜜形成最底的一層。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622110856,
+              "stepId": "density-column-1",
+              "action": {
+                "type": "pour",
+                "subject": "honey",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.7795352056022946,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622106859,
+          "updatedAt": 1786622110856,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 303.9542980706269,
+          "y": 336.1549458488901
+        },
+        "screenBounds": {
+          "left": 248.93259299135764,
+          "right": 352.9974964943287,
+          "top": 269.2779476808939,
+          "bottom": 403.5563097611444,
+          "width": 104.06490350297105,
+          "height": 134.27836208025053
+        },
+        "homePose": {
+          "position": {
+            "x": -4.55,
+            "y": 0.05,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -4.550000190734863,
+            "y": 0.05000000074505806,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -4.550000190734863,
+              "y": 0.05000000074505806,
+              "z": -1.25
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": {
+            "contact": false,
+            "distance": 7.182381379688081,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.73
+          }
+        },
+        "targetPoint": {
+          "x": 744.8164806376215,
+          "y": 171.77979530143236
+        },
+        "nextSubject": {
+          "id": "water",
+          "point": {
+            "x": 403.46701494909655,
+            "y": 335.6510624591004
+          },
+          "bounds": {
+            "left": 355.29817319880226,
+            "right": 446.4771303482368,
+            "top": 269.786908599784,
+            "bottom": 402.02377405144443,
+            "width": 91.17895714943455,
+            "height": 132.23686545166044
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "honey",
+          "hit": "honey",
+          "action": {
+            "type": "pour",
+            "subject": "honey",
+            "target": "column",
+            "evidence": {
+              "contact": false,
+              "distance": 1.7795352056022946,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.73,
+              "tiltDeg": 63.999999999994024
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 4459.9000000059605
+        }
+      },
+      "metrics": {
+        "returnDistancePx": 6.02,
+        "screenAreaRatioAfterVsBefore": 1.0071,
+        "overlapWithNextSubjectPx2": 0,
+        "overlapShareOfNextSubject": 0,
+        "nextSubjectPickability": {
+          "pickable": true,
+          "point": {
+            "x": 403.46701494909655,
+            "y": 335.6510624591004
+          }
+        }
+      },
+      "evidence": {
+        "during": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\density-column-step-1-honey-during.png",
+        "after": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\density-column-step-1-honey-after.png"
+      }
+    },
+    {
+      "experiment": "density-column",
+      "experimentTitle": "密度彩虹塔",
+      "step": 2,
+      "stepTitle": "沿杯壁加入水",
+      "subject": "water",
+      "target": "column",
+      "nextSubject": "oil",
+      "realPointerGesture": true,
+      "accepted": true,
+      "stepAdvanced": true,
+      "before": {
+        "timestamp": 9736.20000000298,
+        "state": {
+          "version": 1,
+          "experimentId": "density-column",
+          "currentStep": 1,
+          "completedSteps": [
+            "density-column-1"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {},
+          "observations": [
+            "蜂蜜形成最底的一層。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622110856,
+              "stepId": "density-column-1",
+              "action": {
+                "type": "pour",
+                "subject": "honey",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.7795352056022946,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622106859,
+          "updatedAt": 1786622110856,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 403.46701494909655,
+          "y": 335.6510624591004
+        },
+        "screenBounds": {
+          "left": 355.29817319880226,
+          "right": 446.4771303482368,
+          "top": 269.786908599784,
+          "bottom": 402.02377405144443,
+          "width": 91.17895714943455,
+          "height": 132.23686545166044
+        },
+        "homePose": {
+          "position": {
+            "x": -3.25,
+            "y": 0.05,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -3.1791515350341797,
+            "y": -0.04501700401306152,
+            "z": -1.4114956855773926
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -3.1791515350341797,
+              "y": -0.04501700401306152,
+              "z": -1.4114956855773926
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": {
+            "contact": false,
+            "distance": 6.17995287543982,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.73
+          }
+        },
+        "targetPoint": {
+          "x": 744.8164806376215,
+          "y": 171.77979530143236
+        },
+        "nextSubject": {
+          "id": "oil",
+          "point": {
+            "x": 487.61376598947464,
+            "y": 339.60091565825553
+          },
+          "bounds": {
+            "left": 444.1471271623824,
+            "right": 526.3921229237029,
+            "top": 273.2277203615675,
+            "bottom": 406.4904712665487,
+            "width": 82.24499576132052,
+            "height": 133.2627509049812
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "honey",
+          "hit": "honey",
+          "action": {
+            "type": "pour",
+            "subject": "honey",
+            "target": "column",
+            "evidence": {
+              "contact": false,
+              "distance": 1.7795352056022946,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.73,
+              "tiltDeg": 63.999999999994024
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 4459.9000000059605
+        }
+      },
+      "during": {
+        "timestamp": 13922.90000000596,
+        "state": {
+          "version": 1,
+          "experimentId": "density-column",
+          "currentStep": 2,
+          "completedSteps": [
+            "density-column-1",
+            "density-column-2"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {},
+          "observations": [
+            "蜂蜜形成最底的一層。",
+            "水停在蜂蜜上方，形成第二層。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622110856,
+              "stepId": "density-column-1",
+              "action": {
+                "type": "pour",
+                "subject": "honey",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.7795352056022946,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622119594,
+              "stepId": "density-column-2",
+              "action": {
+                "type": "pour",
+                "subject": "water",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.8098775382716854,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622106859,
+          "updatedAt": 1786622119594,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 675.0823460758197,
+          "y": 171.4231484559848
+        },
+        "screenBounds": {
+          "left": 598.0881549894166,
+          "right": 759.0921519815445,
+          "top": 101.77664197466339,
+          "bottom": 242.50762824089992,
+          "width": 161.0039969921279,
+          "height": 140.73098626623653
+        },
+        "homePose": {
+          "position": {
+            "x": -3.25,
+            "y": 0.05,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -0.16566023230552673,
+            "y": 3.4650864601135254,
+            "z": 0.10000000149011612
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": -0.5311862230300903,
+            "w": 0.8472551107406616
+          },
+          "velocity": {
+            "x": 0,
+            "y": -0.00001375491774524562,
+            "z": -4.2984117953892564e-7
+          },
+          "dynamic": false,
+          "sleeping": false
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -0.16566023230552673,
+              "y": 3.4650864601135254,
+              "z": 0.10000000149011612
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -0.5311862230300903,
+              "w": 0.8472551107406616
+            },
+            "velocity": {
+              "x": 0,
+              "y": -0.00001375491774524562,
+              "z": -4.2984117953892564e-7
+            },
+            "dynamic": false,
+            "sleeping": false
+          },
+          "contacts": [],
+          "socket": {
+            "contact": true,
+            "distance": 1.6423556199136409,
+            "angleErrorDeg": 64.17127686092752,
+            "targetRadius": 0.73
+          }
+        },
+        "targetPoint": {
+          "x": 744.8164806376215,
+          "y": 171.77979530143236
+        },
+        "nextSubject": {
+          "id": "oil",
+          "point": {
+            "x": 487.61376598947464,
+            "y": 339.60091565825553
+          },
+          "bounds": {
+            "left": 444.1471271623824,
+            "right": 526.3921229237029,
+            "top": 273.2277203615675,
+            "bottom": 406.4904712665487,
+            "width": 82.24499576132052,
+            "height": 133.2627509049812
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "water",
+          "hit": "water",
+          "action": {
+            "type": "pour",
+            "subject": "water",
+            "target": "column",
+            "evidence": {
+              "contact": false,
+              "distance": 1.8098775382716854,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.73,
+              "tiltDeg": 63.999999999994024
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 13197.10000000894
+        }
+      },
+      "after": {
+        "timestamp": 15602.10000000894,
+        "state": {
+          "version": 1,
+          "experimentId": "density-column",
+          "currentStep": 2,
+          "completedSteps": [
+            "density-column-1",
+            "density-column-2"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {},
+          "observations": [
+            "蜂蜜形成最底的一層。",
+            "水停在蜂蜜上方，形成第二層。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622110856,
+              "stepId": "density-column-1",
+              "action": {
+                "type": "pour",
+                "subject": "honey",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.7795352056022946,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622119594,
+              "stepId": "density-column-2",
+              "action": {
+                "type": "pour",
+                "subject": "water",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.8098775382716854,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622106859,
+          "updatedAt": 1786622119594,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 395.76244009987596,
+          "y": 334.92231940322887
+        },
+        "screenBounds": {
+          "left": 346.4596002876601,
+          "right": 439.7200582268635,
+          "top": 268.2064201753316,
+          "bottom": 402.16008899767127,
+          "width": 93.26045793920338,
+          "height": 133.9536688223397
+        },
+        "homePose": {
+          "position": {
+            "x": -3.25,
+            "y": 0.05,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -3.25,
+            "y": 0.05000000074505806,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -3.25,
+              "y": 0.05000000074505806,
+              "z": -1.25
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": {
+            "contact": false,
+            "distance": 6.13812674962579,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.73
+          }
+        },
+        "targetPoint": {
+          "x": 744.8164806376215,
+          "y": 171.77979530143236
+        },
+        "nextSubject": {
+          "id": "oil",
+          "point": {
+            "x": 495.632038789798,
+            "y": 335.2360892665072
+          },
+          "bounds": {
+            "left": 453.02617052371556,
+            "right": 533.6783719682685,
+            "top": 269.4254036533642,
+            "bottom": 401.55451642535115,
+            "width": 80.65220144455293,
+            "height": 132.12911277198697
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "water",
+          "hit": "water",
+          "action": {
+            "type": "pour",
+            "subject": "water",
+            "target": "column",
+            "evidence": {
+              "contact": false,
+              "distance": 1.8098775382716854,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.73,
+              "tiltDeg": 63.999999999994024
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 13197.10000000894
+        }
+      },
+      "metrics": {
+        "returnDistancePx": 7.74,
+        "screenAreaRatioAfterVsBefore": 1.0361,
+        "overlapWithNextSubjectPx2": 0,
+        "overlapShareOfNextSubject": 0,
+        "nextSubjectPickability": {
+          "pickable": true,
+          "point": {
+            "x": 495.632038789798,
+            "y": 335.2360892665072
+          }
+        }
+      },
+      "evidence": {
+        "during": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\density-column-step-2-water-during.png",
+        "after": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\density-column-step-2-water-after.png"
+      }
+    },
+    {
+      "experiment": "density-column",
+      "experimentTitle": "密度彩虹塔",
+      "step": 3,
+      "stepTitle": "加入食用油",
+      "subject": "oil",
+      "target": "column",
+      "nextSubject": "cork",
+      "realPointerGesture": true,
+      "accepted": true,
+      "stepAdvanced": true,
+      "before": {
+        "timestamp": 18276.29999999702,
+        "state": {
+          "version": 1,
+          "experimentId": "density-column",
+          "currentStep": 2,
+          "completedSteps": [
+            "density-column-1",
+            "density-column-2"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {},
+          "observations": [
+            "蜂蜜形成最底的一層。",
+            "水停在蜂蜜上方，形成第二層。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622110856,
+              "stepId": "density-column-1",
+              "action": {
+                "type": "pour",
+                "subject": "honey",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.7795352056022946,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622119594,
+              "stepId": "density-column-2",
+              "action": {
+                "type": "pour",
+                "subject": "water",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.8098775382716854,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622106859,
+          "updatedAt": 1786622119594,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 495.632038789798,
+          "y": 335.2360892665072
+        },
+        "screenBounds": {
+          "left": 453.02617052371556,
+          "right": 533.6783719682685,
+          "top": 269.4254036533642,
+          "bottom": 401.55451642535115,
+          "width": 80.65220144455293,
+          "height": 132.12911277198697
+        },
+        "homePose": {
+          "position": {
+            "x": -1.95,
+            "y": 0.05,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -1.848085880279541,
+            "y": -0.04501694440841675,
+            "z": -1.3850762844085693
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -1.848085880279541,
+              "y": -0.04501694440841675,
+              "z": -1.3850762844085693
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": {
+            "contact": false,
+            "distance": 5.249854854321898,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.73
+          }
+        },
+        "targetPoint": {
+          "x": 744.8164806376215,
+          "y": 171.77979530143236
+        },
+        "nextSubject": {
+          "id": "cork",
+          "point": {
+            "x": 301.54350977272605,
+            "y": 498.54315825634046
+          },
+          "bounds": {
+            "left": 266.8681572053293,
+            "right": 334.1303924860762,
+            "top": 467.2890379789197,
+            "bottom": 530.5312134618235,
+            "width": 67.26223528074689,
+            "height": 63.24217548290386
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "water",
+          "hit": "water",
+          "action": {
+            "type": "pour",
+            "subject": "water",
+            "target": "column",
+            "evidence": {
+              "contact": false,
+              "distance": 1.8098775382716854,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.73,
+              "tiltDeg": 63.999999999994024
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 13197.10000000894
+        }
+      },
+      "during": {
+        "timestamp": 22506.20000000298,
+        "state": {
+          "version": 1,
+          "experimentId": "density-column",
+          "currentStep": 3,
+          "completedSteps": [
+            "density-column-1",
+            "density-column-2",
+            "density-column-3"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {},
+          "observations": [
+            "蜂蜜形成最底的一層。",
+            "水停在蜂蜜上方，形成第二層。",
+            "油浮在水面，三層液體沒有按顏色排列。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622110856,
+              "stepId": "density-column-1",
+              "action": {
+                "type": "pour",
+                "subject": "honey",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.7795352056022946,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622119594,
+              "stepId": "density-column-2",
+              "action": {
+                "type": "pour",
+                "subject": "water",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.8098775382716854,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622128179,
+              "stepId": "density-column-3",
+              "action": {
+                "type": "pour",
+                "subject": "oil",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.8221316026020968,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622106859,
+          "updatedAt": 1786622128179,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 675.0823460758197,
+          "y": 171.4231484559848
+        },
+        "screenBounds": {
+          "left": 598.0881549894166,
+          "right": 759.0921519815445,
+          "top": 101.77664197466339,
+          "bottom": 242.50762824089992,
+          "width": 161.0039969921279,
+          "height": 140.73098626623653
+        },
+        "homePose": {
+          "position": {
+            "x": -1.95,
+            "y": 0.05,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -0.16566023230552673,
+            "y": 3.4650864601135254,
+            "z": 0.10000000149011612
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": -0.5311862230300903,
+            "w": 0.8472551107406616
+          },
+          "velocity": {
+            "x": 0,
+            "y": -0.00001375491774524562,
+            "z": -4.2984117953892564e-7
+          },
+          "dynamic": false,
+          "sleeping": false
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -0.16566023230552673,
+              "y": 3.4650864601135254,
+              "z": 0.10000000149011612
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -0.5311862230300903,
+              "w": 0.8472551107406616
+            },
+            "velocity": {
+              "x": 0,
+              "y": -0.00001375491774524562,
+              "z": -4.2984117953892564e-7
+            },
+            "dynamic": false,
+            "sleeping": false
+          },
+          "contacts": [],
+          "socket": {
+            "contact": true,
+            "distance": 1.6423556199136409,
+            "angleErrorDeg": 64.17127686092752,
+            "targetRadius": 0.73
+          }
+        },
+        "targetPoint": {
+          "x": 744.8164806376215,
+          "y": 171.77979530143236
+        },
+        "nextSubject": {
+          "id": "cork",
+          "point": {
+            "x": 301.54350977272605,
+            "y": 498.54315825634046
+          },
+          "bounds": {
+            "left": 266.8681572053293,
+            "right": 334.1303924860762,
+            "top": 467.2890379789197,
+            "bottom": 530.5312134618235,
+            "width": 67.26223528074689,
+            "height": 63.24217548290386
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "oil",
+          "hit": "oil",
+          "action": {
+            "type": "pour",
+            "subject": "oil",
+            "target": "column",
+            "evidence": {
+              "contact": false,
+              "distance": 1.8221316026020968,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.73,
+              "tiltDeg": 63.999999999994024
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 21781.70000000298
+        }
+      },
+      "after": {
+        "timestamp": 24176.40000000596,
+        "state": {
+          "version": 1,
+          "experimentId": "density-column",
+          "currentStep": 3,
+          "completedSteps": [
+            "density-column-1",
+            "density-column-2",
+            "density-column-3"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 0,
+          "variables": {},
+          "observations": [
+            "蜂蜜形成最底的一層。",
+            "水停在蜂蜜上方，形成第二層。",
+            "油浮在水面，三層液體沒有按顏色排列。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622110856,
+              "stepId": "density-column-1",
+              "action": {
+                "type": "pour",
+                "subject": "honey",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.7795352056022946,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622119594,
+              "stepId": "density-column-2",
+              "action": {
+                "type": "pour",
+                "subject": "water",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.8098775382716854,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622128179,
+              "stepId": "density-column-3",
+              "action": {
+                "type": "pour",
+                "subject": "oil",
+                "target": "column",
+                "evidence": {
+                  "contact": false,
+                  "distance": 1.8221316026020968,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.73,
+                  "tiltDeg": 63.999999999994024
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622106859,
+          "updatedAt": 1786622128179,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 487.14072527308315,
+          "y": 333.69546426408675
+        },
+        "screenBounds": {
+          "left": 443.5022811513218,
+          "right": 526.0585357448232,
+          "top": 267.13989026770287,
+          "bottom": 400.77043101626174,
+          "width": 82.55625459350136,
+          "height": 133.63054074855887
+        },
+        "homePose": {
+          "position": {
+            "x": -1.95,
+            "y": 0.05,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -1.9500000476837158,
+            "y": 0.05000000074505806,
+            "z": -1.25
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -1.9500000476837158,
+              "y": 0.05000000074505806,
+              "z": -1.25
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": {
+            "contact": false,
+            "distance": 5.210239948286541,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.73
+          }
+        },
+        "targetPoint": {
+          "x": 744.8164806376215,
+          "y": 171.77979530143236
+        },
+        "nextSubject": {
+          "id": "cork",
+          "point": {
+            "x": 301.54350977272605,
+            "y": 498.54315825634046
+          },
+          "bounds": {
+            "left": 266.8681572053293,
+            "right": 334.1303924860762,
+            "top": 467.2890379789197,
+            "bottom": 530.5312134618235,
+            "width": 67.26223528074689,
+            "height": 63.24217548290386
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "oil",
+          "hit": "oil",
+          "action": {
+            "type": "pour",
+            "subject": "oil",
+            "target": "column",
+            "evidence": {
+              "contact": false,
+              "distance": 1.8221316026020968,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.73,
+              "tiltDeg": 63.999999999994024
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 21781.70000000298
+        }
+      },
+      "metrics": {
+        "returnDistancePx": 8.63,
+        "screenAreaRatioAfterVsBefore": 1.0352,
+        "overlapWithNextSubjectPx2": 0,
+        "overlapShareOfNextSubject": 0,
+        "nextSubjectPickability": {
+          "pickable": true,
+          "point": {
+            "x": 301.54350977272605,
+            "y": 498.54315825634046
+          }
+        }
+      },
+      "evidence": {
+        "during": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\density-column-step-3-oil-during.png",
+        "after": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\density-column-step-3-oil-after.png"
+      }
+    },
+    {
+      "experiment": "water-filter",
+      "experimentTitle": "清澈不等於安全",
+      "step": 2,
+      "stepTitle": "加入細沙",
+      "subject": "sand",
+      "target": "filter",
+      "nextSubject": "gravel",
+      "realPointerGesture": true,
+      "accepted": true,
+      "stepAdvanced": true,
+      "before": {
+        "timestamp": 1469.0999999940395,
+        "state": {
+          "version": 1,
+          "experimentId": "water-filter",
+          "currentStep": 1,
+          "completedSteps": [
+            "water-filter-1"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "棉層貼在出口上方。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622134608,
+              "stepId": "water-filter-1",
+              "action": {
+                "type": "place",
+                "subject": "cotton",
+                "target": "filter"
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622133627,
+          "updatedAt": 1786622134608,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 392.2941575519996,
+          "y": 373.6358316709206
+        },
+        "screenBounds": {
+          "left": 352.4207201093,
+          "right": 429.06253984098055,
+          "top": 334.8761581514573,
+          "bottom": 413.6139065045053,
+          "width": 76.64181973168053,
+          "height": 78.737748353048
+        },
+        "homePose": {
+          "position": {
+            "x": -3.25,
+            "y": 0.05,
+            "z": -1.42
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -3.25,
+            "y": -0.05402028560638428,
+            "z": -1.4199999570846558
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -3.25,
+              "y": -0.05402028560638428,
+              "z": -1.4199999570846558
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": {
+            "contact": false,
+            "distance": 5.91986611251242,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.81
+          }
+        },
+        "targetPoint": {
+          "x": 721.4448332714836,
+          "y": 209.3063068282999
+        },
+        "nextSubject": {
+          "id": "gravel",
+          "point": {
+            "x": 472.0295073064673,
+            "y": 372.19987959015765
+          },
+          "bounds": {
+            "left": 435.62228529694727,
+            "right": 505.6087198178808,
+            "top": 333.5617902205311,
+            "bottom": 412.0493242374071,
+            "width": 69.98643452093353,
+            "height": 78.487534016876
+          }
+        },
+        "science": null,
+        "lastInteraction": null
+      },
+      "during": {
+        "timestamp": 5819.5,
+        "state": {
+          "version": 1,
+          "experimentId": "water-filter",
+          "currentStep": 2,
+          "completedSteps": [
+            "water-filter-1",
+            "water-filter-2"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "棉層貼在出口上方。",
+            "細沙形成緊密的中層。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622134608,
+              "stepId": "water-filter-1",
+              "action": {
+                "type": "place",
+                "subject": "cotton",
+                "target": "filter"
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622138250,
+              "stepId": "water-filter-2",
+              "action": {
+                "type": "pour",
+                "subject": "sand",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.1703158252302976,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622133627,
+          "updatedAt": 1786622138250,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 684.1352091138191,
+          "y": 188.8263097639569
+        },
+        "screenBounds": {
+          "left": 641.6643399204363,
+          "right": 731.0842638284372,
+          "top": 135.90659766354494,
+          "bottom": 243.1598874075831,
+          "width": 89.4199239080009,
+          "height": 107.25328974403817
+        },
+        "homePose": {
+          "position": {
+            "x": -3.25,
+            "y": 0.05,
+            "z": -1.42
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": 0.5500925183296204,
+            "y": 3.3008992671966553,
+            "z": -0.4277777671813965
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": -0.5311862230300903,
+            "w": 0.8472551107406616
+          },
+          "velocity": {
+            "x": -0.000010316188308934215,
+            "y": -0.00001375491774524562,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": false
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": 0.5500925183296204,
+              "y": 3.3008992671966553,
+              "z": -0.4277777671813965
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -0.5311862230300903,
+              "w": 0.8472551107406616
+            },
+            "velocity": {
+              "x": -0.000010316188308934215,
+              "y": -0.00001375491774524562,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": false
+          },
+          "contacts": [],
+          "socket": {
+            "contact": true,
+            "distance": 0.9342903645650259,
+            "angleErrorDeg": 64.17127686092752,
+            "targetRadius": 0.81
+          }
+        },
+        "targetPoint": {
+          "x": 721.4448332714836,
+          "y": 209.3063068282999
+        },
+        "nextSubject": {
+          "id": "gravel",
+          "point": {
+            "x": 472.0295073064673,
+            "y": 372.19987959015765
+          },
+          "bounds": {
+            "left": 435.62228529694727,
+            "right": 505.6087198178808,
+            "top": 333.5617902205311,
+            "bottom": 412.0493242374071,
+            "width": 69.98643452093353,
+            "height": 78.487534016876
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "sand",
+          "hit": "sand",
+          "action": {
+            "type": "pour",
+            "subject": "sand",
+            "target": "filter",
+            "evidence": {
+              "contact": true,
+              "distance": 1.1703158252302976,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.81,
+              "tiltDeg": 63.99999999999766
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 5076.70000000298
+        }
+      },
+      "after": {
+        "timestamp": 7479.899999991059,
+        "state": {
+          "version": 1,
+          "experimentId": "water-filter",
+          "currentStep": 2,
+          "completedSteps": [
+            "water-filter-1",
+            "water-filter-2"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "棉層貼在出口上方。",
+            "細沙形成緊密的中層。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622134608,
+              "stepId": "water-filter-1",
+              "action": {
+                "type": "place",
+                "subject": "cotton",
+                "target": "filter"
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622138250,
+              "stepId": "water-filter-2",
+              "action": {
+                "type": "pour",
+                "subject": "sand",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.1703158252302976,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622133627,
+          "updatedAt": 1786622138250,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 391.4900705368697,
+          "y": 367.4186897317466
+        },
+        "screenBounds": {
+          "left": 351.44764758110483,
+          "right": 428.40455216726326,
+          "top": 328.6301623611222,
+          "bottom": 407.43054588722896,
+          "width": 76.95690458615843,
+          "height": 78.80038352610677
+        },
+        "homePose": {
+          "position": {
+            "x": -3.25,
+            "y": 0.05,
+            "z": -1.42
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -3.25,
+            "y": 0.05000000074505806,
+            "z": -1.4199999570846558
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -3.25,
+              "y": 0.05000000074505806,
+              "z": -1.4199999570846558
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": {
+            "contact": false,
+            "distance": 5.860315679968247,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.81
+          }
+        },
+        "targetPoint": {
+          "x": 721.4448332714836,
+          "y": 209.3063068282999
+        },
+        "nextSubject": {
+          "id": "gravel",
+          "point": {
+            "x": 472.3759398583941,
+            "y": 372.1699597692889
+          },
+          "bounds": {
+            "left": 435.98536019845847,
+            "right": 505.9399499156441,
+            "top": 333.53438618568526,
+            "bottom": 412.0167431191327,
+            "width": 69.95458971718563,
+            "height": 78.48235693344742
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "sand",
+          "hit": "sand",
+          "action": {
+            "type": "pour",
+            "subject": "sand",
+            "target": "filter",
+            "evidence": {
+              "contact": true,
+              "distance": 1.1703158252302976,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.81,
+              "tiltDeg": 63.99999999999766
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 5076.70000000298
+        }
+      },
+      "metrics": {
+        "returnDistancePx": 6.27,
+        "screenAreaRatioAfterVsBefore": 1.0049,
+        "overlapWithNextSubjectPx2": 0,
+        "overlapShareOfNextSubject": 0,
+        "nextSubjectPickability": {
+          "pickable": true,
+          "point": {
+            "x": 472.3759398583941,
+            "y": 372.1699597692889
+          }
+        }
+      },
+      "evidence": {
+        "during": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\water-filter-step-2-sand-during.png",
+        "after": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\water-filter-step-2-sand-after.png"
+      }
+    },
+    {
+      "experiment": "water-filter",
+      "experimentTitle": "清澈不等於安全",
+      "step": 3,
+      "stepTitle": "加入碎石",
+      "subject": "gravel",
+      "target": "filter",
+      "nextSubject": "muddy-water",
+      "realPointerGesture": true,
+      "accepted": true,
+      "stepAdvanced": true,
+      "before": {
+        "timestamp": 10172.29999999702,
+        "state": {
+          "version": 1,
+          "experimentId": "water-filter",
+          "currentStep": 2,
+          "completedSteps": [
+            "water-filter-1",
+            "water-filter-2"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "棉層貼在出口上方。",
+            "細沙形成緊密的中層。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622134608,
+              "stepId": "water-filter-1",
+              "action": {
+                "type": "place",
+                "subject": "cotton",
+                "target": "filter"
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622138250,
+              "stepId": "water-filter-2",
+              "action": {
+                "type": "pour",
+                "subject": "sand",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.1703158252302976,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622133627,
+          "updatedAt": 1786622138250,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 472.3759398583941,
+          "y": 372.1699597692889
+        },
+        "screenBounds": {
+          "left": 435.98536019845847,
+          "right": 505.9399499156441,
+          "top": 333.53438618568526,
+          "bottom": 412.0167431191327,
+          "width": 69.95458971718563,
+          "height": 78.48235693344742
+        },
+        "homePose": {
+          "position": {
+            "x": -2.08,
+            "y": 0.05,
+            "z": -1.42
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -2.074981451034546,
+            "y": -0.05401718616485596,
+            "z": -1.4207319021224976
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -2.074981451034546,
+              "y": -0.05401718616485596,
+              "z": -1.4207319021224976
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": {
+            "contact": false,
+            "distance": 5.061367795270747,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.81
+          }
+        },
+        "targetPoint": {
+          "x": 721.4448332714836,
+          "y": 209.3063068282999
+        },
+        "nextSubject": {
+          "id": "muddy-water",
+          "point": {
+            "x": 297.034951787532,
+            "y": 470.409619649311
+          },
+          "bounds": {
+            "left": 223.14359217584888,
+            "right": 361.3098565721401,
+            "top": 397.44334447758587,
+            "bottom": 546.2673308880674,
+            "width": 138.16626439629124,
+            "height": 148.8239864104815
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "sand",
+          "hit": "sand",
+          "action": {
+            "type": "pour",
+            "subject": "sand",
+            "target": "filter",
+            "evidence": {
+              "contact": true,
+              "distance": 1.1703158252302976,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.81,
+              "tiltDeg": 63.99999999999766
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 5076.70000000298
+        }
+      },
+      "during": {
+        "timestamp": 14430,
+        "state": {
+          "version": 1,
+          "experimentId": "water-filter",
+          "currentStep": 3,
+          "completedSteps": [
+            "water-filter-1",
+            "water-filter-2",
+            "water-filter-3"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "棉層貼在出口上方。",
+            "細沙形成緊密的中層。",
+            "碎石形成最上層，濾水器組裝完成。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622134608,
+              "stepId": "water-filter-1",
+              "action": {
+                "type": "place",
+                "subject": "cotton",
+                "target": "filter"
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622138250,
+              "stepId": "water-filter-2",
+              "action": {
+                "type": "pour",
+                "subject": "sand",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.1703158252302976,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622146863,
+              "stepId": "water-filter-3",
+              "action": {
+                "type": "pour",
+                "subject": "gravel",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.173771140614232,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622133627,
+          "updatedAt": 1786622146863,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 684.1352091138191,
+          "y": 188.8263097639569
+        },
+        "screenBounds": {
+          "left": 641.6643399204363,
+          "right": 731.0842638284372,
+          "top": 135.90659766354494,
+          "bottom": 243.1598874075831,
+          "width": 89.4199239080009,
+          "height": 107.25328974403817
+        },
+        "homePose": {
+          "position": {
+            "x": -2.08,
+            "y": 0.05,
+            "z": -1.42
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": 0.5500925183296204,
+            "y": 3.3008992671966553,
+            "z": -0.4277777671813965
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": -0.5311862230300903,
+            "w": 0.8472551107406616
+          },
+          "velocity": {
+            "x": -0.000010316188308934215,
+            "y": -0.00001375491774524562,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": false
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": 0.5500925183296204,
+              "y": 3.3008992671966553,
+              "z": -0.4277777671813965
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -0.5311862230300903,
+              "w": 0.8472551107406616
+            },
+            "velocity": {
+              "x": -0.000010316188308934215,
+              "y": -0.00001375491774524562,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": false
+          },
+          "contacts": [],
+          "socket": {
+            "contact": true,
+            "distance": 0.9342903645650259,
+            "angleErrorDeg": 64.17127686092752,
+            "targetRadius": 0.81
+          }
+        },
+        "targetPoint": {
+          "x": 721.4448332714836,
+          "y": 209.3063068282999
+        },
+        "nextSubject": {
+          "id": "muddy-water",
+          "point": {
+            "x": 297.034951787532,
+            "y": 470.409619649311
+          },
+          "bounds": {
+            "left": 223.14359217584888,
+            "right": 361.3098565721401,
+            "top": 397.44334447758587,
+            "bottom": 546.2673308880674,
+            "width": 138.16626439629124,
+            "height": 148.8239864104815
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "gravel",
+          "hit": "gravel",
+          "action": {
+            "type": "pour",
+            "subject": "gravel",
+            "target": "filter",
+            "evidence": {
+              "contact": true,
+              "distance": 1.173771140614232,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.81,
+              "tiltDeg": 63.99999999999766
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 13687.89999999106
+        }
+      },
+      "after": {
+        "timestamp": 16096.5,
+        "state": {
+          "version": 1,
+          "experimentId": "water-filter",
+          "currentStep": 3,
+          "completedSteps": [
+            "water-filter-1",
+            "water-filter-2",
+            "water-filter-3"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "棉層貼在出口上方。",
+            "細沙形成緊密的中層。",
+            "碎石形成最上層，濾水器組裝完成。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622134608,
+              "stepId": "water-filter-1",
+              "action": {
+                "type": "place",
+                "subject": "cotton",
+                "target": "filter"
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622138250,
+              "stepId": "water-filter-2",
+              "action": {
+                "type": "pour",
+                "subject": "sand",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.1703158252302976,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622146863,
+              "stepId": "water-filter-3",
+              "action": {
+                "type": "pour",
+                "subject": "gravel",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.173771140614232,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622133627,
+          "updatedAt": 1786622146863,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 471.4856817731166,
+          "y": 365.99438970648856
+        },
+        "screenBounds": {
+          "left": 434.9326289828462,
+          "right": 505.19056277724314,
+          "top": 327.3277309617909,
+          "bottom": 405.8772859574637,
+          "width": 70.25793379439693,
+          "height": 78.54955499567279
+        },
+        "homePose": {
+          "position": {
+            "x": -2.08,
+            "y": 0.05,
+            "z": -1.42
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -2.0799999237060547,
+            "y": 0.05000000074505806,
+            "z": -1.4199999570846558
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -2.0799999237060547,
+              "y": 0.05000000074505806,
+              "z": -1.4199999570846558
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": {
+            "contact": false,
+            "distance": 4.994817248459171,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.81
+          }
+        },
+        "targetPoint": {
+          "x": 721.4448332714836,
+          "y": 209.3063068282999
+        },
+        "nextSubject": {
+          "id": "muddy-water",
+          "point": {
+            "x": 297.034951787532,
+            "y": 470.409619649311
+          },
+          "bounds": {
+            "left": 223.14359217584888,
+            "right": 361.3098565721401,
+            "top": 397.44334447758587,
+            "bottom": 546.2673308880674,
+            "width": 138.16626439629124,
+            "height": 148.8239864104815
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "gravel",
+          "hit": "gravel",
+          "action": {
+            "type": "pour",
+            "subject": "gravel",
+            "target": "filter",
+            "evidence": {
+              "contact": true,
+              "distance": 1.173771140614232,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.81,
+              "tiltDeg": 63.99999999999766
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 13687.89999999106
+        }
+      },
+      "metrics": {
+        "returnDistancePx": 6.24,
+        "screenAreaRatioAfterVsBefore": 1.0052,
+        "overlapWithNextSubjectPx2": 0,
+        "overlapShareOfNextSubject": 0,
+        "nextSubjectPickability": {
+          "pickable": true,
+          "point": {
+            "x": 297.034951787532,
+            "y": 470.409619649311
+          }
+        }
+      },
+      "evidence": {
+        "during": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\water-filter-step-3-gravel-during.png",
+        "after": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\water-filter-step-3-gravel-after.png"
+      }
+    },
+    {
+      "experiment": "water-filter",
+      "experimentTitle": "清澈不等於安全",
+      "step": 4,
+      "stepTitle": "倒入泥水",
+      "subject": "muddy-water",
+      "target": "filter",
+      "nextSubject": "sensor",
+      "realPointerGesture": true,
+      "accepted": true,
+      "stepAdvanced": true,
+      "before": {
+        "timestamp": 18763.39999999106,
+        "state": {
+          "version": 1,
+          "experimentId": "water-filter",
+          "currentStep": 3,
+          "completedSteps": [
+            "water-filter-1",
+            "water-filter-2",
+            "water-filter-3"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "棉層貼在出口上方。",
+            "細沙形成緊密的中層。",
+            "碎石形成最上層，濾水器組裝完成。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622134608,
+              "stepId": "water-filter-1",
+              "action": {
+                "type": "place",
+                "subject": "cotton",
+                "target": "filter"
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622138250,
+              "stepId": "water-filter-2",
+              "action": {
+                "type": "pour",
+                "subject": "sand",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.1703158252302976,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622146863,
+              "stepId": "water-filter-3",
+              "action": {
+                "type": "pour",
+                "subject": "gravel",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.173771140614232,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622133627,
+          "updatedAt": 1786622146863,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 297.034951787532,
+          "y": 470.409619649311
+        },
+        "screenBounds": {
+          "left": 223.14359217584888,
+          "right": 361.3098565721401,
+          "top": 397.44334447758587,
+          "bottom": 546.2673308880674,
+          "width": 138.16626439629124,
+          "height": 148.8239864104815
+        },
+        "homePose": {
+          "position": {
+            "x": -3.85,
+            "y": 0.05,
+            "z": 1.48
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -3.8499999046325684,
+            "y": -0.07102024555206299,
+            "z": 1.4800000190734863
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": true,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -3.8499999046325684,
+              "y": -0.07102024555206299,
+              "z": 1.4800000190734863
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": true,
+            "sleeping": true
+          },
+          "contacts": [
+            "lab-bench"
+          ],
+          "socket": {
+            "contact": false,
+            "distance": 6.397305635424031,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.81
+          }
+        },
+        "targetPoint": {
+          "x": 721.4448332714836,
+          "y": 209.3063068282999
+        },
+        "nextSubject": {
+          "id": "sensor",
+          "point": {
+            "x": 429.4492249609091,
+            "y": 463.02948411475677
+          },
+          "bounds": {
+            "left": 390.32687017787225,
+            "right": 465.34784897775177,
+            "top": 400.5062609810062,
+            "bottom": 523.7551147684338,
+            "width": 75.02097879987952,
+            "height": 123.2488537874276
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "gravel",
+          "hit": "gravel",
+          "action": {
+            "type": "pour",
+            "subject": "gravel",
+            "target": "filter",
+            "evidence": {
+              "contact": true,
+              "distance": 1.173771140614232,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.81,
+              "tiltDeg": 63.99999999999766
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 13687.89999999106
+        }
+      },
+      "during": {
+        "timestamp": 23037.5,
+        "state": {
+          "version": 1,
+          "experimentId": "water-filter",
+          "currentStep": 4,
+          "completedSteps": [
+            "water-filter-1",
+            "water-filter-2",
+            "water-filter-3",
+            "water-filter-4"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "棉層貼在出口上方。",
+            "細沙形成緊密的中層。",
+            "碎石形成最上層，濾水器組裝完成。",
+            "大顆粒留在碎石和沙層，收集杯中的水較清澈。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622134608,
+              "stepId": "water-filter-1",
+              "action": {
+                "type": "place",
+                "subject": "cotton",
+                "target": "filter"
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622138250,
+              "stepId": "water-filter-2",
+              "action": {
+                "type": "pour",
+                "subject": "sand",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.1703158252302976,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622146863,
+              "stepId": "water-filter-3",
+              "action": {
+                "type": "pour",
+                "subject": "gravel",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.173771140614232,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622155476,
+              "stepId": "water-filter-4",
+              "action": {
+                "type": "pour",
+                "subject": "muddy-water",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.6311765359403738,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622133627,
+          "updatedAt": 1786622155476,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 662.9658601827147,
+          "y": 187.44012941619013
+        },
+        "screenBounds": {
+          "left": 599.8289267659306,
+          "right": 732.6962993028483,
+          "top": 115.223964096465,
+          "bottom": 261.9088310472252,
+          "width": 132.86737253691763,
+          "height": 146.68486695076018
+        },
+        "homePose": {
+          "position": {
+            "x": -3.85,
+            "y": 0.05,
+            "z": 1.48
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": 0.05425442382693291,
+            "y": 3.1599371433258057,
+            "z": -0.5722222328186035
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": -0.5311862230300903,
+            "w": 0.8472551107406616
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0.00001375491774524562,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": false
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": 0.05425442382693291,
+              "y": 3.1599371433258057,
+              "z": -0.5722222328186035
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -0.5311862230300903,
+              "w": 0.8472551107406616
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0.00001375491774524562,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": false
+          },
+          "contacts": [],
+          "socket": {
+            "contact": true,
+            "distance": 1.4526677214490469,
+            "angleErrorDeg": 64.17127686092752,
+            "targetRadius": 0.81
+          }
+        },
+        "targetPoint": {
+          "x": 721.4448332714836,
+          "y": 209.3063068282999
+        },
+        "nextSubject": {
+          "id": "sensor",
+          "point": {
+            "x": 429.4492249609091,
+            "y": 463.02948411475677
+          },
+          "bounds": {
+            "left": 390.32687017787225,
+            "right": 465.34784897775177,
+            "top": 400.5062609810062,
+            "bottom": 523.7551147684338,
+            "width": 75.02097879987952,
+            "height": 123.2488537874276
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "muddy-water",
+          "hit": "muddy-water",
+          "action": {
+            "type": "pour",
+            "subject": "muddy-water",
+            "target": "filter",
+            "evidence": {
+              "contact": true,
+              "distance": 1.6311765359403738,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.81,
+              "tiltDeg": 63.99999999999766
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 22301
+        }
+      },
+      "after": {
+        "timestamp": 24699.70000000298,
+        "state": {
+          "version": 1,
+          "experimentId": "water-filter",
+          "currentStep": 4,
+          "completedSteps": [
+            "water-filter-1",
+            "water-filter-2",
+            "water-filter-3",
+            "water-filter-4"
+          ],
+          "attempts": 0,
+          "hintsUsed": 0,
+          "prediction": 1,
+          "variables": {},
+          "observations": [
+            "棉層貼在出口上方。",
+            "細沙形成緊密的中層。",
+            "碎石形成最上層，濾水器組裝完成。",
+            "大顆粒留在碎石和沙層，收集杯中的水較清澈。"
+          ],
+          "actionHistory": [
+            {
+              "at": 1786622134608,
+              "stepId": "water-filter-1",
+              "action": {
+                "type": "place",
+                "subject": "cotton",
+                "target": "filter"
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622138250,
+              "stepId": "water-filter-2",
+              "action": {
+                "type": "pour",
+                "subject": "sand",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.1703158252302976,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622146863,
+              "stepId": "water-filter-3",
+              "action": {
+                "type": "pour",
+                "subject": "gravel",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.173771140614232,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            },
+            {
+              "at": 1786622155476,
+              "stepId": "water-filter-4",
+              "action": {
+                "type": "pour",
+                "subject": "muddy-water",
+                "target": "filter",
+                "evidence": {
+                  "contact": true,
+                  "distance": 1.6311765359403738,
+                  "angleErrorDeg": 64.00000023546858,
+                  "targetRadius": 0.81,
+                  "tiltDeg": 63.99999999999766
+                }
+              },
+              "accepted": true
+            }
+          ],
+          "startedAt": 1786622133627,
+          "updatedAt": 1786622155476,
+          "completedAt": null,
+          "complete": false
+        },
+        "screenPoint": {
+          "x": 295.4512713666193,
+          "y": 462.0126275930996
+        },
+        "screenBounds": {
+          "left": 221.07399992770775,
+          "right": 360.10707385055775,
+          "top": 388.8766297820169,
+          "bottom": 538.0604360723037,
+          "width": 139.03307392285,
+          "height": 149.18380629028678
+        },
+        "homePose": {
+          "position": {
+            "x": -3.85,
+            "y": 0.05,
+            "z": 1.48
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          }
+        },
+        "physicsPose": {
+          "position": {
+            "x": -3.8499999046325684,
+            "y": 0.05000000074505806,
+            "z": 1.4800000190734863
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+          },
+          "velocity": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dynamic": false,
+          "sleeping": true
+        },
+        "physicsDebug": {
+          "pose": {
+            "position": {
+              "x": -3.8499999046325684,
+              "y": 0.05000000074505806,
+              "z": 1.4800000190734863
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "w": 1
+            },
+            "velocity": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "dynamic": false,
+            "sleeping": true
+          },
+          "contacts": [],
+          "socket": {
+            "contact": false,
+            "distance": 6.333032374603946,
+            "angleErrorDeg": 0,
+            "targetRadius": 0.81
+          }
+        },
+        "targetPoint": {
+          "x": 721.4448332714836,
+          "y": 209.3063068282999
+        },
+        "nextSubject": {
+          "id": "sensor",
+          "point": {
+            "x": 429.90435083712566,
+            "y": 463.38126416876196
+          },
+          "bounds": {
+            "left": 390.5693222568672,
+            "right": 465.9779585710936,
+            "top": 400.5285120090335,
+            "bottom": 524.4295288176933,
+            "width": 75.40863631422638,
+            "height": 123.90101680865979
+          }
+        },
+        "science": null,
+        "lastInteraction": {
+          "phase": "pointerup",
+          "expected": "muddy-water",
+          "hit": "muddy-water",
+          "action": {
+            "type": "pour",
+            "subject": "muddy-water",
+            "target": "filter",
+            "evidence": {
+              "contact": true,
+              "distance": 1.6311765359403738,
+              "angleErrorDeg": 64.00000023546858,
+              "targetRadius": 0.81,
+              "tiltDeg": 63.99999999999766
+            }
+          },
+          "result": {
+            "accepted": true,
+            "complete": false
+          },
+          "at": 22301
+        }
+      },
+      "metrics": {
+        "returnDistancePx": 8.55,
+        "screenAreaRatioAfterVsBefore": 1.0087,
+        "overlapWithNextSubjectPx2": 0,
+        "overlapShareOfNextSubject": 0,
+        "nextSubjectPickability": {
+          "pickable": true,
+          "point": {
+            "x": 429.90435083712566,
+            "y": 463.38126416876196
+          }
+        }
+      },
+      "evidence": {
+        "during": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\water-filter-step-4-muddy-water-during.png",
+        "after": "C:\\Users\\kochu\\Documents\\BuiO\\tmp\\pour-postfix-run\\tmp\\science-lab-pour-baseline\\water-filter-step-4-muddy-water-after.png"
+      }
+    }
+  ]
+}

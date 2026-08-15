@@ -15,6 +15,11 @@ npm-debug.log*
 
 # Generated image work files
 tmp/imagegen/
+tmp/scene-audit/
+tmp/science-lab-baseline/
+tmp/science-lab-physics-live/
+tmp/science-lab-qa/
+tmp/science-lab-visual-qa/
 
 # OS
 .DS_Store

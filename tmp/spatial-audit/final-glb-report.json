@@ -1,0 +1,1505 @@
+﻿{
+  "file": "C:\\Users\\kochu\\Documents\\BuiO\\science-lab-app\\dist\\assets\\science-lab-kit-BaegznHE.glb",
+  "sceneUp": [
+    0,
+    1,
+    0
+  ],
+  "report": {
+    "ASSET_BEAKER": {
+      "rootTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "rootUserData": {
+        "name": "ASSET_BEAKER",
+        "asset_id": "beaker",
+        "asset_version": 1,
+        "unit_meters": 1,
+        "authoring_up_axis": "Z",
+        "shipping_up_axis": "Y",
+        "dimensions_m": [
+          0.9,
+          0.95,
+          0.9
+        ],
+        "interaction_ready": true
+      },
+      "visualBounds": {
+        "min": [
+          -0.454,
+          0.0425,
+          -0.454
+        ],
+        "max": [
+          0.454,
+          1.02293,
+          0.505
+        ],
+        "size": [
+          0.908,
+          0.98043,
+          0.959
+        ]
+      },
+      "nodes": [
+        {
+          "name": "ASSET_BEAKER",
+          "type": "Object3D",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            0,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "ASSET_BEAKER",
+            "asset_id": "beaker",
+            "asset_version": 1,
+            "unit_meters": 1,
+            "authoring_up_axis": "Z",
+            "shipping_up_axis": "Y",
+            "dimensions_m": [
+              0.9,
+              0.95,
+              0.9
+            ],
+            "interaction_ready": true
+          }
+        },
+        {
+          "name": "COL_BEAKER_BODY",
+          "type": "Object3D",
+          "localPosition": [
+            0,
+            0.48,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            0.48,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "COL_BEAKER_BODY",
+            "is_collision_proxy": true,
+            "collider": "cylinder",
+            "dimensions_m": [
+              0.82,
+              0.9,
+              0.82
+            ],
+            "mass_kg": 0.34
+          }
+        },
+        {
+          "name": "PIVOT_BEAKER_GRIP",
+          "type": "Object3D",
+          "localPosition": [
+            0.34,
+            0.58,
+            0.18
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0.34,
+            0.58,
+            0.18
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "PIVOT_BEAKER_GRIP",
+            "semantic": "grip",
+            "grip": true,
+            "handedness": "either"
+          }
+        },
+        {
+          "name": "SOCKET_BEAKER_POUR",
+          "type": "Object3D",
+          "localPosition": [
+            0,
+            0.92,
+            0.5
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            0.92,
+            0.5
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "SOCKET_BEAKER_POUR",
+            "semantic": "pour_socket",
+            "direction": [
+              0,
+              0,
+              1
+            ]
+          }
+        }
+      ],
+      "meshBounds": []
+    },
+    "ASSET_GRADUATED_CYLINDER": {
+      "rootTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "rootUserData": {
+        "name": "ASSET_GRADUATED_CYLINDER",
+        "asset_id": "graduated_cylinder",
+        "asset_version": 1,
+        "unit_meters": 1,
+        "authoring_up_axis": "Z",
+        "shipping_up_axis": "Y",
+        "dimensions_m": [
+          0.46,
+          1.52,
+          0.46
+        ],
+        "interaction_ready": true
+      },
+      "visualBounds": {
+        "min": [
+          -0.199186,
+          0.0175,
+          -0.225305
+        ],
+        "max": [
+          0.199186,
+          1.472,
+          0.225305
+        ],
+        "size": [
+          0.398372,
+          1.4545,
+          0.450609
+        ]
+      },
+      "nodes": [
+        {
+          "name": "ASSET_GRADUATED_CYLINDER",
+          "type": "Object3D",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            0,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "ASSET_GRADUATED_CYLINDER",
+            "asset_id": "graduated_cylinder",
+            "asset_version": 1,
+            "unit_meters": 1,
+            "authoring_up_axis": "Z",
+            "shipping_up_axis": "Y",
+            "dimensions_m": [
+              0.46,
+              1.52,
+              0.46
+            ],
+            "interaction_ready": true
+          }
+        },
+        {
+          "name": "COL_GRADUATED_CYLINDER",
+          "type": "Object3D",
+          "localPosition": [
+            0,
+            0.77,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            0.77,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "COL_GRADUATED_CYLINDER",
+            "is_collision_proxy": true,
+            "collider": "cylinder",
+            "dimensions_m": [
+              0.32,
+              1.4,
+              0.32
+            ],
+            "mass_kg": 0.25
+          }
+        },
+        {
+          "name": "PIVOT_CYLINDER_GRIP",
+          "type": "Object3D",
+          "localPosition": [
+            0.12,
+            0.92,
+            0.08
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0.12,
+            0.92,
+            0.08
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "PIVOT_CYLINDER_GRIP",
+            "semantic": "grip",
+            "grip": true
+          }
+        },
+        {
+          "name": "SOCKET_CYLINDER_FILL",
+          "type": "Object3D",
+          "localPosition": [
+            0,
+            1.46,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            1.46,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "SOCKET_CYLINDER_FILL",
+            "semantic": "fill_socket",
+            "radius": 0.14
+          }
+        }
+      ],
+      "meshBounds": []
+    },
+    "ASSET_REAGENT_BOTTLE": {
+      "rootTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "quaternion": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "rootUserData": {
+        "name": "ASSET_REAGENT_BOTTLE",
+        "asset_id": "reagent_bottle",
+        "asset_version": 1,
+        "unit_meters": 1,
+        "authoring_up_axis": "Z",
+        "shipping_up_axis": "Y",
+        "dimensions_m": [
+          0.72,
+          1.18,
+          0.72
+        ],
+        "interaction_ready": true
+      },
+      "visualBounds": {
+        "min": [
+          -0.33,
+          0.07,
+          -0.33
+        ],
+        "max": [
+          0.33,
+          1.195,
+          0.347
+        ],
+        "size": [
+          0.66,
+          1.125,
+          0.677
+        ]
+      },
+      "nodes": [
+        {
+          "name": "ASSET_REAGENT_BOTTLE",
+          "type": "Object3D",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            0,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "ASSET_REAGENT_BOTTLE",
+            "asset_id": "reagent_bottle",
+            "asset_version": 1,
+            "unit_meters": 1,
+            "authoring_up_axis": "Z",
+            "shipping_up_axis": "Y",
+            "dimensions_m": [
+              0.72,
+              1.18,
+              0.72
+            ],
+            "interaction_ready": true
+          }
+        },
+        {
+          "name": "BOTTLE_CAP",
+          "type": "Mesh",
+          "localPosition": [
+            0,
+            1.13,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            1.13,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_00",
+          "type": "Mesh",
+          "localPosition": [
+            0.184,
+            1.13,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0.184,
+            1.13,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_00"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_01",
+          "type": "Mesh",
+          "localPosition": [
+            0.159349,
+            1.13,
+            -0.092
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0.159349,
+            1.13,
+            -0.092
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_01"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_02",
+          "type": "Mesh",
+          "localPosition": [
+            0.092,
+            1.13,
+            -0.159349
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0.092,
+            1.13,
+            -0.159349
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_02"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_03",
+          "type": "Mesh",
+          "localPosition": [
+            0,
+            1.13,
+            -0.184
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            1.13,
+            -0.184
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_03"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_04",
+          "type": "Mesh",
+          "localPosition": [
+            -0.092,
+            1.13,
+            -0.159349
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            -0.092,
+            1.13,
+            -0.159349
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_04"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_05",
+          "type": "Mesh",
+          "localPosition": [
+            -0.159349,
+            1.13,
+            -0.092
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            -0.159349,
+            1.13,
+            -0.092
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_05"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_06",
+          "type": "Mesh",
+          "localPosition": [
+            -0.184,
+            1.13,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            -0.184,
+            1.13,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_06"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_07",
+          "type": "Mesh",
+          "localPosition": [
+            -0.159349,
+            1.13,
+            0.092
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            -0.159349,
+            1.13,
+            0.092
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_07"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_08",
+          "type": "Mesh",
+          "localPosition": [
+            -0.092,
+            1.13,
+            0.159349
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            -0.092,
+            1.13,
+            0.159349
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_08"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_09",
+          "type": "Mesh",
+          "localPosition": [
+            0,
+            1.13,
+            0.184
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            1.13,
+            0.184
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_09"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_10",
+          "type": "Mesh",
+          "localPosition": [
+            0.092,
+            1.13,
+            0.159349
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0.092,
+            1.13,
+            0.159349
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_10"
+          }
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_11",
+          "type": "Mesh",
+          "localPosition": [
+            0.159349,
+            1.13,
+            0.092
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0.159349,
+            1.13,
+            0.092
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "BOTTLE_CAP_GRIP_11"
+          }
+        },
+        {
+          "name": "COL_REAGENT_BOTTLE",
+          "type": "Object3D",
+          "localPosition": [
+            0,
+            0.59,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            0.59,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "COL_REAGENT_BOTTLE",
+            "is_collision_proxy": true,
+            "collider": "cylinder",
+            "dimensions_m": [
+              0.64,
+              1.16,
+              0.64
+            ],
+            "mass_kg": 0.62
+          }
+        },
+        {
+          "name": "PIVOT_BOTTLE_CAP",
+          "type": "Object3D",
+          "localPosition": [
+            0,
+            1.13,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            1.13,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "PIVOT_BOTTLE_CAP",
+            "semantic": "twist_pivot",
+            "axis": [
+              0,
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "name": "PIVOT_BOTTLE_GRIP",
+          "type": "Object3D",
+          "localPosition": [
+            0.25,
+            0.62,
+            0.1
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0.25,
+            0.62,
+            0.1
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "PIVOT_BOTTLE_GRIP",
+            "semantic": "grip",
+            "grip": true
+          }
+        },
+        {
+          "name": "SOCKET_BOTTLE_POUR",
+          "type": "Object3D",
+          "localPosition": [
+            0,
+            1.1,
+            0
+          ],
+          "localQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "localScale": [
+            1,
+            1,
+            1
+          ],
+          "worldPosition": [
+            0,
+            1.1,
+            0
+          ],
+          "worldQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "worldScale": [
+            1,
+            1,
+            1
+          ],
+          "visible": true,
+          "userData": {
+            "name": "SOCKET_BOTTLE_POUR",
+            "semantic": "pour_socket",
+            "direction": [
+              0,
+              1,
+              0
+            ]
+          }
+        }
+      ],
+      "meshBounds": [
+        {
+          "name": "BOTTLE_BODY",
+          "min": [
+            -0.33,
+            0.07,
+            -0.33
+          ],
+          "max": [
+            0.33,
+            0.79,
+            0.33
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP",
+          "min": [
+            -0.19,
+            1.065,
+            -0.19
+          ],
+          "max": [
+            0.19,
+            1.195,
+            0.19
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_00",
+          "min": [
+            0.178,
+            1.104,
+            -0.0135
+          ],
+          "max": [
+            0.19,
+            1.156,
+            0.0135
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_01",
+          "min": [
+            0.148603,
+            1.104,
+            -0.105491
+          ],
+          "max": [
+            0.170095,
+            1.156,
+            -0.078509
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_02",
+          "min": [
+            0.078509,
+            1.104,
+            -0.170095
+          ],
+          "max": [
+            0.105491,
+            1.156,
+            -0.148603
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_03",
+          "min": [
+            -0.0135,
+            1.104,
+            -0.19
+          ],
+          "max": [
+            0.0135,
+            1.156,
+            -0.178
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_04",
+          "min": [
+            -0.105491,
+            1.104,
+            -0.170095
+          ],
+          "max": [
+            -0.078509,
+            1.156,
+            -0.148603
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_05",
+          "min": [
+            -0.170095,
+            1.104,
+            -0.105491
+          ],
+          "max": [
+            -0.148603,
+            1.156,
+            -0.078509
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_06",
+          "min": [
+            -0.19,
+            1.104,
+            -0.0135
+          ],
+          "max": [
+            -0.178,
+            1.156,
+            0.0135
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_07",
+          "min": [
+            -0.170095,
+            1.104,
+            0.078509
+          ],
+          "max": [
+            -0.148603,
+            1.156,
+            0.105491
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_08",
+          "min": [
+            -0.105491,
+            1.104,
+            0.148603
+          ],
+          "max": [
+            -0.078509,
+            1.156,
+            0.170095
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_09",
+          "min": [
+            -0.0135,
+            1.104,
+            0.178
+          ],
+          "max": [
+            0.0135,
+            1.156,
+            0.19
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_10",
+          "min": [
+            0.078509,
+            1.104,
+            0.148603
+          ],
+          "max": [
+            0.105491,
+            1.156,
+            0.170095
+          ]
+        },
+        {
+          "name": "BOTTLE_CAP_GRIP_11",
+          "min": [
+            0.148603,
+            1.104,
+            0.078509
+          ],
+          "max": [
+            0.170095,
+            1.156,
+            0.105491
+          ]
+        },
+        {
+          "name": "BOTTLE_NECK",
+          "min": [
+            -0.16,
+            0.9,
+            -0.16
+          ],
+          "max": [
+            0.16,
+            1.1,
+            0.16
+          ]
+        },
+        {
+          "name": "BOTTLE_SHOULDER",
+          "min": [
+            -0.318144,
+            0.72,
+            -0.318144
+          ],
+          "max": [
+            0.318144,
+            0.94,
+            0.318144
+          ]
+        }
+      ]
+    }
+  }
+}

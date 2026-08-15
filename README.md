@@ -11,6 +11,8 @@
 - 英文學習：`/english`
 - 多人闖關遊戲：`/game`
 - 晶核守衛塔防：`/tower-defense`
+- 奇趣科學島 3D 模擬實驗室：`/science-lab`
+- 寵物樂園養成與俯視冒險：`/pet`
 
 Mario Kart／Quiz Kart 實驗模組已移除，`/kart/*` 不再是有效路由。
 
@@ -59,3 +61,7 @@ npm run check:security
 需要已啟動伺服器的整合測試，可分別執行 `check:network-live`、`check:session-live`、`check:settings-live`、`check:host-ui-live`、`check:launchers-live`、`check:lasers-live` 及 `check:checkpoint-live`。
 
 塔防模擬及平衡測試可執行 `npm run check:tower-defense`；伺服器啟動後，以 `npm run check:tower-defense-live` 驗證三張地圖、答題經濟、塔管理、技能、音效狀態、勝負結算及響應式畫面。
+
+科學實驗室以 `npm run build:science-lab` 建立正式資源；`npm run check:science-lab` 驗證 5 個探究、科學安全、狀態保存及資源預算，`npm run check:science-lab-live` 驗證觸控版面、登入保護及非 WebGL 後備模式，`npm run check:science-lab-physics` 則以真實指標手勢回歸碰撞、浮力、摩擦、接線及其他科學狀態。
+
+寵物樂園以 `npm run build:pet` 建立正式資源；`npm run check:pet` 驗證養成、經濟、素材及安全規則，`npm run check:pet-live` 則在桌面、iPad 橫向及手機尺寸驗收學生與老師完整流程。詳細內容見 `pet-app/README.md`。
