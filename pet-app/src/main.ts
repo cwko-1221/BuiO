@@ -218,7 +218,7 @@ class StudentApp {
   }
 
   private picker(title: string, body: string) {
-    this.modal(`<div class="picker"><header class="picker-head"><h2>${escapeHtml(title)}</h2><button class="round-button" data-action="close-modal" aria-label="${this.locale==='zh-HK'?'關閉':'Close'}">✕</button></header><div class="picker-body">${body}</div></div>`);
+    this.modal(`<div class="picker"><header class="picker-head"><h2>${escapeHtml(title)}</h2><button class="round-button" data-action="close-modal" aria-label="${this.locale==='zh-HK'?'關閉':'Close'}">✕</button></header><div class="picker-body">${body}</div></div>`,'framed');
   }
   private async feed(foodId:string){const pet=this.activePet()!;const result=await api.feed(pet.id,foodId,idempotencyKey());audio.sfx('feed');this.game?.events.emit('pet:emote',result.evolved?'evolve':'eat');if(result.evolved){audio.sfx('evolve');this.celebrate('evolve');}await this.reload();this.startBedroom();this.renderHomePanel();this.renderFeedPicker();}
   private async activate(petId:string){await api.activatePet(petId);await this.reload();audio.sfx('happy');this.renderCollection();}
@@ -259,7 +259,7 @@ class StudentApp {
   private updateWallet(){this.setValue('#coinBalance',this.state.wallet.balance.toLocaleString());this.setValue('#dustBalance',String(this.state.profile.stardust));}
   private setValue(selector:string,value:string){const node=document.querySelector<HTMLElement>(selector);if(!node)return;if(node.textContent===value){node.textContent=value;return;}node.textContent=value;node.classList.remove('bump');void node.offsetWidth;node.classList.add('bump');window.setTimeout(()=>node.classList.remove('bump'),400);}
   private toast(message:string,error=false){const element=document.createElement('div');element.className=`toast ${error?'error':''}`;element.setAttribute('role',error?'alert':'status');element.textContent=message;document.querySelector('#toasts')?.append(element);window.setTimeout(()=>{element.classList.add('leaving');window.setTimeout(()=>element.remove(),200);},3000);}
-  private modal(content:string){const root=document.querySelector('#modalRoot')!;root.innerHTML=`<div class="modal-backdrop"><div class="modal-card">${content}</div></div>`;root.querySelector('[data-action="back-home"]')?.addEventListener('click',()=>{root.innerHTML='';this.openHome();});}
+  private modal(content:string,variant=''){const root=document.querySelector('#modalRoot')!;root.innerHTML=`<div class="modal-backdrop"><div class="modal-card ${variant}">${content}</div></div>`;root.querySelector('[data-action="back-home"]')?.addEventListener('click',()=>{root.innerHTML='';this.openHome();});}
   private celebrate(type:string){const layer=document.querySelector('#celebrationLayer')!;layer.innerHTML=Array.from({length:type==='epic'?42:24},(_,index)=>`<i style="--x:${Math.random()*100}%;--d:${Math.random()*.9}s;--c:${index%5}"></i>`).join('');window.setTimeout(()=>layer.innerHTML='',2200);}
 }
 

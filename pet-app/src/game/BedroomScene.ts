@@ -18,9 +18,22 @@ export class BedroomScene extends Phaser.Scene {
   editing = false;
   roomScale = 1;
   grid?: Phaser.GameObjects.Graphics;
+  ghost?: Phaser.GameObjects.Graphics;
 
   constructor() { super('Bedroom'); }
-  init(data: BedroomData) { this.model = data; this.placements = data.bootstrap.room.placements.map((item) => ({ ...item })); this.editing = !!data.editing; }
+  init(data: BedroomData) {
+    this.model = data;
+    this.placements = data.bootstrap.room.placements.map((item) => ({ ...item }));
+    this.editing = !!data.editing;
+    // Phaser reuses the scene instance across stop/start, so these fields survive a restart.
+    // Leaving destroyed containers in the map made setEditing() touch objects whose .input
+    // had already been torn down ("Cannot set properties of undefined (setting 'draggable')"),
+    // which threw during create() and left the room blank.
+    this.furniture.clear();
+    this.grid = undefined;
+    this.ghost = undefined;
+    this.avatar = undefined;
+  }
   preload() {
     const catalog = this.model.bootstrap.catalog;
     const room = catalog.rooms.find((entry) => entry.id === this.model.bootstrap.room.themeId);
@@ -52,8 +65,12 @@ export class BedroomScene extends Phaser.Scene {
       scale: .86,
     });
     this.avatar.setDepth(60);
+    this.ghost = this.add.graphics().setDepth(15);
     this.input.on('drag', (_pointer: Phaser.Input.Pointer, target: Phaser.GameObjects.Container, dragX: number, dragY: number) => {
-      if (!this.editing || !target.getData('placementId')) return; target.x = dragX; target.y = dragY;
+      if (!this.editing || !target.getData('placementId')) return;
+      target.x = dragX; target.y = dragY;
+      const placement = this.placements.find((item) => item.id === target.getData('placementId'));
+      if (placement) this.drawFootprint(placement, this.screenToGrid(dragX, dragY));
     });
     this.input.on('dragend', (_pointer: Phaser.Input.Pointer, target: Phaser.GameObjects.Container) => {
       if (!this.editing) return;
@@ -65,6 +82,7 @@ export class BedroomScene extends Phaser.Scene {
       }
       const screen = this.gridToScreen(placement.x, placement.y); target.setPosition(screen.x, screen.y);
       target.setDepth(this.depthFor(placement)); // re-sort: moving a piece changes what it occludes
+      this.clearFootprint();
       this.game.events.emit('room:placements', this.placements.map((item) => ({ ...item })));
     });
     this.game.events.on('room:set-editing', this.setEditing, this);
@@ -98,6 +116,34 @@ export class BedroomScene extends Phaser.Scene {
     const dx = (x - ORIGIN_X) / TILE_WIDTH; const dy = (y - ORIGIN_Y) / TILE_HEIGHT;
     return { x: Phaser.Math.Clamp(Math.round((dx + dy) / 2), 0, 11), y: Phaser.Math.Clamp(Math.round((dy - dx) / 2), 0, 9) };
   }
+  /**
+   * Footprint preview under a dragged piece: one isometric tile per grid cell it would
+   * occupy, green where the drop is legal and red where it is not. Without this a child
+   * only discovers an illegal placement when the piece snaps back, with no explanation of
+   * how much floor the piece actually needs.
+   */
+  private drawFootprint(placement: RoomPlacement, cell: { x: number; y: number }) {
+    const ghost = this.ghost; if (!ghost) return;
+    ghost.clear();
+    const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+    const legal = this.fits(placement.itemId, cell.x, cell.y, placement.rotation, placement.id);
+    ghost.fillStyle(legal ? 0x53d987 : 0xf2685c, .38);
+    ghost.lineStyle(3, legal ? 0x1f9d57 : 0xc2352a, .95);
+    for (let x = cell.x; x < cell.x + width; x += 1) {
+      for (let y = cell.y; y < cell.y + height; y += 1) {
+        // Grid coordinates are lattice points, so a cell spans (x,y) to (x+1,y+1).
+        const corners = [
+          this.gridToScreen(x, y), this.gridToScreen(x + 1, y),
+          this.gridToScreen(x + 1, y + 1), this.gridToScreen(x, y + 1),
+        ].map((point) => new Phaser.Math.Vector2(point.x, point.y));
+        ghost.fillPoints(corners, true);
+        ghost.strokePoints(corners, true, true);
+      }
+    }
+  }
+
+  private clearFootprint() { this.ghost?.clear(); }
+
   /** Grid footprint after rotation. 90/270 swap the axes, matching the server. */
   private footprintOf(itemId: string, rotation: number): [number, number] {
     const definition = this.model.bootstrap.catalog.furniture.find((item) => item.id === itemId);
@@ -192,7 +238,14 @@ export class BedroomScene extends Phaser.Scene {
   private setEditing(value: boolean) {
     this.editing = value;
     this.grid?.setVisible(value);
-    this.furniture.forEach((item) => { this.input.setDraggable(item, value); item.input!.draggable = value; });
+    if (!value) this.clearFootprint();
+    this.furniture.forEach((item, id) => {
+      // A container destroyed by a scene restart keeps its map entry but loses its input;
+      // drop it rather than trusting it. The non-null assertion here used to throw.
+      if (!item.active || !item.input) { this.furniture.delete(id); return; }
+      this.input.setDraggable(item, value);
+      item.input.draggable = value;
+    });
   }
   private placeNewItem(itemId: string) {
     if (!this.editing || this.placements.length >= 80) return;
