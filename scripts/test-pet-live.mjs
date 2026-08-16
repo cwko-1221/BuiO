@@ -65,7 +65,20 @@ try {
   const stageWidth=(await page.locator('.room-stage').boundingBox()).width;
   const mainWidth=(await page.locator('#petMain').boundingBox()).width;
   assert.equal(Math.round(stageWidth),Math.round(mainWidth),'the room must span the full width of the app on the room tab');
-  await page.locator('[data-action="decorate"]').click(); await page.locator('#roomTheme').waitFor();
+  await page.locator('[data-action="decorate"]').click(); await page.locator('[data-action="open-themes"]').waitFor();
+  // Native <select> popups are drawn by the OS and cannot be styled, so the decorate bar
+  // must not contain any.
+  assert.equal(await page.locator('.decor-head select').count(),0,'decorate controls must not use native selects');
+  // Inventory counts track what is already in the room, in real time.
+  // Pin the id first: ":not([disabled])" is re-evaluated on every use, so after the piece is
+  // disabled the same locator would silently resolve to the next available button.
+  const spareId=await page.locator('.decor-strip [data-action="add-furniture"]:not([disabled])').first().getAttribute('data-id');
+  const spare=page.locator(`[data-action="add-furniture"][data-id="${spareId}"]`);
+  assert.equal(await spare.locator('small').innerText(),'×1');
+  await spare.click();
+  await page.waitForFunction((id)=>document.querySelector(`[data-action="add-furniture"][data-id="${id}"]`)?.hasAttribute('disabled'),spareId);
+  assert.equal(await spare.locator('small').innerText(),'×0');
+  assert.equal(await spare.isDisabled(),true,'a placed piece must leave the selectable strip');
   await page.screenshot({path:path.join(artifactDir,'06-decoration-ipad-landscape.png')});
   await page.locator('[data-tab="home"]').click(); await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(250);
   await page.screenshot({path:path.join(artifactDir,'07-home-mobile.png')});

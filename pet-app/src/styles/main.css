@@ -1347,3 +1347,84 @@ html.reduced-motion *, html.reduced-motion *:before, html.reduced-motion *:after
   transform: rotate(45deg); pointer-events: none;
 }
 .field:after { top: auto; bottom: 22px; margin-top: 0; }
+
+/* --- pet status in the top bar ------------------------------------------- */
+/* Stardust had no sink yet, so its pill was dead HUD. The room's identity row moved up
+   here to share that space with the coin pill instead of costing a second row. */
+.pet-status {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; align-items: center; gap: var(--s2);
+  padding: 6px var(--s2); min-height: 52px;
+  background: var(--game-face);
+  border: var(--stroke) solid var(--stroke-col);
+  border-radius: var(--r-pill);
+  box-shadow: var(--raise);
+}
+.pet-status:empty { display: none; }
+.pet-status b { font-weight: 900; font-size: 1.02rem; white-space: nowrap; }
+.pet-status .room-bar-stage { white-space: nowrap; }
+.pet-status .progress { flex: 1 1 90px; min-width: 70px; max-width: 260px; }
+.pet-status small { color: var(--ink-quiet); font-weight: 700; white-space: nowrap; }
+
+@media (max-width: 900px) {
+  /* Keep the name and stage; the XP readout is the first thing that can go. */
+  .pet-status small { display: none; }
+}
+@media (max-width: 560px) {
+  .pet-status { gap: var(--s1); padding: 4px var(--s1); min-height: 46px; }
+  .pet-status .progress { display: none; }
+  .pet-status b { font-size: .95rem; }
+}
+
+/* --- decorate controls: no native selects -------------------------------- */
+/* A native <select> popup is drawn by the operating system and cannot be styled at all, so
+   it breaks the illusion the instant it opens. Two-state settings became a toggle and the
+   theme list opens in the same framed picker used elsewhere. */
+.chooser {
+  display: grid; gap: 0; text-align: left;
+  padding: 6px var(--s2); min-height: 48px;
+  background: var(--game-face);
+  border: var(--stroke) solid var(--stroke-col);
+  border-radius: var(--r-md);
+  box-shadow: var(--raise);
+  cursor: pointer;
+}
+.chooser small { font-size: .68rem; color: var(--ink-quiet); font-weight: 700; line-height: 1.1; }
+.chooser b { font-size: .86rem; font-weight: 900; white-space: nowrap; }
+.chooser:active { transform: translateY(var(--press)); box-shadow: 0 0 0 var(--edge-cream); }
+
+.segmented-toggle {
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px; min-height: 48px;
+  background: var(--sunk);
+  border: var(--stroke) solid var(--stroke-col);
+  border-radius: var(--r-md);
+  box-shadow: var(--raise);
+}
+.segmented-toggle > small { font-size: .68rem; color: var(--ink-quiet); font-weight: 700; padding: 0 4px; }
+.seg {
+  border: 0; border-radius: calc(var(--r-md) - 6px);
+  padding: 0 var(--s2); min-height: 36px;
+  background: transparent; color: var(--ink-quiet);
+  font-family: inherit; font-size: .8rem; font-weight: 800; cursor: pointer;
+  white-space: nowrap;
+}
+.seg.on { background: var(--game-face-hot); color: #6d3410; box-shadow: var(--lift-1); }
+
+/* --- theme picker -------------------------------------------------------- */
+.theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--s2); }
+.theme-card {
+  display: grid; gap: 6px; padding: 6px; cursor: pointer;
+  background: var(--game-face);
+  border: var(--stroke) solid var(--stroke-col);
+  border-radius: var(--r-lg);
+  box-shadow: var(--raise);
+}
+.theme-card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--r-sm); display: block; }
+.theme-card b { font-size: .84rem; font-weight: 900; }
+.theme-card.on { background: var(--game-face-hot); box-shadow: var(--raise-hot); }
+.theme-card:active { transform: translateY(var(--press)); box-shadow: 0 0 0 var(--edge-cream); }
+
+/* Placed-out pieces stay visible but clearly unavailable. */
+.decor-strip button[disabled] { opacity: .42; box-shadow: none; cursor: not-allowed; transform: translateY(var(--press)); }
+.decor-strip button[disabled] small { color: var(--danger-ink); }

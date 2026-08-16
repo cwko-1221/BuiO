@@ -53,7 +53,8 @@ class StudentApp {
     app.innerHTML = `<div class="pet-shell">
       <header class="pet-topbar">
         <a class="brand" href="/" aria-label="BuiO"><span class="brand-mark">B</span><span><b>${this.t('title')}</b><small>${escapeHtml(this.identity.name)} · ${escapeHtml(this.identity.className || '')}</small></span></a>
-        <div class="wallet"><span>${icon('coin')}<b id="coinBalance">${this.state.wallet.balance.toLocaleString()}</b><small>${this.t('coins')}</small></span><span>${icon('spark')}<b id="dustBalance">${this.state.profile.stardust}</b><small>${this.t('dust')}</small></span></div>
+        <div class="pet-status" id="petStatus"></div>
+        <div class="wallet"><span>${icon('coin')}<b id="coinBalance">${this.state.wallet.balance.toLocaleString()}</b><small>${this.t('coins')}</small></span></div>
         <button class="round-button" data-action="audio" aria-label="Sound">${icon(audio.enabled?'sound':'mute')}</button>
       </header>
       <main class="pet-main" id="petMain" data-layout="room">
@@ -89,6 +90,16 @@ class StudentApp {
       if (action === 'buy-item') return this.buyItem(button.dataset.id!,button as HTMLButtonElement);
       if (action === 'shop-category') return this.renderShop(button.dataset.id!);
       if (action === 'decorate') return this.renderDecorator();
+      if (action === 'open-themes') return this.renderThemePicker();
+      if (action === 'set-theme') {
+        this.state.room.themeId=button.dataset.id!;
+        document.querySelector('#modalRoot')!.innerHTML='';
+        this.startBedroom(); this.renderDecorator(); return;
+      }
+      if (action === 'set-visibility') {
+        this.state.room.visibility=button.dataset.id as 'private'|'class';
+        this.renderDecorator(); return;
+      }
       if (action === 'open-feed') return this.renderFeedPicker();
       if (action === 'open-outfit') return this.renderOutfitPicker();
       if (action === 'close-modal') { document.querySelector('#modalRoot')!.innerHTML=''; return; }
@@ -132,7 +143,7 @@ class StudentApp {
       this.surfaceObserver.observe(surface);
     }
     this.game.scene.add('Bedroom',BedroomScene,false);
-    this.game.events.on('room:placements',(placements:RoomPlacement[])=>{this.roomPlacements=placements.map((item)=>({...item}));});
+    this.game.events.on('room:placements',(placements:RoomPlacement[])=>{this.roomPlacements=placements.map((item)=>({...item}));this.refreshDecorStrip();});
     this.game.events.on('room:selected',(id:string)=>{this.selectedFurniture=id;document.querySelector('#furnitureActions')?.classList.add('visible');});
   }
   private startBedroom(roomOverride?: any, petOverride?: PetInstance) {
@@ -174,6 +185,7 @@ class StudentApp {
       document.querySelector('#sidePanel')!.innerHTML = '';
     } else {
       document.querySelector('#roomBar')!.innerHTML = '';
+      document.querySelector('#petStatus')!.innerHTML = ''; // no pet context off the room tab
       // Nothing is visible, so stop rendering it: a hidden Phaser scene running at 60fps is
       // pure battery cost on a tablet.
       this.game?.scene.stop('Bedroom');
@@ -193,7 +205,9 @@ class StudentApp {
       ['open-feed','food',this.t('feed')],
       ['open-outfit','spark',this.locale==='zh-HK'?'換裝':'Outfit'],
     ];
-    document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity"><span class="rarity ${definition.rarity}">${definition.rarity}</span><h1>${escapeHtml(this.petName(definition,pet.stage))}</h1><span class="room-bar-stage">Stage ${pet.stage}/4</span><div class="progress" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progress}%"></i></div><small>${pet.xp.toLocaleString()} XP · ${this.t('daily')} ${dailyXp}/${this.state.catalog.dailyXpCap}</small></div><div class="room-bar-actions">${actions.map(([action,glyph,label])=>`<button data-action="${action}">${icon(glyph)}<span>${escapeHtml(label)}</span></button>`).join('')}</div>`;
+    // Identity rides in the top bar alongside the coin pill; the room bar carries only actions.
+    document.querySelector('#petStatus')!.innerHTML=`<span class="rarity ${definition.rarity}">${definition.rarity}</span><b>${escapeHtml(this.petName(definition,pet.stage))}</b><span class="room-bar-stage">Stage ${pet.stage}/4</span><div class="progress" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progress}%"></i></div><small>${pet.xp.toLocaleString()} XP · ${this.t('daily')} ${dailyXp}/${this.state.catalog.dailyXpCap}</small>`;
+    document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-actions">${actions.map(([action,glyph,label])=>`<button data-action="${action}">${icon(glyph)}<span>${escapeHtml(label)}</span></button>`).join('')}</div>`;
   }
 
   /**
@@ -239,24 +253,74 @@ class StudentApp {
     this.game?.events.emit('room:set-editing',true);
     const zh=this.locale==='zh-HK';
     const owned=this.state.catalog.furniture.filter((item)=>this.inventory(item.id)>0);
-    const themes=this.state.catalog.rooms.filter((room)=>this.inventory(`room:${room.id}`)>0);
+    const theme=this.state.catalog.rooms.find((room)=>room.id===this.state.room.themeId);
     const inventory=owned.length
-      ?`<div class="decor-strip">${owned.map((item)=>`<button data-action="add-furniture" data-id="${item.id}"><span>${escapeHtml(this.name(item.name).split(/[・·‧·]/).pop()!.trim())}</span><small>×${this.inventory(item.id)}</small></button>`).join('')}</div>`
+      ?`<div class="decor-strip">${owned.map((item)=>{const left=this.remaining(item.id);return `<button data-action="add-furniture" data-id="${item.id}" ${left?'':'disabled'}><span>${escapeHtml(this.name(item.name).split(/[・·‧·]/).pop()!.trim())}</span><small>×${left}</small></button>`;}).join('')}</div>`
       :`<div class="decor-strip empty"><span>${zh?'還沒有家具。':'No furniture yet.'}</span><button data-tab="shop" class="secondary">${zh?'去商店選購家具':'Browse furniture'}</button></div>`;
     // Decorating happens in the room, so the controls stay a bar above it rather than a side
     // column — the child needs to see the whole floor while placing.
     this.setLayout('room');
     document.querySelector('#petMain')?.setAttribute('data-mode','editing');
-    document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity decor-head"><h1>${this.t('decorate')}</h1><label class="inline-field"><span>${zh?'主題':'Theme'}</span><select id="roomTheme">${themes.map((room)=>`<option value="${room.id}" ${room.id===this.state.room.themeId?'selected':''}>${escapeHtml(this.name(room.name))}</option>`).join('')}</select></label><label class="inline-field"><span>${zh?'參觀':'Visits'}</span><select id="roomVisibility"><option value="private" ${this.state.room.visibility==='private'?'selected':''}>${this.t('private')}</option><option value="class" ${this.state.room.visibility==='class'?'selected':''}>${this.t('class')}</option></select></label><div class="decor-tools" id="furnitureActions"><button data-action="rotate-item">↻ ${zh?'旋轉':'Rotate'}</button><button data-action="remove-item">× ${zh?'收回':'Remove'}</button></div><button class="primary" data-action="save-room">${this.t('save')}</button><button class="secondary" data-action="back-home">${zh?'取消':'Cancel'}</button></div>${inventory}`;
+    // No <select> anywhere: a native option list is rendered by the OS and cannot be styled,
+    // so it breaks the illusion the moment it opens. Visibility is a two-state toggle and the
+    // theme opens the same framed picker the rest of the app uses.
+    const visibility=(value:'private'|'class',label:string)=>`<button data-action="set-visibility" data-id="${value}" class="seg ${this.state.room.visibility===value?'on':''}">${label}</button>`;
+    document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity decor-head"><h1>${this.t('decorate')}</h1><button class="chooser" data-action="open-themes"><small>${zh?'主題':'Theme'}</small><b>${escapeHtml(theme?this.name(theme.name):'—')}</b></button><div class="segmented-toggle"><small>${zh?'參觀':'Visits'}</small>${visibility('private',this.t('private'))}${visibility('class',this.t('class'))}</div><div class="decor-tools" id="furnitureActions"><button data-action="rotate-item">↻ ${zh?'旋轉':'Rotate'}</button><button data-action="remove-item">× ${zh?'收回':'Remove'}</button></div><button class="primary" data-action="save-room">${this.t('save')}</button><button class="secondary" data-action="back-home">${zh?'取消':'Cancel'}</button></div>${inventory}`;
   }
-  private async saveRoom(){const result=await api.saveRoom({themeId:this.state.room.themeId,visibility:this.state.room.visibility,placements:this.roomPlacements});this.state.room=result;audio.sfx('decorate');await this.reload();this.game?.events.emit('room:set-editing',false);this.openHome();this.toast(this.locale==='zh-HK'?'房間已儲存。':'Room saved.');}
+
+  /**
+   * Update the counts in place as pieces are placed and removed. Patching the existing
+   * buttons rather than re-rendering the strip keeps its horizontal scroll position, which
+   * matters when there are ten pieces and the child is mid-scroll.
+   */
+  private refreshDecorStrip(){
+    const strip=document.querySelector('.decor-strip'); if(!strip) return;
+    strip.querySelectorAll<HTMLButtonElement>('[data-action="add-furniture"]').forEach((button)=>{
+      const left=this.remaining(button.dataset.id!);
+      const count=button.querySelector('small'); if(count) count.textContent=`×${left}`;
+      button.disabled=left<=0;
+    });
+  }
+
+  /** Copies still free to place: owned minus whatever is already in the room right now. */
+  private remaining(itemId:string){
+    return this.inventory(itemId)-this.roomPlacements.filter((placement)=>placement.itemId===itemId).length;
+  }
+
+  private renderThemePicker(){
+    const zh=this.locale==='zh-HK';
+    const themes=this.state.catalog.rooms.filter((room)=>this.inventory(`room:${room.id}`)>0);
+    const body=`<div class="theme-grid">${themes.map((room)=>`<button class="theme-card ${room.id===this.state.room.themeId?'on':''}" data-action="set-theme" data-id="${room.id}"><img src="${room.art}" alt="" loading="lazy"><b>${escapeHtml(this.name(room.name))}</b></button>`).join('')}</div>`;
+    this.picker(zh?'房間主題':'Room theme',body);
+  }
+  private async saveRoom(){
+    const button=document.querySelector<HTMLButtonElement>('[data-action="save-room"]');
+    if(button){button.disabled=true;button.classList.add('loading');}
+    try{
+      const result=await api.saveRoom({themeId:this.state.room.themeId,visibility:this.state.room.visibility,placements:this.roomPlacements});
+      this.state.room=result;
+      this.roomPlacements=result.placements.map((item:RoomPlacement)=>({...item}));
+      audio.sfx('decorate');
+      // Saving a room touches no wallet, inventory or pet state, so there is nothing to
+      // re-fetch; and the scene already shows this exact arrangement. The old path did a full
+      // bootstrap round trip and then restarted the Phaser scene — re-running preload and
+      // rebuilding every furniture object — for no visible change. That was the delay.
+      this.game?.events.emit('room:set-editing',false);
+      document.querySelector('#petMain')?.removeAttribute('data-mode');
+      this.tab='home'; this.renderHomePanel();
+      this.toast(this.locale==='zh-HK'?'房間已儲存。':'Room saved.');
+    }catch(error){
+      if(button){button.disabled=false;button.classList.remove('loading');}
+      throw error;
+    }
+  }
   private async renderVisits(){this.setLayout('full');document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">CLASS VISITS</p><h1>${this.t('visit')}</h1><div class="loading-card">${this.locale==='zh-HK'?'正在尋找開放房間…':'Finding open rooms…'}</div></div>`;const data=await api.classRooms();document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">${escapeHtml(data.className||'CLASS')}</p><h1>${this.t('visit')}</h1><div class="visit-grid">${data.rooms.length?data.rooms.map((room:any)=>`<article class="visit-card"><div class="avatar-letter">${escapeHtml(room.ownerName).slice(0,1)}</div><div><h3>${escapeHtml(room.ownerName)}</h3><p>${room.activePet?escapeHtml(this.petName(this.state.catalog.pets.find((pet)=>pet.id===room.activePet.speciesId)!,room.activePet.stage)):this.locale==='zh-HK'?'尚未孵化':'No pet yet'}</p></div><button data-action="visit-room" data-id="${room.ownerStudentId}">${this.t('visitRoom')}</button></article>`).join(''):`<div class="empty-state">${this.locale==='zh-HK'?'暫時沒有同學開放房間。':'No classmates have opened their rooms yet.'}</div>`}</div></div>`;}
   private async visitRoom(studentId:string){const data=await api.room(studentId);this.visiting=data.room;if(data.room.activePet)this.startBedroom(data.room,data.room.activePet);this.setLayout('room');document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity visitor-panel"><p class="eyebrow">VISITING</p><h1>${escapeHtml(data.room.ownerName)}</h1><p>${this.locale==='zh-HK'?'只可觀看和送出每日一個表情；沒有留言或聊天。':'View the room and send one daily reaction. There are no messages or chat.'}</p><div class="reaction-row">${this.state.catalog.reactions.map((reaction,index)=>`<button data-action="reaction" data-owner="${studentId}" data-id="${reaction}"><span>${['♥','★','!','👏','✿','✦'][index]}</span><small>${data.room.reactions?.[reaction]||0}</small></button>`).join('')}</div><button class="secondary" data-action="back-home">${this.t('back')}</button></div>`;}
   private async react(owner:string,reaction:string){const result=await api.react(owner,reaction);audio.sfx('reaction');this.celebrate('reaction');document.querySelectorAll('[data-action="reaction"]').forEach((button)=>{const id=(button as HTMLElement).dataset.id!;button.querySelector('small')!.textContent=String(result.reactions[id]||0);});}
   private async toggleWearable(wearableId:string){const pet=this.activePet()!;const definition=this.state.catalog.wearables.find((item)=>item.id===wearableId)!;let outfit=pet.equippedWearables.filter((id)=>this.state.catalog.wearables.find((item)=>item.id===id)?.slot!==definition.slot);if(!pet.equippedWearables.includes(wearableId))outfit.push(wearableId);await api.setOutfit(pet.id,outfit);await this.reload();this.startBedroom();this.renderHomePanel();this.renderOutfitPicker();}
   private renderSettings(){this.setLayout('full');document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll settings-panel"><p class="eyebrow">COMFORT & ACCESS</p><h1>${this.t('settings')}</h1><label class="field"><span>${this.locale==='zh-HK'?'音樂音量':'Music volume'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.musicLevel}" data-setting="music"></label><label class="field"><span>${this.locale==='zh-HK'?'音效音量':'Sound effects'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.sfxLevel}" data-setting="sfx"></label><label class="toggle"><input type="checkbox" id="motionToggle" ${localStorage.getItem('pet-reduced-motion')==='1'?'checked':''}><span>${this.locale==='zh-HK'?'減少動畫':'Reduce motion'}</span></label><p class="privacy-note">${this.locale==='zh-HK'?'私隱：房間預設私人；公開後只有同班學生可參觀。系統沒有聊天、留言、交易或排行榜。':'Privacy: rooms are private by default. Only classmates can visit when opened. There is no chat, messaging, trading or leaderboard.'}</p></div>`;document.querySelector('#motionToggle')?.addEventListener('change',(event)=>{const on=(event.target as HTMLInputElement).checked;localStorage.setItem('pet-reduced-motion',on?'1':'0');document.documentElement.classList.toggle('reduced-motion',on);});}
   private async reload(){this.state=await api.bootstrap();this.roomPlacements=this.state.room.placements.map((item)=>({...item}));this.updateWallet();}
-  private updateWallet(){this.setValue('#coinBalance',this.state.wallet.balance.toLocaleString());this.setValue('#dustBalance',String(this.state.profile.stardust));}
+  private updateWallet(){this.setValue('#coinBalance',this.state.wallet.balance.toLocaleString());}
   private setValue(selector:string,value:string){const node=document.querySelector<HTMLElement>(selector);if(!node)return;if(node.textContent===value){node.textContent=value;return;}node.textContent=value;node.classList.remove('bump');void node.offsetWidth;node.classList.add('bump');window.setTimeout(()=>node.classList.remove('bump'),400);}
   private toast(message:string,error=false){const element=document.createElement('div');element.className=`toast ${error?'error':''}`;element.setAttribute('role',error?'alert':'status');element.textContent=message;document.querySelector('#toasts')?.append(element);window.setTimeout(()=>{element.classList.add('leaving');window.setTimeout(()=>element.remove(),200);},3000);}
   private modal(content:string,variant=''){const root=document.querySelector('#modalRoot')!;root.innerHTML=`<div class="modal-backdrop"><div class="modal-card ${variant}">${content}</div></div>`;root.querySelector('[data-action="back-home"]')?.addEventListener('click',()=>{root.innerHTML='';this.openHome();});}

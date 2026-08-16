@@ -70,17 +70,20 @@ export class BedroomScene extends Phaser.Scene {
       if (!this.editing || !target.getData('placementId')) return;
       target.x = dragX; target.y = dragY;
       const placement = this.placements.find((item) => item.id === target.getData('placementId'));
-      if (placement) this.drawFootprint(placement, this.screenToGrid(dragX, dragY));
+      if (!placement) return;
+      const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+      this.drawFootprint(placement, this.screenToFootprintOrigin(dragX, dragY, width, height));
     });
     this.input.on('dragend', (_pointer: Phaser.Input.Pointer, target: Phaser.GameObjects.Container) => {
       if (!this.editing) return;
       const placement = this.placements.find((item) => item.id === target.getData('placementId')); if (!placement) return;
-      const grid = this.screenToGrid(target.x, target.y);
+      const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+      const grid = this.screenToFootprintOrigin(target.x, target.y, width, height);
       // Snap back to the last valid square rather than accepting a drop the server will reject.
       if (this.fits(placement.itemId, grid.x, grid.y, placement.rotation, placement.id)) {
         placement.x = grid.x; placement.y = grid.y;
       }
-      const screen = this.gridToScreen(placement.x, placement.y); target.setPosition(screen.x, screen.y);
+      const screen = this.footprintCentre(placement); target.setPosition(screen.x, screen.y);
       target.setDepth(this.depthFor(placement)); // re-sort: moving a piece changes what it occludes
       this.clearFootprint();
       this.game.events.emit('room:placements', this.placements.map((item) => ({ ...item })));
@@ -144,6 +147,25 @@ export class BedroomScene extends Phaser.Scene {
 
   private clearFootprint() { this.ghost?.clear(); }
 
+  /** Screen position of the centre of a placement's footprint. */
+  private footprintCentre(placement: RoomPlacement) {
+    const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+    return this.gridToScreen(placement.x + width / 2, placement.y + height / 2);
+  }
+
+  /**
+   * Inverse of footprintCentre: the origin cell for a footprint whose centre sits at a screen
+   * point. Clamped so a large piece cannot be dragged partly outside the room.
+   */
+  private screenToFootprintOrigin(x: number, y: number, width: number, height: number) {
+    const dx = (x - ORIGIN_X) / TILE_WIDTH;
+    const dy = (y - ORIGIN_Y) / TILE_HEIGHT;
+    return {
+      x: Phaser.Math.Clamp(Math.round((dx + dy) / 2 - width / 2), 0, 12 - width),
+      y: Phaser.Math.Clamp(Math.round((dy - dx) / 2 - height / 2), 0, 10 - height),
+    };
+  }
+
   /** Grid footprint after rotation. 90/270 swap the axes, matching the server. */
   private footprintOf(itemId: string, rotation: number): [number, number] {
     const definition = this.model.bootstrap.catalog.furniture.find((item) => item.id === itemId);
@@ -194,12 +216,21 @@ export class BedroomScene extends Phaser.Scene {
 
   private addFurniture(placement: RoomPlacement) {
     const definition = this.model.bootstrap.catalog.furniture.find((item) => item.id === placement.itemId); if (!definition) return;
-    const point = this.gridToScreen(placement.x, placement.y);
+    // Anchor on the CENTRE of the footprint, not its top lattice corner. Anchoring at the
+    // corner made a multi-cell piece sit visibly off the tiles it actually occupies — the
+    // "floating" look, and it disagreed with the footprint preview.
+    const point = this.footprintCentre(placement);
     const container = this.add.container(point.x, point.y).setDepth(this.depthFor(placement));
     const art = this.furnitureArt(definition, placement); container.add(art);
     container.setAngle(placement.rotation);
-    const [footprintX, footprintY] = definition.footprint || [1, 1];
-    container.setSize(Math.max(64, footprintX * TILE_WIDTH), Math.max(56, footprintY * TILE_HEIGHT * 2)).setInteractive({ draggable: true, useHandCursor: true });
+    // Hit area must match what is drawn. setSize() builds a rect centred on the container
+    // origin, but the art renders upward from its base, so only the bottom corner of a piece
+    // was grabbable. Derive the rect from the rendered bounds instead.
+    const bounds = container.getBounds();
+    container.setInteractive(
+      new Phaser.Geom.Rectangle(bounds.x - container.x, bounds.y - container.y, bounds.width, bounds.height),
+      Phaser.Geom.Rectangle.Contains,
+    );
     container.setData('placementId', placement.id); this.input.setDraggable(container, this.editing);
     container.on('pointerdown', () => { this.furniture.forEach((item) => item.setAlpha(1)); container.setAlpha(.7); this.game.events.emit('room:selected', placement.id); });
     this.furniture.set(placement.id, container);
@@ -277,6 +308,8 @@ export class BedroomScene extends Phaser.Scene {
       return;
     }
     placement.rotation = rotation; object.setAngle(rotation);
+    // A rotated non-square footprint occupies different cells, so its centre moves too.
+    const centre = this.footprintCentre(placement); object.setPosition(centre.x, centre.y);
     this.game.events.emit('room:placements', this.placements.map((item) => ({ ...item })));
   }
   private removeSelected(id: string) { const index = this.placements.findIndex((item) => item.id === id); if (index < 0) return; this.placements.splice(index,1); this.furniture.get(id)?.destroy(); this.furniture.delete(id); this.game.events.emit('room:placements', this.placements); }
