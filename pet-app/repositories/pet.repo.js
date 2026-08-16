@@ -169,6 +169,10 @@ function publicPet(row) {
     xp: Number(row.xp) || 0, stage: Number(row.stage) || 1,
     dailyXp: Number(row.dailyXp ?? row.dailyxp) || 0,
     dailyXpDate: row.dailyXpDate || row.dailyxpdate || '',
+    // Outfits are still a live feature — setOutfit(), PUT /pets/:petId/outfit and the
+    // EquippedWearables column all remain. Omitting it here left the client reading
+    // .length off undefined and the room scene failing to build the pet.
+    equippedWearables: row.equippedWearables || row.equippedwearables || [],
   };
 }
 

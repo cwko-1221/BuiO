@@ -186,8 +186,9 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     return container;
   }
 
-  private addWearables(ids: string[]) {
-    ids.forEach((id, index) => {
+  /** Tolerates a missing outfit: a cosmetic field must never stop the pet from rendering. */
+  private addWearables(ids: string[] | undefined) {
+    (ids ?? []).forEach((id, index) => {
       const hue = Math.abs([...id].reduce((sum, char) => sum + char.charCodeAt(0), 0) * 7919) % 0xffffff;
       if (id.startsWith('head')) this.add(this.scene.add.star(0, -130, 5, 16, 28, hue).setAngle(index * 8));
       else if (id.startsWith('face')) this.add(this.scene.add.rectangle(0, -62, 78, 25, hue, 0.25).setStrokeStyle(4, hue));
