@@ -49,12 +49,22 @@ try {
   await page.locator('.modal-card [data-action="back-home"]').click();
   await page.locator('#game-root canvas').waitFor();
   await page.locator('[data-tab="collection"]').click(); await page.locator('.pet-card').first().waitFor();
+  // Browsing tabs do not show the room at all.
+  assert.equal(await page.locator('#petMain').getAttribute('data-layout'),'full');
+  assert.equal(await page.locator('.room-stage').isVisible(),false);
   assert.equal(await page.locator('.pet-card').count(),20);
   await page.setViewportSize({width:1180,height:820}); await page.screenshot({path:path.join(artifactDir,'03-collection-ipad-landscape.png')});
   await page.locator('[data-tab="shop"]').click(); await page.locator('.shop-feature').waitFor();
   assert.match(await page.locator('.shop-feature').innerText(),/55%/);
 
-  await page.locator('[data-tab="home"]').click(); await page.locator('.home-panel').waitFor();
+  // The room tab now puts its controls in a bar above a full-width play surface rather than
+  // in a side panel, so assert on the bar and that the room genuinely owns the full width.
+  await page.locator('[data-tab="home"]').click(); await page.locator('.room-bar-actions').waitFor();
+  assert.equal(await page.locator('#petMain').getAttribute('data-layout'),'room');
+  assert.equal(await page.locator('.side-panel').isVisible(),false);
+  const stageWidth=(await page.locator('.room-stage').boundingBox()).width;
+  const mainWidth=(await page.locator('#petMain').boundingBox()).width;
+  assert.equal(Math.round(stageWidth),Math.round(mainWidth),'the room must span the full width of the app on the room tab');
   await page.locator('[data-action="decorate"]').click(); await page.locator('#roomTheme').waitFor();
   await page.screenshot({path:path.join(artifactDir,'06-decoration-ipad-landscape.png')});
   await page.locator('[data-tab="home"]').click(); await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(250);

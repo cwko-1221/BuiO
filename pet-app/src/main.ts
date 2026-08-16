@@ -56,8 +56,11 @@ class StudentApp {
         <div class="wallet"><span>${icon('coin')}<b id="coinBalance">${this.state.wallet.balance.toLocaleString()}</b><small>${this.t('coins')}</small></span><span>${icon('spark')}<b id="dustBalance">${this.state.profile.stardust}</b><small>${this.t('dust')}</small></span></div>
         <button class="round-button" data-action="audio" aria-label="Sound">${icon(audio.enabled?'sound':'mute')}</button>
       </header>
-      <main class="pet-main">
-        <section class="play-surface" id="playSurface"><div id="game-root"></div><div id="gameHud" class="game-hud"></div><div id="celebrationLayer" class="celebration-layer" aria-hidden="true"></div></section>
+      <main class="pet-main" id="petMain" data-layout="room">
+        <section class="room-stage">
+          <div class="room-bar" id="roomBar"></div>
+          <section class="play-surface" id="playSurface"><div id="game-root"></div><div id="gameHud" class="game-hud"></div><div id="celebrationLayer" class="celebration-layer" aria-hidden="true"></div></section>
+        </section>
         <aside class="side-panel" id="sidePanel"></aside>
       </main>
       <nav class="pet-nav" aria-label="Pet Paradise">
@@ -86,6 +89,9 @@ class StudentApp {
       if (action === 'buy-item') return this.buyItem(button.dataset.id!,button as HTMLButtonElement);
       if (action === 'shop-category') return this.renderShop(button.dataset.id!);
       if (action === 'decorate') return this.renderDecorator();
+      if (action === 'open-feed') return this.renderFeedPicker();
+      if (action === 'open-outfit') return this.renderOutfitPicker();
+      if (action === 'close-modal') { document.querySelector('#modalRoot')!.innerHTML=''; return; }
       if (action === 'add-furniture') { this.game?.events.emit('room:add-item',button.dataset.id); return; }
       if (action === 'rotate-item') { if(this.selectedFurniture)this.game?.events.emit('room:rotate-selected',this.selectedFurniture); return; }
       if (action === 'remove-item') { if(this.selectedFurniture)this.game?.events.emit('room:remove-selected',this.selectedFurniture); return; }
@@ -136,30 +142,89 @@ class StudentApp {
     if(roomOverride)this.state.room=originalRoom;audio.setTheme('bedroom');
   }
   private openHome() {
-    this.visiting=undefined;this.tab='home';this.startBedroom();this.renderHomePanel();document.querySelector('#gameHud')!.innerHTML='';
+    this.visiting=undefined;this.tab='home';
+    this.game?.events.emit('room:set-editing',false);
+    document.querySelector('#petMain')?.removeAttribute('data-mode');
+    this.startBedroom();this.renderHomePanel();document.querySelector('#gameHud')!.innerHTML='';
   }
   private renderHatch() {
     // Before the first hatch there is no Phaser scene, so the play surface would otherwise be a
     // dead rectangle on the very first screen a child sees. Dress it with a CSS hero instead.
     document.querySelector('#game-root')!.innerHTML=`<div class="stage-poster"><div class="poster-egg"><span></span></div><div class="poster-sparks" aria-hidden="true">${Array.from({length:10},(_,index)=>`<i style="--i:${index}"></i>`).join('')}</div></div>`;
-    const panel=document.querySelector('#sidePanel')!;
-    panel.innerHTML=`<div class="panel-scroll hatch-panel"><p class="eyebrow">FIRST FRIEND</p><h1>${this.t('hatchTitle')}</h1><p>${this.t('hatchCopy')}</p><div class="odds">${this.t('probability')}</div><button class="primary jumbo" data-action="hatch">${this.t('hatch')}</button></div>`;
+    // The poster lives in the play surface, so the copy sits in the bar above it — the side
+    // panel is not rendered in room layout.
+    this.setLayout('room');
+    document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity hatch-bar"><div class="hatch-copy"><p class="eyebrow">FIRST FRIEND</p><h1>${this.t('hatchTitle')}</h1><p class="muted">${this.t('hatchCopy')}</p></div><div class="odds">${this.t('probability')}</div><button class="primary jumbo" data-action="hatch">${this.t('hatch')}</button></div>`;
   }
   private async hatch(button: HTMLButtonElement) {
     button.disabled=true;button.classList.add('loading');const result=await api.hatch(idempotencyKey());audio.sfx('hatch');this.celebrate(result.rarity==='epic'?'epic':'hatch');await this.reload();this.startBedroom();this.renderReveal(result.speciesId,result.rarity,result.duplicateDust);
   }
   private renderReveal(speciesId:string,rarity:string,dust:number){const definition=this.state.catalog.pets.find((pet)=>pet.id===speciesId)!;const pet=this.state.pets.find((pet)=>pet.speciesId===speciesId);const stage=pet?.stage||1;this.modal(`<div class="reveal-card ${rarity}"><p class="eyebrow">${rarity.toUpperCase()}</p><img src="${definition.art[stage-1]}" alt=""><h2>${escapeHtml(this.petName(definition,stage))}</h2><p>${dust?`重複品種轉成 ${dust} 星塵`:`天賦：${escapeHtml(this.name(definition.talent))}`}</p><button class="primary" data-action="back-home">${this.t('back')}</button></div>`);}
+  /**
+   * 'room' gives the play surface the whole width with its controls stacked above it.
+   * 'full' hides the room entirely and gives the panel the whole screen — the browsing tabs
+   * (collection, shop, visits, settings) do not show the room at all.
+   *
+   * The side panel used to be a permanent grid column, which on an iPad surrendered ~340px
+   * of room width on every screen including the one where the room is the whole point.
+   */
+  private setLayout(mode: 'room' | 'full') {
+    document.querySelector('#petMain')?.setAttribute('data-layout', mode);
+    if (mode === 'room') {
+      document.querySelector('#sidePanel')!.innerHTML = '';
+    } else {
+      document.querySelector('#roomBar')!.innerHTML = '';
+      // Nothing is visible, so stop rendering it: a hidden Phaser scene running at 60fps is
+      // pure battery cost on a tablet.
+      this.game?.scene.stop('Bedroom');
+    }
+    // The canvas is sized to its container, so it has to be told the container changed.
+    this.game?.scale.refresh();
+  }
+
   private renderHomePanel() {
     const pet=this.activePet();const definition=this.definition(pet);if(!pet||!definition){this.renderHatch();return;}const next=this.state.catalog.evolutionThresholds[pet.stage]||pet.xp;const previous=this.state.catalog.evolutionThresholds[pet.stage-1]||0;const progress=pet.stage===4?100:Math.round(((pet.xp-previous)/(next-previous))*100);
-    const foods=this.state.catalog.foods.filter((food)=>this.inventory(food.id)>0);
-    const wearables=this.state.catalog.wearables.filter((item)=>this.inventory(item.id)>0);
-    document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll home-panel"><div class="pet-title"><span class="rarity ${definition.rarity}">${definition.rarity}</span><h1>${escapeHtml(this.petName(definition,pet.stage))}</h1><p>${escapeHtml(this.name(definition.talent))}</p></div><div class="xp-card"><div><b>Stage ${pet.stage}/4</b><span>${pet.xp.toLocaleString()} XP</span></div><div class="progress"><i style="width:${progress}%"></i></div><small>${this.t('daily')} ${pet.dailyXpDate===this.state.serverDay?pet.dailyXp:0}/${this.state.catalog.dailyXpCap}</small></div><div class="quick-actions"><button data-action="play">${icon('play')}<span>${this.t('play')}</span></button><button data-action="sleep">${icon('moon')}<span>${this.t('sleep')}</span></button><button data-action="decorate">${icon('decorate')}<span>${this.t('decorate')}</span></button></div><section><div class="section-title"><h2>${this.t('feed')}</h2><small>${foods.length}</small></div><div class="food-row">${foods.length?foods.map((food)=>`<button class="food-chip" data-action="feed" data-id="${food.id}"><span>${['🍎','🍪','🥕','🫐','🥪','🥗','🍞','🍙','🌙','🥧','🍲','✨'][this.state.catalog.foods.indexOf(food)]}</span><b>${escapeHtml(this.name(food.name))}</b><small>+${food.xp} XP · ×${this.inventory(food.id)}</small></button>`).join(''):`<div class="empty-state">${this.t('empty')}<br><button data-tab="shop" class="text-button">${this.t('shop')}</button></div>`}</div></section><section><div class="section-title"><h2>${this.locale==='zh-HK'?'寵物換裝':'Pet outfit'}</h2><small>${pet.equippedWearables.length}/5</small></div><div class="mini-list">${wearables.length?wearables.map((item)=>`<button class="mini-item ${pet.equippedWearables.includes(item.id)?'selected':''}" data-action="equip-wearable" data-id="${item.id}"><b>${escapeHtml(this.name(item.name))}</b><small>${item.slot}</small></button>`).join(''):`<p class="muted">${this.locale==='zh-HK'?'到商店收集頭飾、面飾、頸飾、背飾及光環。':'Collect head, face, neck, back and aura accessories in the shop.'}</p>`}</div></section></div>`;
+    this.setLayout('room');
+    const dailyXp=pet.dailyXpDate===this.state.serverDay?pet.dailyXp:0;
+    const actions: [string,string,string][] = [
+      ['play','play',this.t('play')],
+      ['sleep','moon',this.t('sleep')],
+      ['decorate','decorate',this.t('decorate')],
+      ['open-feed','food',this.t('feed')],
+      ['open-outfit','spark',this.locale==='zh-HK'?'換裝':'Outfit'],
+    ];
+    document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity"><span class="rarity ${definition.rarity}">${definition.rarity}</span><h1>${escapeHtml(this.petName(definition,pet.stage))}</h1><span class="room-bar-stage">Stage ${pet.stage}/4</span><div class="progress" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progress}%"></i></div><small>${pet.xp.toLocaleString()} XP · ${this.t('daily')} ${dailyXp}/${this.state.catalog.dailyXpCap}</small></div><div class="room-bar-actions">${actions.map(([action,glyph,label])=>`<button data-action="${action}">${icon(glyph)}<span>${escapeHtml(label)}</span></button>`).join('')}</div>`;
   }
-  private async feed(foodId:string){const pet=this.activePet()!;const result=await api.feed(pet.id,foodId,idempotencyKey());audio.sfx('feed');this.game?.events.emit('pet:emote',result.evolved?'evolve':'eat');if(result.evolved){audio.sfx('evolve');this.celebrate('evolve');}await this.reload();this.startBedroom();this.renderHomePanel();}
-  private async activate(petId:string){await api.activatePet(petId);await this.reload();audio.sfx('happy');this.startBedroom();this.renderCollection();}
-  private renderCollection() { this.startBedroom();const owned=new Map(this.state.pets.map((pet)=>[pet.speciesId,pet]));document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">20 SPECIES · 80 FORMS</p><h1>${this.t('collection')}</h1><div class="collection-grid">${this.state.catalog.pets.map((definition)=>{const pet=owned.get(definition.id);const stage=pet?.stage||1;return `<article class="pet-card ${definition.rarity} ${pet?'':'locked'}"><div class="pet-art"><img src="${definition.art[stage-1]}" alt="" loading="lazy"></div><span class="rarity ${definition.rarity}">${definition.rarity}</span><h3>${escapeHtml(this.petName(definition,stage))}</h3><p>${pet?`Stage ${stage} · ${pet.xp} XP`:this.t('locked')}</p>${pet?`<button data-action="activate" data-id="${pet.id}" ${pet.id===this.state.profile.activePetId?'disabled':''}>${pet.id===this.state.profile.activePetId?this.t('active'):this.t('choose')}</button>`:''}</article>`}).join('')}</div></div>`; }
+
+  /**
+   * Feeding and dressing are list pickers. They open over the room rather than living in a
+   * permanent side column, so the room keeps the full width of the screen while browsing.
+   */
+  private renderFeedPicker() {
+    const foods=this.state.catalog.foods.filter((food)=>this.inventory(food.id)>0);
+    const body=foods.length
+      ? `<div class="food-row">${foods.map((food)=>`<button class="food-chip" data-action="feed" data-id="${food.id}"><span>${['🍎','🍪','🥕','🫐','🥪','🥗','🍞','🍙','🌙','🥧','🍲','✨'][this.state.catalog.foods.indexOf(food)]}</span><b>${escapeHtml(this.name(food.name))}</b><small>+${food.xp} XP · ×${this.inventory(food.id)}</small></button>`).join('')}</div>`
+      : `<div class="empty-state">${this.t('empty')}<br><button data-tab="shop" class="text-button" data-action="close-modal">${this.t('shop')}</button></div>`;
+    this.picker(this.t('feed'), body);
+  }
+
+  private renderOutfitPicker() {
+    const pet=this.activePet(); if(!pet) return;
+    const wearables=this.state.catalog.wearables.filter((item)=>this.inventory(item.id)>0);
+    const body=wearables.length
+      ? `<div class="mini-list">${wearables.map((item)=>`<button class="mini-item ${pet.equippedWearables.includes(item.id)?'selected':''}" data-action="equip-wearable" data-id="${item.id}"><b>${escapeHtml(this.name(item.name))}</b><small>${item.slot}</small></button>`).join('')}</div>`
+      : `<p class="muted">${this.locale==='zh-HK'?'到商店收集頭飾、面飾、頸飾、背飾及光環。':'Collect head, face, neck, back and aura accessories in the shop.'}</p>`;
+    this.picker(`${this.locale==='zh-HK'?'換裝':'Outfit'} · ${pet.equippedWearables.length}/5`, body);
+  }
+
+  private picker(title: string, body: string) {
+    this.modal(`<div class="picker"><header class="picker-head"><h2>${escapeHtml(title)}</h2><button class="round-button" data-action="close-modal" aria-label="${this.locale==='zh-HK'?'關閉':'Close'}">✕</button></header><div class="picker-body">${body}</div></div>`);
+  }
+  private async feed(foodId:string){const pet=this.activePet()!;const result=await api.feed(pet.id,foodId,idempotencyKey());audio.sfx('feed');this.game?.events.emit('pet:emote',result.evolved?'evolve':'eat');if(result.evolved){audio.sfx('evolve');this.celebrate('evolve');}await this.reload();this.startBedroom();this.renderHomePanel();this.renderFeedPicker();}
+  private async activate(petId:string){await api.activatePet(petId);await this.reload();audio.sfx('happy');this.renderCollection();}
+  private renderCollection() { this.setLayout('full');const owned=new Map(this.state.pets.map((pet)=>[pet.speciesId,pet]));document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">20 SPECIES · 80 FORMS</p><h1>${this.t('collection')}</h1><div class="collection-grid">${this.state.catalog.pets.map((definition)=>{const pet=owned.get(definition.id);const stage=pet?.stage||1;return `<article class="pet-card ${definition.rarity} ${pet?'':'locked'}"><div class="pet-art"><img src="${definition.art[stage-1]}" alt="" loading="lazy"></div><span class="rarity ${definition.rarity}">${definition.rarity}</span><h3>${escapeHtml(this.petName(definition,stage))}</h3><p>${pet?`Stage ${stage} · ${pet.xp} XP`:this.t('locked')}</p>${pet?`<button data-action="activate" data-id="${pet.id}" ${pet.id===this.state.profile.activePetId?'disabled':''}>${pet.id===this.state.profile.activePetId?this.t('active'):this.t('choose')}</button>`:''}</article>`}).join('')}</div></div>`; }
   private renderShop(category='eggs') {
-    this.startBedroom();const categories=this.locale==='zh-HK'
+    this.setLayout('full');const categories=this.locale==='zh-HK'
       ?[['eggs','寵物蛋'],['food','食物'],['wearables','服飾'],['rooms','房間'],['furniture','家具']]
       :[['eggs','Eggs'],['food','Food'],['wearables','Outfits'],['rooms','Rooms'],['furniture','Furniture']];
     let cards='';const pet=this.activePet();
@@ -176,16 +241,20 @@ class StudentApp {
     const owned=this.state.catalog.furniture.filter((item)=>this.inventory(item.id)>0);
     const themes=this.state.catalog.rooms.filter((room)=>this.inventory(`room:${room.id}`)>0);
     const inventory=owned.length
-      ?`<div class="inventory-grid">${owned.map((item)=>`<button data-action="add-furniture" data-id="${item.id}"><span>${escapeHtml(this.name(item.name).split(/[・·‧·]/).pop()!.trim())}</span><small>×${this.inventory(item.id)}</small></button>`).join('')}</div>`
-      :`<div class="empty-state"><span>${zh?'還沒有家具。':'No furniture yet.'}</span><button data-tab="shop" class="secondary">${zh?'去商店選購家具':'Browse furniture'}</button></div>`;
-    document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">12 × 10 GRID</p><h1>${this.t('decorate')}</h1><p class="lead">${zh?'點選家具放入房間，再拖動到喜歡的位置。':'Tap a piece to place it, then drag it where you like.'}</p><label class="field"><span>${zh?'房間主題':'Room theme'}</span><select id="roomTheme">${themes.map((room)=>`<option value="${room.id}" ${room.id===this.state.room.themeId?'selected':''}>${escapeHtml(this.name(room.name))}</option>`).join('')}</select></label><label class="field"><span>${zh?'參觀權限':'Visit privacy'}</span><select id="roomVisibility"><option value="private" ${this.state.room.visibility==='private'?'selected':''}>${this.t('private')}</option><option value="class" ${this.state.room.visibility==='class'?'selected':''}>${this.t('class')}</option></select></label><div class="decor-tools" id="furnitureActions"><button data-action="rotate-item">↻ ${zh?'旋轉':'Rotate'}</button><button data-action="remove-item">× ${zh?'收回':'Remove'}</button></div><div class="section-title"><h2>${zh?'我的家具':'My furniture'}</h2><small>${owned.length}</small></div>${inventory}<button class="primary sticky-action" data-action="save-room">${this.t('save')}</button></div>`;
+      ?`<div class="decor-strip">${owned.map((item)=>`<button data-action="add-furniture" data-id="${item.id}"><span>${escapeHtml(this.name(item.name).split(/[・·‧·]/).pop()!.trim())}</span><small>×${this.inventory(item.id)}</small></button>`).join('')}</div>`
+      :`<div class="decor-strip empty"><span>${zh?'還沒有家具。':'No furniture yet.'}</span><button data-tab="shop" class="secondary">${zh?'去商店選購家具':'Browse furniture'}</button></div>`;
+    // Decorating happens in the room, so the controls stay a bar above it rather than a side
+    // column — the child needs to see the whole floor while placing.
+    this.setLayout('room');
+    document.querySelector('#petMain')?.setAttribute('data-mode','editing');
+    document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity decor-head"><h1>${this.t('decorate')}</h1><label class="inline-field"><span>${zh?'主題':'Theme'}</span><select id="roomTheme">${themes.map((room)=>`<option value="${room.id}" ${room.id===this.state.room.themeId?'selected':''}>${escapeHtml(this.name(room.name))}</option>`).join('')}</select></label><label class="inline-field"><span>${zh?'參觀':'Visits'}</span><select id="roomVisibility"><option value="private" ${this.state.room.visibility==='private'?'selected':''}>${this.t('private')}</option><option value="class" ${this.state.room.visibility==='class'?'selected':''}>${this.t('class')}</option></select></label><div class="decor-tools" id="furnitureActions"><button data-action="rotate-item">↻ ${zh?'旋轉':'Rotate'}</button><button data-action="remove-item">× ${zh?'收回':'Remove'}</button></div><button class="primary" data-action="save-room">${this.t('save')}</button><button class="secondary" data-action="back-home">${zh?'取消':'Cancel'}</button></div>${inventory}`;
   }
   private async saveRoom(){const result=await api.saveRoom({themeId:this.state.room.themeId,visibility:this.state.room.visibility,placements:this.roomPlacements});this.state.room=result;audio.sfx('decorate');await this.reload();this.game?.events.emit('room:set-editing',false);this.openHome();this.toast(this.locale==='zh-HK'?'房間已儲存。':'Room saved.');}
-  private async renderVisits(){this.startBedroom();document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">CLASS VISITS</p><h1>${this.t('visit')}</h1><div class="loading-card">${this.locale==='zh-HK'?'正在尋找開放房間…':'Finding open rooms…'}</div></div>`;const data=await api.classRooms();document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">${escapeHtml(data.className||'CLASS')}</p><h1>${this.t('visit')}</h1><div class="visit-grid">${data.rooms.length?data.rooms.map((room:any)=>`<article class="visit-card"><div class="avatar-letter">${escapeHtml(room.ownerName).slice(0,1)}</div><div><h3>${escapeHtml(room.ownerName)}</h3><p>${room.activePet?escapeHtml(this.petName(this.state.catalog.pets.find((pet)=>pet.id===room.activePet.speciesId)!,room.activePet.stage)):this.locale==='zh-HK'?'尚未孵化':'No pet yet'}</p></div><button data-action="visit-room" data-id="${room.ownerStudentId}">${this.t('visitRoom')}</button></article>`).join(''):`<div class="empty-state">${this.locale==='zh-HK'?'暫時沒有同學開放房間。':'No classmates have opened their rooms yet.'}</div>`}</div></div>`;}
-  private async visitRoom(studentId:string){const data=await api.room(studentId);this.visiting=data.room;if(data.room.activePet)this.startBedroom(data.room,data.room.activePet);document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll visitor-panel"><p class="eyebrow">VISITING</p><h1>${escapeHtml(data.room.ownerName)}</h1><p>${this.locale==='zh-HK'?'只可觀看和送出每日一個表情；沒有留言或聊天。':'View the room and send one daily reaction. There are no messages or chat.'}</p><div class="reaction-row">${this.state.catalog.reactions.map((reaction,index)=>`<button data-action="reaction" data-owner="${studentId}" data-id="${reaction}"><span>${['♥','★','!','👏','✿','✦'][index]}</span><small>${data.room.reactions?.[reaction]||0}</small></button>`).join('')}</div><button class="secondary" data-action="back-home">${this.t('back')}</button></div>`;}
+  private async renderVisits(){this.setLayout('full');document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">CLASS VISITS</p><h1>${this.t('visit')}</h1><div class="loading-card">${this.locale==='zh-HK'?'正在尋找開放房間…':'Finding open rooms…'}</div></div>`;const data=await api.classRooms();document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">${escapeHtml(data.className||'CLASS')}</p><h1>${this.t('visit')}</h1><div class="visit-grid">${data.rooms.length?data.rooms.map((room:any)=>`<article class="visit-card"><div class="avatar-letter">${escapeHtml(room.ownerName).slice(0,1)}</div><div><h3>${escapeHtml(room.ownerName)}</h3><p>${room.activePet?escapeHtml(this.petName(this.state.catalog.pets.find((pet)=>pet.id===room.activePet.speciesId)!,room.activePet.stage)):this.locale==='zh-HK'?'尚未孵化':'No pet yet'}</p></div><button data-action="visit-room" data-id="${room.ownerStudentId}">${this.t('visitRoom')}</button></article>`).join(''):`<div class="empty-state">${this.locale==='zh-HK'?'暫時沒有同學開放房間。':'No classmates have opened their rooms yet.'}</div>`}</div></div>`;}
+  private async visitRoom(studentId:string){const data=await api.room(studentId);this.visiting=data.room;if(data.room.activePet)this.startBedroom(data.room,data.room.activePet);this.setLayout('room');document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity visitor-panel"><p class="eyebrow">VISITING</p><h1>${escapeHtml(data.room.ownerName)}</h1><p>${this.locale==='zh-HK'?'只可觀看和送出每日一個表情；沒有留言或聊天。':'View the room and send one daily reaction. There are no messages or chat.'}</p><div class="reaction-row">${this.state.catalog.reactions.map((reaction,index)=>`<button data-action="reaction" data-owner="${studentId}" data-id="${reaction}"><span>${['♥','★','!','👏','✿','✦'][index]}</span><small>${data.room.reactions?.[reaction]||0}</small></button>`).join('')}</div><button class="secondary" data-action="back-home">${this.t('back')}</button></div>`;}
   private async react(owner:string,reaction:string){const result=await api.react(owner,reaction);audio.sfx('reaction');this.celebrate('reaction');document.querySelectorAll('[data-action="reaction"]').forEach((button)=>{const id=(button as HTMLElement).dataset.id!;button.querySelector('small')!.textContent=String(result.reactions[id]||0);});}
-  private async toggleWearable(wearableId:string){const pet=this.activePet()!;const definition=this.state.catalog.wearables.find((item)=>item.id===wearableId)!;let outfit=pet.equippedWearables.filter((id)=>this.state.catalog.wearables.find((item)=>item.id===id)?.slot!==definition.slot);if(!pet.equippedWearables.includes(wearableId))outfit.push(wearableId);await api.setOutfit(pet.id,outfit);await this.reload();this.startBedroom();}
-  private renderSettings(){this.startBedroom();document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll settings-panel"><p class="eyebrow">COMFORT & ACCESS</p><h1>${this.t('settings')}</h1><label class="field"><span>${this.locale==='zh-HK'?'音樂音量':'Music volume'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.musicLevel}" data-setting="music"></label><label class="field"><span>${this.locale==='zh-HK'?'音效音量':'Sound effects'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.sfxLevel}" data-setting="sfx"></label><label class="toggle"><input type="checkbox" id="motionToggle" ${localStorage.getItem('pet-reduced-motion')==='1'?'checked':''}><span>${this.locale==='zh-HK'?'減少動畫':'Reduce motion'}</span></label><p class="privacy-note">${this.locale==='zh-HK'?'私隱：房間預設私人；公開後只有同班學生可參觀。系統沒有聊天、留言、交易或排行榜。':'Privacy: rooms are private by default. Only classmates can visit when opened. There is no chat, messaging, trading or leaderboard.'}</p></div>`;document.querySelector('#motionToggle')?.addEventListener('change',(event)=>{const on=(event.target as HTMLInputElement).checked;localStorage.setItem('pet-reduced-motion',on?'1':'0');document.documentElement.classList.toggle('reduced-motion',on);});}
+  private async toggleWearable(wearableId:string){const pet=this.activePet()!;const definition=this.state.catalog.wearables.find((item)=>item.id===wearableId)!;let outfit=pet.equippedWearables.filter((id)=>this.state.catalog.wearables.find((item)=>item.id===id)?.slot!==definition.slot);if(!pet.equippedWearables.includes(wearableId))outfit.push(wearableId);await api.setOutfit(pet.id,outfit);await this.reload();this.startBedroom();this.renderHomePanel();this.renderOutfitPicker();}
+  private renderSettings(){this.setLayout('full');document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll settings-panel"><p class="eyebrow">COMFORT & ACCESS</p><h1>${this.t('settings')}</h1><label class="field"><span>${this.locale==='zh-HK'?'音樂音量':'Music volume'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.musicLevel}" data-setting="music"></label><label class="field"><span>${this.locale==='zh-HK'?'音效音量':'Sound effects'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.sfxLevel}" data-setting="sfx"></label><label class="toggle"><input type="checkbox" id="motionToggle" ${localStorage.getItem('pet-reduced-motion')==='1'?'checked':''}><span>${this.locale==='zh-HK'?'減少動畫':'Reduce motion'}</span></label><p class="privacy-note">${this.locale==='zh-HK'?'私隱：房間預設私人；公開後只有同班學生可參觀。系統沒有聊天、留言、交易或排行榜。':'Privacy: rooms are private by default. Only classmates can visit when opened. There is no chat, messaging, trading or leaderboard.'}</p></div>`;document.querySelector('#motionToggle')?.addEventListener('change',(event)=>{const on=(event.target as HTMLInputElement).checked;localStorage.setItem('pet-reduced-motion',on?'1':'0');document.documentElement.classList.toggle('reduced-motion',on);});}
   private async reload(){this.state=await api.bootstrap();this.roomPlacements=this.state.room.placements.map((item)=>({...item}));this.updateWallet();}
   private updateWallet(){this.setValue('#coinBalance',this.state.wallet.balance.toLocaleString());this.setValue('#dustBalance',String(this.state.profile.stardust));}
   private setValue(selector:string,value:string){const node=document.querySelector<HTMLElement>(selector);if(!node)return;if(node.textContent===value){node.textContent=value;return;}node.textContent=value;node.classList.remove('bump');void node.offsetWidth;node.classList.add('bump');window.setTimeout(()=>node.classList.remove('bump'),400);}
