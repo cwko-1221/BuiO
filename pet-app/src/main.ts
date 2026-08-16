@@ -143,16 +143,47 @@ class StudentApp {
     this.game.events.on('room:placements',(placements:RoomPlacement[])=>{this.roomPlacements=placements.map((item)=>({...item}));this.refreshDecorStrip();});
     this.game.events.on('room:selected',(id:string)=>{this.selectedFurniture=id;document.querySelector('#furnitureActions')?.classList.add('visible');});
   }
+  /**
+   * Re-measure the play surface and resize the canvas to it.
+   *
+   * Reading the parent synchronously right after un-hiding the stage still sees the old
+   * zero-sized box, so Phaser scaled the canvas to 0x0 and the room rendered nothing even
+   * though the scene was active and visible — the blank room after returning from another
+   * tab. Measuring on the next frame, once layout has settled, and resizing explicitly
+   * rather than relying on refresh() alone, fixes it for every entry path.
+   */
+  private refreshStage() {
+    const scale = this.game?.scale; if (!scale) return;
+    const apply = () => {
+      const surface = document.querySelector('#playSurface') as HTMLElement | null;
+      if (!surface) return;
+      const { width, height } = surface.getBoundingClientRect();
+      if (width < 1 || height < 1) return; // still hidden; the ResizeObserver will call back
+      scale.setParentSize(width, height);
+      scale.refresh();
+    };
+    apply();
+    requestAnimationFrame(apply);
+  }
+
   private startBedroom(roomOverride?: any, petOverride?: PetInstance) {
     this.ensureGame(); const pet=petOverride||this.activePet();if(!pet)return;const definition=this.definition(pet)!;
     const originalRoom=this.state.room;if(roomOverride)this.state.room={themeId:roomOverride.themeId,visibility:roomOverride.visibility,placements:roomOverride.placements};
     this.game!.scene.stop('Bedroom');this.game!.scene.start('Bedroom',{bootstrap:this.state,activePet:pet,petDefinition:definition});
+    // The canvas is sized from its container. If anything started the scene while the stage
+    // was still hidden the canvas would be zero-sized, so re-measure once it is on screen.
+    this.refreshStage();
     if(roomOverride)this.state.room=originalRoom;audio.setTheme('bedroom');
   }
   private openHome() {
     this.visiting=undefined;this.tab='home';
     this.game?.events.emit('room:set-editing',false);
     document.querySelector('#petMain')?.removeAttribute('data-mode');
+    // Reveal the stage BEFORE booting the scene. Coming back from a browsing tab the layout
+    // is still "full", which hides .room-stage entirely; a scene started into a display:none
+    // container gets a zero-sized canvas and renders nothing until something forces a resize,
+    // which is why the room came up blank until the tab was tapped a second time.
+    this.setLayout('room');
     this.startBedroom();this.renderHomePanel();document.querySelector('#gameHud')!.innerHTML='';
   }
   private renderHatch() {
@@ -188,7 +219,7 @@ class StudentApp {
       this.game?.scene.stop('Bedroom');
     }
     // The canvas is sized to its container, so it has to be told the container changed.
-    this.game?.scale.refresh();
+    this.refreshStage();
   }
 
   private renderHomePanel() {
@@ -331,7 +362,7 @@ class StudentApp {
     }
   }
   private async renderVisits(){this.setLayout('full');document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">CLASS VISITS</p><h1>${this.t('visit')}</h1><div class="loading-card">${this.locale==='zh-HK'?'正在尋找開放房間…':'Finding open rooms…'}</div></div>`;const data=await api.classRooms();document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">${escapeHtml(data.className||'CLASS')}</p><h1>${this.t('visit')}</h1><div class="visit-grid">${data.rooms.length?data.rooms.map((room:any)=>`<article class="visit-card"><div class="avatar-letter">${escapeHtml(room.ownerName).slice(0,1)}</div><div><h3>${escapeHtml(room.ownerName)}</h3><p>${room.activePet?escapeHtml(this.petName(this.state.catalog.pets.find((pet)=>pet.id===room.activePet.speciesId)!,room.activePet.stage)):this.locale==='zh-HK'?'尚未孵化':'No pet yet'}</p></div><button data-action="visit-room" data-id="${room.ownerStudentId}">${this.t('visitRoom')}</button></article>`).join(''):`<div class="empty-state">${this.locale==='zh-HK'?'暫時沒有同學開放房間。':'No classmates have opened their rooms yet.'}</div>`}</div></div>`;}
-  private async visitRoom(studentId:string){const data=await api.room(studentId);this.visiting=data.room;if(data.room.activePet)this.startBedroom(data.room,data.room.activePet);this.setLayout('room');document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity visitor-panel"><p class="eyebrow">VISITING</p><h1>${escapeHtml(data.room.ownerName)}</h1><p>${this.locale==='zh-HK'?'只可觀看和送出每日一個表情；沒有留言或聊天。':'View the room and send one daily reaction. There are no messages or chat.'}</p><div class="reaction-row">${this.state.catalog.reactions.map((reaction,index)=>`<button data-action="reaction" data-owner="${studentId}" data-id="${reaction}"><span>${['♥','★','!','👏','✿','✦'][index]}</span><small>${data.room.reactions?.[reaction]||0}</small></button>`).join('')}</div><button class="secondary" data-action="back-home">${this.t('back')}</button></div>`;}
+  private async visitRoom(studentId:string){const data=await api.room(studentId);this.visiting=data.room;this.setLayout('room');if(data.room.activePet)this.startBedroom(data.room,data.room.activePet);document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity visitor-panel"><p class="eyebrow">VISITING</p><h1>${escapeHtml(data.room.ownerName)}</h1><p>${this.locale==='zh-HK'?'只可觀看和送出每日一個表情；沒有留言或聊天。':'View the room and send one daily reaction. There are no messages or chat.'}</p><div class="reaction-row">${this.state.catalog.reactions.map((reaction,index)=>`<button data-action="reaction" data-owner="${studentId}" data-id="${reaction}"><span>${['♥','★','!','👏','✿','✦'][index]}</span><small>${data.room.reactions?.[reaction]||0}</small></button>`).join('')}</div><button class="secondary" data-action="back-home">${this.t('back')}</button></div>`;}
   private async react(owner:string,reaction:string){const result=await api.react(owner,reaction);audio.sfx('reaction');this.celebrate('reaction');document.querySelectorAll('[data-action="reaction"]').forEach((button)=>{const id=(button as HTMLElement).dataset.id!;button.querySelector('small')!.textContent=String(result.reactions[id]||0);});}
   private async toggleWearable(wearableId:string){const pet=this.activePet()!;const definition=this.state.catalog.wearables.find((item)=>item.id===wearableId)!;let outfit=pet.equippedWearables.filter((id)=>this.state.catalog.wearables.find((item)=>item.id===id)?.slot!==definition.slot);if(!pet.equippedWearables.includes(wearableId))outfit.push(wearableId);await api.setOutfit(pet.id,outfit);await this.reload();this.startBedroom();this.renderHomePanel();this.renderOutfitPicker();}
   private renderSettings(){this.setLayout('full');const seg=(value:'private'|'class',label:string)=>`<button data-action="set-visibility" data-id="${value}" class="seg ${this.state.room.visibility===value?'on':''}">${escapeHtml(label)}</button>`;document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll settings-panel"><p class="eyebrow">COMFORT & ACCESS</p><h1>${this.t('settings')}</h1><div class="setting-row"><div><b>${this.locale==='zh-HK'?'房間參觀權限':'Room visits'}</b><small>${this.locale==='zh-HK'?'開放後，只有同班同學可以參觀你的房間。':'When opened, only classmates can visit your room.'}</small></div><div class="segmented-toggle">${seg('private',this.t('private'))}${seg('class',this.t('class'))}</div></div><label class="field"><span>${this.locale==='zh-HK'?'音樂音量':'Music volume'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.musicLevel}" data-setting="music"></label><label class="field"><span>${this.locale==='zh-HK'?'音效音量':'Sound effects'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.sfxLevel}" data-setting="sfx"></label><label class="toggle"><input type="checkbox" id="motionToggle" ${localStorage.getItem('pet-reduced-motion')==='1'?'checked':''}><span>${this.locale==='zh-HK'?'減少動畫':'Reduce motion'}</span></label><p class="privacy-note">${this.locale==='zh-HK'?'私隱：房間預設私人；公開後只有同班學生可參觀。系統沒有聊天、留言、交易或排行榜。':'Privacy: rooms are private by default. Only classmates can visit when opened. There is no chat, messaging, trading or leaderboard.'}</p></div>`;document.querySelector('#motionToggle')?.addEventListener('change',(event)=>{const on=(event.target as HTMLInputElement).checked;localStorage.setItem('pet-reduced-motion',on?'1':'0');document.documentElement.classList.toggle('reduced-motion',on);});}

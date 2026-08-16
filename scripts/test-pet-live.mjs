@@ -62,6 +62,16 @@ try {
   await page.locator('[data-tab="home"]').click(); await page.locator('.room-bar-actions').waitFor();
   assert.equal(await page.locator('#petMain').getAttribute('data-layout'),'room');
   assert.equal(await page.locator('.side-panel').isVisible(),false);
+  // Returning from a browsing tab un-hides the stage. Measuring the parent synchronously
+  // then leaves Phaser sizing the canvas to 0x0, so the room renders nothing despite the
+  // scene being active — assert the canvas actually has a size on the way back.
+  await page.waitForFunction(()=>{
+    const c=document.querySelector('#game-root canvas');
+    return !!c && c.clientWidth>200 && c.clientHeight>200;
+  },null,{timeout:4000}).catch(async()=>{
+    const box=await page.locator('#game-root canvas').boundingBox();
+    throw new assert.AssertionError({message:`room canvas stayed collapsed on return: ${JSON.stringify(box)}`,actual:box,expected:'sized'});
+  });
   const stageWidth=(await page.locator('.room-stage').boundingBox()).width;
   const mainWidth=(await page.locator('#petMain').boundingBox()).width;
   assert.equal(Math.round(stageWidth),Math.round(mainWidth),'the room must span the full width of the app on the room tab');

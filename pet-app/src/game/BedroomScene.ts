@@ -4,6 +4,12 @@ import type { Bootstrap, FurnitureDefinition, PetDefinition, PetInstance, RoomPl
 
 interface BedroomData { bootstrap: Bootstrap; activePet: PetInstance; petDefinition: PetDefinition; editing?: boolean }
 
+type FurnitureHitArea = { tile: Phaser.Geom.Polygon; body: Phaser.Geom.Rectangle };
+
+/** Hit inside the footprint tiles or the drawn body — either grabs the piece. */
+const hitTest = (area: FurnitureHitArea, x: number, y: number) =>
+  Phaser.Geom.Polygon.Contains(area.tile, x, y) || Phaser.Geom.Rectangle.Contains(area.body, x, y);
+
 /** 2:1 isometric tile. Half-extents, so a tile spans 2*TILE_WIDTH by 2*TILE_HEIGHT on screen. */
 const TILE_WIDTH = 38;
 const TILE_HEIGHT = 19;
@@ -19,6 +25,8 @@ export class BedroomScene extends Phaser.Scene {
   roomScale = 1;
   grid?: Phaser.GameObjects.Graphics;
   ghost?: Phaser.GameObjects.Graphics;
+  roomTextureKey = '';
+  petTextureKey = '';
 
   constructor() { super('Bedroom'); }
   init(data: BedroomData) {
@@ -37,13 +45,19 @@ export class BedroomScene extends Phaser.Scene {
   preload() {
     const catalog = this.model.bootstrap.catalog;
     const room = catalog.rooms.find((entry) => entry.id === this.model.bootstrap.room.themeId);
-    if (room) this.load.image('active-room', room.art);
+    // Key textures by identity, never by role. Phaser skips any load whose key is already in
+    // the texture cache, so a fixed 'active-room' key meant the first theme loaded won for the
+    // whole session: switching themes silently kept the old art until a page reload cleared
+    // the cache. The same trap applies to the pet's fallback art when the active pet changes.
+    this.roomTextureKey = room ? `room:${room.id}` : '';
+    if (room && !this.textures.exists(this.roomTextureKey)) this.load.image(this.roomTextureKey, room.art);
 
     // Prefer the animated atlas; fall back to the static form art only if it is unavailable.
     const stage = this.model.activePet.stage;
     if (!PetAvatar.preload(this, this.model.petDefinition, stage, catalog.animation)) {
-      this.load.image('active-pet', this.model.petDefinition.art[stage - 1]);
-    }
+      this.petTextureKey = `pet:${this.model.petDefinition.id}:${stage}`;
+      if (!this.textures.exists(this.petTextureKey)) this.load.image(this.petTextureKey, this.model.petDefinition.art[stage - 1]);
+    } else this.petTextureKey = '';
 
     // Real furniture art, one texture per distinct item actually placed in the room.
     for (const itemId of new Set(this.placements.map((placement) => placement.itemId))) {
@@ -53,15 +67,15 @@ export class BedroomScene extends Phaser.Scene {
   }
   create() {
     this.cameras.main.setBackgroundColor('#efe2c8');
-    if (this.textures.exists('active-room')) {
-      const image = this.add.image(640, 360, 'active-room');
+    if (this.roomTextureKey && this.textures.exists(this.roomTextureKey)) {
+      const image = this.add.image(640, 360, this.roomTextureKey);
       image.setDisplaySize(1280, 720).setAlpha(.98);
     } else this.drawDollhouse();
     this.drawRoomFrame();
     this.placements.forEach((placement) => this.addFurniture(placement));
     this.avatar = new PetAvatar(this, 640, 475, this.model.petDefinition, this.model.activePet, {
       layout: this.model.bootstrap.catalog.animation,
-      fallbackTexture: this.textures.exists('active-pet') ? 'active-pet' : undefined,
+      fallbackTexture: this.petTextureKey && this.textures.exists(this.petTextureKey) ? this.petTextureKey : undefined,
       scale: .86,
     });
     this.avatar.setDepth(60);
@@ -220,6 +234,27 @@ export class BedroomScene extends Phaser.Scene {
     return 20 + (placement.x + placement.y);
   }
 
+  /**
+   * A piece is grabbable by the tiles it stands on, plus its own drawn shape.
+   *
+   * The tile diamond is the predictable target — it is exactly the area the drag preview
+   * highlights, so "tap the square the thing is on" always works. The sprite rectangle is
+   * kept as well so a tall piece can also be grabbed by its body rather than only its feet.
+   * Coordinates are local to the container, which is why the art is rotated instead of it.
+   */
+  private hitAreaFor(placement: RoomPlacement, container: Phaser.GameObjects.Container) {
+    const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+    const halfW = ((width + height) / 2) * TILE_WIDTH;
+    const halfH = ((width + height) / 2) * TILE_HEIGHT;
+    const skewX = ((width - height) / 2) * TILE_WIDTH;
+    const skewY = ((width - height) / 2) * TILE_HEIGHT;
+    const bounds = container.getBounds();
+    return {
+      tile: new Phaser.Geom.Polygon([-skewX, -halfH, halfW, skewY, skewX, halfH, -halfW, -skewY]),
+      body: new Phaser.Geom.Rectangle(bounds.x - container.x, bounds.y - container.y, bounds.width, bounds.height),
+    };
+  }
+
   private addFurniture(placement: RoomPlacement) {
     const definition = this.model.bootstrap.catalog.furniture.find((item) => item.id === placement.itemId); if (!definition) return;
     // Anchor on the CENTRE of the footprint, not its top lattice corner. Anchoring at the
@@ -227,16 +262,14 @@ export class BedroomScene extends Phaser.Scene {
     // "floating" look, and it disagreed with the footprint preview.
     const point = this.footprintCentre(placement);
     const container = this.add.container(point.x, point.y).setDepth(this.depthFor(placement));
-    const art = this.furnitureArt(definition, placement); container.add(art);
-    container.setAngle(placement.rotation);
-    // Hit area must match what is drawn. setSize() builds a rect centred on the container
-    // origin, but the art renders upward from its base, so only the bottom corner of a piece
-    // was grabbable. Derive the rect from the rendered bounds instead.
-    const bounds = container.getBounds();
-    container.setInteractive(
-      new Phaser.Geom.Rectangle(bounds.x - container.x, bounds.y - container.y, bounds.width, bounds.height),
-      Phaser.Geom.Rectangle.Contains,
-    );
+    const art = this.furnitureArt(definition, placement);
+    // Rotate the art, not the outer container: the container carries the hit area, and
+    // rotating it would spin the footprint polygon out of alignment with the floor.
+    art.setAngle(placement.rotation);
+    container.add(art);
+    // Explicit config form: passing a plain object as the first argument makes Phaser read it
+    // as an InputConfiguration rather than as a hit area, leaving hitAreaCallback undefined.
+    container.setInteractive({ hitArea: this.hitAreaFor(placement, container), hitAreaCallback: hitTest, useHandCursor: true });
     container.setData('placementId', placement.id); this.input.setDraggable(container, this.editing);
     container.on('pointerdown', () => { this.furniture.forEach((item) => item.setAlpha(1)); container.setAlpha(.7); this.game.events.emit('room:selected', placement.id); });
     this.furniture.set(placement.id, container);
@@ -319,9 +352,12 @@ export class BedroomScene extends Phaser.Scene {
       this.game.events.emit('room:blocked', placement.id);
       return;
     }
-    placement.rotation = rotation; object.setAngle(rotation);
-    // A rotated non-square footprint occupies different cells, so its centre moves too.
+    placement.rotation = rotation;
+    (object.list[0] as Phaser.GameObjects.Container | undefined)?.setAngle(rotation);
+    // A rotated non-square footprint occupies different cells, so its centre and the tiles
+    // you can grab it by both change.
     const centre = this.footprintCentre(placement); object.setPosition(centre.x, centre.y);
+    if (object.input) object.input.hitArea = this.hitAreaFor(placement, object);
     this.game.events.emit('room:placements', this.placements.map((item) => ({ ...item })));
   }
   private removeSelected(id: string) { const index = this.placements.findIndex((item) => item.id === id); if (index < 0) return; this.placements.splice(index,1); this.furniture.get(id)?.destroy(); this.furniture.delete(id); this.game.events.emit('room:placements', this.placements); }
