@@ -96,10 +96,7 @@ class StudentApp {
         document.querySelector('#modalRoot')!.innerHTML='';
         this.startBedroom(); this.renderDecorator(); return;
       }
-      if (action === 'set-visibility') {
-        this.state.room.visibility=button.dataset.id as 'private'|'class';
-        this.renderDecorator(); return;
-      }
+      if (action === 'set-visibility') return this.setVisibility(button.dataset.id as 'private'|'class');
       if (action === 'open-feed') return this.renderFeedPicker();
       if (action === 'open-outfit') return this.renderOutfitPicker();
       if (action === 'close-modal') { document.querySelector('#modalRoot')!.innerHTML=''; return; }
@@ -264,8 +261,9 @@ class StudentApp {
     // No <select> anywhere: a native option list is rendered by the OS and cannot be styled,
     // so it breaks the illusion the moment it opens. Visibility is a two-state toggle and the
     // theme opens the same framed picker the rest of the app uses.
-    const visibility=(value:'private'|'class',label:string)=>`<button data-action="set-visibility" data-id="${value}" class="seg ${this.state.room.visibility===value?'on':''}">${label}</button>`;
-    document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity decor-head"><h1>${this.t('decorate')}</h1><button class="chooser" data-action="open-themes"><small>${zh?'主題':'Theme'}</small><b>${escapeHtml(theme?this.name(theme.name):'—')}</b></button><div class="segmented-toggle"><small>${zh?'參觀':'Visits'}</small>${visibility('private',this.t('private'))}${visibility('class',this.t('class'))}</div><div class="decor-tools" id="furnitureActions"><button data-action="rotate-item">↻ ${zh?'旋轉':'Rotate'}</button><button data-action="remove-item">× ${zh?'收回':'Remove'}</button></div><button class="primary" data-action="save-room">${this.t('save')}</button><button class="secondary" data-action="back-home">${zh?'取消':'Cancel'}</button></div>${inventory}`;
+    // Visit privacy lives in Settings, not here — it is a standing account setting rather
+    // than part of arranging a room, and it kept this bar from being about placing furniture.
+    document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity decor-head"><h1>${this.t('decorate')}</h1><button class="chooser" data-action="open-themes"><small>${zh?'主題':'Theme'}</small><b>${escapeHtml(theme?this.name(theme.name):'—')}</b></button><div class="decor-tools" id="furnitureActions"><button data-action="rotate-item">↻ ${zh?'旋轉':'Rotate'}</button><button data-action="remove-item">× ${zh?'收回':'Remove'}</button></div><button class="primary" data-action="save-room">${this.t('save')}</button><button class="secondary" data-action="back-home">${zh?'取消':'Cancel'}</button></div>${inventory}`;
   }
 
   /**
@@ -280,6 +278,24 @@ class StudentApp {
       const count=button.querySelector('small'); if(count) count.textContent=`×${left}`;
       button.disabled=left<=0;
     });
+  }
+
+  /**
+   * Visit privacy is a standing account setting, so it persists the moment it changes rather
+   * than waiting for a room save. The room endpoint takes the whole room, so the current
+   * theme and placements ride along unchanged. Reflected optimistically, then confirmed.
+   */
+  private async setVisibility(visibility:'private'|'class'){
+    if(this.state.room.visibility===visibility) return;
+    const previous=this.state.room.visibility;
+    this.state.room.visibility=visibility;
+    this.renderSettings();
+    try{
+      this.state.room=await api.saveRoom({themeId:this.state.room.themeId,visibility,placements:this.roomPlacements});
+      this.toast(this.locale==='zh-HK'?'已更新參觀權限。':'Visit setting updated.');
+    }catch(error){
+      this.state.room.visibility=previous; this.renderSettings(); throw error;
+    }
   }
 
   /** Copies still free to place: owned minus whatever is already in the room right now. */
@@ -318,7 +334,7 @@ class StudentApp {
   private async visitRoom(studentId:string){const data=await api.room(studentId);this.visiting=data.room;if(data.room.activePet)this.startBedroom(data.room,data.room.activePet);this.setLayout('room');document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity visitor-panel"><p class="eyebrow">VISITING</p><h1>${escapeHtml(data.room.ownerName)}</h1><p>${this.locale==='zh-HK'?'只可觀看和送出每日一個表情；沒有留言或聊天。':'View the room and send one daily reaction. There are no messages or chat.'}</p><div class="reaction-row">${this.state.catalog.reactions.map((reaction,index)=>`<button data-action="reaction" data-owner="${studentId}" data-id="${reaction}"><span>${['♥','★','!','👏','✿','✦'][index]}</span><small>${data.room.reactions?.[reaction]||0}</small></button>`).join('')}</div><button class="secondary" data-action="back-home">${this.t('back')}</button></div>`;}
   private async react(owner:string,reaction:string){const result=await api.react(owner,reaction);audio.sfx('reaction');this.celebrate('reaction');document.querySelectorAll('[data-action="reaction"]').forEach((button)=>{const id=(button as HTMLElement).dataset.id!;button.querySelector('small')!.textContent=String(result.reactions[id]||0);});}
   private async toggleWearable(wearableId:string){const pet=this.activePet()!;const definition=this.state.catalog.wearables.find((item)=>item.id===wearableId)!;let outfit=pet.equippedWearables.filter((id)=>this.state.catalog.wearables.find((item)=>item.id===id)?.slot!==definition.slot);if(!pet.equippedWearables.includes(wearableId))outfit.push(wearableId);await api.setOutfit(pet.id,outfit);await this.reload();this.startBedroom();this.renderHomePanel();this.renderOutfitPicker();}
-  private renderSettings(){this.setLayout('full');document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll settings-panel"><p class="eyebrow">COMFORT & ACCESS</p><h1>${this.t('settings')}</h1><label class="field"><span>${this.locale==='zh-HK'?'音樂音量':'Music volume'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.musicLevel}" data-setting="music"></label><label class="field"><span>${this.locale==='zh-HK'?'音效音量':'Sound effects'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.sfxLevel}" data-setting="sfx"></label><label class="toggle"><input type="checkbox" id="motionToggle" ${localStorage.getItem('pet-reduced-motion')==='1'?'checked':''}><span>${this.locale==='zh-HK'?'減少動畫':'Reduce motion'}</span></label><p class="privacy-note">${this.locale==='zh-HK'?'私隱：房間預設私人；公開後只有同班學生可參觀。系統沒有聊天、留言、交易或排行榜。':'Privacy: rooms are private by default. Only classmates can visit when opened. There is no chat, messaging, trading or leaderboard.'}</p></div>`;document.querySelector('#motionToggle')?.addEventListener('change',(event)=>{const on=(event.target as HTMLInputElement).checked;localStorage.setItem('pet-reduced-motion',on?'1':'0');document.documentElement.classList.toggle('reduced-motion',on);});}
+  private renderSettings(){this.setLayout('full');const seg=(value:'private'|'class',label:string)=>`<button data-action="set-visibility" data-id="${value}" class="seg ${this.state.room.visibility===value?'on':''}">${escapeHtml(label)}</button>`;document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll settings-panel"><p class="eyebrow">COMFORT & ACCESS</p><h1>${this.t('settings')}</h1><div class="setting-row"><div><b>${this.locale==='zh-HK'?'房間參觀權限':'Room visits'}</b><small>${this.locale==='zh-HK'?'開放後，只有同班同學可以參觀你的房間。':'When opened, only classmates can visit your room.'}</small></div><div class="segmented-toggle">${seg('private',this.t('private'))}${seg('class',this.t('class'))}</div></div><label class="field"><span>${this.locale==='zh-HK'?'音樂音量':'Music volume'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.musicLevel}" data-setting="music"></label><label class="field"><span>${this.locale==='zh-HK'?'音效音量':'Sound effects'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.sfxLevel}" data-setting="sfx"></label><label class="toggle"><input type="checkbox" id="motionToggle" ${localStorage.getItem('pet-reduced-motion')==='1'?'checked':''}><span>${this.locale==='zh-HK'?'減少動畫':'Reduce motion'}</span></label><p class="privacy-note">${this.locale==='zh-HK'?'私隱：房間預設私人；公開後只有同班學生可參觀。系統沒有聊天、留言、交易或排行榜。':'Privacy: rooms are private by default. Only classmates can visit when opened. There is no chat, messaging, trading or leaderboard.'}</p></div>`;document.querySelector('#motionToggle')?.addEventListener('change',(event)=>{const on=(event.target as HTMLInputElement).checked;localStorage.setItem('pet-reduced-motion',on?'1':'0');document.documentElement.classList.toggle('reduced-motion',on);});}
   private async reload(){this.state=await api.bootstrap();this.roomPlacements=this.state.room.placements.map((item)=>({...item}));this.updateWallet();}
   private updateWallet(){this.setValue('#coinBalance',this.state.wallet.balance.toLocaleString());}
   private setValue(selector:string,value:string){const node=document.querySelector<HTMLElement>(selector);if(!node)return;if(node.textContent===value){node.textContent=value;return;}node.textContent=value;node.classList.remove('bump');void node.offsetWidth;node.classList.add('bump');window.setTimeout(()=>node.classList.remove('bump'),400);}

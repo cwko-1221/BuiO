@@ -68,11 +68,17 @@ export class BedroomScene extends Phaser.Scene {
     this.ghost = this.add.graphics().setDepth(15);
     this.input.on('drag', (_pointer: Phaser.Input.Pointer, target: Phaser.GameObjects.Container, dragX: number, dragY: number) => {
       if (!this.editing || !target.getData('placementId')) return;
-      target.x = dragX; target.y = dragY;
       const placement = this.placements.find((item) => item.id === target.getData('placementId'));
-      if (!placement) return;
+      if (!placement) { target.x = dragX; target.y = dragY; return; }
       const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
-      this.drawFootprint(placement, this.screenToFootprintOrigin(dragX, dragY, width, height));
+      const cell = this.screenToFootprintOrigin(dragX, dragY, width, height);
+      this.drawFootprint(placement, cell);
+      // Snap the piece to the target cell instead of letting it trail the finger. Following
+      // the pointer freely meant the piece and its own preview were never in the same place
+      // while dragging, which reads as the furniture being misaligned with the grid.
+      const centre = this.gridToScreen(cell.x + width / 2, cell.y + height / 2);
+      target.setPosition(centre.x, centre.y);
+      target.setDepth(this.depthFor({ ...placement, x: cell.x, y: cell.y }));
     });
     this.input.on('dragend', (_pointer: Phaser.Input.Pointer, target: Phaser.GameObjects.Container) => {
       if (!this.editing) return;
@@ -254,6 +260,12 @@ export class BedroomScene extends Phaser.Scene {
         box.x + box.width / 2,
         placement.layer === 'rug' ? box.y + box.height / 2 : box.y + box.height,
       );
+      // The container sits at the CENTRE of the footprint diamond, but a standing piece rests
+      // on the whole diamond, so its base has to reach the front corner — half the diamond's
+      // height (w+h)*TILE_HEIGHT/2 further down. Without this the art floats a half-footprint
+      // above the tiles it occupies, which is the displacement seen against the drag preview.
+      // Rugs lie flat and are already centred on the diamond, so they stay put.
+      if (placement.layer !== 'rug') image.setY(((footprintX + footprintY) * TILE_HEIGHT) / 2);
       container.add(image);
       return container;
     }

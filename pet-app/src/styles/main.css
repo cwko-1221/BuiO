@@ -1339,14 +1339,44 @@ html.reduced-motion *, html.reduced-motion *:before, html.reduced-motion *:after
 .inline-field select:focus-visible, .field select:focus-visible {
   outline: var(--stroke) solid var(--accent); outline-offset: 2px;
 }
-/* Chevron drawn from a rotated square so it needs no font glyph and no asset. */
-.inline-field:after, .field:after {
+/* Chevron drawn from a rotated square so it needs no font glyph and no asset.
+   Scoped to fields that actually contain a select — .field also wraps range inputs, which
+   were getting a stray chevron floating at the end of the slider track. */
+.inline-field:has(select):after, .field:has(select):after {
   content: ""; position: absolute; right: 18px; top: 50%;
   width: 8px; height: 8px; margin-top: -7px;
   border-right: 3px solid var(--coin-ink); border-bottom: 3px solid var(--coin-ink);
   transform: rotate(45deg); pointer-events: none;
 }
-.field:after { top: auto; bottom: 22px; margin-top: 0; }
+.field:has(select):after { top: auto; bottom: 22px; margin-top: 0; }
+
+/* --- range inputs: the last unstyled native control ---------------------- */
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 20px; background: transparent; cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 14px; border-radius: var(--r-pill);
+  background: var(--sunk);
+  box-shadow: inset 0 2px 4px rgba(78, 54, 30, .22);
+}
+input[type="range"]::-moz-range-track {
+  height: 14px; border-radius: var(--r-pill); background: var(--sunk);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 28px; height: 28px; margin-top: -7px;
+  border-radius: 50%;
+  background: var(--game-face-hot);
+  border: var(--stroke) solid var(--stroke-col);
+  box-shadow: 0 3px 0 var(--edge-gold), 0 5px 10px rgba(120, 74, 16, .3);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #f9bd6a;
+  border: var(--stroke) solid var(--stroke-col);
+  box-shadow: 0 3px 0 var(--edge-gold);
+}
 
 /* --- pet status in the top bar ------------------------------------------- */
 /* Stardust had no sink yet, so its pill was dead HUD. The room's identity row moved up
@@ -1428,3 +1458,15 @@ html.reduced-motion *, html.reduced-motion *:before, html.reduced-motion *:after
 /* Placed-out pieces stay visible but clearly unavailable. */
 .decor-strip button[disabled] { opacity: .42; box-shadow: none; cursor: not-allowed; transform: translateY(var(--press)); }
 .decor-strip button[disabled] small { color: var(--danger-ink); }
+
+/* --- settings rows ------------------------------------------------------- */
+.setting-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s3); flex-wrap: wrap;
+  padding: var(--s2);
+  background: var(--warm);
+  border-radius: var(--r-lg);
+  margin-bottom: var(--s2);
+}
+.setting-row b { display: block; font-weight: 900; }
+.setting-row small { display: block; color: var(--ink-soft); max-width: 46ch; }
