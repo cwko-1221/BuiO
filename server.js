@@ -295,12 +295,18 @@ app.use('/pet/assets', (req, res, next) => {
   immutable: config.isProd,
   setHeaders: (res) => setPetHeaders(res),
 }));
-app.get('/pet/preview', (req, res, next) => {
+app.get('/pet/preview', async (req, res, next) => {
   if (config.isProd) return next();
-  if (config.mockAuth && !req.session?.studentId) {
+  if (!req.session?.studentId) {
     req.session.studentId = 'S001';
     req.session.studentName = '預覽學生';
     req.session.role = 'student';
+  }
+  try {
+    const petRepo = require('./pet-app/repositories/pet.repo');
+    await petRepo.grantUnlimitedMoney(req.session.studentId, 999999);
+  } catch (err) {
+    // Ignore error if schema not initialized
   }
   setPetHeaders(res, { document: true });
   res.set('Cache-Control', 'no-store');

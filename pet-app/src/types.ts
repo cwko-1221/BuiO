@@ -5,32 +5,44 @@ export type Localized = Record<Locale, string>;
 export interface PetDefinition {
   id: string; rarity: Rarity; element: string; names: Record<Locale, string[]>;
   talent: Localized; color: string; body: string; art: string[];
+  /** One sprite atlas per evolution stage. Absent until the animation pipeline has run. */
+  atlas?: string[];
+}
+export type PetAction =
+  | 'idle' | 'walk' | 'auto-attack' | 'active-skill' | 'hit' | 'faint-return'
+  | 'eat' | 'happy' | 'play' | 'sleep' | 'hatch' | 'evolve';
+export type PetFacing = 'front' | 'right' | 'back' | 'left';
+/** Atlas layout, derived server-side from the generated sprite manifest. */
+export interface AnimationLayout {
+  frameWidth: number; frameHeight: number; columns: number; fps: number;
+  directions: PetFacing[];
+  actions: { name: PetAction; start: number; length: number }[];
 }
 export interface RoomDefinition { id: string; name: Localized; price: number; primary: string; accent: string; art: string }
-export interface MapDefinition { id: string; name: Localized; price: number; boss: Localized; element: string; color: string; badgeId: string; art: string; order: number }
 export interface FoodDefinition { id: string; name: Localized; category: 'food'; tier: number; price: number; xp: number }
-export interface SkillDefinition { id: string; name: Localized; category: 'skill'; kind: string; element: string; price: number }
-export interface WearableDefinition { id: string; name: Localized; category: 'wearable'; slot: string; rarity: string; price: number; currency: 'coins' | 'stardust'; art?: string }
-export interface FurnitureDefinition { id: string; name: Localized; category: 'furniture'; roomId: string; price: number; footprint: [number, number]; layer: string; art?: string }
+/** Alpha bounding box of the drawn object, as 0..1 fractions of its source canvas. */
+export interface ContentBox { x: number; y: number; width: number; height: number }
+export interface WearableDefinition { id: string; name: Localized; category: 'wearable'; slot: string; rarity: string; price: number; currency: 'coins' | 'stardust'; art?: string; content?: ContentBox | null }
+export interface FurnitureDefinition { id: string; name: Localized; category: 'furniture'; roomId: string; price: number; footprint: [number, number]; layer: string; art?: string; content?: ContentBox | null }
 export interface Catalog {
-  version: string; pets: PetDefinition[]; rooms: RoomDefinition[]; maps: MapDefinition[];
-  foods: FoodDefinition[]; skills: SkillDefinition[]; wearables: WearableDefinition[];
+  version: string; pets: PetDefinition[]; rooms: RoomDefinition[];
+  foods: FoodDefinition[]; wearables: WearableDefinition[];
   furniture: FurnitureDefinition[]; evolutionThresholds: number[]; dailyXpCap: number;
+  animation: AnimationLayout | null;
   egg: { randomPrice: number; directCommonPrice: number; directRarePrice: number; odds: Record<Rarity, number>; pityAt: number; duplicateDust: Record<Rarity, number> };
   reactions: string[];
 }
 export interface PetInstance {
   id: string; speciesId: string; xp: number; stage: number; dailyXp: number; dailyXpDate: string;
-  equippedSkills: string[]; equippedWearables: string[]; ownedSkills: string[];
+  equippedWearables: string[];
 }
 export interface InventoryStack { itemId: string; quantity: number }
 export interface RoomPlacement { id: string; itemId: string; x: number; y: number; rotation: number; layer: string }
 export interface RoomState { themeId: string; visibility: 'private' | 'class'; placements: RoomPlacement[]; updatedAt?: string }
-export interface MapProgress { mapId: string; clears: number; bestTime: number | null; badges: string[]; dailyRewardDate: string; dailyRewardCount: number }
 export interface Bootstrap {
   profile: { studentId: string; activePetId: string | null; starterEggClaimed: boolean; eggPity: number; stardust: number };
   wallet: { balance: number }; pets: PetInstance[]; inventory: InventoryStack[]; room: RoomState;
-  mapProgress: MapProgress[]; catalog: Catalog; serverDay: string;
+  catalog: Catalog; serverDay: string;
 }
 export interface Identity { id: string; name: string; role: 'student' | 'teacher'; className: string; classNo?: number | null; language: Locale }
 

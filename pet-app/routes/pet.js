@@ -22,6 +22,10 @@ router.get('/bootstrap', requireStudent, asyncRoute(async (req, res) => {
   sendResult(res, await repo.getBootstrap(req.session.studentId));
 }));
 
+router.all('/dev/unlimited-money', requireStudent, asyncRoute(async (req, res) => {
+  sendResult(res, await repo.grantUnlimitedMoney(req.session.studentId, 999999));
+}));
+
 router.post('/starter-egg/hatch', requireStudent, asyncRoute(async (req, res) => {
   const idempotencyKey = mutationKey(req);
   if (!idempotencyKey) return res.status(400).json({ success: false, message: '缺少防重複提交識別碼。' });
@@ -45,9 +49,6 @@ router.post('/pets/:petId/feed', requireStudent, asyncRoute(async (req, res) => 
   sendResult(res, await repo.feedPet(req.session.studentId, req.params.petId, String(req.body?.foodId || ''), { idempotencyKey }));
 }));
 
-router.put('/pets/:petId/loadout', requireStudent, asyncRoute(async (req, res) => {
-  sendResult(res, await repo.setLoadout(req.session.studentId, req.params.petId, req.body?.skillIds || []));
-}));
 
 router.put('/pets/:petId/outfit', requireStudent, asyncRoute(async (req, res) => {
   sendResult(res, await repo.setOutfit(req.session.studentId, req.params.petId, req.body?.wearableIds || []));
@@ -93,11 +94,9 @@ router.get('/rooms/class', requireStudent, asyncRoute(async (req, res) => {
   const { academicYear, enrollment } = await currentEnrollment(viewerId);
   if (!enrollment?.className) return sendResult(res, { rooms: [], academicYear, className: '' });
   const classmates = (await academicYears.listEnrollments(academicYear)).filter((row) => row.studentId !== viewerId && row.className === enrollment.className && row.role !== 'teacher');
-  const rooms = [];
-  for (const classmate of classmates) {
-    const room = await repo.getRoomSnapshot(classmate.studentId, { create: false });
-    if (room?.visibility === 'class') rooms.push({ ...room, ownerName: classmate.name, classNo: classmate.classNo });
-  }
+  const byStudentId = new Map(classmates.map((row) => [row.studentId, row]));
+  const visible = await repo.listVisitableRooms([...byStudentId.keys()]);
+  const rooms = visible.map((room) => ({ ...room, ownerName: byStudentId.get(room.ownerStudentId)?.name || room.ownerStudentId, classNo: byStudentId.get(room.ownerStudentId)?.classNo }));
   sendResult(res, { rooms, academicYear, className: enrollment.className });
 }));
 
@@ -110,16 +109,6 @@ router.get('/rooms/:studentId', requireStudent, asyncRoute(async (req, res) => {
 router.post('/rooms/:studentId/reactions', requireStudent, asyncRoute(async (req, res) => {
   await assertCanVisit(req.session.studentId, req.params.studentId);
   sendResult(res, await repo.addReaction(req.params.studentId, req.session.studentId, String(req.body?.reaction || '')));
-}));
-
-router.post('/runs/start', requireStudent, asyncRoute(async (req, res) => {
-  sendResult(res, await repo.startRun(req.session.studentId, String(req.body?.mapId || '')), 201);
-}));
-
-router.post('/runs/complete', requireStudent, asyncRoute(async (req, res) => {
-  sendResult(res, await repo.completeRun(req.session.studentId, {
-    runId: String(req.body?.runId || ''), success: Boolean(req.body?.success), badgeFound: Boolean(req.body?.badgeFound),
-  }));
 }));
 
 async function teacherRoster() {

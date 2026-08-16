@@ -3,16 +3,6 @@ type SoundName = 'tap' | 'buy' | 'coin' | 'hatch' | 'evolve' | 'feed' | 'happy' 
 const THEMES: Record<string, { tempo: number; root: number; scale: number[]; pattern: number[] }> = {
   bedroom: { tempo: 92, root: 60, scale: [0,2,4,7,9], pattern: [0,2,4,2,1,3,4,3] },
   shop: { tempo: 116, root: 65, scale: [0,2,4,7,9], pattern: [0,1,2,4,3,2,1,3] },
-  'clover-meadow': { tempo: 108, root: 62, scale: [0,2,4,7,9], pattern: [0,2,1,3,2,4,3,1] },
-  'whisper-forest': { tempo: 86, root: 57, scale: [0,3,5,7,10], pattern: [0,2,1,4,2,1,3,1] },
-  'coral-cove': { tempo: 104, root: 64, scale: [0,2,5,7,9], pattern: [0,3,2,4,1,3,2,0] },
-  'crystal-cavern': { tempo: 78, root: 59, scale: [0,3,5,8,10], pattern: [0,4,2,1,3,2,4,1] },
-  'cloudpeak-trail': { tempo: 124, root: 67, scale: [0,2,4,7,11], pattern: [0,1,3,4,2,3,1,4] },
-  'aurora-tundra': { tempo: 72, root: 61, scale: [0,2,5,7,10], pattern: [0,2,4,3,1,2,3,0] },
-  'ember-volcano': { tempo: 126, root: 52, scale: [0,3,5,7,10], pattern: [0,1,0,3,2,1,4,3] },
-  'moonlit-marsh': { tempo: 82, root: 55, scale: [0,3,5,6,10], pattern: [0,3,1,4,2,1,3,2] },
-  'gearwork-city': { tempo: 132, root: 58, scale: [0,2,4,6,9], pattern: [0,2,4,1,3,4,2,1] },
-  'starfall-ruins': { tempo: 76, root: 54, scale: [0,2,3,7,8], pattern: [0,4,2,3,1,4,3,2] },
 };
 
 export class AudioEngine {

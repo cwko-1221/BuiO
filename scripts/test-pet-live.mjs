@@ -12,7 +12,9 @@ const require=createRequire(import.meta.url); const { catalog }=require('../pet-
 const reservePort = () => new Promise((resolve,reject)=>{const server=net.createServer();server.once('error',reject);server.listen(0,'127.0.0.1',()=>{const port=server.address().port;server.close(()=>resolve(port));});});
 const port=await reservePort(); const baseURL=`http://127.0.0.1:${port}`;
 const tempDir=await fs.mkdtemp(path.join(os.tmpdir(),'buio-pet-live-')); const databaseFile=path.join(tempDir,'db.json');
-const artifactDir=path.resolve('artifacts/pet-playtest'); await fs.mkdir(artifactDir,{recursive:true});
+// PET_PLAYTEST_DIR lets concurrent workstreams capture to their own folder instead of
+// overwriting each other's screenshots in the shared default.
+const artifactDir=path.resolve(process.env.PET_PLAYTEST_DIR||'artifacts/pet-playtest'); await fs.mkdir(artifactDir,{recursive:true});
 await fs.writeFile(databaseFile,JSON.stringify({
   users:[
     {studentid:'S001',name:'陳小星',passwordhash:bcrypt.hashSync('student123',4),role:'student',classname:'5A',classno:1,language:'zh-HK'},
@@ -51,12 +53,7 @@ try {
   await page.setViewportSize({width:1180,height:820}); await page.screenshot({path:path.join(artifactDir,'03-collection-ipad-landscape.png')});
   await page.locator('[data-tab="shop"]').click(); await page.locator('.shop-feature').waitFor();
   assert.match(await page.locator('.shop-feature').innerText(),/55%/);
-  await page.locator('[data-tab="maps"]').click(); await page.locator('.map-card').first().waitFor();
-  assert.equal(await page.locator('.map-card').count(),10); await waitImages(page);
-  await page.screenshot({path:path.join(artifactDir,'04-ten-maps-ipad-landscape.png')});
-  await page.locator('.map-card [data-action="enter-map"]:not([disabled])').first().click();
-  await page.locator('.adventure-panel').waitFor(); await page.waitForTimeout(500);
-  await page.screenshot({path:path.join(artifactDir,'05-adventure-ipad-landscape.png')});
+
   await page.locator('[data-tab="home"]').click(); await page.locator('.home-panel').waitFor();
   await page.locator('[data-action="decorate"]').click(); await page.locator('#roomTheme').waitFor();
   await page.screenshot({path:path.join(artifactDir,'06-decoration-ipad-landscape.png')});
@@ -81,7 +78,7 @@ try {
   assert.deepEqual(errors,[]);
   await teacherContext.close(); await context.close();
   console.log(`✓ protected student and teacher role routing`);
-  console.log(`✓ hatch, collection, 10-map list, adventure, decoration and grant flows`);
+  console.log(`✓ hatch, collection, decoration and grant flows`);
   console.log(`✓ desktop, iPad landscape and mobile screenshots: ${artifactDir}`);
   console.log(`✓ no browser console or uncaught page errors`);
 } finally {

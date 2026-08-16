@@ -562,33 +562,424 @@
       "studentId": "S001",
       "activePetId": "8947b57f-8805-4a00-b898-563447615a57",
       "starterEggClaimed": true,
-      "eggPity": 1,
-      "stardust": 0,
+      "eggPity": 2,
+      "stardust": 999999,
       "createdAt": "2026-08-13T13:03:28.012Z",
-      "updatedAt": "2026-08-13T13:03:36.358Z"
+      "updatedAt": "2026-08-16T11:13:31.566Z"
     }
   ],
   "petWallets": [
     {
       "studentId": "S001",
-      "balance": 0,
-      "updatedAt": "2026-08-13T13:03:28.012Z"
+      "balance": 999999,
+      "updatedAt": "2026-08-16T11:13:31.566Z"
     }
   ],
-  "petCurrencyLedger": [],
+  "petCurrencyLedger": [
+    {
+      "transactionId": "6e154ce3-d123-4989-8fe8-2e97e6f3b7d0",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -2200,
+      "kind": "egg_purchase",
+      "idempotencyKey": "714cf019-2f24-4c73-af5b-b39663e640a5",
+      "metadata": {
+        "speciesId": "ink-raccoon",
+        "random": false
+      },
+      "createdAt": "2026-08-16T08:02:37.903Z"
+    },
+    {
+      "transactionId": "5ef313f9-dc9a-481b-9a00-c3770f6c5ca7",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -800,
+      "kind": "egg_purchase",
+      "idempotencyKey": "cfe009ce-f9af-4fa6-ab21-620883c70d72",
+      "metadata": {
+        "speciesId": null,
+        "random": true
+      },
+      "createdAt": "2026-08-16T08:03:15.606Z"
+    },
+    {
+      "transactionId": "f5081353-d263-4a12-8d62-97234a21bddd",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -25,
+      "kind": "shop_purchase",
+      "idempotencyKey": "e947b4be-a501-4686-b01b-24c39b010645",
+      "metadata": {
+        "itemId": "apple-slice",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:03:22.230Z"
+    },
+    {
+      "transactionId": "a8d72338-782e-4c98-884d-83e90d2f7570",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -25,
+      "kind": "shop_purchase",
+      "idempotencyKey": "b5fc222e-b2ac-4525-ad7b-47d5597c203a",
+      "metadata": {
+        "itemId": "apple-slice",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:03:23.016Z"
+    },
+    {
+      "transactionId": "51bc55d6-413d-494d-8c49-fb4cc1e2c3ac",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -25,
+      "kind": "shop_purchase",
+      "idempotencyKey": "a35d84bb-9c6f-4654-8c39-b4e49c6b1b54",
+      "metadata": {
+        "itemId": "pet-biscuit",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:03:37.994Z"
+    },
+    {
+      "transactionId": "f8acd691-5219-4f0f-a7fc-2a81f535b599",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -25,
+      "kind": "shop_purchase",
+      "idempotencyKey": "43053f2e-c582-4ab4-9991-62cc5f09408f",
+      "metadata": {
+        "itemId": "berry-jelly",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:03:38.774Z"
+    },
+    {
+      "transactionId": "e59eb4dd-930e-4908-a9ee-586dffaf7a79",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -25,
+      "kind": "shop_purchase",
+      "idempotencyKey": "54dcab3b-ff43-4994-b111-a36cdd2ec379",
+      "metadata": {
+        "itemId": "carrot-star",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:03:39.127Z"
+    },
+    {
+      "transactionId": "b43f5402-48ab-4b20-be23-c2817e189215",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -60,
+      "kind": "shop_purchase",
+      "idempotencyKey": "d46e1bbc-b7a3-45cb-be36-6350b0162275",
+      "metadata": {
+        "itemId": "veggie-bowl",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:03:41.234Z"
+    },
+    {
+      "transactionId": "ebccbd49-1b68-429f-b00f-a1b154319983",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -60,
+      "kind": "shop_purchase",
+      "idempotencyKey": "4ccc7d16-5f99-4d7a-9ea0-c6ed0b2f7785",
+      "metadata": {
+        "itemId": "fish-sandwich",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:03:41.707Z"
+    },
+    {
+      "transactionId": "b478e970-2387-4322-9a56-728730bce57b",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -140,
+      "kind": "shop_purchase",
+      "idempotencyKey": "18467f73-3a7f-4f76-9952-6195dc3b347a",
+      "metadata": {
+        "itemId": "moon-cake",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:03:43.469Z"
+    },
+    {
+      "transactionId": "de4762da-68b8-44aa-8844-a2ba765cdb9a",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "f7147176-c8a8-43d3-bc25-6ee8ee9e3150",
+      "metadata": {
+        "itemId": "head-01",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:04:09.233Z"
+    },
+    {
+      "transactionId": "7272fe23-ca37-4625-a84f-2598c8ec208a",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "045d228e-88dc-4e98-a649-cbdf1f4d90dd",
+      "metadata": {
+        "itemId": "head-02",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:04:09.780Z"
+    },
+    {
+      "transactionId": "db0b10aa-3c7d-47eb-b559-679a2d95de74",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "6d2bf9e9-29a5-41a9-b570-a67121042f77",
+      "metadata": {
+        "itemId": "head-03",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:04:10.778Z"
+    },
+    {
+      "transactionId": "d07450a1-4981-48e8-9fce-38d5c4ef79de",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "cede5161-463c-4122-b98a-f9cf9ab91667",
+      "metadata": {
+        "itemId": "head-04",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:04:11.086Z"
+    },
+    {
+      "transactionId": "18a3bd7d-2f85-4460-b2fe-0ccb4f418a91",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "70038c62-f7c0-4891-852e-09938fd0f222",
+      "metadata": {
+        "itemId": "head-05",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:04:11.918Z"
+    },
+    {
+      "transactionId": "48622b22-e933-43e5-991c-4362e7b94930",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "4654eef5-dfcb-43dd-9f54-e73777d8e21c",
+      "metadata": {
+        "itemId": "head-07",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:04:13.741Z"
+    },
+    {
+      "transactionId": "f070be09-5844-4774-87b3-a48b0c70b905",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "b17513f8-e343-4958-9b4d-4f53b68130fa",
+      "metadata": {
+        "itemId": "head-09",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:04:14.490Z"
+    },
+    {
+      "transactionId": "e15fce7c-087e-4e77-aeef-698c507f9656",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -450,
+      "kind": "shop_purchase",
+      "idempotencyKey": "6deb01bb-8a78-42b5-a7c4-f9b7905fac13",
+      "metadata": {
+        "itemId": "head-14",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:04:30.645Z"
+    },
+    {
+      "transactionId": "b3719aa8-7af9-408e-b518-30012663f930",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -600,
+      "kind": "shop_purchase",
+      "idempotencyKey": "3cde66a1-bfc7-49ec-bb2b-b41057c9c451",
+      "metadata": {
+        "itemId": "map:whisper-forest",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:10:09.976Z"
+    },
+    {
+      "transactionId": "ca5878fd-ba41-4bfa-839c-f82d8fdc5ca5",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -700,
+      "kind": "shop_purchase",
+      "idempotencyKey": "f2122773-5621-4e02-aa13-6968236674fc",
+      "metadata": {
+        "itemId": "room:cloud-loft",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:10:15.939Z"
+    },
+    {
+      "transactionId": "1c026089-95c2-404d-9ae8-e0fcd0cdc2fe",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -900,
+      "kind": "shop_purchase",
+      "idempotencyKey": "9126db41-d1c2-4d93-8aee-2b94e05ef917",
+      "metadata": {
+        "itemId": "room:forest-treehouse",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:10:17.469Z"
+    },
+    {
+      "transactionId": "c53483db-29d2-4a01-921c-016f2a28572c",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -800,
+      "kind": "shop_purchase",
+      "idempotencyKey": "c3cec249-cbf9-4d63-93dc-f490054569a0",
+      "metadata": {
+        "itemId": "room:ocean-cabin",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:10:17.904Z"
+    },
+    {
+      "transactionId": "c96df770-aed0-4332-bdc1-b28e7b3e487a",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -1100,
+      "kind": "shop_purchase",
+      "idempotencyKey": "aeb0e499-16c6-417a-a4a9-d83635a1083c",
+      "metadata": {
+        "itemId": "room:candy-workshop",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:10:19.584Z"
+    },
+    {
+      "transactionId": "e8f449d2-90de-4867-9356-4e266b6c2779",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -1000,
+      "kind": "shop_purchase",
+      "idempotencyKey": "472cd3a3-212c-4139-bfed-2ae16909e4ba",
+      "metadata": {
+        "itemId": "room:space-pod",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:10:20.949Z"
+    },
+    {
+      "transactionId": "3a835a4f-b5d4-482b-b546-c4f6656a836b",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -1200,
+      "kind": "shop_purchase",
+      "idempotencyKey": "a54c9240-03da-4f13-b25d-a6c20dc7fe51",
+      "metadata": {
+        "itemId": "room:lava-den",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:10:22.187Z"
+    },
+    {
+      "transactionId": "a9560373-e108-41f7-93ca-4418e9b0fadf",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -1300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "54110590-6365-4cfb-aa6f-fd4e88a7ebe9",
+      "metadata": {
+        "itemId": "room:aurora-observatory",
+        "quantity": 1,
+        "petId": null
+      },
+      "createdAt": "2026-08-16T08:10:24.249Z"
+    }
+  ],
   "petInstances": [
     {
       "petId": "8947b57f-8805-4a00-b898-563447615a57",
       "studentId": "S001",
       "speciesId": "pudding-pig",
+      "xp": 100,
+      "stage": 1,
+      "dailyXp": 100,
+      "dailyXpDate": "2026-08-16",
+      "equippedSkills": [],
+      "equippedWearables": [
+        "head-03"
+      ],
+      "createdAt": "2026-08-13T13:03:36.358Z",
+      "updatedAt": "2026-08-16T08:05:07.134Z"
+    },
+    {
+      "petId": "d441c27e-25aa-4bb3-86c6-6d1ae5a4a20a",
+      "studentId": "S001",
+      "speciesId": "ink-raccoon",
       "xp": 0,
       "stage": 1,
       "dailyXp": 0,
       "dailyXpDate": "",
       "equippedSkills": [],
       "equippedWearables": [],
-      "createdAt": "2026-08-13T13:03:36.358Z",
-      "updatedAt": "2026-08-13T13:03:36.358Z"
+      "createdAt": "2026-08-16T08:02:37.903Z",
+      "updatedAt": "2026-08-16T08:02:37.903Z"
+    },
+    {
+      "petId": "dd515ce7-cc1e-455f-b7d9-7ae7572c136d",
+      "studentId": "S001",
+      "speciesId": "thunderhorn-goat",
+      "xp": 0,
+      "stage": 1,
+      "dailyXp": 0,
+      "dailyXpDate": "",
+      "equippedSkills": [],
+      "equippedWearables": [],
+      "createdAt": "2026-08-16T08:03:15.606Z",
+      "updatedAt": "2026-08-16T08:03:15.606Z"
     }
   ],
   "petSkills": [],
@@ -652,12 +1043,127 @@
       "studentId": "S001",
       "itemId": "sunny-oak-furniture-10",
       "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "apple-slice",
+      "quantity": 0
+    },
+    {
+      "studentId": "S001",
+      "itemId": "pet-biscuit",
+      "quantity": 0
+    },
+    {
+      "studentId": "S001",
+      "itemId": "berry-jelly",
+      "quantity": 0
+    },
+    {
+      "studentId": "S001",
+      "itemId": "carrot-star",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "veggie-bowl",
+      "quantity": 0
+    },
+    {
+      "studentId": "S001",
+      "itemId": "fish-sandwich",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "moon-cake",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "head-01",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "head-02",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "head-03",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "head-04",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "head-05",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "head-07",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "head-09",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "head-14",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "map:whisper-forest",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "room:cloud-loft",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "room:forest-treehouse",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "room:ocean-cabin",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "room:candy-workshop",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "room:space-pod",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "room:lava-den",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "room:aurora-observatory",
+      "quantity": 1
     }
   ],
   "petRoomLayouts": [
     {
       "studentId": "S001",
-      "themeId": "sunny-oak",
+      "themeId": "space-pod",
       "visibility": "private",
       "placements": [
         {
@@ -709,7 +1215,7 @@
           "layer": "furniture"
         }
       ],
-      "updatedAt": "2026-08-13T13:03:28.012Z"
+      "updatedAt": "2026-08-16T08:11:18.206Z"
     }
   ],
   "petMapProgress": [],
@@ -732,6 +1238,15 @@
       "startedAt": "2026-08-13T13:16:18.862Z",
       "completedAt": "2026-08-13T13:16:57.395Z",
       "success": false
+    },
+    {
+      "runId": "c9c4acd3-bcf2-4e26-b6e2-6f49deff0727",
+      "studentId": "S001",
+      "mapId": "clover-meadow",
+      "seed": 1089802732,
+      "startedAt": "2026-08-16T08:01:40.961Z",
+      "completedAt": null,
+      "success": null
     }
   ],
   "petIdempotency": [
@@ -759,6 +1274,473 @@
         "eggPity": 1
       },
       "createdAt": "2026-08-13T13:03:36.358Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "714cf019-2f24-4c73-af5b-b39663e640a5",
+      "kind": "direct_egg",
+      "response": {
+        "speciesId": "ink-raccoon",
+        "rarity": "rare",
+        "pet": {
+          "id": "d441c27e-25aa-4bb3-86c6-6d1ae5a4a20a",
+          "speciesId": "ink-raccoon",
+          "xp": 0,
+          "stage": 1,
+          "dailyXp": 0,
+          "dailyXpDate": "",
+          "equippedSkills": [],
+          "equippedWearables": [],
+          "ownedSkills": []
+        },
+        "duplicateDust": 0,
+        "balance": 997799,
+        "stardust": 999999,
+        "eggPity": 1
+      },
+      "createdAt": "2026-08-16T08:02:37.903Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "cfe009ce-f9af-4fa6-ab21-620883c70d72",
+      "kind": "random_egg",
+      "response": {
+        "speciesId": "thunderhorn-goat",
+        "rarity": "rare",
+        "pet": {
+          "id": "dd515ce7-cc1e-455f-b7d9-7ae7572c136d",
+          "speciesId": "thunderhorn-goat",
+          "xp": 0,
+          "stage": 1,
+          "dailyXp": 0,
+          "dailyXpDate": "",
+          "equippedSkills": [],
+          "equippedWearables": [],
+          "ownedSkills": []
+        },
+        "duplicateDust": 0,
+        "balance": 996999,
+        "stardust": 999999,
+        "eggPity": 2
+      },
+      "createdAt": "2026-08-16T08:03:15.606Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "e947b4be-a501-4686-b01b-24c39b010645",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "apple-slice",
+        "quantity": 1,
+        "petId": null,
+        "balance": 996974,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:03:22.230Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "b5fc222e-b2ac-4525-ad7b-47d5597c203a",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "apple-slice",
+        "quantity": 1,
+        "petId": null,
+        "balance": 996949,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:03:23.016Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "c36484cd-6587-47d4-964d-47917e002498",
+      "kind": "pet_feed",
+      "response": {
+        "pet": {
+          "id": "8947b57f-8805-4a00-b898-563447615a57",
+          "speciesId": "pudding-pig",
+          "xp": 15,
+          "stage": 1,
+          "dailyXp": 15,
+          "dailyXpDate": "2026-08-16",
+          "equippedSkills": [],
+          "equippedWearables": [],
+          "ownedSkills": []
+        },
+        "consumed": "apple-slice",
+        "evolved": false
+      },
+      "createdAt": "2026-08-16T08:03:25.559Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "5ee313fa-6402-4446-a09d-9c8534a6a547",
+      "kind": "pet_feed",
+      "response": {
+        "pet": {
+          "id": "8947b57f-8805-4a00-b898-563447615a57",
+          "speciesId": "pudding-pig",
+          "xp": 30,
+          "stage": 1,
+          "dailyXp": 30,
+          "dailyXpDate": "2026-08-16",
+          "equippedSkills": [],
+          "equippedWearables": [],
+          "ownedSkills": []
+        },
+        "consumed": "apple-slice",
+        "evolved": false
+      },
+      "createdAt": "2026-08-16T08:03:27.201Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "a35d84bb-9c6f-4654-8c39-b4e49c6b1b54",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "pet-biscuit",
+        "quantity": 1,
+        "petId": null,
+        "balance": 996924,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:03:37.994Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "43053f2e-c582-4ab4-9991-62cc5f09408f",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "berry-jelly",
+        "quantity": 1,
+        "petId": null,
+        "balance": 996899,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:03:38.774Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "54dcab3b-ff43-4994-b111-a36cdd2ec379",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "carrot-star",
+        "quantity": 1,
+        "petId": null,
+        "balance": 996874,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:03:39.127Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "d46e1bbc-b7a3-45cb-be36-6350b0162275",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "veggie-bowl",
+        "quantity": 1,
+        "petId": null,
+        "balance": 996814,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:03:41.234Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "4ccc7d16-5f99-4d7a-9ea0-c6ed0b2f7785",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "fish-sandwich",
+        "quantity": 1,
+        "petId": null,
+        "balance": 996754,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:03:41.707Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "18467f73-3a7f-4f76-9952-6195dc3b347a",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "moon-cake",
+        "quantity": 1,
+        "petId": null,
+        "balance": 996614,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:03:43.469Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "c0ad029f-046a-4464-a9ce-cd9278e69767",
+      "kind": "pet_feed",
+      "response": {
+        "pet": {
+          "id": "8947b57f-8805-4a00-b898-563447615a57",
+          "speciesId": "pudding-pig",
+          "xp": 45,
+          "stage": 1,
+          "dailyXp": 45,
+          "dailyXpDate": "2026-08-16",
+          "equippedSkills": [],
+          "equippedWearables": [],
+          "ownedSkills": []
+        },
+        "consumed": "pet-biscuit",
+        "evolved": false
+      },
+      "createdAt": "2026-08-16T08:03:46.484Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "1230e9be-d181-4b9e-bec7-177d5336cb3a",
+      "kind": "pet_feed",
+      "response": {
+        "pet": {
+          "id": "8947b57f-8805-4a00-b898-563447615a57",
+          "speciesId": "pudding-pig",
+          "xp": 85,
+          "stage": 1,
+          "dailyXp": 85,
+          "dailyXpDate": "2026-08-16",
+          "equippedSkills": [],
+          "equippedWearables": [],
+          "ownedSkills": []
+        },
+        "consumed": "veggie-bowl",
+        "evolved": false
+      },
+      "createdAt": "2026-08-16T08:03:49.568Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "4ea71a46-7877-4dfb-8c1a-8c5880f2dec2",
+      "kind": "pet_feed",
+      "response": {
+        "pet": {
+          "id": "8947b57f-8805-4a00-b898-563447615a57",
+          "speciesId": "pudding-pig",
+          "xp": 100,
+          "stage": 1,
+          "dailyXp": 100,
+          "dailyXpDate": "2026-08-16",
+          "equippedSkills": [],
+          "equippedWearables": [],
+          "ownedSkills": []
+        },
+        "consumed": "berry-jelly",
+        "evolved": false
+      },
+      "createdAt": "2026-08-16T08:03:51.466Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "f7147176-c8a8-43d3-bc25-6ee8ee9e3150",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "head-01",
+        "quantity": 1,
+        "petId": null,
+        "balance": 999879,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:04:09.233Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "045d228e-88dc-4e98-a649-cbdf1f4d90dd",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "head-02",
+        "quantity": 1,
+        "petId": null,
+        "balance": 999759,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:04:09.780Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "6d2bf9e9-29a5-41a9-b570-a67121042f77",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "head-03",
+        "quantity": 1,
+        "petId": null,
+        "balance": 999639,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:04:10.778Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "cede5161-463c-4122-b98a-f9cf9ab91667",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "head-04",
+        "quantity": 1,
+        "petId": null,
+        "balance": 999519,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:04:11.086Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "70038c62-f7c0-4891-852e-09938fd0f222",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "head-05",
+        "quantity": 1,
+        "petId": null,
+        "balance": 999399,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:04:11.918Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "4654eef5-dfcb-43dd-9f54-e73777d8e21c",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "head-07",
+        "quantity": 1,
+        "petId": null,
+        "balance": 999099,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:04:13.741Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "b17513f8-e343-4958-9b4d-4f53b68130fa",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "head-09",
+        "quantity": 1,
+        "petId": null,
+        "balance": 998799,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:04:14.490Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "6deb01bb-8a78-42b5-a7c4-f9b7905fac13",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "head-14",
+        "quantity": 1,
+        "petId": null,
+        "balance": 998349,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:04:30.645Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "3cde66a1-bfc7-49ec-bb2b-b41057c9c451",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "map:whisper-forest",
+        "quantity": 1,
+        "petId": null,
+        "balance": 999399,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:10:09.976Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "f2122773-5621-4e02-aa13-6968236674fc",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "room:cloud-loft",
+        "quantity": 1,
+        "petId": null,
+        "balance": 998699,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:10:15.939Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "9126db41-d1c2-4d93-8aee-2b94e05ef917",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "room:forest-treehouse",
+        "quantity": 1,
+        "petId": null,
+        "balance": 997799,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:10:17.469Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "c3cec249-cbf9-4d63-93dc-f490054569a0",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "room:ocean-cabin",
+        "quantity": 1,
+        "petId": null,
+        "balance": 996999,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:10:17.905Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "aeb0e499-16c6-417a-a4a9-d83635a1083c",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "room:candy-workshop",
+        "quantity": 1,
+        "petId": null,
+        "balance": 995899,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:10:19.584Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "472cd3a3-212c-4139-bfed-2ae16909e4ba",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "room:space-pod",
+        "quantity": 1,
+        "petId": null,
+        "balance": 994899,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:10:20.949Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "a54c9240-03da-4f13-b25d-a6c20dc7fe51",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "room:lava-den",
+        "quantity": 1,
+        "petId": null,
+        "balance": 993699,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:10:22.187Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "54110590-6365-4cfb-aa6f-fd4e88a7ebe9",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "room:aurora-observatory",
+        "quantity": 1,
+        "petId": null,
+        "balance": 992399,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-16T08:10:24.249Z"
     }
   ]
 }

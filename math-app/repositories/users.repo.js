@@ -202,13 +202,10 @@ async function deleteById(studentId) {
   }
   d.studentStats = d.studentStats.filter(s => s.studentid !== studentId);
   d.questionLogs = d.questionLogs.filter(l => l.studentid !== studentId);
-  const petIds = new Set((d.petInstances || []).filter(row => row.studentId === studentId).map(row => row.petId));
-  for (const key of ['petProfiles','petWallets','petCurrencyLedger','petInstances','petInventory','petRoomLayouts','petMapProgress','petRunTickets','petIdempotency']) {
-    if (Array.isArray(d[key])) d[key] = d[key].filter(row => row.studentId !== studentId && row.actorId !== studentId);
-  }
-  if (Array.isArray(d.petSkills)) d.petSkills = d.petSkills.filter(row => !petIds.has(row.petId));
-  if (Array.isArray(d.petRoomReactions)) d.petRoomReactions = d.petRoomReactions.filter(row => row.ownerStudentId !== studentId && row.visitorStudentId !== studentId);
   store.save();
+  // Pet Paradise owns the per-table deletion semantics for its own data; duplicating them
+  // here is how the two copies drifted apart in the first place.
+  require('../../pet-app/repositories/pet.repo').purgeJsonStudent(studentId);
 }
 
 async function upgradeAllStudents() {

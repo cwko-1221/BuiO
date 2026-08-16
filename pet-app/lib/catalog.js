@@ -1,7 +1,40 @@
 'use strict';
 
 const crypto = require('crypto');
+const fs = require('node:fs');
+const path = require('node:path');
 const CATALOG_VERSION = '2026.08.13-1';
+
+/**
+ * Sprite atlas layout, read from the generated manifest so the build pipeline stays the single
+ * source of truth for frame counts. The client cannot fetch the manifest itself — /pet/assets
+ * only serves hashed .js/.css/.webp — so the layout rides along with the catalog in /bootstrap.
+ *
+ * The manifest's `columns` is a per-frame action label, so consecutive runs collapse into
+ * {name, start, length} ranges that map directly onto Phaser animation frame ranges.
+ */
+function loadAnimationLayout() {
+  try {
+    const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'assets', 'art', 'sprites', 'manifest.json'), 'utf8'));
+    if (!Array.isArray(manifest.columns) || !Array.isArray(manifest.rows)) return null;
+    const actions = [];
+    manifest.columns.forEach((name, index) => {
+      const previous = actions[actions.length - 1];
+      if (previous && previous.name === name && previous.start + previous.length === index) previous.length += 1;
+      else actions.push({ name, start: index, length: 1 });
+    });
+    return {
+      frameWidth: manifest.frameWidth,
+      frameHeight: manifest.frameHeight,
+      columns: manifest.columns.length,
+      fps: manifest.fps || 24,
+      directions: manifest.rows,
+      actions,
+    };
+  } catch {
+    return null; // No atlases generated yet; the runtime falls back to the static form art.
+  }
+}
 const artPath = (folder, id) => {
   const hash = crypto.createHash('sha256').update(`${CATALOG_VERSION}:${folder}:${id}`).digest('hex').slice(0, 10);
   return `/pet/assets/art/${folder}/${id}-${hash}.webp`;
@@ -32,6 +65,7 @@ const PETS = [
   id, rarity, element, names: { 'zh-HK': namesZh, 'en-US': namesEn },
   talent: { 'zh-HK': talentZh, 'en-US': talentEn }, color, body,
   art: Array.from({ length: 4 }, (_, index) => artPath('pets', `${id}-${index + 1}`)),
+  atlas: Array.from({ length: 4 }, (_, index) => artPath('sprites', `${id}-${index + 1}-atlas`)),
 }));
 
 const ROOMS = [
@@ -47,23 +81,6 @@ const ROOMS = [
   ['moon-magic-attic','月影魔法閣樓','Moonlit Magic Attic',1700,'#655789','#d1a8d2'],
 ].map(([id, zh, en, price, primary, accent]) => ({ id, name: { 'zh-HK': zh, 'en-US': en }, price, primary, accent, art: artPath('rooms', id) }));
 
-const MAPS = [
-  ['clover-meadow','四葉草原','Clover Meadow',0,'荊棘野豬','Bramble Boar','nature','#72bd68'],
-  ['whisper-forest','低語森林','Whisper Forest',600,'樹根巨像','Root Colossus','nature','#3f805c'],
-  ['coral-cove','珊瑚海灣','Coral Cove',700,'礁石蟹王','Reef Crab King','water','#41a8bf'],
-  ['crystal-cavern','水晶洞窟','Crystal Cavern',800,'稜鏡巨蝠','Prism Greatbat','ice-light','#7567b5'],
-  ['cloudpeak-trail','雲峰山道','Cloudpeak Trail',900,'風暴巨鳥','Storm Roc','wind','#77bcd1'],
-  ['aurora-tundra','極光雪原','Aurora Tundra',1000,'冰牙海象','Ice-tusk Walrus','ice','#9bd6e4'],
-  ['ember-volcano','熾焰火山','Ember Volcano',1100,'熔岩巨人','Magma Giant','fire','#b94e3f'],
-  ['moonlit-marsh','月光沼澤','Moonlit Marsh',1200,'燈影水蛇','Lantern Serpent','shadow','#56548c'],
-  ['gearwork-city','齒輪城市','Gearwork City',1400,'發條泰坦','Clockwork Titan','electric','#9b815a'],
-  ['starfall-ruins','星墜遺跡','Starfall Ruins',1600,'虛空彗獸','Void Comet Beast','cosmic','#4d4f88'],
-].map(([id, zh, en, price, bossZh, bossEn, element, color], index) => ({
-  id, name: { 'zh-HK': zh, 'en-US': en }, price,
-  boss: { 'zh-HK': bossZh, 'en-US': bossEn }, element, color,
-  badgeId: `badge-${id}`, art: artPath('maps', id), order: index,
-}));
-
 const FOOD_GROUPS = [
   ['apple-slice','蘋果星片','Apple Stars'],['pet-biscuit','寵物餅乾','Pet Biscuits'],
   ['carrot-star','甘筍星星','Carrot Stars'],['berry-jelly','莓果啫喱','Berry Jelly'],
@@ -77,16 +94,20 @@ const FOODS = FOOD_GROUPS.map(([id, zh, en], index) => {
   return { id, name: { 'zh-HK': zh, 'en-US': en }, category: 'food', tier: tier + 1, price: [25, 60, 140][tier], xp: [15, 40, 100][tier] };
 });
 
-const SKILLS = [
-  ['ember-bolt','火焰彈','Ember Bolt','attack','fire',450],['tide-burst','水泡爆破','Tide Burst','attack','water',450],
-  ['vine-whip','藤蔓鞭','Vine Whip','attack','nature',450],['thunder-arc','連鎖電弧','Thunder Arc','attack','electric',450],
-  ['frost-nova','冰霜新星','Frost Nova','attack','ice',450],['star-beam','星光束','Star Beam','attack','cosmic',450],
-  ['shadow-orb','暗影球','Shadow Orb','attack','shadow',450],['wind-dash','疾風衝刺','Wind Dash','explore','wind',350],
-  ['rock-smash','岩石重擊','Rock Smash','explore','earth',350],['glide-current','滑翔翼流','Glide Current','explore','wind',350],
-  ['dive-bubble','潛水泡','Dive Bubble','explore','water',350],['treasure-scent','尋寶嗅覺','Treasure Scent','explore','cosmic',350],
-  ['guardian-bubble','守護泡泡','Guardian Bubble','support','water',400],['healing-pollen','治療花粉','Healing Pollen','support','nature',400],
-  ['haste-cheer','加速鼓舞','Haste Cheer','support','light',400],['decoy-toy','誘餌玩具','Decoy Toy','support','shadow',400],
-].map(([id, zh, en, kind, element, price]) => ({ id, name: { 'zh-HK': zh, 'en-US': en }, category: 'skill', kind, element, price }));
+
+/**
+ * Alpha bounding boxes for placeable art, as 0..1 fractions of the source canvas. Props are
+ * drawn on a fixed canvas but neither fill nor centre it, so the runtime needs the real bounds
+ * to size a piece against its grid footprint and stand it on the floor. Generated by
+ * scripts/pet-art/metrics.mjs; absent entries simply fall back to whole-canvas fitting.
+ */
+const CONTENT_METRICS = (() => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'assets', 'art', 'collectibles', 'metrics.json'), 'utf8'));
+  } catch {
+    return {};
+  }
+})();
 
 const WEARABLE_GROUPS = [
   ['head',20,['小皇冠','探險帽','花環','星星髮夾','廚師帽','雲朵帽','海員帽','巫師帽','竹葉帽','雪帽','火焰頭環','月亮冠','齒輪禮帽','蝴蝶結','王者頭冠','睡帽','貓耳帽','護目鏡','珊瑚冠','宇宙頭盔']],
@@ -101,7 +122,7 @@ for (const [slot, count, names] of WEARABLE_GROUPS) {
     const rarity = index >= count - 4 ? 'stardust' : index >= Math.floor(count * .55) ? 'fancy' : index >= Math.floor(count * .25) ? 'rare' : 'common';
     const price = rarity === 'stardust' ? [30, 60, 100][index % 3] : ({ common: 120, rare: 300, fancy: 450 })[rarity];
     const id = `${slot}-${String(index + 1).padStart(2, '0')}`;
-    WEARABLES.push({ id, name: { 'zh-HK': names[index], 'en-US': `${slot[0].toUpperCase()}${slot.slice(1)} ${index + 1}` }, category: 'wearable', slot, rarity, price, currency: rarity === 'stardust' ? 'stardust' : 'coins', art: artPath('collectibles/wearables', id) });
+    WEARABLES.push({ id, name: { 'zh-HK': names[index], 'en-US': `${slot[0].toUpperCase()}${slot.slice(1)} ${index + 1}` }, category: 'wearable', slot, rarity, price, currency: rarity === 'stardust' ? 'stardust' : 'coins', art: artPath('collectibles/wearables', id), content: CONTENT_METRICS[id] || null });
   }
 }
 
@@ -112,6 +133,7 @@ const FURNITURE = ROOMS.flatMap((room) => FURNITURE_NAMES.map((name, index) => (
   name: { 'zh-HK': `${room.name['zh-HK']}・${name}`, 'en-US': `${room.name['en-US']} ${FURNITURE_EN[index]}` },
   category: 'furniture', roomId: room.id, price: [120,120,120,300,120,300,300,120,450,450][index],
   art: artPath('collectibles/furniture', `${room.id}-furniture-${index + 1}`),
+  content: CONTENT_METRICS[`${room.id}-furniture-${index + 1}`] || null,
   footprint: index === 0 ? [3,2] : index === 1 ? [4,3] : index === 5 ? [2,2] : [1,1],
   layer: index === 1 ? 'rug' : index === 6 ? 'wall' : 'furniture',
 })));
@@ -123,18 +145,17 @@ const catalog = Object.freeze({
   version: CATALOG_VERSION,
   pets: PETS,
   rooms: ROOMS,
-  maps: MAPS,
   foods: FOODS,
-  skills: SKILLS,
   wearables: WEARABLES,
   furniture: FURNITURE,
   evolutionThresholds: EVOLUTION_THRESHOLDS,
+  animation: loadAnimationLayout(),
   dailyXpCap: 100,
   egg: EGG,
   reactions: ['heart','star','wow','clap','flower','sparkle'],
 });
 
 const byId = (items) => new Map(items.map((item) => [item.id, item]));
-const indexes = Object.freeze({ pets: byId(PETS), rooms: byId(ROOMS), maps: byId(MAPS), foods: byId(FOODS), skills: byId(SKILLS), wearables: byId(WEARABLES), furniture: byId(FURNITURE) });
+const indexes = Object.freeze({ pets: byId(PETS), rooms: byId(ROOMS), foods: byId(FOODS), wearables: byId(WEARABLES), furniture: byId(FURNITURE) });
 
 module.exports = { catalog, indexes };

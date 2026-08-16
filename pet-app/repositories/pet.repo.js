@@ -7,9 +7,9 @@ const { getPool, withTransaction } = require('../../math-app/db/database');
 const { catalog, indexes } = require('../lib/catalog');
 
 const JSON_KEYS = [
-  'petProfiles', 'petWallets', 'petCurrencyLedger', 'petInstances', 'petSkills',
-  'petInventory', 'petRoomLayouts', 'petMapProgress', 'petRoomReactions',
-  'petRunTickets', 'petIdempotency',
+  'petProfiles', 'petWallets', 'petCurrencyLedger', 'petInstances',
+  'petInventory', 'petRoomLayouts', 'petRoomReactions',
+  'petIdempotency',
 ];
 
 const hkDay = (date = new Date()) => new Intl.DateTimeFormat('en-CA', {
@@ -52,10 +52,6 @@ async function ensureSchema() {
       CreatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(), UpdatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       UNIQUE(StudentID, SpeciesID)
     );
-    CREATE TABLE IF NOT EXISTS PetSkills (
-      PetID UUID NOT NULL REFERENCES PetInstances(PetID) ON DELETE CASCADE, SkillID VARCHAR(80) NOT NULL,
-      PurchasedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(), PRIMARY KEY(PetID, SkillID)
-    );
     CREATE TABLE IF NOT EXISTS PetInventory (
       StudentID VARCHAR(20) NOT NULL REFERENCES Users(StudentID) ON DELETE CASCADE,
       ItemID VARCHAR(120) NOT NULL, Quantity INTEGER NOT NULL DEFAULT 0 CHECK (Quantity >= 0),
@@ -67,23 +63,11 @@ async function ensureSchema() {
       Placements JSONB NOT NULL DEFAULT '[]'::jsonb, UpdatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       CHECK (Visibility IN ('private','class'))
     );
-    CREATE TABLE IF NOT EXISTS PetMapProgress (
-      StudentID VARCHAR(20) NOT NULL REFERENCES Users(StudentID) ON DELETE CASCADE,
-      MapID VARCHAR(80) NOT NULL, Clears INTEGER NOT NULL DEFAULT 0, BestTime INTEGER,
-      Badges JSONB NOT NULL DEFAULT '[]'::jsonb, DailyRewardDate VARCHAR(10) NOT NULL DEFAULT '',
-      DailyRewardCount INTEGER NOT NULL DEFAULT 0, UpdatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      PRIMARY KEY(StudentID, MapID)
-    );
     CREATE TABLE IF NOT EXISTS PetRoomReactions (
       OwnerStudentID VARCHAR(20) NOT NULL REFERENCES Users(StudentID) ON DELETE CASCADE,
       VisitorStudentID VARCHAR(20) NOT NULL REFERENCES Users(StudentID) ON DELETE CASCADE,
       ReactionDay VARCHAR(10) NOT NULL, Reaction VARCHAR(20) NOT NULL, UpdatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       PRIMARY KEY(OwnerStudentID, VisitorStudentID, ReactionDay)
-    );
-    CREATE TABLE IF NOT EXISTS PetRunTickets (
-      RunID UUID PRIMARY KEY, StudentID VARCHAR(20) NOT NULL REFERENCES Users(StudentID) ON DELETE CASCADE,
-      MapID VARCHAR(80) NOT NULL, Seed INTEGER NOT NULL, StartedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      CompletedAt TIMESTAMPTZ, Success BOOLEAN
     );
     CREATE TABLE IF NOT EXISTS PetIdempotency (
       ActorID VARCHAR(20) NOT NULL, IdempotencyKey VARCHAR(120) NOT NULL, Kind VARCHAR(40) NOT NULL,
@@ -107,7 +91,6 @@ function ensureJsonData() {
 function starterInventoryRows(studentId) {
   const rows = [
     { studentId, itemId: 'room:sunny-oak', quantity: 1 },
-    { studentId, itemId: 'map:clover-meadow', quantity: 1 },
   ];
   for (const item of catalog.furniture.filter((entry) => entry.roomId === 'sunny-oak')) {
     rows.push({ studentId, itemId: item.id, quantity: 1 });
@@ -115,11 +98,25 @@ function starterInventoryRows(studentId) {
   return rows;
 }
 
+/**
+ * The starter room is the first thing a child sees, so it is arranged the way a decorated room
+ * actually reads rather than scattered across the floor: the bed tucked into the back corner
+ * with a side table and lamp flanking it, wall art centred above, a rug defining the open
+ * middle, and the toy out in the play area where the pet stands.
+ *
+ * Grid is 12x10 with the origin at the back corner, so x=0 and y=0 are the two walls.
+ * Footprints must not overlap within a layer — validatePlacements() rejects the whole save
+ * if they do.
+ */
 function starterPlacements() {
   return [
-    ['sunny-oak-furniture-1',2,6,0,'furniture'],['sunny-oak-furniture-2',4,7,0,'rug'],
-    ['sunny-oak-furniture-3',7,6,0,'furniture'],['sunny-oak-furniture-5',9,3,0,'furniture'],
-    ['sunny-oak-furniture-7',6,1,0,'wall'],['sunny-oak-furniture-9',8,7,0,'furniture'],
+    // itemId,                        x, y, rotation, layer      footprint  reasoning
+    ['sunny-oak-furniture-1', 0, 1, 0, 'furniture'], // [3,2] bed against the back-left wall
+    ['sunny-oak-furniture-3', 3, 1, 0, 'furniture'], // [1,1] side table at the head of the bed
+    ['sunny-oak-furniture-5', 0, 3, 0, 'furniture'], // [1,1] night light at the foot of the bed
+    ['sunny-oak-furniture-7', 1, 0, 0, 'wall'],      // [1,1] wall art above the bed
+    ['sunny-oak-furniture-2', 4, 4, 0, 'rug'],       // [4,3] rug anchoring the open middle
+    ['sunny-oak-furniture-9', 6, 7, 0, 'furniture'], // [1,1] toy out in the play area
   ].map(([itemId, x, y, rotation, layer]) => ({ id: makeId(), itemId, x, y, rotation, layer }));
 }
 
@@ -166,15 +163,12 @@ function chooseSpecies(rarity, ownedSpecies, random) {
   return source[Math.min(source.length - 1, Math.floor(random() * source.length))];
 }
 
-function publicPet(row, skillIds = []) {
+function publicPet(row) {
   return {
     id: row.petId || row.petid, speciesId: row.speciesId || row.speciesid,
     xp: Number(row.xp) || 0, stage: Number(row.stage) || 1,
     dailyXp: Number(row.dailyXp ?? row.dailyxp) || 0,
     dailyXpDate: row.dailyXpDate || row.dailyxpdate || '',
-    equippedSkills: row.equippedSkills || row.equippedskills || [],
-    equippedWearables: row.equippedWearables || row.equippedwearables || [],
-    ownedSkills: skillIds,
   };
 }
 
@@ -182,36 +176,23 @@ async function getBootstrap(studentId) {
   await ensureStudent(studentId);
   if (config.db.mode === 'postgres') {
     const pool = getPool();
-    const [profileResult, walletResult, petsResult, skillsResult, inventoryResult, roomResult, progressResult] = await Promise.all([
+    const [profileResult, walletResult, petsResult, inventoryResult, roomResult] = await Promise.all([
       pool.query(`SELECT StudentID AS "studentId", ActivePetID AS "activePetId", StarterEggClaimed AS "starterEggClaimed", EggPity AS "eggPity", Stardust AS stardust FROM PetProfiles WHERE StudentID=$1`, [studentId]),
       pool.query(`SELECT Balance AS balance FROM PetWallets WHERE StudentID=$1`, [studentId]),
       pool.query(`SELECT PetID AS "petId",SpeciesID AS "speciesId",XP AS xp,Stage AS stage,DailyXP AS "dailyXp",DailyXPDate AS "dailyXpDate",EquippedSkills AS "equippedSkills",EquippedWearables AS "equippedWearables" FROM PetInstances WHERE StudentID=$1 ORDER BY CreatedAt`, [studentId]),
-      pool.query(`SELECT s.PetID AS "petId",s.SkillID AS "skillId" FROM PetSkills s JOIN PetInstances p ON p.PetID=s.PetID WHERE p.StudentID=$1`, [studentId]),
       pool.query(`SELECT ItemID AS "itemId",Quantity AS quantity FROM PetInventory WHERE StudentID=$1 AND Quantity>0`, [studentId]),
       pool.query(`SELECT ThemeID AS "themeId",Visibility AS visibility,Placements AS placements,UpdatedAt AS "updatedAt" FROM PetRoomLayouts WHERE StudentID=$1`, [studentId]),
-      pool.query(`SELECT MapID AS "mapId",Clears AS clears,BestTime AS "bestTime",Badges AS badges,DailyRewardDate AS "dailyRewardDate",DailyRewardCount AS "dailyRewardCount" FROM PetMapProgress WHERE StudentID=$1`, [studentId]),
     ]);
-    const skillsByPet = new Map();
-    for (const row of skillsResult.rows) {
-      if (!skillsByPet.has(row.petId)) skillsByPet.set(row.petId, []);
-      skillsByPet.get(row.petId).push(row.skillId);
-    }
-    return { profile: profileResult.rows[0], wallet: { balance: Number(walletResult.rows[0]?.balance) || 0 }, pets: petsResult.rows.map((row) => publicPet(row, skillsByPet.get(row.petId) || [])), inventory: inventoryResult.rows.map((row) => ({ ...row, quantity: Number(row.quantity) })), room: roomResult.rows[0], mapProgress: progressResult.rows, catalog, serverDay: hkDay() };
+    return { profile: profileResult.rows[0], wallet: { balance: Number(walletResult.rows[0]?.balance) || 0 }, pets: petsResult.rows.map((row) => publicPet(row)), inventory: inventoryResult.rows.map((row) => ({ ...row, quantity: Number(row.quantity) })), room: roomResult.rows[0], catalog, serverDay: hkDay() };
   }
   const data = ensureJsonData();
   const profile = data.petProfiles.find((row) => row.studentId === studentId);
-  const skillsByPet = new Map();
-  for (const row of data.petSkills.filter((entry) => data.petInstances.some((pet) => pet.petId === entry.petId && pet.studentId === studentId))) {
-    if (!skillsByPet.has(row.petId)) skillsByPet.set(row.petId, []);
-    skillsByPet.get(row.petId).push(row.skillId);
-  }
   return clone({
     profile,
     wallet: data.petWallets.find((row) => row.studentId === studentId),
-    pets: data.petInstances.filter((row) => row.studentId === studentId).map((row) => publicPet(row, skillsByPet.get(row.petId) || [])),
+    pets: data.petInstances.filter((row) => row.studentId === studentId).map((row) => publicPet(row)),
     inventory: data.petInventory.filter((row) => row.studentId === studentId && row.quantity > 0),
     room: data.petRoomLayouts.find((row) => row.studentId === studentId),
-    mapProgress: data.petMapProgress.filter((row) => row.studentId === studentId),
     catalog, serverDay: hkDay(),
   });
 }
@@ -261,14 +242,14 @@ function applyJsonEgg(studentId, { starter = false, directSpeciesId = null, rand
     duplicateDust = catalog.egg.duplicateDust[species.rarity];
     profile.stardust += duplicateDust;
   } else {
-    pet = { petId: makeId(), studentId, speciesId: species.id, xp: 0, stage: 1, dailyXp: 0, dailyXpDate: '', equippedSkills: [], equippedWearables: [], createdAt: nowIso(), updatedAt: nowIso() };
+    pet = { petId: makeId(), studentId, speciesId: species.id, xp: 0, stage: 1, dailyXp: 0, dailyXpDate: '', equippedWearables: [], createdAt: nowIso(), updatedAt: nowIso() };
     data.petInstances.push(pet);
     if (!profile.activePetId) profile.activePetId = pet.petId;
   }
   if (starter) profile.starterEggClaimed = true;
   if (countsForPity) profile.eggPity = species.rarity === 'epic' ? 0 : Math.min(9, profile.eggPity + 1);
   profile.updatedAt = nowIso();
-  const response = { speciesId: species.id, rarity: species.rarity, pet: pet ? publicPet(pet, []) : null, duplicateDust, balance: wallet.balance, stardust: profile.stardust, eggPity: profile.eggPity };
+  const response = { speciesId: species.id, rarity: species.rarity, pet: pet ? publicPet(pet) : null, duplicateDust, balance: wallet.balance, stardust: profile.stardust, eggPity: profile.eggPity };
   writeJsonIdempotency(data, studentId, idempotencyKey, kind, response);
   store.save();
   return clone(response);
@@ -312,7 +293,7 @@ async function applyPostgresEgg(studentId, options) {
     let pet = null; let duplicateDust = 0;
     if (owned.has(species.id)) duplicateDust = catalog.egg.duplicateDust[species.rarity];
     else {
-      pet = { petId: makeId(), speciesId: species.id, xp: 0, stage: 1, dailyXp: 0, dailyXpDate: '', equippedSkills: [], equippedWearables: [], ownedSkills: [] };
+      pet = { petId: makeId(), speciesId: species.id, xp: 0, stage: 1, dailyXp: 0, dailyXpDate: '' };
       await client.query(`INSERT INTO PetInstances (PetID,StudentID,SpeciesID) VALUES ($1,$2,$3)`, [pet.petId, studentId, species.id]);
     }
     const nextPity = countsForPity ? (species.rarity === 'epic' ? 0 : Math.min(9, Number(profile.eggPity) + 1)) : Number(profile.eggPity);
@@ -384,40 +365,35 @@ async function feedPet(studentId, petId, foodId, { idempotencyKey } = {}) {
   const usedToday = pet.dailyXpDate === day ? pet.dailyXp : 0;
   if (usedToday + food.xp > catalog.dailyXpCap) throw Object.assign(new Error('Daily XP limit would be exceeded'), { status: 409 });
   const previousStage = pet.stage; pet.xp += food.xp; pet.stage = stageForXp(pet.xp); pet.dailyXp = usedToday + food.xp; pet.dailyXpDate = day; pet.updatedAt = nowIso(); item.quantity -= 1;
-  const response = { pet: publicPet(pet, data.petSkills.filter((row) => row.petId === petId).map((row) => row.skillId)), consumed: foodId, evolved: pet.stage > previousStage };
+  const response = { pet: publicPet(pet), consumed: foodId, evolved: pet.stage > previousStage };
   writeJsonIdempotency(data, studentId, idempotencyKey, 'pet_feed', response); store.save(); return clone(response);
 }
 
 function purchaseDefinition(itemId) {
   if (itemId.startsWith('room:')) return { ...indexes.rooms.get(itemId.slice(5)), itemId, category: 'room_theme', currency: 'coins' };
-  if (itemId.startsWith('map:')) return { ...indexes.maps.get(itemId.slice(4)), itemId, category: 'map', currency: 'coins' };
-  const found = indexes.foods.get(itemId) || indexes.skills.get(itemId) || indexes.wearables.get(itemId) || indexes.furniture.get(itemId);
+  const found = indexes.foods.get(itemId) || indexes.wearables.get(itemId) || indexes.furniture.get(itemId);
   return found ? { ...found, itemId: found.id, currency: found.currency || 'coins' } : null;
 }
 
-async function purchaseItem(studentId, { itemId, quantity = 1, petId = null, idempotencyKey }) {
+async function purchaseItem(studentId, { itemId, quantity = 1, idempotencyKey }) {
   const definition = purchaseDefinition(itemId);
   if (!definition) throw Object.assign(new Error('Shop item not found'), { status: 404 });
   quantity = Number(quantity);
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > (definition.category === 'food' ? 20 : definition.category === 'furniture' ? 10 : 1)) throw Object.assign(new Error('Invalid quantity'), { status: 400 });
-  if (definition.category === 'skill' && !petId) throw Object.assign(new Error('A pet must be selected for this skill'), { status: 400 });
   await ensureStudent(studentId);
   if (config.db.mode === 'postgres') return withTransaction(async (client) => {
     if (idempotencyKey) {
       const cached = await client.query(`SELECT Kind AS kind,Response AS response FROM PetIdempotency WHERE ActorID=$1 AND IdempotencyKey=$2`, [studentId, idempotencyKey]);
-      if (cached.rows[0]) return cached.rows[0].response;
+      if (cached.rows[0]) {
+        if (cached.rows[0].kind !== 'shop_purchase') throw Object.assign(new Error('Idempotency key already used'), { status: 409 });
+        return cached.rows[0].response;
+      }
     }
     const walletResult = await client.query(`SELECT Balance AS balance FROM PetWallets WHERE StudentID=$1 FOR UPDATE`, [studentId]);
     const profileResult = await client.query(`SELECT Stardust AS stardust FROM PetProfiles WHERE StudentID=$1 FOR UPDATE`, [studentId]);
     let balance = Number(walletResult.rows[0].balance); let stardust = Number(profileResult.rows[0].stardust);
     const existing = await client.query(`SELECT Quantity AS quantity FROM PetInventory WHERE StudentID=$1 AND ItemID=$2`, [studentId, itemId]);
     if (definition.category !== 'food' && definition.category !== 'furniture' && existing.rowCount) throw Object.assign(new Error('Item already owned'), { status: 409 });
-    if (definition.category === 'skill') {
-      const pet = await client.query(`SELECT 1 FROM PetInstances WHERE PetID=$1 AND StudentID=$2`, [petId, studentId]);
-      if (!pet.rowCount) throw Object.assign(new Error('Pet not found'), { status: 404 });
-      const skill = await client.query(`SELECT 1 FROM PetSkills WHERE PetID=$1 AND SkillID=$2`, [petId, itemId]);
-      if (skill.rowCount) throw Object.assign(new Error('Skill already owned by this pet'), { status: 409 });
-    }
     const total = Number(definition.price) * quantity;
     if (definition.currency === 'stardust') {
       if (stardust < total) throw Object.assign(new Error('Not enough stardust'), { status: 409 });
@@ -425,11 +401,10 @@ async function purchaseItem(studentId, { itemId, quantity = 1, petId = null, ide
     } else {
       if (balance < total) throw Object.assign(new Error('Not enough coins'), { status: 409 });
       balance -= total; await client.query(`UPDATE PetWallets SET Balance=$2,UpdatedAt=NOW() WHERE StudentID=$1`, [studentId, balance]);
-      await client.query(`INSERT INTO PetCurrencyLedger (TransactionID,StudentID,ActorID,Delta,Kind,IdempotencyKey,Metadata) VALUES ($1,$2,$2,$3,'shop_purchase',$4,$5::jsonb)`, [makeId(), studentId, -total, idempotencyKey || null, JSON.stringify({ itemId, quantity, petId })]);
+      await client.query(`INSERT INTO PetCurrencyLedger (TransactionID,StudentID,ActorID,Delta,Kind,IdempotencyKey,Metadata) VALUES ($1,$2,$2,$3,'shop_purchase',$4,$5::jsonb)`, [makeId(), studentId, -total, idempotencyKey || null, JSON.stringify({ itemId, quantity })]);
     }
-    if (definition.category === 'skill') await client.query(`INSERT INTO PetSkills (PetID,SkillID) VALUES ($1,$2)`, [petId, itemId]);
-    else await client.query(`INSERT INTO PetInventory (StudentID,ItemID,Quantity) VALUES ($1,$2,$3) ON CONFLICT (StudentID,ItemID) DO UPDATE SET Quantity=PetInventory.Quantity+EXCLUDED.Quantity,UpdatedAt=NOW()`, [studentId, itemId, quantity]);
-    const response = { itemId, quantity, petId, balance, stardust };
+    await client.query(`INSERT INTO PetInventory (StudentID,ItemID,Quantity) VALUES ($1,$2,$3) ON CONFLICT (StudentID,ItemID) DO UPDATE SET Quantity=PetInventory.Quantity+EXCLUDED.Quantity,UpdatedAt=NOW()`, [studentId, itemId, quantity]);
+    const response = { itemId, quantity, balance, stardust };
     if (idempotencyKey) await client.query(`INSERT INTO PetIdempotency (ActorID,IdempotencyKey,Kind,Response) VALUES ($1,$2,'shop_purchase',$3::jsonb)`, [studentId, idempotencyKey, JSON.stringify(response)]);
     return response;
   });
@@ -438,40 +413,16 @@ async function purchaseItem(studentId, { itemId, quantity = 1, petId = null, ide
   const wallet = data.petWallets.find((row) => row.studentId === studentId); const profile = data.petProfiles.find((row) => row.studentId === studentId);
   const existing = data.petInventory.find((row) => row.studentId === studentId && row.itemId === itemId);
   if (!['food','furniture'].includes(definition.category) && existing) throw Object.assign(new Error('Item already owned'), { status: 409 });
-  if (definition.category === 'skill') {
-    if (!data.petInstances.some((row) => row.petId === petId && row.studentId === studentId)) throw Object.assign(new Error('Pet not found'), { status: 404 });
-    if (data.petSkills.some((row) => row.petId === petId && row.skillId === itemId)) throw Object.assign(new Error('Skill already owned by this pet'), { status: 409 });
-  }
   const total = Number(definition.price) * quantity;
   if (definition.currency === 'stardust') { if (profile.stardust < total) throw Object.assign(new Error('Not enough stardust'), { status: 409 }); profile.stardust -= total; }
   else {
     if (wallet.balance < total) throw Object.assign(new Error('Not enough coins'), { status: 409 }); wallet.balance -= total; wallet.updatedAt = nowIso();
-    data.petCurrencyLedger.push({ transactionId: makeId(), studentId, actorId: studentId, delta: -total, kind: 'shop_purchase', idempotencyKey, metadata: { itemId, quantity, petId }, createdAt: nowIso() });
+    data.petCurrencyLedger.push({ transactionId: makeId(), studentId, actorId: studentId, delta: -total, kind: 'shop_purchase', idempotencyKey, metadata: { itemId, quantity }, createdAt: nowIso() });
   }
-  if (definition.category === 'skill') data.petSkills.push({ petId, skillId: itemId, purchasedAt: nowIso() });
-  else if (existing) existing.quantity += quantity;
+  if (existing) existing.quantity += quantity;
   else data.petInventory.push({ studentId, itemId, quantity });
-  const response = { itemId, quantity, petId, balance: wallet.balance, stardust: profile.stardust };
+  const response = { itemId, quantity, balance: wallet.balance, stardust: profile.stardust };
   writeJsonIdempotency(data, studentId, idempotencyKey, 'shop_purchase', response); store.save(); return clone(response);
-}
-
-async function setLoadout(studentId, petId, skillIds) {
-  if (!Array.isArray(skillIds) || skillIds.length > 2 || new Set(skillIds).size !== skillIds.length) throw Object.assign(new Error('Choose up to two unique skills'), { status: 400 });
-  await ensureStudent(studentId);
-  if (config.db.mode === 'postgres') {
-    const owned = await getPool().query(`SELECT s.SkillID AS "skillId" FROM PetSkills s JOIN PetInstances p ON p.PetID=s.PetID WHERE p.PetID=$1 AND p.StudentID=$2`, [petId, studentId]);
-    const ownedSet = new Set(owned.rows.map((row) => row.skillId));
-    if (!skillIds.every((id) => ownedSet.has(id))) throw Object.assign(new Error('Skill not owned by this pet'), { status: 409 });
-    const updated = await getPool().query(`UPDATE PetInstances SET EquippedSkills=$3::jsonb,UpdatedAt=NOW() WHERE PetID=$1 AND StudentID=$2`, [petId, studentId, JSON.stringify(skillIds)]);
-    if (!updated.rowCount) throw Object.assign(new Error('Pet not found'), { status: 404 });
-  } else {
-    const data = ensureJsonData(); const pet = data.petInstances.find((row) => row.petId === petId && row.studentId === studentId);
-    if (!pet) throw Object.assign(new Error('Pet not found'), { status: 404 });
-    const owned = new Set(data.petSkills.filter((row) => row.petId === petId).map((row) => row.skillId));
-    if (!skillIds.every((id) => owned.has(id))) throw Object.assign(new Error('Skill not owned by this pet'), { status: 409 });
-    pet.equippedSkills = [...skillIds]; pet.updatedAt = nowIso(); store.save();
-  }
-  return { petId, equippedSkills: skillIds };
 }
 
 async function setOutfit(studentId, petId, wearableIds) {
@@ -544,6 +495,59 @@ async function getRoomSnapshot(studentId, { create = true } = {}) {
   return { ownerStudentId: studentId, themeId: bootstrap.room.themeId, visibility: bootstrap.room.visibility, placements: bootstrap.room.placements || [], activePet, reactions: await reactionCounts(studentId) };
 }
 
+/**
+ * Class-visit listing. Fetching this per classmate meant one getBootstrap (seven queries) each;
+ * a class of thirty cost roughly two hundred sequential round-trips. This resolves the whole
+ * class in a fixed four queries, and only touches students who have actually opened their room,
+ * so listing a class no longer materialises pet profiles for everyone in it.
+ */
+async function listVisitableRooms(studentIds) {
+  const ids = [...new Set(studentIds)];
+  if (!ids.length) return [];
+  await ensureSchema();
+
+  if (config.db.mode === 'postgres') {
+    const pool = getPool();
+    const [layouts, profiles, pets, reactions] = await Promise.all([
+      pool.query(`SELECT StudentID AS "studentId",ThemeID AS "themeId",Visibility AS visibility,Placements AS placements FROM PetRoomLayouts WHERE StudentID=ANY($1::text[]) AND Visibility='class'`, [ids]),
+      pool.query(`SELECT StudentID AS "studentId",ActivePetID AS "activePetId" FROM PetProfiles WHERE StudentID=ANY($1::text[])`, [ids]),
+      pool.query(`SELECT StudentID AS "studentId",PetID AS "petId",SpeciesID AS "speciesId",XP AS xp,Stage AS stage,DailyXP AS "dailyXp",DailyXPDate AS "dailyXpDate",EquippedSkills AS "equippedSkills",EquippedWearables AS "equippedWearables" FROM PetInstances WHERE StudentID=ANY($1::text[]) ORDER BY CreatedAt`, [ids]),
+      pool.query(`SELECT OwnerStudentID AS "ownerStudentId",Reaction AS reaction,COUNT(*)::int AS count FROM PetRoomReactions WHERE OwnerStudentID=ANY($1::text[]) GROUP BY OwnerStudentID,Reaction`, [ids]),
+    ]);
+    const activeByStudent = new Map(profiles.rows.map((row) => [row.studentId, row.activePetId]));
+    const petsByStudent = new Map();
+    for (const row of pets.rows) {
+      if (!petsByStudent.has(row.studentId)) petsByStudent.set(row.studentId, []);
+      petsByStudent.get(row.studentId).push(row);
+    }
+    const reactionsByOwner = new Map();
+    for (const row of reactions.rows) {
+      if (!reactionsByOwner.has(row.ownerStudentId)) reactionsByOwner.set(row.ownerStudentId, {});
+      reactionsByOwner.get(row.ownerStudentId)[row.reaction] = Number(row.count);
+    }
+    return layouts.rows.map((room) => {
+      const owned = petsByStudent.get(room.studentId) || [];
+      const active = owned.find((pet) => pet.petId === activeByStudent.get(room.studentId)) || owned[0] || null;
+      return { ownerStudentId: room.studentId, themeId: room.themeId, visibility: room.visibility, placements: room.placements || [], activePet: active ? publicPet(active) : null, reactions: reactionsByOwner.get(room.studentId) || {} };
+    });
+  }
+
+  const data = ensureJsonData();
+  const wanted = new Set(ids);
+  return data.petRoomLayouts
+    .filter((room) => wanted.has(room.studentId) && room.visibility === 'class')
+    .map((room) => {
+      const profile = data.petProfiles.find((row) => row.studentId === room.studentId);
+      const owned = data.petInstances.filter((row) => row.studentId === room.studentId);
+      const active = owned.find((pet) => pet.petId === profile?.activePetId) || owned[0] || null;
+      const reactions = {};
+      for (const row of data.petRoomReactions.filter((entry) => entry.ownerStudentId === room.studentId)) {
+        reactions[row.reaction] = (reactions[row.reaction] || 0) + 1;
+      }
+      return clone({ ownerStudentId: room.studentId, themeId: room.themeId, visibility: room.visibility, placements: room.placements || [], activePet: active ? publicPet(active) : null, reactions });
+    });
+}
+
 async function reactionCounts(ownerStudentId) {
   if (config.db.mode === 'postgres') {
     const result = await getPool().query(`SELECT Reaction AS reaction,COUNT(*)::int AS count FROM PetRoomReactions WHERE OwnerStudentID=$1 GROUP BY Reaction`, [ownerStudentId]);
@@ -563,61 +567,7 @@ async function addReaction(ownerStudentId, visitorStudentId, reaction) {
   return { reaction, reactions: await reactionCounts(ownerStudentId) };
 }
 
-async function startRun(studentId, mapId) {
-  if (!indexes.maps.has(mapId)) throw Object.assign(new Error('Map not found'), { status: 404 });
-  await ensureStudent(studentId); const unlockId = `map:${mapId}`;
-  if (config.db.mode === 'postgres') {
-    const unlocked = await getPool().query(`SELECT 1 FROM PetInventory WHERE StudentID=$1 AND ItemID=$2 AND Quantity>0`, [studentId, unlockId]);
-    if (!unlocked.rowCount) throw Object.assign(new Error('Map not unlocked'), { status: 409 });
-    const ticket = { runId: makeId(), mapId, seed: crypto.randomInt(1, 2147483646), startedAt: nowIso() };
-    await getPool().query(`INSERT INTO PetRunTickets (RunID,StudentID,MapID,Seed,StartedAt) VALUES ($1,$2,$3,$4,$5)`, [ticket.runId, studentId, mapId, ticket.seed, ticket.startedAt]); return ticket;
-  }
-  const data = ensureJsonData(); if (!data.petInventory.some((row) => row.studentId === studentId && row.itemId === unlockId && row.quantity > 0)) throw Object.assign(new Error('Map not unlocked'), { status: 409 });
-  const ticket = { runId: makeId(), studentId, mapId, seed: crypto.randomInt(1, 2147483646), startedAt: nowIso(), completedAt: null, success: null }; data.petRunTickets.push(ticket); store.save(); return clone(ticket);
-}
 
-async function completeRun(studentId, { runId, success, badgeFound = false }, options = {}) {
-  const minimumMs = options.minimumMs ?? 30000; const day = hkDay();
-  if (config.db.mode === 'postgres') return withTransaction(async (client) => {
-    const ticketResult = await client.query(`SELECT RunID AS "runId",MapID AS "mapId",StartedAt AS "startedAt",CompletedAt AS "completedAt" FROM PetRunTickets WHERE RunID=$1 AND StudentID=$2 FOR UPDATE`, [runId, studentId]);
-    const ticket = ticketResult.rows[0]; if (!ticket) throw Object.assign(new Error('Run not found'), { status: 404 }); if (ticket.completedAt) throw Object.assign(new Error('Run already completed'), { status: 409 });
-    const elapsedMs = Date.now() - new Date(ticket.startedAt).getTime(); if (elapsedMs < minimumMs || elapsedMs > 15 * 60 * 1000) throw Object.assign(new Error('Run duration is invalid'), { status: 409 });
-    await client.query(`UPDATE PetRunTickets SET CompletedAt=NOW(),Success=$3 WHERE RunID=$1 AND StudentID=$2`, [runId, studentId, !!success]);
-    let foodId = null; const map = indexes.maps.get(ticket.mapId);
-    if (success) {
-      await client.query(`INSERT INTO PetMapProgress (StudentID,MapID) VALUES ($1,$2) ON CONFLICT DO NOTHING`, [studentId, ticket.mapId]);
-      const progressResult = await client.query(`SELECT Clears AS clears,BestTime AS "bestTime",Badges AS badges,DailyRewardDate AS "dailyRewardDate",DailyRewardCount AS "dailyRewardCount" FROM PetMapProgress WHERE StudentID=$1 AND MapID=$2 FOR UPDATE`, [studentId, ticket.mapId]);
-      const progress = progressResult.rows[0]; const dailyCount = progress.dailyRewardDate === day ? Number(progress.dailyRewardCount) : 0;
-      const totalDailyResult = await client.query(`SELECT COALESCE(SUM(DailyRewardCount),0)::int AS count FROM PetMapProgress WHERE StudentID=$1 AND DailyRewardDate=$2`, [studentId, day]);
-      const totalDaily = Number(totalDailyResult.rows[0]?.count) || 0;
-      if (totalDaily < 3) {
-        foodId = catalog.foods[(Number(progress.clears) + map.order) % 4].id;
-        await client.query(`INSERT INTO PetInventory (StudentID,ItemID,Quantity) VALUES ($1,$2,1) ON CONFLICT (StudentID,ItemID) DO UPDATE SET Quantity=PetInventory.Quantity+1,UpdatedAt=NOW()`, [studentId, foodId]);
-      }
-      const badges = Array.isArray(progress.badges) ? [...progress.badges] : []; if (badgeFound && !badges.includes(map.badgeId)) badges.push(map.badgeId);
-      const elapsedSeconds = Math.ceil(elapsedMs / 1000); const bestTime = progress.bestTime == null ? elapsedSeconds : Math.min(Number(progress.bestTime), elapsedSeconds);
-      await client.query(`UPDATE PetMapProgress SET Clears=Clears+1,BestTime=$3,Badges=$4::jsonb,DailyRewardDate=$5,DailyRewardCount=$6,UpdatedAt=NOW() WHERE StudentID=$1 AND MapID=$2`, [studentId, ticket.mapId, bestTime, JSON.stringify(badges), day, foodId ? dailyCount + 1 : dailyCount]);
-    }
-    return { runId, success: !!success, elapsedSeconds: Math.ceil(elapsedMs / 1000), foodId, badgeId: success && badgeFound ? map.badgeId : null, coins: 0 };
-  });
-  const data = ensureJsonData(); const ticket = data.petRunTickets.find((row) => row.runId === runId && row.studentId === studentId);
-  if (!ticket) throw Object.assign(new Error('Run not found'), { status: 404 }); if (ticket.completedAt) throw Object.assign(new Error('Run already completed'), { status: 409 });
-  const elapsedMs = Date.now() - new Date(ticket.startedAt).getTime(); if (elapsedMs < minimumMs || elapsedMs > 15 * 60 * 1000) throw Object.assign(new Error('Run duration is invalid'), { status: 409 });
-  ticket.completedAt = nowIso(); ticket.success = !!success; let foodId = null; const map = indexes.maps.get(ticket.mapId);
-  if (success) {
-    let progress = data.petMapProgress.find((row) => row.studentId === studentId && row.mapId === ticket.mapId);
-    if (!progress) { progress = { studentId, mapId: ticket.mapId, clears: 0, bestTime: null, badges: [], dailyRewardDate: '', dailyRewardCount: 0 }; data.petMapProgress.push(progress); }
-    if (progress.dailyRewardDate !== day) { progress.dailyRewardDate = day; progress.dailyRewardCount = 0; }
-    const totalDaily = data.petMapProgress.filter((row) => row.studentId === studentId && row.dailyRewardDate === day).reduce((sum, row) => sum + Number(row.dailyRewardCount || 0), 0);
-    if (totalDaily < 3) {
-      foodId = catalog.foods[(progress.clears + map.order) % 4].id; let item = data.petInventory.find((row) => row.studentId === studentId && row.itemId === foodId);
-      if (item) item.quantity += 1; else data.petInventory.push({ studentId, itemId: foodId, quantity: 1 }); progress.dailyRewardCount += 1;
-    }
-    if (badgeFound && !progress.badges.includes(map.badgeId)) progress.badges.push(map.badgeId);
-    progress.clears += 1; progress.bestTime = progress.bestTime == null ? Math.ceil(elapsedMs / 1000) : Math.min(progress.bestTime, Math.ceil(elapsedMs / 1000)); progress.updatedAt = nowIso();
-  }
-  store.save(); return { runId, success: !!success, elapsedSeconds: Math.ceil(elapsedMs / 1000), foodId, badgeId: success && badgeFound ? map.badgeId : null, coins: 0 };
-}
 
 async function walletBalances(studentIds) {
   await ensureSchema();
@@ -653,17 +603,42 @@ async function grantCoins(actorId, studentIds, amount, { note = '', idempotencyK
   const response = { batchId, count: uniqueIds.length, amount, total: amount * uniqueIds.length, balances }; writeJsonIdempotency(data, actorId, idempotencyKey, 'teacher_grant', response); store.save(); return clone(response);
 }
 
+// Ownership differs per table, so a single blanket predicate is wrong. In particular
+// PetCurrencyLedger.actorId is the *teacher* who issued a grant: matching on it would delete
+// the grant history of every student that teacher ever paid. Postgres does not do that
+// (ActorID carries no foreign key, so those rows survive the cascade) and neither do we —
+// a grant record belongs to the student who received it.
 function purgeJsonStudent(studentId) {
-  const data = ensureJsonData(); const petIds = new Set(data.petInstances.filter((row) => row.studentId === studentId).map((row) => row.petId));
-  for (const key of JSON_KEYS) {
-    data[key] = data[key].filter((row) => row.studentId !== studentId && row.ownerStudentId !== studentId && row.visitorStudentId !== studentId && row.actorId !== studentId && !petIds.has(row.petId));
-  }
+  const data = ensureJsonData();
+  const ownedByStudentId = ['petProfiles', 'petWallets', 'petCurrencyLedger', 'petInstances', 'petInventory', 'petRoomLayouts'];
+  for (const key of ownedByStudentId) data[key] = data[key].filter((row) => row.studentId !== studentId);
+  // Idempotency records are namespaced by the actor that created them.
+  data.petIdempotency = data.petIdempotency.filter((row) => row.actorId !== studentId);
+  // Reactions are a two-sided relationship; remove the row from either side.
+  data.petRoomReactions = data.petRoomReactions.filter((row) => row.ownerStudentId !== studentId && row.visitorStudentId !== studentId);
   store.save();
+}
+
+async function grantUnlimitedMoney(studentId, amount = 999999) {
+  await ensureStudent(studentId);
+  if (config.db.mode === 'postgres') {
+    const pool = getPool();
+    await pool.query(`UPDATE PetWallets SET Balance=$2, UpdatedAt=NOW() WHERE StudentID=$1`, [studentId, amount]);
+    await pool.query(`UPDATE PetProfiles SET Stardust=$2, UpdatedAt=NOW() WHERE StudentID=$1`, [studentId, amount]);
+  } else {
+    const data = ensureJsonData();
+    const wallet = data.petWallets.find((row) => row.studentId === studentId);
+    if (wallet) { wallet.balance = amount; wallet.updatedAt = nowIso(); }
+    const profile = data.petProfiles.find((row) => row.studentId === studentId);
+    if (profile) { profile.stardust = amount; profile.updatedAt = nowIso(); }
+    store.save();
+  }
+  return { balance: amount, stardust: amount };
 }
 
 module.exports = {
   ensureSchema, ensureStudent, getBootstrap, hatchStarter, purchaseEgg, activatePet, feedPet,
-  purchaseItem, setLoadout, setOutfit, saveRoom, getRoomSnapshot, addReaction,
-  startRun, completeRun, walletBalances, grantCoins, purgeJsonStudent,
+  purchaseItem, setOutfit, saveRoom, getRoomSnapshot, listVisitableRooms, addReaction,
+  walletBalances, grantCoins, grantUnlimitedMoney, purgeJsonStudent,
   hkDay, chooseRarity, chooseSpecies, stageForXp, validatePlacements,
 };

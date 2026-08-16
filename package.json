@@ -29,6 +29,8 @@
     "check:science-lab-physics": "node scripts/test-science-lab-physics-live.mjs",
     "build:pet": "npm --prefix pet-app run build",
     "generate:pet-assets": "node scripts/generate-pet-assets.mjs",
+    "generate:pet-art": "node scripts/pet-art/index.mjs",
+    "generate:pet-art:list": "node scripts/pet-art/index.mjs --list",
     "check:pet": "node scripts/test-pet-module.mjs",
     "check:pet-live": "node scripts/test-pet-live.mjs",
     "dev:homework-fixture": "node scripts/start-homework-fixture.mjs",

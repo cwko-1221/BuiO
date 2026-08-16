@@ -24,17 +24,17 @@ const store = require('../db/jsonStore.js');
 const pass = (label) => console.log(`✓ ${label}`);
 
 assert.equal(catalog.pets.length,20); assert.equal(catalog.pets.flatMap((pet)=>pet.art).length,80);
-assert.equal(catalog.rooms.length,10); assert.equal(catalog.maps.length,10);
-assert.equal(catalog.foods.length,12); assert.equal(catalog.skills.length,16);
+assert.equal(catalog.rooms.length,10);
+assert.equal(catalog.foods.length,12);
 assert.equal(catalog.wearables.length,80); assert.equal(catalog.furniture.length,100);
 assert.equal(new Set(catalog.pets.map((pet)=>pet.id)).size,20);
 assert.deepEqual(catalog.evolutionThresholds,[0,400,1100,2100]);
 assert.deepEqual(catalog.egg.odds,{common:.55,rare:.35,epic:.10});
-for(const group of [catalog.pets,catalog.rooms,catalog.maps,catalog.foods,catalog.skills,catalog.wearables,catalog.furniture]) {
+for(const group of [catalog.pets,catalog.rooms,catalog.foods,catalog.wearables,catalog.furniture]) {
   for(const item of group) {
     const values = item.names?.['zh-HK'] || item.name?.['zh-HK'];
     assert.ok(values && (Array.isArray(values) ? values.every(Boolean) : true));
-    assert.ok(!JSON.stringify(item).includes('�'));
+    assert.ok(!JSON.stringify(item).includes('\uFFFD'));
   }
 }
 pass('catalogue counts, evolution rules and bilingual content');
@@ -45,21 +45,25 @@ for(const pet of catalog.pets) for(const publicPath of pet.art) {
   assert.equal(metadata.width,640); assert.equal(metadata.height,640); assert.equal(metadata.hasAlpha,true);
 }
 for(const room of catalog.rooms) { const metadata=await sharp(path.join(artRoot,room.art.split('/art/')[1])).metadata(); assert.equal(metadata.width,1600); assert.equal(metadata.height,900); }
-for(const map of catalog.maps) { const metadata=await sharp(path.join(artRoot,map.art.split('/art/')[1])).metadata(); assert.equal(metadata.width,1600); assert.equal(metadata.height,1000); }
+
 assert.equal((await fs.readdir(path.join(artRoot,'items'))).filter((name)=>name.endsWith('.webp')).length,15);
 const assetManifest=JSON.parse(await fs.readFile(path.join(artRoot,'manifest.json'),'utf8'));
 const spriteManifest=JSON.parse(await fs.readFile(path.join(artRoot,'sprites/manifest.json'),'utf8'));
-assert.equal(spriteManifest.sheets.length,80); assert.equal(spriteManifest.columns.length,12); assert.equal(spriteManifest.rows.length,4);
-for(const sheet of spriteManifest.sheets){const metadata=await sharp(path.join(artRoot,sheet.split('/art/')[1])).metadata();assert.equal(metadata.width,2304);assert.equal(metadata.height,768);assert.equal(metadata.hasAlpha,true);}
+assert.equal(spriteManifest.sheets.length,80);
+assert.ok(spriteManifest.columns.length>=12,`expected >=12 actions, got ${spriteManifest.columns.length}`);
+assert.equal(spriteManifest.rows.length,4);
+const atlasWidth=spriteManifest.frameWidth*spriteManifest.columns.length;
+const atlasHeight=spriteManifest.frameHeight*spriteManifest.rows.length;
+for(const sheet of spriteManifest.sheets){const metadata=await sharp(path.join(artRoot,sheet.split('/art/')[1])).metadata();assert.equal(metadata.width,atlasWidth,`${sheet} width`);assert.equal(metadata.height,atlasHeight,`${sheet} height`);assert.equal(metadata.hasAlpha,true);}
 assert.equal((await fs.readdir(path.join(artRoot,'collectibles/wearables'))).filter((name)=>name.endsWith('.webp')).length,80);
 assert.equal((await fs.readdir(path.join(artRoot,'collectibles/furniture'))).filter((name)=>name.endsWith('.webp')).length,100);
-assert.equal((await fs.readdir(path.join(artRoot,'enemies'))).filter((name)=>name.endsWith('.webp')).length,12);
-assert.equal((await fs.readdir(path.join(artRoot,'bosses'))).filter((name)=>name.endsWith('.webp')).length,10);
+
 assert.equal((await fs.readdir(path.join(artRoot,'effects'))).filter((name)=>name.endsWith('.webp')).length,16);
-assert.equal((await fs.readdir(path.join(artRoot,'layers/maps'))).filter((name)=>name.endsWith('.json')).length,10);
+
 assert.deepEqual(assetManifest.audio,{musicThemes:12,petVoiceVariants:20,sfxEvents:15,generator:'WebAudio note events; no third-party audio'});
-pass('80 transparent forms and 80 four-direction/twelve-action atlases');
-pass('10 layered rooms, 10 collision maps, 180 collectibles, enemies, bosses, effects and audio');
+const actionCount=new Set(spriteManifest.columns).size;
+pass(`80 transparent forms and 80 atlases (${actionCount} actions, ${spriteManifest.columns.length} frames x ${spriteManifest.rows.length} directions @ ${spriteManifest.frameWidth}px)`);
+pass('10 layered rooms, 180 collectibles, effects and audio');
 
 const grant=await repo.grantCoins('T001',['S001','S002'],10000,{note:'測試獎勵',idempotencyKey:'grant-1'});
 const repeatedGrant=await repo.grantCoins('T001',['S001','S002'],10000,{note:'測試獎勵',idempotencyKey:'grant-1'});
@@ -98,10 +102,6 @@ pass('food consumption, idempotency, Hong Kong daily XP cap and four stages');
 
 const second=await repo.purchaseEgg('S001',{kind:'direct',speciesId:'starpatch-cat',idempotencyKey:'direct-second'});
 assert.ok(second.pet);
-await repo.purchaseItem('S001',{itemId:'ember-bolt',petId:pet.id,idempotencyKey:'skill-buy'});
-await repo.setLoadout('S001',pet.id,['ember-bolt']);
-await assert.rejects(()=>repo.setLoadout('S001',second.pet.id,['ember-bolt']),/not owned by this pet/);
-pass('purchased skills remain bound to the selected pet');
 
 const bootstrap=await repo.getBootstrap('S001');
 await repo.saveRoom('S001',{themeId:'sunny-oak',visibility:'class',placements:bootstrap.room.placements});
@@ -110,18 +110,55 @@ await repo.addReaction('S001','S002','heart'); await repo.addReaction('S001','S0
 assert.deepEqual((await repo.getRoomSnapshot('S001')).reactions,{star:1});
 pass('room ownership, grid bounds, visibility and one anonymous reaction per day');
 
-for(let index=0;index<3;index+=1){const run=await repo.startRun('S001','clover-meadow');const result=await repo.completeRun('S001',{runId:run.runId,success:true,badgeFound:index===0},{minimumMs:0});assert.ok(result.foodId);assert.equal(result.coins,0);}
-await repo.purchaseItem('S001',{itemId:'map:whisper-forest',quantity:1,idempotencyKey:'map-buy'});
-const fourth=await repo.startRun('S001','whisper-forest');const fourthResult=await repo.completeRun('S001',{runId:fourth.runId,success:true,badgeFound:true},{minimumMs:0});
-assert.equal(fourthResult.foodId,null); assert.equal(fourthResult.coins,0);
-await assert.rejects(()=>repo.completeRun('S001',{runId:fourth.runId,success:true},{minimumMs:0}),/already completed/);
-pass('one-time run tickets, no coin drops and global first-three daily food rewards');
+const visitable=await repo.listVisitableRooms(['S001','S002','S003']);
+assert.equal(visitable.length,1);
+assert.equal(visitable[0].ownerStudentId,'S001');
+assert.equal(visitable[0].visibility,'class');
+assert.deepEqual(visitable[0].reactions,{star:1});
+assert.ok(visitable[0].activePet?.speciesId);
+assert.deepEqual(await repo.listVisitableRooms([]),[]);
+assert.equal(store.load().petProfiles.some((row)=>row.studentId==='S003'),false);
+pass('class visit listing batches in fixed queries without materialising absent students');
 
 const serverSource=await fs.readFile(path.resolve('server.js'),'utf8'); const configSource=await fs.readFile(path.resolve('src/config.js'),'utf8');
 assert.match(serverSource,/app\.use\('\/api\/pet'/); assert.match(serverSource,/app\.get\(\[?'\/pet'/); assert.match(configSource,/id: 'pet'/);
 const css=await fs.readFile(path.resolve('pet-app/src/styles/main.css'),'utf8'); assert.doesNotMatch(css,/@import\s+url\(['"]https?:/);
 await fs.access(path.resolve('pet-app/dist/index.html')); await fs.access(path.resolve('pet-app/dist/assets/art/manifest.json'));
 pass('protected platform integration, self-hosted UI and production build');
+
+const grantsBefore=store.load().petCurrencyLedger.filter((row)=>row.kind==='teacher_grant').length;
+repo.purgeJsonStudent('T001');
+const grantsAfterTeacher=store.load().petCurrencyLedger.filter((row)=>row.kind==='teacher_grant');
+assert.equal(grantsAfterTeacher.length,grantsBefore);
+assert.ok(grantsAfterTeacher.every((row)=>row.actorId==='T001'));
+repo.purgeJsonStudent('S002');
+const after=store.load();
+assert.equal(after.petWallets.filter((row)=>row.studentId==='S002').length,0);
+assert.equal(after.petCurrencyLedger.filter((row)=>row.studentId==='S002').length,0);
+assert.equal(after.petInstances.filter((row)=>row.studentId==='S002').length,0);
+assert.equal(after.petRoomReactions.filter((row)=>row.visitorStudentId==='S002').length,0);
+assert.ok(after.petCurrencyLedger.some((row)=>row.studentId==='S001'&&row.kind==='teacher_grant'));
+assert.ok(after.petInstances.some((row)=>row.studentId==='S001'));
+pass('student deletion clears own data while preserving other students ledger history');
+
+async function tonalBuckets(file) {
+  const { data, info }=await sharp(file).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  const histogram=new Array(32).fill(0); let opaque=0;
+  for(let pixel=0;pixel<data.length;pixel+=info.channels) {
+    if(data[pixel+3]<200) continue;
+    opaque+=1;
+    const luma=0.2126*data[pixel]+0.7152*data[pixel+1]+0.0722*data[pixel+2];
+    histogram[Math.min(31,Math.floor(luma/8))]+=1;
+  }
+  return histogram.filter((count)=>count>opaque*0.005).length;
+}
+const flat=[];
+for(const pet of [catalog.pets[0],catalog.pets[8],catalog.pets[15],catalog.pets[19]]) {
+  const buckets=await tonalBuckets(path.join(artRoot,pet.art[3].split('/art/')[1]));
+  if(buckets<20) flat.push(`${pet.id} (${buckets}/32)`);
+}
+assert.equal(flat.length,0,`these forms read as flat fills rather than shaded volumes, need >=20 of 32 luminance buckets: ${flat.join(', ')}`);
+pass('creature forms carry a continuous shading ramp rather than flat fills');
 
 await fs.rm(tempDir,{recursive:true,force:true});
 console.log('\nPet module checks passed.');
