@@ -230,7 +230,7 @@ function bindHold(id,action){
     scene?.setAction(action,false);
   });
 }
-bindHold('btnLeft','left');bindHold('btnDown','down');bindHold('btnRight','right');bindHold('btnJump','jump');
+bindHold('btnLeft','left');bindHold('btnRight','right');bindHold('btnJump','jump');
 $('resetBtn').addEventListener('click',()=>scene?.resetToCheckpoint('manual'));
 const audioBtn=$('audioBtn');
 function refreshAudioButton(){
