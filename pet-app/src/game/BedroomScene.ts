@@ -318,7 +318,10 @@ export class BedroomScene extends Phaser.Scene {
    * The footprint still swaps on 90/270, so rotation continues to change the cells occupied.
    */
   private applyFacing(art: Phaser.GameObjects.Container, rotation: number) {
-    const flipped = rotation === 180 || rotation === 270;
+    // 90 and 270 are the turned states — the same ones whose footprint swaps — so a press
+    // always changes both the facing and the cells occupied. Mapping the mirror to 180/270
+    // instead meant 0 -> 90 looked identical and the button appeared to need two presses.
+    const flipped = rotation === 90 || rotation === 270;
     art.setAngle(0);
     for (const child of art.list) {
       if (child instanceof Phaser.GameObjects.Image) child.setFlipX(flipped);
@@ -415,7 +418,10 @@ export class BedroomScene extends Phaser.Scene {
   private rotateSelected(id: string) {
     const placement = this.placements.find((item) => item.id === id); const object = this.furniture.get(id);
     if (!placement || !object) return;
-    const rotation = (placement.rotation + 90) % 360;
+    // Cycle 0 and 90 only. With a single drawn view per piece, 180 and 270 are visually
+    // identical to 0 and 90 — they would be presses that appear to do nothing. Modulo 180
+    // also folds any legacy 180/270 value already saved back into the two live states.
+    const rotation = (placement.rotation + 90) % 180;
     // A non-square footprint can stop fitting once turned; refuse rather than save an invalid room.
     if (!this.fits(placement.itemId, placement.x, placement.y, rotation, placement.id)) {
       this.game.events.emit('room:blocked', placement.id);
