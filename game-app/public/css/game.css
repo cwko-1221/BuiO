@@ -5,7 +5,16 @@
    permits pinch. pan-y refuses pinch while leaving vertical scrolling, which the teacher
    page and the results list both need, since this stylesheet serves both pages. */
 html, body { touch-action: pan-y; }
-.q-overlay, .q-box, .q-choices, #answerBtn, .answer-btn-float, .hud { touch-action: pan-y; }
+.q-overlay, .q-box, .hud { touch-action: pan-y; }
+.q-choices { touch-action: pan-y; }
+/* Controls and the answer button are pure targets: no panning, no long-press callout, no
+   selection highlight when a child rests a finger on the label. */
+#answerBtn, .answer-btn-float, .tbtn, button {
+  touch-action: manipulation;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
 .q-overlay, .q-box { -webkit-user-select: none; user-select: none; }
 
 /* BuiO Game module — 唔好望落嚟 (Don't Look Down) */

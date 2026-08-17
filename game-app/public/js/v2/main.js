@@ -180,6 +180,26 @@ function updateHudAndNetwork(state){
   }
 }
 
+// iOS ignores user-scalable=no (since iOS 10) and touch-action: manipulation still permits a
+// pinch — it only drops the double-tap delay. Refusing the WebKit gesture events is the only
+// reliable way to decline one, and it is not cosmetic: when iOS claims the touch stream for a
+// zoom, the button holding a finger can stop receiving pointer events entirely, so the
+// direction stays pressed and further taps do nothing because it is already held.
+for(const type of ['gesturestart','gesturechange','gestureend']){
+  document.addEventListener(type,event=>event.preventDefault(),{passive:false});
+}
+document.addEventListener('touchmove',event=>{if(event.touches.length>1)event.preventDefault();},{passive:false});
+
+// Every held control registers a release here, so the state can be cleared without depending
+// on which element the pointer happened to end on.
+const heldReleases=new Set();
+function releaseAllHeld(){for(const release of heldReleases)release();}
+window.addEventListener('touchend',e=>{if(e.touches.length===0)releaseAllHeld();},{passive:true});
+window.addEventListener('touchcancel',releaseAllHeld,{passive:true});
+window.addEventListener('pointercancel',releaseAllHeld,{passive:true});
+window.addEventListener('blur',releaseAllHeld);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAllHeld();});
+
 function bindHold(id,action){
   const el=$(id);
   let activePointer=null;
@@ -202,6 +222,13 @@ function bindHold(id,action){
   el.addEventListener('pointerup',off);
   el.addEventListener('pointercancel',off);
   el.addEventListener('lostpointercapture',off);
+  // Unconditional release for the case where none of the above ever arrives.
+  heldReleases.add(()=>{
+    if(activePointer===null)return;
+    activePointer=null;
+    el.classList.remove('is-pressed');
+    scene?.setAction(action,false);
+  });
 }
 bindHold('btnLeft','left');bindHold('btnDown','down');bindHold('btnRight','right');bindHold('btnJump','jump');
 $('resetBtn').addEventListener('click',()=>scene?.resetToCheckpoint('manual'));
