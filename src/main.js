@@ -1,3 +1,20 @@
+
+// ExcelJS is ~926KB and only teachers importing or exporting a spreadsheet ever need it, yet
+// it was loaded eagerly on the portal for every student on every visit. Fetch it on demand.
+let excelJsPromise = null;
+function loadExcelJs() {
+  if (window.ExcelJS) return Promise.resolve(window.ExcelJS);
+  if (!excelJsPromise) {
+    excelJsPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/vendor/exceljs.min.js';
+      script.onload = () => resolve(window.ExcelJS);
+      script.onerror = () => { excelJsPromise = null; reject(new Error('Excel 元件載入失敗，請檢查網絡後再試。')); };
+      document.head.appendChild(script);
+    });
+  }
+  return excelJsPromise;
+}
 import { MATH_QUIZ_URL, MATH_DASHBOARD_URL, WHITEBOARD_BASE, MODULES, iconSvg } from './config.js';
 import { state, updateState } from './store.js';
 import { t, I18N } from './i18n.js';
@@ -102,9 +119,7 @@ async function parseStudentFile(file) {
   if (extension !== 'xlsx') {
     throw new Error('只支援 .xlsx 或 .csv；請把舊式 .xls 另存為 .xlsx');
   }
-  if (!window.ExcelJS) {
-    throw new Error('Excel 解析工具未能載入，請重新整理頁面');
-  }
+  await loadExcelJs();
 
   const workbook = new window.ExcelJS.Workbook();
   await workbook.xlsx.load(await file.arrayBuffer());
@@ -176,10 +191,7 @@ function renderBatchPreview(students) {
 }
 
 async function downloadStudentTemplate() {
-  if (!window.ExcelJS) {
-    alert('Excel 工具未能載入，請重新整理頁面。');
-    return;
-  }
+  await loadExcelJs();
   const workbook = new window.ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('學生名單');
   worksheet.addRow(['學號', '姓名', '密碼', '班級', '班號', '中文分組', '英文分組', '數學分組']);

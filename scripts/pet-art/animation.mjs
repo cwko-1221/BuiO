@@ -73,13 +73,29 @@ const ACTIONS = [
   { name: 'evolve', frames: 14, fps: 14, loop: false },
 ];
 
-const TOTAL_FRAMES = ACTIONS.reduce((sum, action) => sum + action.frames, 0);
+// Generate only what is actually drawn.
+//
+// The room is the only place a pet appears, and it only ever shows the front view — the
+// bedroom scene never calls setFacing — while walk and the four combat actions lost their
+// only consumer when the adventure scene was removed. Emitting all twelve actions across
+// four directions produced a 16320x640 sheet: 1.4MB per species per stage, 111MB in total,
+// of which roughly 83% was never displayed. That width also sat 64 pixels under the 16384
+// texture limit of the machine that happened to be testing it; many tablets cap at 8192,
+// where the texture cannot be uploaded at all and the pet simply fails to render.
+//
+// Set PET_ATLAS_FULL=1 to regenerate the complete set if the adventure mode returns.
+const FULL_ATLAS = process.env.PET_ATLAS_FULL === '1';
+const ROOM_ACTIONS = new Set(['idle', 'eat', 'happy', 'play', 'sleep', 'hatch', 'evolve']);
+const ACTIVE_ACTIONS = FULL_ATLAS ? ACTIONS : ACTIONS.filter((action) => ROOM_ACTIONS.has(action.name));
+const ACTIVE_DIRECTIONS = FULL_ATLAS ? DIRECTIONS : DIRECTIONS.slice(0, 1);
+
+const TOTAL_FRAMES = ACTIVE_ACTIONS.reduce((sum, action) => sum + action.frames, 0);
 
 // WebP tops out at 16383px on an edge, and the atlas is one frame per column, so the cell size
 // is derived from the frame budget rather than hard-coded. Raising a frame count shrinks the
 // cell instead of producing an image the encoder refuses.
 const CELL = Math.min(160, Math.floor(16320 / TOTAL_FRAMES / 8) * 8);
-const ROWS = DIRECTIONS.length;
+const ROWS = ACTIVE_DIRECTIONS.length;
 
 // Slightly below the hero framing, and pushed down the cell, because `happy`, `play` and
 // `evolve` all need headroom above the standing silhouette for the jump arc.
@@ -89,7 +105,7 @@ const FRAME_DROP = 0.13; // fraction of the cell the whole rig is nudged down by
 const START_OF = new Map();
 {
   let cursor = 0;
-  for (const action of ACTIONS) {
+  for (const action of ACTIVE_ACTIONS) {
     START_OF.set(action.name, cursor);
     cursor += action.frames;
   }
@@ -1041,7 +1057,7 @@ function paletteFor(pet) {
 /** All frames of every action, already decorated, for one species+stage. */
 function timeline(pet, stage) {
   const frames = [];
-  for (const action of ACTIONS) {
+  for (const action of ACTIVE_ACTIONS) {
     const ctx = { frames: action.frames, loop: action.loop, stage, pet, body: pet.body, H: 1 };
     const poses = BUILDERS[action.name](ctx);
     const extras = decorate(action.name, ctx);
@@ -1106,9 +1122,9 @@ async function buildAtlas(pet, stage, cell) {
   const layers = [];
 
   for (let row = 0; row < ROWS; row += 1) {
-    const direction = DIRECTIONS[row];
+    const direction = ACTIVE_DIRECTIONS[row];
     let cursor = 0;
-    for (const action of ACTIONS) {
+    for (const action of ACTIVE_ACTIONS) {
       const slice = frames.slice(cursor, cursor + action.frames);
       let defs = WHITEOUT;
       let markup = '';
@@ -1216,7 +1232,7 @@ export async function generate({ catalog, resolve, generatedPath, log }) {
 
   const columns = [];
   const actions = {};
-  for (const action of ACTIONS) {
+  for (const action of ACTIVE_ACTIONS) {
     actions[action.name] = {
       start: START_OF.get(action.name),
       count: action.frames,
@@ -1230,7 +1246,7 @@ export async function generate({ catalog, resolve, generatedPath, log }) {
     frameWidth: CELL,
     frameHeight: CELL,
     columns,
-    rows: DIRECTIONS.map((direction) => direction.name),
+    rows: ACTIVE_DIRECTIONS.map((direction) => direction.name),
     sheets,
     actions,
     fps: 24,
@@ -1251,7 +1267,7 @@ export async function generate({ catalog, resolve, generatedPath, log }) {
   return {
     counts: {
       atlases: sheets.length,
-      actions: ACTIONS.length,
+      actions: ACTIVE_ACTIONS.length,
       framesPerSheet: TOTAL_FRAMES * ROWS,
       cell: CELL,
       seconds: Number(seconds),

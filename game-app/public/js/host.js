@@ -1,3 +1,20 @@
+
+// ExcelJS is ~926KB and only teachers importing or exporting a spreadsheet ever need it, yet
+// it was loaded eagerly on the portal for every student on every visit. Fetch it on demand.
+let excelJsPromise = null;
+function loadExcelJs() {
+  if (window.ExcelJS) return Promise.resolve(window.ExcelJS);
+  if (!excelJsPromise) {
+    excelJsPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/vendor/exceljs.min.js';
+      script.onload = () => resolve(window.ExcelJS);
+      script.onerror = () => { excelJsPromise = null; reject(new Error('Excel 元件載入失敗，請檢查網絡後再試。')); };
+      document.head.appendChild(script);
+    });
+  }
+  return excelJsPromise;
+}
 'use strict';
 
 // 唔好望落嚟 — teacher host console.
@@ -208,7 +225,7 @@
     $('editorError').textContent = '';
     $('excelImportStatus').textContent = `正在讀取 ${file.name}…`;
     try {
-      if (!window.ExcelJS) throw new Error('Excel 元件未載入，請重新整理頁面。');
+      await loadExcelJs();
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(await file.arrayBuffer());
       const sheet = workbook.worksheets[0];
@@ -246,7 +263,7 @@
   async function downloadExcelTemplate() {
     $('editorError').textContent = '';
     try {
-      if (!window.ExcelJS) throw new Error('Excel 元件未載入，請重新整理頁面。');
+      await loadExcelJs();
       const workbook = new ExcelJS.Workbook();
       workbook.creator = 'BuiO';
       const sheet = workbook.addWorksheet('Questions', { views: [{ state: 'frozen', ySplit: 1 }] });

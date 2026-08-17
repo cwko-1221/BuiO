@@ -50,8 +50,8 @@ assert.equal((await fs.readdir(path.join(artRoot,'items'))).filter((name)=>name.
 const assetManifest=JSON.parse(await fs.readFile(path.join(artRoot,'manifest.json'),'utf8'));
 const spriteManifest=JSON.parse(await fs.readFile(path.join(artRoot,'sprites/manifest.json'),'utf8'));
 assert.equal(spriteManifest.sheets.length,80);
-assert.ok(spriteManifest.columns.length>=12,`expected >=12 actions, got ${spriteManifest.columns.length}`);
-assert.equal(spriteManifest.rows.length,4);
+assert.ok(spriteManifest.columns.length>=40,`expected >=40 frames, got ${spriteManifest.columns.length}`);
+assert.ok(spriteManifest.rows.length>=1,`expected at least one direction row`);
 const atlasWidth=spriteManifest.frameWidth*spriteManifest.columns.length;
 const atlasHeight=spriteManifest.frameHeight*spriteManifest.rows.length;
 for(const sheet of spriteManifest.sheets){const metadata=await sharp(path.join(artRoot,sheet.split('/art/')[1])).metadata();assert.equal(metadata.width,atlasWidth,`${sheet} width`);assert.equal(metadata.height,atlasHeight,`${sheet} height`);assert.equal(metadata.hasAlpha,true);}
