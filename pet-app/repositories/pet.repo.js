@@ -120,16 +120,49 @@ function starterPlacements() {
   ].map(([itemId, x, y, rotation, layer]) => ({ id: makeId(), itemId, x, y, rotation, layer }));
 }
 
+/**
+ * Students already provisioned in this process. Provisioning is idempotent and only ever adds
+ * rows, so a stale entry can at worst skip a no-op. Cleared on restart, which is when the
+ * single provisioning statement below runs once more.
+ */
+const provisionedStudents = new Set();
+
+/**
+ * Ensure a student's pet records exist.
+ *
+ * This used to issue fourteen sequential INSERTs on EVERY call — profile, wallet, room layout,
+ * then one per starter furniture item in a loop — with no guard, so a student who had played
+ * for months still paid all fourteen on every request. The JSON path has always guarded itself
+ * and did the work once; only the Postgres path was unprotected, which is why it never showed
+ * up in local testing. With the service in Ohio and the database in Singapore, every one of
+ * those round-trips costs roughly 220ms, so a single tap could spend seconds re-inserting rows
+ * that were already there.
+ *
+ * It is now one statement (and zero after the first call in this process).
+ */
 async function ensureStudent(studentId, runner) {
   await ensureSchema();
   if (config.db.mode === 'postgres') {
+    if (provisionedStudents.has(studentId)) return;
     const db = runner || getPool();
-    await db.query(`INSERT INTO PetProfiles (StudentID) VALUES ($1) ON CONFLICT DO NOTHING`, [studentId]);
-    await db.query(`INSERT INTO PetWallets (StudentID) VALUES ($1) ON CONFLICT DO NOTHING`, [studentId]);
-    await db.query(`INSERT INTO PetRoomLayouts (StudentID, Placements) VALUES ($1,$2::jsonb) ON CONFLICT DO NOTHING`, [studentId, JSON.stringify(starterPlacements())]);
-    for (const item of starterInventoryRows(studentId)) {
-      await db.query(`INSERT INTO PetInventory (StudentID,ItemID,Quantity) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`, [studentId, item.itemId, item.quantity]);
-    }
+    // All four tables in a single round-trip. The data-modifying CTEs run unconditionally;
+    // the final INSERT expands the starter items from an array rather than looping.
+    await db.query(
+      `WITH profile AS (
+         INSERT INTO PetProfiles (StudentID) VALUES ($1) ON CONFLICT DO NOTHING
+       ), wallet AS (
+         INSERT INTO PetWallets (StudentID) VALUES ($1) ON CONFLICT DO NOTHING
+       ), layout AS (
+         INSERT INTO PetRoomLayouts (StudentID, Placements) VALUES ($1,$2::jsonb) ON CONFLICT DO NOTHING
+       )
+       INSERT INTO PetInventory (StudentID, ItemID, Quantity)
+       SELECT $1, item, 1 FROM unnest($3::text[]) AS item
+       ON CONFLICT DO NOTHING`,
+      [studentId, JSON.stringify(starterPlacements()), starterInventoryRows(studentId).map((row) => row.itemId)],
+    );
+    // Only remember it when not inside a caller's transaction: that transaction may still roll
+    // back, and a cached entry would then skip provisioning that never actually committed.
+    if (!runner) provisionedStudents.add(studentId);
     return;
   }
   const data = ensureJsonData();

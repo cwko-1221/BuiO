@@ -560,19 +560,19 @@
   "petProfiles": [
     {
       "studentId": "S001",
-      "activePetId": "8947b57f-8805-4a00-b898-563447615a57",
+      "activePetId": "dd515ce7-cc1e-455f-b7d9-7ae7572c136d",
       "starterEggClaimed": true,
-      "eggPity": 2,
+      "eggPity": 4,
       "stardust": 999999,
       "createdAt": "2026-08-13T13:03:28.012Z",
-      "updatedAt": "2026-08-16T11:13:31.566Z"
+      "updatedAt": "2026-08-17T10:11:39.571Z"
     }
   ],
   "petWallets": [
     {
       "studentId": "S001",
-      "balance": 999999,
-      "updatedAt": "2026-08-16T11:13:31.566Z"
+      "balance": 998399,
+      "updatedAt": "2026-08-17T10:11:39.571Z"
     }
   ],
   "petCurrencyLedger": [
@@ -937,6 +937,32 @@
         "petId": null
       },
       "createdAt": "2026-08-16T08:10:24.249Z"
+    },
+    {
+      "transactionId": "04945f32-b3ba-4c86-8ee7-5c0e671599f5",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -800,
+      "kind": "egg_purchase",
+      "idempotencyKey": "46d272a7-068f-4db7-917f-21735222170f",
+      "metadata": {
+        "speciesId": null,
+        "random": true
+      },
+      "createdAt": "2026-08-17T10:11:36.924Z"
+    },
+    {
+      "transactionId": "e5b1a8ab-a755-4b40-8b53-894efb232f53",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -800,
+      "kind": "egg_purchase",
+      "idempotencyKey": "1d38c2f4-d64d-4a2f-981f-51fc7076a53d",
+      "metadata": {
+        "speciesId": null,
+        "random": true
+      },
+      "createdAt": "2026-08-17T10:11:39.571Z"
     }
   ],
   "petInstances": [
@@ -980,6 +1006,30 @@
       "equippedWearables": [],
       "createdAt": "2026-08-16T08:03:15.606Z",
       "updatedAt": "2026-08-16T08:03:15.606Z"
+    },
+    {
+      "petId": "2ee5b530-ed34-4284-8261-b0611ecab510",
+      "studentId": "S001",
+      "speciesId": "mossback-turtle",
+      "xp": 0,
+      "stage": 1,
+      "dailyXp": 0,
+      "dailyXpDate": "",
+      "equippedWearables": [],
+      "createdAt": "2026-08-17T10:11:36.924Z",
+      "updatedAt": "2026-08-17T10:11:36.924Z"
+    },
+    {
+      "petId": "c44dd576-c1ff-4c6d-bc38-e26ac82224ee",
+      "studentId": "S001",
+      "speciesId": "starpatch-cat",
+      "xp": 0,
+      "stage": 1,
+      "dailyXp": 0,
+      "dailyXpDate": "",
+      "equippedWearables": [],
+      "createdAt": "2026-08-17T10:11:39.571Z",
+      "updatedAt": "2026-08-17T10:11:39.571Z"
     }
   ],
   "petSkills": [],
@@ -1741,6 +1791,52 @@
         "stardust": 999999
       },
       "createdAt": "2026-08-16T08:10:24.249Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "46d272a7-068f-4db7-917f-21735222170f",
+      "kind": "random_egg",
+      "response": {
+        "speciesId": "mossback-turtle",
+        "rarity": "common",
+        "pet": {
+          "id": "2ee5b530-ed34-4284-8261-b0611ecab510",
+          "speciesId": "mossback-turtle",
+          "xp": 0,
+          "stage": 1,
+          "dailyXp": 0,
+          "dailyXpDate": "",
+          "equippedWearables": []
+        },
+        "duplicateDust": 0,
+        "balance": 999199,
+        "stardust": 999999,
+        "eggPity": 3
+      },
+      "createdAt": "2026-08-17T10:11:36.924Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "1d38c2f4-d64d-4a2f-981f-51fc7076a53d",
+      "kind": "random_egg",
+      "response": {
+        "speciesId": "starpatch-cat",
+        "rarity": "common",
+        "pet": {
+          "id": "c44dd576-c1ff-4c6d-bc38-e26ac82224ee",
+          "speciesId": "starpatch-cat",
+          "xp": 0,
+          "stage": 1,
+          "dailyXp": 0,
+          "dailyXpDate": "",
+          "equippedWearables": []
+        },
+        "duplicateDust": 0,
+        "balance": 998399,
+        "stardust": 999999,
+        "eggPity": 4
+      },
+      "createdAt": "2026-08-17T10:11:39.571Z"
     }
   ]
 }
