@@ -15,6 +15,13 @@ function required(name) {
 }
 
 const supabaseUrl = process.env.SUPABASE_DB_URL || null;
+// Falling back to the JSON store is right for local development and catastrophic in
+// production: the server starts cleanly, every student is served an empty world, and each
+// write goes to a container-local file that is discarded on the next deploy. A missing
+// connection string is far easier to diagnose as a refusal to boot than as silent data loss.
+if (isProd && !supabaseUrl) {
+  throw new Error('SUPABASE_DB_URL is required in production (without it the server would silently use the local JSON store and lose all writes)');
+}
 const mode = supabaseUrl ? 'postgres' : 'json';
 
 const sessionSecret =
