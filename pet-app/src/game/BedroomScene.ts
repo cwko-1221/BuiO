@@ -4,11 +4,50 @@ import type { Bootstrap, FurnitureDefinition, PetDefinition, PetInstance, RoomPl
 
 interface BedroomData { bootstrap: Bootstrap; activePet: PetInstance; petDefinition: PetDefinition; editing?: boolean }
 
-type FurnitureHitArea = { tile: Phaser.Geom.Polygon; body: Phaser.Geom.Rectangle };
+type FurnitureHitArea = {
+  tile: Phaser.Geom.Polygon;
+  scene: Phaser.Scene;
+  /** Everything needed to map a container-local point back into texture pixels. */
+  art?: { key: string; offsetY: number; angle: number; scale: number; originX: number; originY: number };
+};
 
-/** Hit inside the footprint tiles or the drawn body — either grabs the piece. */
-const hitTest = (area: FurnitureHitArea, x: number, y: number) =>
-  Phaser.Geom.Polygon.Contains(area.tile, x, y) || Phaser.Geom.Rectangle.Contains(area.body, x, y);
+/**
+ * Hit the drawn pixels, or the tiles the piece stands on.
+ *
+ * A bounding rectangle is the wrong shape for isometric furniture: a lamp on a post is mostly
+ * empty space inside its own box, and neighbouring boxes overlap heavily. Phaser then picks
+ * whichever overlapping object sits highest, so tapping the post of one piece would grab the
+ * table beside it, and tapping the piece itself did nothing. Sampling the texture's alpha means
+ * a tap lands on whatever is actually drawn under the finger.
+ *
+ * The footprint tiles stay as a second region so flat rugs, and the empty floor a piece stands
+ * on, remain grabbable.
+ */
+const hitTest = (area: FurnitureHitArea, x: number, y: number) => {
+  const art = area.art;
+  if (art) {
+    // Undo the container-local transform: shift by the art's offset, unrotate, unscale, then
+    // move from origin-relative to top-left texture coordinates.
+    let localX = x;
+    let localY = y - art.offsetY;
+    if (art.angle) {
+      const radians = -art.angle * Math.PI / 180;
+      const cos = Math.cos(radians);
+      const sin = Math.sin(radians);
+      [localX, localY] = [localX * cos - localY * sin, localX * sin + localY * cos];
+    }
+    const source = area.scene.textures.get(art.key)?.getSourceImage() as { width: number; height: number } | undefined;
+    if (source) {
+      const textureX = Math.round(localX / art.scale + art.originX * source.width);
+      const textureY = Math.round(localY / art.scale + art.originY * source.height);
+      if (textureX >= 0 && textureY >= 0 && textureX < source.width && textureY < source.height) {
+        const pixel = area.scene.textures.getPixelAlpha(textureX, textureY, art.key);
+        if (pixel !== null && pixel > 8) return true;
+      }
+    }
+  }
+  return Phaser.Geom.Polygon.Contains(area.tile, x, y);
+};
 
 /** 2:1 isometric tile. Half-extents, so a tile spans 2*TILE_WIDTH by 2*TILE_HEIGHT on screen. */
 const TILE_WIDTH = 38;
@@ -248,10 +287,21 @@ export class BedroomScene extends Phaser.Scene {
     const halfH = ((width + height) / 2) * TILE_HEIGHT;
     const skewX = ((width - height) / 2) * TILE_WIDTH;
     const skewY = ((width - height) / 2) * TILE_HEIGHT;
-    const bounds = container.getBounds();
+    // The art lives in an inner container so rotation does not spin the footprint polygon;
+    // describe its transform so the hit test can sample the texture under the finger.
+    const art = container.list[0] as Phaser.GameObjects.Container | undefined;
+    const image = art?.list?.find((child) => child instanceof Phaser.GameObjects.Image) as Phaser.GameObjects.Image | undefined;
     return {
       tile: new Phaser.Geom.Polygon([-skewX, -halfH, halfW, skewY, skewX, halfH, -halfW, -skewY]),
-      body: new Phaser.Geom.Rectangle(bounds.x - container.x, bounds.y - container.y, bounds.width, bounds.height),
+      scene: this,
+      art: image && image.texture?.key !== '__MISSING' ? {
+        key: image.texture.key,
+        offsetY: image.y,
+        angle: art?.angle ?? 0,
+        scale: image.scaleX || 1,
+        originX: image.originX,
+        originY: image.originY,
+      } : undefined,
     };
   }
 
