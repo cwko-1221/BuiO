@@ -162,16 +162,30 @@ app.get('/api/network/ip', (req, res) => {
 // ----------------------------------------------------------------
 // Static
 // ----------------------------------------------------------------
-app.use('/src', express.static(path.join(__dirname, 'src')));
-app.use('/vendor', express.static(path.join(__dirname, 'node_modules', 'exceljs', 'dist')));
+// ---------------------------------------------------------------- static cache ---
+// Only four of the twenty-six static mounts set any cache policy, so nearly every CSS file,
+// script, image and BOTH copies of Phaser (1.3MB each, for /game and /tower-defense) were
+// served with max-age=0 and revalidated on every page load. With a class opening a game at
+// once on a small instance, that is the difference between one download and thirty.
+//
+// VENDOR  libraries pinned by package.json — the file only changes when the dependency does
+// MEDIA   images, sprites and audio — replaced by editing the file, rarely and deliberately
+// APP     our own css/js — already cache-busted with ?v= in markup, but kept short so a
+//         forgotten version bump cannot strand a class on stale code for a month
+const CACHE_VENDOR = { maxAge: '30d', immutable: true };
+const CACHE_MEDIA  = { maxAge: '30d' };
+const CACHE_APP    = { maxAge: '1h' };
 
-app.use('/math-app/css', express.static(path.join(__dirname, 'math-app', 'public', 'css')));
-app.use('/math-app/js', express.static(path.join(__dirname, 'math-app', 'public', 'js')));
-app.use('/math-app/images', express.static(path.join(__dirname, 'math-app', 'public', 'images')));
+app.use('/src', express.static(path.join(__dirname, 'src'), CACHE_APP));
+app.use('/vendor', express.static(path.join(__dirname, 'node_modules', 'exceljs', 'dist'), CACHE_VENDOR));
+
+app.use('/math-app/css', express.static(path.join(__dirname, 'math-app', 'public', 'css'), CACHE_APP));
+app.use('/math-app/js', express.static(path.join(__dirname, 'math-app', 'public', 'js'), CACHE_APP));
+app.use('/math-app/images', express.static(path.join(__dirname, 'math-app', 'public', 'images'), CACHE_MEDIA));
 
 // Chinese module static + page routes
-app.use('/chinese/css', express.static(path.join(__dirname, 'chinese-app', 'public', 'css')));
-app.use('/chinese/js', express.static(path.join(__dirname, 'chinese-app', 'public', 'js')));
+app.use('/chinese/css', express.static(path.join(__dirname, 'chinese-app', 'public', 'css'), CACHE_APP));
+app.use('/chinese/js', express.static(path.join(__dirname, 'chinese-app', 'public', 'js'), CACHE_APP));
 
 function requireSession(req, res, next) {
   if (!req.session || !req.session.studentId) return res.redirect('/');
@@ -188,8 +202,8 @@ app.get('/chinese/student', requireSession, (req, res) => res.sendFile(path.join
 app.get('/chinese/practice', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'chinese-app', 'public', 'practice.html')));
 
 // English module static + page routes
-app.use('/english/css', express.static(path.join(__dirname, 'english-app', 'public', 'css')));
-app.use('/english/js', express.static(path.join(__dirname, 'english-app', 'public', 'js')));
+app.use('/english/css', express.static(path.join(__dirname, 'english-app', 'public', 'css'), CACHE_APP));
+app.use('/english/js', express.static(path.join(__dirname, 'english-app', 'public', 'js'), CACHE_APP));
 
 function requireTeacherPageEn(req, res, next) {
   if (!req.session || !req.session.studentId) return res.redirect('/');
@@ -202,8 +216,8 @@ app.get('/english/student', requireSession, (req, res) => res.sendFile(path.join
 app.get('/english/practice', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'practice.html')));
 
 // Phonics Express static assets + role-aware pages
-app.use('/phonics/css', express.static(path.join(__dirname, 'phonics-app', 'public', 'css')));
-app.use('/phonics/js', express.static(path.join(__dirname, 'phonics-app', 'public', 'js')));
+app.use('/phonics/css', express.static(path.join(__dirname, 'phonics-app', 'public', 'css'), CACHE_APP));
+app.use('/phonics/js', express.static(path.join(__dirname, 'phonics-app', 'public', 'js'), CACHE_APP));
 app.get('/phonics', requireSession, (req, res) => {
   const page = req.session.role === 'teacher' ? 'teacher.html' : 'index.html';
   res.sendFile(path.join(__dirname, 'phonics-app', 'public', page));
@@ -217,10 +231,10 @@ app.get('/phonics/teacher', requireSession, (req, res) => {
 });
 
 // Game module static + page routes
-app.use('/game/css', express.static(path.join(__dirname, 'game-app', 'public', 'css')));
-app.use('/game/js', express.static(path.join(__dirname, 'game-app', 'public', 'js')));
-app.use('/game/images', express.static(path.join(__dirname, 'game-app', 'public', 'images')));
-app.use('/game/vendor/phaser', express.static(path.join(__dirname, 'node_modules', 'phaser', 'dist')));
+app.use('/game/css', express.static(path.join(__dirname, 'game-app', 'public', 'css'), CACHE_APP));
+app.use('/game/js', express.static(path.join(__dirname, 'game-app', 'public', 'js'), CACHE_APP));
+app.use('/game/images', express.static(path.join(__dirname, 'game-app', 'public', 'images'), CACHE_MEDIA));
+app.use('/game/vendor/phaser', express.static(path.join(__dirname, 'node_modules', 'phaser', 'dist'), CACHE_VENDOR));
 app.get('/game/preview', (req, res, next) => {
   if (config.isProd) return next();
   res.sendFile(path.join(__dirname, 'game-app', 'public', 'play.html'));
@@ -241,8 +255,8 @@ app.get('/game/host/preview', (req, res, next) => {
 });
 
 // Unified quiz-game lobby
-app.use('/games/css', express.static(path.join(__dirname, 'game-hub-app', 'public', 'css')));
-app.use('/games/js', express.static(path.join(__dirname, 'game-hub-app', 'public', 'js')));
+app.use('/games/css', express.static(path.join(__dirname, 'game-hub-app', 'public', 'css'), CACHE_APP));
+app.use('/games/js', express.static(path.join(__dirname, 'game-hub-app', 'public', 'js'), CACHE_APP));
 app.get('/games/preview', (req, res, next) => {
   if (config.isProd) return next();
   res.sendFile(path.join(__dirname, 'game-hub-app', 'public', 'index.html'));
@@ -252,10 +266,10 @@ app.get('/games', requireSession, (_req, res) => {
 });
 
 // Tower defense module
-app.use('/tower-defense/css', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'css')));
-app.use('/tower-defense/js', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'js')));
+app.use('/tower-defense/css', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'css'), CACHE_APP));
+app.use('/tower-defense/js', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'js'), CACHE_APP));
 app.use('/tower-defense/assets', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'assets'), { maxAge: process.env.NODE_ENV === 'production' ? '30d' : 0 }));
-app.use('/tower-defense/vendor/phaser', express.static(path.join(__dirname, 'node_modules', 'phaser', 'dist')));
+app.use('/tower-defense/vendor/phaser', express.static(path.join(__dirname, 'node_modules', 'phaser', 'dist'), CACHE_VENDOR));
 app.get('/tower-defense/preview', (req, res, next) => {
   if (config.isProd) return next();
   res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'index.html'));
@@ -362,8 +376,8 @@ app.get('/math',           (req, res) => {
 });
 
 // Missing-homework module (teachers and appointed subject monitors only).
-app.use('/homework/css', express.static(path.join(__dirname, 'homework-app', 'public', 'css')));
-app.use('/homework/js', express.static(path.join(__dirname, 'homework-app', 'public', 'js')));
+app.use('/homework/css', express.static(path.join(__dirname, 'homework-app', 'public', 'css'), CACHE_APP));
+app.use('/homework/js', express.static(path.join(__dirname, 'homework-app', 'public', 'js'), CACHE_APP));
 app.get('/homework', requireSession, async (req, res, next) => {
   try {
     if (req.session.role !== 'teacher') {

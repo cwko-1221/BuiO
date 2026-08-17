@@ -2,7 +2,7 @@ import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, WORLD, towerStats } from './cont
 import { TowerDefenseSimulation } from './simulation.js?v=20260809-path-grid-1';
 import { BattleScene } from './BattleScene.js?v=20260809-path-grid-1';
 import { CrystalAudio } from './audio.js?v=20260802-2';
-import { MAP_ART, TOWER_ART, atlasPosition } from './assets.js?v=20260802-1';
+import { MAP_ART, MAP_THUMB, TOWER_ART, atlasPosition } from './assets.js?v=20260817-thumbs';
 
 const $=id=>document.getElementById(id);
 const previewRoute=location.pathname.endsWith('/preview');
@@ -46,7 +46,7 @@ async function api(path,{method='GET',body}={}){
 function renderMenu(){
   $('mapSelector').innerHTML=mapOrder.map((id,index)=>{
     const map=MAPS[id],color=`#${map.palette.accent.toString(16).padStart(6,'0')}`;
-    return `<button class="map-card ${selectedMap===id?'selected':''}" data-map="${id}" style="--map-color:${color}33;--map-image:url('${MAP_ART[id]}')"><span class="map-number">SECTOR ${String(index+1).padStart(2,'0')}</span><span class="route-badge">${map.paths.length} 個入口</span><b>${map.name}</b><small>${map.subtitle}</small></button>`;
+    return `<button class="map-card ${selectedMap===id?'selected':''}" data-map="${id}" style="--map-color:${color}33;--map-image:url('${MAP_THUMB[id]}')"><span class="map-number">SECTOR ${String(index+1).padStart(2,'0')}</span><span class="route-badge">${map.paths.length} 個入口</span><b>${map.name}</b><small>${map.subtitle}</small></button>`;
   }).join('');
   const best=Object.values(profile.bestScores);const highest=best.length?Math.max(...best):0;
   $('campaignRecord').innerHTML=`戰役進度 <b>${profile.completed.length}/3</b> · 最高分 <b>${highest.toLocaleString('zh-HK')}</b> · 累積答對 <b>${profile.totalCorrect}</b>`;

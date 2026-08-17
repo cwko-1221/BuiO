@@ -1,7 +1,17 @@
+// Full-resolution battlefield art. Only the chosen map is ever loaded, by BattleScene.
 export const MAP_ART=Object.freeze({
   starport:'/tower-defense/assets/maps/starport.webp',
   moonwood:'/tower-defense/assets/maps/moonwood.webp',
   embercore:'/tower-defense/assets/maps/embercore.webp',
+});
+
+// 480x300 thumbnails for the map picker. The picker used MAP_ART, so choosing a map pulled
+// all three 1600x900 backgrounds — about 1.5MB per student before the game even started, of
+// which 1MB was never played. At 20KB each these are 96% smaller.
+export const MAP_THUMB=Object.freeze({
+  starport:'/tower-defense/assets/maps/starport-thumb.webp',
+  moonwood:'/tower-defense/assets/maps/moonwood-thumb.webp',
+  embercore:'/tower-defense/assets/maps/embercore-thumb.webp',
 });
 
 export const TOWER_ART=Object.freeze({
