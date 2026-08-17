@@ -8,7 +8,7 @@ type FurnitureHitArea = {
   tile: Phaser.Geom.Polygon;
   scene: Phaser.Scene;
   /** Everything needed to map a container-local point back into texture pixels. */
-  art?: { key: string; offsetY: number; angle: number; scale: number; originX: number; originY: number };
+  art?: { key: string; offsetY: number; angle: number; scale: number; originX: number; originY: number; flipped: boolean };
 };
 
 /**
@@ -40,8 +40,9 @@ const hitTest = (area: FurnitureHitArea, x: number, y: number) => {
     if (source) {
       const textureX = Math.round(localX / art.scale + art.originX * source.width);
       const textureY = Math.round(localY / art.scale + art.originY * source.height);
-      if (textureX >= 0 && textureY >= 0 && textureX < source.width && textureY < source.height) {
-        const pixel = area.scene.textures.getPixelAlpha(textureX, textureY, art.key);
+      const sampleX = art.flipped ? source.width - 1 - textureX : textureX;
+      if (sampleX >= 0 && textureY >= 0 && sampleX < source.width && textureY < source.height) {
+        const pixel = area.scene.textures.getPixelAlpha(sampleX, textureY, art.key);
         if (pixel !== null && pixel > 8) return true;
       }
     }
@@ -297,12 +298,32 @@ export class BedroomScene extends Phaser.Scene {
       art: image && image.texture?.key !== '__MISSING' ? {
         key: image.texture.key,
         offsetY: image.y,
-        angle: art?.angle ?? 0,
+        angle: 0,
         scale: image.scaleX || 1,
         originX: image.originX,
         originY: image.originY,
+        flipped: Boolean(art?.getData('flipped')),
       } : undefined,
     };
+  }
+
+  /**
+   * Show which way a piece faces.
+   *
+   * Rotation used to spin the sprite on screen with setAngle. In an isometric view that is
+   * wrong: turning a piece means turning it in the world, not rotating its picture, and a
+   * 90-degree screen rotation of an isometric drawing makes the object appear to lie flat.
+   * Each piece has exactly one drawn view, so a true quarter turn is not available; mirroring
+   * gives the two facings the art can honestly express, and the piece always stays upright.
+   * The footprint still swaps on 90/270, so rotation continues to change the cells occupied.
+   */
+  private applyFacing(art: Phaser.GameObjects.Container, rotation: number) {
+    const flipped = rotation === 180 || rotation === 270;
+    art.setAngle(0);
+    for (const child of art.list) {
+      if (child instanceof Phaser.GameObjects.Image) child.setFlipX(flipped);
+    }
+    art.setData('flipped', flipped);
   }
 
   private addFurniture(placement: RoomPlacement) {
@@ -313,9 +334,7 @@ export class BedroomScene extends Phaser.Scene {
     const point = this.footprintCentre(placement);
     const container = this.add.container(point.x, point.y).setDepth(this.depthFor(placement));
     const art = this.furnitureArt(definition, placement);
-    // Rotate the art, not the outer container: the container carries the hit area, and
-    // rotating it would spin the footprint polygon out of alignment with the floor.
-    art.setAngle(placement.rotation);
+    this.applyFacing(art, placement.rotation);
     container.add(art);
     // Explicit config form: passing a plain object as the first argument makes Phaser read it
     // as an InputConfiguration rather than as a hit area, leaving hitAreaCallback undefined.
@@ -403,7 +422,8 @@ export class BedroomScene extends Phaser.Scene {
       return;
     }
     placement.rotation = rotation;
-    (object.list[0] as Phaser.GameObjects.Container | undefined)?.setAngle(rotation);
+    const art = object.list[0] as Phaser.GameObjects.Container | undefined;
+    if (art) this.applyFacing(art, rotation);
     // A rotated non-square footprint occupies different cells, so its centre and the tiles
     // you can grab it by both change.
     const centre = this.footprintCentre(placement); object.setPosition(centre.x, centre.y);
