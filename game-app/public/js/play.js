@@ -1238,6 +1238,29 @@
     if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') input.right = false;
   });
 
+  // iOS has ignored user-scalable=no and maximum-scale since iOS 10, so the page could still
+  // be pinch-zoomed however the viewport meta was written. That is not just cosmetic: once
+  // iOS decides a second finger begins a zoom gesture it takes ownership of the touch stream,
+  // and the button that owned the first finger may never receive touchend or touchcancel.
+  // The held direction then stays true forever — the key looks jammed, and pressing again
+  // does nothing because the flag was already set. Blocking the gesture fixes both symptoms.
+  for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
+    document.addEventListener(type, e => e.preventDefault(), { passive: false });
+  }
+  document.addEventListener('touchmove', e => {
+    if (e.touches.length > 1) e.preventDefault(); // pinch
+  }, { passive: false });
+
+  // Safety net, independent of which element the touch ended on: when the last finger leaves
+  // the screen nothing can still be held. Also release when the tab is hidden or loses focus,
+  // so switching apps mid-press cannot leave a direction stuck on return.
+  const releaseHeld = () => { input.left = false; input.right = false; };
+  window.addEventListener('touchend', e => { if (e.touches.length === 0) releaseHeld(); }, { passive: true });
+  window.addEventListener('touchcancel', releaseHeld, { passive: true });
+  window.addEventListener('pointercancel', releaseHeld, { passive: true });
+  window.addEventListener('blur', releaseHeld);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) releaseHeld(); });
+
   function bindHold(id, on, off) {
     const el = $(id);
     const start = e => { e.preventDefault(); on(); };
@@ -1245,6 +1268,8 @@
     el.addEventListener('touchstart', start, { passive: false });
     el.addEventListener('touchend', end);
     el.addEventListener('touchcancel', end);
+    // A touch that never reports its end on this element still releases via releaseHeld().
+    el.addEventListener('lostpointercapture', off);
     el.addEventListener('mousedown', start);
     el.addEventListener('mouseup', end);
     el.addEventListener('mouseleave', off);
