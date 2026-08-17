@@ -7,6 +7,16 @@ export interface PetDefinition {
   talent: Localized; color: string; body: string; art: string[];
   /** One sprite atlas per evolution stage. Absent until the animation pipeline has run. */
   atlas?: string[];
+  /** Where worn items belong on the creature, per evolution stage. */
+  anchors?: (PetAnchors | null)[];
+}
+/**
+ * Landmarks measured from a creature's idle frame, as 0..1 fractions of its atlas cell:
+ * `top` the skull, `eye` the eye line, `bottom` the feet, `centre` the body's midline,
+ * `width` the silhouette, `head` the skull width, `face` the span across the eyes.
+ */
+export interface PetAnchors {
+  top: number; eye: number; bottom: number; centre: number; width: number; head: number; face: number;
 }
 export type PetAction =
   | 'idle' | 'walk' | 'auto-attack' | 'active-skill' | 'hit' | 'faint-return'

@@ -98,6 +98,7 @@ export class BedroomScene extends Phaser.Scene {
       this.petTextureKey = `pet:${this.model.petDefinition.id}:${stage}`;
       if (!this.textures.exists(this.petTextureKey)) this.load.image(this.petTextureKey, this.model.petDefinition.art[stage - 1]);
     } else this.petTextureKey = '';
+    PetAvatar.preloadWearables(this, this.model.activePet.equippedWearables, catalog.wearables);
 
     // Real furniture art, one texture per distinct item actually placed in the room.
     for (const itemId of new Set(this.placements.map((placement) => placement.itemId))) {
@@ -117,6 +118,7 @@ export class BedroomScene extends Phaser.Scene {
       layout: this.model.bootstrap.catalog.animation,
       fallbackTexture: this.petTextureKey && this.textures.exists(this.petTextureKey) ? this.petTextureKey : undefined,
       scale: .86,
+      wearables: this.model.bootstrap.catalog.wearables,
     });
     this.avatar.setDepth(60);
     this.ghost = this.add.graphics().setDepth(15);

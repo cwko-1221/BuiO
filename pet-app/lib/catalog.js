@@ -43,6 +43,19 @@ const artPath = (folder, id) => {
   return `/pet/assets/art/${folder}/${id}-${hash}.webp`;
 };
 
+/**
+ * Where each creature is actually drawn inside its atlas cell, as 0..1 fractions of the cell.
+ * Cells are square and no creature fills one, so accessories anchored to the cell float above a
+ * short form and sink into a tall one. Generated alongside the collectible metrics.
+ */
+const BODY_METRICS = (() => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'assets', 'art', 'sprites', 'body-metrics.json'), 'utf8'));
+  } catch {
+    return {};
+  }
+})();
+
 const PETS = [
   ['starpatch-cat','common','light',['星斑幼貓','月影貓','星鬃獵貓','天穹星獅'],['Starpatch Kitten','Moonshadow Cat','Star-Mane Hunter','Skybound Star Lion'],'幸運飛撲','Lucky Pounce','#f4c45e','cat'],
   ['cloud-ear-dog','common','wind',['雲耳幼犬','追風犬','霧嶺牧犬','蒼穹守望犬'],['Cloud-ear Pup','Windchaser','Mist Ridge Sheepdog','Skywatch Hound'],'順風奔跑','Tailwind Run','#82cde7','dog'],
@@ -69,6 +82,7 @@ const PETS = [
   talent: { 'zh-HK': talentZh, 'en-US': talentEn }, color, body,
   art: Array.from({ length: 4 }, (_, index) => artPath('pets', `${id}-${index + 1}`)),
   atlas: Array.from({ length: 4 }, (_, index) => artPath('sprites', `${id}-${index + 1}-atlas`)),
+  anchors: Array.from({ length: 4 }, (_, index) => BODY_METRICS[`${id}-${index + 1}`] || null),
 }));
 
 const ROOMS = [

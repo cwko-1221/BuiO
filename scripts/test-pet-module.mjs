@@ -164,5 +164,21 @@ for(const pet of [catalog.pets[0],catalog.pets[8],catalog.pets[15],catalog.pets[
 assert.equal(flat.length,0,`these forms read as flat fills rather than shaded volumes, need >=20 of 32 luminance buckets: ${flat.join(', ')}`);
 pass('creature forms carry a continuous shading ramp rather than flat fills');
 
+// Worn items are anchored to landmarks measured off each creature's idle frame. If those go
+// missing or come back out of order the avatar silently falls back to whole-cell proportions,
+// which puts hats in mid-air, so assert the shape of every published set.
+const unanchored=[];
+for(const pet of catalog.pets) {
+  pet.anchors.forEach((anchor,stage)=>{
+    if(!anchor) return void unanchored.push(`${pet.id}-${stage+1} missing`);
+    const ordered=anchor.top<anchor.eye&&anchor.eye<anchor.bottom;
+    const sized=anchor.face>0&&anchor.head>=anchor.face&&anchor.width>=anchor.head;
+    if(!ordered||!sized) unanchored.push(`${pet.id}-${stage+1} ${JSON.stringify(anchor)}`);
+  });
+}
+assert.equal(unanchored.length,0,`wearable anchors must run skull < eye < feet with face <= head <= body: ${unanchored.join(', ')}`);
+assert.ok(catalog.wearables.every((item)=>item.art&&item.content),'every wearable needs artwork and a content box to be placed on a pet');
+pass('every creature stage publishes ordered wearable anchors and every item has art to hang on them');
+
 await fs.rm(tempDir,{recursive:true,force:true});
 console.log('\nPet module checks passed.');
