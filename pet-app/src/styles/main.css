@@ -1470,3 +1470,15 @@ input[type="range"]::-moz-range-thumb {
 }
 .setting-row b { display: block; font-weight: 900; }
 .setting-row small { display: block; color: var(--ink-soft); max-width: 46ch; }
+
+/* Narrow phones: the brand wordmark, the pet status pill, the coin pill and the sound button
+   cannot share 390px. The wordmark is the only one that carries no live information, so it
+   collapses to its badge and the status pill keeps the space. */
+@media (max-width: 560px) {
+  .pet-topbar { gap: var(--s1); padding: var(--s1) var(--s2); }
+  .brand span:last-child { display: none; }
+  .brand { padding: 0; }
+  .pet-status { flex: 1 1 0; min-width: 0; overflow: hidden; }
+  .pet-status b { overflow: hidden; text-overflow: ellipsis; }
+  .wallet > span { min-width: 0; padding: 4px var(--s1); }
+}

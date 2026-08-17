@@ -60,12 +60,19 @@ async function createSet({ teacherId, title, questions }) {
       INSERT INTO game_question_sets (title, created_by)
       VALUES ($1, $2) RETURNING id`, [title, teacherId]);
     const setId = rows[0].id;
-    for (let i = 0; i < questions.length; i++) {
-      const q = questions[i];
-      await client.query(`
-        INSERT INTO game_questions (set_id, question, choices, correct_index, order_index)
-        VALUES ($1, $2, $3, $4, $5)`,
-        [setId, q.question, JSON.stringify(q.choices), q.correctIndex, i]);
+    if (questions.length) {
+      await client.query(
+        `INSERT INTO game_questions (set_id, question, choices, correct_index, order_index)
+         SELECT $1, q, c::jsonb, i, ord
+         FROM unnest($2::text[], $3::text[], $4::int[], $5::int[]) AS t(q, c, i, ord)`,
+        [
+          setId,
+          questions.map(q => q.question),
+          questions.map(q => JSON.stringify(q.choices)),
+          questions.map(q => q.correctIndex),
+          questions.map((_, index) => index),
+        ],
+      );
     }
     await client.query('COMMIT');
     return setId;
@@ -91,12 +98,19 @@ async function replaceSetQuestions({ setId, teacherId, title, questions }) {
       throw err;
     }
     await client.query('DELETE FROM game_questions WHERE set_id = $1', [setId]);
-    for (let i = 0; i < questions.length; i++) {
-      const q = questions[i];
-      await client.query(`
-        INSERT INTO game_questions (set_id, question, choices, correct_index, order_index)
-        VALUES ($1, $2, $3, $4, $5)`,
-        [setId, q.question, JSON.stringify(q.choices), q.correctIndex, i]);
+    if (questions.length) {
+      await client.query(
+        `INSERT INTO game_questions (set_id, question, choices, correct_index, order_index)
+         SELECT $1, q, c::jsonb, i, ord
+         FROM unnest($2::text[], $3::text[], $4::int[], $5::int[]) AS t(q, c, i, ord)`,
+        [
+          setId,
+          questions.map(q => q.question),
+          questions.map(q => JSON.stringify(q.choices)),
+          questions.map(q => q.correctIndex),
+          questions.map((_, index) => index),
+        ],
+      );
     }
     await client.query('COMMIT');
   } catch (e) {

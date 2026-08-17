@@ -14,7 +14,7 @@ export type PetAction =
 export type PetFacing = 'front' | 'right' | 'back' | 'left';
 /** Atlas layout, derived server-side from the generated sprite manifest. */
 export interface AnimationLayout {
-  frameWidth: number; frameHeight: number; columns: number; fps: number;
+  frameWidth: number; frameHeight: number; framesPerDirection: number; fps: number;
   directions: PetFacing[];
   actions: { name: PetAction; start: number; length: number }[];
 }

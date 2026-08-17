@@ -50,10 +50,14 @@ assert.equal((await fs.readdir(path.join(artRoot,'items'))).filter((name)=>name.
 const assetManifest=JSON.parse(await fs.readFile(path.join(artRoot,'manifest.json'),'utf8'));
 const spriteManifest=JSON.parse(await fs.readFile(path.join(artRoot,'sprites/manifest.json'),'utf8'));
 assert.equal(spriteManifest.sheets.length,80);
-assert.ok(spriteManifest.columns.length>=40,`expected >=40 frames, got ${spriteManifest.columns.length}`);
+// 4096 is the smallest MAX_TEXTURE_SIZE still in the field; above it the sheet cannot be
+// uploaded and the pet does not render at all, which is worse than loading slowly.
+assert.ok(spriteManifest.frameWidth*spriteManifest.gridColumns<=4096,`atlas too wide for older tablets`);
+assert.ok(spriteManifest.frameHeight*spriteManifest.gridRows*spriteManifest.rows.length<=4096,`atlas too tall for older tablets`);
+assert.ok(spriteManifest.gridColumns>0&&spriteManifest.gridRows>0,`sprite manifest must publish its grid`);
 assert.ok(spriteManifest.rows.length>=1,`expected at least one direction row`);
-const atlasWidth=spriteManifest.frameWidth*spriteManifest.columns.length;
-const atlasHeight=spriteManifest.frameHeight*spriteManifest.rows.length;
+const atlasWidth=spriteManifest.frameWidth*spriteManifest.gridColumns;
+const atlasHeight=spriteManifest.frameHeight*spriteManifest.gridRows*spriteManifest.rows.length;
 for(const sheet of spriteManifest.sheets){const metadata=await sharp(path.join(artRoot,sheet.split('/art/')[1])).metadata();assert.equal(metadata.width,atlasWidth,`${sheet} width`);assert.equal(metadata.height,atlasHeight,`${sheet} height`);assert.equal(metadata.hasAlpha,true);}
 assert.equal((await fs.readdir(path.join(artRoot,'collectibles/wearables'))).filter((name)=>name.endsWith('.webp')).length,80);
 assert.equal((await fs.readdir(path.join(artRoot,'collectibles/furniture'))).filter((name)=>name.endsWith('.webp')).length,100);

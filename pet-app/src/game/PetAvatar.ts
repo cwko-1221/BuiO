@@ -4,11 +4,14 @@ import type { AnimationLayout, PetAction, PetDefinition, PetFacing, PetInstance 
 /**
  * The pet as an animated sprite.
  *
- * The build pipeline emits one atlas per species per evolution stage: a grid whose columns are
- * animation frames and whose four rows are the facings (front / right / back / left). The frame
- * ranges for each action arrive from the server inside `catalog.animation`, because the client
- * is not allowed to fetch the sprite manifest directly — /pet/assets only serves hashed
- * .js/.css/.webp files.
+ * The build pipeline emits one atlas per species per evolution stage, laid out as a grid with
+ * one action per row. Phaser indexes a spritesheet in reading order, so an action's frames run
+ * contiguously from its published start index. The grid exists so the sheet stays inside the
+ * 4096px texture limit that older tablets report — a single long strip could not be uploaded
+ * on those devices at all, and the pet would fail to render rather than merely load slowly.
+ *
+ * The frame ranges arrive from the server inside `catalog.animation`, because the client cannot
+ * fetch the sprite manifest directly — /pet/assets only serves hashed .js/.css/.webp files.
  *
  * If the atlas is missing (pipeline not yet run) this degrades to the single static form image,
  * so the room is never empty.
@@ -106,7 +109,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
       for (const action of layout.actions) {
         const animationKey = `${definition.id}-${stage}-${action.name}-${facing}`;
         if (this.scene.anims.exists(animationKey)) continue;
-        const base = row * layout.columns;
+        const base = row * layout.framesPerDirection;
         this.scene.anims.create({
           key: animationKey,
           frames: Array.from({ length: action.length }, (_, offset) => ({
@@ -129,7 +132,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
       // Keep the state change legible without oscillation: hold the action's key pose.
       const range = this.layout.actions.find((entry) => entry.name === action);
       const row = Math.max(0, this.layout.directions.indexOf(facing));
-      if (range) this.sprite.setFrame(row * this.layout.columns + range.start + Math.floor(range.length / 2));
+      if (range) this.sprite.setFrame(row * this.layout.framesPerDirection + range.start + Math.floor(range.length / 2));
       this.scene.time.delayedCall(420, () => this.settle());
       return;
     }

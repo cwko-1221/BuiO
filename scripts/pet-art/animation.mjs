@@ -91,6 +91,16 @@ const ACTIVE_DIRECTIONS = FULL_ATLAS ? DIRECTIONS : DIRECTIONS.slice(0, 1);
 
 const TOTAL_FRAMES = ACTIVE_ACTIONS.reduce((sum, action) => sum + action.frames, 0);
 
+// Lay the sheet out as a grid, one action per row, rather than a single long strip.
+// A strip of 70 frames at 160px is 11200px wide: under the 16384 texture limit of current
+// hardware, but above the 8192 — and on older tablets 4096 — that many devices report, where
+// the texture cannot be uploaded at all and the pet fails to render entirely rather than
+// merely loading slowly. One row per action keeps the frame index trivial (row * GRID_COLUMNS
+// + step) and costs only the padding cells of the shorter actions, which are transparent and
+// compress to nothing.
+const GRID_COLUMNS = ACTIVE_ACTIONS.reduce((max, action) => Math.max(max, action.frames), 0);
+const GRID_ROWS = ACTIVE_ACTIONS.length;
+
 // WebP tops out at 16383px on an edge, and the atlas is one frame per column, so the cell size
 // is derived from the frame budget rather than hard-coded. Raising a frame count shrinks the
 // cell instead of producing an image the encoder refuses.
@@ -1124,6 +1134,7 @@ async function buildAtlas(pet, stage, cell) {
   for (let row = 0; row < ROWS; row += 1) {
     const direction = ACTIVE_DIRECTIONS[row];
     let cursor = 0;
+    let actionRow = 0;
     for (const action of ACTIVE_ACTIONS) {
       const slice = frames.slice(cursor, cursor + action.frames);
       let defs = WHITEOUT;
@@ -1137,17 +1148,18 @@ async function buildAtlas(pet, stage, cell) {
       const svg = svgDocument(action.frames * cell, cell, markup, { defs, grain: false });
       layers.push({
         input: await sharp(Buffer.from(svg)).png({ compressionLevel: 0 }).toBuffer(),
-        left: cursor * cell,
-        top: row * cell,
+        left: 0,
+        top: (row * GRID_ROWS + actionRow) * cell,
       });
+      actionRow += 1;
       cursor += action.frames;
     }
   }
 
   return sharp({
     create: {
-      width: TOTAL_FRAMES * cell,
-      height: ROWS * cell,
+      width: GRID_COLUMNS * cell,
+      height: ROWS * GRID_ROWS * cell,
       channels: 4,
       background: { r: 0, g: 0, b: 0, alpha: 0 },
     },
@@ -1232,15 +1244,17 @@ export async function generate({ catalog, resolve, generatedPath, log }) {
 
   const columns = [];
   const actions = {};
-  for (const action of ACTIVE_ACTIONS) {
+  ACTIVE_ACTIONS.forEach((action, actionIndex) => {
     actions[action.name] = {
-      start: START_OF.get(action.name),
+      start: actionIndex * GRID_COLUMNS, // its row, in reading order
       count: action.frames,
       fps: action.fps,
       loop: action.loop,
     };
-    for (let i = 0; i < action.frames; i += 1) columns.push(action.name);
-  }
+    // One label per grid cell, so columns.length still equals the sheet's cell count and a
+    // consumer can map any frame index straight back to its action. Padding reads as null.
+    for (let i = 0; i < GRID_COLUMNS; i += 1) columns.push(i < action.frames ? action.name : null);
+  });
 
   const manifest = {
     frameWidth: CELL,
@@ -1250,10 +1264,12 @@ export async function generate({ catalog, resolve, generatedPath, log }) {
     sheets,
     actions,
     fps: 24,
-    // Layout contract for the runtime: one column per frame, one row per direction.
-    // Phaser: load.spritesheet(key, sheet, { frameWidth, frameHeight }); the frame index for
-    // action A, direction row R, step n is  R * columns.length + actions[A].start + n.
-    layout: 'frame-per-column',
+    // Layout contract for the runtime: a grid, one action per row. Phaser indexes a
+    // spritesheet in reading order, so the frame for action A step n is simply
+    // actions[A].start + n, where start is that action's row times gridColumns.
+    gridColumns: GRID_COLUMNS,
+    gridRows: GRID_ROWS,
+    layout: 'action-per-row',
     frameCount: TOTAL_FRAMES,
     generatedAt: new Date().toISOString(),
     notes: 'evolve reveals stage+1 from frame 7; hatch shows the egg for frames 0-5.',

@@ -16,17 +16,20 @@ const CATALOG_VERSION = '2026.08.13-1';
 function loadAnimationLayout() {
   try {
     const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'assets', 'art', 'sprites', 'manifest.json'), 'utf8'));
-    if (!Array.isArray(manifest.columns) || !Array.isArray(manifest.rows)) return null;
-    const actions = [];
-    manifest.columns.forEach((name, index) => {
-      const previous = actions[actions.length - 1];
-      if (previous && previous.name === name && previous.start + previous.length === index) previous.length += 1;
-      else actions.push({ name, start: index, length: 1 });
-    });
+    if (!manifest.actions || !Array.isArray(manifest.rows)) return null;
+    // The sheet is a grid, one action per row, so an action's frames are contiguous from its
+    // start index in reading order. Take the ranges the generator published rather than
+    // re-deriving them from per-cell labels, which now include nulls where a short action is
+    // padded out to the grid width.
+    const actions = Object.entries(manifest.actions).map(([name, action]) => ({
+      name, start: action.start, length: action.count,
+    }));
     return {
       frameWidth: manifest.frameWidth,
       frameHeight: manifest.frameHeight,
-      columns: manifest.columns.length,
+      // Cells occupied by one direction, used to offset into the right block if the sheet
+      // ever carries more than one again.
+      framesPerDirection: (manifest.gridColumns || manifest.columns.length) * (manifest.gridRows || 1),
       fps: manifest.fps || 24,
       directions: manifest.rows,
       actions,
