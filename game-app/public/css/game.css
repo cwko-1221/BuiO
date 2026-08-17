@@ -1,8 +1,11 @@
 /* iOS ignores user-scalable=no, so pinch-zoom must be refused in CSS and by cancelling the
    gesture events (see play.js). Double-tap zoom goes too: in a platformer a fast double tap is
-   a jump, not a zoom request. Anything that genuinely scrolls opts back in locally. */
-html, body { touch-action: manipulation; }
-.q-overlay, .q-box, .q-choices, #answerBtn, .answer-btn-float, .hud { touch-action: manipulation; }
+   a jump, not a zoom request.
+   pan-y and not manipulation: manipulation only removes the double-tap zoom delay and still
+   permits pinch. pan-y refuses pinch while leaving vertical scrolling, which the teacher
+   page and the results list both need, since this stylesheet serves both pages. */
+html, body { touch-action: pan-y; }
+.q-overlay, .q-box, .q-choices, #answerBtn, .answer-btn-float, .hud { touch-action: pan-y; }
 .q-overlay, .q-box { -webkit-user-select: none; user-select: none; }
 
 /* BuiO Game module — 唔好望落嚟 (Don't Look Down) */

@@ -1,3 +1,16 @@
+
+// iOS has ignored user-scalable=no since iOS 10, and touch-action: manipulation still permits
+// pinch — it only removes the double-tap zoom delay. Refusing the WebKit gesture events is the
+// only reliable way to decline a pinch, and it matters beyond appearance: once iOS claims the
+// touch stream for a zoom, a control holding a finger may never receive touchend, leaving it
+// stuck down.
+for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
+  document.addEventListener(type, event => event.preventDefault(), { passive: false });
+}
+document.addEventListener('touchmove', event => {
+  if (event.touches.length > 1) event.preventDefault();
+}, { passive: false });
+
 import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, WORLD, towerStats } from './content.js?v=20260809-path-grid-1';
 import { TowerDefenseSimulation } from './simulation.js?v=20260809-path-grid-1';
 import { BattleScene } from './BattleScene.js?v=20260809-path-grid-1';

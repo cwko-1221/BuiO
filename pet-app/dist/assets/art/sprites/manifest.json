@@ -14,38 +14,6 @@
     "idle",
     "idle",
     "idle",
-    "walk",
-    "walk",
-    "walk",
-    "walk",
-    "walk",
-    "walk",
-    "walk",
-    "walk",
-    "auto-attack",
-    "auto-attack",
-    "auto-attack",
-    "auto-attack",
-    "auto-attack",
-    "auto-attack",
-    "active-skill",
-    "active-skill",
-    "active-skill",
-    "active-skill",
-    "active-skill",
-    "active-skill",
-    "active-skill",
-    "active-skill",
-    "hit",
-    "hit",
-    "hit",
-    "hit",
-    "faint-return",
-    "faint-return",
-    "faint-return",
-    "faint-return",
-    "faint-return",
-    "faint-return",
     "eat",
     "eat",
     "eat",
@@ -106,10 +74,7 @@
     "evolve"
   ],
   "rows": [
-    "front",
-    "right",
-    "back",
-    "left"
+    "front"
   ],
   "sheets": [
     "/pet/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
@@ -200,68 +165,38 @@
       "fps": 12,
       "loop": true
     },
-    "walk": {
-      "start": 12,
-      "count": 8,
-      "fps": 16,
-      "loop": true
-    },
-    "auto-attack": {
-      "start": 20,
-      "count": 6,
-      "fps": 20,
-      "loop": false
-    },
-    "active-skill": {
-      "start": 26,
-      "count": 8,
-      "fps": 18,
-      "loop": false
-    },
-    "hit": {
-      "start": 34,
-      "count": 4,
-      "fps": 22,
-      "loop": false
-    },
-    "faint-return": {
-      "start": 38,
-      "count": 6,
-      "fps": 14,
-      "loop": false
-    },
     "eat": {
-      "start": 44,
+      "start": 12,
       "count": 8,
       "fps": 14,
       "loop": false
     },
     "happy": {
-      "start": 52,
+      "start": 20,
       "count": 8,
       "fps": 18,
       "loop": false
     },
     "play": {
-      "start": 60,
+      "start": 28,
       "count": 8,
       "fps": 18,
       "loop": false
     },
     "sleep": {
-      "start": 68,
+      "start": 36,
       "count": 10,
       "fps": 6,
       "loop": true
     },
     "hatch": {
-      "start": 78,
+      "start": 46,
       "count": 10,
       "fps": 12,
       "loop": false
     },
     "evolve": {
-      "start": 88,
+      "start": 56,
       "count": 14,
       "fps": 14,
       "loop": false
@@ -269,7 +204,7 @@
   },
   "fps": 24,
   "layout": "frame-per-column",
-  "frameCount": 102,
-  "generatedAt": "2026-08-16T05:55:38.277Z",
+  "frameCount": 70,
+  "generatedAt": "2026-08-17T15:49:53.728Z",
   "notes": "evolve reveals stage+1 from frame 7; hatch shows the egg for frames 0-5."
 }

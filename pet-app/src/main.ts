@@ -6,6 +6,19 @@ import { BedroomScene } from './game/BedroomScene';
 import type { Bootstrap, Identity, InventoryStack, Locale, PetDefinition, PetInstance, RoomPlacement } from './types';
 import { idempotencyKey } from './types';
 
+
+// iOS has ignored user-scalable=no since iOS 10, and touch-action: manipulation still permits
+// pinch — it only removes the double-tap zoom delay. Refusing the WebKit gesture events is the
+// only reliable way to decline a pinch, and it matters beyond appearance: once iOS claims the
+// touch stream for a zoom, a control holding a finger may never receive touchend, leaving it
+// stuck down.
+for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
+  document.addEventListener(type, event => event.preventDefault(), { passive: false });
+}
+document.addEventListener('touchmove', event => {
+  if (event.touches.length > 1) event.preventDefault();
+}, { passive: false });
+
 const app = document.querySelector<HTMLDivElement>('#app')!;
 const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[character]!));
 const icon = (name: string) => `<span class="icon icon-${name}" aria-hidden="true"></span>`;
