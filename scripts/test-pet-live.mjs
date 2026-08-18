@@ -141,6 +141,26 @@ try {
   await page.mouse.up();
   await page.locator('.gear-slot[data-slot="head"].filled').waitFor({timeout:8000});
   await page.screenshot({path:path.join(artifactDir,'11-equipment-board.png')});
+  // The figure in the middle previews the outfit by stacking the pieces over one atlas cell, all
+  // sized and positioned in fractions of that cell. A piece can legitimately come out wider than
+  // the cell — a crown on a round-bodied creature, a pair of wings — and the page's global
+  // img rule quietly capped those at the stack's width while their offsets still assumed the
+  // full size, which slid the whole outfit up and to the left. Assert what is drawn is the size
+  // it was told to be.
+  const previewFits=await page.evaluate(()=>{
+    const stack=document.querySelector('.figure-stack'); if(!stack) return null;
+    const width=stack.getBoundingClientRect().width;
+    return [...document.querySelectorAll('.figure-piece')].map((piece)=>({
+      declared:Math.round(width*parseFloat(piece.style.width)/100),
+      drawn:Math.round(piece.getBoundingClientRect().width),
+      capped:getComputedStyle(piece).maxWidth,
+    }));
+  });
+  assert.ok(previewFits&&previewFits.length,'the equipment board should preview the outfit on the creature');
+  for(const piece of previewFits){
+    assert.equal(piece.capped,'none','a preview piece must not be capped to the stack width');
+    assert.ok(Math.abs(piece.drawn-piece.declared)<=1,`preview piece drawn at ${piece.drawn}px but sized ${piece.declared}px`);
+  }
   await page.locator('.picker-head [data-action="close-modal"]').click();
   await page.reload({waitUntil:'networkidle'}); await page.locator('#game-root canvas').waitFor();
   await page.waitForFunction(()=>window.__petGame?.scene?.getScene('Bedroom')?.avatar?.worn?.length>0,null,{timeout:15000});
@@ -166,6 +186,7 @@ try {
   console.log(`✓ hatch, collection, decoration and grant flows`);
   console.log(`✓ desktop, iPad landscape and mobile screenshots: ${artifactDir}`);
   console.log(`✓ equipment board: ${OUTFIT_SLOT_COUNT} slots, drag-to-equip, ${OUTFIT_SEALED_COUNT} awaiting art`);
+  console.log(`✓ the board previews the outfit on the creature at the size it computed`);
   console.log(`✓ worn items track the pose, cast contact shadows and take the room light`);
   console.log(`✓ no browser console or uncaught page errors`);
 } finally {
