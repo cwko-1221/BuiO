@@ -104,10 +104,18 @@ function starterInventoryRows(studentId) {
  * with a side table and lamp flanking it, wall art centred above, a rug defining the open
  * middle, and the toy out in the play area where the pet stands.
  *
- * Grid is 12x10 with the origin at the back corner, so x=0 and y=0 are the two walls.
+ * Grid is ROOM_COLUMNS x ROOM_ROWS with the origin at the back-left corner of the floor.
  * Footprints must not overlap within a layer — validatePlacements() rejects the whole save
  * if they do.
  */
+/**
+ * The floor plan, shared with the client's BedroomScene. Seen straight on the room is wider
+ * than it was isometrically, so this only ever grew — every arrangement saved under the old
+ * 12 x 10 grid still fits and needs no migration.
+ */
+const ROOM_COLUMNS = 14;
+const ROOM_ROWS = 10;
+
 function starterPlacements() {
   return [
     // itemId,                        x, y, rotation, layer      footprint  reasoning
@@ -518,7 +526,7 @@ function validatePlacements(placements, inventoryRows) {
     const x = Number(placement.x); const y = Number(placement.y); const rotation = Number(placement.rotation) || 0;
     if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || y < 0 || x > 11 || y > 9 || ![0,90,180,270].includes(rotation)) throw Object.assign(new Error('Furniture is outside the room grid'), { status: 400 });
     let [width, height] = item.footprint; if (rotation === 90 || rotation === 270) [width, height] = [height, width];
-    if (x + width > 12 || y + height > 10) throw Object.assign(new Error('Furniture footprint is outside the room grid'), { status: 400 });
+    if (x + width > ROOM_COLUMNS || y + height > ROOM_ROWS) throw Object.assign(new Error('Furniture footprint is outside the room grid'), { status: 400 });
     if (item.layer !== 'wall') for (let px = x; px < x + width; px += 1) for (let py = y; py < y + height; py += 1) {
       const key = `${item.layer}:${px}:${py}`; if (occupied.has(key)) throw Object.assign(new Error('Furniture footprints overlap'), { status: 409 }); occupied.add(key);
     }

@@ -50,14 +50,26 @@ const hitTest = (area: FurnitureHitArea, x: number, y: number) => {
   return Phaser.Geom.Polygon.Contains(area.tile, x, y);
 };
 
-/** 2:1 isometric tile. Half-extents, so a tile spans 2*TILE_WIDTH by 2*TILE_HEIGHT on screen. */
-const TILE_WIDTH = 38;
-const TILE_HEIGHT = 19;
+/**
+ * The floor, seen straight on rather than isometrically.
+ *
+ * Each cell is a square patch of floor viewed at an angle, so it is drawn twice as wide as it
+ * is tall. That is foreshortening, not a squashed grid: the room art paints its boards and
+ * tiles at the same 2:1 ratio, and the two only line up because they share these numbers.
+ *
+ * Full extents — a cell spans TILE_WIDTH by TILE_HEIGHT on screen.
+ */
+const TILE_WIDTH = 84;
+const TILE_HEIGHT = 42;
+/** Floor plan. The back wall takes the space above FLOOR_Y. */
+const GRID_COLUMNS = 14;
+const GRID_ROWS = 10;
 /** How far the room's colour pulls the creature and its outfit. Subtle on purpose. */
 const AMBIENT_STRENGTH = 0.12;
 
-const ORIGIN_X = 640;
-const ORIGIN_Y = 330;
+/** Screen position of grid corner (0,0): the back-left corner of the floor. */
+const ORIGIN_X = 52;
+const ORIGIN_Y = 276;
 
 export class BedroomScene extends Phaser.Scene {
   model!: BedroomData;
@@ -117,14 +129,17 @@ export class BedroomScene extends Phaser.Scene {
     } else this.drawDollhouse();
     this.drawRoomFrame();
     this.placements.forEach((placement) => this.addFurniture(placement));
-    this.avatar = new PetAvatar(this, 640, 475, this.model.petDefinition, this.model.activePet, {
+    // Stand the creature on a floor cell rather than a fixed point, so it sorts against the
+    // furniture by the row it is on — the same rule every piece of furniture follows.
+    const home = this.gridToScreen(GRID_COLUMNS / 2, GRID_ROWS * .62);
+    this.avatar = new PetAvatar(this, home.x, home.y, this.model.petDefinition, this.model.activePet, {
       layout: this.model.bootstrap.catalog.animation,
       fallbackTexture: this.petTextureKey && this.textures.exists(this.petTextureKey) ? this.petTextureKey : undefined,
       scale: .86,
       wearables: this.model.bootstrap.catalog.wearables,
       ambient: this.ambientLight(),
     });
-    this.avatar.setDepth(60);
+    this.avatar.setDepth(20 + GRID_ROWS * .62 + 1);
     this.ghost = this.add.graphics().setDepth(15);
     this.input.on('drag', (_pointer: Phaser.Input.Pointer, target: Phaser.GameObjects.Container, dragX: number, dragY: number) => {
       if (!this.editing || !target.getData('placementId')) return;
@@ -166,24 +181,39 @@ export class BedroomScene extends Phaser.Scene {
   }
   private drawDollhouse() {
     const room = this.model.bootstrap.catalog.rooms.find((entry) => entry.id === this.model.bootstrap.room.themeId)!;
+    const wall = Phaser.Display.Color.HexStringToColor(room.primary).color;
+    const floor = Phaser.Display.Color.HexStringToColor(room.accent).color;
     const graphics = this.add.graphics();
-    graphics.fillGradientStyle(Phaser.Display.Color.HexStringToColor(room.primary).color, Phaser.Display.Color.HexStringToColor(room.accent).color, 0xf8e9cb, 0xe1c79e, 1);
-    graphics.fillRect(0,0,1280,720); graphics.fillStyle(0xffffff,.36); graphics.fillTriangle(100,90,640,330,640,610); graphics.fillTriangle(1180,90,640,330,640,610);
-    graphics.fillStyle(0xf5dfb7,.82); graphics.fillPoints([new Phaser.Math.Vector2(175,430),new Phaser.Math.Vector2(640,228),new Phaser.Math.Vector2(1105,430),new Phaser.Math.Vector2(640,665)],true);
+    // Wall behind, floor in front, split on the same line the grid starts at.
+    graphics.fillStyle(wall, 1); graphics.fillRect(0, 0, 1280, ORIGIN_Y);
+    graphics.fillStyle(floor, 1); graphics.fillRect(0, ORIGIN_Y, 1280, 720 - ORIGIN_Y);
+    graphics.fillStyle(0xffffff, .18); graphics.fillRect(0, ORIGIN_Y - 18, 1280, 18);
+    // Boards at the same 2:1 the real art uses, so the placement grid reads as floor.
+    graphics.lineStyle(2, 0x000000, .07);
+    for (let row = 0; row <= GRID_ROWS; row += 1) {
+      const y = ORIGIN_Y + row * TILE_HEIGHT;
+      graphics.lineBetween(0, y, 1280, y);
+    }
+    for (let column = 0; column <= GRID_COLUMNS; column += 1) {
+      const x = ORIGIN_X + column * TILE_WIDTH;
+      graphics.lineBetween(x, ORIGIN_Y, x, ORIGIN_Y + GRID_ROWS * TILE_HEIGHT);
+    }
   }
   /** Placement grid. Only meaningful while decorating; otherwise it reads as debug overlay. */
   private drawRoomFrame() {
     const graphics = this.add.graphics().setDepth(12);
     graphics.lineStyle(2, 0xffffff, .22);
-    for (let index = 0; index <= 12; index += 1) { const a = this.gridToScreen(index,0); const b = this.gridToScreen(index,10); graphics.lineBetween(a.x,a.y,b.x,b.y); }
-    for (let index = 0; index <= 10; index += 1) { const a = this.gridToScreen(0,index); const b = this.gridToScreen(12,index); graphics.lineBetween(a.x,a.y,b.x,b.y); }
+    for (let index = 0; index <= GRID_COLUMNS; index += 1) { const a = this.gridToScreen(index,0); const b = this.gridToScreen(index,GRID_ROWS); graphics.lineBetween(a.x,a.y,b.x,b.y); }
+    for (let index = 0; index <= GRID_ROWS; index += 1) { const a = this.gridToScreen(0,index); const b = this.gridToScreen(GRID_COLUMNS,index); graphics.lineBetween(a.x,a.y,b.x,b.y); }
     graphics.setVisible(this.editing);
     this.grid = graphics;
   }
-  private gridToScreen(x: number, y: number) { return { x: ORIGIN_X + (x - y) * TILE_WIDTH, y: ORIGIN_Y + (x + y) * TILE_HEIGHT }; }
+  private gridToScreen(x: number, y: number) { return { x: ORIGIN_X + x * TILE_WIDTH, y: ORIGIN_Y + y * TILE_HEIGHT }; }
   private screenToGrid(x: number, y: number) {
-    const dx = (x - ORIGIN_X) / TILE_WIDTH; const dy = (y - ORIGIN_Y) / TILE_HEIGHT;
-    return { x: Phaser.Math.Clamp(Math.round((dx + dy) / 2), 0, 11), y: Phaser.Math.Clamp(Math.round((dy - dx) / 2), 0, 9) };
+    return {
+      x: Phaser.Math.Clamp(Math.floor((x - ORIGIN_X) / TILE_WIDTH), 0, GRID_COLUMNS - 1),
+      y: Phaser.Math.Clamp(Math.floor((y - ORIGIN_Y) / TILE_HEIGHT), 0, GRID_ROWS - 1),
+    };
   }
   /**
    * Footprint preview under a dragged piece: one isometric tile per grid cell it would
@@ -224,11 +254,9 @@ export class BedroomScene extends Phaser.Scene {
    * point. Clamped so a large piece cannot be dragged partly outside the room.
    */
   private screenToFootprintOrigin(x: number, y: number, width: number, height: number) {
-    const dx = (x - ORIGIN_X) / TILE_WIDTH;
-    const dy = (y - ORIGIN_Y) / TILE_HEIGHT;
     return {
-      x: Phaser.Math.Clamp(Math.round((dx + dy) / 2 - width / 2), 0, 12 - width),
-      y: Phaser.Math.Clamp(Math.round((dy - dx) / 2 - height / 2), 0, 10 - height),
+      x: Phaser.Math.Clamp(Math.round((x - ORIGIN_X) / TILE_WIDTH - width / 2), 0, GRID_COLUMNS - width),
+      y: Phaser.Math.Clamp(Math.round((y - ORIGIN_Y) / TILE_HEIGHT - height / 2), 0, GRID_ROWS - height),
     };
   }
 
@@ -250,7 +278,7 @@ export class BedroomScene extends Phaser.Scene {
     const definition = catalog.furniture.find((item) => item.id === itemId);
     if (!definition) return false;
     const [width, height] = this.footprintOf(itemId, rotation);
-    if (x < 0 || y < 0 || x + width > 12 || y + height > 10) return false;
+    if (x < 0 || y < 0 || x + width > GRID_COLUMNS || y + height > GRID_ROWS) return false;
     if (definition.layer === 'wall') return true; // wall pieces are not occupancy-checked
 
     const occupied = new Set<string>();
@@ -276,8 +304,12 @@ export class BedroomScene extends Phaser.Scene {
    */
   private depthFor(placement: RoomPlacement) {
     if (placement.layer === 'wall') return 5;
-    if (placement.layer === 'rug') return 10 + (placement.x + placement.y) * .01;
-    return 20 + (placement.x + placement.y);
+    const [, height] = this.footprintOf(placement.itemId, placement.rotation);
+    // Seen straight on, only depth into the room decides what covers what — and a deep piece
+    // is covered by anything in front of the row it reaches, not the row it starts on.
+    const front = placement.y + height;
+    if (placement.layer === 'rug') return 10 + front * .01;
+    return 20 + front;
   }
 
   /**
@@ -290,16 +322,15 @@ export class BedroomScene extends Phaser.Scene {
    */
   private hitAreaFor(placement: RoomPlacement, container: Phaser.GameObjects.Container) {
     const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
-    const halfW = ((width + height) / 2) * TILE_WIDTH;
-    const halfH = ((width + height) / 2) * TILE_HEIGHT;
-    const skewX = ((width - height) / 2) * TILE_WIDTH;
-    const skewY = ((width - height) / 2) * TILE_HEIGHT;
+    const halfW = (width * TILE_WIDTH) / 2;
+    const halfH = (height * TILE_HEIGHT) / 2;
     // The art lives in an inner container so rotation does not spin the footprint polygon;
     // describe its transform so the hit test can sample the texture under the finger.
     const art = container.list[0] as Phaser.GameObjects.Container | undefined;
     const image = art?.list?.find((child) => child instanceof Phaser.GameObjects.Image) as Phaser.GameObjects.Image | undefined;
     return {
-      tile: new Phaser.Geom.Polygon([-skewX, -halfH, halfW, skewY, skewX, halfH, -halfW, -skewY]),
+      // Seen straight on the footprint is a plain rectangle, so the grabbable floor is too.
+      tile: new Phaser.Geom.Polygon([-halfW, -halfH, halfW, -halfH, halfW, halfH, -halfW, halfH]),
       scene: this,
       art: image && image.texture?.key !== '__MISSING' ? {
         key: image.texture.key,
@@ -378,8 +409,8 @@ export class BedroomScene extends Phaser.Scene {
       // content box. Using the canvas instead renders a 1x1 piece at roughly a third of its
       // intended size and offset from where it was placed.
       const box = definition.content ?? { x: 0, y: 0, width: 1, height: 1 };
-      // An fx-by-fy footprint spans (fx + fy) half-tiles horizontally in 2:1 isometric.
-      const targetWidth = (footprintX + footprintY) * TILE_WIDTH;
+      // Seen straight on, a footprint that is fx cells wide simply spans fx cells of floor.
+      const targetWidth = footprintX * TILE_WIDTH;
       image.setScale(targetWidth / Math.max(1, box.width * image.width));
       // Origin is expressed in canvas fractions: horizontally centred on the object, and
       // vertically at its base so it stands on the floor (rugs sit on their own centre).
@@ -387,12 +418,9 @@ export class BedroomScene extends Phaser.Scene {
         box.x + box.width / 2,
         placement.layer === 'rug' ? box.y + box.height / 2 : box.y + box.height,
       );
-      // The container sits at the CENTRE of the footprint diamond, but a standing piece rests
-      // on the whole diamond, so its base has to reach the front corner — half the diamond's
-      // height (w+h)*TILE_HEIGHT/2 further down. Without this the art floats a half-footprint
-      // above the tiles it occupies, which is the displacement seen against the drag preview.
-      // Rugs lie flat and are already centred on the diamond, so they stay put.
-      if (placement.layer !== 'rug') image.setY(((footprintX + footprintY) * TILE_HEIGHT) / 2);
+      // The container sits at the centre of the footprint, but a standing piece rests on the
+      // front edge of it, half a footprint further down. Rugs lie flat and stay centred.
+      if (placement.layer !== 'rug') image.setY((footprintY * TILE_HEIGHT) / 2);
       container.add(image);
       return container;
     }
