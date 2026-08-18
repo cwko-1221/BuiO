@@ -46,6 +46,25 @@ const UI = {
   },
 } as const;
 
+/**
+ * The equipment board, in the order a player expects to read it down a character sheet.
+ *
+ * Four of these have no artwork behind them yet — the collection covers head, face, neck, back
+ * and aura only. They are still laid out, and marked as not yet open, because a board with holes
+ * punched in it reads as a board that is coming rather than one that is broken.
+ */
+const OUTFIT_SLOTS: { key: string; zh: string; en: string; icon: string; side: 'left' | 'right' | 'foot' }[] = [
+  { key:'head', zh:'頭飾', en:'Head',  icon:'👑', side:'left' },
+  { key:'face', zh:'面飾', en:'Face',  icon:'👓', side:'left' },
+  { key:'neck', zh:'頸部', en:'Neck',  icon:'🧣', side:'left' },
+  { key:'body', zh:'衣服', en:'Body',  icon:'👕', side:'left' },
+  { key:'back', zh:'背部', en:'Back',  icon:'🎒', side:'right' },
+  { key:'hand', zh:'手飾', en:'Hands', icon:'🧤', side:'right' },
+  { key:'legs', zh:'下身', en:'Legs',  icon:'👖', side:'right' },
+  { key:'feet', zh:'鞋子', en:'Shoes', icon:'👟', side:'right' },
+  { key:'aura', zh:'光環', en:'Aura',  icon:'✨', side:'foot' },
+];
+
 class StudentApp {
   identity: Identity; state!: Bootstrap; locale: Locale; game?: Phaser.Game; tab = 'home'; selectedFurniture = ''; roomPlacements: RoomPlacement[] = [];
   visiting?: any;
@@ -83,7 +102,11 @@ class StudentApp {
       <div class="toast-stack" id="toasts" aria-live="polite"></div>
       <div class="modal-root" id="modalRoot"></div>
     </div>`;
-    app.addEventListener('click', this.handleClick); app.addEventListener('change', this.handleChange); app.addEventListener('input', this.handleInput);
+    app.addEventListener('click', this.handleClick);
+    document.addEventListener('pointerdown',this.handlePointerDown);
+    document.addEventListener('pointermove',this.handlePointerMove);
+    document.addEventListener('pointerup',this.handlePointerUp);
+    document.addEventListener('pointercancel',this.handlePointerUp); app.addEventListener('change', this.handleChange); app.addEventListener('input', this.handleInput);
   }
   private handleClick = async (event: Event) => {
     const button = (event.target as HTMLElement).closest<HTMLElement>('[data-action],[data-tab]'); if (!button) return;
@@ -120,7 +143,8 @@ class StudentApp {
       if (action === 'visit-room') return this.visitRoom(button.dataset.id!);
       if (action === 'reaction') return this.react(button.dataset.owner!,button.dataset.id!);
       if (action === 'back-home') return this.openHome();
-      if (action === 'equip-wearable') return this.toggleWearable(button.dataset.id!);
+      if (action === 'equip-wearable') return this.equipWearable(button.dataset.id!);
+      if (action === 'unequip-slot') return this.clearSlot(button.dataset.id!);
     } catch (error) { this.toast((error as Error).message,true); }
   };
   private handleChange = (event: Event) => { const target=event.target as HTMLInputElement|HTMLSelectElement;if(target.id==='roomVisibility')this.state.room.visibility=target.value as 'private'|'class';if(target.id==='roomTheme')this.state.room.themeId=target.value; };
@@ -267,17 +291,136 @@ class StudentApp {
     this.picker(this.t('feed'), body);
   }
 
-  private renderOutfitPicker() {
-    const pet=this.activePet(); if(!pet) return;
-    const wearables=this.state.catalog.wearables.filter((item)=>this.inventory(item.id)>0);
-    const body=wearables.length
-      ? `<div class="mini-list">${wearables.map((item)=>`<button class="mini-item ${pet.equippedWearables.includes(item.id)?'selected':''}" data-action="equip-wearable" data-id="${item.id}"><b>${escapeHtml(this.name(item.name))}</b><small>${item.slot}</small></button>`).join('')}</div>`
-      : `<p class="muted">${this.locale==='zh-HK'?'到商店收集頭飾、面飾、頸飾、背飾及光環。':'Collect head, face, neck, back and aura accessories in the shop.'}</p>`;
-    this.picker(`${this.locale==='zh-HK'?'換裝':'Outfit'} · ${pet.equippedWearables.length}/5`, body);
+  /**
+   * Frame a piece's thumbnail on the piece itself.
+   *
+   * Every item is drawn on the same 640px canvas and none of them fills it — a bell occupies a
+   * fifth of its frame, sitting off to one side. Shown as-is they all read as specks adrift in a
+   * large box, so each thumbnail is magnified to its measured content and shifted so that
+   * content lands in the middle of the slot.
+   */
+  private thumbStyle(item:{content?:{x:number;y:number;width:number;height:number}|null}) {
+    const box=item.content; if(!box) return '';
+    const zoom=Math.min(3.2,Math.max(1,0.92/Math.max(box.width,box.height)));
+    const shiftX=(0.5-(box.x+box.width/2))*100;
+    const shiftY=(0.5-(box.y+box.height/2))*100;
+    return `transform:scale(${zoom.toFixed(2)}) translate(${shiftX.toFixed(1)}%, ${shiftY.toFixed(1)}%)`;
   }
 
-  private picker(title: string, body: string) {
-    this.modal(`<div class="picker"><header class="picker-head"><h2>${escapeHtml(title)}</h2><button class="round-button" data-action="close-modal" aria-label="${this.locale==='zh-HK'?'關閉':'Close'}">✕</button></header><div class="picker-body">${body}</div></div>`,'framed');
+  /**
+   * The equipment board: worn gear on the left around the creature, the wardrobe on the right.
+   *
+   * Items move by dragging one onto a slot, and by tapping — dragging is what the board asks
+   * for, but a tap has to work too, because a drag that starts on a scrolling list is easy for
+   * a child to lose halfway and there is nothing to fall back on if it does.
+   */
+  private renderOutfitPicker() {
+    const pet=this.activePet(); if(!pet) return;
+    const zh=this.locale==='zh-HK';
+    const definition=this.state.catalog.pets.find((item)=>item.id===pet.speciesId)!;
+    const byId=(id:string)=>this.state.catalog.wearables.find((item)=>item.id===id);
+    const equipped=new Map(pet.equippedWearables.map((id)=>[byId(id)?.slot||'',id]));
+    const owned=this.state.catalog.wearables.filter((item)=>this.inventory(item.id)>0);
+    const stocked=new Set(this.state.catalog.wearables.map((item)=>item.slot));
+
+    const cell=(slot:typeof OUTFIT_SLOTS[number])=>{
+      const id=equipped.get(slot.key); const item=id?byId(id):undefined;
+      const open=stocked.has(slot.key);
+      return `<div class="gear-slot${item?' filled':''}${open?'':' sealed'}" data-slot="${slot.key}" data-drop="${slot.key}">
+        <span class="gear-label">${zh?slot.zh:slot.en}</span>
+        ${item
+          ? `<span class="gear-thumb"><img src="${item.art}" alt="${escapeHtml(this.name(item.name))}" draggable="false" style="${this.thumbStyle(item)}"></span><button class="gear-clear" data-action="unequip-slot" data-id="${slot.key}" aria-label="${zh?'脫下':'Remove'}">✕</button>`
+          : `<span class="gear-ghost">${open?slot.icon:'🔒'}</span>`}
+      </div>`;
+    };
+    const column=(side:string)=>OUTFIT_SLOTS.filter((slot)=>slot.side===side).map(cell).join('');
+
+    const wardrobe=owned.length
+      ? `<div class="gear-tray">${owned.map((item)=>`<button class="gear-tile${pet.equippedWearables.includes(item.id)?' worn':''}" data-action="equip-wearable" data-id="${item.id}" data-slot="${item.slot}" draggable="false">
+          <span class="gear-thumb"><img src="${item.art}" alt="" loading="lazy" draggable="false" style="${this.thumbStyle(item)}"></span>
+          <b>${escapeHtml(this.name(item.name))}</b>
+          <small>${OUTFIT_SLOTS.find((slot)=>slot.key===item.slot)?.[zh?'zh':'en']||item.slot}</small>
+        </button>`).join('')}</div>`
+      : `<p class="muted">${zh?'到商店收集頭飾、面飾、頸飾、背飾及光環。':'Collect head, face, neck, back and aura accessories in the shop.'}</p>`;
+
+    const sealed=OUTFIT_SLOTS.filter((slot)=>!stocked.has(slot.key)).map((slot)=>zh?slot.zh:slot.en).join('、');
+
+    this.picker(`${zh?'裝備':'Equipment'} · ${pet.equippedWearables.length}/${OUTFIT_SLOTS.filter((slot)=>stocked.has(slot.key)).length}`,
+      `<div class="gear-board">
+        <section class="gear-doll">
+          <div class="gear-column">${column('left')}</div>
+          <div class="gear-figure"><img src="${definition.art[pet.stage-1]}" alt="" draggable="false"></div>
+          <div class="gear-column">${column('right')}</div>
+          <div class="gear-foot">${column('foot')}</div>
+        </section>
+        <section class="gear-wardrobe">
+          <p class="eyebrow">${zh?'背包':'Bag'} · ${owned.length}</p>
+          ${wardrobe}
+          ${sealed?`<p class="gear-note">🔒 ${sealed} ${zh?'尚未開放。':'not available yet.'}</p>`:''}
+        </section>
+      </div>`,'wide');
+  }
+
+  /**
+   * Pointer-driven dragging, not the HTML5 drag events.
+   *
+   * This is an iPad app first, and native drag-and-drop never fires on iOS Safari, so the
+   * gesture is built from pointer events: lift a copy of the tile under the finger, light up the
+   * slot it is over, drop it there.
+   *
+   * Bound once to the document rather than to the board, because the board is rebuilt from
+   * scratch every time something is equipped — a listener attached to it would be thrown away
+   * with the first successful drop.
+   */
+  private dragged: HTMLElement|null=null; private dragGhost: HTMLElement|null=null;
+  private dragTarget: HTMLElement|null=null; private dragging=false; private dragFrom={x:0,y:0};
+
+  private endDrag() {
+    this.dragGhost?.remove(); this.dragGhost=null;
+    this.dragTarget?.classList.remove('over','reject'); this.dragTarget=null;
+    this.dragged?.classList.remove('lifted'); this.dragged=null;
+    this.dragging=false;
+  }
+  private slotUnder(x:number,y:number) {
+    return (document.elementFromPoint(x,y) as HTMLElement|null)?.closest('[data-drop]') as HTMLElement|null;
+  }
+  private handlePointerDown = (event: PointerEvent) => {
+    const tile=(event.target as HTMLElement)?.closest?.('.gear-tile') as HTMLElement|null;
+    if(!tile) return;
+    this.dragged=tile; this.dragFrom={x:event.clientX,y:event.clientY}; this.dragging=false;
+  };
+  private handlePointerMove = (event: PointerEvent) => {
+    const tile=this.dragged; if(!tile) return;
+    if(!this.dragging){
+      // Only commit to a drag once the finger has clearly moved, so a tap stays a tap and the
+      // wardrobe can still be scrolled with the same finger.
+      if(Math.hypot(event.clientX-this.dragFrom.x,event.clientY-this.dragFrom.y)<10) return;
+      this.dragging=true; tile.classList.add('lifted');
+      const source=tile.querySelector('img') as HTMLImageElement|null;
+      const ghost=document.createElement('div'); ghost.className='gear-ghost-drag';
+      if(source)ghost.innerHTML='<img src="'+source.src+'" alt="">';
+      document.body.appendChild(ghost); this.dragGhost=ghost;
+    }
+    this.dragGhost!.style.transform='translate('+event.clientX+'px, '+event.clientY+'px)';
+    const over=this.slotUnder(event.clientX,event.clientY);
+    if(over!==this.dragTarget){
+      this.dragTarget?.classList.remove('over','reject');
+      this.dragTarget=over;
+      if(over)over.classList.add(over.dataset.drop===tile.dataset.slot?'over':'reject');
+    }
+  };
+  private handlePointerUp = (event: PointerEvent) => {
+    const tile=this.dragged; if(!tile){this.endDrag();return;}
+    const dropped=this.dragging?this.slotUnder(event.clientX,event.clientY):null;
+    const id=tile.dataset.id; const slot=tile.dataset.slot; const wasDragging=this.dragging;
+    this.endDrag();
+    if(!wasDragging||!dropped) return;   // a plain tap; the click handler equips it instead
+    if(dropped.dataset.drop!==slot){this.toast(this.locale==='zh-HK'?'呢格唔啱著呢件。':'That piece does not go in this slot.',true);return;}
+    void this.equipWearable(id!);
+  };
+
+  private picker(title: string, body: string, variant='') {
+    this.modal(`<div class="picker ${variant}"><header class="picker-head"><h2>${escapeHtml(title)}</h2><button class="round-button" data-action="close-modal" aria-label="${this.locale==='zh-HK'?'關閉':'Close'}">✕</button></header><div class="picker-body">${body}</div></div>`,`framed ${variant}`.trim());
   }
   private async feed(foodId:string){const pet=this.activePet()!;const result=await api.feed(pet.id,foodId,idempotencyKey());audio.sfx('feed');this.game?.events.emit('pet:emote',result.evolved?'evolve':'eat');if(result.evolved){audio.sfx('evolve');this.celebrate('evolve');}await this.reload();this.startBedroom();this.renderHomePanel();this.renderFeedPicker();}
   private async activate(petId:string){await api.activatePet(petId);await this.reload();audio.sfx('happy');this.renderCollection();}
@@ -381,7 +524,22 @@ class StudentApp {
   private async renderVisits(){this.setLayout('full');document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">CLASS VISITS</p><h1>${this.t('visit')}</h1><div class="loading-card">${this.locale==='zh-HK'?'正在尋找開放房間…':'Finding open rooms…'}</div></div>`;const data=await api.classRooms();document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">${escapeHtml(data.className||'CLASS')}</p><h1>${this.t('visit')}</h1><div class="visit-grid">${data.rooms.length?data.rooms.map((room:any)=>`<article class="visit-card"><div class="avatar-letter">${escapeHtml(room.ownerName).slice(0,1)}</div><div><h3>${escapeHtml(room.ownerName)}</h3><p>${room.activePet?escapeHtml(this.petName(this.state.catalog.pets.find((pet)=>pet.id===room.activePet.speciesId)!,room.activePet.stage)):this.locale==='zh-HK'?'尚未孵化':'No pet yet'}</p></div><button data-action="visit-room" data-id="${room.ownerStudentId}">${this.t('visitRoom')}</button></article>`).join(''):`<div class="empty-state">${this.locale==='zh-HK'?'暫時沒有同學開放房間。':'No classmates have opened their rooms yet.'}</div>`}</div></div>`;}
   private async visitRoom(studentId:string){const data=await api.room(studentId);this.visiting=data.room;this.setLayout('room');if(data.room.activePet)this.startBedroom(data.room,data.room.activePet);document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity visitor-panel"><p class="eyebrow">VISITING</p><h1>${escapeHtml(data.room.ownerName)}</h1><p>${this.locale==='zh-HK'?'只可觀看和送出每日一個表情；沒有留言或聊天。':'View the room and send one daily reaction. There are no messages or chat.'}</p><div class="reaction-row">${this.state.catalog.reactions.map((reaction,index)=>`<button data-action="reaction" data-owner="${studentId}" data-id="${reaction}"><span>${['♥','★','!','👏','✿','✦'][index]}</span><small>${data.room.reactions?.[reaction]||0}</small></button>`).join('')}</div><button class="secondary" data-action="back-home">${this.t('back')}</button></div>`;}
   private async react(owner:string,reaction:string){const result=await api.react(owner,reaction);audio.sfx('reaction');this.celebrate('reaction');document.querySelectorAll('[data-action="reaction"]').forEach((button)=>{const id=(button as HTMLElement).dataset.id!;button.querySelector('small')!.textContent=String(result.reactions[id]||0);});}
-  private async toggleWearable(wearableId:string){const pet=this.activePet()!;const definition=this.state.catalog.wearables.find((item)=>item.id===wearableId)!;let outfit=pet.equippedWearables.filter((id)=>this.state.catalog.wearables.find((item)=>item.id===id)?.slot!==definition.slot);if(!pet.equippedWearables.includes(wearableId))outfit.push(wearableId);await api.setOutfit(pet.id,outfit);await this.reload();this.startBedroom();this.renderHomePanel();this.renderOutfitPicker();}
+  /** Put a piece on. Anything already in that slot comes off, since a slot holds one thing. */
+  private async equipWearable(wearableId:string){
+    const pet=this.activePet()!; const definition=this.state.catalog.wearables.find((item)=>item.id===wearableId)!;
+    const outfit=pet.equippedWearables.filter((id)=>this.state.catalog.wearables.find((item)=>item.id===id)?.slot!==definition.slot);
+    if(!pet.equippedWearables.includes(wearableId))outfit.push(wearableId);
+    await this.saveOutfit(pet.id,outfit);
+  }
+  /** Empty one slot. */
+  private async clearSlot(slot:string){
+    const pet=this.activePet()!;
+    await this.saveOutfit(pet.id,pet.equippedWearables.filter((id)=>this.state.catalog.wearables.find((item)=>item.id===id)?.slot!==slot));
+  }
+  private async saveOutfit(petId:string,outfit:string[]){
+    await api.setOutfit(petId,outfit); audio.sfx('happy');
+    await this.reload(); this.startBedroom(); this.renderHomePanel(); this.renderOutfitPicker();
+  }
   private renderSettings(){this.setLayout('full');const seg=(value:'private'|'class',label:string)=>`<button data-action="set-visibility" data-id="${value}" class="seg ${this.state.room.visibility===value?'on':''}">${escapeHtml(label)}</button>`;document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll settings-panel"><p class="eyebrow">COMFORT & ACCESS</p><h1>${this.t('settings')}</h1><div class="setting-row"><div><b>${this.locale==='zh-HK'?'房間參觀權限':'Room visits'}</b><small>${this.locale==='zh-HK'?'開放後，只有同班同學可以參觀你的房間。':'When opened, only classmates can visit your room.'}</small></div><div class="segmented-toggle">${seg('private',this.t('private'))}${seg('class',this.t('class'))}</div></div><label class="field"><span>${this.locale==='zh-HK'?'音樂音量':'Music volume'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.musicLevel}" data-setting="music"></label><label class="field"><span>${this.locale==='zh-HK'?'音效音量':'Sound effects'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.sfxLevel}" data-setting="sfx"></label><label class="toggle"><input type="checkbox" id="motionToggle" ${localStorage.getItem('pet-reduced-motion')==='1'?'checked':''}><span>${this.locale==='zh-HK'?'減少動畫':'Reduce motion'}</span></label><p class="privacy-note">${this.locale==='zh-HK'?'私隱：房間預設私人；公開後只有同班學生可參觀。系統沒有聊天、留言、交易或排行榜。':'Privacy: rooms are private by default. Only classmates can visit when opened. There is no chat, messaging, trading or leaderboard.'}</p></div>`;document.querySelector('#motionToggle')?.addEventListener('change',(event)=>{const on=(event.target as HTMLInputElement).checked;localStorage.setItem('pet-reduced-motion',on?'1':'0');document.documentElement.classList.toggle('reduced-motion',on);});}
   private async reload(){this.state=await api.bootstrap();this.roomPlacements=this.state.room.placements.map((item)=>({...item}));this.updateWallet();}
   private updateWallet(){this.setValue('#coinBalance',this.state.wallet.balance.toLocaleString());}

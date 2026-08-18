@@ -7,6 +7,9 @@ import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 import bcrypt from 'bcryptjs';
 import { chromium } from 'playwright';
+
+/** Slots on the equipment board, and how many of them have no collection behind them yet. */
+const OUTFIT_SLOT_COUNT=9; const OUTFIT_SEALED_COUNT=4;
 const require=createRequire(import.meta.url); const { catalog }=require('../pet-app/lib/catalog.js');
 
 const reservePort = () => new Promise((resolve,reject)=>{const server=net.createServer();server.once('error',reject);server.listen(0,'127.0.0.1',()=>{const port=server.address().port;server.close(()=>resolve(port));});});
@@ -115,8 +118,30 @@ try {
   // visible from the DOM, so this reaches into the running scene.
   const buy=await context.request.post('/api/pet/shop/purchase',{data:{itemId:'head-01',quantity:1},headers:{'Idempotency-Key':'live-crown'}});
   assert.equal(buy.status(),201);
-  const outfit=await context.request.put(`/api/pet/pets/${(await (await context.request.get('/api/pet/bootstrap')).json()).pets[0].id}/outfit`,{data:{wearableIds:['head-01']}});
-  assert.equal(outfit.status(),200);
+  // The purchase went through the API, so the open page still holds the old inventory.
+  await page.reload({waitUntil:'networkidle'}); await page.locator('#game-root canvas').waitFor();
+  // Equip through the board the way a child does, rather than through the API, so the slots and
+  // the drag gesture are covered too. Native HTML5 dragging is dead on iOS, so this is a pointer
+  // gesture: press the tile, move, and drop it on the slot that accepts it.
+  await page.locator('[data-action="open-outfit"]').click(); await page.locator('.gear-board').waitFor();
+  assert.equal(await page.locator('.gear-slot').count(),OUTFIT_SLOT_COUNT);
+  assert.equal(await page.locator('.gear-slot.sealed').count(),OUTFIT_SEALED_COUNT);
+  await page.locator('.gear-tile[data-id="head-01"]').scrollIntoViewIfNeeded();
+  const tile=await page.locator('.gear-tile[data-id="head-01"]').boundingBox();
+  const target=await page.locator('.gear-slot[data-slot="head"]').boundingBox();
+  await page.mouse.move(tile.x+tile.width/2,tile.y+tile.height/2); await page.mouse.down();
+  for(let step=1;step<=6;step+=1){
+    await page.mouse.move(
+      tile.x+tile.width/2+((target.x+target.width/2)-(tile.x+tile.width/2))*step/6,
+      tile.y+tile.height/2+((target.y+target.height/2)-(tile.y+tile.height/2))*step/6);
+    await page.waitForTimeout(25);
+  }
+  assert.equal(await page.locator('.gear-ghost-drag').count(),1,'nothing is following the pointer during a drag');
+  assert.equal(await page.locator('.gear-slot[data-slot="head"].over').count(),1,'the receiving slot does not light up');
+  await page.mouse.up();
+  await page.locator('.gear-slot[data-slot="head"].filled').waitFor({timeout:8000});
+  await page.screenshot({path:path.join(artifactDir,'11-equipment-board.png')});
+  await page.locator('.picker-head [data-action="close-modal"]').click();
   await page.reload({waitUntil:'networkidle'}); await page.locator('#game-root canvas').waitFor();
   await page.waitForFunction(()=>window.__petGame?.scene?.getScene('Bedroom')?.avatar?.worn?.length>0,null,{timeout:15000});
   const worn=await page.evaluate(async()=>{
@@ -140,6 +165,7 @@ try {
   console.log(`✓ protected student and teacher role routing`);
   console.log(`✓ hatch, collection, decoration and grant flows`);
   console.log(`✓ desktop, iPad landscape and mobile screenshots: ${artifactDir}`);
+  console.log(`✓ equipment board: ${OUTFIT_SLOT_COUNT} slots, drag-to-equip, ${OUTFIT_SEALED_COUNT} awaiting art`);
   console.log(`✓ worn items track the pose, cast contact shadows and take the room light`);
   console.log(`✓ no browser console or uncaught page errors`);
 } finally {

@@ -621,6 +621,110 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
 }
 .mini-item.selected small { color: var(--success-ink); }
 
+
+/* -------------------------------------------------- equipment board (換裝) --- */
+/* Worn gear reads as a character sheet: slots framed around the creature on the left, the bag
+   on the right. Slots keep their frame whether or not anything is in them, so the board looks
+   the same shape before and after a child dresses their pet. */
+/* The doll needs a floor of its own: two 76px slot columns plus the creature between them do
+   not fit in a fraction that a long item name on the right can win. */
+.gear-board {
+  display: grid; grid-template-columns: minmax(320px, 1.05fr) minmax(0, 1fr);
+  gap: var(--s3); align-items: start;
+}
+
+.gear-doll {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'left figure right' 'foot foot foot';
+  gap: var(--s2);
+  padding: var(--s2);
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: linear-gradient(180deg, var(--warm), var(--card));
+}
+.gear-doll > .gear-column:first-of-type { grid-area: left; }
+.gear-doll > .gear-column:last-of-type { grid-area: right; }
+.gear-figure { grid-area: figure; display: grid; place-items: center; min-height: 220px; min-width: 128px; }
+.gear-figure img { width: min(100%, 190px); filter: drop-shadow(0 8px 14px rgba(52, 40, 28, .18)); }
+.gear-foot { grid-area: foot; display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 76px)); justify-content: center; }
+.gear-column { display: grid; gap: var(--s1); align-content: start; }
+
+.gear-slot {
+  position: relative;
+  width: 76px; height: 76px;
+  display: grid; place-items: center;
+  border: 2px dashed var(--line-strong); border-radius: var(--r-md);
+  background: var(--chip);
+  transition: border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease),
+              transform var(--t-fast) var(--ease);
+}
+/* The thumbnail is a window onto the piece: the art is blown up inside it and clipped by it,
+   so the label pinned outside the slot stays readable. */
+.gear-thumb { display: block; overflow: hidden; border-radius: calc(var(--r-md) - 4px); }
+.gear-slot .gear-thumb { width: 84%; height: 84%; }
+.gear-slot img { width: 100%; height: 100%; object-fit: contain; }
+.gear-label {
+  position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+  padding: 1px 7px; border-radius: var(--r-pill);
+  background: var(--ink); color: #fff;
+  font-size: 0.68rem; font-weight: 800; letter-spacing: .04em; white-space: nowrap;
+}
+.gear-ghost { font-size: 1.6rem; opacity: .34; }
+.gear-slot.filled { border-style: solid; border-color: #3d9e6d; background: #eefaf2; }
+.gear-slot.sealed { opacity: .5; }
+/* While a piece is over a slot: green when it belongs there, red when it does not. */
+.gear-slot.over { border-color: #3d9e6d; background: #dff3e6; transform: scale(1.06); }
+.gear-slot.reject { border-color: var(--accent); background: var(--accent-soft); }
+.gear-clear {
+  position: absolute; top: -8px; right: -8px;
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  font-size: 0.7rem; line-height: 1; cursor: pointer; box-shadow: var(--lift-1);
+}
+
+.gear-wardrobe { display: grid; gap: var(--s1); align-content: start; }
+.gear-tray {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--s1);
+  max-height: min(46vh, 380px); overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding-right: 2px;
+}
+.gear-tile {
+  display: grid; gap: 2px; justify-items: center;
+  padding: var(--s1) 6px;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--card); cursor: grab; box-shadow: var(--lift-1);
+  touch-action: none; /* the tile owns the gesture, so a drag never scrolls the tray instead */
+  transition: border-color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+.gear-tile .gear-thumb { width: 56px; height: 56px; pointer-events: none; }
+.gear-tile img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.gear-tile b { font-size: 0.78rem; font-weight: 800; text-align: center; line-height: 1.15; }
+.gear-tile small { color: var(--ink-soft); font-size: var(--fs-micro); }
+.gear-tile:hover { border-color: var(--line-strong); transform: translateY(-2px); }
+.gear-tile.worn { border-color: #3d9e6d; background: #eefaf2; }
+.gear-tile.lifted { opacity: .35; }
+.gear-note { margin: 0; color: var(--ink-quiet); font-size: var(--fs-micro); }
+
+/* The piece that follows the finger. Centred on the pointer and inert, so the slot under it can
+   still be found with elementFromPoint. */
+.gear-ghost-drag {
+  position: fixed; top: 0; left: 0; z-index: 90;
+  margin: -34px 0 0 -34px; width: 68px; height: 68px;
+  pointer-events: none;
+  display: grid; place-items: center;
+  border-radius: var(--r-md); background: rgba(255, 255, 255, .92);
+  box-shadow: 0 10px 22px rgba(52, 40, 28, .26);
+}
+.gear-ghost-drag img { width: 84%; height: 84%; object-fit: contain; }
+
+@media (max-width: 860px) {
+  .gear-board { grid-template-columns: minmax(0, 1fr); }
+  .gear-doll { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .gear-figure { min-height: 160px; }
+  .gear-figure img { width: min(100%, 140px); }
+  .gear-tray { max-height: 34vh; }
+}
+
 /* ------------------------------------------------------ card grid views --- */
 .collection-grid, .shop-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: var(--s2);
@@ -1307,6 +1411,10 @@ html.reduced-motion *, html.reduced-motion *:before, html.reduced-motion *:after
   padding: var(--s3);
   max-height: min(56vh, 460px);
 }
+/* The equipment board needs both columns side by side, so it opts into a wider dialog. */
+.modal-card.framed.wide { width: min(1040px, 96vw); }
+.modal-card.framed.wide .picker-body { max-height: min(74vh, 640px); }
+
 /* Keep the close control inside the viewport on narrow screens. */
 .modal-card.framed .picker-head .round-button {
   top: calc(var(--s2) * -1); right: calc(var(--s2) * -1);
