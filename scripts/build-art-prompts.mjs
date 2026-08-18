@@ -15,7 +15,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { catalog } = require('../pet-app/lib/catalog.js');
-const { SLOTS, SETS } = require('../pet-app/lib/furniture-sets.js');
+const { SLOTS, SETS, BATCHES } = require('../pet-app/lib/furniture-sets.js');
 
 /** The room and everything built into it. */
 const WORLD_STYLE = `Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.`;
@@ -40,15 +40,15 @@ const ROOMS = [
 
 const WEARABLES = [
   ['head', '頭飾', 5, 4, `a small jewelled crown, an explorer's wide-brim hat, a woven flower wreath, a star-shaped hairclip, a chef's toque, a fluffy cloud cap, a sailor cap, a pointed wizard hat, a conical bamboo leaf hat, a knitted snow hat with a pompom, a circlet of flame, a crescent moon crown, a brass gear top hat, a large ribbon bow, an ornate king's crown, a soft nightcap, a cat-ear headband, a pair of aviator goggles worn on the head, a branching coral crown, a domed cosmic helmet`,
-    `Each accessory is drawn on its own, from the front, exactly as it would look while worn - but with no creature, no head, no mannequin and no stand underneath it. Left-to-right symmetrical wherever the object itself is symmetrical. Scaled as if to fit a head about 300 pixels wide.`],
+    `Each accessory is drawn on its own, from the front, exactly as it would look while worn - but with no creature, no head, no mannequin and no stand underneath it. Left-to-right symmetrical wherever the object itself is symmetrical. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
   ['face', '面飾', 4, 3, `round wire spectacles, star-shaped sunglasses, a curled gentleman's moustache, heart-shaped sunglasses, tinted explorer goggles, a single monocle on a fine chain, a snowflake face sticker, rainbow face paint stripes, a crescent moon eye mask, a bubble-dome face visor, a mechanical eyepatch with brass rivets, a red party nose`,
-    `Each item is drawn on its own, from the front, exactly as it would sit on a face - but with no creature, no head and no mannequin. Eyewear is drawn as a matching pair with the space between the lenses left empty so a face can show through. Scaled as if to fit a face about 260 pixels wide.`],
+    `Each item is drawn on its own, from the front, exactly as it would sit on a face - but with no creature, no head and no mannequin. Eyewear is drawn as a matching pair with the space between the lenses left empty so a face can show through. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
   ['neck', '頸部', 4, 4, `a red neckerchief, a blue neckerchief, a gold bell on a collar, a pearl necklace, a collar of woven leaves, a starlight bow tie, an explorer's badge on a strap, a crystal pendant, a fluffy cloud scarf, a rainbow striped scarf, a flame-edged shoulder cape, a snow-white fur shoulder cape, a bamboo knot necktie, a crescent moon pendant, a brass gear necklace, a collar of small flowers`,
-    `Each item is drawn on its own, from the front, exactly as it would sit around a neck - but with no creature and no mannequin. Drawn as a closed ring or an open U shape seen from the front, never as a single straight strand. Scaled as if to fit a neck about 200 pixels wide.`],
+    `Each item is drawn on its own, from the front, exactly as it would sit around a neck - but with no creature and no mannequin. Drawn as a closed ring or an open U shape seen from the front, never as a single straight strand. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
   ['back', '背部', 4, 4, `a small school satchel, a pair of butterfly wings, a pair of leathery dragon wings, a fluffy cloud cape, an ocean-blue rucksack, a woven bamboo basket, a starry cloak, an explorer's tool case, a moonlight cape, a rocket pack, a snowman-shaped backpack, a garden backpack with small plants growing out of it, a wind-up clockwork key and gear, a candy-striped backpack, a pair of small crystal wings, a rolled mini tent`,
-    `Each item is drawn on its own, from the front, exactly as it would look worn on a back - but with no creature and no mannequin. Wings and capes are perfectly left-to-right symmetrical and fully spread open. Backpacks are seen from the front as they would look peeking out from behind a body. Scaled as if to fit a body about 300 pixels wide.`],
+    `Each item is drawn on its own, from the front, exactly as it would look worn on a back - but with no creature and no mannequin. Wings and capes are perfectly left-to-right symmetrical and fully spread open. Backpacks are seen from the front as they would look peeking out from behind a body. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
   ['aura', '光環', 4, 4, `a trail of glowing stars, a trail of soap bubbles, a trail of drifting leaves, a trail of orange sparks, a trail of snowflakes, a rainbow shimmer trail, a ring of moon shadow, a ring of warm sunlight, a ring of floating crystals, a ring of crackling lightning, a swirl of flower petals, a swirl of music notes, a small cloud following along, a ring of tiny orbiting planets, a swarm of fireflies, a ring of slowly turning brass gears`,
-    `Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. No creature stands in it and the middle is left empty. Glowing, semi-transparent, light and airy. Scaled as if to surround a body about 320 pixels wide.`],
+    `Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. No creature stands in it and the middle is left empty. Glowing, semi-transparent, light and airy. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
 ];
 
 const SPECIES = [
@@ -245,30 +245,27 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: ${theme}
 
-Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.`);
+A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.`);
 }
 
-for (let i = 0; i < ROOMS.length; i += 2) {
-  const [idA, zhA] = ROOMS[i];
-  const [idB, zhB] = ROOMS[i + 1];
+for (let i = 0; i < BATCHES.length; i += 2) {
+  const [idA, labelA] = BATCHES[i];
+  const [idB, labelB] = BATCHES[i + 1];
   const list = (id, offset) => SETS[id]
-    .map(([, , detail], k) => `  cell ${offset + k + 1}  ${detail}, ${SLOTS[k].size}`).join('\n');
-  block(`家具 · ${zhA} + ${zhB}`, `檔名：furniture-${idA}-${idB}.png　20 格（5 x 4）　風格：動森`,
+    .map(([, , detail], k) => `  cell ${offset + k + 1}  ${detail} - ${SLOTS[k].size}`).join('\n');
+  block(`家具 · ${labelA} + ${labelB}`, `檔名：furniture-${idA}-${idB}.png　20 格（5 x 4）　風格：動森`,
 `${WORLD_STYLE}
 
-A sprite sheet of 20 separate pieces of furniture for a cosy pet bedroom. Every cell holds a different object - no two cells repeat.
+A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game. Every cell holds a different object; no two cells repeat.
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor - any horizontal top surface such as a table top, a seat or a shelf is an ellipse or a rectangle twice as wide as it is deep. The base of each piece rests on the bottom edge of its own cell. Nothing is tilted or rotated. Nothing carries any writing or lettering.
+Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, because the floor of the game is seen at that angle. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
-Cells 1 to 10 furnish one room, and read as one set:
+The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
+
 ${list(idA, 0)}
-
-Cells 11 to 20 furnish a different room, and read as a second set:
 ${list(idB, 10)}
-
-The two sets must be clearly distinct from each other in material and colour.
 
 Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not repeat an item, and do not leave a cell empty.
 

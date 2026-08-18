@@ -1,22 +1,25 @@
 'use strict';
 
 /**
- * What furnishes each room.
+ * The hundred pieces of furniture.
  *
- * Every theme used to hold the same ten things — bed, rug, table, chair, lamp, cabinet, picture,
- * plant, toy, ornament — recoloured ten ways. A hundred items that are really ten items makes a
- * shop nobody wants to scroll, so each room now has its own ten, chosen to say what that room is.
+ * They were once ten pieces recoloured ten ways, one palette per room, which made a shop that
+ * scrolls for a hundred items and shows the same chair each time. They are now a hundred
+ * different things: mostly ordinary furniture a child would recognise and can put in any room,
+ * with two batches kept deliberately themed so the fantasy rooms have something of their own.
  *
- * The slots themselves cannot move: their footprints, layers and prices are fixed by index, and
- * rooms saved by students refer to a piece by index. So each theme fills the same shaped set —
- * one large floor piece, one rug, one two-by-two, one wall piece and six small things — with
- * whatever belongs in that room.
+ * Nothing here is tied to a room. A piece can be placed anywhere; the batching below only
+ * decides which pieces are drawn on the same sheet and which id each one takes.
  *
- * Each entry is [Chinese name, English name, what to draw]. The last is only read by the prompt
- * builder; it never reaches the client.
+ * The slots cannot move. Footprint, layer and price are fixed by position, and a saved
+ * arrangement refers to a piece by its position — so every batch fills the same shape: one large
+ * floor piece, one rug, one two-by-two, one wall piece, and six small things.
+ *
+ * Each entry is [Chinese name, English name, what to draw]. The last is read only by the prompt
+ * builder and never reaches the client.
  */
 
-/** Footprint and layer per slot, stated once so a set can be checked against it. */
+/** Footprint, layer and the size to state in a prompt, per position in a batch. */
 const SLOTS = [
   { footprint: [3, 2], layer: 'furniture', size: 'three tiles wide and two deep' },
   { footprint: [4, 3], layer: 'rug', size: 'four tiles wide and three deep, lying flat on the floor' },
@@ -24,133 +27,147 @@ const SLOTS = [
   { footprint: [1, 1], layer: 'furniture', size: 'one tile' },
   { footprint: [1, 1], layer: 'furniture', size: 'one tile' },
   { footprint: [2, 2], layer: 'furniture', size: 'two tiles wide and two deep' },
-  { footprint: [1, 1], layer: 'wall', size: 'hanging flat on the wall, no depth' },
+  { footprint: [1, 1], layer: 'wall', size: 'hanging flat on the wall, seen straight on, no depth' },
   { footprint: [1, 1], layer: 'furniture', size: 'one tile' },
   { footprint: [1, 1], layer: 'furniture', size: 'one tile' },
   { footprint: [1, 1], layer: 'furniture', size: 'one tile' },
 ];
 
+/** Batches, in the order their ids run. The label is only used to title a prompt. */
+const BATCHES = [
+  ['sunny-oak', '睡眠'],
+  ['cloud-loft', '客廳'],
+  ['ocean-cabin', '書房'],
+  ['forest-treehouse', '遊玩'],
+  ['space-pod', '收納'],
+  ['candy-workshop', '綠意'],
+  ['lava-den', '燈光'],
+  ['aurora-observatory', '飲食'],
+  ['bamboo-room', '奇幻'],
+  ['moon-magic-attic', '自然'],
+];
+
 const SETS = {
   'sunny-oak': [
-    ['橡木寵物床', 'Oak Pet Bed', 'a low oak pet bed with a quilted cream mattress'],
-    ['編織圓地毯', 'Braided Rug', 'a braided oval rag rug in warm cream and sage'],
-    ['橡木小圓桌', 'Oak Side Table', 'a small round oak side table on turned legs'],
-    ['閱讀翼背椅', 'Reading Chair', 'a small wingback reading chair in sage green fabric'],
-    ['銅座檯燈', 'Brass Lamp', 'a slim brass floor lamp with a warm cream shade'],
-    ['橡木抽屜櫃', 'Oak Dresser', 'an oak chest of drawers with small brass knobs'],
-    ['田園風景畫', 'Meadow Painting', 'a framed painting of a green meadow'],
-    ['蕨葉盆栽', 'Potted Fern', 'a leafy fern in a cream ceramic pot'],
-    ['玩具藤籃', 'Toy Basket', 'a wicker basket spilling over with soft toys'],
-    ['木搖搖馬', 'Rocking Horse', 'a small carved wooden rocking horse'],
+    ['雙人寵物床', 'Double Pet Bed', 'a soft double pet bed with a padded rim and a folded blanket'],
+    ['素色地毯', 'Plain Rug', 'a plain woven rug in soft warm grey'],
+    ['床頭小櫃', 'Bedside Table', 'a small bedside table with one drawer'],
+    ['腳踏軟凳', 'Footstool', 'a small round padded footstool'],
+    ['床頭燈', 'Bedside Lamp', 'a bedside lamp with a fabric shade, softly lit'],
+    ['矮抽屜櫃', 'Low Dresser', 'a low chest of four drawers'],
+    ['圓掛鐘', 'Wall Clock', 'a round wall clock with simple hands'],
+    ['摺疊毛毯堆', 'Folded Blankets', 'a neat stack of folded blankets'],
+    ['枕頭套裝', 'Pillow Set', 'a pair of plump pillows resting against each other'],
+    ['小鬧鐘', 'Alarm Clock', 'a small twin-bell alarm clock'],
   ],
   'cloud-loft': [
-    ['雲朵坐墊床', 'Cloud Bed', 'a cloud-shaped floor cushion bed in soft white'],
-    ['蓬鬆雲地毯', 'Cloud Rug', 'a fluffy white rug shaped like a drifting cloud'],
-    ['樺木玻璃几', 'Birch Table', 'a small birch table with a pale glass top'],
-    ['吊蛋椅', 'Hanging Egg Chair', 'a woven hanging egg chair on a slim white stand'],
-    ['紙燈籠立燈', 'Paper Lantern', 'a tall paper lantern floor lamp glowing softly'],
-    ['白色百葉櫃', 'Louvred Cabinet', 'a white cabinet with louvred doors'],
-    ['圓框鏡', 'Porthole Mirror', 'a round mirror in a white frame like a porthole'],
-    ['吊掛綠植', 'Hanging Plant', 'a trailing plant in a macrame hanger on a stand'],
-    ['紙飛機吊飾', 'Paper Plane Mobile', 'a mobile of small paper aeroplanes on a stand'],
-    ['黃銅風向儀', 'Weather Vane', 'a small brass weather vane ornament'],
+    ['雙人梳化', 'Two-seat Sofa', 'a two-seat sofa with soft cushions'],
+    ['條紋大地毯', 'Striped Rug', 'a large area rug with broad soft stripes'],
+    ['圓茶几', 'Coffee Table', 'a round low coffee table on three legs'],
+    ['扶手軟椅', 'Armchair', 'a padded armchair with rolled arms'],
+    ['落地立燈', 'Floor Lamp', 'a tall floor lamp with a drum shade, softly lit'],
+    ['電視矮櫃', 'Media Cabinet', 'a long low media cabinet with sliding doors'],
+    ['抽象掛畫', 'Abstract Painting', 'a framed abstract painting in calm colours'],
+    ['藤面邊凳', 'Woven Stool', 'a small stool with a woven top'],
+    ['雜誌架', 'Magazine Rack', 'a slim rack holding a few magazines'],
+    ['地板坐墊', 'Floor Cushion', 'a large flat floor cushion'],
   ],
   'ocean-cabin': [
-    ['水手吊床', 'Sailor Hammock', 'a low slung canvas hammock between two teak posts'],
-    ['麻繩編織墊', 'Rope Mat', 'a mat woven from thick pale rope'],
-    ['木桶邊几', 'Barrel Table', 'a small barrel used as a side table'],
-    ['船長轉椅', 'Captain Chair', 'a teak swivel chair with a teal cushion'],
-    ['銅環吊燈座', 'Gimbal Lamp', 'a brass gimbal lamp on a stand'],
-    ['鐵箍航海箱', 'Sea Chest', 'a teak sea chest bound with iron bands'],
+    ['書桌連椅', 'Writing Desk', 'a writing desk with a chair tucked under it'],
+    ['深綠書房毯', 'Study Rug', 'a rectangular rug in deep green with a border'],
+    ['旋轉書椅', 'Desk Chair', 'a small swivel desk chair on castors'],
+    ['書本疊', 'Book Stack', 'a leaning stack of hardback books'],
+    ['綠罩檯燈', 'Banker Lamp', 'a green glass banker lamp, lit'],
+    ['高書櫃', 'Bookshelf', 'a tall bookshelf filled with books'],
+    ['備忘板', 'Pinboard', 'a cork pinboard with a few blank notes pinned to it'],
+    ['地球儀', 'Globe', 'a globe on a wooden stand'],
+    ['筆筒', 'Pencil Pot', 'a pot holding pencils and brushes'],
+    ['文件收納盒', 'File Box', 'a small lidded box for papers'],
+  ],
+  'forest-treehouse': [
+    ['遊戲軟墊池', 'Play Mat', 'a padded play mat with a soft raised rim'],
+    ['道路遊戲毯', 'Road Rug', 'a play rug printed with little roads and crossings'],
+    ['小搖搖馬', 'Rocking Horse', 'a small carved wooden rocking horse'],
+    ['豆袋椅', 'Beanbag', 'a slouchy beanbag chair'],
+    ['套圈遊戲架', 'Ring Toss', 'a standing ring toss game with hoops'],
+    ['玩具箱', 'Toy Chest', 'a toy chest with a hinged lid, toys peeking out'],
+    ['牆上籃球框', 'Hoop', 'a small basketball hoop mounted on a backboard'],
+    ['積木堆', 'Building Blocks', 'a stack of coloured building blocks'],
+    ['泰迪熊', 'Teddy Bear', 'a plush teddy bear sitting upright'],
+    ['陀螺台', 'Spinning Top', 'a wooden spinning top on a small base'],
+  ],
+  'space-pod': [
+    ['長餐邊櫃', 'Sideboard', 'a long low sideboard with three doors'],
+    ['麻編地墊', 'Jute Mat', 'a flat woven jute mat with a plain border'],
+    ['藤編收納籃', 'Storage Basket', 'a round wicker storage basket with handles'],
+    ['摺梯凳', 'Step Stool', 'a small two-step wooden stool'],
+    ['掛衣架', 'Coat Stand', 'a slim coat stand with a scarf hung on it'],
+    ['方格層架', 'Cube Shelving', 'a cube shelving unit with boxes in some cubes'],
+    ['牆掛勾排', 'Wall Hooks', 'a row of wall hooks on a wooden rail'],
+    ['收納木箱堆', 'Crates', 'two stacked wooden storage crates'],
+    ['洗衣籃', 'Laundry Hamper', 'a lidded laundry hamper'],
+    ['鞋架', 'Shoe Rack', 'a low two-tier shoe rack'],
+  ],
+  'candy-workshop': [
+    ['長花槽長椅', 'Planter Bench', 'a long bench with planters built into each end'],
+    ['葉紋地毯', 'Leaf Rug', 'a rug printed with a scattered leaf pattern'],
+    ['多肉小盆', 'Succulent', 'a small potted succulent in a clay pot'],
+    ['棕櫚盆栽', 'Potted Palm', 'a tall potted palm in a woven basket'],
+    ['澆水壺架', 'Watering Can', 'a metal watering can on a small stand'],
+    ['植物層架', 'Plant Shelf', 'a shelving unit holding several potted plants'],
+    ['垂吊藤蔓', 'Hanging Vine', 'a trailing vine in a hanging planter'],
+    ['玻璃生態瓶', 'Terrarium', 'a sealed glass terrarium with moss inside'],
+    ['盆景樹', 'Bonsai', 'a small bonsai tree in a shallow dish'],
+    ['園藝工具袋', 'Garden Tools', 'a bag of soil with a trowel leaning against it'],
+  ],
+  'lava-den': [
+    ['展示長凳', 'Display Bench', 'a low bench with two small lamps standing on it'],
+    ['放射紋圓毯', 'Sunburst Rug', 'a round rug with a sunburst pattern'],
+    ['地板紙燈籠', 'Floor Lantern', 'a paper lantern standing on the floor, lit'],
+    ['燭台托盤', 'Candle Tray', 'a tray holding a cluster of lit candles'],
+    ['向上立燈', 'Torchiere', 'a tall uplighter floor lamp'],
+    ['玻璃陳列櫃', 'Display Cabinet', 'a cabinet with glass doors and lit shelves'],
+    ['串燈', 'Fairy Lights', 'a looped string of small warm fairy lights'],
+    ['小檯燈', 'Table Lamp', 'a small table lamp with a round shade'],
+    ['熔岩燈', 'Lava Lamp', 'a lava lamp with slow rising blobs'],
+    ['鏡球座', 'Mirror Ball', 'a small mirror ball on a stand'],
+  ],
+  'aurora-observatory': [
+    ['餐桌連凳', 'Dining Set', 'a small dining table with two stools tucked under it'],
+    ['格仔廚房墊', 'Kitchen Mat', 'a chequered kitchen floor mat'],
+    ['圓座高凳', 'Round Stool', 'a stool with a round padded seat'],
+    ['茶點推車', 'Tea Trolley', 'a two-tier tea trolley on castors'],
+    ['飲水機', 'Water Dispenser', 'a standing water dispenser with a bottle on top'],
+    ['廚房吊櫃', 'Kitchen Cupboard', 'a cupboard with panelled doors and a worktop'],
+    ['調味瓶掛架', 'Jar Shelf', 'a wall shelf lined with labelled-looking jars'],
+    ['水果盤架', 'Fruit Bowl', 'a bowl of fruit on a short stand'],
+    ['寵物食碗', 'Food Bowls', 'a pair of pet bowls on a mat'],
+    ['小爐水壺', 'Kettle', 'a kettle sitting on a small burner'],
+  ],
+  'bamboo-room': [
+    ['金幣寶座巢', 'Hoard Nest', 'a low nest hollowed out of a pile of gold coins'],
+    ['月相圓毯', 'Moon Phase Rug', 'a round rug woven with the phases of the moon'],
+    ['三腳坩堝', 'Cauldron Stand', 'a three legged iron stand holding a small cauldron'],
+    ['絨面高背椅', 'Velvet Chair', 'a high backed chair in deep plum velvet'],
+    ['鐵燭台', 'Candelabra', 'a tall iron candelabra with lit candles'],
+    ['藥劑抽屜櫃', 'Potion Cabinet', 'a cabinet of many small drawers holding glass bottles'],
+    ['月框掛鏡', 'Moon Mirror', 'a mirror set in a crescent moon frame'],
+    ['發光菇盆', 'Glowing Mushroom', 'a softly glowing mushroom growing in a pot'],
+    ['裂紋龍蛋', 'Cracked Dragon Egg', 'a cracked dragon egg glowing from within'],
+    ['水晶球座', 'Crystal Ball', 'a crystal ball resting on a clawed stand'],
+  ],
+  'moon-magic-attic': [
+    ['苔蘚樹枝窩', 'Mossy Nest', 'a woven twig nest bed lined with moss'],
+    ['粗繩編織墊', 'Rope Mat', 'a mat woven from thick pale rope'],
+    ['樹樁茶几', 'Stump Table', 'a tree stump used as a side table'],
+    ['藤編扶手椅', 'Wicker Armchair', 'a wicker armchair with a linen cushion'],
+    ['樹枝提燈', 'Branch Lantern', 'a lantern hanging from a forked branch stand'],
+    ['中空原木櫃', 'Hollow Log Chest', 'a hollow log laid on its side as a storage chest'],
     ['船舵掛飾', 'Ship Wheel', 'a wooden ship wheel hung on the wall'],
-    ['玻璃罐珊瑚', 'Coral Jar', 'a piece of pale coral in a glass jar'],
+    ['樹皮盆蕨', 'Bark Planter', 'a fern growing from a pot made of curled bark'],
     ['玩具帆船', 'Toy Sailboat', 'a small wooden toy sailboat with a cloth sail'],
     ['銅潛水盔', 'Diving Helmet', 'a brass diving helmet resting on a stand'],
   ],
-  'forest-treehouse': [
-    ['苔蘚樹枝窩', 'Mossy Nest', 'a woven twig nest bed lined with moss'],
-    ['葉編地墊', 'Leaf Mat', 'a mat woven from broad green leaves'],
-    ['樹樁茶几', 'Stump Table', 'a tree stump used as a side table'],
-    ['藤編扶手椅', 'Wicker Armchair', 'a wicker armchair with moss green cushions'],
-    ['樹枝提燈架', 'Branch Lantern', 'a lantern hanging from a forked branch stand'],
-    ['中空原木櫃', 'Hollow Log Chest', 'a hollow log laid on its side as a storage chest'],
-    ['押花掛畫', 'Pressed Flowers', 'a frame of pressed wildflowers hung on the wall'],
-    ['樹皮盆蕨', 'Bark Planter', 'a fern growing from a pot made of curled bark'],
-    ['橡實玩具', 'Acorn Toy', 'a chunky wooden toy carved as an acorn'],
-    ['松鼠木雕', 'Squirrel Carving', 'a carved wooden squirrel holding a nut'],
-  ],
-  'space-pod': [
-    ['休眠艙床', 'Sleep Capsule', 'a padded sleep capsule with a curved open shell'],
-    ['星圖地墊', 'Starfield Mat', 'a dark floor mat printed with a starfield'],
-    ['鍍鉻圓几', 'Chrome Pedestal', 'a chrome pedestal table with a dark top'],
-    ['駕駛躺椅', 'Pilot Seat', 'a reclining padded pilot seat in indigo'],
-    ['電漿立燈', 'Plasma Lamp', 'a floor lamp holding a glowing plasma sphere'],
-    ['補給儲物櫃', 'Supply Locker', 'a grey metal supply locker with a handle'],
-    ['行星觀景屏', 'Planet Screen', 'a wall screen showing a distant planet'],
-    ['玻璃罩植物', 'Domed Plant', 'a small plant growing under a glass dome'],
-    ['玩具人造衛星', 'Toy Satellite', 'a toy satellite with small solar panels'],
-    ['懸浮陀螺儀', 'Gyroscope', 'a brass gyroscope turning above its base'],
-  ],
-  'candy-workshop': [
-    ['棉花糖床', 'Marshmallow Bed', 'a bed shaped from two fat pink marshmallows'],
-    ['糖霜格地毯', 'Icing Mat', 'a chequered mint and cream icing mat'],
-    ['馬卡龍矮凳', 'Macaron Stool', 'a stool made from a stacked pink macaron'],
-    ['杯子蛋糕椅', 'Cupcake Chair', 'an armchair shaped like a frosted cupcake'],
-    ['糖果棒立燈', 'Candy Cane Lamp', 'a floor lamp with a candy cane stem'],
-    ['糖霜收納櫃', 'Icing Cabinet', 'a pastel cabinet trimmed with piped icing'],
-    ['蛋糕掛畫', 'Cake Picture', 'a framed picture of a tiered cake'],
-    ['茶杯薄荷盆', 'Teacup Planter', 'a mint plant growing from an oversized teacup'],
-    ['薑餅人玩偶', 'Gingerbread Toy', 'a smiling gingerbread figure toy'],
-    ['拉絲糖雕', 'Sugar Sculpture', 'a swirl of spun sugar set on a small base'],
-  ],
-  'lava-den': [
-    ['金幣寶座巢', 'Hoard Nest', 'a low nest hollowed out of a pile of gold coins'],
-    ['焦痕獸皮毯', 'Scorched Hide', 'a dark hide rug with scorched edges'],
-    ['黑曜石方几', 'Obsidian Block', 'a squat block of polished obsidian as a table'],
-    ['石座王椅', 'Stone Throne', 'a small carved stone throne seat'],
-    ['餘燼火盆', 'Ember Brazier', 'an iron brazier holding glowing embers'],
-    ['鐵箍寶箱', 'Treasure Chest', 'a heavy chest bound in blackened iron'],
-    ['龍鱗旗幟', 'Scale Banner', 'a banner of overlapping dragon scales hung on the wall'],
-    ['火花盆花', 'Fire Flower', 'a flower with ember-orange petals in a stone pot'],
-    ['裂紋龍蛋', 'Cracked Egg', 'a cracked dragon egg glowing from within'],
-    ['鐵砧與劍', 'Anvil and Sword', 'a small anvil with a glowing sword resting on it'],
-  ],
-  'aurora-observatory': [
-    ['星幕臥榻', 'Star Daybed', 'a daybed under a small canopy printed with stars'],
-    ['星座地毯', 'Constellation Rug', 'a deep blue rug embroidered with constellations'],
-    ['黃銅三腳几', 'Tripod Table', 'a small brass tripod table'],
-    ['觀星軟椅', 'Observation Chair', 'a padded chair tilted back for looking upward'],
-    ['星象投影燈', 'Star Projector', 'a standing projector casting points of light'],
-    ['星圖抽屜櫃', 'Map Cabinet', 'a cabinet of wide shallow drawers for star charts'],
-    ['星圖掛畫', 'Star Chart', 'a framed star chart hung on the wall'],
-    ['發光苔玻璃', 'Glowing Terrarium', 'a glass terrarium of faintly glowing moss'],
-    ['玩具天體儀', 'Toy Orrery', 'a small orrery with planets on brass arms'],
-    ['黃銅望遠鏡', 'Brass Telescope', 'a brass telescope on a wooden tripod'],
-  ],
-  'bamboo-room': [
-    ['榻榻米被褥', 'Futon', 'a folded futon laid out on the floor'],
-    ['稻草編織蓆', 'Straw Mat', 'a woven straw mat with a bound edge'],
-    ['漆器矮茶几', 'Tea Table', 'a low lacquered tea table'],
-    ['和式坐墊', 'Floor Cushion', 'a flat floor cushion with a low armrest'],
-    ['和紙行燈', 'Andon Lamp', 'a square paper andon lamp on a wooden frame'],
-    ['階梯箪笥', 'Step Tansu', 'a stepped tansu chest of small drawers'],
-    ['掛軸', 'Hanging Scroll', 'a painted hanging scroll on the wall'],
-    ['盆栽松', 'Bonsai Pine', 'a small pine bonsai in a shallow dish'],
-    ['劍玉', 'Kendama', 'a wooden kendama toy'],
-    ['石水缽', 'Water Basin', 'a round stone water basin with a bamboo spout'],
-  ],
-  'moon-magic-attic': [
-    ['星帳四柱床', 'Canopy Bed', 'a small four poster bed with star-printed drapes'],
-    ['月相地毯', 'Moon Phase Rug', 'a round rug woven with the phases of the moon'],
-    ['三腳坩堝几', 'Cauldron Stand', 'a three legged iron stand holding a small cauldron'],
-    ['絨面高背椅', 'Velvet Chair', 'a high backed chair in deep plum velvet'],
-    ['燭台立燈', 'Candelabra', 'a tall iron candelabra with lit candles'],
-    ['藥劑抽屜櫃', 'Potion Cabinet', 'a cabinet of many small drawers holding bottles'],
-    ['月框掛鏡', 'Moon Mirror', 'a mirror in a crescent moon frame'],
-    ['發光菇盆', 'Glowing Mushroom', 'a glowing mushroom growing in a small pot'],
-    ['黑貓玩偶', 'Black Cat Plush', 'a plush black cat toy with green eyes'],
-    ['水晶球座', 'Crystal Ball', 'a crystal ball resting on a clawed stand'],
-  ],
 };
 
-module.exports = { SLOTS, SETS };
+module.exports = { SLOTS, SETS, BATCHES };

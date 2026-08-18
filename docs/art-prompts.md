@@ -29,7 +29,7 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: a warm oak bedroom: honey-toned herringbone floorboards, cream painted wall panelling with a white chair rail, a tall arched window on the back wall filled with soft morning light and a hint of green garden beyond
 
-Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.
+A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
 
 ==============================================================================
@@ -49,7 +49,7 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: an airy attic above the clouds: pale bleached birch floorboards, soft sky-blue plaster walls with a white picture rail, a large round porthole window on the back wall full of drifting white cloud
 
-Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.
+A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
 
 ==============================================================================
@@ -69,7 +69,7 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: a ship's cabin: dark polished teak planking, painted teal wainscot below a varnished timber rail, a brass porthole on the back wall showing calm blue water, thick rope trim along the skirting
 
-Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.
+A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
 
 ==============================================================================
@@ -89,7 +89,7 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: a treehouse interior: wide rough-sawn timber floorboards, bark-textured plank walls with ivy creeping in at the corners, a large leaf-framed opening on the back wall looking out into green canopy
 
-Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.
+A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
 
 ==============================================================================
@@ -109,7 +109,7 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: a sleeping pod aboard a starship: pale grey seamless composite floor, deep indigo padded wall panels with soft glowing seams, a wide viewport on the back wall full of stars and a distant nebula
 
-Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.
+A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
 
 ==============================================================================
@@ -129,7 +129,7 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: a confectioner's workshop: a chequered mint and cream tiled floor, glossy pink sugar-glazed walls with a scalloped border, a rounded pastry-shop window on the back wall with a striped awning inside
 
-Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.
+A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
 
 ==============================================================================
@@ -149,7 +149,7 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: a dragon's den: dark basalt flagstones with faint ember cracks glowing between them, rough volcanic rock walls, a glowing lava seam running across the back wall behind a low stone arch
 
-Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.
+A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
 
 ==============================================================================
@@ -169,7 +169,7 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: an observatory at night: deep blue polished stone floor, midnight indigo walls with faint constellation etchings, a wide arched window on the back wall filled with green and violet aurora ribbons
 
-Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.
+A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
 
 ==============================================================================
@@ -189,7 +189,7 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: a Japanese room: pale woven tatami mats, a paper shoji screen wall softly backlit, dark timber posts and beams, a low tokonoma alcove in the back wall
 
-Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.
+A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
 
 ==============================================================================
@@ -209,47 +209,44 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: a witch's attic: worn violet floorboards, deep plum walls with faint hand-painted gold stars, a crescent-shaped window on the back wall showing a night sky
 
-Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.
+A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
 
 ==============================================================================
-[011/100]  家具 · 橡木暖陽房 + 雲端閣樓
+[011/100]  家具 · 睡眠 + 客廳
 檔名：furniture-sunny-oak-cloud-loft.png　20 格（5 x 4）　風格：動森
 ==============================================================================
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A sprite sheet of 20 separate pieces of furniture for a cosy pet bedroom. Every cell holds a different object - no two cells repeat.
+A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game. Every cell holds a different object; no two cells repeat.
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor - any horizontal top surface such as a table top, a seat or a shelf is an ellipse or a rectangle twice as wide as it is deep. The base of each piece rests on the bottom edge of its own cell. Nothing is tilted or rotated. Nothing carries any writing or lettering.
+Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, because the floor of the game is seen at that angle. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
-Cells 1 to 10 furnish one room, and read as one set:
-  cell 1  a low oak pet bed with a quilted cream mattress, three tiles wide and two deep
-  cell 2  a braided oval rag rug in warm cream and sage, four tiles wide and three deep, lying flat on the floor
-  cell 3  a small round oak side table on turned legs, one tile
-  cell 4  a small wingback reading chair in sage green fabric, one tile
-  cell 5  a slim brass floor lamp with a warm cream shade, one tile
-  cell 6  an oak chest of drawers with small brass knobs, two tiles wide and two deep
-  cell 7  a framed painting of a green meadow, hanging flat on the wall, no depth
-  cell 8  a leafy fern in a cream ceramic pot, one tile
-  cell 9  a wicker basket spilling over with soft toys, one tile
-  cell 10  a small carved wooden rocking horse, one tile
+The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
 
-Cells 11 to 20 furnish a different room, and read as a second set:
-  cell 11  a cloud-shaped floor cushion bed in soft white, three tiles wide and two deep
-  cell 12  a fluffy white rug shaped like a drifting cloud, four tiles wide and three deep, lying flat on the floor
-  cell 13  a small birch table with a pale glass top, one tile
-  cell 14  a woven hanging egg chair on a slim white stand, one tile
-  cell 15  a tall paper lantern floor lamp glowing softly, one tile
-  cell 16  a white cabinet with louvred doors, two tiles wide and two deep
-  cell 17  a round mirror in a white frame like a porthole, hanging flat on the wall, no depth
-  cell 18  a trailing plant in a macrame hanger on a stand, one tile
-  cell 19  a mobile of small paper aeroplanes on a stand, one tile
-  cell 20  a small brass weather vane ornament, one tile
-
-The two sets must be clearly distinct from each other in material and colour.
+  cell 1  a soft double pet bed with a padded rim and a folded blanket - three tiles wide and two deep
+  cell 2  a plain woven rug in soft warm grey - four tiles wide and three deep, lying flat on the floor
+  cell 3  a small bedside table with one drawer - one tile
+  cell 4  a small round padded footstool - one tile
+  cell 5  a bedside lamp with a fabric shade, softly lit - one tile
+  cell 6  a low chest of four drawers - two tiles wide and two deep
+  cell 7  a round wall clock with simple hands - hanging flat on the wall, seen straight on, no depth
+  cell 8  a neat stack of folded blankets - one tile
+  cell 9  a pair of plump pillows resting against each other - one tile
+  cell 10  a small twin-bell alarm clock - one tile
+  cell 11  a two-seat sofa with soft cushions - three tiles wide and two deep
+  cell 12  a large area rug with broad soft stripes - four tiles wide and three deep, lying flat on the floor
+  cell 13  a round low coffee table on three legs - one tile
+  cell 14  a padded armchair with rolled arms - one tile
+  cell 15  a tall floor lamp with a drum shade, softly lit - one tile
+  cell 16  a long low media cabinet with sliding doors - two tiles wide and two deep
+  cell 17  a framed abstract painting in calm colours - hanging flat on the wall, seen straight on, no depth
+  cell 18  a small stool with a woven top - one tile
+  cell 19  a slim rack holding a few magazines - one tile
+  cell 20  a large flat floor cushion - one tile
 
 Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not repeat an item, and do not leave a cell empty.
 
@@ -257,43 +254,40 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[012/100]  家具 · 海洋船艙 + 森林樹屋
+[012/100]  家具 · 書房 + 遊玩
 檔名：furniture-ocean-cabin-forest-treehouse.png　20 格（5 x 4）　風格：動森
 ==============================================================================
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A sprite sheet of 20 separate pieces of furniture for a cosy pet bedroom. Every cell holds a different object - no two cells repeat.
+A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game. Every cell holds a different object; no two cells repeat.
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor - any horizontal top surface such as a table top, a seat or a shelf is an ellipse or a rectangle twice as wide as it is deep. The base of each piece rests on the bottom edge of its own cell. Nothing is tilted or rotated. Nothing carries any writing or lettering.
+Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, because the floor of the game is seen at that angle. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
-Cells 1 to 10 furnish one room, and read as one set:
-  cell 1  a low slung canvas hammock between two teak posts, three tiles wide and two deep
-  cell 2  a mat woven from thick pale rope, four tiles wide and three deep, lying flat on the floor
-  cell 3  a small barrel used as a side table, one tile
-  cell 4  a teak swivel chair with a teal cushion, one tile
-  cell 5  a brass gimbal lamp on a stand, one tile
-  cell 6  a teak sea chest bound with iron bands, two tiles wide and two deep
-  cell 7  a wooden ship wheel hung on the wall, hanging flat on the wall, no depth
-  cell 8  a piece of pale coral in a glass jar, one tile
-  cell 9  a small wooden toy sailboat with a cloth sail, one tile
-  cell 10  a brass diving helmet resting on a stand, one tile
+The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
 
-Cells 11 to 20 furnish a different room, and read as a second set:
-  cell 11  a woven twig nest bed lined with moss, three tiles wide and two deep
-  cell 12  a mat woven from broad green leaves, four tiles wide and three deep, lying flat on the floor
-  cell 13  a tree stump used as a side table, one tile
-  cell 14  a wicker armchair with moss green cushions, one tile
-  cell 15  a lantern hanging from a forked branch stand, one tile
-  cell 16  a hollow log laid on its side as a storage chest, two tiles wide and two deep
-  cell 17  a frame of pressed wildflowers hung on the wall, hanging flat on the wall, no depth
-  cell 18  a fern growing from a pot made of curled bark, one tile
-  cell 19  a chunky wooden toy carved as an acorn, one tile
-  cell 20  a carved wooden squirrel holding a nut, one tile
-
-The two sets must be clearly distinct from each other in material and colour.
+  cell 1  a writing desk with a chair tucked under it - three tiles wide and two deep
+  cell 2  a rectangular rug in deep green with a border - four tiles wide and three deep, lying flat on the floor
+  cell 3  a small swivel desk chair on castors - one tile
+  cell 4  a leaning stack of hardback books - one tile
+  cell 5  a green glass banker lamp, lit - one tile
+  cell 6  a tall bookshelf filled with books - two tiles wide and two deep
+  cell 7  a cork pinboard with a few blank notes pinned to it - hanging flat on the wall, seen straight on, no depth
+  cell 8  a globe on a wooden stand - one tile
+  cell 9  a pot holding pencils and brushes - one tile
+  cell 10  a small lidded box for papers - one tile
+  cell 11  a padded play mat with a soft raised rim - three tiles wide and two deep
+  cell 12  a play rug printed with little roads and crossings - four tiles wide and three deep, lying flat on the floor
+  cell 13  a small carved wooden rocking horse - one tile
+  cell 14  a slouchy beanbag chair - one tile
+  cell 15  a standing ring toss game with hoops - one tile
+  cell 16  a toy chest with a hinged lid, toys peeking out - two tiles wide and two deep
+  cell 17  a small basketball hoop mounted on a backboard - hanging flat on the wall, seen straight on, no depth
+  cell 18  a stack of coloured building blocks - one tile
+  cell 19  a plush teddy bear sitting upright - one tile
+  cell 20  a wooden spinning top on a small base - one tile
 
 Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not repeat an item, and do not leave a cell empty.
 
@@ -301,43 +295,40 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[013/100]  家具 · 星際睡艙 + 糖果工房
+[013/100]  家具 · 收納 + 綠意
 檔名：furniture-space-pod-candy-workshop.png　20 格（5 x 4）　風格：動森
 ==============================================================================
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A sprite sheet of 20 separate pieces of furniture for a cosy pet bedroom. Every cell holds a different object - no two cells repeat.
+A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game. Every cell holds a different object; no two cells repeat.
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor - any horizontal top surface such as a table top, a seat or a shelf is an ellipse or a rectangle twice as wide as it is deep. The base of each piece rests on the bottom edge of its own cell. Nothing is tilted or rotated. Nothing carries any writing or lettering.
+Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, because the floor of the game is seen at that angle. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
-Cells 1 to 10 furnish one room, and read as one set:
-  cell 1  a padded sleep capsule with a curved open shell, three tiles wide and two deep
-  cell 2  a dark floor mat printed with a starfield, four tiles wide and three deep, lying flat on the floor
-  cell 3  a chrome pedestal table with a dark top, one tile
-  cell 4  a reclining padded pilot seat in indigo, one tile
-  cell 5  a floor lamp holding a glowing plasma sphere, one tile
-  cell 6  a grey metal supply locker with a handle, two tiles wide and two deep
-  cell 7  a wall screen showing a distant planet, hanging flat on the wall, no depth
-  cell 8  a small plant growing under a glass dome, one tile
-  cell 9  a toy satellite with small solar panels, one tile
-  cell 10  a brass gyroscope turning above its base, one tile
+The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
 
-Cells 11 to 20 furnish a different room, and read as a second set:
-  cell 11  a bed shaped from two fat pink marshmallows, three tiles wide and two deep
-  cell 12  a chequered mint and cream icing mat, four tiles wide and three deep, lying flat on the floor
-  cell 13  a stool made from a stacked pink macaron, one tile
-  cell 14  an armchair shaped like a frosted cupcake, one tile
-  cell 15  a floor lamp with a candy cane stem, one tile
-  cell 16  a pastel cabinet trimmed with piped icing, two tiles wide and two deep
-  cell 17  a framed picture of a tiered cake, hanging flat on the wall, no depth
-  cell 18  a mint plant growing from an oversized teacup, one tile
-  cell 19  a smiling gingerbread figure toy, one tile
-  cell 20  a swirl of spun sugar set on a small base, one tile
-
-The two sets must be clearly distinct from each other in material and colour.
+  cell 1  a long low sideboard with three doors - three tiles wide and two deep
+  cell 2  a flat woven jute mat with a plain border - four tiles wide and three deep, lying flat on the floor
+  cell 3  a round wicker storage basket with handles - one tile
+  cell 4  a small two-step wooden stool - one tile
+  cell 5  a slim coat stand with a scarf hung on it - one tile
+  cell 6  a cube shelving unit with boxes in some cubes - two tiles wide and two deep
+  cell 7  a row of wall hooks on a wooden rail - hanging flat on the wall, seen straight on, no depth
+  cell 8  two stacked wooden storage crates - one tile
+  cell 9  a lidded laundry hamper - one tile
+  cell 10  a low two-tier shoe rack - one tile
+  cell 11  a long bench with planters built into each end - three tiles wide and two deep
+  cell 12  a rug printed with a scattered leaf pattern - four tiles wide and three deep, lying flat on the floor
+  cell 13  a small potted succulent in a clay pot - one tile
+  cell 14  a tall potted palm in a woven basket - one tile
+  cell 15  a metal watering can on a small stand - one tile
+  cell 16  a shelving unit holding several potted plants - two tiles wide and two deep
+  cell 17  a trailing vine in a hanging planter - hanging flat on the wall, seen straight on, no depth
+  cell 18  a sealed glass terrarium with moss inside - one tile
+  cell 19  a small bonsai tree in a shallow dish - one tile
+  cell 20  a bag of soil with a trowel leaning against it - one tile
 
 Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not repeat an item, and do not leave a cell empty.
 
@@ -345,43 +336,40 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[014/100]  家具 · 熔岩龍窩 + 極光觀測房
+[014/100]  家具 · 燈光 + 飲食
 檔名：furniture-lava-den-aurora-observatory.png　20 格（5 x 4）　風格：動森
 ==============================================================================
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A sprite sheet of 20 separate pieces of furniture for a cosy pet bedroom. Every cell holds a different object - no two cells repeat.
+A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game. Every cell holds a different object; no two cells repeat.
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor - any horizontal top surface such as a table top, a seat or a shelf is an ellipse or a rectangle twice as wide as it is deep. The base of each piece rests on the bottom edge of its own cell. Nothing is tilted or rotated. Nothing carries any writing or lettering.
+Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, because the floor of the game is seen at that angle. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
-Cells 1 to 10 furnish one room, and read as one set:
-  cell 1  a low nest hollowed out of a pile of gold coins, three tiles wide and two deep
-  cell 2  a dark hide rug with scorched edges, four tiles wide and three deep, lying flat on the floor
-  cell 3  a squat block of polished obsidian as a table, one tile
-  cell 4  a small carved stone throne seat, one tile
-  cell 5  an iron brazier holding glowing embers, one tile
-  cell 6  a heavy chest bound in blackened iron, two tiles wide and two deep
-  cell 7  a banner of overlapping dragon scales hung on the wall, hanging flat on the wall, no depth
-  cell 8  a flower with ember-orange petals in a stone pot, one tile
-  cell 9  a cracked dragon egg glowing from within, one tile
-  cell 10  a small anvil with a glowing sword resting on it, one tile
+The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
 
-Cells 11 to 20 furnish a different room, and read as a second set:
-  cell 11  a daybed under a small canopy printed with stars, three tiles wide and two deep
-  cell 12  a deep blue rug embroidered with constellations, four tiles wide and three deep, lying flat on the floor
-  cell 13  a small brass tripod table, one tile
-  cell 14  a padded chair tilted back for looking upward, one tile
-  cell 15  a standing projector casting points of light, one tile
-  cell 16  a cabinet of wide shallow drawers for star charts, two tiles wide and two deep
-  cell 17  a framed star chart hung on the wall, hanging flat on the wall, no depth
-  cell 18  a glass terrarium of faintly glowing moss, one tile
-  cell 19  a small orrery with planets on brass arms, one tile
-  cell 20  a brass telescope on a wooden tripod, one tile
-
-The two sets must be clearly distinct from each other in material and colour.
+  cell 1  a low bench with two small lamps standing on it - three tiles wide and two deep
+  cell 2  a round rug with a sunburst pattern - four tiles wide and three deep, lying flat on the floor
+  cell 3  a paper lantern standing on the floor, lit - one tile
+  cell 4  a tray holding a cluster of lit candles - one tile
+  cell 5  a tall uplighter floor lamp - one tile
+  cell 6  a cabinet with glass doors and lit shelves - two tiles wide and two deep
+  cell 7  a looped string of small warm fairy lights - hanging flat on the wall, seen straight on, no depth
+  cell 8  a small table lamp with a round shade - one tile
+  cell 9  a lava lamp with slow rising blobs - one tile
+  cell 10  a small mirror ball on a stand - one tile
+  cell 11  a small dining table with two stools tucked under it - three tiles wide and two deep
+  cell 12  a chequered kitchen floor mat - four tiles wide and three deep, lying flat on the floor
+  cell 13  a stool with a round padded seat - one tile
+  cell 14  a two-tier tea trolley on castors - one tile
+  cell 15  a standing water dispenser with a bottle on top - one tile
+  cell 16  a cupboard with panelled doors and a worktop - two tiles wide and two deep
+  cell 17  a wall shelf lined with labelled-looking jars - hanging flat on the wall, seen straight on, no depth
+  cell 18  a bowl of fruit on a short stand - one tile
+  cell 19  a pair of pet bowls on a mat - one tile
+  cell 20  a kettle sitting on a small burner - one tile
 
 Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not repeat an item, and do not leave a cell empty.
 
@@ -389,43 +377,40 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[015/100]  家具 · 竹林和室 + 月影魔法閣樓
+[015/100]  家具 · 奇幻 + 自然
 檔名：furniture-bamboo-room-moon-magic-attic.png　20 格（5 x 4）　風格：動森
 ==============================================================================
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A sprite sheet of 20 separate pieces of furniture for a cosy pet bedroom. Every cell holds a different object - no two cells repeat.
+A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game. Every cell holds a different object; no two cells repeat.
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor - any horizontal top surface such as a table top, a seat or a shelf is an ellipse or a rectangle twice as wide as it is deep. The base of each piece rests on the bottom edge of its own cell. Nothing is tilted or rotated. Nothing carries any writing or lettering.
+Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, because the floor of the game is seen at that angle. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
-Cells 1 to 10 furnish one room, and read as one set:
-  cell 1  a folded futon laid out on the floor, three tiles wide and two deep
-  cell 2  a woven straw mat with a bound edge, four tiles wide and three deep, lying flat on the floor
-  cell 3  a low lacquered tea table, one tile
-  cell 4  a flat floor cushion with a low armrest, one tile
-  cell 5  a square paper andon lamp on a wooden frame, one tile
-  cell 6  a stepped tansu chest of small drawers, two tiles wide and two deep
-  cell 7  a painted hanging scroll on the wall, hanging flat on the wall, no depth
-  cell 8  a small pine bonsai in a shallow dish, one tile
-  cell 9  a wooden kendama toy, one tile
-  cell 10  a round stone water basin with a bamboo spout, one tile
+The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
 
-Cells 11 to 20 furnish a different room, and read as a second set:
-  cell 11  a small four poster bed with star-printed drapes, three tiles wide and two deep
-  cell 12  a round rug woven with the phases of the moon, four tiles wide and three deep, lying flat on the floor
-  cell 13  a three legged iron stand holding a small cauldron, one tile
-  cell 14  a high backed chair in deep plum velvet, one tile
-  cell 15  a tall iron candelabra with lit candles, one tile
-  cell 16  a cabinet of many small drawers holding bottles, two tiles wide and two deep
-  cell 17  a mirror in a crescent moon frame, hanging flat on the wall, no depth
-  cell 18  a glowing mushroom growing in a small pot, one tile
-  cell 19  a plush black cat toy with green eyes, one tile
-  cell 20  a crystal ball resting on a clawed stand, one tile
-
-The two sets must be clearly distinct from each other in material and colour.
+  cell 1  a low nest hollowed out of a pile of gold coins - three tiles wide and two deep
+  cell 2  a round rug woven with the phases of the moon - four tiles wide and three deep, lying flat on the floor
+  cell 3  a three legged iron stand holding a small cauldron - one tile
+  cell 4  a high backed chair in deep plum velvet - one tile
+  cell 5  a tall iron candelabra with lit candles - one tile
+  cell 6  a cabinet of many small drawers holding glass bottles - two tiles wide and two deep
+  cell 7  a mirror set in a crescent moon frame - hanging flat on the wall, seen straight on, no depth
+  cell 8  a softly glowing mushroom growing in a pot - one tile
+  cell 9  a cracked dragon egg glowing from within - one tile
+  cell 10  a crystal ball resting on a clawed stand - one tile
+  cell 11  a woven twig nest bed lined with moss - three tiles wide and two deep
+  cell 12  a mat woven from thick pale rope - four tiles wide and three deep, lying flat on the floor
+  cell 13  a tree stump used as a side table - one tile
+  cell 14  a wicker armchair with a linen cushion - one tile
+  cell 15  a lantern hanging from a forked branch stand - one tile
+  cell 16  a hollow log laid on its side as a storage chest - two tiles wide and two deep
+  cell 17  a wooden ship wheel hung on the wall - hanging flat on the wall, seen straight on, no depth
+  cell 18  a fern growing from a pot made of curled bark - one tile
+  cell 19  a small wooden toy sailboat with a cloth sail - one tile
+  cell 20  a brass diving helmet resting on a stand - one tile
 
 Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not repeat an item, and do not leave a cell empty.
 
@@ -443,7 +428,7 @@ A sprite sheet of 20 head accessories worn by small anime creature companions.
 
 Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 20 cells in 4 rows of 5. Do not add a row, do not repeat an item, and do not leave a cell empty.
 
-Each accessory is drawn on its own, from the front, exactly as it would look while worn - but with no creature, no head, no mannequin and no stand underneath it. Left-to-right symmetrical wherever the object itself is symmetrical. Scaled as if to fit a head about 300 pixels wide.
+Each accessory is drawn on its own, from the front, exactly as it would look while worn - but with no creature, no head, no mannequin and no stand underneath it. Left-to-right symmetrical wherever the object itself is symmetrical. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
 
 Items, in this exact order, one per cell reading left to right and top to bottom:
 a small jewelled crown, an explorer's wide-brim hat, a woven flower wreath, a star-shaped hairclip, a chef's toque, a fluffy cloud cap, a sailor cap, a pointed wizard hat, a conical bamboo leaf hat, a knitted snow hat with a pompom, a circlet of flame, a crescent moon crown, a brass gear top hat, a large ribbon bow, an ornate king's crown, a soft nightcap, a cat-ear headband, a pair of aviator goggles worn on the head, a branching coral crown, a domed cosmic helmet
@@ -462,7 +447,7 @@ A sprite sheet of 12 face accessories worn by small anime creature companions.
 
 Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 12 cells in 3 rows of 4. Do not add a row, do not repeat an item, and do not leave a cell empty.
 
-Each item is drawn on its own, from the front, exactly as it would sit on a face - but with no creature, no head and no mannequin. Eyewear is drawn as a matching pair with the space between the lenses left empty so a face can show through. Scaled as if to fit a face about 260 pixels wide.
+Each item is drawn on its own, from the front, exactly as it would sit on a face - but with no creature, no head and no mannequin. Eyewear is drawn as a matching pair with the space between the lenses left empty so a face can show through. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
 
 Items, in this exact order, one per cell reading left to right and top to bottom:
 round wire spectacles, star-shaped sunglasses, a curled gentleman's moustache, heart-shaped sunglasses, tinted explorer goggles, a single monocle on a fine chain, a snowflake face sticker, rainbow face paint stripes, a crescent moon eye mask, a bubble-dome face visor, a mechanical eyepatch with brass rivets, a red party nose
@@ -481,7 +466,7 @@ A sprite sheet of 16 neck accessories worn by small anime creature companions.
 
 Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 16 cells in 4 rows of 4. Do not add a row, do not repeat an item, and do not leave a cell empty.
 
-Each item is drawn on its own, from the front, exactly as it would sit around a neck - but with no creature and no mannequin. Drawn as a closed ring or an open U shape seen from the front, never as a single straight strand. Scaled as if to fit a neck about 200 pixels wide.
+Each item is drawn on its own, from the front, exactly as it would sit around a neck - but with no creature and no mannequin. Drawn as a closed ring or an open U shape seen from the front, never as a single straight strand. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
 
 Items, in this exact order, one per cell reading left to right and top to bottom:
 a red neckerchief, a blue neckerchief, a gold bell on a collar, a pearl necklace, a collar of woven leaves, a starlight bow tie, an explorer's badge on a strap, a crystal pendant, a fluffy cloud scarf, a rainbow striped scarf, a flame-edged shoulder cape, a snow-white fur shoulder cape, a bamboo knot necktie, a crescent moon pendant, a brass gear necklace, a collar of small flowers
@@ -500,7 +485,7 @@ A sprite sheet of 16 back accessories worn by small anime creature companions.
 
 Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 16 cells in 4 rows of 4. Do not add a row, do not repeat an item, and do not leave a cell empty.
 
-Each item is drawn on its own, from the front, exactly as it would look worn on a back - but with no creature and no mannequin. Wings and capes are perfectly left-to-right symmetrical and fully spread open. Backpacks are seen from the front as they would look peeking out from behind a body. Scaled as if to fit a body about 300 pixels wide.
+Each item is drawn on its own, from the front, exactly as it would look worn on a back - but with no creature and no mannequin. Wings and capes are perfectly left-to-right symmetrical and fully spread open. Backpacks are seen from the front as they would look peeking out from behind a body. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
 
 Items, in this exact order, one per cell reading left to right and top to bottom:
 a small school satchel, a pair of butterfly wings, a pair of leathery dragon wings, a fluffy cloud cape, an ocean-blue rucksack, a woven bamboo basket, a starry cloak, an explorer's tool case, a moonlight cape, a rocket pack, a snowman-shaped backpack, a garden backpack with small plants growing out of it, a wind-up clockwork key and gear, a candy-striped backpack, a pair of small crystal wings, a rolled mini tent
@@ -519,7 +504,7 @@ A sprite sheet of 16 aura accessories worn by small anime creature companions.
 
 Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 16 cells in 4 rows of 4. Do not add a row, do not repeat an item, and do not leave a cell empty.
 
-Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. No creature stands in it and the middle is left empty. Glowing, semi-transparent, light and airy. Scaled as if to surround a body about 320 pixels wide.
+Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. No creature stands in it and the middle is left empty. Glowing, semi-transparent, light and airy. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
 
 Items, in this exact order, one per cell reading left to right and top to bottom:
 a trail of glowing stars, a trail of soap bubbles, a trail of drifting leaves, a trail of orange sparks, a trail of snowflakes, a rainbow shimmer trail, a ring of moon shadow, a ring of warm sunlight, a ring of floating crystals, a ring of crackling lightning, a swirl of flower petals, a swirl of music notes, a small cloud following along, a ring of tiny orbiting planets, a swarm of fireflies, a ring of slowly turning brass gears
