@@ -108,6 +108,91 @@ async function write(target, buffer, dry) {
   await fs.writeFile(target, buffer);
 }
 
+/**
+ * Knock a flat background out of a sheet that came back without alpha.
+ *
+ * Not every generator honours a request for transparency, and a sheet on white cannot simply
+ * have its white pixels deleted: this dragon has white markings on its wings, and keying by
+ * colour punches holes straight through them. So the background is found by flooding inward
+ * from the edges of the sheet instead — anything the flood cannot reach without crossing the
+ * artwork is interior, and stays.
+ *
+ * The last pass softens the boundary by one pixel, because a hard cut leaves the pale fringe
+ * the generator drew around each subject, and eighty of those stacked on a pet is a visible halo.
+ */
+async function knockOutBackground(buffer) {
+  const { data, info } = await sharp(buffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { width, height, channels } = info;
+  const at = (x, y) => (y * width + x) * channels;
+
+  // The corners agree on the background colour; if they do not, this is not a flat matte.
+  const corners = [[0, 0], [width - 1, 0], [0, height - 1], [width - 1, height - 1]]
+    .map(([x, y]) => [data[at(x, y)], data[at(x, y) + 1], data[at(x, y) + 2]]);
+  const [br, bg, bb] = corners[0];
+  const agrees = corners.every(([r, g, b]) => Math.abs(r - br) + Math.abs(g - bg) + Math.abs(b - bb) < 24);
+  if (!agrees) return null;
+
+  const near = (index, tolerance) =>
+    Math.abs(data[index] - br) + Math.abs(data[index + 1] - bg) + Math.abs(data[index + 2] - bb) <= tolerance;
+
+  const background = new Uint8Array(width * height);
+  const stack = [];
+  for (let x = 0; x < width; x += 1) { stack.push(x, 0, x, height - 1); }
+  for (let y = 0; y < height; y += 1) { stack.push(0, y, width - 1, y); }
+  while (stack.length) {
+    const y = stack.pop();
+    const x = stack.pop();
+    if (x < 0 || y < 0 || x >= width || y >= height) continue;
+    const flat = y * width + x;
+    if (background[flat]) continue;
+    if (!near(at(x, y), 46)) continue;
+    background[flat] = 1;
+    stack.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1);
+  }
+
+  let cleared = 0;
+  for (let i = 0; i < background.length; i += 1) {
+    if (!background[i]) continue;
+    data[i * channels + 3] = 0;
+    cleared += 1;
+  }
+  if (cleared < background.length * 0.05) return null;   // nothing that looks like a matte
+
+  // Feather: any kept pixel touching the background loses part of its alpha, which takes the
+  // generator's pale outline with it instead of leaving it as a rim.
+  const edge = [];
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (background[y * width + x]) continue;
+      const touching = (x > 0 && background[y * width + x - 1]) || (x < width - 1 && background[y * width + x + 1])
+        || (y > 0 && background[(y - 1) * width + x]) || (y < height - 1 && background[(y + 1) * width + x]);
+      if (touching && near(at(x, y), 132)) edge.push(at(x, y));
+    }
+  }
+  for (const index of edge) data[index + 3] = Math.round(data[index + 3] * 0.35);
+
+  return {
+    buffer: await sharp(data, { raw: { width, height, channels } }).png().toBuffer(),
+    cleared: cleared / background.length,
+  };
+}
+
+/** Give every sheet an alpha channel, keying a flat matte out when the generator did not. */
+async function loadSheet(file) {
+  const raw = await sharp(file).ensureAlpha().png().toBuffer();
+  const { data, info } = await sharp(raw).raw().toBuffer({ resolveWithObject: true });
+  let clear = 0;
+  for (let i = 3; i < data.length; i += info.channels) if (data[i] < 8) clear += 1;
+  if (clear > (data.length / info.channels) * 0.02) return raw;   // already transparent
+  const keyed = await knockOutBackground(raw);
+  if (!keyed) {
+    log('      no alpha and no flat background to key - importing as is');
+    return raw;
+  }
+  log(`      no alpha; keyed a flat background off ${Math.round(keyed.cleared * 100)}% of the sheet`);
+  return keyed.buffer;
+}
+
 // ------------------------------------------------------------------ rooms ---
 async function importRoom(file, roomId, dry) {
   const room = catalog.rooms.find((entry) => entry.id === roomId);
@@ -120,7 +205,7 @@ async function importRoom(file, roomId, dry) {
 
 // -------------------------------------------------------------- furniture ---
 async function importFurniture(file, roomIds, dry) {
-  const sheet = await sharp(file).png().toBuffer();
+  const sheet = await loadSheet(file);
   const meta = await sharp(sheet).metadata();
   let written = 0;
   for (let block = 0; block < roomIds.length; block += 1) {
@@ -144,7 +229,7 @@ async function importWearables(file, slot, dry) {
   const grid = WEARABLE_GRID[slot];
   if (!grid) throw new Error(`unknown wearable slot ${slot}`);
   const items = catalog.wearables.filter((item) => item.slot === slot);
-  const sheet = await sharp(file).png().toBuffer();
+  const sheet = await loadSheet(file);
   const meta = await sharp(sheet).metadata();
   let written = 0;
   for (let index = 0; index < items.length; index += 1) {
@@ -169,7 +254,7 @@ async function importWearables(file, slot, dry) {
 async function importPet(file, speciesId, stage, dry) {
   const pet = catalog.pets.find((entry) => entry.id === speciesId);
   if (!pet) throw new Error(`no species called ${speciesId}`);
-  const sheet = await sharp(file).png().toBuffer();
+  const sheet = await loadSheet(file);
   const meta = await sharp(sheet).metadata();
 
   const cells = [];
