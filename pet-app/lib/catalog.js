@@ -168,7 +168,9 @@ const FURNITURE = ROOMS.flatMap((room) => FURNITURE_NAMES.map((name, index) => (
 })));
 
 const EVOLUTION_THRESHOLDS = [0, 400, 1100, 2100];
-const EGG = Object.freeze({ randomPrice: 800, directCommonPrice: 1200, directRarePrice: 2200, odds: { common: .55, rare: .35, epic: .10 }, pityAt: 10, duplicateDust: { common: 10, rare: 25, epic: 60 } });
+// A duplicate species pays back coins. It used to pay stardust, which nothing on sale accepts
+// any more, so drawing a species you already had was worth nothing at all.
+const EGG = Object.freeze({ randomPrice: 800, directCommonPrice: 1200, directRarePrice: 2200, odds: { common: .55, rare: .35, epic: .10 }, pityAt: 10, duplicateCoins: { common: 10, rare: 25, epic: 60 } });
 
 const catalog = Object.freeze({
   version: CATALOG_VERSION,

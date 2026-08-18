@@ -34,14 +34,14 @@ export interface RoomDefinition { id: string; name: Localized; price: number; pr
 export interface FoodDefinition { id: string; name: Localized; category: 'food'; tier: number; price: number; xp: number }
 /** Alpha bounding box of the drawn object, as 0..1 fractions of its source canvas. */
 export interface ContentBox { x: number; y: number; width: number; height: number }
-export interface WearableDefinition { id: string; name: Localized; category: 'wearable'; slot: string; rarity: string; price: number; currency: 'coins' | 'stardust'; art?: string; content?: ContentBox | null }
+export interface WearableDefinition { id: string; name: Localized; category: 'wearable'; slot: string; rarity: string; price: number; currency: 'coins'; art?: string; content?: ContentBox | null }
 export interface FurnitureDefinition { id: string; name: Localized; category: 'furniture'; roomId: string; price: number; footprint: [number, number]; layer: string; art?: string; content?: ContentBox | null }
 export interface Catalog {
   version: string; pets: PetDefinition[]; rooms: RoomDefinition[];
   foods: FoodDefinition[]; wearables: WearableDefinition[];
   furniture: FurnitureDefinition[]; evolutionThresholds: number[]; dailyXpCap: number;
   animation: AnimationLayout | null;
-  egg: { randomPrice: number; directCommonPrice: number; directRarePrice: number; odds: Record<Rarity, number>; pityAt: number; duplicateDust: Record<Rarity, number> };
+  egg: { randomPrice: number; directCommonPrice: number; directRarePrice: number; odds: Record<Rarity, number>; pityAt: number; duplicateCoins: Record<Rarity, number> };
   reactions: string[];
 }
 export interface PetInstance {

@@ -290,10 +290,14 @@ function applyJsonEgg(studentId, { starter = false, directSpeciesId = null, rand
     data.petCurrencyLedger.push({ transactionId: makeId(), studentId, actorId: studentId, delta: -price, kind: 'egg_purchase', idempotencyKey, metadata: { speciesId: directSpeciesId, random: !directSpeciesId }, createdAt: nowIso() });
   }
   let pet = null;
-  let duplicateDust = 0;
+  let duplicateCoins = 0;
   if (owned.has(species.id)) {
-    duplicateDust = catalog.egg.duplicateDust[species.rarity];
-    profile.stardust += duplicateDust;
+    // A refund is a coin movement like any other, so it goes through the ledger. It needs its
+    // own idempotency key: the unique index allows one row per key, and the purchase above has
+    // already claimed the draw's own key.
+    duplicateCoins = catalog.egg.duplicateCoins[species.rarity];
+    wallet.balance += duplicateCoins; wallet.updatedAt = nowIso();
+    data.petCurrencyLedger.push({ transactionId: makeId(), studentId, actorId: studentId, delta: duplicateCoins, kind: 'egg_duplicate', idempotencyKey: idempotencyKey ? `${idempotencyKey}:duplicate` : null, metadata: { speciesId: species.id, rarity: species.rarity }, createdAt: nowIso() });
   } else {
     pet = { petId: makeId(), studentId, speciesId: species.id, xp: 0, stage: 1, dailyXp: 0, dailyXpDate: '', equippedWearables: [], createdAt: nowIso(), updatedAt: nowIso() };
     data.petInstances.push(pet);
@@ -302,7 +306,7 @@ function applyJsonEgg(studentId, { starter = false, directSpeciesId = null, rand
   if (starter) profile.starterEggClaimed = true;
   if (countsForPity) profile.eggPity = species.rarity === 'epic' ? 0 : Math.min(9, profile.eggPity + 1);
   profile.updatedAt = nowIso();
-  const response = { speciesId: species.id, rarity: species.rarity, pet: pet ? publicPet(pet) : null, duplicateDust, balance: wallet.balance, stardust: profile.stardust, eggPity: profile.eggPity };
+  const response = { speciesId: species.id, rarity: species.rarity, pet: pet ? publicPet(pet) : null, duplicateCoins, balance: wallet.balance, eggPity: profile.eggPity };
   writeJsonIdempotency(data, studentId, idempotencyKey, kind, response);
   store.save();
   return clone(response);
@@ -343,17 +347,21 @@ async function applyPostgresEgg(studentId, options) {
       await client.query(`UPDATE PetWallets SET Balance=$2,UpdatedAt=NOW() WHERE StudentID=$1`, [studentId, balance]);
       await client.query(`INSERT INTO PetCurrencyLedger (TransactionID,StudentID,ActorID,Delta,Kind,IdempotencyKey,Metadata) VALUES ($1,$2,$2,$3,'egg_purchase',$4,$5::jsonb)`, [makeId(), studentId, -price, idempotencyKey || null, JSON.stringify({ speciesId: directSpeciesId, random: !directSpeciesId })]);
     }
-    let pet = null; let duplicateDust = 0;
-    if (owned.has(species.id)) duplicateDust = catalog.egg.duplicateDust[species.rarity];
-    else {
+    let pet = null; let duplicateCoins = 0;
+    if (owned.has(species.id)) {
+      // As above: the refund is ledgered under its own key, since the draw's key is taken.
+      duplicateCoins = catalog.egg.duplicateCoins[species.rarity];
+      balance += duplicateCoins;
+      await client.query(`UPDATE PetWallets SET Balance=$2,UpdatedAt=NOW() WHERE StudentID=$1`, [studentId, balance]);
+      await client.query(`INSERT INTO PetCurrencyLedger (TransactionID,StudentID,ActorID,Delta,Kind,IdempotencyKey,Metadata) VALUES ($1,$2,$2,$3,'egg_duplicate',$4,$5::jsonb)`, [makeId(), studentId, duplicateCoins, idempotencyKey ? `${idempotencyKey}:duplicate` : null, JSON.stringify({ speciesId: species.id, rarity: species.rarity })]);
+    } else {
       pet = { petId: makeId(), speciesId: species.id, xp: 0, stage: 1, dailyXp: 0, dailyXpDate: '' };
       await client.query(`INSERT INTO PetInstances (PetID,StudentID,SpeciesID) VALUES ($1,$2,$3)`, [pet.petId, studentId, species.id]);
     }
     const nextPity = countsForPity ? (species.rarity === 'epic' ? 0 : Math.min(9, Number(profile.eggPity) + 1)) : Number(profile.eggPity);
-    const nextDust = Number(profile.stardust) + duplicateDust;
     const activePetId = profile.activePetId || pet?.petId || null;
-    await client.query(`UPDATE PetProfiles SET ActivePetID=$2,StarterEggClaimed=CASE WHEN $3 THEN TRUE ELSE StarterEggClaimed END,EggPity=$4,Stardust=$5,UpdatedAt=NOW() WHERE StudentID=$1`, [studentId, activePetId, starter, nextPity, nextDust]);
-    const response = { speciesId: species.id, rarity: species.rarity, pet, duplicateDust, balance, stardust: nextDust, eggPity: nextPity };
+    await client.query(`UPDATE PetProfiles SET ActivePetID=$2,StarterEggClaimed=CASE WHEN $3 THEN TRUE ELSE StarterEggClaimed END,EggPity=$4,UpdatedAt=NOW() WHERE StudentID=$1`, [studentId, activePetId, starter, nextPity]);
+    const response = { speciesId: species.id, rarity: species.rarity, pet, duplicateCoins, balance, eggPity: nextPity };
     if (idempotencyKey) await client.query(`INSERT INTO PetIdempotency (ActorID,IdempotencyKey,Kind,Response) VALUES ($1,$2,$3,$4::jsonb)`, [studentId, idempotencyKey, kind, JSON.stringify(response)]);
     return response;
   });

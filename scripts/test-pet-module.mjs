@@ -88,8 +88,13 @@ const draws=[];
 for(let index=0;index<10;index+=1) draws.push(await repo.purchaseEgg('S002',{kind:'random',idempotencyKey:`pity-${index}`,random:()=>.99}));
 assert.ok(draws.slice(0,9).every((draw)=>draw.rarity==='common'));
 assert.equal(draws[9].rarity,'epic'); assert.equal(draws[9].eggPity,0);
-assert.ok(draws.slice(1,9).some((draw)=>draw.duplicateDust===10));
-pass('55/35/10 draw path, duplicate stardust and tenth-draw epic pity');
+// A duplicate now pays coins straight back into the wallet, and the refund is ledgered under
+// its own key so the draw's own key stays free for the purchase row.
+assert.ok(draws.slice(1,9).some((draw)=>draw.duplicateCoins===10),'a repeat of an owned species should refund coins');
+const refunds=store.load().petCurrencyLedger.filter((row)=>row.kind==='egg_duplicate'&&row.studentId==='S002');
+assert.equal(refunds.length,draws.filter((draw)=>draw.duplicateCoins>0).length);
+assert.ok(refunds.every((row)=>row.delta>0));
+pass('55/35/10 draw path, duplicate refund in coins and tenth-draw epic pity');
 
 const beforeFood=(await repo.getBootstrap('S001')).wallet.balance;
 await repo.purchaseItem('S001',{itemId:'apple-slice',quantity:7,idempotencyKey:'food-buy'});
