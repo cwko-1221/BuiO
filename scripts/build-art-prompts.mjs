@@ -48,7 +48,7 @@ const WEARABLES = [
   ['back', '背部', 4, 4, `a small school satchel, a pair of butterfly wings, a pair of leathery dragon wings, a fluffy cloud cape, an ocean-blue rucksack, a woven bamboo basket, a starry cloak, an explorer's tool case, a moonlight cape, a rocket pack, a snowman-shaped backpack, a garden backpack with small plants growing out of it, a wind-up clockwork key and gear, a candy-striped backpack, a pair of small crystal wings, a rolled mini tent`,
     `Each item is drawn on its own, from the front, exactly as it would look worn on a back - but with no creature and no mannequin. Wings and capes are perfectly left-to-right symmetrical and fully spread open. Backpacks are seen from the front as they would look peeking out from behind a body. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
   ['aura', '光環', 4, 4, `a trail of glowing stars, a trail of soap bubbles, a trail of drifting leaves, a trail of orange sparks, a trail of snowflakes, a rainbow shimmer trail, a ring of moon shadow, a ring of warm sunlight, a ring of floating crystals, a ring of crackling lightning, a swirl of flower petals, a swirl of music notes, a small cloud following along, a ring of tiny orbiting planets, a swarm of fireflies, a ring of slowly turning brass gears`,
-    `Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. No creature stands in it and the middle is left empty. Glowing, semi-transparent, light and airy. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
+    `Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. There is no creature and no mannequin in the cell, and the middle is left empty. Glowing, semi-transparent, light and airy. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
 ];
 
 const SPECIES = [
@@ -224,15 +224,72 @@ In every cell the creature stands on the same baseline, occupies the same height
 
 Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.`;
 
+
+/**
+ * What each kind of prompt must and must not say.
+ *
+ * These are the clauses the first generated sheets proved were needed: a sheet that did not
+ * insist on alpha came back on white, one that did not state its cell count came back with a
+ * fifth row, one that described a room got the room painted behind every chair. Checking them
+ * here means an edit that quietly drops one fails the build instead of being discovered in a
+ * batch of a hundred generated images.
+ *
+ * Rooms are the deliberate exception: a room is a background, so it must demand the opposite of
+ * transparency, and must not mention alpha at all.
+ */
+const MUST_SAY = {
+  room: [
+    'fully opaque', 'no transparency anywhere', '38 percent of the way down',
+    'must not read as a grid', 'must be entirely empty', 'no characters or creatures',
+    '16:9 landscape',
+  ],
+  sheet: [
+    'genuinely transparent', 'real alpha channel', 'Save as PNG with alpha', 'Not white',
+    'no white outline or sticker die-cut edge', 'no text', 'no watermark',
+  ],
+  furniture: [
+    'Do not draw a room, a setting or a scene', 'writing, lettering, numbers or a logo',
+    'twice as wide as it is deep', 'Exactly 20 cells in 4 rows of 5', 'do not repeat an item',
+  ],
+  wearable: [
+    'Each cell contains ONE cut-out object', 'no creature', 'do not repeat an item',
+  ],
+  pet: [
+    'five landmarks must read clearly', 'Do not draw the creature as a single undivided ball',
+    'The same individual creature appears in all 20 cells', 'present in all 20 cells',
+    'turned, not the creature redrawn', 'true side profile facing to the right',
+    'Row 4 faces the viewer', 'stands on the same baseline',
+    'Exactly 20 cells in 4 rows of 5', 'Do not add a fifth row', 'not a die-cut sticker',
+  ],
+};
+const MUST_NOT_SAY = {
+  room: ['transparent background', 'real alpha channel'],
+  sheet: ['fully opaque'],
+};
+
+const problems = [];
+function check(kind, label, body) {
+  const groups = kind === 'room' ? ['room'] : ['sheet', kind];
+  for (const group of groups) {
+    for (const phrase of MUST_SAY[group] || []) {
+      if (!body.toLowerCase().includes(phrase.toLowerCase())) problems.push(`${label} — missing "${phrase}"`);
+    }
+    for (const phrase of MUST_NOT_SAY[group] || []) {
+      if (body.toLowerCase().includes(phrase.toLowerCase())) problems.push(`${label} — must not say "${phrase}"`);
+    }
+  }
+}
+
 const out = [];
 let n = 0;
-const block = (label, note, body) => {
+const block = (kind, label, note, body) => {
   n += 1;
+  check(kind, label, body);
   out.push(`\n\n${'='.repeat(78)}\n[${String(n).padStart(3, '0')}/100]  ${label}\n${note}\n${'='.repeat(78)}\n\n${body}\n`);
 };
 
 for (const [id, zh, theme] of ROOMS) {
-  block(`房間 · ${zh}`, `檔名：room-${id}.png　輸出：1600 x 900　不透明　風格：動森`,
+  block('room', `房間 · ${zh}`, `檔名：room-${id}.png　輸出：1600 x 900　不透明　風格：動森`,
 `${WORLD_STYLE}
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
@@ -257,7 +314,7 @@ for (let i = 0; i < BATCHES.length; i += 2) {
   const [idB, labelB] = BATCHES[i + 1];
   const list = (id, offset) => SETS[id]
     .map(([, , detail], k) => `  cell ${offset + k + 1}  ${detail} - ${SLOTS[k].size}`).join('\n');
-  block(`家具 · ${labelA} + ${labelB}`, `檔名：furniture-${idA}-${idB}.png　20 格（5 x 4）　風格：動森`,
+  block('furniture', `家具 · ${labelA} + ${labelB}`, `檔名：furniture-${idA}-${idB}.png　20 格（5 x 4）　風格：動森`,
 `${WORLD_STYLE}
 
 A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game. Every cell holds a different object; no two cells repeat.
@@ -277,7 +334,7 @@ ${sheet(5, 4)}`);
 }
 
 for (const [slot, zh, cols, rows, items, extra] of WEARABLES) {
-  block(`飾物 · ${zh}`, `檔名：wearable-${slot}.png　${cols * rows} 格（${cols} x ${rows}）　風格：日系動漫（跟寵物）`,
+  block('wearable', `飾物 · ${zh}`, `檔名：wearable-${slot}.png　${cols * rows} 格（${cols} x ${rows}）　風格：日系動漫（跟寵物）`,
 `${PET_STYLE}
 
 A sprite sheet of ${cols * rows} ${slot} accessories worn by small anime creature companions.
@@ -294,7 +351,7 @@ ${sheet(cols, rows)}`);
 
 for (const [id, zh, base, stages] of SPECIES) {
   stages.forEach((growth, index) => {
-    block(`寵物 · ${zh} 第 ${index + 1} 階段`, `檔名：pet-${id}-${index + 1}.png　20 格（5 x 4）　風格：日系動漫`,
+    block('pet', `寵物 · ${zh} 第 ${index + 1} 階段`, `檔名：pet-${id}-${index + 1}.png　20 格（5 x 4）　風格：日系動漫`,
 `${PET_STYLE}
 
 A character sprite sheet for ONE creature: ${base}. At this stage it is ${growth}.
@@ -323,6 +380,13 @@ const header = `# BuiO 寵物模組 · 美術生成 prompt
 由 scripts/build-art-prompts.mjs 生成，唔好手改；改咗個 script 再跑過。
 `;
 
+if (problems.length) {
+  console.error(`\n${problems.length} prompt(s) failed the clause check:`);
+  for (const problem of [...new Set(problems.map((p) => p.slice(p.indexOf('—'))))]) console.error('  ' + problem);
+  process.exit(1);
+}
+
 fs.writeFileSync('docs/art-prompts.md', header + out.join(''));
 console.log(`docs/art-prompts.md · ${n} 段 · ${(header + out.join('')).length.toLocaleString()} 字`);
 console.log('  房間 10（動森）· 家具 5（動森）· 飾物 5（動漫）· 寵物 80（動漫）');
+console.log('  逐段條款檢查：全部通過');

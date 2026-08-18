@@ -544,7 +544,7 @@ A sprite sheet of 16 aura accessories worn by small anime creature companions.
 
 Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 16 cells in 4 rows of 4. Do not add a row, do not repeat an item, and do not leave a cell empty.
 
-Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. No creature stands in it and the middle is left empty. Glowing, semi-transparent, light and airy. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
+Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. There is no creature and no mannequin in the cell, and the middle is left empty. Glowing, semi-transparent, light and airy. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
 
 Items, in this exact order, one per cell reading left to right and top to bottom:
 a trail of glowing stars, a trail of soap bubbles, a trail of drifting leaves, a trail of orange sparks, a trail of snowflakes, a rainbow shimmer trail, a ring of moon shadow, a ring of warm sunlight, a ring of floating crystals, a ring of crackling lightning, a swirl of flower petals, a swirl of music notes, a small cloud following along, a ring of tiny orbiting planets, a swarm of fireflies, a ring of slowly turning brass gears
