@@ -66,6 +66,33 @@ const OUTFIT_SLOTS: { key: string; zh: string; en: string; icon: string; side: '
   { key:'aura', zh:'光環', en:'Aura',  icon:'✨', side:'foot' },
 ];
 
+/** Server refusals a student can hit, in the language they read. */
+const REFUSALS: Record<string, string> = {
+  'Not enough coins': '金幣唔夠。',
+  'Not enough stardust': '星塵唔夠。',
+  'Item already owned': '你已經有呢件嘢喇。',
+  'Shop item not found': '商店冇呢件貨品。',
+  'Pet already owned': '你已經有呢隻寵物喇。',
+  'Pet not found': '搵唔到呢隻寵物。',
+  'This pet cannot be bought directly': '呢隻寵物要靠扭蛋先開到。',
+  'Starter egg already claimed': '新手蛋已經領取咗。',
+  'Daily XP limit would be exceeded': '今日經驗已經滿咗，聽日再嚟。',
+  'Food not owned': '你冇呢款食物。',
+  'Food not found': '搵唔到呢款食物。',
+  'Wearable not owned': '你冇呢件飾物。',
+  'Invalid outfit': '呢套裝備唔合規則。',
+  'Outfit slots must be unique': '同一個部位只可以著一件。',
+  'Room theme not owned': '你未擁有呢個房間主題。',
+  'Furniture not owned': '你冇呢件家具。',
+  'Furniture footprints overlap': '家具重疊咗，請移開少少。',
+  'Furniture is outside the room grid': '家具超出咗房間範圍。',
+  'Furniture footprint is outside the room grid': '家具超出咗房間範圍。',
+  'Too many copies of furniture placed': '呢件家具擺得太多。',
+  'Room may contain at most 80 items': '房間最多只可以擺 80 件嘢。',
+  'This room is not available to visit': '呢個房間而家唔開放參觀。',
+  'Invalid reaction': '呢個反應唔啱。',
+};
+
 class StudentApp {
   identity: Identity; state!: Bootstrap; locale: Locale; game?: Phaser.Game; tab = 'home'; selectedFurniture = ''; roomPlacements: RoomPlacement[] = [];
   visiting?: any;
@@ -117,35 +144,35 @@ class StudentApp {
       if (button.dataset.tab) return this.openTab(button.dataset.tab);
       const action = button.dataset.action!;
       if (action === 'audio') { audio.setEnabled(!audio.enabled); button.innerHTML = icon(audio.enabled?'sound':'mute'); return; }
-      if (action === 'hatch') return this.hatch(button as HTMLButtonElement);
-      if (action === 'feed') return this.feed(button.dataset.id!);
+      if (action === 'hatch') return await this.hatch(button as HTMLButtonElement);
+      if (action === 'feed') return await this.feed(button.dataset.id!);
       if (action === 'play') { this.game?.events.emit('pet:emote','happy'); audio.sfx('happy',this.state.catalog.pets.findIndex((pet)=>pet.id===this.activePet()?.speciesId)); return; }
       if (action === 'sleep') { this.game?.events.emit('pet:emote','sleep'); return; }
-      if (action === 'activate') return this.activate(button.dataset.id!);
-      if (action === 'buy-random-egg') return this.buyEgg({kind:'random'},button as HTMLButtonElement);
-      if (action === 'buy-direct-egg') return this.buyEgg({kind:'direct',speciesId:button.dataset.id},button as HTMLButtonElement);
-      if (action === 'buy-item') return this.buyItem(button.dataset.id!,button as HTMLButtonElement);
-      if (action === 'shop-category') return this.renderShop(button.dataset.id!);
-      if (action === 'decorate') return this.renderDecorator();
-      if (action === 'open-themes') return this.renderThemePicker();
+      if (action === 'activate') return await this.activate(button.dataset.id!);
+      if (action === 'buy-random-egg') return await this.buyEgg({kind:'random'},button as HTMLButtonElement);
+      if (action === 'buy-direct-egg') return await this.buyEgg({kind:'direct',speciesId:button.dataset.id},button as HTMLButtonElement);
+      if (action === 'buy-item') return await this.buyItem(button.dataset.id!,button as HTMLButtonElement);
+      if (action === 'shop-category') return await this.renderShop(button.dataset.id!);
+      if (action === 'decorate') return await this.renderDecorator();
+      if (action === 'open-themes') return await this.renderThemePicker();
       if (action === 'set-theme') {
         this.state.room.themeId=button.dataset.id!;
         document.querySelector('#modalRoot')!.innerHTML='';
         this.startBedroom(); this.renderDecorator(); return;
       }
-      if (action === 'set-visibility') return this.setVisibility(button.dataset.id as 'private'|'class');
-      if (action === 'open-feed') return this.renderFeedPicker();
-      if (action === 'open-outfit') return this.renderOutfitPicker();
+      if (action === 'set-visibility') return await this.setVisibility(button.dataset.id as 'private'|'class');
+      if (action === 'open-feed') return await this.renderFeedPicker();
+      if (action === 'open-outfit') return await this.renderOutfitPicker();
       if (action === 'close-modal') { document.querySelector('#modalRoot')!.innerHTML=''; return; }
       if (action === 'add-furniture') { this.game?.events.emit('room:add-item',button.dataset.id); return; }
       if (action === 'rotate-item') { if(this.selectedFurniture)this.game?.events.emit('room:rotate-selected',this.selectedFurniture); return; }
       if (action === 'remove-item') { if(this.selectedFurniture)this.game?.events.emit('room:remove-selected',this.selectedFurniture); return; }
-      if (action === 'save-room') return this.saveRoom();
-      if (action === 'visit-room') return this.visitRoom(button.dataset.id!);
-      if (action === 'reaction') return this.react(button.dataset.owner!,button.dataset.id!);
-      if (action === 'back-home') return this.openHome();
-      if (action === 'equip-wearable') return this.equipWearable(button.dataset.id!);
-      if (action === 'unequip-slot') return this.clearSlot(button.dataset.id!);
+      if (action === 'save-room') return await this.saveRoom();
+      if (action === 'visit-room') return await this.visitRoom(button.dataset.id!);
+      if (action === 'reaction') return await this.react(button.dataset.owner!,button.dataset.id!);
+      if (action === 'back-home') return await this.openHome();
+      if (action === 'equip-wearable') return await this.equipWearable(button.dataset.id!);
+      if (action === 'unequip-slot') return await this.clearSlot(button.dataset.id!);
     } catch (error) { this.toast((error as Error).message,true); }
   };
   private handleChange = (event: Event) => { const target=event.target as HTMLInputElement|HTMLSelectElement;if(target.id==='roomVisibility')this.state.room.visibility=target.value as 'private'|'class';if(target.id==='roomTheme')this.state.room.themeId=target.value; };
@@ -475,8 +502,8 @@ class StudentApp {
     if(category!=='eggs')cards=`<div class="shop-grid">${list.map((item:any)=>{const owned=this.inventory(item.id)>0;const art=item.art||'';return `<article class="shop-card ${owned?'owned':''}">${art?`<img src="${art}" alt="" loading="lazy">`:`<div class="item-glyph ${item.category}">${icon(item.category==='food'?'food':item.kind||'spark')}</div>`}<h3>${escapeHtml(this.name(item.name))}</h3><p>${item.xp?`+${item.xp} XP`:item.kind||item.category}</p><button data-action="buy-item" data-id="${item.id}" ${owned&&!['food','furniture'].includes(item.category)?'disabled':''}>${owned&&!['food','furniture'].includes(item.category)?this.t('owned'):`${this.t('buy')} · ${item.price} ${item.currency==='stardust'?this.t('dust'):this.t('coins')}`}</button></article>`}).join('')}</div>`;
     document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">MAGIC MARKET</p><h1>${this.t('shop')}</h1><div class="filter-row" role="tablist">${categories.map(([id,label])=>`<button data-action="shop-category" data-id="${id}" role="tab" aria-selected="${category===id}" class="${category===id?'active':''}">${label}</button>`).join('')}</div>${cards}</div>`;
   }
-  private async buyEgg(body:any,button:HTMLButtonElement){button.disabled=true;const result=await api.buyEgg(body,idempotencyKey());audio.sfx('hatch');this.celebrate(result.rarity==='epic'?'epic':'hatch');await this.reload();this.startBedroom();this.renderReveal(result.speciesId,result.rarity,result.duplicateDust);}
-  private async buyItem(itemId:string,button:HTMLButtonElement){button.disabled=true;await api.purchase({itemId,quantity:1},idempotencyKey());audio.sfx('buy');await this.reload();this.updateWallet();this.renderShop(button.closest('.panel-scroll')?.querySelector('.filter-row .active')?.getAttribute('data-id')||'eggs');this.toast(this.locale==='zh-HK'?'購買成功！':'Purchase complete!');}
+  private async buyEgg(body:any,button:HTMLButtonElement){button.disabled=true;let result;try{result=await api.buyEgg(body,idempotencyKey());}catch(error){button.disabled=false;throw error;}audio.sfx('hatch');this.celebrate(result.rarity==='epic'?'epic':'hatch');await this.reload();this.startBedroom();this.renderReveal(result.speciesId,result.rarity,result.duplicateDust);}
+  private async buyItem(itemId:string,button:HTMLButtonElement){button.disabled=true;try{await api.purchase({itemId,quantity:1},idempotencyKey());}catch(error){button.disabled=false;throw error;}audio.sfx('buy');await this.reload();this.updateWallet();this.renderShop(button.closest('.panel-scroll')?.querySelector('.filter-row .active')?.getAttribute('data-id')||'eggs');this.toast(this.locale==='zh-HK'?'購買成功！':'Purchase complete!');}
   private renderDecorator(){
     this.game?.events.emit('room:set-editing',true);
     const zh=this.locale==='zh-HK';
@@ -584,7 +611,8 @@ class StudentApp {
   private async reload(){this.state=await api.bootstrap();this.roomPlacements=this.state.room.placements.map((item)=>({...item}));this.updateWallet();}
   private updateWallet(){this.setValue('#coinBalance',this.state.wallet.balance.toLocaleString());}
   private setValue(selector:string,value:string){const node=document.querySelector<HTMLElement>(selector);if(!node)return;if(node.textContent===value){node.textContent=value;return;}node.textContent=value;node.classList.remove('bump');void node.offsetWidth;node.classList.add('bump');window.setTimeout(()=>node.classList.remove('bump'),400);}
-  private toast(message:string,error=false){const element=document.createElement('div');element.className=`toast ${error?'error':''}`;element.setAttribute('role',error?'alert':'status');element.textContent=message;document.querySelector('#toasts')?.append(element);window.setTimeout(()=>{element.classList.add('leaving');window.setTimeout(()=>element.remove(),200);},3000);}
+  private toast(message:string,error=false){
+    if(error&&this.locale==='zh-HK')message=REFUSALS[message]||message;const element=document.createElement('div');element.className=`toast ${error?'error':''}`;element.setAttribute('role',error?'alert':'status');element.textContent=message;document.querySelector('#toasts')?.append(element);window.setTimeout(()=>{element.classList.add('leaving');window.setTimeout(()=>element.remove(),200);},3000);}
   private modal(content:string,variant=''){const root=document.querySelector('#modalRoot')!;root.innerHTML=`<div class="modal-backdrop"><div class="modal-card ${variant}">${content}</div></div>`;root.querySelector('[data-action="back-home"]')?.addEventListener('click',()=>{root.innerHTML='';this.openHome();});}
   private celebrate(type:string){const layer=document.querySelector('#celebrationLayer')!;layer.innerHTML=Array.from({length:type==='epic'?42:24},(_,index)=>`<i style="--x:${Math.random()*100}%;--d:${Math.random()*.9}s;--c:${index%5}"></i>`).join('');window.setTimeout(()=>layer.innerHTML='',2200);}
 }

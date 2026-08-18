@@ -180,5 +180,15 @@ assert.equal(unanchored.length,0,`wearable anchors must run skull < eye < feet w
 assert.ok(catalog.wearables.every((item)=>item.art&&item.content),'every wearable needs artwork and a content box to be placed on a pet');
 pass('every creature stage publishes ordered wearable anchors and every item has art to hang on them');
 
+// Everything on sale has to be payable in something the interface actually shows. Twenty pieces
+// were priced in stardust after stardust was taken out of the topbar, so the shop offered them,
+// the server refused every purchase, and the button was left dead with no message — which is
+// what a child reads as the page having stopped.
+const unpayable=[...catalog.wearables,...catalog.furniture,...catalog.foods,...catalog.rooms.map((room)=>({...room,id:`room:${room.id}`}))]
+  .filter((item)=>item.currency&&item.currency!=='coins');
+assert.equal(unpayable.length,0,`priced in a currency the player cannot see: ${unpayable.map((item)=>item.id).join(', ')}`);
+assert.ok(catalog.wearables.every((item)=>Number.isInteger(item.price)&&item.price>0),'every wearable needs a positive price');
+pass('every purchasable item is priced in the one currency the interface shows');
+
 await fs.rm(tempDir,{recursive:true,force:true});
 console.log('\nPet module checks passed.');

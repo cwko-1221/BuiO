@@ -145,10 +145,13 @@ const WEARABLE_GROUPS = [
 const WEARABLES = [];
 for (const [slot, count, names] of WEARABLE_GROUPS) {
   for (let index = 0; index < count; index += 1) {
-    const rarity = index >= count - 4 ? 'stardust' : index >= Math.floor(count * .55) ? 'fancy' : index >= Math.floor(count * .25) ? 'rare' : 'common';
-    const price = rarity === 'stardust' ? [30, 60, 100][index % 3] : ({ common: 120, rare: 300, fancy: 450 })[rarity];
+    // The rarest four of each slot used to be priced in stardust. Stardust was taken out of the
+    // interface, which left those twenty pieces showing a price in a currency a child can
+    // neither see nor spend: the shop offered them and the server refused every purchase.
+    const rarity = index >= count - 4 ? 'legend' : index >= Math.floor(count * .55) ? 'fancy' : index >= Math.floor(count * .25) ? 'rare' : 'common';
+    const price = ({ common: 120, rare: 300, fancy: 450, legend: 600 })[rarity];
     const id = `${slot}-${String(index + 1).padStart(2, '0')}`;
-    WEARABLES.push({ id, name: { 'zh-HK': names[index], 'en-US': `${slot[0].toUpperCase()}${slot.slice(1)} ${index + 1}` }, category: 'wearable', slot, rarity, price, currency: rarity === 'stardust' ? 'stardust' : 'coins', art: artPath('collectibles/wearables', id), content: CONTENT_METRICS[id] || null });
+    WEARABLES.push({ id, name: { 'zh-HK': names[index], 'en-US': `${slot[0].toUpperCase()}${slot.slice(1)} ${index + 1}` }, category: 'wearable', slot, rarity, price, currency: 'coins', art: artPath('collectibles/wearables', id), content: CONTENT_METRICS[id] || null });
   }
 }
 
