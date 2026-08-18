@@ -15,6 +15,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { catalog } = require('../pet-app/lib/catalog.js');
+const { SLOTS, SETS } = require('../pet-app/lib/furniture-sets.js');
 
 /** The room and everything built into it. */
 const WORLD_STYLE = `Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.`;
@@ -35,40 +36,6 @@ const ROOMS = [
   ['aurora-observatory', '極光觀測房', `an observatory at night: deep blue polished stone floor, midnight indigo walls with faint constellation etchings, a wide arched window on the back wall filled with green and violet aurora ribbons`],
   ['bamboo-room', '竹林和室', `a Japanese room: pale woven tatami mats, a paper shoji screen wall softly backlit, dark timber posts and beams, a low tokonoma alcove in the back wall`],
   ['moon-magic-attic', '月影魔法閣樓', `a witch's attic: worn violet floorboards, deep plum walls with faint hand-painted gold stars, a crescent-shaped window on the back wall showing a night sky`],
-];
-
-/**
- * What each room's furniture is made of.
- *
- * Kept apart from the room descriptions on purpose. Those describe architecture - floorboards,
- * panelling, a window - and handing one to a furniture prompt gets the room painted behind every
- * piece instead of a cut-out object. A chair needs the theme's materials and palette; it does not
- * need to be told there is a window.
- */
-const MATERIALS = {
-  "sunny-oak": "warm honey oak, cream painted trim, soft sage-green fabric, small brass knobs",
-  "cloud-loft": "pale bleached birch, white paint, sky-blue quilted fabric, soft rounded edges",
-  "ocean-cabin": "dark varnished teak, brass fittings, teal painted panels, rope detailing",
-  "forest-treehouse": "rough natural timber and woven wicker, moss green cushions, carved leaf motifs",
-  "space-pod": "pale grey composite and brushed metal, indigo padding, thin glowing seams",
-  "candy-workshop": "glossy pink and mint enamel, sugar-icing scallops, wrapped-sweet patterns",
-  "lava-den": "dark basalt and blackened iron, glowing ember-orange inlays, heavy slab shapes",
-  "aurora-observatory": "deep midnight lacquer, polished brass, pale aurora-green glass",
-  "bamboo-room": "pale bamboo and woven tatami, dark timber joints, paper panel inserts",
-  "moon-magic-attic": "violet-stained wood, tarnished gold star inlays, deep plum velvet"
-};
-
-const FURNITURE_ROLES = [
-  'a small pet bed, low and soft, three tiles wide and two deep',
-  'a soft area rug lying flat on the floor, four tiles wide and three deep, seen at the same floor angle',
-  'a small round side table',
-  'a cosy armchair',
-  'a floor lamp with a lit shade',
-  'a storage cabinet with drawers, two tiles wide and two deep',
-  'a framed picture that hangs flat on the wall, no depth, seen straight on',
-  'a potted plant',
-  'a pet toy resting on the floor',
-  'a distinctive decorative ornament unique to this theme, with no writing or lettering anywhere on it',
 ];
 
 const WEARABLES = [
@@ -284,25 +251,24 @@ Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is 
 for (let i = 0; i < ROOMS.length; i += 2) {
   const [idA, zhA] = ROOMS[i];
   const [idB, zhB] = ROOMS[i + 1];
-  const materialsA = MATERIALS[idA];
-  const materialsB = MATERIALS[idB];
-  const list = (offset) => FURNITURE_ROLES.map((role, k) => `  cell ${offset + k + 1}  ${role}`).join('\n');
+  const list = (id, offset) => SETS[id]
+    .map(([, , detail], k) => `  cell ${offset + k + 1}  ${detail}, ${SLOTS[k].size}`).join('\n');
   block(`家具 · ${zhA} + ${zhB}`, `檔名：furniture-${idA}-${idB}.png　20 格（5 x 4）　風格：動森`,
 `${WORLD_STYLE}
 
-A sprite sheet of 20 separate pieces of furniture for a cosy pet bedroom.
+A sprite sheet of 20 separate pieces of furniture for a cosy pet bedroom. Every cell holds a different object - no two cells repeat.
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor - any horizontal top surface such as a table top, a seat or a shelf is an ellipse or a rectangle twice as wide as it is deep. The base of each piece rests on the bottom edge of its own cell. Nothing is tilted or rotated.
+Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor - any horizontal top surface such as a table top, a seat or a shelf is an ellipse or a rectangle twice as wide as it is deep. The base of each piece rests on the bottom edge of its own cell. Nothing is tilted or rotated. Nothing carries any writing or lettering.
 
-Cells 1 to 10 are one matching set, made of: ${materialsA}
-${list(0)}
+Cells 1 to 10 furnish one room, and read as one set:
+${list(idA, 0)}
 
-Cells 11 to 20 are a second matching set, made of: ${materialsB}
-${list(10)}
+Cells 11 to 20 furnish a different room, and read as a second set:
+${list(idB, 10)}
 
-Each set must read as one family of furniture, and the two sets must be clearly distinct from each other.
+The two sets must be clearly distinct from each other in material and colour.
 
 Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not repeat an item, and do not leave a cell empty.
 

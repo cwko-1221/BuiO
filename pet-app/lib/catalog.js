@@ -3,6 +3,7 @@
 const crypto = require('crypto');
 const fs = require('node:fs');
 const path = require('node:path');
+const furnitureSets = require('./furniture-sets');
 const CATALOG_VERSION = '2026.08.13-1';
 
 /**
@@ -155,16 +156,16 @@ for (const [slot, count, names] of WEARABLE_GROUPS) {
   }
 }
 
-const FURNITURE_NAMES = ['寵物床','柔軟地毯','小圓桌','休閒椅','夜燈','收納櫃','牆上畫','盆栽','互動玩具','主題擺設'];
-const FURNITURE_EN = ['Pet Bed','Soft Rug','Round Table','Lounge Chair','Night Light','Storage','Wall Art','Planter','Interactive Toy','Theme Ornament'];
-const FURNITURE = ROOMS.flatMap((room) => FURNITURE_NAMES.map((name, index) => ({
+// Each room furnishes itself. The slots keep their footprints, layers and prices by index,
+// because a saved arrangement refers to a piece by index; only what the piece is has changed.
+const FURNITURE = ROOMS.flatMap((room) => furnitureSets.SETS[room.id].map(([zh, en], index) => ({
   id: `${room.id}-furniture-${index + 1}`,
-  name: { 'zh-HK': `${room.name['zh-HK']}・${name}`, 'en-US': `${room.name['en-US']} ${FURNITURE_EN[index]}` },
+  name: { 'zh-HK': zh, 'en-US': en },
   category: 'furniture', roomId: room.id, price: [120,120,120,300,120,300,300,120,450,450][index],
   art: artPath('collectibles/furniture', `${room.id}-furniture-${index + 1}`),
   content: CONTENT_METRICS[`${room.id}-furniture-${index + 1}`] || null,
-  footprint: index === 0 ? [3,2] : index === 1 ? [4,3] : index === 5 ? [2,2] : [1,1],
-  layer: index === 1 ? 'rug' : index === 6 ? 'wall' : 'furniture',
+  footprint: furnitureSets.SLOTS[index].footprint,
+  layer: furnitureSets.SLOTS[index].layer,
 })));
 
 const EVOLUTION_THRESHOLDS = [0, 400, 1100, 2100];
