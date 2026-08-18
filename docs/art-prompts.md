@@ -23,11 +23,15 @@ A single completely empty interior room, seen straight on from the front. Orthog
 
 MOST IMPORTANT: the horizontal line where the back wall meets the floor sits exactly 38 percent of the way down from the top edge of the image. The wall occupies the top 38 percent and nothing more; the floor occupies the bottom 62 percent and runs all the way to the left and right edges of the frame. Side walls, if any, appear only above that line and never cut into the floor.
 
-Draw the floor as a flat rectangular grid, like graph paper seen at an angle. The lines running away from the viewer stay perfectly vertical and parallel on screen - they must not tilt inward and must not meet at a vanishing point. The lines running left to right stay perfectly horizontal. Every floor tile is the same size from the back of the room to the front, and each tile is a rectangle exactly twice as wide as it is tall.
+The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
+
+So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
+
+There are no perspective lines running toward a vanishing point anywhere on the floor. Give it depth with a gentle darkening toward the back wall instead.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
-Theme: a warm oak bedroom: honey-toned herringbone floorboards, cream painted wall panelling with a white chair rail, a tall arched window on the back wall filled with soft morning light and a hint of green garden beyond
+Theme: a warm oak bedroom: a warm honey-toned wooden floor in staggered planks with soft grain, cream painted wall panelling with a white chair rail, a tall arched window on the back wall filled with soft morning light and a hint of green garden beyond
 
 A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
@@ -43,11 +47,15 @@ A single completely empty interior room, seen straight on from the front. Orthog
 
 MOST IMPORTANT: the horizontal line where the back wall meets the floor sits exactly 38 percent of the way down from the top edge of the image. The wall occupies the top 38 percent and nothing more; the floor occupies the bottom 62 percent and runs all the way to the left and right edges of the frame. Side walls, if any, appear only above that line and never cut into the floor.
 
-Draw the floor as a flat rectangular grid, like graph paper seen at an angle. The lines running away from the viewer stay perfectly vertical and parallel on screen - they must not tilt inward and must not meet at a vanishing point. The lines running left to right stay perfectly horizontal. Every floor tile is the same size from the back of the room to the front, and each tile is a rectangle exactly twice as wide as it is tall.
+The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
+
+So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
+
+There are no perspective lines running toward a vanishing point anywhere on the floor. Give it depth with a gentle darkening toward the back wall instead.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
-Theme: an airy attic above the clouds: pale bleached birch floorboards, soft sky-blue plaster walls with a white picture rail, a large round porthole window on the back wall full of drifting white cloud
+Theme: an airy attic above the clouds: a pale bleached birch floor in staggered planks, the joins barely visible, soft sky-blue plaster walls with a white picture rail, a large round porthole window on the back wall full of drifting white cloud
 
 A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
@@ -63,11 +71,15 @@ A single completely empty interior room, seen straight on from the front. Orthog
 
 MOST IMPORTANT: the horizontal line where the back wall meets the floor sits exactly 38 percent of the way down from the top edge of the image. The wall occupies the top 38 percent and nothing more; the floor occupies the bottom 62 percent and runs all the way to the left and right edges of the frame. Side walls, if any, appear only above that line and never cut into the floor.
 
-Draw the floor as a flat rectangular grid, like graph paper seen at an angle. The lines running away from the viewer stay perfectly vertical and parallel on screen - they must not tilt inward and must not meet at a vanishing point. The lines running left to right stay perfectly horizontal. Every floor tile is the same size from the back of the room to the front, and each tile is a rectangle exactly twice as wide as it is tall.
+The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
+
+So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
+
+There are no perspective lines running toward a vanishing point anywhere on the floor. Give it depth with a gentle darkening toward the back wall instead.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
-Theme: a ship's cabin: dark polished teak planking, painted teal wainscot below a varnished timber rail, a brass porthole on the back wall showing calm blue water, thick rope trim along the skirting
+Theme: a ship's cabin: a dark polished teak floor in staggered planks with rich grain, painted teal wainscot below a varnished timber rail, a brass porthole on the back wall showing calm blue water, thick rope trim along the skirting
 
 A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
@@ -83,11 +95,15 @@ A single completely empty interior room, seen straight on from the front. Orthog
 
 MOST IMPORTANT: the horizontal line where the back wall meets the floor sits exactly 38 percent of the way down from the top edge of the image. The wall occupies the top 38 percent and nothing more; the floor occupies the bottom 62 percent and runs all the way to the left and right edges of the frame. Side walls, if any, appear only above that line and never cut into the floor.
 
-Draw the floor as a flat rectangular grid, like graph paper seen at an angle. The lines running away from the viewer stay perfectly vertical and parallel on screen - they must not tilt inward and must not meet at a vanishing point. The lines running left to right stay perfectly horizontal. Every floor tile is the same size from the back of the room to the front, and each tile is a rectangle exactly twice as wide as it is tall.
+The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
+
+So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
+
+There are no perspective lines running toward a vanishing point anywhere on the floor. Give it depth with a gentle darkening toward the back wall instead.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
-Theme: a treehouse interior: wide rough-sawn timber floorboards, bark-textured plank walls with ivy creeping in at the corners, a large leaf-framed opening on the back wall looking out into green canopy
+Theme: a treehouse interior: a warm timber floor of staggered rough-sawn planks, bark-textured plank walls with ivy creeping in at the corners, a large leaf-framed opening on the back wall looking out into green canopy
 
 A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
@@ -103,11 +119,15 @@ A single completely empty interior room, seen straight on from the front. Orthog
 
 MOST IMPORTANT: the horizontal line where the back wall meets the floor sits exactly 38 percent of the way down from the top edge of the image. The wall occupies the top 38 percent and nothing more; the floor occupies the bottom 62 percent and runs all the way to the left and right edges of the frame. Side walls, if any, appear only above that line and never cut into the floor.
 
-Draw the floor as a flat rectangular grid, like graph paper seen at an angle. The lines running away from the viewer stay perfectly vertical and parallel on screen - they must not tilt inward and must not meet at a vanishing point. The lines running left to right stay perfectly horizontal. Every floor tile is the same size from the back of the room to the front, and each tile is a rectangle exactly twice as wide as it is tall.
+The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
+
+So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
+
+There are no perspective lines running toward a vanishing point anywhere on the floor. Give it depth with a gentle darkening toward the back wall instead.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
-Theme: a sleeping pod aboard a starship: pale grey seamless composite floor, deep indigo padded wall panels with soft glowing seams, a wide viewport on the back wall full of stars and a distant nebula
+Theme: a sleeping pod aboard a starship: a pale grey seamless composite floor with a soft sheen and no joins at all, deep indigo padded wall panels with soft glowing seams, a wide viewport on the back wall full of stars and a distant nebula
 
 A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
@@ -123,11 +143,15 @@ A single completely empty interior room, seen straight on from the front. Orthog
 
 MOST IMPORTANT: the horizontal line where the back wall meets the floor sits exactly 38 percent of the way down from the top edge of the image. The wall occupies the top 38 percent and nothing more; the floor occupies the bottom 62 percent and runs all the way to the left and right edges of the frame. Side walls, if any, appear only above that line and never cut into the floor.
 
-Draw the floor as a flat rectangular grid, like graph paper seen at an angle. The lines running away from the viewer stay perfectly vertical and parallel on screen - they must not tilt inward and must not meet at a vanishing point. The lines running left to right stay perfectly horizontal. Every floor tile is the same size from the back of the room to the front, and each tile is a rectangle exactly twice as wide as it is tall.
+The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
+
+So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
+
+There are no perspective lines running toward a vanishing point anywhere on the floor. Give it depth with a gentle darkening toward the back wall instead.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
-Theme: a confectioner's workshop: a chequered mint and cream tiled floor, glossy pink sugar-glazed walls with a scalloped border, a rounded pastry-shop window on the back wall with a striped awning inside
+Theme: a confectioner's workshop: a smooth mint-cream floor with a soft candy sheen and no joins at all, glossy pink sugar-glazed walls with a scalloped border, a rounded pastry-shop window on the back wall with a striped awning inside
 
 A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
@@ -143,11 +167,15 @@ A single completely empty interior room, seen straight on from the front. Orthog
 
 MOST IMPORTANT: the horizontal line where the back wall meets the floor sits exactly 38 percent of the way down from the top edge of the image. The wall occupies the top 38 percent and nothing more; the floor occupies the bottom 62 percent and runs all the way to the left and right edges of the frame. Side walls, if any, appear only above that line and never cut into the floor.
 
-Draw the floor as a flat rectangular grid, like graph paper seen at an angle. The lines running away from the viewer stay perfectly vertical and parallel on screen - they must not tilt inward and must not meet at a vanishing point. The lines running left to right stay perfectly horizontal. Every floor tile is the same size from the back of the room to the front, and each tile is a rectangle exactly twice as wide as it is tall.
+The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
+
+So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
+
+There are no perspective lines running toward a vanishing point anywhere on the floor. Give it depth with a gentle darkening toward the back wall instead.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
-Theme: a dragon's den: dark basalt flagstones with faint ember cracks glowing between them, rough volcanic rock walls, a glowing lava seam running across the back wall behind a low stone arch
+Theme: a dragon's den: a dark basalt floor with a faint ember glow bleeding up through fine irregular cracks, rough volcanic rock walls, a glowing lava seam running across the back wall behind a low stone arch
 
 A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
@@ -163,11 +191,15 @@ A single completely empty interior room, seen straight on from the front. Orthog
 
 MOST IMPORTANT: the horizontal line where the back wall meets the floor sits exactly 38 percent of the way down from the top edge of the image. The wall occupies the top 38 percent and nothing more; the floor occupies the bottom 62 percent and runs all the way to the left and right edges of the frame. Side walls, if any, appear only above that line and never cut into the floor.
 
-Draw the floor as a flat rectangular grid, like graph paper seen at an angle. The lines running away from the viewer stay perfectly vertical and parallel on screen - they must not tilt inward and must not meet at a vanishing point. The lines running left to right stay perfectly horizontal. Every floor tile is the same size from the back of the room to the front, and each tile is a rectangle exactly twice as wide as it is tall.
+The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
+
+So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
+
+There are no perspective lines running toward a vanishing point anywhere on the floor. Give it depth with a gentle darkening toward the back wall instead.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
-Theme: an observatory at night: deep blue polished stone floor, midnight indigo walls with faint constellation etchings, a wide arched window on the back wall filled with green and violet aurora ribbons
+Theme: an observatory at night: a deep blue polished stone floor with a soft sheen and no joins at all, midnight indigo walls with faint constellation etchings, a wide arched window on the back wall filled with green and violet aurora ribbons
 
 A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
@@ -183,11 +215,15 @@ A single completely empty interior room, seen straight on from the front. Orthog
 
 MOST IMPORTANT: the horizontal line where the back wall meets the floor sits exactly 38 percent of the way down from the top edge of the image. The wall occupies the top 38 percent and nothing more; the floor occupies the bottom 62 percent and runs all the way to the left and right edges of the frame. Side walls, if any, appear only above that line and never cut into the floor.
 
-Draw the floor as a flat rectangular grid, like graph paper seen at an angle. The lines running away from the viewer stay perfectly vertical and parallel on screen - they must not tilt inward and must not meet at a vanishing point. The lines running left to right stay perfectly horizontal. Every floor tile is the same size from the back of the room to the front, and each tile is a rectangle exactly twice as wide as it is tall.
+The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
+
+So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
+
+There are no perspective lines running toward a vanishing point anywhere on the floor. Give it depth with a gentle darkening toward the back wall instead.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
-Theme: a Japanese room: pale woven tatami mats, a paper shoji screen wall softly backlit, dark timber posts and beams, a low tokonoma alcove in the back wall
+Theme: a Japanese room: a pale tatami floor with a fine woven grain running in alternating directions, a paper shoji screen wall softly backlit, dark timber posts and beams, a low tokonoma alcove in the back wall
 
 A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
@@ -203,11 +239,15 @@ A single completely empty interior room, seen straight on from the front. Orthog
 
 MOST IMPORTANT: the horizontal line where the back wall meets the floor sits exactly 38 percent of the way down from the top edge of the image. The wall occupies the top 38 percent and nothing more; the floor occupies the bottom 62 percent and runs all the way to the left and right edges of the frame. Side walls, if any, appear only above that line and never cut into the floor.
 
-Draw the floor as a flat rectangular grid, like graph paper seen at an angle. The lines running away from the viewer stay perfectly vertical and parallel on screen - they must not tilt inward and must not meet at a vanishing point. The lines running left to right stay perfectly horizontal. Every floor tile is the same size from the back of the room to the front, and each tile is a rectangle exactly twice as wide as it is tall.
+The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
+
+So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
+
+There are no perspective lines running toward a vanishing point anywhere on the floor. Give it depth with a gentle darkening toward the back wall instead.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
-Theme: a witch's attic: worn violet floorboards, deep plum walls with faint hand-painted gold stars, a crescent-shaped window on the back wall showing a night sky
+Theme: a witch's attic: a worn violet-stained parquet floor of staggered blocks with soft grain, deep plum walls with faint hand-painted gold stars, a crescent-shaped window on the back wall showing a night sky
 
 A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge to edge - this one is a background, so no transparency anywhere. No border, no frame, no vignette, no text, no watermark, and no characters or creatures.
 
