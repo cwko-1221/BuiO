@@ -20,6 +20,8 @@ export type SlotLayout = {
   width: number;
   /** Ceiling on height, in heads, so a lanky piece stays in proportion. */
   tallest: number;
+  /** How strongly a wide-drawn piece is allowed to spread past the body. 0 or absent: not at all. */
+  spread?: number;
   behind?: boolean;
 };
 
@@ -27,14 +29,16 @@ export const SLOT_LAYOUT: Record<string, SlotLayout> = {
   head: { line: 'skull', anchor: 0.86, against: 'head', width: 1.06, tallest: 1.5 },
   face: { line: 'eye', anchor: 0.50, against: 'face', width: 1.32, tallest: 0.9 },
   neck: { line: 'chin', anchor: 0.42, against: 'head', width: 0.70, tallest: 0.9 },
-  back: { line: 'body', anchor: 0.50, against: 'width', width: 0.86, tallest: 2.2, behind: true },
-  aura: { line: 'feet', anchor: 0.60, against: 'width', width: 1.25, tallest: 3.0, behind: true },
+  back: { line: 'body', anchor: 0.50, against: 'width', width: 0.86, tallest: 1.15, spread: 2.4, behind: true },
+  aura: { line: 'feet', anchor: 0.60, against: 'width', width: 1.25, tallest: 0.9, behind: true },
 };
 
 /** Whole-cell fallback for art with no measured landmarks. */
 export const UNMEASURED: PetAnchors = {
   top: 0.14, eye: 0.34, bottom: 1, centre: 0.5, width: 0.86, head: 0.6, face: 0.42,
 };
+
+const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
 
 export type Placement = {
   /** Anchor point on the creature, in cell fractions. */
@@ -65,14 +69,23 @@ export function placeWearable(anchors: PetAnchors, slotKey: string, box: Content
     : slot.line === 'eye' ? anchors.eye
       : slot.line === 'chin' ? anchors.eye + 0.62 * head
         : slot.line === 'feet' ? anchors.bottom
-          : anchors.eye + 0.42 * (anchors.bottom - anchors.eye);
+          : anchors.eye + 0.3 * (anchors.bottom - anchors.eye);
 
   const give = slot.against === 'width' ? stretch : 1;
-  const target = anchors[slot.against] * slot.width * give;
+  // A back piece is sized by the shape it was drawn as. Wings are painted half again as wide as
+  // they are tall and are meant to be seen past the body; a backpack is drawn square and belongs
+  // against it. Fitting both to the same fraction of the silhouette hid every pair of wings
+  // behind the creature wearing them.
+  const spread = slot.spread ? clamp(1 + (box.width / Math.max(0.001, box.height) - 1) * slot.spread, 1, 3) : 1;
+  const target = anchors[slot.against] * slot.width * give * spread;
   // Width alone is not enough. A monocle trails a long chain and a wizard hat is mostly point,
   // so fitting either to the head's width makes it taller than the whole creature; the cap keeps
   // a lanky piece in proportion by falling back to a height fit.
-  const ceiling = slot.tallest * head;
+  //
+  // What counts as too tall depends on what the piece belongs to. A hat is measured in heads,
+  // but wings belong to the body, and a small-headed creature has a head so much shorter than
+  // its body that a cap in heads clamped its wings back down to stubs.
+  const ceiling = slot.tallest * (slot.against === 'width' ? anchors.bottom - anchors.top : head);
 
   return {
     x: anchors.centre,
