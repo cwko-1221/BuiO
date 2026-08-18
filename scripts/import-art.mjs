@@ -193,10 +193,68 @@ async function loadSheet(file) {
   return keyed.buffer;
 }
 
+/**
+ * Find the line where the back wall meets the floor, and say whether it is where the grid needs
+ * it to be.
+ *
+ * The placement grid is ten rows deep and fixed, so it only fits if the floor starts near the
+ * top 38 percent of the image. A room drawn with the floor starting halfway down leaves the back
+ * rows of the grid sitting on the wall, and furniture placed there floats in mid-air — which is
+ * hard to spot by eye on a single picture and obvious the moment a child drags a bed to the back
+ * of the room. Cheaper to measure it here than to discover it later.
+ *
+ * The wall and the floor are different materials, so the join is the strongest run-to-run change
+ * in average row colour anywhere in the middle of the image.
+ */
+async function measureFloorLine(file) {
+  const width = 320;
+  const height = 180;
+  const { data, info } = await sharp(file).resize(width, height, { fit: 'fill' }).removeAlpha().raw()
+    .toBuffer({ resolveWithObject: true });
+  const rowMean = [];
+  for (let y = 0; y < height; y += 1) {
+    let r = 0; let g = 0; let b = 0;
+    for (let x = 0; x < width; x += 1) {
+      const i = (y * width + x) * info.channels;
+      r += data[i]; g += data[i + 1]; b += data[i + 2];
+    }
+    rowMean.push([r / width, g / width, b / width]);
+  }
+  // Compare a band above each row with the band below it: a material change moves both together.
+  const band = 6;
+  let best = 0;
+  let bestAt = 0;
+  for (let y = Math.round(height * 0.2); y < Math.round(height * 0.75); y += 1) {
+    const above = [0, 0, 0];
+    const below = [0, 0, 0];
+    for (let k = 1; k <= band; k += 1) {
+      for (let c = 0; c < 3; c += 1) {
+        above[c] += rowMean[Math.max(0, y - k)][c];
+        below[c] += rowMean[Math.min(height - 1, y + k)][c];
+      }
+    }
+    const jump = Math.abs(above[0] - below[0]) + Math.abs(above[1] - below[1]) + Math.abs(above[2] - below[2]);
+    if (jump > best) { best = jump; bestAt = y; }
+  }
+  return { fraction: bestAt / height, strength: best / band };
+}
+
 // ------------------------------------------------------------------ rooms ---
+/** Where the grid expects the floor to start, and how far off it will tolerate. */
+const FLOOR_LINE = 0.38;
+const FLOOR_TOLERANCE = 0.04;
+
 async function importRoom(file, roomId, dry) {
   const room = catalog.rooms.find((entry) => entry.id === roomId);
   if (!room) throw new Error(`no room called ${roomId}`);
+  const floor = await measureFloorLine(file);
+  const off = floor.fraction - FLOOR_LINE;
+  const percent = (value) => `${Math.round(value * 100)}%`;
+  if (Math.abs(off) <= FLOOR_TOLERANCE) {
+    log(`      floor line ${percent(floor.fraction)} - within tolerance of ${percent(FLOOR_LINE)}`);
+  } else {
+    log(`      floor line ${percent(floor.fraction)}, wanted ${percent(FLOOR_LINE)} - ${off > 0 ? 'wall too tall' : 'wall too short'}, the back rows of the grid will not sit on floor`);
+  }
   const buffer = await sharp(file).resize(ROOM_SIZE.width, ROOM_SIZE.height, { fit: 'fill' })
     .flatten({ background: '#ffffff' }).webp({ quality: 90 }).toBuffer();
   await write(fileFor(room.art), buffer, dry);
