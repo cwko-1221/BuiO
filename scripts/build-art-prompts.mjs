@@ -77,7 +77,7 @@ const SPECIES = [
      'a tall herding dog, a thick ruff around the neck, longer legs built for running',
      'a noble sky hound, a flowing mantle of cloud-white fur across its shoulders, calm and watchful']],
   ['pudding-pig', '布丁豬',
-    `a pig with warm caramel-pink skin, a glossy rounded body like set pudding, a small upturned snout, tiny folded ears and a curled tail`,
+    `a pig with warm caramel-pink skin, a glossy rounded body like set pudding, a distinct head above a soft neck crease, a small upturned snout, tiny folded ears and a curled tail`,
     ['a tiny piglet, head about one third of its full height, wobbly and soft all over',
      'a caramel-glazed pig, deeper amber tone, a faint sugary sheen along its back',
      'a stout boar with rough stone-grey plates along its shoulders and small blunt tusks',
@@ -95,7 +95,7 @@ const SPECIES = [
      'a tide otter, broad shoulders, a mantle of foam-white fur across its back',
      'a sea-crown otter king, a coral and pearl crown grown into its brow, long flowing whiskers, majestic']],
   ['mossback-turtle', '苔背龜',
-    `a turtle with a soft green shell, moss growing across the shell plates, a rounded pale-green head, gentle dark eyes and short sturdy legs`,
+    `a turtle whose mossy green shell sits low on its back leaving clear shoulder space above it, a rounded pale-green head held well clear of the shell on a short visible neck, gentle dark eyes and short sturdy legs`,
     ['a hatchling, head about one third of its full height, shell still small and smooth',
      'a garden turtle, small flowers and ferns now growing on the shell',
      'an ancient bark turtle, the shell hardened into woody plates with a small tree taking root',
@@ -125,7 +125,7 @@ const SPECIES = [
      'a storm ibex, long swept-back horns, a thick storm-grey mane',
      'a sky-thunder ram, massive spiralled horns wreathed in lightning, a mane like thunderclouds']],
   ['coral-seal', '珊瑚海豹',
-    `a seal with smooth coral-pink and cream hide, a rounded body, huge glossy dark eyes, small flippers and delicate whiskers`,
+    `a seal with smooth coral-pink and cream hide, a rounded head set above a soft but visible neck fold, sloped shoulders behind it, huge glossy dark eyes, small flippers and delicate whiskers`,
     ['a seal pup, head about one third of its full height, soft and rounded all over',
      'a reef-glow seal, faint bioluminescent spots along its flanks',
      'a deep blue seal, darker hide, longer body built for depth',
@@ -161,13 +161,13 @@ const SPECIES = [
      'a volcanic wing dragon, powerful build, molten light between the scales of its chest',
      'a corona ember dragon, a ring of solar fire behind its wings, crowned horns, immense and noble']],
   ['nebula-slime', '星雲膠獸',
-    `a slime with a translucent violet body full of drifting stars, a glossy rounded surface, huge bright eyes near the front and a soft flattened base`,
-    ['a stardrop slime, small and perfectly round, head and body one shape',
+    `a slime creature whose translucent violet body, full of drifting stars, rises into a distinct rounded head above a clear narrowed neck, with sloped shoulders below it, two small stubby arms, huge bright eyes set in the upper half of the head, and a soft flattened base`,
+    ['a stardrop slime, small and soft, the head barely lifted above the shoulders but still its own shape',
      'a nebula slime, larger, swirling clouds of pink and blue inside its body',
      'a starcore monster, a bright burning core visible at its centre, small orbiting fragments',
      'a cosmic light-eater, a body like a window into deep space, a ring of swallowed light around it']],
   ['abyss-lantern-squid', '深淵燈魷',
-    `a squid with deep blue-black skin, a soft rounded mantle, a glowing pale lantern bulb on its head, large luminous eyes and short curling tentacles`,
+    `a squid with deep blue-black skin, a domed mantle that reads as a head with a glowing pale lantern bulb on top, a clear collar line of frills where the mantle meets narrow shoulders, large luminous eyes set high, and short curling tentacles it stands on`,
     ['a lantern squidlet, head about one third of its full height, one small glowing bulb',
      'a ghost-tide squid, longer tentacles, faint trailing light',
      'an abyss giant squid, a broad mantle, many bright lantern nodes along its arms',
@@ -180,11 +180,36 @@ const SPECIES = [
      'a nine-sky thunder sovereign, a radiant halo of lightning, a mane of white fire, divine and serene']],
   ['grove-colossus', '森林巨獸',
     `a beast built of living wood and moss, a broad rounded body, glowing green eyes set deep in a mossy face, thick root-like legs and small ferns growing along its back`,
-    ['a sprout spirit, small and round, a single seedling growing from its head',
+    ['a sprout spirit, small and round-bodied with a clear little head on top, a single seedling growing from it',
      'a vinehorn beast, curling vine horns, thicker limbs, flowers opening along its shoulders',
      'an ancient grove colossus, huge and slow, whole saplings rooted in its back',
      'a guardian of all trees, a towering figure crowned with a full canopy, glowing sap running through its bark']],
 ];
+
+/**
+ * The five places an accessory has to land.
+ *
+ * The outfit system puts a hat on the skull, glasses on the eye line, a collar under the chin,
+ * wings behind the shoulders and a ring of light at the feet, and it finds those places by
+ * measuring the art. A creature drawn as a featureless blob has none of them: the first sheet
+ * generated came back as a lovely slime that could wear a hat and nothing else. So the anatomy
+ * is now part of the brief rather than something each design happens to have or not.
+ */
+const ANATOMY = `This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.`;
 
 const PET_ROWS = `Row 1, seen from the FRONT, facing the viewer:
   cell 1  standing idle
@@ -201,7 +226,9 @@ Row 4, seen from the FRONT only:
   cell 19  sitting down
   cell 20  surprised, ears and eyes wide
 
-In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.`;
+In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.`;
 
 const out = [];
 let n = 0;
@@ -267,6 +294,8 @@ for (const [id, zh, base, stages] of SPECIES) {
 `${PET_STYLE}
 
 A character sprite sheet for ONE creature: ${base}. At this stage it is ${growth}.
+
+${ANATOMY}
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 

@@ -486,6 +486,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a cat with cream and honey fur, a soft velvety coat, oversized round amber eyes, a single five-pointed star patch on its forehead, small rounded ears and a stubby upturned tail. At this stage it is a plump kitten cub, head about one third of its full height, very short stubby legs, everything soft and round.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -504,6 +520,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -517,6 +535,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a cat with cream and honey fur, a soft velvety coat, oversized round amber eyes, a single five-pointed star patch on its forehead, small rounded ears and a stubby upturned tail. At this stage it is a growing cat, slightly longer in the body and tail, faint silver moon markings appearing along its flanks.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -535,6 +569,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -548,6 +584,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a cat with cream and honey fur, a soft velvety coat, oversized round amber eyes, a single five-pointed star patch on its forehead, small rounded ears and a stubby upturned tail. At this stage it is a lean hunting cat, longer legs, a short mane of star-flecked fur starting at the neck, alert posture.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -566,6 +618,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -579,6 +633,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a cat with cream and honey fur, a soft velvety coat, oversized round amber eyes, a single five-pointed star patch on its forehead, small rounded ears and a stubby upturned tail. At this stage it is a small celestial lion, a full mane of pale gold fur with tiny lights caught in it, broad chest, regal and calm.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -597,6 +667,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -610,6 +682,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a dog with soft pale blue-grey fur, fluffy cloud-shaped ears, a white blaze down its chest, warm dark eyes and a loosely curled tail. At this stage it is a round puppy, head about one third of its full height, paws too big for its legs.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -628,6 +716,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -641,6 +731,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a dog with soft pale blue-grey fur, fluffy cloud-shaped ears, a white blaze down its chest, warm dark eyes and a loosely curled tail. At this stage it is a lively young dog, leaner in the body, a faint breeze always lifting the fur at its ears.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -659,6 +765,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -672,6 +780,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a dog with soft pale blue-grey fur, fluffy cloud-shaped ears, a white blaze down its chest, warm dark eyes and a loosely curled tail. At this stage it is a tall herding dog, a thick ruff around the neck, longer legs built for running.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -690,6 +814,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -703,6 +829,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a dog with soft pale blue-grey fur, fluffy cloud-shaped ears, a white blaze down its chest, warm dark eyes and a loosely curled tail. At this stage it is a noble sky hound, a flowing mantle of cloud-white fur across its shoulders, calm and watchful.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -721,6 +863,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -732,7 +876,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a pig with warm caramel-pink skin, a glossy rounded body like set pudding, a small upturned snout, tiny folded ears and a curled tail. At this stage it is a tiny piglet, head about one third of its full height, wobbly and soft all over.
+A character sprite sheet for ONE creature: a pig with warm caramel-pink skin, a glossy rounded body like set pudding, a distinct head above a soft neck crease, a small upturned snout, tiny folded ears and a curled tail. At this stage it is a tiny piglet, head about one third of its full height, wobbly and soft all over.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -752,6 +912,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -763,7 +925,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a pig with warm caramel-pink skin, a glossy rounded body like set pudding, a small upturned snout, tiny folded ears and a curled tail. At this stage it is a caramel-glazed pig, deeper amber tone, a faint sugary sheen along its back.
+A character sprite sheet for ONE creature: a pig with warm caramel-pink skin, a glossy rounded body like set pudding, a distinct head above a soft neck crease, a small upturned snout, tiny folded ears and a curled tail. At this stage it is a caramel-glazed pig, deeper amber tone, a faint sugary sheen along its back.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -783,6 +961,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -794,7 +974,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a pig with warm caramel-pink skin, a glossy rounded body like set pudding, a small upturned snout, tiny folded ears and a curled tail. At this stage it is a stout boar with rough stone-grey plates along its shoulders and small blunt tusks.
+A character sprite sheet for ONE creature: a pig with warm caramel-pink skin, a glossy rounded body like set pudding, a distinct head above a soft neck crease, a small upturned snout, tiny folded ears and a curled tail. At this stage it is a stout boar with rough stone-grey plates along its shoulders and small blunt tusks.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -814,6 +1010,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -825,7 +1023,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a pig with warm caramel-pink skin, a glossy rounded body like set pudding, a small upturned snout, tiny folded ears and a curled tail. At this stage it is a huge harvest boar, thick armoured plates, golden wheat and fruit motifs worked into its hide, immense and gentle.
+A character sprite sheet for ONE creature: a pig with warm caramel-pink skin, a glossy rounded body like set pudding, a distinct head above a soft neck crease, a small upturned snout, tiny folded ears and a curled tail. At this stage it is a huge harvest boar, thick armoured plates, golden wheat and fruit motifs worked into its hide, immense and gentle.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -845,6 +1059,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -858,6 +1074,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a rabbit with pale lavender fur, very long upright ears with soft pink inner lining, large violet eyes, a round cotton tail and a small crescent moon mark on its brow. At this stage it is a small bunny kit, head about one third of its full height, ears still short and floppy.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -876,6 +1108,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -889,6 +1123,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a rabbit with pale lavender fur, very long upright ears with soft pink inner lining, large violet eyes, a round cotton tail and a small crescent moon mark on its brow. At this stage it is a slender rabbit, ears fully grown and upright, a faint silver shimmer along its back.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -907,6 +1157,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -920,6 +1172,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a rabbit with pale lavender fur, very long upright ears with soft pink inner lining, large violet eyes, a round cotton tail and a small crescent moon mark on its brow. At this stage it is a swift runner, long powerful hind legs, a ring of pale moonlight around its brow.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -938,6 +1206,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -951,6 +1221,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a rabbit with pale lavender fur, very long upright ears with soft pink inner lining, large violet eyes, a round cotton tail and a small crescent moon mark on its brow. At this stage it is a sacred moon hare, tall and graceful, a crescent halo above its head, robes of starlight fur.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -969,6 +1255,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -982,6 +1270,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: an otter with sleek teal-blue fur, a paler cream belly, round dark eyes, small ears, webbed paws and a thick flat tail. At this stage it is a chubby otter pup, head about one third of its full height, always holding a bubble in its paws.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1000,6 +1304,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1013,6 +1319,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: an otter with sleek teal-blue fur, a paler cream belly, round dark eyes, small ears, webbed paws and a thick flat tail. At this stage it is a stream otter, longer and sleeker, water beading along its coat.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1031,6 +1353,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1044,6 +1368,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: an otter with sleek teal-blue fur, a paler cream belly, round dark eyes, small ears, webbed paws and a thick flat tail. At this stage it is a tide otter, broad shoulders, a mantle of foam-white fur across its back.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1062,6 +1402,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1075,6 +1417,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: an otter with sleek teal-blue fur, a paler cream belly, round dark eyes, small ears, webbed paws and a thick flat tail. At this stage it is a sea-crown otter king, a coral and pearl crown grown into its brow, long flowing whiskers, majestic.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1093,6 +1451,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1104,7 +1464,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a turtle with a soft green shell, moss growing across the shell plates, a rounded pale-green head, gentle dark eyes and short sturdy legs. At this stage it is a hatchling, head about one third of its full height, shell still small and smooth.
+A character sprite sheet for ONE creature: a turtle whose mossy green shell sits low on its back leaving clear shoulder space above it, a rounded pale-green head held well clear of the shell on a short visible neck, gentle dark eyes and short sturdy legs. At this stage it is a hatchling, head about one third of its full height, shell still small and smooth.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -1124,6 +1500,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1135,7 +1513,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a turtle with a soft green shell, moss growing across the shell plates, a rounded pale-green head, gentle dark eyes and short sturdy legs. At this stage it is a garden turtle, small flowers and ferns now growing on the shell.
+A character sprite sheet for ONE creature: a turtle whose mossy green shell sits low on its back leaving clear shoulder space above it, a rounded pale-green head held well clear of the shell on a short visible neck, gentle dark eyes and short sturdy legs. At this stage it is a garden turtle, small flowers and ferns now growing on the shell.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -1155,6 +1549,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1166,7 +1562,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a turtle with a soft green shell, moss growing across the shell plates, a rounded pale-green head, gentle dark eyes and short sturdy legs. At this stage it is an ancient bark turtle, the shell hardened into woody plates with a small tree taking root.
+A character sprite sheet for ONE creature: a turtle whose mossy green shell sits low on its back leaving clear shoulder space above it, a rounded pale-green head held well clear of the shell on a short visible neck, gentle dark eyes and short sturdy legs. At this stage it is an ancient bark turtle, the shell hardened into woody plates with a small tree taking root.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -1186,6 +1598,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1197,7 +1611,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a turtle with a soft green shell, moss growing across the shell plates, a rounded pale-green head, gentle dark eyes and short sturdy legs. At this stage it is a world-tree tortoise, a full canopy growing from its back, roots along its legs, immense and serene.
+A character sprite sheet for ONE creature: a turtle whose mossy green shell sits low on its back leaving clear shoulder space above it, a rounded pale-green head held well clear of the shell on a short visible neck, gentle dark eyes and short sturdy legs. At this stage it is a world-tree tortoise, a full canopy growing from its back, roots along its legs, immense and serene.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -1217,6 +1647,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1230,6 +1662,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a hamster with warm orange-brown fur, very round cheeks, a cream belly, tiny round ears, bright black eyes and small pink paws. At this stage it is a tiny hamster pup, head about one third of its full height, cheeks stuffed round.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1248,6 +1696,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1261,6 +1711,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a hamster with warm orange-brown fur, very round cheeks, a cream belly, tiny round ears, bright black eyes and small pink paws. At this stage it is a coal-ball hamster, deeper ember tone, faint glowing flecks in its fur.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1279,6 +1745,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1292,6 +1760,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a hamster with warm orange-brown fur, very round cheeks, a cream belly, tiny round ears, bright black eyes and small pink paws. At this stage it is a blaze runner, lean and quick, a trail of flame along its back and tail.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1310,6 +1794,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1323,6 +1809,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a hamster with warm orange-brown fur, very round cheeks, a cream belly, tiny round ears, bright black eyes and small pink paws. At this stage it is a sun-wheel hamster, a burning ring of fire turning behind it, coat like molten gold.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1341,6 +1843,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1354,6 +1858,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a fox with fresh green and cream fur, a bushy tail that ends in a large leaf shape, bright golden eyes, tall pointed ears and slender legs. At this stage it is a fox kit, head about one third of its full height, tail leaf still small and curled.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1372,6 +1892,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1385,6 +1907,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a fox with fresh green and cream fur, a bushy tail that ends in a large leaf shape, bright golden eyes, tall pointed ears and slender legs. At this stage it is a vine-shadow fox, darker green, thin vines twining along its legs.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1403,6 +1941,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1416,6 +1956,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a fox with fresh green and cream fur, a bushy tail that ends in a large leaf shape, bright golden eyes, tall pointed ears and slender legs. At this stage it is a forest spirit fox, longer body, several leaf-tipped tails, faint glow at its paws.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1434,6 +1990,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1447,6 +2005,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a fox with fresh green and cream fur, a bushy tail that ends in a large leaf shape, bright golden eyes, tall pointed ears and slender legs. At this stage it is an emerald crown spirit fox, a crown of living leaves, many flowing tails, luminous and calm.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1465,6 +2039,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1478,6 +2054,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a penguin with soft white and pale blue feathers, a rounded body, a small orange beak, round dark eyes and short flippers. At this stage it is a downy chick, head about one third of its full height, fluffy and unsteady.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1496,6 +2088,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1509,6 +2103,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a penguin with soft white and pale blue feathers, a rounded body, a small orange beak, round dark eyes and short flippers. At this stage it is an ice-sail penguin, sleeker feathers, a small crest of ice along its head.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1527,6 +2137,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1540,6 +2152,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a penguin with soft white and pale blue feathers, a rounded body, a small orange beak, round dark eyes and short flippers. At this stage it is an aurora penguin, feathers shot through with faint green and violet light.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1558,6 +2186,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1571,6 +2201,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a penguin with soft white and pale blue feathers, a rounded body, a small orange beak, round dark eyes and short flippers. At this stage it is an ice-sea emperor penguin, tall and stately, a mantle of frost and a crown of clear ice.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1589,6 +2235,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1602,6 +2250,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a goat with pale cream wool, small curved horns crackling with faint blue light, amber slit eyes, dark hooves and a short tail. At this stage it is a kid, head about one third of its full height, horns just budding.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1620,6 +2284,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1633,6 +2299,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a goat with pale cream wool, small curved horns crackling with faint blue light, amber slit eyes, dark hooves and a short tail. At this stage it is a spark-hoof goat, horns curving properly now, small arcs of electricity at its hooves.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1651,6 +2333,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1664,6 +2348,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a goat with pale cream wool, small curved horns crackling with faint blue light, amber slit eyes, dark hooves and a short tail. At this stage it is a storm ibex, long swept-back horns, a thick storm-grey mane.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1682,6 +2382,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1695,6 +2397,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a goat with pale cream wool, small curved horns crackling with faint blue light, amber slit eyes, dark hooves and a short tail. At this stage it is a sky-thunder ram, massive spiralled horns wreathed in lightning, a mane like thunderclouds.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1713,6 +2431,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1724,7 +2444,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a seal with smooth coral-pink and cream hide, a rounded body, huge glossy dark eyes, small flippers and delicate whiskers. At this stage it is a seal pup, head about one third of its full height, soft and rounded all over.
+A character sprite sheet for ONE creature: a seal with smooth coral-pink and cream hide, a rounded head set above a soft but visible neck fold, sloped shoulders behind it, huge glossy dark eyes, small flippers and delicate whiskers. At this stage it is a seal pup, head about one third of its full height, soft and rounded all over.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -1744,6 +2480,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1755,7 +2493,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a seal with smooth coral-pink and cream hide, a rounded body, huge glossy dark eyes, small flippers and delicate whiskers. At this stage it is a reef-glow seal, faint bioluminescent spots along its flanks.
+A character sprite sheet for ONE creature: a seal with smooth coral-pink and cream hide, a rounded head set above a soft but visible neck fold, sloped shoulders behind it, huge glossy dark eyes, small flippers and delicate whiskers. At this stage it is a reef-glow seal, faint bioluminescent spots along its flanks.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -1775,6 +2529,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1786,7 +2542,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a seal with smooth coral-pink and cream hide, a rounded body, huge glossy dark eyes, small flippers and delicate whiskers. At this stage it is a deep blue seal, darker hide, longer body built for depth.
+A character sprite sheet for ONE creature: a seal with smooth coral-pink and cream hide, a rounded head set above a soft but visible neck fold, sloped shoulders behind it, huge glossy dark eyes, small flippers and delicate whiskers. At this stage it is a deep blue seal, darker hide, longer body built for depth.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -1806,6 +2578,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1817,7 +2591,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a seal with smooth coral-pink and cream hide, a rounded body, huge glossy dark eyes, small flippers and delicate whiskers. At this stage it is a coral sea king, a crown of living coral along its spine, pearls set into its hide, regal.
+A character sprite sheet for ONE creature: a seal with smooth coral-pink and cream hide, a rounded head set above a soft but visible neck fold, sloped shoulders behind it, huge glossy dark eyes, small flippers and delicate whiskers. At this stage it is a coral sea king, a crown of living coral along its spine, pearls set into its hide, regal.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -1837,6 +2627,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1850,6 +2642,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a panda with soft green and cream fur instead of black and white, round dark eye patches, small round ears, a stout body and a bamboo leaf tucked behind one ear. At this stage it is a panda cub, head about one third of its full height, sitting round like a dumpling.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1868,6 +2676,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1881,6 +2691,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a panda with soft green and cream fur instead of black and white, round dark eye patches, small round ears, a stout body and a bamboo leaf tucked behind one ear. At this stage it is a green bamboo adept, standing upright, a simple cloth belt, a bamboo stave.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1899,6 +2725,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1912,6 +2740,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a panda with soft green and cream fur instead of black and white, round dark eye patches, small round ears, a stout body and a bamboo leaf tucked behind one ear. At this stage it is a jade-armour panda, plates of polished green bamboo across its shoulders.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1930,6 +2774,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1943,6 +2789,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a panda with soft green and cream fur instead of black and white, round dark eye patches, small round ears, a stout body and a bamboo leaf tucked behind one ear. At this stage it is a guardian of a thousand bamboos, a full suit of bamboo armour, a serene stance, wind in the leaves around it.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1961,6 +2823,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -1974,6 +2838,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a bat with deep violet fur, large rounded ears, wide membranous wings, big luminous pale eyes and a small upturned nose. At this stage it is a bat pup, head about one third of its full height, wings still small and folded.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -1992,6 +2872,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2005,6 +2887,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a bat with deep violet fur, large rounded ears, wide membranous wings, big luminous pale eyes and a small upturned nose. At this stage it is a twilight bat, wings fully grown, a faint purple glow along the wing bones.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2023,6 +2921,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2036,6 +2936,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a bat with deep violet fur, large rounded ears, wide membranous wings, big luminous pale eyes and a small upturned nose. At this stage it is an eclipse bat, a dark ring marking on its chest, wings edged in silver.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2054,6 +2970,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2067,6 +2985,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a bat with deep violet fur, large rounded ears, wide membranous wings, big luminous pale eyes and a small upturned nose. At this stage it is an evernight wing king, enormous spread wings full of stars, a crown of dark crystal.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2085,6 +3019,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2098,6 +3034,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a deer with pale ice-blue fur, translucent crystal antlers, a white dappled back, large gentle dark eyes and slender legs. At this stage it is a fawn, head about one third of its full height, antlers just two small crystal buds.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2116,6 +3068,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2129,6 +3083,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a deer with pale ice-blue fur, translucent crystal antlers, a white dappled back, large gentle dark eyes and slender legs. At this stage it is a prism deer, small branching crystal antlers that catch the light.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2147,6 +3117,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2160,6 +3132,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a deer with pale ice-blue fur, translucent crystal antlers, a white dappled back, large gentle dark eyes and slender legs. At this stage it is an ice-crystal stag, tall branching antlers, a mantle of frost across its shoulders.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2178,6 +3166,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2191,6 +3181,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a deer with pale ice-blue fur, translucent crystal antlers, a white dappled back, large gentle dark eyes and slender legs. At this stage it is a dawn crystal hart, great antlers glowing with sunrise colours, luminous and stately.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2209,6 +3215,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2222,6 +3230,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a raccoon with slate-grey fur, a dark ink-blot mask across its eyes, a ringed bushy tail, small clever paws and bright curious eyes. At this stage it is a raccoon kit, head about one third of its full height, mask still faint.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2240,6 +3264,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2253,6 +3279,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a raccoon with slate-grey fur, a dark ink-blot mask across its eyes, a ringed bushy tail, small clever paws and bright curious eyes. At this stage it is a shadow-step raccoon, darker coat, its paws trailing faint wisps of ink.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2271,6 +3313,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2284,6 +3328,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a raccoon with slate-grey fur, a dark ink-blot mask across its eyes, a ringed bushy tail, small clever paws and bright curious eyes. At this stage it is a phantom-ink raccoon, parts of its body fading into drifting ink.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2302,6 +3362,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2315,6 +3377,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a raccoon with slate-grey fur, a dark ink-blot mask across its eyes, a ringed bushy tail, small clever paws and bright curious eyes. At this stage it is a living ink spirit, a body of flowing brush strokes holding a raccoon shape, elegant and calm.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2333,6 +3411,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2346,6 +3426,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a dragon with deep ember-red scales, a warm gold underbelly, broad membranous wings, a crest of soft spines along its neck, large gentle golden eyes and glowing amber cracks along its shoulders. At this stage it is a whelp still half in its cracked ember shell, head about one third of its full height, wings tiny.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2364,6 +3460,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2377,6 +3475,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a dragon with deep ember-red scales, a warm gold underbelly, broad membranous wings, a crest of soft spines along its neck, large gentle golden eyes and glowing amber cracks along its shoulders. At this stage it is a flame-wing drake, wings now large enough to lift it, small curved horns.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2395,6 +3509,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2408,6 +3524,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a dragon with deep ember-red scales, a warm gold underbelly, broad membranous wings, a crest of soft spines along its neck, large gentle golden eyes and glowing amber cracks along its shoulders. At this stage it is a volcanic wing dragon, powerful build, molten light between the scales of its chest.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2426,6 +3558,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2439,6 +3573,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a dragon with deep ember-red scales, a warm gold underbelly, broad membranous wings, a crest of soft spines along its neck, large gentle golden eyes and glowing amber cracks along its shoulders. At this stage it is a corona ember dragon, a ring of solar fire behind its wings, crowned horns, immense and noble.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2457,6 +3607,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2468,7 +3620,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a slime with a translucent violet body full of drifting stars, a glossy rounded surface, huge bright eyes near the front and a soft flattened base. At this stage it is a stardrop slime, small and perfectly round, head and body one shape.
+A character sprite sheet for ONE creature: a slime creature whose translucent violet body, full of drifting stars, rises into a distinct rounded head above a clear narrowed neck, with sloped shoulders below it, two small stubby arms, huge bright eyes set in the upper half of the head, and a soft flattened base. At this stage it is a stardrop slime, small and soft, the head barely lifted above the shoulders but still its own shape.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -2488,6 +3656,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2499,7 +3669,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a slime with a translucent violet body full of drifting stars, a glossy rounded surface, huge bright eyes near the front and a soft flattened base. At this stage it is a nebula slime, larger, swirling clouds of pink and blue inside its body.
+A character sprite sheet for ONE creature: a slime creature whose translucent violet body, full of drifting stars, rises into a distinct rounded head above a clear narrowed neck, with sloped shoulders below it, two small stubby arms, huge bright eyes set in the upper half of the head, and a soft flattened base. At this stage it is a nebula slime, larger, swirling clouds of pink and blue inside its body.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -2519,6 +3705,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2530,7 +3718,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a slime with a translucent violet body full of drifting stars, a glossy rounded surface, huge bright eyes near the front and a soft flattened base. At this stage it is a starcore monster, a bright burning core visible at its centre, small orbiting fragments.
+A character sprite sheet for ONE creature: a slime creature whose translucent violet body, full of drifting stars, rises into a distinct rounded head above a clear narrowed neck, with sloped shoulders below it, two small stubby arms, huge bright eyes set in the upper half of the head, and a soft flattened base. At this stage it is a starcore monster, a bright burning core visible at its centre, small orbiting fragments.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -2550,6 +3754,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2561,7 +3767,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a slime with a translucent violet body full of drifting stars, a glossy rounded surface, huge bright eyes near the front and a soft flattened base. At this stage it is a cosmic light-eater, a body like a window into deep space, a ring of swallowed light around it.
+A character sprite sheet for ONE creature: a slime creature whose translucent violet body, full of drifting stars, rises into a distinct rounded head above a clear narrowed neck, with sloped shoulders below it, two small stubby arms, huge bright eyes set in the upper half of the head, and a soft flattened base. At this stage it is a cosmic light-eater, a body like a window into deep space, a ring of swallowed light around it.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -2581,6 +3803,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2592,7 +3816,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a squid with deep blue-black skin, a soft rounded mantle, a glowing pale lantern bulb on its head, large luminous eyes and short curling tentacles. At this stage it is a lantern squidlet, head about one third of its full height, one small glowing bulb.
+A character sprite sheet for ONE creature: a squid with deep blue-black skin, a domed mantle that reads as a head with a glowing pale lantern bulb on top, a clear collar line of frills where the mantle meets narrow shoulders, large luminous eyes set high, and short curling tentacles it stands on. At this stage it is a lantern squidlet, head about one third of its full height, one small glowing bulb.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -2612,6 +3852,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2623,7 +3865,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a squid with deep blue-black skin, a soft rounded mantle, a glowing pale lantern bulb on its head, large luminous eyes and short curling tentacles. At this stage it is a ghost-tide squid, longer tentacles, faint trailing light.
+A character sprite sheet for ONE creature: a squid with deep blue-black skin, a domed mantle that reads as a head with a glowing pale lantern bulb on top, a clear collar line of frills where the mantle meets narrow shoulders, large luminous eyes set high, and short curling tentacles it stands on. At this stage it is a ghost-tide squid, longer tentacles, faint trailing light.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -2643,6 +3901,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2654,7 +3914,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a squid with deep blue-black skin, a soft rounded mantle, a glowing pale lantern bulb on its head, large luminous eyes and short curling tentacles. At this stage it is an abyss giant squid, a broad mantle, many bright lantern nodes along its arms.
+A character sprite sheet for ONE creature: a squid with deep blue-black skin, a domed mantle that reads as a head with a glowing pale lantern bulb on top, a clear collar line of frills where the mantle meets narrow shoulders, large luminous eyes set high, and short curling tentacles it stands on. At this stage it is an abyss giant squid, a broad mantle, many bright lantern nodes along its arms.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -2674,6 +3950,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2685,7 +3963,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a squid with deep blue-black skin, a soft rounded mantle, a glowing pale lantern bulb on its head, large luminous eyes and short curling tentacles. At this stage it is a trench lantern spirit, a great glowing crown of light, long flowing arms, mysterious and calm.
+A character sprite sheet for ONE creature: a squid with deep blue-black skin, a domed mantle that reads as a head with a glowing pale lantern bulb on top, a clear collar line of frills where the mantle meets narrow shoulders, large luminous eyes set high, and short curling tentacles it stands on. At this stage it is a trench lantern spirit, a great glowing crown of light, long flowing arms, mysterious and calm.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -2705,6 +3999,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2718,6 +4014,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a kirin with golden scaled hide, a flowing white mane, a single branching antler, hooved feet, a long tufted tail and clear amber eyes. At this stage it is a spark kirin fawn, head about one third of its full height, antler just a small stub.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2736,6 +4048,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2749,6 +4063,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a kirin with golden scaled hide, a flowing white mane, a single branching antler, hooved feet, a long tufted tail and clear amber eyes. At this stage it is a cloudbolt kirin, mane lengthening, small arcs of light along its back.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2767,6 +4097,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2780,6 +4112,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a kirin with golden scaled hide, a flowing white mane, a single branching antler, hooved feet, a long tufted tail and clear amber eyes. At this stage it is a thunderhorn kirin, a tall branching antler crackling with light, powerful legs.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2798,6 +4146,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2811,6 +4161,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a kirin with golden scaled hide, a flowing white mane, a single branching antler, hooved feet, a long tufted tail and clear amber eyes. At this stage it is a nine-sky thunder sovereign, a radiant halo of lightning, a mane of white fire, divine and serene.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2829,6 +4195,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2840,7 +4208,23 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A character sprite sheet for ONE creature: a beast built of living wood and moss, a broad rounded body, glowing green eyes set deep in a mossy face, thick root-like legs and small ferns growing along its back. At this stage it is a sprout spirit, small and round, a single seedling growing from its head.
+A character sprite sheet for ONE creature: a beast built of living wood and moss, a broad rounded body, glowing green eyes set deep in a mossy face, thick root-like legs and small ferns growing along its back. At this stage it is a sprout spirit, small and round-bodied with a clear little head on top, a single seedling growing from it.
+
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
 
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
@@ -2860,6 +4244,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2873,6 +4259,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a beast built of living wood and moss, a broad rounded body, glowing green eyes set deep in a mossy face, thick root-like legs and small ferns growing along its back. At this stage it is a vinehorn beast, curling vine horns, thicker limbs, flowers opening along its shoulders.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2891,6 +4293,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2904,6 +4308,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a beast built of living wood and moss, a broad rounded body, glowing green eyes set deep in a mossy face, thick root-like legs and small ferns growing along its back. At this stage it is an ancient grove colossus, huge and slow, whole saplings rooted in its back.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2922,6 +4342,8 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
 
@@ -2935,6 +4357,22 @@ Japanese anime creature art: crisp clean linework, cel shading with clear hard-e
 
 A character sprite sheet for ONE creature: a beast built of living wood and moss, a broad rounded body, glowing green eyes set deep in a mossy face, thick root-like legs and small ferns growing along its back. At this stage it is a guardian of all trees, a towering figure crowned with a full canopy, glowing sap running through its bark.
 
+This creature is dressed up by the player, so five landmarks must read clearly
+on its body, from every angle, even if the creature is round or blob-like:
+
+  HEAD   a distinct head shape at the top - a dome, a skull, a bulge - separate
+         enough from the body to have a top a hat could sit flat on.
+  FACE   eyes set in the upper half of the head, level with each other, with
+         clear space across the bridge between them where glasses would rest.
+  NECK   a visible narrowing, collar line or ruff where the head meets the body,
+         wide enough to wear a collar or a scarf.
+  BACK   an upright shoulder area behind and below the head, broad and flat
+         enough that wings or a pack worn there would be seen on both sides.
+  FEET   feet or a base planted on the ground, with open floor around them.
+
+Do not draw the creature as a single undivided ball. Head, neck and shoulders must
+be readable even on the roundest design.
+
 The same individual creature appears in all 20 cells - identical colours, markings, proportions and features. This is one character seen from different angles and in different poses, not a set of design variations.
 
 Row 1, seen from the FRONT, facing the viewer:
@@ -2953,5 +4391,7 @@ Row 4, seen from the FRONT only:
   cell 20  surprised, ears and eyes wide
 
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
+
+Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.
 
 Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.
