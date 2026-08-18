@@ -28,3 +28,6 @@ Thumbs.db
 # Editor
 .vscode/settings.json
 *.swp
+
+# generated art dropped in for import
+art-inbox/

@@ -37,7 +37,8 @@
     "check:tower-defense-live": "node scripts/test-tower-defense-live.mjs",
     "check:game-hub-live": "node scripts/test-game-hub-live.mjs",
     "build:game-assets": "node scripts/generate-reference-extensions.mjs && node scripts/generate-fixed-bricks.mjs && node scripts/build-game-assets.mjs && node scripts/analyze-game-geometry.mjs && node scripts/pack-game-atlases.mjs",
-    "postinstall": "npm --prefix whiteboard-app/client install && npm --prefix whiteboard-app/client run build && npm --prefix science-lab-app install && npm --prefix science-lab-app run build && npm --prefix pet-app install && npm --prefix pet-app run build"
+    "postinstall": "npm --prefix whiteboard-app/client install && npm --prefix whiteboard-app/client run build && npm --prefix science-lab-app install && npm --prefix science-lab-app run build && npm --prefix pet-app install && npm --prefix pet-app run build",
+    "import:art": "node scripts/import-art.mjs"
   },
   "dependencies": {
     "@google-cloud/text-to-speech": "^6.4.1",
