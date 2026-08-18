@@ -9,6 +9,8 @@ export interface PetDefinition {
   atlas?: string[];
   /** Where worn items belong on the creature, per evolution stage. */
   anchors?: (PetAnchors | null)[];
+  /** How those landmarks move frame by frame, per stage. Base64 signed bytes, 4 per atlas cell. */
+  motion?: (string | null)[];
 }
 /**
  * Landmarks measured from a creature's idle frame, as 0..1 fractions of its atlas cell:

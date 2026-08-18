@@ -53,6 +53,9 @@ const hitTest = (area: FurnitureHitArea, x: number, y: number) => {
 /** 2:1 isometric tile. Half-extents, so a tile spans 2*TILE_WIDTH by 2*TILE_HEIGHT on screen. */
 const TILE_WIDTH = 38;
 const TILE_HEIGHT = 19;
+/** How far the room's colour pulls the creature and its outfit. Subtle on purpose. */
+const AMBIENT_STRENGTH = 0.12;
+
 const ORIGIN_X = 640;
 const ORIGIN_Y = 330;
 
@@ -119,6 +122,7 @@ export class BedroomScene extends Phaser.Scene {
       fallbackTexture: this.petTextureKey && this.textures.exists(this.petTextureKey) ? this.petTextureKey : undefined,
       scale: .86,
       wearables: this.model.bootstrap.catalog.wearables,
+      ambient: this.ambientLight(),
     });
     this.avatar.setDepth(60);
     this.ghost = this.add.graphics().setDepth(15);
@@ -319,6 +323,22 @@ export class BedroomScene extends Phaser.Scene {
    * gives the two facings the art can honestly express, and the piece always stays upright.
    * The footprint still swaps on 90/270, so rotation continues to change the cells occupied.
    */
+  /**
+   * The room's light, as a tint every occupant shares.
+   *
+   * The creature and its outfit are drawn against ten different rooms, from a warm oak bedroom
+   * to a blue-lit space pod, and art that ignores the room it stands in reads as pasted on top
+   * of a background rather than standing inside it. A small pull towards the theme colour is
+   * enough to seat everything in the same light without recolouring the art.
+   */
+  private ambientLight() {
+    const room = this.model.bootstrap.catalog.rooms.find((entry) => entry.id === this.model.bootstrap.room.themeId);
+    if (!room) return 0xffffff;
+    const theme = Phaser.Display.Color.HexStringToColor(room.primary);
+    const mix = (channel: number) => Math.round(255 + (channel - 255) * AMBIENT_STRENGTH);
+    return Phaser.Display.Color.GetColor(mix(theme.red), mix(theme.green), mix(theme.blue));
+  }
+
   private applyFacing(art: Phaser.GameObjects.Container, rotation: number) {
     // 90 and 270 are the turned states — the same ones whose footprint swaps — so a press
     // always changes both the facing and the cells occupied. Mapping the mirror to 180/270

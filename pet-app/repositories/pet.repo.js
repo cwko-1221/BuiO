@@ -220,18 +220,34 @@ async function getBootstrap(studentId) {
       pool.query(`SELECT ItemID AS "itemId",Quantity AS quantity FROM PetInventory WHERE StudentID=$1 AND Quantity>0`, [studentId]),
       pool.query(`SELECT ThemeID AS "themeId",Visibility AS visibility,Placements AS placements,UpdatedAt AS "updatedAt" FROM PetRoomLayouts WHERE StudentID=$1`, [studentId]),
     ]);
-    return { profile: profileResult.rows[0], wallet: { balance: Number(walletResult.rows[0]?.balance) || 0 }, pets: petsResult.rows.map((row) => publicPet(row)), inventory: inventoryResult.rows.map((row) => ({ ...row, quantity: Number(row.quantity) })), room: roomResult.rows[0], catalog, serverDay: hkDay() };
+    const pets = petsResult.rows.map((row) => publicPet(row));
+    return { profile: profileResult.rows[0], wallet: { balance: Number(walletResult.rows[0]?.balance) || 0 }, pets, inventory: inventoryResult.rows.map((row) => ({ ...row, quantity: Number(row.quantity) })), room: roomResult.rows[0], catalog: catalogFor(pets), serverDay: hkDay() };
   }
   const data = ensureJsonData();
   const profile = data.petProfiles.find((row) => row.studentId === studentId);
+  const pets = data.petInstances.filter((row) => row.studentId === studentId).map((row) => publicPet(row));
   return clone({
     profile,
     wallet: data.petWallets.find((row) => row.studentId === studentId),
-    pets: data.petInstances.filter((row) => row.studentId === studentId).map((row) => publicPet(row)),
+    pets,
     inventory: data.petInventory.filter((row) => row.studentId === studentId && row.quantity > 0),
     room: data.petRoomLayouts.find((row) => row.studentId === studentId),
-    catalog, serverDay: hkDay(),
+    catalog: catalogFor(pets), serverDay: hkDay(),
   });
+}
+
+/**
+ * The catalogue, with the per-frame motion tracks trimmed to the species this student owns.
+ *
+ * The tracks are what keep a worn hat following the head, but they are only ever read for the
+ * pet standing in the room. Shipping all eighty of them costs 21 KB gzipped on every bootstrap,
+ * which is real money on a class of thirty tablets waking up at once, so a student is sent the
+ * handful they can actually animate. A species that arrives later simply falls back to the
+ * resting anchors until the next bootstrap.
+ */
+function catalogFor(pets) {
+  const owned = new Set(pets.map((pet) => pet.speciesId));
+  return { ...catalog, pets: catalog.pets.map((pet) => (owned.has(pet.id) ? pet : { ...pet, motion: undefined })) };
 }
 
 function readJsonIdempotency(data, actorId, key, kind) {

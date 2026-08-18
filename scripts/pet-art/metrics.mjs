@@ -65,47 +65,112 @@ export async function generate({ catalog, resolve, root, log }) {
   await fs.mkdir(path.join(root, 'collectibles'), { recursive: true });
   await fs.writeFile(path.join(root, 'collectibles', 'metrics.json'), JSON.stringify(metrics, null, 0));
 
-  const bodies = await measureBodies({ catalog, resolve, root, log });
+  const creatures = await measureCreatures({ catalog, resolve, root, log });
 
-  log(`measured ${measured} content boxes${missing ? `, ${missing} missing` : ''}, ${bodies} creature anchors`);
-  return { counts: { measured, missing, bodies } };
+  log(`measured ${measured} content boxes${missing ? `, ${missing} missing` : ''}, ${creatures.anchors} creature anchors over ${creatures.tracks} motion tracks`);
+  return { counts: { measured, missing, ...creatures } };
 }
 
 /**
- * Where a hat, a pair of glasses and a collar belong on each creature.
+ * Where a hat, a pair of glasses and a collar belong on each creature, frame by frame.
  *
  * Atlas cells are square and no creature fills one, and the forms differ wildly — long ears,
  * horns, a shell, no neck at all. Any fixed proportion of the cell therefore floats accessories
  * above the squat creatures and buries them in the tall ones, so the runtime needs anchors
- * measured from the art itself. Doing it here keeps the cost at build time.
+ * measured from the art itself.
  *
- * The idle pose is the resting one, so it is the right frame to fit accessories against.
+ * Measuring only the resting pose is not enough either. A creature's head travels 19px within
+ * idle and 45px while it is happy, on a 160px cell — an accessory pinned to one set of anchors
+ * stays put while the head moves out from under it, which is exactly what reads as a sticker
+ * rather than something worn. So every frame is measured, and the difference from the resting
+ * pose ships alongside as a compact per-frame track.
  */
-async function measureBodies({ catalog, resolve, root, log }) {
+async function measureCreatures({ catalog, resolve, root, log }) {
   let manifest;
   try {
     manifest = JSON.parse(await fs.readFile(path.join(root, 'sprites', 'manifest.json'), 'utf8'));
   } catch {
     log('no sprite manifest yet; skipping creature anchors');
-    return 0;
+    return { anchors: 0, tracks: 0 };
   }
-  const region = { left: 0, top: 0, width: manifest.frameWidth, height: manifest.frameHeight };
+  const { frameWidth: cellW, frameHeight: cellH } = manifest;
+  const columns = manifest.gridColumns || manifest.columns.length;
+  const cells = columns * (manifest.gridRows || 1);
 
-  const bodies = {};
+  // Only the cells an action actually occupies are drawn; the rest of the grid is padding.
+  const animated = new Set();
+  for (const action of Object.values(manifest.actions || {})) {
+    for (let i = 0; i < action.count; i += 1) animated.add(action.start + i);
+  }
+
+  const anchors = {};
+  const motion = {};
   for (const pet of catalog.pets) {
     for (let stage = 0; stage < (pet.atlas?.length ?? 0); stage += 1) {
+      let sheet;
       try {
-        const { data, info } = await sharp(resolve(pet.atlas[stage])).extract(region).ensureAlpha().raw()
-          .toBuffer({ resolveWithObject: true });
-        const found = anchors(data, info);
-        if (found) bodies[`${pet.id}-${stage + 1}`] = found;
+        sheet = await sharp(resolve(pet.atlas[stage])).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
       } catch {
-        // atlas not generated yet; the runtime falls back to fitting against the whole cell
+        continue; // atlas not generated yet; the runtime falls back to whole-cell proportions
+      }
+      const cellAt = (index) => landmarks(sheet.data, sheet.info, {
+        left: (index % columns) * cellW, top: Math.floor(index / columns) * cellH, width: cellW, height: cellH,
+      });
+
+      const rest = cellAt(0);
+      if (!rest) continue;
+      const key = `${pet.id}-${stage + 1}`;
+      const round = (value) => Number(value.toFixed(4));
+      anchors[key] = {
+        top: round(rest.skull / cellH), eye: round(rest.eye / cellH), bottom: round(rest.bottom / cellH),
+        centre: round(rest.centre / cellW), width: round(rest.width / cellW),
+        head: round(rest.head / cellW), face: round(rest.face / cellW),
+      };
+
+      // Four signed bytes per cell: how far the skull and the eyes have moved, how far the body
+      // has swayed, and how much wider it has become, all against the resting pose. Signed bytes
+      // cover every pose measured and keep the whole table inside a few kilobytes.
+      const track = new Int8Array(cells * 4);
+      for (const index of animated) {
+        const frame = index === 0 ? rest : cellAt(index);
+        if (!frame) continue;
+        track[index * 4] = clampByte(frame.skull - rest.skull);
+        track[index * 4 + 1] = clampByte(frame.eye - rest.eye);
+        track[index * 4 + 2] = clampByte(frame.centre - rest.centre);
+        track[index * 4 + 3] = clampByte(Math.round((frame.width / rest.width - 1) * 100));
+      }
+      smooth(track, manifest.actions);
+      motion[key] = Buffer.from(track.buffer).toString('base64');
+    }
+  }
+
+  await fs.writeFile(path.join(root, 'sprites', 'body-metrics.json'), JSON.stringify(anchors, null, 0));
+  await fs.writeFile(path.join(root, 'sprites', 'frame-motion.json'), JSON.stringify(motion, null, 0));
+  return { anchors: Object.keys(anchors).length, tracks: Object.keys(motion).length };
+}
+
+const clampByte = (value) => Math.max(-127, Math.min(127, Math.round(value)));
+
+/**
+ * Median-of-three along each action, per channel.
+ *
+ * The landmarks are read off the pixels, so a single frame can disagree with its neighbours for
+ * reasons that have nothing to do with where the head is — a blink darkens a different row, a
+ * turned ear widens the silhouette. Left alone those one-frame spikes make a hat jump down over
+ * the face and back, which looks worse than not tracking at all. A median throws out the odd
+ * frame while leaving the real arc of the motion untouched.
+ */
+function smooth(track, actions) {
+  for (const action of Object.values(actions || {})) {
+    if (action.count < 3) continue;
+    for (let channel = 0; channel < 4; channel += 1) {
+      const source = Array.from({ length: action.count }, (_, i) => track[(action.start + i) * 4 + channel]);
+      for (let i = 0; i < action.count; i += 1) {
+        const window = [source[Math.max(0, i - 1)], source[i], source[Math.min(action.count - 1, i + 1)]].sort((a, b) => a - b);
+        track[(action.start + i) * 4 + channel] = window[1];
       }
     }
   }
-  await fs.writeFile(path.join(root, 'sprites', 'body-metrics.json'), JSON.stringify(bodies, null, 0));
-  return Object.keys(bodies).length;
 }
 
 /** Fraction of the widest row a row must reach to count as skull rather than ear or horn. */
@@ -113,24 +178,25 @@ const SKULL_WIDTH_RATIO = 0.72;
 /** Luminance below which a pixel reads as eye rather than fur. */
 const EYE_LUMINANCE = 0.38;
 
-/** Anchor lines and widths for one idle frame, as 0..1 fractions of the cell. */
-function anchors(data, info) {
-  const { width: W, height: H, channels: C } = info;
-  const alphaAt = (x, y) => data[(y * W + x) * C + 3];
+/** Anchor lines and widths for one frame, in cell pixels. */
+function landmarks(data, info, rect) {
+  const { channels: C } = info;
+  const stride = info.width * C;
+  const alphaAt = (x, y) => data[(rect.top + y) * stride + (rect.left + x) * C + 3];
   const luminanceAt = (x, y) => {
-    const i = (y * W + x) * C;
+    const i = (rect.top + y) * stride + (rect.left + x) * C;
     return (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114) / 255;
   };
 
-  let minX = W;
-  let minY = H;
+  let minX = rect.width;
+  let minY = rect.height;
   let maxX = -1;
   let maxY = -1;
-  const widths = new Int32Array(H);
-  for (let y = 0; y < H; y += 1) {
+  const widths = new Int32Array(rect.height);
+  for (let y = 0; y < rect.height; y += 1) {
     let rowMin = -1;
     let rowMax = -1;
-    for (let x = 0; x < W; x += 1) {
+    for (let x = 0; x < rect.width; x += 1) {
       if (alphaAt(x, y) <= ALPHA_THRESHOLD) continue;
       if (rowMin < 0) rowMin = x;
       rowMax = x;
@@ -180,17 +246,14 @@ function anchors(data, info) {
   }
   if (eyeMax < eyeMin) { eyeMin = minX; eyeMax = maxX; }
 
-  const round = (value) => Number(value.toFixed(4));
   return {
-    top: round(skull / H),
-    eye: round(eyeY / H),
-    bottom: round((maxY + 1) / H),
-    centre: round(((minX + maxX + 1) / 2) / W),
-    width: round((maxX - minX + 1) / W),
+    skull, eye: eyeY, bottom: maxY + 1,
+    centre: (minX + maxX + 1) / 2,
+    width: maxX - minX + 1,
     // Widest row of the head region rather than the row halfway down it: a tapering muzzle or a
     // pointed mantle is narrower there than the eyes it has to sit above, and glasses fitted to
     // that would come out wider than the hat.
-    head: round(headPeak / W),
-    face: round((eyeMax - eyeMin + 1) / W),
+    head: headPeak,
+    face: eyeMax - eyeMin + 1,
   };
 }

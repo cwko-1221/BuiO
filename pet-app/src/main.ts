@@ -152,6 +152,10 @@ class StudentApp {
       this.surfaceObserver = new ResizeObserver(() => this.game?.scale.refresh());
       this.surfaceObserver.observe(surface);
     }
+    // A handle on the running game. The room is the one part of this app that cannot be
+    // inspected from the DOM — everything inside the canvas is invisible to a test — so the
+    // browser checks reach the live scene through here to assert what is actually on screen.
+    (window as unknown as { __petGame?: Phaser.Game }).__petGame = this.game;
     this.game.scene.add('Bedroom',BedroomScene,false);
     this.game.events.on('room:placements',(placements:RoomPlacement[])=>{this.roomPlacements=placements.map((item)=>({...item}));this.refreshDecorStrip();});
     this.game.events.on('room:selected',(id:string)=>{this.selectedFurniture=id;document.querySelector('#furnitureActions')?.classList.add('visible');});

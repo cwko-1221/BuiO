@@ -48,13 +48,21 @@ const artPath = (folder, id) => {
  * Cells are square and no creature fills one, so accessories anchored to the cell float above a
  * short form and sink into a tall one. Generated alongside the collectible metrics.
  */
-const BODY_METRICS = (() => {
+const readSpriteMetrics = (name) => {
   try {
-    return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'assets', 'art', 'sprites', 'body-metrics.json'), 'utf8'));
+    return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'assets', 'art', 'sprites', name), 'utf8'));
   } catch {
     return {};
   }
-})();
+};
+
+const BODY_METRICS = readSpriteMetrics('body-metrics.json');
+
+/**
+ * Per-frame movement of those landmarks, base64 signed bytes, four per atlas cell. Without it a
+ * worn item holds still while the creature breathes out from under it.
+ */
+const FRAME_MOTION = readSpriteMetrics('frame-motion.json');
 
 const PETS = [
   ['starpatch-cat','common','light',['星斑幼貓','月影貓','星鬃獵貓','天穹星獅'],['Starpatch Kitten','Moonshadow Cat','Star-Mane Hunter','Skybound Star Lion'],'幸運飛撲','Lucky Pounce','#f4c45e','cat'],
@@ -83,6 +91,7 @@ const PETS = [
   art: Array.from({ length: 4 }, (_, index) => artPath('pets', `${id}-${index + 1}`)),
   atlas: Array.from({ length: 4 }, (_, index) => artPath('sprites', `${id}-${index + 1}-atlas`)),
   anchors: Array.from({ length: 4 }, (_, index) => BODY_METRICS[`${id}-${index + 1}`] || null),
+  motion: Array.from({ length: 4 }, (_, index) => FRAME_MOTION[`${id}-${index + 1}`] || null),
 }));
 
 const ROOMS = [

@@ -108,11 +108,39 @@ try {
   await teacherPage.screenshot({path:path.join(artifactDir,'09-teacher-grant-complete.png')});
   await page.setViewportSize({width:1180,height:820}); await page.reload({waitUntil:'networkidle'});
   await page.locator('#coinBalance').waitFor(); assert.equal((await page.locator('#coinBalance').innerText()).replace(/,/g,''),'250');
+  // A worn item has to ride the pose, not sit at a fixed spot on the canvas. The head travels up
+  // to 45px on a 160px cell inside a single action, so a crown pinned to the resting anchors
+  // slides off the head as soon as the creature breathes — and a crown whose size wobbles frame
+  // to frame means the landmark track is spiking rather than tracking. Nothing about either is
+  // visible from the DOM, so this reaches into the running scene.
+  const buy=await context.request.post('/api/pet/shop/purchase',{data:{itemId:'head-01',quantity:1},headers:{'Idempotency-Key':'live-crown'}});
+  assert.equal(buy.status(),201);
+  const outfit=await context.request.put(`/api/pet/pets/${(await (await context.request.get('/api/pet/bootstrap')).json()).pets[0].id}/outfit`,{data:{wearableIds:['head-01']}});
+  assert.equal(outfit.status(),200);
+  await page.reload({waitUntil:'networkidle'}); await page.locator('#game-root canvas').waitFor();
+  await page.waitForFunction(()=>window.__petGame?.scene?.getScene('Bedroom')?.avatar?.worn?.length>0,null,{timeout:15000});
+  const worn=await page.evaluate(async()=>{
+    const avatar=window.__petGame.scene.getScene('Bedroom').avatar; const out=[];
+    for(let index=0;index<40;index+=1){
+      out.push({cell:Number(avatar.sprite?.frame?.name),y:Number(avatar.worn[0].image.y.toFixed(2)),scale:Number(avatar.worn[0].image.scaleX.toFixed(4)),shaded:!!avatar.worn[0].shade,tint:avatar.worn[0].image.tintTopLeft});
+      await new Promise((resolve)=>setTimeout(resolve,40));
+    }
+    return out;
+  });
+  const seen=(key)=>new Set(worn.map((sample)=>sample[key])).size;
+  assert.ok(seen('cell')>1,'the pet never changed frame, so the outfit check proved nothing');
+  assert.ok(seen('y')>1,'the crown held one position across frames - it is not following the head');
+  assert.equal(seen('scale'),1,'the crown resized between frames - the landmark track is spiking');
+  assert.ok(worn[0].shaded,'the crown casts no contact shadow');
+  assert.notEqual(worn[0].tint,0xffffff,'the crown is not picking up the room light');
+  await page.screenshot({path:path.join(artifactDir,'10-outfit-ipad-landscape.png')});
+
   assert.deepEqual(errors,[]);
   await teacherContext.close(); await context.close();
   console.log(`✓ protected student and teacher role routing`);
   console.log(`✓ hatch, collection, decoration and grant flows`);
   console.log(`✓ desktop, iPad landscape and mobile screenshots: ${artifactDir}`);
+  console.log(`✓ worn items track the pose, cast contact shadows and take the room light`);
   console.log(`✓ no browser console or uncaught page errors`);
 } finally {
   if(browser) await browser.close();
