@@ -20,9 +20,9 @@ const { catalog } = require('../pet-app/lib/catalog.js');
 const WORLD_STYLE = `Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.`;
 
 /** The creature and anything it wears. */
-const PET_STYLE = `Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. Identical rendering style, line weight, palette and lighting across every cell of the sheet.`;
+const PET_STYLE = `Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.`;
 
-const sheet = (cols, rows) => `Lay the items out as a strict grid, ${cols} columns by ${rows} rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. Fully transparent background with alpha. No ground shadow, no cast shadow, no reflection, no scenery, no text, no caption, no number, no label, no watermark, no frame or border. Square canvas 4096 x 4096.`;
+const sheet = (cols, rows) => `Lay the items out as a strict grid, ${cols} columns by ${rows} rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.`;
 
 const ROOMS = [
   ['sunny-oak', '橡木暖陽房', `a warm oak bedroom: honey-toned herringbone floorboards, cream painted wall panelling with a white chair rail, a tall arched window on the back wall filled with soft morning light and a hint of green garden beyond`],
@@ -226,6 +226,12 @@ Row 4, seen from the FRONT only:
   cell 19  sitting down
   cell 20  surprised, ears and eyes wide
 
+The side and back rows are the same creature turned, not the creature redrawn. Across all four rows keep the same overall height, the same body width, the same head-to-body ratio and the same limb length. Check the size of the head against the body in every single cell.
+
+Every feature named in the description above is present in all 20 cells - from behind, lying down, and in every walk pose. If part of the design is something the creature sits in, wears or carries, it is there in every cell too, not only in the first one.
+
+Row 2 is a true side profile facing to the right in all five of its cells, at the same angle each time. Row 4 faces the viewer at the same front angle as row 1.
+
 In every cell the creature stands on the same baseline, occupies the same height, and is shown in full with nothing cropped or cut off by the cell edge.
 
 Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses, and do not leave a cell empty.`;
@@ -249,7 +255,7 @@ The room must be entirely empty: no furniture, no rugs, no plants, no props, no 
 
 Theme: ${theme}
 
-Landscape canvas 1600 x 900, opaque, filled edge to edge, no border, no text.`);
+Landscape canvas 1600 x 900, fully opaque and filled edge to edge - this one is a background, so no transparency. No border, no frame, no text, no watermark, no characters.`);
 }
 
 for (let i = 0; i < ROOMS.length; i += 2) {
