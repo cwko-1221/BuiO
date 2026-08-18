@@ -645,7 +645,11 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
 .gear-doll > .gear-column:first-of-type { grid-area: left; }
 .gear-doll > .gear-column:last-of-type { grid-area: right; }
 .gear-figure { grid-area: figure; display: grid; place-items: center; min-height: 220px; min-width: 128px; }
-.gear-figure img { width: min(100%, 190px); filter: drop-shadow(0 8px 14px rgba(52, 40, 28, .18)); }
+.gear-figure > img { width: min(100%, 190px); filter: drop-shadow(0 8px 14px rgba(52, 40, 28, .18)); }
+/* One square atlas cell with the outfit stacked over it, all positioned in cell fractions. */
+.figure-stack { position: relative; width: min(100%, 200px); aspect-ratio: 1; filter: drop-shadow(0 8px 14px rgba(52, 40, 28, .18)); }
+.figure-body { position: absolute; inset: 0; background-position: 0 0; background-repeat: no-repeat; }
+.figure-piece { position: absolute; }
 .gear-foot { grid-area: foot; display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 76px)); justify-content: center; }
 .gear-column { display: grid; gap: var(--s1); align-content: start; }
 

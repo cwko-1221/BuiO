@@ -1,10 +1,6 @@
 import Phaser from 'phaser';
 import type { AnimationLayout, ContentBox, PetAction, PetAnchors, PetDefinition, PetFacing, PetInstance, WearableDefinition } from '../types';
-
-type SlotLayout = {
-  line: 'skull' | 'eye' | 'chin' | 'body' | 'feet'; anchor: number;
-  against: 'head' | 'face' | 'width'; width: number; tallest: number; behind?: boolean;
-};
+import { SLOT_LAYOUT, UNMEASURED, placeWearable, type SlotLayout } from './wearableLayout';
 
 /** Unpack a base64 motion track into signed bytes. Four per atlas cell, or nothing if absent. */
 function decodeMotion(encoded?: string | null) {
@@ -60,7 +56,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   private anchors?: PetAnchors;
   private motion?: Int8Array;
   private ambient?: number;
-  private worn: { image: Phaser.GameObjects.Image; shade?: Phaser.GameObjects.Image; slot: SlotLayout; box: ContentBox }[] = [];
+  private worn: { image: Phaser.GameObjects.Image; shade?: Phaser.GameObjects.Image; slotKey: string; box: ContentBox }[] = [];
 
   /** Texture key for a species/stage atlas. Shared so preload and construction agree. */
   static atlasKey(definition: PetDefinition, stage: number) {
@@ -226,28 +222,6 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   }
 
   /**
-   * How each slot is placed against the creature's measured landmarks.
-   *
-   * `line` is where the slot sits: on the skull, on the eye line, or somewhere down the body
-   * between the eyes and the feet. `anchor` is the point of the item's own artwork that lands
-   * on that line — a hat hangs from near its brim, a collar sits on its middle. `width` scales
-   * the item against the landmark it belongs to, so a wide-headed slime gets a wide hat and a
-   * narrow rabbit a narrow one without either being hand-tuned.
-   */
-  private static readonly SLOT_LAYOUT: Record<string, SlotLayout> = {
-    head: { line: 'skull', anchor: 0.86, against: 'head', width: 1.06, tallest: 1.5 },
-    face: { line: 'eye', anchor: 0.50, against: 'face', width: 1.32, tallest: 0.9 },
-    neck: { line: 'chin', anchor: 0.42, against: 'head', width: 0.70, tallest: 0.9 },
-    back: { line: 'body', anchor: 0.50, against: 'width', width: 0.86, tallest: 2.2, behind: true },
-    aura: { line: 'feet', anchor: 0.60, against: 'width', width: 1.25, tallest: 3.0, behind: true },
-  };
-
-  /** Whole-cell fallback for the static-art path, where no landmarks were measured. */
-  private static readonly UNMEASURED: PetAnchors = {
-    top: 0.14, eye: 0.34, bottom: 1, centre: 0.5, width: 0.86, head: 0.6, face: 0.42,
-  };
-
-  /**
    * Draw the equipped items using their own artwork.
    *
    * These were placeholder Phaser shapes — a star for a hat, a rectangle for glasses — left in
@@ -263,17 +237,17 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     const equipped = (ids ?? []).filter((id) => this.scene.textures.exists(id));
     if (!equipped.length) return;
 
-    this.anchors = definition.anchors?.[stage - 1] ?? PetAvatar.UNMEASURED;
+    this.anchors = definition.anchors?.[stage - 1] ?? UNMEASURED;
     this.motion = decodeMotion(definition.motion?.[stage - 1]);
 
     for (const id of equipped) {
       const item = wearables?.find((entry) => entry.id === id);
-      const slot = PetAvatar.SLOT_LAYOUT[item?.slot ?? id.split('-')[0]];
+      const slotKey = item?.slot ?? id.split('-')[0];
+      const slot = SLOT_LAYOUT[slotKey];
       if (!slot) continue;
       const box = item?.content ?? { x: 0, y: 0, width: 1, height: 1 };
 
       const image = this.scene.add.image(0, 0, id);
-      image.setOrigin(box.x + box.width / 2, box.y + slot.anchor * box.height);
       if (this.ambient !== undefined) image.setTint(this.ambient);
 
       // A worn thing darkens what it sits on. Without that contact the art reads as a decal
@@ -283,11 +257,11 @@ export class PetAvatar extends Phaser.GameObjects.Container {
       let shade: Phaser.GameObjects.Image | undefined;
       if (!slot.behind) {
         shade = this.scene.add.image(0, 0, id);
-        shade.setOrigin(image.originX, image.originY).setTint(0x000000).setAlpha(0.22);
+        shade.setTint(0x000000).setAlpha(0.22);
         this.add(shade);
       }
       if (slot.behind) this.addAt(image, 1); else this.add(image);
-      this.worn.push({ image, shade, slot, box });
+      this.worn.push({ image, shade, slotKey, box });
     }
 
     this.layoutWearables();
@@ -306,7 +280,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   /** Place every worn item against the landmarks for one atlas cell. */
   private layoutWearables(cell = 0) {
     if (!this.worn.length) return;
-    const anchors = this.anchors ?? PetAvatar.UNMEASURED;
+    const anchors = this.anchors ?? UNMEASURED;
     const cellWidth = this.sprite && this.layout ? this.layout.frameWidth : this.staticArtSize().width;
     const cellHeight = this.sprite && this.layout ? this.layout.frameHeight : this.staticArtSize().height;
     const scale = this.sprite ? this.sprite.scaleY : this.staticArtScale();
@@ -330,31 +304,17 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     const head = Math.max(0.01, eye - top);
 
     for (const worn of this.worn) {
-      const { slot, box, image, shade } = worn;
-      // The head is the unit of measure for anything worn on it: a chin sits about two thirds of
-      // a head below the eyes whatever the creature's overall proportions are.
-      const line = slot.line === 'skull' ? top
-        : slot.line === 'eye' ? eye
-          : slot.line === 'chin' ? eye + 0.62 * head
-            : slot.line === 'feet' ? anchors.bottom
-              : eye + 0.42 * (anchors.bottom - eye);
-      // Only what is measured against the body follows the body's squash: a cape stretches with
-      // the torso, a crown does not get wider because the creature inhaled.
-      const give = slot.against === 'width' ? stretch : 1;
-      const target = anchors[slot.against] * cellWidth * scale * slot.width * give;
-
-      // Width alone is not enough. A monocle trails a long chain and a wizard hat is mostly
-      // point, so fitting either to the head's width makes it taller than the whole creature;
-      // the cap keeps a lanky piece in proportion by falling back to a height fit.
-      const ceiling = slot.tallest * head * cellHeight * scale;
-      const fitted = Math.min(
-        target / Math.max(1, box.width * image.width),
-        ceiling / Math.max(1, box.height * image.height),
-      );
-      const y = toLocalY(line);
-      image.setScale(fitted).setPosition(centreX, y);
+      const place = placeWearable({ ...anchors, top, eye, centre }, worn.slotKey, worn.box, stretch);
+      if (!place) continue;
+      const y = (place.y * cellHeight - origin * cellHeight) * scale;
+      const x = (place.x - 0.5) * cellWidth * scale;
+      worn.image.setOrigin(place.originX, place.originY);
+      worn.image.setScale(place.size * cellWidth * scale / Math.max(1, worn.image.width));
+      worn.image.setPosition(x, y);
       // The shadow lands slightly low and slightly flattened, as if cast onto the body below.
-      shade?.setScale(fitted * 0.97, fitted * 0.9).setPosition(centreX, y + Math.max(2, ceiling * 0.06));
+      worn.shade?.setOrigin(place.originX, place.originY)
+        .setScale(worn.image.scaleX * 0.97, worn.image.scaleY * 0.9)
+        .setPosition(x, y + Math.max(2, place.size * cellHeight * scale * 0.06));
     }
   }
 

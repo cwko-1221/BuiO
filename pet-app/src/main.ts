@@ -3,6 +3,7 @@ import './styles/main.css';
 import { api } from './api';
 import { audio } from './audio';
 import { BedroomScene } from './game/BedroomScene';
+import { placeWearable } from './game/wearableLayout';
 import type { Bootstrap, Identity, InventoryStack, Locale, PetDefinition, PetInstance, RoomPlacement } from './types';
 import { idempotencyKey } from './types';
 
@@ -292,6 +293,45 @@ class StudentApp {
   }
 
   /**
+   * The creature wearing what is in the slots.
+   *
+   * The landmarks are measured against the atlas cell, not the standalone portrait, so the
+   * preview shows the atlas's resting frame — cropped out with a background offset — and lays
+   * the pieces over it with the placement the room uses. Falling back to the portrait when a
+   * pet has no atlas costs the overlays, which is the right trade: a creature with no clothes is
+   * better than a creature wearing them in the wrong places.
+   */
+  private previewFigure(definition:PetDefinition,pet:PetInstance) {
+    const layout=this.state.catalog.animation;
+    const atlas=definition.atlas?.[pet.stage-1];
+    const anchors=definition.anchors?.[pet.stage-1];
+    if(!layout||!atlas||!anchors) {
+      return `<img src="${definition.art[pet.stage-1]}" alt="" draggable="false">`;
+    }
+    const grid=this.atlasGrid(layout);
+    const pieces=pet.equippedWearables.map((id)=>{
+      const item=this.state.catalog.wearables.find((entry)=>entry.id===id);
+      if(!item?.art) return null;
+      const place=placeWearable(anchors,item.slot,item.content||{x:0,y:0,width:1,height:1});
+      if(!place) return null;
+      const left=(place.x-place.size*place.originX)*100;
+      const top=(place.y-place.size*place.originY)*100;
+      return {place,html:`<img class="figure-piece" src="${item.art}" alt="" draggable="false"
+        style="left:${left.toFixed(2)}%;top:${top.toFixed(2)}%;width:${(place.size*100).toFixed(2)}%">`};
+    }).filter(Boolean) as {place:{behind:boolean};html:string}[];
+    const behind=pieces.filter((piece)=>piece.place.behind).map((piece)=>piece.html).join('');
+    const front=pieces.filter((piece)=>!piece.place.behind).map((piece)=>piece.html).join('');
+    return `<div class="figure-stack">${behind}<i class="figure-body" style="background-image:url('${atlas}');background-size:${grid.x*100}% ${grid.y*100}%"></i>${front}</div>`;
+  }
+  /** Columns and rows of the atlas grid, so one cell can be cropped out with a background size. */
+  private atlasGrid(layout:{framesPerDirection:number;actions:{start:number;length:number}[]}) {
+    const cells=layout.framesPerDirection;
+    const columns=Math.max(...layout.actions.map((action)=>action.length));
+    const rows=Math.max(1,Math.round(cells/Math.max(1,columns)));
+    return {x:columns,y:rows};
+  }
+
+  /**
    * Frame a piece's thumbnail on the piece itself.
    *
    * Every item is drawn on the same 640px canvas and none of them fills it — a bell occupies a
@@ -349,7 +389,7 @@ class StudentApp {
       `<div class="gear-board">
         <section class="gear-doll">
           <div class="gear-column">${column('left')}</div>
-          <div class="gear-figure"><img src="${definition.art[pet.stage-1]}" alt="" draggable="false"></div>
+          <div class="gear-figure">${this.previewFigure(definition,pet)}</div>
           <div class="gear-column">${column('right')}</div>
           <div class="gear-foot">${column('foot')}</div>
         </section>
