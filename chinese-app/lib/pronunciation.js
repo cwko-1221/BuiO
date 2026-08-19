@@ -810,8 +810,19 @@ async function evaluatePronunciation(
       assessmentMs = Date.now() - assessmentStartedAt;
       azureRequests += 1;
     }
+    // Tone is measured on every submission but does not count towards the score
+    // until it has been calibrated against real recordings. Checked against 12
+    // archived readings that Azure and a teacher both accepted, the current
+    // thresholds failed 10 of them: real speech drifts downwards across an
+    // utterance and drops at the end, so 攤位 read correctly measured as falling
+    // where the tone letters say high level. Failing a child who read correctly
+    // is worse than passing one who did not, so it stays off until the evidence
+    // says otherwise. The measurement is still recorded on every attempt, which
+    // is what makes the calibration possible.
     const toneEvidence = analyzeTones(audio, contentCheck.expectedJyutping);
-    const combined = combinePronunciationEvidence(assessment.score, contentCheck, toneEvidence);
+    const toneCounts = booleanEnv('CHINESE_TONE_SCORING', false);
+    const combined = combinePronunciationEvidence(
+      assessment.score, contentCheck, toneCounts ? toneEvidence : null);
     const classification = classifyAccuracy(combined.score);
     return {
       ...assessment,
@@ -827,6 +838,7 @@ async function evaluatePronunciation(
         contentCheck,
         combined,
         toneEvidence,
+        toneScoring: toneCounts,
         assessmentTranscript: assessment.transcript,
       },
       timing: { queueWaitMs, contentRecognitionMs, assessmentMs, azureRequests },

@@ -31,3 +31,5 @@ Thumbs.db
 
 # generated art dropped in for import
 art-inbox/
+.env.txt
+.env.*.txt

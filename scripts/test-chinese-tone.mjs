@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
+import { speakTones, speakJyutping, resetVoiceNoise } from './lib/cantonese-audio.mjs';
+
 const require = createRequire(import.meta.url);
 const { analyzeTones, expectedTones, TONE_TARGETS } =
   require('../chinese-app/lib/toneAnalysis.js');
@@ -101,5 +103,63 @@ const soloCorrect = analyzeTones(read(1), 'jing1');
 assert.ok(soloCorrect.score >= 85, `a solo level tone must score high, got ${soloCorrect.score}`);
 assert.ok(analyzeTones(read(2), 'jing1').score < soloCorrect.score,
   'a rising contour read for a level tone must cost marks even alone');
+
+// ----- a real voice, not a pure tone ----------------------------------------
+// Every test above passed while the pitch tracker was slipping octaves on real
+// speech: a correctly read 海豚 came back spanning 102 Hz to 410 Hz with both
+// contours inverted, and scored 47%. Pure tones never exercised that, so the
+// voice below is a glottal pulse train through formant resonators, with jitter
+// and breath noise, at three different vocal ranges.
+const VOICES = [
+  ['a child around 250 Hz', 1],
+  ['an adult around 125 Hz', 0.5],
+  ['a low voice around 100 Hz', 0.4],
+];
+
+for (const [who, pitchScale] of VOICES) {
+  resetVoiceNoise();
+  const spoken = analyzeTones(speakJyutping('hoi2 tyun4', { pitchScale }), 'hoi2 tyun4');
+  assert.ok(spoken, `${who} reading 海豚 correctly must be measurable`);
+  assert.ok(spoken.score >= 85,
+    `${who} reading 海豚 correctly must not be failed, got ${spoken.score}`);
+  // The octave error showed up here first: two octaves of range on one word.
+  assert.ok(spoken.speakerRange.spanSemitones <= 12,
+    `${who} cannot span ${spoken.speakerRange.spanSemitones} semitones on one word`);
+  assert.equal(spoken.measuredSyllables, 2);
+  assert.ok(spoken.syllables[0].contour.slope > 0,
+    `a rising tone must be measured as rising for ${who}`);
+  assert.ok(spoken.syllables[1].contour.slope < 0,
+    `a falling tone must be measured as falling for ${who}`);
+
+  resetVoiceNoise();
+  const wrongSecond = analyzeTones(speakTones([2, 2], { pitchScale }), 'hoi2 tyun4');
+  assert.ok(wrongSecond.score < 70,
+    `${who} reading 海短 must not pass, got ${wrongSecond.score}`);
+  resetVoiceNoise();
+  const wrongFirst = analyzeTones(speakTones([1, 4], { pitchScale }), 'hoi2 tyun4');
+  assert.ok(wrongFirst.score < 70,
+    `${who} reading 開豚 must not pass, got ${wrongFirst.score}`);
+  assert.ok(spoken.score - wrongSecond.score > 30,
+    `right and wrong must stay far apart for ${who}`);
+}
+
+// A three-syllable word on a real voice, where the tones only span part of the
+// range and nothing may be stretched to fill it.
+resetVoiceNoise();
+const spokenThree = analyzeTones(speakJyutping('gung1 zok3 fong1'), 'gung1 zok3 fong1');
+assert.ok(spokenThree.score >= 85,
+  `工作坊 read correctly on a real voice must not be failed, got ${spokenThree.score}`);
+assert.equal(spokenThree.measuredSyllables, 3);
+
+// Noise carries no pitch, so it must report no evidence rather than a bad
+// score. A tone score is only allowed to cost marks when it was measured.
+let hiss = 1234567;
+const noise = new Float32Array(16000).map(() => {
+  hiss = (hiss * 16807) % 2147483647;
+  return (hiss / 2147483647 * 2 - 1) * 0.2;
+});
+const fromNoise = analyzeTones(wav([noise]), 'hoi2 tyun4');
+assert.ok(fromNoise === null || fromNoise.score === null,
+  'an unpitched recording must report no tone evidence, not a low score');
 
 console.log('✅ Cantonese tone analysis tests passed.');

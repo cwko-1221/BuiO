@@ -324,7 +324,7 @@ currentAssessment = {
 const currentItemToneMistake = await evaluatePronunciation(
   readJyutping('hoi2 tyun4'), '海豚', 'hoi2 tyun4', fakeSdk,
   { assignmentId: 'assignment-1', itemId: 'item-sea' });
-assert.equal(currentItemToneMistake.score, 85.2,
+assert.equal(currentItemToneMistake.score, 86,
   '海豚 read as 開豚 must remain below 100 even when scripted Azure returns all 100');
 assert.equal(currentItemToneMistake.diagnostics.reference.text, '海豚');
 assert.equal(currentItemToneMistake.diagnostics.reference.itemId, 'item-sea');
@@ -361,7 +361,7 @@ currentAssessment = {
 const gatedCorrectPhrase = await evaluatePronunciation(
   readJyutping('kei5 ngo2'), '企鵝', 'kei5 ngo2', fakeSdk);
 assert.equal(gatedCorrectPhrase.status, 'pass');
-assert.equal(gatedCorrectPhrase.score, 92.1);
+assert.equal(gatedCorrectPhrase.score, 92.9);
 assert.equal(gatedCorrectPhrase.contentCheck.status, 'matched');
 assert.equal(gatedCorrectPhrase.timing.azureRequests, 2);
 assert.equal(assessmentCalls, 1);
@@ -419,7 +419,7 @@ plainRecognitions = 0;
 currentRecognition = { transcript: '企鵝', confidence: 0.94 };
 const parallelPhrase = await evaluatePronunciation(
   readJyutping('kei5 ngo2'), '企鵝', 'kei5 ngo2', fakeSdk);
-assert.equal(parallelPhrase.score, 92.1,
+assert.equal(parallelPhrase.score, 92.9,
   'running the two calls together must not change the score');
 assert.equal(parallelPhrase.timing.azureRequests, 2);
 assert.equal(plainRecognitions, 1,
@@ -427,7 +427,45 @@ assert.equal(plainRecognitions, 1,
 assert.equal(assessmentCalls, 1);
 delete process.env.AZURE_SPEECH_MAX_CONCURRENT;
 
+// ----- tone is measured on every submission but does not count by default ----
+// Checked against 12 archived readings that Azure and a teacher both accepted,
+// the current tone thresholds failed 10: real speech drifts downwards across an
+// utterance and drops at the end, so 攤位 read correctly measures as falling
+// where the tone letters say high level. Until that is calibrated against real
+// recordings of wrong readings as well as right ones, the measurement is
+// recorded and not scored, because failing a child who read correctly is worse
+// than passing one who did not.
+assessmentCalls = 0;
+azureRequests = 0;
+currentRecognition = { transcript: '海豚', confidence: 0.65 };
+currentAssessment = {
+  accuracyScore: 100,
+  pronunciationScore: 100,
+  completenessScore: 100,
+  fluencyScore: 100,
+  detailResult: {
+    Words: [{
+      Word: '海豚',
+      PronunciationAssessment: { AccuracyScore: 100, ErrorType: 'None' },
+      Phonemes: Array.from({ length: 5 }, () => ({
+        PronunciationAssessment: { AccuracyScore: 100 },
+      })),
+    }],
+  },
+};
+const toneOffWrongTone = await evaluatePronunciation(
+  readTones(2, 2), '海豚', 'hoi2 tyun4', fakeSdk);
+assert.equal(toneOffWrongTone.diagnostics.toneScoring, false,
+  'tone must not count towards the score until it is calibrated');
+assert.ok(toneOffWrongTone.diagnostics.toneEvidence,
+  'tone must still be measured and recorded, which is what makes calibration possible');
+assert.equal(toneOffWrongTone.diagnostics.combined.toneScore, null,
+  'an uncalibrated measurement must not reach the score');
+
 // ----- a wrong tone must cost marks even when Azure sees nothing wrong -------
+// Everything below runs with tone scoring switched on, which is what the
+// calibration work is aiming at.
+process.env.CHINESE_TONE_SCORING = '1';
 // This is the reported failure. 海短 read for 海豚 came back at 98%: Azure
 // scored all five phonemes 100 because scripted assessment force-aligns to the
 // reference, and its recogniser rewrote the non-word 海短 back to the real word
@@ -476,6 +514,8 @@ const wrongFirstTone = await evaluatePronunciation(
   readTones(1, 4), '海豚', 'hoi2 tyun4', fakeSdk);
 assert.equal(wrongFirstTone.correct, false,
   `開豚 read for 海豚 must not pass, got ${wrongFirstTone.score}`);
+
+delete process.env.CHINESE_TONE_SCORING;
 
 // ----- the limit counts Azure requests, not submissions ----------------------
 // Each submission makes two calls, so a limit of 4 must admit two submissions

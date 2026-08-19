@@ -33,12 +33,17 @@ function percentileOf(sorted, ratio) {
   return sorted[index];
 }
 
-// Normalised autocorrelation. Children carry a much higher fundamental than
-// adults, so the search covers both rather than assuming a range.
+// Pitch is found with YIN rather than plain autocorrelation. Autocorrelation
+// picks the lag with the strongest correlation, and for a voice that is often
+// twice or half the real period: a correctly read 海豚 came back with a
+// two-octave range, 102 Hz to 410 Hz, and both syllable contours inverted.
+// YIN takes the *first* period whose normalised difference drops below a
+// threshold, which is what keeps it on the fundamental.
 function framePitch(samples, start, length, sampleRate, minHz, maxHz) {
   const end = Math.min(samples.length, start + length);
   const size = end - start;
   if (size < 64) return 0;
+
   let mean = 0;
   for (let i = start; i < end; i += 1) mean += samples[i];
   mean /= size;
@@ -50,24 +55,53 @@ function framePitch(samples, start, length, sampleRate, minHz, maxHz) {
   if (energy < 1e-7) return 0;
 
   const minLag = Math.max(2, Math.floor(sampleRate / maxHz));
-  const maxLag = Math.min(size - 1, Math.floor(sampleRate / minHz));
-  let bestLag = 0;
-  let bestScore = 0;
-  for (let lag = minLag; lag <= maxLag; lag += 1) {
-    let correlation = 0;
-    let lagEnergy = 0;
+  const maxLag = Math.min(Math.floor(size / 2), Math.floor(sampleRate / minHz));
+  if (maxLag <= minLag) return 0;
+
+  // Squared difference, then normalised by its own running mean so that the
+  // value at each lag says how much better that lag is than the lags before it.
+  const difference = new Float32Array(maxLag + 1);
+  for (let lag = 1; lag <= maxLag; lag += 1) {
+    let total = 0;
     for (let i = 0; i + lag < size; i += 1) {
-      correlation += frame[i] * frame[i + lag];
-      lagEnergy += frame[i + lag] * frame[i + lag];
+      const delta = frame[i] - frame[i + lag];
+      total += delta * delta;
     }
-    const score = correlation / (Math.sqrt(energy * lagEnergy) + 1e-9);
-    if (score > bestScore) {
-      bestScore = score;
-      bestLag = lag;
-    }
+    difference[lag] = total;
   }
-  if (!bestLag || bestScore < numericEnv('CHINESE_TONE_MIN_CORRELATION', 0.35)) return 0;
-  return sampleRate / bestLag;
+  const normalised = new Float32Array(maxLag + 1);
+  normalised[0] = 1;
+  let runningSum = 0;
+  for (let lag = 1; lag <= maxLag; lag += 1) {
+    runningSum += difference[lag];
+    normalised[lag] = runningSum > 0 ? difference[lag] * lag / runningSum : 1;
+  }
+
+  const threshold = numericEnv('CHINESE_TONE_YIN_THRESHOLD', 0.15);
+  let chosen = -1;
+  for (let lag = minLag; lag <= maxLag; lag += 1) {
+    if (normalised[lag] >= threshold) continue;
+    // Walk to the bottom of this dip rather than stopping at its edge.
+    while (lag + 1 <= maxLag && normalised[lag + 1] < normalised[lag]) lag += 1;
+    chosen = lag;
+    break;
+  }
+  if (chosen < 0) {
+    let best = minLag;
+    for (let lag = minLag; lag <= maxLag; lag += 1) {
+      if (normalised[lag] < normalised[best]) best = lag;
+    }
+    if (normalised[best] > numericEnv('CHINESE_TONE_YIN_FALLBACK', 0.4)) return 0;
+    chosen = best;
+  }
+
+  // Parabolic interpolation around the dip, so the contour is not quantised to
+  // whole samples of lag.
+  const previous = normalised[Math.max(minLag, chosen - 1)];
+  const next = normalised[Math.min(maxLag, chosen + 1)];
+  const divisor = previous + next - 2 * normalised[chosen];
+  const shift = Math.abs(divisor) < 1e-9 ? 0 : (previous - next) / (2 * divisor);
+  return sampleRate / (chosen + Math.max(-1, Math.min(1, shift)));
 }
 
 function pitchTrack(samples, sampleRate) {
@@ -86,6 +120,38 @@ function pitchTrack(samples, sampleRate) {
     });
   }
   return frames;
+}
+
+// Even YIN slips an octave on a creaky or breathy frame. Anything sitting close
+// to double or half the utterance's own median is folded back, and a short
+// median filter removes what is left. The guard is set wide enough that a real
+// speaking range, which rarely exceeds an octave on one word, is never folded.
+function repairOctaves(frames) {
+  const voiced = frames.filter(frame => frame.hz > 0).map(frame => frame.hz);
+  if (voiced.length < 3) return frames;
+  const sorted = [...voiced].sort((a, b) => a - b);
+  const median = sorted[Math.floor(sorted.length / 2)];
+  const guard = Math.max(1.4, numericEnv('CHINESE_TONE_OCTAVE_GUARD', 1.7));
+
+  const corrected = frames.map(frame => {
+    if (!frame.hz) return frame;
+    let hz = frame.hz;
+    while (hz > median * guard) hz /= 2;
+    while (hz < median / guard) hz *= 2;
+    return { ...frame, hz };
+  });
+
+  const width = 2;
+  return corrected.map((frame, index) => {
+    if (!frame.hz) return frame;
+    const window = [];
+    for (let i = index - width; i <= index + width; i += 1) {
+      if (corrected[i] && corrected[i].hz > 0) window.push(corrected[i].hz);
+    }
+    if (window.length < 3) return frame;
+    window.sort((a, b) => a - b);
+    return { ...frame, hz: window[Math.floor(window.length / 2)] };
+  });
 }
 
 // A syllable is a run of frames that are both voiced and loud enough to be the
@@ -266,9 +332,16 @@ function analyzeTones(buffer, expectedJyutping) {
   try { decoded = decodePcm16Wav(buffer); }
   catch { return null; }
 
-  const frames = pitchTrack(decoded.samples, decoded.sampleRate);
+  const frames = repairOctaves(pitchTrack(decoded.samples, decoded.sampleRate));
   const range = speakerRange(frames, tones);
   if (!range) return null;
+  // A range this wide is a broken pitch track, not a speaker. Reporting no
+  // evidence is right here: a wrong tone score fails a child who read correctly,
+  // which is worse than not scoring the tone at all.
+  const widestSpan = numericEnv('CHINESE_TONE_MAX_SPAN_ST', 15);
+  if (!Number.isFinite(range.span) || range.span > widestSpan) return null;
+  const voicedFrames = frames.filter(frame => frame.hz > 0).length;
+  if (voicedFrames < Math.max(8, tones.length * 8)) return null;
   const runs = selectSyllables(frames, voicedRuns(frames), tones.length);
   if (!runs.length) return null;
 
@@ -310,6 +383,7 @@ function analyzeTones(buffer, expectedJyutping) {
 
 module.exports = {
   TONE_TARGETS,
+  repairOctaves,
   analyzeTones,
   expectedTones,
   pitchTrack,
