@@ -242,7 +242,9 @@ const MUST_SAY = {
     'fully opaque', 'no transparency anywhere',
     // The three surfaces and their proportions: a grid is laid over the floor, so a room that
     // puts its wall where the floor should be leaves cells stranded on the wall.
-    'THE FLOOR IS THE SUBJECT', '30 percent of the image height', 'It is a trapezoid', 'middle 72 percent',
+    'THE FLOOR IS THE SUBJECT', 'EVERY ROOM IN THIS SET IS THE SAME ROOM', 'it is a measurement',
+    '18 percent across,  30 percent down', '82 percent across,  30 percent down',
+    '100 percent across, 100 percent down', 'down to 30 percent',
     'SIDE WALLS', 'The whole floor is visible',
     'must not read as a grid', 'must be entirely empty', 'no characters or creatures',
     '16:9 landscape',
@@ -300,19 +302,26 @@ A single completely empty interior room, seen straight on from the front. Orthog
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
-The room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+EVERY ROOM IN THIS SET IS THE SAME ROOM WITH DIFFERENT DECORATION. The camera angle, the wall height and the shape of the floor are identical in every one of them - only the colours, the materials and the props change. So the shape below is not a guideline, it is a measurement: a placement grid is laid over the floor in software and that grid is built to these exact numbers, so a floor drawn to any other shape cannot be used.
 
-  BACK WALL   a shallow band across the top of the picture, taking up only the top
-              30 percent of the image height and no more. Flat, parallel to the
-              picture, spanning the full width. Do not make it taller than this.
-  FLOOR       the whole bottom 70 percent of the image. It is a trapezoid, wider at
-              the front than at the back: where it meets the back wall it spans the
-              middle 72 percent of the image width, and at the bottom edge of the
-              image it spans the full width. Its left and right edges are straight
-              lines running from one to the other.
-  SIDE WALLS  the two wedges left over between the floor and the left and right edges
-              of the image. They run from the back wall down to the bottom corners
-              and never overlap the floor.
+Measure from the top left corner of the image, as percentages of the image width and of the image height:
+
+  FLOOR       a trapezoid with these four corners and no others:
+                back left    18 percent across,  30 percent down
+                back right   82 percent across,  30 percent down
+                front left    0 percent across, 100 percent down
+                front right 100 percent across, 100 percent down
+              Its left and right edges are straight lines between those corners. Its
+              front edge lies along the bottom edge of the image and its two front
+              corners sit exactly in the bottom two corners of the frame, so no part
+              of the floor runs past the edge of the picture.
+  BACK WALL   the band above the floor, from the top of the image down to 30 percent
+              down. A shallow strip, flat and parallel to the picture, spanning the
+              full width. Do not make it taller than this.
+  SIDE WALLS  the two wedges left over between the floor and the sides of the image.
+              The left one has corners at the top left of the image, the floor's back
+              left corner and the bottom left of the image; the right one mirrors it.
+              Both must be drawn, and neither overlaps the floor.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 

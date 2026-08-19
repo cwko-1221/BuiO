@@ -80,7 +80,7 @@ const FLOOR_CENTRE = STAGE_WIDTH / 2;
  * how far it has drifted, rather than the grid bending to fit whatever came back.
  */
 const FLOOR_LINE = 0.30;     // the back wall is a shallow band across the top
-const BACK_SPAN = 0.72;      // the floor's width where it meets that wall
+const BACK_SPAN = 0.64;      // the floor's width where it meets that wall
 const FRONT_SPAN = 1.00;     // and at the bottom of the frame
 
 const FLOOR_TOP = STAGE_HEIGHT * FLOOR_LINE;
