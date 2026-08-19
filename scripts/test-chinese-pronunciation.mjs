@@ -423,6 +423,39 @@ assert.equal(plainRecognitions, 1,
 assert.equal(assessmentCalls, 1);
 delete process.env.AZURE_SPEECH_MAX_CONCURRENT;
 
+// ----- the limit counts Azure requests, not submissions ----------------------
+// Each submission makes two calls, so a limit of 4 must admit two submissions
+// at a time rather than four. Counting submissions would have put 20 requests
+// in flight against a quota of 10.
+process.env.AZURE_SPEECH_MAX_CONCURRENT = '4';
+let inFlight = 0;
+let peakInFlight = 0;
+class CountingRecognizer {
+  recognizeOnceAsync(resolve) {
+    inFlight += 1;
+    peakInFlight = Math.max(peakInFlight, inFlight);
+    setTimeout(() => {
+      inFlight -= 1;
+      resolve({
+        reason: 1, text: '企鵝', confidence: 0.94,
+        properties: { getProperty: () => JSON.stringify({
+          NBest: [{ Display: '企鵝', Confidence: 0.94 }] }) },
+      });
+    }, 20);
+  }
+  close() {}
+}
+const countingSdk = { ...fakeSdk, SpeechRecognizer: CountingRecognizer };
+const crowd = await Promise.all(Array.from({ length: 6 }, () =>
+  evaluatePronunciation(wav(clearSpeech), '企鵝', 'kei5 ngo2', countingSdk)));
+assert.equal(crowd.length, 6, 'every queued submission must still be scored');
+assert.ok(peakInFlight <= 4,
+  `no more Azure requests may be in flight than the limit allows, saw ${peakInFlight}`);
+assert.ok(peakInFlight >= 3,
+  `the allowance must actually be used, saw only ${peakInFlight}`);
+assert.equal(inFlight, 0, 'every slot must be given back');
+delete process.env.AZURE_SPEECH_MAX_CONCURRENT;
+
 // ----- a full scoring queue must fail fast instead of hanging -----------------
 process.env.AZURE_SPEECH_MAX_CONCURRENT = '1';
 process.env.AZURE_SPEECH_QUEUE_TIMEOUT_MS = '1000';

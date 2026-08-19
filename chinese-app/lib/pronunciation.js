@@ -476,16 +476,24 @@ function azureConcurrency() {
   return Math.max(1, Math.floor(numericEnv('AZURE_SPEECH_MAX_CONCURRENT', 1)));
 }
 
-function acquireAzureSlot() {
-  if (activeAzureRequests < azureConcurrency()) {
-    activeAzureRequests += 1;
+// A submission holds one slot per Azure request it is about to make, because
+// the limit this counts against is Azure's own concurrent-request quota. An
+// evaluation that runs its two calls together therefore holds two, and both are
+// taken at once so two half-served submissions cannot wait on each other.
+function evaluationSlots() {
+  return Math.min(azureConcurrency(), azureConcurrency() >= 2 ? 2 : 1);
+}
+
+function acquireAzureSlots(slots) {
+  if (activeAzureRequests + slots <= azureConcurrency()) {
+    activeAzureRequests += slots;
     return Promise.resolve();
   }
   // Without this, a whole class queued behind one slot waits indefinitely and
   // every recording looks frozen. A clear "try again" beats an endless spinner.
   const queueTimeoutMs = Math.max(1000, numericEnv('AZURE_SPEECH_QUEUE_TIMEOUT_MS', 25000));
   return new Promise((resolve, reject) => {
-    const waiter = { resolve: null };
+    const waiter = { slots, resolve: null };
     const timer = setTimeout(() => {
       const index = azureWaiters.indexOf(waiter);
       if (index >= 0) azureWaiters.splice(index, 1);
@@ -498,16 +506,23 @@ function acquireAzureSlot() {
   });
 }
 
-function releaseAzureSlot() {
-  const next = azureWaiters.shift();
-  if (next) next.resolve();
-  else activeAzureRequests = Math.max(0, activeAzureRequests - 1);
+function releaseAzureSlots(slots) {
+  activeAzureRequests = Math.max(0, activeAzureRequests - slots);
+  // Waiters are served in turn. A wide one at the head holds the queue rather
+  // than being overtaken, so nobody is starved by a stream of narrow requests.
+  while (azureWaiters.length
+      && activeAzureRequests + azureWaiters[0].slots <= azureConcurrency()) {
+    const next = azureWaiters.shift();
+    activeAzureRequests += next.slots;
+    next.resolve();
+  }
 }
 
 async function withAzureSlot(task) {
-  await acquireAzureSlot();
+  const slots = evaluationSlots();
+  await acquireAzureSlots(slots);
   try { return await task(); }
-  finally { releaseAzureSlot(); }
+  finally { releaseAzureSlots(slots); }
 }
 
 function recognizeOnce(recognizer, transform) {
@@ -706,7 +721,7 @@ async function evaluatePronunciation(
     // the tier allows more than one request at a time they run together and
     // cost one round trip of waiting. On F0 they stay sequential, which also
     // keeps the saving of skipping assessment for a clearly wrong answer.
-    if (azureConcurrency() >= 2) {
+    if (evaluationSlots() >= 2) {
       const [independent, scored] = await Promise.all([
         recognizeContent(audio, sdkOverride),
         assessPronunciation(audio, referenceText, sdkOverride),

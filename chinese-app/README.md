@@ -68,7 +68,9 @@ chinese-app/
    AZURE_PRONUNCIATION_LOWER_BAND_WEIGHT=0.15
    # Miscue detection scores classroom noise as an inserted word. Leave it off.
    AZURE_PRONUNCIATION_ENABLE_MISCUE=0
-   # F0 allows one concurrent real-time Speech request. Raise this only after moving to S0.
+   # Concurrent Azure *requests*, not submissions. A submission makes two calls and
+   # runs them together once this is 2 or more, so 10 serves five students at a time.
+   # F0 allows one concurrent request; raise this only after moving to S0.
    AZURE_SPEECH_MAX_CONCURRENT=1
    # A student queued behind a full slot gives up here instead of hanging.
    AZURE_SPEECH_QUEUE_TIMEOUT_MS=25000
@@ -116,6 +118,10 @@ chinese-app/
 - The two calls run **together** when `AZURE_SPEECH_MAX_CONCURRENT` is 2 or more, so the
   student waits for one round trip rather than two. On F0, which allows a single concurrent
   request, they stay sequential and a clearly wrong answer still skips the assessment call.
+- That setting counts concurrent Azure **requests**, matching the quota it exists to respect,
+  not concurrent submissions. A submission running its two calls together holds two of them,
+  and takes both at once so two half-served submissions cannot wait on each other. A limit of
+  10 therefore scores five students at a time; a class of 30 clears in roughly six rounds.
 - Azure `zh-HK` returns an accuracy score for each expected phoneme, but doesn't return the
   identity of the phoneme actually spoken. The reference-free recognition supplies that
   missing evidence and is converted to Jyutping.
