@@ -282,7 +282,7 @@ async function importRoom(file, roomId, dry) {
   if (!room) throw new Error(`no room called ${roomId}`);
 
   const floor = await measureFloor(file);
-  const SPEC = { line: 0.30, backSpan: 0.64, frontSpan: 1.00 };
+  const SPEC = { line: 0.26, backSpan: 0.54, frontSpan: 0.84 };
   if (floor) {
     const pct = (value) => `${Math.round(value * 100)}%`;
     const off = (actual, want, tolerance) => (Math.abs(actual - want) <= tolerance ? '' : ` (spec ${pct(want)})`);

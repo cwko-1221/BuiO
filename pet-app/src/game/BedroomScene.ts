@@ -79,9 +79,9 @@ const FLOOR_CENTRE = STAGE_WIDTH / 2;
  * size wherever it is placed. The art is what conforms — the importer measures each room and says
  * how far it has drifted, rather than the grid bending to fit whatever came back.
  */
-const FLOOR_LINE = 0.30;     // the back wall is a shallow band across the top
-const BACK_SPAN = 0.64;      // the floor's width where it meets that wall
-const FRONT_SPAN = 1.00;     // and at the bottom of the frame
+const FLOOR_LINE = 0.26;     // the back wall is a shallow band across the top
+const BACK_SPAN = 0.54;      // the floor's width where it meets that wall
+const FRONT_SPAN = 0.84;     // and along the bottom of the frame, kept in off the sides
 
 const FLOOR_TOP = STAGE_HEIGHT * FLOOR_LINE;
 const FLOOR_DEPTH = STAGE_HEIGHT - FLOOR_TOP;

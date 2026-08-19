@@ -243,8 +243,11 @@ const MUST_SAY = {
     // The three surfaces and their proportions: a grid is laid over the floor, so a room that
     // puts its wall where the floor should be leaves cells stranded on the wall.
     'THE FLOOR IS THE SUBJECT', 'EVERY ROOM IN THIS SET IS THE SAME ROOM', 'it is a measurement',
-    '18 percent across,  30 percent down', '82 percent across,  30 percent down',
-    '100 percent across, 100 percent down', 'down to 30 percent',
+    '23 percent across,  26 percent down', '77 percent across,  26 percent down',
+    '8 percent across, 100 percent down', '92 percent across, 100 percent down',
+    'down to 26 percent', 'THE WHOLE FLOOR MUST BE INSIDE THE PICTURE',
+    'never reaches the left or the right edge of the image',
+    'about 8 percent of the image width on the left',
     'SIDE WALLS', 'The whole floor is visible',
     'must not read as a grid', 'one and a half times the size of the same one at the back',
     'must be entirely empty', 'no characters or creatures',
@@ -308,21 +311,22 @@ EVERY ROOM IN THIS SET IS THE SAME ROOM WITH DIFFERENT DECORATION. The camera an
 Measure from the top left corner of the image, as percentages of the image width and of the image height:
 
   FLOOR       a trapezoid with these four corners and no others:
-                back left    18 percent across,  30 percent down
-                back right   82 percent across,  30 percent down
-                front left    0 percent across, 100 percent down
-                front right 100 percent across, 100 percent down
-              Its left and right edges are straight lines between those corners. Its
-              front edge lies along the bottom edge of the image and its two front
-              corners sit exactly in the bottom two corners of the frame, so no part
-              of the floor runs past the edge of the picture.
-  BACK WALL   the band above the floor, from the top of the image down to 30 percent
+                back left    23 percent across,  26 percent down
+                back right   77 percent across,  26 percent down
+                front left    8 percent across, 100 percent down
+                front right  92 percent across, 100 percent down
+              Its left and right edges are straight lines between those corners, and
+              its front edge runs along the bottom edge of the image between the two
+              front corners.
+  BACK WALL   the band above the floor, from the top of the image down to 26 percent
               down. A shallow strip, flat and parallel to the picture, spanning the
               full width. Do not make it taller than this.
   SIDE WALLS  the two wedges left over between the floor and the sides of the image.
               The left one has corners at the top left of the image, the floor's back
-              left corner and the bottom left of the image; the right one mirrors it.
+              left corner and the floor's front left corner; the right one mirrors it.
               Both must be drawn, and neither overlaps the floor.
+
+THE WHOLE FLOOR MUST BE INSIDE THE PICTURE, AND HERE IS HOW TO CHECK IT. The floor never reaches the left or the right edge of the image at any height, not even along the very bottom: at the bottom edge of the picture there is still a strip of side wall about 8 percent of the image width on the left, another on the right, and the floor between them. If the floor runs off the side of the image anywhere, the room has been drawn wider than the frame and its two front corners are outside the picture, which is the one mistake this room cannot have. Draw the room a little smaller until both front corners are inside the frame with wall beside them.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
