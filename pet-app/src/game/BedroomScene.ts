@@ -91,12 +91,22 @@ const FRONT_HALF = (STAGE_WIDTH * FRONT_SPAN) / 2;
 const halfWidthAt = (eased: number) => BACK_HALF + (FRONT_HALF - BACK_HALF) * eased;
 
 /**
- * How depth maps to screen. Rows bunch up toward the back, the way a floor does — spacing them
- * evenly would give a flat plane painted with a grid rather than a floor going away from you.
+ * How depth maps to screen: the perspective of a flat floor seen by an eye, which is width scaling
+ * as one over distance. That falls straight out of the two spans above — the floor being 64 per
+ * cent as wide at the back means the back row is 1 / 0.64 as far away — so there is nothing here
+ * to tune, and rows spread apart toward the front the way real ones do. A power curve was tried
+ * first and its rows grew by less and less as they came forward, until the front of the floor
+ * looked flat and the last rows looked squashed together.
  */
-const DEPTH_CURVE = 1.35;
-const easeDepth = (t: number) => Math.pow(Phaser.Math.Clamp(t, 0, 1), DEPTH_CURVE);
-const unEaseDepth = (e: number) => Math.pow(Phaser.Math.Clamp(e, 0, 1), 1 / DEPTH_CURVE);
+const DEPTH_RATIO = BACK_SPAN / FRONT_SPAN;
+const easeDepth = (t: number) => {
+  const d = Phaser.Math.Clamp(t, 0, 1);
+  return (DEPTH_RATIO * d) / (1 - (1 - DEPTH_RATIO) * d);
+};
+const unEaseDepth = (e: number) => {
+  const d = Phaser.Math.Clamp(e, 0, 1);
+  return d / (DEPTH_RATIO + (1 - DEPTH_RATIO) * d);
+};
 
 /** The creature's size on the front row; every other row scales down from here. */
 const PET_SCALE = .86;

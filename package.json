@@ -40,6 +40,7 @@
     "postinstall": "npm --prefix whiteboard-app/client install && npm --prefix whiteboard-app/client run build && npm --prefix science-lab-app install && npm --prefix science-lab-app run build && npm --prefix pet-app install && npm --prefix pet-app run build",
     "import:art": "node scripts/import-art.mjs",
     "build:art-prompts": "node scripts/build-art-prompts.mjs",
+    "build:room-shape": "node scripts/room-shape.mjs",
     "check:chinese-tone": "node scripts/test-chinese-tone.mjs"
   },
   "dependencies": {
