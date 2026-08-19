@@ -60,6 +60,10 @@ chinese-app/
    AZURE_PRONUNCIATION_MAX_SCORE=98
    # How much of the score comes from whichever of the two evidence signals is lower.
    AZURE_PRONUNCIATION_LOWER_SIGNAL_WEIGHT=0.7
+   # How a syllable divides. Tone multiplies the sounds rather than sitting beside them.
+   AZURE_PRONUNCIATION_ONSET_WEIGHT=0.25
+   AZURE_PRONUNCIATION_FINAL_WEIGHT=0.35
+   AZURE_PRONUNCIATION_TONE_WEIGHT=0.4
    # How hard the weakest third of the phonemes pulls the score down.
    AZURE_PRONUNCIATION_LOWER_BAND_WEIGHT=0.15
    # Miscue detection scores classroom noise as an inserted word. Leave it off.
@@ -115,9 +119,13 @@ chinese-app/
 - Azure `zh-HK` returns an accuracy score for each expected phoneme, but doesn't return the
   identity of the phoneme actually spoken. The reference-free recognition supplies that
   missing evidence and is converted to Jyutping.
-- Expected and heard Jyutping are aligned syllable by syllable. Each syllable compares onset
-  (30%), final (45%), and tone (25%). For example, `海豚 hoi2 tyun4` versus
-  `開豚 hoi1 tyun4` scores 87.5 for this evidence, not 100.
+- Expected and heard Jyutping are aligned syllable by syllable. Onset (25%) and final (35%)
+  make up the sounds, and **tone (40%) multiplies them rather than sitting beside them**.
+  Tone only means something on the right syllable: Cantonese has six tones and they collide
+  constantly, so 你好 read for 企鵝 must not be rewarded for sharing both tones with it —
+  scored side by side that pair got 66, and as a multiplier it gets the 44 it deserves.
+  `海豚 hoi2 tyun4` read as `開豚 hoi1 tyun4` scores 80 for this evidence, and as
+  `凱豚 hoi5 tyun4` scores 90, because tone 5 is a near neighbour of tone 2.
 - **Every dictionary reading of a character counts as correct.** 你 is `nei5` or `lei5`
   and 好 is `hou2` or `hou3`; scoring against a single canonical reading failed children
   who chose the other valid one. A teacher's own Jyutping stays authoritative and is simply

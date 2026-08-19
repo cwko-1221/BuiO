@@ -120,12 +120,18 @@ assert.equal(unstableAggregates.score, 80,
   'unstable aggregate scores must not override direct phoneme similarity');
 
 const toneMistake = scoreCantonesePronunciation('hoi2 tyun4', 'hoi1 tyun4');
-assert.equal(toneMistake.score, 87.5,
+assert.equal(toneMistake.score, 80,
   '海豚 read as 開豚 must be close, but must never receive 100');
 assert.deepEqual(toneMistake.alignment, [
-  { expected: 'hoi2', heard: 'hoi1', score: 75 },
+  { expected: 'hoi2', heard: 'hoi1', score: 60 },
   { expected: 'tyun4', heard: 'tyun4', score: 100 },
 ]);
+// Tone is 40% of a syllable, but only of a syllable that was otherwise said
+// correctly. 你好 and 企鵝 share both tones and share nothing else.
+assert.equal(scoreCantonesePronunciation('kei5 ngo2', 'nei5 hou2').score, 43.8,
+  'landing the tones of a completely different word must earn nothing');
+assert.equal(scoreCantonesePronunciation('hoi2 tyun4', 'hoi5 tyun4').score, 90,
+  'a tone confused with its close neighbour costs less than a plain wrong tone');
 assert.equal(combinePronunciationEvidence(100, { pronunciationScore: 87.5 }).score, 91.3,
   'the weaker signal carries most of the weight without outright failing the reading');
 assert.equal(combinePronunciationEvidence(87.5, { pronunciationScore: 100 }).score, 91.3,
@@ -141,14 +147,14 @@ const wrongPhrase = compareRecognizedContent(
   'kei5 ngo2',
 );
 assert.equal(wrongPhrase.status, 'wrong-content');
-assert.equal(wrongPhrase.pronunciationScore, 58.7);
+assert.equal(wrongPhrase.pronunciationScore, 43.8);
 const nearTonePhrase = compareRecognizedContent(
   { transcript: '開豚', confidence: 0.96 },
   '海豚',
   'hoi2 tyun4',
 );
 assert.equal(nearTonePhrase.status, 'phonetic-near');
-assert.equal(nearTonePhrase.pronunciationScore, 87.5);
+assert.equal(nearTonePhrase.pronunciationScore, 80);
 assert.equal(compareRecognizedContent(
   { transcript: '企鵝', confidence: 0.5 }, '企鵝', 'kei5 ngo2').status, 'matched');
 assert.equal(compareRecognizedContent(
@@ -270,7 +276,7 @@ currentRecognition = { transcript: '你好', confidence: 0.96 };
 const gatedWrongPhrase = await evaluatePronunciation(
   wav(clearSpeech), '企鵝', 'kei5 ngo2', fakeSdk);
 assert.equal(gatedWrongPhrase.status, 'retry');
-assert.equal(gatedWrongPhrase.score, 58.7);
+assert.equal(gatedWrongPhrase.score, 43.8);
 assert.equal(gatedWrongPhrase.transcript, '你好');
 assert.equal(azureRequests, 1,
   'a clearly wrong answer must not also pay for a pronunciation assessment');
@@ -314,12 +320,12 @@ currentAssessment = {
 };
 const currentItemToneMistake = await evaluatePronunciation(
   wav(clearSpeech), '海豚', 'hoi2 tyun4', fakeSdk, { assignmentId: 'assignment-1', itemId: 'item-sea' });
-assert.equal(currentItemToneMistake.score, 91.3,
+assert.equal(currentItemToneMistake.score, 86,
   '海豚 read as 開豚 must remain below 100 even when scripted Azure returns all 100');
 assert.equal(currentItemToneMistake.diagnostics.reference.text, '海豚');
 assert.equal(currentItemToneMistake.diagnostics.reference.itemId, 'item-sea');
 assert.equal(currentItemToneMistake.diagnostics.combined.acousticScore, 100);
-assert.equal(currentItemToneMistake.diagnostics.combined.recognizedPronunciationScore, 87.5);
+assert.equal(currentItemToneMistake.diagnostics.combined.recognizedPronunciationScore, 80);
 assert.equal(currentItemToneMistake.contentCheck.candidates.length, 2,
   'the detailed Azure NBest response must be preserved for auditing');
 assert.equal(currentItemToneMistake.timing.azureRequests, 2);

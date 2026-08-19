@@ -143,14 +143,35 @@ function toneSimilarity(a, b) {
   return 0;
 }
 
+// Tone carries more of a syllable than either half of the sound it rides on,
+// because in Cantonese it is the part that changes the word. The weights are
+// normalised, so a teacher can raise the tone share without having to work out
+// what the other two should become.
+function syllableWeights() {
+  const onset = Math.max(0, numericEnv('AZURE_PRONUNCIATION_ONSET_WEIGHT', 0.25));
+  const rhyme = Math.max(0, numericEnv('AZURE_PRONUNCIATION_FINAL_WEIGHT', 0.35));
+  const tone = Math.max(0, numericEnv('AZURE_PRONUNCIATION_TONE_WEIGHT', 0.4));
+  const total = onset + rhyme + tone;
+  if (!total) return { onset: 0.25, rhyme: 0.35, tone: 0.4 };
+  return { onset: onset / total, rhyme: rhyme / total, tone: tone / total };
+}
+
 function syllableSimilarity(expected, heard) {
   const a = splitJyutpingSyllable(expected);
   const b = splitJyutpingSyllable(heard);
   if (!a || !b) return 0;
-  const finalSimilarity = similarity(a.final, b.final);
-  return onsetSimilarity(a.onset, b.onset) * 0.3
-    + finalSimilarity * 0.45
-    + toneSimilarity(a.tone, b.tone) * 0.25;
+  const weights = syllableWeights();
+  const segmentalWeight = weights.onset + weights.rhyme;
+  const toneScore = toneSimilarity(a.tone, b.tone);
+  if (!segmentalWeight) return toneScore;
+  const segmental = (onsetSimilarity(a.onset, b.onset) * weights.onset
+    + similarity(a.final, b.final) * weights.rhyme) / segmentalWeight;
+  // Tone scales the sounds it rides on rather than being added beside them.
+  // Cantonese has six tones and they collide constantly, so landing the tone of
+  // a completely different word must earn nothing: 你好 and 企鵝 share both
+  // tones, and adding tone alongside the sounds scored that pair 66 instead of
+  // the 44 it deserves.
+  return segmental * (1 - weights.tone + weights.tone * toneScore);
 }
 
 // Best pairing across every allowed reading of the expected and heard character.
