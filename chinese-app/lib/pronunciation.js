@@ -1,7 +1,7 @@
 'use strict';
 
 const { getJyutpingCandidates } = require('to-jyutping');
-const { analyzeTones } = require('./toneAnalysis');
+const { analyzeTones, phonemeTimings } = require('./toneAnalysis');
 
 let speechSdk;
 let activeAzureRequests = 0;
@@ -301,6 +301,9 @@ function strictScoreFromDetails({ accuracyScore, completenessScore, details }) {
     const phonemes = (word.Phonemes || []).map(phoneme => ({
       phoneme: phoneme.Phoneme || '',
       accuracyScore: finiteScore(phoneme.PronunciationAssessment?.AccuracyScore),
+      startMs: Number.isFinite(phoneme.Offset) ? phoneme.Offset / 10000 : null,
+      endMs: Number.isFinite(phoneme.Offset) && Number.isFinite(phoneme.Duration)
+        ? (phoneme.Offset + phoneme.Duration) / 10000 : null,
       spoken: (phoneme.PronunciationAssessment?.NBestPhonemes || []).map(candidate => ({
         phoneme: candidate.Phoneme || '',
         score: finiteScore(candidate.Score),
@@ -819,7 +822,8 @@ async function evaluatePronunciation(
     // is worse than passing one who did not, so it stays off until the evidence
     // says otherwise. The measurement is still recorded on every attempt, which
     // is what makes the calibration possible.
-    const toneEvidence = analyzeTones(audio, contentCheck.expectedJyutping);
+    const toneEvidence = analyzeTones(audio, contentCheck.expectedJyutping,
+      phonemeTimings(assessment.words));
     const toneCounts = booleanEnv('CHINESE_TONE_SCORING', false);
     const combined = combinePronunciationEvidence(
       assessment.score, contentCheck, toneCounts ? toneEvidence : null);
