@@ -19,7 +19,7 @@
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
+A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
@@ -66,7 +66,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
+A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
@@ -113,7 +113,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
+A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
@@ -160,7 +160,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
+A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
@@ -207,7 +207,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
+A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
@@ -254,7 +254,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
+A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
@@ -301,7 +301,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
+A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
@@ -348,7 +348,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
+A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
@@ -395,7 +395,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
+A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
@@ -442,7 +442,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
+A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 

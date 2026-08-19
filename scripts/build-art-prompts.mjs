@@ -298,7 +298,7 @@ for (const [id, zh, theme] of ROOMS) {
   block('room', `房間 · ${zh}`, `檔名：room-${id}.png　輸出：1600 x 900　不透明　風格：動森`,
 `${WORLD_STYLE}
 
-A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
+A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
 
 THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
