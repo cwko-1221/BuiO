@@ -78,15 +78,19 @@ function unitsText(units) {
   return units.map(unit => unit.character).join('');
 }
 
-// The teacher's Jyutping stays authoritative, but the dictionary's other
-// readings for the same character are accepted alongside it.
+// When the teacher wrote the Jyutping, that is the reading being taught and the
+// only one that counts. Accepting the dictionary's alternatives alongside it
+// made a single character almost unmarkable: 虎 is listed as fu2 and fu1, so
+// reading 虎 on the wrong tone matched an accepted reading and scored 100.
+// Only when no Jyutping was supplied do the dictionary's readings all count,
+// because then there is nothing to say which one was meant.
 function expectedUnits(expectedText, expectedJyutping) {
   const given = jyutpingSyllables(expectedJyutping);
   const fromText = jyutpingUnits(expectedText);
   if (given.length && given.length === fromText.length) {
     return fromText.map((unit, index) => ({
       character: unit.character,
-      readings: Array.from(new Set([given[index], ...unit.readings])),
+      readings: [given[index]],
     }));
   }
   if (given.length) return unitsFromSyllables(given);
@@ -238,7 +242,17 @@ function alignUnits(expected, heard) {
     }
   }
   const length = Math.max(expected.length, heard.length, 1);
-  const score = Math.max(0, (1 - costs[expected.length][heard.length] / length) * 100);
+  const mean = Math.max(0, (1 - costs[expected.length][heard.length] / length) * 100);
+  // A two-character word read with one character wrong averages out to a pass.
+  // The weakest syllable carries more than its share, because on a word this
+  // short it is the whole of the mistake.
+  // A syllable that was left out or added counts as the weakest of all, which
+  // is why the whole alignment is used and not only the pairs that matched.
+  const weakest = alignment.length ? Math.min(...alignment.map(pair => pair.score)) : mean;
+  const weakestWeight = expected.length > 1
+    ? ratioEnv('AZURE_PRONUNCIATION_WEAKEST_SYLLABLE_WEIGHT', 0.6)
+    : 0;
+  const score = mean * (1 - weakestWeight) + weakest * weakestWeight;
   return { score: Math.round(score * 10) / 10, alignment };
 }
 
@@ -374,7 +388,8 @@ function compareRecognizedContent(recognition, expectedText, expectedJyutping = 
     : [{ transcript: recognition?.transcript || '', confidence: recognition?.confidence }])
     .map(candidate => {
       const transcript = normalizeText(candidate.transcript);
-      const heardUnits = jyutpingUnits(transcript).slice(0, maximumHeardUnits);
+      const heardUnits = jyutpingUnits(transcript).slice(0, maximumHeardUnits)
+        .map(unit => ({ character: unit.character, readings: unit.readings.slice(0, 1) }));
       const window = extractBestWindow(expectedList, heardUnits);
       const extracted = window ? heardUnits.slice(window.start, window.end) : [];
       const trimmed = !!window && (window.start > 0 || window.end < heardUnits.length);
@@ -484,7 +499,12 @@ function combinePronunciationEvidence(assessmentScore, contentCheck, toneEvidenc
   // noisy signal fail an accurate reading, while an even blend let a confident
   // forced alignment hide a wrong word.
   const maximumScore = Math.min(100, Math.max(0, numericEnv('AZURE_PRONUNCIATION_MAX_SCORE', 98)));
-  const lowerWeight = ratioEnv('AZURE_PRONUNCIATION_LOWER_SIGNAL_WEIGHT', 0.7);
+  // Measured across thirteen archived readings, zh-HK returned an acoustic score
+  // of 100 for twelve of them and 94.8 for the last, including for readings that
+  // were wrong. A signal that is nearly always 100 can only inflate an average,
+  // so the lower signal is taken outright. It still defers to the acoustic score
+  // on the rare occasion that one is genuinely the lower of the two.
+  const lowerWeight = ratioEnv('AZURE_PRONUNCIATION_LOWER_SIGNAL_WEIGHT', 1);
   // Tone joins as a third signal, and it is the only one of the three measured
   // from the recording itself. Azure scored every phoneme of 海短 at 100 and
   // its recogniser rewrote the word back to 海豚, so without this a wrong tone

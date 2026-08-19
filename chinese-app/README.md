@@ -59,8 +59,11 @@ chinese-app/
    AZURE_CONTENT_WRONG_SCORE=65
    # zh-HK does not return the identity of the phoneme actually spoken. Avoid false 100s.
    AZURE_PRONUNCIATION_MAX_SCORE=98
-   # How much of the score comes from whichever of the two evidence signals is lower.
-   AZURE_PRONUNCIATION_LOWER_SIGNAL_WEIGHT=0.7
+   # How much of the score comes from whichever evidence signal is lower. zh-HK
+   # returns an acoustic score of 100 for almost everything, so it is taken outright.
+   AZURE_PRONUNCIATION_LOWER_SIGNAL_WEIGHT=1
+   # How much the weakest syllable of a multi-syllable word carries.
+   AZURE_PRONUNCIATION_WEAKEST_SYLLABLE_WEIGHT=0.6
    # Tone measurement. Azure gives zh-HK no tone information, so pitch is read locally.
    CHINESE_TONE_SEMITONES_PER_LEVEL=2
    CHINESE_TONE_SLOPE_TOLERANCE=3
@@ -149,8 +152,22 @@ chinese-app/
   skipping a syllable is a real deduction, and the child is told the answer was unfinished
   rather than wrong. Azure miscue detection is off for the same reason: it scores the
   neighbours as inserted words.
-- The displayed percentage weights whichever of the two signals is **lower** at 70% and the
-  higher at 30%, with a default automatic ceiling of 98. A reading is only as good as its
+- The displayed percentage is whichever of the two signals is **lower**, with a default
+  automatic ceiling of 98. Measured across thirteen archived readings, zh-HK returned an
+  acoustic score of 100 for twelve of them and 94.8 for the last — including for readings
+  that were wrong — so blending it in could only inflate the result. Taking the lower signal
+  defers to the Jyutping comparison in practice while still letting a genuinely low acoustic
+  score count.
+- **A teacher's Jyutping is the only reading that counts**, and a heard character is read as
+  the sound it usually spells. Accepting every dictionary reading on both sides made a
+  single character almost unmarkable: 虎 is listed as fu2 and fu1, so reading it on the
+  wrong tone scored 100, and 父 and 滸 both list fu2 and so both stood in for it. 你 read
+  as lei5 rather than nei5 still only costs marks rather than failing, because n and l are
+  near neighbours.
+- **The weakest syllable of a word carries 60% of its score.** Two characters averaged out
+  meant one wrong character still passed. A syllable left out counts as the weakest of all.
+- On the sixteen archived recordings available, correct readings score 79 to 98 and the two
+  deliberately wrong ones score 48 and 68. A reading is only as good as its
   weakest evidence, but not hostage to it: the outright minimum let one noisy signal fail an
   accurate reading, while an even blend let a confident forced alignment carry a word the
   recogniser never heard. Full-text, word, and completeness aggregates remain diagnostic
