@@ -66,15 +66,29 @@ const hitTest = (area: FurnitureHitArea, x: number, y: number) => {
 const GRID_COLUMNS = 14;
 const GRID_ROWS = 10;
 
-/** Where the back wall stops and the floor starts. */
-const FLOOR_TOP = 276;
-/** The floor reaches the bottom of the frame. */
-const FLOOR_BOTTOM = 720;
-const FLOOR_DEPTH = FLOOR_BOTTOM - FLOOR_TOP;
-const FLOOR_CENTRE = 640;
-/** Half-widths of the trapezoid: the front edge spans the frame, the back edge is inset. */
-const FRONT_HALF = 600;   // the floor is 94% of the frame at the front
-const BACK_HALF = 448;    // and 70% where it meets the back wall
+/** The design surface the room art is drawn onto. */
+const STAGE_WIDTH = 1280;
+const STAGE_HEIGHT = 720;
+const FLOOR_CENTRE = STAGE_WIDTH / 2;
+
+/**
+ * The floor, identical in every room.
+ *
+ * Every room is the same room as far as the game is concerned: the same fourteen by ten of
+ * playable floor, so a arrangement carries from one theme to the next and a piece is the same
+ * size wherever it is placed. The art is what conforms — the importer measures each room and says
+ * how far it has drifted, rather than the grid bending to fit whatever came back.
+ */
+const FLOOR_LINE = 0.30;     // the back wall is a shallow band across the top
+const BACK_SPAN = 0.72;      // the floor's width where it meets that wall
+const FRONT_SPAN = 1.00;     // and at the bottom of the frame
+
+const FLOOR_TOP = STAGE_HEIGHT * FLOOR_LINE;
+const FLOOR_DEPTH = STAGE_HEIGHT - FLOOR_TOP;
+const BACK_HALF = (STAGE_WIDTH * BACK_SPAN) / 2;
+const FRONT_HALF = (STAGE_WIDTH * FRONT_SPAN) / 2;
+/** Half the floor's width at a depth, which also fixes how big things standing there look. */
+const halfWidthAt = (eased: number) => BACK_HALF + (FRONT_HALF - BACK_HALF) * eased;
 
 /**
  * How depth maps to screen. Rows bunch up toward the back, the way a floor does — spacing them
@@ -83,8 +97,6 @@ const BACK_HALF = 448;    // and 70% where it meets the back wall
 const DEPTH_CURVE = 1.35;
 const easeDepth = (t: number) => Math.pow(Phaser.Math.Clamp(t, 0, 1), DEPTH_CURVE);
 const unEaseDepth = (e: number) => Math.pow(Phaser.Math.Clamp(e, 0, 1), 1 / DEPTH_CURVE);
-/** Half the floor's width at a given depth, which also fixes how big things standing there look. */
-const halfWidthAt = (eased: number) => BACK_HALF + (FRONT_HALF - BACK_HALF) * eased;
 
 /** The creature's size on the front row; every other row scales down from here. */
 const PET_SCALE = .86;

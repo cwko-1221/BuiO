@@ -194,67 +194,109 @@ async function loadSheet(file) {
 }
 
 /**
- * Find the line where the back wall meets the floor, and say whether it is where the grid needs
- * it to be.
+ * Measure the shape of a room's floor: where it starts, and how wide it is at the back and front.
  *
- * The placement grid is ten rows deep and fixed, so it only fits if the floor starts near the
- * top 38 percent of the image. A room drawn with the floor starting halfway down leaves the back
- * rows of the grid sitting on the wall, and furniture placed there floats in mid-air — which is
- * hard to spot by eye on a single picture and obvious the moment a child drags a bed to the back
- * of the room. Cheaper to measure it here than to discover it later.
+ * Every room in the game is the same size, so this is a check rather than a calibration: the
+ * grid does not bend to fit a room, the room has to be drawn to fit the grid. What this reports
+ * is how far a generated room has drifted, and whether it is worth generating again.
  *
- * The wall and the floor are different materials, so the join is the strongest run-to-run change
- * in average row colour anywhere in the middle of the image.
+ * The floor is found by flooding out from the bottom middle of the frame, comparing each pixel to
+ * the one it spread from rather than to a fixed sample. Floors are shaded, darkening toward the
+ * back, so a fixed sample loses them halfway up; comparing locally follows the gradient and still
+ * stops dead at a skirting board. Two earlier attempts failed here: the strongest horizontal edge
+ * is a wainscot rail, not the floor, and a fixed reference colour cut the floor in half.
  */
-async function measureFloorLine(file) {
-  const width = 320;
-  const height = 180;
+async function measureFloor(file) {
+  const width = 400;
+  const height = 225;
   const { data, info } = await sharp(file).resize(width, height, { fit: 'fill' }).removeAlpha().raw()
     .toBuffer({ resolveWithObject: true });
-  const rowMean = [];
+  const at = (x, y) => { const i = (y * width + x) * info.channels; return [data[i], data[i + 1], data[i + 2]]; };
+  const apart = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
+
+  const floor = new Uint8Array(width * height);
+  const stack = [Math.round(width / 2), height - 3];
+  floor[(height - 3) * width + Math.round(width / 2)] = 1;
+  while (stack.length) {
+    const y = stack.pop();
+    const x = stack.pop();
+    const here = at(x, y);
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+      const flat = ny * width + nx;
+      if (floor[flat]) continue;
+      if (apart(at(nx, ny), here) > 42) continue;   // a skirting board is a wall of difference
+      floor[flat] = 1;
+      stack.push(nx, ny);
+    }
+  }
+
+  const spans = [];
   for (let y = 0; y < height; y += 1) {
-    let r = 0; let g = 0; let b = 0;
+    let left = -1;
+    let right = -1;
     for (let x = 0; x < width; x += 1) {
-      const i = (y * width + x) * info.channels;
-      r += data[i]; g += data[i + 1]; b += data[i + 2];
+      if (!floor[y * width + x]) continue;
+      if (left < 0) left = x;
+      right = x;
     }
-    rowMean.push([r / width, g / width, b / width]);
+    // A row counts as floor only once it is a real band, not a few stray pixels of matching wall.
+    if (left >= 0 && right - left > width * 0.2) spans.push({ y, span: (right - left + 1) / width });
   }
-  // Compare a band above each row with the band below it: a material change moves both together.
-  const band = 6;
-  let best = 0;
-  let bestAt = 0;
-  for (let y = Math.round(height * 0.2); y < Math.round(height * 0.75); y += 1) {
-    const above = [0, 0, 0];
-    const below = [0, 0, 0];
-    for (let k = 1; k <= band; k += 1) {
-      for (let c = 0; c < 3; c += 1) {
-        above[c] += rowMean[Math.max(0, y - k)][c];
-        below[c] += rowMean[Math.min(height - 1, y + k)][c];
-      }
-    }
-    const jump = Math.abs(above[0] - below[0]) + Math.abs(above[1] - below[1]) + Math.abs(above[2] - below[2]);
-    if (jump > best) { best = jump; bestAt = y; }
-  }
-  return { fraction: bestAt / height, strength: best / band };
+  if (spans.length < 12) return null;
+
+  const median = (list) => {
+    const sorted = list.map((entry) => entry.span).sort((a, b) => a - b);
+    return sorted[Math.floor(sorted.length / 2)];
+  };
+  const round = (value) => Number(value.toFixed(4));
+  return {
+    line: round(spans[0].y / height),
+    backSpan: round(median(spans.slice(0, 8))),
+    frontSpan: round(median(spans.slice(-8))),
+  };
 }
 
-// ------------------------------------------------------------------ rooms ---
-/** Where the grid expects the floor to start, and how far off it will tolerate. */
-const FLOOR_LINE = 0.38;
-const FLOOR_TOLERANCE = 0.04;
+/** A picture of what was measured, so nobody has to take the numbers on trust. */
+async function floorPreview(file, floor, roomId) {
+  const width = 800;
+  const height = 450;
+  const top = height * floor.line;
+  const back = (width * floor.backSpan) / 2;
+  const front = (width * floor.frontSpan) / 2;
+  const svg = Buffer.from(`<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="${width / 2 - back},${top} ${width / 2 + back},${top} ${width / 2 + front},${height} ${width / 2 - front},${height}"
+      fill="#e0483a" fill-opacity="0.22" stroke="#e0483a" stroke-width="3"/>
+    <line x1="0" y1="${top}" x2="${width}" y2="${top}" stroke="#1d6fd0" stroke-width="2" stroke-dasharray="8 6"/>
+    <text x="12" y="${top - 8}" font-family="monospace" font-size="18" font-weight="700" fill="#1d6fd0">floor ${Math.round(floor.line * 100)}%</text>
+  </svg>`);
+  const target = path.join('art-inbox', `measured-${roomId}.png`);
+  await sharp(file).resize(width, height, { fit: 'fill' }).composite([{ input: svg }]).png().toFile(target);
+  return target;
+}
 
 async function importRoom(file, roomId, dry) {
   const room = catalog.rooms.find((entry) => entry.id === roomId);
   if (!room) throw new Error(`no room called ${roomId}`);
-  const floor = await measureFloorLine(file);
-  const off = floor.fraction - FLOOR_LINE;
-  const percent = (value) => `${Math.round(value * 100)}%`;
-  if (Math.abs(off) <= FLOOR_TOLERANCE) {
-    log(`      floor line ${percent(floor.fraction)} - within tolerance of ${percent(FLOOR_LINE)}`);
+
+  const floor = await measureFloor(file);
+  const SPEC = { line: 0.30, backSpan: 0.72, frontSpan: 1.00 };
+  if (floor) {
+    const pct = (value) => `${Math.round(value * 100)}%`;
+    const off = (actual, want, tolerance) => (Math.abs(actual - want) <= tolerance ? '' : ` (spec ${pct(want)})`);
+    log(`      wall ${pct(floor.line)}${off(floor.line, SPEC.line, .04)}`
+      + `, floor ${pct(floor.backSpan)} wide at the back${off(floor.backSpan, SPEC.backSpan, .06)}`
+      + `, ${pct(floor.frontSpan)} at the front${off(floor.frontSpan, SPEC.frontSpan, .06)}`);
+    const drifted = Math.abs(floor.line - SPEC.line) > .04
+      || Math.abs(floor.backSpan - SPEC.backSpan) > .06
+      || Math.abs(floor.frontSpan - SPEC.frontSpan) > .06;
+    log(`      ${drifted ? 'off spec - the grid will not sit on this floor, generate it again' : 'matches the grid'}: ${await floorPreview(file, SPEC, roomId)}`);
   } else {
-    log(`      floor line ${percent(floor.fraction)}, wanted ${percent(FLOOR_LINE)} - ${off > 0 ? 'wall too tall' : 'wall too short'}, the back rows of the grid will not sit on floor`);
+    log('      could not find the floor to check it');
   }
+
   const buffer = await sharp(file).resize(ROOM_SIZE.width, ROOM_SIZE.height, { fit: 'fill' })
     .flatten({ background: '#ffffff' }).webp({ quality: 90 }).toBuffer();
   await write(fileFor(room.art), buffer, dry);
@@ -440,4 +482,9 @@ if (touchedPets && !dry) {
 }
 
 log(`\n${sheets} sheet${sheets === 1 ? '' : 's'} → ${assets} asset${assets === 1 ? '' : 's'}${dry ? ' (dry run)' : ''}`);
-if (!dry) log('run `node scripts/pet-art/index.mjs --only=metrics` to re-measure content boxes and anchors');
+if (!dry && !OUT_ROOT) {
+  // The server reads pet-app/dist, which the build copies from pet-app/public. Importing without
+  // building leaves the new art in the source tree and the old art on screen.
+  log('next: npm run build:pet            copies the new art into the served bundle');
+  log('      node scripts/pet-art/index.mjs --only=metrics   re-measures content boxes and anchors');
+}

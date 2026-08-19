@@ -560,19 +560,19 @@
   "petProfiles": [
     {
       "studentId": "S001",
-      "activePetId": "dd515ce7-cc1e-455f-b7d9-7ae7572c136d",
+      "activePetId": "1046d428-ac60-4251-bebd-c6e4d69a044e",
       "starterEggClaimed": true,
       "eggPity": 4,
       "stardust": 999999,
       "createdAt": "2026-08-13T13:03:28.012Z",
-      "updatedAt": "2026-08-17T10:11:39.571Z"
+      "updatedAt": "2026-08-19T16:02:53.163Z"
     }
   ],
   "petWallets": [
     {
       "studentId": "S001",
-      "balance": 996699,
-      "updatedAt": "2026-08-19T13:59:28.495Z"
+      "balance": 995499,
+      "updatedAt": "2026-08-19T16:02:44.860Z"
     }
   ],
   "petCurrencyLedger": [
@@ -976,6 +976,19 @@
         "quantity": 1
       },
       "createdAt": "2026-08-19T13:59:28.496Z"
+    },
+    {
+      "transactionId": "3d32e39e-2094-4642-b121-73340ac31317",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -1200,
+      "kind": "egg_purchase",
+      "idempotencyKey": "63ebec1e-e139-45f4-8277-dbbd483b6301",
+      "metadata": {
+        "speciesId": "spark-hamster",
+        "random": false
+      },
+      "createdAt": "2026-08-19T16:02:44.861Z"
     }
   ],
   "petInstances": [
@@ -1043,6 +1056,18 @@
       "equippedWearables": [],
       "createdAt": "2026-08-17T10:11:39.571Z",
       "updatedAt": "2026-08-17T10:11:39.571Z"
+    },
+    {
+      "petId": "1046d428-ac60-4251-bebd-c6e4d69a044e",
+      "studentId": "S001",
+      "speciesId": "spark-hamster",
+      "xp": 0,
+      "stage": 1,
+      "dailyXp": 0,
+      "dailyXpDate": "",
+      "equippedWearables": [],
+      "createdAt": "2026-08-19T16:02:44.861Z",
+      "updatedAt": "2026-08-19T16:02:44.861Z"
     }
   ],
   "petSkills": [],
@@ -1867,6 +1892,28 @@
         "stardust": 999999
       },
       "createdAt": "2026-08-19T13:59:28.496Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "63ebec1e-e139-45f4-8277-dbbd483b6301",
+      "kind": "direct_egg",
+      "response": {
+        "speciesId": "spark-hamster",
+        "rarity": "common",
+        "pet": {
+          "id": "1046d428-ac60-4251-bebd-c6e4d69a044e",
+          "speciesId": "spark-hamster",
+          "xp": 0,
+          "stage": 1,
+          "dailyXp": 0,
+          "dailyXpDate": "",
+          "equippedWearables": []
+        },
+        "duplicateCoins": 0,
+        "balance": 995499,
+        "eggPity": 4
+      },
+      "createdAt": "2026-08-19T16:02:44.861Z"
     }
   ]
 }

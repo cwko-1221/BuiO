@@ -21,18 +21,21 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
-  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
-              spanning the full width.
-  FLOOR       everything below that line. It is a trapezoid, wider at the front than
-              at the back: where it meets the back wall it spans the middle 70 percent
-              of the image width, and at the bottom edge of the image it spans the
-              middle 94 percent. Its left and right edges are straight lines running
-              from one to the other.
+The room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+
+  BACK WALL   a shallow band across the top of the picture, taking up only the top
+              30 percent of the image height and no more. Flat, parallel to the
+              picture, spanning the full width. Do not make it taller than this.
+  FLOOR       the whole bottom 70 percent of the image. It is a trapezoid, wider at
+              the front than at the back: where it meets the back wall it spans the
+              middle 72 percent of the image width, and at the bottom edge of the
+              image it spans the full width. Its left and right edges are straight
+              lines running from one to the other.
   SIDE WALLS  the two wedges left over between the floor and the left and right edges
-              of the image. They run from the back wall all the way down to the bottom
-              corners and never overlap the floor.
+              of the image. They run from the back wall down to the bottom corners
+              and never overlap the floor.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
@@ -58,18 +61,21 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
-  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
-              spanning the full width.
-  FLOOR       everything below that line. It is a trapezoid, wider at the front than
-              at the back: where it meets the back wall it spans the middle 70 percent
-              of the image width, and at the bottom edge of the image it spans the
-              middle 94 percent. Its left and right edges are straight lines running
-              from one to the other.
+The room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+
+  BACK WALL   a shallow band across the top of the picture, taking up only the top
+              30 percent of the image height and no more. Flat, parallel to the
+              picture, spanning the full width. Do not make it taller than this.
+  FLOOR       the whole bottom 70 percent of the image. It is a trapezoid, wider at
+              the front than at the back: where it meets the back wall it spans the
+              middle 72 percent of the image width, and at the bottom edge of the
+              image it spans the full width. Its left and right edges are straight
+              lines running from one to the other.
   SIDE WALLS  the two wedges left over between the floor and the left and right edges
-              of the image. They run from the back wall all the way down to the bottom
-              corners and never overlap the floor.
+              of the image. They run from the back wall down to the bottom corners
+              and never overlap the floor.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
@@ -95,18 +101,21 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
-  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
-              spanning the full width.
-  FLOOR       everything below that line. It is a trapezoid, wider at the front than
-              at the back: where it meets the back wall it spans the middle 70 percent
-              of the image width, and at the bottom edge of the image it spans the
-              middle 94 percent. Its left and right edges are straight lines running
-              from one to the other.
+The room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+
+  BACK WALL   a shallow band across the top of the picture, taking up only the top
+              30 percent of the image height and no more. Flat, parallel to the
+              picture, spanning the full width. Do not make it taller than this.
+  FLOOR       the whole bottom 70 percent of the image. It is a trapezoid, wider at
+              the front than at the back: where it meets the back wall it spans the
+              middle 72 percent of the image width, and at the bottom edge of the
+              image it spans the full width. Its left and right edges are straight
+              lines running from one to the other.
   SIDE WALLS  the two wedges left over between the floor and the left and right edges
-              of the image. They run from the back wall all the way down to the bottom
-              corners and never overlap the floor.
+              of the image. They run from the back wall down to the bottom corners
+              and never overlap the floor.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
@@ -132,18 +141,21 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
-  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
-              spanning the full width.
-  FLOOR       everything below that line. It is a trapezoid, wider at the front than
-              at the back: where it meets the back wall it spans the middle 70 percent
-              of the image width, and at the bottom edge of the image it spans the
-              middle 94 percent. Its left and right edges are straight lines running
-              from one to the other.
+The room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+
+  BACK WALL   a shallow band across the top of the picture, taking up only the top
+              30 percent of the image height and no more. Flat, parallel to the
+              picture, spanning the full width. Do not make it taller than this.
+  FLOOR       the whole bottom 70 percent of the image. It is a trapezoid, wider at
+              the front than at the back: where it meets the back wall it spans the
+              middle 72 percent of the image width, and at the bottom edge of the
+              image it spans the full width. Its left and right edges are straight
+              lines running from one to the other.
   SIDE WALLS  the two wedges left over between the floor and the left and right edges
-              of the image. They run from the back wall all the way down to the bottom
-              corners and never overlap the floor.
+              of the image. They run from the back wall down to the bottom corners
+              and never overlap the floor.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
@@ -169,18 +181,21 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
-  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
-              spanning the full width.
-  FLOOR       everything below that line. It is a trapezoid, wider at the front than
-              at the back: where it meets the back wall it spans the middle 70 percent
-              of the image width, and at the bottom edge of the image it spans the
-              middle 94 percent. Its left and right edges are straight lines running
-              from one to the other.
+The room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+
+  BACK WALL   a shallow band across the top of the picture, taking up only the top
+              30 percent of the image height and no more. Flat, parallel to the
+              picture, spanning the full width. Do not make it taller than this.
+  FLOOR       the whole bottom 70 percent of the image. It is a trapezoid, wider at
+              the front than at the back: where it meets the back wall it spans the
+              middle 72 percent of the image width, and at the bottom edge of the
+              image it spans the full width. Its left and right edges are straight
+              lines running from one to the other.
   SIDE WALLS  the two wedges left over between the floor and the left and right edges
-              of the image. They run from the back wall all the way down to the bottom
-              corners and never overlap the floor.
+              of the image. They run from the back wall down to the bottom corners
+              and never overlap the floor.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
@@ -206,18 +221,21 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
-  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
-              spanning the full width.
-  FLOOR       everything below that line. It is a trapezoid, wider at the front than
-              at the back: where it meets the back wall it spans the middle 70 percent
-              of the image width, and at the bottom edge of the image it spans the
-              middle 94 percent. Its left and right edges are straight lines running
-              from one to the other.
+The room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+
+  BACK WALL   a shallow band across the top of the picture, taking up only the top
+              30 percent of the image height and no more. Flat, parallel to the
+              picture, spanning the full width. Do not make it taller than this.
+  FLOOR       the whole bottom 70 percent of the image. It is a trapezoid, wider at
+              the front than at the back: where it meets the back wall it spans the
+              middle 72 percent of the image width, and at the bottom edge of the
+              image it spans the full width. Its left and right edges are straight
+              lines running from one to the other.
   SIDE WALLS  the two wedges left over between the floor and the left and right edges
-              of the image. They run from the back wall all the way down to the bottom
-              corners and never overlap the floor.
+              of the image. They run from the back wall down to the bottom corners
+              and never overlap the floor.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
@@ -243,18 +261,21 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
-  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
-              spanning the full width.
-  FLOOR       everything below that line. It is a trapezoid, wider at the front than
-              at the back: where it meets the back wall it spans the middle 70 percent
-              of the image width, and at the bottom edge of the image it spans the
-              middle 94 percent. Its left and right edges are straight lines running
-              from one to the other.
+The room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+
+  BACK WALL   a shallow band across the top of the picture, taking up only the top
+              30 percent of the image height and no more. Flat, parallel to the
+              picture, spanning the full width. Do not make it taller than this.
+  FLOOR       the whole bottom 70 percent of the image. It is a trapezoid, wider at
+              the front than at the back: where it meets the back wall it spans the
+              middle 72 percent of the image width, and at the bottom edge of the
+              image it spans the full width. Its left and right edges are straight
+              lines running from one to the other.
   SIDE WALLS  the two wedges left over between the floor and the left and right edges
-              of the image. They run from the back wall all the way down to the bottom
-              corners and never overlap the floor.
+              of the image. They run from the back wall down to the bottom corners
+              and never overlap the floor.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
@@ -280,18 +301,21 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
-  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
-              spanning the full width.
-  FLOOR       everything below that line. It is a trapezoid, wider at the front than
-              at the back: where it meets the back wall it spans the middle 70 percent
-              of the image width, and at the bottom edge of the image it spans the
-              middle 94 percent. Its left and right edges are straight lines running
-              from one to the other.
+The room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+
+  BACK WALL   a shallow band across the top of the picture, taking up only the top
+              30 percent of the image height and no more. Flat, parallel to the
+              picture, spanning the full width. Do not make it taller than this.
+  FLOOR       the whole bottom 70 percent of the image. It is a trapezoid, wider at
+              the front than at the back: where it meets the back wall it spans the
+              middle 72 percent of the image width, and at the bottom edge of the
+              image it spans the full width. Its left and right edges are straight
+              lines running from one to the other.
   SIDE WALLS  the two wedges left over between the floor and the left and right edges
-              of the image. They run from the back wall all the way down to the bottom
-              corners and never overlap the floor.
+              of the image. They run from the back wall down to the bottom corners
+              and never overlap the floor.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
@@ -317,18 +341,21 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
-  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
-              spanning the full width.
-  FLOOR       everything below that line. It is a trapezoid, wider at the front than
-              at the back: where it meets the back wall it spans the middle 70 percent
-              of the image width, and at the bottom edge of the image it spans the
-              middle 94 percent. Its left and right edges are straight lines running
-              from one to the other.
+The room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+
+  BACK WALL   a shallow band across the top of the picture, taking up only the top
+              30 percent of the image height and no more. Flat, parallel to the
+              picture, spanning the full width. Do not make it taller than this.
+  FLOOR       the whole bottom 70 percent of the image. It is a trapezoid, wider at
+              the front than at the back: where it meets the back wall it spans the
+              middle 72 percent of the image width, and at the bottom edge of the
+              image it spans the full width. Its left and right edges are straight
+              lines running from one to the other.
   SIDE WALLS  the two wedges left over between the floor and the left and right edges
-              of the image. They run from the back wall all the way down to the bottom
-              corners and never overlap the floor.
+              of the image. They run from the back wall down to the bottom corners
+              and never overlap the floor.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
@@ -354,18 +381,21 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
 
-  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
-              spanning the full width.
-  FLOOR       everything below that line. It is a trapezoid, wider at the front than
-              at the back: where it meets the back wall it spans the middle 70 percent
-              of the image width, and at the bottom edge of the image it spans the
-              middle 94 percent. Its left and right edges are straight lines running
-              from one to the other.
+The room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
+
+  BACK WALL   a shallow band across the top of the picture, taking up only the top
+              30 percent of the image height and no more. Flat, parallel to the
+              picture, spanning the full width. Do not make it taller than this.
+  FLOOR       the whole bottom 70 percent of the image. It is a trapezoid, wider at
+              the front than at the back: where it meets the back wall it spans the
+              middle 72 percent of the image width, and at the bottom edge of the
+              image it spans the full width. Its left and right edges are straight
+              lines running from one to the other.
   SIDE WALLS  the two wedges left over between the floor and the left and right edges
-              of the image. They run from the back wall all the way down to the bottom
-              corners and never overlap the floor.
+              of the image. They run from the back wall down to the bottom corners
+              and never overlap the floor.
 
 The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
