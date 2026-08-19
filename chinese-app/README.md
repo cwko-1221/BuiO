@@ -58,8 +58,8 @@ chinese-app/
    AZURE_CONTENT_WRONG_SCORE=65
    # zh-HK does not return the identity of the phoneme actually spoken. Avoid false 100s.
    AZURE_PRONUNCIATION_MAX_SCORE=98
-   # How much of the score comes from Azure's phoneme evidence vs the heard Jyutping.
-   AZURE_PRONUNCIATION_ACOUSTIC_WEIGHT=0.6
+   # How much of the score comes from whichever of the two evidence signals is lower.
+   AZURE_PRONUNCIATION_LOWER_SIGNAL_WEIGHT=0.7
    # How hard the weakest third of the phonemes pulls the score down.
    AZURE_PRONUNCIATION_LOWER_BAND_WEIGHT=0.15
    # Miscue detection scores classroom noise as an inserted word. Leave it off.
@@ -68,8 +68,6 @@ chinese-app/
    AZURE_SPEECH_MAX_CONCURRENT=1
    # A student queued behind a full slot gives up here instead of hanging.
    AZURE_SPEECH_QUEUE_TIMEOUT_MS=25000
-   # Set to 1 to go back to a separate reference-free recognition call. Doubles the wait.
-   AZURE_SPEECH_INDEPENDENT_RECOGNITION=0
    # Classroom noise is scored, not rejected. Set to 1 to restore the old hard gate.
    CHINESE_AUDIO_NOISE_GATE=0
 
@@ -106,13 +104,17 @@ chinese-app/
 - The server fetches exactly the current `assignmentId + itemId`. The current item's Chinese
   text is the only `ReferenceText` sent to Azure scripted Pronunciation Assessment; the question
   bank and other assignment items are never included in that assessment.
-- **One Azure round trip per submission.** Enabling pronunciation assessment adds phoneme
-  scoring to a recognition, it does not replace it, so a single call returns both the heard
-  text and the per-phoneme accuracy scores. Two separate calls used to double both the wait
-  and the quota spent per recording, which is what made a whole class queue up.
+- **Two Azure calls, and the second one is not optional.** Scripted pronunciation
+  assessment force-aligns the audio to the reference text and reports that reference text
+  back as the recognised text, so it cannot say what was actually spoken. Folding the two
+  calls into one was tried and reverted: 海豚, 開豚 and Hi豚 all came back as 海豚 and all
+  scored 98. What was said has to come from a recognition that has never seen the question.
+- The two calls run **together** when `AZURE_SPEECH_MAX_CONCURRENT` is 2 or more, so the
+  student waits for one round trip rather than two. On F0, which allows a single concurrent
+  request, they stay sequential and a clearly wrong answer still skips the assessment call.
 - Azure `zh-HK` returns an accuracy score for each expected phoneme, but doesn't return the
-  identity of the phoneme actually spoken. The recognised text from the same call supplies
-  that missing evidence and is converted to Jyutping.
+  identity of the phoneme actually spoken. The reference-free recognition supplies that
+  missing evidence and is converted to Jyutping.
 - Expected and heard Jyutping are aligned syllable by syllable. Each syllable compares onset
   (30%), final (45%), and tone (25%). For example, `海豚 hoi2 tyun4` versus
   `開豚 hoi1 tyun4` scores 87.5 for this evidence, not 100.
@@ -127,11 +129,12 @@ chinese-app/
   skipping a syllable is a real deduction, and the child is told the answer was unfinished
   rather than wrong. Azure miscue detection is off for the same reason: it scores the
   neighbours as inserted words.
-- The displayed percentage is a weighted blend of (a) Azure's current-item phoneme evidence
-  (60%) and (b) the heard Jyutping score (40%), with a default automatic ceiling of 98.
-  These were previously reduced to their **minimum**, which let a single noisy signal fail
-  an accurate reading. Full-text, word, and completeness aggregates remain diagnostic only.
-  Google STT is not used.
+- The displayed percentage weights whichever of the two signals is **lower** at 70% and the
+  higher at 30%, with a default automatic ceiling of 98. A reading is only as good as its
+  weakest evidence, but not hostage to it: the outright minimum let one noisy signal fail an
+  accurate reading, while an even blend let a confident forced alignment carry a word the
+  recogniser never heard. Full-text, word, and completeness aggregates remain diagnostic
+  only. Google STT is not used.
 - **70% and above passes.** There is no band between pass and retry: anything below the
   pass mark is a retry with an explanation of what the scorer heard. `inconclusive` is now
   reserved for recordings that produced no usable evidence at all.

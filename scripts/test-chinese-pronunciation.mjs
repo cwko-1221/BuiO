@@ -126,10 +126,12 @@ assert.deepEqual(toneMistake.alignment, [
   { expected: 'hoi2', heard: 'hoi1', score: 75 },
   { expected: 'tyun4', heard: 'tyun4', score: 100 },
 ]);
-assert.equal(combinePronunciationEvidence(100, { pronunciationScore: 87.5 }).score, 95,
-  'the two signals are blended, so one weak signal deducts marks without failing the reading');
-assert.ok(combinePronunciationEvidence(100, { pronunciationScore: 87.5 }).score < 98,
-  'a Jyutping mismatch must still cost marks against a perfect forced alignment');
+assert.equal(combinePronunciationEvidence(100, { pronunciationScore: 87.5 }).score, 91.3,
+  'the weaker signal carries most of the weight without outright failing the reading');
+assert.equal(combinePronunciationEvidence(87.5, { pronunciationScore: 100 }).score, 91.3,
+  'it is the lower score that dominates, whichever signal it came from');
+assert.ok(combinePronunciationEvidence(100, { pronunciationScore: 50 }).score < 70,
+  'a confident forced alignment must not carry a reading the recogniser did not hear');
 assert.equal(combinePronunciationEvidence(100, { pronunciationScore: 100 }).score, 98,
   'zh-HK cannot expose spoken phoneme identities, so one automatic sample cannot claim perfect certainty');
 
@@ -164,6 +166,7 @@ class FakeRecognizer {
   recognizeOnceAsync(resolve) {
     azureRequests += 1;
     if (this.isAssessment) assessmentCalls += 1;
+    else plainRecognitions += 1;
     const result = { reason: 1, text: currentRecognition.transcript, confidence: currentRecognition.confidence };
     const candidates = currentRecognition.candidates
       || [{ transcript: currentRecognition.transcript, confidence: currentRecognition.confidence }];
@@ -188,6 +191,7 @@ class FakeAssessmentConfig {
 }
 let assessmentCalls = 0;
 let azureRequests = 0;
+let plainRecognitions = 0;
 let currentRecognition = { transcript: '好', confidence: 0.96 };
 let currentAssessment = {
   accuracyScore: 96,
@@ -268,7 +272,8 @@ const gatedWrongPhrase = await evaluatePronunciation(
 assert.equal(gatedWrongPhrase.status, 'retry');
 assert.equal(gatedWrongPhrase.score, 58.7);
 assert.equal(gatedWrongPhrase.transcript, '你好');
-assert.equal(azureRequests, 1, 'a submission must cost exactly one Azure round trip');
+assert.equal(azureRequests, 1,
+  'a clearly wrong answer must not also pay for a pronunciation assessment');
 assert.equal(gatedWrongPhrase.timing.azureRequests, 1);
 
 azureRequests = 0;
@@ -280,6 +285,8 @@ assert.equal(uncertainPhrase.score, null);
 assert.equal(azureRequests, 1, 'uncertain content must not cost a second Azure round trip');
 
 assessmentCalls = 0;
+azureRequests = 0;
+plainRecognitions = 0;
 currentRecognition = {
   transcript: '開豚',
   confidence: 0.96,
@@ -307,7 +314,7 @@ currentAssessment = {
 };
 const currentItemToneMistake = await evaluatePronunciation(
   wav(clearSpeech), '海豚', 'hoi2 tyun4', fakeSdk, { assignmentId: 'assignment-1', itemId: 'item-sea' });
-assert.equal(currentItemToneMistake.score, 95,
+assert.equal(currentItemToneMistake.score, 91.3,
   '海豚 read as 開豚 must remain below 100 even when scripted Azure returns all 100');
 assert.equal(currentItemToneMistake.diagnostics.reference.text, '海豚');
 assert.equal(currentItemToneMistake.diagnostics.reference.itemId, 'item-sea');
@@ -315,10 +322,14 @@ assert.equal(currentItemToneMistake.diagnostics.combined.acousticScore, 100);
 assert.equal(currentItemToneMistake.diagnostics.combined.recognizedPronunciationScore, 87.5);
 assert.equal(currentItemToneMistake.contentCheck.candidates.length, 2,
   'the detailed Azure NBest response must be preserved for auditing');
-assert.equal(currentItemToneMistake.timing.azureRequests, 1);
+assert.equal(currentItemToneMistake.timing.azureRequests, 2);
+assert.ok(plainRecognitions >= 1,
+  'scripted assessment reports the reference text back, so what was actually said '
+  + 'must come from a recognition that never saw the question');
 
 assessmentCalls = 0;
 azureRequests = 0;
+plainRecognitions = 0;
 currentRecognition = { transcript: '企鵝', confidence: 0.94 };
 currentAssessment = {
   accuracyScore: 96,
@@ -340,10 +351,12 @@ currentAssessment = {
 const gatedCorrectPhrase = await evaluatePronunciation(
   wav(clearSpeech), '企鵝', 'kei5 ngo2', fakeSdk);
 assert.equal(gatedCorrectPhrase.status, 'pass');
-assert.equal(gatedCorrectPhrase.score, 93.9);
+assert.equal(gatedCorrectPhrase.score, 92.9);
 assert.equal(gatedCorrectPhrase.contentCheck.status, 'matched');
-assert.equal(gatedCorrectPhrase.timing.azureRequests, 1);
-assert.equal(assessmentCalls, 1, 'the single round trip must carry the assessment config');
+assert.equal(gatedCorrectPhrase.timing.azureRequests, 2);
+assert.equal(assessmentCalls, 1);
+assert.equal(plainRecognitions, 1,
+  'the content evidence must come from a reference-free recognition');
 // ----- classroom noise: score the matching stretch, not the whole transcript --
 const buriedInNoise = compareRecognizedContent(
   { transcript: '旱上料刷你好料刺尹料', confidence: 0.55 },
@@ -387,6 +400,22 @@ const window = extractBestWindow(
 );
 assert.equal(window.score, 100);
 assert.deepEqual([window.start, window.end], [4, 6]);
+
+// ----- a tier that allows concurrency pays one round trip of waiting ---------
+process.env.AZURE_SPEECH_MAX_CONCURRENT = '4';
+assessmentCalls = 0;
+azureRequests = 0;
+plainRecognitions = 0;
+currentRecognition = { transcript: '企鵝', confidence: 0.94 };
+const parallelPhrase = await evaluatePronunciation(
+  wav(clearSpeech), '企鵝', 'kei5 ngo2', fakeSdk);
+assert.equal(parallelPhrase.score, 92.9,
+  'running the two calls together must not change the score');
+assert.equal(parallelPhrase.timing.azureRequests, 2);
+assert.equal(plainRecognitions, 1,
+  'the reference-free recognition still supplies what was actually said');
+assert.equal(assessmentCalls, 1);
+delete process.env.AZURE_SPEECH_MAX_CONCURRENT;
 
 // ----- a full scoring queue must fail fast instead of hanging -----------------
 process.env.AZURE_SPEECH_MAX_CONCURRENT = '1';

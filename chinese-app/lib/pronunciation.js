@@ -431,17 +431,22 @@ function combinePronunciationEvidence(assessmentScore, contentCheck) {
   }
   // zh-HK returns an accuracy score for each expected phoneme but never reveals
   // which phoneme was actually spoken, so the recognised Jyutping still has to
-  // weigh in. The two are blended rather than reduced to their minimum: taking
-  // the minimum let a single noisy signal fail an otherwise accurate reading.
+  // weigh in. Whichever of the two is lower carries the most weight, because a
+  // reading is only as good as its weakest evidence. It is a majority rather
+  // than the outright minimum the scorer used to take: the minimum let one
+  // noisy signal fail an accurate reading, while an even blend let a confident
+  // forced alignment hide a wrong word.
   const maximumScore = Math.min(100, Math.max(0, numericEnv('AZURE_PRONUNCIATION_MAX_SCORE', 98)));
-  const acousticWeight = ratioEnv('AZURE_PRONUNCIATION_ACOUSTIC_WEIGHT', 0.6);
-  const blended = acousticScore * acousticWeight
-    + recognizedPronunciationScore * (1 - acousticWeight);
+  const lowerWeight = ratioEnv('AZURE_PRONUNCIATION_LOWER_SIGNAL_WEIGHT', 0.7);
+  const lowerScore = Math.min(acousticScore, recognizedPronunciationScore);
+  const upperScore = Math.max(acousticScore, recognizedPronunciationScore);
+  const blended = lowerScore * lowerWeight + upperScore * (1 - lowerWeight);
   return {
     score: Math.round(Math.min(blended, maximumScore) * 10) / 10,
     acousticScore,
     recognizedPronunciationScore,
-    acousticWeight,
+    lowerScore,
+    lowerWeight,
     maximumScore,
   };
 }
@@ -657,32 +662,6 @@ function assessPronunciation(audio, referenceText, sdkOverride = null) {
   });
 }
 
-// One Azure round trip returns both the recognised text and the phoneme scores:
-// enabling pronunciation assessment adds scoring to a recognition, it does not
-// replace it. Two separate calls doubled both the wait and the quota spent per
-// submission, which is what made a whole classroom queue up.
-function recognizeAndAssess(audio, referenceText, sdkOverride = null) {
-  const invalid = requireAudioAndConfig(audio);
-  if (invalid) return Promise.reject(invalid);
-  if (!String(referenceText || '').trim()) return Promise.reject(new Error('缺少發音評估參考文字。'));
-  const azure = sdkOverride || sdk();
-  const recognizer = buildRecognizer(azure, audio, referenceText);
-  return recognizeOnce(recognizer, result => {
-    if (result.reason === azure.ResultReason.NoMatch) {
-      return {
-        recognition: { transcript: '', confidence: null, candidates: [] },
-        assessment: { ...NO_MATCH_ASSESSMENT },
-      };
-    }
-    if (result.reason !== azure.ResultReason.RecognizedSpeech) {
-      throw cancellationError(azure, result, 'Azure 粵語發音評估失敗。');
-    }
-    return {
-      recognition: detailedRecognition(azure, result),
-      assessment: assessmentFromResult(azure, result),
-    };
-  });
-}
 
 async function evaluatePronunciation(
   audio,
@@ -694,16 +673,29 @@ async function evaluatePronunciation(
   const queuedAt = Date.now();
   return withAzureSlot(async () => {
     const queueWaitMs = Date.now() - queuedAt;
-    const independentRecognition = booleanEnv('AZURE_SPEECH_INDEPENDENT_RECOGNITION', false);
+    // Scripted assessment force-aligns the audio to the reference text, so the
+    // text it reports back is the question, not what the child said. Reading
+    // 開豚 for 海豚 came back as 海豚 and scored full marks. What was actually
+    // spoken has to come from a recognition that has never seen the question.
     const recognitionStartedAt = Date.now();
     let recognition;
     let assessment = null;
-    if (independentRecognition) {
-      recognition = await recognizeContent(audio, sdkOverride);
+    let azureRequests = 0;
+    // Two Azure calls are needed, but they do not have to be consecutive. When
+    // the tier allows more than one request at a time they run together and
+    // cost one round trip of waiting. On F0 they stay sequential, which also
+    // keeps the saving of skipping assessment for a clearly wrong answer.
+    if (azureConcurrency() >= 2) {
+      const [independent, scored] = await Promise.all([
+        recognizeContent(audio, sdkOverride),
+        assessPronunciation(audio, referenceText, sdkOverride),
+      ]);
+      recognition = independent;
+      assessment = scored;
+      azureRequests = 2;
     } else {
-      const combined = await recognizeAndAssess(audio, referenceText, sdkOverride);
-      recognition = combined.recognition;
-      assessment = combined.assessment;
+      recognition = await recognizeContent(audio, sdkOverride);
+      azureRequests = 1;
     }
     const contentRecognitionMs = Date.now() - recognitionStartedAt;
     const contentCheck = compareRecognizedContent(recognition, referenceText, expectedJyutping);
@@ -730,7 +722,7 @@ async function evaluatePronunciation(
           contentCheck,
           unusedAcousticScore: assessment?.score ?? null,
         },
-        timing: { queueWaitMs, contentRecognitionMs, assessmentMs: 0, azureRequests: 1 },
+        timing: { queueWaitMs, contentRecognitionMs, assessmentMs: 0, azureRequests },
         message: contentCheck.message,
       };
     }
@@ -740,6 +732,7 @@ async function evaluatePronunciation(
       const assessmentStartedAt = Date.now();
       assessment = await assessPronunciation(audio, referenceText, sdkOverride);
       assessmentMs = Date.now() - assessmentStartedAt;
+      azureRequests += 1;
     }
     const combined = combinePronunciationEvidence(assessment.score, contentCheck);
     const classification = classifyAccuracy(combined.score);
@@ -758,12 +751,7 @@ async function evaluatePronunciation(
         combined,
         assessmentTranscript: assessment.transcript,
       },
-      timing: {
-        queueWaitMs,
-        contentRecognitionMs,
-        assessmentMs,
-        azureRequests: assessmentMs ? 2 : 1,
-      },
+      timing: { queueWaitMs, contentRecognitionMs, assessmentMs, azureRequests },
       message: contentCheck.message || assessment.message,
     };
   });
@@ -781,6 +769,5 @@ module.exports = {
   combinePronunciationEvidence,
   recognizeContent,
   assessPronunciation,
-  recognizeAndAssess,
   evaluatePronunciation,
 };
