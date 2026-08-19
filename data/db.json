@@ -571,8 +571,8 @@
   "petWallets": [
     {
       "studentId": "S001",
-      "balance": 998399,
-      "updatedAt": "2026-08-17T10:11:39.571Z"
+      "balance": 996699,
+      "updatedAt": "2026-08-19T13:59:28.495Z"
     }
   ],
   "petCurrencyLedger": [
@@ -963,6 +963,19 @@
         "random": true
       },
       "createdAt": "2026-08-17T10:11:39.571Z"
+    },
+    {
+      "transactionId": "8fca775b-5f91-464a-9491-e05db8beb204",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -1700,
+      "kind": "shop_purchase",
+      "idempotencyKey": "9dc8beaf-6291-4e87-941f-7e6ba529e487",
+      "metadata": {
+        "itemId": "room:moon-magic-attic",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-19T13:59:28.496Z"
     }
   ],
   "petInstances": [
@@ -1208,6 +1221,11 @@
       "studentId": "S001",
       "itemId": "room:aurora-observatory",
       "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "room:moon-magic-attic",
+      "quantity": 1
     }
   ],
   "petRoomLayouts": [
@@ -1219,8 +1237,8 @@
         {
           "id": "23a59b32-c688-42a4-9a28-1358420baccc",
           "itemId": "sunny-oak-furniture-1",
-          "x": 2,
-          "y": 6,
+          "x": 11,
+          "y": 0,
           "rotation": 0,
           "layer": "furniture"
         },
@@ -1235,8 +1253,8 @@
         {
           "id": "3735b20e-b824-492f-8a2d-23c5c03ae550",
           "itemId": "sunny-oak-furniture-3",
-          "x": 7,
-          "y": 6,
+          "x": 6,
+          "y": 0,
           "rotation": 0,
           "layer": "furniture"
         },
@@ -1244,15 +1262,15 @@
           "id": "f01eb275-f85b-473c-a66c-b19628934d0c",
           "itemId": "sunny-oak-furniture-5",
           "x": 9,
-          "y": 3,
+          "y": 0,
           "rotation": 0,
           "layer": "furniture"
         },
         {
           "id": "93aa5953-b400-443e-8b2a-3acb92e5ceee",
           "itemId": "sunny-oak-furniture-7",
-          "x": 6,
-          "y": 1,
+          "x": 1,
+          "y": 0,
           "rotation": 0,
           "layer": "wall"
         },
@@ -1265,7 +1283,7 @@
           "layer": "furniture"
         }
       ],
-      "updatedAt": "2026-08-16T08:11:18.206Z"
+      "updatedAt": "2026-08-19T14:06:37.323Z"
     }
   ],
   "petMapProgress": [],
@@ -1837,6 +1855,18 @@
         "eggPity": 4
       },
       "createdAt": "2026-08-17T10:11:39.571Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "9dc8beaf-6291-4e87-941f-7e6ba529e487",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "room:moon-magic-attic",
+        "quantity": 1,
+        "balance": 996699,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-19T13:59:28.496Z"
     }
   ]
 }

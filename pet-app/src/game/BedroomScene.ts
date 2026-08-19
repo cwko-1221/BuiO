@@ -84,7 +84,6 @@ export class BedroomScene extends Phaser.Scene {
   petCell = { x: 0, y: 0 };
   petTarget?: { x: number; y: number };
   petStep?: Phaser.Tweens.Tween;
-  petPause?: Phaser.Time.TimerEvent;
   roomTextureKey = '';
   petTextureKey = '';
 
@@ -103,7 +102,6 @@ export class BedroomScene extends Phaser.Scene {
     this.avatar = undefined;
     this.petTarget = undefined;
     this.petStep = undefined;
-    this.petPause = undefined;
   }
   preload() {
     const catalog = this.model.bootstrap.catalog;
@@ -149,8 +147,13 @@ export class BedroomScene extends Phaser.Scene {
       ambient: this.ambientLight(),
     });
     this.avatar.setDepth(this.petDepth());
-    if (!this.editing) this.scheduleWander(600);
     this.ghost = this.add.graphics().setDepth(15);
+    // A tap that hits no furniture is a tap on the floor, which is where the child wants the pet.
+    this.input.on('pointerup', (pointer: Phaser.Input.Pointer, targets: Phaser.GameObjects.GameObject[]) => {
+      if (this.editing || targets.length) return;
+      if (pointer.getDistance() > 16) return;   // a drag across the room is not a destination
+      this.walkTo(this.screenToGrid(pointer.worldX, pointer.worldY));
+    });
     this.input.on('drag', (_pointer: Phaser.Input.Pointer, target: Phaser.GameObjects.Container, dragX: number, dragY: number) => {
       if (!this.editing || !target.getData('placementId')) return;
       const placement = this.placements.find((item) => item.id === target.getData('placementId'));
@@ -444,7 +447,7 @@ export class BedroomScene extends Phaser.Scene {
     return container;
   }
   private setEditing(value: boolean) {
-    if (value) this.haltWander(); else this.scheduleWander(900);
+    if (value) this.haltWalk();
     this.editing = value;
     this.grid?.setVisible(value);
     if (!value) this.clearFootprint();
@@ -523,33 +526,19 @@ export class BedroomScene extends Phaser.Scene {
     return blocked;
   }
 
-  private scheduleWander(delay: number) {
-    this.petPause?.remove();
-    this.petPause = this.time.delayedCall(delay, () => this.pickDestination());
-  }
-
   /**
-   * Choose somewhere to go, then walk there a cell at a time.
+   * Send the creature to a cell the child tapped.
    *
-   * A cell at a time rather than a straight line to the target, because a straight line walks
-   * through the wardrobe. Each step picks whichever free neighbour closes the distance most, so
-   * the creature rounds furniture without needing a real path search in a room this small.
+   * It used to choose its own destinations. Being able to point at the floor and have the pet
+   * trot over is the whole difference between watching an aquarium and playing with a pet, and a
+   * creature that is already walking somewhere of its own accord makes the tap feel ignored.
    */
-  private pickDestination() {
+  private walkTo(cell: { x: number; y: number }) {
     if (this.editing || !this.avatar) return;
-    const blocked = this.blockedCells();
-    for (let attempt = 0; attempt < 12; attempt += 1) {
-      const target = {
-        x: Phaser.Math.Between(0, GRID_COLUMNS - 1),
-        y: Phaser.Math.Between(0, GRID_ROWS - 1),
-      };
-      const distance = Math.abs(target.x - this.petCell.x) + Math.abs(target.y - this.petCell.y);
-      if (distance < 3 || blocked.has(`${target.x}:${target.y}`)) continue;
-      this.petTarget = target;
-      this.stepTowardsTarget();
-      return;
-    }
-    this.scheduleWander(1200);
+    if (cell.x < 0 || cell.y < 0 || cell.x >= GRID_COLUMNS || cell.y >= GRID_ROWS) return;
+    if (this.blockedCells().has(`${cell.x}:${cell.y}`)) return;
+    this.petTarget = cell;
+    if (!this.petStep?.isPlaying()) this.stepTowardsTarget();
   }
 
   private stepTowardsTarget() {
@@ -559,7 +548,6 @@ export class BedroomScene extends Phaser.Scene {
     if (target.x === this.petCell.x && target.y === this.petCell.y) {
       this.petTarget = undefined;
       avatar.play('idle');
-      this.scheduleWander(Phaser.Math.Between(1800, 5000));
       return;
     }
 
@@ -571,10 +559,9 @@ export class BedroomScene extends Phaser.Scene {
       .filter((cell) => cell.x >= 0 && cell.y >= 0 && cell.x < GRID_COLUMNS && cell.y < GRID_ROWS)
       .filter((cell) => !blocked.has(`${cell.x}:${cell.y}`));
     if (!options.length) {
-      // Boxed in on the axes that help; give up on this destination rather than jittering.
+      // Boxed in on the axes that help; stop rather than jitter against the furniture.
       this.petTarget = undefined;
       avatar.play('idle');
-      this.scheduleWander(1500);
       return;
     }
     // Prefer the axis with further to go, so the creature does not stair-step the whole way.
@@ -603,18 +590,14 @@ export class BedroomScene extends Phaser.Scene {
   }
 
   /** Stop where it stands. Used while decorating, and while a one-shot reaction plays. */
-  private haltWander() {
+  private haltWalk() {
     this.petStep?.stop();
     this.petStep = undefined;
-    this.petPause?.remove();
-    this.petPause = undefined;
     this.petTarget = undefined;
   }
 
   private petEmote(type: 'happy'|'eat'|'attack'|'hurt'|'sleep'|'evolve') {
-    this.haltWander();
+    this.haltWalk();
     this.avatar?.emote(type);
-    // Sleeping is a state the child chose; everything else is a moment, so the walk comes back.
-    if (type !== 'sleep') this.scheduleWander(2200);
   }
 }

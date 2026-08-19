@@ -294,13 +294,20 @@ for (const [id, zh, theme] of ROOMS) {
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT: the horizontal line where the back wall meets the floor sits exactly 38 percent of the way down from the top edge of the image. The wall occupies the top 38 percent and nothing more; the floor occupies the bottom 62 percent and runs all the way to the left and right edges of the frame. Side walls, if any, appear only above that line and never cut into the floor.
+MOST IMPORTANT - the picture is split by one straight horizontal line 38 percent of the way down from the top edge:
+
+  ABOVE the line, the whole width is back wall. Nothing else.
+  BELOW the line, the whole width is floor. Nothing else.
+
+The floor is a rectangle. It touches the left edge of the image, the right edge of the image and the bottom edge of the image, and it is exactly as wide at the back, where it meets the wall, as it is at the front. It does not taper, narrow or converge toward the back, and no part of it is hidden or cut off - the entire floor is visible.
+
+There are NO side walls, no corner walls, no walls at the left or right, and nothing standing at the edges of the floor. Only the one flat back wall, seen straight on, parallel to the picture. A game grid is laid over this floor and a piece dropped near an edge has to land on floor, not on a wall.
 
 The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
 
 So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
 
-There are no perspective lines running toward a vanishing point anywhere on the floor. Give it depth with a gentle darkening toward the back wall instead.
+Nothing on the floor recedes: no perspective, no vanishing point, no lines angling inward. It is an even plane of one material. Give it depth with a gentle darkening toward the back wall instead.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
@@ -321,7 +328,7 @@ A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, slightly above eye level, standing squarely on an invisible floor. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, because the floor of the game is seen at that angle. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
+Every piece is drawn from the same straight-on front view, from slightly above, as if standing on a flat floor that recedes upward without perspective - the same floor the rooms are drawn with. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, which is what that viewing angle does to a square. Vertical faces are drawn flat and square to the viewer, never angled off to one side. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
 The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
 

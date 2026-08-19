@@ -188,13 +188,20 @@ class StudentApp {
   private ensureGame() {
     if (this.game) return;
     document.querySelector('#game-root')!.innerHTML=''; // clear the pre-hatch poster
-    // Scale.ENVELOP (cover) instead of FIT (contain): the 1280x720 design surface is scaled by
-    // max(parentW/1280, parentH/720) so it always fills #game-root and the overflow is clipped
-    // by the parent. FIT was the source of the grey letterbox bars — see art bible §4.
+    // Scale.FIT (contain) rather than ENVELOP (cover).
+    //
+    // Cover was chosen to kill the letterbox bars, and it did — by cropping the top and bottom of
+    // the design surface whenever the play surface was wider than 16:9, which it is as soon as
+    // the decorating strip appears. That was harmless when the room was a diamond floating in the
+    // middle. It is not harmless now: the floor runs to the bottom of the frame, so cover cut off
+    // the front rows of the placement grid and a child could not reach them at all.
+    //
+    // The bars come back, so the surface behind the canvas is painted with the room's own colour
+    // and they read as the room continuing rather than as black edges.
     this.game = new Phaser.Game({
       type: Phaser.AUTO, parent:'game-root', transparent:true,
       render:{antialias:true,pixelArt:false},
-      scale:{ mode:Phaser.Scale.ENVELOP, autoCenter:Phaser.Scale.CENTER_BOTH, parent:'game-root', width:1280, height:720, expandParent:false },
+      scale:{ mode:Phaser.Scale.FIT, autoCenter:Phaser.Scale.CENTER_BOTH, parent:'game-root', width:1280, height:720, expandParent:false },
       physics:{default:'arcade',arcade:{debug:false,gravity:{x:0,y:0}}}, audio:{noAudio:true},
     });
     // The play surface also changes size without a window resize (panel slides in,
@@ -238,6 +245,12 @@ class StudentApp {
   private startBedroom(roomOverride?: any, petOverride?: PetInstance) {
     this.ensureGame(); const pet=petOverride||this.activePet();if(!pet)return;const definition=this.definition(pet)!;
     const originalRoom=this.state.room;if(roomOverride)this.state.room={themeId:roomOverride.themeId,visibility:roomOverride.visibility,placements:roomOverride.placements};
+    // Contain leaves bars above and below the room on a wide surface. Paint what is behind the
+    // canvas with the room's own wall colour so they read as the room carrying on rather than as
+    // the picture stopping.
+    const theme=this.state.catalog.rooms.find((entry)=>entry.id===this.state.room.themeId);
+    const surface=document.querySelector('#playSurface') as HTMLElement|null;
+    if(surface&&theme)surface.style.background=theme.primary;
     this.game!.scene.stop('Bedroom');this.game!.scene.start('Bedroom',{bootstrap:this.state,activePet:pet,petDefinition:definition});
     // The canvas is sized from its container. If anything started the scene while the stage
     // was still hidden the canvas would be zero-sized, so re-measure once it is on screen.
