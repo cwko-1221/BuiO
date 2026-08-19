@@ -1,6 +1,6 @@
 'use strict';
 
-const { getJyutpingText } = require('to-jyutping');
+const { getJyutpingCandidates } = require('to-jyutping');
 
 let speechSdk;
 let activeAzureRequests = 0;
@@ -28,17 +28,68 @@ function numericEnv(name, fallback) {
   return Number.isFinite(value) ? value : fallback;
 }
 
+function booleanEnv(name, fallback) {
+  const raw = String(process.env[name] ?? '').trim().toLowerCase();
+  if (!raw) return fallback;
+  return !['0', 'false', 'no', 'off'].includes(raw);
+}
+
+function ratioEnv(name, fallback) {
+  return Math.min(1, Math.max(0, numericEnv(name, fallback)));
+}
+
 function normalizeText(value) {
   return String(value || '').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 }
+
+const SYLLABLE_PATTERN = /^[a-z]+[1-6]$/;
 
 function jyutpingSyllables(value) {
   return String(value || '').toLowerCase().match(/[a-z]+[1-6]/g) || [];
 }
 
-function jyutpingForText(value) {
-  try { return jyutpingSyllables(getJyutpingText(normalizeText(value))); }
-  catch { return []; }
+// A "unit" is one scorable character plus every Jyutping reading the dictionary
+// allows for it. Carrying all readings instead of one canonical reading is what
+// stops 你 (nei5/lei5) or 好 (hou2/hou3) from being marked wrong just because
+// the dictionary and the child picked different valid readings.
+function jyutpingUnits(value) {
+  try {
+    return getJyutpingCandidates(normalizeText(value))
+      .map(([character, readings]) => ({
+        character,
+        readings: (readings || [])
+          .map(reading => String(reading).toLowerCase())
+          .filter(reading => SYLLABLE_PATTERN.test(reading)),
+      }))
+      .filter(unit => unit.readings.length);
+  } catch { return []; }
+}
+
+function unitsFromSyllables(syllables) {
+  return syllables.map(syllable => ({ character: '', readings: [syllable] }));
+}
+
+function primaryReadings(units) {
+  return units.map(unit => unit.readings[0]);
+}
+
+function unitsText(units) {
+  return units.map(unit => unit.character).join('');
+}
+
+// The teacher's Jyutping stays authoritative, but the dictionary's other
+// readings for the same character are accepted alongside it.
+function expectedUnits(expectedText, expectedJyutping) {
+  const given = jyutpingSyllables(expectedJyutping);
+  const fromText = jyutpingUnits(expectedText);
+  if (given.length && given.length === fromText.length) {
+    return fromText.map((unit, index) => ({
+      character: unit.character,
+      readings: Array.from(new Set([given[index], ...unit.readings])),
+    }));
+  }
+  if (given.length) return unitsFromSyllables(given);
+  return fromText;
 }
 
 function levenshtein(a, b) {
@@ -68,6 +119,7 @@ const JYUTPING_ONSETS = [
 const SIMILAR_ONSETS = [
   new Set(['b', 'p']), new Set(['d', 't']), new Set(['g', 'k']),
   new Set(['gw', 'kw']), new Set(['z', 'c', 's']), new Set(['n', 'l']),
+  new Set(['ng', '']), new Set(['w', 'm']),
 ];
 
 function splitJyutpingSyllable(value) {
@@ -80,7 +132,6 @@ function splitJyutpingSyllable(value) {
 
 function onsetSimilarity(a, b) {
   if (a === b) return 1;
-  if (!a || !b) return 0;
   return SIMILAR_ONSETS.some(group => group.has(a) && group.has(b)) ? 0.5 : 0;
 }
 
@@ -102,9 +153,24 @@ function syllableSimilarity(expected, heard) {
     + toneSimilarity(a.tone, b.tone) * 0.25;
 }
 
-function alignJyutping(expected, heard) {
+// Best pairing across every allowed reading of the expected and heard character.
+function unitSimilarity(expectedReadings, heardReadings) {
+  let best = { score: 0, expected: expectedReadings[0] || null, heard: heardReadings[0] || null };
+  for (const expected of expectedReadings) {
+    for (const heard of heardReadings) {
+      const score = syllableSimilarity(expected, heard);
+      if (score > best.score) best = { score, expected, heard };
+      if (best.score === 1) return best;
+    }
+  }
+  return best;
+}
+
+function alignUnits(expected, heard) {
   const rows = expected.length + 1;
   const columns = heard.length + 1;
+  const pairs = expected.map(expectedUnit =>
+    heard.map(heardUnit => unitSimilarity(expectedUnit.readings, heardUnit.readings)));
   const costs = Array.from({ length: rows }, () => Array(columns).fill(0));
   const paths = Array.from({ length: rows }, () => Array(columns).fill(null));
   for (let i = 1; i < rows; i += 1) {
@@ -118,7 +184,7 @@ function alignJyutping(expected, heard) {
   for (let i = 1; i < rows; i += 1) {
     for (let j = 1; j < columns; j += 1) {
       const choices = [
-        { cost: costs[i - 1][j - 1] + 1 - syllableSimilarity(expected[i - 1], heard[j - 1]), path: 'match' },
+        { cost: costs[i - 1][j - 1] + 1 - pairs[i - 1][j - 1].score, path: 'match' },
         { cost: costs[i - 1][j] + 1, path: 'delete' },
         { cost: costs[i][j - 1] + 1, path: 'insert' },
       ].sort((left, right) => left.cost - right.cost);
@@ -133,15 +199,19 @@ function alignJyutping(expected, heard) {
   while (i > 0 || j > 0) {
     const path = paths[i][j];
     if (path === 'match') {
-      const score = syllableSimilarity(expected[i - 1], heard[j - 1]);
-      alignment.unshift({ expected: expected[i - 1], heard: heard[j - 1], score: Math.round(score * 1000) / 10 });
+      const pair = pairs[i - 1][j - 1];
+      alignment.unshift({
+        expected: pair.expected,
+        heard: pair.heard,
+        score: Math.round(pair.score * 1000) / 10,
+      });
       i -= 1;
       j -= 1;
     } else if (path === 'delete') {
-      alignment.unshift({ expected: expected[i - 1], heard: null, score: 0 });
+      alignment.unshift({ expected: expected[i - 1].readings[0], heard: null, score: 0 });
       i -= 1;
     } else {
-      alignment.unshift({ expected: null, heard: heard[j - 1], score: 0 });
+      alignment.unshift({ expected: null, heard: heard[j - 1].readings[0], score: 0 });
       j -= 1;
     }
   }
@@ -150,16 +220,42 @@ function alignJyutping(expected, heard) {
   return { score: Math.round(score * 10) / 10, alignment };
 }
 
+// Classroom recordings pick up neighbours, chairs, and the teacher. Instead of
+// scoring the whole transcript, find the stretch of syllables that best matches
+// the question and score only that, so 你好 heard inside 旱上料刷你好料刺尹料 is
+// scored as 你好. A window shorter than the question is still normalised against
+// the expected length, so leaving out a syllable stays a real deduction.
+function extractBestWindow(expected, heard) {
+  if (!expected.length || !heard.length) return null;
+  const best = { ...alignUnits(expected, heard), start: 0, end: heard.length };
+  if (heard.length <= expected.length) return best;
+  const minimumLength = Math.max(1, expected.length - 1);
+  const maximumLength = Math.min(heard.length, expected.length + 2);
+  for (let length = minimumLength; length <= maximumLength; length += 1) {
+    for (let start = 0; start + length <= heard.length; start += 1) {
+      if (start === 0 && length === heard.length) continue;
+      const window = alignUnits(expected, heard.slice(start, start + length));
+      if (window.score > best.score) {
+        best.score = window.score;
+        best.alignment = window.alignment;
+        best.start = start;
+        best.end = start + length;
+      }
+    }
+  }
+  return best;
+}
+
 function scoreCantonesePronunciation(expectedJyutping, heardJyutping) {
   const expected = Array.isArray(expectedJyutping) ? expectedJyutping : jyutpingSyllables(expectedJyutping);
   const heard = Array.isArray(heardJyutping) ? heardJyutping : jyutpingSyllables(heardJyutping);
   if (!expected.length || !heard.length) return { score: null, expected, heard, alignment: [] };
-  return { ...alignJyutping(expected, heard), expected, heard };
+  return { ...alignUnits(unitsFromSyllables(expected), unitsFromSyllables(heard)), expected, heard };
 }
 
 function classifyAccuracy(score) {
-  const passScore = numericEnv('AZURE_PRONUNCIATION_PASS_SCORE', 85);
-  const retryScore = Math.min(passScore, numericEnv('AZURE_PRONUNCIATION_RETRY_SCORE', 65));
+  const passScore = numericEnv('AZURE_PRONUNCIATION_PASS_SCORE', 70);
+  const retryScore = Math.min(passScore, numericEnv('AZURE_PRONUNCIATION_RETRY_SCORE', 70));
   if (!Number.isFinite(score)) return { status: 'inconclusive', correct: false, passScore, retryScore };
   if (score >= passScore) return { status: 'pass', correct: true, passScore, retryScore };
   if (score < retryScore) return { status: 'retry', correct: false, passScore, retryScore };
@@ -203,9 +299,12 @@ function strictScoreFromDetails({ accuracyScore, completenessScore, details }) {
   const lowerBandScore = sortedPhonemeScores.length
     ? sortedPhonemeScores.slice(0, lowerBandCount).reduce((sum, score) => sum + score, 0) / lowerBandCount
     : null;
+  // The weakest third still pulls the score down so one bad sound stays visible,
+  // but at a weight that no longer sinks an otherwise accurate reading.
+  const lowerBandWeight = ratioEnv('AZURE_PRONUNCIATION_LOWER_BAND_WEIGHT', 0.15);
   const phonemeSimilarityScore = phonemeMeanScore === null || lowerBandScore === null
     ? null
-    : phonemeMeanScore * 0.7 + lowerBandScore * 0.3;
+    : phonemeMeanScore * (1 - lowerBandWeight) + lowerBandScore * lowerBandWeight;
   const wordMeanScore = wordScores.length
     ? wordScores.reduce((sum, score) => sum + score, 0) / wordScores.length
     : null;
@@ -217,7 +316,7 @@ function strictScoreFromDetails({ accuracyScore, completenessScore, details }) {
     score: strictScore === null ? null : Math.round(strictScore * 10) / 10,
     words,
     diagnostics: {
-      algorithm: 'azure-scripted-phoneme-evidence-v4',
+      algorithm: 'azure-scripted-phoneme-evidence-v5',
       fullTextAccuracyScore: finiteScore(accuracyScore),
       completenessScore: finiteScore(completenessScore),
       weakestWordScore,
@@ -225,6 +324,7 @@ function strictScoreFromDetails({ accuracyScore, completenessScore, details }) {
       wordMeanScore,
       phonemeMeanScore,
       lowerBandScore,
+      lowerBandWeight,
       phonemeSimilarityScore: finiteScore(phonemeSimilarityScore),
       phonemeScores,
       hasPhonemeEvidence: phonemeScores.length > 0,
@@ -234,21 +334,29 @@ function strictScoreFromDetails({ accuracyScore, completenessScore, details }) {
 
 function compareRecognizedContent(recognition, expectedText, expectedJyutping = '') {
   const expected = normalizeText(expectedText);
-  const expectedPronunciation = jyutpingSyllables(expectedJyutping);
-  const expectedSyllables = expectedPronunciation.length ? expectedPronunciation : jyutpingForText(expected);
+  const expectedList = expectedUnits(expectedText, expectedJyutping);
+  const maximumHeardUnits = Math.max(8, numericEnv('AZURE_CONTENT_MAX_HEARD_UNITS', 48));
   const candidates = (Array.isArray(recognition?.candidates) && recognition.candidates.length
     ? recognition.candidates
     : [{ transcript: recognition?.transcript || '', confidence: recognition?.confidence }])
     .map(candidate => {
       const transcript = normalizeText(candidate.transcript);
-      const heardSyllables = jyutpingForText(transcript);
-      const comparison = scoreCantonesePronunciation(expectedSyllables, heardSyllables);
+      const heardUnits = jyutpingUnits(transcript).slice(0, maximumHeardUnits);
+      const window = extractBestWindow(expectedList, heardUnits);
+      const extracted = window ? heardUnits.slice(window.start, window.end) : [];
+      const trimmed = !!window && (window.start > 0 || window.end < heardUnits.length);
       return {
         transcript,
         confidence: finiteScore(candidate.confidence),
-        jyutping: heardSyllables.join(' '),
-        pronunciationScore: comparison.score,
-        alignment: comparison.alignment,
+        jyutping: primaryReadings(heardUnits).join(' '),
+        containsExpected: !!expected && !!transcript && transcript.includes(expected),
+        extractedText: unitsText(extracted),
+        extractedJyutping: primaryReadings(extracted).join(' '),
+        extractedFrom: trimmed
+          ? { start: window.start, end: window.end, heardUnits: heardUnits.length }
+          : null,
+        pronunciationScore: window ? window.score : null,
+        alignment: window ? window.alignment : [],
       };
     });
   const top = candidates[0];
@@ -256,40 +364,62 @@ function compareRecognizedContent(recognition, expectedText, expectedJyutping = 
     expected,
     transcript: top?.transcript || '',
     confidence: top?.confidence ?? null,
-    expectedJyutping: expectedSyllables.join(' '),
+    expectedJyutping: primaryReadings(expectedList).join(' '),
     transcriptJyutping: top?.jyutping || '',
+    extractedText: top?.extractedText || '',
+    extractedJyutping: top?.extractedJyutping || '',
+    extractedFrom: top?.extractedFrom || null,
     pronunciationScore: top?.pronunciationScore ?? null,
     alignment: top?.alignment || [],
     candidates,
   };
 
-  if (!expectedSyllables.length) {
+  if (!expectedList.length) {
     return { status: 'inconclusive', ...diagnostics, message: '題目的粵拼資料不完整，今次不評分。' };
   }
   if (!top?.transcript || !Number.isFinite(top.pronunciationScore)) {
     return { status: 'inconclusive', ...diagnostics, message: '未能清楚辨識讀音，請再錄一次。' };
   }
-  const minimumConfidence = numericEnv('AZURE_CONTENT_MIN_SCORING_CONFIDENCE', 0.35);
+  // A transcript that literally contains the question is direct evidence the
+  // child said the right words, whatever else the microphone picked up.
+  if (top.containsExpected) {
+    return {
+      status: 'matched',
+      ...diagnostics,
+      message: top.extractedFrom ? `錄音夾雜其他聲音，系統只抽取「${expectedText}」評分。` : '',
+    };
+  }
+  const closeEnoughScore = numericEnv('AZURE_CONTENT_CLOSE_ENOUGH_SCORE', 95);
+  const incomplete = !!top.extractedText
+    && top.extractedText.length < expected.length
+    && expected.includes(top.extractedText);
+  const minimumConfidence = ratioEnv('AZURE_CONTENT_MIN_SCORING_CONFIDENCE', 0.2);
   if (top.confidence !== null && top.confidence < minimumConfidence) {
     return { status: 'inconclusive', ...diagnostics, message: '辨識信心太低，今次不評分，請在較近咪高峰的位置再錄。' };
   }
-  if (top.transcript === expected) return { status: 'matched', ...diagnostics };
 
-  const confidenceThreshold = numericEnv('AZURE_CONTENT_MIN_CONFIDENCE', 0.55);
+  const confidenceThreshold = ratioEnv('AZURE_CONTENT_MIN_CONFIDENCE', 0.7);
   const wrongThreshold = numericEnv('AZURE_CONTENT_WRONG_SCORE', 65);
   if (top.confidence !== null && top.confidence >= confidenceThreshold
       && top.pronunciationScore < wrongThreshold) {
     return {
       status: 'wrong-content',
       ...diagnostics,
-      message: `系統聽到「${top.transcript}」，與當前題目「${expectedText}」的讀音不同。`,
+      message: incomplete
+        ? `系統只聽到「${top.extractedText}」，未讀完「${expectedText}」，請完整再讀一次。`
+        : `系統聽到「${top.extractedText || top.transcript}」，與當前題目「${expectedText}」的讀音不同。`,
     };
   }
 
+  const heardLabel = top.extractedText || top.transcript;
   return {
     status: 'phonetic-near',
     ...diagnostics,
-    message: `系統聽到「${top.transcript}」，已按它與「${expectedText}」的粵拼差異扣分。`,
+    message: incomplete
+      ? `系統只聽到「${top.extractedText}」，未讀完「${expectedText}」，請完整再讀一次。`
+      : top.pronunciationScore >= closeEnoughScore
+        ? (top.extractedFrom ? `錄音夾雜其他聲音，系統只抽取「${heardLabel}」評分。` : '')
+        : `系統從錄音抽取到「${heardLabel}」，已按它與「${expectedText}」的粵拼差異扣分。`,
   };
 }
 
@@ -299,15 +429,19 @@ function combinePronunciationEvidence(assessmentScore, contentCheck) {
   if (acousticScore === null || recognizedPronunciationScore === null) {
     return { score: null, acousticScore, recognizedPronunciationScore, maximumScore: null };
   }
-  // zh-HK returns an accuracy score for each expected phoneme, but it does not
-  // expose which phoneme was actually spoken. Independent reference-free STT
-  // supplies that missing evidence. The result may never exceed either signal.
+  // zh-HK returns an accuracy score for each expected phoneme but never reveals
+  // which phoneme was actually spoken, so the recognised Jyutping still has to
+  // weigh in. The two are blended rather than reduced to their minimum: taking
+  // the minimum let a single noisy signal fail an otherwise accurate reading.
   const maximumScore = Math.min(100, Math.max(0, numericEnv('AZURE_PRONUNCIATION_MAX_SCORE', 98)));
-  const score = Math.min(acousticScore, recognizedPronunciationScore, maximumScore);
+  const acousticWeight = ratioEnv('AZURE_PRONUNCIATION_ACOUSTIC_WEIGHT', 0.6);
+  const blended = acousticScore * acousticWeight
+    + recognizedPronunciationScore * (1 - acousticWeight);
   return {
-    score: Math.round(score * 10) / 10,
+    score: Math.round(Math.min(blended, maximumScore) * 10) / 10,
     acousticScore,
     recognizedPronunciationScore,
+    acousticWeight,
     maximumScore,
   };
 }
@@ -321,12 +455,26 @@ function acquireAzureSlot() {
     activeAzureRequests += 1;
     return Promise.resolve();
   }
-  return new Promise(resolve => azureWaiters.push(resolve));
+  // Without this, a whole class queued behind one slot waits indefinitely and
+  // every recording looks frozen. A clear "try again" beats an endless spinner.
+  const queueTimeoutMs = Math.max(1000, numericEnv('AZURE_SPEECH_QUEUE_TIMEOUT_MS', 25000));
+  return new Promise((resolve, reject) => {
+    const waiter = { resolve: null };
+    const timer = setTimeout(() => {
+      const index = azureWaiters.indexOf(waiter);
+      if (index >= 0) azureWaiters.splice(index, 1);
+      const error = new Error('同一時間評分的同學太多，請等幾秒再按錄音。');
+      error.statusCode = 503;
+      reject(error);
+    }, queueTimeoutMs);
+    waiter.resolve = () => { clearTimeout(timer); resolve(); };
+    azureWaiters.push(waiter);
+  });
 }
 
 function releaseAzureSlot() {
   const next = azureWaiters.shift();
-  if (next) next();
+  if (next) next.resolve();
   else activeAzureRequests = Math.max(0, activeAzureRequests - 1);
 }
 
@@ -392,20 +540,99 @@ function detailedRecognition(azure, result) {
   return { ...fallback, candidates: fallback.transcript ? [fallback] : [] };
 }
 
-function recognizeContent(audio, sdkOverride = null) {
-  if (!audio?.length) return Promise.reject(new Error('錄音內容是空的，請重新錄音。'));
-  if (!isConfigured()) {
-    const error = new Error('Azure 粵語語音辨識尚未設定。');
-    error.statusCode = 501;
-    return Promise.reject(error);
-  }
-  const azure = sdkOverride || sdk();
+// Trailing silence is what usually keeps recognizeOnceAsync waiting after a
+// child has stopped speaking, so the segmentation timeouts are shortened.
+function applySpeechTuning(azure, speechConfig) {
+  if (typeof speechConfig?.setProperty !== 'function') return;
+  const ids = azure.PropertyId || {};
+  const set = (id, value) => {
+    if (id === undefined || id === null) return;
+    try { speechConfig.setProperty(id, String(value)); } catch {}
+  };
+  set(ids.Speech_SegmentationSilenceTimeoutMs, numericEnv('AZURE_SPEECH_SEGMENTATION_SILENCE_MS', 350));
+  set(ids.SpeechServiceConnection_EndSilenceTimeoutMs, numericEnv('AZURE_SPEECH_END_SILENCE_MS', 350));
+  set(ids.SpeechServiceConnection_InitialSilenceTimeoutMs, numericEnv('AZURE_SPEECH_INITIAL_SILENCE_MS', 4000));
+}
+
+function openConnectionEarly(azure, recognizer) {
+  try { azure.Connection?.fromRecognizer?.(recognizer)?.openConnection?.(); }
+  catch {}
+}
+
+function buildRecognizer(azure, audio, referenceText) {
   const { key, region } = credentials();
   const speechConfig = azure.SpeechConfig.fromSubscription(key, region);
   speechConfig.speechRecognitionLanguage = 'zh-HK';
   speechConfig.outputFormat = azure.OutputFormat.Detailed;
+  applySpeechTuning(azure, speechConfig);
   const audioConfig = azure.AudioConfig.fromWavFileInput(audio, 'recording.wav');
   const recognizer = new azure.SpeechRecognizer(speechConfig, audioConfig);
+  const reference = String(referenceText || '').trim();
+  if (reference) {
+    // Miscue detection penalises insertions, and in a classroom the insertions
+    // are the neighbours, not the child. It stays off so the phoneme scores
+    // describe how the target words were said. Skipped or extra syllables are
+    // still caught by the Jyutping window, which normalises every window
+    // against the full length of the question.
+    const assessmentConfig = new azure.PronunciationAssessmentConfig(
+      reference,
+      azure.PronunciationAssessmentGradingSystem.HundredMark,
+      azure.PronunciationAssessmentGranularity.Phoneme,
+      booleanEnv('AZURE_PRONUNCIATION_ENABLE_MISCUE', false),
+    );
+    assessmentConfig.applyTo(recognizer);
+  }
+  openConnectionEarly(azure, recognizer);
+  return recognizer;
+}
+
+const NO_MATCH_ASSESSMENT = {
+  status: 'inconclusive', correct: false, score: null,
+  transcript: '', provider: 'azure-scripted-phoneme-zh-HK-v5', words: [],
+};
+
+function assessmentFromResult(azure, result) {
+  const assessment = azure.PronunciationAssessmentResult.fromResult(result);
+  const accuracyScore = finiteScore(assessment.accuracyScore);
+  const completenessScore = finiteScore(assessment.completenessScore);
+  const details = assessment.detailResult || {};
+  const strict = strictScoreFromDetails({ accuracyScore, completenessScore, details });
+  const classification = strict.diagnostics.hasPhonemeEvidence
+    ? classifyAccuracy(strict.score)
+    : { ...classifyAccuracy(Number.NaN), message: '未取得音素層級分數，今次結果不會當作通過。' };
+  return {
+    ...classification,
+    score: strict.score,
+    accuracyScore,
+    pronunciationScore: finiteScore(assessment.pronunciationScore),
+    completenessScore,
+    fluencyScore: finiteScore(assessment.fluencyScore),
+    transcript: result.text || '',
+    provider: 'azure-scripted-phoneme-zh-HK-v5',
+    words: strict.words,
+    diagnostics: strict.diagnostics,
+  };
+}
+
+function requireAudioAndConfig(audio) {
+  if (!audio?.length) {
+    const error = new Error('錄音內容是空的，請重新錄音。');
+    error.statusCode = 400;
+    return error;
+  }
+  if (!isConfigured()) {
+    const error = new Error('Azure 粵語語音辨識尚未設定。');
+    error.statusCode = 501;
+    return error;
+  }
+  return null;
+}
+
+function recognizeContent(audio, sdkOverride = null) {
+  const invalid = requireAudioAndConfig(audio);
+  if (invalid) return Promise.reject(invalid);
+  const azure = sdkOverride || sdk();
+  const recognizer = buildRecognizer(azure, audio, '');
   return recognizeOnce(recognizer, result => {
     if (result.reason === azure.ResultReason.NoMatch) return { transcript: '', confidence: null, candidates: [] };
     if (result.reason !== azure.ResultReason.RecognizedSpeech) {
@@ -416,59 +643,43 @@ function recognizeContent(audio, sdkOverride = null) {
 }
 
 function assessPronunciation(audio, referenceText, sdkOverride = null) {
-  if (!audio?.length) return Promise.reject(new Error('錄音內容是空的，請重新錄音。'));
+  const invalid = requireAudioAndConfig(audio);
+  if (invalid) return Promise.reject(invalid);
   if (!String(referenceText || '').trim()) return Promise.reject(new Error('缺少發音評估參考文字。'));
-  if (!isConfigured()) {
-    const error = new Error('Azure 粵語發音評估尚未設定。');
-    error.statusCode = 501;
-    return Promise.reject(error);
-  }
-
   const azure = sdkOverride || sdk();
-  const { key, region } = credentials();
-  const speechConfig = azure.SpeechConfig.fromSubscription(key, region);
-  speechConfig.speechRecognitionLanguage = 'zh-HK';
-  speechConfig.outputFormat = azure.OutputFormat.Detailed;
-  const audioConfig = azure.AudioConfig.fromWavFileInput(audio, 'recording.wav');
-  const recognizer = new azure.SpeechRecognizer(speechConfig, audioConfig);
-  const assessmentConfig = new azure.PronunciationAssessmentConfig(
-    String(referenceText).trim(),
-    azure.PronunciationAssessmentGradingSystem.HundredMark,
-    azure.PronunciationAssessmentGranularity.Phoneme,
-    true,
-  );
-  assessmentConfig.applyTo(recognizer);
-
+  const recognizer = buildRecognizer(azure, audio, referenceText);
   return recognizeOnce(recognizer, result => {
-    if (result.reason === azure.ResultReason.NoMatch) {
-      return {
-        status: 'inconclusive', correct: false, score: null,
-        transcript: '', provider: 'azure-scripted-phoneme-zh-HK-v4', words: [],
-      };
-    }
+    if (result.reason === azure.ResultReason.NoMatch) return { ...NO_MATCH_ASSESSMENT };
     if (result.reason !== azure.ResultReason.RecognizedSpeech) {
       throw cancellationError(azure, result, 'Azure 發音評估失敗。');
     }
+    return assessmentFromResult(azure, result);
+  });
+}
 
-    const assessment = azure.PronunciationAssessmentResult.fromResult(result);
-    const accuracyScore = finiteScore(assessment.accuracyScore);
-    const completenessScore = finiteScore(assessment.completenessScore);
-    const details = assessment.detailResult || {};
-    const strict = strictScoreFromDetails({ accuracyScore, completenessScore, details });
-    const classification = strict.diagnostics.hasPhonemeEvidence
-      ? classifyAccuracy(strict.score)
-      : { ...classifyAccuracy(Number.NaN), message: '未取得音素層級分數，今次結果不會當作通過。' };
+// One Azure round trip returns both the recognised text and the phoneme scores:
+// enabling pronunciation assessment adds scoring to a recognition, it does not
+// replace it. Two separate calls doubled both the wait and the quota spent per
+// submission, which is what made a whole classroom queue up.
+function recognizeAndAssess(audio, referenceText, sdkOverride = null) {
+  const invalid = requireAudioAndConfig(audio);
+  if (invalid) return Promise.reject(invalid);
+  if (!String(referenceText || '').trim()) return Promise.reject(new Error('缺少發音評估參考文字。'));
+  const azure = sdkOverride || sdk();
+  const recognizer = buildRecognizer(azure, audio, referenceText);
+  return recognizeOnce(recognizer, result => {
+    if (result.reason === azure.ResultReason.NoMatch) {
+      return {
+        recognition: { transcript: '', confidence: null, candidates: [] },
+        assessment: { ...NO_MATCH_ASSESSMENT },
+      };
+    }
+    if (result.reason !== azure.ResultReason.RecognizedSpeech) {
+      throw cancellationError(azure, result, 'Azure 粵語發音評估失敗。');
+    }
     return {
-      ...classification,
-      score: strict.score,
-      accuracyScore,
-      pronunciationScore: finiteScore(assessment.pronunciationScore),
-      completenessScore,
-      fluencyScore: finiteScore(assessment.fluencyScore),
-      transcript: result.text || '',
-      provider: 'azure-scripted-phoneme-zh-HK-v4',
-      words: strict.words,
-      diagnostics: strict.diagnostics,
+      recognition: detailedRecognition(azure, result),
+      assessment: assessmentFromResult(azure, result),
     };
   });
 }
@@ -483,11 +694,20 @@ async function evaluatePronunciation(
   const queuedAt = Date.now();
   return withAzureSlot(async () => {
     const queueWaitMs = Date.now() - queuedAt;
-    const contentStartedAt = Date.now();
-    const recognition = await recognizeContent(audio, sdkOverride);
-    const contentRecognitionMs = Date.now() - contentStartedAt;
+    const independentRecognition = booleanEnv('AZURE_SPEECH_INDEPENDENT_RECOGNITION', false);
+    const recognitionStartedAt = Date.now();
+    let recognition;
+    let assessment = null;
+    if (independentRecognition) {
+      recognition = await recognizeContent(audio, sdkOverride);
+    } else {
+      const combined = await recognizeAndAssess(audio, referenceText, sdkOverride);
+      recognition = combined.recognition;
+      assessment = combined.assessment;
+    }
+    const contentRecognitionMs = Date.now() - recognitionStartedAt;
     const contentCheck = compareRecognizedContent(recognition, referenceText, expectedJyutping);
-    const provider = 'azure-current-item-cantonese-phonetic-v4';
+    const provider = 'azure-current-item-cantonese-phonetic-v5';
     const reference = {
       assignmentId: referenceContext.assignmentId || null,
       itemId: referenceContext.itemId || null,
@@ -495,30 +715,32 @@ async function evaluatePronunciation(
       jyutping: contentCheck.expectedJyutping,
     };
 
-    if (contentCheck.status === 'wrong-content') {
-      const classification = classifyAccuracy(contentCheck.pronunciationScore);
+    if (contentCheck.status === 'wrong-content' || contentCheck.status === 'inconclusive') {
+      const wrong = contentCheck.status === 'wrong-content';
+      const classification = wrong
+        ? classifyAccuracy(contentCheck.pronunciationScore)
+        : { status: 'inconclusive', correct: false };
       return {
         ...classification,
-        score: contentCheck.pronunciationScore,
+        score: wrong ? contentCheck.pronunciationScore : null,
         transcript: recognition.transcript, provider, contentCheck,
-        diagnostics: { algorithm: 'current-item-phonetic-comparison-v4', reference, contentCheck },
-        timing: { queueWaitMs, contentRecognitionMs, assessmentMs: 0 },
-        message: contentCheck.message,
-      };
-    }
-    if (contentCheck.status === 'inconclusive') {
-      return {
-        status: 'inconclusive', correct: false, score: null,
-        transcript: recognition.transcript, provider, contentCheck,
-        diagnostics: { algorithm: 'current-item-phonetic-comparison-v4', reference, contentCheck },
-        timing: { queueWaitMs, contentRecognitionMs, assessmentMs: 0 },
+        diagnostics: {
+          algorithm: 'current-item-phonetic-comparison-v5',
+          reference,
+          contentCheck,
+          unusedAcousticScore: assessment?.score ?? null,
+        },
+        timing: { queueWaitMs, contentRecognitionMs, assessmentMs: 0, azureRequests: 1 },
         message: contentCheck.message,
       };
     }
 
-    const assessmentStartedAt = Date.now();
-    const assessment = await assessPronunciation(audio, referenceText, sdkOverride);
-    const assessmentMs = Date.now() - assessmentStartedAt;
+    let assessmentMs = 0;
+    if (!assessment) {
+      const assessmentStartedAt = Date.now();
+      assessment = await assessPronunciation(audio, referenceText, sdkOverride);
+      assessmentMs = Date.now() - assessmentStartedAt;
+    }
     const combined = combinePronunciationEvidence(assessment.score, contentCheck);
     const classification = classifyAccuracy(combined.score);
     return {
@@ -530,14 +752,19 @@ async function evaluatePronunciation(
       contentCheck,
       diagnostics: {
         ...assessment.diagnostics,
-        algorithm: 'azure-current-item-cantonese-phonetic-v4',
+        algorithm: 'azure-current-item-cantonese-phonetic-v5',
         reference,
         contentCheck,
         combined,
         assessmentTranscript: assessment.transcript,
       },
-      timing: { queueWaitMs, contentRecognitionMs, assessmentMs },
-      message: contentCheck.status === 'phonetic-near' ? contentCheck.message : assessment.message,
+      timing: {
+        queueWaitMs,
+        contentRecognitionMs,
+        assessmentMs,
+        azureRequests: assessmentMs ? 2 : 1,
+      },
+      message: contentCheck.message || assessment.message,
     };
   });
 }
@@ -546,10 +773,14 @@ module.exports = {
   isConfigured,
   classifyAccuracy,
   scoreCantonesePronunciation,
+  extractBestWindow,
+  expectedUnits,
+  jyutpingUnits,
   strictScoreFromDetails,
   compareRecognizedContent,
   combinePronunciationEvidence,
   recognizeContent,
   assessPronunciation,
+  recognizeAndAssess,
   evaluatePronunciation,
 };

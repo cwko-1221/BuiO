@@ -1,5 +1,16 @@
 'use strict';
 
+function numericEnv(name, fallback) {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function booleanEnv(name, fallback) {
+  const raw = String(process.env[name] ?? '').trim().toLowerCase();
+  if (!raw) return fallback;
+  return !['0', 'false', 'no', 'off'].includes(raw);
+}
+
 function percentile(sorted, ratio) {
   if (!sorted.length) return 0;
   const index = Math.min(sorted.length - 1, Math.max(0, Math.round((sorted.length - 1) * ratio)));
@@ -86,13 +97,27 @@ function analyzeWavQuality(buffer) {
     clippedRatio: Number(clippedRatio.toFixed(4)),
   };
 
-  if (durationMs < 300) return { ok: false, reason: 'too-short', message: '錄音太短，請按下錄音後完整讀出答案。', metrics };
-  if (voiceRms < 0.01) return { ok: false, reason: 'too-quiet', message: '收音太小聲，請把 iPad 或咪高峰移近一點再試。', metrics };
-  if (clippedRatio > 0.02) return { ok: false, reason: 'clipping', message: '聲音過大而失真，請稍為遠離咪高峰再試。', metrics };
-  if (durationMs >= 800 && noiseRms > 0.025 && snrDb < 5) {
+  const noisy = durationMs >= 800 && noiseRms > numericEnv('CHINESE_AUDIO_NOISE_RMS', 0.025)
+    && snrDb < numericEnv('CHINESE_AUDIO_MIN_SNR_DB', 5);
+
+  if (durationMs < numericEnv('CHINESE_AUDIO_MIN_MS', 300)) {
+    return { ok: false, reason: 'too-short', message: '錄音太短，請按下錄音後完整讀出答案。', metrics };
+  }
+  if (voiceRms < numericEnv('CHINESE_AUDIO_MIN_VOICE_RMS', 0.006)) {
+    return { ok: false, reason: 'too-quiet', message: '收音太小聲，請把 iPad 或咪高峰移近一點再試。', metrics };
+  }
+  if (clippedRatio > numericEnv('CHINESE_AUDIO_MAX_CLIPPED_RATIO', 0.05)) {
+    return { ok: false, reason: 'clipping', message: '聲音過大而失真，請稍為遠離咪高峰再試。', metrics };
+  }
+  // Classroom noise no longer blocks scoring. The scorer now extracts the
+  // stretch of syllables that matches the question, so a noisy recording that
+  // still contains the answer can be marked. The metric is reported so a
+  // teacher can see why a score was low, and the old hard gate is available
+  // through CHINESE_AUDIO_NOISE_GATE for a quiet room.
+  if (noisy && booleanEnv('CHINESE_AUDIO_NOISE_GATE', false)) {
     return { ok: false, reason: 'too-noisy', message: '環境聲音太嘈，未能公平評分；請靠近咪高峰再試。', metrics };
   }
-  return { ok: true, reason: 'ok', message: '', metrics };
+  return { ok: true, reason: 'ok', warning: noisy ? 'noisy' : '', message: '', metrics };
 }
 
 module.exports = { decodePcm16Wav, analyzeWavQuality };

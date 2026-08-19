@@ -151,7 +151,7 @@
 
     // ------------------- recording state (refs) -------------------
     const rec = {
-      pcm: null, requested: false, stopping: false,
+      pcm: null, requested: false, stopping: false, scoringTicker: null,
       autoStopTimer: null, ttsAudio: null, ttsUrl: null,
     };
 
@@ -167,6 +167,25 @@
       btn.classList.toggle('recording', state.recording);
       btn.setAttribute('aria-pressed', String(state.recording));
       btn.textContent = state.recording ? '🔴  正在錄音・按一下送出' : '🎙️  開始錄音';
+    }
+
+    function startScoringTicker() {
+      stopScoringTicker();
+      const startedAt = Date.now();
+      const paint = () => {
+        const btn = document.querySelector('.record-btn');
+        if (!btn) return;
+        const seconds = Math.round((Date.now() - startedAt) / 1000);
+        btn.textContent = seconds < 1 ? '⏳  正在評分…' : `⏳  正在評分… ${seconds} 秒`;
+      };
+      paint();
+      rec.scoringTicker = setInterval(paint, 1000);
+    }
+
+    function stopScoringTicker() {
+      if (!rec.scoringTicker) return;
+      clearInterval(rec.scoringTicker);
+      rec.scoringTicker = null;
     }
 
     function clearAutoStopTimer() {
@@ -270,8 +289,8 @@
           audio: {
             channelCount: { ideal: 1 },
             echoCancellation: { ideal: true },
-            noiseSuppression: { ideal: false },
-            autoGainControl: { ideal: false },
+            noiseSuppression: { ideal: true },
+            autoGainControl: { ideal: true },
           },
         });
         if (!rec.requested) { stream.getTracks().forEach(t => t.stop()); return; }
@@ -341,6 +360,7 @@
       const itemId = it.id;
       const phase = state.phase;
       state.submitting = true; render();
+      startScoringTicker();
       try {
         uploadRecording(storageBlob, storageMimeType, itemId, phase).then(url => {
           if (!url) return;
@@ -356,6 +376,10 @@
         if (res.status === 501) {
           state.pronunciationAvailable = false;
           state.message = `ℹ️ ${data.message || 'Azure 粵語發音評估未設定，請使用下方按鈕自我評估。'}`;
+          return;
+        }
+        if (res.status === 503) {
+          state.message = `⏳ ${data.message || '同一時間評分的同學太多，請等幾秒再按錄音。'}`;
           return;
         }
         if (!res.ok) {
@@ -379,13 +403,16 @@
               assessmentAudioQuality: storedQuality, assessmentPronunciationProvider: data.provider || '',
             };
         await patchAttemptItem(resultPatch, itemId);
+        // A pass stays a single short line. Only a retry explains itself, so the
+        // child is told what the scorer actually heard.
         state.message = data.correct
           ? `✅ 發音標準度：${scoreTxt}`
-          : `❌ 發音標準度：${scoreTxt}，請再試一次。`;
+          : `❌ 發音標準度：${scoreTxt}，請再試一次。${data.message ? `　${data.message}` : ''}`;
       } catch (e) {
         console.warn('pronunciation request failed:', e.message);
         state.message = '❌ 發音標準度：未能評分，請再試一次。';
       } finally {
+        stopScoringTicker();
         state.submitting = false; render();
       }
     }
