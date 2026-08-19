@@ -21,20 +21,26 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the picture is split by one straight horizontal line 38 percent of the way down from the top edge:
+MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
 
-  ABOVE the line, the whole width is back wall. Nothing else.
-  BELOW the line, the whole width is floor. Nothing else.
+  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
+              spanning the full width.
+  FLOOR       everything below that line. It is a trapezoid, wider at the front than
+              at the back: where it meets the back wall it spans the middle 70 percent
+              of the image width, and at the bottom edge of the image it spans the
+              middle 94 percent. Its left and right edges are straight lines running
+              from one to the other.
+  SIDE WALLS  the two wedges left over between the floor and the left and right edges
+              of the image. They run from the back wall all the way down to the bottom
+              corners and never overlap the floor.
 
-The floor is a rectangle. It touches the left edge of the image, the right edge of the image and the bottom edge of the image, and it is exactly as wide at the back, where it meets the wall, as it is at the front. It does not taper, narrow or converge toward the back, and no part of it is hidden or cut off - the entire floor is visible.
-
-There are NO side walls, no corner walls, no walls at the left or right, and nothing standing at the edges of the floor. Only the one flat back wall, seen straight on, parallel to the picture. A game grid is laid over this floor and a piece dropped near an edge has to land on floor, not on a wall.
+The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
 The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
 
 So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
 
-Nothing on the floor recedes: no perspective, no vanishing point, no lines angling inward. It is an even plane of one material. Give it depth with a gentle darkening toward the back wall instead.
+The floor's own edges converge, because it is a trapezoid - that is the only perspective it needs. Do not draw further perspective lines across the middle of it. Give it depth with a gentle darkening toward the back wall.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
@@ -52,20 +58,26 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the picture is split by one straight horizontal line 38 percent of the way down from the top edge:
+MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
 
-  ABOVE the line, the whole width is back wall. Nothing else.
-  BELOW the line, the whole width is floor. Nothing else.
+  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
+              spanning the full width.
+  FLOOR       everything below that line. It is a trapezoid, wider at the front than
+              at the back: where it meets the back wall it spans the middle 70 percent
+              of the image width, and at the bottom edge of the image it spans the
+              middle 94 percent. Its left and right edges are straight lines running
+              from one to the other.
+  SIDE WALLS  the two wedges left over between the floor and the left and right edges
+              of the image. They run from the back wall all the way down to the bottom
+              corners and never overlap the floor.
 
-The floor is a rectangle. It touches the left edge of the image, the right edge of the image and the bottom edge of the image, and it is exactly as wide at the back, where it meets the wall, as it is at the front. It does not taper, narrow or converge toward the back, and no part of it is hidden or cut off - the entire floor is visible.
-
-There are NO side walls, no corner walls, no walls at the left or right, and nothing standing at the edges of the floor. Only the one flat back wall, seen straight on, parallel to the picture. A game grid is laid over this floor and a piece dropped near an edge has to land on floor, not on a wall.
+The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
 The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
 
 So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
 
-Nothing on the floor recedes: no perspective, no vanishing point, no lines angling inward. It is an even plane of one material. Give it depth with a gentle darkening toward the back wall instead.
+The floor's own edges converge, because it is a trapezoid - that is the only perspective it needs. Do not draw further perspective lines across the middle of it. Give it depth with a gentle darkening toward the back wall.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
@@ -83,20 +95,26 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the picture is split by one straight horizontal line 38 percent of the way down from the top edge:
+MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
 
-  ABOVE the line, the whole width is back wall. Nothing else.
-  BELOW the line, the whole width is floor. Nothing else.
+  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
+              spanning the full width.
+  FLOOR       everything below that line. It is a trapezoid, wider at the front than
+              at the back: where it meets the back wall it spans the middle 70 percent
+              of the image width, and at the bottom edge of the image it spans the
+              middle 94 percent. Its left and right edges are straight lines running
+              from one to the other.
+  SIDE WALLS  the two wedges left over between the floor and the left and right edges
+              of the image. They run from the back wall all the way down to the bottom
+              corners and never overlap the floor.
 
-The floor is a rectangle. It touches the left edge of the image, the right edge of the image and the bottom edge of the image, and it is exactly as wide at the back, where it meets the wall, as it is at the front. It does not taper, narrow or converge toward the back, and no part of it is hidden or cut off - the entire floor is visible.
-
-There are NO side walls, no corner walls, no walls at the left or right, and nothing standing at the edges of the floor. Only the one flat back wall, seen straight on, parallel to the picture. A game grid is laid over this floor and a piece dropped near an edge has to land on floor, not on a wall.
+The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
 The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
 
 So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
 
-Nothing on the floor recedes: no perspective, no vanishing point, no lines angling inward. It is an even plane of one material. Give it depth with a gentle darkening toward the back wall instead.
+The floor's own edges converge, because it is a trapezoid - that is the only perspective it needs. Do not draw further perspective lines across the middle of it. Give it depth with a gentle darkening toward the back wall.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
@@ -114,20 +132,26 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the picture is split by one straight horizontal line 38 percent of the way down from the top edge:
+MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
 
-  ABOVE the line, the whole width is back wall. Nothing else.
-  BELOW the line, the whole width is floor. Nothing else.
+  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
+              spanning the full width.
+  FLOOR       everything below that line. It is a trapezoid, wider at the front than
+              at the back: where it meets the back wall it spans the middle 70 percent
+              of the image width, and at the bottom edge of the image it spans the
+              middle 94 percent. Its left and right edges are straight lines running
+              from one to the other.
+  SIDE WALLS  the two wedges left over between the floor and the left and right edges
+              of the image. They run from the back wall all the way down to the bottom
+              corners and never overlap the floor.
 
-The floor is a rectangle. It touches the left edge of the image, the right edge of the image and the bottom edge of the image, and it is exactly as wide at the back, where it meets the wall, as it is at the front. It does not taper, narrow or converge toward the back, and no part of it is hidden or cut off - the entire floor is visible.
-
-There are NO side walls, no corner walls, no walls at the left or right, and nothing standing at the edges of the floor. Only the one flat back wall, seen straight on, parallel to the picture. A game grid is laid over this floor and a piece dropped near an edge has to land on floor, not on a wall.
+The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
 The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
 
 So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
 
-Nothing on the floor recedes: no perspective, no vanishing point, no lines angling inward. It is an even plane of one material. Give it depth with a gentle darkening toward the back wall instead.
+The floor's own edges converge, because it is a trapezoid - that is the only perspective it needs. Do not draw further perspective lines across the middle of it. Give it depth with a gentle darkening toward the back wall.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
@@ -145,20 +169,26 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the picture is split by one straight horizontal line 38 percent of the way down from the top edge:
+MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
 
-  ABOVE the line, the whole width is back wall. Nothing else.
-  BELOW the line, the whole width is floor. Nothing else.
+  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
+              spanning the full width.
+  FLOOR       everything below that line. It is a trapezoid, wider at the front than
+              at the back: where it meets the back wall it spans the middle 70 percent
+              of the image width, and at the bottom edge of the image it spans the
+              middle 94 percent. Its left and right edges are straight lines running
+              from one to the other.
+  SIDE WALLS  the two wedges left over between the floor and the left and right edges
+              of the image. They run from the back wall all the way down to the bottom
+              corners and never overlap the floor.
 
-The floor is a rectangle. It touches the left edge of the image, the right edge of the image and the bottom edge of the image, and it is exactly as wide at the back, where it meets the wall, as it is at the front. It does not taper, narrow or converge toward the back, and no part of it is hidden or cut off - the entire floor is visible.
-
-There are NO side walls, no corner walls, no walls at the left or right, and nothing standing at the edges of the floor. Only the one flat back wall, seen straight on, parallel to the picture. A game grid is laid over this floor and a piece dropped near an edge has to land on floor, not on a wall.
+The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
 The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
 
 So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
 
-Nothing on the floor recedes: no perspective, no vanishing point, no lines angling inward. It is an even plane of one material. Give it depth with a gentle darkening toward the back wall instead.
+The floor's own edges converge, because it is a trapezoid - that is the only perspective it needs. Do not draw further perspective lines across the middle of it. Give it depth with a gentle darkening toward the back wall.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
@@ -176,20 +206,26 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the picture is split by one straight horizontal line 38 percent of the way down from the top edge:
+MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
 
-  ABOVE the line, the whole width is back wall. Nothing else.
-  BELOW the line, the whole width is floor. Nothing else.
+  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
+              spanning the full width.
+  FLOOR       everything below that line. It is a trapezoid, wider at the front than
+              at the back: where it meets the back wall it spans the middle 70 percent
+              of the image width, and at the bottom edge of the image it spans the
+              middle 94 percent. Its left and right edges are straight lines running
+              from one to the other.
+  SIDE WALLS  the two wedges left over between the floor and the left and right edges
+              of the image. They run from the back wall all the way down to the bottom
+              corners and never overlap the floor.
 
-The floor is a rectangle. It touches the left edge of the image, the right edge of the image and the bottom edge of the image, and it is exactly as wide at the back, where it meets the wall, as it is at the front. It does not taper, narrow or converge toward the back, and no part of it is hidden or cut off - the entire floor is visible.
-
-There are NO side walls, no corner walls, no walls at the left or right, and nothing standing at the edges of the floor. Only the one flat back wall, seen straight on, parallel to the picture. A game grid is laid over this floor and a piece dropped near an edge has to land on floor, not on a wall.
+The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
 The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
 
 So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
 
-Nothing on the floor recedes: no perspective, no vanishing point, no lines angling inward. It is an even plane of one material. Give it depth with a gentle darkening toward the back wall instead.
+The floor's own edges converge, because it is a trapezoid - that is the only perspective it needs. Do not draw further perspective lines across the middle of it. Give it depth with a gentle darkening toward the back wall.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
@@ -207,20 +243,26 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the picture is split by one straight horizontal line 38 percent of the way down from the top edge:
+MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
 
-  ABOVE the line, the whole width is back wall. Nothing else.
-  BELOW the line, the whole width is floor. Nothing else.
+  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
+              spanning the full width.
+  FLOOR       everything below that line. It is a trapezoid, wider at the front than
+              at the back: where it meets the back wall it spans the middle 70 percent
+              of the image width, and at the bottom edge of the image it spans the
+              middle 94 percent. Its left and right edges are straight lines running
+              from one to the other.
+  SIDE WALLS  the two wedges left over between the floor and the left and right edges
+              of the image. They run from the back wall all the way down to the bottom
+              corners and never overlap the floor.
 
-The floor is a rectangle. It touches the left edge of the image, the right edge of the image and the bottom edge of the image, and it is exactly as wide at the back, where it meets the wall, as it is at the front. It does not taper, narrow or converge toward the back, and no part of it is hidden or cut off - the entire floor is visible.
-
-There are NO side walls, no corner walls, no walls at the left or right, and nothing standing at the edges of the floor. Only the one flat back wall, seen straight on, parallel to the picture. A game grid is laid over this floor and a piece dropped near an edge has to land on floor, not on a wall.
+The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
 The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
 
 So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
 
-Nothing on the floor recedes: no perspective, no vanishing point, no lines angling inward. It is an even plane of one material. Give it depth with a gentle darkening toward the back wall instead.
+The floor's own edges converge, because it is a trapezoid - that is the only perspective it needs. Do not draw further perspective lines across the middle of it. Give it depth with a gentle darkening toward the back wall.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
@@ -238,20 +280,26 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the picture is split by one straight horizontal line 38 percent of the way down from the top edge:
+MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
 
-  ABOVE the line, the whole width is back wall. Nothing else.
-  BELOW the line, the whole width is floor. Nothing else.
+  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
+              spanning the full width.
+  FLOOR       everything below that line. It is a trapezoid, wider at the front than
+              at the back: where it meets the back wall it spans the middle 70 percent
+              of the image width, and at the bottom edge of the image it spans the
+              middle 94 percent. Its left and right edges are straight lines running
+              from one to the other.
+  SIDE WALLS  the two wedges left over between the floor and the left and right edges
+              of the image. They run from the back wall all the way down to the bottom
+              corners and never overlap the floor.
 
-The floor is a rectangle. It touches the left edge of the image, the right edge of the image and the bottom edge of the image, and it is exactly as wide at the back, where it meets the wall, as it is at the front. It does not taper, narrow or converge toward the back, and no part of it is hidden or cut off - the entire floor is visible.
-
-There are NO side walls, no corner walls, no walls at the left or right, and nothing standing at the edges of the floor. Only the one flat back wall, seen straight on, parallel to the picture. A game grid is laid over this floor and a piece dropped near an edge has to land on floor, not on a wall.
+The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
 The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
 
 So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
 
-Nothing on the floor recedes: no perspective, no vanishing point, no lines angling inward. It is an even plane of one material. Give it depth with a gentle darkening toward the back wall instead.
+The floor's own edges converge, because it is a trapezoid - that is the only perspective it needs. Do not draw further perspective lines across the middle of it. Give it depth with a gentle darkening toward the back wall.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
@@ -269,20 +317,26 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the picture is split by one straight horizontal line 38 percent of the way down from the top edge:
+MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
 
-  ABOVE the line, the whole width is back wall. Nothing else.
-  BELOW the line, the whole width is floor. Nothing else.
+  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
+              spanning the full width.
+  FLOOR       everything below that line. It is a trapezoid, wider at the front than
+              at the back: where it meets the back wall it spans the middle 70 percent
+              of the image width, and at the bottom edge of the image it spans the
+              middle 94 percent. Its left and right edges are straight lines running
+              from one to the other.
+  SIDE WALLS  the two wedges left over between the floor and the left and right edges
+              of the image. They run from the back wall all the way down to the bottom
+              corners and never overlap the floor.
 
-The floor is a rectangle. It touches the left edge of the image, the right edge of the image and the bottom edge of the image, and it is exactly as wide at the back, where it meets the wall, as it is at the front. It does not taper, narrow or converge toward the back, and no part of it is hidden or cut off - the entire floor is visible.
-
-There are NO side walls, no corner walls, no walls at the left or right, and nothing standing at the edges of the floor. Only the one flat back wall, seen straight on, parallel to the picture. A game grid is laid over this floor and a piece dropped near an edge has to land on floor, not on a wall.
+The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
 The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
 
 So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
 
-Nothing on the floor recedes: no perspective, no vanishing point, no lines angling inward. It is an even plane of one material. Give it depth with a gentle darkening toward the back wall instead.
+The floor's own edges converge, because it is a trapezoid - that is the only perspective it needs. Do not draw further perspective lines across the middle of it. Give it depth with a gentle darkening toward the back wall.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
@@ -300,20 +354,26 @@ Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded form
 
 A single completely empty interior room, seen straight on from the front. Orthographic camera, slightly above eye level. The back wall is parallel to the picture plane and the floor is one flat plane in front of it.
 
-MOST IMPORTANT - the picture is split by one straight horizontal line 38 percent of the way down from the top edge:
+MOST IMPORTANT - the room is built from exactly three surfaces, and their proportions are fixed because a placement grid is laid over the floor and every cell has to land on floor rather than on a wall:
 
-  ABOVE the line, the whole width is back wall. Nothing else.
-  BELOW the line, the whole width is floor. Nothing else.
+  BACK WALL   fills the top 38 percent of the image, flat, parallel to the picture,
+              spanning the full width.
+  FLOOR       everything below that line. It is a trapezoid, wider at the front than
+              at the back: where it meets the back wall it spans the middle 70 percent
+              of the image width, and at the bottom edge of the image it spans the
+              middle 94 percent. Its left and right edges are straight lines running
+              from one to the other.
+  SIDE WALLS  the two wedges left over between the floor and the left and right edges
+              of the image. They run from the back wall all the way down to the bottom
+              corners and never overlap the floor.
 
-The floor is a rectangle. It touches the left edge of the image, the right edge of the image and the bottom edge of the image, and it is exactly as wide at the back, where it meets the wall, as it is at the front. It does not taper, narrow or converge toward the back, and no part of it is hidden or cut off - the entire floor is visible.
-
-There are NO side walls, no corner walls, no walls at the left or right, and nothing standing at the edges of the floor. Only the one flat back wall, seen straight on, parallel to the picture. A game grid is laid over this floor and a piece dropped near an edge has to land on floor, not on a wall.
+The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
 
 The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
 
 So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
 
-Nothing on the floor recedes: no perspective, no vanishing point, no lines angling inward. It is an even plane of one material. Give it depth with a gentle darkening toward the back wall instead.
+The floor's own edges converge, because it is a trapezoid - that is the only perspective it needs. Do not draw further perspective lines across the middle of it. Give it depth with a gentle darkening toward the back wall.
 
 The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
 
@@ -333,7 +393,7 @@ A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, from slightly above, as if standing on a flat floor that recedes upward without perspective - the same floor the rooms are drawn with. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, which is what that viewing angle does to a square. Vertical faces are drawn flat and square to the viewer, never angled off to one side. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
+Every piece is drawn from the same straight-on front view, from slightly above, as if standing in the middle of the room looking straight at the camera. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle about twice as wide as it is deep, which is what that viewing angle does to a square. Vertical faces are flat and square to the viewer, never angled off to one side, and no piece is drawn in three-quarter view or from a corner. The game shrinks a piece as it is placed further back, so draw each one at a single, neutral size. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
 The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
 
@@ -374,7 +434,7 @@ A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, from slightly above, as if standing on a flat floor that recedes upward without perspective - the same floor the rooms are drawn with. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, which is what that viewing angle does to a square. Vertical faces are drawn flat and square to the viewer, never angled off to one side. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
+Every piece is drawn from the same straight-on front view, from slightly above, as if standing in the middle of the room looking straight at the camera. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle about twice as wide as it is deep, which is what that viewing angle does to a square. Vertical faces are flat and square to the viewer, never angled off to one side, and no piece is drawn in three-quarter view or from a corner. The game shrinks a piece as it is placed further back, so draw each one at a single, neutral size. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
 The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
 
@@ -415,7 +475,7 @@ A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, from slightly above, as if standing on a flat floor that recedes upward without perspective - the same floor the rooms are drawn with. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, which is what that viewing angle does to a square. Vertical faces are drawn flat and square to the viewer, never angled off to one side. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
+Every piece is drawn from the same straight-on front view, from slightly above, as if standing in the middle of the room looking straight at the camera. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle about twice as wide as it is deep, which is what that viewing angle does to a square. Vertical faces are flat and square to the viewer, never angled off to one side, and no piece is drawn in three-quarter view or from a corner. The game shrinks a piece as it is placed further back, so draw each one at a single, neutral size. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
 The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
 
@@ -456,7 +516,7 @@ A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, from slightly above, as if standing on a flat floor that recedes upward without perspective - the same floor the rooms are drawn with. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, which is what that viewing angle does to a square. Vertical faces are drawn flat and square to the viewer, never angled off to one side. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
+Every piece is drawn from the same straight-on front view, from slightly above, as if standing in the middle of the room looking straight at the camera. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle about twice as wide as it is deep, which is what that viewing angle does to a square. Vertical faces are flat and square to the viewer, never angled off to one side, and no piece is drawn in three-quarter view or from a corner. The game shrinks a piece as it is placed further back, so draw each one at a single, neutral size. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
 The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
 
@@ -497,7 +557,7 @@ A sprite sheet of 20 separate pieces of furniture for a child's pet bedroom game
 
 Each cell contains ONE cut-out object and nothing else. Do not draw a room, a setting or a scene in any cell: no floor, no floorboards, no wall, no wall panelling, no skirting, no window, no background of any kind behind or beneath the object. Each piece floats alone on transparency.
 
-Every piece is drawn from the same straight-on front view, from slightly above, as if standing on a flat floor that recedes upward without perspective - the same floor the rooms are drawn with. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle exactly twice as wide as it is deep, which is what that viewing angle does to a square. Vertical faces are drawn flat and square to the viewer, never angled off to one side. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
+Every piece is drawn from the same straight-on front view, from slightly above, as if standing in the middle of the room looking straight at the camera. Any horizontal top surface - a table top, a seat, a shelf - is drawn as an ellipse or a rectangle about twice as wide as it is deep, which is what that viewing angle does to a square. Vertical faces are flat and square to the viewer, never angled off to one side, and no piece is drawn in three-quarter view or from a corner. The game shrinks a piece as it is placed further back, so draw each one at a single, neutral size. The base of each piece touches the bottom edge of its own cell. Nothing is tilted, rotated or seen from a corner. Nothing carries writing, lettering, numbers or a logo.
 
 The size given after each item is how much floor it takes up in the game, so draw wide pieces wide and small pieces small relative to one another.
 
