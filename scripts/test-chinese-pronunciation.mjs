@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 
+import { readJyutping, readTones } from './lib/cantonese-audio.mjs';
+
 const require = createRequire(import.meta.url);
 const { analyzeWavQuality } = require('../chinese-app/lib/audioQuality');
 const {
@@ -229,7 +231,8 @@ const fakeSdk = {
   CancellationDetails: { fromResult: () => ({ errorDetails: '' }) },
   PronunciationAssessmentResult: { fromResult: () => currentAssessment },
 };
-const assessed = await assessPronunciation(wav(clearSpeech), '好', fakeSdk);
+const goodTone = readJyutping('hou2');
+const assessed = await assessPronunciation(goodTone, '好', fakeSdk);
 assert.equal(assessed.status, 'pass');
 assert.equal(assessed.score, 89.8);
 assert.equal(assessed.transcript, '好');
@@ -254,7 +257,7 @@ currentAssessment = {
     }],
   },
 };
-const strictAssessed = await assessPronunciation(wav(clearSpeech), '好', fakeSdk);
+const strictAssessed = await assessPronunciation(goodTone, '好', fakeSdk);
 assert.equal(strictAssessed.score, 80.1);
 assert.ok(strictAssessed.score < 85,
   'a single mispronounced sound must still show up as a deduction');
@@ -265,7 +268,7 @@ currentAssessment = {
     Words: [{ Word: '好', PronunciationAssessment: { AccuracyScore: 100, ErrorType: 'None' } }],
   },
 };
-const unsupportedGranularity = await assessPronunciation(wav(clearSpeech), '好', fakeSdk);
+const unsupportedGranularity = await assessPronunciation(goodTone, '好', fakeSdk);
 assert.equal(unsupportedGranularity.status, 'inconclusive',
   'an aggregate 100 without phoneme evidence must never pass');
 assert.equal(unsupportedGranularity.correct, false);
@@ -274,7 +277,7 @@ assessmentCalls = 0;
 azureRequests = 0;
 currentRecognition = { transcript: '你好', confidence: 0.96 };
 const gatedWrongPhrase = await evaluatePronunciation(
-  wav(clearSpeech), '企鵝', 'kei5 ngo2', fakeSdk);
+  readJyutping('kei5 ngo2'), '企鵝', 'kei5 ngo2', fakeSdk);
 assert.equal(gatedWrongPhrase.status, 'retry');
 assert.equal(gatedWrongPhrase.score, 43.8);
 assert.equal(gatedWrongPhrase.transcript, '你好');
@@ -285,7 +288,7 @@ assert.equal(gatedWrongPhrase.timing.azureRequests, 1);
 azureRequests = 0;
 currentRecognition = { transcript: '不清楚', confidence: 0.1 };
 const uncertainPhrase = await evaluatePronunciation(
-  wav(clearSpeech), '企鵝', 'kei5 ngo2', fakeSdk);
+  readJyutping('kei5 ngo2'), '企鵝', 'kei5 ngo2', fakeSdk);
 assert.equal(uncertainPhrase.status, 'inconclusive');
 assert.equal(uncertainPhrase.score, null);
 assert.equal(azureRequests, 1, 'uncertain content must not cost a second Azure round trip');
@@ -319,8 +322,9 @@ currentAssessment = {
   },
 };
 const currentItemToneMistake = await evaluatePronunciation(
-  wav(clearSpeech), '海豚', 'hoi2 tyun4', fakeSdk, { assignmentId: 'assignment-1', itemId: 'item-sea' });
-assert.equal(currentItemToneMistake.score, 86,
+  readJyutping('hoi2 tyun4'), '海豚', 'hoi2 tyun4', fakeSdk,
+  { assignmentId: 'assignment-1', itemId: 'item-sea' });
+assert.equal(currentItemToneMistake.score, 85.2,
   '海豚 read as 開豚 must remain below 100 even when scripted Azure returns all 100');
 assert.equal(currentItemToneMistake.diagnostics.reference.text, '海豚');
 assert.equal(currentItemToneMistake.diagnostics.reference.itemId, 'item-sea');
@@ -355,9 +359,9 @@ currentAssessment = {
   },
 };
 const gatedCorrectPhrase = await evaluatePronunciation(
-  wav(clearSpeech), '企鵝', 'kei5 ngo2', fakeSdk);
+  readJyutping('kei5 ngo2'), '企鵝', 'kei5 ngo2', fakeSdk);
 assert.equal(gatedCorrectPhrase.status, 'pass');
-assert.equal(gatedCorrectPhrase.score, 92.9);
+assert.equal(gatedCorrectPhrase.score, 92.1);
 assert.equal(gatedCorrectPhrase.contentCheck.status, 'matched');
 assert.equal(gatedCorrectPhrase.timing.azureRequests, 2);
 assert.equal(assessmentCalls, 1);
@@ -414,14 +418,64 @@ azureRequests = 0;
 plainRecognitions = 0;
 currentRecognition = { transcript: '企鵝', confidence: 0.94 };
 const parallelPhrase = await evaluatePronunciation(
-  wav(clearSpeech), '企鵝', 'kei5 ngo2', fakeSdk);
-assert.equal(parallelPhrase.score, 92.9,
+  readJyutping('kei5 ngo2'), '企鵝', 'kei5 ngo2', fakeSdk);
+assert.equal(parallelPhrase.score, 92.1,
   'running the two calls together must not change the score');
 assert.equal(parallelPhrase.timing.azureRequests, 2);
 assert.equal(plainRecognitions, 1,
   'the reference-free recognition still supplies what was actually said');
 assert.equal(assessmentCalls, 1);
 delete process.env.AZURE_SPEECH_MAX_CONCURRENT;
+
+// ----- a wrong tone must cost marks even when Azure sees nothing wrong -------
+// This is the reported failure. 海短 read for 海豚 came back at 98%: Azure
+// scored all five phonemes 100 because scripted assessment force-aligns to the
+// reference, and its recogniser rewrote the non-word 海短 back to the real word
+// 海豚, so the Jyutping comparison saw a perfect match too. zh-HK has no tone
+// assessment at all — prosody is en-US only — so the pitch is measured locally.
+assessmentCalls = 0;
+azureRequests = 0;
+currentRecognition = { transcript: '海豚', confidence: 0.65 };
+currentAssessment = {
+  accuracyScore: 100,
+  pronunciationScore: 100,
+  completenessScore: 100,
+  fluencyScore: 100,
+  detailResult: {
+    Words: [{
+      Word: '海豚',
+      PronunciationAssessment: { AccuracyScore: 100, ErrorType: 'None' },
+      Phonemes: Array.from({ length: 5 }, () => ({
+        PronunciationAssessment: { AccuracyScore: 100 },
+      })),
+    }],
+  },
+};
+const readCorrectly = await evaluatePronunciation(
+  readJyutping('hoi2 tyun4'), '海豚', 'hoi2 tyun4', fakeSdk);
+assert.equal(readCorrectly.status, 'pass');
+assert.ok(readCorrectly.score >= 90,
+  `a correct reading must still pass, got ${readCorrectly.score}`);
+
+// 海短: the second syllable read on tone 2 instead of tone 4.
+const wrongTone = await evaluatePronunciation(
+  readTones(2, 2), '海豚', 'hoi2 tyun4', fakeSdk);
+assert.equal(wrongTone.diagnostics.combined.acousticScore, 100,
+  'Azure must still be reporting a perfect phoneme score for this to be a regression test');
+assert.equal(wrongTone.diagnostics.combined.recognizedPronunciationScore, 100,
+  'the recogniser must still be reporting the corrected word for this to be a regression test');
+assert.ok(wrongTone.diagnostics.combined.toneScore < 70,
+  `the tone must be measured as wrong, got ${wrongTone.diagnostics.combined.toneScore}`);
+assert.equal(wrongTone.correct, false,
+  `海短 read for 海豚 must not pass, got ${wrongTone.score}`);
+assert.ok(readCorrectly.score - wrongTone.score > 20,
+  'a wrong tone must be clearly separated from a right one');
+
+// 開豚: the first syllable read on tone 1 instead of tone 2.
+const wrongFirstTone = await evaluatePronunciation(
+  readTones(1, 4), '海豚', 'hoi2 tyun4', fakeSdk);
+assert.equal(wrongFirstTone.correct, false,
+  `開豚 read for 海豚 must not pass, got ${wrongFirstTone.score}`);
 
 // ----- the limit counts Azure requests, not submissions ----------------------
 // Each submission makes two calls, so a limit of 4 must admit two submissions
@@ -447,7 +501,7 @@ class CountingRecognizer {
 }
 const countingSdk = { ...fakeSdk, SpeechRecognizer: CountingRecognizer };
 const crowd = await Promise.all(Array.from({ length: 6 }, () =>
-  evaluatePronunciation(wav(clearSpeech), '企鵝', 'kei5 ngo2', countingSdk)));
+  evaluatePronunciation(readJyutping('kei5 ngo2'), '企鵝', 'kei5 ngo2', countingSdk)));
 assert.equal(crowd.length, 6, 'every queued submission must still be scored');
 assert.ok(peakInFlight <= 4,
   `no more Azure requests may be in flight than the limit allows, saw ${peakInFlight}`);
@@ -467,8 +521,8 @@ class SlowRecognizer {
 }
 const slowSdk = { ...fakeSdk, SpeechRecognizer: SlowRecognizer };
 const [first, second] = await Promise.allSettled([
-  evaluatePronunciation(wav(clearSpeech), '企鵝', 'kei5 ngo2', slowSdk),
-  evaluatePronunciation(wav(clearSpeech), '企鵝', 'kei5 ngo2', slowSdk),
+  evaluatePronunciation(readJyutping('kei5 ngo2'), '企鵝', 'kei5 ngo2', slowSdk),
+  evaluatePronunciation(readJyutping('kei5 ngo2'), '企鵝', 'kei5 ngo2', slowSdk),
 ]);
 assert.equal(second.status, 'rejected', 'a queued request must not wait forever');
 assert.equal(second.reason.statusCode, 503);

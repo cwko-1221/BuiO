@@ -14,6 +14,7 @@ chinese-app/
 │   ├── google.js              Google Cloud TTS helper
 │   ├── pronunciation.js       Azure zh-HK Pronunciation Assessment helper
 │   ├── audioQuality.js        PCM WAV validation + classroom noise quality gate
+│   ├── toneAnalysis.js        Pitch tracking + Cantonese tone scoring (Azure has none)
 │   └── storage.js             Supabase Storage upload helper
 ├── repositories/
 │   ├── classes.repo.js
@@ -60,6 +61,11 @@ chinese-app/
    AZURE_PRONUNCIATION_MAX_SCORE=98
    # How much of the score comes from whichever of the two evidence signals is lower.
    AZURE_PRONUNCIATION_LOWER_SIGNAL_WEIGHT=0.7
+   # Tone measurement. Azure gives zh-HK no tone information, so pitch is read locally.
+   CHINESE_TONE_SEMITONES_PER_LEVEL=2
+   CHINESE_TONE_SLOPE_TOLERANCE=3
+   CHINESE_TONE_LEVEL_WEIGHT=0.5
+   CHINESE_TONE_WEAKEST_WEIGHT=0.5
    # How a syllable divides. Tone multiplies the sounds rather than sitting beside them.
    AZURE_PRONUNCIATION_ONSET_WEIGHT=0.25
    AZURE_PRONUNCIATION_FINAL_WEIGHT=0.35
@@ -149,6 +155,23 @@ chinese-app/
   accurate reading, while an even blend let a confident forced alignment carry a word the
   recogniser never heard. Full-text, word, and completeness aggregates remain diagnostic
   only. Google STT is not used.
+- **Tone is measured here, not by Azure.** Prosody assessment is en-US only, so zh-HK
+  returns no tone information of any kind. Both Azure signals were blind to a wrong tone:
+  scripted assessment force-aligns to the reference and scored all five phonemes of 海短
+  read against 海豚 at 100, and the reference-free recogniser rewrote the non-word 海短 back
+  to the real word 海豚, so the Jyutping comparison saw a perfect match too. That reading
+  scored 98%. `lib/toneAnalysis.js` tracks the pitch of the recording directly, fits a
+  contour per syllable, and compares it against the Chao tone letters for the expected
+  Jyutping. Pitch is read in semitones per tone level, anchored so the recording's average
+  height matches the average height the question calls for — how high a child pitches their
+  voice is unknowable from one short word, so it cancels out and only the differences within
+  the recording are scored. A wrong tone now lands near 50 where a correct one is above 90.
+- The three signals are combined by the same rule: the lowest carries 70%. A tone score is
+  only produced when there was enough voiced pitch to measure; when there wasn't, it is
+  absent rather than zero, because no evidence must never read as bad evidence.
+- `nBestPhonemeCount` is requested so Azure reports which phonemes it thought were actually
+  spoken rather than only how the expected ones scored. Whether zh-HK populates it is
+  recorded under `diagnostics.spokenPhonemes` rather than assumed.
 - **70% and above passes.** There is no band between pass and retry: anything below the
   pass mark is a retry with an explanation of what the scorer heard. `inconclusive` is now
   reserved for recordings that produced no usable evidence at all.

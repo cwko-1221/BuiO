@@ -1,6 +1,7 @@
 'use strict';
 
 const { getJyutpingCandidates } = require('to-jyutping');
+const { analyzeTones } = require('./toneAnalysis');
 
 let speechSdk;
 let activeAzureRequests = 0;
@@ -300,6 +301,10 @@ function strictScoreFromDetails({ accuracyScore, completenessScore, details }) {
     const phonemes = (word.Phonemes || []).map(phoneme => ({
       phoneme: phoneme.Phoneme || '',
       accuracyScore: finiteScore(phoneme.PronunciationAssessment?.AccuracyScore),
+      spoken: (phoneme.PronunciationAssessment?.NBestPhonemes || []).map(candidate => ({
+        phoneme: candidate.Phoneme || '',
+        score: finiteScore(candidate.Score),
+      })),
     })).filter(phoneme => phoneme.accuracyScore !== null);
     return {
       word: word.Word || '',
@@ -349,6 +354,10 @@ function strictScoreFromDetails({ accuracyScore, completenessScore, details }) {
       phonemeSimilarityScore: finiteScore(phonemeSimilarityScore),
       phonemeScores,
       hasPhonemeEvidence: phonemeScores.length > 0,
+      spokenPhonemes: words.flatMap(word => word.phonemes.map(phoneme => ({
+        expected: phoneme.phoneme,
+        heard: phoneme.spoken.map(candidate => `${candidate.phoneme}:${candidate.score}`).join(' '),
+      }))).filter(entry => entry.heard),
     },
   };
 }
@@ -444,11 +453,25 @@ function compareRecognizedContent(recognition, expectedText, expectedJyutping = 
   };
 }
 
-function combinePronunciationEvidence(assessmentScore, contentCheck) {
+// A reading is only as good as its weakest evidence, but not hostage to it.
+function weakestLedBlend(scores, lowerWeight) {
+  const usable = scores.filter(Number.isFinite);
+  if (!usable.length) return null;
+  if (usable.length === 1) return usable[0];
+  const lowest = Math.min(...usable);
+  const rest = usable.filter((score, index) => index !== usable.indexOf(lowest));
+  const restMean = rest.reduce((sum, score) => sum + score, 0) / rest.length;
+  return lowest * lowerWeight + restMean * (1 - lowerWeight);
+}
+
+function combinePronunciationEvidence(assessmentScore, contentCheck, toneEvidence = null) {
   const acousticScore = finiteScore(assessmentScore);
   const recognizedPronunciationScore = finiteScore(contentCheck?.pronunciationScore);
+  const toneScore = finiteScore(toneEvidence?.score);
   if (acousticScore === null || recognizedPronunciationScore === null) {
-    return { score: null, acousticScore, recognizedPronunciationScore, maximumScore: null };
+    if (toneScore === null) {
+      return { score: null, acousticScore, recognizedPronunciationScore, toneScore, maximumScore: null };
+    }
   }
   // zh-HK returns an accuracy score for each expected phoneme but never reveals
   // which phoneme was actually spoken, so the recognised Jyutping still has to
@@ -459,14 +482,22 @@ function combinePronunciationEvidence(assessmentScore, contentCheck) {
   // forced alignment hide a wrong word.
   const maximumScore = Math.min(100, Math.max(0, numericEnv('AZURE_PRONUNCIATION_MAX_SCORE', 98)));
   const lowerWeight = ratioEnv('AZURE_PRONUNCIATION_LOWER_SIGNAL_WEIGHT', 0.7);
-  const lowerScore = Math.min(acousticScore, recognizedPronunciationScore);
-  const upperScore = Math.max(acousticScore, recognizedPronunciationScore);
-  const blended = lowerScore * lowerWeight + upperScore * (1 - lowerWeight);
+  // Tone joins as a third signal, and it is the only one of the three measured
+  // from the recording itself. Azure scored every phoneme of 海短 at 100 and
+  // its recogniser rewrote the word back to 海豚, so without this a wrong tone
+  // was invisible to both of the others.
+  const blended = weakestLedBlend(
+    [acousticScore, recognizedPronunciationScore, toneScore], lowerWeight);
+  if (blended === null) {
+    return { score: null, acousticScore, recognizedPronunciationScore, toneScore, maximumScore: null };
+  }
   return {
     score: Math.round(Math.min(blended, maximumScore) * 10) / 10,
     acousticScore,
     recognizedPronunciationScore,
-    lowerScore,
+    toneScore,
+    lowerScore: Math.min(...[acousticScore, recognizedPronunciationScore, toneScore]
+      .filter(Number.isFinite)),
     lowerWeight,
     maximumScore,
   };
@@ -621,6 +652,15 @@ function buildRecognizer(azure, audio, referenceText) {
       azure.PronunciationAssessmentGranularity.Phoneme,
       booleanEnv('AZURE_PRONUNCIATION_ENABLE_MISCUE', false),
     );
+    // The per-phoneme accuracy score says how well the expected phoneme was
+    // matched and came back as 100 for every phoneme of a misread word. This
+    // asks instead which phonemes were most likely spoken, which is the only
+    // part of the response that can disagree with the reference text. Whether
+    // zh-HK populates it is recorded in the diagnostics rather than assumed.
+    try {
+      assessmentConfig.nbestPhonemeCount = Math.max(0,
+        numericEnv('AZURE_PRONUNCIATION_NBEST_PHONEMES', 5));
+    } catch {}
     assessmentConfig.applyTo(recognizer);
   }
   openConnectionEarly(azure, recognizer);
@@ -770,7 +810,8 @@ async function evaluatePronunciation(
       assessmentMs = Date.now() - assessmentStartedAt;
       azureRequests += 1;
     }
-    const combined = combinePronunciationEvidence(assessment.score, contentCheck);
+    const toneEvidence = analyzeTones(audio, contentCheck.expectedJyutping);
+    const combined = combinePronunciationEvidence(assessment.score, contentCheck, toneEvidence);
     const classification = classifyAccuracy(combined.score);
     return {
       ...assessment,
@@ -785,6 +826,7 @@ async function evaluatePronunciation(
         reference,
         contentCheck,
         combined,
+        toneEvidence,
         assessmentTranscript: assessment.transcript,
       },
       timing: { queueWaitMs, contentRecognitionMs, assessmentMs, azureRequests },
