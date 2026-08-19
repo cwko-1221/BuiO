@@ -168,7 +168,16 @@ export class PetAvatar extends Phaser.GameObjects.Container {
       this.scene.time.delayedCall(420, () => this.settle());
       return;
     }
-    const animationKey = `${this.animationPrefix}-${action}-${facing}`;
+    // Left is the right-hand set mirrored. Drawing it twice would double the sheet for a view
+    // nobody can tell apart, and the creatures are close enough to symmetrical for it to hold.
+    const drawn = facing === 'left' ? 'right' : facing;
+    this.sprite.setFlipX(facing === 'left');
+
+    // A sheet may not carry every facing — today's art has only the front — so fall back rather
+    // than freezing on whatever was playing.
+    let animationKey = `${this.animationPrefix}-${action}-${drawn}`;
+    if (!this.scene.anims.exists(animationKey)) animationKey = `${this.animationPrefix}-${action}-front`;
+    if (!this.scene.anims.exists(animationKey)) animationKey = `${this.animationPrefix}-idle-front`;
     if (!this.scene.anims.exists(animationKey)) return;
     this.sprite.play(animationKey, true);
     if (!LOOPING.has(action)) {
@@ -184,6 +193,9 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     if (facing === this.facing) return;
     this.play(this.current, facing);
   }
+
+  /** What the creature is doing, so the room can tell walking apart from a one-shot reaction. */
+  get action() { return this.current; }
 
   /** Legacy entry point used by the DOM layer's `pet:emote` event. */
   emote(type: string) {

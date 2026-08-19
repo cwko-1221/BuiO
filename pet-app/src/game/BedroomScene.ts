@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { PetAvatar } from './PetAvatar';
-import type { Bootstrap, FurnitureDefinition, PetDefinition, PetInstance, RoomPlacement } from '../types';
+import type { Bootstrap, FurnitureDefinition, PetDefinition, PetFacing, PetInstance, RoomPlacement } from '../types';
 
 interface BedroomData { bootstrap: Bootstrap; activePet: PetInstance; petDefinition: PetDefinition; editing?: boolean }
 
@@ -80,6 +80,11 @@ export class BedroomScene extends Phaser.Scene {
   roomScale = 1;
   grid?: Phaser.GameObjects.Graphics;
   ghost?: Phaser.GameObjects.Graphics;
+  /** Floor cell the creature is standing on, and where it is heading. */
+  petCell = { x: 0, y: 0 };
+  petTarget?: { x: number; y: number };
+  petStep?: Phaser.Tweens.Tween;
+  petPause?: Phaser.Time.TimerEvent;
   roomTextureKey = '';
   petTextureKey = '';
 
@@ -96,6 +101,9 @@ export class BedroomScene extends Phaser.Scene {
     this.grid = undefined;
     this.ghost = undefined;
     this.avatar = undefined;
+    this.petTarget = undefined;
+    this.petStep = undefined;
+    this.petPause = undefined;
   }
   preload() {
     const catalog = this.model.bootstrap.catalog;
@@ -131,7 +139,8 @@ export class BedroomScene extends Phaser.Scene {
     this.placements.forEach((placement) => this.addFurniture(placement));
     // Stand the creature on a floor cell rather than a fixed point, so it sorts against the
     // furniture by the row it is on — the same rule every piece of furniture follows.
-    const home = this.gridToScreen(GRID_COLUMNS / 2, GRID_ROWS * .62);
+    this.petCell = { x: Math.floor(GRID_COLUMNS / 2), y: Math.floor(GRID_ROWS * .62) };
+    const home = this.petCentre(this.petCell);
     this.avatar = new PetAvatar(this, home.x, home.y, this.model.petDefinition, this.model.activePet, {
       layout: this.model.bootstrap.catalog.animation,
       fallbackTexture: this.petTextureKey && this.textures.exists(this.petTextureKey) ? this.petTextureKey : undefined,
@@ -139,7 +148,8 @@ export class BedroomScene extends Phaser.Scene {
       wearables: this.model.bootstrap.catalog.wearables,
       ambient: this.ambientLight(),
     });
-    this.avatar.setDepth(20 + GRID_ROWS * .62 + 1);
+    this.avatar.setDepth(this.petDepth());
+    if (!this.editing) this.scheduleWander(600);
     this.ghost = this.add.graphics().setDepth(15);
     this.input.on('drag', (_pointer: Phaser.Input.Pointer, target: Phaser.GameObjects.Container, dragX: number, dragY: number) => {
       if (!this.editing || !target.getData('placementId')) return;
@@ -434,6 +444,7 @@ export class BedroomScene extends Phaser.Scene {
     return container;
   }
   private setEditing(value: boolean) {
+    if (value) this.haltWander(); else this.scheduleWander(900);
     this.editing = value;
     this.grid?.setVisible(value);
     if (!value) this.clearFootprint();
@@ -487,5 +498,123 @@ export class BedroomScene extends Phaser.Scene {
     this.game.events.emit('room:placements', this.placements.map((item) => ({ ...item })));
   }
   private removeSelected(id: string) { const index = this.placements.findIndex((item) => item.id === id); if (index < 0) return; this.placements.splice(index,1); this.furniture.get(id)?.destroy(); this.furniture.delete(id); this.game.events.emit('room:placements', this.placements); }
-  private petEmote(type: 'happy'|'eat'|'attack'|'hurt'|'sleep'|'evolve') { this.avatar?.emote(type); }
+
+  /** Screen point a creature standing on a cell should sit at: the middle of the cell's front. */
+  private petCentre(cell: { x: number; y: number }) {
+    return this.gridToScreen(cell.x + .5, cell.y + 1);
+  }
+
+  /** Sorted by the row it stands on, one step in front of the furniture sharing that row. */
+  private petDepth() {
+    return 20 + this.petCell.y + 1 + .5;
+  }
+
+  /** Cells a creature will not walk onto. Rugs are walked over; everything else is furniture. */
+  private blockedCells() {
+    const blocked = new Set<string>();
+    for (const placement of this.placements) {
+      const definition = this.model.bootstrap.catalog.furniture.find((item) => item.id === placement.itemId);
+      if (!definition || definition.layer !== 'furniture') continue;
+      const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+      for (let x = placement.x; x < placement.x + width; x += 1) {
+        for (let y = placement.y; y < placement.y + height; y += 1) blocked.add(`${x}:${y}`);
+      }
+    }
+    return blocked;
+  }
+
+  private scheduleWander(delay: number) {
+    this.petPause?.remove();
+    this.petPause = this.time.delayedCall(delay, () => this.pickDestination());
+  }
+
+  /**
+   * Choose somewhere to go, then walk there a cell at a time.
+   *
+   * A cell at a time rather than a straight line to the target, because a straight line walks
+   * through the wardrobe. Each step picks whichever free neighbour closes the distance most, so
+   * the creature rounds furniture without needing a real path search in a room this small.
+   */
+  private pickDestination() {
+    if (this.editing || !this.avatar) return;
+    const blocked = this.blockedCells();
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      const target = {
+        x: Phaser.Math.Between(0, GRID_COLUMNS - 1),
+        y: Phaser.Math.Between(0, GRID_ROWS - 1),
+      };
+      const distance = Math.abs(target.x - this.petCell.x) + Math.abs(target.y - this.petCell.y);
+      if (distance < 3 || blocked.has(`${target.x}:${target.y}`)) continue;
+      this.petTarget = target;
+      this.stepTowardsTarget();
+      return;
+    }
+    this.scheduleWander(1200);
+  }
+
+  private stepTowardsTarget() {
+    const target = this.petTarget;
+    const avatar = this.avatar;
+    if (!target || !avatar || this.editing) return;
+    if (target.x === this.petCell.x && target.y === this.petCell.y) {
+      this.petTarget = undefined;
+      avatar.play('idle');
+      this.scheduleWander(Phaser.Math.Between(1800, 5000));
+      return;
+    }
+
+    const blocked = this.blockedCells();
+    const options = [
+      { x: this.petCell.x + Math.sign(target.x - this.petCell.x), y: this.petCell.y },
+      { x: this.petCell.x, y: this.petCell.y + Math.sign(target.y - this.petCell.y) },
+    ].filter((cell) => cell.x !== this.petCell.x || cell.y !== this.petCell.y)
+      .filter((cell) => cell.x >= 0 && cell.y >= 0 && cell.x < GRID_COLUMNS && cell.y < GRID_ROWS)
+      .filter((cell) => !blocked.has(`${cell.x}:${cell.y}`));
+    if (!options.length) {
+      // Boxed in on the axes that help; give up on this destination rather than jittering.
+      this.petTarget = undefined;
+      avatar.play('idle');
+      this.scheduleWander(1500);
+      return;
+    }
+    // Prefer the axis with further to go, so the creature does not stair-step the whole way.
+    options.sort((first, second) =>
+      (Math.abs(target.x - second.x) + Math.abs(target.y - second.y))
+      - (Math.abs(target.x - first.x) + Math.abs(target.y - first.y)));
+    const next = options[options.length - 1];
+
+    const facing: PetFacing = next.x !== this.petCell.x
+      ? (next.x > this.petCell.x ? 'right' : 'left')
+      : (next.y > this.petCell.y ? 'front' : 'back');
+    avatar.play('walk', facing);
+
+    const from = this.petCentre(this.petCell);
+    const to = this.petCentre(next);
+    this.petCell = next;
+    avatar.setDepth(this.petDepth());
+    this.petStep = this.tweens.add({
+      targets: avatar,
+      x: to.x,
+      y: to.y,
+      duration: Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y) * 7,
+      ease: 'Linear',
+      onComplete: () => this.stepTowardsTarget(),
+    });
+  }
+
+  /** Stop where it stands. Used while decorating, and while a one-shot reaction plays. */
+  private haltWander() {
+    this.petStep?.stop();
+    this.petStep = undefined;
+    this.petPause?.remove();
+    this.petPause = undefined;
+    this.petTarget = undefined;
+  }
+
+  private petEmote(type: 'happy'|'eat'|'attack'|'hurt'|'sleep'|'evolve') {
+    this.haltWander();
+    this.avatar?.emote(type);
+    // Sleeping is a state the child chose; everything else is a moment, so the walk comes back.
+    if (type !== 'sleep') this.scheduleWander(2200);
+  }
 }

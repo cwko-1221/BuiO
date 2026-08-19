@@ -180,6 +180,36 @@ try {
   assert.notEqual(worn[0].tint,0xffffff,'the crown is not picking up the room light');
   await page.screenshot({path:path.join(artifactDir,'10-outfit-ipad-landscape.png')});
 
+  // The creature wanders the floor on its own. It has to move, it has to sort by the row it
+  // stands on so the furniture in front of it covers it, it must not walk through a wardrobe,
+  // and it must hold still while the room is being rearranged - a pet strolling through a
+  // half-placed bed is both wrong and impossible to aim around.
+  await page.locator('[data-tab="home"]').click(); await page.locator('#game-root canvas').waitFor();
+  await page.waitForFunction(()=>window.__petGame?.scene?.getScene('Bedroom')?.avatar,null,{timeout:15000});
+  const stroll=await page.evaluate(async()=>{
+    const scene=window.__petGame.scene.getScene('Bedroom'); const seen=[];
+    for(let index=0;index<70;index+=1){
+      seen.push({spot:Math.round(scene.avatar.x)+','+Math.round(scene.avatar.y),cell:scene.petCell.x+':'+scene.petCell.y,depth:scene.avatar.depth});
+      await new Promise((resolve)=>setTimeout(resolve,120));
+    }
+    return {seen,blocked:[...scene.blockedCells()]};
+  });
+  const visited=[...new Set(stroll.seen.map((sample)=>sample.cell))];
+  assert.ok(visited.length>=3,'the pet stood on only '+visited.length+' cell(s) in eight seconds');
+  assert.ok(new Set(stroll.seen.map((sample)=>sample.depth)).size>=2,'the pet never re-sorted, so furniture will not cover it');
+  assert.deepEqual(visited.filter((cell)=>stroll.blocked.includes(cell)),[],'the pet walked onto furniture');
+  assert.deepEqual(stroll.seen.filter((sample)=>sample.depth!==20+Number(sample.cell.split(':')[1])+1.5),[],'depth does not follow the row');
+  await page.locator('[data-action="decorate"]').click(); await page.waitForTimeout(800);
+  const parked=await page.evaluate(async()=>{
+    const scene=window.__petGame.scene.getScene('Bedroom'); const seen=new Set();
+    for(let index=0;index<20;index+=1){
+      seen.add(Math.round(scene.avatar.x)+','+Math.round(scene.avatar.y));
+      await new Promise((resolve)=>setTimeout(resolve,120));
+    }
+    return seen.size;
+  });
+  assert.equal(parked,1,'the pet kept walking while the room was being decorated');
+
   assert.deepEqual(errors,[]);
   await teacherContext.close(); await context.close();
   console.log(`✓ protected student and teacher role routing`);
@@ -187,6 +217,7 @@ try {
   console.log(`✓ desktop, iPad landscape and mobile screenshots: ${artifactDir}`);
   console.log(`✓ equipment board: ${OUTFIT_SLOT_COUNT} slots, drag-to-equip, ${OUTFIT_SEALED_COUNT} awaiting art`);
   console.log(`✓ the board previews the outfit on the creature at the size it computed`);
+  console.log(`✓ the creature wanders the floor, sorts by its row, and holds still while decorating`);
   console.log(`✓ worn items track the pose, cast contact shadows and take the room light`);
   console.log(`✓ no browser console or uncaught page errors`);
 } finally {
