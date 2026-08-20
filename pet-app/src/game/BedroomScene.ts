@@ -264,7 +264,7 @@ export class BedroomScene extends Phaser.Scene {
       // To the front edge of the footprint, which is where the piece is anchored once it is put
       // down. Snapping to the middle of the footprint instead left it half its own depth above
       // where it would land, so every piece dropped lower than the cell it had been shown on.
-      const centre = this.gridToScreen(cell.x + width / 2, cell.y + height);
+      const centre = this.gridToScreen(cell.x + width / 2, cell.y + height / 2);
       target.setPosition(centre.x, centre.y);
       this.resize({ ...placement, x: cell.x, y: cell.y });
       target.setDepth(this.depthFor({ ...placement, x: cell.x, y: cell.y }));
@@ -396,21 +396,19 @@ export class BedroomScene extends Phaser.Scene {
   private clearFootprint() { this.ghost?.clear(); }
 
   /**
-   * Where a piece stands: the middle of the front edge of its footprint, which is the point it
-   * touches the floor. Anchoring at the centre of the footprint instead needs a correction for
-   * half its depth, and that correction changes with perspective — this needs none.
+   * Where a piece stands: the middle of its footprint, both across and back.
+   *
+   * It used to be the middle of the front edge, on the reasoning that the front edge is where a
+   * piece meets the floor. That is true of a piece one tile deep and wrong of anything bigger:
+   * a lamp grown to two tiles sat on the near edge of its own square with both its tiles behind
+   * it, which reads as the piece having slipped forward off its highlight. Sitting it in the
+   * middle plants it in its tiles. Depth still comes from the front row — that is about what a
+   * piece hides, not where it stands.
    */
   private footprintCentre(placement: RoomPlacement) {
     const [width, height] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
-    return this.gridToScreen(placement.x + width / 2, placement.y + height);
-  }
-
-  /** Middle of the footprint, for the things that lie flat rather than stand. */
-  private footprintMiddle(placement: RoomPlacement) {
-    const [width, height] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
     return this.gridToScreen(placement.x + width / 2, placement.y + height / 2);
   }
-
   /**
    * Inverse of footprintCentre: the origin cell for a footprint whose centre sits at a screen
    * point. Clamped so a large piece cannot be dragged partly outside the room.
@@ -419,7 +417,7 @@ export class BedroomScene extends Phaser.Scene {
     const cell = this.screenToCell(x, y);
     return {
       x: Phaser.Math.Clamp(Math.round(cell.x - width / 2), 0, GRID_COLUMNS - width),
-      y: Phaser.Math.Clamp(Math.round(cell.y - height), 0, GRID_ROWS - height),
+      y: Phaser.Math.Clamp(Math.round(cell.y - height / 2), 0, GRID_ROWS - height),
     };
   }
 
@@ -629,8 +627,8 @@ export class BedroomScene extends Phaser.Scene {
     const across = (turned ? drawn * (baseDepth / Math.max(1, baseWidth)) : drawn)
       * (footprintX / Math.max(1, baseAcross));
     const middle = placement.x + footprintX / 2;
-    const front = this.gridToScreen(middle + across / 2, placement.y + footprintY);
-    const back = this.gridToScreen(middle - across / 2, placement.y + footprintY);
+    const front = this.gridToScreen(middle + across / 2, placement.y + footprintY / 2);
+    const back = this.gridToScreen(middle - across / 2, placement.y + footprintY / 2);
     const targetWidth = Math.abs(front.x - back.x);
     image.setScale(targetWidth / Math.max(1, box.width * image.width));
     // Origin is expressed in canvas fractions: horizontally centred on the object, and
@@ -641,9 +639,8 @@ export class BedroomScene extends Phaser.Scene {
     );
     // The container already sits on the front edge of the footprint, so a standing piece needs
     // no offset. A rug lies flat across the whole footprint, so it is lifted to its middle.
-    image.setY(placement.layer === 'rug'
-      ? this.footprintMiddle(placement).y - this.footprintCentre(placement).y
-      : 0);
+    // Standing pieces and rugs share one anchor now, so neither needs an offset from it.
+    image.setY(0);
   }
   /** Re-size a placed piece after it has moved, so it keeps filling the square it is on. */
   private resize(placement: RoomPlacement) {

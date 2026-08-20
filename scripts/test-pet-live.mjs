@@ -99,7 +99,7 @@ try {
     const scene = window.__petGame.scene.getScene('Bedroom');
     const placement = scene.placements[scene.placements.length - 1];
     const [w, h] = scene.footprintOf(placement.itemId, placement.rotation);
-    const shownWhileDragging = scene.gridToScreen(placement.x + w / 2, placement.y + h);
+    const shownWhileDragging = scene.gridToScreen(placement.x + w / 2, placement.y + h / 2);
     const whereItLands = scene.footprintCentre(placement);
     return { shownWhileDragging, whereItLands };
   });
@@ -117,8 +117,8 @@ try {
     const after = scene.footprintOf(placement.itemId, placement.rotation, placement.size);
     const piece = scene.furniture.get(placement.id);
     const [w, h] = after;
-    const left = scene.gridToScreen(placement.x, placement.y + h);
-    const right = scene.gridToScreen(placement.x + w, placement.y + h);
+    const left = scene.gridToScreen(placement.x, placement.y + h / 2);
+    const right = scene.gridToScreen(placement.x + w, placement.y + h / 2);
     // The container sits where the piece meets the floor and the art is centred on it, so the
     // container's own x is the middle of the piece.
     return { before, after, middleOfFloor: (left.x + right.x) / 2, middleOfPiece: piece ? piece.x : null };
