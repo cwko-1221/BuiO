@@ -124,7 +124,8 @@ const PETS = [
  * still use it, because taking a room back off somebody is worse than a grid that does not line
  * up. Importing a room adds it here, so nothing has to be remembered.
  */
-const FITTED = new Set(Object.keys(require('../../scripts/room-floors.json')));
+const MARKED_FLOORS = require('../../scripts/room-floors.json');
+const FITTED = new Set(Object.keys(MARKED_FLOORS));
 
 const ROOMS = [
   ['sunny-oak','橡木暖陽房','Sunny Oak Bedroom',0,'#e6b572','#89b89a'],
@@ -140,6 +141,7 @@ const ROOMS = [
 ].map(([id, zh, en, price, primary, accent]) => ({
   id, name: { 'zh-HK': zh, 'en-US': en }, price, primary, accent,
   art: artPath('rooms', id), pending: !FITTED.has(id),
+  floor: MARKED_FLOORS[id] || null,
 }));
 
 const FOOD_GROUPS = [

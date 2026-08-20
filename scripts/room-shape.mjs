@@ -10,14 +10,22 @@ import sharp from 'sharp';
 
 const scene = fs.readFileSync('pet-app/src/game/BedroomScene.ts', 'utf8');
 const read = (name) => {
-  const found = scene.match(new RegExp('^const ' + name + ' = ([0-9.]+)', 'm'));
-  if (!found) throw new Error(`BedroomScene no longer declares ${name} — this guide cannot be trusted`);
+  const found = scene.match(new RegExp('^const ' + name + ' = ([0-9]+)', 'm'));
+  if (!found) throw new Error(name + " is no longer declared in BedroomScene — this guide cannot be trusted");
   return Number(found[1]);
 };
-const W = read('STAGE_WIDTH'), H = read('STAGE_HEIGHT');
-const LINE = read('FLOOR_LINE'), BACK = read('BACK_SPAN'), FRONT = read('FRONT_SPAN');
 const COLS = read('GRID_COLUMNS'), ROWS = read('GRID_ROWS');
+const W = read('STAGE_WIDTH'), H = read('STAGE_HEIGHT');
 
+// Each room is laid out on the corners that were pointed at on its own picture; this is the
+// shape a room is expected to arrive in, and what a room without corners falls back to.
+const found = scene.match(/const DEFAULT_FLOOR[^=]*= (\[[^;]+\]);/);
+if (!found) throw new Error("BedroomScene no longer declares DEFAULT_FLOOR — this guide cannot be trusted");
+const QUAD = JSON.parse(found[1].replace(/\.(\d)/g, "0.$1"));
+
+const LINE = (QUAD[0][1] + QUAD[1][1]) / 2;
+const BACK = QUAD[1][0] - QUAD[0][0];
+const FRONT = Math.min(1, QUAD[2][0] - QUAD[3][0]);
 const top = H * LINE, depth = H - top, backHalf = (W * BACK) / 2, frontHalf = (W * FRONT) / 2, cx = W / 2;
 const ratio = BACK / FRONT;
 const ease = (t) => (ratio * t) / (1 - (1 - ratio) * t);

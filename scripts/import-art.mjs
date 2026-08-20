@@ -279,29 +279,43 @@ function homography(from, to) {
   };
 }
 
-/** The room with the grid drawn on it, so where the grid lands is looked at rather than trusted. */
-async function gridPreview(file, roomId) {
-  const { width, height } = ROOM_SIZE;
-  const back = (SPEC.backSpan / 2) * width, front = (SPEC.frontSpan / 2) * width;
-  const top = SPEC.line * height, centre = width / 2, ratio = SPEC.backSpan / SPEC.frontSpan;
-  const ease = (t) => (ratio * t) / (1 - (1 - ratio) * t);
-  const pt = (gx, gy) => {
-    const e = ease(gy / 10);
-    return [centre + (gx / 14 - .5) * 2 * (back + (front - back) * e), top + (height - top) * e];
+/**
+ * A room's painted floor usually runs off the bottom corners of its picture, so the grid is
+ * pulled back along the floor's own side edges until both are inside the frame. Same rule as
+ * the scene, because a preview drawn to a different rule would be worse than none.
+ */
+function insideFrame(corners) {
+  const [bl, br, fr, fl] = corners;
+  const edge = 0.004;
+  const limit = (from, to, bound) => {
+    if (to - from === 0) return 1;
+    const t = (bound - from) / (to - from);
+    return t > 0 && t < 1 ? t : 1;
   };
-  let lines = '';
-  for (let c = 0; c <= 14; c++) { const [ax, ay] = pt(c, 0), [bx, by] = pt(c, 10); lines += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}"/>`; }
-  for (let r = 0; r <= 10; r++) { const [ax, ay] = pt(0, r), [bx, by] = pt(14, r); lines += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}"/>`; }
+  const far = Math.min(1, limit(bl[0], fl[0], edge), limit(br[0], fr[0], 1 - edge),
+    limit(bl[1], fl[1], 1 - edge), limit(br[1], fr[1], 1 - edge));
+  const along = (back, front) => [back[0] + (front[0] - back[0]) * far, back[1] + (front[1] - back[1]) * far];
+  return [bl, br, along(br, fr), along(bl, fl)];
+}
+
+/** The room with its own grid drawn on it, so the corners are looked at rather than trusted. */
+async function gridPreview(file, corners, roomId) {
+  const { width, height } = ROOM_SIZE;
+  const place = homography([[0, 0], [1, 0], [1, 1], [0, 1]],
+    insideFrame(corners).map(([x, y]) => [x * width, y * height]));
+  const cell = (gx, gy) => place(gx / 14, gy / 10);
+  let lines = ``;
+  for (let c = 0; c <= 14; c += 1) lines += `<polyline fill="none" points="${Array.from({ length: 11 }, (_, r) => cell(c, r)).join(' ')}"/>`;
+  for (let r = 0; r <= 10; r += 1) lines += `<polyline fill="none" points="${Array.from({ length: 15 }, (_, c) => cell(c, r)).join(' ')}"/>`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-    <g stroke="#00e5ff" stroke-width="2" opacity=".85" fill="none">${lines}</g>
-    <polygon points="${pt(0, 0)} ${pt(14, 0)} ${pt(14, 10)} ${pt(0, 10)}" fill="none" stroke="#c0392b" stroke-width="5"/>
+    <g stroke="#00e5ff" stroke-width="2" opacity=".85">${lines}</g>
+    <polygon points="${cell(0, 0)} ${cell(14, 0)} ${cell(14, 10)} ${cell(0, 10)}" fill="none" stroke="#c0392b" stroke-width="5"/>
   </svg>`;
   const out = path.join('art-inbox', `checked-${roomId}.png`);
   await sharp(file).resize(width, height, { fit: 'fill' })
     .composite([{ input: Buffer.from(svg) }]).png().toFile(out);
   return out;
 }
-
 /**
  * Corners pointed at once are kept in the repository, so re-importing a room never asks again and
  * so the correction that produced a shipped room is on the record next to it.
@@ -323,30 +337,19 @@ async function importRoom(file, roomId, dry, quad) {
     log('      check it in the picture below - npm run room:corners to move any of them');
   }
   /**
-   * The grid has to lie on painted floor everywhere, so the check is a margin: how much floor
-   * there is beyond the grid's edge, at the back of the grid and at the front. Nothing left over
-   * means the grid would hang past the skirting onto the wall, and that is a room to generate
-   * again — there is nothing to correct here, because the picture is used exactly as it was drawn.
+   * The grid is this room's own floor now, so there is nothing to compare against — the corners
+   * are the answer rather than a candidate. What is still worth saying is where the floor starts
+   * and how much of the picture the grid ends up covering, since the grid stops where the floor
+   * leaves the frame, and worth drawing so the corners can be checked by eye rather than read.
    */
   const backY = (corners[0][1] + corners[1][1]) / 2;
-  const edgeAt = (side, y) => {
-    const back = corners[side], front = corners[side === 0 ? 3 : 2];
-    return back[0] + (front[0] - back[0]) * (y - backY) / (1 - backY);
-  };
-  const halfAt = (y) => (BACK_SPAN + (FRONT_SPAN - BACK_SPAN) * (y - FLOOR_LINE) / (1 - FLOOR_LINE)) / 2;
-  const spare = (y) => Math.min(.5 - halfAt(y) - edgeAt(0, y), edgeAt(1, y) - (.5 + halfAt(y)));
-  const toSpare = Math.min(spare(FLOOR_LINE), spare(1));
-
-  log(`      floor starts ${(backY * 100).toFixed(1)}% against the grid's ${FLOOR_LINE * 100}%, `
-    + `${(toSpare * 100).toFixed(1)}% of floor to spare beside the grid`);
-  const check = await gridPreview(file, roomId);
-  log(`      ${check}`);
-  if ((backY > FLOOR_LINE || toSpare < 0) && !argv.includes('--anyway')) {
-    log('      the grid would run off the painted floor - generate this room again, or --anyway');
-    return 0;
-  }
+  const reach = Math.min(1,
+    corners[0][0] === corners[3][0] ? 1 : (0 - corners[0][0]) / (corners[3][0] - corners[0][0]),
+    corners[1][0] === corners[2][0] ? 1 : (1 - corners[1][0]) / (corners[2][0] - corners[1][0]));
+  const front = backY + (1 - backY) * reach;
+  log(`      floor from ${(backY * 100).toFixed(1)}% down to ${(front * 100).toFixed(1)}%, where it leaves the frame and the grid stops`);
+  log(`      ${await gridPreview(file, corners, roomId)}`);
   if (!dry) await fs.writeFile(FLOORS, JSON.stringify({ ...await readFloors(), [roomId]: corners }, null, 2));
-
   const image = sharp(file).resize(ROOM_SIZE.width, ROOM_SIZE.height, { fit: 'fill' });
   const buffer = await image.flatten({ background: '#ffffff' }).webp({ quality: 90 }).toBuffer();
   await write(fileFor(room.art), buffer, dry);

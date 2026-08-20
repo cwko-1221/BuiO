@@ -72,47 +72,82 @@ const STAGE_HEIGHT = 720;
 const FLOOR_CENTRE = STAGE_WIDTH / 2;
 
 /**
- * The floor, identical in every room.
+ * The floor, one room at a time. Each room's four corners were pointed at by hand — the back
+ * two where the skirting meets each side wall, the front two worked out from the side edges —
+ * and the grid is laid on exactly those. A single grid shared by every room had to fit inside
+ * the narrowest floor of the ten and so hung short of the skirting in the other nine.
  *
- * Every room is the same room as far as the game is concerned: the same fourteen by ten of
- * playable floor, so an arrangement carries from one theme to the next and a piece is the same
- * size wherever it is placed.
- *
- * These three numbers are the largest such floor that lies inside the painted floor of every
- * room, with a margin. That is why the grid does not use the whole of any one room's floor: it
- * has to fit the narrowest, and fitting inside is what lets the artwork be used exactly as drawn,
- * with nothing stretched onto the grid and no corner of floor invented where the picture ran out.
- * The importer checks each new room against these and refuses one the grid would overhang.
+ * The trade is that a cell is not quite the same patch of floor in two different themes, so a
+ * saved arrangement shifts a little when the theme changes. The ten floors agree to within a
+ * few per cent, which is a smaller error than the gap it removes.
  */
-const FLOOR_LINE = 0.389;    // below the highest skirting of the ten rooms
-const BACK_SPAN = 0.551;     // inside the narrowest floor there, by about a per cent
-const FRONT_SPAN = 0.976;    // and inside it again along the bottom of the frame
-
-const FLOOR_TOP = STAGE_HEIGHT * FLOOR_LINE;
-const FLOOR_DEPTH = STAGE_HEIGHT - FLOOR_TOP;
-const BACK_HALF = (STAGE_WIDTH * BACK_SPAN) / 2;
-const FRONT_HALF = (STAGE_WIDTH * FRONT_SPAN) / 2;
-/** Half the floor's width at a depth, which also fixes how big things standing there look. */
-const halfWidthAt = (eased: number) => BACK_HALF + (FRONT_HALF - BACK_HALF) * eased;
+const DEFAULT_FLOOR: [number, number][] = [[.2245, .389], [.7755, .389], [.988, 1], [.012, 1]];
 
 /**
- * How depth maps to screen: the perspective of a flat floor seen by an eye, which is width scaling
- * as one over distance. That falls straight out of the two spans above — the floor being 64 per
- * cent as wide at the back means the back row is 1 / 0.64 as far away — so there is nothing here
- * to tune, and rows spread apart toward the front the way real ones do. A power curve was tried
- * first and its rows grew by less and less as they came forward, until the front of the floor
- * looked flat and the last rows looked squashed together.
+ * The map from the grid to the picture: the projective transform taking the unit square onto
+ * those four corners. It is the whole of the perspective — rows bunch toward the back and a cell
+ * narrows with distance because that is what projecting a rectangle does, with no curve to tune.
  */
-const DEPTH_RATIO = BACK_SPAN / FRONT_SPAN;
-const easeDepth = (t: number) => {
-  const d = Phaser.Math.Clamp(t, 0, 1);
-  return (DEPTH_RATIO * d) / (1 - (1 - DEPTH_RATIO) * d);
-};
-const unEaseDepth = (e: number) => {
-  const d = Phaser.Math.Clamp(e, 0, 1);
-  return d / (DEPTH_RATIO + (1 - DEPTH_RATIO) * d);
-};
-
+/**
+ * A room's painted floor usually runs off the bottom corners of its picture, so the corners that
+ * were pointed at sit outside the frame. The grid is pulled back along the floor's own two side
+ * edges until both are inside, which keeps every cell on painted floor and in view — the far
+ * corners of a grid that overhung the frame could be neither seen nor tapped.
+ */
+function insideFrame(corners: [number, number][]): [number, number][] {
+  const [backLeft, backRight, frontRight, frontLeft] = corners;
+  const edge = 0.004;
+  let far = 1;
+  const limit = (from: number, to: number, bound: number) => {
+    if ((to - from) === 0) return 1;
+    const t = (bound - from) / (to - from);
+    return t > 0 && t < 1 ? t : 1;
+  };
+  far = Math.min(far, limit(backLeft[0], frontLeft[0], edge));
+  far = Math.min(far, limit(backRight[0], frontRight[0], 1 - edge));
+  far = Math.min(far, limit(backLeft[1], frontLeft[1], 1 - edge));
+  far = Math.min(far, limit(backRight[1], frontRight[1], 1 - edge));
+  const along = (back: [number, number], front: [number, number]): [number, number] =>
+    [back[0] + (front[0] - back[0]) * far, back[1] + (front[1] - back[1]) * far];
+  return [backLeft, backRight, along(backRight, frontRight), along(backLeft, frontLeft)];
+}
+function floorMap(corners: [number, number][]) {
+  const points = insideFrame(corners).map(([x, y]) => [x * STAGE_WIDTH, y * STAGE_HEIGHT] as const);
+  const rows: number[][] = [], values: number[] = [];
+  const square = [[0, 0], [1, 0], [1, 1], [0, 1]] as const;
+  for (let i = 0; i < 4; i += 1) {
+    const [x, y] = square[i], [u, v] = points[i];
+    rows.push([x, y, 1, 0, 0, 0, -u * x, -u * y]); values.push(u);
+    rows.push([0, 0, 0, x, y, 1, -v * x, -v * y]); values.push(v);
+  }
+  const m = rows.map((row, i) => [...row, values[i]]);
+  for (let col = 0; col < 8; col += 1) {
+    let pivot = col;
+    for (let r = col + 1; r < 8; r += 1) if (Math.abs(m[r][col]) > Math.abs(m[pivot][col])) pivot = r;
+    [m[col], m[pivot]] = [m[pivot], m[col]];
+    for (let r = 0; r < 8; r += 1) {
+      if (r === col) continue;
+      const factor = m[r][col] / m[col][col];
+      for (let k = col; k <= 8; k += 1) m[r][k] -= factor * m[col][k];
+    }
+  }
+  const h = m.map((row, i) => row[8] / row[i]);
+  const forward = (x: number, y: number) => {
+    const w = h[6] * x + h[7] * y + 1;
+    return { x: (h[0] * x + h[1] * y + h[2]) / w, y: (h[3] * x + h[4] * y + h[5]) / w };
+  };
+  // Inverting a 3x3 whose last entry is 1, so the inverse is worth writing out rather than
+  // iterating: a tap has to land on the same cell the piece under the finger was drawn on.
+  const a = h[0], b = h[1], cc = h[2], d = h[3], e = h[4], ff = h[5], g = h[6], i2 = h[7];
+  const inverse = (x: number, y: number) => {
+    const A = e - ff * i2, B = cc * i2 - b, C = b * ff - cc * e;
+    const D = ff * g - d, E = a - cc * g, F = cc * d - a * ff;
+    const G = d * i2 - e * g, H = b * g - a * i2, I = a * e - b * d;
+    const w = G * x + H * y + I;
+    return { x: (A * x + B * y + C) / w, y: (D * x + E * y + F) / w };
+  };
+  return { forward, inverse };
+}
 /** The creature's size on the front row; every other row scales down from here. */
 const PET_SCALE = .86;
 
@@ -136,6 +171,9 @@ export class BedroomScene extends Phaser.Scene {
    * to know which cells the furniture is standing on.
    */
   petSpot = { x: 0, y: 0 };
+
+  /** This room's grid, built from the corners that were pointed at on its picture. */
+  private floor = floorMap(DEFAULT_FLOOR);
   petLegs?: { x: number; y: number }[];
   petStep?: Phaser.Tweens.Tween;
   roomTextureKey = '';
@@ -182,6 +220,8 @@ export class BedroomScene extends Phaser.Scene {
     }
   }
   create() {
+    const themed = this.model.bootstrap.catalog.rooms.find((entry) => entry.id === this.model.bootstrap.room.themeId);
+    this.floor = floorMap((themed?.floor as [number, number][]) || DEFAULT_FLOOR);
     this.cameras.main.setBackgroundColor('#efe2c8');
     if (this.roomTextureKey && this.textures.exists(this.roomTextureKey)) {
       const image = this.add.image(640, 360, this.roomTextureKey);
@@ -294,29 +334,20 @@ export class BedroomScene extends Phaser.Scene {
    * value, which keeps the left and right edges of the floor straight lines on screen.
    */
   private gridToScreen(x: number, y: number) {
-    const eased = easeDepth(y / GRID_ROWS);
-    const half = halfWidthAt(eased);
-    return {
-      x: FLOOR_CENTRE + (x / GRID_COLUMNS - .5) * 2 * half,
-      y: FLOOR_TOP + FLOOR_DEPTH * eased,
-    };
+    return this.floor.forward(x / GRID_COLUMNS, y / GRID_ROWS);
   }
 
-  /** How much smaller something standing at this depth is drawn, against the front row. */
+  /** How big something standing at a depth is drawn: the floor narrows, and so does it. */
   private depthScale(y: number) {
-    return halfWidthAt(easeDepth(y / GRID_ROWS)) / FRONT_HALF;
+    const at = (v: number) => this.floor.forward(1, v).x - this.floor.forward(0, v).x;
+    return at(Phaser.Math.Clamp(y / GRID_ROWS, 0, 1)) / at(1);
   }
 
   /** Inverse of gridToScreen, in fractional cells. */
   private screenToCell(x: number, y: number) {
-    const eased = Phaser.Math.Clamp((y - FLOOR_TOP) / FLOOR_DEPTH, 0, 1);
-    const half = halfWidthAt(eased);
-    return {
-      x: ((x - FLOOR_CENTRE) / (2 * half) + .5) * GRID_COLUMNS,
-      y: unEaseDepth(eased) * GRID_ROWS,
-    };
+    const at = this.floor.inverse(x, y);
+    return { x: at.x * GRID_COLUMNS, y: at.y * GRID_ROWS };
   }
-
   private screenToGrid(x: number, y: number) {
     const cell = this.screenToCell(x, y);
     return {

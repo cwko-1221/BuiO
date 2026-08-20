@@ -30,10 +30,14 @@ export interface AnimationLayout {
   directions: PetFacing[];
   actions: { name: PetAction; start: number; length: number }[];
 }
+/** The floor's four corners as fractions of the room image: back left, back right, front right, front left. */
+export type RoomFloor = [number, number][];
 export interface RoomDefinition {
   id: string; name: Localized; price: number; primary: string; accent: string; art: string;
   /** Drawn to an older shape the grid does not fit, so it is not offered until it is redrawn. */
   pending?: boolean;
+  /** Where this room's floor was pointed at, which is where its grid goes. */
+  floor?: RoomFloor | null;
 }
 export interface FoodDefinition { id: string; name: Localized; category: 'food'; tier: number; price: number; xp: number }
 /** Alpha bounding box of the drawn object, as 0..1 fractions of its source canvas. */
