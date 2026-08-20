@@ -240,11 +240,9 @@ Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses,
 const MUST_SAY = {
   room: [
     'fully opaque', 'no transparency anywhere',
-    'The floor is the subject of the picture', 'about a quarter of the image height',
-    'SIDE WALLS', 'THE WHOLE FLOOR MUST BE IN THE PICTURE',
-    'never touches the left or right edge', 'about a tenth of the image wide',
-    'clearly shorter than the picture is wide',
-    'looking down into an open shoebox',
+    'The floor is the subject of the picture', 'about a third of the image height',
+    'SIDE WALLS', 'about three fifths of the picture',
+    'floor from corner to corner', 'the floor has to be the wider of the two',
     'must not read as a grid', 'one and a half times the size of the same plank at the back',
     'Nothing stands on the floor', 'no characters',
     '16:9 landscape',
@@ -300,15 +298,14 @@ for (const [id, zh, theme] of ROOMS) {
 
 One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture; the walls are a shallow band behind it and a wedge down each side.
 
-  BACK WALL   a strip across the top, about a quarter of the image height. Flat and
-              parallel to the picture. Do not make it taller than that.
-  FLOOR       a trapezoid below it, narrower where it meets the back wall than it is
-              at the front, with straight side edges.
+  BACK WALL   a strip across the top, about a third of the image height and no more.
+              Flat and parallel to the picture.
+  FLOOR       a trapezoid filling everything below it, narrower where it meets the
+              back wall than at the front, with straight side edges.
   SIDE WALLS  a wedge on each side, between the floor and the edge of the picture,
-              widening as it comes forward. At the very bottom of the picture each
-              one is still about a tenth of the image wide.
+              narrowing as it comes forward.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. Its near edge is a straight line along the bottom of the picture, clearly shorter than the picture is wide, with side wall to the left of it and side wall to the right of it. The floor never touches the left or right edge of the image at any height. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
+Where the floor meets the back wall it is about three fifths of the picture's width. Coming forward it widens past both sides of the picture, so the bottom edge of the picture is floor from corner to corner and the side walls have run out before they get there. The game lays its grid inside that floor, which is why the floor has to be the wider of the two everywhere: a room drawn narrower leaves the grid hanging over the skirting.
 
 Symmetrical left to right, no tilt and no roll.
 

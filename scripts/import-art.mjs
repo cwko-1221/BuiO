@@ -235,10 +235,11 @@ async function loadSheet(file) {
  */
 /**
  * The floor the game projects, as fractions of the room image. These are the same three numbers
- * BedroomScene draws its grid from, and the whole point of what follows is to move a generated
- * room onto them rather than hoping one was generated on them.
+ * BedroomScene draws its grid from. A room is used exactly as drawn, so all this does is check
+ * that the grid lands on painted floor.
  */
-const SPEC = { line: 0.26, backSpan: 0.54, frontSpan: 0.84 };
+const FLOOR_LINE = 0.41, BACK_SPAN = 0.57, FRONT_SPAN = 0.98;
+const SPEC = { line: FLOOR_LINE, backSpan: BACK_SPAN, frontSpan: FRONT_SPAN };
 /** Back left, back right, front right, front left — the order corners are clicked and stored in. */
 const specQuad = () => {
   const back = SPEC.backSpan / 2, front = SPEC.frontSpan / 2;
@@ -278,112 +279,8 @@ function homography(from, to) {
   };
 }
 
-/**
- * Move a generated room onto the grid's floor.
- *
- * Given where the floor's four corners actually are, this is the transform that puts them where
- * the game expects them, and it carries the walls along with it. Corners are allowed to fall
- * outside the picture — that is the usual case, since a room drawn wider than its frame has its
- * near corners off the edge. What was never drawn is continued from what was: floor is reflected
- * along its own row so a plank carries on as a plank, and wall is carried straight down the column
- * so panelling carries on as panelling. The report says how much of the floor that came to.
- */
-async function rectifyRoom(file, quad) {
-  const source = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  const { width: sw, height: sh, channels } = source.info;
-  const { width: dw, height: dh } = ROOM_SIZE;
-  const out = Buffer.alloc(dw * dh * 4);
-  const missing = Buffer.alloc(dw * dh);
-  const sample = (u, v, o) => {
-    const sx = Math.min(Math.max(u * sw - .5, 0), sw - 1e-6);
-    const sy = Math.min(Math.max(v * sh - .5, 0), sh - 1e-6);
-    const x0 = Math.floor(sx), y0 = Math.floor(sy);
-    const fx = sx - x0, fy = sy - y0;
-    const x1 = Math.min(x0 + 1, sw - 1), y1 = Math.min(y0 + 1, sh - 1);
-    const at = (px, py) => (py * sw + px) * channels;
-    const a = at(x0, y0), b = at(x1, y0), c = at(x0, y1), d = at(x1, y1);
-    for (let ch = 0; ch < 3; ch++) {
-      const top = source.data[a + ch] * (1 - fx) + source.data[b + ch] * fx;
-      const bottom = source.data[c + ch] * (1 - fx) + source.data[d + ch] * fx;
-      out[o + ch] = Math.round(top * (1 - fy) + bottom * fy);
-    }
-    out[o + 3] = 255;
-  };
-  const floorMap = homography(specQuad(), quad);
-
-  /**
-   * The wall gets its own map. Carrying the floor's projection up past the floor's back edge
-   * pushes the top of the picture out of frame — the ship's cabin lost the top of its porthole
-   * that way — because a projective map does not stay gentle outside the quad that defined it.
-   * Instead the wall band is squeezed straight into the band the grid leaves for it, spread to
-   * the full width at the top and matching the floor exactly where the two meet, so the whole
-   * wall survives and there is no seam.
-   */
-  const sourceBackY = (quad[0][1] + quad[1][1]) / 2;
-  const sourceCentre = (quad[0][0] + quad[1][0]) / 2;
-  const seamScale = ((quad[1][0] - quad[0][0]) / 2) / (SPEC.backSpan / 2);
-  const wallMap = (X, Y) => {
-    const t = Y / SPEC.line;
-    return [(.5 + (sourceCentre - .5) * t) + (X - .5) * (1 + (seamScale - 1) * t), t * sourceBackY];
-  };
-  const toSource = (X, Y) => (Y < SPEC.line ? wallMap(X, Y) : floorMap(X, Y));
-
-  // Whether an output pixel lands on the grid's floor, which is what the fraction below is of.
-  const backHalf = SPEC.backSpan / 2, frontHalf = SPEC.frontSpan / 2;
-  const onFloor = (X, Y) => Y >= SPEC.line
-    && Math.abs(X - .5) <= backHalf + (frontHalf - backHalf) * (Y - SPEC.line) / (1 - SPEC.line);
-  const inside = (X, Y) => {
-    const [u, v] = toSource(X, Y);
-    return u >= 0 && u <= 1 && v >= 0 && v <= 1;
-  };
-  let invented = 0, floorPixels = 0;
-  // The last row of each column that still had picture behind it, for carrying a wall downward.
-  const lastGood = new Int32Array(dw).fill(-1);
-
-  for (let y = 0; y < dh; y++) {
-    const Y = (y + .5) / dh;
-    // Where this row still has picture behind it. Past those the room was drawn outside its own
-    // frame, and what is missing has to be continued from what is there.
-    let first = 0, last = dw - 1;
-    while (first < dw && !inside((first + .5) / dw, Y)) first++;
-    while (last > first && !inside((last + .5) / dw, Y)) last--;
-
-    for (let x = 0; x < dw; x++) {
-      const X = (x + .5) / dw;
-      const floor = onFloor(X, Y);
-      if (floor) floorPixels++;
-      const o = (y * dw + x) * 4;
-
-      if (x >= first && x <= last) {
-        const [u, v] = toSource(X, Y);
-        sample(u, v, o);
-        lastGood[x] = y;
-        continue;
-      }
-
-      missing[y * dw + x] = 1;
-      if (floor) {
-        // Reflecting along the row keeps the floor's perspective, so a plank carries on as a plank.
-        invented++;
-        const bounce = x < first ? Math.min(2 * first - x, last) : Math.max(2 * last - x, first);
-        const [u, v] = toSource((bounce + .5) / dw, Y);
-        sample(u, v, o);
-      } else if (lastGood[x] >= 0) {
-        // Wall, and there is wall above it: carry that straight down. Panelling runs vertically,
-        // so it continues; reflecting it sideways folds a false corner into the picture instead.
-        out.copy(out, o, (lastGood[x] * dw + x) * 4, (lastGood[x] * dw + x) * 4 + 4);
-      } else {
-        const edge = x < first ? first : last;
-        const [u, v] = toSource((edge + .5) / dw, Y);
-        sample(u, v, o);
-      }
-    }
-  }
-  return { raw: out, missing, invented: floorPixels ? invented / floorPixels : 0 };
-}
-
-/** The corrected room with the grid drawn on it, so the correction can be checked by eye. */
-async function rectifiedPreview(raw, missing, roomId) {
+/** The room with the grid drawn on it, so where the grid lands is looked at rather than trusted. */
+async function gridPreview(file, roomId) {
   const { width, height } = ROOM_SIZE;
   const back = (SPEC.backSpan / 2) * width, front = (SPEC.frontSpan / 2) * width;
   const top = SPEC.line * height, centre = width / 2, ratio = SPEC.backSpan / SPEC.frontSpan;
@@ -399,16 +296,9 @@ async function rectifiedPreview(raw, missing, roomId) {
     <g stroke="#00e5ff" stroke-width="2" opacity=".85" fill="none">${lines}</g>
     <polygon points="${pt(0, 0)} ${pt(14, 0)} ${pt(14, 10)} ${pt(0, 10)}" fill="none" stroke="#c0392b" stroke-width="5"/>
   </svg>`;
-  // Tint whatever floor had to be carried in from the edge, so it is judged rather than counted.
-  const tint = Buffer.alloc(width * height * 4);
-  for (let i = 0; i < width * height; i++) {
-    if (!missing[i]) continue;
-    tint[i * 4] = 255; tint[i * 4 + 1] = 0; tint[i * 4 + 2] = 200; tint[i * 4 + 3] = 90;
-  }
   const out = path.join('art-inbox', `checked-${roomId}.png`);
-  await sharp(raw, { raw: { width, height, channels: 4 } })
-    .composite([{ input: tint, raw: { width, height, channels: 4 } }, { input: Buffer.from(svg) }])
-    .png().toFile(out);
+  await sharp(file).resize(width, height, { fit: 'fill' })
+    .composite([{ input: Buffer.from(svg) }]).png().toFile(out);
   return out;
 }
 
@@ -433,26 +323,31 @@ async function importRoom(file, roomId, dry, quad) {
     log('      check it in the picture below - npm run room:corners to move any of them');
   }
   /**
-   * How much of the floor may be made up before the room is refused. A per cent or two at the
-   * near corners is plank carried on as plank and nobody sees it. Much more than that and the
-   * bottom corners of the room were never drawn at all — not the floor and not the wall beside
-   * it — and no fill invents a wall that was never there. That is a room to generate again.
+   * The grid has to lie on painted floor everywhere, so the check is a margin: how much floor
+   * there is beyond the grid's edge, at the back of the grid and at the front. Nothing left over
+   * means the grid would hang past the skirting onto the wall, and that is a room to generate
+   * again — there is nothing to correct here, because the picture is used exactly as it was drawn.
    */
-  const INVENTION_LIMIT = .04;
+  const backY = (corners[0][1] + corners[1][1]) / 2;
+  const edgeAt = (side, y) => {
+    const back = corners[side], front = corners[side === 0 ? 3 : 2];
+    return back[0] + (front[0] - back[0]) * (y - backY) / (1 - backY);
+  };
+  const halfAt = (y) => (BACK_SPAN + (FRONT_SPAN - BACK_SPAN) * (y - FLOOR_LINE) / (1 - FLOOR_LINE)) / 2;
+  const spare = (y) => Math.min(.5 - halfAt(y) - edgeAt(0, y), edgeAt(1, y) - (.5 + halfAt(y)));
+  const toSpare = Math.min(spare(FLOOR_LINE), spare(1));
 
-  const { raw, missing, invented } = await rectifyRoom(file, corners);
-  const check = await rectifiedPreview(raw, missing, roomId);
-  if (invented > INVENTION_LIMIT && !argv.includes('--anyway')) {
-    log(`      ${(invented * 100).toFixed(1)}% of the floor was drawn outside the frame, past the ${INVENTION_LIMIT * 100}% this can make up`);
-    log('      the bottom corners of this room do not exist - generate it again, or --anyway to take it as is');
-    log(`      ${check}`);
+  log(`      floor starts ${(backY * 100).toFixed(1)}% against the grid's ${FLOOR_LINE * 100}%, `
+    + `${(toSpare * 100).toFixed(1)}% of floor to spare beside the grid`);
+  const check = await gridPreview(file, roomId);
+  log(`      ${check}`);
+  if ((backY > FLOOR_LINE || toSpare < 0) && !argv.includes('--anyway')) {
+    log('      the grid would run off the painted floor - generate this room again, or --anyway');
     return 0;
   }
-  log(`      floor moved onto the grid${invented > .002 ? `, ${(invented * 100).toFixed(1)}% of it reflected back in, tinted pink in the check` : ''}`);
-  log(`      ${check}`);
   if (!dry) await fs.writeFile(FLOORS, JSON.stringify({ ...await readFloors(), [roomId]: corners }, null, 2));
 
-  const image = sharp(raw, { raw: { width: ROOM_SIZE.width, height: ROOM_SIZE.height, channels: 4 } });
+  const image = sharp(file).resize(ROOM_SIZE.width, ROOM_SIZE.height, { fit: 'fill' });
   const buffer = await image.flatten({ background: '#ffffff' }).webp({ quality: 90 }).toBuffer();
   await write(fileFor(room.art), buffer, dry);
   return 1;

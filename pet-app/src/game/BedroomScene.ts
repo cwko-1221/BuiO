@@ -75,13 +75,18 @@ const FLOOR_CENTRE = STAGE_WIDTH / 2;
  * The floor, identical in every room.
  *
  * Every room is the same room as far as the game is concerned: the same fourteen by ten of
- * playable floor, so a arrangement carries from one theme to the next and a piece is the same
- * size wherever it is placed. The art is what conforms — the importer measures each room and says
- * how far it has drifted, rather than the grid bending to fit whatever came back.
+ * playable floor, so an arrangement carries from one theme to the next and a piece is the same
+ * size wherever it is placed.
+ *
+ * These three numbers are the largest such floor that lies inside the painted floor of every
+ * room, with a margin. That is why the grid does not use the whole of any one room's floor: it
+ * has to fit the narrowest, and fitting inside is what lets the artwork be used exactly as drawn,
+ * with nothing stretched onto the grid and no corner of floor invented where the picture ran out.
+ * The importer checks each new room against these and refuses one the grid would overhang.
  */
-const FLOOR_LINE = 0.26;     // the back wall is a shallow band across the top
-const BACK_SPAN = 0.54;      // the floor's width where it meets that wall
-const FRONT_SPAN = 0.84;     // and along the bottom of the frame, kept in off the sides
+const FLOOR_LINE = 0.41;     // the floor starts below every room's skirting
+const BACK_SPAN = 0.57;      // and is narrower than the narrowest floor there
+const FRONT_SPAN = 0.98;     // and at the bottom, where every room's floor runs off the frame
 
 const FLOOR_TOP = STAGE_HEIGHT * FLOOR_LINE;
 const FLOOR_DEPTH = STAGE_HEIGHT - FLOOR_TOP;
