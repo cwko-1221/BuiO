@@ -514,6 +514,8 @@ async function setOutfit(studentId, petId, wearableIds) {
   return { petId, equippedWearables: wearableIds };
 }
 
+const { sizedFootprint, SIZE_STEPS } = require('../lib/furniture-sets');
+
 function validatePlacements(placements, inventoryRows) {
   if (!Array.isArray(placements) || placements.length > 80) throw Object.assign(new Error('Room may contain at most 80 items'), { status: 400 });
   const owned = new Map(inventoryRows.map((row) => [row.itemId, Number(row.quantity)]));
@@ -524,13 +526,15 @@ function validatePlacements(placements, inventoryRows) {
     used.set(item.id, (used.get(item.id) || 0) + 1);
     if (used.get(item.id) > owned.get(item.id)) throw Object.assign(new Error('Too many copies of furniture placed'), { status: 409 });
     const x = Number(placement.x); const y = Number(placement.y); const rotation = Number(placement.rotation) || 0;
-    if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || y < 0 || x > 11 || y > 9 || ![0,90,180,270].includes(rotation)) throw Object.assign(new Error('Furniture is outside the room grid'), { status: 400 });
-    let [width, height] = item.footprint; if (rotation === 90 || rotation === 270) [width, height] = [height, width];
+    const size = Math.round(Number(placement.size) || 0);
+    if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || y < 0 || x >= ROOM_COLUMNS || y >= ROOM_ROWS
+      || size < SIZE_STEPS.min || size > SIZE_STEPS.max || ![0,90,180,270].includes(rotation)) throw Object.assign(new Error('Furniture is outside the room grid'), { status: 400 });
+    let [width, height] = sizedFootprint(item.footprint, size); if (rotation === 90 || rotation === 270) [width, height] = [height, width];
     if (x + width > ROOM_COLUMNS || y + height > ROOM_ROWS) throw Object.assign(new Error('Furniture footprint is outside the room grid'), { status: 400 });
     if (item.layer !== 'wall') for (let px = x; px < x + width; px += 1) for (let py = y; py < y + height; py += 1) {
       const key = `${item.layer}:${px}:${py}`; if (occupied.has(key)) throw Object.assign(new Error('Furniture footprints overlap'), { status: 409 }); occupied.add(key);
     }
-    return { id: String(placement.id || makeId()), itemId: item.id, x, y, rotation, layer: item.layer };
+    return { id: String(placement.id || makeId()), itemId: item.id, x, y, rotation, size, layer: item.layer };
   });
 }
 

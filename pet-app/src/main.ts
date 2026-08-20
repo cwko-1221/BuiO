@@ -165,6 +165,8 @@ class StudentApp {
       if (action === 'open-outfit') return await this.renderOutfitPicker();
       if (action === 'close-modal') { document.querySelector('#modalRoot')!.innerHTML=''; return; }
       if (action === 'add-furniture') { this.game?.events.emit('room:add-item',button.dataset.id); return; }
+      if (action === 'grow-item') { if(this.selectedFurniture)this.game?.events.emit('room:grow-selected',this.selectedFurniture); return; }
+      if (action === 'shrink-item') { if(this.selectedFurniture)this.game?.events.emit('room:shrink-selected',this.selectedFurniture); return; }
       if (action === 'rotate-item') { if(this.selectedFurniture)this.game?.events.emit('room:rotate-selected',this.selectedFurniture); return; }
       if (action === 'remove-item') { if(this.selectedFurniture)this.game?.events.emit('room:remove-selected',this.selectedFurniture); return; }
       if (action === 'save-room') return await this.saveRoom();
@@ -534,7 +536,7 @@ class StudentApp {
     // theme opens the same framed picker the rest of the app uses.
     // Visit privacy lives in Settings, not here — it is a standing account setting rather
     // than part of arranging a room, and it kept this bar from being about placing furniture.
-    document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity decor-head"><h1>${this.t('decorate')}</h1><button class="chooser" data-action="open-themes"><small>${zh?'主題':'Theme'}</small><b>${escapeHtml(theme?this.name(theme.name):'—')}</b></button><div class="decor-tools" id="furnitureActions"><button data-action="rotate-item">↻ ${zh?'旋轉':'Rotate'}</button><button data-action="remove-item">× ${zh?'收回':'Remove'}</button></div><button class="primary" data-action="save-room">${this.t('save')}</button><button class="secondary" data-action="back-home">${zh?'取消':'Cancel'}</button></div>${inventory}`;
+    document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity decor-head"><h1>${this.t('decorate')}</h1><button class="chooser" data-action="open-themes"><small>${zh?'主題':'Theme'}</small><b>${escapeHtml(theme?this.name(theme.name):'—')}</b></button><div class="decor-tools" id="furnitureActions"><button data-action="grow-item">＋ ${zh?'放大':'Bigger'}</button><button data-action="shrink-item">－ ${zh?'縮小':'Smaller'}</button><button data-action="rotate-item">↻ ${zh?'旋轉':'Rotate'}</button><button data-action="remove-item">× ${zh?'收回':'Remove'}</button></div><button class="primary" data-action="save-room">${this.t('save')}</button><button class="secondary" data-action="back-home">${zh?'取消':'Cancel'}</button></div>${inventory}`;
   }
 
   /**

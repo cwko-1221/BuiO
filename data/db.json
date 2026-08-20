@@ -1191,13 +1191,15 @@
       "petId": "1046d428-ac60-4251-bebd-c6e4d69a044e",
       "studentId": "S001",
       "speciesId": "spark-hamster",
-      "xp": 0,
+      "xp": 15,
       "stage": 1,
-      "dailyXp": 0,
-      "dailyXpDate": "",
-      "equippedWearables": [],
+      "dailyXp": 15,
+      "dailyXpDate": "2026-08-21",
+      "equippedWearables": [
+        "head-02"
+      ],
       "createdAt": "2026-08-19T16:02:44.861Z",
-      "updatedAt": "2026-08-20T16:33:44.752Z"
+      "updatedAt": "2026-08-20T17:15:06.190Z"
     }
   ],
   "petSkills": [],
@@ -1280,7 +1282,7 @@
     {
       "studentId": "S001",
       "itemId": "carrot-star",
-      "quantity": 1
+      "quantity": 0
     },
     {
       "studentId": "S001",
@@ -1403,7 +1405,7 @@
           "id": "23a59b32-c688-42a4-9a28-1358420baccc",
           "itemId": "sunny-oak-furniture-1",
           "x": 11,
-          "y": 0,
+          "y": 8,
           "rotation": 0,
           "layer": "furniture"
         },
@@ -1419,7 +1421,7 @@
           "id": "3735b20e-b824-492f-8a2d-23c5c03ae550",
           "itemId": "sunny-oak-furniture-3",
           "x": 3,
-          "y": 2,
+          "y": 5,
           "rotation": 0,
           "layer": "furniture"
         },
@@ -1427,7 +1429,7 @@
           "id": "f01eb275-f85b-473c-a66c-b19628934d0c",
           "itemId": "sunny-oak-furniture-5",
           "x": 9,
-          "y": 0,
+          "y": 9,
           "rotation": 0,
           "layer": "furniture"
         },
@@ -1443,20 +1445,20 @@
           "id": "9f938f59-c54e-487b-af6d-14b997930a03",
           "itemId": "sunny-oak-furniture-9",
           "x": 8,
-          "y": 7,
+          "y": 9,
           "rotation": 0,
           "layer": "furniture"
         },
         {
           "id": "5cd97953-6c3f-47ff-9be7-d184cd940210",
           "itemId": "sunny-oak-furniture-3",
-          "x": 6,
-          "y": 2,
+          "x": 2,
+          "y": 9,
           "rotation": 0,
           "layer": "furniture"
         }
       ],
-      "updatedAt": "2026-08-20T16:24:34.565Z"
+      "updatedAt": "2026-08-20T17:12:49.755Z"
     }
   ],
   "petMapProgress": [],
@@ -2182,6 +2184,27 @@
         "stardust": 999999
       },
       "createdAt": "2026-08-20T16:24:48.424Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "63bff8ee-5b91-4860-8746-ef4e0c2865b0",
+      "kind": "pet_feed",
+      "response": {
+        "pet": {
+          "id": "1046d428-ac60-4251-bebd-c6e4d69a044e",
+          "speciesId": "spark-hamster",
+          "xp": 15,
+          "stage": 1,
+          "dailyXp": 15,
+          "dailyXpDate": "2026-08-21",
+          "equippedWearables": [
+            "head-01"
+          ]
+        },
+        "consumed": "carrot-star",
+        "evolved": false
+      },
+      "createdAt": "2026-08-20T17:14:30.164Z"
     }
   ]
 }

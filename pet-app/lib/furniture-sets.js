@@ -20,6 +20,16 @@
  */
 
 /** Footprint, layer and the size to state in a prompt, per position in a batch. */
+/**
+ * How much floor a piece takes after a child has grown or shrunk it. A step adds a tile to
+ * each side, so a bedside chest at one tile becomes four, which is what "bigger" looks like
+ * on a grid — a multiplier would jump a rug from twenty-four tiles to fifty-four.
+ */
+const SIZE_STEPS = { min: -1, max: 3 };
+function sizedFootprint([width, height], step = 0) {
+  const by = Math.max(SIZE_STEPS.min, Math.min(SIZE_STEPS.max, Math.round(Number(step) || 0)));
+  return [Math.max(1, width + by), Math.max(1, height + by)];
+}
 const SLOTS = [
   { footprint: [3, 2], layer: 'furniture', size: 'three tiles wide and two deep' },
   { footprint: [4, 3], layer: 'rug', size: 'four tiles wide and three deep, lying flat on the floor' },
@@ -170,4 +180,4 @@ const SETS = {
   ],
 };
 
-module.exports = { SLOTS, SETS, BATCHES };
+module.exports = { sizedFootprint, SIZE_STEPS, SLOTS, SETS, BATCHES };

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { PetAvatar } from './PetAvatar';
+import { sizedFootprint, SIZE_STEPS } from '../furniture-size';
 import type { Bootstrap, FurnitureDefinition, PetDefinition, PetFacing, PetInstance, RoomPlacement } from '../types';
 
 interface BedroomData { bootstrap: Bootstrap; activePet: PetInstance; petDefinition: PetDefinition; editing?: boolean }
@@ -228,6 +229,7 @@ export class BedroomScene extends Phaser.Scene {
       image.setDisplaySize(1280, 720).setAlpha(.98);
     } else this.drawDollhouse();
     this.drawRoomFrame();
+    this.placements = this.placements.map((placement) => this.inBounds(placement));
     this.placements.forEach((placement) => this.addFurniture(placement));
     // Stand the creature on a floor cell rather than a fixed point, so it sorts against the
     // furniture by the row it is on — the same rule every piece of furniture follows.
@@ -252,7 +254,7 @@ export class BedroomScene extends Phaser.Scene {
       if (!this.editing || !target.getData('placementId')) return;
       const placement = this.placements.find((item) => item.id === target.getData('placementId'));
       if (!placement) { target.x = dragX; target.y = dragY; return; }
-      const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+      const [width, height] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
       const cell = this.screenToFootprintOrigin(dragX, dragY, width, height);
       this.drawFootprint(placement, cell);
       // Snap the piece to the target cell instead of letting it trail the finger. Following
@@ -264,18 +266,20 @@ export class BedroomScene extends Phaser.Scene {
       // where it would land, so every piece dropped lower than the cell it had been shown on.
       const centre = this.gridToScreen(cell.x + width / 2, cell.y + height);
       target.setPosition(centre.x, centre.y);
+      this.resize({ ...placement, x: cell.x, y: cell.y });
       target.setDepth(this.depthFor({ ...placement, x: cell.x, y: cell.y }));
     });
     this.input.on('dragend', (_pointer: Phaser.Input.Pointer, target: Phaser.GameObjects.Container) => {
       if (!this.editing) return;
       const placement = this.placements.find((item) => item.id === target.getData('placementId')); if (!placement) return;
-      const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+      const [width, height] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
       const grid = this.screenToFootprintOrigin(target.x, target.y, width, height);
       // Snap back to the last valid square rather than accepting a drop the server will reject.
-      if (this.fits(placement.itemId, grid.x, grid.y, placement.rotation, placement.id)) {
+      if (this.fits(placement.itemId, grid.x, grid.y, placement.rotation, placement.id, placement.size)) {
         placement.x = grid.x; placement.y = grid.y;
       }
       const screen = this.footprintCentre(placement); target.setPosition(screen.x, screen.y);
+      this.resize(placement);
       target.setDepth(this.depthFor(placement)); // re-sort: moving a piece changes what it occludes
       this.clearFootprint();
       this.game.events.emit('room:placements', this.placements.map((item) => ({ ...item })));
@@ -283,6 +287,8 @@ export class BedroomScene extends Phaser.Scene {
     this.game.events.on('room:set-editing', this.setEditing, this);
     this.game.events.on('room:add-item', this.placeNewItem, this);
     this.game.events.on('room:rotate-selected', this.rotateSelected, this);
+    this.game.events.on('room:grow-selected', (id: string) => this.resizeSelected(id, 1), this);
+    this.game.events.on('room:shrink-selected', (id: string) => this.resizeSelected(id, -1), this);
     this.game.events.on('room:remove-selected', this.removeSelected, this);
     this.game.events.on('pet:emote', this.petEmote, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -369,7 +375,7 @@ export class BedroomScene extends Phaser.Scene {
   private drawFootprint(placement: RoomPlacement, cell: { x: number; y: number }) {
     const ghost = this.ghost; if (!ghost) return;
     ghost.clear();
-    const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+    const [width, height] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
     const legal = this.fits(placement.itemId, cell.x, cell.y, placement.rotation, placement.id);
     ghost.fillStyle(legal ? 0x53d987 : 0xf2685c, .38);
     ghost.lineStyle(3, legal ? 0x1f9d57 : 0xc2352a, .95);
@@ -395,13 +401,13 @@ export class BedroomScene extends Phaser.Scene {
    * half its depth, and that correction changes with perspective — this needs none.
    */
   private footprintCentre(placement: RoomPlacement) {
-    const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+    const [width, height] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
     return this.gridToScreen(placement.x + width / 2, placement.y + height);
   }
 
   /** Middle of the footprint, for the things that lie flat rather than stand. */
   private footprintMiddle(placement: RoomPlacement) {
-    const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+    const [width, height] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
     return this.gridToScreen(placement.x + width / 2, placement.y + height / 2);
   }
 
@@ -418,10 +424,29 @@ export class BedroomScene extends Phaser.Scene {
   }
 
   /** Grid footprint after rotation. 90/270 swap the axes, matching the server. */
-  private footprintOf(itemId: string, rotation: number): [number, number] {
+  private footprintOf(itemId: string, rotation: number, size = 0): [number, number] {
     const definition = this.model.bootstrap.catalog.furniture.find((item) => item.id === itemId);
-    const [width, height] = definition?.footprint || [1, 1];
+    const [width, height] = sizedFootprint(definition?.footprint || [1, 1], size);
     return rotation === 90 || rotation === 270 ? [height, width] : [width, height];
+  }
+
+  /** Grow or shrink the selected piece by a step, if there is room for it where it stands. */
+  private resizeSelected(id: string, by: number) {
+    const placement = this.placements.find((item) => item.id === id);
+    if (!placement) return;
+    const size = Phaser.Math.Clamp((placement.size || 0) + by, SIZE_STEPS.min, SIZE_STEPS.max);
+    if (size === (placement.size || 0)) return;
+    if (!this.fits(placement.itemId, placement.x, placement.y, placement.rotation, placement.id, size)) return;
+    placement.size = size;
+    const container = this.furniture.get(placement.id);
+    if (container) {
+      const centre = this.footprintCentre(placement);
+      container.setPosition(centre.x, centre.y);
+      container.setDepth(this.depthFor(placement));
+      container.setInteractive({ hitArea: this.hitAreaFor(placement, container), hitAreaCallback: hitTest, useHandCursor: true });
+    }
+    this.resize(placement);
+    this.game.events.emit('room:placements', this.placements.map((item) => ({ ...item })));
   }
 
   /**
@@ -430,11 +455,11 @@ export class BedroomScene extends Phaser.Scene {
    * a table and only surfaces "Furniture footprints overlap" when they press save, discarding
    * the whole arrangement.
    */
-  private fits(itemId: string, x: number, y: number, rotation: number, ignorePlacementId?: string) {
+  private fits(itemId: string, x: number, y: number, rotation: number, ignorePlacementId?: string, size = 0) {
     const catalog = this.model.bootstrap.catalog;
     const definition = catalog.furniture.find((item) => item.id === itemId);
     if (!definition) return false;
-    const [width, height] = this.footprintOf(itemId, rotation);
+    const [width, height] = this.footprintOf(itemId, rotation, size);
     if (x < 0 || y < 0 || x + width > GRID_COLUMNS || y + height > GRID_ROWS) return false;
     if (definition.layer === 'wall') return true; // wall pieces are not occupancy-checked
 
@@ -443,7 +468,7 @@ export class BedroomScene extends Phaser.Scene {
       if (placement.id === ignorePlacementId) continue;
       const other = catalog.furniture.find((item) => item.id === placement.itemId);
       if (!other || other.layer !== definition.layer) continue;
-      const [otherWidth, otherHeight] = this.footprintOf(placement.itemId, placement.rotation);
+      const [otherWidth, otherHeight] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
       for (let px = placement.x; px < placement.x + otherWidth; px += 1) {
         for (let py = placement.y; py < placement.y + otherHeight; py += 1) occupied.add(`${px}:${py}`);
       }
@@ -461,7 +486,7 @@ export class BedroomScene extends Phaser.Scene {
    */
   private depthFor(placement: RoomPlacement) {
     if (placement.layer === 'wall') return 5;
-    const [, height] = this.footprintOf(placement.itemId, placement.rotation);
+    const [, height] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
     // Seen straight on, only depth into the room decides what covers what — and a deep piece
     // is covered by anything in front of the row it reaches, not the row it starts on.
     const front = placement.y + height;
@@ -478,7 +503,7 @@ export class BedroomScene extends Phaser.Scene {
    * Coordinates are local to the container, which is why the art is rotated instead of it.
    */
   private hitAreaFor(placement: RoomPlacement, container: Phaser.GameObjects.Container) {
-    const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+    const [width, height] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
     // The footprint is a trapezoid on screen, and the container sits at the middle of its front
     // edge, so its corners are taken from the projection and shifted into container space.
     const anchor = this.footprintCentre(placement);
@@ -547,6 +572,19 @@ export class BedroomScene extends Phaser.Scene {
     art.setData('flipped', flipped);
   }
 
+  /**
+   * Keep a placement inside the room. Pieces have grown since some of these were saved, and a
+   * chest that was one tile at the right-hand wall is two now and would hang off the end of the
+   * floor. Sliding it back in is better than dropping it: the child put it there.
+   */
+  private inBounds(placement: RoomPlacement): RoomPlacement {
+    const [width, height] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
+    return {
+      ...placement,
+      x: Phaser.Math.Clamp(placement.x, 0, Math.max(0, GRID_COLUMNS - width)),
+      y: Phaser.Math.Clamp(placement.y, 0, Math.max(0, GRID_ROWS - height)),
+    };
+  }
   private addFurniture(placement: RoomPlacement) {
     const definition = this.model.bootstrap.catalog.furniture.find((item) => item.id === placement.itemId); if (!definition) return;
     // Anchor on the CENTRE of the footprint, not its top lattice corner. Anchoring at the
@@ -565,37 +603,62 @@ export class BedroomScene extends Phaser.Scene {
     this.furniture.set(placement.id, container);
   }
 
+  /**
+   * Size and anchor a piece for where it now stands.
+   *
+   * A cell is smaller at the back of the room than at the front, so a piece carried forward has
+   * to grow with the floor under it. This used to be worked out once, when the piece was first
+   * drawn, and dropping it somewhere else only moved it — so a chest dragged from the back wall
+   * to the front stayed the size it had been at the back and no longer filled its own square.
+   */
+  private sizeFurniture(image: Phaser.GameObjects.Image, definition: FurnitureDefinition, placement: RoomPlacement) {
+    // Through footprintOf, so a piece that has been turned or resized is centred on the floor it
+    // actually occupies. Reading definition.footprint straight left a turned piece measured across
+    // its unturned width, which put it off to one side of its own square.
+    const [footprintX, footprintY] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
+    // Props do not fill or centre their canvas, so fit and anchor against the measured content
+    // box. Using the canvas instead renders a piece at roughly a third of its intended size.
+    const box = definition.content ?? { x: 0, y: 0, width: 1, height: 1 };
+    // How wide it is drawn is not the same as how much floor it occupies: a clock, a lamp and
+    // an armchair all take one tile and are nothing like the same size, so the drawn width comes
+    // from how big the piece was drawn next to the others on its sheet.
+    const [baseWidth, baseDepth] = definition.footprint || [1, 1];
+    const turned = placement.rotation === 90 || placement.rotation === 270;
+    const baseAcross = turned ? baseDepth : baseWidth;
+    const drawn = definition.drawTiles || baseWidth;
+    const across = (turned ? drawn * (baseDepth / Math.max(1, baseWidth)) : drawn)
+      * (footprintX / Math.max(1, baseAcross));
+    const middle = placement.x + footprintX / 2;
+    const front = this.gridToScreen(middle + across / 2, placement.y + footprintY);
+    const back = this.gridToScreen(middle - across / 2, placement.y + footprintY);
+    const targetWidth = Math.abs(front.x - back.x);
+    image.setScale(targetWidth / Math.max(1, box.width * image.width));
+    // Origin is expressed in canvas fractions: horizontally centred on the object, and
+    // vertically at its base so it stands on the floor (rugs sit on their own centre).
+    image.setOrigin(
+      box.x + box.width / 2,
+      placement.layer === 'rug' ? box.y + box.height / 2 : box.y + box.height,
+    );
+    // The container already sits on the front edge of the footprint, so a standing piece needs
+    // no offset. A rug lies flat across the whole footprint, so it is lifted to its middle.
+    image.setY(placement.layer === 'rug'
+      ? this.footprintMiddle(placement).y - this.footprintCentre(placement).y
+      : 0);
+  }
+  /** Re-size a placed piece after it has moved, so it keeps filling the square it is on. */
+  private resize(placement: RoomPlacement) {
+    const definition = this.model.bootstrap.catalog.furniture.find((item) => item.id === placement.itemId);
+    const container = this.furniture.get(placement.id);
+    if (!definition || !container) return;
+    const art = container.list[0] as Phaser.GameObjects.Container | undefined;
+    const image = art?.list?.[0] as Phaser.GameObjects.Image | undefined;
+    if (image?.setScale) this.sizeFurniture(image, definition, placement);
+  }
   private furnitureArt(definition: FurnitureDefinition, placement: RoomPlacement) {
     const container = this.add.container();
     if (this.textures.exists(definition.id)) {
-      const [footprintX, footprintY] = definition.footprint || [1, 1];
       const image = this.add.image(0, 0, definition.id);
-      // Props do not fill or centre their canvas, so fit and anchor against the measured
-      // content box. Using the canvas instead renders a 1x1 piece at roughly a third of its
-      // intended size and offset from where it was placed.
-      const box = definition.content ?? { x: 0, y: 0, width: 1, height: 1 };
-      // How wide it is drawn is not the same as how much floor it occupies: a clock, a lamp and
-      // an armchair all take one tile and are nothing like the same size, so the drawn width comes
-      // from how big the piece was drawn next to the others on its sheet. A cell is narrower at
-      // the back, so it is measured where the piece actually stands rather than from a fixed tile.
-      const across = definition.drawTiles || footprintX;
-      const middle = placement.x + footprintX / 2;
-      const front = this.gridToScreen(middle + across / 2, placement.y + footprintY);
-      const back = this.gridToScreen(middle - across / 2, placement.y + footprintY);
-      const targetWidth = Math.abs(front.x - back.x);
-      image.setScale(targetWidth / Math.max(1, box.width * image.width));
-      // Origin is expressed in canvas fractions: horizontally centred on the object, and
-      // vertically at its base so it stands on the floor (rugs sit on their own centre).
-      image.setOrigin(
-        box.x + box.width / 2,
-        placement.layer === 'rug' ? box.y + box.height / 2 : box.y + box.height,
-      );
-      // The container already sits on the front edge of the footprint, so a standing piece needs
-      // no offset. A rug lies flat across the whole footprint, so it is lifted to its middle.
-      if (placement.layer === 'rug') {
-        const middle = this.footprintMiddle(placement);
-        image.setY(middle.y - this.footprintCentre(placement).y);
-      }
+      this.sizeFurniture(image, definition, placement);
       container.add(image);
       return container;
     }
@@ -697,7 +760,7 @@ export class BedroomScene extends Phaser.Scene {
     for (const placement of this.placements) {
       const definition = this.model.bootstrap.catalog.furniture.find((item) => item.id === placement.itemId);
       if (!definition || definition.layer !== 'furniture') continue;
-      const [width, height] = this.footprintOf(placement.itemId, placement.rotation);
+      const [width, height] = this.footprintOf(placement.itemId, placement.rotation, placement.size);
       for (let x = placement.x; x < placement.x + width; x += 1) {
         for (let y = placement.y; y < placement.y + height; y += 1) blocked.add(`${x}:${y}`);
       }

@@ -63,7 +63,11 @@ export interface PetInstance {
   equippedWearables: string[];
 }
 export interface InventoryStack { itemId: string; quantity: number }
-export interface RoomPlacement { id: string; itemId: string; x: number; y: number; rotation: number; layer: string }
+export interface RoomPlacement {
+  id: string; itemId: string; x: number; y: number; rotation: number; layer: string;
+  /** How many steps a child has grown (+) or shrunk (-) it. A step is a tile on each side. */
+  size?: number;
+}
 export interface RoomState { themeId: string; visibility: 'private' | 'class'; placements: RoomPlacement[]; updatedAt?: string }
 export interface Bootstrap {
   profile: { studentId: string; activePetId: string | null; starterEggClaimed: boolean; eggPity: number; stardust: number };

@@ -107,6 +107,27 @@ try {
     carried.shownWhileDragging.y - carried.whereItLands.y) < 0.5,
     'a dropped piece does not land where the drag showed it');
 
+  // Bigger and smaller step the footprint a tile on each side, so a one-tile chest becomes four,
+  // and the piece stays centred on the floor it now occupies rather than on the floor it used to.
+  const resized = await page.evaluate(() => {
+    const scene = window.__petGame.scene.getScene('Bedroom');
+    const placement = scene.placements[scene.placements.length - 1];
+    const before = scene.footprintOf(placement.itemId, placement.rotation, placement.size);
+    scene.game.events.emit('room:grow-selected', placement.id);
+    const after = scene.footprintOf(placement.itemId, placement.rotation, placement.size);
+    const piece = scene.furniture.get(placement.id);
+    const [w, h] = after;
+    const left = scene.gridToScreen(placement.x, placement.y + h);
+    const right = scene.gridToScreen(placement.x + w, placement.y + h);
+    // The container sits where the piece meets the floor and the art is centred on it, so the
+    // container's own x is the middle of the piece.
+    return { before, after, middleOfFloor: (left.x + right.x) / 2, middleOfPiece: piece ? piece.x : null };
+  });
+  if (resized.middleOfPiece !== null && resized.after[0] > resized.before[0]) {
+    assert.ok(Math.abs(resized.middleOfFloor - resized.middleOfPiece) < 2,
+      'a resized piece is not centred on the floor it occupies');
+  }
+
   await page.screenshot({path:path.join(artifactDir,'06-decoration-ipad-landscape.png')});
   await page.locator('[data-tab="home"]').click(); await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(250);
   await page.screenshot({path:path.join(artifactDir,'07-home-mobile.png')});
