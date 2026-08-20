@@ -16,8 +16,20 @@
 // By default this overwrites the live assets. Pass --out <dir> to write a copy somewhere else
 // and look at a batch before it replaces anything.
 //
+// A room needs one extra step the first time. Every room in the game shares one grid, and no
+// generator lands on a shape on request, so point at the floor's four corners once:
+//
+//   npm run room:corners -- art-inbox/room-sunny-oak.png
+//
+// That records them in scripts/room-floors.json, and importing then moves the floor onto the
+// grid. Importing a room with no corners recorded leaves it uncorrected and says so.
+//
+// Assets are served out of pet-app/dist, which the build copies from public, so run
+// npm run build:pet afterwards or the old art stays on screen.
+//
 // Usage:  npm run import:art -- art-inbox/*.png
 //         npm run import:art -- --dry art-inbox/pet-starpatch-cat-1.png
+//         npm run import:art -- --floor 23,26 77,26 99,100 1,100 art-inbox/room-x.png
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -30,6 +42,20 @@ const { catalog } = require('../pet-app/lib/catalog.js');
 const argv = process.argv.slice(2);
 const dry = argv.includes('--dry');
 const outIndex = argv.indexOf('--out');
+/**
+ * --floor takes the floor's four corners as per cent of the image: back-left, back-right,
+ * front-right, front-left. The front pair is usually outside the picture, which is allowed and
+ * is the whole point — a room drawn wider than its frame has its near corners off the edge.
+ */
+const CORNER = /^-?[0-9.]+,-?[0-9.]+$/;
+const floorIndex = argv.indexOf('--floor');
+const floorArgs = floorIndex < 0 ? [] : argv.slice(floorIndex + 1).filter((a, i, all) =>
+  CORNER.test(a) && all.slice(0, i).every((b) => CORNER.test(b))).slice(0, 4);
+const FLOOR_ARG = floorIndex < 0 ? null : floorArgs.map((pair) => pair.split(',').map((n) => Number(n) / 100));
+if (FLOOR_ARG && FLOOR_ARG.length !== 4) {
+  throw new Error('--floor wants four "x,y" corners in per cent: back-left back-right front-right front-left');
+}
+
 const OUT_ROOT = outIndex >= 0 ? path.resolve(argv[outIndex + 1]) : null;
 const PUBLIC_ROOT = path.resolve('pet-app/public');
 /** Canvas the runtime expects for each kind of standalone object. */
@@ -206,99 +232,146 @@ async function loadSheet(file) {
  * stops dead at a skirting board. Two earlier attempts failed here: the strongest horizontal edge
  * is a wainscot rail, not the floor, and a fixed reference colour cut the floor in half.
  */
-async function measureFloor(file) {
-  const width = 400;
-  const height = 225;
-  const { data, info } = await sharp(file).resize(width, height, { fit: 'fill' }).removeAlpha().raw()
-    .toBuffer({ resolveWithObject: true });
-  const at = (x, y) => { const i = (y * width + x) * info.channels; return [data[i], data[i + 1], data[i + 2]]; };
-  const apart = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
+/**
+ * The floor the game projects, as fractions of the room image. These are the same three numbers
+ * BedroomScene draws its grid from, and the whole point of what follows is to move a generated
+ * room onto them rather than hoping one was generated on them.
+ */
+const SPEC = { line: 0.26, backSpan: 0.54, frontSpan: 0.84 };
+/** Back left, back right, front right, front left — the order corners are clicked and stored in. */
+const specQuad = () => {
+  const back = SPEC.backSpan / 2, front = SPEC.frontSpan / 2;
+  return [[.5 - back, SPEC.line], [.5 + back, SPEC.line], [.5 + front, 1], [.5 - front, 1]];
+};
 
-  const floor = new Uint8Array(width * height);
-  const stack = [Math.round(width / 2), height - 3];
-  floor[(height - 3) * width + Math.round(width / 2)] = 1;
-  while (stack.length) {
-    const y = stack.pop();
-    const x = stack.pop();
-    const here = at(x, y);
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const nx = x + dx;
-      const ny = y + dy;
-      if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
-      const flat = ny * width + nx;
-      if (floor[flat]) continue;
-      if (apart(at(nx, ny), here) > 42) continue;   // a skirting board is a wall of difference
-      floor[flat] = 1;
-      stack.push(nx, ny);
+/** Solve a small dense system by elimination with partial pivoting. */
+function solve(rows, values) {
+  const n = values.length;
+  const m = rows.map((row, i) => [...row, values[i]]);
+  for (let col = 0; col < n; col++) {
+    let pivot = col;
+    for (let r = col + 1; r < n; r++) if (Math.abs(m[r][col]) > Math.abs(m[pivot][col])) pivot = r;
+    [m[col], m[pivot]] = [m[pivot], m[col]];
+    if (Math.abs(m[col][col]) < 1e-12) throw new Error('the four corners are degenerate');
+    for (let r = 0; r < n; r++) {
+      if (r === col) continue;
+      const factor = m[r][col] / m[col][col];
+      for (let c = col; c <= n; c++) m[r][c] -= factor * m[col][c];
     }
   }
+  return m.map((row, i) => row[n] / row[i]);
+}
 
-  const spans = [];
-  for (let y = 0; y < height; y += 1) {
-    let left = -1;
-    let right = -1;
-    for (let x = 0; x < width; x += 1) {
-      if (!floor[y * width + x]) continue;
-      if (left < 0) left = x;
-      right = x;
-    }
-    // A row counts as floor only once it is a real band, not a few stray pixels of matching wall.
-    if (left >= 0 && right - left > width * 0.2) spans.push({ y, span: (right - left + 1) / width });
+/** The projective map taking one quad onto another — the only transform that keeps a plane flat. */
+function homography(from, to) {
+  const rows = [], values = [];
+  for (let i = 0; i < 4; i++) {
+    const [x, y] = from[i], [u, v] = to[i];
+    rows.push([x, y, 1, 0, 0, 0, -u * x, -u * y]); values.push(u);
+    rows.push([0, 0, 0, x, y, 1, -v * x, -v * y]); values.push(v);
   }
-  if (spans.length < 12) return null;
-
-  const median = (list) => {
-    const sorted = list.map((entry) => entry.span).sort((a, b) => a - b);
-    return sorted[Math.floor(sorted.length / 2)];
-  };
-  const round = (value) => Number(value.toFixed(4));
-  return {
-    line: round(spans[0].y / height),
-    backSpan: round(median(spans.slice(0, 8))),
-    frontSpan: round(median(spans.slice(-8))),
+  const h = solve(rows, values);
+  return (x, y) => {
+    const w = h[6] * x + h[7] * y + 1;
+    return [(h[0] * x + h[1] * y + h[2]) / w, (h[3] * x + h[4] * y + h[5]) / w];
   };
 }
 
-/** A picture of what was measured, so nobody has to take the numbers on trust. */
-async function floorPreview(file, floor, roomId) {
-  const width = 800;
-  const height = 450;
-  const top = height * floor.line;
-  const back = (width * floor.backSpan) / 2;
-  const front = (width * floor.frontSpan) / 2;
-  const svg = Buffer.from(`<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="${width / 2 - back},${top} ${width / 2 + back},${top} ${width / 2 + front},${height} ${width / 2 - front},${height}"
-      fill="#e0483a" fill-opacity="0.22" stroke="#e0483a" stroke-width="3"/>
-    <line x1="0" y1="${top}" x2="${width}" y2="${top}" stroke="#1d6fd0" stroke-width="2" stroke-dasharray="8 6"/>
-    <text x="12" y="${top - 8}" font-family="monospace" font-size="18" font-weight="700" fill="#1d6fd0">floor ${Math.round(floor.line * 100)}%</text>
-  </svg>`);
-  const target = path.join('art-inbox', `measured-${roomId}.png`);
-  await sharp(file).resize(width, height, { fit: 'fill' }).composite([{ input: svg }]).png().toFile(target);
-  return target;
+/**
+ * Move a generated room onto the grid's floor.
+ *
+ * Given where the floor's four corners actually are, this is the transform that puts them where
+ * the game expects them, and it carries the walls along with it. Corners are allowed to fall
+ * outside the picture — that is the usual case, since a room drawn wider than its frame has its
+ * near corners off the edge — and whatever floor was never drawn is carried in from the edge
+ * pixels beside it, with a note saying how much of the floor that was.
+ */
+async function rectifyRoom(file, quad) {
+  const source = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { width: sw, height: sh, channels } = source.info;
+  const { width: dw, height: dh } = ROOM_SIZE;
+  const toSource = homography(specQuad(), quad);
+  const out = Buffer.alloc(dw * dh * 4);
+
+  // Where the source runs out, hold its edge pixel rather than mirroring: a wall carried
+  // outward reads as a wider panel, where a mirror folds a fake corner into the picture.
+  const hold = (v, n) => Math.min(Math.max(v, 0), n - 1e-6);
+  let invented = 0, floorPixels = 0;
+
+  for (let y = 0; y < dh; y++) {
+    for (let x = 0; x < dw; x++) {
+      const [u, v] = toSource((x + .5) / dw, (y + .5) / dh);
+      const onFloor = v >= SPEC.line;
+      if (onFloor) floorPixels++;
+      if (onFloor && (u < 0 || u > 1 || v < 0 || v > 1)) invented++;
+      const sx = hold(u * sw - .5, sw), sy = hold(v * sh - .5, sh);
+      const x0 = Math.floor(sx), y0 = Math.floor(sy);
+      const fx = sx - x0, fy = sy - y0;
+      const x1 = Math.min(x0 + 1, sw - 1), y1 = Math.min(y0 + 1, sh - 1);
+      const at = (px, py) => (py * sw + px) * channels;
+      const a = at(x0, y0), b = at(x1, y0), c = at(x0, y1), d = at(x1, y1);
+      const o = (y * dw + x) * 4;
+      for (let ch = 0; ch < 3; ch++) {
+        const top = source.data[a + ch] * (1 - fx) + source.data[b + ch] * fx;
+        const bottom = source.data[c + ch] * (1 - fx) + source.data[d + ch] * fx;
+        out[o + ch] = Math.round(top * (1 - fy) + bottom * fy);
+      }
+      out[o + 3] = 255;
+    }
+  }
+  return { raw: out, invented: floorPixels ? invented / floorPixels : 0 };
 }
 
-async function importRoom(file, roomId, dry) {
+/** The corrected room with the grid drawn on it, so the correction can be checked by eye. */
+async function rectifiedPreview(raw, roomId) {
+  const { width, height } = ROOM_SIZE;
+  const back = (SPEC.backSpan / 2) * width, front = (SPEC.frontSpan / 2) * width;
+  const top = SPEC.line * height, centre = width / 2, ratio = SPEC.backSpan / SPEC.frontSpan;
+  const ease = (t) => (ratio * t) / (1 - (1 - ratio) * t);
+  const pt = (gx, gy) => {
+    const e = ease(gy / 10);
+    return [centre + (gx / 14 - .5) * 2 * (back + (front - back) * e), top + (height - top) * e];
+  };
+  let lines = '';
+  for (let c = 0; c <= 14; c++) { const [ax, ay] = pt(c, 0), [bx, by] = pt(c, 10); lines += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}"/>`; }
+  for (let r = 0; r <= 10; r++) { const [ax, ay] = pt(0, r), [bx, by] = pt(14, r); lines += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}"/>`; }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+    <g stroke="#00e5ff" stroke-width="2" opacity=".85" fill="none">${lines}</g>
+    <polygon points="${pt(0, 0)} ${pt(14, 0)} ${pt(14, 10)} ${pt(0, 10)}" fill="none" stroke="#c0392b" stroke-width="5"/>
+  </svg>`;
+  const out = path.join('art-inbox', `checked-${roomId}.png`);
+  await sharp(raw, { raw: { width, height, channels: 4 } })
+    .composite([{ input: Buffer.from(svg) }]).png().toFile(out);
+  return out;
+}
+
+/**
+ * Corners pointed at once are kept in the repository, so re-importing a room never asks again and
+ * so the correction that produced a shipped room is on the record next to it.
+ */
+const FLOORS = 'scripts/room-floors.json';
+const readFloors = async () => { try { return JSON.parse(await fs.readFile(FLOORS, 'utf8')); } catch { return {}; } };
+const savedFloor = async (roomId) => (await readFloors())[roomId] || null;
+
+async function importRoom(file, roomId, dry, quad) {
   const room = catalog.rooms.find((entry) => entry.id === roomId);
   if (!room) throw new Error(`no room called ${roomId}`);
 
-  const floor = await measureFloor(file);
-  const SPEC = { line: 0.26, backSpan: 0.54, frontSpan: 0.84 };
-  if (floor) {
-    const pct = (value) => `${Math.round(value * 100)}%`;
-    const off = (actual, want, tolerance) => (Math.abs(actual - want) <= tolerance ? '' : ` (spec ${pct(want)})`);
-    log(`      wall ${pct(floor.line)}${off(floor.line, SPEC.line, .04)}`
-      + `, floor ${pct(floor.backSpan)} wide at the back${off(floor.backSpan, SPEC.backSpan, .06)}`
-      + `, ${pct(floor.frontSpan)} at the front${off(floor.frontSpan, SPEC.frontSpan, .06)}`);
-    const drifted = Math.abs(floor.line - SPEC.line) > .04
-      || Math.abs(floor.backSpan - SPEC.backSpan) > .06
-      || Math.abs(floor.frontSpan - SPEC.frontSpan) > .06;
-    log(`      ${drifted ? 'off spec - the grid will not sit on this floor, generate it again' : 'matches the grid'}: ${await floorPreview(file, SPEC, roomId)}`);
+  const corners = quad || await savedFloor(roomId);
+  let image = sharp(file).resize(ROOM_SIZE.width, ROOM_SIZE.height, { fit: 'fill' });
+
+  if (corners) {
+    const { raw, invented } = await rectifyRoom(file, corners);
+    image = sharp(raw, { raw: { width: ROOM_SIZE.width, height: ROOM_SIZE.height, channels: 4 } });
+    log(`      floor moved onto the grid${invented > .002 ? `, ${(invented * 100).toFixed(1)}% of it carried in from the edge, because that much was drawn outside the frame` : ''}`);
+    log(`      ${await rectifiedPreview(raw, roomId)}`);
+    if (!dry) await fs.writeFile(FLOORS, JSON.stringify({ ...await readFloors(), [roomId]: corners }, null, 2));
   } else {
-    log('      could not find the floor to check it');
+    log('      no floor corners yet, so the grid will land wherever the art put the floor');
+    log(`      run: npm run room:corners -- ${file}`);
   }
 
-  const buffer = await sharp(file).resize(ROOM_SIZE.width, ROOM_SIZE.height, { fit: 'fill' })
-    .flatten({ background: '#ffffff' }).webp({ quality: 90 }).toBuffer();
+  const buffer = await image.flatten({ background: '#ffffff' }).webp({ quality: 90 }).toBuffer();
   await write(fileFor(room.art), buffer, dry);
   return 1;
 }
@@ -427,9 +500,9 @@ function spriteManifest() {
 }
 
 // -------------------------------------------------------------------- main ---
-const files = argv.filter((entry, index) => !entry.startsWith('--') && argv[index - 1] !== '--out');
+const files = argv.filter((entry) => !entry.startsWith('--') && entry !== argv[outIndex + 1] && !floorArgs.includes(entry));
 if (!files.length) {
-  console.error('usage: npm run import:art -- [--dry] [--out <dir>] <sheet.png> ...');
+  console.error('usage: npm run import:art -- [--dry] [--out <dir>] [--floor "x,y x,y x,y x,y"] <sheet.png> ...');
   process.exit(1);
 }
 
@@ -442,7 +515,7 @@ for (const file of files) {
   try {
     let written = 0;
     if (name.startsWith('room-')) {
-      written = await importRoom(file, name.slice(5), dry);
+      written = await importRoom(file, name.slice(5), dry, FLOOR_ARG);
     } else if (name.startsWith('furniture-')) {
       const ids = name.slice(10).split('+');
       written = await importFurniture(file, ids.length > 1 ? ids : splitRoomPair(name.slice(10)), dry);

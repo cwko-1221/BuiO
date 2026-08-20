@@ -240,17 +240,11 @@ Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not add extra poses,
 const MUST_SAY = {
   room: [
     'fully opaque', 'no transparency anywhere',
-    // The three surfaces and their proportions: a grid is laid over the floor, so a room that
-    // puts its wall where the floor should be leaves cells stranded on the wall.
-    'THE FLOOR IS THE SUBJECT', 'EVERY ROOM IN THIS SET IS THE SAME ROOM', 'it is a measurement',
-    '23 percent across,  26 percent down', '77 percent across,  26 percent down',
-    '8 percent across, 100 percent down', '92 percent across, 100 percent down',
-    'down to 26 percent', 'THE WHOLE FLOOR MUST BE INSIDE THE PICTURE',
-    'never reaches the left or the right edge of the image',
-    'about 8 percent of the image width on the left',
-    'SIDE WALLS', 'The whole floor is visible',
-    'must not read as a grid', 'one and a half times the size of the same one at the back',
-    'must be entirely empty', 'no characters or creatures',
+    'The floor is the subject of the picture', 'about a quarter of the image height',
+    'SIDE WALLS', 'THE WHOLE FLOOR MUST BE IN THE PICTURE',
+    'never touch the left or right edge', 'bottom left corner and the bottom right corner',
+    'must not read as a grid', 'one and a half times the size of the same plank at the back',
+    'Nothing stands on the floor', 'no characters',
     '16:9 landscape',
   ],
   sheet: [
@@ -302,41 +296,24 @@ for (const [id, zh, theme] of ROOMS) {
   block('room', `房間 · ${zh}`, `檔名：room-${id}.png　輸出：1600 x 900　不透明　風格：動森`,
 `${WORLD_STYLE}
 
-A single completely empty interior room, seen square on from the front and from high up. The back wall is parallel to the picture plane and the floor is one flat plane in front of it, running away from the viewer.
+One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture: it fills most of the frame, and the walls are a shallow band behind it and beside it.
 
-THE FLOOR IS THE SUBJECT OF THIS PICTURE. The camera is mounted high in the corner of the room looking down, the way a doll's house is photographed from above, so the floor fills most of the frame and the walls are a shallow band behind it. This is a play area for placing furniture, not a photograph of a wall.
+  BACK WALL   a strip across the top, about a quarter of the image height. Flat and
+              parallel to the picture. Do not make it taller than that.
+  FLOOR       everything below it. A trapezoid, narrower where it meets the back wall
+              than it is at the front, with straight side edges.
+  SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
+              drawn, and neither covers the floor.
 
-EVERY ROOM IN THIS SET IS THE SAME ROOM WITH DIFFERENT DECORATION. The camera angle, the wall height and the shape of the floor are identical in every one of them - only the colours, the materials and the props change. So the shape below is not a guideline, it is a measurement: a placement grid is laid over the floor in software and that grid is built to these exact numbers, so a floor drawn to any other shape cannot be used.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. If the floor runs off the side, the room has been drawn wider than the frame and its near corners are outside the picture - draw the room smaller until both are inside.
 
-Measure from the top left corner of the image, as percentages of the image width and of the image height:
+Symmetrical left to right, no tilt and no roll.
 
-  FLOOR       a trapezoid with these four corners and no others:
-                back left    23 percent across,  26 percent down
-                back right   77 percent across,  26 percent down
-                front left    8 percent across, 100 percent down
-                front right  92 percent across, 100 percent down
-              Its left and right edges are straight lines between those corners, and
-              its front edge runs along the bottom edge of the image between the two
-              front corners.
-  BACK WALL   the band above the floor, from the top of the image down to 26 percent
-              down. A shallow strip, flat and parallel to the picture, spanning the
-              full width. Do not make it taller than this.
-  SIDE WALLS  the two wedges left over between the floor and the sides of the image.
-              The left one has corners at the top left of the image, the floor's back
-              left corner and the floor's front left corner; the right one mirrors it.
-              Both must be drawn, and neither overlaps the floor.
+The floor must not read as a grid - the game draws its own grid on top while a child arranges the furniture, and a second one painted into the floor fights it. So no large square tiles, and no joins that run the full width and the full depth at once. Staggered planks, parquet, brick bond, a fine grain or plain stone all work. Keep the joins low in contrast and the planks small.
 
-THE WHOLE FLOOR MUST BE INSIDE THE PICTURE, AND HERE IS HOW TO CHECK IT. The floor never reaches the left or the right edge of the image at any height, not even along the very bottom: at the bottom edge of the picture there is still a strip of side wall about 8 percent of the image width on the left, another on the right, and the floor between them. If the floor runs off the side of the image anywhere, the room has been drawn wider than the frame and its two front corners are outside the picture, which is the one mistake this room cannot have. Draw the room a little smaller until both front corners are inside the frame with wall beside them.
+The floor recedes with the room: a plank at the front is about one and a half times the size of the same plank at the back, changing evenly between them. That is a change of scale, not a set of lines, so do not draw perspective lines converging on a point. Darken the floor gently toward the back wall.
 
-The whole floor is visible - nothing is cropped, hidden behind anything, or cut off by the frame. The camera does not tilt, roll or move off centre: the room is symmetrical left to right about the middle of the image.
-
-The floor must not read as a grid. The game draws its own placement grid over this floor while a child arranges the furniture, and a second grid painted into the floorboards fights it and makes both look wrong.
-
-So no large square tiles, and no long straight joins that run the full width and the full depth at the same time - that crossing is what turns a floor into a grid. Texture is welcome; cells are not. Staggered planks, a parquet or brick-bond pattern where the joins never line up from one row to the next, a fine woven grain, brushed stone, or a plain seamless surface all work. Keep every join low in contrast, closer to a change of tone than a drawn line, and keep the individual planks or blocks small next to the size of the room.
-
-The texture on the floor recedes with the floor. A plank, a tile or a block drawn at the front of the room is about one and a half times the size of the same one at the back, and it changes gradually and evenly between them. This matters because the game scales the furniture and the creature by that same amount as they move toward the back wall, so a floor whose planks stay one size all the way from front to back leaves everything standing on it looking the wrong size. Do not turn that recession into drawn perspective lines converging on a point in the middle of the floor - it is a change of scale, not a set of lines. Give the floor depth as well with a gentle darkening toward the back wall.
-
-The room must be entirely empty: no furniture, no rugs, no plants, no props, no characters, nothing standing on the floor. Only the built surfaces are decorated - wallpaper, wall panelling, skirting, and a window or door built into the wall itself.
+Nothing stands on the floor: no furniture, no rugs, no plants, no props, no characters. Only the built surfaces are decorated - wallpaper, panelling, skirting, and a window or door set into the wall.
 
 Theme: ${theme}
 

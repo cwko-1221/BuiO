@@ -1,0 +1,161 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Room corners</title>
+<style>
+  :root { color-scheme: dark; --ink: #e8e4dc; --dim: #9a938a; --hot: #ff5a4d; --grid: #24d3e8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #14120f; color: var(--ink);
+         font: 15px/1.5 system-ui, "Noto Sans TC", sans-serif; }
+  header { padding: 14px 20px; border-bottom: 1px solid #2c2823; display: flex;
+           gap: 20px; align-items: baseline; flex-wrap: wrap; }
+  h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  #step { color: var(--hot); font-weight: 600; }
+  .hint { color: var(--dim); font-size: 13px; }
+  main { padding: 20px; display: flex; justify-content: center; }
+  #stage { position: relative; line-height: 0; max-width: 100%; }
+  canvas { max-width: 100%; height: auto; cursor: crosshair; touch-action: none; }
+  footer { padding: 0 20px 24px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  button { font: inherit; padding: 9px 18px; border-radius: 8px; border: 1px solid #3a352e;
+           background: #221f1a; color: var(--ink); cursor: pointer; }
+  button.go { background: var(--hot); border-color: var(--hot); color: #180f0d; font-weight: 600; }
+  button:disabled { opacity: .4; cursor: default; }
+  #said { color: var(--dim); }
+</style>
+
+<header>
+  <h1>__ROOM__</h1>
+  <div id="step"></div>
+  <div class="hint">點完可以拖動任何一點微調。紅色 = 地板四角，藍色 = 遊戲嘅格。</div>
+</header>
+<main><div id="stage"><canvas id="c"></canvas></div></main>
+<footer>
+  <button id="undo">退回一點</button>
+  <button id="reset">重新開始</button>
+  <button id="save" class="go" disabled>儲存四角</button>
+  <span id="said"></span>
+</footer>
+
+<script>
+const SPEC = { line: 0.26, backSpan: 0.54, frontSpan: 0.84 };
+const COLS = 14, ROWS = 10;
+const STEPS = ['㇐ 地板嘅左後角（牆腳同左邊線交界）', '㇑ 地板嘅右後角',
+               '㇒ 左邊線再落低啲嘅任何一點', '㇓ 右邊線再落低啲嘅任何一點'];
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const image = new Image();
+let clicks = [], dragging = -1;
+
+image.onload = () => { canvas.width = image.width; canvas.height = image.height; draw(); };
+image.src = '/image';
+
+/** Solve a small dense system by elimination with partial pivoting. */
+function solve(rows, values) {
+  const n = values.length, m = rows.map((row, i) => [...row, values[i]]);
+  for (let col = 0; col < n; col++) {
+    let pivot = col;
+    for (let r = col + 1; r < n; r++) if (Math.abs(m[r][col]) > Math.abs(m[pivot][col])) pivot = r;
+    [m[col], m[pivot]] = [m[pivot], m[col]];
+    for (let r = 0; r < n; r++) {
+      if (r === col) continue;
+      const factor = m[r][col] / m[col][col];
+      for (let c = col; c <= n; c++) m[r][c] -= factor * m[col][c];
+    }
+  }
+  return m.map((row, i) => row[n] / row[i]);
+}
+function homography(from, to) {
+  const rows = [], values = [];
+  for (let i = 0; i < 4; i++) {
+    const [x, y] = from[i], [u, v] = to[i];
+    rows.push([x, y, 1, 0, 0, 0, -u * x, -u * y]); values.push(u);
+    rows.push([0, 0, 0, x, y, 1, -v * x, -v * y]); values.push(v);
+  }
+  const h = solve(rows, values);
+  return (x, y) => {
+    const w = h[6] * x + h[7] * y + 1;
+    return [(h[0] * x + h[1] * y + h[2]) / w, (h[3] * x + h[4] * y + h[5]) / w];
+  };
+}
+const specQuad = () => {
+  const back = SPEC.backSpan / 2, front = SPEC.frontSpan / 2;
+  return [[.5 - back, SPEC.line], [.5 + back, SPEC.line], [.5 + front, 1], [.5 - front, 1]];
+};
+
+/** The four floor corners, with the front pair extended to the bottom of the picture. */
+function quadFrom(points) {
+  if (points.length < 4) return null;
+  const [bl, br, ll, rr] = points;
+  const toBottom = (top, low) => {
+    const dy = low[1] - top[1];
+    if (Math.abs(dy) < 1e-6) return [top[0], 1];
+    return [top[0] + (low[0] - top[0]) * (1 - top[1]) / dy, 1];
+  };
+  return [bl, br, toBottom(br, rr), toBottom(bl, ll)];
+}
+
+function draw() {
+  ctx.drawImage(image, 0, 0);
+  const w = canvas.width, h = canvas.height, s = w / 900;
+  const quad = quadFrom(clicks);
+
+  if (quad) {
+    const toSource = homography(specQuad(), quad);
+    const ratio = SPEC.backSpan / SPEC.frontSpan;
+    const ease = (t) => (ratio * t) / (1 - (1 - ratio) * t);
+    const back = (SPEC.backSpan / 2), front = (SPEC.frontSpan / 2);
+    const cell = (gx, gy) => {
+      const e = ease(gy / ROWS);
+      const [u, v] = toSource(.5 + (gx / COLS - .5) * 2 * (back + (front - back) * e),
+                              SPEC.line + (1 - SPEC.line) * e);
+      return [u * w, v * h];
+    };
+    ctx.strokeStyle = '#24d3e8'; ctx.lineWidth = 2 * s; ctx.globalAlpha = .8;
+    ctx.beginPath();
+    for (let c = 0; c <= COLS; c++) { ctx.moveTo(...cell(c, 0)); for (let r = 1; r <= ROWS; r++) ctx.lineTo(...cell(c, r)); }
+    for (let r = 0; r <= ROWS; r++) { ctx.moveTo(...cell(0, r)); for (let c = 1; c <= COLS; c++) ctx.lineTo(...cell(c, r)); }
+    ctx.stroke(); ctx.globalAlpha = 1;
+
+    ctx.strokeStyle = '#ff5a4d'; ctx.lineWidth = 4 * s;
+    ctx.beginPath();
+    quad.forEach(([x, y], i) => (i ? ctx.lineTo(x * w, y * h) : ctx.moveTo(x * w, y * h)));
+    ctx.closePath(); ctx.stroke();
+  }
+
+  clicks.forEach(([x, y], i) => {
+    ctx.fillStyle = i < 2 ? '#ff5a4d' : '#ffd166';
+    ctx.beginPath(); ctx.arc(x * w, y * h, 9 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#180f0d'; ctx.font = `${13 * s}px system-ui`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(i + 1), x * w, y * h);
+  });
+
+  document.getElementById('step').textContent = clicks.length < 4 ? STEPS[clicks.length] : '四點齊了 — 看藍色格是否貼住地板，可拖動微調';
+  document.getElementById('save').disabled = clicks.length < 4;
+}
+
+const at = (event) => {
+  const box = canvas.getBoundingClientRect();
+  return [(event.clientX - box.left) / box.width, (event.clientY - box.top) / box.height];
+};
+canvas.addEventListener('pointerdown', (event) => {
+  const [x, y] = at(event);
+  const near = clicks.findIndex(([px, py]) =>
+    Math.hypot((px - x) * canvas.width, (py - y) * canvas.height) < 18);
+  if (near >= 0) { dragging = near; canvas.setPointerCapture(event.pointerId); return; }
+  if (clicks.length < 4) { clicks.push([x, y]); draw(); }
+});
+canvas.addEventListener('pointermove', (event) => {
+  if (dragging < 0) return;
+  clicks[dragging] = at(event); draw();
+});
+canvas.addEventListener('pointerup', () => { dragging = -1; });
+
+document.getElementById('undo').onclick = () => { clicks.pop(); draw(); };
+document.getElementById('reset').onclick = () => { clicks = []; draw(); };
+document.getElementById('save').onclick = async () => {
+  const quad = quadFrom(clicks);
+  await fetch('/corners', { method: 'POST', body: JSON.stringify({ quad }) });
+  document.getElementById('said').textContent = '已儲存 — 可以關掉這一頁，回到終端機';
+};
+</script>

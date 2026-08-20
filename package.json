@@ -41,6 +41,7 @@
     "import:art": "node scripts/import-art.mjs",
     "build:art-prompts": "node scripts/build-art-prompts.mjs",
     "build:room-shape": "node scripts/room-shape.mjs",
+    "room:corners": "node scripts/room-corners.mjs",
     "check:chinese-tone": "node scripts/test-chinese-tone.mjs"
   },
   "dependencies": {
