@@ -297,13 +297,22 @@ async function rectifyRoom(file, quad) {
   // outward reads as a wider panel, where a mirror folds a fake corner into the picture.
   const hold = (v, n) => Math.min(Math.max(v, 0), n - 1e-6);
   let invented = 0, floorPixels = 0;
+  const missing = Buffer.alloc(dw * dh);
+  // Whether an output pixel lands on the grid's floor, which is what the fraction below is of.
+  const back = SPEC.backSpan / 2, front = SPEC.frontSpan / 2;
+  const onFloor = (X, Y) => Y >= SPEC.line
+    && Math.abs(X - .5) <= back + (front - back) * (Y - SPEC.line) / (1 - SPEC.line);
 
   for (let y = 0; y < dh; y++) {
     for (let x = 0; x < dw; x++) {
-      const [u, v] = toSource((x + .5) / dw, (y + .5) / dh);
-      const onFloor = v >= SPEC.line;
-      if (onFloor) floorPixels++;
-      if (onFloor && (u < 0 || u > 1 || v < 0 || v > 1)) invented++;
+      const X = (x + .5) / dw, Y = (y + .5) / dh;
+      const [u, v] = toSource(X, Y);
+      const floor = onFloor(X, Y);
+      if (floor) floorPixels++;
+      if (u < 0 || u > 1 || v < 0 || v > 1) {
+        missing[y * dw + x] = 1;
+        if (floor) invented++;
+      }
       const sx = hold(u * sw - .5, sw), sy = hold(v * sh - .5, sh);
       const x0 = Math.floor(sx), y0 = Math.floor(sy);
       const fx = sx - x0, fy = sy - y0;
@@ -319,11 +328,11 @@ async function rectifyRoom(file, quad) {
       out[o + 3] = 255;
     }
   }
-  return { raw: out, invented: floorPixels ? invented / floorPixels : 0 };
+  return { raw: out, missing, invented: floorPixels ? invented / floorPixels : 0 };
 }
 
 /** The corrected room with the grid drawn on it, so the correction can be checked by eye. */
-async function rectifiedPreview(raw, roomId) {
+async function rectifiedPreview(raw, missing, roomId) {
   const { width, height } = ROOM_SIZE;
   const back = (SPEC.backSpan / 2) * width, front = (SPEC.frontSpan / 2) * width;
   const top = SPEC.line * height, centre = width / 2, ratio = SPEC.backSpan / SPEC.frontSpan;
@@ -339,9 +348,16 @@ async function rectifiedPreview(raw, roomId) {
     <g stroke="#00e5ff" stroke-width="2" opacity=".85" fill="none">${lines}</g>
     <polygon points="${pt(0, 0)} ${pt(14, 0)} ${pt(14, 10)} ${pt(0, 10)}" fill="none" stroke="#c0392b" stroke-width="5"/>
   </svg>`;
+  // Tint whatever floor had to be carried in from the edge, so it is judged rather than counted.
+  const tint = Buffer.alloc(width * height * 4);
+  for (let i = 0; i < width * height; i++) {
+    if (!missing[i]) continue;
+    tint[i * 4] = 255; tint[i * 4 + 1] = 0; tint[i * 4 + 2] = 200; tint[i * 4 + 3] = 90;
+  }
   const out = path.join('art-inbox', `checked-${roomId}.png`);
   await sharp(raw, { raw: { width, height, channels: 4 } })
-    .composite([{ input: Buffer.from(svg) }]).png().toFile(out);
+    .composite([{ input: tint, raw: { width, height, channels: 4 } }, { input: Buffer.from(svg) }])
+    .png().toFile(out);
   return out;
 }
 
@@ -361,10 +377,10 @@ async function importRoom(file, roomId, dry, quad) {
   let image = sharp(file).resize(ROOM_SIZE.width, ROOM_SIZE.height, { fit: 'fill' });
 
   if (corners) {
-    const { raw, invented } = await rectifyRoom(file, corners);
+    const { raw, missing, invented } = await rectifyRoom(file, corners);
     image = sharp(raw, { raw: { width: ROOM_SIZE.width, height: ROOM_SIZE.height, channels: 4 } });
-    log(`      floor moved onto the grid${invented > .002 ? `, ${(invented * 100).toFixed(1)}% of it carried in from the edge, because that much was drawn outside the frame` : ''}`);
-    log(`      ${await rectifiedPreview(raw, roomId)}`);
+    log(`      floor moved onto the grid${invented > .002 ? `, ${(invented * 100).toFixed(1)}% of it carried in from the edge because it was drawn outside the frame, tinted pink in the check` : ''}`);
+    log(`      ${await rectifiedPreview(raw, missing, roomId)}`);
     if (!dry) await fs.writeFile(FLOORS, JSON.stringify({ ...await readFloors(), [roomId]: corners }, null, 2));
   } else {
     log('      no floor corners yet, so the grid will land wherever the art put the floor');

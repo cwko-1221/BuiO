@@ -243,6 +243,7 @@ const MUST_SAY = {
     'The floor is the subject of the picture', 'about a quarter of the image height',
     'SIDE WALLS', 'THE WHOLE FLOOR MUST BE IN THE PICTURE',
     'never touch the left or right edge', 'bottom left corner and the bottom right corner',
+    'looking down into an open shoebox',
     'must not read as a grid', 'one and a half times the size of the same plank at the back',
     'Nothing stands on the floor', 'no characters',
     '16:9 landscape',
@@ -305,7 +306,7 @@ One completely empty room, seen straight on from high above, the way a doll's ho
   SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
               drawn, and neither covers the floor.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. If the floor runs off the side, the room has been drawn wider than the frame and its near corners are outside the picture - draw the room smaller until both are inside.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
 
 Symmetrical left to right, no tilt and no roll.
 
