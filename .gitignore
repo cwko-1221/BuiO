@@ -13,13 +13,9 @@ data/*.json
 *.log
 npm-debug.log*
 
-# Generated image work files
-tmp/imagegen/
-tmp/scene-audit/
-tmp/science-lab-baseline/
-tmp/science-lab-physics-live/
-tmp/science-lab-qa/
-tmp/science-lab-visual-qa/
+# Scratch. Screenshots, renders and QA evidence land here; scripts that write into it
+# create what they need, so nothing in it is worth keeping between sessions.
+tmp/
 
 # OS
 .DS_Store
