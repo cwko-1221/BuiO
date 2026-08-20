@@ -443,9 +443,12 @@ async function importWearables(file, slot, dry) {
   const items = catalog.wearables.filter((item) => item.slot === slot);
   const sheet = await loadSheet(file);
   const meta = await sharp(sheet).metadata();
+  const boxes = await findCells(sheet, grid[0], grid[1]);
+  const drawn = boxes.filter(Boolean).length;
+  log(`      found ${drawn} of ${items.length} pieces on the sheet`);
   let written = 0;
   for (let index = 0; index < items.length; index += 1) {
-    const cut = await cell(sheet, meta, grid[0], grid[1], index);
+    const cut = await cell(sheet, meta, grid[0], grid[1], index, boxes);
     const seated = await seat(cut, { canvas: PROP_CANVAS, standing: false, fill: 0.8 });
     if (!seated) { log(`      cell ${index + 1} is empty, skipped`); continue; }
     await write(fileFor(items[index].art), seated, dry);

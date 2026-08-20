@@ -49,24 +49,84 @@ export async function findCells(file, columns, rows) {
         queue[tail++] = next;
       }
     }
-    if (count >= SPECK * w * h) blobs.push({ left, top, right, bottom, x: sumX / count, y: sumY / count });
+    if (count >= SPECK * w * h) blobs.push({ left, top, right, bottom, count, x: sumX / count, y: sumY / count });
   }
 
-  // Which cell a blob belongs to is decided by where its weight is, not by where its edges reach.
-  // That is what lets a piece be wider than its column without being claimed by the next one, and
-  // it puts a detached part — a lamp's shade clear of its base — back with the rest of its piece.
-  const cells = Array.from({ length: columns * rows }, () => null);
+  // Which cell a blob belongs to is decided by where its weight is, not by where its edges
+  // reach. That is what lets a piece be wider than its column without being claimed by the
+  // next one along.
+  const grouped = Array.from({ length: columns * rows }, () => []);
   for (const blob of blobs) {
     const column = Math.min(columns - 1, Math.max(0, Math.floor((blob.x / w) * columns)));
     const row = Math.min(rows - 1, Math.max(0, Math.floor((blob.y / h) * rows)));
-    const at = row * columns + column;
-    const box = cells[at];
-    cells[at] = box ? {
-      left: Math.min(box.left, blob.left), top: Math.min(box.top, blob.top),
-      right: Math.max(box.right, blob.right), bottom: Math.max(box.bottom, blob.bottom),
-    } : { left: blob.left, top: blob.top, right: blob.right, bottom: blob.bottom };
+    grouped[row * columns + column].push(blob);
   }
 
+  // Within a cell the largest blob is the piece, and another blob only joins it if it is close
+  // by — a lamp shade clear of its base, the books standing in a rack. A piece drawn wider than
+  // its column leaves a sliver over the boundary whose weight lands in the next cell along, and
+  // taking the whole cell as one box swept that sliver into its neighbour: every wearable came
+  // out with a crumb of the hat before it floating off to the left.
+  const reach = 0.12 * (w / columns);
+  const cells = grouped.map((blobsHere) => {
+    if (!blobsHere.length) return null;
+    const [core, ...rest] = [...blobsHere].sort((a, b) => b.count - a.count);
+    let box = { left: core.left, top: core.top, right: core.right, bottom: core.bottom };
+    let joined = true;
+    while (joined) {
+      joined = false;
+      for (let i = rest.length - 1; i >= 0; i -= 1) {
+        const blob = rest[i];
+        const apart = Math.max(box.left - blob.right, blob.left - box.right,
+          box.top - blob.bottom, blob.top - box.bottom);
+        if (apart > reach) continue;
+        box = {
+          left: Math.min(box.left, blob.left), top: Math.min(box.top, blob.top),
+          right: Math.max(box.right, blob.right), bottom: Math.max(box.bottom, blob.bottom),
+        };
+        rest.splice(i, 1);
+        joined = true;
+      }
+    }
+    return box;
+  });
+  // Two pieces drawn close enough to touch are one run of opaque pixels, so one cell takes both
+  // and its neighbour comes up empty — the dragon wings and the cloud cape are joined at a wing
+  // tip. Nothing in the drawing separates them, but the sheet is still a grid, so an empty cell
+  // whose neighbour has spilled well into it takes back its own side of the boundary.
+  const cellWidth = w / columns, cellHeight = h / rows;
+  const spilled = 0.25;
+  for (let index = 0; index < cells.length; index += 1) {
+    if (cells[index]) continue;
+    const column = index % columns, row = (index - column) / columns;
+    const near = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for (const [dx, dy] of near) {
+      const nx = column + dx, ny = row + dy;
+      if (nx < 0 || ny < 0 || nx >= columns || ny >= rows) continue;
+      const neighbour = cells[ny * columns + nx];
+      if (!neighbour) continue;
+      const left = column * cellWidth, right = (column + 1) * cellWidth;
+      const top = row * cellHeight, bottom = (row + 1) * cellHeight;
+      const over = Math.min(neighbour.right, right) - Math.max(neighbour.left, left);
+      const under = Math.min(neighbour.bottom, bottom) - Math.max(neighbour.top, top);
+      if (dx && (over < spilled * cellWidth || under <= 0)) continue;
+      if (dy && (under < spilled * cellHeight || over <= 0)) continue;
+      if (dx < 0) {
+        cells[index] = { left, top: neighbour.top, right: neighbour.right, bottom: neighbour.bottom };
+        neighbour.right = left - 1;
+      } else if (dx > 0) {
+        cells[index] = { left: neighbour.left, top: neighbour.top, right: right - 1, bottom: neighbour.bottom };
+        neighbour.left = right;
+      } else if (dy < 0) {
+        cells[index] = { left: neighbour.left, top, right: neighbour.right, bottom: neighbour.bottom };
+        neighbour.bottom = top - 1;
+      } else {
+        cells[index] = { left: neighbour.left, top: neighbour.top, right: neighbour.right, bottom: bottom - 1 };
+        neighbour.top = bottom;
+      }
+      break;
+    }
+  }
   const back = 1 / scale;
   return cells.map((box) => box && {
     left: Math.max(0, Math.round(box.left * back)),

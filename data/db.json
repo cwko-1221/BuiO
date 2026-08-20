@@ -571,8 +571,8 @@
   "petWallets": [
     {
       "studentId": "S001",
-      "balance": 992679,
-      "updatedAt": "2026-08-20T18:00:56.703Z"
+      "balance": 989409,
+      "updatedAt": "2026-08-20T18:34:41.665Z"
     }
   ],
   "petCurrencyLedger": [
@@ -1145,6 +1145,110 @@
         "quantity": 1
       },
       "createdAt": "2026-08-20T18:00:56.703Z"
+    },
+    {
+      "transactionId": "669eaaac-7fb2-49f3-b4db-e52c7630c532",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -450,
+      "kind": "shop_purchase",
+      "idempotencyKey": "d072ac4c-df3c-4839-a88e-bdb0b338a6bc",
+      "metadata": {
+        "itemId": "bamboo-room-furniture-10",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T18:14:20.755Z"
+    },
+    {
+      "transactionId": "ecf58a05-ae78-4a60-b519-7f448c7076c9",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -600,
+      "kind": "shop_purchase",
+      "idempotencyKey": "3f0f752e-3520-4042-9930-d127b65e1769",
+      "metadata": {
+        "itemId": "back-15",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T18:31:04.891Z"
+    },
+    {
+      "transactionId": "1577c9a2-9e6d-47ad-9eed-5eb9455cd7f4",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "e4030497-8a1b-4b4b-8813-5fc18bf97655",
+      "metadata": {
+        "itemId": "back-02",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T18:31:27.900Z"
+    },
+    {
+      "transactionId": "2345ca24-e6fb-4218-8947-f7a2eafd937c",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -450,
+      "kind": "shop_purchase",
+      "idempotencyKey": "758955b8-a1b8-4939-8498-9501ba078428",
+      "metadata": {
+        "itemId": "back-09",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T18:31:30.736Z"
+    },
+    {
+      "transactionId": "e5658041-674c-415e-9812-67a53f74c1f7",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -450,
+      "kind": "shop_purchase",
+      "idempotencyKey": "0be9db8f-530b-4cb4-8cb7-01d6ef534d21",
+      "metadata": {
+        "itemId": "neck-11",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T18:32:56.027Z"
+    },
+    {
+      "transactionId": "647284c0-0336-4c43-9732-c4f6947c28da",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -600,
+      "kind": "shop_purchase",
+      "idempotencyKey": "67821b14-81dc-428e-9604-7ed542e9c014",
+      "metadata": {
+        "itemId": "aura-13",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T18:33:52.362Z"
+    },
+    {
+      "transactionId": "f9940a25-1205-4f2a-b242-b800d2edfeed",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "633969eb-217a-4d7b-aff2-7bc0136850a4",
+      "metadata": {
+        "itemId": "aura-07",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T18:34:09.911Z"
+    },
+    {
+      "transactionId": "2426d5ce-f4c4-4cec-9b62-6e9fdf5062fd",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "afb312f4-a507-4948-9c67-0c324d1ddcb5",
+      "metadata": {
+        "itemId": "neck-06",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T18:34:41.665Z"
     }
   ],
   "petInstances": [
@@ -1222,10 +1326,13 @@
       "dailyXp": 15,
       "dailyXpDate": "2026-08-21",
       "equippedWearables": [
-        "head-02"
+        "head-01",
+        "back-09",
+        "aura-07",
+        "neck-06"
       ],
       "createdAt": "2026-08-19T16:02:44.861Z",
-      "updatedAt": "2026-08-20T17:15:06.190Z"
+      "updatedAt": "2026-08-20T18:34:54.778Z"
     }
   ],
   "petSkills": [],
@@ -1429,6 +1536,46 @@
       "studentId": "S001",
       "itemId": "bamboo-room-furniture-9",
       "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "bamboo-room-furniture-10",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "back-15",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "back-02",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "back-09",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "neck-11",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "aura-13",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "aura-07",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "neck-06",
+      "quantity": 1
     }
   ],
   "petRoomLayouts": [
@@ -1450,7 +1597,7 @@
           "id": "9ea29696-2f99-4d2f-a83e-baa4d4a7d904",
           "itemId": "sunny-oak-furniture-2",
           "x": 4,
-          "y": 4,
+          "y": 3,
           "rotation": 0,
           "size": 2,
           "layer": "rug"
@@ -1521,14 +1668,23 @@
         {
           "id": "e1302af5-9936-4257-a0f6-2141fa50eb99",
           "itemId": "bamboo-room-furniture-9",
-          "x": 0,
-          "y": 8,
+          "x": 6,
+          "y": 5,
+          "rotation": 0,
+          "size": 1,
+          "layer": "furniture"
+        },
+        {
+          "id": "99d2970b-0e3f-4ecd-85d8-5970f648611f",
+          "itemId": "bamboo-room-furniture-10",
+          "x": 6,
+          "y": 0,
           "rotation": 0,
           "size": 1,
           "layer": "furniture"
         }
       ],
-      "updatedAt": "2026-08-20T18:07:18.456Z"
+      "updatedAt": "2026-08-20T18:14:52.478Z"
     }
   ],
   "petMapProgress": [],
@@ -2299,6 +2455,102 @@
         "stardust": 999999
       },
       "createdAt": "2026-08-20T18:00:56.703Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "d072ac4c-df3c-4839-a88e-bdb0b338a6bc",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "bamboo-room-furniture-10",
+        "quantity": 1,
+        "balance": 992229,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T18:14:20.755Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "3f0f752e-3520-4042-9930-d127b65e1769",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "back-15",
+        "quantity": 1,
+        "balance": 991629,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T18:31:04.891Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "e4030497-8a1b-4b4b-8813-5fc18bf97655",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "back-02",
+        "quantity": 1,
+        "balance": 991509,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T18:31:27.900Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "758955b8-a1b8-4939-8498-9501ba078428",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "back-09",
+        "quantity": 1,
+        "balance": 991059,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T18:31:30.736Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "0be9db8f-530b-4cb4-8cb7-01d6ef534d21",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "neck-11",
+        "quantity": 1,
+        "balance": 990609,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T18:32:56.027Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "67821b14-81dc-428e-9604-7ed542e9c014",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "aura-13",
+        "quantity": 1,
+        "balance": 990009,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T18:33:52.362Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "633969eb-217a-4d7b-aff2-7bc0136850a4",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "aura-07",
+        "quantity": 1,
+        "balance": 989709,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T18:34:09.911Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "afb312f4-a507-4948-9c67-0c324d1ddcb5",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "neck-06",
+        "quantity": 1,
+        "balance": 989409,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T18:34:41.665Z"
     }
   ]
 }
