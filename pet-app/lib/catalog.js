@@ -95,6 +95,15 @@ const PETS = [
   motion: Array.from({ length: 4 }, (_, index) => FRAME_MOTION[`${id}-${index + 1}`] || null),
 }));
 
+/**
+ * The rooms whose artwork has been checked against the grid, which is every room the importer has
+ * accepted. The rest are drawn to an older shape the grid would sit on the walls of, so they are
+ * kept out of the shop until their pictures are regenerated — a student who already owns one can
+ * still use it, because taking a room back off somebody is worse than a grid that does not line
+ * up. Importing a room adds it here, so nothing has to be remembered.
+ */
+const FITTED = new Set(Object.keys(require('../../scripts/room-floors.json')));
+
 const ROOMS = [
   ['sunny-oak','橡木暖陽房','Sunny Oak Bedroom',0,'#e6b572','#89b89a'],
   ['cloud-loft','雲端閣樓','Cloud Loft',700,'#9bcbea','#ede6d5'],
@@ -106,7 +115,10 @@ const ROOMS = [
   ['aurora-observatory','極光觀測房','Aurora Observatory',1300,'#5d7eae','#b9e4df'],
   ['bamboo-room','竹林和室','Bamboo Haven',1500,'#7e9f66','#d7c99b'],
   ['moon-magic-attic','月影魔法閣樓','Moonlit Magic Attic',1700,'#655789','#d1a8d2'],
-].map(([id, zh, en, price, primary, accent]) => ({ id, name: { 'zh-HK': zh, 'en-US': en }, price, primary, accent, art: artPath('rooms', id) }));
+].map(([id, zh, en, price, primary, accent]) => ({
+  id, name: { 'zh-HK': zh, 'en-US': en }, price, primary, accent,
+  art: artPath('rooms', id), pending: !FITTED.has(id),
+}));
 
 const FOOD_GROUPS = [
   ['apple-slice','蘋果星片','Apple Stars'],['pet-biscuit','寵物餅乾','Pet Biscuits'],

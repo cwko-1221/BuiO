@@ -30,7 +30,11 @@ export interface AnimationLayout {
   directions: PetFacing[];
   actions: { name: PetAction; start: number; length: number }[];
 }
-export interface RoomDefinition { id: string; name: Localized; price: number; primary: string; accent: string; art: string }
+export interface RoomDefinition {
+  id: string; name: Localized; price: number; primary: string; accent: string; art: string;
+  /** Drawn to an older shape the grid does not fit, so it is not offered until it is redrawn. */
+  pending?: boolean;
+}
 export interface FoodDefinition { id: string; name: Localized; category: 'food'; tier: number; price: number; xp: number }
 /** Alpha bounding box of the drawn object, as 0..1 fractions of its source canvas. */
 export interface ContentBox { x: number; y: number; width: number; height: number }
