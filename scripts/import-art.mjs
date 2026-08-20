@@ -367,12 +367,58 @@ async function importRoom(file, roomId, dry, quad) {
 }
 
 // -------------------------------------------------------------- furniture ---
+/**
+ * The drawn width of each piece in floor tiles, kept beside the art. The metrics pass rewrites
+ * the content boxes from the seated images and would lose this, which is why it lives in its own
+ * file rather than in metrics.json.
+ */
+const DRAW_TILES = path.join('pet-app', 'public', 'assets', 'art', 'collectibles', 'draw-tiles.json');
+async function rememberDrawTiles(tiles, dry) {
+  if (dry) return;
+  let known = {};
+  try { known = JSON.parse(await fs.readFile(DRAW_TILES, 'utf8')); } catch { /* first sheet */ }
+  await fs.writeFile(DRAW_TILES, JSON.stringify({ ...known, ...tiles }, null, 0));
+}
+
 async function importFurniture(file, roomIds, dry) {
   const sheet = await loadSheet(file);
   const meta = await sharp(sheet).metadata();
   const boxes = await findCells(sheet, 5, 4);
   const drawn = boxes.filter(Boolean).length;
   log(`      found ${drawn} of 20 pieces on the sheet${drawn < 20 ? ' - the empty cells are skipped' : ''}`);
+
+  /**
+   * How wide to draw each piece, in floor tiles.
+   *
+   * A footprint is how much floor a piece occupies, and it is coarse: a wall clock, a floor lamp
+   * and an armchair are all one tile. Drawing all three a tile wide makes the clock enormous and
+   * the lamp enormouser, because a lamp is drawn narrow and tall and was being stretched to a
+   * tile across. The sheet already says how big these things are next to each other — the lamp is
+   * drawn half the armchair's width — so that proportion is what is kept. Within each footprint
+   * the widest piece fills it and the rest keep their share, which needs nothing hand-tuned.
+   */
+  const cellWidth = meta.width / 5;
+  const spans = boxes.map((box) => (box ? box.width / cellWidth : 0));
+  const widest = new Map();
+  const pieceAt = (index) => {
+    const room = roomIds[Math.floor(index / 10)];
+    return catalog.furniture.filter((item) => item.roomId === room)[index % 10];
+  };
+  for (let index = 0; index < 20; index += 1) {
+    const piece = pieceAt(index);
+    if (!piece || !spans[index]) continue;
+    const across = (piece.footprint || [1, 1])[0];
+    widest.set(across, Math.max(widest.get(across) || 0, spans[index]));
+  }
+  const tiles = {};
+  for (let index = 0; index < 20; index += 1) {
+    const piece = pieceAt(index);
+    if (!piece || !spans[index]) continue;
+    const across = (piece.footprint || [1, 1])[0];
+    tiles[piece.id] = Number((across * (spans[index] / widest.get(across))).toFixed(3));
+  }
+  await rememberDrawTiles(tiles, dry);
+
   let written = 0;
   for (let block = 0; block < roomIds.length; block += 1) {
     const pieces = catalog.furniture.filter((item) => item.roomId === roomIds[block]);

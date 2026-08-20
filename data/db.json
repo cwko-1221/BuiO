@@ -1295,7 +1295,7 @@
           "id": "93aa5953-b400-443e-8b2a-3acb92e5ceee",
           "itemId": "sunny-oak-furniture-7",
           "x": 1,
-          "y": 0,
+          "y": 3,
           "rotation": 0,
           "layer": "wall"
         },
@@ -1308,7 +1308,7 @@
           "layer": "furniture"
         }
       ],
-      "updatedAt": "2026-08-19T14:06:37.323Z"
+      "updatedAt": "2026-08-20T16:05:12.216Z"
     }
   ],
   "petMapProgress": [],

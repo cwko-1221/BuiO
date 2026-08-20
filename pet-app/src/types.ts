@@ -43,7 +43,13 @@ export interface FoodDefinition { id: string; name: Localized; category: 'food';
 /** Alpha bounding box of the drawn object, as 0..1 fractions of its source canvas. */
 export interface ContentBox { x: number; y: number; width: number; height: number }
 export interface WearableDefinition { id: string; name: Localized; category: 'wearable'; slot: string; rarity: string; price: number; currency: 'coins'; art?: string; content?: ContentBox | null }
-export interface FurnitureDefinition { id: string; name: Localized; category: 'furniture'; roomId: string; price: number; footprint: [number, number]; layer: string; art?: string; content?: ContentBox | null }
+export interface FurnitureDefinition {
+  id: string; name: Localized; category: 'furniture'; roomId: string; price: number;
+  footprint: [number, number]; layer: string; art?: string; content?: ContentBox | null;
+  /** How wide to draw it, in floor tiles. A footprint is how much floor it occupies, which is
+   *  coarser: a clock, a lamp and an armchair all occupy one tile and are not the same size. */
+  drawTiles?: number | null;
+}
 export interface Catalog {
   version: string; pets: PetDefinition[]; rooms: RoomDefinition[];
   foods: FoodDefinition[]; wearables: WearableDefinition[];

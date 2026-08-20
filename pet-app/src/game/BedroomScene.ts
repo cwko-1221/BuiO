@@ -574,10 +574,14 @@ export class BedroomScene extends Phaser.Scene {
       // content box. Using the canvas instead renders a 1x1 piece at roughly a third of its
       // intended size and offset from where it was placed.
       const box = definition.content ?? { x: 0, y: 0, width: 1, height: 1 };
-      // A footprint fx cells wide spans fx cells of floor — but a cell is narrower at the back,
-      // so the width is measured where the piece actually stands rather than from a fixed tile.
-      const front = this.gridToScreen(placement.x + footprintX, placement.y + footprintY);
-      const back = this.gridToScreen(placement.x, placement.y + footprintY);
+      // How wide it is drawn is not the same as how much floor it occupies: a clock, a lamp and
+      // an armchair all take one tile and are nothing like the same size, so the drawn width comes
+      // from how big the piece was drawn next to the others on its sheet. A cell is narrower at
+      // the back, so it is measured where the piece actually stands rather than from a fixed tile.
+      const across = definition.drawTiles || footprintX;
+      const middle = placement.x + footprintX / 2;
+      const front = this.gridToScreen(middle + across / 2, placement.y + footprintY);
+      const back = this.gridToScreen(middle - across / 2, placement.y + footprintY);
       const targetWidth = Math.abs(front.x - back.x);
       image.setScale(targetWidth / Math.max(1, box.width * image.width));
       // Origin is expressed in canvas fractions: horizontally centred on the object, and
