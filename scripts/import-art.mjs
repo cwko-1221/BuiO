@@ -77,7 +77,7 @@ const WEARABLE_GRID = { head: [5, 4], face: [4, 3], neck: [4, 4], back: [4, 4], 
 const log = (...parts) => console.log(...parts);
 
 /** Where a published asset URL lives on disk. */
-const fileFor = (url) => path.join(OUT_ROOT || PUBLIC_ROOT, url.replace('/pet/assets', 'assets'));
+const fileFor = (url) => path.join(OUT_ROOT || PUBLIC_ROOT, url.split('?')[0].replace('/pet/assets', 'assets'));
 
 /** Alpha bounding box of an image buffer, or null when nothing was drawn. */
 async function contentBounds(buffer) {

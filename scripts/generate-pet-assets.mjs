@@ -112,21 +112,21 @@ function effectSvg(skill,index){
 async function main(){
   await fs.rm(root,{recursive:true,force:true});
   await fs.mkdir(root,{recursive:true});
-  for(const pet of catalog.pets) for(let stage=1;stage<=4;stage+=1) await writeWebp(pet.art[stage-1].split('/art/')[1],petSvg(pet,stage));
+  for(const pet of catalog.pets) for(let stage=1;stage<=4;stage+=1) await writeWebp(pet.art[stage-1].split('?')[0].split('/art/')[1],petSvg(pet,stage));
   const spriteSheets=[]; for(const pet of catalog.pets) for(let stage=1;stage<=4;stage+=1) spriteSheets.push(await spriteAtlas(pet,stage));
   await fs.mkdir(path.join(root,'sprites'),{recursive:true}); await fs.writeFile(path.join(root,'sprites/manifest.json'),JSON.stringify({frameWidth:192,frameHeight:192,columns:ACTIONS,rows:DIRECTIONS,sheets:spriteSheets},null,2));
   for(const [index,room] of catalog.rooms.entries()) {
     const imagegenSource = room.id === 'sunny-oak' ? path.resolve('pet-app/art-source/imagegen/sunny-oak-key-art.png') : '';
     if (imagegenSource && await fs.stat(imagegenSource).then(()=>true).catch(()=>false)) {
-      const target=path.join(root,room.art.split('/art/')[1]); await fs.mkdir(path.dirname(target),{recursive:true});
+      const target=path.join(root,room.art.split('?')[0].split('/art/')[1]); await fs.mkdir(path.dirname(target),{recursive:true});
       await sharp(imagegenSource).resize(1600,900,{fit:'cover'}).webp({quality:91}).toFile(target);
-    } else await writeWebp(room.art.split('/art/')[1],roomSvg(room,index),{quality:90});
+    } else await writeWebp(room.art.split('?')[0].split('/art/')[1],roomSvg(room,index),{quality:90});
   }
-  for(const [index,map] of catalog.maps.entries()) await writeWebp(map.art.split('/art/')[1],mapSvg(map,index),{quality:88});
+  for(const [index,map] of catalog.maps.entries()) await writeWebp(map.art.split('?')[0].split('/art/')[1],mapSvg(map,index),{quality:88});
   for(const [index,slot] of ['head','face','neck','back','aura'].entries()) await writeWebp(generatedPath('items',slot),itemSvg(slot,index));
   for(const [index,room] of catalog.rooms.entries()) await writeWebp(generatedPath('items',`${room.id}-furniture`),itemSvg('furniture',index));
-  for(const [index,item] of catalog.wearables.entries()) await writeWebp(item.art.split('/art/')[1],itemSvg(item.slot,index));
-  for(const [index,item] of catalog.furniture.entries()) await writeWebp(item.art.split('/art/')[1],itemSvg('furniture',index));
+  for(const [index,item] of catalog.wearables.entries()) await writeWebp(item.art.split('?')[0].split('/art/')[1],itemSvg(item.slot,index));
+  for(const [index,item] of catalog.furniture.entries()) await writeWebp(item.art.split('?')[0].split('/art/')[1],itemSvg('furniture',index));
   for(let index=0;index<12;index+=1) await writeWebp(generatedPath('enemies',`family-${String(index+1).padStart(2,'0')}`),enemySvg(index));
   for(const [index,map] of catalog.maps.entries()) await writeWebp(generatedPath('bosses',`${map.id}-boss`),enemySvg(index,true));
   for(const [index,skill] of catalog.skills.entries()) await writeWebp(generatedPath('effects',skill.id),effectSvg(skill,index));

@@ -39,9 +39,31 @@ function loadAnimationLayout() {
     return null; // No atlases generated yet; the runtime falls back to the static form art.
   }
 }
+/**
+ * Art is served for a year and marked immutable, which is only honest if the address changes when
+ * the picture does. The file's name cannot carry that: the name is derived from the id so the
+ * pipeline can work out where to write, and replacing a room's artwork left the address identical.
+ * Browsers that had the old picture kept it and never asked again. So the address carries a stamp
+ * of the file's contents alongside, and a redrawn picture is simply a different address.
+ */
+const ART_ROOTS = [
+  path.join(__dirname, '..', 'dist', 'assets', 'art'),     // what the server actually serves
+  path.join(__dirname, '..', 'public', 'assets', 'art'),   // before a build has copied it across
+];
+const contentStamp = (folder, name) => {
+  for (const root of ART_ROOTS) {
+    try {
+      return crypto.createHash('sha256').update(fs.readFileSync(path.join(root, folder, name)))
+        .digest('hex').slice(0, 8);
+    } catch { /* not generated yet, or this root is the wrong one */ }
+  }
+  return null;
+};
 const artPath = (folder, id) => {
   const hash = crypto.createHash('sha256').update(`${CATALOG_VERSION}:${folder}:${id}`).digest('hex').slice(0, 10);
-  return `/pet/assets/art/${folder}/${id}-${hash}.webp`;
+  const name = `${id}-${hash}.webp`;
+  const stamp = contentStamp(folder, name);
+  return `/pet/assets/art/${folder}/${name}${stamp ? `?v=${stamp}` : ''}`;
 };
 
 /**

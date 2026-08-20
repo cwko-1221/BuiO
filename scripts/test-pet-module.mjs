@@ -41,10 +41,10 @@ pass('catalogue counts, evolution rules and bilingual content');
 
 const artRoot=path.resolve('pet-app/public/assets/art');
 for(const pet of catalog.pets) for(const publicPath of pet.art) {
-  const file=path.join(artRoot,publicPath.split('/art/')[1]); const metadata=await sharp(file).metadata();
+  const file=path.join(artRoot,publicPath.split('?')[0].split('/art/')[1]); const metadata=await sharp(file).metadata();
   assert.equal(metadata.width,640); assert.equal(metadata.height,640); assert.equal(metadata.hasAlpha,true);
 }
-for(const room of catalog.rooms) { const metadata=await sharp(path.join(artRoot,room.art.split('/art/')[1])).metadata(); assert.equal(metadata.width,1600); assert.equal(metadata.height,900); }
+for(const room of catalog.rooms) { const metadata=await sharp(path.join(artRoot,room.art.split('?')[0].split('/art/')[1])).metadata(); assert.equal(metadata.width,1600); assert.equal(metadata.height,900); }
 
 assert.equal((await fs.readdir(path.join(artRoot,'items'))).filter((name)=>name.endsWith('.webp')).length,15);
 const assetManifest=JSON.parse(await fs.readFile(path.join(artRoot,'manifest.json'),'utf8'));
@@ -58,7 +58,7 @@ assert.ok(spriteManifest.gridColumns>0&&spriteManifest.gridRows>0,`sprite manife
 assert.ok(spriteManifest.rows.length>=1,`expected at least one direction row`);
 const atlasWidth=spriteManifest.frameWidth*spriteManifest.gridColumns;
 const atlasHeight=spriteManifest.frameHeight*spriteManifest.gridRows*spriteManifest.rows.length;
-for(const sheet of spriteManifest.sheets){const metadata=await sharp(path.join(artRoot,sheet.split('/art/')[1])).metadata();assert.equal(metadata.width,atlasWidth,`${sheet} width`);assert.equal(metadata.height,atlasHeight,`${sheet} height`);assert.equal(metadata.hasAlpha,true);}
+for(const sheet of spriteManifest.sheets){const metadata=await sharp(path.join(artRoot,sheet.split('?')[0].split('/art/')[1])).metadata();assert.equal(metadata.width,atlasWidth,`${sheet} width`);assert.equal(metadata.height,atlasHeight,`${sheet} height`);assert.equal(metadata.hasAlpha,true);}
 assert.equal((await fs.readdir(path.join(artRoot,'collectibles/wearables'))).filter((name)=>name.endsWith('.webp')).length,80);
 assert.equal((await fs.readdir(path.join(artRoot,'collectibles/furniture'))).filter((name)=>name.endsWith('.webp')).length,100);
 
@@ -163,7 +163,7 @@ async function tonalBuckets(file) {
 }
 const flat=[];
 for(const pet of [catalog.pets[0],catalog.pets[8],catalog.pets[15],catalog.pets[19]]) {
-  const buckets=await tonalBuckets(path.join(artRoot,pet.art[3].split('/art/')[1]));
+  const buckets=await tonalBuckets(path.join(artRoot,pet.art[3].split('?')[0].split('/art/')[1]));
   if(buckets<20) flat.push(`${pet.id} (${buckets}/32)`);
 }
 assert.equal(flat.length,0,`these forms read as flat fills rather than shaded volumes, need >=20 of 32 luminance buckets: ${flat.join(', ')}`);
