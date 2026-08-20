@@ -44,7 +44,15 @@ const STEPS = ['㇐ 地板嘅左後角（牆腳同左邊線交界）', '㇑ 地�
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 const image = new Image();
-let clicks = [], dragging = -1;
+const FITTED = __FITTED__;
+// The fit gives four corners; the page works in the four points those came from, so the front
+// pair is folded back onto the side edges at a depth that is on the picture.
+let clicks = (() => {
+  const [bl, br, fr, fl] = FITTED;
+  const along = (top, front) => [top[0] + (front[0] - top[0]) * .7, top[1] + (front[1] - top[1]) * .7];
+  return [bl, br, along(bl, fl), along(br, fr)];
+})();
+let dragging = -1;
 
 image.onload = () => { canvas.width = image.width; canvas.height = image.height; draw(); };
 image.src = '/image';
@@ -130,7 +138,7 @@ function draw() {
     ctx.fillText(String(i + 1), x * w, y * h);
   });
 
-  document.getElementById('step').textContent = clicks.length < 4 ? STEPS[clicks.length] : '四點齊了 — 看藍色格是否貼住地板，可拖動微調';
+  document.getElementById('step').textContent = clicks.length < 4 ? STEPS[clicks.length] : '已自動找出四角 — 看藍色格是否貼住地板，可拖動微調';
   document.getElementById('save').disabled = clicks.length < 4;
 }
 

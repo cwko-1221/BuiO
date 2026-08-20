@@ -35,6 +35,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import sharp from 'sharp';
+import { findFloor } from './room-floor-fit.mjs';
 
 const require = createRequire(import.meta.url);
 const { catalog } = require('../pet-app/lib/catalog.js');
@@ -283,49 +284,99 @@ function homography(from, to) {
  * Given where the floor's four corners actually are, this is the transform that puts them where
  * the game expects them, and it carries the walls along with it. Corners are allowed to fall
  * outside the picture — that is the usual case, since a room drawn wider than its frame has its
- * near corners off the edge — and whatever floor was never drawn is carried in from the edge
- * pixels beside it, with a note saying how much of the floor that was.
+ * near corners off the edge. What was never drawn is continued from what was: floor is reflected
+ * along its own row so a plank carries on as a plank, and wall is carried straight down the column
+ * so panelling carries on as panelling. The report says how much of the floor that came to.
  */
 async function rectifyRoom(file, quad) {
   const source = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const { width: sw, height: sh, channels } = source.info;
   const { width: dw, height: dh } = ROOM_SIZE;
-  const toSource = homography(specQuad(), quad);
   const out = Buffer.alloc(dw * dh * 4);
-
-  // Where the source runs out, hold its edge pixel rather than mirroring: a wall carried
-  // outward reads as a wider panel, where a mirror folds a fake corner into the picture.
-  const hold = (v, n) => Math.min(Math.max(v, 0), n - 1e-6);
-  let invented = 0, floorPixels = 0;
   const missing = Buffer.alloc(dw * dh);
+  const sample = (u, v, o) => {
+    const sx = Math.min(Math.max(u * sw - .5, 0), sw - 1e-6);
+    const sy = Math.min(Math.max(v * sh - .5, 0), sh - 1e-6);
+    const x0 = Math.floor(sx), y0 = Math.floor(sy);
+    const fx = sx - x0, fy = sy - y0;
+    const x1 = Math.min(x0 + 1, sw - 1), y1 = Math.min(y0 + 1, sh - 1);
+    const at = (px, py) => (py * sw + px) * channels;
+    const a = at(x0, y0), b = at(x1, y0), c = at(x0, y1), d = at(x1, y1);
+    for (let ch = 0; ch < 3; ch++) {
+      const top = source.data[a + ch] * (1 - fx) + source.data[b + ch] * fx;
+      const bottom = source.data[c + ch] * (1 - fx) + source.data[d + ch] * fx;
+      out[o + ch] = Math.round(top * (1 - fy) + bottom * fy);
+    }
+    out[o + 3] = 255;
+  };
+  const floorMap = homography(specQuad(), quad);
+
+  /**
+   * The wall gets its own map. Carrying the floor's projection up past the floor's back edge
+   * pushes the top of the picture out of frame — the ship's cabin lost the top of its porthole
+   * that way — because a projective map does not stay gentle outside the quad that defined it.
+   * Instead the wall band is squeezed straight into the band the grid leaves for it, spread to
+   * the full width at the top and matching the floor exactly where the two meet, so the whole
+   * wall survives and there is no seam.
+   */
+  const sourceBackY = (quad[0][1] + quad[1][1]) / 2;
+  const sourceCentre = (quad[0][0] + quad[1][0]) / 2;
+  const seamScale = ((quad[1][0] - quad[0][0]) / 2) / (SPEC.backSpan / 2);
+  const wallMap = (X, Y) => {
+    const t = Y / SPEC.line;
+    return [(.5 + (sourceCentre - .5) * t) + (X - .5) * (1 + (seamScale - 1) * t), t * sourceBackY];
+  };
+  const toSource = (X, Y) => (Y < SPEC.line ? wallMap(X, Y) : floorMap(X, Y));
+
   // Whether an output pixel lands on the grid's floor, which is what the fraction below is of.
-  const back = SPEC.backSpan / 2, front = SPEC.frontSpan / 2;
+  const backHalf = SPEC.backSpan / 2, frontHalf = SPEC.frontSpan / 2;
   const onFloor = (X, Y) => Y >= SPEC.line
-    && Math.abs(X - .5) <= back + (front - back) * (Y - SPEC.line) / (1 - SPEC.line);
+    && Math.abs(X - .5) <= backHalf + (frontHalf - backHalf) * (Y - SPEC.line) / (1 - SPEC.line);
+  const inside = (X, Y) => {
+    const [u, v] = toSource(X, Y);
+    return u >= 0 && u <= 1 && v >= 0 && v <= 1;
+  };
+  let invented = 0, floorPixels = 0;
+  // The last row of each column that still had picture behind it, for carrying a wall downward.
+  const lastGood = new Int32Array(dw).fill(-1);
 
   for (let y = 0; y < dh; y++) {
+    const Y = (y + .5) / dh;
+    // Where this row still has picture behind it. Past those the room was drawn outside its own
+    // frame, and what is missing has to be continued from what is there.
+    let first = 0, last = dw - 1;
+    while (first < dw && !inside((first + .5) / dw, Y)) first++;
+    while (last > first && !inside((last + .5) / dw, Y)) last--;
+
     for (let x = 0; x < dw; x++) {
-      const X = (x + .5) / dw, Y = (y + .5) / dh;
-      const [u, v] = toSource(X, Y);
+      const X = (x + .5) / dw;
       const floor = onFloor(X, Y);
       if (floor) floorPixels++;
-      if (u < 0 || u > 1 || v < 0 || v > 1) {
-        missing[y * dw + x] = 1;
-        if (floor) invented++;
-      }
-      const sx = hold(u * sw - .5, sw), sy = hold(v * sh - .5, sh);
-      const x0 = Math.floor(sx), y0 = Math.floor(sy);
-      const fx = sx - x0, fy = sy - y0;
-      const x1 = Math.min(x0 + 1, sw - 1), y1 = Math.min(y0 + 1, sh - 1);
-      const at = (px, py) => (py * sw + px) * channels;
-      const a = at(x0, y0), b = at(x1, y0), c = at(x0, y1), d = at(x1, y1);
       const o = (y * dw + x) * 4;
-      for (let ch = 0; ch < 3; ch++) {
-        const top = source.data[a + ch] * (1 - fx) + source.data[b + ch] * fx;
-        const bottom = source.data[c + ch] * (1 - fx) + source.data[d + ch] * fx;
-        out[o + ch] = Math.round(top * (1 - fy) + bottom * fy);
+
+      if (x >= first && x <= last) {
+        const [u, v] = toSource(X, Y);
+        sample(u, v, o);
+        lastGood[x] = y;
+        continue;
       }
-      out[o + 3] = 255;
+
+      missing[y * dw + x] = 1;
+      if (floor) {
+        // Reflecting along the row keeps the floor's perspective, so a plank carries on as a plank.
+        invented++;
+        const bounce = x < first ? Math.min(2 * first - x, last) : Math.max(2 * last - x, first);
+        const [u, v] = toSource((bounce + .5) / dw, Y);
+        sample(u, v, o);
+      } else if (lastGood[x] >= 0) {
+        // Wall, and there is wall above it: carry that straight down. Panelling runs vertically,
+        // so it continues; reflecting it sideways folds a false corner into the picture instead.
+        out.copy(out, o, (lastGood[x] * dw + x) * 4, (lastGood[x] * dw + x) * 4 + 4);
+      } else {
+        const edge = x < first ? first : last;
+        const [u, v] = toSource((edge + .5) / dw, Y);
+        sample(u, v, o);
+      }
     }
   }
   return { raw: out, missing, invented: floorPixels ? invented / floorPixels : 0 };
@@ -373,20 +424,35 @@ async function importRoom(file, roomId, dry, quad) {
   const room = catalog.rooms.find((entry) => entry.id === roomId);
   if (!room) throw new Error(`no room called ${roomId}`);
 
-  const corners = quad || await savedFloor(roomId);
-  let image = sharp(file).resize(ROOM_SIZE.width, ROOM_SIZE.height, { fit: 'fill' });
-
-  if (corners) {
-    const { raw, missing, invented } = await rectifyRoom(file, corners);
-    image = sharp(raw, { raw: { width: ROOM_SIZE.width, height: ROOM_SIZE.height, channels: 4 } });
-    log(`      floor moved onto the grid${invented > .002 ? `, ${(invented * 100).toFixed(1)}% of it carried in from the edge because it was drawn outside the frame, tinted pink in the check` : ''}`);
-    log(`      ${await rectifiedPreview(raw, missing, roomId)}`);
-    if (!dry) await fs.writeFile(FLOORS, JSON.stringify({ ...await readFloors(), [roomId]: corners }, null, 2));
-  } else {
-    log('      no floor corners yet, so the grid will land wherever the art put the floor');
-    log(`      run: npm run room:corners -- ${file}`);
+  let corners = quad || await savedFloor(roomId);
+  if (!corners) {
+    // Nobody has pointed at this room's floor, so fit it: the wall meets the floor along three
+    // long straight lines, and those can be found even where wall and floor are the same wood.
+    corners = (await findFloor(file)).quad;
+    log(`      fitted the floor's corners: ${corners.map((p) => p.map((n) => (n * 100).toFixed(1)).join(',')).join('  ')}`);
+    log('      check it in the picture below - npm run room:corners to move any of them');
   }
+  /**
+   * How much of the floor may be made up before the room is refused. A per cent or two at the
+   * near corners is plank carried on as plank and nobody sees it. Much more than that and the
+   * bottom corners of the room were never drawn at all — not the floor and not the wall beside
+   * it — and no fill invents a wall that was never there. That is a room to generate again.
+   */
+  const INVENTION_LIMIT = .04;
 
+  const { raw, missing, invented } = await rectifyRoom(file, corners);
+  const check = await rectifiedPreview(raw, missing, roomId);
+  if (invented > INVENTION_LIMIT && !argv.includes('--anyway')) {
+    log(`      ${(invented * 100).toFixed(1)}% of the floor was drawn outside the frame, past the ${INVENTION_LIMIT * 100}% this can make up`);
+    log('      the bottom corners of this room do not exist - generate it again, or --anyway to take it as is');
+    log(`      ${check}`);
+    return 0;
+  }
+  log(`      floor moved onto the grid${invented > .002 ? `, ${(invented * 100).toFixed(1)}% of it reflected back in, tinted pink in the check` : ''}`);
+  log(`      ${check}`);
+  if (!dry) await fs.writeFile(FLOORS, JSON.stringify({ ...await readFloors(), [roomId]: corners }, null, 2));
+
+  const image = sharp(raw, { raw: { width: ROOM_SIZE.width, height: ROOM_SIZE.height, channels: 4 } });
   const buffer = await image.flatten({ background: '#ffffff' }).webp({ quality: 90 }).toBuffer();
   await write(fileFor(room.art), buffer, dry);
   return 1;
@@ -516,7 +582,8 @@ function spriteManifest() {
 }
 
 // -------------------------------------------------------------------- main ---
-const files = argv.filter((entry) => !entry.startsWith('--') && entry !== argv[outIndex + 1] && !floorArgs.includes(entry));
+const consumed = new Set([...(outIndex >= 0 ? [outIndex + 1] : [])].map((i) => argv[i]));
+const files = argv.filter((entry) => !entry.startsWith('--') && !consumed.has(entry) && !floorArgs.includes(entry));
 if (!files.length) {
   console.error('usage: npm run import:art -- [--dry] [--out <dir>] [--floor "x,y x,y x,y x,y"] <sheet.png> ...');
   process.exit(1);

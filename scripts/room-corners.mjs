@@ -15,6 +15,7 @@ import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { findFloor } from './room-floor-fit.mjs';
 
 const file = process.argv[2];
 if (!file) {
@@ -23,7 +24,10 @@ if (!file) {
 }
 const roomId = path.basename(file).replace(/\.[^.]+$/, '').replace(/^room-/, '');
 const target = 'scripts/room-floors.json';
-const page = (await fs.readFile('tools/room-corners.html', 'utf8')).replace('__ROOM__', roomId);
+const fitted = (await findFloor(file)).quad;
+const page = (await fs.readFile('tools/room-corners.html', 'utf8'))
+  .replace('__ROOM__', roomId)
+  .replace('__FITTED__', JSON.stringify(fitted));
 const image = await fs.readFile(file);
 const type = { '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg' }[path.extname(file).toLowerCase()] || 'image/png';
 
