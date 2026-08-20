@@ -68,6 +68,9 @@ export class PetAvatar extends Phaser.GameObjects.Container {
    * atlas for this pet, so the caller knows to load the static form art instead.
    */
   static preload(scene: Phaser.Scene, definition: PetDefinition, stage: number, layout?: AnimationLayout | null) {
+    // A creature whose sheet has not been imported yet is still on placeholder art, which the
+    // manifest does not describe. Playing it would cut frames in the wrong places.
+    if (!definition.animated) return false;
     const url = definition.atlas?.[stage - 1];
     if (!url || !layout) return false;
     const key = PetAvatar.atlasKey(definition, stage);
@@ -132,25 +135,26 @@ export class PetAvatar extends Phaser.GameObjects.Container {
 
   /** Build one Phaser animation per action per facing from the server-supplied frame ranges. */
   private registerAnimations(definition: PetDefinition, stage: number, layout: AnimationLayout) {
-    for (let row = 0; row < layout.directions.length; row += 1) {
-      const facing = layout.directions[row];
-      for (const action of layout.actions) {
+    for (const action of layout.actions) {
+      // A clip from the pose sheet already knows which way it faces and which cells it plays.
+      // An action from the older sheet is a run within each direction row, so it is built once
+      // per direction and offset into that row.
+      const facings = action.facing ? [action.facing] : layout.directions;
+      for (const facing of facings) {
         const animationKey = `${definition.id}-${stage}-${action.name}-${facing}`;
         if (this.scene.anims.exists(animationKey)) continue;
-        const base = row * layout.framesPerDirection;
+        const row = Math.max(0, layout.directions.indexOf(facing));
+        const cells = action.frames
+          ?? Array.from({ length: action.length }, (_, offset) => row * layout.framesPerDirection + action.start + offset);
         this.scene.anims.create({
           key: animationKey,
-          frames: Array.from({ length: action.length }, (_, offset) => ({
-            key: this.textureKey,
-            frame: base + action.start + offset,
-          })),
+          frames: cells.map((frame) => ({ key: this.textureKey, frame })),
           frameRate: action.name === 'sleep' ? Math.round(layout.fps / 2.5) : layout.fps,
           repeat: LOOPING.has(action.name) ? -1 : 0,
         });
       }
     }
   }
-
   /** Play an action. One-shot actions fall back to idle when they finish. */
   play(action: PetAction, facing: PetFacing = this.facing) {
     this.facing = facing;
@@ -158,10 +162,13 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     if (!this.sprite || !this.layout) return this.tweenFallback(action);
     if (this.reducedMotion && !LOOPING.has(action)) {
       // Keep the state change legible without oscillation: hold the action's key pose.
-      const range = this.layout.actions.find((entry) => entry.name === action);
+      const range = this.layout.actions.find((entry) => entry.name === action && (!entry.facing || entry.facing === facing))
+        ?? this.layout.actions.find((entry) => entry.name === action);
       const row = Math.max(0, this.layout.directions.indexOf(facing));
       if (range) {
-        const cell = row * this.layout.framesPerDirection + range.start + Math.floor(range.length / 2);
+        const cells = range.frames
+          ?? Array.from({ length: range.length }, (_, offset) => row * this.layout!.framesPerDirection + range.start + offset);
+        const cell = cells[Math.floor(cells.length / 2)];
         this.sprite.setFrame(cell);
         this.layoutWearables(cell);
       }

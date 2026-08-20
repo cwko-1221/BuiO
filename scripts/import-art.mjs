@@ -466,15 +466,31 @@ async function importWearables(file, slot, dry) {
  * generator draws the creature a little larger in one pose than the next, and that reads as the
  * pet pulsing as it walks — far more obvious than any single frame being slightly off.
  */
+/**
+ * Which creatures have been drawn to the pose sheet. The manifest describes one layout for
+ * every atlas, so a species still on the old placeholder art cannot be played from it — the
+ * frames would be cut in the wrong places. The catalogue publishes an atlas only for the
+ * creatures listed here, and the rest fall back to their still art until their sheets arrive.
+ */
+const PET_SHEETS = path.join('pet-app', 'public', 'assets', 'art', 'sprites', 'imported.json');
+async function rememberPetSheet(speciesId, stage, dry) {
+  if (dry) return;
+  let known = {};
+  try { known = JSON.parse(await fs.readFile(PET_SHEETS, 'utf8')); } catch { /* first sheet */ }
+  known[speciesId] = { ...(known[speciesId] || {}), [stage]: true };
+  await fs.writeFile(PET_SHEETS, JSON.stringify(known, null, 0));
+}
 async function importPet(file, speciesId, stage, dry) {
   const pet = catalog.pets.find((entry) => entry.id === speciesId);
   if (!pet) throw new Error(`no species called ${speciesId}`);
   const sheet = await loadSheet(file);
   const meta = await sharp(sheet).metadata();
 
+  const boxes = await findCells(sheet, ATLAS_COLUMNS, ATLAS_ROWS);
+  log(`      found ${boxes.filter(Boolean).length} of ${ATLAS_COLUMNS * ATLAS_ROWS} poses on the sheet`);
   const cells = [];
   for (let index = 0; index < ATLAS_COLUMNS * ATLAS_ROWS; index += 1) {
-    const cut = await cell(sheet, meta, ATLAS_COLUMNS, ATLAS_ROWS, index);
+    const cut = await cell(sheet, meta, ATLAS_COLUMNS, ATLAS_ROWS, index, boxes);
     cells.push({ cut, bounds: await contentBounds(cut) });
   }
   const drawn = cells.filter((entry) => entry.bounds);
@@ -517,6 +533,7 @@ async function importPet(file, speciesId, stage, dry) {
   // The portrait is the front-facing idle, at the size the rest of the interface expects.
   const portrait = await seat(cells[0].cut, { canvas: PROP_CANVAS, standing: true, fill: 0.88 });
   if (portrait) await write(fileFor(pet.art[stage - 1]), portrait, dry);
+  await rememberPetSheet(speciesId, stage, dry);
   return 2;
 }
 

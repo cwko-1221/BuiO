@@ -17,19 +17,33 @@ const CATALOG_VERSION = '2026.08.13-1';
 function loadAnimationLayout() {
   try {
     const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'assets', 'art', 'sprites', 'manifest.json'), 'utf8'));
+
+    // The pose sheet: a row per direction the creature is drawn facing, five poses across, and
+    // a list of clips saying which of those cells each action plays. An action is no longer a
+    // contiguous run — walk is contact, pass, contact, pass — so the frames travel as a list.
+    if (Array.isArray(manifest.clips)) {
+      const actions = [];
+      for (const clip of manifest.clips) {
+        actions.push({ name: clip.name, facing: clip.facing, frames: clip.frames, start: clip.frames[0], length: clip.frames.length });
+      }
+      return {
+        frameWidth: manifest.frameWidth,
+        frameHeight: manifest.frameHeight,
+        framesPerDirection: manifest.columns,
+        fps: manifest.fps || 8,
+        directions: manifest.directions,
+        actions,
+      };
+    }
+
+    // The older sheet: one action per row, contiguous from its start index in reading order.
     if (!manifest.actions || !Array.isArray(manifest.rows)) return null;
-    // The sheet is a grid, one action per row, so an action's frames are contiguous from its
-    // start index in reading order. Take the ranges the generator published rather than
-    // re-deriving them from per-cell labels, which now include nulls where a short action is
-    // padded out to the grid width.
     const actions = Object.entries(manifest.actions).map(([name, action]) => ({
       name, start: action.start, length: action.count,
     }));
     return {
       frameWidth: manifest.frameWidth,
       frameHeight: manifest.frameHeight,
-      // Cells occupied by one direction, used to offset into the right block if the sheet
-      // ever carries more than one again.
       framesPerDirection: (manifest.gridColumns || manifest.columns.length) * (manifest.gridRows || 1),
       fps: manifest.fps || 24,
       directions: manifest.rows,
@@ -59,6 +73,23 @@ const contentStamp = (folder, name) => {
   }
   return null;
 };
+/**
+ * Creatures drawn to the pose sheet, all four stages of them. One manifest describes the
+ * layout of every atlas, so a creature still on the old placeholder art would be cut into
+ * frames in the wrong places; it is published without an atlas instead and the runtime falls
+ * back to its still art. Recorded by the importer, so this keeps itself.
+ */
+const POSE_SHEETS = (() => {
+  try {
+    const seen = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'assets', 'art', 'sprites', 'imported.json'), 'utf8'));
+    return new Set(Object.entries(seen)
+      .filter(([, stages]) => [1, 2, 3, 4].every((stage) => stages[stage]))
+      .map(([id]) => id));
+  } catch {
+    return new Set();
+  }
+})();
+
 const artPath = (folder, id) => {
   const hash = crypto.createHash('sha256').update(`${CATALOG_VERSION}:${folder}:${id}`).digest('hex').slice(0, 10);
   const name = `${id}-${hash}.webp`;
@@ -113,6 +144,10 @@ const PETS = [
   talent: { 'zh-HK': talentZh, 'en-US': talentEn }, color, body,
   art: Array.from({ length: 4 }, (_, index) => artPath('pets', `${id}-${index + 1}`)),
   atlas: Array.from({ length: 4 }, (_, index) => artPath('sprites', `${id}-${index + 1}-atlas`)),
+  // The atlas path is always here so the pipeline knows where to write; whether it may be played
+  // is a separate question, because one manifest describes the layout of every atlas and a
+  // creature still on placeholder art would be cut into frames in the wrong places.
+  animated: POSE_SHEETS.has(id),
   anchors: Array.from({ length: 4 }, (_, index) => BODY_METRICS[`${id}-${index + 1}`] || null),
   motion: Array.from({ length: 4 }, (_, index) => FRAME_MOTION[`${id}-${index + 1}`] || null),
 }));

@@ -7,6 +7,8 @@ export interface PetDefinition {
   talent: Localized; color: string; body: string; art: string[];
   /** One sprite atlas per evolution stage. Absent until the animation pipeline has run. */
   atlas?: string[];
+  /** Whether that atlas is drawn to the layout the manifest describes, and so can be played. */
+  animated?: boolean;
   /** Where worn items belong on the creature, per evolution stage. */
   anchors?: (PetAnchors | null)[];
   /** How those landmarks move frame by frame, per stage. Base64 signed bytes, 4 per atlas cell. */
@@ -28,7 +30,12 @@ export type PetFacing = 'front' | 'right' | 'back' | 'left';
 export interface AnimationLayout {
   frameWidth: number; frameHeight: number; framesPerDirection: number; fps: number;
   directions: PetFacing[];
-  actions: { name: PetAction; start: number; length: number }[];
+  /**
+   * One entry per action. The pose sheet names the facing it belongs to and lists the cells it
+   * plays, because a walk there is contact, pass, contact, pass and not a contiguous run. The
+   * older sheet gave a start and a length within each direction row instead.
+   */
+  actions: { name: PetAction; start: number; length: number; facing?: PetFacing; frames?: number[] }[];
 }
 /** The floor's four corners as fractions of the room image: back left, back right, front right, front left. */
 export type RoomFloor = [number, number][];

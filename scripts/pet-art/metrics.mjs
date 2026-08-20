@@ -94,18 +94,25 @@ async function measureCreatures({ catalog, resolve, root, log }) {
     return { anchors: 0, tracks: 0 };
   }
   const { frameWidth: cellW, frameHeight: cellH } = manifest;
-  const columns = manifest.gridColumns || manifest.columns.length;
-  const cells = columns * (manifest.gridRows || 1);
+  // The manifest has had two shapes. The pose sheet gives plain counts; the older one listed the
+  // columns and rows it used. Reading .length off a number came back undefined, which put every
+  // frame at NaN and quietly handed back whole-cell proportions for all eighty creatures.
+  const count = (value, fallback) => (Array.isArray(value) ? value.length : Number(value) || fallback);
+  const columns = manifest.gridColumns || count(manifest.columns, 1);
+  const cells = columns * (manifest.gridRows || count(manifest.rows, 1));
 
-  // Only the cells an action actually occupies are drawn; the rest of the grid is padding.
-  const animated = new Set();
+  // Only the cells something is drawn in are measured; the rest of the grid is padding.
+  const drawn = new Set();
+  for (const clip of manifest.clips || []) for (const frame of clip.frames) drawn.add(frame);
   for (const action of Object.values(manifest.actions || {})) {
-    for (let i = 0; i < action.count; i += 1) animated.add(action.start + i);
+    for (let i = 0; i < action.count; i += 1) drawn.add(action.start + i);
   }
+  const animated = drawn;
 
   const anchors = {};
   const motion = {};
   for (const pet of catalog.pets) {
+    if (!pet.animated) continue;
     for (let stage = 0; stage < (pet.atlas?.length ?? 0); stage += 1) {
       let sheet;
       try {

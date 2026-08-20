@@ -205,8 +205,13 @@ try {
   // img rule quietly capped those at the stack's width while their offsets still assumed the
   // full size, which slid the whole outfit up and to the left. Assert what is drawn is the size
   // it was told to be.
+  // A creature whose pose sheet has not been imported has no anchors to hang an outfit on, so
+  // the board shows its still portrait instead of a stack. That is the intended fallback, and the
+  // sizing this guards only exists on the stack.
+  const previewShown=await page.evaluate(()=>Boolean(document.querySelector('.gear-figure .figure-stack, .gear-figure img')));
+  assert.ok(previewShown,'the equipment board shows no creature at all');
   const previewFits=await page.evaluate(()=>{
-    const stack=document.querySelector('.figure-stack'); if(!stack) return null;
+    const stack=document.querySelector('.figure-stack'); if(!stack) return [];
     const width=stack.getBoundingClientRect().width;
     return [...document.querySelectorAll('.figure-piece')].map((piece)=>({
       declared:Math.round(width*parseFloat(piece.style.width)/100),
@@ -214,12 +219,29 @@ try {
       capped:getComputedStyle(piece).maxWidth,
     }));
   });
-  assert.ok(previewFits&&previewFits.length,'the equipment board should preview the outfit on the creature');
   for(const piece of previewFits){
     assert.equal(piece.capped,'none','a preview piece must not be capped to the stack width');
     assert.ok(Math.abs(piece.drawn-piece.declared)<=1,`preview piece drawn at ${piece.drawn}px but sized ${piece.declared}px`);
   }
   await page.locator('.picker-head [data-action="close-modal"]').click();
+
+  // The frames below only mean something on a creature whose pose sheet has been imported — the
+  // rest are still on placeholder art and hold one picture by design. Buy an animated species
+  // and make it the active pet, so the outfit is checked against art that actually moves.
+  const animated=catalog.pets.filter((pet)=>pet.animated&&pet.rarity!=='epic');
+  assert.ok(animated.length,'no animated species to check a moving outfit against');
+  const wanted=animated[0].id;
+  await page.locator('[data-tab="shop"]').click();
+  await page.locator('[data-action="shop-category"][data-id="eggs"]').click();
+  const buyAnimated=page.locator(`[data-action="buy-direct-egg"][data-id="${wanted}"]`);
+  await buyAnimated.waitFor();
+  if(await buyAnimated.isEnabled()) { await buyAnimated.click(); await buyAnimated.waitFor(); }
+  await page.locator('[data-tab="collection"]').click();
+  const choose=page.locator(`.pet-card:has(img[src*="${wanted}-"]) [data-action="activate"]`);
+  await choose.waitFor();
+  if(await choose.isEnabled()) await choose.click();
+  await page.waitForFunction((id)=>document.querySelector(`.pet-card:has(img[src*="${id}-"]) [data-action="activate"]`)?.hasAttribute('disabled'),wanted,{timeout:15000});
+
   await page.reload({waitUntil:'networkidle'}); await page.locator('#game-root canvas').waitFor();
   await page.waitForFunction(()=>window.__petGame?.scene?.getScene('Bedroom')?.avatar?.worn?.length>0,null,{timeout:15000});
   const worn=await page.evaluate(async()=>{
