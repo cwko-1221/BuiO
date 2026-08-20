@@ -29,9 +29,9 @@
 </header>
 <main><div id="stage"><canvas id="c"></canvas></div></main>
 <footer>
-  <button id="undo">退回一點</button>
-  <button id="reset">重新開始</button>
-  <button id="save" class="go" disabled>儲存四角</button>
+  <button id="reset">重新標記四點</button>
+  <button id="prev">← 上一間</button>
+  <button id="save" class="go" disabled>儲存並下一間 →</button>
   <span id="said"></span>
 </footer>
 
@@ -45,6 +45,7 @@ const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 const image = new Image();
 const FITTED = __FITTED__;
+const AT = __AT__, LAST = __LAST__;
 // The fit gives four corners; the page works in the four points those came from, so the front
 // pair is folded back onto the side edges at a depth that is on the picture.
 let clicks = (() => {
@@ -55,7 +56,7 @@ let clicks = (() => {
 let dragging = -1;
 
 image.onload = () => { canvas.width = image.width; canvas.height = image.height; draw(); };
-image.src = '/image';
+image.src = '/image?at=' + AT;
 
 /** Solve a small dense system by elimination with partial pivoting. */
 function solve(rows, values) {
@@ -138,7 +139,7 @@ function draw() {
     ctx.fillText(String(i + 1), x * w, y * h);
   });
 
-  document.getElementById('step').textContent = clicks.length < 4 ? STEPS[clicks.length] : '已自動找出四角 — 看藍色格是否貼住地板，可拖動微調';
+  document.getElementById('step').textContent = clicks.length < 4 ? STEPS[clicks.length] : '已自動找出四角 — 藍色格貼住地板就可以直接下一間，否則拖動微調或重新標記';
   document.getElementById('save').disabled = clicks.length < 4;
 }
 
@@ -160,8 +161,10 @@ canvas.addEventListener('pointermove', (event) => {
 });
 canvas.addEventListener('pointerup', () => { dragging = -1; });
 
-document.getElementById('undo').onclick = () => { clicks.pop(); draw(); };
 document.getElementById('reset').onclick = () => { clicks = []; draw(); };
+document.getElementById('prev').disabled = AT === 0;
+document.getElementById('prev').onclick = () => { location.search = '?at=' + (AT - 1); };
+if (AT === LAST) document.getElementById('save').textContent = '儲存並完成';
 document.getElementById('save').onclick = async () => {
   const said = document.getElementById('said');
   said.style.color = '';
@@ -170,9 +173,10 @@ document.getElementById('save').onclick = async () => {
     const quad = quadFrom(clicks);
     const spread = Math.abs(quad[1][0] - quad[0][0]) * Math.abs(quad[2][1] - quad[0][1]);
     if (!Number.isFinite(spread) || spread < .01) throw new Error('degenerate');
-    const reply = await fetch('/corners', { method: 'POST', body: JSON.stringify({ quad }) });
+    const reply = await fetch('/corners?at=' + AT, { method: 'POST', body: JSON.stringify({ quad }) });
     if (!reply.ok) throw new Error(reply.status);
-    said.textContent = '已儲存 — 可以再拖動微調後重新儲存，完成後回終端機按 Ctrl-C';
+    if (AT < LAST) { location.search = '?at=' + (AT + 1); return; }
+    said.textContent = '十間都標好了 — 回終端機按 Ctrl-C，然後 npm run import:art';
   } catch {
     said.style.color = '#ff5a4d';
     said.textContent = '儲存不了 — 終端機的 npm run room:corners 已經停了，重新執行一次再試';

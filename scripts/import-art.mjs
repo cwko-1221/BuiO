@@ -238,7 +238,7 @@ async function loadSheet(file) {
  * BedroomScene draws its grid from. A room is used exactly as drawn, so all this does is check
  * that the grid lands on painted floor.
  */
-const FLOOR_LINE = 0.41, BACK_SPAN = 0.57, FRONT_SPAN = 0.98;
+const FLOOR_LINE = 0.389, BACK_SPAN = 0.551, FRONT_SPAN = 0.976;
 const SPEC = { line: FLOOR_LINE, backSpan: BACK_SPAN, frontSpan: FRONT_SPAN };
 /** Back left, back right, front right, front left — the order corners are clicked and stored in. */
 const specQuad = () => {

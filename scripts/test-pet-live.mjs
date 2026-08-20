@@ -196,36 +196,40 @@ try {
   });
   assert.ok(reachable,'part of the placement grid is off screen, so the far rows cannot be tapped');
 
+  // Somewhere free to send it, deliberately off the middle of its cell: the creature walks the
+  // floor rather than the grid, so it has to stop where it was sent and not on the nearest cell.
   const destination=await page.evaluate(()=>{
     const scene=window.__petGame.scene.getScene('Bedroom');
     const blocked=scene.blockedCells();
+    const here=scene.cellUnder(scene.petSpot);
     for(let y=9;y>=0;y-=1)for(let x=13;x>=0;x-=1){
-      if(!blocked.has(x+':'+y)&&(x!==scene.petCell.x||y!==scene.petCell.y)) return {x,y};
+      if(!blocked.has(x+':'+y)&&(x!==here.x||y!==here.y)) return {x:x+0.28,y:y+0.72};
     }
     return null;
   });
   assert.ok(destination,'the room has no free cell to send the pet to');
-  const spot=await page.evaluate((cell)=>{
+  const spot=await page.evaluate((at)=>{
     const game=window.__petGame; const scene=game.scene.getScene('Bedroom');
-    const point=scene.gridToScreen(cell.x+0.5,cell.y+0.5);
+    const point=scene.gridToScreen(at.x,at.y);
     const box=game.canvas.getBoundingClientRect(); const scale=box.width/scene.cameras.main.width;
     return {x:box.x+point.x*scale,y:box.y+point.y*scale};
   },destination);
   await page.mouse.click(spot.x,spot.y);
   await page.waitForFunction((want)=>{
     const scene=window.__petGame.scene.getScene('Bedroom');
-    return scene.petCell.x===want.x&&scene.petCell.y===want.y;
+    return Math.abs(scene.petSpot.x-want.x)<0.06&&Math.abs(scene.petSpot.y-want.y)<0.06;
   },destination,{timeout:20000});
   const arrival=await page.evaluate(()=>{
     const scene=window.__petGame.scene.getScene('Bedroom');
-    return {cell:scene.petCell,depth:scene.avatar.depth,blocked:[...scene.blockedCells()]};
+    return {spot:scene.petSpot,cell:scene.cellUnder(scene.petSpot),depth:scene.avatar.depth,blocked:[...scene.blockedCells()]};
   });
-  assert.equal(arrival.depth,20+arrival.cell.y+1.5,'depth does not follow the row the pet stands on');
+  assert.ok(Math.abs(arrival.spot.x-Math.round(arrival.spot.x))>0.05,'the pet snapped to a cell instead of stopping where it was sent');
+  assert.equal(Math.round((arrival.depth-20-arrival.spot.y)*1000)/1000,0.5,'depth does not follow where the pet stands');
   assert.ok(!arrival.blocked.includes(arrival.cell.x+':'+arrival.cell.y),'the pet ended up standing on furniture');
 
   await page.waitForTimeout(3000);
-  const unattended=await page.evaluate(()=>window.__petGame.scene.getScene('Bedroom').petCell);
-  assert.deepEqual(unattended,arrival.cell,'the pet wandered off on its own instead of waiting to be told');
+  const unattended=await page.evaluate(()=>window.__petGame.scene.getScene('Bedroom').petSpot);
+  assert.ok(Math.hypot(unattended.x-arrival.spot.x,unattended.y-arrival.spot.y)<0.1,'the pet wandered off on its own instead of waiting to be told');
 
   assert.deepEqual(errors,[]);
   await teacherContext.close(); await context.close();

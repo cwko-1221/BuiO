@@ -84,9 +84,9 @@ const FLOOR_CENTRE = STAGE_WIDTH / 2;
  * with nothing stretched onto the grid and no corner of floor invented where the picture ran out.
  * The importer checks each new room against these and refuses one the grid would overhang.
  */
-const FLOOR_LINE = 0.41;     // the floor starts below every room's skirting
-const BACK_SPAN = 0.57;      // and is narrower than the narrowest floor there
-const FRONT_SPAN = 0.98;     // and at the bottom, where every room's floor runs off the frame
+const FLOOR_LINE = 0.389;    // below the highest skirting of the ten rooms
+const BACK_SPAN = 0.551;     // inside the narrowest floor there, by about a per cent
+const FRONT_SPAN = 0.976;    // and inside it again along the bottom of the frame
 
 const FLOOR_TOP = STAGE_HEIGHT * FLOOR_LINE;
 const FLOOR_DEPTH = STAGE_HEIGHT - FLOOR_TOP;
@@ -129,8 +129,14 @@ export class BedroomScene extends Phaser.Scene {
   grid?: Phaser.GameObjects.Graphics;
   ghost?: Phaser.GameObjects.Graphics;
   /** Floor cell the creature is standing on, and where it is heading. */
-  petCell = { x: 0, y: 0 };
-  petTarget?: { x: number; y: number };
+  /**
+   * Where the creature stands, in fractional cells. The grid is for furniture — a piece has to
+   * sit somewhere a child can find it again — but a creature walking cell to cell stair-steps
+   * around the room like a chess piece. It walks the floor instead, and consults the grid only
+   * to know which cells the furniture is standing on.
+   */
+  petSpot = { x: 0, y: 0 };
+  petLegs?: { x: number; y: number }[];
   petStep?: Phaser.Tweens.Tween;
   roomTextureKey = '';
   petTextureKey = '';
@@ -148,7 +154,7 @@ export class BedroomScene extends Phaser.Scene {
     this.grid = undefined;
     this.ghost = undefined;
     this.avatar = undefined;
-    this.petTarget = undefined;
+    this.petLegs = undefined;
     this.petStep = undefined;
   }
   preload() {
@@ -185,22 +191,22 @@ export class BedroomScene extends Phaser.Scene {
     this.placements.forEach((placement) => this.addFurniture(placement));
     // Stand the creature on a floor cell rather than a fixed point, so it sorts against the
     // furniture by the row it is on — the same rule every piece of furniture follows.
-    this.petCell = { x: Math.floor(GRID_COLUMNS / 2), y: Math.floor(GRID_ROWS * .62) };
-    const home = this.petCentre(this.petCell);
+    this.petSpot = { x: GRID_COLUMNS / 2, y: GRID_ROWS * .68 };
+    const home = this.petCentre(this.petSpot);
     this.avatar = new PetAvatar(this, home.x, home.y, this.model.petDefinition, this.model.activePet, {
       layout: this.model.bootstrap.catalog.animation,
       fallbackTexture: this.petTextureKey && this.textures.exists(this.petTextureKey) ? this.petTextureKey : undefined,
-      scale: PET_SCALE * this.depthScale(this.petCell.y + 1),
+      scale: PET_SCALE * this.depthScale(this.petSpot.y),
       wearables: this.model.bootstrap.catalog.wearables,
       ambient: this.ambientLight(),
     });
-    this.seatPet(this.petCell);
+    this.seatPet(this.petSpot);
     this.ghost = this.add.graphics().setDepth(15);
     // A tap that hits no furniture is a tap on the floor, which is where the child wants the pet.
     this.input.on('pointerup', (pointer: Phaser.Input.Pointer, targets: Phaser.GameObjects.GameObject[]) => {
       if (this.editing || targets.length) return;
       if (pointer.getDistance() > 16) return;   // a drag across the room is not a destination
-      this.walkTo(this.screenToGrid(pointer.worldX, pointer.worldY));
+      this.walkTo(this.screenToCell(pointer.worldX, pointer.worldY));
     });
     this.input.on('drag', (_pointer: Phaser.Input.Pointer, target: Phaser.GameObjects.Container, dragX: number, dragY: number) => {
       if (!this.editing || !target.getData('placementId')) return;
@@ -619,23 +625,31 @@ export class BedroomScene extends Phaser.Scene {
   }
   private removeSelected(id: string) { const index = this.placements.findIndex((item) => item.id === id); if (index < 0) return; this.placements.splice(index,1); this.furniture.get(id)?.destroy(); this.furniture.delete(id); this.game.events.emit('room:placements', this.placements); }
 
-  /** Screen point a creature standing on a cell should sit at: the middle of the cell's front. */
-  private petCentre(cell: { x: number; y: number }) {
-    return this.gridToScreen(cell.x + .5, cell.y + 1);
+  /** Screen point for a place on the floor, in fractional cells. */
+  private petCentre(spot: { x: number; y: number }) {
+    return this.gridToScreen(spot.x, spot.y);
+  }
+
+  /** The cell a creature standing here is on: the row it sorts against and collides with. */
+  private cellUnder(spot: { x: number; y: number }) {
+    return {
+      x: Phaser.Math.Clamp(Math.floor(spot.x), 0, GRID_COLUMNS - 1),
+      y: Phaser.Math.Clamp(Math.ceil(spot.y) - 1, 0, GRID_ROWS - 1),
+    };
   }
 
   /** Sorted by the row it stands on, one step in front of the furniture sharing that row. */
   private petDepth() {
-    return 20 + this.petCell.y + 1 + .5;
+    return 20 + this.petSpot.y + .5;
   }
 
-  /** Put the creature on a cell: its position, its depth, and how big it is at that distance. */
-  private seatPet(cell: { x: number; y: number }) {
+  /** Put the creature somewhere on the floor: position, depth, and size at that distance. */
+  private seatPet(spot: { x: number; y: number }) {
     const avatar = this.avatar; if (!avatar) return;
-    const point = this.petCentre(cell);
+    const point = this.petCentre(spot);
     avatar.setPosition(point.x, point.y);
     avatar.setDepth(this.petDepth());
-    avatar.setScale(PET_SCALE * this.depthScale(cell.y + 1));
+    avatar.setScale(PET_SCALE * this.depthScale(spot.y));
   }
 
   /** Cells a creature will not walk onto. Rugs are walked over; everything else is furniture. */
@@ -652,77 +666,91 @@ export class BedroomScene extends Phaser.Scene {
     return blocked;
   }
 
+  /** Keep a creature on the floor and off the skirting, in fractional cells. */
+  private onFloor(spot: { x: number; y: number }) {
+    return {
+      x: Phaser.Math.Clamp(spot.x, .45, GRID_COLUMNS - .45),
+      y: Phaser.Math.Clamp(spot.y, .7, GRID_ROWS),
+    };
+  }
+
+  /** Whether a creature can walk straight from one place to another without meeting furniture. */
+  private clearRun(from: { x: number; y: number }, to: { x: number; y: number }, blocked: Set<string>) {
+    const steps = Math.ceil(Math.hypot(to.x - from.x, to.y - from.y) * 4) || 1;
+    for (let i = 1; i <= steps; i += 1) {
+      const at = { x: from.x + (to.x - from.x) * (i / steps), y: from.y + (to.y - from.y) * (i / steps) };
+      const cell = this.cellUnder(at);
+      if (blocked.has(`${cell.x}:${cell.y}`)) return false;
+    }
+    return true;
+  }
+
   /**
-   * Send the creature to a cell the child tapped.
+   * Send the creature to a point on the floor the child tapped.
    *
    * It used to choose its own destinations. Being able to point at the floor and have the pet
    * trot over is the whole difference between watching an aquarium and playing with a pet, and a
-   * creature that is already walking somewhere of its own accord makes the tap feel ignored.
+   * creature already walking somewhere of its own accord makes the tap feel ignored.
    */
-  private walkTo(cell: { x: number; y: number }) {
+  private walkTo(point: { x: number; y: number }) {
     if (this.editing || !this.avatar) return;
-    if (cell.x < 0 || cell.y < 0 || cell.x >= GRID_COLUMNS || cell.y >= GRID_ROWS) return;
-    if (this.blockedCells().has(`${cell.x}:${cell.y}`)) return;
-    this.petTarget = cell;
-    if (!this.petStep?.isPlaying()) this.stepTowardsTarget();
+    const target = this.onFloor(point);
+    const blocked = this.blockedCells();
+    const cell = this.cellUnder(target);
+    if (blocked.has(`${cell.x}:${cell.y}`)) return;
+
+    // Straight there when the way is clear, otherwise round one corner, which is enough for
+    // furniture standing against a wall. Nothing in one room is worth more pathfinding than that.
+    const corners = [{ x: target.x, y: this.petSpot.y }, { x: this.petSpot.x, y: target.y }];
+    let legs: { x: number; y: number }[] | undefined;
+    if (this.clearRun(this.petSpot, target, blocked)) legs = [target];
+    else for (const corner of corners) {
+      if (this.clearRun(this.petSpot, corner, blocked) && this.clearRun(corner, target, blocked)) {
+        legs = [corner, target];
+        break;
+      }
+    }
+    if (!legs) return;
+    this.petStep?.stop();
+    this.petLegs = legs;
+    this.walkNextLeg();
   }
 
-  private stepTowardsTarget() {
-    const target = this.petTarget;
+  private walkNextLeg() {
     const avatar = this.avatar;
-    if (!target || !avatar || this.editing) return;
-    if (target.x === this.petCell.x && target.y === this.petCell.y) {
-      this.petTarget = undefined;
-      avatar.play('idle');
+    const next = this.petLegs?.shift();
+    if (!avatar || this.editing || !next) {
+      this.petLegs = undefined;
+      this.petStep = undefined;
+      avatar?.play('idle');
       return;
     }
-
-    const blocked = this.blockedCells();
-    const options = [
-      { x: this.petCell.x + Math.sign(target.x - this.petCell.x), y: this.petCell.y },
-      { x: this.petCell.x, y: this.petCell.y + Math.sign(target.y - this.petCell.y) },
-    ].filter((cell) => cell.x !== this.petCell.x || cell.y !== this.petCell.y)
-      .filter((cell) => cell.x >= 0 && cell.y >= 0 && cell.x < GRID_COLUMNS && cell.y < GRID_ROWS)
-      .filter((cell) => !blocked.has(`${cell.x}:${cell.y}`));
-    if (!options.length) {
-      // Boxed in on the axes that help; stop rather than jitter against the furniture.
-      this.petTarget = undefined;
-      avatar.play('idle');
-      return;
-    }
-    // Prefer the axis with further to go, so the creature does not stair-step the whole way.
-    options.sort((first, second) =>
-      (Math.abs(target.x - second.x) + Math.abs(target.y - second.y))
-      - (Math.abs(target.x - first.x) + Math.abs(target.y - first.y)));
-    const next = options[options.length - 1];
-
-    const facing: PetFacing = next.x !== this.petCell.x
-      ? (next.x > this.petCell.x ? 'right' : 'left')
-      : (next.y > this.petCell.y ? 'front' : 'back');
+    const from = this.petCentre(this.petSpot);
+    const to = this.petCentre(next);
+    const facing: PetFacing = Math.abs(to.x - from.x) >= Math.abs(to.y - from.y)
+      ? (to.x >= from.x ? 'right' : 'left')
+      : (to.y >= from.y ? 'front' : 'back');
     avatar.play('walk', facing);
 
-    const from = this.petCentre(this.petCell);
-    const to = this.petCentre(next);
-    this.petCell = next;
-    avatar.setDepth(this.petDepth());
-    const scale = PET_SCALE * this.depthScale(next.y + 1);
-    this.petStep = this.tweens.add({
-      targets: avatar,
-      x: to.x,
-      y: to.y,
-      scaleX: scale,
-      scaleY: scale,
-      duration: Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y) * 7,
+    const began = { x: this.petSpot.x, y: this.petSpot.y };
+    this.petStep = this.tweens.addCounter({
+      from: 0,
+      to: 1,
+      duration: Math.max(120, Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y) * 7),
       ease: 'Linear',
-      onComplete: () => this.stepTowardsTarget(),
+      onUpdate: (tween) => {
+        const t = tween.getValue() ?? 0;
+        this.petSpot = { x: began.x + (next.x - began.x) * t, y: began.y + (next.y - began.y) * t };
+        this.seatPet(this.petSpot);
+      },
+      onComplete: () => { this.petSpot = next; this.seatPet(next); this.walkNextLeg(); },
     });
   }
-
   /** Stop where it stands. Used while decorating, and while a one-shot reaction plays. */
   private haltWalk() {
     this.petStep?.stop();
     this.petStep = undefined;
-    this.petTarget = undefined;
+    this.petLegs = undefined;
   }
 
   private petEmote(type: 'happy'|'eat'|'attack'|'hurt'|'sleep'|'evolve') {
