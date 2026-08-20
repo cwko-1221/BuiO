@@ -107,6 +107,28 @@ try {
     carried.shownWhileDragging.y - carried.whereItLands.y) < 0.5,
     'a dropped piece does not land where the drag showed it');
 
+  // One press is one step, however many times the room has been rebuilt. The listeners were
+  // registered with inline arrows and so could never be taken off, and a second copy joined them
+  // on every restart until a single press on Bigger took a one-tile chest straight to nine.
+  const stepped = await page.evaluate(() => {
+    const scene = window.__petGame.scene.getScene('Bedroom');
+    const placement = scene.placements[scene.placements.length - 1];
+    // Somewhere it has room to grow, so the step is refused for no reason other than the bug.
+    for (let y = 0; y < 10; y += 1) for (let x = 0; x < 14; x += 1) {
+      if (!scene.fits(placement.itemId, x, y, placement.rotation, placement.id, (placement.size || 0) + 1)) continue;
+      placement.x = x; placement.y = y;
+      const start = placement.size || 0;
+      scene.game.events.emit('room:grow-selected', placement.id);
+      const once = placement.size || 0;
+      scene.game.events.emit('room:shrink-selected', placement.id);
+      return { start, once, back: placement.size || 0 };
+    }
+    return null;
+  });
+  assert.ok(stepped, 'nowhere in the room a piece could be grown, so one press could not be checked');
+  assert.equal(stepped.once - stepped.start, 1, 'one press on Bigger moved more than one step');
+  assert.equal(stepped.back, stepped.start, 'Smaller did not undo one press of Bigger');
+
   // Bigger and smaller step the footprint a tile on each side, so a one-tile chest becomes four,
   // and the piece stays centred on the floor it now occupies rather than on the floor it used to.
   const resized = await page.evaluate(() => {

@@ -287,13 +287,14 @@ export class BedroomScene extends Phaser.Scene {
     this.game.events.on('room:set-editing', this.setEditing, this);
     this.game.events.on('room:add-item', this.placeNewItem, this);
     this.game.events.on('room:rotate-selected', this.rotateSelected, this);
-    this.game.events.on('room:grow-selected', (id: string) => this.resizeSelected(id, 1), this);
-    this.game.events.on('room:shrink-selected', (id: string) => this.resizeSelected(id, -1), this);
+    this.game.events.on('room:grow-selected', this.growSelected, this);
+    this.game.events.on('room:shrink-selected', this.shrinkSelected, this);
     this.game.events.on('room:remove-selected', this.removeSelected, this);
     this.game.events.on('pet:emote', this.petEmote, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.game.events.off('room:set-editing', this.setEditing, this); this.game.events.off('room:add-item', this.placeNewItem, this);
       this.game.events.off('room:rotate-selected', this.rotateSelected, this); this.game.events.off('room:remove-selected', this.removeSelected, this); this.game.events.off('pet:emote', this.petEmote, this);
+      this.game.events.off('room:grow-selected', this.growSelected, this); this.game.events.off('room:shrink-selected', this.shrinkSelected, this);
     });
   }
   /**
@@ -427,6 +428,15 @@ export class BedroomScene extends Phaser.Scene {
     const [width, height] = sizedFootprint(definition?.footprint || [1, 1], size);
     return rotation === 90 || rotation === 270 ? [height, width] : [width, height];
   }
+
+  /**
+   * One press, one step. These are fields rather than inline arrows because a listener can only
+   * be taken off again by reference: without that the pair stayed registered when the scene
+   * restarted, a second copy joined them, and a single press on Bigger took a one-tile chest
+   * through four tiles to nine.
+   */
+  private growSelected = (id: string) => this.resizeSelected(id, 1);
+  private shrinkSelected = (id: string) => this.resizeSelected(id, -1);
 
   /** Grow or shrink the selected piece by a step, if there is room for it where it stands. */
   private resizeSelected(id: string, by: number) {

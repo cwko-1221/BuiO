@@ -571,8 +571,8 @@
   "petWallets": [
     {
       "studentId": "S001",
-      "balance": 993249,
-      "updatedAt": "2026-08-20T16:24:48.424Z"
+      "balance": 992679,
+      "updatedAt": "2026-08-20T18:00:56.703Z"
     }
   ],
   "petCurrencyLedger": [
@@ -1119,6 +1119,32 @@
         "quantity": 1
       },
       "createdAt": "2026-08-20T16:24:48.424Z"
+    },
+    {
+      "transactionId": "5eba8bc5-7ac8-4384-846e-f7fa5a72433e",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "57b97568-b3a9-400a-8a9c-2cf4ef7ad872",
+      "metadata": {
+        "itemId": "ocean-cabin-furniture-8",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T17:55:08.424Z"
+    },
+    {
+      "transactionId": "201c48d2-ee62-4f05-a52c-51fc6b524821",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -450,
+      "kind": "shop_purchase",
+      "idempotencyKey": "22a15e9d-d451-46bd-ac26-634d67e780fd",
+      "metadata": {
+        "itemId": "bamboo-room-furniture-9",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T18:00:56.703Z"
     }
   ],
   "petInstances": [
@@ -1393,72 +1419,116 @@
       "studentId": "S001",
       "itemId": "ocean-cabin-furniture-6",
       "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "ocean-cabin-furniture-8",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "bamboo-room-furniture-9",
+      "quantity": 1
     }
   ],
   "petRoomLayouts": [
     {
       "studentId": "S001",
-      "themeId": "space-pod",
+      "themeId": "sunny-oak",
       "visibility": "private",
       "placements": [
         {
           "id": "23a59b32-c688-42a4-9a28-1358420baccc",
           "itemId": "sunny-oak-furniture-1",
           "x": 11,
-          "y": 8,
+          "y": 6,
           "rotation": 0,
+          "size": 0,
           "layer": "furniture"
         },
         {
           "id": "9ea29696-2f99-4d2f-a83e-baa4d4a7d904",
           "itemId": "sunny-oak-furniture-2",
           "x": 4,
-          "y": 7,
+          "y": 4,
           "rotation": 0,
+          "size": 2,
           "layer": "rug"
-        },
-        {
-          "id": "3735b20e-b824-492f-8a2d-23c5c03ae550",
-          "itemId": "sunny-oak-furniture-3",
-          "x": 3,
-          "y": 5,
-          "rotation": 0,
-          "layer": "furniture"
         },
         {
           "id": "f01eb275-f85b-473c-a66c-b19628934d0c",
           "itemId": "sunny-oak-furniture-5",
-          "x": 9,
-          "y": 9,
+          "x": 0,
+          "y": 0,
           "rotation": 0,
+          "size": 1,
           "layer": "furniture"
         },
         {
-          "id": "93aa5953-b400-443e-8b2a-3acb92e5ceee",
-          "itemId": "sunny-oak-furniture-7",
-          "x": 1,
+          "id": "a6645064-a6df-4494-9a56-37e341137e08",
+          "itemId": "ocean-cabin-furniture-6",
+          "x": 11,
+          "y": 0,
+          "rotation": 0,
+          "size": 1,
+          "layer": "furniture"
+        },
+        {
+          "id": "4a35444e-b8f6-46df-be7d-e23987811e4f",
+          "itemId": "sunny-oak-furniture-4",
+          "x": 0,
           "y": 3,
           "rotation": 0,
-          "layer": "wall"
-        },
-        {
-          "id": "9f938f59-c54e-487b-af6d-14b997930a03",
-          "itemId": "sunny-oak-furniture-9",
-          "x": 8,
-          "y": 9,
-          "rotation": 0,
+          "size": 1,
           "layer": "furniture"
         },
         {
-          "id": "5cd97953-6c3f-47ff-9be7-d184cd940210",
-          "itemId": "sunny-oak-furniture-3",
+          "id": "80d6f462-ece0-40fc-8010-1f4ab7bc4eea",
+          "itemId": "ocean-cabin-furniture-1",
           "x": 2,
-          "y": 9,
+          "y": 0,
           "rotation": 0,
+          "size": 0,
+          "layer": "furniture"
+        },
+        {
+          "id": "e26a83fa-bde3-44ce-ab91-5bf56eb0bf11",
+          "itemId": "sunny-oak-furniture-8",
+          "x": 0,
+          "y": 6,
+          "rotation": 0,
+          "size": 1,
+          "layer": "furniture"
+        },
+        {
+          "id": "bf2dd730-49d6-47e6-88ce-ea1e95a1c29f",
+          "itemId": "sunny-oak-furniture-3",
+          "x": 9,
+          "y": 0,
+          "rotation": 0,
+          "size": 1,
+          "layer": "furniture"
+        },
+        {
+          "id": "0d998e82-a076-46f8-bb8e-6702bb3316a6",
+          "itemId": "ocean-cabin-furniture-8",
+          "x": 12,
+          "y": 3,
+          "rotation": 0,
+          "size": 1,
+          "layer": "furniture"
+        },
+        {
+          "id": "e1302af5-9936-4257-a0f6-2141fa50eb99",
+          "itemId": "bamboo-room-furniture-9",
+          "x": 0,
+          "y": 8,
+          "rotation": 0,
+          "size": 1,
           "layer": "furniture"
         }
       ],
-      "updatedAt": "2026-08-20T17:12:49.755Z"
+      "updatedAt": "2026-08-20T18:07:18.456Z"
     }
   ],
   "petMapProgress": [],
@@ -2205,6 +2275,30 @@
         "evolved": false
       },
       "createdAt": "2026-08-20T17:14:30.164Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "57b97568-b3a9-400a-8a9c-2cf4ef7ad872",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "ocean-cabin-furniture-8",
+        "quantity": 1,
+        "balance": 993129,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T17:55:08.425Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "22a15e9d-d451-46bd-ac26-634d67e780fd",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "bamboo-room-furniture-9",
+        "quantity": 1,
+        "balance": 992679,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T18:00:56.703Z"
     }
   ]
 }
