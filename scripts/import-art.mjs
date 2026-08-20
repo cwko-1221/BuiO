@@ -598,6 +598,9 @@ log(`\n${sheets} sheet${sheets === 1 ? '' : 's'} → ${assets} asset${assets ===
 if (!dry && !OUT_ROOT) {
   // The server reads pet-app/dist, which the build copies from pet-app/public. Importing without
   // building leaves the new art in the source tree and the old art on screen.
-  log('next: npm run build:pet            copies the new art into the served bundle');
-  log('      node scripts/pet-art/index.mjs --only=metrics   re-measures content boxes and anchors');
+  log('next: node scripts/pet-art/index.mjs --only=metrics   re-measures content boxes and anchors');
+  log('      npm run build:pet            copies the new art into the served bundle');
+  log('      restart the dev server       the catalogue is read once at startup, so a running');
+  log('                                   server keeps serving the old sizes and anchors even');
+  log('                                   though it serves the new pictures straight off disk');
 }

@@ -571,8 +571,8 @@
   "petWallets": [
     {
       "studentId": "S001",
-      "balance": 995499,
-      "updatedAt": "2026-08-19T16:02:44.860Z"
+      "balance": 993249,
+      "updatedAt": "2026-08-20T16:24:48.424Z"
     }
   ],
   "petCurrencyLedger": [
@@ -989,6 +989,136 @@
         "random": false
       },
       "createdAt": "2026-08-19T16:02:44.861Z"
+    },
+    {
+      "transactionId": "f6f4beb4-bbe0-48d8-9dbe-63155d95b6a0",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "51a6c5f5-e1e3-4fb3-8754-35096c71a9bc",
+      "metadata": {
+        "itemId": "sunny-oak-furniture-3",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T16:24:23.262Z"
+    },
+    {
+      "transactionId": "42ecffb9-a95a-42fc-be45-fbf056cdd114",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "a412eeb2-4277-4e55-8bde-fad5c62e384f",
+      "metadata": {
+        "itemId": "sunny-oak-furniture-3",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T16:24:41.569Z"
+    },
+    {
+      "transactionId": "2d831095-407d-4a09-85b1-fd8d16842e7c",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "41639a78-078e-4c93-816b-186c7dc661dd",
+      "metadata": {
+        "itemId": "sunny-oak-furniture-4",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T16:24:41.943Z"
+    },
+    {
+      "transactionId": "c43093c1-5621-4691-8332-76bf126d1883",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "9b259ca4-dcb6-48a7-8f65-721f9f37ccde",
+      "metadata": {
+        "itemId": "sunny-oak-furniture-5",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T16:24:42.288Z"
+    },
+    {
+      "transactionId": "7661c2b2-6871-488a-8e7a-d383dffca9f8",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "ef0ddcfe-4fa6-4bf3-a988-0243b55502a0",
+      "metadata": {
+        "itemId": "sunny-oak-furniture-6",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T16:24:42.650Z"
+    },
+    {
+      "transactionId": "23f711c4-b38f-45d2-9e18-8067eee8f471",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "f45cd69d-a090-43fc-b9c7-53a637d34ca4",
+      "metadata": {
+        "itemId": "sunny-oak-furniture-7",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T16:24:42.971Z"
+    },
+    {
+      "transactionId": "7ef412b2-df41-4775-9efe-134f1f2720da",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "18b40d07-9fc2-4908-b527-0bb819ed488b",
+      "metadata": {
+        "itemId": "sunny-oak-furniture-8",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T16:24:43.296Z"
+    },
+    {
+      "transactionId": "a01f02a7-d834-4e61-bbfc-016d8db73fbe",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -450,
+      "kind": "shop_purchase",
+      "idempotencyKey": "3487edc4-2776-4da1-b040-f5330cd8a26d",
+      "metadata": {
+        "itemId": "sunny-oak-furniture-9",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T16:24:43.623Z"
+    },
+    {
+      "transactionId": "5a9b0614-f200-4634-a8b5-69e5a2357453",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "badd3d4e-4126-43f9-b194-8a7b72dae42f",
+      "metadata": {
+        "itemId": "ocean-cabin-furniture-1",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T16:24:44.256Z"
+    },
+    {
+      "transactionId": "151e987c-11b9-4b63-9ed7-4efa09c05c08",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "90b79474-c1ad-41a8-8262-880ddea15902",
+      "metadata": {
+        "itemId": "ocean-cabin-furniture-6",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-20T16:24:48.424Z"
     }
   ],
   "petInstances": [
@@ -1067,7 +1197,7 @@
       "dailyXpDate": "",
       "equippedWearables": [],
       "createdAt": "2026-08-19T16:02:44.861Z",
-      "updatedAt": "2026-08-19T16:02:44.861Z"
+      "updatedAt": "2026-08-20T16:33:44.752Z"
     }
   ],
   "petSkills": [],
@@ -1095,37 +1225,37 @@
     {
       "studentId": "S001",
       "itemId": "sunny-oak-furniture-3",
-      "quantity": 1
+      "quantity": 3
     },
     {
       "studentId": "S001",
       "itemId": "sunny-oak-furniture-4",
-      "quantity": 1
+      "quantity": 2
     },
     {
       "studentId": "S001",
       "itemId": "sunny-oak-furniture-5",
-      "quantity": 1
+      "quantity": 2
     },
     {
       "studentId": "S001",
       "itemId": "sunny-oak-furniture-6",
-      "quantity": 1
+      "quantity": 2
     },
     {
       "studentId": "S001",
       "itemId": "sunny-oak-furniture-7",
-      "quantity": 1
+      "quantity": 2
     },
     {
       "studentId": "S001",
       "itemId": "sunny-oak-furniture-8",
-      "quantity": 1
+      "quantity": 2
     },
     {
       "studentId": "S001",
       "itemId": "sunny-oak-furniture-9",
-      "quantity": 1
+      "quantity": 2
     },
     {
       "studentId": "S001",
@@ -1251,6 +1381,16 @@
       "studentId": "S001",
       "itemId": "room:moon-magic-attic",
       "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "ocean-cabin-furniture-1",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "ocean-cabin-furniture-6",
+      "quantity": 1
     }
   ],
   "petRoomLayouts": [
@@ -1278,8 +1418,8 @@
         {
           "id": "3735b20e-b824-492f-8a2d-23c5c03ae550",
           "itemId": "sunny-oak-furniture-3",
-          "x": 6,
-          "y": 0,
+          "x": 3,
+          "y": 2,
           "rotation": 0,
           "layer": "furniture"
         },
@@ -1306,9 +1446,17 @@
           "y": 7,
           "rotation": 0,
           "layer": "furniture"
+        },
+        {
+          "id": "5cd97953-6c3f-47ff-9be7-d184cd940210",
+          "itemId": "sunny-oak-furniture-3",
+          "x": 6,
+          "y": 2,
+          "rotation": 0,
+          "layer": "furniture"
         }
       ],
-      "updatedAt": "2026-08-20T16:05:12.216Z"
+      "updatedAt": "2026-08-20T16:24:34.565Z"
     }
   ],
   "petMapProgress": [],
@@ -1914,6 +2062,126 @@
         "eggPity": 4
       },
       "createdAt": "2026-08-19T16:02:44.861Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "51a6c5f5-e1e3-4fb3-8754-35096c71a9bc",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "sunny-oak-furniture-3",
+        "quantity": 1,
+        "balance": 995379,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T16:24:23.262Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "a412eeb2-4277-4e55-8bde-fad5c62e384f",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "sunny-oak-furniture-3",
+        "quantity": 1,
+        "balance": 995259,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T16:24:41.569Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "41639a78-078e-4c93-816b-186c7dc661dd",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "sunny-oak-furniture-4",
+        "quantity": 1,
+        "balance": 994959,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T16:24:41.943Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "9b259ca4-dcb6-48a7-8f65-721f9f37ccde",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "sunny-oak-furniture-5",
+        "quantity": 1,
+        "balance": 994839,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T16:24:42.288Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "ef0ddcfe-4fa6-4bf3-a988-0243b55502a0",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "sunny-oak-furniture-6",
+        "quantity": 1,
+        "balance": 994539,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T16:24:42.650Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "f45cd69d-a090-43fc-b9c7-53a637d34ca4",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "sunny-oak-furniture-7",
+        "quantity": 1,
+        "balance": 994239,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T16:24:42.971Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "18b40d07-9fc2-4908-b527-0bb819ed488b",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "sunny-oak-furniture-8",
+        "quantity": 1,
+        "balance": 994119,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T16:24:43.296Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "3487edc4-2776-4da1-b040-f5330cd8a26d",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "sunny-oak-furniture-9",
+        "quantity": 1,
+        "balance": 993669,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T16:24:43.623Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "badd3d4e-4126-43f9-b194-8a7b72dae42f",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "ocean-cabin-furniture-1",
+        "quantity": 1,
+        "balance": 993549,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T16:24:44.256Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "90b79474-c1ad-41a8-8262-880ddea15902",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "ocean-cabin-furniture-6",
+        "quantity": 1,
+        "balance": 993249,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-20T16:24:48.424Z"
     }
   ]
 }
