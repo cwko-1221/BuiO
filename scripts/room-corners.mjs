@@ -48,7 +48,7 @@ const server = http.createServer(async (request, response) => {
     console.log(`  back ${say(quad[0])} ${say(quad[1])}   front ${say(quad[3])} ${say(quad[2])}`);
     console.log(`\n  next: npm run import:art -- ${file}`);
     console.log('        npm run build:pet\n');
-    server.close();
+    console.log('  (still listening - nudge a corner and save again, or press Ctrl-C when done)');
     return;
   }
   response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end(page);

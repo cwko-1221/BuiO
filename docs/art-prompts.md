@@ -19,16 +19,17 @@
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture: it fills most of the frame, and the walls are a shallow band behind it and beside it.
+One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture; the walls are a shallow band behind it and a wedge down each side.
 
   BACK WALL   a strip across the top, about a quarter of the image height. Flat and
               parallel to the picture. Do not make it taller than that.
-  FLOOR       everything below it. A trapezoid, narrower where it meets the back wall
-              than it is at the front, with straight side edges.
-  SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
-              drawn, and neither covers the floor.
+  FLOOR       a trapezoid below it, narrower where it meets the back wall than it is
+              at the front, with straight side edges.
+  SIDE WALLS  a wedge on each side, between the floor and the edge of the picture,
+              widening as it comes forward. At the very bottom of the picture each
+              one is still about a tenth of the image wide.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. Its near edge is a straight line along the bottom of the picture, clearly shorter than the picture is wide, with side wall to the left of it and side wall to the right of it. The floor never touches the left or right edge of the image at any height. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
 
 Symmetrical left to right, no tilt and no roll.
 
@@ -50,16 +51,17 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture: it fills most of the frame, and the walls are a shallow band behind it and beside it.
+One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture; the walls are a shallow band behind it and a wedge down each side.
 
   BACK WALL   a strip across the top, about a quarter of the image height. Flat and
               parallel to the picture. Do not make it taller than that.
-  FLOOR       everything below it. A trapezoid, narrower where it meets the back wall
-              than it is at the front, with straight side edges.
-  SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
-              drawn, and neither covers the floor.
+  FLOOR       a trapezoid below it, narrower where it meets the back wall than it is
+              at the front, with straight side edges.
+  SIDE WALLS  a wedge on each side, between the floor and the edge of the picture,
+              widening as it comes forward. At the very bottom of the picture each
+              one is still about a tenth of the image wide.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. Its near edge is a straight line along the bottom of the picture, clearly shorter than the picture is wide, with side wall to the left of it and side wall to the right of it. The floor never touches the left or right edge of the image at any height. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
 
 Symmetrical left to right, no tilt and no roll.
 
@@ -81,16 +83,17 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture: it fills most of the frame, and the walls are a shallow band behind it and beside it.
+One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture; the walls are a shallow band behind it and a wedge down each side.
 
   BACK WALL   a strip across the top, about a quarter of the image height. Flat and
               parallel to the picture. Do not make it taller than that.
-  FLOOR       everything below it. A trapezoid, narrower where it meets the back wall
-              than it is at the front, with straight side edges.
-  SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
-              drawn, and neither covers the floor.
+  FLOOR       a trapezoid below it, narrower where it meets the back wall than it is
+              at the front, with straight side edges.
+  SIDE WALLS  a wedge on each side, between the floor and the edge of the picture,
+              widening as it comes forward. At the very bottom of the picture each
+              one is still about a tenth of the image wide.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. Its near edge is a straight line along the bottom of the picture, clearly shorter than the picture is wide, with side wall to the left of it and side wall to the right of it. The floor never touches the left or right edge of the image at any height. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
 
 Symmetrical left to right, no tilt and no roll.
 
@@ -112,16 +115,17 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture: it fills most of the frame, and the walls are a shallow band behind it and beside it.
+One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture; the walls are a shallow band behind it and a wedge down each side.
 
   BACK WALL   a strip across the top, about a quarter of the image height. Flat and
               parallel to the picture. Do not make it taller than that.
-  FLOOR       everything below it. A trapezoid, narrower where it meets the back wall
-              than it is at the front, with straight side edges.
-  SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
-              drawn, and neither covers the floor.
+  FLOOR       a trapezoid below it, narrower where it meets the back wall than it is
+              at the front, with straight side edges.
+  SIDE WALLS  a wedge on each side, between the floor and the edge of the picture,
+              widening as it comes forward. At the very bottom of the picture each
+              one is still about a tenth of the image wide.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. Its near edge is a straight line along the bottom of the picture, clearly shorter than the picture is wide, with side wall to the left of it and side wall to the right of it. The floor never touches the left or right edge of the image at any height. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
 
 Symmetrical left to right, no tilt and no roll.
 
@@ -143,16 +147,17 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture: it fills most of the frame, and the walls are a shallow band behind it and beside it.
+One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture; the walls are a shallow band behind it and a wedge down each side.
 
   BACK WALL   a strip across the top, about a quarter of the image height. Flat and
               parallel to the picture. Do not make it taller than that.
-  FLOOR       everything below it. A trapezoid, narrower where it meets the back wall
-              than it is at the front, with straight side edges.
-  SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
-              drawn, and neither covers the floor.
+  FLOOR       a trapezoid below it, narrower where it meets the back wall than it is
+              at the front, with straight side edges.
+  SIDE WALLS  a wedge on each side, between the floor and the edge of the picture,
+              widening as it comes forward. At the very bottom of the picture each
+              one is still about a tenth of the image wide.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. Its near edge is a straight line along the bottom of the picture, clearly shorter than the picture is wide, with side wall to the left of it and side wall to the right of it. The floor never touches the left or right edge of the image at any height. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
 
 Symmetrical left to right, no tilt and no roll.
 
@@ -174,16 +179,17 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture: it fills most of the frame, and the walls are a shallow band behind it and beside it.
+One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture; the walls are a shallow band behind it and a wedge down each side.
 
   BACK WALL   a strip across the top, about a quarter of the image height. Flat and
               parallel to the picture. Do not make it taller than that.
-  FLOOR       everything below it. A trapezoid, narrower where it meets the back wall
-              than it is at the front, with straight side edges.
-  SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
-              drawn, and neither covers the floor.
+  FLOOR       a trapezoid below it, narrower where it meets the back wall than it is
+              at the front, with straight side edges.
+  SIDE WALLS  a wedge on each side, between the floor and the edge of the picture,
+              widening as it comes forward. At the very bottom of the picture each
+              one is still about a tenth of the image wide.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. Its near edge is a straight line along the bottom of the picture, clearly shorter than the picture is wide, with side wall to the left of it and side wall to the right of it. The floor never touches the left or right edge of the image at any height. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
 
 Symmetrical left to right, no tilt and no roll.
 
@@ -205,16 +211,17 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture: it fills most of the frame, and the walls are a shallow band behind it and beside it.
+One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture; the walls are a shallow band behind it and a wedge down each side.
 
   BACK WALL   a strip across the top, about a quarter of the image height. Flat and
               parallel to the picture. Do not make it taller than that.
-  FLOOR       everything below it. A trapezoid, narrower where it meets the back wall
-              than it is at the front, with straight side edges.
-  SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
-              drawn, and neither covers the floor.
+  FLOOR       a trapezoid below it, narrower where it meets the back wall than it is
+              at the front, with straight side edges.
+  SIDE WALLS  a wedge on each side, between the floor and the edge of the picture,
+              widening as it comes forward. At the very bottom of the picture each
+              one is still about a tenth of the image wide.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. Its near edge is a straight line along the bottom of the picture, clearly shorter than the picture is wide, with side wall to the left of it and side wall to the right of it. The floor never touches the left or right edge of the image at any height. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
 
 Symmetrical left to right, no tilt and no roll.
 
@@ -236,16 +243,17 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture: it fills most of the frame, and the walls are a shallow band behind it and beside it.
+One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture; the walls are a shallow band behind it and a wedge down each side.
 
   BACK WALL   a strip across the top, about a quarter of the image height. Flat and
               parallel to the picture. Do not make it taller than that.
-  FLOOR       everything below it. A trapezoid, narrower where it meets the back wall
-              than it is at the front, with straight side edges.
-  SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
-              drawn, and neither covers the floor.
+  FLOOR       a trapezoid below it, narrower where it meets the back wall than it is
+              at the front, with straight side edges.
+  SIDE WALLS  a wedge on each side, between the floor and the edge of the picture,
+              widening as it comes forward. At the very bottom of the picture each
+              one is still about a tenth of the image wide.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. Its near edge is a straight line along the bottom of the picture, clearly shorter than the picture is wide, with side wall to the left of it and side wall to the right of it. The floor never touches the left or right edge of the image at any height. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
 
 Symmetrical left to right, no tilt and no roll.
 
@@ -267,16 +275,17 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture: it fills most of the frame, and the walls are a shallow band behind it and beside it.
+One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture; the walls are a shallow band behind it and a wedge down each side.
 
   BACK WALL   a strip across the top, about a quarter of the image height. Flat and
               parallel to the picture. Do not make it taller than that.
-  FLOOR       everything below it. A trapezoid, narrower where it meets the back wall
-              than it is at the front, with straight side edges.
-  SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
-              drawn, and neither covers the floor.
+  FLOOR       a trapezoid below it, narrower where it meets the back wall than it is
+              at the front, with straight side edges.
+  SIDE WALLS  a wedge on each side, between the floor and the edge of the picture,
+              widening as it comes forward. At the very bottom of the picture each
+              one is still about a tenth of the image wide.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. Its near edge is a straight line along the bottom of the picture, clearly shorter than the picture is wide, with side wall to the left of it and side wall to the right of it. The floor never touches the left or right edge of the image at any height. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
 
 Symmetrical left to right, no tilt and no roll.
 
@@ -298,16 +307,17 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 Cozy stylised video-game art in the spirit of Animal Crossing: soft rounded forms, smooth matte shading with gentle gradients and no harsh highlights, a warm muted pastel palette, clean readable silhouettes, no black outlines, a subtle hand-painted texture, and soft even lighting from the upper left. Friendly, premium, toy-like. Identical rendering style, line weight, palette and lighting across every item on the sheet.
 
-One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture: it fills most of the frame, and the walls are a shallow band behind it and beside it.
+One completely empty room, seen straight on from high above, the way a doll's house is photographed with its front wall taken off. The floor is the subject of the picture; the walls are a shallow band behind it and a wedge down each side.
 
   BACK WALL   a strip across the top, about a quarter of the image height. Flat and
               parallel to the picture. Do not make it taller than that.
-  FLOOR       everything below it. A trapezoid, narrower where it meets the back wall
-              than it is at the front, with straight side edges.
-  SIDE WALLS  the two wedges between the floor and the sides of the picture. Both are
-              drawn, and neither covers the floor.
+  FLOOR       a trapezoid below it, narrower where it meets the back wall than it is
+              at the front, with straight side edges.
+  SIDE WALLS  a wedge on each side, between the floor and the edge of the picture,
+              widening as it comes forward. At the very bottom of the picture each
+              one is still about a tenth of the image wide.
 
-THE WHOLE FLOOR MUST BE IN THE PICTURE. The floor must never touch the left or right edge of the image, not even along the very bottom: a strip of side wall stays visible in the bottom left corner and the bottom right corner, with the floor between them. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
+THE WHOLE FLOOR MUST BE IN THE PICTURE. Its near edge is a straight line along the bottom of the picture, clearly shorter than the picture is wide, with side wall to the left of it and side wall to the right of it. The floor never touches the left or right edge of the image at any height. Think of it as looking down into an open shoebox that sits inside the picture with room around it: all four corners of its floor are in view. If the floor runs off the side, the box has been drawn wider than the picture - draw it smaller until both near corners are inside.
 
 Symmetrical left to right, no tilt and no roll.
 

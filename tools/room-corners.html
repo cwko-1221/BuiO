@@ -139,6 +139,7 @@ const at = (event) => {
   return [(event.clientX - box.left) / box.width, (event.clientY - box.top) / box.height];
 };
 canvas.addEventListener('pointerdown', (event) => {
+  if (!image.complete || !image.naturalWidth) return;   // nothing to point at yet
   const [x, y] = at(event);
   const near = clicks.findIndex(([px, py]) =>
     Math.hypot((px - x) * canvas.width, (py - y) * canvas.height) < 18);
@@ -154,8 +155,19 @@ canvas.addEventListener('pointerup', () => { dragging = -1; });
 document.getElementById('undo').onclick = () => { clicks.pop(); draw(); };
 document.getElementById('reset').onclick = () => { clicks = []; draw(); };
 document.getElementById('save').onclick = async () => {
-  const quad = quadFrom(clicks);
-  await fetch('/corners', { method: 'POST', body: JSON.stringify({ quad }) });
-  document.getElementById('said').textContent = '已儲存 — 可以關掉這一頁，回到終端機';
+  const said = document.getElementById('said');
+  said.style.color = '';
+  said.textContent = '儲存中…';
+  try {
+    const quad = quadFrom(clicks);
+    const spread = Math.abs(quad[1][0] - quad[0][0]) * Math.abs(quad[2][1] - quad[0][1]);
+    if (!Number.isFinite(spread) || spread < .01) throw new Error('degenerate');
+    const reply = await fetch('/corners', { method: 'POST', body: JSON.stringify({ quad }) });
+    if (!reply.ok) throw new Error(reply.status);
+    said.textContent = '已儲存 — 可以再拖動微調後重新儲存，完成後回終端機按 Ctrl-C';
+  } catch {
+    said.style.color = '#ff5a4d';
+    said.textContent = '儲存不了 — 終端機的 npm run room:corners 已經停了，重新執行一次再試';
+  }
 };
 </script>
