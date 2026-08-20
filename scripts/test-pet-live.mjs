@@ -92,6 +92,21 @@ try {
   await page.waitForFunction((id)=>document.querySelector(`[data-action="add-furniture"][data-id="${id}"]`)?.hasAttribute('disabled'),spareId);
   assert.equal(await spare.locator('small').innerText(),'×0');
   assert.equal(await spare.isDisabled(),true,'a placed piece must leave the selectable strip');
+  // A piece has to land where the drag showed it. It was being snapped to the middle of its
+  // footprint while dragging and anchored on the front edge once dropped, so every piece fell
+  // half its own depth below the cell it had been shown on.
+  const carried = await page.evaluate(() => {
+    const scene = window.__petGame.scene.getScene('Bedroom');
+    const placement = scene.placements[scene.placements.length - 1];
+    const [w, h] = scene.footprintOf(placement.itemId, placement.rotation);
+    const shownWhileDragging = scene.gridToScreen(placement.x + w / 2, placement.y + h);
+    const whereItLands = scene.footprintCentre(placement);
+    return { shownWhileDragging, whereItLands };
+  });
+  assert.ok(Math.hypot(carried.shownWhileDragging.x - carried.whereItLands.x,
+    carried.shownWhileDragging.y - carried.whereItLands.y) < 0.5,
+    'a dropped piece does not land where the drag showed it');
+
   await page.screenshot({path:path.join(artifactDir,'06-decoration-ipad-landscape.png')});
   await page.locator('[data-tab="home"]').click(); await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(250);
   await page.screenshot({path:path.join(artifactDir,'07-home-mobile.png')});

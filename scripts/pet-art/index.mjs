@@ -53,9 +53,10 @@ export const generatedPath = (folder, id) => {
 
 /** Map a public URL (/pet/assets/art/x.webp) or a relative path to an absolute file path. */
 const resolve = (publicPath) => {
-  const relative = String(publicPath).includes('/art/')
-    ? String(publicPath).split('/art/')[1]
-    : String(publicPath);
+  const address = String(publicPath).split('?')[0];   // art addresses carry a content stamp
+  const relative = address.includes('/art/')
+    ? address.split('/art/')[1]
+    : address;
   return path.join(root, relative);
 };
 

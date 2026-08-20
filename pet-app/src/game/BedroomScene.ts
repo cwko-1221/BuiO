@@ -258,7 +258,11 @@ export class BedroomScene extends Phaser.Scene {
       // Snap the piece to the target cell instead of letting it trail the finger. Following
       // the pointer freely meant the piece and its own preview were never in the same place
       // while dragging, which reads as the furniture being misaligned with the grid.
-      const centre = this.gridToScreen(cell.x + width / 2, cell.y + height / 2);
+      //
+      // To the front edge of the footprint, which is where the piece is anchored once it is put
+      // down. Snapping to the middle of the footprint instead left it half its own depth above
+      // where it would land, so every piece dropped lower than the cell it had been shown on.
+      const centre = this.gridToScreen(cell.x + width / 2, cell.y + height);
       target.setPosition(centre.x, centre.y);
       target.setDepth(this.depthFor({ ...placement, x: cell.x, y: cell.y }));
     });
