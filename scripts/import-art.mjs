@@ -36,6 +36,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import sharp from 'sharp';
 import { findFloor } from './room-floor-fit.mjs';
+import { findCells } from './sheet-cells.mjs';
 
 const require = createRequire(import.meta.url);
 const { catalog } = require('../pet-app/lib/catalog.js');
@@ -100,7 +101,16 @@ async function contentBounds(buffer) {
 }
 
 /** Cut one cell out of a sheet laid out as a uniform grid. */
-async function cell(sheet, meta, columns, rows, index) {
+/**
+ * Cut one cell out of a sheet.
+ *
+ * Where the boxes come from is measured rather than assumed — see sheet-cells — because a
+ * generator lays a grid out approximately and a piece drawn wider than its column gets sliced in
+ * half by an even cut. The even cut stays as the fallback for a sheet nothing could be found on.
+ */
+async function cell(sheet, meta, columns, rows, index, boxes) {
+  const found = boxes?.[index];
+  if (found) return sharp(sheet).extract(found).png().toBuffer();
   const width = Math.floor(meta.width / columns);
   const height = Math.floor(meta.height / rows);
   return sharp(sheet)
@@ -360,13 +370,16 @@ async function importRoom(file, roomId, dry, quad) {
 async function importFurniture(file, roomIds, dry) {
   const sheet = await loadSheet(file);
   const meta = await sharp(sheet).metadata();
+  const boxes = await findCells(sheet, 5, 4);
+  const drawn = boxes.filter(Boolean).length;
+  log(`      found ${drawn} of 20 pieces on the sheet${drawn < 20 ? ' - the empty cells are skipped' : ''}`);
   let written = 0;
   for (let block = 0; block < roomIds.length; block += 1) {
     const pieces = catalog.furniture.filter((item) => item.roomId === roomIds[block]);
     if (!pieces.length) throw new Error(`no furniture for room ${roomIds[block]}`);
     for (let index = 0; index < pieces.length; index += 1) {
       const piece = pieces[index];
-      const cut = await cell(sheet, meta, 5, 4, block * 10 + index);
+      const cut = await cell(sheet, meta, 5, 4, block * 10 + index, boxes);
       // A rug lies flat and is centred; everything else stands on the floor of its canvas.
       const seated = await seat(cut, { canvas: PROP_CANVAS, standing: piece.layer !== 'rug' });
       if (!seated) { log(`      cell ${block * 10 + index + 1} is empty, skipped`); continue; }
