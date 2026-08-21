@@ -11,6 +11,8 @@ export interface PetDefinition {
   animated?: boolean;
   /** Where worn items belong on the creature, per evolution stage. */
   anchors?: (PetAnchors | null)[];
+  /** The same, measured on the side and back poses, because a head is not where the front says. */
+  facingAnchors?: (Partial<Record<PetFacing, PetAnchors>> | null)[];
   /** How those landmarks move frame by frame, per stage. Base64 signed bytes, 4 per atlas cell. */
   motion?: (string | null)[];
 }

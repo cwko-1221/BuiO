@@ -54,9 +54,10 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   private current: PetAction = 'idle';
   private reducedMotion: boolean;
   private anchors?: PetAnchors;
+  private facingAnchors?: Partial<Record<PetFacing, PetAnchors>>;
   private motion?: Int8Array;
   private ambient?: number;
-  private worn: { image: Phaser.GameObjects.Image; shade?: Phaser.GameObjects.Image; slotKey: string; box: ContentBox }[] = [];
+  private worn: { image: Phaser.GameObjects.Image; shade?: Phaser.GameObjects.Image; slotKey: string; box: ContentBox; behind: boolean }[] = [];
 
   /** Texture key for a species/stage atlas. Shared so preload and construction agree. */
   static atlasKey(definition: PetDefinition, stage: number) {
@@ -257,6 +258,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     if (!equipped.length) return;
 
     this.anchors = definition.anchors?.[stage - 1] ?? UNMEASURED;
+    this.facingAnchors = definition.facingAnchors?.[stage - 1] ?? undefined;
     this.motion = decodeMotion(definition.motion?.[stage - 1]);
 
     for (const id of equipped) {
@@ -280,7 +282,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
         this.add(shade);
       }
       if (slot.behind) this.addAt(image, 1); else this.add(image);
-      this.worn.push({ image, shade, slotKey, box });
+      this.worn.push({ image, shade, slotKey, box, behind: !!slot.behind });
     }
 
     this.layoutWearables();
@@ -299,7 +301,22 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   /** Place every worn item against the landmarks for one atlas cell. */
   private layoutWearables(cell = 0) {
     if (!this.worn.length) return;
-    const anchors = this.anchors ?? UNMEASURED;
+    // A creature seen from the side does not carry its head where its front view does, so the
+    // landmarks measured on that pose are used when it is turned. Left is the right-hand set
+    // mirrored, exactly as the body is.
+    const seen = this.facing === 'left' ? 'right' : this.facing;
+    const anchors = this.facingAnchors?.[seen] ?? this.anchors ?? UNMEASURED;
+
+    // What is worn on the back is behind the creature until the creature turns round. Wings
+    // and a satchel belong in front of it from behind; an aura is a glow on the floor and
+    // stays under it whichever way it faces.
+    for (const piece of this.worn) {
+      if (piece.slotKey !== 'back') continue;
+      const wanted = this.facing !== 'back' && piece.behind;
+      const at = this.getIndex(piece.image);
+      if (wanted && at > 1) this.moveTo(piece.image, 1);
+      if (!wanted && at <= 1) this.bringToTop(piece.image);
+    }
     const cellWidth = this.sprite && this.layout ? this.layout.frameWidth : this.staticArtSize().width;
     const cellHeight = this.sprite && this.layout ? this.layout.frameHeight : this.staticArtSize().height;
     const scale = this.sprite ? this.sprite.scaleY : this.staticArtScale();

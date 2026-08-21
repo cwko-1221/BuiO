@@ -565,14 +565,14 @@
       "eggPity": 4,
       "stardust": 999999,
       "createdAt": "2026-08-13T13:03:28.012Z",
-      "updatedAt": "2026-08-21T04:54:01.705Z"
+      "updatedAt": "2026-08-21T05:25:21.040Z"
     }
   ],
   "petWallets": [
     {
       "studentId": "S001",
-      "balance": 989409,
-      "updatedAt": "2026-08-20T18:34:41.665Z"
+      "balance": 988209,
+      "updatedAt": "2026-08-21T04:58:10.565Z"
     }
   ],
   "petCurrencyLedger": [
@@ -1249,6 +1249,19 @@
         "quantity": 1
       },
       "createdAt": "2026-08-20T18:34:41.665Z"
+    },
+    {
+      "transactionId": "1fe292e9-19ff-4562-9943-bde9b2e430ee",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -1200,
+      "kind": "egg_purchase",
+      "idempotencyKey": "5d25f891-1d22-46ac-9953-b655c51e5a36",
+      "metadata": {
+        "speciesId": "cloud-ear-dog",
+        "random": false
+      },
+      "createdAt": "2026-08-21T04:58:10.565Z"
     }
   ],
   "petInstances": [
@@ -1313,9 +1326,11 @@
       "stage": 1,
       "dailyXp": 0,
       "dailyXpDate": "",
-      "equippedWearables": [],
+      "equippedWearables": [
+        "aura-07"
+      ],
       "createdAt": "2026-08-17T10:11:39.571Z",
-      "updatedAt": "2026-08-21T04:52:52.112Z"
+      "updatedAt": "2026-08-21T05:01:54.195Z"
     },
     {
       "petId": "1046d428-ac60-4251-bebd-c6e4d69a044e",
@@ -1333,6 +1348,18 @@
       ],
       "createdAt": "2026-08-19T16:02:44.861Z",
       "updatedAt": "2026-08-20T18:34:54.778Z"
+    },
+    {
+      "petId": "957ebcef-0d84-4c67-865b-a3c03d04b8a7",
+      "studentId": "S001",
+      "speciesId": "cloud-ear-dog",
+      "xp": 0,
+      "stage": 1,
+      "dailyXp": 0,
+      "dailyXpDate": "",
+      "equippedWearables": [],
+      "createdAt": "2026-08-21T04:58:10.565Z",
+      "updatedAt": "2026-08-21T04:58:10.565Z"
     }
   ],
   "petSkills": [],
@@ -2551,6 +2578,28 @@
         "stardust": 999999
       },
       "createdAt": "2026-08-20T18:34:41.665Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "5d25f891-1d22-46ac-9953-b655c51e5a36",
+      "kind": "direct_egg",
+      "response": {
+        "speciesId": "cloud-ear-dog",
+        "rarity": "common",
+        "pet": {
+          "id": "957ebcef-0d84-4c67-865b-a3c03d04b8a7",
+          "speciesId": "cloud-ear-dog",
+          "xp": 0,
+          "stage": 1,
+          "dailyXp": 0,
+          "dailyXpDate": "",
+          "equippedWearables": []
+        },
+        "duplicateCoins": 0,
+        "balance": 988209,
+        "eggPity": 4
+      },
+      "createdAt": "2026-08-21T04:58:10.565Z"
     }
   ]
 }

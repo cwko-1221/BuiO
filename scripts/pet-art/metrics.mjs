@@ -128,11 +128,22 @@ async function measureCreatures({ catalog, resolve, root, log }) {
       if (!rest) continue;
       const key = `${pet.id}-${stage + 1}`;
       const round = (value) => Number(value.toFixed(4));
-      anchors[key] = {
-        top: round(rest.skull / cellH), eye: round(rest.eye / cellH), bottom: round(rest.bottom / cellH),
-        centre: round(rest.centre / cellW), width: round(rest.width / cellW),
-        head: round(rest.head / cellW), face: round(rest.face / cellW),
-      };
+      const asAnchor = (frame) => ({
+        top: round(frame.skull / cellH), eye: round(frame.eye / cellH), bottom: round(frame.bottom / cellH),
+        centre: round(frame.centre / cellW), width: round(frame.width / cellW),
+        head: round(frame.head / cellW), face: round(frame.face / cellW),
+      });
+      anchors[key] = asAnchor(rest);
+
+      // A creature seen from the side does not carry its head where its front view does: the
+      // muzzle is forward of the body's middle and the skull reads narrower. One set of landmarks
+      // for all three rows put a hat on the head from the front and beside it from the side, so
+      // each facing is measured on its own resting pose.
+      (manifest.directions || []).forEach((facing, row) => {
+        if (row === 0) return;   // the front is the key above
+        const resting = cellAt(row * columns);
+        if (resting) anchors[`${key}-${facing}`] = asAnchor(resting);
+      });
 
       // Four signed bytes per cell: how far the skull and the eyes have moved, how far the body
       // has swayed, and how much wider it has become, all against the resting pose. Signed bytes

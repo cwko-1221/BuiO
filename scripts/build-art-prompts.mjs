@@ -40,15 +40,20 @@ const ROOMS = [
 
 const WEARABLES = [
   ['head', '頭飾', 5, 4, `a small jewelled crown, an explorer's wide-brim hat, a woven flower wreath, a star-shaped hairclip, a chef's toque, a fluffy cloud cap, a sailor cap, a pointed wizard hat, a conical bamboo leaf hat, a knitted snow hat with a pompom, a circlet of flame, a crescent moon crown, a brass gear top hat, a large ribbon bow, an ornate king's crown, a soft nightcap, a cat-ear headband, a pair of aviator goggles worn on the head, a branching coral crown, a domed cosmic helmet`,
-    `Each accessory is drawn on its own, from the front, exactly as it would look while worn - but with no creature, no head, no mannequin and no stand underneath it. Left-to-right symmetrical wherever the object itself is symmetrical. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
+    `Each accessory is drawn on its own, exactly as it would look while worn - but with no creature, no head, no mannequin and no stand underneath it. Left-to-right symmetrical wherever the object itself is symmetrical. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`,
+    `A hat from behind is its back and the far side of its brim, with nothing of its front showing. In profile it is one side of the brim and the crown, with any feather, badge or buckle sitting where that side would carry it.`],
   ['face', '面飾', 4, 3, `round wire spectacles, star-shaped sunglasses, a curled gentleman's moustache, heart-shaped sunglasses, tinted explorer goggles, a single monocle on a fine chain, a snowflake face sticker, rainbow face paint stripes, a crescent moon eye mask, a bubble-dome face visor, a mechanical eyepatch with brass rivets, a red party nose`,
-    `Each item is drawn on its own, from the front, exactly as it would sit on a face - but with no creature, no head and no mannequin. Eyewear is drawn as a matching pair with the space between the lenses left empty so a face can show through. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
+    `Each item is drawn on its own, exactly as it would sit on a face - but with no creature, no head and no mannequin. Seen from the front, eyewear is a matching pair with the space between the lenses left empty so a face can show through. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`,
+    `Eyewear in profile is one lens with its arm running back towards the ear. From behind a face piece has almost nothing to show: draw only the strap or the arms crossing the back of a head, or the object edge-on as a thin shape.`],
   ['neck', '頸部', 4, 4, `a red neckerchief, a blue neckerchief, a gold bell on a collar, a pearl necklace, a collar of woven leaves, a starlight bow tie, an explorer's badge on a strap, a crystal pendant, a fluffy cloud scarf, a rainbow striped scarf, a flame-edged shoulder cape, a snow-white fur shoulder cape, a bamboo knot necktie, a crescent moon pendant, a brass gear necklace, a collar of small flowers`,
-    `Each item is drawn on its own, from the front, exactly as it would sit around a neck - but with no creature and no mannequin. Drawn as a closed ring or an open U shape seen from the front, never as a single straight strand. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
+    `Each item is drawn on its own, exactly as it would sit around a neck - but with no creature and no mannequin. Seen from the front it is a closed ring or an open U, never a single straight strand. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`,
+    `A collar or a scarf from behind is the back of the loop, with the knot, buckle or clasp shown if that is where it sits. In profile the loop is seen edge-on, thicker on the near side than the far one.`],
   ['back', '背部', 4, 4, `a small school satchel, a pair of butterfly wings, a pair of leathery dragon wings, a fluffy cloud cape, an ocean-blue rucksack, a woven bamboo basket, a starry cloak, an explorer's tool case, a moonlight cape, a rocket pack, a snowman-shaped backpack, a garden backpack with small plants growing out of it, a wind-up clockwork key and gear, a candy-striped backpack, a pair of small crystal wings, a rolled mini tent`,
-    `Each item is drawn on its own, from the front, exactly as it would look worn on a back - but with no creature and no mannequin. Wings and capes are perfectly left-to-right symmetrical and fully spread open. Backpacks are seen from the front as they would look peeking out from behind a body. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
+    `Each item is drawn on its own, exactly as it would look worn on a back - but with no creature and no mannequin. Wings and capes are left-to-right symmetrical and fully spread open in the front and back views. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`,
+    `This is the view that matters most here. From behind, wings are fully spread with their outer faces to the viewer and a pack shows its back, its straps and its buckles. From the front the item is only what shows past the body on either side. In profile it is edge-on: a wing folded or foreshortened, a pack seen from its side.`],
   ['aura', '光環', 4, 4, `a trail of glowing stars, a trail of soap bubbles, a trail of drifting leaves, a trail of orange sparks, a trail of snowflakes, a rainbow shimmer trail, a ring of moon shadow, a ring of warm sunlight, a ring of floating crystals, a ring of crackling lightning, a swirl of flower petals, a swirl of music notes, a small cloud following along, a ring of tiny orbiting planets, a swarm of fireflies, a ring of slowly turning brass gears`,
-    `Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. There is no creature and no mannequin in the cell, and the middle is left empty. Glowing, semi-transparent, light and airy. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`],
+    `Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. There is no creature and no mannequin in the cell, and the middle is left empty. Glowing, semi-transparent, light and airy. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.`,
+    `A ring lying on the floor barely changes when the creature turns, so these three differ only a little: the same shallow ellipse each time, with whatever floats in it rearranged so that the front, the side and the back of the ring each read as their own picture.`],
 ];
 
 const SPECIES = [
@@ -271,8 +276,10 @@ const MUST_NOT_SAY = {
   sheet: ['fully opaque'],
 };
 
+const counts = { room: 0, furniture: 0, wearable: 0, pet: 0 };
 const problems = [];
 function check(kind, label, body) {
+  counts[kind] = (counts[kind] || 0) + 1;
   const groups = kind === 'room' ? ['room'] : ['sheet', kind];
   for (const group of groups) {
     for (const phrase of MUST_SAY[group] || []) {
@@ -289,7 +296,7 @@ let n = 0;
 const block = (kind, label, note, body) => {
   n += 1;
   check(kind, label, body);
-  out.push(`\n\n${'='.repeat(78)}\n[${String(n).padStart(3, '0')}/100]  ${label}\n${note}\n${'='.repeat(78)}\n\n${body}\n`);
+  out.push(`\n\n${'='.repeat(78)}\n[${String(n).padStart(3, '0')}]  ${label}\n${note}\n${'='.repeat(78)}\n\n${body}\n`);
 };
 
 for (const [id, zh, theme] of ROOMS) {
@@ -344,22 +351,57 @@ Exactly 20 cells in 4 rows of 5. Do not add a fifth row, do not repeat an item, 
 ${sheet(5, 4)}`);
 }
 
-for (const [slot, zh, cols, rows, items, extra] of WEARABLES) {
-  block('wearable', `飾物 · ${zh}`, `檔名：wearable-${slot}.png　${cols * rows} 格（${cols} x ${rows}）　風格：日系動漫（跟寵物）`,
+/**
+ * Accessories, three views of each.
+ *
+ * A creature that walks turns to face away and to the side, and one drawing pinned to all three
+ * is a front-facing crown seen from behind. Each item is drawn front, right side and back, in
+ * three cells side by side so the generator has the other views in front of it and draws the
+ * same object rather than three similar ones. Eight items to a sheet keeps every cell large.
+ */
+const VIEWS_PER_ITEM = 3;
+const ITEMS_PER_SHEET = 8;
+const VIEW_COLUMNS = 6;
+
+for (const [slot, zh, , , items, extra, viewNote] of WEARABLES) {
+  const list = items.split(',').map((entry) => entry.trim());
+  const sheets = Math.ceil(list.length / ITEMS_PER_SHEET);
+  for (let sheet_ = 0; sheet_ < sheets; sheet_ += 1) {
+    const batch = list.slice(sheet_ * ITEMS_PER_SHEET, (sheet_ + 1) * ITEMS_PER_SHEET);
+    const cells = batch.length * VIEWS_PER_ITEM;
+    const VIEW_ROWS = Math.ceil(cells / VIEW_COLUMNS);
+    const numbered = batch.map((item, index) => {
+      const first = index * VIEWS_PER_ITEM + 1;
+      return `  cells ${first}, ${first + 1} and ${first + 2}   ${item}`;
+    }).join(String.fromCharCode(10));
+    block(
+      'wearable',
+      `飾物 · ${zh}${sheets > 1 ? ` ${sheet_ + 1}/${sheets}` : ''}`,
+      `檔名：wearable-${slot}-${sheet_ + 1}.png　${cells} 格（${VIEW_COLUMNS} x ${VIEW_ROWS}）　風格：日系動漫（跟寵物）`,
 `${PET_STYLE}
 
-A sprite sheet of ${cols * rows} ${slot} accessories worn by small anime creature companions.
+A sprite sheet of ${batch.length} ${slot} accessories worn by small anime creature companions, each drawn three times.
 
-Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly ${cols * rows} cells in ${rows} rows of ${cols}. Do not add a row, do not repeat an item, and do not leave a cell empty.
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
+
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
+
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
+
+${viewNote}
+
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly ${cells} cells in ${VIEW_ROWS} rows of ${VIEW_COLUMNS}, which is ${batch.length} items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
 
 ${extra}
 
-Items, in this exact order, one per cell reading left to right and top to bottom:
-${items}
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+${numbered}
 
-${sheet(cols, rows)}`);
+${sheet(VIEW_COLUMNS, VIEW_ROWS)}`);
+  }
 }
-
 for (const [id, zh, base, stages] of SPECIES) {
   stages.forEach((growth, index) => {
     block('pet', `寵物 · ${zh} 第 ${index + 1} 階段`, `檔名：pet-${id}-${index + 1}.png　20 格（5 x 4）　風格：日系動漫`,
@@ -399,5 +441,5 @@ if (problems.length) {
 
 fs.writeFileSync('docs/art-prompts.md', header + out.join(''));
 console.log(`docs/art-prompts.md · ${n} 段 · ${(header + out.join('')).length.toLocaleString()} 字`);
-console.log('  房間 10（動森）· 家具 5（動森）· 飾物 5（動漫）· 寵物 80（動漫）');
+console.log(`  房間 ${counts.room} 張（動森）· 家具 ${counts.furniture} 張（動森）· 飾物 ${counts.wearable} 張（動漫）· 寵物 ${counts.pet} 張（動漫）`);
 console.log('  逐段條款檢查：全部通過');

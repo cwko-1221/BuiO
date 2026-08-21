@@ -181,6 +181,41 @@ try {
   // Equip through the board the way a child does, rather than through the API, so the slots and
   // the drag gesture are covered too. Native HTML5 dragging is dead on iOS, so this is a pointer
   // gesture: press the tile, move, and drop it on the slot that accepts it.
+  // The frames below only mean something on a creature whose pose sheet has been imported — the
+  // rest are still on placeholder art and hold one picture by design. Buy an animated species
+  // and make it the active pet, so the outfit is checked against art that actually moves.
+  const animated=catalog.pets.filter((pet)=>pet.animated&&pet.rarity!=='epic');
+  assert.ok(animated.length,'no animated species to check a moving outfit against');
+  const wanted=animated[0].id;
+  await page.locator('[data-tab="shop"]').click();
+  await page.locator('[data-action="shop-category"][data-id="eggs"]').click();
+  const buyAnimated=page.locator(`[data-action="buy-direct-egg"][data-id="${wanted}"]`);
+  await buyAnimated.waitFor();
+  if(await buyAnimated.isEnabled()) {
+    await buyAnimated.click();
+    await page.waitForFunction((id)=>Boolean(document.querySelector(`[data-action="buy-direct-egg"][data-id="${id}"]`)?.hasAttribute('disabled')),
+      wanted,{timeout:15000}).catch(()=>{});
+    // Hatching opens the reveal, whose backdrop swallows every click behind it until it is gone.
+    for(let tries=0;tries<6;tries+=1){
+      if(!await page.locator('.modal-backdrop').count()) break;
+      const dismiss=page.locator('#modalRoot [data-action="back-home"], #modalRoot [data-action="close-modal"]').first();
+      if(await dismiss.count()) await dismiss.click({force:true}).catch(()=>{});
+      else await page.evaluate(()=>{ document.querySelector('#modalRoot').innerHTML=''; });
+      await page.waitForTimeout(400);
+    }
+  }
+  // The reveal opens after the purchase settles, so clear whatever is over the page rather than
+  // racing it. The modal is not what is under test here.
+  await page.waitForTimeout(600);
+  await page.evaluate(()=>{ const root=document.querySelector('#modalRoot'); if(root) root.innerHTML=''; });
+  await page.locator('[data-tab="collection"]').click();
+  const choose=page.locator(`.pet-card:has(img[src*="${wanted}-"]) [data-action="activate"]`);
+  await choose.waitFor({timeout:15000}).catch(()=>{ throw new Error(`${wanted} was never owned, so the pose checks would have run on a creature that holds one picture`); });
+  if(await choose.isEnabled()) await choose.click();
+  await page.waitForFunction((id)=>document.querySelector(`.pet-card:has(img[src*="${id}-"]) [data-action="activate"]`)?.hasAttribute('disabled'),wanted,{timeout:15000});
+  // Back to the room: the outfit board is opened from there, not from the collection.
+  await page.locator('[data-tab="home"]').click();
+
   await page.locator('[data-action="open-outfit"]').click(); await page.locator('.gear-board').waitFor();
   assert.equal(await page.locator('.gear-slot').count(),OUTFIT_SLOT_COUNT);
   assert.equal(await page.locator('.gear-slot.sealed').count(),OUTFIT_SEALED_COUNT);
@@ -224,27 +259,6 @@ try {
     assert.ok(Math.abs(piece.drawn-piece.declared)<=1,`preview piece drawn at ${piece.drawn}px but sized ${piece.declared}px`);
   }
   await page.locator('.picker-head [data-action="close-modal"]').click();
-
-  // The frames below only mean something on a creature whose pose sheet has been imported — the
-  // rest are still on placeholder art and hold one picture by design. Buy an animated species
-  // and make it the active pet, so the outfit is checked against art that actually moves.
-  const animated=catalog.pets.filter((pet)=>pet.animated&&pet.rarity!=='epic');
-  assert.ok(animated.length,'no animated species to check a moving outfit against');
-  const wanted=animated[0].id;
-  await page.locator('[data-tab="shop"]').click();
-  await page.locator('[data-action="shop-category"][data-id="eggs"]').click();
-  const buyAnimated=page.locator(`[data-action="buy-direct-egg"][data-id="${wanted}"]`);
-  await buyAnimated.waitFor();
-  if(await buyAnimated.isEnabled()) {
-    await buyAnimated.click();
-    await page.waitForFunction((id)=>Boolean(document.querySelector(`[data-action="buy-direct-egg"][data-id="${id}"]`)?.hasAttribute('disabled')),
-      wanted,{timeout:15000}).catch(()=>{});
-  }
-  await page.locator('[data-tab="collection"]').click();
-  const choose=page.locator(`.pet-card:has(img[src*="${wanted}-"]) [data-action="activate"]`);
-  await choose.waitFor({timeout:15000}).catch(()=>{ throw new Error(`${wanted} was never owned, so the pose checks would have run on a creature that holds one picture`); });
-  if(await choose.isEnabled()) await choose.click();
-  await page.waitForFunction((id)=>document.querySelector(`.pet-card:has(img[src*="${id}-"]) [data-action="activate"]`)?.hasAttribute('disabled'),wanted,{timeout:15000});
 
   await page.reload({waitUntil:'networkidle'}); await page.locator('#game-root canvas').waitFor();
   await page.waitForFunction(()=>window.__petGame?.scene?.getScene('Bedroom')?.avatar?.worn?.length>0,null,{timeout:15000});

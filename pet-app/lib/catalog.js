@@ -156,6 +156,16 @@ const PETS = [
   // creature still on placeholder art would be cut into frames in the wrong places.
   animated: POSE_SHEETS.has(id),
   anchors: Array.from({ length: 4 }, (_, index) => BODY_METRICS[`${id}-${index + 1}`] || null),
+  // The same landmarks measured on each facing, so a hat sits on the head from the side too.
+  facingAnchors: Array.from({ length: 4 }, (_, index) => {
+    const stage = index + 1;
+    const byFacing = {};
+    for (const facing of ['right', 'back']) {
+      const found = BODY_METRICS[`${id}-${stage}-${facing}`];
+      if (found) byFacing[facing] = found;
+    }
+    return Object.keys(byFacing).length ? byFacing : null;
+  }),
   motion: Array.from({ length: 4 }, (_, index) => FRAME_MOTION[`${id}-${index + 1}`] || null),
 }));
 

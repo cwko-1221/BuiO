@@ -1,6 +1,6 @@
 # BuiO 寵物模組 · 美術生成 prompt
 
-合共 100 段。每段由 ====== 之間嘅內容整段複製，貼落圖像生成 AI。
+合共 106 段。每段由 ====== 之間嘅內容整段複製，貼落圖像生成 AI。
 
 兩種風格：
   房間、家具            動物森友會風 —— 柔和、無描邊、暖調
@@ -13,7 +13,7 @@
 
 
 ==============================================================================
-[001/100]  房間 · 橡木暖陽房
+[001]  房間 · 橡木暖陽房
 檔名：room-sunny-oak.png　輸出：1600 x 900　不透明　風格：動森
 ==============================================================================
 
@@ -44,7 +44,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 
 ==============================================================================
-[002/100]  房間 · 雲端閣樓
+[002]  房間 · 雲端閣樓
 檔名：room-cloud-loft.png　輸出：1600 x 900　不透明　風格：動森
 ==============================================================================
 
@@ -75,7 +75,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 
 ==============================================================================
-[003/100]  房間 · 海洋船艙
+[003]  房間 · 海洋船艙
 檔名：room-ocean-cabin.png　輸出：1600 x 900　不透明　風格：動森
 ==============================================================================
 
@@ -106,7 +106,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 
 ==============================================================================
-[004/100]  房間 · 森林樹屋
+[004]  房間 · 森林樹屋
 檔名：room-forest-treehouse.png　輸出：1600 x 900　不透明　風格：動森
 ==============================================================================
 
@@ -137,7 +137,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 
 ==============================================================================
-[005/100]  房間 · 星際睡艙
+[005]  房間 · 星際睡艙
 檔名：room-space-pod.png　輸出：1600 x 900　不透明　風格：動森
 ==============================================================================
 
@@ -168,7 +168,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 
 ==============================================================================
-[006/100]  房間 · 糖果工房
+[006]  房間 · 糖果工房
 檔名：room-candy-workshop.png　輸出：1600 x 900　不透明　風格：動森
 ==============================================================================
 
@@ -199,7 +199,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 
 ==============================================================================
-[007/100]  房間 · 熔岩龍窩
+[007]  房間 · 熔岩龍窩
 檔名：room-lava-den.png　輸出：1600 x 900　不透明　風格：動森
 ==============================================================================
 
@@ -230,7 +230,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 
 ==============================================================================
-[008/100]  房間 · 極光觀測房
+[008]  房間 · 極光觀測房
 檔名：room-aurora-observatory.png　輸出：1600 x 900　不透明　風格：動森
 ==============================================================================
 
@@ -261,7 +261,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 
 ==============================================================================
-[009/100]  房間 · 竹林和室
+[009]  房間 · 竹林和室
 檔名：room-bamboo-room.png　輸出：1600 x 900　不透明　風格：動森
 ==============================================================================
 
@@ -292,7 +292,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 
 ==============================================================================
-[010/100]  房間 · 月影魔法閣樓
+[010]  房間 · 月影魔法閣樓
 檔名：room-moon-magic-attic.png　輸出：1600 x 900　不透明　風格：動森
 ==============================================================================
 
@@ -323,7 +323,7 @@ A 16:9 landscape image, at least 1536 pixels wide, fully opaque and filled edge 
 
 
 ==============================================================================
-[011/100]  家具 · 睡眠 + 客廳
+[011]  家具 · 睡眠 + 客廳
 檔名：furniture-sunny-oak-cloud-loft.png　20 格（5 x 4）　風格：動森
 ==============================================================================
 
@@ -364,7 +364,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[012/100]  家具 · 書房 + 遊玩
+[012]  家具 · 書房 + 遊玩
 檔名：furniture-ocean-cabin-forest-treehouse.png　20 格（5 x 4）　風格：動森
 ==============================================================================
 
@@ -405,7 +405,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[013/100]  家具 · 收納 + 綠意
+[013]  家具 · 收納 + 綠意
 檔名：furniture-space-pod-candy-workshop.png　20 格（5 x 4）　風格：動森
 ==============================================================================
 
@@ -446,7 +446,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[014/100]  家具 · 燈光 + 飲食
+[014]  家具 · 燈光 + 飲食
 檔名：furniture-lava-den-aurora-observatory.png　20 格（5 x 4）　風格：動森
 ==============================================================================
 
@@ -487,7 +487,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[015/100]  家具 · 奇幻 + 自然
+[015]  家具 · 奇幻 + 自然
 檔名：furniture-bamboo-room-moon-magic-attic.png　20 格（5 x 4）　風格：動森
 ==============================================================================
 
@@ -528,102 +528,395 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[016/100]  飾物 · 頭飾
-檔名：wearable-head.png　20 格（5 x 4）　風格：日系動漫（跟寵物）
+[016]  飾物 · 頭飾 1/3
+檔名：wearable-head-1.png　24 格（6 x 4）　風格：日系動漫（跟寵物）
 ==============================================================================
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A sprite sheet of 20 head accessories worn by small anime creature companions.
+A sprite sheet of 8 head accessories worn by small anime creature companions, each drawn three times.
 
-Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 20 cells in 4 rows of 5. Do not add a row, do not repeat an item, and do not leave a cell empty.
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
 
-Each accessory is drawn on its own, from the front, exactly as it would look while worn - but with no creature, no head, no mannequin and no stand underneath it. Left-to-right symmetrical wherever the object itself is symmetrical. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
 
-Items, in this exact order, one per cell reading left to right and top to bottom:
-a small jewelled crown, an explorer's wide-brim hat, a woven flower wreath, a star-shaped hairclip, a chef's toque, a fluffy cloud cap, a sailor cap, a pointed wizard hat, a conical bamboo leaf hat, a knitted snow hat with a pompom, a circlet of flame, a crescent moon crown, a brass gear top hat, a large ribbon bow, an ornate king's crown, a soft nightcap, a cat-ear headband, a pair of aviator goggles worn on the head, a branching coral crown, a domed cosmic helmet
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
 
-Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+A hat from behind is its back and the far side of its brim, with nothing of its front showing. In profile it is one side of the brim and the crown, with any feather, badge or buckle sitting where that side would carry it.
 
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 24 cells in 4 rows of 6, which is 8 items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
 
-==============================================================================
-[017/100]  飾物 · 面飾
-檔名：wearable-face.png　12 格（4 x 3）　風格：日系動漫（跟寵物）
-==============================================================================
+Each accessory is drawn on its own, exactly as it would look while worn - but with no creature, no head, no mannequin and no stand underneath it. Left-to-right symmetrical wherever the object itself is symmetrical. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
 
-Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+  cells 1, 2 and 3   a small jewelled crown
+  cells 4, 5 and 6   an explorer's wide-brim hat
+  cells 7, 8 and 9   a woven flower wreath
+  cells 10, 11 and 12   a star-shaped hairclip
+  cells 13, 14 and 15   a chef's toque
+  cells 16, 17 and 18   a fluffy cloud cap
+  cells 19, 20 and 21   a sailor cap
+  cells 22, 23 and 24   a pointed wizard hat
 
-A sprite sheet of 12 face accessories worn by small anime creature companions.
-
-Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 12 cells in 3 rows of 4. Do not add a row, do not repeat an item, and do not leave a cell empty.
-
-Each item is drawn on its own, from the front, exactly as it would sit on a face - but with no creature, no head and no mannequin. Eyewear is drawn as a matching pair with the space between the lenses left empty so a face can show through. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
-
-Items, in this exact order, one per cell reading left to right and top to bottom:
-round wire spectacles, star-shaped sunglasses, a curled gentleman's moustache, heart-shaped sunglasses, tinted explorer goggles, a single monocle on a fine chain, a snowflake face sticker, rainbow face paint stripes, a crescent moon eye mask, a bubble-dome face visor, a mechanical eyepatch with brass rivets, a red party nose
-
-Lay the items out as a strict grid, 4 columns by 3 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+Lay the items out as a strict grid, 6 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
 
 
 ==============================================================================
-[018/100]  飾物 · 頸部
-檔名：wearable-neck.png　16 格（4 x 4）　風格：日系動漫（跟寵物）
+[017]  飾物 · 頭飾 2/3
+檔名：wearable-head-2.png　24 格（6 x 4）　風格：日系動漫（跟寵物）
 ==============================================================================
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A sprite sheet of 16 neck accessories worn by small anime creature companions.
+A sprite sheet of 8 head accessories worn by small anime creature companions, each drawn three times.
 
-Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 16 cells in 4 rows of 4. Do not add a row, do not repeat an item, and do not leave a cell empty.
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
 
-Each item is drawn on its own, from the front, exactly as it would sit around a neck - but with no creature and no mannequin. Drawn as a closed ring or an open U shape seen from the front, never as a single straight strand. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
 
-Items, in this exact order, one per cell reading left to right and top to bottom:
-a red neckerchief, a blue neckerchief, a gold bell on a collar, a pearl necklace, a collar of woven leaves, a starlight bow tie, an explorer's badge on a strap, a crystal pendant, a fluffy cloud scarf, a rainbow striped scarf, a flame-edged shoulder cape, a snow-white fur shoulder cape, a bamboo knot necktie, a crescent moon pendant, a brass gear necklace, a collar of small flowers
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
 
-Lay the items out as a strict grid, 4 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+A hat from behind is its back and the far side of its brim, with nothing of its front showing. In profile it is one side of the brim and the crown, with any feather, badge or buckle sitting where that side would carry it.
 
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 24 cells in 4 rows of 6, which is 8 items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
 
-==============================================================================
-[019/100]  飾物 · 背部
-檔名：wearable-back.png　16 格（4 x 4）　風格：日系動漫（跟寵物）
-==============================================================================
+Each accessory is drawn on its own, exactly as it would look while worn - but with no creature, no head, no mannequin and no stand underneath it. Left-to-right symmetrical wherever the object itself is symmetrical. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
 
-Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+  cells 1, 2 and 3   a conical bamboo leaf hat
+  cells 4, 5 and 6   a knitted snow hat with a pompom
+  cells 7, 8 and 9   a circlet of flame
+  cells 10, 11 and 12   a crescent moon crown
+  cells 13, 14 and 15   a brass gear top hat
+  cells 16, 17 and 18   a large ribbon bow
+  cells 19, 20 and 21   an ornate king's crown
+  cells 22, 23 and 24   a soft nightcap
 
-A sprite sheet of 16 back accessories worn by small anime creature companions.
-
-Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 16 cells in 4 rows of 4. Do not add a row, do not repeat an item, and do not leave a cell empty.
-
-Each item is drawn on its own, from the front, exactly as it would look worn on a back - but with no creature and no mannequin. Wings and capes are perfectly left-to-right symmetrical and fully spread open. Backpacks are seen from the front as they would look peeking out from behind a body. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
-
-Items, in this exact order, one per cell reading left to right and top to bottom:
-a small school satchel, a pair of butterfly wings, a pair of leathery dragon wings, a fluffy cloud cape, an ocean-blue rucksack, a woven bamboo basket, a starry cloak, an explorer's tool case, a moonlight cape, a rocket pack, a snowman-shaped backpack, a garden backpack with small plants growing out of it, a wind-up clockwork key and gear, a candy-striped backpack, a pair of small crystal wings, a rolled mini tent
-
-Lay the items out as a strict grid, 4 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+Lay the items out as a strict grid, 6 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
 
 
 ==============================================================================
-[020/100]  飾物 · 光環
-檔名：wearable-aura.png　16 格（4 x 4）　風格：日系動漫（跟寵物）
+[018]  飾物 · 頭飾 3/3
+檔名：wearable-head-3.png　12 格（6 x 2）　風格：日系動漫（跟寵物）
 ==============================================================================
 
 Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
 
-A sprite sheet of 16 aura accessories worn by small anime creature companions.
+A sprite sheet of 4 head accessories worn by small anime creature companions, each drawn three times.
 
-Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 16 cells in 4 rows of 4. Do not add a row, do not repeat an item, and do not leave a cell empty.
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
+
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
+
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
+
+A hat from behind is its back and the far side of its brim, with nothing of its front showing. In profile it is one side of the brim and the crown, with any feather, badge or buckle sitting where that side would carry it.
+
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 12 cells in 2 rows of 6, which is 4 items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
+
+Each accessory is drawn on its own, exactly as it would look while worn - but with no creature, no head, no mannequin and no stand underneath it. Left-to-right symmetrical wherever the object itself is symmetrical. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
+
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+  cells 1, 2 and 3   a cat-ear headband
+  cells 4, 5 and 6   a pair of aviator goggles worn on the head
+  cells 7, 8 and 9   a branching coral crown
+  cells 10, 11 and 12   a domed cosmic helmet
+
+Lay the items out as a strict grid, 6 columns by 2 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+
+
+==============================================================================
+[019]  飾物 · 面飾 1/2
+檔名：wearable-face-1.png　24 格（6 x 4）　風格：日系動漫（跟寵物）
+==============================================================================
+
+Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
+
+A sprite sheet of 8 face accessories worn by small anime creature companions, each drawn three times.
+
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
+
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
+
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
+
+Eyewear in profile is one lens with its arm running back towards the ear. From behind a face piece has almost nothing to show: draw only the strap or the arms crossing the back of a head, or the object edge-on as a thin shape.
+
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 24 cells in 4 rows of 6, which is 8 items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
+
+Each item is drawn on its own, exactly as it would sit on a face - but with no creature, no head and no mannequin. Seen from the front, eyewear is a matching pair with the space between the lenses left empty so a face can show through. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
+
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+  cells 1, 2 and 3   round wire spectacles
+  cells 4, 5 and 6   star-shaped sunglasses
+  cells 7, 8 and 9   a curled gentleman's moustache
+  cells 10, 11 and 12   heart-shaped sunglasses
+  cells 13, 14 and 15   tinted explorer goggles
+  cells 16, 17 and 18   a single monocle on a fine chain
+  cells 19, 20 and 21   a snowflake face sticker
+  cells 22, 23 and 24   rainbow face paint stripes
+
+Lay the items out as a strict grid, 6 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+
+
+==============================================================================
+[020]  飾物 · 面飾 2/2
+檔名：wearable-face-2.png　12 格（6 x 2）　風格：日系動漫（跟寵物）
+==============================================================================
+
+Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
+
+A sprite sheet of 4 face accessories worn by small anime creature companions, each drawn three times.
+
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
+
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
+
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
+
+Eyewear in profile is one lens with its arm running back towards the ear. From behind a face piece has almost nothing to show: draw only the strap or the arms crossing the back of a head, or the object edge-on as a thin shape.
+
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 12 cells in 2 rows of 6, which is 4 items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
+
+Each item is drawn on its own, exactly as it would sit on a face - but with no creature, no head and no mannequin. Seen from the front, eyewear is a matching pair with the space between the lenses left empty so a face can show through. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
+
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+  cells 1, 2 and 3   a crescent moon eye mask
+  cells 4, 5 and 6   a bubble-dome face visor
+  cells 7, 8 and 9   a mechanical eyepatch with brass rivets
+  cells 10, 11 and 12   a red party nose
+
+Lay the items out as a strict grid, 6 columns by 2 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+
+
+==============================================================================
+[021]  飾物 · 頸部 1/2
+檔名：wearable-neck-1.png　24 格（6 x 4）　風格：日系動漫（跟寵物）
+==============================================================================
+
+Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
+
+A sprite sheet of 8 neck accessories worn by small anime creature companions, each drawn three times.
+
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
+
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
+
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
+
+A collar or a scarf from behind is the back of the loop, with the knot, buckle or clasp shown if that is where it sits. In profile the loop is seen edge-on, thicker on the near side than the far one.
+
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 24 cells in 4 rows of 6, which is 8 items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
+
+Each item is drawn on its own, exactly as it would sit around a neck - but with no creature and no mannequin. Seen from the front it is a closed ring or an open U, never a single straight strand. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
+
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+  cells 1, 2 and 3   a red neckerchief
+  cells 4, 5 and 6   a blue neckerchief
+  cells 7, 8 and 9   a gold bell on a collar
+  cells 10, 11 and 12   a pearl necklace
+  cells 13, 14 and 15   a collar of woven leaves
+  cells 16, 17 and 18   a starlight bow tie
+  cells 19, 20 and 21   an explorer's badge on a strap
+  cells 22, 23 and 24   a crystal pendant
+
+Lay the items out as a strict grid, 6 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+
+
+==============================================================================
+[022]  飾物 · 頸部 2/2
+檔名：wearable-neck-2.png　24 格（6 x 4）　風格：日系動漫（跟寵物）
+==============================================================================
+
+Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
+
+A sprite sheet of 8 neck accessories worn by small anime creature companions, each drawn three times.
+
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
+
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
+
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
+
+A collar or a scarf from behind is the back of the loop, with the knot, buckle or clasp shown if that is where it sits. In profile the loop is seen edge-on, thicker on the near side than the far one.
+
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 24 cells in 4 rows of 6, which is 8 items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
+
+Each item is drawn on its own, exactly as it would sit around a neck - but with no creature and no mannequin. Seen from the front it is a closed ring or an open U, never a single straight strand. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
+
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+  cells 1, 2 and 3   a fluffy cloud scarf
+  cells 4, 5 and 6   a rainbow striped scarf
+  cells 7, 8 and 9   a flame-edged shoulder cape
+  cells 10, 11 and 12   a snow-white fur shoulder cape
+  cells 13, 14 and 15   a bamboo knot necktie
+  cells 16, 17 and 18   a crescent moon pendant
+  cells 19, 20 and 21   a brass gear necklace
+  cells 22, 23 and 24   a collar of small flowers
+
+Lay the items out as a strict grid, 6 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+
+
+==============================================================================
+[023]  飾物 · 背部 1/2
+檔名：wearable-back-1.png　24 格（6 x 4）　風格：日系動漫（跟寵物）
+==============================================================================
+
+Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
+
+A sprite sheet of 8 back accessories worn by small anime creature companions, each drawn three times.
+
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
+
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
+
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
+
+This is the view that matters most here. From behind, wings are fully spread with their outer faces to the viewer and a pack shows its back, its straps and its buckles. From the front the item is only what shows past the body on either side. In profile it is edge-on: a wing folded or foreshortened, a pack seen from its side.
+
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 24 cells in 4 rows of 6, which is 8 items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
+
+Each item is drawn on its own, exactly as it would look worn on a back - but with no creature and no mannequin. Wings and capes are left-to-right symmetrical and fully spread open in the front and back views. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
+
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+  cells 1, 2 and 3   a small school satchel
+  cells 4, 5 and 6   a pair of butterfly wings
+  cells 7, 8 and 9   a pair of leathery dragon wings
+  cells 10, 11 and 12   a fluffy cloud cape
+  cells 13, 14 and 15   an ocean-blue rucksack
+  cells 16, 17 and 18   a woven bamboo basket
+  cells 19, 20 and 21   a starry cloak
+  cells 22, 23 and 24   an explorer's tool case
+
+Lay the items out as a strict grid, 6 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+
+
+==============================================================================
+[024]  飾物 · 背部 2/2
+檔名：wearable-back-2.png　24 格（6 x 4）　風格：日系動漫（跟寵物）
+==============================================================================
+
+Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
+
+A sprite sheet of 8 back accessories worn by small anime creature companions, each drawn three times.
+
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
+
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
+
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
+
+This is the view that matters most here. From behind, wings are fully spread with their outer faces to the viewer and a pack shows its back, its straps and its buckles. From the front the item is only what shows past the body on either side. In profile it is edge-on: a wing folded or foreshortened, a pack seen from its side.
+
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 24 cells in 4 rows of 6, which is 8 items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
+
+Each item is drawn on its own, exactly as it would look worn on a back - but with no creature and no mannequin. Wings and capes are left-to-right symmetrical and fully spread open in the front and back views. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
+
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+  cells 1, 2 and 3   a moonlight cape
+  cells 4, 5 and 6   a rocket pack
+  cells 7, 8 and 9   a snowman-shaped backpack
+  cells 10, 11 and 12   a garden backpack with small plants growing out of it
+  cells 13, 14 and 15   a wind-up clockwork key and gear
+  cells 16, 17 and 18   a candy-striped backpack
+  cells 19, 20 and 21   a pair of small crystal wings
+  cells 22, 23 and 24   a rolled mini tent
+
+Lay the items out as a strict grid, 6 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+
+
+==============================================================================
+[025]  飾物 · 光環 1/2
+檔名：wearable-aura-1.png　24 格（6 x 4）　風格：日系動漫（跟寵物）
+==============================================================================
+
+Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
+
+A sprite sheet of 8 aura accessories worn by small anime creature companions, each drawn three times.
+
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
+
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
+
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
+
+A ring lying on the floor barely changes when the creature turns, so these three differ only a little: the same shallow ellipse each time, with whatever floats in it rearranged so that the front, the side and the back of the ring each read as their own picture.
+
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 24 cells in 4 rows of 6, which is 8 items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
 
 Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. There is no creature and no mannequin in the cell, and the middle is left empty. Glowing, semi-transparent, light and airy. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
 
-Items, in this exact order, one per cell reading left to right and top to bottom:
-a trail of glowing stars, a trail of soap bubbles, a trail of drifting leaves, a trail of orange sparks, a trail of snowflakes, a rainbow shimmer trail, a ring of moon shadow, a ring of warm sunlight, a ring of floating crystals, a ring of crackling lightning, a swirl of flower petals, a swirl of music notes, a small cloud following along, a ring of tiny orbiting planets, a swarm of fireflies, a ring of slowly turning brass gears
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+  cells 1, 2 and 3   a trail of glowing stars
+  cells 4, 5 and 6   a trail of soap bubbles
+  cells 7, 8 and 9   a trail of drifting leaves
+  cells 10, 11 and 12   a trail of orange sparks
+  cells 13, 14 and 15   a trail of snowflakes
+  cells 16, 17 and 18   a rainbow shimmer trail
+  cells 19, 20 and 21   a ring of moon shadow
+  cells 22, 23 and 24   a ring of warm sunlight
 
-Lay the items out as a strict grid, 4 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+Lay the items out as a strict grid, 6 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
 
 
 ==============================================================================
-[021/100]  寵物 · 星斑貓 第 1 階段
+[026]  飾物 · 光環 2/2
+檔名：wearable-aura-2.png　24 格（6 x 4）　風格：日系動漫（跟寵物）
+==============================================================================
+
+Japanese anime creature art: crisp clean linework, cel shading with clear hard-edged separation between light and shadow, a vivid saturated palette built around one strong accent colour, expressive oversized eyes with layered iris gradients and bright catchlights, and a cool rim light along the top edge. Cute and cool at the same time - soft rounded proportions carrying sharp confident detailing: crisp fur tufts, defined markings, small crests and fangs. Appealing enough to be a plush toy and striking enough to be a trading card. This is character art rendered with cel shading and clean linework - not sticker art, not a die-cut sticker with a white keyline around it, and not flat vector shapes. Identical rendering style, line weight, palette and lighting across every cell of the sheet.
+
+A sprite sheet of 8 aura accessories worn by small anime creature companions, each drawn three times.
+
+THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
+
+  first cell    the item seen from the FRONT, straight on
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  third cell    the SAME item seen from BEHIND, straight on
+
+The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.
+
+A ring lying on the floor barely changes when the creature turns, so these three differ only a little: the same shallow ellipse each time, with whatever floats in it rearranged so that the front, the side and the back of the ring each read as their own picture.
+
+Each cell contains ONE cut-out object and nothing else - no room, no setting, no floor, no wall, no background of any kind. Exactly 24 cells in 4 rows of 6, which is 8 items of three views, two items to a row. Do not add a row, do not repeat an item, and do not leave a cell empty.
+
+Each effect is drawn on its own as a flat ground effect: a wide shallow ellipse lying on the floor, seen at the same angle as the room floor, twice as wide as it is tall. There is no creature and no mannequin in the cell, and the middle is left empty. Glowing, semi-transparent, light and airy. Drawn large enough to fill most of its cell, since it will be scaled to the creature later.
+
+Items, in this exact order, three cells each, reading left to right and top to bottom:
+  cells 1, 2 and 3   a ring of floating crystals
+  cells 4, 5 and 6   a ring of crackling lightning
+  cells 7, 8 and 9   a swirl of flower petals
+  cells 10, 11 and 12   a swirl of music notes
+  cells 13, 14 and 15   a small cloud following along
+  cells 16, 17 and 18   a ring of tiny orbiting planets
+  cells 19, 20 and 21   a swarm of fireflies
+  cells 22, 23 and 24   a ring of slowly turning brass gears
+
+Lay the items out as a strict grid, 6 columns by 4 rows, one item per cell, each item centred in its own cell with clear even margins, never touching a cell edge or a neighbour. Uniform scale relative to the cell. The background must be genuinely transparent - a real alpha channel. Not white, not a light grey, not a drawn checkerboard pattern, not any backdrop at all. Save as PNG with alpha. Nothing whatsoever is drawn behind or between the subjects: no ground shadow, no cast shadow, no reflection, no glow pad, no scenery, no text, no caption, no number, no label, no watermark, no frame, no border, and no white outline or sticker die-cut edge around anything. Square canvas 4096 x 4096.
+
+
+==============================================================================
+[027]  寵物 · 星斑貓 第 1 階段
 檔名：pet-starpatch-cat-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -678,7 +971,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[022/100]  寵物 · 星斑貓 第 2 階段
+[028]  寵物 · 星斑貓 第 2 階段
 檔名：pet-starpatch-cat-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -733,7 +1026,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[023/100]  寵物 · 星斑貓 第 3 階段
+[029]  寵物 · 星斑貓 第 3 階段
 檔名：pet-starpatch-cat-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -788,7 +1081,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[024/100]  寵物 · 星斑貓 第 4 階段
+[030]  寵物 · 星斑貓 第 4 階段
 檔名：pet-starpatch-cat-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -843,7 +1136,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[025/100]  寵物 · 雲耳犬 第 1 階段
+[031]  寵物 · 雲耳犬 第 1 階段
 檔名：pet-cloud-ear-dog-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -898,7 +1191,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[026/100]  寵物 · 雲耳犬 第 2 階段
+[032]  寵物 · 雲耳犬 第 2 階段
 檔名：pet-cloud-ear-dog-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -953,7 +1246,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[027/100]  寵物 · 雲耳犬 第 3 階段
+[033]  寵物 · 雲耳犬 第 3 階段
 檔名：pet-cloud-ear-dog-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1008,7 +1301,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[028/100]  寵物 · 雲耳犬 第 4 階段
+[034]  寵物 · 雲耳犬 第 4 階段
 檔名：pet-cloud-ear-dog-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1063,7 +1356,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[029/100]  寵物 · 布丁豬 第 1 階段
+[035]  寵物 · 布丁豬 第 1 階段
 檔名：pet-pudding-pig-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1118,7 +1411,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[030/100]  寵物 · 布丁豬 第 2 階段
+[036]  寵物 · 布丁豬 第 2 階段
 檔名：pet-pudding-pig-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1173,7 +1466,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[031/100]  寵物 · 布丁豬 第 3 階段
+[037]  寵物 · 布丁豬 第 3 階段
 檔名：pet-pudding-pig-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1228,7 +1521,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[032/100]  寵物 · 布丁豬 第 4 階段
+[038]  寵物 · 布丁豬 第 4 階段
 檔名：pet-pudding-pig-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1283,7 +1576,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[033/100]  寵物 · 月芽兔 第 1 階段
+[039]  寵物 · 月芽兔 第 1 階段
 檔名：pet-crescent-rabbit-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1338,7 +1631,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[034/100]  寵物 · 月芽兔 第 2 階段
+[040]  寵物 · 月芽兔 第 2 階段
 檔名：pet-crescent-rabbit-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1393,7 +1686,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[035/100]  寵物 · 月芽兔 第 3 階段
+[041]  寵物 · 月芽兔 第 3 階段
 檔名：pet-crescent-rabbit-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1448,7 +1741,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[036/100]  寵物 · 月芽兔 第 4 階段
+[042]  寵物 · 月芽兔 第 4 階段
 檔名：pet-crescent-rabbit-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1503,7 +1796,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[037/100]  寵物 · 泡泡水獺 第 1 階段
+[043]  寵物 · 泡泡水獺 第 1 階段
 檔名：pet-bubble-otter-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1558,7 +1851,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[038/100]  寵物 · 泡泡水獺 第 2 階段
+[044]  寵物 · 泡泡水獺 第 2 階段
 檔名：pet-bubble-otter-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1613,7 +1906,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[039/100]  寵物 · 泡泡水獺 第 3 階段
+[045]  寵物 · 泡泡水獺 第 3 階段
 檔名：pet-bubble-otter-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1668,7 +1961,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[040/100]  寵物 · 泡泡水獺 第 4 階段
+[046]  寵物 · 泡泡水獺 第 4 階段
 檔名：pet-bubble-otter-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1723,7 +2016,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[041/100]  寵物 · 苔背龜 第 1 階段
+[047]  寵物 · 苔背龜 第 1 階段
 檔名：pet-mossback-turtle-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1778,7 +2071,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[042/100]  寵物 · 苔背龜 第 2 階段
+[048]  寵物 · 苔背龜 第 2 階段
 檔名：pet-mossback-turtle-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1833,7 +2126,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[043/100]  寵物 · 苔背龜 第 3 階段
+[049]  寵物 · 苔背龜 第 3 階段
 檔名：pet-mossback-turtle-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1888,7 +2181,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[044/100]  寵物 · 苔背龜 第 4 階段
+[050]  寵物 · 苔背龜 第 4 階段
 檔名：pet-mossback-turtle-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1943,7 +2236,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[045/100]  寵物 · 火花鼠 第 1 階段
+[051]  寵物 · 火花鼠 第 1 階段
 檔名：pet-spark-hamster-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -1998,7 +2291,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[046/100]  寵物 · 火花鼠 第 2 階段
+[052]  寵物 · 火花鼠 第 2 階段
 檔名：pet-spark-hamster-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2053,7 +2346,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[047/100]  寵物 · 火花鼠 第 3 階段
+[053]  寵物 · 火花鼠 第 3 階段
 檔名：pet-spark-hamster-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2108,7 +2401,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[048/100]  寵物 · 火花鼠 第 4 階段
+[054]  寵物 · 火花鼠 第 4 階段
 檔名：pet-spark-hamster-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2163,7 +2456,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[049/100]  寵物 · 葉尾狐 第 1 階段
+[055]  寵物 · 葉尾狐 第 1 階段
 檔名：pet-leaftail-fox-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2218,7 +2511,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[050/100]  寵物 · 葉尾狐 第 2 階段
+[056]  寵物 · 葉尾狐 第 2 階段
 檔名：pet-leaftail-fox-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2273,7 +2566,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[051/100]  寵物 · 葉尾狐 第 3 階段
+[057]  寵物 · 葉尾狐 第 3 階段
 檔名：pet-leaftail-fox-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2328,7 +2621,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[052/100]  寵物 · 葉尾狐 第 4 階段
+[058]  寵物 · 葉尾狐 第 4 階段
 檔名：pet-leaftail-fox-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2383,7 +2676,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[053/100]  寵物 · 雪羽企鵝 第 1 階段
+[059]  寵物 · 雪羽企鵝 第 1 階段
 檔名：pet-snowfeather-penguin-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2438,7 +2731,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[054/100]  寵物 · 雪羽企鵝 第 2 階段
+[060]  寵物 · 雪羽企鵝 第 2 階段
 檔名：pet-snowfeather-penguin-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2493,7 +2786,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[055/100]  寵物 · 雪羽企鵝 第 3 階段
+[061]  寵物 · 雪羽企鵝 第 3 階段
 檔名：pet-snowfeather-penguin-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2548,7 +2841,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[056/100]  寵物 · 雪羽企鵝 第 4 階段
+[062]  寵物 · 雪羽企鵝 第 4 階段
 檔名：pet-snowfeather-penguin-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2603,7 +2896,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[057/100]  寵物 · 雷角羊 第 1 階段
+[063]  寵物 · 雷角羊 第 1 階段
 檔名：pet-thunderhorn-goat-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2658,7 +2951,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[058/100]  寵物 · 雷角羊 第 2 階段
+[064]  寵物 · 雷角羊 第 2 階段
 檔名：pet-thunderhorn-goat-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2713,7 +3006,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[059/100]  寵物 · 雷角羊 第 3 階段
+[065]  寵物 · 雷角羊 第 3 階段
 檔名：pet-thunderhorn-goat-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2768,7 +3061,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[060/100]  寵物 · 雷角羊 第 4 階段
+[066]  寵物 · 雷角羊 第 4 階段
 檔名：pet-thunderhorn-goat-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2823,7 +3116,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[061/100]  寵物 · 珊瑚海豹 第 1 階段
+[067]  寵物 · 珊瑚海豹 第 1 階段
 檔名：pet-coral-seal-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2878,7 +3171,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[062/100]  寵物 · 珊瑚海豹 第 2 階段
+[068]  寵物 · 珊瑚海豹 第 2 階段
 檔名：pet-coral-seal-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2933,7 +3226,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[063/100]  寵物 · 珊瑚海豹 第 3 階段
+[069]  寵物 · 珊瑚海豹 第 3 階段
 檔名：pet-coral-seal-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -2988,7 +3281,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[064/100]  寵物 · 珊瑚海豹 第 4 階段
+[070]  寵物 · 珊瑚海豹 第 4 階段
 檔名：pet-coral-seal-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3043,7 +3336,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[065/100]  寵物 · 竹熊貓 第 1 階段
+[071]  寵物 · 竹熊貓 第 1 階段
 檔名：pet-bamboo-panda-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3098,7 +3391,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[066/100]  寵物 · 竹熊貓 第 2 階段
+[072]  寵物 · 竹熊貓 第 2 階段
 檔名：pet-bamboo-panda-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3153,7 +3446,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[067/100]  寵物 · 竹熊貓 第 3 階段
+[073]  寵物 · 竹熊貓 第 3 階段
 檔名：pet-bamboo-panda-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3208,7 +3501,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[068/100]  寵物 · 竹熊貓 第 4 階段
+[074]  寵物 · 竹熊貓 第 4 階段
 檔名：pet-bamboo-panda-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3263,7 +3556,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[069/100]  寵物 · 夜翼蝠 第 1 階段
+[075]  寵物 · 夜翼蝠 第 1 階段
 檔名：pet-nightwing-bat-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3318,7 +3611,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[070/100]  寵物 · 夜翼蝠 第 2 階段
+[076]  寵物 · 夜翼蝠 第 2 階段
 檔名：pet-nightwing-bat-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3373,7 +3666,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[071/100]  寵物 · 夜翼蝠 第 3 階段
+[077]  寵物 · 夜翼蝠 第 3 階段
 檔名：pet-nightwing-bat-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3428,7 +3721,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[072/100]  寵物 · 夜翼蝠 第 4 階段
+[078]  寵物 · 夜翼蝠 第 4 階段
 檔名：pet-nightwing-bat-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3483,7 +3776,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[073/100]  寵物 · 晶鹿 第 1 階段
+[079]  寵物 · 晶鹿 第 1 階段
 檔名：pet-crystal-deer-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3538,7 +3831,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[074/100]  寵物 · 晶鹿 第 2 階段
+[080]  寵物 · 晶鹿 第 2 階段
 檔名：pet-crystal-deer-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3593,7 +3886,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[075/100]  寵物 · 晶鹿 第 3 階段
+[081]  寵物 · 晶鹿 第 3 階段
 檔名：pet-crystal-deer-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3648,7 +3941,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[076/100]  寵物 · 晶鹿 第 4 階段
+[082]  寵物 · 晶鹿 第 4 階段
 檔名：pet-crystal-deer-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3703,7 +3996,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[077/100]  寵物 · 墨狸 第 1 階段
+[083]  寵物 · 墨狸 第 1 階段
 檔名：pet-ink-raccoon-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3758,7 +4051,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[078/100]  寵物 · 墨狸 第 2 階段
+[084]  寵物 · 墨狸 第 2 階段
 檔名：pet-ink-raccoon-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3813,7 +4106,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[079/100]  寵物 · 墨狸 第 3 階段
+[085]  寵物 · 墨狸 第 3 階段
 檔名：pet-ink-raccoon-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3868,7 +4161,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[080/100]  寵物 · 墨狸 第 4 階段
+[086]  寵物 · 墨狸 第 4 階段
 檔名：pet-ink-raccoon-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3923,7 +4216,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[081/100]  寵物 · 熾焰龍 第 1 階段
+[087]  寵物 · 熾焰龍 第 1 階段
 檔名：pet-emberwing-dragon-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -3978,7 +4271,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[082/100]  寵物 · 熾焰龍 第 2 階段
+[088]  寵物 · 熾焰龍 第 2 階段
 檔名：pet-emberwing-dragon-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4033,7 +4326,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[083/100]  寵物 · 熾焰龍 第 3 階段
+[089]  寵物 · 熾焰龍 第 3 階段
 檔名：pet-emberwing-dragon-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4088,7 +4381,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[084/100]  寵物 · 熾焰龍 第 4 階段
+[090]  寵物 · 熾焰龍 第 4 階段
 檔名：pet-emberwing-dragon-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4143,7 +4436,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[085/100]  寵物 · 星雲膠獸 第 1 階段
+[091]  寵物 · 星雲膠獸 第 1 階段
 檔名：pet-nebula-slime-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4198,7 +4491,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[086/100]  寵物 · 星雲膠獸 第 2 階段
+[092]  寵物 · 星雲膠獸 第 2 階段
 檔名：pet-nebula-slime-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4253,7 +4546,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[087/100]  寵物 · 星雲膠獸 第 3 階段
+[093]  寵物 · 星雲膠獸 第 3 階段
 檔名：pet-nebula-slime-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4308,7 +4601,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[088/100]  寵物 · 星雲膠獸 第 4 階段
+[094]  寵物 · 星雲膠獸 第 4 階段
 檔名：pet-nebula-slime-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4363,7 +4656,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[089/100]  寵物 · 深淵燈魷 第 1 階段
+[095]  寵物 · 深淵燈魷 第 1 階段
 檔名：pet-abyss-lantern-squid-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4418,7 +4711,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[090/100]  寵物 · 深淵燈魷 第 2 階段
+[096]  寵物 · 深淵燈魷 第 2 階段
 檔名：pet-abyss-lantern-squid-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4473,7 +4766,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[091/100]  寵物 · 深淵燈魷 第 3 階段
+[097]  寵物 · 深淵燈魷 第 3 階段
 檔名：pet-abyss-lantern-squid-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4528,7 +4821,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[092/100]  寵物 · 深淵燈魷 第 4 階段
+[098]  寵物 · 深淵燈魷 第 4 階段
 檔名：pet-abyss-lantern-squid-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4583,7 +4876,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[093/100]  寵物 · 雷麒麟 第 1 階段
+[099]  寵物 · 雷麒麟 第 1 階段
 檔名：pet-storm-kirin-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4638,7 +4931,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[094/100]  寵物 · 雷麒麟 第 2 階段
+[100]  寵物 · 雷麒麟 第 2 階段
 檔名：pet-storm-kirin-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4693,7 +4986,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[095/100]  寵物 · 雷麒麟 第 3 階段
+[101]  寵物 · 雷麒麟 第 3 階段
 檔名：pet-storm-kirin-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4748,7 +5041,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[096/100]  寵物 · 雷麒麟 第 4 階段
+[102]  寵物 · 雷麒麟 第 4 階段
 檔名：pet-storm-kirin-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4803,7 +5096,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[097/100]  寵物 · 森林巨獸 第 1 階段
+[103]  寵物 · 森林巨獸 第 1 階段
 檔名：pet-grove-colossus-1.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4858,7 +5151,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[098/100]  寵物 · 森林巨獸 第 2 階段
+[104]  寵物 · 森林巨獸 第 2 階段
 檔名：pet-grove-colossus-2.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4913,7 +5206,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[099/100]  寵物 · 森林巨獸 第 3 階段
+[105]  寵物 · 森林巨獸 第 3 階段
 檔名：pet-grove-colossus-3.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
@@ -4968,7 +5261,7 @@ Lay the items out as a strict grid, 5 columns by 4 rows, one item per cell, each
 
 
 ==============================================================================
-[100/100]  寵物 · 森林巨獸 第 4 階段
+[106]  寵物 · 森林巨獸 第 4 階段
 檔名：pet-grove-colossus-4.png　20 格（5 x 4）　風格：日系動漫
 ==============================================================================
 
