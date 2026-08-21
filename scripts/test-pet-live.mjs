@@ -270,6 +270,25 @@ try {
     }
     return out;
   });
+  // Turning has to change the drawing, not just the body under it. An accessory is drawn from
+  // three sides; left borrows the right-hand drawing and mirrors it, as the body does.
+  const turned=await page.evaluate(async()=>{
+    const avatar=window.__petGame.scene.getScene('Bedroom').avatar;
+    const out={};
+    for(const facing of ['front','right','back','left']){
+      avatar.play('walk',facing);
+      await new Promise((resolve)=>setTimeout(resolve,120));
+      out[facing]={texture:avatar.worn[0].image.texture.key,flipped:avatar.worn[0].image.flipX};
+    }
+    avatar.play('idle','front');
+    return out;
+  });
+  assert.notEqual(turned.front.texture,turned.right.texture,'the outfit keeps its front drawing when the creature turns side on');
+  assert.notEqual(turned.front.texture,turned.back.texture,'the outfit keeps its front drawing when the creature turns away');
+  assert.equal(turned.left.texture,turned.right.texture,'left should borrow the right-hand drawing');
+  assert.equal(turned.left.flipped,true,'the left-hand view is the right-hand drawing mirrored');
+  assert.equal(turned.right.flipped,false,'the right-hand view should not be mirrored');
+
   const seen=(key)=>new Set(worn.map((sample)=>sample[key])).size;
   assert.ok(seen('cell')>1,'the pet never changed frame, so the outfit check proved nothing');
   assert.ok(seen('y')>1,'the crown held one position across frames - it is not following the head');

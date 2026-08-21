@@ -385,7 +385,9 @@ A sprite sheet of ${batch.length} ${slot} accessories worn by small anime creatu
 THREE VIEWS OF EVERY ITEM, IN THREE CELLS SIDE BY SIDE. The creature wearing these turns around as it walks, so each item is needed from every side:
 
   first cell    the item seen from the FRONT, straight on
-  second cell   the SAME item seen from its RIGHT SIDE, in true profile
+  second cell   the SAME item seen from its RIGHT SIDE, in true profile, with the front
+                of the item pointing towards the RIGHT edge of its cell - the creature
+                wearing it walks to the right, and its own side view faces that way
   third cell    the SAME item seen from BEHIND, straight on
 
 The three are one object turned, not three objects. Same size, same colours, same details, same materials, same wear and tear — only the angle changes. Line them up so the three views sit at the same height and read as a turntable.

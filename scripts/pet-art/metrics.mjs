@@ -48,13 +48,23 @@ export async function generate({ catalog, resolve, root, log }) {
   let measured = 0;
   let missing = 0;
 
+  // An accessory is drawn from three sides and each drawing has its own outline — a hat in
+  // profile is narrower and sits differently in its canvas than the same hat from the front — so
+  // each view is measured under its own name rather than borrowing the front's box.
+  const pieces = [];
   for (const item of [...catalog.furniture, ...catalog.wearables]) {
-    if (!item.art) continue;
-    const file = resolve(item.art);
+    if (item.art) pieces.push([item.id, item.art]);
+    for (const [facing, url] of Object.entries(item.views || {})) {
+      if (url) pieces.push([`${item.id}-${facing}`, url]);
+    }
+  }
+
+  for (const [id, url] of pieces) {
+    const file = resolve(url);
     try {
       const box = await contentBox(file);
       if (box) {
-        metrics[item.id] = box;
+        metrics[id] = box;
         measured += 1;
       }
     } catch {

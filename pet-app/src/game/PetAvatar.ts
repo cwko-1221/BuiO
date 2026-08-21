@@ -57,7 +57,10 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   private facingAnchors?: Partial<Record<PetFacing, PetAnchors>>;
   private motion?: Int8Array;
   private ambient?: number;
-  private worn: { image: Phaser.GameObjects.Image; shade?: Phaser.GameObjects.Image; slotKey: string; box: ContentBox; behind: boolean }[] = [];
+  private worn: {
+    image: Phaser.GameObjects.Image; shade?: Phaser.GameObjects.Image; slotKey: string;
+    box: ContentBox; behind: boolean; views: Record<string, { key: string; box: ContentBox }>;
+  }[] = [];
 
   /** Texture key for a species/stage atlas. Shared so preload and construction agree. */
   static atlasKey(definition: PetDefinition, stage: number) {
@@ -86,6 +89,13 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     for (const id of ids ?? []) {
       const definition = wearables.find((item) => item.id === id);
       if (definition?.art && !scene.textures.exists(id)) scene.load.image(id, definition.art);
+      // The same piece drawn from the side and from behind. A creature that walks turns away, and
+      // a front-facing crown seen from behind is the thing these are here to stop.
+      for (const facing of ['right', 'back'] as const) {
+        const url = definition?.views?.[facing];
+        const key = `${id}:${facing}`;
+        if (url && !scene.textures.exists(key)) scene.load.image(key, url);
+      }
     }
   }
 
@@ -267,6 +277,16 @@ export class PetAvatar extends Phaser.GameObjects.Container {
       const slot = SLOT_LAYOUT[slotKey];
       if (!slot) continue;
       const box = item?.content ?? { x: 0, y: 0, width: 1, height: 1 };
+      // What to draw, and the outline to fit it by, for each way the creature can face. A view
+      // with no art of its own falls back to the front, which is what a set that has only ever
+      // been drawn once looks like.
+      const views: Record<string, { key: string; box: ContentBox }> = { front: { key: id, box } };
+      for (const facing of ['right', 'back'] as const) {
+        const key = `${id}:${facing}`;
+        views[facing] = this.scene.textures.exists(key)
+          ? { key, box: item?.viewContent?.[facing] ?? box }
+          : { key: id, box };
+      }
 
       const image = this.scene.add.image(0, 0, id);
       if (this.ambient !== undefined) image.setTint(this.ambient);
@@ -282,7 +302,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
         this.add(shade);
       }
       if (slot.behind) this.addAt(image, 1); else this.add(image);
-      this.worn.push({ image, shade, slotKey, box, behind: !!slot.behind });
+      this.worn.push({ image, shade, slotKey, box, behind: !!slot.behind, views });
     }
 
     this.layoutWearables();
@@ -340,7 +360,11 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     const head = Math.max(0.01, eye - top);
 
     for (const worn of this.worn) {
-      const place = placeWearable({ ...anchors, top, eye, centre }, worn.slotKey, worn.box, stretch);
+      // Left borrows the right-hand drawing and mirrors it, exactly as the body does.
+      const view = worn.views[seen] ?? worn.views.front;
+      if (worn.image.texture.key !== view.key) worn.image.setTexture(view.key);
+      if (worn.shade && worn.shade.texture.key !== view.key) worn.shade.setTexture(view.key);
+      const place = placeWearable({ ...anchors, top, eye, centre }, worn.slotKey, view.box, stretch);
       if (!place) continue;
       const y = (place.y * cellHeight - origin * cellHeight) * scale;
       // Walking left is the right-hand art mirrored — the body already is. A worn thing that did

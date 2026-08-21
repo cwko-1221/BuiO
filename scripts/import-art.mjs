@@ -43,6 +43,12 @@ const { catalog } = require('../pet-app/lib/catalog.js');
 
 const argv = process.argv.slice(2);
 const dry = argv.includes('--dry');
+/**
+ * The creature's side art faces right, so an accessory's profile has to as well or a hat's
+ * brim points back the way the creature came. The brief says right; a sheet drawn the other
+ * way round is turned once here rather than being redrawn.
+ */
+const flipProfile = argv.includes('--flip-profile');
 const outIndex = argv.indexOf('--out');
 /**
  * --floor takes the floor's four corners as per cent of the image: back-left, back-right,
@@ -469,7 +475,8 @@ async function importWearables(file, slot, dry, sheetNumber) {
     for (let view = 0; view < (turntable ? VIEWS.length : 1); view += 1) {
       const at = turntable ? index * VIEWS.length + view : index;
       const cut = await cell(sheet, meta, columns, rows, at, boxes);
-      const seated = await seat(cut, { canvas: PROP_CANVAS, standing: false, fill: 0.8 });
+      const turned = flipProfile && VIEWS[view] === 'right' ? await sharp(cut).flop().png().toBuffer() : cut;
+      const seated = await seat(turned, { canvas: PROP_CANVAS, standing: false, fill: 0.8 });
       if (!seated) { log(`      cell ${at + 1} is empty, skipped`); continue; }
       const target = VIEWS[view] ? batch[index].views?.[VIEWS[view]] : batch[index].art;
       if (!target) continue;

@@ -560,12 +560,12 @@
   "petProfiles": [
     {
       "studentId": "S001",
-      "activePetId": "c44dd576-c1ff-4c6d-bc38-e26ac82224ee",
+      "activePetId": "8947b57f-8805-4a00-b898-563447615a57",
       "starterEggClaimed": true,
       "eggPity": 4,
       "stardust": 999999,
       "createdAt": "2026-08-13T13:03:28.012Z",
-      "updatedAt": "2026-08-21T05:40:01.195Z"
+      "updatedAt": "2026-08-21T08:13:12.989Z"
     }
   ],
   "petWallets": [
@@ -1330,7 +1330,7 @@
         "aura-07"
       ],
       "createdAt": "2026-08-17T10:11:39.571Z",
-      "updatedAt": "2026-08-21T05:01:54.195Z"
+      "updatedAt": "2026-08-21T07:44:16.406Z"
     },
     {
       "petId": "1046d428-ac60-4251-bebd-c6e4d69a044e",
@@ -1695,10 +1695,10 @@
         {
           "id": "e1302af5-9936-4257-a0f6-2141fa50eb99",
           "itemId": "bamboo-room-furniture-9",
-          "x": 6,
-          "y": 5,
+          "x": 2,
+          "y": 2,
           "rotation": 0,
-          "size": 1,
+          "size": 0,
           "layer": "furniture"
         },
         {
@@ -1711,7 +1711,7 @@
           "layer": "furniture"
         }
       ],
-      "updatedAt": "2026-08-20T18:14:52.478Z"
+      "updatedAt": "2026-08-21T08:13:46.471Z"
     }
   ],
   "petMapProgress": [],
