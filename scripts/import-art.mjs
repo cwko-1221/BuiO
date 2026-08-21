@@ -73,6 +73,15 @@ const POSE_ROWS = ['front', 'right', 'back'];
 const POSE_COLUMNS = ['idle', 'walk-a', 'walk-pass', 'walk-b', 'blink'];
 const FRONT_ONLY = ['eat', 'happy', 'sleep', 'sit', 'surprised'];
 
+/**
+ * Accessory sheets are turntables: every item drawn from the front, from its right side and
+ * from behind, in three cells side by side, eight items to a sheet. A creature that walks
+ * turns away, and one drawing pinned to all three views is a front-facing crown seen from
+ * behind. The older single-view sheets still import, under their own unnumbered name.
+ */
+const VIEWS = [null, 'right', 'back'];   // the front keeps the plain id, so old art still resolves
+const VIEW_COLUMNS = 6;
+const ITEMS_PER_SHEET = 8;
 const WEARABLE_GRID = { head: [5, 4], face: [4, 3], neck: [4, 4], back: [4, 4], aura: [4, 4] };
 
 const log = (...parts) => console.log(...parts);
@@ -437,22 +446,36 @@ async function importFurniture(file, roomIds, dry) {
 }
 
 // --------------------------------------------------------------- wearables ---
-async function importWearables(file, slot, dry) {
-  const grid = WEARABLE_GRID[slot];
-  if (!grid) throw new Error(`unknown wearable slot ${slot}`);
+async function importWearables(file, slot, dry, sheetNumber) {
   const items = catalog.wearables.filter((item) => item.slot === slot);
   const sheet = await loadSheet(file);
   const meta = await sharp(sheet).metadata();
-  const boxes = await findCells(sheet, grid[0], grid[1]);
-  const drawn = boxes.filter(Boolean).length;
-  log(`      found ${drawn} of ${items.length} pieces on the sheet`);
+
+  // A numbered sheet is a turntable; an unnumbered one is the older single-view grid.
+  const turntable = Number.isInteger(sheetNumber);
+  const batch = turntable
+    ? items.slice((sheetNumber - 1) * ITEMS_PER_SHEET, sheetNumber * ITEMS_PER_SHEET)
+    : items;
+  if (!batch.length) throw new Error(`sheet ${sheetNumber} of ${slot} is past the end of the set`);
+  const columns = turntable ? VIEW_COLUMNS : WEARABLE_GRID[slot][0];
+  const rows = turntable ? Math.ceil((batch.length * VIEWS.length) / VIEW_COLUMNS) : WEARABLE_GRID[slot][1];
+
+  const boxes = await findCells(sheet, columns, rows);
+  const wanted = turntable ? batch.length * VIEWS.length : items.length;
+  log(`      found ${boxes.filter(Boolean).length} of ${wanted} pieces on the sheet`);
+
   let written = 0;
-  for (let index = 0; index < items.length; index += 1) {
-    const cut = await cell(sheet, meta, grid[0], grid[1], index, boxes);
-    const seated = await seat(cut, { canvas: PROP_CANVAS, standing: false, fill: 0.8 });
-    if (!seated) { log(`      cell ${index + 1} is empty, skipped`); continue; }
-    await write(fileFor(items[index].art), seated, dry);
-    written += 1;
+  for (let index = 0; index < batch.length; index += 1) {
+    for (let view = 0; view < (turntable ? VIEWS.length : 1); view += 1) {
+      const at = turntable ? index * VIEWS.length + view : index;
+      const cut = await cell(sheet, meta, columns, rows, at, boxes);
+      const seated = await seat(cut, { canvas: PROP_CANVAS, standing: false, fill: 0.8 });
+      if (!seated) { log(`      cell ${at + 1} is empty, skipped`); continue; }
+      const target = VIEWS[view] ? batch[index].views?.[VIEWS[view]] : batch[index].art;
+      if (!target) continue;
+      await write(fileFor(target), seated, dry);
+      written += 1;
+    }
   }
   return written;
 }
@@ -580,7 +603,12 @@ for (const file of files) {
       const ids = name.slice(10).split('+');
       written = await importFurniture(file, ids.length > 1 ? ids : splitRoomPair(name.slice(10)), dry);
     } else if (name.startsWith('wearable-')) {
-      written = await importWearables(file, name.slice(9), dry);
+      // wearable-<slot>-<n> is one turntable sheet of eight; wearable-<slot> is an older
+      // single-view grid of the whole slot.
+      const turntable = name.match(/^wearable-([a-z]+)-([0-9]+)$/);
+      written = turntable
+        ? await importWearables(file, turntable[1], dry, Number(turntable[2]))
+        : await importWearables(file, name.slice(9), dry);
     } else if (name.startsWith('pet-')) {
       const match = name.match(/^pet-(.+)-(\d)$/);
       if (!match) throw new Error('expected pet-<speciesId>-<stage>');

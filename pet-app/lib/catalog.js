@@ -252,7 +252,18 @@ for (const [slot, count, names] of WEARABLE_GROUPS) {
     const rarity = index >= count - 4 ? 'legend' : index >= Math.floor(count * .55) ? 'fancy' : index >= Math.floor(count * .25) ? 'rare' : 'common';
     const price = ({ common: 120, rare: 300, fancy: 450, legend: 600 })[rarity];
     const id = `${slot}-${String(index + 1).padStart(2, '0')}`;
-    WEARABLES.push({ id, name: { 'zh-HK': names[index], 'en-US': `${slot[0].toUpperCase()}${slot.slice(1)} ${index + 1}` }, category: 'wearable', slot, rarity, price, currency: 'coins', art: artPath('collectibles/wearables', id), content: CONTENT_METRICS[id] || null });
+    WEARABLES.push({ id, name: { 'zh-HK': names[index], 'en-US': `${slot[0].toUpperCase()}${slot.slice(1)} ${index + 1}` }, category: 'wearable', slot, rarity, price, currency: 'coins', art: artPath('collectibles/wearables', id), content: CONTENT_METRICS[id] || null,
+      // A creature that walks turns away, so an accessory is drawn from the front, from its
+      // right and from behind. The front keeps the plain id, so a set that only has the one
+      // drawing still resolves; a view with no art of its own falls back to it at runtime.
+      views: {
+        right: artPath('collectibles/wearables', `${id}-right`),
+        back: artPath('collectibles/wearables', `${id}-back`),
+      },
+      viewContent: {
+        right: CONTENT_METRICS[`${id}-right`] || null,
+        back: CONTENT_METRICS[`${id}-back`] || null,
+      } });
   }
 }
 

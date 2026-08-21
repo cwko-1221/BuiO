@@ -343,13 +343,19 @@ export class PetAvatar extends Phaser.GameObjects.Container {
       const place = placeWearable({ ...anchors, top, eye, centre }, worn.slotKey, worn.box, stretch);
       if (!place) continue;
       const y = (place.y * cellHeight - origin * cellHeight) * scale;
-      const x = (place.x - 0.5) * cellWidth * scale;
+      // Walking left is the right-hand art mirrored — the body already is. A worn thing that did
+      // not mirror with it ended up facing the way the creature had come from, with a hat's brim
+      // pointing backwards and a satchel's buckles on the wrong shoulder.
+      const mirrored = this.facing === 'left';
+      const x = (place.x - 0.5) * cellWidth * scale * (mirrored ? -1 : 1);
       worn.image.setOrigin(place.originX, place.originY);
       worn.image.setScale(place.size * cellWidth * scale / Math.max(1, worn.image.width));
+      worn.image.setFlipX(mirrored);
       worn.image.setPosition(x, y);
       // The shadow lands slightly low and slightly flattened, as if cast onto the body below.
+      worn.shade?.setFlipX(mirrored);
       worn.shade?.setOrigin(place.originX, place.originY)
-        .setScale(worn.image.scaleX * 0.97, worn.image.scaleY * 0.9)
+        .setScale(Math.abs(worn.image.scaleX) * 0.97 * (mirrored ? -1 : 1), worn.image.scaleY * 0.9)
         .setPosition(x, y + Math.max(2, place.size * cellHeight * scale * 0.06));
     }
   }

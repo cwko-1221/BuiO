@@ -78,7 +78,14 @@ for(const sheet of atlases){
   assert.equal(metadata.height,atlasHeight,`${sheet} height`);
   assert.equal(metadata.hasAlpha,true,`${sheet} lost its transparency`);
 }
-assert.equal((await fs.readdir(path.join(artRoot,'collectibles/wearables'))).filter((name)=>name.endsWith('.webp')).length,80);
+// Every accessory has its front view, and any extra file is one of the two turned views of an
+// accessory that has them — the sheets arrive slot by slot, so the total climbs from 80 to 240.
+const wornFiles=new Set((await fs.readdir(path.join(artRoot,'collectibles/wearables'))).filter((name)=>name.endsWith('.webp')));
+const named=new Set(catalog.wearables.flatMap((item)=>[item.art,item.views?.right,item.views?.back])
+  .filter(Boolean).map((url)=>url.split('?')[0].split('/').pop()));
+for(const item of catalog.wearables) assert.ok(wornFiles.has(item.art.split('?')[0].split('/').pop()),`${item.id} has no front view`);
+for(const file of wornFiles) assert.ok(named.has(file),`${file} is not a view the catalogue names`);
+assert.ok(wornFiles.size>=80&&wornFiles.size<=240,`expected between 80 and 240 accessory files, found ${wornFiles.size}`);
 assert.equal((await fs.readdir(path.join(artRoot,'collectibles/furniture'))).filter((name)=>name.endsWith('.webp')).length,100);
 
 assert.equal((await fs.readdir(path.join(artRoot,'effects'))).filter((name)=>name.endsWith('.webp')).length,16);

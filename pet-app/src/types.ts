@@ -53,7 +53,13 @@ export interface RoomDefinition {
 export interface FoodDefinition { id: string; name: Localized; category: 'food'; tier: number; price: number; xp: number }
 /** Alpha bounding box of the drawn object, as 0..1 fractions of its source canvas. */
 export interface ContentBox { x: number; y: number; width: number; height: number }
-export interface WearableDefinition { id: string; name: Localized; category: 'wearable'; slot: string; rarity: string; price: number; currency: 'coins'; art?: string; content?: ContentBox | null }
+export interface WearableDefinition {
+  id: string; name: Localized; category: 'wearable'; slot: string; rarity: string; price: number;
+  currency: 'coins'; art?: string; content?: ContentBox | null;
+  /** The same piece drawn from the side and from behind. Absent art falls back to the front. */
+  views?: { right?: string; back?: string };
+  viewContent?: { right?: ContentBox | null; back?: ContentBox | null };
+}
 export interface FurnitureDefinition {
   id: string; name: Localized; category: 'furniture'; roomId: string; price: number;
   footprint: [number, number]; layer: string; art?: string; content?: ContentBox | null;
