@@ -565,14 +565,14 @@
       "eggPity": 4,
       "stardust": 999999,
       "createdAt": "2026-08-13T13:03:28.012Z",
-      "updatedAt": "2026-08-21T08:13:12.989Z"
+      "updatedAt": "2026-08-21T10:52:40.784Z"
     }
   ],
   "petWallets": [
     {
       "studentId": "S001",
-      "balance": 988209,
-      "updatedAt": "2026-08-21T04:58:10.565Z"
+      "balance": 986169,
+      "updatedAt": "2026-08-21T11:00:37.026Z"
     }
   ],
   "petCurrencyLedger": [
@@ -1262,6 +1262,84 @@
         "random": false
       },
       "createdAt": "2026-08-21T04:58:10.565Z"
+    },
+    {
+      "transactionId": "8d2df3f2-9f03-4031-b5ed-4b60bc25fe76",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "34a574d2-c0f1-434b-9818-b85df91686fd",
+      "metadata": {
+        "itemId": "back-03",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T10:57:13.869Z"
+    },
+    {
+      "transactionId": "ef748e32-cedc-434d-b143-bad05f4bc770",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "260fe77a-5cb2-40e5-9aab-51b155a40bd7",
+      "metadata": {
+        "itemId": "aura-01",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T10:57:20.389Z"
+    },
+    {
+      "transactionId": "cf59d78d-cf6c-40bb-b834-5fb56104ea04",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "6ae1a005-6f8b-4db7-b96a-5cd522c1246a",
+      "metadata": {
+        "itemId": "face-05",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T10:59:09.419Z"
+    },
+    {
+      "transactionId": "7c5df89e-2cc5-42e1-aaea-7ba75ea48812",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -600,
+      "kind": "shop_purchase",
+      "idempotencyKey": "cf48c6b7-e74e-40bb-8527-39bba98276cb",
+      "metadata": {
+        "itemId": "head-20",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T10:59:10.881Z"
+    },
+    {
+      "transactionId": "2c024a87-ceb0-48d9-84bb-1fde195cc03b",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -600,
+      "kind": "shop_purchase",
+      "idempotencyKey": "815ca898-413c-41a3-8e74-1a5f5d280e4a",
+      "metadata": {
+        "itemId": "head-17",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T10:59:13.498Z"
+    },
+    {
+      "transactionId": "f38bfe4f-95f3-40e4-bfeb-32fbb5141c1c",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "b69fb74d-988f-4770-bee6-11aa3697fc04",
+      "metadata": {
+        "itemId": "neck-08",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T11:00:37.026Z"
     }
   ],
   "petInstances": [
@@ -1275,10 +1353,13 @@
       "dailyXpDate": "2026-08-16",
       "equippedSkills": [],
       "equippedWearables": [
-        "head-01"
+        "aura-07",
+        "face-05",
+        "head-20",
+        "back-09"
       ],
       "createdAt": "2026-08-13T13:03:36.358Z",
-      "updatedAt": "2026-08-21T04:53:37.870Z"
+      "updatedAt": "2026-08-21T11:00:16.371Z"
     },
     {
       "petId": "d441c27e-25aa-4bb3-86c6-6d1ae5a4a20a",
@@ -1330,7 +1411,7 @@
         "aura-07"
       ],
       "createdAt": "2026-08-17T10:11:39.571Z",
-      "updatedAt": "2026-08-21T07:44:16.406Z"
+      "updatedAt": "2026-08-21T10:52:33.028Z"
     },
     {
       "petId": "1046d428-ac60-4251-bebd-c6e4d69a044e",
@@ -1602,6 +1683,36 @@
     {
       "studentId": "S001",
       "itemId": "neck-06",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "back-03",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "aura-01",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "face-05",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "head-20",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "head-17",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "neck-08",
       "quantity": 1
     }
   ],
@@ -2600,6 +2711,78 @@
         "eggPity": 4
       },
       "createdAt": "2026-08-21T04:58:10.565Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "34a574d2-c0f1-434b-9818-b85df91686fd",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "back-03",
+        "quantity": 1,
+        "balance": 988089,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T10:57:13.870Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "260fe77a-5cb2-40e5-9aab-51b155a40bd7",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "aura-01",
+        "quantity": 1,
+        "balance": 987969,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T10:57:20.389Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "6ae1a005-6f8b-4db7-b96a-5cd522c1246a",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "face-05",
+        "quantity": 1,
+        "balance": 987669,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T10:59:09.419Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "cf48c6b7-e74e-40bb-8527-39bba98276cb",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "head-20",
+        "quantity": 1,
+        "balance": 987069,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T10:59:10.881Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "815ca898-413c-41a3-8e74-1a5f5d280e4a",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "head-17",
+        "quantity": 1,
+        "balance": 986469,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T10:59:13.498Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "b69fb74d-988f-4770-bee6-11aa3697fc04",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "neck-08",
+        "quantity": 1,
+        "balance": 986169,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T11:00:37.026Z"
     }
   ]
 }

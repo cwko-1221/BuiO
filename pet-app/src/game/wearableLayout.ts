@@ -23,13 +23,31 @@ export type SlotLayout = {
   /** How strongly a wide-drawn piece is allowed to spread past the body. 0 or absent: not at all. */
   spread?: number;
   behind?: boolean;
+  /**
+   * What changes when the creature turns. These creatures stand on four legs, so a pair of wings
+   * that spreads wide across the back from the front and from behind lies flat along it from the
+   * side — a different place on the body, not just a different picture of the same place.
+   * offsetX and offsetY nudge from the landmark, in fractions of the creature's own height.
+   */
+  byFacing?: Partial<Record<'front' | 'right' | 'back', SlotTuning>>;
 };
+
+export type SlotTuning = Partial<Pick<SlotLayout, 'line' | 'anchor' | 'against' | 'width' | 'tallest' | 'spread'>>
+  & { offsetX?: number; offsetY?: number };
 
 export const SLOT_LAYOUT: Record<string, SlotLayout> = {
   head: { line: 'skull', anchor: 0.86, against: 'head', width: 1.06, tallest: 1.5 },
   face: { line: 'eye', anchor: 0.50, against: 'face', width: 1.32, tallest: 0.9 },
   neck: { line: 'chin', anchor: 0.42, against: 'head', width: 0.70, tallest: 0.9 },
-  back: { line: 'body', anchor: 0.50, against: 'width', width: 0.86, tallest: 1.15, spread: 2.4, behind: true },
+  back: {
+    line: 'body', anchor: 0.50, against: 'width', width: 1.15, tallest: 1.35, spread: 2.4, behind: true,
+    byFacing: {
+      // Seen from the side the creature is on all fours: its back is a level line from the
+      // shoulders to the rump, so a wing lies along it rather than standing up behind it. It
+      // sits higher, a little towards the tail, and reads smaller because it is foreshortened.
+      right: { anchor: 0.62, width: 0.66, tallest: 0.75, spread: 1.2, offsetX: -0.10, offsetY: -0.13 },
+    },
+  },
   aura: { line: 'feet', anchor: 0.60, against: 'width', width: 1.25, tallest: 0.9, behind: true },
 };
 
@@ -58,9 +76,18 @@ export type Placement = {
  * Cells are square, so a fraction of the width and a fraction of the height are the same length
  * and the sizing can be done in one axis.
  */
-export function placeWearable(anchors: PetAnchors, slotKey: string, box: ContentBox, stretch = 1): Placement | null {
-  const slot = SLOT_LAYOUT[slotKey];
-  if (!slot) return null;
+export function placeWearable(
+  anchors: PetAnchors,
+  slotKey: string,
+  box: ContentBox,
+  stretch = 1,
+  facing: 'front' | 'right' | 'back' = 'front',
+): Placement | null {
+  const base = SLOT_LAYOUT[slotKey];
+  if (!base) return null;
+  const slot = { ...base, ...(base.byFacing?.[facing] ?? {}) };
+  const nudgeX = base.byFacing?.[facing]?.offsetX ?? 0;
+  const nudgeY = base.byFacing?.[facing]?.offsetY ?? 0;
 
   // The head is the unit of measure for anything worn on it: a chin sits about two thirds of a
   // head below the eyes whatever the creature's overall proportions are.
@@ -87,9 +114,12 @@ export function placeWearable(anchors: PetAnchors, slotKey: string, box: Content
   // its body that a cap in heads clamped its wings back down to stubs.
   const ceiling = slot.tallest * (slot.against === 'width' ? anchors.bottom - anchors.top : head);
 
+  // The nudges are in fractions of the creature's own height, so they mean the same thing on a
+  // tall creature and a squat one.
+  const tall = Math.max(0.01, anchors.bottom - anchors.top);
   return {
-    x: anchors.centre,
-    y,
+    x: anchors.centre + nudgeX * tall,
+    y: y + nudgeY * tall,
     size: Math.min(target / Math.max(0.001, box.width), ceiling / Math.max(0.001, box.height)),
     originX: box.x + box.width / 2,
     originY: box.y + slot.anchor * box.height,

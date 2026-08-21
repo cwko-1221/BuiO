@@ -283,6 +283,15 @@ try {
     avatar.play('idle','front');
     return out;
   });
+  // Two pictures of the same outfit, so how it sits from the front and from the side can be
+  // judged rather than only asserted.
+  for(const facing of ['front','right']) {
+    await page.evaluate((way)=>window.__petGame.scene.getScene('Bedroom').avatar.play('idle',way),facing);
+    await page.waitForTimeout(300);
+    await page.locator('#game-root canvas').screenshot({path:path.join(artifactDir,`12-outfit-${facing}.png`)});
+  }
+  await page.evaluate(()=>window.__petGame.scene.getScene('Bedroom').avatar.play('idle','front'));
+
   assert.notEqual(turned.front.texture,turned.right.texture,'the outfit keeps its front drawing when the creature turns side on');
   assert.notEqual(turned.front.texture,turned.back.texture,'the outfit keeps its front drawing when the creature turns away');
   assert.equal(turned.left.texture,turned.right.texture,'left should borrow the right-hand drawing');

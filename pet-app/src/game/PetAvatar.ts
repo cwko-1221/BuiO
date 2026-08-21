@@ -364,7 +364,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
       const view = worn.views[seen] ?? worn.views.front;
       if (worn.image.texture.key !== view.key) worn.image.setTexture(view.key);
       if (worn.shade && worn.shade.texture.key !== view.key) worn.shade.setTexture(view.key);
-      const place = placeWearable({ ...anchors, top, eye, centre }, worn.slotKey, view.box, stretch);
+      const place = placeWearable({ ...anchors, top, eye, centre }, worn.slotKey, view.box, stretch, seen);
       if (!place) continue;
       const y = (place.y * cellHeight - origin * cellHeight) * scale;
       // Walking left is the right-hand art mirrored — the body already is. A worn thing that did

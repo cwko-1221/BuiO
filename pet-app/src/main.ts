@@ -354,7 +354,7 @@ class StudentApp {
     const pieces=pet.equippedWearables.map((id)=>{
       const item=this.state.catalog.wearables.find((entry)=>entry.id===id);
       if(!item?.art) return null;
-      const place=placeWearable(anchors,item.slot,item.content||{x:0,y:0,width:1,height:1});
+      const place=placeWearable(anchors,item.slot,item.content||{x:0,y:0,width:1,height:1},1,'front');
       if(!place) return null;
       const left=(place.x-place.size*place.originX)*100;
       const top=(place.y-place.size*place.originY)*100;
