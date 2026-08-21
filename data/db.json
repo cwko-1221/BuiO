@@ -560,12 +560,12 @@
   "petProfiles": [
     {
       "studentId": "S001",
-      "activePetId": "1046d428-ac60-4251-bebd-c6e4d69a044e",
+      "activePetId": "c44dd576-c1ff-4c6d-bc38-e26ac82224ee",
       "starterEggClaimed": true,
       "eggPity": 4,
       "stardust": 999999,
       "createdAt": "2026-08-13T13:03:28.012Z",
-      "updatedAt": "2026-08-19T16:02:53.163Z"
+      "updatedAt": "2026-08-21T04:54:01.705Z"
     }
   ],
   "petWallets": [
@@ -1262,10 +1262,10 @@
       "dailyXpDate": "2026-08-16",
       "equippedSkills": [],
       "equippedWearables": [
-        "head-03"
+        "head-01"
       ],
       "createdAt": "2026-08-13T13:03:36.358Z",
-      "updatedAt": "2026-08-16T08:05:07.134Z"
+      "updatedAt": "2026-08-21T04:53:37.870Z"
     },
     {
       "petId": "d441c27e-25aa-4bb3-86c6-6d1ae5a4a20a",
@@ -1315,7 +1315,7 @@
       "dailyXpDate": "",
       "equippedWearables": [],
       "createdAt": "2026-08-17T10:11:39.571Z",
-      "updatedAt": "2026-08-17T10:11:39.571Z"
+      "updatedAt": "2026-08-21T04:52:52.112Z"
     },
     {
       "petId": "1046d428-ac60-4251-bebd-c6e4d69a044e",

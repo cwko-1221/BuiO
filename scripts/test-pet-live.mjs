@@ -162,13 +162,13 @@ try {
   await teacherPage.goto('/pet',{waitUntil:'networkidle'}); await teacherPage.locator('.teacher-shell').waitFor();
   assert.equal(await teacherPage.locator('[data-student]').count(),2);
   await teacherPage.locator('[data-student="S001"]').check();
-  await teacherPage.locator('#grantAmount').fill('250'); await teacherPage.locator('#previewGrant').click();
+  await teacherPage.locator('#grantAmount').fill('2000'); await teacherPage.locator('#previewGrant').click();
   await teacherPage.locator('.grant-confirm').waitFor(); await teacherPage.screenshot({path:path.join(artifactDir,'08-teacher-grant-confirmation.png')});
   await teacherPage.locator('#commitGrant').click(); await teacherPage.locator('#grantMessage').waitFor();
-  await teacherPage.waitForFunction(()=>document.querySelector('#grantMessage')?.textContent?.includes('250'));
+  await teacherPage.waitForFunction(()=>document.querySelector('#grantMessage')?.textContent?.replace(/,/g,'').includes('2000'));
   await teacherPage.screenshot({path:path.join(artifactDir,'09-teacher-grant-complete.png')});
   await page.setViewportSize({width:1180,height:820}); await page.reload({waitUntil:'networkidle'});
-  await page.locator('#coinBalance').waitFor(); assert.equal((await page.locator('#coinBalance').innerText()).replace(/,/g,''),'250');
+  await page.locator('#coinBalance').waitFor(); assert.equal((await page.locator('#coinBalance').innerText()).replace(/,/g,''),'2000');
   // A worn item has to ride the pose, not sit at a fixed spot on the canvas. The head travels up
   // to 45px on a 160px cell inside a single action, so a crown pinned to the resting anchors
   // slides off the head as soon as the creature breathes — and a crown whose size wobbles frame
@@ -235,10 +235,14 @@ try {
   await page.locator('[data-action="shop-category"][data-id="eggs"]').click();
   const buyAnimated=page.locator(`[data-action="buy-direct-egg"][data-id="${wanted}"]`);
   await buyAnimated.waitFor();
-  if(await buyAnimated.isEnabled()) { await buyAnimated.click(); await buyAnimated.waitFor(); }
+  if(await buyAnimated.isEnabled()) {
+    await buyAnimated.click();
+    await page.waitForFunction((id)=>Boolean(document.querySelector(`[data-action="buy-direct-egg"][data-id="${id}"]`)?.hasAttribute('disabled')),
+      wanted,{timeout:15000}).catch(()=>{});
+  }
   await page.locator('[data-tab="collection"]').click();
   const choose=page.locator(`.pet-card:has(img[src*="${wanted}-"]) [data-action="activate"]`);
-  await choose.waitFor();
+  await choose.waitFor({timeout:15000}).catch(()=>{ throw new Error(`${wanted} was never owned, so the pose checks would have run on a creature that holds one picture`); });
   if(await choose.isEnabled()) await choose.click();
   await page.waitForFunction((id)=>document.querySelector(`.pet-card:has(img[src*="${id}-"]) [data-action="activate"]`)?.hasAttribute('disabled'),wanted,{timeout:15000});
 

@@ -366,7 +366,11 @@ class StudentApp {
     return `<div class="figure-stack">${behind}<i class="figure-body" style="background-image:url('${atlas}');background-size:${grid.x*100}% ${grid.y*100}%"></i>${front}</div>`;
   }
   /** Columns and rows of the atlas grid, so one cell can be cropped out with a background size. */
-  private atlasGrid(layout:{framesPerDirection:number;actions:{start:number;length:number}[]}) {
+  private atlasGrid(layout:{framesPerDirection:number;columns?:number;rows?:number;actions:{start:number;length:number}[]}) {
+    // Take the grid the sheet publishes. Inferring it from the longest action only held while
+    // one action filled a row; on the pose sheet the longest is a four-frame walk on a sheet
+    // five across, which cropped a four by one grid and showed the creature in strips.
+    if(layout.columns&&layout.rows) return {x:layout.columns,y:layout.rows};
     const cells=layout.framesPerDirection;
     const columns=Math.max(...layout.actions.map((action)=>action.length));
     const rows=Math.max(1,Math.round(cells/Math.max(1,columns)));

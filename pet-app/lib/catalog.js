@@ -30,6 +30,11 @@ function loadAnimationLayout() {
         frameWidth: manifest.frameWidth,
         frameHeight: manifest.frameHeight,
         framesPerDirection: manifest.columns,
+        // The grid the atlas is actually laid out on. It used to be inferred from the longest
+        // action, which on the pose sheet is a four-frame walk on a five-wide sheet — so the
+        // preview cropped a four by one grid out of a five by four atlas and showed strips.
+        columns: manifest.columns,
+        rows: manifest.rows,
         fps: manifest.fps || 8,
         directions: manifest.directions,
         actions,
@@ -45,6 +50,8 @@ function loadAnimationLayout() {
       frameWidth: manifest.frameWidth,
       frameHeight: manifest.frameHeight,
       framesPerDirection: (manifest.gridColumns || manifest.columns.length) * (manifest.gridRows || 1),
+      columns: manifest.gridColumns || manifest.columns.length,
+      rows: (manifest.gridRows || 1) * manifest.rows.length,
       fps: manifest.fps || 24,
       directions: manifest.rows,
       actions,

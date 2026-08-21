@@ -29,6 +29,8 @@ export type PetFacing = 'front' | 'right' | 'back' | 'left';
 /** Atlas layout, derived server-side from the generated sprite manifest. */
 export interface AnimationLayout {
   frameWidth: number; frameHeight: number; framesPerDirection: number; fps: number;
+  /** How the atlas is laid out, for cropping one cell out of it with a background size. */
+  columns?: number; rows?: number;
   directions: PetFacing[];
   /**
    * One entry per action. The pose sheet names the facing it belongs to and lists the cells it
