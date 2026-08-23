@@ -33,18 +33,18 @@ const UI = {
   'zh-HK': {
     title:'寵物樂園', home:'我的房間', collection:'寵物圖鑑', shop:'魔法商店', visit:'同班參觀', settings:'設定',
     coins:'金幣', dust:'星塵', feed:'餵食', play:'一起玩', sleep:'休息', decorate:'佈置房間', save:'儲存佈置', private:'私人房間', class:'開放同班參觀',
-    hatchTitle:'你的第一顆蛋正在等待！', hatchCopy:'蛋內藏着普通、稀有或史詩級原創寵物。首次孵化完全免費。', hatch:'開始孵化',
+    hatchTitle:'你的第一顆蛋正在等待！', hatchCopy:'蛋內藏着三隻完成版寵物之一。首次孵化完全免費。', hatch:'開始孵化',
     owned:'已擁有', locked:'未擁有', active:'主寵', choose:'選為主寵', buy:'購買', visitRoom:'參觀房間', back:'返回房間',
     teacherTitle:'老師金幣中心', individual:'個別學生', wholeClass:'全班', preview:'預覽發放', confirm:'確認發放', amount:'每人金額', note:'備註（選填）',
-    empty:'暫時沒有內容。', daily:'今日經驗', probability:'普通 55% · 稀有 35% · 史詩 10%', pity:'史詩保底', randomEgg:'隨機寵物蛋', directPet:'指定寵物',
+    empty:'暫時沒有內容。', daily:'今日經驗', probability:'目前開放 3 隻完成版寵物', pity:'保底', randomEgg:'隨機寵物蛋', directPet:'指定寵物',
   },
   'en-US': {
     title:'Pet Paradise', home:'My Room', collection:'Pet Collection', shop:'Magic Shop', visit:'Class Visits', settings:'Settings',
     coins:'Coins', dust:'Stardust', feed:'Feed', play:'Play', sleep:'Rest', decorate:'Decorate', save:'Save room', private:'Private room', class:'Open to class',
-    hatchTitle:'Your first egg is waiting!', hatchCopy:'A common, rare or epic original pet is inside. Your first hatch is free.', hatch:'Hatch now',
+    hatchTitle:'Your first egg is waiting!', hatchCopy:'One of the three completed pets is inside. Your first hatch is free.', hatch:'Hatch now',
     owned:'Owned', locked:'Not owned', active:'Active', choose:'Make active', buy:'Buy', visitRoom:'Visit room', back:'Back to room',
     teacherTitle:'Teacher Coin Centre', individual:'Students', wholeClass:'Whole class', preview:'Preview grant', confirm:'Confirm grant', amount:'Coins per student', note:'Note (optional)',
-    empty:'Nothing here yet.', daily:'Daily XP', probability:'Common 55% · Rare 35% · Epic 10%', pity:'Epic pity', randomEgg:'Random pet egg', directPet:'Choose a pet',
+    empty:'Nothing here yet.', daily:'Daily XP', probability:'3 completed pets currently available', pity:'Pity', randomEgg:'Random pet egg', directPet:'Choose a pet',
   },
 } as const;
 
@@ -253,7 +253,13 @@ class StudentApp {
     // the picture stopping.
     const theme=this.state.catalog.rooms.find((entry)=>entry.id===this.state.room.themeId);
     const surface=document.querySelector('#playSurface') as HTMLElement|null;
-    if(surface&&theme)surface.style.background=theme.primary;
+    if(surface&&theme){
+      surface.style.backgroundColor=theme.primary;
+      surface.style.backgroundImage=`url('${theme.backdrop}')`;
+      surface.style.backgroundSize='cover';
+      surface.style.backgroundPosition='center';
+      surface.style.backgroundRepeat='no-repeat';
+    }
     this.game!.scene.stop('Bedroom');this.game!.scene.start('Bedroom',{bootstrap:this.state,activePet:pet,petDefinition:definition});
     // The canvas is sized from its container. If anything started the scene while the stage
     // was still hidden the canvas would be zero-sized, so re-measure once it is on screen.
@@ -353,9 +359,21 @@ class StudentApp {
       return `<img src="${definition.art[pet.stage-1]}" alt="" draggable="false">`;
     }
     const grid=this.atlasGrid(layout);
-    // A complete redrawn outfit is already fitted and occluded in every frame. The preview uses
-    // it as one character sheet and intentionally does not add the old free-positioned pieces.
-    const pieces=(fullOutfit||definition.animated?[]:pet.equippedWearables).map((id)=>{
+    const registered=pet.equippedWearables.flatMap((id)=>{
+      const entry=this.state.catalog.redrawnWearables[`${definition.id}:${pet.stage}:${id}`];
+      return entry?[{id,entry}]:[];
+    });
+    const hiddenSlots=new Set(registered.flatMap(({entry})=>entry.occludes||[]));
+    const redraws=registered.filter(({entry})=>!hiddenSlots.has(entry.slot));
+    // A complete outfit already contains every physical item. A modular redraw replaces only its
+    // registered piece; unfinished slots and auras continue through the established placement.
+    const legacyIds=fullOutfit
+      ? pet.equippedWearables.filter((id)=>id.startsWith('aura-'))
+      : PetAvatar.legacyWearableIds(
+        definition,pet.stage,pet.equippedWearables,this.state.catalog.wearables,
+        this.state.catalog.redrawnWearables,
+      );
+    const pieces=legacyIds.map((id)=>{
       const item=this.state.catalog.wearables.find((entry)=>entry.id===id);
       if(!item?.art) return null;
       const place=placeWearable(anchors,item.slot,item.content||{x:0,y:0,width:1,height:1},1,'front',item.fit);
@@ -367,7 +385,12 @@ class StudentApp {
     }).filter(Boolean) as {place:{behind:boolean};html:string}[];
     const behind=pieces.filter((piece)=>piece.place.behind).map((piece)=>piece.html).join('');
     const front=pieces.filter((piece)=>!piece.place.behind).map((piece)=>piece.html).join('');
-    return `<div class="figure-stack">${behind}<i class="figure-body" style="background-image:url('${atlas}');background-size:${grid.x*100}% ${grid.y*100}%"></i>${front}</div>`;
+    const atlasLayer=(url:string|undefined)=>url
+      ? `<i class="figure-body" style="background-image:url('${url}');background-size:${grid.x*100}% ${grid.y*100}%"></i>`
+      : '';
+    const redrawRear=fullOutfit?'':redraws.map(({entry})=>atlasLayer(entry.rear)).join('');
+    const redrawFront=fullOutfit?'':redraws.map(({entry})=>`${atlasLayer(entry.patch)}${atlasLayer(entry.front)}`).join('');
+    return `<div class="figure-stack">${behind}${redrawRear}<i class="figure-body" style="background-image:url('${atlas}');background-size:${grid.x*100}% ${grid.y*100}%"></i>${redrawFront}${front}</div>`;
   }
   /** Columns and rows of the atlas grid, so one cell can be cropped out with a background size. */
   private atlasGrid(layout:{framesPerDirection:number;columns?:number;rows?:number;actions:{start:number;length:number}[]}) {
@@ -514,13 +537,13 @@ class StudentApp {
   }
   private async feed(foodId:string){const pet=this.activePet()!;const result=await api.feed(pet.id,foodId,idempotencyKey());audio.sfx('feed');this.game?.events.emit('pet:emote',result.evolved?'evolve':'eat');if(result.evolved){audio.sfx('evolve');this.celebrate('evolve');}await this.reload();this.startBedroom();this.renderHomePanel();this.renderFeedPicker();}
   private async activate(petId:string){await api.activatePet(petId);await this.reload();audio.sfx('happy');this.renderCollection();}
-  private renderCollection() { this.setLayout('full');const owned=new Map(this.state.pets.map((pet)=>[pet.speciesId,pet]));document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">20 SPECIES · 80 FORMS</p><h1>${this.t('collection')}</h1><div class="collection-grid">${this.state.catalog.pets.map((definition)=>{const pet=owned.get(definition.id);const stage=pet?.stage||1;return `<article class="pet-card ${definition.rarity} ${pet?'':'locked'}"><div class="pet-art"><img src="${definition.art[stage-1]}" alt="" loading="lazy"></div><span class="rarity ${definition.rarity}">${definition.rarity}</span><h3>${escapeHtml(this.petName(definition,stage))}</h3><p>${pet?`Stage ${stage} · ${pet.xp} XP`:this.t('locked')}</p>${pet?`<button data-action="activate" data-id="${pet.id}" ${pet.id===this.state.profile.activePetId?'disabled':''}>${pet.id===this.state.profile.activePetId?this.t('active'):this.t('choose')}</button>`:''}</article>`}).join('')}</div></div>`; }
+  private renderCollection() { this.setLayout('full');const owned=new Map(this.state.pets.map((pet)=>[pet.speciesId,pet]));const forms=this.state.catalog.pets.length*4;document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">${this.state.catalog.pets.length} SPECIES · ${forms} FORMS</p><h1>${this.t('collection')}</h1><div class="collection-grid">${this.state.catalog.pets.map((definition)=>{const pet=owned.get(definition.id);const stage=pet?.stage||1;return `<article class="pet-card ${definition.rarity} ${pet?'':'locked'}"><div class="pet-art"><img src="${definition.art[stage-1]}" alt="" loading="lazy"></div><span class="rarity ${definition.rarity}">${definition.rarity}</span><h3>${escapeHtml(this.petName(definition,stage))}</h3><p>${pet?`Stage ${stage} · ${pet.xp} XP`:this.t('locked')}</p>${pet?`<button data-action="activate" data-id="${pet.id}" ${pet.id===this.state.profile.activePetId?'disabled':''}>${pet.id===this.state.profile.activePetId?this.t('active'):this.t('choose')}</button>`:''}</article>`}).join('')}</div></div>`; }
   private renderShop(category='eggs') {
     this.setLayout('full');const categories=this.locale==='zh-HK'
       ?[['eggs','寵物蛋'],['food','食物'],['wearables','服飾'],['rooms','房間'],['furniture','家具']]
       :[['eggs','Eggs'],['food','Food'],['wearables','Outfits'],['rooms','Rooms'],['furniture','Furniture']];
     let cards='';const pet=this.activePet();
-    if(category==='eggs')cards=`<article class="shop-feature"><div class="shop-egg"></div><div><span class="rarity epic">${this.t('pity')} ${this.state.profile.eggPity}/${this.state.catalog.egg.pityAt-1}</span><h3>${this.t('randomEgg')}</h3><p>${this.t('probability')}<br>${this.locale==='zh-HK'?'第十抽必定史詩，未擁有品種權重較高。':'The tenth draw is guaranteed epic; unseen species are favoured.'}</p><button class="primary" data-action="buy-random-egg">${this.t('buy')} · ${this.state.catalog.egg.randomPrice} ${this.t('coins')}</button></div></article><h2>${this.t('directPet')}</h2><div class="shop-grid">${this.state.catalog.pets.filter((item)=>item.rarity!=='epic').map((item)=>`<article class="shop-card"><img src="${item.art[0]}" alt="" loading="lazy"><span class="rarity ${item.rarity}">${item.rarity}</span><h3>${escapeHtml(this.petName(item,1))}</h3><button data-action="buy-direct-egg" data-id="${item.id}" ${this.state.pets.some((owned)=>owned.speciesId===item.id)?'disabled':''}>${this.state.pets.some((owned)=>owned.speciesId===item.id)?this.t('owned'):`${this.t('buy')} · ${item.rarity==='common'?1200:2200}`}</button></article>`).join('')}</div>`;
+    if(category==='eggs')cards=`<article class="shop-feature"><div class="shop-egg"></div><div><span class="rarity common">${this.t('probability')}</span><h3>${this.t('randomEgg')}</h3><p>${this.locale==='zh-HK'?'隨機獲得三隻完成版之一；未擁有品種優先。':'Receive one of the three completed pets; unseen species are favoured.'}</p><button class="primary" data-action="buy-random-egg">${this.t('buy')} · ${this.state.catalog.egg.randomPrice} ${this.t('coins')}</button></div></article><h2>${this.t('directPet')}</h2><div class="shop-grid">${this.state.catalog.pets.map((item)=>`<article class="shop-card"><img src="${item.art[0]}" alt="" loading="lazy"><span class="rarity ${item.rarity}">${item.rarity}</span><h3>${escapeHtml(this.petName(item,1))}</h3><button data-action="buy-direct-egg" data-id="${item.id}" ${this.state.pets.some((owned)=>owned.speciesId===item.id)?'disabled':''}>${this.state.pets.some((owned)=>owned.speciesId===item.id)?this.t('owned'):`${this.t('buy')} · ${item.rarity==='common'?1200:2200}`}</button></article>`).join('')}</div>`;
     const list = category==='food'?this.state.catalog.foods:category==='wearables'?this.state.catalog.wearables:category==='rooms'?this.state.catalog.rooms.filter((room)=>!room.pending||this.inventory(`room:${room.id}`)>0).map((item)=>({...item,id:`room:${item.id}`,category:'room_theme'})):category==='furniture'?this.state.catalog.furniture:[];
     if(category!=='eggs')cards=`<div class="shop-grid">${list.map((item:any)=>{const owned=this.inventory(item.id)>0;const art=item.art||'';return `<article class="shop-card ${owned?'owned':''}">${art?`<img src="${art}" alt="" loading="lazy">`:`<div class="item-glyph ${item.category}">${icon(item.category==='food'?'food':item.kind||'spark')}</div>`}<h3>${escapeHtml(this.name(item.name))}</h3><p>${item.xp?`+${item.xp} XP`:item.kind||item.category}</p><button data-action="buy-item" data-id="${item.id}" ${owned&&!['food','furniture'].includes(item.category)?'disabled':''}>${owned&&!['food','furniture'].includes(item.category)?this.t('owned'):`${this.t('buy')} · ${item.price} ${this.t('coins')}`}</button></article>`}).join('')}</div>`;
     document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">MAGIC MARKET</p><h1>${this.t('shop')}</h1><div class="filter-row" role="tablist">${categories.map(([id,label])=>`<button data-action="shop-category" data-id="${id}" role="tab" aria-selected="${category===id}" class="${category===id?'active':''}">${label}</button>`).join('')}</div>${cards}</div>`;

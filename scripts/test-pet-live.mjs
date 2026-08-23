@@ -55,10 +55,10 @@ try {
   // Browsing tabs do not show the room at all.
   assert.equal(await page.locator('#petMain').getAttribute('data-layout'),'full');
   assert.equal(await page.locator('.room-stage').isVisible(),false);
-  assert.equal(await page.locator('.pet-card').count(),20);
+  assert.equal(await page.locator('.pet-card').count(),3);
   await page.setViewportSize({width:1180,height:820}); await page.screenshot({path:path.join(artifactDir,'03-collection-ipad-landscape.png')});
   await page.locator('[data-tab="shop"]').click(); await page.locator('.shop-feature').waitFor();
-  assert.match(await page.locator('.shop-feature').innerText(),/55%/);
+  assert.match(await page.locator('.shop-feature').innerText(),/3 隻完成版寵物/);
 
   // The room tab now puts its controls in a bar above a full-width play surface rather than
   // in a side panel, so assert on the bar and that the room genuinely owns the full width.

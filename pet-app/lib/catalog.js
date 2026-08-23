@@ -155,7 +155,10 @@ const BODY_METRICS = readSpriteMetrics('body-metrics.json');
  */
 const FRAME_MOTION = readSpriteMetrics('frame-motion.json');
 
-const PETS = [
+// Keep the complete design library in source control, but expose only creatures whose four
+// production forms and directional pose sheets are approved. Unreleased concepts must not leak
+// into eggs, the shop, collection, visits or saved active-pet choices.
+const PET_LIBRARY = [
   ['starpatch-cat','common','light',['星斑幼貓','月影貓','星鬃獵貓','天穹星獅'],['Starpatch Kitten','Moonshadow Cat','Star-Mane Hunter','Skybound Star Lion'],'幸運飛撲','Lucky Pounce','#f4c45e','cat'],
   ['cloud-ear-dog','common','wind',['雲耳幼犬','追風犬','霧嶺牧犬','蒼穹守望犬'],['Cloud-ear Pup','Windchaser','Mist Ridge Sheepdog','Skywatch Hound'],'順風奔跑','Tailwind Run','#82cde7','dog'],
   ['pudding-pig','common','earth',['布丁小豬','焦糖豬','岩甲野豬','豐穰巨豬'],['Pudding Piglet','Caramel Pig','Rockplate Boar','Harvest Grandboar'],'松露衝撞','Truffle Charge','#efa6a1','pig'],
@@ -198,6 +201,8 @@ const PETS = [
   }),
   motion: Array.from({ length: 4 }, (_, index) => FRAME_MOTION[`${id}-${index + 1}`] || null),
 }));
+const RELEASED_PET_IDS = new Set(['starpatch-cat', 'cloud-ear-dog', 'pudding-pig']);
+const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
 
 /**
  * The rooms whose artwork has been checked against the grid, which is every room the importer has
@@ -222,7 +227,8 @@ const ROOMS = [
   ['moon-magic-attic','月影魔法閣樓','Moonlit Magic Attic',1700,'#655789','#d1a8d2'],
 ].map(([id, zh, en, price, primary, accent]) => ({
   id, name: { 'zh-HK': zh, 'en-US': en }, price, primary, accent,
-  art: artPath('rooms', id), pending: !FITTED.has(id),
+  art: artPath('rooms', id), backdrop: artPath('room-backdrops', `${id}-backdrop`),
+  pending: !FITTED.has(id),
   floor: MARKED_FLOORS[id] || null,
 }));
 
@@ -346,7 +352,15 @@ const FURNITURE = ROOMS.flatMap((room) => furnitureSets.SETS[room.id].map(([zh, 
 const EVOLUTION_THRESHOLDS = [0, 400, 1100, 2100];
 // A duplicate species pays back coins. It used to pay stardust, which nothing on sale accepts
 // any more, so drawing a species you already had was worth nothing at all.
-const EGG = Object.freeze({ randomPrice: 800, directCommonPrice: 1200, directRarePrice: 2200, odds: { common: .55, rare: .35, epic: .10 }, pityAt: 10, duplicateCoins: { common: 10, rare: 25, epic: 60 } });
+const EGG = Object.freeze({
+  randomPrice: 800,
+  directCommonPrice: 1200,
+  directRarePrice: 2200,
+  // The current public release contains only the three completed common creatures.
+  odds: { common: 1, rare: 0, epic: 0 },
+  pityAt: 0,
+  duplicateCoins: { common: 10, rare: 25, epic: 60 },
+});
 
 const catalog = Object.freeze({
   version: CATALOG_VERSION,

@@ -190,7 +190,7 @@ const stageForXp = (xp) => {
 };
 
 function chooseRarity(pity, random) {
-  if (pity >= catalog.egg.pityAt - 1) return 'epic';
+  if (catalog.egg.pityAt > 0 && pity >= catalog.egg.pityAt - 1) return 'epic';
   const roll = random();
   if (roll < catalog.egg.odds.epic) return 'epic';
   if (roll < catalog.egg.odds.epic + catalog.egg.odds.rare) return 'rare';
@@ -199,6 +199,7 @@ function chooseRarity(pity, random) {
 
 function chooseSpecies(rarity, ownedSpecies, random) {
   const pool = catalog.pets.filter((pet) => pet.rarity === rarity);
+  if (!pool.length) throw Object.assign(new Error('No released pet is available for this rarity'), { status: 409 });
   const unseen = pool.filter((pet) => !ownedSpecies.has(pet.id));
   const source = unseen.length && random() < .8 ? unseen : pool;
   return source[Math.min(source.length - 1, Math.floor(random() * source.length))];
@@ -217,6 +218,20 @@ function publicPet(row) {
   };
 }
 
+const releasedPets = (rows) => rows
+  .map((row) => publicPet(row))
+  .filter((pet) => indexes.pets.has(pet.speciesId));
+const releasedProfile = (profile, pets) => {
+  const active = pets.find((pet) => pet.id === profile?.activePetId) || pets[0] || null;
+  return {
+    ...profile,
+    activePetId: active?.id ?? null,
+    // Someone who previously owned only retired concepts must be able to claim a released pet.
+    starterEggClaimed: pets.length ? Boolean(profile?.starterEggClaimed) : false,
+    eggPity: catalog.egg.pityAt > 0 ? Number(profile?.eggPity) || 0 : 0,
+  };
+};
+
 async function getBootstrap(studentId) {
   await ensureStudent(studentId);
   if (config.db.mode === 'postgres') {
@@ -228,12 +243,14 @@ async function getBootstrap(studentId) {
       pool.query(`SELECT ItemID AS "itemId",Quantity AS quantity FROM PetInventory WHERE StudentID=$1 AND Quantity>0`, [studentId]),
       pool.query(`SELECT ThemeID AS "themeId",Visibility AS visibility,Placements AS placements,UpdatedAt AS "updatedAt" FROM PetRoomLayouts WHERE StudentID=$1`, [studentId]),
     ]);
-    const pets = petsResult.rows.map((row) => publicPet(row));
-    return { profile: profileResult.rows[0], wallet: { balance: Number(walletResult.rows[0]?.balance) || 0 }, pets, inventory: inventoryResult.rows.map((row) => ({ ...row, quantity: Number(row.quantity) })), room: roomResult.rows[0], catalog: catalogFor(pets), serverDay: hkDay() };
+    const pets = releasedPets(petsResult.rows);
+    const profile = releasedProfile(profileResult.rows[0], pets);
+    return { profile, wallet: { balance: Number(walletResult.rows[0]?.balance) || 0 }, pets, inventory: inventoryResult.rows.map((row) => ({ ...row, quantity: Number(row.quantity) })), room: roomResult.rows[0], catalog: catalogFor(pets), serverDay: hkDay() };
   }
   const data = ensureJsonData();
-  const profile = data.petProfiles.find((row) => row.studentId === studentId);
-  const pets = data.petInstances.filter((row) => row.studentId === studentId).map((row) => publicPet(row));
+  const storedProfile = data.petProfiles.find((row) => row.studentId === studentId);
+  const pets = releasedPets(data.petInstances.filter((row) => row.studentId === studentId));
+  const profile = releasedProfile(storedProfile, pets);
   return clone({
     profile,
     wallet: data.petWallets.find((row) => row.studentId === studentId),
@@ -276,8 +293,9 @@ function applyJsonEgg(studentId, { starter = false, directSpeciesId = null, rand
   if (cached) return cached;
   const profile = data.petProfiles.find((row) => row.studentId === studentId);
   const wallet = data.petWallets.find((row) => row.studentId === studentId);
-  if (starter && profile.starterEggClaimed) throw Object.assign(new Error('Starter egg already claimed'), { status: 409 });
   const owned = new Set(data.petInstances.filter((row) => row.studentId === studentId).map((row) => row.speciesId));
+  const releasedOwned = new Set([...owned].filter((id) => indexes.pets.has(id)));
+  if (starter && profile.starterEggClaimed && releasedOwned.size) throw Object.assign(new Error('Starter egg already claimed'), { status: 409 });
   let species;
   let price = 0;
   let countsForPity = false;
@@ -290,7 +308,7 @@ function applyJsonEgg(studentId, { starter = false, directSpeciesId = null, rand
     const rarity = chooseRarity(profile.eggPity, random);
     species = chooseSpecies(rarity, owned, random);
     price = starter ? 0 : catalog.egg.randomPrice;
-    countsForPity = true;
+    countsForPity = catalog.egg.pityAt > 0;
   }
   if (wallet.balance < price) throw Object.assign(new Error('Not enough coins'), { status: 409 });
   if (price) {
@@ -309,7 +327,7 @@ function applyJsonEgg(studentId, { starter = false, directSpeciesId = null, rand
   } else {
     pet = { petId: makeId(), studentId, speciesId: species.id, xp: 0, stage: 1, dailyXp: 0, dailyXpDate: '', equippedWearables: [], createdAt: nowIso(), updatedAt: nowIso() };
     data.petInstances.push(pet);
-    if (!profile.activePetId) profile.activePetId = pet.petId;
+    if (!profile.activePetId || (starter && !releasedOwned.size)) profile.activePetId = pet.petId;
   }
   if (starter) profile.starterEggClaimed = true;
   if (countsForPity) profile.eggPity = species.rarity === 'epic' ? 0 : Math.min(9, profile.eggPity + 1);
@@ -336,9 +354,10 @@ async function applyPostgresEgg(studentId, options) {
     const walletResult = await client.query(`SELECT Balance AS balance FROM PetWallets WHERE StudentID=$1 FOR UPDATE`, [studentId]);
     const profile = profileResult.rows[0];
     let balance = Number(walletResult.rows[0].balance);
-    if (starter && profile.starterEggClaimed) throw Object.assign(new Error('Starter egg already claimed'), { status: 409 });
     const ownedResult = await client.query(`SELECT SpeciesID AS "speciesId" FROM PetInstances WHERE StudentID=$1`, [studentId]);
     const owned = new Set(ownedResult.rows.map((row) => row.speciesId));
+    const releasedOwned = new Set([...owned].filter((id) => indexes.pets.has(id)));
+    if (starter && profile.starterEggClaimed && releasedOwned.size) throw Object.assign(new Error('Starter egg already claimed'), { status: 409 });
     let species; let price = 0; let countsForPity = false;
     if (directSpeciesId) {
       species = indexes.pets.get(directSpeciesId);
@@ -347,7 +366,7 @@ async function applyPostgresEgg(studentId, options) {
       price = species.rarity === 'common' ? catalog.egg.directCommonPrice : catalog.egg.directRarePrice;
     } else {
       species = chooseSpecies(chooseRarity(Number(profile.eggPity), random), owned, random);
-      price = starter ? 0 : catalog.egg.randomPrice; countsForPity = true;
+      price = starter ? 0 : catalog.egg.randomPrice; countsForPity = catalog.egg.pityAt > 0;
     }
     if (balance < price) throw Object.assign(new Error('Not enough coins'), { status: 409 });
     if (price) {
@@ -366,8 +385,10 @@ async function applyPostgresEgg(studentId, options) {
       pet = { petId: makeId(), speciesId: species.id, xp: 0, stage: 1, dailyXp: 0, dailyXpDate: '' };
       await client.query(`INSERT INTO PetInstances (PetID,StudentID,SpeciesID) VALUES ($1,$2,$3)`, [pet.petId, studentId, species.id]);
     }
-    const nextPity = countsForPity ? (species.rarity === 'epic' ? 0 : Math.min(9, Number(profile.eggPity) + 1)) : Number(profile.eggPity);
-    const activePetId = profile.activePetId || pet?.petId || null;
+    const nextPity = catalog.egg.pityAt > 0
+      ? (countsForPity ? (species.rarity === 'epic' ? 0 : Math.min(9, Number(profile.eggPity) + 1)) : Number(profile.eggPity))
+      : 0;
+    const activePetId = (starter && !releasedOwned.size ? pet?.petId : profile.activePetId) || pet?.petId || null;
     await client.query(`UPDATE PetProfiles SET ActivePetID=$2,StarterEggClaimed=CASE WHEN $3 THEN TRUE ELSE StarterEggClaimed END,EggPity=$4,UpdatedAt=NOW() WHERE StudentID=$1`, [studentId, activePetId, starter, nextPity]);
     const response = { speciesId: species.id, rarity: species.rarity, pet, duplicateCoins, balance, eggPity: nextPity };
     if (idempotencyKey) await client.query(`INSERT INTO PetIdempotency (ActorID,IdempotencyKey,Kind,Response) VALUES ($1,$2,$3,$4::jsonb)`, [studentId, idempotencyKey, kind, JSON.stringify(response)]);
@@ -388,12 +409,13 @@ async function purchaseEgg(studentId, options = {}) {
 async function activatePet(studentId, petId) {
   await ensureStudent(studentId);
   if (config.db.mode === 'postgres') {
-    const owned = await getPool().query(`SELECT 1 FROM PetInstances WHERE PetID=$1 AND StudentID=$2`, [petId, studentId]);
-    if (!owned.rowCount) throw Object.assign(new Error('Pet not found'), { status: 404 });
+    const owned = await getPool().query(`SELECT SpeciesID AS "speciesId" FROM PetInstances WHERE PetID=$1 AND StudentID=$2`, [petId, studentId]);
+    if (!owned.rowCount || !indexes.pets.has(owned.rows[0].speciesId)) throw Object.assign(new Error('Pet not found'), { status: 404 });
     await getPool().query(`UPDATE PetProfiles SET ActivePetID=$2,UpdatedAt=NOW() WHERE StudentID=$1`, [studentId, petId]);
   } else {
     const data = ensureJsonData();
-    if (!data.petInstances.some((row) => row.petId === petId && row.studentId === studentId)) throw Object.assign(new Error('Pet not found'), { status: 404 });
+    const owned = data.petInstances.find((row) => row.petId === petId && row.studentId === studentId);
+    if (!owned || !indexes.pets.has(owned.speciesId)) throw Object.assign(new Error('Pet not found'), { status: 404 });
     const profile = data.petProfiles.find((row) => row.studentId === studentId); profile.activePetId = petId; profile.updatedAt = nowIso(); store.save();
   }
   return { activePetId: petId };
@@ -599,7 +621,8 @@ async function listVisitableRooms(studentIds) {
       reactionsByOwner.get(row.ownerStudentId)[row.reaction] = Number(row.count);
     }
     return layouts.rows.map((room) => {
-      const owned = petsByStudent.get(room.studentId) || [];
+      const owned = (petsByStudent.get(room.studentId) || [])
+        .filter((pet) => indexes.pets.has(pet.speciesId));
       const active = owned.find((pet) => pet.petId === activeByStudent.get(room.studentId)) || owned[0] || null;
       return { ownerStudentId: room.studentId, themeId: room.themeId, visibility: room.visibility, placements: room.placements || [], activePet: active ? publicPet(active) : null, reactions: reactionsByOwner.get(room.studentId) || {} };
     });
@@ -611,7 +634,7 @@ async function listVisitableRooms(studentIds) {
     .filter((room) => wanted.has(room.studentId) && room.visibility === 'class')
     .map((room) => {
       const profile = data.petProfiles.find((row) => row.studentId === room.studentId);
-      const owned = data.petInstances.filter((row) => row.studentId === room.studentId);
+      const owned = data.petInstances.filter((row) => row.studentId === room.studentId && indexes.pets.has(row.speciesId));
       const active = owned.find((pet) => pet.petId === profile?.activePetId) || owned[0] || null;
       const reactions = {};
       for (const row of data.petRoomReactions.filter((entry) => entry.ownerStudentId === room.studentId)) {

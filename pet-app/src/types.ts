@@ -47,6 +47,8 @@ export interface AnimationLayout {
 export type RoomFloor = [number, number][];
 export interface RoomDefinition {
   id: string; name: Localized; price: number; primary: string; accent: string; art: string;
+  /** Low-detail square texture shown behind the contained 16:9 room on tall or wide screens. */
+  backdrop: string;
   /** Drawn to an older shape the grid does not fit, so it is not offered until it is redrawn. */
   pending?: boolean;
   /** Where this room's floor was pointed at, which is where its grid goes. */

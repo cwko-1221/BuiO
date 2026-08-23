@@ -23,13 +23,15 @@ const repo = require('../pet-app/repositories/pet.repo.js');
 const store = require('../db/jsonStore.js');
 const pass = (label) => console.log(`✓ ${label}`);
 
-assert.equal(catalog.pets.length,20); assert.equal(catalog.pets.flatMap((pet)=>pet.art).length,80);
+assert.deepEqual(catalog.pets.map((pet)=>pet.id),['starpatch-cat','cloud-ear-dog','pudding-pig']);
+assert.equal(catalog.pets.flatMap((pet)=>pet.art).length,12);
 assert.equal(catalog.rooms.length,10);
 assert.equal(catalog.foods.length,12);
 assert.equal(catalog.wearables.length,80); assert.equal(catalog.furniture.length,100);
-assert.equal(new Set(catalog.pets.map((pet)=>pet.id)).size,20);
+assert.equal(new Set(catalog.pets.map((pet)=>pet.id)).size,3);
 assert.deepEqual(catalog.evolutionThresholds,[0,400,1100,2100]);
-assert.deepEqual(catalog.egg.odds,{common:.55,rare:.35,epic:.10});
+assert.deepEqual(catalog.egg.odds,{common:1,rare:0,epic:0});
+assert.equal(catalog.egg.pityAt,0);
 for(const group of [catalog.pets,catalog.rooms,catalog.foods,catalog.wearables,catalog.furniture]) {
   for(const item of group) {
     const values = item.names?.['zh-HK'] || item.name?.['zh-HK'];
@@ -44,7 +46,12 @@ for(const pet of catalog.pets) for(const publicPath of pet.art) {
   const file=path.join(artRoot,publicPath.split('?')[0].split('/art/')[1]); const metadata=await sharp(file).metadata();
   assert.equal(metadata.width,640); assert.equal(metadata.height,640); assert.equal(metadata.hasAlpha,true);
 }
-for(const room of catalog.rooms) { const metadata=await sharp(path.join(artRoot,room.art.split('?')[0].split('/art/')[1])).metadata(); assert.equal(metadata.width,1600); assert.equal(metadata.height,900); }
+for(const room of catalog.rooms) {
+  const metadata=await sharp(path.join(artRoot,room.art.split('?')[0].split('/art/')[1])).metadata();
+  assert.equal(metadata.width,1600); assert.equal(metadata.height,900);
+  const backdrop=await sharp(path.join(artRoot,room.backdrop.split('?')[0].split('/art/')[1])).metadata();
+  assert.equal(backdrop.width,2048); assert.equal(backdrop.height,2048);
+}
 
 assert.equal((await fs.readdir(path.join(artRoot,'items'))).filter((name)=>name.endsWith('.webp')).length,15);
 const assetManifest=JSON.parse(await fs.readFile(path.join(artRoot,'manifest.json'),'utf8'));
@@ -116,7 +123,7 @@ assert.equal((await fs.readdir(path.join(artRoot,'collectibles/furniture'))).fil
 assert.equal((await fs.readdir(path.join(artRoot,'effects'))).filter((name)=>name.endsWith('.webp')).length,16);
 
 assert.deepEqual(assetManifest.audio,{musicThemes:12,petVoiceVariants:20,sfxEvents:15,generator:'WebAudio note events; no third-party audio'});
-pass(`80 transparent forms, ${animated.length} animated species (${spriteManifest.clips.length} clips, ${spriteManifest.columns} x ${spriteManifest.rows} poses @ ${spriteManifest.frameWidth}px)`);
+pass(`12 released transparent forms, ${animated.length} animated species (${spriteManifest.clips.length} clips, ${spriteManifest.columns} x ${spriteManifest.rows} poses @ ${spriteManifest.frameWidth}px)`);
 pass('10 layered rooms, 180 collectibles, effects and audio');
 
 const grant=await repo.grantCoins('T001',['S001','S002'],10000,{note:'測試獎勵',idempotencyKey:'grant-1'});
@@ -135,16 +142,16 @@ await assert.rejects(()=>repo.purchaseEgg('S001',{kind:'direct',speciesId:'ember
 pass('starter egg is once-only and epic direct purchase is blocked');
 
 const draws=[];
-for(let index=0;index<10;index+=1) draws.push(await repo.purchaseEgg('S002',{kind:'random',idempotencyKey:`pity-${index}`,random:()=>.99}));
-assert.ok(draws.slice(0,9).every((draw)=>draw.rarity==='common'));
-assert.equal(draws[9].rarity,'epic'); assert.equal(draws[9].eggPity,0);
+for(let index=0;index<10;index+=1) draws.push(await repo.purchaseEgg('S002',{kind:'random',idempotencyKey:`release-draw-${index}`,random:()=>.99}));
+assert.ok(draws.every((draw)=>draw.rarity==='common'));
+assert.ok(draws.every((draw)=>draw.eggPity===0));
 // A duplicate now pays coins straight back into the wallet, and the refund is ledgered under
 // its own key so the draw's own key stays free for the purchase row.
 assert.ok(draws.slice(1,9).some((draw)=>draw.duplicateCoins===10),'a repeat of an owned species should refund coins');
 const refunds=store.load().petCurrencyLedger.filter((row)=>row.kind==='egg_duplicate'&&row.studentId==='S002');
 assert.equal(refunds.length,draws.filter((draw)=>draw.duplicateCoins>0).length);
 assert.ok(refunds.every((row)=>row.delta>0));
-pass('55/35/10 draw path, duplicate refund in coins and tenth-draw epic pity');
+pass('released-pet-only draw path and duplicate refund in coins');
 
 const beforeFood=(await repo.getBootstrap('S001')).wallet.balance;
 await repo.purchaseItem('S001',{itemId:'apple-slice',quantity:7,idempotencyKey:'food-buy'});
@@ -212,7 +219,7 @@ async function tonalBuckets(file) {
   return histogram.filter((count)=>count>opaque*0.005).length;
 }
 const flat=[];
-for(const pet of [catalog.pets[0],catalog.pets[8],catalog.pets[15],catalog.pets[19]]) {
+for(const pet of catalog.pets) {
   const buckets=await tonalBuckets(path.join(artRoot,pet.art[3].split('?')[0].split('/art/')[1]));
   if(buckets<20) flat.push(`${pet.id} (${buckets}/32)`);
 }
