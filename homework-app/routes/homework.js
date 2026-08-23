@@ -291,9 +291,50 @@ router.get('/analysis', requireTeacher, async (req, res, next) => {
     const rows = [];
     for (const record of records) for (const homework of record.homeworks) {
       const item = homework.statuses.find(entry => entry.studentId === studentId);
-      if (item?.status === 'missing') rows.push({ date: record.date, subject: record.subject, homework: homework.title, status: item.status, madeUp: Boolean(item.madeUp) });
+      if (item?.status === 'missing') rows.push({ date: record.date, subject: record.subject, homeworkId: homework.id, homework: homework.title, status: item.status, madeUp: Boolean(item.madeUp) });
     }
     res.json({ success: true, student: { id: studentId, name: user.name }, rows });
+  } catch (error) { next(error); }
+});
+
+router.put('/analysis/made-up', requireTeacher, async (req, res, next) => {
+  try {
+    const academicYear = text(req.body.academicYear, 10);
+    const className = text(req.body.className, 10);
+    const studentId = text(req.body.studentId, 20);
+    const updates = Array.isArray(req.body.updates) ? req.body.updates : [];
+    if (!isAcademicYear(academicYear) || !/^P[1-6]$/.test(className) || !studentId) return fail(res, 400, '參數不正確');
+    if (!updates.length) return fail(res, 400, '沒有需要更新的項目');
+    const user = await repo.findUser(studentId, academicYear);
+    if (!user || user.role === 'teacher' || user.classname !== className) return fail(res, 404, '找不到該學生');
+    // Group updates by record key (date + subject)
+    const grouped = new Map();
+    for (const update of updates) {
+      const key = `${text(update.date, 10)}:${text(update.subject, 40)}`;
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key).push({ homeworkId: text(update.homeworkId, 50), madeUp: Boolean(update.madeUp) });
+    }
+    let changed = 0;
+    for (const [key, items] of grouped) {
+      const [date, subject] = key.split(':');
+      const record = await repo.findRecord({ academicYear, className, subject, date });
+      if (!record) continue;
+      let modified = false;
+      for (const { homeworkId, madeUp } of items) {
+        const homework = record.homeworks.find(hw => hw.id === homeworkId);
+        if (!homework) continue;
+        const row = homework.statuses.find(entry => entry.studentId === studentId);
+        if (row && row.status === 'missing' && row.madeUp !== madeUp) {
+          row.madeUp = madeUp;
+          modified = true;
+          changed++;
+        }
+      }
+      if (modified) {
+        await repo.updateRecord({ academicYear, className, subject, date, homeworks: record.homeworks, updatedBy: req.session.studentId });
+      }
+    }
+    res.json({ success: true, message: `已更新 ${changed} 項狀態` });
   } catch (error) { next(error); }
 });
 

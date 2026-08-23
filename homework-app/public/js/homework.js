@@ -157,7 +157,7 @@ function renderAnalysis() {
       <div class="field"><label for="analysisStudent">學生</label><select id="analysisStudent">${options(students, f.studentId, item => `${item.name} (${item.id})`, item => item.id)}</select></div>
     </div>
     <div class="actions" style="margin-top:16px"><button class="button primary" id="runAnalysis" ${!f.studentId ? 'disabled' : ''}>顯示欠交總表</button></div>
-    ${rows.length ? `<table class="analysis-table"><thead><tr><th>日期</th><th>科目</th><th>功課</th><th>狀態</th></tr></thead><tbody>${rows.map(row => `<tr><td>${row.date}</td><td>${escapeHtml(subjectName(row.subject))}</td><td>${escapeHtml(row.homework)}</td><td><div class="status-summary"><span class="status-tag missing">欠交</span>${row.madeUp ? '<span class="status-tag made-up">已補做</span>' : ''}</div></td></tr>`).join('')}</tbody></table>` : '<div class="empty" style="margin-top:20px">沒有欠交記錄，或請按「顯示欠交總表」。</div>'}
+    ${rows.length ? `<table class="analysis-table"><thead><tr><th>日期</th><th>科目</th><th>功課</th><th>狀態</th><th>更新狀態</th></tr></thead><tbody>${rows.map((row, index) => `<tr><td>${row.date}</td><td>${escapeHtml(subjectName(row.subject))}</td><td>${escapeHtml(row.homework)}</td><td><div class="status-summary"><span class="status-tag missing">欠交</span>${row.madeUp ? '<span class="status-tag made-up">已補做</span>' : ''}</div></td><td><label class="analysis-made-up-label"><input type="checkbox" class="analysis-made-up" data-index="${index}" data-date="${escapeHtml(row.date)}" data-subject="${escapeHtml(row.subject)}" data-hw-id="${escapeHtml(row.homeworkId)}" ${row.madeUp ? 'checked' : ''}> 已補做</label></td></tr>`).join('')}</tbody></table><div class="actions" style="margin-top:20px"><button class="button primary" id="saveAnalysisMadeUp">儲存</button></div>` : '<div class="empty" style="margin-top:20px">沒有欠交記錄，或請按「顯示欠交總表」。</div>'}
   </section>`);
 }
 
@@ -276,6 +276,24 @@ function bindTeacher() {
     analysisClass.onchange = () => { filterState.analysis.className = analysisClass.value; loadAnalysisStudents(); };
     analysisStudent.onchange = () => { filterState.analysis.studentId = analysisStudent.value; state.analysisRows = []; render(); };
     runAnalysis.onclick = loadAnalysis;
+    document.getElementById('saveAnalysisMadeUp')?.addEventListener('click', async () => {
+      const f = filterState.analysis;
+      const checkboxes = document.querySelectorAll('.analysis-made-up');
+      const updates = [...checkboxes].map(input => ({
+        date: input.dataset.date,
+        subject: input.dataset.subject,
+        homeworkId: input.dataset.hwId,
+        madeUp: input.checked,
+      }));
+      try {
+        const result = await api('/analysis/made-up', {
+          method: 'PUT',
+          body: JSON.stringify({ academicYear: f.academicYear, className: f.className, studentId: f.studentId, updates }),
+        });
+        setMessage(result.message);
+        await loadAnalysis();
+      } catch (error) { setMessage(error.message, 'error'); }
+    });
   } else {
     classAnalysisYear.onchange = () => {
       filterState.classAnalysis.academicYear = classAnalysisYear.value;
