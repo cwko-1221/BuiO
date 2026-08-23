@@ -118,6 +118,35 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Equipment that still needs the established directional placement path.
+   *
+   * A registered per-pet redraw replaces only that one item. Unregistered items remain usable
+   * while their redraws are produced, and a redraw may explicitly hide a legacy slot (for
+   * example, a sealed helmet hiding face equipment). Auras are never baked into a pet atlas.
+   */
+  static legacyWearableIds(
+    definition: PetDefinition,
+    stage: number,
+    ids: string[] | undefined,
+    wearables: WearableDefinition[] | undefined,
+    catalog: Record<string, RedrawnWearableAtlas> | undefined,
+  ) {
+    const equipped = ids ?? [];
+    const registered = equipped.flatMap((id) => {
+      const entry = catalog?.[`${definition.id}:${stage}:${id}`];
+      return entry ? [{ id, entry }] : [];
+    });
+    const redrawnIds = new Set(registered.map(({ id }) => id));
+    const occludedSlots = new Set(registered.flatMap(({ entry }) => entry.occludes ?? []));
+    return equipped.filter((id) => {
+      if (id.startsWith('aura-')) return true;
+      if (redrawnIds.has(id)) return false;
+      const slot = wearables?.find((item) => item.id === id)?.slot;
+      return !slot || !occludedSlots.has(slot);
+    });
+  }
+
+  /**
    * Assemble one temporary spritesheet from registered redraw layers. Canvas compositing makes
    * several erase masks additive, which a single Phaser bitmap mask cannot do. This happens once
    * when the room opens, not on every animation frame.
@@ -306,13 +335,16 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     }
 
     this.setScale(scale);
-    // A complete outfit sheet already contains every contact shadow and occlusion. Drawing the
-    // old free-positioned images over it would reintroduce the sticker effect it replaces.
-    // Imported animated pets use only approved whole-character redraws. Until an exact outfit is
-    // ready, showing the clean base pet is preferable to silently falling back to sticker art.
-    if (!this.fullOutfit && !definition.animated) {
-      this.addWearables(pet.equippedWearables, definition, pet.stage, wearables);
-    }
+    // A complete outfit sheet contains every physical item but never an aura. A modular redraw
+    // replaces only its registered item; all other owned equipment must remain usable while the
+    // redraw library is being completed. This keeps the wardrobe functional without drawing the
+    // legacy version over an item that already has approved fitted artwork.
+    const legacyIds = this.fullOutfit
+      ? pet.equippedWearables.filter((id) => id.startsWith('aura-'))
+      : PetAvatar.legacyWearableIds(
+        definition, pet.stage, pet.equippedWearables, wearables, redrawnWearables,
+      );
+    this.addWearables(legacyIds, definition, pet.stage, wearables);
     scene.add.existing(this);
     this.play('idle');
   }

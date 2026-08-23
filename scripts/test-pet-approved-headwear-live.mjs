@@ -73,7 +73,8 @@ try {
       headers: { 'Idempotency-Key': 'approved-headwear-cat' },
     }), 'starpatch-cat');
   }
-  for (const itemId of ['head-05', 'head-06']) {
+  const compatibilityItems = ['face-01', 'neck-10', 'back-02', 'aura-01'];
+  for (const itemId of ['head-05', 'head-06', ...compatibilityItems]) {
     await ok(await context.request.post('/api/pet/shop/purchase', {
       data: { itemId, quantity: 1 },
       headers: { 'Idempotency-Key': `approved-${itemId}` },
@@ -136,8 +137,33 @@ try {
       });
     }
   }
+
+  // Publishing one fitted item must never disable the rest of the wardrobe. Keep the approved
+  // chef hat on the composed pet atlas while every unfinished slot uses its directional artwork.
+  await ok(await context.request.put(`/api/pet/pets/${pet.id}/outfit`, {
+    data: { wearableIds: ['head-05', ...compatibilityItems] },
+  }), 'hybrid redraw + legacy outfit');
+  await page.goto('/pet', { waitUntil: 'networkidle' });
+  await page.locator('#game-root canvas').waitFor();
+  await page.waitForFunction(() => {
+    const avatar = window.__petGame?.scene?.getScene('Bedroom')?.avatar;
+    return avatar?.sprite?.texture?.key === 'redrawn-composite-starpatch-cat-1-head-05'
+      && avatar?.worn?.length === 4;
+  }, null, { timeout: 15000 });
+  const hybrid = await page.evaluate(() => {
+    const avatar = window.__petGame.scene.getScene('Bedroom').avatar;
+    return {
+      texture: avatar.sprite.texture.key,
+      legacySlots: avatar.worn.map((piece) => piece.slotKey).sort(),
+      legacyTextures: avatar.worn.map((piece) => piece.image.texture.key).sort(),
+    };
+  });
+  assert.equal(hybrid.texture, 'redrawn-composite-starpatch-cat-1-head-05');
+  assert.deepEqual(hybrid.legacySlots, ['aura', 'back', 'face', 'neck']);
+  assert.deepEqual(hybrid.legacyTextures, compatibilityItems.slice().sort());
   assert.deepEqual(browserErrors, [], browserErrors.join('\n'));
   console.log(`✓ approved chef hat and cloud cap rendered in four directions: ${artifactDir}`);
+  console.log('✓ approved redraw and unfinished face/neck/back/aura items remain wearable together');
   await context.close();
 } finally {
   if (browser) await browser.close();

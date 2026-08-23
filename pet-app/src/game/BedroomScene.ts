@@ -224,9 +224,10 @@ export class BedroomScene extends Phaser.Scene {
         catalog.redrawnWearables,
       );
     }
-    if (!outfitUrl && !this.model.petDefinition.animated) {
-      PetAvatar.preloadWearables(this, this.model.activePet.equippedWearables, catalog.wearables);
-    }
+    // Load the established directional artwork as a compatibility path. The avatar filters out
+    // items that have an approved redraw (or are already baked into a complete outfit), while
+    // keeping every other wardrobe item and all auras available during the redraw rollout.
+    PetAvatar.preloadWearables(this, this.model.activePet.equippedWearables, catalog.wearables);
 
     // Real furniture art, one texture per distinct item actually placed in the room.
     for (const itemId of new Set(this.placements.map((placement) => placement.itemId))) {
