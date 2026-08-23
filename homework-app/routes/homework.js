@@ -310,13 +310,14 @@ router.put('/analysis/made-up', requireTeacher, async (req, res, next) => {
     // Group updates by record key (date + subject)
     const grouped = new Map();
     for (const update of updates) {
-      const key = `${text(update.date, 10)}:${text(update.subject, 40)}`;
-      if (!grouped.has(key)) grouped.set(key, []);
-      grouped.get(key).push({ homeworkId: text(update.homeworkId, 50), madeUp: Boolean(update.madeUp) });
+      const date = text(update.date, 10);
+      const subject = text(update.subject, 40);
+      const key = `${date}|${subject}`;
+      if (!grouped.has(key)) grouped.set(key, { date, subject, items: [] });
+      grouped.get(key).items.push({ homeworkId: text(update.homeworkId, 50), madeUp: Boolean(update.madeUp) });
     }
     let changed = 0;
-    for (const [key, items] of grouped) {
-      const [date, subject] = key.split(':');
+    for (const [, { date, subject, items }] of grouped) {
       const record = await repo.findRecord({ academicYear, className, subject, date });
       if (!record) continue;
       let modified = false;

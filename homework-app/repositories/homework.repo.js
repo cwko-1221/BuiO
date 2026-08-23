@@ -152,10 +152,12 @@ async function replaceMonitors({ academicYear, className, subject, studentIds, c
 
 function mapRecord(row) {
   if (!row) return null;
+  const raw = row.date || row.recorddate;
+  const date = raw instanceof Date ? raw.toISOString().slice(0, 10) : String(raw).slice(0, 10);
   return {
     id: Number(row.id), academicYear: row.academicYear || row.academicyear,
     className: row.className || row.classname, subject: row.subject,
-    date: String(row.date || row.recorddate).slice(0, 10), homeworks: normalizeStoredHomeworks(row.homeworks),
+    date, homeworks: normalizeStoredHomeworks(row.homeworks),
     createdBy: row.createdBy || row.createdby, submittedAt: row.submittedAt || row.submittedat,
     updatedBy: row.updatedBy || row.updatedby, updatedAt: row.updatedAt || row.updatedat,
   };
