@@ -227,7 +227,7 @@ const ROOMS = [
   ['moon-magic-attic','月影魔法閣樓','Moonlit Magic Attic',1700,'#655789','#d1a8d2'],
 ].map(([id, zh, en, price, primary, accent]) => ({
   id, name: { 'zh-HK': zh, 'en-US': en }, price, primary, accent,
-  art: artPath('rooms', id), backdrop: artPath('room-backdrops', `${id}-backdrop`),
+  art: artPath('rooms', id), backdrop: artPath('room-backdrops', 'universal-black-starfield'),
   pending: !FITTED.has(id),
   floor: MARKED_FLOORS[id] || null,
 }));

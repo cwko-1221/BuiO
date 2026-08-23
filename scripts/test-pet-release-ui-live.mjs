@@ -159,7 +159,7 @@ try {
         canvas: canvasRect ? { width: canvasRect.width, height: canvasRect.height } : null,
       };
     });
-    assert.ok(computed.backgroundImage.includes('/room-backdrops/sunny-oak-backdrop-'),
+    assert.ok(computed.backgroundImage.includes('/room-backdrops/universal-black-starfield-'),
       `room backdrop missing at ${width}x${height}: ${computed.backgroundImage}`);
     assert.equal(computed.backgroundSize, 'cover');
     assert.equal(computed.backgroundPosition, '50% 50%');
