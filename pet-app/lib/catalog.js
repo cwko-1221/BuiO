@@ -60,6 +60,36 @@ function loadAnimationLayout() {
     return null; // No atlases generated yet; the runtime falls back to the static form art.
   }
 }
+
+/**
+ * Complete dressed-pet atlases. Each key is one exact pet, stage and sorted outfit. These are
+ * holistic redraws, not accessory overlays, so the client swaps the character sheet as a unit.
+ */
+function loadOutfitAtlases() {
+  try {
+    const manifest = JSON.parse(fs.readFileSync(path.join(
+      __dirname, '..', 'public', 'assets', 'art', 'outfit-atlases', 'manifest.json',
+    ), 'utf8'));
+    return manifest.atlases && typeof manifest.atlases === 'object' ? manifest.atlases : {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Per-item replacement layers sampled from complete pet + equipment redraws. Unlike the old
+ * freely positioned art, every layer is already registered to the pet's exact 5 x 4 atlas.
+ */
+function loadRedrawnWearables() {
+  try {
+    const manifest = JSON.parse(fs.readFileSync(path.join(
+      __dirname, '..', 'public', 'assets', 'art', 'outfit-atlases', 'manifest.json',
+    ), 'utf8'));
+    return manifest.modular && typeof manifest.modular === 'object' ? manifest.modular : {};
+  } catch {
+    return {};
+  }
+}
 /**
  * Art is served for a year and marked immutable, which is only honest if the address changes when
  * the picture does. The file's name cannot carry that: the name is derived from the id so the
@@ -236,6 +266,27 @@ const CONTENT_METRICS = (() => {
   }
 })();
 
+/**
+ * A crown sits on top of a head; a helmet goes over it. Both are worn on the head and the two
+ * belong in completely different places — a helmet perched above the skull like a crown reads
+ * as a hat floating over the creature rather than one it is wearing.
+ */
+const HATS = new Set(['探險帽', '廚師帽', '雲朵帽', '海員帽', '巫師帽', '竹葉帽', '雪帽',
+  '齒輪禮帽', '睡帽']);
+// A clip or a bow is pinned to the side of a head and hangs from its own top, where a crown
+// rests on the skull from its own base. Anchored like a crown, a hairclip's ribbons pushed the
+// star up off the head entirely.
+const CLIPPED_ON = new Set(['星星髮夾', '蝴蝶結']);
+const HEAD_FIT = (name) => (CLIPPED_ON.has(name) ? 'clip'
+  : name === '貓耳帽' ? 'headset'
+    : name === '護目鏡' ? 'goggles'
+      : name === '宇宙頭盔' ? 'helmet'
+        : HATS.has(name) ? 'hat' : 'crown');
+
+// The first side-view sheets still drew wings upright. These corrected profiles are authored
+// low along a four-legged creature's back; left mirrors the same art at runtime.
+const FLAT_SIDE_BACKS = new Set(['back-02', 'back-03', 'back-15']);
+
 const WEARABLE_GROUPS = [
   ['head',20,['小皇冠','探險帽','花環','星星髮夾','廚師帽','雲朵帽','海員帽','巫師帽','竹葉帽','雪帽','火焰頭環','月亮冠','齒輪禮帽','蝴蝶結','王者頭冠','睡帽','貓耳帽','護目鏡','珊瑚冠','宇宙頭盔']],
   ['face',12,['圓框眼鏡','星形眼鏡','小鬍子','愛心眼鏡','探險鏡','單片眼鏡','雪花貼','彩虹面彩','月影面罩','泡泡面罩','機械眼罩','派對鼻']],
@@ -253,13 +304,25 @@ for (const [slot, count, names] of WEARABLE_GROUPS) {
     const price = ({ common: 120, rare: 300, fancy: 450, legend: 600 })[rarity];
     const id = `${slot}-${String(index + 1).padStart(2, '0')}`;
     WEARABLES.push({ id, name: { 'zh-HK': names[index], 'en-US': `${slot[0].toUpperCase()}${slot.slice(1)} ${index + 1}` }, category: 'wearable', slot, rarity, price, currency: 'coins', art: artPath('collectibles/wearables', id), content: CONTENT_METRICS[id] || null,
+      fit: slot === 'head' ? HEAD_FIT(names[index]) : undefined,
       // A creature that walks turns away, so an accessory is drawn from the front, from its
       // right and from behind. The front keeps the plain id, so a set that only has the one
       // drawing still resolves; a view with no art of its own falls back to it at runtime.
       views: {
-        right: artPath('collectibles/wearables', `${id}-right`),
+        right: artPath('collectibles/wearables', FLAT_SIDE_BACKS.has(id) ? `${id}-right-flat` : `${id}-right`),
         back: artPath('collectibles/wearables', `${id}-back`),
       },
+      sourceViews: FLAT_SIDE_BACKS.has(id)
+        ? { right: artPath('collectibles/wearables', `${id}-right`) }
+        : undefined,
+      sideBehind: FLAT_SIDE_BACKS.has(id) || undefined,
+      profileSizing: FLAT_SIDE_BACKS.has(id) ? 'canvas' : undefined,
+      profileOffset: FLAT_SIDE_BACKS.has(id) ? { y: -0.11 } : undefined,
+      // Butterfly wings pass behind the body, while their leather straps cross in front. Keeping
+      // those as separate layers stops the whole wing painting from being pasted over the pet.
+      overlays: id === 'back-02'
+        ? { back: artPath('collectibles/wearables', 'back-02-back-front') }
+        : undefined,
       viewContent: {
         right: CONTENT_METRICS[`${id}-right`] || null,
         back: CONTENT_METRICS[`${id}-back`] || null,
@@ -294,6 +357,8 @@ const catalog = Object.freeze({
   furniture: FURNITURE,
   evolutionThresholds: EVOLUTION_THRESHOLDS,
   animation: loadAnimationLayout(),
+  outfitAtlases: loadOutfitAtlases(),
+  redrawnWearables: loadRedrawnWearables(),
   dailyXpCap: 100,
   egg: EGG,
   reactions: ['heart','star','wow','clap','flower','sparkle'],

@@ -3,6 +3,7 @@ import './styles/main.css';
 import { api } from './api';
 import { audio } from './audio';
 import { BedroomScene } from './game/BedroomScene';
+import { PetAvatar } from './game/PetAvatar';
 import { placeWearable } from './game/wearableLayout';
 import type { Bootstrap, Identity, InventoryStack, Locale, PetDefinition, PetInstance, RoomPlacement } from './types';
 import { idempotencyKey } from './types';
@@ -345,16 +346,19 @@ class StudentApp {
    */
   private previewFigure(definition:PetDefinition,pet:PetInstance) {
     const layout=this.state.catalog.animation;
-    const atlas=definition.atlas?.[pet.stage-1];
+    const fullOutfit=PetAvatar.fullOutfitUrl(definition,pet.stage,pet.equippedWearables,this.state.catalog.outfitAtlases);
+    const atlas=fullOutfit||definition.atlas?.[pet.stage-1];
     const anchors=definition.anchors?.[pet.stage-1];
     if(!layout||!atlas||!anchors) {
       return `<img src="${definition.art[pet.stage-1]}" alt="" draggable="false">`;
     }
     const grid=this.atlasGrid(layout);
-    const pieces=pet.equippedWearables.map((id)=>{
+    // A complete redrawn outfit is already fitted and occluded in every frame. The preview uses
+    // it as one character sheet and intentionally does not add the old free-positioned pieces.
+    const pieces=(fullOutfit||definition.animated?[]:pet.equippedWearables).map((id)=>{
       const item=this.state.catalog.wearables.find((entry)=>entry.id===id);
       if(!item?.art) return null;
-      const place=placeWearable(anchors,item.slot,item.content||{x:0,y:0,width:1,height:1},1,'front');
+      const place=placeWearable(anchors,item.slot,item.content||{x:0,y:0,width:1,height:1},1,'front',item.fit);
       if(!place) return null;
       const left=(place.x-place.size*place.originX)*100;
       const top=(place.y-place.size*place.originY)*100;

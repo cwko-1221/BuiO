@@ -23,6 +23,8 @@ export interface PetDefinition {
  */
 export interface PetAnchors {
   top: number; eye: number; bottom: number; centre: number; width: number; head: number; face: number;
+  /** Where the head is across the picture, which on a creature seen side on is not its middle. */
+  headCentre?: number;
 }
 export type PetAction =
   | 'idle' | 'walk' | 'auto-attack' | 'active-skill' | 'hit' | 'faint-return'
@@ -53,12 +55,43 @@ export interface RoomDefinition {
 export interface FoodDefinition { id: string; name: Localized; category: 'food'; tier: number; price: number; xp: number }
 /** Alpha bounding box of the drawn object, as 0..1 fractions of its source canvas. */
 export interface ContentBox { x: number; y: number; width: number; height: number }
+export type WearableFit = 'crown' | 'hat' | 'clip' | 'headset' | 'goggles' | 'helmet';
 export interface WearableDefinition {
   id: string; name: Localized; category: 'wearable'; slot: string; rarity: string; price: number;
   currency: 'coins'; art?: string; content?: ContentBox | null;
+  /** A helmet encloses the face; a hat, crown, headset and clip each meet the head differently. */
+  fit?: WearableFit;
   /** The same piece drawn from the side and from behind. Absent art falls back to the front. */
   views?: { right?: string; back?: string };
   viewContent?: { right?: ContentBox | null; back?: ContentBox | null };
+  /** Foreground-only slices for pieces whose base must pass behind the pet. */
+  overlays?: { right?: string; back?: string };
+  /** Superseded direction drawings kept as non-destructive source material. */
+  sourceViews?: { right?: string; back?: string };
+  /** A folded profile remains behind the body instead of being painted over the visible flank. */
+  sideBehind?: boolean;
+  /** Flat profiles preserve their authored canvas scale, not the front view's upright height. */
+  profileSizing?: 'height' | 'canvas';
+  /** Extra right-profile nudge in fractions of the creature's height. */
+  profileOffset?: { x?: number; y?: number };
+}
+
+/**
+ * A wearable sampled from a complete pet + item redraw. Every image uses the same atlas grid as
+ * the base pet. `erase` removes the shipped body pixels first; `patch` then restores the locally
+ * redrawn fur, contact shadow and item. Equipment such as wings may additionally straddle the
+ * body with separate rear and front drawings.
+ */
+export interface RedrawnWearableAtlas {
+  slot: string;
+  /** Slots physically enclosed by this item, for example a sealed helmet hiding glasses. */
+  occludes?: string[];
+  erase?: string;
+  patch?: string;
+  rear?: string;
+  /** A late mask for headwear that must remove ears restored by a face redraw before front art. */
+  frontErase?: string;
+  front?: string;
 }
 export interface FurnitureDefinition {
   id: string; name: Localized; category: 'furniture'; roomId: string; price: number;
@@ -72,6 +105,10 @@ export interface Catalog {
   foods: FoodDefinition[]; wearables: WearableDefinition[];
   furniture: FurnitureDefinition[]; evolutionThresholds: number[]; dailyXpCap: number;
   animation: AnimationLayout | null;
+  /** Exact complete-pet redraws, keyed by `petId:stage:sorted+wearable+ids`. */
+  outfitAtlases: Record<string, string>;
+  /** Per-item redraw layers, keyed by `petId:stage:wearableId`. */
+  redrawnWearables: Record<string, RedrawnWearableAtlas>;
   egg: { randomPrice: number; directCommonPrice: number; directRarePrice: number; odds: Record<Rarity, number>; pityAt: number; duplicateCoins: Record<Rarity, number> };
   reactions: string[];
 }

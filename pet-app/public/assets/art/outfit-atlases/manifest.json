@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "atlases": {},
+  "modular": {
+    "starpatch-cat:1:head-05": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--head-05--patch-eb7a0ada94.webp"
+    },
+    "starpatch-cat:1:head-06": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--head-06--patch-ac74d7ed5a.webp"
+    }
+  }
+}

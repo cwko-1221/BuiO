@@ -208,11 +208,25 @@ export class BedroomScene extends Phaser.Scene {
 
     // Prefer the animated atlas; fall back to the static form art only if it is unavailable.
     const stage = this.model.activePet.stage;
-    if (!PetAvatar.preload(this, this.model.petDefinition, stage, catalog.animation)) {
+    const outfitUrl = PetAvatar.fullOutfitUrl(
+      this.model.petDefinition, stage, this.model.activePet.equippedWearables, catalog.outfitAtlases,
+    );
+    if (!PetAvatar.preload(
+      this, this.model.petDefinition, stage, catalog.animation,
+      this.model.activePet.equippedWearables, catalog.outfitAtlases,
+    )) {
       this.petTextureKey = `pet:${this.model.petDefinition.id}:${stage}`;
       if (!this.textures.exists(this.petTextureKey)) this.load.image(this.petTextureKey, this.model.petDefinition.art[stage - 1]);
     } else this.petTextureKey = '';
-    PetAvatar.preloadWearables(this, this.model.activePet.equippedWearables, catalog.wearables);
+    if (!outfitUrl && this.model.petDefinition.animated) {
+      PetAvatar.preloadRedrawnWearables(
+        this, this.model.petDefinition, stage, this.model.activePet.equippedWearables,
+        catalog.redrawnWearables,
+      );
+    }
+    if (!outfitUrl && !this.model.petDefinition.animated) {
+      PetAvatar.preloadWearables(this, this.model.activePet.equippedWearables, catalog.wearables);
+    }
 
     // Real furniture art, one texture per distinct item actually placed in the room.
     for (const itemId of new Set(this.placements.map((placement) => placement.itemId))) {
@@ -240,6 +254,8 @@ export class BedroomScene extends Phaser.Scene {
       fallbackTexture: this.petTextureKey && this.textures.exists(this.petTextureKey) ? this.petTextureKey : undefined,
       scale: PET_SCALE * this.depthScale(this.petSpot.y),
       wearables: this.model.bootstrap.catalog.wearables,
+      outfitAtlases: this.model.bootstrap.catalog.outfitAtlases,
+      redrawnWearables: this.model.bootstrap.catalog.redrawnWearables,
       ambient: this.ambientLight(),
     });
     this.seatPet(this.petSpot);

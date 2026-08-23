@@ -130,9 +130,9 @@ async function measureCreatures({ catalog, resolve, root, log }) {
       } catch {
         continue; // atlas not generated yet; the runtime falls back to whole-cell proportions
       }
-      const cellAt = (index) => landmarks(sheet.data, sheet.info, {
+      const cellAt = (index, hint) => landmarks(sheet.data, sheet.info, {
         left: (index % columns) * cellW, top: Math.floor(index / columns) * cellH, width: cellW, height: cellH,
-      });
+      }, hint);
 
       const rest = cellAt(0);
       if (!rest) continue;
@@ -140,7 +140,8 @@ async function measureCreatures({ catalog, resolve, root, log }) {
       const round = (value) => Number(value.toFixed(4));
       const asAnchor = (frame) => ({
         top: round(frame.skull / cellH), eye: round(frame.eye / cellH), bottom: round(frame.bottom / cellH),
-        centre: round(frame.centre / cellW), width: round(frame.width / cellW),
+        centre: round(frame.centre / cellW), headCentre: round(frame.headCentre / cellW),
+        width: round(frame.width / cellW),
         head: round(frame.head / cellW), face: round(frame.face / cellW),
       });
       anchors[key] = asAnchor(rest);
@@ -149,10 +150,28 @@ async function measureCreatures({ catalog, resolve, root, log }) {
       // muzzle is forward of the body's middle and the skull reads narrower. One set of landmarks
       // for all three rows put a hat on the head from the front and beside it from the side, so
       // each facing is measured on its own resting pose.
+      // Only where the head is, not how big it is. A creature turning round does not change the
+      // size of its head, and measuring that again on a pose it was never designed for gave a
+      // head as wide as the body from the side and half again as deep from behind — so a hat
+      // came out a third of its size on one and half as big again on the other. Width and depth
+      // come from the front, where they can be read off a face; each turned pose contributes only
+      // the two things it can say for itself: how high the head sits and where along it is.
+      const headDepth = rest.eye - rest.skull;
+      const skullBelowTop = rest.skull - rest.headTop;
       (manifest.directions || []).forEach((facing, row) => {
         if (row === 0) return;   // the front is the key above
-        const resting = cellAt(row * columns);
-        if (resting) anchors[`${key}-${facing}`] = asAnchor(resting);
+        const resting = cellAt(row * columns, { headDepth, skullBelowTop, profile: facing === 'right' });
+        if (!resting) return;
+        anchors[`${key}-${facing}`] = {
+          top: round(resting.skull / cellH),
+          eye: round((resting.skull + headDepth) / cellH),
+          bottom: round(resting.bottom / cellH),
+          centre: round(resting.centre / cellW),
+          headCentre: round(resting.headCentre / cellW),
+          width: round(resting.width / cellW),
+          head: round(rest.head / cellW),
+          face: round(rest.face / cellW),
+        };
       });
 
       // Four signed bytes per cell: how far the skull and the eyes have moved, how far the body
@@ -207,7 +226,7 @@ const SKULL_WIDTH_RATIO = 0.72;
 const EYE_LUMINANCE = 0.38;
 
 /** Anchor lines and widths for one frame, in cell pixels. */
-function landmarks(data, info, rect) {
+function landmarks(data, info, rect, hint = {}) {
   const { channels: C } = info;
   const stride = info.width * C;
   const alphaAt = (x, y) => data[(rect.top + y) * stride + (rect.left + x) * C + 3];
@@ -238,6 +257,17 @@ function landmarks(data, info, rect) {
   }
   if (maxY < 0) return null;
 
+  /** The unbroken run of creature at a row that contains a given column. */
+  const runAt = (y, x0) => {
+    const at = Math.round(x0);
+    if (at < 0 || at > maxX || alphaAt(at, y) <= ALPHA_THRESHOLD) return null;
+    let left = at;
+    let right = at;
+    while (left > minX && alphaAt(left - 1, y) > ALPHA_THRESHOLD) left -= 1;
+    while (right < maxX && alphaAt(right + 1, y) > ALPHA_THRESHOLD) right += 1;
+    return { left, right, width: right - left + 1 };
+  };
+
   // Eye line: every form has large high-contrast eyes, and they are the one landmark that stays
   // on the face whatever the silhouette does, so the darkest row of the upper body locates the
   // face far more reliably than any proportion of the body.
@@ -254,17 +284,6 @@ function landmarks(data, info, rect) {
     if (dark > darkest) { darkest = dark; eyeY = y; }
   }
 
-  // Top of the skull: the first row broad enough to be head rather than ear, horn or antenna,
-  // so a hat lands on the head with the ears poking past it rather than hovering above them.
-  // Measured only above the eyes and against the widest row up there — a winged or wide-hipped
-  // form is broadest at the body, and comparing against that never finds a head at all.
-  let headPeak = 0;
-  for (let y = minY; y <= eyeY; y += 1) if (widths[y] > headPeak) headPeak = widths[y];
-  let skull = minY;
-  for (let y = minY; y <= eyeY; y += 1) {
-    if (widths[y] >= headPeak * SKULL_WIDTH_RATIO) { skull = y; break; }
-  }
-
   let eyeMin = maxX;
   let eyeMax = minX;
   for (let x = minX; x <= maxX; x += 1) {
@@ -272,11 +291,68 @@ function landmarks(data, info, rect) {
     if (x < eyeMin) eyeMin = x;
     if (x > eyeMax) eyeMax = x;
   }
-  if (eyeMax < eyeMin) { eyeMin = minX; eyeMax = maxX; }
+  // Eyes read as a compact dark patch. A row of shadow across a whole back is not a pair of eyes,
+  // and a creature seen from behind has none at all — its darkest row is wherever its markings
+  // happen to be, which is no use for finding a head.
+  const looksLikeEyes = eyeMax >= eyeMin && (eyeMax - eyeMin + 1) < (maxX - minX + 1) * 0.72;
+
+  // Where the head is, across the picture. Seen from the front or from behind that is the middle
+  // of the creature; seen from the side it is at the leading end of a body that is mostly not
+  // head, and measuring a head at the body's middle gave a head as wide as the creature is long.
+  let headX;
+  if (looksLikeEyes) {
+    headX = (eyeMin + eyeMax) / 2;
+    // In profile only one eye shows, and an eye is near the front of a head rather than in the
+    // middle of it. Taking the eye for the head's centre hung a hat off the creature's face.
+    if (hint.profile) headX -= (eyeMax - eyeMin + 1) * 1.6;
+  } else {
+    const band = Math.max(minY + 1, Math.round(minY + (maxY - minY) * 0.22));
+    let widestRow = minY;
+    for (let y = minY; y <= band; y += 1) if (widths[y] > widths[widestRow]) widestRow = y;
+    let left = minX;
+    let right = maxX;
+    for (let x = minX; x <= maxX; x += 1) if (alphaAt(x, widestRow) > ALPHA_THRESHOLD) { left = x; break; }
+    for (let x = maxX; x >= minX; x -= 1) if (alphaAt(x, widestRow) > ALPHA_THRESHOLD) { right = x; break; }
+    headX = (left + right) / 2;
+  }
+
+  // With no eyes to find, the head is as deep as the same creature's head is from the front.
+  if (!looksLikeEyes && hint?.headDepth) {
+    eyeY = Math.min(searchTo, Math.round(minY + hint.headDepth));
+  }
+
+  // Top of the skull: the first row broad enough to be head rather than ear, horn or antenna,
+  // so a hat lands on the head with the ears poking past it rather than hovering above them.
+  // Measured along the run the head is in, so a body behind or below it is not mistaken for one.
+  // The top of the head itself, ear tips and all — a stable thing to measure from, unlike the
+  // skull line, which is a judgement about how broad is broad enough.
+  let headTop = minY;
+  for (let y = minY; y <= eyeY; y += 1) { if (runAt(y, headX)) { headTop = y; break; } }
+
+  let headPeak = 0;
+  for (let y = minY; y <= eyeY; y += 1) {
+    const run = runAt(y, headX);
+    if (run && run.width > headPeak) headPeak = run.width;
+  }
+  if (!headPeak) for (let y = minY; y <= eyeY; y += 1) if (widths[y] > headPeak) headPeak = widths[y];
+  let skull = minY;
+  for (let y = minY; y <= eyeY; y += 1) {
+    const run = runAt(y, headX);
+    if ((run ? run.width : widths[y]) >= headPeak * SKULL_WIDTH_RATIO) { skull = y; break; }
+  }
+
+  if (!looksLikeEyes) { eyeMin = Math.round(headX - headPeak * 0.3); eyeMax = Math.round(headX + headPeak * 0.3); }
+
+  // How far below the top of the head the skull line sits is a fact about the creature, so a
+  // pose that cannot judge it for itself is told. Read fresh on a back view, the ears merge into
+  // the head and the skull comes out at the ear tips, which perches a hat above the animal.
+  if (hint.skullBelowTop !== undefined) skull = Math.round(headTop + hint.skullBelowTop);
 
   return {
-    skull, eye: eyeY, bottom: maxY + 1,
+    skull, headTop, eye: eyeY, bottom: maxY + 1,
     centre: (minX + maxX + 1) / 2,
+    // Where the head is, which is not where the body's middle is on a creature seen side on.
+    headCentre: headX,
     width: maxX - minX + 1,
     // Widest row of the head region rather than the row halfway down it: a tapering muzzle or a
     // pointed mantle is narrower there than the eyes it has to sit above, and glasses fitted to

@@ -1,4 +1,4 @@
-import type { ContentBox, PetAnchors } from '../types';
+import type { ContentBox, PetAnchors, WearableFit } from '../types';
 
 /**
  * Where a worn piece sits on a creature, in fractions of its atlas cell.
@@ -30,13 +30,33 @@ export type SlotLayout = {
    * offsetX and offsetY nudge from the landmark, in fractions of the creature's own height.
    */
   byFacing?: Partial<Record<'front' | 'right' | 'back', SlotTuning>>;
+  /** Some things are worn over the part they belong to and some rest on top of it. */
+  byFit?: Partial<Record<WearableFit, SlotTuning>>;
 };
 
 export type SlotTuning = Partial<Pick<SlotLayout, 'line' | 'anchor' | 'against' | 'width' | 'tallest' | 'spread'>>
   & { offsetX?: number; offsetY?: number };
 
 export const SLOT_LAYOUT: Record<string, SlotLayout> = {
-  head: { line: 'skull', anchor: 0.86, against: 'head', width: 1.06, tallest: 1.5 },
+  head: {
+    line: 'skull', anchor: 0.92, against: 'face', width: 1.08, tallest: 1.45,
+    byFit: {
+      // A crown rests between the ears and is measured against the face rather than the full
+      // silhouette. Long dog ears and fluffy cheeks otherwise make the same crown enormous.
+      crown: { anchor: 0.94, against: 'face', width: 1.08, tallest: 1.45 },
+      // A hat has a brim that spans the skull, but still should not inherit the width of ears.
+      hat: { anchor: 0.84, against: 'face', width: 1.50, tallest: 1.65 },
+      // Pinned to one side of the head and hanging from its own top.
+      clip: { anchor: 0.30, against: 'face', width: 0.65, tallest: 1.1, offsetX: 0.12 },
+      // A headband wraps round the head; its ears are part of the accessory, not a tall hat.
+      headset: { anchor: 0.56, against: 'face', width: 1.35, tallest: 1.45 },
+      // Goggles belong on the eye line even though the equipment board groups them with hats.
+      goggles: { line: 'eye', anchor: 0.50, against: 'face', width: 1.42, tallest: 0.95 },
+      // A space helmet encloses the head. Its centre belongs on the eyes, so the visor actually
+      // covers the face instead of perching above it like a crown.
+      helmet: { line: 'eye', anchor: 0.53, against: 'head', width: 1.05, tallest: 1.55, offsetY: 0.01 },
+    },
+  },
   face: { line: 'eye', anchor: 0.50, against: 'face', width: 1.32, tallest: 0.9 },
   neck: { line: 'chin', anchor: 0.42, against: 'head', width: 0.70, tallest: 0.9 },
   back: {
@@ -53,7 +73,7 @@ export const SLOT_LAYOUT: Record<string, SlotLayout> = {
 
 /** Whole-cell fallback for art with no measured landmarks. */
 export const UNMEASURED: PetAnchors = {
-  top: 0.14, eye: 0.34, bottom: 1, centre: 0.5, width: 0.86, head: 0.6, face: 0.42,
+  top: 0.14, eye: 0.34, bottom: 1, centre: 0.5, headCentre: 0.5, width: 0.86, head: 0.6, face: 0.42,
 };
 
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
@@ -82,19 +102,32 @@ export function placeWearable(
   box: ContentBox,
   stretch = 1,
   facing: 'front' | 'right' | 'back' = 'front',
+  fit?: WearableFit,
+  frontBox?: ContentBox,
+  viewSizing: 'height' | 'canvas' = 'height',
+  extraOffset?: { x?: number; y?: number },
 ): Placement | null {
   const base = SLOT_LAYOUT[slotKey];
   if (!base) return null;
-  const slot = { ...base, ...(base.byFacing?.[facing] ?? {}) };
-  const nudgeX = base.byFacing?.[facing]?.offsetX ?? 0;
-  const nudgeY = base.byFacing?.[facing]?.offsetY ?? 0;
+  const slot = { ...base, ...(fit ? base.byFit?.[fit] ?? {} : {}), ...(base.byFacing?.[facing] ?? {}) };
+  const tuned = { ...(fit ? base.byFit?.[fit] ?? {} : {}), ...(base.byFacing?.[facing] ?? {}) };
+  const nudgeX = (tuned.offsetX ?? 0) + (extraOffset?.x ?? 0);
+  const nudgeY = (tuned.offsetY ?? 0) + (extraOffset?.y ?? 0);
 
   // The head is the unit of measure for anything worn on it: a chin sits about two thirds of a
   // head below the eyes whatever the creature's overall proportions are.
-  const head = Math.max(0.01, anchors.eye - anchors.top);
+  const skullToEye = Math.max(0.01, anchors.eye - anchors.top);
+  // The distance from skull to eye is not a usable head height on every species. A fluffy dog
+  // has its eyes just under the skull line, while a pig's broad face is much deeper. Combining
+  // that rise with the measured head width gives hats, glasses and collars one stable unit.
+  const head = Math.max(skullToEye, anchors.head * 0.68);
+  const neck = Math.max(
+    anchors.eye + 0.62 * skullToEye,
+    anchors.eye + 0.38 * (anchors.bottom - anchors.eye),
+  ) + 0.075;
   const y = slot.line === 'skull' ? anchors.top
     : slot.line === 'eye' ? anchors.eye
-      : slot.line === 'chin' ? anchors.eye + 0.62 * head
+      : slot.line === 'chin' ? neck
         : slot.line === 'feet' ? anchors.bottom
           : anchors.eye + 0.3 * (anchors.bottom - anchors.eye);
 
@@ -117,10 +150,26 @@ export function placeWearable(
   // The nudges are in fractions of the creature's own height, so they mean the same thing on a
   // tall creature and a squat one.
   const tall = Math.max(0.01, anchors.bottom - anchors.top);
+  // What is worn on the head hangs off the head, and on a creature seen side on the head is at
+  // the front of a body that is mostly not head. Anything worn on the body keeps the body's own
+  // middle: a pair of wings belongs across the back, not over an ear.
+  const wornOnHead = slot.line === 'skull' || slot.line === 'eye' || slot.line === 'chin';
+  const along = wornOnHead ? (anchors.headCentre ?? anchors.centre) : anchors.centre;
+  // Sizing a turned view by its width blows it back up. A hat in profile is narrower than the
+  // same hat from the front because it is foreshortened, and fitting that narrower drawing to the
+  // same target width undoes the foreshortening — a side-on hat came out as wide as a front-on
+  // one and so much too big. Turning something does not change its height, so the turned views
+  // keep the height the front view was given.
+  const front = frontBox ?? box;
+  const straight = Math.min(target / Math.max(0.001, front.width), ceiling / Math.max(0.001, front.height));
+  const size = box === front || viewSizing === 'canvas'
+    ? straight
+    : straight * (front.height / Math.max(0.001, box.height));
+
   return {
-    x: anchors.centre + nudgeX * tall,
+    x: along + nudgeX * tall,
     y: y + nudgeY * tall,
-    size: Math.min(target / Math.max(0.001, box.width), ceiling / Math.max(0.001, box.height)),
+    size,
     originX: box.x + box.width / 2,
     originY: box.y + slot.anchor * box.height,
     behind: !!slot.behind,

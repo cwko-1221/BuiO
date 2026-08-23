@@ -78,14 +78,39 @@ for(const sheet of atlases){
   assert.equal(metadata.height,atlasHeight,`${sheet} height`);
   assert.equal(metadata.hasAlpha,true,`${sheet} lost its transparency`);
 }
+const redrawManifest=JSON.parse(await fs.readFile(path.join(artRoot,'outfit-atlases/manifest.json'),'utf8'));
+assert.deepEqual(catalog.redrawnWearables,redrawManifest.modular||{},'bootstrap redraw catalogue differs from its manifest');
+for(const [key,layers] of Object.entries(catalog.redrawnWearables)){
+  assert.match(key,/^[a-z0-9-]+:[1-4]:(?:head|face|neck|back)-\d{2}$/);
+  assert.ok(['head','face','neck','back'].includes(layers.slot),`${key} has an invalid redraw slot`);
+  assert.ok(layers.patch||layers.front||layers.rear,`${key} publishes no visible redraw layer`);
+  for(const url of [layers.patch,layers.erase,layers.rear,layers.frontErase,layers.front].filter(Boolean)){
+    const file=path.join(artRoot,url.split('/art/')[1]);
+    const metadata=await sharp(file).metadata();
+    assert.equal(metadata.width,atlasWidth,`${key} layer width`);
+    assert.equal(metadata.height,atlasHeight,`${key} layer height`);
+    assert.equal(metadata.hasAlpha,true,`${key} layer lost transparency`);
+  }
+}
 // Every accessory has its front view, and any extra file is one of the two turned views of an
 // accessory that has them — the sheets arrive slot by slot, so the total climbs from 80 to 240.
 const wornFiles=new Set((await fs.readdir(path.join(artRoot,'collectibles/wearables'))).filter((name)=>name.endsWith('.webp')));
-const named=new Set(catalog.wearables.flatMap((item)=>[item.art,item.views?.right,item.views?.back])
+const named=new Set(catalog.wearables.flatMap((item)=>[
+  item.art,item.views?.right,item.views?.back,item.overlays?.right,item.overlays?.back,
+  item.sourceViews?.right,item.sourceViews?.back,
+])
   .filter(Boolean).map((url)=>url.split('?')[0].split('/').pop()));
 for(const item of catalog.wearables) assert.ok(wornFiles.has(item.art.split('?')[0].split('/').pop()),`${item.id} has no front view`);
 for(const file of wornFiles) assert.ok(named.has(file),`${file} is not a view the catalogue names`);
-assert.ok(wornFiles.size>=80&&wornFiles.size<=240,`expected between 80 and 240 accessory files, found ${wornFiles.size}`);
+assert.ok(wornFiles.size>=80&&wornFiles.size<=244,`expected between 80 and 244 accessory files, found ${wornFiles.size}`);
+assert.equal(catalog.wearables.find((item)=>item.id==='head-17')?.fit,'headset','cat ears must wrap the head rather than perch above it');
+assert.equal(catalog.wearables.find((item)=>item.id==='head-20')?.fit,'helmet','the space helmet must use the enclosing-head fit');
+for(const id of ['back-02','back-03','back-15']){
+  const wing=catalog.wearables.find((item)=>item.id===id);
+  assert.equal(wing?.sideBehind,true,`${id} must lie behind the side-on body`);
+  assert.match(wing?.views?.right||'',/right-flat/,`${id} must use the folded side profile`);
+}
+assert.ok(catalog.wearables.find((item)=>item.id==='back-02')?.overlays?.back,'butterfly wings need a foreground harness layer');
 assert.equal((await fs.readdir(path.join(artRoot,'collectibles/furniture'))).filter((name)=>name.endsWith('.webp')).length,100);
 
 assert.equal((await fs.readdir(path.join(artRoot,'effects'))).filter((name)=>name.endsWith('.webp')).length,16);
