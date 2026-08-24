@@ -118,6 +118,12 @@ const result = {
   warningCount: warnings.length,
   warnings,
   verdict: errors.length === 0 ? 'PASS_METADATA_ONLY' : 'REJECT',
+  publishable: false,
+  publishGate: errors.length > 0
+    ? 'BLOCKED_QUEUE_ERRORS'
+    : warnings.length > 0
+      ? 'BLOCKED_LEGACY_READY_WITHOUT_DIRECTION_EVIDENCE'
+      : 'BLOCKED_METADATA_ONLY_VALIDATOR',
   errors,
 };
 console.log(JSON.stringify(result, null, 2));
