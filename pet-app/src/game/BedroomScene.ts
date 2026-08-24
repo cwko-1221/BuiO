@@ -208,9 +208,6 @@ export class BedroomScene extends Phaser.Scene {
 
     // Prefer the animated atlas; fall back to the static form art only if it is unavailable.
     const stage = this.model.activePet.stage;
-    const outfitUrl = PetAvatar.fullOutfitUrl(
-      this.model.petDefinition, stage, this.model.activePet.equippedWearables, catalog.outfitAtlases,
-    );
     if (!PetAvatar.preload(
       this, this.model.petDefinition, stage, catalog.animation,
       this.model.activePet.equippedWearables, catalog.outfitAtlases,
@@ -218,7 +215,10 @@ export class BedroomScene extends Phaser.Scene {
       this.petTextureKey = `pet:${this.model.petDefinition.id}:${stage}`;
       if (!this.textures.exists(this.petTextureKey)) this.load.image(this.petTextureKey, this.model.petDefinition.art[stage - 1]);
     } else this.petTextureKey = '';
-    if (!outfitUrl && this.model.petDefinition.animated) {
+    // A complete physical outfit still leaves environmental auras modular. Load registered aura
+    // layers even when an exact full-outfit sheet is available so the compositor can place them
+    // around that sheet; unregistered items continue through the compatibility path below.
+    if (this.model.petDefinition.animated) {
       PetAvatar.preloadRedrawnWearables(
         this, this.model.petDefinition, stage, this.model.activePet.equippedWearables,
         catalog.redrawnWearables,

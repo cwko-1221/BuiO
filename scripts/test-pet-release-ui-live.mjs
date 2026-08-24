@@ -129,15 +129,13 @@ try {
   await page.locator('[data-tab="home"]').click();
   await page.locator('[data-action="open-outfit"]').click();
   await page.locator('.gear-board').waitFor();
-  const preview = await page.locator('.gear-figure').evaluate((figure) => {
-    const layers = [...figure.querySelectorAll('.figure-body')].map((layer) => (
-      getComputedStyle(layer).backgroundImage
-    ));
-    return { layers };
+  await page.locator('.figure-preview-canvas[data-ready="true"]').waitFor({ timeout: 5000 });
+  const preview = await page.locator('.figure-preview-canvas[data-ready="true"]').evaluate((canvas) => {
+    return { canvas: true, ready: canvas.dataset.ready, layers: decodeURIComponent(canvas.dataset.layers||'') };
   });
-  assert.equal(preview.layers.length, 2, 'preview should contain the pet atlas and cloud-cap patch');
-  assert.ok(preview.layers.some((url) => url.includes('outfit-atlases') && url.includes('head-06')),
-    `cloud cap missing from preview layers: ${JSON.stringify(preview.layers)}`);
+  assert.equal(preview.canvas, true, 'preview should use the shared canvas compositor');
+  assert.equal(preview.ready, 'true');
+  assert.ok(preview.layers.includes('head-06'), `cloud cap missing from preview layers: ${preview.layers}`);
   assert.match(await page.locator('.picker-head h2').innerText(), /裝備 · 1\/5/);
   await page.screenshot({ path: path.join(artifactDir, '01-outfit-cloud-cap-preview-ipad-landscape.png') });
   await page.locator('[data-action="close-modal"]').click();

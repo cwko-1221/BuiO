@@ -106,7 +106,6 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     catalog: Record<string, RedrawnWearableAtlas> | undefined,
   ) {
     for (const id of ids ?? []) {
-      if (id.startsWith('aura-')) continue;
       const entry = catalog?.[`${definition.id}:${stage}:${id}`];
       if (!entry) continue;
       for (const layer of ['erase', 'rear', 'patch', 'frontErase', 'front'] as const) {
@@ -139,7 +138,10 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     const redrawnIds = new Set(registered.map(({ id }) => id));
     const occludedSlots = new Set(registered.flatMap(({ entry }) => entry.occludes ?? []));
     return equipped.filter((id) => {
-      if (id.startsWith('aura-')) return true;
+      // Auras are still legacy environmental effects until their per-pet redraw is registered.
+      // Once registered, however, they are rendered by the exact same atlas compositor as every
+      // other slot; leaving one here would draw the old free-positioned sticker on top of it.
+      if (id.startsWith('aura-')) return !redrawnIds.has(id);
       if (redrawnIds.has(id)) return false;
       const slot = wearables?.find((item) => item.id === id)?.slot;
       return !slot || !occludedSlots.has(slot);
@@ -158,8 +160,11 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     ids: string[] | undefined,
     layout: AnimationLayout,
     catalog: Record<string, RedrawnWearableAtlas> | undefined,
+    baseTextureKey?: string,
   ) {
-    const equipped = (ids ?? []).filter((id) => !id.startsWith('aura-'));
+    // A registered aura is a modular redraw, not a legacy floor effect. It participates in the
+    // same rear -> base -> patch -> front pass as head, face, neck and back equipment.
+    const equipped = ids ?? [];
     const discovered = equipped.flatMap((id) => {
       const entry = catalog?.[`${definition.id}:${stage}:${id}`];
       return entry ? [{ id, entry }] : [];
@@ -169,9 +174,10 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     if (!entries.length) return undefined;
 
     const signature = entries.map(({ id }) => id).sort().join('+');
-    const key = `redrawn-composite-${definition.id}-${stage}-${signature}`;
+    const baseIdentity = baseTextureKey ? `-base-${baseTextureKey}` : '';
+    const key = `redrawn-composite-${definition.id}-${stage}-${signature}${baseIdentity}`;
     if (scene.textures.exists(key)) return key;
-    const baseKey = PetAvatar.atlasKey(definition, stage);
+    const baseKey = baseTextureKey ?? PetAvatar.atlasKey(definition, stage);
     if (!scene.textures.exists(baseKey)) return undefined;
 
     const columns = layout.columns ?? layout.framesPerDirection;
@@ -184,7 +190,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     const context = canvas.getContext('2d');
     if (!context) return undefined;
     const source = (textureKey: string) => scene.textures.get(textureKey).getSourceImage() as CanvasImageSource;
-    const slotOrder: Record<string, number> = { back: 0, neck: 1, head: 2, face: 3 };
+    const slotOrder: Record<string, number> = { aura: 0, back: 1, neck: 2, head: 3, face: 4 };
     const ordered = [...entries].sort((a, b) => (slotOrder[a.entry.slot] ?? 9) - (slotOrder[b.entry.slot] ?? 9));
 
     // Anything physically behind the pet must exist before the body is painted.
@@ -303,13 +309,23 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     this.add(this.shadow);
 
     const outfitUrl = PetAvatar.fullOutfitUrl(definition, pet.stage, pet.equippedWearables, outfitAtlases);
-    const redrawnKey = !outfitUrl && layout
+    const outfitKey = outfitUrl
+      ? PetAvatar.fullOutfitKey(definition, pet.stage, pet.equippedWearables)
+      : undefined;
+    const registeredAuraIds = (pet.equippedWearables ?? []).filter((id) => (
+      id.startsWith('aura-') && Boolean(redrawnWearables?.[`${definition.id}:${pet.stage}:${id}`])
+    ));
+    // Complete physical outfits never contain an aura. If an aura has an exact redraw, compose
+    // it over that complete outfit as the base; otherwise retain the existing complete outfit
+    // path and let only unregistered auras use their compatibility art.
+    const redrawnIds = outfitUrl ? registeredAuraIds : pet.equippedWearables;
+    const redrawnKey = layout && (!outfitUrl || registeredAuraIds.length)
       ? PetAvatar.composeRedrawnAtlas(
-        scene, definition, pet.stage, pet.equippedWearables, layout, redrawnWearables,
+        scene, definition, pet.stage, redrawnIds, layout, redrawnWearables, outfitKey,
       )
       : undefined;
     const key = outfitUrl
-      ? PetAvatar.fullOutfitKey(definition, pet.stage, pet.equippedWearables)
+      ? redrawnKey ?? outfitKey!
       : redrawnKey ?? PetAvatar.atlasKey(definition, pet.stage);
     if (layout && scene.textures.exists(key)) {
       this.fullOutfit = Boolean(outfitUrl);
@@ -340,7 +356,13 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     // redraw library is being completed. This keeps the wardrobe functional without drawing the
     // legacy version over an item that already has approved fitted artwork.
     const legacyIds = this.fullOutfit
-      ? pet.equippedWearables.filter((id) => id.startsWith('aura-'))
+      ? PetAvatar.legacyWearableIds(
+        definition,
+        pet.stage,
+        pet.equippedWearables.filter((id) => id.startsWith('aura-')),
+        wearables,
+        redrawnWearables,
+      )
       : PetAvatar.legacyWearableIds(
         definition, pet.stage, pet.equippedWearables, wearables, redrawnWearables,
       );

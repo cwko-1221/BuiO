@@ -649,6 +649,7 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
 /* One square atlas cell with the outfit stacked over it, all positioned in cell fractions. */
 .figure-stack { position: relative; width: min(100%, 200px); aspect-ratio: 1; filter: drop-shadow(0 8px 14px rgba(52, 40, 28, .18)); }
 .figure-body { position: absolute; inset: 0; background-position: 0 0; background-repeat: no-repeat; }
+.figure-preview-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; image-rendering: auto; }
 /* A piece wider than the creature — a crown on a round body, a pair of wings — is positioned in
    cell fractions and sized past 100%. The global img rule capped it at the stack's width while
    its left and top still assumed the full size, which slid the whole outfit up and to the left. */

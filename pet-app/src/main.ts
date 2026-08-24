@@ -358,7 +358,6 @@ class StudentApp {
     if(!layout||!atlas||!anchors) {
       return `<img src="${definition.art[pet.stage-1]}" alt="" draggable="false">`;
     }
-    const grid=this.atlasGrid(layout);
     const registered=pet.equippedWearables.flatMap((id)=>{
       const entry=this.state.catalog.redrawnWearables[`${definition.id}:${pet.stage}:${id}`];
       return entry?[{id,entry}]:[];
@@ -368,7 +367,10 @@ class StudentApp {
     // A complete outfit already contains every physical item. A modular redraw replaces only its
     // registered piece; unfinished slots and auras continue through the established placement.
     const legacyIds=fullOutfit
-      ? pet.equippedWearables.filter((id)=>id.startsWith('aura-'))
+      ? PetAvatar.legacyWearableIds(
+        definition,pet.stage,pet.equippedWearables.filter((id)=>id.startsWith('aura-')),
+        this.state.catalog.wearables,this.state.catalog.redrawnWearables,
+      )
       : PetAvatar.legacyWearableIds(
         definition,pet.stage,pet.equippedWearables,this.state.catalog.wearables,
         this.state.catalog.redrawnWearables,
@@ -385,12 +387,21 @@ class StudentApp {
     }).filter(Boolean) as {place:{behind:boolean};html:string}[];
     const behind=pieces.filter((piece)=>piece.place.behind).map((piece)=>piece.html).join('');
     const front=pieces.filter((piece)=>!piece.place.behind).map((piece)=>piece.html).join('');
-    const atlasLayer=(url:string|undefined)=>url
-      ? `<i class="figure-body" style="background-image:url('${url}');background-size:${grid.x*100}% ${grid.y*100}%"></i>`
-      : '';
-    const redrawRear=fullOutfit?'':redraws.map(({entry})=>atlasLayer(entry.rear)).join('');
-    const redrawFront=fullOutfit?'':redraws.map(({entry})=>`${atlasLayer(entry.patch)}${atlasLayer(entry.front)}`).join('');
-    return `<div class="figure-stack">${behind}${redrawRear}<i class="figure-body" style="background-image:url('${atlas}');background-size:${grid.x*100}% ${grid.y*100}%"></i>${redrawFront}${front}</div>`;
+    // The room uses canvas destination-out for erase/frontErase. Reusing that operation here is
+    // important: CSS layers can show a hat correctly in isolation but cannot remove the base ear
+    // or face pixels that the complete redraw intentionally replaces.
+    const modularRedraws=fullOutfit
+      ? redraws.filter(({id})=>id.startsWith('aura-'))
+      : redraws;
+    const layerData=modularRedraws.map(({entry}) => ({
+      rear: entry.rear || '', erase: entry.erase || '', patch: entry.patch || '',
+      frontErase: entry.frontErase || '', front: entry.front || '',
+    }));
+    const encodedBase=escapeHtml(encodeURIComponent(atlas));
+    const encodedLayers=escapeHtml(encodeURIComponent(JSON.stringify(layerData)));
+    const canvas=`<canvas class="figure-preview-canvas" width="${layout.frameWidth}" height="${layout.frameHeight}"
+      data-base="${encodedBase}" data-layers="${encodedLayers}" aria-label=""></canvas>`;
+    return `<div class="figure-stack">${behind}${canvas}${front}</div>`;
   }
   /** Columns and rows of the atlas grid, so one cell can be cropped out with a background size. */
   private atlasGrid(layout:{framesPerDirection:number;columns?:number;rows?:number;actions:{start:number;length:number}[]}) {
@@ -534,6 +545,45 @@ class StudentApp {
 
   private picker(title: string, body: string, variant='') {
     this.modal(`<div class="picker ${variant}"><header class="picker-head"><h2>${escapeHtml(title)}</h2><button class="round-button" data-action="close-modal" aria-label="${this.locale==='zh-HK'?'關閉':'Close'}">✕</button></header><div class="picker-body">${body}</div></div>`,`framed ${variant}`.trim());
+    this.hydratePreviewCanvases();
+  }
+  /** Draw the one preview cell with the same rear/base/erase/patch/frontErase/front order as Phaser. */
+  private hydratePreviewCanvases() {
+    document.querySelectorAll<HTMLCanvasElement>('.figure-preview-canvas').forEach((canvas) => {
+      const base=canvas.dataset.base ? decodeURIComponent(canvas.dataset.base) : '';
+      let layers:{rear:string;erase:string;patch:string;frontErase:string;front:string}[]=[];
+      try { layers=canvas.dataset.layers ? JSON.parse(decodeURIComponent(canvas.dataset.layers)) : []; } catch { layers=[]; }
+      const ctx=canvas.getContext('2d'); if(!ctx||!base)return;
+      const load=(url:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{
+        const image=new Image(); image.onload=()=>resolve(image); image.onerror=reject; image.src=url;
+      });
+      const loadLayer=(url:string)=>url?load(url):Promise.resolve(null);
+      Promise.all([
+        load(base),
+        ...layers.flatMap((entry)=>[entry.rear,entry.erase,entry.patch,entry.frontErase,entry.front]).map(loadLayer),
+      ]).then((images) => {
+        const [baseImage,...rest]=images;
+        const sourceWidth=Number(canvas.width)||160; const sourceHeight=Number(canvas.height)||160;
+        const draw=(image:HTMLImageElement|null, mode:GlobalCompositeOperation='source-over')=>{
+          if(!image)return;
+          ctx.globalCompositeOperation=mode;
+          ctx.drawImage(image,0,0,sourceWidth,sourceHeight,0,0,canvas.width,canvas.height);
+        };
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        const drawPass=(offset:number,mode:GlobalCompositeOperation='source-over')=>{
+          for(let layerIndex=0;layerIndex<layers.length;layerIndex+=1){
+            draw(rest[layerIndex*5+offset] as HTMLImageElement|null,mode);
+          }
+        };
+        drawPass(0);
+        draw(baseImage as HTMLImageElement);
+        drawPass(1,'destination-out');
+        drawPass(2);
+        drawPass(3,'destination-out');
+        drawPass(4);
+        ctx.globalCompositeOperation='source-over'; canvas.dataset.ready='true';
+      }).catch(()=>{ canvas.dataset.ready='error'; });
+    });
   }
   private async feed(foodId:string){const pet=this.activePet()!;const result=await api.feed(pet.id,foodId,idempotencyKey());audio.sfx('feed');this.game?.events.emit('pet:emote',result.evolved?'evolve':'eat');if(result.evolved){audio.sfx('evolve');this.celebrate('evolve');}await this.reload();this.startBedroom();this.renderHomePanel();this.renderFeedPicker();}
   private async activate(petId:string){await api.activatePet(petId);await this.reload();audio.sfx('happy');this.renderCollection();}
