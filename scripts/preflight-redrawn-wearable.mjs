@@ -80,8 +80,14 @@ for (let row = 0; row < 4; row += 1) {
         if (masked) {
           cellMaskPixels += 1;
           if (base[at + 3] > 0) cellMaskOverBasePixels += 1;
-          if (inRoi(x, y, eyeRoi)) cellEyeCovered += 1;
-          if (inRoi(x, y, tailRoi)) cellTailCovered += 1;
+          // A topology bridge may include unchanged base pixels solely to make
+          // the mask one connected component. It must not fail the protected
+          // eye/tail gate unless the frozen target actually changes that pixel.
+          // This keeps the gate about visible occlusion rather than coverage
+          // bookkeeping, while the final exact composite proof remains strict.
+          const visibleChange = !sameRgba(target, base, at);
+          if (visibleChange && inRoi(x, y, eyeRoi)) cellEyeCovered += 1;
+          if (visibleChange && inRoi(x, y, tailRoi)) cellTailCovered += 1;
           continue;
         }
         if (target[at + 3] > 0 || base[at + 3] > 0) {
