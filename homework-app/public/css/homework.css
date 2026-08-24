@@ -290,6 +290,11 @@ button { cursor: pointer; }
   text-align: center;
 }
 
+.empty-actions {
+  justify-content: center;
+  margin-top: 18px;
+}
+
 .notice {
   padding: 12px 14px;
   border: 1px solid #cce3ff;

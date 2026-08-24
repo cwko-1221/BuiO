@@ -116,11 +116,14 @@ function homeworkCards({ teacher = false, locked = false } = {}) {
 
 function renderRecords() {
   const f = filterState.records;
+  const editingNewRecord = !state.record && state.homeworks.length > 0;
   return shell(`<section class="panel">
     <div class="panel-head"><div><h2>欠交功課記錄</h2><p class="hint">老師可檢視及修改任何已提交記錄，並把欠交更新為「已補做」。</p></div><div class="actions"><button class="button secondary" id="printRecord" ${!state.record ? 'disabled' : ''}>下載 PDF</button></div></div>
     ${filterHtml('record', f, true)}
   </section>
-  <section class="panel">${state.record ? `${homeworkCards({ teacher: true })}<div class="actions" style="margin-top:20px"><button class="button primary" id="saveRecord">儲存修改</button></div>` : '<div class="empty">所選日期暫時沒有科長提交的記錄。</div>'}</section>`);
+  <section class="panel">${state.record || editingNewRecord
+    ? `${editingNewRecord ? '<div class="notice">正在新增老師記錄；所有學生已預設為「完成」，可按需要修改。</div>' : ''}${homeworkCards({ teacher: true })}<div class="actions" style="margin-top:20px"><button class="button secondary" id="addTeacherHomework">＋ 新增功課</button><button class="button primary" id="saveRecord">${editingNewRecord ? '儲存記錄' : '儲存修改'}</button></div>`
+    : '<div class="empty">所選日期暫時沒有科長提交的記錄。<div class="actions empty-actions"><button class="button primary" id="createTeacherRecord">＋ 新增記錄</button></div></div>'}</section>`);
 }
 
 async function loadAnalysisStudents() {
@@ -193,8 +196,8 @@ function renderClassAnalysis() {
   </section>`);
 }
 
-function emptyHomework(roster) {
-  return { id: crypto.randomUUID(), title: '', statuses: roster.map(student => ({ studentId: student.id, status: '', madeUp: false })) };
+function emptyHomework(roster, defaultStatus = '') {
+  return { id: crypto.randomUUID(), title: '', statuses: roster.map(student => ({ studentId: student.id, status: defaultStatus, madeUp: false })) };
 }
 
 async function loadStudentRecord() {
@@ -259,7 +262,24 @@ function bindTeacher() {
   } else if (state.view === 'records') {
     const reload = () => { filterState.records = { academicYear: recordYear.value, className: recordClass.value, subject: recordSubject.value, date: recordDate.value }; loadTeacherRecord(); };
     recordYear.onchange = reload; recordClass.onchange = reload; recordSubject.onchange = reload; recordDate.onchange = reload;
-    document.getElementById('saveRecord')?.addEventListener('click', async () => { syncEditor(); try { const result = await api('/records', { method: 'PUT', body: JSON.stringify({ ...filterState.records, homeworks: state.homeworks }) }); state.record = result.record; setMessage(result.message); } catch (error) { setMessage(error.message, 'error'); } });
+    document.getElementById('createTeacherRecord')?.addEventListener('click', () => {
+      state.homeworks = [emptyHomework(state.roster, 'complete')];
+      render();
+    });
+    document.getElementById('addTeacherHomework')?.addEventListener('click', () => {
+      syncEditor();
+      state.homeworks.push(emptyHomework(state.roster, 'complete'));
+      render();
+    });
+    document.getElementById('saveRecord')?.addEventListener('click', async () => {
+      syncEditor();
+      try {
+        const result = await api('/records', { method: state.record ? 'PUT' : 'POST', body: JSON.stringify({ ...filterState.records, homeworks: state.homeworks }) });
+        state.record = result.record;
+        state.homeworks = structuredClone(result.record.homeworks);
+        setMessage(result.message);
+      } catch (error) { setMessage(error.message, 'error'); }
+    });
     document.getElementById('printRecord')?.addEventListener('click', async () => {
       try {
         const f = filterState.records;
