@@ -82,6 +82,16 @@ Mask rules:
 - every visible component has an anchor contact and an occlusion declaration.
   A floating accessory, an attachment on the wrong ear, a necklace in the rear
   view or a wing that covers the tail is a reject.
+- the layer manifest is the independent source-of-truth for recomposition: its
+  relative paths resolve beside the manifest, its masks must carry an explicit
+  alpha channel, and target/composite/recompose bytes may never be reused as a
+  layer image or mask;
+- unchanged pixels included only to keep a semantic component 4-connected must
+  be declared by `maskPolicy.allowUnchangedSupportPixels` with a finite maximum;
+  an undeclared support bridge is a reject, not a warning;
+- any protected eye/ear/tail/body ROI declared by the frozen spec is checked
+  against the union of all layer support masks. A non-zero overlap is a critic
+  reject even when the recomposite happens to match the target.
 
 ## 4. Batch pipeline and worker handoff
 
@@ -101,7 +111,7 @@ parallel, but a worker may not consume another worker's mutable output.
    `audit-redrawn-layer-manifest.mjs` (the older
    `audit-redrawn-mask-only.mjs` remains a compatibility adapter); reject holes,
    non-binary mask alpha, source/coordinate violations, layer pixels outside
-   their support, and any pet contamination.
+   their support, target/composite source reuse, and any pet contamination.
 5. `composite`: an independent compositor performs exact same-coordinate
    source-over in the declared layer order. It may not resize, rotate, flip or
    “improve” the mask. Emit the recomposite and per-cell diff.
@@ -111,7 +121,9 @@ parallel, but a worker may not consume another worker's mutable output.
    eye clearance and anchors. A copied report or body-locked target is not
    evidence.
 7. `publish`: only an independent `PASS` with exact RGBA mismatch `0`, zero
-   protected-pet contamination and complete lineage may enter the manifest.
+   protected-pet contamination, a publishable layer-manifest audit, and complete
+   lineage may enter the manifest. Publish readiness is fail-closed if any
+   earlier gate fails.
 
 The fast path is fail-closed: `preflight` rejects first, `mask` and
 `composite` are parallelized only after target freeze, and `critic` runs only

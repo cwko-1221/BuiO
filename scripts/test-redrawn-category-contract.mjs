@@ -88,7 +88,15 @@ check('layer manifest audit is exact and fail-closed', layerManifestAudit.includ
   && layerManifestAudit.includes('nonBinaryMaskAlphaPixels')
   && layerManifestAudit.includes('undeclaredHoleCells')
   && layerManifestAudit.includes('exactRgbaMismatchPixels')
-  && layerManifestAudit.includes('compositeUsedAsTarget: false'));
+  && layerManifestAudit.includes('compositeUsedAsTarget: false')
+  && layerManifestAudit.includes('readMaskRgba')
+  && layerManifestAudit.includes('target may not be a composite/recompose output')
+  && layerManifestAudit.includes('protectedRoiViolations')
+  && layerManifestAudit.includes('maskPolicy'));
+check('batch runner makes layer-manifest audit a publish gate', runner.includes('buildLayerManifest')
+  && runner.includes('audit-redrawn-layer-manifest.mjs')
+  && runner.includes('layerManifestAudit.publishable === true')
+  && runner.includes('pipelinePass && missing.length === 0'));
 
 const faceBack = face.cells.filter((cell) => cell.row === 2);
 check('face declares exactly 25 legal lens apertures', face.globalRules.expectedTotalTrueLensApertures === 25 && face.cells.reduce((sum, cell) => sum + cell.trueApertures, 0) === 25);

@@ -31,7 +31,10 @@ const DESTINATION_OUT = new Set(['erase', 'frontErase']);
 const manifestAbsolute = path.resolve(manifestPath);
 const manifest = JSON.parse(await fs.readFile(manifestAbsolute, 'utf8'));
 const manifestDirectory = path.dirname(manifestAbsolute);
-const resolveInput = (value) => path.isAbsolute(value) ? value : path.resolve(process.cwd(), value);
+// Manifest-local relative paths are intentional: a proof bundle can be moved
+// and audited from any working directory without silently resolving assets
+// against the caller's cwd.
+const resolveInput = (value) => path.isAbsolute(value) ? value : path.resolve(manifestDirectory, value);
 const hashFile = async (input) => crypto.createHash('sha256').update(await fs.readFile(input)).digest('hex');
 const same = (left, right) => left[0] === right[0] && left[1] === right[1] && left[2] === right[2] && left[3] === right[3];
 const rgbaAt = (buffer, pixel) => {
@@ -63,6 +66,13 @@ const readRgba = async (input) => {
   }
   return decoded.data;
 };
+const readMaskRgba = async (input) => {
+  const metadata = await sharp(input).metadata();
+  if (metadata.channels !== 4 && metadata.hasAlpha !== true) {
+    throw new Error(`${input} must contain an explicit alpha channel; opaque RGB masks are rejected`);
+  }
+  return readRgba(input);
+};
 
 const errors = [];
 const warnings = [];
@@ -82,6 +92,7 @@ if (manifest.geometry?.transformAllowed !== false) fail('geometry.transformAllow
 if (!Array.isArray(manifest.emptyByDefault)) fail('emptyByDefault must be an array');
 if (typeof manifest.target !== 'string' || !manifest.target) fail('target path is required');
 if (typeof manifest.base !== 'string' || !manifest.base) fail('base path is required');
+if (typeof manifest.target === 'string' && /composite|recompose/i.test(path.basename(manifest.target))) fail('target may not be a composite/recompose output');
 for (const direction of manifest.emptyByDefault ?? []) {
   if (!(direction in DIRECTION_ROWS)) fail(`unknown emptyByDefault direction ${direction}`);
 }
@@ -91,9 +102,16 @@ for (const layer of Object.keys(layerEntries)) {
 
 let target;
 let base;
+let targetCanonical = null;
+let baseCanonical = null;
+let targetHash = null;
+let baseHash = null;
 try {
   target = await readRgba(resolveInput(manifest.target));
   base = await readRgba(resolveInput(manifest.base));
+  targetCanonical = await fs.realpath(resolveInput(manifest.target));
+  baseCanonical = await fs.realpath(resolveInput(manifest.base));
+  [targetHash, baseHash] = await Promise.all([hashFile(targetCanonical), hashFile(baseCanonical)]);
 } catch (error) {
   fail(`target/base read failed: ${error.message}`);
 }
@@ -112,7 +130,14 @@ for (const layer of ORDER) {
   }
   const maskPath = resolveInput(entry.mask);
   let mask;
-  try { mask = await readRgba(maskPath); } catch (error) { fail(`${layer} mask read failed: ${error.message}`); continue; }
+  try {
+    const maskCanonical = await fs.realpath(maskPath);
+    if (targetCanonical && maskCanonical === targetCanonical) fail(`${layer}.mask may not reference the frozen target`);
+    if (/composite|recompose/i.test(path.basename(maskCanonical))) fail(`${layer}.mask may not reference a composite/recompose output`);
+    const maskHash = await hashFile(maskCanonical);
+    if (targetHash && maskHash === targetHash) fail(`${layer}.mask bytes must not equal the frozen target`);
+    mask = await readMaskRgba(maskPath);
+  } catch (error) { fail(`${layer} mask read failed: ${error.message}`); continue; }
   let content = null;
   const kind = entry.kind ?? (DESTINATION_OUT.has(layer) ? 'destination-out' : 'content');
   if (DESTINATION_OUT.has(layer) && kind !== 'destination-out') fail(`${layer}.kind must be destination-out`);
@@ -120,7 +145,16 @@ for (const layer of ORDER) {
   if (kind === 'content') {
     if (typeof entry.image !== 'string' || !entry.image) fail(`${layer}.image is required for content layer`);
     else {
-      try { content = await readRgba(resolveInput(entry.image)); } catch (error) { fail(`${layer} image read failed: ${error.message}`); }
+      try {
+        const imagePath = resolveInput(entry.image);
+        const imageCanonical = await fs.realpath(imagePath);
+        if (targetCanonical && imageCanonical === targetCanonical) fail(`${layer}.image may not reference the frozen target`);
+        if (/composite|recompose/i.test(path.basename(imageCanonical))) fail(`${layer}.image may not reference a composite/recompose output`);
+        const imageHash = await hashFile(imageCanonical);
+        if (targetHash && imageHash === targetHash) fail(`${layer}.image bytes must not equal the frozen target`);
+        if (baseHash && imageHash === baseHash) fail(`${layer}.image bytes must not equal the bare base`);
+        content = await readRgba(imagePath);
+      } catch (error) { fail(`${layer} image read failed: ${error.message}`); }
     }
   } else if (entry.image) {
     fail(`${layer} destination-out layer may not also declare image`);
@@ -217,12 +251,14 @@ for (let row = 0; row < ROWS; row += 1) for (let column = 0; column < COLUMNS; c
       if (nx >= 0 && nx < CELL && ny >= 0 && ny < CELL) pushOutside(nx, ny);
     }
   }
-  let holes = 0; let holePixels = 0;
+  let holes = 0; let holePixels = 0; const holeBboxes = []; const holePixelCounts = [];
   for (let seed = 0; seed < selected.length; seed += 1) {
     if (selected[seed] || outside[seed]) continue;
     holes += 1; const queue = [seed]; outside[seed] = 1;
+    let minX = CELL; let minY = CELL; let maxX = -1; let maxY = -1;
     for (let head = 0; head < queue.length; head += 1) {
       const local = queue[head]; holePixels += 1; const x = local % CELL; const y = Math.floor(local / CELL);
+      minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
       for (const [dx, dy] of cardinal) {
         const nx = x + dx; const ny = y + dy;
         if (nx < 0 || nx >= CELL || ny < 0 || ny >= CELL) continue;
@@ -230,12 +266,19 @@ for (let row = 0; row < ROWS; row += 1) for (let column = 0; column < COLUMNS; c
         if (!selected[next] && !outside[next]) { outside[next] = 1; queue.push(next); }
       }
     }
+    holeBboxes.push([minX, minY, maxX + 1, maxY + 1]); holePixelCounts.push(queue.length);
   }
   componentCells.push({ row, column, components });
-  if (holes > 0) holeCells.push({ row, column, holes, holePixels });
+  if (holes > 0) holeCells.push({ row, column, holes, holePixels, holeBboxes, holePixelCounts });
 }
 const declaredHoles = manifest.allowedHoles ?? [];
-const holeMismatch = holeCells.filter((cell) => !declaredHoles.some((allowed) => allowed.row === cell.row && allowed.column === cell.column && allowed.holes === cell.holes));
+const holeMismatch = holeCells.filter((cell) => !declaredHoles.some((allowed) => {
+  if (allowed.row !== cell.row || allowed.column !== cell.column || allowed.holes !== cell.holes) return false;
+  if (allowed.holePixels !== undefined && allowed.holePixels !== cell.holePixels) return false;
+  if (Array.isArray(allowed.holeBboxes) && JSON.stringify(allowed.holeBboxes) !== JSON.stringify(cell.holeBboxes)) return false;
+  if (Array.isArray(allowed.holePixelCounts) && JSON.stringify(allowed.holePixelCounts) !== JSON.stringify(cell.holePixelCounts)) return false;
+  return true;
+}));
 
 const composite = Buffer.from(base ?? Buffer.alloc(PIXELS * CHANNELS));
 const applyContent = (layer) => {
@@ -276,6 +319,24 @@ for (let pixel = 0; pixel < PIXELS; pixel += 1) {
   if (!same(targetPixel, compositePixel)) { exactRgbaMismatchPixels += 1; cell.exactRgbaMismatchPixels += 1; }
 }
 
+const protectedRoiViolations = [];
+for (const roi of manifest.protectedRois ?? []) {
+  if (!roi || !Number.isInteger(roi.row) || !Number.isInteger(roi.column) || !Array.isArray(roi.zone) || roi.zone.length !== 4) {
+    fail('protectedRois entries require integer row/column and a four-number zone');
+    continue;
+  }
+  let supportPixels = 0;
+  for (let y = roi.zone[1]; y < roi.zone[3]; y += 1) for (let x = roi.zone[0]; x < roi.zone[2]; x += 1) {
+    if (x < 0 || y < 0 || x >= CELL || y >= CELL) continue;
+    const global = (roi.row * CELL + y) * WIDTH + roi.column * CELL + x;
+    supportPixels += unionMask[global];
+  }
+  if (supportPixels > 0) protectedRoiViolations.push({ id: roi.id ?? `roi-${protectedRoiViolations.length + 1}`, row: roi.row, column: roi.column, zone: roi.zone, supportPixels });
+}
+const visibleSupportPixels = unionMask.reduce((sum, value) => sum + value, 0);
+if (visibleSupportPixels === 0 && targetBaseOutsideMaskMismatchPixels === 0) fail('manifest declares no visible layer support for a non-changing target');
+if ((manifest.protectedRois ?? []).length > 0 && protectedRoiViolations.length > 0) fail('protected ROI pixels are covered by accessory support masks');
+
 const metrics = {
   targetBaseOutsideMaskMismatchPixels,
   maskPixelsWithNoTargetBaseDifference,
@@ -283,6 +344,8 @@ const metrics = {
   emptyDirectionViolations: emptyDirectionViolations.length,
   holeCells: holeCells.length,
   undeclaredHoleCells: holeMismatch.length,
+  visibleSupportPixels,
+  protectedRoiViolations: protectedRoiViolations.length,
   layerMetrics,
 };
 const technicalErrors = Object.values(layerMetrics).reduce((sum, layer) => sum
@@ -292,7 +355,11 @@ const technicalErrors = Object.values(layerMetrics).reduce((sum, layer) => sum
   + (layer.layerOutsideMaskPixels ?? 0), 0);
 for (const [layer, details] of Object.entries(layerMetrics)) {
   if ((details.maskWithoutLayerPixels ?? 0) > 0) {
-    warnings.push(`${layer}: ${details.maskWithoutLayerPixels} support-mask pixels have no visible content; allowed as unchanged target/base coverage but review semantically`);
+    const allowed = manifest.maskPolicy?.allowUnchangedSupportPixels === true;
+    const maximum = manifest.maskPolicy?.maximumUnchangedSupportPixels;
+    const overLimit = Number.isInteger(maximum) && details.maskWithoutLayerPixels > maximum;
+    if (!allowed || overLimit) errors.push(`${layer}: ${details.maskWithoutLayerPixels} support-mask pixels have no visible content; declare maskPolicy.allowUnchangedSupportPixels with an adequate maximum only for intentional topology bridges`);
+    else warnings.push(`${layer}: ${details.maskWithoutLayerPixels} declared unchanged support pixels are allowed by maskPolicy`);
   }
 }
 const accepted = errors.length === 0
