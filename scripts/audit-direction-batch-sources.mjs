@@ -38,10 +38,17 @@ const outputPath = valueFor('output');
 const lineageRootsInput = valueFor('lineage-roots') ?? 'artifacts,pet-app/art-source/imagegen';
 const lineageRoots = lineageRootsInput.split(',').map((value) => value.trim()).filter(Boolean);
 const concurrencyValue = valueFor('concurrency');
-const concurrency = Math.max(1, Math.min(16, Number(concurrencyValue ?? 8)));
+// Four workers are enough to keep the missing-source checks and any future
+// Sharp metadata reads moving without triggering native resource pressure on
+// the complete three-pet stage-one queue. Explicit values are bounded too.
+const concurrency = Math.max(1, Math.min(4, Number(concurrencyValue ?? 4)));
 if (!Number.isInteger(concurrency)) throw new Error('--concurrency must be an integer');
 const lineageConcurrencyValue = valueFor('lineage-concurrency');
-const lineageConcurrency = Math.max(1, Math.min(4, Number(lineageConcurrencyValue ?? 2)));
+// Keep the default conservative: the recursive composite-hash scan is shared,
+// but Sharp/file-handle pressure still scales with the number of targets. A
+// caller can opt into 2-4 workers after measuring the host; the default must
+// remain safe for the full 192-job stage-one queue.
+const lineageConcurrency = Math.max(1, Math.min(4, Number(lineageConcurrencyValue ?? 1)));
 if (!Number.isInteger(lineageConcurrency)) throw new Error('--lineage-concurrency must be an integer');
 
 const EXPECTED = { width: 800, height: 160, format: 'png', channels: 4, hasAlpha: true };
