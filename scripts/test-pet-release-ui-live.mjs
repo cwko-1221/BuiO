@@ -150,7 +150,6 @@ try {
   await page.route('**/api/pet/bootstrap', async (route) => {
     const response = await route.fetch();
     const data = await response.json();
-    const cat = data.catalog.pets.find((entry) => entry.id === 'starpatch-cat');
     const cloud = data.catalog.redrawnWearables['starpatch-cat:1:head-06'];
     assert.ok(cloud?.patch, 'cloud-cap patch missing for compositor erase fixture');
     const opaqueErase = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="160" height="160" fill="white"/></svg>')}`;
