@@ -110,6 +110,11 @@ export const auditTargetLineage = async ({ targetInput, rootsInput, lineageInput
     verdict: errors.length === 0 ? 'PASS' : 'REJECT',
     target: { path: relative(targetPath), sha256: targetHash, metadata: targetMetadata },
     scan: { roots: roots.map((root) => relative(root)), candidateCount: candidates.length, compositeHashMatches: matches },
+    // Keep the audit report directly consumable by the batch runner.  These
+    // fields are a machine-generated witness of the exact target bytes and the
+    // independent composite scan; no pixel data is changed or inferred.
+    output: { targetPath: relative(targetPath), sha256: targetHash },
+    verification: { earlierCompositeHashMatches: matches },
     lineage: lineageInput ? { path: relative(path.resolve(lineageInput)), supplied: Boolean(lineage) } : null,
     errors,
     warnings,
