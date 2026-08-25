@@ -98,8 +98,10 @@ parallel, but a worker may not consume another worker's mutable output.
    tail coverage is an early reject; do not spend time on semantic masking.
 4. `mask`: an independent masker reads only the frozen target/spec and emits
    `rear`, `erase`, `patch`, `front` masks/layers. Run
-   `audit-redrawn-mask-only.mjs`; reject holes, non-binary alpha, source/coordinate
-   violations and any pet contamination.
+   `audit-redrawn-layer-manifest.mjs` (the older
+   `audit-redrawn-mask-only.mjs` remains a compatibility adapter); reject holes,
+   non-binary mask alpha, source/coordinate violations, layer pixels outside
+   their support, and any pet contamination.
 5. `composite`: an independent compositor performs exact same-coordinate
    source-over in the declared layer order. It may not resize, rotate, flip or
    “improve” the mask. Emit the recomposite and per-cell diff.
@@ -149,11 +151,12 @@ changes before scaling beyond the two approved head items:
   direction batches and per-cell protected ROIs instead of the current generic
   eye/tail rectangles. Emit `directionBatch`, `anchor`, and support-mask hash
   for every cell. Keep the current early reject semantics.
-- `audit-redrawn-mask-only.mjs`: accept a layer manifest and audit
-  `rear/erase/patch/front` independently. Enforce disjoint ownership, declared
-  semantic gaps only, binary masks, zero hidden RGB and exact source sampling;
-  the current single broad/refined mask interface remains as a compatibility
-  adapter only.
+- `audit-redrawn-layer-manifest.mjs`: audit a frozen manifest and recomposite
+  `rear/erase/patch/frontErase/front` from the declared source-coordinate
+  layers. Enforce the exact layer order, binary masks, zero hidden RGB, no
+  undeclared holes, empty-by-default direction rows and exact target equality.
+- `audit-redrawn-mask-only.mjs`: keep the broad/refined-mask interface only as
+  a compatibility adapter; it is not the publish gate.
 - `audit-redrawn-accessory-mask.mjs`: compose the four depth layers in the
   frozen order (`rear -> cleared base -> patch -> front`) and report exact
   deltas per direction batch. It must never repair a target by copying the

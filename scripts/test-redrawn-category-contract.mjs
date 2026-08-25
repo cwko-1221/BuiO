@@ -21,6 +21,7 @@ const paths = {
   layeredSolver: 'scripts/solve-redrawn-straddled-layers.mjs',
   frontEraseQa: 'scripts/qa-redrawn-front-erase.mjs',
   faceQa: 'scripts/qa-face-wearable-apertures.mjs',
+  layerManifestAudit: 'scripts/audit-redrawn-layer-manifest.mjs',
   runtime: 'pet-app/src/game/PetAvatar.ts',
   preview: 'pet-app/src/main.ts',
   face: 'pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/masked-face-01-proof/independent-acceptance-spec/face-01-independent-acceptance-spec.json',
@@ -29,9 +30,9 @@ const paths = {
   aura: 'scripts/redrawn-category-specs/aura-straddled.template.json',
   regression: 'scripts/redrawn-category-specs/batch-set-head05-head06-regression.json',
 };
-const [contract, face, neck, back, aura, regression, runner, solver, layeredSolver, frontEraseQa, faceQa, runtime, preview] = await Promise.all([
+const [contract, face, neck, back, aura, regression, runner, solver, layeredSolver, frontEraseQa, faceQa, layerManifestAudit, runtime, preview] = await Promise.all([
   readJson(paths.contract), readJson(paths.face), readJson(paths.neck), readJson(paths.back), readJson(paths.aura), readJson(paths.regression),
-  readText(paths.runner), readText(paths.solver), readText(paths.layeredSolver), readText(paths.frontEraseQa), readText(paths.faceQa), readText(paths.runtime), readText(paths.preview),
+  readText(paths.runner), readText(paths.solver), readText(paths.layeredSolver), readText(paths.frontEraseQa), readText(paths.faceQa), readText(paths.layerManifestAudit), readText(paths.runtime), readText(paths.preview),
 ]);
 
 const sourceOver = (background, foreground) => {
@@ -83,6 +84,11 @@ check('batch frontErase has explicit input, output and independent QA gate', run
   && layeredSolver.includes('frontErasePath') && layeredSolver.includes('frontErasePath: path.join')
   && frontEraseQa.includes('derivedFromComposite: false') && frontEraseQa.includes('decodedMismatchPixels'));
 check('batch lineage forbids composite-to-target circularity', runner.includes('targetImmutable') && runner.includes('targetPredatesMask') && !runner.includes('copyFile(solveReport.outputs.compositePath, targetPath)'));
+check('layer manifest audit is exact and fail-closed', layerManifestAudit.includes("JSON.stringify(manifest.layerOrder) !== JSON.stringify(ORDER)")
+  && layerManifestAudit.includes('nonBinaryMaskAlphaPixels')
+  && layerManifestAudit.includes('undeclaredHoleCells')
+  && layerManifestAudit.includes('exactRgbaMismatchPixels')
+  && layerManifestAudit.includes('compositeUsedAsTarget: false'));
 
 const faceBack = face.cells.filter((cell) => cell.row === 2);
 check('face declares exactly 25 legal lens apertures', face.globalRules.expectedTotalTrueLensApertures === 25 && face.cells.reduce((sum, cell) => sum + cell.trueApertures, 0) === 25);
