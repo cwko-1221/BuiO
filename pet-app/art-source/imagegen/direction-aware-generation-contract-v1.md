@@ -190,7 +190,9 @@ changes before scaling beyond the two approved head items:
   is not eligible for masking until both the target-lineage audit and all four
   direction sources pass this inventory. Use `--lineage-roots` to identify the
   historical output roots that must be scanned; the default is
-  `artifacts,pet-app/art-source/imagegen`.
+  `artifacts,pet-app/art-source/imagegen`. Lineage workers are independently
+  bounded (default `--lineage-concurrency 2`, maximum `4`) and share both the
+  recursive candidate scan and candidate SHA-256 cache.
 - `create-direction-source-templates.mjs`: copy the frozen pet atlas rows into
   four exact `800x160` RGBA authoring canvases (front, side-right, back,
   special), recording the base hash and cell mapping. These are blank

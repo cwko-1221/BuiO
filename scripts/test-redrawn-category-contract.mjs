@@ -107,6 +107,8 @@ check('direction ingress audits every expected full redraw before masking', sour
   && sourceAudit.includes('expectedFullRedraw')
   && sourceAudit.includes('targetLineage')
   && sourceAudit.includes('--lineage-roots'));
+check('lineage ingress work is bounded and hash-cached', sourceAudit.includes('lineageConcurrency')
+  && sourceAudit.includes('lineageHashCache') && layerManifestAudit.includes('target may not be a composite/recompose output'));
 check('direction source templates preserve frozen coordinates', sourceTemplates.includes('TEMPLATES_CREATED')
   && sourceTemplates.includes('800x160') && sourceTemplates.includes('transformed: false')
   && sourceTemplates.includes('baseSha256'));

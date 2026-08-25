@@ -27,7 +27,7 @@ const valueFor = (name) => {
 
 const queuePath = valueFor('queue');
 if (!queuePath) {
-  console.error('usage: node scripts/audit-direction-batch-sources.mjs --queue <queue.json> [--pet id] [--stage n] [--output report.json] [--concurrency n] [--lineage-roots root[,root...]]');
+  console.error('usage: node scripts/audit-direction-batch-sources.mjs --queue <queue.json> [--pet id] [--stage n] [--output report.json] [--concurrency n] [--lineage-concurrency n] [--lineage-roots root[,root...]]');
   process.exit(1);
 }
 const petFilter = valueFor('pet');
@@ -40,6 +40,9 @@ const lineageRoots = lineageRootsInput.split(',').map((value) => value.trim()).f
 const concurrencyValue = valueFor('concurrency');
 const concurrency = Math.max(1, Math.min(16, Number(concurrencyValue ?? 8)));
 if (!Number.isInteger(concurrency)) throw new Error('--concurrency must be an integer');
+const lineageConcurrencyValue = valueFor('lineage-concurrency');
+const lineageConcurrency = Math.max(1, Math.min(4, Number(lineageConcurrencyValue ?? 2)));
+if (!Number.isInteger(lineageConcurrency)) throw new Error('--lineage-concurrency must be an integer');
 
 const EXPECTED = { width: 800, height: 160, format: 'png', channels: 4, hasAlpha: true };
 const sha256 = async (input) => crypto.createHash('sha256').update(await fs.readFile(input)).digest('hex');
@@ -59,6 +62,7 @@ if (jobs.length === 0) throw new Error('no queue jobs matched the requested filt
 // considered ready. A shared cache keeps the recursive composite scan one
 // pass per root set while each target still gets its own hash/metadata check.
 const lineageCache = new Map();
+const lineageHashCache = new Map();
 const lineageByKey = new Map();
 let lineageCursor = 0;
 const auditLineageWorker = async () => {
@@ -69,11 +73,11 @@ const auditLineageWorker = async () => {
     const job = jobs[index];
     const target = typeof job.expectedFullRedraw === 'string' ? job.expectedFullRedraw : null;
     lineageByKey.set(job.key, target
-      ? await auditTargetLineage({ targetInput: target, rootsInput: lineageRoots, candidateCache: lineageCache })
+      ? await auditTargetLineage({ targetInput: target, rootsInput: lineageRoots, candidateCache: lineageCache, candidateHashCache: lineageHashCache })
       : { verdict: 'REJECT', target: null, scan: { roots: lineageRoots, candidateCount: 0, compositeHashMatches: [] }, errors: ['expectedFullRedraw path is missing'], warnings: [] });
   }
 };
-await Promise.all(Array.from({ length: Math.min(concurrency, jobs.length) }, auditLineageWorker));
+await Promise.all(Array.from({ length: Math.min(lineageConcurrency, jobs.length) }, auditLineageWorker));
 
 const sources = [];
 for (const job of jobs) {
@@ -187,6 +191,7 @@ const summary = {
     rejectedJobs: jobResults.filter((job) => job.targetLineage?.verdict !== 'PASS').length,
   },
   concurrency,
+  lineageConcurrency,
   jobCount: jobs.length,
   directionSources: sources.length,
   readyJobs: jobResults.filter((job) => job.status === 'READY_FOR_MASKING_PREFLIGHT').length,

@@ -46,7 +46,7 @@ const runAudit = async (queuePath, id) => {
   const outputPath = path.join(tempRoot, `audit-${id}.json`);
   const run = spawnSync(process.execPath, [
     'scripts/audit-direction-batch-sources.mjs', '--queue', queuePath,
-    '--lineage-roots', compositeRoot, '--concurrency', '1', '--output', outputPath,
+    '--lineage-roots', compositeRoot, '--concurrency', '1', '--lineage-concurrency', '2', '--output', outputPath,
   ], { cwd: workspace, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });
   if (!run.stdout.trim()) throw new Error(`audit produced no JSON: ${run.stderr}`);
   return { exitCode: run.status, report: JSON.parse(await fs.readFile(outputPath, 'utf8')) };
@@ -61,6 +61,7 @@ try {
   const rejected = await runAudit(await writeQueue(copiedTarget, sourceFolder), 'rejected');
   const rejectedJob = rejected.report.jobs[0];
   if (rejected.exitCode === 0 || rejected.report.verdict !== 'REJECT_PREMASK_SOURCES'
+    || rejected.report.lineageConcurrency !== 2
     || rejectedJob.targetLineage?.verdict !== 'REJECT'
     || !rejectedJob.targetLineage.errors.some((message) => message.includes('match 1 earlier composite'))) {
     throw new Error(`composite-derived target was not rejected: ${JSON.stringify(rejected.report)}`);
@@ -71,6 +72,7 @@ try {
   const accepted = await runAudit(await writeQueue(independentTarget, sourceFolder), 'accepted');
   const acceptedJob = accepted.report.jobs[0];
   if (accepted.exitCode !== 0 || accepted.report.verdict !== 'PASS_SOURCE_INVENTORY'
+    || accepted.report.lineageConcurrency !== 2
     || acceptedJob.targetLineage?.verdict !== 'PASS'
     || acceptedJob.status !== 'READY_FOR_MASKING_PREFLIGHT') {
     throw new Error(`independent target was not admitted: ${JSON.stringify(accepted.report)}`);

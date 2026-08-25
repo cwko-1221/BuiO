@@ -30,9 +30,9 @@ const walkCompositeOutputs = async (root) => {
 const readLineage = async (lineageInput) => fs.readFile(lineageInput, 'utf8').then(JSON.parse).catch(() => null);
 
 /**
- * @param {{targetInput:string, rootsInput:string|string[], lineageInput?:string|null, candidateCache?:Map<string,string[]>}} options
+ * @param {{targetInput:string, rootsInput:string|string[], lineageInput?:string|null, candidateCache?:Map<string,string[]|Promise<string[]>>, candidateHashCache?:Map<string,string|null|Promise<string|null>>}} options
  */
-export const auditTargetLineage = async ({ targetInput, rootsInput, lineageInput = null, candidateCache = null }) => {
+export const auditTargetLineage = async ({ targetInput, rootsInput, lineageInput = null, candidateCache = null, candidateHashCache = null }) => {
   const targetPath = path.resolve(targetInput);
   const roots = (Array.isArray(rootsInput) ? rootsInput : String(rootsInput ?? '').split(','))
     .map((value) => path.resolve(String(value).trim())).filter(Boolean);
@@ -71,7 +71,15 @@ export const auditTargetLineage = async ({ targetInput, rootsInput, lineageInput
   const matches = [];
   if (targetHash) {
     for (const candidate of candidates) {
-      const candidateHash = await sha256(candidate).catch(() => null);
+      const normalizedCandidate = path.normalize(candidate).toLowerCase();
+      let candidateHash;
+      if (candidateHashCache?.has(normalizedCandidate)) candidateHash = await candidateHashCache.get(normalizedCandidate);
+      else {
+        const hash = sha256(candidate).catch(() => null);
+        if (candidateHashCache) candidateHashCache.set(normalizedCandidate, hash);
+        candidateHash = await hash;
+        if (candidateHashCache) candidateHashCache.set(normalizedCandidate, candidateHash);
+      }
       if (candidateHash && candidateHash === targetHash) matches.push({ path: relative(candidate), sha256: candidateHash });
     }
   }
