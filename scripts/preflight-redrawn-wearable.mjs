@@ -6,15 +6,23 @@
  * by a wearable-only layer, so it is rejected immediately. This intentionally does
  * not replace the final per-pixel solver or independent critic.
  *
- *   node scripts/preflight-redrawn-wearable.mjs target.png base.webp mask.png report.json
+ *   node scripts/preflight-redrawn-wearable.mjs target.png base.webp mask.png report.json [--spec frozen-item-spec.json]
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import sharp from 'sharp';
 
-const [targetPath, basePath, maskPath, reportPath] = process.argv.slice(2);
+const positional = [];
+let specPath = null;
+const rawArgs = process.argv.slice(2);
+for (let index = 0; index < rawArgs.length; index += 1) {
+  if (rawArgs[index] === '--spec') { specPath = rawArgs[index + 1]; index += 1; }
+  else positional.push(rawArgs[index]);
+}
+const [targetPath, basePath, maskPath, reportPath] = positional;
 if (!targetPath || !basePath || !maskPath) {
-  console.error('usage: node scripts/preflight-redrawn-wearable.mjs <target> <base> <mask> [report.json]');
+  console.error('usage: node scripts/preflight-redrawn-wearable.mjs <target> <base> <mask> [report.json] [--spec frozen-item-spec.json]');
   process.exit(1);
 }
 
@@ -30,6 +38,19 @@ const read = async (input) => {
   return image.data;
 };
 const [target, base, mask] = await Promise.all([read(targetPath), read(basePath), read(maskPath)]);
+let frozenSpec = null;
+if (specPath) {
+  try {
+    frozenSpec = JSON.parse(await fs.readFile(specPath, 'utf8'));
+    const atlas = frozenSpec.atlas ?? {};
+    if (atlas.width !== undefined && (atlas.width !== WIDTH || atlas.height !== HEIGHT || atlas.cellWidth !== CELL || atlas.cellHeight !== CELL)) {
+      throw new Error('spec atlas must declare 800x640 with 160x160 cells');
+    }
+  } catch (error) {
+    console.error(`invalid --spec: ${error.message}`);
+    process.exit(2);
+  }
+}
 
 const atOf = (x, y) => (y * WIDTH + x) * CHANNELS;
 const sameRgba = (left, right, at) => (
@@ -54,6 +75,13 @@ const tailRoiFor = (row) => {
   if (row === 2) return { minX: 42, maxX: 112, minY: 54, maxY: 132 };
   return null;
 };
+const specRoiFor = (kind, row, column) => {
+  const rois = frozenSpec?.protectedRois;
+  if (!Array.isArray(rois)) return null;
+  const match = rois.find((roi) => roi?.kind === kind && roi.row === row && roi.column === column);
+  if (!Array.isArray(match?.zone) || match.zone.length !== 4) return null;
+  return { minX: match.zone[0], maxX: match.zone[2] - 1, minY: match.zone[1], maxY: match.zone[3] - 1 };
+};
 
 const cells = [];
 let outsideMaskMismatch = 0;
@@ -71,8 +99,8 @@ for (let row = 0; row < 4; row += 1) {
     let cellMaskOverBasePixels = 0;
     let cellEyeCovered = 0;
     let cellTailCovered = 0;
-    const eyeRoi = eyeRoiFor(row, column);
-    const tailRoi = tailRoiFor(row);
+    const eyeRoi = specRoiFor('eye', row, column) ?? eyeRoiFor(row, column);
+    const tailRoi = specRoiFor('tail', row, column) ?? tailRoiFor(row);
     for (let y = 0; y < CELL; y += 1) {
       for (let x = 0; x < CELL; x += 1) {
         const at = atOf(column * CELL + x, row * CELL + y);
@@ -122,6 +150,18 @@ for (let row = 0; row < 4; row += 1) {
 const report = {
   schemaVersion: 1,
   inputs: { targetPath, basePath, maskPath },
+  frozenSpec: specPath ? {
+    path: specPath,
+    directionBatch: frozenSpec?.directionBatch ?? null,
+    anchorSpec: frozenSpec?.anchorSpec ?? null,
+    occlusionSpec: frozenSpec?.occlusionSpec ?? null,
+    protectedRois: frozenSpec?.protectedRois ?? null,
+  } : null,
+  policyHashes: {
+    targetSha256: crypto.createHash('sha256').update(await fs.readFile(targetPath)).digest('hex'),
+    baseSha256: crypto.createHash('sha256').update(await fs.readFile(basePath)).digest('hex'),
+    supportMaskSha256: crypto.createHash('sha256').update(await fs.readFile(maskPath)).digest('hex'),
+  },
   policy: {
     purpose: 'cheap preflight only; final semantic and source-over QA remains mandatory',
     outsideMaskMustMatchBase: true,
