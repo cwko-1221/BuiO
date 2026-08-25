@@ -24,7 +24,11 @@ const spec = JSON.parse(await fs.readFile(inputPath, 'utf8'));
 if (!spec.base || !Array.isArray(spec.candidates)) throw new Error('candidates.json requires base and candidates[]');
 
 const WIDTH = 800; const HEIGHT = 640; const CELL = 160; const CHANNELS = 4;
-const read = async (file) => {
+const read = async (file, { explicitAlpha = false } = {}) => {
+  const metadata = await sharp(file).metadata();
+  if (explicitAlpha && (metadata.channels !== CHANNELS || metadata.hasAlpha !== true)) {
+    throw new Error(`${file} must contain an explicit RGBA alpha channel; got channels=${metadata.channels ?? '?'} alpha=${metadata.hasAlpha === true}`);
+  }
   const image = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   if (image.info.width !== WIDTH || image.info.height !== HEIGHT) throw new Error(`${file} must be ${WIDTH}x${HEIGHT}`);
   return image.data;
@@ -40,7 +44,33 @@ const same = (a, b, at) => a[at] === b[at] && a[at + 1] === b[at + 1] && a[at + 
 
 const rank = [];
 for (const candidate of spec.candidates) {
-  const [target, mask] = await Promise.all([read(candidate.target), read(candidate.supportMask)]);
+  let target; let mask;
+  try {
+    // Ranking is still diagnostic, but it must not promote a flattened RGB
+    // target or support mask into the semantic solver.  In particular,
+    // ensureAlpha() would otherwise make an opaque checkerboard mask appear
+    // to be a valid all-on mask.
+    [target, mask] = await Promise.all([
+      read(candidate.target, { explicitAlpha: true }),
+      read(candidate.supportMask, { explicitAlpha: true }),
+    ]);
+  } catch (error) {
+    rank.push({
+      ...candidate,
+      verdict: 'REJECT_PREMASK',
+      errors: [error.message],
+      totals: {
+        maskPixels: 0,
+        outsideMaskMismatchPixels: 0,
+        outsideMaskComparablePixels: 0,
+        outsideMaskMismatchRate: 0,
+        protectedEyeMaskPixels: 0,
+        protectedTailMaskPixels: 0,
+      },
+      cells: [],
+    });
+    continue;
+  }
   let outsideMaskMismatch = 0; let outsideComparable = 0; let maskPixels = 0; let eyeCovered = 0; let tailCovered = 0;
   const cells = [];
   for (let row = 0; row < 4; row += 1) for (let column = 0; column < 5; column += 1) {

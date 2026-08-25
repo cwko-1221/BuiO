@@ -68,7 +68,11 @@ const readRgba = async (input) => {
 };
 const readMaskRgba = async (input) => {
   const metadata = await sharp(input).metadata();
-  if (metadata.channels !== 4 && metadata.hasAlpha !== true) {
+  // Both properties are required.  Using && here would admit a four-channel
+  // opaque image (or any decoder that reports alpha inconsistently), which
+  // would turn an accidental flattened mask into a fully covering mask after
+  // decode and make the exact composite proof meaningless.
+  if (metadata.channels !== 4 || metadata.hasAlpha !== true) {
     throw new Error(`${input} must contain an explicit alpha channel; opaque RGB masks are rejected`);
   }
   return readRgba(input);

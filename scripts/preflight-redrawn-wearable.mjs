@@ -30,14 +30,26 @@ const WIDTH = 800;
 const HEIGHT = 640;
 const CELL = 160;
 const CHANNELS = 4;
-const read = async (input) => {
+const read = async (input, { explicitAlpha = false } = {}) => {
+  const metadata = await sharp(input).metadata();
+  if (explicitAlpha && (metadata.channels !== CHANNELS || metadata.hasAlpha !== true)) {
+    throw new Error(`${input} must contain an explicit RGBA alpha channel; got channels=${metadata.channels ?? '?'} alpha=${metadata.hasAlpha === true}`);
+  }
   const image = await sharp(input).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   if (image.info.width !== WIDTH || image.info.height !== HEIGHT) {
     throw new Error(`${input} must be ${WIDTH}x${HEIGHT}`);
   }
   return image.data;
 };
-const [target, base, mask] = await Promise.all([read(targetPath), read(basePath), read(maskPath)]);
+// A full redraw and its support mask are authoring evidence, not ordinary
+// display images.  Do not let sharp's ensureAlpha() silently turn an opaque
+// RGB/checkerboard input into an all-on alpha mask.  The bare pet base may be
+// RGB because it is only the comparison reference and gains alpha on decode.
+const [target, base, mask] = await Promise.all([
+  read(targetPath, { explicitAlpha: true }),
+  read(basePath),
+  read(maskPath, { explicitAlpha: true }),
+]);
 let frozenSpec = null;
 if (specPath) {
   try {
