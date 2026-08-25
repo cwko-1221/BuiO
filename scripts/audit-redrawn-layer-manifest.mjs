@@ -136,6 +136,8 @@ for (const layer of ORDER) {
     if (/composite|recompose/i.test(path.basename(maskCanonical))) fail(`${layer}.mask may not reference a composite/recompose output`);
     const maskHash = await hashFile(maskCanonical);
     if (targetHash && maskHash === targetHash) fail(`${layer}.mask bytes must not equal the frozen target`);
+    if (baseCanonical && maskCanonical === baseCanonical) fail(`${layer}.mask may not reference the bare base`);
+    if (baseHash && maskHash === baseHash) fail(`${layer}.mask bytes must not equal the bare base`);
     mask = await readMaskRgba(maskPath);
   } catch (error) { fail(`${layer} mask read failed: ${error.message}`); continue; }
   let content = null;
