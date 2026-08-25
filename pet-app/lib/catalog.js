@@ -85,7 +85,24 @@ function loadRedrawnWearables() {
     const manifest = JSON.parse(fs.readFileSync(path.join(
       __dirname, '..', 'public', 'assets', 'art', 'outfit-atlases', 'manifest.json',
     ), 'utf8'));
-    return manifest.modular && typeof manifest.modular === 'object' ? manifest.modular : {};
+    if (!manifest.modular || typeof manifest.modular !== 'object' || Array.isArray(manifest.modular)) return {};
+
+    // A generated manifest can outlive a withdrawn queue item. Do not let a stale or hand-edited
+    // entry make an unapproved pet/item appear as a fitted redraw: the public catalogue is the
+    // release allow-list, while the manifest only supplies artwork for those known definitions.
+    const petIds = new Set(PETS.map((pet) => pet.id));
+    const wearableById = new Map(WEARABLES.map((item) => [item.id, item]));
+    const accepted = {};
+    for (const [key, entry] of Object.entries(manifest.modular)) {
+      const match = /^([^:]+):([1-4]):(.+)$/.exec(key);
+      if (!match || !entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+      const [, petId, stageText, itemId] = match;
+      const item = wearableById.get(itemId);
+      const hasVisibleLayer = ['patch', 'rear', 'front'].some((layer) => typeof entry[layer] === 'string' && entry[layer]);
+      if (!petIds.has(petId) || !item || entry.slot !== item.slot || !hasVisibleLayer) continue;
+      accepted[key] = entry;
+    }
+    return accepted;
   } catch {
     return {};
   }
