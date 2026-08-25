@@ -180,6 +180,11 @@ changes before scaling beyond the two approved head items:
   `semanticComponents` and `emptyByDefault` to every job. Generate four
   direction jobs per item, then pack them; do not represent a 20-cell ImageGen
   collage as one opaque job.
+- `audit-direction-batch-sources.mjs`: run the read-only ingress inventory in
+  parallel before starting any masking worker. It accepts only existing
+  `800x160` RGBA PNG direction strips, reports missing/invalid sources per
+  item, and never normalizes or repairs an ImageGen output. A job is not
+  eligible for masking until all four directions pass this inventory.
 
 These changes preserve the existing two published items while making a failed
 side/back/special cell fail locally and early instead of forcing a new full
