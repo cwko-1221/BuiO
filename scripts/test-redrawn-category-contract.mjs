@@ -103,6 +103,10 @@ check('direction source audit is fail-closed and transform-free', sourceAudit.in
   && sourceAudit.includes('REJECT_PREMASK')
   && sourceAudit.includes('transform.${key} must be false at source ingress')
   && sourceAudit.includes('resizes, converts, packs, or repairs'));
+check('direction ingress audits every expected full redraw before masking', sourceAudit.includes('auditTargetLineage')
+  && sourceAudit.includes('expectedFullRedraw')
+  && sourceAudit.includes('targetLineage')
+  && sourceAudit.includes('--lineage-roots'));
 check('direction source templates preserve frozen coordinates', sourceTemplates.includes('TEMPLATES_CREATED')
   && sourceTemplates.includes('800x160') && sourceTemplates.includes('transformed: false')
   && sourceTemplates.includes('baseSha256'));

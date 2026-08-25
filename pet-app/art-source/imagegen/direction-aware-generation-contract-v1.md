@@ -181,10 +181,16 @@ changes before scaling beyond the two approved head items:
   direction jobs per item, then pack them; do not represent a 20-cell ImageGen
   collage as one opaque job.
 - `audit-direction-batch-sources.mjs`: run the read-only ingress inventory in
-  parallel before starting any masking worker. It accepts only existing
-  `800x160` RGBA PNG direction strips, reports missing/invalid sources per
-  item, and never normalizes or repairs an ImageGen output. A job is not
-  eligible for masking until all four directions pass this inventory.
+  parallel before starting any masking worker. It first invokes the shared
+  `audit-redrawn-target-lineage.mjs` policy for every job's
+  `expectedFullRedraw`, rejecting missing targets, non-RGBA atlases and any
+  target whose bytes match a prior composite/recompose output. It then accepts
+  only existing `800x160` RGBA PNG direction strips, reports missing/invalid
+  sources per item, and never normalizes or repairs an ImageGen output. A job
+  is not eligible for masking until both the target-lineage audit and all four
+  direction sources pass this inventory. Use `--lineage-roots` to identify the
+  historical output roots that must be scanned; the default is
+  `artifacts,pet-app/art-source/imagegen`.
 - `create-direction-source-templates.mjs`: copy the frozen pet atlas rows into
   four exact `800x160` RGBA authoring canvases (front, side-right, back,
   special), recording the base hash and cell mapping. These are blank

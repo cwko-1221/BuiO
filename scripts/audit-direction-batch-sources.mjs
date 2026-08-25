@@ -14,6 +14,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
+import { auditTargetLineage } from './lib/audit-redrawn-target-lineage.mjs';
 
 const argv = process.argv.slice(2);
 const valueFor = (name) => {
@@ -26,7 +27,7 @@ const valueFor = (name) => {
 
 const queuePath = valueFor('queue');
 if (!queuePath) {
-  console.error('usage: node scripts/audit-direction-batch-sources.mjs --queue <queue.json> [--pet id] [--stage n] [--output report.json] [--concurrency n]');
+  console.error('usage: node scripts/audit-direction-batch-sources.mjs --queue <queue.json> [--pet id] [--stage n] [--output report.json] [--concurrency n] [--lineage-roots root[,root...]]');
   process.exit(1);
 }
 const petFilter = valueFor('pet');
@@ -34,6 +35,8 @@ const stageValue = valueFor('stage');
 const stageFilter = stageValue === null ? null : Number(stageValue);
 if (stageFilter !== null && !Number.isInteger(stageFilter)) throw new Error('--stage must be an integer');
 const outputPath = valueFor('output');
+const lineageRootsInput = valueFor('lineage-roots') ?? 'artifacts,pet-app/art-source/imagegen';
+const lineageRoots = lineageRootsInput.split(',').map((value) => value.trim()).filter(Boolean);
 const concurrencyValue = valueFor('concurrency');
 const concurrency = Math.max(1, Math.min(16, Number(concurrencyValue ?? 8)));
 if (!Number.isInteger(concurrency)) throw new Error('--concurrency must be an integer');
@@ -50,6 +53,27 @@ const jobs = queue.jobs.filter((job) => (
   && (stageFilter === null || job.stage === stageFilter)
 ));
 if (jobs.length === 0) throw new Error('no queue jobs matched the requested filters');
+
+// Every queue job names an expected complete redraw. Run the same immutable
+// target-lineage audit used by the masking batch before source shape work is
+// considered ready. A shared cache keeps the recursive composite scan one
+// pass per root set while each target still gets its own hash/metadata check.
+const lineageCache = new Map();
+const lineageByKey = new Map();
+let lineageCursor = 0;
+const auditLineageWorker = async () => {
+  while (true) {
+    const index = lineageCursor;
+    lineageCursor += 1;
+    if (index >= jobs.length) return;
+    const job = jobs[index];
+    const target = typeof job.expectedFullRedraw === 'string' ? job.expectedFullRedraw : null;
+    lineageByKey.set(job.key, target
+      ? await auditTargetLineage({ targetInput: target, rootsInput: lineageRoots, candidateCache: lineageCache })
+      : { verdict: 'REJECT', target: null, scan: { roots: lineageRoots, candidateCount: 0, compositeHashMatches: [] }, errors: ['expectedFullRedraw path is missing'], warnings: [] });
+  }
+};
+await Promise.all(Array.from({ length: Math.min(concurrency, jobs.length) }, auditLineageWorker));
 
 const sources = [];
 for (const job of jobs) {
@@ -136,13 +160,17 @@ for (const entry of sources) {
 }
 const jobResults = jobs.map((job) => {
   const directionResults = byKey.get(job.key) ?? [];
-  const pass = directionResults.length === 4 && directionResults.every((entry) => entry.verdict === 'PASS_SOURCE_SHAPE');
+  const lineage = lineageByKey.get(job.key) ?? { verdict: 'REJECT', errors: ['target-lineage audit did not run'] };
+  const sourceShapePass = directionResults.length === 4 && directionResults.every((entry) => entry.verdict === 'PASS_SOURCE_SHAPE');
+  const pass = sourceShapePass && lineage.verdict === 'PASS';
   return {
     key: job.key,
     petId: job.petId,
     stage: job.stage,
     wearableId: job.wearableId,
     status: pass ? 'READY_FOR_MASKING_PREFLIGHT' : 'REJECT_PREMASK',
+    sourceShapePass,
+    targetLineage: lineage,
     directionResults,
   };
 });
@@ -151,6 +179,13 @@ const summary = {
   queue: relative(resolveInput(queuePath)),
   filters: { pet: petFilter, stage: stageFilter },
   expected: EXPECTED,
+  targetLineage: {
+    required: true,
+    roots: lineageRoots,
+    audit: 'scripts/audit-redrawn-target-lineage.mjs',
+    passedJobs: jobResults.filter((job) => job.targetLineage?.verdict === 'PASS').length,
+    rejectedJobs: jobResults.filter((job) => job.targetLineage?.verdict !== 'PASS').length,
+  },
   concurrency,
   jobCount: jobs.length,
   directionSources: sources.length,
