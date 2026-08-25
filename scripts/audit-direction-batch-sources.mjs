@@ -76,6 +76,10 @@ for (const job of jobs) {
     if (seenDirections.has(id)) errors.push(`duplicate direction id: ${id}`);
     seenDirections.add(id);
     if (!source) errors.push('source path is missing');
+    const transform = direction?.transform ?? {};
+    for (const key of ['resize', 'rotate', 'mirror', 'translate']) {
+      if (transform[key] === true) errors.push(`transform.${key} must be false at source ingress`);
+    }
     sources.push({
       key: job.key,
       petId: job.petId,
