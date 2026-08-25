@@ -363,7 +363,12 @@ class StudentApp {
       return entry?[{id,entry}]:[];
     });
     const hiddenSlots=new Set(registered.flatMap(({entry})=>entry.occludes||[]));
-    const redraws=registered.filter(({entry})=>!hiddenSlots.has(entry.slot));
+    // The equipped array is an API payload, not a layer order. Match the Phaser compositor's
+    // canonical rear -> body -> patch -> front ordering so the preview cannot disagree with the
+    // room when a child equips the same pieces in a different sequence.
+    const redraws=registered
+      .filter(({entry})=>!hiddenSlots.has(entry.slot))
+      .sort((a,b)=>PetAvatar.redrawnSlotOrder(a.entry.slot)-PetAvatar.redrawnSlotOrder(b.entry.slot)||a.id.localeCompare(b.id));
     // A complete outfit already contains every physical item. A modular redraw replaces only its
     // registered piece; unfinished slots and auras continue through the established placement.
     const legacyIds=fullOutfit
@@ -394,6 +399,9 @@ class StudentApp {
       ? redraws.filter(({id})=>id.startsWith('aura-'))
       : redraws;
     const layerData=modularRedraws.map(({entry}) => ({
+      // Keep the slot in the diagnostic payload as well as the URLs. It makes a preview's layer
+      // order inspectable in browser QA without changing the compositor's pixel inputs.
+      slot: entry.slot,
       rear: entry.rear || '', erase: entry.erase || '', patch: entry.patch || '',
       frontErase: entry.frontErase || '', front: entry.front || '',
     }));
@@ -551,7 +559,7 @@ class StudentApp {
   private hydratePreviewCanvases() {
     document.querySelectorAll<HTMLCanvasElement>('.figure-preview-canvas').forEach((canvas) => {
       const base=canvas.dataset.base ? decodeURIComponent(canvas.dataset.base) : '';
-      let layers:{rear:string;erase:string;patch:string;frontErase:string;front:string}[]=[];
+      let layers:{slot?:string;rear:string;erase:string;patch:string;frontErase:string;front:string}[]=[];
       try { layers=canvas.dataset.layers ? JSON.parse(decodeURIComponent(canvas.dataset.layers)) : []; } catch { layers=[]; }
       const ctx=canvas.getContext('2d'); if(!ctx||!base)return;
       const load=(url:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{

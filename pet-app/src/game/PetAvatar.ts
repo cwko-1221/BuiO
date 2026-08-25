@@ -96,6 +96,16 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     return `redrawn-${definition.id}-${stage}-${id}-${layer}`;
   }
 
+  /**
+   * Canonical pass order for modular redraws.  The room compositor and the wardrobe preview must
+   * use the same order: the saved outfit array is user input and is not a rendering order.
+   * Keeping this in one place prevents a preview from disagreeing with the in-room result when a
+   * multi-slot outfit was saved in a different order (for example face, head, then back).
+   */
+  static redrawnSlotOrder(slot: string) {
+    return ({ aura: 0, back: 1, neck: 2, head: 3, face: 4 } as Record<string, number>)[slot] ?? 9;
+  }
+
   /** Load only registered redraw layers. Missing equipment stays invisible instead of reverting
    * to the old free-positioned sticker artwork on an animated pet. */
   static preloadRedrawnWearables(
@@ -190,8 +200,10 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     const context = canvas.getContext('2d');
     if (!context) return undefined;
     const source = (textureKey: string) => scene.textures.get(textureKey).getSourceImage() as CanvasImageSource;
-    const slotOrder: Record<string, number> = { aura: 0, back: 1, neck: 2, head: 3, face: 4 };
-    const ordered = [...entries].sort((a, b) => (slotOrder[a.entry.slot] ?? 9) - (slotOrder[b.entry.slot] ?? 9));
+    const ordered = [...entries].sort((a, b) => (
+      PetAvatar.redrawnSlotOrder(a.entry.slot) - PetAvatar.redrawnSlotOrder(b.entry.slot)
+      || a.id.localeCompare(b.id)
+    ));
 
     // Anything physically behind the pet must exist before the body is painted.
     for (const { id, entry } of ordered) {

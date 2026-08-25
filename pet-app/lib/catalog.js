@@ -70,7 +70,29 @@ function loadOutfitAtlases() {
     const manifest = JSON.parse(fs.readFileSync(path.join(
       __dirname, '..', 'public', 'assets', 'art', 'outfit-atlases', 'manifest.json',
     ), 'utf8'));
-    return manifest.atlases && typeof manifest.atlases === 'object' ? manifest.atlases : {};
+    if (!manifest.atlases || typeof manifest.atlases !== 'object' || Array.isArray(manifest.atlases)) return {};
+
+    // The manifest is generated artwork, not an authority to re-release a retired pet or an
+    // unknown item.  Keep complete-outfit atlases behind the same public-catalogue allow-list as
+    // modular layers.  This matters after a queue item is withdrawn: a stale atlas must not become
+    // playable merely because a saved outfit happens to have the old signature.
+    const petIds = new Set(PETS.map((pet) => pet.id));
+    const wearableIds = new Set(WEARABLES.map((item) => item.id));
+    const accepted = {};
+    for (const [key, url] of Object.entries(manifest.atlases)) {
+      if (typeof url !== 'string' || !url) continue;
+      const match = /^([^:]+):([1-4]):([^:]+)$/.exec(key);
+      if (!match) continue;
+      const [, petId, stageText, signature] = match;
+      if (!petIds.has(petId)) continue;
+      const ids = signature.split('+');
+      if (!ids.length || ids.length > 5 || new Set(ids).size !== ids.length) continue;
+      // Auras are environmental layers and are intentionally never baked into a complete
+      // physical outfit.  The client removes them from its signature as an additional guard.
+      if (ids.some((id) => id.startsWith('aura-') || !wearableIds.has(id))) continue;
+      accepted[key] = url;
+    }
+    return accepted;
   } catch {
     return {};
   }

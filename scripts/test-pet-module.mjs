@@ -87,6 +87,18 @@ for(const sheet of atlases){
 }
 const redrawManifest=JSON.parse(await fs.readFile(path.join(artRoot,'outfit-atlases/manifest.json'),'utf8'));
 assert.deepEqual(catalog.redrawnWearables,redrawManifest.modular||{},'bootstrap redraw catalogue differs from its manifest');
+const releasedPetIds=new Set(catalog.pets.map((pet)=>pet.id));
+const releasedWearableIds=new Set(catalog.wearables.map((item)=>item.id));
+for(const [key,url] of Object.entries(catalog.outfitAtlases)){
+  const match=/^([^:]+):([1-4]):([^:]+)$/.exec(key);
+  assert.ok(match,`${key} is not a valid complete-outfit key`);
+  const [,petId,,signature]=match;
+  const ids=signature.split('+');
+  assert.ok(releasedPetIds.has(petId),`${key} exposes a withdrawn pet`);
+  assert.ok(ids.length<=5&&new Set(ids).size===ids.length,`${key} has an invalid outfit signature`);
+  assert.ok(ids.every((id)=>releasedWearableIds.has(id)&&!id.startsWith('aura-')),`${key} contains a non-physical or unknown item`);
+  assert.equal(typeof url,'string',`${key} has no atlas URL`);
+}
 for(const [key,layers] of Object.entries(catalog.redrawnWearables)){
   assert.match(key,/^[a-z0-9-]+:[1-4]:(?:head|face|neck|back)-\d{2}$/);
   assert.ok(['head','face','neck','back'].includes(layers.slot),`${key} has an invalid redraw slot`);

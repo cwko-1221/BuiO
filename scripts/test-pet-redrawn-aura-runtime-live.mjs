@@ -88,12 +88,18 @@ try {
     data: { itemId: 'aura-01', quantity: 1 },
     headers: { 'Idempotency-Key': 'redrawn-aura-01' },
   }), 'aura-01');
+  await ok(await context.request.post('/api/pet/shop/purchase', {
+    data: { itemId: 'head-05', quantity: 1 },
+    headers: { 'Idempotency-Key': 'redrawn-aura-head-05' },
+  }), 'head-05');
   bootstrap = await ok(await context.request.get('/api/pet/bootstrap'), 'bootstrap after purchase');
   const pet = bootstrap.pets.find((entry) => entry.speciesId === 'starpatch-cat');
   assert.ok(pet, 'starpatch-cat missing');
   await ok(await context.request.post(`/api/pet/pets/${pet.id}/activate`), 'activate');
   await ok(await context.request.put(`/api/pet/pets/${pet.id}/outfit`, {
-    data: { wearableIds: ['aura-01'] },
+    // Deliberately save the slots in the opposite order from the compositor. Preview and room
+    // must still agree on aura -> head rather than treating the API array as z-order.
+    data: { wearableIds: ['head-05', 'aura-01'] },
   }), 'aura outfit');
 
   // Toggle this test-only bootstrap augmentation without touching the production catalog.
@@ -137,6 +143,14 @@ try {
   assert.equal(registered.worn, 0, 'registered aura fell through to legacy wearable placement');
   assert.deepEqual(registered.auraLayerKeys.map((entry) => entry.loaded), [true, true, true]);
 
+  await page.locator('[data-action="open-outfit"]').click();
+  await page.locator('.figure-preview-canvas[data-ready="true"]').waitFor({ timeout: 5000 });
+  const previewOrder = await page.locator('.figure-preview-canvas[data-ready="true"]').evaluate((canvas) => (
+    JSON.parse(decodeURIComponent(canvas.dataset.layers || '[]')).map((entry) => entry.slot)
+  ));
+  assert.deepEqual(previewOrder, ['aura', 'head'], 'preview used saved outfit order instead of canonical layer order');
+  await page.locator('[data-action="close-modal"]').click();
+
   // Remove only the injected entry. The same equipped item must then use the compatibility
   // artwork, proving that fallback remains available for auras not yet redrawn.
   injectRegisteredAura = false;
@@ -144,13 +158,14 @@ try {
   await page.locator('#game-root canvas').waitFor();
   await page.waitForFunction(() => {
     const avatar = window.__petGame?.scene?.getScene('Bedroom')?.avatar;
-    return avatar?.sprite?.texture?.key === 'atlas-starpatch-cat-1' && avatar?.worn?.length === 1;
+    return avatar?.sprite?.texture?.key === 'redrawn-composite-starpatch-cat-1-head-05'
+      && avatar?.worn?.length === 1;
   }, null, { timeout: 15000 });
   const fallback = await page.evaluate(() => {
     const avatar = window.__petGame.scene.getScene('Bedroom').avatar;
     return { texture: avatar.sprite.texture.key, worn: avatar.worn.length, slot: avatar.worn[0]?.slotKey };
   });
-  assert.deepEqual(fallback, { texture: 'atlas-starpatch-cat-1', worn: 1, slot: 'aura' });
+  assert.deepEqual(fallback, { texture: 'redrawn-composite-starpatch-cat-1-head-05', worn: 1, slot: 'aura' });
   assert.deepEqual(errors, [], errors.join('\n'));
   console.log('✓ registered aura uses rear/patch/front atlas layers with no legacy sticker');
   console.log('✓ unregistered aura preserves legacy fallback');
