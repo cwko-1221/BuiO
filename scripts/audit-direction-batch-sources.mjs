@@ -38,10 +38,10 @@ const outputPath = valueFor('output');
 const lineageRootsInput = valueFor('lineage-roots') ?? 'artifacts,pet-app/art-source/imagegen';
 const lineageRoots = lineageRootsInput.split(',').map((value) => value.trim()).filter(Boolean);
 const concurrencyValue = valueFor('concurrency');
-// Four workers are enough to keep the missing-source checks and any future
-// Sharp metadata reads moving without triggering native resource pressure on
-// the complete three-pet stage-one queue. Explicit values are bounded too.
-const concurrency = Math.max(1, Math.min(4, Number(concurrencyValue ?? 4)));
+// Two workers keep the missing-source checks and future Sharp metadata reads
+// moving without triggering native resource pressure on the complete
+// three-pet stage-one queue. Explicit values are bounded too.
+const concurrency = Math.max(1, Math.min(2, Number(concurrencyValue ?? 2)));
 if (!Number.isInteger(concurrency)) throw new Error('--concurrency must be an integer');
 const lineageConcurrencyValue = valueFor('lineage-concurrency');
 // Keep the default conservative: the recursive composite-hash scan is shared,
