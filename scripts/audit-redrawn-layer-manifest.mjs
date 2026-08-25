@@ -67,13 +67,21 @@ const readRgba = async (input) => {
 const errors = [];
 const warnings = [];
 const fail = (message) => errors.push(message);
+if (manifest.schemaVersion !== 1) fail('schemaVersion must be 1');
 const layerEntries = manifest.layers && typeof manifest.layers === 'object' ? manifest.layers : {};
+if (!manifest.layers || typeof manifest.layers !== 'object' || Array.isArray(manifest.layers)) fail('layers must be an object');
 const identity = manifest.identity ?? {};
 for (const field of ['petId', 'stage', 'wearableId', 'slot']) {
   if (identity[field] === undefined || identity[field] === '') fail(`identity.${field} is required`);
 }
 if (JSON.stringify(manifest.layerOrder) !== JSON.stringify(ORDER)) fail(`layerOrder must be exactly ${ORDER.join('/')}`);
+if (manifest.geometry?.width !== WIDTH || manifest.geometry?.height !== HEIGHT
+  || manifest.geometry?.cellWidth !== CELL || manifest.geometry?.cellHeight !== CELL
+  || manifest.geometry?.columns !== COLUMNS || manifest.geometry?.rows !== ROWS) fail('geometry must declare the exact 800x640, 160-cell atlas');
 if (manifest.geometry?.transformAllowed !== false) fail('geometry.transformAllowed must be false');
+if (!Array.isArray(manifest.emptyByDefault)) fail('emptyByDefault must be an array');
+if (typeof manifest.target !== 'string' || !manifest.target) fail('target path is required');
+if (typeof manifest.base !== 'string' || !manifest.base) fail('base path is required');
 for (const direction of manifest.emptyByDefault ?? []) {
   if (!(direction in DIRECTION_ROWS)) fail(`unknown emptyByDefault direction ${direction}`);
 }
