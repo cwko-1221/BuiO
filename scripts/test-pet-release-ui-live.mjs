@@ -140,6 +140,63 @@ try {
   await page.screenshot({ path: path.join(artifactDir, '01-outfit-cloud-cap-preview-ipad-landscape.png') });
   await page.locator('[data-action="close-modal"]').click();
 
+  // Exercise the browser compositor's erase pass independently of the production cloud-cap
+  // entry. The released cap currently needs only its opaque patch, so inject a test-only,
+  // fully-opaque 160px erase mask and prove that the preview becomes exactly the patch's first
+  // cell. Using the compressed base atlas as a mask would make destination-out alpha-dependent
+  // and would test WebP rounding instead of the compositor order.
+  // This catches the old CSS-layer regression where erase/frontErase was silently ignored, while
+  // leaving the production manifest and art untouched.
+  await page.route('**/api/pet/bootstrap', async (route) => {
+    const response = await route.fetch();
+    const data = await response.json();
+    const cat = data.catalog.pets.find((entry) => entry.id === 'starpatch-cat');
+    const cloud = data.catalog.redrawnWearables['starpatch-cat:1:head-06'];
+    assert.ok(cloud?.patch, 'cloud-cap patch missing for compositor erase fixture');
+    const opaqueErase = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="160" height="160" fill="white"/></svg>')}`;
+    data.catalog.redrawnWearables['starpatch-cat:1:head-06'] = { ...cloud, erase: opaqueErase };
+    await route.fulfill({ response, body: JSON.stringify(data) });
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('#game-root canvas').waitFor();
+  await page.locator('[data-action="open-outfit"]').click();
+  await page.locator('.figure-preview-canvas[data-ready="true"]').waitFor({ timeout: 5000 });
+  const erasedCloudPreview = await page.locator('.figure-preview-canvas[data-ready="true"]').evaluate(async (canvas) => {
+    const entries = JSON.parse(decodeURIComponent(canvas.dataset.layers || ''));
+    const layer = entries.find((entry) => entry.patch);
+    if (!layer?.erase || !layer.patch) throw new Error('cloud-cap erase fixture was not loaded');
+    const image = await new Promise((resolve, reject) => {
+      const loaded = new Image();
+      loaded.onload = () => resolve(loaded);
+      loaded.onerror = reject;
+      loaded.src = layer.patch;
+    });
+    const expectedCanvas = document.createElement('canvas');
+    expectedCanvas.width = canvas.width;
+    expectedCanvas.height = canvas.height;
+    const expectedContext = expectedCanvas.getContext('2d');
+    if (!expectedContext) throw new Error('expected compositor canvas unavailable');
+    expectedContext.drawImage(image, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+    const actual = canvas.getContext('2d')?.getImageData(0, 0, canvas.width, canvas.height).data;
+    const expected = expectedContext.getImageData(0, 0, canvas.width, canvas.height).data;
+    if (!actual) throw new Error('preview compositor pixels unavailable');
+    let mismatch = 0;
+    let actualAlpha = 0;
+    for (let index = 0; index < actual.length; index += 4) {
+      if (actual[index + 3]) actualAlpha += 1;
+      for (let channel = 0; channel < 4; channel += 1) {
+        if (actual[index + channel] !== expected[index + channel]) mismatch += 1;
+      }
+    }
+    return { mismatch, actualAlpha, erase: layer.erase, patch: layer.patch, width: canvas.width, height: canvas.height };
+  });
+  console.log('cloud erase fixture metrics', erasedCloudPreview);
+  assert.equal(erasedCloudPreview.mismatch, 0,
+    `cloud-cap preview must apply erase before patch with exact first-cell pixels (mismatch=${erasedCloudPreview.mismatch}, alpha=${erasedCloudPreview.actualAlpha})`);
+  assert.ok(erasedCloudPreview.actualAlpha > 0, 'cloud-cap patch unexpectedly rendered empty');
+  await page.locator('[data-action="close-modal"]').click();
+  await page.unroute('**/api/pet/bootstrap');
+
   const captureRoom = async (width, height, filename) => {
     await page.setViewportSize({ width, height });
     await page.waitForTimeout(500);
