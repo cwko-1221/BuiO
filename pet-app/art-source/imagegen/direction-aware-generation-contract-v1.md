@@ -185,6 +185,11 @@ changes before scaling beyond the two approved head items:
   `800x160` RGBA PNG direction strips, reports missing/invalid sources per
   item, and never normalizes or repairs an ImageGen output. A job is not
   eligible for masking until all four directions pass this inventory.
+- `create-direction-source-templates.mjs`: copy the frozen pet atlas rows into
+  four exact `800x160` RGBA authoring canvases (front, side-right, back,
+  special), recording the base hash and cell mapping. These are blank
+  production-coordinate templates for a redraw artist/editor, not wearable
+  candidates and never runtime inputs by themselves.
 
 These changes preserve the existing two published items while making a failed
 side/back/special cell fail locally and early instead of forcing a new full

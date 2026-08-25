@@ -23,6 +23,7 @@ const paths = {
   faceQa: 'scripts/qa-face-wearable-apertures.mjs',
   layerManifestAudit: 'scripts/audit-redrawn-layer-manifest.mjs',
   sourceAudit: 'scripts/audit-direction-batch-sources.mjs',
+  sourceTemplates: 'scripts/create-direction-source-templates.mjs',
   runtime: 'pet-app/src/game/PetAvatar.ts',
   preview: 'pet-app/src/main.ts',
   face: 'pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/masked-face-01-proof/independent-acceptance-spec/face-01-independent-acceptance-spec.json',
@@ -31,9 +32,9 @@ const paths = {
   aura: 'scripts/redrawn-category-specs/aura-straddled.template.json',
   regression: 'scripts/redrawn-category-specs/batch-set-head05-head06-regression.json',
 };
-const [contract, face, neck, back, aura, regression, runner, solver, layeredSolver, frontEraseQa, faceQa, layerManifestAudit, sourceAudit, runtime, preview] = await Promise.all([
+const [contract, face, neck, back, aura, regression, runner, solver, layeredSolver, frontEraseQa, faceQa, layerManifestAudit, sourceAudit, sourceTemplates, runtime, preview] = await Promise.all([
   readJson(paths.contract), readJson(paths.face), readJson(paths.neck), readJson(paths.back), readJson(paths.aura), readJson(paths.regression),
-  readText(paths.runner), readText(paths.solver), readText(paths.layeredSolver), readText(paths.frontEraseQa), readText(paths.faceQa), readText(paths.layerManifestAudit), readText(paths.sourceAudit), readText(paths.runtime), readText(paths.preview),
+  readText(paths.runner), readText(paths.solver), readText(paths.layeredSolver), readText(paths.frontEraseQa), readText(paths.faceQa), readText(paths.layerManifestAudit), readText(paths.sourceAudit), readText(paths.sourceTemplates), readText(paths.runtime), readText(paths.preview),
 ]);
 
 const sourceOver = (background, foreground) => {
@@ -102,6 +103,9 @@ check('direction source audit is fail-closed and transform-free', sourceAudit.in
   && sourceAudit.includes('REJECT_PREMASK')
   && sourceAudit.includes('transform.${key} must be false at source ingress')
   && sourceAudit.includes('resizes, converts, packs, or repairs'));
+check('direction source templates preserve frozen coordinates', sourceTemplates.includes('TEMPLATES_CREATED')
+  && sourceTemplates.includes('800x160') && sourceTemplates.includes('transformed: false')
+  && sourceTemplates.includes('baseSha256'));
 
 const faceBack = face.cells.filter((cell) => cell.row === 2);
 check('face declares exactly 25 legal lens apertures', face.globalRules.expectedTotalTrueLensApertures === 25 && face.cells.reduce((sum, cell) => sum + cell.trueApertures, 0) === 25);
