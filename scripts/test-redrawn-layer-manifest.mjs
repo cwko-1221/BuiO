@@ -25,6 +25,11 @@ for (let y = 10; y < 30; y += 1) for (let x = 10; x < 30; x += 1) {
   const pixel = y * width + x; const at = pixel * channels;
   patchMask[at + 3] = 255; patch.set(rgba(220, 40, 40, 255), at); target.set(rgba(220, 40, 40, 255), at);
 }
+// A topology bridge may cover an unchanged alpha-zero base pixel. The auditor
+// must preserve its hidden RGBA bytes instead of zeroing them during no-op over.
+base.set(rgba(7, 8, 9, 0), (15 * width + 15) * channels);
+target.set(rgba(7, 8, 9, 0), (15 * width + 15) * channels);
+patch.set(rgba(0, 0, 0, 0), (15 * width + 15) * channels);
 for (let y = 10; y < 30; y += 1) for (let x = 170; x < 190; x += 1) {
   const pixel = y * width + x; eraseMask[pixel * channels + 3] = 255; target.fill(0, pixel * channels, pixel * channels + channels);
 }

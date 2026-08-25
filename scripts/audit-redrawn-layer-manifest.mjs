@@ -45,8 +45,9 @@ const writeRgba = (buffer, pixel, rgba) => {
 const over = (background, foreground) => {
   const ba = background[3] / 255;
   const fa = foreground[3] / 255;
+  if (fa === 0) return [...background];
   const oa = fa + ba * (1 - fa);
-  if (oa <= 0) return [0, 0, 0, 0];
+  if (oa <= 0) return [...background];
   return [
     Math.round((foreground[0] * fa + background[0] * ba * (1 - fa)) / oa),
     Math.round((foreground[1] * fa + background[1] * ba * (1 - fa)) / oa),
@@ -280,8 +281,12 @@ const technicalErrors = Object.values(layerMetrics).reduce((sum, layer) => sum
   + (layer.nonBinaryMaskAlphaPixels ?? 0)
   + (layer.maskTransparentRgbNonZeroPixels ?? 0)
   + (layer.transparentLayerRgbNonZeroPixels ?? 0)
-  + (layer.layerOutsideMaskPixels ?? 0)
-  + (layer.maskWithoutLayerPixels ?? 0), 0);
+  + (layer.layerOutsideMaskPixels ?? 0), 0);
+for (const [layer, details] of Object.entries(layerMetrics)) {
+  if ((details.maskWithoutLayerPixels ?? 0) > 0) {
+    warnings.push(`${layer}: ${details.maskWithoutLayerPixels} support-mask pixels have no visible content; allowed as unchanged target/base coverage but review semantically`);
+  }
+}
 const accepted = errors.length === 0
   && technicalErrors === 0
   && targetBaseOutsideMaskMismatchPixels === 0
