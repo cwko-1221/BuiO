@@ -14,6 +14,7 @@ import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import sharp from 'sharp';
+import { auditTargetLineage } from './lib/audit-redrawn-target-lineage.mjs';
 
 const argv = process.argv.slice(2);
 const positional = argv.filter((argument) => !argument.startsWith('--'));
@@ -27,6 +28,8 @@ const option = (name, fallback) => {
 const petFilter = option('pet', null);
 const limit = Math.max(1, Math.min(100, Number.parseInt(option('limit', '20'), 10) || 20));
 const pixelThreshold = Math.max(0, Math.min(255, Number.parseInt(option('threshold', '8'), 10) || 8));
+const lineageRoots = option('lineage-roots', 'artifacts,pet-app/art-source/imagegen')
+  .split(',').map((value) => value.trim()).filter(Boolean);
 
 const ROOT = process.cwd();
 const resolveInput = (value, base = ROOT) => path.isAbsolute(value) ? value : path.resolve(base, value);
@@ -158,6 +161,9 @@ const inspectEvidence = async (files, candidatePath) => {
 };
 
 const imageCache = new Map();
+const lineageCandidateCache = new Map();
+const lineageHashCache = new Map();
+const lineageCache = new Map();
 const readImage = async (filePath) => {
   const key = path.normalize(filePath).toLowerCase();
   if (!imageCache.has(key)) {
@@ -210,6 +216,19 @@ const measureAgainstBase = async (targetPath, basePath) => {
   };
 };
 
+const auditCandidateLineage = async (candidatePath) => {
+  const key = path.normalize(candidatePath).toLowerCase();
+  if (!lineageCache.has(key)) {
+    lineageCache.set(key, auditTargetLineage({
+      targetInput: candidatePath,
+      rootsInput: lineageRoots,
+      candidateCache: lineageCandidateCache,
+      candidateHashCache: lineageHashCache,
+    }));
+  }
+  return lineageCache.get(key);
+};
+
 const queue = await readJson(queueAbsolutePath);
 const jobs = Array.isArray(queue.jobs) ? queue.jobs : [];
 const filteredJobs = jobs.filter((job) => !petFilter || job.petId === petFilter);
@@ -226,6 +245,7 @@ for (const job of filteredJobs) {
     if (!exists) continue;
     const evidence = await inspectEvidence(evidenceFiles, candidatePath);
     const measurement = await measureAgainstBase(candidatePath, basePath);
+    const targetLineage = await auditCandidateLineage(candidatePath);
     const pathDiagnostic = /body[-_ ]?locked|author[-_ ]?locked|locked[-_ ]?target|production[-_ ]?lock|never_publish|diagnostic_only/i.test(candidatePath);
     const diagnosticOnly = pathDiagnostic;
     const evidenceReject = evidence.independentReject;
@@ -233,12 +253,15 @@ for (const job of filteredJobs) {
       ? 'NEVER_PUBLISH_DIAGNOSTIC_BODY_LOCK'
       : !measurement.readable || !measurement.validCanvas
         ? 'REJECT_INVALID_CANVAS'
+        : targetLineage.verdict !== 'PASS'
+          ? 'REJECT_TARGET_LINEAGE'
         : evidenceReject
           ? 'REJECT_INDEPENDENT_EVIDENCE'
           : 'RUN_MASK_AND_SOURCE_OVER_PRECHECK';
     const priority = (recommendation === 'RUN_MASK_AND_SOURCE_OVER_PRECHECK' ? 2_000_000 : 0)
       + (evidence.independentPass ? 100_000 : 0)
       - (diagnosticOnly ? 1_000_000 : 0)
+      - (targetLineage.verdict !== 'PASS' ? 750_000 : 0)
       - (evidenceReject ? 500_000 : 0)
       - (measurement.thresholdChangedPixels || Number.MAX_SAFE_INTEGER);
     rows.push({
@@ -251,6 +274,13 @@ for (const job of filteredJobs) {
       candidate: relativeCandidate,
       expectedFullRedraw: path.relative(ROOT, expectedPath),
       diagnosticOnly,
+      targetLineage: {
+        verdict: targetLineage.verdict,
+        target: targetLineage.target,
+        scan: targetLineage.scan,
+        errors: targetLineage.errors,
+        warnings: targetLineage.warnings,
+      },
       evidence: {
         independentPassFound: evidence.independentPass,
         independentRejectFound: evidenceReject,
@@ -273,12 +303,14 @@ const report = {
     petFilter,
     limit,
     pixelThreshold,
+    lineageRoots,
     readOnly: true,
   },
   policy: {
     purpose: 'bounded triage only; no mask, composite, critic or manifest mutation',
     bodyLockedTargets: 'diagnostic only; never substitute for the original full redraw and never publish',
     wholeAtlasDelta: 'priority hint only; it cannot certify body preservation because the wearable mask is not yet known',
+    targetLineage: 'independent target must decode as 800x640 RGBA and must not match any earlier composite/recompose output',
     nextGate: 'run preflight-redrawn-wearable, then exact mask-only audit and independent critic',
   },
   totals: {
@@ -287,6 +319,7 @@ const report = {
     candidatesFound: rows.length,
     readyForMaskPrecheck: rows.filter((row) => row.recommendation === 'RUN_MASK_AND_SOURCE_OVER_PRECHECK').length,
     diagnosticOnly: rows.filter((row) => row.diagnosticOnly).length,
+    rejectedByLineage: rows.filter((row) => row.recommendation === 'REJECT_TARGET_LINEAGE').length,
     rejectedByEvidence: rows.filter((row) => row.recommendation === 'REJECT_INDEPENDENT_EVIDENCE').length,
   },
   priority: rows.slice(0, limit),
