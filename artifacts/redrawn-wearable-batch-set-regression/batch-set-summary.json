@@ -1,0 +1,65 @@
+{
+  "verdict": "DATA_PASS",
+  "mode": "OFFLINE_BATCH_SET_NO_PUBLISH",
+  "configPath": "C:\\Users\\kochu\\Documents\\BuiO\\scripts\\redrawn-category-specs\\batch-set-head05-head06-regression.json",
+  "concurrency": 2,
+  "published": false,
+  "manifestOrRuntimeModified": false,
+  "items": [
+    {
+      "id": "head-05-v3",
+      "exitCode": 0,
+      "verdict": "DATA_PASS",
+      "summaryPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-set-regression\\head-05-v3\\head-05-v3-batch-summary.json",
+      "preflight": {
+        "verdict": "PASS",
+        "missingInputs": [],
+        "batchProcessStarted": true
+      },
+      "publish": {
+        "executed": false,
+        "ready": false,
+        "missing": [
+          "petId",
+          "stage",
+          "wearableId",
+          "slot"
+        ],
+        "blockedByPipeline": false,
+        "script": "scripts/publish-redrawn-wearable.mjs",
+        "args": null,
+        "command": null
+      },
+      "stdout": "{\n  \"verdict\": \"DATA_PASS\",\n  \"summaryPath\": \"C:\\\\Users\\\\kochu\\\\Documents\\\\BuiO\\\\artifacts\\\\redrawn-wearable-batch-set-regression\\\\head-05-v3\\\\head-05-v3-batch-summary.json\",\n  \"markdownPath\": \"C:\\\\Users\\\\kochu\\\\Documents\\\\BuiO\\\\artifacts\\\\redrawn-wearable-batch-set-regression\\\\head-05-v3\\\\head-05-v3-batch-summary.md\",\n  \"maskPath\": \"C:\\\\Users\\\\kochu\\\\Documents\\\\BuiO\\\\artifacts\\\\redrawn-wearable-batch-set-regression\\\\head-05-v3\\\\head-05-v3-canonical-mask.png\",\n  \"failedCells\": [],\n  \"proof\": \"C:\\\\Users\\\\kochu\\\\Documents\\\\BuiO\\\\artifacts\\\\redrawn-wearable-batch-set-regression\\\\head-05-v3\\\\proof-4x\\\\all-frames-left-vs-right-4x.png\",\n  \"expectedComparison\": \"PASS\"\n}",
+      "stderr": ""
+    },
+    {
+      "id": "head-06-v9",
+      "exitCode": 0,
+      "verdict": "DATA_PASS",
+      "summaryPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-set-regression\\head-06-v9\\head-06-v9-batch-summary.json",
+      "preflight": {
+        "verdict": "PASS",
+        "missingInputs": [],
+        "batchProcessStarted": true
+      },
+      "publish": {
+        "executed": false,
+        "ready": false,
+        "missing": [
+          "petId",
+          "stage",
+          "wearableId",
+          "slot"
+        ],
+        "blockedByPipeline": false,
+        "script": "scripts/publish-redrawn-wearable.mjs",
+        "args": null,
+        "command": null
+      },
+      "stdout": "{\n  \"verdict\": \"DATA_PASS\",\n  \"summaryPath\": \"C:\\\\Users\\\\kochu\\\\Documents\\\\BuiO\\\\artifacts\\\\redrawn-wearable-batch-set-regression\\\\head-06-v9\\\\head-06-v9-batch-summary.json\",\n  \"markdownPath\": \"C:\\\\Users\\\\kochu\\\\Documents\\\\BuiO\\\\artifacts\\\\redrawn-wearable-batch-set-regression\\\\head-06-v9\\\\head-06-v9-batch-summary.md\",\n  \"maskPath\": \"C:\\\\Users\\\\kochu\\\\Documents\\\\BuiO\\\\artifacts\\\\redrawn-wearable-batch-set-regression\\\\head-06-v9\\\\head-06-v9-canonical-mask.png\",\n  \"failedCells\": [],\n  \"proof\": \"C:\\\\Users\\\\kochu\\\\Documents\\\\BuiO\\\\artifacts\\\\redrawn-wearable-batch-set-regression\\\\head-06-v9\\\\proof-4x\\\\all-frames-left-vs-right-4x.png\",\n  \"expectedComparison\": \"PASS\"\n}",
+      "stderr": ""
+    }
+  ],
+  "completedUtc": "2026-08-25T05:21:50.397Z"
+}

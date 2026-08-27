@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "verdict": "REJECT_PENDING_AMENDED_ZONE",
+  "stage": "source-semantic",
+  "candidate": "artifacts/head20-attempt6-per-cell/c01/c01-target-independent-full-redraw.png",
+  "lineage": "artifacts/head20-attempt6-per-cell/c01/c01-lineage.json",
+  "reason": "The revised source/mask still conflicts with the closed-helmet contract: 385 natural-ear pixels (270 alpha>=128) lie at x31-37 outside the former window. The controlled amended extension is required; current target does not prove regenerated ear coverage. Independent raw-redraw provenance is also missing.",
+  "independentAudit": "artifacts/head20-attempt6-per-cell/c01/c01-source-acceptance-amended-zone.json",
+  "zoneAmendmentEvidence": "artifacts/head20-attempt6-per-cell/c01/c01-zone-amendment-evidence.json",
+  "metrics": {
+    "exactOutsideWindowDifferencePixels": 0,
+    "candidateDiffPixels": 9610,
+    "components4Connected": 81,
+    "detachedComponentCount": 80,
+    "innerBoundaryRing2pxMismatchPixels": 214,
+    "innerBoundaryRing4pxMismatchPixels": 497,
+    "innerBoundaryRing2NonIntentionalMismatchPixels": 0,
+    "innerBoundaryRing4NonIntentionalMismatchPixels": 0,
+    "intentionalOcclusionMaskDeclared": true,
+    "maskOutsideWindowPixels": 0,
+    "naturalEarPixelsOutsidePreviousZone": 385,
+    "naturalEarOpaquePixelsOutsidePreviousZone": 270,
+    "amendedNaturalEarCoverage": "PENDING_REGENERATED_C01",
+    "rawFullRedrawProvenance": "MISSING",
+    "collarChangedClaim": 0,
+    "naturalEarCoverage": "FAIL_PENDING_AMENDED_ZONE"
+  },
+  "requiredRevision": {
+    "redraw": "c01 only",
+    "preserveDeclaredHelmetWindow": true,
+    "useAmendedExtension": [31, 28, 38, 101],
+    "requireExplicitIntentionalOcclusionMask": true,
+    "maskMustCoverNaturalEarOcclusion": true,
+    "outsideWindowDiff": 0,
+    "boundaryRing2And4NonIntentionalDiff": 0,
+    "detachedComponents": 0,
+    "rawFullRedrawProvenance": "required before acceptance"
+  },
+  "publishable": false
+}

@@ -1,0 +1,313 @@
+{
+  "verdict": "REJECT",
+  "geometry": {
+    "canvas": "800x640",
+    "cell": "160x160",
+    "resized": false,
+    "rotated": false,
+    "shifted": false,
+    "stretched": false
+  },
+  "inputPolicy": {
+    "existingWearableLayerRead": false,
+    "solvedOnlyFrom": [
+      "frozen target",
+      "base",
+      "mask"
+    ],
+    "frontEraseInputPath": "-",
+    "frontEraseDerivedFromComposite": false
+  },
+  "metrics": {
+    "maskPixels": 47020,
+    "maskPixelsWithNoTargetBaseDifference": 0,
+    "nonBinaryMaskAlphaPixels": 0,
+    "maskTransparentRgbNonZeroPixels": 0,
+    "targetBaseDifferencesOutsideMask": 0,
+    "enclosedMaskHolePixels": 90,
+    "cellsWithOneFourConnectedComponent": 7,
+    "forcedErasePixels": 0,
+    "unexpectedUnsolvablePixels": 0,
+    "eraseOutsideMaskPixels": 0,
+    "layerOutsideMaskPixels": 0,
+    "layerTransparentRgbNonZeroPixels": 0,
+    "eraseTransparentRgbNonZeroPixels": 0,
+    "frozenTargetTransparentRgbNonZeroPixels": 48383,
+    "frontEraseVisiblePixels": 0,
+    "frontEraseNonBinaryAlphaPixels": 0,
+    "frontEraseTransparentRgbNonZeroPixels": 0,
+    "frontEraseOutsideMaskPixels": 0,
+    "exactRgbaMismatchPixels": 0
+  },
+  "cells": [
+    {
+      "row": 0,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    }
+  ],
+  "holeCells": [
+    {
+      "row": 0,
+      "column": 0,
+      "fourConnectedComponents": 2,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "fourConnectedComponents": 4,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "fourConnectedComponents": 2,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "fourConnectedComponents": 2,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "fourConnectedComponents": 2,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "fourConnectedComponents": 3,
+      "enclosedHolePixels": 2
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "fourConnectedComponents": 3,
+      "enclosedHolePixels": 5
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "fourConnectedComponents": 11,
+      "enclosedHolePixels": 26
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "fourConnectedComponents": 12,
+      "enclosedHolePixels": 25
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "fourConnectedComponents": 17,
+      "enclosedHolePixels": 32
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "fourConnectedComponents": 2,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "fourConnectedComponents": 3,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "fourConnectedComponents": 2,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    }
+  ],
+  "forcedEraseCoordinates": [],
+  "unexpectedUnsolvableCoordinates": [],
+  "inputs": {
+    "targetPath": "artifacts/head07-compositing/body-lock-v2-strict-tail/locked-target-body-exact.png",
+    "basePath": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "maskPath": "artifacts/head07-compositing/body-lock-v2-strict-tail/mask-alpha-refined-protected-roi.png",
+    "frontErasePath": "-",
+    "sha256": {
+      "target": "cef3138e805b373b5e39f36265f05f664d690ad1acebdcb58e9a27ad6fa2ad85",
+      "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+      "mask": "4ddde6bdec60b1ad4556a5f1e02a8323c5842088a11082db5383277d7cf03033"
+    }
+  },
+  "outputs": {
+    "layerPath": "artifacts\\head07-compositing\\body-lock-v2-strict-tail\\solve-body-lock-v2\\head-07-body-lock-v2-solved-layer.png",
+    "erasePath": "artifacts\\head07-compositing\\body-lock-v2-strict-tail\\solve-body-lock-v2\\head-07-body-lock-v2-erase.png",
+    "frontErasePath": "artifacts\\head07-compositing\\body-lock-v2-strict-tail\\solve-body-lock-v2\\head-07-body-lock-v2-front-erase.png",
+    "compositePath": "artifacts\\head07-compositing\\body-lock-v2-strict-tail\\solve-body-lock-v2\\head-07-body-lock-v2-composite.png",
+    "diffPath": "artifacts\\head07-compositing\\body-lock-v2-strict-tail\\solve-body-lock-v2\\head-07-body-lock-v2-diff.png",
+    "sha256": {
+      "layer": "075638b6a849b47225c143b07ec12ef7fb5443f0b09585c7e0dad179ce3f0bfd",
+      "erase": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f",
+      "frontErase": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f",
+      "composite": "cef3138e805b373b5e39f36265f05f664d690ad1acebdcb58e9a27ad6fa2ad85",
+      "diff": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f"
+    }
+  }
+}

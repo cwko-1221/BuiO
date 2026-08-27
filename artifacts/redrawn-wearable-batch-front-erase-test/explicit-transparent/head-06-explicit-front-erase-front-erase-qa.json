@@ -1,0 +1,40 @@
+{
+  "verdict": "PASS",
+  "sourcePolicy": {
+    "independentInputRequired": true,
+    "compositeRead": false,
+    "derivedFromComposite": false,
+    "sourceCoordinatePreserved": true
+  },
+  "pathPolicy": {
+    "verdict": "PASS",
+    "inputPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-set-regression\\head-06-v9\\compositing\\head-06-v9-batch-front-erase.png",
+    "outputPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\explicit-transparent\\compositing\\head-06-explicit-front-erase-batch-front-erase.png",
+    "canonicalMaskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\explicit-transparent\\head-06-explicit-front-erase-canonical-mask.png",
+    "inputBasenameForbiddenComposite": false
+  },
+  "geometry": {
+    "width": 800,
+    "height": 640,
+    "channels": 4,
+    "transformed": false,
+    "resampled": false
+  },
+  "metrics": {
+    "decodedMismatchPixels": 0,
+    "nonBinaryAlphaPixels": 0,
+    "transparentRgbNonZeroPixels": 0,
+    "outsideCanonicalMaskPixels": 0,
+    "visiblePixels": 0
+  },
+  "inputs": {
+    "inputPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-set-regression\\head-06-v9\\compositing\\head-06-v9-batch-front-erase.png",
+    "outputPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\explicit-transparent\\compositing\\head-06-explicit-front-erase-batch-front-erase.png",
+    "canonicalMaskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\explicit-transparent\\head-06-explicit-front-erase-canonical-mask.png",
+    "sha256": {
+      "input": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f",
+      "output": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f",
+      "canonicalMask": "b4f0fcf3951d482e69e8f3ee7ae4fe77366bb58286b894ecf9e7f0efb81d2518"
+    }
+  }
+}

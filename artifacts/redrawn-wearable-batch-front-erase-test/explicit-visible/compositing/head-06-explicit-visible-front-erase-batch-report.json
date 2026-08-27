@@ -1,0 +1,315 @@
+{
+  "verdict": "REJECT",
+  "geometry": {
+    "canvas": "800x640",
+    "cell": "160x160",
+    "resized": false,
+    "rotated": false,
+    "shifted": false,
+    "stretched": false
+  },
+  "inputPolicy": {
+    "existingWearableLayerRead": false,
+    "solvedOnlyFrom": [
+      "frozen target",
+      "base",
+      "mask",
+      "explicit frontErase input"
+    ],
+    "frontEraseInputPath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-06-canonical-v9-mask.png",
+    "frontEraseDerivedFromComposite": false
+  },
+  "metrics": {
+    "maskPixels": 105837,
+    "maskPixelsWithNoTargetBaseDifference": 0,
+    "nonBinaryMaskAlphaPixels": 0,
+    "maskTransparentRgbNonZeroPixels": 0,
+    "targetBaseDifferencesOutsideMask": 0,
+    "enclosedMaskHolePixels": 0,
+    "cellsWithOneFourConnectedComponent": 20,
+    "forcedErasePixels": 0,
+    "unexpectedUnsolvablePixels": 0,
+    "eraseOutsideMaskPixels": 0,
+    "layerOutsideMaskPixels": 0,
+    "layerTransparentRgbNonZeroPixels": 0,
+    "eraseTransparentRgbNonZeroPixels": 0,
+    "frozenTargetTransparentRgbNonZeroPixels": 39063,
+    "frontEraseVisiblePixels": 105837,
+    "frontEraseNonBinaryAlphaPixels": 0,
+    "frontEraseTransparentRgbNonZeroPixels": 0,
+    "frontEraseOutsideMaskPixels": 0,
+    "exactRgbaMismatchPixels": 105837
+  },
+  "cells": [
+    {
+      "row": 0,
+      "column": 0,
+      "exactRgbaMismatchPixels": 5842,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "exactRgbaMismatchPixels": 5808,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "exactRgbaMismatchPixels": 5808,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "exactRgbaMismatchPixels": 5829,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "exactRgbaMismatchPixels": 5914,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "exactRgbaMismatchPixels": 3839,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "exactRgbaMismatchPixels": 3844,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "exactRgbaMismatchPixels": 3825,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "exactRgbaMismatchPixels": 3845,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "exactRgbaMismatchPixels": 3769,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "exactRgbaMismatchPixels": 6038,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "exactRgbaMismatchPixels": 6129,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "exactRgbaMismatchPixels": 6140,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "exactRgbaMismatchPixels": 6064,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "exactRgbaMismatchPixels": 6077,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "exactRgbaMismatchPixels": 6089,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "exactRgbaMismatchPixels": 4631,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "exactRgbaMismatchPixels": 6108,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "exactRgbaMismatchPixels": 5157,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "exactRgbaMismatchPixels": 5081,
+      "erasePixels": 0
+    }
+  ],
+  "holeCells": [
+    {
+      "row": 0,
+      "column": 0,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    }
+  ],
+  "forcedEraseCoordinates": [],
+  "unexpectedUnsolvableCoordinates": [],
+  "inputs": {
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-06-full-redraw-canonical-v9.png",
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\sprites\\starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\explicit-visible\\head-06-explicit-visible-front-erase-canonical-mask.png",
+    "frontErasePath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-06-canonical-v9-mask.png",
+    "sha256": {
+      "target": "125075c6b9363e7114ade1e70b54a5f46460ebd03e3464f05b5b5a8c143465ad",
+      "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+      "mask": "b4f0fcf3951d482e69e8f3ee7ae4fe77366bb58286b894ecf9e7f0efb81d2518",
+      "frontErase": "e676ed54ef034448bab7930f0d45ae25702981d9644186ac9ac31e9b822332e9"
+    }
+  },
+  "outputs": {
+    "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\explicit-visible\\compositing\\head-06-explicit-visible-front-erase-batch-solved-layer.png",
+    "erasePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\explicit-visible\\compositing\\head-06-explicit-visible-front-erase-batch-erase.png",
+    "frontErasePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\explicit-visible\\compositing\\head-06-explicit-visible-front-erase-batch-front-erase.png",
+    "compositePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\explicit-visible\\compositing\\head-06-explicit-visible-front-erase-batch-composite.png",
+    "diffPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\explicit-visible\\compositing\\head-06-explicit-visible-front-erase-batch-diff.png",
+    "sha256": {
+      "layer": "6429410916c631f07a0f87365ebb199981e076653d3761cd7d27ba81ae888e15",
+      "erase": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f",
+      "frontErase": "b4f0fcf3951d482e69e8f3ee7ae4fe77366bb58286b894ecf9e7f0efb81d2518",
+      "composite": "59a5e1990bede136f4dfa4e5b48fa40955528a49ae5d9a85fc0517442b551d2f",
+      "diff": "a547b6cbfea651f581a8e7626aecf6a73ee4a591028cf41b625d180609c49d69"
+    }
+  }
+}

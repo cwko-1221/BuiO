@@ -1,0 +1,92 @@
+{
+  "verdict": "REJECT",
+  "mode": "OFFLINE_BATCH_SET_NO_PUBLISH",
+  "configPath": "C:\\Users\\kochu\\Documents\\BuiO\\scripts\\redrawn-category-specs\\batch-set-head02-head03-head20-prepared.json",
+  "concurrency": 3,
+  "published": false,
+  "manifestOrRuntimeModified": false,
+  "items": [
+    {
+      "id": "head-02",
+      "exitCode": 2,
+      "verdict": "REJECT",
+      "summaryPath": null,
+      "preflight": {
+        "verdict": "REJECT",
+        "missingInputs": [
+          {
+            "role": "target",
+            "path": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-02-full-redraw-canonical-v1.png"
+          },
+          {
+            "role": "lineage",
+            "path": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-02-proof\\canonical-v1\\target-lineage.json"
+          }
+        ],
+        "batchProcessStarted": false
+      },
+      "publish": {
+        "executed": false,
+        "ready": false,
+        "reason": "missing canonical/config input; rejected before item process start"
+      },
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "id": "head-03",
+      "exitCode": 2,
+      "verdict": "REJECT",
+      "summaryPath": null,
+      "preflight": {
+        "verdict": "REJECT",
+        "missingInputs": [
+          {
+            "role": "target",
+            "path": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-03-full-redraw-canonical-v1.png"
+          },
+          {
+            "role": "lineage",
+            "path": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-03-proof\\canonical-v1\\target-lineage.json"
+          }
+        ],
+        "batchProcessStarted": false
+      },
+      "publish": {
+        "executed": false,
+        "ready": false,
+        "reason": "missing canonical/config input; rejected before item process start"
+      },
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "id": "head-20",
+      "exitCode": 2,
+      "verdict": "REJECT",
+      "summaryPath": null,
+      "preflight": {
+        "verdict": "REJECT",
+        "missingInputs": [
+          {
+            "role": "target",
+            "path": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-full-redraw-canonical-v1.png"
+          },
+          {
+            "role": "lineage",
+            "path": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-20-proof\\canonical-v1\\target-lineage.json"
+          }
+        ],
+        "batchProcessStarted": false
+      },
+      "publish": {
+        "executed": false,
+        "ready": false,
+        "reason": "missing canonical/config input; rejected before item process start"
+      },
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "completedUtc": "2026-08-23T07:09:02.358Z"
+}

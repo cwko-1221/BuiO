@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "category": "head",
+  "description": "Template for a closed helmet. Replacement zones are permissions, never instructions to erase; the solver still proves each erase pixel is an unavoidable source-over fallback.",
+  "atlas": {
+    "width": 800,
+    "height": 640,
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "columns": 5,
+    "rows": 4
+  },
+  "topology": {
+    "fillEnclosedHoles": true,
+    "expectedComponents4ConnectedPerCell": 1,
+    "expectedEnclosedTransparentComponentsPerCell": 0,
+    "emptyCells": []
+  },
+  "solve": {
+    "maximumErasePixels": 256,
+    "unexpectedUnsolvablePixels": 0,
+    "exactRgbaMismatchPixels": 0,
+    "eraseReplacement": {
+      "mode": "minimal-source-over-fallback",
+      "allowedRegions": [
+        { "id": "front-face-replacement", "row": 0, "column": 0, "zone": [32, 48, 128, 128], "minimumPixels": 0, "maximumPixels": 64 },
+        { "id": "side-face-replacement", "row": 1, "column": 0, "zone": [78, 48, 152, 128], "minimumPixels": 0, "maximumPixels": 64 }
+      ]
+    }
+  },
+  "publish": {
+    "petId": "starpatch-cat",
+    "stage": 1,
+    "wearableId": "head-20",
+    "slot": "head",
+    "occludes": ["face"]
+  }
+}

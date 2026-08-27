@@ -1,0 +1,23 @@
+{
+  "verdict": "DIAGNOSTIC_BODY_LOCKED_NOT_PUBLISHABLE",
+  "sourceFullRedraw": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-20-dressed-atlas-v2.png",
+  "basePath": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+  "specPath": "scripts/redrawn-category-specs/head-20-closed-helmet-replacement.json",
+  "outputPath": "artifacts/head20-body-locked-diagnostic/head-20-body-locked-target.png",
+  "geometry": {
+    "canvas": "800x640",
+    "transformed": false,
+    "sameCoordinate": true
+  },
+  "policy": "source full-redraw pixels inside helmet replacement windows; base pixels outside windows",
+  "metrics": {
+    "changedPixelsInside": 192316,
+    "restoredPixelsOutside": 80369,
+    "restoredBytesOutside": 283767
+  },
+  "hashes": {
+    "sourceFullRedraw": "370378be0360e31dd6ce82e37a4cf852ac6a9fc2c43902b51946b6e4c340d924",
+    "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+    "output": "9dae97035dbfbbe4631d1646e9a8355ec455f353a51ee816bfd2b79701549980"
+  }
+}

@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-24T20:24:33.566Z",
+  "policy": "diagnostic preflight ranking; never publish from this report",
+  "base": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+  "candidates": [
+    {
+      "id": "head-08",
+      "category": "head",
+      "target": "artifacts/head-08-clean-target.png",
+      "supportMask": "artifacts/head-08-preflight-envelope.png",
+      "verdict": "EARLY_REJECT",
+      "totals": {
+        "maskPixels": 253755,
+        "outsideMaskMismatchPixels": 68944,
+        "outsideMaskComparablePixels": 68944,
+        "outsideMaskMismatchRate": 1,
+        "protectedEyeMaskPixels": 64605,
+        "protectedTailMaskPixels": 33820
+      },
+      "cells": [
+        {
+          "index": 1,
+          "row": 0,
+          "column": 0,
+          "maskPixels": 12771,
+          "outsideMaskMismatchPixels": 3038,
+          "outsideMaskComparablePixels": 3038,
+          "protectedEyeMaskPixels": 4365,
+          "protectedTailMaskPixels": 0
+        },
+        {
+          "index": 2,
+          "row": 0,
+          "column": 1,
+          "maskPixels": 12771,
+          "outsideMaskMismatchPixels": 2834,
+          "outsideMaskComparablePixels": 2834,
+          "protectedEyeMaskPixels": 4365,
+          "protectedTailMaskPixels": 0
+        },
+        {
+          "index": 3,
+          "row": 0,
+          "column": 2,
+          "maskPixels": 12771,
+          "outsideMaskMismatchPixels": 2367,
+          "outsideMaskComparablePixels": 2367,
+          "protectedEyeMaskPixels": 4365,
+          "protectedTailMaskPixels": 0
+        },
+        {
+          "index": 4,
+          "row": 0,
+          "column": 3,
+          "maskPixels": 12771,
+          "outsideMaskMismatchPixels": 2776,
+          "outsideMaskComparablePixels": 2776,
+          "protectedEyeMaskPixels": 4365,
+          "protectedTailMaskPixels": 0
+        },
+        {
+          "index": 5,
+          "row": 0,
+          "column": 4,
+          "maskPixels": 12771,
+          "outsideMaskMismatchPixels": 3274,
+          "outsideMaskComparablePixels": 3274,
+          "protectedEyeMaskPixels": 4365,
+          "protectedTailMaskPixels": 0
+        },
+        {
+          "index": 6,
+          "row": 1,
+          "column": 0,
+          "maskPixels": 12180,
+          "outsideMaskMismatchPixels": 4209,
+          "outsideMaskComparablePixels": 4209,
+          "protectedEyeMaskPixels": 3621,
+          "protectedTailMaskPixels": 2291
+        },
+        {
+          "index": 7,
+          "row": 1,
+          "column": 1,
+          "maskPixels": 12180,
+          "outsideMaskMismatchPixels": 4513,
+          "outsideMaskComparablePixels": 4513,
+          "protectedEyeMaskPixels": 3621,
+          "protectedTailMaskPixels": 2291
+        },
+        {
+          "index": 8,
+          "row": 1,
+          "column": 2,
+          "maskPixels": 12180,
+          "outsideMaskMismatchPixels": 3963,
+          "outsideMaskComparablePixels": 3963,
+          "protectedEyeMaskPixels": 3621,
+          "protectedTailMaskPixels": 2291
+        },
+        {
+          "index": 9,
+          "row": 1,
+          "column": 3,
+          "maskPixels": 12180,
+          "outsideMaskMismatchPixels": 5031,
+          "outsideMaskComparablePixels": 5031,
+          "protectedEyeMaskPixels": 3621,
+          "protectedTailMaskPixels": 2291
+        },
+        {
+          "index": 10,
+          "row": 1,
+          "column": 4,
+          "maskPixels": 12180,
+          "outsideMaskMismatchPixels": 5349,
+          "outsideMaskComparablePixels": 5349,
+          "protectedEyeMaskPixels": 3621,
+          "protectedTailMaskPixels": 2291
+        },
+        {
+          "index": 11,
+          "row": 2,
+          "column": 0,
+          "maskPixels": 13029,
+          "outsideMaskMismatchPixels": 2831,
+          "outsideMaskComparablePixels": 2831,
+          "protectedEyeMaskPixels": 0,
+          "protectedTailMaskPixels": 4473
+        },
+        {
+          "index": 12,
+          "row": 2,
+          "column": 1,
+          "maskPixels": 13029,
+          "outsideMaskMismatchPixels": 2381,
+          "outsideMaskComparablePixels": 2381,
+          "protectedEyeMaskPixels": 0,
+          "protectedTailMaskPixels": 4473
+        },
+        {
+          "index": 13,
+          "row": 2,
+          "column": 2,
+          "maskPixels": 13029,
+          "outsideMaskMismatchPixels": 2685,
+          "outsideMaskComparablePixels": 2685,
+          "protectedEyeMaskPixels": 0,
+          "protectedTailMaskPixels": 4473
+        },
+        {
+          "index": 14,
+          "row": 2,
+          "column": 3,
+          "maskPixels": 13029,
+          "outsideMaskMismatchPixels": 2919,
+          "outsideMaskComparablePixels": 2919,
+          "protectedEyeMaskPixels": 0,
+          "protectedTailMaskPixels": 4473
+        },
+        {
+          "index": 15,
+          "row": 2,
+          "column": 4,
+          "maskPixels": 13029,
+          "outsideMaskMismatchPixels": 3341,
+          "outsideMaskComparablePixels": 3341,
+          "protectedEyeMaskPixels": 0,
+          "protectedTailMaskPixels": 4473
+        },
+        {
+          "index": 16,
+          "row": 3,
+          "column": 0,
+          "maskPixels": 12771,
+          "outsideMaskMismatchPixels": 3288,
+          "outsideMaskComparablePixels": 3288,
+          "protectedEyeMaskPixels": 4935,
+          "protectedTailMaskPixels": 0
+        },
+        {
+          "index": 17,
+          "row": 3,
+          "column": 1,
+          "maskPixels": 12771,
+          "outsideMaskMismatchPixels": 2310,
+          "outsideMaskComparablePixels": 2310,
+          "protectedEyeMaskPixels": 4935,
+          "protectedTailMaskPixels": 0
+        },
+        {
+          "index": 18,
+          "row": 3,
+          "column": 2,
+          "maskPixels": 12771,
+          "outsideMaskMismatchPixels": 4170,
+          "outsideMaskComparablePixels": 4170,
+          "protectedEyeMaskPixels": 4935,
+          "protectedTailMaskPixels": 0
+        },
+        {
+          "index": 19,
+          "row": 3,
+          "column": 3,
+          "maskPixels": 12771,
+          "outsideMaskMismatchPixels": 3890,
+          "outsideMaskComparablePixels": 3890,
+          "protectedEyeMaskPixels": 4935,
+          "protectedTailMaskPixels": 0
+        },
+        {
+          "index": 20,
+          "row": 3,
+          "column": 4,
+          "maskPixels": 12771,
+          "outsideMaskMismatchPixels": 3775,
+          "outsideMaskComparablePixels": 3775,
+          "protectedEyeMaskPixels": 4935,
+          "protectedTailMaskPixels": 0
+        }
+      ]
+    }
+  ]
+}

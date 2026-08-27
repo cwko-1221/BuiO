@@ -31,8 +31,12 @@
     "generate:pet-assets": "node scripts/generate-pet-assets.mjs",
     "generate:pet-art": "node scripts/pet-art/index.mjs",
     "generate:pet-art:list": "node scripts/pet-art/index.mjs --list",
+    "build:pet-redrawn-queue": "node scripts/build-redrawn-wearable-queue.mjs",
+    "build:pet-redrawn-queue:all": "node scripts/build-redrawn-wearable-queue.mjs --all-stages",
     "check:pet": "node scripts/test-pet-module.mjs",
     "check:pet-live": "node scripts/test-pet-live.mjs",
+    "check:pet-wearables-live": "node scripts/test-pet-wearables-live.mjs",
+    "check:pet-redrawn-wearable-live": "node scripts/test-pet-redrawn-wearable-live.mjs",
     "dev:homework-fixture": "node scripts/start-homework-fixture.mjs",
     "check:tower-defense-live": "node scripts/test-tower-defense-live.mjs",
     "check:game-hub-live": "node scripts/test-game-hub-live.mjs",
@@ -42,6 +46,7 @@
     "build:art-prompts": "node scripts/build-art-prompts.mjs",
     "build:room-shape": "node scripts/room-shape.mjs",
     "room:corners": "node scripts/room-corners.mjs",
+    "fit": "node scripts/fit-preview.mjs",
     "check:chinese-tone": "node scripts/test-chinese-tone.mjs"
   },
   "dependencies": {

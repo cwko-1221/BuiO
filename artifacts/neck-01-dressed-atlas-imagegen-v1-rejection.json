@@ -1,0 +1,21 @@
+{
+  "candidate": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/neck-01-dressed-atlas-imagegen-v1-raw.png",
+  "petId": "starpatch-cat",
+  "stage": 1,
+  "wearableId": "neck-01",
+  "directionBatch": "front+side-right+back+special",
+  "verdict": "REJECT_BEFORE_MASKING",
+  "sourceMetadata": {
+    "width": 1409,
+    "height": 1117,
+    "channels": 3,
+    "hasAlpha": false
+  },
+  "reasons": [
+    "The output is not the frozen 800x640 atlas and has no alpha channel; black background is baked into RGB pixels.",
+    "The generated cat body, outline, scale and per-cell registration drift from the authoritative base atlas.",
+    "Cleaning the black background or resizing/cropping would alter source pixels before masking and would conceal body drift.",
+    "Although the scarf semantics are visually promising, no strict preflight or zero-transform lineage can be established."
+  ],
+  "nextAction": "retain only as visual design reference; regenerate against fixed direction-cell targets"
+}

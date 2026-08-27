@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "independent": true,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c03",
+  "revision": "r9-accessory-only",
+  "stage": "RIGHT_CUP_ISOLATED_LAYER_SEMANTIC_PRE_GATE",
+  "contract": "ROI is layer-only. Blue/gold helmet evidence must exist; zero high-confidence orange/cream/pink fur-like pixels. Warm gold trim is an allowed material class and is reported separately.",
+  "inputs": {
+    "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-rebuild\\c03-r9-accessory-only-candidate-layer-160x160.png",
+    "layerSha256": "fc57ee1296a4ae311a6564914e57337c0116acd9f8107b67f74e06c980590dca",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-rebuild\\c03-r9-accessory-only-candidate-mask-160x160.png",
+    "maskSha256": "5f51fd48697c5054c7e3fda6a8245d718e751c553258304cc522ccf49d61d8ba",
+    "roi": [
+      113,
+      30,
+      131,
+      80
+    ]
+  },
+  "classifier": {
+    "goldTrim": "warm red/gold material, counted as allowed before fur tests; prevents normal gold rim false positives",
+    "permittedGlassHighlight": "only a green-suppressed violet galaxy-glass region 4-connected (possibly through other qualifying highlight pixels) to a cobalt-blue shell pixel; it is still surfaced to the visual critic",
+    "rejectedFur": "only high-confidence orange/cream/pink criteria; ambiguous warm pixels are surfaced to the visual critic rather than mechanically rejected"
+  },
+  "metrics": {
+    "roiPixels": 900,
+    "maskSupportPixels": 139,
+    "layerSupportPixels": 139,
+    "supportMismatchPixels": 0,
+    "blueShellPixels": 127,
+    "goldTrimPixels": 8,
+    "neutralHelmetPixels": 4,
+    "permittedGlassHighlightPixels": 0,
+    "unmistakableOrangeFurPixels": 0,
+    "unmistakableCreamFurPixels": 0,
+    "unmistakablePinkFurPixels": 0,
+    "ambiguousWarmPixels": 0,
+    "helmetEvidencePixels": 139,
+    "furPixels": 0,
+    "samples": {
+      "fur": [],
+      "gold": [
+        [
+          113,
+          77,
+          190,
+          131,
+          63
+        ],
+        [
+          114,
+          77,
+          230,
+          129,
+          14
+        ],
+        [
+          115,
+          77,
+          227,
+          116,
+          8
+        ],
+        [
+          113,
+          78,
+          250,
+          187,
+          53
+        ],
+        [
+          114,
+          78,
+          233,
+          144,
+          25
+        ],
+        [
+          115,
+          78,
+          95,
+          53,
+          35
+        ],
+        [
+          117,
+          78,
+          153,
+          103,
+          85
+        ],
+        [
+          113,
+          79,
+          249,
+          212,
+          81
+        ]
+      ],
+      "blue": [
+        [
+          113,
+          36,
+          19,
+          48,
+          196
+        ],
+        [
+          113,
+          37,
+          6,
+          24,
+          182
+        ],
+        [
+          113,
+          38,
+          14,
+          35,
+          192
+        ],
+        [
+          114,
+          38,
+          6,
+          29,
+          158
+        ],
+        [
+          113,
+          39,
+          7,
+          27,
+          160
+        ],
+        [
+          114,
+          39,
+          4,
+          19,
+          129
+        ],
+        [
+          113,
+          40,
+          5,
+          25,
+          144
+        ],
+        [
+          114,
+          40,
+          7,
+          25,
+          132
+        ],
+        [
+          115,
+          40,
+          13,
+          40,
+          189
+        ],
+        [
+          113,
+          41,
+          6,
+          26,
+          144
+        ],
+        [
+          114,
+          41,
+          8,
+          23,
+          116
+        ],
+        [
+          115,
+          41,
+          9,
+          26,
+          144
+        ]
+      ],
+      "permittedGlassHighlight": []
+    }
+  },
+  "gates": {
+    "layerMaskSupportExactWithinRoi": true,
+    "rightCupHasActualHelmetSupport": true,
+    "blueOrGoldHelmetEvidence": true,
+    "noUnmistakableOrangeCreamPinkFur": true,
+    "visualCritic": "PENDING"
+  },
+  "verdict": "PASS_RIGHT_CUP_SEMANTIC_PRE_GATE_PENDING_VISUAL_CRITIC",
+  "publishable": false
+}

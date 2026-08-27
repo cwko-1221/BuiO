@@ -1,0 +1,304 @@
+{
+  "verdict": "DATA_PASS",
+  "geometry": {
+    "canvas": "800x640",
+    "cell": "160x160",
+    "resized": false,
+    "rotated": false,
+    "shifted": false,
+    "stretched": false
+  },
+  "inputPolicy": {
+    "existingWearableLayerRead": false,
+    "solvedOnlyFrom": [
+      "frozen target",
+      "base",
+      "mask"
+    ]
+  },
+  "metrics": {
+    "maskPixels": 91186,
+    "maskPixelsWithNoTargetBaseDifference": 105,
+    "nonBinaryMaskAlphaPixels": 0,
+    "maskTransparentRgbNonZeroPixels": 0,
+    "targetBaseDifferencesOutsideMask": 0,
+    "enclosedMaskHolePixels": 0,
+    "cellsWithOneFourConnectedComponent": 20,
+    "forcedErasePixels": 0,
+    "unexpectedUnsolvablePixels": 0,
+    "eraseOutsideMaskPixels": 0,
+    "layerOutsideMaskPixels": 0,
+    "layerTransparentRgbNonZeroPixels": 0,
+    "eraseTransparentRgbNonZeroPixels": 0,
+    "frozenTargetTransparentRgbNonZeroPixels": 43867,
+    "exactRgbaMismatchPixels": 0
+  },
+  "cells": [
+    {
+      "row": 0,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    }
+  ],
+  "holeCells": [
+    {
+      "row": 0,
+      "column": 0,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "fourConnectedComponents": 1,
+      "enclosedHolePixels": 0
+    }
+  ],
+  "forcedEraseCoordinates": [],
+  "unexpectedUnsolvableCoordinates": [],
+  "inputs": {
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-05-full-redraw-canonical-v3.png",
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\sprites\\starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3\\head-05-v3-canonical-mask.png",
+    "sha256": {
+      "target": "68a7b09974115cd9ab240d7c49b634d02bcebd09e50923b1fabb5b472b8c7d6c",
+      "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+      "mask": "1de1b5dcc7cb915fae138e16c6322889712c2a70610fbb30c9ed790b7b32d153"
+    }
+  },
+  "outputs": {
+    "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3\\compositing\\head-05-v3-batch-solved-layer.png",
+    "erasePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3\\compositing\\head-05-v3-batch-erase.png",
+    "compositePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3\\compositing\\head-05-v3-batch-composite.png",
+    "diffPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3\\compositing\\head-05-v3-batch-diff.png",
+    "sha256": {
+      "layer": "756732e05ac56949db62ab8795fbaf00076dfc4790a6b3da0470a26f1325a18e",
+      "erase": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f",
+      "composite": "d96390ba40821fa10d0fa7eea585fa885ab3a1ab767fe2c1271f6bc007487aed",
+      "diff": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f"
+    }
+  }
+}

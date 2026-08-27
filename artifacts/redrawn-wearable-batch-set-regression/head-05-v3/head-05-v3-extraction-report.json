@@ -1,0 +1,792 @@
+{
+  "verdict": "PASS",
+  "category": "head",
+  "geometry": {
+    "canvas": "800x640",
+    "cell": "160x160",
+    "resized": false,
+    "rotated": false,
+    "shifted": false,
+    "stretched": false,
+    "resampled": false
+  },
+  "retry": {
+    "partialRetry": false,
+    "selectedCells": [
+      "r0c0",
+      "r0c1",
+      "r0c2",
+      "r0c3",
+      "r0c4",
+      "r1c0",
+      "r1c1",
+      "r1c2",
+      "r1c3",
+      "r1c4",
+      "r2c0",
+      "r2c1",
+      "r2c2",
+      "r2c3",
+      "r2c4",
+      "r3c0",
+      "r3c1",
+      "r3c2",
+      "r3c3",
+      "r3c4"
+    ],
+    "seedMaskPath": null
+  },
+  "inputs": {
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\sprites\\starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-05-full-redraw-canonical-v3.png",
+    "specPath": "C:\\Users\\kochu\\Documents\\BuiO\\scripts\\redrawn-category-specs\\head-solid.json",
+    "lineagePath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-05-proof\\canonical-v3\\target-lineage.json",
+    "sha256": {
+      "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+      "target": "68a7b09974115cd9ab240d7c49b634d02bcebd09e50923b1fabb5b472b8c7d6c",
+      "spec": "12cb7d6dddbf759134b289a0210ddc371bc6555028343d9623892cf2e871ec50",
+      "lineage": "6211835cd54ab676887278628e05e5ca84c1f2c8cad77244536f01e8faf36423"
+    }
+  },
+  "output": {
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-set-regression\\head-05-v3\\head-05-v3-canonical-mask.png",
+    "sha256": "1de1b5dcc7cb915fae138e16c6322889712c2a70610fbb30c9ed790b7b32d153"
+  },
+  "lineageChecks": [
+    {
+      "name": "lineage verdict is PASS",
+      "pass": true
+    },
+    {
+      "name": "lineage declares this exact frozen target path",
+      "pass": true
+    },
+    {
+      "name": "lineage declares this exact frozen target hash",
+      "pass": true
+    },
+    {
+      "name": "lineage proves no earlier composite byte-copy became target",
+      "pass": true
+    },
+    {
+      "name": "target existed before this extraction run",
+      "pass": true
+    },
+    {
+      "name": "target filename is not composite/recompose",
+      "pass": true
+    },
+    {
+      "name": "frozen target predates generated canonical mask",
+      "pass": true
+    }
+  ],
+  "metrics": {
+    "targetBaseDifferenceOutsideMask": 0,
+    "failedCells": 0,
+    "transparentMaskRgbNonZeroPixels": 0
+  },
+  "cells": [
+    {
+      "index": 1,
+      "row": 0,
+      "column": 0,
+      "selectedForRetry": true,
+      "holesFilled": 0,
+      "maskPixels": 5031,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 5031,
+          "bbox": [
+            28,
+            4,
+            123,
+            76
+          ],
+          "centroid": [
+            75.89286424170145,
+            38.680381633870006
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "column": 1,
+      "selectedForRetry": true,
+      "holesFilled": 10,
+      "maskPixels": 5246,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 5246,
+          "bbox": [
+            27,
+            4,
+            123,
+            85
+          ],
+          "centroid": [
+            76.25676706061762,
+            39.972931757529544
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "column": 2,
+      "selectedForRetry": true,
+      "holesFilled": 0,
+      "maskPixels": 5106,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 5106,
+          "bbox": [
+            29,
+            5,
+            126,
+            76
+          ],
+          "centroid": [
+            77.54112808460634,
+            39.38249118683901
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 4,
+      "row": 0,
+      "column": 3,
+      "selectedForRetry": true,
+      "holesFilled": 0,
+      "maskPixels": 4863,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 4863,
+          "bbox": [
+            33,
+            5,
+            126,
+            76
+          ],
+          "centroid": [
+            79.58276783878264,
+            39.462266090890395
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 5,
+      "row": 0,
+      "column": 4,
+      "selectedForRetry": true,
+      "holesFilled": 0,
+      "maskPixels": 4801,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 4801,
+          "bbox": [
+            31,
+            6,
+            122,
+            77
+          ],
+          "centroid": [
+            76.82920224953135,
+            39.645073942928555
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 6,
+      "row": 1,
+      "column": 0,
+      "selectedForRetry": true,
+      "holesFilled": 19,
+      "maskPixels": 3857,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 3857,
+          "bbox": [
+            54,
+            10,
+            127,
+            91
+          ],
+          "centroid": [
+            88.45346123930516,
+            46.08452164894996
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 7,
+      "row": 1,
+      "column": 1,
+      "selectedForRetry": true,
+      "holesFilled": 24,
+      "maskPixels": 3737,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 3737,
+          "bbox": [
+            60,
+            15,
+            133,
+            91
+          ],
+          "centroid": [
+            94.90420123093391,
+            49.84185175274284
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 8,
+      "row": 1,
+      "column": 2,
+      "selectedForRetry": true,
+      "holesFilled": 20,
+      "maskPixels": 3843,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 3843,
+          "bbox": [
+            59,
+            14,
+            133,
+            91
+          ],
+          "centroid": [
+            94.23367161072079,
+            48.93000260213375
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 9,
+      "row": 1,
+      "column": 3,
+      "selectedForRetry": true,
+      "holesFilled": 7,
+      "maskPixels": 3632,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 3632,
+          "bbox": [
+            59,
+            15,
+            132,
+            91
+          ],
+          "centroid": [
+            93.11618942731278,
+            49.118942731277535
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 10,
+      "row": 1,
+      "column": 4,
+      "selectedForRetry": true,
+      "holesFilled": 6,
+      "maskPixels": 3562,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 3562,
+          "bbox": [
+            54,
+            17,
+            128,
+            91
+          ],
+          "centroid": [
+            89.05839416058394,
+            50.79983155530601
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 11,
+      "row": 2,
+      "column": 0,
+      "selectedForRetry": true,
+      "holesFilled": 4,
+      "maskPixels": 5001,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 5001,
+          "bbox": [
+            30,
+            0,
+            119,
+            84
+          ],
+          "centroid": [
+            72.98220355928814,
+            37.24835032993401
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 12,
+      "row": 2,
+      "column": 1,
+      "selectedForRetry": true,
+      "holesFilled": 1,
+      "maskPixels": 5154,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 5154,
+          "bbox": [
+            32,
+            0,
+            121,
+            83
+          ],
+          "centroid": [
+            75.39580908032596,
+            35.93286767559177
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 13,
+      "row": 2,
+      "column": 2,
+      "selectedForRetry": true,
+      "holesFilled": 1,
+      "maskPixels": 5277,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 5277,
+          "bbox": [
+            29,
+            0,
+            121,
+            85
+          ],
+          "centroid": [
+            73.68978586317984,
+            38.19348114458973
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 14,
+      "row": 2,
+      "column": 3,
+      "selectedForRetry": true,
+      "holesFilled": 2,
+      "maskPixels": 5078,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 5078,
+          "bbox": [
+            32,
+            0,
+            121,
+            84
+          ],
+          "centroid": [
+            74.4554942890902,
+            37.9293028751477
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 15,
+      "row": 2,
+      "column": 4,
+      "selectedForRetry": true,
+      "holesFilled": 9,
+      "maskPixels": 5114,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 5114,
+          "bbox": [
+            33,
+            0,
+            122,
+            86
+          ],
+          "centroid": [
+            76.46578021118498,
+            38.54634337113805
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 16,
+      "row": 3,
+      "column": 0,
+      "selectedForRetry": true,
+      "holesFilled": 1,
+      "maskPixels": 4943,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 4943,
+          "bbox": [
+            34,
+            5,
+            124,
+            78
+          ],
+          "centroid": [
+            78.81853125632207,
+            41.058668824600446
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 17,
+      "row": 3,
+      "column": 1,
+      "selectedForRetry": true,
+      "holesFilled": 0,
+      "maskPixels": 4334,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 4334,
+          "bbox": [
+            31,
+            0,
+            121,
+            68
+          ],
+          "centroid": [
+            75.43493308721735,
+            28.440470696815876
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 18,
+      "row": 3,
+      "column": 2,
+      "selectedForRetry": true,
+      "holesFilled": 1,
+      "maskPixels": 3670,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 3670,
+          "bbox": [
+            8,
+            36,
+            95,
+            113
+          ],
+          "centroid": [
+            46.119891008174385,
+            67.58310626702998
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 19,
+      "row": 3,
+      "column": 3,
+      "selectedForRetry": true,
+      "holesFilled": 0,
+      "maskPixels": 4580,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 4580,
+          "bbox": [
+            25,
+            0,
+            114,
+            72
+          ],
+          "centroid": [
+            70.30917030567686,
+            31.312227074235807
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    },
+    {
+      "index": 20,
+      "row": 3,
+      "column": 4,
+      "selectedForRetry": true,
+      "holesFilled": 0,
+      "maskPixels": 4357,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 1,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 4357,
+          "bbox": [
+            31,
+            0,
+            119,
+            70
+          ],
+          "centroid": [
+            75.84025705760844,
+            30.171218728482902
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "verdict": "PASS"
+    }
+  ]
+}

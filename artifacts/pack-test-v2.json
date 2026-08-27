@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "atlas": {
+    "width": 800,
+    "height": 640,
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "columns": 5,
+    "rows": 4
+  },
+  "directionBatches": [
+    {
+      "directionBatch": "front",
+      "row": 0,
+      "sourcePath": "artifacts/pack-test-row0.png",
+      "sourceSha256": "dfd0c762405728ea0fb71f905d0c24a6c38b5fa5e7e563bbfc512945c9f7666c",
+      "sourceWidth": 800,
+      "sourceHeight": 160
+    },
+    {
+      "directionBatch": "side-right",
+      "row": 1,
+      "sourcePath": "artifacts/pack-test-row1.png",
+      "sourceSha256": "67211a2170c6bc0105d64dcf0b7f1203d887a74aa4937d697bacce08e1617ea1",
+      "sourceWidth": 800,
+      "sourceHeight": 160
+    },
+    {
+      "directionBatch": "back",
+      "row": 2,
+      "sourcePath": "artifacts/pack-test-row2.png",
+      "sourceSha256": "904a529fb9084ea40ff97e9da9f122f80dc20c9f5dc494ebb91b03a0efb5d4e1",
+      "sourceWidth": 800,
+      "sourceHeight": 160
+    },
+    {
+      "directionBatch": "special",
+      "row": 3,
+      "sourcePath": "artifacts/pack-test-row3.png",
+      "sourceSha256": "04c163196036a617246ee5f2298afd6ac7a18b1dca02231e3bdfa63fb24d015a",
+      "sourceWidth": 800,
+      "sourceHeight": 160
+    }
+  ],
+  "policy": {
+    "transformed": false,
+    "operation": "raw row copy only",
+    "leftFacingSideMustBeRuntimeFlip": true,
+    "targetMustBeFrozenBeforeMasking": true
+  },
+  "output": {
+    "path": "artifacts/pack-test-packed-v2.png",
+    "sha256": "87ece166aaa2b2cd2c40e923bcf37bb6686595fd1d5451c083f0ed866debccca"
+  }
+}

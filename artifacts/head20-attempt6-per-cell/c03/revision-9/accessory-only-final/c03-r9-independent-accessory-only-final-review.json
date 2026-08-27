@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "independent": true,
+  "role": "masking_and_compositing_critic",
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c03",
+  "revision": "r9-accessory-only-final",
+  "inputPaths": {
+    "base": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\c03-base-original-160x160.png",
+    "lineage": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-accessory-only-final-lineage.json",
+    "target": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-body-preserving-complete-dressed-target-160x160.png",
+    "composite": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-zero-transform-composite-160x160.png",
+    "combined": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-hardware-tint-layer-160x160.png",
+    "hardware": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-hardware-layer-160x160.png",
+    "tint": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-visor-tint-layer-160x160.png",
+    "silhouette": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-wearable-silhouette-mask-160x160.png",
+    "opaqueErase": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-opaque-erase-mask-160x160.png",
+    "visualCritic": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-accessory-only-final-visual-critic.json"
+  },
+  "missing": [],
+  "gates": {
+    "allRequiredInputsPresent": true,
+    "lineageHashesMatch": true,
+    "storedCompositeExactlyMatchesTarget": true,
+    "reconstructedBaseEraseTintHardwareExactlyMatchesTarget": false,
+    "reconstructedBaseEraseCombinedLayerExactlyMatchesTarget": false,
+    "targetUnchangedOutsideActualSilhouette": true,
+    "actualSilhouetteIsSingleFourConnectedComponent": true,
+    "actualSilhouetteHasNoEnclosedHoles": true,
+    "combinedLayerSupportExactlyMatchesSilhouette": true,
+    "opaqueEraseOnlyOnFullyOpaqueHardware": true,
+    "opaqueEraseInsideSilhouette": true,
+    "allThreeR9PreGatesExistHashMatchAndPass": true,
+    "independentAccessoryOnlyAnatomyAuditPasses": false,
+    "noTransparentRgbResidue": false
+  },
+  "metrics": {
+    "storedCompositeVsTargetExactRgbaMismatchPixels": 0,
+    "targetOutsideSilhouetteBaseDiffPixels": 0,
+    "silhouetteTopology": {
+      "foregroundPixels": 7223,
+      "fourConnectedComponents": 1,
+      "enclosedTransparentHolePixels": 0
+    },
+    "combinedLayerVsSilhouetteSupportMismatchPixels": 0,
+    "opaqueEraseMaskOnNonOpaqueHardwarePixels": 0,
+    "opaqueEraseMaskOutsideSilhouettePixels": 0,
+    "reconstructedSeparateTintThenHardwareVsTargetExactRgbaMismatchPixels": 1552,
+    "reconstructedCombinedLayerVsTargetExactRgbaMismatchPixels": 1552,
+    "transparentRgbResiduePixels": {
+      "target": 1552,
+      "composite": 1552,
+      "combined": 0,
+      "hardware": 0,
+      "tint": 0,
+      "silhouette": 0,
+      "opaqueErase": 0
+    }
+  },
+  "evidence": {
+    "lineageStatus": "FROZEN_FOR_INDEPENDENT_SOLVER_AND_CRITIC_REVIEW_NOT_APPROVED",
+    "hashGates": {
+      "base": true,
+      "lineage_combined": true,
+      "lineage_hardware": true,
+      "lineage_tint": true,
+      "lineage_silhouette": true,
+      "lineage_opaqueErase": true,
+      "lineage_target": true,
+      "lineage_composite": true
+    },
+    "preGates": {
+      "c03-r9-accessory-only-anatomy-pregate.json": {
+        "exists": true,
+        "hashMatches": true,
+        "declaredVerdict": "PASS_ACCESSORY_ONLY_ANATOMY_PRE_GATE_PENDING_VISUAL_CRITIC",
+        "passes": true
+      },
+      "c03-r9-accessory-only-rightcup-semantic-pregate.json": {
+        "exists": true,
+        "hashMatches": true,
+        "declaredVerdict": "PASS_RIGHT_CUP_SEMANTIC_PRE_GATE_PENDING_VISUAL_CRITIC",
+        "passes": true
+      },
+      "c03-r9-accessory-only-rightcup-geometry-pregate.json": {
+        "exists": true,
+        "hashMatches": true,
+        "declaredVerdict": "PASS_CURVED_OR_NON_RECTILINEAR_RIGHT_CUP_PENDING_VISUAL_CRITIC",
+        "passes": true
+      }
+    },
+    "anatomyAudit": {
+      "existingIndependentVisualCriticVerdict": "REJECT",
+      "releaseDecision": "NOT_PUBLISHABLE",
+      "passes": false
+    },
+    "existingVisualCriticPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-accessory-only-final-visual-critic.json"
+  },
+  "verdict": "REJECT_INDEPENDENT_MASK_COMPOSITE_AND_ANATOMY_REVIEW",
+  "publishable": false,
+  "hashes": {
+    "base": "d6603d155cc87d4ea652bd45a4bceb2a1fb414ad5c8ba6d1c81c4da037b8e6c0",
+    "combined": "fc57ee1296a4ae311a6564914e57337c0116acd9f8107b67f74e06c980590dca",
+    "hardware": "270ff8b0c5e0a14087c418a7e3d91eb5a8febf5d22d23e5ae4bfeaee27f55343",
+    "tint": "b9582fc7ed0f3cf66080fac9ddd1708bdc0794fb2a3bbac1f08ca65c098c0850",
+    "silhouette": "5f51fd48697c5054c7e3fda6a8245d718e751c553258304cc522ccf49d61d8ba",
+    "opaqueErase": "097ff7be15cc426571cb08bea73f2af62ebbf2a993f6e99da915ea3f92910b68",
+    "target": "0a82eaceeb802180502486c7b9078505cba3a5035b64f2c4d08924fd0f0a8ffe",
+    "composite": "0a82eaceeb802180502486c7b9078505cba3a5035b64f2c4d08924fd0f0a8ffe"
+  },
+  "failures": [
+    "reconstructedBaseEraseTintHardwareExactlyMatchesTarget",
+    "reconstructedBaseEraseCombinedLayerExactlyMatchesTarget",
+    "independentAccessoryOnlyAnatomyAuditPasses",
+    "noTransparentRgbResidue"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "cell": "c02",
+  "sourceAtlas": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\sprites\\starpatch-cat-1-atlas-2737c2cd0c.webp",
+  "sourceAtlasSha256": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+  "extract": [
+    160,
+    0,
+    160,
+    160
+  ],
+  "output": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\c02-base-original-160x160.png",
+  "outputSha256": "6abd73e57f1d4778aa2528458aaaec5c5e5ccd908f6f17213df38e836b189af0"
+}

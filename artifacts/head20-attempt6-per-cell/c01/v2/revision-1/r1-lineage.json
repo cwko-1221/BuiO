@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 2,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "version": "c01-v2-revision1",
+  "verdict": "REJECT_PENDING_CRITIC",
+  "publishable": false,
+  "rawFullRedrawSource": {
+    "path": "C:\\Users\\kochu\\.codex\\generated_images\\01a03945-f681-7441-a121-c408b5c198d7\\exec-5ef8b10b-0bb5-43bd-8759-d33b78e9b72e.png",
+    "sha256": "9dc7f8202f89dfdda1a431615fbc65d0a032a049bcba9795870c8b34c0948853",
+    "width": 1254,
+    "height": 1254,
+    "channels": 3,
+    "hasAlpha": false,
+    "format": "png",
+    "mtime": "2026-08-25T20:05:00.657Z",
+    "sourceRole": "true base-c01-guided independent full-dressed ImageGen redraw; rendered-source/art-direction only"
+  },
+  "originalPrototypeLineage": {
+    "pet": {
+      "path": "C:/Users/kochu/Documents/BuiO/art-inbox/pet-starpatch-cat-1.png",
+      "sha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253"
+    },
+    "accessory": {
+      "path": "C:/Users/kochu/Documents/BuiO/art-inbox/wearable-head-3.png",
+      "sha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954"
+    },
+    "view": "bottom-row right three space-helmet views"
+  },
+  "generation": {
+    "model": "gpt-image-1 via Codex image_gen.imagegen",
+    "prompt": "Use case precise-object-edit. Asset type raw full-dressed c01 sprite source. Image 1 is the exact authoritative c01 base crop and must anchor coordinate/pose. Keep the lower pet from the helmet collar downward bit-identical in pose, scale, silhouette, fur pattern, tail, torso, legs and paws; do not redraw, resize, shift, crop or stylize it. Change only amended c01 helmet semantic zone x=31..136,y=5..126. Image 2 is only art direction for a closed white/gold retro space helmet with a filled deep-space visor, gold pods and blue integrated helmet ear fins. Fully occlude every natural pink ear inside the amended zone. Produce an independent full-dressed redraw, not an isolated accessory, mask, composite or pasted crop. Transparent background if possible; no checkerboard, black background, text, watermark or contact sheet.",
+    "timestamp": "2026-08-26T04:05:00.6572222+08:00",
+    "seed": null,
+    "modelIdentifierNote": "Tool did not expose a seed; raw file and prompt are retained."
+  },
+  "normalization": {
+    "steps": [
+      "read raw 1254x1254 RGB without any prior target/mask/composite",
+      "remove only border-reachable neutral bright checkerboard via 4-connected flood (chroma<=8,min>=215)",
+      "extract raw generated helmet source window [277,148,1007,818)",
+      "resize extracted raw RGBA to 106x122 with Lanczos3 fit-fill at c01 coordinate [31,5)",
+      "fill measured ear-zone alpha gaps from nearest generated helmet pixel; fill enclosed support holes; no transform after same-coordinate layer extraction"
+    ],
+    "hashes": {
+      "rawSha256": "9dc7f8202f89dfdda1a431615fbc65d0a032a049bcba9795870c8b34c0948853",
+      "cleanedRgbaPngSha256": "120f8f7adccf5b57fefa495cc2dedfa7a22fcf7b7bf830164079057de04bfced",
+      "rawHelmetCropPngSha256": "c456e0c04a537ac89c4488af751ab3b550f37b941298953dffd78a0a421b98dd",
+      "mappedHelmetPngSha256": "a9e17c7368cd88d143482a85afbf527aab55f762c9bf68f0d134b349c2ce492d"
+    },
+    "sourceCrop": {
+      "left": 277,
+      "top": 148,
+      "width": 730,
+      "height": 670
+    },
+    "targetWindow": {
+      "x": 31,
+      "y": 5,
+      "width": 106,
+      "height": 122
+    },
+    "foregroundPixels": 497281,
+    "enclosedHolesFilled": 800
+  },
+  "sourceToCandidateMapping": {
+    "method": "raw-generated helmet crop -> deterministic 106x122 RGBA coordinate mapping -> base-lock outside amended union",
+    "baseSha256": "cc87a049bc41b7635bdb1ca4d92f46c1822d73423b86ce7c69c6526fa6ae80d4",
+    "specSha256": "19a7802dc8534a2ee2de1695b921fd4ea5575ca7bd30a1f1e059a62ed5aa86c8",
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-1\\r1-target-coordinate-locked-160x160.png",
+    "targetSha256": "8b939d4a1a6ed223193426fc183da875c6bbf373b2ae327add17ef3d555ba0d3",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-1\\r1-helmet-mask-same-coordinate-160x160.png",
+    "maskSha256": "9bd99e9fbad7717cea240877589b5a57479828461b11810b3f5ac3af9ac6d904",
+    "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-1\\r1-helmet-layer-same-coordinate-160x160.png",
+    "layerSha256": "1e0b1d100d1deaa5f8f797ec08d331d2fbe6b711ea3b9690d87153902b60cb8c",
+    "amendedUnion": [
+      [
+        38,
+        5,
+        137,
+        127
+      ],
+      [
+        31,
+        28,
+        38,
+        101
+      ]
+    ],
+    "protectedRois": [
+      [
+        104,
+        0,
+        160,
+        127
+      ],
+      [
+        0,
+        101,
+        160,
+        160
+      ]
+    ],
+    "outsideUnionByteDifferencePixels": 0,
+    "noTransformsAfterNormalization": true
+  },
+  "gates": {
+    "target160x160Rgba": true,
+    "mask160x160Rgba": true,
+    "outsideUnionByteLocked": true,
+    "earBasePixels": 385,
+    "earCoveredPixels": 385,
+    "earCoveragePass": true,
+    "maskSupportOnlyEditable": true,
+    "holeFreeSupport": true,
+    "noRuntimeMutation": true,
+    "critic": "PENDING_INDEPENDENT_CRITIC",
+    "publishable": false
+  },
+  "forbiddenInputProof": {
+    "priorC01Target": "NOT_READ",
+    "priorV2Target": "NOT_READ",
+    "attempt5": "NOT_READ",
+    "masks": "NOT_READ",
+    "composites": "NOT_READ",
+    "originalAccessoryPixels": "NOT_READ_BY_PREPARATION_SCRIPT"
+  },
+  "note": "This is a new revision and is not a quality PASS until independent visual critic confirms helmet/collar alignment and no body/tail drift."
+}

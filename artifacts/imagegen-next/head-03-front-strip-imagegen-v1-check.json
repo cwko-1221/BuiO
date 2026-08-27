@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "input": "artifacts/imagegen-next/head-03-front-strip-imagegen-v1.png",
+  "direction": "front",
+  "expected": {
+    "width": 800,
+    "height": 160,
+    "format": "png",
+    "channels": 4,
+    "alpha": true
+  },
+  "observed": {
+    "width": 1774,
+    "height": 887,
+    "format": "png",
+    "channels": 3,
+    "hasAlpha": false
+  },
+  "transformed": false,
+  "verdict": "REJECT_PREMASK",
+  "errors": [
+    "dimensions must be 800x160, got 1774x887",
+    "source must have an alpha channel (RGBA PNG); baked checkerboard/black backgrounds are forbidden"
+  ]
+}

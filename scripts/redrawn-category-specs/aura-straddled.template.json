@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "category": "aura",
+  "templateOnly": true,
+  "authoringStatus": "AWAITING_FROZEN_CANONICAL_TARGET_SEMANTIC_ZONES",
+  "description": "Aura template using independent rear and front atlas layers around the unchanged pet base. No legacy free-positioned aura image may be used as a canonical target.",
+  "atlas": { "width": 800, "height": 640, "cellWidth": 160, "cellHeight": 160, "columns": 5, "rows": 4 },
+  "topology": {
+    "fillEnclosedHoles": false,
+    "minimumComponents4ConnectedPerCell": 1,
+    "maximumComponents4ConnectedPerCell": 8,
+    "expectedEnclosedTransparentComponentsPerCell": 0,
+    "cells": [],
+    "emptyCells": []
+  },
+  "layering": {
+    "mode": "rear-base-erase-patch-front",
+    "allowedSemanticLayers": ["rear", "front"],
+    "semanticRegions": [],
+    "requiredSemanticCoverage": [],
+    "topology": {
+      "layers": {
+        "rear": { "defaultMinimumComponents": 0, "defaultMaximumComponents": 8, "defaultExpectedHoles": 0, "cells": [] },
+        "patch": { "defaultMinimumComponents": 0, "defaultMaximumComponents": 0, "defaultExpectedHoles": 0, "cells": [] },
+        "front": { "defaultMinimumComponents": 0, "defaultMaximumComponents": 8, "defaultExpectedHoles": 0, "cells": [] }
+      }
+    }
+  },
+  "solve": {
+    "maximumErasePixels": 0,
+    "unexpectedUnsolvablePixels": 0,
+    "exactRgbaMismatchPixels": 0,
+    "eraseReplacement": { "mode": "forbidden-for-aura", "allowedRegions": [] }
+  },
+  "publish": { "slot": "aura", "execute": false }
+}

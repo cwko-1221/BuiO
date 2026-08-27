@@ -1,0 +1,2497 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-24T20:15:50.236Z",
+  "inputs": {
+    "queuePath": "pet-app\\art-source\\imagegen\\redrawn-wearable-production-queue.json",
+    "petFilter": "starpatch-cat",
+    "limit": 12,
+    "pixelThreshold": 8,
+    "readOnly": true
+  },
+  "policy": {
+    "purpose": "bounded triage only; no mask, composite, critic or manifest mutation",
+    "bodyLockedTargets": "diagnostic only; never substitute for the original full redraw and never publish",
+    "wholeAtlasDelta": "priority hint only; it cannot certify body preservation because the wearable mask is not yet known",
+    "nextGate": "run preflight-redrawn-wearable, then exact mask-only audit and independent critic"
+  },
+  "totals": {
+    "queueJobs": 192,
+    "filteredJobs": 64,
+    "candidatesFound": 31,
+    "readyForMaskPrecheck": 25,
+    "diagnosticOnly": 0,
+    "rejectedByEvidence": 0
+  },
+  "priority": [
+    {
+      "key": "starpatch-cat:1:head-02",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-02",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-02-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-02-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": true,
+        "relevantReports": [
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-02-proof\\phase-d-full-source-v2\\source-qa.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": true,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-02-proof\\phase-d-full-source-v1\\head-02-frozen-spec-v1.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": true,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-02-proof\\phase-d-full-source-v1\\source-qa.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": true,
+            "independentPass": false,
+            "independentReject": false
+          }
+        ]
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 269365,
+        "thresholdChangedPixels": 251046,
+        "thresholdChangedRate": 0.490324,
+        "alphaChangedPixels": 234663,
+        "changedPixelsPerCell": [
+          13312,
+          13603,
+          11898,
+          12247,
+          12997,
+          13989,
+          14024,
+          12961,
+          14588,
+          13067,
+          13189,
+          13003,
+          13201,
+          13275,
+          13155,
+          13249,
+          13984,
+          13376,
+          15011,
+          15236
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1748954
+    },
+    {
+      "key": "starpatch-cat:1:back-02",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "back-02",
+      "slot": "back",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 270067,
+        "thresholdChangedPixels": 252329,
+        "thresholdChangedRate": 0.49283,
+        "alphaChangedPixels": 229493,
+        "changedPixelsPerCell": [
+          13610,
+          13221,
+          11865,
+          12525,
+          14075,
+          12944,
+          12972,
+          11921,
+          14023,
+          13504,
+          13554,
+          12781,
+          13067,
+          13734,
+          14704,
+          13117,
+          13870,
+          13920,
+          15020,
+          15640
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1747671
+    },
+    {
+      "key": "starpatch-cat:1:face-01",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "face-01",
+      "slot": "face",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\face-01-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\face-01-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 268741,
+        "thresholdChangedPixels": 252706,
+        "thresholdChangedRate": 0.493566,
+        "alphaChangedPixels": 232171,
+        "changedPixelsPerCell": [
+          12873,
+          14545,
+          12938,
+          13305,
+          13586,
+          12483,
+          13807,
+          12561,
+          14297,
+          13139,
+          12365,
+          13677,
+          13779,
+          13732,
+          13667,
+          12023,
+          13505,
+          12362,
+          14631,
+          15466
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1747294
+    },
+    {
+      "key": "starpatch-cat:1:back-02",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "back-02",
+      "slot": "back",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 271384,
+        "thresholdChangedPixels": 253885,
+        "thresholdChangedRate": 0.495869,
+        "alphaChangedPixels": 231493,
+        "changedPixelsPerCell": [
+          13677,
+          13291,
+          11954,
+          12615,
+          14160,
+          12989,
+          13002,
+          11958,
+          14064,
+          13569,
+          13633,
+          12871,
+          13122,
+          13821,
+          14789,
+          13192,
+          13926,
+          13979,
+          15072,
+          15700
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1746115
+    },
+    {
+      "key": "starpatch-cat:1:head-05",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-05",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-05-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-05-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": [
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-05-proof\\canonical-v3\\independent-final-qa\\head-05-v3-final-independent-qa.json",
+            "bodyLockedEvidence": false,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          }
+        ]
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 278263,
+        "thresholdChangedPixels": 257643,
+        "thresholdChangedRate": 0.503209,
+        "alphaChangedPixels": 236960,
+        "changedPixelsPerCell": [
+          14399,
+          14423,
+          12813,
+          13135,
+          13791,
+          14495,
+          14441,
+          13498,
+          14531,
+          13096,
+          13587,
+          13591,
+          13783,
+          13674,
+          13652,
+          13600,
+          13948,
+          13533,
+          15147,
+          15126
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1742357
+    },
+    {
+      "key": "starpatch-cat:1:head-06",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-06",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-06-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-06-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": true,
+        "relevantReports": [
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v8-canonical\\head-06-v6-production-lock-report.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v8-canonical\\independent-final-hole-audit-root.json",
+            "bodyLockedEvidence": false,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v8-canonical\\independent-final-v2-hole-audit-root.json",
+            "bodyLockedEvidence": false,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v8-canonical\\independent-final-v2-precheck\\report.json",
+            "bodyLockedEvidence": false,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v6-qa-production\\head-06-v6-final-independent-qa.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v6-qa-production\\head-06-v6-independent-source-vs-recompose.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v6-qa-production\\head-06-v6-production-lock-report.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v6-no-erase\\report.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6-solid-v4\\mask-only-audit-original.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6-solid-v4\\mask-only-audit-v5-qa.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6-solid-v4\\mask-only-audit-v6-qa.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6-solid-v4\\semantic-mask-qa-v6.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6\\solid-v2-hole-audit.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6\\solid-v4-hole-audit.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6\\solid-v6-qa-root-hole-audit.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6\\solid-v7-qa-hole-audit.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6\\solid-v8-qa-hole-audit.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          }
+        ]
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 274523,
+        "thresholdChangedPixels": 257986,
+        "thresholdChangedRate": 0.503879,
+        "alphaChangedPixels": 238602,
+        "changedPixelsPerCell": [
+          13638,
+          13399,
+          12198,
+          12978,
+          13429,
+          14197,
+          14258,
+          12493,
+          13999,
+          12950,
+          13805,
+          13393,
+          13794,
+          13730,
+          13718,
+          13689,
+          13984,
+          15053,
+          14928,
+          14890
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1742014
+    },
+    {
+      "key": "starpatch-cat:1:head-20",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-20",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 271189,
+        "thresholdChangedPixels": 258318,
+        "thresholdChangedRate": 0.504527,
+        "alphaChangedPixels": 233203,
+        "changedPixelsPerCell": [
+          15267,
+          14427,
+          11948,
+          12468,
+          13752,
+          13988,
+          13900,
+          11924,
+          13847,
+          12946,
+          13946,
+          13569,
+          13095,
+          13139,
+          13540,
+          13496,
+          13781,
+          12439,
+          14759,
+          14958
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1741682
+    },
+    {
+      "key": "starpatch-cat:1:neck-10",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "neck-10",
+      "slot": "neck",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 273184,
+        "thresholdChangedPixels": 258644,
+        "thresholdChangedRate": 0.505164,
+        "alphaChangedPixels": 233163,
+        "changedPixelsPerCell": [
+          13223,
+          13436,
+          11621,
+          12215,
+          12961,
+          14029,
+          13977,
+          12764,
+          14298,
+          12966,
+          13872,
+          13592,
+          13809,
+          13766,
+          13888,
+          13859,
+          14336,
+          13842,
+          15358,
+          15372
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1741356
+    },
+    {
+      "key": "starpatch-cat:1:head-07",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-07",
+      "slot": "head",
+      "queueStatus": "pending-redraw",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-07-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-07-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 276235,
+        "thresholdChangedPixels": 260034,
+        "thresholdChangedRate": 0.507879,
+        "alphaChangedPixels": 237022,
+        "changedPixelsPerCell": [
+          14298,
+          14605,
+          11901,
+          12654,
+          14134,
+          13974,
+          14073,
+          12620,
+          14760,
+          13447,
+          12965,
+          13066,
+          13048,
+          13413,
+          13633,
+          14266,
+          14077,
+          14278,
+          15278,
+          15745
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1739966
+    },
+    {
+      "key": "starpatch-cat:1:head-20",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-20",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 272685,
+        "thresholdChangedPixels": 260045,
+        "thresholdChangedRate": 0.5079,
+        "alphaChangedPixels": 235480,
+        "changedPixelsPerCell": [
+          15358,
+          14483,
+          11999,
+          12523,
+          13822,
+          14065,
+          13967,
+          11969,
+          13883,
+          13009,
+          14015,
+          13653,
+          13144,
+          13174,
+          13618,
+          13571,
+          13925,
+          12547,
+          14940,
+          15020
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1739955
+    },
+    {
+      "key": "starpatch-cat:1:neck-10",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "neck-10",
+      "slot": "neck",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 274716,
+        "thresholdChangedPixels": 260374,
+        "thresholdChangedRate": 0.508543,
+        "alphaChangedPixels": 235413,
+        "changedPixelsPerCell": [
+          13265,
+          13520,
+          11670,
+          12279,
+          13009,
+          14136,
+          14089,
+          12884,
+          14408,
+          13113,
+          13924,
+          13647,
+          13843,
+          13816,
+          13964,
+          13945,
+          14403,
+          13947,
+          15431,
+          15423
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1739626
+    },
+    {
+      "key": "starpatch-cat:1:head-07",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-07",
+      "slot": "head",
+      "queueStatus": "pending-redraw",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-07-dressed-atlas-v3.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-07-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 278757,
+        "thresholdChangedPixels": 263226,
+        "thresholdChangedRate": 0.514113,
+        "alphaChangedPixels": 239358,
+        "changedPixelsPerCell": [
+          14248,
+          14557,
+          11866,
+          12927,
+          14050,
+          13902,
+          13990,
+          12566,
+          14679,
+          13387,
+          13458,
+          13538,
+          13516,
+          13955,
+          14014,
+          14254,
+          14321,
+          14315,
+          15502,
+          15712
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1736774
+    }
+  ],
+  "allCandidates": [
+    {
+      "key": "starpatch-cat:1:head-02",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-02",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-02-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-02-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": true,
+        "relevantReports": [
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-02-proof\\phase-d-full-source-v2\\source-qa.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": true,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-02-proof\\phase-d-full-source-v1\\head-02-frozen-spec-v1.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": true,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-02-proof\\phase-d-full-source-v1\\source-qa.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": true,
+            "independentPass": false,
+            "independentReject": false
+          }
+        ]
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 269365,
+        "thresholdChangedPixels": 251046,
+        "thresholdChangedRate": 0.490324,
+        "alphaChangedPixels": 234663,
+        "changedPixelsPerCell": [
+          13312,
+          13603,
+          11898,
+          12247,
+          12997,
+          13989,
+          14024,
+          12961,
+          14588,
+          13067,
+          13189,
+          13003,
+          13201,
+          13275,
+          13155,
+          13249,
+          13984,
+          13376,
+          15011,
+          15236
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1748954
+    },
+    {
+      "key": "starpatch-cat:1:back-02",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "back-02",
+      "slot": "back",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 270067,
+        "thresholdChangedPixels": 252329,
+        "thresholdChangedRate": 0.49283,
+        "alphaChangedPixels": 229493,
+        "changedPixelsPerCell": [
+          13610,
+          13221,
+          11865,
+          12525,
+          14075,
+          12944,
+          12972,
+          11921,
+          14023,
+          13504,
+          13554,
+          12781,
+          13067,
+          13734,
+          14704,
+          13117,
+          13870,
+          13920,
+          15020,
+          15640
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1747671
+    },
+    {
+      "key": "starpatch-cat:1:face-01",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "face-01",
+      "slot": "face",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\face-01-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\face-01-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 268741,
+        "thresholdChangedPixels": 252706,
+        "thresholdChangedRate": 0.493566,
+        "alphaChangedPixels": 232171,
+        "changedPixelsPerCell": [
+          12873,
+          14545,
+          12938,
+          13305,
+          13586,
+          12483,
+          13807,
+          12561,
+          14297,
+          13139,
+          12365,
+          13677,
+          13779,
+          13732,
+          13667,
+          12023,
+          13505,
+          12362,
+          14631,
+          15466
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1747294
+    },
+    {
+      "key": "starpatch-cat:1:back-02",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "back-02",
+      "slot": "back",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 271384,
+        "thresholdChangedPixels": 253885,
+        "thresholdChangedRate": 0.495869,
+        "alphaChangedPixels": 231493,
+        "changedPixelsPerCell": [
+          13677,
+          13291,
+          11954,
+          12615,
+          14160,
+          12989,
+          13002,
+          11958,
+          14064,
+          13569,
+          13633,
+          12871,
+          13122,
+          13821,
+          14789,
+          13192,
+          13926,
+          13979,
+          15072,
+          15700
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1746115
+    },
+    {
+      "key": "starpatch-cat:1:head-05",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-05",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-05-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-05-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": [
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-05-proof\\canonical-v3\\independent-final-qa\\head-05-v3-final-independent-qa.json",
+            "bodyLockedEvidence": false,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          }
+        ]
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 278263,
+        "thresholdChangedPixels": 257643,
+        "thresholdChangedRate": 0.503209,
+        "alphaChangedPixels": 236960,
+        "changedPixelsPerCell": [
+          14399,
+          14423,
+          12813,
+          13135,
+          13791,
+          14495,
+          14441,
+          13498,
+          14531,
+          13096,
+          13587,
+          13591,
+          13783,
+          13674,
+          13652,
+          13600,
+          13948,
+          13533,
+          15147,
+          15126
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1742357
+    },
+    {
+      "key": "starpatch-cat:1:head-06",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-06",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-06-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-06-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": true,
+        "relevantReports": [
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v8-canonical\\head-06-v6-production-lock-report.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v8-canonical\\independent-final-hole-audit-root.json",
+            "bodyLockedEvidence": false,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v8-canonical\\independent-final-v2-hole-audit-root.json",
+            "bodyLockedEvidence": false,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v8-canonical\\independent-final-v2-precheck\\report.json",
+            "bodyLockedEvidence": false,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v6-qa-production\\head-06-v6-final-independent-qa.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v6-qa-production\\head-06-v6-independent-source-vs-recompose.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v6-qa-production\\head-06-v6-production-lock-report.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\zero-transform-compositing\\locked-v6-no-erase\\report.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6-solid-v4\\mask-only-audit-original.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6-solid-v4\\mask-only-audit-v5-qa.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6-solid-v4\\mask-only-audit-v6-qa.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6-solid-v4\\semantic-mask-qa-v6.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6\\solid-v2-hole-audit.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6\\solid-v4-hole-audit.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6\\solid-v6-qa-root-hole-audit.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6\\solid-v7-qa-hole-audit.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          },
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-06-proof\\locked-target-v6\\solid-v8-qa-hole-audit.json",
+            "bodyLockedEvidence": true,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          }
+        ]
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 274523,
+        "thresholdChangedPixels": 257986,
+        "thresholdChangedRate": 0.503879,
+        "alphaChangedPixels": 238602,
+        "changedPixelsPerCell": [
+          13638,
+          13399,
+          12198,
+          12978,
+          13429,
+          14197,
+          14258,
+          12493,
+          13999,
+          12950,
+          13805,
+          13393,
+          13794,
+          13730,
+          13718,
+          13689,
+          13984,
+          15053,
+          14928,
+          14890
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1742014
+    },
+    {
+      "key": "starpatch-cat:1:head-20",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-20",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 271189,
+        "thresholdChangedPixels": 258318,
+        "thresholdChangedRate": 0.504527,
+        "alphaChangedPixels": 233203,
+        "changedPixelsPerCell": [
+          15267,
+          14427,
+          11948,
+          12468,
+          13752,
+          13988,
+          13900,
+          11924,
+          13847,
+          12946,
+          13946,
+          13569,
+          13095,
+          13139,
+          13540,
+          13496,
+          13781,
+          12439,
+          14759,
+          14958
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1741682
+    },
+    {
+      "key": "starpatch-cat:1:neck-10",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "neck-10",
+      "slot": "neck",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 273184,
+        "thresholdChangedPixels": 258644,
+        "thresholdChangedRate": 0.505164,
+        "alphaChangedPixels": 233163,
+        "changedPixelsPerCell": [
+          13223,
+          13436,
+          11621,
+          12215,
+          12961,
+          14029,
+          13977,
+          12764,
+          14298,
+          12966,
+          13872,
+          13592,
+          13809,
+          13766,
+          13888,
+          13859,
+          14336,
+          13842,
+          15358,
+          15372
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1741356
+    },
+    {
+      "key": "starpatch-cat:1:head-07",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-07",
+      "slot": "head",
+      "queueStatus": "pending-redraw",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-07-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-07-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 276235,
+        "thresholdChangedPixels": 260034,
+        "thresholdChangedRate": 0.507879,
+        "alphaChangedPixels": 237022,
+        "changedPixelsPerCell": [
+          14298,
+          14605,
+          11901,
+          12654,
+          14134,
+          13974,
+          14073,
+          12620,
+          14760,
+          13447,
+          12965,
+          13066,
+          13048,
+          13413,
+          13633,
+          14266,
+          14077,
+          14278,
+          15278,
+          15745
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1739966
+    },
+    {
+      "key": "starpatch-cat:1:head-20",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-20",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 272685,
+        "thresholdChangedPixels": 260045,
+        "thresholdChangedRate": 0.5079,
+        "alphaChangedPixels": 235480,
+        "changedPixelsPerCell": [
+          15358,
+          14483,
+          11999,
+          12523,
+          13822,
+          14065,
+          13967,
+          11969,
+          13883,
+          13009,
+          14015,
+          13653,
+          13144,
+          13174,
+          13618,
+          13571,
+          13925,
+          12547,
+          14940,
+          15020
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1739955
+    },
+    {
+      "key": "starpatch-cat:1:neck-10",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "neck-10",
+      "slot": "neck",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 274716,
+        "thresholdChangedPixels": 260374,
+        "thresholdChangedRate": 0.508543,
+        "alphaChangedPixels": 235413,
+        "changedPixelsPerCell": [
+          13265,
+          13520,
+          11670,
+          12279,
+          13009,
+          14136,
+          14089,
+          12884,
+          14408,
+          13113,
+          13924,
+          13647,
+          13843,
+          13816,
+          13964,
+          13945,
+          14403,
+          13947,
+          15431,
+          15423
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1739626
+    },
+    {
+      "key": "starpatch-cat:1:head-07",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-07",
+      "slot": "head",
+      "queueStatus": "pending-redraw",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-07-dressed-atlas-v3.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-07-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 278757,
+        "thresholdChangedPixels": 263226,
+        "thresholdChangedRate": 0.514113,
+        "alphaChangedPixels": 239358,
+        "changedPixelsPerCell": [
+          14248,
+          14557,
+          11866,
+          12927,
+          14050,
+          13902,
+          13990,
+          12566,
+          14679,
+          13387,
+          13458,
+          13538,
+          13516,
+          13955,
+          14014,
+          14254,
+          14321,
+          14315,
+          15502,
+          15712
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1736774
+    },
+    {
+      "key": "starpatch-cat:1:head-07",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-07",
+      "slot": "head",
+      "queueStatus": "pending-redraw",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-07-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-07-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 279220,
+        "thresholdChangedPixels": 264044,
+        "thresholdChangedRate": 0.515711,
+        "alphaChangedPixels": 241724,
+        "changedPixelsPerCell": [
+          14277,
+          14586,
+          11885,
+          12947,
+          14080,
+          13929,
+          14001,
+          12578,
+          14695,
+          13410,
+          13482,
+          13573,
+          13533,
+          13993,
+          14061,
+          14279,
+          14338,
+          14335,
+          15512,
+          15726
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1735956
+    },
+    {
+      "key": "starpatch-cat:1:head-01",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-01",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-01-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-01-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 287349,
+        "thresholdChangedPixels": 266078,
+        "thresholdChangedRate": 0.519684,
+        "alphaChangedPixels": 254163,
+        "changedPixelsPerCell": [
+          15058,
+          15726,
+          12294,
+          13159,
+          14789,
+          14139,
+          13969,
+          12789,
+          15209,
+          14806,
+          13451,
+          13387,
+          13713,
+          14435,
+          14337,
+          14773,
+          14865,
+          14597,
+          15361,
+          16492
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1733922
+    },
+    {
+      "key": "starpatch-cat:1:face-01",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "face-01",
+      "slot": "face",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\face-01-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\face-01-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 285662,
+        "thresholdChangedPixels": 270027,
+        "thresholdChangedRate": 0.527396,
+        "alphaChangedPixels": 252987,
+        "changedPixelsPerCell": [
+          13457,
+          14125,
+          13187,
+          14680,
+          14627,
+          14371,
+          14408,
+          13607,
+          15837,
+          14022,
+          13311,
+          13353,
+          14256,
+          14936,
+          14496,
+          13061,
+          14204,
+          13470,
+          16086,
+          16168
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1729973
+    },
+    {
+      "key": "starpatch-cat:1:back-02",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "back-02",
+      "slot": "back",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\outfit-head-20-neck-10-back-02-dressed-atlas.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 285019,
+        "thresholdChangedPixels": 273944,
+        "thresholdChangedRate": 0.535047,
+        "alphaChangedPixels": 251834,
+        "changedPixelsPerCell": [
+          15901,
+          14750,
+          12961,
+          13521,
+          14675,
+          14208,
+          13545,
+          12069,
+          14269,
+          13461,
+          14809,
+          14267,
+          13955,
+          14777,
+          15250,
+          14118,
+          13967,
+          13242,
+          15191,
+          16083
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1726056
+    },
+    {
+      "key": "starpatch-cat:1:head-20",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-20",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\outfit-head-20-neck-10-back-02-dressed-atlas.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 285019,
+        "thresholdChangedPixels": 273944,
+        "thresholdChangedRate": 0.535047,
+        "alphaChangedPixels": 251834,
+        "changedPixelsPerCell": [
+          15901,
+          14750,
+          12961,
+          13521,
+          14675,
+          14208,
+          13545,
+          12069,
+          14269,
+          13461,
+          14809,
+          14267,
+          13955,
+          14777,
+          15250,
+          14118,
+          13967,
+          13242,
+          15191,
+          16083
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1726056
+    },
+    {
+      "key": "starpatch-cat:1:neck-10",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "neck-10",
+      "slot": "neck",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\outfit-head-20-neck-10-back-02-dressed-atlas.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 285019,
+        "thresholdChangedPixels": 273944,
+        "thresholdChangedRate": 0.535047,
+        "alphaChangedPixels": 251834,
+        "changedPixelsPerCell": [
+          15901,
+          14750,
+          12961,
+          13521,
+          14675,
+          14208,
+          13545,
+          12069,
+          14269,
+          13461,
+          14809,
+          14267,
+          13955,
+          14777,
+          15250,
+          14118,
+          13967,
+          13242,
+          15191,
+          16083
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1726056
+    },
+    {
+      "key": "starpatch-cat:1:head-03",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-03",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-03-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-03-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 290688,
+        "thresholdChangedPixels": 276273,
+        "thresholdChangedRate": 0.539596,
+        "alphaChangedPixels": 257050,
+        "changedPixelsPerCell": [
+          14605,
+          14522,
+          13392,
+          14286,
+          14403,
+          14381,
+          14796,
+          14006,
+          15120,
+          13862,
+          13542,
+          14579,
+          14846,
+          14596,
+          14681,
+          13710,
+          14705,
+          13918,
+          16644,
+          16094
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1723727
+    },
+    {
+      "key": "starpatch-cat:1:back-02",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "back-02",
+      "slot": "back",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\outfit-head-20-neck-10-back-02-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 287126,
+        "thresholdChangedPixels": 276314,
+        "thresholdChangedRate": 0.539676,
+        "alphaChangedPixels": 254843,
+        "changedPixelsPerCell": [
+          16023,
+          14862,
+          13132,
+          13670,
+          14775,
+          14271,
+          13593,
+          12107,
+          14326,
+          13537,
+          14912,
+          14386,
+          14060,
+          14883,
+          15362,
+          14229,
+          14118,
+          13310,
+          15397,
+          16173
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1723686
+    },
+    {
+      "key": "starpatch-cat:1:head-20",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-20",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\outfit-head-20-neck-10-back-02-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 287126,
+        "thresholdChangedPixels": 276314,
+        "thresholdChangedRate": 0.539676,
+        "alphaChangedPixels": 254843,
+        "changedPixelsPerCell": [
+          16023,
+          14862,
+          13132,
+          13670,
+          14775,
+          14271,
+          13593,
+          12107,
+          14326,
+          13537,
+          14912,
+          14386,
+          14060,
+          14883,
+          15362,
+          14229,
+          14118,
+          13310,
+          15397,
+          16173
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1723686
+    },
+    {
+      "key": "starpatch-cat:1:neck-10",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "neck-10",
+      "slot": "neck",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\outfit-head-20-neck-10-back-02-dressed-atlas-v2.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 287126,
+        "thresholdChangedPixels": 276314,
+        "thresholdChangedRate": 0.539676,
+        "alphaChangedPixels": 254843,
+        "changedPixelsPerCell": [
+          16023,
+          14862,
+          13132,
+          13670,
+          14775,
+          14271,
+          13593,
+          12107,
+          14326,
+          13537,
+          14912,
+          14386,
+          14060,
+          14883,
+          15362,
+          14229,
+          14118,
+          13310,
+          15397,
+          16173
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1723686
+    },
+    {
+      "key": "starpatch-cat:1:head-04",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-04",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-04-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-04-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 291588,
+        "thresholdChangedPixels": 276629,
+        "thresholdChangedRate": 0.540291,
+        "alphaChangedPixels": 257783,
+        "changedPixelsPerCell": [
+          14464,
+          15919,
+          14466,
+          15143,
+          14598,
+          13248,
+          14357,
+          13682,
+          15565,
+          13575,
+          13113,
+          14139,
+          14841,
+          15462,
+          14641,
+          13028,
+          15036,
+          13636,
+          16597,
+          16078
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1723371
+    },
+    {
+      "key": "starpatch-cat:1:head-05",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-05",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-05-dressed-atlas-v2-normalized.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-05-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": [
+          {
+            "path": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\masked-head-05-proof\\canonical-v3\\independent-final-qa\\head-05-v3-final-independent-qa.json",
+            "bodyLockedEvidence": false,
+            "targetMatch": false,
+            "independentPass": false,
+            "independentReject": false
+          }
+        ]
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 290717,
+        "thresholdChangedPixels": 277822,
+        "thresholdChangedRate": 0.542621,
+        "alphaChangedPixels": 254790,
+        "changedPixelsPerCell": [
+          14290,
+          14864,
+          11761,
+          12993,
+          14659,
+          14611,
+          14932,
+          13445,
+          15167,
+          14826,
+          13946,
+          14129,
+          14035,
+          14412,
+          15106,
+          14560,
+          14607,
+          16589,
+          15777,
+          16008
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1722178
+    },
+    {
+      "key": "starpatch-cat:1:head-08",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-08",
+      "slot": "head",
+      "queueStatus": "pending-redraw",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-08-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-08-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          800,
+          640
+        ],
+        "validCanvas": true,
+        "exactChangedPixels": 512000,
+        "thresholdChangedPixels": 505422,
+        "thresholdChangedRate": 0.987152,
+        "alphaChangedPixels": 509555,
+        "changedPixelsPerCell": [
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600,
+          25600
+        ],
+        "note": "Whole-atlas delta is only a triage lower bound; it is not outside-mask proof."
+      },
+      "recommendation": "RUN_MASK_AND_SOURCE_OVER_PRECHECK",
+      "priority": 1494578
+    },
+    {
+      "key": "starpatch-cat:1:back-02",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "back-02",
+      "slot": "back",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          1402,
+          1122
+        ],
+        "validCanvas": false
+      },
+      "recommendation": "REJECT_INVALID_CANVAS",
+      "priority": -9007199254740991
+    },
+    {
+      "key": "starpatch-cat:1:back-02",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "back-02",
+      "slot": "back",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\outfit-head-20-neck-10-back-02-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\back-02-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          1402,
+          1122
+        ],
+        "validCanvas": false
+      },
+      "recommendation": "REJECT_INVALID_CANVAS",
+      "priority": -9007199254740991
+    },
+    {
+      "key": "starpatch-cat:1:head-20",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-20",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          1402,
+          1122
+        ],
+        "validCanvas": false
+      },
+      "recommendation": "REJECT_INVALID_CANVAS",
+      "priority": -9007199254740991
+    },
+    {
+      "key": "starpatch-cat:1:head-20",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "head-20",
+      "slot": "head",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\outfit-head-20-neck-10-back-02-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          1402,
+          1122
+        ],
+        "validCanvas": false
+      },
+      "recommendation": "REJECT_INVALID_CANVAS",
+      "priority": -9007199254740991
+    },
+    {
+      "key": "starpatch-cat:1:neck-10",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "neck-10",
+      "slot": "neck",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          1402,
+          1122
+        ],
+        "validCanvas": false
+      },
+      "recommendation": "REJECT_INVALID_CANVAS",
+      "priority": -9007199254740991
+    },
+    {
+      "key": "starpatch-cat:1:neck-10",
+      "petId": "starpatch-cat",
+      "stage": 1,
+      "wearableId": "neck-10",
+      "slot": "neck",
+      "queueStatus": "ready",
+      "candidate": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\outfit-head-20-neck-10-back-02-dressed-atlas-v1.png",
+      "expectedFullRedraw": "pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\neck-10-dressed-atlas-v1.png",
+      "diagnosticOnly": false,
+      "evidence": {
+        "independentPassFound": false,
+        "independentRejectFound": false,
+        "bodyLockedEvidenceFound": false,
+        "relevantReports": []
+      },
+      "measurement": {
+        "readable": true,
+        "dimensions": [
+          1402,
+          1122
+        ],
+        "validCanvas": false
+      },
+      "recommendation": "REJECT_INVALID_CANVAS",
+      "priority": -9007199254740991
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "role": "immutable locked dressed-art target authored before production extraction",
+  "canvas": "800x640",
+  "transformedDuringAuthoring": false,
+  "productionMaskOrLayerRead": false,
+  "inputs": {
+    "basePath": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "sourceLayerPath": "artifacts/aura01-clean/layer.png",
+    "sha256": {
+      "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+      "sourceLayer": "c92fdfc1c218604fc66a110fdbad159491b4289ae39ec916242e5237ebe33135"
+    }
+  },
+  "output": {
+    "targetPath": "artifacts/aura01-clean/locked-target.png",
+    "sha256": "b72079edc7a5733753348391409723847c21120dda993be579db595f0a5de4f5",
+    "writtenUtc": "2026-08-24T18:59:22.440Z"
+  },
+  "metrics": {
+    "sourceLayerPixels": 55343,
+    "baseBytesPreservedOutsideLayer": 456657
+  }
+}

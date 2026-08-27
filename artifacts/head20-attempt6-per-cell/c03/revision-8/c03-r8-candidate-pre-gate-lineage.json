@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "cell": "c03",
+  "revision": "r8",
+  "stage": "TARGET_LOCAL_SEMANTIC_PRE_GATE_ONLY",
+  "source": {
+    "rawPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-8\\c03-r8-raw-full-dressed-imagegen-source.png",
+    "sha256": "760a95e7a075e7fb0bc50c7609407732fd5ba71ec733136306ed970b5f6b2ef4",
+    "crop": [
+      270,
+      145,
+      720,
+      600
+    ],
+    "mappedPlacement": [
+      27,
+      5,
+      132,
+      105
+    ]
+  },
+  "outputs": {
+    "candidateLayer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-8\\c03-r8-helmet-pre-gate-candidate-layer-160x160.png",
+      "sha256": "2cb09c0f59a628a90e1d96d035bc825c49731540444244f0a70d89aacceb4da4"
+    },
+    "candidateMask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-8\\c03-r8-helmet-pre-gate-candidate-mask-160x160.png",
+      "sha256": "4a82bd969537b9830f44627508d2c483c8a085c0ab6ed17ba0095a770dc19e24"
+    }
+  },
+  "metrics": {
+    "pixels": 6008,
+    "components4Connected": 1,
+    "enclosedHoles": 0,
+    "tailIntersectionPixels": 0,
+    "bodyChestIntersectionPixels": 0,
+    "raisedPawIntersectionPixels": 0,
+    "leftNaturalEarUnchangedOpaquePixels": 0,
+    "rightNaturalEarUnchangedOpaquePixels": 0
+  },
+  "verdict": "PENDING_INDEPENDENT_TARGET_LOCAL_RIGHT_CUP_GATE",
+  "forbidden": "NO_TARGET_OR_COMPOSITE_WRITTEN"
+}\n

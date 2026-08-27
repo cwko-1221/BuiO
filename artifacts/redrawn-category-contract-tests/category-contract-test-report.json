@@ -1,0 +1,174 @@
+{
+  "verdict": "TEST_PASS",
+  "implementationVerdict": "FULL_CATEGORY_SUPPORT",
+  "noTargetGenerated": true,
+  "compositeUsedAsTarget": false,
+  "manifestOrRuntimeModified": false,
+  "contractPath": "C:\\Users\\kochu\\Documents\\BuiO\\scripts\\redrawn-category-contract.json",
+  "checks": [
+    {
+      "name": "contract covers exactly head/face/neck/back/aura",
+      "verdict": "PASS"
+    },
+    {
+      "name": "contract fixes the 800x640 5x4 atlas without transforms",
+      "verdict": "PASS"
+    },
+    {
+      "name": "runtime layer order contract is explicit",
+      "verdict": "PASS"
+    },
+    {
+      "name": "rear is below semi-transparent base",
+      "verdict": "PASS",
+      "details": {
+        "actual": [
+          128,
+          0,
+          127,
+          255
+        ]
+      }
+    },
+    {
+      "name": "union erase occurs before patch",
+      "verdict": "PASS",
+      "details": {
+        "actual": [
+          0,
+          255,
+          0,
+          128
+        ]
+      }
+    },
+    {
+      "name": "frontErase occurs after patch and before front",
+      "verdict": "PASS",
+      "details": {
+        "actual": [
+          0,
+          0,
+          255,
+          255
+        ]
+      }
+    },
+    {
+      "name": "single solver preserves hidden base RGBA outside coverage",
+      "verdict": "PASS"
+    },
+    {
+      "name": "runner routes both back and aura to the layered solver",
+      "verdict": "PASS"
+    },
+    {
+      "name": "layered solver accepts only back/aura categories",
+      "verdict": "PASS"
+    },
+    {
+      "name": "layered solver enforces declared semantic layers",
+      "verdict": "PASS"
+    },
+    {
+      "name": "batch frontErase has explicit input, output and independent QA gate",
+      "verdict": "PASS"
+    },
+    {
+      "name": "batch lineage forbids composite-to-target circularity",
+      "verdict": "PASS"
+    },
+    {
+      "name": "layer manifest audit is exact and fail-closed",
+      "verdict": "PASS"
+    },
+    {
+      "name": "batch runner makes layer-manifest audit a publish gate",
+      "verdict": "PASS"
+    },
+    {
+      "name": "direction source audit is fail-closed and transform-free",
+      "verdict": "PASS"
+    },
+    {
+      "name": "direction ingress audits every expected full redraw before masking",
+      "verdict": "PASS"
+    },
+    {
+      "name": "lineage ingress work is bounded and hash-cached",
+      "verdict": "PASS"
+    },
+    {
+      "name": "direction source templates preserve frozen coordinates",
+      "verdict": "PASS"
+    },
+    {
+      "name": "face declares exactly 25 legal lens apertures",
+      "verdict": "PASS"
+    },
+    {
+      "name": "face back row is five completely empty cells",
+      "verdict": "PASS"
+    },
+    {
+      "name": "face QA rejects undeclared holes and validates eye evidence",
+      "verdict": "PASS"
+    },
+    {
+      "name": "neck back row is five completely empty cells",
+      "verdict": "PASS"
+    },
+    {
+      "name": "back declares rear/base/erase/patch/front semantics",
+      "verdict": "PASS"
+    },
+    {
+      "name": "aura is rear/front only with patch and erase forbidden",
+      "verdict": "PASS"
+    },
+    {
+      "name": "aura publish plan omits the transparent patch artifact",
+      "verdict": "PASS"
+    },
+    {
+      "name": "head regression input set is exactly head-05/head-06",
+      "verdict": "PASS"
+    },
+    {
+      "name": "runtime implementation order matches the contract",
+      "verdict": "PASS"
+    },
+    {
+      "name": "wardrobe preview uses the same mask-capable canvas compositor",
+      "verdict": "PASS"
+    }
+  ],
+  "headRegression": {
+    "requested": false,
+    "verdict": "NOT_RUN",
+    "command": null,
+    "summaryPath": null,
+    "items": []
+  },
+  "knownGaps": [
+    {
+      "id": "runtime-aura-modular-layers",
+      "open": false,
+      "evidence": "PetAvatar skips aura preload and removes aura IDs from modular composition.",
+      "minimalFix": "Allow registered aura entries through preload/compose; keep only unregistered auras on the legacy placement path. Preserve the same rear/base/.../front ordering."
+    },
+    {
+      "id": "wardrobe-preview-erase-frontErase",
+      "open": false,
+      "evidence": "previewFigure must use a canvas compositor with the same erase/frontErase destination-out passes as PetAvatar.",
+      "minimalFix": "Build/cache the preview frame from the same composed atlas canvas used by PetAvatar; CSS stacking alone cannot reproduce erase/frontErase."
+    },
+    {
+      "id": "batch-frontErase-authoring",
+      "open": false,
+      "evidence": "Batch publish args hard-code frontErase to \"-\" and the solver has no independent frontErase output.",
+      "minimalFix": "Add an explicit, separately sourced frontErase input/QA stage; never infer it from the composite. Keep it optional for categories that do not require late anatomical masking."
+    }
+  ],
+  "openGapCount": 0
+}

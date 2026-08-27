@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "verdict": "PASS",
+  "target": {
+    "path": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-20-dressed-atlas-v2.png",
+    "sha256": "370378be0360e31dd6ce82e37a4cf852ac6a9fc2c43902b51946b6e4c340d924",
+    "metadata": {
+      "format": "png",
+      "mediaType": "image/png",
+      "width": 800,
+      "height": 640,
+      "space": "srgb",
+      "channels": 4,
+      "depth": "uchar",
+      "isProgressive": false,
+      "isPalette": false,
+      "bitsPerSample": 8,
+      "hasProfile": false,
+      "hasAlpha": true,
+      "autoOrient": {
+        "width": 800,
+        "height": 640
+      }
+    }
+  },
+  "scan": {
+    "roots": [
+      "artifacts",
+      "pet-app/art-source/imagegen"
+    ],
+    "candidateCount": 156,
+    "compositeHashMatches": []
+  },
+  "output": {
+    "targetPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-20-dressed-atlas-v2.png",
+    "sha256": "370378be0360e31dd6ce82e37a4cf852ac6a9fc2c43902b51946b6e4c340d924"
+  },
+  "verification": {
+    "earlierCompositeHashMatches": []
+  },
+  "lineage": null,
+  "errors": [],
+  "warnings": [],
+  "policy": {
+    "targetMustBeIndependent": true,
+    "compositeHashMatchRejects": true,
+    "noPixelRepairOrTransformPerformed": true
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "role": "independent_visual_critic",
+  "cell": "c03",
+  "revision": "r9-accessory-only-final",
+  "scope": "base, complete target, combined accessory layer, topology silhouette, opaque erase mask, and r9 raw source",
+  "verdict": "REJECT",
+  "releaseDecision": "NOT_PUBLISHABLE",
+  "artifactReview": {
+    "base": "c03-base-original-160x160.png",
+    "target": "c03-r9-body-preserving-complete-dressed-target-160x160.png",
+    "combinedAccessoryLayer": "c03-r9-hardware-tint-layer-160x160.png",
+    "topologySilhouette": "c03-r9-wearable-silhouette-mask-160x160.png",
+    "opaqueEraseMask": "c03-r9-opaque-erase-mask-160x160.png",
+    "rawFullDressedSource": "../c03-r9-raw-full-dressed-imagegen-source.png"
+  },
+  "mechanicalEvidenceAcknowledged": {
+    "targetVsZeroTransformCompositeRgbaMismatchPixels": 0,
+    "targetOutsideWearableSilhouetteBaseDiffPixels": 0,
+    "note": "Exact compositing alone is insufficient: this critic found semantic/accessory-only and release-quality failures."
+  },
+  "nearestNeighbourVisualFindings": [
+    {
+      "check": "accessory-only layer contains no animal anatomy",
+      "result": "FAIL",
+      "evidence": "The combined accessory layer visibly carries cream/orange fur-like content along the left interior visor edge (approximately x=42..57, y=46..69) and a cream facial/muzzle-shaped horizontal band across the lower visor (approximately x=55..96, y=70..80). These are not blue/gold hardware or a neutral translucent visor tint."
+    },
+    {
+      "check": "natural ears fully occluded by a closed helmet",
+      "result": "FAIL_HARD",
+      "evidence": "Both original orange/pink ears remain plainly visible under the low-alpha blue visor in the completed target, approximately left x=50..70,y=38..63 and right x=91..111,y=34..63. A support/silhouette mask covering these pixels does not make the helmet visually closed; the opaque helmet shell must occlude them."
+    },
+    {
+      "check": "original face remains correctly visible through low-alpha visor",
+      "result": "FAIL",
+      "evidence": "The target does not read as a clean transparent visor over the original face: the added cream band visibly crosses the eye/muzzle region and interrupts the face."
+    },
+    {
+      "check": "right ear cup is blue/gold, rounded and free of fur/block artifacts",
+      "result": "FAIL",
+      "evidence": "The target/layer does not provide a clearly separated, rounded screen-right blue/gold ear cup at this coordinate scale; it blends into the improperly retained natural ear/fur area."
+    },
+    {
+      "check": "tail/body/paws protected",
+      "result": "PASS_MECHANICAL_ONLY",
+      "evidence": "The mechanical report records protected base support and the body remains present, but this cannot compensate for the helmet-layer failures."
+    }
+  ],
+  "rawSourceAssessment": "The r9 raw full-dressed redraw is a coherent high-quality reference with closed blue/gold cups, visible eyes and tail. The defect was introduced by the accessory-only extraction/final mapping, not justified by the raw reference.",
+  "requiredRevision": "Rebuild only the accessory-only layer from r9 raw: retain blue/gold shell, both rounded cups, collar hardware and a genuinely low-alpha visor tint; exclude every cat-face/ear/fur pixel. Add opaque shell coverage over both natural ears while keeping the original eyes, star, nose and mouth visible through the transparent visor. Re-run zero-transform comparison and independent visual review."
+}

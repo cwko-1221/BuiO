@@ -1,0 +1,416 @@
+{
+  "inputPath": "artifacts/aura01-clean/target.png",
+  "outputPath": "artifacts/aura01-clean-v3/target.png",
+  "removedComponents": [
+    {
+      "row": 0,
+      "column": 1,
+      "pixels": 138,
+      "bounds": [
+        46,
+        90,
+        56,
+        112
+      ],
+      "fill": 0.545
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "pixels": 108,
+      "bounds": [
+        111,
+        88,
+        120,
+        105
+      ],
+      "fill": 0.6
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "pixels": 79,
+      "bounds": [
+        46,
+        89,
+        53,
+        107
+      ],
+      "fill": 0.52
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "pixels": 44,
+      "bounds": [
+        138,
+        40,
+        141,
+        59
+      ],
+      "fill": 0.55
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "pixels": 100,
+      "bounds": [
+        108,
+        89,
+        116,
+        106
+      ],
+      "fill": 0.617
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "pixels": 53,
+      "bounds": [
+        35,
+        90,
+        40,
+        104
+      ],
+      "fill": 0.589
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "pixels": 79,
+      "bounds": [
+        58,
+        59,
+        77,
+        67
+      ],
+      "fill": 0.439
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "pixels": 220,
+      "bounds": [
+        70,
+        25,
+        103,
+        34
+      ],
+      "fill": 0.647
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "pixels": 159,
+      "bounds": [
+        59,
+        60,
+        80,
+        72
+      ],
+      "fill": 0.556
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "pixels": 236,
+      "bounds": [
+        71,
+        25,
+        104,
+        37
+      ],
+      "fill": 0.534
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "pixels": 120,
+      "bounds": [
+        57,
+        61,
+        74,
+        71
+      ],
+      "fill": 0.606
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "pixels": 84,
+      "bounds": [
+        150,
+        65,
+        153,
+        116
+      ],
+      "fill": 0.404
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "pixels": 238,
+      "bounds": [
+        61,
+        24,
+        103,
+        35
+      ],
+      "fill": 0.461
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "pixels": 126,
+      "bounds": [
+        54,
+        60,
+        73,
+        70
+      ],
+      "fill": 0.573
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "pixels": 246,
+      "bounds": [
+        45,
+        24,
+        86,
+        35
+      ],
+      "fill": 0.488
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "pixels": 101,
+      "bounds": [
+        47,
+        61,
+        59,
+        72
+      ],
+      "fill": 0.647
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "pixels": 136,
+      "bounds": [
+        45,
+        67,
+        56,
+        86
+      ],
+      "fill": 0.567
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "pixels": 124,
+      "bounds": [
+        106,
+        68,
+        118,
+        86
+      ],
+      "fill": 0.502
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "pixels": 42,
+      "bounds": [
+        136,
+        23,
+        141,
+        37
+      ],
+      "fill": 0.467
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "pixels": 267,
+      "bounds": [
+        46,
+        65,
+        62,
+        92
+      ],
+      "fill": 0.561
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "pixels": 68,
+      "bounds": [
+        76,
+        11,
+        105,
+        15
+      ],
+      "fill": 0.453
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "pixels": 167,
+      "bounds": [
+        46,
+        66,
+        58,
+        87
+      ],
+      "fill": 0.584
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "pixels": 117,
+      "bounds": [
+        107,
+        69,
+        118,
+        86
+      ],
+      "fill": 0.542
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "pixels": 37,
+      "bounds": [
+        150,
+        78,
+        153,
+        101
+      ],
+      "fill": 0.385
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "pixels": 101,
+      "bounds": [
+        73,
+        12,
+        102,
+        19
+      ],
+      "fill": 0.421
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "pixels": 129,
+      "bounds": [
+        44,
+        69,
+        55,
+        88
+      ],
+      "fill": 0.537
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "pixels": 99,
+      "bounds": [
+        103,
+        70,
+        114,
+        85
+      ],
+      "fill": 0.516
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "pixels": 129,
+      "bounds": [
+        36,
+        69,
+        46,
+        88
+      ],
+      "fill": 0.586
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "pixels": 66,
+      "bounds": [
+        74,
+        0,
+        100,
+        3
+      ],
+      "fill": 0.611
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "pixels": 154,
+      "bounds": [
+        74,
+        90,
+        91,
+        102
+      ],
+      "fill": 0.658
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "pixels": 90,
+      "bounds": [
+        83,
+        10,
+        105,
+        15
+      ],
+      "fill": 0.652
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "pixels": 120,
+      "bounds": [
+        74,
+        0,
+        97,
+        8
+      ],
+      "fill": 0.556
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "pixels": 46,
+      "bounds": [
+        43,
+        62,
+        49,
+        74
+      ],
+      "fill": 0.505
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "pixels": 53,
+      "bounds": [
+        64,
+        0,
+        81,
+        6
+      ],
+      "fill": 0.421
+    }
+  ],
+  "removedPixels": 4076,
+  "verdict": "CLEAN_ENCLOSED_NEUTRAL_ISLANDS"
+}

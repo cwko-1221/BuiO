@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "description": "Prepared next head batch. Canonical target and lineage paths are intentionally future inputs; missing files must preflight REJECT without starting an item process or publishing.",
+  "output": "artifacts/redrawn-wearable-batch-next/head02-head03-head20-preflight",
+  "concurrency": 3,
+  "published": false,
+  "inputPolicy": {
+    "allowExistingPublishedLayerAsCandidateInput": false,
+    "allowIsolatedPatchEraseAsCandidateInput": false,
+    "targetMustPrecedeMask": true
+  },
+  "items": [
+    {
+      "id": "head-02",
+      "base": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+      "frozenAcceptanceSpec": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/batch-acceptance-prep/frozen-head-specs-v1/head-02-frozen-acceptance-spec.json",
+      "authoritativeFullDressed": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-02-dressed-atlas-v1.png",
+      "target": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-02-full-redraw-canonical-v1.png",
+      "spec": "scripts/redrawn-category-specs/head-02-safari-goggles.json",
+      "lineage": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/masked-head-02-proof/canonical-v1/target-lineage.json",
+      "output": "artifacts/redrawn-wearable-batch-next/head02-head03-head20-preflight/head-02",
+      "prefix": "head-02-canonical-v1",
+      "dryRun": true,
+      "publish": { "execute": false, "petId": "starpatch-cat", "stage": 1, "wearableId": "head-02", "slot": "head", "occludes": [] }
+    },
+    {
+      "id": "head-03",
+      "base": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+      "frozenAcceptanceSpec": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/batch-acceptance-prep/frozen-head-specs-v1/head-03-frozen-acceptance-spec.json",
+      "authoritativeFullDressed": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-03-dressed-atlas-v1.png",
+      "target": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-03-full-redraw-canonical-v1.png",
+      "spec": "scripts/redrawn-category-specs/head-03-flower-wreath-semantic-components.json",
+      "lineage": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/masked-head-03-proof/canonical-v1/target-lineage.json",
+      "output": "artifacts/redrawn-wearable-batch-next/head02-head03-head20-preflight/head-03",
+      "prefix": "head-03-canonical-v1",
+      "dryRun": true,
+      "publish": { "execute": false, "petId": "starpatch-cat", "stage": 1, "wearableId": "head-03", "slot": "head", "occludes": [] }
+    },
+    {
+      "id": "head-20",
+      "base": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+      "frozenAcceptanceSpec": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/batch-acceptance-prep/frozen-head-specs-v1/head-20-frozen-acceptance-spec.json",
+      "authoritativeFullDressed": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-20-dressed-atlas-v2.png",
+      "target": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-20-full-redraw-canonical-v1.png",
+      "spec": "scripts/redrawn-category-specs/head-20-closed-helmet-replacement.json",
+      "lineage": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/masked-head-20-proof/canonical-v1/target-lineage.json",
+      "output": "artifacts/redrawn-wearable-batch-next/head02-head03-head20-preflight/head-20",
+      "prefix": "head-20-canonical-v1",
+      "dryRun": true,
+      "publish": { "execute": false, "petId": "starpatch-cat", "stage": 1, "wearableId": "head-20", "slot": "head", "occludes": ["face", "natural ears"] }
+    }
+  ]
+}

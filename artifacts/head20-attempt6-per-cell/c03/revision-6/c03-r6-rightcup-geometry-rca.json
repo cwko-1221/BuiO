@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c03",
+  "revision": "r6",
+  "stage": "FORMAL_RCA_AFTER_REPEATED_RIGHT_CUP_REJECTIONS",
+  "finding": "The prior colour/material gate can confirm blue/gold material and reject obvious fur contamination, but it cannot reject a geometrically rectangular opaque extension. r6 therefore passes mechanical compositing and colour evidence while the lower screen-right cup reads as a clipped block rather than a curved ear cup.",
+  "rootCause": "Missing geometry invariant: no contour/run-length gate constrained the right-cup lower edge. This is not a critic-threshold issue; exact compositing can be correct while the rendered silhouette is semantically wrong.",
+  "newRequiredGate": {
+    "script": "scripts/audit-head20-c03-rightcup-geometry-pregate.mjs",
+    "probe": [113, 79, 132, 91],
+    "rule": "Reject when at least four consecutive probe rows are fully opaque across the full probe width and at least four consecutive probe columns are fully opaque across the full probe height.",
+    "reason": "This detects an opaque rectilinear 19x12-style protrusion from mask contour/run-length evidence, without relying on colour."
+  },
+  "r6IndependentResult": {
+    "mask": "artifacts/head20-attempt6-per-cell/c03/revision-6/c03-r6-helmet-mask-same-coordinate-160x160.png",
+    "maskSha256": "7d71f0a6b30ef192f883e32c484049fdf514bd95bb16f84ded779a5b5f48495a",
+    "report": "artifacts/head20-attempt6-per-cell/c03/revision-6/c03-r6-independent-rightcup-geometry-review.json",
+    "verdict": "REJECT_RECTILINEAR_RIGHT_CUP_PROTRUSION",
+    "fullWidthStraightRows": 12,
+    "fullHeightStraightColumns": 19,
+    "flatRightEdgeRows": 11
+  },
+  "knownNonRectilinearFixture": {
+    "mask": "artifacts/head20-attempt6-per-cell/c03/revision-3/c03-r3-helmet-mask-same-coordinate-160x160.png",
+    "maskSha256": "d1c9194ed60b2c8dd78e2be9db1af6fa623f0d62dcd54cd4e91424a5cc5b5d26",
+    "report": "tmp/c03-r3-rightcup-geometry-fixture.json",
+    "verdict": "PASS_CURVED_OR_NON_RECTILINEAR_RIGHT_CUP_PENDING_VISUAL_CRITIC",
+    "fullWidthStraightRows": 0,
+    "fullHeightStraightColumns": 0,
+    "note": "This is a geometry fixture only; it is not a release approval for r3."
+  },
+  "nextAction": "Reject r6 from publication. Regenerate a fresh numbered c03 source/layer and run both the colour/material pre-gate and this geometry pre-gate before mask/composite/critic handoff.",
+  "publishable": false
+}

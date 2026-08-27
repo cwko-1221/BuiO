@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c01",
+  "sourceBase": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\c01-base-original-160x160.png",
+  "sourceBaseSha256": "cc87a049bc41b7635bdb1ca4d92f46c1822d73423b86ce7c69c6526fa6ae80d4",
+  "method": "4-connected alpha>=128 flood from seed [128,86] constrained to visible-tail semantic window x=[114,141), y=[74,101); excludes head/ear zone and torso below collar",
+  "seed": [
+    118,
+    82
+  ],
+  "constraint": [
+    114,
+    74,
+    141,
+    101
+  ],
+  "pixels": 269,
+  "bounds": [
+    114,
+    74,
+    129,
+    101
+  ],
+  "rightEarRoi": [
+    103,
+    28,
+    126,
+    55
+  ],
+  "rightEarIntersectionPixels": 0,
+  "protectedBodyRoi": [
+    0,
+    101,
+    160,
+    160
+  ],
+  "bodyIntersectionPixels": 0,
+  "tailMaskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-tail-visible-pixels-mask.png",
+  "verdict": "PASS_TIGHT_TAIL_MASK"
+}

@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "verdict": "REJECT",
+  "target": {
+    "path": "artifacts/head04-v2-target.png",
+    "sha256": "8a751fab8896979d0f81f237fc8dc518a9214b16a199cbf7926b3fbeb48f57d5",
+    "metadata": {
+      "format": "png",
+      "mediaType": "image/png",
+      "width": 800,
+      "height": 640,
+      "space": "srgb",
+      "channels": 4,
+      "depth": "uchar",
+      "isProgressive": false,
+      "isPalette": false,
+      "bitsPerSample": 8,
+      "hasProfile": false,
+      "hasAlpha": true,
+      "autoOrient": {
+        "width": 800,
+        "height": 640
+      }
+    }
+  },
+  "scan": {
+    "roots": [
+      "artifacts",
+      "pet-app/art-source/imagegen"
+    ],
+    "candidateCount": 143,
+    "compositeHashMatches": [
+      {
+        "path": "artifacts/head04-radius2-critic-v2/head04-r2-v2-composite.png",
+        "sha256": "8a751fab8896979d0f81f237fc8dc518a9214b16a199cbf7926b3fbeb48f57d5"
+      },
+      {
+        "path": "artifacts/head04-v2-diagnostic/head04-v2-composite.png",
+        "sha256": "8a751fab8896979d0f81f237fc8dc518a9214b16a199cbf7926b3fbeb48f57d5"
+      },
+      {
+        "path": "artifacts/head04-v2-diagnostic-bridged/head04-v2-bridged-composite.png",
+        "sha256": "8a751fab8896979d0f81f237fc8dc518a9214b16a199cbf7926b3fbeb48f57d5"
+      },
+      {
+        "path": "artifacts/head04-v2-radius3-solve/head04-v2-r3-composite.png",
+        "sha256": "8a751fab8896979d0f81f237fc8dc518a9214b16a199cbf7926b3fbeb48f57d5"
+      },
+      {
+        "path": "artifacts/head04-v2-radius3-verify3/composite.png",
+        "sha256": "8a751fab8896979d0f81f237fc8dc518a9214b16a199cbf7926b3fbeb48f57d5"
+      },
+      {
+        "path": "artifacts/head04-v2-radius4-solve/head04-v2-r4-composite.png",
+        "sha256": "8a751fab8896979d0f81f237fc8dc518a9214b16a199cbf7926b3fbeb48f57d5"
+      },
+      {
+        "path": "artifacts/head04-v2-solve/head04-v2-composite.png",
+        "sha256": "8a751fab8896979d0f81f237fc8dc518a9214b16a199cbf7926b3fbeb48f57d5"
+      }
+    ]
+  },
+  "lineage": null,
+  "errors": [
+    "target bytes match 7 earlier composite/recompose output(s)"
+  ],
+  "warnings": [],
+  "policy": {
+    "targetMustBeIndependent": true,
+    "compositeHashMatchRejects": true,
+    "noPixelRepairOrTransformPerformed": true
+  }
+}

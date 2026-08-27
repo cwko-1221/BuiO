@@ -1,0 +1,19 @@
+{
+  "verdict": "CLEAN_TARGET_FROZEN",
+  "inputPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-08-dressed-atlas-v1.png",
+  "outputPath": "artifacts/head-08-clean-target.png",
+  "canvas": "800x640",
+  "connectivity": 4,
+  "checkerRule": "min RGB >= 226 and channel spread <= 7, border-connected only; cool cap envelope protects white/lavender crown",
+  "sourceSize": [
+    800,
+    640
+  ],
+  "normalization": "none (already 800x640)",
+  "crownProtectedPixels": 1500,
+  "transparentPixels": 336650,
+  "opaquePixels": 175350,
+  "checkerPixels": 336650,
+  "inputSha256": "545cef7eb85bf1e2463601751b64aa1df71b169f02fb30cd59b06436d8dd549d",
+  "outputSha256": "c3460b93d49cc57aec7be7b3d61d9faa7b4942ce081429e9084ac11678c81551"
+}

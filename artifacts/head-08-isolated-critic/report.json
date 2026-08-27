@@ -1,0 +1,845 @@
+{
+  "accepted": false,
+  "verdict": "REJECT",
+  "reason": "The same-coordinate accessory composite differs from the full redraw; differences outside wearable/erase coverage cannot be repaired by compositing.",
+  "invariant": {
+    "canvas": "800x640",
+    "cell": "160x160",
+    "transformed": false,
+    "sampling": "same pixel index only"
+  },
+  "inputs": {
+    "targetPath": "artifacts/head-08-clean-target.png",
+    "basePath": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "layerPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-08-isolated-hat-v1.png",
+    "erasePath": "-",
+    "sha256": {
+      "target": "c3460b93d49cc57aec7be7b3d61d9faa7b4942ce081429e9084ac11678c81551",
+      "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+      "layer": "f2fa7f590e54e481dbd7b0b2d8a8c244024361fd9335a1a54a8ace964e631bc8",
+      "erase": null
+    }
+  },
+  "totals": {
+    "exactMismatchPixels": 241350,
+    "visualMismatchPixels": 232726,
+    "maxVisualDelta": 255,
+    "unfixableOutsideWearablePixels": 105185,
+    "targetBaseOutsideWearablePixels": 381088,
+    "layerPixels": 130912,
+    "erasePixels": 0,
+    "baseDarkFacePixelsCoveredByLayer": 2896,
+    "layerTargetRgbMismatchPixels": 130723,
+    "visualMismatchPercent": 45.454,
+    "unfixableOutsideWearablePercent": 27.601
+  },
+  "cells": [
+    {
+      "row": 0,
+      "column": 0,
+      "exactMismatchPixels": 12337,
+      "visualMismatchPixels": 11979,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 5407,
+      "targetBaseOutsideWearablePixels": 18876,
+      "layerPixels": 6724,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 314,
+      "layerTargetRgbMismatchPixels": 6721,
+      "meanVisualDelta": 77.822,
+      "visualMismatchPercent": 46.793,
+      "unfixableOutsideWearablePercent": 28.645
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "exactMismatchPixels": 12414,
+      "visualMismatchPixels": 12029,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 5413,
+      "targetBaseOutsideWearablePixels": 18832,
+      "layerPixels": 6768,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 297,
+      "layerTargetRgbMismatchPixels": 6764,
+      "meanVisualDelta": 77.676,
+      "visualMismatchPercent": 46.988,
+      "unfixableOutsideWearablePercent": 28.744
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "exactMismatchPixels": 11233,
+      "visualMismatchPixels": 10733,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 4232,
+      "targetBaseOutsideWearablePixels": 18872,
+      "layerPixels": 6728,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 341,
+      "layerTargetRgbMismatchPixels": 6718,
+      "meanVisualDelta": 68.851,
+      "visualMismatchPercent": 41.926,
+      "unfixableOutsideWearablePercent": 22.425
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "exactMismatchPixels": 11949,
+      "visualMismatchPixels": 11620,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 5251,
+      "targetBaseOutsideWearablePixels": 19100,
+      "layerPixels": 6500,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 394,
+      "layerTargetRgbMismatchPixels": 6487,
+      "meanVisualDelta": 79.709,
+      "visualMismatchPercent": 45.391,
+      "unfixableOutsideWearablePercent": 27.492
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "exactMismatchPixels": 12920,
+      "visualMismatchPixels": 12590,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 6103,
+      "targetBaseOutsideWearablePixels": 18978,
+      "layerPixels": 6622,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 38,
+      "layerTargetRgbMismatchPixels": 6613,
+      "meanVisualDelta": 89.944,
+      "visualMismatchPercent": 49.18,
+      "unfixableOutsideWearablePercent": 32.158
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "exactMismatchPixels": 12116,
+      "visualMismatchPixels": 11606,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 5004,
+      "targetBaseOutsideWearablePixels": 18839,
+      "layerPixels": 6761,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 80,
+      "layerTargetRgbMismatchPixels": 6746,
+      "meanVisualDelta": 76.478,
+      "visualMismatchPercent": 45.336,
+      "unfixableOutsideWearablePercent": 26.562
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "exactMismatchPixels": 11630,
+      "visualMismatchPixels": 11192,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 5015,
+      "targetBaseOutsideWearablePixels": 19298,
+      "layerPixels": 6302,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 56,
+      "layerTargetRgbMismatchPixels": 6294,
+      "meanVisualDelta": 75.479,
+      "visualMismatchPercent": 43.719,
+      "unfixableOutsideWearablePercent": 25.987
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "exactMismatchPixels": 11030,
+      "visualMismatchPixels": 10685,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 4550,
+      "targetBaseOutsideWearablePixels": 19328,
+      "layerPixels": 6272,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 35,
+      "layerTargetRgbMismatchPixels": 6264,
+      "meanVisualDelta": 76.131,
+      "visualMismatchPercent": 41.738,
+      "unfixableOutsideWearablePercent": 23.541
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "exactMismatchPixels": 12348,
+      "visualMismatchPixels": 12001,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 5935,
+      "targetBaseOutsideWearablePixels": 19474,
+      "layerPixels": 6126,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 87,
+      "layerTargetRgbMismatchPixels": 6115,
+      "meanVisualDelta": 88.244,
+      "visualMismatchPercent": 46.879,
+      "unfixableOutsideWearablePercent": 30.477
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "exactMismatchPixels": 12568,
+      "visualMismatchPixels": 12303,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 6251,
+      "targetBaseOutsideWearablePixels": 19510,
+      "layerPixels": 6090,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 20,
+      "layerTargetRgbMismatchPixels": 6084,
+      "meanVisualDelta": 96.222,
+      "visualMismatchPercent": 48.059,
+      "unfixableOutsideWearablePercent": 32.04
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "exactMismatchPixels": 11262,
+      "visualMismatchPixels": 10572,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 4442,
+      "targetBaseOutsideWearablePixels": 19181,
+      "layerPixels": 6419,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 0,
+      "layerTargetRgbMismatchPixels": 6413,
+      "meanVisualDelta": 61.512,
+      "visualMismatchPercent": 41.297,
+      "unfixableOutsideWearablePercent": 23.158
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "exactMismatchPixels": 10864,
+      "visualMismatchPixels": 10252,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 3994,
+      "targetBaseOutsideWearablePixels": 19097,
+      "layerPixels": 6503,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 1,
+      "layerTargetRgbMismatchPixels": 6497,
+      "meanVisualDelta": 59.006,
+      "visualMismatchPercent": 40.047,
+      "unfixableOutsideWearablePercent": 20.914
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "exactMismatchPixels": 11352,
+      "visualMismatchPixels": 10729,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 4422,
+      "targetBaseOutsideWearablePixels": 18993,
+      "layerPixels": 6607,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 3,
+      "layerTargetRgbMismatchPixels": 6600,
+      "meanVisualDelta": 66.355,
+      "visualMismatchPercent": 41.91,
+      "unfixableOutsideWearablePercent": 23.282
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "exactMismatchPixels": 12072,
+      "visualMismatchPixels": 11716,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 5379,
+      "targetBaseOutsideWearablePixels": 19112,
+      "layerPixels": 6488,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 2,
+      "layerTargetRgbMismatchPixels": 6474,
+      "meanVisualDelta": 83.04,
+      "visualMismatchPercent": 45.766,
+      "unfixableOutsideWearablePercent": 28.145
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "exactMismatchPixels": 12827,
+      "visualMismatchPixels": 12499,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 6118,
+      "targetBaseOutsideWearablePixels": 19074,
+      "layerPixels": 6526,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 0,
+      "layerTargetRgbMismatchPixels": 6514,
+      "meanVisualDelta": 91.574,
+      "visualMismatchPercent": 48.824,
+      "unfixableOutsideWearablePercent": 32.075
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "exactMismatchPixels": 12208,
+      "visualMismatchPixels": 11838,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 5235,
+      "targetBaseOutsideWearablePixels": 18829,
+      "layerPixels": 6771,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 55,
+      "layerTargetRgbMismatchPixels": 6756,
+      "meanVisualDelta": 81.022,
+      "visualMismatchPercent": 46.242,
+      "unfixableOutsideWearablePercent": 27.803
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "exactMismatchPixels": 11589,
+      "visualMismatchPixels": 11149,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 5006,
+      "targetBaseOutsideWearablePixels": 19331,
+      "layerPixels": 6269,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 384,
+      "layerTargetRgbMismatchPixels": 6262,
+      "meanVisualDelta": 72.398,
+      "visualMismatchPercent": 43.551,
+      "unfixableOutsideWearablePercent": 25.896
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "exactMismatchPixels": 12294,
+      "visualMismatchPixels": 11772,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 5055,
+      "targetBaseOutsideWearablePixels": 18593,
+      "layerPixels": 7007,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 0,
+      "layerTargetRgbMismatchPixels": 6994,
+      "meanVisualDelta": 75.939,
+      "visualMismatchPercent": 45.984,
+      "unfixableOutsideWearablePercent": 27.188
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "exactMismatchPixels": 12898,
+      "visualMismatchPixels": 12478,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 5892,
+      "targetBaseOutsideWearablePixels": 18838,
+      "layerPixels": 6762,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 386,
+      "layerTargetRgbMismatchPixels": 6749,
+      "meanVisualDelta": 82.047,
+      "visualMismatchPercent": 48.742,
+      "unfixableOutsideWearablePercent": 31.277
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "exactMismatchPixels": 13439,
+      "visualMismatchPixels": 12983,
+      "maxVisualDelta": 255,
+      "unfixableOutsideWearablePixels": 6481,
+      "targetBaseOutsideWearablePixels": 18933,
+      "layerPixels": 6667,
+      "erasePixels": 0,
+      "baseDarkFacePixelsCoveredByLayer": 403,
+      "layerTargetRgbMismatchPixels": 6658,
+      "meanVisualDelta": 91.614,
+      "visualMismatchPercent": 50.715,
+      "unfixableOutsideWearablePercent": 34.231
+    }
+  ],
+  "darkDetailGeometry": [
+    {
+      "label": "front-reference",
+      "row": 0,
+      "column": 0,
+      "note": "Largest components are diagnostic candidates only; visual review identifies the pet-eye components.",
+      "target": [
+        {
+          "pixels": 338,
+          "bounds": [
+            76,
+            45,
+            128,
+            72
+          ],
+          "centroid": [
+            106.5,
+            57.9
+          ]
+        },
+        {
+          "pixels": 164,
+          "bounds": [
+            92,
+            74,
+            110,
+            88
+          ],
+          "centroid": [
+            99.7,
+            80.8
+          ]
+        },
+        {
+          "pixels": 158,
+          "bounds": [
+            58,
+            74,
+            75,
+            88
+          ],
+          "centroid": [
+            67.5,
+            81.4
+          ]
+        },
+        {
+          "pixels": 87,
+          "bounds": [
+            46,
+            56,
+            63,
+            67
+          ],
+          "centroid": [
+            52.6,
+            60.7
+          ]
+        },
+        {
+          "pixels": 21,
+          "bounds": [
+            89,
+            47,
+            94,
+            53
+          ],
+          "centroid": [
+            92.3,
+            50.6
+          ]
+        },
+        {
+          "pixels": 20,
+          "bounds": [
+            64,
+            45,
+            69,
+            49
+          ],
+          "centroid": [
+            66.8,
+            47.3
+          ]
+        },
+        {
+          "pixels": 19,
+          "bounds": [
+            63,
+            51,
+            74,
+            55
+          ],
+          "centroid": [
+            68.7,
+            52.1
+          ]
+        },
+        {
+          "pixels": 5,
+          "bounds": [
+            122,
+            76,
+            126,
+            76
+          ],
+          "centroid": [
+            124,
+            76
+          ]
+        }
+      ],
+      "base": [
+        {
+          "pixels": 213,
+          "coveredPixels": 190,
+          "coveredPercent": 89.2,
+          "bounds": [
+            86,
+            71,
+            106,
+            87
+          ],
+          "centroid": [
+            95,
+            78.8
+          ]
+        },
+        {
+          "pixels": 212,
+          "coveredPixels": 132,
+          "coveredPercent": 62.3,
+          "bounds": [
+            48,
+            71,
+            67,
+            87
+          ],
+          "centroid": [
+            58.4,
+            79
+          ]
+        }
+      ],
+      "composite": [
+        {
+          "pixels": 1248,
+          "bounds": [
+            76,
+            45,
+            120,
+            111
+          ],
+          "centroid": [
+            96.8,
+            80.8
+          ]
+        },
+        {
+          "pixels": 105,
+          "bounds": [
+            54,
+            80,
+            71,
+            94
+          ],
+          "centroid": [
+            61.7,
+            89.2
+          ]
+        },
+        {
+          "pixels": 100,
+          "bounds": [
+            48,
+            71,
+            62,
+            85
+          ],
+          "centroid": [
+            54.4,
+            76.8
+          ]
+        },
+        {
+          "pixels": 64,
+          "bounds": [
+            38,
+            104,
+            64,
+            111
+          ],
+          "centroid": [
+            53.1,
+            107.2
+          ]
+        },
+        {
+          "pixels": 51,
+          "bounds": [
+            64,
+            56,
+            73,
+            76
+          ],
+          "centroid": [
+            68.2,
+            65.7
+          ]
+        },
+        {
+          "pixels": 43,
+          "bounds": [
+            50,
+            95,
+            57,
+            102
+          ],
+          "centroid": [
+            53.9,
+            98.7
+          ]
+        },
+        {
+          "pixels": 27,
+          "bounds": [
+            101,
+            72,
+            106,
+            84
+          ],
+          "centroid": [
+            104.1,
+            76.6
+          ]
+        },
+        {
+          "pixels": 13,
+          "bounds": [
+            69,
+            109,
+            76,
+            111
+          ],
+          "centroid": [
+            72.8,
+            110.5
+          ]
+        },
+        {
+          "pixels": 11,
+          "bounds": [
+            61,
+            98,
+            65,
+            104
+          ],
+          "centroid": [
+            63.5,
+            101.7
+          ]
+        },
+        {
+          "pixels": 6,
+          "bounds": [
+            117,
+            77,
+            120,
+            79
+          ],
+          "centroid": [
+            118.5,
+            78
+          ]
+        },
+        {
+          "pixels": 6,
+          "bounds": [
+            55,
+            110,
+            60,
+            110
+          ],
+          "centroid": [
+            57.5,
+            110
+          ]
+        },
+        {
+          "pixels": 5,
+          "bounds": [
+            85,
+            63,
+            87,
+            66
+          ],
+          "centroid": [
+            86.2,
+            64.8
+          ]
+        }
+      ]
+    },
+    {
+      "label": "side-reference",
+      "row": 1,
+      "column": 0,
+      "note": "Largest components are diagnostic candidates only; visual review identifies the pet-eye components.",
+      "target": [
+        {
+          "pixels": 112,
+          "bounds": [
+            59,
+            51,
+            82,
+            69
+          ],
+          "centroid": [
+            70.9,
+            60.2
+          ]
+        },
+        {
+          "pixels": 97,
+          "bounds": [
+            114,
+            61,
+            126,
+            74
+          ],
+          "centroid": [
+            121.3,
+            67.5
+          ]
+        },
+        {
+          "pixels": 66,
+          "bounds": [
+            82,
+            50,
+            102,
+            63
+          ],
+          "centroid": [
+            94.2,
+            58
+          ]
+        },
+        {
+          "pixels": 36,
+          "bounds": [
+            92,
+            45,
+            108,
+            48
+          ],
+          "centroid": [
+            100.8,
+            46.5
+          ]
+        },
+        {
+          "pixels": 30,
+          "bounds": [
+            75,
+            45,
+            85,
+            48
+          ],
+          "centroid": [
+            79.2,
+            46.7
+          ]
+        }
+      ],
+      "base": [
+        {
+          "pixels": 114,
+          "coveredPixels": 75,
+          "coveredPercent": 65.8,
+          "bounds": [
+            114,
+            74,
+            127,
+            88
+          ],
+          "centroid": [
+            122,
+            80.6
+          ]
+        }
+      ],
+      "composite": [
+        {
+          "pixels": 2237,
+          "bounds": [
+            41,
+            45,
+            127,
+            111
+          ],
+          "centroid": [
+            85.6,
+            81.6
+          ]
+        },
+        {
+          "pixels": 201,
+          "bounds": [
+            21,
+            96,
+            52,
+            111
+          ],
+          "centroid": [
+            35.6,
+            104.2
+          ]
+        },
+        {
+          "pixels": 50,
+          "bounds": [
+            114,
+            74,
+            122,
+            85
+          ],
+          "centroid": [
+            119,
+            79.8
+          ]
+        },
+        {
+          "pixels": 36,
+          "bounds": [
+            29,
+            91,
+            45,
+            98
+          ],
+          "centroid": [
+            38,
+            94.2
+          ]
+        },
+        {
+          "pixels": 19,
+          "bounds": [
+            59,
+            57,
+            64,
+            63
+          ],
+          "centroid": [
+            62.1,
+            60.8
+          ]
+        },
+        {
+          "pixels": 5,
+          "bounds": [
+            66,
+            49,
+            70,
+            53
+          ],
+          "centroid": [
+            68,
+            51
+          ]
+        },
+        {
+          "pixels": 5,
+          "bounds": [
+            75,
+            58,
+            79,
+            60
+          ],
+          "centroid": [
+            77,
+            59.4
+          ]
+        }
+      ]
+    }
+  ]
+}

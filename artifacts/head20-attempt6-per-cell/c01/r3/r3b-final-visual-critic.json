@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "revision": "r3b-final",
+  "independent": true,
+  "inputs": {
+    "frozenLineage": "artifacts/head20-attempt6-per-cell/c01/v2/revision-3/r3b/r3b-final-lineage.json",
+    "target": {
+      "path": "artifacts/head20-attempt6-per-cell/c01/v2/revision-3/r3b/r3b-target-coordinate-locked-160x160.png",
+      "sha256": "ff42e1ac4f991136decd7ed28d431f015caeda8bfa7379137a31d2997dcc9b09"
+    },
+    "mask": {
+      "path": "artifacts/head20-attempt6-per-cell/c01/v2/revision-3/r3b/r3b-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "2dbf69e3bea93a5e1a509ec3366e72503381d9fc8a1e3ae340195a2835a10606"
+    },
+    "layer": {
+      "path": "artifacts/head20-attempt6-per-cell/c01/v2/revision-3/r3b/r3b-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "daea390113ace356bf53ce049178914809dca3145e4845f5e6343e3d8dcaedae"
+    }
+  },
+  "pixelGateEvidence": {
+    "actualMaskPixels": 7631,
+    "components4Connected": 1,
+    "enclosedHoles": 0,
+    "outsideAllowedUnionPixels": 0,
+    "tailBodyLegPawBowlIntersectionPixels": 0,
+    "transparentLayerRgbPixels": 0,
+    "exactZeroTransformCompositeMismatchPixels": 0,
+    "leftNaturalEarUnchangedOpaquePixels": 0,
+    "rightNaturalEarUnchangedOpaquePixels": 0
+  },
+  "visualReview": {
+    "bothNaturalEarsCovered": true,
+    "rightSideWedge": "PASS: it is the protected, byte-identical original tail outside the actual mask, not an exposed natural ear.",
+    "collar": "PASS: the lower collar is visually curved without a square seam.",
+    "helmetShell": "FAIL: an opaque, axis-aligned deep-blue rectangular block is visible immediately screen-left of the visor/left ear-cup, approximately local x=31..46, y=28..75. It is neither a rounded helmet ear-cup nor a legitimate shell contour and reads as a cropping/mapping artifact.",
+    "quality": "FAIL: this block is conspicuous at nearest-neighbour review and violates the requested redrawn, integrated, release-quality wearable look. Pixel-perfect reconstruction of an invalid target is not acceptance."
+  },
+  "verdict": "REJECT_PENDING_R3C_VISUAL_SOURCE_EXTRACTION",
+  "requiredRevision": [
+    "Keep the frozen base, protected anatomy masks, original art-inbox references, and current zero-transform contract.",
+    "Redraw/extract c01 only from a fresh full-dressed source or isolate the genuine rounded left ear-cup contour; do not patch in a rectangular fill.",
+    "Before handoff, render a nearest-neighbour zoom and reject any axis-aligned shell blocks, checker remnants, or detached exterior artifacts.",
+    "After the final assets are frozen, regenerate matching lineage hashes and rerun the exact mask/composite audit."
+  ],
+  "publishable": false
+}

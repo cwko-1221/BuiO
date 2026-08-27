@@ -1,0 +1,13 @@
+{
+  "targetPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/aura-01-dressed-atlas-v1.png",
+  "basePath": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+  "maskPath": "artifacts/aura01-pilot/mask.png",
+  "layerPath": "artifacts/aura01-pilot/layer.png",
+  "category": "aura",
+  "layerRole": "rear",
+  "transformed": false,
+  "seedPixels": 84831,
+  "maskPixels": 144542,
+  "petOcclusionRule": "base alpha >= 32 is never masked",
+  "verdict": "CANDIDATE_FOR_COMPOSITE_QA"
+}

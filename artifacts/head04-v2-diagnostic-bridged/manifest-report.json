@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "verdict": "DATA_PASS",
+  "publishable": true,
+  "transformed": false,
+  "inputPolicy": {
+    "targetImmutable": true,
+    "compositeUsedAsTarget": false,
+    "sameCoordinate": true
+  },
+  "identity": {
+    "petId": "starpatch-cat",
+    "stage": 1,
+    "wearableId": "head-04",
+    "slot": "head"
+  },
+  "layerOrder": [
+    "rear",
+    "erase",
+    "patch",
+    "frontErase",
+    "front"
+  ],
+  "inputs": {
+    "manifest": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head04-v2-diagnostic-bridged\\manifest.json",
+    "target": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head04-v2-target.png",
+      "sha256": "8a751fab8896979d0f81f237fc8dc518a9214b16a199cbf7926b3fbeb48f57d5"
+    },
+    "base": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\sprites\\starpatch-cat-1-atlas-2737c2cd0c.webp",
+      "sha256": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39"
+    }
+  },
+  "metrics": {
+    "targetBaseOutsideMaskMismatchPixels": 0,
+    "maskPixelsWithNoTargetBaseDifference": 6417,
+    "exactRgbaMismatchPixels": 0,
+    "emptyDirectionViolations": 0,
+    "holeCells": 0,
+    "undeclaredHoleCells": 0,
+    "visibleSupportPixels": 21005,
+    "protectedRoiViolations": 0,
+    "layerMetrics": {
+      "rear": {
+        "declared": false,
+        "visibleMaskPixels": 0,
+        "visibleLayerPixels": 0
+      },
+      "erase": {
+        "declared": false,
+        "visibleMaskPixels": 0,
+        "visibleLayerPixels": 0
+      },
+      "patch": {
+        "declared": true,
+        "kind": "content",
+        "visibleMaskPixels": 21005,
+        "visibleLayerPixels": 14588,
+        "nonBinaryMaskAlphaPixels": 0,
+        "maskTransparentRgbNonZeroPixels": 0,
+        "transparentLayerRgbNonZeroPixels": 0,
+        "layerOutsideMaskPixels": 0,
+        "maskWithoutLayerPixels": 6417
+      },
+      "frontErase": {
+        "declared": false,
+        "visibleMaskPixels": 0,
+        "visibleLayerPixels": 0
+      },
+      "front": {
+        "declared": false,
+        "visibleMaskPixels": 0,
+        "visibleLayerPixels": 0
+      }
+    }
+  },
+  "cells": [
+    {
+      "index": 1,
+      "row": 0,
+      "column": 0,
+      "maskPixels": 1154,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "column": 1,
+      "maskPixels": 1148,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "column": 2,
+      "maskPixels": 568,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 4,
+      "row": 0,
+      "column": 3,
+      "maskPixels": 1172,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 5,
+      "row": 0,
+      "column": 4,
+      "maskPixels": 1863,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 6,
+      "row": 1,
+      "column": 0,
+      "maskPixels": 1013,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 7,
+      "row": 1,
+      "column": 1,
+      "maskPixels": 1023,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 8,
+      "row": 1,
+      "column": 2,
+      "maskPixels": 998,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 9,
+      "row": 1,
+      "column": 3,
+      "maskPixels": 963,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 10,
+      "row": 1,
+      "column": 4,
+      "maskPixels": 968,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 11,
+      "row": 2,
+      "column": 0,
+      "maskPixels": 939,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 12,
+      "row": 2,
+      "column": 1,
+      "maskPixels": 955,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 13,
+      "row": 2,
+      "column": 2,
+      "maskPixels": 933,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 14,
+      "row": 2,
+      "column": 3,
+      "maskPixels": 945,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 15,
+      "row": 2,
+      "column": 4,
+      "maskPixels": 937,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 16,
+      "row": 3,
+      "column": 0,
+      "maskPixels": 1077,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 17,
+      "row": 3,
+      "column": 1,
+      "maskPixels": 1086,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 18,
+      "row": 3,
+      "column": 2,
+      "maskPixels": 1099,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 19,
+      "row": 3,
+      "column": 3,
+      "maskPixels": 1097,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 20,
+      "row": 3,
+      "column": 4,
+      "maskPixels": 1067,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    }
+  ],
+  "holeCells": [],
+  "componentCells": [
+    {
+      "row": 0,
+      "column": 0,
+      "components": 1
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "components": 1
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "components": 1
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "components": 1
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "components": 1
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "components": 1
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "components": 1
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "components": 1
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "components": 1
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "components": 1
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "components": 1
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "components": 1
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "components": 1
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "components": 1
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "components": 1
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "components": 1
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "components": 1
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "components": 1
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "components": 1
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "components": 1
+    }
+  ],
+  "emptyDirectionViolations": [],
+  "errors": [],
+  "warnings": [
+    "patch: 6417 declared unchanged support pixels are allowed by maskPolicy"
+  ]
+}

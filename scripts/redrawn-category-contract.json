@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "scope": "fixed-coordinate redrawn wearable atlas",
+  "geometry": { "width": 800, "height": 640, "cellWidth": 160, "cellHeight": 160, "columns": 5, "rows": 4, "transformAllowed": false },
+  "lineage": {
+    "targetMustExistBeforeMask": true,
+    "targetMustRemainImmutable": true,
+    "compositeMayNeverBecomeTarget": true,
+    "existingLayerMayNeverBecomeTargetOrSolverInput": true
+  },
+  "rgba": {
+    "composition": "8-bit source-over using browser canvas rounding",
+    "exactTargetMismatchPixels": 0,
+    "targetBaseDifferenceOutsideCoverage": 0,
+    "generatedTransparentRgbMustBeZero": true,
+    "baseHiddenRgbaOutsideCoverageMustBePreserved": true
+  },
+  "runtimeOrder": ["rear", "base", "union erase", "patch", "union frontErase", "front"],
+  "categories": {
+    "head": {
+      "batchSolver": "single-source-over-layer",
+      "publishedLayers": ["patch", "erase"],
+      "semanticHolePolicy": "zero unless an item-specific contract explicitly declares a filled replacement rather than an aperture",
+      "defaultBackVisibility": "visible",
+      "runtimeSupportRequired": true
+    },
+    "face": {
+      "batchSolver": "single-source-over-layer plus face aperture QA",
+      "publishedLayers": ["patch", "erase"],
+      "semanticHolePolicy": "only declared true lens apertures; every undeclared enclosed hole rejects",
+      "defaultBackVisibility": "row 2 cells all empty",
+      "runtimeSupportRequired": true
+    },
+    "neck": {
+      "batchSolver": "single-source-over-layer",
+      "publishedLayers": ["patch", "erase"],
+      "semanticHolePolicy": "zero unless category config explicitly declares otherwise",
+      "defaultBackVisibility": "row 2 cells all empty",
+      "runtimeSupportRequired": true
+    },
+    "back": {
+      "batchSolver": "rear-base-erase-patch-front",
+      "publishedLayers": ["rear", "patch", "erase", "front"],
+      "semanticHolePolicy": "per-layer and union topology from category config",
+      "defaultBackVisibility": "visible with foreground tail/body occlusion preserved",
+      "runtimeSupportRequired": true
+    },
+    "aura": {
+      "batchSolver": "rear-base-erase-patch-front",
+      "publishedLayers": ["rear", "front"],
+      "forbiddenLayers": ["erase", "patch"],
+      "semanticHolePolicy": "per-layer topology from category config",
+      "defaultBackVisibility": "rear/front are pose-authored in every declared visible cell",
+      "runtimeSupportRequired": true
+    }
+  },
+  "knownImplementationGaps": {
+    "wardrobePreviewErase": "preview stacks rear/base/patch/front but does not apply erase or frontErase",
+    "runtimeAuraModularLayers": "PetAvatar currently skips aura redraw preload/composition and keeps aura in legacy placement",
+    "batchFrontEraseAuthoring": "runtime/publisher accept frontErase, but the batch solver does not independently author or verify one"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "revision": "r6",
+  "independent": true,
+  "reviewedFrozenLineage": {
+    "path": "artifacts/head20-attempt6-per-cell/c01/v2/revision-6/r6-lineage.json",
+    "frozen": true,
+    "rawFullDressedSourceSha256": "1a8a47e52c220854fb198fb9e7d537ac4d661262579342a163333153282c4fe4",
+    "sourcePolicy": "raw r4 full-dressed source only; no r4/r5 target, mask, layer, or composite input"
+  },
+  "reviewedArtifacts": {
+    "target": {
+      "path": "artifacts/head20-attempt6-per-cell/c01/v2/revision-6/r6-target-coordinate-locked-160x160.png",
+      "sha256": "e9a8ae5de3898d82508ab86fd76df7da34438aa1ed714a75aa79dcbf86960639"
+    },
+    "layer": {
+      "path": "artifacts/head20-attempt6-per-cell/c01/v2/revision-6/r6-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "bcda4d821d8b26f137bb02d6386e85e04372739917719bab2e6e029a7f120c92"
+    },
+    "mask": {
+      "path": "artifacts/head20-attempt6-per-cell/c01/v2/revision-6/r6-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "aad8878f93797699430be0057fac0c6b4e8d542196d2b9c71c8d9b5f02ed8ad3"
+    },
+    "mechanicalAudit": "artifacts/head20-attempt6-per-cell/c01/v2/revision-6/r6-independent-acceptance.json"
+  },
+  "mechanicalEvidence": {
+    "maskOneFourConnectedComponent": true,
+    "maskEnclosedHoles": 0,
+    "maskOutsideAllowedUnionPixels": 0,
+    "protectedTailBodyLegPawBowlIntersectionPixels": 0,
+    "transparentLayerRgbPixels": 0,
+    "exactZeroTransformCompositeMismatchPixels": 0,
+    "leftNaturalEarUnchangedOpaquePixels": 0,
+    "rightNaturalEarUnchangedOpaquePixels": 0
+  },
+  "visualReview": {
+    "method": "nearest-neighbour review of the frozen 160x160 target and isolated layer, compared against the r6 raw full-dressed source, art-inbox helmet reference, and original base crop",
+    "helmetCups": "PASS: both screen-left and screen-right helmet ear cups/fins retain rounded, continuous blue-and-gold contours. No flat dark-blue rectangle or rectilinear crop protrusion remains; r4's x31..37/y28..40 defect is absent.",
+    "naturalEars": "PASS: no pink natural-ear tip remains; both ears are replaced by the integrated helmet fins.",
+    "tail": "PASS: the screen-right tail remains visibly original and is not consumed by the headwear layer.",
+    "collar": "PASS: the lower helmet rim follows a smooth curved neck/cheek boundary without a square block, vertical cut seam, or halo.",
+    "overall": "PASS: the extracted same-coordinate layer reads as a redrawn, worn closed helmet rather than a pasted accessory, and matches the intended full-dressed visual at release-review scale."
+  },
+  "verdict": "APPROVE",
+  "publishableForC01Only": true,
+  "scopeLimit": "This approves only c01/front as an r6 verified source-layer package. It does not approve remaining 19 head-20 cells, other wearables, a runtime manifest change, or a release/push."
+}

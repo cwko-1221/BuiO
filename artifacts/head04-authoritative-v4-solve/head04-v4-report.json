@@ -1,0 +1,313 @@
+{
+  "verdict": "REJECT",
+  "geometry": {
+    "canvas": "800x640",
+    "cell": "160x160",
+    "resized": false,
+    "rotated": false,
+    "shifted": false,
+    "stretched": false
+  },
+  "inputPolicy": {
+    "existingWearableLayerRead": false,
+    "solvedOnlyFrom": [
+      "frozen target",
+      "base",
+      "mask"
+    ],
+    "frontEraseInputPath": "-",
+    "frontEraseDerivedFromComposite": false
+  },
+  "metrics": {
+    "maskPixels": 17990,
+    "maskPixelsWithNoTargetBaseDifference": 642,
+    "nonBinaryMaskAlphaPixels": 0,
+    "maskTransparentRgbNonZeroPixels": 0,
+    "targetBaseDifferencesOutsideMask": 0,
+    "enclosedMaskHolePixels": 0,
+    "cellsWithOneFourConnectedComponent": 0,
+    "forcedErasePixels": 0,
+    "unexpectedUnsolvablePixels": 0,
+    "eraseOutsideMaskPixels": 0,
+    "layerOutsideMaskPixels": 0,
+    "layerTransparentRgbNonZeroPixels": 0,
+    "eraseTransparentRgbNonZeroPixels": 0,
+    "frozenTargetTransparentRgbNonZeroPixels": 54922,
+    "frontEraseVisiblePixels": 0,
+    "frontEraseNonBinaryAlphaPixels": 0,
+    "frontEraseTransparentRgbNonZeroPixels": 0,
+    "frontEraseOutsideMaskPixels": 0,
+    "exactRgbaMismatchPixels": 0
+  },
+  "cells": [
+    {
+      "row": 0,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "exactRgbaMismatchPixels": 0,
+      "erasePixels": 0
+    }
+  ],
+  "holeCells": [
+    {
+      "row": 0,
+      "column": 0,
+      "fourConnectedComponents": 6,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "fourConnectedComponents": 6,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "fourConnectedComponents": 5,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "fourConnectedComponents": 6,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "fourConnectedComponents": 2,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "fourConnectedComponents": 4,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "fourConnectedComponents": 2,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "fourConnectedComponents": 2,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "fourConnectedComponents": 6,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "fourConnectedComponents": 3,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "fourConnectedComponents": 5,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "fourConnectedComponents": 2,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "fourConnectedComponents": 5,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "fourConnectedComponents": 4,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "fourConnectedComponents": 2,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "fourConnectedComponents": 3,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "fourConnectedComponents": 5,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "fourConnectedComponents": 7,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "fourConnectedComponents": 4,
+      "enclosedHolePixels": 0
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "fourConnectedComponents": 3,
+      "enclosedHolePixels": 0
+    }
+  ],
+  "forcedEraseCoordinates": [],
+  "unexpectedUnsolvableCoordinates": [],
+  "inputs": {
+    "targetPath": "artifacts/head04-authoritative-v4-target-sealed.png",
+    "basePath": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "maskPath": "artifacts/head04-preflight-mask-v4-sealed.png",
+    "frontErasePath": "-",
+    "sha256": {
+      "target": "84ec71a756b16ed0158747a403506e6eb1ddc393fb6635728da11d15471e0761",
+      "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+      "mask": "4b1a1cb2349571a7b732b7f59835aa724c60f0df82d743ae34553867b6743a4d"
+    }
+  },
+  "outputs": {
+    "layerPath": "artifacts\\head04-authoritative-v4-solve\\head04-v4-solved-layer.png",
+    "erasePath": "artifacts\\head04-authoritative-v4-solve\\head04-v4-erase.png",
+    "frontErasePath": "artifacts\\head04-authoritative-v4-solve\\head04-v4-front-erase.png",
+    "compositePath": "artifacts\\head04-authoritative-v4-solve\\head04-v4-composite.png",
+    "diffPath": "artifacts\\head04-authoritative-v4-solve\\head04-v4-diff.png",
+    "sha256": {
+      "layer": "35889540f5d6621949dd9e40b8538e8ee0c49cd571381493463a8114042cca6f",
+      "erase": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f",
+      "frontErase": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f",
+      "composite": "84ec71a756b16ed0158747a403506e6eb1ddc393fb6635728da11d15471e0761",
+      "diff": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f"
+    }
+  }
+}

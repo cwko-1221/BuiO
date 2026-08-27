@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c02",
+  "purpose": "minimal c02 left natural-ear/head-edge occlusion outside native [36,5,134,127] helmet permission; no tail, chest, legs, or raised-paw pixels",
+  "inputs": {
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\c02-base-original-160x160.png",
+    "baseSha256": "6abd73e57f1d4778aa2528458aaaec5c5e5ccd908f6f17213df38e836b189af0"
+  },
+  "output": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\revision-1\\c02-left-natural-ear-occlusion-extension.png",
+    "sha256": "90836c8660992b840a4dd54f2738916b4e8be2b846e470c4a2721f3fb816e4ad",
+    "pixels": 331,
+    "boundsInclusive": [
+      26,
+      31,
+      35,
+      70
+    ]
+  },
+  "constraints": {
+    "nativeHelmetZone": [
+      36,
+      5,
+      134,
+      127
+    ],
+    "selection": [
+      26,
+      31,
+      36,
+      71
+    ],
+    "bodyChestLegsPawsExcludedByYMin": 71,
+    "tailScreenRightExcluded": true
+  },
+  "verdict": "PASS_PROPOSED_C02_LEFT_EAR_EXTENSION"
+}

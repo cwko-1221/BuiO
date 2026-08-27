@@ -1,0 +1,891 @@
+{
+  "verdict": "DATA_PASS",
+  "category": "back",
+  "layerOrder": [
+    "rear",
+    "base",
+    "minimal erase",
+    "patch",
+    "union frontErase",
+    "front"
+  ],
+  "geometry": {
+    "canvas": "800x640",
+    "cell": "160x160",
+    "resized": false,
+    "rotated": false,
+    "shifted": false,
+    "stretched": false,
+    "resampled": false
+  },
+  "inputPolicy": {
+    "existingPublishedOutputRead": false,
+    "solvedOnlyFrom": [
+      "frozen target",
+      "base",
+      "canonical mask",
+      "category semantic-region spec"
+    ],
+    "frontEraseInputPath": "-",
+    "frontEraseDerivedFromComposite": false
+  },
+  "metrics": {
+    "nonBinaryMaskAlphaPixels": 0,
+    "maskTransparentRgbNonZeroPixels": 0,
+    "targetBaseDifferencesOutsideMask": 0,
+    "unassignedDifferencePixels": 0,
+    "ambiguousSemanticRegionPixels": 0,
+    "rearUnsolvablePixels": 0,
+    "forcedErasePixels": 100,
+    "unexpectedUnsolvablePixels": 0,
+    "eraseOutsideAllowedRegions": 0,
+    "ambiguousEraseRegionPixels": 0,
+    "replacementLayerTargetMismatchPixels": 0,
+    "layerOutsideMaskPixels": 0,
+    "eraseOutsideMaskPixels": 0,
+    "rearTransparentRgbNonZeroPixels": 0,
+    "patchTransparentRgbNonZeroPixels": 0,
+    "frontTransparentRgbNonZeroPixels": 0,
+    "eraseTransparentRgbNonZeroPixels": 0,
+    "baseRgbaMismatchOutsideMaskPixels": 0,
+    "exactRgbaMismatchPixels": 0,
+    "frontEraseVisiblePixels": 0,
+    "frontEraseNonBinaryAlphaPixels": 0,
+    "frontEraseTransparentRgbNonZeroPixels": 0,
+    "frontEraseOutsideMaskPixels": 0
+  },
+  "exactMismatchCells": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "failedCells": [],
+  "semanticRegions": [
+    {
+      "id": "rear-under-base",
+      "layer": "rear",
+      "semantic": "rear-wing",
+      "row": 0,
+      "column": 0,
+      "zone": [
+        30,
+        30,
+        40,
+        40
+      ],
+      "minimumPixels": 100,
+      "maximumPixels": 100,
+      "actualDifferencePixels": 100,
+      "verdict": "PASS"
+    },
+    {
+      "id": "ordinary-patch",
+      "layer": "patch",
+      "semantic": "body-contact-patch",
+      "row": 0,
+      "column": 0,
+      "zone": [
+        50,
+        30,
+        60,
+        40
+      ],
+      "minimumPixels": 100,
+      "maximumPixels": 100,
+      "actualDifferencePixels": 100,
+      "verdict": "PASS"
+    },
+    {
+      "id": "ordinary-front",
+      "layer": "front",
+      "semantic": "front-wing",
+      "row": 0,
+      "column": 0,
+      "zone": [
+        70,
+        30,
+        80,
+        40
+      ],
+      "minimumPixels": 100,
+      "maximumPixels": 100,
+      "actualDifferencePixels": 100,
+      "verdict": "PASS"
+    },
+    {
+      "id": "erase-replacement-patch",
+      "layer": "patch",
+      "semantic": "minimal-replacement",
+      "row": 0,
+      "column": 0,
+      "zone": [
+        90,
+        30,
+        100,
+        40
+      ],
+      "minimumPixels": 100,
+      "maximumPixels": 100,
+      "actualDifferencePixels": 100,
+      "verdict": "PASS"
+    },
+    {
+      "id": "flat-side-wing",
+      "layer": "front",
+      "semantic": "side-wing-flat-on-back",
+      "row": 1,
+      "column": 0,
+      "zone": [
+        30,
+        70,
+        70,
+        78
+      ],
+      "minimumPixels": 320,
+      "maximumPixels": 320,
+      "actualDifferencePixels": 320,
+      "verdict": "PASS"
+    }
+  ],
+  "requiredSemanticCoverage": [
+    {
+      "semantic": "side-wing-flat-on-back",
+      "row": 1,
+      "column": 0,
+      "allowedLayers": [
+        "front"
+      ],
+      "minimumPixels": 320,
+      "actualPixels": 320,
+      "verdict": "PASS"
+    }
+  ],
+  "topologyCells": [
+    {
+      "layer": "rear",
+      "row": 0,
+      "column": 0,
+      "actualComponents": 1,
+      "minimumComponents": 1,
+      "maximumComponents": 1,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 0,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 0,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 0,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 0,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 1,
+      "column": 0,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 1,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 1,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 1,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 1,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 2,
+      "column": 0,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 2,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 2,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 2,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 2,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 3,
+      "column": 0,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 3,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 3,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 3,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "rear",
+      "row": 3,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 0,
+      "column": 0,
+      "actualComponents": 2,
+      "minimumComponents": 2,
+      "maximumComponents": 2,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 0,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 0,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 0,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 0,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 1,
+      "column": 0,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 1,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 1,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 1,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 1,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 2,
+      "column": 0,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 2,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 2,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 2,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 2,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 3,
+      "column": 0,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 3,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 3,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 3,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "patch",
+      "row": 3,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 0,
+      "column": 0,
+      "actualComponents": 1,
+      "minimumComponents": 1,
+      "maximumComponents": 1,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 0,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 0,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 0,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 0,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 1,
+      "column": 0,
+      "actualComponents": 1,
+      "minimumComponents": 1,
+      "maximumComponents": 1,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 1,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 1,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 1,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 1,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 2,
+      "column": 0,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 2,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 2,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 2,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 2,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 3,
+      "column": 0,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 3,
+      "column": 1,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 3,
+      "column": 2,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 3,
+      "column": 3,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    },
+    {
+      "layer": "front",
+      "row": 3,
+      "column": 4,
+      "actualComponents": 0,
+      "minimumComponents": 0,
+      "maximumComponents": 0,
+      "actualHoles": 0,
+      "expectedHoles": 0,
+      "verdict": "PASS"
+    }
+  ],
+  "eraseReplacementRegions": [
+    {
+      "id": "declared-minimal-erase",
+      "layer": "patch",
+      "row": 0,
+      "column": 0,
+      "zone": [
+        90,
+        30,
+        100,
+        40
+      ],
+      "minimumPixels": 100,
+      "maximumPixels": 100,
+      "actualPixels": 100,
+      "verdict": "PASS"
+    }
+  ],
+  "inputs": {
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\synthetic-expected-final.png",
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\synthetic-base.png",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\synthetic-canonical-mask.png",
+    "specPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\synthetic-back-spec.json",
+    "frontErasePath": "-",
+    "sha256": {
+      "target": "5520f10b3eadbffa71adf3e7d87d7ff8cb9e5a85aa1142e21cfaaebce05ce941",
+      "base": "e857ada86012a9d68d884bd3819678c8dbff15dd5177face98d2df9d2a1255d9",
+      "mask": "6f4b1974b12adf6d55632ee2c5c1681204836ced9b1b5e5fa3c955f62a0e945d",
+      "spec": "9ebe36a42317a685036f51e20bdb1e8bc0066e7cc59217a43b3a8013dd7ea3c2"
+    }
+  },
+  "outputs": {
+    "rearPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\solved\\synthetic-order-rear.png",
+    "erasePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\solved\\synthetic-order-erase.png",
+    "patchPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\solved\\synthetic-order-patch.png",
+    "frontPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\solved\\synthetic-order-front.png",
+    "frontErasePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\solved\\synthetic-order-front-erase.png",
+    "compositePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\solved\\synthetic-order-composite.png",
+    "diffPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\solved\\synthetic-order-diff.png",
+    "sha256": {
+      "rear": "17a7466d467f67949f44a973a56335345b2e31d71e7aaa108bdb58c78181ceae",
+      "erase": "22dc7ab5ad022db33578d373bf654c124550cb539b821b4bbfbff3ee91413d05",
+      "patch": "fca5cd9f84117a19ddbb831cd4a6d97067e3e688f8c05626d09f7d301184fada",
+      "front": "eb94c93835bcf28765b0a086ad392ac96ee9e761f681b0375a384699def29eed",
+      "frontErase": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f",
+      "composite": "5520f10b3eadbffa71adf3e7d87d7ff8cb9e5a85aa1142e21cfaaebce05ce941",
+      "diff": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f"
+    }
+  }
+}

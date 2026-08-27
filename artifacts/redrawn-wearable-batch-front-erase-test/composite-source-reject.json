@@ -1,0 +1,40 @@
+{
+  "verdict": "REJECT",
+  "sourcePolicy": {
+    "independentInputRequired": true,
+    "compositeRead": false,
+    "derivedFromComposite": false,
+    "sourceCoordinatePreserved": true
+  },
+  "pathPolicy": {
+    "verdict": "REJECT",
+    "inputPath": "artifacts/redrawn-wearable-batch-set-regression/head-06-v9/compositing/head-06-v9-batch-composite.png",
+    "outputPath": "artifacts/redrawn-wearable-batch-front-erase-test/explicit-transparent/compositing/head-06-explicit-front-erase-batch-front-erase.png",
+    "canonicalMaskPath": "artifacts/redrawn-wearable-batch-front-erase-test/explicit-transparent/head-06-explicit-front-erase-canonical-mask.png",
+    "inputBasenameForbiddenComposite": true
+  },
+  "geometry": {
+    "width": 800,
+    "height": 640,
+    "channels": 4,
+    "transformed": false,
+    "resampled": false
+  },
+  "metrics": {
+    "decodedMismatchPixels": 272910,
+    "nonBinaryAlphaPixels": 135047,
+    "transparentRgbNonZeroPixels": 39063,
+    "outsideCanonicalMaskPixels": 128010,
+    "visiblePixels": 233847
+  },
+  "inputs": {
+    "inputPath": "artifacts/redrawn-wearable-batch-set-regression/head-06-v9/compositing/head-06-v9-batch-composite.png",
+    "outputPath": "artifacts/redrawn-wearable-batch-front-erase-test/explicit-transparent/compositing/head-06-explicit-front-erase-batch-front-erase.png",
+    "canonicalMaskPath": "artifacts/redrawn-wearable-batch-front-erase-test/explicit-transparent/head-06-explicit-front-erase-canonical-mask.png",
+    "sha256": {
+      "input": "b12f12ed8606fd9fa451b282c839c1730b46a91084911478abae86afbc6fd7c3",
+      "output": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f",
+      "canonicalMask": "b4f0fcf3951d482e69e8f3ee7ae4fe77366bb58286b894ecf9e7f0efb81d2518"
+    }
+  }
+}

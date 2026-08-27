@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": {
+    "row": 0,
+    "column": 0,
+    "id": "c01",
+    "size": "160x160"
+  },
+  "verdict": "REJECT",
+  "inputs": {
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\sprites\\starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "baseSha256": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+    "baseCropSha256": "355e2bc9201bc25af4855def626fb87846a42ab2a203fa50c9737ab1ed6c309b",
+    "candidatePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt5-source-prep\\head-20-attempt5-target.png",
+    "candidateSha256": "d00f6c6d3751fce3de743f53e15bf226eef9be855aa031b9e7194f2e8aa6b91c",
+    "specPath": "C:\\Users\\kochu\\Documents\\BuiO\\scripts\\redrawn-category-specs\\head-20-closed-helmet-replacement.json",
+    "specSha256": "19a0df9373fcfbd58b72d30d827845f01e55ed63ea19ba2e7e071df863efb61f",
+    "prototypePetPath": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\pet-starpatch-cat-1.png",
+    "prototypePetSha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253",
+    "prototypeAccessoryPath": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\wearable-head-3.png",
+    "prototypeAccessorySha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+    "occlusionMaskPath": null,
+    "occlusionMaskSha256": null
+  },
+  "contract": {
+    "source": "original pet crop + original wearable-head-3 space-helmet three-view reference",
+    "outsideWindow": "byte-identical to original base",
+    "boundaryRing": "2px and 4px inner rings; mismatches are allowed only when explicitly covered by occlusion mask",
+    "detachedComponents": "candidate-base difference union must be one 4-connected component"
+  },
+  "metrics": {
+    "replacementZone": [
+      38,
+      5,
+      137,
+      127
+    ],
+    "exactOutsideWindowDifferencePixels": 0,
+    "candidateDiffPixels": 8314,
+    "intentionalDiffPixels": 0,
+    "components4Connected": 1,
+    "detachedComponentCount": 0,
+    "detachedComponents": [],
+    "innerBoundaryRing2px": {
+      "total": 868,
+      "mismatches": 318,
+      "intentional": 0,
+      "mismatchesOutsideIntentional": 318
+    },
+    "innerBoundaryRing4px": {
+      "total": 1704,
+      "mismatches": 642,
+      "intentional": 0,
+      "mismatchesOutsideIntentional": 642
+    },
+    "occlusionMaskDeclared": false
+  },
+  "gates": {
+    "baseCropRecorded": true,
+    "prototypeLineageRecorded": true,
+    "exactOutsideWindowPass": true,
+    "innerBoundaryRing2Pass": false,
+    "innerBoundaryRing4Pass": false,
+    "noDetachedComponentsPass": true,
+    "critic": "PENDING"
+  },
+  "publishable": false
+}

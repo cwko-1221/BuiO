@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "independent": true,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c03",
+  "revision": "r6",
+  "contract": "actual silhouette only; zero-transform base -> erase(mask) -> source-over(layer)",
+  "sourceDerivationAudit": {
+    "preparationProgramPath": "C:\\Users\\kochu\\Documents\\BuiO\\scripts\\prepare-head20-c02-revision1.mjs",
+    "preparationProgramSha256": "8847f402453f46388c4bbe099f993d659d935db6df0e9e54a82eab460adde3ce",
+    "declaredInputs": [
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-raw-full-dressed-imagegen-source.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\c03-base-original-160x160.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-tail-visible-pixels-mask.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-ear-extension-empty.png"
+    ],
+    "noPriorC03CandidateDeclared": true
+  },
+  "inputHashes": {
+    "base": "d6603d155cc87d4ea652bd45a4bceb2a1fb414ad5c8ba6d1c81c4da037b8e6c0",
+    "target": "548b5fb17df3c53da8cbfe600d24fa8a6e03f832bd48bd19690ca7a582c557b5",
+    "mask": "7d71f0a6b30ef192f883e32c484049fdf514bd95bb16f84ded779a5b5f48495a",
+    "layer": "d4a3bf8dba426c78d230c5ae3f755f135537bd33fd111f34eda947827f9316aa",
+    "tail": "791c5b1d2cbf17e3494e38db40d61e0b7acb42e1585dc28c4fbaf5076a0bd33d",
+    "extension": "1cb6b844edfab5a219e11b8a753ffd1e05aa23c8c698f0885a2ec197e042032e",
+    "protections": "b93953299849a448dea242e0134d1b046c94cb99ae2464ea7b70ea8e618e8cf3",
+    "pet": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253",
+    "accessory": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+    "raw": "9f3923079e630d7f30ac7356194ddac2dfe924384d1d3835b28c3b38b64179b9"
+  },
+  "provenance": {
+    "rawSource": true,
+    "rawDistinctFromAllPriorC03Raws": true,
+    "priorRawHashes": [
+      {
+        "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-1\\c03-r1-raw-full-dressed-imagegen-source.png",
+        "sha256": "f76d8e95f94ebff7e492ca859ae5485d3460f5a00be8f7ec3fede50307354793"
+      },
+      {
+        "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-2\\c03-r2-raw-full-dressed-imagegen-source.png",
+        "sha256": "f76d8e95f94ebff7e492ca859ae5485d3460f5a00be8f7ec3fede50307354793"
+      },
+      {
+        "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-r3-raw-full-dressed-imagegen-source.png",
+        "sha256": "8bce443ce5447451377d865386ac0fb405bb2f2d6c7c16b2fe9b85c7c94289db"
+      },
+      {
+        "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-4\\c03-r4-raw-full-dressed-imagegen-source.png",
+        "sha256": "8bce443ce5447451377d865386ac0fb405bb2f2d6c7c16b2fe9b85c7c94289db"
+      }
+    ],
+    "generation": true,
+    "originalPet": true,
+    "originalAccessory": true,
+    "forbiddenInputs": true,
+    "frozenHashes": true,
+    "noPriorC03CandidateDeclared": true,
+    "pass": true
+  },
+  "metrics": {
+    "maskPixels": 7806,
+    "components4Connected": 1,
+    "componentSizes": [
+      7806
+    ],
+    "enclosedHolePixels": 0,
+    "maskOutsideDeclaredPermissionsPixels": 0,
+    "layerMaskSupportMismatchPixels": 0,
+    "tailIntersectionPixels": 0,
+    "bodyChestLegPawIntersectionPixels": 0,
+    "targetDifferenceOutsideActualMaskPixels": 0,
+    "transparentLayerRgbPixels": 0,
+    "exactRgbaMismatchPixels": 0
+  },
+  "gates": {
+    "provenance": true,
+    "maskNonempty": true,
+    "maskOneComponent": true,
+    "maskHoleFree": true,
+    "maskInsideDeclaredC03Permissions": true,
+    "maskLayerSupportExact": true,
+    "tailProtection": true,
+    "bodyChestLegPawProtection": true,
+    "targetUnchangedOutsideMask": true,
+    "transparentLayerRgbClean": true,
+    "exactEraseSourceOver": true,
+    "visualCritic": "PENDING"
+  },
+  "mechanicalVerdict": "PASS",
+  "verdict": "PASS_MASK_COMPOSITE_PENDING_INDEPENDENT_VISUAL_CRITIC",
+  "publishable": false
+}

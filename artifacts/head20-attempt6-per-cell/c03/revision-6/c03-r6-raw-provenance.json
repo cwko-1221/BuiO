@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c03",
+  "revision": "r6",
+  "stage": "RAW_FULL_DRESSED_SOURCE_PRE_EXTRACTION",
+  "generation": {
+    "model": "built-in image_gen",
+    "timestamp": "2026-08-26T17:54:32+08:00",
+    "prompt": "Independent c03 full-dressed redraw from the original Starpatch Cat and wearable-head-3 helmet references. Hard invariants: transparent galaxy visor with both eyes visible; compact front-facing sitting pose with both front paws down together; screen-right blue/gold circular ear cup; orange tail behind the body with a transparent gap to that cup; no natural ears, no crop, no blocks."
+  },
+  "rawFullRedrawSource": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-raw-full-dressed-imagegen-source.png",
+    "sha256": "9f3923079e630d7f30ac7356194ddac2dfe924384d1d3835b28c3b38b64179b9",
+    "dimensions": [1254, 1254, 3]
+  },
+  "originalPrototypes": {
+    "pet": "art-inbox/pet-starpatch-cat-1.png",
+    "accessory": "art-inbox/wearable-head-3.png (bottom-right blue/white/gold space helmet)",
+    "pose": "c03 original base cell [320,0,160,160]"
+  },
+  "verdict": "RAW_VISUAL_PRECHECK_PENDING_PARENT_CONFIRMATION",
+  "forbidden": "No target, mask, layer or composite has been read or written in revision-6."
+}

@@ -1,0 +1,20 @@
+{
+  "verdict": "REJECT",
+  "reviewType": "coordinateCompatibility",
+  "reason": "The normalized independent full-atlas redraw is visually clean but its head-window boundary does not continue the untouched engine pet. Base-locking outside the windows leaves visible square seams, exposed natural ears and incompatible body/head geometry; this is source body drift, not an overly strict critic.",
+  "metrics": {
+    "generatedDiffOutsideWindows": 94157,
+    "generatedDiffInsideWindows": 205070,
+    "generatedDiffInnerBoundaryRing4px": 18441,
+    "assembledTargetDiffOutsideWindows": 0,
+    "residualBrightForegroundInformational": 5564,
+    "residualCheckerboardPatternDetectorInformational": 842,
+    "criticCrossingBoundarySeamCells": 20,
+    "criticAggregateIntroducedEdgeJump": 866787,
+    "criticExcessPairsAtLeast48": 1828,
+    "criticWorstCells": ["c14", "c15", "c19", "c20", "c1"],
+    "criticDetachedSourceComponents": ["c8", "c9", "c12", "c14", "c15", "c18", "c19"]
+  },
+  "publishable": false,
+  "nextStrategy": "Per-cell targeted inpainting/redraw of only the declared head window using the original base crop and helmet three-view as references; enforce inner-boundary edge continuity before atlas assembly."
+}

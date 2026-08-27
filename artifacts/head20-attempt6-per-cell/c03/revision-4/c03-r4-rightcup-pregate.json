@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "cell": "c03",
+  "revision": "r4",
+  "stage": "ISOLATED_RIGHT_CUP_PRE_GATE_BEFORE_TARGET_LAYER",
+  "input": {
+    "rawPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-4\\c03-r4-raw-full-dressed-imagegen-source.png",
+    "rawSha256": "8bce443ce5447451377d865386ac0fb405bb2f2d6c7c16b2fe9b85c7c94289db",
+    "crop": [
+      860,
+      385,
+      145,
+      250
+    ]
+  },
+  "output": {
+    "cupPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-4\\c03-r4-rightcup-helmet-only-24x42.png",
+    "cupSha256": "33d8465f213434e4a4d6a113a1f10a9bdbbdc92d3563ebafaa335e735bdcdbab",
+    "zoomPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-4\\c03-r4-rightcup-helmet-only-8x.png"
+  },
+  "rightCupRoiTarget": [
+    113,
+    30,
+    131,
+    80
+  ],
+  "metrics": {
+    "opaquePixels": 659,
+    "blueShellPixels": 234,
+    "goldShellPixels": 203,
+    "furColorOrAnatomyPixels": 0
+  },
+  "rules": {
+    "minimumBlueGoldShellPixels": 80,
+    "requiredFurPixels": 0,
+    "source": "same new independent full-dressed raw; crop excludes tail/body; all warm pixels in crop are connected gold hardware, not a separate fur/anatomy component"
+  },
+  "verdict": "PASS_ISOLATED_HELMET_ONLY_RIGHT_CUP"
+}

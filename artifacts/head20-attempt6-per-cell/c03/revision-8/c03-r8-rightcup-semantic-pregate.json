@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 1,
+  "independent": true,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c03",
+  "revision": "r4",
+  "stage": "RIGHT_CUP_ISOLATED_LAYER_SEMANTIC_PRE_GATE",
+  "contract": "ROI is layer-only. Blue/gold helmet evidence must exist; zero high-confidence orange/cream/pink fur-like pixels. Warm gold trim is an allowed material class and is reported separately.",
+  "inputs": {
+    "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-8\\c03-r8-helmet-pre-gate-candidate-layer-160x160.png",
+    "layerSha256": "2cb09c0f59a628a90e1d96d035bc825c49731540444244f0a70d89aacceb4da4",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-8\\c03-r8-helmet-pre-gate-candidate-mask-160x160.png",
+    "maskSha256": "4a82bd969537b9830f44627508d2c483c8a085c0ab6ed17ba0095a770dc19e24",
+    "roi": [
+      113,
+      30,
+      131,
+      80
+    ]
+  },
+  "classifier": {
+    "goldTrim": "warm red/gold material, counted as allowed before fur tests; prevents normal gold rim false positives",
+    "rejectedFur": "only high-confidence orange/cream/pink criteria; ambiguous warm pixels are surfaced to the visual critic rather than mechanically rejected"
+  },
+  "metrics": {
+    "roiPixels": 900,
+    "maskSupportPixels": 150,
+    "layerSupportPixels": 150,
+    "supportMismatchPixels": 0,
+    "blueShellPixels": 45,
+    "goldTrimPixels": 44,
+    "neutralHelmetPixels": 32,
+    "unmistakableOrangeFurPixels": 0,
+    "unmistakableCreamFurPixels": 1,
+    "unmistakablePinkFurPixels": 0,
+    "ambiguousWarmPixels": 10,
+    "helmetEvidencePixels": 121,
+    "furPixels": 1,
+    "samples": {
+      "fur": [
+        [
+          114,
+          44,
+          210,
+          180,
+          156,
+          "cream"
+        ]
+      ],
+      "gold": [
+        [
+          113,
+          42,
+          210,
+          172,
+          140
+        ],
+        [
+          113,
+          43,
+          200,
+          157,
+          112
+        ],
+        [
+          114,
+          43,
+          204,
+          168,
+          135
+        ],
+        [
+          113,
+          47,
+          151,
+          106,
+          53
+        ],
+        [
+          116,
+          47,
+          177,
+          139,
+          111
+        ],
+        [
+          113,
+          48,
+          190,
+          116,
+          37
+        ],
+        [
+          114,
+          48,
+          152,
+          127,
+          106
+        ],
+        [
+          113,
+          49,
+          195,
+          116,
+          39
+        ],
+        [
+          114,
+          49,
+          153,
+          100,
+          48
+        ],
+        [
+          113,
+          50,
+          191,
+          120,
+          51
+        ],
+        [
+          114,
+          50,
+          170,
+          96,
+          33
+        ],
+        [
+          115,
+          50,
+          163,
+          122,
+          96
+        ]
+      ],
+      "blue": [
+        [
+          117,
+          48,
+          113,
+          108,
+          133
+        ],
+        [
+          116,
+          49,
+          53,
+          89,
+          130
+        ],
+        [
+          117,
+          49,
+          80,
+          101,
+          128
+        ],
+        [
+          116,
+          50,
+          111,
+          123,
+          139
+        ],
+        [
+          117,
+          50,
+          16,
+          66,
+          114
+        ],
+        [
+          116,
+          51,
+          99,
+          99,
+          122
+        ],
+        [
+          117,
+          51,
+          0,
+          43,
+          113
+        ],
+        [
+          118,
+          51,
+          100,
+          113,
+          137
+        ],
+        [
+          117,
+          52,
+          3,
+          68,
+          142
+        ],
+        [
+          118,
+          52,
+          44,
+          64,
+          97
+        ],
+        [
+          113,
+          53,
+          79,
+          80,
+          106
+        ],
+        [
+          117,
+          53,
+          5,
+          70,
+          145
+        ]
+      ]
+    }
+  },
+  "gates": {
+    "layerMaskSupportExactWithinRoi": true,
+    "rightCupHasActualHelmetSupport": true,
+    "blueOrGoldHelmetEvidence": true,
+    "noUnmistakableOrangeCreamPinkFur": false,
+    "visualCritic": "PENDING"
+  },
+  "verdict": "REJECT_RIGHT_CUP_SEMANTIC_PRE_GATE",
+  "publishable": false
+}

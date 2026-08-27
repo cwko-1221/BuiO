@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c03",
+  "revision": "r6",
+  "verdict": "FROZEN_PENDING_INDEPENDENT_VISUAL_CRITIC",
+  "generation": {
+    "model": "built-in image_gen",
+    "timestamp": "2026-08-26T17:54:32+08:00",
+    "prompt": "Independent c03 full-dressed redraw from the original Starpatch Cat and wearable-head-3 helmet references. Hard invariants: transparent galaxy visor with both eyes visible; compact front-facing sitting pose with both front paws down together; screen-right blue/gold circular ear cup; orange tail behind the body with a transparent gap to that cup; no natural ears, no crop, no blocks."
+  },
+  "rawFullRedrawSource": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-raw-full-dressed-imagegen-source.png",
+    "sha256": "9f3923079e630d7f30ac7356194ddac2dfe924384d1d3835b28c3b38b64179b9",
+    "dimensions": [
+      1254,
+      1254,
+      3
+    ]
+  },
+  "originalPrototypeLineage": {
+    "pet": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\pet-starpatch-cat-1.png",
+      "sha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253"
+    },
+    "accessory": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\wearable-head-3.png",
+      "sha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+      "view": "bottom-row right space-helmet front"
+    }
+  },
+  "forbiddenInputProof": {
+    "c01C02TargetMaskLayerComposite": "NOT_READ",
+    "oldV2": "NOT_READ",
+    "r3bR4R5": "NOT_READ",
+    "usedInputs": [
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-raw-full-dressed-imagegen-source.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\c03-base-original-160x160.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-tail-visible-pixels-mask.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-ear-extension-empty.png"
+    ]
+  },
+  "normalization": {
+    "sourceSha256": "9f3923079e630d7f30ac7356194ddac2dfe924384d1d3835b28c3b38b64179b9",
+    "steps": "connected checker flood -> raw head crop [270,145,720,600] -> single 105x100 Lanczos3 map at [27,5] -> source-alpha silhouette -> original-base lock outside actual silhouette",
+    "crop": [
+      270,
+      145,
+      720,
+      600
+    ],
+    "mappedPlacement": [
+      27,
+      5,
+      132,
+      105
+    ],
+    "cleanedSha256": "7aa4f933d8f220d34952c2bde5878ec0d006a5119e7f17bd83e632c8179059fd",
+    "mappedSha256": "9fa0ad2310928b917332ede57976b6222e473a4af34b38367935a05470f00183"
+  },
+  "semanticMask": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-helmet-mask-same-coordinate-160x160.png",
+    "sha256": "7d71f0a6b30ef192f883e32c484049fdf514bd95bb16f84ded779a5b5f48495a",
+    "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-helmet-layer-same-coordinate-160x160.png",
+    "layerSha256": "d4a3bf8dba426c78d230c5ae3f755f135537bd33fd111f34eda947827f9316aa",
+    "nativeZone": [
+      24,
+      5,
+      132,
+      127
+    ],
+    "leftEarExtension": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-ear-extension-empty.png",
+      "sha256": "1cb6b844edfab5a219e11b8a753ffd1e05aa23c8c698f0885a2ec197e042032e"
+    },
+    "tailProtection": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-tail-visible-pixels-mask.png",
+      "sha256": "791c5b1d2cbf17e3494e38db40d61e0b7acb42e1585dc28c4fbaf5076a0bd33d"
+    },
+    "pixels": 7806,
+    "components4Connected": 1,
+    "enclosedHoles": 0,
+    "tailIntersectionPixels": 0,
+    "bodyChestIntersectionPixels": 0,
+    "raisedPawIntersectionPixels": 0,
+    "leftNaturalEarUnchangedOpaquePixels": 0,
+    "rightNaturalEarUnchangedOpaquePixels": 0
+  },
+  "outputs": {
+    "target": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-target-coordinate-locked-160x160.png",
+      "sha256": "548b5fb17df3c53da8cbfe600d24fa8a6e03f832bd48bd19690ca7a582c557b5"
+    },
+    "layer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "d4a3bf8dba426c78d230c5ae3f755f135537bd33fd111f34eda947827f9316aa"
+    },
+    "mask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "7d71f0a6b30ef192f883e32c484049fdf514bd95bb16f84ded779a5b5f48495a"
+    }
+  },
+  "gates": {
+    "exactOutsideAllowedBaseLock": true,
+    "maskLayerSupportExact": true,
+    "oneComponent": true,
+    "holeFree": true,
+    "tailProtected": true,
+    "bodyChestProtected": true,
+    "raisedPawProtected": true,
+    "naturalEarsOccluded": true,
+    "critic": "PENDING_INDEPENDENT_VISUAL_REVIEW",
+    "publishable": false
+  },
+  "independentPreGate": {
+    "candidateOnly": true,
+    "targetLocalReport": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-rightcup-target-local-semantic-pregate.json",
+      "sha256": "239cd1c154f4c01e68e8c887e1eb97d7fdd6e8bd16ec4cd13ce9be4956d7c7d2",
+      "verdict": "PASS"
+    },
+    "finalLayerReport": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-rightcup-final-semantic-audit.json",
+      "sha256": "3d59299e19fbc05b1dcd29df0a265fa785b773cbaf4f0dd260a71599fa85ea08",
+      "verdict": "PASS"
+    }
+  },
+  "mechanicalAudit": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-6\\c03-r6-mechanical-audit.json",
+    "sha256": "a86c38922aabbcc0f38118421dd8e92a0e70713b0454bfa8081a486b20ea6d0e",
+    "verdict": "PASS_MECHANICAL_PENDING_VISUAL_CRITIC"
+  },
+  "freeze": {
+    "frozen": true,
+    "frozenAt": "2026-08-26T18:00:00+08:00",
+    "artifactSha256": {
+      "c03-r6-raw-full-dressed-imagegen-source.png": "9f3923079e630d7f30ac7356194ddac2dfe924384d1d3835b28c3b38b64179b9",
+      "c03-r6-target-coordinate-locked-160x160.png": "548b5fb17df3c53da8cbfe600d24fa8a6e03f832bd48bd19690ca7a582c557b5",
+      "c03-r6-helmet-layer-same-coordinate-160x160.png": "d4a3bf8dba426c78d230c5ae3f755f135537bd33fd111f34eda947827f9316aa",
+      "c03-r6-helmet-mask-same-coordinate-160x160.png": "7d71f0a6b30ef192f883e32c484049fdf514bd95bb16f84ded779a5b5f48495a",
+      "c03-r6-helmet-pre-gate-candidate-layer-160x160.png": "d4a3bf8dba426c78d230c5ae3f755f135537bd33fd111f34eda947827f9316aa",
+      "c03-r6-helmet-pre-gate-candidate-mask-160x160.png": "7d71f0a6b30ef192f883e32c484049fdf514bd95bb16f84ded779a5b5f48495a",
+      "c03-r6-rightcup-target-local-semantic-pregate.json": "239cd1c154f4c01e68e8c887e1eb97d7fdd6e8bd16ec4cd13ce9be4956d7c7d2",
+      "c03-r6-rightcup-final-semantic-audit.json": "3d59299e19fbc05b1dcd29df0a265fa785b773cbaf4f0dd260a71599fa85ea08",
+      "c03-r6-mechanical-audit.json": "a86c38922aabbcc0f38118421dd8e92a0e70713b0454bfa8081a486b20ea6d0e",
+      "c03-tail-visible-pixels-mask.png": "791c5b1d2cbf17e3494e38db40d61e0b7acb42e1585dc28c4fbaf5076a0bd33d",
+      "c03-ear-extension-empty.png": "1cb6b844edfab5a219e11b8a753ffd1e05aa23c8c698f0885a2ec197e042032e",
+      "c03-protection-evidence.json": "b93953299849a448dea242e0134d1b046c94cb99ae2464ea7b70ea8e618e8cf3",
+      "c03-r6-raw-provenance.json": "2d6886d472d7ad3615c9f5e3d559de0016bb7c52aab5331c367274f417a00ed4"
+    },
+    "rule": "No further image, mask, layer, target, or lineage writes are permitted without a fresh numbered revision."
+  },
+  "frozen": true
+}

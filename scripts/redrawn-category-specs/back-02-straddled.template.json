@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "category": "back",
+  "wearableId": "back-02",
+  "templateOnly": true,
+  "authoringStatus": "AWAITING_FROZEN_CANONICAL_TARGET_SEMANTIC_ZONES",
+  "description": "Back wearable template using rear -> base -> minimal erase -> patch -> front. Semantic regions must be authored from the frozen canonical candidate before running; no existing published layer may be used as input.",
+  "atlas": {
+    "width": 800,
+    "height": 640,
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "columns": 5,
+    "rows": 4
+  },
+  "topology": {
+    "fillEnclosedHoles": false,
+    "minimumComponents4ConnectedPerCell": 1,
+    "maximumComponents4ConnectedPerCell": 3,
+    "expectedEnclosedTransparentComponentsPerCell": 0,
+    "cells": [],
+    "emptyCells": []
+  },
+  "layering": {
+    "mode": "rear-base-erase-patch-front",
+    "semanticRegions": [],
+    "requiredSemanticCoverage": [
+      {
+        "semantic": "side-wing-flat-on-back",
+        "rows": [1],
+        "columns": [0, 1, 2, 3, 4],
+        "layers": ["rear", "patch", "front"],
+        "minimumPixels": 1
+      }
+    ],
+    "topology": {
+      "layers": {
+        "rear": { "defaultMinimumComponents": 0, "defaultMaximumComponents": 3, "defaultExpectedHoles": 0, "cells": [] },
+        "patch": { "defaultMinimumComponents": 0, "defaultMaximumComponents": 3, "defaultExpectedHoles": 0, "cells": [] },
+        "front": { "defaultMinimumComponents": 0, "defaultMaximumComponents": 3, "defaultExpectedHoles": 0, "cells": [] }
+      }
+    }
+  },
+  "solve": {
+    "maximumErasePixels": 0,
+    "unexpectedUnsolvablePixels": 0,
+    "exactRgbaMismatchPixels": 0,
+    "eraseReplacement": {
+      "mode": "minimal-source-over-fallback",
+      "allowedRegions": []
+    }
+  },
+  "publish": {
+    "wearableId": "back-02",
+    "slot": "back",
+    "execute": false
+  }
+}

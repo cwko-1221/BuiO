@@ -560,19 +560,19 @@
   "petProfiles": [
     {
       "studentId": "S001",
-      "activePetId": "8947b57f-8805-4a00-b898-563447615a57",
+      "activePetId": "c44dd576-c1ff-4c6d-bc38-e26ac82224ee",
       "starterEggClaimed": true,
       "eggPity": 4,
       "stardust": 999999,
       "createdAt": "2026-08-13T13:03:28.012Z",
-      "updatedAt": "2026-08-21T10:52:40.784Z"
+      "updatedAt": "2026-08-23T06:31:17.257Z"
     }
   ],
   "petWallets": [
     {
       "studentId": "S001",
-      "balance": 986169,
-      "updatedAt": "2026-08-21T11:00:37.026Z"
+      "balance": 983499,
+      "updatedAt": "2026-08-22T04:21:53.770Z"
     }
   ],
   "petCurrencyLedger": [
@@ -1340,6 +1340,97 @@
         "quantity": 1
       },
       "createdAt": "2026-08-21T11:00:37.026Z"
+    },
+    {
+      "transactionId": "a079b090-d2d0-451d-9db7-ad423a1167b7",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "1ce1ad89-63b1-46eb-9423-bebe4da10342",
+      "metadata": {
+        "itemId": "head-06",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T11:05:04.254Z"
+    },
+    {
+      "transactionId": "cefa57e9-4708-4581-8a01-f5f291f213fa",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -450,
+      "kind": "shop_purchase",
+      "idempotencyKey": "6414d52f-638f-4840-98e3-f559b945973b",
+      "metadata": {
+        "itemId": "neck-10",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T15:26:25.987Z"
+    },
+    {
+      "transactionId": "136ce434-33e6-4538-822f-15d3638932e7",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -450,
+      "kind": "shop_purchase",
+      "idempotencyKey": "342ead0b-5f94-40e0-9e6b-dbb35d78ec2f",
+      "metadata": {
+        "itemId": "back-10",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T15:29:06.982Z"
+    },
+    {
+      "transactionId": "65a76bbf-7a48-4db1-81da-0685a35c0b49",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -450,
+      "kind": "shop_purchase",
+      "idempotencyKey": "3cab3adf-b1e8-4b4b-b83c-b3fea2dc520d",
+      "metadata": {
+        "itemId": "face-07",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T15:31:39.230Z"
+    },
+    {
+      "transactionId": "2ec57d5e-810c-440f-b340-bc0f0823485a",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -600,
+      "kind": "shop_purchase",
+      "idempotencyKey": "8bc0cfde-6edf-402d-b6ad-362884bfa41b",
+      "metadata": {
+        "itemId": "face-11",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T15:31:42.793Z"
+    },
+    {
+      "transactionId": "cd52a569-6a81-4eef-b0df-82667b124fad",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -120,
+      "kind": "shop_purchase",
+      "idempotencyKey": "9ea3a204-f96c-483f-a4a2-fca611f067c0",
+      "metadata": {
+        "itemId": "neck-03",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-21T15:39:08.707Z"
+    },
+    {
+      "transactionId": "c2d7b520-9abf-49aa-b4c7-f442145bbe42",
+      "studentId": "S001",
+      "actorId": "S001",
+      "delta": -300,
+      "kind": "shop_purchase",
+      "idempotencyKey": "0237f580-c2ac-459f-a392-ea899227b18e",
+      "metadata": {
+        "itemId": "aura-08",
+        "quantity": 1
+      },
+      "createdAt": "2026-08-22T04:21:53.770Z"
     }
   ],
   "petInstances": [
@@ -1354,12 +1445,11 @@
       "equippedSkills": [],
       "equippedWearables": [
         "aura-07",
-        "face-05",
-        "head-20",
-        "back-09"
+        "back-10",
+        "neck-08"
       ],
       "createdAt": "2026-08-13T13:03:36.358Z",
-      "updatedAt": "2026-08-21T11:00:16.371Z"
+      "updatedAt": "2026-08-22T03:27:30.957Z"
     },
     {
       "petId": "d441c27e-25aa-4bb3-86c6-6d1ae5a4a20a",
@@ -1408,10 +1498,11 @@
       "dailyXp": 0,
       "dailyXpDate": "",
       "equippedWearables": [
-        "aura-07"
+        "aura-07",
+        "head-06"
       ],
       "createdAt": "2026-08-17T10:11:39.571Z",
-      "updatedAt": "2026-08-21T10:52:33.028Z"
+      "updatedAt": "2026-08-23T07:16:22.296Z"
     },
     {
       "petId": "1046d428-ac60-4251-bebd-c6e4d69a044e",
@@ -1438,9 +1529,12 @@
       "stage": 1,
       "dailyXp": 0,
       "dailyXpDate": "",
-      "equippedWearables": [],
+      "equippedWearables": [
+        "aura-01",
+        "back-15"
+      ],
       "createdAt": "2026-08-21T04:58:10.565Z",
-      "updatedAt": "2026-08-21T04:58:10.565Z"
+      "updatedAt": "2026-08-22T03:25:29.745Z"
     }
   ],
   "petSkills": [],
@@ -1714,12 +1808,47 @@
       "studentId": "S001",
       "itemId": "neck-08",
       "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "head-06",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "neck-10",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "back-10",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "face-07",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "face-11",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "neck-03",
+      "quantity": 1
+    },
+    {
+      "studentId": "S001",
+      "itemId": "aura-08",
+      "quantity": 1
     }
   ],
   "petRoomLayouts": [
     {
       "studentId": "S001",
-      "themeId": "sunny-oak",
+      "themeId": "candy-workshop",
       "visibility": "private",
       "placements": [
         {
@@ -1809,7 +1938,7 @@
           "x": 2,
           "y": 2,
           "rotation": 0,
-          "size": 0,
+          "size": 1,
           "layer": "furniture"
         },
         {
@@ -1820,9 +1949,18 @@
           "rotation": 0,
           "size": 1,
           "layer": "furniture"
+        },
+        {
+          "id": "6504ef94-b37d-4e1d-be2a-7cd13dc313f4",
+          "itemId": "sunny-oak-furniture-10",
+          "x": 0,
+          "y": 9,
+          "rotation": 0,
+          "size": -1,
+          "layer": "furniture"
         }
       ],
-      "updatedAt": "2026-08-21T08:13:46.471Z"
+      "updatedAt": "2026-08-21T15:25:19.108Z"
     }
   ],
   "petMapProgress": [],
@@ -2783,6 +2921,90 @@
         "stardust": 999999
       },
       "createdAt": "2026-08-21T11:00:37.026Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "1ce1ad89-63b1-46eb-9423-bebe4da10342",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "head-06",
+        "quantity": 1,
+        "balance": 985869,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T11:05:04.254Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "6414d52f-638f-4840-98e3-f559b945973b",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "neck-10",
+        "quantity": 1,
+        "balance": 985419,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T15:26:25.987Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "342ead0b-5f94-40e0-9e6b-dbb35d78ec2f",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "back-10",
+        "quantity": 1,
+        "balance": 984969,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T15:29:06.982Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "3cab3adf-b1e8-4b4b-b83c-b3fea2dc520d",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "face-07",
+        "quantity": 1,
+        "balance": 984519,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T15:31:39.230Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "8bc0cfde-6edf-402d-b6ad-362884bfa41b",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "face-11",
+        "quantity": 1,
+        "balance": 983919,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T15:31:42.793Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "9ea3a204-f96c-483f-a4a2-fca611f067c0",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "neck-03",
+        "quantity": 1,
+        "balance": 983799,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-21T15:39:08.707Z"
+    },
+    {
+      "actorId": "S001",
+      "key": "0237f580-c2ac-459f-a392-ea899227b18e",
+      "kind": "shop_purchase",
+      "response": {
+        "itemId": "aura-08",
+        "quantity": 1,
+        "balance": 983499,
+        "stardust": 999999
+      },
+      "createdAt": "2026-08-22T04:21:53.770Z"
     }
   ]
 }

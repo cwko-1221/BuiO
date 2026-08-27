@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "cell": "c03",
+  "revision": "r8",
+  "stage": "RAW_FULL_DRESSED_SOURCE_PRE_EXTRACTION",
+  "generation": {
+    "model": "built-in image_gen",
+    "timestamp": "2026-08-26T19:31:44+08:00",
+    "prompt": "Independent c03 redraw from pet-starpatch-cat-1 and wearable-head-3 space helmet references. Required: completely hidden natural ears; both eyes visible through transparent galaxy visor; paws down together; tail behind/right with transparent gap to rounded blue-gold right cup; no rectilinear lower/right cup protrusion."
+  },
+  "rawFullRedrawSource": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-8\\c03-r8-raw-full-dressed-imagegen-source.png",
+    "sha256": "760a95e7a075e7fb0bc50c7609407732fd5ba71ec733136306ed970b5f6b2ef4",
+    "dimensions": [1254,1254,3]
+  },
+  "verdict": "RAW_VISUAL_PRECHECK_PENDING_PARENT_CONFIRMATION",
+  "forbidden": "No r8 target, mask, layer, or composite has been read or written."
+}

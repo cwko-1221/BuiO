@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "petId": "starpatch-cat",
+    "stage": 1,
+    "wearableId": "head-04",
+    "slot": "head"
+  },
+  "layerOrder": [
+    "rear",
+    "erase",
+    "patch",
+    "frontErase",
+    "front"
+  ],
+  "geometry": {
+    "width": 800,
+    "height": 640,
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "columns": 5,
+    "rows": 4,
+    "transformAllowed": false
+  },
+  "emptyByDefault": [],
+  "target": "../head04-v2-target.png",
+  "base": "../../pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+  "layers": {
+    "patch": {
+      "kind": "content",
+      "mask": "mask-bridged.png",
+      "image": "head04-v2-bridged-solved-layer.png"
+    }
+  },
+  "maskPolicy": {
+    "allowUnchangedSupportPixels": true,
+    "maximumUnchangedSupportPixels": 6417
+  }
+}

@@ -1,0 +1,1510 @@
+{
+  "schemaVersion": 1,
+  "verdict": "CANDIDATE_FOR_INDEPENDENT_CRITIC",
+  "item": {
+    "id": "head-04",
+    "category": "head",
+    "pet": "starpatch-cat",
+    "form": 1
+  },
+  "inputs": {
+    "frozenTarget": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-04-dressed-atlas-v1.png",
+    "spec": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/batch-acceptance-prep/frozen-head-specs-v1/head-04-frozen-acceptance-spec.json",
+    "base": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\sprites\\starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "previousMaskLayerRead": false
+  },
+  "outputs": {
+    "mask": "artifacts/head04-from-full-mask.png",
+    "layer": "artifacts/head04-from-full-layer.png"
+  },
+  "geometry": {
+    "canvas": "800x640",
+    "cell": "160x160",
+    "columns": 5,
+    "rows": 4,
+    "cells": 20,
+    "transformed": false,
+    "registration": "none"
+  },
+  "hashes": {
+    "frozenTarget": "f3f59fa879d7e1d16d372ca08a44b01036594e24f3a2650ff201d49a3ee83cfb",
+    "spec": "de773bd017457d689eb0dc5887870423f84d42c4e57e234fd775dc188e02d3dd",
+    "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+    "mask": "d135aa7a0c27aae6b9cfcf91f880f1f699c53e7e9a543cb977c519b137cbc764",
+    "layer": "424fb47fb0c9ee17a06201a4a9c0c8a340f4fa4678653d8dfb1bad5802835715"
+  },
+  "totals": {
+    "maskPixels": 7994,
+    "hiddenRgbNonZero": 0
+  },
+  "lineage": {
+    "target": "frozen head-04-dressed-atlas-v1.png per head-04 spec; no prior candidate read",
+    "coordinatesPreserved": true
+  },
+  "bodyLock": {
+    "procedure": "Build semantic blue/purple/gold clip mask from frozen target only; reject detached islands; source-over with frozen base at exact coordinates; critic must verify eye/face/ear/fur/tail/paw/body ROIs.",
+    "metrics": {
+      "targetEqualsBaseExact": 0,
+      "recomposeMismatchPixels": 283594,
+      "recomposeMaskRegionMismatchPixels": 0,
+      "recomposeOutsideMaskMismatchPixels": 283594,
+      "recomposeTotalMae": 116651931,
+      "exactRecompose": false
+    }
+  },
+  "method": "same-coordinate hue-locked star/ribbon/clasp extraction; gold admitted only adjacent to blue/purple; enclosed holes filled; 1-2px islands rejected",
+  "cells": [
+    {
+      "cell": 1,
+      "row": 0,
+      "column": 0,
+      "maskPixels": 535,
+      "holePixels": 20,
+      "rejectedIslands": [],
+      "components": [
+        {
+          "size": 535,
+          "bounds": [
+            114,
+            42,
+            142,
+            79
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 2,
+      "row": 0,
+      "column": 1,
+      "maskPixels": 534,
+      "holePixels": 27,
+      "rejectedIslands": [
+        {
+          "size": 3,
+          "bounds": [
+            140,
+            134,
+            141,
+            135
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            139,
+            137,
+            139,
+            137
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 534,
+          "bounds": [
+            117,
+            42,
+            146,
+            78
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 3,
+      "row": 0,
+      "column": 2,
+      "maskPixels": 462,
+      "holePixels": 18,
+      "rejectedIslands": [
+        {
+          "size": 5,
+          "bounds": [
+            75,
+            102,
+            76,
+            104
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            72,
+            100,
+            73,
+            100
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            150,
+            59,
+            150,
+            59
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            150,
+            71,
+            150,
+            71
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            151,
+            72,
+            151,
+            72
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            75,
+            100,
+            75,
+            100
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            74,
+            102,
+            74,
+            102
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 462,
+          "bounds": [
+            127,
+            43,
+            153,
+            78
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 4,
+      "row": 0,
+      "column": 3,
+      "maskPixels": 525,
+      "holePixels": 21,
+      "rejectedIslands": [
+        {
+          "size": 4,
+          "bounds": [
+            151,
+            72,
+            152,
+            74
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            150,
+            75,
+            150,
+            75
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            151,
+            76,
+            151,
+            76
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 525,
+          "bounds": [
+            127,
+            41,
+            154,
+            79
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 5,
+      "row": 0,
+      "column": 4,
+      "maskPixels": 500,
+      "holePixels": 25,
+      "rejectedIslands": [
+        {
+          "size": 1,
+          "bounds": [
+            144,
+            73,
+            144,
+            73
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            143,
+            76,
+            143,
+            76
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 500,
+          "bounds": [
+            119,
+            42,
+            146,
+            79
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 6,
+      "row": 1,
+      "column": 0,
+      "maskPixels": 442,
+      "holePixels": 20,
+      "rejectedIslands": [
+        {
+          "size": 7,
+          "bounds": [
+            72,
+            124,
+            76,
+            126
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 3,
+          "bounds": [
+            119,
+            113,
+            120,
+            114
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 3,
+          "bounds": [
+            114,
+            119,
+            115,
+            120
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            121,
+            100,
+            122,
+            100
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            67,
+            127,
+            67,
+            128
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            69,
+            129,
+            69,
+            130
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            69,
+            132,
+            70,
+            132
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            123,
+            94,
+            123,
+            94
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            121,
+            96,
+            121,
+            96
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            120,
+            115,
+            120,
+            115
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            117,
+            117,
+            117,
+            117
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            112,
+            118,
+            112,
+            118
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            115,
+            121,
+            115,
+            121
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            70,
+            128,
+            70,
+            128
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 442,
+          "bounds": [
+            87,
+            45,
+            112,
+            79
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 7,
+      "row": 1,
+      "column": 1,
+      "maskPixels": 473,
+      "holePixels": 14,
+      "rejectedIslands": [
+        {
+          "size": 18,
+          "bounds": [
+            92,
+            126,
+            97,
+            133
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            137,
+            95,
+            138,
+            95
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            135,
+            97,
+            136,
+            97
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            95,
+            133,
+            95,
+            134
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            49,
+            52,
+            49,
+            52
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            136,
+            100,
+            136,
+            100
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            135,
+            107,
+            135,
+            107
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            130,
+            115,
+            130,
+            115
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            128,
+            116,
+            128,
+            116
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            132,
+            116,
+            132,
+            116
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            131,
+            117,
+            131,
+            117
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            130,
+            118,
+            130,
+            118
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            90,
+            129,
+            90,
+            129
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            96,
+            135,
+            96,
+            135
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            96,
+            137,
+            96,
+            137
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 473,
+          "bounds": [
+            96,
+            48,
+            121,
+            83
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 8,
+      "row": 1,
+      "column": 2,
+      "maskPixels": 435,
+      "holePixels": 17,
+      "rejectedIslands": [
+        {
+          "size": 3,
+          "bounds": [
+            126,
+            119,
+            126,
+            121
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            135,
+            96,
+            136,
+            96
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            128,
+            121,
+            128,
+            122
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            84,
+            129,
+            84,
+            130
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            87,
+            134,
+            87,
+            135
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            85,
+            136,
+            85,
+            137
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            138,
+            94,
+            138,
+            94
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            137,
+            95,
+            137,
+            95
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            135,
+            101,
+            135,
+            101
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            136,
+            102,
+            136,
+            102
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            135,
+            106,
+            135,
+            106
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            136,
+            107,
+            136,
+            107
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            131,
+            118,
+            131,
+            118
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            129,
+            120,
+            129,
+            120
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            125,
+            124,
+            125,
+            124
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            127,
+            126,
+            127,
+            126
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            85,
+            127,
+            85,
+            127
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            82,
+            129,
+            82,
+            129
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            82,
+            131,
+            82,
+            131
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            86,
+            133,
+            86,
+            133
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            88,
+            136,
+            88,
+            136
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            86,
+            138,
+            86,
+            138
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 435,
+          "bounds": [
+            97,
+            47,
+            122,
+            80
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 9,
+      "row": 1,
+      "column": 3,
+      "maskPixels": 438,
+      "holePixels": 21,
+      "rejectedIslands": [
+        {
+          "size": 11,
+          "bounds": [
+            104,
+            128,
+            106,
+            133
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 8,
+          "bounds": [
+            102,
+            127,
+            103,
+            132
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 4,
+          "bounds": [
+            114,
+            80,
+            115,
+            82
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 4,
+          "bounds": [
+            104,
+            126,
+            107,
+            126
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 3,
+          "bounds": [
+            107,
+            135,
+            108,
+            136
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            142,
+            97,
+            143,
+            97
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            103,
+            134,
+            103,
+            135
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            145,
+            95,
+            145,
+            95
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            142,
+            102,
+            142,
+            102
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            143,
+            103,
+            143,
+            103
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            140,
+            115,
+            140,
+            115
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            105,
+            134,
+            105,
+            134
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            107,
+            134,
+            107,
+            134
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 438,
+          "bounds": [
+            102,
+            48,
+            127,
+            80
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 10,
+      "row": 1,
+      "column": 4,
+      "maskPixels": 419,
+      "holePixels": 19,
+      "rejectedIslands": [
+        {
+          "size": 4,
+          "bounds": [
+            88,
+            127,
+            91,
+            127
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 4,
+          "bounds": [
+            86,
+            130,
+            88,
+            131
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 3,
+          "bounds": [
+            138,
+            91,
+            139,
+            92
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            140,
+            90,
+            141,
+            90
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            135,
+            93,
+            136,
+            93
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            128,
+            119,
+            129,
+            119
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            134,
+            94,
+            134,
+            94
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            134,
+            98,
+            134,
+            98
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            135,
+            103,
+            135,
+            103
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            135,
+            109,
+            135,
+            109
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            129,
+            117,
+            129,
+            117
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            127,
+            118,
+            127,
+            118
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            127,
+            120,
+            127,
+            120
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            89,
+            129,
+            89,
+            129
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 419,
+          "bounds": [
+            90,
+            49,
+            115,
+            80
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 11,
+      "row": 2,
+      "column": 0,
+      "maskPixels": 244,
+      "holePixels": 6,
+      "rejectedIslands": [],
+      "components": [
+        {
+          "size": 244,
+          "bounds": [
+            36,
+            48,
+            49,
+            71
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 12,
+      "row": 2,
+      "column": 1,
+      "maskPixels": 252,
+      "holePixels": 8,
+      "rejectedIslands": [],
+      "components": [
+        {
+          "size": 252,
+          "bounds": [
+            46,
+            47,
+            59,
+            71
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 13,
+      "row": 2,
+      "column": 2,
+      "maskPixels": 236,
+      "holePixels": 4,
+      "rejectedIslands": [],
+      "components": [
+        {
+          "size": 236,
+          "bounds": [
+            49,
+            48,
+            63,
+            71
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 14,
+      "row": 2,
+      "column": 3,
+      "maskPixels": 240,
+      "holePixels": 4,
+      "rejectedIslands": [],
+      "components": [
+        {
+          "size": 240,
+          "bounds": [
+            55,
+            50,
+            68,
+            73
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 15,
+      "row": 2,
+      "column": 4,
+      "maskPixels": 227,
+      "holePixels": 8,
+      "rejectedIslands": [
+        {
+          "size": 1,
+          "bounds": [
+            139,
+            55,
+            139,
+            55
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            137,
+            56,
+            137,
+            56
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 227,
+          "bounds": [
+            51,
+            51,
+            63,
+            74
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 16,
+      "row": 3,
+      "column": 0,
+      "maskPixels": 402,
+      "holePixels": 22,
+      "rejectedIslands": [],
+      "components": [
+        {
+          "size": 402,
+          "bounds": [
+            108,
+            59,
+            132,
+            90
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 17,
+      "row": 3,
+      "column": 1,
+      "maskPixels": 432,
+      "holePixels": 23,
+      "rejectedIslands": [
+        {
+          "size": 21,
+          "bounds": [
+            125,
+            87,
+            131,
+            91
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 8,
+          "bounds": [
+            78,
+            110,
+            82,
+            111
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 6,
+          "bounds": [
+            102,
+            122,
+            104,
+            124
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 5,
+          "bounds": [
+            62,
+            104,
+            63,
+            106
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 5,
+          "bounds": [
+            88,
+            114,
+            91,
+            115
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            78,
+            114,
+            79,
+            114
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 2,
+          "bounds": [
+            102,
+            121,
+            102,
+            122
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            135,
+            41,
+            135,
+            41
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            80,
+            112,
+            80,
+            112
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            89,
+            116,
+            89,
+            116
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        },
+        {
+          "size": 1,
+          "bounds": [
+            100,
+            120,
+            100,
+            120
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 432,
+          "bounds": [
+            113,
+            25,
+            137,
+            59
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 18,
+      "row": 3,
+      "column": 2,
+      "maskPixels": 387,
+      "holePixels": 15,
+      "rejectedIslands": [
+        {
+          "size": 1,
+          "bounds": [
+            126,
+            75,
+            126,
+            75
+          ],
+          "reason": "detached-from-primary-clip-assembly"
+        }
+      ],
+      "components": [
+        {
+          "size": 387,
+          "bounds": [
+            98,
+            63,
+            125,
+            91
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 19,
+      "row": 3,
+      "column": 3,
+      "maskPixels": 398,
+      "holePixels": 30,
+      "rejectedIslands": [],
+      "components": [
+        {
+          "size": 398,
+          "bounds": [
+            118,
+            30,
+            140,
+            62
+          ]
+        }
+      ]
+    },
+    {
+      "cell": 20,
+      "row": 3,
+      "column": 4,
+      "maskPixels": 413,
+      "holePixels": 22,
+      "rejectedIslands": [],
+      "components": [
+        {
+          "size": 413,
+          "bounds": [
+            114,
+            25,
+            137,
+            58
+          ]
+        }
+      ]
+    }
+  ]
+}

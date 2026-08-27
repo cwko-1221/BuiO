@@ -1,0 +1,25 @@
+{
+  "source": "pet-app/art-source/imagegen/room-backdrops/universal-black-starfield-v1.png",
+  "size": [
+    2048,
+    2048
+  ],
+  "rooms": [
+    "sunny-oak",
+    "cloud-loft",
+    "ocean-cabin",
+    "forest-treehouse",
+    "space-pod",
+    "candy-workshop",
+    "lava-den",
+    "aurora-observatory",
+    "bamboo-room",
+    "moon-magic-attic"
+  ],
+  "output": {
+    "id": "universal-black-starfield",
+    "publicUrl": "/pet/assets/art/room-backdrops/universal-black-starfield-1f6f9470ef.webp",
+    "outputPath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\room-backdrops\\universal-black-starfield-1f6f9470ef.webp",
+    "bytes": 109024
+  }
+}

@@ -246,6 +246,76 @@ const fillCellHoles = (bitmap, row, column) => {
   return filled;
 };
 
+// Some closed headwear is rendered as several anti-aliased islands (visor,
+// shell highlights and side hardware).  Connect only through pixels where the
+// frozen target is byte-identical to the base, and only inside an explicitly
+// declared semantic bridge zone.  These are support pixels: the solved layer
+// still carries the target bytes and exact recomposition remains mandatory.
+const bridgeCellComponents = (bitmap, row, column, zone) => {
+  if (!zone) return { bridgedPixels: 0, unresolvedComponents: 0 };
+  const localIndex = (x, y) => y * CELL_WIDTH + x;
+  const globalIndex = (x, y) => (row * CELL_HEIGHT + y) * WIDTH + column * CELL_WIDTH + x;
+  const inZone = (x, y) => x >= zone[0] && x < zone[2] && y >= zone[1] && y < zone[3];
+  const labelComponents = () => {
+    const labels = new Int32Array(CELL_PIXELS); labels.fill(-1); const components = [];
+    for (let seed = 0; seed < CELL_PIXELS; seed += 1) {
+      if (!bitmap[globalIndex(seed % CELL_WIDTH, Math.floor(seed / CELL_WIDTH))] || labels[seed] >= 0) continue;
+      const queue = [seed]; labels[seed] = components.length; let head = 0;
+      while (head < queue.length) {
+        const local = queue[head++]; const x = local % CELL_WIDTH; const y = Math.floor(local / CELL_WIDTH);
+        for (const [offsetX, offsetY] of DIR4) {
+          const nx = x + offsetX; const ny = y + offsetY;
+          if (nx < 0 || nx >= CELL_WIDTH || ny < 0 || ny >= CELL_HEIGHT) continue;
+          const next = localIndex(nx, ny);
+          if (labels[next] >= 0 || !bitmap[globalIndex(nx, ny)]) continue;
+          labels[next] = components.length; queue.push(next);
+        }
+      }
+      components.push(queue);
+    }
+    return { labels, components };
+  };
+  let bridgedPixels = 0;
+  let unresolvedComponents = 0;
+  while (true) {
+    const { labels, components } = labelComponents();
+    if (components.length <= 1) break;
+    const principal = components[0];
+    const targetComponent = components[1];
+    const targetSet = new Uint8Array(CELL_PIXELS);
+    for (const local of targetComponent) targetSet[local] = 1;
+    const seen = new Uint8Array(CELL_PIXELS); const parent = new Int32Array(CELL_PIXELS); parent.fill(-1);
+    const queue = [];
+    for (const local of principal) { seen[local] = 1; queue.push(local); }
+    let found = -1;
+    for (let head = 0; head < queue.length && found < 0; head += 1) {
+      const local = queue[head]; const x = local % CELL_WIDTH; const y = Math.floor(local / CELL_WIDTH);
+      for (const [offsetX, offsetY] of DIR4) {
+        const nx = x + offsetX; const ny = y + offsetY;
+        if (nx < 0 || nx >= CELL_WIDTH || ny < 0 || ny >= CELL_HEIGHT || !inZone(nx, ny)) continue;
+        const next = localIndex(nx, ny); if (seen[next]) continue;
+        const global = globalIndex(nx, ny);
+        // Existing mask pixels are traversable; otherwise only unchanged
+        // target/base pixels may be used as invisible support bridges.
+        if (!bitmap[global] && exactDifference[global]) continue;
+        seen[next] = 1; parent[next] = local; queue.push(next);
+        if (targetSet[next]) { found = next; break; }
+      }
+    }
+    if (found < 0) { unresolvedComponents += components.length - 1; break; }
+    // `found` is already a pixel in the target component and is therefore
+    // already marked in the mask.  Walk from its parent so the support path
+    // actually receives pixels; starting at `found` would make no mutation
+    // and repeat the same component search forever.
+    let cursor = parent[found];
+    while (cursor >= 0 && !bitmap[globalIndex(cursor % CELL_WIDTH, Math.floor(cursor / CELL_WIDTH))]) {
+      bitmap[globalIndex(cursor % CELL_WIDTH, Math.floor(cursor / CELL_WIDTH))] = 1;
+      bridgedPixels += 1; cursor = parent[cursor];
+    }
+  }
+  return { bridgedPixels, unresolvedComponents };
+};
+
 const topologyCellOverrides = new Map((spec.topology?.cells ?? []).map((cell) => [`${cell.row}:${cell.column}`, cell]));
 const faceCellDeclarations = new Map((spec.cells ?? []).map((cell) => [`${cell.row}:${cell.column}`, cell]));
 const emptyCellKeys = new Set([
@@ -285,8 +355,53 @@ const expectedFor = (row, column) => {
 };
 const zoneContains = (zone, point) => point[0] >= zone[0] && point[0] < zone[2] && point[1] >= zone[1] && point[1] < zone[3];
 const extractionCells = []; const failedCellSet = new Set();
+const declaredBridgeZones = spec.topology?.bridgeZones ?? [];
+const semanticBridgeZones = spec.topology?.connectComponents4Connected === true
+  ? (spec.solve?.eraseReplacement?.allowedRegions ?? [])
+  : [];
+const bridgeZones = new Map([...declaredBridgeZones, ...semanticBridgeZones]
+  .filter((entry) => Number.isInteger(entry.row) && Number.isInteger(entry.column) && Array.isArray(entry.zone))
+  .map((entry) => [`${entry.row}:${entry.column}`, entry.zone]));
+// A target/base difference is not automatically an accessory pixel. When a
+// category declares replacement windows, every difference outside its local
+// semantic window is body drift/contamination and must reject before masking.
+// Fall back to the solve replacement regions so older specs get the same
+// protection without duplicating geometry.
+const replacementZoneEntries = [
+  ...(spec.topology?.replacementZones ?? spec.solve?.eraseReplacement?.allowedRegions ?? []),
+  ...(spec.topology?.replacementExtensions ?? []),
+];
+const replacementZones = new Map();
+for (const entry of replacementZoneEntries) {
+  if (!Number.isInteger(entry.row) || !Number.isInteger(entry.column) || !Array.isArray(entry.zone)) continue;
+  const key = `${entry.row}:${entry.column}`;
+  const zones = replacementZones.get(key) ?? [];
+  zones.push(entry.zone); replacementZones.set(key, zones);
+}
+let targetBaseDifferencesOutsideReplacementZones = 0;
+const targetBaseDifferencesOutsideReplacementZonesByCell = Array(ROWS * COLUMNS).fill(0);
+for (let pixel = 0; pixel < PIXELS; pixel += 1) {
+  if (!exactDifference[pixel] || replacementZones.size === 0) continue;
+  const x = pixel % WIDTH; const y = Math.floor(pixel / WIDTH);
+  const row = Math.floor(y / CELL_HEIGHT); const column = Math.floor(x / CELL_WIDTH);
+  const zones = replacementZones.get(`${row}:${column}`) ?? [];
+  const localPoint = [x - column * CELL_WIDTH, y - row * CELL_HEIGHT];
+  if (!zones.some((zone) => zoneContains(zone, localPoint))) {
+    targetBaseDifferencesOutsideReplacementZones += 1;
+    targetBaseDifferencesOutsideReplacementZonesByCell[row * COLUMNS + column] += 1;
+  }
+}
+const bridgedPixelsByCell = Array(ROWS * COLUMNS).fill(0);
+const unresolvedBridgeComponentsByCell = Array(ROWS * COLUMNS).fill(0);
 for (let row = 0; row < ROWS; row += 1) for (let column = 0; column < COLUMNS; column += 1) {
-  const cellIndex = row * COLUMNS + column; const topology = analyzeCell(maskBitmap, row, column); const expected = expectedFor(row, column);
+  const cellIndex = row * COLUMNS + column;
+  if (spec.topology?.connectComponents4Connected === true) {
+    const bridge = bridgeCellComponents(maskBitmap, row, column, bridgeZones.get(`${row}:${column}`));
+    bridgedPixelsByCell[cellIndex] = bridge.bridgedPixels;
+    unresolvedBridgeComponentsByCell[cellIndex] = bridge.unresolvedComponents;
+    if (fillEnclosedHoles) holesFilledByCell[cellIndex] += fillCellHoles(maskBitmap, row, column);
+  }
+  const topology = analyzeCell(maskBitmap, row, column); const expected = expectedFor(row, column);
   const maskPixels = topology.components.reduce((sum, component) => sum + component.pixels, 0);
   let aperturesPass = true;
   if (expected.apertureZones?.length) {
@@ -327,16 +442,20 @@ for (let row = 0; row < ROWS; row += 1) for (let column = 0; column < COLUMNS; c
   if (!pass) failedCellSet.add(cellIndex);
   extractionCells.push({
     index: cellIndex + 1, row, column, selectedForRetry: selectedCells.has(cellIndex), holesFilled: holesFilledByCell[cellIndex],
+    targetBaseDifferencesOutsideReplacementZones: targetBaseDifferencesOutsideReplacementZonesByCell[cellIndex],
     maskPixels, expectedComponents4Connected: { minimum: expected.componentMinimum, maximum: expected.componentMaximum }, actualComponents4Connected: topology.components.length,
     expectedEnclosedTransparentComponents: expected.holes, actualEnclosedTransparentComponents: topology.holes.length,
     components: topology.components, componentGroups: componentGroupResults,
     enclosedTransparentComponents: topology.holes, aperturesPass, componentGroupsPass,
+    bridgedSupportPixels: bridgedPixelsByCell[cellIndex],
+    unresolvedBridgeComponents: unresolvedBridgeComponentsByCell[cellIndex],
     verdict: pass ? 'PASS' : 'REJECT',
   });
 }
 let targetBaseDifferenceOutsideMask = 0;
 for (let pixel = 0; pixel < PIXELS; pixel += 1) if (exactDifference[pixel] && !maskBitmap[pixel]) targetBaseDifferenceOutsideMask += 1;
-const extractionPass = failedCellSet.size === 0 && targetBaseDifferenceOutsideMask === 0;
+const extractionPass = failedCellSet.size === 0 && targetBaseDifferenceOutsideMask === 0
+  && targetBaseDifferencesOutsideReplacementZones === 0;
 
 await fs.mkdir(outputDirectory, { recursive: true });
 const maskPath = path.join(outputDirectory, `${prefix}-canonical-mask.png`);
@@ -356,7 +475,12 @@ const extractionReport = {
   inputs: { basePath, targetPath, specPath, lineagePath, sha256: { base: await sha256(basePath), target: targetHashBefore, spec: await sha256(specPath), lineage: await sha256(lineagePath), ...(seedMaskPath ? { seedMask: await sha256(seedMaskPath) } : {}) } },
   output: { maskPath, sha256: await sha256(maskPath) },
   lineageChecks,
-  metrics: { targetBaseDifferenceOutsideMask, failedCells: failedCellSet.size, transparentMaskRgbNonZeroPixels: 0 },
+  metrics: {
+    targetBaseDifferenceOutsideMask,
+    targetBaseDifferencesOutsideReplacementZones,
+    failedCells: failedCellSet.size,
+    transparentMaskRgbNonZeroPixels: 0,
+  },
   cells: extractionCells,
 };
 await fs.writeFile(extractionReportPath, `${JSON.stringify(extractionReport, null, 2)}\n`, 'utf8');
@@ -696,7 +820,8 @@ const markdown = [
   `- Verdict: **${summary.verdict}**`,
   `- Mode: ${summary.mode}`, `- Category: ${category}`, '- Published: no',
   `- Target lineage: ${summary.lineage.verdict}`, `- Target immutable: ${targetImmutable ? 'PASS' : 'REJECT'}`,
-  `- Canonical extraction: ${extractionReport.verdict}`, `- Exact RGBA mismatch pixels: ${solveReport?.metrics?.exactRgbaMismatchPixels ?? 'not run'}`,
+  `- Canonical extraction: ${extractionReport.verdict}`, `- Target/base differences outside replacement zones: ${extractionReport.metrics.targetBaseDifferencesOutsideReplacementZones}`,
+  `- Exact RGBA mismatch pixels: ${solveReport?.metrics?.exactRgbaMismatchPixels ?? 'not run'}`,
   `- Unexpected unsolvable pixels: ${solveReport?.metrics?.unexpectedUnsolvablePixels ?? 'not run'}`,
   `- Transparent layer RGB residue: ${solveReport ? (solveReport.metrics.layerTransparentRgbNonZeroPixels
     ?? ((solveReport.metrics.rearTransparentRgbNonZeroPixels ?? 0) + (solveReport.metrics.patchTransparentRgbNonZeroPixels ?? 0) + (solveReport.metrics.frontTransparentRgbNonZeroPixels ?? 0))) : 'not run'}`,

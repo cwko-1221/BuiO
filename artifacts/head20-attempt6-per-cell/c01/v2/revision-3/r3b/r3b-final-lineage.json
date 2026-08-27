@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "revision": "r3b",
+  "frozen": true,
+  "frozenAt": "2026-08-26T00:52:00.000Z",
+  "scope": "fresh full-dressed source preparation and same-coordinate extraction only; this lineage does not authorize runtime publish",
+  "generation": {
+    "model": "built-in image_gen",
+    "timestamp": "2026-08-26T00:41:41.000Z",
+    "prompt": "Use case: precise-object-edit; single 2D game-sprite reference for starpatch-cat head-20 c01/front pose. Draw one complete front-pose orange-and-cream starpatch cat wearing the blue-and-white galaxy space helmet from wearable-head-3 bottom-right front/side/back reference. Closed helmet, both natural ears fully hidden, deep navy galaxy visor with both cat eyes visible, gold/blue ear-cups, continuous collar, transparent background; no sticker-like pasted helmet."
+  },
+  "rawFullRedrawSource": {
+    "path": "artifacts/head20-attempt6-per-cell/c01/v2/revision-3/r3b/r3b-raw-full-dressed-imagegen-source.png",
+    "storedPath": "artifacts/head20-attempt6-per-cell/c01/v2/revision-3/r3b/r3b-raw-full-dressed-imagegen-source.png",
+    "sha256": "2a54f4cc297d559152276196de9342368213e8499a7bd671cedfdb7fd2373993",
+    "generatedPath": "C:/Users/kochu/.codex/generated_images/01a03b54-1158-75d3-a29d-83ca62051eed/exec-bc96539f-add5-49ca-8774-6c1484b04497.png",
+    "generatedSha256": "0f35ba49dfb58a81e28fcef7d29b36e31969bd2855e912789ccaa141ef33702c",
+    "dimensions": "1254x1254 RGB",
+    "width": 1254,
+    "height": 1254,
+    "channels": 3,
+    "hasAlpha": false
+  },
+  "prototypeLineage": {
+    "pet": {
+      "path": "art-inbox/pet-starpatch-cat-1.png",
+      "sha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253"
+    },
+    "accessory": {
+      "path": "art-inbox/wearable-head-3.png",
+      "sha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+      "reference": "bottom-row right galaxy space-helmet front/side/back views"
+    }
+  },
+  "normalization": {
+    "steps": "connected RGB checkerboard flood removal; fixed fresh-source helmet crop [274,168,700,655]; a single 700x655-to-106x122 Lanczos3 mapping placed at c01 x=31,y=5; non-principal detached mapped components removed; source-derived RGB copied only inside r3b actual silhouette; base bytes retained everywhere outside that silhouette",
+    "sourceSha256": "2a54f4cc297d559152276196de9342368213e8499a7bd671cedfdb7fd2373993",
+    "basePath": "artifacts/head20-attempt6-per-cell/c01/c01-base-original-160x160.png",
+    "baseSha256": "cc87a049bc41b7635bdb1ca4d92f46c1822d73423b86ce7c69c6526fa6ae80d4",
+    "mapping": "No further transform after the one source-to-c01 mapping."
+  },
+  "forbiddenInputProof": {
+    "notOldTarget": true,
+    "notComposite": true,
+    "notMask": true,
+    "usedRevision1": false,
+    "usedRevision2": false,
+    "usedWholeAtlasV2": false,
+    "usedAttempt5": false
+  },
+  "sourceToCandidateMapping": {
+    "method": "one fresh-source helmet crop mapping before target formation; no transform after same-coordinate mask extraction",
+    "targetPath": "artifacts/head20-attempt6-per-cell/c01/v2/revision-3/r3b/r3b-target-coordinate-locked-160x160.png"
+  },
+  "frozenArtifacts": {
+    "coordinateLockedTarget": {
+      "path": "artifacts/head20-attempt6-per-cell/c01/v2/revision-3/r3b/r3b-target-coordinate-locked-160x160.png",
+      "sha256": "ff42e1ac4f991136decd7ed28d431f015caeda8bfa7379137a31d2997dcc9b09",
+      "dimensions": "160x160 RGBA"
+    },
+    "sameCoordinateHelmetLayer": {
+      "path": "artifacts/head20-attempt6-per-cell/c01/v2/revision-3/r3b/r3b-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "daea390113ace356bf53ce049178914809dca3145e4845f5e6343e3d8dcaedae",
+      "dimensions": "160x160 RGBA; alpha=0 outside the binary mask"
+    },
+    "actualBinaryHelmetMask": {
+      "path": "artifacts/head20-attempt6-per-cell/c01/v2/revision-3/r3b/r3b-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "2dbf69e3bea93a5e1a509ec3366e72503381d9fc8a1e3ae340195a2835a10606",
+      "dimensions": "160x160 RGBA"
+    }
+  },
+  "semanticGeometry": {
+    "actualMaskPixels": 7631,
+    "components4Connected": 1,
+    "enclosedHoles": 0,
+    "outsideAllowedUnionPixels": 0,
+    "trueTailIntersectionPixels": 0,
+    "bodyPawOrBowlIntersectionPixels": 0,
+    "leftNaturalEarUnchangedOpaquePixels": 0,
+    "rightNaturalEarUnchangedOpaquePixels": 0,
+    "collarRows": [95, 96, 97, 98, 99, 100]
+  },
+  "handoff": {
+    "next": ["independent zero-transform compositor", "per-pixel composite versus target comparison", "independent visual critic"],
+    "publishable": false
+  }
+}

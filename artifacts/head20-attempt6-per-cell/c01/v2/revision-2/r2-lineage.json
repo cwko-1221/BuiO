@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 3,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "version": "c01-revision-2",
+  "verdict": "REJECT_PENDING_CRITIC",
+  "publishable": false,
+  "rawFullRedrawSource": {
+    "path": "C:\\Users\\kochu\\.codex\\generated_images\\01a03945-f681-7441-a121-c408b5c198d7\\exec-2eae4842-e6fb-45fb-b4b5-cfc5af43060c.png",
+    "sha256": "97dc7c3fb1a40e0e98d56c933a3612ad7126187848e7b04754b7885dc135c7df",
+    "width": 1254,
+    "height": 1254,
+    "channels": 3,
+    "hasAlpha": false,
+    "format": "png",
+    "mtime": "2026-08-25T22:13:19.928Z"
+  },
+  "generation": {
+    "model": "gpt-image-1 via Codex image_gen.imagegen",
+    "timestamp": "2026-08-26T06:13:19+08:00 (filesystem timestamp resolution)",
+    "prompt": "Use case: precise-object-edit. Asset type: one front-facing c01 game sprite source for a 2.5D pet wearable. Input Image 1: the raw base-guided full-dressed space-helmet redraw; use it as the primary rendered-art source and preserve its polished white/gold helmet, filled deep-space visor, blue/gold side pods, lighting, and chibi finish. Input Image 2: the original c01 pet crop; use only as the exact anatomy/pose/scale reference for the small starpatch cat. Create a new independent full-dressed front c01 source in the same cute cat style, with the closed space helmet properly worn on the cat. Completely cover BOTH natural pink cat ears; replace them with clearly integrated blue helmet ear fins/shell ears that are part of the helmet, with no pink fur ear tips visible anywhere. The visor is a fully filled opaque deep-space glass surface, not a hole. The lower helmet collar must be a smooth curved ring that meets the cat cheeks/neck with no rectangular white block, no hard square seam, no disconnected strips, and no checkerboard gaps. Keep the original front pose, body silhouette, fur colors, tail position, paws, and proportions; do not redesign or enlarge the body. Single centered front sprite, transparent background if possible, no text, watermark, contact sheet or extra objects. Raw full-dressed redraw only, not a mask, composited layer, isolated accessory or pasted crop.",
+    "seed": null,
+    "rawToolOutput": "exec-2eae4842-e6fb-45fb-b4b5-cfc5af43060c.png"
+  },
+  "originalReferences": {
+    "baseC01": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\c01-base-original-160x160.png",
+      "sha256": "cc87a049bc41b7635bdb1ca4d92f46c1822d73423b86ce7c69c6526fa6ae80d4"
+    },
+    "petPrototype": {
+      "path": "C:/Users/kochu/Documents/BuiO/art-inbox/pet-starpatch-cat-1.png",
+      "sha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253"
+    },
+    "accessoryPrototype": {
+      "path": "C:/Users/kochu/Documents/BuiO/art-inbox/wearable-head-3.png",
+      "sha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954"
+    },
+    "spec": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\scripts\\redrawn-category-specs\\head-20-closed-helmet-replacement.json",
+      "sha256": "79d2288c41176ac1e394ad234211b84f77c8adc47f017abd1dd9ff92157d6127"
+    }
+  },
+  "normalization": {
+    "steps": [
+      "border-reachable neutral-bright checker flood only",
+      "raw generated helmet crop [295,176,699,796)",
+      "generated integrated-fin/dome/side-pod/collar polygon clip before mapping",
+      "Lanczos3 resize to 106x96 at c01 [31,5); collar ends within y<101",
+      "same-coordinate support extraction; no transform at mask/composite time",
+      "ear ROI gaps filled from nearest generated helmet pixel only"
+    ],
+    "crop": {
+      "left": 295,
+      "top": 176,
+      "width": 699,
+      "height": 620
+    },
+    "mapWindow": {
+      "x": 31,
+      "y": 5,
+      "width": 106,
+      "height": 96
+    },
+    "hashes": {
+      "cleanedRgba": "6f6f489020b65ff3d22035d57d70953d4c7033d94402d0ccad7973c1d2e064e6",
+      "helmetCrop": "bd2f65b33b7f1354edb1886723803101be23f158c61556837c9900819c7296f0",
+      "mappedHelmet": "8c03da156885b400e1e96f2853becf65d3495b645ebf8a3d0b4d2dbdd5b70aa9"
+    },
+    "foregroundPixels": 486688
+  },
+  "sourceToCandidateMapping": {
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-2\\r2-target-coordinate-locked-160x160.png",
+    "targetSha256": "8feecd5f8939638acfec6f064e20bd549b066404b2c70d7d5fc68e003c59dfe0",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-2\\r2-helmet-mask-same-coordinate-160x160.png",
+    "maskSha256": "2b7273f540b65257f9bdfad4792cbb0b9364d932b5af68ce439cb10919ace44f",
+    "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-2\\r2-helmet-layer-same-coordinate-160x160.png",
+    "layerSha256": "49270ef559f7b7717c95d16ebde0052a8f6a23fe3650e67e10bba8fae5a82d4c",
+    "declaredUnion": [
+      [
+        38,
+        5,
+        137,
+        127
+      ],
+      [
+        31,
+        28,
+        38,
+        101
+      ]
+    ],
+    "actualSupportPixels": 7237,
+    "actualComponents4": 1,
+    "outsideUnionSupportPixels": 0,
+    "protectedTailBodySupportPixels": 0,
+    "noTransformsAfterNormalization": true
+  },
+  "semanticGates": {
+    "leftEarBaseAlphaPixels": 385,
+    "leftEarBaseAlphaGte128": 270,
+    "leftEarCoveredPixels": 385,
+    "rightEarRoi": [
+      104,
+      28,
+      124,
+      64
+    ],
+    "rightEarBaseAlphaPixels": 671,
+    "rightEarBaseAlphaGte128": 611,
+    "rightEarCoveredPixels": 671,
+    "bothEarCoveragePass": true,
+    "noTailBodySupportPass": true,
+    "actualMaskMatchesLayer": true,
+    "outsideUnionSupportPass": true,
+    "critic": "PENDING"
+  },
+  "forbiddenInputProof": {
+    "r1": "NOT_READ",
+    "priorTargets": "NOT_READ",
+    "priorMasks": "NOT_READ",
+    "composites": "NOT_READ",
+    "oldWholeAtlasV2": "NOT_READ",
+    "attempt5": "NOT_READ"
+  },
+  "note": "r2 is a new versioned c01 source/mask/layer only. Manager/critic must inspect visual collar continuity and both ear occlusion before any publish."
+}

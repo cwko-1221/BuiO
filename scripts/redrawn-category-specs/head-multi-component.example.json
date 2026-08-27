@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "category": "head",
+  "description": "Template for disconnected but intentional headwear pieces. Replace zones with coordinates measured from the frozen target before running.",
+  "atlas": {
+    "width": 800,
+    "height": 640,
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "columns": 5,
+    "rows": 4
+  },
+  "topology": {
+    "fillEnclosedHoles": true,
+    "expectedEnclosedTransparentComponentsPerCell": 0,
+    "cells": [
+      {
+        "row": 0,
+        "column": 0,
+        "componentGroups": [
+          { "id": "main-head-piece", "zone": [20, 0, 140, 100], "expectedComponents": 1 },
+          { "id": "separate-decoration", "zone": [100, 0, 160, 80], "expectedComponents": 1 }
+        ]
+      }
+    ]
+  },
+  "solve": {
+    "maximumErasePixels": 0,
+    "unexpectedUnsolvablePixels": 0,
+    "exactRgbaMismatchPixels": 0
+  }
+}

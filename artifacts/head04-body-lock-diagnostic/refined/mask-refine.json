@@ -1,0 +1,9 @@
+{
+  "inputPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-04-independent-proof/independent-mask-v1/head-04-mask.png",
+  "basePath": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+  "outputPath": "artifacts/head04-body-lock-diagnostic/refined/mask.png",
+  "transformed": false,
+  "clearedEyePixels": 42,
+  "clearedTailPixels": 1439,
+  "verdict": "DIAGNOSTIC_ONLY"
+}

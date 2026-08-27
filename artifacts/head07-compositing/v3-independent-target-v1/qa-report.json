@@ -1,0 +1,1238 @@
+{
+  "inputs": {
+    "targetPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-07-independent-proof/head-07-clean-target-v1.png",
+    "proofPath": "artifacts/head07-compositing/v3-independent-target-v1/composite.png",
+    "basePath": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "maskPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-07-canonical-source-mask-v3.png",
+    "layerPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-07-canonical-source-layer-v3.png"
+  },
+  "acceptancePolicy": {
+    "requiredProofExactRgbaRate": 1,
+    "requiredSilhouetteIou": 1,
+    "requiredExtractedLayerExactSourcePixelRate": 1,
+    "requiredExtractedLayerCoordinateViolations": 0,
+    "cellRule": "All 20 cells must independently pass. Any mismatch rejects the asset."
+  },
+  "atlas": {
+    "proofExactRgbaRate": 0.000046,
+    "silhouetteIou": 0.65283,
+    "extractedLayerExactSourcePixelRate": 0.000021,
+    "outsideMaskMismatchRateAgainstBase": 1,
+    "passingCells": 0,
+    "totalCells": 20
+  },
+  "theoreticalFinding": "No mismatch was found outside the wearable mask.",
+  "verdict": "REJECT",
+  "cells": [
+    {
+      "row": 0,
+      "column": 0,
+      "index": 1,
+      "view": "front",
+      "targetBounds": {
+        "minX": 41,
+        "minY": 13,
+        "maxX": 142,
+        "maxY": 147,
+        "width": 102,
+        "height": 135,
+        "pixels": 9524
+      },
+      "proofBounds": {
+        "minX": 30,
+        "minY": 13,
+        "maxX": 142,
+        "maxY": 154,
+        "width": 113,
+        "height": 142,
+        "pixels": 11607
+      },
+      "baseBounds": {
+        "minX": 30,
+        "minY": 28,
+        "maxX": 130,
+        "maxY": 154,
+        "width": 101,
+        "height": 127,
+        "pixels": 10094
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 86.374,
+      "silhouetteIou": 0.703014,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 23003,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 431,
+        "baseEyeInkCoveredByWearableMask": 431,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": null,
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "index": 2,
+      "view": "front",
+      "targetBounds": {
+        "minX": 43,
+        "minY": 13,
+        "maxX": 145,
+        "maxY": 148,
+        "width": 103,
+        "height": 136,
+        "pixels": 10478
+      },
+      "proofBounds": {
+        "minX": 26,
+        "minY": 13,
+        "maxX": 141,
+        "maxY": 154,
+        "width": 116,
+        "height": 142,
+        "pixels": 11950
+      },
+      "baseBounds": {
+        "minX": 26,
+        "minY": 27,
+        "maxX": 134,
+        "maxY": 154,
+        "width": 109,
+        "height": 128,
+        "pixels": 10615
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 81.641,
+      "silhouetteIou": 0.712453,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 22942,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 409,
+        "baseEyeInkCoveredByWearableMask": 409,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": null,
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "index": 3,
+      "view": "front",
+      "targetBounds": {
+        "minX": 35,
+        "minY": 17,
+        "maxX": 130,
+        "maxY": 148,
+        "width": 96,
+        "height": 132,
+        "pixels": 9011
+      },
+      "proofBounds": {
+        "minX": 34,
+        "minY": 17,
+        "maxX": 130,
+        "maxY": 154,
+        "width": 97,
+        "height": 138,
+        "pixels": 9774
+      },
+      "baseBounds": {
+        "minX": 34,
+        "minY": 29,
+        "maxX": 126,
+        "maxY": 154,
+        "width": 93,
+        "height": 126,
+        "pixels": 8851
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0.0002,
+      "proofMeanAbsoluteRgbaError": 41.184,
+      "silhouetteIou": 0.878312,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0.000078,
+      "extractedLayerCoordinateViolations": 23193,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 420,
+        "baseEyeInkCoveredByWearableMask": 420,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": null,
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "index": 4,
+      "view": "front",
+      "targetBounds": {
+        "minX": 23,
+        "minY": 13,
+        "maxX": 122,
+        "maxY": 147,
+        "width": 100,
+        "height": 135,
+        "pixels": 9254
+      },
+      "proofBounds": {
+        "minX": 24,
+        "minY": 13,
+        "maxX": 127,
+        "maxY": 154,
+        "width": 104,
+        "height": 142,
+        "pixels": 10753
+      },
+      "baseBounds": {
+        "minX": 32,
+        "minY": 27,
+        "maxX": 127,
+        "maxY": 154,
+        "width": 96,
+        "height": 128,
+        "pixels": 9705
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0.000262,
+      "proofMeanAbsoluteRgbaError": 77.968,
+      "silhouetteIou": 0.745812,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0.000117,
+      "extractedLayerCoordinateViolations": 23099,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 437,
+        "baseEyeInkCoveredByWearableMask": 437,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": null,
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "index": 5,
+      "view": "front",
+      "targetBounds": {
+        "minX": 18,
+        "minY": 13,
+        "maxX": 115,
+        "maxY": 147,
+        "width": 98,
+        "height": 135,
+        "pixels": 9619
+      },
+      "proofBounds": {
+        "minX": 18,
+        "minY": 13,
+        "maxX": 128,
+        "maxY": 154,
+        "width": 111,
+        "height": 142,
+        "pixels": 11297
+      },
+      "baseBounds": {
+        "minX": 32,
+        "minY": 27,
+        "maxX": 128,
+        "maxY": 154,
+        "width": 97,
+        "height": 128,
+        "pixels": 9890
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0.000082,
+      "proofMeanAbsoluteRgbaError": 75.934,
+      "silhouetteIou": 0.719217,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0.000039,
+      "extractedLayerCoordinateViolations": 22343,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 74,
+        "baseEyeInkCoveredByWearableMask": 74,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": null,
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "index": 6,
+      "view": "side",
+      "targetBounds": {
+        "minX": 28,
+        "minY": 17,
+        "maxX": 140,
+        "maxY": 138,
+        "width": 113,
+        "height": 122,
+        "pixels": 9248
+      },
+      "proofBounds": {
+        "minX": 22,
+        "minY": 17,
+        "maxX": 137,
+        "maxY": 154,
+        "width": 116,
+        "height": 138,
+        "pixels": 10793
+      },
+      "baseBounds": {
+        "minX": 22,
+        "minY": 35,
+        "maxX": 137,
+        "maxY": 154,
+        "width": 116,
+        "height": 120,
+        "pixels": 9360
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0.000086,
+      "proofMeanAbsoluteRgbaError": 74.303,
+      "silhouetteIou": 0.727226,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0.000039,
+      "extractedLayerCoordinateViolations": 23509,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 121,
+        "baseEyeInkCoveredByWearableMask": 121,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": {
+        "targetVsProofExactRgbaRate": 0,
+        "accessoryMaskPixelsOverVisibleBase": 2633
+      },
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "index": 7,
+      "view": "side",
+      "targetBounds": {
+        "minX": 35,
+        "minY": 19,
+        "maxX": 139,
+        "maxY": 137,
+        "width": 105,
+        "height": 119,
+        "pixels": 8790
+      },
+      "proofBounds": {
+        "minX": 22,
+        "minY": 19,
+        "maxX": 137,
+        "maxY": 154,
+        "width": 116,
+        "height": 136,
+        "pixels": 10546
+      },
+      "baseBounds": {
+        "minX": 22,
+        "minY": 37,
+        "maxX": 137,
+        "maxY": 154,
+        "width": 116,
+        "height": 118,
+        "pixels": 9310
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0.000085,
+      "proofMeanAbsoluteRgbaError": 89.026,
+      "silhouetteIou": 0.649266,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0.000039,
+      "extractedLayerCoordinateViolations": 23716,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 118,
+        "baseEyeInkCoveredByWearableMask": 118,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": {
+        "targetVsProofExactRgbaRate": 0,
+        "accessoryMaskPixelsOverVisibleBase": 2419
+      },
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "index": 8,
+      "view": "side",
+      "targetBounds": {
+        "minX": 25,
+        "minY": 18,
+        "maxX": 127,
+        "maxY": 138,
+        "width": 103,
+        "height": 121,
+        "pixels": 8158
+      },
+      "proofBounds": {
+        "minX": 26,
+        "minY": 18,
+        "maxX": 133,
+        "maxY": 154,
+        "width": 108,
+        "height": 137,
+        "pixels": 9981
+      },
+      "baseBounds": {
+        "minX": 26,
+        "minY": 35,
+        "maxX": 133,
+        "maxY": 154,
+        "width": 108,
+        "height": 120,
+        "pixels": 8553
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0.000096,
+      "proofMeanAbsoluteRgbaError": 71.902,
+      "silhouetteIou": 0.743632,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0.000039,
+      "extractedLayerCoordinateViolations": 23637,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 122,
+        "baseEyeInkCoveredByWearableMask": 122,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": {
+        "targetVsProofExactRgbaRate": 0,
+        "accessoryMaskPixelsOverVisibleBase": 2360
+      },
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "index": 9,
+      "view": "side",
+      "targetBounds": {
+        "minX": 16,
+        "minY": 18,
+        "maxX": 122,
+        "maxY": 137,
+        "width": 107,
+        "height": 120,
+        "pixels": 8762
+      },
+      "proofBounds": {
+        "minX": 23,
+        "minY": 17,
+        "maxX": 136,
+        "maxY": 154,
+        "width": 114,
+        "height": 138,
+        "pixels": 10998
+      },
+      "baseBounds": {
+        "minX": 23,
+        "minY": 36,
+        "maxX": 136,
+        "maxY": 154,
+        "width": 114,
+        "height": 119,
+        "pixels": 9356
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 90.142,
+      "silhouetteIou": 0.646255,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 23594,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 118,
+        "baseEyeInkCoveredByWearableMask": 118,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": {
+        "targetVsProofExactRgbaRate": 0,
+        "accessoryMaskPixelsOverVisibleBase": 2572
+      },
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "index": 10,
+      "view": "side",
+      "targetBounds": {
+        "minX": 14,
+        "minY": 20,
+        "maxX": 118,
+        "maxY": 138,
+        "width": 105,
+        "height": 119,
+        "pixels": 8571
+      },
+      "proofBounds": {
+        "minX": 25,
+        "minY": 20,
+        "maxX": 135,
+        "maxY": 154,
+        "width": 111,
+        "height": 135,
+        "pixels": 10428
+      },
+      "baseBounds": {
+        "minX": 25,
+        "minY": 37,
+        "maxX": 135,
+        "maxY": 154,
+        "width": 111,
+        "height": 118,
+        "pixels": 8918
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 91.768,
+      "silhouetteIou": 0.635167,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 23411,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 25,
+        "baseEyeInkCoveredByWearableMask": 25,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": {
+        "targetVsProofExactRgbaRate": 0,
+        "accessoryMaskPixelsOverVisibleBase": 2416
+      },
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "index": 11,
+      "view": "back",
+      "targetBounds": {
+        "minX": 42,
+        "minY": 5,
+        "maxX": 133,
+        "maxY": 138,
+        "width": 92,
+        "height": 134,
+        "pixels": 8316
+      },
+      "proofBounds": {
+        "minX": 36,
+        "minY": 5,
+        "maxX": 123,
+        "maxY": 154,
+        "width": 88,
+        "height": 150,
+        "pixels": 10578
+      },
+      "baseBounds": {
+        "minX": 36,
+        "minY": 21,
+        "maxX": 123,
+        "maxY": 154,
+        "width": 88,
+        "height": 134,
+        "pixels": 9416
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 86.675,
+      "silhouetteIou": 0.651718,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 23215,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": null,
+      "tailFit": {
+        "targetVsProofExactRgbaRate": 0,
+        "accessoryMaskPixelsOverVisibleBase": 5451
+      },
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "index": 12,
+      "view": "back",
+      "targetBounds": {
+        "minX": 47,
+        "minY": 5,
+        "maxX": 132,
+        "maxY": 159,
+        "width": 86,
+        "height": 155,
+        "pixels": 8038
+      },
+      "proofBounds": {
+        "minX": 36,
+        "minY": 5,
+        "maxX": 124,
+        "maxY": 154,
+        "width": 89,
+        "height": 150,
+        "pixels": 10279
+      },
+      "baseBounds": {
+        "minX": 36,
+        "minY": 21,
+        "maxX": 124,
+        "maxY": 154,
+        "width": 89,
+        "height": 134,
+        "pixels": 9154
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 97.125,
+      "silhouetteIou": 0.604643,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 23290,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": null,
+      "tailFit": {
+        "targetVsProofExactRgbaRate": 0,
+        "accessoryMaskPixelsOverVisibleBase": 5349
+      },
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "index": 13,
+      "view": "back",
+      "targetBounds": {
+        "minX": 36,
+        "minY": 5,
+        "maxX": 121,
+        "maxY": 138,
+        "width": 86,
+        "height": 134,
+        "pixels": 7744
+      },
+      "proofBounds": {
+        "minX": 36,
+        "minY": 5,
+        "maxX": 124,
+        "maxY": 154,
+        "width": 89,
+        "height": 150,
+        "pixels": 10469
+      },
+      "baseBounds": {
+        "minX": 36,
+        "minY": 20,
+        "maxX": 124,
+        "maxY": 154,
+        "width": 89,
+        "height": 135,
+        "pixels": 9388
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 78.231,
+      "silhouetteIou": 0.685453,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 23127,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": null,
+      "tailFit": {
+        "targetVsProofExactRgbaRate": 0,
+        "accessoryMaskPixelsOverVisibleBase": 5380
+      },
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "index": 14,
+      "view": "back",
+      "targetBounds": {
+        "minX": 27,
+        "minY": 5,
+        "maxX": 111,
+        "maxY": 159,
+        "width": 85,
+        "height": 155,
+        "pixels": 7975
+      },
+      "proofBounds": {
+        "minX": 35,
+        "minY": 5,
+        "maxX": 125,
+        "maxY": 154,
+        "width": 91,
+        "height": 150,
+        "pixels": 10527
+      },
+      "baseBounds": {
+        "minX": 35,
+        "minY": 21,
+        "maxX": 125,
+        "maxY": 154,
+        "width": 91,
+        "height": 134,
+        "pixels": 9373
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 107.605,
+      "silhouetteIou": 0.557014,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 23359,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": null,
+      "tailFit": {
+        "targetVsProofExactRgbaRate": 0,
+        "accessoryMaskPixelsOverVisibleBase": 5441
+      },
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "index": 15,
+      "view": "back",
+      "targetBounds": {
+        "minX": 25,
+        "minY": 7,
+        "maxX": 111,
+        "maxY": 159,
+        "width": 87,
+        "height": 153,
+        "pixels": 8281
+      },
+      "proofBounds": {
+        "minX": 36,
+        "minY": 6,
+        "maxX": 124,
+        "maxY": 154,
+        "width": 89,
+        "height": 149,
+        "pixels": 10485
+      },
+      "baseBounds": {
+        "minX": 36,
+        "minY": 23,
+        "maxX": 124,
+        "maxY": 154,
+        "width": 89,
+        "height": 132,
+        "pixels": 9354
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 105.522,
+      "silhouetteIou": 0.562141,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 23158,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": null,
+      "tailFit": {
+        "targetVsProofExactRgbaRate": 0,
+        "accessoryMaskPixelsOverVisibleBase": 5463
+      },
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "index": 16,
+      "view": "special",
+      "targetBounds": {
+        "minX": 38,
+        "minY": 2,
+        "maxX": 135,
+        "maxY": 130,
+        "width": 98,
+        "height": 129,
+        "pixels": 9974
+      },
+      "proofBounds": {
+        "minX": 34,
+        "minY": 1,
+        "maxX": 126,
+        "maxY": 154,
+        "width": 93,
+        "height": 154,
+        "pixels": 11001
+      },
+      "baseBounds": {
+        "minX": 34,
+        "minY": 22,
+        "maxX": 126,
+        "maxY": 154,
+        "width": 93,
+        "height": 133,
+        "pixels": 9045
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0.000079,
+      "proofMeanAbsoluteRgbaError": 89.179,
+      "silhouetteIou": 0.657579,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0.000039,
+      "extractedLayerCoordinateViolations": 23261,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 351,
+        "baseEyeInkCoveredByWearableMask": 351,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": null,
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "index": 17,
+      "view": "special",
+      "targetBounds": {
+        "minX": 34,
+        "minY": 0,
+        "maxX": 135,
+        "maxY": 128,
+        "width": 102,
+        "height": 129,
+        "pixels": 9142
+      },
+      "proofBounds": {
+        "minX": 29,
+        "minY": 0,
+        "maxX": 131,
+        "maxY": 154,
+        "width": 103,
+        "height": 155,
+        "pixels": 10276
+      },
+      "baseBounds": {
+        "minX": 29,
+        "minY": 30,
+        "maxX": 131,
+        "maxY": 154,
+        "width": 103,
+        "height": 125,
+        "pixels": 9058
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0.000082,
+      "proofMeanAbsoluteRgbaError": 105.011,
+      "silhouetteIou": 0.59177,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0.000039,
+      "extractedLayerCoordinateViolations": 24279,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 390,
+        "baseEyeInkCoveredByWearableMask": 390,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": null,
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "index": 18,
+      "view": "special",
+      "targetBounds": {
+        "minX": 18,
+        "minY": 27,
+        "maxX": 137,
+        "maxY": 127,
+        "width": 120,
+        "height": 101,
+        "pixels": 9243
+      },
+      "proofBounds": {
+        "minX": 20,
+        "minY": 26,
+        "maxX": 139,
+        "maxY": 154,
+        "width": 120,
+        "height": 129,
+        "pixels": 9564
+      },
+      "baseBounds": {
+        "minX": 20,
+        "minY": 64,
+        "maxX": 139,
+        "maxY": 154,
+        "width": 120,
+        "height": 91,
+        "pixels": 8462
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 118.607,
+      "silhouetteIou": 0.488484,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 24498,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 45,
+        "baseEyeInkCoveredByWearableMask": 45,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": null,
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "index": 19,
+      "view": "special",
+      "targetBounds": {
+        "minX": 20,
+        "minY": 0,
+        "maxX": 115,
+        "maxY": 125,
+        "width": 96,
+        "height": 126,
+        "pixels": 9729
+      },
+      "proofBounds": {
+        "minX": 20,
+        "minY": 0,
+        "maxX": 129,
+        "maxY": 154,
+        "width": 110,
+        "height": 155,
+        "pixels": 11093
+      },
+      "baseBounds": {
+        "minX": 30,
+        "minY": 32,
+        "maxX": 129,
+        "maxY": 154,
+        "width": 100,
+        "height": 123,
+        "pixels": 9845
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 107.741,
+      "silhouetteIou": 0.569576,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 24105,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 403,
+        "baseEyeInkCoveredByWearableMask": 403,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": null,
+      "exactMatch": false,
+      "verdict": "REJECT"
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "index": 20,
+      "view": "special",
+      "targetBounds": {
+        "minX": 21,
+        "minY": 0,
+        "maxX": 115,
+        "maxY": 127,
+        "width": 95,
+        "height": 128,
+        "pixels": 9571
+      },
+      "proofBounds": {
+        "minX": 28,
+        "minY": 0,
+        "maxX": 129,
+        "maxY": 154,
+        "width": 102,
+        "height": 155,
+        "pixels": 11639
+      },
+      "baseBounds": {
+        "minX": 31,
+        "minY": 20,
+        "maxX": 129,
+        "maxY": 154,
+        "width": 99,
+        "height": 135,
+        "pixels": 10238
+      },
+      "accessoryMaskBounds": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 159,
+        "maxY": 159,
+        "width": 160,
+        "height": 160,
+        "pixels": 25600
+      },
+      "proofExactRgbaRate": 0,
+      "proofMeanAbsoluteRgbaError": 101.229,
+      "silhouetteIou": 0.599306,
+      "maskPixelCount": 25600,
+      "extractedLayerExactSourcePixelRate": 0,
+      "extractedLayerCoordinateViolations": 23844,
+      "outsideMaskMismatchRateAgainstBase": 1,
+      "eyeFit": {
+        "baseEyeInkPixels": 370,
+        "baseEyeInkCoveredByWearableMask": 370,
+        "baseEyeInkOccludedRate": 1,
+        "targetVisibleEyeInkPixels": 0,
+        "proofVisibleEyeInkPixels": 0,
+        "targetVisibleEyeInkBounds": null,
+        "proofVisibleEyeInkBounds": null
+      },
+      "tailFit": null,
+      "exactMatch": false,
+      "verdict": "REJECT"
+    }
+  ]
+}

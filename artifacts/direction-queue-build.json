@@ -1,0 +1,22 @@
+{
+  "pets": [
+    "starpatch-cat",
+    "cloud-ear-dog",
+    "pudding-pig"
+  ],
+  "activeStages": [
+    1
+  ],
+  "deferredStages": [
+    2,
+    3,
+    4
+  ],
+  "deferredJobs": 576,
+  "physicalWearablesPerForm": 64,
+  "aurasExcludedAsSharedEffects": 16,
+  "totalJobs": 192,
+  "readyJobs": 2,
+  "pendingJobs": 190
+}
+C:\Users\kochu\Documents\BuiO\pet-app\art-source\imagegen\redrawn-wearable-production-queue.json

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "role": "independent_visual_critic",
+  "cell": "c03",
+  "revision": "r6",
+  "reviewedAt": "2026-08-26T18:00:00+08:00",
+  "artifactFreezeVerified": true,
+  "artifacts": {
+    "rawFullDressedSource": {
+      "sha256": "9f3923079e630d7f30ac7356194ddac2dfe924384d1d3835b28c3b38b64179b9"
+    },
+    "target": {
+      "sha256": "548b5fb17df3c53da8cbfe600d24fa8a6e03f832bd48bd19690ca7a582c557b5"
+    },
+    "layer": {
+      "sha256": "d4a3bf8dba426c78d230c5ae3f755f135537bd33fd111f34eda947827f9316aa"
+    },
+    "mask": {
+      "sha256": "7d71f0a6b30ef192f883e32c484049fdf514bd95bb16f84ded779a5b5f48495a"
+    }
+  },
+  "lineage": {
+    "r1ToR5Reuse": "NOT_DETECTED: r6 target/layer hashes differ from prior revision target/layer hashes; frozen lineage declares raw-r6 plus base/protection inputs only.",
+    "rawSourceQuality": "The raw r6 redraw itself has a coherent helmet, visible eyes, and an independently visible tail; the failure is in the isolated-layer extraction/mapping."
+  },
+  "mechanicalAudit": {
+    "reportedVerdict": "PASS_MECHANICAL_PENDING_VISUAL_CRITIC",
+    "exactCompositeMismatch": 0,
+    "tailBodyPawProtected": true
+  },
+  "nearestNeighbourVisualReview": {
+    "eyesVisible": true,
+    "naturalEarsOccluded": true,
+    "leftCup": "PASS: rounded blue/gold helmet edge.",
+    "rightCup": "FAIL: the isolated layer contains a dark warm brown/rose rectangular protrusion instead of a rounded blue/gold ear cup.",
+    "defectCoordinates160": {
+      "primaryRectangle": [113, 79, 131, 90],
+      "observedAlphaSupport": "Every row y=79..90 contains opaque layer pixels through x=131; the vertical and horizontal square edges are not a curved cup silhouette.",
+      "colourEvidence": "Mean opaque RGB per row in this block is approximately (81..97,59..78,56..83), visibly warm brown/rose rather than the required blue/gold hardware."
+    },
+    "collar": "The front collar is visually continuous enough in the target, but it cannot offset the failed accessory-only right-cup extraction.",
+    "tailPaws": "Target preserves the base tail/body/paws mechanically; however the layer wrongly carries the screen-right warm anatomy-like block, which must remain outside the accessory layer."
+  },
+  "verdict": "REJECT",
+  "releaseDecision": "NOT_PUBLISHABLE",
+  "requiredRevision": "Regenerate c03 only. Re-extract the screen-right helmet cup from the raw full redraw as a rounded blue/gold shell; remove all warm animal-coloured/layer-owned pixels at x=113..131, y=79..90 and preserve the base tail/body outside the helmet mask. Re-run exact zero-transform composite and a fresh independent visual review."
+}

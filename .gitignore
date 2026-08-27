@@ -29,3 +29,7 @@ Thumbs.db
 art-inbox/
 .env.txt
 .env.*.txt
+
+# Generated art work: 4096px redraws and the layers lifted out of them. The sources are the
+# artist's, the outputs are reproducible from them with scripts/bake-wearable.mjs.
+pet-app/art-source/imagegen/

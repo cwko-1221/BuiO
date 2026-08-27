@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c03",
+  "revision": "r3",
+  "verdict": "SOURCE_LAYER_EXTRACTION_PENDING_INDEPENDENT_MECHANICAL_AUDIT",
+  "generation": {
+    "model": "built-in image_gen",
+    "timestamp": "2026-08-26T14:56:53.3335654+08:00",
+    "prompt": "c03 exact original-pose cat wearing head-20 rounded closed galaxy helmet; natural ears hidden; collar above chest; transparent background; no blocks or cutoffs"
+  },
+  "rawFullRedrawSource": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-r3-raw-full-dressed-imagegen-source.png",
+    "sha256": "8bce443ce5447451377d865386ac0fb405bb2f2d6c7c16b2fe9b85c7c94289db",
+    "dimensions": [
+      1254,
+      1254,
+      3
+    ]
+  },
+  "originalPrototypeLineage": {
+    "pet": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\pet-starpatch-cat-1.png",
+      "sha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253"
+    },
+    "accessory": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\wearable-head-3.png",
+      "sha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+      "view": "bottom-row right space-helmet front"
+    }
+  },
+  "forbiddenInputProof": {
+    "c01C02TargetMaskLayerComposite": "NOT_READ",
+    "oldV2": "NOT_READ",
+    "r3bR4R5": "NOT_READ",
+    "usedInputs": [
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-r3-raw-full-dressed-imagegen-source.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\c03-base-original-160x160.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-tail-visible-pixels-mask.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-ear-extension-empty.png"
+    ]
+  },
+  "normalization": {
+    "sourceSha256": "8bce443ce5447451377d865386ac0fb405bb2f2d6c7c16b2fe9b85c7c94289db",
+    "steps": "connected checker flood -> raw head crop [260,155,720,650] -> single 105x100 Lanczos3 map at [27,5] -> source-alpha silhouette -> original-base lock outside actual silhouette",
+    "crop": [
+      260,
+      155,
+      720,
+      650
+    ],
+    "mappedPlacement": [
+      27,
+      5,
+      132,
+      105
+    ],
+    "cleanedSha256": "bd56ce05cfb2fc6aff2001709208189d54e827b08b8d940629ea2e8e838e294d",
+    "mappedSha256": "91b2147b2d1082fb6399b88c67b4ef2e68fc3a651a86b31f811821a1c2f963ce"
+  },
+  "semanticMask": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-r3-helmet-mask-same-coordinate-160x160.png",
+    "sha256": "d1c9194ed60b2c8dd78e2be9db1af6fa623f0d62dcd54cd4e91424a5cc5b5d26",
+    "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-r3-helmet-layer-same-coordinate-160x160.png",
+    "layerSha256": "2eddd7bb94895f1293ca92c134a9a3bd4e5fe6ef84680f61ea983fe1f6907001",
+    "nativeZone": [
+      24,
+      5,
+      132,
+      127
+    ],
+    "leftEarExtension": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-ear-extension-empty.png",
+      "sha256": "1cb6b844edfab5a219e11b8a753ffd1e05aa23c8c698f0885a2ec197e042032e"
+    },
+    "tailProtection": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-tail-visible-pixels-mask.png",
+      "sha256": "791c5b1d2cbf17e3494e38db40d61e0b7acb42e1585dc28c4fbaf5076a0bd33d"
+    },
+    "pixels": 6076,
+    "components4Connected": 1,
+    "enclosedHoles": 0,
+    "tailIntersectionPixels": 0,
+    "bodyChestIntersectionPixels": 0,
+    "raisedPawIntersectionPixels": 0,
+    "leftNaturalEarUnchangedOpaquePixels": 0,
+    "rightNaturalEarUnchangedOpaquePixels": 0
+  },
+  "outputs": {
+    "target": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-r3-target-coordinate-locked-160x160.png",
+      "sha256": "2cece31bfb31643ad8ca6f1cf6084f656719f9ed3056916683c94a109e8bbb9d"
+    },
+    "layer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-r3-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "2eddd7bb94895f1293ca92c134a9a3bd4e5fe6ef84680f61ea983fe1f6907001"
+    },
+    "mask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-3\\c03-r3-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "d1c9194ed60b2c8dd78e2be9db1af6fa623f0d62dcd54cd4e91424a5cc5b5d26"
+    }
+  },
+  "gates": {
+    "exactOutsideAllowedBaseLock": true,
+    "maskLayerSupportExact": true,
+    "oneComponent": true,
+    "holeFree": true,
+    "tailProtected": true,
+    "bodyChestProtected": true,
+    "raisedPawProtected": true,
+    "naturalEarsOccluded": true,
+    "critic": "PENDING_INDEPENDENT_MECHANICAL_AND_VISUAL_REVIEW",
+    "publishable": false
+  },
+  "frozen": true,
+  "frozenAt": "2026-08-26T08:46:01.864Z",
+  "frozenArtifactHashes": {
+    "raw": "8bce443ce5447451377d865386ac0fb405bb2f2d6c7c16b2fe9b85c7c94289db",
+    "target": "2cece31bfb31643ad8ca6f1cf6084f656719f9ed3056916683c94a109e8bbb9d",
+    "layer": "2eddd7bb94895f1293ca92c134a9a3bd4e5fe6ef84680f61ea983fe1f6907001",
+    "mask": "d1c9194ed60b2c8dd78e2be9db1af6fa623f0d62dcd54cd4e91424a5cc5b5d26",
+    "tail": "791c5b1d2cbf17e3494e38db40d61e0b7acb42e1585dc28c4fbaf5076a0bd33d",
+    "protection": "0a2d4f77c7dca423fe1f32c65453d90a8721fc78fc06203540f89d9d72c9e6a7"
+  },
+  "extractionRevisionNote": "r3 uses the new independent raw 8bce443c... only. Its right blue/gold cup is source-derived; source tail/fur beyond y70 is excluded before layer formation. No prior target/layer/mask/composite was read."
+}

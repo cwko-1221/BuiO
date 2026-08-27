@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "queue": "pet-app/art-source/imagegen/redrawn-wearable-production-queue.json",
+  "jobs": 192,
+  "directionBatchContract": "direction-aware-v1",
+  "errorCount": 0,
+  "verdict": "PASS_METADATA_ONLY",
+  "errors": []
+}

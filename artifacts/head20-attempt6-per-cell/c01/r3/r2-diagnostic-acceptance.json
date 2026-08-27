@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "version": "r3",
+  "contract": {
+    "allowedUnion": "containment only; it is not the replacement silhouette",
+    "composition": "base -> erase(actual binary silhouette) -> source-over(target-derived patch), identical coordinates and no transforms",
+    "anatomyProtection": "actual silhouette may not cover original visible tail/body/legs/paws/bowl support"
+  },
+  "inputs": {
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\c01-base-original-160x160.png",
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-2\\r2-target-coordinate-locked-160x160.png",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-2\\r2-helmet-mask-same-coordinate-160x160.png",
+    "patchPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-2\\r2-helmet-layer-same-coordinate-160x160.png",
+    "specPath": "C:\\Users\\kochu\\Documents\\BuiO\\scripts\\redrawn-category-specs\\head-20-closed-helmet-replacement.json",
+    "lineagePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-2\\r2-lineage.json",
+    "baseSha256": "cc87a049bc41b7635bdb1ca4d92f46c1822d73423b86ce7c69c6526fa6ae80d4",
+    "targetSha256": "8feecd5f8939638acfec6f064e20bd549b066404b2c70d7d5fc68e003c59dfe0",
+    "maskSha256": "2b7273f540b65257f9bdfad4792cbb0b9364d932b5af68ce439cb10919ace44f",
+    "patchSha256": "49270ef559f7b7717c95d16ebde0052a8f6a23fe3650e67e10bba8fae5a82d4c",
+    "petPrototypePath": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\pet-starpatch-cat-1.png",
+    "petPrototypeSha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253",
+    "accessoryPrototypePath": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\wearable-head-3.png",
+    "accessoryPrototypeSha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954"
+  },
+  "metrics": {
+    "allowedZones": [
+      [
+        38,
+        5,
+        137,
+        127
+      ],
+      [
+        31,
+        28,
+        38,
+        101
+      ]
+    ],
+    "allowedUnionPixels": 12589,
+    "actualSilhouettePixels": 7237,
+    "actualSilhouetteComponents4Connected": 1,
+    "actualSilhouetteComponentSizes": [
+      7237
+    ],
+    "actualSilhouetteEnclosedHolePixels": 6,
+    "maskOutsideAllowedUnionPixels": 0,
+    "protectedBaseSupportPixelsByRoi": {
+      "c01-tail": 269,
+      "c01-torso-legs-paws-bowl": 3888
+    },
+    "protectedSupportIntersectionPixels": 40,
+    "protectedSupportIntersectionByRoi": {
+      "c01-tail": 40,
+      "c01-torso-legs-paws-bowl": 0
+    },
+    "patchOutsideActualMaskPixels": 0,
+    "transparentPatchRgbPixels": 0,
+    "targetDifferenceOutsideActualMaskPixels": 0,
+    "exactRgbaMismatchPixels": 0
+  },
+  "provenance": {
+    "provided": true,
+    "rawFullRedraw": true,
+    "generation": true,
+    "normalization": true,
+    "mapping": true,
+    "forbiddenInputs": true,
+    "pass": true
+  },
+  "gates": {
+    "sourcePrototypesRecorded": true,
+    "actualMaskNonEmpty": true,
+    "actualMaskInsideAllowedUnion": true,
+    "actualMaskOneFourConnectedComponent": true,
+    "actualMaskNoEnclosedHoles": false,
+    "patchHasNoSupportOutsideActualMask": true,
+    "patchHasNoTransparentRgbGarbage": true,
+    "targetChangesOnlyInsideActualMask": true,
+    "actualMaskAvoidsTrueTailBodyLegPawBowlSupport": false,
+    "exactSameCoordinateErasePatchComposite": true,
+    "rawFullRedrawProvenance": true,
+    "critic": "PENDING"
+  },
+  "verdict": "REJECT",
+  "publishable": false
+}

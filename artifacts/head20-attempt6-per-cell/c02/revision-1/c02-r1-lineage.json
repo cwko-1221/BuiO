@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c02",
+  "revision": "r1",
+  "verdict": "SOURCE_LAYER_EXTRACTION_PENDING_INDEPENDENT_MECHANICAL_AUDIT",
+  "generation": {
+    "model": "built-in image_gen",
+    "timestamp": "2026-08-26T13:41:13.7953895+08:00",
+    "prompt": "c02 exact raised-paw cat wearing head-20 rounded closed galaxy helmet; natural ears hidden; collar above chest; transparent background; no blocks or cutoffs"
+  },
+  "rawFullRedrawSource": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\revision-1\\c02-r1-raw-full-dressed-imagegen-source.png",
+    "sha256": "c8b9b902109e2cea468819f38763c627cddf50b350435641e1879dee754455bc",
+    "dimensions": [
+      1254,
+      1254,
+      3
+    ],
+    "originalGeneratedPath": "C:/Users/kochu/.codex/generated_images/01a03b54-1158-75d3-a29d-83ca62051eed/exec-3be841ce-3810-4252-9f17-94423467ef6d.png",
+    "originalGeneratedSha256": "c8b9b902109e2cea468819f38763c627cddf50b350435641e1879dee754455bc"
+  },
+  "originalPrototypeLineage": {
+    "pet": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\pet-starpatch-cat-1.png",
+      "sha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253"
+    },
+    "accessory": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\wearable-head-3.png",
+      "sha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+      "view": "bottom-row right space-helmet front"
+    }
+  },
+  "forbiddenInputProof": {
+    "c01TargetMaskLayerComposite": "NOT_READ",
+    "oldV2": "NOT_READ",
+    "r3bR4R5": "NOT_READ",
+    "usedInputs": [
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\revision-1\\c02-r1-raw-full-dressed-imagegen-source.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\c02-base-original-160x160.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\c02-tail-visible-pixels-mask.png",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\revision-1\\c02-left-natural-ear-occlusion-extension.png"
+    ]
+  },
+  "normalization": {
+    "sourceSha256": "c8b9b902109e2cea468819f38763c627cddf50b350435641e1879dee754455bc",
+    "steps": "connected checker flood -> raw head crop [236,165,720,650] -> single 110x100 Lanczos3 map at [23,5] -> source-alpha silhouette -> original-base lock outside actual silhouette",
+    "crop": [
+      236,
+      165,
+      720,
+      650
+    ],
+    "mappedPlacement": [
+      23,
+      5,
+      133,
+      105
+    ],
+    "cleanedSha256": "454361bee183233be2184483fe5fb78f7b77fc63798d902cf273f1da684c6739",
+    "mappedSha256": "a69460b1f32044fb8d270ab410e128f60d7a0019d1993ac8cfd20c26b7996e90"
+  },
+  "semanticMask": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\revision-1\\c02-r1-helmet-mask-same-coordinate-160x160.png",
+    "sha256": "9d104defdbea2047354646ec6eb805d9ff5c43d8602d4254c99637e22236c70d",
+    "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\revision-1\\c02-r1-helmet-layer-same-coordinate-160x160.png",
+    "layerSha256": "9517666a869c0142675b7357fc2451d17d40ce15b23e2b7f0242699e4916622b",
+    "nativeZone": [
+      36,
+      5,
+      134,
+      127
+    ],
+    "leftEarExtension": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\revision-1\\c02-left-natural-ear-occlusion-extension.png",
+      "sha256": "90836c8660992b840a4dd54f2738916b4e8be2b846e470c4a2721f3fb816e4ad"
+    },
+    "tailProtection": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\c02-tail-visible-pixels-mask.png",
+      "sha256": "d45c4b49ed28285a37a913725ed2c01b4e6feb93fa68e47ab1cd710bad1d3289"
+    },
+    "pixels": 7286,
+    "components4Connected": 1,
+    "enclosedHoles": 0,
+    "tailIntersectionPixels": 0,
+    "bodyChestIntersectionPixels": 0,
+    "raisedPawIntersectionPixels": 0,
+    "leftNaturalEarUnchangedOpaquePixels": 0,
+    "rightNaturalEarUnchangedOpaquePixels": 0
+  },
+  "outputs": {
+    "target": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\revision-1\\c02-r1-target-coordinate-locked-160x160.png",
+      "sha256": "37eef0a10cf9a8ced458460473f4cb6bea716e509986e2514d2ee110855f26cb"
+    },
+    "layer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\revision-1\\c02-r1-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "9517666a869c0142675b7357fc2451d17d40ce15b23e2b7f0242699e4916622b"
+    },
+    "mask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\revision-1\\c02-r1-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "9d104defdbea2047354646ec6eb805d9ff5c43d8602d4254c99637e22236c70d"
+    }
+  },
+  "gates": {
+    "exactOutsideAllowedBaseLock": true,
+    "maskLayerSupportExact": true,
+    "oneComponent": true,
+    "holeFree": true,
+    "tailProtected": true,
+    "bodyChestProtected": true,
+    "raisedPawProtected": true,
+    "naturalEarsOccluded": true,
+    "critic": "PENDING_INDEPENDENT_VISUAL_CRITIC",
+    "publishable": false
+  },
+  "frozen": true,
+  "frozenAt": "2026-08-26T06:26:54.029Z",
+  "mechanicalAudit": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\revision-1\\c02-r1-mechanical-audit.json",
+    "sha256": "0a33a8288c3e01c54aa9f98f4656eec60493e552d9f10582c5ca567d6cb39e3b",
+    "verdict": "PASS_MECHANICAL_PENDING_INDEPENDENT_CRITIC"
+  },
+  "frozenArtifactHashes": {
+    "raw": "c8b9b902109e2cea468819f38763c627cddf50b350435641e1879dee754455bc",
+    "target": "37eef0a10cf9a8ced458460473f4cb6bea716e509986e2514d2ee110855f26cb",
+    "layer": "9517666a869c0142675b7357fc2451d17d40ce15b23e2b7f0242699e4916622b",
+    "mask": "9d104defdbea2047354646ec6eb805d9ff5c43d8602d4254c99637e22236c70d",
+    "audit": "0a33a8288c3e01c54aa9f98f4656eec60493e552d9f10582c5ca567d6cb39e3b",
+    "tail": "d45c4b49ed28285a37a913725ed2c01b4e6feb93fa68e47ab1cd710bad1d3289",
+    "tailEvidence": "1fd607d173c0b24acb82eeecf6029f2efe1542fcf960db47e89c39f98c875f22",
+    "earExtension": "90836c8660992b840a4dd54f2738916b4e8be2b846e470c4a2721f3fb816e4ad",
+    "earEvidence": "be7d2ef51086b2d70f2cc73e485d1af2f765148ed1c72149865bd3c3ce8e434d"
+  }
+}

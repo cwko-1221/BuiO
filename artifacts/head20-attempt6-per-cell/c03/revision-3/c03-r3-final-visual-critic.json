@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c03",
+  "revision": "r3",
+  "independent": true,
+  "reviewedFrozenLineage": {
+    "path": "artifacts/head20-attempt6-per-cell/c03/revision-3/c03-r3-lineage.json",
+    "frozen": true,
+    "rawFullDressedSourceSha256": "8bce443ce5447451377d865386ac0fb405bb2f2d6c7c16b2fe9b85c7c94289db"
+  },
+  "reviewedArtifacts": {
+    "target": {
+      "path": "artifacts/head20-attempt6-per-cell/c03/revision-3/c03-r3-target-coordinate-locked-160x160.png",
+      "sha256": "2cece31bfb31643ad8ca6f1cf6084f656719f9ed3056916683c94a109e8bbb9d"
+    },
+    "layer": {
+      "path": "artifacts/head20-attempt6-per-cell/c03/revision-3/c03-r3-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "2eddd7bb94895f1293ca92c134a9a3bd4e5fe6ef84680f61ea983fe1f6907001"
+    },
+    "mask": {
+      "path": "artifacts/head20-attempt6-per-cell/c03/revision-3/c03-r3-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "d1c9194ed60b2c8dd78e2be9db1af6fa623f0d62dcd54cd4e91424a5cc5b5d26"
+    }
+  },
+  "visualReview": {
+    "method": "nearest-neighbour inspection of frozen target and isolated layer against raw r3 and c03 base",
+    "rightCup": "FAIL: the isolated layer retains a screen-right peach/orange/pink animal-anatomy lobe in approximately x=114..131, y=30..80 instead of a genuine rounded blue-and-gold right helmet cup. The lobe is also present in the target.",
+    "isolation": "FAIL: the unwanted lobe is present in the layer on transparent background, proving it is neither the untouched base tail nor permitted base anatomy. This directly violates accessory-only layer isolation.",
+    "other": "The left cup, visor eyes and collar are visually acceptable, but they cannot compensate for the asymmetric contaminated right side.",
+    "releaseQuality": "FAIL: this remains visibly asymmetric and reads as an incomplete crop/extraction."
+  },
+  "verdict": "REJECT_PENDING_C03_NEW_EXTRACTION_STRATEGY",
+  "requiredRevision": [
+    "Do not retry the same broad raw crop/alpha silhouette strategy.",
+    "Build the right cup from a helmet-only source region / explicitly exclude all orange, cream and pink animal anatomy before it can enter the isolated layer.",
+    "Require a pre-freeze layer-only visual gate that proves the right lobe is blue/gold helmet hardware and the original base tail is the only remaining fur on screen-right.",
+    "Repeat mechanical and independent visual gates with a frozen c03 candidate."
+  ],
+  "publishable": false
+}

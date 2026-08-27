@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "independent": true,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c03",
+  "revision": "r9",
+  "stage": "RIGHT_CUP_MASK_CONTOUR_GEOMETRY_PRE_GATE",
+  "contract": "Reject a full-width/full-height opaque rectilinear protrusion in the target-local lower right-cup probe. Acceptance is geometry-only and does not infer helmet identity from color.",
+  "inputs": {
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\c03-r9-helmet-pre-gate-candidate-mask-160x160.png",
+    "maskSha256": "035b77884457ab0c19d2723fd4444709554ccef5328e3444b3b4758da341aaf3",
+    "contourArea": [
+      105,
+      70,
+      132,
+      91
+    ],
+    "blockProbe": [
+      113,
+      79,
+      132,
+      91
+    ]
+  },
+  "metrics": {
+    "contourRowSpans": [
+      {
+        "y": 70,
+        "left": 105,
+        "right": 111,
+        "width": 7
+      },
+      {
+        "y": 71,
+        "left": 105,
+        "right": 111,
+        "width": 7
+      },
+      {
+        "y": 72,
+        "left": 105,
+        "right": 111,
+        "width": 7
+      },
+      {
+        "y": 73,
+        "left": 105,
+        "right": 112,
+        "width": 8
+      },
+      {
+        "y": 74,
+        "left": 105,
+        "right": 112,
+        "width": 8
+      },
+      {
+        "y": 75,
+        "left": 105,
+        "right": 112,
+        "width": 8
+      },
+      {
+        "y": 76,
+        "left": 105,
+        "right": 113,
+        "width": 9
+      },
+      {
+        "y": 77,
+        "left": 105,
+        "right": 115,
+        "width": 11
+      },
+      {
+        "y": 78,
+        "left": 105,
+        "right": 117,
+        "width": 13
+      },
+      {
+        "y": 79,
+        "left": 105,
+        "right": 118,
+        "width": 14
+      },
+      {
+        "y": 80,
+        "left": 105,
+        "right": 117,
+        "width": 13
+      },
+      {
+        "y": 81,
+        "left": 105,
+        "right": 117,
+        "width": 13
+      },
+      {
+        "y": 82,
+        "left": 105,
+        "right": 116,
+        "width": 12
+      },
+      {
+        "y": 83,
+        "left": 105,
+        "right": 115,
+        "width": 11
+      },
+      {
+        "y": 84,
+        "left": 105,
+        "right": 115,
+        "width": 11
+      },
+      {
+        "y": 85,
+        "left": 105,
+        "right": 114,
+        "width": 10
+      },
+      {
+        "y": 86,
+        "left": 105,
+        "right": 113,
+        "width": 9
+      },
+      {
+        "y": 87,
+        "left": 105,
+        "right": 112,
+        "width": 8
+      },
+      {
+        "y": 88,
+        "left": 105,
+        "right": 129,
+        "width": 25
+      },
+      {
+        "y": 89,
+        "left": 105,
+        "right": 131,
+        "width": 27
+      },
+      {
+        "y": 90,
+        "left": 105,
+        "right": 131,
+        "width": 27
+      }
+    ],
+    "probeRows": [
+      {
+        "y": 79,
+        "opaque": 6,
+        "full": false
+      },
+      {
+        "y": 80,
+        "opaque": 5,
+        "full": false
+      },
+      {
+        "y": 81,
+        "opaque": 5,
+        "full": false
+      },
+      {
+        "y": 82,
+        "opaque": 4,
+        "full": false
+      },
+      {
+        "y": 83,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "y": 84,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "y": 85,
+        "opaque": 2,
+        "full": false
+      },
+      {
+        "y": 86,
+        "opaque": 1,
+        "full": false
+      },
+      {
+        "y": 87,
+        "opaque": 0,
+        "full": false
+      },
+      {
+        "y": 88,
+        "opaque": 17,
+        "full": false
+      },
+      {
+        "y": 89,
+        "opaque": 19,
+        "full": true
+      },
+      {
+        "y": 90,
+        "opaque": 19,
+        "full": true
+      }
+    ],
+    "probeColumns": [
+      {
+        "x": 113,
+        "opaque": 11,
+        "full": false
+      },
+      {
+        "x": 114,
+        "opaque": 10,
+        "full": false
+      },
+      {
+        "x": 115,
+        "opaque": 9,
+        "full": false
+      },
+      {
+        "x": 116,
+        "opaque": 7,
+        "full": false
+      },
+      {
+        "x": 117,
+        "opaque": 6,
+        "full": false
+      },
+      {
+        "x": 118,
+        "opaque": 4,
+        "full": false
+      },
+      {
+        "x": 119,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "x": 120,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "x": 121,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "x": 122,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "x": 123,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "x": 124,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "x": 125,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "x": 126,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "x": 127,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "x": 128,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "x": 129,
+        "opaque": 3,
+        "full": false
+      },
+      {
+        "x": 130,
+        "opaque": 2,
+        "full": false
+      },
+      {
+        "x": 131,
+        "opaque": 2,
+        "full": false
+      }
+    ],
+    "fullWidthStraightRows": 2,
+    "fullHeightStraightColumns": 0,
+    "flatRightEdgeRows": 2,
+    "boundarySteps": [
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      2,
+      2,
+      1,
+      -1,
+      0,
+      -1,
+      -1,
+      0,
+      -1,
+      -1,
+      -1,
+      17,
+      2,
+      0
+    ]
+  },
+  "gates": {
+    "noRectilinearRightCupProtrusion": true,
+    "visualCritic": "PENDING"
+  },
+  "verdict": "PASS_CURVED_OR_NON_RECTILINEAR_RIGHT_CUP_PENDING_VISUAL_CRITIC",
+  "publishable": false
+}
