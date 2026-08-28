@@ -30,6 +30,20 @@ let OPENING = 3;
 const KEEP_ABOVE = 0.0001;
 /** How solid the middle of a worn thing is, in pixels. An outline never has this much. */
 let SOLID = 7;
+/**
+ * The largest enclosed gap that is a fault rather than a feature, in pixels of the sheet.
+ *
+ * A gap the mask has left in the middle of a worn thing is a hole the floor shows through. A gap a
+ * pair of spectacles leaves is the lens, and the creature's own eye has to show through it. What
+ * tells them apart is size: measured over these sheets a lens runs to twenty-five thousand pixels
+ * and the largest fault in a cape to three thousand, an order of magnitude clear of each other.
+ */
+let FILL = 12000;
+/** How far either side of the creature's silhouette counts as its outline, in pixels. */
+let EDGE = 14;
+/** A piece this much along the outline and this thin is the creature, not something worn. */
+const ON_EDGE = 0.75;
+let THIN = 22;
 
 const raw = async (file) => {
   const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
@@ -162,8 +176,129 @@ function sweep(mask, width, height, radius, keep) {
   return pass(pass(mask, true), false);
 }
 
+/**
+ * Close the gaps a mask has left inside itself, up to a size, and leave the larger ones alone.
+ *
+ * Where an accessory is painted in nearly the colour it covers — a white cape over cream fur — the
+ * difference between the two pictures falls under the mark the mask grows by, and the mask steps
+ * over those pixels. What is left is a gap enclosed by accessory on every side, which the game
+ * draws the floor through. A gap that is not enclosed is not a fault: it is the mask's outline.
+ */
+function fillGaps(mask, width, height, largest) {
+  const count = width * height;
+  const outside = new Uint8Array(count);
+  const queue = new Int32Array(count);
+  let tail = 0;
+  const reach = (p) => { if (!outside[p] && !mask[p]) { outside[p] = 1; queue[tail += 1, tail - 1] = p; } };
+  for (let x = 0; x < width; x += 1) { reach(x); reach((height - 1) * width + x); }
+  for (let y = 0; y < height; y += 1) { reach(y * width); reach(y * width + width - 1); }
+  for (let head = 0; head < tail; head += 1) {
+    const p = queue[head];
+    const x = p % width;
+    const y = (p - x) / width;
+    if (x > 0) reach(p - 1);
+    if (x + 1 < width) reach(p + 1);
+    if (y > 0) reach(p - width);
+    if (y + 1 < height) reach(p + width);
+  }
+
+  const seen = new Uint8Array(count);
+  let filled = 0;
+  let left = 0;
+  for (let start = 0; start < count; start += 1) {
+    if (seen[start] || mask[start] || outside[start]) continue;
+    let head = 0;
+    let end = 0;
+    queue[end += 1, end - 1] = start;
+    seen[start] = 1;
+    const gap = [start];
+    while (head < end) {
+      const at = queue[head += 1, head - 1];
+      const x = at % width;
+      const y = (at - x) / width;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+        const next = ny * width + nx;
+        if (seen[next] || mask[next] || outside[next]) continue;
+        seen[next] = 1;
+        queue[end += 1, end - 1] = next;
+        gap.push(next);
+      }
+    }
+    if (gap.length > largest) { left += 1; continue; }
+    for (const at of gap) mask[at] = 1;
+    filled += 1;
+  }
+  return { filled, left };
+}
+
 const shrinkBy = (mask, width, height, radius) => sweep(mask, width, height, radius, 'all');
 const growBy = (mask, width, height, radius) => sweep(mask, width, height, radius, 'any');
+
+/**
+ * Take out the pieces of a mask that are the creature's own outline, drawn again.
+ *
+ * Asked for the sheet a second time the generator draws the whole creature again, and its fur lands
+ * a pixel or two off where the first drawing put it. Where the thing being worn stands well clear of
+ * the fur in colour, that discrepancy stays under the mark the mask grows by and never shows. Where
+ * it does not — pale frost on cream cheeks, pearls on a cream chest — the mask has to be grown so
+ * meanly to catch the accessory that the discrepancy comes too, and the layer arrives with loops of
+ * fur outline floating around the thing that was wanted.
+ *
+ * Such a loop can be told apart without knowing what was drawn: it runs along the silhouette the
+ * base sheet has, and it is thin — its area over its longest side is a handful of pixels, where a
+ * collar or a pair of spectacles is tens. Both conditions together, because a fine chain is thin
+ * without lying on the outline, and the hem of a cape lies on the outline without being thin.
+ */
+function dropOutline(mask, body, width, height) {
+  const wide = growBy(body, width, height, EDGE);
+  const core = shrinkBy(body, width, height, EDGE);
+  const seen = new Uint8Array(width * height);
+  const queue = new Int32Array(width * height);
+  let dropped = 0;
+  let pixels = 0;
+  for (let start = 0; start < width * height; start += 1) {
+    if (seen[start] || !mask[start]) continue;
+    let head = 0;
+    let tail = 0;
+    queue[tail += 1, tail - 1] = start;
+    seen[start] = 1;
+    const piece = [start];
+    let left = width;
+    let right = 0;
+    let top = height;
+    let bottom = 0;
+    let along = 0;
+    while (head < tail) {
+      const at = queue[head += 1, head - 1];
+      const x = at % width;
+      const y = (at - x) / width;
+      if (wide[at] && !core[at]) along += 1;
+      if (x < left) left = x;
+      if (x > right) right = x;
+      if (y < top) top = y;
+      if (y > bottom) bottom = y;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+        const next = ny * width + nx;
+        if (seen[next] || !mask[next]) continue;
+        seen[next] = 1;
+        queue[tail += 1, tail - 1] = next;
+        piece.push(next);
+      }
+    }
+    const spine = piece.length / Math.max(right - left + 1, bottom - top + 1);
+    if (along / piece.length < ON_EDGE || spine > THIN) continue;
+    for (const at of piece) mask[at] = 0;
+    dropped += 1;
+    pixels += piece.length;
+  }
+  return { dropped, pixels };
+}
 
 /**
  * Keep the pieces of a mask that have something solid in them, whole.
@@ -225,6 +360,9 @@ SEED = option('seed', SEED);
 SPREAD = option('spread', SPREAD);
 SOLID = option('solid', SOLID);
 OPENING = option('opening', OPENING);
+FILL = option('fill', FILL);
+THIN = option('thin', THIN);
+EDGE = option('edge', EDGE);
 const [baseFile, redrawFile, outDir = 'tmp/baked'] = argv.filter((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--'));
 if (!baseFile || !redrawFile) {
   console.error('usage: node scripts/bake-wearable.mjs <base.png> <redraw.png> [out-dir]');
@@ -243,9 +381,14 @@ const gap = difference(base.data, redraw.data, count);
 const { mask: rough } = findRegions(gap, width, height);
 const opened = growBy(shrinkBy(rough, width, height, OPENING), width, height, OPENING);
 const { kept: mask, thin } = keepSolidRegions(opened, width, height, SOLID);
-// Nothing is filled in. A pair of spectacles is a rim around a hole, and through that hole the
-// creature's own eye has to show: filling it took the eye into the accessory and swapped it for
-// the redraw's version of the same eye.
+// The creature as the base sheet drew it, which is what says where its outline runs.
+const body = new Uint8Array(count);
+for (let at = 0; at < count; at += 1) body[at] = base.data[at * 4 + 3] > 32 ? 1 : 0;
+const outline = dropOutline(mask, body, width, height);
+// Small gaps inside the mask are closed and large ones are not: a pair of spectacles is a rim
+// around a hole, and through that hole the creature's own eye has to show, whereas a gap in the
+// middle of a cape is a hole the floor shows through.
+const { filled, left: kept } = fillGaps(mask, width, height, FILL);
 const { kept: regions, dropped } = dropSpecks(mask, width, height, KEEP_ABOVE * width * height);
 
 let masked = 0;
@@ -288,6 +431,8 @@ await asPng(dressed).toFile(path.join(outDir, `${name}-dressed.png`));
 const share = (masked / count) * 100;
 console.log(`seed ${SEED} spread ${SPREAD} solid ${SOLID} opening ${OPENING}`);
 console.log(`mask: ${regions} region${regions === 1 ? '' : 's'} kept, ${thin.toLocaleString()} outlines and ${dropped.toLocaleString()} specks dropped, ${masked.toLocaleString()} pixels (${share.toFixed(2)}% of the sheet)`);
+console.log(`outline: ${outline.dropped.toLocaleString()} pieces of the creature's own edge removed, ${outline.pixels.toLocaleString()} pixels`);
+console.log(`gaps: ${filled.toLocaleString()} closed, ${kept.toLocaleString()} left open as deliberate`);
 console.log(wrongInside
   ? `FAILED: ${wrongInside} masked pixels are not the redraw`
   : 'inside the mask the dressed pose is the redraw, pixel for pixel');
