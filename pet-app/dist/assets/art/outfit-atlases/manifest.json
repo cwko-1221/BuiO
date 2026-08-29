@@ -14,6 +14,10 @@
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-04--patch-47792f4cf1.webp"
     },
+    "starpatch-cat:1:face-05": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-05--patch-652a8d4e95.webp"
+    },
     "starpatch-cat:1:face-06": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-06--patch-9a23fbaf79.webp"
@@ -22,9 +26,21 @@
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-07--patch-d339d10983.webp"
     },
+    "starpatch-cat:1:face-08": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-08--patch-9becce2d76.webp"
+    },
     "starpatch-cat:1:face-09": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-09--patch-a4932373bf.webp"
+    },
+    "starpatch-cat:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-11--patch-05f0b05c34.webp"
+    },
+    "starpatch-cat:1:face-12": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-12--patch-d9d54377a2.webp"
     },
     "starpatch-cat:1:head-05": {
       "slot": "head",
