@@ -62,13 +62,25 @@
       "slot": "neck",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--neck-01--patch-3d14125de0.webp"
     },
+    "starpatch-cat:1:neck-02": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--neck-02--patch-544547155a.webp"
+    },
     "starpatch-cat:1:neck-03": {
       "slot": "neck",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--neck-03--patch-d7f9ec7084.webp"
     },
+    "starpatch-cat:1:neck-04": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--neck-04--patch-f1885c8f64.webp"
+    },
     "starpatch-cat:1:neck-05": {
       "slot": "neck",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--neck-05--patch-11e67ac3e7.webp"
+    },
+    "starpatch-cat:1:neck-06": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--neck-06--patch-a61bd012e7.webp"
     },
     "starpatch-cat:1:neck-07": {
       "slot": "neck",
@@ -94,9 +106,17 @@
       "slot": "neck",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--neck-12--patch-1b291ca7a9.webp"
     },
+    "starpatch-cat:1:neck-13": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--neck-13--patch-949de6ee6e.webp"
+    },
     "starpatch-cat:1:neck-14": {
       "slot": "neck",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--neck-14--patch-319cd7ee0b.webp"
+    },
+    "starpatch-cat:1:neck-15": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--neck-15--patch-0574f80aee.webp"
     },
     "starpatch-cat:1:neck-16": {
       "slot": "neck",
