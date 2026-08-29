@@ -29,8 +29,45 @@ function load() {
   return _data;
 }
 
+/**
+ * Codes Windows reports when something else has the file open for a moment.
+ *
+ * On this machine the store lives inside the repository, so Defender, the search indexer, git and
+ * whatever editor is watching the tree all touch it. Any of them holding a handle for a few
+ * milliseconds is enough to fail a write, which surfaced as "寵物樂園暫時未能完成操作" on a perfectly
+ * ordinary change of outfit — and went away when the child pressed the button again.
+ */
+const BUSY = new Set(['EBUSY', 'EPERM', 'EACCES', 'UNKNOWN']);
+const ATTEMPTS = 5;
+
+/** Block for a moment. save() is synchronous by contract, and its callers are mid-request. */
+function pause(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+/**
+ * Write the store out without ever leaving it half-written.
+ *
+ * Writing straight to the file truncates it before the first byte lands, so a write that failed
+ * partway — which is exactly what the transient locks above cause — left the database empty or cut
+ * in half, and the next start could not parse it. Writing a temporary file and renaming it over the
+ * target instead means the real file is only ever replaced by a complete one; a rename within a
+ * directory is atomic.
+ */
 function save() {
-  fs.writeFileSync(DB_FILE, JSON.stringify(load(), null, 2), 'utf8');
+  const body = JSON.stringify(load(), null, 2);
+  const temp = `${DB_FILE}.${process.pid}.tmp`;
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      fs.writeFileSync(temp, body, 'utf8');
+      fs.renameSync(temp, DB_FILE);
+      return;
+    } catch (error) {
+      try { fs.rmSync(temp, { force: true }); } catch { /* nothing left to clean up */ }
+      if (attempt >= ATTEMPTS || !BUSY.has(error.code)) throw error;
+      pause(15 * (2 ** (attempt - 1)));
+    }
+  }
 }
 
 function nextLogId() {
