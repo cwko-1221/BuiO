@@ -286,6 +286,26 @@ router.put('/records', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
+/**
+ * Remove a day's record entirely.
+ *
+ * Teachers only, and deliberately not offered to monitors: a monitor who filed the wrong thing can
+ * correct it through the editor, whereas deleting takes the day's record away from everyone who
+ * might still need to read it. The date is part of the address rather than an id, so this can only
+ * remove the record the teacher is looking at.
+ */
+router.delete('/records', requireTeacher, async (req, res, next) => {
+  try {
+    const assignment = await requireAssignment(req, res);
+    if (!assignment) return;
+    const date = text(req.query.date, 10);
+    if (!isIsoDate(date)) return fail(res, 400, '日期不正確');
+    const removed = await repo.deleteRecord({ ...assignment, date });
+    if (!removed) return fail(res, 404, '找不到記錄');
+    res.json({ success: true, message: '記錄已刪除', record: removed });
+  } catch (error) { next(error); }
+});
+
 router.get('/analysis', requireTeacher, async (req, res, next) => {
   try {
     const academicYear = text(req.query.academicYear, 10);

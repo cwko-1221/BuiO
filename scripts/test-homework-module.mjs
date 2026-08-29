@@ -123,6 +123,17 @@ try {
   assert.ok(result.data.record.homeworks[0].statuses.every(row => row.status === 'complete'), 'teacher-created record can default every student to complete');
   assert.equal((await request(teacher, '/api/homework/records', { method: 'POST', body: teacherCreatedBody })).response.status, 409, 'teacher cannot duplicate an existing record');
 
+  const teacherCreated = `academicYear=${year}&className=P4&subject=chinese-b&date=2020-01-01`;
+  result = await request(teacher, `/api/homework/records?${teacherCreated}`, { method: 'DELETE' });
+  assert.equal(result.response.status, 200, 'teacher can delete a record');
+  assert.equal(result.data.record.homeworks[0].title, '老師補充記錄', 'delete reports what it removed');
+  assert.equal((await request(teacher, `/api/homework/records?${teacherCreated}`)).data.record, null, 'the deleted record is gone');
+  assert.equal((await request(teacher, `/api/homework/records?${teacherCreated}`, { method: 'DELETE' })).response.status, 404, 'deleting a record twice is a miss, not an error');
+  // Creating the same day again proves the row really left the store rather than being hidden: the
+  // unique constraint on year/class/subject/date would still reject this otherwise.
+  assert.equal((await request(teacher, '/api/homework/records', { method: 'POST', body: teacherCreatedBody })).response.status, 201, 'the date is free to record again after a delete');
+  await request(teacher, `/api/homework/records?${teacherCreated}`, { method: 'DELETE' });
+
   const monitor = await login('S001');
   assert.equal((await request(monitor, '/api/homework/meta')).data.canAccess, true);
   assert.equal((await request(monitor, '/homework')).response.status, 200);
@@ -166,6 +177,11 @@ try {
   assert.equal(result.data.pending.length, 1, 'homepage reminder sees outstanding homework');
   assert.equal(result.data.pending[0].subjectName, '中文 A組', 'homepage reminder includes the subject and group');
   assert.equal((await request(nonMonitor, '/api/homework/records', { method: 'PUT', body: monitorUpdate })).response.status, 403, 'non-monitor cannot update record');
+  // The monitor filed this record today and may still edit it, which is exactly why the delete has
+  // to be refused separately: being allowed to correct a record is not being allowed to remove it.
+  const monitorRecord = `academicYear=${year}&className=P4&subject=chinese-a&date=${today}`;
+  assert.equal((await request(monitor, `/api/homework/records?${monitorRecord}`, { method: 'DELETE' })).response.status, 403, 'a monitor cannot delete the record it filed');
+  assert.ok((await request(teacher, `/api/homework/records?${monitorRecord}`)).data.record, 'the refused delete left the record alone');
   const teacherRecord = await request(teacher, `/api/homework/records?academicYear=${year}&className=P4&subject=chinese-a&date=${today}`);
   teacherRecord.data.record.homeworks[0].statuses.find(row => row.studentId === 'S003').madeUp = true;
   teacherRecord.data.record.homeworks[1].title = '默書改正（老師修訂）';

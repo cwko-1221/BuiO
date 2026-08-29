@@ -122,7 +122,7 @@ function renderRecords() {
     ${filterHtml('record', f, true)}
   </section>
   <section class="panel">${state.record || editingNewRecord
-    ? `${editingNewRecord ? '<div class="notice">正在新增老師記錄；所有學生已預設為「完成」，可按需要修改。</div>' : ''}${homeworkCards({ teacher: true })}<div class="actions" style="margin-top:20px"><button class="button secondary" id="addTeacherHomework">＋ 新增功課</button><button class="button primary" id="saveRecord">${editingNewRecord ? '儲存記錄' : '儲存修改'}</button></div>`
+    ? `${editingNewRecord ? '<div class="notice">正在新增老師記錄；所有學生已預設為「完成」，可按需要修改。</div>' : ''}${homeworkCards({ teacher: true })}<div class="actions" style="margin-top:20px"><button class="button secondary" id="addTeacherHomework">＋ 新增功課</button><button class="button primary" id="saveRecord">${editingNewRecord ? '儲存記錄' : '儲存修改'}</button>${state.record ? '<button class="button danger" id="deleteRecord" style="margin-left:auto">刪除記錄</button>' : ''}</div>`
     : '<div class="empty">所選日期暫時沒有科長提交的記錄。<div class="actions empty-actions"><button class="button primary" id="createTeacherRecord">＋ 新增記錄</button></div></div>'}</section>`);
 }
 
@@ -277,6 +277,19 @@ function bindTeacher() {
         const result = await api('/records', { method: state.record ? 'PUT' : 'POST', body: JSON.stringify({ ...filterState.records, homeworks: state.homeworks }) });
         state.record = result.record;
         state.homeworks = structuredClone(result.record.homeworks);
+        setMessage(result.message);
+      } catch (error) { setMessage(error.message, 'error'); }
+    });
+    // Deleting takes the day away from everyone who might still read it, and there is no undo, so
+    // the confirmation names the record rather than asking a bare "are you sure".
+    document.getElementById('deleteRecord')?.addEventListener('click', async () => {
+      const f = filterState.records;
+      if (!window.confirm(`確定刪除 ${f.className} ${subjectName(f.subject)} ${f.date} 的記錄嗎？此操作無法復原。`)) return;
+      try {
+        const query = `academicYear=${encodeURIComponent(f.academicYear)}&className=${f.className}&subject=${f.subject}&date=${f.date}`;
+        const result = await api(`/records?${query}`, { method: 'DELETE' });
+        state.record = null;
+        state.homeworks = [];
         setMessage(result.message);
       } catch (error) { setMessage(error.message, 'error'); }
     });

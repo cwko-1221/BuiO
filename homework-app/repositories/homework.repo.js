@@ -210,6 +210,32 @@ async function updateRecord(payload) {
   return mapRecord(row);
 }
 
+/**
+ * Remove one day's record, and hand back what was removed so the caller can say what it deleted.
+ *
+ * A record is identified the same way everywhere else identifies it — year, class, subject, date —
+ * rather than by its id, so a caller cannot delete a row it did not first look up.
+ */
+async function deleteRecord({ academicYear, className, subject, date }) {
+  await ensureSchema();
+  const existing = await findRecord({ academicYear, className, subject, date });
+  if (!existing) return null;
+  if (config.db.mode === 'postgres') {
+    const result = await getPool().query(
+      'DELETE FROM HomeworkRecords WHERE AcademicYear=$1 AND ClassName=$2 AND Subject=$3 AND RecordDate=$4',
+      [academicYear, className, subject, date],
+    );
+    return result.rowCount ? existing : null;
+  }
+  const rows = jsonData().homeworkRecords;
+  const at = rows.findIndex(row => row.academicYear === academicYear && row.className === className
+    && row.subject === subject && row.date === date);
+  if (at < 0) return null;
+  rows.splice(at, 1);
+  store.save();
+  return existing;
+}
+
 async function listRecords(filters = {}) {
   await ensureSchema();
   if (config.db.mode === 'postgres') {
@@ -235,4 +261,4 @@ async function listRecords(filters = {}) {
     .sort((a, b) => b.date.localeCompare(a.date) || a.subject.localeCompare(b.subject)).map(mapRecord);
 }
 
-module.exports = { ensureSchema, listStudents, listClassStudents, findUser, listMonitors, replaceMonitors, findRecord, createRecord, updateRecord, listRecords };
+module.exports = { ensureSchema, listStudents, listClassStudents, findUser, listMonitors, replaceMonitors, findRecord, createRecord, updateRecord, deleteRecord, listRecords };
