@@ -230,21 +230,28 @@ function normalizeHomeworks(homeworks, rosterIds, statuses, { allowMadeUp = fals
 
 router.post('/records', async (req, res, next) => {
   try {
-    if (req.session.role === 'teacher') return fail(res, 403, '教師請使用修改記錄功能');
     const assignment = {
       academicYear: text(req.body.academicYear, 10), className: text(req.body.className, 10), subject: text(req.body.subject, 40),
     };
     const date = text(req.body.date, 10);
     if (!isAcademicYear(assignment.academicYear) || !/^P[1-6]$/.test(assignment.className) || !subjectById(assignment.subject) || !isIsoDate(date)) return fail(res, 400, '學年、班別、科目或日期不正確');
     if (!subjectsForGrade(assignment.className).some(item => item.id === assignment.subject)) return fail(res, 400, '該年級沒有此科目');
-    if (date !== todayHongKong()) return fail(res, 400, '科長只可填報今天的記錄；過去日期只供查閱');
-    if (!(await isMonitor(req.session.studentId, assignment.academicYear, assignment.className, assignment.subject))) return fail(res, 403, '你未獲委任為此科科長');
+    const isTeacher = req.session.role === 'teacher';
+    if (!isTeacher) {
+      if (date !== todayHongKong()) return fail(res, 400, '科長只可填報今天的記錄；過去日期只供查閱');
+      if (!(await isMonitor(req.session.studentId, assignment.academicYear, assignment.className, assignment.subject))) return fail(res, 403, '你未獲委任為此科科長');
+    }
     if (await repo.findRecord({ ...assignment, date })) return fail(res, 409, '此日期的記錄已建立，請使用修改功能');
     const roster = await repo.listStudents(assignment.academicYear, assignment.className, assignment.subject);
-    const result = normalizeHomeworks(req.body.homeworks, roster.map(student => student.id), STUDENT_STATUSES);
+    const result = normalizeHomeworks(
+      req.body.homeworks,
+      roster.map(student => student.id),
+      isTeacher ? TEACHER_STATUSES : STUDENT_STATUSES,
+      { allowMadeUp: isTeacher },
+    );
     if (result.error) return fail(res, 400, result.error);
     const record = await repo.createRecord({ ...assignment, date, homeworks: result.homeworks, createdBy: req.session.studentId });
-    res.status(201).json({ success: true, message: '欠交功課記錄已儲存', record });
+    res.status(201).json({ success: true, message: isTeacher ? '老師記錄已新增' : '欠交功課記錄已儲存', record });
   } catch (error) {
     if (error.code === '23505' || error.code === 'RECORD_EXISTS') return fail(res, 409, '此日期的記錄已儲存');
     next(error);

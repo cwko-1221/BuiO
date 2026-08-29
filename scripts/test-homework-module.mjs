@@ -105,6 +105,24 @@ try {
   result = await request(nonMonitor, '/api/homework/records', { method: 'POST', body: { academicYear: year, className: 'P4', subject: 'chinese-a', date: today, homeworks: [] } });
   assert.equal(result.response.status, 403, 'protected write API');
 
+  const teacherRoster = (await request(teacher, `/api/homework/roster?academicYear=${year}&className=P4&subject=chinese-b`)).data.students;
+  const teacherCreatedBody = {
+    academicYear: year,
+    className: 'P4',
+    subject: 'chinese-b',
+    date: '2020-01-01',
+    homeworks: [{
+      id: 'teacher-hw-1',
+      title: '老師補充記錄',
+      statuses: teacherRoster.map(student => ({ studentId: student.id, status: 'complete', madeUp: false })),
+    }],
+  };
+  result = await request(teacher, '/api/homework/records', { method: 'POST', body: teacherCreatedBody });
+  assert.equal(result.response.status, 201, 'teacher can create a record when no monitor record exists');
+  assert.equal(result.data.record.createdBy, 'T001', 'teacher-created record tracks its creator');
+  assert.ok(result.data.record.homeworks[0].statuses.every(row => row.status === 'complete'), 'teacher-created record can default every student to complete');
+  assert.equal((await request(teacher, '/api/homework/records', { method: 'POST', body: teacherCreatedBody })).response.status, 409, 'teacher cannot duplicate an existing record');
+
   const monitor = await login('S001');
   assert.equal((await request(monitor, '/api/homework/meta')).data.canAccess, true);
   assert.equal((await request(monitor, '/homework')).response.status, 200);
