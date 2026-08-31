@@ -34,7 +34,7 @@
       <div class="topbar-actions">
         <div id="progressChip" class="progress-chip" aria-label="完成進度">
           <span class="progress-ring"><i id="progressRing"></i></span>
-          <span><b id="progressCount">0 / 5</b><small>已完成</small></span>
+          <span><b id="progressCount">0 / 6</b><small>已完成</small></span>
         </div>
         <button id="notebookButton" class="icon-button" type="button" aria-label="打開科學筆記" title="科學筆記">
           <svg viewBox="0 0 24 24"><path d="M5 3h12a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2z"/><path d="M8 3v16M11 8h5M11 12h5"/></svg>
@@ -78,7 +78,6 @@
               <button class="filter-chip" data-filter="物質" type="button" aria-pressed="false">物質</button>
               <button class="filter-chip" data-filter="環境" type="button" aria-pressed="false">環境</button>
               <button class="filter-chip" data-filter="能量" type="button" aria-pressed="false">能量</button>
-              <button class="filter-chip" data-filter="生命與健康" type="button" aria-pressed="false">生命</button>
               <button class="filter-chip" data-filter="力與運動" type="button" aria-pressed="false">力與運動</button>
             </div>
           </div>
@@ -133,6 +132,12 @@
           <input id="variableSlider" type="range" min="0" max="100" value="0" />
         </div>
 
+        <div id="recordPanel" class="record-panel" hidden>
+          <p class="section-kicker">記錄數據 · RECORD</p>
+          <b id="recordLabel">讀數</b>
+          <div id="recordOptions" class="record-options" role="radiogroup" aria-label="選擇讀數"></div>
+        </div>
+
         <div id="observationStrip" class="observation-strip" hidden aria-live="polite">
           <span class="observation-icon" aria-hidden="true">◎</span>
           <div><b>觀察到甚麼？</b><p id="observationText"></p></div>
@@ -165,22 +170,24 @@
       </section>
     </main>
 
-    <dialog id="predictionDialog" class="glass-dialog prediction-dialog" aria-labelledby="predictionTitle">
-      <div class="dialog-icon">?</div>
-      <p class="section-kicker">先想一想 · PREDICT</p>
-      <h2 id="predictionTitle">你預計會發生甚麼？</h2>
-      <p id="predictionPrompt"></p>
-      <div id="predictionOptions" class="prediction-options" role="radiogroup" aria-label="選擇你的預測"></div>
-      <button id="predictionSubmit" class="primary-button" type="button" disabled>帶着預測開始實驗</button>
-    </dialog>
+    <section id="stageScreen" class="stage-screen" hidden>
+      <div class="stage-inner">
+        <p id="stageKicker" class="stage-kicker"></p>
+        <div id="stageBody" class="stage-body"></div>
+        <div class="stage-foot">
+          <div id="stageDots" class="stage-dots" aria-hidden="true"></div>
+          <button id="stageNext" class="stage-next" type="button">繼續</button>
+        </div>
+      </div>
+    </section>
 
     <dialog id="resultDialog" class="glass-dialog result-dialog" aria-labelledby="resultTitle">
       <div class="result-burst" aria-hidden="true"><span>★</span></div>
-      <p class="section-kicker">探究完成 · DISCOVERY MADE</p>
+      <p class="section-kicker">第五步 · 科學解釋 EXPLAIN</p>
       <h2 id="resultTitle">發現密度的秘密！</h2>
       <div class="result-score"><span id="resultStars">★★★</span><small id="resultScoreText">獨立完成</small></div>
       <div class="result-grid">
-        <section><span class="result-label">你的預測</span><p id="resultPrediction"></p></section>
+        <section><span class="result-label">你的假說</span><p id="resultPrediction"></p></section>
         <section><span class="result-label">實驗觀察</span><p id="resultObservation"></p></section>
         <section id="resultComparison" class="result-comparison" hidden>
           <span class="result-label">對照比較</span>

@@ -1,4 +1,4 @@
-const STATE_VERSION = 1;
+const STATE_VERSION = 2;
 
 export class LabSimulation extends EventTarget {
   constructor(definition, restoredState = null) {
@@ -18,6 +18,8 @@ export class LabSimulation extends EventTarget {
       prediction: null,
       variables: {},
       observations: [],
+      records: [],
+      reflection: null,
       actionHistory: [],
       startedAt: Date.now(),
       updatedAt: Date.now(),
@@ -34,12 +36,23 @@ export class LabSimulation extends EventTarget {
     state.currentStep = Math.max(0, Math.min(this.definition.steps.length, Number(state.currentStep) || 0));
     state.completedSteps = Array.isArray(state.completedSteps) ? state.completedSteps.slice(0, state.currentStep) : [];
     state.observations = Array.isArray(state.observations) ? state.observations.slice(0, state.currentStep) : [];
+    state.records = Array.isArray(state.records) ? state.records : [];
     state.actionHistory = Array.isArray(state.actionHistory) ? state.actionHistory.slice(-100) : [];
     return state;
   }
 
   get step() {
     return this.definition.steps[this.state.currentStep] || null;
+  }
+
+  setReflection(optionIndex) {
+    const reflection = this.definition.analysis?.reflection;
+    if (!reflection || !Number.isInteger(optionIndex)) return false;
+    if (optionIndex < 0 || optionIndex >= reflection.options.length) return false;
+    this.state.reflection = optionIndex;
+    this.#touch();
+    this.#emit('statechange', { reason: 'reflection' });
+    return true;
   }
 
   setPrediction(optionIndex) {
@@ -90,6 +103,19 @@ export class LabSimulation extends EventTarget {
     }
 
     if (expected.type === 'adjust') this.state.variables[expected.subject] = Number(action.value);
+    if (expected.type === 'record') {
+      // Keep one row per measurement so a repeated step overwrites rather than
+      // stacking a second reading of the same quantity into the table.
+      const row = {
+        subject: expected.subject,
+        label: expected.label || expected.subject,
+        value: expected.options[Number(action.value)],
+        unit: expected.unit || '',
+      };
+      const existing = this.state.records.findIndex((item) => item.subject === row.subject);
+      if (existing >= 0) this.state.records[existing] = row;
+      else this.state.records.push(row);
+    }
     const completedIndex = this.state.currentStep;
     const completedStep = this.step;
     this.state.completedSteps.push(completedStep.id || `${this.definition.id}-${completedIndex + 1}`);
@@ -114,6 +140,13 @@ export class LabSimulation extends EventTarget {
       const value = Number(action.value);
       if (!Number.isFinite(value)) return { accepted: false, reason: 'invalid-value' };
       if (value < expected.min || value > expected.max) return { accepted: false, reason: 'adjust-more' };
+    }
+    if (expected.type === 'record') {
+      const choice = Number(action.value);
+      if (!Number.isInteger(choice) || choice < 0 || choice >= expected.options.length) {
+        return { accepted: false, reason: 'record-missing' };
+      }
+      if (choice !== expected.answer) return { accepted: false, reason: 'record-mismatch' };
     }
     if (expected.type === 'stir') {
       const amount = Number(action.amount);

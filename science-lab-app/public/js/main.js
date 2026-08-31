@@ -23,8 +23,9 @@ const dom = {
   hint: $('#hintButton'), hintBox: $('#hintBox'), reset: $('#resetButton'), accessible: $('#accessibleActionButton'),
   variable: $('#variableControl'), variableLabel: $('#variableLabel'), variableValue: $('#variableValue'), slider: $('#variableSlider'),
   observation: $('#observationStrip'), observationText: $('#observationText'), interactionLabel: $('#interactionLabel'),
-  predictionDialog: $('#predictionDialog'), predictionTitle: $('#predictionTitle'), predictionPrompt: $('#predictionPrompt'),
-  predictionOptions: $('#predictionOptions'), predictionSubmit: $('#predictionSubmit'),
+  stage: $('#stageScreen'), stageKicker: $('#stageKicker'), stageBody: $('#stageBody'),
+  stageDots: $('#stageDots'), stageNext: $('#stageNext'),
+  recordPanel: $('#recordPanel'), recordLabel: $('#recordLabel'), recordOptions: $('#recordOptions'),
   resultDialog: $('#resultDialog'), resultTitle: $('#resultTitle'), resultStars: $('#resultStars'), resultScoreText: $('#resultScoreText'),
   resultPrediction: $('#resultPrediction'), resultObservation: $('#resultObservation'), resultExplanation: $('#resultExplanation'), resultCodes: $('#resultCodes'),
   resultComparison: $('#resultComparison'), comparisonLeftLabel: $('#comparisonLeftLabel'), comparisonLeftValue: $('#comparisonLeftValue'),
@@ -46,10 +47,12 @@ let renderer;
 let simulation;
 let currentExperiment;
 let selectedPrediction = null;
+let selectedReflection = null;
 let observationTimer;
 let phenomenonTimer;
 let phenomenonCountdownTimer;
 let pendingResultScore = null;
+let analysisScore = null;
 let settings = ProgressStore.loadSettings();
 const activeExperimentIds = experiments.map((experiment) => experiment.id);
 
@@ -189,12 +192,13 @@ function startExperiment(id, { forceNew = false } = {}) {
   setMissionCollapsed(true);
   dom.hintBox.hidden = true;
   dom.observation.hidden = true;
+  dom.recordPanel.hidden = true;
   history.replaceState(null, '', `#${definition.id}`);
   updateMission();
   if (canRestore) {
     showToast(`已回復到步驟 ${saved.currentStep + 1}，可以繼續探究。`, 'success');
   } else {
-    openPrediction();
+    openObservation();
   }
 }
 
@@ -209,7 +213,8 @@ function bindSimulation() {
       'wrong-target': '位置未對準。留意目標位置的光圈，再放近一點。',
       'wrong-verb': '試試依照任務提示，用另一種操作方法。',
       'adjust-more': '方向正確！再調校一點，留意數值變化。',
-      'stir-more': '已開始搓洗，再多畫幾個完整圓圈。',
+      'record-mismatch': '再看清楚儀器上的讀數，然後選一次。',
+      'record-missing': '請在數據面板選一個讀數。',
     };
     showToast(messages[event.detail.reason] || '再觀察一下器材和目標位置。', 'try');
   });
@@ -246,9 +251,32 @@ function updateMission() {
   dom.hintBox.hidden = true;
   dom.hintBox.textContent = step.hint;
   dom.accessible.setAttribute('aria-label', `以按鈕完成：${step.instruction}`);
-  dom.accessible.textContent = step.action.type === 'adjust' ? '套用建議數值' : '按鈕操作';
+  dom.accessible.textContent = step.action.type === 'adjust' ? '套用建議數值'
+    : step.action.type === 'record' ? '填入儀器讀數' : '按鈕操作';
   renderer.setStep(step);
   configureVariable(step);
+  configureRecord(step);
+}
+
+function configureRecord(step) {
+  const action = step.action;
+  const isRecord = action.type === 'record';
+  dom.recordPanel.hidden = !isRecord;
+  if (!isRecord) return;
+  dom.recordLabel.textContent = `${action.label || '讀數'}${action.unit ? `（${action.unit}）` : ''}`;
+  dom.recordOptions.replaceChildren(...action.options.map((option, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'record-option';
+    button.dataset.record = String(index);
+    button.setAttribute('role', 'radio');
+    button.setAttribute('aria-checked', 'false');
+    button.textContent = option;
+    button.addEventListener('click', () => {
+      simulation?.dispatchAction({ type: 'record', subject: action.subject, value: index });
+    });
+    return button;
+  }));
 }
 
 function configureVariable(step) {
@@ -258,7 +286,7 @@ function configureVariable(step) {
   if (!isAdjust) return;
   const range = action.range || [0, 100];
   const low = Math.min(...range), high = Math.max(...range);
-  const value = simulation.state.variables[action.subject] ?? range[0];
+  const value = simulation.state.variables[action.subject] ?? action.start ?? range[0];
   dom.slider.min = String(low);
   dom.slider.max = String(high);
   dom.slider.step = high - low <= 10 ? '0.5' : '1';
@@ -277,21 +305,385 @@ function syncVariableValue(value) {
   dom.slider.value = String(value);
 }
 
-function openPrediction() {
-  selectedPrediction = null;
-  dom.predictionTitle.textContent = currentExperiment.question;
-  dom.predictionPrompt.innerHTML = `${currentExperiment.prediction.prompt}<br><small><b>安全提示：</b>${currentExperiment.safety}</small>`;
-  dom.predictionOptions.innerHTML = currentExperiment.prediction.options.map((option, index) => `<button class="prediction-option" data-prediction="${index}" type="button" role="radio" aria-checked="false"><i>${String.fromCharCode(65 + index)}</i><span>${option}</span></button>`).join('');
-  dom.predictionSubmit.disabled = true;
-  $$('.prediction-option').forEach((button) => button.addEventListener('click', () => {
-    selectedPrediction = Number(button.dataset.prediction);
-    $$('.prediction-option').forEach((item) => {
-      item.classList.toggle('selected', item === button);
-      item.setAttribute('aria-checked', String(item === button));
-    });
-    dom.predictionSubmit.disabled = false;
+const MEDIA_BASE = '/science-lab/media';
+let observationClips = null;
+
+async function loadObservationClips() {
+  if (observationClips) return observationClips;
+  try {
+    const response = await fetch(`${MEDIA_BASE}/index.json`, { credentials: 'include' });
+    observationClips = new Set(response.ok ? (await response.json()).clips || [] : []);
+  } catch {
+    observationClips = new Set();
+  }
+  return observationClips;
+}
+
+// --- slide stage ------------------------------------------------------------
+// One idea per screen. Each phase of the inquiry cycle is a short run of slides
+// rather than a dense dialog, so nothing on screen is smaller than a child will
+// read and nothing asks them to take in five things at once.
+let stageSlides = [];
+let stageIndex = 0;
+let stageDone = null;
+let stageAdvanceTimer = null;
+
+function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text != null) node.textContent = text;
+  return node;
+}
+
+function runStage(slides, onDone) {
+  stageSlides = slides.filter(Boolean);
+  stageIndex = 0;
+  stageDone = onDone;
+  dom.stage.hidden = false;
+  dom.lab.classList.add('stage-open');
+  renderStageSlide();
+}
+
+function closeStage() {
+  clearTimeout(stageAdvanceTimer);
+  stageAdvanceTimer = null;
+  dom.stage.hidden = true;
+  dom.lab.classList.remove('stage-open');
+  dom.stageBody.replaceChildren();
+  stageSlides = [];
+  const done = stageDone;
+  stageDone = null;
+  done?.();
+}
+
+function advanceStage() {
+  clearTimeout(stageAdvanceTimer);
+  stageAdvanceTimer = null;
+  const slide = stageSlides[stageIndex];
+  if (slide?.onLeave && slide.onLeave() === false) return;
+  stageIndex += 1;
+  if (stageIndex >= stageSlides.length) { closeStage(); return; }
+  renderStageSlide();
+}
+
+function renderStageSlide() {
+  const slide = stageSlides[stageIndex];
+  if (!slide) { closeStage(); return; }
+  dom.stage.dataset.slide = slide.id || slide.kind;
+  dom.stage.dataset.kind = slide.kind;
+  dom.stageKicker.textContent = slide.kicker || '';
+  dom.stageKicker.hidden = !slide.kicker;
+  dom.stageBody.replaceChildren(slide.render());
+  // Restart the entry animation for every slide, including a repeat of the
+  // same kind, so each screen reads as a new beat.
+  dom.stageBody.classList.remove('entering');
+  void dom.stageBody.offsetWidth;
+  dom.stageBody.classList.add('entering');
+
+  const total = stageSlides.filter((item) => item.kind !== 'chapter').length;
+  const position = stageSlides.slice(0, stageIndex + 1).filter((item) => item.kind !== 'chapter').length;
+  dom.stageDots.replaceChildren(...Array.from({ length: total }, (_, index) => {
+    const dot = element('i', index < position ? 'on' : '');
+    return dot;
   }));
-  dom.predictionDialog.showModal();
+  dom.stageDots.hidden = slide.kind === 'chapter' || total < 2;
+
+  dom.stageNext.textContent = slide.next || '繼續';
+  dom.stageNext.disabled = Boolean(slide.locked);
+  if (slide.kind === 'analysis') dom.stageNext.disabled = false;
+  dom.stageNext.hidden = slide.kind === 'chapter';
+
+  if (slide.kind === 'chapter') {
+    // A chapter card is a beat, not a task: it moves on by itself, and a tap
+    // skips it for a child who has read it already.
+    stageAdvanceTimer = setTimeout(advanceStage, settings.reduceMotion ? 900 : 1900);
+  }
+  slide.onEnter?.();
+}
+
+function unlockStage(next) {
+  const slide = stageSlides[stageIndex];
+  if (slide) slide.locked = false;
+  if (next) dom.stageNext.textContent = next;
+  dom.stageNext.disabled = false;
+}
+
+function chapterSlide(step, title, note) {
+  return {
+    kind: 'chapter',
+    id: `chapter-${step}`,
+    render() {
+      const wrap = element('div', 'stage-chapter');
+      wrap.append(element('span', 'stage-chapter-step', step));
+      wrap.append(element('h2', 'stage-chapter-title', title));
+      if (note) wrap.append(element('p', 'stage-chapter-note', note));
+      return wrap;
+    },
+  };
+}
+
+function videoSlide(definition) {
+  return {
+    kind: 'video',
+    id: 'observe-video',
+    kicker: '第一步 · 觀察 OBSERVE',
+    next: '看完了',
+    render() {
+      const wrap = element('div', 'stage-video');
+      wrap.append(element('h2', 'stage-heading', definition.observe.title));
+      const frame = element('div', 'stage-video-frame');
+      const video = document.createElement('video');
+      video.id = 'observeVideo';
+      video.className = 'stage-video-player';
+      video.playsInline = true;
+      video.controls = true;
+      video.preload = 'metadata';
+      video.hidden = true;
+      const fallback = element('div', 'stage-video-fallback');
+      fallback.id = 'observeFallback';
+      fallback.append(element('span', null, '◎'));
+      fallback.append(element('p', null, '這個探究的觀察影片尚未加入。先記住下面的問題，在實驗中親自觀察。'));
+      frame.append(video, fallback);
+      wrap.append(frame);
+      wrap.append(element('p', 'stage-caption', definition.observe.caption));
+      this.video = video;
+      this.fallback = fallback;
+      return wrap;
+    },
+    async onEnter() {
+      const experimentId = definition.id;
+      const clips = await loadObservationClips();
+      const name = ['mp4', 'webm'].map((ext) => `${experimentId}.${ext}`).find((file) => clips.has(file));
+      if (!name || currentExperiment?.id !== experimentId || !this.video?.isConnected) return;
+      this.video.onloadeddata = () => { this.video.hidden = false; this.fallback.hidden = true; };
+      this.video.onerror = () => { this.video.hidden = true; this.fallback.hidden = false; };
+      this.video.src = `${MEDIA_BASE}/${name}`;
+    },
+    onLeave() {
+      this.video?.pause();
+    },
+  };
+}
+
+function noticeSlide(definition) {
+  return {
+    kind: 'notice',
+    id: 'observe-notice',
+    kicker: '第一步 · 觀察 OBSERVE',
+    render() {
+      const wrap = element('div', 'stage-notice');
+      wrap.append(element('h2', 'stage-heading', '看的時候留意'));
+      const list = element('ul', 'stage-list');
+      list.id = 'observeNotice';
+      for (const item of definition.observe.notice) list.append(element('li', null, item));
+      wrap.append(list);
+      return wrap;
+    },
+  };
+}
+
+function wonderSlide(definition) {
+  return {
+    kind: 'wonder',
+    id: 'observe-wonder',
+    kicker: '第一步 · 觀察 OBSERVE',
+    next: '我要提出假說',
+    render() {
+      const wrap = element('div', 'stage-wonder');
+      wrap.append(element('p', 'stage-lead', '我的疑問是⋯⋯'));
+      const question = element('h2', 'stage-question', definition.observe.wonder);
+      question.id = 'observeWonder';
+      wrap.append(question);
+      return wrap;
+    },
+  };
+}
+
+function hypothesisSlide(definition) {
+  return {
+    kind: 'hypothesis',
+    id: 'hypothesis',
+    kicker: '第二步 · 假說 HYPOTHESIS',
+    next: '用實驗驗證',
+    locked: true,
+    render() {
+      const wrap = element('div', 'stage-choice');
+      wrap.append(element('h2', 'stage-heading', definition.prediction.prompt));
+      const options = element('div', 'stage-options');
+      options.id = 'predictionOptions';
+      options.setAttribute('role', 'radiogroup');
+      options.setAttribute('aria-label', '選擇你的假說');
+      definition.prediction.options.forEach((option, index) => {
+        const button = element('button', 'stage-option');
+        button.type = 'button';
+        button.dataset.prediction = String(index);
+        button.setAttribute('role', 'radio');
+        button.setAttribute('aria-checked', 'false');
+        button.append(element('i', null, String.fromCharCode(65 + index)));
+        button.append(element('span', null, option));
+        button.addEventListener('click', () => {
+          selectedPrediction = index;
+          $$('[data-prediction]').forEach((item) => {
+            const active = item === button;
+            item.classList.toggle('selected', active);
+            item.setAttribute('aria-checked', String(active));
+          });
+          unlockStage();
+        });
+        options.append(button);
+      });
+      wrap.append(options);
+      const safety = element('p', 'stage-safety');
+      safety.append(element('b', null, '安全提示：'));
+      safety.append(document.createTextNode(definition.safety));
+      wrap.append(safety);
+      return wrap;
+    },
+    onLeave() {
+      if (selectedPrediction == null) return false;
+      simulation.setPrediction(selectedPrediction);
+      return true;
+    },
+  };
+}
+
+function analysisSlide(definition) {
+  return {
+    kind: 'analysis',
+    id: 'analysis',
+    kicker: '第四步 · 分析與反思 ANALYSE',
+    next: '看科學解釋',
+    locked: true,
+    render() {
+      const wrap = element('div', 'stage-analysis');
+      wrap.append(element('h2', 'stage-heading', '你的假說站得住嗎？'));
+
+      const chosen = simulation.state.prediction;
+      const matched = chosen === definition.prediction.answer;
+      const verdict = element('div', 'stage-verdict');
+      const mine = element('section', matched ? 'held' : 'revised');
+      mine.append(element('span', 'stage-label', '你的假說'));
+      const hypothesis = element('p', null, chosen == null
+        ? '未有假說紀錄'
+        : `${definition.prediction.options[chosen]}${matched ? '（證據支持）' : '（證據不支持，要修正）'}`);
+      hypothesis.id = 'analysisHypothesis';
+      mine.append(hypothesis);
+      const evidenceBox = element('section');
+      evidenceBox.append(element('span', 'stage-label', '實驗證據'));
+      const evidence = element('p', null, definition.analysis.evidence);
+      evidence.id = 'analysisEvidence';
+      evidenceBox.append(evidence);
+      verdict.append(mine, evidenceBox);
+      wrap.append(verdict);
+
+      const records = simulation.state.records || [];
+      if (records.length) {
+        const data = element('section', 'stage-data');
+        data.id = 'analysisData';
+        data.append(element('span', 'stage-label', '你記錄的數據'));
+        const table = element('table', 'stage-table');
+        const body = element('tbody');
+        body.id = 'analysisTableBody';
+        for (const row of records) {
+          const tr = element('tr');
+          const th = element('th', null, row.label);
+          th.scope = 'row';
+          tr.append(th, element('td', null, row.unit ? `${row.value} ${row.unit}` : row.value));
+          body.append(tr);
+        }
+        table.append(body);
+        data.append(table);
+        wrap.append(data);
+      }
+      return wrap;
+    },
+  };
+}
+
+function reflectionSlide(definition) {
+  const reflection = definition.analysis.reflection;
+  return {
+    kind: 'reflection',
+    id: 'reflection',
+    kicker: '第四步 · 分析與反思 ANALYSE',
+    next: '看科學解釋',
+    locked: true,
+    render() {
+      const wrap = element('div', 'stage-choice');
+      wrap.append(element('p', 'stage-lead', '再想一步'));
+      wrap.append(element('h2', 'stage-heading', reflection.prompt));
+      const options = element('div', 'stage-options');
+      options.id = 'analysisReflectOptions';
+      options.setAttribute('role', 'radiogroup');
+      options.setAttribute('aria-label', '選擇你的想法');
+      const feedback = element('p', 'stage-feedback');
+      feedback.id = 'analysisReflectFeedback';
+      feedback.hidden = true;
+      reflection.options.forEach((option, index) => {
+        const button = element('button', 'stage-option');
+        button.type = 'button';
+        button.dataset.reflection = String(index);
+        button.setAttribute('role', 'radio');
+        button.setAttribute('aria-checked', 'false');
+        button.append(element('i', null, String.fromCharCode(65 + index)));
+        button.append(element('span', null, option));
+        button.addEventListener('click', () => {
+          selectedReflection = index;
+          simulation.setReflection(index);
+          $$('[data-reflection]').forEach((item) => {
+            const active = item === button;
+            item.classList.toggle('selected', active);
+            item.setAttribute('aria-checked', String(active));
+          });
+          const right = index === reflection.answer;
+          feedback.textContent = right ? `答對了。${reflection.because}` : `再想想。${reflection.because}`;
+          feedback.classList.toggle('right', right);
+          feedback.hidden = false;
+          unlockStage();
+        });
+        options.append(button);
+      });
+      wrap.append(options, feedback);
+      return wrap;
+    },
+  };
+}
+
+function openObservation() {
+  const definition = currentExperiment;
+  if (!definition.observe) { openHypothesisOnly(); return; }
+  runStage([
+    chapterSlide('第一步', '觀察', '先看清楚發生了甚麼'),
+    videoSlide(definition),
+    noticeSlide(definition),
+    wonderSlide(definition),
+    chapterSlide('第二步', '假說', '你認為答案是甚麼？'),
+    hypothesisSlide(definition),
+  ], () => {
+    renderer.setStep(simulation.step);
+    showToast('假說已記下。現在用實驗證據驗證它！', 'success');
+  });
+}
+
+function openHypothesisOnly() {
+  runStage([
+    chapterSlide('第二步', '假說', '你認為答案是甚麼？'),
+    hypothesisSlide(currentExperiment),
+  ], () => {
+    renderer.setStep(simulation.step);
+  });
+}
+
+function openAnalysis(score) {
+  const definition = currentExperiment;
+  if (!definition.analysis) { openResult(score); return; }
+  analysisScore = score;
+  selectedReflection = null;
+  runStage([
+    chapterSlide('第四步', '分析與反思', '證據怎樣說？'),
+    analysisSlide(definition),
+    reflectionSlide(definition),
+  ], () => openResult(analysisScore ?? simulation.score()));
 }
 
 function normalizeComparison(result) {
@@ -350,7 +742,7 @@ function revealExplanation() {
   if (pendingResultScore == null) return;
   const score = pendingResultScore;
   cancelPhenomenon();
-  openResult(score);
+  openAnalysis(score);
 }
 
 function cancelPhenomenon() {
@@ -368,8 +760,8 @@ function openResult(score) {
   const comparison = normalizeComparison(definition.result);
   dom.resultTitle.textContent = definition.result.title;
   dom.resultStars.textContent = '★'.repeat(score) + '☆'.repeat(3 - score);
-  dom.resultScoreText.textContent = simulation.state.prediction == null ? '完成操作，但未有預測紀錄' : score === 3 ? '獨立而細心地完成' : score === 2 ? '善用提示完成探究' : '堅持重試完成探究';
-  const prediction = simulation.state.prediction == null ? '未作預測' : definition.prediction.options[simulation.state.prediction];
+  dom.resultScoreText.textContent = simulation.state.prediction == null ? '完成操作，但未有假說紀錄' : score === 3 ? '獨立而細心地完成' : score === 2 ? '善用提示完成探究' : '堅持重試完成探究';
+  const prediction = simulation.state.prediction == null ? '未提出假說' : definition.prediction.options[simulation.state.prediction];
   const correct = simulation.state.prediction === definition.prediction.answer;
   dom.resultPrediction.textContent = simulation.state.prediction == null ? prediction : `${prediction}${correct ? '（與觀察結果一致）' : '（實驗證據令我修正了想法）'}`;
   dom.resultObservation.textContent = definition.result.observation;
@@ -436,6 +828,7 @@ function showCatalog({ canonicalize = true } = {}) {
   dom.catalog.hidden = false;
   dom.variable.hidden = true;
   dom.observation.hidden = true;
+  dom.recordPanel.hidden = true;
   dom.lab.classList.remove('mission-open');
   renderer.loadCatalog();
   renderCards($('.filter-chip.active')?.dataset.filter || 'all');
@@ -500,17 +893,22 @@ function bindEvents() {
     simulation.reset({ keepPrediction: true });
     showToast('本次實驗已回到第一步。');
   });
-  dom.accessible.addEventListener('click', () => renderer?.performAccessibleAction());
+  dom.accessible.addEventListener('click', () => {
+    const action = simulation?.step?.action;
+    if (action?.type === 'record') {
+      simulation.dispatchAction({ type: 'record', subject: action.subject, value: action.answer });
+      return;
+    }
+    renderer?.performAccessibleAction();
+  });
   dom.missionPanelToggle.addEventListener('click', () => {
     setMissionCollapsed(!dom.missionPanel.classList.contains('collapsed'));
   });
-  dom.predictionSubmit.addEventListener('click', () => {
-    simulation.setPrediction(selectedPrediction);
-    dom.predictionDialog.close();
-    renderer.setStep(simulation.step);
-    showToast('預測已記下。現在用實驗證據驗證它！', 'success');
+  dom.stageNext.addEventListener('click', advanceStage);
+  dom.stage.addEventListener('click', (event) => {
+    // A chapter card advances on any tap; other slides need their own control.
+    if (dom.stage.dataset.kind === 'chapter' && !event.target.closest('button')) advanceStage();
   });
-  dom.predictionDialog.addEventListener('cancel', (event) => event.preventDefault());
   dom.phenomenonExplain.addEventListener('click', revealExplanation);
   dom.replay.addEventListener('click', () => { dom.resultDialog.close(); startExperiment(currentExperiment.id, { forceNew: true }); });
   dom.next.addEventListener('click', () => {

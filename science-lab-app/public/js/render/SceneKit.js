@@ -329,6 +329,45 @@ export function replaceWireGeometry(mesh, start, end, radius = .045) {
   mesh.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3([start.clone(), midpoint, end.clone()]), 24, radius, 8, false);
 }
 
+/** A lit instrument panel whose reading can be rewritten in place. */
+export function dynamicDisplay(initialText, { width = 512, height = 192, scale = [2.2, .82] } = {}) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d');
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
+  const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(material);
+  sprite.scale.set(scale[0], scale[1], 1);
+  sprite.userData.canvasTexture = texture;
+  sprite.userData.text = '';
+  sprite.userData.setText = (text, accent = '#60e0bb') => {
+    if (sprite.userData.text === `${text}|${accent}`) return;
+    sprite.userData.text = `${text}|${accent}`;
+    context.clearRect(0, 0, width, height);
+    const gradient = context.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#082f39');
+    gradient.addColorStop(1, '#0c4c58');
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.roundRect(5, 5, width - 10, height - 10, 30);
+    context.fill();
+    context.strokeStyle = accent;
+    context.lineWidth = 7;
+    context.stroke();
+    context.fillStyle = '#dffdf5';
+    context.font = `700 ${Math.round(height * .43)}px "Microsoft JhengHei", sans-serif`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(text, width / 2, height / 2 + 3, width - 44);
+    texture.needsUpdate = true;
+  };
+  sprite.userData.setText(initialText);
+  return sprite;
+}
+
 export function makeLabelSprite(text, { color = '#123b45', background = '#fffdf7', scale = 1 } = {}) {
   const canvas = document.createElement('canvas');
   // High-resolution label atlas: the old 384×120 texture blurred quickly on
@@ -353,6 +392,34 @@ export function makeLabelSprite(text, { color = '#123b45', background = '#fffdf7
   sprite.userData.educationalLabel = true;
   sprite.userData.authoredScale = sprite.scale.clone();
   return sprite;
+}
+
+/** A physical label face that stays attached to its object instead of billboarding. */
+export function makeLabelPlane(text, { color = '#123b45', background = '#fffdf7', scale = 1 } = {}) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 768;
+  canvas.height = 208;
+  const context = canvas.getContext('2d');
+  context.fillStyle = background;
+  roundedRect(context, 6, 6, 756, 196, 34);
+  context.fill();
+  context.fillStyle = color;
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.font = '800 72px "Microsoft JhengHei", sans-serif';
+  context.fillText(text, 384, 105, 690);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const material = new THREE.MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    depthTest: false,
+  });
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(2.8 * scale, .76 * scale), material);
+  plane.userData.canvasTexture = texture;
+  plane.userData.educationalLabel = true;
+  plane.userData.authoredScale = plane.scale.clone();
+  return plane;
 }
 
 function roundedRect(context, x, y, width, height, radius) {

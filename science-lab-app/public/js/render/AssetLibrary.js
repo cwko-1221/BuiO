@@ -8,6 +8,9 @@ let loadPromise = null;
 const ASSETS = {
   beaker: 'ASSET_BEAKER',
   bottle: 'ASSET_REAGENT_BOTTLE',
+  spoonWood: 'ASSET_SPOON_WOOD',
+  spoonPlastic: 'ASSET_SPOON_PLASTIC',
+  spoonCopper: 'ASSET_SPOON_COPPER',
 };
 
 /** Load the locally generated Blender equipment kit once. */

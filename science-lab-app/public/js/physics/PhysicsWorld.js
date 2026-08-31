@@ -184,6 +184,13 @@ export class PhysicsWorld {
     record.body.setEnabled(true);
     record.body.resetForces(true);
     record.body.resetTorques(true);
+    // A carried object passes through the apparatus. The student's hand is not
+    // a rigid body: making the collider a sensor lets the piece follow the
+    // pointer to the socket it is aimed at instead of wedging against a guard
+    // rail or a vessel wall on the way in. It still registers socket overlap,
+    // and becomes solid again the moment it is let go.
+    record.carriedGhost = true;
+    record.collider.setSensor(true);
     const current = record.body.translation();
     const target = point || new THREE.Vector3(current.x, current.y, current.z);
     record.body.setGravityScale(.18, true);
@@ -232,6 +239,10 @@ export class PhysicsWorld {
     const record = this.records.get(id);
     this.grabs.delete(id);
     if (!record || record.completed) return;
+    if (record.carriedGhost) {
+      record.carriedGhost = false;
+      record.collider.setSensor(false);
+    }
     record.body.setGravityScale(1, true);
     record.body.setLinearDamping(record.physics.linearDamping ?? 2.4);
     record.body.setAngularDamping(record.physics.angularDamping ?? 4.5);
@@ -316,7 +327,9 @@ export class PhysicsWorld {
   }
 
   setMaterial(id, { friction, restitution } = {}) {
-    const collider = this.records.get(id)?.collider;
+    // Fixed apparatus needs its contact material changed too: a track that
+    // gains a rough surface is a static collider, not a carried entity.
+    const collider = this.records.get(id)?.collider || this.statics.get(id)?.collider;
     if (!collider) return false;
     if (Number.isFinite(friction)) collider.setFriction(friction);
     if (Number.isFinite(restitution)) collider.setRestitution(restitution);

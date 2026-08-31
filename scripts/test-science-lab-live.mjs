@@ -9,6 +9,26 @@ import { createRequire } from 'node:module';
 import { chromium } from 'playwright';
 import { experiments } from '../science-lab-app/public/js/data/experiments.js';
 
+// The inquiry phases run as full-screen slides. Step through them until the
+// wanted slide is on screen.
+async function advanceStageTo(page, slide) {
+  for (let guard = 0; guard < 16; guard += 1) {
+    const current = await page.locator('#stageScreen:not([hidden])').getAttribute('data-slide').catch(() => null);
+    if (current === slide) return;
+    if (current === null) throw new Error(`stage closed before reaching ${slide}`);
+    if (await page.locator('#stageNext:not([hidden]):not([disabled])').count()) {
+      await page.locator('#stageNext').click();
+    }
+    await page.waitForTimeout(650);
+  }
+  throw new Error(`stage never reached ${slide}`);
+}
+
+async function passObservation(page) {
+  await page.locator('#stageScreen:not([hidden])').waitFor();
+  await advanceStageTo(page, 'hypothesis');
+}
+
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcryptjs');
 const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'buio-science-lab-'));
@@ -49,9 +69,10 @@ async function waitForServer() {
 
 async function openExperiment(page, definition) {
   await page.goto(`${base}/science-lab/preview#${definition.id}`, { waitUntil: 'networkidle' });
-  await page.locator('#predictionDialog[open]').waitFor();
+  await passObservation(page);
   await page.locator(`[data-prediction="${definition.prediction.answer}"]`).click();
-  await page.locator('#predictionSubmit').click();
+  await page.locator('#stageNext').click();
+  await page.locator('#stageScreen').waitFor({ state: 'hidden' });
   await page.waitForFunction((id) => window.__scienceLabTest?.getState()?.experimentId === id, definition.id);
   await page.waitForTimeout(120);
   assert.equal(await page.locator('#missionPanel.collapsed').count(), 1,
@@ -121,7 +142,19 @@ async function revealCompletion(page, { lingerMs = 0 } = {}) {
       'the explanation does not cover the result during the observation interval');
   }
   await page.locator('#phenomenonExplainButton').click();
+  await passAnalysis(page);
   await page.locator('#resultDialog[open]').waitFor({ timeout: 5000 });
+}
+
+// Analysis and reflection sit between the observed result and the explanation:
+// the explanation is not reachable until a reflection answer is given.
+async function passAnalysis(page) {
+  await page.locator('#stageScreen:not([hidden])').waitFor({ timeout: 6000 });
+  await advanceStageTo(page, 'reflection');
+  assert.equal(await page.locator('#stageNext').isDisabled(), true,
+    'the explanation stays locked until the student answers the reflection');
+  await page.locator('[data-reflection="0"]').click();
+  await page.locator('#stageNext').click();
 }
 
 async function clickAccessibleAction(page) {
@@ -176,7 +209,10 @@ try {
   page.on('response', (response) => { if (response.status() >= 400) failedHttp.push(`${response.status()} ${response.url()}`); });
   page.on('request', (request) => {
     const url = new URL(request.url());
-    if (!['127.0.0.1', 'localhost'].includes(url.hostname)) externalRequests.push(request.url());
+    // Textures packed inside the local GLB are decoded through inherited-origin
+    // blob URLs by ImageBitmapLoader; they remain first-party assets.
+    const sourceUrl = url.protocol === 'blob:' ? new URL(url.pathname) : url;
+    if (!['127.0.0.1', 'localhost'].includes(sourceUrl.hostname)) externalRequests.push(request.url());
   });
 
   const loginResponse = await page.request.post(`${base}/api/auth/login`, {
@@ -201,7 +237,7 @@ try {
 
   await page.goto(`${base}/science-lab/preview`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.querySelector('#bootScreen')?.classList.contains('done'));
-  assert.equal(await page.locator('[data-experiment]').count(), 5, 'catalog exposes exactly the five selected investigations');
+  assert.equal(await page.locator('[data-experiment]').count(), 6, 'catalog exposes exactly the six selected investigations');
   assert.equal(await page.locator('#catalogScreen').isVisible(), true, 'catalog is visible after boot');
   const desktopLayout = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
@@ -242,27 +278,9 @@ try {
   await page.waitForFunction(() => window.__scienceLabTest.getState().currentStep === 3);
   await completeWithAccessibleControls(page);
 
-  // Stir: trace a complete circle over the hands and verify accumulated angular
-  // motion, not merely the keyboard-equivalent action.
-  const transmission = experiments.find((item) => item.id === 'transmission');
-  await openExperiment(page, transmission);
-  await clickAccessibleAction(page);
-  await page.waitForFunction(() => window.__scienceLabTest.getState().currentStep === 1);
-  await page.screenshot({ path: path.join(qaDirectory, 'transmission-ordinary-light-live.png'), fullPage: true });
-  await clickAccessibleAction(page);
-  await page.waitForFunction(() => window.__scienceLabTest.getState().currentStep === 2);
-  await clickAccessibleAction(page);
-  await page.waitForFunction(() => window.__scienceLabTest.getState().currentStep === 3);
-  await clickAccessibleAction(page);
-  await page.waitForFunction(() => window.__scienceLabTest.getState().currentStep === 4);
-  await clickAccessibleAction(page);
-  await page.waitForFunction(() => window.__scienceLabTest.getState().complete);
-  await page.screenshot({ path: path.join(qaDirectory, 'transmission-uv-result-live.png'), fullPage: true });
-  await revealCompletion(page);
-
   // Load and finish every other scene; this catches missing apparatus IDs,
   // builder exceptions, malformed results and broken persistence together.
-  const alreadyCompleted = new Set(['density-column', 'electric-crane', 'transmission']);
+  const alreadyCompleted = new Set(['density-column', 'electric-crane']);
   for (const definition of experiments.filter((item) => !alreadyCompleted.has(item.id))) {
     await openExperiment(page, definition);
     await completeWithAccessibleControls(page);
@@ -277,21 +295,21 @@ try {
   }
 
   await page.locator('#nextExperimentButton').click();
-  await page.locator('#predictionDialog[open]').waitFor();
-  assert.equal(await page.locator('#predictionDialog [data-close-dialog]').count(), 0, 'prediction cannot be skipped with a close button');
-  await page.keyboard.press('Escape');
-  assert.equal(await page.locator('#predictionDialog[open]').count(), 1, 'prediction cannot be skipped with Escape');
+  await passObservation(page);
+  assert.equal(await page.locator('#stageNext').isDisabled(), true,
+    'the experiment cannot start before a hypothesis is chosen');
   const nextDefinition = experiments[(experiments.length > 0 ? 0 : -1)];
   await page.locator(`[data-prediction="${nextDefinition.prediction.answer}"]`).click();
-  await page.locator('#predictionSubmit').click();
+  await page.locator('#stageNext').click();
+  await page.locator('#stageScreen').waitFor({ state: 'hidden' });
   await page.locator('#homeButton').click();
   await page.locator('#catalogScreen').waitFor({ state: 'visible' });
-  assert.match((await page.locator('#progressCount').textContent()).trim(), /^5 \/ 5$/, 'catalog shows all selected investigations completed');
-  assert.equal(await page.locator('.experiment-card.completed').count(), 5, 'all selected catalog cards retain completion state');
+  assert.match((await page.locator('#progressCount').textContent()).trim(), /^6 \/ 6$/, 'catalog shows all selected investigations completed');
+  assert.equal(await page.locator('.experiment-card.completed').count(), 6, 'all selected catalog cards retain completion state');
 
   await page.locator('#notebookButton').click();
   await page.locator('#notebookDialog[open]').waitFor();
-  assert.equal(await page.locator('[data-notebook-id]').count(), 5, 'science notebook contains every selected investigation');
+  assert.equal(await page.locator('[data-notebook-id]').count(), 6, 'science notebook contains every selected investigation');
   assert.equal(await page.locator('.notebook-entry.locked').count(), 0, 'completed entries are all unlocked');
   await page.keyboard.press('Escape');
 
@@ -417,12 +435,13 @@ try {
       return nativeGetContext.call(this, type, ...args);
     };
   });
-  const fallbackDefinition = experiments.find((item) => item.id === 'transmission');
+  const fallbackDefinition = experiments.find((item) => item.id === 'water-filter');
   await fallbackPage.goto(`${base}/science-lab/preview#${fallbackDefinition.id}`, { waitUntil: 'networkidle' });
   await fallbackPage.waitForFunction(() => document.body.classList.contains('no-webgl'));
-  await fallbackPage.locator('#predictionDialog[open]').waitFor();
+  await passObservation(fallbackPage);
   await fallbackPage.locator(`[data-prediction="${fallbackDefinition.prediction.answer}"]`).click();
-  await fallbackPage.locator('#predictionSubmit').click();
+  await fallbackPage.locator('#stageNext').click();
+  await fallbackPage.locator('#stageScreen').waitFor({ state: 'hidden' });
   for (let index = 0; index < fallbackDefinition.steps.length; index += 1) {
     await clickAccessibleAction(fallbackPage);
   }
@@ -437,7 +456,7 @@ try {
   assert.deepEqual(browserErrors.filter((message) => !message.startsWith('Failed to load resource:')), [], `browser errors: ${JSON.stringify(browserErrors)}`);
   assert.deepEqual(externalRequests, [], 'the module does not depend on third-party network assets');
 
-  console.log('Science Lab live drag, connect, stir, tap, adjust, persistence, auth and responsive tests passed.');
+  console.log('Science Lab live drag, connect, tap, adjust, persistence, auth and responsive tests passed.');
 } finally {
   if (browser) await browser.close();
   server.kill('SIGTERM');

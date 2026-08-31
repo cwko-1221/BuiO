@@ -4,6 +4,7 @@ const express = require('express');
 const session = require('cookie-session');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const os = require('os');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
@@ -342,12 +343,31 @@ const setScienceLabHeaders = (res, { document = false } = {}) => {
   if (document) {
     // Rapier compiles its bundled WebAssembly module locally. The narrowly
     // scoped wasm token permits that without enabling JavaScript eval.
-    res.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; media-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
+    res.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' blob:; media-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
   }
 };
 app.use('/science-lab/assets', express.static(path.join(scienceLabDist, 'assets'), {
   maxAge: config.isProd ? '1y' : 0,
   immutable: config.isProd,
+  setHeaders: (res) => setScienceLabHeaders(res),
+}));
+// The catalogue of clips is published so the student page never has to probe
+// for a file that has not been supplied yet.
+const scienceLabMedia = path.join(__dirname, 'science-lab-app', 'public', 'media');
+app.get('/science-lab/media/index.json', (_req, res) => {
+  setScienceLabHeaders(res);
+  res.set('Cache-Control', 'no-store');
+  let clips = [];
+  try {
+    clips = fs.readdirSync(scienceLabMedia).filter((name) => /\.(mp4|webm)$/i.test(name));
+  } catch { clips = []; }
+  res.json({ clips });
+});
+// Observation clips are served straight from source, not through the bundler:
+// they are large, they change independently of the code, and keeping them out
+// of dist means a rebuild never re-commits a binary.
+app.use('/science-lab/media', express.static(scienceLabMedia, {
+  maxAge: config.isProd ? '30d' : 0,
   setHeaders: (res) => setScienceLabHeaders(res),
 }));
 app.get('/science-lab/preview', (req, res, next) => {

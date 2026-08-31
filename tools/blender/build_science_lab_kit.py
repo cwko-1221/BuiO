@@ -116,6 +116,141 @@ def material(
 MAT = {}
 
 
+def _texture_sample(kind: str, u: float, v: float, seed: float) -> tuple[float, float]:
+    """Return deterministic height and fine noise for a small PBR texture."""
+    noise = math.sin((u * 127.1 + v * 311.7 + seed * 19.19) * 12.9898) * 43758.5453
+    noise = noise - math.floor(noise)
+    if kind == "wood":
+        grain = math.sin(v * 46.0 + math.sin(u * 13.0) * 2.1)
+        fine = math.sin(v * 137.0 + u * 9.0)
+        return 0.5 + grain * 0.32 + fine * 0.08 + (noise - 0.5) * 0.08, noise
+    if kind == "copper":
+        brushed = math.sin(v * 236.0 + math.sin(u * 17.0) * 0.5)
+        return 0.5 + brushed * 0.055 + (noise - 0.5) * 0.045, noise
+    return 0.5 + (noise - 0.5) * 0.22, noise
+
+
+def _generated_texture(name: str, kind: str, channel: str, *, size: int = 256) -> bpy.types.Image:
+    """Create and pack a compact colour, roughness or tangent-normal texture."""
+    heights: list[float] = []
+    noises: list[float] = []
+    for y in range(size):
+        v = y / max(1, size - 1)
+        for x in range(size):
+            u = x / max(1, size - 1)
+            height, noise = _texture_sample(kind, u, v, len(name) * 0.17)
+            heights.append(max(0.0, min(1.0, height)))
+            noises.append(noise)
+
+    pixels: list[float] = []
+    for y in range(size):
+        for x in range(size):
+            index = y * size + x
+            height = heights[index]
+            noise = noises[index]
+            if channel == "base":
+                if kind == "wood":
+                    factor = 0.78 + height * 0.28
+                    color = (
+                        min(1.0, 0.82 * factor),
+                        min(1.0, 0.60 * factor),
+                        min(1.0, 0.36 * factor),
+                    )
+                elif kind == "copper":
+                    factor = 0.96 + (noise - 0.5) * 0.045
+                    color = (
+                        min(1.0, 0.98 * factor),
+                        min(1.0, 0.47 * factor),
+                        min(1.0, 0.19 * factor),
+                    )
+                else:
+                    factor = 0.95 + (noise - 0.5) * 0.055
+                    color = (0.055 * factor, 0.57 * factor, 0.36 * factor)
+            elif channel == "roughness":
+                if kind == "wood":
+                    value = 0.52 + (1.0 - height) * 0.19
+                elif kind == "copper":
+                    value = 0.22 + abs(height - 0.5) * 0.16
+                else:
+                    value = 0.31 + noise * 0.11
+                color = (value, value, value)
+            else:
+                left = heights[y * size + max(0, x - 1)]
+                right = heights[y * size + min(size - 1, x + 1)]
+                down = heights[max(0, y - 1) * size + x]
+                up = heights[min(size - 1, y + 1) * size + x]
+                strength = 1.15 if kind == "wood" else 0.72 if kind == "copper" else 0.38
+                nx = -(right - left) * strength
+                ny = -(up - down) * strength
+                nz = 1.0
+                length = math.sqrt(nx * nx + ny * ny + nz * nz)
+                color = (nx / length * 0.5 + 0.5, ny / length * 0.5 + 0.5, nz / length * 0.5 + 0.5)
+            pixels.extend((*color, 1.0))
+
+    image = bpy.data.images.new(name, width=size, height=size, alpha=True)
+    image.file_format = "PNG"
+    image.pixels.foreach_set(pixels)
+    image.update()
+    image.pack()
+    if channel != "base":
+        image.colorspace_settings.name = "Non-Color"
+    return image
+
+
+def spoon_material(kind: str) -> bpy.types.Material:
+    """PBR material with packed authored maps, suitable for glTF export."""
+    key = f"spoon_{kind}"
+    cached = MAT.get(key)
+    if cached is not None:
+        return cached
+    name = f"MAT_SPOON_{kind.upper()}"
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    nodes.clear()
+    output = nodes.new("ShaderNodeOutputMaterial")
+    bsdf = nodes.new("ShaderNodeBsdfPrincipled")
+    output.location = (620, 0)
+    bsdf.location = (340, 0)
+    links.new(bsdf.outputs["BSDF"], output.inputs["Surface"])
+    # A slightly softened metallic response keeps copper readable under the
+    # deliberately simple classroom lighting while retaining brushed highlights.
+    set_input(bsdf, ["Metallic"], 0.84 if kind == "copper" else 0.0)
+    set_input(bsdf, ["Roughness"], 0.25 if kind == "copper" else 0.38 if kind == "plastic" else 0.62)
+    set_input(bsdf, ["IOR"], 1.46)
+    set_input(bsdf, ["Coat Weight", "Clearcoat"], 0.24 if kind == "plastic" else 0.08 if kind == "wood" else 0.0)
+    set_input(bsdf, ["Coat Roughness", "Clearcoat Roughness"], 0.18)
+
+    base_node = nodes.new("ShaderNodeTexImage")
+    base_node.name = f"{name}_BASE"
+    base_node.image = _generated_texture(f"TEX_{kind.upper()}_BASE", kind, "base")
+    base_node.location = (-520, 150)
+    links.new(base_node.outputs["Color"], bsdf.inputs["Base Color"])
+
+    rough_node = nodes.new("ShaderNodeTexImage")
+    rough_node.name = f"{name}_ROUGH"
+    rough_node.image = _generated_texture(f"TEX_{kind.upper()}_ROUGH", kind, "roughness")
+    rough_node.location = (-520, -30)
+    links.new(rough_node.outputs["Color"], bsdf.inputs["Roughness"])
+
+    normal_node = nodes.new("ShaderNodeTexImage")
+    normal_node.name = f"{name}_NORMAL"
+    normal_node.image = _generated_texture(f"TEX_{kind.upper()}_NORMAL", kind, "normal")
+    normal_node.location = (-520, -220)
+    normal_map = nodes.new("ShaderNodeNormalMap")
+    normal_map.location = (-80, -210)
+    # Keep the micro-surface readable without exposing UV seams or creating a
+    # woven/grid look at the close camera distance used by the experiment.
+    normal_map.inputs["Strength"].default_value = 0.34 if kind == "wood" else 0.035 if kind == "copper" else 0.09
+    links.new(normal_node.outputs["Color"], normal_map.inputs["Color"])
+    links.new(normal_map.outputs["Normal"], bsdf.inputs["Normal"])
+    mat["material_family"] = "metal" if kind == "copper" else "wood" if kind == "wood" else "polymer"
+    mat["texture_maps"] = ["baseColor", "roughness", "normal"]
+    MAT[key] = mat
+    return mat
+
+
 def build_materials() -> None:
     MAT.update(
         glass=material("MAT_GLASS_CLEAR", (0.72, 0.93, 1.0, 0.30), roughness=0.08, transmission=0.88, ior=1.46),
@@ -321,6 +456,272 @@ def proxy(name, parent, location, dimensions, shape="box", *, rotation=(0, 0, 0)
     obj["dimensions_m"] = shipping_dimensions(dimensions)
     obj["mass_kg"] = mass
     return obj
+
+
+def smart_uv(obj: bpy.types.Object) -> None:
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.025)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    obj.select_set(False)
+
+
+def spoon_handle(name: str, parent: bpy.types.Object, spoon_mat: bpy.types.Material) -> bpy.types.Object:
+    sections = 20
+    length = 1.46
+    verts = []
+    faces = []
+    for index in range(sections + 1):
+        t = index / sections
+        z = t * length
+        if z <= 0.15:
+            width = max(0.008, 0.145 * math.sqrt(max(0.0, 1.0 - ((z - 0.15) / 0.15) ** 2)))
+        else:
+            blend = (z - 0.15) / (length - 0.15)
+            blend = blend * blend * (3.0 - 2.0 * blend)
+            width = 0.145 + (0.048 - 0.145) * blend
+        # A real spoon handle meets the back of the bowl.  Move only the upper
+        # neck rearward so it remains unioned but cannot protrude through the
+        # visible concave face.
+        neck_blend = max(0.0, min(1.0, (z / length - 0.78) / 0.22))
+        neck_blend = neck_blend * neck_blend * (3.0 - 2.0 * neck_blend)
+        center_y = 0.022 * neck_blend
+        half_depth = 0.031 - 0.003 * neck_blend
+        verts.extend([
+            (-width, center_y - half_depth, z),
+            (width, center_y - half_depth, z),
+            (-width, center_y + half_depth, z),
+            (width, center_y + half_depth, z),
+        ])
+    for index in range(sections):
+        base = index * 4
+        nxt = base + 4
+        faces.extend([
+            (base, base + 1, nxt + 1, nxt),
+            (base + 3, base + 2, nxt + 2, nxt + 3),
+            (base + 2, base, nxt, nxt + 2),
+            (base + 1, base + 3, nxt + 3, nxt + 1),
+        ])
+    faces.extend([(0, 2, 3, 1), (sections * 4, sections * 4 + 1, sections * 4 + 3, sections * 4 + 2)])
+    mesh = bpy.data.meshes.new(f"{name}_MESH")
+    mesh.from_pydata(verts, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    finish_mesh(obj, parent, spoon_mat, bevel=0.014, smooth=True)
+    smart_uv(obj)
+    return obj
+
+
+def spoon_bowl(name: str, parent: bpy.types.Object, spoon_mat: bpy.types.Material) -> bpy.types.Object:
+    length_segments = 24
+    width_segments = 14
+    # Overlap the neck of the handle generously so the exact boolean below can
+    # form a continuous, manufactured spoon body with no floating seam.
+    start_z = 1.38
+    length = 0.96
+    half_width = 0.255
+    depth = 0.105
+    wall = 0.03
+    verts = []
+    faces = []
+
+    def spread(t: float) -> float:
+        return math.pow(max(0.0, math.sin(math.pi * t)), 0.57) * (0.88 + 0.12 * t) + 0.22 * math.pow(1.0 - t, 5)
+
+    def add_surface(outer: bool) -> int:
+        base = len(verts)
+        for i in range(length_segments + 1):
+            t = 0.006 + (0.992 * i / length_segments)
+            outline = spread(t)
+            hollow = math.pow(max(0.0, math.sin(math.pi * t)), 0.78)
+            for j in range(width_segments + 1):
+                s = -1.0 + 2.0 * j / width_segments
+                across = math.pow(max(0.0, 1.0 - s * s), 0.8)
+                y = -0.012 + depth * hollow * across
+                if outer:
+                    y += wall * (0.72 + 0.28 * across)
+                verts.append((half_width * outline * s, y, start_z + t * length))
+        for i in range(length_segments):
+            for j in range(width_segments):
+                a = base + i * (width_segments + 1) + j
+                b = a + 1
+                c = a + width_segments + 1
+                d = c + 1
+                if outer:
+                    faces.extend([(a, c, b), (b, c, d)])
+                else:
+                    faces.extend([(a, b, c), (b, d, c)])
+        return base
+
+    inner = add_surface(False)
+    outer = add_surface(True)
+    stride = width_segments + 1
+    outline = []
+    for j in range(width_segments + 1):
+        outline.append((0, j))
+    for i in range(1, length_segments + 1):
+        outline.append((i, width_segments))
+    for j in range(width_segments - 1, -1, -1):
+        outline.append((length_segments, j))
+    for i in range(length_segments - 1, 0, -1):
+        outline.append((i, 0))
+    for index, (i, j) in enumerate(outline):
+        ni, nj = outline[(index + 1) % len(outline)]
+        a = inner + i * stride + j
+        b = inner + ni * stride + nj
+        c = outer + i * stride + j
+        d = outer + ni * stride + nj
+        faces.extend([(a, c, b), (b, c, d)])
+
+    mesh = bpy.data.meshes.new(f"{name}_MESH")
+    mesh.from_pydata(verts, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    finish_mesh(obj, parent, spoon_mat, smooth=True)
+    smart_uv(obj)
+    return obj
+
+
+def spoon_body(name: str, parent: bpy.types.Object, spoon_mat: bpy.types.Material) -> bpy.types.Object:
+    """Build one watertight loft from handle tip through the concave bowl.
+
+    Unlike the older boolean construction, every cross-section shares vertices
+    with the next one.  The handle therefore widens, thins and curves into the
+    bowl without a front seam, side gap or intersecting connector.
+    """
+    handle_rows = 28
+    bowl_rows = 36
+    width_segments = 18
+    neck_z = 1.405
+    bowl_length = 0.965
+    neck_width = 0.050
+    rows: list[dict[str, float | str]] = []
+
+    for index in range(handle_rows + 1):
+        t = index / handle_rows
+        z = neck_z * t
+        if z <= 0.15:
+            end_round = math.sin((z / 0.15) * math.pi / 2)
+            width = 0.028 + (0.145 - 0.028) * end_round
+        else:
+            taper = (z - 0.15) / (neck_z - 0.15)
+            taper = taper * taper * (3.0 - 2.0 * taper)
+            width = 0.145 + (neck_width - 0.145) * taper
+        rows.append({"region": "handle", "z": z, "width": width, "t": t})
+
+    for index in range(1, bowl_rows + 1):
+        t = index / bowl_rows
+        spread = math.pow(max(0.0, math.sin(math.pi * t)), 0.68) * (0.90 + 0.10 * t)
+        target_width = 0.255 * spread
+        neck_blend = min(1.0, t / 0.24)
+        neck_blend = neck_blend * neck_blend * (3.0 - 2.0 * neck_blend)
+        width = max(0.007, neck_width + (target_width - neck_width) * neck_blend)
+        rows.append({
+            "region": "bowl",
+            "z": neck_z + t * bowl_length,
+            "width": width,
+            "t": t,
+        })
+
+    stride = width_segments + 1
+    verts: list[tuple[float, float, float]] = []
+
+    def surface_y(row: dict[str, float | str], s: float, *, back: bool) -> float:
+        across = math.pow(max(0.0, 1.0 - s * s), 0.82)
+        if row["region"] == "handle":
+            # A subtly crowned, solid handle that arrives at the neck with the
+            # same front/back profile used by the first bowl section.
+            return (0.030 - 0.004 * across) if back else (-0.030 + 0.004 * across)
+        t = float(row["t"])
+        onset = min(1.0, t / 0.18)
+        onset = onset * onset * (3.0 - 2.0 * onset)
+        hollow = math.pow(max(0.0, math.sin(math.pi * t)), 0.82)
+        if back:
+            return 0.030 - 0.015 * onset + 0.088 * hollow * across
+        rim_y = -0.030 - 0.008 * onset
+        return rim_y + 0.115 * hollow * across
+
+    for back in (False, True):
+        for row in rows:
+            width = float(row["width"])
+            z = float(row["z"])
+            for segment in range(width_segments + 1):
+                s = -1.0 + 2.0 * segment / width_segments
+                verts.append((width * s, surface_y(row, s, back=back), z))
+
+    faces: list[tuple[int, ...]] = []
+    back_base = len(rows) * stride
+    for row_index in range(len(rows) - 1):
+        for segment in range(width_segments):
+            a = row_index * stride + segment
+            b = a + 1
+            c = a + stride
+            d = c + 1
+            faces.extend([(a, b, c), (b, d, c)])
+            ba, bb, bc, bd = back_base + a, back_base + b, back_base + c, back_base + d
+            faces.extend([(ba, bc, bb), (bb, bc, bd)])
+
+    for row_index in range(len(rows) - 1):
+        front_left = row_index * stride
+        next_front_left = front_left + stride
+        back_left = back_base + front_left
+        next_back_left = back_left + stride
+        faces.append((front_left, next_front_left, next_back_left, back_left))
+        front_right = row_index * stride + width_segments
+        next_front_right = front_right + stride
+        back_right = back_base + front_right
+        next_back_right = back_right + stride
+        faces.append((front_right, back_right, next_back_right, next_front_right))
+
+    for segment in range(width_segments):
+        front_bottom = segment
+        back_bottom = back_base + segment
+        faces.append((front_bottom, back_bottom, back_bottom + 1, front_bottom + 1))
+        front_top = (len(rows) - 1) * stride + segment
+        back_top = back_base + front_top
+        faces.append((front_top, front_top + 1, back_top + 1, back_top))
+
+    mesh = bpy.data.meshes.new(f"{name}_MESH")
+    mesh.from_pydata(verts, [], faces)
+    mesh.validate(verbose=False)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    finish_mesh(obj, parent, spoon_mat, smooth=True)
+    obj["continuous_topology"] = True
+    obj["junction_type"] = "lofted_handle_to_bowl"
+    smart_uv(obj)
+    return obj
+
+
+def make_spoon_asset(kind: str, mass: float) -> bpy.types.Object:
+    suffix = kind.upper()
+    spoon_mat = spoon_material(kind)
+    r = root(f"ASSET_SPOON_{suffix}", f"spoon_{kind}", (0.56, 0.15, 2.37))
+    r["material_kind"] = kind
+    r["pbr_textures"] = ["baseColor", "roughness", "normal"]
+    spoon_body(f"SPOON_{suffix}_BODY", r, spoon_mat)
+    empty(f"PIVOT_SPOON_{suffix}_GRIP", r, (0, -0.045, 0.72), "grip", grip=True, handedness="either")
+    empty(f"SOCKET_SPOON_{suffix}_BUTTER", r, (0, 0.055, 1.935), "butter_seat", radius=0.13)
+    proxy(f"COL_SPOON_{suffix}", r, (0, 0.02, 1.185), (0.56, 0.15, 2.37), "box", mass=mass)
+    return r
+
+
+def make_spoon_wood():
+    return make_spoon_asset("wood", 0.075)
+
+
+def make_spoon_plastic():
+    return make_spoon_asset("plastic", 0.045)
+
+
+def make_spoon_copper():
+    return make_spoon_asset("copper", 0.12)
 
 
 def add_graduations(parent, radius, z_start, z_end, count, *, front_y=-0.01):
@@ -604,6 +1005,9 @@ BUILDERS = [
     make_beaker,
     make_graduated_cylinder,
     make_reagent_bottle,
+    make_spoon_wood,
+    make_spoon_plastic,
+    make_spoon_copper,
     make_goggles,
     make_tuning_fork,
     make_mallet,

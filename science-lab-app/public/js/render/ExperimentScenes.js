@@ -1,20 +1,20 @@
 import {
-  buildTransmission,
-} from './scenes/BiologyScenes.js';
-import {
   buildDensity,
   buildFilter,
   buildForces,
 } from './scenes/MatterForceScenes.js';
 import {
   buildElectric,
+  buildReflection,
+  buildConduction,
 } from './scenes/EnergyScenes.js';
 
 const builders = Object.freeze({
-  transmission: buildTransmission,
   'density-column': buildDensity,
   'water-filter': buildFilter,
   'electric-crane': buildElectric,
+  'light-reflection': buildReflection,
+  'heat-conduction': buildConduction,
   'force-coaster': buildForces,
 });
 

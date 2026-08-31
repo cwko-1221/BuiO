@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {
   palette, mat, roundedBox, cylinder, sphere, torus, makeBottle, makeBeaker,
-  makeButton, makeTargetRing, makeLabelSprite,
+  makeButton, makeTargetRing, makeLabelSprite, dynamicDisplay,
 } from '../SceneKit.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -31,6 +31,8 @@ function addSocket(api, id, label, position, radius, color, rotation = null, phy
   api.root.add(socket);
   api.target(id, label, socket, {
     radius: radius + .16,
+    ...(physics.pourOffset ? { pourOffset: physics.pourOffset } : {}),
+    ...(physics.snapOffset ? { snapOffset: physics.snapOffset } : {}),
     physics: {
       shape: 'cuboid',
       halfExtents: [radius, physics.halfHeight ?? .25, radius],
@@ -169,49 +171,6 @@ function makeCart() {
   return cart;
 }
 
-function makeSpringScale() {
-  const scale = new THREE.Group();
-  const body = roundedBox(1.22, .54, .4, 0xf5f0de, .14, 5, { roughness: .56 });
-  body.position.y = .39;
-  const windowMesh = roundedBox(.62, .3, .025, 0xb9edf0, .055, 3, {
-    transparent: true, opacity: .72, roughness: .08, depthWrite: false,
-  });
-  windowMesh.position.set(.05, .42, .215);
-  const slider = roundedBox(.055, .22, .03, palette.coral, .015, 2, { emissive: palette.coral, emissiveIntensity: .2 });
-  slider.position.set(-.18, .42, .238);
-  const rearGrip = torus(.18, .045, palette.deep, { roughness: .72 });
-  rearGrip.rotation.y = Math.PI / 2;
-  rearGrip.position.set(.78, .39, 0);
-  const frontHook = torus(.17, .032, palette.metal, { arc: Math.PI * 1.55, metalness: .7, roughness: .22 });
-  frontHook.rotation.y = Math.PI / 2;
-  frontHook.position.set(-.78, .39, 0);
-  const springPoints = [];
-  for (let index = 0; index <= 64; index += 1) {
-    const t = index / 64;
-    springPoints.push(new THREE.Vector3(
-      -.24 + t * .48,
-      .42 + Math.sin(t * Math.PI * 16) * .045,
-      .232 + Math.cos(t * Math.PI * 16) * .018,
-    ));
-  }
-  const spring = new THREE.Mesh(
-    new THREE.TubeGeometry(new THREE.CatmullRomCurve3(springPoints), 72, .012, 6, false),
-    mat(palette.metal, { metalness: .78, roughness: .22 }),
-  );
-  for (let index = 0; index <= 6; index += 1) {
-    const tick = roundedBox(.018, index % 3 === 0 ? .17 : .11, .018, palette.deep, .006, 1, { castShadow: false });
-    tick.position.set(THREE.MathUtils.lerp(-.24, .24, index / 6), .42, .242);
-    scale.add(tick);
-  }
-  const units = makeLabelSprite('0    3    6 N', { color: '#123b45', background: '#fffdf7', scale: .35 });
-  units.position.set(.02, .68, .245);
-  units.scale.set(1.05, .28, 1);
-  scale.add(body, windowMesh, spring, slider, rearGrip, frontHook, units);
-  scale.userData.slider = slider;
-  scale.userData.frontHook = frontHook;
-  return scale;
-}
-
 /** A true rigid-body density column with layer-specific buoyancy and drag. */
 export function buildDensity(api) {
   const center = new THREE.Vector3(1.45, 0, .1);
@@ -245,7 +204,11 @@ export function buildDensity(api) {
     tick.position.set(-.63, baseY + index * .245, .64);
     column.add(tick);
   }
-  addEntity(api, 'column', '密度柱', column, [center.x, 0, center.z], { targetOnly: true });
+  addEntity(api, 'column', '密度柱', column, [center.x, 0, center.z], {
+    targetOnly: true,
+    namePlateMode: 'paired-fixed',
+    namePlateFrontOffset: 1.18,
+  });
 
   // Bottom plus eight tangential wall colliders keep released objects inside.
   addStaticBox(api, 'density-column-bottom', new THREE.Vector3(center.x, .23, center.z), new THREE.Vector3(.78, .055, .78), IDENTITY, { friction: .35, restitution: .12 });
@@ -261,7 +224,9 @@ export function buildDensity(api) {
     addStaticBox(api, `density-column-wall-${index + 1}`, position, new THREE.Vector3(.32, (mouthY - baseY) / 2, .045), rotation, { friction: .12, restitution: .08 });
   }
 
-  addSocket(api, 'column', '量筒口', new THREE.Vector3(center.x, mouthY + .03, center.z), .57, palette.mint, null, { halfHeight: .32 });
+  // The lip sits over the opening while the bottle body leans clear of the
+  // rim; the carry aims at the same pose the pour animation lands on.
+  addSocket(api, 'column', '量筒口', new THREE.Vector3(center.x, mouthY + .03, center.z), .57, palette.mint, null, { halfHeight: .32, pourOffset: [-.18, .45, 0] });
 
   const layerSpecs = [
     { id: 'honey', color: 0xb86d17, base: baseY, height: .82, density: 1.42, drag: 6.8 },
@@ -288,14 +253,17 @@ export function buildDensity(api) {
   }
 
   const bottles = {
-    honey: addEntity(api, 'honey', '蜂蜜', makeBottle(0xb97524, '蜂蜜', 1, { open: true }), [-4.55, 0, -1.25], {
-      draggable: true, physics: { shape: 'cylinder', radius: .464, halfHeight: .841, center: [0, .856, 0], density: 1.3, friction: .55, restitution: .04 },
+    honey: addEntity(api, 'honey', '蜂蜜', makeBottle(0xb97524, '蜂蜜', 1, { open: true }), [-4.9, 0, -1.25], {
+      draggable: true, namePlateMode: 'paired-fixed', namePlateFrontOffset: .82,
+      physics: { shape: 'cylinder', radius: .464, halfHeight: .841, center: [0, .856, 0], density: 1.3, friction: .55, restitution: .04 },
     }),
     water: addEntity(api, 'water', '水', makeBottle(palette.blue, '水', 1, { open: true }), [-3.25, 0, -1.25], {
-      draggable: true, physics: { shape: 'cylinder', radius: .464, halfHeight: .841, center: [0, .856, 0], density: 1.0, friction: .5, restitution: .05 },
+      draggable: true, namePlateMode: 'paired-fixed', namePlateFrontOffset: .82,
+      physics: { shape: 'cylinder', radius: .464, halfHeight: .841, center: [0, .856, 0], density: 1.0, friction: .5, restitution: .05 },
     }),
-    oil: addEntity(api, 'oil', '食用油', makeBottle(0xf1d253, '油', 1, { open: true }), [-1.95, 0, -1.25], {
-      draggable: true, physics: { shape: 'cylinder', radius: .464, halfHeight: .841, center: [0, .856, 0], density: .82, friction: .48, restitution: .06 },
+    oil: addEntity(api, 'oil', '食用油', makeBottle(0xf1d253, '油', 1, { open: true }), [-1.6, 0, -1.25], {
+      draggable: true, namePlateMode: 'paired-fixed', namePlateFrontOffset: .82,
+      physics: { shape: 'cylinder', radius: .464, halfHeight: .841, center: [0, .856, 0], density: .82, friction: .48, restitution: .06 },
     }),
   };
   for (const [id, object] of Object.entries(bottles)) {
@@ -321,8 +289,10 @@ export function buildDensity(api) {
     pore.scale.y = .22;
     corkModel.add(pore);
   }
-  const cork = addEntity(api, 'cork', '軟木塞', corkModel, [-3.95, .26, 1.65], {
+  const cork = addEntity(api, 'cork', '軟木塞', corkModel, [-4.15, .26, 1.65], {
     draggable: true,
+    namePlateMode: 'paired-fixed',
+    namePlateFrontOffset: .62,
     physics: { shape: 'cylinder', density: .24, height: .48, friction: .38, restitution: .16, linearDamping: .16, angularDamping: .32, allowRotation: true },
   });
 
@@ -334,8 +304,10 @@ export function buildDensity(api) {
   const beadCore = sphere(.095, 0xe8fbff, { transparent: true, opacity: .64, roughness: .03, emissive: 0xa9edff, emissiveIntensity: .2, depthWrite: false });
   beadCore.position.set(-.06, .065, .09);
   beadModel.add(beadGlass, beadCore);
-  const bead = addEntity(api, 'bead', '玻璃珠', beadModel, [-2.75, .3, 1.65], {
+  const bead = addEntity(api, 'bead', '玻璃珠', beadModel, [-2.45, .3, 1.65], {
     draggable: true,
+    namePlateMode: 'paired-fixed',
+    namePlateFrontOffset: .62,
     physics: { shape: 'ball', radius: .27, density: 2.5, friction: .28, restitution: .22, linearDamping: .08, angularDamping: .18, allowRotation: true },
   });
 
@@ -370,7 +342,7 @@ export function buildDensity(api) {
     if (layer) {
       layer.target = 1;
       activePour = action.subject;
-      api.tiltPour(bottles[action.subject], new THREE.Vector3(center.x - .18, mouthY + .48, center.z), layer.color);
+      api.tiltPour(bottles[action.subject], null, layer.color, { target: 'column' });
     }
     if (action.subject === 'cork' || action.subject === 'bead') {
       installSolid(action.subject);
@@ -530,7 +502,7 @@ export function buildFilter(api) {
   lip.position.y = .92;
   funnel.add(cone, coneRim, neck, lip);
   addEntity(api, 'filter', '濾斗', funnel, [center.x, 0, center.z], { targetOnly: true });
-  addSocket(api, 'filter', '濾斗口', new THREE.Vector3(center.x, funnelTop + .04, center.z), .65, palette.mint, null, { halfHeight: .32 });
+  addSocket(api, 'filter', '濾斗口', new THREE.Vector3(center.x, funnelTop + .04, center.z), .65, palette.mint, null, { halfHeight: .32, pourOffset: [-.15, .35, 0] });
 
   // Funnel neck and eight sloped wall approximations prevent equipment from
   // passing through the fixed apparatus during physical dragging.
@@ -599,15 +571,18 @@ export function buildFilter(api) {
     );
   }
 
+  // Short enough to stand in the collection beaker under the funnel. A taller
+  // probe has no path to the water: its head fouls the funnel wall on the way
+  // down and the carried body wedges in the neck.
   const sensor = new THREE.Group();
-  const probe = cylinder(.065, 1.05, palette.metal, { metalness: .72, roughness: .21 });
-  probe.position.y = .53;
+  const probe = cylinder(.065, .56, palette.metal, { metalness: .72, roughness: .21 });
+  probe.position.y = .29;
   const probeTip = sphere(.105, palette.blue, { metalness: .15, roughness: .2, emissive: palette.blue, emissiveIntensity: .16 });
   probeTip.position.y = .06;
-  const sensorHead = roundedBox(.7, .5, .34, 0x2c8bc6, .13, 5, { roughness: .35 });
-  sensorHead.position.y = 1.22;
-  const screen = roundedBox(.42, .2, .025, 0x153f49, .04, 2, { emissive: 0x60e0bb, emissiveIntensity: .22 });
-  screen.position.set(0, 1.24, .185);
+  const sensorHead = roundedBox(.62, .38, .3, 0x2c8bc6, .12, 5, { roughness: .35 });
+  sensorHead.position.y = .72;
+  const screen = roundedBox(.38, .16, .025, 0x153f49, .04, 2, { emissive: 0x60e0bb, emissiveIntensity: .22 });
+  screen.position.set(0, .74, .165);
   sensor.add(probe, probeTip, sensorHead, screen);
   const sensorEntity = addEntity(api, 'sensor', '濁度探頭', sensor, [-2.25, .04, 1.52], {
     draggable: true, physics: { shape: 'capsule', density: 1.05, friction: .44, restitution: .06, allowRotation: true },
@@ -667,13 +642,31 @@ export function buildFilter(api) {
   const clearDrops = makePourDrops(0xa8d9cf, 28);
   api.root.add(dirtyDrops.group, clearDrops.group);
 
+  const meterStand = new THREE.Group();
   const meter = makePhysicalGauge(palette.mint);
-  meter.position.set(3.55, .12, .65);
-  meter.rotation.y = -.12;
-  api.root.add(meter);
-  const warningLamp = sphere(.13, palette.yellow, { emissive: palette.yellow, emissiveIntensity: .25, roughness: .25 });
-  warningLamp.position.set(3.95, .38, .85);
+  // The needle rests at the top of the scale until a probe is in the water;
+  // an unmeasured meter must not claim a value.
+  meter.userData.needlePivot.rotation.z = .62;
+  // A dial the size of a bottle cap is unreadable across a classroom; the
+  // instrument is scaled up as a whole so the needle and its scale stay legible.
+  meter.scale.setScalar(1.75);
+  meter.position.set(0, 0, 0);
+  meterStand.add(meter);
+  meterStand.position.set(3.05, .1, .62);
+  meterStand.rotation.y = -.16;
+  api.root.add(meterStand);
+  addEntity(api, 'turbidity-meter', '濁度計', meterStand, [3.05, .1, .62], { targetOnly: true });
+  // The panel states the reading in words and the bench plate names the
+  // instrument, so separate scale captions would only crowd the dial.
+  const turbidityDisplay = dynamicDisplay('濁度：未量度', { scale: [3.1, .88] });
+  turbidityDisplay.position.set(3.2, 1.9, .62);
+  api.root.add(turbidityDisplay);
+  const warningLamp = sphere(.16, palette.yellow, { emissive: palette.yellow, emissiveIntensity: .25, roughness: .25 });
+  warningLamp.position.set(4.35, .3, 2.24);
   api.root.add(warningLamp);
+  const warningCaption = makeLabelSprite('微生物／溶解物：未知', { color: '#7a3b16', background: '#fff3df', scale: .4 });
+  warningCaption.position.set(4.35, .8, 2.24);
+  api.root.add(warningCaption);
 
   let filtering = false;
   let filterProgress = 0;
@@ -689,7 +682,7 @@ export function buildFilter(api) {
       api.moveObject(cottonEntity, new THREE.Vector3(center.x, 1.76, center.z), { duration: .45, scale: .55 });
     } else {
       const source = id === 'sand' ? sandCup : gravelCup;
-      api.tiltPour(source, new THREE.Vector3(center.x - .12, funnelTop + .35, center.z), id === 'sand' ? 0xe4bf76 : 0x81776b);
+      api.tiltPour(source, null, id === 'sand' ? 0xe4bf76 : 0x81776b, { target: 'filter' });
     }
   }
 
@@ -698,13 +691,12 @@ export function buildFilter(api) {
     if (action.subject === 'muddy-water') {
       filtering = true;
       filterProgress = 0;
-      api.tiltPour(muddy, new THREE.Vector3(center.x - .18, funnelTop + .42, center.z), 0x705537);
+      api.tiltPour(muddy, null, 0x705537, { target: 'filter' });
     }
     if (action.subject === 'sensor') {
       sensorInserted = true;
       const sensorRootPosition = worldPoint(api, new THREE.Vector3(center.x + .32, waterTargetY - .06, center.z));
       api.setPhysicsPose?.('sensor', sensorRootPosition, worldQuaternion(api), { dynamic: false });
-      meter.userData.needlePivot.rotation.z = -.72;
       warningLamp.material.emissiveIntensity = 1.45;
       warningLamp.material.color.setHex(palette.coral);
       warningLamp.material.emissive.setHex(palette.coral);
@@ -755,10 +747,24 @@ export function buildFilter(api) {
         drop.scale.y = 1.5 + phase * 2.2;
       });
       if (collectedLevel > .02) collectedSurface.position.y += Math.sin(time * 3.1) * .003;
-      if (!sensorInserted && filtering) {
-        meter.userData.needlePivot.rotation.z = damp(meter.userData.needlePivot.rotation.z, .62 - filterProgress * 1.05, 2.2, dt);
+      if (sensorInserted) {
+        screen.material.emissiveIntensity = .45 + Math.sin(time * 4) * .08;
+        // The needle settles from the top of the scale onto the reading, so the
+        // fall in turbidity is something the student watches happen.
+        meter.userData.needlePivot.rotation.z = damp(meter.userData.needlePivot.rotation.z, -.72, 1.9, dt);
       }
-      if (sensorInserted) screen.material.emissiveIntensity = .45 + Math.sin(time * 4) * .08;
+      // Read the panel off the needle so the words and the dial never disagree.
+      const needle = meter.userData.needlePivot.rotation.z;
+      const turbidity = THREE.MathUtils.clamp((.62 - needle) / 1.34, 0, 1);
+      if (!sensorInserted) {
+        turbidityDisplay.userData.setText('濁度：未量度', '#8fb7c4');
+      } else if (turbidity < .45) {
+        turbidityDisplay.userData.setText(`濁度：高 ${Math.round(90 - turbidity * 60)} NTU`, '#f0a37a');
+      } else if (turbidity < .8) {
+        turbidityDisplay.userData.setText(`濁度：中 ${Math.round(90 - turbidity * 60)} NTU`, '#f2d25a');
+      } else {
+        turbidityDisplay.userData.setText(`濁度：低 ${Math.round(90 - turbidity * 60)} NTU`, '#60e0bb');
+      }
     },
     dispose() {},
   };
@@ -811,6 +817,9 @@ export function buildForces(api) {
   }
 
   const runLength = 5.25;
+  // Tuned so the cart still travels a clear, readable distance on the rough
+  // surface rather than stopping the moment it arrives.
+  const roughFriction = .44;
   const runCenterX = hinge.x + runLength / 2 - .04;
   const runout = roundedBox(runLength, .16, 1.48, 0xe9d4aa, .08, 4, { roughness: .62 });
   runout.position.set(runCenterX, .14, hinge.z);
@@ -822,6 +831,30 @@ export function buildForces(api) {
     api.root.add(rail);
     addStaticBox(api, `force-runout-rail-${index + 1}`, new THREE.Vector3(runCenterX, .28, z), new THREE.Vector3(runLength / 2, .18, .045), IDENTITY, { friction: .4 });
   }
+  // Distances are read from the foot of the ramp, where the horizontal run
+  // begins, so 0 m is the moment the cart stops descending.
+  const rulerZ = hinge.z + 1.02;
+  const rulerStrip = roundedBox(runLength, .03, .3, 0xfdf6e3, .012, 2, { roughness: .8, castShadow: false });
+  rulerStrip.position.set(hinge.x + runLength / 2, .16, rulerZ);
+  api.root.add(rulerStrip);
+  for (let metre = 0; metre <= 5; metre += 1) {
+    const major = roundedBox(.035, .04, .2, palette.deep, .01, 1, { castShadow: false });
+    major.position.set(hinge.x + metre, .19, rulerZ);
+    api.root.add(major);
+    const mark = makeLabelSprite(`${metre} m`, { color: '#123b45', background: '#fdf6e3', scale: .42 });
+    mark.position.set(hinge.x + metre, .36, rulerZ + .34);
+    api.root.add(mark);
+    if (metre < 5) {
+      const half = roundedBox(.025, .03, .11, 0x6f8f96, .008, 1, { castShadow: false });
+      half.position.set(hinge.x + metre + .5, .185, rulerZ);
+      api.root.add(half);
+    }
+  }
+  api.root.add(makeLabelSprite('距離尺 · 由斜台底計起', { color: '#123b45', background: '#fdf6e3', scale: .5 })
+    .translateX(hinge.x + runLength / 2)
+    .translateY(.82)
+    .translateZ(rulerZ + .34));
+
   const endBumper = roundedBox(.16, .56, 1.52, palette.coral, .055, 3, { roughness: .48 });
   endBumper.position.set(hinge.x + runLength - .02, .36, hinge.z);
   api.root.add(endBumper);
@@ -860,15 +893,9 @@ export function buildForces(api) {
   const runTarget = makeTargetRing(palette.mint, 1.62);
   runTarget.position.set(runCenterX, .24, hinge.z);
   api.root.add(runTarget);
-  api.target('runout', '水平軌道', runTarget, { radius: 2.12, physics: { shape: 'cuboid', halfExtents: [2.38, .3, .66], padding: .04 } });
-
-  const pullEndX = hinge.x + runLength - .58;
-  const pullTarget = makeTargetRing(palette.yellow, .46);
-  pullTarget.position.set(pullEndX, trackTopY + .18, hinge.z);
-  api.root.add(pullTarget);
-  api.target('pull-end', '彈簧秤拉動終點', pullTarget, {
-    radius: .62,
-    physics: { shape: 'cuboid', halfExtents: [.58, .34, .58], padding: .04 },
+  api.target('runout', '水平軌道', runTarget, {
+    radius: 2.12,
+    physics: { shape: 'cuboid', halfExtents: [2.38, .3, .66], padding: .04 },
   });
 
   const cart = makeCart();
@@ -876,58 +903,40 @@ export function buildForces(api) {
     draggable: true,
     physics: { density: .82, friction: .16, restitution: .045, linearDamping: .07, angularDamping: .22, rotationAxes: [false, false, true] },
   });
-  const cartHookTarget = makeTargetRing(palette.mint, .28);
-  cartHookTarget.rotation.z = Math.PI / 2;
-  cartHookTarget.position.set(.76, .42, 0);
-  cart.add(cartHookTarget);
-  api.target('cart-hook', '小車掛鈎', cartHookTarget, { radius: .43, physics: { shape: 'cuboid', halfExtents: [.3, .3, .34], padding: .03 } });
 
   const release = addEntity(api, 'release', '釋放掣', makeButton(palette.mint), [-4.82, .05, -.58], { tappable: true });
 
   const roughGroup = new THREE.Group();
-  const roughBoard = roundedBox(4.55, .13, 1.36, 0x8b6547, .045, 3, { roughness: 1 });
+  // Narrower than the 1.39 gap between the run-out rails, so the board has
+  // real clearance to be lowered between them instead of jamming.
+  const roughBoard = roundedBox(4.55, .13, 1.24, 0x8b6547, .045, 3, { roughness: 1 });
   roughBoard.position.y = .08;
   roughGroup.add(roughBoard);
   const roughRandom = seeded(99);
   for (let index = 0; index < 80; index += 1) {
     const grit = sphere(.018 + roughRandom() * .025, index % 3 ? 0x6f4c35 : 0xab8060, { roughness: 1, widthSegments: 7, heightSegments: 5, castShadow: false });
-    grit.position.set((roughRandom() - .5) * 4.25, .15 + roughRandom() * .02, (roughRandom() - .5) * 1.15);
+    grit.position.set((roughRandom() - .5) * 4.25, .15 + roughRandom() * .02, (roughRandom() - .5) * 1.04);
     roughGroup.add(grit);
   }
   const rough = addEntity(api, 'rough-track', '粗糙表面', roughGroup, [2.25, .13, 1.62], {
     draggable: true,
-    physics: { friction: 1.55, density: 1.1, restitution: .015, linearDamping: 3.5, angularDamping: 6 },
+    physics: { friction: .58, density: 1.1, restitution: .015, linearDamping: 3.5, angularDamping: 6 },
   });
 
-  const springScale = makeSpringScale();
-  // Park the scale in a separate front lane. The cart remains free to settle
-  // on its own wheels instead of being pushed sideways by an initial contact.
-  addEntity(api, 'spring-scale', '彈簧秤', springScale, [-2.72, .14, 2.5], {
-    draggable: true,
-    physics: { density: .72, friction: .5, restitution: .05, linearDamping: 2.6, angularDamping: 4.5 },
-  });
-
-  const tetherGeometry = new THREE.BufferGeometry();
-  tetherGeometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 0, 0, 0], 3));
-  const tether = new THREE.Line(tetherGeometry, new THREE.LineBasicMaterial({ color: palette.coral, transparent: true, opacity: .9 }));
-  tether.visible = false;
-  api.root.add(tether);
-
-  const speedGauge = makePhysicalGauge(palette.blue);
-  speedGauge.position.set(3.85, .18, 1.65);
-  api.root.add(speedGauge);
   const frictionLamp = roundedBox(.22, .22, .08, palette.coral, .05, 3, { emissive: palette.coral, emissiveIntensity: .08 });
   frictionLamp.position.set(4.35, .58, 1.88);
   api.root.add(frictionLamp);
 
   function makeStopMarker(text, color, zOffset) {
     const marker = new THREE.Group();
-    const pole = cylinder(.028, .58, color, { metalness: .2, roughness: .38 });
-    pole.position.y = .29;
+    const pole = cylinder(.028, .74, color, { metalness: .2, roughness: .38 });
+    pole.position.y = .37;
     const foot = cylinder(.12, .035, color, { roughness: .5 });
-    const markerLabel = makeLabelSprite(text, { color: '#123b45', background: '#fffdf7', scale: .34 });
-    markerLabel.position.y = .73;
-    marker.add(pole, foot, markerLabel);
+    const readout = dynamicDisplay(`${text} —`, { scale: [2.05, .58] });
+    readout.position.y = .95;
+    marker.add(pole, foot, readout);
+    marker.userData.readout = readout;
+    marker.userData.text = text;
     marker.position.set(hinge.x, trackTopY + .02, hinge.z + zOffset);
     marker.visible = false;
     api.root.add(marker);
@@ -942,20 +951,13 @@ export function buildForces(api) {
   let runs = 0;
   let roughInstalled = false;
   let running = false;
-  let scaleAttached = false;
-  let pulling = false;
-  let pullReleased = false;
-  let springReadingN = 0;
-  let peakSpringReadingN = 0;
-  let springExtension = 0;
-  let pullStartCartX = 0;
-  let pullDistance = 0;
   let lastCartSpeed = 0;
   let wheelAngle = 0;
   let previousCartX = cart.position.x;
   let runStartX = null;
   let runPeakDistance = 0;
   const trialDistances = { smooth: null, rough: null };
+  const trialMetres = { smooth: null, rough: null };
   let comparisonReady = false;
 
   function finishRun(localCart) {
@@ -965,14 +967,24 @@ export function buildForces(api) {
     trialDistances[trial] = measuredDistance;
     const marker = trial === 'rough' ? roughStopMarker : smoothStopMarker;
     marker.position.x = THREE.MathUtils.clamp(localCart.x, hinge.x + .12, hinge.x + runLength - .22);
+    // Read off the same scale the student reads: metres from the foot of the ramp.
+    const metres = Math.max(0, marker.position.x - hinge.x);
+    trialMetres[trial] = Number(metres.toFixed(1));
+    marker.userData.readout.userData.setText(
+      `${marker.userData.text} ${metres.toFixed(1)} m`,
+      trial === 'rough' ? '#f0a37a' : '#60e0bb',
+    );
     marker.visible = true;
     comparisonReady = Number.isFinite(trialDistances.smooth) && Number.isFinite(trialDistances.rough);
     running = false;
+    // The labelled stop marker keeps the evidence, so the cart returns to the
+    // start: the run-out is left clear for the rough board, and the next trial
+    // begins from the same height.
+    poseOnRamp();
   }
 
-  function clearPullForces() {
+  function clearCartForces() {
     api.setPhysicsForce?.('cart', { x: 0, y: 0, z: 0 });
-    api.setPhysicsForce?.('spring-scale', { x: 0, y: 0, z: 0 });
   }
 
   function updateRampCollision(degrees) {
@@ -986,36 +998,12 @@ export function buildForces(api) {
   }
 
   function poseOnRamp() {
-    clearPullForces();
+    clearCartForces();
     const world = worldPoint(api, startPosition);
     api.setPhysicsPose?.('cart', world, worldQuaternion(api, rampQuaternion), { dynamic: false, velocity: { x: 0, y: 0, z: 0 } });
     api.setPhysicsMaterial?.('cart', { friction: .16, restitution: .035 });
-    const hookPosition = new THREE.Vector3(.76, .42, 0).applyQuaternion(rampQuaternion).add(startPosition);
-    api.updateTargetPose?.('cart-hook', worldPoint(api, hookPosition), worldQuaternion(api, rampQuaternion));
     cartPlaced = true;
     running = false;
-  }
-
-  function poseForPull() {
-    clearPullForces();
-    const local = new THREE.Vector3(hinge.x + .78, trackTopY + .16, hinge.z);
-    api.setPhysicsPose?.('cart', worldPoint(api, local), worldQuaternion(api), { dynamic: false });
-    api.setPhysicsMaterial?.('cart', { friction: .95, restitution: .02 });
-    cartPlaced = true;
-    running = false;
-  }
-
-  function updateTether() {
-    if (!scaleAttached) return;
-    const from = springScale.userData.frontHook.getWorldPosition(new THREE.Vector3());
-    const to = cartHookTarget.getWorldPosition(new THREE.Vector3());
-    const localFrom = api.root.worldToLocal(from.clone());
-    const localTo = api.root.worldToLocal(to.clone());
-    const positions = tether.geometry.attributes.position;
-    positions.setXYZ(0, localFrom.x, localFrom.y, localFrom.z);
-    positions.setXYZ(1, localTo.x, localTo.y, localTo.z);
-    positions.needsUpdate = true;
-    tether.geometry.computeBoundingSphere();
   }
 
   api.onPreview = (subject, value) => {
@@ -1045,55 +1033,25 @@ export function buildForces(api) {
         finishRun(api.root.worldToLocal(new THREE.Vector3(currentPose.position.x, currentPose.position.y, currentPose.position.z)));
       }
       roughInstalled = true;
-      const destination = new THREE.Vector3(hinge.x + 2.48, trackTopY, hinge.z);
+      // The board is the visible surface; the track it covers is what the cart
+      // actually rolls on, so the roughness is applied to the track's contact
+      // material. Leaving the board's own collider in play made it a kerb.
+      const destination = new THREE.Vector3(hinge.x + 2.48, .1, hinge.z);
       api.setPhysicsPose?.('rough-track', worldPoint(api, destination), worldQuaternion(api), { dynamic: false });
-      api.setPhysicsMaterial?.('rough-track', { friction: 1.55, restitution: .01 });
-      poseForPull();
-    }
-    if (action.subject === 'spring-scale' && action.target === 'cart-hook') {
-      if (!roughInstalled) poseForPull();
-      const cartPose = api.getPhysicsPose?.('cart');
-      const cartWorld = cartPose ? new THREE.Vector3(cartPose.position.x, cartPose.position.y, cartPose.position.z) : worldPoint(api, new THREE.Vector3(hinge.x + .78, trackTopY + .16, hinge.z));
-      const scaleWorld = cartWorld.clone().add(new THREE.Vector3(1.5, -.02, 0));
-      api.setPhysicsPose?.('spring-scale', scaleWorld, worldQuaternion(api), { dynamic: false });
-      api.setPhysicsMaterial?.('cart', { friction: .28, restitution: .02 });
-      api.makePhysicsDynamic?.('cart', { x: 0, y: 0, z: 0 });
-      clearPullForces();
-      scaleAttached = true;
-      tether.visible = true;
-      pulling = false;
-      pullReleased = false;
-      springReadingN = 0;
-      peakSpringReadingN = 0;
-      springExtension = 0;
-      pullStartCartX = api.root.worldToLocal(cartWorld.clone()).x;
-      pullDistance = 0;
-      springScale.userData.slider.position.x = -.18;
-      frictionLamp.material.emissiveIntensity = .18;
-    }
-    if (action.subject === 'spring-scale' && action.target === 'pull-end') {
-      const pullEndWorld = worldPoint(api, new THREE.Vector3(pullEndX, trackTopY + .18, hinge.z));
-      api.setPhysicsPose?.('spring-scale', pullEndWorld, worldQuaternion(api), { dynamic: false, velocity: { x: 0, y: 0, z: 0 } });
-      api.makePhysicsDynamic?.('cart');
-      clearPullForces();
-      scaleAttached = true;
-      tether.visible = true;
-      pulling = true;
-      pullReleased = true;
+      api.setPhysicsEnabled?.('rough-track', false);
+      api.setPhysicsMaterial?.('force-runout-surface', { friction: roughFriction, restitution: .02 });
     }
     if (action.subject === 'release') {
       runs += 1;
       api.pressButton(release);
       if (!cartPlaced || runs > 1) poseOnRamp();
-      scaleAttached = false;
-      pulling = false;
-      pullReleased = false;
-      tether.visible = false;
-      clearPullForces();
+      clearCartForces();
       // The cart must descend under gravity. Once it reaches the horizontal
       // section, the installed collider's actual contact material supplies
       // the rough/smooth difference; no scripted rolling impulse is applied.
-      api.setPhysicsMaterial?.('cart', { friction: roughInstalled ? .28 : .12, restitution: .035 });
+      // The cart is the control. Changing its own friction would also slow it
+      // on the ramp, which is not the variable under test.
+      api.setPhysicsMaterial?.('cart', { friction: .12, restitution: .035 });
       api.makePhysicsDynamic?.('cart', { x: 0, y: 0, z: 0 });
       runStartX = startPosition.x;
       runPeakDistance = 0;
@@ -1114,10 +1072,6 @@ export function buildForces(api) {
         const speed = Math.hypot(pose.velocity.x, pose.velocity.y, pose.velocity.z);
         lastCartSpeed = speed;
         if (running && Number.isFinite(runStartX)) runPeakDistance = Math.max(runPeakDistance, localCart.x - runStartX);
-        if (scaleAttached) pullDistance = Math.max(pullDistance, localCart.x - pullStartCartX);
-        cartHookTarget.updateWorldMatrix(true, false);
-        api.updateTargetPose?.('cart-hook', cartHookTarget.getWorldPosition(new THREE.Vector3()), cartHookTarget.getWorldQuaternion(new THREE.Quaternion()));
-        speedGauge.userData.needlePivot.rotation.z = damp(speedGauge.userData.needlePivot.rotation.z, THREE.MathUtils.lerp(-1.15, .82, THREE.MathUtils.clamp(speed / 2.6, 0, 1)), 5, dt);
         if (running && localCart.x > hinge.x + .05) {
           const heat = THREE.MathUtils.clamp(speed / 1.4, 0, 1);
           frictionLamp.material.emissiveIntensity = roughInstalled ? .22 + heat * (.7 + Math.sin(time * 9) * .12) : .1;
@@ -1125,52 +1079,6 @@ export function buildForces(api) {
         if (running && (speed < .035 && runPeakDistance > .45 || localCart.x > hinge.x + 4.82)) finishRun(localCart);
       }
 
-      let measuredTension = 0;
-      if (scaleAttached && pose) {
-        const scalePose = api.getPhysicsPose?.('spring-scale');
-        if (scalePose) {
-          const cartHookWorld = cartHookTarget.getWorldPosition(new THREE.Vector3());
-          const scaleHookWorld = springScale.userData.frontHook.getWorldPosition(new THREE.Vector3());
-          const springVector = scaleHookWorld.sub(cartHookWorld);
-          springVector.y = 0;
-          const hookDistance = springVector.length();
-          springExtension = Math.max(0, hookDistance - .08);
-          const direction = hookDistance > .001 ? springVector.multiplyScalar(1 / hookDistance) : new THREE.Vector3(1, 0, 0);
-          // Merely attaching leaves the hooks at their rest length. Only the
-          // next real pointer drag can create extension and begin the pull.
-          if (!pullReleased && springExtension > .025) pulling = true;
-          const cartVelocity = new THREE.Vector3(pose.velocity.x, pose.velocity.y, pose.velocity.z);
-          const scaleVelocity = new THREE.Vector3(scalePose.velocity.x, scalePose.velocity.y, scalePose.velocity.z);
-          const relativeSpeed = scaleVelocity.sub(cartVelocity).dot(direction);
-          if (pulling) measuredTension = THREE.MathUtils.clamp(springExtension * 5.4 + relativeSpeed * .32, 0, 6);
-          if (pulling && measuredTension > .001) {
-            const force = direction.multiplyScalar(measuredTension);
-            api.setPhysicsForce?.('cart', { x: force.x, y: 0, z: force.z });
-            api.setPhysicsForce?.('spring-scale', pullReleased
-              ? { x: 0, y: 0, z: 0 }
-              : { x: -force.x, y: 0, z: -force.z });
-          } else {
-            clearPullForces();
-          }
-          if (pullReleased && springExtension < .09 && lastCartSpeed < .08) {
-            pulling = false;
-            clearPullForces();
-          }
-        } else {
-          pulling = false;
-          clearPullForces();
-        }
-      }
-      springReadingN = damp(springReadingN, measuredTension, measuredTension > springReadingN ? 12 : 5, dt);
-      peakSpringReadingN = Math.max(peakSpringReadingN, springReadingN);
-      springScale.userData.slider.position.x = damp(
-        springScale.userData.slider.position.x,
-        THREE.MathUtils.lerp(-.18, .24, THREE.MathUtils.clamp(springReadingN / 6, 0, 1)),
-        10,
-        dt,
-      );
-      if (scaleAttached) frictionLamp.material.emissiveIntensity = .18 + THREE.MathUtils.clamp(springReadingN / 6, 0, 1) * .92;
-      updateTether();
     },
     getState() {
       return {
@@ -1178,18 +1086,13 @@ export function buildForces(api) {
         angleDeg: currentAngle,
         roughInstalled,
         running,
-        scaleAttached,
-        pulling,
-        pullReleased,
-        springReadingN: Number(springReadingN.toFixed(3)),
-        peakSpringReadingN: Number(peakSpringReadingN.toFixed(3)),
-        springExtension: Number(springExtension.toFixed(3)),
-        pullDistance: Number(pullDistance.toFixed(3)),
         cartSpeed: Number(lastCartSpeed.toFixed(3)),
         comparisonReady,
         comparison: {
           controlledVariables: ['cart', 'rampAngle', 'startPosition'],
           independentVariable: 'surfaceRoughness',
+          smoothMetres: trialMetres.smooth,
+          roughMetres: trialMetres.rough,
           smoothTravelWorldUnits: Number.isFinite(trialDistances.smooth) ? Number(trialDistances.smooth.toFixed(3)) : null,
           roughTravelWorldUnits: Number.isFinite(trialDistances.rough) ? Number(trialDistances.rough.toFixed(3)) : null,
           roughStopsSooner: comparisonReady ? trialDistances.rough < trialDistances.smooth : null,
@@ -1197,9 +1100,7 @@ export function buildForces(api) {
       };
     },
     dispose() {
-      clearPullForces();
-      tether.geometry.dispose();
-      tether.material.dispose();
+      clearCartForces();
     },
   };
 }

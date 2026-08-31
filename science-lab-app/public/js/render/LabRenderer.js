@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import {
   palette, mat, roundedBox, cylinder, sphere, torus, makeBench, makeBeaker,
   makeBottle, makeTargetRing, makeWire, replaceWireGeometry, disposeObject, worldPosition,
+  makeLabelPlane,
 } from './SceneKit.js';
 import { buildExperimentScene } from './ExperimentScenes.js';
 import { PhysicsWorld } from '../physics/PhysicsWorld.js';
@@ -11,14 +12,19 @@ import { loadScienceLabKit, getAssetLibraryStats } from './AssetLibrary.js';
 const DEFAULT_CAMERA = new THREE.Vector3(0, 7.6, 11.2);
 const DEFAULT_TARGET = new THREE.Vector3(0, .9, 0);
 const CAMERA_PRESETS = {
-  transmission: { position: [-.25, 7.25, 11.7], target: [.25, 1.0, -.1] },
   'density-column': { position: [-.15, 7.55, 11.8], target: [.2, 1.2, .05] },
   'water-filter': { position: [-.1, 7.55, 11.9], target: [.35, 1.3, .05] },
   'electric-crane': { position: [-.3, 7.35, 12.2], target: [.25, 1.25, 0] },
+  'light-reflection': { position: [-.1, 7.15, 11.4], target: [.35, 1.7, .05] },
+  'heat-conduction': { position: [-.8, 6.05, 9.9], target: [-.4, 2.2, .05] },
   'force-coaster': { position: [-.2, 7.85, 12.8], target: [.2, 1.0, -.15] },
 };
 
 export class LabRenderer {
+  namePlateQueue = [];
+
+  namePlates = new Map();
+
   constructor(canvas, { settings, audio, onAction, onPreview, onHover, onContextIssue } = {}) {
     this.canvas = canvas;
     this.settings = settings;
@@ -200,7 +206,10 @@ export class LabRenderer {
     this.experimentRoot.position.y = .05;
     this.world.add(this.experimentRoot);
     const api = this.#createSceneApi();
+    this.namePlateQueue = [];
+    this.namePlates = new Map();
     this.sceneController = buildExperimentScene(definition, api);
+    this.#layOutNamePlates();
     this.#updateLabelScale();
     if (actionHistory?.length) {
       this.instant = true;
@@ -263,12 +272,99 @@ export class LabRenderer {
     };
     const entity = { id, label, object, options, home };
     this.entities.set(id, entity);
+    // Connection ports are named by the step instruction and sit too close
+    // together to plate; parts that are not pickable are scenery.
+    if (label && options.namePlate !== false && !options.connectable && options.pickable !== false) this.namePlateQueue.push(entity);
     this.physics?.registerEntity(id, object, options);
     object.traverse((child) => {
       if (!child.isMesh) return;
       child.userData.entityId = id;
       if (!options.targetOnly && options.pickable !== false) this.pickables.push(child);
     });
+  }
+
+  /**
+   * Build one plate per named piece of apparatus and stand them along the front
+   * of the bench. Plates are laid out together rather than one at a time so
+   * neighbouring apparatus cannot end up with overlapping names.
+   */
+  #layOutNamePlates() {
+    // Plate the nearest apparatus first. The bench is seen at an angle, so two
+    // plates a short distance apart in depth still read as one stacked blur;
+    // a crowded plate therefore steps backwards, which keeps the plates in the
+    // same front-to-back order as the apparatus they name.
+    const queued = this.namePlateQueue
+      .map((entity) => ({ entity, bounds: new THREE.Box3().setFromObject(entity.object) }))
+      .filter(({ bounds }) => !bounds.isEmpty() && Number.isFinite(bounds.min.x))
+      .sort((a, b) => b.bounds.max.z - a.bounds.max.z);
+    const placed = [];
+    for (const { entity, bounds } of queued) {
+      const centre = bounds.getCenter(new THREE.Vector3());
+      const plate = this.#makeNamePlate(entity.label);
+      const paired = entity.options.namePlateMode === 'paired-fixed';
+      const local = paired
+        ? this.experimentRoot.worldToLocal(centre.clone())
+        : this.experimentRoot.worldToLocal(new THREE.Vector3(centre.x, 0, bounds.max.z + .34));
+      local.y = .02;
+      if (paired) local.z += entity.options.namePlateFrontOffset ?? .68;
+      local.x = THREE.MathUtils.clamp(local.x, -5, 5);
+      local.z = THREE.MathUtils.clamp(local.z, -2.5, 2.62);
+      if (!paired) {
+        for (let guard = 0; guard < 10; guard += 1) {
+          const clash = placed.find((other) => Math.abs(other.x - local.x) < 1.56 && Math.abs(other.z - local.z) < .88);
+          if (!clash) break;
+          local.z = clash.z - .92;
+          if (local.z < -2.5) {
+            // No room behind: stand it beside the plate that is already there.
+            local.z = clash.z;
+            local.x += local.x < 0 ? -1.6 : 1.6;
+            local.x = THREE.MathUtils.clamp(local.x, -5, 5);
+          }
+        }
+      }
+      placed.push({ x: local.x, z: local.z });
+      plate.position.copy(local);
+      this.experimentRoot.add(plate);
+      this.namePlates.set(entity.id, plate);
+    }
+    this.namePlateQueue = [];
+    this.#highlightNamePlates();
+  }
+
+  #makeNamePlate(text) {
+    const plate = new THREE.Group();
+    const base = roundedBox(1.5, .06, .36, 0xf3efe2, .026, 2, { roughness: .78 });
+    base.position.y = .03;
+    const face = new THREE.Group();
+    const easel = roundedBox(1.4, .5, .05, 0xfffdf7, .06, 3, { roughness: .7 });
+    easel.position.set(0, .29, 0);
+    easel.renderOrder = 5;
+    const caption = makeLabelPlane(text, { scale: .48 });
+    caption.position.set(0, .29, .04);
+    caption.renderOrder = 6;
+    face.add(easel, caption);
+    plate.add(base, face);
+    plate.userData.face = face;
+    plate.userData.caption = caption;
+    plate.userData.easel = easel;
+    plate.userData.authoredScale = caption.scale.clone();
+    return plate;
+  }
+
+  /** The apparatus this step needs reads larger than the rest of the bench. */
+  #highlightNamePlates() {
+    const action = this.currentStep?.action;
+    const active = new Set([action?.subject, action?.target].filter(Boolean));
+    for (const [id, plate] of this.namePlates) {
+      const on = active.has(id);
+      const authored = plate.userData.authoredScale;
+      plate.userData.caption.scale.set(
+        authored.x * (on ? 1.24 : 1),
+        authored.y * (on ? 1.24 : 1),
+        1,
+      );
+      plate.userData.easel.material.color.set(on ? 0xfff3cd : 0xfffdf7);
+    }
   }
 
   #registerTarget(id, label, object, options) {
@@ -289,6 +385,7 @@ export class LabRenderer {
       if (target?.indicator) target.indicator.visible = true;
     }
     this.#updateSelectionHelper();
+    this.#highlightNamePlates();
   }
 
   #updateSelectionHelper() {
@@ -336,6 +433,7 @@ export class LabRenderer {
       this.previewVariable(expected.subject, action.value);
     }
     if (expected.type === 'stir') action.amount = expected.amount;
+    if (expected.type === 'record') action.value = expected.answer;
     if (expected.evidence && expected.target) {
       const target = this.targets.get(expected.target)?.object;
       const targetPosition = target?.getWorldPosition(new THREE.Vector3());
@@ -429,7 +527,16 @@ export class LabRenderer {
       physics: false,
       startTargetScreenDistance,
     };
+    if (id === expected.subject && ['place','pour','strike'].includes(expected.type)) {
+      const pickupHeight = Math.max(.32, startWorldPosition.y + .38);
+      this.dragPlane.constant = -pickupHeight;
+      entity.object.scale.multiplyScalar(1.06);
+      this.dragState.physics = Boolean(this.physics?.grab(id, startWorldPosition));
+      this.audio?.play('pickup');
+    }
     if (id === expected.subject && expected.type === 'pour') {
+      // Measure the lip after the pickup scale, or the carried vessel aims a
+      // lip that is 6% short of where its rim actually is.
       const socket = entity.object.userData.pourSocket || entity.object.userData.spout || entity.object.userData.mouth;
       if (socket) {
         entity.object.updateWorldMatrix(true, true);
@@ -438,13 +545,9 @@ export class LabRenderer {
           .worldToLocal(socket.getWorldPosition(new THREE.Vector3()))
           .multiply(worldScale);
       }
-    }
-    if (id === expected.subject && ['place','pour','strike'].includes(expected.type)) {
-      const pickupHeight = Math.max(.32, startWorldPosition.y + .38);
-      this.dragPlane.constant = -pickupHeight;
-      entity.object.scale.multiplyScalar(1.06);
-      this.dragState.physics = Boolean(this.physics?.grab(id, startWorldPosition));
-      this.audio?.play('pickup');
+      // A pump dispenser is worked upright; only a lipped vessel is tipped, and
+      // the carry must use the same angle the pour animation ends at.
+      this.dragState.pourTiltDegrees = entity.object.userData.pumpHead ? 0 : 64;
     }
     if (id === expected.subject && expected.type === 'connect') {
       const position = worldPosition(entity.object);
@@ -473,32 +576,47 @@ export class LabRenderer {
           const targetX = rect.left + (projected.x + 1) * .5 * rect.width;
           const targetY = rect.top + (-projected.y + 1) * .5 * rect.height;
           const screenDistance = Math.hypot(event.clientX - targetX, event.clientY - targetY);
-          const captureRadius = THREE.MathUtils.clamp(rect.width * .075, 58, 96);
-          const capture = 1 - THREE.MathUtils.clamp(screenDistance / captureRadius, 0, 1);
+          // Bring the piece within reach of the socket and it aligns itself.
+          // Inside the lock radius the fit is exact so a child does not have to
+          // hold a pixel-perfect position; between lock and capture the pull
+          // eases in, so the alignment is felt rather than sprung on them.
+          const captureRadius = THREE.MathUtils.clamp(rect.width * .055, 52, 92);
+          const lockRadius = captureRadius * .6;
+          const capture = screenDistance <= lockRadius
+            ? 1
+            : 1 - THREE.MathUtils.smoothstep(screenDistance, lockRadius, captureRadius);
           const journey = 1 - THREE.MathUtils.clamp(screenDistance / (state.startTargetScreenDistance || screenDistance || 1), 0, 1);
-          const liftOffset = expected.type === 'pour' ? .42 : .08;
+          // Carry the apparatus to the same place the accepted action will put
+          // it. Approaching one pose and then snapping to another is what makes
+          // a released object appear to jump, and it also drives objects into
+          // colliders (rails, vessel walls) that the settled pose clears.
+          const approach = targetWorld.clone().add(this.#targetApproachOffset(targetRecord, expected.type));
           this.dragPoint.y = THREE.MathUtils.lerp(
             state.startWorldPosition.y + .38,
-            targetWorld.y + liftOffset,
+            approach.y,
             THREE.MathUtils.smoothstep(journey, 0, 1),
           );
-          if (capture > 0) {
-            const offset = targetRecord.options.snapOffset
-              ? new THREE.Vector3(...targetRecord.options.snapOffset)
-              : new THREE.Vector3();
-            this.dragPoint.lerp(targetWorld.add(offset), THREE.MathUtils.smoothstep(capture, 0, 1));
-            state.socketCapture = capture;
-          }
+          if (capture > 0) this.dragPoint.lerp(approach, capture);
+          state.socketCapture = capture;
+          state.approachPoint = approach;
+          // Orientation is part of the fit: a cart meets the ramp at the ramp's
+          // own angle, not the angle it was lifted from the bench at.
+          state.targetQuaternion = targetRecord.object.getWorldQuaternion(new THREE.Quaternion());
+          state.approachQuaternion = state.entity.home.worldQuaternion.clone()
+            .slerp(state.targetQuaternion, capture);
+          this.#showSocketLock(targetRecord, capture);
         }
         if (state.physics) {
           let physicsTarget = this.dragPoint;
           let pourQuaternion = null;
           if (expected.type === 'pour' && expected.target && state.pourSocketLocal) {
-            const targetObject = this.targets.get(expected.target)?.object;
-            const targetPosition = targetObject?.getWorldPosition(new THREE.Vector3());
+            // Tip towards the pouring pose, not towards the ring itself: the
+            // lip belongs over the opening while the body stays clear of the
+            // vessel wall, which is exactly where the pour animation ends.
+            const targetPosition = state.approachPoint?.clone() || null;
             if (targetPosition) {
               const proximity = 1 - THREE.MathUtils.clamp(this.dragPoint.distanceTo(targetPosition) / 2.2, 0, 1);
-              const tilt = -THREE.MathUtils.degToRad(64 * proximity);
+              const tilt = -THREE.MathUtils.degToRad((state.pourTiltDegrees ?? 64) * proximity);
               pourQuaternion = state.entity.home.worldQuaternion.clone()
                 .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), tilt));
               const lipAlignedRoot = this.dragPoint.clone().sub(state.pourSocketLocal.clone().applyQuaternion(pourQuaternion));
@@ -509,8 +627,37 @@ export class LabRenderer {
           // Advance the rigid body in short fixed physics steps while the
           // pointer moves. This preserves the full swept collision path even
           // for low-rate touch events instead of teleporting on release.
+          // Remember the fully seated pose while the socket has any hold on the
+          // piece, so letting go anywhere in the capture zone finishes the fit
+          // instead of leaving it half pulled.
+          if (state.socketCapture > 0 && state.approachPoint) {
+            if (expected.type === 'pour' && state.pourSocketLocal) {
+              const settled = state.entity.home.worldQuaternion.clone().multiply(
+                new THREE.Quaternion().setFromAxisAngle(
+                  new THREE.Vector3(0, 0, 1),
+                  -THREE.MathUtils.degToRad(state.pourTiltDegrees ?? 64),
+                ),
+              );
+              state.lockedQuaternion = settled;
+              state.lockedTarget = state.approachPoint.clone()
+                .sub(state.pourSocketLocal.clone().applyQuaternion(settled));
+            } else {
+              state.lockedQuaternion = state.targetQuaternion?.clone() || null;
+              state.lockedTarget = state.approachPoint.clone();
+            }
+          } else {
+            state.lockedTarget = null;
+            state.lockedQuaternion = null;
+          }
           this.physics.advanceGrab(state.id, physicsTarget);
-          if (pourQuaternion) this.physics.setGrabRotation(state.id, pourQuaternion);
+          // A carried piece holds the angle it was picked up at and turns to
+          // meet the socket as it locks on. Writing the rotation is safe while
+          // carried because the collider is a sensor and cannot be forced
+          // through anything.
+          this.physics.setGrabRotation(
+            state.id,
+            pourQuaternion || state.approachQuaternion || state.entity.home.worldQuaternion,
+          );
           state.physicsTarget = physicsTarget.clone();
         } else {
           state.entity.object.position.x = this.dragPoint.x;
@@ -558,10 +705,14 @@ export class LabRenderer {
     const expected = this.currentStep.action;
     this.dragState = null;
     this.controls.enabled = this.mode === 'lab';
+    this.#clearSocketLock();
     if (this.canvas.hasPointerCapture(event.pointerId)) this.canvas.releasePointerCapture(event.pointerId);
     if (this.tempWire) { this.world.remove(this.tempWire); disposeObject(this.tempWire); this.tempWire = null; }
     if (state.physics) {
-      this.physics?.finishGrab(state.id, state.physicsTarget || this.dragPoint, 14);
+      // Letting go inside the capture zone completes the fit rather than
+      // freezing the piece wherever the pointer happened to stop.
+      if (state.lockedQuaternion) this.physics?.setGrabRotation(state.id, state.lockedQuaternion);
+      this.physics?.finishGrab(state.id, state.lockedTarget || state.physicsTarget || this.dragPoint, 14);
       this.physics?.release(state.id);
     }
 
@@ -570,7 +721,10 @@ export class LabRenderer {
       return;
     }
     const action = { type: expected.type, subject: expected.subject };
-    if (expected.target) action.target = this.#nearTarget(state.entity.object, expected.target, event) ? expected.target : null;
+    const locked = (state.socketCapture || 0) > 0;
+    if (expected.target) {
+      action.target = locked || this.#nearTarget(state.entity.object, expected.target, event) ? expected.target : null;
+    }
     if (expected.target && state.physics) {
       action.evidence = this.physics?.getSocketMetrics(state.id, expected.target) || undefined;
       if (action.evidence && Number.isFinite(state.pourTiltDeg)) action.evidence.tiltDeg = state.pourTiltDeg;
@@ -601,6 +755,47 @@ export class LabRenderer {
     this.raycaster.ray.intersectPlane(plane, target);
   }
 
+  /**
+   * Show how firmly the carried piece has taken the socket: the ring tightens
+   * and brightens as the fit closes, so alignment is visible before release.
+   */
+  #showSocketLock(targetRecord, capture) {
+    const ring = targetRecord?.indicator;
+    if (!ring) return;
+    this.lockedTargetRing = capture > 0 ? ring : null;
+    const eased = THREE.MathUtils.smoothstep(capture, 0, 1);
+    ring.scale.setScalar(1 + eased * .12);
+    const mesh = ring.userData.ring;
+    if (mesh?.material) {
+      mesh.material.opacity = .75 + eased * .25;
+      mesh.material.emissiveIntensity = .7 + eased * 1.3;
+    }
+  }
+
+  #clearSocketLock() {
+    const ring = this.lockedTargetRing;
+    this.lockedTargetRing = null;
+    if (!ring) return;
+    ring.scale.setScalar(1);
+    const mesh = ring.userData.ring;
+    if (mesh?.material) {
+      mesh.material.opacity = .75;
+      mesh.material.emissiveIntensity = .7;
+    }
+  }
+
+  /**
+   * Where a carried object is aimed for a given verb: the ring itself unless
+   * the scene authored an offset. `pourOffset` is the settled pouring pose and
+   * is shared by the carry and the release animation so the two agree.
+   */
+  #targetApproachOffset(targetRecord, verb) {
+    const options = targetRecord?.options || {};
+    const authored = (verb === 'pour' && options.pourOffset) || options.snapOffset;
+    if (authored) return new THREE.Vector3(...authored);
+    return new THREE.Vector3(0, verb === 'pour' ? .42 : .08, 0);
+  }
+
   #nearTarget(object, targetId, pointerEvent = null) {
     const target = this.targets.get(targetId);
     if (!target) return false;
@@ -627,10 +822,14 @@ export class LabRenderer {
   #variableStart(expected) {
     const range = expected.range || [0, 100];
     const value = this.currentVariableSubject === expected.subject ? this.currentVariable : null;
-    return Number.isFinite(value) ? value : Number(range[0]);
+    return Number.isFinite(value) ? value : Number(expected.start ?? range[0]);
   }
 
   #returnHome(entity) {
+    // Apparatus whose pose the scene controls — a torch on a swinging arm, a
+    // dial — must not be yanked back to the pose it happened to be registered
+    // in when a student prods it during another step.
+    if (entity.options.keepPose) return;
     if (this.physics?.returnHome(entity.id, entity.home.worldPosition, entity.home.worldQuaternion)) {
       this.animateScale(entity.object, entity.home.scale.clone(), .25);
       return;
@@ -674,6 +873,17 @@ export class LabRenderer {
     if (!object) return;
     const entity = [...this.entities.values()].find((item) => item.object === object);
     if (!entity) return;
+
+    // Pour where the student released, not at an independently authored point.
+    // The receiving socket plus its authored pourOffset is the single pose the
+    // carry aims at and the animation lands on, so releasing tips the vessel
+    // instead of teleporting it.
+    const receiver = options.target ? this.targets.get(options.target) : null;
+    if (receiver) {
+      destination = receiver.object.getWorldPosition(new THREE.Vector3())
+        .add(this.#targetApproachOffset(receiver, 'pour'));
+    }
+    if (!destination) return;
 
     // The visible stream must originate at the authored lip/socket, never at
     // the container root (which is normally on the base). The endpoint pose is

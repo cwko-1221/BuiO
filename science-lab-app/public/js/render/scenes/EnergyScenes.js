@@ -8,10 +8,14 @@ import {
   torus,
   makeButton,
   makeTargetRing,
+  makeBeaker,
   makeLabelSprite,
+  dynamicDisplay,
   makeWire,
   replaceWireGeometry,
   worldPosition,
+  cloneScienceAsset,
+  getAssetMarker,
 } from '../SceneKit.js';
 import { CircuitSystem, OpticalSystem, ThermalSystem } from '../../simulation/ScienceSystems.js';
 
@@ -80,44 +84,6 @@ function createBeam(color = 0xfff2ad, radius = .026, opacity = .88) {
   beam.visible = false;
   beam.renderOrder = 6;
   return beam;
-}
-
-function dynamicDisplay(initialText, { width = 512, height = 192, scale = [2.2, .82] } = {}) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext('2d');
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.minFilter = THREE.LinearFilter;
-  const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
-  const sprite = new THREE.Sprite(material);
-  sprite.scale.set(scale[0], scale[1], 1);
-  sprite.userData.canvasTexture = texture;
-  sprite.userData.text = '';
-  sprite.userData.setText = (text, accent = '#60e0bb') => {
-    if (sprite.userData.text === `${text}|${accent}`) return;
-    sprite.userData.text = `${text}|${accent}`;
-    context.clearRect(0, 0, width, height);
-    const gradient = context.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#082f39');
-    gradient.addColorStop(1, '#0c4c58');
-    context.fillStyle = gradient;
-    context.beginPath();
-    context.roundRect(5, 5, width - 10, height - 10, 30);
-    context.fill();
-    context.strokeStyle = accent;
-    context.lineWidth = 7;
-    context.stroke();
-    context.fillStyle = '#dffdf5';
-    context.font = `700 ${Math.round(height * .43)}px "Microsoft JhengHei", sans-serif`;
-    context.textAlign = 'center';
-    context.textBaseline = 'middle';
-    context.fillText(text, width / 2, height / 2 + 3, width - 44);
-    texture.needsUpdate = true;
-  };
-  sprite.userData.setText(initialText);
-  return sprite;
 }
 
 function makeThermometer() {
@@ -1469,6 +1435,7 @@ export function buildElectric(api) {
   const battery = makeBattery();
   battery.position.set(-4.18, 0, 1.42);
   api.root.add(battery);
+  api.entity('battery', '低壓電池', battery, { targetOnly: true });
   addStatic(api, 'circuit-battery', battery.userData.caseBody, { friction: .75 });
   makeCircuitPort(api, battery, 'battery-positive', '電池正極', new THREE.Vector3(.43, 1.02, .05), palette.coral, portRegistry);
   makeCircuitPort(api, battery, 'battery-negative', '電池負極', new THREE.Vector3(-.43, 1.02, .05), palette.blue, portRegistry);
@@ -1484,6 +1451,7 @@ export function buildElectric(api) {
   const bulb = makeCircuitBulb();
   bulb.position.set(1.25, 0, 1.58);
   api.root.add(bulb);
+  api.entity('bulb', '燈泡', bulb, { targetOnly: true });
   addStatic(api, 'circuit-bulb-base', bulb.userData.pedestal, { friction: .72 });
   makeCircuitPort(api, bulb, 'bulb-in', '燈泡輸入端', new THREE.Vector3(-.58, .29, .32), palette.coral, portRegistry);
   makeCircuitPort(api, bulb, 'bulb-out', '燈泡輸出端', new THREE.Vector3(.58, .29, .32), palette.blue, portRegistry);
@@ -1569,8 +1537,9 @@ export function buildElectric(api) {
     clipIds.push(id);
   });
 
-  const liftButton = addEntity(api, 'crane-lift', '啟動電磁起重', makeButton(palette.blue), [4.42, .06, -1.82], { tappable: true });
-  api.root.add(label('電磁起重', [4.42, .93, -1.82], .43));
+  // The electromagnet has no separate start button: closing the circuit is what
+  // magnetises the core, so the clips rise on that same action and the button's
+  // label would sit over empty bench.
   const circuitDisplay = dynamicDisplay('OPEN · 24 °C', { scale: [2.3, .68] });
   circuitDisplay.position.set(3.55, 2.45, .83);
   api.root.add(circuitDisplay);
@@ -1695,12 +1664,9 @@ export function buildElectric(api) {
         }));
         attachedClips.clear();
         magneticForceNewtons.clear();
-      }
-    }
-    if (action.subject === 'crane-lift') {
-      refreshCircuit();
-      api.pressButton(liftButton);
-      if (powered) {
+      } else if (powered) {
+        // Current through the coil is the whole cause. The clips answer the
+        // closed circuit itself, with no second command to press.
         liftCommanded = true;
         clipIds.forEach((id) => api.makePhysicsDynamic?.(id));
         api.sparkle(new THREE.Vector3(CORE_WORLD.x, .78, CORE_WORLD.z), palette.blue, 18);
@@ -1774,4 +1740,766 @@ export function buildElectric(api) {
     }),
     dispose: () => {},
   };
+}
+
+function makeSampleTile(kind) {
+  const group = new THREE.Group();
+  if (kind === 'mirror') {
+    const backing = roundedBox(1.5, .1, 1.12, 0x466d76, .05, 3, { metalness: .35, roughness: .3 });
+    const face = roundedBox(1.36, .04, .98, 0xeffdff, .03, 3, {
+      metalness: .55, roughness: .06, emissive: 0xbfeaf2, emissiveIntensity: .45,
+    });
+    face.position.y = .07;
+    group.add(backing, face);
+  } else if (kind === 'foil') {
+    // A real crumpled sheet is one continuous surface of irregular facets, not
+    // loose flakes. Displacing the vertices of a plane and shading it flat
+    // gives exactly that, and the facets are what scatter the beam.
+    const random = seededRandom(23);
+    const geometry = new THREE.PlaneGeometry(1.44, 1.06, 18, 13);
+    geometry.rotateX(-Math.PI / 2);
+    const position = geometry.attributes.position;
+    for (let index = 0; index < position.count; index += 1) {
+      // Creases fade out towards the rim so the sheet still reads as a sheet.
+      const edge = Math.max(Math.abs(position.getX(index)) / .72, Math.abs(position.getZ(index)) / .53);
+      const inset = 1 - edge ** 3;
+      position.setY(index, .055 + (random() - .5) * .19 * inset);
+    }
+    geometry.computeVertexNormals();
+    const sheet = new THREE.Mesh(geometry, mat(0xdde5ea, {
+      metalness: .88, roughness: .3, side: THREE.DoubleSide,
+    }));
+    sheet.material.flatShading = true;
+    sheet.material.needsUpdate = true;
+    sheet.castShadow = true;
+    sheet.receiveShadow = true;
+    const backing = roundedBox(1.46, .05, 1.08, 0xb9c3c9, .02, 2, { metalness: .5, roughness: .55 });
+    backing.position.y = .01;
+    group.add(backing, sheet);
+  } else {
+    const card = roundedBox(1.44, .08, 1.06, 0x22262b, .035, 3, { roughness: .97, metalness: 0 });
+    group.add(card);
+  }
+  return group;
+}
+
+function seededRandom(seed = 1) {
+  let value = seed >>> 0;
+  return () => {
+    value = (value * 1664525 + 1013904223) >>> 0;
+    return value / 0x100000000;
+  };
+}
+
+/** Regular reflection, diffuse reflection and absorption on one bench. */
+export function buildReflection(api) {
+  const hit = new THREE.Vector3(.5, .92, 0);
+  const armLength = 3.15;
+  const defaultAngle = 45;
+  let incidenceDeg = defaultAngle;
+  let torchOn = false;
+  let surface = null;
+
+  const stand = new THREE.Group();
+  const foot = roundedBox(1.9, .16, 1.5, palette.deep, .07, 3, { roughness: .5 });
+  foot.position.y = .08;
+  const post = cylinder(.13, .74, palette.metal, { metalness: .7, roughness: .24 });
+  post.position.y = .48;
+  const cradle = roundedBox(1.72, .12, 1.3, 0x2f5b66, .05, 3, { roughness: .45 });
+  cradle.position.y = .86;
+  stand.add(foot, post, cradle);
+  stand.position.set(hit.x, 0, hit.z);
+  api.root.add(stand);
+  api.entity('sample-stand', '樣本架', stand, { targetOnly: true });
+  addStatic(api, 'reflection-stand', cradle, { friction: .7 });
+
+  // The holder ring sits on the cradle where a sample lies flat, so its normal
+  // points straight up and the two angles are symmetric about it.
+  addTarget(api, 'sample-holder', '樣本位置', [hit.x, hit.y, hit.z], .82, palette.mint, {
+    rotation: [0, 0, 0],
+    physics: { shape: 'cuboid', halfExtents: [.86, .3, .68], padding: .05 },
+  });
+
+  const normalLine = createBeam(0x9fd8e6, .018, .5);
+  normalLine.visible = true;
+  api.root.add(normalLine);
+  setBeamFromWorld(normalLine, api.root,
+    worldOf(api, new THREE.Vector3(hit.x, hit.y, hit.z)),
+    worldOf(api, new THREE.Vector3(hit.x, hit.y + 2.7, hit.z)), .018);
+  api.root.add(label('法線', [hit.x + .34, hit.y + 2.72, hit.z], .34));
+
+  const arcPoints = [];
+  for (let index = 0; index <= 30; index += 1) {
+    const a = THREE.MathUtils.lerp(-Math.PI / 2.1, Math.PI / 2.1, index / 30);
+    arcPoints.push(new THREE.Vector3(Math.sin(a) * 2.05, Math.cos(a) * 2.05, 0));
+  }
+  const arc = new THREE.Mesh(
+    new THREE.TubeGeometry(new THREE.CatmullRomCurve3(arcPoints), 40, .022, 6, false),
+    mat(palette.metal, { metalness: .45, roughness: .35 }),
+  );
+  arc.position.set(hit.x, hit.y, hit.z);
+  api.root.add(arc);
+
+  const torch = makeTorch();
+  addEntity(api, 'torch', '電筒', torch, [hit.x - 2.4, hit.y + 2.1, hit.z], { tappable: true, keepPose: true });
+  // A handle on the bench swings the torch arm, so the angle can be set by
+  // dragging the apparatus and not only by the on-screen slider.
+  // Stand the handle back and clear of the sample tiles: sitting just behind
+  // the mirror put their two name plates on top of one another.
+  const angleHandle = addEntity(api, 'light-angle', '角度把手', makeButton(palette.yellow), [-4.25, .05, -.55], { adjustable: true });
+
+  const incidentBeam = createBeam(0xfff4b8, .05, .9);
+  api.root.add(incidentBeam);
+  const reflectedBeams = [];
+  for (let index = 0; index < 21; index += 1) {
+    const beam = createBeam(0xfff4b8, .045, .88);
+    reflectedBeams.push(beam);
+    api.root.add(beam);
+  }
+
+  const readout = dynamicDisplay('電筒未開', { scale: [3.1, .84] });
+  readout.position.set(hit.x + .1, hit.y + 3.3, hit.z);
+  api.root.add(readout);
+
+  const tiles = {
+    mirror: addEntity(api, 'mirror', '鏡子', makeSampleTile('mirror'), [-3.5, .12, 1.85], {
+      draggable: true, physics: { shape: 'cuboid', density: 1.1, friction: .5, restitution: .04 },
+    }),
+    'foil-crumpled': addEntity(api, 'foil-crumpled', '鋁箔（摺皺）', makeSampleTile('foil'), [-1.7, .12, 2.05], {
+      draggable: true, physics: { shape: 'cuboid', density: .5, friction: .62, restitution: .02 },
+    }),
+    card: addEntity(api, 'card', '黑卡紙', makeSampleTile('card'), [.1, .12, 2.2], {
+      draggable: true, physics: { shape: 'cuboid', density: .7, friction: .74, restitution: .02 },
+    }),
+  };
+  const homes = Object.fromEntries(Object.entries(tiles).map(([id, object]) => [id, object.position.clone()]));
+
+  // How each surface answers the beam: one clean ray, a wide scatter, or almost
+  // nothing at all.
+  const surfaces = {
+    mirror: { rays: 1, spreadDeg: 0, reach: 3.4, opacity: .92, label: '鏡子' },
+    'foil-crumpled': { rays: 19, spreadDeg: 78, reach: .95, opacity: .27, label: '鋁箔（摺皺）' },
+    card: { rays: 13, spreadDeg: 82, reach: .34, opacity: .14, label: '黑卡紙' },
+  };
+
+  function torchPosition(degrees) {
+    const radians = THREE.MathUtils.degToRad(degrees);
+    return new THREE.Vector3(
+      hit.x - Math.sin(radians) * armLength,
+      hit.y + Math.cos(radians) * armLength,
+      hit.z,
+    );
+  }
+
+  function placeTorch(degrees) {
+    const position = torchPosition(degrees);
+    torch.position.copy(position);
+    // Point the torch head at the sample.
+    const direction = new THREE.Vector3(hit.x, hit.y, hit.z).sub(position).normalize();
+    torch.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), direction);
+  }
+
+  function refreshBeams() {
+    const spec = surface ? surfaces[surface] : null;
+    const origin = torch.userData.spout
+      ? torch.userData.spout.getWorldPosition(new THREE.Vector3())
+      : worldOf(api, torch.position.clone());
+    const target = worldOf(api, new THREE.Vector3(hit.x, hit.y, hit.z));
+    incidentBeam.visible = torchOn;
+    if (torchOn) setBeamFromWorld(incidentBeam, api.root, origin, target, .05);
+
+    for (const beam of reflectedBeams) beam.visible = false;
+    if (!torchOn || !spec) { updateReadout(); return; }
+
+    for (let index = 0; index < spec.rays; index += 1) {
+      const beam = reflectedBeams[index];
+      // A mirror returns one ray at the reflected angle. A rough surface
+      // scatters about the normal — and never below the surface, which is
+      // what sent rays through the sample and its holder.
+      const spread = Math.min(spec.spreadDeg, 82);
+      const degrees = spec.rays === 1
+        ? incidenceDeg
+        : THREE.MathUtils.lerp(-spread, spread, index / (spec.rays - 1));
+      const angle = THREE.MathUtils.degToRad(THREE.MathUtils.clamp(degrees, -82, 82));
+      const end = new THREE.Vector3(
+        hit.x + Math.sin(angle) * spec.reach,
+        hit.y + Math.cos(angle) * spec.reach,
+        hit.z,
+      );
+      // Scattered rays are thinner as well as dimmer: the same light spread
+      // over many directions leaves less along any one of them.
+      setBeamFromWorld(beam, api.root, target, worldOf(api, end), spec.rays === 1 ? .05 : .022);
+      beam.material.opacity = spec.opacity;
+      beam.visible = true;
+    }
+    updateReadout();
+  }
+
+  function updateReadout() {
+    if (!torchOn) { readout.userData.setText('電筒未開', '#8fb7c4'); return; }
+    if (!surface) { readout.userData.setText('樣本架上沒有物料', '#f2d25a'); return; }
+    if (surface === 'mirror') {
+      readout.userData.setText(`入射角 ${Math.round(incidenceDeg)}° · 反射角 ${Math.round(incidenceDeg)}°`, '#60e0bb');
+      return;
+    }
+    if (surface === 'card') { readout.userData.setText('幾乎沒有反射光', '#f0a37a'); return; }
+    readout.userData.setText('漫反射：沒有單一反射角', '#f2d25a');
+  }
+
+  function mountSurface(id) {
+    for (const [tileId, object] of Object.entries(tiles)) {
+      if (tileId === id) continue;
+      object.position.copy(homes[tileId]);
+      object.rotation.set(0, 0, 0);
+      api.setPhysicsPose?.(tileId, worldOf(api, homes[tileId]), worldQuaternionOf(api), { dynamic: false });
+    }
+    const seat = new THREE.Vector3(hit.x, hit.y - .04, hit.z);
+    tiles[id].position.copy(seat);
+    tiles[id].rotation.set(0, 0, 0);
+    api.setPhysicsPose?.(id, worldOf(api, seat), worldQuaternionOf(api), { dynamic: false });
+    api.setPhysicsEnabled?.(id, false);
+    surface = id;
+    refreshBeams();
+  }
+
+  placeTorch(incidenceDeg);
+  refreshBeams();
+
+  api.onPreview = (subject, value) => {
+    if (subject !== 'light-angle') return;
+    incidenceDeg = THREE.MathUtils.clamp(value, 15, 70);
+    placeTorch(incidenceDeg);
+    refreshBeams();
+  };
+
+  api.onAction = (action) => {
+    if (surfaces[action.subject]) mountSurface(action.subject);
+    if (action.subject === 'torch') {
+      torchOn = !torchOn;
+      torch.userData.lens.material.emissiveIntensity = torchOn ? 2.6 : .2;
+      api.pressButton(torch);
+      refreshBeams();
+      if (torchOn) api.sparkle(worldOf(api, new THREE.Vector3(hit.x, hit.y + .2, hit.z)), palette.yellow, 8);
+    }
+    if (action.subject === 'light-angle') {
+      api.pressButton(angleHandle);
+      incidenceDeg = THREE.MathUtils.clamp(Number(action.value) || defaultAngle, 15, 70);
+      placeTorch(incidenceDeg);
+      refreshBeams();
+    }
+  };
+
+  return {
+    update(time) {
+      if (!torchOn) return;
+      const flicker = 1 + Math.sin(time * 6.4) * .04;
+      incidentBeam.material.opacity = .9 * flicker;
+    },
+    getState() {
+      return {
+        experiment: 'light-reflection',
+        torchOn,
+        surface,
+        incidenceDeg: Number(incidenceDeg.toFixed(1)),
+        reflectionDeg: surface === 'mirror' ? Number(incidenceDeg.toFixed(1)) : null,
+        scattered: surface != null && surface !== 'mirror',
+        visibleReflectedRays: reflectedBeams.filter((beam) => beam.visible).length,
+      };
+    },
+    dispose() {},
+  };
+}
+
+function worldOf(api, point) {
+  api.root.updateWorldMatrix(true, false);
+  return api.root.localToWorld(point.clone());
+}
+
+function worldQuaternionOf(api) {
+  api.root.updateWorldMatrix(true, false);
+  return api.root.getWorldQuaternion(new THREE.Quaternion());
+}
+
+/**
+ * The scoop of a spoon, shaped the way a real one is: a shallow oval dish whose
+ * long axis carries on the line of the handle, hollow on one face, convex on the
+ * other, with a lip running all the way round. Three blocks of vertices — inner
+ * face, outer face and the band that bridges them — are stitched into one
+ * geometry so the lip stays a crisp edge while both faces still shade smoothly.
+ * Draw groups 0/1/2 are inner, outer and lip, so the hollow can be tinted deeper
+ * than the back and actually read as a hollow.
+ */
+function spoonBowlGeometry({
+  length = .9, halfWidth = .255, depth = .105, wall = .028,
+  lengthSegments = 22, widthSegments = 12,
+} = {}) {
+  const start = .006;
+  const end = .998;
+  // Rings bunch up at both ends, so the tip closes as a round nose instead of
+  // the point a straight run of segments would leave.
+  const along = (index) => start + (end - start) * (1 - Math.cos(Math.PI * index / lengthSegments)) / 2;
+  // The outline is what makes it a spoon at a glance: an egg, widest a little
+  // past the middle, blunt at the far end, pinched to handle width at the neck.
+  const spread = (t) => (
+    Math.pow(Math.max(0, Math.sin(Math.PI * t)), .57) * (.88 + .12 * t)
+    + .22 * Math.pow(1 - t, 5)
+  );
+  // A teaspoon is a shallow dish, not a ladle: its centre sits only a little
+  // below the rim and the hollow fades cleanly into the narrow neck.
+  const dip = (t) => Math.pow(Math.max(0, Math.sin(Math.PI * t)), .78);
+  const positions = [];
+  const indices = [];
+  const vertex = (i, j, outer) => {
+    const t = along(i);
+    const s = -1 + 2 * (j / widthSegments);
+    const bulge = Math.max(0, 1 - s * s) ** .8;
+    const z = -depth * dip(t) * bulge;
+    positions.push(
+      halfWidth * spread(t) * s,
+      (t - start) / (end - start) * length,
+      outer ? z - wall * (.72 + .28 * bulge) : z,
+    );
+  };
+  const face = (outer) => {
+    const base = positions.length / 3;
+    for (let i = 0; i <= lengthSegments; i += 1) {
+      for (let j = 0; j <= widthSegments; j += 1) vertex(i, j, outer);
+    }
+    for (let i = 0; i < lengthSegments; i += 1) {
+      for (let j = 0; j < widthSegments; j += 1) {
+        const a = base + i * (widthSegments + 1) + j;
+        const b = a + 1;
+        const c = a + widthSegments + 1;
+        const d = c + 1;
+        if (outer) indices.push(a, c, b, b, c, d);
+        else indices.push(a, b, c, b, d, c);
+      }
+    }
+    return indices.length;
+  };
+  const innerEnd = face(false);
+  const outerEnd = face(true);
+
+  // Walk the outline once and bridge the two faces, so the rim shows a real
+  // edge instead of a paper-thin sheet.
+  const loop = [];
+  for (let j = 0; j <= widthSegments; j += 1) loop.push([0, j]);
+  for (let i = 1; i <= lengthSegments; i += 1) loop.push([i, widthSegments]);
+  for (let j = widthSegments - 1; j >= 0; j -= 1) loop.push([lengthSegments, j]);
+  for (let i = lengthSegments - 1; i >= 1; i -= 1) loop.push([i, 0]);
+  const rimBase = positions.length / 3;
+  for (const [i, j] of loop) {
+    vertex(i, j, false);
+    vertex(i, j, true);
+  }
+  for (let k = 0; k < loop.length; k += 1) {
+    const a = rimBase + k * 2;
+    const c = rimBase + ((k + 1) % loop.length) * 2;
+    indices.push(a, a + 1, c, c, a + 1, c + 1);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setIndex(indices);
+  geometry.addGroup(0, innerEnd, 0);
+  geometry.addGroup(innerEnd, outerEnd - innerEnd, 1);
+  geometry.addGroup(outerEnd, indices.length - outerEnd, 2);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function spoonHandleGeometry({
+  length = 1.54,
+  neckHalfWidth = .058,
+  gripHalfWidth = .145,
+  thickness = .055,
+} = {}) {
+  const shape = new THREE.Shape();
+  shape.moveTo(-neckHalfWidth, length);
+  shape.bezierCurveTo(-.068, 1.28, -.105, .7, -gripHalfWidth, .24);
+  shape.bezierCurveTo(-gripHalfWidth, .09, -.078, 0, 0, 0);
+  shape.bezierCurveTo(.078, 0, gripHalfWidth, .09, gripHalfWidth, .24);
+  shape.bezierCurveTo(.105, .7, .068, 1.28, neckHalfWidth, length);
+  shape.lineTo(-neckHalfWidth, length);
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: thickness,
+    bevelEnabled: true,
+    bevelSegments: 3,
+    bevelSize: .014,
+    bevelThickness: .012,
+    curveSegments: 14,
+  });
+  geometry.translate(0, 0, -thickness / 2);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function makeButterPat() {
+  const butter = new THREE.Group();
+  const pat = roundedBox(.25, .12, .19, 0xf2dc86, .045, 2, { roughness: .5 });
+  const gloss = roundedBox(.13, .05, .1, 0xf9ecab, .022, 2, { roughness: .42 });
+  gloss.position.set(-.02, .06, .012);
+  butter.add(pat, gloss);
+  return butter;
+}
+
+function makeProceduralSpoon(handleColor, bowlColor, { metal = false, kind = 'plastic' } = {}) {
+  const group = new THREE.Group();
+  const finish = {
+    metalness: metal ? .64 : .025,
+    roughness: metal ? .26 : kind === 'wood' ? .72 : .36,
+  };
+
+  // The handle is a thin, tapered extrusion with a rounded end. This silhouette
+  // stays recognisable both lying on the bench and standing in the beaker; the
+  // old circular shaft made the utensil read as a paddle on a stick.
+  const handle = new THREE.Mesh(
+    spoonHandleGeometry({ thickness: metal ? .045 : .065 }),
+    mat(handleColor, finish),
+  );
+  handle.castShadow = true;
+  handle.receiveShadow = true;
+
+  const dish = new THREE.Group();
+  dish.position.set(0, 1.49, -.005);
+  dish.rotation.x = -.095;
+  dish.updateMatrix();
+  const tint = new THREE.Color(bowlColor);
+  const bowl = new THREE.Mesh(spoonBowlGeometry(), [
+    mat(tint.clone().multiplyScalar(metal ? .98 : .9), { ...finish, roughness: Math.min(1, finish.roughness + .08) }),
+    mat(bowlColor, finish),
+    mat(tint.clone().lerp(new THREE.Color(0xffffff), metal ? .24 : .12), finish),
+  ]);
+  bowl.castShadow = true;
+  bowl.receiveShadow = true;
+  // A short swelling on the back where the neck runs into the scoop, the spine
+  // every spoon has, so the two are one piece rather than a paddle on a rod.
+  const spine = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 10), mat(bowlColor, finish));
+  spine.scale.set(.062, .19, metal ? .027 : .04);
+  spine.position.set(0, .105, -.035);
+  spine.castShadow = true;
+  dish.add(bowl, spine);
+
+  const butter = makeButterPat();
+  butter.rotation.x = dish.rotation.x;
+  // Sat in the deepest part of the hollow, converted once into spoon space so
+  // the melt animation can slide it straight down the spoon.
+  butter.position.copy(new THREE.Vector3(0, .48, -.085).applyMatrix4(dish.matrix));
+
+  const accents = [];
+  if (kind === 'wood') {
+    for (const x of [-.043, .043]) {
+      const grain = roundedBox(.014, .92, .012, 0x87552f, .006, 2, { roughness: .84 });
+      grain.position.set(x, .7, .042);
+      grain.rotation.z = x * .18;
+      accents.push(grain);
+    }
+  }
+
+  group.add(handle, dish, butter, ...accents);
+  group.userData.handle = handle;
+  group.userData.butter = butter;
+  return group;
+}
+
+function makeSpoon(handleColor, bowlColor, { metal = false, kind = 'plastic' } = {}) {
+  const assetId = {
+    wood: 'spoonWood',
+    plastic: 'spoonPlastic',
+    metal: 'spoonCopper',
+  }[kind];
+  const model = cloneScienceAsset(assetId);
+  if (!model) return makeProceduralSpoon(handleColor, bowlColor, { metal, kind });
+
+  const suffix = kind === 'metal' ? 'COPPER' : kind.toUpperCase();
+  const butterSeat = getAssetMarker(model, `SOCKET_SPOON_${suffix}_BUTTER`);
+  const butter = makeButterPat();
+  model.updateWorldMatrix(true, true);
+  butter.position.copy(
+    butterSeat
+      ? model.worldToLocal(butterSeat.getWorldPosition(new THREE.Vector3()))
+      : new THREE.Vector3(0, 1.91, -.055),
+  );
+  model.add(butter);
+  model.userData.handle = model.getObjectByName(`SPOON_${suffix}_HANDLE`);
+  model.userData.butter = butter;
+  model.userData.materialKind = kind;
+  return model;
+}
+
+/** Which material carries heat up a spoon fastest — a fair test with butter. */
+export function buildConduction(api) {
+  const centre = new THREE.Vector3(.55, 0, -.15);
+  const waterTop = 1.34;
+  const meltPoint = 45;
+  const softenPoint = 36;
+  const waterHot = 82;
+  const roomTemperature = 22;
+  const waterHeatingRate = 2.4;
+
+  const tripod = new THREE.Group();
+  const plate = cylinder(1.72, .18, palette.deep, { roughness: .45, metalness: .2 });
+  plate.position.y = .09;
+  const ring = torus(1.40, .07, palette.metal, { metalness: .68, roughness: .28 });
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = .52;
+  for (let index = 0; index < 3; index += 1) {
+    const angle = index / 3 * Math.PI * 2;
+    const leg = cylinder(.055, .52, palette.metal, { metalness: .66, roughness: .3 });
+    leg.position.set(Math.cos(angle) * .96, .27, Math.sin(angle) * .96);
+    tripod.add(leg);
+  }
+  tripod.add(plate, ring);
+  tripod.position.copy(centre);
+  api.root.add(tripod);
+  api.entity('hot-plate', '電熱板', tripod, { targetOnly: true });
+  addStatic(api, 'conduction-plate', plate, { friction: .7 });
+
+  const beaker = makeBeaker({ radius: 1.22, height: 2.05 });
+  beaker.position.set(centre.x, .58, centre.z);
+  api.root.add(beaker);
+  api.entity('beaker', '燒杯', beaker, { targetOnly: true });
+
+  const water = cylinder(1.12, 1.28, 0x8ccfe0, {
+    transparent: true, opacity: .62, roughness: .12, transmission: .3, depthWrite: false,
+  });
+  water.position.set(centre.x, .58 + .64, centre.z);
+  water.renderOrder = 2;
+  api.root.add(water);
+
+  addSocket2(api, 'beaker-water', '熱水中', new THREE.Vector3(centre.x, waterTop, centre.z), 1.02, palette.mint);
+
+  const heater = addEntity(api, 'heater', '加熱開關', makeButton(palette.coral), [centre.x + 2.05, .05, 1.35], { tappable: true });
+
+  // Conductance is what separates the materials: the same water, the same
+  // butter, the same spoon shape — only how fast heat travels up the handle.
+  const spoonSpecs = [
+    { id: 'spoon-wood', label: '木匙', handle: 0xb77a42, bowl: 0xc89158, kind: 'wood', metal: false, conductance: .055, home: [-3.7, .06, 2.0] },
+    { id: 'spoon-plastic', label: '塑膠匙', handle: 0x35ad78, bowl: 0x4ac68d, kind: 'plastic', metal: false, conductance: .075, home: [-2.05, .06, 2.05] },
+    { id: 'spoon-copper', label: '銅匙', handle: 0xcf7436, bowl: 0xee9857, kind: 'metal', metal: true, conductance: 10.4, home: [-.4, .06, 2.1] },
+  ];
+
+  const thermal = new ThermalSystem({
+    bodies: spoonSpecs.map((spec) => ({
+      id: spec.id,
+      temperature: roomTemperature,
+      ambientTemperature: roomTemperature,
+      heatCapacity: 26,
+      conductance: spec.conductance,
+    })),
+  });
+
+  const spoons = new Map();
+  for (const spec of spoonSpecs) {
+    const spoon = makeSpoon(spec.handle, spec.bowl, { metal: spec.metal, kind: spec.kind });
+    const object = addEntity(api, spec.id, spec.label, spoon, spec.home, {
+      draggable: true,
+      namePlateMode: 'paired-fixed',
+      namePlateFrontOffset: .68,
+      physics: { shape: 'cuboid', density: spec.metal ? 2.4 : .8, friction: .58, restitution: .04 },
+    });
+    object.updateWorldMatrix(true, true);
+    api.setPhysicsPose?.(
+      spec.id,
+      object.getWorldPosition(new THREE.Vector3()),
+      object.getWorldQuaternion(new THREE.Quaternion()),
+      { dynamic: false },
+    );
+    const badge = dynamicDisplay(`${spec.label} 22 °C`, { width: 400, height: 150, scale: [1.22, .46] });
+    badge.position.set(spec.home[0], 3.28, .62);
+    api.root.add(badge);
+    spoons.set(spec.id, {
+      spec,
+      object,
+      badge,
+      inWater: false,
+      butterFallen: false,
+      fallTemperature: null,
+      butterSlideProgress: 0,
+      butterFallVelocity: 0,
+      butterDetached: false,
+      butterSplashPlayed: false,
+      baseHandleColor: new THREE.Color(spec.handle),
+      butterHome: object.userData.butter.position.clone(),
+      butterHomeScale: object.userData.butter.scale.clone(),
+    });
+  }
+
+  const readout = dynamicDisplay('水溫 22 °C', { scale: [3.3, .9] });
+  readout.position.set(centre.x + 1.15, 4.75, centre.z);
+  api.root.add(readout);
+
+  let heating = false;
+  let elapsed = 0;
+  let waterTemperature = roomTemperature;
+  const fallOrder = [];
+  const coolWaterColor = new THREE.Color(0x8ccfe0);
+  const hotWaterColor = new THREE.Color(0xa6c6cf);
+
+  function seatSpoon(id) {
+    const record = spoons.get(id);
+    if (!record || record.inWater) return;
+    const slot = [...spoons.values()].filter((item) => item.inWater).length;
+    // Splayed like real cutlery in a beaker: each handle leans to its own
+    // side so all three, and their butter, stay separately visible.
+    const lean = (slot - 1) * .32;
+    const seat = new THREE.Vector3(
+      centre.x + Math.sin(lean) * .25,
+      waterTop - .84,
+      centre.z - .16 + slot * .16,
+    );
+    record.object.position.copy(seat);
+    record.object.rotation.set(-.10, 0, -lean);
+    // The body pose is authoritative once physics syncs, so the lean has to go
+    // to the body too or the spoon snaps back upright.
+    const seated = worldQuaternionOf(api).multiply(
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(-.10, 0, -lean)),
+    );
+    api.setPhysicsPose?.(id, worldOf(api, seat), seated, { dynamic: false });
+    api.setPhysicsEnabled?.(id, false);
+    record.inWater = true;
+    thermal.setAmbient(id, heating ? waterTemperature : roomTemperature);
+  }
+
+  function refreshAppearance() {
+    // Warm water reads warmer; the spoons keep their own colours so a student
+    // is comparing materials, not a false-colour overlay.
+    const warmRatio = THREE.MathUtils.clamp(
+      (waterTemperature - roomTemperature) / (waterHot - roomTemperature),
+      0,
+      1,
+    );
+    water.material.color.lerpColors(coolWaterColor, hotWaterColor, warmRatio);
+  }
+
+  function updateReadout() {
+    // Every spoon carries its own reading, so the three can be compared at a
+    // glance instead of being read off one shared line.
+    for (const record of spoons.values()) {
+      const temperature = thermal.getBody(record.spec.id).temperature;
+      const accent = record.butterFallen ? '#f0a37a' : temperature > 40 ? '#f2d25a' : '#8fd4e6';
+      record.badge.userData.setText(
+        record.butterFallen
+          ? `${record.spec.label} ${Math.round(record.fallTemperature)}° 跌下`
+          : `${record.spec.label} ${Math.round(temperature)} °C`,
+        accent,
+      );
+    }
+    const accent = !heating ? '#8fb7c4' : waterTemperature < 50 ? '#60e0bb' : '#f0a37a';
+    readout.userData.setText(`水溫 ${Math.round(waterTemperature)} °C`, accent);
+  }
+
+  refreshAppearance();
+  updateReadout();
+
+  api.onAction = (action) => {
+    if (spoons.has(action.subject)) {
+      seatSpoon(action.subject);
+      refreshAppearance();
+      updateReadout();
+    }
+    if (action.subject === 'heater') {
+      heating = true;
+      api.pressButton(heater);
+      for (const record of spoons.values()) {
+        // Only a spoon standing in the water feels the hot water; the rest keep
+        // sitting at room temperature, which is what makes this a fair test.
+        thermal.setAmbient(record.spec.id, record.inWater ? waterTemperature : roomTemperature);
+      }
+      api.sparkle(worldOf(api, new THREE.Vector3(centre.x, .3, centre.z)), palette.coral, 10);
+      refreshAppearance();
+      updateReadout();
+    }
+  };
+
+  return {
+    update(time, dt = 1 / 60) {
+      if (heating) {
+        elapsed += dt;
+        waterTemperature = Math.min(waterHot, waterTemperature + waterHeatingRate * dt);
+        for (const record of spoons.values()) {
+          thermal.setAmbient(
+            record.spec.id,
+            record.inWater ? waterTemperature : roomTemperature,
+          );
+        }
+        thermal.step(dt);
+        for (const record of spoons.values()) {
+          if (!record.inWater || record.butterFallen) continue;
+          const temperature = thermal.getBody(record.spec.id).temperature;
+          record.butterSlideProgress = THREE.MathUtils.clamp(
+            (temperature - softenPoint) / (meltPoint - softenPoint),
+            0,
+            1,
+          );
+          if (temperature >= meltPoint) {
+            record.butterFallen = true;
+            record.fallTemperature = temperature;
+            fallOrder.push(record.spec.id);
+          }
+        }
+      }
+      for (const record of spoons.values()) {
+        const butter = record.object.userData.butter;
+        if (record.butterFallen) {
+          if (!record.butterDetached) {
+            // Preserve the last softened position, then detach from the leaning
+            // spoon so gravity is vertical in the laboratory rather than along
+            // the spoon's local axis.
+            api.root.attach(butter);
+            record.butterDetached = true;
+            record.butterFallVelocity = .12;
+          }
+          record.butterFallVelocity = Math.min(1.8, record.butterFallVelocity + dt * 1.15);
+          butter.position.y = Math.max(-1.6, butter.position.y - record.butterFallVelocity * dt);
+          butter.rotation.z += dt * .28;
+          if (!record.butterSplashPlayed && butter.position.y <= waterTop + .04) {
+            record.butterSplashPlayed = true;
+            api.splash(butter.getWorldPosition(new THREE.Vector3()), 0xf5dd7a);
+          }
+        } else {
+          butter.position.copy(record.butterHome);
+          const slide = record.butterSlideProgress;
+          const easedSlide = slide * slide * (3 - 2 * slide);
+          butter.position.y -= easedSlide * .38;
+          butter.scale.copy(record.butterHomeScale);
+          butter.scale.multiply(new THREE.Vector3(
+            1 + easedSlide * .12,
+            1 - easedSlide * .18,
+            1 + easedSlide * .08,
+          ));
+        }
+      }
+      refreshAppearance();
+      updateReadout();
+    },
+    getState() {
+      return {
+        experiment: 'heat-conduction',
+        heating,
+        elapsed: Number(elapsed.toFixed(2)),
+        waterTemperature: Number(waterTemperature.toFixed(1)),
+        inWater: [...spoons.values()].filter((record) => record.inWater).map((record) => record.spec.id),
+        temperatures: Object.fromEntries(spoonSpecs.map((spec) => [spec.id, Number(thermal.getBody(spec.id).temperature.toFixed(1))])),
+        butterFallen: [...fallOrder],
+        butterSlideProgress: Object.fromEntries(
+          spoonSpecs.map((spec) => [spec.id, Number(spoons.get(spec.id).butterSlideProgress.toFixed(2))]),
+        ),
+        firstToFall: fallOrder[0] || null,
+        meltPoint,
+      };
+    },
+    dispose() {},
+  };
+}
+
+function addSocket2(api, id, labelText, position, radius, color) {
+  const socket = makeTargetRing(color, radius);
+  socket.position.copy(position);
+  api.root.add(socket);
+  api.target(id, labelText, socket, {
+    radius: radius + .18,
+    physics: { shape: 'cuboid', halfExtents: [radius, .42, radius], padding: .06 },
+  });
+  return socket;
 }

@@ -159,6 +159,29 @@ async function sourcePoint(page, id) {
   throw new Error(`${id}: no pickable mesh found near projected group centre ${JSON.stringify(point)}`);
 }
 
+// The inquiry phases are full-screen slides; walk them until the wanted slide
+// is on screen.
+async function advanceStageTo(page, slide) {
+  for (let guard = 0; guard < 16; guard += 1) {
+    const current = await page.locator('#stageScreen:not([hidden])').getAttribute('data-slide').catch(() => null);
+    if (current === slide) return;
+    if (current === null) throw new Error(`stage closed before reaching ${slide}`);
+    if (await page.locator('#stageNext:not([hidden]):not([disabled])').count()) {
+      await page.locator('#stageNext').click();
+    }
+    await page.waitForTimeout(650);
+  }
+  throw new Error(`stage never reached ${slide}`);
+}
+
+// A recording step is answered on its own panel: click the reading the
+// instrument is actually showing.
+async function recordGesture(page, action) {
+  await page.locator('#recordPanel:not([hidden])').waitFor();
+  await page.locator(`[data-record="${action.answer}"]`).click();
+  return { verb: 'record', chose: action.options[action.answer] };
+}
+
 async function movePointer(page, from, to, steps = 24, pauseMs = gesturePauseMs) {
   for (let index = 1; index <= steps; index += 1) {
     const t = index / steps;
@@ -354,6 +377,8 @@ async function performStep(page, definition, stepIndex, gestureCounts) {
     gestureEvidence = await dragGesture(page, action.subject, action.target, { strike: true, physicalContact: true });
   } else if (action.type === 'tap') {
     gestureEvidence = await tapGesture(page, action.subject);
+  } else if (action.type === 'record') {
+    gestureEvidence = await recordGesture(page, action);
   } else if (action.type === 'stir') {
     gestureEvidence = await stirGesture(page, action.subject, action.amount);
   } else if (action.type === 'adjust') {
@@ -388,7 +413,11 @@ async function performStep(page, definition, stepIndex, gestureCounts) {
       pouring.position.y - target.position.y,
       pouring.position.z - target.position.z,
     );
-    assert.ok(lipHorizontalDistance < .26 && pouring.socket.y > target.position.y + .04 && pouring.socket.y < target.position.y + 1.5,
+    // An upright pump dispenser cannot dip its nozzle towards the hands the
+    // way a tipped bottle can: its whole body would pass through them, so its
+    // lip legitimately sits a full bottle height above the receiver.
+    const lipCeiling = ['tracer', 'soap'].includes(action.subject) ? 2.2 : 1.5;
+    assert.ok(lipHorizontalDistance < .26 && pouring.socket.y > target.position.y + .04 && pouring.socket.y < target.position.y + lipCeiling,
       `${definition.id}: ${action.subject} lip is above the receiver (${lipDistance.toFixed(3)} m total, ${lipHorizontalDistance.toFixed(3)} m horizontal)`);
     if (!['tracer', 'soap'].includes(action.subject)) {
       assert.ok(baseDistance > lipDistance + .3,
@@ -435,9 +464,11 @@ async function openExperiment(page, definition) {
   await page.goto(`${base}/science-lab/preview?physicsRun=${navigationSerial}#${definition.id}`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.querySelector('#bootScreen')?.classList.contains('done'));
   await page.waitForFunction(() => window.__scienceLabTest?.rendererKind?.() === 'webgl');
-  await page.locator('#predictionDialog[open]').waitFor();
+  await page.locator('#stageScreen:not([hidden])').waitFor();
+  await advanceStageTo(page, 'hypothesis');
   await page.locator(`[data-prediction="${definition.prediction.answer}"]`).click();
-  await page.locator('#predictionSubmit').click();
+  await page.locator('#stageNext').click();
+  await page.locator('#stageScreen').waitFor({ state: 'hidden' });
   await page.waitForFunction((id) => {
     const state = window.__scienceLabTest?.getState?.();
     return state?.experimentId === id && state.prediction != null && state.currentStep === 0;
@@ -510,7 +541,6 @@ async function openExperiment(page, definition) {
   const forbiddenInitialContacts = {
     'root-viewer': [['water-cup', 'magnifier']],
     'light-lab': [['mirror', 'prism']],
-    'force-coaster': [['cart', 'spring-scale']],
   }[definition.id] || [];
   if (forbiddenInitialContacts.length) {
     await page.waitForTimeout(350);
@@ -552,8 +582,31 @@ async function runSoundPlacementCausalityRegression(page, definition) {
   return { struck, stopped, placedStoppedFork, screenshotPath };
 }
 
+function assertClipsLifted(electric) {
+  assert.equal(electric.magneticModel, 'current-scaled-distance-force',
+    'electric: the crane uses a current- and distance-dependent force model');
+  assert.equal(electric.attachedClipCount, 6,
+    `electric: all six dynamic clips reach the powered core through magnetic force: ${JSON.stringify(electric)}`);
+  assert.ok(electric.clips.every((clip) => clip.pose?.dynamic === true),
+    `electric: attracted clips remain dynamic rigid bodies: ${JSON.stringify(electric.clips)}`);
+  assert.ok(Object.values(electric.magneticForceNewtons).every((force) => Number(force) > 0),
+    `electric: every lifted clip has a solved magnetic force: ${JSON.stringify(electric.magneticForceNewtons)}`);
+}
+
+// Index of the nth step of a given verb, so inserting a recording step never
+// silently moves a check onto the wrong action.
+function stepAt(definition, type, occurrence = 0) {
+  let seen = 0;
+  for (const [index, step] of definition.steps.entries()) {
+    if (step.action.type !== type) continue;
+    if (seen === occurrence) return index;
+    seen += 1;
+  }
+  return -1;
+}
+
 async function runSemanticChecks(page, definition, stepIndex, samples) {
-  if (definition.id === 'density-column' && stepIndex === 3) {
+  if (definition.id === 'density-column' && stepIndex === stepAt(definition, 'place', 0)) {
     await page.waitForTimeout(2600);
     samples.cork = await page.evaluate(() => window.__scienceLabTest.getPhysicsPose('cork'));
     assert.ok(samples.cork, 'density: cork remains a live rigid body after release');
@@ -562,7 +615,7 @@ async function runSemanticChecks(page, definition, stepIndex, samples) {
     assert.ok(Math.abs(samples.cork.velocity.y) < .45,
       `density: cork is close to buoyant equilibrium before the observation is accepted: ${JSON.stringify(samples.cork)}`);
   }
-  if (definition.id === 'density-column' && stepIndex === 4) {
+  if (definition.id === 'density-column' && stepIndex === stepAt(definition, 'place', 1)) {
     await page.waitForTimeout(2300);
     samples.bead = await page.evaluate(() => window.__scienceLabTest.getPhysicsPose('bead'));
     samples.cork = await page.evaluate(() => window.__scienceLabTest.getPhysicsPose('cork'));
@@ -590,50 +643,102 @@ async function runSemanticChecks(page, definition, stepIndex, samples) {
       `eco-house: equal-duration comparison clearly separates the materials: ${JSON.stringify(eco.comparison)}`);
   }
 
-  if (definition.id === 'force-coaster' && stepIndex === 1) {
+  if (definition.id === 'heat-conduction' && stepIndex === stepAt(definition, 'tap', 0)) {
+    await page.waitForTimeout(1400);
+    const heat = await sceneState(page, 'heat-conduction');
+    assert.equal(heat.heating, true, 'heat: the hot plate is on');
+    assert.deepEqual(heat.inWater.sort(), ['spoon-copper', 'spoon-plastic', 'spoon-wood'],
+      `heat: all three spoons share the same water: ${JSON.stringify(heat)}`);
+    assert.ok(heat.waterTemperature > 24 && heat.waterTemperature < 29,
+      `heat: water warms visibly instead of jumping to 82 °C: ${JSON.stringify(heat)}`);
+    assert.equal(heat.firstToFall, null,
+      `heat: butter remains visible during the gradual warm-up: ${JSON.stringify(heat)}`);
+    assert.ok(heat.temperatures['spoon-copper'] > heat.temperatures['spoon-wood'] + .25,
+      `heat: the metal handle starts warming fastest: ${JSON.stringify(heat.temperatures)}`);
+  }
+  if (definition.id === 'heat-conduction' && stepIndex === stepAt(definition, 'record', 0)) {
+    await page.waitForFunction(() => {
+      const state = window.__scienceLabTest?.getDebugStats?.()?.science;
+      return state?.experiment === 'heat-conduction'
+        && state.butterSlideProgress?.['spoon-copper'] >= .2
+        && state.firstToFall == null;
+    }, undefined, { timeout: 18000 });
+    const softening = await sceneState(page, 'heat-conduction');
+    assert.ok(softening.waterTemperature < 82,
+      `heat: copper butter starts sliding while the displayed water temperature is still rising: ${JSON.stringify(softening)}`);
+    await page.screenshot({ path: path.join(evidenceDirectory, '05-heat-conduction-butter-sliding.png'), fullPage: true });
+    await page.waitForFunction(() => (
+      window.__scienceLabTest?.getDebugStats?.()?.science?.firstToFall === 'spoon-copper'
+    ), undefined, { timeout: 10000 });
+    await page.waitForTimeout(180);
+    await page.screenshot({ path: path.join(evidenceDirectory, '05-heat-conduction-butter-falling.png'), fullPage: true });
+    const heat = await sceneState(page, 'heat-conduction');
+    assert.equal(heat.firstToFall, 'spoon-copper',
+      `heat: the copper spoon drops its butter first: ${JSON.stringify(heat)}`);
+    assert.equal(heat.butterFallen.includes('spoon-wood'), false,
+      `heat: the insulating handles keep their butter: ${JSON.stringify(heat)}`);
+    // The whole point of the fair test: only the material differs, so the
+    // insulators must still be near room temperature while copper is hot.
+    assert.ok(heat.temperatures['spoon-copper'] > heat.temperatures['spoon-plastic'] + 18,
+      `heat: conductor and insulator separate clearly: ${JSON.stringify(heat.temperatures)}`);
+  }
+  if (definition.id === 'light-reflection' && stepIndex === stepAt(definition, 'tap', 0)) {
+    const light = await sceneState(page, 'light-reflection');
+    assert.equal(light.torchOn, true, 'light: the torch tap turns the beam on');
+    assert.equal(light.surface, 'mirror', 'light: the mirror is the surface under test');
+    assert.equal(light.visibleReflectedRays, 1, `light: a mirror returns a single ray: ${JSON.stringify(light)}`);
+    assert.equal(light.reflectionDeg, light.incidenceDeg,
+      `light: the reflected angle equals the incident angle: ${JSON.stringify(light)}`);
+  }
+  if (definition.id === 'light-reflection' && stepIndex === stepAt(definition, 'adjust', 0)) {
+    const light = await sceneState(page, 'light-reflection');
+    assert.ok(light.incidenceDeg >= 52 && light.incidenceDeg <= 58,
+      `light: the incident angle follows the student's adjustment: ${JSON.stringify(light)}`);
+    assert.equal(light.reflectionDeg, light.incidenceDeg,
+      'light: the two angles stay equal at every incidence');
+  }
+  if (definition.id === 'light-reflection' && stepIndex === stepAt(definition, 'place', 1)) {
+    const light = await sceneState(page, 'light-reflection');
+    assert.equal(light.scattered, true, `light: a crumpled surface scatters: ${JSON.stringify(light)}`);
+    assert.equal(light.reflectionDeg, null, 'light: a scattering surface has no single reflected angle');
+    assert.ok(light.visibleReflectedRays > 5,
+      `light: scattering shows many rays, not one: ${JSON.stringify(light)}`);
+    assert.ok(light.incidenceDeg >= 52 && light.incidenceDeg <= 58,
+      'light: only the surface changed, the torch angle is held');
+  }
+  if (definition.id === 'force-coaster' && stepIndex === stepAt(definition, 'place', 0)) {
     samples.cartStart = await page.evaluate(() => window.__scienceLabTest.getPhysicsPose('cart'));
     assert.ok(samples.cartStart, 'forces: cart is a live rigid body at the ramp socket');
   }
-  if (definition.id === 'force-coaster' && stepIndex === 2) {
-    await page.waitForTimeout(2600);
-    samples.smoothEnd = await page.evaluate(() => window.__scienceLabTest.getPhysicsPose('cart'));
-    assert.ok(samples.smoothEnd.position.x > samples.cartStart.position.x + 1.2, `forces: gravity moves the cart down the smooth run: ${JSON.stringify(samples)}`);
-  }
-  if (definition.id === 'force-coaster' && stepIndex === 4) {
-    samples.cartConnected = await page.evaluate(() => window.__scienceLabTest.getPhysicsPose('cart'));
-    await page.waitForTimeout(900);
-    const cartWaiting = await page.evaluate(() => window.__scienceLabTest.getPhysicsPose('cart'));
+  if (definition.id === 'force-coaster' && stepIndex === stepAt(definition, 'tap', 0)) {
+    // A finished run returns the cart to the ramp and leaves the labelled stop
+    // marker as the evidence, so the recorded travel — not the resting cart —
+    // is what the trial is read from.
+    await page.waitForTimeout(4200);
     const force = await sceneState(page, 'force-coaster');
-    assert.equal(force.scaleAttached, true, `forces: spring scale stays visibly connected: ${JSON.stringify(force)}`);
-    assert.equal(force.pulling, false, `forces: attaching alone cannot start the pull: ${JSON.stringify(force)}`);
-    assert.ok(force.peakSpringReadingN < .05, `forces: an unextended attached scale reads zero: ${JSON.stringify(force)}`);
-    assert.ok(Math.abs(cartWaiting.position.x - samples.cartConnected.position.x) < .18,
-      `forces: connecting the scale does not start an automatic tween: ${JSON.stringify({ cartConnected: samples.cartConnected, cartWaiting, force })}`);
+    samples.smoothTravel = force.comparison.smoothTravelWorldUnits;
+    assert.ok(samples.smoothTravel > 1.2, `forces: gravity moves the cart down the smooth run: ${JSON.stringify(force)}`);
   }
-  if (definition.id === 'force-coaster' && stepIndex === 5) {
-    await page.waitForTimeout(1800);
-    samples.scalePull = await page.evaluate(() => window.__scienceLabTest.getPhysicsPose('cart'));
+  if (definition.id === 'force-coaster' && stepIndex === stepAt(definition, 'place', 1)) {
+    await page.waitForTimeout(700);
     const force = await sceneState(page, 'force-coaster');
-    const contact = await page.evaluate(() => window.__scienceLabTest.getPhysicsDebug('cart'));
-    assert.ok(samples.scalePull.position.x > samples.cartConnected.position.x + .38,
-      `forces: the student's scale drag physically pulls the cart: ${JSON.stringify({ samples, force, contact })}`);
-    // The physical cart remains dynamic and can vary slightly with the fixed-step
-    // contact solve. 0.38 m still proves a sustained, student-driven pull while
-    // staying well above the no-input drift guard checked earlier in this flow.
-    assert.ok(force.pullDistance > .38 && force.peakSpringReadingN > .35,
-      `forces: spring reading is derived from non-zero extension and cart displacement: ${JSON.stringify(force)}`);
-    assert.equal(force.pullReleased, true, `forces: the scale records a real release at the runout: ${JSON.stringify(force)}`);
-    assert.ok(contact.contacts.includes('rough-track'),
-      `forces: the pulled cart is actually contacting the installed rough board: ${JSON.stringify(contact)}`);
+    assert.equal(force.roughInstalled, true, `forces: the rough board is installed on the run-out: ${JSON.stringify(force)}`);
+    const board = await page.evaluate(() => window.__scienceLabTest.getPhysicsPose('rough-track'));
+    const ring = await page.evaluate(() => window.__scienceLabTest.getTargetWorldPose('runout'));
+    // The board must actually reach the track the student aimed at rather than
+    // stalling against a guard rail on the way in.
+    assert.ok(Math.hypot(board.position.x - ring.position.x, board.position.z - ring.position.z) < .3,
+      `forces: the released board is seated on the run-out: ${JSON.stringify({ board, ring })}`);
+    samples.roughBoard = board;
   }
-  if (definition.id === 'force-coaster' && stepIndex === 6) {
-    await page.waitForTimeout(2800);
-    samples.roughEnd = await page.evaluate(() => window.__scienceLabTest.getPhysicsPose('cart'));
-    const smoothDistance = samples.smoothEnd.position.x - samples.cartStart.position.x;
-    const roughDistance = samples.roughEnd.position.x - samples.cartStart.position.x;
-    assert.ok(roughDistance > .45, `forces: rough run still moves under gravity: ${JSON.stringify(samples)}`);
-    assert.ok(roughDistance < smoothDistance - .3, `forces: rough surface stops the cart sooner: ${JSON.stringify({ smoothDistance, roughDistance, samples })}`);
+  if (definition.id === 'force-coaster' && stepIndex === stepAt(definition, 'tap', 1)) {
+    await page.waitForTimeout(4200);
     const force = await sceneState(page, 'force-coaster');
+    const roughTravel = force.comparison.roughTravelWorldUnits;
+    samples.roughTravel = roughTravel;
+    assert.ok(roughTravel > .45, `forces: rough run still moves under gravity: ${JSON.stringify(force.comparison)}`);
+    assert.ok(roughTravel < samples.smoothTravel - .3,
+      `forces: rough surface stops the cart sooner: ${JSON.stringify(force.comparison)}`);
     assert.equal(force.comparisonReady, true, `forces: both surface trials remain recorded after trial B: ${JSON.stringify(force)}`);
     assert.equal(force.comparison.roughStopsSooner, true,
       `forces: comparison is derived from the two rigid-body travel distances: ${JSON.stringify(force.comparison)}`);
@@ -687,32 +792,25 @@ async function runSemanticChecks(page, definition, stepIndex, samples) {
     }
   }
 
-  if (definition.id === 'electric-crane' && stepIndex === 4) {
+  if (definition.id === 'electric-crane' && stepIndex === stepAt(definition, 'connect', 3)) {
     const electric = await sceneState(page, 'electric-crane');
     assert.equal(electric.connectedEdges.length, 4, `electric: four student leads form the intended path: ${JSON.stringify(electric)}`);
     assert.equal(electric.powered, false, 'electric: an open switch keeps an otherwise continuous circuit unpowered');
     assert.equal(electric.circuit?.switches?.find((entry) => entry.id === 'main-switch')?.closed, false,
       'electric: circuit solver serialises the open switch in the otherwise wired path');
   }
-  if (definition.id === 'electric-crane' && stepIndex === 5) {
+  if (definition.id === 'electric-crane' && stepIndex === stepAt(definition, 'tap', 0)) {
     const electric = await sceneState(page, 'electric-crane');
     assert.equal(electric.switchClosed, true, 'electric: real switch tap closes the knife switch');
     assert.equal(electric.powered, true, `electric: closed, fully wired path is powered: ${JSON.stringify(electric)}`);
     assert.ok(electric.currentAmps > 0, `electric: continuous circuit carries current: ${JSON.stringify(electric)}`);
-  }
-  if (definition.id === 'electric-crane' && stepIndex === 6) {
+    // Current through the coil is the whole cause: closing the circuit lifts
+    // the clips with no separate crane command.
     await page.waitForTimeout(1800);
-    const electric = await sceneState(page, 'electric-crane');
-    assert.equal(electric.magneticModel, 'current-scaled-distance-force',
-      'electric: the crane uses a current- and distance-dependent force model');
-    assert.equal(electric.attachedClipCount, 6,
-      `electric: all six dynamic clips reach the powered core through magnetic force: ${JSON.stringify(electric)}`);
-    assert.ok(electric.clips.every((clip) => clip.pose?.dynamic === true),
-      `electric: attracted clips remain dynamic rigid bodies: ${JSON.stringify(electric.clips)}`);
-    assert.ok(Object.values(electric.magneticForceNewtons).every((force) => Number(force) > 0),
-      `electric: every lifted clip has a solved magnetic force: ${JSON.stringify(electric.magneticForceNewtons)}`);
+    const lifted = await sceneState(page, 'electric-crane');
+    assertClipsLifted(lifted);
   }
-  if (definition.id === 'electric-crane' && stepIndex === 7) {
+  if (definition.id === 'electric-crane' && stepIndex === stepAt(definition, 'tap', 1)) {
     await page.waitForTimeout(1100);
     const electric = await sceneState(page, 'electric-crane');
     assert.equal(electric.powered, false, 'electric: final real switch tap breaks continuity again');
@@ -720,7 +818,6 @@ async function runSemanticChecks(page, definition, stepIndex, samples) {
     assert.ok(electric.clips.every((clip) => clip.pose?.dynamic === true),
       `electric: released clips fall under rigid-body gravity: ${JSON.stringify(electric.clips)}`);
   }
-
   if (definition.id === 'light-lab' && stepIndex === 2) {
     const light = await sceneState(page, 'light-lab');
     assert.equal(light.torchOn, true, 'light: torch remains on');
@@ -775,7 +872,11 @@ try {
   page.on('response', (response) => { if (response.status() >= 400) failedHttp.push(`${response.status()} ${response.url()}`); });
   page.on('request', (request) => {
     const url = new URL(request.url());
-    if (!['127.0.0.1', 'localhost'].includes(url.hostname)) externalRequests.push(request.url());
+    // ImageBitmapLoader exposes images embedded in our same-origin GLB as
+    // blob:http://127.0.0.1/... requests. Resolve the inherited blob origin
+    // before deciding whether the asset is third-party.
+    const sourceUrl = url.protocol === 'blob:' ? new URL(url.pathname) : url;
+    if (!['127.0.0.1', 'localhost'].includes(sourceUrl.hostname)) externalRequests.push(request.url());
   });
   await page.addInitScript(() => {
     try { localStorage.clear(); } catch {}
@@ -799,11 +900,52 @@ try {
   for (const definition of definitionsToRun) {
     try {
       await openExperiment(page, definition);
+      if (process.env.SCIENCE_LAB_CAPTURE_INITIAL === '1') {
+        const initialScreenshotPath = path.join(
+          evidenceDirectory,
+          `${String(definition.number).padStart(2, '0')}-${definition.id}-initial.png`,
+        );
+        await page.screenshot({ path: initialScreenshotPath, fullPage: true });
+      }
+      if (process.env.SCIENCE_LAB_CAPTURE_ORBIT === '1'
+        && ['density-column', 'heat-conduction'].includes(definition.id)) {
+        const originalViewport = page.viewportSize();
+        await page.setViewportSize({ width: 980, height: 769 });
+        await page.waitForTimeout(450);
+        await page.screenshot({
+          path: path.join(evidenceDirectory, `${String(definition.number).padStart(2, '0')}-${definition.id}-nameplates-980x769.png`),
+          fullPage: true,
+        });
+        const canvas = await page.locator('#labCanvas').boundingBox();
+        assert.ok(canvas, 'heat-conduction canvas is visible for orbit-label review');
+        const start = { x: canvas.x + canvas.width * .84, y: canvas.y + canvas.height * .56 };
+        await page.mouse.move(start.x, start.y);
+        await page.mouse.down();
+        await page.mouse.move(start.x - canvas.width * .22, start.y, { steps: 24 });
+        await page.mouse.up();
+        await page.waitForTimeout(450);
+        await page.screenshot({
+          path: path.join(evidenceDirectory, `${String(definition.number).padStart(2, '0')}-${definition.id}-nameplates-orbited.png`),
+          fullPage: true,
+        });
+        await page.locator('#cameraResetButton').click();
+        await page.setViewportSize(originalViewport);
+        await page.waitForTimeout(450);
+      }
       const samples = {};
       for (let stepIndex = 0; stepIndex < definition.steps.length; stepIndex += 1) {
         await performStep(page, definition, stepIndex, gestureCounts);
         await runSemanticChecks(page, definition, stepIndex, samples);
       }
+      await page.locator('#stageScreen:not([hidden])').waitFor({ timeout: 8500 });
+      await advanceStageTo(page, 'analysis');
+      const recordedRows = await page.locator('#analysisTableBody tr').count();
+      const expectedRows = definition.steps.filter((step) => step.action.type === 'record').length;
+      assert.equal(recordedRows, expectedRows,
+        `${definition.id}: every recorded reading reaches the analysis table`);
+      await advanceStageTo(page, 'reflection');
+      await page.locator(`[data-reflection="${definition.analysis.reflection.answer}"]`).click();
+      await page.locator('#stageNext').click();
       await page.locator('#resultDialog[open]').waitFor({ timeout: 8500 });
       assert.equal(await page.evaluate(() => window.__scienceLabAccessibleClicks || 0), 0,
         `${definition.id}: all steps were completed through real gestures, not the alternate action`);
@@ -827,7 +969,7 @@ try {
   }
 
   if (!onlyExperiments.size) {
-    for (const verb of ['place', 'pour', 'connect', 'tap', 'adjust', 'stir']) {
+    for (const verb of ['place', 'pour', 'connect', 'tap', 'adjust', 'record']) {
       assert.ok(gestureCounts[verb] > 0, `live runner exercises a real ${verb} gesture`);
     }
   }
