@@ -339,6 +339,18 @@ const WEARABLE_GROUPS = [
   ['back',16,['小書包','蝴蝶翅膀','龍翼背包','雲朵披風','海洋背囊','竹簍','星星斗篷','探險工具箱','月光披風','火箭背包','雪人背包','花園背包','機械發條','糖果背包','水晶小翼','迷你帳篷']],
   ['aura',16,['星光足跡','泡泡足跡','葉片足跡','火花足跡','雪花足跡','彩虹足跡','月影光環','日光光環','水晶光環','雷電光環','花瓣旋風','音符旋風','小雲跟隨','星球環繞','螢火蟲群','齒輪光環']],
 ];
+
+// Physical wearables are released only after their complete animal-plus-wearable redraw has
+// been accepted into art-source/imagegen/baked-wearables/cat/Finished. Aura artwork is the one
+// explicit exception: it remains a separate environmental effect and may stay available without
+// a baked pet redraw. Keep this as an explicit release list rather than reading art-source at
+// runtime, because production deployments contain public assets but not the artist workspace.
+const FINISHED_REDRAW_WEARABLE_IDS = new Set([
+  'face-01', 'face-02', 'face-03', 'face-04', 'face-06', 'face-07', 'face-08', 'face-09', 'face-12',
+  'head-03', 'head-04',
+  'neck-01', 'neck-02', 'neck-03', 'neck-04', 'neck-05', 'neck-06', 'neck-07', 'neck-08',
+  'neck-09', 'neck-10', 'neck-11', 'neck-12', 'neck-13', 'neck-14', 'neck-15', 'neck-16',
+]);
 const WEARABLES = [];
 for (const [slot, count, names] of WEARABLE_GROUPS) {
   for (let index = 0; index < count; index += 1) {
@@ -348,6 +360,7 @@ for (const [slot, count, names] of WEARABLE_GROUPS) {
     const rarity = index >= count - 4 ? 'legend' : index >= Math.floor(count * .55) ? 'fancy' : index >= Math.floor(count * .25) ? 'rare' : 'common';
     const price = ({ common: 120, rare: 300, fancy: 450, legend: 600 })[rarity];
     const id = `${slot}-${String(index + 1).padStart(2, '0')}`;
+    if (slot !== 'aura' && !FINISHED_REDRAW_WEARABLE_IDS.has(id)) continue;
     WEARABLES.push({ id, name: { 'zh-HK': names[index], 'en-US': `${slot[0].toUpperCase()}${slot.slice(1)} ${index + 1}` }, category: 'wearable', slot, rarity, price, currency: 'coins', art: artPath('collectibles/wearables', id), content: CONTENT_METRICS[id] || null,
       fit: slot === 'head' ? HEAD_FIT(names[index]) : undefined,
       // A creature that walks turns away, so an accessory is drawn from the front, from its

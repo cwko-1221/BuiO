@@ -206,6 +206,7 @@ function chooseSpecies(rarity, ownedSpecies, random) {
 }
 
 function publicPet(row) {
+  const equippedWearables = row.equippedWearables || row.equippedwearables || [];
   return {
     id: row.petId || row.petid, speciesId: row.speciesId || row.speciesid,
     xp: Number(row.xp) || 0, stage: Number(row.stage) || 1,
@@ -214,7 +215,9 @@ function publicPet(row) {
     // Outfits are still a live feature — setOutfit(), PUT /pets/:petId/outfit and the
     // EquippedWearables column all remain. Omitting it here left the client reading
     // .length off undefined and the room scene failing to build the pet.
-    equippedWearables: row.equippedWearables || row.equippedwearables || [],
+    // Retired catalogue entries can remain in an old save. Do not send them back to the client,
+    // where they would otherwise keep rendering after the shop item itself has been withdrawn.
+    equippedWearables: equippedWearables.filter((id) => indexes.wearables.has(id)),
   };
 }
 
