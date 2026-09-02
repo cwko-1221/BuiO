@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const config = require('../../config');
 const store = require('../../db/jsonStore');
 const { getPool, withTransaction } = require('../../math-app/db/database');
-const { catalog, indexes } = require('../lib/catalog');
+const { catalog, indexes, WEARABLE_PET_IDS } = require('../lib/catalog');
 
 const JSON_KEYS = [
   'petProfiles', 'petWallets', 'petCurrencyLedger', 'petInstances',
@@ -524,14 +524,21 @@ async function setOutfit(studentId, petId, wearableIds) {
   const definitions = wearableIds.map((id) => indexes.wearables.get(id));
   if (definitions.some((item) => !item) || new Set(definitions.map((item) => item.slot)).size !== definitions.length) throw Object.assign(new Error('Outfit slots must be unique'), { status: 400 });
   await ensureStudent(studentId);
+  // Only species with baked wearable art may be dressed. Undressing stays open for everyone, so a
+  // pet that was dressed before its species was closed can still be cleared.
+  const dressable = (speciesId) => !wearableIds.length || WEARABLE_PET_IDS.has(speciesId);
   if (config.db.mode === 'postgres') {
     const inventory = await getPool().query(`SELECT ItemID AS "itemId" FROM PetInventory WHERE StudentID=$1 AND Quantity>0 AND ItemID=ANY($2::text[])`, [studentId, wearableIds]);
     if (inventory.rowCount !== wearableIds.length) throw Object.assign(new Error('Wearable not owned'), { status: 409 });
+    const species = await getPool().query(`SELECT SpeciesID AS "speciesId" FROM PetInstances WHERE PetID=$1 AND StudentID=$2`, [petId, studentId]);
+    if (!species.rowCount) throw Object.assign(new Error('Pet not found'), { status: 404 });
+    if (!dressable(species.rows[0].speciesId)) throw Object.assign(new Error('Species cannot wear outfits yet'), { status: 409 });
     const updated = await getPool().query(`UPDATE PetInstances SET EquippedWearables=$3::jsonb,UpdatedAt=NOW() WHERE PetID=$1 AND StudentID=$2`, [petId, studentId, JSON.stringify(wearableIds)]);
     if (!updated.rowCount) throw Object.assign(new Error('Pet not found'), { status: 404 });
   } else {
     const data = ensureJsonData(); const pet = data.petInstances.find((row) => row.petId === petId && row.studentId === studentId);
     if (!pet) throw Object.assign(new Error('Pet not found'), { status: 404 });
+    if (!dressable(pet.speciesId)) throw Object.assign(new Error('Species cannot wear outfits yet'), { status: 409 });
     const owned = new Set(data.petInventory.filter((row) => row.studentId === studentId && row.quantity > 0).map((row) => row.itemId));
     if (!wearableIds.every((id) => owned.has(id))) throw Object.assign(new Error('Wearable not owned'), { status: 409 });
     pet.equippedWearables = [...wearableIds]; pet.updatedAt = nowIso(); store.save();

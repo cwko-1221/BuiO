@@ -84,7 +84,7 @@ function loadOutfitAtlases() {
       const match = /^([^:]+):([1-4]):([^:]+)$/.exec(key);
       if (!match) continue;
       const [, petId, stageText, signature] = match;
-      if (!petIds.has(petId)) continue;
+      if (!petIds.has(petId) || !WEARABLE_PET_IDS.has(petId)) continue;
       const ids = signature.split('+');
       if (!ids.length || ids.length > 5 || new Set(ids).size !== ids.length) continue;
       // Auras are environmental layers and are intentionally never baked into a complete
@@ -121,7 +121,7 @@ function loadRedrawnWearables() {
       const [, petId, stageText, itemId] = match;
       const item = wearableById.get(itemId);
       const hasVisibleLayer = ['patch', 'rear', 'front'].some((layer) => typeof entry[layer] === 'string' && entry[layer]);
-      if (!petIds.has(petId) || !item || entry.slot !== item.slot || !hasVisibleLayer) continue;
+      if (!petIds.has(petId) || !WEARABLE_PET_IDS.has(petId) || !item || entry.slot !== item.slot || !hasVisibleLayer) continue;
       accepted[key] = entry;
     }
     return accepted;
@@ -242,6 +242,13 @@ const PET_LIBRARY = [
 }));
 const RELEASED_PET_IDS = new Set(['starpatch-cat', 'cloud-ear-dog', 'pudding-pig']);
 const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
+
+/**
+ * The species that may wear accessories. Every wearable is a redraw of one specific animal, so a
+ * species only joins this list once its own sheets have been baked; until then its dressing room
+ * stays shut rather than offering items that would not fit. The cat is the only one finished.
+ */
+const WEARABLE_PET_IDS = new Set(['starpatch-cat']);
 
 /**
  * The rooms whose artwork has been checked against the grid, which is every room the importer has
@@ -420,6 +427,7 @@ const catalog = Object.freeze({
   rooms: ROOMS,
   foods: FOODS,
   wearables: WEARABLES,
+  wearablePetIds: Array.from(WEARABLE_PET_IDS),
   furniture: FURNITURE,
   evolutionThresholds: EVOLUTION_THRESHOLDS,
   animation: loadAnimationLayout(),
@@ -433,4 +441,4 @@ const catalog = Object.freeze({
 const byId = (items) => new Map(items.map((item) => [item.id, item]));
 const indexes = Object.freeze({ pets: byId(PETS), rooms: byId(ROOMS), foods: byId(FOODS), wearables: byId(WEARABLES), furniture: byId(FURNITURE) });
 
-module.exports = { catalog, indexes };
+module.exports = { catalog, indexes, WEARABLE_PET_IDS };

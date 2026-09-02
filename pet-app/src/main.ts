@@ -55,6 +55,8 @@ const UI = {
  * and aura only. They are still laid out, and marked as not yet open, because a board with holes
  * punched in it reads as a board that is coming rather than one that is broken.
  */
+/** Mirrors lib/catalog.js WEARABLE_PET_IDS; used only when the server omits the list. */
+const WEARABLE_PET_IDS = ['starpatch-cat'];
 const OUTFIT_SLOTS: { key: string; zh: string; en: string; icon: string; side: 'left' | 'right' | 'foot' }[] = [
   { key:'head', zh:'頭飾', en:'Head',  icon:'👑', side:'left' },
   { key:'face', zh:'面飾', en:'Face',  icon:'👓', side:'left' },
@@ -105,6 +107,17 @@ class StudentApp {
   inventory(itemId: string) { return this.state.inventory.find((item) => item.itemId === itemId)?.quantity || 0; }
   activePet() { return this.state.pets.find((pet) => pet.id === this.state.profile.activePetId) || this.state.pets[0]; }
   definition(pet?: PetInstance) { return this.state.catalog.pets.find((definition) => definition.id === pet?.speciesId); }
+  /**
+   * Accessories are redraws of one specific animal, so a species can only be dressed once its own
+   * sheets exist. Today that is the cat alone; the rest keep the outfit UI hidden rather than
+   * offering items that have no artwork for them.
+   */
+  private canDress(pet?: PetInstance) {
+    // A server older than this build sends no list. Fall back to the same default the catalogue
+    // ships rather than sealing the wardrobe for every pet, which is the worse failure.
+    const open=this.state.catalog.wearablePetIds?.length?this.state.catalog.wearablePetIds:WEARABLE_PET_IDS;
+    return !!pet && open.includes(pet.speciesId);
+  }
 
   async start() {
     this.state = await api.bootstrap(); this.roomPlacements = this.state.room.placements.map((item) => ({...item})); this.renderShell();
@@ -322,6 +335,8 @@ class StudentApp {
       ['sleep','moon',this.t('sleep')],
       ['decorate','decorate',this.t('decorate')],
       ['open-feed','food',this.t('feed')],
+      // The button stays for every pet; species without finished wearable art get the
+      // "not open yet" notice inside the picker rather than a missing action.
       ['open-outfit','spark',this.locale==='zh-HK'?'換裝':'Outfit'],
     ];
     // Identity rides in the top bar alongside the coin pill; the room bar carries only actions.
@@ -449,6 +464,8 @@ class StudentApp {
   private renderOutfitPicker() {
     const pet=this.activePet(); if(!pet) return;
     const zh=this.locale==='zh-HK';
+    if(!this.canDress(pet)) return this.picker(zh?'裝備':'Equipment',
+      `<div class="empty-state">${zh?'呢隻寵物嘅飾物系統暫未開放。<br>目前只有星斑幼貓可以換裝。':'The outfit system is not open for this pet yet.<br>Only the Starpatch Kitten can dress up for now.'}</div>`);
     const definition=this.state.catalog.pets.find((item)=>item.id===pet.speciesId)!;
     const byId=(id:string)=>this.state.catalog.wearables.find((item)=>item.id===id);
     const equipped=new Map(pet.equippedWearables.map((id)=>[byId(id)?.slot||'',id]));
@@ -697,7 +714,7 @@ class StudentApp {
   private async react(owner:string,reaction:string){const result=await api.react(owner,reaction);audio.sfx('reaction');this.celebrate('reaction');document.querySelectorAll('[data-action="reaction"]').forEach((button)=>{const id=(button as HTMLElement).dataset.id!;button.querySelector('small')!.textContent=String(result.reactions[id]||0);});}
   /** Put a piece on. Anything already in that slot comes off, since a slot holds one thing. */
   private async equipWearable(wearableId:string){
-    const pet=this.activePet()!; const definition=this.state.catalog.wearables.find((item)=>item.id===wearableId)!;
+    const pet=this.activePet()!; if(!this.canDress(pet)) return; const definition=this.state.catalog.wearables.find((item)=>item.id===wearableId)!;
     const outfit=pet.equippedWearables.filter((id)=>this.state.catalog.wearables.find((item)=>item.id===id)?.slot!==definition.slot);
     if(!pet.equippedWearables.includes(wearableId))outfit.push(wearableId);
     await this.saveOutfit(pet.id,outfit);
