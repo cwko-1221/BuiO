@@ -2306,8 +2306,10 @@ export function buildConduction(api) {
       { dynamic: false },
     );
     const badge = dynamicDisplay(`${spec.label} 22 °C`, { width: 400, height: 150, scale: [1.22, .46] });
-    badge.position.set(spec.home[0], 3.28, .62);
-    api.root.add(badge);
+    // Stagger the heights: three readings over three neighbouring spoons
+    // would otherwise sit on top of one another.
+    badge.position.set(0, 3.05 + spoonSpecs.indexOf(spec) * .38, 0);
+    object.add(badge);
     spoons.set(spec.id, {
       spec,
       object,
@@ -2325,8 +2327,8 @@ export function buildConduction(api) {
     });
   }
 
-  const readout = dynamicDisplay('水溫 22 °C', { scale: [3.3, .9] });
-  readout.position.set(centre.x + 1.15, 4.75, centre.z);
+  const readout = dynamicDisplay('水溫 22 °C', { scale: [2.7, .74] });
+  readout.position.set(centre.x, 4.9, centre.z);
   api.root.add(readout);
 
   let heating = false;

@@ -19,6 +19,36 @@ export const palette = {
   wood: 0xc78552,
 };
 
+// Labels are canvas textures magnified on screen, so they are drawn at twice
+// the resolution they used to be and filtered with the display's anisotropy.
+const LABEL_WIDTH = 1536;
+const LABEL_HEIGHT = 416;
+let labelAnisotropy = 1;
+
+export function setLabelAnisotropy(value) {
+  labelAnisotropy = Math.max(1, Math.floor(value) || 1);
+}
+
+/** One label atlas, shared by the billboard and the flat-plane label. */
+function drawLabelCanvas(text, color, background) {
+  const canvas = document.createElement('canvas');
+  canvas.width = LABEL_WIDTH;
+  canvas.height = LABEL_HEIGHT;
+  const context = canvas.getContext('2d');
+  context.fillStyle = background;
+  roundedRect(context, 12, 12, LABEL_WIDTH - 24, LABEL_HEIGHT - 24, 68);
+  context.fill();
+  context.fillStyle = color;
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.font = '800 144px "Microsoft JhengHei", sans-serif';
+  context.fillText(text, LABEL_WIDTH / 2, LABEL_HEIGHT / 2 + 6, LABEL_WIDTH - 156);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = labelAnisotropy;
+  return texture;
+}
+
 export function mat(color, options = {}) {
   const Material = options.transmission ? THREE.MeshPhysicalMaterial : THREE.MeshStandardMaterial;
   return new Material({
@@ -330,7 +360,7 @@ export function replaceWireGeometry(mesh, start, end, radius = .045) {
 }
 
 /** A lit instrument panel whose reading can be rewritten in place. */
-export function dynamicDisplay(initialText, { width = 512, height = 192, scale = [2.2, .82] } = {}) {
+export function dynamicDisplay(initialText, { width = 1024, height = 384, scale = [2.2, .82] } = {}) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -338,6 +368,7 @@ export function dynamicDisplay(initialText, { width = 512, height = 192, scale =
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.minFilter = THREE.LinearFilter;
+  texture.anisotropy = labelAnisotropy;
   const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
   const sprite = new THREE.Sprite(material);
   sprite.scale.set(scale[0], scale[1], 1);
@@ -352,10 +383,10 @@ export function dynamicDisplay(initialText, { width = 512, height = 192, scale =
     gradient.addColorStop(1, '#0c4c58');
     context.fillStyle = gradient;
     context.beginPath();
-    context.roundRect(5, 5, width - 10, height - 10, 30);
+    context.roundRect(width * .01, height * .026, width * .98, height * .948, height * .156);
     context.fill();
     context.strokeStyle = accent;
-    context.lineWidth = 7;
+    context.lineWidth = Math.max(5, height * .036);
     context.stroke();
     context.fillStyle = '#dffdf5';
     context.font = `700 ${Math.round(height * .43)}px "Microsoft JhengHei", sans-serif`;
@@ -369,22 +400,7 @@ export function dynamicDisplay(initialText, { width = 512, height = 192, scale =
 }
 
 export function makeLabelSprite(text, { color = '#123b45', background = '#fffdf7', scale = 1 } = {}) {
-  const canvas = document.createElement('canvas');
-  // High-resolution label atlas: the old 384×120 texture blurred quickly on
-  // classroom projectors, particularly for the smaller apparatus captions.
-  canvas.width = 768;
-  canvas.height = 208;
-  const context = canvas.getContext('2d');
-  context.fillStyle = background;
-  roundedRect(context, 6, 6, 756, 196, 34);
-  context.fill();
-  context.fillStyle = color;
-  context.textAlign = 'center';
-  context.textBaseline = 'middle';
-  context.font = '800 72px "Microsoft JhengHei", sans-serif';
-  context.fillText(text, 384, 105, 690);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
+  const texture = drawLabelCanvas(text, color, background);
   const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
   const sprite = new THREE.Sprite(material);
   sprite.scale.set(2.8 * scale, .76 * scale, 1);
@@ -394,27 +410,9 @@ export function makeLabelSprite(text, { color = '#123b45', background = '#fffdf7
   return sprite;
 }
 
-/** A physical label face that stays attached to its object instead of billboarding. */
 export function makeLabelPlane(text, { color = '#123b45', background = '#fffdf7', scale = 1 } = {}) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 768;
-  canvas.height = 208;
-  const context = canvas.getContext('2d');
-  context.fillStyle = background;
-  roundedRect(context, 6, 6, 756, 196, 34);
-  context.fill();
-  context.fillStyle = color;
-  context.textAlign = 'center';
-  context.textBaseline = 'middle';
-  context.font = '800 72px "Microsoft JhengHei", sans-serif';
-  context.fillText(text, 384, 105, 690);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  const material = new THREE.MeshBasicMaterial({
-    map: texture,
-    transparent: true,
-    depthTest: false,
-  });
+  const texture = drawLabelCanvas(text, color, background);
+  const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthTest: false });
   const plane = new THREE.Mesh(new THREE.PlaneGeometry(2.8 * scale, .76 * scale), material);
   plane.userData.canvasTexture = texture;
   plane.userData.educationalLabel = true;

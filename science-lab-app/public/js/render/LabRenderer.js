@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import {
   palette, mat, roundedBox, cylinder, sphere, torus, makeBench, makeBeaker,
   makeBottle, makeTargetRing, makeWire, replaceWireGeometry, disposeObject, worldPosition,
-  makeLabelPlane,
+  makeLabelPlane, setLabelAnisotropy,
 } from './SceneKit.js';
 import { buildExperimentScene } from './ExperimentScenes.js';
 import { PhysicsWorld } from '../physics/PhysicsWorld.js';
@@ -16,7 +16,7 @@ const CAMERA_PRESETS = {
   'water-filter': { position: [-.1, 7.55, 11.9], target: [.35, 1.3, .05] },
   'electric-crane': { position: [-.3, 7.35, 12.2], target: [.25, 1.25, 0] },
   'light-reflection': { position: [-.1, 7.15, 11.4], target: [.35, 1.7, .05] },
-  'heat-conduction': { position: [-.8, 6.05, 9.9], target: [-.4, 2.2, .05] },
+  'heat-conduction': { position: [.1, 6.05, 9.9], target: [.5, 2.2, .05] },
   'force-coaster': { position: [-.2, 7.85, 12.8], target: [.2, 1.0, -.15] },
 };
 
@@ -63,6 +63,9 @@ export class LabRenderer {
       this.contextIssueHandler?.('這部裝置未能啟動 WebGL，請更新瀏覽器或改用另一部裝置。');
       throw error;
     }
+    // Canvas-backed labels are viewed at a glancing angle across the bench,
+    // where anisotropic filtering is what keeps the characters legible.
+    setLabelAnisotropy(this.renderer.capabilities.getMaxAnisotropy());
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
@@ -78,7 +81,18 @@ export class LabRenderer {
     this.controls.target.copy(DEFAULT_TARGET);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = .065;
-    this.controls.enablePan = false;
+    // Panning is how a tablet user brings a far corner of the bench into
+    // reach. One finger still drags apparatus; two fingers move the view.
+    this.controls.enablePan = true;
+    this.controls.screenSpacePanning = true;
+    this.controls.panSpeed = .9;
+    this.controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+    // With a mouse, pressing the wheel pans; rolling it still zooms.
+    this.controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.PAN,
+      RIGHT: THREE.MOUSE.PAN,
+    };
     this.controls.minDistance = 8.6;
     this.controls.maxDistance = 15.5;
     this.controls.minPolarAngle = .75;
@@ -86,6 +100,9 @@ export class LabRenderer {
     this.controls.minAzimuthAngle = -.52;
     this.controls.maxAzimuthAngle = .52;
     this.controls.update();
+    // A long press over the bench raises iOS's selection callout and the
+    // desktop context menu. Both interrupt a drag, and neither is wanted.
+    this.canvas.addEventListener('contextmenu', (event) => event.preventDefault());
 
     this.environment = new THREE.Group();
     this.world = new THREE.Group();
@@ -1392,6 +1409,17 @@ export class LabRenderer {
     };
   }
 
+  /** Panning stays within arm's reach of the bench, never past it. */
+  #clampPan() {
+    const home = this.cameraPreset?.target || [DEFAULT_TARGET.x, DEFAULT_TARGET.y, DEFAULT_TARGET.z];
+    const target = this.controls.target;
+    const before = target.clone();
+    target.x = THREE.MathUtils.clamp(target.x, home[0] - 3.4, home[0] + 3.4);
+    target.y = THREE.MathUtils.clamp(target.y, home[1] - 1.4, home[1] + 2.4);
+    target.z = THREE.MathUtils.clamp(target.z, home[2] - 2.6, home[2] + 2.6);
+    if (!before.equals(target)) this.camera.position.add(target.clone().sub(before));
+  }
+
   #frame(timeMs) {
     if (this.destroyed || this.paused) return;
     const dt = Math.min(.05, (timeMs - this.lastFrame) / 1000 || .016);
@@ -1403,6 +1431,7 @@ export class LabRenderer {
     }
     this.elapsed += dt;
     this.controls.update();
+    this.#clampPan();
     if (this.mode === 'lab') this.physics?.step(dt);
     this.#updateAnimations(dt);
     this.#updateParticles(dt);
