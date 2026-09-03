@@ -1,0 +1,18 @@
+# head-05-v3-cell-retry redrawn wearable batch
+
+- Verdict: **DATA_PASS**
+- Mode: DRY_RUN_NO_PUBLISH
+- Category: head
+- Published: no
+- Target lineage: PASS
+- Target immutable: PASS
+- Canonical extraction: PASS
+- Exact RGBA mismatch pixels: 0
+- Unexpected unsolvable pixels: 0
+- Transparent layer RGB residue: 0
+- Transparent erase RGB residue: 0
+- Failed cells: none
+- 4x proof: C:\Users\kochu\Documents\BuiO\artifacts\redrawn-wearable-batch-dry-run\head-05-v3-cell-retry\proof-4x\selected-frames-left-vs-right-4x.png
+- Expected PASS comparison: PASS
+
+The pipeline never writes the game manifest or runtime. A frozen target with invalid or circular lineage is rejected before mask extraction.

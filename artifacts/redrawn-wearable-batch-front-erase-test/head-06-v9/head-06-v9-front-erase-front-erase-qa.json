@@ -1,0 +1,40 @@
+{
+  "verdict": "REJECT",
+  "sourcePolicy": {
+    "independentInputRequired": true,
+    "compositeRead": false,
+    "derivedFromComposite": false,
+    "sourceCoordinatePreserved": true
+  },
+  "pathPolicy": {
+    "verdict": "PASS",
+    "inputPath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-06-exact-front-erase-v5.png",
+    "outputPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\head-06-v9\\compositing\\head-06-v9-front-erase-batch-front-erase.png",
+    "canonicalMaskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\head-06-v9\\head-06-v9-front-erase-canonical-mask.png",
+    "inputBasenameForbiddenComposite": false
+  },
+  "geometry": {
+    "width": 800,
+    "height": 640,
+    "channels": 4,
+    "transformed": false,
+    "resampled": false
+  },
+  "metrics": {
+    "decodedMismatchPixels": 0,
+    "nonBinaryAlphaPixels": 0,
+    "transparentRgbNonZeroPixels": 0,
+    "outsideCanonicalMaskPixels": 1435,
+    "visiblePixels": 9982
+  },
+  "inputs": {
+    "inputPath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-06-exact-front-erase-v5.png",
+    "outputPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\head-06-v9\\compositing\\head-06-v9-front-erase-batch-front-erase.png",
+    "canonicalMaskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-front-erase-test\\head-06-v9\\head-06-v9-front-erase-canonical-mask.png",
+    "sha256": {
+      "input": "d274462ef67b33ff22bc312c455905ee9c22877cdc427124b42f64aaa9f2cd23",
+      "output": "d274462ef67b33ff22bc312c455905ee9c22877cdc427124b42f64aaa9f2cd23",
+      "canonicalMask": "b4f0fcf3951d482e69e8f3ee7ae4fe77366bb58286b894ecf9e7f0efb81d2518"
+    }
+  }
+}

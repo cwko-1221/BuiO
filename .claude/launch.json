@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "buio",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/kochu/AppData/Local/Temp/claude/C--Users-kochu-Documents-BuiO/7e6cede3-6c33-4c08-971c-26413c9a2955/scratchpad/dev-preview.mjs"
+      ],
+      "port": 3000
+    }
+  ]
+}

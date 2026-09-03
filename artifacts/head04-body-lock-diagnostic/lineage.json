@@ -1,0 +1,23 @@
+{
+  "role": "immutable locked dressed-art target authored before production extraction",
+  "canvas": "800x640",
+  "transformedDuringAuthoring": false,
+  "productionMaskOrLayerRead": false,
+  "inputs": {
+    "basePath": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "sourceLayerPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-04-independent-proof/independent-mask-v1/head-04-layer.png",
+    "sha256": {
+      "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+      "sourceLayer": "d5c57f78087262fb73f2e428cc84a296ec43b58600c79fec79404461d981a57c"
+    }
+  },
+  "output": {
+    "targetPath": "artifacts/head04-body-lock-diagnostic/locked-target.png",
+    "sha256": "77f22e195f651b1aa7d4f7dc239ef934ddc1584ccb0c09cd22353f2fd2e4d9cc",
+    "writtenUtc": "2026-08-24T18:14:41.821Z"
+  },
+  "metrics": {
+    "sourceLayerPixels": 13197,
+    "baseBytesPreservedOutsideLayer": 498803
+  }
+}

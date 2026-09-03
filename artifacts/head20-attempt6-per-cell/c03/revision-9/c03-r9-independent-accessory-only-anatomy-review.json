@@ -1,0 +1,689 @@
+{
+  "schemaVersion": 1,
+  "independent": true,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c03",
+  "revision": "r9",
+  "stage": "ACCESSORY_ONLY_ANATOMY_EXCLUSION_PRE_GATE",
+  "contract": "Opaque intermediate-layer pixels may describe helmet shell, trim, or visor graphics only. They must not reproduce pet eyes/pupils, nose/mouth, forehead star, or face fur. Alpha below 192 is treated as a permitted translucent visor/tint, not copied anatomy.",
+  "inputs": {
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\c03-base-original-160x160.png",
+    "baseSha256": "d6603d155cc87d4ea652bd45a4bceb2a1fb414ad5c8ba6d1c81c4da037b8e6c0",
+    "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\c03-r9-helmet-pre-gate-candidate-layer-160x160.png",
+    "layerSha256": "1d8384fb25c40b6b875445a77d8385187e49ded6376f39f31fa0b54d0e491c49",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\c03-r9-helmet-pre-gate-candidate-mask-160x160.png",
+    "maskSha256": "035b77884457ab0c19d2723fd4444709554ccef5328e3444b3b4758da341aaf3",
+    "rois": {
+      "leftEye": [
+        48,
+        43,
+        76,
+        72
+      ],
+      "rightEye": [
+        83,
+        43,
+        111,
+        72
+      ],
+      "foreheadStar": [
+        71,
+        25,
+        91,
+        45
+      ],
+      "noseMouth": [
+        68,
+        64,
+        93,
+        82
+      ],
+      "faceFur": [
+        42,
+        27,
+        119,
+        88
+      ]
+    }
+  },
+  "thresholds": {
+    "eye": "amber >=24 AND neutral-dark >=12 in either eye ROI",
+    "foreheadStar": "yellow >=30",
+    "noseMouth": "pink >=20 AND neutral-dark >=5",
+    "faceFur": "near-base-colour >=90 OR cream >=110"
+  },
+  "metrics": {
+    "anatomyMetrics": {
+      "leftEye": {
+        "opaqueLayerPixels": 812,
+        "amberIrisPixels": 88,
+        "neutralDarkPupilPixels": 132,
+        "pinkNoseMouthPixels": 95,
+        "yellowStarPixels": 56,
+        "creamFurPixels": 78,
+        "nearBaseColourPixels": 184,
+        "samples": [
+          [
+            60,
+            43,
+            239,
+            216,
+            190
+          ],
+          [
+            61,
+            43,
+            239,
+            199,
+            167
+          ],
+          [
+            62,
+            43,
+            241,
+            201,
+            170
+          ],
+          [
+            63,
+            43,
+            244,
+            215,
+            189
+          ],
+          [
+            67,
+            43,
+            247,
+            182,
+            95
+          ],
+          [
+            68,
+            43,
+            250,
+            156,
+            23
+          ],
+          [
+            69,
+            43,
+            249,
+            155,
+            24
+          ],
+          [
+            70,
+            43,
+            249,
+            165,
+            48
+          ],
+          [
+            71,
+            43,
+            250,
+            208,
+            149
+          ],
+          [
+            75,
+            43,
+            250,
+            194,
+            115
+          ],
+          [
+            61,
+            44,
+            240,
+            203,
+            174
+          ],
+          [
+            62,
+            44,
+            240,
+            200,
+            172
+          ],
+          [
+            63,
+            44,
+            243,
+            200,
+            171
+          ],
+          [
+            64,
+            44,
+            248,
+            224,
+            196
+          ],
+          [
+            67,
+            44,
+            248,
+            172,
+            71
+          ],
+          [
+            68,
+            44,
+            251,
+            154,
+            23
+          ]
+        ]
+      },
+      "rightEye": {
+        "opaqueLayerPixels": 812,
+        "amberIrisPixels": 154,
+        "neutralDarkPupilPixels": 135,
+        "pinkNoseMouthPixels": 171,
+        "yellowStarPixels": 132,
+        "creamFurPixels": 142,
+        "nearBaseColourPixels": 70,
+        "samples": [
+          [
+            83,
+            43,
+            246,
+            207,
+            176
+          ],
+          [
+            84,
+            43,
+            246,
+            206,
+            176
+          ],
+          [
+            85,
+            43,
+            246,
+            212,
+            183
+          ],
+          [
+            103,
+            43,
+            160,
+            138,
+            116
+          ],
+          [
+            104,
+            43,
+            151,
+            110,
+            84
+          ],
+          [
+            106,
+            43,
+            37,
+            17,
+            71
+          ],
+          [
+            83,
+            44,
+            245,
+            203,
+            174
+          ],
+          [
+            84,
+            44,
+            245,
+            204,
+            174
+          ],
+          [
+            85,
+            44,
+            245,
+            222,
+            196
+          ],
+          [
+            104,
+            44,
+            160,
+            130,
+            104
+          ],
+          [
+            105,
+            44,
+            126,
+            84,
+            76
+          ],
+          [
+            107,
+            44,
+            44,
+            21,
+            75
+          ],
+          [
+            83,
+            45,
+            245,
+            206,
+            176
+          ],
+          [
+            84,
+            45,
+            244,
+            218,
+            191
+          ],
+          [
+            89,
+            45,
+            154,
+            131,
+            117
+          ],
+          [
+            90,
+            45,
+            154,
+            132,
+            115
+          ]
+        ]
+      },
+      "foreheadStar": {
+        "opaqueLayerPixels": 400,
+        "amberIrisPixels": 128,
+        "neutralDarkPupilPixels": 18,
+        "pinkNoseMouthPixels": 19,
+        "yellowStarPixels": 121,
+        "creamFurPixels": 26,
+        "nearBaseColourPixels": 22,
+        "samples": [
+          [
+            72,
+            25,
+            107,
+            93,
+            85
+          ],
+          [
+            74,
+            25,
+            105,
+            89,
+            81
+          ],
+          [
+            75,
+            25,
+            103,
+            74,
+            55
+          ],
+          [
+            78,
+            25,
+            63,
+            41,
+            49
+          ],
+          [
+            79,
+            25,
+            37,
+            21,
+            48
+          ],
+          [
+            80,
+            25,
+            30,
+            21,
+            49
+          ],
+          [
+            82,
+            25,
+            13,
+            16,
+            73
+          ],
+          [
+            85,
+            25,
+            2,
+            13,
+            54
+          ],
+          [
+            86,
+            25,
+            7,
+            22,
+            70
+          ],
+          [
+            88,
+            25,
+            8,
+            19,
+            62
+          ],
+          [
+            89,
+            25,
+            1,
+            11,
+            49
+          ],
+          [
+            73,
+            26,
+            144,
+            110,
+            82
+          ],
+          [
+            77,
+            26,
+            131,
+            111,
+            86
+          ],
+          [
+            78,
+            26,
+            116,
+            90,
+            64
+          ],
+          [
+            79,
+            26,
+            103,
+            73,
+            44
+          ],
+          [
+            81,
+            26,
+            75,
+            44,
+            51
+          ]
+        ]
+      },
+      "noseMouth": {
+        "opaqueLayerPixels": 450,
+        "amberIrisPixels": 23,
+        "neutralDarkPupilPixels": 27,
+        "pinkNoseMouthPixels": 89,
+        "yellowStarPixels": 24,
+        "creamFurPixels": 12,
+        "nearBaseColourPixels": 210,
+        "samples": [
+          [
+            71,
+            64,
+            238,
+            127,
+            128
+          ],
+          [
+            72,
+            64,
+            249,
+            130,
+            127
+          ],
+          [
+            73,
+            64,
+            255,
+            138,
+            135
+          ],
+          [
+            74,
+            64,
+            241,
+            119,
+            118
+          ],
+          [
+            75,
+            64,
+            241,
+            161,
+            157
+          ],
+          [
+            82,
+            64,
+            209,
+            187,
+            170
+          ],
+          [
+            83,
+            64,
+            204,
+            108,
+            11
+          ],
+          [
+            84,
+            64,
+            255,
+            176,
+            3
+          ],
+          [
+            85,
+            64,
+            251,
+            207,
+            41
+          ],
+          [
+            86,
+            64,
+            247,
+            221,
+            21
+          ],
+          [
+            87,
+            64,
+            251,
+            240,
+            61
+          ],
+          [
+            88,
+            64,
+            252,
+            243,
+            79
+          ],
+          [
+            89,
+            64,
+            247,
+            220,
+            20
+          ],
+          [
+            90,
+            64,
+            250,
+            202,
+            22
+          ],
+          [
+            91,
+            64,
+            255,
+            176,
+            8
+          ],
+          [
+            92,
+            64,
+            212,
+            100,
+            0
+          ]
+        ]
+      },
+      "faceFur": {
+        "opaqueLayerPixels": 4502,
+        "amberIrisPixels": 599,
+        "neutralDarkPupilPixels": 484,
+        "pinkNoseMouthPixels": 614,
+        "yellowStarPixels": 499,
+        "creamFurPixels": 395,
+        "nearBaseColourPixels": 506,
+        "samples": [
+          [
+            72,
+            27,
+            170,
+            124,
+            76
+          ],
+          [
+            73,
+            27,
+            178,
+            116,
+            30
+          ],
+          [
+            74,
+            27,
+            161,
+            141,
+            118
+          ],
+          [
+            82,
+            27,
+            120,
+            101,
+            86
+          ],
+          [
+            83,
+            27,
+            110,
+            82,
+            65
+          ],
+          [
+            85,
+            27,
+            68,
+            47,
+            53
+          ],
+          [
+            87,
+            27,
+            23,
+            20,
+            62
+          ],
+          [
+            94,
+            27,
+            9,
+            14,
+            67
+          ],
+          [
+            95,
+            27,
+            19,
+            13,
+            59
+          ],
+          [
+            97,
+            27,
+            141,
+            63,
+            71
+          ],
+          [
+            98,
+            27,
+            74,
+            33,
+            70
+          ],
+          [
+            99,
+            27,
+            13,
+            13,
+            72
+          ],
+          [
+            111,
+            27,
+            0,
+            14,
+            42
+          ],
+          [
+            112,
+            27,
+            55,
+            50,
+            75
+          ],
+          [
+            113,
+            27,
+            172,
+            126,
+            111
+          ],
+          [
+            114,
+            27,
+            228,
+            140,
+            35
+          ]
+        ]
+      }
+    },
+    "layerMaskSupportMismatchPixels": 0,
+    "copiedEyes": true,
+    "copiedStar": true,
+    "copiedNoseMouth": true,
+    "copiedFur": true
+  },
+  "gates": {
+    "noOpaqueCopiedEyesOrPupils": false,
+    "noOpaqueCopiedForeheadStar": false,
+    "noOpaqueCopiedNoseOrMouth": false,
+    "noOpaqueCopiedOrangeCreamFur": false,
+    "layerMaskSupportRecorded": true,
+    "visualCritic": "PENDING"
+  },
+  "verdict": "REJECT_LAYER_CONTAINS_PET_ANATOMY",
+  "publishable": false
+}

@@ -1,0 +1,635 @@
+{
+  "frames": {
+    "crate": {
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 240,
+        "h": 196
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 196
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 196
+      }
+    },
+    "barrel": {
+      "frame": {
+        "x": 248,
+        "y": 4,
+        "w": 240,
+        "h": 228
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 228
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 228
+      }
+    },
+    "plank": {
+      "frame": {
+        "x": 492,
+        "y": 4,
+        "w": 240,
+        "h": 62
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 62
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 62
+      }
+    },
+    "stone-slab": {
+      "frame": {
+        "x": 736,
+        "y": 4,
+        "w": 240,
+        "h": 184
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 184
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 184
+      }
+    },
+    "ladder": {
+      "frame": {
+        "x": 980,
+        "y": 4,
+        "w": 127,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 127,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 127,
+        "h": 240
+      }
+    },
+    "rope-bridge": {
+      "frame": {
+        "x": 1111,
+        "y": 4,
+        "w": 240,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 80
+      }
+    },
+    "hanging-ring": {
+      "frame": {
+        "x": 1355,
+        "y": 4,
+        "w": 112,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 112,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 112,
+        "h": 240
+      }
+    },
+    "trampoline": {
+      "frame": {
+        "x": 1471,
+        "y": 4,
+        "w": 240,
+        "h": 160
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 160
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 160
+      }
+    },
+    "spring-pad": {
+      "frame": {
+        "x": 1715,
+        "y": 4,
+        "w": 240,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 205
+      }
+    },
+    "slingshot-platform": {
+      "frame": {
+        "x": 4,
+        "y": 248,
+        "w": 231,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 231,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 231,
+        "h": 240
+      }
+    },
+    "conveyor": {
+      "frame": {
+        "x": 239,
+        "y": 248,
+        "w": 240,
+        "h": 84
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 84
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 84
+      }
+    },
+    "seesaw": {
+      "frame": {
+        "x": 483,
+        "y": 248,
+        "w": 240,
+        "h": 102
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 102
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 102
+      }
+    },
+    "rotating-beam": {
+      "frame": {
+        "x": 727,
+        "y": 248,
+        "w": 240,
+        "h": 120
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 120
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 120
+      }
+    },
+    "moving-lift": {
+      "frame": {
+        "x": 971,
+        "y": 248,
+        "w": 240,
+        "h": 231
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 231
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 231
+      }
+    },
+    "cloud-pad": {
+      "frame": {
+        "x": 1215,
+        "y": 248,
+        "w": 240,
+        "h": 117
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 117
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 117
+      }
+    },
+    "basketball": {
+      "frame": {
+        "x": 1459,
+        "y": 248,
+        "w": 237,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 237,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 237,
+        "h": 240
+      }
+    },
+    "beach-ball": {
+      "frame": {
+        "x": 1700,
+        "y": 248,
+        "w": 236,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 236,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 236,
+        "h": 240
+      }
+    },
+    "balloons": {
+      "frame": {
+        "x": 4,
+        "y": 492,
+        "w": 149,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 149,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 149,
+        "h": 240
+      }
+    },
+    "fan": {
+      "frame": {
+        "x": 157,
+        "y": 492,
+        "w": 165,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 165,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 165,
+        "h": 240
+      }
+    },
+    "arrow-sign": {
+      "frame": {
+        "x": 326,
+        "y": 492,
+        "w": 240,
+        "h": 216
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 216
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 216
+      }
+    },
+    "checkpoint-flag": {
+      "frame": {
+        "x": 570,
+        "y": 492,
+        "w": 174,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 174,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 174,
+        "h": 240
+      }
+    },
+    "summit-flag": {
+      "frame": {
+        "x": 748,
+        "y": 492,
+        "w": 192,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 240
+      }
+    },
+    "bench": {
+      "frame": {
+        "x": 944,
+        "y": 492,
+        "w": 240,
+        "h": 195
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 195
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 195
+      }
+    },
+    "chair": {
+      "frame": {
+        "x": 1188,
+        "y": 492,
+        "w": 149,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 149,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 149,
+        "h": 240
+      }
+    },
+    "sofa": {
+      "frame": {
+        "x": 1341,
+        "y": 492,
+        "w": 240,
+        "h": 98
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 98
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 98
+      }
+    },
+    "bed": {
+      "frame": {
+        "x": 1585,
+        "y": 492,
+        "w": 240,
+        "h": 141
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 141
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 141
+      }
+    },
+    "table": {
+      "frame": {
+        "x": 4,
+        "y": 736,
+        "w": 240,
+        "h": 199
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 199
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 199
+      }
+    },
+    "book-stack": {
+      "frame": {
+        "x": 248,
+        "y": 736,
+        "w": 205,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 205,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 205,
+        "h": 240
+      }
+    },
+    "street-lamp": {
+      "frame": {
+        "x": 457,
+        "y": 736,
+        "w": 111,
+        "h": 240
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 111,
+        "h": 240
+      },
+      "sourceSize": {
+        "w": 111,
+        "h": 240
+      }
+    },
+    "stone-arch": {
+      "frame": {
+        "x": 572,
+        "y": 736,
+        "w": 240,
+        "h": 201
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 201
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 201
+      }
+    },
+    "jump-ramp": {
+      "frame": {
+        "x": 816,
+        "y": 736,
+        "w": 240,
+        "h": 219
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 219
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 219
+      }
+    }
+  },
+  "meta": {
+    "app": "BuiO atlas builder",
+    "version": "2",
+    "image": "global-0.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 2048
+    },
+    "scale": "1"
+  }
+}

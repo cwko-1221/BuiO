@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "independent": true,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c03",
+  "revision": "r1",
+  "contract": "actual silhouette only; zero-transform base -> erase(mask) -> source-over(layer)",
+  "inputHashes": {
+    "base": "d6603d155cc87d4ea652bd45a4bceb2a1fb414ad5c8ba6d1c81c4da037b8e6c0",
+    "target": "5736742f716457ec5ec75a784640102e941a0d29b37791685007b079119fe122",
+    "mask": "ffb765b1208a0132ea7fa8cf15581f5050a907f063c3464adb24cfa3ff9a8ac5",
+    "layer": "d24b153cccd5fe7cb34490414e6c27a5d09bb4cb06150aebb8c5fa6c6385d470",
+    "tail": "791c5b1d2cbf17e3494e38db40d61e0b7acb42e1585dc28c4fbaf5076a0bd33d",
+    "extension": "1cb6b844edfab5a219e11b8a753ffd1e05aa23c8c698f0885a2ec197e042032e",
+    "protections": "0a2d4f77c7dca423fe1f32c65453d90a8721fc78fc06203540f89d9d72c9e6a7",
+    "pet": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253",
+    "accessory": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+    "raw": "f76d8e95f94ebff7e492ca859ae5485d3460f5a00be8f7ec3fede50307354793"
+  },
+  "provenance": {
+    "rawSource": true,
+    "generation": true,
+    "originalPet": true,
+    "originalAccessory": true,
+    "forbiddenInputs": true,
+    "frozenHashes": true,
+    "pass": true
+  },
+  "metrics": {
+    "maskPixels": 6160,
+    "components4Connected": 1,
+    "componentSizes": [
+      6160
+    ],
+    "enclosedHolePixels": 0,
+    "maskOutsideDeclaredPermissionsPixels": 0,
+    "layerMaskSupportMismatchPixels": 0,
+    "tailIntersectionPixels": 0,
+    "bodyChestLegPawIntersectionPixels": 0,
+    "targetDifferenceOutsideActualMaskPixels": 0,
+    "transparentLayerRgbPixels": 0,
+    "exactRgbaMismatchPixels": 0
+  },
+  "gates": {
+    "provenance": true,
+    "maskNonempty": true,
+    "maskOneComponent": true,
+    "maskHoleFree": true,
+    "maskInsideDeclaredC03Permissions": true,
+    "maskLayerSupportExact": true,
+    "tailProtection": true,
+    "bodyChestLegPawProtection": true,
+    "targetUnchangedOutsideMask": true,
+    "transparentLayerRgbClean": true,
+    "exactEraseSourceOver": true,
+    "visualCritic": "PENDING"
+  },
+  "mechanicalVerdict": "PASS",
+  "verdict": "PASS_MASK_COMPOSITE_PENDING_INDEPENDENT_VISUAL_CRITIC",
+  "publishable": false
+}

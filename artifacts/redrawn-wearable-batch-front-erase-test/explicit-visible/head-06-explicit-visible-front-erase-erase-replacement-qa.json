@@ -1,0 +1,17 @@
+{
+  "verdict": "PASS",
+  "policy": {
+    "mode": "minimal-source-over-fallback",
+    "maximumErasePixels": 0,
+    "requireLayerEqualsTargetAtErase": true
+  },
+  "metrics": {
+    "erasePixels": 0,
+    "eraseOutsideAllowedRegions": 0,
+    "ambiguousEraseRegionPixels": 0,
+    "replacementLayerTargetMismatchPixels": 0,
+    "nonBinaryEraseAlphaPixels": 0,
+    "minimalFallbackProof": true
+  },
+  "regions": []
+}

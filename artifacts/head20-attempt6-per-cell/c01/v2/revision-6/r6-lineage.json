@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "revision": "r6",
+  "verdict": "SOURCE_LAYER_EXTRACTION_PENDING_INDEPENDENT_CRITIC",
+  "rawFullRedrawSource": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-raw-full-dressed-imagegen-source.png",
+    "originalGeneratedPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-4\\r4-raw-full-dressed-imagegen-source.png",
+    "sha256": "1a8a47e52c220854fb198fb9e7d537ac4d661262579342a163333153282c4fe4",
+    "originalGeneratedSha256": "1a8a47e52c220854fb198fb9e7d537ac4d661262579342a163333153282c4fe4",
+    "width": 1254,
+    "height": 1254,
+    "channels": 3,
+    "hasAlpha": false,
+    "format": "png",
+    "generator": "built-in image_gen",
+    "timestamp": "2026-08-26T05:00:34.962Z",
+    "prompt": "Full front-pose starpatch cat wearing a closed blue-white galaxy space helmet; original pet-starpatch-cat-1 and wearable-head-3 helmet views as visual prototypes; natural ears fully hidden; continuous collar; transparent background."
+  },
+  "originalPrototypeLineage": {
+    "pet": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\pet-starpatch-cat-1.png",
+      "sha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253"
+    },
+    "accessory": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\wearable-head-3.png",
+      "sha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+      "view": "bottom-row right space-helmet front/side/back"
+    }
+  },
+  "forbiddenInputProof": {
+    "notOldTarget": true,
+    "notComposite": true,
+    "notMask": true,
+    "usedRevision1": false,
+    "usedRevision2": false,
+    "usedWholeAtlasV2": false,
+    "usedAttempt5": false,
+    "r3bTargetLayerMaskComposite": "NOT_READ",
+    "r4TargetLayerMaskComposite": "NOT_READ",
+    "r5TargetLayerMaskComposite": "NOT_READ",
+    "permittedRawOnly": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-raw-full-dressed-imagegen-source.png"
+  },
+  "normalization": {
+    "steps": "r4 independent raw full-dressed source only -> connected RGB checker flood -> expanded crop [260,167,764,630] with 41px transparent left margin -> 129x122 Lanczos3 map at x=20,y=5 preserving visor/collar anchor -> source-alpha-derived closed silhouette -> base byte lock outside original c01 semantic union",
+    "rawHelmetCrop": [
+      260,
+      167,
+      764,
+      630
+    ],
+    "mappedPlacement": [
+      20,
+      5,
+      149,
+      127
+    ],
+    "detachedMappedComponentsRemoved": 80,
+    "detachedMappedPixelsRemoved": 244,
+    "cleanedPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-cleaned-raw-1254x1254-rgba.png",
+    "cleanedSha256": "9718a0b410ff55e1fe9cf3765a216d469610309c66c300ea767d86b4fe435a6d",
+    "mappedPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-mapped-helmet-129x122-rgba.png",
+    "mappedSha256": "00b83016f75d20692044b7f11082c8a27a70652f318367b4688afbb2fcef0dbd",
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-target-coordinate-locked-160x160.png",
+    "targetSha256": "e9a8ae5de3898d82508ab86fd76df7da34438aa1ed714a75aa79dcbf86960639",
+    "sourceSha256": "1a8a47e52c220854fb198fb9e7d537ac4d661262579342a163333153282c4fe4"
+  },
+  "sourceToCandidateMapping": {
+    "method": "r4 raw-only expanded-crop source mapping; no transform after extraction; coordinate target locks original base outside actual mask",
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\c01-base-original-160x160.png",
+    "baseSha256": "cc87a049bc41b7635bdb1ca4d92f46c1822d73423b86ce7c69c6526fa6ae80d4",
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-target-coordinate-locked-160x160.png",
+    "targetSha256": "e9a8ae5de3898d82508ab86fd76df7da34438aa1ed714a75aa79dcbf86960639",
+    "rawOnlyInput": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-raw-full-dressed-imagegen-source.png",
+    "rawOnlyInputSha256": "1a8a47e52c220854fb198fb9e7d537ac4d661262579342a163333153282c4fe4"
+  },
+  "semanticMask": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-helmet-mask-same-coordinate-160x160.png",
+    "sha256": "aad8878f93797699430be0057fac0c6b4e8d542196d2b9c71c8d9b5f02ed8ad3",
+    "pathLayer": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-helmet-layer-same-coordinate-160x160.png",
+    "layerSha256": "bcda4d821d8b26f137bb02d6386e85e04372739917719bab2e6e029a7f120c92",
+    "allowedZones": [
+      [
+        38,
+        5,
+        137,
+        127
+      ],
+      [
+        31,
+        28,
+        38,
+        101
+      ]
+    ],
+    "actualSilhouettePixels": 7855,
+    "components4Connected": 1,
+    "enclosedHoles": 0,
+    "outsideAllowedPixels": 0,
+    "trueTailProtectedPixels": 269,
+    "tailIntersectionPixels": 0,
+    "protectedBodyOrPawIntersectionPixels": 0,
+    "leftNaturalEarUnchangedOpaquePixels": 0,
+    "rightNaturalEarUnchangedOpaquePixels": 0,
+    "collarContinuous": {
+      "rows": [
+        95,
+        96,
+        97,
+        98,
+        99,
+        100
+      ],
+      "continuousSpans": [
+        48,
+        113
+      ]
+    },
+    "diagnosticOnlyExtension": {
+      "evidencePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-left-earcup-amendment-evidence.json",
+      "evidenceSha256": "f5c3dc9a1c6a2e487bd1b51e0dbb3ca0c56f9f1330aa94bcb169b5be56657341",
+      "pixelMaskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-left-earcup-extension-allowed-mask.png",
+      "pixelMaskSha256": "3f5aff0e5a91556fcd61e1332dc4b842de89d1dd9fa43fbac840ddd6e60e5871",
+      "consumedByActualSupport": false
+    }
+  },
+  "gates": {
+    "exactOutsideAllowedBaseLock": true,
+    "maskLayerSupportExact": true,
+    "actualMaskOneComponent": true,
+    "actualMaskHoleFree": true,
+    "actualMaskWithinAllowedUnion": true,
+    "trueTailProtected": true,
+    "naturalEarsOccluded": true,
+    "critic": "PENDING_INDEPENDENT_VISUAL_REVIEW",
+    "publishable": false
+  },
+  "generation": {
+    "model": "built-in image_gen",
+    "timestamp": "2026-08-26T02:55:02.241Z",
+    "prompt": "Use case: precise-object-edit. Fresh full-body front-facing redraw of the original orange-and-cream starpatch cat wearing wearable-head-3 bottom-row right blue-and-white galaxy space helmet; rounded symmetric blue-and-gold ear cups, continuous rounded outer helmet silhouette, deep navy galaxy visor with both cat eyes, both natural ears fully hidden, collar ending at neck above chest, no rectangular blue panels or blocks, transparent background.",
+    "lineage": "r6 re-extracts only the independently generated r4 raw full-dressed source; it does not read r4/r5 targets, masks, layers, or composites."
+  },
+  "mechanicalAudit": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-mechanical-audit.json",
+    "sha256": "7fae196ee0a6fb0b851f562f632ff9c606f5f6d8b3817886eba7ab691fd371c2",
+    "verdict": "PASS_MECHANICAL_PENDING_VISUAL_CRITIC"
+  },
+  "frozenArtifactHashes": {
+    "rawFullDressed": "1a8a47e52c220854fb198fb9e7d537ac4d661262579342a163333153282c4fe4",
+    "target": "e9a8ae5de3898d82508ab86fd76df7da34438aa1ed714a75aa79dcbf86960639",
+    "layer": "bcda4d821d8b26f137bb02d6386e85e04372739917719bab2e6e029a7f120c92",
+    "mask": "aad8878f93797699430be0057fac0c6b4e8d542196d2b9c71c8d9b5f02ed8ad3",
+    "diagnosticExtension": "3f5aff0e5a91556fcd61e1332dc4b842de89d1dd9fa43fbac840ddd6e60e5871",
+    "mechanicalAudit": "7fae196ee0a6fb0b851f562f632ff9c606f5f6d8b3817886eba7ab691fd371c2"
+  },
+  "frozen": true,
+  "frozenAt": "2026-08-26T05:05:57.441Z"
+}

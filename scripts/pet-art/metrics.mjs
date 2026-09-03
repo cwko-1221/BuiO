@@ -1,0 +1,363 @@
+// Content-box metrics for placeable art.
+//
+// Props are authored on a fixed 640x640 canvas, but the drawn object occupies only part of it
+// and is not centred — a 1x1 side table might be 206x229 pixels sitting at (217,267). The
+// runtime needs to scale a piece to the grid footprint it occupies and stand it on the floor,
+// and it can only do that against the object's real bounds. Measuring the alpha bounding box
+// here keeps that cost at build time instead of paying it on every client.
+//
+// Runs last in the pipeline so it always measures the current art.
+
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import sharp from 'sharp';
+
+export const category = 'metrics';
+
+const ALPHA_THRESHOLD = 16;
+
+/** Alpha bounding box in canvas pixels, normalised to 0..1 fractions of the canvas. */
+async function contentBox(file, region) {
+  const pipeline = sharp(file);
+  if (region) pipeline.extract(region);
+  const { data, info } = await pipeline.ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  let minX = info.width;
+  let minY = info.height;
+  let maxX = -1;
+  let maxY = -1;
+  for (let y = 0; y < info.height; y += 1) {
+    for (let x = 0; x < info.width; x += 1) {
+      if (data[(y * info.width + x) * info.channels + 3] <= ALPHA_THRESHOLD) continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+  }
+  if (maxX < 0) return null; // fully transparent
+  return {
+    x: Number((minX / info.width).toFixed(4)),
+    y: Number((minY / info.height).toFixed(4)),
+    width: Number(((maxX - minX + 1) / info.width).toFixed(4)),
+    height: Number(((maxY - minY + 1) / info.height).toFixed(4)),
+  };
+}
+
+export async function generate({ catalog, resolve, root, log }) {
+  const metrics = {};
+  let measured = 0;
+  let missing = 0;
+
+  // An accessory is drawn from three sides and each drawing has its own outline — a hat in
+  // profile is narrower and sits differently in its canvas than the same hat from the front — so
+  // each view is measured under its own name rather than borrowing the front's box.
+  const pieces = [];
+  for (const item of [...catalog.furniture, ...catalog.wearables]) {
+    if (item.art) pieces.push([item.id, item.art]);
+    for (const [facing, url] of Object.entries(item.views || {})) {
+      if (url) pieces.push([`${item.id}-${facing}`, url]);
+    }
+  }
+
+  for (const [id, url] of pieces) {
+    const file = resolve(url);
+    try {
+      const box = await contentBox(file);
+      if (box) {
+        metrics[id] = box;
+        measured += 1;
+      }
+    } catch {
+      missing += 1; // not generated yet; the runtime falls back to whole-canvas fitting
+    }
+  }
+
+  await fs.mkdir(path.join(root, 'collectibles'), { recursive: true });
+  await fs.writeFile(path.join(root, 'collectibles', 'metrics.json'), JSON.stringify(metrics, null, 0));
+
+  const creatures = await measureCreatures({ catalog, resolve, root, log });
+
+  log(`measured ${measured} content boxes${missing ? `, ${missing} missing` : ''}, ${creatures.anchors} creature anchors over ${creatures.tracks} motion tracks`);
+  return { counts: { measured, missing, ...creatures } };
+}
+
+/**
+ * Where a hat, a pair of glasses and a collar belong on each creature, frame by frame.
+ *
+ * Atlas cells are square and no creature fills one, and the forms differ wildly — long ears,
+ * horns, a shell, no neck at all. Any fixed proportion of the cell therefore floats accessories
+ * above the squat creatures and buries them in the tall ones, so the runtime needs anchors
+ * measured from the art itself.
+ *
+ * Measuring only the resting pose is not enough either. A creature's head travels 19px within
+ * idle and 45px while it is happy, on a 160px cell — an accessory pinned to one set of anchors
+ * stays put while the head moves out from under it, which is exactly what reads as a sticker
+ * rather than something worn. So every frame is measured, and the difference from the resting
+ * pose ships alongside as a compact per-frame track.
+ */
+async function measureCreatures({ catalog, resolve, root, log }) {
+  let manifest;
+  try {
+    manifest = JSON.parse(await fs.readFile(path.join(root, 'sprites', 'manifest.json'), 'utf8'));
+  } catch {
+    log('no sprite manifest yet; skipping creature anchors');
+    return { anchors: 0, tracks: 0 };
+  }
+  const { frameWidth: cellW, frameHeight: cellH } = manifest;
+  // The manifest has had two shapes. The pose sheet gives plain counts; the older one listed the
+  // columns and rows it used. Reading .length off a number came back undefined, which put every
+  // frame at NaN and quietly handed back whole-cell proportions for all eighty creatures.
+  const count = (value, fallback) => (Array.isArray(value) ? value.length : Number(value) || fallback);
+  const columns = manifest.gridColumns || count(manifest.columns, 1);
+  const cells = columns * (manifest.gridRows || count(manifest.rows, 1));
+
+  // Only the cells something is drawn in are measured; the rest of the grid is padding.
+  const drawn = new Set();
+  for (const clip of manifest.clips || []) for (const frame of clip.frames) drawn.add(frame);
+  for (const action of Object.values(manifest.actions || {})) {
+    for (let i = 0; i < action.count; i += 1) drawn.add(action.start + i);
+  }
+  const animated = drawn;
+
+  const anchors = {};
+  const motion = {};
+  for (const pet of catalog.pets) {
+    if (!pet.animated) continue;
+    for (let stage = 0; stage < (pet.atlas?.length ?? 0); stage += 1) {
+      let sheet;
+      try {
+        sheet = await sharp(resolve(pet.atlas[stage])).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      } catch {
+        continue; // atlas not generated yet; the runtime falls back to whole-cell proportions
+      }
+      const cellAt = (index, hint) => landmarks(sheet.data, sheet.info, {
+        left: (index % columns) * cellW, top: Math.floor(index / columns) * cellH, width: cellW, height: cellH,
+      }, hint);
+
+      const rest = cellAt(0);
+      if (!rest) continue;
+      const key = `${pet.id}-${stage + 1}`;
+      const round = (value) => Number(value.toFixed(4));
+      const asAnchor = (frame) => ({
+        top: round(frame.skull / cellH), eye: round(frame.eye / cellH), bottom: round(frame.bottom / cellH),
+        centre: round(frame.centre / cellW), headCentre: round(frame.headCentre / cellW),
+        width: round(frame.width / cellW),
+        head: round(frame.head / cellW), face: round(frame.face / cellW),
+      });
+      anchors[key] = asAnchor(rest);
+
+      // A creature seen from the side does not carry its head where its front view does: the
+      // muzzle is forward of the body's middle and the skull reads narrower. One set of landmarks
+      // for all three rows put a hat on the head from the front and beside it from the side, so
+      // each facing is measured on its own resting pose.
+      // Only where the head is, not how big it is. A creature turning round does not change the
+      // size of its head, and measuring that again on a pose it was never designed for gave a
+      // head as wide as the body from the side and half again as deep from behind — so a hat
+      // came out a third of its size on one and half as big again on the other. Width and depth
+      // come from the front, where they can be read off a face; each turned pose contributes only
+      // the two things it can say for itself: how high the head sits and where along it is.
+      const headDepth = rest.eye - rest.skull;
+      const skullBelowTop = rest.skull - rest.headTop;
+      (manifest.directions || []).forEach((facing, row) => {
+        if (row === 0) return;   // the front is the key above
+        const resting = cellAt(row * columns, { headDepth, skullBelowTop, profile: facing === 'right' });
+        if (!resting) return;
+        anchors[`${key}-${facing}`] = {
+          top: round(resting.skull / cellH),
+          eye: round((resting.skull + headDepth) / cellH),
+          bottom: round(resting.bottom / cellH),
+          centre: round(resting.centre / cellW),
+          headCentre: round(resting.headCentre / cellW),
+          width: round(resting.width / cellW),
+          head: round(rest.head / cellW),
+          face: round(rest.face / cellW),
+        };
+      });
+
+      // Four signed bytes per cell: how far the skull and the eyes have moved, how far the body
+      // has swayed, and how much wider it has become, all against the resting pose. Signed bytes
+      // cover every pose measured and keep the whole table inside a few kilobytes.
+      const track = new Int8Array(cells * 4);
+      for (const index of animated) {
+        const frame = index === 0 ? rest : cellAt(index);
+        if (!frame) continue;
+        track[index * 4] = clampByte(frame.skull - rest.skull);
+        track[index * 4 + 1] = clampByte(frame.eye - rest.eye);
+        track[index * 4 + 2] = clampByte(frame.centre - rest.centre);
+        track[index * 4 + 3] = clampByte(Math.round((frame.width / rest.width - 1) * 100));
+      }
+      smooth(track, manifest.actions);
+      motion[key] = Buffer.from(track.buffer).toString('base64');
+    }
+  }
+
+  await fs.writeFile(path.join(root, 'sprites', 'body-metrics.json'), JSON.stringify(anchors, null, 0));
+  await fs.writeFile(path.join(root, 'sprites', 'frame-motion.json'), JSON.stringify(motion, null, 0));
+  return { anchors: Object.keys(anchors).length, tracks: Object.keys(motion).length };
+}
+
+const clampByte = (value) => Math.max(-127, Math.min(127, Math.round(value)));
+
+/**
+ * Median-of-three along each action, per channel.
+ *
+ * The landmarks are read off the pixels, so a single frame can disagree with its neighbours for
+ * reasons that have nothing to do with where the head is — a blink darkens a different row, a
+ * turned ear widens the silhouette. Left alone those one-frame spikes make a hat jump down over
+ * the face and back, which looks worse than not tracking at all. A median throws out the odd
+ * frame while leaving the real arc of the motion untouched.
+ */
+function smooth(track, actions) {
+  for (const action of Object.values(actions || {})) {
+    if (action.count < 3) continue;
+    for (let channel = 0; channel < 4; channel += 1) {
+      const source = Array.from({ length: action.count }, (_, i) => track[(action.start + i) * 4 + channel]);
+      for (let i = 0; i < action.count; i += 1) {
+        const window = [source[Math.max(0, i - 1)], source[i], source[Math.min(action.count - 1, i + 1)]].sort((a, b) => a - b);
+        track[(action.start + i) * 4 + channel] = window[1];
+      }
+    }
+  }
+}
+
+/** Fraction of the widest row a row must reach to count as skull rather than ear or horn. */
+const SKULL_WIDTH_RATIO = 0.72;
+/** Luminance below which a pixel reads as eye rather than fur. */
+const EYE_LUMINANCE = 0.38;
+
+/** Anchor lines and widths for one frame, in cell pixels. */
+function landmarks(data, info, rect, hint = {}) {
+  const { channels: C } = info;
+  const stride = info.width * C;
+  const alphaAt = (x, y) => data[(rect.top + y) * stride + (rect.left + x) * C + 3];
+  const luminanceAt = (x, y) => {
+    const i = (rect.top + y) * stride + (rect.left + x) * C;
+    return (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114) / 255;
+  };
+
+  let minX = rect.width;
+  let minY = rect.height;
+  let maxX = -1;
+  let maxY = -1;
+  const widths = new Int32Array(rect.height);
+  for (let y = 0; y < rect.height; y += 1) {
+    let rowMin = -1;
+    let rowMax = -1;
+    for (let x = 0; x < rect.width; x += 1) {
+      if (alphaAt(x, y) <= ALPHA_THRESHOLD) continue;
+      if (rowMin < 0) rowMin = x;
+      rowMax = x;
+    }
+    if (rowMin < 0) continue;
+    widths[y] = rowMax - rowMin + 1;
+    if (rowMin < minX) minX = rowMin;
+    if (rowMax > maxX) maxX = rowMax;
+    if (y < minY) minY = y;
+    maxY = y;
+  }
+  if (maxY < 0) return null;
+
+  /** The unbroken run of creature at a row that contains a given column. */
+  const runAt = (y, x0) => {
+    const at = Math.round(x0);
+    if (at < 0 || at > maxX || alphaAt(at, y) <= ALPHA_THRESHOLD) return null;
+    let left = at;
+    let right = at;
+    while (left > minX && alphaAt(left - 1, y) > ALPHA_THRESHOLD) left -= 1;
+    while (right < maxX && alphaAt(right + 1, y) > ALPHA_THRESHOLD) right += 1;
+    return { left, right, width: right - left + 1 };
+  };
+
+  // Eye line: every form has large high-contrast eyes, and they are the one landmark that stays
+  // on the face whatever the silhouette does, so the darkest row of the upper body locates the
+  // face far more reliably than any proportion of the body.
+  const searchTo = Math.round(minY + (maxY - minY) * 0.72);
+  let eyeY = minY;
+  let darkest = 0;
+  for (let y = minY; y <= searchTo; y += 1) {
+    let dark = 0;
+    for (let x = minX; x <= maxX; x += 1) {
+      if (alphaAt(x, y) <= 128) continue;
+      const luminance = luminanceAt(x, y);
+      if (luminance < EYE_LUMINANCE) dark += EYE_LUMINANCE - luminance;
+    }
+    if (dark > darkest) { darkest = dark; eyeY = y; }
+  }
+
+  let eyeMin = maxX;
+  let eyeMax = minX;
+  for (let x = minX; x <= maxX; x += 1) {
+    if (alphaAt(x, eyeY) <= 128 || luminanceAt(x, eyeY) >= EYE_LUMINANCE) continue;
+    if (x < eyeMin) eyeMin = x;
+    if (x > eyeMax) eyeMax = x;
+  }
+  // Eyes read as a compact dark patch. A row of shadow across a whole back is not a pair of eyes,
+  // and a creature seen from behind has none at all — its darkest row is wherever its markings
+  // happen to be, which is no use for finding a head.
+  const looksLikeEyes = eyeMax >= eyeMin && (eyeMax - eyeMin + 1) < (maxX - minX + 1) * 0.72;
+
+  // Where the head is, across the picture. Seen from the front or from behind that is the middle
+  // of the creature; seen from the side it is at the leading end of a body that is mostly not
+  // head, and measuring a head at the body's middle gave a head as wide as the creature is long.
+  let headX;
+  if (looksLikeEyes) {
+    headX = (eyeMin + eyeMax) / 2;
+    // In profile only one eye shows, and an eye is near the front of a head rather than in the
+    // middle of it. Taking the eye for the head's centre hung a hat off the creature's face.
+    if (hint.profile) headX -= (eyeMax - eyeMin + 1) * 1.6;
+  } else {
+    const band = Math.max(minY + 1, Math.round(minY + (maxY - minY) * 0.22));
+    let widestRow = minY;
+    for (let y = minY; y <= band; y += 1) if (widths[y] > widths[widestRow]) widestRow = y;
+    let left = minX;
+    let right = maxX;
+    for (let x = minX; x <= maxX; x += 1) if (alphaAt(x, widestRow) > ALPHA_THRESHOLD) { left = x; break; }
+    for (let x = maxX; x >= minX; x -= 1) if (alphaAt(x, widestRow) > ALPHA_THRESHOLD) { right = x; break; }
+    headX = (left + right) / 2;
+  }
+
+  // With no eyes to find, the head is as deep as the same creature's head is from the front.
+  if (!looksLikeEyes && hint?.headDepth) {
+    eyeY = Math.min(searchTo, Math.round(minY + hint.headDepth));
+  }
+
+  // Top of the skull: the first row broad enough to be head rather than ear, horn or antenna,
+  // so a hat lands on the head with the ears poking past it rather than hovering above them.
+  // Measured along the run the head is in, so a body behind or below it is not mistaken for one.
+  // The top of the head itself, ear tips and all — a stable thing to measure from, unlike the
+  // skull line, which is a judgement about how broad is broad enough.
+  let headTop = minY;
+  for (let y = minY; y <= eyeY; y += 1) { if (runAt(y, headX)) { headTop = y; break; } }
+
+  let headPeak = 0;
+  for (let y = minY; y <= eyeY; y += 1) {
+    const run = runAt(y, headX);
+    if (run && run.width > headPeak) headPeak = run.width;
+  }
+  if (!headPeak) for (let y = minY; y <= eyeY; y += 1) if (widths[y] > headPeak) headPeak = widths[y];
+  let skull = minY;
+  for (let y = minY; y <= eyeY; y += 1) {
+    const run = runAt(y, headX);
+    if ((run ? run.width : widths[y]) >= headPeak * SKULL_WIDTH_RATIO) { skull = y; break; }
+  }
+
+  if (!looksLikeEyes) { eyeMin = Math.round(headX - headPeak * 0.3); eyeMax = Math.round(headX + headPeak * 0.3); }
+
+  // How far below the top of the head the skull line sits is a fact about the creature, so a
+  // pose that cannot judge it for itself is told. Read fresh on a back view, the ears merge into
+  // the head and the skull comes out at the ear tips, which perches a hat above the animal.
+  if (hint.skullBelowTop !== undefined) skull = Math.round(headTop + hint.skullBelowTop);
+
+  return {
+    skull, headTop, eye: eyeY, bottom: maxY + 1,
+    centre: (minX + maxX + 1) / 2,
+    // Where the head is, which is not where the body's middle is on a creature seen side on.
+    headCentre: headX,
+    width: maxX - minX + 1,
+    // Widest row of the head region rather than the row halfway down it: a tapering muzzle or a
+    // pointed mantle is narrower there than the eyes it has to sit above, and glasses fitted to
+    // that would come out wider than the hat.
+    head: headPeak,
+    face: eyeMax - eyeMin + 1,
+  };
+}

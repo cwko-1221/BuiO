@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "revision": "r3b",
+  "verdict": "SOURCE_LAYER_EXTRACTION_PENDING_INDEPENDENT_CRITIC",
+  "rawFullRedrawSource": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-3\\r3b\\r3b-raw-full-dressed-imagegen-source.png",
+    "originalGeneratedPath": "C:\\Users\\kochu\\.codex\\generated_images\\01a03b54-1158-75d3-a29d-83ca62051eed\\exec-bc96539f-add5-49ca-8774-6c1484b04497.png",
+    "sha256": "2a54f4cc297d559152276196de9342368213e8499a7bd671cedfdb7fd2373993",
+    "originalGeneratedSha256": "0f35ba49dfb58a81e28fcef7d29b36e31969bd2855e912789ccaa141ef33702c",
+    "width": 1254,
+    "height": 1254,
+    "channels": 3,
+    "hasAlpha": false,
+    "format": "png",
+    "generator": "built-in image_gen",
+    "timestamp": "2026-08-26T01:42:52.991Z",
+    "prompt": "Full front-pose starpatch cat wearing a closed blue-white galaxy space helmet; original pet-starpatch-cat-1 and wearable-head-3 helmet views as visual prototypes; natural ears fully hidden; continuous collar; transparent background."
+  },
+  "originalPrototypeLineage": {
+    "pet": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\pet-starpatch-cat-1.png",
+      "sha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253"
+    },
+    "accessory": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\wearable-head-3.png",
+      "sha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+      "view": "bottom-row right space-helmet front/side/back"
+    }
+  },
+  "forbiddenInputProof": {
+    "notOldTarget": true,
+    "notComposite": true,
+    "notMask": true,
+    "usedRevision1": false,
+    "usedRevision2": false,
+    "usedWholeAtlasV2": false,
+    "usedAttempt5": false
+  },
+  "normalization": {
+    "steps": "connected RGB checker flood -> fixed helmet crop -> one 700x655 to 106x122 Lanczos3 map -> retain principal rendered component/remove detached checker remnants -> map at x=31,y=5 -> target base lock outside actual r3 silhouette",
+    "rawHelmetCrop": [
+      274,
+      168,
+      700,
+      655
+    ],
+    "mappedPlacement": [
+      31,
+      5,
+      137,
+      127
+    ],
+    "detachedMappedComponentsRemoved": 81,
+    "detachedMappedPixelsRemoved": 198,
+    "cleanedPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-3\\r3b\\r3b-cleaned-raw-1254x1254-rgba.png",
+    "cleanedSha256": "8b2d0a469e2472afb0f8002f421c2ec97d41dccc9162212c7c7318a9dc978a37",
+    "mappedPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-3\\r3b\\r3b-mapped-helmet-106x122-rgba.png",
+    "mappedSha256": "3e289e0b1e3d4b40852dc9a1c76db1066b54c5cf25d07168b0a92e30ffcf4a61",
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-3\\r3b\\r3b-target-coordinate-locked-160x160.png",
+    "targetSha256": "ff42e1ac4f991136decd7ed28d431f015caeda8bfa7379137a31d2997dcc9b09"
+  },
+  "sourceToCandidateMapping": {
+    "method": "fresh full-dressed source helmet crop mapped once before target formation; target is byte-locked to base outside actual silhouette",
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\c01-base-original-160x160.png",
+    "baseSha256": "cc87a049bc41b7635bdb1ca4d92f46c1822d73423b86ce7c69c6526fa6ae80d4",
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-3\\r3b\\r3b-target-coordinate-locked-160x160.png",
+    "targetSha256": "ff42e1ac4f991136decd7ed28d431f015caeda8bfa7379137a31d2997dcc9b09"
+  },
+  "semanticMask": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-3\\r3b\\r3b-helmet-mask-same-coordinate-160x160.png",
+    "sha256": "2dbf69e3bea93a5e1a509ec3366e72503381d9fc8a1e3ae340195a2835a10606",
+    "pathLayer": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-3\\r3b\\r3b-helmet-layer-same-coordinate-160x160.png",
+    "layerSha256": "daea390113ace356bf53ce049178914809dca3145e4845f5e6343e3d8dcaedae",
+    "allowedZones": [
+      [
+        38,
+        5,
+        137,
+        127
+      ],
+      [
+        31,
+        28,
+        38,
+        101
+      ]
+    ],
+    "actualSilhouettePixels": 7631,
+    "components4Connected": 1,
+    "enclosedHoles": 0,
+    "outsideAllowedPixels": 0,
+    "trueTailProtectedPixels": 269,
+    "tailIntersectionPixels": 0,
+    "protectedBodyOrPawIntersectionPixels": 0,
+    "leftNaturalEarUnchangedOpaquePixels": 0,
+    "rightNaturalEarUnchangedOpaquePixels": 0,
+    "collarContinuous": {
+      "rows": [
+        95,
+        96,
+        97,
+        98,
+        99,
+        100
+      ],
+      "continuousSpans": [
+        48,
+        113
+      ]
+    }
+  },
+  "gates": {
+    "exactOutsideAllowedBaseLock": true,
+    "maskLayerSupportExact": true,
+    "actualMaskOneComponent": true,
+    "actualMaskHoleFree": true,
+    "actualMaskWithinAllowedUnion": true,
+    "trueTailProtected": true,
+    "naturalEarsOccluded": true,
+    "critic": "PENDING",
+    "publishable": false
+  }
+}

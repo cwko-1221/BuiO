@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>教師後台 ・ 粵語學習</title>
+  <link rel="stylesheet" href="/chinese/css/style.css" />
+</head>
+<body>
+  <div id="root"></div>
+  <script src="/chinese/js/common.js"></script>
+  <script>
+    const { api, el, toast, fmtDate, renderTopbar, ensureAuth } = ChineseApp;
+    const root = document.getElementById('root');
+
+    let me = null;
+    const state = {
+      groups: [], assignments: [], categories: [],
+      expandedClass: null,          // e.g. "1A"
+      selected: null,               // assignment object
+      attempts: [], attemptDetail: null,
+      // browse-and-pick from question bank (selection only, exactly 5)
+      browse: null,                 // { category, items, picked: Set, title, group }
+      // bank admin (view categories + edit per-item image)
+      bankAdmin: null,              // { category, items }
+    };
+
+    async function loadAll() {
+      const [g, a, c] = await Promise.all([
+        api('/api/chinese/teacher/groups'),
+        api('/api/chinese/teacher/assignments'),
+        api('/api/chinese/teacher/bank/categories'),
+      ]);
+      state.groups = g.groups;
+      state.assignments = a.assignments;
+      state.categories = c.categories;
+    }
+
+    async function init() {
+      me = await ensureAuth('teacher'); if (!me) return;
+      await loadAll();
+      render();
+    }
+
+    function render() {
+      root.innerHTML = '';
+      root.appendChild(renderTopbar({ title: '粵語繁中學習平台', user: me }));
+      const container = el('div', { class: 'container' });
+      container.appendChild(el('div', { class: 'page-head' },
+        el('h1', {}, '教師儀表板'),
+        el('p', {}, '建立練習作業並追蹤學生表現。')
+      ));
+      if (state.selected) container.appendChild(renderDetail(state.selected));
+      else if (state.browse) container.appendChild(renderBrowsePicker());
+      else if (state.bankAdmin) container.appendChild(renderBankAdmin());
+      else {
+        container.appendChild(renderBankAdminEntry());
+        container.appendChild(renderBankCard());
+        container.appendChild(renderCreateCard());
+        container.appendChild(renderClassList());
+      }
+      root.appendChild(container);
+    }
+
+    // ------------------ Quick-create from question bank ------------------
+    function renderBankCard() {
+      const card = el('div', { class: 'card' });
+      card.appendChild(el('h2', {}, '從題庫快速建立（5 個項目）'));
+      card.appendChild(el('p', { class: 'muted', style: { marginTop: '-4px' } },
+        '選擇題庫，系統會隨機抽 5 題並自動配上圖示。'));
+
+      let titleInput, categorySelect, groupSelect;
+      const catOpts = state.categories.length
+        ? state.categories.map(c => el('option', { value: c.category }, `${c.category}（${c.count} 題）`))
+        : [el('option', { value: '', disabled: true }, '題庫為空（請執行 question_bank.sql）')];
+      const groupOpts = state.groups.length
+        ? state.groups.map(g => el('option', { value: `${g.classname}|${g.group}` }, `${g.label} （${g.count} 位學生）`))
+        : [el('option', { value: '', disabled: true }, '尚未有學生分組')];
+
+      card.appendChild(el('div', { class: 'form-grid', style: { marginTop: '8px' } },
+        el('div', {},
+          el('label', {}, '作業標題'),
+          (titleInput = el('input', { type: 'text', placeholder: '例如：日常用語 ・ 第 1 課' }))
+        ),
+        el('div', {},
+          el('label', {}, '題庫類別'),
+          (categorySelect = el('select', {}, ...catOpts))
+        ),
+      ));
+      card.appendChild(el('div', { class: 'form-row' },
+        el('label', {}, '指派班級'),
+        (groupSelect = el('select', {}, ...groupOpts))
+      ));
+
+      const submit = async (status) => {
+        const title = titleInput.value.trim();
+        if (!title) return toast('請輸入標題', 'error');
+        if (!categorySelect.value) return toast('請選擇題庫類別', 'error');
+        if (!groupSelect.value) return toast('請選擇班級', 'error');
+        const [targetClassname, targetGroup] = groupSelect.value.split('|');
+        try {
+          await api('/api/chinese/teacher/assignments/from-bank', { method: 'POST', body: {
+            targetClassname, targetGroup, title, status, category: categorySelect.value, count: 5,
+          } });
+          await loadAll(); render();
+          toast(status === 'published' ? '已隨機產生並發佈' : '已存為草稿', 'success');
+        } catch (e) { toast(e.message, 'error'); }
+      };
+      const openBrowse = async () => {
+        if (!categorySelect.value) return toast('請先選擇題庫類別', 'error');
+        if (!groupSelect.value) return toast('請先選擇班級', 'error');
+        const title = titleInput.value.trim();
+        if (!title) return toast('請輸入標題', 'error');
+        try {
+          const { items } = await api(`/api/chinese/teacher/bank/items?category=${encodeURIComponent(categorySelect.value)}`);
+          state.browse = {
+            category: categorySelect.value,
+            items, picked: new Set(),
+            title, group: groupSelect.value,
+          };
+          render();
+        } catch (e) { toast(e.message, 'error'); }
+      };
+
+      card.appendChild(el('div', { class: 'row', style: { marginTop: '12px' } },
+        el('button', { class: 'btn btn-primary', onclick: () => submit('published') }, '🎲 隨機產生並發佈'),
+        el('button', { class: 'btn btn-ghost', onclick: openBrowse }, '🔍 瀏覽題庫挑 5 題'),
+        el('button', { class: 'btn btn-ghost', onclick: () => submit('draft') }, '存為草稿'),
+      ));
+      return card;
+    }
+
+    // ------------------ Browse & pick from bank ------------------
+    function renderBrowsePicker() {
+      const b = state.browse;
+      const wrap = el('div');
+
+      const statusBar = el('div', { class: 'card', style: { display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' } },
+        el('button', { class: 'btn-back', onclick: () => { state.browse = null; render(); } }, '← 取消'),
+        el('div', { style: { flex: 1, minWidth: '160px' } },
+          el('h2', { style: { margin: 0 } }, `題庫：${b.category}`),
+          el('div', { class: 'muted', style: { marginTop: '4px' } },
+            `「${b.title}」 ・ ${b.group.replace('|', '')} ・ 已選 `,
+            el('strong', { id: 'pickedCount', style: { color: 'var(--primary)' } }, String(b.picked.size)),
+            ` / 5`)
+        ),
+        el('button', {
+          class: 'btn btn-primary', id: 'createFromPickBtn',
+          disabled: b.picked.size !== 5,
+          onclick: () => submitPick('published'),
+        }, '建立並發佈'),
+        el('button', {
+          class: 'btn btn-ghost',
+          disabled: b.picked.size !== 5,
+          onclick: () => submitPick('draft'),
+        }, '存為草稿'),
+      );
+      wrap.appendChild(statusBar);
+
+      const grid = el('div', {
+        class: 'card',
+        style: { display: 'grid', gap: '8px',
+                 gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' },
+      });
+      for (const item of b.items) {
+        const isPicked = b.picked.has(item.id);
+        const row = el('div', {
+          style: {
+            display: 'flex', alignItems: 'center', gap: '10px', padding: '10px',
+            border: `1px solid ${isPicked ? 'var(--primary)' : 'var(--border)'}`,
+            borderRadius: '10px',
+            background: isPicked ? 'var(--primary-soft)' : 'transparent',
+            transition: 'background 0.12s, border-color 0.12s',
+          },
+        });
+
+        // Thumb is display-only in the pick flow — image editing lives in
+        // the dedicated 瀏覽題庫 admin view.
+        row.appendChild(renderStaticThumb(item));
+
+        // Label wraps just the checkbox + text → clicking text toggles select.
+        const label = el('label', {
+          style: { display: 'flex', alignItems: 'center', gap: '10px',
+                   flex: 1, minWidth: 0, cursor: 'pointer' },
+        });
+        const checkbox = el('input', {
+          type: 'checkbox', checked: isPicked,
+          style: { width: '18px', height: '18px', flexShrink: '0', accentColor: 'var(--primary)' },
+        });
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            if (b.picked.size >= 5) {
+              checkbox.checked = false;
+              return toast('最多只可選 5 題', 'error');
+            }
+            b.picked.add(item.id);
+          } else {
+            b.picked.delete(item.id);
+          }
+          render();
+        });
+        label.appendChild(checkbox);
+        label.appendChild(el('div', { style: { minWidth: 0, flex: 1 } },
+          el('div', { style: { fontSize: '1.1rem', fontWeight: '700' } }, item.traditionalText),
+          el('div', { class: 'muted', style: { fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, item.englishMeaning),
+        ));
+        row.appendChild(label);
+        grid.appendChild(row);
+      }
+      wrap.appendChild(grid);
+      return wrap;
+    }
+
+    function emojiCodepointUrl(emoji) {
+      if (!emoji) return null;
+      const cp = Array.from(emoji)
+        .map(c => c.codePointAt(0))
+        .filter(c => c !== 0xFE0F)
+        .map(c => c.toString(16))
+        .join('-');
+      return cp ? `https://github.githubassets.com/images/icons/emoji/unicode/${cp}.png?v8` : null;
+    }
+
+    function renderStaticThumb(item) {
+      const wrap = el('div', {
+        style: { width: '36px', height: '36px', borderRadius: '8px',
+                 background: 'rgba(255,255,255,0.06)', overflow: 'hidden',
+                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: '0' },
+      });
+      const url = item.imageUrl || emojiCodepointUrl(item.emoji);
+      if (url) wrap.appendChild(el('img', { src: url, alt: item.englishMeaning,
+        style: { width: '100%', height: '100%', objectFit: 'cover' } }));
+      else wrap.appendChild(el('span', { class: 'muted' }, '?'));
+      return wrap;
+    }
+
+    // ------------------ Bank admin (browse + edit images) ------------------
+    function renderBankAdminEntry() {
+      return el('div', {
+        class: 'card',
+        style: { display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' },
+        onclick: () => { state.bankAdmin = { category: null, items: [] }; render(); },
+      },
+        el('div', { style: { fontSize: '1.6rem' } }, '🔍'),
+        el('div', { style: { flex: 1 } },
+          el('h2', { style: { margin: 0 } }, '瀏覽題庫'),
+          el('p', { class: 'muted', style: { margin: '4px 0 0' } },
+            '查看所有類別與題目，點擊圖示即可更換圖片。')
+        ),
+        el('span', { class: 'badge info' }, '進入 →')
+      );
+    }
+
+    function renderBankAdmin() {
+      const wrap = el('div');
+      wrap.appendChild(el('button', {
+        class: 'btn-back',
+        onclick: () => {
+          if (state.bankAdmin?.category) {
+            state.bankAdmin = { category: null, items: [] };
+          } else {
+            state.bankAdmin = null;
+          }
+          render();
+        },
+      }, state.bankAdmin.category ? '← 回類別列表' : '← 返回'));
+
+      wrap.appendChild(el('div', { class: 'page-head', style: { marginTop: '12px', marginBottom: '8px' } },
+        el('h1', { style: { fontSize: '1.5rem' } },
+          state.bankAdmin.category ? `題庫 ・ ${state.bankAdmin.category}` : '瀏覽題庫'),
+        el('p', {}, state.bankAdmin.category
+          ? '點擊任一圖示更換成自訂圖片。'
+          : '選擇類別以查看與編輯題目。')
+      ));
+
+      if (!state.bankAdmin.category) {
+        // Category grid
+        const grid = el('div', {
+          style: { display: 'grid', gap: '12px',
+                   gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' },
+        });
+        if (!state.categories.length) {
+          grid.appendChild(el('div', { class: 'card empty' }, '題庫為空。'));
+        }
+        for (const c of state.categories) {
+          grid.appendChild(el('div', {
+            class: 'assignment-card',
+            onclick: () => openCategoryAdmin(c.category),
+          },
+            el('div', {},
+              el('div', { class: 'title' }, c.category),
+              el('div', { class: 'sub' }, `${c.count} 題`)
+            ),
+            el('span', { class: 'badge info' }, '查看 →')
+          ));
+        }
+        wrap.appendChild(grid);
+        return wrap;
+      }
+
+      // New-item form for the current category
+      wrap.appendChild(renderNewItemCard(state.bankAdmin.category));
+
+      // Items grid for the selected category
+      const grid = el('div', {
+        class: 'card',
+        style: { display: 'grid', gap: '8px',
+                 gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' },
+      });
+      for (const item of state.bankAdmin.items) {
+        grid.appendChild(el('div', {
+          style: { display: 'flex', alignItems: 'center', gap: '10px', padding: '10px',
+                   border: '1px solid var(--border)', borderRadius: '10px', position: 'relative' },
+        },
+          renderBankThumb(item),
+          el('div', { style: { minWidth: 0, flex: 1 } },
+            el('div', { style: { fontSize: '1.1rem', fontWeight: '700' } }, item.traditionalText),
+            el('div', { class: 'muted', style: { fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, item.englishMeaning),
+          ),
+          el('button', {
+            title: '刪除題目',
+            style: {
+              background: 'transparent', border: '1px solid var(--border)',
+              color: 'var(--danger)', borderRadius: '8px',
+              padding: '4px 8px', fontSize: '0.8rem', cursor: 'pointer', flexShrink: '0',
+            },
+            onclick: async () => {
+              if (!confirm(`刪除題目「${item.traditionalText}」？已建立的作業不受影響。`)) return;
+              try {
+                await api(`/api/chinese/teacher/bank/items/${item.id}`, { method: 'DELETE' });
+                state.bankAdmin.items = state.bankAdmin.items.filter(x => x.id !== item.id);
+                await refreshCategories();
+                render();
+                toast('已刪除', 'success');
+              } catch (e) { toast(e.message, 'error'); }
+            },
+          }, '刪除'),
+        ));
+      }
+      wrap.appendChild(grid);
+      return wrap;
+    }
+
+    function renderNewItemCard(category) {
+      const card = el('div', { class: 'card' });
+      card.appendChild(el('h3', { style: { margin: 0 } }, '新增題目'));
+      card.appendChild(el('p', { class: 'muted', style: { margin: '4px 0 10px' } },
+        `加入到「${category}」類別。點擊右側方框上傳圖片。`));
+
+      let charInput, meaningInput;
+      let stagedFile = null;
+
+      // Clickable image preview on the right (matches assignment-item form).
+      const preview = el('div', {
+        title: '點擊上傳圖片',
+        style: { width: '56px', height: '56px', borderRadius: '10px',
+                 background: 'rgba(255,255,255,0.05)', border: '1px dashed var(--border)',
+                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                 color: 'var(--text-dim)', fontSize: '1.1rem', flexShrink: '0',
+                 backgroundSize: 'cover', backgroundPosition: 'center', cursor: 'pointer' },
+      }, '📷');
+      const stagedFileInput = el('input', { type: 'file', accept: 'image/*',
+        style: { display: 'none' } });
+      stagedFileInput.addEventListener('change', () => {
+        const f = stagedFileInput.files?.[0]; if (!f) return;
+        stagedFile = f;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          preview.style.backgroundImage = `url("${ev.target.result}")`;
+          preview.textContent = '';
+        };
+        reader.readAsDataURL(f);
+      });
+      preview.addEventListener('click', () => stagedFileInput.click());
+
+      const row = el('div', {
+        style: { display: 'flex', gap: '10px', alignItems: 'center' },
+      },
+        (charInput = el('input', {
+          type: 'text', placeholder: '繁體字（例：橙）',
+          style: { flex: '1 1 0', minWidth: '0' },
+        })),
+        (meaningInput = el('input', {
+          type: 'text', placeholder: '英文意義（例：orange）',
+          style: { flex: '2 1 0', minWidth: '0' },
+        })),
+        preview,
+        stagedFileInput,
+      );
+
+      const addBtn = el('button', {
+        class: 'btn btn-primary',
+        onclick: async () => {
+          const tt = charInput.value.trim();
+          const em = meaningInput.value.trim();
+          if (!tt || !em) return toast('請填寫繁體字與英文意義', 'error');
+          addBtn.disabled = true;
+          try {
+            const { item } = await api('/api/chinese/teacher/bank/items', {
+              method: 'POST',
+              body: { category, traditionalText: tt, englishMeaning: em },
+            });
+            if (stagedFile) {
+              const fd = new FormData(); fd.append('file', stagedFile);
+              const r = await fetch(`/api/chinese/teacher/bank/items/${item.id}/image`, {
+                method: 'POST', body: fd, credentials: 'same-origin',
+              });
+              const d = await r.json();
+              if (!r.ok) throw new Error(d.message || '圖片上傳失敗');
+              item.imageUrl = d.publicUrl;
+            }
+            state.bankAdmin.items = [...state.bankAdmin.items, item]
+              .sort((a, b) => a.traditionalText.localeCompare(b.traditionalText));
+            await refreshCategories();
+            charInput.value = ''; meaningInput.value = '';
+            stagedFile = null;
+            preview.style.backgroundImage = ''; preview.textContent = '📷';
+            stagedFileInput.value = '';
+            render();
+            toast('已新增題目', 'success');
+          } catch (e) { toast(e.message, 'error'); }
+          finally { addBtn.disabled = false; }
+        },
+      }, '＋ 新增');
+
+      card.appendChild(row);
+      card.appendChild(el('div', { style: { marginTop: '10px' } }, addBtn));
+      return card;
+    }
+
+    async function refreshCategories() {
+      try {
+        const { categories } = await api('/api/chinese/teacher/bank/categories');
+        state.categories = categories;
+      } catch {}
+    }
+
+    async function openCategoryAdmin(category) {
+      try {
+        const { items } = await api(`/api/chinese/teacher/bank/items?category=${encodeURIComponent(category)}`);
+        state.bankAdmin = { category, items };
+        render();
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    function renderBankThumb(item) {
+      // Use a <label> wrapping the hidden <input type=file> so the browser
+      // forwards every click on the label/img natively — no programmatic
+      // .click() (which some browsers block when the input is display:none).
+      const wrap = el('label', {
+        style: { width: '36px', height: '36px', borderRadius: '8px',
+                 background: 'rgba(255,255,255,0.06)', overflow: 'hidden', cursor: 'pointer',
+                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: '0',
+                 position: 'relative' },
+        title: '點擊更換圖片',
+      });
+      const url = item.imageUrl || emojiCodepointUrl(item.emoji);
+      if (url) {
+        wrap.appendChild(el('img', {
+          src: url, alt: item.englishMeaning,
+          style: { width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' },
+        }));
+      } else {
+        wrap.appendChild(el('span', { class: 'muted' }, '?'));
+      }
+
+      // visually hidden but kept in the layout so .click forwarding works
+      const fileInput = el('input', {
+        type: 'file', accept: 'image/*',
+        style: { position: 'absolute', width: '1px', height: '1px',
+                 padding: 0, margin: '-1px', overflow: 'hidden',
+                 clip: 'rect(0,0,0,0)', border: 0 },
+      });
+      fileInput.addEventListener('change', async () => {
+        const f = fileInput.files?.[0]; if (!f) return;
+        const fd = new FormData(); fd.append('file', f);
+        try {
+          const res = await fetch(`/api/chinese/teacher/bank/items/${item.id}/image`, {
+            method: 'POST', body: fd, credentials: 'same-origin',
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || '上傳失敗');
+          item.imageUrl = data.publicUrl;
+          render();
+          toast('已更新圖片', 'success');
+        } catch (err) { toast(err.message, 'error'); }
+      });
+      wrap.appendChild(fileInput);
+
+      if (item.imageUrl) {
+        const resetBtn = el('button', {
+          type: 'button',
+          title: '還原預設圖示',
+          style: {
+            position: 'absolute', top: '-6px', right: '-6px', width: '18px', height: '18px',
+            border: 'none', borderRadius: '50%', background: 'var(--danger)', color: '#fff',
+            fontSize: '11px', lineHeight: '18px', padding: 0, cursor: 'pointer',
+          },
+          onclick: async (e) => {
+            e.preventDefault(); e.stopPropagation();
+            try {
+              await api(`/api/chinese/teacher/bank/items/${item.id}/image`, { method: 'DELETE' });
+              item.imageUrl = null;
+              render();
+              toast('已還原預設圖示', 'success');
+            } catch (err) { toast(err.message, 'error'); }
+          },
+        }, '×');
+        wrap.appendChild(resetBtn);
+      }
+
+      return wrap;
+    }
+
+    async function submitPick(status) {
+      const b = state.browse; if (!b) return;
+      if (b.picked.size !== 5) return toast('請選 5 題', 'error');
+      const [targetClassname, targetGroup] = b.group.split('|');
+      try {
+        await api('/api/chinese/teacher/assignments/from-bank', { method: 'POST', body: {
+          targetClassname, targetGroup, title: b.title, status,
+          itemIds: [...b.picked],
+        } });
+        state.browse = null;
+        await loadAll(); render();
+        toast(status === 'published' ? '已建立並發佈' : '已存為草稿', 'success');
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    // ------------------ Create assignment ------------------
+    function renderCreateCard() {
+      const card = el('div', { class: 'card' });
+      card.appendChild(el('h2', {}, '建立新作業（5 個項目）'));
+      let titleInput, groupSelect;
+      const items = Array.from({ length: 5 }, () => ({
+        traditionalText: '', englishMeaning: '', imageUrl: '',
+      }));
+
+      const groupOpts = state.groups.length
+        ? state.groups.map(g => el('option', { value: `${g.classname}|${g.group}` }, `${g.label} （${g.count} 位學生）`))
+        : [el('option', { value: '', disabled: true }, '尚未有學生分組')];
+      card.appendChild(el('div', { class: 'form-grid' },
+        el('div', {},
+          el('label', {}, '作業標題'),
+          (titleInput = el('input', { type: 'text', placeholder: '例如：第一課' }))
+        ),
+        el('div', {},
+          el('label', {}, '指派班級'),
+          (groupSelect = el('select', {}, ...groupOpts))
+        )
+      ));
+      card.appendChild(el('h3', {}, '練習項目'));
+      const itemsWrap = el('div');
+      items.forEach((it, i) => itemsWrap.appendChild(renderItemRow(it, i)));
+      card.appendChild(itemsWrap);
+
+      const submit = async (status) => {
+        const title = titleInput.value.trim();
+        if (!title) return toast('請輸入標題', 'error');
+        if (!groupSelect.value) return toast('請選擇班級', 'error');
+        if (items.some(it => !it.traditionalText.trim() || !it.englishMeaning.trim())) {
+          return toast('每個項目都需要繁體字與英文', 'error');
+        }
+        const [targetClassname, targetGroup] = groupSelect.value.split('|');
+        try {
+          await api('/api/chinese/teacher/assignments', { method: 'POST', body: {
+            targetClassname, targetGroup, title, status, items,
+          } });
+          await loadAll(); render();
+          toast(status === 'published' ? '已發佈作業' : '已存為草稿', 'success');
+        } catch (e) { toast(e.message, 'error'); }
+      };
+      card.appendChild(el('div', { class: 'row', style: { marginTop: '14px' } },
+        el('button', { class: 'btn btn-primary', onclick: () => submit('published') }, '發佈作業'),
+        el('button', { class: 'btn btn-ghost', onclick: () => submit('draft') }, '存為草稿'),
+      ));
+      return card;
+    }
+
+    function renderItemRow(it, i) {
+      const row = el('div', { class: 'assignment-item-form' });
+      row.appendChild(el('div', { class: 'muted', style: { marginBottom: '8px' } }, `第 ${i + 1} 項`));
+
+      // Preview doubles as the upload trigger — click to pick.
+      const preview = el('div', {
+        class: 'item-image-preview',
+        title: '點擊上傳圖片',
+        style: { width: '56px', height: '56px', borderRadius: '10px',
+                 background: 'rgba(255,255,255,0.05)', border: '1px dashed var(--border)',
+                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                 color: 'var(--text-dim)', fontSize: '1.1rem', flexShrink: '0',
+                 backgroundSize: 'cover', backgroundPosition: 'center', cursor: 'pointer' },
+      }, '📷');
+      const fileInput = el('input', { type: 'file', accept: 'image/*', style: { display: 'none' } });
+      fileInput.addEventListener('change', async () => {
+        const f = fileInput.files?.[0]; if (!f) return;
+        const fd = new FormData(); fd.append('file', f);
+        preview.textContent = '…';
+        try {
+          const res = await fetch('/api/chinese/teacher/upload-image', {
+            method: 'POST', body: fd, credentials: 'same-origin',
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || '上傳失敗');
+          it.imageUrl = data.publicUrl;
+          preview.style.backgroundImage = `url("${data.publicUrl}")`;
+          preview.textContent = '';
+          removeBtn.style.display = '';
+        } catch (e) { toast(e.message, 'error'); preview.textContent = '📷'; }
+      });
+      preview.addEventListener('click', () => fileInput.click());
+
+      const removeBtn = el('button', {
+        class: 'btn-back', type: 'button',
+        style: { display: 'none', padding: '4px 8px', fontSize: '0.75rem' },
+        onclick: (e) => {
+          e.stopPropagation();
+          it.imageUrl = ''; preview.style.backgroundImage = ''; preview.textContent = '📷';
+          fileInput.value = ''; removeBtn.style.display = 'none';
+        },
+      }, '移除');
+
+      const imgCol = el('div', {
+        style: { display: 'flex', flexDirection: 'column', alignItems: 'center',
+                 gap: '4px', flexShrink: '0' },
+      }, preview, removeBtn, fileInput);
+
+      const inputsRow = el('div', {
+        style: { display: 'flex', gap: '10px', alignItems: 'flex-start', width: '100%' },
+      },
+        el('input', {
+          type: 'text', placeholder: '繁體字（例：學）',
+          style: { flex: '1 1 0', minWidth: '0' },
+          oninput: e => it.traditionalText = e.target.value,
+        }),
+        el('input', {
+          type: 'text', placeholder: '英文意義（例：learn）',
+          style: { flex: '2 1 0', minWidth: '0' },
+          oninput: e => it.englishMeaning = e.target.value,
+        }),
+        imgCol,
+      );
+      row.appendChild(inputsRow);
+      return row;
+    }
+
+    // ------------------ Class-grouped list ------------------
+    function renderClassList() {
+      const wrap = el('div');
+      wrap.appendChild(el('h2', { style: { margin: '20px 0 12px', fontSize: '1.1rem' } }, '已發佈練習'));
+
+      if (!state.assignments.length) {
+        wrap.appendChild(el('div', { class: 'card empty' }, '尚未建立任何作業。'));
+        return wrap;
+      }
+
+      // Group assignments by targetLabel
+      const byClass = new Map();
+      for (const a of state.assignments) {
+        if (!byClass.has(a.targetLabel)) byClass.set(a.targetLabel, []);
+        byClass.get(a.targetLabel).push(a);
+      }
+      // Sort class labels ('1A','1B','2A',...)
+      const labels = [...byClass.keys()].sort();
+      for (const label of labels) {
+        wrap.appendChild(renderClassRow(label, byClass.get(label)));
+      }
+      return wrap;
+    }
+
+    function renderClassRow(label, list) {
+      const isOpen = state.expandedClass === label;
+      const head = el('div', {
+        class: 'assignment-card',
+        onclick: () => { state.expandedClass = isOpen ? null : label; render(); },
+      },
+        el('div', {},
+          el('div', { class: 'title' }, `班級 ${label}`),
+          el('div', { class: 'sub' }, `${list.length} 份作業`)
+        ),
+        el('span', { class: 'badge info' }, isOpen ? '▾ 收合' : '▸ 展開')
+      );
+      if (!isOpen) return head;
+      const items = el('div', { style: { marginLeft: '12px', marginTop: '8px' } });
+      for (const a of list) {
+        items.appendChild(el('div', {
+          class: 'assignment-card', onclick: () => openDetail(a),
+          style: { background: 'rgba(255,255,255,0.04)' },
+        },
+          el('div', {},
+            el('div', { class: 'title' }, a.title),
+            el('div', { class: 'sub' }, `${fmtDate(a.createdAt)} ・ ${a.attemptCount}/${a.targetCount} 已嘗試`)
+          ),
+          el('span', { class: `badge ${a.status === 'published' ? 'success' : 'warn'}` },
+            a.status === 'published' ? '已發佈' : '草稿')
+        ));
+      }
+      const wrap = el('div');
+      wrap.appendChild(head);
+      wrap.appendChild(items);
+      return wrap;
+    }
+
+    async function openDetail(a) {
+      try {
+        const [{ assignment }, { attempts }] = await Promise.all([
+          api(`/api/chinese/teacher/assignments/${a.id}`),
+          api(`/api/chinese/teacher/assignments/${a.id}/attempts`),
+        ]);
+        state.selected = assignment; state.attempts = attempts;
+        state.attemptDetail = null;
+        render();
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    // ------------------ Detail view ------------------
+    function renderDetail(a) {
+      const wrap = el('div');
+      wrap.appendChild(el('button', {
+        class: 'btn-back', onclick: () => { state.selected = null; state.attemptDetail = null; render(); }
+      }, '← 回作業列表'));
+      wrap.appendChild(el('div', { class: 'card', style: { marginTop: '12px' } },
+        el('div', { class: 'row between' },
+          el('div', {},
+            el('h2', { style: { margin: 0 } }, a.title),
+            el('div', { class: 'muted', style: { marginTop: '4px' } },
+              `${a.targetLabel} ・ ${a.status === 'published' ? '已發佈' : '草稿'}`)
+          ),
+          el('div', { class: 'row' },
+            el('button', { class: 'btn btn-ghost', onclick: async () => {
+              const next = a.status === 'published' ? 'draft' : 'published';
+              try {
+                await api(`/api/chinese/teacher/assignments/${a.id}`, { method: 'PATCH', body: { status: next } });
+                openDetail(a); await loadAll();
+                toast('已更新', 'success');
+              } catch (e) { toast(e.message, 'error'); }
+            } }, a.status === 'published' ? '收回為草稿' : '發佈'),
+            el('button', { class: 'btn btn-danger', onclick: async () => {
+              if (!confirm(`刪除作業「${a.title}」？所有嘗試紀錄會一併刪除。`)) return;
+              try {
+                await api(`/api/chinese/teacher/assignments/${a.id}`, { method: 'DELETE' });
+                await loadAll(); state.selected = null; render();
+                toast('已刪除', 'success');
+              } catch (e) { toast(e.message, 'error'); }
+            } }, '刪除作業')
+          )
+        )
+      ));
+      wrap.appendChild(el('div', { class: 'card' },
+        el('h3', {}, '練習項目'),
+        el('table', {}, el('thead', {}, el('tr', {},
+          el('th', {}, '#'), el('th', {}, '繁體'), el('th', {}, 'Jyutping'),
+          el('th', {}, '英文意義'), el('th', {}, '圖片'),
+        )), el('tbody', {}, ...a.items.map(it => el('tr', {},
+          el('td', {}, it.orderIndex),
+          el('td', { style: { fontSize: '1.3rem' } }, it.traditionalText),
+          el('td', {}, it.jyutping),
+          el('td', {}, it.englishMeaning),
+          el('td', {}, it.imageUrl
+            ? el('img', { src: it.imageUrl, style: { width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px' } })
+            : el('span', { class: 'muted' }, '—')
+          ),
+        ))))
+      ));
+      wrap.appendChild(el('div', { class: 'card' },
+        el('h3', {}, `學生嘗試（${state.attempts.length}）`),
+        state.attempts.length === 0
+          ? el('p', { class: 'muted' }, '尚未有學生嘗試。')
+          : el('table', {}, el('thead', {}, el('tr', {},
+              el('th', {}, '學生'), el('th', {}, '班級'), el('th', {}, '狀態'),
+              el('th', {}, '分數'), el('th', {}, '開始'), el('th', {}, '完成'), el('th', {}, ''),
+            )), el('tbody', {}, ...state.attempts.map(at => el('tr', {},
+              el('td', {}, `${at.studentName} (${at.studentId})`),
+              el('td', {}, `${at.className} ${at.classNo || ''}`),
+              el('td', {}, el('span', { class: `badge ${at.status === 'completed' ? 'success' : 'warn'}` },
+                at.status === 'completed' ? '已完成' : '進行中')),
+              el('td', {}, `${at.score} / 5`),
+              el('td', {}, fmtDate(at.startedAt)),
+              el('td', {}, at.completedAt ? fmtDate(at.completedAt) : '—'),
+              el('td', {}, el('button', { class: 'btn btn-ghost', onclick: () => openAttemptDetail(at.id) }, '詳情'))
+            ))))
+      ));
+      if (state.attemptDetail) wrap.appendChild(renderAttemptDetail(state.attemptDetail));
+      return wrap;
+    }
+
+    async function openAttemptDetail(attemptId) {
+      try {
+        const { attempt } = await api(`/api/chinese/teacher/attempts/${attemptId}`);
+        state.attemptDetail = attempt;
+        render();
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    function pronunciationBadge(label, correct, score, status) {
+      const cls = status === 'inconclusive' ? 'warn' : (correct ? 'success' : 'danger');
+      const value = typeof score === 'number' ? ` ${Math.round(score)}%` : '';
+      return el('span', { class: `badge ${cls}` }, `${label}${value}`);
+    }
+
+    function qualitySummary(label, quality) {
+      const q = quality?.metrics;
+      if (!q) return null;
+      const assessment = quality?.assessment;
+      const combined = assessment?.combined;
+      const scoring = combined
+        ? ` ・ Azure 音素 ${Math.round(combined.acousticScore)}% ・ 粵拼配對 ${Math.round(combined.recognizedPronunciationScore)}% ・ 最終 ${Math.round(combined.score)}%`
+        : '';
+      return el('div', { class: 'muted', style: { marginTop: '4px' } },
+        `${label}收音：${quality.ok ? '合格' : quality.reason} ・ ${q.durationMs}ms ・ SNR ${q.snrDb}dB${scoring}`);
+    }
+
+    function renderAttemptDetail(d) {
+      return el('div', { class: 'card' },
+        el('h3', {}, `${d.studentName}（${d.studentId}） ・ ${d.score}/5`),
+        ...d.items.map(it => el('div', { class: 'assignment-item-form' },
+          el('div', { class: 'row between' },
+            el('div', {},
+              el('strong', { style: { fontSize: '1.3rem' } }, it.traditionalText),
+              el('span', { class: 'muted' }, `  ${it.jyutping} ・ ${it.englishMeaning}`)
+            ),
+            el('div', { class: 'row' },
+              el('span', { class: `badge ${it.handwritingCorrect ? 'success' : 'danger'}` }, '寫'),
+              pronunciationBadge('練讀', it.speechCorrect, it.speechPronunciationScore, it.speechPronunciationStatus),
+              pronunciationBadge('評核', it.assessmentCorrect, it.assessmentPronunciationScore, it.assessmentPronunciationStatus),
+            )
+          ),
+          it.speechTranscript ? el('div', { class: 'muted', style: { marginTop: '6px' } }, `練讀逐字稿：${it.speechTranscript}`) : null,
+          qualitySummary('練讀', it.speechAudioQuality),
+          it.speechRecordingUrl ? el('audio', { controls: true, src: it.speechRecordingUrl }) : null,
+          it.assessmentTranscript ? el('div', { class: 'muted', style: { marginTop: '6px' } }, `評核逐字稿：${it.assessmentTranscript}`) : null,
+          qualitySummary('評核', it.assessmentAudioQuality),
+          it.assessmentRecordingUrl ? el('audio', { controls: true, src: it.assessmentRecordingUrl }) : null,
+        ))
+      );
+    }
+
+    init().catch(e => toast(e.message, 'error'));
+  </script>
+</body>
+</html>

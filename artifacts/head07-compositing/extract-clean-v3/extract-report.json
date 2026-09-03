@@ -1,0 +1,4521 @@
+{
+  "item": "head-07",
+  "phase": "source-extraction-from-independent-clean-full-redraw",
+  "verdict": "REJECT_NON_SEMANTIC_HOLES_REMAIN",
+  "inputPolicy": {
+    "fullPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-07-independent-proof/head-07-clean-target-v3.png",
+    "specPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/batch-acceptance-prep/frozen-head-specs-v1/head-07-frozen-acceptance-spec.json",
+    "oldFailedMaskLayerCompositeRead": false,
+    "transformsApplied": false
+  },
+  "outputs": {
+    "maskPath": "artifacts/head07-compositing/extract-clean-v3/mask.png",
+    "layerPath": "artifacts/head07-compositing/extract-clean-v3/layer.png"
+  },
+  "hashes": {
+    "full": "62ee7372c02313223a5ce84c7e137d6ecfcc62cd7a3b0a06a81849d475b02be6",
+    "spec": "46fe466fe5c4564f38c95a73fd39c047c22da2a518ca343b39df15da57a86c77",
+    "mask": "a0a026fefbd6c08e283bf2f14c6d7e56e7ecc38b245b5feaab6ae2e99b35c307",
+    "layer": "4144b947a07d161eaa69b3528a3dd9f51b50326c23efb75575490af94b87c347"
+  },
+  "totals": {
+    "visiblePixels": 44434,
+    "filledHolePixels": 1314,
+    "remainingHoles": 36,
+    "remainingHolePixels": 370,
+    "hiddenRgbNonZero": 0,
+    "sourceMismatch": 0
+  },
+  "cells": [
+    {
+      "row": 0,
+      "column": 0,
+      "bandRow": 40,
+      "crownPixels": 1574,
+      "crownBounds": [
+        46,
+        13,
+        135,
+        49
+      ],
+      "blueComponents": [
+        {
+          "size": 326,
+          "bounds": [
+            126,
+            63,
+            142,
+            99
+          ]
+        },
+        {
+          "size": 232,
+          "bounds": [
+            49,
+            37,
+            88,
+            53
+          ]
+        },
+        {
+          "size": 147,
+          "bounds": [
+            53,
+            49,
+            87,
+            60
+          ]
+        },
+        {
+          "size": 144,
+          "bounds": [
+            94,
+            36,
+            128,
+            43
+          ]
+        },
+        {
+          "size": 52,
+          "bounds": [
+            54,
+            45,
+            80,
+            54
+          ]
+        },
+        {
+          "size": 42,
+          "bounds": [
+            96,
+            48,
+            107,
+            52
+          ]
+        },
+        {
+          "size": 17,
+          "bounds": [
+            103,
+            44,
+            111,
+            46
+          ]
+        },
+        {
+          "size": 10,
+          "bounds": [
+            94,
+            43,
+            98,
+            45
+          ]
+        },
+        {
+          "size": 8,
+          "bounds": [
+            85,
+            43,
+            88,
+            45
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 19,
+          "bounds": [
+            58,
+            56,
+            71,
+            60
+          ]
+        },
+        {
+          "size": 14,
+          "bounds": [
+            55,
+            47,
+            63,
+            51
+          ]
+        },
+        {
+          "size": 13,
+          "bounds": [
+            55,
+            51,
+            62,
+            55
+          ]
+        },
+        {
+          "size": 11,
+          "bounds": [
+            93,
+            53,
+            103,
+            53
+          ]
+        },
+        {
+          "size": 8,
+          "bounds": [
+            109,
+            43,
+            114,
+            44
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            129,
+            61,
+            130,
+            63
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            72,
+            48,
+            74,
+            49
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            86,
+            43,
+            87,
+            43
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            101,
+            47,
+            102,
+            47
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            69,
+            50,
+            70,
+            50
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 2168,
+          "bounds": [
+            45,
+            13,
+            135,
+            60
+          ]
+        },
+        {
+          "size": 331,
+          "bounds": [
+            126,
+            61,
+            142,
+            99
+          ]
+        },
+        {
+          "size": 55,
+          "bounds": [
+            93,
+            47,
+            107,
+            53
+          ]
+        },
+        {
+          "size": 13,
+          "bounds": [
+            94,
+            43,
+            98,
+            45
+          ]
+        },
+        {
+          "size": 12,
+          "bounds": [
+            85,
+            43,
+            88,
+            46
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 0,
+        "column": 0,
+        "filledPixels": 17,
+        "remainingHoles": 1,
+        "remainingHolePixels": 18,
+        "remainingComponents": [
+          {
+            "size": 18,
+            "bounds": [
+              63,
+              48,
+              71,
+              52
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 18,
+            "bounds": [
+              63,
+              48,
+              71,
+              52
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "bandRow": 40,
+      "crownPixels": 1752,
+      "crownBounds": [
+        43,
+        13,
+        144,
+        57
+      ],
+      "blueComponents": [
+        {
+          "size": 289,
+          "bounds": [
+            92,
+            31,
+            132,
+            50
+          ]
+        },
+        {
+          "size": 257,
+          "bounds": [
+            45,
+            36,
+            85,
+            53
+          ]
+        },
+        {
+          "size": 143,
+          "bounds": [
+            51,
+            47,
+            83,
+            61
+          ]
+        },
+        {
+          "size": 115,
+          "bounds": [
+            131,
+            81,
+            141,
+            95
+          ]
+        },
+        {
+          "size": 64,
+          "bounds": [
+            94,
+            47,
+            110,
+            52
+          ]
+        },
+        {
+          "size": 44,
+          "bounds": [
+            52,
+            44,
+            76,
+            54
+          ]
+        },
+        {
+          "size": 24,
+          "bounds": [
+            102,
+            44,
+            114,
+            47
+          ]
+        },
+        {
+          "size": 19,
+          "bounds": [
+            125,
+            66,
+            128,
+            74
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            82,
+            42,
+            85,
+            44
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            135,
+            98,
+            138,
+            100
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 19,
+          "bounds": [
+            106,
+            43,
+            116,
+            47
+          ]
+        },
+        {
+          "size": 14,
+          "bounds": [
+            61,
+            54,
+            71,
+            57
+          ]
+        },
+        {
+          "size": 11,
+          "bounds": [
+            51,
+            48,
+            56,
+            53
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            72,
+            53,
+            76,
+            53
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            103,
+            42,
+            105,
+            43
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            103,
+            53,
+            106,
+            53
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            75,
+            47,
+            77,
+            47
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            55,
+            52,
+            56,
+            53
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            53,
+            54,
+            54,
+            55
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            129,
+            86,
+            130,
+            87
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            62,
+            45,
+            63,
+            45
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            99,
+            46,
+            100,
+            46
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            58,
+            47,
+            58,
+            48
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            65,
+            49,
+            66,
+            49
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            132,
+            91,
+            132,
+            92
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 2363,
+          "bounds": [
+            43,
+            13,
+            144,
+            61
+          ]
+        },
+        {
+          "size": 118,
+          "bounds": [
+            129,
+            81,
+            141,
+            95
+          ]
+        },
+        {
+          "size": 72,
+          "bounds": [
+            94,
+            46,
+            110,
+            53
+          ]
+        },
+        {
+          "size": 19,
+          "bounds": [
+            125,
+            66,
+            128,
+            74
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            135,
+            98,
+            138,
+            100
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 0,
+        "column": 1,
+        "filledPixels": 31,
+        "remainingHoles": 1,
+        "remainingHolePixels": 7,
+        "remainingComponents": [
+          {
+            "size": 7,
+            "bounds": [
+              59,
+              46,
+              63,
+              48
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 7,
+            "bounds": [
+              59,
+              46,
+              63,
+              48
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "bandRow": 44,
+      "crownPixels": 1500,
+      "crownBounds": [
+        37,
+        17,
+        124,
+        53
+      ],
+      "blueComponents": [
+        {
+          "size": 253,
+          "bounds": [
+            39,
+            38,
+            77,
+            54
+          ]
+        },
+        {
+          "size": 209,
+          "bounds": [
+            116,
+            73,
+            129,
+            100
+          ]
+        },
+        {
+          "size": 187,
+          "bounds": [
+            83,
+            38,
+            121,
+            49
+          ]
+        },
+        {
+          "size": 133,
+          "bounds": [
+            44,
+            52,
+            75,
+            63
+          ]
+        },
+        {
+          "size": 72,
+          "bounds": [
+            85,
+            52,
+            103,
+            57
+          ]
+        },
+        {
+          "size": 46,
+          "bounds": [
+            44,
+            49,
+            67,
+            57
+          ]
+        },
+        {
+          "size": 25,
+          "bounds": [
+            93,
+            48,
+            104,
+            52
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 19,
+          "bounds": [
+            97,
+            47,
+            107,
+            51
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            48,
+            54,
+            53,
+            56
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            51,
+            60,
+            57,
+            62
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            54,
+            49,
+            57,
+            50
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            62,
+            58,
+            66,
+            58
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            58,
+            59,
+            60,
+            59
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            118,
+            77,
+            120,
+            77
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            91,
+            50,
+            92,
+            50
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            95,
+            52,
+            96,
+            52
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            60,
+            53,
+            61,
+            53
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            55,
+            54,
+            56,
+            54
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            98,
+            58,
+            99,
+            58
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            101,
+            59,
+            102,
+            59
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 2046,
+          "bounds": [
+            37,
+            17,
+            124,
+            63
+          ]
+        },
+        {
+          "size": 209,
+          "bounds": [
+            116,
+            73,
+            129,
+            100
+          ]
+        },
+        {
+          "size": 76,
+          "bounds": [
+            85,
+            52,
+            103,
+            58
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 0,
+        "column": 2,
+        "filledPixels": 21,
+        "remainingHoles": 1,
+        "remainingHolePixels": 19,
+        "remainingComponents": [
+          {
+            "size": 19,
+            "bounds": [
+              54,
+              51,
+              66,
+              54
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 19,
+            "bounds": [
+              54,
+              51,
+              66,
+              54
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "bandRow": 50,
+      "crownPixels": 1441,
+      "crownBounds": [
+        24,
+        13,
+        109,
+        56
+      ],
+      "blueComponents": [
+        {
+          "size": 329,
+          "bounds": [
+            104,
+            53,
+            121,
+            86
+          ]
+        },
+        {
+          "size": 233,
+          "bounds": [
+            26,
+            35,
+            64,
+            51
+          ]
+        },
+        {
+          "size": 152,
+          "bounds": [
+            70,
+            35,
+            102,
+            44
+          ]
+        },
+        {
+          "size": 132,
+          "bounds": [
+            32,
+            47,
+            64,
+            59
+          ]
+        },
+        {
+          "size": 63,
+          "bounds": [
+            72,
+            46,
+            87,
+            51
+          ]
+        },
+        {
+          "size": 46,
+          "bounds": [
+            34,
+            43,
+            55,
+            51
+          ]
+        },
+        {
+          "size": 27,
+          "bounds": [
+            80,
+            43,
+            92,
+            47
+          ]
+        },
+        {
+          "size": 11,
+          "bounds": [
+            60,
+            42,
+            64,
+            44
+          ]
+        },
+        {
+          "size": 10,
+          "bounds": [
+            70,
+            41,
+            74,
+            43
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 19,
+          "bounds": [
+            33,
+            44,
+            42,
+            50
+          ]
+        },
+        {
+          "size": 15,
+          "bounds": [
+            87,
+            42,
+            94,
+            45
+          ]
+        },
+        {
+          "size": 12,
+          "bounds": [
+            34,
+            49,
+            40,
+            53
+          ]
+        },
+        {
+          "size": 8,
+          "bounds": [
+            107,
+            50,
+            108,
+            53
+          ]
+        },
+        {
+          "size": 6,
+          "bounds": [
+            78,
+            52,
+            83,
+            52
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            78,
+            45,
+            80,
+            46
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            43,
+            44,
+            46,
+            44
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            81,
+            42,
+            83,
+            42
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            42,
+            48,
+            43,
+            49
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            56,
+            45,
+            57,
+            45
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            97,
+            46,
+            98,
+            46
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 2123,
+          "bounds": [
+            24,
+            13,
+            109,
+            59
+          ]
+        },
+        {
+          "size": 345,
+          "bounds": [
+            104,
+            49,
+            121,
+            86
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 0,
+        "column": 3,
+        "filledPixels": 6,
+        "remainingHoles": 0,
+        "remainingHolePixels": 0,
+        "remainingComponents": [],
+        "rejectedBeforeFill": []
+      }
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "bandRow": 52,
+      "crownPixels": 1625,
+      "crownBounds": [
+        18,
+        13,
+        104,
+        51
+      ],
+      "blueComponents": [
+        {
+          "size": 514,
+          "bounds": [
+            66,
+            36,
+            114,
+            85
+          ]
+        },
+        {
+          "size": 213,
+          "bounds": [
+            21,
+            36,
+            60,
+            52
+          ]
+        },
+        {
+          "size": 151,
+          "bounds": [
+            26,
+            49,
+            59,
+            63
+          ]
+        },
+        {
+          "size": 131,
+          "bounds": [
+            68,
+            48,
+            97,
+            60
+          ]
+        },
+        {
+          "size": 74,
+          "bounds": [
+            25,
+            44,
+            51,
+            57
+          ]
+        },
+        {
+          "size": 53,
+          "bounds": [
+            75,
+            44,
+            97,
+            53
+          ]
+        },
+        {
+          "size": 11,
+          "bounds": [
+            66,
+            43,
+            69,
+            45
+          ]
+        },
+        {
+          "size": 10,
+          "bounds": [
+            57,
+            43,
+            60,
+            45
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 250,
+          "bounds": [
+            51,
+            24,
+            74,
+            52
+          ]
+        },
+        {
+          "size": 34,
+          "bounds": [
+            77,
+            42,
+            97,
+            51
+          ]
+        },
+        {
+          "size": 28,
+          "bounds": [
+            79,
+            47,
+            95,
+            53
+          ]
+        },
+        {
+          "size": 15,
+          "bounds": [
+            25,
+            49,
+            31,
+            54
+          ]
+        },
+        {
+          "size": 10,
+          "bounds": [
+            27,
+            53,
+            32,
+            57
+          ]
+        },
+        {
+          "size": 8,
+          "bounds": [
+            100,
+            48,
+            102,
+            51
+          ]
+        },
+        {
+          "size": 8,
+          "bounds": [
+            88,
+            56,
+            91,
+            59
+          ]
+        },
+        {
+          "size": 7,
+          "bounds": [
+            33,
+            46,
+            37,
+            48
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            77,
+            54,
+            81,
+            54
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            83,
+            55,
+            86,
+            55
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            52,
+            47,
+            53,
+            48
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            69,
+            42,
+            70,
+            42
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            73,
+            47,
+            74,
+            47
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            96,
+            54,
+            97,
+            54
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            98,
+            55,
+            98,
+            56
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 3147,
+          "bounds": [
+            18,
+            13,
+            114,
+            85
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 0,
+        "column": 4,
+        "filledPixels": 182,
+        "remainingHoles": 0,
+        "remainingHolePixels": 0,
+        "remainingComponents": [],
+        "rejectedBeforeFill": []
+      }
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "bandRow": 44,
+      "crownPixels": 979,
+      "crownBounds": [
+        73,
+        17,
+        131,
+        50
+      ],
+      "blueComponents": [
+        {
+          "size": 922,
+          "bounds": [
+            66,
+            30,
+            132,
+            79
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 98,
+          "bounds": [
+            124,
+            24,
+            136,
+            42
+          ]
+        },
+        {
+          "size": 10,
+          "bounds": [
+            92,
+            45,
+            98,
+            47
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            83,
+            49,
+            88,
+            52
+          ]
+        },
+        {
+          "size": 7,
+          "bounds": [
+            95,
+            49,
+            100,
+            50
+          ]
+        },
+        {
+          "size": 6,
+          "bounds": [
+            89,
+            51,
+            93,
+            52
+          ]
+        },
+        {
+          "size": 6,
+          "bounds": [
+            80,
+            52,
+            82,
+            55
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            122,
+            47,
+            124,
+            47
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            101,
+            48,
+            103,
+            48
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            115,
+            49,
+            117,
+            49
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            130,
+            45,
+            131,
+            45
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            126,
+            46,
+            127,
+            46
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            90,
+            48,
+            90,
+            49
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            119,
+            48,
+            120,
+            48
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 1936,
+          "bounds": [
+            66,
+            17,
+            136,
+            79
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 1,
+        "column": 0,
+        "filledPixels": 101,
+        "remainingHoles": 1,
+        "remainingHolePixels": 6,
+        "remainingComponents": [
+          {
+            "size": 6,
+            "bounds": [
+              76,
+              66,
+              78,
+              69
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 6,
+            "bounds": [
+              76,
+              66,
+              78,
+              69
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "bandRow": 50,
+      "crownPixels": 960,
+      "crownBounds": [
+        70,
+        19,
+        124,
+        58
+      ],
+      "blueComponents": [
+        {
+          "size": 936,
+          "bounds": [
+            64,
+            33,
+            128,
+            84
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 110,
+          "bounds": [
+            118,
+            24,
+            130,
+            43
+          ]
+        },
+        {
+          "size": 12,
+          "bounds": [
+            78,
+            56,
+            83,
+            61
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            86,
+            55,
+            91,
+            58
+          ]
+        },
+        {
+          "size": 7,
+          "bounds": [
+            89,
+            51,
+            92,
+            53
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            126,
+            47,
+            127,
+            47
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            124,
+            48,
+            125,
+            48
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            96,
+            49,
+            96,
+            50
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            121,
+            49,
+            122,
+            49
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            94,
+            50,
+            94,
+            51
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            112,
+            53,
+            113,
+            53
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            86,
+            54,
+            87,
+            54
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            84,
+            55,
+            85,
+            55
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            70,
+            78,
+            70,
+            79
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 1934,
+          "bounds": [
+            64,
+            19,
+            131,
+            84
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 1,
+        "column": 1,
+        "filledPixels": 102,
+        "remainingHoles": 3,
+        "remainingHolePixels": 17,
+        "remainingComponents": [
+          {
+            "size": 7,
+            "bounds": [
+              75,
+              69,
+              77,
+              72
+            ]
+          },
+          {
+            "size": 5,
+            "bounds": [
+              123,
+              44,
+              127,
+              44
+            ]
+          },
+          {
+            "size": 5,
+            "bounds": [
+              71,
+              75,
+              72,
+              78
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 7,
+            "bounds": [
+              75,
+              69,
+              77,
+              72
+            ]
+          },
+          {
+            "size": 5,
+            "bounds": [
+              123,
+              44,
+              127,
+              44
+            ]
+          },
+          {
+            "size": 5,
+            "bounds": [
+              71,
+              75,
+              72,
+              78
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "bandRow": 50,
+      "crownPixels": 867,
+      "crownBounds": [
+        59,
+        18,
+        109,
+        57
+      ],
+      "blueComponents": [
+        {
+          "size": 839,
+          "bounds": [
+            54,
+            34,
+            117,
+            83
+          ]
+        },
+        {
+          "size": 15,
+          "bounds": [
+            65,
+            36,
+            70,
+            42
+          ]
+        },
+        {
+          "size": 13,
+          "bounds": [
+            104,
+            32,
+            109,
+            36
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 117,
+          "bounds": [
+            104,
+            21,
+            116,
+            40
+          ]
+        },
+        {
+          "size": 14,
+          "bounds": [
+            67,
+            53,
+            75,
+            58
+          ]
+        },
+        {
+          "size": 7,
+          "bounds": [
+            78,
+            49,
+            82,
+            51
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            82,
+            52,
+            84,
+            54
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            74,
+            56,
+            76,
+            58
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            107,
+            41,
+            108,
+            42
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            101,
+            50,
+            103,
+            50
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            113,
+            44,
+            114,
+            44
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            111,
+            45,
+            112,
+            45
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            109,
+            46,
+            110,
+            46
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 1818,
+          "bounds": [
+            54,
+            18,
+            118,
+            83
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 1,
+        "column": 2,
+        "filledPixels": 107,
+        "remainingHoles": 1,
+        "remainingHolePixels": 7,
+        "remainingComponents": [
+          {
+            "size": 7,
+            "bounds": [
+              66,
+              59,
+              68,
+              62
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 7,
+            "bounds": [
+              66,
+              59,
+              68,
+              62
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "bandRow": 47,
+      "crownPixels": 1087,
+      "crownBounds": [
+        35,
+        18,
+        108,
+        59
+      ],
+      "blueComponents": [
+        {
+          "size": 843,
+          "bounds": [
+            50,
+            31,
+            113,
+            80
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 109,
+          "bounds": [
+            101,
+            23,
+            113,
+            43
+          ]
+        },
+        {
+          "size": 24,
+          "bounds": [
+            66,
+            48,
+            80,
+            55
+          ]
+        },
+        {
+          "size": 19,
+          "bounds": [
+            71,
+            51,
+            84,
+            56
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            109,
+            45,
+            111,
+            46
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            63,
+            57,
+            64,
+            59
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            97,
+            51,
+            98,
+            52
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            105,
+            42,
+            105,
+            43
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            102,
+            49,
+            103,
+            49
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 2026,
+          "bounds": [
+            35,
+            18,
+            114,
+            80
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 1,
+        "column": 3,
+        "filledPixels": 97,
+        "remainingHoles": 2,
+        "remainingHolePixels": 10,
+        "remainingComponents": [
+          {
+            "size": 5,
+            "bounds": [
+              64,
+              55,
+              66,
+              57
+            ]
+          },
+          {
+            "size": 5,
+            "bounds": [
+              62,
+              64,
+              62,
+              68
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 5,
+            "bounds": [
+              64,
+              55,
+              66,
+              57
+            ]
+          },
+          {
+            "size": 5,
+            "bounds": [
+              62,
+              64,
+              62,
+              68
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "bandRow": 55,
+      "crownPixels": 1318,
+      "crownBounds": [
+        35,
+        20,
+        104,
+        79
+      ],
+      "blueComponents": [
+        {
+          "size": 926,
+          "bounds": [
+            41,
+            33,
+            108,
+            86
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 93,
+          "bounds": [
+            98,
+            25,
+            109,
+            44
+          ]
+        },
+        {
+          "size": 20,
+          "bounds": [
+            58,
+            54,
+            69,
+            61
+          ]
+        },
+        {
+          "size": 8,
+          "bounds": [
+            62,
+            60,
+            66,
+            63
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            101,
+            44,
+            101,
+            45
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            101,
+            50,
+            102,
+            50
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            99,
+            51,
+            100,
+            51
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            69,
+            58,
+            69,
+            59
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 2297,
+          "bounds": [
+            35,
+            20,
+            109,
+            86
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 1,
+        "column": 4,
+        "filledPixels": 128,
+        "remainingHoles": 2,
+        "remainingHolePixels": 15,
+        "remainingComponents": [
+          {
+            "size": 9,
+            "bounds": [
+              54,
+              62,
+              58,
+              65
+            ]
+          },
+          {
+            "size": 6,
+            "bounds": [
+              50,
+              75,
+              52,
+              78
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 9,
+            "bounds": [
+              54,
+              62,
+              58,
+              65
+            ]
+          },
+          {
+            "size": 6,
+            "bounds": [
+              50,
+              75,
+              52,
+              78
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "bandRow": 39,
+      "crownPixels": 1578,
+      "crownBounds": [
+        54,
+        5,
+        118,
+        38
+      ],
+      "blueComponents": [
+        {
+          "size": 783,
+          "bounds": [
+            58,
+            15,
+            118,
+            64
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            72,
+            57,
+            74,
+            61
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 28,
+          "bounds": [
+            86,
+            42,
+            91,
+            47
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            114,
+            33,
+            116,
+            35
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            97,
+            42,
+            100,
+            42
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            104,
+            54,
+            105,
+            55
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            79,
+            42,
+            80,
+            42
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            73,
+            44,
+            74,
+            44
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            109,
+            45,
+            110,
+            45
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            67,
+            46,
+            68,
+            46
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            107,
+            46,
+            108,
+            46
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            70,
+            47,
+            70,
+            48
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 2353,
+          "bounds": [
+            54,
+            5,
+            122,
+            64
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            72,
+            57,
+            74,
+            61
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 2,
+        "column": 0,
+        "filledPixels": 28,
+        "remainingHoles": 2,
+        "remainingHolePixels": 38,
+        "remainingComponents": [
+          {
+            "size": 31,
+            "bounds": [
+              100,
+              35,
+              114,
+              41
+            ]
+          },
+          {
+            "size": 7,
+            "bounds": [
+              70,
+              40,
+              75,
+              41
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 31,
+            "bounds": [
+              100,
+              35,
+              114,
+              41
+            ]
+          },
+          {
+            "size": 7,
+            "bounds": [
+              70,
+              40,
+              75,
+              41
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "bandRow": 37,
+      "crownPixels": 1512,
+      "crownBounds": [
+        57,
+        5,
+        119,
+        37
+      ],
+      "blueComponents": [
+        {
+          "size": 722,
+          "bounds": [
+            59,
+            23,
+            119,
+            60
+          ]
+        },
+        {
+          "size": 35,
+          "bounds": [
+            112,
+            14,
+            118,
+            26
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 26,
+          "bounds": [
+            87,
+            41,
+            93,
+            46
+          ]
+        },
+        {
+          "size": 7,
+          "bounds": [
+            73,
+            51,
+            75,
+            55
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            80,
+            41,
+            82,
+            41
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            66,
+            39,
+            66,
+            40
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            112,
+            39,
+            113,
+            39
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            111,
+            44,
+            112,
+            44
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            109,
+            45,
+            110,
+            45
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 2251,
+          "bounds": [
+            57,
+            5,
+            119,
+            60
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 2,
+        "column": 1,
+        "filledPixels": 28,
+        "remainingHoles": 3,
+        "remainingHolePixels": 24,
+        "remainingComponents": [
+          {
+            "size": 10,
+            "bounds": [
+              98,
+              40,
+              105,
+              41
+            ]
+          },
+          {
+            "size": 8,
+            "bounds": [
+              73,
+              40,
+              79,
+              41
+            ]
+          },
+          {
+            "size": 6,
+            "bounds": [
+              87,
+              41,
+              90,
+              43
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 10,
+            "bounds": [
+              98,
+              40,
+              105,
+              41
+            ]
+          },
+          {
+            "size": 8,
+            "bounds": [
+              73,
+              40,
+              79,
+              41
+            ]
+          },
+          {
+            "size": 6,
+            "bounds": [
+              87,
+              41,
+              90,
+              43
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "bandRow": 38,
+      "crownPixels": 1590,
+      "crownBounds": [
+        48,
+        5,
+        111,
+        38
+      ],
+      "blueComponents": [
+        {
+          "size": 859,
+          "bounds": [
+            49,
+            21,
+            111,
+            66
+          ]
+        },
+        {
+          "size": 14,
+          "bounds": [
+            103,
+            15,
+            107,
+            19
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 28,
+          "bounds": [
+            78,
+            42,
+            83,
+            47
+          ]
+        },
+        {
+          "size": 6,
+          "bounds": [
+            62,
+            53,
+            64,
+            56
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            106,
+            34,
+            108,
+            36
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            52,
+            34,
+            53,
+            35
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            89,
+            42,
+            91,
+            42
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            56,
+            40,
+            57,
+            40
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            71,
+            42,
+            72,
+            42
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            95,
+            44,
+            96,
+            44
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            59,
+            46,
+            60,
+            46
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            61,
+            47,
+            62,
+            47
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 2460,
+          "bounds": [
+            48,
+            5,
+            111,
+            66
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 2,
+        "column": 2,
+        "filledPixels": 55,
+        "remainingHoles": 1,
+        "remainingHolePixels": 14,
+        "remainingComponents": [
+          {
+            "size": 14,
+            "bounds": [
+              92,
+              39,
+              101,
+              42
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 14,
+            "bounds": [
+              92,
+              39,
+              101,
+              42
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "bandRow": 37,
+      "crownPixels": 1509,
+      "crownBounds": [
+        37,
+        5,
+        99,
+        37
+      ],
+      "blueComponents": [
+        {
+          "size": 739,
+          "bounds": [
+            39,
+            17,
+            99,
+            61
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 28,
+          "bounds": [
+            67,
+            40,
+            72,
+            46
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            78,
+            40,
+            80,
+            41
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            44,
+            35,
+            46,
+            36
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            59,
+            40,
+            60,
+            41
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            46,
+            44,
+            47,
+            44
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            90,
+            44,
+            91,
+            44
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            48,
+            45,
+            49,
+            45
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 2257,
+          "bounds": [
+            37,
+            5,
+            99,
+            61
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 2,
+        "column": 3,
+        "filledPixels": 40,
+        "remainingHoles": 2,
+        "remainingHolePixels": 13,
+        "remainingComponents": [
+          {
+            "size": 7,
+            "bounds": [
+              67,
+              41,
+              70,
+              43
+            ]
+          },
+          {
+            "size": 6,
+            "bounds": [
+              55,
+              40,
+              58,
+              41
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 7,
+            "bounds": [
+              67,
+              41,
+              70,
+              43
+            ]
+          },
+          {
+            "size": 6,
+            "bounds": [
+              55,
+              40,
+              58,
+              41
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "bandRow": 40,
+      "crownPixels": 1588,
+      "crownBounds": [
+        38,
+        7,
+        99,
+        40
+      ],
+      "blueComponents": [
+        {
+          "size": 792,
+          "bounds": [
+            38,
+            21,
+            99,
+            68
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 34,
+          "bounds": [
+            65,
+            43,
+            71,
+            49
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            94,
+            36,
+            95,
+            38
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            42,
+            37,
+            44,
+            38
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            57,
+            43,
+            59,
+            44
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            77,
+            44,
+            80,
+            44
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            91,
+            46,
+            93,
+            47
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            43,
+            41,
+            44,
+            41
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            52,
+            46,
+            53,
+            46
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            45,
+            47,
+            46,
+            47
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            47,
+            48,
+            48,
+            48
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            89,
+            48,
+            90,
+            48
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            49,
+            49,
+            49,
+            50
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            50,
+            52,
+            50,
+            53
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 2419,
+          "bounds": [
+            37,
+            7,
+            100,
+            68
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 2,
+        "column": 4,
+        "filledPixels": 51,
+        "remainingHoles": 1,
+        "remainingHolePixels": 5,
+        "remainingComponents": [
+          {
+            "size": 5,
+            "bounds": [
+              54,
+              43,
+              57,
+              44
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 5,
+            "bounds": [
+              54,
+              43,
+              57,
+              44
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "bandRow": 30,
+      "crownPixels": 1653,
+      "crownBounds": [
+        39,
+        2,
+        126,
+        39
+      ],
+      "blueComponents": [
+        {
+          "size": 262,
+          "bounds": [
+            85,
+            17,
+            123,
+            33
+          ]
+        },
+        {
+          "size": 254,
+          "bounds": [
+            41,
+            26,
+            80,
+            41
+          ]
+        },
+        {
+          "size": 98,
+          "bounds": [
+            56,
+            39,
+            80,
+            47
+          ]
+        },
+        {
+          "size": 68,
+          "bounds": [
+            89,
+            37,
+            106,
+            41
+          ]
+        },
+        {
+          "size": 47,
+          "bounds": [
+            52,
+            36,
+            71,
+            43
+          ]
+        },
+        {
+          "size": 32,
+          "bounds": [
+            95,
+            33,
+            110,
+            35
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            86,
+            33,
+            90,
+            35
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            77,
+            34,
+            80,
+            36
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 8,
+          "bounds": [
+            104,
+            36,
+            108,
+            37
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            93,
+            42,
+            94,
+            42
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 1980,
+          "bounds": [
+            39,
+            2,
+            126,
+            41
+          ]
+        },
+        {
+          "size": 121,
+          "bounds": [
+            89,
+            33,
+            110,
+            42
+          ]
+        },
+        {
+          "size": 98,
+          "bounds": [
+            56,
+            39,
+            80,
+            47
+          ]
+        },
+        {
+          "size": 49,
+          "bounds": [
+            52,
+            35,
+            72,
+            43
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 3,
+        "column": 0,
+        "filledPixels": 1,
+        "remainingHoles": 0,
+        "remainingHolePixels": 0,
+        "remainingComponents": [],
+        "rejectedBeforeFill": []
+      }
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "bandRow": 23,
+      "crownPixels": 522,
+      "crownBounds": [
+        37,
+        0,
+        74,
+        28
+      ],
+      "blueComponents": [
+        {
+          "size": 193,
+          "bounds": [
+            39,
+            11,
+            75,
+            29
+          ]
+        },
+        {
+          "size": 137,
+          "bounds": [
+            81,
+            10,
+            115,
+            19
+          ]
+        },
+        {
+          "size": 119,
+          "bounds": [
+            44,
+            21,
+            74,
+            36
+          ]
+        },
+        {
+          "size": 66,
+          "bounds": [
+            115,
+            83,
+            126,
+            90
+          ]
+        },
+        {
+          "size": 60,
+          "bounds": [
+            84,
+            20,
+            100,
+            26
+          ]
+        },
+        {
+          "size": 39,
+          "bounds": [
+            46,
+            18,
+            67,
+            28
+          ]
+        },
+        {
+          "size": 27,
+          "bounds": [
+            117,
+            39,
+            126,
+            42
+          ]
+        },
+        {
+          "size": 26,
+          "bounds": [
+            89,
+            17,
+            103,
+            21
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 191,
+          "bounds": [
+            67,
+            0,
+            88,
+            23
+          ]
+        },
+        {
+          "size": 15,
+          "bounds": [
+            89,
+            20,
+            100,
+            22
+          ]
+        },
+        {
+          "size": 11,
+          "bounds": [
+            93,
+            16,
+            99,
+            18
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            88,
+            25,
+            92,
+            25
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            54,
+            29,
+            57,
+            30
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            103,
+            20,
+            104,
+            21
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            47,
+            24,
+            48,
+            25
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            51,
+            25,
+            52,
+            26
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            64,
+            26,
+            66,
+            26
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            49,
+            27,
+            50,
+            28
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            97,
+            27,
+            99,
+            27
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            58,
+            28,
+            60,
+            28
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            101,
+            18,
+            101,
+            19
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            53,
+            21,
+            53,
+            22
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            94,
+            26,
+            95,
+            26
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            61,
+            27,
+            62,
+            27
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 1431,
+          "bounds": [
+            37,
+            0,
+            116,
+            36
+          ]
+        },
+        {
+          "size": 66,
+          "bounds": [
+            115,
+            83,
+            126,
+            90
+          ]
+        },
+        {
+          "size": 27,
+          "bounds": [
+            117,
+            39,
+            126,
+            42
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 3,
+        "column": 1,
+        "filledPixels": 101,
+        "remainingHoles": 3,
+        "remainingHolePixels": 49,
+        "remainingComponents": [
+          {
+            "size": 22,
+            "bounds": [
+              80,
+              11,
+              84,
+              18
+            ]
+          },
+          {
+            "size": 20,
+            "bounds": [
+              72,
+              15,
+              77,
+              19
+            ]
+          },
+          {
+            "size": 7,
+            "bounds": [
+              86,
+              18,
+              90,
+              19
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 22,
+            "bounds": [
+              80,
+              11,
+              84,
+              18
+            ]
+          },
+          {
+            "size": 20,
+            "bounds": [
+              72,
+              15,
+              77,
+              19
+            ]
+          },
+          {
+            "size": 7,
+            "bounds": [
+              86,
+              18,
+              90,
+              19
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "bandRow": 45,
+      "crownPixels": 45,
+      "crownBounds": [
+        101,
+        48,
+        118,
+        56
+      ],
+      "blueComponents": [
+        {
+          "size": 498,
+          "bounds": [
+            51,
+            30,
+            114,
+            56
+          ]
+        },
+        {
+          "size": 147,
+          "bounds": [
+            21,
+            57,
+            47,
+            79
+          ]
+        },
+        {
+          "size": 61,
+          "bounds": [
+            58,
+            51,
+            75,
+            62
+          ]
+        },
+        {
+          "size": 56,
+          "bounds": [
+            36,
+            67,
+            50,
+            78
+          ]
+        },
+        {
+          "size": 42,
+          "bounds": [
+            61,
+            45,
+            81,
+            55
+          ]
+        },
+        {
+          "size": 13,
+          "bounds": [
+            37,
+            66,
+            43,
+            72
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 13,
+          "bounds": [
+            97,
+            47,
+            99,
+            51
+          ]
+        },
+        {
+          "size": 7,
+          "bounds": [
+            34,
+            70,
+            36,
+            74
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            78,
+            43,
+            81,
+            44
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            38,
+            71,
+            39,
+            73
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            83,
+            43,
+            84,
+            44
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            72,
+            46,
+            73,
+            47
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            70,
+            51,
+            71,
+            52
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            43,
+            67,
+            44,
+            68
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            75,
+            45,
+            75,
+            46
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            70,
+            47,
+            71,
+            47
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            72,
+            50,
+            73,
+            50
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            33,
+            75,
+            33,
+            76
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            32,
+            77,
+            32,
+            78
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 828,
+          "bounds": [
+            51,
+            28,
+            118,
+            62
+          ]
+        },
+        {
+          "size": 241,
+          "bounds": [
+            21,
+            57,
+            50,
+            79
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 3,
+        "column": 2,
+        "filledPixels": 19,
+        "remainingHoles": 2,
+        "remainingHolePixels": 19,
+        "remainingComponents": [
+          {
+            "size": 11,
+            "bounds": [
+              63,
+              48,
+              70,
+              51
+            ]
+          },
+          {
+            "size": 8,
+            "bounds": [
+              40,
+              68,
+              43,
+              71
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 11,
+            "bounds": [
+              63,
+              48,
+              70,
+              51
+            ]
+          },
+          {
+            "size": 8,
+            "bounds": [
+              40,
+              68,
+              43,
+              71
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "bandRow": 21,
+      "crownPixels": 487,
+      "crownBounds": [
+        20,
+        0,
+        58,
+        24
+      ],
+      "blueComponents": [
+        {
+          "size": 247,
+          "bounds": [
+            99,
+            30,
+            112,
+            65
+          ]
+        },
+        {
+          "size": 214,
+          "bounds": [
+            22,
+            9,
+            59,
+            27
+          ]
+        },
+        {
+          "size": 151,
+          "bounds": [
+            65,
+            8,
+            100,
+            17
+          ]
+        },
+        {
+          "size": 123,
+          "bounds": [
+            27,
+            19,
+            58,
+            34
+          ]
+        },
+        {
+          "size": 60,
+          "bounds": [
+            67,
+            18,
+            85,
+            23
+          ]
+        },
+        {
+          "size": 48,
+          "bounds": [
+            27,
+            16,
+            51,
+            28
+          ]
+        },
+        {
+          "size": 26,
+          "bounds": [
+            74,
+            15,
+            88,
+            19
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 191,
+          "bounds": [
+            51,
+            0,
+            74,
+            22
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            32,
+            19,
+            37,
+            22
+          ]
+        },
+        {
+          "size": 8,
+          "bounds": [
+            81,
+            19,
+            87,
+            20
+          ]
+        },
+        {
+          "size": 7,
+          "bounds": [
+            83,
+            15,
+            87,
+            17
+          ]
+        },
+        {
+          "size": 6,
+          "bounds": [
+            72,
+            17,
+            76,
+            18
+          ]
+        },
+        {
+          "size": 6,
+          "bounds": [
+            35,
+            22,
+            38,
+            24
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            74,
+            23,
+            78,
+            23
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            37,
+            28,
+            40,
+            29
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            98,
+            33,
+            99,
+            36
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            32,
+            25,
+            34,
+            26
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            46,
+            25,
+            49,
+            25
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            29,
+            27,
+            31,
+            28
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            80,
+            14,
+            81,
+            15
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            29,
+            23,
+            30,
+            24
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            80,
+            24,
+            82,
+            24
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            43,
+            26,
+            45,
+            26
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            68,
+            13,
+            69,
+            13
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            89,
+            17,
+            89,
+            18
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            27,
+            26,
+            28,
+            26
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            41,
+            27,
+            42,
+            27
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 1459,
+          "bounds": [
+            20,
+            0,
+            102,
+            34
+          ]
+        },
+        {
+          "size": 252,
+          "bounds": [
+            98,
+            30,
+            112,
+            65
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 3,
+        "column": 3,
+        "filledPixels": 121,
+        "remainingHoles": 3,
+        "remainingHolePixels": 31,
+        "remainingComponents": [
+          {
+            "size": 11,
+            "bounds": [
+              64,
+              6,
+              69,
+              11
+            ]
+          },
+          {
+            "size": 11,
+            "bounds": [
+              74,
+              17,
+              82,
+              18
+            ]
+          },
+          {
+            "size": 9,
+            "bounds": [
+              74,
+              13,
+              80,
+              14
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 11,
+            "bounds": [
+              64,
+              6,
+              69,
+              11
+            ]
+          },
+          {
+            "size": 11,
+            "bounds": [
+              74,
+              17,
+              82,
+              18
+            ]
+          },
+          {
+            "size": 9,
+            "bounds": [
+              74,
+              13,
+              80,
+              14
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "bandRow": 20,
+      "crownPixels": 542,
+      "crownBounds": [
+        70,
+        0,
+        107,
+        29
+      ],
+      "blueComponents": [
+        {
+          "size": 642,
+          "bounds": [
+            68,
+            7,
+            114,
+            64
+          ]
+        },
+        {
+          "size": 180,
+          "bounds": [
+            29,
+            10,
+            55,
+            27
+          ]
+        },
+        {
+          "size": 65,
+          "bounds": [
+            37,
+            18,
+            60,
+            27
+          ]
+        },
+        {
+          "size": 22,
+          "bounds": [
+            76,
+            16,
+            89,
+            22
+          ]
+        },
+        {
+          "size": 16,
+          "bounds": [
+            57,
+            9,
+            62,
+            12
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            48,
+            15,
+            54,
+            17
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            93,
+            25,
+            97,
+            29
+          ]
+        },
+        {
+          "size": 9,
+          "bounds": [
+            32,
+            28,
+            36,
+            32
+          ]
+        }
+      ],
+      "goldSemanticComponents": [
+        {
+          "size": 163,
+          "bounds": [
+            55,
+            0,
+            76,
+            20
+          ]
+        },
+        {
+          "size": 5,
+          "bounds": [
+            81,
+            20,
+            84,
+            21
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            74,
+            23,
+            77,
+            23
+          ]
+        },
+        {
+          "size": 4,
+          "bounds": [
+            103,
+            27,
+            104,
+            29
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            41,
+            21,
+            42,
+            22
+          ]
+        },
+        {
+          "size": 3,
+          "bounds": [
+            47,
+            23,
+            49,
+            23
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            85,
+            18,
+            85,
+            19
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            87,
+            19,
+            87,
+            20
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            85,
+            22,
+            86,
+            22
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            92,
+            22,
+            92,
+            23
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            39,
+            23,
+            40,
+            23
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            87,
+            23,
+            88,
+            23
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            79,
+            24,
+            80,
+            24
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            89,
+            24,
+            90,
+            24
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            92,
+            26,
+            93,
+            26
+          ]
+        },
+        {
+          "size": 2,
+          "bounds": [
+            100,
+            31,
+            100,
+            32
+          ]
+        }
+      ],
+      "semanticComponents": [
+        {
+          "size": 1702,
+          "bounds": [
+            28,
+            0,
+            114,
+            64
+          ]
+        }
+      ],
+      "holeAudit": {
+        "row": 3,
+        "column": 4,
+        "filledPixels": 78,
+        "remainingHoles": 7,
+        "remainingHolePixels": 78,
+        "remainingComponents": [
+          {
+            "size": 23,
+            "bounds": [
+              41,
+              16,
+              48,
+              21
+            ]
+          },
+          {
+            "size": 16,
+            "bounds": [
+              95,
+              25,
+              100,
+              32
+            ]
+          },
+          {
+            "size": 11,
+            "bounds": [
+              60,
+              9,
+              64,
+              12
+            ]
+          },
+          {
+            "size": 8,
+            "bounds": [
+              67,
+              10,
+              68,
+              16
+            ]
+          },
+          {
+            "size": 7,
+            "bounds": [
+              60,
+              15,
+              63,
+              17
+            ]
+          },
+          {
+            "size": 7,
+            "bounds": [
+              53,
+              16,
+              57,
+              17
+            ]
+          },
+          {
+            "size": 6,
+            "bounds": [
+              37,
+              20,
+              40,
+              22
+            ]
+          }
+        ],
+        "rejectedBeforeFill": [
+          {
+            "size": 23,
+            "bounds": [
+              41,
+              16,
+              48,
+              21
+            ]
+          },
+          {
+            "size": 16,
+            "bounds": [
+              95,
+              25,
+              100,
+              32
+            ]
+          },
+          {
+            "size": 11,
+            "bounds": [
+              60,
+              9,
+              64,
+              12
+            ]
+          },
+          {
+            "size": 8,
+            "bounds": [
+              67,
+              10,
+              68,
+              16
+            ]
+          },
+          {
+            "size": 7,
+            "bounds": [
+              60,
+              15,
+              63,
+              17
+            ]
+          },
+          {
+            "size": 7,
+            "bounds": [
+              53,
+              16,
+              57,
+              17
+            ]
+          },
+          {
+            "size": 6,
+            "bounds": [
+              37,
+              20,
+              40,
+              22
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "frozenSpecVersion": 1
+}

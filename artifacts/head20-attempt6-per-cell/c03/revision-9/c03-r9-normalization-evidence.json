@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "cell": "c03",
+  "revision": "r9",
+  "stage": "RAW_NORMALIZATION_PRE_CANDIDATE",
+  "input": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\c03-r9-raw-full-dressed-imagegen-source.png",
+    "sha256": "0ff73bc069955f8f0751a9b157d5a1cbff14ce7a5f06eb248c4441967d84f35b",
+    "dimensions": [
+      1230,
+      1278,
+      4
+    ]
+  },
+  "output": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\c03-r9-normalized-rgb-1254x1254.png",
+    "sha256": "b6238f4854b157012fb687420dc042f6be0f2e22e71f1abe33ec676bd9b7f365",
+    "dimensions": [
+      1254,
+      1254,
+      3
+    ]
+  },
+  "steps": "resize transparent 1230x1278 ImageGen raw to the existing 1254x1254 normalized coordinate reference with Lanczos3; flatten only transparent exterior to white so the established border-connected checker/white cleanup can remove it. No pet/base, previous target, mask, layer or composite was read.",
+  "verdict": "PASS_NORMALIZED_SOURCE_FOR_CANDIDATE_ONLY"
+}

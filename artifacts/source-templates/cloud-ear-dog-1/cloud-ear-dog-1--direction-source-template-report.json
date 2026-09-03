@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "role": "AUTHORING_TEMPLATE_ONLY_NOT_A_WEARABLE_CANDIDATE",
+  "base": {
+    "path": "pet-app/public/assets/art/sprites/cloud-ear-dog-1-atlas-b69dddce39.webp",
+    "sha256": "0820008f9eb7f007ef1dc62a2011d4eacb251b14628805bb384ff84da1b6fadd",
+    "geometry": {
+      "width": 800,
+      "height": 640,
+      "channels": 4,
+      "hasAlpha": true
+    }
+  },
+  "outputDirectory": "artifacts/source-templates/cloud-ear-dog-1",
+  "contract": {
+    "directionBatch": "front,side-right,back,special",
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "columns": 5,
+    "transforms": false
+  },
+  "outputs": [
+    {
+      "id": "front",
+      "row": 0,
+      "cells": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "source": "artifacts/source-templates/cloud-ear-dog-1/cloud-ear-dog-1--front-strip.png",
+      "sha256": "de722456ceb1324c0fb0d56f86ca2ceeabd88f1d676035c2df2eaa1c81de8f16",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    },
+    {
+      "id": "side-right",
+      "row": 1,
+      "cells": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "source": "artifacts/source-templates/cloud-ear-dog-1/cloud-ear-dog-1--side-right-strip.png",
+      "sha256": "e5eed7eb94b46d790946e6781ae8c06649b0bcbc9300757de6fb1c3361a0e068",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    },
+    {
+      "id": "back",
+      "row": 2,
+      "cells": [
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "source": "artifacts/source-templates/cloud-ear-dog-1/cloud-ear-dog-1--back-strip.png",
+      "sha256": "ac917b7f74da878f95a1a9db73c10e375881e5af3636b6a1aaaa5a65274973f1",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    },
+    {
+      "id": "special",
+      "row": 3,
+      "cells": [
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "source": "artifacts/source-templates/cloud-ear-dog-1/cloud-ear-dog-1--special-strip.png",
+      "sha256": "03a5a4c8a12ac8dd4d1e1055f38b6e502edc97808a7db14387effbe25e9b6272",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    }
+  ],
+  "generatedAt": "2026-08-25T05:20:31.800Z"
+}

@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "role": "wardrobe_manager",
+  "sourceContract": {
+    "origin": "art-inbox",
+    "originalPet": "art-inbox/pet-starpatch-cat-1.png",
+    "originalAccessorySheet": "art-inbox/wearable-head-3.png",
+    "accessoryFamily": "space helmet; bottom-row three-view group in wearable-head-3.png",
+    "forbiddenSourceReuse": [
+      "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-20-dressed-atlas-v2.png",
+      "artifacts/head20-body-locked-diagnostic/head-20-body-locked-target.png",
+      "any composite/recompose output"
+    ],
+    "requiredFlow": [
+      "art-inbox original pet + original accessory",
+      "full dressed redraw",
+      "accessory-only same-coordinate mask/layers",
+      "zero-transform composite onto original pet",
+      "per-pixel compare to full dressed redraw",
+      "independent critic"
+    ],
+    "sourcePreparation": {
+      "allowDeterministicAtlasNormalization": true,
+      "policy": "1402x1122 generated visual source may be normalized to an exact 800x640 RGBA atlas before production lineage; this is source preparation, never a runtime/mask/composite transform.",
+      "requiredEvidence": [
+        "5x4 cell mapping documented",
+        "near-black/background-to-alpha operation documented",
+        "no checkerboard baked into alpha",
+        "normalized target lineage recorded after preparation",
+        "normalized target still starts from art-inbox originals, not v2/diagnostic/composite"
+      ]
+    },
+    "acceptedCompositePackage": {
+      "order": ["base", "rear", "opaqueErase", "hardwarePatch", "visorTint", "frontErase", "front"],
+      "masks": {
+        "wearableSilhouetteMask": "the exported accessory visual silhouette; alpha>0 union must be one 4-connected, hole-free assembly",
+        "opaqueEraseMask": "only pixels where original pet must be cleared for opaque hardware; it must never be expanded to fill a visor or erase the pet face",
+        "rule": "A low-alpha visor tint is source-over only. It keeps the original face underneath and must not contain copied face pixels."
+      },
+      "patchSemantics": ["helmet shell", "opaque visor", "collar/occlusion support"],
+      "frontSemantics": ["visor tint/reflection only; no copied pet eyes, nose, mouth, forehead mark or fur"],
+      "occludedFaceMayBeMultipleComponents": false,
+      "helmetUnionTopology": {
+        "scope": "declared helmet union only",
+        "fourConnectedPerCell": 1,
+        "enclosedHolesPerCell": 0
+      },
+      "protectedBytes": ["tail", "torso below collar", "legs", "paws", "feeding bowl"],
+      "hardMetrics": [
+        "outside replacement window = 0",
+        "protected support drift = 0",
+        "visor/helmet union holes = 0",
+        "all transparent layer RGB = 0",
+        "accessory-only layer contains no copied pet anatomy",
+        "exact composite mismatch = 0"
+      ],
+      "criticRequirement": "independent semantic-layer and pixel-level review; no lone old helmet-layer requirement"
+    }
+  },
+  "invalidGeneratedOutputs": [
+    {
+      "path": "C:/Users/kochu/.codex/generated_images/01a0271e-6bcf-7382-9586-21b7e9d78ece/exec-1a4cb20a-1148-43f8-b310-0443cbc3dde2.png",
+      "verdict": "REJECT_PREMASK_AS_FINAL_SOURCE",
+      "reason": "1402x1122 RGB/no alpha; requires documented deterministic source preparation before it can be considered for normalized-target lineage",
+      "countsAsQualityAttempt": false
+    },
+    {
+      "path": "C:/Users/kochu/.codex/generated_images/01a03930-560f-72d2-880a-904e2b57ff4a/exec-a8a107cc-5fde-414d-8263-167a4c3c4cc2.png",
+      "verdict": "REJECT_PREMASK_AS_FINAL_SOURCE",
+      "reason": "1402x1122 RGB/no alpha; requires documented deterministic source preparation before it can be considered for normalized-target lineage",
+      "countsAsQualityAttempt": false
+    }
+  ],
+  "attempt": 6,
+  "attemptPolicy": {
+    "mustContinueSameJobUntilPass": true,
+    "rootCauseReviewAfterConsecutiveRejects": 5,
+    "maskMayConsumeProtectedBody": false
+  },
+  "lastAttempt": {
+    "id": "head-20-per-cell-targeted-redraw-v6",
+    "source": "artifacts/head20-attempt5-source-prep/head-20-attempt5-target.png",
+    "lineage": "artifacts/head20-attempt5-source-prep/head-20-attempt5-lineage.json (source-prep PASS; target compatibility REJECT)",
+    "verdict": "IN_PROGRESS",
+    "diagnosticOnly": false,
+    "seamReview": "artifacts/head20-attempt5-source-prep/semantic-seam-review.json (REJECT_SOURCE_STAGE)",
+    "metrics": {
+      "cells": 20,
+      "failedCells": null,
+      "targetBaseDifferencesOutsideReplacementZones": 0,
+      "generatedDiffOutsideWindows": 94157,
+      "generatedDiffInnerBoundaryRing4px": 18441,
+      "assembledTargetDiffOutsideWindows": 0,
+      "criticCrossingBoundarySeamCells": 20,
+      "criticAggregateIntroducedEdgeJump": 866787,
+      "criticExcessPairsAtLeast48": 1828,
+      "criticWorstCells": ["c14", "c15", "c19", "c20", "c1"],
+      "criticDetachedSourceComponents": ["c8", "c9", "c12", "c14", "c15", "c18", "c19"],
+      "enclosedMaskHolePixels": null,
+      "cellsWithOneFourConnectedComponent": null,
+      "unexpectedUnsolvablePixels": null,
+      "exactRgbaMismatchPixels": null,
+      "publishable": false
+    },
+    "blocker": "Attempt 5 normalized source-prep passed, but visual coordinate-compatibility review rejected the assembled target: 18,441 generated inner-boundary ring pixels drift from the untouched base, producing square seams/exposed ears. No masking/compositing was started."
+  },
+  "rootCauseReview": {
+    "sourceBodyDrift": "PRIMARY: whole-atlas generation changes pose/scale/head boundary; base-locking outside windows creates seams",
+    "maskTopology": "SECONDARY: not reached on attempt 5; do not widen masks",
+    "compositeSolver": "NOT_REACHED: correctly held until source compatibility passes",
+    "criticFalseReject": "NO_EVIDENCE: seam metrics are objective (18,441 inner-ring drift pixels)",
+    "workflowFailure": "WHOLE_ATLAS_GENERATION: generating all 20 cells at once does not preserve same-coordinate base geometry",
+    "formalFiveRejectReview": {
+      "trigger": "attempt 5 rejected after prior attempts 1-4",
+      "reviewedAt": "2026-08-26",
+      "decision": "Change generation granularity, not quality threshold. Stop whole-atlas redraws; generate one declared head window per cell against its original base crop and helmet three-view reference, then assemble only cells that pass inner-boundary continuity.",
+      "criticStrictnessChanged": false,
+      "maskExpansionAllowed": false,
+      "nextAttempt": 6
+    }
+  },
+  "nextStrategy": {
+    "role": "full_redraw_source",
+    "action": "Generate targeted inpainting/redraw per cell: original base crop + original space-helmet three-view as references; redraw only the declared head window, preserve all outside pixels, and require a 2-4px inner-boundary continuity gate before accepting the cell. Assemble accepted cells into a full 800x640 RGBA target only after all 20 cells pass.",
+    "requiredBeforeMasking": [
+      "target lineage PASS",
+      "target dimensions/channels PASS",
+      "targetBaseDifferencesOutsideReplacementZones = 0"
+    ],
+    "publish": false,
+    "cellEvidence": ["source SHA", "prompt/reference lineage", "inner-boundary diff metrics", "cell-level critic verdict"]
+  },
+  "attempt6Pilot": {
+    "cell": "c01",
+    "status": "BLOCKED_V2_RIGHT_EAR_AND_PROVENANCE",
+    "acceptanceScript": "scripts/audit-head20-cell-source.mjs",
+    "latestReport": "artifacts/head20-attempt6-per-cell/c01/v2/c01-v2-source-acceptance-semantic.json",
+    "criticReport": "artifacts/head20-attempt6-per-cell/c01/c01-critic-review.json",
+    "zoneAmendmentEvidence": "artifacts/head20-attempt6-per-cell/c01/c01-zone-amendment-evidence.json",
+    "latestVerdict": "REJECT_V2_RIGHT_EAR_AND_PROVENANCE",
+    "metrics": { "exactOutsideWindowDifferencePixels": 0, "maskOutsideWindowPixels": 0, "maskUnionMismatchPixels": 0, "candidateDiffPixels": 11129, "candidateDiffComponents4Connected": 42, "candidateDiffDetachedComponentCount": 41, "replacementUnionPixels": 12589, "replacementUnionComponents4Connected": 1, "replacementUnionHolePixels": 0, "innerBoundaryRing2MismatchPixels": 740, "innerBoundaryRing4MismatchPixels": 1443, "innerBoundaryRing2NonIntentionalMismatchPixels": 0, "innerBoundaryRing4NonIntentionalMismatchPixels": 0, "occlusionMaskDeclared": true, "naturalEarPixelsOutsidePreviousZone": 385, "naturalEarOpaquePixelsOutsidePreviousZone": 270, "leftEarRoiUnchangedOpaquePixels": 0, "rightEarRoiUnchangedOpaquePixels": 15, "naturalEarCoverage": "FAIL_RIGHT_EAR", "v2AmendedExtensionOpaquePixels": 430, "lineageEvidencePass": false },
+    "v2SourcePrep": {
+      "source": "C:/Users/kochu/.codex/generated_images/01a03945-f681-7441-a121-c408b5c198d7/exec-5ef8b10b-0bb5-43bd-8759-d33b78e9b72e.png",
+      "sourceSha256": "9dc7f8202f89dfdda1a431615fbc65d0a032a049bcba9795870c8b34c0948853",
+      "target": "artifacts/head20-attempt6-per-cell/c01/v2/c01-v2-target-coordinate-locked.png",
+      "lineage": "artifacts/head20-attempt6-per-cell/c01/v2/c01-v2-lineage.json",
+      "acceptance": "REJECT: source union semantic topology passes, but measured right ear remains byte-identical at 15 opaque ROI pixels and generation provenance is pending."
+    },
+    "semanticPack": {
+      "mask": "artifacts/head20-attempt6-per-cell/c01/v2/c01-v2-replacement-union-mask.png",
+      "targetPatch": "artifacts/head20-attempt6-per-cell/c01/v2/c01-v2-target-patch.png",
+      "report": "artifacts/head20-attempt6-per-cell/c01/v2/c01-v2-semantic-pack-report.json",
+      "unionPixels": 12589,
+      "unionComponents4": 1,
+      "unionHolePixels": 0,
+      "exactCompositeMismatchPixels": 0,
+      "note": "candidate diff islands are diagnostic; semantic union topology passes, but target right-ear/provenance gates fail"
+    },
+    "tailProtection": {
+      "mask": "artifacts/head20-attempt6-per-cell/c01/v2/c01-tail-visible-pixels-mask.png",
+      "evidence": "artifacts/head20-attempt6-per-cell/c01/v2/c01-tail-protection-evidence.json",
+      "bounds": [114,74,129,101],
+      "pixels": 269,
+      "rightEarIntersectionPixels": 0,
+      "bodyIntersectionPixels": 0,
+      "verdict": "PASS_TIGHT_TAIL_MASK"
+    },
+    "blocker": "The new raw source was prepared without touching the old candidate. Semantic replacement union is 1 component/0 holes and exact composite mismatch is 0, but measured right-ear ROI [103,28,126,55] still has 15 unchanged opaque base pixels (left=0), and raw generation model/prompt/timestamp/seed provenance is pending. The unsafe broad x>=104 tail ROI is replaced by a tight pixel-level tail mask [114,74,129,101] (269 pixels) with zero ear/body intersections. Keep publish locked; source must cover the right ear and provide provenance before masking acceptance."
+  },
+  "c01RejectedRevision6AccessoryAnatomy": {
+    "status": "REVOKED_NOT_ACCESSORY_ONLY",
+    "revision": "r6",
+    "target": "artifacts/head20-attempt6-per-cell/c01/v2/revision-6/r6-target-coordinate-locked-160x160.png",
+    "mask": "artifacts/head20-attempt6-per-cell/c01/v2/revision-6/r6-helmet-mask-same-coordinate-160x160.png",
+    "layer": "artifacts/head20-attempt6-per-cell/c01/v2/revision-6/r6-helmet-layer-same-coordinate-160x160.png",
+    "acceptance": "artifacts/head20-attempt6-per-cell/c01/v2/revision-6/r6-independent-acceptance.json",
+    "critic": "artifacts/head20-attempt6-per-cell/c01/v2/revision-6/r6-final-visual-critic.json",
+    "metrics": {
+      "actualSilhouettePixels": 7855,
+      "components4Connected": 1,
+      "enclosedHoles": 0,
+      "protectedSupportIntersectionPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    "publish": false,
+    "reason": "Revoked after the new accessory-only review: r6 layer visibly contains copied cat eyes, nose/mouth and forehead star. Pixel-exact compositing is insufficient when the isolated layer contains pet anatomy. Retained only as rejected regression evidence; do not publish or reuse."
+  },
+  "c02RejectedRevision1AccessoryAnatomy": {
+    "status": "REVOKED_NOT_ACCESSORY_ONLY",
+    "revision": "r1",
+    "target": "artifacts/head20-attempt6-per-cell/c02/revision-1/c02-r1-target-coordinate-locked-160x160.png",
+    "mask": "artifacts/head20-attempt6-per-cell/c02/revision-1/c02-r1-helmet-mask-same-coordinate-160x160.png",
+    "layer": "artifacts/head20-attempt6-per-cell/c02/revision-1/c02-r1-helmet-layer-same-coordinate-160x160.png",
+    "acceptance": "artifacts/head20-attempt6-per-cell/c02/revision-1/c02-r1-independent-mask-composite-review.json",
+    "critic": "artifacts/head20-attempt6-per-cell/c02/revision-1/c02-r1-final-visual-critic.json",
+    "metrics": {
+      "actualSilhouettePixels": 7286,
+      "components4Connected": 1,
+      "enclosedHoles": 0,
+      "protectedSupportIntersectionPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    "publish": false,
+    "reason": "Revoked after the new accessory-only review: r1 layer visibly contains copied cat eyes, nose/mouth and forehead star. Retained only as rejected regression evidence; do not publish or reuse."
+  },
+  "c03FormalRootCauseReview": {
+    "status": "IN_PROGRESS_BEFORE_R7",
+    "trigger": "c03 r1-r3 visual rejects for animal-anatomy contamination; r4 target-local color pre-gate reject; r5 raw preflight reject; r6 visual reject for a rectilinear right-cup protrusion despite color pass",
+    "confirmedRootCause": "The prior target-local gate classified color only. It could reject fur contamination but could not prove the right cup's silhouette was curved and helmet-like; r6 consequently passed color but rendered a brown/rose 19px-wide rectangular protrusion at x113..131,y79..90.",
+    "qualityThreshold": "UNCHANGED",
+    "strategyChange": "Require both color-material evidence and mask-contour geometry evidence before c03 r7 target/layer/mask formation. The geometric gate must reject block-like full-width run lengths/straight protrusions and accept only a rounded cup contour.",
+    "currentCell": "c03",
+    "nextAllowedAction": "Create c03 r7 only after the independent geometry pre-gate passes against a newly generated or independently usable raw full-dressed source.",
+    "publish": false
+  },
+  "accessoryOnlyRegression": {
+    "status": "ENFORCED_FROM_C03_R9_FORWARD_AND_RETROACTIVELY_APPLIED",
+    "trigger": "Direct inspection and an independent c03 anatomy audit found copied cat face pixels in the supposedly isolated helmet layer.",
+    "rejectedPackages": [
+      "c01 revision-6",
+      "c02 revision-1",
+      "c03 revision-9 pre-gate candidate"
+    ],
+    "newHardGate": "At alpha >=192, isolated accessory layers may not contain copied pet eyes, pupils, nose, mouth, forehead mark or fur. A low-alpha visor tint/reflection is permitted only when it does not bake pet anatomy.",
+    "evidence": "artifacts/head20-attempt6-per-cell/c03/revision-9/c03-r9-independent-accessory-only-anatomy-review.json",
+    "publish": false
+  },
+  "c03Revision9AccessoryOnlyFinal": {
+    "status": "REJECT_NOT_PUBLISHABLE",
+    "target": "artifacts/head20-attempt6-per-cell/c03/revision-9/accessory-only-final/c03-r9-body-preserving-complete-dressed-target-160x160.png",
+    "independentAudit": "artifacts/head20-attempt6-per-cell/c03/revision-9/accessory-only-final/c03-r9-independent-accessory-only-final-review.json",
+    "visualCritic": "artifacts/head20-attempt6-per-cell/c03/revision-9/accessory-only-final/c03-r9-accessory-only-final-visual-critic.json",
+    "mechanicallyTrueButInsufficient": ["stored target/composite mismatch = 0", "outside-silhouette drift = 0", "silhouette = one component / zero holes"],
+    "hardFailures": ["independent reconstruction mismatch = 1552", "target/composite transparent RGB residue = 1552", "natural ears remain visible", "layer includes fur/face-like content"],
+    "nextRevisionContract": "Use the r9 creative reference and only pure hardware/tint reconstruction. Every pixel in measured natural-ear masks requires hardware alpha >=192. An inner eye/face guard must remain free of opaque hardware; no orange/cream/pink fur-like material is permitted anywhere in the isolated layer.",
+    "publish": false
+  },
+  "history": [
+    { "attempt": 1, "id": "head-20-attachment-baseline", "verdict": "REJECT", "reason": "5-19 disconnected mask components and body differences were not semantically separated" },
+    { "attempt": 2, "id": "head-20-bridge-review", "verdict": "REJECT", "reason": "bridge prototype left 1-8 unresolved components per cell; no solver pass" },
+    { "attempt": 3, "id": "head-20-body-drift-gate", "verdict": "REJECT", "reason": "80369 target/base differences outside replacement zones" },
+    { "attempt": 4, "id": "head-20-body-locked-diagnostic", "verdict": "REJECT", "reason": "diagnostic-only lock left 1642 holes, 0 connected cells, 36792 unexpected unsolvable pixels" },
+    { "attempt": 5, "id": "head-20-full-redraw-source-v5", "verdict": "REJECT", "reason": "source-prep normalized 1402x1122 original-based visual to 800x640 RGBA and locked base outside windows, but independent critic rejected 20/20 boundary seams: aggregate edge jump 866,787, 1,828 excess pairs >=48, worst c14/c15/c19/c20/c1; detached components c8/c9/c12/c14/c15/c18/c19; visible square seams/exposed ears" },
+    { "attempt": 6, "id": "head-20-per-cell-targeted-redraw-v6", "verdict": "IN_PROGRESS", "reason": "formal five-reject review selected per-cell targeted inpainting with boundary continuity gate; masking/compositing remain locked" }
+  ]
+}

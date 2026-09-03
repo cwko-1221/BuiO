@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "category": "neck",
+  "wearableId": "neck-10",
+  "description": "Neck wearable contract: every rear-view cell (atlas row 2) is empty; all other cells stay at the original 800x640 coordinates and must recompose exactly.",
+  "atlas": {
+    "width": 800,
+    "height": 640,
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "columns": 5,
+    "rows": 4
+  },
+  "topology": {
+    "fillEnclosedHoles": false,
+    "expectedComponents4ConnectedPerCell": 1,
+    "expectedEnclosedTransparentComponentsPerCell": 0,
+    "emptyCells": [
+      { "row": 2, "column": 0, "semantic": "neck-not-visible-from-back" },
+      { "row": 2, "column": 1, "semantic": "neck-not-visible-from-back" },
+      { "row": 2, "column": 2, "semantic": "neck-not-visible-from-back" },
+      { "row": 2, "column": 3, "semantic": "neck-not-visible-from-back" },
+      { "row": 2, "column": 4, "semantic": "neck-not-visible-from-back" }
+    ]
+  },
+  "solve": {
+    "maximumErasePixels": 0,
+    "unexpectedUnsolvablePixels": 0,
+    "exactRgbaMismatchPixels": 0
+  },
+  "publish": {
+    "wearableId": "neck-10",
+    "slot": "neck",
+    "execute": false
+  }
+}

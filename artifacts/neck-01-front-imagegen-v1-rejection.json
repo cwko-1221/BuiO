@@ -1,0 +1,15 @@
+{
+  "candidate": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/neck-01-front-strip-imagegen-v1-raw.png",
+  "petId": "starpatch-cat",
+  "stage": 1,
+  "wearableId": "neck-01",
+  "directionBatch": "front",
+  "verdict": "REJECT_BEFORE_MASKING",
+  "reasons": [
+    "ImageGen output is 1774x887 instead of the required 800x160 five-cell strip.",
+    "PNG has no alpha channel; checkerboard transparency was baked into the pixels.",
+    "Generated pet scale and body pixels drift from the authoritative base atlas.",
+    "Using crop, resize, translation or background cleanup would violate the zero-transform handoff and hide source drift."
+  ],
+  "nextAction": "discard candidate and regenerate an authoritative direction strip; do not mask or publish"
+}

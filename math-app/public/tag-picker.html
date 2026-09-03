@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>選擇題型 ✦ 杯澳四則特訓</title>
+    <link rel="stylesheet" href="/math-app/css/style.css">
+    <style>
+        body { min-height: 100vh; }
+        .picker-wrap { max-width: 960px; margin: 0 auto; padding: 24px 20px 60px; }
+        .picker-topbar { display: flex; align-items: center; gap: 12px; padding: 14px 0 24px; }
+        .picker-topbar h1 { margin: 0; font-size: 1.15rem; flex: 1; }
+        .picker-topbar .btn-back { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary); padding: 8px 14px; border-radius: 10px; cursor: pointer;
+            font-size: 0.9rem; text-decoration: none; }
+
+        .picker-hero { padding: 22px 24px; border-radius: 18px;
+            background: linear-gradient(135deg, rgba(56,189,248,0.16), rgba(139,92,246,0.10));
+            border: 1px solid rgba(56,189,248,0.25); margin-bottom: 20px; }
+        .picker-hero h2 { margin: 0 0 4px; font-size: 1.3rem; }
+        .picker-hero p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
+
+        .cat-section { margin-top: 22px; }
+        .cat-heading { margin: 0 0 10px; font-size: 1rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0.02em; }
+        .tag-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+        .tag-btn { padding: 14px 16px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04); color: inherit; text-align: left; font-size: 0.9rem;
+            transition: transform 0.1s, border-color 0.2s, background 0.2s; line-height: 1.4;
+            display: flex; flex-direction: column; gap: 4px; }
+        .tag-btn:hover { transform: translateY(-1px); border-color: rgba(139,92,246,0.5);
+            background: rgba(139,92,246,0.12); }
+        .tag-btn .cat { font-size: 0.75rem; color: var(--text-muted); }
+
+        .picker-msg { padding: 40px 16px; text-align: center; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="picker-wrap">
+        <header class="picker-topbar">
+            <a class="btn-back" href="/math">← 返回</a>
+            <h1>🎯 選擇題型練習</h1>
+        </header>
+
+        <section class="picker-hero">
+            <h2>選一個題型開始練習</h2>
+            <p>系統會生成 10 條該題型的題目，答完會納入你的統計。</p>
+        </section>
+
+        <div id="content"><p class="picker-msg">載入中…</p></div>
+    </div>
+
+    <script>
+    (async () => {
+        const content = document.getElementById('content');
+        try {
+            const meRes = await fetch('/api/auth/me', { credentials: 'include' });
+            const meData = await meRes.json();
+            if (!meData.success) { location.href = '/'; return; }
+
+            const stRes = await fetch('/api/quiz/today-status', { credentials: 'include' });
+            const st = await stRes.json();
+            if (!st.done) {
+                content.innerHTML =
+                    `<div class="picker-msg">🔒 需先完成今天的隨機練習（${st.todayCount}/${st.need}）。<br><br>`
+                    + `<a class="btn-back" href="/math">← 回主頁完成隨機練習</a></div>`;
+                return;
+            }
+
+            const tagRes = await fetch('/api/quiz/grade-tags', { credentials: 'include' });
+            const tagData = await tagRes.json();
+            if (!tagData.success) throw new Error('無法載入題型清單');
+
+            const byCategory = new Map();
+            for (const t of tagData.tags) {
+                const cat = t.category || '其他';
+                if (!byCategory.has(cat)) byCategory.set(cat, []);
+                byCategory.get(cat).push(t);
+            }
+            const catOrder = ['加法', '減法', '乘法', '除法', '混合', '其他'];
+            const cats = [...byCategory.keys()].sort((a, b) => {
+                const ai = catOrder.indexOf(a), bi = catOrder.indexOf(b);
+                return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+            });
+
+            content.innerHTML = '';
+            for (const cat of cats) {
+                const section = document.createElement('div');
+                section.className = 'cat-section';
+                const list = byCategory.get(cat);
+                let inner = `<h3 class="cat-heading">${cat}（${list.length}）</h3><div class="tag-grid">`;
+                for (const t of list) {
+                    inner += `<a class="tag-btn" href="/quiz.html?tag=${encodeURIComponent(t.tag)}">`
+                        + `<span>${escapeHtml(t.tagName)}</span>`
+                        + `<span class="cat">${escapeHtml(cat)}</span></a>`;
+                }
+                inner += '</div>';
+                section.innerHTML = inner;
+                content.appendChild(section);
+            }
+        } catch (e) {
+            content.innerHTML = `<div class="picker-msg">載入失敗：${e.message}</div>`;
+        }
+    })();
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c =>
+            ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    </script>
+</body>
+</html>

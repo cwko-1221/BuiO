@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "cell": "c03",
+  "revision": "r1",
+  "verdict": "PASS_MECHANICAL_PENDING_INDEPENDENT_CRITIC",
+  "inputs": {
+    "base": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\c03-base-original-160x160.png",
+      "sha256": "d6603d155cc87d4ea652bd45a4bceb2a1fb414ad5c8ba6d1c81c4da037b8e6c0"
+    },
+    "tail": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-1\\c03-tail-visible-pixels-mask.png",
+      "sha256": "791c5b1d2cbf17e3494e38db40d61e0b7acb42e1585dc28c4fbaf5076a0bd33d"
+    }
+  },
+  "outputs": {
+    "target": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-1\\c03-r1-target-coordinate-locked-160x160.png",
+      "sha256": "5736742f716457ec5ec75a784640102e941a0d29b37791685007b079119fe122"
+    },
+    "layer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-1\\c03-r1-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "d24b153cccd5fe7cb34490414e6c27a5d09bb4cb06150aebb8c5fa6c6385d470"
+    },
+    "mask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-1\\c03-r1-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "ffb765b1208a0132ea7fa8cf15581f5050a907f063c3464adb24cfa3ff9a8ac5"
+    }
+  },
+  "metrics": {
+    "maskPixels": 6160,
+    "components4Connected": 1,
+    "enclosedHoles": 0,
+    "targetOutsideAllowedBaseDiffPixels": 0,
+    "layerMaskSupportMismatchPixels": 0,
+    "tailIntersectionPixels": 0,
+    "bodyChestLegPawIntersectionPixels": 0,
+    "zeroTransformSourceOverExactTargetMismatchPixels": 0
+  },
+  "scope": "in-memory zero-transform audit only; no composite or runtime asset written",
+  "publishable": false
+}

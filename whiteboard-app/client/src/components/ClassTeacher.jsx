@@ -1,0 +1,642 @@
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { QRCodeSVG } from 'qrcode.react';
+import { io } from 'socket.io-client';
+import styles from './ClassTeacher.module.css';
+
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
+const STUDENTS_PER_PAGE = 12;
+const OFFSCREEN_WIDTH = 800;
+const OFFSCREEN_HEIGHT = 600;
+
+export default function ClassTeacher() {
+    const [searchParams] = useSearchParams();
+    const roomId = searchParams.get('room');
+
+    const socketRef = useRef(null);
+    const fileInputRef = useRef(null);
+
+    // students: [{ socketId, name }]
+    const [students, setStudents] = useState([]);
+    const [page, setPage] = useState(0);
+    const [zoomedStudent, setZoomedStudent] = useState(null);
+    const [showLargeQR, setShowLargeQR] = useState(false);
+    const [uploadedImage, setUploadedImage] = useState(null); // base64 string
+    const [uploading, setUploading] = useState(false);
+    const [locked, setLocked] = useState(false);
+
+    // Teacher drawing state
+    const [teacherActiveTool, setTeacherActiveTool] = useState('pen');
+    const isTeacherDrawing = useRef(false);
+    const teacherLastPos = useRef({ normX: 0, normY: 0 });
+    const teacherSyncVersion = useRef(0);
+
+    // Special offscreen canvas for the Teacher Board
+    const teacherOffscreenRef = useRef(null);
+
+    // Offscreen canvases
+    const offscreenCanvasesRef = useRef(new Map());
+    const drawStateRef = useRef(new Map());
+    const gridCanvasRefs = useRef(new Map());
+    const zoomCanvasRef = useRef(null);
+    const animFrameRef = useRef(null);
+    const bgImageRef = useRef(null); // HTMLImageElement for the background
+
+    const getOrCreateOffscreen = useCallback((studentId) => {
+        if (!offscreenCanvasesRef.current.has(studentId)) {
+            const canvas = document.createElement('canvas');
+            canvas.width = OFFSCREEN_WIDTH;
+            canvas.height = OFFSCREEN_HEIGHT;
+            const ctx = canvas.getContext('2d');
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            // Canvas is transparent — strokes only, bg composited separately
+            offscreenCanvasesRef.current.set(studentId, { canvas, ctx });
+        }
+        return offscreenCanvasesRef.current.get(studentId);
+    }, []);
+
+    useEffect(() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1200;
+        canvas.height = 900;
+        const ctx = canvas.getContext('2d');
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        teacherOffscreenRef.current = { canvas, ctx };
+    }, []);
+
+    // End the class on tab close so the portal flips back to 開啟白板課堂
+    // immediately instead of waiting for the WebSocket ping timeout.
+    useEffect(() => {
+        if (!roomId) return;
+        const end = () => {
+            try {
+                const blob = new Blob([JSON.stringify({ roomId })], { type: 'application/json' });
+                navigator.sendBeacon('/api/whiteboard/sessions/end', blob);
+            } catch (e) { /* ignore */ }
+        };
+        window.addEventListener('pagehide', end);
+        window.addEventListener('beforeunload', end);
+        return () => {
+            window.removeEventListener('pagehide', end);
+            window.removeEventListener('beforeunload', end);
+        };
+    }, [roomId]);
+
+    // Socket setup
+    useEffect(() => {
+        if (!roomId) return;
+
+        socketRef.current = io(SERVER_URL);
+
+        socketRef.current.on('connect', () => {
+            socketRef.current.emit('join-room', { roomId, name: 'Teacher', isTeacher: true, roomType: 'class' });
+        });
+
+        socketRef.current.on('student-list', (list) => {
+            setStudents(list);
+            const activeIds = new Set(list.map(s => s.socketId));
+            for (const id of offscreenCanvasesRef.current.keys()) {
+                if (!activeIds.has(id)) {
+                    offscreenCanvasesRef.current.delete(id);
+                    drawStateRef.current.delete(id);
+                }
+            }
+        });
+
+        socketRef.current.on('draw', (data) => {
+            const { studentId, x, y, state, color, size, isEraser } = data;
+            if (!studentId) return;
+
+            const { ctx } = getOrCreateOffscreen(studentId);
+            const localX = x * OFFSCREEN_WIDTH;
+            const localY = y * OFFSCREEN_HEIGHT;
+
+            if (state === 'start') {
+                ctx.beginPath();
+                ctx.moveTo(localX, localY);
+                drawStateRef.current.set(studentId, { drawing: true });
+            } else if (state === 'move') {
+                if (isEraser) {
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.lineWidth = size * 2;
+                } else {
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = size;
+                }
+                ctx.lineTo(localX, localY);
+                ctx.stroke();
+            } else if (state === 'end') {
+                drawStateRef.current.set(studentId, { drawing: false });
+            }
+        });
+
+        socketRef.current.on('student-clear', ({ studentId }) => {
+            if (offscreenCanvasesRef.current.has(studentId)) {
+                const { ctx } = offscreenCanvasesRef.current.get(studentId);
+                ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                // Only clear strokes — bg image is composited separately in render loop
+            }
+        });
+
+        socketRef.current.on('clear-board', () => {
+            for (const [, { ctx }] of offscreenCanvasesRef.current) {
+                ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                // Only clear strokes — bg image is composited separately in render loop
+            }
+        });
+
+        socketRef.current.on('image-uploaded', () => {
+            setUploading(false);
+        });
+
+        return () => {
+            if (socketRef.current) socketRef.current.disconnect();
+        };
+    }, [roomId, getOrCreateOffscreen]);
+
+    // Animation loop
+    useEffect(() => {
+        const render = () => {
+            for (const [studentId, canvasEl] of gridCanvasRefs.current) {
+                if (!canvasEl) continue;
+                const offscreen = offscreenCanvasesRef.current.get(studentId);
+                if (!offscreen) continue;
+
+                const ctx = canvasEl.getContext('2d');
+                const rect = canvasEl.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+
+                if (canvasEl.width !== Math.round(rect.width * dpr) || canvasEl.height !== Math.round(rect.height * dpr)) {
+                    canvasEl.width = Math.round(rect.width * dpr);
+                    canvasEl.height = Math.round(rect.height * dpr);
+                }
+
+                ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+                // Draw background image first
+                if (bgImageRef.current) {
+                    ctx.drawImage(bgImageRef.current, 0, 0, canvasEl.width, canvasEl.height);
+                } else {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
+                }
+                // Draw student strokes on top
+                ctx.drawImage(offscreen.canvas, 0, 0, canvasEl.width, canvasEl.height);
+            }
+
+            // Render zoom canvas
+            if (zoomedStudent && zoomCanvasRef.current) {
+                const offscreen = zoomedStudent === 'teacher' 
+                    ? teacherOffscreenRef.current 
+                    : offscreenCanvasesRef.current.get(zoomedStudent);
+                
+                if (offscreen) {
+                    const canvasEl = zoomCanvasRef.current;
+                    const ctx = canvasEl.getContext('2d');
+                    const rect = canvasEl.getBoundingClientRect();
+                    const dpr = window.devicePixelRatio || 1;
+
+                    if (canvasEl.width !== Math.round(rect.width * dpr) || canvasEl.height !== Math.round(rect.height * dpr)) {
+                        canvasEl.width = Math.round(rect.width * dpr);
+                        canvasEl.height = Math.round(rect.height * dpr);
+                    }
+
+                    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+                    // Draw background image first
+                    if (bgImageRef.current) {
+                        ctx.drawImage(bgImageRef.current, 0, 0, canvasEl.width, canvasEl.height);
+                    } else {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
+                    }
+                    // Draw student strokes on top
+                    ctx.drawImage(offscreen.canvas, 0, 0, canvasEl.width, canvasEl.height);
+                }
+            }
+
+            animFrameRef.current = requestAnimationFrame(render);
+        };
+
+        animFrameRef.current = requestAnimationFrame(render);
+        return () => {
+            if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+        };
+    }, [zoomedStudent]);
+
+    // Pagination
+    const totalPages = Math.max(1, Math.ceil(students.length / STUDENTS_PER_PAGE));
+    const visibleStudents = students.slice(page * STUDENTS_PER_PAGE, (page + 1) * STUDENTS_PER_PAGE);
+
+    useEffect(() => {
+        if (page >= totalPages) {
+            setPage(Math.max(0, totalPages - 1));
+        }
+    }, [page, totalPages]);
+
+    const clearAllBoards = () => {
+        if (socketRef.current) {
+            socketRef.current.emit('clear-board');
+        }
+    };
+
+    const toggleLock = () => {
+        if (socketRef.current) {
+            if (locked) {
+                socketRef.current.emit('unlock-board');
+            } else {
+                socketRef.current.emit('lock-board');
+            }
+            setLocked(!locked);
+        }
+    };
+
+    const emitTeacherDraw = useCallback((studentId, state, normX, normY) => {
+        if (studentId === 'teacher') return; // Don't emit network events for local teacher board
+        if (socketRef.current) {
+            socketRef.current.emit('teacher-draw', {
+                studentId,
+                x: normX,
+                y: normY,
+                state,
+                color: '#ef4444', // Red for teacher
+                size: teacherActiveTool === 'eraser' ? 10 : 3,
+                isEraser: teacherActiveTool === 'eraser'
+            });
+        }
+    }, [teacherActiveTool]);
+
+    // Pointer events provide smooth live feedback, while a lossless snapshot at
+    // the end of each erase gesture guarantees that differently sized student
+    // canvases finish with exactly the same pixels as the teacher's board.
+    const syncTeacherBoard = useCallback((studentId, offscreen) => {
+        if (studentId === 'teacher' || !offscreen?.canvas || !socketRef.current) return;
+
+        teacherSyncVersion.current += 1;
+        socketRef.current.emit('teacher-board-sync', {
+            studentId,
+            version: teacherSyncVersion.current,
+            imageData: offscreen.canvas.toDataURL('image/png')
+        });
+    }, []);
+
+    const getZoomNormCoords = (e) => {
+        const canvas = zoomCanvasRef.current;
+        const rect = canvas.getBoundingClientRect();
+        
+        const cssX = e.clientX - rect.left;
+        const cssY = e.clientY - rect.top;
+        
+        const offscreen = zoomedStudent === 'teacher' 
+            ? teacherOffscreenRef.current 
+            : offscreenCanvasesRef.current.get(zoomedStudent);
+            
+        if (!offscreen) return null;
+        
+        // ClassTeacher stretches the offscreen canvas to fit the zoom canvas
+        const normX = cssX / rect.width;
+        const normY = cssY / rect.height;
+        
+        return { normX, normY, offscreen };
+    };
+
+    const handleZoomPointerDown = (e) => {
+        if (!zoomedStudent) return;
+        if (e.cancelable) e.preventDefault();
+        
+        const coords = getZoomNormCoords(e);
+        if (!coords) return;
+        
+        isTeacherDrawing.current = true;
+        teacherLastPos.current = { normX: coords.normX, normY: coords.normY };
+        
+        const { offscreen, normX, normY } = coords;
+        const ctx = offscreen.ctx;
+        const pxX = normX * offscreen.canvas.width;
+        const pxY = normY * offscreen.canvas.height;
+        
+        ctx.beginPath();
+        if (teacherActiveTool === 'eraser') {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.lineWidth = 20;
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+        }
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.moveTo(pxX, pxY);
+        ctx.lineTo(pxX, pxY);
+        ctx.stroke();
+        
+        emitTeacherDraw(zoomedStudent, 'start', normX, normY);
+    };
+
+    const handleZoomPointerMove = (e) => {
+        if (!isTeacherDrawing.current || !zoomedStudent) return;
+        if (e.cancelable) e.preventDefault();
+        
+        const coords = getZoomNormCoords(e);
+        if (!coords) return;
+        const { offscreen, normX, normY } = coords;
+        
+        const ctx = offscreen.ctx;
+        const startX = teacherLastPos.current.normX * offscreen.canvas.width;
+        const startY = teacherLastPos.current.normY * offscreen.canvas.height;
+        const endX = normX * offscreen.canvas.width;
+        const endY = normY * offscreen.canvas.height;
+        
+        ctx.beginPath();
+        if (teacherActiveTool === 'eraser') {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.lineWidth = 20;
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+        }
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+        
+        teacherLastPos.current = { normX, normY };
+        emitTeacherDraw(zoomedStudent, 'move', normX, normY);
+    };
+
+    const handleZoomPointerUp = (e) => {
+        if (!isTeacherDrawing.current || !zoomedStudent) return;
+        if (e.cancelable) e.preventDefault();
+        
+        isTeacherDrawing.current = false;
+        
+        const coords = getZoomNormCoords(e);
+        if (coords) {
+            emitTeacherDraw(zoomedStudent, 'end', coords.normX, coords.normY);
+            if (teacherActiveTool === 'eraser') {
+                syncTeacherBoard(zoomedStudent, coords.offscreen);
+            }
+        }
+    };
+
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file.');
+            return;
+        }
+
+        setUploading(true);
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                // Compress image to JPG (70% quality)
+                const canvas = document.createElement('canvas');
+                canvas.width = tempImg.width;
+                canvas.height = tempImg.height;
+                const ctx = canvas.getContext('2d');
+                
+                // Fill background with white in case of transparent PNG
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(tempImg, 0, 0);
+
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                
+                setUploadedImage(compressedBase64);
+
+                // Create image element and cache it for the render loop
+                const img = new Image();
+                img.onload = () => {
+                    bgImageRef.current = img;
+                    // No need to repaint offscreen canvases — bg is composited in render loop
+                };
+                img.src = compressedBase64;
+
+                // Send to server
+                if (socketRef.current) {
+                    socketRef.current.emit('upload-image', compressedBase64);
+                }
+            };
+            tempImg.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        // Reset input so the same file can be re-selected
+        e.target.value = '';
+    };
+
+    const joinUrl = `${window.location.origin}/class-student?room=${roomId}`;
+
+    const zoomedStudentName = zoomedStudent === 'teacher' 
+        ? '👨‍🏫 Teacher Board' 
+        : (zoomedStudent ? (students.find(s => s.socketId === zoomedStudent)?.name || 'Unknown Student') : '');
+
+    return (
+        <div className={styles.container}>
+            {/* Header */}
+            <header className={styles.header}>
+                <div className={styles.headerLeft}>
+                    <h1>Class Module</h1>
+                    <div className={styles.roomBadge}>Room: {roomId}</div>
+                </div>
+
+                <div className={styles.headerCenter}>
+                    <span className={styles.studentCount}>
+                        {students.length} Student{students.length !== 1 ? 's' : ''} Connected
+                    </span>
+                </div>
+
+                <div className={styles.headerRight}>
+                    <button
+                        className={styles.teachingBtn}
+                        onClick={() => setZoomedStudent('teacher')}
+                    >
+                        👨‍🏫 Teaching
+                    </button>
+                    <button
+                        className={styles.uploadBtn}
+                        onClick={handleUploadClick}
+                        disabled={uploading}
+                    >
+                        {uploading ? 'Uploading...' : uploadedImage ? '📄 Change Image' : '📤 Upload Image'}
+                    </button>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={handleFileChange}
+                    />
+
+                    <button
+                        className={locked ? styles.unlockBtn : styles.lockBtn}
+                        onClick={toggleLock}
+                    >
+                        {locked ? '🔓 Unlock' : '🔒 Lock'}
+                    </button>
+
+                    <button className={styles.clearBtn} onClick={clearAllBoards}>
+                        Clear All
+                    </button>
+
+                    <div
+                        className={styles.qrContainer}
+                        onClick={() => setShowLargeQR(true)}
+                        title="Click to enlarge"
+                    >
+                        <div className={styles.qrLabel}>Scan to Join</div>
+                        <QRCodeSVG value={joinUrl} size={64} />
+                    </div>
+                </div>
+            </header>
+
+            {/* Main Grid Area */}
+            <main className={styles.gridArea}>
+                {students.length === 0 ? (
+                    <div className={styles.emptyState}>
+                        <div className={styles.emptyIcon}>{uploadedImage ? '📄' : '📤'}</div>
+                        <h2>{uploadedImage ? 'Image uploaded! Waiting for students...' : 'Upload an image to start'}</h2>
+                        <p>
+                            {uploadedImage
+                                ? 'Share the room code or QR code for students to join.'
+                                : 'Click "Upload Image" to set a worksheet, then share the room code.'}
+                        </p>
+                    </div>
+                ) : (
+                    <div className={styles.grid}>
+                        {visibleStudents.map((student) => (
+                            <div
+                                key={student.socketId}
+                                className={styles.studentTile}
+                                onClick={() => setZoomedStudent(student.socketId)}
+                            >
+                                <div className={styles.tileHeader}>
+                                    <span className={styles.dot}></span>
+                                    <span className={styles.tileName}>{student.name}</span>
+                                </div>
+                                <div className={styles.tileCanvas}>
+                                    <canvas
+                                        ref={(el) => {
+                                            if (el) {
+                                                gridCanvasRefs.current.set(student.socketId, el);
+                                                getOrCreateOffscreen(student.socketId);
+                                            } else {
+                                                gridCanvasRefs.current.delete(student.socketId);
+                                            }
+                                        }}
+                                        className={styles.miniCanvas}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </main>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className={styles.pagination}>
+                    <button
+                        className={styles.pageBtn}
+                        disabled={page === 0}
+                        onClick={() => setPage(p => p - 1)}
+                    >
+                        ← Previous
+                    </button>
+                    <span className={styles.pageIndicator}>
+                        Page {page + 1} of {totalPages}
+                    </span>
+                    <button
+                        className={styles.pageBtn}
+                        disabled={page >= totalPages - 1}
+                        onClick={() => setPage(p => p + 1)}
+                    >
+                        Next →
+                    </button>
+                </div>
+            )}
+
+            {/* Zoom Modal */}
+            {zoomedStudent && (
+                <div className={styles.zoomOverlay} onClick={() => setZoomedStudent(null)}>
+                    <div className={styles.zoomContent} onClick={e => e.stopPropagation()}>
+                        <div className={styles.zoomHeader}>
+                            <h2 className={styles.zoomTitle}>{zoomedStudentName}</h2>
+                            <div className={styles.zoomToolbar}>
+                                <button 
+                                    className={`${styles.zoomToolBtn} ${teacherActiveTool === 'pen' ? styles.zoomToolActive : ''}`}
+                                    onClick={() => setTeacherActiveTool('pen')}
+                                >Pen</button>
+                                <button 
+                                    className={`${styles.zoomToolBtn} ${teacherActiveTool === 'eraser' ? styles.zoomToolActive : ''}`}
+                                    onClick={() => setTeacherActiveTool('eraser')}
+                                >Eraser</button>
+                                {zoomedStudent === 'teacher' && (
+                                    <button 
+                                        className={styles.zoomToolBtn}
+                                        onClick={() => {
+                                            const offscreen = teacherOffscreenRef.current;
+                                            if (offscreen) {
+                                                const { ctx, canvas } = offscreen;
+                                                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                                ctx.fillStyle = '#ffffff';
+                                                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                            }
+                                        }}
+                                    >Clear</button>
+                                )}
+                            </div>
+                            <button className={styles.closeZoomBtn} onClick={() => setZoomedStudent(null)}>×</button>
+                        </div>
+                        <div className={styles.zoomCanvasWrapper}>
+                            <canvas 
+                                ref={zoomCanvasRef} 
+                                className={styles.zoomCanvas} 
+                                onPointerDown={handleZoomPointerDown}
+                                onPointerMove={handleZoomPointerMove}
+                                onPointerUp={handleZoomPointerUp}
+                                onPointerCancel={handleZoomPointerUp}
+                                onPointerLeave={handleZoomPointerUp}
+                                style={{ touchAction: 'none' }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Large QR Code Overlay */}
+            {showLargeQR && (
+                <div className={styles.qrModalOverlay} onClick={() => setShowLargeQR(false)}>
+                    <div className={styles.qrModalContent} onClick={e => e.stopPropagation()}>
+                        <button className={styles.closeQRBtn} onClick={() => setShowLargeQR(false)}>×</button>
+                        <h2 className={styles.qrModalTitle}>Scan to Join Class Module</h2>
+                        <div className={styles.largeQRCodeWrapper}>
+                            <QRCodeSVG value={joinUrl} size={300} />
+                        </div>
+                        <div className={styles.qrModalRoomCode}>
+                            Room Code: <strong>{roomId}</strong>
+                        </div>
+                        <p className={styles.qrModalInstructions}>
+                            Point your device camera here to instantly join the session
+                        </p>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}

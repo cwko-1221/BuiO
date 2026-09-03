@@ -1,0 +1,280 @@
+export const TOPICS = ['物質', '環境', '能量', '力與運動'];
+
+export const experiments = [
+  {
+    id: 'density-column', number: 1, topic: '物質', grades: '小三至小六', minutes: 10,
+    title: '密度彩虹塔', englishTitle: 'Density Tower', color: '#9b83ee', icon: 'density',
+    observe: {
+      title: '三種液體，一個量筒',
+      caption: '影片裡三種液體先後倒進同一個量筒，全程沒有攪拌。',
+      notice: ['三種液體有沒有混成一種顏色？', '哪一種留在最底？', '放進去的物件停在哪一層？'],
+      wonder: '為甚麼它們排成一層一層，而不是混在一起？',
+    },
+    question: '液體分層是因為顏色、質量，還是密度不同？',
+    objective: '比較液體和固體的密度，以相對密度預測分層與浮沉。',
+    apparatus: ['密度柱', '塑膠量杯', '蜂蜜', '水', '油', '軟木與玻璃珠'],
+    curriculum: { items: '#19、#27', codes: ['3MA2', '6MA1', '6MA2'] },
+    safety: '模擬液體不可飲用；真實活動若有灑漏要立即通知老師並清理。',
+    modelNote: '液體顏色為方便辨認而加上；顏色本身不會決定密度。蜂蜜與水可逐漸混合，本模型只呈現輕放後的短時間觀察。',
+    prediction: {
+      prompt: '把相同體積的蜂蜜、水和油放在一起，哪一種會在最底？',
+      options: ['蜂蜜', '水', '油'],
+      answer: 0,
+    },
+    steps: [
+      { verb: '倒入', title: '先加入蜂蜜', instruction: '把蜂蜜瓶拖到量筒上方。', cue: '拖動金色蜂蜜瓶', hint: '蜂蜜在三種液體中密度最大。', action: { type: 'pour', subject: 'honey', target: 'column' }, observation: '蜂蜜形成最底的一層。' },
+      { verb: '倒入', title: '沿杯壁加入水', instruction: '把藍色水瓶拖到量筒上方。', cue: '拖動水瓶並慢慢倒入', hint: '輕輕倒入可減少暫時混合。', action: { type: 'pour', subject: 'water', target: 'column' }, observation: '水停在蜂蜜上方，形成第二層。' },
+      { verb: '倒入', title: '加入食用油', instruction: '把黃色油瓶拖到量筒上方。', cue: '拖動油瓶到量筒', hint: '油的密度比水小。', action: { type: 'pour', subject: 'oil', target: 'column' }, observation: '油浮在水面，三層液體沒有按顏色排列。' },
+      { verb: '投入', title: '測試軟木', instruction: '把軟木拖進密度柱。', cue: '拖動輕巧的軟木', hint: '比較軟木與最上層油的密度。', action: { type: 'place', subject: 'cork', target: 'column' }, observation: '軟木浮在油面，代表它的平均密度比油還小。' },
+      { verb: '投入', title: '測試玻璃珠', instruction: '把玻璃珠拖進密度柱。', cue: '拖動閃亮玻璃珠', hint: '玻璃珠的密度比三種液體都大。', action: { type: 'place', subject: 'bead', target: 'column' }, observation: '玻璃珠穿過所有液層並沉到底部。' },
+    ],
+    analysis: {
+      evidence: '液體由下至上是蜂蜜、水、油；軟木停在油面，玻璃珠沉到底部。顏色並沒有決定次序。',
+      reflection: {
+        prompt: '如果改為先倒油、最後倒蜂蜜，靜置後的次序會怎樣？',
+        options: ['一樣是蜂蜜在最底', '油會留在最底', '三層會完全混合'],
+        answer: 0,
+        because: '決定次序的是密度，不是倒入的先後。蜂蜜密度最大，靜置後仍然回到最底。',
+      },
+    },
+    result: {
+      title: '你建成了短時間分層的密度塔！',
+      observation: '液體由下至上是蜂蜜、水、油；軟木浮面，玻璃珠沉底。',
+      explanation: '密度是單位體積內的質量。液體的浮力向上作用；物件相對周圍液體的平均密度影響浮沉。蜂蜜與水可隨時間混合，所以分層不是永久不變。',
+    },
+  },
+  {
+    id: 'water-filter', number: 2, topic: '環境', grades: '小三', minutes: 11,
+    title: '清澈不等於安全', englishTitle: 'Filter Challenge', color: '#58bce5', icon: 'filter',
+    observe: {
+      title: '一杯泥水的去向',
+      caption: '影片裡一杯泥水倒進濾斗，慢慢流進下面的收集杯。',
+      notice: ['泥水流過濾層後顏色有甚麼變化？', '甚麼東西留在濾層上面？', '流出來的水是否就等於可以飲用？'],
+      wonder: '看起來清澈的水，是不是就代表安全？',
+    },
+    question: '濾過後看起來清澈的水，可以直接飲用嗎？',
+    objective: '按粒子大小設計濾水層，分辨清澈度與飲用安全。',
+    apparatus: ['濾斗與支架', '棉層', '細沙', '碎石', '泥水', '濁度檢測器'],
+    curriculum: { items: '#23、#56', codes: ['3MA4', '3EA2'] },
+    safety: '所有水樣都標示「不可飲用」；實物活動也不可品嘗濾過水。',
+    modelNote: '濁度只反映懸浮粒子，不能證明沒有溶解物或微生物。',
+    prediction: {
+      prompt: '泥水經砂石和棉層過濾後看起來清澈，最安全的下一步是甚麼？',
+      options: ['直接飲用', '送往合適消毒及水質檢測', '只靠氣味判斷'],
+      answer: 1,
+    },
+    steps: [
+      { verb: '加入', title: '鋪上棉層', instruction: '把棉花拖到濾斗最底。', cue: '拖動白色棉層', hint: '棉層承托上面的濾材並截留幼細顆粒。', action: { type: 'place', subject: 'cotton', target: 'filter' }, observation: '棉層貼在出口上方。' },
+      { verb: '加入', title: '加入細沙', instruction: '把細沙杯拖到濾斗。', cue: '拖動淺黃色細沙', hint: '細沙能截留較小的懸浮粒子。', action: { type: 'pour', subject: 'sand', target: 'filter' }, observation: '細沙形成緊密的中層。' },
+      { verb: '加入', title: '加入碎石', instruction: '把碎石杯拖到濾斗。', cue: '拖動灰色碎石', hint: '較粗的濾材放在上方先攔截大顆粒。', action: { type: 'pour', subject: 'gravel', target: 'filter' }, observation: '碎石形成最上層，濾水器組裝完成。' },
+      { verb: '過濾', title: '倒入泥水', instruction: '把泥水杯拖到濾斗上方。', cue: '慢慢把泥水倒入', hint: '留意每一層截留甚麼粒子。', action: { type: 'pour', subject: 'muddy-water', target: 'filter' }, observation: '大顆粒留在碎石和沙層，收集杯中的水較清澈。' },
+      { verb: '檢測', title: '檢查濾過水', instruction: '把濁度探頭拖進收集杯。', cue: '拖動藍色探頭到水中', hint: '清澈度只是水質的其中一個指標。', action: { type: 'place', subject: 'sensor', target: 'filtered-water' }, observation: '本模型的濁度指示由高轉為低，但「微生物／溶解物未知」指示仍亮起。' },
+      { verb: '記錄', title: '記下濁度讀數', instruction: '看濁度計的面板，把讀數記進數據表。', cue: '讀出面板上的數值', hint: '面板會顯示「濁度：低 xx NTU」。', action: { type: 'record', subject: 'turbidity', label: '濾過水濁度', unit: 'NTU', options: ['約 30', '約 60', '約 90'], answer: 0 }, observation: '濁度讀數已記入數據表。' },
+    ],
+    analysis: {
+      evidence: '濾層截住大部分懸浮粒子，濁度讀數由高降到低；但「微生物／溶解物」指示仍然亮着「未知」。',
+      reflection: {
+        prompt: '濁度讀數很低，是否代表這杯水一定安全？',
+        options: ['是，清澈就代表安全', '不是，還要檢測微生物和溶解物', '只要沒有異味就安全'],
+        answer: 1,
+        because: '濁度只量度懸浮粒子。溶解物和微生物看不見也量不到，必須另外消毒和檢測才能判斷安全。',
+      },
+    },
+    result: {
+      title: '你完成了濾水，也保留了科學警覺！',
+      observation: '濾層除去大部分懸浮粒子，濁度明顯下降；溶解物和微生物風險仍未確定。',
+      explanation: '過濾主要按粒子大小分離懸浮物，不能保證移除所有微生物或溶解物。清澈水仍須合適消毒及檢測才可判斷安全。',
+    },
+  },
+  {
+    id: 'electric-crane', number: 3, topic: '能量', grades: '小四至小六', minutes: 14,
+    title: '電磁起重機', englishTitle: 'Circuit Crane', color: '#65a8ff', icon: 'circuit',
+    observe: {
+      title: '一段接不上的電路',
+      caption: '影片裡電池、開關、線圈和燈泡放在枱上，其中一個接點沒有接好。',
+      notice: ['燈泡有沒有亮？', '線圈旁邊的鐵夾有沒有動？', '溫度顯示是多少？'],
+      wonder: '要怎樣接，電流才會通過線圈，讓鐵芯吸起鐵夾？',
+    },
+    question: '怎樣接成閉合電路，並在不過熱下增強電磁鐵？',
+    objective: '建立閉合電路，觀察電流的熱效應和磁效應。',
+    apparatus: ['低壓電池', '開關', '燈泡', '絕緣線圈', '鐵芯', '溫度指示器'],
+    curriculum: { items: '#47', codes: ['4MB7', '4MB8', '6MB6', '6MB7'] },
+    safety: '只模擬低壓電池；不可接駁市電。短路或導線過熱時應立即斷電。',
+    modelNote: '移動光點和磁場線是教學疊加圖，並非肉眼可見的電子或磁場。',
+    prediction: {
+      prompt: '電池、燈泡和導線只差一個接點未接上，燈泡會怎樣？',
+      options: ['不會亮', '一樣亮', '只亮一半'],
+      answer: 0,
+    },
+    steps: [
+      { verb: '組裝', title: '把線圈套上鐵芯', instruction: '把絕緣線圈拖到鐵芯上。', cue: '拖動橙色線圈', hint: '線圈要接入完整回路才會產生磁效應。', action: { type: 'place', subject: 'coil', target: 'iron-core' }, observation: '線圈已套上鐵芯，但尚未接線或通電。' },
+      { verb: '連接', title: '由電池接到開關', instruction: '從電池正極拖出電線，連接開關左端。', cue: '由紅色正極連到開關', hint: '端口會以形狀和光圈同時提示。', action: { type: 'connect', subject: 'battery-positive', target: 'switch-in' }, observation: '第一段導電路徑完成，但電路仍未閉合。' },
+      { verb: '連接', title: '把開關接到線圈', instruction: '把開關右端連到線圈輸入端。', cue: '由開關連到橙色線圈端口', hint: '電流必須真正通過線圈。', action: { type: 'connect', subject: 'switch-out', target: 'coil-in' }, observation: '開關已接到線圈的一端，仍要完成回路。' },
+      { verb: '連接', title: '把線圈接到燈泡', instruction: '從線圈輸出端連到燈泡輸入端。', cue: '由線圈連到燈泡', hint: '燈泡可提示回路是否通電。', action: { type: 'connect', subject: 'coil-out', target: 'bulb-in' }, observation: '線圈與燈泡已串聯，還差回到電池的一段。' },
+      { verb: '連接', title: '完成回路', instruction: '把燈泡另一端連回電池負極。', cue: '由燈泡連到藍色負極', hint: '完整路徑要回到電池。', action: { type: 'connect', subject: 'bulb-out', target: 'battery-negative' }, observation: '回路完整，但開關仍然斷開，所以線圈未通電。' },
+      { verb: '接通', title: '閉合開關', instruction: '按下開關，觀察燈泡、線圈、鐵夾和溫度。', cue: '點按綠色開關', hint: '閉合後電流沿完整路徑通過線圈，鐵芯即時磁化。', action: { type: 'tap', subject: 'switch' }, observation: '燈泡亮起，線圈通電並磁化鐵芯，隨即吸起 6 個鐵夾；模型溫度由 24°C 升至 31°C。' },
+      { verb: '記錄', title: '記下通電後的溫度', instruction: '看電路顯示屏，把線圈溫度記進數據表。', cue: '讀出顯示屏上的溫度', hint: '通電前是 24 °C，現在呢？', action: { type: 'record', subject: 'coil-temperature', label: '通電後線圈溫度', unit: '°C', options: ['24', '31', '45'], answer: 1 }, observation: '溫度讀數已記入數據表。' },
+      { verb: '斷電', title: '安全關閉回路', instruction: '再次按下開關，觀察斷電後的鐵夾。', cue: '點按綠色開關', hint: '沒有電流時，電磁效應會大幅減弱。', action: { type: 'tap', subject: 'switch' }, observation: '燈泡熄滅，線圈斷電，鐵夾落回托盤。' },
+    ],
+    analysis: {
+      evidence: '回路接通後燈泡亮起，線圈同時磁化鐵芯吸起 6 個鐵夾，模型溫度由 24 °C 升到 31 °C；斷電後鐵夾全部落回托盤。',
+      reflection: {
+        prompt: '如果開關一直閉合不斷電，最可能出現甚麼情況？',
+        options: ['磁力永遠保持不變', '線圈溫度繼續上升', '電池電壓會愈來愈高'],
+        answer: 1,
+        because: '電流通過有電阻的線圈會持續發熱。真實電磁鐵要顧及散熱和安全溫度，不能長時間通電。',
+      },
+    },
+    result: {
+      title: '你的電磁起重機成功運作！',
+      observation: '閉合回路令燈泡亮起；通電線圈磁化鐵芯並提起 6 個鐵夾，斷電後磁力大幅消失。',
+      explanation: '電流需要完整導電路徑。電流會產生磁場，也會因電阻造成發熱；增強電磁鐵要兼顧圈數、電流和安全溫度。',
+    },
+  },
+  {
+    id: 'light-reflection', number: 4, topic: '能量', grades: '小四至小六', minutes: 12,
+    title: '光的反射', englishTitle: 'Bounce the Beam', color: '#f2c85b', icon: 'circuit',
+    observe: {
+      title: '同一支電筒，三種表面',
+      caption: '影片裡電筒斜射到樣本架上，樣本換成鏡子、摺皺鋁箔和黑卡紙。',
+      notice: ['反射的光是一條，還是散開很多條？', '換了物料後，反射光有甚麼改變？', '哪一種表面幾乎看不到反射光？'],
+      wonder: '同一束光射到不同表面，為甚麼反射出來的樣子差這麼遠？',
+    },
+    question: '光射到不同表面，反射出來的光會有甚麼分別？',
+    objective: '比較規則反射與漫反射，並量度入射角與反射角的關係。',
+    apparatus: ['電筒', '樣本架', '鏡子', '鋁箔（摺皺）', '黑卡紙', '角度儀'],
+    curriculum: { items: '#41、#42', codes: ['4MB3', '4MB4', '6MB2'] },
+    safety: '不可用電筒或任何光源直射別人的眼睛；真實實驗亦不可用鏡子把陽光反射到人身上。',
+    modelNote: '光線是教學疊加圖。真實的光同時向很多方向散開，本模型只畫出幾條代表性的光線。',
+    prediction: {
+      prompt: '同一束光分別射到鏡子和摺皺鋁箔上，反射光會怎樣？',
+      options: ['兩者都只反射出一條光', '鏡子反射一條，摺皺鋁箔散開很多條', '兩者都完全不反射'],
+      answer: 1,
+    },
+    steps: [
+      { verb: '放置', title: '把鏡子放上樣本架', instruction: '把鏡子拖到樣本架的光圈上。', cue: '拖動鏡子到樣本架', hint: '鏡面要向上，光才會由上方射進來。', action: { type: 'place', subject: 'mirror', target: 'sample-holder' }, observation: '鏡子平放在樣本架上，鏡面朝上。' },
+      { verb: '照明', title: '開啟電筒', instruction: '點按電筒，讓光射到鏡面。', cue: '點按紅色電筒', hint: '留意反射光是一條還是很多條。', action: { type: 'tap', subject: 'torch' }, observation: '光射到鏡面後，反射成清晰的一條光，離開的方向與射入的方向對稱。' },
+      { verb: '調校', title: '把入射角調到 55°', instruction: '轉動電筒臂，把入射角調到 55°。', cue: '拖動電筒或使用滑桿', hint: '留意法線兩邊的角度。', action: { type: 'adjust', subject: 'light-angle', min: 52, max: 58, unit: '°', range: [15, 70], start: 45 }, observation: '入射角變大，反射光同時擺到另一邊，兩個角仍然對稱。' },
+      { verb: '記錄', title: '記下反射角', instruction: '看角度顯示，把反射角記進數據表。', cue: '讀出顯示屏上的反射角', hint: '入射角是 55°，反射角呢？', action: { type: 'record', subject: 'reflection-angle', label: '鏡面反射角', unit: '°', options: ['35', '55', '90'], answer: 1 }, observation: '反射角讀數已記入數據表。' },
+      { verb: '更換', title: '改用摺皺鋁箔', instruction: '把摺皺鋁箔拖到樣本架上。', cue: '拖動摺皺鋁箔', hint: '電筒角度保持不變，只換表面。', action: { type: 'place', subject: 'foil-crumpled', target: 'sample-holder' }, observation: '同一束光散成很多條射向不同方向，找不到單一的反射角。' },
+      { verb: '更換', title: '改用黑卡紙', instruction: '把黑卡紙拖到樣本架上。', cue: '拖動黑卡紙', hint: '光去了哪裏？', action: { type: 'place', subject: 'card', target: 'sample-holder' }, observation: '幾乎看不到反射光，大部分光被卡紙吸收。' },
+      { verb: '記錄', title: '記下最集中的表面', instruction: '三種表面之中，哪一種的反射光最集中？記進數據表。', cue: '選出反射光最集中的表面', hint: '回想每次換物料時反射光的樣子。', action: { type: 'record', subject: 'sharpest-surface', label: '反射光最集中的表面', unit: '', options: ['鏡子', '摺皺鋁箔', '黑卡紙'], answer: 0 }, observation: '比較結果已記入數據表。' },
+    ],
+    analysis: {
+      evidence: '電筒角度不變，只換了表面：鏡子把光反射成清晰的一條，入射角和反射角相等；摺皺鋁箔把同一束光散向四方；黑卡紙幾乎沒有反射光。',
+      reflection: {
+        prompt: '摺皺鋁箔把光散開，是因為它不遵守反射定律嗎？',
+        options: ['是，粗糙表面沒有反射定律', '不是，每一小塊仍然遵守，只是朝向不同', '不是，因為光穿過了鋁箔'],
+        answer: 1,
+        because: '摺皺鋁箔由無數細小的平面組成，每一小塊都遵守入射角等於反射角，只是它們朝向不同，反射光才會散向四方。這叫漫反射。',
+      },
+    },
+    result: {
+      title: '你分辨了規則反射與漫反射！',
+      observation: '鏡面反射角等於入射角（55°）；摺皺鋁箔散射；黑卡紙幾乎不反射。',
+      explanation: '光在任何表面都遵守反射定律：入射角等於反射角。平滑表面各處朝向一致，反射光集中成一條，叫規則反射；粗糙表面的細小平面朝向不同，反射光散向四方，叫漫反射。我們能看見大部分物件，正是靠漫反射。深色表面把大部分光吸收轉為熱，所以看起來暗。',
+    },
+  },
+  {
+    id: 'heat-conduction', number: 5, topic: '能量', grades: '小四至小六', minutes: 13,
+    title: '熱傳導比賽', englishTitle: 'Conduction Race', color: '#e8804f', icon: 'circuit',
+    observe: {
+      title: '三支匙，同一杯熱水',
+      caption: '影片裡三支不同材料的匙插在同一杯熱水中，每支匙柄上都放了一小塊牛油。',
+      notice: ['哪一塊牛油最先開始融化？', '三支匙插在水中的深度是否一樣？', '牛油放在匙的哪一端？離水面有多遠？'],
+      wonder: '水只碰到匙的下半截，為甚麼上面的牛油會融化？',
+    },
+    question: '同樣浸在熱水中，哪一種材料的匙把熱傳得最快？',
+    objective: '以公平測試比較不同材料的導熱能力，認識熱由高溫傳向低溫。',
+    apparatus: ['燒杯與熱水', '電熱板', '木匙', '塑膠匙', '銅匙', '牛油', '溫度顯示屏'],
+    curriculum: { items: '#33、#44', codes: ['4MB1', '4MB2', '6MB4'] },
+    safety: '真實實驗的熱水會燙傷，必須由老師處理；不可徒手觸摸浸過熱水的金屬匙。',
+    modelNote: '顯示屏的溫度是本模型計算出來的匙柄整體溫度，不描繪匙內部逐點的溫度分佈；真實的匙由下而上會有溫度梯度。',
+    prediction: {
+      prompt: '木匙、塑膠匙和銅匙同時浸在熱水中，哪一支的牛油會最先跌下？',
+      options: ['木匙', '塑膠匙', '銅匙'],
+      answer: 2,
+    },
+    steps: [
+      { verb: '放置', title: '放入木匙', instruction: '把木匙拖進燒杯的熱水中。', cue: '拖動啡色木匙', hint: '三支匙都要浸到同一深度才公平。', action: { type: 'place', subject: 'spoon-wood', target: 'beaker-water' }, observation: '木匙站在杯中，牛油在水面以上的匙柄上。' },
+      { verb: '放置', title: '放入塑膠匙', instruction: '把塑膠匙拖進同一杯熱水中。', cue: '拖動綠色塑膠匙', hint: '同一杯水、同樣的牛油，只有材料不同。', action: { type: 'place', subject: 'spoon-plastic', target: 'beaker-water' }, observation: '塑膠匙與木匙並排站在杯中。' },
+      { verb: '放置', title: '放入銅匙', instruction: '把銅匙拖進同一杯熱水中。', cue: '拖動金色銅匙', hint: '三支匙齊了，可以開始加熱。', action: { type: 'place', subject: 'spoon-copper', target: 'beaker-water' }, observation: '三支匙同時浸在水中，起點完全相同。' },
+      { verb: '加熱', title: '開啟電熱板', instruction: '按下加熱開關，觀察水溫逐步升向 82 °C。', cue: '點按紅色加熱開關', hint: '留意中央水溫和牛油的位置變化。', action: { type: 'tap', subject: 'heater' }, observation: '水溫慢慢上升；銅匙上的牛油先軟化、沿匙面滑下，木匙和塑膠匙的變化較慢。' },
+      { verb: '記錄', title: '記下最先跌下的牛油', instruction: '哪一支匙的牛油最先跌下？記進數據表。', cue: '選出最先跌牛油的匙', hint: '看顯示屏，哪一支匙柄升溫最快。', action: { type: 'record', subject: 'fastest-spoon', label: '牛油最先跌下的匙', unit: '', options: ['木匙', '塑膠匙', '銅匙'], answer: 2 }, observation: '比較結果已記入數據表。' },
+      { verb: '記錄', title: '記下牛油跌下時的溫度', instruction: '看顯示屏，把牛油跌下時的匙柄溫度記進數據表。', cue: '讀出顯示屏上的溫度', hint: '牛油大約在甚麼溫度融化？', action: { type: 'record', subject: 'melt-temperature', label: '牛油跌下時的匙柄溫度', unit: '°C', options: ['22', '45', '82'], answer: 1 }, observation: '溫度讀數已記入數據表。' },
+    ],
+    analysis: {
+      evidence: '三支匙以相同深度浸在同一杯逐步升溫的水中，牛油大小和位置相同；銅匙柄升溫最快，牛油先軟化、滑下並跌入水中，木匙和塑膠匙長時間仍接近室溫。',
+      reflection: {
+        prompt: '牛油在水面以上，並沒有碰到熱水，為甚麼會融化？',
+        options: ['熱水的蒸氣把牛油烘熱', '熱沿着匙由水中傳到匙柄', '牛油自己會發熱'],
+        answer: 1,
+        because: '熱由高溫的地方傳向低溫的地方。熱水把匙的下端加熱，熱再沿着匙的材料一路傳上匙柄，把牛油熔掉——這就是傳導。金屬傳導快，木和塑膠傳導慢，所以常被用來做鑊柄。',
+      },
+    },
+    result: {
+      title: '你找出了傳熱最快的材料！',
+      observation: '銅匙的牛油最先跌下（約 45 °C）；同一時間木匙和塑膠匙的匙柄仍然接近 23 °C。',
+      explanation: '熱由高溫傳向低溫。傳導是熱在物料內部一路傳遞，不同材料的傳導快慢差別很大：金屬是良導體，木和塑膠是不良導體（絕緣體）。公平測試的關鍵是只讓材料不同，水溫、深度和牛油都保持一樣。',
+    },
+  },
+  {
+    id: 'force-coaster', number: 6, topic: '力與運動', grades: '小三至小五', minutes: 13,
+    title: '斜台與摩擦挑戰', englishTitle: 'Ramp Rally', color: '#f28b72', icon: 'ramp',
+    observe: {
+      title: '同一部車，兩種路面',
+      caption: '影片裡同一部小車由同一高度放手，分別在光滑面和粗糙面上滑行。',
+      notice: ['兩次出發的高度是否一樣？', '哪一次走得比較遠？', '車停下之前有沒有被推過？'],
+      wonder: '沒有人推它，車最後為甚麼會停下來？',
+    },
+    question: '車停下時，原來的運動能量去了哪裏？',
+    objective: '固定斜角，只更換接觸表面，比較摩擦對運動的影響。',
+    apparatus: ['可調斜台', '角度儀', '小車', '粗糙／光滑表面', '距離尺'],
+    curriculum: { items: '#30、#31、#48、#51–53', codes: ['4MC1', '4MC2', '5MB1', '5MB2'] },
+    safety: '小車保持在防護軌道內；真實活動不可把物件朝人發射。',
+    modelNote: '能量條和力箭咀是教學疊加圖；距離是本模型的固定示範數值。',
+    prediction: {
+      prompt: '同一小車以相同高度出發，哪種表面令它最快停下？',
+      options: ['粗糙表面', '光滑表面', '兩者完全相同'],
+      answer: 0,
+    },
+    steps: [
+      { verb: '調校', title: '把斜台調到 25°', instruction: '轉動斜台把手到 25°。', cue: '拖動黃色角度把手或使用滑桿', hint: '角度儀會顯示實時數值。', action: { type: 'adjust', subject: 'ramp-angle', min: 23, max: 27, unit: '°', range: [5, 40], start: 25 }, observation: '斜台固定在 25°，垂直高度保持不變。' },
+      { verb: '放置', title: '把小車放在起點', instruction: '把小車拖到斜台頂端的起點。', cue: '拖動藍色小車', hint: '每次都由同一高度出發才公平。', action: { type: 'place', subject: 'cart', target: 'ramp-start' }, observation: '小車具有重力勢能，準備轉化為動能。' },
+      { verb: '釋放', title: '在光滑面測試', instruction: '按下釋放掣，觀察距離和速度。', cue: '點按綠色釋放掣', hint: '不要推車，只讓重力使它起動。', action: { type: 'tap', subject: 'release' }, observation: '小車在光滑面前進 4.4 m，停點標記留在尺上。' },
+      { verb: '記錄', title: '記下光滑面的距離', instruction: '看「光滑面停點」標記停在距離尺的哪一格，把數字記進數據表。', cue: '讀出停點標記上的米數', hint: '距離尺由斜台底計起，這是第一組對照數據。', action: { type: 'record', subject: 'smooth-distance', label: '光滑面前進距離', unit: 'm', options: ['2.0', '4.4', '6.5'], answer: 1 }, observation: '光滑面的距離已記入數據表。' },
+      { verb: '更換', title: '改用粗糙表面', instruction: '把粗糙板拖到水平軌道。', cue: '拖動啡色粗糙板', hint: '保持小車、角度和起點不變。', action: { type: 'place', subject: 'rough-track', target: 'runout' }, observation: '只改變表面，形成公平比較。' },
+      { verb: '再試', title: '再次釋放小車', instruction: '按下釋放掣，觀察粗糙面的結果。', cue: '點按綠色釋放掣', hint: '比較路程和能量條。', action: { type: 'tap', subject: 'release' }, observation: '小車只前進 2.0 m；更多機械能經摩擦轉為熱。' },
+      { verb: '記錄', title: '記下粗糙面的距離', instruction: '看「粗糙面停點」標記停在距離尺的哪一格，把數字記進數據表。', cue: '讀出停點標記上的米數', hint: '與光滑面的一組比較。', action: { type: 'record', subject: 'rough-distance', label: '粗糙面前進距離', unit: 'm', options: ['2.0', '4.4', '6.5'], answer: 0 }, observation: '粗糙面的距離已記入數據表，可以比較了。' },
+    ],
+    analysis: {
+      evidence: '斜台角度和起點都沒有改變，只換了接觸表面；粗糙面上的小車明顯較早停下。',
+      reflection: {
+        prompt: '小車停下來時，原本的動能去了哪裏？',
+        options: ['能量消失了', '大部分經摩擦轉為熱', '全部變回重力勢能'],
+        answer: 1,
+        because: '能量不會消失。摩擦力反對相對運動，把機械能轉成接觸面的熱能，所以車會慢下來並停止。',
+      },
+    },
+    result: {
+      title: '你用數據找到了摩擦的作用！',
+      observation: '只更換接觸表面後，小車前進距離明顯較短；斜台高度相同，起始重力勢能相同。',
+      explanation: '摩擦力反對相對運動，把部分機械能轉為熱。車停下不是能量消失；公平比較要保持小車、角度和起點相同。',
+      comparison: {
+        leftLabel: '光滑面 · 同一起點',
+        leftValue: '前進 4.4 m',
+        rightLabel: '粗糙面 · 同一起點',
+        rightValue: '前進 2.0 m',
+        conclusion: '只更換接觸表面：粗糙面的摩擦較大，小車更早停下，更多機械能轉為熱。',
+      },
+    },
+  },
+];
+
+export const experimentById = new Map(experiments.map((experiment) => [experiment.id, experiment]));
+
+export function getNextExperiment(id) {
+  const index = experiments.findIndex((item) => item.id === id);
+  if (index < 0) return null;
+  return experiments[(index + 1) % experiments.length];
+}

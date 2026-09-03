@@ -1,0 +1,19 @@
+{
+  "verdict": "CLEAN_TARGET_FROZEN",
+  "inputPath": "C:\\Users\\kochu\\.codex\\generated_images\\01a0271e-6bcf-7382-9586-21b7e9d78ece\\exec-fc770235-9db1-4929-907e-915f23252566.png",
+  "outputPath": "artifacts/aura01-clean/target.png",
+  "canvas": "800x640",
+  "connectivity": 4,
+  "checkerRule": "min RGB >= 226 and channel spread <= 7, border-connected only; cool cap envelope protects white/lavender crown",
+  "sourceSize": [
+    1402,
+    1122
+  ],
+  "normalization": "sharp lanczos3 1402x1122 -> 800x640",
+  "crownProtectedPixels": 6232,
+  "transparentPixels": 203018,
+  "opaquePixels": 308982,
+  "checkerPixels": 203018,
+  "inputSha256": "ae1ff68b09d9602c0ba003b9e7b02721b9da4d0204171521b1806d31451a385d",
+  "outputSha256": "99f54a3d7c33369851617a39129501d5e7511659e9b8485e9ef1dde7c9982abe"
+}

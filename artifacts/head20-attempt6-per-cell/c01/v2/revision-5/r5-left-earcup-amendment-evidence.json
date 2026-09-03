@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c01",
+  "revision": "r5",
+  "status": "PROPOSED_SEMANTIC_AMENDMENT",
+  "purpose": "round the left helmet ear-cup contour without allowing a rectangular slab or any body/tail replacement",
+  "amendment": {
+    "id": "c01-rounded-left-earcup-transparent-arc-r5",
+    "boundingZone": [
+      24,
+      28,
+      31,
+      64
+    ],
+    "pixelMask": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-5\\r5-left-earcup-extension-allowed-mask.png",
+    "pixelMaskSha256": "520faf918bfb92724d79a4aebc22e9446cf7039b16b8a88da1dcb20141d4f47b",
+    "rule": "only pixels with original base alpha <= 3 are newly permitted; old x=31..37 natural-ear permission remains unchanged"
+  },
+  "inputs": {
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\c01-base-original-160x160.png",
+    "baseSha256": "cc87a049bc41b7635bdb1ca4d92f46c1822d73423b86ce7c69c6526fa6ae80d4",
+    "tailPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-tail-visible-pixels-mask.png",
+    "tailSha256": "d4fc049a93e5c668cefd21e8e3aa112e20804dbb4f1ebf55b9a4bf6845979f58"
+  },
+  "metrics": {
+    "candidatePixels": 210,
+    "baseAlphaGt0Pixels": 14,
+    "baseAlphaGte4Pixels": 0,
+    "tailIntersectionPixels": 0,
+    "bodyLegPawBowlIntersectionPixels": 0,
+    "oldUnionIntersectionPixels": 0
+  },
+  "protectedRois": {
+    "trueTailMask": [
+      114,
+      74,
+      129,
+      101
+    ],
+    "torsoLegsPawsBowl": [
+      0,
+      101,
+      160,
+      160
+    ],
+    "rightNaturalEar": [
+      103,
+      28,
+      126,
+      55
+    ]
+  },
+  "verdict": "PASS_PROPOSED_MINIMAL_TRANSPARENT_EXTENSION"
+}

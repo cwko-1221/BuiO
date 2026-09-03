@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>學生作業 ・ 粵語學習</title>
+  <link rel="stylesheet" href="/chinese/css/style.css" />
+</head>
+<body>
+  <div id="root"></div>
+  <script src="/chinese/js/common.js"></script>
+  <script>
+    const { api, el, toast, fmtDate, renderTopbar, ensureAuth } = ChineseApp;
+    const root = document.getElementById('root');
+
+    async function init() {
+      const me = await ensureAuth('student');
+      if (!me) return;
+      root.appendChild(renderTopbar({ title: '粵語繁中學習平台', user: me }));
+      const container = el('div', { class: 'container narrow' });
+      container.appendChild(el('div', { class: 'page-head' },
+        el('h1', {}, `你好，${me.name}`),
+        el('p', {}, '選擇下方的練習開始。')
+      ));
+      root.appendChild(container);
+
+      container.appendChild(el('p', { class: 'muted' }, '載入作業中…'));
+      try {
+        const { assignments } = await api(`/api/chinese/student/assignments`);
+        container.innerHTML = '';
+        if (!assignments.length) {
+          container.appendChild(el('div', { class: 'card empty' }, '目前沒有作業。'));
+          return;
+        }
+        const pending = assignments.filter(a => !a.attempt || a.attempt.status !== 'completed');
+        const done = assignments.filter(a => a.attempt && a.attempt.status === 'completed');
+        if (pending.length) {
+          container.appendChild(el('h2', { style: { margin: '8px 0' } }, '待完成'));
+          for (const a of pending) container.appendChild(renderCard(a));
+        }
+        if (done.length) {
+          container.appendChild(el('h2', { style: { margin: '20px 0 8px' } }, '已完成'));
+          for (const a of done) container.appendChild(renderCard(a));
+        }
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    function renderCard(a) {
+      const score = a.attempt ? `${a.attempt.score}/5` : '—';
+      return el('div', {
+        class: 'assignment-card',
+        onclick: () => location.href = `/chinese/practice?assignmentId=${a.id}`,
+      },
+        el('div', {},
+          el('div', { class: 'title' }, a.title),
+          el('div', { class: 'sub' }, `${a.targetLabel} ・ ${fmtDate(a.createdAt)}`)
+        ),
+        el('div', { class: 'score' }, score)
+      );
+    }
+
+    init().catch(e => toast(e.message, 'error'));
+  </script>
+</body>
+</html>

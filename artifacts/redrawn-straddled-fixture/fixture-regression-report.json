@@ -1,0 +1,56 @@
+{
+  "verdict": "REJECT",
+  "syntheticOnly": true,
+  "publishedOutputRead": false,
+  "inputs": {
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\synthetic-base.png",
+    "expectedPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\synthetic-expected-final.png",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\synthetic-canonical-mask.png",
+    "specPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\synthetic-back-spec.json"
+  },
+  "solverReportPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-straddled-fixture\\solved\\synthetic-order-report.json",
+  "assertions": {
+    "verdict": true,
+    "exactRgbaZero": true,
+    "baseHiddenRgbaPreservedOutsideMask": true,
+    "unexpectedUnsolvableZero": true,
+    "minimalEraseExactly100": true,
+    "transparentRgbZero": true,
+    "declaredOrder": false,
+    "sideWingSemanticPass": true,
+    "perLayerTopologyPass": true
+  },
+  "metrics": {
+    "nonBinaryMaskAlphaPixels": 0,
+    "maskTransparentRgbNonZeroPixels": 0,
+    "targetBaseDifferencesOutsideMask": 0,
+    "unassignedDifferencePixels": 0,
+    "ambiguousSemanticRegionPixels": 0,
+    "rearUnsolvablePixels": 0,
+    "forcedErasePixels": 100,
+    "unexpectedUnsolvablePixels": 0,
+    "eraseOutsideAllowedRegions": 0,
+    "ambiguousEraseRegionPixels": 0,
+    "replacementLayerTargetMismatchPixels": 0,
+    "layerOutsideMaskPixels": 0,
+    "eraseOutsideMaskPixels": 0,
+    "rearTransparentRgbNonZeroPixels": 0,
+    "patchTransparentRgbNonZeroPixels": 0,
+    "frontTransparentRgbNonZeroPixels": 0,
+    "eraseTransparentRgbNonZeroPixels": 0,
+    "baseRgbaMismatchOutsideMaskPixels": 0,
+    "exactRgbaMismatchPixels": 0,
+    "frontEraseVisiblePixels": 0,
+    "frontEraseNonBinaryAlphaPixels": 0,
+    "frontEraseTransparentRgbNonZeroPixels": 0,
+    "frontEraseOutsideMaskPixels": 0
+  },
+  "layerOrder": [
+    "rear",
+    "base",
+    "minimal erase",
+    "patch",
+    "union frontErase",
+    "front"
+  ]
+}

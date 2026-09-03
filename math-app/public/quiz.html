@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="杯澳四則特訓 - 四則運算練習">
+    <title>練習中 ✦ 杯澳四則特訓</title>
+    <link rel="stylesheet" href="/math-app/css/style.css">
+</head>
+<body>
+    <div class="page-container">
+        <!-- Navigation -->
+        <nav class="navbar" id="navbar">
+            <div class="navbar-brand">
+                <img src="/math-app/images/logo.png" alt="校徽" class="logo-img">
+                <span>杯澳四則特訓</span>
+            </div>
+            <ul class="navbar-nav">
+                <li><a href="/math" style="color:var(--text-primary); font-size:1rem; text-decoration:none; font-weight:600; padding:8px 16px; border-radius:8px;">🏠 回主頁</a></li>
+            </ul>
+            <div class="navbar-user">
+                <span id="student-name">載入中...</span>
+                <div class="avatar" id="student-avatar">?</div>
+            </div>
+        </nav>
+
+        <!-- Main Quiz Area -->
+        <div class="main-content">
+            <!-- Loading State -->
+            <div id="loading-state">
+                <div class="loading-spinner"></div>
+                <p style="text-align:center; color: var(--text-muted);">正在準備題目...</p>
+            </div>
+
+            <!-- Quiz Active State -->
+            <div id="quiz-state" style="display:none;">
+                <!-- Header: Progress + Timer -->
+                <div class="quiz-header">
+                    <div class="quiz-progress">
+                        <span class="progress-text" id="progress-text">第 1 / 10 題</span>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" id="progress-bar"></div>
+                        </div>
+                    </div>
+                    <div class="quiz-timer">
+                        <span class="timer-icon">⏱️</span>
+                        <span class="timer-value" id="timer-value">0</span>
+                        <span style="color: var(--text-muted); font-size:0.8rem;">秒</span>
+                    </div>
+                </div>
+
+                <!-- Question Dots -->
+                <div class="quiz-dots" id="quiz-dots"></div>
+
+                <!-- Question Card -->
+                <div class="quiz-question-card glass-card-static" id="question-card">
+                    <div class="question-number" id="question-number">第 1 題</div>
+                    <div class="question-tag" id="question-tag">
+                        <span>📐</span>
+                        <span id="question-tag-text">加法</span>
+                    </div>
+                    <div class="question-category" id="question-category">兩位數加法 (無進位)</div>
+                    <div class="question-text" id="question-text">23 + 45</div>
+                    <div class="answer-input-wrapper">
+                        <span class="equals-sign">=</span>
+                        <input type="number" class="answer-input" id="answer-input" 
+                               placeholder="?" autocomplete="off" inputmode="numeric">
+                        <button class="btn btn-primary" id="submit-answer-btn">確認送出</button>
+                    </div>
+                </div>
+
+                <!-- Canvas Sketchpad -->
+                <div class="sketchpad-container glass-card-static">
+                    <div class="sketchpad-header">
+                        <span style="color:var(--text-muted); font-size:0.9rem;">📝 計算紙 (用手指或滑鼠書寫)</span>
+                        <button class="btn btn-ghost" id="clear-canvas-btn" style="padding: 6px 12px; font-size: 0.8rem;">🗑️ 清除草稿</button>
+                    </div>
+                    <canvas id="scratchpad"></canvas>
+                </div>
+            </div>
+
+            <!-- Results State -->
+            <div id="results-state" style="display:none;">
+                <div class="results-container">
+                    <div class="results-hero glass-card-static">
+                        <div class="results-score" id="results-score">0%</div>
+                        <div class="results-label" id="results-label">本次練習正確率</div>
+                    </div>
+
+                    <div class="results-stats">
+                        <div class="result-stat-card glass-card-static">
+                            <div class="result-stat-value" id="stat-correct" style="color:var(--accent-green);">0</div>
+                            <div class="result-stat-label">答對</div>
+                        </div>
+                        <div class="result-stat-card glass-card-static">
+                            <div class="result-stat-value" id="stat-incorrect" style="color:var(--accent-red);">0</div>
+                            <div class="result-stat-label">答錯</div>
+                        </div>
+                        <div class="result-stat-card glass-card-static">
+                            <div class="result-stat-value" id="stat-time" style="color:var(--accent-cyan);">0s</div>
+                            <div class="result-stat-label">平均用時</div>
+                        </div>
+                    </div>
+
+                    <div class="results-detail glass-card-static" id="results-detail">
+                        <!-- Result items filled by JS -->
+                    </div>
+
+                    <div class="results-actions">
+                        <button class="btn btn-primary btn-lg" id="retry-btn">🔄 再練習一組</button>
+                        <button class="btn btn-ghost btn-lg" onclick="location.href='/math'">🏠 回主頁</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Overlay -->
+    <div class="feedback-overlay" id="feedback-overlay">
+        <div class="feedback-icon" id="feedback-icon">✅</div>
+    </div>
+
+    <script src="/math-app/js/quiz.js"></script>
+</body>
+</html>

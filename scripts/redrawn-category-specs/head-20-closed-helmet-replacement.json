@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "category": "head",
+  "wearableId": "head-20",
+  "description": "Closed space helmet. Search windows are containment permissions only; the solver must use the true minimum erase needed for exact source-over replacement.",
+  "frozenAcceptanceSpec": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/batch-acceptance-prep/frozen-head-specs-v1/head-20-frozen-acceptance-spec.json",
+  "authoritativeFullDressed": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-20-dressed-atlas-v2.png",
+  "atlas": { "width": 800, "height": 640, "cellWidth": 160, "cellHeight": 160, "columns": 5, "rows": 4 },
+  "topology": {
+    "fillEnclosedHoles": true,
+    "connectComponents4Connected": true,
+    "expectedComponents4ConnectedPerCell": 1,
+    "expectedEnclosedTransparentComponentsPerCell": 0,
+    "connectComponents4Connected": true,
+    "replacementZones": [
+      { "row": 0, "column": 0, "zone": [38, 5, 137, 127] },
+      { "row": 0, "column": 1, "zone": [36, 5, 134, 127] },
+      { "row": 0, "column": 2, "zone": [24, 5, 132, 127] },
+      { "row": 0, "column": 3, "zone": [14, 5, 122, 127] },
+      { "row": 0, "column": 4, "zone": [8, 5, 116, 127] },
+      { "row": 1, "column": 0, "zone": [70, 5, 160, 125] },
+      { "row": 1, "column": 1, "zone": [68, 5, 158, 125] },
+      { "row": 1, "column": 2, "zone": [54, 5, 145, 126] },
+      { "row": 1, "column": 3, "zone": [48, 5, 136, 126] },
+      { "row": 1, "column": 4, "zone": [42, 5, 132, 126] },
+      { "row": 2, "column": 0, "zone": [44, 0, 150, 119] },
+      { "row": 2, "column": 1, "zone": [40, 0, 149, 119] },
+      { "row": 2, "column": 2, "zone": [22, 0, 133, 119] },
+      { "row": 2, "column": 3, "zone": [20, 0, 125, 119] },
+      { "row": 2, "column": 4, "zone": [15, 0, 120, 119] },
+      { "row": 3, "column": 0, "zone": [30, 0, 145, 131] },
+      { "row": 3, "column": 1, "zone": [34, 0, 140, 128] },
+      { "row": 3, "column": 2, "zone": [5, 30, 120, 160] },
+      { "row": 3, "column": 3, "zone": [10, 0, 130, 126] },
+      { "row": 3, "column": 4, "zone": [12, 0, 126, 123] }
+    ],
+    "replacementExtensions": [
+      {
+        "id": "helmet-natural-ear-occlusion-c01",
+        "row": 0,
+        "column": 0,
+        "zone": [31, 28, 38, 101],
+        "reason": "Closed helmet must cover the original left natural-ear component outside the prior x=38 boundary.",
+        "evidence": {
+          "baseComponentPixelsAlphaGt0": 385,
+          "baseComponentPixelsAlphaGte128": 270,
+          "xBounds": [31, 38],
+          "yBounds": [28, 101],
+          "protectedRoiIntersections": { "tail": 0, "torso": 0, "legs": 0, "paws": 0, "feedingBowl": 0 }
+        }
+      }
+    ],
+    "protectedRois": [
+      { "id": "c01-tail", "row": 0, "column": 0, "zone": [114, 74, 129, 101], "pixelMask": "artifacts/head20-attempt6-per-cell/c01/v2/c01-tail-visible-pixels-mask.png", "semantic": "visible-tail-pixels-only", "derivationEvidence": "artifacts/head20-attempt6-per-cell/c01/v2/c01-tail-protection-evidence.json" },
+      { "id": "c01-torso-legs-paws-bowl", "row": 0, "column": 0, "zone": [0, 101, 160, 160] }
+    ],
+    "bridgeZones": [
+      { "row": 0, "column": 0, "zone": [31, 28, 38, 101] },
+      { "row": 0, "column": 0, "zone": [38, 5, 137, 127] },
+      { "row": 0, "column": 1, "zone": [36, 5, 134, 127] },
+      { "row": 0, "column": 2, "zone": [24, 5, 132, 127] },
+      { "row": 0, "column": 3, "zone": [14, 5, 122, 127] },
+      { "row": 0, "column": 4, "zone": [8, 5, 116, 127] },
+      { "row": 1, "column": 0, "zone": [70, 5, 160, 125] },
+      { "row": 1, "column": 1, "zone": [68, 5, 158, 125] },
+      { "row": 1, "column": 2, "zone": [54, 5, 145, 126] },
+      { "row": 1, "column": 3, "zone": [48, 5, 136, 126] },
+      { "row": 1, "column": 4, "zone": [42, 5, 132, 126] },
+      { "row": 2, "column": 0, "zone": [44, 0, 150, 119] },
+      { "row": 2, "column": 1, "zone": [40, 0, 149, 119] },
+      { "row": 2, "column": 2, "zone": [22, 0, 133, 119] },
+      { "row": 2, "column": 3, "zone": [20, 0, 125, 119] },
+      { "row": 2, "column": 4, "zone": [15, 0, 120, 119] },
+      { "row": 3, "column": 0, "zone": [30, 0, 145, 131] },
+      { "row": 3, "column": 1, "zone": [34, 0, 140, 128] },
+      { "row": 3, "column": 2, "zone": [5, 30, 120, 160] },
+      { "row": 3, "column": 3, "zone": [10, 0, 130, 126] },
+      { "row": 3, "column": 4, "zone": [12, 0, 126, 123] }
+    ],
+    "semanticFamilies": ["closedHelmetReplacement"],
+    "semanticRequirements": {
+      "c01ClosedHelmetNaturalEarCoverage": {
+        "rule": "closed helmet must fully occlude both measured natural-ear ROIs; no opaque base pixel may remain byte-identical in the ROI after redraw",
+        "leftNaturalEarRoi": { "zone": [31, 28, 58, 55], "baseOpaquePixelsMeasured": 632, "evidenceSource": "c01-base-original-160x160.png" },
+        "rightNaturalEarRoi": { "zone": [103, 28, 126, 55], "baseOpaquePixelsMeasured": 542, "evidenceSource": "c01-base-original-160x160.png" },
+        "requiredUnchangedOpaquePixels": 0,
+        "rightEarRevisionEvidence": { "v2UnchangedOpaquePixels": 38, "verdict": "REJECT_PENDING_RIGHT_EAR_COVERAGE" }
+      }
+    },
+    "filledVisorIsNotAperture": true,
+    "emptyCells": []
+  },
+  "solve": {
+    "maximumErasePixels": 254220,
+    "unexpectedUnsolvablePixels": 0,
+    "exactRgbaMismatchPixels": 0,
+    "eraseReplacement": {
+      "mode": "minimal-source-over-fallback",
+      "requireSemanticIntersection": true,
+      "protectedAlways": ["entire-tail", "torso-below-collar", "all-legs-and-paws", "feeding-bowl"],
+      "allowedRegions": [
+        { "id": "helmet-natural-ear-occlusion-c01", "row": 0, "column": 0, "zone": [31, 28, 38, 101], "minimumPixels": 0, "maximumPixels": 385, "semantic": "natural-ear-occlusion" },
+        { "id": "helmet-replacement-cell-01", "row": 0, "column": 0, "zone": [38, 5, 137, 127], "minimumPixels": 0, "maximumPixels": 12078 },
+        { "id": "helmet-replacement-cell-02", "row": 0, "column": 1, "zone": [36, 5, 134, 127], "minimumPixels": 0, "maximumPixels": 11956 },
+        { "id": "helmet-replacement-cell-03", "row": 0, "column": 2, "zone": [24, 5, 132, 127], "minimumPixels": 0, "maximumPixels": 13176 },
+        { "id": "helmet-replacement-cell-04", "row": 0, "column": 3, "zone": [14, 5, 122, 127], "minimumPixels": 0, "maximumPixels": 13176 },
+        { "id": "helmet-replacement-cell-05", "row": 0, "column": 4, "zone": [8, 5, 116, 127], "minimumPixels": 0, "maximumPixels": 13176 },
+        { "id": "helmet-replacement-cell-06", "row": 1, "column": 0, "zone": [70, 5, 160, 125], "minimumPixels": 0, "maximumPixels": 10800 },
+        { "id": "helmet-replacement-cell-07", "row": 1, "column": 1, "zone": [68, 5, 158, 125], "minimumPixels": 0, "maximumPixels": 10800 },
+        { "id": "helmet-replacement-cell-08", "row": 1, "column": 2, "zone": [54, 5, 145, 126], "minimumPixels": 0, "maximumPixels": 11011 },
+        { "id": "helmet-replacement-cell-09", "row": 1, "column": 3, "zone": [48, 5, 136, 126], "minimumPixels": 0, "maximumPixels": 10648 },
+        { "id": "helmet-replacement-cell-10", "row": 1, "column": 4, "zone": [42, 5, 132, 126], "minimumPixels": 0, "maximumPixels": 10890 },
+        { "id": "helmet-replacement-cell-11", "row": 2, "column": 0, "zone": [44, 0, 150, 119], "minimumPixels": 0, "maximumPixels": 12614 },
+        { "id": "helmet-replacement-cell-12", "row": 2, "column": 1, "zone": [40, 0, 149, 119], "minimumPixels": 0, "maximumPixels": 12971 },
+        { "id": "helmet-replacement-cell-13", "row": 2, "column": 2, "zone": [22, 0, 133, 119], "minimumPixels": 0, "maximumPixels": 13209 },
+        { "id": "helmet-replacement-cell-14", "row": 2, "column": 3, "zone": [20, 0, 125, 119], "minimumPixels": 0, "maximumPixels": 12495 },
+        { "id": "helmet-replacement-cell-15", "row": 2, "column": 4, "zone": [15, 0, 120, 119], "minimumPixels": 0, "maximumPixels": 12495 },
+        { "id": "helmet-replacement-cell-16", "row": 3, "column": 0, "zone": [30, 0, 145, 131], "minimumPixels": 0, "maximumPixels": 15065 },
+        { "id": "helmet-replacement-cell-17", "row": 3, "column": 1, "zone": [34, 0, 140, 128], "minimumPixels": 0, "maximumPixels": 13568 },
+        { "id": "helmet-replacement-cell-18", "row": 3, "column": 2, "zone": [5, 30, 120, 160], "minimumPixels": 0, "maximumPixels": 14950 },
+        { "id": "helmet-replacement-cell-19", "row": 3, "column": 3, "zone": [10, 0, 130, 126], "minimumPixels": 0, "maximumPixels": 15120 },
+        { "id": "helmet-replacement-cell-20", "row": 3, "column": 4, "zone": [12, 0, 126, 123], "minimumPixels": 0, "maximumPixels": 14022 }
+      ]
+    }
+  },
+  "publish": { "petId": "starpatch-cat", "stage": 1, "wearableId": "head-20", "slot": "head", "occludes": ["face", "natural ears"], "execute": false }
+}

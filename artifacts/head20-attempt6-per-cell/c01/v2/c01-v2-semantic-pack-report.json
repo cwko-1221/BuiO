@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "version": "c01-v2",
+  "sourceTarget": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-v2-target-coordinate-locked.png",
+  "sourceTargetSha256": "f0f60a5a18cb20fad8e7a52958a444d42cc143599ddef76e16a163c24f2e72fb",
+  "zones": [
+    [
+      38,
+      5,
+      137,
+      127
+    ],
+    [
+      31,
+      28,
+      38,
+      101
+    ]
+  ],
+  "unionPixels": 12589,
+  "unionComponents4": 1,
+  "unionHolePixels": 0,
+  "unionTargetDiffPixels": 11129,
+  "earExtensionTargetDiffPixels": 430,
+  "layerOrder": [
+    "base",
+    "erase:replacement-union-mask",
+    "patch:target-derived-alpha-preserving",
+    "visibleHelmetOverlay:diagnostic"
+  ],
+  "patchSemantics": "target-derived shell/visor/collar pixels; alpha is retained so target background gaps remain transparent after erase",
+  "protectedBytes": "base bytes remain unchanged outside amended union; tail/torso/legs/paws/bowl are outside union",
+  "exactCompositeMismatchPixels": 0,
+  "paths": {
+    "replacementUnionMask": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-v2-replacement-union-mask.png",
+    "targetPatch": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-v2-target-patch.png",
+    "visibleHelmetOverlay": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-v2-visible-helmet-overlay.png",
+    "exactComposite": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-v2-exact-composite.png",
+    "report": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-v2-semantic-pack-report.json"
+  },
+  "verdict": "SEMANTIC_PACK_READY_PENDING_PROVENANCE_CRITIC",
+  "publishable": false
+}

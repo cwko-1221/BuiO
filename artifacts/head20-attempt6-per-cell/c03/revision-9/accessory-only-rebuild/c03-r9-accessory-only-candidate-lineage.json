@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "cell": "c03",
+  "revision": "r9-accessory-only",
+  "stage": "INTERMEDIATE_ACCESSORY_ONLY_PRE_GATE",
+  "source": {
+    "rawNormalizedPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\c03-r9-normalized-rgb-1254x1254.png",
+    "sha256": "b6238f4854b157012fb687420dc042f6be0f2e22e71f1abe33ec676bd9b7f365",
+    "crop": [
+      270,
+      145,
+      720,
+      600
+    ],
+    "mappedPlacement": [
+      27,
+      5,
+      132,
+      105
+    ]
+  },
+  "outputs": {
+    "candidateLayer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-rebuild\\c03-r9-accessory-only-candidate-layer-160x160.png",
+      "sha256": "fc57ee1296a4ae311a6564914e57337c0116acd9f8107b67f74e06c980590dca"
+    },
+    "topologyMask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-rebuild\\c03-r9-accessory-only-candidate-topology-mask-160x160.png",
+      "sha256": "5f51fd48697c5054c7e3fda6a8245d718e751c553258304cc522ccf49d61d8ba"
+    },
+    "opaqueEraseMask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-rebuild\\c03-r9-accessory-only-candidate-opaque-erase-mask-160x160.png",
+      "sha256": "097ff7be15cc426571cb08bea73f2af62ebbf2a993f6e99da915ea3f92910b68"
+    }
+  },
+  "rules": {
+    "rawPetAnatomy": "never copied",
+    "visor": "uniform source-derived translucent galaxy-glass tint only",
+    "hardware": "raw source pixels restricted to blue/gold/neutral material classes and explicit helmet zones",
+    "maskRoles": "topology mask validates one closed hole-free visual silhouette; opaque erase mask excludes the translucent visor tint"
+  },
+  "metrics": {
+    "maskPixels": 7223,
+    "components4Connected": 1,
+    "enclosedHoles": 0,
+    "tailIntersectionPixels": 0,
+    "bodyChestLegPawIntersectionPixels": 0,
+    "leftNaturalEarUnmaskedPixels": 0,
+    "rightNaturalEarUnmaskedPixels": 0
+  },
+  "verdict": "PENDING_INDEPENDENT_MATERIAL_GEOMETRY_AND_PET_ANATOMY_GATES",
+  "forbidden": "NO_TARGET_OR_COMPOSITE_WRITTEN"
+}

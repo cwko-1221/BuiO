@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "cell": "c03",
+  "inputs": {
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\c03-base-original-160x160.png",
+    "baseSha256": "d6603d155cc87d4ea652bd45a4bceb2a1fb414ad5c8ba6d1c81c4da037b8e6c0"
+  },
+  "tail": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-8\\c03-tail-visible-pixels-mask.png",
+    "sha256": "791c5b1d2cbf17e3494e38db40d61e0b7acb42e1585dc28c4fbaf5076a0bd33d",
+    "pixels": 295,
+    "boundsInclusive": [
+      111,
+      29,
+      123,
+      78
+    ],
+    "selection": "manually traced screen-right visible tail curl polygon AND base alpha >=128",
+    "polygon": [
+      [
+        111,
+        31
+      ],
+      [
+        121,
+        28
+      ],
+      [
+        130,
+        31
+      ],
+      [
+        137,
+        39
+      ],
+      [
+        140,
+        49
+      ],
+      [
+        139,
+        59
+      ],
+      [
+        134,
+        68
+      ],
+      [
+        127,
+        75
+      ],
+      [
+        119,
+        79
+      ],
+      [
+        113,
+        76
+      ],
+      [
+        112,
+        70
+      ],
+      [
+        116,
+        63
+      ],
+      [
+        119,
+        56
+      ],
+      [
+        119,
+        49
+      ],
+      [
+        116,
+        41
+      ]
+    ]
+  },
+  "earExtension": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-8\\c03-ear-extension-empty.png",
+    "sha256": "1cb6b844edfab5a219e11b8a753ffd1e05aa23c8c698f0885a2ec197e042032e",
+    "pixels": 0,
+    "reason": "native c03 helmet permission [24,5,132,127] already contains both natural ears"
+  },
+  "protections": {
+    "bodyChestLegsPaws": [
+      0,
+      101,
+      160,
+      160
+    ],
+    "raisedPaw": "none in c03 pose"
+  },
+  "verdict": "PASS_C03_CELL_SPECIFIC_PROTECTION"
+}

@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "independent": true,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c03",
+  "revision": "r10",
+  "stage": "RIGHT_CUP_ISOLATED_LAYER_SEMANTIC_PRE_GATE",
+  "contract": "ROI is layer-only. Blue/gold helmet evidence must exist; zero high-confidence orange/cream/pink fur-like pixels. Warm gold trim is an allowed material class and is reported separately.",
+  "inputs": {
+    "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-10\\c03-r10-accessory-only-hardware-tint-candidate-layer-160x160.png",
+    "layerSha256": "94ef5cbbf48e922d1bd6903264c46b8ac0fc245993186e7e7b1d15648765c742",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-10\\c03-r10-wearable-silhouette-candidate-mask-160x160.png",
+    "maskSha256": "73b7baa23a59e8f9e336f2d8183e228f7e9e669bc84bbc4cb798e021cfa86aa3",
+    "roi": [
+      113,
+      30,
+      131,
+      80
+    ]
+  },
+  "classifier": {
+    "goldTrim": "warm red/gold material, counted as allowed before fur tests; prevents normal gold rim false positives",
+    "permittedGlassHighlight": "only a green-suppressed violet galaxy-glass region 4-connected (possibly through other qualifying highlight pixels) to a cobalt-blue shell pixel; it is still surfaced to the visual critic",
+    "rejectedFur": "only high-confidence orange/cream/pink criteria; ambiguous warm pixels are surfaced to the visual critic rather than mechanically rejected"
+  },
+  "metrics": {
+    "roiPixels": 900,
+    "maskSupportPixels": 184,
+    "layerSupportPixels": 184,
+    "supportMismatchPixels": 0,
+    "blueShellPixels": 151,
+    "goldTrimPixels": 29,
+    "neutralHelmetPixels": 4,
+    "permittedGlassHighlightPixels": 0,
+    "unmistakableOrangeFurPixels": 0,
+    "unmistakableCreamFurPixels": 0,
+    "unmistakablePinkFurPixels": 0,
+    "ambiguousWarmPixels": 0,
+    "helmetEvidencePixels": 184,
+    "furPixels": 0,
+    "samples": {
+      "fur": [],
+      "gold": [
+        [
+          113,
+          30,
+          223,
+          160,
+          29
+        ],
+        [
+          114,
+          30,
+          223,
+          160,
+          29
+        ],
+        [
+          115,
+          30,
+          223,
+          160,
+          29
+        ],
+        [
+          115,
+          31,
+          223,
+          160,
+          29
+        ],
+        [
+          116,
+          32,
+          223,
+          160,
+          29
+        ],
+        [
+          116,
+          33,
+          223,
+          160,
+          29
+        ],
+        [
+          116,
+          34,
+          223,
+          160,
+          29
+        ],
+        [
+          116,
+          35,
+          223,
+          160,
+          29
+        ],
+        [
+          117,
+          36,
+          223,
+          160,
+          29
+        ],
+        [
+          117,
+          37,
+          223,
+          160,
+          29
+        ],
+        [
+          117,
+          38,
+          223,
+          160,
+          29
+        ],
+        [
+          117,
+          39,
+          223,
+          160,
+          29
+        ]
+      ],
+      "blue": [
+        [
+          113,
+          31,
+          25,
+          77,
+          192
+        ],
+        [
+          114,
+          31,
+          25,
+          77,
+          192
+        ],
+        [
+          113,
+          32,
+          25,
+          79,
+          193
+        ],
+        [
+          114,
+          32,
+          25,
+          79,
+          193
+        ],
+        [
+          115,
+          32,
+          25,
+          79,
+          193
+        ],
+        [
+          113,
+          33,
+          26,
+          80,
+          195
+        ],
+        [
+          114,
+          33,
+          26,
+          80,
+          195
+        ],
+        [
+          115,
+          33,
+          26,
+          80,
+          195
+        ],
+        [
+          113,
+          34,
+          27,
+          81,
+          196
+        ],
+        [
+          114,
+          34,
+          27,
+          81,
+          196
+        ],
+        [
+          115,
+          34,
+          27,
+          81,
+          196
+        ],
+        [
+          113,
+          35,
+          27,
+          83,
+          198
+        ]
+      ],
+      "permittedGlassHighlight": []
+    }
+  },
+  "gates": {
+    "layerMaskSupportExactWithinRoi": true,
+    "rightCupHasActualHelmetSupport": true,
+    "blueOrGoldHelmetEvidence": true,
+    "noUnmistakableOrangeCreamPinkFur": true,
+    "visualCritic": "PENDING"
+  },
+  "verdict": "PASS_RIGHT_CUP_SEMANTIC_PRE_GATE_PENDING_VISUAL_CRITIC",
+  "publishable": false
+}

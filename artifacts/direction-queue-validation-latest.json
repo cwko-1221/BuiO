@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "queue": "pet-app/art-source/imagegen/redrawn-wearable-production-queue.json",
+  "jobs": 192,
+  "directionBatchContract": "direction-aware-v1",
+  "errorCount": 0,
+  "warningCount": 2,
+  "warnings": [
+    "starpatch-cat:1:head-05: legacy ready entry has no direction-batch PASS evidence; runtime stays approved but new publish is blocked",
+    "starpatch-cat:1:head-06: legacy ready entry has no direction-batch PASS evidence; runtime stays approved but new publish is blocked"
+  ],
+  "verdict": "PASS_METADATA_ONLY",
+  "publishable": false,
+  "publishGate": "BLOCKED_LEGACY_READY_WITHOUT_DIRECTION_EVIDENCE",
+  "errors": []
+}

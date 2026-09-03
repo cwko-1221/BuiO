@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c02",
+  "purpose": "exact c02 visible tail alpha pixels only, derived from the independent original c02 base; no c01 artifact used",
+  "inputs": {
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\c02-base-original-160x160.png",
+    "baseSha256": "6abd73e57f1d4778aa2528458aaaec5c5e5ccd908f6f17213df38e836b189af0"
+  },
+  "method": {
+    "tailContourPolygon": [
+      [
+        123,
+        27
+      ],
+      [
+        133,
+        24
+      ],
+      [
+        143,
+        28
+      ],
+      [
+        150,
+        37
+      ],
+      [
+        153,
+        48
+      ],
+      [
+        153,
+        57
+      ],
+      [
+        149,
+        66
+      ],
+      [
+        143,
+        73
+      ],
+      [
+        136,
+        78
+      ],
+      [
+        128,
+        82
+      ],
+      [
+        122,
+        80
+      ],
+      [
+        121,
+        75
+      ],
+      [
+        125,
+        68
+      ],
+      [
+        129,
+        61
+      ],
+      [
+        130,
+        54
+      ],
+      [
+        128,
+        47
+      ],
+      [
+        124,
+        40
+      ]
+    ],
+    "selection": "inside polygon AND original base alpha >=128",
+    "exclusions": "merged haunch/chest and all raised-paw pixels are not classified as tail"
+  },
+  "output": {
+    "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c02\\c02-tail-visible-pixels-mask.png",
+    "sha256": "d45c4b49ed28285a37a913725ed2c01b4e6feb93fa68e47ab1cd710bad1d3289",
+    "pixels": 235,
+    "boundsInclusive": [
+      121,
+      36,
+      133,
+      79
+    ]
+  },
+  "protectedCompanions": {
+    "bodyChestLegsAndPaws": [
+      0,
+      101,
+      160,
+      160
+    ],
+    "raisedPaw": [
+      59,
+      91,
+      106,
+      160
+    ]
+  },
+  "verdict": "PASS_C02_VISIBLE_TAIL_PROTECTION"
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c03",
+  "revision": "r2",
+  "independent": true,
+  "reviewedFrozenLineage": {
+    "path": "artifacts/head20-attempt6-per-cell/c03/revision-2/c03-r2-lineage.json",
+    "frozen": true,
+    "rawFullDressedSourceSha256": "f76d8e95f94ebff7e492ca859ae5485d3460f5a00be8f7ec3fede50307354793"
+  },
+  "reviewedArtifacts": {
+    "target": {
+      "path": "artifacts/head20-attempt6-per-cell/c03/revision-2/c03-r2-target-coordinate-locked-160x160.png",
+      "sha256": "6fa3d31db50f26dbbcf3dfc063948e021099e8969f83b042d092f3423a6481e0"
+    },
+    "layer": {
+      "path": "artifacts/head20-attempt6-per-cell/c03/revision-2/c03-r2-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "b691e803b192e8a46a29051a962bb2ca9dfb29bfb2aa11cb05e918bb7c56df5d"
+    },
+    "mask": {
+      "path": "artifacts/head20-attempt6-per-cell/c03/revision-2/c03-r2-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "ffb765b1208a0132ea7fa8cf15581f5050a907f063c3464adb24cfa3ff9a8ac5"
+    }
+  },
+  "visualReview": {
+    "method": "nearest-neighbour review of target and isolated layer against c03 base and raw full-dressed source",
+    "r1Lobe": "PARTIAL_FIX_ONLY: r1's large animal-anatomy lobe is reduced, but it is not removed from the isolated accessory layer.",
+    "rightHelmetCup": "FAIL: screen-right support remains a peach/orange/pink-edged lobe rather than a genuine rounded blue-and-gold helmet shell/cup. It is visible in the isolated layer and in the final target, approximately local x=113..131, y=30..80.",
+    "anatomyIsolation": "FAIL: because the lobe is in the layer rather than byte-identical base content, it is still extracted pet anatomy / raw-tail-or-ear contamination. The original tail and body must remain in the base; this layer may only contain helmet and declared occlusion support.",
+    "other": "Eyes remain visible and the left cup/collar are broadly acceptable, but these do not offset the right-side semantic extraction failure.",
+    "releaseQuality": "FAIL: asymmetric ear hardware and visible pet-anatomy contamination remain conspicuous at nearest-neighbour review."
+  },
+  "verdict": "REJECT_PENDING_C03_R3",
+  "requiredRevision": [
+    "Build a c03 layer with a genuine blue-and-gold right ear cup matched to the left/helmet reference, not a crop of raw fur/tail/ear pixels.",
+    "Explicitly pixel-mask raw pet anatomy out of the right cup extraction region before mapping; preserve it only from the original base.",
+    "Run a layer-only visual pre-gate at nearest-neighbour zoom before freeze, then repeat mechanical and independent critic checks."
+  ],
+  "publishable": false
+}

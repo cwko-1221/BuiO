@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "version": "c01-v2",
+  "verdict": "REJECT_SOURCE_SEMANTIC_EAR_GATE",
+  "rawFullRedrawSource": {
+    "path": "C:\\Users\\kochu\\.codex\\generated_images\\01a03945-f681-7441-a121-c408b5c198d7\\exec-5ef8b10b-0bb5-43bd-8759-d33b78e9b72e.png",
+    "sha256": "9dc7f8202f89dfdda1a431615fbc65d0a032a049bcba9795870c8b34c0948853",
+    "width": 1254,
+    "height": 1254,
+    "channels": 3,
+    "hasAlpha": false,
+    "format": "png",
+    "modifiedTime": "2026-08-25T20:05:00.657Z"
+  },
+  "originalPrototypeLineage": {
+    "petPath": "art-inbox/pet-starpatch-cat-1.png",
+    "accessoryPath": "art-inbox/wearable-head-3.png",
+    "accessoryView": "bottom-row three-view space helmet"
+  },
+  "generation": {
+    "model": "PENDING_SOURCE_WORKER_METADATA",
+    "prompt": "PENDING_SOURCE_WORKER_METADATA",
+    "timestamp": "PENDING_SOURCE_WORKER_METADATA",
+    "seed": "PENDING_SOURCE_WORKER_METADATA"
+  },
+  "normalization": {
+    "steps": "connected RGB checker flood -> subject bounding crop -> deterministic 114x150 Lanczos3 mapping -> base lock outside amended union -> transparent RGB canonicalization inside amended union",
+    "sourceSha256": "9dc7f8202f89dfdda1a431615fbc65d0a032a049bcba9795870c8b34c0948853",
+    "checkerRemoval": "4-connected flood from RGB image border; chroma<=8 and min channel>=215; no isolated subject-white removal",
+    "removedCheckerPixels": 1075235,
+    "sourceSubjectCrop": {
+      "left": 277,
+      "top": 148,
+      "width": 730,
+      "height": 962
+    },
+    "sourceSubjectCropSize": "730x962",
+    "coordinateMapping": "subject crop -> exact 114x150 Lanczos3 fit-fill at c01 x=23,y=5; no transform after mapping",
+    "normalizedPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-v2-normalized-subject-rgba.png",
+    "normalizedSha256": "d10331d1dde62ae3f53a1f85350f09da303a603dd5a24de6cde68670452f102b",
+    "outputSha256": "f0f60a5a18cb20fad8e7a52958a444d42cc143599ddef76e16a163c24f2e72fb"
+  },
+  "sourceToCandidateMapping": {
+    "method": "c01 subject crop mapped into amended union coordinate space; exact base lock outside union",
+    "outputPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-v2-target-coordinate-locked.png",
+    "outputSha256": "f0f60a5a18cb20fad8e7a52958a444d42cc143599ddef76e16a163c24f2e72fb",
+    "outputDimensions": "160x160 RGBA",
+    "amendedReplacementUnion": [
+      [
+        38,
+        5,
+        137,
+        127
+      ],
+      [
+        31,
+        28,
+        38,
+        101
+      ]
+    ],
+    "outsideUnionByteDifferencePixels": 0,
+    "copiedOpaquePixels": 10722,
+    "amendedExtensionOpaquePixels": 371,
+    "noTransformsAfterNormalization": true
+  },
+  "forbiddenInputProof": {
+    "notOldTarget": true,
+    "notComposite": true,
+    "notMask": true,
+    "oldC01Candidate": "NOT_USED",
+    "oldWholeAtlasV2": "NOT_USED",
+    "attempt5Target": "NOT_USED",
+    "diagnosticOrComposite": "NOT_USED"
+  },
+  "semanticRequirements": {
+    "naturalEarCoverage": {
+      "leftNaturalEarRoi": {
+        "zone": [
+          31,
+          28,
+          58,
+          55
+        ],
+        "baseOpaquePixels": 565,
+        "unchangedOpaquePixels": 0,
+        "pass": true
+      },
+      "rightNaturalEarRoi": {
+        "zone": [
+          103,
+          28,
+          126,
+          55
+        ],
+        "baseOpaquePixels": 478,
+        "unchangedOpaquePixels": 15,
+        "pass": false
+      }
+    },
+    "pass": false
+  },
+  "acceptance": {
+    "sourcePreparation": "PASS",
+    "earExtensionCoverage": "PENDING_SEMANTIC_REVIEW",
+    "naturalEarCoverage": "REJECT_RIGHT_OR_LEFT_EAR_REMAINS",
+    "publishable": false,
+    "next": [
+      "audit-head20-cell-source.mjs",
+      "masking agent",
+      "zero-transform composite",
+      "independent critic"
+    ]
+  }
+}

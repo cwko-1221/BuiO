@@ -1,0 +1,11 @@
+{
+  "base": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+  "candidates": [
+    {
+      "id": "head-08",
+      "category": "head",
+      "target": "artifacts/head-08-clean-target.png",
+      "supportMask": "artifacts/head-08-preflight-envelope.png"
+    }
+  ]
+}

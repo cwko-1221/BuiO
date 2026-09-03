@@ -1,0 +1,22 @@
+{
+  "verdict": "BODY_LOCKED_TARGET",
+  "fullPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-07-independent-proof/head-07-clean-target-v3.png",
+  "basePath": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+  "maskPath": "artifacts/head07-compositing/extract-clean-v3-gold25-fillall/mask.png",
+  "outputPath": "artifacts/head07-compositing/extract-clean-v3-gold25-fillall/body-locked-target.png",
+  "geometry": {
+    "canvas": "800x640",
+    "transformed": false,
+    "sameCoordinate": true
+  },
+  "policy": "full reference pixels inside mask; original pet bytes outside mask",
+  "accessoryPixels": 185185,
+  "fullReferenceVisibleMaskPixels": 185185,
+  "bodyBytesReplaced": 305161,
+  "hashes": {
+    "full": "62ee7372c02313223a5ce84c7e137d6ecfcc62cd7a3b0a06a81849d475b02be6",
+    "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+    "mask": "b1133856725d89290147dfa0aa9f21fbe4092bbf6c9b165ef329fc832a6704ec",
+    "output": "af74e2760f2721d342c2ab579d61e76818e1defddd1b769821698453335dd123"
+  }
+}

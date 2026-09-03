@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "version": "c01-v2",
+  "status": "SOURCE_RECEIVED_TARGET_PREP_PENDING",
+  "rawFullRedrawSource": {
+    "path": "C:/Users/kochu/.codex/generated_images/01a03945-f681-7441-a121-c408b5c198d7/exec-5ef8b10b-0bb5-43bd-8759-d33b78e9b72e.png",
+    "sha256": "9dc7f8202f89dfdda1a431615fbc65d0a032a049bcba9795870c8b34c0948853",
+    "width": 1254,
+    "height": 1254,
+    "channels": 3,
+    "hasAlpha": false,
+    "format": "png",
+    "background": "RGB checkerboard reported; deterministic source-prep cleanup required",
+    "sourceRole": "independent base-c01 guided full-dressed redraw; not a mask/composite/runtime asset"
+  },
+  "originalPrototypeLineage": {
+    "petPath": "art-inbox/pet-starpatch-cat-1.png",
+    "accessoryPath": "art-inbox/wearable-head-3.png",
+    "accessoryView": "bottom-row three-view space helmet",
+    "visualSourceMustUseBoth": true
+  },
+  "coordinateContract": {
+    "amendedReplacementUnion": [
+      [38, 5, 137, 127],
+      [31, 28, 38, 101]
+    ],
+    "extensionReason": "measured natural-ear occlusion; 385 alpha>0 / 270 alpha>=128 pixels at x31-37",
+    "outsideUnionMustBeByteIdenticalToBase": true,
+    "noTransformsAfterNormalization": true
+  },
+  "requiredGenerationEvidence": {
+    "model": "PENDING_SOURCE_WORKER",
+    "prompt": "PENDING_SOURCE_WORKER",
+    "timestamp": "PENDING_SOURCE_WORKER",
+    "seed": "PENDING_SOURCE_WORKER",
+    "normalizationSteps": "PENDING_VERSIONED_C01_V2_TARGET",
+    "normalizedSourceSha256": "PENDING_VERSIONED_C01_V2_TARGET",
+    "sourceToCandidateMapping": "PENDING_VERSIONED_C01_V2_TARGET",
+    "forbiddenInputProof": "PENDING_SOURCE_WORKER"
+  },
+  "forbiddenReuse": {
+    "oldC01Candidate": "artifacts/head20-attempt6-per-cell/c01/c01-target-independent-full-redraw.png",
+    "oldWholeAtlasV2": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-20-dressed-atlas-v2.png",
+    "attempt5Target": "artifacts/head20-attempt5-source-prep/head-20-attempt5-target.png",
+    "diagnosticOrComposite": true
+  },
+  "nextGates": [
+    "versioned c01-v2 160x160 RGBA target and lineage",
+    "RGB checkerboard removal evidence",
+    "exact outside amended union = 0",
+    "mask support outside amended union = 0",
+    "natural-ear coverage = PASS",
+    "no holes / no detached components",
+    "2px and 4px boundary non-intentional diff = 0",
+    "independent critic PASS"
+  ],
+  "publishable": false
+}

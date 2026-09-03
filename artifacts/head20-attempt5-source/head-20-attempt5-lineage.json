@@ -1,0 +1,424 @@
+{
+  "schemaVersion": 1,
+  "attempt": 5,
+  "verdict": "SOURCE_STRUCTURAL_PASS",
+  "sourcePolicy": {
+    "originalPet": {
+      "path": "art-inbox/pet-starpatch-cat-1.png",
+      "sha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253",
+      "metadata": {
+        "format": "png",
+        "mediaType": "image/png",
+        "width": 4096,
+        "height": 4096,
+        "space": "srgb",
+        "channels": 4,
+        "depth": "uchar",
+        "density": 96,
+        "isProgressive": false,
+        "isPalette": false,
+        "bitsPerSample": 8,
+        "hasProfile": false,
+        "hasAlpha": true,
+        "autoOrient": {
+          "width": 4096,
+          "height": 4096
+        }
+      }
+    },
+    "originalAccessory": {
+      "path": "art-inbox/wearable-head-3.png",
+      "sha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+      "metadata": {
+        "format": "png",
+        "mediaType": "image/png",
+        "width": 4096,
+        "height": 4096,
+        "space": "srgb",
+        "channels": 4,
+        "depth": "uchar",
+        "density": 72,
+        "isProgressive": false,
+        "isPalette": false,
+        "bitsPerSample": 8,
+        "hasProfile": false,
+        "hasAlpha": true,
+        "autoOrient": {
+          "width": 4096,
+          "height": 4096
+        }
+      }
+    },
+    "baseAtlas": {
+      "path": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+      "sha256": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+      "metadata": {
+        "format": "webp",
+        "mediaType": "image/webp",
+        "width": 800,
+        "height": 640,
+        "space": "srgb",
+        "channels": 4,
+        "depth": "uchar",
+        "isProgressive": false,
+        "isPalette": false,
+        "hasProfile": false,
+        "hasAlpha": true,
+        "autoOrient": {
+          "width": 800,
+          "height": 640
+        }
+      }
+    },
+    "forbiddenInputs": [
+      "head-20-dressed-atlas-v2",
+      "body-lock diagnostics",
+      "masks",
+      "composites",
+      "prior generated layers"
+    ]
+  },
+  "target": {
+    "path": "artifacts/head20-attempt5-source/head-20-attempt5-independent-full-redraw.png",
+    "sha256": "f3de6ae217357ecac22bcd8edbf69192c381804e9f1b7a1e14c1b54f697bac0d",
+    "width": 800,
+    "height": 640,
+    "channels": 4,
+    "hasAlpha": true
+  },
+  "geometry": {
+    "columns": 5,
+    "rows": 4,
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "transformedBaseBytesOutsideWindows": false
+  },
+  "placementPlans": [
+    {
+      "row": 0,
+      "column": 0,
+      "x": 19,
+      "y": 0,
+      "width": 122,
+      "height": 128,
+      "reference": 0,
+      "referenceBBox": [
+        2102,
+        2331,
+        2807,
+        3098
+      ]
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "x": 19,
+      "y": 0,
+      "width": 122,
+      "height": 128,
+      "reference": 0,
+      "referenceBBox": [
+        2102,
+        2331,
+        2807,
+        3098
+      ]
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "x": 19,
+      "y": 0,
+      "width": 122,
+      "height": 128,
+      "reference": 0,
+      "referenceBBox": [
+        2102,
+        2331,
+        2807,
+        3098
+      ]
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "x": 19,
+      "y": 0,
+      "width": 122,
+      "height": 128,
+      "reference": 0,
+      "referenceBBox": [
+        2102,
+        2331,
+        2807,
+        3098
+      ]
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "x": 19,
+      "y": 0,
+      "width": 122,
+      "height": 128,
+      "reference": 0,
+      "referenceBBox": [
+        2102,
+        2331,
+        2807,
+        3098
+      ]
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "x": 43,
+      "y": 0,
+      "width": 115,
+      "height": 127,
+      "reference": 1,
+      "referenceBBox": [
+        2853,
+        2308,
+        3330,
+        3046
+      ]
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "x": 43,
+      "y": 0,
+      "width": 115,
+      "height": 127,
+      "reference": 1,
+      "referenceBBox": [
+        2853,
+        2308,
+        3330,
+        3046
+      ]
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "x": 43,
+      "y": 0,
+      "width": 115,
+      "height": 127,
+      "reference": 1,
+      "referenceBBox": [
+        2853,
+        2308,
+        3330,
+        3046
+      ]
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "x": 43,
+      "y": 0,
+      "width": 115,
+      "height": 127,
+      "reference": 1,
+      "referenceBBox": [
+        2853,
+        2308,
+        3330,
+        3046
+      ]
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "x": 43,
+      "y": 0,
+      "width": 115,
+      "height": 127,
+      "reference": 1,
+      "referenceBBox": [
+        2853,
+        2308,
+        3330,
+        3046
+      ]
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "x": 17,
+      "y": 0,
+      "width": 126,
+      "height": 123,
+      "reference": 2,
+      "referenceBBox": [
+        3363,
+        2367,
+        4048,
+        3029
+      ]
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "x": 17,
+      "y": 0,
+      "width": 126,
+      "height": 123,
+      "reference": 2,
+      "referenceBBox": [
+        3363,
+        2367,
+        4048,
+        3029
+      ]
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "x": 17,
+      "y": 0,
+      "width": 126,
+      "height": 123,
+      "reference": 2,
+      "referenceBBox": [
+        3363,
+        2367,
+        4048,
+        3029
+      ]
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "x": 17,
+      "y": 0,
+      "width": 126,
+      "height": 123,
+      "reference": 2,
+      "referenceBBox": [
+        3363,
+        2367,
+        4048,
+        3029
+      ]
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "x": 17,
+      "y": 0,
+      "width": 126,
+      "height": 123,
+      "reference": 2,
+      "referenceBBox": [
+        3363,
+        2367,
+        4048,
+        3029
+      ]
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "x": 19,
+      "y": 0,
+      "width": 122,
+      "height": 128,
+      "reference": 0,
+      "referenceBBox": [
+        2102,
+        2331,
+        2807,
+        3098
+      ]
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "x": 19,
+      "y": 0,
+      "width": 122,
+      "height": 128,
+      "reference": 0,
+      "referenceBBox": [
+        2102,
+        2331,
+        2807,
+        3098
+      ]
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "x": 38,
+      "y": 9,
+      "width": 114,
+      "height": 113,
+      "reference": 1,
+      "referenceBBox": [
+        2853,
+        2308,
+        3330,
+        3046
+      ]
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "x": 8,
+      "y": 29,
+      "width": 116,
+      "height": 105,
+      "reference": 1,
+      "referenceBBox": [
+        2853,
+        2308,
+        3330,
+        3046
+      ]
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "x": 19,
+      "y": 0,
+      "width": 122,
+      "height": 128,
+      "reference": 0,
+      "referenceBBox": [
+        2102,
+        2331,
+        2807,
+        3098
+      ]
+    }
+  ],
+  "outsideWindowChanged": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "semanticPreGate": {
+    "helmetAssemblyTopology": "PENDING_MASK_SOLVER",
+    "exactBodyByteLock": true
+  }
+}

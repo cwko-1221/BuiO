@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "category": "head",
+  "wearableId": "head-03",
+  "description": "Flower wreath with legal same-coordinate detached flowers/leaves. Exact target identity, not an artificial alpha bridge, authorizes each semantic component.",
+  "frozenAcceptanceSpec": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/batch-acceptance-prep/frozen-head-specs-v1/head-03-frozen-acceptance-spec.json",
+  "authoritativeFullDressed": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-03-dressed-atlas-v1.png",
+  "atlas": { "width": 800, "height": 640, "cellWidth": 160, "cellHeight": 160, "columns": 5, "rows": 4 },
+  "topology": {
+    "fillEnclosedHoles": true,
+    "minimumComponents4ConnectedPerCell": 1,
+    "maximumComponents4ConnectedPerCell": 16,
+    "expectedEnclosedTransparentComponentsPerCell": 0,
+    "semanticDetachedComponents": {
+      "allowedIdentities": ["wreathBackbone", "profileWreathArc", "obliqueWreathArc", "completeFlowerHead", "completePetalCluster", "completeLeafCluster", "completeBerryCluster", "leftRearWreathArc", "rightRearWreathArc"],
+      "requireSameCoordinateFrozenTargetIdentity": true,
+      "forbidSyntheticAlphaBridges": true,
+      "rejectIdentities": ["looseColourSpeck", "incompletePetalFragment", "duplicatedBlossom", "petColouredFragment"]
+    },
+    "cells": [
+      { "row": 2, "column": 0, "minimumComponents4Connected": 2, "maximumComponents4Connected": 16 },
+      { "row": 2, "column": 1, "minimumComponents4Connected": 2, "maximumComponents4Connected": 16 },
+      { "row": 2, "column": 2, "minimumComponents4Connected": 2, "maximumComponents4Connected": 16 },
+      { "row": 2, "column": 3, "minimumComponents4Connected": 2, "maximumComponents4Connected": 16 },
+      { "row": 2, "column": 4, "minimumComponents4Connected": 2, "maximumComponents4Connected": 16 }
+    ],
+    "emptyCells": []
+  },
+  "solve": { "maximumErasePixels": 0, "unexpectedUnsolvablePixels": 0, "exactRgbaMismatchPixels": 0 },
+  "publish": { "petId": "starpatch-cat", "stage": 1, "wearableId": "head-03", "slot": "head", "occludes": [], "execute": false }
+}

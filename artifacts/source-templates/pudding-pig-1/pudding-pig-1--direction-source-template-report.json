@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "role": "AUTHORING_TEMPLATE_ONLY_NOT_A_WEARABLE_CANDIDATE",
+  "base": {
+    "path": "pet-app/public/assets/art/sprites/pudding-pig-1-atlas-08b728429a.webp",
+    "sha256": "8dd04b4b582903688dde1a236da5fb62244fc04ae5b70f39d722ec1a5bb66e52",
+    "geometry": {
+      "width": 800,
+      "height": 640,
+      "channels": 4,
+      "hasAlpha": true
+    }
+  },
+  "outputDirectory": "artifacts/source-templates/pudding-pig-1",
+  "contract": {
+    "directionBatch": "front,side-right,back,special",
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "columns": 5,
+    "transforms": false
+  },
+  "outputs": [
+    {
+      "id": "front",
+      "row": 0,
+      "cells": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "source": "artifacts/source-templates/pudding-pig-1/pudding-pig-1--front-strip.png",
+      "sha256": "a74394d4334344869ba613926c592ff37aa6bceac7d0c235c8c092ef616e1ad6",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    },
+    {
+      "id": "side-right",
+      "row": 1,
+      "cells": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "source": "artifacts/source-templates/pudding-pig-1/pudding-pig-1--side-right-strip.png",
+      "sha256": "931af9984791ea765e6d1a4f9e18e0c040b58282d57406799e7275baa4421e0f",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    },
+    {
+      "id": "back",
+      "row": 2,
+      "cells": [
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "source": "artifacts/source-templates/pudding-pig-1/pudding-pig-1--back-strip.png",
+      "sha256": "182cf1903d9218c1ba3989f2ef9ce982124a4b93f1dd57d90dd84a70e21e0b83",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    },
+    {
+      "id": "special",
+      "row": 3,
+      "cells": [
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "source": "artifacts/source-templates/pudding-pig-1/pudding-pig-1--special-strip.png",
+      "sha256": "1ff6a88a6e420bdf796da47b36ca36d34aa77710486fc8a92c55d120ef9755dd",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    }
+  ],
+  "generatedAt": "2026-08-25T05:20:32.011Z"
+}

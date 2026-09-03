@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "identity": { "petId": "starpatch-cat", "stage": 1, "wearableId": "head-06", "slot": "head" },
+  "geometry": { "width": 800, "height": 640, "cellWidth": 160, "cellHeight": 160, "columns": 5, "rows": 4, "transformAllowed": false },
+  "target": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-06-full-redraw-canonical-v9.png",
+  "base": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+  "layerOrder": ["rear", "erase", "patch", "frontErase", "front"],
+  "emptyByDefault": [],
+  "layers": {
+    "erase": { "kind": "destination-out", "mask": "artifacts/redrawn-wearable-batch-set-regression/head-06-v9/compositing/head-06-v9-batch-erase.png" },
+    "patch": { "kind": "content", "mask": "artifacts/redrawn-wearable-batch-set-regression/head-06-v9/head-06-v9-canonical-mask.png", "image": "artifacts/redrawn-wearable-batch-set-regression/head-06-v9/compositing/head-06-v9-batch-solved-layer.png" }
+  }
+}

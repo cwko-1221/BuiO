@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c01",
+  "revision": "r6",
+  "verdict": "SOURCE_LAYER_EXTRACTION_READY_FOR_INDEPENDENT_MASK_COMPOSITE_CRITIC",
+  "scope": "fresh full-dressed redraw source and same-coordinate extraction only; no zero-transform composite was produced and no runtime asset was published",
+  "inputs": {
+    "rawFullDressed": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-raw-full-dressed-imagegen-source.png",
+      "originalGeneratedPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-4\\r4-raw-full-dressed-imagegen-source.png",
+      "sha256": "1a8a47e52c220854fb198fb9e7d537ac4d661262579342a163333153282c4fe4",
+      "originalGeneratedSha256": "1a8a47e52c220854fb198fb9e7d537ac4d661262579342a163333153282c4fe4",
+      "width": 1254,
+      "height": 1254,
+      "channels": 3,
+      "hasAlpha": false,
+      "format": "png",
+      "generator": "built-in image_gen",
+      "timestamp": "2026-08-26T05:00:34.962Z",
+      "prompt": "Full front-pose starpatch cat wearing a closed blue-white galaxy space helmet; original pet-starpatch-cat-1 and wearable-head-3 helmet views as visual prototypes; natural ears fully hidden; continuous collar; transparent background."
+    },
+    "originalPrototypes": {
+      "pet": {
+        "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\pet-starpatch-cat-1.png",
+        "sha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253"
+      },
+      "accessory": {
+        "path": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\wearable-head-3.png",
+        "sha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+        "view": "bottom-row right space-helmet front/side/back"
+      }
+    },
+    "forbiddenInputProof": {
+      "notOldTarget": true,
+      "notComposite": true,
+      "notMask": true,
+      "usedRevision1": false,
+      "usedRevision2": false,
+      "usedWholeAtlasV2": false,
+      "usedAttempt5": false
+    }
+  },
+  "outputs": {
+    "coordinateLockedFullDressedTarget": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-target-coordinate-locked-160x160.png",
+      "sha256": "e9a8ae5de3898d82508ab86fd76df7da34438aa1ed714a75aa79dcbf86960639",
+      "dimensions": "160x160 RGBA"
+    },
+    "sameCoordinateHelmetLayer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "bcda4d821d8b26f137bb02d6386e85e04372739917719bab2e6e029a7f120c92",
+      "dimensions": "160x160 RGBA transparent outside mask"
+    },
+    "actualBinaryHelmetMask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "aad8878f93797699430be0057fac0c6b4e8d542196d2b9c71c8d9b5f02ed8ad3",
+      "dimensions": "160x160 RGBA"
+    }
+  },
+  "metrics": {
+    "semanticAllowedUnion": [
+      [
+        38,
+        5,
+        137,
+        127
+      ],
+      [
+        31,
+        28,
+        38,
+        101
+      ]
+    ],
+    "actualMask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "aad8878f93797699430be0057fac0c6b4e8d542196d2b9c71c8d9b5f02ed8ad3",
+      "pathLayer": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-helmet-layer-same-coordinate-160x160.png",
+      "layerSha256": "bcda4d821d8b26f137bb02d6386e85e04372739917719bab2e6e029a7f120c92",
+      "allowedZones": [
+        [
+          38,
+          5,
+          137,
+          127
+        ],
+        [
+          31,
+          28,
+          38,
+          101
+        ]
+      ],
+      "actualSilhouettePixels": 7855,
+      "components4Connected": 1,
+      "enclosedHoles": 0,
+      "outsideAllowedPixels": 0,
+      "trueTailProtectedPixels": 269,
+      "tailIntersectionPixels": 0,
+      "protectedBodyOrPawIntersectionPixels": 0,
+      "leftNaturalEarUnchangedOpaquePixels": 0,
+      "rightNaturalEarUnchangedOpaquePixels": 0,
+      "collarContinuous": {
+        "rows": [
+          95,
+          96,
+          97,
+          98,
+          99,
+          100
+        ],
+        "continuousSpans": [
+          48,
+          113
+        ]
+      }
+    },
+    "exactOutsideAllowedBaseByteDifferencePixels": 0,
+    "layerMaskSupportMismatchPixels": 0,
+    "sourceCheckerPixelsRemoved": 1111671
+  },
+  "gates": {
+    "exactOutsideAllowedBaseLock": true,
+    "maskLayerSupportExact": true,
+    "actualMaskOneComponent": true,
+    "actualMaskHoleFree": true,
+    "actualMaskWithinAllowedUnion": true,
+    "trueTailProtected": true,
+    "naturalEarsOccluded": true,
+    "critic": "PENDING",
+    "publishable": false
+  },
+  "nextRequired": [
+    "independent masking-agent validation of actual r3 mask and layer support",
+    "zero-transform source-over composite against c01 base",
+    "per-pixel target versus composite comparison",
+    "independent visual critic verdict"
+  ],
+  "publishable": false
+}

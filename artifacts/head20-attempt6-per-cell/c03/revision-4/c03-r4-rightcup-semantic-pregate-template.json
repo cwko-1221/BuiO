@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "independent": true,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c03",
+  "revision": "r4",
+  "stage": "RIGHT_CUP_ISOLATED_LAYER_SEMANTIC_PRE_GATE",
+  "status": "WAITING_FOR_FROZEN_R4_TARGET_MASK_LAYER",
+  "command": "node scripts/audit-head20-c03-rightcup-semantic-pregate.mjs <r4-layer-160.png> <r4-mask-160.png> <c03-r4-rightcup-semantic-pregate.json>",
+  "roi": [113, 30, 131, 80],
+  "requiredGates": {
+    "layerMaskSupportExactWithinRoi": true,
+    "rightCupHasActualHelmetSupport": true,
+    "blueOrGoldHelmetEvidence": true,
+    "noUnmistakableOrangeCreamPinkFur": true,
+    "visualCritic": "PENDING"
+  },
+  "classifierPolicy": "Gold trim is a permitted warm helmet material and is reported separately. Only high-confidence orange, cream, or pink fur-like pixels are a mechanical rejection; ambiguous warm pixels are explicitly surfaced for the visual critic."
+}

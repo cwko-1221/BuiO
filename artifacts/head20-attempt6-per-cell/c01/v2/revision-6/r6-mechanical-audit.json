@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c01",
+  "revision": "r6",
+  "verdict": "PASS_MECHANICAL_PENDING_VISUAL_CRITIC",
+  "inputs": {
+    "base": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\c01-base-original-160x160.png",
+      "sha256": "cc87a049bc41b7635bdb1ca4d92f46c1822d73423b86ce7c69c6526fa6ae80d4"
+    },
+    "tail": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-tail-visible-pixels-mask.png",
+      "sha256": "d4fc049a93e5c668cefd21e8e3aa112e20804dbb4f1ebf55b9a4bf6845979f58"
+    },
+    "raw": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-raw-full-dressed-imagegen-source.png",
+      "sha256": "1a8a47e52c220854fb198fb9e7d537ac4d661262579342a163333153282c4fe4",
+      "dimensions": [
+        1254,
+        1254,
+        3
+      ]
+    },
+    "semanticExtension": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-left-earcup-extension-allowed-mask.png",
+      "sha256": "3f5aff0e5a91556fcd61e1332dc4b842de89d1dd9fa43fbac840ddd6e60e5871"
+    }
+  },
+  "cropMarginEvidence": {
+    "rawHelmetCrop": [
+      260,
+      167,
+      764,
+      630
+    ],
+    "transparentColumnsBeforeFirstSubjectAlpha": 41,
+    "sourceSubjectLeftX": 301,
+    "cropLeftX": 260,
+    "note": "the expanded crop deliberately includes x260..300 before the raw source’s first foreground alpha at x301"
+  },
+  "outputs": {
+    "target": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-target-coordinate-locked-160x160.png",
+      "sha256": "e9a8ae5de3898d82508ab86fd76df7da34438aa1ed714a75aa79dcbf86960639"
+    },
+    "layer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "bcda4d821d8b26f137bb02d6386e85e04372739917719bab2e6e029a7f120c92"
+    },
+    "mask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\revision-6\\r6-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "aad8878f93797699430be0057fac0c6b4e8d542196d2b9c71c8d9b5f02ed8ad3"
+    }
+  },
+  "metrics": {
+    "maskPixels": 7855,
+    "components4Connected": 1,
+    "enclosedHoles": 0,
+    "targetOutsideAllowedBaseDiffPixels": 0,
+    "layerMaskSupportMismatchPixels": 0,
+    "maskOutsideAllowedPixels": 0,
+    "tailIntersectionPixels": 0,
+    "bodyLegPawBowlIntersectionPixels": 0,
+    "zeroTransformSourceOverExactTargetMismatchPixels": 0
+  },
+  "scope": "in-memory zero-transform source-over audit only; no composite image and no runtime/publish output were written",
+  "publishable": false
+}

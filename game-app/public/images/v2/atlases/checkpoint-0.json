@@ -1,0 +1,255 @@
+{
+  "frames": {
+    "cp-start-royal-crate": {
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 240,
+        "h": 108
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 108
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 108
+      }
+    },
+    "cp-castle-drawbridge-winch": {
+      "frame": {
+        "x": 248,
+        "y": 4,
+        "w": 240,
+        "h": 122
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 122
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 122
+      }
+    },
+    "cp-market-spice-cart": {
+      "frame": {
+        "x": 492,
+        "y": 4,
+        "w": 240,
+        "h": 106
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 106
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 106
+      }
+    },
+    "cp-forest-mushroom-log": {
+      "frame": {
+        "x": 736,
+        "y": 4,
+        "w": 240,
+        "h": 119
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 119
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 119
+      }
+    },
+    "cp-farm-windmill-gear": {
+      "frame": {
+        "x": 980,
+        "y": 4,
+        "w": 240,
+        "h": 110
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 110
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 110
+      }
+    },
+    "cp-snow-ice-sled": {
+      "frame": {
+        "x": 1224,
+        "y": 4,
+        "w": 240,
+        "h": 99
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 99
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 99
+      }
+    },
+    "cp-factory-gate-console": {
+      "frame": {
+        "x": 1468,
+        "y": 4,
+        "w": 240,
+        "h": 120
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 120
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 120
+      }
+    },
+    "cp-observatory-astrolabe": {
+      "frame": {
+        "x": 1712,
+        "y": 4,
+        "w": 240,
+        "h": 150
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 150
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 150
+      }
+    },
+    "cp-vault-lockbox": {
+      "frame": {
+        "x": 4,
+        "y": 158,
+        "w": 240,
+        "h": 138
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 138
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 138
+      }
+    },
+    "cp-workshop-toolbench": {
+      "frame": {
+        "x": 248,
+        "y": 158,
+        "w": 240,
+        "h": 89
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 89
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 89
+      }
+    },
+    "cp-office-typewriter-desk": {
+      "frame": {
+        "x": 492,
+        "y": 158,
+        "w": 240,
+        "h": 85
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 85
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 85
+      }
+    },
+    "cp-summit-beacon-plinth": {
+      "frame": {
+        "x": 736,
+        "y": 158,
+        "w": 240,
+        "h": 91
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 91
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 91
+      }
+    }
+  },
+  "meta": {
+    "app": "BuiO atlas builder",
+    "version": "2",
+    "image": "checkpoint-0.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 2048
+    },
+    "scale": "1"
+  }
+}

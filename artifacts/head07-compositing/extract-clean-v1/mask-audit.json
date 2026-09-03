@@ -1,0 +1,571 @@
+{
+  "inputs": {
+    "targetPath": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-07-independent-proof/head-07-clean-target-v1.png",
+    "broadMaskPath": "artifacts/head07-compositing/extract-clean-v1/mask.png",
+    "refinedMaskPath": "artifacts/head07-compositing/extract-clean-v1/mask.png",
+    "layerPath": "artifacts/head07-compositing/extract-clean-v1/layer.png"
+  },
+  "canvas": {
+    "width": 800,
+    "height": 640,
+    "cell": 160
+  },
+  "geometry": {
+    "transformed": false,
+    "resampled": false,
+    "shifted": false,
+    "refinedMaskIsSubsetOfBroadMask": true
+  },
+  "atlas": {
+    "maskPixels": 512000,
+    "subsetViolations": 0,
+    "layerCoordinateOrSourceViolations": 141399,
+    "nonBinaryMaskAlphaPixels": 0,
+    "passingCells": 0,
+    "totalCells": 20
+  },
+  "limitation": "Technical PASS does not certify semantic purity. Every cell still requires visual rejection of pet fur, ears, tail, body, eyes, and shadows.",
+  "technicalVerdict": "REJECT",
+  "cells": [
+    {
+      "row": 0,
+      "column": 0,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 8000,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 7889,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6671,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6801,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6308,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 7224,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6769,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6243,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6815,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6170,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6950,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6716,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6218,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6780,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 6737,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 7734,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 7517,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 8167,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 7897,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "pixels": 25600,
+      "bounds": [
+        0,
+        0,
+        159,
+        159
+      ],
+      "subsetViolations": 0,
+      "layerCoordinateOrSourceViolations": 7793,
+      "nonBinaryMaskAlphaPixels": 0,
+      "components": [
+        {
+          "pixels": 25600,
+          "bounds": [
+            0,
+            0,
+            159,
+            159
+          ]
+        }
+      ],
+      "enclosedTransparentHoles": [],
+      "technicalVerdict": "REJECT"
+    }
+  ]
+}

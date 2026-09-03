@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "role": "AUTHORING_TEMPLATE_ONLY_NOT_A_WEARABLE_CANDIDATE",
+  "base": {
+    "path": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "sha256": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+    "geometry": {
+      "width": 800,
+      "height": 640,
+      "channels": 4,
+      "hasAlpha": true
+    }
+  },
+  "outputDirectory": "artifacts/source-templates/starpatch-cat-1",
+  "contract": {
+    "directionBatch": "front,side-right,back,special",
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "columns": 5,
+    "transforms": false
+  },
+  "outputs": [
+    {
+      "id": "front",
+      "row": 0,
+      "cells": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "source": "artifacts/source-templates/starpatch-cat-1/starpatch-cat-1--front-strip.png",
+      "sha256": "265a99efc2e465c76cf513a097348a11df5ce2bce71c8d855f591c752309e377",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    },
+    {
+      "id": "side-right",
+      "row": 1,
+      "cells": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "source": "artifacts/source-templates/starpatch-cat-1/starpatch-cat-1--side-right-strip.png",
+      "sha256": "be9399d2196847c6fa038128579e15a312b583d298a2230641b2aaffde53f842",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    },
+    {
+      "id": "back",
+      "row": 2,
+      "cells": [
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "source": "artifacts/source-templates/starpatch-cat-1/starpatch-cat-1--back-strip.png",
+      "sha256": "2de7542346fb8378505fa81f9d6b21922fc5151fc527cb4bb9e9c4f11da53ade",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    },
+    {
+      "id": "special",
+      "row": 3,
+      "cells": [
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "source": "artifacts/source-templates/starpatch-cat-1/starpatch-cat-1--special-strip.png",
+      "sha256": "27dd46381333636b822899f0860a42a78e05ef2516225a12a0674a04af879110",
+      "geometry": {
+        "width": 800,
+        "height": 160,
+        "channels": 4,
+        "hasAlpha": true,
+        "transformed": false
+      }
+    }
+  ],
+  "generatedAt": "2026-08-25T05:20:31.584Z"
+}

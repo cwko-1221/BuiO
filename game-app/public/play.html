@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>唔好望落嚟 | BuiO 遊戲</title>
+  <link rel="stylesheet" href="/game/css/game.css?v=20260818-touch-2">
+</head>
+<body>
+
+  <!-- ============ JOIN ============ -->
+  <div id="joinScreen" class="screen active">
+    <div class="panel-center">
+      <div class="card">
+        <div class="game-logo">🏔️</div>
+        <h1>唔好望落嚟</h1>
+        <p class="sub">答問題儲能量，一路跳上山頂！千祈唔好望落嚟……</p>
+        <div id="roomList" class="room-list">
+          <p class="muted"><span class="pulse-dot"></span>搵緊老師嘅遊戲房間…</p>
+        </div>
+        <div id="joinError" class="error-msg"></div>
+        <button class="btn secondary" style="margin-top:8px" onclick="location.href='/'">🏠 回主頁</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LOBBY ============ -->
+  <div id="lobbyScreen" class="screen">
+    <div class="panel-center">
+      <div class="card">
+        <div class="game-logo">⛺</div>
+        <h1 id="lobbySetTitle">準備中</h1>
+        <p class="sub" id="lobbyHostName"></p>
+        <p class="lobby-wait"><span class="pulse-dot"></span>等緊老師開始遊戲…</p>
+        <div class="avatar-customizer">
+          <div class="avatar-preview" aria-label="角色預覽">
+            <img id="avatarPreviewImage" class="avatar-preview-image character-blue" src="/game/images/v2/characters/player-idle.webp" alt="">
+            <span id="avatarPreviewAccessory" class="avatar-preview-accessory" aria-hidden="true"></span>
+          </div>
+          <div class="avatar-options">
+            <div class="avatar-option-group">
+              <span class="avatar-option-label">角色顏色</span>
+              <div class="character-swatches" role="group" aria-label="選擇角色顏色">
+                <button class="character-swatch swatch-blue" type="button" data-character="blue" aria-label="海藍角色" title="海藍角色"></button>
+                <button class="character-swatch swatch-mint" type="button" data-character="mint" aria-label="薄荷角色" title="薄荷角色"></button>
+                <button class="character-swatch swatch-coral" type="button" data-character="coral" aria-label="珊瑚角色" title="珊瑚角色"></button>
+                <button class="character-swatch swatch-violet" type="button" data-character="violet" aria-label="星紫角色" title="星紫角色"></button>
+              </div>
+            </div>
+            <div class="avatar-option-group">
+              <span class="avatar-option-label">配件</span>
+              <div class="accessory-options" role="group" aria-label="選擇角色配件">
+                <button class="accessory-option" type="button" data-accessory="none" aria-label="不使用配件" title="不使用配件">∅</button>
+                <button class="accessory-option" type="button" data-accessory="cap" aria-label="學士帽" title="學士帽">🎓</button>
+                <button class="accessory-option" type="button" data-accessory="crown" aria-label="皇冠" title="皇冠">👑</button>
+                <button class="accessory-option" type="button" data-accessory="star" aria-label="星星" title="星星">⭐</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:20px; font-size:14px; color:#6b7690; text-align:left; background:#f5f8fc; border-radius:12px; padding:14px;">
+          <b>玩法：</b><br>
+          🕹️ 左右移動 + 跳躍會消耗 ⚡能量<br>
+          📝 隨時撳「答題」，答啱補充能量<br>
+          🏔️ 最快爬上山頂就贏！跌落嚟要再爬過…
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ GAME ============ -->
+  <div id="gameScreen" class="screen">
+    <div id="gameCanvas" tabindex="-1" aria-label="唔好望落嚟遊戲世界"></div>
+
+    <div class="hud">
+      <div class="hud-cluster hud-cluster-primary">
+        <div class="energy-wrap" aria-label="能量">
+          <span class="energy-icon">⚡</span>
+          <div class="energy-copy"><small>能量</small><strong id="energyText">40</strong></div>
+          <div class="energy-bar"><div id="energyFill" class="energy-fill"></div></div>
+        </div>
+        <div class="hud-pill altitude-pill" id="heightPill">🏔️ 高度 0m</div>
+        <div class="hud-pill stage-pill" id="stagePill">01 · 城堡</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="hud-cluster hud-cluster-secondary">
+        <button class="audio-toggle-btn" id="audioBtn" type="button" aria-label="關閉遊戲聲音" aria-pressed="false">🔊</button>
+        <button class="reset-position-btn" id="resetBtn" type="button" aria-label="返回最近檢查點">↻ 復位</button>
+        <div class="hud-pill streak-pill" id="streakPill" style="display:none">🔥 0</div>
+        <div class="hud-pill timer-pill" id="timerPill">--:--</div>
+      </div>
+    </div>
+
+    <div id="toasts"></div>
+
+    <button id="answerBtn" class="answer-btn-float" aria-label="答題補充能量"><span class="zap">⚡</span><span>答題</span><small>補充能量</small></button>
+
+    <div class="touch-controls">
+      <div class="cluster">
+        <button class="tbtn" id="btnLeft" type="button" aria-label="向左移動">◀</button>
+        <button class="tbtn" id="btnRight" type="button" aria-label="向右移動">▶</button>
+      </div>
+      <div class="cluster">
+        <button class="tbtn" id="btnJump" type="button" aria-label="跳躍">⬆</button>
+      </div>
+    </div>
+
+    <!-- question modal -->
+    <div id="qOverlay" class="q-overlay">
+      <div class="q-box">
+        <div id="qText" class="q-text"></div>
+        <div id="qChoices" class="q-choices"></div>
+        <div id="qFeedback" class="q-feedback"></div>
+        <button id="qClose" class="btn secondary q-close" style="display:none">繼續爬山 🧗</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RESULTS ============ -->
+  <div id="resultScreen" class="screen">
+    <div class="panel-center">
+      <div class="card" style="max-width:540px">
+        <div class="game-logo" id="resultEmoji">🏁</div>
+        <h1>遊戲結束</h1>
+        <p class="sub" id="resultSub"></p>
+        <div id="resultsList" class="results-list"></div>
+        <button class="btn" onclick="location.href='/'">🏠 回主頁</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/game/vendor/phaser/phaser.min.js"></script>
+  <script type="module" src="/game/js/v2/main.js?v=20260818-touch-2"></script>
+</body>
+</html>

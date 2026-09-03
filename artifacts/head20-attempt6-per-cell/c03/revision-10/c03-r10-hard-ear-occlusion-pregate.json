@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "independent": true,
+  "cell": "c03",
+  "revision": "r10",
+  "stage": "HARD_NATURAL_EAR_OPAQUE_OCCLUSION_PRE_GATE",
+  "contract": "Every selected original natural-ear pixel needs hardware alpha >=192; low-alpha visor tint is insufficient. Opaque hardware must remain out of the inner eye/face guard.",
+  "inputs": {
+    "naturalEarMask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-10\\c03-natural-ear-pixels-mask.png",
+      "sha256": "77a2084a835c3f547d509b6b8eaaae092b9f51e850928e3756d8cdd635e461ee"
+    },
+    "innerFaceGuard": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-10\\c03-inner-face-opaque-hardware-guard-mask.png",
+      "sha256": "e529ae8d64506ac66b4e6ca1df2032ee06bf90780874fa3165a7ea416d5c1ac2"
+    },
+    "hardwareLayer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-10\\c03-r10-accessory-only-hardware-tint-candidate-layer-160x160.png",
+      "sha256": "94ef5cbbf48e922d1bd6903264c46b8ac0fc245993186e7e7b1d15648765c742"
+    }
+  },
+  "metrics": {
+    "selectedEarPixels": 549,
+    "earNotOpaque": 0,
+    "faceGuardPixels": 1173,
+    "faceOpaque": 0,
+    "samples": {
+      "earNotOpaque": [],
+      "faceOpaque": []
+    }
+  },
+  "gates": {
+    "allMeasuredNaturalEarPixelsHaveOpaqueHardware": true,
+    "noOpaqueHardwareInInnerEyeFaceGuard": true,
+    "visualCritic": "PENDING"
+  },
+  "verdict": "PASS_HARD_EAR_OCCLUSION_PENDING_VISUAL_CRITIC",
+  "publishable": false
+}

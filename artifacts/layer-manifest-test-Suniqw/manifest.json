@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "petId": "fixture-cat",
+    "stage": 1,
+    "wearableId": "fixture-head",
+    "slot": "head"
+  },
+  "geometry": {
+    "width": 800,
+    "height": 640,
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "columns": 5,
+    "rows": 4,
+    "transformAllowed": false
+  },
+  "target": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\layer-manifest-test-Suniqw\\target.png",
+  "base": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\layer-manifest-test-Suniqw\\base.png",
+  "layerOrder": [
+    "rear",
+    "erase",
+    "patch",
+    "frontErase",
+    "front"
+  ],
+  "emptyByDefault": [],
+  "layers": {
+    "erase": {
+      "kind": "destination-out",
+      "mask": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\layer-manifest-test-Suniqw\\erase-mask.png"
+    },
+    "patch": {
+      "kind": "content",
+      "mask": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\layer-manifest-test-Suniqw\\patch-mask.png",
+      "image": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\layer-manifest-test-Suniqw\\patch.png"
+    }
+  }
+}

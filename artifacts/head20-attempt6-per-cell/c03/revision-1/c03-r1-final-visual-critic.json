@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c03",
+  "revision": "r1",
+  "independent": true,
+  "reviewedFrozenLineage": {
+    "path": "artifacts/head20-attempt6-per-cell/c03/revision-1/c03-r1-lineage.json",
+    "frozen": true,
+    "rawFullDressedSourceSha256": "f76d8e95f94ebff7e492ca859ae5485d3460f5a00be8f7ec3fede50307354793"
+  },
+  "reviewedArtifacts": {
+    "target": {
+      "path": "artifacts/head20-attempt6-per-cell/c03/revision-1/c03-r1-target-coordinate-locked-160x160.png",
+      "sha256": "5736742f716457ec5ec75a784640102e941a0d29b37791685007b079119fe122"
+    },
+    "layer": {
+      "path": "artifacts/head20-attempt6-per-cell/c03/revision-1/c03-r1-helmet-layer-same-coordinate-160x160.png",
+      "sha256": "d24b153cccd5fe7cb34490414e6c27a5d09bb4cb06150aebb8c5fa6c6385d470"
+    },
+    "mask": {
+      "path": "artifacts/head20-attempt6-per-cell/c03/revision-1/c03-r1-helmet-mask-same-coordinate-160x160.png",
+      "sha256": "ffb765b1208a0132ea7fa8cf15581f5050a907f063c3464adb24cfa3ff9a8ac5"
+    },
+    "mechanicalAudit": "artifacts/head20-attempt6-per-cell/c03/revision-1/c03-r1-mechanical-audit.json"
+  },
+  "mechanicalGateSummary": {
+    "oneFourConnectedHoleFreeMask": true,
+    "tailBodyChestLegPawProtected": true,
+    "zeroTransformExactTargetMismatchPixels": 0
+  },
+  "visualReview": {
+    "method": "nearest-neighbour inspection of frozen target, isolated helmet layer, mask, original base crop, and raw full-dressed source",
+    "leftHelmetCup": "PASS: screen-left cup is blue-and-gold, rounded, and connected without a rectangular crop artifact.",
+    "faceAndCollar": "PASS: both eyes are visible and the collar rim is generally curved without a square horizontal seam.",
+    "rightHelmetCupAndAnatomyIsolation": "FAIL: the isolated helmet layer itself contains a screen-right orange/cream, pink-edged animal-anatomy-shaped lobe (approximately local x=114..131, y=30..100) instead of a symmetric rounded blue-and-gold helmet cup. The same lobe is visible in the composed target. It is therefore not the untouched base tail; it is pet anatomy accidentally extracted into the accessory layer.",
+    "naturalEarRequirement": "FAIL: the right-side anatomy-shaped lobe has the appearance of exposed cat ear/tail fur rather than a helmet ear cap. Regardless of whether its raw-source origin is ear or tail, it violates the requirement that the isolated layer contain only the redrawn wearable plus required occlusion support.",
+    "releaseQuality": "FAIL: target asymmetry and embedded pet anatomy make this read as a crop/extraction mistake rather than a properly worn, symmetric closed helmet. Exact reconstruction of this target does not remedy the semantic defect."
+  },
+  "verdict": "REJECT_PENDING_C03_R2",
+  "requiredRevision": [
+    "Redraw/extract c03 only from an appropriate full-dressed source; retain original base tail, body and paws outside the actual accessory silhouette.",
+    "Replace the screen-right fur/ear/tail lobe with the genuine rounded blue-and-gold right helmet cup from the full redraw/reference.",
+    "Require a visual layer-isolation pre-gate: isolated headwear may not contain orange/cream pet anatomy except explicitly declared, necessary occlusion support.",
+    "Re-run zero-transform and independent visual review after freezing the new assets."
+  ],
+  "publishable": false
+}

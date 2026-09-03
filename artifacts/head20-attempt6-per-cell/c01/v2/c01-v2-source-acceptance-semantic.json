@@ -1,0 +1,499 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": {
+    "row": 0,
+    "column": 0,
+    "id": "c01",
+    "size": "160x160"
+  },
+  "verdict": "REJECT",
+  "inputs": {
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\sprites\\starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "baseSha256": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+    "baseCropSha256": "355e2bc9201bc25af4855def626fb87846a42ab2a203fa50c9737ab1ed6c309b",
+    "candidatePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-v2-target-coordinate-locked.png",
+    "candidateSha256": "f0f60a5a18cb20fad8e7a52958a444d42cc143599ddef76e16a163c24f2e72fb",
+    "specPath": "C:\\Users\\kochu\\Documents\\BuiO\\scripts\\redrawn-category-specs\\head-20-closed-helmet-replacement.json",
+    "specSha256": "79d2288c41176ac1e394ad234211b84f77c8adc47f017abd1dd9ff92157d6127",
+    "prototypePetPath": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\pet-starpatch-cat-1.png",
+    "prototypePetSha256": "3814ef025dfb7d87ea95d5c0622f22d8900af65967321adbaf202bbaae09c253",
+    "prototypeAccessoryPath": "C:\\Users\\kochu\\Documents\\BuiO\\art-inbox\\wearable-head-3.png",
+    "prototypeAccessorySha256": "d1e5038197fcbab424bfc200454cbc3e37048ac02414a27bf86330170e7b7954",
+    "occlusionMaskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-v2-replacement-union-mask.png",
+    "occlusionMaskSha256": "bee974924a353e7e0493d14edee06aa2285ca0ffa12f8a692aa6e9044d32eddb",
+    "lineagePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c01\\v2\\c01-v2-lineage.json",
+    "lineageSha256": "b1a153578255ebb35eb7aaa631b42c880a0386c551ac15a193ec207b31f69105"
+  },
+  "lineageAudit": {
+    "declaredVerdict": "REJECT_SOURCE_SEMANTIC_EAR_GATE",
+    "declaredTopologyPass": false,
+    "declaredOutsideWindowChanged": null,
+    "declaredComponents4": null,
+    "targetShaMatchesLineage": false,
+    "evidence": {
+      "rawFullRedrawPathAndSha": true,
+      "rawFullRedrawDimensionsAlpha": true,
+      "rawFullRedrawExists": true,
+      "generationPromptModelTimestamp": true,
+      "normalizationStepsAndHashes": true,
+      "sourceToCandidateMapping": true,
+      "forbiddenInputProof": true
+    },
+    "evidencePass": true
+  },
+  "contract": {
+    "source": "original pet crop + original wearable-head-3 space-helmet three-view reference",
+    "outsideWindow": "byte-identical to original base outside the amended zone union",
+    "boundaryRing": "2px and 4px inner rings; mismatches are allowed only when explicitly covered by occlusion mask",
+    "candidateDiffIslands": "diagnostic only; anti-aliased/highlight islands are not accessory topology",
+    "replacementUnionTopology": "declared binary replacement/erase union must be one 4-connected component with zero enclosed holes"
+  },
+  "metrics": {
+    "replacementZones": [
+      [
+        38,
+        5,
+        137,
+        127
+      ],
+      [
+        31,
+        28,
+        38,
+        101
+      ]
+    ],
+    "exactOutsideWindowDifferencePixels": 0,
+    "maskOutsideWindowPixels": 0,
+    "maskUnionMismatchPixels": 0,
+    "candidateDiffPixels": 11129,
+    "intentionalDiffPixels": 11129,
+    "candidateDiffComponents4Connected": 42,
+    "candidateDiffDetachedComponentCount": 41,
+    "candidateDiffDetachedComponents": [
+      {
+        "pixels": 2,
+        "bbox": [
+          59,
+          8,
+          61,
+          9
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          94,
+          8,
+          96,
+          9
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          57,
+          9,
+          59,
+          10
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          48,
+          15,
+          49,
+          16
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          107,
+          16,
+          108,
+          17
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          108,
+          17,
+          109,
+          18
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          109,
+          18,
+          110,
+          19
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          43,
+          19,
+          44,
+          20
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          110,
+          19,
+          111,
+          20
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          42,
+          20,
+          43,
+          21
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          111,
+          20,
+          112,
+          21
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          112,
+          21,
+          113,
+          22
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          113,
+          22,
+          114,
+          23
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          118,
+          29,
+          119,
+          31
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          120,
+          29,
+          121,
+          31
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          119,
+          31,
+          120,
+          33
+        ]
+      },
+      {
+        "pixels": 12,
+        "bbox": [
+          120,
+          31,
+          123,
+          38
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          130,
+          49,
+          131,
+          51
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          131,
+          51,
+          132,
+          53
+        ]
+      },
+      {
+        "pixels": 6,
+        "bbox": [
+          132,
+          53,
+          133,
+          59
+        ]
+      },
+      {
+        "pixels": 5,
+        "bbox": [
+          133,
+          59,
+          134,
+          64
+        ]
+      },
+      {
+        "pixels": 6,
+        "bbox": [
+          132,
+          64,
+          133,
+          70
+        ]
+      },
+      {
+        "pixels": 3,
+        "bbox": [
+          131,
+          71,
+          132,
+          74
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          130,
+          74,
+          131,
+          76
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          129,
+          76,
+          130,
+          77
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          130,
+          77,
+          131,
+          78
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          131,
+          78,
+          132,
+          79
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          132,
+          79,
+          133,
+          80
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          133,
+          80,
+          134,
+          81
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          134,
+          81,
+          135,
+          83
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          135,
+          83,
+          136,
+          84
+        ]
+      },
+      {
+        "pixels": 3,
+        "bbox": [
+          136,
+          84,
+          137,
+          87
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          34,
+          87,
+          35,
+          89
+        ]
+      },
+      {
+        "pixels": 26,
+        "bbox": [
+          31,
+          89,
+          36,
+          101
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          35,
+          89,
+          36,
+          91
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          36,
+          91,
+          37,
+          93
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          37,
+          93,
+          38,
+          95
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          38,
+          95,
+          39,
+          96
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          39,
+          96,
+          40,
+          97
+        ]
+      },
+      {
+        "pixels": 2,
+        "bbox": [
+          40,
+          99,
+          41,
+          101
+        ]
+      },
+      {
+        "pixels": 1,
+        "bbox": [
+          36,
+          100,
+          37,
+          101
+        ]
+      }
+    ],
+    "replacementUnionComponents4Connected": 1,
+    "replacementUnionHolePixels": 0,
+    "naturalEarCoverage": {
+      "leftNaturalEarRoi": {
+        "zone": [
+          31,
+          28,
+          58,
+          55
+        ],
+        "baseOpaquePixels": 565,
+        "unchangedOpaquePixels": 0,
+        "pass": true
+      },
+      "rightNaturalEarRoi": {
+        "zone": [
+          103,
+          28,
+          126,
+          55
+        ],
+        "baseOpaquePixels": 478,
+        "unchangedOpaquePixels": 15,
+        "pass": false
+      }
+    },
+    "innerBoundaryRing2px": {
+      "total": 1172,
+      "mismatches": 740,
+      "intentional": 1172,
+      "mismatchesOutsideIntentional": 0
+    },
+    "innerBoundaryRing4px": {
+      "total": 2215,
+      "mismatches": 1443,
+      "intentional": 2215,
+      "mismatchesOutsideIntentional": 0
+    },
+    "occlusionMaskDeclared": true
+  },
+  "gates": {
+    "baseCropRecorded": true,
+    "prototypeLineageRecorded": true,
+    "exactOutsideWindowPass": true,
+    "maskOutsideWindowPass": true,
+    "maskEqualsReplacementUnionPass": true,
+    "naturalEarCoveragePass": false,
+    "innerBoundaryRing2Pass": true,
+    "innerBoundaryRing4Pass": true,
+    "noDetachedComponentsPass": true,
+    "critic": "PENDING"
+  },
+  "publishable": false
+}

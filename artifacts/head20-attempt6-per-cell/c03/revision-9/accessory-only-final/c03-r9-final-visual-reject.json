@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "cell": "c03",
+  "revision": "r9-accessory-only-final",
+  "verdict": "REJECT_VISUAL_NATURAL_EARS_VISIBLE_THROUGH_TINT",
+  "defect": "The topology mask covers both natural ears, but its visor tint is translucent there; the original orange/pink ear anatomy remains visible. A closed helmet requires opaque hardware coverage over the actual ear pixels.",
+  "disposition": "Final target/layer/masks are retained as reject evidence and must not be mutated or published.",
+  "nextRevisionRequirement": "Use frozen accessory-only source layers only as inputs; add blue/gold opaque ear-seat/cap geometry over measured natural-ear pixels, excluding eye/face/tail/body/paw regions; pass hard opaque-ear-occlusion plus existing anatomy, material, geometry and exact-composite gates."
+}

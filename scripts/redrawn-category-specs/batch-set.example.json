@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "output": "artifacts/redrawn-wearable-batch-set/example",
+  "concurrency": 2,
+  "items": [
+    {
+      "id": "head-02",
+      "base": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+      "target": "REPLACE_WITH_FROZEN_TARGET.png",
+      "spec": "scripts/redrawn-category-specs/head-multi-component.example.json",
+      "lineage": "REPLACE_WITH_TARGET_LINEAGE.json",
+      "output": "artifacts/redrawn-wearable-batch-set/example/head-02",
+      "prefix": "head-02",
+      "publish": { "petId": "starpatch-cat", "stage": 1, "wearableId": "head-02", "slot": "head", "occludes": [] }
+    },
+    {
+      "id": "head-20",
+      "base": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+      "target": "REPLACE_WITH_FROZEN_TARGET.png",
+      "spec": "scripts/redrawn-category-specs/head-closed-helmet.example.json",
+      "lineage": "REPLACE_WITH_TARGET_LINEAGE.json",
+      "output": "artifacts/redrawn-wearable-batch-set/example/head-20",
+      "prefix": "head-20",
+      "publish": { "petId": "starpatch-cat", "stage": 1, "wearableId": "head-20", "slot": "head", "occludes": ["face"] }
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "verdict": "DATA_PASS",
+  "mode": "DRY_RUN_NO_PUBLISH",
+  "category": "head",
+  "noPublish": true,
+  "manifestOrRuntimeModified": false,
+  "geometry": {
+    "canvas": "800x640",
+    "cell": "160x160",
+    "transformed": false,
+    "resampled": false
+  },
+  "lineage": {
+    "verdict": "PASS",
+    "targetHashBefore": "68a7b09974115cd9ab240d7c49b634d02bcebd09e50923b1fabb5b472b8c7d6c",
+    "targetHashAfter": "68a7b09974115cd9ab240d7c49b634d02bcebd09e50923b1fabb5b472b8c7d6c",
+    "targetImmutable": true,
+    "targetPredatesMask": true,
+    "checks": [
+      {
+        "name": "lineage verdict is PASS",
+        "pass": true
+      },
+      {
+        "name": "lineage declares this exact frozen target path",
+        "pass": true
+      },
+      {
+        "name": "lineage declares this exact frozen target hash",
+        "pass": true
+      },
+      {
+        "name": "lineage proves no earlier composite byte-copy became target",
+        "pass": true
+      },
+      {
+        "name": "target existed before this extraction run",
+        "pass": true
+      },
+      {
+        "name": "target filename is not composite/recompose",
+        "pass": true
+      },
+      {
+        "name": "frozen target predates the seed mask used for retry",
+        "pass": true
+      },
+      {
+        "name": "frozen target predates generated canonical mask",
+        "pass": true
+      }
+    ]
+  },
+  "extraction": {
+    "reportPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3-cell-retry\\head-05-v3-cell-retry-extraction-report.json",
+    "verdict": "PASS",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3-cell-retry\\head-05-v3-cell-retry-canonical-mask.png",
+    "maskHash": "1de1b5dcc7cb915fae138e16c6322889712c2a70610fbb30c9ed790b7b32d153",
+    "selectedCells": [
+      "r0c0"
+    ]
+  },
+  "solve": {
+    "verdict": "DATA_PASS",
+    "reportPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3-cell-retry\\compositing\\head-05-v3-cell-retry-batch-report.json",
+    "metrics": {
+      "maskPixels": 91186,
+      "maskPixelsWithNoTargetBaseDifference": 105,
+      "nonBinaryMaskAlphaPixels": 0,
+      "maskTransparentRgbNonZeroPixels": 0,
+      "targetBaseDifferencesOutsideMask": 0,
+      "enclosedMaskHolePixels": 0,
+      "cellsWithOneFourConnectedComponent": 20,
+      "forcedErasePixels": 0,
+      "unexpectedUnsolvablePixels": 0,
+      "eraseOutsideMaskPixels": 0,
+      "layerOutsideMaskPixels": 0,
+      "layerTransparentRgbNonZeroPixels": 0,
+      "eraseTransparentRgbNonZeroPixels": 0,
+      "frozenTargetTransparentRgbNonZeroPixels": 43867,
+      "exactRgbaMismatchPixels": 0
+    },
+    "outputs": {
+      "layerPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3-cell-retry\\compositing\\head-05-v3-cell-retry-batch-solved-layer.png",
+      "erasePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3-cell-retry\\compositing\\head-05-v3-cell-retry-batch-erase.png",
+      "compositePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3-cell-retry\\compositing\\head-05-v3-cell-retry-batch-composite.png",
+      "diffPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3-cell-retry\\compositing\\head-05-v3-cell-retry-batch-diff.png",
+      "sha256": {
+        "layer": "756732e05ac56949db62ab8795fbaf00076dfc4790a6b3da0470a26f1325a18e",
+        "erase": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f",
+        "composite": "d96390ba40821fa10d0fa7eea585fa885ab3a1ab767fe2c1271f6bc007487aed",
+        "diff": "bd68f0c7c9af319053d818775ed21dea3355d9f5d634fc4d30eeb49dd216e89f"
+      }
+    }
+  },
+  "categoryQa": {
+    "verdict": "PASS"
+  },
+  "proof": {
+    "transformed": false,
+    "displayScale": 4,
+    "selectedCells": [
+      "r0c0"
+    ],
+    "contactSheetPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3-cell-retry\\proof-4x\\selected-frames-left-vs-right-4x.png",
+    "files": [
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-dry-run\\head-05-v3-cell-retry\\proof-4x\\frame-r0-c0-left-vs-right-4x.png"
+    ]
+  },
+  "expectedComparison": {
+    "verdict": "PASS",
+    "maskDecodedMismatchPixels": 0,
+    "outputDecodedMismatchPixels": {
+      "layer": 0,
+      "erase": 0,
+      "composite": 0,
+      "diff": 0
+    },
+    "metricMismatches": []
+  },
+  "failedCells": [],
+  "retry": {
+    "supported": true,
+    "mutationScope": "only selected mask cells; global exact recomposition is always rechecked",
+    "command": null
+  },
+  "completedUtc": "2026-08-23T04:22:53.574Z"
+}

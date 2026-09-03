@@ -1,0 +1,1898 @@
+{
+  "verdict": "REJECT",
+  "category": "head",
+  "geometry": {
+    "canvas": "800x640",
+    "cell": "160x160",
+    "resized": false,
+    "rotated": false,
+    "shifted": false,
+    "stretched": false,
+    "resampled": false
+  },
+  "retry": {
+    "partialRetry": false,
+    "selectedCells": [
+      "r0c0",
+      "r0c1",
+      "r0c2",
+      "r0c3",
+      "r0c4",
+      "r1c0",
+      "r1c1",
+      "r1c2",
+      "r1c3",
+      "r1c4",
+      "r2c0",
+      "r2c1",
+      "r2c2",
+      "r2c3",
+      "r2c4",
+      "r3c0",
+      "r3c1",
+      "r3c2",
+      "r3c3",
+      "r3c4"
+    ],
+    "seedMaskPath": null
+  },
+  "inputs": {
+    "basePath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\sprites\\starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "targetPath": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v2.png",
+    "specPath": "C:\\Users\\kochu\\Documents\\BuiO\\scripts\\redrawn-category-specs\\head-20-closed-helmet-replacement.json",
+    "lineagePath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-lineage-audit-attachment.json",
+    "sha256": {
+      "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+      "target": "370378be0360e31dd6ce82e37a4cf852ac6a9fc2c43902b51946b6e4c340d924",
+      "spec": "abe3b34f7f5c777a70c1d1d6f4d6de3bdbc3a0198e6c18adad8c1176827c5271",
+      "lineage": "eff360b69b6f5b06763fb1675052c2958de5f5964de1787126906763bf42ca11"
+    }
+  },
+  "output": {
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-next\\head20-attachment-bridged-v2\\head-20-attachment-bridged-v2-canonical-mask.png",
+    "sha256": "c246cec494c60ab5279ccd63a369a7f6426aecd9618e83b52aca5f95c29899f2"
+  },
+  "lineageChecks": [
+    {
+      "name": "lineage verdict is PASS",
+      "pass": true
+    },
+    {
+      "name": "lineage declares this exact frozen target path",
+      "pass": true
+    },
+    {
+      "name": "lineage declares this exact frozen target hash",
+      "pass": true
+    },
+    {
+      "name": "lineage proves no earlier composite byte-copy became target",
+      "pass": true
+    },
+    {
+      "name": "target existed before this extraction run",
+      "pass": true
+    },
+    {
+      "name": "target filename is not composite/recompose",
+      "pass": true
+    },
+    {
+      "name": "frozen target predates generated canonical mask",
+      "pass": true
+    }
+  ],
+  "metrics": {
+    "targetBaseDifferenceOutsideMask": 0,
+    "failedCells": 20,
+    "transparentMaskRgbNonZeroPixels": 0
+  },
+  "cells": [
+    {
+      "index": 1,
+      "row": 0,
+      "column": 0,
+      "selectedForRetry": true,
+      "holesFilled": 159,
+      "maskPixels": 15517,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 8,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 15503,
+          "bbox": [
+            23,
+            15,
+            155,
+            160
+          ],
+          "centroid": [
+            86.91827388247437,
+            85.04134683609624
+          ]
+        },
+        {
+          "pixels": 2,
+          "bbox": [
+            146,
+            51,
+            147,
+            53
+          ],
+          "centroid": [
+            146,
+            51.5
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            155,
+            70,
+            156,
+            71
+          ],
+          "centroid": [
+            155,
+            70
+          ]
+        },
+        {
+          "pixels": 5,
+          "bbox": [
+            155,
+            75,
+            156,
+            80
+          ],
+          "centroid": [
+            155,
+            77
+          ]
+        },
+        {
+          "pixels": 2,
+          "bbox": [
+            146,
+            116,
+            147,
+            118
+          ],
+          "centroid": [
+            146,
+            116.5
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            126,
+            139,
+            127,
+            140
+          ],
+          "centroid": [
+            126,
+            139
+          ]
+        },
+        {
+          "pixels": 2,
+          "bbox": [
+            127,
+            141,
+            128,
+            143
+          ],
+          "centroid": [
+            127,
+            141.5
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            126,
+            144,
+            127,
+            145
+          ],
+          "centroid": [
+            126,
+            144
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 0,
+      "unresolvedBridgeComponents": 7,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "column": 1,
+      "selectedForRetry": true,
+      "holesFilled": 148,
+      "maskPixels": 14634,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 3,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 14630,
+          "bbox": [
+            23,
+            15,
+            148,
+            160
+          ],
+          "centroid": [
+            85.09767600820233,
+            84.38127136021873
+          ]
+        },
+        {
+          "pixels": 3,
+          "bbox": [
+            140,
+            122,
+            141,
+            125
+          ],
+          "centroid": [
+            140,
+            123
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            139,
+            125,
+            140,
+            126
+          ],
+          "centroid": [
+            139,
+            125
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 3,
+      "unresolvedBridgeComponents": 2,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "column": 2,
+      "selectedForRetry": true,
+      "holesFilled": 80,
+      "maskPixels": 12083,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 2,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 12019,
+          "bbox": [
+            30,
+            14,
+            138,
+            160
+          ],
+          "centroid": [
+            81.45253348864298,
+            82.73541892004326
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            128,
+            136,
+            136,
+            144
+          ],
+          "centroid": [
+            131.5,
+            139.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 4,
+      "unresolvedBridgeComponents": 1,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 4,
+      "row": 0,
+      "column": 3,
+      "selectedForRetry": true,
+      "holesFilled": 99,
+      "maskPixels": 12626,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 2,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 12562,
+          "bbox": [
+            21,
+            13,
+            129,
+            160
+          ],
+          "centroid": [
+            76.79652921509314,
+            83.8024199968158
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            16,
+            136,
+            24,
+            144
+          ],
+          "centroid": [
+            19.5,
+            139.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 4,
+      "unresolvedBridgeComponents": 1,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 5,
+      "row": 0,
+      "column": 4,
+      "selectedForRetry": true,
+      "holesFilled": 135,
+      "maskPixels": 13962,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 3,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 13837,
+          "bbox": [
+            14,
+            14,
+            137,
+            160
+          ],
+          "centroid": [
+            77.11042856110429,
+            85.50307147503071
+          ]
+        },
+        {
+          "pixels": 61,
+          "bbox": [
+            120,
+            136,
+            128,
+            144
+          ],
+          "centroid": [
+            123.55737704918033,
+            139.55737704918033
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            144,
+            136,
+            152,
+            144
+          ],
+          "centroid": [
+            147.5,
+            139.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 5,
+      "unresolvedBridgeComponents": 2,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 6,
+      "row": 1,
+      "column": 0,
+      "selectedForRetry": true,
+      "holesFilled": 165,
+      "maskPixels": 14230,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 8,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 2,
+          "bbox": [
+            49,
+            0,
+            51,
+            1
+          ],
+          "centroid": [
+            49.5,
+            0
+          ]
+        },
+        {
+          "pixels": 4,
+          "bbox": [
+            80,
+            0,
+            84,
+            1
+          ],
+          "centroid": [
+            81.5,
+            0
+          ]
+        },
+        {
+          "pixels": 3,
+          "bbox": [
+            96,
+            0,
+            99,
+            1
+          ],
+          "centroid": [
+            97,
+            0
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            101,
+            0,
+            102,
+            1
+          ],
+          "centroid": [
+            101,
+            0
+          ]
+        },
+        {
+          "pixels": 14216,
+          "bbox": [
+            15,
+            17,
+            158,
+            160
+          ],
+          "centroid": [
+            86.11487056837366,
+            92.2360016882386
+          ]
+        },
+        {
+          "pixels": 2,
+          "bbox": [
+            129,
+            17,
+            131,
+            18
+          ],
+          "centroid": [
+            129.5,
+            17
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            154,
+            55,
+            155,
+            56
+          ],
+          "centroid": [
+            154,
+            55
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            138,
+            108,
+            139,
+            109
+          ],
+          "centroid": [
+            138,
+            108
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 0,
+      "unresolvedBridgeComponents": 7,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 7,
+      "row": 1,
+      "column": 1,
+      "selectedForRetry": true,
+      "holesFilled": 134,
+      "maskPixels": 14101,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 7,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 2,
+          "bbox": [
+            80,
+            0,
+            82,
+            1
+          ],
+          "centroid": [
+            80.5,
+            0
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            64,
+            8,
+            72,
+            16
+          ],
+          "centroid": [
+            67.5,
+            11.5
+          ]
+        },
+        {
+          "pixels": 14015,
+          "bbox": [
+            14,
+            16,
+            153,
+            160
+          ],
+          "centroid": [
+            85.70802711380664,
+            95.20841955048162
+          ]
+        },
+        {
+          "pixels": 3,
+          "bbox": [
+            128,
+            23,
+            129,
+            26
+          ],
+          "centroid": [
+            128,
+            24
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            99,
+            34,
+            100,
+            35
+          ],
+          "centroid": [
+            99,
+            34
+          ]
+        },
+        {
+          "pixels": 14,
+          "bbox": [
+            153,
+            61,
+            154,
+            75
+          ],
+          "centroid": [
+            153,
+            67.5
+          ]
+        },
+        {
+          "pixels": 2,
+          "bbox": [
+            152,
+            76,
+            153,
+            78
+          ],
+          "centroid": [
+            152,
+            76.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 0,
+      "unresolvedBridgeComponents": 6,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 8,
+      "row": 1,
+      "column": 2,
+      "selectedForRetry": true,
+      "holesFilled": 69,
+      "maskPixels": 12038,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 9,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 2,
+          "bbox": [
+            70,
+            0,
+            72,
+            1
+          ],
+          "centroid": [
+            70.5,
+            0
+          ]
+        },
+        {
+          "pixels": 2,
+          "bbox": [
+            86,
+            0,
+            88,
+            1
+          ],
+          "centroid": [
+            86.5,
+            0
+          ]
+        },
+        {
+          "pixels": 3,
+          "bbox": [
+            101,
+            0,
+            104,
+            1
+          ],
+          "centroid": [
+            102,
+            0
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            48,
+            8,
+            56,
+            16
+          ],
+          "centroid": [
+            51.5,
+            11.5
+          ]
+        },
+        {
+          "pixels": 11773,
+          "bbox": [
+            16,
+            19,
+            137,
+            160
+          ],
+          "centroid": [
+            79.87267476429118,
+            93.6071519578697
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            32,
+            24,
+            40,
+            32
+          ],
+          "centroid": [
+            35.5,
+            27.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            144,
+            24,
+            152,
+            32
+          ],
+          "centroid": [
+            147.5,
+            27.5
+          ]
+        },
+        {
+          "pixels": 2,
+          "bbox": [
+            42,
+            44,
+            44,
+            45
+          ],
+          "centroid": [
+            42.5,
+            44
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            0,
+            152,
+            8,
+            160
+          ],
+          "centroid": [
+            3.5,
+            155.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 0,
+      "unresolvedBridgeComponents": 8,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 9,
+      "row": 1,
+      "column": 3,
+      "selectedForRetry": true,
+      "holesFilled": 86,
+      "maskPixels": 13969,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 8,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 59,
+          "bbox": [
+            96,
+            0,
+            104,
+            8
+          ],
+          "centroid": [
+            99.62711864406779,
+            3.7966101694915255
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            0,
+            8,
+            8,
+            16
+          ],
+          "centroid": [
+            3.5,
+            11.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            64,
+            8,
+            72,
+            16
+          ],
+          "centroid": [
+            67.5,
+            11.5
+          ]
+        },
+        {
+          "pixels": 3,
+          "bbox": [
+            94,
+            20,
+            97,
+            21
+          ],
+          "centroid": [
+            95,
+            20
+          ]
+        },
+        {
+          "pixels": 13713,
+          "bbox": [
+            14,
+            21,
+            145,
+            160
+          ],
+          "centroid": [
+            80.05279661634945,
+            95.62028731860279
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            48,
+            24,
+            56,
+            32
+          ],
+          "centroid": [
+            51.5,
+            27.5
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            61,
+            52,
+            62,
+            53
+          ],
+          "centroid": [
+            61,
+            52
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            60,
+            54,
+            61,
+            55
+          ],
+          "centroid": [
+            60,
+            54
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 0,
+      "unresolvedBridgeComponents": 7,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 10,
+      "row": 1,
+      "column": 4,
+      "selectedForRetry": true,
+      "holesFilled": 117,
+      "maskPixels": 13126,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 8,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 3,
+          "bbox": [
+            56,
+            0,
+            59,
+            1
+          ],
+          "centroid": [
+            57,
+            0
+          ]
+        },
+        {
+          "pixels": 2,
+          "bbox": [
+            62,
+            0,
+            64,
+            1
+          ],
+          "centroid": [
+            62.5,
+            0
+          ]
+        },
+        {
+          "pixels": 4,
+          "bbox": [
+            93,
+            0,
+            97,
+            1
+          ],
+          "centroid": [
+            94.5,
+            0
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            128,
+            8,
+            136,
+            16
+          ],
+          "centroid": [
+            131.5,
+            11.5
+          ]
+        },
+        {
+          "pixels": 12986,
+          "bbox": [
+            11,
+            20,
+            137,
+            160
+          ],
+          "centroid": [
+            77.77190820884029,
+            93.63737871553981
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            48,
+            24,
+            56,
+            32
+          ],
+          "centroid": [
+            51.5,
+            27.5
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            17,
+            54,
+            18,
+            55
+          ],
+          "centroid": [
+            17,
+            54
+          ]
+        },
+        {
+          "pixels": 2,
+          "bbox": [
+            23,
+            106,
+            24,
+            108
+          ],
+          "centroid": [
+            23,
+            106.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 0,
+      "unresolvedBridgeComponents": 7,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 11,
+      "row": 2,
+      "column": 0,
+      "selectedForRetry": true,
+      "holesFilled": 132,
+      "maskPixels": 14215,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 2,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 14151,
+          "bbox": [
+            31,
+            0,
+            152,
+            160
+          ],
+          "centroid": [
+            84.66242668362659,
+            79.29164016677267
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            128,
+            152,
+            136,
+            160
+          ],
+          "centroid": [
+            131.5,
+            155.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 68,
+      "unresolvedBridgeComponents": 1,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 12,
+      "row": 2,
+      "column": 1,
+      "selectedForRetry": true,
+      "holesFilled": 140,
+      "maskPixels": 13812,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 9,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 13540,
+          "bbox": [
+            31,
+            0,
+            143,
+            160
+          ],
+          "centroid": [
+            84.02304283604136,
+            77.70849335302806
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            16,
+            8,
+            24,
+            16
+          ],
+          "centroid": [
+            19.5,
+            11.5
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            88,
+            14,
+            89,
+            15
+          ],
+          "centroid": [
+            88,
+            14
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            135,
+            15,
+            136,
+            16
+          ],
+          "centroid": [
+            135,
+            15
+          ]
+        },
+        {
+          "pixels": 9,
+          "bbox": [
+            134,
+            17,
+            135,
+            26
+          ],
+          "centroid": [
+            134,
+            21
+          ]
+        },
+        {
+          "pixels": 6,
+          "bbox": [
+            135,
+            26,
+            136,
+            32
+          ],
+          "centroid": [
+            135,
+            28.5
+          ]
+        },
+        {
+          "pixels": 63,
+          "bbox": [
+            128,
+            144,
+            136,
+            152
+          ],
+          "centroid": [
+            131.55555555555554,
+            147.55555555555554
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            16,
+            152,
+            24,
+            160
+          ],
+          "centroid": [
+            19.5,
+            155.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            120,
+            152,
+            128,
+            160
+          ],
+          "centroid": [
+            123.5,
+            155.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 19,
+      "unresolvedBridgeComponents": 8,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 13,
+      "row": 2,
+      "column": 2,
+      "selectedForRetry": true,
+      "holesFilled": 44,
+      "maskPixels": 13260,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 4,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 13068,
+          "bbox": [
+            16,
+            0,
+            136,
+            160
+          ],
+          "centroid": [
+            79.03688399142945,
+            78.78305785123968
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            16,
+            120,
+            24,
+            128
+          ],
+          "centroid": [
+            19.5,
+            123.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            0,
+            136,
+            8,
+            144
+          ],
+          "centroid": [
+            3.5,
+            139.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            120,
+            136,
+            128,
+            144
+          ],
+          "centroid": [
+            123.5,
+            139.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 72,
+      "unresolvedBridgeComponents": 3,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 14,
+      "row": 2,
+      "column": 3,
+      "selectedForRetry": true,
+      "holesFilled": 75,
+      "maskPixels": 13290,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 4,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 13106,
+          "bbox": [
+            16,
+            0,
+            136,
+            160
+          ],
+          "centroid": [
+            78.9185106058294,
+            78.40561574851213
+          ]
+        },
+        {
+          "pixels": 56,
+          "bbox": [
+            129,
+            96,
+            136,
+            104
+          ],
+          "centroid": [
+            132,
+            99.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            0,
+            104,
+            8,
+            112
+          ],
+          "centroid": [
+            3.5,
+            107.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            112,
+            152,
+            120,
+            160
+          ],
+          "centroid": [
+            115.5,
+            155.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 41,
+      "unresolvedBridgeComponents": 3,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 15,
+      "row": 2,
+      "column": 4,
+      "selectedForRetry": true,
+      "holesFilled": 134,
+      "maskPixels": 13830,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 2,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 13766,
+          "bbox": [
+            16,
+            0,
+            136,
+            160
+          ],
+          "centroid": [
+            76.60344326601772,
+            80.21291587970362
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            16,
+            136,
+            24,
+            144
+          ],
+          "centroid": [
+            19.5,
+            139.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 78,
+      "unresolvedBridgeComponents": 1,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 16,
+      "row": 3,
+      "column": 0,
+      "selectedForRetry": true,
+      "holesFilled": 134,
+      "maskPixels": 13738,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 2,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 13676,
+          "bbox": [
+            31,
+            0,
+            143,
+            160
+          ],
+          "centroid": [
+            85.33109096226967,
+            84.89382860485522
+          ]
+        },
+        {
+          "pixels": 62,
+          "bbox": [
+            120,
+            152,
+            128,
+            160
+          ],
+          "centroid": [
+            123.5,
+            155.61290322580646
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 33,
+      "unresolvedBridgeComponents": 1,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 17,
+      "row": 3,
+      "column": 1,
+      "selectedForRetry": true,
+      "holesFilled": 113,
+      "maskPixels": 14039,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 9,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 13709,
+          "bbox": [
+            24,
+            4,
+            146,
+            160
+          ],
+          "centroid": [
+            83.22992194908454,
+            76.93872638412722
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            16,
+            24,
+            24,
+            32
+          ],
+          "centroid": [
+            19.5,
+            27.5
+          ]
+        },
+        {
+          "pixels": 2,
+          "bbox": [
+            131,
+            34,
+            132,
+            36
+          ],
+          "centroid": [
+            131,
+            34.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            0,
+            40,
+            8,
+            48
+          ],
+          "centroid": [
+            3.5,
+            43.5
+          ]
+        },
+        {
+          "pixels": 3,
+          "bbox": [
+            144,
+            59,
+            145,
+            62
+          ],
+          "centroid": [
+            144,
+            60
+          ]
+        },
+        {
+          "pixels": 5,
+          "bbox": [
+            145,
+            63,
+            146,
+            68
+          ],
+          "centroid": [
+            145,
+            65
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            0,
+            104,
+            8,
+            112
+          ],
+          "centroid": [
+            3.5,
+            107.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            0,
+            136,
+            8,
+            144
+          ],
+          "centroid": [
+            3.5,
+            139.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            144,
+            152,
+            152,
+            160
+          ],
+          "centroid": [
+            147.5,
+            155.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 1,
+      "unresolvedBridgeComponents": 8,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 18,
+      "row": 3,
+      "column": 2,
+      "selectedForRetry": true,
+      "holesFilled": 116,
+      "maskPixels": 12663,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 7,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 2,
+          "bbox": [
+            72,
+            0,
+            74,
+            1
+          ],
+          "centroid": [
+            72.5,
+            0
+          ]
+        },
+        {
+          "pixels": 2,
+          "bbox": [
+            77,
+            0,
+            79,
+            1
+          ],
+          "centroid": [
+            77.5,
+            0
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            96,
+            8,
+            104,
+            16
+          ],
+          "centroid": [
+            99.5,
+            11.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            64,
+            24,
+            72,
+            32
+          ],
+          "centroid": [
+            67.5,
+            27.5
+          ]
+        },
+        {
+          "pixels": 12522,
+          "bbox": [
+            14,
+            38,
+            152,
+            160
+          ],
+          "centroid": [
+            80.96797636160358,
+            103.47476441463026
+          ]
+        },
+        {
+          "pixels": 8,
+          "bbox": [
+            31,
+            43,
+            39,
+            44
+          ],
+          "centroid": [
+            34.5,
+            43
+          ]
+        },
+        {
+          "pixels": 1,
+          "bbox": [
+            137,
+            78,
+            138,
+            79
+          ],
+          "centroid": [
+            137,
+            78
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 0,
+      "unresolvedBridgeComponents": 6,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 19,
+      "row": 3,
+      "column": 3,
+      "selectedForRetry": true,
+      "holesFilled": 138,
+      "maskPixels": 15100,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 3,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 14972,
+          "bbox": [
+            16,
+            0,
+            137,
+            160
+          ],
+          "centroid": [
+            74.9394870424793,
+            84.409631311782
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            0,
+            56,
+            8,
+            64
+          ],
+          "centroid": [
+            3.5,
+            59.5
+          ]
+        },
+        {
+          "pixels": 64,
+          "bbox": [
+            0,
+            120,
+            8,
+            128
+          ],
+          "centroid": [
+            3.5,
+            123.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 22,
+      "unresolvedBridgeComponents": 2,
+      "verdict": "REJECT"
+    },
+    {
+      "index": 20,
+      "row": 3,
+      "column": 4,
+      "selectedForRetry": true,
+      "holesFilled": 123,
+      "maskPixels": 15179,
+      "expectedComponents4Connected": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "actualComponents4Connected": 2,
+      "expectedEnclosedTransparentComponents": 0,
+      "actualEnclosedTransparentComponents": 0,
+      "components": [
+        {
+          "pixels": 15123,
+          "bbox": [
+            16,
+            0,
+            136,
+            160
+          ],
+          "centroid": [
+            76.35112080936322,
+            81.72862527276334
+          ]
+        },
+        {
+          "pixels": 56,
+          "bbox": [
+            113,
+            152,
+            120,
+            160
+          ],
+          "centroid": [
+            116,
+            155.5
+          ]
+        }
+      ],
+      "componentGroups": [],
+      "enclosedTransparentComponents": [],
+      "aperturesPass": true,
+      "componentGroupsPass": true,
+      "bridgedSupportPixels": 36,
+      "unresolvedBridgeComponents": 1,
+      "verdict": "REJECT"
+    }
+  ]
+}

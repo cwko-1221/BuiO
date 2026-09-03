@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>遊戲主持台 | BuiO</title>
+  <script>if(new URLSearchParams(location.search).get('hub')==='1')document.documentElement.classList.add('hub-launch');</script>
+  <style>html.hub-launch #setupScreen{display:none!important}html.hub-launch #lobbyScreen{display:flex!important}</style>
+  <link rel="stylesheet" href="/game/css/game.css?v=20260818-touch-1">
+</head>
+<body>
+
+  <!-- ============ SETUP ============ -->
+  <div id="setupScreen" class="screen active">
+    <div class="host-shell">
+      <div class="host-topbar">
+        <h1>🏔️ 唔好望落嚟 — 主持台</h1>
+        <a class="icon-btn" href="/">🏠 回主頁</a>
+      </div>
+      <div class="host-grid">
+        <div class="host-card">
+          <h2>1️⃣ 選擇題庫</h2>
+          <div id="setList"><p class="muted">載入中…</p></div>
+          <button id="newSetBtn" class="btn secondary" style="margin-top:10px">➕ 新增題庫</button>
+        </div>
+        <div class="host-card">
+          <h2>2️⃣ 遊戲設定</h2>
+          <div class="field">
+            <label>遊戲時間</label>
+            <select id="durationSelect">
+              <option value="300">5 分鐘</option>
+              <option value="480" selected>8 分鐘</option>
+              <option value="600">10 分鐘</option>
+              <option value="900">15 分鐘</option>
+            </select>
+          </div>
+          <div class="settings-pair">
+            <div class="field">
+              <label for="maxEnergyInput">最高能量</label>
+              <input id="maxEnergyInput" type="number" min="20" max="500" step="5" value="100">
+            </div>
+            <div class="field">
+              <label for="energyPerCorrectInput">每題增加能量</label>
+              <input id="energyPerCorrectInput" type="number" min="1" max="100" step="1" value="25">
+            </div>
+          </div>
+          <label class="toggle-row" for="infiniteEnergyToggle">
+            <span>
+              <strong>無限能量</strong>
+              <small>玩家移動及跳躍時不會消耗能量</small>
+            </span>
+            <span class="toggle-control">
+              <input id="infiniteEnergyToggle" type="checkbox">
+              <span class="toggle-track" aria-hidden="true"></span>
+            </span>
+          </label>
+          <button id="createRoomBtn" class="btn" disabled>🚀 建立遊戲房間</button>
+          <div id="setupError" class="error-msg"></div>
+          <div style="margin-top:16px; font-size:14px; color:#6b7690; background:#f5f8fc; border-radius:12px; padding:14px;">
+            學生喺自己嘅裝置爬山：答問題儲 ⚡能量，用能量移動同跳躍。<br>
+            最快到山頂（或者時間結束時爬得最高）嘅學生獲勝 🏆
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SET EDITOR ============ -->
+  <div id="editorScreen" class="screen">
+    <div class="host-shell" style="max-width:760px">
+      <div class="host-topbar">
+        <h1 id="editorTitle">✏️ 新增題庫</h1>
+        <button class="icon-btn" id="editorBackBtn">← 返回</button>
+      </div>
+      <div class="host-card">
+        <div class="field">
+          <label>題庫名稱</label>
+          <input id="editorSetTitle" type="text" maxlength="60" placeholder="例如：三年級數學 第二課">
+        </div>
+        <div class="excel-toolbar">
+          <input id="excelImportInput" type="file" accept=".xlsx" hidden>
+          <button id="excelImportBtn" class="btn secondary small" type="button">📥 Excel 匯入</button>
+          <button id="excelTemplateBtn" class="btn secondary small" type="button">⬇️ 下載 Excel 範本</button>
+          <span id="excelImportStatus" class="muted">支援 .xlsx，每列一題</span>
+        </div>
+        <div id="editorQuestions"></div>
+        <div class="editor-actions">
+          <button id="addQuestionBtn" class="btn secondary small">➕ 加題目</button>
+          <div style="flex:1"></div>
+          <button id="saveSetBtn" class="btn small">💾 儲存題庫</button>
+        </div>
+        <div id="editorError" class="error-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LOBBY ============ -->
+  <div id="lobbyScreen" class="screen">
+    <div class="panel-center">
+      <div class="card" style="max-width:620px">
+        <div class="game-logo">⛺</div>
+        <h1 id="lobbyTitle">房間已建立</h1>
+        <p class="join-hint">學生入 <b>主頁 → 遊戲</b> 就會見到你嘅房間，撳一下就加入</p>
+        <p class="sub" id="lobbyInfo">正在建立房間…</p>
+        <div class="roster" id="lobbyRoster"><span class="muted">等待學生加入…</span></div>
+        <button id="startGameBtn" class="btn" disabled>▶️ 開始遊戲</button>
+        <button id="cancelRoomBtn" class="btn secondary" style="margin-top:8px">取消房間</button>
+        <div id="lobbyError" class="error-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LIVE BOARD ============ -->
+  <div id="liveScreen" class="screen">
+    <div class="host-shell">
+      <div class="host-topbar">
+        <h1>🏔️ 比賽進行中</h1>
+        <div class="hud-pill" style="background:#1f2a44;color:#fff;font-weight:800;padding:8px 16px;border-radius:999px" id="liveTimer">--:--</div>
+        <button class="icon-btn" id="endGameBtn" style="color:var(--coral);border-color:#ffd2d2">⏹ 結束遊戲</button>
+      </div>
+      <div class="host-card">
+        <div class="board-wrap">
+          <canvas id="mountainCanvas" width="130" height="480"></canvas>
+          <div class="live-list" id="liveList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RESULTS ============ -->
+  <div id="resultScreen" class="screen">
+    <div class="panel-center">
+      <div class="card" style="max-width:560px">
+        <div class="game-logo">🏆</div>
+        <h1>最終排名</h1>
+        <p class="sub" id="resultReason"></p>
+        <div id="resultsList" class="results-list"></div>
+        <button class="btn" id="playAgainBtn">🔄 再玩一場</button>
+        <button class="btn secondary" style="margin-top:8px" onclick="location.href='/'">🏠 回主頁</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/game/js/host.js?v=20260802-unified-launch-1"></script>
+</body>
+</html>

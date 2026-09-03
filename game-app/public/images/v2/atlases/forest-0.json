@@ -1,0 +1,535 @@
+{
+  "frames": {
+    "grass-ledge": {
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 240,
+        "h": 90
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 90
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 90
+      }
+    },
+    "stone-ledge": {
+      "frame": {
+        "x": 248,
+        "y": 4,
+        "w": 240,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 72
+      }
+    },
+    "tree-stump": {
+      "frame": {
+        "x": 492,
+        "y": 4,
+        "w": 240,
+        "h": 185
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 185
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 185
+      }
+    },
+    "forest-log": {
+      "frame": {
+        "x": 736,
+        "y": 4,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "log-bridge": {
+      "frame": {
+        "x": 980,
+        "y": 4,
+        "w": 240,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 204
+      }
+    },
+    "red-mushroom": {
+      "frame": {
+        "x": 1224,
+        "y": 4,
+        "w": 240,
+        "h": 210
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 210
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 210
+      }
+    },
+    "blue-mushroom": {
+      "frame": {
+        "x": 1468,
+        "y": 4,
+        "w": 240,
+        "h": 178
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 178
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 178
+      }
+    },
+    "giant-leaf": {
+      "frame": {
+        "x": 1712,
+        "y": 4,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "vine-arch": {
+      "frame": {
+        "x": 4,
+        "y": 218,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "hollow-tree": {
+      "frame": {
+        "x": 248,
+        "y": 218,
+        "w": 240,
+        "h": 187
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 187
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 187
+      }
+    },
+    "tree-branch": {
+      "frame": {
+        "x": 492,
+        "y": 218,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "forest-boulder": {
+      "frame": {
+        "x": 736,
+        "y": 218,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "moss-boulder": {
+      "frame": {
+        "x": 980,
+        "y": 218,
+        "w": 240,
+        "h": 179
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 179
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 179
+      }
+    },
+    "fallen-tree": {
+      "frame": {
+        "x": 1224,
+        "y": 218,
+        "w": 240,
+        "h": 216
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 216
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 216
+      }
+    },
+    "beehive": {
+      "frame": {
+        "x": 1468,
+        "y": 218,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "wood-lookout": {
+      "frame": {
+        "x": 1712,
+        "y": 218,
+        "w": 240,
+        "h": 197
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 197
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 197
+      }
+    },
+    "canoe": {
+      "frame": {
+        "x": 4,
+        "y": 438,
+        "w": 240,
+        "h": 222
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 222
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 222
+      }
+    },
+    "lily-pad": {
+      "frame": {
+        "x": 248,
+        "y": 438,
+        "w": 240,
+        "h": 187
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 187
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 187
+      }
+    },
+    "treehouse": {
+      "frame": {
+        "x": 492,
+        "y": 438,
+        "w": 240,
+        "h": 225
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 225
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 225
+      }
+    },
+    "root-ramp": {
+      "frame": {
+        "x": 736,
+        "y": 438,
+        "w": 240,
+        "h": 197
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 197
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 197
+      }
+    },
+    "forest-bush": {
+      "frame": {
+        "x": 980,
+        "y": 438,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "pine-tree": {
+      "frame": {
+        "x": 1224,
+        "y": 438,
+        "w": 240,
+        "h": 210
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 210
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 210
+      }
+    },
+    "oak-canopy": {
+      "frame": {
+        "x": 1468,
+        "y": 438,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "butterflies": {
+      "frame": {
+        "x": 1712,
+        "y": 438,
+        "w": 240,
+        "h": 157
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 157
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 157
+      }
+    },
+    "giant-acorn": {
+      "frame": {
+        "x": 4,
+        "y": 667,
+        "w": 240,
+        "h": 228
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 228
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 228
+      }
+    },
+    "flower-patch": {
+      "frame": {
+        "x": 248,
+        "y": 667,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    }
+  },
+  "meta": {
+    "app": "BuiO atlas builder",
+    "version": "2",
+    "image": "forest-0.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 2048
+    },
+    "scale": "1"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "adaptive-math",
+  "version": "1.0.0",
+  "description": "國小四則運算適性學習系統 (Adaptive Math Learning System)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test:db": "node tests/testDatabase.js",
+    "test:gen": "node tests/testGenerator.js"
+  },
+  "keywords": [
+    "math",
+    "adaptive-learning",
+    "education"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "cookie-session": "^2.1.0",
+    "pg": "^8.20.0"
+  }
+}

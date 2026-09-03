@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "output": "artifacts/redrawn-wearable-batch-set-regression",
+  "concurrency": 2,
+  "items": [
+    {
+      "id": "head-05-v3",
+      "base": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+      "target": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-05-full-redraw-canonical-v3.png",
+      "spec": "scripts/redrawn-category-specs/head-solid.json",
+      "lineage": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/masked-head-05-proof/canonical-v3/target-lineage.json",
+      "output": "artifacts/redrawn-wearable-batch-set-regression/head-05-v3",
+      "prefix": "head-05-v3",
+      "expectedMask": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-05-canonical-mask-v3.png",
+      "expectedReport": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/masked-head-05-proof/canonical-v3/compositing/head-05-v3-report.json"
+    },
+    {
+      "id": "head-06-v9",
+      "base": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+      "target": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-06-full-redraw-canonical-v9.png",
+      "spec": "scripts/redrawn-category-specs/head-solid.json",
+      "lineage": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/masked-head-06-proof/canonical-v9/target-lineage.json",
+      "output": "artifacts/redrawn-wearable-batch-set-regression/head-06-v9",
+      "prefix": "head-06-v9",
+      "expectedMask": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-06-canonical-v9-mask.png",
+      "expectedReport": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/masked-head-06-proof/canonical-v9/compositing/head-06-canonical-diff-final-compositing-report.json"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "version": "2026.08.13-1",
+  "style": "procedural soft-shaded flat vector; OKLab palette; 135° key light",
+  "generatedAt": "2026-08-16T05:57:39.493Z",
+  "categories": {
+    "creatures": {
+      "forms": 80,
+      "species": 20
+    },
+    "animation": {
+      "atlases": 80,
+      "actions": 12,
+      "framesPerSheet": 408,
+      "cell": 160,
+      "seconds": 292.4
+    },
+    "rooms": {
+      "rooms": 10,
+      "foregrounds": 10
+    },
+    "metrics": {
+      "measured": 180,
+      "missing": 0
+    }
+  },
+  "audio": {
+    "musicThemes": 12,
+    "petVoiceVariants": 20,
+    "sfxEvents": 15,
+    "generator": "WebAudio note events; no third-party audio"
+  }
+}

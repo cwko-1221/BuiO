@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "independent": true,
+  "job": "starpatch-cat:1:head-20",
+  "cell": "c03",
+  "revision": "r8",
+  "stage": "RIGHT_CUP_MASK_CONTOUR_GEOMETRY_PRE_GATE",
+  "contract": "Reject a full-width/full-height opaque rectilinear protrusion in the target-local lower right-cup probe. Acceptance is geometry-only and does not infer helmet identity from color.",
+  "inputs": {
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-8\\c03-r8-helmet-pre-gate-candidate-mask-160x160.png",
+    "maskSha256": "4a82bd969537b9830f44627508d2c483c8a085c0ab6ed17ba0095a770dc19e24",
+    "contourArea": [
+      105,
+      70,
+      132,
+      91
+    ],
+    "blockProbe": [
+      113,
+      79,
+      132,
+      91
+    ]
+  },
+  "metrics": {
+    "contourRowSpans": [
+      {
+        "y": 70,
+        "left": 105,
+        "right": 111,
+        "width": 7
+      },
+      {
+        "y": 71,
+        "left": 105,
+        "right": 111,
+        "width": 7
+      },
+      {
+        "y": 72,
+        "left": 105,
+        "right": 111,
+        "width": 7
+      },
+      {
+        "y": 73,
+        "left": 105,
+        "right": 112,
+        "width": 8
+      },
+      {
+        "y": 74,
+        "left": 105,
+        "right": 112,
+        "width": 8
+      },
+      {
+        "y": 75,
+        "left": 105,
+        "right": 112,
+        "width": 8
+      },
+      {
+        "y": 76,
+        "left": 105,
+        "right": 113,
+        "width": 9
+      },
+      {
+        "y": 77,
+        "left": 105,
+        "right": 115,
+        "width": 11
+      },
+      {
+        "y": 78,
+        "left": 105,
+        "right": 117,
+        "width": 13
+      },
+      {
+        "y": 79,
+        "left": 105,
+        "right": 127,
+        "width": 23
+      },
+      {
+        "y": 80,
+        "left": 105,
+        "right": 127,
+        "width": 23
+      },
+      {
+        "y": 81,
+        "left": 105,
+        "right": 126,
+        "width": 22
+      },
+      {
+        "y": 82,
+        "left": 105,
+        "right": 126,
+        "width": 22
+      },
+      {
+        "y": 83,
+        "left": 105,
+        "right": 126,
+        "width": 22
+      },
+      {
+        "y": 84,
+        "left": 105,
+        "right": 125,
+        "width": 21
+      },
+      {
+        "y": 85,
+        "left": 105,
+        "right": 125,
+        "width": 21
+      },
+      {
+        "y": 86,
+        "left": 105,
+        "right": 124,
+        "width": 20
+      },
+      {
+        "y": 87,
+        "left": 105,
+        "right": 124,
+        "width": 20
+      },
+      {
+        "y": 88,
+        "left": 105,
+        "right": 123,
+        "width": 19
+      },
+      {
+        "y": 89,
+        "left": 105,
+        "right": 122,
+        "width": 18
+      },
+      {
+        "y": 90,
+        "left": 105,
+        "right": 119,
+        "width": 15
+      }
+    ],
+    "probeRows": [
+      {
+        "y": 79,
+        "opaque": 15,
+        "full": false
+      },
+      {
+        "y": 80,
+        "opaque": 15,
+        "full": false
+      },
+      {
+        "y": 81,
+        "opaque": 14,
+        "full": false
+      },
+      {
+        "y": 82,
+        "opaque": 14,
+        "full": false
+      },
+      {
+        "y": 83,
+        "opaque": 14,
+        "full": false
+      },
+      {
+        "y": 84,
+        "opaque": 13,
+        "full": false
+      },
+      {
+        "y": 85,
+        "opaque": 13,
+        "full": false
+      },
+      {
+        "y": 86,
+        "opaque": 12,
+        "full": false
+      },
+      {
+        "y": 87,
+        "opaque": 12,
+        "full": false
+      },
+      {
+        "y": 88,
+        "opaque": 11,
+        "full": false
+      },
+      {
+        "y": 89,
+        "opaque": 10,
+        "full": false
+      },
+      {
+        "y": 90,
+        "opaque": 7,
+        "full": false
+      }
+    ],
+    "probeColumns": [
+      {
+        "x": 113,
+        "opaque": 12,
+        "full": true
+      },
+      {
+        "x": 114,
+        "opaque": 12,
+        "full": true
+      },
+      {
+        "x": 115,
+        "opaque": 12,
+        "full": true
+      },
+      {
+        "x": 116,
+        "opaque": 12,
+        "full": true
+      },
+      {
+        "x": 117,
+        "opaque": 12,
+        "full": true
+      },
+      {
+        "x": 118,
+        "opaque": 12,
+        "full": true
+      },
+      {
+        "x": 119,
+        "opaque": 12,
+        "full": true
+      },
+      {
+        "x": 120,
+        "opaque": 11,
+        "full": false
+      },
+      {
+        "x": 121,
+        "opaque": 11,
+        "full": false
+      },
+      {
+        "x": 122,
+        "opaque": 11,
+        "full": false
+      },
+      {
+        "x": 123,
+        "opaque": 10,
+        "full": false
+      },
+      {
+        "x": 124,
+        "opaque": 9,
+        "full": false
+      },
+      {
+        "x": 125,
+        "opaque": 7,
+        "full": false
+      },
+      {
+        "x": 126,
+        "opaque": 5,
+        "full": false
+      },
+      {
+        "x": 127,
+        "opaque": 2,
+        "full": false
+      },
+      {
+        "x": 128,
+        "opaque": 0,
+        "full": false
+      },
+      {
+        "x": 129,
+        "opaque": 0,
+        "full": false
+      },
+      {
+        "x": 130,
+        "opaque": 0,
+        "full": false
+      },
+      {
+        "x": 131,
+        "opaque": 0,
+        "full": false
+      }
+    ],
+    "fullWidthStraightRows": 0,
+    "fullHeightStraightColumns": 7,
+    "flatRightEdgeRows": 2,
+    "boundarySteps": [
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      2,
+      2,
+      10,
+      0,
+      -1,
+      0,
+      0,
+      -1,
+      0,
+      -1,
+      0,
+      -1,
+      -1,
+      -3
+    ]
+  },
+  "gates": {
+    "noRectilinearRightCupProtrusion": true,
+    "visualCritic": "PENDING"
+  },
+  "verdict": "PASS_CURVED_OR_NON_RECTILINEAR_RIGHT_CUP_PENDING_VISUAL_CRITIC",
+  "publishable": false
+}

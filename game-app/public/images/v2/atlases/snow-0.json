@@ -1,0 +1,535 @@
+{
+  "frames": {
+    "ice-slab": {
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 240,
+        "h": 83
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 83
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 83
+      }
+    },
+    "snow-ledge": {
+      "frame": {
+        "x": 248,
+        "y": 4,
+        "w": 240,
+        "h": 85
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 85
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 85
+      }
+    },
+    "ice-crystal": {
+      "frame": {
+        "x": 492,
+        "y": 4,
+        "w": 240,
+        "h": 197
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 197
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 197
+      }
+    },
+    "ice-bridge": {
+      "frame": {
+        "x": 736,
+        "y": 4,
+        "w": 240,
+        "h": 157
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 157
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 157
+      }
+    },
+    "snow-mound": {
+      "frame": {
+        "x": 980,
+        "y": 4,
+        "w": 240,
+        "h": 228
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 228
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 228
+      }
+    },
+    "snowman": {
+      "frame": {
+        "x": 1224,
+        "y": 4,
+        "w": 240,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 192
+      }
+    },
+    "sled": {
+      "frame": {
+        "x": 1468,
+        "y": 4,
+        "w": 240,
+        "h": 197
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 197
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 197
+      }
+    },
+    "ski-ramp": {
+      "frame": {
+        "x": 1712,
+        "y": 4,
+        "w": 240,
+        "h": 202
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 202
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 202
+      }
+    },
+    "cable-car": {
+      "frame": {
+        "x": 4,
+        "y": 236,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "snow-pine": {
+      "frame": {
+        "x": 248,
+        "y": 236,
+        "w": 240,
+        "h": 197
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 197
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 197
+      }
+    },
+    "igloo": {
+      "frame": {
+        "x": 492,
+        "y": 236,
+        "w": 240,
+        "h": 197
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 197
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 197
+      }
+    },
+    "frozen-barrel": {
+      "frame": {
+        "x": 736,
+        "y": 236,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "ice-arch": {
+      "frame": {
+        "x": 980,
+        "y": 236,
+        "w": 240,
+        "h": 135
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 135
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 135
+      }
+    },
+    "giant-snowflake": {
+      "frame": {
+        "x": 1224,
+        "y": 236,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "hockey-puck": {
+      "frame": {
+        "x": 1468,
+        "y": 236,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "hockey-stick": {
+      "frame": {
+        "x": 1712,
+        "y": 236,
+        "w": 240,
+        "h": 185
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 185
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 185
+      }
+    },
+    "curling-stone": {
+      "frame": {
+        "x": 4,
+        "y": 448,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "gift-stack": {
+      "frame": {
+        "x": 248,
+        "y": 448,
+        "w": 240,
+        "h": 157
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 157
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 157
+      }
+    },
+    "chimney": {
+      "frame": {
+        "x": 492,
+        "y": 448,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "cabin-roof": {
+      "frame": {
+        "x": 736,
+        "y": 448,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "frozen-log": {
+      "frame": {
+        "x": 980,
+        "y": 448,
+        "w": 240,
+        "h": 157
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 157
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 157
+      }
+    },
+    "ice-column": {
+      "frame": {
+        "x": 1224,
+        "y": 448,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "snowball": {
+      "frame": {
+        "x": 1468,
+        "y": 448,
+        "w": 240,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 208
+      }
+    },
+    "giant-boot": {
+      "frame": {
+        "x": 1712,
+        "y": 448,
+        "w": 240,
+        "h": 197
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 197
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 197
+      }
+    },
+    "aurora-crystal": {
+      "frame": {
+        "x": 4,
+        "y": 660,
+        "w": 240,
+        "h": 221
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 221
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 221
+      }
+    },
+    "snow-lantern": {
+      "frame": {
+        "x": 248,
+        "y": 660,
+        "w": 240,
+        "h": 228
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 240,
+        "h": 228
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 228
+      }
+    }
+  },
+  "meta": {
+    "app": "BuiO atlas builder",
+    "version": "2",
+    "image": "snow-0.webp",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2048,
+      "h": 2048
+    },
+    "scale": "1"
+  }
+}

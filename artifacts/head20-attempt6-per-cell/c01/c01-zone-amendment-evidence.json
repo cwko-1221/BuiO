@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "cell": "c01",
+  "verdict": "ZONE_AMENDED_PENDING_TARGET_REPROOF",
+  "reason": "The closed helmet must cover the original natural-ear component that extends left of the former x=38 search window.",
+  "previousZone": [38, 5, 137, 127],
+  "amendedExtension": [31, 28, 38, 101],
+  "amendedUnion": "old c01 zone union amended ear extension",
+  "beforeCounts": {
+    "naturalEarPixelsAlphaGt0OutsidePreviousZone": 385,
+    "naturalEarPixelsAlphaGte128OutsidePreviousZone": 270,
+    "uncoveredByCurrentOcclusionMask": 385,
+    "opaqueUncoveredByCurrentOcclusionMask": 270
+  },
+  "afterCounts": {
+    "naturalEarPixelsInsideAmendedExtension": 385,
+    "opaqueNaturalEarPixelsInsideAmendedExtension": 270,
+    "currentTargetChangedPixelsInsideAmendedExtension": 0,
+    "currentOcclusionMaskPixelsInsideAmendedExtension": 0,
+    "currentEarCoverageStatus": "FAIL_NOT_REGENERATED",
+    "tailIntersectionPixels": 0,
+    "torsoIntersectionPixels": 0,
+    "legsIntersectionPixels": 0,
+    "pawsIntersectionPixels": 0,
+    "feedingBowlIntersectionPixels": 0,
+    "targetCoverageAfterRevision": "PENDING_REGENERATED_C01"
+  },
+  "evidence": {
+    "baseCrop": "artifacts/head20-attempt6-per-cell/c01/c01-base-original-160x160.png",
+    "oldOcclusionMask": "artifacts/head20-attempt6-per-cell/c01/c01-intentional-occlusion-mask.png",
+    "protectedRois": {
+      "tail": [104, 0, 160, 127],
+      "torsoLegsPawsFeedingBowl": [0, 101, 160, 160]
+    },
+    "extensionUsesOnlyMeasuredNaturalEarBounds": true
+  },
+  "publishable": false
+}

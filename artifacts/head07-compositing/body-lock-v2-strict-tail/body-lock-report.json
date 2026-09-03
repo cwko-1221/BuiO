@@ -1,0 +1,247 @@
+{
+  "verdict": "LOCKED_TARGET_DIAGNOSTIC_ONLY",
+  "warning": "Derived body-lock artifact. It is not an authoritative redraw and must not be published or used as a manifest target.",
+  "contract": {
+    "operation": "lockedTarget = base everywhere; target pixel copied only at refinedMask alpha 255; no resize/shift/rotation/warp",
+    "sourceTarget": "pet-app/art-source/imagegen/baked-wearables/starpatch-cat-1/head-07-independent-proof/head-07-clean-target-v3.png",
+    "sourceBase": "pet-app/public/assets/art/sprites/starpatch-cat-1-atlas-2737c2cd0c.webp",
+    "sourceMask": "artifacts/head07-compositing/extract-clean-v3-gold25-fillall/mask-alpha.png",
+    "protectedFiltering": "eye ink pixels removed; every candidate layer pixel over visible base in frozen side/back tail ROIs removed",
+    "tailMode": "strict-tail"
+  },
+  "inputSha256": {
+    "target": "62ee7372c02313223a5ce84c7e137d6ecfcc62cd7a3b0a06a81849d475b02be6",
+    "base": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39",
+    "sourceMask": "9fa583048d485a9ab1196361e88cbaeca73384c27420fddc05e3844c5f5a72bf"
+  },
+  "outputSha256": {
+    "refinedMask": "4ddde6bdec60b1ad4556a5f1e02a8323c5842088a11082db5383277d7cf03033",
+    "layer": "075638b6a849b47225c143b07ec12ef7fb5443f0b09585c7e0dad179ce3f0bfd",
+    "lockedTarget": "cef3138e805b373b5e39f36265f05f664d690ad1acebdcb58e9a27ad6fa2ad85",
+    "lockedTargetCanonical": "fad053e940934d228d9c75ba096e207bd4757f9dd6b802016b64df9bd6b71bf0"
+  },
+  "outputs": {
+    "refinedMask": "artifacts\\head07-compositing\\body-lock-v2-strict-tail\\mask-alpha-refined-protected-roi.png",
+    "layer": "artifacts\\head07-compositing\\body-lock-v2-strict-tail\\layer-refined-protected-roi.png",
+    "lockedTarget": "artifacts\\head07-compositing\\body-lock-v2-strict-tail\\locked-target-body-exact.png",
+    "lockedTargetCanonical": "artifacts\\head07-compositing\\body-lock-v2-strict-tail\\locked-target-body-exact-rgba0.png",
+    "report": "artifacts\\head07-compositing\\body-lock-v2-strict-tail\\body-lock-report.json"
+  },
+  "stats": {
+    "sourceMaskPixels": 48091,
+    "keptMaskPixels": 47020,
+    "clearedPixels": 1071,
+    "clearedEyePixels": 6,
+    "clearedTailPetPixels": 1065,
+    "clearedTargetTransparentPixels": 0,
+    "sourceMaskChannels": 4,
+    "byCell": [
+      {
+        "row": 0,
+        "column": 0,
+        "index": 1,
+        "sourceMaskPixels": 3022,
+        "keptMaskPixels": 3022,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 0,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 0,
+        "column": 1,
+        "index": 2,
+        "sourceMaskPixels": 3162,
+        "keptMaskPixels": 3162,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 0,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 0,
+        "column": 2,
+        "index": 3,
+        "sourceMaskPixels": 2959,
+        "keptMaskPixels": 2959,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 0,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 0,
+        "column": 3,
+        "index": 4,
+        "sourceMaskPixels": 2508,
+        "keptMaskPixels": 2502,
+        "clearedEyePixels": 6,
+        "clearedTailPetPixels": 0,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 0,
+        "column": 4,
+        "index": 5,
+        "sourceMaskPixels": 3606,
+        "keptMaskPixels": 3606,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 0,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 1,
+        "column": 0,
+        "index": 6,
+        "sourceMaskPixels": 2043,
+        "keptMaskPixels": 2038,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 5,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 1,
+        "column": 1,
+        "index": 7,
+        "sourceMaskPixels": 2053,
+        "keptMaskPixels": 2042,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 11,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 1,
+        "column": 2,
+        "index": 8,
+        "sourceMaskPixels": 1932,
+        "keptMaskPixels": 1854,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 78,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 1,
+        "column": 3,
+        "index": 9,
+        "sourceMaskPixels": 2133,
+        "keptMaskPixels": 2021,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 112,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 1,
+        "column": 4,
+        "index": 10,
+        "sourceMaskPixels": 2440,
+        "keptMaskPixels": 1998,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 442,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 2,
+        "column": 0,
+        "index": 11,
+        "sourceMaskPixels": 2428,
+        "keptMaskPixels": 2355,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 73,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 2,
+        "column": 1,
+        "index": 12,
+        "sourceMaskPixels": 2303,
+        "keptMaskPixels": 2246,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 57,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 2,
+        "column": 2,
+        "index": 13,
+        "sourceMaskPixels": 2529,
+        "keptMaskPixels": 2414,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 115,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 2,
+        "column": 3,
+        "index": 14,
+        "sourceMaskPixels": 2310,
+        "keptMaskPixels": 2254,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 56,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 2,
+        "column": 4,
+        "index": 15,
+        "sourceMaskPixels": 2475,
+        "keptMaskPixels": 2359,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 116,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 3,
+        "column": 0,
+        "index": 16,
+        "sourceMaskPixels": 2783,
+        "keptMaskPixels": 2783,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 0,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 3,
+        "column": 1,
+        "index": 17,
+        "sourceMaskPixels": 1707,
+        "keptMaskPixels": 1707,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 0,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 3,
+        "column": 2,
+        "index": 18,
+        "sourceMaskPixels": 1768,
+        "keptMaskPixels": 1768,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 0,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 3,
+        "column": 3,
+        "index": 19,
+        "sourceMaskPixels": 1909,
+        "keptMaskPixels": 1909,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 0,
+        "clearedTargetTransparentPixels": 0
+      },
+      {
+        "row": 3,
+        "column": 4,
+        "index": 20,
+        "sourceMaskPixels": 2021,
+        "keptMaskPixels": 2021,
+        "clearedEyePixels": 0,
+        "clearedTailPetPixels": 0,
+        "clearedTargetTransparentPixels": 0
+      }
+    ],
+    "lockedOutsideMaskMismatch": 0,
+    "lockedInsideMaskTargetMismatch": 0,
+    "lockedVsCleanTargetMismatch": 228174,
+    "hiddenTransparentRgbPixels": 48383,
+    "exactBodyLockInvariant": true,
+    "canonicalTransparentTargetIsForExactRgbaQa": true
+  }
+}

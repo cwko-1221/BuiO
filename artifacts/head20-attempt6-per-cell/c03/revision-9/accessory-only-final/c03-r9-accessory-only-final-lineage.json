@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "job": "starpatch-cat:1:head-20",
+  "attempt": 6,
+  "cell": "c03",
+  "revision": "r9-accessory-only-final",
+  "status": "FROZEN_FOR_INDEPENDENT_SOLVER_AND_CRITIC_REVIEW_NOT_APPROVED",
+  "generation": {
+    "model": "built-in image_gen",
+    "prompt": "r9 independent full-dressed creative reference; final target is deliberately body-preserving base plus frozen accessory-only layer.",
+    "rawSource": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\c03-r9-raw-full-dressed-imagegen-source.png",
+      "sha256": "0ff73bc069955f8f0751a9b157d5a1cbff14ce7a5f06eb248c4441967d84f35b"
+    },
+    "normalization": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\c03-r9-normalized-rgb-1254x1254.png",
+      "sha256": "b6238f4854b157012fb687420dc042f6be0f2e22e71f1abe33ec676bd9b7f365",
+      "steps": "transparent raw normalized to 1254x1254 before accessory-only extraction"
+    }
+  },
+  "originals": {
+    "base": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\c03-base-original-160x160.png",
+      "sha256": "d6603d155cc87d4ea652bd45a4bceb2a1fb414ad5c8ba6d1c81c4da037b8e6c0"
+    },
+    "pet": "art-inbox/pet-starpatch-cat-1.png",
+    "accessory": "art-inbox/wearable-head-3.png"
+  },
+  "frozenCandidate": {
+    "layer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-rebuild\\c03-r9-accessory-only-candidate-layer-160x160.png",
+      "sha256": "fc57ee1296a4ae311a6564914e57337c0116acd9f8107b67f74e06c980590dca"
+    },
+    "topologyMask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-rebuild\\c03-r9-accessory-only-candidate-topology-mask-160x160.png",
+      "sha256": "5f51fd48697c5054c7e3fda6a8245d718e751c553258304cc522ccf49d61d8ba"
+    },
+    "opaqueEraseMask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-rebuild\\c03-r9-accessory-only-candidate-opaque-erase-mask-160x160.png",
+      "sha256": "097ff7be15cc426571cb08bea73f2af62ebbf2a993f6e99da915ea3f92910b68"
+    }
+  },
+  "maskRoles": {
+    "wearableSilhouetteMask": "binary alpha union for closed visual silhouette/topology; it includes transparent visor tint",
+    "opaqueEraseMask": "binary alpha only where opaque hardware replaces base; face visor tint is excluded"
+  },
+  "outputs": {
+    "wearableLayer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-hardware-tint-layer-160x160.png",
+      "sha256": "fc57ee1296a4ae311a6564914e57337c0116acd9f8107b67f74e06c980590dca"
+    },
+    "hardwareLayer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-hardware-layer-160x160.png",
+      "sha256": "270ff8b0c5e0a14087c418a7e3d91eb5a8febf5d22d23e5ae4bfeaee27f55343"
+    },
+    "visorTintLayer": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-visor-tint-layer-160x160.png",
+      "sha256": "b9582fc7ed0f3cf66080fac9ddd1708bdc0794fb2a3bbac1f08ca65c098c0850"
+    },
+    "wearableSilhouetteMask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-wearable-silhouette-mask-160x160.png",
+      "sha256": "5f51fd48697c5054c7e3fda6a8245d718e751c553258304cc522ccf49d61d8ba"
+    },
+    "opaqueEraseMask": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-opaque-erase-mask-160x160.png",
+      "sha256": "097ff7be15cc426571cb08bea73f2af62ebbf2a993f6e99da915ea3f92910b68"
+    },
+    "target": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-body-preserving-complete-dressed-target-160x160.png",
+      "sha256": "0a82eaceeb802180502486c7b9078505cba3a5035b64f2c4d08924fd0f0a8ffe"
+    },
+    "composite": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-final\\c03-r9-zero-transform-composite-160x160.png",
+      "sha256": "0a82eaceeb802180502486c7b9078505cba3a5035b64f2c4d08924fd0f0a8ffe"
+    }
+  },
+  "preGates": {
+    "c03-r9-accessory-only-anatomy-pregate.json": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-rebuild\\c03-r9-accessory-only-anatomy-pregate.json",
+      "sha256": "dc1ceff35f9a946d98396bd7ccbc1efaaf0a153558d02ffe88bcb77999e30f2a",
+      "verdict": "PASS_ACCESSORY_ONLY_ANATOMY_PRE_GATE_PENDING_VISUAL_CRITIC"
+    },
+    "c03-r9-accessory-only-rightcup-semantic-pregate.json": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-rebuild\\c03-r9-accessory-only-rightcup-semantic-pregate.json",
+      "sha256": "9e9bff25b08643008b477c9926576398f4d5ec60394c2169b8458c1982197203",
+      "verdict": "PASS_RIGHT_CUP_SEMANTIC_PRE_GATE_PENDING_VISUAL_CRITIC"
+    },
+    "c03-r9-accessory-only-rightcup-geometry-pregate.json": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-attempt6-per-cell\\c03\\revision-9\\accessory-only-rebuild\\c03-r9-accessory-only-rightcup-geometry-pregate.json",
+      "sha256": "adfc140eb414036eb6eb6454a751d92fcde13f9959404c60e103084bb805363b",
+      "verdict": "PASS_CURVED_OR_NON_RECTILINEAR_RIGHT_CUP_PENDING_VISUAL_CRITIC"
+    }
+  },
+  "exactCompare": {
+    "targetVsZeroTransformCompositeRgbaMismatchPixels": 0,
+    "targetOutsideWearableSilhouetteBaseDiffPixels": 0,
+    "layerVsTopologySupportMismatchPixels": 0,
+    "opaqueEraseMaskOnNonOpaqueLayerPixels": 0
+  },
+  "forbiddenInputProof": "Final construction read only base plus the frozen r9 accessory-only candidate layer/topology/erase masks; no c01/c02/c03 prior candidate/final target/layer/mask/composite was read.",
+  "publishable": false
+}

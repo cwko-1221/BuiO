@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Data files
+data/*.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Scratch. Screenshots, renders and QA evidence land here; scripts that write into it
+# create what they need, so nothing in it is worth keeping between sessions.
+tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+*.swp
+
+# generated art dropped in for import
+art-inbox/
+.env.txt
+.env.*.txt
+
+# Generated art work: 4096px redraws and the layers lifted out of them. The sources are the
+# artist's, the outputs are reproducible from them with scripts/bake-wearable.mjs.
+pet-app/art-source/imagegen/

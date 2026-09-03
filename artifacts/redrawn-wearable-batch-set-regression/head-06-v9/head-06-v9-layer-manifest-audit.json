@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "verdict": "DATA_PASS",
+  "publishable": true,
+  "transformed": false,
+  "inputPolicy": {
+    "targetImmutable": true,
+    "compositeUsedAsTarget": false,
+    "sameCoordinate": true
+  },
+  "identity": {
+    "petId": "UNSET",
+    "stage": "UNSET",
+    "wearableId": "head-06-v9",
+    "slot": "head"
+  },
+  "layerOrder": [
+    "rear",
+    "erase",
+    "patch",
+    "frontErase",
+    "front"
+  ],
+  "inputs": {
+    "manifest": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-set-regression\\head-06-v9\\head-06-v9-layer-manifest.json",
+    "target": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-06-full-redraw-canonical-v9.png",
+      "sha256": "125075c6b9363e7114ade1e70b54a5f46460ebd03e3464f05b5b5a8c143465ad"
+    },
+    "base": {
+      "path": "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\sprites\\starpatch-cat-1-atlas-2737c2cd0c.webp",
+      "sha256": "d0b0969d5ac961f3a13b1e4d66e1faa1eab2852aeeb6c073812dac2fbd73fc39"
+    }
+  },
+  "metrics": {
+    "targetBaseOutsideMaskMismatchPixels": 0,
+    "maskPixelsWithNoTargetBaseDifference": 0,
+    "exactRgbaMismatchPixels": 0,
+    "emptyDirectionViolations": 0,
+    "holeCells": 0,
+    "undeclaredHoleCells": 0,
+    "visibleSupportPixels": 105837,
+    "protectedRoiViolations": 0,
+    "layerMetrics": {
+      "rear": {
+        "declared": false,
+        "visibleMaskPixels": 0,
+        "visibleLayerPixels": 0
+      },
+      "erase": {
+        "declared": true,
+        "kind": "destination-out",
+        "visibleMaskPixels": 0,
+        "visibleLayerPixels": 0,
+        "nonBinaryMaskAlphaPixels": 0,
+        "maskTransparentRgbNonZeroPixels": 0,
+        "transparentLayerRgbNonZeroPixels": 0,
+        "layerOutsideMaskPixels": 0,
+        "maskWithoutLayerPixels": 0
+      },
+      "patch": {
+        "declared": true,
+        "kind": "content",
+        "visibleMaskPixels": 105837,
+        "visibleLayerPixels": 105837,
+        "nonBinaryMaskAlphaPixels": 0,
+        "maskTransparentRgbNonZeroPixels": 0,
+        "transparentLayerRgbNonZeroPixels": 0,
+        "layerOutsideMaskPixels": 0,
+        "maskWithoutLayerPixels": 0
+      },
+      "frontErase": {
+        "declared": true,
+        "kind": "destination-out",
+        "visibleMaskPixels": 0,
+        "visibleLayerPixels": 0,
+        "nonBinaryMaskAlphaPixels": 0,
+        "maskTransparentRgbNonZeroPixels": 0,
+        "transparentLayerRgbNonZeroPixels": 0,
+        "layerOutsideMaskPixels": 0,
+        "maskWithoutLayerPixels": 0
+      },
+      "front": {
+        "declared": false,
+        "visibleMaskPixels": 0,
+        "visibleLayerPixels": 0
+      }
+    }
+  },
+  "cells": [
+    {
+      "index": 1,
+      "row": 0,
+      "column": 0,
+      "maskPixels": 5842,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "column": 1,
+      "maskPixels": 5808,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "column": 2,
+      "maskPixels": 5808,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 4,
+      "row": 0,
+      "column": 3,
+      "maskPixels": 5829,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 5,
+      "row": 0,
+      "column": 4,
+      "maskPixels": 5914,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 6,
+      "row": 1,
+      "column": 0,
+      "maskPixels": 3839,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 7,
+      "row": 1,
+      "column": 1,
+      "maskPixels": 3844,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 8,
+      "row": 1,
+      "column": 2,
+      "maskPixels": 3825,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 9,
+      "row": 1,
+      "column": 3,
+      "maskPixels": 3845,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 10,
+      "row": 1,
+      "column": 4,
+      "maskPixels": 3769,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 11,
+      "row": 2,
+      "column": 0,
+      "maskPixels": 6038,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 12,
+      "row": 2,
+      "column": 1,
+      "maskPixels": 6129,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 13,
+      "row": 2,
+      "column": 2,
+      "maskPixels": 6140,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 14,
+      "row": 2,
+      "column": 3,
+      "maskPixels": 6064,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 15,
+      "row": 2,
+      "column": 4,
+      "maskPixels": 6077,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 16,
+      "row": 3,
+      "column": 0,
+      "maskPixels": 6089,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 17,
+      "row": 3,
+      "column": 1,
+      "maskPixels": 4631,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 18,
+      "row": 3,
+      "column": 2,
+      "maskPixels": 6108,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 19,
+      "row": 3,
+      "column": 3,
+      "maskPixels": 5157,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    },
+    {
+      "index": 20,
+      "row": 3,
+      "column": 4,
+      "maskPixels": 5081,
+      "targetBaseOutsideMaskMismatchPixels": 0,
+      "exactRgbaMismatchPixels": 0
+    }
+  ],
+  "holeCells": [],
+  "componentCells": [
+    {
+      "row": 0,
+      "column": 0,
+      "components": 1
+    },
+    {
+      "row": 0,
+      "column": 1,
+      "components": 1
+    },
+    {
+      "row": 0,
+      "column": 2,
+      "components": 1
+    },
+    {
+      "row": 0,
+      "column": 3,
+      "components": 1
+    },
+    {
+      "row": 0,
+      "column": 4,
+      "components": 1
+    },
+    {
+      "row": 1,
+      "column": 0,
+      "components": 1
+    },
+    {
+      "row": 1,
+      "column": 1,
+      "components": 1
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "components": 1
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "components": 1
+    },
+    {
+      "row": 1,
+      "column": 4,
+      "components": 1
+    },
+    {
+      "row": 2,
+      "column": 0,
+      "components": 1
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "components": 1
+    },
+    {
+      "row": 2,
+      "column": 2,
+      "components": 1
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "components": 1
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "components": 1
+    },
+    {
+      "row": 3,
+      "column": 0,
+      "components": 1
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "components": 1
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "components": 1
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "components": 1
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "components": 1
+    }
+  ],
+  "emptyDirectionViolations": [],
+  "errors": [],
+  "warnings": []
+}

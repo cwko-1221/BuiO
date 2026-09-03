@@ -1,0 +1,17 @@
+{
+  "name": "buio-pet-paradise",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "phaser": "^4.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vite": "^8.2.1"
+  }
+}

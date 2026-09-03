@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "category": "custom",
+  "atlas": {
+    "width": 800,
+    "height": 640,
+    "cellWidth": 160,
+    "cellHeight": 160,
+    "columns": 5,
+    "rows": 4
+  },
+  "topology": {
+    "fillEnclosedHoles": false,
+    "expectedComponents4ConnectedPerCell": 1,
+    "expectedEnclosedTransparentComponentsPerCell": 0,
+    "emptyCells": [],
+    "cells": [
+      {
+        "row": 2,
+        "column": 0,
+        "expectedComponents4Connected": 0,
+        "expectedEnclosedTransparentComponents": 0,
+        "mustBeEmpty": true
+      }
+    ]
+  },
+  "solve": {
+    "maximumErasePixels": 0,
+    "unexpectedUnsolvablePixels": 0,
+    "exactRgbaMismatchPixels": 0
+  }
+}

@@ -1,0 +1,688 @@
+import Phaser from 'phaser';
+import type {
+  AnimationLayout, ContentBox, PetAction, PetAnchors, PetDefinition, PetFacing, PetInstance,
+  RedrawnWearableAtlas, WearableDefinition,
+} from '../types';
+import { SLOT_LAYOUT, UNMEASURED, placeWearable, type SlotLayout } from './wearableLayout';
+
+/** Unpack a base64 motion track into signed bytes. Four per atlas cell, or nothing if absent. */
+function decodeMotion(encoded?: string | null) {
+  if (!encoded) return undefined;
+  try {
+    const binary = atob(encoded);
+    const bytes = new Int8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) bytes[i] = (binary.charCodeAt(i) << 24) >> 24;
+    return bytes;
+  } catch {
+    return undefined; // a malformed track must never stop the pet from rendering
+  }
+}
+
+/**
+ * The pet as an animated sprite.
+ *
+ * The build pipeline emits one atlas per species per evolution stage, laid out as a grid with
+ * one action per row. Phaser indexes a spritesheet in reading order, so an action's frames run
+ * contiguously from its published start index. The grid exists so the sheet stays inside the
+ * 4096px texture limit that older tablets report — a single long strip could not be uploaded
+ * on those devices at all, and the pet would fail to render rather than merely load slowly.
+ *
+ * The frame ranges arrive from the server inside `catalog.animation`, because the client cannot
+ * fetch the sprite manifest directly — /pet/assets only serves hashed .js/.css/.webp files.
+ *
+ * If the atlas is missing (pipeline not yet run) this degrades to the single static form image,
+ * so the room is never empty.
+ */
+
+/** Actions that loop until something else is requested. Everything else returns to idle. */
+const LOOPING: ReadonlySet<PetAction> = new Set<PetAction>(['idle', 'walk', 'sleep']);
+
+/** Legacy emote names used by the DOM layer and scenes, mapped onto real actions. */
+const EMOTE_ACTION: Record<string, PetAction> = {
+  happy: 'happy', eat: 'eat', attack: 'auto-attack', hurt: 'hit',
+  sleep: 'sleep', evolve: 'evolve', play: 'play', hatch: 'hatch', skill: 'active-skill',
+};
+
+/** Vertical origin that plants the creature's feet on the floor rather than its centre. */
+const FOOT_ORIGIN = 0.78;
+
+export class PetAvatar extends Phaser.GameObjects.Container {
+  private sprite?: Phaser.GameObjects.Sprite;
+  private staticArt?: Phaser.GameObjects.Image | Phaser.GameObjects.Container;
+  private shadow: Phaser.GameObjects.Ellipse;
+  private layout?: AnimationLayout | null;
+  private textureKey = '';
+  private animationPrefix = '';
+  private facing: PetFacing = 'front';
+  private current: PetAction = 'idle';
+  private reducedMotion: boolean;
+  private anchors?: PetAnchors;
+  private facingAnchors?: Partial<Record<PetFacing, PetAnchors>>;
+  private motion?: Int8Array;
+  private ambient?: number;
+  private fullOutfit = false;
+  private worn: {
+    image: Phaser.GameObjects.Image; shade?: Phaser.GameObjects.Image; overlay?: Phaser.GameObjects.Image; slotKey: string;
+    box: ContentBox; behind: boolean; views: Record<string, { key: string; box: ContentBox; overlayKey?: string }>;
+    fit?: WearableDefinition['fit']; sideBehind?: boolean; profileSizing?: WearableDefinition['profileSizing'];
+    profileOffset?: WearableDefinition['profileOffset'];
+  }[] = [];
+
+  /** Texture key for a species/stage atlas. Shared so preload and construction agree. */
+  static atlasKey(definition: PetDefinition, stage: number) {
+    return `atlas-${definition.id}-${stage}`;
+  }
+
+  /** Auras are environmental effects; everything physically worn forms one exact redraw key. */
+  static outfitSignature(ids: string[] | undefined) {
+    return (ids ?? []).filter((id) => !id.startsWith('aura-')).sort().join('+');
+  }
+
+  static fullOutfitUrl(
+    definition: PetDefinition,
+    stage: number,
+    ids: string[] | undefined,
+    outfitAtlases: Record<string, string> | undefined,
+  ) {
+    const signature = PetAvatar.outfitSignature(ids);
+    return signature ? outfitAtlases?.[`${definition.id}:${stage}:${signature}`] : undefined;
+  }
+
+  static fullOutfitKey(definition: PetDefinition, stage: number, ids: string[] | undefined) {
+    return `outfit-${definition.id}-${stage}-${PetAvatar.outfitSignature(ids)}`;
+  }
+
+  static redrawnAtlasKey(definition: PetDefinition, stage: number, id: string, layer: keyof RedrawnWearableAtlas) {
+    return `redrawn-${definition.id}-${stage}-${id}-${layer}`;
+  }
+
+  /**
+   * Canonical pass order for modular redraws.  The room compositor and the wardrobe preview must
+   * use the same order: the saved outfit array is user input and is not a rendering order.
+   * Keeping this in one place prevents a preview from disagreeing with the in-room result when a
+   * multi-slot outfit was saved in a different order (for example face, head, then back).
+   */
+  static redrawnSlotOrder(slot: string) {
+    return ({ aura: 0, back: 1, neck: 2, head: 3, face: 4 } as Record<string, number>)[slot] ?? 9;
+  }
+
+  /** Load only registered redraw layers. Missing equipment stays invisible instead of reverting
+   * to the old free-positioned sticker artwork on an animated pet. */
+  static preloadRedrawnWearables(
+    scene: Phaser.Scene,
+    definition: PetDefinition,
+    stage: number,
+    ids: string[] | undefined,
+    catalog: Record<string, RedrawnWearableAtlas> | undefined,
+  ) {
+    for (const id of ids ?? []) {
+      const entry = catalog?.[`${definition.id}:${stage}:${id}`];
+      if (!entry) continue;
+      for (const layer of ['erase', 'rear', 'patch', 'frontErase', 'front'] as const) {
+        const url = entry[layer];
+        const key = PetAvatar.redrawnAtlasKey(definition, stage, id, layer);
+        if (url && !scene.textures.exists(key)) scene.load.image(key, url);
+      }
+    }
+  }
+
+  /**
+   * Equipment that still needs the established directional placement path.
+   *
+   * A registered per-pet redraw replaces only that one item. Unregistered items remain usable
+   * while their redraws are produced, and a redraw may explicitly hide a legacy slot (for
+   * example, a sealed helmet hiding face equipment). Auras are never baked into a pet atlas.
+   */
+  static legacyWearableIds(
+    definition: PetDefinition,
+    stage: number,
+    ids: string[] | undefined,
+    wearables: WearableDefinition[] | undefined,
+    catalog: Record<string, RedrawnWearableAtlas> | undefined,
+  ) {
+    const equipped = ids ?? [];
+    const registered = equipped.flatMap((id) => {
+      const entry = catalog?.[`${definition.id}:${stage}:${id}`];
+      return entry ? [{ id, entry }] : [];
+    });
+    const redrawnIds = new Set(registered.map(({ id }) => id));
+    const occludedSlots = new Set(registered.flatMap(({ entry }) => entry.occludes ?? []));
+    return equipped.filter((id) => {
+      // Auras are still legacy environmental effects until their per-pet redraw is registered.
+      // Once registered, however, they are rendered by the exact same atlas compositor as every
+      // other slot; leaving one here would draw the old free-positioned sticker on top of it.
+      if (id.startsWith('aura-')) return !redrawnIds.has(id);
+      if (redrawnIds.has(id)) return false;
+      const slot = wearables?.find((item) => item.id === id)?.slot;
+      return !slot || !occludedSlots.has(slot);
+    });
+  }
+
+  /**
+   * Assemble one temporary spritesheet from registered redraw layers. Canvas compositing makes
+   * several erase masks additive, which a single Phaser bitmap mask cannot do. This happens once
+   * when the room opens, not on every animation frame.
+   */
+  static composeRedrawnAtlas(
+    scene: Phaser.Scene,
+    definition: PetDefinition,
+    stage: number,
+    ids: string[] | undefined,
+    layout: AnimationLayout,
+    catalog: Record<string, RedrawnWearableAtlas> | undefined,
+    baseTextureKey?: string,
+  ) {
+    // A registered aura is a modular redraw, not a legacy floor effect. It participates in the
+    // same rear -> base -> patch -> front pass as head, face, neck and back equipment.
+    const equipped = ids ?? [];
+    const discovered = equipped.flatMap((id) => {
+      const entry = catalog?.[`${definition.id}:${stage}:${id}`];
+      return entry ? [{ id, entry }] : [];
+    });
+    const occludedSlots = new Set(discovered.flatMap(({ entry }) => entry.occludes ?? []));
+    const entries = discovered.filter(({ entry }) => !occludedSlots.has(entry.slot));
+    if (!entries.length) return undefined;
+
+    const signature = entries.map(({ id }) => id).sort().join('+');
+    const baseIdentity = baseTextureKey ? `-base-${baseTextureKey}` : '';
+    const key = `redrawn-composite-${definition.id}-${stage}-${signature}${baseIdentity}`;
+    if (scene.textures.exists(key)) return key;
+    const baseKey = baseTextureKey ?? PetAvatar.atlasKey(definition, stage);
+    if (!scene.textures.exists(baseKey)) return undefined;
+
+    const columns = layout.columns ?? layout.framesPerDirection;
+    const rows = layout.rows ?? layout.directions.length;
+    const width = layout.frameWidth * columns;
+    const height = layout.frameHeight * rows;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    if (!context) return undefined;
+    const source = (textureKey: string) => scene.textures.get(textureKey).getSourceImage() as CanvasImageSource;
+    const ordered = [...entries].sort((a, b) => (
+      PetAvatar.redrawnSlotOrder(a.entry.slot) - PetAvatar.redrawnSlotOrder(b.entry.slot)
+      || a.id.localeCompare(b.id)
+    ));
+
+    // Anything physically behind the pet must exist before the body is painted.
+    for (const { id, entry } of ordered) {
+      const layerKey = PetAvatar.redrawnAtlasKey(definition, stage, id, 'rear');
+      if (entry.rear && scene.textures.exists(layerKey)) context.drawImage(source(layerKey), 0, 0, width, height);
+    }
+    context.drawImage(source(baseKey), 0, 0, width, height);
+
+    // Erase every covered body region as a union, then paint the sampled redraws in deterministic
+    // back -> neck -> head -> face order. This lets glasses sit on a helmet without showing ears
+    // through the helmet, while keeping a scarf in front of a wing harness.
+    context.save();
+    context.globalCompositeOperation = 'destination-out';
+    for (const { id, entry } of ordered) {
+      const layerKey = PetAvatar.redrawnAtlasKey(definition, stage, id, 'erase');
+      if (entry.erase && scene.textures.exists(layerKey)) context.drawImage(source(layerKey), 0, 0, width, height);
+    }
+    context.restore();
+    for (const { id, entry } of ordered) {
+      const layerKey = PetAvatar.redrawnAtlasKey(definition, stage, id, 'patch');
+      if (entry.patch && scene.textures.exists(layerKey)) context.drawImage(source(layerKey), 0, 0, width, height);
+    }
+
+    // Enclosed but open-faced headwear may hide ears while remaining compatible with glasses.
+    // Face patches are already present here; clear only the late anatomical mask, then paint the
+    // fitted front item. This prevents a face redraw from restoring ears through a chef hat.
+    context.save();
+    context.globalCompositeOperation = 'destination-out';
+    for (const { id, entry } of ordered) {
+      const layerKey = PetAvatar.redrawnAtlasKey(definition, stage, id, 'frontErase');
+      if (entry.frontErase && scene.textures.exists(layerKey)) context.drawImage(source(layerKey), 0, 0, width, height);
+    }
+    context.restore();
+    for (const { id, entry } of ordered) {
+      const layerKey = PetAvatar.redrawnAtlasKey(definition, stage, id, 'front');
+      if (entry.front && scene.textures.exists(layerKey)) context.drawImage(source(layerKey), 0, 0, width, height);
+    }
+
+    const texture = scene.textures.addCanvas(key, canvas);
+    if (!texture) return undefined;
+    for (let row = 0; row < rows; row += 1) {
+      for (let column = 0; column < columns; column += 1) {
+        const frame = row * columns + column;
+        texture.add(frame, 0, column * layout.frameWidth, row * layout.frameHeight, layout.frameWidth, layout.frameHeight);
+      }
+    }
+    return key;
+  }
+
+  /**
+   * Queue the atlas for loading. Call from a scene's preload(). Returns false when there is no
+   * atlas for this pet, so the caller knows to load the static form art instead.
+   */
+  static preload(
+    scene: Phaser.Scene,
+    definition: PetDefinition,
+    stage: number,
+    layout?: AnimationLayout | null,
+    equippedIds?: string[],
+    outfitAtlases?: Record<string, string>,
+  ) {
+    // A creature whose sheet has not been imported yet is still on placeholder art, which the
+    // manifest does not describe. Playing it would cut frames in the wrong places.
+    if (!definition.animated) return false;
+    const outfitUrl = PetAvatar.fullOutfitUrl(definition, stage, equippedIds, outfitAtlases);
+    const url = outfitUrl ?? definition.atlas?.[stage - 1];
+    if (!url || !layout) return false;
+    const key = outfitUrl
+      ? PetAvatar.fullOutfitKey(definition, stage, equippedIds)
+      : PetAvatar.atlasKey(definition, stage);
+    if (!scene.textures.exists(key)) {
+      scene.load.spritesheet(key, url, { frameWidth: layout.frameWidth, frameHeight: layout.frameHeight });
+    }
+    return true;
+  }
+
+  /** Queue the artwork for a pet's equipped items. Call from a scene's preload(). */
+  static preloadWearables(scene: Phaser.Scene, ids: string[] | undefined, wearables: WearableDefinition[]) {
+    for (const id of ids ?? []) {
+      const definition = wearables.find((item) => item.id === id);
+      if (definition?.art && !scene.textures.exists(id)) scene.load.image(id, definition.art);
+      // The same piece drawn from the side and from behind. A creature that walks turns away, and
+      // a front-facing crown seen from behind is the thing these are here to stop.
+      for (const facing of ['right', 'back'] as const) {
+        const url = definition?.views?.[facing];
+        const key = `${id}:${facing}`;
+        if (url && !scene.textures.exists(key)) scene.load.image(key, url);
+        const overlayUrl = definition?.overlays?.[facing];
+        const overlayKey = `${id}:${facing}:overlay`;
+        if (overlayUrl && !scene.textures.exists(overlayKey)) scene.load.image(overlayKey, overlayUrl);
+      }
+    }
+  }
+
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    definition: PetDefinition,
+    pet: PetInstance,
+    options: {
+      layout?: AnimationLayout | null; fallbackTexture?: string; scale?: number;
+      wearables?: WearableDefinition[]; ambient?: number; outfitAtlases?: Record<string, string>;
+      redrawnWearables?: Record<string, RedrawnWearableAtlas>;
+    } = {},
+  ) {
+    super(scene, x, y);
+    const { layout, fallbackTexture, scale = 1, wearables, ambient, outfitAtlases, redrawnWearables } = options;
+    this.ambient = ambient;
+    this.layout = layout;
+    this.reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
+      || localStorage.getItem('pet-reduced-motion') === '1';
+
+    this.shadow = scene.add.ellipse(0, 30, 112, 30, 0x263547, 0.18);
+    this.add(this.shadow);
+
+    const outfitUrl = PetAvatar.fullOutfitUrl(definition, pet.stage, pet.equippedWearables, outfitAtlases);
+    const outfitKey = outfitUrl
+      ? PetAvatar.fullOutfitKey(definition, pet.stage, pet.equippedWearables)
+      : undefined;
+    const registeredAuraIds = (pet.equippedWearables ?? []).filter((id) => (
+      id.startsWith('aura-') && Boolean(redrawnWearables?.[`${definition.id}:${pet.stage}:${id}`])
+    ));
+    // Complete physical outfits never contain an aura. If an aura has an exact redraw, compose
+    // it over that complete outfit as the base; otherwise retain the existing complete outfit
+    // path and let only unregistered auras use their compatibility art.
+    const redrawnIds = outfitUrl ? registeredAuraIds : pet.equippedWearables;
+    const redrawnKey = layout && (!outfitUrl || registeredAuraIds.length)
+      ? PetAvatar.composeRedrawnAtlas(
+        scene, definition, pet.stage, redrawnIds, layout, redrawnWearables, outfitKey,
+      )
+      : undefined;
+    const key = outfitUrl
+      ? redrawnKey ?? outfitKey!
+      : redrawnKey ?? PetAvatar.atlasKey(definition, pet.stage);
+    if (layout && scene.textures.exists(key)) {
+      this.fullOutfit = Boolean(outfitUrl);
+      this.textureKey = key;
+      // Animation keys include the texture identity. A nude and a dressed sheet use the same
+      // frame numbers but must never share cached Phaser animations backed by different art.
+      this.animationPrefix = key;
+      this.registerAnimations(definition, pet.stage, layout);
+      this.sprite = scene.add.sprite(0, 0, key, 0).setOrigin(0.5, FOOT_ORIGIN);
+      // Atlas cells are authored small so the sheets stay manageable; scale to stage presence.
+      this.sprite.setScale((250 / layout.frameHeight) * (1 + (pet.stage - 1) * 0.06));
+      if (ambient !== undefined) this.sprite.setTint(ambient);
+      this.add(this.sprite);
+    } else {
+      this.staticArt = fallbackTexture && scene.textures.exists(fallbackTexture)
+        ? scene.add.image(0, 0, fallbackTexture).setOrigin(0.5, 0.82)
+        : this.fallbackBody(definition, pet.stage);
+      if (this.staticArt instanceof Phaser.GameObjects.Image) {
+        const max = Math.max(this.staticArt.width, this.staticArt.height);
+        this.staticArt.setScale((230 / Math.max(1, max)) * (1 + (pet.stage - 1) * 0.08));
+      }
+      this.add(this.staticArt);
+    }
+
+    this.setScale(scale);
+    // A complete outfit sheet contains every physical item but never an aura. A modular redraw
+    // replaces only its registered item; all other owned equipment must remain usable while the
+    // redraw library is being completed. This keeps the wardrobe functional without drawing the
+    // legacy version over an item that already has approved fitted artwork.
+    const legacyIds = this.fullOutfit
+      ? PetAvatar.legacyWearableIds(
+        definition,
+        pet.stage,
+        pet.equippedWearables.filter((id) => id.startsWith('aura-')),
+        wearables,
+        redrawnWearables,
+      )
+      : PetAvatar.legacyWearableIds(
+        definition, pet.stage, pet.equippedWearables, wearables, redrawnWearables,
+      );
+    this.addWearables(legacyIds, definition, pet.stage, wearables);
+    scene.add.existing(this);
+    this.play('idle');
+  }
+
+  /** Build one Phaser animation per action per facing from the server-supplied frame ranges. */
+  private registerAnimations(definition: PetDefinition, stage: number, layout: AnimationLayout) {
+    for (const action of layout.actions) {
+      // A clip from the pose sheet already knows which way it faces and which cells it plays.
+      // An action from the older sheet is a run within each direction row, so it is built once
+      // per direction and offset into that row.
+      const facings = action.facing ? [action.facing] : layout.directions;
+      for (const facing of facings) {
+        const animationKey = `${this.animationPrefix}-${action.name}-${facing}`;
+        if (this.scene.anims.exists(animationKey)) continue;
+        const row = Math.max(0, layout.directions.indexOf(facing));
+        const cells = action.frames
+          ?? Array.from({ length: action.length }, (_, offset) => row * layout.framesPerDirection + action.start + offset);
+        this.scene.anims.create({
+          key: animationKey,
+          frames: cells.map((frame) => ({ key: this.textureKey, frame })),
+          frameRate: action.name === 'sleep' ? Math.round(layout.fps / 2.5) : layout.fps,
+          repeat: LOOPING.has(action.name) ? -1 : 0,
+        });
+      }
+    }
+  }
+  /** Play an action. One-shot actions fall back to idle when they finish. */
+  play(action: PetAction, facing: PetFacing = this.facing) {
+    this.facing = facing;
+    this.current = action;
+    if (!this.sprite || !this.layout) return this.tweenFallback(action);
+    if (this.reducedMotion && !LOOPING.has(action)) {
+      // Keep the state change legible without oscillation: hold the action's key pose.
+      const range = this.layout.actions.find((entry) => entry.name === action && (!entry.facing || entry.facing === facing))
+        ?? this.layout.actions.find((entry) => entry.name === action);
+      const row = Math.max(0, this.layout.directions.indexOf(facing));
+      if (range) {
+        const cells = range.frames
+          ?? Array.from({ length: range.length }, (_, offset) => row * this.layout!.framesPerDirection + range.start + offset);
+        const cell = cells[Math.floor(cells.length / 2)];
+        this.sprite.setFrame(cell);
+        this.layoutWearables(cell);
+      }
+      this.scene.time.delayedCall(420, () => this.settle());
+      return;
+    }
+    // Left is the right-hand set mirrored. Drawing it twice would double the sheet for a view
+    // nobody can tell apart, and the creatures are close enough to symmetrical for it to hold.
+    const drawn = facing === 'left' ? 'right' : facing;
+    this.sprite.setFlipX(facing === 'left');
+
+    // A sheet may not carry every facing — today's art has only the front — so fall back rather
+    // than freezing on whatever was playing.
+    let animationKey = `${this.animationPrefix}-${action}-${drawn}`;
+    if (!this.scene.anims.exists(animationKey)) animationKey = `${this.animationPrefix}-${action}-front`;
+    if (!this.scene.anims.exists(animationKey)) animationKey = `${this.animationPrefix}-idle-front`;
+    if (!this.scene.anims.exists(animationKey)) return;
+    this.sprite.play(animationKey, true);
+    if (!LOOPING.has(action)) {
+      this.sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => this.settle());
+    }
+  }
+
+  private settle() {
+    if (this.current !== 'sleep') this.play('idle', this.facing);
+  }
+
+  setFacing(facing: PetFacing) {
+    if (facing === this.facing) return;
+    this.play(this.current, facing);
+  }
+
+  /** What the creature is doing, so the room can tell walking apart from a one-shot reaction. */
+  get action() { return this.current; }
+
+  /** Legacy entry point used by the DOM layer's `pet:emote` event. */
+  emote(type: string) {
+    const action = EMOTE_ACTION[type] ?? 'happy';
+    this.play(action);
+    if (this.reducedMotion) return;
+    // A short positional accent on top of the frame animation — the frames carry the squash and
+    // stretch, so this only adds travel the atlas cannot express.
+    if (action === 'happy') {
+      this.scene.tweens.add({ targets: this, y: this.y - 26, duration: 190, yoyo: true, ease: 'Sine.out' });
+    } else if (action === 'hit') {
+      this.scene.tweens.add({ targets: this, x: this.x - 14, duration: 70, yoyo: true, repeat: 1, ease: 'Quad.out' });
+    }
+  }
+
+  /** Idle breathing for the no-atlas fallback path only; atlas idle already breathes. */
+  private tweenFallback(action: PetAction) {
+    const target = this.staticArt;
+    if (!target || this.reducedMotion) return;
+    this.scene.tweens.killTweensOf(target);
+    if (LOOPING.has(action)) {
+      this.scene.tweens.add({ targets: target, y: -7, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      this.scene.tweens.add({ targets: this.shadow, scaleX: 0.88, alpha: 0.12, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+    }
+  }
+
+  private fallbackBody(definition: PetDefinition, stage: number) {
+    const container = this.scene.add.container(0, 0);
+    const color = Phaser.Display.Color.HexStringToColor(definition.color).color;
+    const body = this.scene.add.ellipse(0, 0, 122 + stage * 9, 94 + stage * 7, color);
+    const head = this.scene.add.circle(0, -57, 54 + stage * 3, color);
+    const eyeA = this.scene.add.ellipse(-19, -62, 10, 15, 0x223047);
+    const eyeB = this.scene.add.ellipse(19, -62, 10, 15, 0x223047);
+    container.add([body, head, eyeA, eyeB]);
+    return container;
+  }
+
+  /**
+   * Draw the equipped items using their own artwork.
+   *
+   * These were placeholder Phaser shapes — a star for a hat, a rectangle for glasses — left in
+   * when the avatar was first wired up. The artwork existed all along; nothing ever loaded it,
+   * so equipping a crown put a blue star over the pet's head.
+   */
+  private addWearables(
+    ids: string[] | undefined,
+    definition: PetDefinition,
+    stage: number,
+    wearables?: WearableDefinition[],
+  ) {
+    const equipped = (ids ?? []).filter((id) => this.scene.textures.exists(id));
+    if (!equipped.length) return;
+
+    this.anchors = definition.anchors?.[stage - 1] ?? UNMEASURED;
+    this.facingAnchors = definition.facingAnchors?.[stage - 1] ?? undefined;
+    this.motion = decodeMotion(definition.motion?.[stage - 1]);
+
+    for (const id of equipped) {
+      const item = wearables?.find((entry) => entry.id === id);
+      const slotKey = item?.slot ?? id.split('-')[0];
+      const slot = SLOT_LAYOUT[slotKey];
+      if (!slot) continue;
+      const box = item?.content ?? { x: 0, y: 0, width: 1, height: 1 };
+      // What to draw, and the outline to fit it by, for each way the creature can face. A view
+      // with no art of its own falls back to the front, which is what a set that has only ever
+      // been drawn once looks like.
+      const views: Record<string, { key: string; box: ContentBox; overlayKey?: string }> = { front: { key: id, box } };
+      for (const facing of ['right', 'back'] as const) {
+        const key = `${id}:${facing}`;
+        views[facing] = this.scene.textures.exists(key)
+          ? {
+            key, box: item?.viewContent?.[facing] ?? box,
+            overlayKey: this.scene.textures.exists(`${id}:${facing}:overlay`) ? `${id}:${facing}:overlay` : undefined,
+          }
+          : { key: id, box };
+      }
+
+      const image = this.scene.add.image(0, 0, id);
+      if (this.ambient !== undefined) image.setTint(this.ambient);
+
+      // A worn thing darkens what it sits on. Without that contact the art reads as a decal
+      // floating a few pixels off the fur, however well it is positioned. A dark copy of the
+      // piece, offset down and flattened, sells the contact at this size — and it is only worth
+      // drawing for the pieces that actually rest against the body.
+      let shade: Phaser.GameObjects.Image | undefined;
+      if (!slot.behind) {
+        shade = this.scene.add.image(0, 0, id);
+        shade.setTint(0x000000).setAlpha(0.22);
+        this.add(shade);
+      }
+      if (slot.behind) this.addAt(image, 1); else this.add(image);
+      const overlayKey = Object.values(views).find((view) => view.overlayKey)?.overlayKey;
+      const overlay = overlayKey ? this.scene.add.image(0, 0, overlayKey).setVisible(false) : undefined;
+      if (overlay) {
+        if (this.ambient !== undefined) overlay.setTint(this.ambient);
+        this.add(overlay);
+      }
+      this.worn.push({
+        image, shade, overlay, slotKey, box, behind: !!slot.behind, views,
+        fit: item?.fit, sideBehind: item?.sideBehind, profileSizing: item?.profileSizing,
+        profileOffset: item?.profileOffset,
+      });
+    }
+
+    this.layoutWearables();
+    // Follow the pose. The head travels up to 45px on a 160px cell between frames of a single
+    // action, so anything pinned to the resting pose slides out from under itself as soon as the
+    // creature breathes — which is precisely what makes a worn item look stuck on.
+    this.sprite?.on(Phaser.Animations.Events.ANIMATION_UPDATE, this.onFrame, this);
+    this.sprite?.on(Phaser.Animations.Events.ANIMATION_START, this.onFrame, this);
+  }
+
+  private onFrame(_animation: Phaser.Animations.Animation, frame: Phaser.Animations.AnimationFrame) {
+    const cell = Number(frame.textureFrame);
+    this.layoutWearables(Number.isFinite(cell) ? cell : 0);
+  }
+
+  /** Place every worn item against the landmarks for one atlas cell. */
+  private layoutWearables(cell = 0) {
+    if (!this.worn.length) return;
+    // A creature seen from the side does not carry its head where its front view does, so the
+    // landmarks measured on that pose are used when it is turned. Left is the right-hand set
+    // mirrored, exactly as the body is.
+    const seen = this.facing === 'left' ? 'right' : this.facing;
+    const anchors = this.facingAnchors?.[seen] ?? this.anchors ?? UNMEASURED;
+
+    // What is worn on the back is behind the creature until the creature turns round. Wings
+    // and a satchel belong in front of it from behind; an aura is a glow on the floor and
+    // stays under it whichever way it faces.
+    const cellWidth = this.sprite && this.layout ? this.layout.frameWidth : this.staticArtSize().width;
+    const cellHeight = this.sprite && this.layout ? this.layout.frameHeight : this.staticArtSize().height;
+    const scale = this.sprite ? this.sprite.scaleY : this.staticArtScale();
+    const origin = this.sprite ? FOOT_ORIGIN : 0.82;
+
+    // The track holds this frame's drift from the resting pose in cell pixels, plus how much the
+    // body has stretched, so the landmarks move and breathe along with the creature.
+    const track = this.motion;
+    const offset = track && cell * 4 + 3 < track.length ? cell * 4 : -1;
+    const eye = anchors.eye + (offset >= 0 ? track![offset + 1] / cellHeight : 0);
+    const centre = anchors.centre + (offset >= 0 ? track![offset + 2] / cellWidth : 0);
+    const stretch = offset >= 0 ? 1 + track![offset + 3] / 100 : 1;
+    // The head keeps its resting shape and simply travels with the eyes. Reading the measured
+    // skull line per frame instead let the two landmarks drift apart, which shrank and dropped a
+    // hat onto the face on the frames where the silhouette happened to read differently — a real
+    // head does not change size when it nods.
+    const top = eye - (anchors.eye - anchors.top);
+
+    const toLocalY = (fraction: number) => (fraction * cellHeight - origin * cellHeight) * scale;
+    const centreX = (centre - 0.5) * cellWidth * scale;
+    const head = Math.max(0.01, eye - top);
+
+    for (const worn of this.worn) {
+      // Left borrows the right-hand drawing and mirrors it, exactly as the body does.
+      const view = worn.views[seen] ?? worn.views.front;
+      // Neckwear in this art set only depicts the front of a collar or necklace. Reusing it for
+      // the rear view paints the pendant down the creature's spine, so the whole slot disappears
+      // while facing away and returns automatically for the front/profile views.
+      const hiddenForFacing = worn.slotKey === 'neck' && seen === 'back';
+      worn.image.setVisible(!hiddenForFacing);
+      worn.shade?.setVisible(!hiddenForFacing);
+      if (worn.image.texture.key !== view.key) worn.image.setTexture(view.key);
+      if (worn.shade && worn.shade.texture.key !== view.key) worn.shade.setTexture(view.key);
+      if (worn.overlay) {
+        worn.overlay.setVisible(!hiddenForFacing && Boolean(view.overlayKey));
+        if (view.overlayKey && worn.overlay.texture.key !== view.overlayKey) worn.overlay.setTexture(view.overlayKey);
+      }
+      if (hiddenForFacing) continue;
+
+      const place = placeWearable(
+        { ...anchors, top, eye, centre }, worn.slotKey, view.box, stretch, seen,
+        worn.fit, worn.views.front.box, worn.profileSizing, seen === 'right' ? worn.profileOffset : undefined,
+      );
+      if (!place) continue;
+      const y = (place.y * cellHeight - origin * cellHeight) * scale;
+      // Walking left is the right-hand art mirrored — the body already is. A worn thing that did
+      // not mirror with it ended up facing the way the creature had come from, with a hat's brim
+      // pointing backwards and a satchel's buckles on the wrong shoulder.
+      const mirrored = this.facing === 'left';
+      const x = (place.x - 0.5) * cellWidth * scale * (mirrored ? -1 : 1);
+      worn.image.setOrigin(place.originX, place.originY);
+      worn.image.setScale(place.size * cellWidth * scale / Math.max(1, worn.image.width));
+      worn.image.setFlipX(mirrored);
+      worn.image.setPosition(x, y);
+      worn.overlay?.setFlipX(mirrored);
+      worn.overlay?.setOrigin(place.originX, place.originY)
+        .setScale(Math.abs(worn.image.scaleX), worn.image.scaleY)
+        .setPosition(x, y);
+      // The shadow lands slightly low and slightly flattened, as if cast onto the body below.
+      worn.shade?.setFlipX(mirrored);
+      worn.shade?.setOrigin(place.originX, place.originY)
+        .setScale(Math.abs(worn.image.scaleX) * 0.97, worn.image.scaleY * 0.9)
+        .setPosition(x, y + Math.max(2, place.size * cellHeight * scale * 0.06));
+    }
+    this.orderWearableLayers(seen);
+  }
+
+  /** Keep cross-slot occlusion deterministic when several pieces overlap. */
+  private orderWearableLayers(seen: 'front' | 'right' | 'back') {
+    const body = this.sprite ?? this.staticArt;
+    if (body) this.bringToTop(body);
+
+    // Back equipment touches the body first. Neckwear then crosses its straps, headwear may
+    // overlap the collar, and facewear is always the nearest layer (for example glasses on a
+    // helmet visor). Auras never enter this list and therefore stay below the body.
+    for (const slot of ['back', 'neck', 'head', 'face']) {
+      for (const worn of this.worn) {
+        if (worn.slotKey !== slot) continue;
+        if (!worn.image.visible) continue;
+        const view = worn.views[seen] ?? worn.views.front;
+        if (slot === 'back') {
+          const baseBehind = seen === 'front' || Boolean(view.overlayKey) || (seen === 'right' && worn.sideBehind);
+          if (!baseBehind) this.bringToTop(worn.image);
+          if (worn.overlay?.visible) this.bringToTop(worn.overlay);
+          continue;
+        }
+        if (worn.shade) this.bringToTop(worn.shade);
+        this.bringToTop(worn.image);
+      }
+    }
+  }
+
+  private staticArtSize() {
+    const art = this.staticArt;
+    return art instanceof Phaser.GameObjects.Image
+      ? { width: art.width, height: art.height }
+      : { width: 230, height: 230 };
+  }
+
+  private staticArtScale() {
+    const art = this.staticArt;
+    return art instanceof Phaser.GameObjects.Image ? art.scaleY : 1;
+  }
+}

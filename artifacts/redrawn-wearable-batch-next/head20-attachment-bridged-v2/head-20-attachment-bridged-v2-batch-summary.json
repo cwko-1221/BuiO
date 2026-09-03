@@ -1,0 +1,144 @@
+{
+  "verdict": "REJECT",
+  "mode": "DRY_RUN_NO_PUBLISH",
+  "category": "head",
+  "noPublish": true,
+  "manifestOrRuntimeModified": false,
+  "geometry": {
+    "canvas": "800x640",
+    "cell": "160x160",
+    "transformed": false,
+    "resampled": false
+  },
+  "lineage": {
+    "verdict": "PASS",
+    "targetHashBefore": "370378be0360e31dd6ce82e37a4cf852ac6a9fc2c43902b51946b6e4c340d924",
+    "targetHashAfter": "370378be0360e31dd6ce82e37a4cf852ac6a9fc2c43902b51946b6e4c340d924",
+    "targetImmutable": true,
+    "targetPredatesMask": true,
+    "checks": [
+      {
+        "name": "lineage verdict is PASS",
+        "pass": true
+      },
+      {
+        "name": "lineage declares this exact frozen target path",
+        "pass": true
+      },
+      {
+        "name": "lineage declares this exact frozen target hash",
+        "pass": true
+      },
+      {
+        "name": "lineage proves no earlier composite byte-copy became target",
+        "pass": true
+      },
+      {
+        "name": "target existed before this extraction run",
+        "pass": true
+      },
+      {
+        "name": "target filename is not composite/recompose",
+        "pass": true
+      },
+      {
+        "name": "frozen target predates generated canonical mask",
+        "pass": true
+      }
+    ]
+  },
+  "extraction": {
+    "reportPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-next\\head20-attachment-bridged-v2\\head-20-attachment-bridged-v2-extraction-report.json",
+    "verdict": "REJECT",
+    "maskPath": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-next\\head20-attachment-bridged-v2\\head-20-attachment-bridged-v2-canonical-mask.png",
+    "maskHash": "c246cec494c60ab5279ccd63a369a7f6426aecd9618e83b52aca5f95c29899f2",
+    "selectedCells": [
+      "r0c0",
+      "r0c1",
+      "r0c2",
+      "r0c3",
+      "r0c4",
+      "r1c0",
+      "r1c1",
+      "r1c2",
+      "r1c3",
+      "r1c4",
+      "r2c0",
+      "r2c1",
+      "r2c2",
+      "r2c3",
+      "r2c4",
+      "r3c0",
+      "r3c1",
+      "r3c2",
+      "r3c3",
+      "r3c4"
+    ]
+  },
+  "solve": null,
+  "eraseReplacementQa": null,
+  "frontEraseQa": null,
+  "categoryQa": {
+    "verdict": "REJECT"
+  },
+  "proof": null,
+  "expectedComparison": null,
+  "layerManifestAudit": null,
+  "failedCells": [
+    "r0c0",
+    "r0c1",
+    "r0c2",
+    "r0c3",
+    "r0c4",
+    "r1c0",
+    "r1c1",
+    "r1c2",
+    "r1c3",
+    "r1c4",
+    "r2c0",
+    "r2c1",
+    "r2c2",
+    "r2c3",
+    "r2c4",
+    "r3c0",
+    "r3c1",
+    "r3c2",
+    "r3c3",
+    "r3c4"
+  ],
+  "retry": {
+    "supported": true,
+    "mutationScope": "only selected mask cells; global exact recomposition is always rechecked",
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "scripts/run-redrawn-wearable-batch.mjs",
+      "--base",
+      "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\public\\assets\\art\\sprites\\starpatch-cat-1-atlas-2737c2cd0c.webp",
+      "--target",
+      "C:\\Users\\kochu\\Documents\\BuiO\\pet-app\\art-source\\imagegen\\baked-wearables\\starpatch-cat-1\\head-20-dressed-atlas-v2.png",
+      "--spec",
+      "C:\\Users\\kochu\\Documents\\BuiO\\scripts\\redrawn-category-specs\\head-20-closed-helmet-replacement.json",
+      "--lineage",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\head20-lineage-audit-attachment.json",
+      "--output",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-next\\head20-attachment-bridged-v2",
+      "--prefix",
+      "head-20-attachment-bridged-v2",
+      "--retry-cells",
+      "r0c0,r0c1,r0c2,r0c3,r0c4,r1c0,r1c1,r1c2,r1c3,r1c4,r2c0,r2c1,r2c2,r2c3,r2c4,r3c0,r3c1,r3c2,r3c3,r3c4",
+      "--seed-mask",
+      "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\redrawn-wearable-batch-next\\head20-attachment-bridged-v2\\head-20-attachment-bridged-v2-canonical-mask.png",
+      "--dry-run"
+    ]
+  },
+  "publish": {
+    "executed": false,
+    "ready": false,
+    "missing": [],
+    "blockedByPipeline": true,
+    "script": "scripts/publish-redrawn-wearable.mjs",
+    "args": null,
+    "command": null
+  },
+  "completedUtc": "2026-08-25T14:39:35.430Z"
+}
