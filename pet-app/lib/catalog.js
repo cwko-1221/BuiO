@@ -400,7 +400,7 @@ for (const [slot, count, names] of WEARABLE_GROUPS) {
 const FURNITURE = ROOMS.flatMap((room) => furnitureSets.SETS[room.id].map(([zh, en], index) => ({
   id: `${room.id}-furniture-${index + 1}`,
   name: { 'zh-HK': zh, 'en-US': en },
-  category: 'furniture', roomId: room.id, price: [120,120,120,300,120,300,300,120,450,450][index],
+  category: 'furniture', roomId: room.id, price: [1200,1200,1200,1500,1200,1500,1500,1200,2250,2250][index],
   art: artPath('collectibles/furniture', `${room.id}-furniture-${index + 1}`),
   content: CONTENT_METRICS[`${room.id}-furniture-${index + 1}`] || null,
   drawTiles: DRAW_TILES[`${room.id}-furniture-${index + 1}`] || null,
