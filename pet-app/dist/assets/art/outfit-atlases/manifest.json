@@ -34,6 +34,10 @@
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-09--patch-a4932373bf.webp"
     },
+    "starpatch-cat:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-11--patch-5b26e08d4c.webp"
+    },
     "starpatch-cat:1:face-12": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-12--patch-d9d54377a2.webp"

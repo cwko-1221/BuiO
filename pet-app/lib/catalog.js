@@ -353,7 +353,8 @@ const WEARABLE_GROUPS = [
 // a baked pet redraw. Keep this as an explicit release list rather than reading art-source at
 // runtime, because production deployments contain public assets but not the artist workspace.
 const FINISHED_REDRAW_WEARABLE_IDS = new Set([
-  'face-01', 'face-02', 'face-03', 'face-04', 'face-06', 'face-07', 'face-08', 'face-09', 'face-12',
+  'face-01', 'face-02', 'face-03', 'face-04', 'face-06', 'face-07', 'face-08', 'face-09',
+  'face-11', 'face-12',
   'head-03', 'head-04',
   'neck-01', 'neck-02', 'neck-03', 'neck-04', 'neck-05', 'neck-06', 'neck-07', 'neck-08',
   'neck-09', 'neck-10', 'neck-11', 'neck-12', 'neck-13', 'neck-14', 'neck-15', 'neck-16',

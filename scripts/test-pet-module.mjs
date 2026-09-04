@@ -27,7 +27,7 @@ assert.deepEqual(catalog.pets.map((pet)=>pet.id),['starpatch-cat','cloud-ear-dog
 assert.equal(catalog.pets.flatMap((pet)=>pet.art).length,12);
 assert.equal(catalog.rooms.length,10);
 assert.equal(catalog.foods.length,12);
-assert.equal(catalog.wearables.length,80); assert.equal(catalog.furniture.length,100);
+assert.equal(catalog.wearables.length,44); assert.equal(catalog.furniture.length,100);
 assert.equal(new Set(catalog.pets.map((pet)=>pet.id)).size,3);
 assert.deepEqual(catalog.evolutionThresholds,[0,400,1100,2100]);
 assert.deepEqual(catalog.egg.odds,{common:1,rare:0,epic:0});
@@ -112,7 +112,8 @@ for(const [key,layers] of Object.entries(catalog.redrawnWearables)){
   }
 }
 // Every accessory has its front view, and any extra file is one of the two turned views of an
-// accessory that has them — the sheets arrive slot by slot, so the total climbs from 80 to 240.
+// accessory that has them. The catalogue releases a piece only once its redraw is finished, so both
+// the item count and the file count move as sheets are accepted and as unfinished pieces are pulled.
 const wornFiles=new Set((await fs.readdir(path.join(artRoot,'collectibles/wearables'))).filter((name)=>name.endsWith('.webp')));
 const named=new Set(catalog.wearables.flatMap((item)=>[
   item.art,item.views?.right,item.views?.back,item.overlays?.right,item.overlays?.back,
@@ -121,15 +122,18 @@ const named=new Set(catalog.wearables.flatMap((item)=>[
   .filter(Boolean).map((url)=>url.split('?')[0].split('/').pop()));
 for(const item of catalog.wearables) assert.ok(wornFiles.has(item.art.split('?')[0].split('/').pop()),`${item.id} has no front view`);
 for(const file of wornFiles) assert.ok(named.has(file),`${file} is not a view the catalogue names`);
-assert.ok(wornFiles.size>=80&&wornFiles.size<=244,`expected between 80 and 244 accessory files, found ${wornFiles.size}`);
-assert.equal(catalog.wearables.find((item)=>item.id==='head-17')?.fit,'headset','cat ears must wrap the head rather than perch above it');
-assert.equal(catalog.wearables.find((item)=>item.id==='head-20')?.fit,'helmet','the space helmet must use the enclosing-head fit');
+assert.ok(wornFiles.size>=40&&wornFiles.size<=244,`expected between 40 and 244 accessory files, found ${wornFiles.size}`);
+// The rules below belong to pieces that are not released today. Assert them where the piece is in
+// the catalogue rather than deleting them, so a piece that comes back brings its rule back with it.
+const released=(id)=>catalog.wearables.find((item)=>item.id===id);
+if(released('head-17')) assert.equal(released('head-17').fit,'headset','cat ears must wrap the head rather than perch above it');
+if(released('head-20')) assert.equal(released('head-20').fit,'helmet','the space helmet must use the enclosing-head fit');
 for(const id of ['back-02','back-03','back-15']){
-  const wing=catalog.wearables.find((item)=>item.id===id);
-  assert.equal(wing?.sideBehind,true,`${id} must lie behind the side-on body`);
-  assert.match(wing?.views?.right||'',/right-flat/,`${id} must use the folded side profile`);
+  const wing=released(id); if(!wing) continue;
+  assert.equal(wing.sideBehind,true,`${id} must lie behind the side-on body`);
+  assert.match(wing.views?.right||'',/right-flat/,`${id} must use the folded side profile`);
 }
-assert.ok(catalog.wearables.find((item)=>item.id==='back-02')?.overlays?.back,'butterfly wings need a foreground harness layer');
+if(released('back-02')) assert.ok(released('back-02').overlays?.back,'butterfly wings need a foreground harness layer');
 assert.equal((await fs.readdir(path.join(artRoot,'collectibles/furniture'))).filter((name)=>name.endsWith('.webp')).length,100);
 
 assert.equal((await fs.readdir(path.join(artRoot,'effects'))).filter((name)=>name.endsWith('.webp')).length,16);
