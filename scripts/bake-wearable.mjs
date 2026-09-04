@@ -26,6 +26,10 @@ let SPREAD = 28;
 const SMALLEST = 0.00002;
 /** Half the thickness of the thinnest thing worth keeping, in pixels of the source sheet. */
 let OPENING = 3;
+// How far the opening may be undone, walking only over ground the rough mask held. Left at the
+// opening radius this is the plain opening; raised, it is what lets a hard opening cut a fur
+// strand off an accessory without taking the accessory's rim with it.
+let REACH = OPENING;
 /** Fraction of the sheet below which an island is a stray brush stroke rather than a worn thing. */
 const KEEP_ABOVE = 0.0001;
 /** How solid the middle of a worn thing is, in pixels. An outline never has this much. */
@@ -238,6 +242,40 @@ const shrinkBy = (mask, width, height, radius) => sweep(mask, width, height, rad
 const growBy = (mask, width, height, radius) => sweep(mask, width, height, radius, 'any');
 
 /**
+ * Grow a mask back inside another one, and no further than a given number of steps.
+ *
+ * A plain opening severs a fur strand from the accessory it is joined to, which is the only way
+ * to be rid of one — but the same erosion takes the accessory's own rim and any part of it
+ * narrower than the radius, and those come back as holes. Regrowing inside the rough mask
+ * restores them: everything the erosion took is within `radius` of what survived. A strand is
+ * long, so capping the walk stops it travelling back along its whole length; it returns as a stub
+ * of `steps` pixels, which the outline filter can then take.
+ */
+function regrowWithin(seed, limit, width, height, steps) {
+  const out = Uint8Array.from(seed);
+  let front = [];
+  for (let at = 0; at < width * height; at += 1) if (out[at]) front.push(at);
+  for (let step = 0; step < steps && front.length; step += 1) {
+    const next = [];
+    for (const at of front) {
+      const x = at % width;
+      const y = (at - x) / width;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+        const to = ny * width + nx;
+        if (out[to] || !limit[to]) continue;
+        out[to] = 1;
+        next.push(to);
+      }
+    }
+    front = next;
+  }
+  return out;
+}
+
+/**
  * Take out the pieces of a mask that are the creature's own outline, drawn again.
  *
  * Asked for the sheet a second time the generator draws the whole creature again, and its fur lands
@@ -360,6 +398,9 @@ SEED = option('seed', SEED);
 SPREAD = option('spread', SPREAD);
 SOLID = option('solid', SOLID);
 OPENING = option('opening', OPENING);
+// How far the opening is allowed to grow back, over the rough mask only. Defaults to the opening
+// radius, which is the plain morphological opening this had before the flag existed.
+REACH = option('reach', OPENING);
 FILL = option('fill', FILL);
 THIN = option('thin', THIN);
 EDGE = option('edge', EDGE);
@@ -379,7 +420,12 @@ const count = width * height;
 
 const gap = difference(base.data, redraw.data, count);
 const { mask: rough } = findRegions(gap, width, height);
-const opened = growBy(shrinkBy(rough, width, height, OPENING), width, height, OPENING);
+// The opening is normally undone by the same radius it was made with. `--reach` walks further
+// than that, but only over ground the rough mask already held, which is what lets the opening be
+// set hard enough to cut a fur strand off without the accessory's rim going with it.
+const opened = REACH > OPENING
+  ? regrowWithin(shrinkBy(rough, width, height, OPENING), rough, width, height, REACH)
+  : growBy(shrinkBy(rough, width, height, OPENING), width, height, OPENING);
 const { kept: mask, thin } = keepSolidRegions(opened, width, height, SOLID);
 // The creature as the base sheet drew it, which is what says where its outline runs.
 const body = new Uint8Array(count);
