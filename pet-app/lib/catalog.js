@@ -365,7 +365,7 @@ for (const [slot, count, names] of WEARABLE_GROUPS) {
     // interface, which left those twenty pieces showing a price in a currency a child can
     // neither see nor spend: the shop offered them and the server refused every purchase.
     const rarity = index >= count - 4 ? 'legend' : index >= Math.floor(count * .55) ? 'fancy' : index >= Math.floor(count * .25) ? 'rare' : 'common';
-    const price = ({ common: 120, rare: 300, fancy: 450, legend: 600 })[rarity];
+    const price = ({ common: 1200, rare: 1500, fancy: 2250, legend: 3000 })[rarity];
     const id = `${slot}-${String(index + 1).padStart(2, '0')}`;
     if (slot !== 'aura' && !FINISHED_REDRAW_WEARABLE_IDS.has(id)) continue;
     WEARABLES.push({ id, name: { 'zh-HK': names[index], 'en-US': `${slot[0].toUpperCase()}${slot.slice(1)} ${index + 1}` }, category: 'wearable', slot, rarity, price, currency: 'coins', art: artPath('collectibles/wearables', id), content: CONTENT_METRICS[id] || null,
