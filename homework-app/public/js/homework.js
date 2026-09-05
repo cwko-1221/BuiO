@@ -258,7 +258,7 @@ function bindTeacher() {
   if (state.view === 'monitors') {
     const reload = () => { filterState.monitors = { academicYear: monitorYear.value, className: monitorClass.value, subject: monitorSubject.value }; loadMonitorRoster(); };
     monitorYear.onchange = reload; monitorClass.onchange = reload; monitorSubject.onchange = reload;
-    saveMonitors.onclick = async () => { try { const f = filterState.monitors; const studentIds = [...document.querySelectorAll('.monitor-check:checked')].map(input => input.value); const result = await api('/monitors', { method: 'PUT', body: JSON.stringify({ ...f, studentIds }) }); setMessage(result.message); } catch (error) { setMessage(error.message, 'error'); } };
+    saveMonitors.onclick = async () => { try { const f = filterState.monitors; const studentIds = [...document.querySelectorAll('.monitor-check:checked')].map(input => input.value); const result = await api('/monitors', { method: 'PUT', body: JSON.stringify({ ...f, studentIds }) }); state.roster = state.roster.map(student => ({ ...student, selected: studentIds.includes(student.id) })); setMessage(result.message); } catch (error) { setMessage(error.message, 'error'); } };
   } else if (state.view === 'records') {
     const reload = () => { filterState.records = { academicYear: recordYear.value, className: recordClass.value, subject: recordSubject.value, date: recordDate.value }; loadTeacherRecord(); };
     recordYear.onchange = reload; recordClass.onchange = reload; recordSubject.onchange = reload; recordDate.onchange = reload;
