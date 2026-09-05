@@ -18,6 +18,10 @@
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-04--patch-47792f4cf1.webp"
     },
+    "starpatch-cat:1:face-05": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-05--patch-397caa4d26.webp"
+    },
     "starpatch-cat:1:face-06": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-06--patch-9a23fbaf79.webp"

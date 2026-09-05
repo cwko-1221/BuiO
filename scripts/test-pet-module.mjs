@@ -27,7 +27,7 @@ assert.deepEqual(catalog.pets.map((pet)=>pet.id),['starpatch-cat','cloud-ear-dog
 assert.equal(catalog.pets.flatMap((pet)=>pet.art).length,12);
 assert.equal(catalog.rooms.length,10);
 assert.equal(catalog.foods.length,12);
-assert.equal(catalog.wearables.length,44); assert.equal(catalog.furniture.length,100);
+assert.equal(catalog.wearables.length,45); assert.equal(catalog.furniture.length,100);
 assert.equal(new Set(catalog.pets.map((pet)=>pet.id)).size,3);
 assert.deepEqual(catalog.evolutionThresholds,[0,400,1100,2100]);
 assert.deepEqual(catalog.egg.odds,{common:1,rare:0,epic:0});
