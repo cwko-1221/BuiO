@@ -2,6 +2,7 @@ import {
   buildDensity,
   buildFilter,
   buildForces,
+  buildAirExpansion,
 } from './scenes/MatterForceScenes.js';
 import {
   buildElectric,
@@ -11,6 +12,7 @@ import {
 
 const builders = Object.freeze({
   'density-column': buildDensity,
+  'air-expansion': buildAirExpansion,
   'water-filter': buildFilter,
   'electric-crane': buildElectric,
   'light-reflection': buildReflection,

@@ -269,6 +269,49 @@ export const experiments = [
       },
     },
   },
+  {
+    id: 'air-expansion', number: 7, topic: '物質', grades: '小三至小五', minutes: 11,
+    title: '空氣的脹與縮', englishTitle: 'Warm Air, Cold Air', color: '#5ec8b0', icon: 'balloon',
+    observe: {
+      title: '一個氣球，兩盆水',
+      caption: '影片裡氣球套在一個硬身空膠樽的樽口上，膠樽先後垂直放進熱水和冰水中。',
+      notice: ['膠樽放進熱水後，氣球有甚麼變化？', '換成冰水之後又怎樣？', '膠樽本身的形狀有沒有改變？'],
+      wonder: '樽口被氣球封住了，為甚麼氣球還會脹大又縮小？',
+    },
+    question: '空氣受熱和遇冷時，體積會有甚麼變化？',
+    objective: '以氣球作指示，觀察密封空氣受熱膨脹、遇冷收縮。',
+    apparatus: ['氣球', '硬身的空膠樽', '熱水盆', '冰水盆', '熱水溫度掣'],
+    curriculum: { items: '#14、#22', codes: ['3MA1', '4MA1'] },
+    safety: '熱水會燙傷，真實實驗必須由老師處理；熱水和冰水的溫差太大可能令膠樽變形或破裂，不要用太熱的水。',
+    modelNote: '氣球的大小為方便觀察而放大了；顯示屏上的毫升數才是按空氣定律算出的實際變化。本模型假設膠樽完全密封而且不會變形。',
+    prediction: {
+      prompt: '氣球套住樽口後把膠樽放進熱水，樽內的空氣會使氣球怎樣？',
+      options: ['脹大', '縮小', '沒有變化'],
+      answer: 0,
+    },
+    steps: [
+      { verb: '套上', title: '把氣球套上樽口', instruction: '把氣球拖到膠樽的樽口上。', cue: '拖動紅色氣球到樽口', hint: '套緊樽口，樽內的空氣才不會走出來。', action: { type: 'place', subject: 'balloon', target: 'bottle-mouth' }, observation: '氣球套住樽口，樽內的空氣被封住了。' },
+      { verb: '浸入', title: '把膠樽放進熱水', instruction: '把膠樽垂直拖進熱水盆。', cue: '拖動膠樽到熱水盆', hint: '留意氣球，不要留意膠樽。', action: { type: 'place', subject: 'bottle', target: 'hot-bath' }, observation: '樽內空氣受熱，氣球慢慢脹起來。' },
+      { verb: '調校', title: '把熱水調到 75 °C', instruction: '轉動溫度掣，把熱水調到 75 °C。', cue: '拖動紅色溫度掣或使用滑桿', hint: '水愈熱，氣球有甚麼分別？', action: { type: 'adjust', subject: 'water-temperature', min: 72, max: 78, unit: '°C', range: [30, 85], start: 60 }, observation: '水溫愈高，氣球脹得愈大。' },
+      { verb: '記錄', title: '記下熱水中的變化', instruction: '氣球在熱水中怎樣了？記進數據表。', cue: '選出氣球的變化', hint: '看顯示屏的毫升數是正還是負。', action: { type: 'record', subject: 'hot-result', label: '熱水中的氣球', unit: '', options: ['脹大', '縮小', '沒有變化'], answer: 0 }, observation: '熱水的結果已記入數據表。' },
+      { verb: '浸入', title: '改放進冰水', instruction: '把同一個膠樽拖進冰水盆。', cue: '拖動膠樽到冰水盆', hint: '氣球和膠樽都沒有換過，只換了水。', action: { type: 'place', subject: 'bottle', target: 'ice-bath' }, observation: '樽內空氣遇冷，氣球癟下去，甚至被吸進樽口。' },
+      { verb: '記錄', title: '記下冰水中的變化', instruction: '氣球在冰水中怎樣了？記進數據表。', cue: '選出氣球的變化', hint: '顯示屏的毫升數變成負數了。', action: { type: 'record', subject: 'cold-result', label: '冰水中的氣球', unit: '', options: ['脹大', '縮小', '沒有變化'], answer: 1 }, observation: '冰水的結果已記入數據表，可以比較了。' },
+    ],
+    analysis: {
+      evidence: '同一個膠樽、同一個氣球，只換了水：在 75 °C 熱水中氣球脹大（約 +90 mL），在 2 °C 冰水中氣球癟下並被吸進樽口（約 −34 mL）。膠樽是硬的，全程形狀不變。',
+      reflection: {
+        prompt: '樽口被氣球封住，沒有空氣進出。那氣球脹大時，多出來的體積是哪裏來的？',
+        options: ['熱水的水蒸氣走進了樽內', '樽內原有的空氣受熱後佔更多空間', '氣球自己產生了空氣'],
+        answer: 1,
+        because: '空氣的分量由頭到尾沒有改變。受熱時空氣粒子運動得更快、分得更開，同樣分量的空氣佔更多空間，多出的體積把氣球撐起；遇冷時粒子運動慢下來、靠得更近，佔的空間變小，氣球就被吸回樽內。',
+      },
+    },
+    result: {
+      title: '你看見了看不見的空氣！',
+      observation: '空氣受熱時氣球脹大，遇冷時氣球縮小並被吸進樽口；水溫愈高，氣球脹得愈大。',
+      explanation: '空氣受熱會膨脹，遇冷會收縮。分量不變，改變的是同樣分量的空氣所佔的空間：溫度升高，粒子運動加快、間距變大，體積就變大；溫度降低則相反。氣球本身不會製造空氣，它只是把看不見的體積變化顯示出來。',
+    },
+  },
 ];
 
 export const experimentById = new Map(experiments.map((experiment) => [experiment.id, experiment]));

@@ -1104,3 +1104,789 @@ export function buildForces(api) {
     },
   };
 }
+
+/** A surface of revolution from a [radius, height] profile — bottles, basins, balloons. */
+function lathe(profile, color, options = {}, segments = 56) {
+  const points = profile.map(([radius, height]) => new THREE.Vector2(Math.max(radius, 0), height));
+  const mesh = new THREE.Mesh(new THREE.LatheGeometry(points, segments), mat(color, options));
+  mesh.geometry.computeVertexNormals();
+  mesh.castShadow = options.castShadow ?? true;
+  mesh.receiveShadow = options.receiveShadow ?? true;
+  return mesh;
+}
+
+/** A soft round puff, used for steam and cold mist. Drawn, never fetched. */
+let puffTexture = null;
+function puffMap() {
+  if (puffTexture) return puffTexture;
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext('2d');
+  const gradient = context.createRadialGradient(64, 64, 2, 64, 64, 62);
+  gradient.addColorStop(0, 'rgba(255,255,255,1)');
+  gradient.addColorStop(.38, 'rgba(255,255,255,.78)');
+  gradient.addColorStop(.72, 'rgba(255,255,255,.26)');
+  gradient.addColorStop(1, 'rgba(255,255,255,0)');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 128, 128);
+  puffTexture = new THREE.CanvasTexture(canvas);
+  puffTexture.colorSpace = THREE.SRGBColorSpace;
+  return puffTexture;
+}
+
+/**
+ * Soft light streaks for a water surface. Still water in a pale bowl is
+ * invisible from above; the moving glints are what say "liquid".
+ */
+let glintTexture = null;
+function glintMap() {
+  if (glintTexture) return glintTexture;
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const context = canvas.getContext('2d');
+  context.clearRect(0, 0, 256, 256);
+  // Deterministic placement: the same bench must screenshot the same way.
+  for (let index = 0; index < 30; index += 1) {
+    const angle = index * 2.399;
+    const radius = 22 + ((index * 37) % 100);
+    const x = 128 + Math.cos(angle) * radius;
+    const y = 128 + Math.sin(angle) * radius;
+    const long = 9 + ((index * 13) % 22);
+    context.save();
+    context.translate(x, y);
+    context.rotate(angle * 1.7);
+    context.scale(long / 7, 1);
+    const gradient = context.createRadialGradient(0, 0, 0, 0, 0, 7);
+    gradient.addColorStop(0, 'rgba(255,255,255,.5)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.arc(0, 0, 7, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
+  }
+  glintTexture = new THREE.CanvasTexture(canvas);
+  glintTexture.colorSpace = THREE.SRGBColorSpace;
+  return glintTexture;
+}
+
+/**
+ * A drifting column of puffs. Hot water sends steam up; ice water spills a
+ * heavier mist that sinks over the rim, so the two baths read differently at a
+ * glance even in a still screenshot.
+ */
+function makeVapour(count, { colour = 0xffffff, rise = .9, spread = .5, size = .7, sink = false, inner = .18 } = {}) {
+  const group = new THREE.Group();
+  const puffs = [];
+  for (let index = 0; index < count; index += 1) {
+    const material = new THREE.SpriteMaterial({
+      map: puffMap(), color: colour, transparent: true, opacity: 0, depthWrite: false,
+    });
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.setScalar(size);
+    group.add(sprite);
+    puffs.push({
+      sprite,
+      phase: index / count,
+      angle: index * 2.399,
+      drift: .5 + (index % 3) * .28,
+    });
+  }
+  group.userData.update = (time, strength) => {
+    group.visible = strength > .01;
+    if (!group.visible) return;
+    for (const puff of puffs) {
+      const t = (time * .34 + puff.phase) % 1;
+      const swirl = puff.angle + t * puff.drift * (sink ? -1 : 1);
+      const radius = spread * (sink ? .35 + t * .95 : inner + t * .72);
+      puff.sprite.position.set(
+        Math.cos(swirl) * radius,
+        sink ? .12 - t * rise : t * rise,
+        Math.sin(swirl) * radius,
+      );
+      puff.sprite.scale.setScalar(size * (.42 + t * (sink ? .8 : 1.25)));
+      // Fade in off the water and out at the top so nothing pops.
+      puff.sprite.material.opacity = strength * Math.sin(Math.PI * t) * (sink ? .5 : .88);
+    }
+  };
+  return group;
+}
+
+/**
+ * A rigid PET bottle. The whole point of the experiment is that the bottle does
+ * not change shape, so it is drawn with the things that say "rigid": a moulded
+ * foot, waist flutes, a shoulder curve, a threaded neck and a lip flange.
+ */
+function makeRigidBottle() {
+  const group = new THREE.Group();
+  const wall = {
+    transparent: true, roughness: .06, metalness: 0,
+    transmission: .98, thickness: .1, ior: 1.5,
+    attenuationColor: 0xf2fcfd, attenuationDistance: 9,
+    clearcoat: .7, clearcoatRoughness: .06,
+    side: THREE.DoubleSide,
+  };
+  const shell = lathe([
+    [0, .015], [.26, .012], [.40, .028], [.485, .085], [.515, .17],
+    [.52, .34], [.487, .43], [.52, .52],
+    [.52, .74], [.487, .83], [.52, .92],
+    [.52, 1.2], [.518, 1.33], [.505, 1.44],
+    [.462, 1.58], [.392, 1.71], [.302, 1.83], [.221, 1.92], [.184, 1.99],
+    [.178, 2.05], [.178, 2.13],
+  ], 0xffffff, wall);
+  group.add(shell);
+
+  // A moulded base ring: a real bottle stands on a raised foot, not a flat disc.
+  const foot = torus(.475, .045, 0xd8eff3, {
+    transparent: true, opacity: .55, roughness: .12, clearcoat: .6,
+  });
+  foot.rotation.x = Math.PI / 2;
+  foot.position.y = .045;
+  group.add(foot);
+
+  // Neck threads.
+  for (let index = 0; index < 3; index += 1) {
+    const thread = torus(.192, .017, 0xdaf1f5, {
+      transparent: true, opacity: .62, roughness: .16, clearcoat: .5,
+    });
+    thread.rotation.x = Math.PI / 2;
+    thread.rotation.z = index * .5;
+    thread.position.y = 2.02 + index * .038;
+    group.add(thread);
+  }
+
+  // The lip flange the balloon grips.
+  const lip = torus(.196, .028, 0xcfeaf0, {
+    transparent: true, opacity: .74, roughness: .1, clearcoat: .7,
+  });
+  lip.rotation.x = Math.PI / 2;
+  lip.position.y = 2.145;
+  group.add(lip);
+
+  const mouth = new THREE.Object3D();
+  mouth.name = 'SOCKET_BOTTLE_MOUTH';
+  mouth.position.y = 2.16;
+  group.add(mouth);
+  group.userData.mouth = mouth;
+  return group;
+}
+
+/**
+ * The balloon is rebuilt from a profile rather than scaled, because a stretched
+ * sphere never looks like latex: an inflating balloon grows a pear belly and
+ * keeps a tight collar, and a cooling one is sucked into a dimple.
+ */
+const BALLOON_SEGMENTS = 48;
+const BALLOON_SKIRT_POINTS = 5;
+const BALLOON_BODY_POINTS = 10;
+const BALLOON_CROWN_POINTS = 13;
+const BALLOON_POINTS = BALLOON_SKIRT_POINTS + BALLOON_BODY_POINTS + BALLOON_CROWN_POINTS;
+
+/**
+ * One continuous outline for every state of the balloon, from sucked into the
+ * neck (swell -1) to fully stretched (swell 1.4). It is written as a single
+ * family on purpose: swapping between an "inflated" and a "collapsed" profile
+ * made the shape jump as it crossed zero, and the two had different point
+ * counts, so the geometry could not be morphed in place either.
+ *
+ * The crown is a quarter-ellipse whose rise simply goes negative as the air
+ * leaves, which turns the dome into a caved-in dish without any special case.
+ */
+function balloonProfile(swell) {
+  const collar = .232;
+  const k = THREE.MathUtils.clamp(-swell, 0, 1);
+  const grown = Math.max(swell, 0);
+  const wall = collar * (1 + .12 * k);
+  const belly = .2325 + grown * .3;
+  const height = .25 + grown * .64 - .13 * k;
+  const drop = .05 + .17 * k;
+  const cave = (height + .07) * k;
+  const edgeRadius = THREE.MathUtils.lerp(belly, wall * .87, k);
+  const edgeHeight = height * (.55 + .45 * k);
+  const crownRise = height * .45 * (1 - k) - cave * k;
+
+  const points = [];
+  // The skirt: rubber narrowing onto the neck below the lip.
+  for (let index = 0; index < BALLOON_SKIRT_POINTS; index += 1) {
+    const u = index / (BALLOON_SKIRT_POINTS - 1);
+    points.push([wall * (.66 + .34 * Math.sin(u * Math.PI / 2)), -drop * (1 - u)]);
+  }
+  // The wall, bulging slightly into a slack fold as the air goes out.
+  for (let index = 1; index <= BALLOON_BODY_POINTS; index += 1) {
+    const u = index / BALLOON_BODY_POINTS;
+    const shape = Math.sin(u * Math.PI / 2) ** .85;
+    const fold = 1 + .05 * k * Math.sin(u * Math.PI);
+    points.push([(wall + (edgeRadius - wall) * shape) * fold, edgeHeight * u]);
+  }
+  // The crown: a dome while there is air in it, a dish once there is not.
+  for (let index = 1; index <= BALLOON_CROWN_POINTS; index += 1) {
+    const w = index / BALLOON_CROWN_POINTS;
+    points.push([
+      edgeRadius * Math.cos(w * Math.PI / 2),
+      edgeHeight + crownRise * Math.sin(w * Math.PI / 2),
+    ]);
+  }
+  return points;
+}
+
+/** Rewrite a lathe's vertices from a profile of the same length, allocation-free. */
+function writeLathe(geometry, points, segments) {
+  const position = geometry.attributes.position;
+  const count = points.length;
+  for (let column = 0; column <= segments; column += 1) {
+    const phi = column / segments * Math.PI * 2;
+    const sin = Math.sin(phi);
+    const cos = Math.cos(phi);
+    for (let index = 0; index < count; index += 1) {
+      const point = points[index];
+      position.setXYZ(column * count + index, point[0] * sin, point[1], point[0] * cos);
+    }
+  }
+  position.needsUpdate = true;
+  geometry.computeVertexNormals();
+  geometry.computeBoundingSphere();
+}
+
+/**
+ * A spent balloon on the bench: one continuous profile from the rolled lip,
+ * along a short slim neck, into the pear. Built as two meshes it showed a seam
+ * at the join, and a long gradual taper read as a decanter rather than latex —
+ * the neck has to be short and thin against the belly to say "balloon".
+ */
+function limpBalloonProfile() {
+  return [
+    [0, 0], [.055, .006], [.086, .022], [.09, .042], [.062, .064],
+    [.056, .12], [.055, .185], [.058, .228],
+    [.076, .259], [.117, .297], [.191, .347],
+    [.253, .416], [.288, .5], [.294, .566],
+    [.276, .646], [.235, .711], [.166, .756], [.09, .778], [0, .785],
+  ];
+}
+
+function makeBalloon() {
+  const group = new THREE.Group();
+  const skin = {
+    roughness: .34, metalness: 0, clearcoat: .62, clearcoatRoughness: .22,
+    side: THREE.DoubleSide,
+  };
+  const bulb = lathe(balloonProfile(0), 0xef6152, skin, BALLOON_SEGMENTS);
+  group.add(bulb);
+  // The rolled bead of latex that grips the bottle lip.
+  const bead = torus(.239, .028, 0xd4503f, { roughness: .38, clearcoat: .5 });
+  bead.rotation.x = Math.PI / 2;
+  bead.position.y = .055;
+  group.add(bead);
+
+  let drawn = 0;
+  let morphable = true;
+
+  group.userData.bead = bead;
+  group.userData.setSwell = (swell) => {
+    if (morphable && Math.abs(swell - drawn) < .0025) return;
+    drawn = swell;
+    const k = THREE.MathUtils.clamp(-swell, 0, 1);
+    // The bead shrinks into the skirt rather than switching off, so there is no
+    // pop partway through the collapse.
+    const shrink = 1 - .86 * k;
+    bead.scale.setScalar(Math.max(shrink, .02));
+    bead.position.y = .055 - k * .2;
+    if (!morphable) {
+      bulb.geometry.dispose();
+      bulb.geometry = new THREE.LatheGeometry(
+        balloonProfile(swell).map(([radius, height]) => new THREE.Vector2(radius, height)),
+        BALLOON_SEGMENTS,
+      );
+      morphable = true;
+      return;
+    }
+    writeLathe(bulb.geometry, balloonProfile(swell), BALLOON_SEGMENTS);
+  };
+  group.userData.setLimp = () => {
+    drawn = Number.NaN;
+    morphable = false;
+    bulb.geometry.dispose();
+    bulb.geometry = new THREE.LatheGeometry(
+      limpBalloonProfile().map(([radius, height]) => new THREE.Vector2(radius, height)),
+      BALLOON_SEGMENTS,
+    );
+    // Lying on its side, lip to the left, belly resting on the tray.
+    bulb.rotation.set(0, 0, -Math.PI * .5);
+    bulb.position.set(-.37, .13, 0);
+    bulb.scale.set(.46, 1, 1.06);
+    bead.visible = false;
+  };
+  group.userData.setUpright = () => {
+    group.scale.setScalar(1);
+    group.rotation.set(0, 0, 0);
+    bulb.rotation.set(0, 0, 0);
+    bulb.position.set(0, 0, 0);
+    bulb.scale.set(1, 1, 1);
+    bead.visible = true;
+    bead.rotation.set(Math.PI / 2, 0, 0);
+    bead.position.set(0, .055, 0);
+    bead.scale.setScalar(1);
+    drawn = Number.NaN;
+    morphable = false;
+  };
+  group.userData.setLimp();
+  group.scale.setScalar(1.12);
+  group.rotation.y = .38;
+  return group;
+}
+
+/**
+ * A basin with a real wall thickness, so the rim catches light and the water
+ * sits inside it rather than floating on a disc.
+ */
+function makeBath(waterColor, rimColor, { vapour = null } = {}) {
+  const group = new THREE.Group();
+  const bowl = lathe([
+    [0, 0], [.52, 0], [.86, .06], [1.08, .22], [1.19, .44], [1.22, .62],
+    [1.225, .68], [1.19, .715], [1.15, .70],
+    [1.13, .62], [1.10, .43], [.99, .23], [.76, .09], [.44, .045], [0, .045],
+  ], 0xf3f8f9, {
+    roughness: .18, metalness: .04, clearcoat: .5, clearcoatRoughness: .18,
+    side: THREE.DoubleSide,
+  });
+  group.add(bowl);
+
+  const rim = torus(1.205, .045, rimColor, { roughness: .28, metalness: .14, clearcoat: .4 });
+  rim.rotation.x = Math.PI / 2;
+  rim.position.y = .695;
+  group.add(rim);
+
+  const level = .5;
+  const water = lathe([
+    [0, .05], [1.02, .05], [1.115, .3], [1.145, level - .015], [1.13, level], [0, level],
+  ], waterColor, {
+    transparent: true, opacity: .68, roughness: .03, metalness: .02,
+    transmission: .68, thickness: .6, ior: 1.333,
+    attenuationColor: waterColor, attenuationDistance: .75,
+    side: THREE.DoubleSide, depthWrite: false,
+  }, 48);
+  water.castShadow = false;
+  group.add(water);
+
+  // The surface is its own near-mirror disc. Without it the basin reads empty:
+  // clear water seen from above is only visible by what it reflects.
+  const surface = new THREE.Mesh(
+    new THREE.CircleGeometry(1.132, 56),
+    mat(waterColor, {
+      transparent: true, opacity: .58, roughness: .03, metalness: .45,
+      side: THREE.DoubleSide, depthWrite: false,
+    }),
+  );
+  surface.rotation.x = -Math.PI / 2;
+  surface.position.y = level + .002;
+  surface.castShadow = false;
+  surface.receiveShadow = false;
+  group.add(surface);
+
+  const glints = new THREE.Mesh(
+    new THREE.CircleGeometry(1.118, 48),
+    new THREE.MeshBasicMaterial({
+      map: glintMap(), transparent: true, opacity: .24,
+      depthWrite: false, blending: THREE.AdditiveBlending,
+    }),
+  );
+  glints.rotation.x = -Math.PI / 2;
+  glints.position.y = level + .008;
+  group.add(glints);
+
+  // The meniscus: water climbs the wall a little, and that thin bright line is
+  // most of what makes a surface read as liquid.
+  const meniscus = torus(1.112, .019, rimColor, {
+    transparent: true, opacity: .46, roughness: .06, clearcoat: .9,
+  });
+  meniscus.rotation.x = Math.PI / 2;
+  meniscus.position.y = level;
+  meniscus.castShadow = false;
+  group.add(meniscus);
+
+  const mist = vapour ? makeVapour(vapour.count, vapour) : null;
+  if (mist) {
+    mist.position.y = level + .04;
+    group.add(mist);
+  }
+
+  group.userData.water = water;
+  group.userData.surface = surface;
+  group.userData.glints = glints;
+  group.userData.meniscus = meniscus;
+  group.userData.level = level;
+  group.userData.mist = mist;
+  return group;
+}
+
+/** Ice that floats: most of the cube is under the surface, a corner above it. */
+function makeIceCube(size) {
+  const cube = roundedBox(size, size * .86, size * .94, 0xf4fcff, size * .17, 3, {
+    transparent: true, opacity: .92, roughness: .1, metalness: .02,
+    transmission: .34, thickness: .16, ior: 1.31,
+    attenuationColor: 0xcdeefb, attenuationDistance: .7,
+    clearcoat: .85, clearcoatRoughness: .08,
+  });
+  cube.castShadow = false;
+  return cube;
+}
+
+/** A low bench riser, so short apparatus clears its own name plate. */
+function makeRiser(radius, height, colour) {
+  const group = new THREE.Group();
+  const body = lathe([
+    [0, 0], [radius * .96, 0], [radius, height * .16],
+    [radius * .94, height - .04], [radius * .99, height - .01], [radius, height],
+    [radius * .9, height], [0, height],
+  ], colour, { roughness: .52, metalness: .04, clearcoat: .25 }, 40);
+  const shadowLine = torus(radius * .93, .018, 0xd7ddd6, { roughness: .7 });
+  shadowLine.rotation.x = Math.PI / 2;
+  shadowLine.position.y = height - .002;
+  group.add(body, shadowLine);
+  return group;
+}
+
+/** A dial with a printed scale, so the set temperature is legible on the bench. */
+function makeTemperatureDial(min, max) {
+  const group = new THREE.Group();
+  const base = cylinder(.52, .13, 0x0d3b46, { roughness: .58, metalness: .12 });
+  base.position.y = .065;
+  const face = cylinder(.5, .06, 0xf6fbfa, { roughness: .34, metalness: .04 });
+  face.position.y = .16;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const context = canvas.getContext('2d');
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+  const dialTop = new THREE.Mesh(
+    new THREE.CircleGeometry(.5, 48),
+    new THREE.MeshStandardMaterial({ map: texture, roughness: .34, metalness: .02 }),
+  );
+  dialTop.rotation.x = -Math.PI / 2;
+  dialTop.position.y = .191;
+
+  const knob = cylinder(.17, .13, 0x14424e, { roughness: .42, metalness: .22 });
+  knob.position.y = .25;
+  const cap = cylinder(.115, .035, 0xef8b62, { roughness: .32, metalness: .1 });
+  cap.position.y = .085;
+  knob.add(cap);
+  const pointer = roundedBox(.05, .035, .34, 0xef6a43, .016, 2, { roughness: .28 });
+  pointer.position.set(0, .35, -.23);
+  const pointerPivot = new THREE.Group();
+  pointerPivot.position.y = 0;
+  pointerPivot.add(pointer);
+
+  // Knurling: the ridges are what make a dial look grippable rather than moulded.
+  for (let index = 0; index < 18; index += 1) {
+    const angle = index / 18 * Math.PI * 2;
+    const ridge = roundedBox(.026, .12, .045, 0xdcecef, .01, 2, { roughness: .4 });
+    ridge.position.set(Math.cos(angle) * .17, 0, Math.sin(angle) * .17);
+    ridge.rotation.y = -angle;
+    knob.add(ridge);
+  }
+
+  group.add(base, face, dialTop, knob, pointerPivot);
+  group.userData.buttonTop = knob;
+  group.userData.setTemperature = (celsius) => {
+    const span = (celsius - min) / (max - min);
+    pointerPivot.rotation.y = THREE.MathUtils.lerp(-Math.PI * .72, Math.PI * .72, span);
+    context.clearRect(0, 0, 256, 256);
+    context.fillStyle = '#f7fbfa';
+    context.beginPath();
+    context.arc(128, 128, 126, 0, Math.PI * 2);
+    context.fill();
+    for (let index = 0; index <= 11; index += 1) {
+      const t = index / 11;
+      const angle = THREE.MathUtils.lerp(Math.PI * .78, Math.PI * 2.22, t);
+      const major = index % 2 === 0;
+      context.strokeStyle = t < span ? '#e2724a' : '#9db9c1';
+      context.lineWidth = major ? 6 : 3;
+      context.beginPath();
+      context.moveTo(128 + Math.cos(angle) * 108, 128 + Math.sin(angle) * 108);
+      context.lineTo(128 + Math.cos(angle) * (major ? 84 : 92), 128 + Math.sin(angle) * (major ? 84 : 92));
+      context.stroke();
+    }
+    context.fillStyle = '#0e3b46';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.font = '700 58px "Microsoft JhengHei", sans-serif';
+    context.fillText(`${Math.round(celsius)}`, 128, 116);
+    context.font = '600 30px "Microsoft JhengHei", sans-serif';
+    context.fillStyle = '#5c8592';
+    context.fillText('°C', 128, 160);
+    texture.needsUpdate = true;
+  };
+  group.userData.setTemperature((min + max) / 2);
+  return group;
+}
+
+/** Air expands when warmed and contracts when cooled — read off a balloon. */
+export function buildAirExpansion(api) {
+  const hotCentre = new THREE.Vector3(-1.95, 0, -.55);
+  const iceCentre = new THREE.Vector3(1.95, 0, -.55);
+  const roomTemperature = 22;
+  const iceTemperature = 2;
+  const bottleAirMl = 500;
+  const bathFloor = .05;
+  const kelvin = (celsius) => celsius + 273.15;
+
+  const hotBath = makeBath(0xe4f0ef, 0xd9705a, {
+    vapour: { count: 12, colour: 0xfffaf6, rise: 1.6, spread: .86, size: .74, inner: .78 },
+  });
+  hotBath.position.copy(hotCentre);
+  api.root.add(hotBath);
+  api.entity('hot-bath-bowl', '熱水盆', hotBath, { targetOnly: true });
+  addStaticBox(api, 'air-hot-bowl', new THREE.Vector3(hotCentre.x, .1, hotCentre.z), new THREE.Vector3(1.05, .1, 1.05), IDENTITY, { friction: .6 });
+
+  const iceBath = makeBath(0xb6dff5, 0x5aa8d9, {
+    vapour: { count: 9, colour: 0xf2fcff, rise: .6, spread: 1.05, size: .95, sink: true },
+  });
+  iceBath.position.copy(iceCentre);
+  api.root.add(iceBath);
+  api.entity('ice-bath-bowl', '冰水盆', iceBath, { targetOnly: true });
+  addStaticBox(api, 'air-ice-bowl', new THREE.Vector3(iceCentre.x, .1, iceCentre.z), new THREE.Vector3(1.05, .1, 1.05), IDENTITY, { friction: .6 });
+
+  // Ice floats in a ring around where the bottle will stand, so it stays visible
+  // once the bottle is in the basin.
+  const iceCubes = [];
+  for (let index = 0; index < 8; index += 1) {
+    const angle = index * 2.399;
+    const radius = .6 + (index % 3) * .17;
+    const size = .27 + (index % 4) * .05;
+    const cube = makeIceCube(size);
+    cube.position.set(
+      iceCentre.x + Math.cos(angle) * radius,
+      iceBath.userData.level - size * .12,
+      iceCentre.z + Math.sin(angle) * radius,
+    );
+    cube.rotation.set(index * .5, index * 1.1, index * .28);
+    api.root.add(cube);
+    iceCubes.push({ cube, phase: index / 8, base: cube.position.y });
+  }
+
+  addSocket(api, 'hot-bath', '熱水盆中', new THREE.Vector3(hotCentre.x, .95, hotCentre.z), .92, palette.coral, null, { halfHeight: .5, snapOffset: [0, .5, 0] });
+  addSocket(api, 'ice-bath', '冰水盆中', new THREE.Vector3(iceCentre.x, .95, iceCentre.z), .92, palette.blue, null, { halfHeight: .5, snapOffset: [0, .5, 0] });
+
+  const bottle = addEntity(api, 'bottle', '硬身膠樽', makeRigidBottle(), [0, .04, 1.5], {
+    draggable: true,
+    physics: { shape: 'cylinder', radius: .56, halfHeight: 1.1, center: [0, 1.06, 0], density: .35, friction: .5, restitution: .04 },
+  });
+
+  // The mouth ring travels with the bottle, so the balloon is always dropped
+  // onto the opening wherever the bottle happens to be standing.
+  const mouthRing = makeTargetRing(palette.mint, .25);
+  mouthRing.position.y = 2.22;
+  bottle.add(mouthRing);
+  api.target('bottle-mouth', '樽口', mouthRing, {
+    radius: .5,
+    physics: { shape: 'cuboid', halfExtents: [.34, .26, .34], padding: .04 },
+  });
+
+  // Small apparatus sits on a riser: a name plate stands 0.55 high just in
+  // front of whatever it names, and anything flat on the bench hides behind it.
+  const balloonTray = makeRiser(.62, .34, 0xf6f1e4);
+  balloonTray.position.set(-3.45, 0, 1.5);
+  api.root.add(balloonTray);
+  addStaticBox(api, 'air-balloon-riser', new THREE.Vector3(-3.45, .17, 1.5), new THREE.Vector3(.6, .17, .6), IDENTITY, { friction: .8 });
+
+  const dialPlinth = makeRiser(.66, .3, 0xeef3f2);
+  dialPlinth.position.set(3.45, 0, 1.5);
+  api.root.add(dialPlinth);
+  addStaticBox(api, 'air-dial-riser', new THREE.Vector3(3.45, .15, 1.5), new THREE.Vector3(.64, .15, .64), IDENTITY, { friction: .8 });
+
+  const balloon = addEntity(api, 'balloon', '氣球', makeBalloon(), [-3.45, .27, 1.5], {
+    draggable: true,
+    physics: { shape: 'cuboid', density: .2, friction: .66, restitution: .06 },
+  });
+
+  const dial = makeTemperatureDial(30, 85);
+  const knob = addEntity(api, 'water-temperature', '熱水溫度掣', dial, [3.45, .32, 1.5], { adjustable: true });
+
+  // Rising bubbles say "this water is hot" without a caption.
+  const bubbles = [];
+  const bubbleGroup = new THREE.Group();
+  bubbleGroup.position.copy(hotCentre);
+  api.root.add(bubbleGroup);
+  for (let index = 0; index < 14; index += 1) {
+    const bubble = sphere(.026 + (index % 3) * .012, 0xffffff, {
+      transparent: true, opacity: .5, roughness: .04, metalness: 0,
+      clearcoat: 1, depthWrite: false, widthSegments: 10, heightSegments: 8,
+    });
+    bubble.castShadow = false;
+    bubbleGroup.add(bubble);
+    bubbles.push({ bubble, phase: index / 14, angle: index * 2.399, radius: .3 + (index % 5) * .13 });
+  }
+
+  const readout = dynamicDisplay('氣球未套上樽口', { scale: [3.1, .84] });
+  readout.position.set(0, 3.05, -2.6);
+  api.root.add(readout);
+
+  let attached = false;
+  let bath = null;
+  let hotTemperature = 60;
+  let shownVolume = 0;
+
+  function bathTemperature() {
+    if (bath === 'hot') return hotTemperature;
+    if (bath === 'ice') return iceTemperature;
+    return roomTemperature;
+  }
+
+  /** Charles's law: a sealed, rigid bottle pushes its extra volume into the balloon. */
+  function balloonVolumeMl() {
+    if (!attached) return 0;
+    return bottleAirMl * (kelvin(bathTemperature()) / kelvin(roomTemperature) - 1);
+  }
+
+  function updateBalloonShape(volume) {
+    if (!attached) return;
+    // The real change is only about a sixth of the bottle's air, so the drawn
+    // balloon is exaggerated; the millilitre reading stays honest.
+    const gain = 90 - 42 * (1 - Math.exp(-Math.max(-volume, 0) / 25));
+    balloon.userData.setSwell(THREE.MathUtils.clamp(volume / gain, -1, 1.4));
+  }
+
+  function updateReadout() {
+    if (!attached) { readout.userData.setText('氣球未套上樽口', '#8fb7c4'); return; }
+    const volume = balloonVolumeMl();
+    if (bath === null) {
+      readout.userData.setText(`室溫 ${roomTemperature} °C · 氣球 0 mL`, '#8fb7c4');
+      return;
+    }
+    const sign = volume >= 0 ? '+' : '−';
+    const accent = bath === 'hot' ? '#f0a37a' : '#8fd4e6';
+    readout.userData.setText(
+      `水溫 ${Math.round(bathTemperature())} °C · 氣球 ${sign}${Math.abs(Math.round(volume))} mL`,
+      accent,
+    );
+  }
+
+  function seatBottle(where) {
+    const centre = where === 'hot' ? hotCentre : iceCentre;
+    // Standing on the floor of the basin, not hovering over it.
+    const seat = new THREE.Vector3(centre.x, bathFloor, centre.z);
+    bottle.position.copy(seat);
+    bottle.rotation.set(0, 0, 0);
+    api.setPhysicsPose?.('bottle', worldPoint(api, seat), worldQuaternion(api), { dynamic: false });
+    api.setPhysicsEnabled?.('bottle', false);
+    bath = where;
+  }
+
+  function attachBalloon() {
+    if (attached) return;
+    api.setPhysicsEnabled?.('balloon', false);
+    api.reparent?.(balloon, bottle);
+    balloon.position.set(0, 2.09, 0);
+    balloon.rotation.set(0, 0, 0);
+    balloon.userData.setUpright();
+    attached = true;
+    balloon.userData.setSwell(0);
+  }
+
+  updateReadout();
+  tintHotWater();
+  dial.userData.setTemperature(hotTemperature);
+
+  /** Warm water only blushes; it is the steam and bubbles that say "hot". */
+  function tintHotWater() {
+    const heat = THREE.MathUtils.clamp((hotTemperature - 30) / 55, 0, 1);
+    const water = hotBath.userData.water.material;
+    water.color.lerpColors(new THREE.Color(0xe6f2f1), new THREE.Color(0xf1dcce), heat);
+    water.attenuationColor.copy(water.color);
+    hotBath.userData.surface.material.color.copy(water.color);
+  }
+
+  api.onPreview = (subject, value) => {
+    if (subject !== 'water-temperature') return;
+    hotTemperature = THREE.MathUtils.clamp(value, 30, 85);
+    tintHotWater();
+    dial.userData.setTemperature(hotTemperature);
+    updateReadout();
+  };
+
+  api.onAction = (action) => {
+    if (action.subject === 'balloon' && action.target === 'bottle-mouth') {
+      attachBalloon();
+      api.sparkle(worldPoint(api, new THREE.Vector3(bottle.position.x, 2.5, bottle.position.z)), palette.mint, 8);
+    }
+    if (action.subject === 'bottle' && action.target === 'hot-bath') seatBottle('hot');
+    if (action.subject === 'bottle' && action.target === 'ice-bath') seatBottle('ice');
+    if (action.subject === 'water-temperature') {
+      api.pressButton(knob);
+      hotTemperature = THREE.MathUtils.clamp(Number(action.value) || hotTemperature, 30, 85);
+      tintHotWater();
+      dial.userData.setTemperature(hotTemperature);
+    }
+    updateReadout();
+  };
+
+  return {
+    update(time, dt = 1 / 60) {
+      // Air does not jump to its new volume; it eases there as the bottle warms.
+      // Plain exponential damping spends most of a big change in the first half
+      // second and then crawls, which reads as a snap rather than as cooling, so
+      // the rate is also capped: long changes travel at a steady pace and only
+      // the last few millilitres ease in.
+      const eased = damp(shownVolume, balloonVolumeMl(), 1.8, dt);
+      const step = THREE.MathUtils.clamp(eased - shownVolume, -52 * dt, 52 * dt);
+      shownVolume += step;
+      updateBalloonShape(shownVolume);
+
+      const heat = THREE.MathUtils.clamp((hotTemperature - 34) / 46, 0, 1);
+      const steaming = bath === 'hot' ? .45 + heat * .55 : .22 + heat * .28;
+      hotBath.userData.mist?.userData.update(time, steaming);
+      iceBath.userData.mist?.userData.update(time, bath === 'ice' ? 1 : .55);
+
+      const boiling = .2 + heat * .5 + (bath === 'hot' ? .3 : 0);
+      bubbleGroup.visible = boiling > .02;
+      if (bubbleGroup.visible) {
+        for (const item of bubbles) {
+          const t = (time * (.55 + boiling * .7) + item.phase) % 1;
+          item.bubble.position.set(
+            Math.cos(item.angle + t * .8) * item.radius,
+            bathFloor + .04 + t * (hotBath.userData.level - bathFloor - .04),
+            Math.sin(item.angle + t * .8) * item.radius,
+          );
+          item.bubble.material.opacity = boiling * .55 * Math.sin(Math.PI * Math.min(t * 1.35, 1));
+        }
+      }
+
+      // A slow turn on the glints is the whole trick: the surface never sits
+      // still, so the eye reads it as liquid instead of enamel.
+      hotBath.userData.glints.rotation.z += dt * .07;
+      iceBath.userData.glints.rotation.z -= dt * .05;
+      hotBath.userData.glints.material.opacity = .19 + Math.sin(time * .9) * .05;
+      iceBath.userData.glints.material.opacity = .16 + Math.sin(time * .7 + 1.6) * .04;
+
+      // Ice bobs; still ice in still water looks like plastic.
+      for (const item of iceCubes) {
+        item.cube.position.y = item.base + Math.sin(time * 1.1 + item.phase * 6.28) * .014;
+        item.cube.rotation.y += dt * .12;
+      }
+
+      if (bath) {
+        const water = (bath === 'hot' ? hotBath : iceBath).userData.water;
+        water.material.opacity = .82 + Math.sin(time * 2.4) * .02;
+      }
+      updateReadout();
+    },
+    getState() {
+      const volume = balloonVolumeMl();
+      return {
+        experiment: 'air-expansion',
+        attached,
+        bath,
+        waterTemperature: Math.round(bathTemperature()),
+        balloonVolumeMl: Number(volume.toFixed(1)),
+        shownVolumeMl: Number(shownVolume.toFixed(1)),
+        expanded: volume > 5,
+        contracted: volume < -5,
+      };
+    },
+    dispose() {},
+  };
+}

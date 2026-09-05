@@ -237,7 +237,7 @@ try {
 
   await page.goto(`${base}/science-lab/preview`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.querySelector('#bootScreen')?.classList.contains('done'));
-  assert.equal(await page.locator('[data-experiment]').count(), 6, 'catalog exposes exactly the six selected investigations');
+  assert.equal(await page.locator('[data-experiment]').count(), 7, 'catalog exposes exactly the seven selected investigations');
   assert.equal(await page.locator('#catalogScreen').isVisible(), true, 'catalog is visible after boot');
   const desktopLayout = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
@@ -304,12 +304,12 @@ try {
   await page.locator('#stageScreen').waitFor({ state: 'hidden' });
   await page.locator('#homeButton').click();
   await page.locator('#catalogScreen').waitFor({ state: 'visible' });
-  assert.match((await page.locator('#progressCount').textContent()).trim(), /^6 \/ 6$/, 'catalog shows all selected investigations completed');
-  assert.equal(await page.locator('.experiment-card.completed').count(), 6, 'all selected catalog cards retain completion state');
+  assert.match((await page.locator('#progressCount').textContent()).trim(), /^7 \/ 7$/, 'catalog shows all selected investigations completed');
+  assert.equal(await page.locator('.experiment-card.completed').count(), 7, 'all selected catalog cards retain completion state');
 
   await page.locator('#notebookButton').click();
   await page.locator('#notebookDialog[open]').waitFor();
-  assert.equal(await page.locator('[data-notebook-id]').count(), 6, 'science notebook contains every selected investigation');
+  assert.equal(await page.locator('[data-notebook-id]').count(), 7, 'science notebook contains every selected investigation');
   assert.equal(await page.locator('.notebook-entry.locked').count(), 0, 'completed entries are all unlocked');
   await page.keyboard.press('Escape');
 

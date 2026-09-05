@@ -513,6 +513,10 @@ export class PhysicsWorld {
   #syncObjects() {
     for (const record of this.records.values()) {
       if (record.completed) continue;
+      // A disabled body is frozen out of the simulation, so its translation is
+      // stale. Writing it back would drag the mesh home again and undo any
+      // scene-side reparenting (a balloon pulled onto a bottle neck, say).
+      if (record.body.isEnabled && !record.body.isEnabled()) continue;
       const p = record.body.translation();
       const q = record.body.rotation();
       const worldPosition = new THREE.Vector3(p.x, p.y, p.z);

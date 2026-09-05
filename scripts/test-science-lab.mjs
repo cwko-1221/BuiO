@@ -13,14 +13,14 @@ const distRoot = path.join(root, 'science-lab-app', 'dist');
 
 assert.deepEqual(
   experiments.map((item) => item.id),
-  ['density-column', 'water-filter', 'electric-crane', 'light-reflection', 'heat-conduction', 'force-coaster'],
-  'the focused release exposes exactly the six selected investigations in order',
+  ['density-column', 'water-filter', 'electric-crane', 'light-reflection', 'heat-conduction', 'force-coaster', 'air-expansion'],
+  'the focused release exposes exactly the seven selected investigations in order',
 );
-assert.deepEqual(experiments.map((item) => item.number), [1, 2, 3, 4, 5, 6], 'visible experiment numbers are contiguous');
+assert.deepEqual(experiments.map((item) => item.number), [1, 2, 3, 4, 5, 6, 7], 'visible experiment numbers are contiguous');
 for (const removedId of ['lab-safety', 'transmission', 'root-viewer', 'food-web', 'eco-house', 'light-lab', 'sound-vacuum', 'earth-moon-sun']) {
   assert.equal(experimentById.has(removedId), false, `${removedId}: removed investigation has no route entry`);
 }
-assert.equal(getNextExperiment('force-coaster')?.id, 'density-column', 'next-station flow cycles only through the selected stations');
+assert.equal(getNextExperiment('air-expansion')?.id, 'density-column', 'next-station flow wraps from the last station to the first');
 assert.equal(getNextExperiment('sound-vacuum'), null, 'unknown legacy route cannot silently enter another experiment');
 assert.equal(new Set(experiments.map((item) => item.id)).size, experiments.length, 'experiment ids are unique');
 assert.deepEqual(
@@ -121,7 +121,7 @@ for (const id of ['labCanvas', 'accessibleActionButton', 'soundToggle', 'motionT
   assert.match(indexSource, new RegExp(`id="${id}"`), `accessible UI includes #${id}`);
 }
 assert.doesNotMatch(indexSource, /(?:src|href)=["']https?:\/\//, 'student shell has no third-party runtime assets');
-assert.match(indexSource, /id="progressCount">0 \/ 6</, 'pre-boot progress count matches the focused release');
+assert.match(indexSource, /id="progressCount">0 \/ 7</, 'pre-boot progress count matches the focused release');
 for (const removedArea of ['地球與太空', '生命與健康']) {
   assert.equal(indexSource.includes(removedArea), false, `catalog has no empty filter for ${removedArea}`);
 }
