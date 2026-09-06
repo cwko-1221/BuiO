@@ -104,7 +104,14 @@ function headLine(atlas, cell, within) {
   const limit = within ? bottom : top + Math.round((bottom - top) * 0.45);
   for (let y = top; y <= limit; y += 1) if (rows[y] && rows[y].width > (rows[head]?.width ?? 0)) head = y;
   const line = rows[head];
-  return { x: (line.left + line.right) / 2, y: head, width: line.width };
+  // How big the head is, taken from its area rather than its widest row. The widest row is whatever
+  // sticks out furthest, and an ear can be a thin flare that adds a third to the width while adding
+  // almost nothing to the head — which is what sent the goggle strap past the pig's head from
+  // behind. Area barely notices a flare, and the square root of it is a width again.
+  let area = 0;
+  for (let y = top; y <= limit; y += 1) if (rows[y]) area += rows[y].width;
+  const width = area > 0 ? Math.sqrt(area * 1.4) : line.width;
+  return { x: (line.left + line.right) / 2, y: head, width };
 }
 
 /**
