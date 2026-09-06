@@ -130,7 +130,7 @@ function eyesIn(rgba, width, cell, index) {
     // the eye it closes but only a few pixels deep, which the roundness test throws away. Both are
     // the same landmark, so both are kept, and a shut eye reports the width it would have open.
     const shut = w >= 7 && h <= Math.max(4, w * 0.55) && area >= 10 && area <= 400;
-    if (shut) { blobs.push({ x: sx / area, y: cy, area: area * 3, w, h: Math.round(w * 0.85), shut: true }); continue; }
+    if (shut) { blobs.push({ x: sx / area, y: cy, area, w, h: Math.round(w * 0.85), shut: true }); continue; }
     if (area < 24 || area > 900) continue;
     if (round < 0.45 || filled < 0.45) continue;
     blobs.push({ x: sx / area, y: cy, area, w, h });
