@@ -104,6 +104,20 @@ function headLine(atlas, cell, within) {
   const limit = within ? bottom : top + Math.round((bottom - top) * 0.45);
   for (let y = top; y <= limit; y += 1) if (rows[y] && rows[y].width > (rows[head]?.width ?? 0)) head = y;
   const line = rows[head];
+  // Curled up, a creature is a blob wider than it is tall and has no head line to find — the widest
+  // row across it is its back. It does have an outline, though, and every creature is drawn lying
+  // the same way round, so the blob itself is the frame: same place within it, same size against it.
+  const wide = rows.reduce((most, r) => Math.max(most, r ? r.width : 0), 0);
+  if (wide > (bottom - top) * 1.25) {
+    let left = CELL;
+    let right = -1;
+    for (let y = top; y <= bottom; y += 1) {
+      if (!rows[y]) continue;
+      if (rows[y].left < left) left = rows[y].left;
+      if (rows[y].right > right) right = rows[y].right;
+    }
+    return { x: (left + right) / 2, y: (top + bottom) / 2, width: right - left, curled: true };
+  }
   // How big the head is, taken from its area rather than its widest row. The widest row is whatever
   // sticks out furthest, and an ear can be a thin flare that adds a third to the width while adding
   // almost nothing to the head — which is what sent the goggle strap past the pig's head from
@@ -156,7 +170,9 @@ function frames(petId, stage, atlas, within) {
     }
     if (!head) return null;
     return {
-      x: head.x, y: head.y + overHead * head.width,
+      // The offset below is where the eyes sit against the head line, and a curled blob has no head
+      // line for it to be measured from. Its own centre is the whole frame.
+      x: head.x, y: head.y + (head.curled ? 0 : overHead * head.width),
       across: head.width * spanOverHead, down: head.width * tallOverHead, eyes: 0, head: head.width,
     };
   });
