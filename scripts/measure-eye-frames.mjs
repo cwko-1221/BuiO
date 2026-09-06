@@ -146,6 +146,9 @@ for (const petId of PETS) {
           // How big one eye is drawn, which is what a lens has to cover. It is not implied by the
           // span: the dog's eyes sit closer together than the cat's and are drawn larger.
           eye: (eyes[0].w + eyes[1].w) / 2 / cell, tall: (eyes[0].h + eyes[1].h) / 2 / cell,
+          // Each eye on its own as well as the pair. Binding a lens to the eye it covers needs to
+          // know where that one eye is, not where the two of them average out.
+          each: eyes.map((e) => ({ x: e.x / cell, y: e.y / cell, w: e.w / cell, h: e.h / cell })),
         });
       } else if (eyes.length === 1) {
         // In profile only one eye shows, so the span across the eyes is gone. The eye's own width
@@ -153,6 +156,7 @@ for (const petId of PETS) {
         cells.push({
           cell: index, eyes: 1, x: eyes[0].x / cell, y: eyes[0].y / cell,
           span: (eyes[0].w * 2.6) / cell, eye: eyes[0].w / cell, tall: eyes[0].h / cell,
+          each: [{ x: eyes[0].x / cell, y: eyes[0].y / cell, w: eyes[0].w / cell, h: eyes[0].h / cell }],
         });
       } else {
         cells.push({ cell: index, eyes: 0 });
