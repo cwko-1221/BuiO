@@ -6,18 +6,29 @@
 // showing the same frame, in the same place, facing the same way.
 //
 // The mountain asks for movements a pet sheet was never drawn for. There is no climbing pose and no
-// falling one, so the sheet's own vocabulary is borrowed: it walks in profile while running, throws
-// its paws up for a jump, and wears the startled face on the way down.
+// falling one, so the sheet's own vocabulary is borrowed.
+//
+// Only the profile row is borrowed from. A climber on this mountain travels left or right and
+// nothing else, and the pet room's front and back rows are drawn facing the viewer — cutting to one
+// of those mid-run turns the creature to face out of the screen for a frame and reads as a glitch
+// rather than as a pose. So every movement below is taken from the sheet's second row, which is the
+// creature seen from its right; facing left is that same row flipped.
 
-/** Which of the pet's twenty cells each of the game's movements plays, and how fast. */
+/**
+ * Which of the pet's twenty cells each of the game's movements plays, and how fast.
+ *
+ * The row runs 5 standing, 6 and 8 the two strides, 7 the passing step between them, 9 a blink.
+ * Airborne poses are chosen from those five for what they read as rather than what they were drawn
+ * for: a stride reads as a push off the ground, and shut eyes read as bracing on the way down.
+ */
 const POSES = Object.freeze({
-  idle: { frames: [0, 0, 4], rate: 4, repeat: -1 },
+  idle: { frames: [5, 5, 9], rate: 4, repeat: -1 },
   run: { frames: [6, 7, 8, 7], rate: 12, repeat: -1 },
-  jump: { frames: [16], rate: 10, repeat: 0 },
-  doubleJump: { frames: [16, 1], rate: 12, repeat: 0 },
-  fall: { frames: [19], rate: 5, repeat: -1 },
-  land: { frames: [18, 0], rate: 12, repeat: 0 },
-  celebrate: { frames: [16, 0], rate: 6, repeat: -1 },
+  jump: { frames: [6], rate: 10, repeat: 0 },
+  doubleJump: { frames: [8, 6], rate: 12, repeat: 0 },
+  fall: { frames: [9], rate: 5, repeat: -1 },
+  land: { frames: [7, 5], rate: 12, repeat: 0 },
+  celebrate: { frames: [6, 8], rate: 6, repeat: -1 },
 });
 
 export const PET_FRAME = 160;

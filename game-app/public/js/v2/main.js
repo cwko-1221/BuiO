@@ -1,7 +1,7 @@
 import { buildCourse, validateCourse } from './course.js?v=20260725-checkpoint-backgrounds-1';
-import { GameScene } from './GameScene.js?v=20260906-pet-climber-3';
+import { GameScene } from './GameScene.js?v=20260907-side-climber-1';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
-import { ACCESSORY_GLYPHS, normaliseAvatar } from './avatar.js?v=20260906-pet-climber-3';
+import { normaliseAvatar } from './avatar.js?v=20260907-side-climber-1';
 
 const $ = id => document.getElementById(id);
 const gameAudio = new GameAudio();
@@ -78,7 +78,6 @@ async function joinRoom(code){
     if(!res?.ok){$('joinError').textContent=res?.message||'加入失敗';loadRooms();return;}
     clearInterval(roomsTimer); startMeta={code,playerKey:res.playerKey||`s:${me.studentId}`};
     selectedAvatar=normaliseAvatar(res.avatar||selectedAvatar);
-    renderAvatarPicker();
     $('lobbySetTitle').textContent=res.setTitle||'準備中'; $('lobbyHostName').textContent=`${teacherLabel(res.hostName)}嘅遊戲房間`;
     if(res.phase==='playing')startGame(res.seed,res.durationSec,res.startedAt,res.resume,res.settings); else show('lobbyScreen');
   });
@@ -297,35 +296,9 @@ function closeQuestion(){
 
 function toast(message,gold=false){const el=document.createElement('div');el.className=`toast${gold?' gold':''}`;el.textContent=message;$('toasts').appendChild(el);setTimeout(()=>el.remove(),2700);}
 
-function renderAvatarPicker(){
-  const previewImage=$('avatarPreviewImage');
-  const previewAccessory=$('avatarPreviewAccessory');
-  if(!previewImage||!previewAccessory)return;
-  previewImage.className=`avatar-preview-image character-${selectedAvatar.character}`;
-  previewAccessory.textContent=ACCESSORY_GLYPHS[selectedAvatar.accessory];
-  document.querySelectorAll('[data-character]').forEach(button=>{
-    button.setAttribute('aria-pressed',String(button.dataset.character===selectedAvatar.character));
-  });
-  document.querySelectorAll('[data-accessory]').forEach(button=>{
-    button.setAttribute('aria-pressed',String(button.dataset.accessory===selectedAvatar.accessory));
-  });
-}
-
-function updateAvatar(next){
-  selectedAvatar=normaliseAvatar({...selectedAvatar,...next});
-  renderAvatarPicker();
-  if(startMeta?.code&&!preview)socket.emit('player:avatar',selectedAvatar,res=>{
-    if(res?.ok)selectedAvatar=normaliseAvatar(res.avatar);
-  });
-}
-
-document.querySelectorAll('[data-character]').forEach(button=>{
-  button.addEventListener('click',()=>updateAvatar({character:button.dataset.character}));
-});
-document.querySelectorAll('[data-accessory]').forEach(button=>{
-  button.addEventListener('click',()=>updateAvatar({accessory:button.dataset.accessory}));
-});
-renderAvatarPicker();
+// Nothing here chooses a climber any more: a child climbs as the pet they already own, and the
+// lobby only has to say the room is waiting. The colour and trinket the old picker set survive as
+// the fallback look for a child who has not hatched a pet yet, at their default values.
 
 function showResults(leaderboard,{personal=false,place=null}={}){
   phaserGame?.destroy(true);phaserGame=null;scene=null;const list=$('resultsList');list.innerHTML='';

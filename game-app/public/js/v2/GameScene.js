@@ -11,9 +11,9 @@ import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest
 import { beginCrumbleFall, CrumblePlatformState } from './CrumblePlatform.js?v=20260725-crumble-wake';
 import { RemoteGhostState, SURFACE_TOLERANCE } from './RemoteGhostState.js?v=20260718-network-4';
 import { timedHazardState } from './timed-hazards.js?v=20260719-power20-lasers';
-import { accessoryGlyph, avatarTint, normaliseAvatar } from './avatar.js?v=20260906-pet-climber-3';
+import { accessoryGlyph, avatarTint, normaliseAvatar } from './avatar.js?v=20260907-side-climber-1';
 import { definePetAnims, destroyLayers, makeLayers, petAnim, petKeys, petOf, queuePet, syncLayers }
-  from './petAvatar.js?v=20260906-pet-climber-3';
+  from './petAvatar.js?v=20260907-side-climber-1';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -582,7 +582,9 @@ export class GameScene extends Phaser.Scene {
     if (conveyorBody && this.grounded) this.setPlayerVelocity(nextVx + conveyorBody.courseObject.behavior.speed,null);
     if (this.hooks.infiniteEnergy) this.energy=this.maxEnergy;
     else if (dir && this.energy > 0) this.energy = Math.max(0,this.energy-4.3*dt);
-    this.player.setFlipX(dir < 0);
+    // Only a direction turns the climber. Letting go of both buttons used to snap it back to
+    // facing right, which a creature drawn in profile shows plainly: it stops, then pivots.
+    if (dir) this.player.setFlipX(dir < 0);
     if (this.grounded&&dir&&Math.abs(nextVx)>1.25&&time>=this.nextStepAt) {
       this.nextStepAt=time+Phaser.Math.Clamp(285-Math.abs(nextVx)*14,185,255);
       this.hooks.onSound?.('step');

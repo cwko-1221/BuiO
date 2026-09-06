@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>唔好望落嚟 | BuiO 遊戲</title>
-  <link rel="stylesheet" href="/game/css/game.css?v=20260818-touch-2">
+  <link rel="stylesheet" href="/game/css/game.css?v=20260907-side-climber-1">
 </head>
 <body>
 
@@ -32,32 +32,6 @@
         <h1 id="lobbySetTitle">準備中</h1>
         <p class="sub" id="lobbyHostName"></p>
         <p class="lobby-wait"><span class="pulse-dot"></span>等緊老師開始遊戲…</p>
-        <div class="avatar-customizer">
-          <div class="avatar-preview" aria-label="角色預覽">
-            <img id="avatarPreviewImage" class="avatar-preview-image character-blue" src="/game/images/v2/characters/player-idle.webp" alt="">
-            <span id="avatarPreviewAccessory" class="avatar-preview-accessory" aria-hidden="true"></span>
-          </div>
-          <div class="avatar-options">
-            <div class="avatar-option-group">
-              <span class="avatar-option-label">角色顏色</span>
-              <div class="character-swatches" role="group" aria-label="選擇角色顏色">
-                <button class="character-swatch swatch-blue" type="button" data-character="blue" aria-label="海藍角色" title="海藍角色"></button>
-                <button class="character-swatch swatch-mint" type="button" data-character="mint" aria-label="薄荷角色" title="薄荷角色"></button>
-                <button class="character-swatch swatch-coral" type="button" data-character="coral" aria-label="珊瑚角色" title="珊瑚角色"></button>
-                <button class="character-swatch swatch-violet" type="button" data-character="violet" aria-label="星紫角色" title="星紫角色"></button>
-              </div>
-            </div>
-            <div class="avatar-option-group">
-              <span class="avatar-option-label">配件</span>
-              <div class="accessory-options" role="group" aria-label="選擇角色配件">
-                <button class="accessory-option" type="button" data-accessory="none" aria-label="不使用配件" title="不使用配件">∅</button>
-                <button class="accessory-option" type="button" data-accessory="cap" aria-label="學士帽" title="學士帽">🎓</button>
-                <button class="accessory-option" type="button" data-accessory="crown" aria-label="皇冠" title="皇冠">👑</button>
-                <button class="accessory-option" type="button" data-accessory="star" aria-label="星星" title="星星">⭐</button>
-              </div>
-            </div>
-          </div>
-        </div>
         <div style="margin-top:20px; font-size:14px; color:#6b7690; text-align:left; background:#f5f8fc; border-radius:12px; padding:14px;">
           <b>玩法：</b><br>
           🕹️ 左右移動 + 跳躍會消耗 ⚡能量<br>
@@ -131,6 +105,6 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/game/vendor/phaser/phaser.min.js"></script>
-  <script type="module" src="/game/js/v2/main.js?v=20260906-pet-climber-3"></script>
+  <script type="module" src="/game/js/v2/main.js?v=20260907-side-climber-1"></script>
 </body>
 </html>
