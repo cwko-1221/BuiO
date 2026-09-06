@@ -184,6 +184,22 @@ for (const petId of PETS) {
       }
       for (const eye of eyes) marks.push({ index, ...eye });
     }
+    // A creature's eyes sit at the same height in every pose: front, profile, blinking, all within
+    // a few pixels of one line. Anything found well off that line is not an eye — it is the nose,
+    // a nostril, or a paw pad, and it passes every local test while putting the head a tenth of a
+    // cell from where it is. Pairs are checked too, not only lone finds: a nose and an eye read as
+    // a pair perfectly well. Rejected cells are left with no landmark rather than a wrong one.
+    const level = cells.filter((c) => c.eyes === 2).map((c) => c.y).sort((p, q) => p - q);
+    if (level.length >= 3) {
+      const half = level.length >> 1;
+      const line = level.length % 2 ? level[half] : (level[half - 1] + level[half]) / 2;
+      for (const c of cells) {
+        if (!c.eyes || Math.abs(c.y - line) <= 0.09) continue;
+        Object.assign(c, {
+          eyes: 0, x: undefined, y: undefined, span: undefined, eye: undefined, tall: undefined, each: undefined,
+        });
+      }
+    }
     found[`${petId}:${stage}`] = cells;
     const seen = cells.filter((c) => c.eyes).length;
     console.log(`${petId}:${stage}  ${seen}/20 cells with eyes  (${cells.filter((c) => c.eyes === 2).length} pairs)`);

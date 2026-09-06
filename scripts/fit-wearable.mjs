@@ -92,7 +92,10 @@ function headLine(atlas, cell, within) {
   }
   if (top < 0) return null;
   let head = top;
-  const limit = top + Math.round((bottom - top) * 0.45);
+  // Upright, the head is the widest thing in the top of the picture. Crouched or curled it is not —
+  // a dog with its rear in the air is widest across the rump — so once the piece has said which
+  // part of the cell to look in, the whole of that part is searched rather than its top alone.
+  const limit = within ? bottom : top + Math.round((bottom - top) * 0.45);
   for (let y = top; y <= limit; y += 1) if (rows[y] && rows[y].width > (rows[head]?.width ?? 0)) head = y;
   const line = rows[head];
   return { x: (line.left + line.right) / 2, y: head, width: line.width };
@@ -232,6 +235,32 @@ function bindToEyes(patch, cell, from, to, out) {
   }
 }
 
+/**
+ * How much of a piece is against the body, as a fraction of the piece.
+ *
+ * A crown that has floated off the head and one that has sunk into the face both look wrong in the
+ * same measurable way: the share of the piece touching the creature stops matching what it was on
+ * the creature it was drawn for. It is a coarse reading and it does not know a good fit from a
+ * plausible one, but it finds the cells that have gone somewhere else without anyone looking.
+ */
+function seated(atlas, layer, width, cell) {
+  const col = cell % COLUMNS;
+  const row = Math.floor(cell / COLUMNS);
+  let on = 0;
+  let all = 0;
+  for (let y = 0; y < CELL; y += 1) {
+    for (let x = 0; x < CELL; x += 1) {
+      const at = ((row * CELL + y) * width + col * CELL + x) * 4;
+      if (layer[at + 3] < 40) continue;
+      all += 1;
+      if (atlas[at + 3] > 128) on += 1;
+    }
+  }
+  // A mark of a few dozen pixels — a whisker of frost, a tear line seen from behind — swings this
+  // ratio wildly while being invisible at the size the game draws. Those are not readings.
+  return all < 120 ? null : on / all;
+}
+
 const contact = async (atlas, layer, text) => {
   const width = COLUMNS * CELL;
   const height = ROWS * CELL;
@@ -273,6 +302,7 @@ function bandOf(patch, cell) {
 }
 
 await fs.mkdir(OUT, { recursive: true });
+const report = [];
 const sourceAtlas = await readAtlas(atlasFile(SOURCE, STAGE));
 
 for (const itemId of WANTED) {
@@ -305,10 +335,20 @@ for (const itemId of WANTED) {
       }
       placed += 1;
     }
+    const suspect = [];
+    for (let cell = 0; cell < COLUMNS * ROWS; cell += 1) {
+      const was = seated(sourceAtlas.data, patch.data, patch.width, cell);
+      const now = seated(atlas.data, fitted, patch.width, cell);
+      if (was === null || now === null) continue;
+      if (Math.abs(now - was) > 0.2) suspect.push(`${cell}:${now > was ? '+' : ''}${Math.round((now - was) * 100)}%`);
+    }
+    report.push({ item: itemId, onto: `${targetId}:${targetStage}`, placed, bound, suspect });
     await sharp(fitted, { raw: { width: patch.width, height: patch.height, channels: 4 } })
       .webp({ quality: 92 }).toFile(path.join(OUT, `${targetId}-${targetStage}--${itemId}--fitted.webp`));
-    strips.push(await contact(atlas, fitted, `${itemId} · ${targetId}:${targetStage} · ${placed}/20 cells, ${bound} bound to the eyes`));
-    console.log(`${itemId} → ${targetId}:${targetStage}  ${placed}/20 (${bound} bound)`);
+    strips.push(await contact(atlas, fitted, `${itemId} · ${targetId}:${targetStage} · ${placed}/20 cells, `
+      + `${bound} bound${suspect.length ? `, ${suspect.length} to check` : ''}`));
+    console.log(`${itemId} → ${targetId}:${targetStage}  ${placed}/20 (${bound} bound)`
+      + (suspect.length ? `  check ${suspect.join(' ')}` : '  clean'));
   }
 
   const meta = await Promise.all(strips.map((s) => sharp(s).metadata()));
@@ -320,4 +360,10 @@ for (const itemId of WANTED) {
   }).composite(strips.map((input, i) => ({ input, left: 0, top: meta.slice(0, i).reduce((s, m) => s + m.height + 8, 0) })))
     .png().toFile(path.join(OUT, `${itemId}-fitted.png`));
 }
-console.log(`\n${OUT}`);
+
+await fs.writeFile(path.join(OUT, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
+const cells = report.reduce((sum, r) => sum + r.placed, 0);
+const flagged = report.reduce((sum, r) => sum + r.suspect.length, 0);
+console.log(`\n${cells} cells fitted, ${flagged} to check `
+  + `(${((1 - flagged / Math.max(1, cells)) * 100).toFixed(1)}% seated as they were on the cat)`);
+console.log(OUT);
