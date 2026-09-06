@@ -46,6 +46,12 @@ const CELL = 160;
 const COLUMNS = 5;
 const ROWS = 4;
 const EYES = JSON.parse(await fs.readFile('tmp/eye-frames/eye-frames.json', 'utf8'));
+/**
+ * The ways of wearing a thing on the head that go round it rather than onto one side of it. These
+ * are the pieces a creature's ears belong in front of; a clip is pinned to an ear and a pair of
+ * goggles sits on the face, and neither is covered by anything.
+ */
+const BEHIND_EARS = new Set(['crown', 'hat', 'headset', 'helmet']);
 
 const atlasFile = (petId, stage) => {
   const url = catalog.pets.find((pet) => pet.id === petId)?.atlas?.[stage - 1];
@@ -261,6 +267,56 @@ function seated(atlas, layer, width, cell) {
   return all < 120 ? null : on / all;
 }
 
+/**
+ * The parts of a creature that belong in front of what it is wearing.
+ *
+ * A crown carried from the cat is drawn over everything, so on the dog it lies across the floppy
+ * ears instead of passing behind them, and reads as stuck on rather than worn. The cat's own baked
+ * art has this right because it was drawn that way; a carried piece has to be told.
+ *
+ * Ears are the parts of the head that stand out to the side of the face. Taking everything above
+ * the eyes and outside the width of the face catches them on all three creatures without knowing
+ * what species it is looking at — pointed, floppy or small and folded — while leaving the crown of
+ * the head, which a piece worn there sits on top of, alone.
+ */
+function earsOf(atlas, cell, frame) {
+  if (!frame || !frame.across) return null;
+  const col = cell % COLUMNS;
+  const row = Math.floor(cell / COLUMNS);
+  const mask = new Uint8Array(CELL * CELL);
+  // The face is wider than the span across the eyes — cheeks and muzzle sit outside it — so the
+  // line between face and ear is drawn a whole eye-span out from the middle, not half of one.
+  const half = frame.across;
+  for (let y = 0; y < CELL; y += 1) {
+    // Below the eyes is cheek and muzzle, which nothing worn on the head passes behind.
+    if (y > frame.y + frame.down * 0.4) continue;
+    for (let x = 0; x < CELL; x += 1) {
+      if (Math.abs(x - frame.x) < half) continue;
+      if (atlas.data[((row * CELL + y) * atlas.width + col * CELL + x) * 4 + 3] < 128) continue;
+      mask[y * CELL + x] = 1;
+    }
+  }
+  return mask;
+}
+
+/** Take back the pixels a creature's own ears should cover. */
+function occlude(layer, patchWidth, cell, ears) {
+  if (!ears) return 0;
+  const col = cell % COLUMNS;
+  const row = Math.floor(cell / COLUMNS);
+  let taken = 0;
+  for (let y = 0; y < CELL; y += 1) {
+    for (let x = 0; x < CELL; x += 1) {
+      if (!ears[y * CELL + x]) continue;
+      const at = ((row * CELL + y) * patchWidth + col * CELL + x) * 4;
+      if (!layer[at + 3]) continue;
+      layer[at] = 0; layer[at + 1] = 0; layer[at + 2] = 0; layer[at + 3] = 0;
+      taken += 1;
+    }
+  }
+  return taken;
+}
+
 const contact = async (atlas, layer, text) => {
   const width = COLUMNS * CELL;
   const height = ROWS * CELL;
@@ -309,6 +365,7 @@ for (const itemId of WANTED) {
   const entry = catalog.redrawnWearables[`${SOURCE}:${STAGE}:${itemId}`];
   if (!entry?.patch) { console.log(`${itemId}: no baked patch`); continue; }
   const patch = await readAtlas(path.join('pet-app/public', entry.patch.replace(/^\/pet\//, '')));
+  const fit = catalog.wearables.find((item) => item.id === itemId)?.fit;
   // Only the poses with no eyes to go on lean on this hint; where the eyes are found the frame
   // comes from them and the band is never consulted.
   const bands = Array.from({ length: COLUMNS * ROWS }, (_, cell) => bandOf(patch, cell));
@@ -321,6 +378,7 @@ for (const itemId of WANTED) {
     const fitted = Buffer.alloc(patch.data.length);
     let placed = 0;
     let bound = 0;
+    let hidden = 0;
     for (let cell = 0; cell < COLUMNS * ROWS; cell += 1) {
       const from = sourceFrames[cell];
       const to = targetFrames[cell];
@@ -333,6 +391,10 @@ for (const itemId of WANTED) {
       } else {
         carry(patch, cell, from, to, fitted);
       }
+      // Whether the ears go in front is not decided by the slot: a garland passes behind them and a
+      // hair clip is pinned to one, and both are head pieces. The catalogue already draws that
+      // distinction — the same `fit` the room places by — so it is read rather than guessed.
+      if (BEHIND_EARS.has(fit)) hidden += occlude(fitted, patch.width, cell, earsOf(atlas, cell, to));
       placed += 1;
     }
     const suspect = [];
@@ -347,7 +409,7 @@ for (const itemId of WANTED) {
       .webp({ quality: 92 }).toFile(path.join(OUT, `${targetId}-${targetStage}--${itemId}--fitted.webp`));
     strips.push(await contact(atlas, fitted, `${itemId} · ${targetId}:${targetStage} · ${placed}/20 cells, `
       + `${bound} bound${suspect.length ? `, ${suspect.length} to check` : ''}`));
-    console.log(`${itemId} → ${targetId}:${targetStage}  ${placed}/20 (${bound} bound)`
+    console.log(`${itemId} → ${targetId}:${targetStage}  ${placed}/20 (${bound} bound${hidden ? `, ${hidden}px behind ears` : ''})`
       + (suspect.length ? `  check ${suspect.join(' ')}` : '  clean'));
   }
 
