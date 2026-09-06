@@ -141,11 +141,19 @@ for (const petId of PETS) {
         const y = (eyes[0].y + eyes[1].y) / 2;
         const x = (eyes[0].x + eyes[1].x) / 2;
         const span = Math.abs(eyes[1].x - eyes[0].x);
-        cells.push({ cell: index, eyes: 2, x: x / cell, y: y / cell, span: span / cell });
+        cells.push({
+          cell: index, eyes: 2, x: x / cell, y: y / cell, span: span / cell,
+          // How big one eye is drawn, which is what a lens has to cover. It is not implied by the
+          // span: the dog's eyes sit closer together than the cat's and are drawn larger.
+          eye: (eyes[0].w + eyes[1].w) / 2 / cell, tall: (eyes[0].h + eyes[1].h) / 2 / cell,
+        });
       } else if (eyes.length === 1) {
         // In profile only one eye shows, so the span across the eyes is gone. The eye's own width
         // stands in for it: it is drawn to the same proportion of the face on every creature here.
-        cells.push({ cell: index, eyes: 1, x: eyes[0].x / cell, y: eyes[0].y / cell, span: (eyes[0].w * 2.6) / cell });
+        cells.push({
+          cell: index, eyes: 1, x: eyes[0].x / cell, y: eyes[0].y / cell,
+          span: (eyes[0].w * 2.6) / cell, eye: eyes[0].w / cell, tall: eyes[0].h / cell,
+        });
       } else {
         cells.push({ cell: index, eyes: 0 });
       }
