@@ -53,7 +53,11 @@ function eyesIn(rgba, width, cell, index) {
   let maxY = -1;
   let minX = cell;
   let maxX = -1;
-  const dark = new Uint8Array(cell * cell);
+  // What counts as dark is decided per cell, not once for the sheet. A sleeping creature's shut eye
+  // is drawn as a mid-brown arc rather than the near-black of an open pupil, and a fixed threshold
+  // that finds the pupil cannot see the arc at all — which is how the sleeper ended up with no
+  // landmark and wore its crown on its paws.
+  const lit = [];
   for (let y = 0; y < cell; y += 1) {
     for (let x = 0; x < cell; x += 1) {
       const i = at(x, y);
@@ -62,8 +66,20 @@ function eyesIn(rgba, width, cell, index) {
       if (y > maxY) maxY = y;
       if (x < minX) minX = x;
       if (x > maxX) maxX = x;
+      lit.push(0.299 * rgba[i] + 0.587 * rgba[i + 1] + 0.114 * rgba[i + 2]);
+    }
+  }
+  if (!lit.length) return [];
+  lit.sort((p, q) => p - q);
+  const middle = lit[lit.length >> 1];
+  const cut = Math.max(70, Math.min(150, middle * 0.62));
+  const dark = new Uint8Array(cell * cell);
+  for (let y = 0; y < cell; y += 1) {
+    for (let x = 0; x < cell; x += 1) {
+      const i = at(x, y);
+      if (rgba[i + 3] < 200) continue;
       const luma = 0.299 * rgba[i] + 0.587 * rgba[i + 1] + 0.114 * rgba[i + 2];
-      if (luma < 96) dark[y * cell + x] = 1;
+      if (luma < cut) dark[y * cell + x] = 1;
     }
   }
   if (maxY < 0) return [];
@@ -109,9 +125,14 @@ function eyesIn(rgba, width, cell, index) {
     const round = Math.min(w, h) / Math.max(w, h);
     const filled = area / (w * h);
     const cy = sy / area;
+    if (cy > floor) continue;
+    // An open eye is a round mass. A shut one — asleep, or mid-blink — is a drawn arc: as wide as
+    // the eye it closes but only a few pixels deep, which the roundness test throws away. Both are
+    // the same landmark, so both are kept, and a shut eye reports the width it would have open.
+    const shut = w >= 7 && h <= Math.max(4, w * 0.55) && area >= 10 && area <= 400;
+    if (shut) { blobs.push({ x: sx / area, y: cy, area: area * 3, w, h: Math.round(w * 0.85), shut: true }); continue; }
     if (area < 24 || area > 900) continue;
     if (round < 0.45 || filled < 0.45) continue;
-    if (cy > floor) continue;
     blobs.push({ x: sx / area, y: cy, area, w, h });
   }
   blobs.sort((a, b) => b.area - a.area);
