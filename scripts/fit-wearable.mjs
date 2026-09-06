@@ -131,6 +131,11 @@ function frames(petId, stage, atlas, within) {
       return {
         x: seen.x * CELL, y: seen.y * CELL,
         across: seen.span * CELL, down: seen.tall * CELL, eyes: 2, each: seen.each,
+        // What a piece is sized against depends on what it spans. Goggles are worn on the eyes and
+        // take the span across them; a garland goes round the head and takes the head. On the cat
+        // those are nearly the same; on a big-headed dog with small eyes they are not, and sizing
+        // its garland by its eyes leaves a bracelet on a forehead.
+        head: head?.width,
       };
     }
     if (seen && seen.eyes === 1 && head) {
@@ -139,22 +144,25 @@ function frames(petId, stage, atlas, within) {
       return {
         x: seen.x * CELL, y: seen.y * CELL,
         across: head.width * spanOverHead, down: head.width * tallOverHead, eyes: 1, each: seen.each,
+        head: head.width,
       };
     }
     if (!head) return null;
     return {
       x: head.x, y: head.y + overHead * head.width,
-      across: head.width * spanOverHead, down: head.width * tallOverHead, eyes: 0,
+      across: head.width * spanOverHead, down: head.width * tallOverHead, eyes: 0, head: head.width,
     };
   });
 }
 
 /** Carry one cell rigidly in the frame: same place against the eyes, same size against the face. */
-function carry(patch, cell, from, to, out) {
+function carry(patch, cell, from, to, out, spansHead) {
   const col = cell % COLUMNS;
   const row = Math.floor(cell / COLUMNS);
-  const rx = to.across / from.across;
-  const ry = to.down / from.down;
+  // A piece that goes round the head is sized by the head; one worn on the face by the face.
+  const byHead = spansHead && from.head && to.head;
+  const rx = byHead ? to.head / from.head : to.across / from.across;
+  const ry = byHead ? to.head / from.head : to.down / from.down;
   for (let y = 0; y < CELL; y += 1) {
     for (let x = 0; x < CELL; x += 1) {
       const sx = from.x + (x - to.x) / rx;
@@ -389,7 +397,7 @@ for (const itemId of WANTED) {
         bindToEyes(patch, cell, from, to, fitted);
         bound += 1;
       } else {
-        carry(patch, cell, from, to, fitted);
+        carry(patch, cell, from, to, fitted, BEHIND_EARS.has(fit));
       }
       // Whether the ears go in front is not decided by the slot: a garland passes behind them and a
       // hair clip is pinned to one, and both are head pieces. The catalogue already draws that
