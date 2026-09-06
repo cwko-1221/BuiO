@@ -11,7 +11,9 @@ import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest
 import { beginCrumbleFall, CrumblePlatformState } from './CrumblePlatform.js?v=20260725-crumble-wake';
 import { RemoteGhostState, SURFACE_TOLERANCE } from './RemoteGhostState.js?v=20260718-network-4';
 import { timedHazardState } from './timed-hazards.js?v=20260719-power20-lasers';
-import { accessoryGlyph, avatarTint, normaliseAvatar } from './avatar.js?v=20260725-avatar-1';
+import { accessoryGlyph, avatarTint, normaliseAvatar } from './avatar.js?v=20260906-pet-climber-3';
+import { definePetAnims, destroyLayers, makeLayers, petAnim, petKeys, petOf, queuePet, syncLayers }
+  from './petAvatar.js?v=20260906-pet-climber-3';
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -55,6 +57,10 @@ export class GameScene extends Phaser.Scene {
     const versioned = url => `${url}${url.includes('?')?'&':'?'}v=${assetVersion}`;
     this.load.image('sky-v2', '/game/images/game/sky-panorama.webp');
     this.load.image('player-v2', '/game/images/v2/characters/player-idle.webp');
+    // The climber's own pet, if they have one. Other climbers' pets are fetched as they appear,
+    // since who else is on the mountain is not known until they are.
+    this.myPet = petOf(this.avatar);
+    if (this.myPet) queuePet(this, this.myPet);
     for (const cp of this.course.checkpoints) {
       if (cp.background) this.load.image(cp.background.key,versioned(cp.background.file));
     }
@@ -351,22 +357,46 @@ export class GameScene extends Phaser.Scene {
     this.playerBody.collisionFilter.mask = CAT_WORLD;
     Matter.Body.setPosition(this.playerBody,{x:this.course.start.x,y:this.course.start.y-38});
     Matter.Composite.add(this.matter.world.localWorld,this.playerBody);
-    this.player = this.add.sprite(0,0,'player-idle-1').setDisplaySize(68,70).setDepth(100);
-    const tint=avatarTint(this.avatar);
-    if (tint!==0xffffff) this.player.setTint(tint);
-    this.playerAccessory = this.add.text(0,0,accessoryGlyph(this.avatar),{
-      fontFamily:'"Segoe UI Emoji","Apple Color Emoji",sans-serif',
-      fontSize:'24px',
-      stroke:'#20263a',
-      strokeThickness:3,
-    }).setOrigin(.5).setDepth(105);
+    const pet = this.myPet && this.textures.exists(petKeys(this.myPet).atlas) ? this.myPet : null;
+    if (pet) {
+      // A pet already carries whatever it is wearing, drawn onto it. The emoji trinket belongs to
+      // the plain climber and would sit on top of a creature that is dressed already.
+      const atlasKey = petKeys(pet).atlas;
+      definePetAnims(this, atlasKey);
+      this.playerAnimPrefix = atlasKey;
+      this.player = this.add.sprite(0,0,atlasKey,0).setDisplaySize(88,88).setDepth(100);
+      this.playerLayers = makeLayers(this, pet, 100);
+      for (const layer of this.playerLayers) layer.setDisplaySize(88,88);
+    } else {
+      this.player = this.add.sprite(0,0,'player-idle-1').setDisplaySize(68,70).setDepth(100);
+      const tint=avatarTint(this.avatar);
+      if (tint!==0xffffff) this.player.setTint(tint);
+      this.playerAccessory = this.add.text(0,0,accessoryGlyph(this.avatar),{
+        fontFamily:'"Segoe UI Emoji","Apple Color Emoji",sans-serif',
+        fontSize:'24px',
+        stroke:'#20263a',
+        strokeThickness:3,
+      }).setOrigin(.5).setDepth(105);
+    }
     this.syncPlayerSprite();
     this.playerName = this.add.text(this.player.x,this.player.y+42,this.hooks.name || '玩家',{fontFamily:'Microsoft JhengHei',fontSize:'17px',fontStyle:'bold',color:'#fff',stroke:'#222a42',strokeThickness:6}).setOrigin(.5).setDepth(110);
+  }
+
+  /**
+   * The animation name to play on the climber.
+   *
+   * A pet's movements are named per creature, because two children on the same mountain may be a
+   * cat and a pig and "run" is a different set of pictures for each. Everywhere that asks for a
+   * movement asks by the plain name and is answered with the right one.
+   */
+  playerAnimName(name) {
+    return this.playerAnimPrefix ? petAnim(this.playerAnimPrefix, name) : name;
   }
 
   syncPlayerSprite() {
     this.player.setPosition(this.playerBody.position.x,this.playerBody.position.y+PLAYER_SPRITE_DY);
     this.playerAccessory?.setPosition(this.player.x,this.player.y-39);
+    syncLayers(this.playerLayers,this.player);
   }
 
   setPlayerPosition(x,y) {
@@ -592,7 +622,7 @@ export class GameScene extends Phaser.Scene {
         if (air) this.airJump--;
         if (!this.hooks.infiniteEnergy) this.energy -= 8;
         this.actions.jumpQueued = 0; this.coyote = 0;
-        this.player.play(air ? 'doubleJump' : 'jump',true);
+        this.player.play(this.playerAnimName(air ? 'doubleJump' : 'jump'),true);
         this.hooks.onEffect?.(air?'doubleJump':'jump',this.player.x,this.player.y);
         this.hooks.onSound?.(air?'doubleJump':'jump');
       }
@@ -629,12 +659,15 @@ export class GameScene extends Phaser.Scene {
     this.syncPlayerSprite();
     this.playerName.setPosition(this.player.x,this.player.y+44);
     const motion = vy < -1 ? 'jump' : vy > 2 ? 'fall' : Math.abs(nextVx)>1 ? 'run' : 'idle';
-    if (!['jump','doubleJump'].includes(this.player.anims.currentAnim?.key) || !this.player.anims.isPlaying) this.player.play(motion,true);
+    const playing=this.player.anims.currentAnim?.key||'';
+    const midJump=playing.endsWith('jump')||playing.endsWith('doubleJump');
+    if (!midJump || !this.player.anims.isPlaying) this.player.play(this.playerAnimName(motion),true);
     for (const ghost of this.ghosts.values()) {
       const pose=ghost.state.sample(time,deltaMs,this.ghostFloorY(ghost.state));
       ghost.sprite.setPosition(pose.x,pose.y);
-      ghost.accessory.setPosition(pose.x,pose.y-39);
+      ghost.accessory?.setPosition(pose.x,pose.y-39);
       ghost.label.setPosition(pose.x,pose.y+40);
+      syncLayers(ghost.layers,ghost.sprite);
     }
 
     if (this.player.y > this.course.world.height + 180 || this.player.x < -100 || this.player.x > this.course.world.width+100) this.respawn();
@@ -765,10 +798,66 @@ export class GameScene extends Phaser.Scene {
     }
     for (const [id,ghost] of this.ghosts) if (!seen.has(id)) {
       ghost.sprite.destroy();
-      ghost.accessory.destroy();
+      ghost.accessory?.destroy();
+      destroyLayers(ghost.layers);
       ghost.label.destroy();
       this.ghosts.delete(id);
     }
+  }
+
+  /**
+   * Fetch another climber's pet.
+   *
+   * Who else is on the mountain is not known until they appear, so their creature cannot be loaded
+   * up front with everything else. It is asked for on sight and the climber wears the plain outfit
+   * until it lands, which is a second at most and never blocks the game.
+   */
+  ensurePet(pet) {
+    if (!pet) return false;
+    const { atlas } = petKeys(pet);
+    if (this.textures.exists(atlas)) return true;
+    this.petsPending ??= new Set();
+    if (this.petsPending.has(atlas)) return false;
+    this.petsPending.add(atlas);
+    if (!queuePet(this,pet)) { this.petsPending.delete(atlas); return this.textures.exists(atlas); }
+    this.load.once('complete',()=>{
+      this.petsPending.delete(atlas);
+      // Anyone still wearing the plain outfit who now has a creature to wear puts it on.
+      for (const ghost of this.ghosts.values()) {
+        if (!ghost.animPrefix && petOf(ghost.avatar)) this.dressGhost(ghost,ghost.avatar,ghost.sprite.x,ghost.sprite.y);
+      }
+    });
+    this.load.start();
+    return false;
+  }
+
+  /** Build (or rebuild) how one other climber looks, keeping where they are and how they move. */
+  dressGhost(ghost,avatar,x,y) {
+    ghost.sprite?.destroy();
+    ghost.accessory?.destroy();
+    destroyLayers(ghost.layers);
+    ghost.accessory=null;
+    ghost.layers=[];
+    const pet=petOf(avatar);
+    if (pet && this.ensurePet(pet)) {
+      const atlasKey=petKeys(pet).atlas;
+      definePetAnims(this,atlasKey);
+      ghost.animPrefix=atlasKey;
+      ghost.sprite=this.add.sprite(x,y,atlasKey,0).setDisplaySize(88,88).setAlpha(.55).setDepth(80);
+      ghost.layers=makeLayers(this,pet,80);
+      for (const layer of ghost.layers) layer.setDisplaySize(88,88).setAlpha(.55);
+    } else {
+      ghost.animPrefix=null;
+      ghost.sprite=this.add.sprite(x,y,'player-idle-1').setDisplaySize(68,70).setAlpha(.55).setDepth(80);
+      ghost.sprite.setTint(avatarTint(avatar));
+      ghost.accessory=this.add.text(x,y-39,accessoryGlyph(avatar),{
+        fontFamily:'"Segoe UI Emoji","Apple Color Emoji",sans-serif',
+        fontSize:'22px',
+        stroke:'#24314d',
+        strokeThickness:3,
+      }).setOrigin(.5).setAlpha(.72).setDepth(85);
+    }
+    ghost.avatar=avatar;
   }
 
   updateGhost(row,myId) {
@@ -777,26 +866,21 @@ export class GameScene extends Phaser.Scene {
     let accepted=true;
     if (!ghost) {
       const avatar=normaliseAvatar(row.avatar);
-      const sprite=this.add.sprite(row.x,row.y,'player-idle-1').setDisplaySize(68,70).setAlpha(.55).setDepth(80);
-      sprite.setTint(avatarTint(avatar));
-      const accessory=this.add.text(row.x,row.y-39,accessoryGlyph(avatar),{
-        fontFamily:'"Segoe UI Emoji","Apple Color Emoji",sans-serif',
-        fontSize:'22px',
-        stroke:'#24314d',
-        strokeThickness:3,
-      }).setOrigin(.5).setAlpha(.72).setDepth(85);
       const label=this.add.text(row.x,row.y+40,row.name,{fontFamily:'Microsoft JhengHei',fontSize:'14px',fontStyle:'bold',color:'#dff8ff',stroke:'#24314d',strokeThickness:4}).setOrigin(.5).setDepth(90);
-      ghost={sprite,accessory,label,state:new RemoteGhostState(row,this.time.now),avatar};
+      ghost={label,layers:[],state:new RemoteGhostState(row,this.time.now),avatar};
+      this.dressGhost(ghost,avatar,row.x,row.y);
       this.ghosts.set(row.id,ghost);
     } else accepted=ghost.state.push(row,this.time.now);
     if (!accepted) return;
     const avatar=normaliseAvatar(row.avatar);
-    if (avatar.character!==ghost.avatar.character||avatar.accessory!==ghost.avatar.accessory) {
-      ghost.avatar=avatar;
-      ghost.sprite.setTint(avatarTint(avatar));
-      ghost.accessory.setText(accessoryGlyph(avatar));
-    }
+    const changed=avatar.character!==ghost.avatar.character
+      || avatar.accessory!==ghost.avatar.accessory
+      || avatar.pet?.atlas!==ghost.avatar.pet?.atlas
+      || (avatar.pet?.layers||[]).join()!==(ghost.avatar.pet?.layers||[]).join();
+    if (changed) this.dressGhost(ghost,avatar,ghost.sprite.x,ghost.sprite.y);
     ghost.sprite.setFlipX(row.facing<0);
-    if (this.anims.exists(row.animation||'idle')) ghost.sprite.play(row.animation||'idle',true);
+    const motion=row.animation||'idle';
+    const key=ghost.animPrefix?petAnim(ghost.animPrefix,motion):motion;
+    if (this.anims.exists(key)) ghost.sprite.play(key,true);
   }
 }

@@ -1,7 +1,7 @@
 import { buildCourse, validateCourse } from './course.js?v=20260725-checkpoint-backgrounds-1';
-import { GameScene } from './GameScene.js?v=20260725-checkpoint-backgrounds-1';
+import { GameScene } from './GameScene.js?v=20260906-pet-climber-3';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
-import { ACCESSORY_GLYPHS, normaliseAvatar } from './avatar.js?v=20260725-avatar-1';
+import { ACCESSORY_GLYPHS, normaliseAvatar } from './avatar.js?v=20260906-pet-climber-3';
 
 const $ = id => document.getElementById(id);
 const gameAudio = new GameAudio();
@@ -37,6 +37,14 @@ function show(screenId) {
 const meReady = fetch('/api/auth/me',{credentials:'include'}).then(r=>r.ok?r.json():null).then(data=>{
   const u=data?.student; if(u?.name){me={name:u.name,studentId:u.id||null};}
 }).catch(()=>{});
+
+// Who the child climbs as. The room tells us again on join — that answer is the one that counts,
+// since it is worked out from their account rather than sent from here — but knowing it early lets
+// the lobby show them their own creature, and lets the preview run as somebody real.
+const petReady = fetch('/api/game/my-pet',{credentials:'include'})
+  .then(r=>r.ok?r.json():null)
+  .then(data=>{ if(data?.pet) selectedAvatar={...selectedAvatar,pet:data.pet}; })
+  .catch(()=>{});
 
 function teacherLabel(name) { const n=String(name||'老師'); return n.endsWith('老師')?n:`${n}老師`; }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -330,6 +338,8 @@ function showResults(leaderboard,{personal=false,place=null}={}){
 if(preview){
   me={name:'Koko',studentId:'preview'};
   gameSettings=normaliseGameSettings({maxEnergy:100,energyPerCorrect:25,infiniteEnergy:previewInfiniteEnergy});
-  startGame(20260711,480,Date.now(),null,gameSettings);
+  // Wait for the pet before starting, or the preview would always show the plain climber and could
+  // never be used to check the thing it is most often opened to check.
+  petReady.then(()=>startGame(20260711,480,Date.now(),null,gameSettings));
 }else if(autoJoinRoom)meReady.then(()=>joinRoom(autoJoinRoom));
 else startRoomPolling();

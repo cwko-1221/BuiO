@@ -13,6 +13,7 @@
 //   - recording summit finishes and building the final leaderboard
 
 const setsRepo = require('../repositories/questionSets.repo');
+const petRepo = require('../../pet-app/repositories/pet.repo');
 const demoSet = require('../lib/demoSet');
 const crystalSet = require('../../tower-defense-app/lib/defaultQuestions');
 
@@ -60,10 +61,33 @@ function normaliseSettings(raw = {}) {
   };
 }
 
-function normaliseAvatar(raw = {}) {
+/**
+ * A player's look. The character and trinket are the child's own choice and come from the client;
+ * the pet does not. A pet is worked out here from the student's own account, so nobody can climb
+ * the mountain wearing somebody else's creature, and so the other players' ghosts show the right
+ * one too — they never talk to the pet module themselves.
+ */
+function normaliseAvatar(raw = {}, pet = null) {
   const character = CHARACTER_IDS.has(raw.character) ? raw.character : 'blue';
   const accessory = ACCESSORY_IDS.has(raw.accessory) ? raw.accessory : 'none';
-  return { character, accessory };
+  return pet ? { character, accessory, pet } : { character, accessory };
+}
+
+/**
+ * The student's pet, or nothing.
+ *
+ * Joining a room must not fail because the pet module is slow or unhappy, and a child who has never
+ * opened it has no pet to find — both end the same way, with the climber they picked instead.
+ */
+async function petLookFor(studentId) {
+  if (!studentId) return null;
+  try {
+    const looks = await petRepo.activePetLooks([studentId]);
+    return looks.get(studentId) || null;
+  } catch (error) {
+    console.warn('[game] could not read pet for', studentId, error.message);
+    return null;
+  }
 }
 
 function initialEnergy(settings) {
@@ -135,6 +159,16 @@ module.exports = function (io, app) {
     rooms.delete(room.code);
     nsp.to(room.code).emit('room:closed', { message });
   }
+
+  // The signed-in child's own pet, for the lobby to show them who they will be climbing as before
+  // they join a room. The climb itself does not use this — it reads the pet on join, server-side,
+  // so what a child sees here can never be what another child is made to wear.
+  app.get('/api/game/my-pet', async (req, res) => {
+    const studentId = req.session?.studentId;
+    if (!studentId) return res.status(401).json({ success: false });
+    const pet = await petLookFor(studentId);
+    return res.json({ success: true, pet });
+  });
 
   // Active game sessions (for portal / debugging)
   app.get('/api/game/sessions', (req, res) => {
@@ -260,12 +294,15 @@ module.exports = function (io, app) {
     });
 
     // ---------------- Student: join & play ----------------
-    socket.on('player:join', ({ code, name, studentId, avatar }, ack) => {
+    socket.on('player:join', async ({ code, name, studentId, avatar }, ack) => {
       const room = rooms.get(String(code || '').trim());
       if (!room) return ack?.({ ok: false, message: '搵唔到呢個房間，請檢查代碼。' });
       if (room.phase === 'ended') return ack?.({ ok: false, message: '遊戲已經結束。' });
 
       const cleanName = String(name || '').trim().slice(0, 20) || '玩家';
+      // Read before the player record is touched, so a reconnecting climber picks up a pet that was
+      // hatched, evolved or dressed differently since they last played.
+      const pet = await petLookFor(studentId);
       // Key players by studentId when available so a page refresh reconnects
       // to the same in-game progress instead of duplicating the player.
       const key = studentId ? `s:${studentId}` : `a:${socket.id}`;
@@ -291,7 +328,7 @@ module.exports = function (io, app) {
           streak: 0,
           finishedAt: null,
           pendingQuestion: null,
-          avatar: normaliseAvatar(avatar),
+          avatar: normaliseAvatar(avatar, pet),
           connected: true,
           socketId: socket.id,
           stateAt: Date.now(),
@@ -302,7 +339,7 @@ module.exports = function (io, app) {
         player.connected = true;
         player.socketId = socket.id;
         player.name = cleanName;
-        player.avatar = normaliseAvatar(avatar || player.avatar);
+        player.avatar = normaliseAvatar(avatar || player.avatar, pet);
       }
 
       socket.data.role = 'player';
@@ -342,7 +379,9 @@ module.exports = function (io, app) {
       const room = rooms.get(socket.data.code);
       const player = room?.players.get(socket.data.playerKey);
       if (!room || !player || room.phase === 'ended') return ack?.({ ok: false });
-      player.avatar = normaliseAvatar(avatar);
+      // The picker only offers the climber and the trinket. Whatever pet was found at join is kept,
+      // since it is not the client's to change.
+      player.avatar = normaliseAvatar(avatar, player.avatar?.pet || null);
       nsp.to(room.hostSocket).emit('lobby:roster', roster(room));
       ack?.({ ok: true, avatar: player.avatar });
     });

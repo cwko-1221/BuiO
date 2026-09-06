@@ -684,6 +684,59 @@ async function walletBalances(studentIds) {
   const rows = ensureJsonData().petWallets.filter((row) => studentIds.includes(row.studentId)); return new Map(rows.map((row) => [row.studentId, Number(row.balance)]));
 }
 
+/**
+ * What each student's active pet looks like, for anywhere outside this app that wants to draw it.
+ *
+ * Read-only on purpose. `getBootstrap` would answer the same question, but it creates the student's
+ * profile, wallet and starter room on the way past, and a child appearing in another module's
+ * player list is not a reason to open a pet account for them. A student with no pet is simply
+ * absent from the answer.
+ *
+ * The artwork is resolved here rather than by the caller: the atlas and the worn layers are
+ * catalogue facts, and the release rules that keep a retired item off a pet belong with them.
+ */
+async function activePetLooks(studentIds) {
+  const wanted = [...new Set(studentIds)].filter(Boolean);
+  if (!wanted.length) return new Map();
+  await ensureSchema();
+
+  let profiles;
+  let pets;
+  if (config.db.mode === 'postgres') {
+    const pool = getPool();
+    const [profileRows, petRows] = await Promise.all([
+      pool.query(`SELECT StudentID AS "studentId",ActivePetID AS "activePetId" FROM PetProfiles WHERE StudentID=ANY($1::text[])`, [wanted]),
+      pool.query(`SELECT PetID AS "petId",StudentID AS "studentId",SpeciesID AS "speciesId",Stage AS stage,EquippedWearables AS "equippedWearables" FROM PetInstances WHERE StudentID=ANY($1::text[])`, [wanted]),
+    ]);
+    profiles = profileRows.rows;
+    pets = petRows.rows;
+  } else {
+    const data = ensureJsonData();
+    profiles = data.petProfiles.filter((row) => wanted.includes(row.studentId));
+    pets = data.petInstances.filter((row) => wanted.includes(row.studentId));
+  }
+
+  const looks = new Map();
+  for (const studentId of wanted) {
+    const mine = pets.filter((row) => (row.studentId || row.studentid) === studentId).map(publicPet)
+      .filter((pet) => indexes.pets.has(pet.speciesId));
+    if (!mine.length) continue;
+    const activeId = profiles.find((row) => row.studentId === studentId)?.activePetId;
+    const pet = mine.find((row) => row.id === activeId) || mine[0];
+    const definition = indexes.pets.get(pet.speciesId);
+    const atlas = definition?.atlas?.[pet.stage - 1];
+    if (!atlas) continue;
+    // Only the pieces this species has a fitted redraw for. One without is not drawn at all rather
+    // than pinned on at a guess, which is the same rule the pet's own room follows.
+    const layers = pet.equippedWearables
+      .map((itemId) => catalog.redrawnWearables[`${pet.speciesId}:${pet.stage}:${itemId}`])
+      .filter((entry) => entry?.patch)
+      .map((entry) => entry.patch);
+    looks.set(studentId, { speciesId: pet.speciesId, stage: pet.stage, atlas, layers });
+  }
+  return looks;
+}
+
 async function grantCoins(actorId, studentIds, amount, { note = '', idempotencyKey } = {}) {
   const uniqueIds = [...new Set(studentIds)];
   if (!uniqueIds.length || !Number.isInteger(amount) || amount < 1 || amount > 10000 || !idempotencyKey) throw Object.assign(new Error('Invalid grant request'), { status: 400 });
@@ -745,6 +798,6 @@ async function grantUnlimitedMoney(studentId, amount = 999999) {
 module.exports = {
   ensureSchema, ensureStudent, getBootstrap, hatchStarter, purchaseEgg, activatePet, feedPet,
   purchaseItem, setOutfit, saveRoom, getRoomSnapshot, listVisitableRooms, addReaction,
-  walletBalances, grantCoins, grantUnlimitedMoney, purgeJsonStudent,
+  walletBalances, activePetLooks, grantCoins, grantUnlimitedMoney, purgeJsonStudent,
   hkDay, chooseRarity, chooseSpecies, stageForXp, validatePlacements,
 };
