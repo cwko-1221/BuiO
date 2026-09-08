@@ -68,7 +68,7 @@ async function findById(studentId) {
 async function findByIdSummary(studentId) {
   if (config.db.mode === 'postgres') {
     const { rows } = await getPool().query(
-      'SELECT Name AS name, Role AS role, ClassName AS classname, ClassNo AS classno, Language AS language FROM Users WHERE StudentID = $1',
+      'SELECT Name AS name, Role AS role, ClassName AS classname, ClassNo AS classno, MathGroup AS mathgroup, Language AS language FROM Users WHERE StudentID = $1',
       [studentId]);
     return rows[0] || null;
   }
@@ -78,6 +78,7 @@ async function findByIdSummary(studentId) {
     name: u.name, role: u.role,
     classname: u.classname || null,
     classno: u.classno || null,
+    mathgroup: u.mathgroup || '',
     language: u.language || 'zh-HK',
   };
 }

@@ -14,7 +14,6 @@
 
 const statsRepo = require('../repositories/stats.repo');
 const { generateQuestion, ALL_TAGS } = require('./questionGenerator');
-const { tagsForClass } = require('./classTags');
 
 const WEAKNESS_THRESHOLD = 70;  // 正確率低於此值視為弱點
 const WEAK_RATIO = 0.6;         // 弱點標籤佔比 60%
@@ -115,9 +114,9 @@ function weightedPick(tags, statsMap) {
  * @returns {{ questions: Array, distribution: Object }}
  */
 async function generateAdaptiveQuiz(studentId, count = DEFAULT_QUIZ_SIZE, opts = {}) {
-    const allowedTags = opts.classname
-      ? tagsForClass(opts.classname)
-      : (opts.allowedTags || ALL_TAGS);
+    // The caller resolves the tag pool: a bare classname would rebuild the grade
+    // curriculum without the teacher's tier switches and quietly undo them.
+    const allowedTags = opts.allowedTags || ALL_TAGS;
     const { weakTags, strongTags, stats } = await analyzeWeaknesses(studentId, allowedTags);
 
     const questions = [];

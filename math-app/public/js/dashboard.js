@@ -73,6 +73,7 @@
 
             if (data.student.role === 'teacher') {
                 // Teacher: existing student-picker flow.
+                initTierPolicyPanel();
                 await loadStudentList();
             } else {
                 // Student: skip the picker, show own stats immediately.
@@ -137,6 +138,155 @@
 
         } catch (e) {
             console.error('載入學生清單失敗:', e);
+        }
+    }
+
+    // ========================================
+    // Tier policy (teacher only)
+    // ========================================
+    // Teachers switch 銅/銀/金/鑽 on or off per grade, or per math group inside a
+    // grade. A switched-off tier stops being generated AND stops appearing on
+    // the child's radar, so the panel says so up front rather than letting a
+    // teacher discover the second half later.
+    let tierPolicyRows = [];
+
+    function initTierPolicyPanel() {
+        const panel = document.getElementById('tier-policy-panel');
+        const toggle = document.getElementById('tier-policy-toggle');
+        const body = document.getElementById('tier-policy-body');
+        if (!panel || !toggle || !body) return;
+
+        panel.hidden = false;
+        toggle.addEventListener('click', () => {
+            const opening = body.hidden;
+            body.hidden = !opening;
+            toggle.textContent = opening ? '收起設定' : '展開設定';
+            toggle.setAttribute('aria-expanded', String(opening));
+            if (opening && !tierPolicyRows.length) loadTierPolicy();
+        });
+    }
+
+    async function loadTierPolicy() {
+        try {
+            const res = await fetch('/api/stats/teacher/tier-policy', { credentials: 'include' });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || '載入失敗');
+            tierPolicyRows = data.rows || [];
+            renderTierPolicy();
+        } catch (e) {
+            const host = document.getElementById('tier-policy-rows');
+            if (host) host.textContent = '載入題目級別設定失敗。';
+            console.error('載入題目級別設定失敗:', e);
+        }
+    }
+
+    function tierPolicyMessage(text, kind) {
+        const box = document.getElementById('tier-policy-message');
+        if (!box) return;
+        box.hidden = !text;
+        box.textContent = text || '';
+        box.className = 'tier-policy-message' + (kind ? ' ' + kind : '');
+    }
+
+    const TIER_EMOJI = { bronze: '🥉', silver: '🥈', gold: '🥇', diamond: '💎' };
+
+    function renderTierPolicy() {
+        const host = document.getElementById('tier-policy-rows');
+        if (!host) return;
+        host.innerHTML = '';
+
+        for (const row of tierPolicyRows) {
+            const off = new Set(row.disabled || []);
+            const el = document.createElement('div');
+            el.className = 'tier-policy-row' + (row.isGradeWide ? '' : ' group');
+
+            const name = document.createElement('div');
+            name.className = 'tier-policy-name';
+            name.textContent = row.label;
+            const count = document.createElement('small');
+            count.textContent = row.studentCount + ' 名學生';
+            name.appendChild(count);
+            el.appendChild(name);
+
+            const switches = document.createElement('div');
+            switches.className = 'tier-policy-switches';
+            for (const tier of row.tiers) {
+                const enabled = !off.has(tier.id);
+                const label = document.createElement('label');
+                label.className = 'tier-policy-switch' + (enabled ? '' : ' off');
+                const box = document.createElement('input');
+                box.type = 'checkbox';
+                box.checked = enabled;
+                box.dataset.tier = tier.id;
+                box.addEventListener('change', () => saveTierPolicyRow(el, row));
+                label.appendChild(box);
+                label.appendChild(document.createTextNode(
+                    (TIER_EMOJI[tier.id] || '') + ' ' + tier.name));
+                switches.appendChild(label);
+            }
+            el.appendChild(switches);
+
+            if (!row.isGradeWide) {
+                const note = document.createElement('div');
+                note.className = 'tier-policy-inherit';
+                if (row.configured) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = '跟隨全級';
+                    btn.addEventListener('click', () => saveTierPolicyRow(el, row, null));
+                    note.appendChild(btn);
+                } else {
+                    note.textContent = '跟隨全級設定';
+                }
+                el.appendChild(note);
+            }
+
+            host.appendChild(el);
+        }
+    }
+
+    // Passing null for disabled clears a group's own rule so it follows its
+    // grade again; otherwise the row's unchecked boxes become the disabled list.
+    async function saveTierPolicyRow(el, row, disabled) {
+        const payload = disabled === null
+            ? null
+            : [...el.querySelectorAll('input[type="checkbox"]')]
+                .filter(box => !box.checked)
+                .map(box => box.dataset.tier);
+
+        el.dataset.busy = '1';
+        tierPolicyMessage('儲存中…', '');
+        try {
+            const res = await fetch('/api/stats/teacher/tier-policy', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    className: row.className,
+                    mathGroup: row.mathGroup,
+                    disabledTiers: payload,
+                }),
+            });
+            const data = await res.json();
+            if (!data.success) {
+                // The server refused — e.g. every tier switched off. Redraw from
+                // the last known-good state so the checkbox stops claiming a
+                // change that was never saved.
+                renderTierPolicy();
+                tierPolicyMessage(data.message || '儲存失敗。', 'error');
+                return;
+            }
+            tierPolicyRows = data.rows || tierPolicyRows;
+            renderTierPolicy();
+            tierPolicyMessage('已儲存 · ' + row.label, 'ok');
+            // The teacher may be looking at a student this rule just changed.
+            if (currentStudentId) reloadAllStats();
+        } catch (e) {
+            renderTierPolicy();
+            tierPolicyMessage('儲存失敗，請再試一次。', 'error');
+            console.error('儲存題目級別設定失敗:', e);
+        } finally {
+            el.dataset.busy = '';
         }
     }
 

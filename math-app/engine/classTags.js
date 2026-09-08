@@ -96,5 +96,28 @@ function tierForTag(tag) {
 }
 
 const TIER_ORDER = TIERS.map(t => ({ id: t.id, name: t.name }));
+const TIER_IDS = TIER_ORDER.map(t => t.id);
 
-module.exports = { CLASS_TAGS, tagsForClass, normalizeClassname, tierForTag, TIER_ORDER };
+// Which tiers a grade actually reaches. A P2 class has no 金 or 鑽 tags, so the
+// teacher screen must not offer switches for them.
+function tiersForClass(classname) {
+  const reached = new Set(tagsForClass(classname).map(tierForTag));
+  return TIER_ORDER.filter(t => reached.has(t.id));
+}
+
+// The grade curriculum minus whatever tiers a teacher switched off for this
+// class/group. Falls back to the unfiltered list when a policy would leave a
+// student nothing to practise: the API refuses to save one, but a stale row
+// must never lock a child out of the app.
+function tagsForScope(classname, disabledTiers) {
+  const tags = tagsForClass(classname);
+  if (!disabledTiers || !disabledTiers.length) return tags;
+  const off = new Set(disabledTiers);
+  const kept = tags.filter(tag => !off.has(tierForTag(tag)));
+  return kept.length ? kept : tags;
+}
+
+module.exports = {
+  CLASS_TAGS, tagsForClass, normalizeClassname, tierForTag,
+  TIER_ORDER, TIER_IDS, tiersForClass, tagsForScope,
+};

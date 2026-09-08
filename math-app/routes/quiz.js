@@ -5,11 +5,10 @@ const router = express.Router();
 
 const logs = require('../repositories/logs.repo');
 const stats = require('../repositories/stats.repo');
-const users = require('../repositories/users.repo');
 const { withTransaction } = require('../db/database');
 const { generateAdaptiveQuiz } = require('../engine/adaptiveEngine');
 const { generateQuestion, TAG_INFO } = require('../engine/questionGenerator');
-const { tagsForClass } = require('../engine/classTags');
+const { scopeForStudent } = require('../engine/studentScope');
 const { requireAuth } = require('../middleware/auth');
 
 // A "random" (adaptive) practice session is 10 questions; if the student's
@@ -18,8 +17,8 @@ const { requireAuth } = require('../middleware/auth');
 const DAILY_RANDOM_THRESHOLD = 10;
 
 async function studentGradeTags(studentId) {
-  const u = await users.findByIdSummary(studentId);
-  return { classname: u?.classname || null, tags: tagsForClass(u?.classname || '') };
+  const scope = await scopeForStudent(studentId);
+  return { classname: scope.classname || null, tags: scope.tags };
 }
 
 async function todayRandomDone(studentId, tags) {
@@ -82,7 +81,7 @@ router.get('/questions', async (req, res, next) => {
       full = Array.from({ length: count }, () => generateQuestion(requestedTag));
     } else {
       // Random / adaptive practice.
-      const result = await generateAdaptiveQuiz(studentId, count, { classname });
+      const result = await generateAdaptiveQuiz(studentId, count, { allowedTags });
       full = result.questions;
       res.locals._distribution = result.distribution;
     }

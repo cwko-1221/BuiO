@@ -7,6 +7,46 @@
     <title>學習儀表板 ✦ 杯澳四則特訓</title>
     <link rel="stylesheet" href="/math-app/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>
+        /* Tier policy panel — teacher-only, sits above the student picker results. */
+        .tier-policy {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            margin-bottom: 24px;
+        }
+        .tier-policy-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+        .tier-policy-head h2 { font-size: 1.05rem; font-weight: 700; margin: 0 0 4px; }
+        .tier-policy-head p { margin: 0; color: var(--text-muted); font-size: 0.85rem; max-width: 62ch; }
+        .tier-policy-toggle {
+            flex: none; padding: 8px 14px; border-radius: 8px; cursor: pointer;
+            background: rgba(139, 92, 246, 0.15); color: var(--text-primary);
+            border: 1px solid rgba(139, 92, 246, 0.4); font-size: 0.85rem; font-weight: 600;
+        }
+        .tier-policy-toggle:hover { background: rgba(139, 92, 246, 0.28); }
+        .tier-policy-rows { margin-top: 16px; display: grid; gap: 8px; }
+        .tier-policy-row {
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+            padding: 10px 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.04);
+        }
+        .tier-policy-row.group { margin-left: 24px; background: rgba(255, 255, 255, 0.02); }
+        .tier-policy-row[data-busy="1"] { opacity: 0.55; pointer-events: none; }
+        .tier-policy-name { min-width: 150px; font-weight: 600; font-size: 0.9rem; }
+        .tier-policy-name small { display: block; font-weight: 400; color: var(--text-muted); font-size: 0.75rem; }
+        .tier-policy-switches { display: flex; gap: 14px; flex-wrap: wrap; }
+        .tier-policy-switch { display: flex; align-items: center; gap: 5px; font-size: 0.85rem; cursor: pointer; }
+        .tier-policy-switch input { cursor: pointer; }
+        .tier-policy-switch.off { color: var(--text-muted); text-decoration: line-through; }
+        .tier-policy-inherit { margin-left: auto; font-size: 0.78rem; color: var(--text-muted); }
+        .tier-policy-inherit button {
+            background: none; border: none; color: #a78bfa; cursor: pointer;
+            font-size: 0.78rem; padding: 0; text-decoration: underline;
+        }
+        .tier-policy-message { margin-top: 12px; font-size: 0.85rem; }
+        .tier-policy-message.error { color: #f87171; }
+        .tier-policy-message.ok { color: #4ade80; }
+    </style>
 </head>
 <body>
     <div class="page-container">
@@ -40,6 +80,21 @@
                     <span id="student-loading" style="color: var(--text-muted); font-size: 0.9rem;">載入名單中...</span>
                 </div>
             </div>
+
+            <!-- Tier policy (teachers only) -->
+            <section id="tier-policy-panel" class="tier-policy" hidden>
+                <div class="tier-policy-head">
+                    <div>
+                        <h2>⚙️ 題目級別設定</h2>
+                        <p>為每個年級或數學分組開關銅、銀、金、鑽題目。關掉的級別不會再出題，學生的能力雷達圖也不會再顯示。</p>
+                    </div>
+                    <button type="button" id="tier-policy-toggle" class="tier-policy-toggle" aria-expanded="false">展開設定</button>
+                </div>
+                <div id="tier-policy-body" hidden>
+                    <div id="tier-policy-rows" class="tier-policy-rows">載入中…</div>
+                    <div id="tier-policy-message" class="tier-policy-message" hidden></div>
+                </div>
+            </section>
 
             <!-- Loading -->
             <div id="loading-state">

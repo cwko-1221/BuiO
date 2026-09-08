@@ -8,7 +8,9 @@ const academicYears = require('../repositories/academic-years.repo');
 const stats = require('../repositories/stats.repo');
 const logs = require('../repositories/logs.repo');
 const { ALL_TAGS, TAG_INFO } = require('../engine/questionGenerator');
-const { tagsForClass, tierForTag, TIER_ORDER } = require('../engine/classTags');
+const { tierForTag, TIER_ORDER, TIER_IDS, tiersForClass, normalizeClassname } = require('../engine/classTags');
+const { scopeForStudent } = require('../engine/studentScope');
+const tierPolicy = require('../repositories/tier-policy.repo');
 const { requireAuth, requireTeacher } = require('../middleware/auth');
 
 router.use(requireAuth);
@@ -23,8 +25,7 @@ function targetStudent(req) {
 async function requireDailyRandomForStudent(req, res) {
   if (req.session.role === 'teacher') return true;
   const uid = req.session.studentId;
-  const u = await users.findByIdSummary(uid);
-  const tags = tagsForClass(u?.classname || '');
+  const { tags } = await scopeForStudent(uid);
   const t = await logs.todayOverview(uid, tags);
   const n = Number(t.todayquestions) || 0;
   if (n < 10) {
@@ -37,11 +38,13 @@ async function requireDailyRandomForStudent(req, res) {
   return true;
 }
 
-// Restrict a student's dashboard to the tags in their grade's curriculum.
+// Restrict a student's dashboard to the tags in their grade's curriculum, minus
+// any tier their teacher switched off for their class or math group — the radar
+// must not draw a 鑽 chart for a child who is never asked a 鑽 question.
 // Falls back to ALL_TAGS for unknown classes / staff / graduated.
 async function tagsForStudentId(studentId) {
-  const u = await users.findByIdSummary(studentId);
-  return tagsForClass(u?.classname || '');
+  const { tags } = await scopeForStudent(studentId);
+  return tags;
 }
 
 function suggestionFor(rate) {
@@ -221,6 +224,90 @@ router.get('/teacher/all-users', requireTeacher, async (req, res, next) => {
       academicYears: years,
       currentAcademicYear,
     });
+  } catch (e) { next(e); }
+});
+
+// ----------------------------------------------------------------
+// Tier policy  (teachers only)
+// ----------------------------------------------------------------
+// Which 銅/銀/金/鑽 tiers a class — or one math group inside it — may receive.
+// The rows are the six grades plus every math group actually in use, so a
+// teacher picks "P4 · B組" off a list instead of inventing a key.
+function policyRows(students, policy) {
+  const groupsByGrade = new Map();
+  const counts = new Map();
+  for (const s of students) {
+    const grade = normalizeClassname(s.className);
+    if (!grade) continue;
+    const group = String(s.mathGroup || '').trim();
+    if (!groupsByGrade.has(grade)) groupsByGrade.set(grade, new Set());
+    if (group) groupsByGrade.get(grade).add(group);
+    const bump = key => counts.set(key, (counts.get(key) || 0) + 1);
+    bump(tierPolicy.policyKey(grade, ''));
+    if (group) bump(tierPolicy.policyKey(grade, group));
+  }
+
+  const rows = [];
+  for (const grade of ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']) {
+    const tiers = tiersForClass(grade);
+    const groups = [...(groupsByGrade.get(grade) || [])].sort();
+    for (const group of ['', ...groups]) {
+      const key = tierPolicy.policyKey(grade, group);
+      rows.push({
+        className: grade,
+        mathGroup: group,
+        label: group ? grade + ' · ' + group : grade + '（全級）',
+        isGradeWide: !group,
+        tiers,
+        configured: Object.prototype.hasOwnProperty.call(policy, key),
+        disabled: tierPolicy.resolve(policy, grade, group),
+        studentCount: counts.get(key) || 0,
+      });
+    }
+  }
+  return rows;
+}
+
+async function respondWithPolicy(res, policy) {
+  const students = await users.listForTeacher(ALL_TAGS, { includeTeachers: false });
+  res.json({ success: true, tiers: TIER_ORDER, rows: policyRows(students, policy) });
+}
+
+router.get('/teacher/tier-policy', requireTeacher, async (req, res, next) => {
+  try {
+    await respondWithPolicy(res, await tierPolicy.getPolicy());
+  } catch (e) { next(e); }
+});
+
+router.put('/teacher/tier-policy', requireTeacher, async (req, res, next) => {
+  try {
+    const className = normalizeClassname(req.body?.className);
+    if (!className) {
+      return res.status(400).json({ success: false, message: '班級不正確，只支援 P1 至 P6。' });
+    }
+    const mathGroup = String(req.body?.mathGroup || '').trim().slice(0, 20);
+    const raw = req.body?.disabledTiers;
+
+    // null clears the rule, so the group follows its grade again.
+    if (raw !== null) {
+      if (!Array.isArray(raw)) {
+        return res.status(400).json({ success: false, message: '請提供要停用的級別。' });
+      }
+      const unknown = raw.filter(id => !TIER_IDS.includes(id));
+      if (unknown.length) {
+        return res.status(400).json({ success: false, message: '未知的題目級別：' + unknown.join('、') });
+      }
+      const off = new Set(raw);
+      if (tiersForClass(className).every(t => off.has(t.id))) {
+        return res.status(400).json({
+          success: false,
+          message: '至少要保留一個級別，否則學生沒有題目可以做。',
+        });
+      }
+    }
+
+    const policy = await tierPolicy.setRule(className, mathGroup, raw === null ? null : raw);
+    await respondWithPolicy(res, policy);
   } catch (e) { next(e); }
 });
 
