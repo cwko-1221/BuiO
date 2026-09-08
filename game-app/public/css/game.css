@@ -1,19 +1,19 @@
-/* iOS ignores user-scalable=no, so pinch-zoom must be refused in CSS and by cancelling the
-   gesture events (see v2/main.js). Double-tap zoom goes too: in a platformer a fast double tap is
-   a jump, not a zoom request.
-   pan-y and not manipulation: manipulation only removes the double-tap zoom delay and still
-   permits pinch. pan-y refuses pinch while leaving vertical scrolling, which the teacher
-   page and the results list both need, since this stylesheet serves both pages. */
-html, body { touch-action: pan-y; }
-.q-overlay, .q-box, .hud { touch-action: pan-y; }
-.q-choices { touch-action: pan-y; }
-/* Controls and the answer button are pure targets: no panning, no long-press callout, no
-   selection highlight when a child rests a finger on the label.
-   pan-y rather than manipulation for the same reason as above — a second finger landing on a
-   button mid-game must not start a pinch — while buttons that sit in a scrolling list (the
-   results, the teacher's roster) still let a vertical swipe through. */
+/* iOS ignores user-scalable=no, so both zooms have to be refused another way.
+   The pinch is refused by cancelling the WebKit gesture events in v2/main.js, which is the only
+   thing iOS reliably honours for it. That leaves the double tap to CSS, and manipulation is the
+   value Safari actually acts on: pan-y ought to imply the same and does in Chrome, but on an iPad
+   a double tap on the question sheet still zoomed the page. Scrolling — the teacher page, the
+   results list, this stylesheet serves both — is untouched by manipulation.
+   main.js carries a second guard for the double tap that depends on no CSS at all. */
+html, body { touch-action: manipulation; }
+.q-overlay, .q-box, .hud { touch-action: manipulation; }
+.q-choices { touch-action: manipulation; }
+/* Controls and the answer button are pure targets: no long-press callout, no selection highlight
+   when a child rests a finger on the label, and no double-tap zoom — an answer is tapped in a
+   hurry, often twice. Buttons that sit in a scrolling list (the results, the teacher's roster)
+   still let a vertical swipe through, which manipulation permits. */
 #answerBtn, .answer-btn-float, .tbtn, button {
-  touch-action: pan-y;
+  touch-action: manipulation;
   -webkit-user-select: none; user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;

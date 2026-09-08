@@ -238,6 +238,35 @@ window.addEventListener('keydown',event=>{
     event.preventDefault();
 });
 
+// The double tap, again, without trusting CSS.
+//
+// touch-action is meant to settle this, but which values an iPad honours for the double tap has
+// moved around between versions, and the question sheet is exactly where a child taps twice: once
+// on an answer, once more because the first did not seem to take. Two taps in the same spot within
+// a third of a second is the browser's zoom gesture and nothing else — the first tap has already
+// been handled by then, so refusing the second costs nothing.
+//
+// Two quick taps in DIFFERENT places are two answers being changed, or two buttons, and are left
+// alone. So is anything inside the climb's own controls: they are touch-action: none, they cannot
+// zoom, and a fast double tap there is a double jump.
+let lastTap={time:0,x:0,y:0};
+document.addEventListener('touchend',event=>{
+  if(event.target?.closest?.('.touch-controls,#gameCanvas'))return;
+  const touch=event.changedTouches[0];
+  if(!touch)return;
+  // performance.now(), not event.timeStamp: what unit and origin a touch event's timestamp
+  // carries has differed between WebKit versions, and a guard that quietly measures the wrong
+  // thing would never fire on the one browser it exists for.
+  const now=performance.now();
+  const sameSpot=Math.abs(touch.clientX-lastTap.x)<40&&Math.abs(touch.clientY-lastTap.y)<40;
+  if(now-lastTap.time<300&&sameSpot){
+    event.preventDefault();
+    lastTap={time:0,x:0,y:0};
+    return;
+  }
+  lastTap={time:now,x:touch.clientX,y:touch.clientY};
+},{passive:false,capture:true});
+
 // Every held control registers a release here, so the state can be cleared without depending
 // on which element the pointer happened to end on.
 const heldReleases=new Set();
