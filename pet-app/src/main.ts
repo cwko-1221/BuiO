@@ -56,7 +56,7 @@ const UI = {
  * punched in it reads as a board that is coming rather than one that is broken.
  */
 /** Mirrors lib/catalog.js WEARABLE_PET_IDS; used only when the server omits the list. */
-const WEARABLE_PET_IDS = ['starpatch-cat'];
+const WEARABLE_PET_IDS = ['starpatch-cat', 'cloud-ear-dog'];
 const OUTFIT_SLOTS: { key: string; zh: string; en: string; icon: string; side: 'left' | 'right' | 'foot' }[] = [
   { key:'head', zh:'頭飾', en:'Head',  icon:'👑', side:'left' },
   { key:'face', zh:'面飾', en:'Face',  icon:'👓', side:'left' },
@@ -109,8 +109,8 @@ class StudentApp {
   definition(pet?: PetInstance) { return this.state.catalog.pets.find((definition) => definition.id === pet?.speciesId); }
   /**
    * Accessories are redraws of one specific animal, so a species can only be dressed once its own
-   * sheets exist. Today that is the cat alone; the rest keep the outfit UI hidden rather than
-   * offering items that have no artwork for them.
+   * sheets exist. The rest keep the outfit UI hidden rather than offering items that have no
+   * artwork for them.
    */
   private canDress(pet?: PetInstance) {
     // A server older than this build sends no list. Fall back to the same default the catalogue
@@ -465,11 +465,18 @@ class StudentApp {
     const pet=this.activePet(); if(!pet) return;
     const zh=this.locale==='zh-HK';
     if(!this.canDress(pet)) return this.picker(zh?'裝備':'Equipment',
-      `<div class="empty-state">${zh?'呢隻寵物嘅飾物系統暫未開放。<br>目前只有星斑幼貓可以換裝。':'The outfit system is not open for this pet yet.<br>Only the Starpatch Kitten can dress up for now.'}</div>`);
+      `<div class="empty-state">${zh?'呢隻寵物嘅飾物系統暫未開放。<br>暫時只有星斑幼貓同雲耳幼犬可以換裝。':'The outfit system is not open for this pet yet.<br>Only the Starpatch Kitten and the Cloud-ear Puppy can dress up for now.'}</div>`);
     const definition=this.state.catalog.pets.find((item)=>item.id===pet.speciesId)!;
     const byId=(id:string)=>this.state.catalog.wearables.find((item)=>item.id===id);
     const equipped=new Map(pet.equippedWearables.map((id)=>[byId(id)?.slot||'',id]));
-    const owned=this.state.catalog.wearables.filter((item)=>this.inventory(item.id)>0);
+    // A species is dressed in redraws of itself, and not every item has been redrawn for every
+    // one of them — three of the dog's neck pieces are white on its white chest and could not be
+    // lifted off it. Offering those would let a child put on something that then does not appear.
+    // Auras are not redraws at all, so they are always on offer.
+    const drawnForThisPet=new Set(Object.keys(this.state.catalog.redrawnWearables)
+      .filter((key)=>key.startsWith(`${pet.speciesId}:`)).map((key)=>key.split(':')[2]));
+    const owned=this.state.catalog.wearables.filter((item)=>this.inventory(item.id)>0
+      && (item.slot==='aura' || drawnForThisPet.has(item.id)));
     const stocked=new Set(this.state.catalog.wearables.map((item)=>item.slot));
 
     const cell=(slot:typeof OUTFIT_SLOTS[number])=>{

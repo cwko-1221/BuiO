@@ -246,9 +246,14 @@ const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
 /**
  * The species that may wear accessories. Every wearable is a redraw of one specific animal, so a
  * species only joins this list once its own sheets have been baked; until then its dressing room
- * stays shut rather than offering items that would not fit. The cat is the only one finished.
+ * stays shut rather than offering items that would not fit.
+ *
+ * The dog wears twenty-six of the twenty-nine. Its frost cape, its white ruff and its silver
+ * locket are all white on a white chest, and no threshold separates them from the fur they lie
+ * on: grown meanly they come out as a few gold stars and a crescent, grown generously they bring
+ * the chest with them. They stay out until their sheets are drawn again with an edge on them.
  */
-const WEARABLE_PET_IDS = new Set(['starpatch-cat']);
+const WEARABLE_PET_IDS = new Set(['starpatch-cat', 'cloud-ear-dog']);
 
 /**
  * The rooms whose artwork has been checked against the grid, which is every room the importer has
