@@ -1,7 +1,7 @@
 import { ASSET_BY_ID, REJECTED_STYLE_ASSET_IDS, SIDE_VIEW_BLOCK_IDS, ZONES, ZONE_NAMES } from './assets.js?v=20260725-checkpoint-themes-2';
 import { ASSET_GEOMETRY } from './asset-geometry.js?v=20260725-checkpoint-themes-2';
 import { alphaBounds, fittedSize } from './colliders.js?v=20260725-checkpoint-themes-2';
-import { CHECKPOINT_BACKGROUNDS, FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260725-checkpoint-backgrounds-1';
+import { CHECKPOINT_BACKGROUNDS, FIXED_MAP, MAP_VERSION } from './fixed-map.js?v=20260907-ipad-perf-3';
 
 function hashString(value) {
   let h=2166136261;

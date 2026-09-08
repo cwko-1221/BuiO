@@ -527,8 +527,8 @@
     "image": "forest-0.webp",
     "format": "RGBA8888",
     "size": {
-      "w": 2048,
-      "h": 2048
+      "w": 1956,
+      "h": 900
     },
     "scale": "1"
   }

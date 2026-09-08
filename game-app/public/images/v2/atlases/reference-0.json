@@ -987,8 +987,8 @@
     "image": "reference-0.webp",
     "format": "RGBA8888",
     "size": {
-      "w": 2048,
-      "h": 2048
+      "w": 2020,
+      "h": 1468
     },
     "scale": "1"
   }

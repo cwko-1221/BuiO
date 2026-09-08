@@ -9,11 +9,25 @@ import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js'
 import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js?v=20260719-flag-checkpoints';
 import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest';
 import { beginCrumbleFall, CrumblePlatformState } from './CrumblePlatform.js?v=20260725-crumble-wake';
-import { RemoteGhostState, SURFACE_TOLERANCE } from './RemoteGhostState.js?v=20260718-network-4';
+import { RemoteGhostState, SURFACE_TOLERANCE } from './RemoteGhostState.js?v=20260908-net-30hz-1';
 import { timedHazardState } from './timed-hazards.js?v=20260719-power20-lasers';
 import { accessoryGlyph, avatarTint, normaliseAvatar } from './avatar.js?v=20260907-side-climber-1';
 import { definePetAnims, destroyLayers, makeLayers, petAnim, petKeys, petOf, queuePet, syncLayers }
   from './petAvatar.js?v=20260907-side-climber-1';
+
+// How wide a column of the course one floor-lookup bucket covers. The course is 5600 wide, so
+// this is a couple of dozen buckets holding a handful of platforms each — enough to turn "which
+// platform is under this climber" from a walk of every body in the world into a walk of one column.
+const FLOOR_BUCKET = 256;
+
+/** Whether two avatars would draw the same climber. */
+function sameLook(a,b) {
+  return !!a && !!b
+    && a.character===b.character
+    && a.accessory===b.accessory
+    && a.pet?.atlas===b.pet?.atlas
+    && (a.pet?.layers||[]).join()===(b.pet?.layers||[]).join();
+}
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -35,6 +49,8 @@ export class GameScene extends Phaser.Scene {
     this.crumbleObjects = new Map();
     this.launcherCooldowns = new Map();
     this.ghosts = new Map();
+    this.looks = new Map();
+    this.floorBuckets = null;
     this.groundContacts = new Map();
     this.leftContacts = new Map();
     this.rightContacts = new Map();
@@ -515,6 +531,9 @@ export class GameScene extends Phaser.Scene {
     Body.setPosition(item.body,item.startBodyPosition);
     Body.setAngle(item.body,item.baseAngle);
     Body.setStatic(item.body,true);
+    // Unconditional: a long stall can carry the state machine from falling to ready in one
+    // call, skipping the removal, and this is the moment the body is put back where it belongs.
+    this.floorBuckets=null;
     if (item.removed) {
       Composite.add(this.matter.world.localWorld,item.body);
       item.removed=false;
@@ -533,6 +552,7 @@ export class GameScene extends Phaser.Scene {
       } else if (result.changed&&result.phase==='hidden') {
         this.clearCrumbleContacts(item.obj.id);
         Composite.remove(this.matter.world.localWorld,item.body,true);
+        this.floorBuckets=null;
         item.removed=true;
         item.sprite.setVisible(false);
       } else if (result.changed&&result.phase==='ready') {
@@ -665,7 +685,14 @@ export class GameScene extends Phaser.Scene {
     const midJump=playing.endsWith('jump')||playing.endsWith('doubleJump');
     if (!midJump || !this.player.anims.isPlaying) this.player.play(this.playerAnimName(motion),true);
     for (const ghost of this.ghosts.values()) {
-      const pose=ghost.state.sample(time,deltaMs,this.ghostFloorY(ghost.state));
+      // The floor depends on where the last snapshot put them, not on the frame: between snapshots
+      // — thirty a second while running, ten while standing still — the answer cannot change.
+      if (ghost.floorAtX!==ghost.state.snapX||ghost.floorAtY!==ghost.state.snapY) {
+        ghost.floorAtX=ghost.state.snapX;
+        ghost.floorAtY=ghost.state.snapY;
+        ghost.floorY=this.ghostFloorY(ghost.state);
+      }
+      const pose=ghost.state.sample(time,deltaMs,ghost.floorY);
       ghost.sprite.setPosition(pose.x,pose.y);
       ghost.accessory?.setPosition(pose.x,pose.y-39);
       ghost.label.setPosition(pose.x,pose.y+40);
@@ -779,9 +806,13 @@ export class GameScene extends Phaser.Scene {
   // platforms turn dynamic while falling and drop out of the static filter
   // automatically.
   ghostFloorY(state) {
+    const bucket=this.floorBucketAt(state.snapX);
+    if (!bucket) return Infinity;
     const feetY=state.snapY+41;
     let floor=Infinity;
-    for (const body of Phaser.Physics.Matter.Matter.Composite.allBodies(this.matter.world.localWorld)) {
+    for (const body of bucket) {
+      // Not baked into the index: a crumbling platform turns dynamic where it stands, and must
+      // stop being a floor for that whole fall without the column being rebuilt.
       if (!body.isStatic||body.isSensor) continue;
       const b=body.bounds;
       if (state.snapX<b.min.x-2||state.snapX>b.max.x+2) continue;
@@ -789,6 +820,34 @@ export class GameScene extends Phaser.Scene {
       floor=b.min.y;
     }
     return floor-41;
+  }
+
+  /**
+   * The static bodies standing in one column of the course.
+   *
+   * This used to ask Matter for every body in the world — a fresh 300-entry array, walked in full,
+   * for each remote climber on every frame. In a class of 25 that is a quarter of a million bounds
+   * tests a second and 1,400 throwaway arrays, all to answer a question about one column. The
+   * columns are built once and rebuilt only when a body actually joins or leaves the world, which
+   * is a crumbling platform vanishing and coming back.
+   */
+  floorBucketAt(x) {
+    if (!this.floorBuckets) this.rebuildFloorBuckets();
+    return this.floorBuckets.get(Math.floor(x/FLOOR_BUCKET));
+  }
+
+  rebuildFloorBuckets() {
+    this.floorBuckets=new Map();
+    for (const body of Phaser.Physics.Matter.Matter.Composite.allBodies(this.matter.world.localWorld)) {
+      if (body.isSensor) continue;
+      const b=body.bounds;
+      const from=Math.floor((b.min.x-2)/FLOOR_BUCKET), to=Math.floor((b.max.x+2)/FLOOR_BUCKET);
+      for (let column=from;column<=to;column++) {
+        let bucket=this.floorBuckets.get(column);
+        if (!bucket) this.floorBuckets.set(column,bucket=[]);
+        bucket.push(body);
+      }
+    }
   }
 
   updateGhosts(list, myId) {
@@ -862,24 +921,42 @@ export class GameScene extends Phaser.Scene {
     ghost.avatar=avatar;
   }
 
+  /**
+   * Who the other climbers are, as told by the server when it changes.
+   *
+   * Names and pets used to arrive stapled to every position frame, which meant re-deriving an
+   * avatar and string-joining its wearable list once per ghost per frame just to notice that
+   * nothing had changed. Both live here now, and a ghost is re-dressed only when this says so.
+   */
+  setLooks(list) {
+    for (const row of list||[]) {
+      if (!row?.id) continue;
+      this.looks.set(row.id,{name:String(row.name??''),avatar:normaliseAvatar(row.avatar)});
+    }
+    for (const [id,ghost] of this.ghosts) {
+      const look=this.looks.get(id);
+      if (!look) continue;
+      if (ghost.label.text!==look.name) ghost.label.setText(look.name);
+      if (!sameLook(look.avatar,ghost.avatar)) {
+        ghost.avatar=look.avatar;
+        this.dressGhost(ghost,look.avatar,ghost.sprite.x,ghost.sprite.y);
+      }
+    }
+  }
+
   updateGhost(row,myId) {
     if (!row||row.id===myId) return;
     let ghost=this.ghosts.get(row.id);
-    let accepted=true;
     if (!ghost) {
-      const avatar=normaliseAvatar(row.avatar);
-      const label=this.add.text(row.x,row.y+40,row.name,{fontFamily:'Microsoft JhengHei',fontSize:'14px',fontStyle:'bold',color:'#dff8ff',stroke:'#24314d',strokeThickness:4}).setOrigin(.5).setDepth(90);
-      ghost={label,layers:[],state:new RemoteGhostState(row,this.time.now),avatar};
-      this.dressGhost(ghost,avatar,row.x,row.y);
+      // A position for somebody whose look has not arrived yet. Positions repeat many times a
+      // second and the look is on its way, so the next frame draws them.
+      const look=this.looks.get(row.id);
+      if (!look) return;
+      const label=this.add.text(row.x,row.y+40,look.name,{fontFamily:'Microsoft JhengHei',fontSize:'14px',fontStyle:'bold',color:'#dff8ff',stroke:'#24314d',strokeThickness:4}).setOrigin(.5).setDepth(90);
+      ghost={label,layers:[],state:new RemoteGhostState(row,this.time.now),avatar:look.avatar};
+      this.dressGhost(ghost,look.avatar,row.x,row.y);
       this.ghosts.set(row.id,ghost);
-    } else accepted=ghost.state.push(row,this.time.now);
-    if (!accepted) return;
-    const avatar=normaliseAvatar(row.avatar);
-    const changed=avatar.character!==ghost.avatar.character
-      || avatar.accessory!==ghost.avatar.accessory
-      || avatar.pet?.atlas!==ghost.avatar.pet?.atlas
-      || (avatar.pet?.layers||[]).join()!==(ghost.avatar.pet?.layers||[]).join();
-    if (changed) this.dressGhost(ghost,avatar,ghost.sprite.x,ghost.sprite.y);
+    } else if (!ghost.state.push(row,this.time.now)) return;
     ghost.sprite.setFlipX(row.facing<0);
     const motion=row.animation||'idle';
     const key=ghost.animPrefix?petAnim(ghost.animPrefix,motion):motion;

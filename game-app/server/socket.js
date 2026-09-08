@@ -24,19 +24,36 @@ const DEFAULT_GAME_SETTINGS = Object.freeze({
 });
 const CHARACTER_IDS = new Set(['blue', 'mint', 'coral', 'violet']);
 const ACCESSORY_IDS = new Set(['none', 'cap', 'crown', 'star']);
-const POSITION_BROADCAST_MS = 16;
-const HOST_POSITION_DIVISOR = 6;
+// 30Hz, not 60. Every climber's own movement is simulated locally, so this rate decides only how
+// smoothly the OTHER climbers read — and their turns, jumps and landings do not wait for it, they
+// are relayed the moment they happen. Halving it halves what 25 iPads receive and parse, at the
+// cost of about three pixels of extra lag on a running ghost, which the dead reckoning in
+// RemoteGhostState absorbs. Below roughly 20Hz the smoothing starts to show.
+const POSITION_BROADCAST_MS = 33;
+// The teacher's mountain board wants about 10 refreshes a second to read as movement rather than
+// as a slideshow; this divides the tick down to it, so it follows the tick rate.
+const HOST_POSITION_DIVISOR = 3;
 
 const playerRoom = code => `${code}:players`;
 
+// What moves, and nothing else.
+//
+// A name and a pet — an atlas URL plus one URL per worn piece — came to some 400 of the 570 bytes
+// this used to weigh, and none of it changes during a climb. Riding on every frame, in a class of
+// 25, that was the bulk of everything a room sent, and it went out sixty times a second. Identity
+// travels separately now, as 'game:looks', on the few occasions it changes.
+//
+// A tenth of a world pixel is finer than any screen here can show, and writing it that way costs a
+// third of the characters of an unrounded double.
 function realtimePosition(p) {
   return {
-    id: p.key, name: p.name, x: p.x, y: p.y,
+    id: p.key,
+    x: Math.round((p.x || 0) * 10) / 10,
+    y: Math.round((p.y || 0) * 10) / 10,
     vx: Math.round((p.vx || 0) * 100) / 100,
     vy: Math.round((p.vy || 0) * 100) / 100,
     facing: p.facing || 1, animation: p.animation || 'idle',
     seq: p.stateSeq || 0, f: !!p.finishedAt,
-    avatar: p.avatar,
   };
 }
 
@@ -144,6 +161,21 @@ module.exports = function (io, app) {
       .map(p => ({ name: p.name, studentId: p.studentId, avatar: p.avatar }));
   }
 
+  // Who the other climbers are. Players never received the lobby roster — the only way they learned
+  // a name or a pet was off the position frames — so it is sent to them here instead, on the few
+  // occasions it can change: the round starting, somebody arriving or coming back, somebody
+  // changing what they climb as.
+  function playerLooks(room) {
+    return [...room.players.values()]
+      .filter(p => p.connected)
+      .map(p => ({ id: p.key, name: p.name, avatar: p.avatar }));
+  }
+
+  function sendLooks(room) {
+    if (!room || room.phase !== 'playing') return;
+    nsp.to(playerRoom(room.code)).emit('game:looks', playerLooks(room));
+  }
+
   function endGame(room, reason) {
     if (room.phase === 'ended') return;
     room.phase = 'ended';
@@ -246,6 +278,7 @@ module.exports = function (io, app) {
       if (room.players.size === 0) return ack?.({ ok: false, message: '未有學生加入。' });
       room.phase = 'playing';
       room.startedAt = Date.now();
+      sendLooks(room);
       nsp.to(room.code).emit('game:start', {
         seed: room.seed,
         durationSec: room.durationSec,
@@ -269,7 +302,10 @@ module.exports = function (io, app) {
         if (++room.positionTick%HOST_POSITION_DIVISOR===0) {
           const hostPositions=positions.map(position=>{
             const p=room.players.get(position.id);
+            // The teacher's board prints names. There is one teacher, and the divisor above keeps
+            // this to about ten refreshes a second, so carrying a name here costs nothing.
             return {...position,
+            name: p.name,
             progress: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
             h: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
             altitude: Math.round((p.altitude || 0) * 10) / 10};
@@ -349,6 +385,9 @@ module.exports = function (io, app) {
       socket.join(playerRoom(room.code));
 
       nsp.to(room.hostSocket).emit('lobby:roster', roster(room));
+      // Mid-round arrivals are the reason this goes to everyone and not just the newcomer: the
+      // others have never seen this child, and the newcomer has never seen any of them.
+      sendLooks(room);
       ack?.({
         ok: true,
         playerKey: key,
@@ -383,6 +422,7 @@ module.exports = function (io, app) {
       // since it is not the client's to change.
       player.avatar = normaliseAvatar(avatar, player.avatar?.pet || null);
       nsp.to(room.hostSocket).emit('lobby:roster', roster(room));
+      sendLooks(room);
       ack?.({ ok: true, avatar: player.avatar });
     });
 

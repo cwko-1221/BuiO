@@ -1,5 +1,5 @@
-import { buildCourse, validateCourse } from './course.js?v=20260725-checkpoint-backgrounds-1';
-import { GameScene } from './GameScene.js?v=20260907-side-climber-1';
+import { buildCourse, validateCourse } from './course.js?v=20260907-ipad-perf-3';
+import { GameScene } from './GameScene.js?v=20260908-net-30hz-1';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 import { normaliseAvatar } from './avatar.js?v=20260907-side-climber-1';
 
@@ -18,6 +18,7 @@ let lastNetworkMotion = null;
 let lastNetworkFacing = null;
 let lastNetworkPose = null;
 let lastFrame = null;
+let pendingLooks = null;
 let startMeta = null;
 let selectedAvatar = normaliseAvatar();
 let gameSettings = { maxEnergy:100, energyPerCorrect:25, infiniteEnergy:false };
@@ -84,6 +85,9 @@ async function joinRoom(code){
 }
 
 socket.on('game:start',({seed,durationSec,startedAt,settings})=>startGame(seed,durationSec,startedAt,null,settings));
+// Identities arrive on their own channel, and ahead of the round starting — so before there is a
+// scene to give them to. Whatever came early waits here until there is.
+socket.on('game:looks',list=>{ pendingLooks=list; scene?.setLooks(list); });
 socket.on('game:positions',list=>scene?.updateGhosts(list,startMeta?.playerKey));
 socket.on('game:position',row=>scene?.updateGhost(row,startMeta?.playerKey));
 socket.on('game:crumble',({id})=>scene?.triggerCrumble(id,false));
@@ -104,6 +108,7 @@ function startGame(seed,durationSec,startedAt,resume,settings){
   if(!report.ok) console.error('[game-v2] invalid course',report);
   startMeta={...(startMeta||{}),seed,durationSec,startedAt:startedAt||Date.now(),course};
   if(phaserGame)phaserGame.destroy(true);
+  scene=null;
   const hooks={
     name:me.name||'Koko', energy:startingEnergy, maxEnergy:gameSettings.maxEnergy,
     avatar:selectedAvatar,
@@ -126,6 +131,9 @@ function startGame(seed,durationSec,startedAt,resume,settings){
     },
     onReady:s=>{
       scene=s;
+      // Kept rather than consumed: the server sends this just before the round starts, so it can
+      // arrive while the previous scene is still standing, and the one built next still needs it.
+      if(pendingLooks)s.setLooks(pendingLooks);
       if(Number.isFinite(resume?.x)&&Number.isFinite(resume?.y))s.setPlayerPosition(resume.x,resume.y);
       else if(preview&&Number.isFinite(previewAltitude)) {
         const checkpoint=course.checkpoints.sort((a,b)=>Math.abs(a.altitude-previewAltitude)-Math.abs(b.altitude-previewAltitude))[0];
@@ -153,7 +161,10 @@ function startGame(seed,durationSec,startedAt,resume,settings){
     onEffect:(type)=>{if(type==='doubleJump')toast('✨ 二段跳');}
   };
   phaserGame=window.__game=new Phaser.Game({
-    type:Phaser.AUTO,parent:'gameCanvas',transparent:true,
+    // Opaque, not transparent: the scene paints its own sky over the whole viewport, and the
+    // only thing behind the canvas is #gameScreen's black. A transparent canvas buys nothing
+    // and costs a per-frame blend against the page on every device — iOS Safari most of all.
+    type:Phaser.AUTO,parent:'gameCanvas',backgroundColor:'#8edcff',
     scale:{mode:Phaser.Scale.RESIZE,width:window.innerWidth,height:window.innerHeight,autoCenter:Phaser.Scale.CENTER_BOTH},
     render:{antialias:true,roundPixels:false,pixelArt:false},
     physics:{default:'matter',matter:{gravity:{y:1.45},enableSleeping:true,debug:new URLSearchParams(location.search).has('physics')}},
@@ -161,22 +172,40 @@ function startGame(seed,durationSec,startedAt,resume,settings){
   });
 }
 
+// The HUD is read, not watched: the stage changes a dozen times in a climb and the clock once
+// a second, but this runs every frame. Writing the same string back still costs a style recalc
+// and a repaint of that layer, sixty times a second, on top of whatever the game is drawing.
+const hudShown=new Map();
+function setHud(id,value){
+  if(hudShown.get(id)===value)return;
+  hudShown.set(id,value);
+  $(id).textContent=value;
+}
+
 function updateHudAndNetwork(state){
   lastFrame=state;
   const now=Date.now(); const left=Math.max(0,startMeta.durationSec-(now-startMeta.startedAt)/1000);
-  $('timerPill').textContent=`⏱ ${Math.floor(left/60)}:${String(Math.floor(left%60)).padStart(2,'0')}`;
-  $('heightPill').textContent=`🏔️ 高度 ${Math.round(state.altitude)}m`;
-  $('stagePill').textContent=`${String(state.zoneIndex+1).padStart(2,'0')} · ${state.zoneName}`;
-  const energyPercent=Math.min(100,Math.max(0,state.energy/gameSettings.maxEnergy*100));
-  $('energyFill').style.width=`${energyPercent}%`;
-  $('energyFill').classList.toggle('low',energyPercent<20);
-  $('energyText').textContent=gameSettings.infiniteEnergy?'∞':Math.round(state.energy);
+  setHud('timerPill',`⏱ ${Math.floor(left/60)}:${String(Math.floor(left%60)).padStart(2,'0')}`);
+  setHud('heightPill',`🏔️ 高度 ${Math.round(state.altitude)}m`);
+  setHud('stagePill',`${String(state.zoneIndex+1).padStart(2,'0')} · ${state.zoneName}`);
+  // The bar is a width, so it is rounded to whole percent: the eye cannot read finer and the
+  // repaint is the same price as the text.
+  const energyPercent=Math.round(Math.min(100,Math.max(0,state.energy/gameSettings.maxEnergy*100)));
+  if(hudShown.get('energyFill')!==energyPercent){
+    hudShown.set('energyFill',energyPercent);
+    $('energyFill').style.width=`${energyPercent}%`;
+    $('energyFill').classList.toggle('low',energyPercent<20);
+  }
+  setHud('energyText',gameSettings.infiniteEnergy?'∞':String(Math.round(state.energy)));
   if(!preview){
     const motionChanged=state.animation!==lastNetworkMotion;
     const facingChanged=state.facing!==lastNetworkFacing;
     const moved=!lastNetworkPose||Math.hypot(state.x-lastNetworkPose.x,state.y-lastNetworkPose.y)>.2;
     const active=moved||state.animation!=='idle';
-    const due=now-lastNet>=(active?16:100);
+    // Matched to the server's broadcast tick: sending faster than the room is relayed only means
+    // frames that are overwritten before anyone sees them, paid for out of the iPad's own radio
+    // and the class's shared Wi-Fi airtime. A turn or a jump still leaves immediately, below.
+    const due=now-lastNet>=(active?33:100);
     if(due||motionChanged||facingChanged){
       lastNet=now;
       lastNetworkMotion=state.animation;
@@ -192,10 +221,22 @@ function updateHudAndNetwork(state){
 // reliable way to decline one, and it is not cosmetic: when iOS claims the touch stream for a
 // zoom, the button holding a finger can stop receiving pointer events entirely, so the
 // direction stays pressed and further taps do nothing because it is already held.
+// Capture phase, because Phaser owns the canvas: a listener that waits for the bubble never
+// runs if the game surface stops the event on its way up.
 for(const type of ['gesturestart','gesturechange','gestureend']){
-  document.addEventListener(type,event=>event.preventDefault(),{passive:false});
+  document.addEventListener(type,event=>event.preventDefault(),{passive:false,capture:true});
 }
-document.addEventListener('touchmove',event=>{if(event.touches.length>1)event.preventDefault();},{passive:false});
+document.addEventListener('touchmove',event=>{if(event.touches.length>1)event.preventDefault();},{passive:false,capture:true});
+
+// An iPad in a keyboard case reaches the same zoom by another road: a two-finger pinch on the
+// trackpad arrives as a wheel event carrying ctrlKey, and cmd with +, -, or 0 resizes the page
+// from the hardware keyboard. Neither leaves a mark on a plain touch iPad, so both stay.
+window.addEventListener('wheel',event=>{if(event.ctrlKey||event.metaKey)event.preventDefault();},{passive:false,capture:true});
+window.addEventListener('keydown',event=>{
+  if(!(event.ctrlKey||event.metaKey))return;
+  if(['+','=','-','_','0'].includes(event.key)||['NumpadAdd','NumpadSubtract','Numpad0'].includes(event.code))
+    event.preventDefault();
+});
 
 // Every held control registers a release here, so the state can be cleared without depending
 // on which element the pointer happened to end on.

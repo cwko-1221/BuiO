@@ -627,8 +627,8 @@
     "image": "global-0.webp",
     "format": "RGBA8888",
     "size": {
-      "w": 2048,
-      "h": 2048
+      "w": 1960,
+      "h": 980
     },
     "scale": "1"
   }

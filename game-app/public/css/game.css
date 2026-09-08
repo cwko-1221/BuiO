@@ -1,5 +1,5 @@
 /* iOS ignores user-scalable=no, so pinch-zoom must be refused in CSS and by cancelling the
-   gesture events (see play.js). Double-tap zoom goes too: in a platformer a fast double tap is
+   gesture events (see v2/main.js). Double-tap zoom goes too: in a platformer a fast double tap is
    a jump, not a zoom request.
    pan-y and not manipulation: manipulation only removes the double-tap zoom delay and still
    permits pinch. pan-y refuses pinch while leaving vertical scrolling, which the teacher
@@ -8,9 +8,12 @@ html, body { touch-action: pan-y; }
 .q-overlay, .q-box, .hud { touch-action: pan-y; }
 .q-choices { touch-action: pan-y; }
 /* Controls and the answer button are pure targets: no panning, no long-press callout, no
-   selection highlight when a child rests a finger on the label. */
+   selection highlight when a child rests a finger on the label.
+   pan-y rather than manipulation for the same reason as above — a second finger landing on a
+   button mid-game must not start a pinch — while buttons that sit in a scrolling list (the
+   results, the teacher's roster) still let a vertical swipe through. */
 #answerBtn, .answer-btn-float, .tbtn, button {
-  touch-action: manipulation;
+  touch-action: pan-y;
   -webkit-user-select: none; user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
@@ -34,7 +37,7 @@ html, body { touch-action: pan-y; }
   --radius: 16px;
   --shadow: 0 10px 30px rgba(31, 42, 68, .12);
   --game-ink: #20263a;
-  --game-panel: rgba(25, 35, 62, .82);
+  --game-panel: rgba(25, 35, 62, .9);
   --game-line: rgba(255,255,255,.22);
 }
 
@@ -130,11 +133,15 @@ input, select, textarea { font-family: inherit; }
 }
 .hud .spacer { flex: 1; }
 .hud-cluster { display: flex; align-items: center; gap: 9px; }
+/* No backdrop-filter anywhere over the game surface. Every blurred layer makes iOS Safari
+   re-sample and re-blur the canvas behind it on every single frame, and the HUD, the pills,
+   the two corner buttons and the three thumb pads are ten such layers sitting on top of a
+   canvas that repaints 60 times a second. The panels were already near-opaque, so they carry
+   a few more points of alpha instead and look the same. */
 .hud-cluster-primary {
   padding: 7px; border: 1px solid var(--game-line); border-radius: 18px;
-  background: linear-gradient(180deg, rgba(42,54,88,.88), rgba(25,35,62,.82));
+  background: linear-gradient(180deg, rgba(42,54,88,.95), rgba(25,35,62,.92));
   box-shadow: 0 8px 22px rgba(18,27,52,.18), inset 0 1px rgba(255,255,255,.16);
-  backdrop-filter: blur(9px) saturate(1.2);
 }
 .energy-wrap { display: grid; grid-template-columns: 28px auto 108px; align-items: center; gap: 7px; min-width: 205px; padding-left: 5px; }
 .energy-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; background: linear-gradient(145deg,#ffe36b,#ff9d23); color: #624000; text-shadow: none; box-shadow: inset 0 2px rgba(255,255,255,.55); }
@@ -149,7 +156,7 @@ input, select, textarea { font-family: inherit; }
 .energy-fill.low { background: linear-gradient(90deg, #ff8f8f, #ff5252); }
 .hud-pill {
   background: var(--game-panel); border: 1px solid var(--game-line); border-radius: 13px; padding: 9px 12px; font-size: 13px;
-  backdrop-filter: blur(8px); box-shadow: inset 0 1px rgba(255,255,255,.12), 0 6px 16px rgba(12,22,48,.14);
+  box-shadow: inset 0 1px rgba(255,255,255,.12), 0 6px 16px rgba(12,22,48,.14);
 }
 .altitude-pill { background: linear-gradient(180deg, rgba(35,122,163,.92), rgba(27,92,130,.9)); }
 .stage-pill { color: #fff2b8; letter-spacing: .03em; }
@@ -158,8 +165,8 @@ input, select, textarea { font-family: inherit; }
 .reset-position-btn, .audio-toggle-btn {
   pointer-events: auto;
   border: 2px solid rgba(255,255,255,.52); border-radius: 12px; padding: 8px 12px;
-  color: #fff; background: rgba(31,42,68,.88); box-shadow: 0 4px 10px rgba(22,31,53,.2);
-  font: 800 12px/1 "Microsoft JhengHei", sans-serif; cursor: pointer; backdrop-filter: blur(8px);
+  color: #fff; background: rgba(31,42,68,.94); box-shadow: 0 4px 10px rgba(22,31,53,.2);
+  font: 800 12px/1 "Microsoft JhengHei", sans-serif; cursor: pointer;
   white-space: nowrap;
 }
 .audio-toggle-btn { width: 38px; padding: 8px 6px; font-size: 15px; }
@@ -188,9 +195,9 @@ input, select, textarea { font-family: inherit; }
 .touch-controls .cluster { display: flex; gap: 8px; pointer-events: auto; touch-action: none; }
 .tbtn {
   width: 116px; height: 116px; flex: 0 0 116px; border-radius: 50%; border: none;
-  background: rgba(26,37,66,.68); color: #fff; font-size: 46px; font-weight: 900;
+  background: rgba(26,37,66,.8); color: #fff; font-size: 46px; font-weight: 900;
   border: 2px solid rgba(255,255,255,.42); box-shadow: inset 0 2px rgba(255,255,255,.12), 0 6px 18px rgba(17,30,59,.2);
-  backdrop-filter: blur(7px); user-select: none; -webkit-user-select: none; touch-action: none;
+  user-select: none; -webkit-user-select: none; touch-action: none;
   -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
 }
 .tbtn:active, .tbtn.is-pressed { background: rgba(255,255,255,.45); transform: scale(.96); }
@@ -223,9 +230,9 @@ input, select, textarea { font-family: inherit; }
   align-items: center;
 }
 .toast {
-  background: rgba(0,0,0,.65); color: #fff; font-weight: 800; padding: 8px 18px;
+  background: rgba(0,0,0,.74); color: #fff; font-weight: 800; padding: 8px 18px;
   border-radius: 999px; font-size: 15px; animation: toastIn .25s ease-out;
-  backdrop-filter: blur(4px); white-space: nowrap;
+  white-space: nowrap;
 }
 .toast.gold { background: rgba(255,176,32,.92); color: #4a3200; }
 @keyframes toastIn { from { opacity: 0; transform: translateY(-12px);} to { opacity: 1; transform: none;} }
@@ -233,8 +240,8 @@ input, select, textarea { font-family: inherit; }
 /* ---------- question modal ---------- */
 .q-overlay {
   position: absolute; inset: 0; z-index: 10; display: none;
-  align-items: center; justify-content: center; background: rgba(15, 22, 40, .72);
-  padding: 16px; backdrop-filter: blur(3px);
+  align-items: center; justify-content: center; background: rgba(15, 22, 40, .82);
+  padding: 16px;
 }
 .q-overlay.open { display: flex; }
 .q-box {

@@ -12,7 +12,7 @@ const finite = (value, fallback=0) => Number.isFinite(Number(value)) ? Number(va
 // is actually heading for and can never be rendered inside one. Grounded
 // snapshots are never projected vertically at all.
 const STEP_MS = 1000/60;   // Matter velocities are px per 60Hz physics step
-const BASE_LEAD_MS = 24;   // hides the 16ms send/broadcast cadence without overshooting
+const BASE_LEAD_MS = 32;   // hides the 33ms send/broadcast cadence without overshooting
 const MAX_LEAD_MS = 120;   // on packet loss the ghost holds instead of flying on
 const AIRBORNE = new Set(['jump','fall']);
 // Hard landings penetrate the platform for a frame on the sender before the

@@ -4,7 +4,7 @@ import { alphaBounds, fittedSize } from './colliders.js?v=20260725-checkpoint-th
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
-export const MAP_VERSION = 'fixed-1500m-2026.07n';
+export const MAP_VERSION = 'fixed-1500m-2026.07o';
 export const WORLD = { width:5600, height:8700, startY:8200, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
