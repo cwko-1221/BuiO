@@ -8,6 +8,7 @@ const fs = require('fs');
 const os = require('os');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const compression = require('compression');
 const { version: APP_VERSION } = require('./package.json');
 
 const config = require('./config');
@@ -19,6 +20,11 @@ const PORT = config.port;
 // ----------------------------------------------------------------
 // Middleware
 // ----------------------------------------------------------------
+// Nothing was compressed on the way out. The game's own scripts are 979KB of text — 740KB of it
+// one generated geometry table — and a class of twelve fetching that is nine megabytes of
+// bandwidth for what gzip turns into 125KB. Already-compressed types (webp, audio) are skipped by
+// the middleware's own list, so the images are left alone.
+app.use(compression());
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
@@ -93,6 +99,13 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST'],
   },
   maxHttpBufferSize: 10 * 1024 * 1024,
+  // Socket.IO leaves this off by default, for servers holding thousands of connections where the
+  // per-connection compression context would cost real memory. A classroom holds twenty-five, and
+  // what they are sent is the same handful of JSON keys repeated once per climber, thirty times a
+  // second — which is exactly what deflate is good at: about 80% off a single frame, and 91% off a
+  // stream of them, since the context carries over between frames. The threshold leaves the small
+  // control messages alone, where the header would cost more than the saving.
+  perMessageDeflate: { threshold: 512 },
   // Fast disconnect detection: ping every 4s, declare dead after 6s of silence.
   // Matters when the teacher closes the tab without an explicit "end class"
   // click — default 20s pingTimeout left students stuck for too long.
