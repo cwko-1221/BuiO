@@ -30,8 +30,16 @@ let OPENING = 3;
 // opening radius this is the plain opening; raised, it is what lets a hard opening cut a fur
 // strand off an accessory without taking the accessory's rim with it.
 let REACH = OPENING;
-/** Fraction of the sheet below which an island is a stray brush stroke rather than a worn thing. */
+/**
+ * Fraction of the sheet below which an island is a stray brush stroke rather than a worn thing.
+ *
+ * One part in ten thousand is a fifth of a per cent of a cell, and everything worn so far has been
+ * far larger. A frost mark on the pig's cheek is not: drawn at a tenth that size, it was thrown out
+ * as dust twenty times over. So `--keep` can name a floor in pixels for the sheets whose accessory
+ * is genuinely tiny — and only those, since this is what keeps the redraw's own flecks out.
+ */
 const KEEP_ABOVE = 0.0001;
+let KEEP_PIXELS = null;
 /** How solid the middle of a worn thing is, in pixels. An outline never has this much. */
 let SOLID = 7;
 /**
@@ -404,6 +412,9 @@ REACH = option('reach', OPENING);
 FILL = option('fill', FILL);
 THIN = option('thin', THIN);
 EDGE = option('edge', EDGE);
+// Given in pixels of the sheet, which is what every other size here is given in, rather than as the
+// fraction it is held as.
+KEEP_PIXELS = option('keep', 0) > 0 ? option('keep', 0) : null;
 const [baseFile, redrawFile, outDir = 'tmp/baked'] = argv.filter((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--'));
 if (!baseFile || !redrawFile) {
   console.error('usage: node scripts/bake-wearable.mjs <base.png> <redraw.png> [out-dir]');
@@ -435,7 +446,7 @@ const outline = dropOutline(mask, body, width, height);
 // around a hole, and through that hole the creature's own eye has to show, whereas a gap in the
 // middle of a cape is a hole the floor shows through.
 const { filled, left: kept } = fillGaps(mask, width, height, FILL);
-const { kept: regions, dropped } = dropSpecks(mask, width, height, KEEP_ABOVE * width * height);
+const { kept: regions, dropped } = dropSpecks(mask, width, height, KEEP_PIXELS ?? KEEP_ABOVE * width * height);
 
 let masked = 0;
 for (let at = 0; at < count; at += 1) if (mask[at]) masked += 1;

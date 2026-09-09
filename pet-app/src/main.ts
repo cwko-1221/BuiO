@@ -56,7 +56,7 @@ const UI = {
  * punched in it reads as a board that is coming rather than one that is broken.
  */
 /** Mirrors lib/catalog.js WEARABLE_PET_IDS; used only when the server omits the list. */
-const WEARABLE_PET_IDS = ['starpatch-cat', 'cloud-ear-dog'];
+const WEARABLE_PET_IDS = ['starpatch-cat', 'cloud-ear-dog', 'pudding-pig'];
 const OUTFIT_SLOTS: { key: string; zh: string; en: string; icon: string; side: 'left' | 'right' | 'foot' }[] = [
   { key:'head', zh:'頭飾', en:'Head',  icon:'👑', side:'left' },
   { key:'face', zh:'面飾', en:'Face',  icon:'👓', side:'left' },
@@ -465,7 +465,7 @@ class StudentApp {
     const pet=this.activePet(); if(!pet) return;
     const zh=this.locale==='zh-HK';
     if(!this.canDress(pet)) return this.picker(zh?'裝備':'Equipment',
-      `<div class="empty-state">${zh?'呢隻寵物嘅飾物系統暫未開放。<br>暫時只有星斑幼貓同雲耳幼犬可以換裝。':'The outfit system is not open for this pet yet.<br>Only the Starpatch Kitten and the Cloud-ear Puppy can dress up for now.'}</div>`);
+      `<div class="empty-state">${zh?'呢隻寵物嘅飾物系統暫未開放。<br>暫時只有星斑幼貓、雲耳幼犬同布丁小豬可以換裝。':'The outfit system is not open for this pet yet.<br>Only the Starpatch Kitten, the Cloud-ear Puppy and the Pudding Piglet can dress up for now.'}</div>`);
     const definition=this.state.catalog.pets.find((item)=>item.id===pet.speciesId)!;
     const byId=(id:string)=>this.state.catalog.wearables.find((item)=>item.id===id);
     const equipped=new Map(pet.equippedWearables.map((id)=>[byId(id)?.slot||'',id]));

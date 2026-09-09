@@ -106,6 +106,118 @@
       "slot": "neck",
       "patch": "/pet/assets/art/outfit-atlases/cloud-ear-dog-1--neck-16--patch-5143f578a7.webp"
     },
+    "pudding-pig:1:face-01": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-01--patch-41eadfff4c.webp"
+    },
+    "pudding-pig:1:face-02": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-02--patch-ca80e3a821.webp"
+    },
+    "pudding-pig:1:face-03": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-03--patch-08acc7bef6.webp"
+    },
+    "pudding-pig:1:face-04": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-04--patch-1328e2d354.webp"
+    },
+    "pudding-pig:1:face-05": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-05--patch-b8004c41c9.webp"
+    },
+    "pudding-pig:1:face-06": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-06--patch-3fcdf34f85.webp"
+    },
+    "pudding-pig:1:face-07": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-07--patch-d26b1294c2.webp"
+    },
+    "pudding-pig:1:face-08": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-08--patch-f95e0f7508.webp"
+    },
+    "pudding-pig:1:face-09": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-09--patch-60661b6031.webp"
+    },
+    "pudding-pig:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-11--patch-edeb40b5e2.webp"
+    },
+    "pudding-pig:1:face-12": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-12--patch-bc38fbbd56.webp"
+    },
+    "pudding-pig:1:head-04": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--head-04--patch-281b5944bf.webp"
+    },
+    "pudding-pig:1:neck-01": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-01--patch-82e1a38297.webp"
+    },
+    "pudding-pig:1:neck-02": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-02--patch-1f31749ec6.webp"
+    },
+    "pudding-pig:1:neck-03": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-03--patch-8d8e786307.webp"
+    },
+    "pudding-pig:1:neck-04": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-04--patch-85fc757ccb.webp"
+    },
+    "pudding-pig:1:neck-05": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-05--patch-b392b41099.webp"
+    },
+    "pudding-pig:1:neck-06": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-06--patch-4c0ef3c474.webp"
+    },
+    "pudding-pig:1:neck-07": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-07--patch-fc5b982b2d.webp"
+    },
+    "pudding-pig:1:neck-08": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-08--patch-d6dda8db6b.webp"
+    },
+    "pudding-pig:1:neck-09": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-09--patch-b3709eee34.webp"
+    },
+    "pudding-pig:1:neck-10": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-10--patch-0638d1bb74.webp"
+    },
+    "pudding-pig:1:neck-11": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-11--patch-559acb8004.webp"
+    },
+    "pudding-pig:1:neck-12": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-12--patch-cd5f573568.webp"
+    },
+    "pudding-pig:1:neck-13": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-13--patch-4c52d63443.webp"
+    },
+    "pudding-pig:1:neck-14": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-14--patch-0514f0cec6.webp"
+    },
+    "pudding-pig:1:neck-15": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-15--patch-1143d7b211.webp"
+    },
+    "pudding-pig:1:neck-16": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-16--patch-ffcc31a8a2.webp"
+    },
     "starpatch-cat:1:face-01": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/starpatch-cat-1--face-01--patch-37119aa376.webp"

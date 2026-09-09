@@ -252,8 +252,13 @@ const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
  * locket are all white on a white chest, and no threshold separates them from the fur they lie
  * on: grown meanly they come out as a few gold stars and a crescent, grown generously they bring
  * the chest with them. They stay out until their sheets are drawn again with an edge on them.
+ *
+ * The pig wears twenty-eight. The three the dog could not is exactly what a pink animal makes
+ * easy, and what it makes hard is the opposite — gold and cream on pink, which is most of the
+ * jewellery. Only its flower crown is missing, and that is the sheet's fault rather than the
+ * mask's: the crown came back as a scribble.
  */
-const WEARABLE_PET_IDS = new Set(['starpatch-cat', 'cloud-ear-dog']);
+const WEARABLE_PET_IDS = new Set(['starpatch-cat', 'cloud-ear-dog', 'pudding-pig']);
 
 /**
  * The rooms whose artwork has been checked against the grid, which is every room the importer has
