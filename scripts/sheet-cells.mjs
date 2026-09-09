@@ -135,3 +135,93 @@ export async function findCells(file, columns, rows) {
     height: Math.min(meta.height, Math.round((box.bottom - box.top + 1) * back)),
   });
 }
+
+/**
+ * Which pixels of a cut belong to the pose next door.
+ *
+ * A cell's box is found from what was drawn, but a box is a rectangle: where the pose next door
+ * was drawn past its own column, whatever part of it falls inside this rectangle is extracted too,
+ * and then scaled and seated along with the pose. In the room that reads as a chip of fur floating
+ * beside the pet.
+ *
+ * What tells a crumb from the pose's own detached marks — the strokes beside a startled head, a
+ * spark, a bubble — is not that it is separate, and not that it reaches the edge of the cut. It is
+ * that it *carries on outside it*, and that most of it is out there. So the region is read large
+ * enough to see past the box on every side, and a piece is marked only when more of it lies
+ * outside the box than in: a crumb is the corner of something drawn next door, while a mark of the
+ * pose's own that the box happens to clip is mostly inside it and stays.
+ *
+ * The size guard is there because a big enough piece running off the edge is more likely the pose
+ * itself, split by a gap in the drawing, than a crumb of its neighbour.
+ */
+export async function crumbMask(sheet, box) {
+  const meta = await sharp(sheet).metadata();
+  // Wide enough to see how much of a piece is out there, not merely that some of it is.
+  const margin = Math.round(Math.max(box.width, box.height) / 2);
+  const left = Math.max(0, box.left - margin);
+  const top = Math.max(0, box.top - margin);
+  const around = {
+    left,
+    top,
+    width: Math.min(meta.width - left, box.width + (box.left - left) + margin),
+    height: Math.min(meta.height - top, box.height + (box.top - top) + margin),
+  };
+  const inset = { x: box.left - left, y: box.top - top };
+  const { data, info } = await sharp(sheet).ensureAlpha().extract(around).raw().toBuffer({ resolveWithObject: true });
+  const { width: w, height: h } = info;
+  const outside = (x, y) => x < inset.x || y < inset.y || x >= inset.x + box.width || y >= inset.y + box.height;
+
+  const label = new Int32Array(w * h).fill(-1);
+  const queue = new Int32Array(w * h);
+  const parts = [];
+  for (let start = 0; start < w * h; start += 1) {
+    if (label[start] >= 0 || data[start * 4 + 3] < ALPHA) continue;
+    const id = parts.length;
+    let head = 0, tail = 0, count = 0, inner = 0, spills = false;
+    queue[tail++] = start;
+    label[start] = id;
+    while (head < tail) {
+      const at = queue[head++];
+      const x = at % w, y = (at - x) / w;
+      count += 1;
+      if (outside(x, y)) spills = true; else inner += 1;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        const next = ny * w + nx;
+        if (label[next] >= 0 || data[next * 4 + 3] < ALPHA) continue;
+        label[next] = id;
+        queue[tail++] = next;
+      }
+    }
+    parts.push({ id, count, inner, spills });
+  }
+  const core = parts.reduce((a, b) => (b.inner > a.inner ? b : a), { inner: -1 });
+  const drop = new Set(parts
+    .filter((part) => part !== core && part.inner > 0 && part.spills
+      && part.inner < core.inner * 0.25 && part.count - part.inner > part.inner)
+    .map((part) => part.id));
+  if (!drop.size) return null;
+
+  const mask = new Uint8Array(box.width * box.height);
+  for (let y = 0; y < box.height; y += 1) {
+    for (let x = 0; x < box.width; x += 1) {
+      if (drop.has(label[(y + inset.y) * w + (x + inset.x)])) mask[y * box.width + x] = 1;
+    }
+  }
+  return mask;
+}
+
+/** Clear the marked pixels out of a cut of the same size. */
+export async function erase(cut, mask, box) {
+  if (!mask) return cut;
+  const { data } = await sharp(cut).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  for (let at = 0; at < box.width * box.height; at += 1) if (mask[at]) data[at * 4 + 3] = 0;
+  return sharp(data, { raw: { width: box.width, height: box.height, channels: 4 } }).png().toBuffer();
+}
+
+/** The cut with the neighbour's crumbs taken out of it. */
+export async function keepPose(sheet, box, cut) {
+  if (!box) return cut;
+  return erase(cut, await crumbMask(sheet, box), box);
+}

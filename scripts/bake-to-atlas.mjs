@@ -21,7 +21,7 @@
 import path from 'node:path';
 import sharp from 'sharp';
 
-import { findCells } from './sheet-cells.mjs';
+import { crumbMask, erase, findCells } from './sheet-cells.mjs';
 
 const CELL = 160;
 const COLUMNS = 5;
@@ -78,8 +78,18 @@ if (meta.width !== layerMeta.width || meta.height !== layerMeta.height) {
 const boxes = await findCells(petFile, COLUMNS, ROWS);
 const cells = [];
 for (let index = 0; index < COLUMNS * ROWS; index += 1) {
-  const pose = await cut(petSheet, meta, index, boxes);
-  cells.push({ pose, bounds: await contentBounds(pose) });
+  // The neighbour's crumb is rubbed out of the pose before it is measured, exactly as the importer
+  // does it — the transform is read off these bounds, so measuring a box the importer did not use
+  // would put every accessory a pixel or two out in that pose.
+  //
+  // The same pixels come out of the accessory's own cut further down. Those pixels are not this
+  // pose, so nothing worn on this pose belongs there either: the redraw altered the crumb along
+  // with everything else it touched, the bake could only read that as something added, and the
+  // result was a fleck of the neighbour's fur floating beside the sleeping dog.
+  const box = boxes?.[index];
+  const crumbs = box ? await crumbMask(petSheet, box) : null;
+  const pose = await erase(await cut(petSheet, meta, index, boxes), crumbs, box);
+  cells.push({ pose, crumbs, box, bounds: await contentBounds(pose) });
 }
 const drawn = cells.filter((entry) => entry.bounds);
 if (!drawn.length) throw new Error('the pet sheet is empty');
@@ -107,7 +117,7 @@ for (let index = 0; index < cells.length; index += 1) {
   // Where the pose lands in its cell fixes where every pixel of the cut lands, accessory included.
   const across = width / bounds.width;
   const down = height / bounds.height;
-  const piece = await cut(layerSheet, meta, index, boxes);
+  const piece = await erase(await cut(layerSheet, meta, index, boxes), cells[index].crumbs, cells[index].box);
   const pieceMeta = await sharp(piece).metadata();
   const scaledWidth = Math.max(1, Math.round(pieceMeta.width * across));
   const scaledHeight = Math.max(1, Math.round(pieceMeta.height * down));

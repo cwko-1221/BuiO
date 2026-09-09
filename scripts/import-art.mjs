@@ -36,7 +36,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import sharp from 'sharp';
 import { findFloor } from './room-floor-fit.mjs';
-import { findCells } from './sheet-cells.mjs';
+import { findCells, keepPose } from './sheet-cells.mjs';
 
 const require = createRequire(import.meta.url);
 const { catalog } = require('../pet-app/lib/catalog.js');
@@ -520,7 +520,12 @@ async function importPet(file, speciesId, stage, dry) {
   log(`      found ${boxes.filter(Boolean).length} of ${ATLAS_COLUMNS * ATLAS_ROWS} poses on the sheet`);
   const cells = [];
   for (let index = 0; index < ATLAS_COLUMNS * ATLAS_ROWS; index += 1) {
-    const cut = await cell(sheet, meta, ATLAS_COLUMNS, ATLAS_ROWS, index, boxes);
+    // A pose is one creature. These sheets are drawn generously — the jumping dog's ear reaches
+    // into the sleeper's column and the sleeper's tail reaches back — and a box is a rectangle, so
+    // each cut arrives with a crumb of its neighbour in the corner. Left in, it is scaled and
+    // seated along with the pose and shows in the room as a chip of fur floating beside the pet.
+    const cut = await keepPose(sheet, boxes?.[index],
+      await cell(sheet, meta, ATLAS_COLUMNS, ATLAS_ROWS, index, boxes));
     cells.push({ cut, bounds: await contentBounds(cut) });
   }
   const drawn = cells.filter((entry) => entry.bounds);
