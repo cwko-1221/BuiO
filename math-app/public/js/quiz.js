@@ -228,14 +228,26 @@
     // ========================================
     // Guide layer: squared paper + 直式 hint
     // ========================================
-    // Big enough to write a digit into with a finger, and still narrow enough that
-    // a phone fits a five-digit sum plus its operator column.
+    // Roomy enough to write a digit into with a finger without aiming. The floor
+    // is what a phone can still fit a division form into: divisor, bar and a
+    // three-digit dividend need six columns of a 341px sketchpad.
     function cellSize() {
-        const min = 40;
-        const max = 60;
-        const columns = 15;
+        const min = 56;
+        const max = 88;
+        const columns = 10;
         if (!guideCanvas) return min;
         return Math.max(min, Math.min(max, Math.round(guideCanvas.width / columns)));
+    }
+
+    // Top-left corner of a form this size, placed in the middle of the paper and
+    // snapped to the ruling so every digit still lands inside a square.
+    function centreOrigin(cols, rows, cell) {
+        const across = Math.floor(guideCanvas.width / cell);
+        const down = Math.floor(guideCanvas.height / cell);
+        return {
+            col: Math.max(0, Math.floor((across - cols) / 2)),
+            row: Math.max(0, Math.floor((down - rows) / 2)),
+        };
     }
 
     function resizeGuide(width, height) {
@@ -385,13 +397,13 @@
         g.fillText(ch, col * cell + cell / 2, row * cell + cell / 2);
     }
 
-    function drawCaption(g, caption, cell, col, row) {
+    function drawCaption(g, caption, cell, col, row, cols) {
         if (!caption) return;
         g.save();
-        g.font = `600 ${Math.round(cell * 0.38)}px "Segoe UI", system-ui, sans-serif`;
-        g.textAlign = 'left';
+        g.font = `600 ${Math.round(cell * 0.32)}px "Segoe UI", system-ui, sans-serif`;
+        g.textAlign = 'center';
         g.textBaseline = 'middle';
-        g.fillText(caption, col * cell + 4, row * cell + cell / 2);
+        g.fillText(caption, (col + cols / 2) * cell, row * cell + cell / 2);
         g.restore();
     }
 
@@ -411,42 +423,54 @@
 
     function drawColumnForm(g, plan, cell) {
         const widest = Math.max.apply(null, plan.operands.map(n => n.length));
-        const firstCol = 2;                      // column 1 is left to the operator
-        const firstRow = plan.caption ? 2 : 1;
-        drawCaption(g, plan.caption, cell, firstCol - 1, firstRow - 1);
+        const cols = widest + 1;                                  // one column for the operator
+        // The rows the form occupies: its caption, the operands, and the row under
+        // the rule the answer goes in — counted so the whole thing centres, not
+        // just the part already printed.
+        const rows = plan.operands.length + 1 + (plan.caption ? 1 : 0);
+        const origin = centreOrigin(cols, rows, cell);
+        const firstRow = origin.row + (plan.caption ? 1 : 0);
+        const digitCol = origin.col + 1;
+
+        drawCaption(g, plan.caption, cell, origin.col, origin.row, cols);
 
         plan.operands.forEach((n, i) => {
             const row = firstRow + i;
-            const offset = firstCol + widest - n.length;
+            const offset = digitCol + widest - n.length;
             for (let d = 0; d < n.length; d++) digitAt(g, n[d], offset + d, row, cell);
-            if (i === plan.operands.length - 1) digitAt(g, plan.glyph, firstCol - 1, row, cell);
+            if (i === plan.operands.length - 1) digitAt(g, plan.glyph, origin.col, row, cell);
         });
 
         const ruleY = (firstRow + plan.operands.length) * cell;
         g.beginPath();
-        g.moveTo((firstCol - 1) * cell, ruleY);
-        g.lineTo((firstCol + widest) * cell, ruleY);
+        g.moveTo(origin.col * cell, ruleY);
+        g.lineTo((digitCol + widest) * cell, ruleY);
         g.stroke();
     }
 
     function drawDivisionForm(g, plan, cell) {
-        const firstCol = plan.divisor.length + 2;
-        // One empty row above the bar is where the quotient goes.
-        const row = plan.caption ? 3 : 2;
-        drawCaption(g, plan.caption, cell, 1, row - 2);
+        const cols = plan.divisor.length + plan.dividend.length;
+        // The empty row above the bar is where the quotient goes; the working runs
+        // below the dividend, so leave it a row too when centring.
+        const rows = 3 + (plan.caption ? 1 : 0);
+        const origin = centreOrigin(cols, rows, cell);
+        const row = origin.row + 1 + (plan.caption ? 1 : 0);
+        const barCol = origin.col + plan.divisor.length;
+
+        drawCaption(g, plan.caption, cell, origin.col, origin.row, cols);
 
         for (let d = 0; d < plan.divisor.length; d++) {
-            digitAt(g, plan.divisor[d], firstCol - plan.divisor.length + d, row, cell);
+            digitAt(g, plan.divisor[d], origin.col + d, row, cell);
         }
         for (let d = 0; d < plan.dividend.length; d++) {
-            digitAt(g, plan.dividend[d], firstCol + d, row, cell);
+            digitAt(g, plan.dividend[d], barCol + d, row, cell);
         }
 
         g.beginPath();
-        g.moveTo(firstCol * cell, row * cell);
-        g.lineTo(firstCol * cell, (row + 1) * cell);
-        g.moveTo(firstCol * cell, row * cell);
-        g.lineTo((firstCol + plan.dividend.length) * cell, row * cell);
+        g.moveTo(barCol * cell, row * cell);
+        g.lineTo(barCol * cell, (row + 1) * cell);
+        g.moveTo(barCol * cell, row * cell);
+        g.lineTo((barCol + plan.dividend.length) * cell, row * cell);
         g.stroke();
     }
 
