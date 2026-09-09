@@ -20,6 +20,11 @@ import { definePetAnims, destroyLayers, makeLayers, petAnim, petKeys, petOf, que
 // platform is under this climber" from a walk of every body in the world into a walk of one column.
 const FLOOR_BUCKET = 256;
 
+// The order is the wire format: a climber's movement arrives as its index here, not as its name.
+// game-app/server/socket.js holds the same list, and scripts/test-game-network.mjs fails if the
+// two ever drift apart.
+const ANIMATIONS = ['idle', 'run', 'jump', 'fall', 'land', 'celebrate'];
+
 /** Whether two avatars would draw the same climber. */
 function sameLook(a,b) {
   return !!a && !!b
@@ -50,6 +55,7 @@ export class GameScene extends Phaser.Scene {
     this.launcherCooldowns = new Map();
     this.ghosts = new Map();
     this.looks = new Map();
+    this.byIndex = new Map();
     this.floorBuckets = null;
     this.groundContacts = new Map();
     this.leftContacts = new Map();
@@ -850,10 +856,40 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * One climber's row, as it comes off the wire.
+   *
+   * `[index, x, y, vx, vy, state, seq]`, where state carries the movement, which way they face and
+   * whether they have finished, in five bits. The names of these fields are not sent — the room
+   * agreed on the order instead — and the climber is a number, resolved back to who they are
+   * through the roster that arrived on 'game:looks'.
+   */
+  decodePosition(row) {
+    if (!Array.isArray(row)) return row;   // a spelt-out row, from a server not yet updated
+    const id = this.byIndex.get(row[0]);
+    if (!id) return null;                  // somebody whose roster entry has not arrived yet
+    const state = row[5] | 0;
+    return {
+      id,
+      x: row[1], y: row[2], vx: row[3], vy: row[4],
+      facing: state & 1 ? -1 : 1,
+      animation: ANIMATIONS[(state >> 1) & 7] || 'idle',
+      f: !!(state & 16),
+      seq: row[6],
+    };
+  }
+
+  /** One climber, relayed the moment they turned or jumped rather than waiting for the tick. */
+  updateGhostRow(row, myId) {
+    const decoded = this.decodePosition(row);
+    if (decoded) this.updateGhost(decoded, myId);
+  }
+
   updateGhosts(list, myId) {
     const seen = new Set();
-    for (const row of list) {
-      if (row.id === myId) continue;
+    for (const wireRow of list) {
+      const row = this.decodePosition(wireRow);
+      if (!row || row.id === myId) continue;
       seen.add(row.id);
       this.updateGhost(row,myId);
     }
@@ -932,6 +968,8 @@ export class GameScene extends Phaser.Scene {
     for (const row of list||[]) {
       if (!row?.id) continue;
       this.looks.set(row.id,{name:String(row.name??''),avatar:normaliseAvatar(row.avatar)});
+      // The number every position frame for this climber will arrive under.
+      if (Number.isInteger(row.n)) this.byIndex.set(row.n,row.id);
     }
     for (const [id,ghost] of this.ghosts) {
       const look=this.looks.get(id);

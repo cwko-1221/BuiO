@@ -1,5 +1,5 @@
 import { buildCourse, validateCourse } from './course.js?v=20260907-ipad-perf-3';
-import { GameScene } from './GameScene.js?v=20260908-net-30hz-1';
+import { GameScene } from './GameScene.js?v=20260910-wire-1';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 import { normaliseAvatar } from './avatar.js?v=20260907-side-climber-1';
 
@@ -89,7 +89,7 @@ socket.on('game:start',({seed,durationSec,startedAt,settings})=>startGame(seed,d
 // scene to give them to. Whatever came early waits here until there is.
 socket.on('game:looks',list=>{ pendingLooks=list; scene?.setLooks(list); });
 socket.on('game:positions',list=>scene?.updateGhosts(list,startMeta?.playerKey));
-socket.on('game:position',row=>scene?.updateGhost(row,startMeta?.playerKey));
+socket.on('game:position',row=>scene?.updateGhostRow(row,startMeta?.playerKey));
 socket.on('game:crumble',({id})=>scene?.triggerCrumble(id,false));
 socket.on('game:summit',({name,place})=>toast(`🏁 ${name} 第 ${place} 位登頂！`,true));
 socket.on('game:over',({leaderboard})=>showResults(leaderboard));

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { RemoteGhostState } from '../game-app/public/js/v2/RemoteGhostState.js';
 
 const moving=new RemoteGhostState({x:100,y:200,seq:1,animation:'run'},1000);
@@ -48,4 +49,37 @@ const jumper=new RemoteGhostState({x:0,y:300,seq:1,animation:'jump',vx:0,vy:-12}
 assert.ok(jumper.sample(10,16).targetY<300,'a rising jump should lead upward');
 assert.equal(jumper.isFalling(),false);
 
-console.log('Remote ghost network state passed: bounded lead, floor-clamped falls, stale-packet rejection and teleport snap.');
+// The wire agreement. A climber's movement travels as an index into this list and its position
+// as an array whose order nobody transmits, so the two sides holding different lists would not
+// fail loudly — the ghosts would simply run when they were standing still. Both are read as text
+// rather than imported, because one is CommonJS and the other a browser module.
+const listIn = (file) => {
+  const source = readFileSync(new URL(file, import.meta.url), 'utf8');
+  const match = source.match(/const ANIMATIONS = \[([^\]]*)\]/);
+  assert.ok(match, `no ANIMATIONS list found in ${file}`);
+  return match[1].split(',').map((entry) => entry.trim().replace(/^'|'$/g, '')).filter(Boolean);
+};
+const serverAnimations = listIn('../game-app/server/socket.js');
+const clientAnimations = listIn('../game-app/public/js/v2/GameScene.js');
+assert.deepEqual(clientAnimations, serverAnimations,
+  'the animation order is the wire format; the server and the browser must agree on it');
+assert.ok(serverAnimations.length <= 8, 'the packed state field leaves three bits for the movement');
+
+// And the packing itself, both ways, so the five bits keep meaning what they say.
+const pack = (animation, facing, finished) => (finished ? 16 : 0)
+  | (serverAnimations.indexOf(animation) << 1) | (facing < 0 ? 1 : 0);
+const unpack = (state) => ({
+  facing: state & 1 ? -1 : 1,
+  animation: clientAnimations[(state >> 1) & 7] || 'idle',
+  f: !!(state & 16),
+});
+for (const animation of serverAnimations) {
+  for (const facing of [1, -1]) {
+    for (const finished of [false, true]) {
+      assert.deepEqual(unpack(pack(animation, facing, finished)), { animation, facing, f: finished },
+        `${animation}/${facing}/${finished} must survive the round trip`);
+    }
+  }
+}
+
+console.log('Remote ghost network state passed: bounded lead, floor-clamped falls, stale-packet rejection, teleport snap and a wire format both sides agree on.');
