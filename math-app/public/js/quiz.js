@@ -239,16 +239,18 @@
         return Math.max(min, Math.min(max, Math.round(guideCanvas.width / columns)));
     }
 
-    // Top-left corner of a form this size, placed in the middle of the paper and
+    // The column a form this wide starts in to sit across the middle of the paper,
     // snapped to the ruling so every digit still lands inside a square.
-    function centreOrigin(cols, rows, cell) {
+    function centreColumn(cols, cell) {
         const across = Math.floor(guideCanvas.width / cell);
-        const down = Math.floor(guideCanvas.height / cell);
-        return {
-            col: Math.max(0, Math.floor((across - cols) / 2)),
-            row: Math.max(0, Math.floor((down - rows) / 2)),
-        };
+        return Math.max(0, Math.floor((across - cols) / 2));
     }
+
+    // Vertically the form is not centred: the working goes underneath it — the
+    // subtractions of a long division, a second row of partial products — and
+    // there is never enough of the page left if the form starts halfway down. It
+    // sits one row from the top instead, that row being where the carries go.
+    const HINT_TOP_ROW = 1;
 
     function resizeGuide(width, height) {
         if (!guideCanvas) return;
@@ -424,43 +426,38 @@
     function drawColumnForm(g, plan, cell) {
         const widest = Math.max.apply(null, plan.operands.map(n => n.length));
         const cols = widest + 1;                                  // one column for the operator
-        // The rows the form occupies: its caption, the operands, and the row under
-        // the rule the answer goes in — counted so the whole thing centres, not
-        // just the part already printed.
-        const rows = plan.operands.length + 1 + (plan.caption ? 1 : 0);
-        const origin = centreOrigin(cols, rows, cell);
-        const firstRow = origin.row + (plan.caption ? 1 : 0);
-        const digitCol = origin.col + 1;
+        const startCol = centreColumn(cols, cell);
+        const firstRow = HINT_TOP_ROW + (plan.caption ? 1 : 0);
+        const digitCol = startCol + 1;
 
-        drawCaption(g, plan.caption, cell, origin.col, origin.row, cols);
+        drawCaption(g, plan.caption, cell, startCol, 0, cols);
 
         plan.operands.forEach((n, i) => {
             const row = firstRow + i;
             const offset = digitCol + widest - n.length;
             for (let d = 0; d < n.length; d++) digitAt(g, n[d], offset + d, row, cell);
-            if (i === plan.operands.length - 1) digitAt(g, plan.glyph, origin.col, row, cell);
+            if (i === plan.operands.length - 1) digitAt(g, plan.glyph, startCol, row, cell);
         });
 
         const ruleY = (firstRow + plan.operands.length) * cell;
         g.beginPath();
-        g.moveTo(origin.col * cell, ruleY);
+        g.moveTo(startCol * cell, ruleY);
         g.lineTo((digitCol + widest) * cell, ruleY);
         g.stroke();
     }
 
     function drawDivisionForm(g, plan, cell) {
         const cols = plan.divisor.length + plan.dividend.length;
-        // The empty row above the bar is where the quotient goes; the working runs
-        // below the dividend, so leave it a row too when centring.
-        const rows = 3 + (plan.caption ? 1 : 0);
-        const origin = centreOrigin(cols, rows, cell);
-        const row = origin.row + 1 + (plan.caption ? 1 : 0);
-        const barCol = origin.col + plan.divisor.length;
+        const startCol = centreColumn(cols, cell);
+        // The row above the bar carries the quotient, so the top row is spent here
+        // rather than on carries. Everything below is the child's working.
+        const row = HINT_TOP_ROW + (plan.caption ? 1 : 0);
+        const barCol = startCol + plan.divisor.length;
 
-        drawCaption(g, plan.caption, cell, origin.col, origin.row, cols);
+        drawCaption(g, plan.caption, cell, startCol, 0, cols);
 
         for (let d = 0; d < plan.divisor.length; d++) {
-            digitAt(g, plan.divisor[d], origin.col + d, row, cell);
+            digitAt(g, plan.divisor[d], startCol + d, row, cell);
         }
         for (let d = 0; d < plan.dividend.length; d++) {
             digitAt(g, plan.dividend[d], barCol + d, row, cell);
