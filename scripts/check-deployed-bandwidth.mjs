@@ -57,7 +57,7 @@ async function textOf(path) {
 }
 
 /** Does the server agree to compress the socket? Answered by the handshake, before any traffic. */
-function socketExtensions() {
+function socketHandshake() {
   return new Promise((resolve) => {
     const request = client.request({
       host: target.hostname,
@@ -73,11 +73,14 @@ function socketExtensions() {
     });
     request.on('upgrade', (response, socket) => {
       socket.destroy();
-      resolve(response.headers['sec-websocket-extensions'] || '');
+      resolve({
+        extensions: response.headers['sec-websocket-extensions'] || '',
+        via: response.headers['server'] || null,
+      });
     });
-    request.on('response', () => resolve(null));
-    request.on('error', () => resolve(null));
-    request.setTimeout(20000, () => { request.destroy(); resolve(null); });
+    request.on('response', () => resolve({ extensions: null, via: null }));
+    request.on('error', () => resolve({ extensions: null, via: null }));
+    request.setTimeout(20000, () => { request.destroy(); resolve({ extensions: null, via: null }); });
     request.end();
   });
 }
@@ -108,12 +111,15 @@ record('artwork left alone',
     ? `${kb(webp.bytes)} of webp, ${webp.encoding ? `re-compressed as ${webp.encoding} (wasted CPU)` : 'sent as-is'}`
     : `${image} answered ${webp.status}`);
 
-const extensions = await socketExtensions();
+// Worth knowing who answered: a CDN in front of the app can strip this extension on its way
+// through, and then no amount of configuring the Node service will bring it back.
+const { extensions, via } = await socketHandshake();
 record('WebSocket compression',
   !!extensions && extensions.includes('permessage-deflate'),
   extensions === null
     ? 'the socket handshake did not complete'
-    : `handshake replied: ${extensions || '(no extensions — permessage-deflate is off)'}`);
+    : `handshake replied: ${extensions || '(no extensions — permessage-deflate is off)'}`
+      + (via ? ` — answered by ${via}` : ''));
 
 // ---- which client the browsers are being handed --------------------------------------------
 const main = await textOf('/game/js/v2/main.js');
@@ -141,7 +147,11 @@ const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} checks passed.`);
 if (failed.length) {
   console.log('Still to deploy: ' + failed.map((r) => r.name).join(', '));
-  console.log('A missing dependency (compression) needs npm install and a restart of the Node service;');
-  console.log('a missing marker means the browsers are still being handed the previous client.');
+  console.log('If HTTP compression passes but the WebSocket one does not, the Node service is');
+  console.log('configured correctly and something in front of it — a CDN terminating the socket —');
+  console.log('is dropping the extension; that cannot be fixed from here, so the payload itself has');
+  console.log('to be made smaller. If HTTP compression fails too, the dependency was never installed:');
+  console.log('rebuild and restart the Node service. A missing marker means the browsers are still');
+  console.log('being handed the previous client.');
 }
 process.exit(failed.length ? 1 : 0);
