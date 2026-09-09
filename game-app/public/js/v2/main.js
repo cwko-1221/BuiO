@@ -226,7 +226,15 @@ function updateHudAndNetwork(state){
 for(const type of ['gesturestart','gesturechange','gestureend']){
   document.addEventListener(type,event=>event.preventDefault(),{passive:false,capture:true});
 }
-document.addEventListener('touchmove',event=>{if(event.touches.length>1)event.preventDefault();},{passive:false,capture:true});
+document.addEventListener('touchmove',event=>{
+  if(event.touches.length>1){event.preventDefault();return;}
+  // A one-finger drag on the play surface, too. Nothing there scrolls — the game screen is fixed
+  // to the viewport and the question sheet is a centred card — so the only thing such a drag can
+  // produce is iOS's rubber band, and that is the opening for the pinch this file cannot refuse:
+  // once iOS has begun a pan it owns the sequence and stops listening to preventDefault. The
+  // controls drive themselves from pointer events, which this does not touch.
+  if(event.target?.closest?.('#gameScreen'))event.preventDefault();
+},{passive:false,capture:true});
 
 // An iPad in a keyboard case reaches the same zoom by another road: a two-finger pinch on the
 // trackpad arrives as a wheel event carrying ctrlKey, and cmd with +, -, or 0 resizes the page
