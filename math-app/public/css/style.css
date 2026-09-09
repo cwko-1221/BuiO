@@ -1182,12 +1182,49 @@ a { color: var(--accent-blue); text-decoration: none; }
     background: rgba(255, 255, 255, 0.02);
 }
 
+.sketchpad-tools {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.sketchpad-tools .btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+/* The pressed state has to read at a glance from across a classroom, so it is a
+   filled chip rather than the usual subtle ghost-button hover. */
+.sketchpad-tools .btn[aria-pressed="true"] {
+    background: rgba(139, 92, 246, 0.3);
+    border-color: rgba(139, 92, 246, 0.65);
+    color: var(--text-primary);
+}
+
+.sketchpad-surface {
+    position: relative;
+}
+
+/* The guide layer carries the grid and the 直式 hint; the child writes on the
+   transparent canvas stacked over it. */
+canvas#scratchpad-guide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+}
+
 canvas#scratchpad {
+    position: relative;
+    z-index: 1;
     width: 100%;
     height: clamp(520px, 68vh, 680px);
     cursor: crosshair;
     display: block;
     touch-action: none;
+    background: transparent;
 }
 
 /* Logo Image Styles */

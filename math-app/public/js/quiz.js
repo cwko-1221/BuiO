@@ -42,6 +42,15 @@
     const canvas = document.getElementById('scratchpad');
     const ctx = canvas ? canvas.getContext('2d') : null;
     const clearCanvasBtn = document.getElementById('clear-canvas-btn');
+
+    // The grid and the 直式 hint are printed on a layer of their own beneath the
+    // ink, so 清除草稿 takes away the child's working without taking away the paper.
+    const guideCanvas = document.getElementById('scratchpad-guide');
+    const guideCtx = guideCanvas ? guideCanvas.getContext('2d') : null;
+    const gridToggleBtn = document.getElementById('grid-toggle-btn');
+    const hintBtn = document.getElementById('hint-btn');
+    let gridOn = false;
+    let hintPlan = null;
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
@@ -123,6 +132,7 @@
                         ctx.lineWidth = 3;
                         ctx.strokeStyle = '#f1f5f9';
                     }
+                    resizeGuide(displayWidth, displayHeight);
                 }
             } else {
                 // Fallback for initial state or if hidden
@@ -136,10 +146,12 @@
                     ctx.lineWidth = 3;
                     ctx.strokeStyle = '#f1f5f9';
                 }
+                resizeGuide(canvas.width, canvas.height);
             }
         };
         
         window.addEventListener('resize', window.resizeCanvas);
+        window.addEventListener('resize', () => redrawGuide());
         window.resizeCanvas();
 
         function startDrawing(e) {
@@ -204,6 +216,263 @@
         if (clearCanvasBtn) {
             clearCanvasBtn.addEventListener('click', clearCanvas);
         }
+
+        if (gridToggleBtn) {
+            gridToggleBtn.addEventListener('click', () => setGrid(!gridOn));
+        }
+        if (hintBtn) {
+            hintBtn.addEventListener('click', toggleHint);
+        }
+    }
+
+    // ========================================
+    // Guide layer: squared paper + 直式 hint
+    // ========================================
+    // Big enough to write a digit into with a finger, and still narrow enough that
+    // a phone fits a five-digit sum plus its operator column.
+    function cellSize() {
+        const min = 40;
+        const max = 60;
+        const columns = 15;
+        if (!guideCanvas) return min;
+        return Math.max(min, Math.min(max, Math.round(guideCanvas.width / columns)));
+    }
+
+    function resizeGuide(width, height) {
+        if (!guideCanvas) return;
+        if (guideCanvas.width !== width || guideCanvas.height !== height) {
+            guideCanvas.width = width;
+            guideCanvas.height = height;
+        }
+        redrawGuide();
+    }
+
+    // A square only looks square when the bitmap matches the box it is painted
+    // into. resizeCanvas can leave the two apart — the sketchpad is laid out only
+    // once the quiz state is shown, and the single frame that switch schedules can
+    // still measure a hidden, zero-sized box and fall back to 800x600 — so the guide
+    // measures itself every time it is drawn.
+    function syncGuideToBox() {
+        const width = guideCanvas.clientWidth;
+        const height = guideCanvas.clientHeight;
+        if (width > 0 && height > 0 && (guideCanvas.width !== width || guideCanvas.height !== height)) {
+            guideCanvas.width = width;
+            guideCanvas.height = height;
+        }
+    }
+
+    function redrawGuide(retriesLeft) {
+        if (!guideCtx || !guideCanvas) return;
+        // The sketchpad can be measured mid-layout, before it has been given a
+        // width; drawing then would stretch every square. Come back on a later
+        // frame, but only a few times — on the results screen the pad is hidden
+        // for good and there is nothing to wait for.
+        if (guideCanvas.clientWidth === 0) {
+            const left = retriesLeft === undefined ? 5 : retriesLeft;
+            if (left > 0) requestAnimationFrame(() => redrawGuide(left - 1));
+            return;
+        }
+        syncGuideToBox();
+        guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+        const cell = cellSize();
+        if (gridOn) drawGrid(cell);
+        if (hintPlan) drawHint(hintPlan, cell);
+    }
+
+    function drawGrid(cell) {
+        const g = guideCtx;
+        g.save();
+        g.lineWidth = 1;
+        g.strokeStyle = 'rgba(148, 163, 184, 0.28)';
+        g.beginPath();
+        // Half-pixel offsets keep the 1px rules crisp instead of blurring across two rows.
+        for (let x = cell; x < guideCanvas.width; x += cell) {
+            g.moveTo(Math.round(x) + 0.5, 0);
+            g.lineTo(Math.round(x) + 0.5, guideCanvas.height);
+        }
+        for (let y = cell; y < guideCanvas.height; y += cell) {
+            g.moveTo(0, Math.round(y) + 0.5);
+            g.lineTo(guideCanvas.width, Math.round(y) + 0.5);
+        }
+        g.stroke();
+        g.restore();
+    }
+
+    function setGrid(on) {
+        gridOn = on;
+        if (gridToggleBtn) gridToggleBtn.setAttribute('aria-pressed', String(on));
+        redrawGuide();
+    }
+
+    // ---- Reading the question back as a 直式 ----
+    // Question text is plain infix — "23 + 45", "(5 + 3) × 4", "247 ÷ 3 (只寫商)".
+    function tokenizeQuestion(text) {
+        const cleaned = String(text || '')
+            .replace(/[（(]\s*只寫商\s*[)）]/g, ' ')
+            .replace(/×/g, '*')
+            .replace(/÷/g, '/')
+            .replace(/[−－]/g, '-')
+            .replace(/[（]/g, '(')
+            .replace(/[）]/g, ')');
+        const tokens = [];
+        const re = /\s*(\d+|[+\-*/()])/g;
+        let m;
+        let consumed = 0;
+        while ((m = re.exec(cleaned)) !== null) {
+            if (m.index !== consumed) return null;   // something we don't understand
+            tokens.push(m[1]);
+            consumed = re.lastIndex;
+        }
+        if (cleaned.slice(consumed).trim() !== '') return null;
+        return tokens.length ? tokens : null;
+    }
+
+    // The one operation a child performs first, given a flat run of numbers.
+    // A chain of additions stays whole because that is how column addition is
+    // taught; everything else collapses to the leftmost highest-precedence pair.
+    function firstStepOfRun(tokens) {
+        const nums = [];
+        const ops = [];
+        for (let i = 0; i < tokens.length; i++) {
+            if (i % 2 === 0) {
+                if (!/^\d+$/.test(tokens[i])) return null;
+                nums.push(tokens[i]);
+            } else {
+                if (!/^[+\-*/]$/.test(tokens[i])) return null;
+                ops.push(tokens[i]);
+            }
+        }
+        if (nums.length < 2 || nums.length !== ops.length + 1) return null;
+        if (ops.every(op => op === '+')) return { op: '+', operands: nums, coversRun: true };
+        let at = ops.findIndex(op => op === '*' || op === '/');
+        if (at < 0) at = 0;
+        return { op: ops[at], operands: [nums[at], nums[at + 1]], coversRun: ops.length === 1 };
+    }
+
+    function firstStep(tokens) {
+        // Innermost bracket first — that is the part the child has to reach for.
+        let open = -1;
+        for (let i = 0; i < tokens.length; i++) {
+            if (tokens[i] === '(') open = i;
+            else if (tokens[i] === ')' && open >= 0) {
+                const step = firstStepOfRun(tokens.slice(open + 1, i));
+                return step && Object.assign(step, { coversRun: false });
+            }
+        }
+        return firstStepOfRun(tokens);
+    }
+
+    const OP_GLYPH = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+
+    function planVerticalForm(text) {
+        const tokens = tokenizeQuestion(text);
+        const step = tokens && firstStep(tokens);
+        if (!step) return null;
+        const glyph = OP_GLYPH[step.op];
+        const caption = step.coversRun ? '' : '先算 ' + step.operands.join(' ' + glyph + ' ');
+        if (step.op === '/') {
+            return { kind: 'division', dividend: step.operands[0], divisor: step.operands[1], caption };
+        }
+        return { kind: 'column', operands: step.operands, glyph, caption };
+    }
+
+    // ---- Printing the 直式 into the squares ----
+    const HINT_INK = '#fbbf24';
+
+    function hintFont(cell) { return `700 ${Math.round(cell * 0.6)}px "Segoe UI", system-ui, sans-serif`; }
+
+    function digitAt(g, ch, col, row, cell) {
+        g.fillText(ch, col * cell + cell / 2, row * cell + cell / 2);
+    }
+
+    function drawCaption(g, caption, cell, col, row) {
+        if (!caption) return;
+        g.save();
+        g.font = `600 ${Math.round(cell * 0.38)}px "Segoe UI", system-ui, sans-serif`;
+        g.textAlign = 'left';
+        g.textBaseline = 'middle';
+        g.fillText(caption, col * cell + 4, row * cell + cell / 2);
+        g.restore();
+    }
+
+    function drawHint(plan, cell) {
+        const g = guideCtx;
+        g.save();
+        g.fillStyle = HINT_INK;
+        g.strokeStyle = HINT_INK;
+        g.lineWidth = 2;
+        g.font = hintFont(cell);
+        g.textAlign = 'center';
+        g.textBaseline = 'middle';
+        if (plan.kind === 'division') drawDivisionForm(g, plan, cell);
+        else drawColumnForm(g, plan, cell);
+        g.restore();
+    }
+
+    function drawColumnForm(g, plan, cell) {
+        const widest = Math.max.apply(null, plan.operands.map(n => n.length));
+        const firstCol = 2;                      // column 1 is left to the operator
+        const firstRow = plan.caption ? 2 : 1;
+        drawCaption(g, plan.caption, cell, firstCol - 1, firstRow - 1);
+
+        plan.operands.forEach((n, i) => {
+            const row = firstRow + i;
+            const offset = firstCol + widest - n.length;
+            for (let d = 0; d < n.length; d++) digitAt(g, n[d], offset + d, row, cell);
+            if (i === plan.operands.length - 1) digitAt(g, plan.glyph, firstCol - 1, row, cell);
+        });
+
+        const ruleY = (firstRow + plan.operands.length) * cell;
+        g.beginPath();
+        g.moveTo((firstCol - 1) * cell, ruleY);
+        g.lineTo((firstCol + widest) * cell, ruleY);
+        g.stroke();
+    }
+
+    function drawDivisionForm(g, plan, cell) {
+        const firstCol = plan.divisor.length + 2;
+        // One empty row above the bar is where the quotient goes.
+        const row = plan.caption ? 3 : 2;
+        drawCaption(g, plan.caption, cell, 1, row - 2);
+
+        for (let d = 0; d < plan.divisor.length; d++) {
+            digitAt(g, plan.divisor[d], firstCol - plan.divisor.length + d, row, cell);
+        }
+        for (let d = 0; d < plan.dividend.length; d++) {
+            digitAt(g, plan.dividend[d], firstCol + d, row, cell);
+        }
+
+        g.beginPath();
+        g.moveTo(firstCol * cell, row * cell);
+        g.lineTo(firstCol * cell, (row + 1) * cell);
+        g.moveTo(firstCol * cell, row * cell);
+        g.lineTo((firstCol + plan.dividend.length) * cell, row * cell);
+        g.stroke();
+    }
+
+    function toggleHint() {
+        if (hintPlan) { clearHint(); return; }
+        const q = questions[currentIndex];
+        const plan = q && planVerticalForm(q.questionText);
+        if (!plan) {
+            if (hintBtn) {
+                const was = hintBtn.textContent;
+                hintBtn.textContent = '這題不用直式';
+                setTimeout(() => { hintBtn.textContent = was; }, 1600);
+            }
+            return;
+        }
+        hintPlan = plan;
+        if (hintBtn) hintBtn.setAttribute('aria-pressed', 'true');
+        // The hint is written in squares, so bring the squares out with it.
+        if (!gridOn) setGrid(true);
+        else redrawGuide();
+    }
+
+    function clearHint() {
+        hintPlan = null;
+        if (hintBtn) hintBtn.setAttribute('aria-pressed', 'false');
+        redrawGuide();
     }
 
     function clearCanvas() {
@@ -339,8 +608,10 @@
         // Focus input
         setTimeout(() => answerInput.focus(), 100);
 
-        // Clear canvas for new question
+        // Clear canvas for new question. The grid is a preference and stays put;
+        // the hint belongs to the question that has just gone.
         clearCanvas();
+        clearHint();
 
         // Restart timer
         startTimer();

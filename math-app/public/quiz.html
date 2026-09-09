@@ -73,9 +73,18 @@
                 <div class="sketchpad-container glass-card-static">
                     <div class="sketchpad-header">
                         <span style="color:var(--text-muted); font-size:0.9rem;">📝 計算紙 (用手指或滑鼠書寫)</span>
-                        <button class="btn btn-ghost" id="clear-canvas-btn" style="padding: 6px 12px; font-size: 0.8rem;">🗑️ 清除草稿</button>
+                        <div class="sketchpad-tools">
+                            <button class="btn btn-ghost" id="grid-toggle-btn" aria-pressed="false">▦ 方格</button>
+                            <button class="btn btn-ghost" id="hint-btn">💡 直式提示</button>
+                            <button class="btn btn-ghost" id="clear-canvas-btn">🗑️ 清除草稿</button>
+                        </div>
                     </div>
-                    <canvas id="scratchpad"></canvas>
+                    <!-- The grid and the 直式 hint live on their own layer, so 清除草稿 wipes the
+                         child's working without taking the paper away with it. -->
+                    <div class="sketchpad-surface">
+                        <canvas id="scratchpad-guide" aria-hidden="true"></canvas>
+                        <canvas id="scratchpad"></canvas>
+                    </div>
                 </div>
             </div>
 
