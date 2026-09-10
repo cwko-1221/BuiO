@@ -56,6 +56,14 @@ let EDGE = 14;
 /** A piece this much along the outline and this thin is the creature, not something worn. */
 const ON_EDGE = 0.75;
 let THIN = 22;
+/**
+ * How wide a break in the accessory's own rim still counts as closed, in pixels of the sheet.
+ *
+ * The sheet is about six times the width the atlas cell will be, so a break narrower than six
+ * source pixels is not there at all once the frame is drawn. Sealing by that much is what lets a
+ * hairline gap in a goggle rim be recognised as the enclosure it visibly is.
+ */
+let SEAL = 8;
 
 const raw = async (file) => {
   const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
@@ -195,6 +203,7 @@ function sweep(mask, width, height, radius, keep) {
  * difference between the two pictures falls under the mark the mask grows by, and the mask steps
  * over those pixels. What is left is a gap enclosed by accessory on every side, which the game
  * draws the floor through. A gap that is not enclosed is not a fault: it is the mask's outline.
+ *
  */
 function fillGaps(mask, width, height, largest) {
   const count = width * height;
@@ -244,6 +253,46 @@ function fillGaps(mask, width, height, largest) {
     filled += 1;
   }
   return { filled, left };
+}
+
+/**
+ * Close what the floor would otherwise show through.
+ *
+ * fillGaps works on gaps the mask encloses exactly, and at this size a rim can be one pixel short
+ * of closing while still reading as closed once the sheet is a hundredth of the size — a goggle
+ * lens that hangs off the side of the head came through as a hole in the room and as nothing at
+ * all here. So enclosure is asked of a mask grown a little, which seals those hairline breaks, and
+ * what is enclosed by it is closed wherever the creature is not standing behind it. Over the
+ * creature nothing is closed: that is a lens, and the eye behind it has to show.
+ *
+ * Closing is safe past the accessory as well as under it. The layer takes the redraw's pixels
+ * where the mask stands, so closing over ground the redraw left empty adds nothing to draw.
+ */
+function sealHoles(mask, body, width, height, radius) {
+  const count = width * height;
+  const sealed = growBy(mask, width, height, radius);
+  const outside = new Uint8Array(count);
+  const queue = new Int32Array(count);
+  let tail = 0;
+  const reach = (p) => { if (!outside[p] && !sealed[p]) { outside[p] = 1; queue[tail++] = p; } };
+  for (let x = 0; x < width; x += 1) { reach(x); reach((height - 1) * width + x); }
+  for (let y = 0; y < height; y += 1) { reach(y * width); reach(y * width + width - 1); }
+  for (let head = 0; head < tail; head += 1) {
+    const p = queue[head];
+    const x = p % width;
+    const y = (p - x) / width;
+    if (x > 0) reach(p - 1);
+    if (x + 1 < width) reach(p + 1);
+    if (y > 0) reach(p - width);
+    if (y + 1 < height) reach(p + width);
+  }
+  let sealedPx = 0;
+  for (let at = 0; at < count; at += 1) {
+    if (mask[at] || body[at] || outside[at]) continue;
+    mask[at] = 1;
+    sealedPx += 1;
+  }
+  return sealedPx;
 }
 
 const shrinkBy = (mask, width, height, radius) => sweep(mask, width, height, radius, 'all');
@@ -412,6 +461,7 @@ REACH = option('reach', OPENING);
 FILL = option('fill', FILL);
 THIN = option('thin', THIN);
 EDGE = option('edge', EDGE);
+SEAL = option('seal', SEAL);
 // Given in pixels of the sheet, which is what every other size here is given in, rather than as the
 // fraction it is held as.
 KEEP_PIXELS = option('keep', 0) > 0 ? option('keep', 0) : null;
@@ -444,9 +494,12 @@ for (let at = 0; at < count; at += 1) body[at] = base.data[at * 4 + 3] > 32 ? 1 
 const outline = dropOutline(mask, body, width, height);
 // Small gaps inside the mask are closed and large ones are not: a pair of spectacles is a rim
 // around a hole, and through that hole the creature's own eye has to show, whereas a gap in the
-// middle of a cape is a hole the floor shows through.
-const { filled, left: kept } = fillGaps(mask, width, height, FILL);
+// middle of a cape is a hole the floor shows through. A large gap with no creature behind it is
+// the second of those however large it is, so the body says which.
+const { filled, left: kept } = fillGaps(mask, width, height, FILL, body);
 const { kept: regions, dropped } = dropSpecks(mask, width, height, KEEP_PIXELS ?? KEEP_ABOVE * width * height);
+// Last, because everything above can leave one: a place the room would draw the floor through.
+const sealedPx = sealHoles(mask, body, width, height, SEAL);
 
 let masked = 0;
 for (let at = 0; at < count; at += 1) if (mask[at]) masked += 1;
@@ -489,7 +542,8 @@ const share = (masked / count) * 100;
 console.log(`seed ${SEED} spread ${SPREAD} solid ${SOLID} opening ${OPENING}`);
 console.log(`mask: ${regions} region${regions === 1 ? '' : 's'} kept, ${thin.toLocaleString()} outlines and ${dropped.toLocaleString()} specks dropped, ${masked.toLocaleString()} pixels (${share.toFixed(2)}% of the sheet)`);
 console.log(`outline: ${outline.dropped.toLocaleString()} pieces of the creature's own edge removed, ${outline.pixels.toLocaleString()} pixels`);
-console.log(`gaps: ${filled.toLocaleString()} closed, ${kept.toLocaleString()} left open as deliberate`);
+console.log(`gaps: ${filled.toLocaleString()} closed, ${kept.toLocaleString()} left open as deliberate`
+  + `, ${sealedPx.toLocaleString()} px of see-through sealed`);
 console.log(wrongInside
   ? `FAILED: ${wrongInside} masked pixels are not the redraw`
   : 'inside the mask the dressed pose is the redraw, pixel for pixel');
