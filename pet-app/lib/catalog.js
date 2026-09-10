@@ -240,7 +240,9 @@ const PET_LIBRARY = [
   }),
   motion: Array.from({ length: 4 }, (_, index) => FRAME_MOTION[`${id}-${index + 1}`] || null),
 }));
-const RELEASED_PET_IDS = new Set(['starpatch-cat', 'cloud-ear-dog', 'pudding-pig']);
+const RELEASED_PET_IDS = new Set([
+  'starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster',
+]);
 const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
 
 /**
@@ -258,7 +260,9 @@ const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
  * jewellery. Only its flower crown is missing, and that is the sheet's fault rather than the
  * mask's: the crown came back as a scribble.
  */
-const WEARABLE_PET_IDS = new Set(['starpatch-cat', 'cloud-ear-dog', 'pudding-pig']);
+const WEARABLE_PET_IDS = new Set([
+  'starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster',
+]);
 
 /**
  * The rooms whose artwork has been checked against the grid, which is every room the importer has

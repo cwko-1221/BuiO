@@ -106,6 +106,122 @@
       "slot": "neck",
       "patch": "/pet/assets/art/outfit-atlases/cloud-ear-dog-1--neck-16--patch-7697aa4c76.webp"
     },
+    "crescent-rabbit:1:face-01": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-01--patch-65a6793e84.webp"
+    },
+    "crescent-rabbit:1:face-02": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-02--patch-35ecc6ca61.webp"
+    },
+    "crescent-rabbit:1:face-03": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-03--patch-a65f625d66.webp"
+    },
+    "crescent-rabbit:1:face-04": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-04--patch-48af7209f3.webp"
+    },
+    "crescent-rabbit:1:face-05": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-05--patch-9dfecaf047.webp"
+    },
+    "crescent-rabbit:1:face-06": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-06--patch-d0bb01d90d.webp"
+    },
+    "crescent-rabbit:1:face-07": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-07--patch-ab3d1882e0.webp"
+    },
+    "crescent-rabbit:1:face-08": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-08--patch-85b6687005.webp"
+    },
+    "crescent-rabbit:1:face-09": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-09--patch-6e05acbacd.webp"
+    },
+    "crescent-rabbit:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-11--patch-b0e53c3c01.webp"
+    },
+    "crescent-rabbit:1:face-12": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-12--patch-f9adda1b2e.webp"
+    },
+    "crescent-rabbit:1:head-03": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--head-03--patch-1b6eb3d1ba.webp"
+    },
+    "crescent-rabbit:1:head-04": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--head-04--patch-9b46687e76.webp"
+    },
+    "crescent-rabbit:1:neck-01": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-01--patch-5815be81aa.webp"
+    },
+    "crescent-rabbit:1:neck-02": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-02--patch-27b784c550.webp"
+    },
+    "crescent-rabbit:1:neck-03": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-03--patch-d1da5d787b.webp"
+    },
+    "crescent-rabbit:1:neck-04": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-04--patch-dcd5421760.webp"
+    },
+    "crescent-rabbit:1:neck-05": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-05--patch-b5faba3bad.webp"
+    },
+    "crescent-rabbit:1:neck-06": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-06--patch-a59a38b3a7.webp"
+    },
+    "crescent-rabbit:1:neck-07": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-07--patch-aa412a9f4e.webp"
+    },
+    "crescent-rabbit:1:neck-08": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-08--patch-56d53d342c.webp"
+    },
+    "crescent-rabbit:1:neck-09": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-09--patch-0e12b64c97.webp"
+    },
+    "crescent-rabbit:1:neck-10": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-10--patch-d1357cab53.webp"
+    },
+    "crescent-rabbit:1:neck-11": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-11--patch-aa244d2862.webp"
+    },
+    "crescent-rabbit:1:neck-12": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-12--patch-e83ba9f391.webp"
+    },
+    "crescent-rabbit:1:neck-13": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-13--patch-8d28249094.webp"
+    },
+    "crescent-rabbit:1:neck-14": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-14--patch-8029b14220.webp"
+    },
+    "crescent-rabbit:1:neck-15": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-15--patch-f1692a3592.webp"
+    },
+    "crescent-rabbit:1:neck-16": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-16--patch-9756c2b0f7.webp"
+    },
     "pudding-pig:1:face-01": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-01--patch-294f4911b2.webp"
@@ -217,6 +333,122 @@
     "pudding-pig:1:neck-16": {
       "slot": "neck",
       "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--neck-16--patch-0088ffe8c4.webp"
+    },
+    "spark-hamster:1:face-01": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-01--patch-a4491c2792.webp"
+    },
+    "spark-hamster:1:face-02": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-02--patch-3cdc3f5fcf.webp"
+    },
+    "spark-hamster:1:face-03": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-03--patch-b5e422d539.webp"
+    },
+    "spark-hamster:1:face-04": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-04--patch-f726f5a20b.webp"
+    },
+    "spark-hamster:1:face-05": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-05--patch-d03b2b86fa.webp"
+    },
+    "spark-hamster:1:face-06": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-06--patch-a83215e749.webp"
+    },
+    "spark-hamster:1:face-07": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-07--patch-a1759d140d.webp"
+    },
+    "spark-hamster:1:face-08": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-08--patch-0a9e65893b.webp"
+    },
+    "spark-hamster:1:face-09": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-09--patch-8c46861f6c.webp"
+    },
+    "spark-hamster:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-11--patch-d23688e994.webp"
+    },
+    "spark-hamster:1:face-12": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-12--patch-7ad8c0cdd9.webp"
+    },
+    "spark-hamster:1:head-03": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--head-03--patch-56a5ee9c32.webp"
+    },
+    "spark-hamster:1:head-04": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--head-04--patch-541eaaaa67.webp"
+    },
+    "spark-hamster:1:neck-01": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-01--patch-0d8f56e44f.webp"
+    },
+    "spark-hamster:1:neck-02": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-02--patch-a1b406d445.webp"
+    },
+    "spark-hamster:1:neck-03": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-03--patch-cf3c01cb9d.webp"
+    },
+    "spark-hamster:1:neck-04": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-04--patch-5bfedea9c4.webp"
+    },
+    "spark-hamster:1:neck-05": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-05--patch-e73be75469.webp"
+    },
+    "spark-hamster:1:neck-06": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-06--patch-5f488217a1.webp"
+    },
+    "spark-hamster:1:neck-07": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-07--patch-ba044baf8d.webp"
+    },
+    "spark-hamster:1:neck-08": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-08--patch-299abc1cfb.webp"
+    },
+    "spark-hamster:1:neck-09": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-09--patch-b404155508.webp"
+    },
+    "spark-hamster:1:neck-10": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-10--patch-5c390b61b5.webp"
+    },
+    "spark-hamster:1:neck-11": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-11--patch-d3cda544cc.webp"
+    },
+    "spark-hamster:1:neck-12": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-12--patch-75dce4fd58.webp"
+    },
+    "spark-hamster:1:neck-13": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-13--patch-c260d9d6a1.webp"
+    },
+    "spark-hamster:1:neck-14": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-14--patch-73ae6dd770.webp"
+    },
+    "spark-hamster:1:neck-15": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-15--patch-3f083a8be0.webp"
+    },
+    "spark-hamster:1:neck-16": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--neck-16--patch-d5ee1da945.webp"
     },
     "starpatch-cat:1:face-01": {
       "slot": "face",
