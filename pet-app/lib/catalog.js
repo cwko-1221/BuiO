@@ -242,7 +242,7 @@ const PET_LIBRARY = [
 }));
 const RELEASED_PET_IDS = new Set([
   'starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster',
-  'mossback-turtle',
+  'mossback-turtle', 'leaftail-fox', 'thunderhorn-goat', 'bubble-otter', 'snowfeather-penguin', 'coral-seal',
 ]);
 const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
 
@@ -263,7 +263,7 @@ const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
  */
 const WEARABLE_PET_IDS = new Set([
   'starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster',
-  'mossback-turtle',
+  'mossback-turtle', 'leaftail-fox', 'thunderhorn-goat', 'bubble-otter', 'snowfeather-penguin', 'coral-seal',
 ]);
 
 /**

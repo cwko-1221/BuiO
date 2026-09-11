@@ -23,12 +23,12 @@ const repo = require('../pet-app/repositories/pet.repo.js');
 const store = require('../db/jsonStore.js');
 const pass = (label) => console.log(`✓ ${label}`);
 
-assert.deepEqual(catalog.pets.map((pet)=>pet.id),['starpatch-cat','cloud-ear-dog','pudding-pig','crescent-rabbit','mossback-turtle','spark-hamster']);
-assert.equal(catalog.pets.flatMap((pet)=>pet.art).length,24);
+assert.deepEqual(catalog.pets.map((pet)=>pet.id),['starpatch-cat','cloud-ear-dog','pudding-pig','crescent-rabbit','bubble-otter','mossback-turtle','spark-hamster','leaftail-fox','snowfeather-penguin','thunderhorn-goat','coral-seal']);
+assert.equal(catalog.pets.flatMap((pet)=>pet.art).length,44);
 assert.equal(catalog.rooms.length,10);
 assert.equal(catalog.foods.length,12);
 assert.equal(catalog.wearables.length,45); assert.equal(catalog.furniture.length,100);
-assert.equal(new Set(catalog.pets.map((pet)=>pet.id)).size,6);
+assert.equal(new Set(catalog.pets.map((pet)=>pet.id)).size,11);
 assert.deepEqual(catalog.evolutionThresholds,[0,400,1100,2100]);
 assert.deepEqual(catalog.egg.odds,{common:1,rare:0,epic:0});
 assert.equal(catalog.egg.pityAt,0);

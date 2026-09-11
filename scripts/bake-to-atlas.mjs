@@ -89,16 +89,20 @@ function dropFloating(frame, pet, cell, share) {
     seen[start] = 1;
     const members = [start];
     let touches = false;
+    let atEdge = false;
     while (queue.length) {
       const at = queue.pop();
       if (near[at]) touches = true;
       const x = at % cell, y = (at - x) / cell;
+      if (x === 0 || y === 0 || x === cell - 1 || y === cell - 1) atEdge = true;
       for (const next of [x > 0 ? at - 1 : -1, x + 1 < cell ? at + 1 : -1, y > 0 ? at - cell : -1, y + 1 < cell ? at + cell : -1]) {
         if (next < 0 || seen[next] || frame[next * 4 + 3] <= 16) continue;
         seen[next] = 1; queue.push(next); members.push(next);
       }
     }
-    if (touches || members.length > total * share) continue;
+    // A large piece alone in the air is left alone — unless it runs into the edge of the frame.
+    // Nothing worn is cut off by the cell's border; a piece that is has come in from the cut.
+    if (touches || (members.length > Math.max(total * share, FLOATING_MIN) && !atEdge)) continue;
     for (const at of members) frame[at * 4 + 3] = 0;
     dropped += members.length;
   }
@@ -169,6 +173,11 @@ let worn = 0;
 let floated = 0;
 /** A piece alone in the air larger than this share of the frame is left for a person to judge. */
 const FLOATING_SHARE = 0.2;
+/**
+ * ...and larger than this in pixels. Measured only against the frame's own patch, a crumb beside a
+ * party nose — the whole patch a couple of hundred pixels — counted as a third of the accessory.
+ */
+const FLOATING_MIN = 120;
 for (let index = 0; index < cells.length; index += 1) {
   const { bounds } = cells[index];
   if (!bounds || SKIP.has(index)) continue;
