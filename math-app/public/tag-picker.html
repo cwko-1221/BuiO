@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>選擇題型 ✦ 杯澳四則特訓</title>
-    <link rel="stylesheet" href="/math-app/css/style.css">
+    <title data-i18n="m.pickerTitle">選擇題型 ✦ 杯澳四則特訓</title>
+    <script src="/shared/i18n.js?v=20260910-1"></script>
+    <script src="/shared/i18n/math.js?v=20260910-1"></script>
+    <link rel="stylesheet" href="/math-app/css/style.css?v=20260910-i18n-1">
     <style>
         body { min-height: 100vh; }
         .picker-wrap { max-width: 960px; margin: 0 auto; padding: 24px 20px 60px; }
@@ -37,16 +39,16 @@
 <body>
     <div class="picker-wrap">
         <header class="picker-topbar">
-            <a class="btn-back" href="/math">← 返回</a>
-            <h1>🎯 選擇題型練習</h1>
+            <a class="btn-back" href="/math" data-i18n="m.pickerBack">← 返回</a>
+            <h1 data-i18n="m.pickerHeading">🎯 選擇題型練習</h1>
         </header>
 
         <section class="picker-hero">
-            <h2>選一個題型開始練習</h2>
-            <p>系統會生成 10 條該題型的題目，答完會納入你的統計。</p>
+            <h2 data-i18n="m.pickerLead1">選一個題型開始練習</h2>
+            <p data-i18n="m.pickerLead2">系統會生成 10 條該題型的題目，答完會納入你的統計。</p>
         </section>
 
-        <div id="content"><p class="picker-msg">載入中…</p></div>
+        <div id="content"><p class="picker-msg" data-i18n="m.loadingDots">載入中…</p></div>
     </div>
 
     <script>
@@ -61,22 +63,24 @@
             const st = await stRes.json();
             if (!st.done) {
                 content.innerHTML =
-                    `<div class="picker-msg">🔒 需先完成今天的隨機練習（${st.todayCount}/${st.need}）。<br><br>`
-                    + `<a class="btn-back" href="/math">← 回主頁完成隨機練習</a></div>`;
+                    `<div class="picker-msg">${BuiI18n.t('m.pickerLocked', { count: st.todayCount, need: st.need })}`
+                    + `<a class="btn-back" href="/math">${escapeHtml(BuiI18n.t('m.pickerBackDaily'))}</a></div>`;
                 return;
             }
 
             const tagRes = await fetch('/api/quiz/grade-tags', { credentials: 'include' });
             const tagData = await tagRes.json();
-            if (!tagData.success) throw new Error('無法載入題型清單');
+            if (!tagData.success) throw new Error(BuiI18n.t('m.pickerNoTags'));
 
             const byCategory = new Map();
             for (const t of tagData.tags) {
-                const cat = t.category || '其他';
+                const cat = t.category || BuiI18n.t('m.catOther');
                 if (!byCategory.has(cat)) byCategory.set(cat, []);
                 byCategory.get(cat).push(t);
             }
-            const catOrder = ['加法', '減法', '乘法', '除法', '混合', '其他'];
+            // Categories arrive already translated from the server, so the display
+            // order is built from the same dictionary rather than Chinese literals.
+            const catOrder = ['m.catAdd','m.catSub','m.catMul','m.catDiv','m.catMix','m.catOther'].map(k => BuiI18n.t(k));
             const cats = [...byCategory.keys()].sort((a, b) => {
                 const ai = catOrder.indexOf(a), bi = catOrder.indexOf(b);
                 return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
@@ -87,7 +91,7 @@
                 const section = document.createElement('div');
                 section.className = 'cat-section';
                 const list = byCategory.get(cat);
-                let inner = `<h3 class="cat-heading">${cat}（${list.length}）</h3><div class="tag-grid">`;
+                let inner = `<h3 class="cat-heading">${escapeHtml(BuiI18n.t('m.pickerCatHead', { cat, count: list.length }))}</h3><div class="tag-grid">`;
                 for (const t of list) {
                     inner += `<a class="tag-btn" href="/quiz.html?tag=${encodeURIComponent(t.tag)}">`
                         + `<span>${escapeHtml(t.tagName)}</span>`
@@ -98,7 +102,7 @@
                 content.appendChild(section);
             }
         } catch (e) {
-            content.innerHTML = `<div class="picker-msg">載入失敗：${e.message}</div>`;
+            content.innerHTML = `<div class="picker-msg">${escapeHtml(BuiI18n.t('m.pickerFailed', { message: e.message }))}</div>`;
         }
     })();
 

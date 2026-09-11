@@ -12,7 +12,7 @@ export class FallbackRenderer {
     this.stage = document.createElement('div');
     this.stage.className = 'fallback-stage';
     this.stage.setAttribute('role', 'img');
-    this.stage.setAttribute('aria-label', '簡化版科學實驗場景');
+    this.stage.setAttribute('aria-label', window.BuiI18n?.sceneLabel?.('簡化版科學實驗場景') ?? '簡化版科學實驗場景');
     this.canvas.after(this.stage);
     this.loadCatalog();
   }

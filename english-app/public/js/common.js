@@ -2,6 +2,8 @@
 (function () {
   'use strict';
 
+  const t = window.BuiI18n.t;
+
   async function api(path, opts = {}) {
     const isForm = opts.body instanceof FormData;
     const headers = { Accept: 'application/json', ...(opts.headers || {}) };
@@ -64,9 +66,9 @@
 
   function renderTopbar({ title, user, backUrl = '/' }) {
     return el('header', { class: 'topbar' },
-      el('button', { class: 'btn-back', onclick: () => location.href = backUrl }, '← 返回'),
+      el('button', { class: 'btn-back', onclick: () => location.href = backUrl }, t('e.back')),
       el('h1', {}, title),
-      user ? el('span', { class: 'user' }, `${user.name}（${user.role === 'teacher' ? '教師' : '學生'}）`) : null,
+      user ? el('span', { class: 'user' }, t('e.userTag', { name: user.name, role: t(user.role === 'teacher' ? 'e.roleTeacher' : 'e.roleStudent') })) : null,
     );
   }
 

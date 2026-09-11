@@ -1,4 +1,17 @@
+const serverI18n = require('../../shared/server-i18n');
+
 module.exports = function(io, app) {
+  // A room holds students who may have chosen different languages, so the
+  // notice is rendered per socket rather than broadcast as one string.
+  const notifyRoom = (roomId, message) => {
+    for (const socket of io.sockets.adapter.rooms.get(roomId) || []) {
+      const client = io.sockets.sockets.get(socket);
+      if (!client) continue;
+      const lang = serverI18n.resolveLang({ headers: client.handshake.headers });
+      client.emit('error', lang === 'en-US' ? serverI18n.translate(message) : message);
+    }
+  };
+
   const rooms = new Map();
 
   function getRoom(roomId) {
@@ -46,7 +59,7 @@ module.exports = function(io, app) {
     if (roomId) {
       rooms.delete(roomId);
       io.to(roomId).emit('clear-board');
-      io.to(roomId).emit('error', '老師已結束課堂');
+      notifyRoom(roomId, '老師已結束課堂');
     }
     res.json({ success: true });
   });
@@ -159,7 +172,7 @@ module.exports = function(io, app) {
         // there is no active session anymore.
         rooms.delete(roomId);
         io.to(roomId).emit('clear-board');
-        io.to(roomId).emit('error', '老師已結束課堂');
+        notifyRoom(roomId, '老師已結束課堂');
         return;
       }
 

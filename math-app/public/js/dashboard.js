@@ -6,6 +6,9 @@
 (function() {
     'use strict';
 
+    // The shared runtime loads blocking in <head>, so the dictionary is ready.
+    const t = window.BuiI18n.t;
+
     // ========================================
     // State
     // ========================================
@@ -14,10 +17,10 @@
     let radarChartObjs = {};             // { bronze: Chart, silver: Chart, ... }
     let timeChartObj = null;
     let tierOrder = [                    // fallback; refreshed from /api/stats/tiers
-        { id: 'bronze',  name: '銅' },
-        { id: 'silver',  name: '銀' },
-        { id: 'gold',    name: '金' },
-        { id: 'diamond', name: '鑽' },
+        { id: 'bronze',  name: t('m.tierBronze') },
+        { id: 'silver',  name: t('m.tierSilver') },
+        { id: 'gold',    name: t('m.tierGold') },
+        { id: 'diamond', name: t('m.tierDiamond') },
     ];
 
     // Build a compact tag label for radar / time-analysis charts.
@@ -36,11 +39,13 @@
         if (!m) return name;
         const prefix = m[1].trim();
         let hints = m[2].split(/[、,]/).map(h => h.trim()).filter(Boolean);
-        hints = hints.filter(h => !/^(和|結果)\s*[<≤]/.test(h));
+        // "和<100" / "sum < 100" only repeats what the prefix already says.
+        hints = hints.filter(h => !/^(和|結果|sum|result)\s*[<≤]/i.test(h));
         if (!hints.length) return prefix;
+        const join = window.BuiI18n.lang === 'en-US' ? ', ' : '、';
         const paren = hints.length <= 2
-            ? hints.join('、')
-            : `${hints[0]}、${hints[hints.length - 1]}`;
+            ? hints.join(join)
+            : `${hints[0]}${join}${hints[hints.length - 1]}`;
         if (opts.compact) return `${prefix}(${paren})`;
         return [prefix, `(${paren})`];
     }
@@ -81,15 +86,15 @@
                 const label = document.querySelector('label[for="student-selector"]');
                 if (label) label.style.display = 'none';
                 const title = document.querySelector('.main-content h1');
-                if (title) title.textContent = '📊 我的學習進度';
+                if (title) title.textContent = t('m.myProgressTitle');
                 const subtitle = title?.nextElementSibling;
                 if (subtitle && subtitle.tagName === 'P') {
-                    subtitle.textContent = '查看你自己每個題型的正確率和弱點分析。';
+                    subtitle.textContent = t('m.myProgressLead');
                 }
                 // Hide the teacher-only "📊 教師儀表板" nav link label so students
                 // don't see a mismatched title in the top bar.
                 const navActive = document.querySelector('.navbar a.active');
-                if (navActive) navActive.textContent = '📊 我的學習';
+                if (navActive) navActive.textContent = t('m.navMyProgress');
                 currentStudentId = data.student.id;
                 await reloadAllStats();
             }
@@ -121,7 +126,7 @@
             data.students.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s.id;
-                opt.textContent = `${s.id} - ${s.name} (答題:${s.totalQuestions}, 正確率:${s.overallAccuracy}%)`;
+                opt.textContent = t('m.studentOption', { id: s.id, name: s.name, count: s.totalQuestions, accuracy: s.overallAccuracy });
                 selector.appendChild(opt);
             });
 
@@ -160,7 +165,7 @@
         toggle.addEventListener('click', () => {
             const opening = body.hidden;
             body.hidden = !opening;
-            toggle.textContent = opening ? '收起設定' : '展開設定';
+            toggle.textContent = t(opening ? 'm.tierCollapse' : 'm.tierExpand');
             toggle.setAttribute('aria-expanded', String(opening));
             if (opening && !tierPolicyRows.length) loadTierPolicy();
         });
@@ -170,12 +175,12 @@
         try {
             const res = await fetch('/api/stats/teacher/tier-policy', { credentials: 'include' });
             const data = await res.json();
-            if (!data.success) throw new Error(data.message || '載入失敗');
+            if (!data.success) throw new Error(data.message || t('m.loadFailed'));
             tierPolicyRows = data.rows || [];
             renderTierPolicy();
         } catch (e) {
             const host = document.getElementById('tier-policy-rows');
-            if (host) host.textContent = '載入題目級別設定失敗。';
+            if (host) host.textContent = t('m.tierLoadFailed');
             console.error('載入題目級別設定失敗:', e);
         }
     }
@@ -204,7 +209,7 @@
             name.className = 'tier-policy-name';
             name.textContent = row.label;
             const count = document.createElement('small');
-            count.textContent = row.studentCount + ' 名學生';
+            count.textContent = t('m.studentCount', { count: row.studentCount });
             name.appendChild(count);
             el.appendChild(name);
 
@@ -232,11 +237,11 @@
                 if (row.configured) {
                     const btn = document.createElement('button');
                     btn.type = 'button';
-                    btn.textContent = '跟隨全級';
+                    btn.textContent = t('m.followYear');
                     btn.addEventListener('click', () => saveTierPolicyRow(el, row, null));
                     note.appendChild(btn);
                 } else {
-                    note.textContent = '跟隨全級設定';
+                    note.textContent = t('m.followingYear');
                 }
                 el.appendChild(note);
             }
@@ -255,7 +260,7 @@
                 .map(box => box.dataset.tier);
 
         el.dataset.busy = '1';
-        tierPolicyMessage('儲存中…', '');
+        tierPolicyMessage(t('m.saving'), '');
         try {
             const res = await fetch('/api/stats/teacher/tier-policy', {
                 method: 'PUT',
@@ -273,17 +278,17 @@
                 // the last known-good state so the checkbox stops claiming a
                 // change that was never saved.
                 renderTierPolicy();
-                tierPolicyMessage(data.message || '儲存失敗。', 'error');
+                tierPolicyMessage(data.message || t('m.saveFailedDot'), 'error');
                 return;
             }
             tierPolicyRows = data.rows || tierPolicyRows;
             renderTierPolicy();
-            tierPolicyMessage('已儲存 · ' + row.label, 'ok');
+            tierPolicyMessage(t('m.savedFor', { label: row.label }), 'ok');
             // The teacher may be looking at a student this rule just changed.
             if (currentStudentId) reloadAllStats();
         } catch (e) {
             renderTierPolicy();
-            tierPolicyMessage('儲存失敗，請再試一次。', 'error');
+            tierPolicyMessage(t('m.saveRetry'), 'error');
             console.error('儲存題目級別設定失敗:', e);
         } finally {
             el.dataset.busy = '';
@@ -378,8 +383,8 @@
             cell.innerHTML = `
                 <div class="radar-tier-head">
                     <span class="radar-tier-badge">${emojiFor[tier.id] || tier.name}</span>
-                    <span>${tier.name} 等級</span>
-                    <span class="radar-tier-subtitle">${list.length} 個能力</span>
+                    <span>${t('m.tierHeading', { tier: tier.name })}</span>
+                    <span class="radar-tier-subtitle">${t('m.skillCount', { count: list.length })}</span>
                 </div>
                 <div class="radar-tier-canvas-wrap"><canvas></canvas></div>
             `;
@@ -435,7 +440,7 @@
             data: {
                 labels: list.map(s => shortLabel(s.tagName, { compact })),
                 datasets: [{
-                    label: '正確率 (%)',
+                    label: t('m.accuracyAxis'),
                     data: list.map(s => s.accuracyRate),
                     backgroundColor: 'rgba(139, 92, 246, 0.15)',
                     borderColor: 'rgba(139, 92, 246, 0.8)',
@@ -460,7 +465,7 @@
                     if (i < 0) return;
                     const tag = list[i].tag;
                     const name = list[i].tagName || tag;
-                    if (confirm(`練習「${name}」（3 條題目）？`)) {
+                    if (confirm(t('m.confirmPractise', { name }))) {
                         location.href = `/quiz.html?tag=${encodeURIComponent(tag)}&count=3`;
                     }
                 },
@@ -477,9 +482,9 @@
                         callbacks: {
                             title: (items) => {
                                 const raw = list[items[0].dataIndex]?.tagName || '';
-                                return raw + (clickable ? '（點選標籤練習 3 題）' : '');
+                                return raw + (clickable ? t('m.clickToPractise') : '');
                             },
-                            label: (ctx) => `正確率: ${ctx.raw}%`,
+                            label: (ctx) => t('m.accuracyTip', { value: ctx.raw }),
                         },
                     },
                 },
@@ -512,7 +517,7 @@
 
         // Category icons
         const icons = {
-            '加法': '➕', '減法': '➖', '乘法': '✖️', '除法': '➗'
+            [t('m.catAdd')]: '➕', [t('m.catSub')]: '➖', [t('m.catMul')]: '✖️', [t('m.catDiv')]: '➗'
         };
 
         for (const s of stats) {
@@ -561,7 +566,7 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">🏆</div>
-                        <div class="empty-state-text">太棒了！目前沒有弱點標籤。<br>所有題型正確率都在 70% 以上！</div>
+                        <div class="empty-state-text">${t('m.noWeakness')}</div>
                     </div>
                 `;
                 return;
@@ -574,7 +579,7 @@
                     <div class="weakness-icon">⚠️</div>
                     <div class="weakness-info">
                         <div class="weakness-name">${w.tagName}</div>
-                        <div class="weakness-detail">${w.suggestion} · 共作答 ${w.totalAttempted} 題</div>
+                        <div class="weakness-detail">${t('m.weaknessDetail', { suggestion: w.suggestion, count: w.totalAttempted })}</div>
                     </div>
                     <div class="weakness-rate">${w.accuracyRate}%</div>
                 `;
@@ -614,7 +619,7 @@
             container.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">📊</div>
-                    <div class="empty-state-text">還沒有作答紀錄<br>開始練習後就會顯示時間分析</div>
+                    <div class="empty-state-text">${t('m.noRecords')}</div>
                 </div>
             `;
             return;
@@ -643,7 +648,7 @@
             data: {
                 labels,
                 datasets: [{
-                    label: '平均秒數',
+                    label: t('m.avgSeconds'),
                     data: values,
                     backgroundColor: colors,
                     borderColor: colors.map(c => c.replace('0.7', '1')),
@@ -670,7 +675,7 @@
                         padding: 12,
                         cornerRadius: 8,
                         callbacks: {
-                            label: (ctx) => `平均: ${ctx.raw} 秒`
+                            label: (ctx) => t('m.avgTip', { value: ctx.raw })
                         }
                     }
                 },
@@ -678,7 +683,7 @@
                 scales: {
                     x: {
                         beginAtZero: true,
-                        title: { display: true, text: '秒', color: '#64748b' },
+                        title: { display: true, text: t('m.secondsAxis'), color: '#64748b' },
                         ticks: { color: '#64748b' },
                         grid: { color: 'rgba(255,255,255,0.04)' }
                     },

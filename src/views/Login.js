@@ -10,7 +10,7 @@ export function renderIcon(name) {
 export function renderLogin() {
   return `
     <main class="login-shell">
-      <section class="login-visual" aria-label="平台介紹">
+      <section class="login-visual" aria-label="${t('login_visual_label')}">
         <!-- 背景裝飾圓圈 -->
         <div class="lv-blob lv-blob-1" aria-hidden="true"></div>
         <div class="lv-blob lv-blob-2" aria-hidden="true"></div>
@@ -18,33 +18,33 @@ export function renderLogin() {
 
         <!-- 校徽品牌 -->
         <div class="brand-lockup">
-          <img src="/math-app/images/logo.png" class="brand-mark" alt="校徽" />
+          <img src="/math-app/images/logo.png" class="brand-mark" alt="${t('school_logo_alt')}" />
           <div>
-            <div class="school-name">杯澳公立學校</div>
-            <div class="platform-name">個人化學習平台</div>
+            <div class="school-name">${t('school_name')}</div>
+            <div class="platform-name">${t('platform_name')}</div>
           </div>
         </div>
 
         <!-- 主要內容 -->
         <div class="lv-center-content">
           <div class="lv-subject-pills" aria-hidden="true">
-            <span class="lv-pill pill-chi">📖 中文</span>
-            <span class="lv-pill pill-eng">🔤 英文</span>
-            <span class="lv-pill pill-math">📐 數學</span>
-            <span class="lv-pill pill-board">🖊️ 白板</span>
+            <span class="lv-pill pill-chi">${t('pill_chi')}</span>
+            <span class="lv-pill pill-eng">${t('pill_eng')}</span>
+            <span class="lv-pill pill-math">${t('pill_math')}</span>
+            <span class="lv-pill pill-board">${t('pill_board')}</span>
           </div>
-          <h1>一站式個人化學習平台</h1>
-          <p class="lv-subtitle">連接學生每天需要的學習工具</p>
+          <h1>${t('login_headline')}</h1>
+          <p class="lv-subtitle">${t('login_tagline')}</p>
         </div>
 
         <!-- 底部裝飾 -->
         <div class="lv-footer-badge">
           <span class="lv-badge-dot"></span>
-          平台運作中
+          ${t('platform_online')}
         </div>
       </section>
 
-      <section class="login-panel" aria-label="登入">
+      <section class="login-panel" aria-label="${t('login_panel_label')}">
         <div class="panel-topline"></div>
         <h2>${t('login_title')}</h2>
         <p>${t('login_subtitle')}</p>

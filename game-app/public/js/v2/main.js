@@ -3,6 +3,17 @@ import { GameScene } from './GameScene.js?v=20260910-wire-1';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 import { normaliseAvatar } from './avatar.js?v=20260907-side-climber-1';
 
+const { t, server: serverText, lang: uiLang } = window.BuiI18n;
+
+// Chinese counts places with 第N位 and needs no suffix; English does.
+function ordinal(place) {
+  const n = Number(place);
+  if (uiLang !== 'en-US' || !Number.isFinite(n)) return place;
+  const rest = n % 100;
+  if (rest >= 11 && rest <= 13) return `${n}th`;
+  return n + (['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+}
+
 const $ = id => document.getElementById(id);
 const gameAudio = new GameAudio();
 window.__gameAudio = gameAudio;
@@ -47,7 +58,12 @@ const petReady = fetch('/api/game/my-pet',{credentials:'include'})
   .then(data=>{ if(data?.pet) selectedAvatar={...selectedAvatar,pet:data.pet}; })
   .catch(()=>{});
 
-function teacherLabel(name) { const n=String(name||'老師'); return n.endsWith('老師')?n:`${n}老師`; }
+// The Chinese honorific trails the name; English has nothing to append.
+function teacherLabel(name) {
+  const n=String(name||t('g.teacherFallback'));
+  if(uiLang!=='zh-HK')return n;
+  return n.endsWith('老師')?n:`${n}老師`;
+}
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function normaliseGameSettings(raw = {}) {
   const maxEnergy=Math.min(Math.max(Math.round(Number(raw.maxEnergy)||100),20),500);
@@ -61,10 +77,10 @@ async function loadRooms() {
     const res=await fetch('/api/game/sessions',{credentials:'include'});
     const rooms=(await res.json()).sessions.filter(r=>r.phase!=='ended');
     const el=$('roomList'); el.innerHTML='';
-    if(!rooms.length){el.innerHTML='<p class="muted"><span class="pulse-dot"></span>而家未有老師開遊戲，等一陣先…</p>';return;}
+    if(!rooms.length){el.innerHTML=`<p class="muted"><span class="pulse-dot"></span>${escapeHtml(t('g.noRooms'))}</p>`;return;}
     for(const r of rooms){
       const row=document.createElement('button'); row.className='room-row';
-      row.innerHTML=`<span class="room-emoji">${r.phase==='lobby'?'⛺':'🏔️'}</span><span class="room-info"><b>${escapeHtml(teacherLabel(r.hostName))}</b><small>${escapeHtml(r.setTitle||'')} · ${r.players} 人</small></span><span class="room-phase ${r.phase==='lobby'?'waiting':'playing'}">${r.phase==='lobby'?'等待開始':'進行中'}</span>`;
+      row.innerHTML=`<span class="room-emoji">${r.phase==='lobby'?'⛺':'🏔️'}</span><span class="room-info"><b>${escapeHtml(teacherLabel(r.hostName))}</b><small>${escapeHtml(r.setTitle||'')} · ${escapeHtml(t('g.playerCount',{count:r.players}))}</small></span><span class="room-phase ${r.phase==='lobby'?'waiting':'playing'}">${escapeHtml(t(r.phase==='lobby'?'g.phaseLobby':'g.phaseLive'))}</span>`;
       row.addEventListener('click',()=>joinRoom(r.code)); el.appendChild(row);
     }
   } catch {}
@@ -74,12 +90,12 @@ function startRoomPolling(){loadRooms();clearInterval(roomsTimer);roomsTimer=set
 
 async function joinRoom(code){
   if(joining)return; joining=true; $('joinError').textContent=''; await meReady;
-  socket.emit('player:join',{code,name:me.name||'玩家',studentId:me.studentId,avatar:selectedAvatar},res=>{
+  socket.emit('player:join',{code,name:me.name||t('g.playerFallback'),studentId:me.studentId,avatar:selectedAvatar},res=>{
     joining=false;
-    if(!res?.ok){$('joinError').textContent=res?.message||'加入失敗';loadRooms();return;}
+    if(!res?.ok){$('joinError').textContent=serverText(res?.message)||t('g.joinFailed');loadRooms();return;}
     clearInterval(roomsTimer); startMeta={code,playerKey:res.playerKey||`s:${me.studentId}`};
     selectedAvatar=normaliseAvatar(res.avatar||selectedAvatar);
-    $('lobbySetTitle').textContent=res.setTitle||'準備中'; $('lobbyHostName').textContent=`${teacherLabel(res.hostName)}嘅遊戲房間`;
+    $('lobbySetTitle').textContent=res.setTitle||t('g.preparing'); $('lobbyHostName').textContent=t('g.hostRoom',{teacher:teacherLabel(res.hostName)});
     if(res.phase==='playing')startGame(res.seed,res.durationSec,res.startedAt,res.resume,res.settings); else show('lobbyScreen');
   });
 }
@@ -91,9 +107,9 @@ socket.on('game:looks',list=>{ pendingLooks=list; scene?.setLooks(list); });
 socket.on('game:positions',list=>scene?.updateGhosts(list,startMeta?.playerKey));
 socket.on('game:position',row=>scene?.updateGhostRow(row,startMeta?.playerKey));
 socket.on('game:crumble',({id})=>scene?.triggerCrumble(id,false));
-socket.on('game:summit',({name,place})=>toast(`🏁 ${name} 第 ${place} 位登頂！`,true));
+socket.on('game:summit',({name,place})=>toast(t('g.summitOther',{name,place:ordinal(place)}),true));
 socket.on('game:over',({leaderboard})=>showResults(leaderboard));
-socket.on('room:closed',({message})=>{if(phaserGame)phaserGame.destroy(true);alert(message||'房間已關閉');location.href='/';});
+socket.on('room:closed',({message})=>{if(phaserGame)phaserGame.destroy(true);alert(serverText(message)||t('g.roomClosed'));location.href='/';});
 
 // One stable, hand-tuned map for every room (a "season" course, like the
 // real DLD). Bump the constant to ship a new map for all rooms at once.
@@ -123,11 +139,11 @@ function startGame(seed,durationSec,startedAt,resume,settings){
     isFrozen:()=>frozen,
     onSound:type=>gameAudio.play(type),
     onCrumble:id=>{if(!preview)socket.emit('game:crumble',{id});},
-    onCheckpoint:cp=>toast(`🏁 已到達${cp.name||cp.zoneName}檢查點`,true),
+    onCheckpoint:cp=>toast(t('g.checkpoint',{name:cp.name||cp.zoneName}),true),
     onRecovery:type=>{
-      if(type==='rapidFall')toast('↩ 下降超過 100 米，返回最近檢查點');
-      else if(type==='laser')toast('⚡ 已返回目前區域檢查點');
-      else toast('↩ 已返回最近檢查點');
+      if(type==='rapidFall')toast(t('g.recoverFall'));
+      else if(type==='laser')toast(t('g.recoverLaser'));
+      else toast(t('g.recoverOther'));
     },
     onReady:s=>{
       scene=s;
@@ -151,14 +167,14 @@ function startGame(seed,durationSec,startedAt,resume,settings){
     onFrame:updateHudAndNetwork,
     onProgress:()=>{},
     onFinish:()=>{
-      if(preview){toast('🏆 登頂成功！',true);return;}
+      if(preview){toast(t('g.summitPreview'),true);return;}
       socket.emit('player:summit',res=>{
         if(!res?.ok)return;
-        toast(`🏆 第 ${res.place} 位登頂！`,true);
+        toast(t('g.summitMine',{place:ordinal(res.place)}),true);
         setTimeout(()=>showResults(res.leaderboard,{personal:true,place:res.place}),650);
       });
     },
-    onEffect:(type)=>{if(type==='doubleJump')toast('✨ 二段跳');}
+    onEffect:(type)=>{if(type==='doubleJump')toast(t('g.doubleJump'));}
   };
   phaserGame=window.__game=new Phaser.Game({
     // Opaque, not transparent: the scene paints its own sky over the whole viewport, and the
@@ -186,7 +202,7 @@ function updateHudAndNetwork(state){
   lastFrame=state;
   const now=Date.now(); const left=Math.max(0,startMeta.durationSec-(now-startMeta.startedAt)/1000);
   setHud('timerPill',`⏱ ${Math.floor(left/60)}:${String(Math.floor(left%60)).padStart(2,'0')}`);
-  setHud('heightPill',`🏔️ 高度 ${Math.round(state.altitude)}m`);
+  setHud('heightPill',t('g.height',{metres:Math.round(state.altitude)}));
   setHud('stagePill',`${String(state.zoneIndex+1).padStart(2,'0')} · ${state.zoneName}`);
   // The bar is a width, so it is rounded to whole percent: the eye cannot read finer and the
   // repaint is the same price as the text.
@@ -321,7 +337,7 @@ const audioBtn=$('audioBtn');
 function refreshAudioButton(){
   audioBtn.textContent=gameAudio.muted?'🔇':'🔊';
   audioBtn.setAttribute('aria-pressed',String(gameAudio.muted));
-  audioBtn.setAttribute('aria-label',gameAudio.muted?'開啟遊戲聲音':'關閉遊戲聲音');
+  audioBtn.setAttribute('aria-label',t(gameAudio.muted?'g.audioOn':'g.audioOff'));
 }
 audioBtn.addEventListener('click',()=>{
   const muted=gameAudio.toggleMuted();
@@ -335,8 +351,8 @@ $('answerBtn').addEventListener('click',openQuestion);$('qClose').addEventListen
 function openQuestion(){
   if(!scene||frozen||scene.finished)return;frozen=true;scene.resumeControl();
   $('qFeedback').textContent='';$('qFeedback').className='q-feedback';$('qClose').style.display='none';$('qOverlay').classList.add('open');
-  if(preview)return renderQuestion({question:'7 × 8 等於多少？',choices:['48','54','56','64']});
-  $('qText').textContent='';$('qChoices').innerHTML='<div class="muted" style="grid-column:1/-1;text-align:center">載入中…</div>';
+  if(preview)return renderQuestion({question:t('g.qSample'),choices:['48','54','56','64']});
+  $('qText').textContent='';$('qChoices').innerHTML=`<div class="muted" style="grid-column:1/-1;text-align:center">${escapeHtml(t('g.qLoading'))}</div>`;
   socket.emit('player:question',res=>{if(!res?.ok)return closeQuestion();renderQuestion(res);});
 }
 function renderQuestion(res){
@@ -361,8 +377,8 @@ function applyAnswer(res,choice,buttons){
   buttons[choice]?.classList.add(res.correct?'correct':'wrong');if(!res.correct)buttons[res.correctChoice]?.classList.add('correct');
   const fb=$('qFeedback');
   fb.textContent=res.correct
-    ? (res.infiniteEnergy?'答啱喇！無限能量保持開啟 ⚡':`答啱喇！能量 +${res.gain} ⚡`)
-    :'差少少，再試下一題！';
+    ? (res.infiniteEnergy?t('g.qRightInfinite'):t('g.qRight',{gain:res.gain}))
+    :t('g.qWrong');
   fb.classList.add(res.correct?'good':'bad');scene.setEnergy(res.energy);
   if(res.correct)setTimeout(closeQuestion,800);else $('qClose').style.display='';
 }
@@ -382,7 +398,7 @@ function showResults(leaderboard,{personal=false,place=null}={}){
   phaserGame?.destroy(true);phaserGame=null;scene=null;const list=$('resultsList');list.innerHTML='';
   leaderboard.forEach(row=>{const d=document.createElement('div');d.className=`result-row${row.rank<=3?` top${row.rank}`:''}`;d.innerHTML=`<div class="rank">${['🥇','🥈','🥉'][row.rank-1]||row.rank}</div><div class="name">${escapeHtml(row.name)}${row.finished?' 🏁':''}</div><div class="stat">✓${row.correct} ✗${row.wrong}</div><div class="height">${Math.round((row.bestProgress??row.bestHeight??0)*100)}%</div>`;list.appendChild(d);});
   $('resultEmoji').textContent=personal?'🏆':'🏁';
-  $('resultSub').textContent=personal?`你以第 ${place} 位登頂，其他玩家仍可繼續挑戰。`:'今次攀登完成！';
+  $('resultSub').textContent=personal?t('g.resultPersonal',{place:ordinal(place)}):t('g.resultDone');
   show('resultScreen');
 }
 

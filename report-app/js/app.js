@@ -86,14 +86,14 @@ function initUpload() {
 
     // Clear data button
     document.getElementById('btn-clear-data')?.addEventListener('click', async () => {
-        if (!confirm('確定要刪除伺服器內全部考評數據及已上傳的 Excel 原檔嗎？')) return;
+        if (!confirm(t('r.confirmClear'))) return;
         try {
             const payload = await ReportAPI.clearAll();
             DataManager.setServerData(payload);
             refreshHomeView();
-            showToast('已刪除伺服器內全部考評數據', 'info');
+            showToast(t('r.cleared'), 'info');
         } catch (error) {
-            showToast(error.message || '未能刪除數據', 'error');
+            showToast(error.message || t('r.clearFailed'), 'error');
         }
     });
 }
@@ -104,7 +104,7 @@ async function handleFiles(fileList) {
     );
 
     if (files.length === 0) {
-        showToast('請選擇 .xls 或 .xlsx 檔案', 'error');
+        showToast(t('r.pickXls'), 'error');
         return;
     }
 
@@ -118,7 +118,7 @@ async function handleFiles(fileList) {
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        progressText.textContent = `正在解析及上傳 ${file.name}... (${i + 1}/${files.length})`;
+        progressText.textContent = t('r.parsingFile', { name: file.name, n: i + 1, total: files.length });
         progressFill.style.width = ((i + 1) / files.length * 100) + '%';
 
         try {
@@ -144,9 +144,9 @@ async function handleFiles(fileList) {
     progressFill.style.width = '0%';
 
     if (successCount > 0) {
-        showToast(`已上傳 ${successCount} 個 Excel 到伺服器` + (errorCount > 0 ? `，${errorCount} 個失敗` : ''), 'success');
+        showToast(t('r.uploaded', { count: successCount }) + (errorCount > 0 ? t('r.uploadedFailed', { count: errorCount }) : ''), 'success');
     } else {
-        showToast('上傳失敗，請檢查 Excel 格式', 'error');
+        showToast(t('r.uploadFailed'), 'error');
     }
 
     refreshHomeView();
@@ -190,8 +190,8 @@ function refreshHomeView() {
             <td>
                 ${escapeHtml(f.filename)}
                 ${f.originalAvailable
-                    ? `<a class="file-source-link" href="/api/report/imports/${encodeURIComponent(f.importId)}/file">下載原檔</a>`
-                    : '<span class="file-source-note">歷史預載資料</span>'}
+                    ? `<a class="file-source-link" href="/api/report/imports/${encodeURIComponent(f.importId)}/file">${t('r.downloadSource')}</a>`
+                    : `<span class="file-source-note">${t('r.preloadedNote')}</span>`}
             </td>
             <td>${escapeHtml(f.schoolYear)}</td>
             <td>${escapeHtml(f.grade)}</td>
@@ -209,11 +209,11 @@ function initExport() {
         const activeView = document.querySelector('.view.active');
         if (!activeView) return;
 
-        showToast('正在生成 PDF...', 'info');
+        showToast(t('r.generatingPdf'), 'info');
 
         const opt = {
             margin: [10, 10, 10, 10],
-            filename: '考評分析報告.pdf',
+            filename: t('r.pdfName'),
             image: { type: 'jpeg', quality: 0.95 },
             html2canvas: { scale: 2, backgroundColor: '#1E293B', useCORS: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
@@ -226,10 +226,10 @@ function initExport() {
         clone.style.color = '#F8FAFC';
 
         html2pdf().set(opt).from(activeView).save().then(() => {
-            showToast('PDF 已生成！', 'success');
+            showToast(t('r.pdfDone'), 'success');
         }).catch(e => {
             console.error(e);
-            showToast('PDF 生成失敗', 'error');
+            showToast(t('r.pdfFailed'), 'error');
         });
     });
 }
@@ -269,13 +269,13 @@ function initAuth() {
         overlay.innerHTML = `
         <div class="auth-box">
             <div class="auth-icon">🔒</div>
-            <h2 class="auth-title">系統已鎖定</h2>
-            <p class="auth-desc">請輸入密碼以存取學生成績數據</p>
+            <h2 class="auth-title">${t('r.locked')}</h2>
+            <p class="auth-desc">${t('r.lockedDesc')}</p>
             <form id="auth-form" class="auth-form">
-                <input type="password" id="auth-password" class="auth-input" placeholder="請輸入密碼..." autocomplete="off">
-                <button type="submit" class="auth-btn">解鎖</button>
+                <input type="password" id="auth-password" class="auth-input" placeholder="${t('r.passwordPh')}" autocomplete="off">
+                <button type="submit" class="auth-btn">${t('r.unlock')}</button>
             </form>
-            <div id="auth-error" class="auth-error">密碼錯誤，請重新輸入</div>
+            <div id="auth-error" class="auth-error">${t('r.wrongPassword')}</div>
         </div>
         `;
         document.body.appendChild(overlay);
@@ -369,7 +369,7 @@ async function loadInitialData() {
                 payload = await ReportAPI.migrateBrowserData(
                     [...grouped].map(([filename, records]) => ({ filename, records }))
                 );
-                showToast('歷史考評數據已遷移到伺服器資料庫', 'success');
+                showToast(t('r.migrated'), 'success');
             }
         }
 
@@ -377,7 +377,7 @@ async function loadInitialData() {
         refreshHomeView();
     } catch (error) {
         console.error('Assessment server data load failed:', error);
-        showToast(error.message || '未能從伺服器載入考評數據', 'error');
+        showToast(error.message || t('r.loadFailed'), 'error');
     }
     
     // Auto switch to student view on load exactly like the root behavior!

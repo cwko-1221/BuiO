@@ -374,7 +374,8 @@ export function dynamicDisplay(initialText, { width = 1024, height = 384, scale 
   sprite.scale.set(scale[0], scale[1], 1);
   sprite.userData.canvasTexture = texture;
   sprite.userData.text = '';
-  sprite.userData.setText = (text, accent = '#60e0bb') => {
+  sprite.userData.setText = (rawText, accent = '#60e0bb') => {
+    const text = window.BuiI18n?.sceneLabel?.(rawText) ?? rawText;
     if (sprite.userData.text === `${text}|${accent}`) return;
     sprite.userData.text = `${text}|${accent}`;
     context.clearRect(0, 0, width, height);
@@ -400,7 +401,7 @@ export function dynamicDisplay(initialText, { width = 1024, height = 384, scale 
 }
 
 export function makeLabelSprite(text, { color = '#123b45', background = '#fffdf7', scale = 1 } = {}) {
-  const texture = drawLabelCanvas(text, color, background);
+  const texture = drawLabelCanvas(window.BuiI18n?.sceneLabel?.(text) ?? text, color, background);
   const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
   const sprite = new THREE.Sprite(material);
   sprite.scale.set(2.8 * scale, .76 * scale, 1);

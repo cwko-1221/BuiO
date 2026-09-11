@@ -13,12 +13,12 @@ export const WHITEBOARD_BASE = '/whiteboard';
 export const MODULES = [
   {
     id: 'homework',
-    name: '欠交功課',
+    name: 'module_homework_name',
     shortName: 'Homework',
-    description: '科長填報、教師跟進及學生欠交分析',
+    description: 'module_homework_desc',
     accent: 'mint',
     icon: 'report',
-    status: '可使用',
+    status: 'module_homework_status',
     roleAccess: ['student', 'teacher']
   },
   {

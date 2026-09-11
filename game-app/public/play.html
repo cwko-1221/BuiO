@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>唔好望落嚟 | BuiO 遊戲</title>
+  <title data-i18n="g.pageTitle">唔好望落嚟 | BuiO 遊戲</title>
+  <script src="/shared/i18n.js?v=20260910-1"></script>
+  <script src="/shared/server-i18n.js?v=20260910-1"></script>
+  <script src="/shared/i18n/game.js?v=20260910-1"></script>
   <link rel="stylesheet" href="/game/css/game.css?v=20260909-nopan-1">
 </head>
 <body>
@@ -13,13 +16,13 @@
     <div class="panel-center">
       <div class="card">
         <div class="game-logo">🏔️</div>
-        <h1>唔好望落嚟</h1>
-        <p class="sub">答問題儲能量，一路跳上山頂！千祈唔好望落嚟……</p>
+        <h1 data-i18n="g.gameName">唔好望落嚟</h1>
+        <p class="sub" data-i18n="g.tagline">答問題儲能量，一路跳上山頂！千祈唔好望落嚟……</p>
         <div id="roomList" class="room-list">
-          <p class="muted"><span class="pulse-dot"></span>搵緊老師嘅遊戲房間…</p>
+          <p class="muted"><span class="pulse-dot"></span><span data-i18n="g.searchingRooms">搵緊老師嘅遊戲房間…</span></p>
         </div>
         <div id="joinError" class="error-msg"></div>
-        <button class="btn secondary" style="margin-top:8px" onclick="location.href='/'">🏠 回主頁</button>
+        <button class="btn secondary" style="margin-top:8px" onclick="location.href='/'" data-i18n="g.home">🏠 回主頁</button>
       </div>
     </div>
   </div>
@@ -29,14 +32,14 @@
     <div class="panel-center">
       <div class="card">
         <div class="game-logo">⛺</div>
-        <h1 id="lobbySetTitle">準備中</h1>
+        <h1 id="lobbySetTitle" data-i18n="g.preparing">準備中</h1>
         <p class="sub" id="lobbyHostName"></p>
-        <p class="lobby-wait"><span class="pulse-dot"></span>等緊老師開始遊戲…</p>
+        <p class="lobby-wait"><span class="pulse-dot"></span><span data-i18n="g.waitingHost">等緊老師開始遊戲…</span></p>
         <div style="margin-top:20px; font-size:14px; color:#6b7690; text-align:left; background:#f5f8fc; border-radius:12px; padding:14px;">
-          <b>玩法：</b><br>
-          🕹️ 左右移動 + 跳躍會消耗 ⚡能量<br>
-          📝 隨時撳「答題」，答啱補充能量<br>
-          🏔️ 最快爬上山頂就贏！跌落嚟要再爬過…
+          <b data-i18n="g.howToPlay">玩法：</b><br>
+          <span data-i18n="g.how1">🕹️ 左右移動 + 跳躍會消耗 ⚡能量</span><br>
+          <span data-i18n="g.how2">📝 隨時撳「答題」，答啱補充能量</span><br>
+          <span data-i18n="g.how3">🏔️ 最快爬上山頂就贏！跌落嚟要再爬過…</span>
         </div>
       </div>
     </div>
@@ -44,22 +47,22 @@
 
   <!-- ============ GAME ============ -->
   <div id="gameScreen" class="screen">
-    <div id="gameCanvas" tabindex="-1" aria-label="唔好望落嚟遊戲世界"></div>
+    <div id="gameCanvas" tabindex="-1" aria-label="唔好望落嚟遊戲世界" data-i18n-attr="aria-label:g.canvasAria"></div>
 
     <div class="hud">
       <div class="hud-cluster hud-cluster-primary">
-        <div class="energy-wrap" aria-label="能量">
+        <div class="energy-wrap" aria-label="能量" data-i18n-attr="aria-label:g.energy">
           <span class="energy-icon">⚡</span>
-          <div class="energy-copy"><small>能量</small><strong id="energyText">40</strong></div>
+          <div class="energy-copy"><small data-i18n="g.energy">能量</small><strong id="energyText">40</strong></div>
           <div class="energy-bar"><div id="energyFill" class="energy-fill"></div></div>
         </div>
-        <div class="hud-pill altitude-pill" id="heightPill">🏔️ 高度 0m</div>
-        <div class="hud-pill stage-pill" id="stagePill">01 · 城堡</div>
+        <div class="hud-pill altitude-pill" id="heightPill">🏔️ 0m</div>
+        <div class="hud-pill stage-pill" id="stagePill" data-i18n="g.stagePillInit">01 · 城堡</div>
       </div>
       <div class="spacer"></div>
       <div class="hud-cluster hud-cluster-secondary">
-        <button class="audio-toggle-btn" id="audioBtn" type="button" aria-label="關閉遊戲聲音" aria-pressed="false">🔊</button>
-        <button class="reset-position-btn" id="resetBtn" type="button" aria-label="返回最近檢查點">↻ 復位</button>
+        <button class="audio-toggle-btn" id="audioBtn" type="button" aria-label="關閉遊戲聲音" aria-pressed="false" data-i18n-attr="aria-label:g.audioOff">🔊</button>
+        <button class="reset-position-btn" id="resetBtn" type="button" aria-label="返回最近檢查點" data-i18n-attr="aria-label:g.resetAria" data-i18n="g.reset">↻ 復位</button>
         <div class="hud-pill streak-pill" id="streakPill" style="display:none">🔥 0</div>
         <div class="hud-pill timer-pill" id="timerPill">--:--</div>
       </div>
@@ -67,15 +70,15 @@
 
     <div id="toasts"></div>
 
-    <button id="answerBtn" class="answer-btn-float" aria-label="答題補充能量"><span class="zap">⚡</span><span>答題</span><small>補充能量</small></button>
+    <button id="answerBtn" class="answer-btn-float" aria-label="答題補充能量" data-i18n-attr="aria-label:g.answerAria"><span class="zap">⚡</span><span data-i18n="g.answer">答題</span><small data-i18n="g.answerSub">補充能量</small></button>
 
     <div class="touch-controls">
       <div class="cluster">
-        <button class="tbtn" id="btnLeft" type="button" aria-label="向左移動">◀</button>
-        <button class="tbtn" id="btnRight" type="button" aria-label="向右移動">▶</button>
+        <button class="tbtn" id="btnLeft" type="button" aria-label="向左移動" data-i18n-attr="aria-label:g.moveLeft">◀</button>
+        <button class="tbtn" id="btnRight" type="button" aria-label="向右移動" data-i18n-attr="aria-label:g.moveRight">▶</button>
       </div>
       <div class="cluster">
-        <button class="tbtn" id="btnJump" type="button" aria-label="跳躍">⬆</button>
+        <button class="tbtn" id="btnJump" type="button" aria-label="跳躍" data-i18n-attr="aria-label:g.jump">⬆</button>
       </div>
     </div>
 
@@ -85,7 +88,7 @@
         <div id="qText" class="q-text"></div>
         <div id="qChoices" class="q-choices"></div>
         <div id="qFeedback" class="q-feedback"></div>
-        <button id="qClose" class="btn secondary q-close" style="display:none">繼續爬山 🧗</button>
+        <button id="qClose" class="btn secondary q-close" style="display:none" data-i18n="g.keepClimbing">繼續爬山 🧗</button>
       </div>
     </div>
   </div>
@@ -95,10 +98,10 @@
     <div class="panel-center">
       <div class="card" style="max-width:540px">
         <div class="game-logo" id="resultEmoji">🏁</div>
-        <h1>遊戲結束</h1>
+        <h1 data-i18n="g.gameOver">遊戲結束</h1>
         <p class="sub" id="resultSub"></p>
         <div id="resultsList" class="results-list"></div>
-        <button class="btn" onclick="location.href='/'">🏠 回主頁</button>
+        <button class="btn" onclick="location.href='/'" data-i18n="g.home">🏠 回主頁</button>
       </div>
     </div>
   </div>

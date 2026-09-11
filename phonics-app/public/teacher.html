@@ -3,49 +3,51 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>音素列車・教師進度</title>
+  <title data-i18n="p.teacherTitle">音素列車・教師進度</title>
+  <script src="/shared/i18n.js?v=20260910-1"></script>
+  <script src="/shared/i18n/phonics.js?v=20260910-1"></script>
   <link rel="stylesheet" href="/phonics/css/phonics.css" />
 </head>
 <body>
   <header class="topbar">
-    <a class="icon-button" href="/" aria-label="返回平台">←</a>
-    <div class="brand"><span class="brand-mark">🚂</span><div><strong>音素列車</strong><span>教師進度</span></div></div>
-    <div class="top-actions" aria-label="預覽學生模式">
-      <a class="secondary-button" href="/phonics/student?accent=en-gb">預覽英式</a>
-      <a class="secondary-button" href="/phonics/student?accent=en-us">預覽美式</a>
+    <a class="icon-button" href="/" aria-label="返回平台" data-i18n-attr="aria-label:p.backPlatform">←</a>
+    <div class="brand"><span class="brand-mark">🚂</span><div><strong data-i18n="p.brand">音素列車</strong><span data-i18n="p.teacherSub">教師進度</span></div></div>
+    <div class="top-actions" aria-label="預覽學生模式" data-i18n-attr="aria-label:p.previewStudent">
+      <a class="secondary-button" href="/phonics/student?accent=en-gb" data-i18n="p.previewGb">預覽英式</a>
+      <a class="secondary-button" href="/phonics/student?accent=en-us" data-i18n="p.previewUs">預覽美式</a>
     </div>
   </header>
   <main class="teacher-main">
     <section class="hero panel teacher-hero">
-      <div><span class="eyebrow">PHONICS PROGRESS</span><h1>全班拼讀進度</h1><p>英式及美式發音均已內置，老師可為每班設定統一口音。</p></div>
+      <div><span class="eyebrow">PHONICS PROGRESS</span><h1 data-i18n="p.classProgress">全班拼讀進度</h1><p data-i18n="p.classProgressLead">英式及美式發音均已內置，老師可為每班設定統一口音。</p></div>
       <div class="hero-train" aria-hidden="true"><span>🚂</span><span>📊</span><span>⭐</span></div>
     </section>
     <section class="filter-panel panel">
-      <label>學年<select id="academicYear"></select></label>
-      <label>班級<select id="className"><option value="">所有班級</option></select></label>
-      <button class="primary-button" id="refreshSummary">更新</button>
+      <label><span data-i18n="p.academicYear">學年</span><select id="academicYear"></select></label>
+      <label><span data-i18n="p.className">班級</span><select id="className"><option value="" data-i18n="p.allClasses">所有班級</option></select></label>
+      <button class="primary-button" id="refreshSummary" data-i18n="p.refresh">更新</button>
     </section>
     <section class="accent-panel panel" aria-labelledby="accentTitle">
       <div>
         <span class="eyebrow">CLASS ACCENT</span>
-        <h2 id="accentTitle">設定全班口音</h2>
-        <p id="accentHelp">請先在上方選擇一個班級。</p>
+        <h2 id="accentTitle" data-i18n="p.accentTitle">設定全班口音</h2>
+        <p id="accentHelp" data-i18n="p.pickClassFirst">請先在上方選擇一個班級。</p>
       </div>
-      <label>發音口音
+      <label><span data-i18n="p.accentLabel">發音口音</span>
         <select id="classAccent" disabled>
-          <option value="en-gb">英式英語</option>
-          <option value="en-us">美式英語</option>
+          <option value="en-gb" data-i18n="p.accentGbName">英式英語</option>
+          <option value="en-us" data-i18n="p.accentUsName">美式英語</option>
         </select>
       </label>
-      <button class="primary-button" id="saveAccent" disabled>儲存口音設定</button>
+      <button class="primary-button" id="saveAccent" disabled data-i18n="p.saveAccent">儲存口音設定</button>
     </section>
     <div class="summary-row" id="teacherTotals"></div>
     <section class="panel table-panel">
-      <div class="section-heading"><div><span class="eyebrow">STUDENT MASTERY</span><h2>學生掌握情況</h2></div><p>兩星或以上的單字計作已掌握。</p></div>
+      <div class="section-heading"><div><span class="eyebrow">STUDENT MASTERY</span><h2 data-i18n="p.masteryTitle">學生掌握情況</h2></div><p data-i18n="p.masteryLead">兩星或以上的單字計作已掌握。</p></div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>學生</th><th>班別</th><th>已練習</th><th>已掌握單字</th><th>星星</th><th>最近練習</th></tr></thead>
-          <tbody id="studentRows"><tr><td colspan="6">載入中…</td></tr></tbody>
+          <thead><tr><th data-i18n="p.colStudent">學生</th><th data-i18n="p.colClass">班別</th><th data-i18n="p.colPractised">已練習</th><th data-i18n="p.colMastered">已掌握單字</th><th data-i18n="p.colStars">星星</th><th data-i18n="p.colRecent">最近練習</th></tr></thead>
+          <tbody id="studentRows"><tr><td colspan="6" data-i18n="p.loading">載入中…</td></tr></tbody>
         </table>
       </div>
     </section>

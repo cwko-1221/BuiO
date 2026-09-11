@@ -27,15 +27,15 @@ export function renderModuleCard(module) {
       <div class="module-icon">${renderIcon(module.icon)}</div>
       <div class="module-copy">
         <div class="module-kicker">${module.shortName}</div>
-        <h3>${module.id === 'homework' ? module.name : t(module.name)}</h3>
-        <p>${module.id === 'homework' ? module.description : t(module.description)}</p>
+        <h3>${t(module.name)}</h3>
+        <p>${t(module.description)}</p>
       </div>
       <div class="module-meta">
         ${module.metric ? `<span>${t(module.metric)}</span>` : ''}
-        <strong>${module.id === 'homework' ? module.status : t(module.status)}</strong>
+        <strong>${t(module.status)}</strong>
       </div>
       <button class="module-action" ${disabled ? 'disabled' : ''} data-open-module="${module.id}">
-        ${module.disabled ? t('module_chinese_metric') : '進入模組'}
+        ${module.disabled ? t('module_chinese_metric') : t('enter_module')}
       </button>
     </article>
   `;

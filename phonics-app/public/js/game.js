@@ -1,7 +1,21 @@
+const { t, lang: uiLang } = window.BuiI18n;
+
+// The clue is what the child reads before blending, so it must never be the
+// spelling itself; the curriculum carries one in each language.
+function clueFor(entry) {
+  return (uiLang === 'en-US' ? entry.en : entry.zh) || entry.zh || entry.en || '';
+}
+function levelSubtitle(level) {
+  return (uiLang === 'en-US' ? level.subtitleEn : level.subtitle) || level.subtitle || '';
+}
+function levelDescription(level) {
+  return (uiLang === 'en-US' ? level.descriptionEn : level.description) || level.description || '';
+}
+
 const state = {
   me: null, levels: [], progress: null, level: null, queue: [], wordIndex: 0,
   joined: [], mistakes: 0, sessionStars: 0, startedAt: 0, busy: false,
-  currentAudio: null, audioSequence: 0, accent: 'en-gb', accentLabel: '英式英語',
+  currentAudio: null, audioSequence: 0, accent: 'en-gb', accentLabel: window.BuiI18n.t('p.accentGbName'),
   ttsAvailable: false, ttsUrls: new Map(),
 };
 
@@ -16,7 +30,7 @@ async function api(path, options = {}) {
     headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) },
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw Object.assign(new Error(data.message || '暫時無法連接平台'), { status: response.status });
+  if (!response.ok) throw Object.assign(new Error(data.message || t('p.noConnection')), { status: response.status });
   return data;
 }
 
@@ -63,12 +77,12 @@ function playAudio(url) {
     };
     audio.addEventListener('ended', finish, { once: true });
     audio.addEventListener('error', () => {
-      $('#audioStatus').textContent = '音檔未能播放，請重新整理後再試。';
+      $('#audioStatus').textContent = t('p.audioFailed');
       $('#audioStatus').classList.add('error');
       finish();
     }, { once: true });
     audio.play().catch(() => {
-      $('#audioStatus').textContent = '請先按一下畫面，再按喇叭播放發音。';
+      $('#audioStatus').textContent = t('p.tapFirst');
       $('#audioStatus').classList.add('error');
       finish();
     });
@@ -86,7 +100,7 @@ async function googleTtsUrl({ wordId = '', accent = state.accent, preview = fals
   });
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    throw new Error(data.message || 'Google TTS 暫時無法使用。');
+    throw new Error(data.message || t('p.ttsUnavailable'));
   }
   const url = URL.createObjectURL(await response.blob());
   state.ttsUrls.set(key, url);
@@ -146,9 +160,9 @@ function progressFor(levelId) {
 function renderSummary() {
   const progress = state.progress || { masteredWords: 0, totalWords: 0, totalStars: 0, attempts: 0 };
   $('#summaryRow').innerHTML = [
-    ['⭐', progress.totalStars, '累積星星'],
-    ['✅', `${progress.masteredWords}/${progress.totalWords}`, '已掌握單字'],
-    ['🚂', progress.attempts, '完成旅程'],
+    ['⭐', progress.totalStars, t('p.starsTotal')],
+    ['✅', `${progress.masteredWords}/${progress.totalWords}`, t('p.wordsMastered')],
+    ['🚂', progress.attempts, t('p.journeysDone')],
   ].map(([icon, value, label]) => `<div class="summary-card"><span class="summary-icon">${icon}</span><div><strong>${value}</strong><span>${label}</span></div></div>`).join('');
 }
 
@@ -159,9 +173,9 @@ function renderLevels() {
     const pct = level.words.length ? Math.round(progress.mastered / level.words.length * 100) : 0;
     return `<button class="level-card" data-level="${escapeHtml(level.id)}">
       <span class="level-card-head"><span class="level-number">${level.order}</span><span class="level-badge">${escapeHtml(level.badge)}</span></span>
-      <h3>${escapeHtml(level.title)}</h3><span class="subtitle">${escapeHtml(level.subtitle)}</span>
-      <p>${escapeHtml(level.description)}</p>
-      <span class="level-card-footer"><span>${progress.mastered}/${level.words.length} 已掌握</span><span class="mini-progress"><span style="width:${pct}%"></span></span></span>
+      <h3>${escapeHtml(level.title)}</h3><span class="subtitle">${escapeHtml(levelSubtitle(level))}</span>
+      <p>${escapeHtml(levelDescription(level))}</p>
+      <span class="level-card-footer"><span>${escapeHtml(t('p.masteredOf', { done: progress.mastered, total: level.words.length }))}</span><span class="mini-progress"><span style="width:${pct}%"></span></span></span>
     </button>`;
   }).join('');
   document.querySelectorAll('[data-level]').forEach(button => button.addEventListener('click', () => startLevel(button.dataset.level)));
@@ -189,17 +203,17 @@ function renderWord() {
   state.busy = false;
   const entry = currentWord();
   const done = state.wordIndex;
-  $('#journeyLabel').textContent = `${state.level.subtitle} · ${done + 1}/${state.queue.length}`;
+  $('#journeyLabel').textContent = t('p.journeyLabel', { subtitle: levelSubtitle(state.level), n: done + 1, total: state.queue.length });
   $('#progressBar').style.width = `${done / state.queue.length * 100}%`;
   $('#starCounter').textContent = `★ ${state.sessionStars}`;
   $('#targetEmoji').textContent = entry.emoji;
-  $('#wordMode').textContent = entry.mode === 'syllable' ? 'SYLLABLE TRAIN · 音節列車' : 'PHONEME TRAIN · 音素列車';
-  $('#targetHint').textContent = `${entry.zh} · ${'_ '.repeat(entry.segments.length).trim()}`;
+  $('#wordMode').textContent = t(entry.mode === 'syllable' ? 'p.modeSyllable' : 'p.modePhoneme');
+  $('#targetHint').textContent = t('p.targetHint', { clue: clueFor(entry), blanks: '_ '.repeat(entry.segments.length).trim() });
   $('#listenWord').onclick = () => speakWord(entry);
   $('#listenWord').disabled = !state.ttsAvailable;
-  $('#listenWord').textContent = state.ttsAvailable ? '🔊 聽完整單字' : '🔇 Google TTS 尚未設定';
+  $('#listenWord').textContent = t(state.ttsAvailable ? 'p.listenWord' : 'p.ttsMissing');
   $('#slowBlend').disabled = true;
-  $('#slowBlend').textContent = '🔊 聽目前拼合';
+  $('#slowBlend').textContent = t('p.slowBlend');
   $('#trackZone').className = 'track-zone';
   renderTrain();
   renderBank();
@@ -207,14 +221,14 @@ function renderWord() {
 
 function renderTrain() {
   const entry = currentWord();
-  const unitLabel = entry.mode === 'syllable' ? '音節' : '音';
+  const unitLabel = t(entry.mode === 'syllable' ? 'p.unitSyllable' : 'p.unitPhoneme');
   $('#joinedTrain').innerHTML = state.joined.map(index => {
     const item = entry.segments[index];
     return `<span class="joined-carriage"><span>${escapeHtml(item.text.replace('_', '·'))}</span><small>/${escapeHtml(item.ipa)}/</small></span>`;
   }).join('');
   const text = state.joined.map(index => entry.segments[index].text.replace('_', '')).join('');
   const blendIpa = entry.segments.slice(0, state.joined.length).map(item => item.ipa).join('');
-  $('#blendReadout').innerHTML = `<span>已連接 ${state.joined.length || 0} 個${unitLabel}</span><strong>${escapeHtml(text || '—')}</strong><small>${state.joined.length ? `音素次序：/${escapeHtml(blendIpa)}/；接完整後播放自然單字` : '接上第一節車廂開始'}</small>`;
+  $('#blendReadout').innerHTML = `<span>${escapeHtml(t('p.joinedCount', { count: state.joined.length || 0, unit: unitLabel }))}</span><strong>${escapeHtml(text || '—')}</strong><small>${state.joined.length ? escapeHtml(t('p.blendOrder', { ipa: blendIpa })) : escapeHtml(t('p.blendStart'))}</small>`;
   $('#dropHint').classList.toggle('hidden', state.joined.length > 0);
   $('#slowBlend').disabled = !state.ttsAvailable || state.joined.length === 0;
 }
@@ -225,10 +239,10 @@ function renderBank() {
   $('#carriageBank').innerHTML = indices.map(index => {
     const item = entry.segments[index];
     return `<div class="carriage-slot ${state.joined.includes(index) ? 'used' : ''}">
-      <div class="carriage" role="button" tabindex="0" aria-label="接駁 ${escapeHtml(item.text)}" draggable="true" data-segment="${index}">
+      <div class="carriage" role="button" tabindex="0" aria-label="${escapeHtml(t('p.couple', { text: item.text }))}" draggable="true" data-segment="${index}">
         <span class="letters">${escapeHtml(item.text.replace('_', '·'))}</span><span class="ipa">/${escapeHtml(item.ipa)}/</span>
       </div>
-      <button class="mini-sound" type="button" data-sound-segment="${index}" aria-label="聆聽 ${escapeHtml(item.text)} 的單音" ${state.ttsAvailable ? '' : 'disabled'}>🔊</button>
+      <button class="mini-sound" type="button" data-sound-segment="${index}" aria-label="${escapeHtml(t('p.hearSound', { text: item.text }))}" ${state.ttsAvailable ? '' : 'disabled'}>🔊</button>
     </div>`;
   }).join('');
   document.querySelectorAll('.carriage').forEach(button => {
@@ -259,7 +273,7 @@ async function connectSegment(index) {
     track.classList.remove('wrong');
     void track.offsetWidth;
     track.classList.add('wrong');
-    toast('再看一次音素次序，找出下一節車廂。');
+    toast(t('p.tryOrder'));
     return;
   }
 
@@ -274,7 +288,7 @@ async function connectSegment(index) {
   }
 
   if (state.ttsAvailable) await speakWord(entry);
-  $('#targetHint').textContent = `${entry.spelling} · ${entry.zh}`;
+  $('#targetHint').textContent = t('p.solvedHint', { spelling: entry.spelling, clue: clueFor(entry) });
   const stars = state.mistakes === 0 ? 3 : state.mistakes <= 2 ? 2 : 1;
   state.sessionStars += stars;
   $('#starCounter').textContent = `★ ${state.sessionStars}`;
@@ -290,7 +304,7 @@ async function connectSegment(index) {
           elapsedMs: Date.now() - state.startedAt,
         }),
       });
-    } catch (error) { toast(`進度未能儲存：${error.message}`); }
+    } catch (error) { toast(t('p.saveFailed', { message: error.message })); }
   }
   await new Promise(resolve => setTimeout(resolve, 950));
   state.wordIndex += 1;
@@ -304,7 +318,7 @@ async function finishLevel() {
     try { state.progress = (await api('/api/phonics/progress')).progress; } catch {}
   }
   const maximum = state.queue.length * 3;
-  $('#resultText').textContent = `你完成了 ${state.queue.length} 個單字，共得到 ${state.sessionStars}/${maximum} 顆星。`;
+  $('#resultText').textContent = t('p.resultText', { words: state.queue.length, stars: state.sessionStars, max: maximum });
   $('#resultStars').textContent = state.sessionStars >= maximum * .8 ? '★★★' : state.sessionStars >= maximum * .5 ? '★★' : '★';
   $('#celebration').classList.remove('hidden');
 }
@@ -337,7 +351,7 @@ async function init() {
   try {
     const me = await api('/api/auth/me');
     state.me = me.student;
-    $('#userChip').textContent = `${state.me.name}${state.me.role === 'teacher' ? ' · 預覽' : ''}`;
+    $('#userChip').textContent = `${state.me.name}${state.me.role === 'teacher' ? t('p.previewSuffix') : ''}`;
     $('#accentPreviewPanel').classList.add('hidden');
     const previewAccent = new URLSearchParams(location.search).get('accent');
     const catalogUrl = state.me.role === 'teacher' && previewAccent
@@ -348,12 +362,12 @@ async function init() {
       state.me.role === 'teacher' ? Promise.resolve({ progress: null }) : api('/api/phonics/progress'),
     ]);
     state.accent = catalog.accent || 'en-gb';
-    state.accentLabel = catalog.accentLabel || (state.accent === 'en-us' ? '美式英語' : '英式英語');
+    state.accentLabel = catalog.accentLabel || t(state.accent === 'en-us' ? 'p.accentUsName' : 'p.accentGbName');
     state.ttsAvailable = catalog.ttsAvailable === true;
     $('#accentPreviewPanel').classList.toggle('hidden', state.me.role !== 'teacher' || !state.ttsAvailable);
     $('#audioStatus').textContent = state.ttsAvailable
-      ? `Google Cloud TTS（${state.accentLabel}）會按 IPA 播放單音、目前拼合及完整單字。`
-      : 'Google TTS 尚未設定，單音、拼合音及完整單字暫時停用。';
+      ? t('p.ttsReady', { accent: state.accentLabel })
+      : t('p.ttsOff');
     $('#audioStatus').classList.remove('error');
     state.levels = catalog.levels;
     state.progress = progress.progress;

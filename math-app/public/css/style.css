@@ -981,13 +981,12 @@ a { color: var(--accent-blue); text-decoration: none; }
 }
 
 .tag-bar-label {
-    width: 140px;
+    width: 200px;
     font-size: 0.8rem;
+    line-height: 1.35;
     color: var(--text-secondary);
     flex-shrink: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
 }
 
 .tag-bar-track {

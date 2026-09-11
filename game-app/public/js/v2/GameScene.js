@@ -401,7 +401,7 @@ export class GameScene extends Phaser.Scene {
       }).setOrigin(.5).setDepth(105);
     }
     this.syncPlayerSprite();
-    this.playerName = this.add.text(this.player.x,this.player.y+42,this.hooks.name || '玩家',{fontFamily:'Microsoft JhengHei',fontSize:'17px',fontStyle:'bold',color:'#fff',stroke:'#222a42',strokeThickness:6}).setOrigin(.5).setDepth(110);
+    this.playerName = this.add.text(this.player.x,this.player.y+42,this.hooks.name || window.BuiI18n.t('g.playerFallback'),{fontFamily:'Microsoft JhengHei',fontSize:'17px',fontStyle:'bold',color:'#fff',stroke:'#222a42',strokeThickness:6}).setOrigin(.5).setDepth(110);
   }
 
   /**

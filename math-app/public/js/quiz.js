@@ -6,6 +6,9 @@
 (function() {
     'use strict';
 
+    // The shared runtime loads blocking in <head>, so the dictionary is ready.
+    const t = window.BuiI18n.t;
+
     // ========================================
     // State
     // ========================================
@@ -68,11 +71,13 @@
     const retryBtn = document.getElementById('retry-btn');
 
     // Category icons
+    // Categories arrive from the server already translated, so the icon table
+    // is keyed off the same dictionary rather than Chinese literals.
     const categoryIcons = {
-        '加法': '➕',
-        '減法': '➖',
-        '乘法': '✖️',
-        '除法': '➗'
+        [t('m.catAdd')]: '➕',
+        [t('m.catSub')]: '➖',
+        [t('m.catMul')]: '✖️',
+        [t('m.catDiv')]: '➗'
     };
 
     // ========================================
@@ -323,6 +328,7 @@
     function tokenizeQuestion(text) {
         const cleaned = String(text || '')
             .replace(/[（(]\s*只寫商\s*[)）]/g, ' ')
+            .replace(/\(\s*quotient only\s*\)/gi, ' ')
             .replace(/×/g, '*')
             .replace(/÷/g, '/')
             .replace(/[−－]/g, '-')
@@ -383,7 +389,7 @@
         const step = tokens && firstStep(tokens);
         if (!step) return null;
         const glyph = OP_GLYPH[step.op];
-        const caption = step.coversRun ? '' : '先算 ' + step.operands.join(' ' + glyph + ' ');
+        const caption = step.coversRun ? '' : t('m.workFirst') + step.operands.join(' ' + glyph + ' ');
         if (step.op === '/') {
             return { kind: 'division', dividend: step.operands[0], divisor: step.operands[1], caption };
         }
@@ -478,7 +484,7 @@
         if (!plan) {
             if (hintBtn) {
                 const was = hintBtn.textContent;
-                hintBtn.textContent = '這題不用直式';
+                hintBtn.textContent = t('m.noColumnForm');
                 setTimeout(() => { hintBtn.textContent = was; }, 1600);
             }
             return;
@@ -518,7 +524,7 @@
             const data = await res.json();
 
             if (!data.success) {
-                alert('載入題目失敗: ' + data.message);
+                alert(t('m.loadQFailed') + data.message);
                 return;
             }
 
@@ -533,7 +539,7 @@
             startTimer();
 
         } catch (error) {
-            alert('連線失敗: ' + error.message);
+            alert(t('m.connectError') + error.message);
         }
     }
 
@@ -564,7 +570,7 @@
         questions.forEach((_, i) => {
             const dot = document.createElement('div');
             dot.className = 'quiz-dot' + (i === 0 ? ' current' : '');
-            dot.title = `第 ${i + 1} 題`;
+            dot.title = t('m.questionNo', { n: i + 1 });
             quizDotsEl.appendChild(dot);
         });
     }
@@ -606,11 +612,11 @@
 
         // Update progress
         const answeredCount = answers.filter(a => a !== null).length;
-        progressText.textContent = `第 ${answeredCount + 1} / ${questions.length} 題`;
+        progressText.textContent = t('m.progress', { n: answeredCount + 1, total: questions.length });
         progressBar.style.width = `${(answeredCount / questions.length) * 100}%`;
 
         // Update question display
-        questionNumber.textContent = `第 ${idx + 1} 題`;
+        questionNumber.textContent = t('m.questionNo', { n: idx + 1 });
         questionTag.textContent = q.category;
         questionCategory.textContent = q.tagName;
         questionText.textContent = q.questionText;
@@ -624,7 +630,7 @@
         answerInput.className = 'answer-input';
         answerInput.disabled = false;
         submitBtn.disabled = false;
-        submitBtn.textContent = '確認';
+        submitBtn.textContent = t('m.confirm');
 
         // Focus input
         setTimeout(() => answerInput.focus(), 100);
@@ -673,7 +679,7 @@
             if (!data.success) {
                 alert(data.message);
                 submitBtn.disabled = false;
-                submitBtn.textContent = '確認';
+                submitBtn.textContent = t('m.confirm');
                 startTimer();
                 return;
             }
@@ -716,9 +722,9 @@
             }, 800);
 
         } catch (error) {
-            alert('提交失敗: ' + error.message);
+            alert(t('m.submitFailed') + error.message);
             submitBtn.disabled = false;
-            submitBtn.textContent = '確認';
+            submitBtn.textContent = t('m.confirm');
             startTimer();
         }
     }
@@ -769,11 +775,11 @@
         animateNumber(resultsScore, accuracy, '%');
         
         if (accuracy >= 80) {
-            resultsLabel.textContent = '🌟 太厲害了！繼續保持！';
+            resultsLabel.textContent = t('m.praiseHigh');
         } else if (accuracy >= 60) {
-            resultsLabel.textContent = '👍 不錯喔！還可以更好！';
+            resultsLabel.textContent = t('m.praiseMid');
         } else {
-            resultsLabel.textContent = '💪 加油！多練習就會進步！';
+            resultsLabel.textContent = t('m.praiseLow');
         }
 
         statCorrect.textContent = correctCount;
@@ -788,7 +794,7 @@
             
             const icon = ans.isCorrect ? '✅' : '❌';
             const iconClass = ans.isCorrect ? 'correct' : 'incorrect';
-            const userAnsText = ans.skipped ? '跳過' : ans.userAnswer;
+            const userAnsText = ans.skipped ? t('m.skipped') : ans.userAnswer;
             const correctAnsText = ans.correctAnswer !== null ? ans.correctAnswer : '?';
 
             item.innerHTML = `

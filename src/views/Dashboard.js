@@ -1,4 +1,4 @@
-import { t } from '../i18n.js';
+import { t, currentLanguage } from '../i18n.js';
 import { state, updateState } from '../store.js';
 import { MODULES } from '../config.js';
 import { renderIcon } from './Login.js';
@@ -12,7 +12,7 @@ export function renderDashboard() {
 function renderStudentDashboard() {
   const sessions = getActiveSessions(); // Fix: Export from services.js or store.js
   const mathStatusHtml = state.mathSsoStatus === 'ok'
-    ? `<div class="sso-status ok">${renderIcon('check')} 數學練習已在新分頁開啟（同帳號免登入）</div>`
+    ? `<div class="sso-status ok">${renderIcon('check')} ${t('math_sso_ok')}</div>`
     : '';
 
   return `
@@ -51,12 +51,12 @@ function renderStudentDashboard() {
 function renderHomeworkReminder() {
   const pending = state.homeworkPending || [];
   if (!pending.length) {
-    return `<div class="homework-reminder clear">${renderIcon('check')} 今天沒有待補做的欠交功課。</div>`;
+    return `<div class="homework-reminder clear">${renderIcon('check')} ${t('homework_clear')}</div>`;
   }
   return `<div class="homework-reminder">
-    <strong>你有 ${pending.length} 份功課需要補做</strong>
+    <strong>${t('homework_pending', { count: pending.length })}</strong>
     <ul>${pending.slice(0, 5).map(item => `<li>${escapeReminder(item.date)} · ${escapeReminder(item.subjectName || item.subject)} · ${escapeReminder(item.homework)}</li>`).join('')}</ul>
-    ${pending.length > 5 ? `<span>另有 ${pending.length - 5} 份…</span>` : ''}
+    ${pending.length > 5 ? `<span>${t('homework_pending_more', { count: pending.length - 5 })}</span>` : ''}
   </div>`;
 }
 
@@ -79,10 +79,10 @@ function renderStudentSessionPanel(sessions) {
         <div class="session-card">
           <div class="session-info">
             <div class="session-teacher">${renderIcon('user')} ${s.teacherName}</div>
-            <div class="session-meta">房間：${s.roomCode} · ${formatTime(s.startTime)} 開課</div>
+            <div class="session-meta">${t('session_meta', { room: s.roomCode, time: formatTime(s.startTime) })}</div>
           </div>
           <button class="primary-action session-join-btn" data-session-id="${s.teacherId}">
-            ${renderIcon('board')} 加入課堂
+            ${renderIcon('board')} ${t('join_class')}
           </button>
         </div>
       `).join('')}
@@ -91,7 +91,7 @@ function renderStudentSessionPanel(sessions) {
 }
 
 function formatTime(ts) {
-  return new Date(ts).toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' });
+  return new Date(ts).toLocaleTimeString(currentLanguage(), { hour: '2-digit', minute: '2-digit' });
 }
 
 function renderTeacherDashboard() {
@@ -110,14 +110,14 @@ function renderTeacherDashboard() {
         <p>${t('teacher_welcome_desc')}</p>
         <div class="action-row">
           ${mySession
-            ? `<button class="danger-action" id="endSessionBtn">${renderIcon('door')} 結束白板課堂</button>
-               <button class="secondary-action" id="rejoinBoardBtn">${renderIcon('board')} 重新進入白板</button>`
-            : `<button class="primary-action" id="openBoardBtn">${renderIcon('board')} 開啟白板課堂</button>`
+            ? `<button class="danger-action" id="endSessionBtn">${renderIcon('door')} ${t('end_board')}</button>
+               <button class="secondary-action" id="rejoinBoardBtn">${renderIcon('board')} ${t('rejoin_board')}</button>`
+            : `<button class="primary-action" id="openBoardBtn">${renderIcon('board')} ${t('open_board')}</button>`
           }
         </div>
         ${mySession ? `
           <div class="active-session-badge">
-            ${renderIcon('check')} 課堂進行中 · ${t('room')}${mySession.roomCode} · ${formatTime(mySession.startTime)} ${t('open_class')}
+            ${renderIcon('check')} ${t('class_live')} · ${t('room')}${mySession.roomCode} · ${formatTime(mySession.startTime)} ${t('open_class')}
           </div>
         ` : ''}
       </div>

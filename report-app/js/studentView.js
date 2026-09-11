@@ -24,7 +24,7 @@ const StudentView = {
         const select = document.getElementById('student-select');
         const students = DataManager.getAllStudents();
         const current = select.value;
-        select.innerHTML = '<option value="">-- 選擇學生 --</option>';
+        select.innerHTML = `<option value="">${t('r.pickStudentOpt')}</option>`;
         for (const name of students) {
             const opt = document.createElement('option');
             opt.value = name;
@@ -68,7 +68,7 @@ const StudentView = {
         const sel = document.getElementById('student-term-select');
         const terms = [...new Set(records.map(r => r.termLabel))];
         const current = sel.value;
-        sel.innerHTML = '<option value="all">全部</option>';
+        sel.innerHTML = `<option value="all">${t('r.allTerms')}</option>`;
         for (const t of terms) {
             const opt = document.createElement('option');
             opt.value = t;
@@ -136,23 +136,23 @@ const StudentView = {
         container.innerHTML = `
             <div class="stat-card green">
                 <div class="stat-value">${bestSubject}</div>
-                <div class="stat-label">最強科目</div>
-                <div class="stat-sub">平均 ${bestPct.toFixed(1)}%</div>
+                <div class="stat-label">${t('r.bestSubject')}</div>
+                <div class="stat-sub">${t('r.avgPct', { pct: bestPct.toFixed(1) })}</div>
             </div>
             <div class="stat-card red">
                 <div class="stat-value">${worstSubject}</div>
-                <div class="stat-label">最弱科目</div>
-                <div class="stat-sub">平均 ${worstPct.toFixed(1)}%</div>
+                <div class="stat-label">${t('r.worstSubject')}</div>
+                <div class="stat-sub">${t('r.avgPct', { pct: worstPct.toFixed(1) })}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">${records.length}</div>
-                <div class="stat-label">考績記錄數</div>
+                <div class="stat-label">${t('r.recordCount')}</div>
                 <div class="stat-sub">${records[0].grade} ~ ${records[records.length-1].grade}</div>
             </div>
             <div class="stat-card amber">
                 <div class="stat-value">${trendText}</div>
-                <div class="stat-label">整體趨勢</div>
-                <div class="stat-sub">首尾對比</div>
+                <div class="stat-label">${t('r.overallTrend')}</div>
+                <div class="stat-sub">${t('r.firstToLast')}</div>
             </div>
         `;
     },
@@ -228,7 +228,7 @@ const StudentView = {
         if (!rec) return;
 
         const numericSubjects = rec.subjects.filter(s => !s.isGrade && s.maxScore);
-        const labels = numericSubjects.map(s => s.name);
+        const labels = numericSubjects.map(s => subjectLabel(s.name));
         const data = numericSubjects.map(s => {
             const score = rec.student.scores[s.name];
             const num = DataManager.getNumericScore(score?.total);
@@ -255,7 +255,7 @@ const StudentView = {
                         pointBackgroundColor: CHART_COLORS[0],
                     },
                     {
-                        label: '全班平均',
+                        label: t('r.classAvg'),
                         data: classAvgData,
                         borderColor: '#64748B',
                         backgroundColor: 'rgba(100,116,139,0.1)',
@@ -335,7 +335,7 @@ const StudentView = {
                         spanGaps: true,
                     },
                     {
-                        label: `全班平均 (${sn})`,
+                        label: t('r.classAvgOf', { subject: subjectLabel(sn) }),
                         data: classAvgData,
                         borderColor: '#64748B',
                         backgroundColor: 'rgba(100,116,139,0.1)',
@@ -367,14 +367,14 @@ const StudentView = {
         // Build a comprehensive table: rows = subjects, columns = grade+term
         const allSubjects = [...new Set(records.flatMap(r => r.subjects.map(s => s.name)))];
 
-        let html = '<thead><tr><th>科目</th>';
+        let html = `<thead><tr><th>${t('r.colSubject')}</th>`;
         for (const rec of records) {
             html += `<th>${rec.grade} ${rec.termLabel}</th>`;
         }
         html += '</tr></thead><tbody>';
 
         for (const sn of allSubjects) {
-            html += `<tr><td class="highlight">${sn}</td>`;
+            html += `<tr><td class="highlight">${subjectLabel(sn)}</td>`;
             for (const rec of records) {
                 const score = rec.student.scores[sn];
                 const val = score ? DataManager.formatScore(score.total) : '---';

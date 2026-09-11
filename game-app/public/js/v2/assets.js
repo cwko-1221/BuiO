@@ -195,7 +195,17 @@ export const ZONE_PROP_IDS = {
   factory: ['fan','giant-gear','crate','cash-chest','book-stack','cannon'],
 };
 export const ZONES = ['castle','market','forest','farm','snow','factory'];
-export const ZONE_NAMES = { castle:'城堡', market:'市集', forest:'森林', farm:'農場', snow:'雪山', factory:'工廠' };
+// Build scripts and tests import this module under Node, where there is no
+// shared runtime — so the authored Chinese stays inline and is swapped for
+// English only when the dictionary is present.
+const say = globalThis.BuiI18n ? globalThis.BuiI18n.translator('g.zone.') : (text) => text;
+
+// Zone names reach the player through the stage pill and checkpoint toasts.
+export const ZONE_NAMES = {
+  castle: say('城堡'), market: say('市集'),
+  forest: say('森林'), farm: say('農場'),
+  snow: say('雪山'), factory: say('工廠'),
+};
 
 export function assetLedger() {
   return { version: 2, count: ASSETS.length, generatedAt: '2026-07-13', assets: ASSETS };

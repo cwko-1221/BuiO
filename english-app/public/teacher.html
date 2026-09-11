@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>教師儀表板 - English Spelling</title>
+  <title data-i18n="e.teacherTitle">教師儀表板 - English Spelling</title>
+  <script src="/shared/i18n.js?v=20260910-1"></script>
+  <script src="/shared/i18n/english.js?v=20260910-1"></script>
   <link rel="stylesheet" href="/chinese/css/style.css" />
   <style>
     .topbar::before { content: 'E'; background: linear-gradient(135deg, #f59e0b, #ef4444); }
@@ -14,6 +16,7 @@
   <script src="/english/js/common.js"></script>
   <script>
     const { api, el, toast, fmtDate, renderTopbar, ensureAuth } = EnglishApp;
+    const t = BuiI18n.t;
     const root = document.getElementById('root');
 
     let me = null;
@@ -46,11 +49,11 @@
 
     function render() {
       root.innerHTML = '';
-      root.appendChild(renderTopbar({ title: 'English Spelling 教師', user: me }));
+      root.appendChild(renderTopbar({ title: t('e.teacherBrand'), user: me }));
       const container = el('div', { class: 'container' });
       container.appendChild(el('div', { class: 'page-head' },
-        el('h1', {}, '教師儀表板'),
-        el('p', {}, '建立英文拼字練習並追蹤學生表現。')
+        el('h1', {}, t('e.dashTitle')),
+        el('p', {}, t('e.dashLead'))
       ));
       if (state.selected) container.appendChild(renderDetail(state.selected));
       else if (state.browse) container.appendChild(renderBrowsePicker());
@@ -72,48 +75,48 @@
       },
         el('div', { style: { fontSize: '1.6rem' } }, '🔎'),
         el('div', { style: { flex: 1 } },
-          el('h2', { style: { margin: 0 } }, '瀏覽題庫'),
+          el('h2', { style: { margin: 0 } }, t('e.browseBank')),
           el('p', { class: 'muted', style: { margin: '4px 0 0' } },
-            '查看所有英文題庫分類與題目，點擊圖片即可更換題庫圖片。')
+            t('e.browseBankLead'))
         ),
-        el('span', { class: 'badge info' }, '進入 →')
+        el('span', { class: 'badge info' }, t('e.enterArrow'))
       );
     }
 
     function renderBankCard() {
       const card = el('div', { class: 'card' });
-      card.appendChild(el('h2', {}, '從題庫快速建立（5 個項目）'));
+      card.appendChild(el('h2', {}, t('e.quickCreate')));
       card.appendChild(el('p', { class: 'muted', style: { marginTop: '-4px' } },
-        '選擇題庫，系統會隨機抽 5 題並自動配上圖片。'));
+        t('e.quickCreateLead')));
 
       let titleInput, categorySelect, groupSelect;
       const catOpts = state.categories.length
-        ? state.categories.map(c => el('option', { value: c.category }, `${c.category}（${c.count} 題）`))
-        : [el('option', { value: '', disabled: true }, '尚未建立英文題庫，請先執行 english schema')];
+        ? state.categories.map(c => el('option', { value: c.category }, t('e.bankOption', { category: c.category, count: c.count })))
+        : [el('option', { value: '', disabled: true }, t('e.noBank'))];
       const groupOpts = state.groups.length
-        ? state.groups.map(g => el('option', { value: `${g.classname}|${g.group}` }, `${g.label}（${g.count} 位學生）`))
-        : [el('option', { value: '', disabled: true }, '尚未找到班級')];
+        ? state.groups.map(g => el('option', { value: `${g.classname}|${g.group}` }, t('e.groupOption', { label: g.label, count: g.count })))
+        : [el('option', { value: '', disabled: true }, t('e.noGroups'))];
 
       card.appendChild(el('div', { class: 'form-grid', style: { marginTop: '8px' } },
         el('div', {},
-          el('label', {}, '作業標題'),
-          (titleInput = el('input', { type: 'text', placeholder: '例如：Animals - 第 1 課' }))
+          el('label', {}, t('e.assignTitle')),
+          (titleInput = el('input', { type: 'text', placeholder: t('e.assignTitlePh') }))
         ),
         el('div', {},
-          el('label', {}, '題庫類別'),
+          el('label', {}, t('e.bankCategory')),
           (categorySelect = el('select', {}, ...catOpts))
         )
       ));
       card.appendChild(el('div', { class: 'form-row' },
-        el('label', {}, '指派班級'),
+        el('label', {}, t('e.assignClass')),
         (groupSelect = el('select', {}, ...groupOpts))
       ));
 
       const submit = async (status) => {
         const title = titleInput.value.trim();
-        if (!title) return toast('請輸入作業標題', 'error');
-        if (!categorySelect.value) return toast('請選擇題庫類別', 'error');
-        if (!groupSelect.value) return toast('請選擇班級', 'error');
+        if (!title) return toast(t('e.needTitle'), 'error');
+        if (!categorySelect.value) return toast(t('e.needCategory'), 'error');
+        if (!groupSelect.value) return toast(t('e.needClass'), 'error');
         const [targetClassname, targetGroup] = groupSelect.value.split('|');
         try {
           await api('/api/english/teacher/assignments/from-bank', { method: 'POST', body: {
@@ -121,15 +124,15 @@
           } });
           await loadAll();
           render();
-          toast(status === 'published' ? '已隨機產生並發布' : '已存為草稿', 'success');
+          toast(t(status === 'published' ? 'e.randomPublished' : 'e.savedDraft'), 'success');
         } catch (e) { toast(e.message, 'error'); }
       };
 
       const openBrowse = async () => {
         const title = titleInput.value.trim();
-        if (!title) return toast('請輸入作業標題', 'error');
-        if (!categorySelect.value) return toast('請選擇題庫類別', 'error');
-        if (!groupSelect.value) return toast('請選擇班級', 'error');
+        if (!title) return toast(t('e.needTitle'), 'error');
+        if (!categorySelect.value) return toast(t('e.needCategory'), 'error');
+        if (!groupSelect.value) return toast(t('e.needClass'), 'error');
         try {
           const { items } = await api(`/api/english/teacher/bank/items?category=${encodeURIComponent(categorySelect.value)}`);
           state.browse = {
@@ -144,9 +147,9 @@
       };
 
       card.appendChild(el('div', { class: 'row', style: { marginTop: '12px' } },
-        el('button', { class: 'btn btn-primary', onclick: () => submit('published') }, '🎲 隨機產生並發布'),
-        el('button', { class: 'btn btn-ghost', onclick: openBrowse }, '🔍 瀏覽題庫挑 5 題'),
-        el('button', { class: 'btn btn-ghost', onclick: () => submit('draft') }, '存為草稿')
+        el('button', { class: 'btn btn-primary', onclick: () => submit('published') }, t('e.randomPublish')),
+        el('button', { class: 'btn btn-ghost', onclick: openBrowse }, t('e.browsePick')),
+        el('button', { class: 'btn btn-ghost', onclick: () => submit('draft') }, t('e.saveDraft'))
       ));
       return card;
     }
@@ -158,11 +161,11 @@
         class: 'card',
         style: { display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' },
       },
-        el('button', { class: 'btn-back', onclick: () => { state.browse = null; render(); } }, '← 返回'),
+        el('button', { class: 'btn-back', onclick: () => { state.browse = null; render(); } }, t('e.back')),
         el('div', { style: { flex: 1, minWidth: '180px' } },
-          el('h2', { style: { margin: 0 } }, `題庫：${b.category}`),
+          el('h2', { style: { margin: 0 } }, t('e.bankHeading', { category: b.category })),
           el('div', { class: 'muted', style: { marginTop: '4px' } },
-            `${b.title}｜${b.group.replace('|', '')}｜已選 `,
+            t('e.pickedPrefix', { title: b.title, group: b.group.replace('|', '') }),
             el('strong', { style: { color: 'var(--primary)' } }, String(b.picked.size)),
             ' / 5')
         ),
@@ -170,19 +173,19 @@
           class: 'btn btn-primary',
           disabled: b.picked.size !== 5,
           onclick: () => submitPick('published'),
-        }, '建立並發布'),
+        }, t('e.createPublish')),
         el('button', {
           class: 'btn btn-ghost',
           disabled: b.picked.size !== 5,
           onclick: () => submitPick('draft'),
-        }, '存為草稿')
+        }, t('e.saveDraft'))
       ));
 
       const grid = el('div', {
         class: 'card',
         style: { display: 'grid', gap: '8px', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' },
       });
-      if (!b.items.length) grid.appendChild(el('div', { class: 'empty' }, '這個分類暫時沒有題目。'));
+      if (!b.items.length) grid.appendChild(el('div', { class: 'empty' }, t('e.categoryEmpty')));
       for (const item of b.items) {
         const isPicked = b.picked.has(item.id);
         const row = el('div', {
@@ -206,7 +209,7 @@
           if (checkbox.checked) {
             if (b.picked.size >= 5) {
               checkbox.checked = false;
-              return toast('最多只能選 5 題', 'error');
+              return toast(t('e.maxFive'), 'error');
             }
             b.picked.add(item.id);
           } else {
@@ -229,7 +232,7 @@
     async function submitPick(status) {
       const b = state.browse;
       if (!b) return;
-      if (b.picked.size !== 5) return toast('請選擇 5 題', 'error');
+      if (b.picked.size !== 5) return toast(t('e.needFive'), 'error');
       const [targetClassname, targetGroup] = b.group.split('|');
       try {
         await api('/api/english/teacher/assignments/from-bank', { method: 'POST', body: {
@@ -238,7 +241,7 @@
         state.browse = null;
         await loadAll();
         render();
-        toast(status === 'published' ? '已建立並發布' : '已存為草稿', 'success');
+        toast(t(status === 'published' ? 'e.createdPublished' : 'e.savedDraft'), 'success');
       } catch (e) { toast(e.message, 'error'); }
     }
 
@@ -251,21 +254,19 @@
           else state.bankAdmin = null;
           render();
         },
-      }, state.bankAdmin.category ? '← 返回分類' : '← 返回'));
+      }, t(state.bankAdmin.category ? 'e.backCategories' : 'e.back')));
 
       wrap.appendChild(el('div', { class: 'page-head', style: { marginTop: '12px', marginBottom: '8px' } },
         el('h1', { style: { fontSize: '1.5rem' } },
-          state.bankAdmin.category ? `題庫 - ${state.bankAdmin.category}` : '瀏覽題庫'),
-        el('p', {}, state.bankAdmin.category
-          ? '點擊圖片可以上載或更換圖片；也可以新增或刪除題目。'
-          : '選擇分類查看英文單字。')
+          state.bankAdmin.category ? t('e.bankInCategory', { category: state.bankAdmin.category }) : t('e.browseBank')),
+        el('p', {}, t(state.bankAdmin.category ? 'e.bankAdminLead' : 'e.pickCategory'))
       ));
 
       if (!state.bankAdmin.category) {
         const grid = el('div', {
           style: { display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' },
         });
-        if (!state.categories.length) grid.appendChild(el('div', { class: 'card empty' }, '尚未建立英文題庫。'));
+        if (!state.categories.length) grid.appendChild(el('div', { class: 'card empty' }, t('e.noCategories')));
         for (const c of state.categories) {
           grid.appendChild(el('div', {
             class: 'assignment-card',
@@ -273,9 +274,9 @@
           },
             el('div', {},
               el('div', { class: 'title' }, c.category),
-              el('div', { class: 'sub' }, `${c.count} 題`)
+              el('div', { class: 'sub' }, t('e.wordCount', { count: c.count }))
             ),
-            el('span', { class: 'badge info' }, '查看 →')
+            el('span', { class: 'badge info' }, t('e.viewArrow'))
           ));
         }
         wrap.appendChild(grid);
@@ -288,7 +289,7 @@
         class: 'card',
         style: { display: 'grid', gap: '8px', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' },
       });
-      if (!state.bankAdmin.items.length) grid.appendChild(el('div', { class: 'empty' }, '這個分類暫時沒有題目。'));
+      if (!state.bankAdmin.items.length) grid.appendChild(el('div', { class: 'empty' }, t('e.categoryEmpty')));
       for (const item of state.bankAdmin.items) {
         grid.appendChild(el('div', {
           style: { display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', border: '1px solid var(--border)', borderRadius: '10px' },
@@ -299,23 +300,23 @@
             el('div', { class: 'muted', style: { fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, item.hint || 'No hint')
           ),
           el('button', {
-            title: '刪除題目',
+            title: t('e.deleteItem'),
             style: {
               background: 'transparent', border: '1px solid var(--border)',
               color: 'var(--danger)', borderRadius: '8px',
               padding: '4px 8px', fontSize: '0.8rem', cursor: 'pointer', flexShrink: 0,
             },
             onclick: async () => {
-              if (!confirm(`刪除題目「${item.word}」？已建立的作業不會受影響。`)) return;
+              if (!confirm(t('e.confirmDeleteItem', { word: item.word }))) return;
               try {
                 await api(`/api/english/teacher/bank/items/${item.id}`, { method: 'DELETE' });
                 state.bankAdmin.items = state.bankAdmin.items.filter(x => x.id !== item.id);
                 await refreshCategories();
                 render();
-                toast('已刪除', 'success');
+                toast(t('e.deleted'), 'success');
               } catch (e) { toast(e.message, 'error'); }
             },
-          }, '刪除')
+          }, t('e.delete'))
         ));
       }
       wrap.appendChild(grid);
@@ -324,14 +325,14 @@
 
     function renderNewItemCard(category) {
       const card = el('div', { class: 'card' });
-      card.appendChild(el('h3', { style: { margin: 0 } }, '新增題目'));
+      card.appendChild(el('h3', { style: { margin: 0 } }, t('e.addItem')));
       card.appendChild(el('p', { class: 'muted', style: { margin: '4px 0 10px' } },
-        `加入到「${category}」分類，可同時上載圖片。`));
+        t('e.addItemLead', { category })));
 
       let wordInput, hintInput;
       let stagedFile = null;
       const preview = el('div', {
-        title: '點擊上載圖片',
+        title: t('e.tapUpload'),
         style: {
           width: '56px', height: '56px', borderRadius: '10px',
           background: 'rgba(255,255,255,0.05)', border: '1px dashed var(--border)',
@@ -339,7 +340,7 @@
           color: 'var(--text-dim)', fontSize: '1.1rem', flexShrink: 0,
           backgroundSize: 'cover', backgroundPosition: 'center', cursor: 'pointer',
         },
-      }, '圖');
+      }, t('e.picShort'));
       const stagedFileInput = el('input', { type: 'file', accept: 'image/*', style: { display: 'none' } });
       stagedFileInput.addEventListener('change', () => {
         const f = stagedFileInput.files?.[0];
@@ -355,8 +356,8 @@
       preview.addEventListener('click', () => stagedFileInput.click());
 
       const row = el('div', { style: { display: 'flex', gap: '10px', alignItems: 'center' } },
-        (wordInput = el('input', { type: 'text', placeholder: 'word，例如 apple', style: { flex: '1 1 0', minWidth: 0 } })),
-        (hintInput = el('input', { type: 'text', placeholder: '提示，例如 蘋果', style: { flex: '2 1 0', minWidth: 0 } })),
+        (wordInput = el('input', { type: 'text', placeholder: t('e.wordPh'), style: { flex: '1 1 0', minWidth: 0 } })),
+        (hintInput = el('input', { type: 'text', placeholder: t('e.hintPh'), style: { flex: '2 1 0', minWidth: 0 } })),
         preview,
         stagedFileInput
       );
@@ -366,7 +367,7 @@
         onclick: async () => {
           const word = wordInput.value.trim();
           const hint = hintInput.value.trim();
-          if (!/^[a-zA-Z]{2,12}$/.test(word)) return toast('單字需要 2-12 個英文字母', 'error');
+          if (!/^[a-zA-Z]{2,12}$/.test(word)) return toast(t('e.wordRule'), 'error');
           addBtn.disabled = true;
           try {
             const { item } = await api('/api/english/teacher/bank/items', {
@@ -380,7 +381,7 @@
                 method: 'POST', body: fd, credentials: 'same-origin',
               });
               const d = await r.json();
-              if (!r.ok) throw new Error(d.message || '圖片上載失敗');
+              if (!r.ok) throw new Error(d.message || t('e.imageUploadFailed'));
               item.imageUrl = d.publicUrl;
             }
             state.bankAdmin.items = [...state.bankAdmin.items, item]
@@ -391,13 +392,13 @@
             stagedFile = null;
             stagedFileInput.value = '';
             preview.style.backgroundImage = '';
-            preview.textContent = '圖';
+            preview.textContent = t('e.picShort');
             render();
-            toast('已新增題目', 'success');
+            toast(t('e.itemAdded'), 'success');
           } catch (e) { toast(e.message, 'error'); }
           finally { addBtn.disabled = false; }
         },
-      }, '新增');
+      }, t('e.addBtn'));
 
       card.appendChild(row);
       card.appendChild(el('div', { style: { marginTop: '10px' } }, addBtn));
@@ -451,7 +452,7 @@
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           position: 'relative',
         },
-        title: '點擊更換圖片',
+        title: t('e.tapChangeImage'),
       });
       const url = item.imageUrl || emojiCodepointUrl(item.emoji);
       if (url) {
@@ -480,10 +481,10 @@
             method: 'POST', body: fd, credentials: 'same-origin',
           });
           const data = await res.json();
-          if (!res.ok) throw new Error(data.message || '圖片上載失敗');
+          if (!res.ok) throw new Error(data.message || t('e.imageUploadFailed'));
           item.imageUrl = data.publicUrl;
           render();
-          toast('已更新圖片', 'success');
+          toast(t('e.imageUpdated'), 'success');
         } catch (err) { toast(err.message, 'error'); }
       });
       wrap.appendChild(fileInput);
@@ -491,7 +492,7 @@
       if (item.imageUrl) {
         wrap.appendChild(el('button', {
           type: 'button',
-          title: '移除圖片',
+          title: t('e.removeImage'),
           style: {
             position: 'absolute', top: '-6px', right: '-6px', width: '18px', height: '18px',
             border: 'none', borderRadius: '50%', background: 'var(--danger)', color: '#fff',
@@ -504,7 +505,7 @@
               await api(`/api/english/teacher/bank/items/${item.id}/image`, { method: 'DELETE' });
               item.imageUrl = null;
               render();
-              toast('已移除圖片', 'success');
+              toast(t('e.imageRemoved'), 'success');
             } catch (err) { toast(err.message, 'error'); }
           },
         }, '×'));
@@ -514,34 +515,34 @@
 
     function renderCreateCard() {
       const card = el('div', { class: 'card' });
-      card.appendChild(el('h2', {}, '手動建立英文拼字練習（5 個項目）'));
+      card.appendChild(el('h2', {}, t('e.manualCreate')));
       let titleInput, groupSelect;
       const items = Array.from({ length: 5 }, () => ({ word: '', hint: '', imageUrl: '' }));
 
       const groupOpts = state.groups.length
-        ? state.groups.map(g => el('option', { value: `${g.classname}|${g.group}` }, `${g.label}（${g.count} 位學生）`))
-        : [el('option', { value: '', disabled: true }, '尚未找到班級')];
+        ? state.groups.map(g => el('option', { value: `${g.classname}|${g.group}` }, t('e.groupOption', { label: g.label, count: g.count })))
+        : [el('option', { value: '', disabled: true }, t('e.noGroups'))];
       card.appendChild(el('div', { class: 'form-grid' },
         el('div', {},
-          el('label', {}, '練習標題'),
-          (titleInput = el('input', { type: 'text', placeholder: '例如：Animals 拼字' }))
+          el('label', {}, t('e.practiceTitleLabel')),
+          (titleInput = el('input', { type: 'text', placeholder: t('e.practiceTitlePh') }))
         ),
         el('div', {},
-          el('label', {}, '指派班級'),
+          el('label', {}, t('e.assignClass')),
           (groupSelect = el('select', {}, ...groupOpts))
         )
       ));
-      card.appendChild(el('h3', {}, '單字項目'));
+      card.appendChild(el('h3', {}, t('e.wordItems')));
       const itemsWrap = el('div');
       items.forEach((it, i) => itemsWrap.appendChild(renderItemRow(it, i)));
       card.appendChild(itemsWrap);
 
       const submit = async (status) => {
         const title = titleInput.value.trim();
-        if (!title) return toast('請輸入練習標題', 'error');
-        if (!groupSelect.value) return toast('請選擇班級', 'error');
+        if (!title) return toast(t('e.needPracticeTitle'), 'error');
+        if (!groupSelect.value) return toast(t('e.needClass'), 'error');
         if (items.some(it => !/^[a-zA-Z]{2,12}$/.test(it.word.trim()))) {
-          return toast('每個單字需要 2-12 個英文字母', 'error');
+          return toast(t('e.everyWordRule'), 'error');
         }
         const [targetClassname, targetGroup] = groupSelect.value.split('|');
         try {
@@ -550,22 +551,22 @@
           } });
           await loadAll();
           render();
-          toast(status === 'published' ? '已發布練習' : '已存為草稿', 'success');
+          toast(t(status === 'published' ? 'e.published' : 'e.savedDraft'), 'success');
         } catch (e) { toast(e.message, 'error'); }
       };
       card.appendChild(el('div', { class: 'row', style: { marginTop: '14px' } },
-        el('button', { class: 'btn btn-primary', onclick: () => submit('published') }, '發布練習'),
-        el('button', { class: 'btn btn-ghost', onclick: () => submit('draft') }, '存為草稿')
+        el('button', { class: 'btn btn-primary', onclick: () => submit('published') }, t('e.publishBtn')),
+        el('button', { class: 'btn btn-ghost', onclick: () => submit('draft') }, t('e.saveDraft'))
       ));
       return card;
     }
 
     function renderItemRow(it, i) {
       const row = el('div', { class: 'assignment-item-form' });
-      row.appendChild(el('div', { class: 'muted', style: { marginBottom: '8px' } }, `第 ${i + 1} 題`));
+      row.appendChild(el('div', { class: 'muted', style: { marginBottom: '8px' } }, t('e.itemNo', { n: i + 1 })));
 
       const preview = el('div', {
-        title: '點擊上載圖片',
+        title: t('e.tapUpload'),
         style: {
           width: '56px', height: '56px', borderRadius: '10px',
           background: 'rgba(255,255,255,0.05)', border: '1px dashed var(--border)',
@@ -573,7 +574,7 @@
           color: 'var(--text-dim)', fontSize: '1.1rem', flexShrink: 0,
           backgroundSize: 'cover', backgroundPosition: 'center', cursor: 'pointer',
         },
-      }, '圖');
+      }, t('e.picShort'));
       const fileInput = el('input', { type: 'file', accept: 'image/*', style: { display: 'none' } });
       fileInput.addEventListener('change', async () => {
         const f = fileInput.files?.[0];
@@ -586,14 +587,14 @@
             method: 'POST', body: fd, credentials: 'same-origin',
           });
           const data = await res.json();
-          if (!res.ok) throw new Error(data.message || '圖片上載失敗');
+          if (!res.ok) throw new Error(data.message || t('e.imageUploadFailed'));
           it.imageUrl = data.publicUrl;
           preview.style.backgroundImage = `url("${data.publicUrl}")`;
           preview.textContent = '';
           removeBtn.style.display = '';
         } catch (e) {
           toast(e.message, 'error');
-          preview.textContent = '圖';
+          preview.textContent = t('e.picShort');
         }
       });
       preview.addEventListener('click', () => fileInput.click());
@@ -605,11 +606,11 @@
           e.stopPropagation();
           it.imageUrl = '';
           preview.style.backgroundImage = '';
-          preview.textContent = '圖';
+          preview.textContent = t('e.picShort');
           fileInput.value = '';
           removeBtn.style.display = 'none';
         },
-      }, '移除');
+      }, t('e.remove'));
 
       const imgCol = el('div', {
         style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', flexShrink: 0 },
@@ -619,12 +620,12 @@
         style: { display: 'flex', gap: '10px', alignItems: 'flex-start', width: '100%' },
       },
         el('input', {
-          type: 'text', placeholder: '單字，例如 apple',
+          type: 'text', placeholder: t('e.wordPh2'),
           style: { flex: '1 1 0', minWidth: 0 },
           oninput: e => { it.word = e.target.value; },
         }),
         el('input', {
-          type: 'text', placeholder: '提示，例如 蘋果',
+          type: 'text', placeholder: t('e.hintPh'),
           style: { flex: '2 1 0', minWidth: 0 },
           oninput: e => { it.hint = e.target.value; },
         }),
@@ -636,9 +637,9 @@
 
     function renderClassList() {
       const wrap = el('div');
-      wrap.appendChild(el('h2', { style: { margin: '20px 0 12px', fontSize: '1.1rem' } }, '已建立練習'));
+      wrap.appendChild(el('h2', { style: { margin: '20px 0 12px', fontSize: '1.1rem' } }, t('e.publishedList')));
       if (!state.assignments.length) {
-        wrap.appendChild(el('div', { class: 'card empty' }, '尚未建立任何英文練習。'));
+        wrap.appendChild(el('div', { class: 'card empty' }, t('e.noAssignments')));
         return wrap;
       }
       const byClass = new Map();
@@ -658,10 +659,10 @@
         onclick: () => { state.expandedClass = isOpen ? null : label; render(); },
       },
         el('div', {},
-          el('div', { class: 'title' }, `班級 ${label}`),
-          el('div', { class: 'sub' }, `${list.length} 個練習`)
+          el('div', { class: 'title' }, t('e.classLabel', { label })),
+          el('div', { class: 'sub' }, t('e.practiceCount', { count: list.length }))
         ),
-        el('span', { class: 'badge info' }, isOpen ? '收起' : '展開')
+        el('span', { class: 'badge info' }, t(isOpen ? 'e.collapse' : 'e.expand'))
       );
       if (!isOpen) return head;
       const items = el('div', { style: { marginLeft: '12px', marginTop: '8px' } });
@@ -672,10 +673,10 @@
         },
           el('div', {},
             el('div', { class: 'title' }, a.title),
-            el('div', { class: 'sub' }, `${fmtDate(a.createdAt)}｜${a.attemptCount}/${a.targetCount} 已提交`)
+            el('div', { class: 'sub' }, t('e.attemptMeta', { date: fmtDate(a.createdAt), attempts: a.attemptCount, targets: a.targetCount }))
           ),
           el('span', { class: `badge ${a.status === 'published' ? 'success' : 'warn'}` },
-            a.status === 'published' ? '已發布' : '草稿')
+            t(a.status === 'published' ? 'e.statusPublished' : 'e.statusDraft'))
         ));
       }
       const wrap = el('div');
@@ -702,13 +703,13 @@
       wrap.appendChild(el('button', {
         class: 'btn-back',
         onclick: () => { state.selected = null; state.attemptDetail = null; render(); },
-      }, '← 返回練習列表'));
+      }, t('e.backAssignments')));
       wrap.appendChild(el('div', { class: 'card', style: { marginTop: '12px' } },
         el('div', { class: 'row between' },
           el('div', {},
             el('h2', { style: { margin: 0 } }, a.title),
             el('div', { class: 'muted', style: { marginTop: '4px' } },
-              `${a.targetLabel}｜${a.status === 'published' ? '已發布' : '草稿'}`)
+              t('e.assignMeta', { label: a.targetLabel, status: t(a.status === 'published' ? 'e.statusPublished' : 'e.statusDraft') }))
           ),
           el('div', { class: 'row' },
             el('button', { class: 'btn btn-ghost', onclick: async () => {
@@ -717,26 +718,26 @@
                 await api(`/api/english/teacher/assignments/${a.id}`, { method: 'PATCH', body: { status: next } });
                 await openDetail(a);
                 await loadAll();
-                toast('已更新狀態', 'success');
+                toast(t('e.statusUpdated'), 'success');
               } catch (e) { toast(e.message, 'error'); }
-            } }, a.status === 'published' ? '改為草稿' : '發布'),
+            } }, t(a.status === 'published' ? 'e.unpublish' : 'e.publishShort')),
             el('button', { class: 'btn btn-danger', onclick: async () => {
-              if (!confirm(`刪除練習「${a.title}」？學生紀錄也會一併刪除。`)) return;
+              if (!confirm(t('e.confirmDeleteAssign', { title: a.title }))) return;
               try {
                 await api(`/api/english/teacher/assignments/${a.id}`, { method: 'DELETE' });
                 await loadAll();
                 state.selected = null;
                 render();
-                toast('已刪除', 'success');
+                toast(t('e.deleted'), 'success');
               } catch (e) { toast(e.message, 'error'); }
-            } }, '刪除練習')
+            } }, t('e.deleteAssign'))
           )
         )
       ));
       wrap.appendChild(el('div', { class: 'card' },
-        el('h3', {}, '單字項目'),
+        el('h3', {}, t('e.wordItems')),
         el('table', {}, el('thead', {}, el('tr', {},
-          el('th', {}, '#'), el('th', {}, '單字'), el('th', {}, '提示'), el('th', {}, '圖片')
+          el('th', {}, '#'), el('th', {}, t('e.colWord')), el('th', {}, t('e.colHint')), el('th', {}, t('e.colImage'))
         )), el('tbody', {}, ...a.items.map(it => el('tr', {},
           el('td', {}, it.orderIndex),
           el('td', { style: { fontSize: '1.2rem', fontWeight: 600, letterSpacing: '0.05em' } }, it.word),
@@ -747,21 +748,21 @@
         ))))
       ));
       wrap.appendChild(el('div', { class: 'card' },
-        el('h3', {}, `學生作答紀錄（${state.attempts.length}）`),
+        el('h3', {}, t('e.attemptsHeading', { count: state.attempts.length })),
         state.attempts.length === 0
-          ? el('p', { class: 'muted' }, '尚未有學生開始作答。')
+          ? el('p', { class: 'muted' }, t('e.noAttempts'))
           : el('table', {}, el('thead', {}, el('tr', {},
-              el('th', {}, '學生'), el('th', {}, '班級'), el('th', {}, '狀態'),
-              el('th', {}, '分數'), el('th', {}, '開始'), el('th', {}, '完成'), el('th', {}, '')
+              el('th', {}, t('e.colStudent')), el('th', {}, t('e.colClass')), el('th', {}, t('e.colStatus')),
+              el('th', {}, t('e.colScore')), el('th', {}, t('e.colStart')), el('th', {}, t('e.colFinish')), el('th', {}, '')
             )), el('tbody', {}, ...state.attempts.map(at => el('tr', {},
               el('td', {}, `${at.studentName} (${at.studentId})`),
               el('td', {}, `${at.className} ${at.classNo || ''}`),
               el('td', {}, el('span', { class: `badge ${at.status === 'completed' ? 'success' : 'warn'}` },
-                at.status === 'completed' ? '已完成' : '進行中')),
+                t(at.status === 'completed' ? 'e.attemptDone' : 'e.attemptOngoing'))),
               el('td', {}, `${at.score} / 5`),
               el('td', {}, fmtDate(at.startedAt)),
               el('td', {}, at.completedAt ? fmtDate(at.completedAt) : '-'),
-              el('td', {}, el('button', { class: 'btn btn-ghost', onclick: () => openAttemptDetail(at.id) }, '查看'))
+              el('td', {}, el('button', { class: 'btn btn-ghost', onclick: () => openAttemptDetail(at.id) }, t('e.view')))
             ))))
       ));
       if (state.attemptDetail) wrap.appendChild(renderAttemptDetail(state.attemptDetail));
@@ -778,16 +779,16 @@
 
     function renderAttemptDetail(d) {
       return el('div', { class: 'card' },
-        el('h3', {}, `${d.studentName}（${d.studentId}）｜${d.score}/5`),
+        el('h3', {}, t('e.attemptHeading', { name: d.studentName, id: d.studentId, score: d.score })),
         ...d.items.map(it => el('div', { class: 'assignment-item-form' },
           el('div', { class: 'row between' },
             el('div', {},
               el('strong', { style: { fontSize: '1.2rem', letterSpacing: '0.05em' } }, it.word),
-              it.hint ? el('span', { class: 'muted' }, `  ｜${it.hint}`) : null
+              it.hint ? el('span', { class: 'muted' }, t('e.hintInline', { hint: it.hint })) : null
             ),
             el('div', { class: 'row' },
-              el('span', { class: `badge ${it.correct ? 'success' : 'danger'}` }, it.correct ? '正確' : '未完成'),
-              el('span', { class: 'badge info' }, `心心 ${it.heartsLeft} / 3`)
+              el('span', { class: `badge ${it.correct ? 'success' : 'danger'}` }, t(it.correct ? 'e.itemCorrect' : 'e.itemIncomplete')),
+              el('span', { class: 'badge info' }, t('e.hearts', { left: it.heartsLeft }))
             )
           )
         ))

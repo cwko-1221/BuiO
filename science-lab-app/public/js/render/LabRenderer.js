@@ -6,6 +6,10 @@ import {
   makeLabelPlane, setLabelAnisotropy,
 } from './SceneKit.js';
 import { buildExperimentScene } from './ExperimentScenes.js';
+
+// Apparatus names are authored in Chinese; the shared table swaps them when the
+// reader has chosen English, and passes anything unmapped straight through.
+const sceneLabel = (text) => window.BuiI18n?.sceneLabel?.(text) ?? text;
 import { PhysicsWorld } from '../physics/PhysicsWorld.js';
 import { loadScienceLabKit, getAssetLibraryStats } from './AssetLibrary.js';
 
@@ -239,8 +243,8 @@ export class LabRenderer {
   #createSceneApi() {
     const api = {
       root: this.experimentRoot,
-      entity: (id, label, object, options = {}) => this.#registerEntity(id, label, object, options),
-      target: (id, label, object, options = {}) => this.#registerTarget(id, label, object, options),
+      entity: (id, label, object, options = {}) => this.#registerEntity(id, sceneLabel(label), object, options),
+      target: (id, label, object, options = {}) => this.#registerTarget(id, sceneLabel(label), object, options),
       moveObject: (object, destination, options) => this.moveObject(object, destination, options),
       animateScale: (object, scale, duration) => this.animateScale(object, scale, duration),
       tiltPour: (object, destination, color, options) => this.tiltPour(object, destination, color, options),

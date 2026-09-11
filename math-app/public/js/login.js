@@ -38,13 +38,13 @@
         const password = passwordInput.value;
 
         if (!studentId || !password) {
-            showError('請輸入學號和密碼');
+            showError(BuiI18n.t('m.loginNeedBoth'));
             return;
         }
 
         // 顯示載入狀態
         loginBtn.disabled = true;
-        loginBtn.textContent = '⏳ 登入中...';
+        loginBtn.textContent = BuiI18n.t('m.loggingIn');
         hideError();
 
         try {
@@ -59,7 +59,7 @@
 
             if (data.success) {
                 // 登入成功，跳轉
-                loginBtn.textContent = '✅ 登入成功！';
+                loginBtn.textContent = BuiI18n.t('m.loginOk');
                 loginBtn.style.background = 'var(--gradient-success)';
                 
                 setTimeout(() => {
@@ -70,12 +70,12 @@
                     }
                 }, 500);
             } else {
-                showError(data.message || '登入失敗');
+                showError(data.message || BuiI18n.t('m.loginFailed'));
                 loginBtn.disabled = false;
-                loginBtn.textContent = '🚀 開始學習';
+                loginBtn.textContent = BuiI18n.t('m.startLearning');
             }
         } catch (error) {
-            showError('連線失敗，請稍後再試');
+            showError(BuiI18n.t('m.connectFailed'));
             loginBtn.disabled = false;
             loginBtn.textContent = '🚀 開始學習';
         }

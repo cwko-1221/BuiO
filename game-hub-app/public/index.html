@@ -4,72 +4,74 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#11142a">
-  <title>遊戲問答 | BuiO</title>
+  <title data-i18n="gh.pageTitle">遊戲問答 | BuiO</title>
+  <script src="/shared/i18n.js?v=20260910-1"></script>
+  <script src="/shared/i18n/game-hub.js?v=20260910-1"></script>
   <link rel="stylesheet" href="/games/css/game-hub.css?v=20260802-2">
   <link rel="stylesheet" href="/games/css/question-bank-editor.css?v=20260802-1">
 </head>
 <body>
   <main class="hub-app">
     <header class="hub-topbar">
-      <a class="hub-brand" href="/"><span class="brand-mark">B</span><span>BuiO <b>遊戲問答</b></span></a>
-      <span id="roleBadge" class="role-badge">載入中</span>
-      <a class="back-link" href="/">返回平台</a>
+      <a class="hub-brand" href="/"><span class="brand-mark">B</span><span>BuiO <b data-i18n="gh.brand">遊戲問答</b></span></a>
+      <span id="roleBadge" class="role-badge" data-i18n="gh.loading">載入中</span>
+      <a class="back-link" href="/" data-i18n="gh.back">返回平台</a>
     </header>
 
-    <section id="loadingView" class="hub-view active loading-view"><span class="loader"></span><p>正在準備遊戲問答大堂…</p></section>
+    <section id="loadingView" class="hub-view active loading-view"><span class="loader"></span><p data-i18n="gh.preparing">正在準備遊戲問答大堂…</p></section>
 
     <section id="teacherView" class="hub-view teacher-view">
       <div class="hub-hero">
-        <div><div class="eyebrow">QUIZ GAME STUDIO</div><h1>一個題庫，<em>兩種冒險</em></h1><p>依次選擇題庫、遊戲和課堂規則，然後進入該遊戲原有老師等待室。</p></div>
+        <div><div class="eyebrow">QUIZ GAME STUDIO</div><h1 data-i18n-html="gh.heroTitle">一個題庫，<em>兩種冒險</em></h1><p data-i18n="gh.heroLead">依次選擇題庫、遊戲和課堂規則，然後進入該遊戲原有老師等待室。</p></div>
         <div class="hero-orbits" aria-hidden="true"><i></i><i></i><span>?</span></div>
       </div>
 
       <div class="teacher-flow">
         <section class="flow-card bank-card">
-          <header><span>01</span><div><h2>選擇題庫</h2><p>這個題庫會由所選遊戲派發給學生</p></div></header>
-          <div id="hubSetList" class="hub-set-list"><div class="empty-state"><i></i>正在載入題庫…</div></div>
+          <header><span>01</span><div><h2 data-i18n="gh.step1Title">選擇題庫</h2><p data-i18n="gh.step1Lead">這個題庫會由所選遊戲派發給學生</p></div></header>
+          <div id="hubSetList" class="hub-set-list"><div class="empty-state"><i></i><span data-i18n="gh.setsLoading">正在載入題庫…</span></div></div>
           <div class="bank-footer">
-            <button id="newSetBtn" class="new-set-button" type="button"><span>＋</span><b>新增題庫</b><small>手動輸入或 Excel 匯入</small></button>
+            <button id="newSetBtn" class="new-set-button" type="button"><span>＋</span><b data-i18n="gh.newBank">新增題庫</b><small data-i18n="gh.newBankHint">手動輸入或 Excel 匯入</small></button>
             <p id="bankAvailabilityNote" class="bank-availability-note"></p>
           </div>
         </section>
 
         <section class="flow-card game-card-panel locked" id="gameStep">
-          <header><span>02</span><div><h2>選擇遊戲</h2><p>兩款遊戲沿用各自的等待和遊玩介面</p></div></header>
+          <header><span>02</span><div><h2 data-i18n="gh.step2Title">選擇遊戲</h2><p data-i18n="gh.step2Lead">兩款遊戲沿用各自的等待和遊玩介面</p></div></header>
           <div class="game-choice-grid">
             <button class="game-choice climb" data-game="climb" disabled>
               <span class="game-art"><i class="mountain"></i><i class="climber">↑</i></span>
-              <span class="game-copy"><small>CLASS RACE</small><b>唔好望落嚟</b><em>全班同步攀登競速</em></span><strong>選擇</strong>
+              <span class="game-copy"><small>CLASS RACE</small><b data-i18n="gh.climbName">唔好望落嚟</b><em data-i18n="gh.climbTag">全班同步攀登競速</em></span><strong data-i18n="gh.choose">選擇</strong>
             </button>
             <button class="game-choice defence" data-game="tower-defense" disabled>
               <span class="game-art"><i class="crystal">◇</i><i class="turret">⌁</i></span>
-              <span class="game-copy"><small>TACTICAL DEFENCE</small><b>晶核守衛戰</b><em>各自選地圖守住 15 波</em></span><strong>選擇</strong>
+              <span class="game-copy"><small>TACTICAL DEFENCE</small><b data-i18n="gh.towerName">晶核守衛戰</b><em data-i18n="gh.towerTag">各自選地圖守住 15 波</em></span><strong data-i18n="gh.choose">選擇</strong>
             </button>
           </div>
           <p id="compatibilityNote" class="compatibility-note"></p>
         </section>
 
         <section class="flow-card settings-card locked" id="settingsStep">
-          <header><span>03</span><div><h2>遊戲設定</h2><p id="settingsDescription">選擇遊戲後顯示設定</p></div></header>
+          <header><span>03</span><div><h2 data-i18n="gh.step3Title">遊戲設定</h2><p id="settingsDescription" data-i18n="gh.step3Lead">選擇遊戲後顯示設定</p></div></header>
           <div id="climbSettings" class="settings-panel" hidden>
-            <label><span>遊戲時間</span><select id="durationSelect"><option value="300">5 分鐘</option><option value="480" selected>8 分鐘</option><option value="600">10 分鐘</option><option value="900">15 分鐘</option></select></label>
-            <label><span>最高能量</span><input id="maxEnergyInput" type="number" min="20" max="500" step="5" value="100"></label>
-            <label><span>答對能量</span><input id="energyPerCorrectInput" type="number" min="1" max="100" value="25"></label>
-            <label class="toggle-setting"><span><b>無限能量</b><small>學生毋須答題補充能量</small></span><input id="infiniteEnergyToggle" type="checkbox"></label>
+            <label><span data-i18n="gh.duration">遊戲時間</span><select id="durationSelect"><option value="300" data-i18n="gh.min5">5 分鐘</option><option value="480" selected data-i18n="gh.min8">8 分鐘</option><option value="600" data-i18n="gh.min10">10 分鐘</option><option value="900" data-i18n="gh.min15">15 分鐘</option></select></label>
+            <label><span data-i18n="gh.maxEnergy">最高能量</span><input id="maxEnergyInput" type="number" min="20" max="500" step="5" value="100"></label>
+            <label><span data-i18n="gh.energyPerCorrect">答對能量</span><input id="energyPerCorrectInput" type="number" min="1" max="100" value="25"></label>
+            <label class="toggle-setting"><span><b data-i18n="gh.infiniteEnergy">無限能量</b><small data-i18n="gh.infiniteEnergyHint">學生毋須答題補充能量</small></span><input id="infiniteEnergyToggle" type="checkbox"></label>
           </div>
           <div id="towerSettings" class="tower-rules" hidden>
-            <div><small>難度</small><b>固定守衛級</b></div><div><small>戰場</small><b>學生自行選擇</b></div><div><small>規則</small><b>每波答對 2 題</b></div><div><small>戰役</small><b>15 波 · 30 秒整備</b></div>
+            <div><small data-i18n="gh.towerDifficulty">難度</small><b data-i18n="gh.towerDifficultyValue">固定守衛級</b></div><div><small data-i18n="gh.towerField">戰場</small><b data-i18n="gh.towerFieldValue">學生自行選擇</b></div><div><small data-i18n="gh.towerRules">規則</small><b data-i18n="gh.towerRulesValue">每波答對 2 題</b></div><div><small data-i18n="gh.towerCampaign">戰役</small><b data-i18n="gh.towerCampaignValue">15 波 · 30 秒整備</b></div>
           </div>
-          <button id="createGameBtn" class="create-game-button" disabled><span>建立遊戲房間</span><small>完成以上三個步驟</small></button>
+          <button id="createGameBtn" class="create-game-button" disabled><span data-i18n="gh.createRoom">建立遊戲房間</span><small data-i18n="gh.createRoomHint">完成以上三個步驟</small></button>
           <div id="teacherHubError" class="hub-error"></div>
         </section>
       </div>
     </section>
 
     <section id="studentView" class="hub-view student-view">
-      <div class="student-hero"><div><div class="eyebrow">LIVE QUIZ ROOMS</div><h1>選擇老師的<br><em>遊戲房間</em></h1><p>加入後會直接進入該遊戲原有學生等待介面。</p></div><div class="live-chip"><i></i><span>自動更新</span></div></div>
-      <div class="room-filter" role="group" aria-label="篩選遊戲"><button class="selected" data-filter="all">全部房間</button><button data-filter="climb">唔好望落嚟</button><button data-filter="tower-defense">晶核守衛戰</button></div>
-      <div id="unifiedRoomList" class="unified-room-list"><div class="empty-state"><i></i>正在搜尋老師開啟的房間…</div></div>
+      <div class="student-hero"><div><div class="eyebrow">LIVE QUIZ ROOMS</div><h1 data-i18n-html="gh.studentTitle">選擇老師的<br><em>遊戲房間</em></h1><p data-i18n="gh.studentLead">加入後會直接進入該遊戲原有學生等待介面。</p></div><div class="live-chip"><i></i><span data-i18n="gh.autoRefresh">自動更新</span></div></div>
+      <div class="room-filter" role="group" aria-label="篩選遊戲" data-i18n-attr="aria-label:gh.filterGames"><button class="selected" data-filter="all" data-i18n="gh.allRooms">全部房間</button><button data-filter="climb" data-i18n="gh.climbName">唔好望落嚟</button><button data-filter="tower-defense" data-i18n="gh.towerName">晶核守衛戰</button></div>
+      <div id="unifiedRoomList" class="unified-room-list"><div class="empty-state"><i></i><span data-i18n="gh.searchingRooms">正在搜尋老師開啟的房間…</span></div></div>
       <div id="studentHubError" class="hub-error"></div>
     </section>
   </main>
@@ -77,27 +79,27 @@
   <div id="questionBankModal" class="bank-modal" hidden>
     <section class="bank-editor" role="dialog" aria-modal="true" aria-labelledby="bankEditorTitle">
       <header class="bank-editor-head">
-        <div><div class="eyebrow">QUESTION BANK BUILDER</div><h2 id="bankEditorTitle">新增題庫</h2><p>所有題目均使用四選一格式，兩款遊戲都可直接使用。</p></div>
-        <button id="closeEditorBtn" class="editor-close" type="button" aria-label="關閉題庫編輯器">✕</button>
+        <div><div class="eyebrow">QUESTION BANK BUILDER</div><h2 id="bankEditorTitle" data-i18n="gh.editorNew">新增題庫</h2><p data-i18n="gh.editorLead">所有題目均使用四選一格式，兩款遊戲都可直接使用。</p></div>
+        <button id="closeEditorBtn" class="editor-close" type="button" aria-label="關閉題庫編輯器" data-i18n-attr="aria-label:gh.editorClose">✕</button>
       </header>
       <div class="bank-editor-body">
-        <label class="set-title-field"><span>題庫名稱</span><input id="editorSetTitle" type="text" maxlength="60" placeholder="例如：中一數學溫習"></label>
+        <label class="set-title-field"><span data-i18n="gh.bankName">題庫名稱</span><input id="editorSetTitle" type="text" maxlength="60" placeholder="例如：中一數學溫習" data-i18n-attr="placeholder:gh.bankNamePh"></label>
         <div class="excel-toolbar">
           <input id="excelImportInput" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
-          <button id="excelImportBtn" class="editor-tool-button primary" type="button">匯入 Excel</button>
-          <button id="excelTemplateBtn" class="editor-tool-button" type="button">下載 Excel 範本</button>
-          <span id="excelImportStatus">支援 .xlsx，每列一題</span>
+          <button id="excelImportBtn" class="editor-tool-button primary" type="button" data-i18n="gh.importExcel">匯入 Excel</button>
+          <button id="excelTemplateBtn" class="editor-tool-button" type="button" data-i18n="gh.downloadTemplate">下載 Excel 範本</button>
+          <span id="excelImportStatus" data-i18n="gh.excelHint">支援 .xlsx，每列一題</span>
         </div>
         <div id="editorQuestions" class="editor-questions"></div>
-        <button id="addQuestionBtn" class="add-question-button" type="button">＋ 新增一題</button>
+        <button id="addQuestionBtn" class="add-question-button" type="button" data-i18n="gh.addQuestion">＋ 新增一題</button>
         <div id="editorError" class="editor-error" role="alert"></div>
       </div>
       <footer class="bank-editor-actions">
-        <button id="cancelEditorBtn" class="editor-cancel" type="button">取消</button>
-        <button id="saveSetBtn" class="editor-save" type="button"><span>儲存題庫</span><small>儲存後可立即選用</small></button>
+        <button id="cancelEditorBtn" class="editor-cancel" type="button" data-i18n="gh.cancel">取消</button>
+        <button id="saveSetBtn" class="editor-save" type="button"><span data-i18n="gh.saveBank">儲存題庫</span><small data-i18n="gh.saveBankHint">儲存後可立即選用</small></button>
       </footer>
     </section>
   </div>
-  <script type="module" src="/games/js/game-hub.js?v=20260802-2"></script>
+  <script type="module" src="/games/js/game-hub.js?v=20260910-1"></script>
 </body>
 </html>

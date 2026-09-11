@@ -20,6 +20,23 @@ const {
 
 const ADMIN_PASSWORD = '999999';
 
+// The hub owns the language switch, but every other module is a separate page
+// load that needs the answer before its first paint. A readable cookie is the
+// only channel that is there synchronously, so login and every language change
+// re-stamp it alongside the session.
+function stampLanguage(req, res, language) {
+  const value = isSupportedLanguage(language) ? language : 'zh-HK';
+  if (req.session) req.session.language = value;
+  res.cookie('buiLang', value, {
+    httpOnly: false,
+    sameSite: 'lax',
+    secure: config.session.secure,
+    maxAge: config.session.maxAge,
+    path: '/',
+  });
+  return value;
+}
+
 function adminPasswordMatches(value) {
   const received = Buffer.from(String(value || ''));
   const expected = Buffer.from(ADMIN_PASSWORD);
@@ -54,6 +71,7 @@ router.post('/login', async (req, res, next) => {
     req.session.studentName = user.name;
     req.session.role = user.role || 'student';
     req.session.adminUnlocked = false;
+    stampLanguage(req, res, user.language);
 
     res.json({
       success: true,
@@ -75,6 +93,7 @@ router.post('/login', async (req, res, next) => {
 // ----------------------------------------------------------------
 router.post('/logout', (req, res) => {
   req.session = null;
+  res.clearCookie('buiLang', { path: '/' });
   res.json({ success: true, message: '已登出' });
 });
 
@@ -110,6 +129,7 @@ router.get('/me', async (req, res, next) => {
       req.session.studentName = u.name;
       req.session.role = u.role || 'student';
     }
+    stampLanguage(req, res, u?.language);
     res.json({
       success: true,
       student: {
@@ -137,6 +157,7 @@ router.put('/language', async (req, res, next) => {
   }
   try {
     await users.updateLanguage(req.session.studentId, language);
+    stampLanguage(req, res, language);
     res.json({ success: true, message: '語言設定已更新', language });
   } catch (e) { next(e); }
 });

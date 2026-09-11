@@ -203,9 +203,9 @@ const mainPhaseSource = await readFile(path.join(sourceRoot, 'js', 'main.js'), '
 assert.match(mainPhaseSource, /openObservation\(\)/, 'an investigation opens on its observation phase');
 assert.match(mainPhaseSource, /function openAnalysis\(/, 'analysis and reflection run before the explanation');
 assert.match(mainPhaseSource, /function runStage\(/, 'the inquiry phases run as a full-screen slide sequence');
-assert.match(mainPhaseSource, /chapterSlide\('第一步', '觀察'/, 'the cycle opens by naming the observation phase');
-assert.match(mainPhaseSource, /chapterSlide\('第二步', '假說'/, 'the hypothesis phase is announced before it is asked');
-assert.match(mainPhaseSource, /chapterSlide\('第四步', '分析與反思'/, 'analysis is announced before the evidence is shown');
+assert.match(mainPhaseSource, /chapterSlide\(t\('sl\.chapterOne'\), t\('sl\.chapterObserve'\)/, 'the cycle opens by naming the observation phase');
+assert.match(mainPhaseSource, /chapterSlide\(t\('sl\.chapterTwo'\), t\('sl\.chapterHypothesis'\)/, 'the hypothesis phase is announced before it is asked');
+assert.match(mainPhaseSource, /chapterSlide\(t\('sl\.chapterFour'\), t\('sl\.chapterAnalyse'\)/, 'analysis is announced before the evidence is shown');
 assert.match(mainPhaseSource, /MEDIA_BASE = '\/science-lab\/media'/, 'observation clips load from the protected media route');
 for (const slide of ['videoSlide', 'noticeSlide', 'wonderSlide', 'hypothesisSlide', 'analysisSlide', 'reflectionSlide']) {
   assert.ok(mainPhaseSource.includes(`function ${slide}(`), `the cycle has a dedicated ${slide}`);

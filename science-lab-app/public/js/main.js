@@ -1,4 +1,8 @@
 import { experiments, experimentById, getNextExperiment } from './data/experiments.js';
+
+// The shared runtime is loaded blocking in <head>, so the dictionary is ready
+// before this module's first render.
+const t = window.BuiI18n.t;
 import { LabSimulation } from './simulation/LabSimulation.js';
 import { ProgressStore } from './persistence/ProgressStore.js';
 import { AudioEngine } from './audio/AudioEngine.js';
@@ -57,19 +61,19 @@ let settings = ProgressStore.loadSettings();
 const activeExperimentIds = experiments.map((experiment) => experiment.id);
 
 async function boot() {
-  setBoot(12, '正在載入實驗內容…');
+  setBoot(12, t('sl.bootContent'));
   let studentId;
   try {
     studentId = await resolveStudentId();
   } catch (error) {
     console.error('3D laboratory initialization failed.', error);
-    setBoot(100, '登入資料已失效，正在返回平台…');
+    setBoot(100, t('sl.bootExpired'));
     setTimeout(() => { location.href = '/'; }, 900);
     return;
   }
   store = new ProgressStore(studentId);
   audio = new AudioEngine(settings.sound);
-  setBoot(35, '正在生成卡通器材…');
+  setBoot(35, t('sl.bootApparatus'));
   try {
     renderer = new LabRenderer($('#labCanvas'), {
       settings,
@@ -93,7 +97,7 @@ async function boot() {
       },
     });
     await renderer.init();
-    showToast('裝置未能啟動 3D，已切換至可完整操作的簡化場景。', 'try');
+    showToast(t('sl.fallbackNotice'), 'try');
   }
   if (location.pathname.endsWith('/preview')) {
     window.__scienceLabTest = {
@@ -110,12 +114,12 @@ async function boot() {
       rendererKind: () => document.body.classList.contains('no-webgl') ? 'fallback' : 'webgl',
     };
   }
-  setBoot(68, '正在整理你的科學筆記…');
+  setBoot(68, t('sl.bootNotebook'));
   renderCards();
   renderProgress();
   applySettings();
   bindEvents();
-  setBoot(100, '實驗室準備好了！');
+  setBoot(100, t('sl.bootReady'));
   setTimeout(() => {
     dom.boot.classList.add('done');
     dom.topbar.hidden = false;
@@ -153,11 +157,11 @@ function renderCards(filter = 'all') {
     const completed = Boolean(progress?.completed);
     const stars = completed ? '★'.repeat(progress.bestScore || 1) + '☆'.repeat(3 - (progress.bestScore || 1)) : '☆☆☆';
     return `<button class="experiment-card ${completed ? 'completed' : ''}" style="--accent:${experiment.color}" data-experiment="${experiment.id}" data-topic="${experiment.topic}" ${filter !== 'all' && experiment.topic !== filter ? 'hidden' : ''} type="button" aria-label="${experiment.title}，${experiment.question}">
-      <span class="card-art"><span class="card-illustration">${illustrationSvg(experiment.icon)}</span><span class="card-complete" aria-label="已完成">✓</span></span>
+      <span class="card-art"><span class="card-illustration">${illustrationSvg(experiment.icon)}</span><span class="card-complete" aria-label="${t('sl.completed')}">✓</span></span>
       <span class="card-copy">
-        <span class="card-topline"><span class="card-topic">${experiment.topic}</span><span>${experiment.minutes} 分鐘 · ${experiment.grades}</span></span>
+        <span class="card-topline"><span class="card-topic">${experiment.topic}</span><span>${t('sl.cardMeta', { minutes: experiment.minutes, grades: experiment.grades })}</span></span>
         <h3>${experiment.title}</h3><p>${experiment.question}</p>
-        <span class="card-footer"><span class="card-stars" aria-label="${completed ? `${progress.bestScore} 星` : '未完成'}">${stars}</span><span class="card-arrow" aria-hidden="true">→</span></span>
+        <span class="card-footer"><span class="card-stars" aria-label="${completed ? t('sl.starsLabel', { count: progress.bestScore }) : t('sl.notCompleted')}">${stars}</span><span class="card-arrow" aria-hidden="true">→</span></span>
       </span>
     </button>`;
   }).join('');
@@ -169,7 +173,7 @@ function renderProgress() {
   dom.progressCount.textContent = `${complete} / ${experiments.length}`;
   const percentage = Math.round((complete / experiments.length) * 100);
   dom.progressRing.style.background = `conic-gradient(var(--yellow) ${percentage}%, rgba(255,255,255,.18) 0)`;
-  dom.continue.querySelector('span').textContent = complete ? '繼續我的探究' : '開始第一個實驗';
+  dom.continue.querySelector('span').textContent = t(complete ? 'sl.continueMine' : 'sl.startFirst');
 }
 
 function startExperiment(id, { forceNew = false } = {}) {
@@ -187,7 +191,7 @@ function startExperiment(id, { forceNew = false } = {}) {
   dom.catalog.hidden = true;
   dom.lab.hidden = false;
   dom.labNumber.textContent = String(definition.number).padStart(2, '0');
-  dom.labMeta.textContent = `${definition.topic} · ${definition.grades} · 約 ${definition.minutes} 分鐘`;
+  dom.labMeta.textContent = t('sl.labMeta', { topic: definition.topic, grades: definition.grades, minutes: definition.minutes });
   dom.labTitle.textContent = definition.title;
   setMissionCollapsed(true);
   dom.hintBox.hidden = true;
@@ -196,7 +200,7 @@ function startExperiment(id, { forceNew = false } = {}) {
   history.replaceState(null, '', `#${definition.id}`);
   updateMission();
   if (canRestore) {
-    showToast(`已回復到步驟 ${saved.currentStep + 1}，可以繼續探究。`, 'success');
+    showToast(t('sl.resumed', { n: saved.currentStep + 1 }), 'success');
   } else {
     openObservation();
   }
@@ -209,18 +213,18 @@ function bindSimulation() {
   });
   simulation.addEventListener('actionrejected', (event) => {
     const messages = {
-      'wrong-object': '這件器材也很有趣，但今步要使用發光提示的器材。',
-      'wrong-target': '位置未對準。留意目標位置的光圈，再放近一點。',
-      'wrong-verb': '試試依照任務提示，用另一種操作方法。',
-      'adjust-more': '方向正確！再調校一點，留意數值變化。',
-      'record-mismatch': '再看清楚儀器上的讀數，然後選一次。',
-      'record-missing': '請在數據面板選一個讀數。',
+      'wrong-object': t('sl.tryWrongObject'),
+      'wrong-target': t('sl.tryWrongTarget'),
+      'wrong-verb': t('sl.tryWrongVerb'),
+      'adjust-more': t('sl.tryAdjustMore'),
+      'record-mismatch': t('sl.tryRecordMismatch'),
+      'record-missing': t('sl.tryRecordMissing'),
     };
-    showToast(messages[event.detail.reason] || '再觀察一下器材和目標位置。', 'try');
+    showToast(messages[event.detail.reason] || t('sl.tryDefault'), 'try');
   });
   simulation.addEventListener('stepcomplete', (event) => {
     showObservation(event.detail.step.observation);
-    showToast('觀察完成，證據已記入科學筆記。', 'success');
+    showToast(t('sl.observeDone'), 'success');
     audio.play('step');
     flashScreen();
   });
@@ -240,8 +244,8 @@ function updateMission() {
   const step = simulation.step;
   if (!step) return;
   const index = simulation.state.currentStep;
-  dom.stepLabel.textContent = `步驟 ${index + 1} / ${currentExperiment.steps.length}`;
-  dom.missionPeekStep.textContent = `步驟 ${index + 1} / ${currentExperiment.steps.length}`;
+  dom.stepLabel.textContent = t('sl.stepOf', { n: index + 1, total: currentExperiment.steps.length });
+  dom.missionPeekStep.textContent = dom.stepLabel.textContent;
   dom.stepProgress.style.width = `${((index + 1) / currentExperiment.steps.length) * 100}%`;
   dom.missionVerb.textContent = step.verb;
   dom.missionTitle.textContent = step.title;
@@ -250,9 +254,9 @@ function updateMission() {
   dom.missionCue.lastElementChild.textContent = step.cue;
   dom.hintBox.hidden = true;
   dom.hintBox.textContent = step.hint;
-  dom.accessible.setAttribute('aria-label', `以按鈕完成：${step.instruction}`);
-  dom.accessible.textContent = step.action.type === 'adjust' ? '套用建議數值'
-    : step.action.type === 'record' ? '填入儀器讀數' : '按鈕操作';
+  dom.accessible.setAttribute('aria-label', t('sl.accessibleAria', { instruction: step.instruction }));
+  dom.accessible.textContent = step.action.type === 'adjust' ? t('sl.accessibleAdjust')
+    : step.action.type === 'record' ? t('sl.accessibleRecord') : t('sl.accessible');
   renderer.setStep(step);
   configureVariable(step);
   configureRecord(step);
@@ -263,7 +267,7 @@ function configureRecord(step) {
   const isRecord = action.type === 'record';
   dom.recordPanel.hidden = !isRecord;
   if (!isRecord) return;
-  dom.recordLabel.textContent = `${action.label || '讀數'}${action.unit ? `（${action.unit}）` : ''}`;
+  dom.recordLabel.textContent = action.unit ? t('sl.readingWithUnit', { label: action.label || t('sl.reading'), unit: action.unit }) : (action.label || t('sl.reading'));
   dom.recordOptions.replaceChildren(...action.options.map((option, index) => {
     const button = document.createElement('button');
     button.type = 'button';
@@ -291,7 +295,7 @@ function configureVariable(step) {
   dom.slider.max = String(high);
   dom.slider.step = high - low <= 10 ? '0.5' : '1';
   dom.slider.value = String(value);
-  dom.variableLabel.textContent = step.verb === '公轉' ? '軌道角度' : step.verb === '自轉' ? '自轉角度' : step.verb === '抽氣' ? '鐘罩氣壓' : step.verb === '推進' ? '經過時間' : '調校數值';
+  dom.variableLabel.textContent = t('sl.variableLabel');
   dom.variable.dataset.subject = action.subject;
   dom.variable.dataset.unit = action.unit || '';
   syncVariableValue(value);
@@ -388,7 +392,7 @@ function renderStageSlide() {
   }));
   dom.stageDots.hidden = slide.kind === 'chapter' || total < 2;
 
-  dom.stageNext.textContent = slide.next || '繼續';
+  dom.stageNext.textContent = slide.next || t('sl.continue');
   dom.stageNext.disabled = Boolean(slide.locked);
   if (slide.kind === 'analysis') dom.stageNext.disabled = false;
   dom.stageNext.hidden = slide.kind === 'chapter';
@@ -426,8 +430,8 @@ function videoSlide(definition) {
   return {
     kind: 'video',
     id: 'observe-video',
-    kicker: '第一步 · 觀察 OBSERVE',
-    next: '看完了',
+    kicker: t('sl.stepOneKicker'),
+    next: t('sl.watched'),
     render() {
       const wrap = element('div', 'stage-video');
       wrap.append(element('h2', 'stage-heading', definition.observe.title));
@@ -442,7 +446,7 @@ function videoSlide(definition) {
       const fallback = element('div', 'stage-video-fallback');
       fallback.id = 'observeFallback';
       fallback.append(element('span', null, '◎'));
-      fallback.append(element('p', null, '這個探究的觀察影片尚未加入。先記住下面的問題，在實驗中親自觀察。'));
+      fallback.append(element('p', null, t('sl.noClip')));
       frame.append(video, fallback);
       wrap.append(frame);
       wrap.append(element('p', 'stage-caption', definition.observe.caption));
@@ -469,10 +473,10 @@ function noticeSlide(definition) {
   return {
     kind: 'notice',
     id: 'observe-notice',
-    kicker: '第一步 · 觀察 OBSERVE',
+    kicker: t('sl.stepOneKicker'),
     render() {
       const wrap = element('div', 'stage-notice');
-      wrap.append(element('h2', 'stage-heading', '看的時候留意'));
+      wrap.append(element('h2', 'stage-heading', t('sl.watchFor')));
       const list = element('ul', 'stage-list');
       list.id = 'observeNotice';
       for (const item of definition.observe.notice) list.append(element('li', null, item));
@@ -486,11 +490,11 @@ function wonderSlide(definition) {
   return {
     kind: 'wonder',
     id: 'observe-wonder',
-    kicker: '第一步 · 觀察 OBSERVE',
-    next: '我要提出假說',
+    kicker: t('sl.stepOneKicker'),
+    next: t('sl.toHypothesis'),
     render() {
       const wrap = element('div', 'stage-wonder');
-      wrap.append(element('p', 'stage-lead', '我的疑問是⋯⋯'));
+      wrap.append(element('p', 'stage-lead', t('sl.myQuestion')));
       const question = element('h2', 'stage-question', definition.observe.wonder);
       question.id = 'observeWonder';
       wrap.append(question);
@@ -503,8 +507,8 @@ function hypothesisSlide(definition) {
   return {
     kind: 'hypothesis',
     id: 'hypothesis',
-    kicker: '第二步 · 假說 HYPOTHESIS',
-    next: '用實驗驗證',
+    kicker: t('sl.stepTwoKicker'),
+    next: t('sl.testIt'),
     locked: true,
     render() {
       const wrap = element('div', 'stage-choice');
@@ -512,7 +516,7 @@ function hypothesisSlide(definition) {
       const options = element('div', 'stage-options');
       options.id = 'predictionOptions';
       options.setAttribute('role', 'radiogroup');
-      options.setAttribute('aria-label', '選擇你的假說');
+      options.setAttribute('aria-label', t('sl.chooseHypothesis'));
       definition.prediction.options.forEach((option, index) => {
         const button = element('button', 'stage-option');
         button.type = 'button';
@@ -534,7 +538,7 @@ function hypothesisSlide(definition) {
       });
       wrap.append(options);
       const safety = element('p', 'stage-safety');
-      safety.append(element('b', null, '安全提示：'));
+      safety.append(element('b', null, t('sl.safetyLead')));
       safety.append(document.createTextNode(definition.safety));
       wrap.append(safety);
       return wrap;
@@ -551,25 +555,25 @@ function analysisSlide(definition) {
   return {
     kind: 'analysis',
     id: 'analysis',
-    kicker: '第四步 · 分析與反思 ANALYSE',
-    next: '看科學解釋',
+    kicker: t('sl.stepFourKicker'),
+    next: t('sl.seeExplanation'),
     locked: true,
     render() {
       const wrap = element('div', 'stage-analysis');
-      wrap.append(element('h2', 'stage-heading', '你的假說站得住嗎？'));
+      wrap.append(element('h2', 'stage-heading', t('sl.doesItHold')));
 
       const chosen = simulation.state.prediction;
       const matched = chosen === definition.prediction.answer;
       const verdict = element('div', 'stage-verdict');
       const mine = element('section', matched ? 'held' : 'revised');
-      mine.append(element('span', 'stage-label', '你的假說'));
+      mine.append(element('span', 'stage-label', t('sl.yourHypothesis')));
       const hypothesis = element('p', null, chosen == null
-        ? '未有假說紀錄'
-        : `${definition.prediction.options[chosen]}${matched ? '（證據支持）' : '（證據不支持，要修正）'}`);
+        ? t('sl.noHypothesis')
+        : `${definition.prediction.options[chosen]}${t(matched ? 'sl.supported' : 'sl.notSupported')}`);
       hypothesis.id = 'analysisHypothesis';
       mine.append(hypothesis);
       const evidenceBox = element('section');
-      evidenceBox.append(element('span', 'stage-label', '實驗證據'));
+      evidenceBox.append(element('span', 'stage-label', t('sl.evidenceLabel')));
       const evidence = element('p', null, definition.analysis.evidence);
       evidence.id = 'analysisEvidence';
       evidenceBox.append(evidence);
@@ -580,7 +584,7 @@ function analysisSlide(definition) {
       if (records.length) {
         const data = element('section', 'stage-data');
         data.id = 'analysisData';
-        data.append(element('span', 'stage-label', '你記錄的數據'));
+        data.append(element('span', 'stage-label', t('sl.yourData')));
         const table = element('table', 'stage-table');
         const body = element('tbody');
         body.id = 'analysisTableBody';
@@ -605,17 +609,17 @@ function reflectionSlide(definition) {
   return {
     kind: 'reflection',
     id: 'reflection',
-    kicker: '第四步 · 分析與反思 ANALYSE',
-    next: '看科學解釋',
+    kicker: t('sl.stepFourKicker'),
+    next: t('sl.seeExplanation'),
     locked: true,
     render() {
       const wrap = element('div', 'stage-choice');
-      wrap.append(element('p', 'stage-lead', '再想一步'));
+      wrap.append(element('p', 'stage-lead', t('sl.thinkFurther')));
       wrap.append(element('h2', 'stage-heading', reflection.prompt));
       const options = element('div', 'stage-options');
       options.id = 'analysisReflectOptions';
       options.setAttribute('role', 'radiogroup');
-      options.setAttribute('aria-label', '選擇你的想法');
+      options.setAttribute('aria-label', t('sl.chooseThought'));
       const feedback = element('p', 'stage-feedback');
       feedback.id = 'analysisReflectFeedback';
       feedback.hidden = true;
@@ -636,7 +640,7 @@ function reflectionSlide(definition) {
             item.setAttribute('aria-checked', String(active));
           });
           const right = index === reflection.answer;
-          feedback.textContent = right ? `答對了。${reflection.because}` : `再想想。${reflection.because}`;
+          feedback.textContent = t(right ? 'sl.rightBecause' : 'sl.wrongBecause', { because: reflection.because });
           feedback.classList.toggle('right', right);
           feedback.hidden = false;
           unlockStage();
@@ -653,21 +657,21 @@ function openObservation() {
   const definition = currentExperiment;
   if (!definition.observe) { openHypothesisOnly(); return; }
   runStage([
-    chapterSlide('第一步', '觀察', '先看清楚發生了甚麼'),
+    chapterSlide(t('sl.chapterOne'), t('sl.chapterObserve'), t('sl.chapterObserveLead')),
     videoSlide(definition),
     noticeSlide(definition),
     wonderSlide(definition),
-    chapterSlide('第二步', '假說', '你認為答案是甚麼？'),
+    chapterSlide(t('sl.chapterTwo'), t('sl.chapterHypothesis'), t('sl.chapterHypothesisLead')),
     hypothesisSlide(definition),
   ], () => {
     renderer.setStep(simulation.step);
-    showToast('假說已記下。現在用實驗證據驗證它！', 'success');
+    showToast(t('sl.hypothesisSaved'), 'success');
   });
 }
 
 function openHypothesisOnly() {
   runStage([
-    chapterSlide('第二步', '假說', '你認為答案是甚麼？'),
+    chapterSlide(t('sl.chapterTwo'), t('sl.chapterHypothesis'), t('sl.chapterHypothesisLead')),
     hypothesisSlide(currentExperiment),
   ], () => {
     renderer.setStep(simulation.step);
@@ -680,7 +684,7 @@ function openAnalysis(score) {
   analysisScore = score;
   selectedReflection = null;
   runStage([
-    chapterSlide('第四步', '分析與反思', '證據怎樣說？'),
+    chapterSlide(t('sl.chapterFour'), t('sl.chapterAnalyse'), t('sl.chapterAnalyseLead')),
     analysisSlide(definition),
     reflectionSlide(definition),
   ], () => openResult(analysisScore ?? simulation.score()));
@@ -717,11 +721,11 @@ function showPhenomenon(score) {
   dom.observation.hidden = true;
   dom.interactionLabel.hidden = true;
   dom.lab.classList.add('showing-phenomenon');
-  dom.phenomenonTitle.textContent = result.phenomenonTitle || '留心觀看最後的實驗現象';
+  dom.phenomenonTitle.textContent = result.phenomenonTitle || t('sl.watchFinal');
   dom.phenomenonText.textContent = result.observation;
   dom.phenomenonComparison.hidden = !comparison;
   dom.phenomenonComparison.textContent = comparison
-    ? `${comparison.leftLabel}：${comparison.leftValue}　↔　${comparison.rightLabel}：${comparison.rightValue}`
+    ? t('sl.comparisonLine', { leftLabel: comparison.leftLabel, leftValue: comparison.leftValue, rightLabel: comparison.rightLabel, rightValue: comparison.rightValue })
     : '';
   dom.phenomenonStage.hidden = false;
   dom.phenomenonTimerBar.style.setProperty('--phenomenon-duration', `${duration}ms`);
@@ -731,7 +735,7 @@ function showPhenomenon(score) {
 
   const updateCountdown = () => {
     const seconds = Math.max(1, Math.ceil((duration - (performance.now() - startedAt)) / 1000));
-    dom.phenomenonCountdown.textContent = `${seconds} 秒後顯示解釋`;
+    dom.phenomenonCountdown.textContent = t('sl.explainIn', { seconds });
   };
   updateCountdown();
   phenomenonCountdownTimer = setInterval(updateCountdown, 250);
@@ -760,10 +764,10 @@ function openResult(score) {
   const comparison = normalizeComparison(definition.result);
   dom.resultTitle.textContent = definition.result.title;
   dom.resultStars.textContent = '★'.repeat(score) + '☆'.repeat(3 - score);
-  dom.resultScoreText.textContent = simulation.state.prediction == null ? '完成操作，但未有假說紀錄' : score === 3 ? '獨立而細心地完成' : score === 2 ? '善用提示完成探究' : '堅持重試完成探究';
-  const prediction = simulation.state.prediction == null ? '未提出假說' : definition.prediction.options[simulation.state.prediction];
+  dom.resultScoreText.textContent = simulation.state.prediction == null ? t('sl.scoreNone') : score === 3 ? t('sl.scoreThree') : score === 2 ? t('sl.scoreTwo') : t('sl.scoreOne');
+  const prediction = simulation.state.prediction == null ? t('sl.noPrediction') : definition.prediction.options[simulation.state.prediction];
   const correct = simulation.state.prediction === definition.prediction.answer;
-  dom.resultPrediction.textContent = simulation.state.prediction == null ? prediction : `${prediction}${correct ? '（與觀察結果一致）' : '（實驗證據令我修正了想法）'}`;
+  dom.resultPrediction.textContent = simulation.state.prediction == null ? prediction : `${prediction}${t(correct ? 'sl.predictionMatched' : 'sl.predictionRevised')}`;
   dom.resultObservation.textContent = definition.result.observation;
   dom.resultComparison.hidden = !comparison;
   if (comparison) {
@@ -773,8 +777,8 @@ function openResult(score) {
     dom.comparisonRightValue.textContent = comparison.rightValue;
     dom.comparisonConclusion.textContent = comparison.conclusion;
   }
-  dom.resultExplanation.textContent = `${definition.result.explanation} 模型限制：${definition.modelNote}`;
-  dom.resultCodes.textContent = `教具 ${definition.curriculum.items} · ${definition.curriculum.codes.join(' · ')}`;
+  dom.resultExplanation.textContent = t('sl.modelLimit', { explanation: definition.result.explanation, note: definition.modelNote });
+  dom.resultCodes.textContent = t('sl.curriculumLine', { items: definition.curriculum.items, codes: definition.curriculum.codes.join(' · ') });
   dom.resultDialog.showModal();
 }
 
@@ -816,7 +820,7 @@ function setMissionCollapsed(collapsed) {
   dom.missionPanel.classList.toggle('collapsed', collapsed);
   dom.lab.classList.toggle('mission-open', !collapsed);
   dom.missionPanelToggle.setAttribute('aria-expanded', String(!collapsed));
-  dom.missionPanelToggle.setAttribute('aria-label', collapsed ? '展開任務卡' : '收起任務卡');
+  dom.missionPanelToggle.setAttribute('aria-label', t(collapsed ? 'sl.expandMission' : 'sl.collapseMission'));
 }
 
 function showCatalog({ canonicalize = true } = {}) {
@@ -841,7 +845,7 @@ function renderNotebook() {
   const completed = store.getCompletedCount(activeExperimentIds);
   const stars = experiments.reduce((sum, item) => sum + (store.getExperiment(item.id)?.bestScore || 0), 0);
   const topics = new Set(experiments.filter((item) => store.getExperiment(item.id)?.completed).map((item) => item.topic)).size;
-  dom.notebookSummary.innerHTML = `<div class="summary-tile"><b>${completed}</b><span>完成探究</span></div><div class="summary-tile"><b>${stars}</b><span>能力星章</span></div><div class="summary-tile"><b>${topics}</b><span>探索範疇</span></div>`;
+  dom.notebookSummary.innerHTML = `<div class="summary-tile"><b>${completed}</b><span>${t('sl.summaryDone')}</span></div><div class="summary-tile"><b>${stars}</b><span>${t('sl.summaryStars')}</span></div><div class="summary-tile"><b>${topics}</b><span>${t('sl.summaryTopics')}</span></div>`;
   dom.notebookEntries.innerHTML = experiments.map((item) => {
     const progress = store.getExperiment(item.id);
     const done = Boolean(progress?.completed);
@@ -856,7 +860,7 @@ function applySettings() {
   dom.contrastToggle.checked = settings.highContrast;
   dom.qualitySelect.value = settings.quality;
   dom.soundButton.setAttribute('aria-pressed', String(settings.sound));
-  dom.soundButton.setAttribute('aria-label', settings.sound ? '關閉聲音' : '開啟聲音');
+  dom.soundButton.setAttribute('aria-label', t(settings.sound ? 'sl.soundOff' : 'sl.soundOn'));
   audio?.setEnabled(settings.sound);
   renderer?.setSettings(settings);
 }
@@ -889,9 +893,9 @@ function bindEvents() {
     renderer?.setStep(simulation?.step);
   });
   dom.reset.addEventListener('click', () => {
-    if (!simulation || !confirm('重新開始這個實驗？已完成的整體紀錄會保留。')) return;
+    if (!simulation || !confirm(t('sl.confirmRestart'))) return;
     simulation.reset({ keepPrediction: true });
-    showToast('本次實驗已回到第一步。');
+    showToast(t('sl.restarted'));
   });
   dom.accessible.addEventListener('click', () => {
     const action = simulation?.step?.action;

@@ -12,6 +12,7 @@ const compression = require('compression');
 const { version: APP_VERSION } = require('./package.json');
 
 const config = require('./config');
+const serverI18n = require('./shared/server-i18n');
 const db = require('./db');                  // JSON seed-on-boot side effect (json mode only)
 
 const app = express();
@@ -46,6 +47,10 @@ app.use(session({
   httpOnly: true,
   sameSite: 'lax',
 }));
+
+// Every route below answers in Chinese. When the reader has chosen English,
+// swap the known message strings on the way out rather than at each call site.
+app.use(require('./shared/server-i18n').middleware);
 
 // ----------------------------------------------------------------
 // API routes (math app)
@@ -190,6 +195,9 @@ const CACHE_VENDOR = { maxAge: '30d', immutable: true };
 const CACHE_MEDIA  = { maxAge: '30d' };
 const CACHE_APP    = { maxAge: '1h' };
 
+// One i18n runtime and one dictionary per module, shared by every page on the
+// platform so the hub's language switch reaches all of them.
+app.use('/shared', express.static(path.join(__dirname, 'shared'), CACHE_APP));
 app.use('/src', express.static(path.join(__dirname, 'src'), CACHE_APP));
 app.use('/vendor', express.static(path.join(__dirname, 'node_modules', 'exceljs', 'dist'), CACHE_VENDOR));
 
@@ -418,7 +426,10 @@ app.get('/homework', requireSession, async (req, res, next) => {
       const academicYears = require('./math-app/repositories/academic-years.repo');
       const academicYear = await academicYears.getCurrentAcademicYear();
       const assignments = await homework.listMonitors({ studentId: req.session.studentId, academicYear });
-      if (!assignments.length) return res.status(403).send('你未獲委任為科長，無權進入欠交功課模組。');
+      if (!assignments.length) {
+        const message = '你未獲委任為科長，無權進入欠交功課模組。';
+        return res.status(403).send(serverI18n.resolveLang(req) === 'en-US' ? serverI18n.translate(message) : message);
+      }
     }
     res.sendFile(path.join(__dirname, 'homework-app', 'public', 'index.html'));
   } catch (error) { next(error); }

@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>拼字遊戲 ・ 英文</title>
+  <title data-i18n="e.practiceTitle">拼字遊戲 ・ 英文</title>
+  <script src="/shared/i18n.js?v=20260910-1"></script>
+  <script src="/shared/i18n/english.js?v=20260910-1"></script>
   <link rel="stylesheet" href="/chinese/css/style.css" />
   <style>
     .topbar::before { content: 'E'; background: linear-gradient(135deg, #f59e0b, #ef4444); }
@@ -54,6 +56,7 @@
   <script src="/english/js/common.js"></script>
   <script>
     const { api, el, toast, renderTopbar, ensureAuth } = EnglishApp;
+    const t = BuiI18n.t;
     const root = document.getElementById('root');
 
     const params = new URLSearchParams(location.search);
@@ -79,7 +82,7 @@
 
     async function init() {
       state.me = await ensureAuth('student'); if (!state.me) return;
-      if (!assignmentId) { root.innerHTML = '<p class="muted" style="padding:24px">缺少 assignmentId</p>'; return; }
+      if (!assignmentId) { root.innerHTML = `<p class="muted" style="padding:24px">${t('e.missingId')}</p>`; return; }
       try {
         const { assignment } = await api(`/api/english/student/assignments/${assignmentId}`);
         state.assignment = assignment;
@@ -152,7 +155,7 @@
         state.tiles[tileIdx] = { ...tile, used: true };
         // word complete?
         if (state.slots.every(s => s.filled)) {
-          state.message = '✅ 正確！';
+          state.message = t('e.correct');
           await savePatch({ correct: true, heartsLeft: state.heartsLeft });
           render();
           setTimeout(advance, 900);
@@ -169,7 +172,7 @@
         }, 350);
         if (state.heartsLeft === 0) {
           state.revealed = true;
-          state.message = `❌ 答案是 "${currentItem().word}"`;
+          state.message = t('e.answerWas', { word: currentItem().word });
           for (const s of state.slots) { s.filled = true; s.reveal = true; }
           await savePatch({ correct: false, heartsLeft: 0 });
           render();
@@ -212,8 +215,8 @@
           body: JSON.stringify({ text: it.word }),
           credentials: 'same-origin',
         });
-        if (res.status === 501) { toast('Google TTS 尚未設定', 'error'); return; }
-        if (!res.ok) { const d = await res.json().catch(()=>({})); toast(d.message || '朗讀失敗', 'error'); return; }
+        if (res.status === 501) { toast(t('e.ttsOff'), 'error'); return; }
+        if (!res.ok) { const d = await res.json().catch(()=>({})); toast(d.message || t('e.readFailed'), 'error'); return; }
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
@@ -224,22 +227,22 @@
 
     function render() {
       root.innerHTML = '';
-      root.appendChild(renderTopbar({ title: state.assignment?.title || '練習', user: state.me, backUrl: '/english/student' }));
+      root.appendChild(renderTopbar({ title: state.assignment?.title || t('e.practice'), user: state.me, backUrl: '/english/student' }));
       const container = el('div', { class: 'container narrow' });
 
       if (state.phase === 'done') {
         container.appendChild(el('div', { class: 'card', style: { textAlign: 'center' } },
           el('h1', { style: { fontSize: '3rem', margin: 0 } }, '🎉'),
-          el('h2', {}, '練習完成'),
+          el('h2', {}, t('e.practiceDone')),
           el('div', { style: { fontSize: '3rem', fontWeight: '700', color: 'var(--primary)', margin: '12px 0' } }, `${state.finalScore} / 5`),
-          el('a', { class: 'btn btn-primary btn-block', style: { marginTop: '12px' }, href: '/english/student' }, '返回練習列表')
+          el('a', { class: 'btn btn-primary btn-block', style: { marginTop: '12px' }, href: '/english/student' }, t('e.backToList'))
         ));
         root.appendChild(container);
         return;
       }
 
       const it = currentItem();
-      if (!it) { container.appendChild(el('p', { class: 'muted' }, '載入中…')); root.appendChild(container); return; }
+      if (!it) { container.appendChild(el('p', { class: 'muted' }, t('e.loading'))); root.appendChild(container); return; }
 
       // Progress bar
       const progress = el('div', { class: 'practice-progress' });
@@ -248,7 +251,7 @@
       }
       container.appendChild(progress);
       container.appendChild(el('div', { class: 'muted', style: { textAlign: 'right', marginBottom: '8px' } },
-        `第 ${state.index + 1} / ${state.items.length} 題`));
+        t('e.progress', { n: state.index + 1, total: state.items.length })));
 
       // Stage
       const stage = el('div', { class: 'spell-stage' });
@@ -272,7 +275,7 @@
       stage.appendChild(wordRow);
 
       // TTS
-      stage.appendChild(el('button', { class: 'tts-btn', onclick: playTts }, '🔊 朗讀'));
+      stage.appendChild(el('button', { class: 'tts-btn', onclick: playTts }, t('e.speak')));
       container.appendChild(stage);
 
       // Tile pool

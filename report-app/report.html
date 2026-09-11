@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>考評報告分析系統</title>
-    <meta name="description" content="學生考評數據可視化分析系統 — 個別學生、全班、科目分析">
+    <title data-i18n="r.pageTitle">考評報告分析系統</title>
+    <meta name="description" content="學生考評數據可視化分析系統" data-i18n-attr="content:r.pageDesc">
+    <script src="/shared/i18n.js?v=20260910-1"></script>
+    <script src="/shared/i18n/report.js?v=20260910-1"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/report-app/css/style.css">
@@ -85,11 +87,11 @@
     <!-- BuiO 頂部欄 -->
     <div class="buio-topbar">
         <div class="buio-left">
-            <span class="buio-title">📊 <span>考評報告分析</span></span>
+            <span class="buio-title">📊 <span data-i18n="r.brand">考評報告分析</span></span>
         </div>
         <div class="buio-right">
-            <span class="buio-user"><span class="buio-avatar" id="buio-avatar">T</span><span id="buio-name">老師</span></span>
-            <a class="buio-logout" id="buio-logout" href="/" style="text-decoration:none;">🏠 回主頁</a>
+            <span class="buio-user"><span class="buio-avatar" id="buio-avatar">T</span><span id="buio-name" data-i18n="r.teacher">老師</span></span>
+            <a class="buio-logout" id="buio-logout" href="/" style="text-decoration:none;" data-i18n="r.home">🏠 回主頁</a>
         </div>
     </div>
 
@@ -97,13 +99,13 @@
     <div id="auth-overlay" class="auth-overlay" style="display:none !important; visibility:hidden !important;">
         <div class="auth-box">
             <div class="auth-icon">🔒</div>
-            <h2 class="auth-title">系統已鎖定</h2>
-            <p class="auth-desc">請輸入密碼以存取學生成績數據</p>
+            <h2 class="auth-title" data-i18n="r.locked">系統已鎖定</h2>
+            <p class="auth-desc" data-i18n="r.lockedDesc">請輸入密碼以存取學生成績數據</p>
             <form id="auth-form" class="auth-form">
-                <input type="password" id="auth-password" class="auth-input" placeholder="請輸入密碼..." autocomplete="off">
-                <button type="submit" class="auth-btn">解鎖</button>
+                <input type="password" id="auth-password" class="auth-input" placeholder="請輸入密碼..." data-i18n-attr="placeholder:r.passwordPh" autocomplete="off">
+                <button type="submit" class="auth-btn" data-i18n="r.unlock">解鎖</button>
             </form>
-            <div id="auth-error" class="auth-error">密碼錯誤，請重新輸入</div>
+            <div id="auth-error" class="auth-error" data-i18n="r.wrongPassword">密碼錯誤，請重新輸入</div>
         </div>
     </div>
 
@@ -111,33 +113,33 @@
     <nav id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <div class="logo-icon">📊</div>
-            <h1 class="logo-text">考評分析</h1>
+            <h1 class="logo-text" data-i18n="r.logoText">考評分析</h1>
         </div>
         <ul class="nav-list">
             <li class="nav-item active" data-view="home">
                 <span class="nav-icon">🏠</span>
-                <span class="nav-label">數據管理</span>
+                <span class="nav-label" data-i18n="r.navData">數據管理</span>
             </li>
             <li class="nav-item" data-view="student">
                 <span class="nav-icon">👤</span>
-                <span class="nav-label">個別學生</span>
+                <span class="nav-label" data-i18n="r.navStudent">個別學生</span>
             </li>
             <li class="nav-item" data-view="class">
                 <span class="nav-icon">👥</span>
-                <span class="nav-label">全班分析</span>
+                <span class="nav-label" data-i18n="r.navClass">全班分析</span>
             </li>
             <li class="nav-item" data-view="subject">
                 <span class="nav-icon">📚</span>
-                <span class="nav-label">按科目</span>
+                <span class="nav-label" data-i18n="r.navSubject">按科目</span>
             </li>
             <li class="nav-item" data-view="compare">
                 <span class="nav-icon">📈</span>
-                <span class="nav-label">趨勢對比</span>
+                <span class="nav-label" data-i18n="r.navCompare">趨勢對比</span>
             </li>
         </ul>
         <div class="sidebar-footer">
-            <button id="btn-export-pdf" class="btn-export" title="導出PDF">
-                <span>📄</span> 導出 PDF
+            <button id="btn-export-pdf" class="btn-export" title="導出PDF" data-i18n-attr="title:r.exportPdfTitle">
+                <span>📄</span> <span data-i18n="r.exportPdf">導出 PDF</span>
             </button>
         </div>
     </nav>
@@ -147,35 +149,35 @@
         <!-- ===== HOME VIEW ===== -->
         <section id="view-home" class="view active">
             <div class="view-header">
-                <h2>數據管理</h2>
-                <p class="view-subtitle">匯入學生考評數據，開始分析</p>
+                <h2 data-i18n="r.dataTitle">數據管理</h2>
+                <p class="view-subtitle" data-i18n="r.dataLead">匯入學生考評數據，開始分析</p>
             </div>
             <div id="upload-area" class="upload-area">
                 <div class="upload-icon">📁</div>
-                <h3>拖放 XLS 檔案到此處</h3>
-                <p>或點擊選擇檔案（支援多選）</p>
+                <h3 data-i18n="r.dropHere">拖放 XLS 檔案到此處</h3>
+                <p data-i18n="r.orChoose">或點擊選擇檔案（支援多選）</p>
                 <input type="file" id="file-input" multiple accept=".xls,.xlsx" hidden>
-                <button id="btn-choose-files" class="btn-primary">選擇檔案</button>
+                <button id="btn-choose-files" class="btn-primary" data-i18n="r.chooseFiles">選擇檔案</button>
             </div>
             <div id="upload-progress" class="upload-progress hidden">
                 <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-                <p id="progress-text">正在解析...</p>
+                <p id="progress-text" data-i18n="r.parsing">正在解析...</p>
             </div>
             <div id="data-overview" class="data-overview hidden">
                 <div class="stats-row">
-                    <div class="stat-card" id="stat-files"><div class="stat-value">0</div><div class="stat-label">已匯入檔案</div></div>
-                    <div class="stat-card" id="stat-students"><div class="stat-value">0</div><div class="stat-label">學生總數</div></div>
-                    <div class="stat-card" id="stat-grades"><div class="stat-value">0</div><div class="stat-label">年級數</div></div>
-                    <div class="stat-card" id="stat-years"><div class="stat-value">0</div><div class="stat-label">學年數</div></div>
+                    <div class="stat-card" id="stat-files"><div class="stat-value">0</div><div class="stat-label" data-i18n="r.statFiles">已匯入檔案</div></div>
+                    <div class="stat-card" id="stat-students"><div class="stat-value">0</div><div class="stat-label" data-i18n="r.statStudents">學生總數</div></div>
+                    <div class="stat-card" id="stat-grades"><div class="stat-value">0</div><div class="stat-label" data-i18n="r.statGrades">年級數</div></div>
+                    <div class="stat-card" id="stat-years"><div class="stat-value">0</div><div class="stat-label" data-i18n="r.statYears">學年數</div></div>
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <h3>已匯入數據</h3>
-                        <button id="btn-clear-data" class="btn-danger-sm">清除全部</button>
+                        <h3 data-i18n="r.importedData">已匯入數據</h3>
+                        <button id="btn-clear-data" class="btn-danger-sm" data-i18n="r.clearAll">清除全部</button>
                     </div>
                     <div class="table-wrap">
                         <table id="data-table" class="data-table">
-                            <thead><tr><th>檔案</th><th>學年</th><th>年級</th><th>班別</th><th>考績期</th><th>學生數</th><th>科目數</th></tr></thead>
+                            <thead><tr><th data-i18n="r.colFile">檔案</th><th data-i18n="r.colYear">學年</th><th data-i18n="r.colGrade">年級</th><th data-i18n="r.colClass">班別</th><th data-i18n="r.colTerm">考績期</th><th data-i18n="r.colStudents">學生數</th><th data-i18n="r.colSubjects">科目數</th></tr></thead>
                             <tbody id="data-table-body"></tbody>
                         </table>
                     </div>
@@ -186,34 +188,34 @@
         <!-- ===== STUDENT VIEW ===== -->
         <section id="view-student" class="view">
             <div class="view-header">
-                <h2>個別學生分析</h2>
-                <p class="view-subtitle">追蹤學生的各科成績趨勢</p>
+                <h2 data-i18n="r.studentTitle">個別學生分析</h2>
+                <p class="view-subtitle" data-i18n="r.studentLead">追蹤學生的各科成績趨勢</p>
             </div>
             <div class="filters-row">
                 <div class="filter-group">
-                    <label>選擇學生</label>
-                    <select id="student-select" class="select"><option value="">-- 請先匯入數據 --</option></select>
+                    <label data-i18n="r.pickStudent">選擇學生</label>
+                    <select id="student-select" class="select"><option value="" data-i18n="r.needImport">-- 請先匯入數據 --</option></select>
                 </div>
                 <div class="filter-group">
-                    <label>考績期</label>
-                    <select id="student-term-select" class="select"><option value="all">全部</option></select>
+                    <label data-i18n="r.colTerm">考績期</label>
+                    <select id="student-term-select" class="select"><option value="all" data-i18n="r.allTerms">全部</option></select>
                 </div>
             </div>
             <div id="student-content" class="hidden">
                 <div class="stats-row" id="student-stats"></div>
                 <div class="charts-grid">
-                    <div class="card chart-card large"><div class="card-header"><h3>各科成績趨勢</h3></div><div class="chart-container"><canvas id="chart-student-trend"></canvas></div></div>
-                    <div class="card chart-card"><div class="card-header"><h3>科目強弱分佈</h3></div><div class="chart-container"><canvas id="chart-student-radar"></canvas></div></div>
+                    <div class="card chart-card large"><div class="card-header"><h3 data-i18n="r.trendBySubject">各科成績趨勢</h3></div><div class="chart-container"><canvas id="chart-student-trend"></canvas></div></div>
+                    <div class="card chart-card"><div class="card-header"><h3 data-i18n="r.strengthSpread">科目強弱分佈</h3></div><div class="chart-container"><canvas id="chart-student-radar"></canvas></div></div>
                     <div class="card chart-card">
                         <div class="card-header">
-                            <h3>與全班平均對比</h3>
+                            <h3 data-i18n="r.vsClassAvg">與全班平均對比</h3>
                             <select id="student-vs-subject-select" class="select" style="min-width: 100px; padding: 4px 24px 4px 8px; font-size: 11px;"></select>
                         </div>
                         <div class="chart-container"><canvas id="chart-student-vs-class"></canvas></div>
                     </div>
                 </div>
                 <div class="card">
-                    <div class="card-header"><h3>詳細成績表</h3></div>
+                    <div class="card-header"><h3 data-i18n="r.detailTable">詳細成績表</h3></div>
                     <div class="table-wrap"><table id="student-detail-table" class="data-table"></table></div>
                 </div>
             </div>
@@ -222,38 +224,38 @@
         <!-- ===== CLASS VIEW ===== -->
         <section id="view-class" class="view">
             <div class="view-header">
-                <h2>全班分析</h2>
-                <p class="view-subtitle">綜覽全班表現與分佈</p>
+                <h2 data-i18n="r.classTitle">全班分析</h2>
+                <p class="view-subtitle" data-i18n="r.classLead">綜覽全班表現與分佈</p>
             </div>
             <div class="filters-row">
                 <div class="filter-group">
-                    <label>年級</label>
-                    <select id="class-grade-select" class="select"><option value="">-- 請先匯入數據 --</option></select>
+                    <label data-i18n="r.colGrade">年級</label>
+                    <select id="class-grade-select" class="select"><option value="" data-i18n="r.needImport">-- 請先匯入數據 --</option></select>
                 </div>
                 <div class="filter-group">
-                    <label>學年</label>
+                    <label data-i18n="r.colYear">學年</label>
                     <select id="class-year-select" class="select"></select>
                 </div>
                 <div class="filter-group">
-                    <label>考績期</label>
+                    <label data-i18n="r.colTerm">考績期</label>
                     <select id="class-term-select" class="select"></select>
                 </div>
             </div>
             <div id="class-content" class="hidden">
                 <div class="stats-row" id="class-stats"></div>
                 <div class="charts-grid">
-                    <div class="card chart-card large"><div class="card-header"><h3>各科平均分</h3></div><div class="chart-container"><canvas id="chart-class-avg"></canvas></div></div>
+                    <div class="card chart-card large"><div class="card-header"><h3 data-i18n="r.subjectAvg">各科平均分</h3></div><div class="chart-container"><canvas id="chart-class-avg"></canvas></div></div>
                     <div class="card chart-card">
                         <div class="card-header">
-                            <h3>分數分佈</h3>
+                            <h3 data-i18n="r.scoreSpread">分數分佈</h3>
                             <select id="class-dist-subject-select" class="select" style="min-width: 100px; padding: 4px 24px 4px 8px; font-size: 11px;"></select>
                         </div>
                         <div class="chart-container"><canvas id="chart-class-dist"></canvas></div>
                     </div>
-                    <div class="card chart-card"><div class="card-header"><h3>及格率</h3></div><div class="chart-container"><canvas id="chart-class-pass"></canvas></div></div>
+                    <div class="card chart-card"><div class="card-header"><h3 data-i18n="r.passRate">及格率</h3></div><div class="chart-container"><canvas id="chart-class-pass"></canvas></div></div>
                 </div>
                 <div class="card">
-                    <div class="card-header"><h3>全班排名</h3></div>
+                    <div class="card-header"><h3 data-i18n="r.classRanking">全班排名</h3></div>
                     <div class="table-wrap"><table id="class-ranking-table" class="data-table"></table></div>
                 </div>
             </div>
@@ -262,28 +264,28 @@
         <!-- ===== SUBJECT VIEW ===== -->
         <section id="view-subject" class="view">
             <div class="view-header">
-                <h2>按科目分析</h2>
-                <p class="view-subtitle">深入分析單一科目的全班表現</p>
+                <h2 data-i18n="r.subjectTitle">按科目分析</h2>
+                <p class="view-subtitle" data-i18n="r.subjectLead">深入分析單一科目的全班表現</p>
             </div>
             <div class="filters-row">
                 <div class="filter-group">
-                    <label>選擇科目</label>
-                    <select id="subject-select" class="select"><option value="">-- 請先匯入數據 --</option></select>
+                    <label data-i18n="r.pickSubject">選擇科目</label>
+                    <select id="subject-select" class="select"><option value="" data-i18n="r.needImport">-- 請先匯入數據 --</option></select>
                 </div>
                 <div class="filter-group">
-                    <label>年級</label>
+                    <label data-i18n="r.colGrade">年級</label>
                     <select id="subject-grade-select" class="select"></select>
                 </div>
                 <div class="filter-group">
-                    <label>學年</label>
+                    <label data-i18n="r.colYear">學年</label>
                     <select id="subject-year-select" class="select"></select>
                 </div>
             </div>
             <div id="subject-content" class="hidden">
                 <div class="stats-row" id="subject-stats"></div>
                 <div class="charts-grid">
-                    <div class="card chart-card"><div class="card-header"><h3>分數段分佈</h3></div><div class="chart-container"><canvas id="chart-subject-dist"></canvas></div></div>
-                    <div class="card chart-card"><div class="card-header"><h3>平均分趨勢</h3></div><div class="chart-container"><canvas id="chart-subject-avg"></canvas></div></div>
+                    <div class="card chart-card"><div class="card-header"><h3 data-i18n="r.bandSpread">分數段分佈</h3></div><div class="chart-container"><canvas id="chart-subject-dist"></canvas></div></div>
+                    <div class="card chart-card"><div class="card-header"><h3 data-i18n="r.avgTrend">平均分趨勢</h3></div><div class="chart-container"><canvas id="chart-subject-avg"></canvas></div></div>
                 </div>
             </div>
         </section>
@@ -291,29 +293,29 @@
         <!-- ===== COMPARE VIEW ===== -->
         <section id="view-compare" class="view">
             <div class="view-header">
-                <h2>趨勢對比</h2>
-                <p class="view-subtitle">跨學生、跨科目的對比分析</p>
+                <h2 data-i18n="r.compareTitle">趨勢對比</h2>
+                <p class="view-subtitle" data-i18n="r.compareLead">跨學生、跨科目的對比分析</p>
             </div>
             <div class="filters-row">
                 <div class="filter-group">
-                    <label>對比模式</label>
+                    <label data-i18n="r.compareMode">對比模式</label>
                     <select id="compare-mode" class="select">
-                        <option value="students">學生 vs 學生</option>
-                        <option value="subjects">科目 vs 科目</option>
+                        <option value="students" data-i18n="r.studentsVs">學生 vs 學生</option>
+                        <option value="subjects" data-i18n="r.subjectsVs">科目 vs 科目</option>
                     </select>
                 </div>
                 <div id="compare-students-filters" class="filter-group">
-                    <label>選擇學生（可多選）</label>
+                    <label data-i18n="r.pickStudentsMulti">選擇學生（可多選）</label>
                     <select id="compare-student-select" class="select" multiple></select>
                 </div>
                 <div id="compare-subject-filter" class="filter-group">
-                    <label>比較科目</label>
+                    <label data-i18n="r.compareSubject">比較科目</label>
                     <select id="compare-subject-select" class="select"></select>
                 </div>
             </div>
             <div id="compare-content" class="hidden">
                 <div class="charts-grid">
-                    <div class="card chart-card large"><div class="card-header"><h3 id="compare-chart-title">對比圖表</h3></div><div class="chart-container"><canvas id="chart-compare"></canvas></div></div>
+                    <div class="card chart-card large"><div class="card-header"><h3 id="compare-chart-title" data-i18n="r.compareChart">對比圖表</h3></div><div class="chart-container"><canvas id="chart-compare"></canvas></div></div>
                 </div>
             </div>
         </section>
@@ -353,7 +355,7 @@
                 window.location.href = data.success ? '/quiz.html' : '/';
                 return;
             }
-            const name = data.student.name || '老師';
+            const name = data.student.name || BuiI18n.t('r.teacher');
             document.getElementById('buio-name').textContent = name;
             document.getElementById('buio-avatar').textContent = name[0] || 'T';
         } catch(e) {

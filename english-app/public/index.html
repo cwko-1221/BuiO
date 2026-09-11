@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>英文拼字 ・ 載入中</title>
+  <title data-i18n="e.loadingTitle">英文拼字 ・ 載入中</title>
+  <script src="/shared/i18n.js?v=20260910-1"></script>
+  <script src="/shared/i18n/english.js?v=20260910-1"></script>
   <link rel="stylesheet" href="/chinese/css/style.css" />
   <style>
     .topbar::before { content: 'E'; background: linear-gradient(135deg, #f59e0b, #ef4444); }
@@ -11,7 +13,7 @@
 </head>
 <body>
   <div class="container narrow" style="padding-top: 80px; text-align: center;">
-    <p class="muted">載入中…</p>
+    <p class="muted" data-i18n="e.loading">載入中…</p>
   </div>
   <script src="/english/js/common.js"></script>
   <script>

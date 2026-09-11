@@ -352,7 +352,7 @@ export class BattleScene extends Phaser.Scene {
     else if(event.type==='chain'){this.animateTowerAttack(event.towerId,1.4);this.energyLine(event.points,0xc9a0ff,5,.2);}
     else if(event.type==='beam'){this.animateTowerAttack(event.towerId,event.power);this.energyLine([event.from,event.to],0xff65c2,3+event.power,.13);}
     else if(event.type==='pulse'){this.animateTowerAttack(event.towerId,1.1);this.ring(event.x,event.y,event.range,0xffdf72,.36);this.particleBurst(event.x,event.y,0xffdf72,12,{distance:event.range*.55,duration:420,size:.42});}
-    else if(event.type==='critical')this.floatText(event.x,event.y-20,'暴擊!',0xffe36a);
+    else if(event.type==='critical')this.floatText(event.x,event.y-20,window.BuiI18n.t('td.critical'),0xffe36a);
     else if(event.type==='heal'){this.floatText(event.x,event.y-24,'+',0x75f2a5);this.ring(event.x,event.y,48,0x69e9a4,.32);this.particleBurst(event.x,event.y,0x69e9a4,8,{distance:38,duration:420,size:.5});}
     else if(event.type==='shieldBreak'){this.ring(event.x,event.y,54,0x83ddff,.32);this.particleBurst(event.x,event.y,0x9feaff,14,{distance:54,duration:360,size:.55,shards:true});}
     else if(event.type==='enemyKilled')this.deathEffect(event);

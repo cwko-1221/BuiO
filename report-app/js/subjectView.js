@@ -15,13 +15,13 @@ const SubjectView = {
         const sel = document.getElementById('subject-select');
         const subjects = DataManager.getAllSubjects();
         const current = sel.value;
-        sel.innerHTML = '<option value="">-- 選擇科目 --</option>';
-        for (const s of subjects) sel.innerHTML += `<option value="${s}">${s}</option>`;
+        sel.innerHTML = `<option value="">${t('r.pickSubjectOpt')}</option>`;
+        for (const s of subjects) sel.innerHTML += `<option value="${s}">${subjectLabel(s)}</option>`;
         if (current && subjects.includes(current)) sel.value = current;
 
         const gradeSel = document.getElementById('subject-grade-select');
         const grades = DataManager.getGrades();
-        gradeSel.innerHTML = '<option value="">全部年級</option>';
+        gradeSel.innerHTML = `<option value="">${t('r.allGrades')}</option>`;
         for (const g of grades) gradeSel.innerHTML += `<option value="${g}">${g}</option>`;
 
         this._updateYears();
@@ -36,7 +36,7 @@ const SubjectView = {
         sel.innerHTML = '';
         if (grade) {
             // Allow selecting all years ONLY if a specific grade is selected
-            sel.innerHTML += '<option value="">全部學年</option>';
+            sel.innerHTML += `<option value="">${t('r.allYears')}</option>`;
         }
         
         for (const y of years) sel.innerHTML += `<option value="${y}">${y}</option>`;
@@ -101,23 +101,23 @@ const SubjectView = {
         container.innerHTML = `
             <div class="stat-card green">
                 <div class="stat-value">${maxPct}</div>
-                <div class="stat-label">最高分</div>
+                <div class="stat-label">${t('r.highest')}</div>
                 <div class="stat-sub">${max.toFixed(1)} / ${maxScore || '---'}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">${avgPct}</div>
-                <div class="stat-label">平均分</div>
+                <div class="stat-label">${t('r.average')}</div>
                 <div class="stat-sub">${avg.toFixed(1)} / ${maxScore || '---'}</div>
             </div>
             <div class="stat-card red">
                 <div class="stat-value">${minPct}</div>
-                <div class="stat-label">最低分</div>
+                <div class="stat-label">${t('r.lowest')}</div>
                 <div class="stat-sub">${min.toFixed(1)} / ${maxScore || '---'}</div>
             </div>
             <div class="stat-card amber">
                 <div class="stat-value">${stdDev.toFixed(1)}</div>
-                <div class="stat-label">標準差</div>
-                <div class="stat-sub">共 ${allScores.length} 筆記錄</div>
+                <div class="stat-label">${t('r.stdDev')}</div>
+                <div class="stat-sub">${t('r.recordTotal', { count: allScores.length })}</div>
             </div>
         `;
     },
@@ -232,7 +232,7 @@ const SubjectView = {
                         ticks: { color: '#64748B', font: { size: 10 }, maxRotation: isAllGrades ? 90 : undefined, minRotation: isAllGrades ? 90 : undefined },
                         grid: { color: 'rgba(255,255,255,0.05)' }
                     },
-                    y: { stacked: true, ticks: { color: '#64748B' }, grid: { color: 'rgba(255,255,255,0.05)' }, title: { display: true, text: '人數', color: '#64748B' } }
+                    y: { stacked: true, ticks: { color: '#64748B' }, grid: { color: 'rgba(255,255,255,0.05)' }, title: { display: true, text: t('r.headcount'), color: '#64748B' } }
                 }
             }
         });
@@ -268,7 +268,7 @@ const SubjectView = {
                 labels,
                 datasets: [
                     {
-                        label: '最高分',
+                        label: t('r.highest'),
                         data: maxData,
                         borderColor: CHART_COLORS[4],
                         backgroundColor: CHART_COLORS[4] + '15',
@@ -280,7 +280,7 @@ const SubjectView = {
                         spanGaps: true,
                     },
                     {
-                        label: '平均分',
+                        label: t('r.average'),
                         data: avgData,
                         borderColor: CHART_COLORS[0],
                         backgroundColor: CHART_COLORS[0] + '20',
@@ -291,7 +291,7 @@ const SubjectView = {
                         spanGaps: true,
                     },
                     {
-                        label: '最低分',
+                        label: t('r.lowest'),
                         data: minData,
                         borderColor: CHART_COLORS[3],
                         backgroundColor: CHART_COLORS[3] + '15',

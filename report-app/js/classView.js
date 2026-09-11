@@ -24,7 +24,7 @@ const ClassView = {
         const sel = document.getElementById('class-grade-select');
         const grades = DataManager.getGrades();
         const current = sel.value;
-        sel.innerHTML = '<option value="">-- 選擇年級 --</option>';
+        sel.innerHTML = `<option value="">${t('r.pickGradeOpt')}</option>`;
         for (const g of grades) {
             sel.innerHTML += `<option value="${g}">${g}</option>`;
         }
@@ -36,7 +36,7 @@ const ClassView = {
         const grade = document.getElementById('class-grade-select').value;
         const sel = document.getElementById('class-year-select');
         const years = DataManager.getSchoolYears(grade);
-        sel.innerHTML = '<option value="">-- 學年 --</option>';
+        sel.innerHTML = `<option value="">${t('r.pickYearOpt')}</option>`;
         for (const y of years) sel.innerHTML += `<option value="${y}">${y}</option>`;
         if (years.length === 1) sel.value = years[0];
         this._updateTerms();
@@ -47,7 +47,7 @@ const ClassView = {
         const year = document.getElementById('class-year-select').value;
         const sel = document.getElementById('class-term-select');
         const terms = DataManager.getTerms(grade, year);
-        sel.innerHTML = '<option value="">-- 考績期 --</option>';
+        sel.innerHTML = `<option value="">${t('r.pickTermOpt')}</option>`;
         for (const t of terms) sel.innerHTML += `<option value="${t}">${t}</option>`;
         if (terms.length === 1) sel.value = terms[0];
     },
@@ -114,21 +114,21 @@ const ClassView = {
         container.innerHTML = `
             <div class="stat-card">
                 <div class="stat-value">${rec.students.length}</div>
-                <div class="stat-label">學生人數</div>
+                <div class="stat-label">${t('r.studentCount')}</div>
                 <div class="stat-sub">${rec.grade} ${rec.className}</div>
             </div>
             <div class="stat-card green">
                 <div class="stat-value">${overallPct}%</div>
-                <div class="stat-label">全班平均（百分比）</div>
+                <div class="stat-label">${t('r.classAvgPct')}</div>
             </div>
             <div class="stat-card amber">
                 <div class="stat-value">${topStudent}</div>
-                <div class="stat-label">最高分學生</div>
-                <div class="stat-sub">平均 ${topScore.toFixed(1)}%</div>
+                <div class="stat-label">${t('r.topStudent')}</div>
+                <div class="stat-sub">${t('r.avgPct', { pct: topScore.toFixed(1) })}</div>
             </div>
             <div class="stat-card violet">
                 <div class="stat-value">${numSubjects.length}</div>
-                <div class="stat-label">主科數目</div>
+                <div class="stat-label">${t('r.coreSubjects')}</div>
             </div>
         `;
     },
@@ -138,7 +138,7 @@ const ClassView = {
         if (this.charts.avg) this.charts.avg.destroy();
 
         const numSubjects = rec.subjects.filter(s => !s.isGrade);
-        const labels = numSubjects.map(s => s.name);
+        const labels = numSubjects.map(s => subjectLabel(s.name));
         const avgData = numSubjects.map(s => {
             const avg = DataManager.getNumericScore(rec.classAverage[s.name]);
             return avg !== null && s.maxScore ? (avg / s.maxScore * 100) : 0;
@@ -157,9 +157,9 @@ const ClassView = {
             data: {
                 labels,
                 datasets: [
-                    { label: '最高分', data: maxData, backgroundColor: CHART_COLORS[4] + '60', borderColor: CHART_COLORS[4], borderWidth: 1 },
-                    { label: '平均分', data: avgData, backgroundColor: CHART_COLORS[0] + '80', borderColor: CHART_COLORS[0], borderWidth: 1 },
-                    { label: '最低分', data: minData, backgroundColor: CHART_COLORS[3] + '60', borderColor: CHART_COLORS[3], borderWidth: 1 },
+                    { label: t('r.highest'), data: maxData, backgroundColor: CHART_COLORS[4] + '60', borderColor: CHART_COLORS[4], borderWidth: 1 },
+                    { label: t('r.average'), data: avgData, backgroundColor: CHART_COLORS[0] + '80', borderColor: CHART_COLORS[0], borderWidth: 1 },
+                    { label: t('r.lowest'), data: minData, backgroundColor: CHART_COLORS[3] + '60', borderColor: CHART_COLORS[3], borderWidth: 1 },
                 ]
             },
             options: {
@@ -203,7 +203,7 @@ const ClassView = {
         // Update dropdown HTML
         if (select) {
             select.innerHTML = numSubjects.map(s => 
-                `<option value="${s.name}" ${s.name === subjName ? 'selected' : ''}>${s.name}</option>`
+                `<option value="${s.name}" ${s.name === subjName ? 'selected' : ''}>${subjectLabel(s.name)}</option>`
             ).join('');
         }
 
@@ -245,7 +245,7 @@ const ClassView = {
                 responsive: true, maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'right', labels: { color: '#94A3B8', font: { size: 11 }, padding: 12 } },
-                    title: { display: true, text: `${subj.name} 分數分佈`, color: '#94A3B8', font: { size: 13 } },
+                    title: { display: true, text: t('r.subjectSpreadTitle', { subject: subjectLabel(subj.name) }), color: '#94A3B8', font: { size: 13 } },
                     datalabels: {
                         display: true,
                         color: '#F8FAFC',
@@ -263,7 +263,7 @@ const ClassView = {
         if (this.charts.pass) this.charts.pass.destroy();
 
         const numSubjects = rec.subjects.filter(s => !s.isGrade && s.maxScore);
-        const labels = numSubjects.map(s => s.name);
+        const labels = numSubjects.map(s => subjectLabel(s.name));
         const passRates = numSubjects.map(subj => {
             let pass = 0, total = 0;
             for (const student of rec.students) {
@@ -280,7 +280,7 @@ const ClassView = {
             data: {
                 labels,
                 datasets: [{
-                    label: '及格率 (≥60%)',
+                    label: t('r.passRateLabel'),
                     data: passRates,
                     backgroundColor: passRates.map(r => r >= 80 ? CHART_COLORS[4] + 'AA' : r >= 60 ? CHART_COLORS[2] + 'AA' : CHART_COLORS[3] + 'AA'),
                     borderColor: passRates.map(r => r >= 80 ? CHART_COLORS[4] : r >= 60 ? CHART_COLORS[2] : CHART_COLORS[3]),
@@ -344,9 +344,9 @@ const ClassView = {
             })
             .sort((a, b) => b.overall - a.overall);
 
-        let html = '<thead><tr><th>排名</th><th>班號</th><th>姓名</th>';
-        for (const subj of numSubjects) html += `<th>${subj.name}</th>`;
-        html += '<th>總平均</th></tr></thead><tbody>';
+        let html = `<thead><tr><th>${t('r.colRank')}</th><th>${t('r.colClassNo')}</th><th>${t('r.colName')}</th>`;
+        for (const subj of numSubjects) html += `<th>${subjectLabel(subj.name)}</th>`;
+        html += `<th>${t('r.colOverall')}</th></tr></thead><tbody>`;
 
         rankings.forEach((r, i) => {
             html += `<tr><td>${i + 1}</td><td>${r.classNo}</td><td>${r.name}</td>`;

@@ -1,0 +1,93 @@
+// Missing Homework: the monitor's daily return, the teacher's records, and the
+// per-student and per-class analyses.
+BuiI18n.register({
+  'h.pageTitle':     { 'zh-HK': '欠交功課｜杯澳公立學校', 'en-US': 'Missing Homework | Pui O Public School' },
+  'h.booting':       { 'zh-HK': '正在載入欠交功課模組…', 'en-US': 'Loading the missing-homework module…' },
+  'h.school':        { 'zh-HK': '杯澳公立學校', 'en-US': 'Pui O Public School' },
+  'h.logoAlt':       { 'zh-HK': '校徽', 'en-US': 'School crest' },
+  'h.navAria':       { 'zh-HK': '欠交功課功能', 'en-US': 'Missing homework sections' },
+  'h.navMonitors':   { 'zh-HK': '設定科長', 'en-US': 'Subject monitors' },
+  'h.navRecords':    { 'zh-HK': '欠交功課記錄', 'en-US': 'Homework records' },
+  'h.navAnalysis':   { 'zh-HK': '學生分析', 'en-US': 'Student analysis' },
+  'h.navClassAnalysis': { 'zh-HK': '班級分析', 'en-US': 'Class analysis' },
+  'h.back':          { 'zh-HK': '← 返回平台主頁', 'en-US': '← Back to the platform' },
+  'h.title':         { 'zh-HK': '欠交功課', 'en-US': 'Missing Homework' },
+  'h.subtitleTeacher': { 'zh-HK': '教師管理與學生跟進', 'en-US': 'Teacher management and student follow-up' },
+  'h.subtitleMonitor': { 'zh-HK': '科長填報', 'en-US': 'Monitor’s daily return' },
+
+  'h.statusComplete': { 'zh-HK': '完成', 'en-US': 'Done' },
+  'h.statusMissing': { 'zh-HK': '欠交', 'en-US': 'Missing' },
+  'h.statusAbsent':  { 'zh-HK': 'Absent', 'en-US': 'Absent' },
+  'h.madeUp':        { 'zh-HK': '已補做', 'en-US': 'Caught up' },
+  'h.badResponse':   { 'zh-HK': '伺服器回應不正確', 'en-US': 'The server sent something unexpected' },
+  'h.actionFailed':  { 'zh-HK': '操作失敗', 'en-US': 'That did not work' },
+
+  'h.year':          { 'zh-HK': '學年', 'en-US': 'Academic year' },
+  'h.class':         { 'zh-HK': '班別', 'en-US': 'Class' },
+  'h.grade':         { 'zh-HK': '年級', 'en-US': 'Year group' },
+  'h.subject':       { 'zh-HK': '科目', 'en-US': 'Subject' },
+  'h.date':          { 'zh-HK': '日期', 'en-US': 'Date' },
+  'h.student':       { 'zh-HK': '學生', 'en-US': 'Student' },
+  'h.classNo':       { 'zh-HK': '班號', 'en-US': 'Class no.' },
+  'h.status':        { 'zh-HK': '狀態', 'en-US': 'Status' },
+
+  'h.monitorsTitle': { 'zh-HK': '設定科長', 'en-US': 'Set the subject monitors' },
+  'h.monitorsHint':  { 'zh-HK': '每科可選多於一位科長；名單只會顯示所選班別及 A／B 組學生。', 'en-US': 'A subject can have more than one monitor. The list shows only the chosen class and A/B group.' },
+  'h.classNoSuffix': { 'zh-HK': '{no}號', 'en-US': 'No. {no}' },
+  'h.noClassNo':     { 'zh-HK': '未設班號', 'en-US': 'No class number' },
+  'h.noStudentsHere': { 'zh-HK': '這個班別／組別暫時沒有學生。', 'en-US': 'No students in this class or group yet.' },
+  'h.saveMonitors':  { 'zh-HK': '儲存科長設定', 'en-US': 'Save the monitors' },
+
+  'h.homeworkNo':    { 'zh-HK': '功課 {n}', 'en-US': 'Homework {n}' },
+  'h.homeworkName':  { 'zh-HK': '功課名稱', 'en-US': 'Homework name' },
+  'h.removeHomework': { 'zh-HK': '移除', 'en-US': 'Remove' },
+
+  'h.recordsTitle':  { 'zh-HK': '欠交功課記錄', 'en-US': 'Homework records' },
+  'h.recordsHint':   { 'zh-HK': '老師可檢視及修改任何已提交記錄，並把欠交更新為「已補做」。', 'en-US': 'Teachers can review and edit any submitted return, and mark a missing item as caught up.' },
+  'h.downloadPdf':   { 'zh-HK': '下載 PDF', 'en-US': 'Download PDF' },
+  'h.newRecordNotice': { 'zh-HK': '正在新增老師記錄；所有學生已預設為「完成」，可按需要修改。', 'en-US': 'Adding a teacher record — everyone starts as “Done”, so change only what you need to.' },
+  'h.addHomework':   { 'zh-HK': '＋ 新增功課', 'en-US': '＋ Add homework' },
+  'h.saveRecord':    { 'zh-HK': '儲存記錄', 'en-US': 'Save the record' },
+  'h.saveChanges':   { 'zh-HK': '儲存修改', 'en-US': 'Save changes' },
+  'h.deleteRecord':  { 'zh-HK': '刪除記錄', 'en-US': 'Delete the record' },
+  'h.noRecordForDay': { 'zh-HK': '所選日期暫時沒有科長提交的記錄。', 'en-US': 'No monitor has submitted a return for that date.' },
+  'h.newRecord':     { 'zh-HK': '＋ 新增記錄', 'en-US': '＋ New record' },
+
+  'h.rosterFailed':  { 'zh-HK': '未能讀取學生名單', 'en-US': 'Could not read the student roster' },
+  'h.analysisTitle': { 'zh-HK': '學生分析', 'en-US': 'Student analysis' },
+  'h.analysisHint':  { 'zh-HK': '按學年及年級查看學生所有曾欠交的功課；「已補做」會保留作歷史記錄。', 'en-US': 'Every piece a student has missed, by year and year group. Items caught up stay on the record.' },
+  'h.showTotals':    { 'zh-HK': '顯示欠交總表', 'en-US': 'Show the totals' },
+  'h.colHomework':   { 'zh-HK': '功課', 'en-US': 'Homework' },
+  'h.colUpdateStatus': { 'zh-HK': '更新狀態', 'en-US': 'Update' },
+  'h.save':          { 'zh-HK': '儲存', 'en-US': 'Save' },
+  'h.noMissing':     { 'zh-HK': '沒有欠交記錄，或請按「顯示欠交總表」。', 'en-US': 'Nothing missing — or press “Show the totals”.' },
+
+  'h.classAnalysisTitle': { 'zh-HK': '班級分析', 'en-US': 'Class analysis' },
+  'h.classAnalysisHint': { 'zh-HK': '選擇學年、班級及時期，統計班內每位學生曾欠交功課的次數；已補做仍會保留在欠交統計。', 'en-US': 'Choose a year, class and period to count how often each student has missed homework. Items caught up still count here.' },
+  'h.from':          { 'zh-HK': '由', 'en-US': 'From' },
+  'h.to':            { 'zh-HK': '至', 'en-US': 'To' },
+  'h.showClassStats': { 'zh-HK': '顯示班級統計', 'en-US': 'Show the class figures' },
+  'h.classTotal':    { 'zh-HK': '時期內全班合共欠交 <strong>{count}</strong> 次', 'en-US': 'The class missed homework <strong>{count}</strong> times in this period' },
+  'h.missingCount':  { 'zh-HK': '欠交次數', 'en-US': 'Times missing' },
+  'h.pickPeriod':    { 'zh-HK': '請選擇時期並按「顯示班級統計」。', 'en-US': 'Choose a period, then press “Show the class figures”.' },
+
+  'h.monitorTitle':  { 'zh-HK': '科長填報', 'en-US': 'Monitor’s return' },
+  'h.monitorHint':   { 'zh-HK': '今天可新增、修改及儲存功課；過去日期只供查閱。', 'en-US': 'You can add, edit and save today’s homework. Past dates are read-only.' },
+  'h.mySubject':     { 'zh-HK': '負責科目', 'en-US': 'My subject' },
+  'h.lockedNotice':  { 'zh-HK': '過往日期只可查看，不能新增或修改。', 'en-US': 'Past dates are read-only — nothing can be added or changed.' },
+  'h.savedNotice':   { 'zh-HK': '今天的記錄已儲存；科長仍可修改狀態或新增功課後再儲存。', 'en-US': 'Today’s return is saved. You can still change a status or add homework and save again.' },
+  'h.saveShort':     { 'zh-HK': '儲存', 'en-US': 'Save' },
+  'h.noRecordDate':  { 'zh-HK': '所選日期沒有欠交功課記錄。', 'en-US': 'No record for that date.' },
+
+  'h.confirmDelete': { 'zh-HK': '確定刪除 {className} {subject} {date} 的記錄嗎？此操作無法復原。', 'en-US': 'Delete the {className} {subject} record for {date}? This cannot be undone.' },
+  'h.pdfFailed':     { 'zh-HK': '未能下載 PDF', 'en-US': 'Could not download the PDF' },
+  'h.pdfName':       { 'zh-HK': '欠交功課_{date}_{className}_{subject}.pdf', 'en-US': 'missing-homework_{date}_{className}_{subject}.pdf' },
+  'h.notMonitor':    { 'zh-HK': '你未獲委任為科長，無權進入此模組。', 'en-US': 'You are not a subject monitor, so this module is not open to you.' },
+  'h.entryFailed':   { 'zh-HK': '未能進入欠交功課模組', 'en-US': 'Could not open the missing-homework module' },
+  'h.backHome':      { 'zh-HK': '返回平台主頁', 'en-US': 'Back to the platform' },
+
+  // Subject names come from the server as `name`, so they are translated by
+  // shared/server-i18n.js; these two keys only cover the A/B suffix in menus.
+  'h.groupA':        { 'zh-HK': 'A組', 'en-US': 'Group A' },
+  'h.groupB':        { 'zh-HK': 'B組', 'en-US': 'Group B' }
+});

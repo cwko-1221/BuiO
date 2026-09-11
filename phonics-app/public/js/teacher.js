@@ -1,3 +1,5 @@
+const { t } = window.BuiI18n;
+
 const $ = selector => document.querySelector(selector);
 
 const state = { classAccents: {}, defaultAccent: 'en-gb' };
@@ -9,7 +11,7 @@ async function api(path, options = {}) {
     headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) },
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw Object.assign(new Error(data.message || '載入失敗'), { status: response.status });
+  if (!response.ok) throw Object.assign(new Error(data.message || t('p.loadFailed')), { status: response.status });
   return data;
 }
 
@@ -29,12 +31,12 @@ function updateAccentControls() {
   $('#saveAccent').disabled = disabled;
   if (disabled) {
     $('#classAccent').value = state.defaultAccent;
-    $('#accentHelp').textContent = '請先在上方選擇一個班級。';
+    $('#accentHelp').textContent = t('p.pickClassFirst');
     return;
   }
   const accent = state.classAccents[className] || state.defaultAccent;
   $('#classAccent').value = accent;
-  $('#accentHelp').textContent = `${className} 學生登入後會自動使用${accent === 'en-us' ? '美式' : '英式'}英語發音。`;
+  $('#accentHelp').textContent = t('p.accentApplied', { className, accent: t(accent === 'en-us' ? 'p.accentUsName' : 'p.accentGbName') });
 }
 
 function escapeHtml(value) {
@@ -42,7 +44,7 @@ function escapeHtml(value) {
 }
 
 function formatDate(value) {
-  if (!value) return '尚未開始';
+  if (!value) return t('p.notStarted');
   return new Intl.DateTimeFormat('zh-HK', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 }
 
@@ -51,8 +53,8 @@ function renderTotals(students) {
   const mastered = students.reduce((sum, item) => sum + item.masteredWords, 0);
   const stars = students.reduce((sum, item) => sum + item.totalStars, 0);
   $('#teacherTotals').innerHTML = [
-    ['👥', students.length, '學生人數'], ['🚂', active, '已開始學生'], ['⭐', stars, '全班累積星星'],
-  ].map(([icon, value, label]) => `<div class="summary-card"><span class="summary-icon">${icon}</span><div><strong>${value}</strong><span>${label}${label.includes('星') ? ` · 掌握 ${mastered} 字` : ''}</span></div></div>`).join('');
+    ['👥', students.length, t('p.studentCount')], ['🚂', active, t('p.startedCount')], ['⭐', stars, t('p.classStars')],
+  ].map(([icon, value, label]) => `<div class="summary-card"><span class="summary-icon">${icon}</span><div><strong>${value}</strong><span>${label}${label === t('p.classStars') ? t('p.masteredSuffix', { count: mastered }) : ''}</span></div></div>`).join('');
 }
 
 function renderRows(students) {
@@ -63,7 +65,7 @@ function renderRows(students) {
     <td>${student.masteredWords}/${student.totalWords}</td>
     <td>⭐ ${student.totalStars}</td>
     <td>${escapeHtml(formatDate(student.lastAttemptAt))}</td>
-  </tr>`).join('') : '<tr><td class="empty-row" colspan="6">這個班級沒有學生。</td></tr>';
+  </tr>`).join('') : `<tr><td class="empty-row" colspan="6">${escapeHtml(t('p.noStudents'))}</td></tr>`;
 }
 
 async function loadSummary({ preserveClass = true } = {}) {
@@ -72,7 +74,7 @@ async function loadSummary({ preserveClass = true } = {}) {
   const query = new URLSearchParams();
   if (year) query.set('academicYear', year);
   if (selectedClass) query.set('className', selectedClass);
-  $('#studentRows').innerHTML = '<tr><td colspan="6">載入中…</td></tr>';
+  $('#studentRows').innerHTML = `<tr><td colspan="6">${escapeHtml(t('p.loading'))}</td></tr>`;
   try {
     const data = await api(`/api/phonics/teacher/summary?${query}`);
     state.classAccents = data.classAccents || {};
@@ -82,7 +84,7 @@ async function loadSummary({ preserveClass = true } = {}) {
     }
     const classSelect = $('#className');
     const keep = selectedClass && data.classes.includes(selectedClass) ? selectedClass : '';
-    classSelect.innerHTML = `<option value="">所有班級</option>${data.classes.map(item => `<option value="${escapeHtml(item)}" ${item === keep ? 'selected' : ''}>${escapeHtml(item)}</option>`).join('')}`;
+    classSelect.innerHTML = `<option value="">${escapeHtml(t('p.allClasses'))}</option>${data.classes.map(item => `<option value="${escapeHtml(item)}" ${item === keep ? 'selected' : ''}>${escapeHtml(item)}</option>`).join('')}`;
     renderTotals(data.students);
     renderRows(data.students);
     updateAccentControls();
@@ -107,7 +109,7 @@ $('#saveAccent').addEventListener('click', async () => {
     });
     state.classAccents[className] = data.setting.accent;
     updateAccentControls();
-    toast(`${className} 已設定為${data.accentLabel}`);
+    toast(t('p.accentSaved', { className, accent: data.accentLabel }));
   } catch (error) {
     toast(error.message);
     $('#saveAccent').disabled = false;

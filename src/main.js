@@ -9,7 +9,7 @@ function loadExcelJs() {
       const script = document.createElement('script');
       script.src = '/vendor/exceljs.min.js';
       script.onload = () => resolve(window.ExcelJS);
-      script.onerror = () => { excelJsPromise = null; reject(new Error('Excel 元件載入失敗，請檢查網絡後再試。')); };
+      script.onerror = () => { excelJsPromise = null; reject(new Error(t('excel_load_failed'))); };
       document.head.appendChild(script);
     });
   }
@@ -17,7 +17,7 @@ function loadExcelJs() {
 }
 import { MATH_QUIZ_URL, MATH_DASHBOARD_URL, WHITEBOARD_BASE, MODULES, iconSvg } from './config.js';
 import { state, updateState } from './store.js';
-import { t, I18N } from './i18n.js';
+import { t, I18N, currentLanguage } from './i18n.js';
 import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, loginApi, fetchHomeworkInfo } from './services.js';
 import { renderTopbar, renderShell } from './views/Shell.js';
 import { renderDashboard } from './views/Dashboard.js';
@@ -49,11 +49,11 @@ function getStudentField(header) {
 }
 
 function rowsToStudents(rows) {
-  if (!rows.length) throw new Error('檔案沒有資料');
+  if (!rows.length) throw new Error(t('file_no_data'));
 
   const headers = rows[0].map(getStudentField);
   if (!headers.includes('studentId') || !headers.includes('name')) {
-    throw new Error('找不到「學號」和「姓名」欄位，請使用下載範本');
+    throw new Error(t('file_missing_columns'));
   }
 
   return rows.slice(1)
@@ -117,14 +117,14 @@ async function parseStudentFile(file) {
     return rowsToStudents(parseCsv(await file.text()));
   }
   if (extension !== 'xlsx') {
-    throw new Error('只支援 .xlsx 或 .csv；請把舊式 .xls 另存為 .xlsx');
+    throw new Error(t('file_unsupported'));
   }
   await loadExcelJs();
 
   const workbook = new window.ExcelJS.Workbook();
   await workbook.xlsx.load(await file.arrayBuffer());
   const worksheet = workbook.worksheets[0];
-  if (!worksheet) throw new Error('Excel 沒有工作表');
+  if (!worksheet) throw new Error(t('excel_no_sheet'));
 
   const rows = [];
   worksheet.eachRow({ includeEmpty: false }, row => {
@@ -170,7 +170,7 @@ function renderBatchPreview(students) {
   preview.innerHTML = `
     <table>
       <thead>
-        <tr><th>列</th><th>學號</th><th>姓名</th><th>班級</th><th>班號</th><th>中文</th><th>英文</th><th>數學</th></tr>
+        <tr><th>${t('preview_col_row')}</th><th>${t('login_id_label')}</th><th>${t('form_name_label')}</th><th>${t('form_class_label')}</th><th>${t('form_classno_label')}</th><th>${t('col_chi')}</th><th>${t('col_eng')}</th><th>${t('col_math')}</th></tr>
       </thead>
       <tbody>
         ${students.slice(0, 50).map(student => `
@@ -193,9 +193,12 @@ function renderBatchPreview(students) {
 async function downloadStudentTemplate() {
   await loadExcelJs();
   const workbook = new window.ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('學生名單');
-  worksheet.addRow(['學號', '姓名', '密碼', '班級', '班號', '中文分組', '英文分組', '數學分組']);
-  worksheet.addRow(['S007', '陳小文', '123456', 'P4', '7', 'A組', 'B組', 'A組']);
+  const worksheet = workbook.addWorksheet(t('template_sheet_name'));
+  const english = currentLanguage() === 'en-US';
+  worksheet.addRow(english
+    ? ['studentId', 'name', 'password', 'class', 'classNo', 'chineseGroup', 'englishGroup', 'mathGroup']
+    : ['學號', '姓名', '密碼', '班級', '班號', '中文分組', '英文分組', '數學分組']);
+  worksheet.addRow(['S007', english ? 'Chan Siu Man' : '陳小文', '123456', 'P4', '7', 'A組', 'B組', 'A組']);
   worksheet.getRow(1).font = { bold: true };
   worksheet.columns = [
     { width: 14 }, { width: 16 }, { width: 14 }, { width: 10 },
@@ -208,7 +211,7 @@ async function downloadStudentTemplate() {
   }));
   const link = document.createElement('a');
   link.href = url;
-  link.download = '學生批量匯入範本.xlsx';
+  link.download = t('template_file_name');
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -289,7 +292,7 @@ async function openModule(moduleId, mode) {
     } else {
       const sessions = getActiveSessions();
       if (sessions.length === 0) {
-        alert('目前沒有老師正在開課，請稍後再試。');
+        alert(t('no_live_class_alert'));
       } else {
         const s = sessions[0];
         const url = `${WHITEBOARD_BASE}/class-student?room=${encodeURIComponent(s.roomCode)}&name=${encodeURIComponent(user.name)}`;
@@ -340,11 +343,11 @@ function bindEvents() {
         await fetchHomeworkInfo();
         render();
       } else {
-        updateState({ loginError: data.message || '登入失敗', loginLoading: false });
+        updateState({ loginError: data.message || t('login_failed'), loginLoading: false });
         render();
       }
     } catch (err) {
-      updateState({ loginError: '連線失敗，請確認伺服器正在運行。', loginLoading: false });
+      updateState({ loginError: t('connect_failed'), loginLoading: false });
       render();
     }
   });
@@ -387,11 +390,11 @@ function bindEvents() {
         body: JSON.stringify({ password: document.getElementById('adminPassword').value }),
       });
       const data = await response.json();
-      if (!response.ok || !data.success) throw new Error(data.message || 'Admin 密碼不正確');
+      if (!response.ok || !data.success) throw new Error(data.message || t('admin_pwd_wrong'));
       updateState({ adminUnlocked: true, studentsLoaded: false });
       render();
     } catch (unlockError) {
-      error.textContent = unlockError.message || '無法解鎖 Admin';
+      error.textContent = unlockError.message || t('admin_unlock_failed');
       error.style.display = 'block';
       button.disabled = false;
     }
@@ -404,12 +407,12 @@ function bindEvents() {
 
   // 學生升級
   document.getElementById('upgradeStudentsBtn')?.addEventListener('click', async () => {
-    if (!confirm('⚠️ 確定要一鍵升級所有學生班級嗎？(例如 P4 會升級為 P5，P6 會變成 Graduated)。此動作無法復原！')) return;
+    if (!confirm(t('confirm_upgrade'))) return;
     
     const btn = document.getElementById('upgradeStudentsBtn');
     btn.disabled = true;
     const originalText = btn.innerHTML;
-    btn.innerHTML = `${renderIcon('loader')} 升級中...`;
+    btn.innerHTML = `${renderIcon('loader')} ${t('upgrading')}`;
     
     try {
       const res = await fetch('/api/auth/upgrade-students', { 
@@ -427,10 +430,10 @@ function bindEvents() {
         await fetchStudentsList(data.currentAcademicYear);
         render();
       } else {
-        alert('❌ 升級失敗：' + data.message);
+        alert(t('upgrade_failed') + data.message);
       }
     } catch (err) {
-      alert('❌ 連線錯誤');
+      alert('❌ ' + t('connect_error'));
     } finally {
       btn.disabled = false;
       btn.innerHTML = originalText;
@@ -464,16 +467,16 @@ function bindEvents() {
       });
       const data = await res.json();
       if (data.success) {
-        alert('🎉 學生新增成功！');
+        alert(t('student_added'));
         await fetchStudentsList();
         render();
       } else {
-        err.textContent = data.message || '新增失敗';
+        err.textContent = data.message || t('add_failed');
         err.style.display = 'block';
         btn.disabled = false;
       }
     } catch (error) {
-      err.textContent = '連線錯誤';
+      err.textContent = t('connect_error');
       err.style.display = 'block';
       btn.disabled = false;
     }
@@ -487,16 +490,16 @@ function bindEvents() {
     renderBatchPreview([]);
     if (!file) return;
 
-    showBatchMessage(`正在讀取 ${file.name}...`);
+    showBatchMessage(t('reading_file', { name: file.name }));
     try {
       pendingBatchStudents = await parseStudentFile(file);
       if (!pendingBatchStudents.length) {
-        throw new Error('檔案內沒有可匯入的學生資料');
+        throw new Error(t('file_no_students'));
       }
       renderBatchPreview(pendingBatchStudents);
-      showBatchMessage(`已讀取 ${pendingBatchStudents.length} 筆資料，請確認預覽後按「匯入學生」。`);
+      showBatchMessage(t('read_ok_preview', { count: pendingBatchStudents.length }));
     } catch (error) {
-      showBatchMessage(error.message || '無法讀取檔案', true);
+      showBatchMessage(error.message || t('read_failed'), true);
     }
   });
 
@@ -504,7 +507,7 @@ function bindEvents() {
     if (!pendingBatchStudents.length) return;
     const button = document.getElementById('importStudentsBtn');
     button.disabled = true;
-    showBatchMessage(`正在匯入 ${pendingBatchStudents.length} 名學生...`);
+    showBatchMessage(t('importing_students', { count: pendingBatchStudents.length }));
 
     try {
       const response = await fetch('/api/auth/register-students-batch', {
@@ -515,18 +518,23 @@ function bindEvents() {
       });
       const data = await response.json();
       if (!response.ok || !data.success) {
-        throw new Error(data.message || '匯入失敗');
+        throw new Error(data.message || t('import_failed'));
       }
 
       const skippedSummary = data.skipped?.length
-        ? `；略過 ${data.skipped.length} 筆：${data.skipped.slice(0, 3).map(item => `第 ${item.rowNumber} 列 ${item.reason}`).join('、')}`
+        ? t('import_skipped', {
+            count: data.skipped.length,
+            rows: data.skipped.slice(0, 3)
+              .map(item => t('import_skipped_row', { row: item.rowNumber, reason: item.reason }))
+              .join(t('import_skipped_join')),
+          })
         : '';
       alert(`${data.message}${skippedSummary}`);
       pendingBatchStudents = [];
       await fetchStudentsList();
       render();
     } catch (error) {
-      showBatchMessage(error.message || '匯入失敗', true);
+      showBatchMessage(error.message || t('import_failed'), true);
       button.disabled = false;
     }
   });
@@ -553,16 +561,16 @@ function bindEvents() {
       });
       const data = await res.json();
       if (data.success) {
-        alert('🎉 教師新增成功！');
+        alert(t('teacher_added'));
         await fetchStudentsList();
         render();
       } else {
-        err.textContent = data.message || '新增失敗';
+        err.textContent = data.message || t('add_failed');
         err.style.display = 'block';
         btn.disabled = false;
       }
     } catch (error) {
-      err.textContent = '連線錯誤';
+      err.textContent = t('connect_error');
       err.style.display = 'block';
       btn.disabled = false;
     }
@@ -572,7 +580,7 @@ function bindEvents() {
   document.querySelectorAll('.delete-student-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const sid = btn.dataset.id;
-      if (!confirm(`確定要永久刪除學生 ${sid} 嗎？此動作無法復原！`)) return;
+      if (!confirm(t('confirm_delete_student', { id: sid }))) return;
       
       btn.disabled = true;
       try {
@@ -582,15 +590,15 @@ function bindEvents() {
         });
         const data = await res.json();
         if (data.success) {
-          alert('✅ 帳號已刪除');
+          alert(t('account_deleted'));
           await fetchStudentsList();
         render();
         } else {
-          alert('刪除失敗: ' + (data.message || '未知錯誤'));
+          alert(t('delete_failed') + (data.message || t('unknown_error')));
           btn.disabled = false;
         }
       } catch (err) {
-        alert('連線錯誤');
+        alert(t('connect_error'));
         btn.disabled = false;
       }
     });
@@ -623,11 +631,11 @@ function bindEvents() {
             return;
           }
         } else {
-          alert('更新失敗: ' + (data.message || '未知錯誤'));
+          alert(t('update_failed') + (data.message || t('unknown_error')));
           e.target.value = originalValue; // 回復原本的值
         }
       } catch (err) {
-        alert('連線錯誤');
+        alert(t('connect_error'));
         e.target.value = originalValue; // 回復原本的值
       } finally {
         e.target.disabled = false;
@@ -696,7 +704,7 @@ function bindEvents() {
 
   // 老師：結束課堂
   document.getElementById('endSessionBtn')?.addEventListener('click', () => {
-    if (confirm('確定要結束白板課堂嗎？學生將無法再加入。')) {
+    if (confirm(t('confirm_end_board'))) {
       endTeacherSession(state.currentUser.name);
       // 不需手動 render()，因為 endTeacherSession 完成後會 fetchActiveSessions 自動重繪
     }

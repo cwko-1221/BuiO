@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>學生作業 ・ 粵語學習</title>
+  <title data-i18n="c.studentTitle">學生作業 ・ 粵語學習</title>
+  <script src="/shared/i18n.js?v=20260910-1"></script>
+  <script src="/shared/i18n/chinese.js?v=20260910-1"></script>
   <link rel="stylesheet" href="/chinese/css/style.css" />
 </head>
 <body>
@@ -11,35 +13,36 @@
   <script src="/chinese/js/common.js"></script>
   <script>
     const { api, el, toast, fmtDate, renderTopbar, ensureAuth } = ChineseApp;
+    const t = BuiI18n.t;
     const root = document.getElementById('root');
 
     async function init() {
       const me = await ensureAuth('student');
       if (!me) return;
-      root.appendChild(renderTopbar({ title: '粵語繁中學習平台', user: me }));
+      root.appendChild(renderTopbar({ title: t('c.platform'), user: me }));
       const container = el('div', { class: 'container narrow' });
       container.appendChild(el('div', { class: 'page-head' },
-        el('h1', {}, `你好，${me.name}`),
-        el('p', {}, '選擇下方的練習開始。')
+        el('h1', {}, t('c.hello', { name: me.name })),
+        el('p', {}, t('c.pickPractice'))
       ));
       root.appendChild(container);
 
-      container.appendChild(el('p', { class: 'muted' }, '載入作業中…'));
+      container.appendChild(el('p', { class: 'muted' }, t('c.loadingWork')));
       try {
         const { assignments } = await api(`/api/chinese/student/assignments`);
         container.innerHTML = '';
         if (!assignments.length) {
-          container.appendChild(el('div', { class: 'card empty' }, '目前沒有作業。'));
+          container.appendChild(el('div', { class: 'card empty' }, t('c.noWork')));
           return;
         }
         const pending = assignments.filter(a => !a.attempt || a.attempt.status !== 'completed');
         const done = assignments.filter(a => a.attempt && a.attempt.status === 'completed');
         if (pending.length) {
-          container.appendChild(el('h2', { style: { margin: '8px 0' } }, '待完成'));
+          container.appendChild(el('h2', { style: { margin: '8px 0' } }, t('c.pending')));
           for (const a of pending) container.appendChild(renderCard(a));
         }
         if (done.length) {
-          container.appendChild(el('h2', { style: { margin: '20px 0 8px' } }, '已完成'));
+          container.appendChild(el('h2', { style: { margin: '20px 0 8px' } }, t('c.done')));
           for (const a of done) container.appendChild(renderCard(a));
         }
       } catch (e) { toast(e.message, 'error'); }

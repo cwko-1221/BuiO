@@ -1,4 +1,4 @@
-import { t } from '../i18n.js';
+import { t, currentLanguage } from '../i18n.js';
 import { state } from '../store.js';
 import { renderIcon } from './Login.js';
 import { renderDashboard } from './Dashboard.js';
@@ -11,8 +11,8 @@ export function renderTopbar() {
   return `
     <header class="topbar">
       <div>
-        <h1>${user.name}，${t('good_morning')}</h1>
-        <p>${user.role === 'teacher' ? '' : (user.className ? user.className + ' · ' : '')}${new Date().toLocaleDateString(JSON.parse(localStorage.getItem('buiSettings') || '{}').language === 'en-US' ? 'en-US' : 'zh-HK', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+        <h1>${t('greeting', { name: user.name })}</h1>
+        <p>${user.role === 'teacher' ? '' : (user.className ? user.className + ' · ' : '')}${new Date().toLocaleDateString(currentLanguage(), { weekday: 'long', month: 'long', day: 'numeric' })}</p>
       </div>
       <div class="profile-chip">
         ${renderIcon('user')}
@@ -28,13 +28,13 @@ export function renderShell() {
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand-lockup compact">
-          <img src="/math-app/images/logo.png" class="brand-mark" alt="校徽" />
+          <img src="/math-app/images/logo.png" class="brand-mark" alt="${t('school_logo_alt')}" />
           <div>
-            <div class="school-name">杯澳公立學校</div>
+            <div class="school-name">${t('school_name')}</div>
             <div class="platform-name">Learning Hub</div>
           </div>
         </div>
-        <nav class="side-nav" aria-label="主要功能">
+        <nav class="side-nav" aria-label="${t('nav_main_label')}">
           <button class="${state.activeView === 'dashboard' ? 'active' : ''}" data-view="dashboard">${renderIcon('math')} ${t('nav_home')}</button>
           ${user.role === 'teacher' ? `<button class="${state.activeView === 'students' ? 'active' : ''}" data-view="students">${renderIcon('user')} ${t('nav_students')}</button>` : ''}
           <button class="${state.activeView === 'modules' ? 'active' : ''}" data-view="modules">${renderIcon('board')} ${t('nav_modules')}</button>

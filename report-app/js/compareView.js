@@ -25,7 +25,7 @@ const CompareView = {
         const subjects = DataManager.getAllSubjects();
         subjSel.innerHTML = '';
         for (const s of subjects) {
-            subjSel.innerHTML += `<option value="${s}">${s}</option>`;
+            subjSel.innerHTML += `<option value="${s}">${subjectLabel(s)}</option>`;
         }
 
         this._onModeChange();
@@ -38,10 +38,10 @@ const CompareView = {
 
         if (mode === 'students') {
             studentsFilter.style.display = '';
-            subjectFilter.querySelector('label').textContent = '比較科目';
+            subjectFilter.querySelector('label').textContent = t('r.compareSubject');
         } else {
             studentsFilter.style.display = 'none';
-            subjectFilter.querySelector('label').textContent = '選擇學生';
+            subjectFilter.querySelector('label').textContent = t('r.pickStudent');
             // Replace subject select with student select for subject-vs-subject mode
             const subjSel = document.getElementById('compare-subject-select');
             const students = DataManager.getAllStudents();
@@ -80,7 +80,7 @@ const CompareView = {
         if (subjSel.options.length > 0 && !subjects.includes(subjSel.options[0]?.value)) {
             subjSel.innerHTML = '';
             for (const s of subjects) {
-                subjSel.innerHTML += `<option value="${s}">${s}</option>`;
+                subjSel.innerHTML += `<option value="${s}">${subjectLabel(s)}</option>`;
             }
         }
 
@@ -88,7 +88,7 @@ const CompareView = {
         if (selectedStudents.length === 0 || !subjectName) return;
 
         document.getElementById('compare-chart-title').textContent =
-            `${subjectName} — 學生對比`;
+            t('r.studentCompare', { subject: subjectLabel(subjectName) });
 
         // Collect all time points
         const allRecords = DataManager.records
@@ -150,7 +150,7 @@ const CompareView = {
         if (!studentName) return;
 
         document.getElementById('compare-chart-title').textContent =
-            `${studentName} — 科目對比`;
+            t('r.subjectCompare', { student: studentName });
 
         const records = DataManager.getStudentRecords(studentName);
         if (!records.length) return;

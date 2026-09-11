@@ -17,6 +17,11 @@ function seededRandom(seed = 0x6d2b79f5) {
   };
 }
 
+// Build scripts and tests import this module under Node, where there is no
+// shared runtime — so the authored Chinese stays inline and is swapped for
+// English only when the dictionary is present.
+const say = globalThis.BuiI18n ? globalThis.BuiI18n.translator('td.') : (text) => text;
+
 export class TowerDefenseSimulation {
   constructor({ mapId='starport', seed=Date.now() } = {}) {
     this.map = MAPS[mapId] || MAPS.starport;
@@ -69,19 +74,19 @@ export class TowerDefenseSimulation {
 
   canBuild(type,x,y) {
     const definition=TOWERS[type];
-    if (!definition) return { ok:false,reason:'未知的防禦塔。' };
-    if (this.state.phase==='won'||this.state.phase==='lost') return { ok:false,reason:'戰役已經結束。' };
-    if (this.state.gold<definition.cost) return { ok:false,reason:'晶幣不足。' };
+    if (!definition) return { ok:false,reason:say('未知的防禦塔。') };
+    if (this.state.phase==='won'||this.state.phase==='lost') return { ok:false,reason:say('戰役已經結束。') };
+    if (this.state.gold<definition.cost) return { ok:false,reason:say('晶幣不足。') };
     return this.canOccupy(x,y);
   }
 
   canOccupy(x,y) {
-    if (x<42||x>WORLD.width-42||y<72||y>WORLD.height-42) return { ok:false,reason:'不能建在地圖邊緣。' };
-    if (distanceToPaths(x,y,this.paths)<WORLD.pathWidth*.5+27) return { ok:false,reason:'不能阻塞怪物路線。' };
+    if (x<42||x>WORLD.width-42||y<72||y>WORLD.height-42) return { ok:false,reason:say('不能建在地圖邊緣。') };
+    if (distanceToPaths(x,y,this.paths)<WORLD.pathWidth*.5+27) return { ok:false,reason:say('不能阻塞怪物路線。') };
     if (this.map.noBuild.some(zone => x>zone.x-30&&x<zone.x+zone.w+30&&y>zone.y-30&&y<zone.y+zone.h+30)) {
-      return { ok:false,reason:'這裡是場景保留區。' };
+      return { ok:false,reason:say('這裡是場景保留區。') };
     }
-    if (this.state.towers.some(tower=>Math.hypot(tower.x-x,tower.y-y)<66)) return { ok:false,reason:'防禦塔距離太近。' };
+    if (this.state.towers.some(tower=>Math.hypot(tower.x-x,tower.y-y)<66)) return { ok:false,reason:say('防禦塔距離太近。') };
     return { ok:true };
   }
 
@@ -102,11 +107,11 @@ export class TowerDefenseSimulation {
 
   upgradeTower(towerId) {
     const tower=this.state.towers.find(item=>item.id===towerId);
-    if (!tower) return { ok:false,reason:'找不到防禦塔。' };
+    if (!tower) return { ok:false,reason:say('找不到防禦塔。') };
     const definition=TOWERS[tower.type];
-    if (tower.level>=definition.levels.length) return { ok:false,reason:'已達最高等級。' };
+    if (tower.level>=definition.levels.length) return { ok:false,reason:say('已達最高等級。') };
     const cost=definition.upgradeCosts[tower.level-1];
-    if (this.state.gold<cost) return { ok:false,reason:'晶幣不足。' };
+    if (this.state.gold<cost) return { ok:false,reason:say('晶幣不足。') };
     this.state.gold-=cost;
     tower.totalSpent+=cost;
     tower.level++;
@@ -118,7 +123,7 @@ export class TowerDefenseSimulation {
 
   sellTower(towerId) {
     const index=this.state.towers.findIndex(item=>item.id===towerId);
-    if (index<0) return { ok:false,reason:'找不到防禦塔。' };
+    if (index<0) return { ok:false,reason:say('找不到防禦塔。') };
     const [tower]=this.state.towers.splice(index,1);
     const refund=Math.floor(tower.totalSpent*.7);
     this.state.gold+=refund;
@@ -145,9 +150,9 @@ export class TowerDefenseSimulation {
   }
 
   startWave({ auto=false }={}) {
-    if (this.state.phase!=='build'||this.state.wave>=this.state.maxWaves) return { ok:false,reason:'現在不能開始下一波。' };
+    if (this.state.phase!=='build'||this.state.wave>=this.state.maxWaves) return { ok:false,reason:say('現在不能開始下一波。') };
     if (this.state.quizKeys<this.state.answersRequired) {
-      return { ok:false,reason:`開始下一波前，必須答對 ${this.state.answersRequired} 題（目前 ${this.state.quizKeys}/${this.state.answersRequired}）。` };
+      return { ok:false,reason:say('開始下一波前，必須答對 {need} 題（目前 {have}/{need}）。',{ need:this.state.answersRequired, have:this.state.quizKeys }) };
     }
     this.state.wave++;
     this.state.phase='wave';
@@ -189,10 +194,10 @@ export class TowerDefenseSimulation {
 
   useAbility(id,x=WORLD.width*.5,y=WORLD.height*.5) {
     const ability=ABILITIES[id];
-    if (!ability) return { ok:false,reason:'未知技能。' };
-    if (this.state.phase!=='wave') return { ok:false,reason:'技能只能在戰鬥中使用。' };
-    if (this.state.abilities[id]>0) return { ok:false,reason:'技能仍在冷卻。' };
-    if (this.state.focus<ability.cost) return { ok:false,reason:'專注能量不足。' };
+    if (!ability) return { ok:false,reason:say('未知技能。') };
+    if (this.state.phase!=='wave') return { ok:false,reason:say('技能只能在戰鬥中使用。') };
+    if (this.state.abilities[id]>0) return { ok:false,reason:say('技能仍在冷卻。') };
+    if (this.state.focus<ability.cost) return { ok:false,reason:say('專注能量不足。') };
     this.state.focus-=ability.cost;
     this.state.abilities[id]=ability.cooldown;
     if (id==='meteor') {

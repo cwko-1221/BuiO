@@ -56,7 +56,7 @@ const UI = {
  * punched in it reads as a board that is coming rather than one that is broken.
  */
 /** Mirrors lib/catalog.js WEARABLE_PET_IDS; used only when the server omits the list. */
-const WEARABLE_PET_IDS = ['starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster'];
+const WEARABLE_PET_IDS = ['starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster', 'mossback-turtle'];
 const OUTFIT_SLOTS: { key: string; zh: string; en: string; icon: string; side: 'left' | 'right' | 'foot' }[] = [
   { key:'head', zh:'頭飾', en:'Head',  icon:'👑', side:'left' },
   { key:'face', zh:'面飾', en:'Face',  icon:'👓', side:'left' },
@@ -872,7 +872,8 @@ async function boot() {
     const identity = await api.identity();
     if (identity.role === 'teacher') await new TeacherApp(identity).start(); else await new StudentApp(identity).start();
   } catch (error) {
-    app.innerHTML = `<main class="fatal-screen"><span>🥚</span><h1>寵物樂園暫時未能開啟</h1><p>${escapeHtml((error as Error).message)}</p><a href="/">返回平台首頁</a></main>`;
+    const say = (key: string) => (window as any).BuiI18n.t(key) as string;
+    app.innerHTML = `<main class="fatal-screen"><span>🥚</span><h1>${escapeHtml(say('pet.fatalTitle'))}</h1><p>${escapeHtml((error as Error).message)}</p><a href="/">${escapeHtml(say('pet.backHome'))}</a></main>`;
   }
 }
 boot();

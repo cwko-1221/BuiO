@@ -7,7 +7,7 @@ const ReportAPI = {
         const body = contentType.includes('application/json') ? await response.json() : null;
         if (!response.ok) {
             if (response.status === 401) window.location.href = '/';
-            throw new Error(body?.message || `伺服器錯誤 (${response.status})`);
+            throw new Error(body?.message || BuiI18n.t('r.serverError', { status: response.status }));
         }
         return body;
     },

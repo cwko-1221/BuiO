@@ -1,13 +1,16 @@
 import type { Bootstrap, Identity, RoomPlacement } from './types';
 
+// The shared runtime is loaded blocking in <head>, before this bundle runs.
+const t = (key: string) => (window as any).BuiI18n.t(key) as string;
+
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(url, {
     credentials: 'include',
     ...options,
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
   });
-  const data = await response.json().catch(() => ({ success: false, message: '伺服器回應格式不正確。' }));
-  if (!response.ok || data.success === false) throw new Error(data.message || '操作失敗。');
+  const data = await response.json().catch(() => ({ success: false, message: t('pet.badResponse') }));
+  if (!response.ok || data.success === false) throw new Error(data.message || t('pet.actionFailed'));
   return data as T;
 }
 

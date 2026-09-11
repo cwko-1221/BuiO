@@ -9,13 +9,15 @@ function loadExcelJs() {
       const script = document.createElement('script');
       script.src = '/vendor/exceljs.min.js';
       script.onload = () => resolve(window.ExcelJS);
-      script.onerror = () => { excelJsPromise = null; reject(new Error('Excel 元件載入失敗，請檢查網絡後再試。')); };
+      script.onerror = () => { excelJsPromise = null; reject(new Error(window.BuiI18n.t('g.excelLoadFailed'))); };
       document.head.appendChild(script);
     });
   }
   return excelJsPromise;
 }
 'use strict';
+
+const { t, server: serverText, lang: uiLang } = window.BuiI18n;
 
 // 唔好望落嚟 — teacher host console.
 // Setup (pick set, duration) -> lobby (join code + roster) -> live board
@@ -28,7 +30,7 @@ function loadExcelJs() {
   const fromHub = launchParams.get('hub') === '1';
   const hubUrl = location.pathname.endsWith('/preview') ? '/games/preview?role=teacher' : '/games';
 
-  let teacherName = '老師';
+  let teacherName = t('g.teacherFallback');
   let selectedSetId = null;
   let editingSetId = null;      // null = creating new
   let roomCode = null;
@@ -59,7 +61,7 @@ function loadExcelJs() {
   // ---------------- question sets ----------------
   async function loadSets() {
     const el = $('setList');
-    el.innerHTML = '<p class="muted">載入中…</p>';
+    el.innerHTML = `<p class="muted">${escapeHtml(t('g.loading'))}</p>`;
     try {
       const res = await fetch('/api/game/teacher/sets', { credentials: 'include' });
       const data = await res.json();
@@ -71,10 +73,10 @@ function loadExcelJs() {
         const row = document.createElement('div');
         row.className = 'set-row' + (set.id === selectedSetId ? ' selected' : '');
         row.innerHTML = `
-          ${set.builtin ? '<span class="tag">內置</span>' : ''}
+          ${set.builtin ? `<span class="tag">${escapeHtml(t('g.builtinTag'))}</span>` : ''}
           <span class="title">${escapeHtml(set.title)}</span>
-          <span class="count">${set.questionCount} 題</span>
-          <button class="btn secondary small set-expand-btn" type="button" data-expand="${set.id}" aria-expanded="false">▾ 展開</button>
+          <span class="count">${escapeHtml(t('g.questionCount',{count:set.questionCount}))}</span>
+          <button class="btn secondary small set-expand-btn" type="button" data-expand="${set.id}" aria-expanded="false">${escapeHtml(t('g.expand'))}</button>
           ${set.builtin ? '' : `<button class="btn secondary small" data-edit="${set.id}">✏️</button>
           <button class="btn secondary small" data-del="${set.id}" style="color:var(--coral)">🗑</button>`}
         `;
@@ -91,7 +93,7 @@ function loadExcelJs() {
         row.querySelector('[data-expand]')?.addEventListener('click', () => toggleSetPreview(set, preview, row.querySelector('[data-expand]')));
         row.querySelector('[data-edit]')?.addEventListener('click', () => openEditor(set.id));
         row.querySelector('[data-del]')?.addEventListener('click', async () => {
-          if (!confirm(`確定刪除「${set.title}」？`)) return;
+          if (!confirm(t('g.confirmDelete',{title:set.title}))) return;
           await fetch(`/api/game/teacher/sets/${set.id}`, { method: 'DELETE', credentials: 'include' });
           if (selectedSetId === set.id) { selectedSetId = null; $('createRoomBtn').disabled = true; }
           setDetailsCache.delete(set.id);
@@ -104,11 +106,11 @@ function loadExcelJs() {
         const note = document.createElement('p');
         note.className = 'muted';
         note.style.marginTop = '8px';
-        note.textContent = '⚠️ 資料庫未連接，暫時只可使用內置示範題庫。';
+        note.textContent = t('g.noDbNote');
         el.appendChild(note);
       }
     } catch (e) {
-      el.innerHTML = `<p class="error-msg">${escapeHtml(e.message || '載入失敗')}</p>`;
+      el.innerHTML = `<p class="error-msg">${escapeHtml(serverText(e.message) || t('g.loadFailed'))}</p>`;
     }
   }
   loadSets();
@@ -118,19 +120,19 @@ function loadExcelJs() {
     document.querySelectorAll('.set-preview').forEach(panel => { panel.hidden = true; });
     document.querySelectorAll('.set-expand-btn').forEach(control => {
       control.setAttribute('aria-expanded', 'false');
-      control.textContent = '▾ 展開';
+      control.textContent = t('g.expand');
     });
     if (!opening) return;
     preview.hidden = false;
     button.setAttribute('aria-expanded', 'true');
-    button.textContent = '▴ 收起';
-    preview.innerHTML = '<p class="muted">載入題目中…</p>';
+    button.textContent = t('g.collapse');
+    preview.innerHTML = `<p class="muted">${escapeHtml(t('g.loadingQuestions'))}</p>`;
     try {
       let detail = setDetailsCache.get(set.id);
       if (!detail) {
         const res = await fetch(`/api/game/teacher/sets/${set.id}`, { credentials: 'include' });
         const data = await res.json();
-        if (!data.success) throw new Error(data.message || '載入失敗');
+        if (!data.success) throw new Error(serverText(data.message) || t('g.loadFailed'));
         detail = data.set;
         setDetailsCache.set(set.id, detail);
       }
@@ -145,7 +147,7 @@ function loadExcelJs() {
           </div>
         </div>`).join('');
     } catch (e) {
-      preview.innerHTML = `<p class="error-msg">${escapeHtml(e.message || '載入失敗')}</p>`;
+      preview.innerHTML = `<p class="error-msg">${escapeHtml(serverText(e.message) || t('g.loadFailed'))}</p>`;
     }
   }
 
@@ -156,12 +158,12 @@ function loadExcelJs() {
     const choices = q.choices || ['', '', '', ''];
     div.innerHTML = `
       <div class="q-num"></div>
-      <button class="del-q" title="刪除題目">✕</button>
-      <input type="text" class="q-question" maxlength="200" placeholder="題目，例如：7 × 8 = ?" value="${escapeHtml(q.question || '')}">
+      <button class="del-q" title="${escapeHtml(t('g.deleteQuestion'))}">✕</button>
+      <input type="text" class="q-question" maxlength="200" placeholder="${escapeHtml(t('g.questionPh'))}" value="${escapeHtml(q.question || '')}">
       ${[0, 1, 2, 3].map(i => `
         <div class="choice-line">
-          <input type="radio" name="" value="${i}" ${q.correctIndex === i ? 'checked' : ''} title="正確答案">
-          <input type="text" class="q-choice-input" maxlength="80" placeholder="選項 ${['A', 'B', 'C', 'D'][i]}${i >= 2 ? '（可留空）' : ''}" value="${escapeHtml(choices[i] || '')}">
+          <input type="radio" name="" value="${i}" ${q.correctIndex === i ? 'checked' : ''} title="${escapeHtml(t('g.correctAnswer'))}">
+          <input type="text" class="q-choice-input" maxlength="80" placeholder="${escapeHtml(t('g.choicePh',{letter:['A','B','C','D'][i]}) + (i >= 2 ? t('g.choiceOptional') : ''))}" value="${escapeHtml(choices[i] || '')}">
         </div>`).join('')}
     `;
     div.querySelector('.del-q').addEventListener('click', () => { div.remove(); renumber(); });
@@ -170,7 +172,7 @@ function loadExcelJs() {
 
   function renumber() {
     [...$('editorQuestions').children].forEach((div, i) => {
-      div.querySelector('.q-num').textContent = `第 ${i + 1} 題`;
+      div.querySelector('.q-num').textContent = t('g.questionNo',{n:i + 1});
       div.querySelectorAll('input[type="radio"]').forEach(r => r.name = `correct-${i}`);
     });
   }
@@ -183,17 +185,17 @@ function loadExcelJs() {
   async function openEditor(setId) {
     editingSetId = setId || null;
     $('editorError').textContent = '';
-    $('excelImportStatus').textContent = '支援 .xlsx，每列一題';
+    $('excelImportStatus').textContent = t('g.excelHint');
     $('editorQuestions').innerHTML = '';
     if (setId) {
-      $('editorTitle').textContent = '✏️ 編輯題庫';
+      $('editorTitle').textContent = t('g.editorEdit');
       const res = await fetch(`/api/game/teacher/sets/${setId}`, { credentials: 'include' });
       const data = await res.json();
-      if (!data.success) { alert(data.message || '載入失敗'); return; }
+      if (!data.success) { alert(serverText(data.message) || t('g.loadFailed')); return; }
       $('editorSetTitle').value = data.set.title;
       data.set.questions.forEach(addQuestion);
     } else {
-      $('editorTitle').textContent = '✏️ 新增題庫';
+      $('editorTitle').textContent = t('g.editorNew');
       $('editorSetTitle').value = '';
       for (let i = 0; i < 3; i++) addQuestion();
     }
@@ -223,13 +225,13 @@ function loadExcelJs() {
     event.target.value = '';
     if (!file) return;
     $('editorError').textContent = '';
-    $('excelImportStatus').textContent = `正在讀取 ${file.name}…`;
+    $('excelImportStatus').textContent = t('g.excelReading',{name:file.name});
     try {
       await loadExcelJs();
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(await file.arrayBuffer());
       const sheet = workbook.worksheets[0];
-      if (!sheet) throw new Error('Excel 內沒有工作表。');
+      if (!sheet) throw new Error(t('g.excelNoSheet'));
       const firstValue = excelCellText(sheet.getCell(1, 1)).toLowerCase();
       const firstDataRow = firstValue === 'question' ? 2 : 1;
       const questions = [];
@@ -240,23 +242,23 @@ function loadExcelJs() {
         const [question, ...rest] = values;
         const choices = rest.slice(0, 4);
         const correctAnswer = rest[4].toUpperCase();
-        if (!question) throw new Error(`第 ${rowNumber} 列缺少 question。`);
-        if (choices.some(choice => !choice)) throw new Error(`第 ${rowNumber} 列必須填寫選項 A、B、C、D。`);
+        if (!question) throw new Error(t('g.excelNoQuestion',{row:rowNumber}));
+        if (choices.some(choice => !choice)) throw new Error(t('g.excelNoOptions',{row:rowNumber}));
         if (!['A', 'B', 'C', 'D'].includes(correctAnswer)) {
-          throw new Error(`第 ${rowNumber} 列 correctAnswer 必須是 A、B、C 或 D。`);
+          throw new Error(t('g.excelBadAnswer',{row:rowNumber}));
         }
         questions.push({ question, choices, correctIndex: correctAnswer.charCodeAt(0) - 65 });
       }
-      if (!questions.length) throw new Error('Excel 內沒有可匯入的題目。');
+      if (!questions.length) throw new Error(t('g.excelEmpty'));
       $('editorQuestions').innerHTML = '';
       questions.forEach(addQuestion);
       if (!$('editorSetTitle').value.trim()) {
         $('editorSetTitle').value = file.name.replace(/\.xlsx$/i, '').slice(0, 60);
       }
-      $('excelImportStatus').textContent = `已匯入 ${questions.length} 題`;
+      $('excelImportStatus').textContent = t('g.excelImported',{count:questions.length});
     } catch (e) {
-      $('excelImportStatus').textContent = '匯入失敗';
-      $('editorError').textContent = e.message || '無法讀取 Excel';
+      $('excelImportStatus').textContent = t('g.excelFailed');
+      $('editorError').textContent = e.message || t('g.excelUnreadable');
     }
   }
 
@@ -276,7 +278,7 @@ function loadExcelJs() {
         { header: 'correctAnswer', key: 'correctAnswer', width: 18 },
       ];
       sheet.addRow({
-        question: '7 × 8 等於多少？',
+        question: t('g.qSample'),
         optionA: '48',
         optionB: '54',
         optionC: '56',
@@ -305,9 +307,9 @@ function loadExcelJs() {
       link.download = 'BuiO-question-bank-template.xlsx';
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      $('excelImportStatus').textContent = 'Excel 範本已下載';
+      $('excelImportStatus').textContent = t('g.templateDone');
     } catch (e) {
-      $('editorError').textContent = e.message || '無法建立 Excel 範本';
+      $('editorError').textContent = e.message || t('g.templateFailed');
     }
   }
 
@@ -344,7 +346,7 @@ function loadExcelJs() {
       loadSets();
       show('setupScreen');
     } catch (e) {
-      $('editorError').textContent = e.message || '儲存失敗';
+      $('editorError').textContent = serverText(e.message) || t('g.saveFailed');
     }
   });
 
@@ -353,10 +355,10 @@ function loadExcelJs() {
     const maxEnergy = Number($('maxEnergyInput').value);
     const energyPerCorrect = Number($('energyPerCorrectInput').value);
     if (!Number.isInteger(maxEnergy) || maxEnergy < 20 || maxEnergy > 500) {
-      throw new Error('最高能量必須是 20 至 500 的整數。');
+      throw new Error(t('g.maxEnergyRange'));
     }
     if (!Number.isInteger(energyPerCorrect) || energyPerCorrect < 1 || energyPerCorrect > maxEnergy) {
-      throw new Error(`每題能量必須是 1 至 ${maxEnergy} 的整數。`);
+      throw new Error(t('g.energyRange',{max:maxEnergy}));
     }
     return {
       maxEnergy,
@@ -394,26 +396,26 @@ function loadExcelJs() {
     }, (res) => {
       $('createRoomBtn').disabled = false;
       if (!res?.ok) {
-        const message = res?.message || '建立失敗';
+        const message = serverText(res?.message) || t('g.createFailed');
         $('setupError').textContent = message;
         if (fromHub) {
           document.documentElement.classList.remove('hub-launch');
-          $('lobbyTitle').textContent = '未能建立房間';
+          $('lobbyTitle').textContent = t('g.createFailedTitle');
           $('lobbyInfo').textContent = message;
-          $('lobbyError').textContent = '請返回遊戲問答重新設定。';
+          $('lobbyError').textContent = t('g.createFailedHint');
           show('lobbyScreen');
         }
         return;
       }
       roomCode = res.code;
       const energyLabel = res.settings.infiniteEnergy
-        ? `無限能量（顯示上限 ${res.settings.maxEnergy}）`
-        : `最高 ${res.settings.maxEnergy} 能量 · 每題 +${res.settings.energyPerCorrect}`;
-      $('lobbyInfo').textContent = `題庫：${res.setTitle} · ${res.questionCount} 題 · ${Math.round(res.durationSec / 60)} 分鐘 · ${energyLabel}`;
-      $('lobbyRoster').innerHTML = '<span class="muted">等待學生加入…</span>';
+        ? t('g.energyInfinite',{max:res.settings.maxEnergy})
+        : t('g.energyLimited',{max:res.settings.maxEnergy,gain:res.settings.energyPerCorrect});
+      $('lobbyInfo').textContent = t('g.lobbyInfo',{title:res.setTitle,count:res.questionCount,minutes:Math.round(res.durationSec / 60),energy:energyLabel});
+      $('lobbyRoster').innerHTML = `<span class="muted">${escapeHtml(t('g.waitingStudents'))}</span>`;
       $('startGameBtn').disabled = true;
       document.documentElement.classList.remove('hub-launch');
-      $('lobbyTitle').textContent = '房間已建立';
+      $('lobbyTitle').textContent = t('g.roomReady');
       show('lobbyScreen');
     });
   }
@@ -422,7 +424,7 @@ function loadExcelJs() {
   socket.on('lobby:roster', (players) => {
     const el = $('lobbyRoster');
     if (!players.length) {
-      el.innerHTML = '<span class="muted">等待學生加入…</span>';
+      el.innerHTML = `<span class="muted">${escapeHtml(t('g.waitingStudents'))}</span>`;
       $('startGameBtn').disabled = true;
       return;
     }
@@ -444,7 +446,7 @@ function loadExcelJs() {
 
   $('startGameBtn').addEventListener('click', () => {
     socket.emit('host:start', (res) => {
-      if (!res?.ok) { $('lobbyError').textContent = res?.message || '無法開始'; return; }
+      if (!res?.ok) { $('lobbyError').textContent = serverText(res?.message) || t('g.startFailed'); return; }
       show('liveScreen');
     });
   });
@@ -471,7 +473,7 @@ function loadExcelJs() {
 
   function renderLiveList() {
     const el = $('liveList');
-    if (!latestPositions.length) { el.innerHTML = '<p class="muted">等待玩家數據…</p>'; return; }
+    if (!latestPositions.length) { el.innerHTML = `<p class="muted">${escapeHtml(t('g.waitingData'))}</p>`; return; }
     const sorted = [...latestPositions].sort((a, b) => (b.f - a.f) || ((b.progress ?? b.h) - (a.progress ?? a.h)));
     el.innerHTML = sorted.map((p, i) => `
       <div class="live-row${p.f ? ' finished' : ''}">
@@ -523,7 +525,7 @@ function loadExcelJs() {
   // ---------------- game over ----------------
   socket.on('game:over', ({ reason, leaderboard }) => {
     clearInterval(liveTimerHandle);
-    const reasons = { time: '時間到！', host: '老師結束咗遊戲', 'all-finished': '全部玩家都到達山頂！' };
+    const reasons = { time: t('g.reasonTime'), host: t('g.reasonHost'), 'all-finished': t('g.reasonAllDone') };
     $('resultReason').textContent = reasons[reason] || '';
     const list = $('resultsList');
     list.innerHTML = leaderboard.map(row => `
@@ -537,7 +539,7 @@ function loadExcelJs() {
   });
 
   $('endGameBtn').addEventListener('click', () => {
-    if (confirm('確定結束遊戲？')) socket.emit('host:end');
+    if (confirm(t('g.confirmEnd'))) socket.emit('host:end');
   });
 
   $('playAgainBtn').addEventListener('click', () => {

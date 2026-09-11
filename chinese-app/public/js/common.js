@@ -4,6 +4,8 @@
 (function () {
   'use strict';
 
+  const t = window.BuiI18n.t;
+
   const API = '/api/chinese';
 
   async function api(path, opts = {}) {
@@ -65,6 +67,8 @@
     return node;
   }
 
+  // ISO-style dates read the same in both languages, so only the chrome
+  // around them needs translating.
   function fmtDate(s) {
     if (!s) return '';
     const d = new Date(s);
@@ -73,9 +77,9 @@
 
   function renderTopbar({ title, user, backUrl = '/' }) {
     return el('header', { class: 'topbar' },
-      el('button', { class: 'btn-back', onclick: () => location.href = backUrl }, '← 返回'),
+      el('button', { class: 'btn-back', onclick: () => location.href = backUrl }, t('c.back')),
       el('h1', {}, title),
-      user ? el('span', { class: 'user' }, `${user.name}（${user.role === 'teacher' ? '教師' : '學生'}）`) : null,
+      user ? el('span', { class: 'user' }, t('c.userTag', { name: user.name, role: t(user.role === 'teacher' ? 'c.roleTeacher' : 'c.roleStudent') })) : null,
     );
   }
 

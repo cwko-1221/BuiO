@@ -12,6 +12,13 @@ export async function fetchStudentsListWrapper() {
   }
 }
 
+// The A/B group codes are database values, so the option keeps the stored
+// code and only its label follows the reader's language.
+function groupLabel(code) {
+  if (!code) return t('group_unset');
+  return code === 'A組' ? t('group_a') : code === 'B組' ? t('group_b') : code;
+}
+
 export function renderStudentManagement() {
   if (!state.studentsLoaded) {
     fetchStudentsListWrapper();
@@ -24,17 +31,17 @@ export function renderStudentManagement() {
     <section class="section-head" style="margin-top:2rem; display:flex; justify-content:space-between; align-items:center;">
       <div>
         <h2>${t('student_mgmt_title')}</h2>
-        <p>${t('student_mgmt_desc')} · 現時學年：<strong>${state.currentAcademicYear}</strong></p>
+        <p>${t('student_mgmt_desc')} · ${t('current_year_label')}<strong>${state.currentAcademicYear}</strong></p>
       </div>
       <label style="display:grid; gap:6px; color:var(--muted); font-weight:700;">
-        查看學年
+        ${t('view_year')}
         <select id="studentAcademicYear" style="min-width:150px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--surface);">
-          ${state.academicYears.map(year => `<option value="${year}" ${year === selectedYear ? 'selected' : ''}>${year}${year === state.currentAcademicYear ? '（現時）' : ''}</option>`).join('')}
+          ${state.academicYears.map(year => `<option value="${year}" ${year === selectedYear ? 'selected' : ''}>${year}${year === state.currentAcademicYear ? t('year_current_suffix') : ''}</option>`).join('')}
         </select>
       </label>
     </section>
 
-    ${!isCurrentYear ? `<div class="glass-card" style="margin-bottom:1.25rem; padding:1rem 1.25rem; color:var(--muted);">正在查看 ${selectedYear} 歷史名冊；舊學年資料只供查閱。</div>` : ''}
+    ${!isCurrentYear ? `<div class="glass-card" style="margin-bottom:1.25rem; padding:1rem 1.25rem; color:var(--muted);">${t('viewing_history', { year: selectedYear })}</div>` : ''}
 
     ${isCurrentYear ? `
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
@@ -44,10 +51,10 @@ export function renderStudentManagement() {
         <label>${t('form_name_label')}<input id="newStudentName" required placeholder="" autocomplete="off"></label>
         <div class="student-fields-grid">
           <label style="margin-bottom:0">${t('form_class_label')}<input id="newStudentClass" list="classOptions" placeholder="" autocomplete="off"></label>
-          <label style="margin-bottom:0">班號<input id="newStudentClassNo" type="number" min="1" max="99" inputmode="numeric" placeholder="" autocomplete="off"></label>
-          <label style="margin-bottom:0">中文分組<input id="newStudentChi" list="groupOptions" placeholder="" autocomplete="off"></label>
-          <label style="margin-bottom:0">英文分組<input id="newStudentEng" list="groupOptions" placeholder="" autocomplete="off"></label>
-          <label style="margin-bottom:0">數學分組<input id="newStudentMath" list="groupOptions" placeholder="" autocomplete="off"></label>
+          <label style="margin-bottom:0">${t('form_classno_label')}<input id="newStudentClassNo" type="number" min="1" max="99" inputmode="numeric" placeholder="" autocomplete="off"></label>
+          <label style="margin-bottom:0">${t('form_chi_group')}<input id="newStudentChi" list="groupOptions" placeholder="" autocomplete="off"></label>
+          <label style="margin-bottom:0">${t('form_eng_group')}<input id="newStudentEng" list="groupOptions" placeholder="" autocomplete="off"></label>
+          <label style="margin-bottom:0">${t('form_math_group')}<input id="newStudentMath" list="groupOptions" placeholder="" autocomplete="off"></label>
         </div>
         <datalist id="classOptions">
           <option value="P1">
@@ -58,8 +65,8 @@ export function renderStudentManagement() {
           <option value="P6">
         </datalist>
         <datalist id="groupOptions">
-          <option value="A組">
-          <option value="B組">
+          <option value="A組" label="${t('group_a')}">
+          <option value="B組" label="${t('group_b')}">
         </datalist>
         <label>${t('form_pwd_label')}<input id="newStudentPw" required value="123456" autocomplete="off"></label>
         <button type="submit" class="primary-action" id="addStudentBtn">${renderIcon('plus')} ${t('form_add_btn')}</button>
@@ -70,18 +77,18 @@ export function renderStudentManagement() {
     <div class="glass-card batch-import-card">
       <div class="batch-import-head">
         <div>
-          <h3>Excel 批量新增／更新學生</h3>
-          <p>以學號為準：新學號會新增帳戶，相同學號會更新姓名、班級、班號及中英數分組。現有學生如沒有填寫密碼，會保留原密碼。</p>
+          <h3>${t('batch_title')}</h3>
+          <p>${t('batch_desc')}</p>
         </div>
-        <button type="button" id="downloadStudentTemplateBtn" class="secondary-action">下載 Excel 範本</button>
+        <button type="button" id="downloadStudentTemplateBtn" class="secondary-action">${t('batch_template_btn')}</button>
       </div>
       <div class="batch-import-controls">
         <label class="file-picker">
-          <span>選擇學生名單</span>
+          <span>${t('batch_pick_file')}</span>
           <input type="file" id="studentExcelInput" accept=".xlsx,.csv" />
         </label>
         <button type="button" id="importStudentsBtn" class="primary-action" disabled>
-          ${renderIcon('plus')} 匯入並更新
+          ${renderIcon('plus')} ${t('batch_import_btn')}
         </button>
       </div>
       <div id="batchImportMessage" class="batch-import-message" hidden></div>
@@ -105,31 +112,31 @@ export function renderStudentManagement() {
             </div>
             <div class="student-edit-fields">
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
-                班級
+                ${t('form_class_label')}
                 <select class="inline-edit" data-id="${s.id}" data-field="className" ${isCurrentYear ? '' : 'disabled'} style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
-                  ${['', 'P1','P2','P3','P4','P5','P6','Graduated'].map(o => `<option value="${o}" ${s.className === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
+                  ${['', 'P1','P2','P3','P4','P5','P6','Graduated'].map(o => `<option value="${o}" ${s.className === o ? 'selected' : ''}>${o || t('group_unset')}</option>`).join('')}
                 </select>
               </label>
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
-                班號
+                ${t('form_classno_label')}
                 <input class="inline-edit class-number-input" data-id="${s.id}" data-field="classNo" type="number" min="1" max="99" inputmode="numeric" value="${s.classNo || ''}" placeholder="--" ${isCurrentYear ? '' : 'disabled'}>
               </label>
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
-                中文 
+                ${t('col_chi')}
                 <select class="inline-edit" data-id="${s.id}" data-field="chineseGroup" ${isCurrentYear ? '' : 'disabled'} style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
-                  ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.chineseGroup === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
+                  ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.chineseGroup === o ? 'selected' : ''}>${groupLabel(o)}</option>`).join('')}
                 </select>
               </label>
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
-                英文 
+                ${t('col_eng')}
                 <select class="inline-edit" data-id="${s.id}" data-field="englishGroup" ${isCurrentYear ? '' : 'disabled'} style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
-                  ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.englishGroup === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
+                  ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.englishGroup === o ? 'selected' : ''}>${groupLabel(o)}</option>`).join('')}
                 </select>
               </label>
               <label style="margin:0; display:flex; align-items:center; gap:6px; color:var(--muted);">
-                數學 
+                ${t('col_math')}
                 <select class="inline-edit" data-id="${s.id}" data-field="mathGroup" ${isCurrentYear ? '' : 'disabled'} style="padding:6px; border:1px solid var(--line); border-radius:6px; min-width:80px; background:var(--surface);">
-                  ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.mathGroup === o ? 'selected' : ''}>${o || '未設定'}</option>`).join('')}
+                  ${['', 'A組','B組'].map(o => `<option value="${o}" ${s.mathGroup === o ? 'selected' : ''}>${groupLabel(o)}</option>`).join('')}
                 </select>
               </label>
             </div>
@@ -145,12 +152,12 @@ export function renderAdminPage() {
   if (!state.adminUnlocked) {
     return `
       <section class="section-head" style="margin-top:2rem;">
-        <div><h2>${t('admin_title')}</h2><p>請輸入 Admin 密碼才能進入系統管理。</p></div>
+        <div><h2>${t('admin_title')}</h2><p>${t('admin_locked_desc')}</p></div>
       </section>
       <div class="glass-card" style="max-width:460px; padding:1.75rem;">
         <form id="adminUnlockForm" class="login-form">
-          <label>Admin 密碼<input id="adminPassword" type="password" inputmode="numeric" maxlength="6" required autocomplete="current-password"></label>
-          <button type="submit" id="adminUnlockBtn" class="primary-action">解鎖 Admin</button>
+          <label>${t('admin_pwd_label')}<input id="adminPassword" type="password" inputmode="numeric" maxlength="6" required autocomplete="current-password"></label>
+          <button type="submit" id="adminUnlockBtn" class="primary-action">${t('admin_unlock_btn')}</button>
           <div id="adminUnlockError" style="color:var(--coral); margin-top:0.5rem; display:none;"></div>
         </form>
       </div>`;
@@ -170,10 +177,10 @@ export function renderAdminPage() {
 
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
       <div>
-        <h3 style="margin:0 0 0.35rem;">學年升級</h3>
-        <p style="margin:0; color:var(--muted);">現時學年：<strong>${state.currentAcademicYear}</strong>。升級會保留舊學年名冊，並把所有學生班級提升一級。</p>
+        <h3 style="margin:0 0 0.35rem;">${t('year_rollover_title')}</h3>
+        <p style="margin:0; color:var(--muted);">${t('year_rollover_desc', { year: state.currentAcademicYear })}</p>
       </div>
-      <button id="upgradeStudentsBtn" class="primary-action" style="background:var(--violet); color:white;">${renderIcon('spark')} 一鍵升級</button>
+      <button id="upgradeStudentsBtn" class="primary-action" style="background:var(--violet); color:white;">${renderIcon('spark')} ${t('year_rollover_btn')}</button>
     </div>
     
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">

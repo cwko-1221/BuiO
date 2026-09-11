@@ -4,23 +4,30 @@ import { alphaBounds, fittedSize } from './colliders.js?v=20260725-checkpoint-th
 // the supplied reference sequence: a forgiving brick tutorial, landmark
 // bases, short prop chains, large set-pieces, and alternating rising turns.
 // Art and object identities remain original to this project.
+// Checkpoint names and the signs planted along the route are read in-game,
+// so they follow the reader's language like the rest of the interface.
+// Build scripts and tests import this module under Node, where there is no
+// shared runtime — so the authored Chinese stays inline and is swapped for
+// English only when the dictionary is present.
+const say = globalThis.BuiI18n ? globalThis.BuiI18n.translator('g.') : (text) => text;
+
 export const MAP_VERSION = 'fixed-1500m-2026.07o';
 export const WORLD = { width:5600, height:8700, startY:8200, summitY:700, pixelsPerMetre:5 };
 export const PLAYER_VISUAL_HEIGHT = 70;
 export const MAX_ROUTE_OBJECT_HEIGHT = PLAYER_VISUAL_HEIGHT * 1.2;
 export const CHECKPOINT_THEME_REPLACEMENTS=[
-  {altitude:0,name:'起點',assetId:'cp-start-royal-crate',objectIds:['fixed-054','fixed-055','fixed-056']},
-  {altitude:210,name:'城堡城門',assetId:'cp-castle-drawbridge-winch',objectIds:['fixed-067','fixed-070','fixed-078']},
-  {altitude:274,name:'市集廣場',assetId:'cp-market-spice-cart',objectIds:['fixed-080','fixed-092']},
-  {altitude:448,name:'森林營地',assetId:'cp-forest-mushroom-log',objectIds:['fixed-095','fixed-103']},
-  {altitude:573,name:'農場風車',assetId:'cp-farm-windmill-gear',objectIds:['fixed-105','fixed-107']},
-  {altitude:704,name:'雪山山口',assetId:'cp-snow-ice-sled',objectIds:['fixed-117','fixed-118','fixed-120']},
-  {altitude:820,name:'工廠入口',assetId:'cp-factory-gate-console',objectIds:['fixed-137','fixed-145']},
-  {altitude:930,name:'觀測台',assetId:'cp-observatory-astrolabe',objectIds:['fixed-152','fixed-155','fixed-158']},
-  {altitude:1058,name:'金庫',assetId:'cp-vault-lockbox',objectIds:['fixed-174','fixed-178','fixed-179']},
-  {altitude:1198,name:'高空工坊',assetId:'cp-workshop-toolbench',objectIds:['fixed-187','fixed-188','fixed-189']},
-  {altitude:1324,name:'辦公室',assetId:'cp-office-typewriter-desk',objectIds:['fixed-196','fixed-197','fixed-198']},
-  {altitude:1464,name:'山巔',assetId:'cp-summit-beacon-plinth',objectIds:['fixed-204','fixed-205','fixed-206']}
+  {altitude:0,name:say('起點'),assetId:'cp-start-royal-crate',objectIds:['fixed-054','fixed-055','fixed-056']},
+  {altitude:210,name:say('城堡城門'),assetId:'cp-castle-drawbridge-winch',objectIds:['fixed-067','fixed-070','fixed-078']},
+  {altitude:274,name:say('市集廣場'),assetId:'cp-market-spice-cart',objectIds:['fixed-080','fixed-092']},
+  {altitude:448,name:say('森林營地'),assetId:'cp-forest-mushroom-log',objectIds:['fixed-095','fixed-103']},
+  {altitude:573,name:say('農場風車'),assetId:'cp-farm-windmill-gear',objectIds:['fixed-105','fixed-107']},
+  {altitude:704,name:say('雪山山口'),assetId:'cp-snow-ice-sled',objectIds:['fixed-117','fixed-118','fixed-120']},
+  {altitude:820,name:say('工廠入口'),assetId:'cp-factory-gate-console',objectIds:['fixed-137','fixed-145']},
+  {altitude:930,name:say('觀測台'),assetId:'cp-observatory-astrolabe',objectIds:['fixed-152','fixed-155','fixed-158']},
+  {altitude:1058,name:say('金庫'),assetId:'cp-vault-lockbox',objectIds:['fixed-174','fixed-178','fixed-179']},
+  {altitude:1198,name:say('高空工坊'),assetId:'cp-workshop-toolbench',objectIds:['fixed-187','fixed-188','fixed-189']},
+  {altitude:1324,name:say('辦公室'),assetId:'cp-office-typewriter-desk',objectIds:['fixed-196','fixed-197','fixed-198']},
+  {altitude:1464,name:say('山巔'),assetId:'cp-summit-beacon-plinth',objectIds:['fixed-204','fixed-205','fixed-206']}
 ];
 export const CHECKPOINT_BACKGROUNDS=[
   {altitude:0,key:'checkpoint-bg-start',file:'/game/images/v2/checkpoint-backgrounds/start.webp'},
@@ -902,17 +909,17 @@ for (const run of [frame01,frame02,frame03,frame04,frame05,frame06,frame07,frame
 // World-space tutorial and wayfinding annotations. These are deliberately
 // separate from collision objects so signs can never create invisible walls.
 annotations.push(
-  {id:'guide-jump',type:'guide',x:3260,y:yAt(9)-255,text:'跳！',assetId:'ref-jump-arrow',renderSize:{w:54,h:54}},
-  {id:'guide-run-jump',type:'guide',x:4000,y:yAt(38)-300,text:'跑動時跳得更遠！',assetId:'ref-run-jump-sign',renderSize:{w:120,h:46},showText:false},
-  {id:'guide-double',type:'guide',x:5070,y:yAt(72)-285,text:'二段跳！',assetId:'ref-double-jump-sign',renderSize:{w:96,h:63},showText:false},
-  {id:'summit-castle',type:'summit',x:3890,y:yAt(112)-280,text:'高峰 1/6・熔城攀登',assetId:'ref-zone-title',renderSize:{w:150,h:59},showText:false},
-  {id:'turn-oven',type:'turn',x:5050,y:yAt(188)-145,text:'← 沿木桶轉向'},
-  {id:'turn-ramp',type:'turn',x:3280,y:yAt(258)-155,text:'→ 登上宴會廳'},
-  {id:'turn-workshop',type:'turn',x:3210,y:yAt(543)-155,text:'→ 沿工場物件攀升'},
-  {id:'summit-coral',type:'summit',x:3660,y:yAt(830)-175,text:'高峰 2/6・珊瑚攀登'},
-  {id:'turn-office',type:'turn',x:1690,y:yAt(910)-155,text:'→ 進入最後攀登'},
-  {id:'milestone-1000',type:'turn',x:4050,y:yAt(1000)-145,text:'繼續向上！'},
-  {id:'summit-final-label',type:'summit',x:4050,y:yAt(1500)-145,text:'登頂！'}
+  {id:'guide-jump',type:'guide',x:3260,y:yAt(9)-255,text:say('跳！'),assetId:'ref-jump-arrow',renderSize:{w:54,h:54}},
+  {id:'guide-run-jump',type:'guide',x:4000,y:yAt(38)-300,text:say('跑動時跳得更遠！'),assetId:'ref-run-jump-sign',renderSize:{w:120,h:46},showText:false},
+  {id:'guide-double',type:'guide',x:5070,y:yAt(72)-285,text:say('二段跳！'),assetId:'ref-double-jump-sign',renderSize:{w:96,h:63},showText:false},
+  {id:'summit-castle',type:'summit',x:3890,y:yAt(112)-280,text:say('高峰 1/6・熔城攀登'),assetId:'ref-zone-title',renderSize:{w:150,h:59},showText:false},
+  {id:'turn-oven',type:'turn',x:5050,y:yAt(188)-145,text:say('← 沿木桶轉向')},
+  {id:'turn-ramp',type:'turn',x:3280,y:yAt(258)-155,text:say('→ 登上宴會廳')},
+  {id:'turn-workshop',type:'turn',x:3210,y:yAt(543)-155,text:say('→ 沿工場物件攀升')},
+  {id:'summit-coral',type:'summit',x:3660,y:yAt(830)-175,text:say('高峰 2/6・珊瑚攀登')},
+  {id:'turn-office',type:'turn',x:1690,y:yAt(910)-155,text:say('→ 進入最後攀登')},
+  {id:'milestone-1000',type:'turn',x:4050,y:yAt(1000)-145,text:say('繼續向上！')},
+  {id:'summit-final-label',type:'summit',x:4050,y:yAt(1500)-145,text:say('登頂！')}
 );
 
 const summitBase=frame18[frame18.length-1];
@@ -929,20 +936,20 @@ export const FIXED_MAP = {
     id:`progress-${index}`,x:node.x,y:node.y,progress:index/(all.length-1),altitude:node.altitude
   })),
   checkpoints:[
-    {altitude:0,x:340,name:'起點'},
-    {altitude:210,name:'城堡城門'},
-    {altitude:274,name:'市集廣場'},
-    {altitude:448,name:'森林營地'},
+    {altitude:0,x:340,name:say('起點')},
+    {altitude:210,name:say('城堡城門')},
+    {altitude:274,name:say('市集廣場')},
+    {altitude:448,name:say('森林營地')},
     // The farm flag was moved back to the preceding platform shown around
     // 561m in the HUD, before the mandatory 580m launcher.
-    {altitude:573,nodeAltitude:556,flagSide:-1,name:'農場風車'},
-    {altitude:704,name:'雪山山口'},
-    {altitude:820,name:'工廠入口'},
-    {altitude:930,name:'觀測台'},
-    {altitude:1058,name:'金庫'},
-    {altitude:1198,name:'高空工坊'},
-    {altitude:1324,name:'辦公室'},
-    {altitude:1464,name:'山巔'}
+    {altitude:573,nodeAltitude:556,flagSide:-1,name:say('農場風車')},
+    {altitude:704,name:say('雪山山口')},
+    {altitude:820,name:say('工廠入口')},
+    {altitude:930,name:say('觀測台')},
+    {altitude:1058,name:say('金庫')},
+    {altitude:1198,name:say('高空工坊')},
+    {altitude:1324,name:say('辦公室')},
+    {altitude:1464,name:say('山巔')}
   ].map(item=>({id:`checkpoint-${item.altitude}`,...item})),
   recoveryBounds:[
     {id:'recovery-castle',minAltitude:35,maxAltitude:210,resetAltitude:0},

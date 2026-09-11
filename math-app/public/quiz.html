@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="杯澳四則特訓 - 四則運算練習">
-    <title>練習中 ✦ 杯澳四則特訓</title>
-    <link rel="stylesheet" href="/math-app/css/style.css">
+    <meta name="description" content="杯澳四則特訓 - 四則運算練習" data-i18n-attr="content:m.quizDesc">
+    <title data-i18n="m.quizTitle">練習中 ✦ 杯澳四則特訓</title>
+    <script src="/shared/i18n.js?v=20260910-1"></script>
+    <script src="/shared/i18n/math.js?v=20260910-1"></script>
+    <link rel="stylesheet" href="/math-app/css/style.css?v=20260910-i18n-1">
 </head>
 <body>
     <div class="page-container">
         <!-- Navigation -->
         <nav class="navbar" id="navbar">
             <div class="navbar-brand">
-                <img src="/math-app/images/logo.png" alt="校徽" class="logo-img">
-                <span>杯澳四則特訓</span>
+                <img src="/math-app/images/logo.png" alt="校徽" class="logo-img" data-i18n-attr="alt:m.logoAlt">
+                <span data-i18n="m.appName">杯澳四則特訓</span>
             </div>
             <ul class="navbar-nav">
-                <li><a href="/math" style="color:var(--text-primary); font-size:1rem; text-decoration:none; font-weight:600; padding:8px 16px; border-radius:8px;">🏠 回主頁</a></li>
+                <li><a href="/math" style="color:var(--text-primary); font-size:1rem; text-decoration:none; font-weight:600; padding:8px 16px; border-radius:8px;" data-i18n="m.home">🏠 回主頁</a></li>
             </ul>
             <div class="navbar-user">
-                <span id="student-name">載入中...</span>
+                <span id="student-name" data-i18n="m.loading">載入中...</span>
                 <div class="avatar" id="student-avatar">?</div>
             </div>
         </nav>
@@ -29,7 +31,7 @@
             <!-- Loading State -->
             <div id="loading-state">
                 <div class="loading-spinner"></div>
-                <p style="text-align:center; color: var(--text-muted);">正在準備題目...</p>
+                <p style="text-align:center; color: var(--text-muted);" data-i18n="m.preparing">正在準備題目...</p>
             </div>
 
             <!-- Quiz Active State -->
@@ -37,7 +39,7 @@
                 <!-- Header: Progress + Timer -->
                 <div class="quiz-header">
                     <div class="quiz-progress">
-                        <span class="progress-text" id="progress-text">第 1 / 10 題</span>
+                        <span class="progress-text" id="progress-text"></span>
                         <div class="progress-bar-container">
                             <div class="progress-bar-fill" id="progress-bar"></div>
                         </div>
@@ -45,7 +47,7 @@
                     <div class="quiz-timer">
                         <span class="timer-icon">⏱️</span>
                         <span class="timer-value" id="timer-value">0</span>
-                        <span style="color: var(--text-muted); font-size:0.8rem;">秒</span>
+                        <span style="color: var(--text-muted); font-size:0.8rem;" data-i18n="m.seconds">秒</span>
                     </div>
                 </div>
 
@@ -54,29 +56,29 @@
 
                 <!-- Question Card -->
                 <div class="quiz-question-card glass-card-static" id="question-card">
-                    <div class="question-number" id="question-number">第 1 題</div>
+                    <div class="question-number" id="question-number"></div>
                     <div class="question-tag" id="question-tag">
                         <span>📐</span>
-                        <span id="question-tag-text">加法</span>
+                        <span id="question-tag-text"></span>
                     </div>
-                    <div class="question-category" id="question-category">兩位數加法 (無進位)</div>
+                    <div class="question-category" id="question-category"></div>
                     <div class="question-text" id="question-text">23 + 45</div>
                     <div class="answer-input-wrapper">
                         <span class="equals-sign">=</span>
                         <input type="number" class="answer-input" id="answer-input" 
                                placeholder="?" autocomplete="off" inputmode="numeric">
-                        <button class="btn btn-primary" id="submit-answer-btn">確認送出</button>
+                        <button class="btn btn-primary" id="submit-answer-btn" data-i18n="m.submit">確認送出</button>
                     </div>
                 </div>
 
                 <!-- Canvas Sketchpad -->
                 <div class="sketchpad-container glass-card-static">
                     <div class="sketchpad-header">
-                        <span style="color:var(--text-muted); font-size:0.9rem;">📝 計算紙 (用手指或滑鼠書寫)</span>
+                        <span style="color:var(--text-muted); font-size:0.9rem;" data-i18n="m.scratchpad">📝 計算紙 (用手指或滑鼠書寫)</span>
                         <div class="sketchpad-tools">
-                            <button class="btn btn-ghost" id="grid-toggle-btn" aria-pressed="false">▦ 方格</button>
-                            <button class="btn btn-ghost" id="hint-btn">💡 直式提示</button>
-                            <button class="btn btn-ghost" id="clear-canvas-btn">🗑️ 清除草稿</button>
+                            <button class="btn btn-ghost" id="grid-toggle-btn" aria-pressed="false" data-i18n="m.gridToggle">▦ 方格</button>
+                            <button class="btn btn-ghost" id="hint-btn" data-i18n="m.hintBtn">💡 直式提示</button>
+                            <button class="btn btn-ghost" id="clear-canvas-btn" data-i18n="m.clearCanvas">🗑️ 清除草稿</button>
                         </div>
                     </div>
                     <!-- The grid and the 直式 hint live on their own layer, so 清除草稿 wipes the
@@ -93,21 +95,21 @@
                 <div class="results-container">
                     <div class="results-hero glass-card-static">
                         <div class="results-score" id="results-score">0%</div>
-                        <div class="results-label" id="results-label">本次練習正確率</div>
+                        <div class="results-label" id="results-label" data-i18n="m.resultsLabel">本次練習正確率</div>
                     </div>
 
                     <div class="results-stats">
                         <div class="result-stat-card glass-card-static">
                             <div class="result-stat-value" id="stat-correct" style="color:var(--accent-green);">0</div>
-                            <div class="result-stat-label">答對</div>
+                            <div class="result-stat-label" data-i18n="m.statCorrect">答對</div>
                         </div>
                         <div class="result-stat-card glass-card-static">
                             <div class="result-stat-value" id="stat-incorrect" style="color:var(--accent-red);">0</div>
-                            <div class="result-stat-label">答錯</div>
+                            <div class="result-stat-label" data-i18n="m.statIncorrect">答錯</div>
                         </div>
                         <div class="result-stat-card glass-card-static">
                             <div class="result-stat-value" id="stat-time" style="color:var(--accent-cyan);">0s</div>
-                            <div class="result-stat-label">平均用時</div>
+                            <div class="result-stat-label" data-i18n="m.statTime">平均用時</div>
                         </div>
                     </div>
 
@@ -116,8 +118,8 @@
                     </div>
 
                     <div class="results-actions">
-                        <button class="btn btn-primary btn-lg" id="retry-btn">🔄 再練習一組</button>
-                        <button class="btn btn-ghost btn-lg" onclick="location.href='/math'">🏠 回主頁</button>
+                        <button class="btn btn-primary btn-lg" id="retry-btn" data-i18n="m.retry">🔄 再練習一組</button>
+                        <button class="btn btn-ghost btn-lg" onclick="location.href='/math'" data-i18n="m.home">🏠 回主頁</button>
                     </div>
                 </div>
             </div>
@@ -129,6 +131,6 @@
         <div class="feedback-icon" id="feedback-icon">✅</div>
     </div>
 
-    <script src="/math-app/js/quiz.js"></script>
+    <script src="/math-app/js/quiz.js?v=20260910-i18n-1"></script>
 </body>
 </html>

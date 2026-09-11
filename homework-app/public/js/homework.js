@@ -1,6 +1,7 @@
 const app = document.getElementById('app');
 const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-const statusLabels = { complete: '完成', missing: '欠交', absent: 'Absent' };
+const { t } = window.BuiI18n;
+const statusLabels = { complete: t('h.statusComplete'), missing: t('h.statusMissing'), absent: t('h.statusAbsent') };
 const grades = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'];
 const state = { meta: null, view: 'monitors', roster: [], record: null, homeworks: [], message: '', messageType: '' };
 
@@ -9,8 +10,8 @@ const subjectName = id => state.meta?.subjects.find(subject => subject.id === id
 const subjectsFor = grade => state.meta.subjects.filter(subject => !subject.grades || subject.grades.includes(grade));
 const api = async (path, options = {}) => {
   const response = await fetch(`/api/homework${path}`, { credentials: 'include', ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
-  const data = await response.json().catch(() => ({ success: false, message: '伺服器回應不正確' }));
-  if (!response.ok || !data.success) throw Object.assign(new Error(data.message || '操作失敗'), { status: response.status });
+  const data = await response.json().catch(() => ({ success: false, message: t('h.badResponse') }));
+  if (!response.ok || !data.success) throw Object.assign(new Error(data.message || t('h.actionFailed')), { status: response.status });
   return data;
 };
 const options = (items, selected, label = value => value, value = item => item) => items.map(item => `<option value="${escapeHtml(value(item))}" ${value(item) === selected ? 'selected' : ''}>${escapeHtml(label(item))}</option>`).join('');
@@ -21,17 +22,17 @@ function shell(content) {
   const teacher = state.meta.role === 'teacher';
   return `<div class="shell ${teacher ? '' : 'student-shell'}">
     <aside class="side">
-      <div class="brand"><img src="/math-app/images/logo.png" alt="校徽"><div><strong>杯澳公立學校</strong><span>LEARNING HUB</span></div></div>
-      ${teacher ? `<nav class="nav" aria-label="欠交功課功能">
-        <button data-view="monitors" class="${state.view === 'monitors' ? 'active' : ''}">設定科長</button>
-        <button data-view="records" class="${state.view === 'records' ? 'active' : ''}">欠交功課記錄</button>
-        <button data-view="analysis" class="${state.view === 'analysis' ? 'active' : ''}">學生分析</button>
-        <button data-view="class-analysis" class="${state.view === 'class-analysis' ? 'active' : ''}">班級分析</button>
+      <div class="brand"><img src="/math-app/images/logo.png" alt="${escapeHtml(t('h.logoAlt'))}"><div><strong>${escapeHtml(t('h.school'))}</strong><span>LEARNING HUB</span></div></div>
+      ${teacher ? `<nav class="nav" aria-label="${escapeHtml(t('h.navAria'))}">
+        <button data-view="monitors" class="${state.view === 'monitors' ? 'active' : ''}">${escapeHtml(t('h.navMonitors'))}</button>
+        <button data-view="records" class="${state.view === 'records' ? 'active' : ''}">${escapeHtml(t('h.navRecords'))}</button>
+        <button data-view="analysis" class="${state.view === 'analysis' ? 'active' : ''}">${escapeHtml(t('h.navAnalysis'))}</button>
+        <button data-view="class-analysis" class="${state.view === 'class-analysis' ? 'active' : ''}">${escapeHtml(t('h.navClassAnalysis'))}</button>
       </nav>` : ''}
-      <a class="back" href="/">← 返回平台主頁</a>
+      <a class="back" href="/">${escapeHtml(t('h.back'))}</a>
     </aside>
     <main class="main">
-      <header class="top"><div><h1>欠交功課</h1><p>${teacher ? '教師管理與學生跟進' : '科長填報'}</p></div><span class="date-chip">${today}</span></header>
+      <header class="top"><div><h1>${escapeHtml(t('h.title'))}</h1><p>${escapeHtml(t(teacher ? 'h.subtitleTeacher' : 'h.subtitleMonitor'))}</p></div><span class="date-chip">${today}</span></header>
       ${notice()}${content}
     </main>
   </div>`;
@@ -41,10 +42,10 @@ function filterHtml(prefix, values, includeDate = false) {
   const subjects = subjectsFor(values.className);
   if (!subjects.some(item => item.id === values.subject)) values.subject = subjects[0]?.id || '';
   return `<div class="filters">
-    <div class="field"><label for="${prefix}Year">學年</label><select id="${prefix}Year">${options(state.meta.academicYears, values.academicYear)}</select></div>
-    <div class="field"><label for="${prefix}Class">班別</label><select id="${prefix}Class">${options(grades, values.className)}</select></div>
-    <div class="field"><label for="${prefix}Subject">科目</label><select id="${prefix}Subject">${options(subjects, values.subject, item => item.name, item => item.id)}</select></div>
-    ${includeDate ? `<div class="field"><label for="${prefix}Date">日期</label><input id="${prefix}Date" type="date" value="${values.date}" max="${today}"></div>` : '<div></div>'}
+    <div class="field"><label for="${prefix}Year">${escapeHtml(t('h.year'))}</label><select id="${prefix}Year">${options(state.meta.academicYears, values.academicYear)}</select></div>
+    <div class="field"><label for="${prefix}Class">${escapeHtml(t('h.class'))}</label><select id="${prefix}Class">${options(grades, values.className)}</select></div>
+    <div class="field"><label for="${prefix}Subject">${escapeHtml(t('h.subject'))}</label><select id="${prefix}Subject">${options(subjects, values.subject, item => item.name, item => item.id)}</select></div>
+    ${includeDate ? `<div class="field"><label for="${prefix}Date">${escapeHtml(t('h.date'))}</label><input id="${prefix}Date" type="date" value="${values.date}" max="${today}"></div>` : '<div></div>'}
   </div>`;
 }
 
@@ -71,13 +72,13 @@ async function loadMonitorRoster() {
 function renderMonitors() {
   const f = filterState.monitors;
   return shell(`<section class="panel">
-    <div class="panel-head"><div><h2>設定科長</h2><p class="hint">每科可選多於一位科長；名單只會顯示所選班別及 A／B 組學生。</p></div></div>
+    <div class="panel-head"><div><h2>${escapeHtml(t('h.monitorsTitle'))}</h2><p class="hint">${escapeHtml(t('h.monitorsHint'))}</p></div></div>
     ${filterHtml('monitor', f)}
     <div class="student-list">${state.roster.length ? state.roster.map(student => `<label class="student-check">
       <input type="checkbox" class="monitor-check" value="${escapeHtml(student.id)}" ${student.selected ? 'checked' : ''}>
-      <span><strong>${escapeHtml(student.name)}</strong><small>${escapeHtml(student.id)} · ${student.classNo ? student.classNo + '號' : '未設班號'}</small></span>
-    </label>`).join('') : '<div class="empty">這個班別／組別暫時沒有學生。</div>'}</div>
-    <div class="actions" style="margin-top:20px"><button class="button primary" id="saveMonitors">儲存科長設定</button></div>
+      <span><strong>${escapeHtml(student.name)}</strong><small>${escapeHtml(student.id)} · ${escapeHtml(student.classNo ? t('h.classNoSuffix', { no: student.classNo }) : t('h.noClassNo'))}</small></span>
+    </label>`).join('') : `<div class="empty">${escapeHtml(t('h.noStudentsHere'))}</div>`}</div>
+    <div class="actions" style="margin-top:20px"><button class="button primary" id="saveMonitors">${escapeHtml(t('h.saveMonitors'))}</button></div>
   </section>`);
 }
 
@@ -100,17 +101,17 @@ function statusControls(homework, student, teacher = false, locked = false) {
   const row = homework.statuses.find(item => item.studentId === student.id);
   const current = row?.status || '';
   const statuses = ['complete', 'missing', 'absent'];
-  if (locked) return `<div class="status-summary"><span class="status-tag ${current}">${statusLabels[current] || '—'}</span>${row?.madeUp ? '<span class="status-tag made-up">已補做</span>' : ''}</div>`;
+  if (locked) return `<div class="status-summary"><span class="status-tag ${current}">${statusLabels[current] || '—'}</span>${row?.madeUp ? `<span class="status-tag made-up">${escapeHtml(t('h.madeUp'))}</span>` : ''}</div>`;
   return `<div class="status-options">
     ${statuses.map(status => `<label><input type="radio" name="${escapeHtml(homework.id)}-${escapeHtml(student.id)}" data-hw="${escapeHtml(homework.id)}" data-student="${escapeHtml(student.id)}" value="${status}" ${current === status ? 'checked' : ''}>${statusLabels[status]}</label>`).join('')}
-    ${teacher ? `<label class="made-up-option"><input type="checkbox" data-made-up data-hw="${escapeHtml(homework.id)}" data-student="${escapeHtml(student.id)}" ${row?.madeUp ? 'checked' : ''}>已補做</label>` : ''}
+    ${teacher ? `<label class="made-up-option"><input type="checkbox" data-made-up data-hw="${escapeHtml(homework.id)}" data-student="${escapeHtml(student.id)}" ${row?.madeUp ? 'checked' : ''}>${escapeHtml(t('h.madeUp'))}</label>` : ''}
   </div>`;
 }
 
 function homeworkCards({ teacher = false, locked = false } = {}) {
   return state.homeworks.map((homework, index) => `<article class="homework-card">
-    <div class="homework-title"><div><strong>功課 ${index + 1}</strong><input class="title-input homework-name" data-hw="${escapeHtml(homework.id)}" value="${escapeHtml(homework.title)}" ${locked ? 'disabled' : ''} aria-label="功課名稱"></div>${!locked && state.homeworks.length > 1 ? `<button class="button danger remove-homework" data-hw="${escapeHtml(homework.id)}">移除</button>` : ''}</div>
-    <table class="status-table"><thead><tr><th>學生</th><th>班號</th><th>狀態</th></tr></thead><tbody>${state.roster.map(student => `<tr><td>${escapeHtml(student.name)} <small>${escapeHtml(student.id)}</small></td><td>${student.classNo || '—'}</td><td>${statusControls(homework, student, teacher, locked)}</td></tr>`).join('')}</tbody></table>
+    <div class="homework-title"><div><strong>${escapeHtml(t('h.homeworkNo', { n: index + 1 }))}</strong><input class="title-input homework-name" data-hw="${escapeHtml(homework.id)}" value="${escapeHtml(homework.title)}" ${locked ? 'disabled' : ''} aria-label="${escapeHtml(t('h.homeworkName'))}"></div>${!locked && state.homeworks.length > 1 ? `<button class="button danger remove-homework" data-hw="${escapeHtml(homework.id)}">${escapeHtml(t('h.removeHomework'))}</button>` : ''}</div>
+    <table class="status-table"><thead><tr><th>${escapeHtml(t('h.student'))}</th><th>${escapeHtml(t('h.classNo'))}</th><th>${escapeHtml(t('h.status'))}</th></tr></thead><tbody>${state.roster.map(student => `<tr><td>${escapeHtml(student.name)} <small>${escapeHtml(student.id)}</small></td><td>${student.classNo || '—'}</td><td>${statusControls(homework, student, teacher, locked)}</td></tr>`).join('')}</tbody></table>
   </article>`).join('');
 }
 
@@ -118,12 +119,12 @@ function renderRecords() {
   const f = filterState.records;
   const editingNewRecord = !state.record && state.homeworks.length > 0;
   return shell(`<section class="panel">
-    <div class="panel-head"><div><h2>欠交功課記錄</h2><p class="hint">老師可檢視及修改任何已提交記錄，並把欠交更新為「已補做」。</p></div><div class="actions"><button class="button secondary" id="printRecord" ${!state.record ? 'disabled' : ''}>下載 PDF</button></div></div>
+    <div class="panel-head"><div><h2>${escapeHtml(t('h.recordsTitle'))}</h2><p class="hint">${escapeHtml(t('h.recordsHint'))}</p></div><div class="actions"><button class="button secondary" id="printRecord" ${!state.record ? 'disabled' : ''}>${escapeHtml(t('h.downloadPdf'))}</button></div></div>
     ${filterHtml('record', f, true)}
   </section>
   <section class="panel">${state.record || editingNewRecord
-    ? `${editingNewRecord ? '<div class="notice">正在新增老師記錄；所有學生已預設為「完成」，可按需要修改。</div>' : ''}${homeworkCards({ teacher: true })}<div class="actions" style="margin-top:20px"><button class="button secondary" id="addTeacherHomework">＋ 新增功課</button><button class="button primary" id="saveRecord">${editingNewRecord ? '儲存記錄' : '儲存修改'}</button>${state.record ? '<button class="button danger" id="deleteRecord" style="margin-left:auto">刪除記錄</button>' : ''}</div>`
-    : '<div class="empty">所選日期暫時沒有科長提交的記錄。<div class="actions empty-actions"><button class="button primary" id="createTeacherRecord">＋ 新增記錄</button></div></div>'}</section>`);
+    ? `${editingNewRecord ? `<div class="notice">${escapeHtml(t('h.newRecordNotice'))}</div>` : ''}${homeworkCards({ teacher: true })}<div class="actions" style="margin-top:20px"><button class="button secondary" id="addTeacherHomework">${escapeHtml(t('h.addHomework'))}</button><button class="button primary" id="saveRecord">${escapeHtml(t(editingNewRecord ? 'h.saveRecord' : 'h.saveChanges'))}</button>${state.record ? `<button class="button danger" id="deleteRecord" style="margin-left:auto">${escapeHtml(t('h.deleteRecord'))}</button>` : ''}</div>`
+    : `<div class="empty">${escapeHtml(t('h.noRecordForDay'))}<div class="actions empty-actions"><button class="button primary" id="createTeacherRecord">${escapeHtml(t('h.newRecord'))}</button></div></div>`}</section>`);
 }
 
 async function loadAnalysisStudents() {
@@ -134,7 +135,7 @@ async function loadAnalysisStudents() {
     if (!state.analysisStudents.some(student => student.id === filterState.analysis.studentId)) filterState.analysis.studentId = state.analysisStudents[0]?.id || '';
     state.analysisRows = [];
     state.message = '';
-  } catch (error) { state.analysisStudents = []; state.message = '未能讀取學生名單'; state.messageType = 'error'; }
+  } catch (error) { state.analysisStudents = []; state.message = t('h.rosterFailed'); state.messageType = 'error'; }
   render();
 }
 
@@ -153,14 +154,14 @@ function renderAnalysis() {
   const f = filterState.analysis;
   const students = state.analysisStudents || [];
   const rows = state.analysisRows || [];
-  return shell(`<section class="panel"><div class="panel-head"><div><h2>學生分析</h2><p class="hint">按學年及年級查看學生所有曾欠交的功課；「已補做」會保留作歷史記錄。</p></div></div>
+  return shell(`<section class="panel"><div class="panel-head"><div><h2>${escapeHtml(t('h.analysisTitle'))}</h2><p class="hint">${escapeHtml(t('h.analysisHint'))}</p></div></div>
     <div class="filters three">
-      <div class="field"><label for="analysisYear">學年</label><select id="analysisYear">${options(state.meta.academicYears, f.academicYear)}</select></div>
-      <div class="field"><label for="analysisClass">年級</label><select id="analysisClass">${options(grades, f.className)}</select></div>
-      <div class="field"><label for="analysisStudent">學生</label><select id="analysisStudent">${options(students, f.studentId, item => `${item.name} (${item.id})`, item => item.id)}</select></div>
+      <div class="field"><label for="analysisYear">${escapeHtml(t('h.year'))}</label><select id="analysisYear">${options(state.meta.academicYears, f.academicYear)}</select></div>
+      <div class="field"><label for="analysisClass">${escapeHtml(t('h.grade'))}</label><select id="analysisClass">${options(grades, f.className)}</select></div>
+      <div class="field"><label for="analysisStudent">${escapeHtml(t('h.student'))}</label><select id="analysisStudent">${options(students, f.studentId, item => `${item.name} (${item.id})`, item => item.id)}</select></div>
     </div>
-    <div class="actions" style="margin-top:16px"><button class="button primary" id="runAnalysis" ${!f.studentId ? 'disabled' : ''}>顯示欠交總表</button></div>
-    ${rows.length ? `<table class="analysis-table"><thead><tr><th>日期</th><th>科目</th><th>功課</th><th>狀態</th><th>更新狀態</th></tr></thead><tbody>${rows.map((row, index) => `<tr><td>${row.date}</td><td>${escapeHtml(subjectName(row.subject))}</td><td>${escapeHtml(row.homework)}</td><td><div class="status-summary"><span class="status-tag missing">欠交</span>${row.madeUp ? '<span class="status-tag made-up">已補做</span>' : ''}</div></td><td><label class="analysis-made-up-label"><input type="checkbox" class="analysis-made-up" data-index="${index}" data-date="${escapeHtml(row.date)}" data-subject="${escapeHtml(row.subject)}" data-hw-id="${escapeHtml(row.homeworkId)}" ${row.madeUp ? 'checked' : ''}> 已補做</label></td></tr>`).join('')}</tbody></table><div class="actions" style="margin-top:20px"><button class="button primary" id="saveAnalysisMadeUp">儲存</button></div>` : '<div class="empty" style="margin-top:20px">沒有欠交記錄，或請按「顯示欠交總表」。</div>'}
+    <div class="actions" style="margin-top:16px"><button class="button primary" id="runAnalysis" ${!f.studentId ? 'disabled' : ''}>${escapeHtml(t('h.showTotals'))}</button></div>
+    ${rows.length ? `<table class="analysis-table"><thead><tr><th>${escapeHtml(t('h.date'))}</th><th>${escapeHtml(t('h.subject'))}</th><th>${escapeHtml(t('h.colHomework'))}</th><th>${escapeHtml(t('h.status'))}</th><th>${escapeHtml(t('h.colUpdateStatus'))}</th></tr></thead><tbody>${rows.map((row, index) => `<tr><td>${row.date}</td><td>${escapeHtml(subjectName(row.subject))}</td><td>${escapeHtml(row.homework)}</td><td><div class="status-summary"><span class="status-tag missing">${escapeHtml(t('h.statusMissing'))}</span>${row.madeUp ? `<span class="status-tag made-up">${escapeHtml(t('h.madeUp'))}</span>` : ''}</div></td><td><label class="analysis-made-up-label"><input type="checkbox" class="analysis-made-up" data-index="${index}" data-date="${escapeHtml(row.date)}" data-subject="${escapeHtml(row.subject)}" data-hw-id="${escapeHtml(row.homeworkId)}" ${row.madeUp ? 'checked' : ''}> ${escapeHtml(t('h.madeUp'))}</label></td></tr>`).join('')}</tbody></table><div class="actions" style="margin-top:20px"><button class="button primary" id="saveAnalysisMadeUp">${escapeHtml(t('h.save'))}</button></div>` : `<div class="empty" style="margin-top:20px">${escapeHtml(t('h.noMissing'))}</div>`}
   </section>`);
 }
 
@@ -184,15 +185,15 @@ function renderClassAnalysis() {
   const f = filterState.classAnalysis;
   const rows = state.classAnalysisRows || [];
   return shell(`<section class="panel">
-    <div class="panel-head"><div><h2>班級分析</h2><p class="hint">選擇學年、班級及時期，統計班內每位學生曾欠交功課的次數；已補做仍會保留在欠交統計。</p></div></div>
+    <div class="panel-head"><div><h2>${escapeHtml(t('h.classAnalysisTitle'))}</h2><p class="hint">${escapeHtml(t('h.classAnalysisHint'))}</p></div></div>
     <div class="filters">
-      <div class="field"><label for="classAnalysisYear">學年</label><select id="classAnalysisYear">${options(state.meta.academicYears, f.academicYear)}</select></div>
-      <div class="field"><label for="classAnalysisClass">班級</label><select id="classAnalysisClass">${options(grades, f.className)}</select></div>
-      <div class="field"><label for="classAnalysisFrom">由</label><input id="classAnalysisFrom" type="date" value="${f.dateFrom}"></div>
-      <div class="field"><label for="classAnalysisTo">至</label><input id="classAnalysisTo" type="date" value="${f.dateTo}" max="${today}"></div>
+      <div class="field"><label for="classAnalysisYear">${escapeHtml(t('h.year'))}</label><select id="classAnalysisYear">${options(state.meta.academicYears, f.academicYear)}</select></div>
+      <div class="field"><label for="classAnalysisClass">${escapeHtml(t('h.class'))}</label><select id="classAnalysisClass">${options(grades, f.className)}</select></div>
+      <div class="field"><label for="classAnalysisFrom">${escapeHtml(t('h.from'))}</label><input id="classAnalysisFrom" type="date" value="${f.dateFrom}"></div>
+      <div class="field"><label for="classAnalysisTo">${escapeHtml(t('h.to'))}</label><input id="classAnalysisTo" type="date" value="${f.dateTo}" max="${today}"></div>
     </div>
-    <div class="actions" style="margin-top:16px"><button class="button primary" id="runClassAnalysis">顯示班級統計</button></div>
-    ${rows.length ? `<div class="analysis-total">時期內全班合共欠交 <strong>${state.classAnalysisTotal || 0}</strong> 次</div><table class="analysis-table"><thead><tr><th>學生</th><th>班號</th><th>欠交次數</th></tr></thead><tbody>${rows.map(row => `<tr><td>${escapeHtml(row.name)} <small>${escapeHtml(row.id)}</small></td><td>${row.classNo || '—'}</td><td><strong>${row.missingCount}</strong></td></tr>`).join('')}</tbody></table>` : '<div class="empty" style="margin-top:20px">請選擇時期並按「顯示班級統計」。</div>'}
+    <div class="actions" style="margin-top:16px"><button class="button primary" id="runClassAnalysis">${escapeHtml(t('h.showClassStats'))}</button></div>
+    ${rows.length ? `<div class="analysis-total">${t('h.classTotal', { count: state.classAnalysisTotal || 0 })}</div><table class="analysis-table"><thead><tr><th>${escapeHtml(t('h.student'))}</th><th>${escapeHtml(t('h.classNo'))}</th><th>${escapeHtml(t('h.missingCount'))}</th></tr></thead><tbody>${rows.map(row => `<tr><td>${escapeHtml(row.name)} <small>${escapeHtml(row.id)}</small></td><td>${row.classNo || '—'}</td><td><strong>${row.missingCount}</strong></td></tr>`).join('')}</tbody></table>` : `<div class="empty" style="margin-top:20px">${escapeHtml(t('h.pickPeriod'))}</div>`}
   </section>`);
 }
 
@@ -218,14 +219,14 @@ function renderStudent() {
   const assignment = state.studentAssignment;
   const locked = state.studentDate !== today;
   return shell(`<section class="panel">
-    <div class="panel-head"><div><h2>科長填報</h2><p class="hint">今天可新增、修改及儲存功課；過去日期只供查閱。</p></div>${assignment ? `<span class="assignment">${assignment.className} · ${escapeHtml(subjectName(assignment.subject))}</span>` : ''}</div>
+    <div class="panel-head"><div><h2>${escapeHtml(t('h.monitorTitle'))}</h2><p class="hint">${escapeHtml(t('h.monitorHint'))}</p></div>${assignment ? `<span class="assignment">${assignment.className} · ${escapeHtml(subjectName(assignment.subject))}</span>` : ''}</div>
     <div class="filters three">
-      <div class="field"><label for="studentAssignment">負責科目</label><select id="studentAssignment">${options(state.meta.assignments, assignment?.id, item => `${item.className} · ${subjectName(item.subject)}`, item => String(item.id))}</select></div>
-      <div class="field"><label for="studentDate">日期</label><input id="studentDate" type="date" value="${state.studentDate}" max="${today}"></div><div></div>
+      <div class="field"><label for="studentAssignment">${escapeHtml(t('h.mySubject'))}</label><select id="studentAssignment">${options(state.meta.assignments, assignment?.id, item => `${item.className} · ${subjectName(item.subject)}`, item => String(item.id))}</select></div>
+      <div class="field"><label for="studentDate">${escapeHtml(t('h.date'))}</label><input id="studentDate" type="date" value="${state.studentDate}" max="${today}"></div><div></div>
     </div>
-    ${locked ? '<div class="notice" style="margin-top:18px">過往日期只可查看，不能新增或修改。</div>' : state.record ? '<div class="notice" style="margin-top:18px">今天的記錄已儲存；科長仍可修改狀態或新增功課後再儲存。</div>' : ''}
+    ${locked ? `<div class="notice" style="margin-top:18px">${escapeHtml(t('h.lockedNotice'))}</div>` : state.record ? `<div class="notice" style="margin-top:18px">${escapeHtml(t('h.savedNotice'))}</div>` : ''}
   </section>
-  <section class="panel">${state.homeworks.length ? `${homeworkCards({ locked })}<div class="actions" style="margin-top:20px">${!locked ? `<button class="button secondary" id="addHomework">＋ 新增功課</button><button class="button primary" id="submitRecord">${state.record ? '儲存修改' : '儲存'}</button>` : ''}</div>` : '<div class="empty">所選日期沒有欠交功課記錄。</div>'}</section>`);
+  <section class="panel">${state.homeworks.length ? `${homeworkCards({ locked })}<div class="actions" style="margin-top:20px">${!locked ? `<button class="button secondary" id="addHomework">${escapeHtml(t('h.addHomework'))}</button><button class="button primary" id="submitRecord">${escapeHtml(t(state.record ? 'h.saveChanges' : 'h.saveShort'))}</button>` : ''}</div>` : `<div class="empty">${escapeHtml(t('h.noRecordDate'))}</div>`}</section>`);
 }
 
 function syncEditor() {
@@ -284,7 +285,7 @@ function bindTeacher() {
     // the confirmation names the record rather than asking a bare "are you sure".
     document.getElementById('deleteRecord')?.addEventListener('click', async () => {
       const f = filterState.records;
-      if (!window.confirm(`確定刪除 ${f.className} ${subjectName(f.subject)} ${f.date} 的記錄嗎？此操作無法復原。`)) return;
+      if (!window.confirm(t('h.confirmDelete', { className: f.className, subject: subjectName(f.subject), date: f.date }))) return;
       try {
         const query = `academicYear=${encodeURIComponent(f.academicYear)}&className=${f.className}&subject=${f.subject}&date=${f.date}`;
         const result = await api(`/records?${query}`, { method: 'DELETE' });
@@ -297,10 +298,10 @@ function bindTeacher() {
       try {
         const f = filterState.records;
         const response = await fetch(`/api/homework/records-pdf?academicYear=${encodeURIComponent(f.academicYear)}&className=${f.className}&subject=${f.subject}&date=${f.date}`, { credentials: 'include' });
-        if (!response.ok) throw new Error((await response.json().catch(() => ({}))).message || '未能下載 PDF');
+        if (!response.ok) throw new Error((await response.json().catch(() => ({}))).message || t('h.pdfFailed'));
         const url = URL.createObjectURL(await response.blob());
         const link = document.createElement('a');
-        link.href = url; link.download = `欠交功課_${f.date}_${f.className}_${f.subject}.pdf`; link.click();
+        link.href = url; link.download = t('h.pdfName', { date: f.date, className: f.className, subject: f.subject }); link.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       } catch (error) { setMessage(error.message, 'error'); }
     });
@@ -364,13 +365,13 @@ function render() {
 async function boot() {
   try {
     state.meta = await api('/meta');
-    if (!state.meta.canAccess) throw new Error('你未獲委任為科長，無權進入此模組。');
+    if (!state.meta.canAccess) throw new Error(t('h.notMonitor'));
     filterState.monitors.academicYear = filterState.records.academicYear = filterState.analysis.academicYear = filterState.classAnalysis.academicYear = state.meta.currentAcademicYear;
     filterState.classAnalysis.dateFrom = `${state.meta.currentAcademicYear.slice(0, 4)}-09-01`;
     if (state.meta.role === 'teacher') await loadMonitorRoster();
     else {
       state.studentAssignment = state.meta.assignments[0]; state.studentDate = today; await loadStudentRecord();
     }
-  } catch (error) { app.innerHTML = `<div class="loading"><div><h2>未能進入欠交功課模組</h2><p>${escapeHtml(error.message)}</p><a href="/">返回平台主頁</a></div></div>`; }
+  } catch (error) { app.innerHTML = `<div class="loading"><div><h2>${escapeHtml(t('h.entryFailed'))}</h2><p>${escapeHtml(error.message)}</p><a href="/">${escapeHtml(t('h.backHome'))}</a></div></div>`; }
 }
 boot();
