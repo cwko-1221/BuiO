@@ -222,6 +222,122 @@
       "slot": "neck",
       "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-16--patch-9756c2b0f7.webp"
     },
+    "mossback-turtle:1:face-01": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-01--patch-17dfde8bf0.webp"
+    },
+    "mossback-turtle:1:face-02": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-02--patch-ba16552072.webp"
+    },
+    "mossback-turtle:1:face-03": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-03--patch-844154e401.webp"
+    },
+    "mossback-turtle:1:face-04": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-04--patch-d97c512fbe.webp"
+    },
+    "mossback-turtle:1:face-05": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-05--patch-1a80c45b40.webp"
+    },
+    "mossback-turtle:1:face-06": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-06--patch-dde97e19d2.webp"
+    },
+    "mossback-turtle:1:face-07": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-07--patch-ad0a9a489d.webp"
+    },
+    "mossback-turtle:1:face-08": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-08--patch-a1418c98e4.webp"
+    },
+    "mossback-turtle:1:face-09": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-09--patch-4b0672be3e.webp"
+    },
+    "mossback-turtle:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-11--patch-9df98e43de.webp"
+    },
+    "mossback-turtle:1:face-12": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-12--patch-ee259b06d6.webp"
+    },
+    "mossback-turtle:1:head-03": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--head-03--patch-ed03a0b0b3.webp"
+    },
+    "mossback-turtle:1:head-04": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--head-04--patch-1d91c6172e.webp"
+    },
+    "mossback-turtle:1:neck-01": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-01--patch-77dfd73f5a.webp"
+    },
+    "mossback-turtle:1:neck-02": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-02--patch-93e4578521.webp"
+    },
+    "mossback-turtle:1:neck-03": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-03--patch-24541278e5.webp"
+    },
+    "mossback-turtle:1:neck-04": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-04--patch-05ee800eea.webp"
+    },
+    "mossback-turtle:1:neck-05": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-05--patch-f5ca0ef577.webp"
+    },
+    "mossback-turtle:1:neck-06": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-06--patch-669f82f894.webp"
+    },
+    "mossback-turtle:1:neck-07": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-07--patch-2b88c6b6f1.webp"
+    },
+    "mossback-turtle:1:neck-08": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-08--patch-429c4f7804.webp"
+    },
+    "mossback-turtle:1:neck-09": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-09--patch-3907e47187.webp"
+    },
+    "mossback-turtle:1:neck-10": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-10--patch-176a70617d.webp"
+    },
+    "mossback-turtle:1:neck-11": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-11--patch-f4ec8e7919.webp"
+    },
+    "mossback-turtle:1:neck-12": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-12--patch-9b1abf13f2.webp"
+    },
+    "mossback-turtle:1:neck-13": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-13--patch-54ffd9f7ee.webp"
+    },
+    "mossback-turtle:1:neck-14": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-14--patch-674975ae32.webp"
+    },
+    "mossback-turtle:1:neck-15": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-15--patch-ed7ee7ff4c.webp"
+    },
+    "mossback-turtle:1:neck-16": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--neck-16--patch-53eb6e7cf7.webp"
+    },
     "pudding-pig:1:face-01": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-01--patch-294f4911b2.webp"

@@ -503,12 +503,30 @@ async function importWearables(file, slot, dry, sheetNumber) {
  * creatures listed here, and the rest fall back to their still art until their sheets arrive.
  */
 const PET_SHEETS = path.join('pet-app', 'public', 'assets', 'art', 'sprites', 'imported.json');
+/**
+ * Record that this sheet has been cut, and make sure the record took.
+ *
+ * A creature is animated only when all four of its stages are listed here, so a write that is
+ * quietly lost costs the species its pose sheet: the rabbit came out of an import unable to turn
+ * and unable to wear anything, because one stage of four never reached this file. On this machine
+ * the write fails now and then with UNKNOWN, a scanner holding the file open — so it is retried,
+ * and then read back, because a write that reports success and changes nothing is the failure that
+ * actually happened.
+ */
 async function rememberPetSheet(speciesId, stage, dry) {
   if (dry) return;
-  let known = {};
-  try { known = JSON.parse(await fs.readFile(PET_SHEETS, 'utf8')); } catch { /* first sheet */ }
-  known[speciesId] = { ...(known[speciesId] || {}), [stage]: true };
-  await fs.writeFile(PET_SHEETS, JSON.stringify(known, null, 0));
+  for (let attempt = 1; attempt <= 8; attempt += 1) {
+    let known = {};
+    try { known = JSON.parse(await fs.readFile(PET_SHEETS, 'utf8')); } catch { /* first sheet */ }
+    known[speciesId] = { ...(known[speciesId] || {}), [stage]: true };
+    try {
+      await fs.writeFile(PET_SHEETS, JSON.stringify(known, null, 0));
+      const back = JSON.parse(await fs.readFile(PET_SHEETS, 'utf8'));
+      if (back?.[speciesId]?.[stage]) return;
+    } catch { /* retried below */ }
+    await new Promise((wake) => { setTimeout(wake, 300 * attempt); });
+  }
+  throw new Error(`could not record ${speciesId} stage ${stage} in ${PET_SHEETS}`);
 }
 async function importPet(file, speciesId, stage, dry) {
   const pet = catalog.pets.find((entry) => entry.id === speciesId);
