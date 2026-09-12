@@ -56,7 +56,7 @@ const UI = {
  * punched in it reads as a board that is coming rather than one that is broken.
  */
 /** Mirrors lib/catalog.js WEARABLE_PET_IDS; used only when the server omits the list. */
-const WEARABLE_PET_IDS = ['starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster', 'mossback-turtle', 'leaftail-fox', 'thunderhorn-goat', 'bubble-otter', 'snowfeather-penguin', 'coral-seal'];
+const WEARABLE_PET_IDS = ['starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster', 'mossback-turtle', 'leaftail-fox', 'thunderhorn-goat', 'bubble-otter', 'snowfeather-penguin', 'coral-seal', 'golden-retriever-dog'];
 const OUTFIT_SLOTS: { key: string; zh: string; en: string; icon: string; side: 'left' | 'right' | 'foot' }[] = [
   { key:'head', zh:'頭飾', en:'Head',  icon:'👑', side:'left' },
   { key:'face', zh:'面飾', en:'Face',  icon:'👓', side:'left' },

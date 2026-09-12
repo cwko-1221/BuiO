@@ -219,6 +219,7 @@ const FRAME_MOTION = readSpriteMetrics('frame-motion.json');
 const PET_LIBRARY = [
   ['starpatch-cat','common','light',['星斑幼貓','月影貓','星鬃獵貓','天穹星獅'],['Starpatch Kitten','Moonshadow Cat','Star-Mane Hunter','Skybound Star Lion'],'幸運飛撲','Lucky Pounce','#f4c45e','cat'],
   ['cloud-ear-dog','common','wind',['雲耳幼犬','追風犬','霧嶺牧犬','蒼穹守望犬'],['Cloud-ear Pup','Windchaser','Mist Ridge Sheepdog','Skywatch Hound'],'順風奔跑','Tailwind Run','#82cde7','dog'],
+  ['golden-retriever-dog','common','light',['金毛幼犬','陽光尋回犬','麥浪獵犬','金輝守護犬'],['Golden Pup','Sunlit Retriever','Wheatwave Hunter','Goldlight Guardian'],'陽光尋回','Sunlit Retrieve','#f0b45c','dog'],
   ['pudding-pig','common','earth',['布丁小豬','焦糖豬','岩甲野豬','豐穰巨豬'],['Pudding Piglet','Caramel Pig','Rockplate Boar','Harvest Grandboar'],'松露衝撞','Truffle Charge','#efa6a1','pig'],
   ['crescent-rabbit','common','light',['月芽兔','銀弦兔','月輪迅兔','星月聖兔'],['Crescent Bunny','Silversong Rabbit','Moonwheel Runner','Starlit Moon Hare'],'月光跳躍','Moonlight Hop','#d7c7f2','rabbit'],
   ['bubble-otter','common','water',['泡泡水獺','溪流水獺','潮汐水獺','海冠獺王'],['Bubble Otter','Stream Otter','Tide Otter','Sea-crown Otter King'],'泡泡護盾','Bubble Guard','#5bc4df','otter'],
@@ -264,7 +265,7 @@ const PET_LIBRARY = [
 const RELEASED_PET_IDS = new Set([
   'starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster',
   'mossback-turtle', 'leaftail-fox', 'thunderhorn-goat', 'bubble-otter', 'snowfeather-penguin', 'coral-seal',
-  'nezuko-kamado',
+  'golden-retriever-dog', 'nezuko-kamado',
 ]);
 const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
 
@@ -282,10 +283,18 @@ const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
  * easy, and what it makes hard is the opposite — gold and cream on pink, which is most of the
  * jewellery. Only its flower crown is missing, and that is the sheet's fault rather than the
  * mask's: the crown came back as a scribble.
+ *
+ * The golden retriever is the one creature here whose accessories were not drawn on it. It was
+ * generated from the cloud-ear dog's sheet, so it holds the same twenty poses and the dog's own
+ * layers fit it once each pose is matched up — which is the whole reason it can be dressed at all
+ * without a sheet of its own. It wears twenty-four: the dog's twenty-six less the star glasses and
+ * the explorer goggles, whose blue is the very blue the cloud-ear dog is inked in, so the dog's
+ * outline cannot be told from the lens and comes across with it.
  */
 const WEARABLE_PET_IDS = new Set([
   'starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster',
   'mossback-turtle', 'leaftail-fox', 'thunderhorn-goat', 'bubble-otter', 'snowfeather-penguin', 'coral-seal',
+  'golden-retriever-dog',
 ]);
 
 /**

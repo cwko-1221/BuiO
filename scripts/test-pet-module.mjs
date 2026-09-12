@@ -25,12 +25,12 @@ const repo = require('../pet-app/repositories/pet.repo.js');
 const store = require('../db/jsonStore.js');
 const pass = (label) => console.log(`✓ ${label}`);
 
-assert.deepEqual(catalog.pets.map((pet)=>pet.id),['starpatch-cat','cloud-ear-dog','pudding-pig','crescent-rabbit','bubble-otter','mossback-turtle','spark-hamster','leaftail-fox','snowfeather-penguin','thunderhorn-goat','coral-seal','nezuko-kamado']);
-assert.equal(catalog.pets.flatMap((pet)=>pet.art).length,48);
+assert.deepEqual(catalog.pets.map((pet)=>pet.id),['starpatch-cat','cloud-ear-dog','golden-retriever-dog','pudding-pig','crescent-rabbit','bubble-otter','mossback-turtle','spark-hamster','leaftail-fox','snowfeather-penguin','thunderhorn-goat','coral-seal','nezuko-kamado']);
+assert.equal(catalog.pets.flatMap((pet)=>pet.art).length,52);
 assert.equal(catalog.rooms.length,10);
 assert.equal(catalog.foods.length,12);
 assert.equal(catalog.wearables.length,45); assert.equal(catalog.furniture.length,100);
-assert.equal(new Set(catalog.pets.map((pet)=>pet.id)).size,12);
+assert.equal(new Set(catalog.pets.map((pet)=>pet.id)).size,13);
 assert.equal(catalog.pets.find((pet)=>pet.id==='nezuko-kamado').directPrice,9999);
 assert.equal(catalog.wearablePetIds.includes('nezuko-kamado'),false);
 assert.deepEqual(catalog.evolutionThresholds,[0,400,1100,2100]);

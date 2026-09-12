@@ -454,6 +454,102 @@
       "slot": "neck",
       "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--neck-16--patch-9756c2b0f7.webp"
     },
+    "golden-retriever-dog:1:face-01": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--face-01--patch-cc01a8d2e3.webp"
+    },
+    "golden-retriever-dog:1:face-03": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--face-03--patch-9d865c8e47.webp"
+    },
+    "golden-retriever-dog:1:face-04": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--face-04--patch-3c7320d1a8.webp"
+    },
+    "golden-retriever-dog:1:face-06": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--face-06--patch-97bd6bfc1e.webp"
+    },
+    "golden-retriever-dog:1:face-07": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--face-07--patch-ad1ac215bc.webp"
+    },
+    "golden-retriever-dog:1:face-08": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--face-08--patch-427e9ac136.webp"
+    },
+    "golden-retriever-dog:1:face-09": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--face-09--patch-b758c6afde.webp"
+    },
+    "golden-retriever-dog:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--face-11--patch-69352538ab.webp"
+    },
+    "golden-retriever-dog:1:face-12": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--face-12--patch-67bc6bfe55.webp"
+    },
+    "golden-retriever-dog:1:head-03": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--head-03--patch-0d86941945.webp"
+    },
+    "golden-retriever-dog:1:head-04": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--head-04--patch-f98d170cc1.webp"
+    },
+    "golden-retriever-dog:1:neck-01": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-01--patch-fc4bb30783.webp"
+    },
+    "golden-retriever-dog:1:neck-02": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-02--patch-9912c088c7.webp"
+    },
+    "golden-retriever-dog:1:neck-03": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-03--patch-46155fd589.webp"
+    },
+    "golden-retriever-dog:1:neck-04": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-04--patch-e48df6bacd.webp"
+    },
+    "golden-retriever-dog:1:neck-05": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-05--patch-a58f4a17c7.webp"
+    },
+    "golden-retriever-dog:1:neck-06": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-06--patch-5308db5fa0.webp"
+    },
+    "golden-retriever-dog:1:neck-07": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-07--patch-6d2f870937.webp"
+    },
+    "golden-retriever-dog:1:neck-08": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-08--patch-3bda845d67.webp"
+    },
+    "golden-retriever-dog:1:neck-10": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-10--patch-9d54ae63cc.webp"
+    },
+    "golden-retriever-dog:1:neck-11": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-11--patch-774bda4961.webp"
+    },
+    "golden-retriever-dog:1:neck-13": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-13--patch-d3e4f6aaec.webp"
+    },
+    "golden-retriever-dog:1:neck-15": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-15--patch-d54d7bba34.webp"
+    },
+    "golden-retriever-dog:1:neck-16": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/golden-retriever-dog-1--neck-16--patch-58a4e9953d.webp"
+    },
     "leaftail-fox:1:face-01": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--face-01--patch-eafec860fb.webp"
