@@ -6,6 +6,10 @@
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--face-01--patch-8ddb824625.webp"
     },
+    "bubble-otter:1:face-02": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--face-02--patch-d74dc7b013.webp"
+    },
     "bubble-otter:1:face-03": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--face-03--patch-5d7dcaa989.webp"
@@ -13,6 +17,10 @@
     "bubble-otter:1:face-04": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--face-04--patch-50c3b52848.webp"
+    },
+    "bubble-otter:1:face-05": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--face-05--patch-96a4a36388.webp"
     },
     "bubble-otter:1:face-06": {
       "slot": "face",
@@ -29,6 +37,10 @@
     "bubble-otter:1:face-09": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--face-09--patch-d70073a216.webp"
+    },
+    "bubble-otter:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--face-11--patch-aa22252011.webp"
     },
     "bubble-otter:1:face-12": {
       "slot": "face",
@@ -112,7 +124,7 @@
     },
     "cloud-ear-dog:1:face-02": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/cloud-ear-dog-1--face-02--patch-6478d0ff0b.webp"
+      "patch": "/pet/assets/art/outfit-atlases/cloud-ear-dog-1--face-02--patch-58f32d586f.webp"
     },
     "cloud-ear-dog:1:face-03": {
       "slot": "face",
@@ -124,7 +136,7 @@
     },
     "cloud-ear-dog:1:face-05": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/cloud-ear-dog-1--face-05--patch-82a905fdb9.webp"
+      "patch": "/pet/assets/art/outfit-atlases/cloud-ear-dog-1--face-05--patch-7c0cdad0cd.webp"
     },
     "cloud-ear-dog:1:face-06": {
       "slot": "face",
@@ -144,7 +156,7 @@
     },
     "cloud-ear-dog:1:face-11": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/cloud-ear-dog-1--face-11--patch-6876fd2b36.webp"
+      "patch": "/pet/assets/art/outfit-atlases/cloud-ear-dog-1--face-11--patch-f207339b9e.webp"
     },
     "cloud-ear-dog:1:face-12": {
       "slot": "face",
@@ -214,6 +226,10 @@
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--face-01--patch-2c644aee25.webp"
     },
+    "coral-seal:1:face-02": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--face-02--patch-bf556cf0cd.webp"
+    },
     "coral-seal:1:face-03": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--face-03--patch-73d051e3f9.webp"
@@ -221,6 +237,10 @@
     "coral-seal:1:face-04": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--face-04--patch-c85e92e394.webp"
+    },
+    "coral-seal:1:face-05": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--face-05--patch-e51c8422b0.webp"
     },
     "coral-seal:1:face-06": {
       "slot": "face",
@@ -237,6 +257,10 @@
     "coral-seal:1:face-09": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--face-09--patch-adc5d3a6f5.webp"
+    },
+    "coral-seal:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--face-11--patch-64edff30f7.webp"
     },
     "coral-seal:1:face-12": {
       "slot": "face",
@@ -320,7 +344,7 @@
     },
     "crescent-rabbit:1:face-02": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-02--patch-35ecc6ca61.webp"
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-02--patch-3f75ef879d.webp"
     },
     "crescent-rabbit:1:face-03": {
       "slot": "face",
@@ -332,7 +356,7 @@
     },
     "crescent-rabbit:1:face-05": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-05--patch-9dfecaf047.webp"
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-05--patch-7ae3609b4d.webp"
     },
     "crescent-rabbit:1:face-06": {
       "slot": "face",
@@ -352,7 +376,7 @@
     },
     "crescent-rabbit:1:face-11": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-11--patch-b0e53c3c01.webp"
+      "patch": "/pet/assets/art/outfit-atlases/crescent-rabbit-1--face-11--patch-7b3c2ec9ef.webp"
     },
     "crescent-rabbit:1:face-12": {
       "slot": "face",
@@ -434,6 +458,10 @@
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--face-01--patch-eafec860fb.webp"
     },
+    "leaftail-fox:1:face-02": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--face-02--patch-c7b225f7b0.webp"
+    },
     "leaftail-fox:1:face-03": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--face-03--patch-8f7cbb7f41.webp"
@@ -441,6 +469,10 @@
     "leaftail-fox:1:face-04": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--face-04--patch-3ca8d5f003.webp"
+    },
+    "leaftail-fox:1:face-05": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--face-05--patch-3d6e51d1b2.webp"
     },
     "leaftail-fox:1:face-06": {
       "slot": "face",
@@ -457,6 +489,10 @@
     "leaftail-fox:1:face-09": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--face-09--patch-d8e6a38af2.webp"
+    },
+    "leaftail-fox:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--face-11--patch-331d47be43.webp"
     },
     "leaftail-fox:1:face-12": {
       "slot": "face",
@@ -540,7 +576,7 @@
     },
     "mossback-turtle:1:face-02": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-02--patch-ba16552072.webp"
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-02--patch-119ff72ca6.webp"
     },
     "mossback-turtle:1:face-03": {
       "slot": "face",
@@ -552,7 +588,7 @@
     },
     "mossback-turtle:1:face-05": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-05--patch-1a80c45b40.webp"
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-05--patch-6c690f2b1d.webp"
     },
     "mossback-turtle:1:face-06": {
       "slot": "face",
@@ -572,7 +608,7 @@
     },
     "mossback-turtle:1:face-11": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-11--patch-9df98e43de.webp"
+      "patch": "/pet/assets/art/outfit-atlases/mossback-turtle-1--face-11--patch-be43a3102e.webp"
     },
     "mossback-turtle:1:face-12": {
       "slot": "face",
@@ -656,7 +692,7 @@
     },
     "pudding-pig:1:face-02": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-02--patch-daaf04565f.webp"
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-02--patch-c44838a241.webp"
     },
     "pudding-pig:1:face-03": {
       "slot": "face",
@@ -668,7 +704,7 @@
     },
     "pudding-pig:1:face-05": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-05--patch-4eef387124.webp"
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-05--patch-d3f73e9f48.webp"
     },
     "pudding-pig:1:face-06": {
       "slot": "face",
@@ -688,7 +724,7 @@
     },
     "pudding-pig:1:face-11": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-11--patch-989f2423c5.webp"
+      "patch": "/pet/assets/art/outfit-atlases/pudding-pig-1--face-11--patch-ad3f3055db.webp"
     },
     "pudding-pig:1:face-12": {
       "slot": "face",
@@ -766,6 +802,10 @@
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--face-01--patch-7f23a28ae4.webp"
     },
+    "snowfeather-penguin:1:face-02": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--face-02--patch-3604467dc6.webp"
+    },
     "snowfeather-penguin:1:face-03": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--face-03--patch-2340a4ed69.webp"
@@ -773,6 +813,10 @@
     "snowfeather-penguin:1:face-04": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--face-04--patch-9163f6ca07.webp"
+    },
+    "snowfeather-penguin:1:face-05": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--face-05--patch-1bb986fe73.webp"
     },
     "snowfeather-penguin:1:face-06": {
       "slot": "face",
@@ -789,6 +833,10 @@
     "snowfeather-penguin:1:face-09": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--face-09--patch-c62cc54e70.webp"
+    },
+    "snowfeather-penguin:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--face-11--patch-fc07e1ced6.webp"
     },
     "snowfeather-penguin:1:face-12": {
       "slot": "face",
@@ -872,7 +920,7 @@
     },
     "spark-hamster:1:face-02": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-02--patch-3cdc3f5fcf.webp"
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-02--patch-eb5ce192d9.webp"
     },
     "spark-hamster:1:face-03": {
       "slot": "face",
@@ -884,7 +932,7 @@
     },
     "spark-hamster:1:face-05": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-05--patch-d03b2b86fa.webp"
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-05--patch-055c3b5998.webp"
     },
     "spark-hamster:1:face-06": {
       "slot": "face",
@@ -904,7 +952,7 @@
     },
     "spark-hamster:1:face-11": {
       "slot": "face",
-      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-11--patch-d23688e994.webp"
+      "patch": "/pet/assets/art/outfit-atlases/spark-hamster-1--face-11--patch-6535514c04.webp"
     },
     "spark-hamster:1:face-12": {
       "slot": "face",
@@ -1102,6 +1150,10 @@
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--face-01--patch-0cfb0bb7d6.webp"
     },
+    "thunderhorn-goat:1:face-02": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--face-02--patch-fd0a7db369.webp"
+    },
     "thunderhorn-goat:1:face-03": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--face-03--patch-445648654c.webp"
@@ -1109,6 +1161,10 @@
     "thunderhorn-goat:1:face-04": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--face-04--patch-379a69d5d1.webp"
+    },
+    "thunderhorn-goat:1:face-05": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--face-05--patch-aa171d54e0.webp"
     },
     "thunderhorn-goat:1:face-06": {
       "slot": "face",
@@ -1125,6 +1181,10 @@
     "thunderhorn-goat:1:face-09": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--face-09--patch-d95e86a123.webp"
+    },
+    "thunderhorn-goat:1:face-11": {
+      "slot": "face",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--face-11--patch-932de52880.webp"
     },
     "thunderhorn-goat:1:face-12": {
       "slot": "face",
