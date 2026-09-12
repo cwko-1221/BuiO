@@ -34,6 +34,78 @@
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--face-12--patch-1e914f743e.webp"
     },
+    "bubble-otter:1:head-03": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--head-03--patch-11354b52c5.webp"
+    },
+    "bubble-otter:1:head-04": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--head-04--patch-ef41041431.webp"
+    },
+    "bubble-otter:1:neck-01": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-01--patch-f4b56e20f4.webp"
+    },
+    "bubble-otter:1:neck-02": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-02--patch-85a85fb4bf.webp"
+    },
+    "bubble-otter:1:neck-03": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-03--patch-824f2f21f8.webp"
+    },
+    "bubble-otter:1:neck-04": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-04--patch-8df923c517.webp"
+    },
+    "bubble-otter:1:neck-05": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-05--patch-384d33fb01.webp"
+    },
+    "bubble-otter:1:neck-06": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-06--patch-0773c2b95e.webp"
+    },
+    "bubble-otter:1:neck-07": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-07--patch-9e6148058f.webp"
+    },
+    "bubble-otter:1:neck-08": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-08--patch-fa86ec5e74.webp"
+    },
+    "bubble-otter:1:neck-09": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-09--patch-0cdfaf7902.webp"
+    },
+    "bubble-otter:1:neck-10": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-10--patch-c70589d0b1.webp"
+    },
+    "bubble-otter:1:neck-11": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-11--patch-c5bb36a3cb.webp"
+    },
+    "bubble-otter:1:neck-12": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-12--patch-b6ba564bec.webp"
+    },
+    "bubble-otter:1:neck-13": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-13--patch-01b5ba36da.webp"
+    },
+    "bubble-otter:1:neck-14": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-14--patch-e8fa324217.webp"
+    },
+    "bubble-otter:1:neck-15": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-15--patch-7292258dd9.webp"
+    },
+    "bubble-otter:1:neck-16": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/bubble-otter-1--neck-16--patch-3cc60a97f6.webp"
+    },
     "cloud-ear-dog:1:face-01": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/cloud-ear-dog-1--face-01--patch-eca8bbe735.webp"
@@ -169,6 +241,78 @@
     "coral-seal:1:face-12": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--face-12--patch-bbd2911b8e.webp"
+    },
+    "coral-seal:1:head-03": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--head-03--patch-15714e8924.webp"
+    },
+    "coral-seal:1:head-04": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--head-04--patch-9e4314094c.webp"
+    },
+    "coral-seal:1:neck-01": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-01--patch-60baeef038.webp"
+    },
+    "coral-seal:1:neck-02": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-02--patch-92522d7d4d.webp"
+    },
+    "coral-seal:1:neck-03": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-03--patch-06cdd783cf.webp"
+    },
+    "coral-seal:1:neck-04": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-04--patch-699726ff22.webp"
+    },
+    "coral-seal:1:neck-05": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-05--patch-52ad18b91b.webp"
+    },
+    "coral-seal:1:neck-06": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-06--patch-7054b77e1f.webp"
+    },
+    "coral-seal:1:neck-07": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-07--patch-bd5f9a1e38.webp"
+    },
+    "coral-seal:1:neck-08": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-08--patch-162f5ada2e.webp"
+    },
+    "coral-seal:1:neck-09": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-09--patch-870b6806b2.webp"
+    },
+    "coral-seal:1:neck-10": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-10--patch-577e5faeef.webp"
+    },
+    "coral-seal:1:neck-11": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-11--patch-3aa8d1a1a4.webp"
+    },
+    "coral-seal:1:neck-12": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-12--patch-977ac49f2a.webp"
+    },
+    "coral-seal:1:neck-13": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-13--patch-478f8f6193.webp"
+    },
+    "coral-seal:1:neck-14": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-14--patch-fc47e6bdb6.webp"
+    },
+    "coral-seal:1:neck-15": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-15--patch-4fa2211c3b.webp"
+    },
+    "coral-seal:1:neck-16": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/coral-seal-1--neck-16--patch-1fbf26074d.webp"
     },
     "crescent-rabbit:1:face-01": {
       "slot": "face",
@@ -317,6 +461,78 @@
     "leaftail-fox:1:face-12": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--face-12--patch-f869b1cc44.webp"
+    },
+    "leaftail-fox:1:head-03": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--head-03--patch-f50a27b42d.webp"
+    },
+    "leaftail-fox:1:head-04": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--head-04--patch-bd2085e893.webp"
+    },
+    "leaftail-fox:1:neck-01": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-01--patch-a5f95afcb2.webp"
+    },
+    "leaftail-fox:1:neck-02": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-02--patch-ed1dc94a34.webp"
+    },
+    "leaftail-fox:1:neck-03": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-03--patch-98dcb5ee36.webp"
+    },
+    "leaftail-fox:1:neck-04": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-04--patch-f0bf7fceee.webp"
+    },
+    "leaftail-fox:1:neck-05": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-05--patch-be952a076c.webp"
+    },
+    "leaftail-fox:1:neck-06": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-06--patch-bb5c18eed0.webp"
+    },
+    "leaftail-fox:1:neck-07": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-07--patch-479a61624f.webp"
+    },
+    "leaftail-fox:1:neck-08": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-08--patch-9662bd3598.webp"
+    },
+    "leaftail-fox:1:neck-09": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-09--patch-8944bda929.webp"
+    },
+    "leaftail-fox:1:neck-10": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-10--patch-44a434c9f4.webp"
+    },
+    "leaftail-fox:1:neck-11": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-11--patch-c7509f6c27.webp"
+    },
+    "leaftail-fox:1:neck-12": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-12--patch-0a5ef69c1d.webp"
+    },
+    "leaftail-fox:1:neck-13": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-13--patch-e84246f7cb.webp"
+    },
+    "leaftail-fox:1:neck-14": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-14--patch-23177060bc.webp"
+    },
+    "leaftail-fox:1:neck-15": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-15--patch-ee0d07839d.webp"
+    },
+    "leaftail-fox:1:neck-16": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/leaftail-fox-1--neck-16--patch-a8e3e14373.webp"
     },
     "mossback-turtle:1:face-01": {
       "slot": "face",
@@ -577,6 +793,78 @@
     "snowfeather-penguin:1:face-12": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--face-12--patch-a00b9e2f37.webp"
+    },
+    "snowfeather-penguin:1:head-03": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--head-03--patch-3dad6549af.webp"
+    },
+    "snowfeather-penguin:1:head-04": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--head-04--patch-d77afdfcf4.webp"
+    },
+    "snowfeather-penguin:1:neck-01": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-01--patch-5dd266c64f.webp"
+    },
+    "snowfeather-penguin:1:neck-02": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-02--patch-a6796a5c58.webp"
+    },
+    "snowfeather-penguin:1:neck-03": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-03--patch-9cb89f487a.webp"
+    },
+    "snowfeather-penguin:1:neck-04": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-04--patch-3b19f6dfed.webp"
+    },
+    "snowfeather-penguin:1:neck-05": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-05--patch-4b720b6860.webp"
+    },
+    "snowfeather-penguin:1:neck-06": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-06--patch-ccb9e27478.webp"
+    },
+    "snowfeather-penguin:1:neck-07": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-07--patch-0ae50b0015.webp"
+    },
+    "snowfeather-penguin:1:neck-08": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-08--patch-781ce4eb75.webp"
+    },
+    "snowfeather-penguin:1:neck-09": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-09--patch-ed2640c7c9.webp"
+    },
+    "snowfeather-penguin:1:neck-10": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-10--patch-feb2d1f71a.webp"
+    },
+    "snowfeather-penguin:1:neck-11": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-11--patch-13e180763a.webp"
+    },
+    "snowfeather-penguin:1:neck-12": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-12--patch-dcc927e704.webp"
+    },
+    "snowfeather-penguin:1:neck-13": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-13--patch-a9a7904d8e.webp"
+    },
+    "snowfeather-penguin:1:neck-14": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-14--patch-cb65161476.webp"
+    },
+    "snowfeather-penguin:1:neck-15": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-15--patch-c6162d5f77.webp"
+    },
+    "snowfeather-penguin:1:neck-16": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/snowfeather-penguin-1--neck-16--patch-41733dc181.webp"
     },
     "spark-hamster:1:face-01": {
       "slot": "face",
@@ -841,6 +1129,78 @@
     "thunderhorn-goat:1:face-12": {
       "slot": "face",
       "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--face-12--patch-08568dcfb6.webp"
+    },
+    "thunderhorn-goat:1:head-03": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--head-03--patch-8720e76c13.webp"
+    },
+    "thunderhorn-goat:1:head-04": {
+      "slot": "head",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--head-04--patch-38a5ef04dd.webp"
+    },
+    "thunderhorn-goat:1:neck-01": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-01--patch-d2d6feee7e.webp"
+    },
+    "thunderhorn-goat:1:neck-02": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-02--patch-e98064f22b.webp"
+    },
+    "thunderhorn-goat:1:neck-03": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-03--patch-81ba093822.webp"
+    },
+    "thunderhorn-goat:1:neck-04": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-04--patch-45f91538b5.webp"
+    },
+    "thunderhorn-goat:1:neck-05": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-05--patch-8d6e70b391.webp"
+    },
+    "thunderhorn-goat:1:neck-06": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-06--patch-6c8649dc81.webp"
+    },
+    "thunderhorn-goat:1:neck-07": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-07--patch-429eac4708.webp"
+    },
+    "thunderhorn-goat:1:neck-08": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-08--patch-a86b32465f.webp"
+    },
+    "thunderhorn-goat:1:neck-09": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-09--patch-4cc8506572.webp"
+    },
+    "thunderhorn-goat:1:neck-10": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-10--patch-82bdc83c99.webp"
+    },
+    "thunderhorn-goat:1:neck-11": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-11--patch-ed34a77c81.webp"
+    },
+    "thunderhorn-goat:1:neck-12": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-12--patch-1192ff23fb.webp"
+    },
+    "thunderhorn-goat:1:neck-13": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-13--patch-edc27f00b7.webp"
+    },
+    "thunderhorn-goat:1:neck-14": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-14--patch-9174f13e84.webp"
+    },
+    "thunderhorn-goat:1:neck-15": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-15--patch-949c11cbe0.webp"
+    },
+    "thunderhorn-goat:1:neck-16": {
+      "slot": "neck",
+      "patch": "/pet/assets/art/outfit-atlases/thunderhorn-goat-1--neck-16--patch-4ecaa31ef4.webp"
     }
   }
 }
