@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import sharp from 'sharp';
 
@@ -76,11 +77,11 @@ assert.ok(spriteManifest.frameHeight*spriteManifest.rows<=4096,`atlas too tall f
 const nezukoLayout=spriteManifest.petLayouts?.['nezuko-kamado'];
 assert.ok(nezukoLayout,'Nezuko must publish its custom animation layout');
 assert.equal(nezukoLayout.columns,8,'Nezuko uses eight cells per row for the longer walk cycle');
-assert.equal(nezukoLayout.rows,4,'Nezuko uses four compact directional rows at runtime');
-assert.equal(nezukoLayout.fps,10,'Nezuko uses the higher-quality walk playback rate');
+assert.equal(nezukoLayout.rows,5,'Nezuko separates walk, idle and special poses at runtime');
+assert.equal(nezukoLayout.fps,12,'Nezuko uses a fluid production walk playback rate');
 const nezukoWalk=nezukoLayout.clips.filter((clip)=>clip.name==='walk');
 assert.equal(nezukoWalk.length,3,'Nezuko has front, side and back walk clips');
-assert.ok(nezukoWalk.every((clip)=>new Set(clip.frames).size>=6),'Nezuko walk clips need six unique poses');
+assert.ok(nezukoWalk.every((clip)=>new Set(clip.frames).size===8),'Nezuko walk clips need eight unique gait phases');
 assert.equal(catalog.animationByPet?.['nezuko-kamado']?.columns,8,'bootstrap exposes Nezuko custom layout');
 // Every atlas the catalogue names is the size the manifest says a frame grid should be, and
 // keeps its alpha — a pet drawn on an opaque square would show its own tile over the floor.
@@ -101,6 +102,43 @@ for(const sheet of atlases){
   assert.equal(metadata.height,atlasHeight,`${sheet} height`);
   assert.equal(metadata.hasAlpha,true,`${sheet} lost its transparency`);
 }
+
+// Nezuko's longer walk is authored on a fixed coordinate system. The safety margin catches a
+// neighbour leaking into a cell, upper-body drift catches the side-view "sliding picture" look,
+// and the baseline assertions preserve a restrained contact/down/pass/up bounce.
+const nezukoAtlas=path.join(artRoot,catalog.pets.find((pet)=>pet.id==='nezuko-kamado')
+  .atlas[0].split('?')[0].split('/art/')[1]);
+for(const [facing,row] of [['front',0],['right',1],['back',2]]) {
+  const hashes=new Set(); const centres=[]; const bottoms=[];
+  for(let column=0;column<8;column+=1) {
+    const frame=await sharp(nezukoAtlas).extract({left:column*160,top:row*160,width:160,height:160})
+      .ensureAlpha().raw().toBuffer({resolveWithObject:true});
+    const {data,info}=frame; let left=160,right=-1,top=160,bottom=-1;
+    for(let y=0;y<160;y+=1) for(let x=0;x<160;x+=1) {
+      if(data[(y*160+x)*info.channels+3]<=16) continue;
+      left=Math.min(left,x); right=Math.max(right,x); top=Math.min(top,y); bottom=Math.max(bottom,y);
+    }
+    assert.ok(right>=left,`Nezuko ${facing} frame ${column+1} is empty`);
+    assert.ok(Math.min(left,top,159-right,159-bottom)>=6,
+      `Nezuko ${facing} frame ${column+1} reaches a neighbouring cell`);
+    let weightedX=0,weight=0; const upperLimit=Math.floor(top+(bottom-top+1)*.68);
+    for(let y=top;y<=upperLimit;y+=1) for(let x=left;x<=right;x+=1) {
+      const alpha=data[(y*160+x)*info.channels+3];
+      if(alpha<=16) continue; weightedX+=x*alpha; weight+=alpha;
+    }
+    centres.push(weightedX/weight); bottoms.push(bottom);
+    hashes.add(createHash('sha256').update(data).digest('hex'));
+  }
+  assert.equal(hashes.size,8,`Nezuko ${facing} walk contains duplicate stills`);
+  assert.ok(Math.max(...centres)-Math.min(...centres)<1,
+    `Nezuko ${facing} upper body drifts sideways during the walk`);
+  assert.ok(Math.max(...bottoms)-Math.min(...bottoms)<=6,
+    `Nezuko ${facing} walk bounces too far vertically`);
+  assert.ok(bottoms[1]>bottoms[0]&&bottoms[3]<bottoms[0]
+    &&bottoms[5]>bottoms[4]&&bottoms[7]<bottoms[4],
+  `Nezuko ${facing} walk does not follow contact/down/pass/up foot timing`);
+}
+pass('Nezuko eight-phase walk clearance, anchor stability and gait timing');
 const redrawManifest=JSON.parse(await fs.readFile(path.join(artRoot,'outfit-atlases/manifest.json'),'utf8'));
 assert.deepEqual(catalog.redrawnWearables,redrawManifest.modular||{},'bootstrap redraw catalogue differs from its manifest');
 const releasedPetIds=new Set(catalog.pets.map((pet)=>pet.id));

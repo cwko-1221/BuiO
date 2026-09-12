@@ -90,15 +90,27 @@ const DEFAULT_PET_LAYOUT = {
 };
 const PET_LAYOUTS = {
   'nezuko-kamado': {
-    columns: 8, rows: 4, cell: ATLAS_CELL, fps: 10,
-    // idle, six authored walk poses, blink. The 4096 source keeps transparent lower padding, so
-    // these four measured bands are cropped into a compact runtime atlas without changing the
-    // requested source canvas size.
-    walkFrames: [1, 2, 3, 4, 5, 6], specialRow: 3,
-    sourceCellWidth: 512,
-    sourceBands: [
-      { top: 0, height: 717 }, { top: 754, height: 652 },
-      { top: 1440, height: 629 }, { top: 2090, height: 642 },
+    columns: 8, rows: 5, cell: ATLAS_CELL, fps: 12,
+    // The 4096 source is an exact 8x8 grid. Only its first five rows ship: three complete
+    // eight-phase walk cycles, a directional idle/blink row and a special-pose row.
+    sourceGrid: { columns: 8, rows: 8 },
+    preserveCellPlacement: true,
+    portraitFrame: 24,
+    poseRows: ['front-walk', 'right-walk', 'back-walk', 'directional-idle', 'front-special'],
+    poseColumns: ['phase-1', 'phase-2', 'phase-3', 'phase-4',
+      'phase-5', 'phase-6', 'phase-7', 'phase-8'],
+    clips: [
+      { name: 'idle', facing: 'front', frames: [24, 24, 25] },
+      { name: 'walk', facing: 'front', frames: [0, 1, 2, 3, 4, 5, 6, 7] },
+      { name: 'idle', facing: 'right', frames: [26, 26, 27] },
+      { name: 'walk', facing: 'right', frames: [8, 9, 10, 11, 12, 13, 14, 15] },
+      { name: 'idle', facing: 'back', frames: [28, 28, 29] },
+      { name: 'walk', facing: 'back', frames: [16, 17, 18, 19, 20, 21, 22, 23] },
+      { name: 'eat', facing: 'front', frames: [32] },
+      { name: 'happy', facing: 'front', frames: [33] },
+      { name: 'sleep', facing: 'front', frames: [34] },
+      { name: 'sit', facing: 'front', frames: [35] },
+      { name: 'surprised', facing: 'front', frames: [36] },
     ],
   },
 };
@@ -183,7 +195,17 @@ async function seat(buffer, { canvas, fill = 0.86, standing = true, scale }) {
 async function write(target, buffer, dry) {
   if (dry) return log(`      would write ${path.relative('.', target)}`);
   await fs.mkdir(path.dirname(target), { recursive: true });
-  await fs.writeFile(target, buffer);
+  // Windows thumbnailing, a running dev server and endpoint scanning can briefly hold generated
+  // images open. A short bounded retry prevents a four-stage import from ending half old/half new.
+  for (let attempt = 1; attempt <= 12; attempt += 1) {
+    try {
+      await fs.writeFile(target, buffer);
+      return;
+    } catch (error) {
+      if (attempt === 12) throw error;
+      await new Promise((wake) => { setTimeout(wake, attempt * 150); });
+    }
+  }
 }
 
 /**
@@ -562,14 +584,12 @@ async function importPet(file, speciesId, stage, dry) {
   const sheet = await loadSheet(file);
   const meta = await sharp(sheet).metadata();
 
-  // The custom Nezuko sheet is authored as four 8-frame bands inside a 4096 square canvas.
-  // Letting the generic spill-recovery pass infer boxes from checker-cleanup remnants can create
-  // a zero-width neighbour box, so its measured source bands are the source of truth. Older 5x4
-  // sheets keep the measured-box path unchanged.
-  const boxes = layout.sourceBands ? null : await findCells(sheet, columns, rows);
+  // Exact-grid sheets have already been normalized and safety-checked. Their transparent slot is
+  // meaningful animation data, so it must not be replaced by inferred content boxes.
+  const boxes = layout.sourceGrid ? null : await findCells(sheet, columns, rows);
   log(boxes
     ? `      found ${boxes.filter(Boolean).length} of ${columns * rows} poses on the sheet`
-    : `      using declared ${columns}x${rows} pose grid and source bands`);
+    : `      using exact ${layout.sourceGrid.columns}x${layout.sourceGrid.rows} source grid`);
   const cells = [];
   for (let index = 0; index < columns * rows; index += 1) {
     // A pose is one creature. These sheets are drawn generously — the jumping dog's ear reaches
@@ -577,16 +597,16 @@ async function importPet(file, speciesId, stage, dry) {
     // each cut arrives with a crumb of its neighbour in the corner. Left in, it is scaled and
     // seated along with the pose and shows in the room as a chip of fur floating beside the pet.
     const row = Math.floor(index / columns);
-    const sourceRect = layout.sourceBands
+    const sourceRect = layout.sourceGrid
       ? {
-        left: (index % columns) * layout.sourceCellWidth,
-        top: layout.sourceBands[row].top,
-        width: layout.sourceCellWidth,
-        height: layout.sourceBands[row].height,
+        left: Math.round((index % columns) * meta.width / layout.sourceGrid.columns),
+        top: Math.round(row * meta.height / layout.sourceGrid.rows),
+        width: Math.round(meta.width / layout.sourceGrid.columns),
+        height: Math.round(meta.height / layout.sourceGrid.rows),
       }
       : undefined;
-    const cut = await keepPose(sheet, boxes?.[index],
-      await cell(sheet, meta, columns, rows, index, boxes, sourceRect));
+    const rawCut = await cell(sheet, meta, columns, rows, index, boxes, sourceRect);
+    const cut = layout.sourceGrid ? rawCut : await keepPose(sheet, boxes?.[index], rawCut);
     cells.push({ cut, bounds: await contentBounds(cut) });
   }
   const drawn = cells.filter((entry) => entry.bounds);
@@ -614,7 +634,9 @@ async function importPet(file, speciesId, stage, dry) {
   const tiles = [];
   for (let index = 0; index < cells.length; index += 1) {
     if (!cells[index].bounds) continue;
-    const seated = await seat(cells[index].cut, { canvas: atlasCell, standing: true, scale: shared });
+    const seated = layout.preserveCellPlacement
+      ? await sharp(cells[index].cut).resize(atlasCell, atlasCell, { fit: 'fill' }).webp({ quality: 92 }).toBuffer()
+      : await seat(cells[index].cut, { canvas: atlasCell, standing: true, scale: shared });
     tiles.push({
       input: await sharp(seated).png().toBuffer(),
       left: (index % columns) * atlasCell,
@@ -627,7 +649,10 @@ async function importPet(file, speciesId, stage, dry) {
   await write(fileFor(pet.atlas[stage - 1]), atlas, dry);
 
   // The portrait is the front-facing idle, at the size the rest of the interface expects.
-  const portrait = await seat(cells[0].cut, { canvas: PROP_CANVAS, standing: true, fill: 0.88 });
+  const portraitSource = cells[layout.portraitFrame ?? 0];
+  const portrait = portraitSource?.bounds
+    ? await seat(portraitSource.cut, { canvas: PROP_CANVAS, standing: true, fill: 0.88 })
+    : null;
   if (portrait) await write(fileFor(pet.art[stage - 1]), portrait, dry);
   await rememberPetSheet(speciesId, stage, dry);
   return 2;
@@ -635,6 +660,15 @@ async function importPet(file, speciesId, stage, dry) {
 
 /** The frame table the runtime reads, derived from the sheet layout rather than restated. */
 function spriteManifestFor(layout) {
+  if (layout.clips) {
+    return {
+      frameWidth: layout.cell, frameHeight: layout.cell,
+      columns: layout.columns, rows: layout.rows, fps: layout.fps,
+      directions: POSE_ROWS,
+      poses: { rows: layout.poseRows, columns: layout.poseColumns, frontOnly: FRONT_ONLY },
+      clips: layout.clips,
+    };
+  }
   const clips = [];
   POSE_ROWS.forEach((facing, row) => {
     const base = row * layout.columns;
