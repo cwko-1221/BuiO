@@ -6,17 +6,23 @@ const path = require('node:path');
 const furnitureSets = require('./furniture-sets');
 const CATALOG_VERSION = '2026.08.13-1';
 
+/** Read the generated manifest once per catalogue load. */
+function readAnimationManifest() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'assets', 'art', 'sprites', 'manifest.json'), 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Sprite atlas layout, read from the generated manifest so the build pipeline stays the single
  * source of truth for frame counts. The client cannot fetch the manifest itself — /pet/assets
  * only serves hashed .js/.css/.webp — so the layout rides along with the catalog in /bootstrap.
- *
- * The manifest's `columns` is a per-frame action label, so consecutive runs collapse into
- * {name, start, length} ranges that map directly onto Phaser animation frame ranges.
  */
-function loadAnimationLayout() {
+function parseAnimationLayout(manifest) {
   try {
-    const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'assets', 'art', 'sprites', 'manifest.json'), 'utf8'));
+    if (!manifest) return null;
 
     // The pose sheet: a row per direction the creature is drawn facing, five poses across, and
     // a list of clips saying which of those cells each action plays. An action is no longer a
@@ -59,6 +65,19 @@ function loadAnimationLayout() {
   } catch {
     return null; // No atlases generated yet; the runtime falls back to the static form art.
   }
+}
+
+function loadAnimationLayout() {
+  return parseAnimationLayout(readAnimationManifest());
+}
+
+/** Optional per-species layouts let a high-motion character use more cells without changing old pets. */
+function loadAnimationLayouts() {
+  const manifest = readAnimationManifest();
+  if (!manifest?.petLayouts || typeof manifest.petLayouts !== 'object') return {};
+  return Object.fromEntries(Object.entries(manifest.petLayouts)
+    .map(([speciesId, layout]) => [speciesId, parseAnimationLayout(layout)])
+    .filter(([, layout]) => layout));
 }
 
 /**
@@ -451,6 +470,7 @@ const catalog = Object.freeze({
   furniture: FURNITURE,
   evolutionThresholds: EVOLUTION_THRESHOLDS,
   animation: loadAnimationLayout(),
+  animationByPet: loadAnimationLayouts(),
   outfitAtlases: loadOutfitAtlases(),
   redrawnWearables: loadRedrawnWearables(),
   dailyXpCap: 100,

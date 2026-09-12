@@ -73,6 +73,15 @@ for(const clip of spriteManifest.clips) {
 // uploaded and the pet does not render at all, which is worse than loading slowly.
 assert.ok(spriteManifest.frameWidth*spriteManifest.columns<=4096,`atlas too wide for older tablets`);
 assert.ok(spriteManifest.frameHeight*spriteManifest.rows<=4096,`atlas too tall for older tablets`);
+const nezukoLayout=spriteManifest.petLayouts?.['nezuko-kamado'];
+assert.ok(nezukoLayout,'Nezuko must publish its custom animation layout');
+assert.equal(nezukoLayout.columns,8,'Nezuko uses eight cells per row for the longer walk cycle');
+assert.equal(nezukoLayout.rows,4,'Nezuko uses four compact directional rows at runtime');
+assert.equal(nezukoLayout.fps,10,'Nezuko uses the higher-quality walk playback rate');
+const nezukoWalk=nezukoLayout.clips.filter((clip)=>clip.name==='walk');
+assert.equal(nezukoWalk.length,3,'Nezuko has front, side and back walk clips');
+assert.ok(nezukoWalk.every((clip)=>new Set(clip.frames).size>=6),'Nezuko walk clips need six unique poses');
+assert.equal(catalog.animationByPet?.['nezuko-kamado']?.columns,8,'bootstrap exposes Nezuko custom layout');
 // Every atlas the catalogue names is the size the manifest says a frame grid should be, and
 // keeps its alpha — a pet drawn on an opaque square would show its own tile over the floor.
 const atlasWidth=spriteManifest.frameWidth*spriteManifest.columns;
@@ -83,6 +92,10 @@ const animated=catalog.pets.filter((pet)=>pet.animated);
 const atlases=animated.flatMap((pet)=>pet.atlas||[]).filter(Boolean);
 assert.equal(atlases.length,animated.length*4,'an animated species needs an atlas for each of its four stages');
 for(const sheet of atlases){
+  const petId=sheet.match(/\/([^/]+)-[1-4]-atlas-/)?.[1] ?? '';
+  const layout=spriteManifest.petLayouts?.[petId] ?? spriteManifest;
+  const atlasWidth=layout.frameWidth*layout.columns;
+  const atlasHeight=layout.frameHeight*layout.rows;
   const metadata=await sharp(path.join(artRoot,sheet.split('?')[0].split('/art/')[1])).metadata();
   assert.equal(metadata.width,atlasWidth,`${sheet} width`);
   assert.equal(metadata.height,atlasHeight,`${sheet} height`);

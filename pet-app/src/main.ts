@@ -366,7 +366,7 @@ class StudentApp {
    * better than a creature wearing them in the wrong places.
    */
   private previewFigure(definition:PetDefinition,pet:PetInstance) {
-    const layout=this.state.catalog.animation;
+    const layout=this.state.catalog.animationByPet?.[definition.id] ?? this.state.catalog.animation;
     const fullOutfit=PetAvatar.fullOutfitUrl(definition,pet.stage,pet.equippedWearables,this.state.catalog.outfitAtlases);
     const atlas=fullOutfit||definition.atlas?.[pet.stage-1];
     const anchors=definition.anchors?.[pet.stage-1];

@@ -52,7 +52,7 @@ async function main() {
 
   const { placeWearable, UNMEASURED } = await loadLayout();
   const canvasMode = rest.includes('--canvas');
-  const layout = catalog.animation;
+  const layout = catalog.animationByPet?.[pet.id] ?? catalog.animation;
   const cell = layout.frameWidth;
   const atlas = await sharp(onDisk(pet.atlas[stage - 1])).ensureAlpha().png().toBuffer();
 

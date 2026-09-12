@@ -80,6 +80,31 @@ const POSE_COLUMNS = ['idle', 'walk-a', 'walk-pass', 'walk-b', 'blink'];
 const FRONT_ONLY = ['eat', 'happy', 'sleep', 'sit', 'surprised'];
 
 /**
+ * Most pets use the original 5x4 pose sheet. A custom layout is opt-in per species so a more
+ * expressive character can have a longer walk cycle without changing how every older atlas is
+ * cropped or played.
+ */
+const DEFAULT_PET_LAYOUT = {
+  columns: ATLAS_COLUMNS, rows: ATLAS_ROWS, cell: ATLAS_CELL, fps: 8,
+  walkFrames: [1, 2, 3], specialRow: 3,
+};
+const PET_LAYOUTS = {
+  'nezuko-kamado': {
+    columns: 8, rows: 4, cell: ATLAS_CELL, fps: 10,
+    // idle, six authored walk poses, blink. The 4096 source keeps transparent lower padding, so
+    // these four measured bands are cropped into a compact runtime atlas without changing the
+    // requested source canvas size.
+    walkFrames: [1, 2, 3, 4, 5, 6], specialRow: 3,
+    sourceCellWidth: 512,
+    sourceBands: [
+      { top: 0, height: 717 }, { top: 754, height: 652 },
+      { top: 1440, height: 629 }, { top: 2090, height: 642 },
+    ],
+  },
+};
+const petLayoutFor = (speciesId) => PET_LAYOUTS[speciesId] || DEFAULT_PET_LAYOUT;
+
+/**
  * Accessory sheets are turntables: every item drawn from the front, from its right side and
  * from behind, in three cells side by side, eight items to a sheet. A creature that walks
  * turns away, and one drawing pinned to all three views is a front-facing crown seen from
@@ -123,7 +148,8 @@ async function contentBounds(buffer) {
  * generator lays a grid out approximately and a piece drawn wider than its column gets sliced in
  * half by an even cut. The even cut stays as the fallback for a sheet nothing could be found on.
  */
-async function cell(sheet, meta, columns, rows, index, boxes) {
+async function cell(sheet, meta, columns, rows, index, boxes, sourceRect) {
+  if (sourceRect) return sharp(sheet).extract(sourceRect).png().toBuffer();
   const found = boxes?.[index];
   if (found) return sharp(sheet).extract(found).png().toBuffer();
   const width = Math.floor(meta.width / columns);
@@ -531,19 +557,36 @@ async function rememberPetSheet(speciesId, stage, dry) {
 async function importPet(file, speciesId, stage, dry) {
   const pet = catalog.pets.find((entry) => entry.id === speciesId);
   if (!pet) throw new Error(`no species called ${speciesId}`);
+  const layout = petLayoutFor(speciesId);
+  const { columns, rows, cell: atlasCell } = layout;
   const sheet = await loadSheet(file);
   const meta = await sharp(sheet).metadata();
 
-  const boxes = await findCells(sheet, ATLAS_COLUMNS, ATLAS_ROWS);
-  log(`      found ${boxes.filter(Boolean).length} of ${ATLAS_COLUMNS * ATLAS_ROWS} poses on the sheet`);
+  // The custom Nezuko sheet is authored as four 8-frame bands inside a 4096 square canvas.
+  // Letting the generic spill-recovery pass infer boxes from checker-cleanup remnants can create
+  // a zero-width neighbour box, so its measured source bands are the source of truth. Older 5x4
+  // sheets keep the measured-box path unchanged.
+  const boxes = layout.sourceBands ? null : await findCells(sheet, columns, rows);
+  log(boxes
+    ? `      found ${boxes.filter(Boolean).length} of ${columns * rows} poses on the sheet`
+    : `      using declared ${columns}x${rows} pose grid and source bands`);
   const cells = [];
-  for (let index = 0; index < ATLAS_COLUMNS * ATLAS_ROWS; index += 1) {
+  for (let index = 0; index < columns * rows; index += 1) {
     // A pose is one creature. These sheets are drawn generously — the jumping dog's ear reaches
     // into the sleeper's column and the sleeper's tail reaches back — and a box is a rectangle, so
     // each cut arrives with a crumb of its neighbour in the corner. Left in, it is scaled and
     // seated along with the pose and shows in the room as a chip of fur floating beside the pet.
+    const row = Math.floor(index / columns);
+    const sourceRect = layout.sourceBands
+      ? {
+        left: (index % columns) * layout.sourceCellWidth,
+        top: layout.sourceBands[row].top,
+        width: layout.sourceCellWidth,
+        height: layout.sourceBands[row].height,
+      }
+      : undefined;
     const cut = await keepPose(sheet, boxes?.[index],
-      await cell(sheet, meta, ATLAS_COLUMNS, ATLAS_ROWS, index, boxes));
+      await cell(sheet, meta, columns, rows, index, boxes, sourceRect));
     cells.push({ cut, bounds: await contentBounds(cut) });
   }
   const drawn = cells.filter((entry) => entry.bounds);
@@ -556,30 +599,30 @@ async function importPet(file, speciesId, stage, dry) {
   // the entire creature. The middle of the fifteen walking cells is the honest reference, since
   // by construction they are all the same creature standing, and the fit against the tallest
   // cell is kept only so nothing gets clipped by its cell.
-  const standing = cells.slice(0, POSE_ROWS.length * ATLAS_COLUMNS)
+  const standing = cells.slice(0, POSE_ROWS.length * columns)
     .filter((entry) => entry.bounds).map((entry) => entry.bounds.height).sort((a, b) => a - b);
   const reference = standing.length ? standing[Math.floor(standing.length / 2)]
     : Math.max(...drawn.map((entry) => entry.bounds.height));
   const tallest = Math.max(...drawn.map((entry) => entry.bounds.height));
   const widest = Math.max(...drawn.map((entry) => entry.bounds.width));
   const shared = Math.min(
-    (ATLAS_CELL * 0.80) / reference,
-    (ATLAS_CELL * 0.96) / tallest,
-    (ATLAS_CELL * 0.94) / widest,
+    (atlasCell * 0.80) / reference,
+    (atlasCell * 0.96) / tallest,
+    (atlasCell * 0.94) / widest,
   );
 
   const tiles = [];
   for (let index = 0; index < cells.length; index += 1) {
     if (!cells[index].bounds) continue;
-    const seated = await seat(cells[index].cut, { canvas: ATLAS_CELL, standing: true, scale: shared });
+    const seated = await seat(cells[index].cut, { canvas: atlasCell, standing: true, scale: shared });
     tiles.push({
       input: await sharp(seated).png().toBuffer(),
-      left: (index % ATLAS_COLUMNS) * ATLAS_CELL,
-      top: Math.floor(index / ATLAS_COLUMNS) * ATLAS_CELL,
+      left: (index % columns) * atlasCell,
+      top: Math.floor(index / columns) * atlasCell,
     });
   }
   const atlas = await sharp({
-    create: { width: ATLAS_COLUMNS * ATLAS_CELL, height: ATLAS_ROWS * ATLAS_CELL, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+    create: { width: columns * atlasCell, height: rows * atlasCell, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
   }).composite(tiles).webp({ quality: 92 }).toBuffer();
   await write(fileFor(pet.atlas[stage - 1]), atlas, dry);
 
@@ -591,24 +634,41 @@ async function importPet(file, speciesId, stage, dry) {
 }
 
 /** The frame table the runtime reads, derived from the sheet layout rather than restated. */
-function spriteManifest() {
+function spriteManifestFor(layout) {
   const clips = [];
   POSE_ROWS.forEach((facing, row) => {
-    const base = row * ATLAS_COLUMNS;
-    clips.push({ name: 'idle', facing, frames: [base + 0, base + 0, base + 4] });
-    // Contact, pass, contact, pass reads as a step rather than a shuffle.
-    clips.push({ name: 'walk', facing, frames: [base + 1, base + 2, base + 3, base + 2] });
+    const base = row * layout.columns;
+    const blink = base + layout.columns - 1;
+    const walk = layout.walkFrames.map((column) => base + column);
+    // Contact, recoil, passing, contact, recoil, passing and back again reads as a step rather
+    // than a shuffle. The 3-pose legacy sequence naturally becomes [1,2,3,2].
+    const returnPass = walk.length > 2 ? walk.slice(1, -1).reverse() : [];
+    clips.push({ name: 'idle', facing, frames: [base + 0, base + 0, blink] });
+    clips.push({ name: 'walk', facing, frames: [...walk, ...returnPass] });
   });
   FRONT_ONLY.forEach((name, column) => {
-    clips.push({ name, facing: 'front', frames: [3 * ATLAS_COLUMNS + column] });
+    clips.push({ name, facing: 'front', frames: [layout.specialRow * layout.columns + column] });
   });
   return {
-    frameWidth: ATLAS_CELL, frameHeight: ATLAS_CELL,
-    columns: ATLAS_COLUMNS, rows: ATLAS_ROWS, fps: 8,
+    frameWidth: layout.cell, frameHeight: layout.cell,
+    columns: layout.columns, rows: layout.rows, fps: layout.fps,
     directions: POSE_ROWS,
-    poses: { rows: POSE_ROWS, columns: POSE_COLUMNS, frontOnly: FRONT_ONLY },
+    poses: {
+      rows: POSE_ROWS,
+      columns: layout.columns === 5
+        ? POSE_COLUMNS
+        : ['idle', ...layout.walkFrames.map((_, index) => `walk-${index + 1}`), 'blink'],
+      frontOnly: FRONT_ONLY,
+    },
     clips,
   };
+}
+
+function spriteManifest() {
+  const petLayouts = Object.fromEntries(
+    Object.entries(PET_LAYOUTS).map(([speciesId, layout]) => [speciesId, spriteManifestFor(layout)]),
+  );
+  return { ...spriteManifestFor(DEFAULT_PET_LAYOUT), petLayouts };
 }
 
 // -------------------------------------------------------------------- main ---

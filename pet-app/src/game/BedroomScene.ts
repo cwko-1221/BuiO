@@ -208,8 +208,9 @@ export class BedroomScene extends Phaser.Scene {
 
     // Prefer the animated atlas; fall back to the static form art only if it is unavailable.
     const stage = this.model.activePet.stage;
+    const layout = catalog.animationByPet?.[this.model.petDefinition.id] ?? catalog.animation;
     if (!PetAvatar.preload(
-      this, this.model.petDefinition, stage, catalog.animation,
+      this, this.model.petDefinition, stage, layout,
       this.model.activePet.equippedWearables, catalog.outfitAtlases,
     )) {
       this.petTextureKey = `pet:${this.model.petDefinition.id}:${stage}`;
@@ -250,8 +251,10 @@ export class BedroomScene extends Phaser.Scene {
     // furniture by the row it is on — the same rule every piece of furniture follows.
     this.petSpot = { x: GRID_COLUMNS / 2, y: GRID_ROWS * .68 };
     const home = this.petCentre(this.petSpot);
+    const layout = this.model.bootstrap.catalog.animationByPet?.[this.model.petDefinition.id]
+      ?? this.model.bootstrap.catalog.animation;
     this.avatar = new PetAvatar(this, home.x, home.y, this.model.petDefinition, this.model.activePet, {
-      layout: this.model.bootstrap.catalog.animation,
+      layout,
       fallbackTexture: this.petTextureKey && this.textures.exists(this.petTextureKey) ? this.petTextureKey : undefined,
       scale: PET_SCALE * this.depthScale(this.petSpot.y),
       wearables: this.model.bootstrap.catalog.wearables,

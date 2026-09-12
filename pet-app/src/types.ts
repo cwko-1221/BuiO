@@ -111,6 +111,8 @@ export interface Catalog {
   wearablePetIds?: string[];
   furniture: FurnitureDefinition[]; evolutionThresholds: number[]; dailyXpCap: number;
   animation: AnimationLayout | null;
+  /** Optional species-specific layouts; older pets continue using the shared 5x4 sheet. */
+  animationByPet?: Record<string, AnimationLayout>;
   /** Exact complete-pet redraws, keyed by `petId:stage:sorted+wearable+ids`. */
   outfitAtlases: Record<string, string>;
   /** Per-item redraw layers, keyed by `petId:stage:wearableId`. */

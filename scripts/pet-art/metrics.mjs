@@ -103,26 +103,28 @@ async function measureCreatures({ catalog, resolve, root, log }) {
     log('no sprite manifest yet; skipping creature anchors');
     return { anchors: 0, tracks: 0 };
   }
-  const { frameWidth: cellW, frameHeight: cellH } = manifest;
-  // The manifest has had two shapes. The pose sheet gives plain counts; the older one listed the
-  // columns and rows it used. Reading .length off a number came back undefined, which put every
-  // frame at NaN and quietly handed back whole-cell proportions for all eighty creatures.
-  const count = (value, fallback) => (Array.isArray(value) ? value.length : Number(value) || fallback);
-  const columns = manifest.gridColumns || count(manifest.columns, 1);
-  const cells = columns * (manifest.gridRows || count(manifest.rows, 1));
-
-  // Only the cells something is drawn in are measured; the rest of the grid is padding.
-  const drawn = new Set();
-  for (const clip of manifest.clips || []) for (const frame of clip.frames) drawn.add(frame);
-  for (const action of Object.values(manifest.actions || {})) {
-    for (let i = 0; i < action.count; i += 1) drawn.add(action.start + i);
-  }
-  const animated = drawn;
-
   const anchors = {};
   const motion = {};
   for (const pet of catalog.pets) {
     if (!pet.animated) continue;
+    // A species may opt into a larger square atlas. Older pets keep reading the shared 5x4
+    // manifest, so their measured coordinates and motion tracks remain byte-for-byte stable.
+    const petManifest = manifest.petLayouts?.[pet.id] || manifest;
+    const { frameWidth: cellW, frameHeight: cellH } = petManifest;
+    // The manifest has had two shapes. The pose sheet gives plain counts; the older one listed the
+    // columns and rows it used. Reading .length off a number came back undefined, which put every
+    // frame at NaN and quietly handed back whole-cell proportions for all eighty creatures.
+    const count = (value, fallback) => (Array.isArray(value) ? value.length : Number(value) || fallback);
+    const columns = petManifest.gridColumns || count(petManifest.columns, 1);
+    const cells = columns * (petManifest.gridRows || count(petManifest.rows, 1));
+
+    // Only the cells something is drawn in are measured; the rest of the grid is padding.
+    const drawn = new Set();
+    for (const clip of petManifest.clips || []) for (const frame of clip.frames) drawn.add(frame);
+    for (const action of Object.values(petManifest.actions || {})) {
+      for (let i = 0; i < action.count; i += 1) drawn.add(action.start + i);
+    }
+    const animated = drawn;
     for (let stage = 0; stage < (pet.atlas?.length ?? 0); stage += 1) {
       let sheet;
       try {
@@ -186,7 +188,7 @@ async function measureCreatures({ catalog, resolve, root, log }) {
         track[index * 4 + 2] = clampByte(frame.centre - rest.centre);
         track[index * 4 + 3] = clampByte(Math.round((frame.width / rest.width - 1) * 100));
       }
-      smooth(track, manifest.actions);
+      smooth(track, petManifest.actions);
       motion[key] = Buffer.from(track.buffer).toString('base64');
     }
   }
