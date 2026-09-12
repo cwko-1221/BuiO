@@ -83,9 +83,11 @@ const nezukoWalk=nezukoLayout.clips.filter((clip)=>clip.name==='walk');
 assert.equal(nezukoWalk.length,3,'Nezuko has front, side and back walk clips');
 assert.ok(nezukoWalk.every((clip)=>new Set(clip.frames).size===8),'Nezuko walk clips need eight unique gait phases');
 const nezukoIdle=nezukoLayout.clips.filter((clip)=>clip.name==='idle');
-assert.equal(nezukoIdle.length,3,'Nezuko has a neutral pose for every direction');
-assert.ok(nezukoIdle.every((clip)=>clip.frames.length===1),
-  'Nezuko idle must hold one stable frame instead of moving the whole silhouette to blink');
+assert.equal(nezukoIdle.length,1,'Nezuko uses one coherent front idle set');
+assert.deepEqual(nezukoIdle[0].frames,[24,25,26,27,28,29,30,31],
+  'Nezuko idle must retain all eight breathe/blink phases');
+assert.deepEqual(nezukoIdle[0].durations,[900,100,700,0,0,0,100,500],
+  'Nezuko idle needs a natural pause between blinks');
 assert.deepEqual(nezukoLayout.clips.find((clip)=>clip.name==='sleep')?.frames,[34],
   'Nezuko rest action must retain the authored sleeping pose');
 assert.equal(catalog.animationByPet?.['nezuko-kamado']?.columns,8,'bootstrap exposes Nezuko custom layout');
@@ -114,8 +116,8 @@ for(const sheet of atlases){
 // and the baseline assertions preserve a restrained contact/down/pass/up bounce.
 const nezukoAtlas=path.join(artRoot,catalog.pets.find((pet)=>pet.id==='nezuko-kamado')
   .atlas[0].split('?')[0].split('/art/')[1]);
-for(const [facing,row,idleCell] of [['front',0,24],['right',1,26],['back',2,28]]) {
-  const hashes=new Set(); const centres=[]; const bottoms=[]; const heights=[];
+for(const [facing,row] of [['front',0],['right',1],['back',2]]) {
+  const hashes=new Set(); const centres=[]; const bottoms=[]; const lowerMasks=[];
   for(let column=0;column<8;column+=1) {
     const frame=await sharp(nezukoAtlas).extract({left:column*160,top:row*160,width:160,height:160})
       .ensureAlpha().raw().toBuffer({resolveWithObject:true});
@@ -132,7 +134,11 @@ for(const [facing,row,idleCell] of [['front',0,24],['right',1,26],['back',2,28]]
       const alpha=data[(y*160+x)*info.channels+3];
       if(alpha<=16) continue; weightedX+=x*alpha; weight+=alpha;
     }
-    centres.push(weightedX/weight); bottoms.push(bottom); heights.push(bottom-top+1);
+    centres.push(weightedX/weight); bottoms.push(bottom);
+    lowerMasks.push(Uint8Array.from({length:160*42},(_,at)=>{
+      const x=at%160,y=118+Math.floor(at/160);
+      return data[(y*160+x)*info.channels+3]>32?1:0;
+    }));
     hashes.add(createHash('sha256').update(data).digest('hex'));
   }
   assert.equal(hashes.size,8,`Nezuko ${facing} walk contains duplicate stills`);
@@ -143,21 +149,39 @@ for(const [facing,row,idleCell] of [['front',0,24],['right',1,26],['back',2,28]]
   assert.ok(bottoms[1]>bottoms[0]&&bottoms[3]<bottoms[0]
     &&bottoms[5]>bottoms[4]&&bottoms[7]<bottoms[4],
   `Nezuko ${facing} walk does not follow contact/down/pass/up foot timing`);
-  const idle=await sharp(nezukoAtlas).extract({left:(idleCell%8)*160,
-    top:Math.floor(idleCell/8)*160,width:160,height:160})
-    .ensureAlpha().raw().toBuffer({resolveWithObject:true});
-  let idleTop=160,idleBottom=-1;
-  for(let y=0;y<160;y+=1) for(let x=0;x<160;x+=1) {
-    if(idle.data[(y*160+x)*idle.info.channels+3]<=16) continue;
-    idleTop=Math.min(idleTop,y); idleBottom=Math.max(idleBottom,y);
+  if(facing!=='right') for(let phase=0;phase<4;phase+=1) {
+    let mismatch=0;
+    for(let y=0;y<42;y+=1) for(let x=0;x<160;x+=1) {
+      if(lowerMasks[phase][y*160+x]!==lowerMasks[phase+4][y*160+159-x]) mismatch+=1;
+    }
+    assert.ok(mismatch/(160*42)<0.06,
+      `Nezuko ${facing} phase ${phase+1} does not alternate onto the opposite leg`);
   }
-  const sortedHeights=[...heights].sort((a,b)=>a-b);
-  assert.ok(Math.abs((idleBottom-idleTop+1)-sortedHeights[4])<=2,
-    `Nezuko ${facing} idle changes size when walking stops`);
-  assert.ok(Math.abs(idleBottom-bottoms[0])<=2,
-    `Nezuko ${facing} idle leaves the walking baseline`);
 }
 pass('Nezuko eight-phase walk clearance, anchor stability and gait timing');
+
+const idleHashes=new Set(),idleCentres=[],idleBottoms=[],idleHeights=[];
+for(let column=0;column<8;column+=1) {
+  const frame=await sharp(nezukoAtlas).extract({left:column*160,top:3*160,width:160,height:160})
+    .ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  const {data,info}=frame; let left=160,right=-1,top=160,bottom=-1,weightedX=0,weight=0;
+  for(let y=0;y<160;y+=1) for(let x=0;x<160;x+=1) {
+    const alpha=data[(y*160+x)*info.channels+3]; if(alpha<=16) continue;
+    left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);
+  }
+  const upperLimit=Math.floor(top+(bottom-top+1)*.7);
+  for(let y=top;y<=upperLimit;y+=1) for(let x=left;x<=right;x+=1) {
+    const alpha=data[(y*160+x)*info.channels+3]; if(alpha<=16) continue;
+    weightedX+=x*alpha;weight+=alpha;
+  }
+  idleCentres.push(weightedX/weight);idleBottoms.push(bottom);idleHeights.push(bottom-top+1);
+  idleHashes.add(createHash('sha256').update(data).digest('hex'));
+}
+assert.ok(idleHashes.size>=6,'Nezuko idle lacks a real breathe/blink progression');
+assert.ok(Math.max(...idleCentres)-Math.min(...idleCentres)<1,'Nezuko idle sways sideways');
+assert.equal(Math.max(...idleBottoms)-Math.min(...idleBottoms),0,'Nezuko idle feet move vertically');
+assert.ok(Math.max(...idleHeights)-Math.min(...idleHeights)<=3,'Nezuko idle changes character scale');
+pass('Nezuko eight-phase idle breathes and blinks on a locked baseline');
 const redrawManifest=JSON.parse(await fs.readFile(path.join(artRoot,'outfit-atlases/manifest.json'),'utf8'));
 assert.deepEqual(catalog.redrawnWearables,redrawManifest.modular||{},'bootstrap redraw catalogue differs from its manifest');
 const releasedPetIds=new Set(catalog.pets.map((pet)=>pet.id));

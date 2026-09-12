@@ -30,7 +30,8 @@ function parseAnimationLayout(manifest) {
     if (Array.isArray(manifest.clips)) {
       const actions = [];
       for (const clip of manifest.clips) {
-        actions.push({ name: clip.name, facing: clip.facing, frames: clip.frames, start: clip.frames[0], length: clip.frames.length });
+        actions.push({ name: clip.name, facing: clip.facing, frames: clip.frames,
+          durations: clip.durations, start: clip.frames[0], length: clip.frames.length });
       }
       return {
         frameWidth: manifest.frameWidth,

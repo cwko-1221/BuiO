@@ -398,7 +398,9 @@ export class PetAvatar extends Phaser.GameObjects.Container {
           ?? Array.from({ length: action.length }, (_, offset) => row * layout.framesPerDirection + action.start + offset);
         this.scene.anims.create({
           key: animationKey,
-          frames: cells.map((frame) => ({ key: this.textureKey, frame })),
+          frames: cells.map((frame, index) => ({
+            key: this.textureKey, frame, duration: action.durations?.[index] ?? 0,
+          })),
           frameRate: action.name === 'sleep' ? Math.round(layout.fps / 2.5) : layout.fps,
           repeat: LOOPING.has(action.name) ? -1 : 0,
         });
@@ -433,7 +435,15 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     // A sheet may not carry every facing — today's art has only the front — so fall back rather
     // than freezing on whatever was playing.
     let animationKey = `${this.animationPrefix}-${action}-${drawn}`;
-    if (!this.scene.anims.exists(animationKey)) animationKey = `${this.animationPrefix}-${action}-front`;
+    if (!this.scene.anims.exists(animationKey)) {
+      animationKey = `${this.animationPrefix}-${action}-front`;
+      // A front-only idle/action must also update the logical facing. Otherwise the art turns
+      // forward while equipment and the next state still believe the pet is side-on.
+      if (this.scene.anims.exists(animationKey)) {
+        this.facing = 'front';
+        this.sprite.setFlipX(false);
+      }
+    }
     if (!this.scene.anims.exists(animationKey)) animationKey = `${this.animationPrefix}-idle-front`;
     if (!this.scene.anims.exists(animationKey)) return;
     this.sprite.play(animationKey, true);

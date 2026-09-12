@@ -43,7 +43,11 @@ export interface AnimationLayout {
    * plays, because a walk there is contact, pass, contact, pass and not a contiguous run. The
    * older sheet gave a start and a length within each direction row instead.
    */
-  actions: { name: PetAction; start: number; length: number; facing?: PetFacing; frames?: number[] }[];
+  actions: {
+    name: PetAction; start: number; length: number; facing?: PetFacing; frames?: number[];
+    /** Optional extra hold time per frame, used for a natural pause between idle blinks. */
+    durations?: number[];
+  }[];
 }
 /** The floor's four corners as fractions of the room image: back left, back right, front right, front left. */
 export type RoomFloor = [number, number][];

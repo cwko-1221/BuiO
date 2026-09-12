@@ -18,7 +18,7 @@ const port = await reservePort();
 const baseURL = `http://127.0.0.1:${port}`;
 const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'buio-nezuko-walk-'));
 const databaseFile = path.join(tempDir, 'db.json');
-const artifactDir = path.resolve('artifacts/nezuko-walk-live');
+const artifactDir = path.resolve('artifacts/nezuko-perfect-v3-live');
 await fs.mkdir(artifactDir, { recursive: true });
 await fs.writeFile(databaseFile, JSON.stringify({
   users: [{ studentid: 'S001', name: '禰豆子步態測試', passwordhash: bcrypt.hashSync('test', 4),
@@ -160,19 +160,35 @@ try {
     const speed = Math.hypot(last.x - first.x, last.y - first.y) / Math.max(1, last.at - first.at) * 1000;
     const distancePerCycle = speed * (8 / 10);
     assert.equal(frames.length, 8, `${run.facing} movement played ${frames.length} of 8 frames: ${frames}`);
-    assert.ok(samples.every((sample) => sample.facing === run.facing),
+    assert.ok(moving.every((sample) => sample.facing === run.facing),
       `${run.facing} movement changed facing mid-run`);
     assert.ok(distancePerCycle>=80&&distancePerCycle<=115,
       `${run.facing} movement covers ${distancePerCycle.toFixed(1)}px per gait cycle`);
     const stopped = samples.filter((sample) => sample.action === 'idle');
     assert.ok(stopped.length >= 4, `${run.facing} did not settle long enough to inspect idle`);
-    assert.equal(new Set(stopped.map((sample) => sample.frame)).size, 1,
-      `${run.facing} idle changes frames after stopping`);
+    assert.ok(stopped.every((sample) => sample.facing === 'front'),
+      `${run.facing} movement did not settle into the authored front idle cycle`);
+    assert.ok(stopped.every((sample) => sample.frame >= 24 && sample.frame <= 31),
+      `${run.facing} movement settled outside the idle cycle`);
     assert.equal(new Set(stopped.map((sample) => `${sample.x}:${sample.y}`)).size, 1,
       `${run.facing} avatar position moves after stopping`);
     report.directions[run.facing] = { frames, speed: Number(speed.toFixed(2)),
       distancePerCycle: Number(distancePerCycle.toFixed(2)), samples };
   }
+
+  report.idle = await page.evaluate(async () => new Promise((resolve) => {
+    const values = []; const began = performance.now();
+    const timer = setInterval(() => {
+      const avatar = window.__petGame.scene.getScene('Bedroom').avatar;
+      values.push({ frame: Number(avatar.sprite.frame.name), x: Number(avatar.x.toFixed(2)),
+        y: Number(avatar.y.toFixed(2)), facing: avatar.facing, action: avatar.current });
+      if (performance.now() - began >= 4000) { clearInterval(timer); resolve(values); }
+    }, 35);
+  }));
+  assert.deepEqual([...new Set(report.idle.map((sample) => sample.frame))].sort((a,b)=>a-b),
+    [24,25,26,27,28,29,30,31], 'idle did not play every breathe/blink frame');
+  assert.equal(new Set(report.idle.map((sample) => `${sample.x}:${sample.y}`)).size,1,
+    'avatar position changes during idle breathe/blink cycle');
 
   await page.getByRole('button', { name: '休息' }).click();
   await page.waitForFunction(() => {
