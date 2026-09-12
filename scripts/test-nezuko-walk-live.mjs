@@ -111,7 +111,7 @@ try {
     throw new Error(`Nezuko was not active. prepared=${JSON.stringify(prepared)} scene=${JSON.stringify(scene)}\n${error.message}`);
   }
 
-  const report = { petId: prepared.petId, fps: 12, directions: {}, errors };
+  const report = { petId: prepared.petId, fps: 10, directions: {}, errors };
   const runs = [
     { facing: 'front', target: { x: 7, y: 9.2 } },
     { facing: 'right', target: { x: 11.5, y: 6.8 } },
@@ -132,14 +132,17 @@ try {
     }, run.facing, { timeout: 5000 });
 
     const sampling = page.evaluate(async ({ facing }) => new Promise((resolve) => {
-      const values = []; const began = performance.now();
+      const values = []; const began = performance.now(); let idleSince = 0;
       const timer = setInterval(() => {
         const scene = window.__petGame.scene.getScene('Bedroom');
         const avatar = scene.avatar;
         values.push({ at: Math.round(performance.now() - began), frame: Number(avatar.sprite.frame.name),
           x: Number(avatar.x.toFixed(2)), y: Number(avatar.y.toFixed(2)),
           facing: avatar.facing, action: avatar.current });
-        if (performance.now() - began >= 1450) { clearInterval(timer); resolve(values); }
+        if (avatar.current === 'idle') idleSince ||= performance.now(); else idleSince = 0;
+        if ((idleSince && performance.now() - idleSince >= 650) || performance.now() - began >= 5000) {
+          clearInterval(timer); resolve(values);
+        }
       }, 35);
     }), run);
     await page.waitForTimeout(420);
@@ -147,20 +150,40 @@ try {
       path: path.join(artifactDir, `${run.facing}-walk.png`),
     });
     const samples = await sampling;
+    await page.locator('.room-stage').screenshot({
+      path: path.join(artifactDir, `${run.facing}-idle.png`),
+    });
     const frames = [...new Set(samples.filter((sample) => sample.action === 'walk')
       .map((sample) => sample.frame))];
     const moving = samples.filter((sample) => sample.action === 'walk');
     const first = moving[0], last = moving[moving.length - 1];
     const speed = Math.hypot(last.x - first.x, last.y - first.y) / Math.max(1, last.at - first.at) * 1000;
-    const distancePerCycle = speed * (8 / 12);
+    const distancePerCycle = speed * (8 / 10);
     assert.equal(frames.length, 8, `${run.facing} movement played ${frames.length} of 8 frames: ${frames}`);
     assert.ok(samples.every((sample) => sample.facing === run.facing),
       `${run.facing} movement changed facing mid-run`);
     assert.ok(distancePerCycle>=80&&distancePerCycle<=115,
       `${run.facing} movement covers ${distancePerCycle.toFixed(1)}px per gait cycle`);
+    const stopped = samples.filter((sample) => sample.action === 'idle');
+    assert.ok(stopped.length >= 4, `${run.facing} did not settle long enough to inspect idle`);
+    assert.equal(new Set(stopped.map((sample) => sample.frame)).size, 1,
+      `${run.facing} idle changes frames after stopping`);
+    assert.equal(new Set(stopped.map((sample) => `${sample.x}:${sample.y}`)).size, 1,
+      `${run.facing} avatar position moves after stopping`);
     report.directions[run.facing] = { frames, speed: Number(speed.toFixed(2)),
       distancePerCycle: Number(distancePerCycle.toFixed(2)), samples };
   }
+
+  await page.getByRole('button', { name: '休息' }).click();
+  await page.waitForFunction(() => {
+    const avatar = window.__petGame?.scene?.getScene('Bedroom')?.avatar;
+    return avatar?.current === 'sleep' && Number(avatar?.sprite?.frame?.name) === 34;
+  }, null, { timeout: 3000 });
+  report.rest = await page.evaluate(() => {
+    const avatar = window.__petGame.scene.getScene('Bedroom').avatar;
+    return { action: avatar.current, frame: Number(avatar.sprite.frame.name) };
+  });
+  await page.locator('.room-stage').screenshot({ path: path.join(artifactDir, 'rest.png') });
 
   assert.deepEqual(errors, [], `browser errors: ${errors.join('\n')}`);
   await fs.writeFile(path.join(artifactDir, 'report.json'), JSON.stringify(report, null, 2));

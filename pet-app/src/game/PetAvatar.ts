@@ -454,6 +454,25 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   /** What the creature is doing, so the room can tell walking apart from a one-shot reaction. */
   get action() { return this.current; }
 
+  /**
+   * Keep long humanoid walks in step with world travel. Stopping an eight-frame gait at an
+   * arbitrary millisecond can cut from a raised foot straight to idle, which reads as a hop.
+   * Older four-frame pets retain their established movement timing.
+   */
+  walkingDuration(distance: number) {
+    const nominal = Math.max(120, distance * 7);
+    const walk = this.layout?.actions.find((entry) => entry.name === 'walk'
+      && (!entry.facing || entry.facing === (this.facing === 'left' ? 'right' : this.facing)))
+      ?? this.layout?.actions.find((entry) => entry.name === 'walk');
+    const frameCount = walk?.frames?.length ?? walk?.length ?? 0;
+    if (!this.layout || frameCount < 8) return nominal;
+    // Each half-cycle ends on the opposite planted foot. Quantising to this boundary prevents
+    // the room tween from ending during a passing/up pose.
+    const plantedStep = (frameCount / 2) / this.layout.fps * 1000;
+    const humanoidNominal = Math.max(plantedStep, distance * 8);
+    return Math.max(plantedStep, Math.round(humanoidNominal / plantedStep) * plantedStep);
+  }
+
   /** Legacy entry point used by the DOM layer's `pet:emote` event. */
   emote(type: string) {
     const action = EMOTE_ACTION[type] ?? 'happy';

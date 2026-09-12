@@ -865,7 +865,7 @@ export class BedroomScene extends Phaser.Scene {
     this.petStep = this.tweens.addCounter({
       from: 0,
       to: 1,
-      duration: Math.max(120, Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y) * 7),
+      duration: avatar.walkingDuration(Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y)),
       ease: 'Linear',
       onUpdate: (tween) => {
         const t = tween.getValue() ?? 0;

@@ -7,7 +7,7 @@
  * source baseline is preserved, so extended feet do not make the character wobble sideways.
  *
  * The shipping source is an 8x8 4096px atlas. Rows 0-2 are the eight-frame front/right/back walk
- * cycles, row 3 contains directional idle/blink frames, row 4 contains the five special poses,
+ * cycles, row 3 contains stable directional idle frames, row 4 contains the five special poses,
  * and rows 5-7 intentionally remain transparent.
  */
 import fs from 'node:fs/promises';
@@ -22,8 +22,13 @@ const RAW_DIR = path.join(WORK_DIR, 'raw');
 const PROCESSED_DIR = path.join(WORK_DIR, 'processed');
 const OUTPUT = path.join(SOURCE_DIR, 'nezuko-kamado-atlas-best-v2-4096.png');
 const PREVIEW = path.join(ROOT, 'artifacts', 'nezuko-best-v2-contact-sheet.png');
-const LEGACY_ATLAS = path.join(ROOT, 'pet-app', 'public', 'assets', 'art', 'sprites',
-  'nezuko-kamado-1-atlas-f05eddc60f.webp');
+const IMPORT_DIR = path.join(ROOT, 'artifacts', 'nezuko-best-v2-import');
+// The approved 5x4 source is the authority for idle and special poses. Never read those poses
+// back from the shipping 8x5 atlas: doing so makes a rebuild recursively treat walk cells as
+// idle cells after the runtime layout changes.
+const LEGACY_ATLAS = path.join(SOURCE_DIR, 'nezuko-kamado-atlas-5x4-4096.png');
+const LEGACY_COLUMNS = 5;
+const LEGACY_ROWS = 4;
 
 const FRAME = 512;
 const SOURCE_COLUMNS = 8;
@@ -182,8 +187,13 @@ async function normalizeWalk(group, scale) {
 }
 
 async function legacyFrame(index) {
-  const left = (index % 8) * 160, top = Math.floor(index / 8) * 160;
-  const cut = await sharp(LEGACY_ATLAS).extract({ left, top, width: 160, height: 160 })
+  const metadata = await sharp(LEGACY_ATLAS).metadata();
+  const column = index % LEGACY_COLUMNS, row = Math.floor(index / LEGACY_COLUMNS);
+  const left = Math.round(column * metadata.width / LEGACY_COLUMNS);
+  const right = Math.round((column + 1) * metadata.width / LEGACY_COLUMNS);
+  const top = Math.round(row * metadata.height / LEGACY_ROWS);
+  const bottom = Math.round((row + 1) * metadata.height / LEGACY_ROWS);
+  const cut = await sharp(LEGACY_ATLAS).extract({ left, top, width: right - left, height: bottom - top })
     .ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const { data, info } = cut;
   const labels = new Int32Array(info.width * info.height).fill(-1);
@@ -213,7 +223,7 @@ async function legacyFrame(index) {
   if (!core) throw new Error(`legacy frame ${index} is empty`);
   const keep = new Set(parts.filter((part) => {
     if (part === core) return true;
-    if (index !== 28) return false;
+    if (index !== 19) return false;
     // Only surprised has intentional detached punctuation. Other detached pieces in the legacy
     // cells are proven neighbour spill and must not survive into the rebuilt atlas.
     const apart = Math.max(core.x0 - part.x1, part.x0 - core.x1,
@@ -225,8 +235,30 @@ async function legacyFrame(index) {
   }
   const cleaned = await sharp(data, { raw: { width: info.width, height: info.height,
     channels: info.channels } }).png().toBuffer();
-  return sharp(cleaned).resize(FRAME, FRAME, { fit: 'fill', kernel: sharp.kernel.lanczos3 })
-    .png().toBuffer();
+  return cleaned;
+}
+
+async function normalizeLegacy(buffer, targetHeight, targetBottom = 478) {
+  const box = await bounds(buffer);
+  if (!box) throw new Error('legacy pose is empty');
+  const cropped = await sharp(buffer).extract({ left: box.left, top: box.top,
+    width: box.width, height: box.height }).png().toBuffer();
+  const scale = Math.min(targetHeight / box.height, 452 / box.width);
+  const width = Math.max(1, Math.round(box.width * scale));
+  const height = Math.max(1, Math.round(box.height * scale));
+  const resized = await sharp(cropped).resize(width, height, {
+    fit: 'fill', kernel: sharp.kernel.lanczos3,
+  }).png().toBuffer();
+  const resizedBox = await bounds(resized);
+  const centre = await upperCentreX(resized, resizedBox);
+  const left = Math.round(FRAME / 2 - centre);
+  const top = Math.round(targetBottom - height);
+  if (left < 0 || top < 0 || left + width > FRAME || top + height > FRAME) {
+    throw new Error('normalized legacy pose would leave its 512px slot');
+  }
+  return sharp({ create: { width: FRAME, height: FRAME, channels: 4,
+    background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite([{ input: resized, left, top }]).png().toBuffer();
 }
 
 async function composeAtlas(walkFrames) {
@@ -237,14 +269,23 @@ async function composeAtlas(walkFrames) {
     }
   }
 
-  // Directional idle and blink frames from the already approved shipped character.
-  const idleSource = [0, 7, 8, 15, 16, 23];
-  for (let column = 0; column < idleSource.length; column += 1) {
-    tiles.push({ input: await legacyFrame(idleSource[column]), left: column * FRAME, top: 3 * FRAME });
+  // Restore the true neutral poses from the approved original 5x4 atlas. Match each pose to the
+  // median height and baseline of its new walk, then duplicate it into the unused blink slot.
+  // A generated blink changed the whole silhouette, which made the stopped character hop.
+  const idleSource = [0, 5, 10];
+  for (let direction = 0; direction < idleSource.length; direction += 1) {
+    const heights = [];
+    for (const frame of walkFrames[direction]) heights.push((await bounds(frame)).height);
+    heights.sort((a, b) => a - b);
+    const idle = await normalizeLegacy(await legacyFrame(idleSource[direction]), heights[4]);
+    for (const column of [direction * 2, direction * 2 + 1]) {
+      tiles.push({ input: idle, left: column * FRAME, top: 3 * FRAME });
+    }
   }
   // eat, happy, sleep, sit, surprised
   for (let column = 0; column < 5; column += 1) {
-    tiles.push({ input: await legacyFrame(24 + column), left: column * FRAME, top: 4 * FRAME });
+    const special = await normalizeLegacy(await legacyFrame(15 + column), column === 2 ? 360 : 430);
+    tiles.push({ input: special, left: column * FRAME, top: 4 * FRAME });
   }
 
   return sharp({ create: { width: SOURCE_COLUMNS * FRAME, height: SOURCE_ROWS * FRAME, channels: 4,
@@ -274,6 +315,10 @@ for (const group of groups) walkFrames.push(await normalizeWalk(group, scale));
 const atlas = await composeAtlas(walkFrames);
 await fs.writeFile(OUTPUT, atlas);
 await fs.writeFile(path.join(WORK_DIR, path.basename(OUTPUT)), atlas);
+await fs.mkdir(IMPORT_DIR, { recursive: true });
+for (let stage = 1; stage <= 4; stage += 1) {
+  await fs.writeFile(path.join(IMPORT_DIR, `pet-nezuko-kamado-${stage}.png`), atlas);
+}
 await writePreview(walkFrames);
 
 const meta = await sharp(atlas).metadata();
