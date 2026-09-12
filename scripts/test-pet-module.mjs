@@ -13,6 +13,7 @@ await fs.writeFile(process.env.BUIO_JSON_DB_FILE,JSON.stringify({
     {studentId:'S001',name:'學生一',role:'student'},
     {studentId:'S002',name:'學生二',role:'student'},
     {studentId:'S003',name:'未進入學生',role:'student'},
+    {studentId:'S004',name:'禰豆子測試學生',role:'student'},
     {studentId:'T001',name:'老師',role:'teacher'},
   ],studentStats:[],questionLogs:[],_logId:0,
 },null,2));
@@ -23,12 +24,14 @@ const repo = require('../pet-app/repositories/pet.repo.js');
 const store = require('../db/jsonStore.js');
 const pass = (label) => console.log(`✓ ${label}`);
 
-assert.deepEqual(catalog.pets.map((pet)=>pet.id),['starpatch-cat','cloud-ear-dog','pudding-pig','crescent-rabbit','bubble-otter','mossback-turtle','spark-hamster','leaftail-fox','snowfeather-penguin','thunderhorn-goat','coral-seal']);
-assert.equal(catalog.pets.flatMap((pet)=>pet.art).length,44);
+assert.deepEqual(catalog.pets.map((pet)=>pet.id),['starpatch-cat','cloud-ear-dog','pudding-pig','crescent-rabbit','bubble-otter','mossback-turtle','spark-hamster','leaftail-fox','snowfeather-penguin','thunderhorn-goat','coral-seal','nezuko-kamado']);
+assert.equal(catalog.pets.flatMap((pet)=>pet.art).length,48);
 assert.equal(catalog.rooms.length,10);
 assert.equal(catalog.foods.length,12);
 assert.equal(catalog.wearables.length,45); assert.equal(catalog.furniture.length,100);
-assert.equal(new Set(catalog.pets.map((pet)=>pet.id)).size,11);
+assert.equal(new Set(catalog.pets.map((pet)=>pet.id)).size,12);
+assert.equal(catalog.pets.find((pet)=>pet.id==='nezuko-kamado').directPrice,9999);
+assert.equal(catalog.wearablePetIds.includes('nezuko-kamado'),false);
 assert.deepEqual(catalog.evolutionThresholds,[0,400,1100,2100]);
 assert.deepEqual(catalog.egg.odds,{common:1,rare:0,epic:0});
 assert.equal(catalog.egg.pityAt,0);
@@ -155,7 +158,11 @@ const starterRetry=await repo.hatchStarter('S001',{idempotencyKey:'starter-1',ra
 assert.equal(starter.speciesId,starterRetry.speciesId); assert.equal(starter.rarity,'common');
 await assert.rejects(()=>repo.hatchStarter('S001',{idempotencyKey:'starter-2',random:()=>.99}),/already claimed/);
 await assert.rejects(()=>repo.purchaseEgg('S001',{kind:'direct',speciesId:'emberwing-dragon',idempotencyKey:'epic-direct'}),/cannot be bought directly/);
-pass('starter egg is once-only and epic direct purchase is blocked');
+await repo.grantCoins('T001',['S004'],9999,{note:'禰豆子測試金幣',idempotencyKey:'grant-nezuko'});
+const nezuko=await repo.purchaseEgg('S004',{kind:'direct',speciesId:'nezuko-kamado',idempotencyKey:'direct-nezuko'});
+assert.equal(nezuko.rarity,'epic'); assert.equal(nezuko.balance,0); assert.ok(nezuko.pet);
+await assert.rejects(()=>repo.setOutfit('S004',nezuko.pet.id,['head-03']),/cannot wear outfits yet/);
+pass('starter egg, special direct-purchase price and closed Nezuko outfit system');
 
 const draws=[];
 for(let index=0;index<10;index+=1) draws.push(await repo.purchaseEgg('S002',{kind:'random',idempotencyKey:`release-draw-${index}`,random:()=>.99}));

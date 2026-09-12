@@ -218,9 +218,11 @@ const PET_LIBRARY = [
   ['abyss-lantern-squid','epic','water-shadow',['燈豆魷','幽潮魷','深淵巨魷','海溝燈神'],['Lantern Squidlet','Ghost-tide Squid','Abyss Giant Squid','Trench Lantern Spirit'],'深海牽引','Abyss Pull','#4378a8','squid'],
   ['storm-kirin','epic','electric-light',['雷芽麟','雲電麟','霆角麒麟','九霄雷皇'],['Spark Kirin','Cloudbolt Kirin','Thunderhorn Kirin','Nine-sky Thunder Sovereign'],'雷霆領域','Thunder Field','#e6c44b','kirin'],
   ['grove-colossus','epic','nature-cosmic',['苗靈獸','藤角獸','古森巨獸','萬木守護神'],['Sprout Spirit','Vinehorn Beast','Ancient Grove Colossus','Guardian of All Trees'],'巨木降臨','Root Colossus','#4f9b65','monster'],
-].map(([id, rarity, element, namesZh, namesEn, talentZh, talentEn, color, body]) => ({
+  ['nezuko-kamado','epic','fire',['竈門禰豆子','竈門禰豆子','竈門禰豆子','竈門禰豆子'],['Nezuko Kamado','Nezuko Kamado','Nezuko Kamado','Nezuko Kamado'],'血鬼術・爆血','Blood Demon Art: Exploding Blood','#e58da2','nezuko',9999],
+].map(([id, rarity, element, namesZh, namesEn, talentZh, talentEn, color, body, directPrice]) => ({
   id, rarity, element, names: { 'zh-HK': namesZh, 'en-US': namesEn },
   talent: { 'zh-HK': talentZh, 'en-US': talentEn }, color, body,
+  directPrice: Number.isInteger(directPrice) ? directPrice : undefined,
   art: Array.from({ length: 4 }, (_, index) => artPath('pets', `${id}-${index + 1}`)),
   atlas: Array.from({ length: 4 }, (_, index) => artPath('sprites', `${id}-${index + 1}-atlas`)),
   // The atlas path is always here so the pipeline knows where to write; whether it may be played
@@ -243,6 +245,7 @@ const PET_LIBRARY = [
 const RELEASED_PET_IDS = new Set([
   'starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster',
   'mossback-turtle', 'leaftail-fox', 'thunderhorn-goat', 'bubble-otter', 'snowfeather-penguin', 'coral-seal',
+  'nezuko-kamado',
 ]);
 const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
 

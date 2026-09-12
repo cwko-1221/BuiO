@@ -304,9 +304,9 @@ function applyJsonEgg(studentId, { starter = false, directSpeciesId = null, rand
   let countsForPity = false;
   if (directSpeciesId) {
     species = indexes.pets.get(directSpeciesId);
-    if (!species || species.rarity === 'epic') throw Object.assign(new Error('This pet cannot be bought directly'), { status: 400 });
+    if (!species || (species.rarity === 'epic' && !species.directPrice)) throw Object.assign(new Error('This pet cannot be bought directly'), { status: 400 });
     if (owned.has(species.id)) throw Object.assign(new Error('Pet already owned'), { status: 409 });
-    price = species.rarity === 'common' ? catalog.egg.directCommonPrice : catalog.egg.directRarePrice;
+    price = species.directPrice ?? (species.rarity === 'common' ? catalog.egg.directCommonPrice : catalog.egg.directRarePrice);
   } else {
     const rarity = chooseRarity(profile.eggPity, random);
     species = chooseSpecies(rarity, owned, random);
@@ -364,9 +364,9 @@ async function applyPostgresEgg(studentId, options) {
     let species; let price = 0; let countsForPity = false;
     if (directSpeciesId) {
       species = indexes.pets.get(directSpeciesId);
-      if (!species || species.rarity === 'epic') throw Object.assign(new Error('This pet cannot be bought directly'), { status: 400 });
+      if (!species || (species.rarity === 'epic' && !species.directPrice)) throw Object.assign(new Error('This pet cannot be bought directly'), { status: 400 });
       if (owned.has(species.id)) throw Object.assign(new Error('Pet already owned'), { status: 409 });
-      price = species.rarity === 'common' ? catalog.egg.directCommonPrice : catalog.egg.directRarePrice;
+      price = species.directPrice ?? (species.rarity === 'common' ? catalog.egg.directCommonPrice : catalog.egg.directRarePrice);
     } else {
       species = chooseSpecies(chooseRarity(Number(profile.eggPity), random), owned, random);
       price = starter ? 0 : catalog.egg.randomPrice; countsForPity = catalog.egg.pityAt > 0;

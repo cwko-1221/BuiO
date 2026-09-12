@@ -5,6 +5,8 @@ export type Localized = Record<Locale, string>;
 export interface PetDefinition {
   id: string; rarity: Rarity; element: string; names: Record<Locale, string[]>;
   talent: Localized; color: string; body: string; art: string[];
+  /** Optional direct-purchase price for special catalogue pets. */
+  directPrice?: number;
   /** One sprite atlas per evolution stage. Absent until the animation pipeline has run. */
   atlas?: string[];
   /** Whether that atlas is drawn to the layout the manifest describes, and so can be played. */
