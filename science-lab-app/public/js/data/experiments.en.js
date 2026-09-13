@@ -2,7 +2,7 @@
 // this and experiments.zh.js according to the language chosen in the hub.
 // Every id, action and answer index matches the Chinese edition exactly, so the
 // renderers and the saved progress are shared between the two.
-export const TOPICS = ['Matter', 'Environment', 'Energy', 'Forces & Motion'];
+export const TOPICS = ['Matter', 'Environment', 'Energy', 'Forces & Motion', 'Human Body'];
 
 export const experiments = [
   {
@@ -315,6 +315,52 @@ export const experiments = [
       title: 'You saw air you cannot see!',
       observation: 'Warmed, the air swelled the balloon; cooled, the balloon shrank and was drawn into the neck. The hotter the water, the bigger the balloon grew.',
       explanation: 'Air expands when warmed and contracts when cooled. The amount does not change — what changes is how much room that same amount takes up. Warmer means faster particles, further apart, and more volume; colder means the opposite. The balloon makes no air of its own; it simply shows a change in volume you could not otherwise see.',
+    },
+  },
+  {
+    id: 'respiratory-system', number: 8, topic: 'Human Body', grades: 'P4–P6', minutes: 12,
+    title: 'The Breathing Machine', englishTitle: 'The Breathing Machine', color: '#ef7d8e', icon: 'lungs',
+    observe: {
+      title: 'Between one breath and the next',
+      caption: 'In the clip a child takes a deep breath in and lets it slowly out, with the camera held on their chest the whole time.',
+      notice: ['As the breath goes in, does the chest swell or shrink?', 'Which way do the ribs move?', 'What happens to all of that on the way out?'],
+      wonder: 'Air cannot walk in by itself. So what pulls it down into the lungs, and what pushes it back out?',
+    },
+    question: 'Which organs does air pass through on its way in and out of the lungs, and how does the body move it?',
+    objective: 'Name the parts of the respiratory system and what each one does, then model how the ribs, diaphragm and chest change as you breathe in and out.',
+    apparatus: ['Respiratory system board', 'Six organ name cards', 'Ribs', 'Diaphragm', 'Chest'],
+    curriculum: { items: '#31, #33', codes: ['4LS1', '5LS2'] },
+    safety: 'Working the model is perfectly safe. Real breathing should not be held for long stretches, though — take deep breaths slowly.',
+    modelNote: 'The model exaggerates how far the ribs and diaphragm travel so that you can see it; a real diaphragm drops only about 1 to 2 cm as you breathe in. The two lungs are drawn the same size here, but the left lung is really smaller, to make room for the heart.',
+    prediction: {
+      prompt: 'When you breathe in, which way does the diaphragm move?',
+      options: ['Upwards', 'Downwards', 'It does not move'],
+      answer: 1,
+    },
+    steps: [
+      { verb: 'Label', title: 'Name the parts of the system', instruction: 'Drag each of the six name cards onto the box that points to it.', cue: 'Drag a name card into the box pointing at that organ', hint: 'Follow the path of the air: where does it go first, and where next?', action: { type: 'label', subject: 'organ-labels', pairs: { 'chip-nose': 'slot-nose', 'chip-throat': 'slot-throat', 'chip-trachea': 'slot-trachea', 'chip-bronchi': 'slot-bronchi', 'chip-lungs': 'slot-lungs', 'chip-diaphragm': 'slot-diaphragm' } }, observation: 'All six parts are labelled: air travels nose to throat to trachea to bronchi to lungs.' },
+      { verb: 'Drag', title: 'Breathing in: pull the ribs outwards', instruction: 'Drag the ribs outwards to show what happens as you breathe in.', cue: 'Drag the ribs outwards, left and right', hint: 'Take a deep breath and feel your own ribs. Which way do they go?', action: { type: 'adjust', subject: 'ribs', min: 50, max: 100, unit: '', range: [-100, 100], start: 0 }, observation: 'The ribs swing outwards and the chest has more room inside it.' },
+      { verb: 'Drag', title: 'Breathing in: pull the diaphragm down', instruction: 'Drag the diaphragm downwards to show what happens as you breathe in.', cue: 'Drag the diaphragm downwards', hint: 'The diaphragm flattens when it tightens. Does flattening raise it or lower it?', action: { type: 'adjust', subject: 'diaphragm', min: 50, max: 100, unit: '', range: [-100, 100], start: 0, adjustAxis: 'vertical', invert: true }, observation: 'The diaphragm drops and flattens, opening the chest from below as well.' },
+      { verb: 'Drag', title: 'Breathing in: open the chest', instruction: 'Drag the chest outwards and let it expand.', cue: 'Drag the chest outwards', hint: 'The ribs and the diaphragm have both moved. What must the chest do?', action: { type: 'adjust', subject: 'chest', min: 50, max: 100, unit: '', range: [-100, 100], start: 0 }, observation: 'The chest is fully expanded, air runs down the trachea and the lungs fill.' },
+      { verb: 'Record', title: 'Record where the air goes', instruction: 'Which way does the air travel as you breathe in? Put it in the data table.', cue: 'Choose the direction of the air', hint: 'Watch the blue arrows on the board.', action: { type: 'record', subject: 'inhale-air', label: 'Air on the way in', unit: '', options: ['Into the lungs', 'Out of the lungs', 'It stops in the trachea'], answer: 0 }, observation: 'The breathing-in result is in the data table.' },
+      { verb: 'Drag', title: 'Breathing out: draw the ribs back in', instruction: 'Drag the ribs inwards to show what happens as you breathe out.', cue: 'Drag the ribs inwards', hint: 'The opposite way to last time.', action: { type: 'adjust', subject: 'ribs', min: -100, max: -50, unit: '', range: [-100, 100], start: 100 }, observation: 'The ribs draw back in and the chest starts to close up.' },
+      { verb: 'Drag', title: 'Breathing out: let the diaphragm rise', instruction: 'Drag the diaphragm upwards to show what happens as you breathe out.', cue: 'Drag the diaphragm upwards', hint: 'A relaxed diaphragm domes back up.', action: { type: 'adjust', subject: 'diaphragm', min: -100, max: -50, unit: '', range: [-100, 100], start: 100, adjustAxis: 'vertical', invert: true }, observation: 'The diaphragm relaxes and domes back up into the chest.' },
+      { verb: 'Drag', title: 'Breathing out: close the chest', instruction: 'Drag the chest inwards and let it shrink back.', cue: 'Drag the chest inwards', hint: 'With less room inside, where can the air in the lungs go?', action: { type: 'adjust', subject: 'chest', min: -100, max: -50, unit: '', range: [-100, 100], start: 100 }, observation: 'The chest closes, and the air in the lungs is squeezed out through the bronchi and trachea.' },
+      { verb: 'Record', title: 'Record where the air goes', instruction: 'Which way does the air travel as you breathe out? Put it in the data table.', cue: 'Choose the direction of the air', hint: 'The arrows have turned around.', action: { type: 'record', subject: 'exhale-air', label: 'Air on the way out', unit: '', options: ['Into the lungs', 'Out of the lungs', 'It stops in the trachea'], answer: 1 }, observation: 'The breathing-out result is in the table, ready to compare with the breath in.' },
+    ],
+    analysis: {
+      evidence: 'With the six cards in place, the path of the air reads nose to throat to trachea to bronchi to lungs. Breathing in, the ribs go out, the diaphragm goes down and the chest expands, and air enters the lungs. Breathing out, all three reverse and the air leaves.',
+      reflection: {
+        prompt: 'The lungs have no muscle of their own and cannot pull. So what actually moves the air into them?',
+        options: ['The lungs suck the air in themselves', 'The chest grows, the pressure inside the lungs drops, and outside air is pushed in', 'The diaphragm pumps the air upwards'],
+        answer: 1,
+        because: 'When the ribs swing out and the diaphragm drops, the chest has more room in it. The lungs stretch open with it and the pressure inside them falls below the pressure outside. Higher pressure pushes towards lower pressure, so outside air is driven down the nose, throat, trachea and bronchi into the lungs. Breathing out, the chest closes, the pressure inside rises, and the air is squeezed back out. Breathing is the work of the ribs and the diaphragm, not of the lungs.',
+      },
+    },
+    result: {
+      title: 'You are your own breathing machine!',
+      observation: 'Air travels through the nose, throat, trachea and bronchi on its way in and out of the lungs. Breathing in, the ribs go out, the diaphragm goes down and the chest expands; breathing out, all three reverse.',
+      explanation: 'The respiratory system is the nose, throat, trachea, bronchi and lungs. The diaphragm separates the chest from the abdomen and works with the ribs to drive every breath. Breathing in, the ribs lift and swing out while the diaphragm tightens and drops: the chest grows, the pressure in it falls, and the atmosphere pushes air into the lungs. Breathing out, the ribs drop back in and the diaphragm relaxes upwards: the chest shrinks, the pressure rises, and the air is pushed back out. The lungs pass oxygen into the blood and carry carbon dioxide away from it.',
     },
   },
 ];

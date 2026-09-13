@@ -13,19 +13,19 @@ const distRoot = path.join(root, 'science-lab-app', 'dist');
 
 assert.deepEqual(
   experiments.map((item) => item.id),
-  ['density-column', 'water-filter', 'electric-crane', 'light-reflection', 'heat-conduction', 'force-coaster', 'air-expansion'],
-  'the focused release exposes exactly the seven selected investigations in order',
+  ['density-column', 'water-filter', 'electric-crane', 'light-reflection', 'heat-conduction', 'force-coaster', 'air-expansion', 'respiratory-system'],
+  'the focused release exposes exactly the eight selected investigations in order',
 );
-assert.deepEqual(experiments.map((item) => item.number), [1, 2, 3, 4, 5, 6, 7], 'visible experiment numbers are contiguous');
+assert.deepEqual(experiments.map((item) => item.number), [1, 2, 3, 4, 5, 6, 7, 8], 'visible experiment numbers are contiguous');
 for (const removedId of ['lab-safety', 'transmission', 'root-viewer', 'food-web', 'eco-house', 'light-lab', 'sound-vacuum', 'earth-moon-sun']) {
   assert.equal(experimentById.has(removedId), false, `${removedId}: removed investigation has no route entry`);
 }
-assert.equal(getNextExperiment('air-expansion')?.id, 'density-column', 'next-station flow wraps from the last station to the first');
+assert.equal(getNextExperiment('respiratory-system')?.id, 'density-column', 'next-station flow wraps from the last station to the first');
 assert.equal(getNextExperiment('sound-vacuum'), null, 'unknown legacy route cannot silently enter another experiment');
 assert.equal(new Set(experiments.map((item) => item.id)).size, experiments.length, 'experiment ids are unique');
 assert.deepEqual(
   new Set(experiments.map((item) => item.topic)),
-  new Set(['環境', '物質', '能量', '力與運動']),
+  new Set(['環境', '物質', '能量', '力與運動', '人體']),
   'all retained science areas are represented',
 );
 
@@ -77,6 +77,24 @@ for (const experiment of experiments) {
     const action = { type: expected.type, subject: expected.subject, target: expected.target };
     if (expected.type === 'adjust') action.value = (expected.min + expected.max) / 2;
     if (expected.type === 'stir') action.amount = expected.amount;
+    if (expected.type === 'label') {
+      assert.ok(expected.pairs && Object.keys(expected.pairs).length >= 2,
+        `${experiment.id}: ${expected.subject} pairs every card with a box`);
+      assert.equal(new Set(Object.values(expected.pairs)).size, Object.keys(expected.pairs).length,
+        `${experiment.id}: ${expected.subject} gives each card a box of its own`);
+      // A board that is only partly filled in must not pass.
+      const [firstCard] = Object.keys(expected.pairs);
+      const partial = { ...expected.pairs };
+      delete partial[firstCard];
+      assert.equal(simulation.dispatchAction({ type: 'label', subject: expected.subject, pairs: partial }).accepted, false,
+        `${experiment.id}: an unfinished board is rejected`);
+      // So must a board where two cards are swapped.
+      const cards = Object.keys(expected.pairs);
+      const swapped = { ...expected.pairs, [cards[0]]: expected.pairs[cards[1]], [cards[1]]: expected.pairs[cards[0]] };
+      assert.equal(simulation.dispatchAction({ type: 'label', subject: expected.subject, pairs: swapped }).accepted, false,
+        `${experiment.id}: cards in the wrong boxes are rejected`);
+      action.pairs = { ...expected.pairs };
+    }
     if (expected.type === 'record') {
       assert.ok(expected.label && Array.isArray(expected.options) && expected.options.length >= 2,
         `${experiment.id}: ${expected.subject} records a labelled reading`);
@@ -121,7 +139,7 @@ for (const id of ['labCanvas', 'accessibleActionButton', 'soundToggle', 'motionT
   assert.match(indexSource, new RegExp(`id="${id}"`), `accessible UI includes #${id}`);
 }
 assert.doesNotMatch(indexSource, /(?:src|href)=["']https?:\/\//, 'student shell has no third-party runtime assets');
-assert.match(indexSource, /id="progressCount">0 \/ 7</, 'pre-boot progress count matches the focused release');
+assert.match(indexSource, /id="progressCount">0 \/ 8</, 'pre-boot progress count matches the focused release');
 for (const removedArea of ['地球與太空', '生命與健康']) {
   assert.equal(indexSource.includes(removedArea), false, `catalog has no empty filter for ${removedArea}`);
 }
@@ -151,6 +169,7 @@ const sceneFiles = [
   path.join(sourceRoot, 'js', 'render', 'ExperimentScenes.js'),
   path.join(sourceRoot, 'js', 'render', 'scenes', 'MatterForceScenes.js'),
   path.join(sourceRoot, 'js', 'render', 'scenes', 'EnergyScenes.js'),
+  path.join(sourceRoot, 'js', 'render', 'scenes', 'BodyScenes.js'),
 ];
 const sceneSource = (await Promise.all(sceneFiles.map((file) => readFile(file, 'utf8')))).join('\n');
 for (const experiment of experiments) {

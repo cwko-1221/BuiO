@@ -1,6 +1,6 @@
 // The Chinese edition of the inquiry content. experiments.js picks between
 // this and experiments.en.js according to the language chosen in the hub.
-export const TOPICS = ['物質', '環境', '能量', '力與運動'];
+export const TOPICS = ['物質', '環境', '能量', '力與運動', '人體'];
 
 export const experiments = [
   {
@@ -312,6 +312,52 @@ export const experiments = [
       title: '你看見了看不見的空氣！',
       observation: '空氣受熱時氣球脹大，遇冷時氣球縮小並被吸進樽口；水溫愈高，氣球脹得愈大。',
       explanation: '空氣受熱會膨脹，遇冷會收縮。分量不變，改變的是同樣分量的空氣所佔的空間：溫度升高，粒子運動加快、間距變大，體積就變大；溫度降低則相反。氣球本身不會製造空氣，它只是把看不見的體積變化顯示出來。',
+    },
+  },
+  {
+    id: 'respiratory-system', number: 8, topic: '人體', grades: '小四至小六', minutes: 12,
+    title: '呼吸系統', englishTitle: 'The Breathing Machine', color: '#ef7d8e', icon: 'lungs',
+    observe: {
+      title: '一呼一吸之間',
+      caption: '影片裡一個小朋友深深吸一口氣，再慢慢呼出來，鏡頭一直照著他的胸口。',
+      notice: ['吸氣時，胸口是脹起還是縮小？', '肋骨向哪個方向移動？', '呼氣的時候，這些變化又是怎樣？'],
+      wonder: '空氣自己不會走路，是甚麼把它吸進肺裏，又把它推回體外？',
+    },
+    question: '空氣經過哪些器官進出肺部？身體又是怎樣把空氣吸進和呼出的？',
+    objective: '認出呼吸系統各器官的位置和功能，並模擬肋骨、橫膈膜和胸腔在吸氣和呼氣時的變化。',
+    apparatus: ['呼吸系統模型板', '六個器官名牌', '肋骨', '橫膈膜', '胸腔'],
+    curriculum: { items: '#31、#33', codes: ['4LS1', '5LS2'] },
+    safety: '這是模型操作，沒有危險。不過真實的呼吸不該長時間憋住，做深呼吸時慢慢來就可以。',
+    modelNote: '模型把肋骨和橫膈膜的移動放大了，方便觀察；真實的橫膈膜吸氣時只下降約 1 至 2 厘米。模型也把左右肺畫成一樣大，其實左肺較小，要讓位給心臟。',
+    prediction: {
+      prompt: '吸氣的時候，橫膈膜會怎樣移動？',
+      options: ['向上升', '向下降', '不會移動'],
+      answer: 1,
+    },
+    steps: [
+      { verb: '標示', title: '認出呼吸系統的器官', instruction: '把上面六個器官名牌，拖到模型板上對應的框裏。', cue: '拖動名牌到指著器官的框', hint: '順著空氣的路線想：空氣先經過哪裏，再到哪裏？', action: { type: 'label', subject: 'organ-labels', pairs: { 'chip-nose': 'slot-nose', 'chip-throat': 'slot-throat', 'chip-trachea': 'slot-trachea', 'chip-bronchi': 'slot-bronchi', 'chip-lungs': 'slot-lungs', 'chip-diaphragm': 'slot-diaphragm' } }, observation: '六個器官都標示好了：空氣沿鼻、喉、氣管、支氣管進入肺部。' },
+      { verb: '拖動', title: '吸氣：把肋骨拉向外', instruction: '向外拖動肋骨，做出吸氣時的樣子。', cue: '向外（左右）拖動肋骨', hint: '深呼吸時摸摸自己的肋骨，它向哪邊走？', action: { type: 'adjust', subject: 'ribs', min: 50, max: 100, unit: '', range: [-100, 100], start: 0 }, observation: '肋骨向外張開，胸腔的空間變大了。' },
+      { verb: '拖動', title: '吸氣：把橫膈膜拉向下', instruction: '向下拖動橫膈膜，做出吸氣時的樣子。', cue: '向下拖動橫膈膜', hint: '橫膈膜收縮時會變平，是升高還是降低？', action: { type: 'adjust', subject: 'diaphragm', min: 50, max: 100, unit: '', range: [-100, 100], start: 0, adjustAxis: 'vertical', invert: true }, observation: '橫膈膜下降變平，胸腔由下方再加大。' },
+      { verb: '拖動', title: '吸氣：把胸腔撐開', instruction: '向外拖動胸腔，讓它脹起來。', cue: '向外拖動胸腔', hint: '肋骨和橫膈膜都動了，胸腔會怎樣？', action: { type: 'adjust', subject: 'chest', min: 50, max: 100, unit: '', range: [-100, 100], start: 0 }, observation: '胸腔完全擴大，空氣沿氣管流進肺部，肺脹起來了。' },
+      { verb: '記錄', title: '記下吸氣時空氣的去向', instruction: '吸氣時空氣往哪裏走？記進數據表。', cue: '選出空氣的方向', hint: '看模型板上的藍色箭嘴。', action: { type: 'record', subject: 'inhale-air', label: '吸氣時的空氣', unit: '', options: ['進入肺部', '離開肺部', '停在氣管'], answer: 0 }, observation: '吸氣的結果已記入數據表。' },
+      { verb: '拖動', title: '呼氣：把肋骨收回內', instruction: '向內拖動肋骨，做出呼氣時的樣子。', cue: '向內拖動肋骨', hint: '和剛才相反的方向。', action: { type: 'adjust', subject: 'ribs', min: -100, max: -50, unit: '', range: [-100, 100], start: 100 }, observation: '肋骨向內收回，胸腔開始變小。' },
+      { verb: '拖動', title: '呼氣：讓橫膈膜升上去', instruction: '向上拖動橫膈膜，做出呼氣時的樣子。', cue: '向上拖動橫膈膜', hint: '橫膈膜放鬆時會向上拱起。', action: { type: 'adjust', subject: 'diaphragm', min: -100, max: -50, unit: '', range: [-100, 100], start: 100, adjustAxis: 'vertical', invert: true }, observation: '橫膈膜放鬆上升，拱回圓頂的形狀。' },
+      { verb: '拖動', title: '呼氣：把胸腔收小', instruction: '向內拖動胸腔，讓它縮回去。', cue: '向內拖動胸腔', hint: '胸腔變小時，肺裏的空氣有甚麼出路？', action: { type: 'adjust', subject: 'chest', min: -100, max: -50, unit: '', range: [-100, 100], start: 100 }, observation: '胸腔縮小，肺裏的空氣沿支氣管和氣管被擠出去。' },
+      { verb: '記錄', title: '記下呼氣時空氣的去向', instruction: '呼氣時空氣往哪裏走？記進數據表。', cue: '選出空氣的方向', hint: '箭嘴的方向調轉了。', action: { type: 'record', subject: 'exhale-air', label: '呼氣時的空氣', unit: '', options: ['進入肺部', '離開肺部', '停在氣管'], answer: 1 }, observation: '呼氣的結果已記入數據表，可以比較一呼一吸了。' },
+    ],
+    analysis: {
+      evidence: '六個名牌放對後，空氣的路線是鼻→喉→氣管→支氣管→肺。吸氣時肋骨向外、橫膈膜向下、胸腔擴大，空氣進入肺部；呼氣時三者全部相反，空氣離開肺部。',
+      reflection: {
+        prompt: '肺本身沒有肌肉，不能自己用力。那吸氣時，是甚麼把空氣送進肺裏？',
+        options: ['肺主動把空氣吸進來', '胸腔變大令肺內氣壓下降，外面的空氣被推進來', '橫膈膜像泵一樣把空氣壓上去'],
+        answer: 1,
+        because: '肋骨向外、橫膈膜向下時，胸腔的空間變大，肺跟著脹開，肺內的氣壓變得比體外低。高壓推向低壓，外面的空氣就沿鼻、喉、氣管、支氣管被推進肺裏。呼氣時胸腔縮小、肺內氣壓升高，空氣就被擠回體外。所以呼吸靠的是肋骨和橫膈膜，不是肺自己出力。',
+      },
+    },
+    result: {
+      title: '你自己就是一部呼吸機器！',
+      observation: '空氣經鼻、喉、氣管、支氣管進出肺部。吸氣時肋骨向外、橫膈膜向下、胸腔擴大；呼氣時三者相反。',
+      explanation: '呼吸系統由鼻、喉、氣管、支氣管和肺組成。橫膈膜把胸腔和腹腔分開，並和肋骨一起帶動呼吸。吸氣時肋骨上提向外、橫膈膜收縮下降，胸腔變大、氣壓下降，空氣被大氣壓推進肺；呼氣時肋骨下降向內、橫膈膜放鬆上升，胸腔縮小、氣壓上升，空氣被推出體外。肺把氧氣送進血液，同時帶走二氧化碳。',
     },
   },
 ];

@@ -6,6 +6,7 @@ const drawings = {
   filter: `<g ${common}><path fill="#c9eff2" opacity=".75" d="M15 11h50L47 44v23H33V44z"/><path fill="#817568" d="M20 19h40l-6 9H26z"/><path fill="#e6c37a" d="M26 28h28l-6 10H32z"/><path fill="#fff" d="M32 38h16v7H32z"/><path fill="#58bce5" d="M33 52h14v15H33z"/></g>`,
   circuit: `<g ${common}><path fill="#ff8268" d="M10 25h20v31H10z"/><path fill="#384c59" d="M10 25h10v31H10z"/><path d="M20 20v5M44 56v-8c0-12 18-12 18 0v8"/><path fill="#fff7b0" d="M42 30c0-15 22-15 22 0 0 6-5 8-5 14H47c0-6-5-8-5-14z"/><path d="M30 40h12M64 40h6v23H20v-7"/></g>`,
   ramp: `<g ${common}><path fill="#d5a05f" d="M10 58h60v10H10z"/><path fill="#ffd660" d="m10 52 46-30 5 8-46 30z"/><path fill="#58a8ff" d="M27 32h18v10H27z"/><circle fill="#123b45" cx="31" cy="44" r="4"/><circle fill="#123b45" cx="42" cy="37" r="4"/><path d="M12 22a20 20 0 0 1 20-12"/></g>`,
+  lungs: `<g ${common}><path fill="#e0879a" d="M38 10h4v18h-4z"/><path fill="#f6c2cb" d="M34 14h12M34 19h12M34 24h12"/><path fill="#ef92a4" d="M38 28c0 6-4 8-9 10-6 2-10 7-10 14 0 8 4 14 10 14 5 0 9-4 9-11z"/><path fill="#ef92a4" d="M42 28c0 6 4 8 9 10 6 2 10 7 10 14 0 8-4 14-10 14-5 0-9-4-9-11z"/><path fill="#d9718a" opacity=".55" d="M29 44c3 4 5 9 5 15M51 44c-3 4-5 9-5 15"/></g>`,
   balloon: `<g ${common}><path fill="#f2705c" d="M40 8c11 0 17 9 17 18s-8 17-17 17-17-8-17-17S29 8 40 8z"/><path fill="#ffd6cd" opacity=".8" d="M33 16c2-4 6-5 8-4"/><path fill="#e4614f" d="M36 43h8v6h-8z"/><path fill="#d9f2f5" opacity=".8" d="M33 49h14l-2 6h6v17H29V55h6z"/><path d="M35 55h10"/></g>`,
 };
 

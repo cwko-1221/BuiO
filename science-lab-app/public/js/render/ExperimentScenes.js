@@ -4,6 +4,7 @@ import {
   buildForces,
   buildAirExpansion,
 } from './scenes/MatterForceScenes.js';
+import { buildRespiratory } from './scenes/BodyScenes.js';
 import {
   buildElectric,
   buildReflection,
@@ -18,6 +19,7 @@ const builders = Object.freeze({
   'light-reflection': buildReflection,
   'heat-conduction': buildConduction,
   'force-coaster': buildForces,
+  'respiratory-system': buildRespiratory,
 });
 
 export function buildExperimentScene(definition, api) {

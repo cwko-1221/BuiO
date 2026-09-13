@@ -18,6 +18,9 @@ const DEFAULT_TARGET = new THREE.Vector3(0, .9, 0);
 const CAMERA_PRESETS = {
   'density-column': { position: [-.15, 7.55, 11.8], target: [.2, 1.2, .05] },
   'air-expansion': { position: [0, 5.35, 9.7], target: [0, 1.35, -.15] },
+  // The breathing board stands upright, so this station is viewed head-on
+  // rather than down onto a bench top.
+  'respiratory-system': { position: [0, 3.15, 12.1], target: [0, 2.8, .2] },
   'water-filter': { position: [-.1, 7.55, 11.9], target: [.35, 1.3, .05] },
   'electric-crane': { position: [-.3, 7.35, 12.2], target: [.25, 1.25, 0] },
   'light-reflection': { position: [-.1, 7.15, 11.4], target: [.35, 1.7, .05] },
@@ -30,6 +33,8 @@ export class LabRenderer {
 
   namePlates = new Map();
 
+  labelPlacements = new Map();
+
   constructor(canvas, { settings, audio, onAction, onPreview, onHover, onContextIssue } = {}) {
     this.canvas = canvas;
     this.settings = settings;
@@ -37,7 +42,7 @@ export class LabRenderer {
     this.actionHandler = onAction;
     this.previewHandler = onPreview;
     this.hoverHandler = onHover;
-    this.contextIssueHandler = onContextIssue;
+    this.contextIssueHandler = onContextIssue ? (message) => onContextIssue(sceneLabel(message)) : null;
     this.entities = new Map();
     this.targets = new Map();
     this.pickables = [];
@@ -228,6 +233,7 @@ export class LabRenderer {
     this.experimentRoot.position.y = .05;
     this.world.add(this.experimentRoot);
     const api = this.#createSceneApi();
+    this.labelPlacements = new Map();
     this.namePlateQueue = [];
     this.namePlates = new Map();
     this.sceneController = buildExperimentScene(definition, api);
@@ -406,6 +412,12 @@ export class LabRenderer {
       const target = this.targets.get(step.action.target);
       if (target?.indicator) target.indicator.visible = true;
     }
+    if (step?.action.type === 'label') {
+      for (const slotId of new Set(Object.values(step.action.pairs || {}))) {
+        const target = this.targets.get(slotId);
+        if (target?.indicator && !this.#slotIsTaken(slotId)) target.indicator.visible = true;
+      }
+    }
     this.#updateSelectionHelper();
     this.#highlightNamePlates();
   }
@@ -428,6 +440,11 @@ export class LabRenderer {
   }
 
   applyAcceptedAction(action) {
+    // Replaying a finished board from saved history has to put the cards back
+    // in their boxes before the scene is told the step was completed.
+    if (action.type === 'label' && action.pairs) {
+      for (const [cardId, slotId] of Object.entries(action.pairs)) this.#seatLabelCard(cardId, slotId, true);
+    }
     this.customAction?.(action);
     const sound = action.type === 'connect' ? 'connect' : action.type === 'pour' ? 'pour' : action.type === 'strike' ? 'impact' : action.type === 'tap' ? 'switch' : action.type === 'stir' ? 'stir' : action.type === 'adjust' ? 'measure' : 'drop';
     if (!this.instant) this.audio?.play(sound);
@@ -449,6 +466,7 @@ export class LabRenderer {
     if (performance.now() < this.inputLockedUntil) return false;
     const expected = this.currentStep?.action;
     if (!expected) return false;
+    if (expected.type === 'label') return this.#fillLabelBoard(expected);
     const action = { type: expected.type, subject: expected.subject, target: expected.target };
     if (expected.type === 'adjust') {
       action.value = (expected.min + expected.max) / 2;
@@ -522,6 +540,8 @@ export class LabRenderer {
     this.controls.enabled = false;
     const entity = this.entities.get(id);
     const startValue = this.#variableStart(expected);
+    const labelPairs = expected.type === 'label' ? (expected.pairs || {}) : null;
+    const labelCard = Boolean(labelPairs && Object.hasOwn(labelPairs, id) && !this.labelPlacements.has(id));
     const startWorldPosition = entity.object.getWorldPosition(new THREE.Vector3());
     const expectedTarget = expected.target ? this.targets.get(expected.target) : null;
     let startTargetScreenDistance = null;
@@ -545,10 +565,22 @@ export class LabRenderer {
       amount: 0,
       lastAngle: null,
       moved: false,
-      wrong: id !== expected.subject,
+      wrong: labelPairs ? !labelCard : id !== expected.subject,
+      labelCard,
       physics: false,
       startTargetScreenDistance,
     };
+    if (labelCard) {
+      // Cards ride in the plane of the board, so the carry plane is the one
+      // facing the camera through the card's own resting position.
+      this.dragPlane.setFromNormalAndCoplanarPoint(
+        this.camera.getWorldDirection(new THREE.Vector3()).negate(),
+        startWorldPosition,
+      );
+      entity.object.scale.multiplyScalar(1.08);
+      entity.object.renderOrder = 20;
+      this.audio?.play('pickup');
+    }
     if (id === expected.subject && ['place','pour','strike'].includes(expected.type)) {
       const pickupHeight = Math.max(.32, startWorldPosition.y + .38);
       this.dragPlane.constant = -pickupHeight;
@@ -586,7 +618,12 @@ export class LabRenderer {
       const dy = event.clientY - state.startY;
       state.moved ||= Math.hypot(dx, dy) > 5;
       if (state.wrong) return;
-      if (['place','pour','strike'].includes(expected.type)) {
+      if (state.labelCard) {
+        this.#rayToPlane(event, this.dragPlane, this.dragPoint);
+        state.entity.object.parent.worldToLocal(this.dragPoint);
+        state.entity.object.position.copy(this.dragPoint);
+        this.#highlightLabelSlot(this.#nearestLabelSlot(expected, event)?.id || null);
+      } else if (['place','pour','strike'].includes(expected.type)) {
         this.#rayToPlane(event, this.dragPlane, this.dragPoint);
         this.dragPoint.x = THREE.MathUtils.clamp(this.dragPoint.x, -5.2, 5.2);
         this.dragPoint.z = THREE.MathUtils.clamp(this.dragPoint.z, -2.6, 2.7);
@@ -693,7 +730,8 @@ export class LabRenderer {
         const range = expected.range || [0, 100];
         const low = Math.min(...range), high = Math.max(...range);
         const direction = expected.invert ? -1 : 1;
-        const travel = state.entity.options.adjustAxis === 'vertical' ? -dy : dx;
+        const axis = expected.adjustAxis || state.entity.options.adjustAxis;
+        const travel = axis === 'vertical' ? -dy : dx;
         const value = THREE.MathUtils.clamp(state.startValue + direction * travel / 320 * (high - low), low, high);
         this.currentVariable = value;
         this.previewVariable(expected.subject, value);
@@ -738,6 +776,10 @@ export class LabRenderer {
       this.physics?.release(state.id);
     }
 
+    if (state.labelCard) {
+      this.#dropLabelCard(state, expected, event);
+      return;
+    }
     if (state.wrong) {
       this.#requestAction({ type: expected.type, subject: state.id, target: null });
       return;
@@ -761,6 +803,104 @@ export class LabRenderer {
     if (['place','pour','strike'].includes(expected.type)) state.entity.object.scale.copy(state.entity.home.scale);
     const result = this.#requestAction(action);
     this.lastInteraction = { phase: 'pointerup', expected: expected.subject, hit: state.id, action, result, at: performance.now() };
+  }
+
+  /**
+   * A labelling step is a puzzle rather than a guided drag: any unplaced card
+   * may go to any box, and only a full, correct board completes the step.
+   */
+  #nearestLabelSlot(expected, event) {
+    const rect = this.canvas.getBoundingClientRect();
+    const reach = Math.max(64, rect.width * .07);
+    let best = null;
+    for (const slotId of new Set(Object.values(expected.pairs || {}))) {
+      if (this.#slotIsTaken(slotId)) continue;
+      const target = this.targets.get(slotId);
+      if (!target) continue;
+      const projected = target.object.getWorldPosition(new THREE.Vector3()).project(this.camera);
+      const x = rect.left + (projected.x + 1) * .5 * rect.width;
+      const y = rect.top + (-projected.y + 1) * .5 * rect.height;
+      const distance = Math.hypot(event.clientX - x, event.clientY - y);
+      if (distance <= reach && (!best || distance < best.distance)) best = { id: slotId, distance };
+    }
+    return best;
+  }
+
+  #slotIsTaken(slotId) {
+    for (const taken of this.labelPlacements.values()) if (taken === slotId) return true;
+    return false;
+  }
+
+  #highlightLabelSlot(slotId) {
+    for (const [id, target] of this.targets) {
+      if (!target.indicator || !target.options.labelSlot) continue;
+      const on = id === slotId;
+      target.indicator.scale.setScalar(on ? 1.08 : 1);
+      const mesh = target.indicator.userData.ring;
+      if (mesh?.material) mesh.material.opacity = on ? 1 : .72;
+    }
+  }
+
+  #dropLabelCard(state, expected, event) {
+    state.entity.object.scale.copy(state.entity.home.scale);
+    state.entity.object.renderOrder = 0;
+    const slot = this.#nearestLabelSlot(expected, event);
+    const wanted = expected.pairs[state.id];
+    this.#highlightLabelSlot(null);
+    if (!slot) {
+      // Dropped on open board: no answer was given, so nothing is judged.
+      this.#returnHome(state.entity);
+      return;
+    }
+    if (slot.id !== wanted) {
+      this.#returnHome(state.entity);
+      this.contextIssueHandler?.('這個名牌不是指著那個器官，再看看框旁邊的線。');
+      // A wrong box is a real attempt, so it is dispatched and rejected.
+      this.#requestAction({ type: 'label', subject: expected.subject, pairs: this.#labelPairs(state.id, slot.id) });
+      return;
+    }
+    this.#seatLabelCard(state.id, slot.id, false);
+    if (this.labelPlacements.size < Object.keys(expected.pairs).length) {
+      this.#emitLabelProgress(expected);
+      return;
+    }
+    this.#requestAction({ type: 'label', subject: expected.subject, pairs: this.#labelPairs() });
+  }
+
+  #labelPairs(extraCard = null, extraSlot = null) {
+    const pairs = Object.fromEntries(this.labelPlacements);
+    if (extraCard) pairs[extraCard] = extraSlot;
+    return pairs;
+  }
+
+  #emitLabelProgress(expected) {
+    this.audio?.play('connect');
+    this.customAction?.({ type: 'label-progress', subject: expected.subject, pairs: this.#labelPairs() });
+  }
+
+  /** Seat a card in its box, either dropped by hand or replayed from history. */
+  #seatLabelCard(cardId, slotId, instant) {
+    const entity = this.entities.get(cardId);
+    const target = this.targets.get(slotId);
+    if (!entity || !target) return;
+    this.labelPlacements.set(cardId, slotId);
+    const seat = entity.object.parent.worldToLocal(target.object.getWorldPosition(new THREE.Vector3()));
+    seat.z += .045;
+    if (instant || this.instant) entity.object.position.copy(seat);
+    else this.moveObject(entity.object, seat, { duration: .26, keepPhysics: true });
+    entity.object.scale.copy(entity.home.scale);
+    entity.options.pickable = false;
+    const seated = new Set();
+    entity.object.traverse((child) => { if (child.isMesh) seated.add(child); });
+    this.pickables = this.pickables.filter((child) => !seated.has(child));
+    if (target.indicator) target.indicator.visible = false;
+  }
+
+  #fillLabelBoard(expected) {
+    for (const [cardId, slotId] of Object.entries(expected.pairs || {})) {
+      if (!this.labelPlacements.has(cardId)) this.#seatLabelCard(cardId, slotId, true);
+    }
+    return this.#requestAction({ type: 'label', subject: expected.subject, pairs: this.#labelPairs() }).accepted;
   }
 
   #pick(event) {

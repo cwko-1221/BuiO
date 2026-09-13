@@ -148,6 +148,16 @@ export class LabSimulation extends EventTarget {
       }
       if (choice !== expected.answer) return { accepted: false, reason: 'record-mismatch' };
     }
+    if (expected.type === 'label') {
+      // A labelling step is answered as a whole: every card has to be sitting
+      // in the box that belongs to it before the step counts as done, so a
+      // partly filled board is a rejection rather than a pass.
+      const placed = action.pairs;
+      if (!placed || typeof placed !== 'object') return { accepted: false, reason: 'label-missing' };
+      for (const [card, slot] of Object.entries(expected.pairs || {})) {
+        if (placed[card] !== slot) return { accepted: false, reason: 'label-mismatch' };
+      }
+    }
     if (expected.type === 'stir') {
       const amount = Number(action.amount);
       if (!Number.isFinite(amount) || amount < expected.amount) return { accepted: false, reason: 'stir-more' };
@@ -177,6 +187,11 @@ export class LabSimulation extends EventTarget {
       target: String(action.target || ''),
       ...(Number.isFinite(Number(action.value)) ? { value: Number(action.value) } : {}),
       ...(Number.isFinite(Number(action.amount)) ? { amount: Number(action.amount) } : {}),
+      ...(action.pairs && typeof action.pairs === 'object' ? {
+        pairs: Object.fromEntries(Object.entries(action.pairs)
+          .filter(([card, slot]) => typeof card === 'string' && typeof slot === 'string')
+          .map(([card, slot]) => [String(card), String(slot)])),
+      } : {}),
       ...(action.evidence && typeof action.evidence === 'object' ? {
         evidence: Object.fromEntries(Object.entries(action.evidence)
           .filter(([, value]) => typeof value === 'boolean' || Number.isFinite(Number(value)))

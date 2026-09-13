@@ -214,6 +214,52 @@ async function seekPhysicalContact(page, subject, target, centre) {
   return { found: false, point: centre, probes };
 }
 
+/** Carry one name card from the word bank into a box on the board. */
+async function dragCard(page, cardId, slotId) {
+  const to = await projectedPoint(page, slotId, true);
+  const from = await projectedPoint(page, cardId, false);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await movePointer(page, from, to, 16);
+  await page.mouse.up();
+  await page.waitForTimeout(240);
+}
+
+/**
+ * Fill in the board the way a pupil does: every card carried by hand into its
+ * own box. Only the full, correct board completes the step.
+ */
+async function labelGesture(page, action) {
+  for (const [cardId, slotId] of Object.entries(action.pairs)) {
+    await dragCard(page, cardId, slotId);
+  }
+  return { contact: true };
+}
+
+/**
+ * Before the golden run, prove the puzzle actually judges: a card dropped in
+ * somebody else's box is refused and comes back to the rack, so the board
+ * cannot be completed by dropping cards anywhere.
+ */
+async function labelRejectionProbe(page, definition, action) {
+  const pairs = Object.entries(action.pairs);
+  const [cardId] = pairs[0];
+  const wrongSlot = pairs[pairs.length - 1][1];
+  const home = await projectedPoint(page, cardId, false);
+  const before = await page.evaluate(() => window.__scienceLabTest.getState());
+  await dragCard(page, cardId, wrongSlot);
+  await page.waitForTimeout(520);
+  const after = await page.evaluate(() => window.__scienceLabTest.getState());
+  assert.equal(after.attempts, before.attempts + 1,
+    `${definition.id}: a card dropped in the wrong box counts as a refused attempt`);
+  assert.equal(after.currentStep, before.currentStep,
+    `${definition.id}: a wrong card cannot advance the labelling step`);
+  const back = await projectedPoint(page, cardId, false);
+  const drift = Math.hypot(back.x - home.x, back.y - home.y);
+  assert.ok(drift < 12,
+    `${definition.id}: a refused card returns to the word bank (drifted ${drift.toFixed(1)} px)`);
+}
+
 async function dragGesture(page, subject, target, { strike = false, physicalContact = false } = {}) {
   // Resolve the stationary receiver first. Animated entities (notably the
   // pond fish) are then picked immediately before pointerdown so their screen
@@ -314,7 +360,7 @@ async function adjustGesture(page, action, state) {
   assert.ok(Number.isFinite(target) && high > low, `invalid adjust range for ${action.subject}`);
   const direction = action.invert ? -1 : 1;
   const travel = (target - start) / (direction * (high - low)) * 320;
-  const vertical = action.subject === 'orbit-tilt';
+  const vertical = action.adjustAxis === 'vertical' || action.subject === 'orbit-tilt';
   const to = vertical
     ? { x: from.x, y: from.y - travel }
     : { x: from.x + travel, y: from.y };
@@ -355,6 +401,7 @@ async function waitForProgress(page, definition, stepIndex, action, gestureEvide
 async function performStep(page, definition, stepIndex, gestureCounts) {
   const step = definition.steps[stepIndex];
   const action = step.action;
+  if (action.type === 'label') await labelRejectionProbe(page, definition, action);
   const before = await page.evaluate(() => window.__scienceLabTest.getState());
   assert.equal(before.currentStep, stepIndex, `${definition.id}: runner and simulation step stay in sync`);
   const attemptsBefore = before.attempts;
@@ -383,6 +430,8 @@ async function performStep(page, definition, stepIndex, gestureCounts) {
     gestureEvidence = await stirGesture(page, action.subject, action.amount);
   } else if (action.type === 'adjust') {
     gestureEvidence = await adjustGesture(page, action, before);
+  } else if (action.type === 'label') {
+    gestureEvidence = await labelGesture(page, action);
   } else {
     throw new Error(`${definition.id}: unsupported physical action type ${action.type}`);
   }
@@ -954,8 +1003,14 @@ try {
       assert.equal(state.currentStep, definition.steps.length, `${definition.id}: every step was traversed`);
       assert.equal(state.actionHistory.filter((entry) => entry.accepted).length, definition.steps.length,
         `${definition.id}: one accepted physical gesture exists for every step`);
-      assert.equal(state.actionHistory.some((entry) => !entry.accepted), false,
-        `${definition.id}: physical golden path contains no rejected shortcut attempts`);
+      const refusals = state.actionHistory.filter((entry) => !entry.accepted);
+      const probedLabels = definition.steps.filter((step) => step.action.type === 'label').length;
+      assert.equal(refusals.length, probedLabels,
+        `${definition.id}: physical golden path contains no rejected shortcut attempts beyond the ${probedLabels} deliberate labelling probe(s)`);
+      for (const refusal of refusals) {
+        assert.equal(refusal.action.type, 'label',
+          `${definition.id}: the only refused gesture is the deliberate wrong-box probe`);
+      }
       const screenshotPath = path.join(evidenceDirectory, `${String(definition.number).padStart(2, '0')}-${definition.id}-complete.png`);
       await page.screenshot({ path: screenshotPath, fullPage: true });
       semanticSamples[definition.id] = samples;
