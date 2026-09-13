@@ -400,6 +400,77 @@ button { cursor: pointer; }
 .analysis-made-up-label:hover { border-color: rgba(15, 139, 141, 0.45); }
 .analysis-made-up-label:has(input:checked) { border-color: var(--amber); background: #fff7e0; color: #875800; }
 .analysis-made-up-label input { width: 16px; height: 16px; accent-color: var(--amber); cursor: pointer; }
+
+.teacher-class-filter { grid-template-columns: minmax(180px, 260px) 1fr; }
+.teacher-class-total {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  color: var(--teal);
+  font-weight: 850;
+}
+.teacher-classes-panel { display: grid; gap: 16px; }
+.teacher-class-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+}
+.teacher-class-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  background: #f4f8fa;
+}
+.teacher-class-card-head h3 { display: inline; margin: 0 0 0 10px; font-size: 1.1rem; }
+.teacher-class-card-head > strong { color: var(--teal); white-space: nowrap; }
+.class-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #e8f5f3;
+  color: var(--teal);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+.missing-record-list { overflow-x: auto; }
+.missing-record-row {
+  display: grid;
+  grid-template-columns: 120px minmax(170px, 1.1fr) minmax(180px, 1.4fr) minmax(140px, 0.8fr);
+  align-items: center;
+  gap: 14px;
+  min-width: 650px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+}
+.missing-record-heading { color: var(--muted); font-size: 0.78rem; font-weight: 850; background: #f8fafc; }
+.missing-record-row span { min-width: 0; }
+.missing-record-row small { display: block; margin-top: 3px; color: var(--muted); font-size: 0.82rem; }
+.missing-record-status { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.caught-up-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #875800;
+  font-size: 0.82rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.caught-up-check input { width: 16px; height: 16px; accent-color: var(--amber); cursor: pointer; }
+.teacher-class-card-actions { display: flex; justify-content: flex-end; padding: 12px 18px 16px; }
+.loading-inline { padding: 28px; color: var(--muted); text-align: center; }
+
+@media (max-width: 720px) {
+  .teacher-class-filter { grid-template-columns: 1fr; }
+  .teacher-class-total { justify-content: flex-start; }
+  .teacher-class-card-head { align-items: flex-start; flex-direction: column; }
+  .teacher-class-card-head h3 { display: block; margin: 8px 0 0; }
+}
 .student-shell .side .nav { display: none; }
 
 @media (max-width: 1100px) {

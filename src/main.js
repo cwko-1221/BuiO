@@ -18,7 +18,7 @@ function loadExcelJs() {
 import { MATH_QUIZ_URL, MATH_DASHBOARD_URL, WHITEBOARD_BASE, MODULES, iconSvg } from './config.js';
 import { state, updateState } from './store.js';
 import { t, I18N, currentLanguage } from './i18n.js';
-import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, loginApi, fetchHomeworkInfo } from './services.js';
+import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, fetchSubjectTeacherSettings, loginApi, fetchHomeworkInfo } from './services.js';
 import { renderTopbar, renderShell } from './views/Shell.js';
 import { renderDashboard } from './views/Dashboard.js';
 import { renderModulesPage } from './views/Modules.js';
@@ -364,6 +364,8 @@ function bindEvents() {
   document.getElementById('adminBtn')?.addEventListener('click', async () => {
     state.activeView = 'admin';
     state.studentsLoaded = false;
+    state.subjectTeachersLoaded = false;
+    state.subjectTeachersLoading = false;
     render();
     try {
       const response = await fetch('/api/auth/admin-status', { credentials: 'include' });
@@ -391,11 +393,49 @@ function bindEvents() {
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.message || t('admin_pwd_wrong'));
-      updateState({ adminUnlocked: true, studentsLoaded: false });
+      updateState({ adminUnlocked: true, studentsLoaded: false, subjectTeachersLoaded: false, subjectTeachersLoading: false });
       render();
     } catch (unlockError) {
       error.textContent = unlockError.message || t('admin_unlock_failed');
       error.style.display = 'block';
+      button.disabled = false;
+    }
+  });
+
+  document.getElementById('subjectTeacherYear')?.addEventListener('change', event => {
+    updateState({ subjectTeacherYear: event.target.value, subjectTeachersLoaded: false, subjectTeachersLoading: false });
+    render();
+  });
+
+  document.getElementById('subjectTeacherClass')?.addEventListener('change', event => {
+    updateState({ subjectTeacherClass: event.target.value, subjectTeachersLoaded: false, subjectTeachersLoading: false });
+    render();
+  });
+
+  document.getElementById('saveSubjectTeachers')?.addEventListener('click', async event => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      const response = await fetch('/api/homework/subject-teachers', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          academicYear: state.subjectTeacherYear || state.currentAcademicYear,
+          className: state.subjectTeacherClass || 'P1',
+          assignments: [...document.querySelectorAll('.subject-teacher-select')].map(select => ({
+            subject: select.dataset.subject,
+            teacherId: select.value,
+          })),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || t('subject_teacher_save_failed'));
+      await fetchSubjectTeacherSettings(state.subjectTeacherYear, state.subjectTeacherClass);
+      alert(t('subject_teacher_saved'));
+      render();
+    } catch (error) {
+      alert(error.message || t('subject_teacher_save_failed'));
       button.disabled = false;
     }
   });
@@ -426,6 +466,9 @@ function bindEvents() {
           currentAcademicYear: data.currentAcademicYear,
           studentManagementYear: data.currentAcademicYear,
           studentsLoaded: false,
+          subjectTeacherYear: data.currentAcademicYear,
+          subjectTeachersLoaded: false,
+          subjectTeachersLoading: false,
         });
         await fetchStudentsList(data.currentAcademicYear);
         render();
@@ -562,6 +605,7 @@ function bindEvents() {
       const data = await res.json();
       if (data.success) {
         alert(t('teacher_added'));
+        updateState({ subjectTeachersLoaded: false, subjectTeachersLoading: false });
         await fetchStudentsList();
         render();
       } else {
@@ -591,6 +635,7 @@ function bindEvents() {
         const data = await res.json();
         if (data.success) {
           alert(t('account_deleted'));
+          updateState({ subjectTeachersLoaded: false, subjectTeachersLoading: false });
           await fetchStudentsList();
         render();
         } else {

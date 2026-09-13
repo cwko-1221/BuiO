@@ -1,8 +1,15 @@
 import { t } from '../i18n.js';
 import { state, updateState } from '../store.js';
 import { renderIcon } from './Login.js';
-import { fetchStudentsList } from '../services.js';
+import { fetchStudentsList, fetchSubjectTeacherSettings } from '../services.js';
 import { triggerRender } from '../main.js';
+
+const escapeHtml = value => String(value ?? '')
+  .replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;')
+  .replaceAll("'", '&#039;');
 
 export async function fetchStudentsListWrapper() {
   updateState({ studentsLoaded: true });
@@ -10,6 +17,12 @@ export async function fetchStudentsListWrapper() {
   if (success) {
     triggerRender();
   }
+}
+
+function fetchSubjectTeacherSettingsWrapper() {
+  if (state.subjectTeachersLoading) return;
+  updateState({ subjectTeachersLoading: true, subjectTeacherError: '' });
+  fetchSubjectTeacherSettings().finally(() => triggerRender());
 }
 
 // The A/B group codes are database values, so the option keeps the stored
@@ -166,7 +179,28 @@ export function renderAdminPage() {
   if (!state.studentsLoaded) {
     fetchStudentsListWrapper();
   }
-  
+  if (!state.subjectTeachersLoaded && !state.subjectTeachersLoading) {
+    fetchSubjectTeacherSettingsWrapper();
+  }
+
+  const selectedSubjectTeacherYear = state.subjectTeacherYear || state.currentAcademicYear;
+  const selectedSubjectTeacherClass = state.subjectTeacherClass || 'P1';
+  const assignmentBySubject = new Map((state.subjectTeachers || []).map(row => [row.subject, row.teacherId]));
+  const subjectTeacherYears = state.academicYears.length ? state.academicYears : [selectedSubjectTeacherYear];
+  const subjectTeacherRows = state.subjectTeachersLoaded
+    ? (state.subjectTeacherSubjects || []).map(subject => `
+        <div class="subject-teacher-row">
+          <div>
+            <strong>${escapeHtml(subject.name)}</strong>
+            <small>${escapeHtml(subject.id)}</small>
+          </div>
+          <select class="subject-teacher-select" data-subject="${escapeHtml(subject.id)}">
+            <option value="">${t('subject_teacher_unset')}</option>
+            ${(state.subjectTeacherTeachers || []).map(teacher => `<option value="${escapeHtml(teacher.id)}" ${assignmentBySubject.get(subject.id) === teacher.id ? 'selected' : ''}>${escapeHtml(teacher.name)} (${escapeHtml(teacher.id)})</option>`).join('')}
+          </select>
+        </div>`).join('')
+    : `<div class="subject-teacher-loading">${t('subject_teacher_loading')}</div>`;
+
   return `
     <section class="section-head" style="margin-top:2rem; display:flex; justify-content:space-between; align-items:center;">
       <div>
@@ -193,6 +227,30 @@ export function renderAdminPage() {
         <div id="addTeacherError" style="color:var(--coral); margin-top:0.5rem; display:none;"></div>
       </form>
     </div>
+
+    <section class="glass-card subject-teacher-settings" style="margin-bottom:2rem; padding:1.5rem;">
+      <div class="subject-teacher-head">
+        <div>
+          <h3>${t('subject_teacher_title')}</h3>
+          <p>${t('subject_teacher_desc')}</p>
+        </div>
+        <div class="subject-teacher-filters">
+          <label>${t('subject_teacher_year')}
+            <select id="subjectTeacherYear">
+              ${subjectTeacherYears.map(year => `<option value="${escapeHtml(year)}" ${year === selectedSubjectTeacherYear ? 'selected' : ''}>${escapeHtml(year)}</option>`).join('')}
+            </select>
+          </label>
+          <label>${t('subject_teacher_class')}
+            <select id="subjectTeacherClass">
+              ${['P1', 'P2', 'P3', 'P4', 'P5', 'P6'].map(className => `<option value="${className}" ${className === selectedSubjectTeacherClass ? 'selected' : ''}>${className}</option>`).join('')}
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="subject-teacher-list">${subjectTeacherRows || `<div class="subject-teacher-loading">${t('subject_teacher_unset')}</div>`}</div>
+      ${state.subjectTeacherError ? `<div class="subject-teacher-error">${escapeHtml(state.subjectTeacherError)}</div>` : ''}
+      <div class="subject-teacher-actions"><button type="button" class="primary-action" id="saveSubjectTeachers" ${state.subjectTeachersLoaded ? '' : 'disabled'}>${t('subject_teacher_save')}</button></div>
+    </section>
 
     <section class="work-panel">
       <h2>${t('students_list_title')}</h2>

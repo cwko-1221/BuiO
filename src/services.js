@@ -1,4 +1,5 @@
 import { state, updateState } from './store.js';
+import { t } from './i18n.js';
 
 let activeSessionsCache = [];
 
@@ -97,6 +98,29 @@ export async function fetchStudentsList(academicYear = state.studentManagementYe
     console.error('Fetch users error:', e);
   }
   return false;
+}
+
+export async function fetchSubjectTeacherSettings(academicYear = state.subjectTeacherYear || state.currentAcademicYear, className = state.subjectTeacherClass || 'P1') {
+  try {
+    const query = `?academicYear=${encodeURIComponent(academicYear)}&className=${encodeURIComponent(className)}`;
+    const res = await fetch(`/api/homework/subject-teachers${query}`, { credentials: 'include' });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.message || t('subject_teacher_load_failed'));
+    updateState({
+      subjectTeachers: data.assignments || [],
+      subjectTeacherSubjects: data.subjects || [],
+      subjectTeacherTeachers: data.teachers || [],
+      subjectTeacherYear: data.academicYear || academicYear,
+      subjectTeacherClass: data.className || className,
+      subjectTeachersLoaded: true,
+      subjectTeachersLoading: false,
+      subjectTeacherError: '',
+    });
+    return true;
+  } catch (error) {
+    updateState({ subjectTeachersLoaded: true, subjectTeachersLoading: false, subjectTeacherError: error.message || t('subject_teacher_load_failed') });
+    return false;
+  }
 }
 
 export async function loginApi(id, password) {

@@ -25,8 +25,17 @@ async function ensureSchema() {
       UpdatedBy VARCHAR(20), UpdatedAt TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE (AcademicYear, ClassName, Subject, RecordDate)
     );
+    CREATE TABLE IF NOT EXISTS HomeworkSubjectTeachers (
+      ID BIGSERIAL PRIMARY KEY, AcademicYear VARCHAR(10) NOT NULL,
+      ClassName VARCHAR(20) NOT NULL, Subject VARCHAR(40) NOT NULL,
+      TeacherID VARCHAR(20) NOT NULL REFERENCES Users(StudentID) ON DELETE CASCADE,
+      CreatedBy VARCHAR(20), CreatedAt TIMESTAMPTZ DEFAULT NOW(),
+      UpdatedBy VARCHAR(20), UpdatedAt TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (AcademicYear, ClassName, Subject)
+    );
     CREATE INDEX IF NOT EXISTS idx_homework_monitors_student ON HomeworkMonitors(StudentID);
     CREATE INDEX IF NOT EXISTS idx_homework_records_filter ON HomeworkRecords(AcademicYear, ClassName, Subject, RecordDate);
+    CREATE INDEX IF NOT EXISTS idx_homework_subject_teachers_teacher ON HomeworkSubjectTeachers(TeacherID, AcademicYear);
   `).catch(error => { schemaPromise = null; throw error; });
   await schemaPromise;
 }
@@ -37,6 +46,8 @@ function jsonData() {
   if (!Array.isArray(data.homeworkRecords)) data.homeworkRecords = [];
   if (!Number.isInteger(data._homeworkMonitorId)) data._homeworkMonitorId = 0;
   if (!Number.isInteger(data._homeworkRecordId)) data._homeworkRecordId = 0;
+  if (!Array.isArray(data.homeworkSubjectTeachers)) data.homeworkSubjectTeachers = [];
+  if (!Number.isInteger(data._homeworkSubjectTeacherId)) data._homeworkSubjectTeacherId = 0;
   return data;
 }
 
@@ -150,6 +161,93 @@ async function replaceMonitors({ academicYear, className, subject, studentIds, c
   return listMonitors({ academicYear, className, subject });
 }
 
+function mapSubjectTeacher(row) {
+  if (!row) return null;
+  return {
+    id: Number(row.id),
+    academicYear: row.academicYear || row.academicyear,
+    className: row.className || row.classname,
+    subject: row.subject,
+    teacherId: row.teacherId || row.teacherid,
+    teacherName: row.teacherName || row.teachername || row.teacherId || row.teacherid,
+  };
+}
+
+function mapTeacher(user) {
+  return { id: user.studentid, name: user.name, role: user.role };
+}
+
+async function listTeachers() {
+  await ensureSchema();
+  if (config.db.mode === 'postgres') {
+    const { rows } = await getPool().query(`SELECT StudentID AS id, Name AS name, Role AS role
+      FROM Users WHERE Role='teacher' ORDER BY Name, StudentID`);
+    return rows;
+  }
+  return jsonData().users.filter(user => user.role === 'teacher').sort((a, b) =>
+    String(a.name || '').localeCompare(String(b.name || ''), 'zh-Hant') || a.studentid.localeCompare(b.studentid)
+  ).map(mapTeacher);
+}
+
+async function listSubjectTeachers(filters = {}) {
+  await ensureSchema();
+  if (config.db.mode === 'postgres') {
+    const values = [];
+    const where = [];
+    for (const [column, value] of [
+      ['AcademicYear', filters.academicYear], ['ClassName', filters.className],
+      ['Subject', filters.subject], ['TeacherID', filters.teacherId],
+    ]) {
+      if (value) { values.push(value); where.push(`st.${column}=$${values.length}`); }
+    }
+    const { rows } = await getPool().query(`SELECT st.ID AS id, st.AcademicYear AS "academicYear",
+      st.ClassName AS "className", st.Subject AS subject, st.TeacherID AS "teacherId",
+      u.Name AS "teacherName" FROM HomeworkSubjectTeachers st
+      JOIN Users u ON u.StudentID=st.TeacherID
+      ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
+      ORDER BY st.AcademicYear DESC, st.ClassName, st.Subject, u.Name, st.TeacherID`, values);
+    return rows.map(mapSubjectTeacher);
+  }
+  const data = jsonData();
+  const names = new Map(data.users.map(user => [user.studentid, user.name]));
+  return data.homeworkSubjectTeachers.filter(row =>
+    (!filters.academicYear || row.academicYear === filters.academicYear)
+    && (!filters.className || row.className === filters.className)
+    && (!filters.subject || row.subject === filters.subject)
+    && (!filters.teacherId || row.teacherId === filters.teacherId)
+  ).map(row => mapSubjectTeacher({ ...row, teacherName: names.get(row.teacherId) || row.teacherId }))
+    .sort((a, b) => a.className.localeCompare(b.className) || a.subject.localeCompare(b.subject));
+}
+
+async function replaceSubjectTeachers({ academicYear, className, assignments, updatedBy }) {
+  await ensureSchema();
+  if (config.db.mode === 'postgres') {
+    const client = await getPool().connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('DELETE FROM HomeworkSubjectTeachers WHERE AcademicYear=$1 AND ClassName=$2', [academicYear, className]);
+      for (const assignment of assignments) {
+        await client.query(`INSERT INTO HomeworkSubjectTeachers
+          (AcademicYear, ClassName, Subject, TeacherID, CreatedBy, UpdatedBy)
+          VALUES ($1,$2,$3,$4,$5,$5)`, [academicYear, className, assignment.subject, assignment.teacherId, updatedBy]);
+      }
+      await client.query('COMMIT');
+    } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); }
+  } else {
+    const data = jsonData();
+    data.homeworkSubjectTeachers = data.homeworkSubjectTeachers.filter(row =>
+      row.academicYear !== academicYear || row.className !== className
+    );
+    for (const assignment of assignments) data.homeworkSubjectTeachers.push({
+      id: ++data._homeworkSubjectTeacherId, academicYear, className,
+      subject: assignment.subject, teacherId: assignment.teacherId,
+      createdBy: updatedBy, updatedBy, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    });
+    store.save();
+  }
+  return listSubjectTeachers({ academicYear, className });
+}
+
 function mapRecord(row) {
   if (!row) return null;
   const raw = row.date || row.recorddate;
@@ -261,4 +359,8 @@ async function listRecords(filters = {}) {
     .sort((a, b) => b.date.localeCompare(a.date) || a.subject.localeCompare(b.subject)).map(mapRecord);
 }
 
-module.exports = { ensureSchema, listStudents, listClassStudents, findUser, listMonitors, replaceMonitors, findRecord, createRecord, updateRecord, deleteRecord, listRecords };
+module.exports = {
+  ensureSchema, listStudents, listClassStudents, findUser, listMonitors, replaceMonitors,
+  listTeachers, listSubjectTeachers, replaceSubjectTeachers,
+  findRecord, createRecord, updateRecord, deleteRecord, listRecords,
+};

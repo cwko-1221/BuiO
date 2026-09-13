@@ -225,6 +225,11 @@ const EXACT = new Map(Object.entries({
   '表現良好，繼續保持': 'Doing well — keep it up',
 
   '你未獲委任為科長，無權進入欠交功課模組。': 'You are not a subject monitor, so the missing-homework module is not open to you.',
+  '科任老師設定已儲存': 'Subject-teacher settings saved',
+  '學年或班別不正確': 'The academic year or class is not valid',
+  '科任老師設定資料不正確': 'The subject-teacher settings are not valid',
+  '任教老師必須是現有教師帳戶': 'The assigned teacher must be an existing teacher account',
+  '你未獲委任教授此班別及科目': 'You are not assigned to teach this class and subject',
   '老師已結束課堂': 'Your teacher has ended the class',
   '預覽學生': 'Preview student',
 

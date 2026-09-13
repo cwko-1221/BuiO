@@ -218,6 +218,29 @@ try {
     ? result.response.headers.getSetCookie()
     : [result.response.headers.get('set-cookie')].filter(Boolean))
     .map(value => value.split(';')[0]).join('; ');
+  result = await request(teacher, '/api/homework/subject-teachers?academicYear=2025-26&className=P4');
+  assert.equal(result.response.status, 200, 'unlocked Admin can read subject-teacher settings');
+  assert.ok(result.data.subjects.some(subject => subject.id === 'chinese-a'), 'subject-teacher settings include the class subjects');
+  result = await request(teacher, '/api/homework/subject-teachers', {
+    method: 'PUT',
+    body: { academicYear: '2025-26', className: 'P4', assignments: [{ subject: 'chinese-a', teacherId: 'T001' }] },
+  });
+  assert.equal(result.response.status, 200, 'Admin can assign a teacher to a subject');
+  result = await request(teacher, '/api/homework/teacher-classes?academicYear=2025-26');
+  assert.equal(result.response.status, 200, 'teacher can read assigned classes');
+  assert.equal(result.data.assignments.length, 1, 'teacher sees only assigned subjects');
+  assert.equal(result.data.assignments[0].subject, 'chinese-a', 'teacher class view is subject-specific');
+  assert.equal(result.data.assignments[0].rows.find(row => row.studentId === 'S003').madeUp, true, 'teacher class view includes made-up state');
+  result = await request(teacher, '/api/homework/teacher-classes/made-up', {
+    method: 'PUT',
+    body: {
+      academicYear: '2025-26',
+      updates: [{ className: 'P4', subject: 'chinese-a', date: today, studentId: 'S003', homeworkId: 'hw-1', madeUp: false }],
+    },
+  });
+  assert.equal(result.response.status, 200, 'assigned teacher can update caught-up state');
+  result = await request(teacher, '/api/homework/teacher-classes?academicYear=2025-26');
+  assert.equal(result.data.assignments[0].rows.find(row => row.studentId === 'S003').madeUp, false, 'caught-up state update is reflected');
   result = await request(teacher, '/api/auth/upgrade-students', { method: 'POST' });
   assert.equal(result.response.status, 200, 'Admin can upgrade the academic year');
   assert.equal(result.data.previousAcademicYear, '2025-26');

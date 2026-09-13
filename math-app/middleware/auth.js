@@ -14,4 +14,11 @@ function requireTeacher(req, res, next) {
   next();
 }
 
-module.exports = { requireAuth, requireTeacher };
+function requireAdminUnlocked(req, res, next) {
+  if (!req.session?.adminUnlocked) {
+    return res.status(403).json({ success: false, message: '請先輸入 Admin 密碼' });
+  }
+  next();
+}
+
+module.exports = { requireAuth, requireTeacher, requireAdminUnlocked };

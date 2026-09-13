@@ -3,7 +3,7 @@ const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Hong_Kong', yea
 const { t } = window.BuiI18n;
 const statusLabels = { complete: t('h.statusComplete'), missing: t('h.statusMissing'), absent: t('h.statusAbsent') };
 const grades = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'];
-const state = { meta: null, view: 'monitors', roster: [], record: null, homeworks: [], message: '', messageType: '' };
+const state = { meta: null, view: 'monitors', roster: [], record: null, homeworks: [], teacherClasses: [], teacherClassYear: '', teacherClassesLoaded: false, teacherClassesTotal: 0, message: '', messageType: '' };
 
 const escapeHtml = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
 const subjectName = id => state.meta?.subjects.find(subject => subject.id === id)?.name || id;
@@ -24,6 +24,7 @@ function shell(content) {
     <aside class="side">
       <div class="brand"><img src="/math-app/images/logo.png" alt="${escapeHtml(t('h.logoAlt'))}"><div><strong>${escapeHtml(t('h.school'))}</strong><span>LEARNING HUB</span></div></div>
       ${teacher ? `<nav class="nav" aria-label="${escapeHtml(t('h.navAria'))}">
+        <button data-view="classes" class="${state.view === 'classes' ? 'active' : ''}">${escapeHtml(t('h.navClasses'))}</button>
         <button data-view="monitors" class="${state.view === 'monitors' ? 'active' : ''}">${escapeHtml(t('h.navMonitors'))}</button>
         <button data-view="records" class="${state.view === 'records' ? 'active' : ''}">${escapeHtml(t('h.navRecords'))}</button>
         <button data-view="analysis" class="${state.view === 'analysis' ? 'active' : ''}">${escapeHtml(t('h.navAnalysis'))}</button>
@@ -95,6 +96,52 @@ async function loadTeacherRecord() {
     state.message = '';
   } catch (error) { state.record = null; state.homeworks = []; state.message = error.message; state.messageType = 'error'; }
   render();
+}
+
+async function loadTeacherClasses() {
+  const academicYear = state.teacherClassYear || state.meta.currentAcademicYear;
+  state.teacherClassYear = academicYear;
+  try {
+    const result = await api(`/teacher-classes?academicYear=${encodeURIComponent(academicYear)}`);
+    state.teacherClasses = result.assignments || [];
+    state.teacherClassesTotal = result.totalMissing || 0;
+    state.teacherClassesLoaded = true;
+    state.message = '';
+  } catch (error) {
+    state.teacherClasses = [];
+    state.teacherClassesTotal = 0;
+    state.teacherClassesLoaded = true;
+    state.message = error.message;
+    state.messageType = 'error';
+  }
+  render();
+}
+
+function renderTeacherClasses() {
+  const groups = state.teacherClasses || [];
+  const academicYear = state.teacherClassYear || state.meta.currentAcademicYear;
+  const total = groups.reduce((count, group) => count + (group.missingCount || 0), 0);
+  const cards = groups.map(group => `<article class="teacher-class-card">
+    <div class="teacher-class-card-head">
+      <div><span class="class-badge">${escapeHtml(group.className)}</span><h3>${escapeHtml(group.subjectName || subjectName(group.subject))}</h3></div>
+      <strong>${escapeHtml(t('h.teacherClassesTotal', { count: group.missingCount || 0 }))}</strong>
+    </div>
+    ${group.rows?.length ? `<div class="missing-record-list">
+      <div class="missing-record-row missing-record-heading"><span>${escapeHtml(t('h.date'))}</span><span>${escapeHtml(t('h.teacherClassesStudent'))}</span><span>${escapeHtml(t('h.teacherClassesHomework'))}</span><span>${escapeHtml(t('h.status'))}</span></div>
+      ${group.rows.map(row => `<div class="missing-record-row">
+        <span>${escapeHtml(row.date)}</span>
+        <span><strong>${escapeHtml(row.studentName)}</strong><small>${escapeHtml(row.classNo ? t('h.classNoSuffix', { no: row.classNo }) : row.studentId)}</small></span>
+        <span>${escapeHtml(row.homework)}</span>
+        <span class="missing-record-status"><span class="status-tag missing">${escapeHtml(t('h.statusMissing'))}</span><label class="caught-up-check"><input type="checkbox" class="teacher-class-made-up" data-class="${escapeHtml(row.className)}" data-subject="${escapeHtml(row.subject)}" data-date="${escapeHtml(row.date)}" data-student="${escapeHtml(row.studentId)}" data-hw-id="${escapeHtml(row.homeworkId)}" ${row.madeUp ? 'checked' : ''}>${escapeHtml(t('h.madeUp'))}</label></span>
+      </div>`).join('')}
+    </div><div class="teacher-class-card-actions"><button type="button" class="button secondary teacher-class-save" data-group="${escapeHtml(group.className)}|${escapeHtml(group.subject)}">${escapeHtml(t('h.teacherClassesSave'))}</button></div>` : `<div class="empty">${escapeHtml(t('h.teacherClassesNoMissing'))}</div>`}
+  </article>`).join('');
+
+  return shell(`<section class="panel">
+    <div class="panel-head"><div><h2>${escapeHtml(t('h.teacherClassesTitle'))}</h2><p class="hint">${escapeHtml(t('h.teacherClassesHint'))}</p></div><span class="assignment">${escapeHtml(academicYear)}</span></div>
+    <div class="filters teacher-class-filter"><div class="field"><label for="teacherClassYear">${escapeHtml(t('h.year'))}</label><select id="teacherClassYear">${options(state.meta.academicYears, academicYear)}</select></div><div class="teacher-class-total">${escapeHtml(t('h.teacherClassesTotal', { count: total }))}</div></div>
+  </section>
+  <section class="panel teacher-classes-panel">${!state.teacherClassesLoaded ? `<div class="loading-inline">${escapeHtml(t('h.booting'))}</div>` : cards || `<div class="empty">${escapeHtml(t('h.teacherClassesNoAssignments'))}</div>`}</section>`);
 }
 
 function statusControls(homework, student, teacher = false, locked = false) {
@@ -247,7 +294,8 @@ function syncEditor() {
 function bindCommon() {
   document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => {
     state.view = button.dataset.view; state.message = '';
-    if (state.view === 'monitors') loadMonitorRoster();
+    if (state.view === 'classes') { state.teacherClassesLoaded = false; loadTeacherClasses(); }
+    else if (state.view === 'monitors') loadMonitorRoster();
     else if (state.view === 'records') loadTeacherRecord();
     else if (state.view === 'analysis') loadAnalysisStudents();
     else { state.classAnalysisRows = []; state.classAnalysisTotal = 0; render(); }
@@ -256,7 +304,36 @@ function bindCommon() {
 }
 
 function bindTeacher() {
-  if (state.view === 'monitors') {
+  if (state.view === 'classes') {
+    document.getElementById('teacherClassYear').onchange = event => {
+      state.teacherClassYear = event.target.value;
+      state.teacherClassesLoaded = false;
+      loadTeacherClasses();
+    };
+    document.querySelectorAll('.teacher-class-save').forEach(button => button.addEventListener('click', async () => {
+      const card = button.closest('.teacher-class-card');
+      const updates = [...card.querySelectorAll('.teacher-class-made-up')].map(input => ({
+        className: input.dataset.class,
+        subject: input.dataset.subject,
+        date: input.dataset.date,
+        studentId: input.dataset.student,
+        homeworkId: input.dataset.hwId,
+        madeUp: input.checked,
+      }));
+      if (!updates.length) return;
+      button.disabled = true;
+      try {
+        const result = await api('/teacher-classes/made-up', {
+          method: 'PUT',
+          body: JSON.stringify({ academicYear: state.teacherClassYear, updates }),
+        });
+        await loadTeacherClasses();
+        setMessage(result.message);
+      } catch (error) {
+        setMessage(error.message, 'error');
+      }
+    }));
+  } else if (state.view === 'monitors') {
     const reload = () => { filterState.monitors = { academicYear: monitorYear.value, className: monitorClass.value, subject: monitorSubject.value }; loadMonitorRoster(); };
     monitorYear.onchange = reload; monitorClass.onchange = reload; monitorSubject.onchange = reload;
     saveMonitors.onclick = async () => { try { const f = filterState.monitors; const studentIds = [...document.querySelectorAll('.monitor-check:checked')].map(input => input.value); const result = await api('/monitors', { method: 'PUT', body: JSON.stringify({ ...f, studentIds }) }); state.roster = state.roster.map(student => ({ ...student, selected: studentIds.includes(student.id) })); setMessage(result.message); } catch (error) { setMessage(error.message, 'error'); } };
@@ -356,7 +433,7 @@ function bindStudent() {
 function render() {
   if (!state.meta) return;
   app.innerHTML = state.meta.role === 'teacher'
-    ? (state.view === 'monitors' ? renderMonitors() : state.view === 'records' ? renderRecords() : state.view === 'analysis' ? renderAnalysis() : renderClassAnalysis())
+    ? (state.view === 'classes' ? renderTeacherClasses() : state.view === 'monitors' ? renderMonitors() : state.view === 'records' ? renderRecords() : state.view === 'analysis' ? renderAnalysis() : renderClassAnalysis())
     : renderStudent();
   bindCommon();
   if (state.meta.role === 'teacher') bindTeacher(); else bindStudent();
@@ -368,6 +445,7 @@ async function boot() {
     if (!state.meta.canAccess) throw new Error(t('h.notMonitor'));
     filterState.monitors.academicYear = filterState.records.academicYear = filterState.analysis.academicYear = filterState.classAnalysis.academicYear = state.meta.currentAcademicYear;
     filterState.classAnalysis.dateFrom = `${state.meta.currentAcademicYear.slice(0, 4)}-09-01`;
+    state.teacherClassYear = state.meta.currentAcademicYear;
     if (state.meta.role === 'teacher') await loadMonitorRoster();
     else {
       state.studentAssignment = state.meta.assignments[0]; state.studentDate = today; await loadStudentRecord();

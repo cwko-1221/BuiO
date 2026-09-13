@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const repo = require('../repositories/homework.repo');
 const academicYearsRepo = require('../../math-app/repositories/academic-years.repo');
-const { requireAuth, requireTeacher } = require('../../math-app/middleware/auth');
+const { requireAuth, requireTeacher, requireAdminUnlocked } = require('../../math-app/middleware/auth');
 const {
   SUBJECTS, STUDENT_STATUSES, TEACHER_STATUSES, subjectById, subjectsForGrade,
   isAcademicYear, isIsoDate, todayHongKong,
@@ -96,6 +96,9 @@ router.get('/meta', async (req, res, next) => {
       studentId: req.session.studentId,
       academicYear: currentAcademicYear,
     });
+    const teacherAssignments = req.session.role === 'teacher'
+      ? await repo.listSubjectTeachers({ teacherId: req.session.studentId, academicYear: currentAcademicYear })
+      : [];
     res.json({
       success: true,
       role: req.session.role,
@@ -104,7 +107,156 @@ router.get('/meta', async (req, res, next) => {
       academicYears,
       currentAcademicYear,
       assignments,
+      teacherAssignments,
     });
+  } catch (error) { next(error); }
+});
+
+function validateTeacherAssignmentScope(academicYear, className) {
+  if (!isAcademicYear(academicYear) || !/^P[1-6]$/.test(className || '')) return '學年或班別不正確';
+  return '';
+}
+
+router.get('/subject-teachers', requireTeacher, requireAdminUnlocked, async (req, res, next) => {
+  try {
+    const academicYear = text(req.query.academicYear, 10) || await academicYearsRepo.getCurrentAcademicYear();
+    const className = text(req.query.className, 10) || 'P1';
+    const scopeError = validateTeacherAssignmentScope(academicYear, className);
+    if (scopeError) return fail(res, 400, scopeError);
+    const [teachers, assignments] = await Promise.all([
+      repo.listTeachers(),
+      repo.listSubjectTeachers({ academicYear, className }),
+    ]);
+    res.json({
+      success: true,
+      academicYear,
+      className,
+      subjects: subjectsForGrade(className),
+      teachers,
+      assignments,
+    });
+  } catch (error) { next(error); }
+});
+
+router.put('/subject-teachers', requireTeacher, requireAdminUnlocked, async (req, res, next) => {
+  try {
+    const academicYear = text(req.body.academicYear, 10);
+    const className = text(req.body.className, 10);
+    const scopeError = validateTeacherAssignmentScope(academicYear, className);
+    if (scopeError) return fail(res, 400, scopeError);
+
+    const rows = Array.isArray(req.body.assignments) ? req.body.assignments : [];
+    const assignments = [];
+    const seenSubjects = new Set();
+    for (const row of rows) {
+      const subject = text(row?.subject, 40);
+      const teacherId = text(row?.teacherId, 20);
+      if (!subject && !teacherId) continue;
+      if (!subject || !teacherId || seenSubjects.has(subject)) return fail(res, 400, '科任老師設定資料不正確');
+      if (!subjectsForGrade(className).some(item => item.id === subject)) return fail(res, 400, '該年級沒有此科目');
+      seenSubjects.add(subject);
+      assignments.push({ subject, teacherId });
+    }
+
+    const teachers = await repo.listTeachers();
+    const teacherIds = new Set(teachers.map(teacher => teacher.id));
+    if (assignments.some(assignment => !teacherIds.has(assignment.teacherId))) {
+      return fail(res, 400, '任教老師必須是現有教師帳戶');
+    }
+    const saved = await repo.replaceSubjectTeachers({
+      academicYear, className, assignments, updatedBy: req.session.studentId,
+    });
+    res.json({ success: true, message: '科任老師設定已儲存', assignments: saved });
+  } catch (error) { next(error); }
+});
+
+router.get('/teacher-classes', requireTeacher, async (req, res, next) => {
+  try {
+    const academicYear = text(req.query.academicYear, 10) || await academicYearsRepo.getCurrentAcademicYear();
+    if (!isAcademicYear(academicYear)) return fail(res, 400, '學年不正確');
+    const assignments = await repo.listSubjectTeachers({ teacherId: req.session.studentId, academicYear });
+    const groups = await Promise.all(assignments.map(async assignment => {
+      const [students, records] = await Promise.all([
+        repo.listClassStudents(academicYear, assignment.className),
+        repo.listRecords({ academicYear, className: assignment.className, subject: assignment.subject }),
+      ]);
+      const studentMap = new Map(students.map(student => [student.id, student]));
+      const rows = [];
+      for (const record of records) for (const homework of record.homeworks || []) {
+        for (const item of homework.statuses || []) {
+          if (item.status !== 'missing') continue;
+          const student = studentMap.get(item.studentId);
+          rows.push({
+            date: record.date,
+            className: assignment.className,
+            subject: assignment.subject,
+            subjectName: subjectById(assignment.subject)?.name || assignment.subject,
+            homeworkId: homework.id,
+            homework: homework.title,
+            studentId: item.studentId,
+            studentName: student?.name || item.studentId,
+            classNo: student?.classNo ?? null,
+            madeUp: Boolean(item.madeUp),
+          });
+        }
+      }
+      return {
+        ...assignment,
+        subjectName: subjectById(assignment.subject)?.name || assignment.subject,
+        rows,
+        missingCount: rows.length,
+      };
+    }));
+    res.json({
+      success: true,
+      academicYear,
+      assignments: groups,
+      totalMissing: groups.reduce((total, group) => total + group.missingCount, 0),
+    });
+  } catch (error) { next(error); }
+});
+
+router.put('/teacher-classes/made-up', requireTeacher, async (req, res, next) => {
+  try {
+    const academicYear = text(req.body.academicYear, 10);
+    const updates = Array.isArray(req.body.updates) ? req.body.updates : [];
+    if (!isAcademicYear(academicYear) || !updates.length || updates.length > 1000) return fail(res, 400, '更新資料不正確');
+
+    const grouped = new Map();
+    for (const update of updates) {
+      const className = text(update?.className, 10);
+      const subject = text(update?.subject, 40);
+      const date = text(update?.date, 10);
+      const studentId = text(update?.studentId, 20);
+      const homeworkId = text(update?.homeworkId, 50);
+      if (!/^P[1-6]$/.test(className) || !subjectById(subject) || !subjectsForGrade(className).some(item => item.id === subject)
+        || !isIsoDate(date) || !studentId || !homeworkId) return fail(res, 400, '更新資料不正確');
+      const key = `${className}|${subject}|${date}`;
+      if (!grouped.has(key)) grouped.set(key, { className, subject, date, items: [] });
+      grouped.get(key).items.push({ studentId, homeworkId, madeUp: Boolean(update.madeUp) });
+    }
+
+    let changed = 0;
+    for (const { className, subject, date, items } of grouped.values()) {
+      const assigned = await repo.listSubjectTeachers({
+        academicYear, className, subject, teacherId: req.session.studentId,
+      });
+      if (!assigned.length) return fail(res, 403, '你未獲委任教授此班別及科目');
+      const record = await repo.findRecord({ academicYear, className, subject, date });
+      if (!record) continue;
+      let modified = false;
+      for (const { studentId, homeworkId, madeUp } of items) {
+        const homework = record.homeworks.find(item => item.id === homeworkId);
+        const row = homework?.statuses.find(item => item.studentId === studentId);
+        if (row && row.status === 'missing' && row.madeUp !== madeUp) {
+          row.madeUp = madeUp;
+          modified = true;
+          changed++;
+        }
+      }
+      if (modified) await repo.updateRecord({ academicYear, className, subject, date, homeworks: record.homeworks, updatedBy: req.session.studentId });
+    }
+    res.json({ success: true, message: `已更新 ${changed} 項狀態` });
   } catch (error) { next(error); }
 });
 
