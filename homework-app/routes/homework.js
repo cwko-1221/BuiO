@@ -178,9 +178,10 @@ router.put('/subject-teachers', requireTeacher, requireAdminUnlocked, async (req
       const subject = text(row?.subject, 40);
       const teacherId = text(row?.teacherId, 20);
       if (!subject && !teacherId) continue;
-      if (!subject || !teacherId || seenSubjects.has(subject)) return fail(res, 400, '科任老師設定資料不正確');
+      if (!subject || seenSubjects.has(subject)) return fail(res, 400, '科任老師設定資料不正確');
       if (!subjectsForGrade(className).some(item => item.id === subject)) return fail(res, 400, '該年級沒有此科目');
       seenSubjects.add(subject);
+      if (!teacherId) continue;
       assignments.push({ subject, teacherId });
     }
 

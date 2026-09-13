@@ -225,11 +225,17 @@ try {
     method: 'PUT',
     body: {
       academicYear: '2025-26', className: 'P4',
-      assignments: [{ subject: 'chinese-a', teacherId: 'T001' }, { subject: 'science', teacherId: 'T001' }],
+      assignments: [{ subject: 'chinese-a', teacherId: 'T001' }, { subject: 'science', teacherId: '' }],
     },
   });
-  assert.equal(result.response.status, 200, 'Admin can assign teachers to subjects');
-  assert.equal(result.data.assignments.length, 2, 'whole-class save stores both assignments');
+  assert.equal(result.response.status, 200, 'Admin can save with other subjects left blank');
+  assert.deepEqual(result.data.assignments.map(row => row.subject), ['chinese-a'], 'blank subjects are ignored by whole-class save');
+  result = await request(teacher, '/api/homework/subject-teachers', {
+    method: 'PATCH',
+    body: { academicYear: '2025-26', className: 'P4', subject: 'science', teacherId: 'T001' },
+  });
+  assert.equal(result.response.status, 200, 'Admin can save another single subject independently');
+  assert.equal(result.data.assignments.length, 2, 'single-subject save adds without replacing existing subjects');
   result = await request(teacher, '/api/homework/subject-teachers', {
     method: 'PATCH',
     body: { academicYear: '2025-26', className: 'P4', subject: 'chinese-a', teacherId: 'T001' },
