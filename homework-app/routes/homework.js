@@ -138,6 +138,32 @@ router.get('/subject-teachers', requireTeacher, requireAdminUnlocked, async (req
   } catch (error) { next(error); }
 });
 
+router.patch('/subject-teachers', requireTeacher, requireAdminUnlocked, async (req, res, next) => {
+  try {
+    const academicYear = text(req.body.academicYear, 10);
+    const className = text(req.body.className, 10);
+    const subject = text(req.body.subject, 40);
+    const teacherId = text(req.body.teacherId, 20);
+    const scopeError = validateTeacherAssignmentScope(academicYear, className);
+    if (scopeError) return fail(res, 400, scopeError);
+    if (!subject || !subjectsForGrade(className).some(item => item.id === subject)) {
+      return fail(res, 400, '科任老師設定資料不正確');
+    }
+
+    if (teacherId) {
+      const teachers = await repo.listTeachers();
+      if (!teachers.some(teacher => teacher.id === teacherId)) {
+        return fail(res, 400, '任教老師必須是現有教師帳戶');
+      }
+    }
+
+    const saved = await repo.replaceSubjectTeacher({
+      academicYear, className, subject, teacherId, updatedBy: req.session.studentId,
+    });
+    res.json({ success: true, message: '科任老師設定已儲存', assignments: saved });
+  } catch (error) { next(error); }
+});
+
 router.put('/subject-teachers', requireTeacher, requireAdminUnlocked, async (req, res, next) => {
   try {
     const academicYear = text(req.body.academicYear, 10);

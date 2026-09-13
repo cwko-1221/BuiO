@@ -248,6 +248,49 @@ async function replaceSubjectTeachers({ academicYear, className, assignments, up
   return listSubjectTeachers({ academicYear, className });
 }
 
+async function replaceSubjectTeacher({ academicYear, className, subject, teacherId, updatedBy }) {
+  await ensureSchema();
+  if (config.db.mode === 'postgres') {
+    const client = await getPool().connect();
+    try {
+      await client.query('BEGIN');
+      if (teacherId) {
+        await client.query(`INSERT INTO HomeworkSubjectTeachers
+          (AcademicYear, ClassName, Subject, TeacherID, CreatedBy, UpdatedBy)
+          VALUES ($1,$2,$3,$4,$5,$5)
+          ON CONFLICT (AcademicYear, ClassName, Subject) DO UPDATE SET
+            TeacherID=EXCLUDED.TeacherID, UpdatedBy=EXCLUDED.UpdatedBy, UpdatedAt=NOW()`,
+        [academicYear, className, subject, teacherId, updatedBy]);
+      } else {
+        await client.query(
+          'DELETE FROM HomeworkSubjectTeachers WHERE AcademicYear=$1 AND ClassName=$2 AND Subject=$3',
+          [academicYear, className, subject],
+        );
+      }
+      await client.query('COMMIT');
+    } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); }
+  } else {
+    const data = jsonData();
+    const existing = data.homeworkSubjectTeachers.find(row =>
+      row.academicYear === academicYear && row.className === className && row.subject === subject);
+    data.homeworkSubjectTeachers = data.homeworkSubjectTeachers.filter(row =>
+      row.academicYear !== academicYear || row.className !== className || row.subject !== subject);
+    if (teacherId) {
+      const now = new Date().toISOString();
+      data.homeworkSubjectTeachers.push({
+        id: existing?.id || ++data._homeworkSubjectTeacherId,
+        academicYear, className, subject, teacherId,
+        createdBy: existing?.createdBy || updatedBy,
+        updatedBy,
+        createdAt: existing?.createdAt || now,
+        updatedAt: now,
+      });
+    }
+    store.save();
+  }
+  return listSubjectTeachers({ academicYear, className });
+}
+
 function mapRecord(row) {
   if (!row) return null;
   const raw = row.date || row.recorddate;
@@ -361,6 +404,6 @@ async function listRecords(filters = {}) {
 
 module.exports = {
   ensureSchema, listStudents, listClassStudents, findUser, listMonitors, replaceMonitors,
-  listTeachers, listSubjectTeachers, replaceSubjectTeachers,
+  listTeachers, listSubjectTeachers, replaceSubjectTeachers, replaceSubjectTeacher,
   findRecord, createRecord, updateRecord, deleteRecord, listRecords,
 };

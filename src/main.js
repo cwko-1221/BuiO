@@ -412,6 +412,42 @@ function bindEvents() {
     render();
   });
 
+  document.querySelectorAll('.subject-teacher-save-one').forEach(button => {
+    button.addEventListener('click', async event => {
+      const saveButton = event.currentTarget;
+      const select = [...document.querySelectorAll('.subject-teacher-select')]
+        .find(item => item.dataset.subject === saveButton.dataset.subject);
+      if (!select) return;
+
+      const academicYear = state.subjectTeacherYear || state.currentAcademicYear;
+      const className = state.subjectTeacherClass || 'P1';
+      saveButton.disabled = true;
+      saveButton.textContent = t('subject_teacher_saving');
+      try {
+        const response = await fetch('/api/homework/subject-teachers', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            academicYear,
+            className,
+            subject: saveButton.dataset.subject,
+            teacherId: select.value,
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || t('subject_teacher_save_failed'));
+        await fetchSubjectTeacherSettings(academicYear, className);
+        alert(t('subject_teacher_saved'));
+        render();
+      } catch (error) {
+        alert(error.message || t('subject_teacher_save_failed'));
+        saveButton.disabled = false;
+        saveButton.textContent = t('subject_teacher_save_one');
+      }
+    });
+  });
+
   document.getElementById('saveSubjectTeachers')?.addEventListener('click', async event => {
     const button = event.currentTarget;
     button.disabled = true;

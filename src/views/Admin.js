@@ -194,10 +194,13 @@ export function renderAdminPage() {
             <strong>${escapeHtml(subject.name)}</strong>
             <small>${escapeHtml(subject.id)}</small>
           </div>
-          <select class="subject-teacher-select" data-subject="${escapeHtml(subject.id)}">
-            <option value="">${t('subject_teacher_unset')}</option>
-            ${(state.subjectTeacherTeachers || []).map(teacher => `<option value="${escapeHtml(teacher.id)}" ${assignmentBySubject.get(subject.id) === teacher.id ? 'selected' : ''}>${escapeHtml(teacher.name)} (${escapeHtml(teacher.id)})</option>`).join('')}
-          </select>
+          <div class="subject-teacher-controls">
+            <select class="subject-teacher-select" data-subject="${escapeHtml(subject.id)}">
+              <option value="">${t('subject_teacher_unset')}</option>
+              ${(state.subjectTeacherTeachers || []).map(teacher => `<option value="${escapeHtml(teacher.id)}" ${assignmentBySubject.get(subject.id) === teacher.id ? 'selected' : ''}>${escapeHtml(teacher.name)} (${escapeHtml(teacher.id)})</option>`).join('')}
+            </select>
+            <button type="button" class="secondary-action subject-teacher-save-one" data-subject="${escapeHtml(subject.id)}">${t('subject_teacher_save_one')}</button>
+          </div>
         </div>`).join('')
     : `<div class="subject-teacher-loading">${t('subject_teacher_loading')}</div>`;
 

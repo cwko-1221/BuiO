@@ -223,9 +223,25 @@ try {
   assert.ok(result.data.subjects.some(subject => subject.id === 'chinese-a'), 'subject-teacher settings include the class subjects');
   result = await request(teacher, '/api/homework/subject-teachers', {
     method: 'PUT',
-    body: { academicYear: '2025-26', className: 'P4', assignments: [{ subject: 'chinese-a', teacherId: 'T001' }] },
+    body: {
+      academicYear: '2025-26', className: 'P4',
+      assignments: [{ subject: 'chinese-a', teacherId: 'T001' }, { subject: 'science', teacherId: 'T001' }],
+    },
   });
-  assert.equal(result.response.status, 200, 'Admin can assign a teacher to a subject');
+  assert.equal(result.response.status, 200, 'Admin can assign teachers to subjects');
+  assert.equal(result.data.assignments.length, 2, 'whole-class save stores both assignments');
+  result = await request(teacher, '/api/homework/subject-teachers', {
+    method: 'PATCH',
+    body: { academicYear: '2025-26', className: 'P4', subject: 'chinese-a', teacherId: 'T001' },
+  });
+  assert.equal(result.response.status, 200, 'Admin can save one subject independently');
+  assert.equal(result.data.assignments.length, 2, 'single-subject save preserves other subjects');
+  result = await request(teacher, '/api/homework/subject-teachers', {
+    method: 'PATCH',
+    body: { academicYear: '2025-26', className: 'P4', subject: 'science', teacherId: '' },
+  });
+  assert.equal(result.response.status, 200, 'Admin can clear one subject independently');
+  assert.deepEqual(result.data.assignments.map(row => row.subject), ['chinese-a'], 'clearing one subject preserves the other assignment');
   result = await request(teacher, '/api/homework/teacher-classes?academicYear=2025-26');
   assert.equal(result.response.status, 200, 'teacher can read assigned classes');
   assert.equal(result.data.assignments.length, 1, 'teacher sees only assigned subjects');

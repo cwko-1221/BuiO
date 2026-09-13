@@ -1256,11 +1256,21 @@ input:focus {
 }
 .subject-teacher-row strong { display: block; }
 .subject-teacher-row small { display: block; margin-top: 0.2rem; color: var(--muted); }
+.subject-teacher-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.subject-teacher-save-one {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
 .subject-teacher-loading { padding: 1rem; color: var(--muted); text-align: center; }
 .subject-teacher-error { margin-top: 0.9rem; color: var(--coral); font-weight: 700; }
 .subject-teacher-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
 
 @media (max-width: 640px) {
   .subject-teacher-row { align-items: stretch; flex-direction: column; }
+  .subject-teacher-controls { align-items: stretch; flex-direction: column; }
   .subject-teacher-select { width: 100%; }
 }
