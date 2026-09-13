@@ -26,7 +26,6 @@ const CHARACTERS = [
   { id: 'crayon-shin-chan', label: 'Crayon Shin-chan' },
   { id: 'doraemon', label: 'Doraemon' },
   { id: 'hello-kitty', label: 'Hello Kitty' },
-  { id: 'donald-trump-cartoon', label: 'Donald Trump cartoon' },
 ];
 
 const pixel = (x, y, width, channels) => (y * width + x) * channels;

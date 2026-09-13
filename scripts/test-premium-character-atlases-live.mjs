@@ -10,7 +10,7 @@ import { chromium } from 'playwright';
 
 const PET_IDS = [
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
-  'doraemon', 'hello-kitty', 'donald-trump-cartoon',
+  'doraemon', 'hello-kitty',
 ];
 const reservePort = () => new Promise((resolve, reject) => {
   const socket = net.createServer(); socket.once('error', reject);
@@ -211,7 +211,38 @@ try {
   assert.equal(normalCard.filter, 'none', 'ordinary pet artwork was filtered');
   await page.locator('.shop-grid').screenshot({ path: path.join(artifactDir, 'shop-mystery-pets.png') });
   report.shopMysteryCards = mysteryCards;
-  console.log('✓ shop hides the six special characters as black silhouettes named ???');
+  console.log(`✓ shop hides all ${PET_IDS.length} special characters as black silhouettes named ???`);
+
+  await page.locator('[data-tab="collection"]').first().click();
+  await page.locator('.collection-grid').waitFor({ timeout: 5000 });
+  const collectionMysteryCards = await page.evaluate((petIds) => petIds.map((petId) => {
+    const card = document.querySelector(`.pet-card[data-species-id="${petId}"]`);
+    const image = card?.querySelector('img');
+    return {
+      petId,
+      mystery: card?.classList.contains('mystery-pet') ?? false,
+      title: card?.querySelector('h3')?.textContent?.trim() ?? '',
+      filter: image ? getComputedStyle(image).filter : 'missing',
+    };
+  }), PET_IDS);
+  for (const card of collectionMysteryCards) {
+    assert.equal(card.mystery, true, `${card.petId} collection card lacks mystery styling`);
+    assert.equal(card.title, '???', `${card.petId} leaks its name in the collection`);
+    assert.notEqual(card.filter, 'none', `${card.petId} collection art is not a silhouette`);
+  }
+  const normalCollectionCard = await page.evaluate(() => {
+    const card = document.querySelector('.pet-card[data-species-id="starpatch-cat"]');
+    const image = card?.querySelector('img');
+    return { mystery: card?.classList.contains('mystery-pet') ?? false,
+      title: card?.querySelector('h3')?.textContent?.trim() ?? '',
+      filter: image ? getComputedStyle(image).filter : 'missing' };
+  });
+  assert.equal(normalCollectionCard.mystery, false, 'ordinary collection pet received mystery styling');
+  assert.notEqual(normalCollectionCard.title, '???', 'ordinary collection pet name was hidden');
+  assert.equal(normalCollectionCard.filter, 'none', 'ordinary collection pet artwork was filtered');
+  await page.locator('.collection-grid').screenshot({ path: path.join(artifactDir, 'collection-mystery-pets.png') });
+  report.collectionMysteryCards = collectionMysteryCards;
+  console.log(`✓ collection hides all ${PET_IDS.length} special characters as black silhouettes named ???`);
 
   assert.deepEqual(errors, [], `browser errors: ${errors.join('\n')}`);
   await fs.writeFile(path.join(artifactDir, 'report.json'), JSON.stringify(report, null, 2));

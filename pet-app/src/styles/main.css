@@ -750,6 +750,11 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
 .pet-card.locked { background: var(--chip); }
 .pet-card.locked .pet-art { filter: saturate(.1); }
 .pet-card.locked .pet-art img { opacity: .78; }
+.pet-card.mystery-pet .pet-art img {
+  filter: brightness(0) saturate(0);
+  opacity: .92;
+}
+.pet-card.mystery-pet h3 { letter-spacing: .16em; }
 .pet-card > .rarity, .shop-card > .rarity { align-self: flex-start; }
 .pet-art {
   aspect-ratio: 1 / 1; border-radius: var(--r-sm);

@@ -244,7 +244,6 @@ const PET_LIBRARY = [
   ['crayon-shin-chan','epic','comedy',['蠟筆小新','蠟筆小新','蠟筆小新','蠟筆小新'],['Crayon Shin-chan','Crayon Shin-chan','Crayon Shin-chan','Crayon Shin-chan'],'動感超人','Action Mask Spirit','#e53935','shin-chan',9999],
   ['doraemon','epic','cosmic',['多啦A夢','多啦A夢','多啦A夢','多啦A夢'],['Doraemon','Doraemon','Doraemon','Doraemon'],'隨意門','Anywhere Door','#1e9eea','doraemon',9999],
   ['hello-kitty','epic','light',['Hello Kitty','Hello Kitty','Hello Kitty','Hello Kitty'],['Hello Kitty','Hello Kitty','Hello Kitty','Hello Kitty'],'友情蝴蝶結','Friendship Bow','#ed3348','hello-kitty',9999],
-  ['donald-trump-cartoon','epic','leadership',['Donald Trump（卡通版）','Donald Trump（卡通版）','Donald Trump（卡通版）','Donald Trump（卡通版）'],['Donald Trump (Cartoon)','Donald Trump (Cartoon)','Donald Trump (Cartoon)','Donald Trump (Cartoon)'],'自信登場','Confident Entrance','#243b6b','trump',9999],
 ].map(([id, rarity, element, namesZh, namesEn, talentZh, talentEn, color, body, directPrice]) => ({
   id, rarity, element, names: { 'zh-HK': namesZh, 'en-US': namesEn },
   talent: { 'zh-HK': talentZh, 'en-US': talentEn }, color, body,
@@ -272,7 +271,7 @@ const RELEASED_PET_IDS = new Set([
   'starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster',
   'mossback-turtle', 'leaftail-fox', 'thunderhorn-goat', 'bubble-otter', 'snowfeather-penguin', 'coral-seal',
   'golden-retriever-dog', 'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
-  'doraemon', 'hello-kitty', 'donald-trump-cartoon',
+  'doraemon', 'hello-kitty',
 ]);
 const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
 
