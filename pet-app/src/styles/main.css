@@ -802,6 +802,12 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
 
 .shop-card { min-height: 232px; }
 .shop-card > img { height: 96px; background: #f2e9dc; border-radius: var(--r-sm); object-fit: contain; }
+.shop-card.mystery-pet > img {
+  background: transparent;
+  filter: brightness(0) saturate(0);
+  opacity: .92;
+}
+.shop-card.mystery-pet h3 { letter-spacing: .16em; }
 .item-glyph {
   height: 96px; border-radius: var(--r-sm);
   background: linear-gradient(135deg, #f6ecdd, #e7d8c4);

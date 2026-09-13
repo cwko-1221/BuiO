@@ -88,31 +88,34 @@ const DEFAULT_PET_LAYOUT = {
   columns: ATLAS_COLUMNS, rows: ATLAS_ROWS, cell: ATLAS_CELL, fps: 8,
   walkFrames: [1, 2, 3], specialRow: 3,
 };
-const PET_LAYOUTS = {
-  'nezuko-kamado': {
-    columns: 8, rows: 5, cell: ATLAS_CELL, fps: 10,
-    // The 4096 source is an exact 8x8 grid. Only its first five rows ship: three complete
-    // eight-phase walk cycles, a full breathe/blink idle cycle and a special-pose row.
-    sourceGrid: { columns: 8, rows: 8 },
-    preserveCellPlacement: true,
-    portraitFrame: 24,
-    poseRows: ['front-walk', 'right-walk', 'back-walk', 'front-idle', 'front-special'],
-    poseColumns: ['phase-1', 'phase-2', 'phase-3', 'phase-4',
-      'phase-5', 'phase-6', 'phase-7', 'phase-8'],
-    clips: [
-      { name: 'idle', facing: 'front', frames: [24, 25, 26, 27, 28, 29, 30, 31],
-        durations: [900, 100, 700, 0, 0, 0, 100, 500] },
-      { name: 'walk', facing: 'front', frames: [0, 1, 2, 3, 4, 5, 6, 7] },
-      { name: 'walk', facing: 'right', frames: [8, 9, 10, 11, 12, 13, 14, 15] },
-      { name: 'walk', facing: 'back', frames: [16, 17, 18, 19, 20, 21, 22, 23] },
-      { name: 'eat', facing: 'front', frames: [32] },
-      { name: 'happy', facing: 'front', frames: [33] },
-      { name: 'sleep', facing: 'front', frames: [34] },
-      { name: 'sit', facing: 'front', frames: [35] },
-      { name: 'surprised', facing: 'front', frames: [36] },
-    ],
-  },
+const PREMIUM_PET_IDS = [
+  'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan', 'doraemon',
+  'hello-kitty', 'donald-trump-cartoon',
+];
+const PREMIUM_PET_LAYOUT = {
+  columns: 8, rows: 5, cell: ATLAS_CELL, fps: 10,
+  // The 4096 source is an exact 8x8 grid. Only its first five rows ship: three complete
+  // eight-phase walk cycles, a full breathe/blink idle cycle and a special-pose row.
+  sourceGrid: { columns: 8, rows: 8 },
+  preserveCellPlacement: true,
+  portraitFrame: 24,
+  poseRows: ['front-walk', 'right-walk', 'back-walk', 'front-idle', 'front-special'],
+  poseColumns: ['phase-1', 'phase-2', 'phase-3', 'phase-4',
+    'phase-5', 'phase-6', 'phase-7', 'phase-8'],
+  clips: [
+    { name: 'idle', facing: 'front', frames: [24, 25, 26, 27, 28, 29, 30, 31],
+      durations: [900, 100, 700, 0, 0, 0, 100, 500] },
+    { name: 'walk', facing: 'front', frames: [0, 1, 2, 3, 4, 5, 6, 7] },
+    { name: 'walk', facing: 'right', frames: [8, 9, 10, 11, 12, 13, 14, 15] },
+    { name: 'walk', facing: 'back', frames: [16, 17, 18, 19, 20, 21, 22, 23] },
+    { name: 'eat', facing: 'front', frames: [32] },
+    { name: 'happy', facing: 'front', frames: [33] },
+    { name: 'sleep', facing: 'front', frames: [34] },
+    { name: 'sit', facing: 'front', frames: [35] },
+    { name: 'surprised', facing: 'front', frames: [36] },
+  ],
 };
+const PET_LAYOUTS = Object.fromEntries(PREMIUM_PET_IDS.map((id) => [id, PREMIUM_PET_LAYOUT]));
 const petLayoutFor = (speciesId) => PET_LAYOUTS[speciesId] || DEFAULT_PET_LAYOUT;
 
 /**
