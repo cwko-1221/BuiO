@@ -133,6 +133,14 @@ try {
   // unique constraint on year/class/subject/date would still reject this otherwise.
   assert.equal((await request(teacher, '/api/homework/records', { method: 'POST', body: teacherCreatedBody })).response.status, 201, 'the date is free to record again after a delete');
   await request(teacher, `/api/homework/records?${teacherCreated}`, { method: 'DELETE' });
+  const teacherBlankBody = {
+    ...teacherCreatedBody,
+    homeworks: [{ id: 'teacher-hw-blank', title: '老師留空記錄', statuses: [] }],
+  };
+  result = await request(teacher, '/api/homework/records', { method: 'POST', body: teacherBlankBody });
+  assert.equal(result.response.status, 201, 'teacher can submit while every student is left blank');
+  assert.ok(result.data.record.homeworks[0].statuses.every(row => row.status === ''), 'blank teacher statuses are stored as empty values');
+  await request(teacher, `/api/homework/records?${teacherCreated}`, { method: 'DELETE' });
 
   const monitor = await login('S001');
   assert.equal((await request(monitor, '/api/homework/meta')).data.canAccess, true);
@@ -170,6 +178,16 @@ try {
   assert.equal(result.response.status, 200, 'monitor can update today record');
   assert.equal(result.data.record.homeworks.length, 3, 'monitor can add homework after saving');
   assert.equal(result.data.record.homeworks[0].title, '工作紙（一）修訂', 'monitor edits saved homework');
+  const partialMonitorUpdate = structuredClone(result.data.record);
+  partialMonitorUpdate.homeworks[0].statuses = [
+    { studentId: 'S001', status: 'complete' },
+    { studentId: 'S003', status: 'missing' },
+  ];
+  partialMonitorUpdate.homeworks[1].statuses = [];
+  result = await request(monitor, '/api/homework/records', { method: 'PUT', body: partialMonitorUpdate });
+  assert.equal(result.response.status, 200, 'monitor can save with students left blank');
+  assert.equal(result.data.record.homeworks[0].statuses.find(row => row.studentId === 'S002').status, '', 'an omitted monitor status is stored as blank');
+  assert.ok(result.data.record.homeworks[1].statuses.every(row => row.status === ''), 'a homework can be submitted with every student blank');
   assert.equal((await request(monitor, '/api/homework/records', { method: 'PUT', body: { ...monitorUpdate, date: '2020-01-01' } })).response.status, 400, 'past record stays read-only');
   assert.equal((await request(monitor, '/api/homework/records', { method: 'POST', body: recordBody })).response.status, 409, 'duplicate create is rejected');
 

@@ -150,7 +150,7 @@ function statusControls(homework, student, teacher = false, locked = false) {
   const statuses = ['complete', 'missing', 'absent'];
   if (locked) return `<div class="status-summary"><span class="status-tag ${current}">${statusLabels[current] || '—'}</span>${row?.madeUp ? `<span class="status-tag made-up">${escapeHtml(t('h.madeUp'))}</span>` : ''}</div>`;
   return `<div class="status-options">
-    ${statuses.map(status => `<label><input type="radio" name="${escapeHtml(homework.id)}-${escapeHtml(student.id)}" data-hw="${escapeHtml(homework.id)}" data-student="${escapeHtml(student.id)}" value="${status}" ${current === status ? 'checked' : ''}>${statusLabels[status]}</label>`).join('')}
+    ${statuses.map(status => `<label><input type="checkbox" name="${escapeHtml(homework.id)}-${escapeHtml(student.id)}" data-hw="${escapeHtml(homework.id)}" data-student="${escapeHtml(student.id)}" value="${status}" ${current === status ? 'checked' : ''}>${statusLabels[status]}</label>`).join('')}
     ${teacher ? `<label class="made-up-option"><input type="checkbox" data-made-up data-hw="${escapeHtml(homework.id)}" data-student="${escapeHtml(student.id)}" ${row?.madeUp ? 'checked' : ''}>${escapeHtml(t('h.madeUp'))}</label>` : ''}
   </div>`;
 }
@@ -278,11 +278,19 @@ function renderStudent() {
 
 function syncEditor() {
   document.querySelectorAll('.homework-name').forEach(input => { const hw = state.homeworks.find(item => item.id === input.dataset.hw); if (hw) hw.title = input.value; });
-  document.querySelectorAll('.status-options input:checked').forEach(input => {
-    if (input.matches('[data-made-up]')) return;
+  const statusInputs = [...document.querySelectorAll('.status-options input:not([data-made-up])')];
+  const statusGroups = new Map();
+  statusInputs.forEach(input => {
+    const key = `${input.dataset.hw}:${input.dataset.student}`;
+    if (!statusGroups.has(key)) statusGroups.set(key, []);
+    statusGroups.get(key).push(input);
+  });
+  statusGroups.forEach(inputs => {
+    const selected = inputs.find(input => input.checked);
+    const input = inputs[0];
     const hw = state.homeworks.find(item => item.id === input.dataset.hw);
     const row = hw?.statuses.find(item => item.studentId === input.dataset.student);
-    if (row) row.status = input.value;
+    if (row) row.status = selected?.value || '';
   });
   document.querySelectorAll('[data-made-up]').forEach(input => {
     const hw = state.homeworks.find(item => item.id === input.dataset.hw);
@@ -299,6 +307,14 @@ function bindCommon() {
     else if (state.view === 'records') loadTeacherRecord();
     else if (state.view === 'analysis') loadAnalysisStudents();
     else { state.classAnalysisRows = []; state.classAnalysisTotal = 0; render(); }
+  }));
+  document.querySelectorAll('.status-options input:not([data-made-up])').forEach(input => input.addEventListener('change', () => {
+    if (input.checked) {
+      document.querySelectorAll('.status-options input:not([data-made-up])').forEach(other => {
+        if (other !== input && other.dataset.hw === input.dataset.hw && other.dataset.student === input.dataset.student) other.checked = false;
+      });
+    }
+    syncEditor();
   }));
   document.querySelectorAll('.remove-homework').forEach(button => button.addEventListener('click', () => { syncEditor(); state.homeworks = state.homeworks.filter(hw => hw.id !== button.dataset.hw); render(); }));
 }

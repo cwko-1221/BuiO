@@ -359,7 +359,7 @@ router.get('/records-pdf', requireTeacher, async (req, res, next) => {
     const lines = ['杯澳公立學校　欠交功課記錄', `${assignment.academicYear}　${assignment.className}　${subject.name}　${date}`, ''];
     record.homeworks.forEach((homework, index) => {
       lines.push(`${index + 1}. ${homework.title}`);
-      const exceptions = homework.statuses.filter(item => item.status !== 'complete');
+      const exceptions = homework.statuses.filter(item => item.status && item.status !== 'complete');
       if (!exceptions.length) lines.push('　全班完成');
       else exceptions.forEach(item => lines.push(`　${names.get(item.studentId) || item.studentId}：${labels[item.status] || item.status}${item.madeUp ? '（已補做）' : ''}`));
       lines.push('');
@@ -383,24 +383,28 @@ function normalizeHomeworks(homeworks, rosterIds, statuses, { allowMadeUp = fals
     const id = text(homeworks[index]?.id, 50) || `hw-${Date.now()}-${index + 1}`;
     const title = text(homeworks[index]?.title, 150);
     if (!title) return { error: `請填寫第 ${index + 1} 份功課名稱` };
-    const incoming = Array.isArray(homeworks[index].statuses) ? homeworks[index].statuses : [];
+    const incoming = Array.isArray(homeworks[index]?.statuses) ? homeworks[index].statuses : [];
     const statusMap = new Map();
+    const seenStudents = new Set();
     for (const row of incoming) {
-      const studentId = text(row.studentId, 20);
-      const status = text(row.status, 20);
-      if (!allowedStudents.has(studentId) || !allowedStatuses.has(status) || statusMap.has(studentId)) return { error: '學生狀態資料不正確' };
+      const studentId = text(row?.studentId, 20);
+      const status = text(row?.status, 20);
+      if (!allowedStudents.has(studentId) || seenStudents.has(studentId)) return { error: '學生狀態資料不正確' };
+      seenStudents.add(studentId);
+      if (!status) continue;
+      if (!allowedStatuses.has(status)) return { error: '學生狀態資料不正確' };
       statusMap.set(studentId, status);
     }
-    if (statusMap.size !== rosterIds.length) return { error: '請為所有學生選擇狀態' };
     normalized.push({
       id,
       title,
       statuses: rosterIds.map(studentId => {
-        const incoming = homeworks[index].statuses.find(row => text(row.studentId, 20) === studentId);
-        const madeUp = allowMadeUp
-          ? Boolean(incoming?.madeUp)
-          : Boolean(preservedMadeUp.get(`${id}:${studentId}`));
-        return { studentId, status: statusMap.get(studentId), madeUp };
+        const incomingRow = incoming.find(row => text(row?.studentId, 20) === studentId);
+        const status = statusMap.get(studentId) || '';
+        const madeUp = status === 'missing' && (allowMadeUp
+          ? Boolean(incomingRow?.madeUp)
+          : Boolean(preservedMadeUp.get(`${id}:${studentId}`)));
+        return { studentId, status, madeUp };
       }),
     });
   }
