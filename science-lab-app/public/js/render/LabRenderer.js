@@ -11,7 +11,7 @@ import { buildExperimentScene } from './ExperimentScenes.js';
 // reader has chosen English, and passes anything unmapped straight through.
 const sceneLabel = (text) => window.BuiI18n?.sceneLabel?.(text) ?? text;
 import { PhysicsWorld } from '../physics/PhysicsWorld.js';
-import { loadScienceLabKit, getAssetLibraryStats } from './AssetLibrary.js';
+import { loadScienceLabKit, loadRespiratoryModel, getAssetLibraryStats } from './AssetLibrary.js';
 
 const DEFAULT_CAMERA = new THREE.Vector3(0, 7.6, 11.2);
 const DEFAULT_TARGET = new THREE.Vector3(0, .9, 0);
@@ -20,7 +20,7 @@ const CAMERA_PRESETS = {
   'air-expansion': { position: [0, 5.35, 9.7], target: [0, 1.35, -.15] },
   // The breathing board stands upright, so this station is viewed head-on
   // rather than down onto a bench top.
-  'respiratory-system': { position: [0, 3.15, 12.1], target: [0, 2.8, .2] },
+  'respiratory-system': { position: [0, 3.3, 10.9], target: [0, 3.05, .2] },
   'water-filter': { position: [-.1, 7.55, 11.9], target: [.35, 1.3, .05] },
   'electric-crane': { position: [-.3, 7.35, 12.2], target: [.25, 1.25, 0] },
   'light-reflection': { position: [-.1, 7.15, 11.4], target: [.35, 1.7, .05] },
@@ -123,6 +123,7 @@ export class LabRenderer {
     });
     await this.physics.init();
     this.assetKit = await loadScienceLabKit();
+    this.anatomyKit = await loadRespiratoryModel();
     this.#buildEnvironment();
     this.#bindInput();
     this.canvas.addEventListener('webglcontextlost', (event) => {

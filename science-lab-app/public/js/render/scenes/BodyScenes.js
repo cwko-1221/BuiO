@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { palette, mat, roundedBox, torus, dynamicDisplay } from '../SceneKit.js';
+import { cloneAnatomy } from '../AssetLibrary.js';
 
 // A standing cutaway model of the respiratory system. The head and abdomen are
 // solid; the front of the thorax is opened so the airway, lungs, rib cage and
@@ -136,11 +137,39 @@ function tube(points, radius, material, { segments = 48, radial = 10 } = {}) {
   return mesh;
 }
 
+/** A tube through points already in space, used for a slice of a longer curve. */
+function tubeThrough(vectors, radius, material, radial = 8) {
+  const mesh = new THREE.Mesh(
+    new THREE.TubeGeometry(new THREE.CatmullRomCurve3(vectors), Math.max(vectors.length - 1, 2), radius, radial, false),
+    material,
+  );
+  mesh.castShadow = false;
+  return mesh;
+}
+
+/**
+ * One rib, drawn as a solid back and side and a faded front. The join is taken
+ * off one sampled curve so the two pieces line up exactly.
+ */
+function addRib(group, level, side, radius, solid, ghost) {
+  const curve = new THREE.CatmullRomCurve3(ribCurve(level, side).map((p) => new THREE.Vector3(...p)));
+  const samples = curve.getPoints(44);
+  const split = 27;
+  group.add(tubeThrough(samples.slice(0, split + 1), radius, solid));
+  group.add(tubeThrough(samples.slice(split), radius, ghost));
+  return samples.at(-1);
+}
+
 const MATERIALS = () => ({
   bone: mat(0xf6ecdc, { roughness: .46, metalness: .02, clearcoat: .18 }),
-  cartilage: mat(0xe6f0ee, { roughness: .32, metalness: 0, clearcoat: .5, transparent: true, opacity: .95 }),
+  boneGhost: mat(0xf6ecdc, {
+    roughness: .5, metalness: .02, transparent: true, opacity: .19, depthWrite: false,
+  }),
+  vessel: mat(0x7a93cf, { roughness: .42, clearcoat: .3 }),
+  vein: mat(0xc0566a, { roughness: .42, clearcoat: .3 }),
+  cartilage: mat(0xe6f0ee, { roughness: .32, metalness: 0, clearcoat: .5, transparent: true, opacity: .42, depthWrite: false }),
   airway: mat(0xdca3b4, { roughness: .44, clearcoat: .3 }),
-  airwayDeep: mat(0xcf8fa4, { roughness: .46 }),
+  airwayDeep: mat(0xb9748d, { roughness: .46, clearcoat: .25 }),
   lung: mat(0xdd7086, { roughness: .5, metalness: 0, clearcoat: .45, clearcoatRoughness: .38 }),
   muscle: mat(0xc9604f, { roughness: .58 }),
   tendon: mat(0xe8d8c6, { roughness: .5 }),
@@ -173,7 +202,10 @@ function ribCurve(level, side) {
 // third thoracic vertebra behind to the sixth costal cartilage in front.
 const OBLIQUE = { n: new THREE.Vector3(0, .819, .573), c: 1.994 };
 const HORIZONTAL = { n: new THREE.Vector3(0, 1, 0), c: 2.62 };
-const FISSURE_GAP = .018;
+const FISSURE_GAP = .045;
+// How far out from the midline the mediastinal surface of each lung sits, as a
+// fraction of the half-width of the chest at that height.
+const MEDIASTINUM = .19;
 
 /**
  * A lung lobe, cut from the whole-lung hull. The hull is a deformed ellipsoid —
@@ -183,7 +215,7 @@ const FISSURE_GAP = .018;
  * neither cross a rib nor drift away from its neighbours.
  */
 function makeLobe(side, material, {
-  top, bottom, innerCut = .55, frontBias = 0, notch = 0, margin = .05, clips = [],
+  top, bottom, innerCut = .55, frontBias = 0, notch = 0, margin = .035, clips = [],
 } = {}) {
   const geometry = new THREE.SphereGeometry(1, 40, 30);
   const position = geometry.attributes.position;
@@ -226,7 +258,9 @@ function makeLobe(side, material, {
     // function the ribs are laid on, so containment is exact, not eyeballed.
     const { rx, rz } = cageInner(y);
     const usable = 1 - margin;
-    x = side * Math.abs(x) * rx * usable * .98;
+    const medial = rx * MEDIASTINUM;
+    const lateral = rx * usable;
+    x = side * (medial + Math.min(Math.abs(x), 1) * (lateral - medial));
     z *= rz * usable * .96;
     const escape = Math.hypot(x / (rx * usable), z / (rz * usable));
     if (escape > 1) { x /= escape; z /= escape; }
@@ -238,7 +272,25 @@ function makeLobe(side, material, {
     position.setXYZ(index, x, y, z);
   }
   geometry.computeVertexNormals();
+
+  // Mottling, and a darker wash down in the fissures and around the hilum.
+  const colours = new Float32Array(position.count * 3);
+  const tint = new THREE.Color();
+  const light = new THREE.Color(0xf5b3bd);
+  const dark = new THREE.Color(0xd4798c);
+  for (let index = 0; index < position.count; index += 1) {
+    vertex.fromBufferAttribute(position, index);
+    const grain = Math.sin(vertex.x * 23.7) * Math.sin(vertex.y * 19.3 + 1.7) * Math.sin(vertex.z * 27.1 + .6);
+    const inward = 1 - THREE.MathUtils.clamp(Math.abs(vertex.x) / .8, 0, 1);
+    tint.copy(light).lerp(dark, THREE.MathUtils.clamp(.28 + grain * .24 + inward * .18, 0, 1));
+    colours[index * 3] = tint.r;
+    colours[index * 3 + 1] = tint.g;
+    colours[index * 3 + 2] = tint.b;
+  }
+  geometry.setAttribute('color', new THREE.BufferAttribute(colours, 3));
+
   const mesh = new THREE.Mesh(geometry, material);
+  mesh.material.vertexColors = true;
   mesh.castShadow = false;
   return mesh;
 }
@@ -331,114 +383,60 @@ export function buildRespiratory(api) {
   model.position.y = .34;
   stage.add(model);
 
+  // The anatomy itself is modelled in Blender and loaded as one glb: the lungs
+  // are carved out of the chest cavity and the diaphragm domes there, so the
+  // lobes cannot cross a rib and their bases sit on the domes by construction.
+  // tmp/bl-lungs.py, tmp/bl-skeleton.py and tmp/bl-export.py rebuild it.
   const organs = new THREE.Group();
   model.add(organs);
 
-  // ------------------------------------------------------------- the airway
-  const airway = turned([
-    [0, 4.62], [.15, 4.56], [.18, 4.26], [.18, 4.08], [.16, 3.96], [0, 3.92],
-  ], 0xdca3b4, { roughness: .44 }, { depth: .9 });
-  organs.add(airway);
-
-  // The larynx: the thyroid cartilage sits over the cricoid ring.
-  const thyroid = turned([
-    [0, 4.06], [.19, 4.02], [.21, 3.86], [.17, 3.74], [0, 3.72],
-  ], 0xe6f0ee, { roughness: .32, clearcoat: .5 }, { depth: .88 });
-  organs.add(thyroid);
-  const cricoid = torus(.16, .035, 0xe6f0ee, { roughness: .32 });
-  cricoid.rotation.x = Math.PI / 2;
-  cricoid.scale.z = .9;
-  cricoid.position.y = 3.68;
-  organs.add(cricoid);
-
-  const trachea = turned([
-    [0, 3.72], [.145, 3.7], [.145, CARINA_Y + .04], [0, CARINA_Y],
-  ], 0xcf8fa4, { roughness: .46 }, { depth: .92 });
-  organs.add(trachea);
-  // Tracheal cartilage is a stack of C-shaped rings, open at the back where the
-  // oesophagus runs — drawing closed rings is the usual giveaway of a model
-  // that was never checked against an anatomy plate.
-  const ringCount = 8;
-  for (let index = 0; index < ringCount; index += 1) {
-    const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(.158, .026, 8, 30, Math.PI * 1.42),
-      M.cartilage,
-    );
-    ring.rotation.x = Math.PI / 2;
-    ring.rotation.z = -Math.PI * .71;
-    ring.scale.z = .92;
-    ring.position.y = 3.64 - index * .085;
-    organs.add(ring);
-  }
-
-  // ---------------------------------------------------------- bronchial tree
-  const bronchi = new THREE.Group();
-  organs.add(bronchi);
-  const carina = new THREE.Vector3(0, CARINA_Y, 0);
-  for (const side of [-1, 1]) {
-    // The right main bronchus is wider, shorter and more vertical than the
-    // left, which is why inhaled objects tend to go down the right side.
-    const right = side > 0;
-    const hilum = new THREE.Vector3(side * .3, CARINA_Y - (right ? .2 : .26), .02);
-    const main = tube([carina.toArray(), hilum.toArray()], right ? .085 : .072, M.airwayDeep, { segments: 8 });
-    bronchi.add(main);
-    const direction = new THREE.Vector3(side * (right ? .74 : .86), right ? -.66 : -.5, .08).normalize();
-    growBronchi(bronchi, M.airwayDeep, hilum, direction, right ? .066 : .058, 0);
-  }
-
-  // ------------------------------------------------------------- the lungs
-  // Right lung: three lobes. Left: two, with the cardiac notch at the front.
-  const lobes = [];
-  const LOBE_PIVOT = CAGE_TOP + .12;
-  const addLobe = (side, options) => {
-    const lobe = makeLobe(side, M.lung.clone(), options);
-    lobe.geometry.translate(0, -LOBE_PIVOT, 0);
-    lobe.position.y = LOBE_PIVOT;
-    organs.add(lobe);
-    lobes.push({ lobe, side });
-    return lobe;
+  const part = (name) => {
+    const mesh = cloneAnatomy(name);
+    if (!mesh) return null;
+    organs.add(mesh);
+    return mesh;
   };
-  const rightHull = { top: 3.34, bottom: 1.76, innerCut: .56, frontBias: .02 };
-  const leftHull = { top: 3.34, bottom: 1.76, innerCut: .56, frontBias: .02, notch: .3 };
-  const above = (plane) => ({ ...plane, keep: 1 });
-  const below = (plane) => ({ ...plane, keep: -1 });
-  // Right lung: superior, middle and inferior.
-  addLobe(1, { ...rightHull, clips: [above(OBLIQUE), above(HORIZONTAL)] });
-  addLobe(1, { ...rightHull, clips: [above(OBLIQUE), below(HORIZONTAL)] });
-  addLobe(1, { ...rightHull, clips: [below(OBLIQUE)] });
-  // Left lung: superior and inferior only, and it carries the cardiac notch.
-  addLobe(-1, { ...leftHull, clips: [above(OBLIQUE)] });
-  addLobe(-1, { ...leftHull, clips: [below(OBLIQUE)] });
 
-  // --------------------------------------------------------- the diaphragm
-  const diaphragmPivot = new THREE.Group();
-  diaphragmPivot.position.y = DIAPHRAGM_BASE;
-  model.add(diaphragmPivot);
-  const diaphragmDomes = new THREE.Group();
-  diaphragmPivot.add(diaphragmDomes);
-  for (const side of [-1, 1]) {
-    // The right dome sits higher, pushed up by the liver beneath it.
-    const dome = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 32, 18, 0, Math.PI * 2, 0, Math.PI * .5),
-      M.muscle,
-    );
-    const { rx, rz } = cageInner(DIAPHRAGM_BASE + .25);
-    dome.scale.set(rx * .62, side > 0 ? DOME_RISE.right : DOME_RISE.left, rz * .84);
-    dome.position.set(side * rx * .44, 0, 0);
-    diaphragmDomes.add(dome);
+  const lungs = part('lungs');
+  const airway = part('airway');
+  const spine = part('spine');
+  const ribShell = part('ribcage') || new THREE.Group();
+  if (!ribShell.parent) organs.add(ribShell);
+
+  // One lung shown through, so the bronchial tree inside it can be seen: the
+  // convention an atlas uses, and the only way the 支氣管 callout has anything
+  // to point at.
+  if (lungs) {
+    lungs.traverse((child) => {
+      if (!child.isMesh) return;
+      child.material.vertexColors = true;
+      child.material.transparent = true;
+      child.material.opacity = .86;
+      child.material.depthWrite = true;
+      child.material.roughness = .5;
+      child.material.clearcoat = .35;
+    });
   }
-  const centralTendon = new THREE.Mesh(
-    new THREE.SphereGeometry(.3, 22, 12, 0, Math.PI * 2, 0, Math.PI * .5),
-    M.tendon,
-  );
-  centralTendon.scale.set(.92, .46, .8);
-  centralTendon.position.y = .3;
-  diaphragmDomes.add(centralTendon);
-  const rim = cageInner(DIAPHRAGM_BASE).rx * .96;
-  const diaphragmSkirt = turned([
-    [.34, .18], [rim * .74, .08], [rim, -.04], [rim, -.16], [.34, .04],
-  ], 0xc9604f, { roughness: .58, side: THREE.DoubleSide }, { depth: .72 });
-  diaphragmDomes.add(diaphragmSkirt);
+
+  // The rib cage is its own group so the breath can swing it outwards.
+  const ribCage = new THREE.Group();
+  model.add(ribCage);
+  organs.remove(ribShell);
+  ribCage.add(ribShell);
+  if (spine) {
+    organs.remove(spine);
+    ribCage.add(spine);
+  }
+
+  const diaphragmPivot = new THREE.Group();
+  model.add(diaphragmPivot);
+  const diaphragmSheet = cloneAnatomy('diaphragm');
+  if (diaphragmSheet) {
+    // Modelled at its resting height, so the pivot carries only the travel.
+    diaphragmSheet.position.y = -DIAPHRAGM_BASE;
+    diaphragmPivot.position.y = DIAPHRAGM_BASE;
+    diaphragmPivot.add(diaphragmSheet);
+  }
 
   const diaphragmHandle = makeHandle(0x9b7fd4);
   diaphragmHandle.position.set(0, .04, 1.02);
@@ -447,62 +445,6 @@ export function buildRespiratory(api) {
   api.entity('diaphragm', '橫膈膜', diaphragmHandle, {
     adjustable: true, adjustAxis: 'vertical', namePlate: false, physics: false,
   });
-
-  // ------------------------------------------------------------ the skeleton
-  const ribCage = new THREE.Group();
-  model.add(ribCage);
-  const ribShell = new THREE.Group();
-  ribCage.add(ribShell);
-
-  const sternumTop = THREE.MathUtils.lerp(CAGE_TOP, CAGE_BOTTOM, .05) - .16;
-  for (let index = 0; index < RIB_COUNT; index += 1) {
-    const level = index / (RIB_COUNT - 1);
-    for (const side of [-1, 1]) {
-      const bone = tube(ribCurve(level, side), .024 + (1 - level) * .004, M.bone, { segments: 40, radial: 8 });
-      ribShell.add(bone);
-
-      // True ribs reach the breastbone through costal cartilage; the lower
-      // ones join the arch above instead, and the last pair ends free.
-      if (index >= RIB_COUNT - 1) continue;
-      const tip = ribCurve(level, side).at(-1);
-      const meetsSternum = index < 6;
-      const target = meetsSternum
-        ? [side * .09, sternumTop - index * .19, cageInner(tip[1]).rz * .92]
-        : [side * .3, tip[1] + .2, cageInner(tip[1]).rz * .95];
-      ribShell.add(tube([
-        tip,
-        [(tip[0] + target[0]) / 2, (tip[1] + target[1]) / 2 - .06, (tip[2] + target[2]) / 2 + .06],
-        target,
-      ], .024, M.cartilage, { segments: 14, radial: 8 }));
-    }
-  }
-
-  const sternum = new THREE.Group();
-  const manubrium = roundedBox(.3, .3, .09, 0xf6ecdc, .05, 3, { roughness: .46, castShadow: false });
-  manubrium.position.y = sternumTop + .06;
-  const body = roundedBox(.24, .84, .085, 0xf6ecdc, .04, 3, { roughness: .46, castShadow: false });
-  body.position.y = sternumTop - .4;
-  const xiphoid = roundedBox(.13, .2, .07, 0xf0e2d0, .04, 3, { roughness: .46, castShadow: false });
-  xiphoid.position.y = sternumTop - .92;
-  sternum.add(manubrium, body, xiphoid);
-  sternum.position.z = cageInner(sternumTop - .4).rz * .94;
-  ribShell.add(sternum);
-
-  // The vertebral column, one body per rib pair.
-  const spine = new THREE.Group();
-  for (let index = 0; index <= RIB_COUNT; index += 1) {
-    const y = THREE.MathUtils.lerp(CAGE_TOP + .12, CAGE_BOTTOM - .18, index / RIB_COUNT);
-    const vertebra = new THREE.Mesh(new THREE.CylinderGeometry(.115, .12, .12, 14), M.bone);
-    vertebra.position.set(0, y, -cageInner(y).rz - .14);
-    spine.add(vertebra);
-    const disc = new THREE.Mesh(new THREE.CylinderGeometry(.105, .105, .04, 14), M.cartilage);
-    disc.position.set(0, y - .085, -cageInner(y).rz - .14);
-    spine.add(disc);
-    const spinous = roundedBox(.07, .1, .22, 0xf0e2d0, .03, 2, { roughness: .46, castShadow: false });
-    spinous.position.set(0, y - .04, -cageInner(y).rz - .3);
-    spine.add(spinous);
-  }
-  ribCage.add(spine);
 
   const ribHandle = makeHandle(0x9b7fd4);
   ribHandle.position.set(1.26, 3.0, .28);
@@ -616,18 +558,22 @@ export function buildRespiratory(api) {
   model.add(downArrow);
   moveMarks.push(downArrow);
 
-  const readout = dynamicDisplay('把六個器官名牌放進正確的框', { scale: [2.9, .62] });
-  readout.position.set(0, 5.18, .5);
+  const readout = dynamicDisplay('把六個器官名牌放進正確的框', { scale: [2.7, .58] });
+  readout.position.set(0, 1.05, 1.35);
   stage.add(readout);
 
   // -------------------------------------------------------- the breath model
   const placed = new Set();
-  const values = { ribs: 0, diaphragm: 0, chest: 0 };
-  const shown = { ribs: 0, diaphragm: 0, chest: 0 };
+  // The thorax moves as one piece, so there is one number for the whole of it:
+  // -100 fully out, +100 fully in. Every handle writes to this, and every part
+  // reads from it.
+  const HANDLES = new Set(['ribs', 'diaphragm', 'chest']);
+  let wanted = 0;
+  let held = 0;
   let labelled = false;
 
   function breath() {
-    return (shown.ribs + shown.diaphragm + shown.chest) / 300;
+    return held / 100;
   }
 
   function phaseText() {
@@ -638,52 +584,33 @@ export function buildRespiratory(api) {
     return ['拖動肋骨、橫膈膜和胸腔，做出一次呼吸', '#8fb7c4'];
   }
 
-  /**
-   * The tightest gap between any lung vertex and the inside of the rib cage,
-   * in model units. Negative would mean a lobe is crossing a rib.
-   */
-  function clearance() {
-    let worst = Infinity;
-    const vertex = new THREE.Vector3();
-    for (const { lobe } of lobes) {
-      const position = lobe.geometry.attributes.position;
-      const scale = lobe.scale;
-      for (let index = 0; index < position.count; index += 6) {
-        vertex.fromBufferAttribute(position, index);
-        const x = vertex.x * scale.x;
-        const y = vertex.y * scale.y + lobe.position.y;
-        const z = vertex.z * scale.z;
-        const { rx, rz } = cageInner(y);
-        const escape = Math.hypot(x / rx, z / rz);
-        worst = Math.min(worst, (1 - escape) * Math.min(rx, rz));
-      }
-    }
-    return worst;
-  }
-
   function refresh() {
     const value = breath();
-    const spread = shown.ribs / 100;
-    ribShell.scale.set(1 + spread * .1, 1, 1 + spread * .08);
-    ribShell.position.y = spread * .12;
+    // Bucket-handle movement of the ribs.
+    ribShell.scale.set(1 + value * .1, 1, 1 + value * .08);
+    ribShell.position.y = value * .12;
+    ribHandle.position.x = 1.26 + value * .1;
 
-    const widen = shown.chest / 100;
-    torso.scale.set(1 + widen * .1, 1, .7 * (1 + widen * .12));
-    chestHandle.position.x = -1.26 - widen * .12;
+    // The chest wall rides out with the ribs it is built on.
+    torso.scale.set(1 + value * .1, 1, .7 * (1 + value * .12));
+    chestHandle.position.x = -1.26 - value * .12;
 
-    const drop = shown.diaphragm / 100;
+    // The diaphragm tightens and drops as the same breath is drawn.
+    const drop = value;
     diaphragmPivot.position.y = DIAPHRAGM_BASE - drop * .26;
-    diaphragmDomes.scale.y = 1 - drop * .42;
+    // A tightening diaphragm flattens as it descends.
+    if (diaphragmSheet) diaphragmSheet.scale.y = 1 - drop * .3;
 
     // The lungs follow the cavity: they cannot grow past the cage that holds
     // them, so the fill is applied as a gentle swell well inside the clamp.
     const fill = THREE.MathUtils.clamp((value + 1) / 2, 0, 1);
-    for (const { lobe } of lobes) {
-      const grow = .97 + fill * .05;
-      // Hung from the apex, so growth runs down into the space the diaphragm
-      // has just left rather than pushing up through the first rib.
-      lobe.scale.set(grow, 1 + drop * .1 + fill * .03, grow);
-      lobe.material.color.lerpColors(new THREE.Color(0xc8607a), new THREE.Color(0xee8aa0), fill);
+    // The lungs fill the space the ribs and diaphragm have opened. They are
+    // carved to the resting cavity, so the swell stays small and cannot push a
+    // lobe back out through a rib.
+    if (lungs) {
+      const grow = .98 + fill * .04;
+      lungs.scale.set(grow, 1 + drop * .07, grow);
+      lungs.position.y = -drop * .06;
     }
 
     const flowing = Math.abs(value) > .2;
@@ -706,8 +633,8 @@ export function buildRespiratory(api) {
   }
 
   api.onPreview = (subject, value) => {
-    if (!(subject in values)) return;
-    values[subject] = THREE.MathUtils.clamp(value, -100, 100);
+    if (!HANDLES.has(subject)) return;
+    wanted = THREE.MathUtils.clamp(value, -100, 100);
   };
 
   api.onAction = (action) => {
@@ -718,8 +645,8 @@ export function buildRespiratory(api) {
       refresh();
       return;
     }
-    if (action.subject in values) {
-      values[action.subject] = THREE.MathUtils.clamp(Number(action.value) || 0, -100, 100);
+    if (HANDLES.has(action.subject)) {
+      wanted = THREE.MathUtils.clamp(Number(action.value) || 0, -100, 100);
       refresh();
     }
   };
@@ -728,13 +655,10 @@ export function buildRespiratory(api) {
 
   return {
     update(time, dt = 1 / 60) {
-      let moved = false;
-      for (const key of Object.keys(values)) {
-        const next = THREE.MathUtils.damp(shown[key], values[key], 9, dt);
-        if (Math.abs(next - shown[key]) > .01) moved = true;
-        shown[key] = next;
-      }
-      if (moved) refresh();
+      const next = THREE.MathUtils.damp(held, wanted, 9, dt);
+      if (Math.abs(next - held) < .01) return;
+      held = next;
+      refresh();
     },
     getState() {
       const value = breath();
@@ -742,14 +666,14 @@ export function buildRespiratory(api) {
         experiment: 'respiratory-system',
         labelled,
         placed: placed.size,
-        ribs: Math.round(shown.ribs),
-        diaphragm: Math.round(shown.diaphragm),
-        chest: Math.round(shown.chest),
+        // One mechanism, so the three report the same travel.
+        ribs: Math.round(held),
+        diaphragm: Math.round(held),
+        chest: Math.round(held),
         breath: Number(value.toFixed(2)),
         inhaling: value > .45,
         exhaling: value < -.45,
-        lobes: lobes.length,
-        clearance: Number(clearance().toFixed(4)),
+        model: lungs ? 'blender' : 'missing',
       };
     },
     dispose() {},

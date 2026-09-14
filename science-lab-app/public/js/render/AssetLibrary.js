@@ -2,8 +2,55 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const KIT_URL = new URL('../../models/science-lab-kit.glb', import.meta.url).href;
+// The respiratory model is its own file: it is only wanted at one station, and
+// it is modelled and exported from Blender on its own schedule.
+const ANATOMY_URL = new URL('../../models/respiratory.glb', import.meta.url).href;
 const templates = new Map();
+const anatomy = new Map();
 let loadPromise = null;
+let anatomyPromise = null;
+
+// The parts the breathing station animates, as named on export.
+const ANATOMY_PARTS = ['lungs', 'ribcage', 'spine', 'airway', 'diaphragm'];
+
+/** Load the Blender respiratory model once. */
+export function loadRespiratoryModel() {
+  if (anatomyPromise) return anatomyPromise;
+  anatomyPromise = new Promise((resolve) => {
+    new GLTFLoader().load(ANATOMY_URL, (gltf) => {
+      for (const part of ANATOMY_PARTS) {
+        const node = gltf.scene.getObjectByName(part);
+        if (node) anatomy.set(part, node);
+      }
+      resolve({ loaded: anatomy.size, expected: ANATOMY_PARTS.length, url: ANATOMY_URL });
+    }, undefined, (error) => {
+      console.warn('Respiratory model could not be loaded.', error);
+      resolve({ loaded: 0, expected: ANATOMY_PARTS.length, url: ANATOMY_URL, error: true });
+    });
+  });
+  return anatomyPromise;
+}
+
+/** A render-resource clone of one anatomical part, or null if it is missing. */
+export function cloneAnatomy(part) {
+  const template = anatomy.get(part);
+  if (!template) return null;
+  const clone = template.clone(true);
+  clone.name = `ANATOMY_${part}`;
+  clone.position.set(0, 0, 0);
+  clone.quaternion.identity();
+  clone.scale.setScalar(1);
+  clone.traverse((child) => {
+    if (!child.isMesh) return;
+    child.geometry = child.geometry.clone();
+    const materials = Array.isArray(child.material) ? child.material : [child.material];
+    const cloned = materials.map((material) => material.clone());
+    child.material = Array.isArray(child.material) ? cloned : cloned[0];
+    child.castShadow = false;
+    child.receiveShadow = false;
+  });
+  return clone;
+}
 
 const ASSETS = {
   beaker: 'ASSET_BEAKER',

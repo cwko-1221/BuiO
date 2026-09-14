@@ -202,9 +202,13 @@ for (const removedId of ['lab-safety', 'transmission', 'root-viewer', 'food-web'
     `${removedId}: removed scene is absent from the production bundle`);
 }
 const glbAssets = (await readdir(path.join(distRoot, 'assets'))).filter((file) => file.endsWith('.glb'));
-assert.equal(glbAssets.length, 1, 'production includes one focused Blender equipment kit');
-assert.ok((await stat(path.join(distRoot, 'assets', glbAssets[0]))).size < 1_500_000,
-  'focused Blender kit includes the selected apparatus and compact PBR spoon textures');
+// The apparatus kit and the respiratory model are modelled and exported from
+// Blender separately, because only one station wants the anatomy. The budget is
+// on the total, which is what a pupil actually downloads.
+assert.equal(glbAssets.length, 2, 'production includes the equipment kit and the respiratory model');
+const glbBytes = (await Promise.all(glbAssets.map(async (file) => (await stat(path.join(distRoot, 'assets', file))).size)))
+  .reduce((sum, size) => sum + size, 0);
+assert.ok(glbBytes < 2_500_000, `Blender models stay within the download budget (actual ${glbBytes} bytes)`);
 const totalGzip = jsAssets.reduce(async (sumPromise, file) => {
   const sum = await sumPromise;
   const contents = await readFile(path.join(distRoot, 'assets', file));
