@@ -8,11 +8,9 @@ import { cloneAnatomy } from '../AssetLibrary.js';
 //
 // The anatomy itself is modelled in Blender and loaded as one glb — see
 // art-source/respiratory. Inside that model the lungs are carved out of the
-// chest cavity and off the diaphragm domes, so a lobe cannot cross a rib or
-// sink into a dome by construction. The few numbers repeated here are measured
-// off the exported file, and the breath maths keeps the lung bases and the dome
-// summit moving by exactly the same distance so that carved fit survives the
-// animation.
+// chest cavity and off the diaphragm domes.  Blender also owns the inhalation
+// and exhalation shape keys: the browser only blends those validated anatomical
+// endpoints.  It never scales an organ as if it were a rubber toy.
 //
 // Colour and material live entirely in the Blender source. Nothing in this file
 // should hold a second palette.
@@ -44,18 +42,6 @@ const BOX_H = .5;
 const translate = (text) => window.BuiI18n?.sceneLabel?.(text) ?? text;
 
 const DIAPHRAGM_BASE = 1.72;
-// Taken from the model: the dome spans 1.720..2.260 and the lungs 2.034..3.440.
-const DOME_APEX = 2.26;
-const LUNG_APEX = 3.44;
-const LUNG_BASE = 2.034;
-// How far the floor of the chest travels over one breath.
-const FLOOR_TRAVEL = .26;
-// Scaling the dome by this much moves its summit exactly FLOOR_TRAVEL while
-// the rim stays pinned to its attachment.
-const DOME_SQUASH = FLOOR_TRAVEL / (DOME_APEX - DIAPHRAGM_BASE);
-// Shrinking the lungs about their apex by this much raises their base by
-// exactly FLOOR_TRAVEL, which is what keeps them sitting on the dome.
-const LUNG_SQUEEZE = FLOOR_TRAVEL / (LUNG_APEX - LUNG_BASE);
 
 /**
  * A flat card of text. The shared label plane is sized for bench name plates
@@ -137,11 +123,10 @@ function makeLeader(from, to, colour = 0x4f8ba0) {
   );
   const dot = new THREE.Mesh(
     new THREE.SphereGeometry(.055, 14, 12),
-    // Anchors sit inside the thorax, behind the sternum and the lungs, so a
-    // depth-tested marker is simply invisible where it matters most.
-    new THREE.MeshBasicMaterial({ color: colour, depthTest: false, transparent: true }),
+    // Anatomical landmarks obey scene depth.  A dot hidden by a rib should not
+    // float over it and teach the wrong spatial relationship.
+    new THREE.MeshBasicMaterial({ color: colour, depthTest: true, depthWrite: false, transparent: true }),
   );
-  dot.renderOrder = 30;
   group.add(rod);
   group.userData.rod = rod;
   group.userData.dot = dot;
@@ -184,6 +169,20 @@ function makeArrow(length, colour, { radius = .05 } = {}) {
   return group;
 }
 
+/** Blend the two Blender-authored breathing endpoints without stacking them. */
+function setBreathMorph(root, value) {
+  if (!root) return;
+  const inhale = Math.max(value, 0);
+  const exhale = Math.max(-value, 0);
+  root.traverse((child) => {
+    const dictionary = child.morphTargetDictionary;
+    const influences = child.morphTargetInfluences;
+    if (!dictionary || !influences) return;
+    if (dictionary.Inhale !== undefined) influences[dictionary.Inhale] = inhale;
+    if (dictionary.Exhale !== undefined) influences[dictionary.Exhale] = exhale;
+  });
+}
+
 /**
  * The respiratory system: name the parts on the model, then work the ribs,
  * diaphragm and chest to drive a breath in and out.
@@ -191,6 +190,7 @@ function makeArrow(length, colour, { radius = .05 } = {}) {
 export function buildRespiratory(api) {
   const stage = new THREE.Group();
   api.root.add(stage);
+  const billboardText = [];
 
   const plinth = turned([
     [0, 0], [.92, 0], [.97, .07], [.88, .15], [.46, .19], [.43, .3], [0, .32],
@@ -212,11 +212,11 @@ export function buildRespiratory(api) {
   // one picks up: bone is dry and takes little, serous membrane is wet and
   // takes a lot.
   const FINISH = {
-    lungs: { clearcoat: .62, clearcoatRoughness: .24, roughness: .48, env: .9 },
-    airway: { clearcoat: .45, clearcoatRoughness: .3, roughness: .5, env: .8 },
-    diaphragm: { clearcoat: .3, clearcoatRoughness: .42, roughness: .62, env: .5 },
-    ribcage: { clearcoat: .12, clearcoatRoughness: .5, roughness: .58, env: .35 },
-    spine: { clearcoat: .12, clearcoatRoughness: .5, roughness: .58, env: .35 },
+    lungs: { clearcoat: .26, clearcoatRoughness: .34, roughness: .56, env: .72 },
+    airway: { clearcoat: .16, clearcoatRoughness: .42, roughness: .52, env: .62 },
+    diaphragm: { clearcoat: .1, clearcoatRoughness: .52, roughness: .64, env: .42 },
+    ribcage: { clearcoat: .04, clearcoatRoughness: .6, roughness: .62, env: .3 },
+    spine: { clearcoat: .04, clearcoatRoughness: .6, roughness: .62, env: .3 },
   };
 
   /**
@@ -229,16 +229,19 @@ export function buildRespiratory(api) {
     if (!recipe) return;
     mesh.traverse((child) => {
       if (!child.isMesh || !child.material) return;
-      const source = child.material;
-      const upgraded = new THREE.MeshPhysicalMaterial();
-      THREE.MeshStandardMaterial.prototype.copy.call(upgraded, source);
-      upgraded.vertexColors = source.vertexColors;
-      upgraded.roughness = recipe.roughness;
-      upgraded.clearcoat = recipe.clearcoat;
-      upgraded.clearcoatRoughness = recipe.clearcoatRoughness;
-      upgraded.envMapIntensity = recipe.env;
-      child.material = upgraded;
-      source.dispose();
+      const sources = Array.isArray(child.material) ? child.material : [child.material];
+      const upgraded = sources.map((source) => {
+        const physical = new THREE.MeshPhysicalMaterial();
+        THREE.MeshStandardMaterial.prototype.copy.call(physical, source);
+        physical.vertexColors = source.vertexColors;
+        physical.roughness = recipe.roughness;
+        physical.clearcoat = recipe.clearcoat;
+        physical.clearcoatRoughness = recipe.clearcoatRoughness;
+        physical.envMapIntensity = recipe.env;
+        source.dispose();
+        return physical;
+      });
+      child.material = Array.isArray(child.material) ? upgraded : upgraded[0];
       // Contact is what tells the eye one thing rests on another.
       child.castShadow = true;
       child.receiveShadow = true;
@@ -254,30 +257,26 @@ export function buildRespiratory(api) {
   };
 
   const lungs = part('lungs');
-  if (lungs) {
-    // Hung from the apex: the apex is anchored under the first rib and it is
-    // the base that rides up and down on the diaphragm.
-    lungs.geometry = lungs.geometry.clone();
-    lungs.geometry.translate(0, -LUNG_APEX, 0);
-    lungs.position.y = LUNG_APEX;
-  }
   const airway = part('airway');
   const spine = part('spine');
   const ribShell = part('ribcage') || new THREE.Group();
   if (!ribShell.parent) organs.add(ribShell);
 
-  // One lung shown through, so the bronchial tree inside it can be seen: the
-  // convention an atlas uses, and the only way the 支氣管 callout has anything
-  // to point at.
+  // A restrained pleural transparency makes the intrapulmonary tree visible
+  // without turning the parenchyma into glass.  Depth pre-pass remains on so
+  // the five lobes keep a coherent surface.
   if (lungs) {
     lungs.traverse((child) => {
       if (!child.isMesh) return;
-      child.material.vertexColors = true;
-      child.material.transparent = true;
-      child.material.opacity = .86;
-      child.material.depthWrite = true;
-      child.material.roughness = .5;
-      child.material.clearcoat = .35;
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      for (const material of materials) {
+        material.vertexColors = true;
+        material.transparent = true;
+        material.opacity = .92;
+        material.depthWrite = true;
+        material.roughness = .54;
+        material.clearcoat = .22;
+      }
     });
   }
 
@@ -293,14 +292,9 @@ export function buildRespiratory(api) {
 
   const diaphragmPivot = new THREE.Group();
   model.add(diaphragmPivot);
-  const diaphragmSheet = cloneAnatomy('diaphragm');
+  const diaphragmSheet = part('diaphragm');
   if (diaphragmSheet) {
-    // Put the mesh's origin on the rim it hinges about, so scaling domes the
-    // sheet instead of moving it.
-    diaphragmSheet.geometry = diaphragmSheet.geometry.clone();
-    diaphragmSheet.geometry.translate(0, -DIAPHRAGM_BASE, 0);
-    diaphragmSheet.position.y = 0;
-    diaphragmPivot.position.y = DIAPHRAGM_BASE;
+    organs.remove(diaphragmSheet);
     diaphragmPivot.add(diaphragmSheet);
   }
 
@@ -321,14 +315,14 @@ export function buildRespiratory(api) {
   const skinTone = 0xd8b59c;
   const skin = { roughness: .56, metalness: .02, side: THREE.DoubleSide };
   const abdomen = turned([
-    [0, .5], [.62, .52], [.74, .82], [.82, 1.34], [.85, 1.6], [0, 1.62],
-  ], skinTone, { roughness: .56 }, { depth: .7 });
+    [0, .5], [.62, .52], [.76, .82], [.94, 1.34], [.96, 1.6], [0, 1.62],
+  ], skinTone, { roughness: .6 }, { depth: .8 });
   model.add(abdomen);
 
   const torso = turned([
-    [.85, 1.62], [.9, 2.05], [.98, 2.7], [1.02, 3.2], [.99, 3.5],
+    [.96, 1.62], [.94, 2.05], [.98, 2.7], [1.02, 3.2], [.99, 3.5],
     [.8, 3.76], [.5, 3.94], [.3, 4.06], [.27, 4.24], [0, 4.26],
-  ], skinTone, skin, { depth: .7, open: .44 });
+  ], skinTone, skin, { depth: .94, open: .44 });
   model.add(torso);
   const chestHandle = makeHandle(HANDLE_COLOUR);
   chestHandle.position.set(-1.26, 2.44, .28);
@@ -378,6 +372,18 @@ export function buildRespiratory(api) {
     shoulder.scale.set(.74, .58, .64);
     shoulder.position.set(side * .84, 3.28, -.04);
     model.add(shoulder);
+  }
+
+  // Standard anterior-view orientation: the patient's right is on the
+  // learner's left.  Never leave this implicit in an anatomy lesson.
+  for (const [x, text] of [[-1.48, 'R｜病人右'], [1.48, 'L｜病人左']]) {
+    const marker = makeTextPlane(text, {
+      width: .9, height: .32, color: '#f8ffff', background: '#123b45',
+      border: '#8fd4e6', radius: .08, weight: 900, pad: .12,
+    });
+    marker.position.set(x, 4.02, .92);
+    stage.add(marker);
+    billboardText.push(marker);
   }
 
   // ---------------------------------------------------- callouts and cards
@@ -464,6 +470,7 @@ export function buildRespiratory(api) {
     const face = makeTextPlane(ORGAN_TEXT[organ], { width: 1, height: .42, background: '#ffffff', border: '#2f9c86', radius: .08 });
     face.position.z = .045;
     chip.add(cardBody, face);
+    billboardText.push(face);
     chip.position.set(-2.68 + index * 1.07, 0, .08);
     rack.add(chip);
     api.entity(`chip-${organ}`, ORGAN_TEXT[organ], chip, { draggable: true, namePlate: false, physics: false });
@@ -520,33 +527,24 @@ export function buildRespiratory(api) {
 
   function refresh() {
     const value = breath();
-    // Bucket-handle movement of the ribs.
-    ribShell.scale.set(1 + value * .1, 1, 1 + value * .08);
-    ribShell.position.y = value * .12;
-    ribHandle.position.x = 1.26 + value * .1;
+    // Blender owns the deformation.  In the rib target the posterior joints
+    // remain almost fixed while lateral/anterior portions lift (bucket- and
+    // pump-handle components); in the diaphragm target the attached rim stays
+    // fixed while both domes contract and flatten.  Lung bases and distal
+    // bronchi share that deformation field.
+    setBreathMorph(ribShell, value);
+    setBreathMorph(lungs, value);
+    setBreathMorph(airway, value);
+    setBreathMorph(diaphragmSheet, value);
 
-    // The chest wall rides out with the ribs it is built on.
-    torso.scale.set(1 + value * .1, 1, .7 * (1 + value * .12));
-    chestHandle.position.x = -1.26 - value * .12;
+    ribHandle.position.x = 1.26 + Math.max(value, 0) * .08 + Math.min(value, 0) * .04;
 
-    // The rim stays put; the summit travels FLOOR_TRAVEL, matching the lung
-    // bases resting on it.
-    const drop = value;
-    if (diaphragmSheet) diaphragmSheet.scale.y = 1 - drop * DOME_SQUASH;
-
-    // The lungs follow the cavity: they cannot grow past the cage that holds
-    // them, so the fill is applied as a gentle swell well inside the clamp.
-    const fill = THREE.MathUtils.clamp((value + 1) / 2, 0, 1);
-    // The lungs fill the space the ribs and diaphragm have opened. They are
-    // carved to the resting cavity, so the swell stays small and cannot push a
-    // lobe back out through a rib.
-    if (lungs) {
-      // Across, the lungs follow the rib cage. Down, they follow the floor of
-      // the chest exactly, so their base stays in contact with the dome
-      // instead of passing through it.
-      const grow = .98 + fill * .04;
-      lungs.scale.set(grow, 1 + drop * LUNG_SQUEEZE, grow);
-    }
+    // The visible skin follows the rib excursion only subtly.  It is not the
+    // source of the breath, merely an external reference surface.
+    const skinAcross = 1 + Math.max(value, 0) * .035 + Math.min(value, 0) * .025;
+    const skinDepth = .94 * (1 + Math.max(value, 0) * .045 + Math.min(value, 0) * .03);
+    torso.scale.set(skinAcross, 1, skinDepth);
+    chestHandle.position.x = -1.26 - Math.max(value, 0) * .08 - Math.min(value, 0) * .04;
 
     const flowing = Math.abs(value) > .2;
     for (const arrow of airMarks) {
@@ -595,7 +593,16 @@ export function buildRespiratory(api) {
 
   return {
     update(time, dt = 1 / 60) {
-      const next = THREE.MathUtils.damp(held, wanted, 9, dt);
+      // A slow deep breath takes seconds, not a single UI frame.
+      const next = THREE.MathUtils.damp(held, wanted, 2.4, dt);
+      if (api.camera) {
+        const cameraWorld = api.camera.getWorldQuaternion(new THREE.Quaternion());
+        const parentWorld = new THREE.Quaternion();
+        for (const plane of billboardText) {
+          plane.parent?.getWorldQuaternion(parentWorld);
+          plane.quaternion.copy(parentWorld.invert().multiply(cameraWorld));
+        }
+      }
       if (Math.abs(next - held) < .01) return;
       held = next;
       refresh();
@@ -611,6 +618,8 @@ export function buildRespiratory(api) {
         diaphragm: Math.round(held),
         chest: Math.round(held),
         breath: Number(value.toFixed(2)),
+        ribMorph: Number(Math.abs(value).toFixed(4)),
+        lungMorph: Number(Math.abs(value).toFixed(4)),
         inhaling: value > .45,
         exhaling: value < -.45,
         model: lungs ? 'blender' : 'missing',

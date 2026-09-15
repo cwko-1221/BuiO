@@ -256,6 +256,7 @@ export class LabRenderer {
   #createSceneApi() {
     const api = {
       root: this.experimentRoot,
+      camera: this.camera,
       entity: (id, label, object, options = {}) => this.#registerEntity(id, sceneLabel(label), object, options),
       target: (id, label, object, options = {}) => this.#registerTarget(id, sceneLabel(label), object, options),
       moveObject: (object, destination, options) => this.moveObject(object, destination, options),

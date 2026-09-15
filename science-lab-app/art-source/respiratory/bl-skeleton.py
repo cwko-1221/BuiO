@@ -7,7 +7,7 @@ from mathutils import Vector
 CAGE_TOP = 3.42
 CAGE_BOTTOM = 1.62
 DIAPHRAGM_BASE = 1.72
-DOME_RISE = {1: 0.54, -1: 0.46}
+DOME_RISE = {-1: 0.54, 1: 0.46}
 RIB_COUNT = 12
 CARINA_Z = 2.96
 
@@ -124,7 +124,7 @@ for index in range(RIB_COUNT):
     sweep = 0.30 if index == 11 else (0.42 if index == 10 else 0.74)
     for side in (-1, 1):
         path = rib_path(level, side, sweep=sweep)
-        built.append(curve_tube('rib_%d_%s' % (index + 1, 'R' if side > 0 else 'L'),
+        built.append(curve_tube('rib_%d_%s' % (index + 1, 'R' if side < 0 else 'L'),
                                 path, 0.026, resolution=10, profile=rib_profile))
         if floating:
             continue  # ribs 11 and 12 carry no cartilage
@@ -140,7 +140,7 @@ for index in range(RIB_COUNT):
         anterior_tip.setdefault(index, {})[side] = (
             (tip[0] + target[0]) / 2, (tip[1] + target[1]) / 2, (tip[2] + target[2]) / 2)
         mid = ((tip[0] + target[0]) / 2, (tip[1] + target[1]) / 2 - 0.05, (tip[2] + target[2]) / 2 - 0.04)
-        built.append(curve_tube('costal_%d_%s' % (index + 1, 'R' if side > 0 else 'L'),
+        built.append(curve_tube('costal_%d_%s' % (index + 1, 'R' if side < 0 else 'L'),
                                 [tip, mid, target], 0.022, resolution=8, profile=costal_profile))
 
 # The breastbone, as one continuous bone. Manubrium, body and xiphoid are
@@ -211,43 +211,78 @@ for index in range(18):
     built.append(curve_tube('tracheal_ring_%d' % (index + 1), arc, 0.010, resolution=6, around=2))
 
 # Main bronchi: the right is wider, shorter and more upright than the left.
+# The segmental branches are deliberately kept short of the pleural surface.
+# They are the conducting tree, not decorative rods painted across the lung.
 for side in (-1, 1):
-    right = side > 0
+    right = side < 0
     # right: ~25 degrees off vertical and short. left: ~45 degrees and longer.
     hilum = (side * (0.22 if right else 0.34), -0.02,
-             CARINA_Z - (0.47 if right else 0.34))
+             CARINA_Z - (0.32 if right else 0.42))
     built.append(curve_tube('bronchus_main_%s' % ('R' if right else 'L'),
                             [(0, 0, CARINA_Z),
                              (side * (0.11 if right else 0.18), -0.01, CARINA_Z - (0.24 if right else 0.17)),
                              hilum],
                             0.042 if right else 0.035))
     # Two further generations inside the lung.
-    for branch in range(3):
-        spread = 0.34 + branch * 0.16
-        end = (side * (0.52 + branch * 0.06), -0.06 + branch * 0.12, hilum[2] - 0.16 - branch * 0.3)
+    for branch in range(3 if right else 2):
+        lateral = 0.44 + branch * 0.045 + (0.07 if (not right and branch == 1) else 0.0)
+        end = (side * lateral, -0.035 + branch * 0.08,
+               hilum[2] - 0.14 - branch * 0.27)
+        if not right and branch == 1:
+            # The left lower-lobe bronchus turns posterolaterally below the
+            # oblique fissure immediately after the hilum; it must not run
+            # along the fissural plane.
+            middle = (side * 0.50, 0.035, 2.30)
+        else:
+            middle = ((hilum[0] + end[0]) / 2,
+                      (hilum[1] + end[1]) / 2,
+                      (hilum[2] + end[2]) / 2 + 0.04)
         built.append(curve_tube('bronchus_%s_%d' % ('R' if right else 'L', branch + 1),
-                                [hilum, ((hilum[0] + end[0]) / 2, (hilum[1] + end[1]) / 2, (hilum[2] + end[2]) / 2 + 0.04), end],
-                                0.026 - branch * 0.005))
+                                [hilum, middle, end],
+                                0.014 - branch * 0.0025))
+
+# Pulmonary vessels at each hilum.  Blue carries deoxygenated blood away from
+# the heart; paired red veins return oxygenated blood.  These are not part of
+# the breathing animation, but they make the hilum anatomically legible and
+# prevent the bronchi from looking like an isolated plumbing diagram.
+for side in (-1, 1):
+    right = side < 0
+    hilum_x = side * (0.22 if right else 0.34)
+    artery_end = (side * 0.51, 0.015, 2.48 if right else 2.56)
+    built.append(curve_tube('pulmonary_artery_%s' % ('R' if right else 'L'),
+                            [(side * 0.10, 0.035, 2.70),
+                             (hilum_x, 0.020, 2.62), artery_end],
+                            0.029, resolution=10, around=3))
+    for branch, dz in enumerate((-0.12, -0.36), 1):
+        vein_end = (side * (0.49 + branch * 0.025), -0.045, 2.50 + dz)
+        built.append(curve_tube('pulmonary_vein_%s_%d' % ('R' if right else 'L', branch),
+                                [(side * 0.08, -0.065, 2.36 + dz * 0.15),
+                                 (hilum_x, -0.055, 2.42 + dz * 0.35), vein_end],
+                                0.024, resolution=9, around=3))
 
 # --------------------------------------------------------------- diaphragm
-resolution = 28
+angular_steps = 72
+radial_steps = 30
 rx, ry = cage_inner(DIAPHRAGM_BASE + 0.1)
-verts = []
+verts = [(0.0, 0.0, diaphragm_top(0.0, 0.0))]
 faces = []
-for row in range(resolution + 1):
-    for col in range(resolution + 1):
-        u = col / resolution
-        v = row / resolution
-        angle = 2.0 * math.pi * u
-        reach = v
+for ring in range(1, radial_steps + 1):
+    reach = ring / radial_steps
+    for step in range(angular_steps):
+        angle = 2.0 * math.pi * step / angular_steps
         x = math.cos(angle) * rx * 0.99 * reach
         y = math.sin(angle) * ry * 0.99 * reach
-        verts.append((x, y, diaphragm_top(x, y)))
-stride = resolution + 1
-for row in range(resolution):
-    for col in range(resolution):
-        a = row * stride + col
-        faces.append((a, a + 1, a + stride + 1, a + stride))
+        # 1.5 mm equivalent pleural clearance avoids z-fighting while keeping
+        # the superior surface under the Blender-carved lung base.
+        verts.append((x, y, diaphragm_top(x, y) - 0.007))
+for step in range(angular_steps):
+    faces.append((0, 1 + step, 1 + (step + 1) % angular_steps))
+for ring in range(1, radial_steps):
+    inner = 1 + (ring - 1) * angular_steps
+    outer = inner + angular_steps
+    for step in range(angular_steps):
+        nxt = (step + 1) % angular_steps
+        faces.append((inner + step, outer + step, outer + nxt, inner + nxt))
 mesh = bpy.data.meshes.new('diaphragm')
 mesh.from_pydata(verts, [], faces)
 mesh.validate()
@@ -256,11 +291,25 @@ diaphragm = bpy.data.objects.new('diaphragm', mesh)
 bpy.context.scene.collection.objects.link(diaphragm)
 bpy.context.view_layer.objects.active = diaphragm
 solidify = diaphragm.modifiers.new('Solidify', 'SOLIDIFY')
-solidify.thickness = 0.05
-solidify.offset = 1
+solidify.thickness = 0.035
+# The mathematical surface is the superior surface the lung was carved
+# against; all muscle thickness must grow inferiorly, never into the lung.
+solidify.offset = -1
 bpy.ops.object.modifier_apply(modifier='Solidify')
 bpy.ops.object.shade_smooth()
 built.append(diaphragm)
+
+# A thin central tendon sits in the shallow saddle between the two muscular
+# domes.  It is intentionally subtle: the tendon is visible in an atlas view
+# without being mistaken for a third dome.
+bpy.ops.mesh.primitive_uv_sphere_add(segments=40, ring_count=18, radius=1.0,
+                                     location=(0.0, -0.015, DIAPHRAGM_BASE + 0.238))
+tendon = bpy.context.active_object
+tendon.name = 'central_tendon'
+tendon.scale = (0.30, 0.25, 0.025)
+bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+bpy.ops.object.shade_smooth()
+built.append(tendon)
 
 for helper in (rib_profile, costal_profile):
     bpy.data.objects.remove(helper, do_unlink=True)

@@ -6,6 +6,7 @@ import { gzipSync } from 'node:zlib';
 
 import { experiments, experimentById, getNextExperiment } from '../science-lab-app/public/js/data/experiments.js';
 import { LabSimulation } from '../science-lab-app/public/js/simulation/LabSimulation.js';
+import { runRespiratoryInterpenetrationCheck } from './check-respiratory-interpenetration.mjs';
 
 const root = path.resolve('.');
 const sourceRoot = path.join(root, 'science-lab-app', 'public');
@@ -258,5 +259,9 @@ assert.match(serverSource, /X-Content-Type-Options/, 'science assets opt out of 
 const portalConfig = await readFile(path.join(root, 'src', 'config.js'), 'utf8');
 assert.match(portalConfig, /id: 'science-lab'/, 'portal has a science module card');
 assert.match(portalConfig, /url: '\/science-lab'/, 'portal card opens the protected module');
+
+const respiratoryGeometry = await runRespiratoryInterpenetrationCheck({ log: () => {} });
+assert.equal(respiratoryGeometry.ok, true,
+  'respiratory anatomy remains free of interpenetration through all 101 tested breath phases');
 
 console.log('Science Lab content, simulation, safety, accessibility, build budget and protected-route checks passed.');

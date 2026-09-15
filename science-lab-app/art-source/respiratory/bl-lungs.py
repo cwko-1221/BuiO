@@ -20,7 +20,9 @@ from mathutils import Vector
 CAGE_TOP = 3.42
 CAGE_BOTTOM = 1.62
 DIAPHRAGM_BASE = 1.72
-DOME_RISE = {1: 0.54, -1: 0.46}
+# The patient's right hemidiaphragm (-X in the anterior view) sits higher over
+# the liver than the left.
+DOME_RISE = {-1: 0.54, 1: 0.46}
 
 OBLIQUE_N = Vector((0.0, -0.573, 0.819)).normalized()
 OBLIQUE_C = 1.994
@@ -61,7 +63,7 @@ def new_mesh(name, verts, faces):
     return obj
 
 
-def make_cavity(name, margin=0.965, segments=64, rings=40):
+def make_cavity(name, margin=0.91, segments=64, rings=40):
     """A closed solid of the inside of the chest, from the cage shape function."""
     verts = []
     for ring in range(rings + 1):
@@ -219,11 +221,12 @@ cavity = make_cavity('cavityCutter')
 dome = make_diaphragm_solid('domeCutter')
 
 specs = [
-    ('lung_R_superior', 1, 0.0, [(OBLIQUE_N, OBLIQUE_C + 0.014, True), (HORIZONTAL_N, HORIZONTAL_C + 0.014, True)]),
-    ('lung_R_middle', 1, 0.0, [(OBLIQUE_N, OBLIQUE_C + 0.014, True), (HORIZONTAL_N, HORIZONTAL_C - 0.014, False)]),
-    ('lung_R_inferior', 1, 0.0, [(OBLIQUE_N, OBLIQUE_C - 0.014, False)]),
-    ('lung_L_superior', -1, 0.34, [(OBLIQUE_N, OBLIQUE_C + 0.014, True)]),
-    ('lung_L_inferior', -1, 0.34, [(OBLIQUE_N, OBLIQUE_C - 0.014, False)]),
+    # In an anterior atlas view the patient's right is the viewer's left (-X).
+    ('lung_R_superior', -1, 0.0, [(OBLIQUE_N, OBLIQUE_C, True), (HORIZONTAL_N, HORIZONTAL_C, True)]),
+    ('lung_R_middle', -1, 0.0, [(OBLIQUE_N, OBLIQUE_C, True), (HORIZONTAL_N, HORIZONTAL_C, False)]),
+    ('lung_R_inferior', -1, 0.0, [(OBLIQUE_N, OBLIQUE_C, False)]),
+    ('lung_L_superior', 1, 0.34, [(OBLIQUE_N, OBLIQUE_C, True)]),
+    ('lung_L_inferior', 1, 0.34, [(OBLIQUE_N, OBLIQUE_C, False)]),
 ]
 
 lobes = []
