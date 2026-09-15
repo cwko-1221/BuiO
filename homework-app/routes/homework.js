@@ -581,12 +581,27 @@ router.get('/class-analysis', requireTeacher, async (req, res, next) => {
       repo.listRecords({ academicYear, className, dateFrom, dateTo }),
     ]);
     const counts = new Map(students.map(student => [student.id, 0]));
-    for (const record of records) for (const homework of record.homeworks) for (const item of homework.statuses || []) {
-      if (item.status === 'missing' && counts.has(item.studentId)) counts.set(item.studentId, counts.get(item.studentId) + 1);
+    const missingRecords = new Map(students.map(student => [student.id, []]));
+    for (const record of records) for (const homework of record.homeworks || []) for (const item of homework.statuses || []) {
+      if (item.status === 'missing' && counts.has(item.studentId)) {
+        counts.set(item.studentId, counts.get(item.studentId) + 1);
+        missingRecords.get(item.studentId).push({
+          date: record.date,
+          subject: record.subject,
+          subjectName: subjectById(record.subject)?.name || record.subject,
+          homeworkId: homework.id,
+          homework: homework.title,
+          madeUp: Boolean(item.madeUp),
+        });
+      }
     }
     res.json({
       success: true,
-      rows: students.map(student => ({ ...student, missingCount: counts.get(student.id) || 0 })),
+      rows: students.map(student => ({
+        ...student,
+        missingCount: counts.get(student.id) || 0,
+        missingRecords: missingRecords.get(student.id) || [],
+      })),
       totalMissing: [...counts.values()].reduce((sum, count) => sum + count, 0),
     });
   } catch (error) { next(error); }

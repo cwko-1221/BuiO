@@ -223,8 +223,14 @@ try {
   result = await request(teacher, `/api/homework/class-analysis?academicYear=${year}&className=P4&dateFrom=${today}&dateTo=${today}`);
   assert.equal(result.response.status, 200, 'teacher can run class analysis');
   assert.equal(result.data.totalMissing, 1, 'class analysis counts historical missing work even after made up');
-  assert.equal(result.data.rows.find(row => row.id === 'S003').missingCount, 1, 'class analysis counts per student');
-  assert.equal(result.data.rows.find(row => row.id === 'S002').missingCount, 0, 'class analysis includes students with zero missing work');
+  const classAnalysisS003 = result.data.rows.find(row => row.id === 'S003');
+  assert.equal(classAnalysisS003.missingCount, 1, 'class analysis counts per student');
+  assert.equal(classAnalysisS003.missingRecords.length, 1, 'class analysis returns each missing record');
+  assert.equal(classAnalysisS003.missingRecords[0].subject, 'chinese-a', 'class analysis detail includes the subject');
+  assert.equal(classAnalysisS003.missingRecords[0].madeUp, true, 'class analysis detail includes the made-up flag');
+  const classAnalysisS002 = result.data.rows.find(row => row.id === 'S002');
+  assert.equal(classAnalysisS002.missingCount, 0, 'class analysis includes students with zero missing work');
+  assert.deepEqual(classAnalysisS002.missingRecords, [], 'students with no missing work have an empty detail list');
 
   result = await request(teacher, '/api/auth/upgrade-students', { method: 'POST' });
   assert.equal(result.response.status, 403, 'academic-year upgrade requires an unlocked Admin session');

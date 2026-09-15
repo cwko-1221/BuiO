@@ -231,6 +231,22 @@ async function loadClassAnalysis() {
 function renderClassAnalysis() {
   const f = filterState.classAnalysis;
   const rows = state.classAnalysisRows || [];
+  const studentCards = rows.map(row => {
+    const records = row.missingRecords || [];
+    const details = records.length ? `<div class="class-analysis-record-list">
+      <div class="class-analysis-record-row class-analysis-record-heading"><span>${escapeHtml(t('h.date'))}</span><span>${escapeHtml(t('h.subject'))}</span><span>${escapeHtml(t('h.colHomework'))}</span><span>${escapeHtml(t('h.status'))}</span></div>
+      ${records.map(record => `<div class="class-analysis-record-row">
+        <span>${escapeHtml(record.date)}</span>
+        <span>${escapeHtml(record.subjectName || subjectName(record.subject))}</span>
+        <span>${escapeHtml(record.homework)}</span>
+        <span class="class-analysis-record-status"><span class="status-tag missing">${escapeHtml(t('h.statusMissing'))}</span>${record.madeUp ? `<span class="status-tag made-up">${escapeHtml(t('h.madeUp'))}</span>` : ''}</span>
+      </div>`).join('')}
+    </div>` : `<div class="class-analysis-empty">${escapeHtml(t('h.classAnalysisNoMissing'))}</div>`;
+    return `<details class="class-analysis-student">
+      <summary><span class="class-analysis-student-name"><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.id)}</small></span><span class="class-analysis-student-count">${escapeHtml(t('h.missingCount'))}：<strong>${row.missingCount}</strong></span></summary>
+      ${details}
+    </details>`;
+  }).join('');
   return shell(`<section class="panel">
     <div class="panel-head"><div><h2>${escapeHtml(t('h.classAnalysisTitle'))}</h2><p class="hint">${escapeHtml(t('h.classAnalysisHint'))}</p></div></div>
     <div class="filters">
@@ -240,7 +256,7 @@ function renderClassAnalysis() {
       <div class="field"><label for="classAnalysisTo">${escapeHtml(t('h.to'))}</label><input id="classAnalysisTo" type="date" value="${f.dateTo}" max="${today}"></div>
     </div>
     <div class="actions" style="margin-top:16px"><button class="button primary" id="runClassAnalysis">${escapeHtml(t('h.showClassStats'))}</button></div>
-    ${rows.length ? `<div class="analysis-total">${t('h.classTotal', { count: state.classAnalysisTotal || 0 })}</div><table class="analysis-table"><thead><tr><th>${escapeHtml(t('h.student'))}</th><th>${escapeHtml(t('h.classNo'))}</th><th>${escapeHtml(t('h.missingCount'))}</th></tr></thead><tbody>${rows.map(row => `<tr><td>${escapeHtml(row.name)} <small>${escapeHtml(row.id)}</small></td><td>${row.classNo || '—'}</td><td><strong>${row.missingCount}</strong></td></tr>`).join('')}</tbody></table>` : `<div class="empty" style="margin-top:20px">${escapeHtml(t('h.pickPeriod'))}</div>`}
+    ${rows.length ? `<div class="analysis-total">${t('h.classTotal', { count: state.classAnalysisTotal || 0 })}</div><div class="class-analysis-students">${studentCards}</div>` : `<div class="empty" style="margin-top:20px">${escapeHtml(t('h.pickPeriod'))}</div>`}
   </section>`);
 }
 

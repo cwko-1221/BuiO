@@ -74,12 +74,13 @@ BuiI18n.register({
   'h.noMissing':     { 'zh-HK': '沒有欠交記錄，或請按「顯示欠交總表」。', 'en-US': 'Nothing missing — or press “Show the totals”.' },
 
   'h.classAnalysisTitle': { 'zh-HK': '班級分析', 'en-US': 'Class analysis' },
-  'h.classAnalysisHint': { 'zh-HK': '選擇學年、班級及時期，統計班內每位學生曾欠交功課的次數；已補做仍會保留在欠交統計。', 'en-US': 'Choose a year, class and period to count how often each student has missed homework. Items caught up still count here.' },
+  'h.classAnalysisHint': { 'zh-HK': '選擇學年、班級及時期，統計班內每位學生曾欠交功課的次數；按下學生即可查看所有欠交記錄，已補做仍會保留。', 'en-US': 'Choose a year, class and period to count each student’s missed homework. Select a student to see every record; items caught up stay visible.' },
   'h.from':          { 'zh-HK': '由', 'en-US': 'From' },
   'h.to':            { 'zh-HK': '至', 'en-US': 'To' },
   'h.showClassStats': { 'zh-HK': '顯示班級統計', 'en-US': 'Show the class figures' },
   'h.classTotal':    { 'zh-HK': '時期內全班合共欠交 <strong>{count}</strong> 次', 'en-US': 'The class missed homework <strong>{count}</strong> times in this period' },
   'h.missingCount':  { 'zh-HK': '欠交次數', 'en-US': 'Times missing' },
+  'h.classAnalysisNoMissing': { 'zh-HK': '這位學生在所選時期沒有欠交功課。', 'en-US': 'This student has no missing homework in the selected period.' },
   'h.pickPeriod':    { 'zh-HK': '請選擇時期並按「顯示班級統計」。', 'en-US': 'Choose a period, then press “Show the class figures”.' },
 
   'h.monitorTitle':  { 'zh-HK': '科長填報', 'en-US': 'Monitor’s return' },

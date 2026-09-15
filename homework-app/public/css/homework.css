@@ -384,6 +384,44 @@ button { cursor: pointer; }
 .analysis-table th,
 .analysis-table td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; }
 .analysis-table th { background: #f4f8fa; color: var(--muted); font-size: 0.84rem; font-weight: 850; }
+.class-analysis-students { display: grid; gap: 10px; margin-top: 18px; }
+.class-analysis-student {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+}
+.class-analysis-student > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style-position: outside;
+}
+.class-analysis-student > summary:hover { background: #f8fafc; }
+.class-analysis-student[open] > summary { border-bottom: 1px solid var(--line); background: #f4f8fa; }
+.class-analysis-student > summary::marker { color: var(--teal); }
+.class-analysis-student-name { display: flex; min-width: 0; flex-direction: column; }
+.class-analysis-student-name strong { font-size: 1rem; }
+.class-analysis-student-name small { margin-top: 3px; color: var(--muted); font-size: 0.82rem; }
+.class-analysis-student-count { flex: 0 0 auto; color: var(--teal); font-size: 0.9rem; font-weight: 750; }
+.class-analysis-student-count strong { font-size: 1.05rem; }
+.class-analysis-record-list { overflow-x: auto; }
+.class-analysis-record-row {
+  display: grid;
+  grid-template-columns: 120px minmax(150px, 1fr) minmax(180px, 1.4fr) minmax(140px, 0.8fr);
+  align-items: center;
+  gap: 14px;
+  min-width: 620px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+}
+.class-analysis-record-row span { min-width: 0; }
+.class-analysis-record-heading { color: var(--muted); font-size: 0.78rem; font-weight: 850; background: #f8fafc; }
+.class-analysis-record-status { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.class-analysis-empty { padding: 16px 18px; color: var(--muted); }
 .analysis-made-up-label {
   display: inline-flex;
   align-items: center;
