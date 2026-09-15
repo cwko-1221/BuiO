@@ -16,6 +16,7 @@ const EXACT = new Map(Object.entries({
   '學號不存在': 'That ID does not exist',
   '密碼錯誤': 'Wrong password',
   '未登入': 'Not signed in',
+  '服務暫時繁忙，請稍後再試': 'The service is temporarily busy. Please try again shortly.',
   '請先登入': 'Please sign in first',
   '請先登入。': 'Please sign in first.',
   '請先登入平台。': 'Please sign in to the platform first.',

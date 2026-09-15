@@ -39,6 +39,9 @@ npm run dev
 - `NODE_ENV`：`development` 或 `production`
 - `SESSION_SECRET`：正式環境必須設定的 session 密鑰
 - `SESSION_MAX_AGE_DAYS`：登入 cookie 有效期，預設為 365 日；可按學校的裝置政策調短
+- `DB_RETRY_ATTEMPTS`：資料庫唯讀查詢遇到暫時連線錯誤時的重試次數，預設為 2
+- `DB_RETRY_BACKOFF_MS`：資料庫重試的初始退避時間，預設為 250 毫秒
+- `DB_SLOW_QUERY_MS`：記錄慢資料庫查詢的門檻，預設為 1000 毫秒
 - `SUPABASE_DB_URL`：設定後使用 PostgreSQL；未設定時使用本機 JSON 資料庫
 - `CORS_ORIGINS`：正式環境允許的來源，以逗號分隔
 - `MOCK_AUTH`：只供非正式環境測試登入

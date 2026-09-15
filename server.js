@@ -3,6 +3,7 @@
 const express = require('express');
 const session = require('cookie-session');
 const cors = require('cors');
+const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -14,6 +15,7 @@ const { version: APP_VERSION } = require('./package.json');
 const config = require('./config');
 const serverI18n = require('./shared/server-i18n');
 const db = require('./db');                  // JSON seed-on-boot side effect (json mode only)
+const { queryWithRetry } = require('./math-app/db/database');
 
 const app = express();
 const PORT = config.port;
@@ -47,6 +49,52 @@ app.use(session({
   httpOnly: true,
   sameSite: 'lax',
 }));
+
+// Give every request a safe correlation id and record API latency. Request bodies,
+// query strings and cookies are intentionally excluded because they may contain
+// student identifiers or credentials. Slow login requests are always logged; other
+// API requests are logged when slow or unsuccessful.
+app.use((req, res, next) => {
+  const requestId = crypto.randomUUID();
+  const started = process.hrtime.bigint();
+  req.requestId = requestId;
+  res.setHeader('X-Request-ID', requestId);
+
+  const isApiRequest = req.path.startsWith('/api/');
+  const isLoginRequest = req.path === '/api/auth/login';
+  const safePath = isLoginRequest
+    ? req.path
+    : req.path.split('/').slice(0, 4).join('/') || '/';
+  req.logPath = safePath;
+
+  res.on('finish', () => {
+    if (!isApiRequest) return;
+    const durationMs = Math.round(Number(process.hrtime.bigint() - started) / 1e6);
+    if (isLoginRequest || res.statusCode >= 500 || durationMs >= 1000) {
+      console.log('[request]', JSON.stringify({
+        requestId,
+        method: req.method,
+        path: safePath,
+        status: res.statusCode,
+        durationMs,
+      }));
+    }
+  });
+
+  res.on('close', () => {
+    if (!isApiRequest || res.writableEnded) return;
+    const durationMs = Math.round(Number(process.hrtime.bigint() - started) / 1e6);
+    console.warn('[request]', JSON.stringify({
+      event: 'aborted',
+      requestId,
+      method: req.method,
+      path: safePath,
+      durationMs,
+    }));
+  });
+
+  next();
+});
 
 // Every route below answers in Chinese. When the reader has chosen English,
 // swap the known message strings on the way out rather than at each call site.
@@ -124,11 +172,21 @@ require('./tower-defense-app/server/socket')(io, app); // namespace /tower-defen
 // ----------------------------------------------------------------
 // Health / debug
 // ----------------------------------------------------------------
-const healthHandler = (req, res) => {
+const healthHandler = async (req, res) => {
+  const started = process.hrtime.bigint();
   try {
-    const summary = config.db.mode === 'json'
-      ? { connected: true, type: 'json-local', userCount: db._load().users.length }
-      : { connected: true, type: 'postgres' };
+    let summary;
+    if (config.db.mode === 'json') {
+      summary = { connected: true, type: 'json-local', userCount: db._load().users.length };
+    } else {
+      const result = await queryWithRetry('SELECT 1 AS ok', [], { label: 'health' });
+      summary = {
+        connected: result.rows?.[0]?.ok === 1 || result.rows?.[0]?.ok === '1',
+        type: 'postgres',
+        latencyMs: Math.round(Number(process.hrtime.bigint() - started) / 1e6),
+      };
+      if (!summary.connected) throw new Error('Database health query returned an unexpected result');
+    }
     res.json({
       status: 'ok',
       service: 'bui-o-learning-platform',
@@ -136,13 +194,23 @@ const healthHandler = (req, res) => {
       environment: config.env,
       uptimeSeconds: Math.floor(process.uptime()),
       database: summary,
+      requestId: req.requestId,
       timestamp: new Date().toISOString(),
     });
   } catch (e) {
-    res.status(500).json({
+    console.error('[health]', JSON.stringify({
+      requestId: req.requestId,
+      durationMs: Math.round(Number(process.hrtime.bigint() - started) / 1e6),
+      code: e?.code || null,
+      retryable: Boolean(e?.retryable),
+      message: String(e?.message || e).split('\n')[0].slice(0, 240),
+    }));
+    res.status(e?.retryable ? 503 : 500).json({
       status: 'error',
       service: 'bui-o-learning-platform',
       version: APP_VERSION,
+      database: { connected: false, type: config.db.mode === 'postgres' ? 'postgres' : 'json-local' },
+      requestId: req.requestId,
       timestamp: new Date().toISOString(),
     });
   }
@@ -462,9 +530,24 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.use('/api', (req, res) => res.status(404).json({ success: false, message: 'Not found' }));
 
 app.use((err, req, res, _next) => {
-  console.error('[server]', err.stack || err.message || err);
+  const retryable = Boolean(err?.retryable);
+  const status = retryable ? 503 : (Number.isInteger(err?.statusCode) ? err.statusCode : 500);
+  console.error('[server]', JSON.stringify({
+    requestId: req.requestId || null,
+    method: req.method,
+    path: req.logPath || req.path.split('/').slice(0, 4).join('/') || '/',
+    status,
+    retryable,
+    code: err?.code || null,
+    message: String(err?.message || err).split('\n')[0].slice(0, 240),
+  }));
+  if (err?.stack) console.error(err.stack);
   if (res.headersSent) return;
-  res.status(500).json({ success: false, message: 'Internal server error' });
+  res.status(status).json({
+    success: false,
+    message: retryable ? '服務暫時繁忙，請稍後再試' : 'Internal server error',
+    requestId: req.requestId || null,
+  });
 });
 
 // ----------------------------------------------------------------

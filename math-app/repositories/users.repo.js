@@ -2,7 +2,7 @@
 
 const config = require('../../config');
 const store = require('../../db/jsonStore');
-const { getPool } = require('../db/database');
+const { getPool, queryWithRetry } = require('../db/database');
 const academicYears = require('./academic-years.repo');
 
 const classRank = name => {
@@ -57,8 +57,8 @@ function mapUserRow(r) {
 
 async function findById(studentId) {
   if (config.db.mode === 'postgres') {
-    const { rows } = await getPool().query(
-      'SELECT * FROM Users WHERE StudentID = $1', [studentId]);
+    const { rows } = await queryWithRetry(
+      'SELECT * FROM Users WHERE StudentID = $1', [studentId], { label: 'users.findById' });
     return rows[0] || null;
   }
   const u = store.load().users.find(x => x.studentid === studentId);
@@ -67,9 +67,9 @@ async function findById(studentId) {
 
 async function findByIdSummary(studentId) {
   if (config.db.mode === 'postgres') {
-    const { rows } = await getPool().query(
+    const { rows } = await queryWithRetry(
       'SELECT Name AS name, Role AS role, ClassName AS classname, ClassNo AS classno, MathGroup AS mathgroup, Language AS language FROM Users WHERE StudentID = $1',
-      [studentId]);
+      [studentId], { label: 'users.findByIdSummary' });
     return rows[0] || null;
   }
   const u = store.load().users.find(x => x.studentid === studentId);
