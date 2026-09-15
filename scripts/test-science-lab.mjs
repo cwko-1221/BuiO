@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { gzipSync } from 'node:zlib';
@@ -11,6 +12,24 @@ import { runRespiratoryInterpenetrationCheck } from './check-respiratory-interpe
 const root = path.resolve('.');
 const sourceRoot = path.join(root, 'science-lab-app', 'public');
 const distRoot = path.join(root, 'science-lab-app', 'dist');
+
+function readGlbJson(buffer, label) {
+  assert.equal(buffer.toString('ascii', 0, 4), 'glTF', `${label}: valid GLB header`);
+  assert.equal(buffer.readUInt32LE(4), 2, `${label}: glTF 2 container`);
+  let offset = 12;
+  while (offset + 8 <= buffer.length) {
+    const length = buffer.readUInt32LE(offset);
+    const type = buffer.readUInt32LE(offset + 4);
+    if (type === 0x4e4f534a) {
+      const text = buffer.subarray(offset + 8, offset + 8 + length).toString('utf8').replace(/\0+$/u, '');
+      return JSON.parse(text);
+    }
+    offset += 8 + length;
+  }
+  assert.fail(`${label}: GLB has no JSON chunk`);
+}
+
+const sha256 = (contents) => createHash('sha256').update(contents).digest('hex');
 
 assert.deepEqual(
   experiments.map((item) => item.id),
@@ -29,6 +48,14 @@ assert.deepEqual(
   new Set(['環境', '物質', '能量', '力與運動', '人體']),
   'all retained science areas are represented',
 );
+
+const respiratoryExperiment = experimentById.get('respiratory-system');
+const respiratoryAdjustments = respiratoryExperiment.steps.filter((step) => step.action.type === 'adjust');
+assert.ok(respiratoryAdjustments.length >= 3, 'respiratory lesson compares inhale, exhale and inhale again');
+assert.deepEqual(new Set(respiratoryAdjustments.map((step) => step.action.subject)), new Set(['breath']),
+  'one coupled breath timeline controls ribs, lungs, airway and diaphragm');
+assert.deepEqual(respiratoryAdjustments.map((step) => Math.sign((step.action.min + step.action.max) / 2)), [1, -1, 1],
+  'respiratory lesson visibly compares inspiration and expiration endpoints');
 
 const actionTypes = new Set();
 const comparisonExperiments = [];
@@ -214,6 +241,37 @@ const glbBytes = (await Promise.all(glbAssets.map(async (file) => (await stat(pa
 // ribs with a costal margin, a mediastinum, C-shaped tracheal cartilage — costs
 // geometry. Still one download, still cached after the first visit.
 assert.ok(glbBytes < 4_000_000, `Blender models stay within the download budget (actual ${glbBytes} bytes)`);
+
+const publicRespiratory = await readFile(path.join(sourceRoot, 'models', 'respiratory.glb'));
+const respiratoryAsset = glbAssets.find((file) => file.startsWith('respiratory-'));
+assert.ok(respiratoryAsset, 'production contains the hashed respiratory model');
+const distRespiratory = await readFile(path.join(distRoot, 'assets', respiratoryAsset));
+assert.equal(sha256(distRespiratory), sha256(publicRespiratory),
+  'the deployed respiratory GLB is byte-identical to the checked Blender export');
+
+const respiratoryGlb = readGlbJson(publicRespiratory, 'respiratory model');
+assert.deepEqual(
+  respiratoryGlb.nodes.map((node) => node.name).sort(),
+  ['airway', 'body', 'diaphragm', 'lungs', 'mediastinum', 'ribcage', 'spine'],
+  'respiratory GLB preserves all seven anatomical systems as semantic nodes',
+);
+const materialNames = respiratoryGlb.materials.map((material) => material.name);
+const lobeMaterials = ['lung_LLL', 'lung_LUL', 'lung_RLL', 'lung_RML', 'lung_RUL'];
+for (const material of lobeMaterials) {
+  assert.ok(materialNames.includes(material), `respiratory GLB preserves ${material} as a distinct lung lobe material`);
+}
+const lungNode = respiratoryGlb.nodes.find((node) => node.name === 'lungs');
+const lungMesh = respiratoryGlb.meshes[lungNode.mesh];
+assert.deepEqual(
+  lungMesh.primitives.map((primitive) => materialNames[primitive.material]).sort(),
+  [...lobeMaterials].sort(),
+  'the lung mesh ships exactly five lobe primitives',
+);
+for (const nodeName of ['ribcage', 'airway', 'lungs', 'body', 'diaphragm']) {
+  const node = respiratoryGlb.nodes.find((candidate) => candidate.name === nodeName);
+  assert.deepEqual(respiratoryGlb.meshes[node.mesh].extras?.targetNames, ['Inhale', 'Exhale'],
+    `${nodeName}: Blender-authored inhale and exhale endpoints survive export`);
+}
 const totalGzip = jsAssets.reduce(async (sumPromise, file) => {
   const sum = await sumPromise;
   const contents = await readFile(path.join(distRoot, 'assets', file));

@@ -191,7 +191,13 @@ function setBreathMorph(root, value) {
 export function buildRespiratory(api) {
   const stage = new THREE.Group();
   api.root.add(stage);
-  const billboardText = [];
+  // Rotate complete label assemblies (card, outline and text) toward the
+  // camera. Rotating only the text plane makes it shear through its 3D card as
+  // soon as the learner leaves the anterior view.
+  const billboards = [];
+  const orientationMarkers = [];
+  const labelSlots = new Map();
+  const labelChips = new Map();
 
   const plinth = turned([
     [0, 0], [.92, 0], [.97, .07], [.88, .15], [.46, .19], [.43, .3], [0, .32],
@@ -350,7 +356,8 @@ export function buildRespiratory(api) {
     });
     marker.position.set(x, 4.02, .92);
     stage.add(marker);
-    billboardText.push(marker);
+    billboards.push(marker);
+    orientationMarkers.push({ marker, screenX: x });
   }
 
   // ---------------------------------------------------- callouts and cards
@@ -431,10 +438,12 @@ export function buildRespiratory(api) {
     stage.add(leader);
     pin.host.add(leader.userData.dot);
     leader.userData.dot.position.copy(pin.local);
-    leaders.push({ leader, edge, pin });
+    leaders.push({ leader, edge, pin, slot: null, side: Math.sign(boxPosition.x) });
+    const slotBillboard = new THREE.Group();
+    slotBillboard.position.copy(boxPosition);
+    stage.add(slotBillboard);
     const well = roundedBox(BOX_W, BOX_H, .06, 0xf4ece2, .08, 3, { roughness: .66, castShadow: false });
-    well.position.copy(boxPosition);
-    stage.add(well);
+    slotBillboard.add(well);
 
     const ring = new THREE.Group();
     const outline = makeTextPlane('', {
@@ -444,9 +453,12 @@ export function buildRespiratory(api) {
     outline.material.opacity = .75;
     ring.add(outline);
     ring.userData.ring = outline;
-    ring.position.copy(boxPosition);
-    ring.position.z += .05;
-    stage.add(ring);
+    ring.position.z = .05;
+    slotBillboard.add(ring);
+    billboards.push(slotBillboard);
+    slotBillboard.userData.screenLayout = { x: boxPosition.x, y: boxPosition.y, depth: boxPosition.z };
+    labelSlots.set(organ, slotBillboard);
+    leaders[leaders.length - 1].slot = slotBillboard;
     api.target(`slot-${organ}`, `${ORGAN_TEXT[organ]}的框`, ring, { radius: 1, labelSlot: true, physics: false });
   });
 
@@ -464,7 +476,8 @@ export function buildRespiratory(api) {
     const face = makeTextPlane(ORGAN_TEXT[organ], { width: 1, height: .42, background: '#ffffff', border: '#2f9c86', radius: .08 });
     face.position.z = .045;
     chip.add(cardBody, face);
-    billboardText.push(face);
+    billboards.push(chip);
+    labelChips.set(organ, chip);
     chip.position.set(-2.68 + index * 1.07, 0, .08);
     rack.add(chip);
     api.entity(`chip-${organ}`, ORGAN_TEXT[organ], chip, { draggable: true, namePlate: false, physics: false });
@@ -493,8 +506,8 @@ export function buildRespiratory(api) {
   model.add(downArrow);
   moveMarks.push(downArrow);
 
-  const readout = dynamicDisplay('把六個器官名牌放進正確的框', { scale: [2.7, .58] });
-  readout.position.set(0, 1.05, 1.35);
+  const readout = dynamicDisplay('把六個器官名牌放進正確的框', { scale: [5.6, .64] });
+  readout.position.set(0, 5.72, 1.18);
   stage.add(readout);
 
   // -------------------------------------------------------- the breath model
@@ -586,17 +599,90 @@ export function buildRespiratory(api) {
 
   refresh();
 
+  const cameraWorld = new THREE.Quaternion();
+  const parentWorld = new THREE.Quaternion();
+  const stageWorld = new THREE.Quaternion();
+  const inverseStageWorld = new THREE.Quaternion();
+  const rightLocal = new THREE.Vector3();
+  const towardWorld = new THREE.Vector3();
+  const towardLocal = new THREE.Vector3();
+  const labelWorld = new THREE.Vector3();
+  const labelLocal = new THREE.Vector3();
+
+  /**
+   * Keep the annotation board in a camera-facing plane around the anatomy.
+   * Fixed world-space callouts collapse into a vertical pile in lateral view;
+   * this preserves the authored left/right rows while the anatomy itself is
+   * free to rotate through the full clinical atlas view.
+   */
+  function updateCameraLabels() {
+    if (!api.camera) return;
+    stage.updateWorldMatrix(true, true);
+    api.camera.getWorldQuaternion(cameraWorld);
+    stage.getWorldQuaternion(stageWorld);
+    inverseStageWorld.copy(stageWorld).invert();
+
+    rightLocal.set(1, 0, 0).applyQuaternion(cameraWorld).applyQuaternion(inverseStageWorld);
+    rightLocal.y = 0;
+    rightLocal.normalize();
+    api.camera.getWorldDirection(towardWorld).negate();
+    towardWorld.y = 0;
+    towardWorld.normalize();
+    towardLocal.copy(towardWorld).applyQuaternion(inverseStageWorld);
+    towardLocal.y = 0;
+    towardLocal.normalize();
+
+    for (const slot of labelSlots.values()) {
+      const layout = slot.userData.screenLayout;
+      slot.position.copy(rightLocal).multiplyScalar(layout.x).addScaledVector(towardLocal, layout.depth);
+      slot.position.y = layout.y;
+    }
+
+    // Right/left is useful in anterior and posterior views, but dishonest in a
+    // true lateral view where the two sides project onto one another.
+    const showLaterality = Math.abs(towardLocal.z) >= .5;
+    const posterior = towardLocal.z < 0;
+    for (const { marker, screenX } of orientationMarkers) {
+      marker.visible = showLaterality;
+      const x = posterior ? -screenX : screenX;
+      marker.position.copy(rightLocal).multiplyScalar(x).addScaledVector(towardLocal, .92);
+      marker.position.y = 4.02;
+    }
+
+    readout.position.copy(towardLocal).multiplyScalar(1.18).addScaledVector(rightLocal, -.28);
+    readout.position.y = 5.72;
+    stage.updateWorldMatrix(true, true);
+
+    // A seated card follows its moving callout slot. Unseated cards remain on
+    // the physical rack so the first task still behaves like a drag puzzle.
+    for (const organ of placed) {
+      const slot = labelSlots.get(organ);
+      const chip = labelChips.get(organ);
+      if (!slot || !chip) continue;
+      slot.getWorldPosition(labelWorld).addScaledVector(towardWorld, .065);
+      labelLocal.copy(labelWorld);
+      rack.worldToLocal(labelLocal);
+      chip.position.copy(labelLocal);
+    }
+
+    for (const { edge, slot, side } of leaders) {
+      edge.copy(slot.position).addScaledVector(rightLocal, -side * BOX_W / 2);
+    }
+
+    for (const billboard of billboards) {
+      billboard.parent?.getWorldQuaternion(parentWorld);
+      billboard.quaternion.copy(parentWorld.invert().multiply(cameraWorld));
+    }
+  }
+
   return {
     update(time, dt = 1 / 60) {
       // A slow deep breath takes seconds, not a single UI frame.
       const next = THREE.MathUtils.damp(held, wanted, 2.4, dt);
-      if (api.camera) {
-        const cameraWorld = api.camera.getWorldQuaternion(new THREE.Quaternion());
-        const parentWorld = new THREE.Quaternion();
-        for (const plane of billboardText) {
-          plane.parent?.getWorldQuaternion(parentWorld);
-          plane.quaternion.copy(parentWorld.invert().multiply(cameraWorld));
-        }
+      updateCameraLabels();
+      for (const { leader, edge, pin } of leaders) {
+        pin.host.updateWorldMatrix(true, false);
+        leader.userData.aimAt(edge, leader.userData.dot.getWorldPosition(labelWorld));
       }
       if (Math.abs(next - held) < .01) {
         if (airflow !== 0) {
