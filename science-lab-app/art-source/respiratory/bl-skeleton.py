@@ -41,7 +41,7 @@ def flat_profile(name, half_width, half_depth):
     curve.dimensions = '2D'
     curve.resolution_u = 1
     spline = curve.splines.new('POLY')
-    count = 10
+    count = 8
     spline.points.add(count - 1)
     for index in range(count):
         angle = 2.0 * math.pi * index / count
@@ -56,7 +56,7 @@ def curve_tube(name, points, radius, resolution=12, smooth=True, profile=None, a
     """A bevelled curve converted to mesh: the clean way to build a rib or a duct."""
     curve = bpy.data.curves.new(name, 'CURVE')
     curve.dimensions = '3D'
-    curve.resolution_u = max(3, resolution // 2)
+    curve.resolution_u = max(2, resolution // 3)
     if profile is not None:
         curve.bevel_mode = 'OBJECT'
         curve.bevel_object = profile
@@ -81,6 +81,80 @@ def curve_tube(name, points, radius, resolution=12, smooth=True, profile=None, a
     if smooth:
         bpy.context.view_layer.objects.active = obj
         bpy.ops.object.shade_smooth()
+    return obj
+
+
+def open_elliptical_shell(name, levels, segments=64, opening_degrees=92.0):
+    """A thin posterior/lateral body shell with a true anterior cutaway.
+
+    ``levels`` is a list of ``(z, half_width, half_depth)`` rings.  Front is
+    -Y in Blender, so the missing sector is centred on -pi/2.  Building the
+    opening into the mesh is preferable to making a transparent solid torso:
+    the learner gets an unobstructed atlas view while the remaining skin still
+    supplies realistic depth and surface landmarks from oblique views.
+    """
+    gap = math.radians(opening_degrees)
+    start = -math.pi / 2.0 + gap / 2.0
+    end = 3.0 * math.pi / 2.0 - gap / 2.0
+    verts = []
+    for z, rx, ry in levels:
+        for step in range(segments + 1):
+            angle = start + (end - start) * step / segments
+            verts.append((math.cos(angle) * rx, math.sin(angle) * ry, z))
+    faces = []
+    stride = segments + 1
+    for ring in range(len(levels) - 1):
+        for step in range(segments):
+            a = ring * stride + step
+            b = a + 1
+            c = a + stride + 1
+            d = a + stride
+            faces.append((a, b, c, d))
+    mesh = bpy.data.meshes.new(name)
+    mesh.from_pydata(verts, [], faces)
+    mesh.validate()
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    bpy.context.view_layer.objects.active = obj
+    solidify = obj.modifiers.new('Skin thickness', 'SOLIDIFY')
+    solidify.thickness = 0.018
+    solidify.offset = 1
+    bpy.ops.object.modifier_apply(modifier=solidify.name)
+    bpy.ops.object.shade_smooth()
+    return obj
+
+
+def ellipsoid(name, location, scale, segments=48, rings=32):
+    """Create an applied, smooth ellipsoid for joined anatomical landmarks."""
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        segments=segments, ring_count=rings, radius=1.0, location=location)
+    obj = bpy.context.active_object
+    obj.name = name
+    obj.scale = scale
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    bpy.ops.object.shade_smooth()
+    return obj
+
+
+def joined_voxel_union(name, members, voxel=0.044):
+    """Fuse overlapping facial volumes so nose, face and cranium have no seam."""
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in members:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = members[0]
+    bpy.ops.object.join()
+    obj = bpy.context.active_object
+    obj.name = name
+    obj.data.name = name
+    obj.data.remesh_voxel_size = voxel
+    obj.data.remesh_voxel_adaptivity = 0.0
+    bpy.ops.object.voxel_remesh()
+    smooth = obj.modifiers.new('Anatomical smoothing', 'SMOOTH')
+    smooth.factor = 0.34
+    smooth.iterations = 3
+    bpy.ops.object.modifier_apply(modifier=smooth.name)
+    bpy.ops.object.shade_smooth()
     return obj
 
 
@@ -115,6 +189,46 @@ built = []
 anterior_tip = {}
 rib_profile = flat_profile('ribProfile', 0.038, 0.016)
 costal_profile = flat_profile('costalProfile', 0.032, 0.015)
+
+# ---------------------------------------------------------- clinical body shell
+# This is deliberately an anatomical cutaway rather than a cartoon mannequin.
+# The anterior chest is open; the posterior/lateral skin and the head remain as
+# translucent orientation surfaces in the web scene.
+body_levels = [
+    (0.92, 0.82, 0.72), (1.18, 0.92, 0.80), (1.52, 0.96, 0.75),
+    (1.78, 1.00, 0.72), (2.10, 0.95, 0.84), (2.48, 0.98, 0.92),
+    (2.88, 1.00, 0.94), (3.22, 1.08, 0.90), (3.48, 1.02, 0.82),
+    (3.70, 0.78, 0.64), (3.88, 0.51, 0.44), (4.05, 0.34, 0.30),
+]
+built.append(open_elliptical_shell('body_trunk', body_levels))
+built.append(open_elliptical_shell('body_neck', [
+    (3.98, 0.31, 0.25), (4.18, 0.285, 0.235), (4.43, 0.30, 0.25),
+], segments=48, opening_degrees=70.0))
+
+# Overlapping volumes are voxel-fused into one continuous facial surface.  The
+# nose projects forward (-Y) with a sloping dorsum, alar tip and real nostril
+# entrance positions used by the upper-airway tubes below.
+head_parts = [
+    ellipsoid('head_cranium', (0.0, 0.055, 4.94), (0.43, 0.39, 0.61)),
+    ellipsoid('head_face', (0.0, -0.115, 4.84), (0.355, 0.31, 0.46)),
+    ellipsoid('head_chin', (0.0, -0.19, 4.50), (0.245, 0.215, 0.19), 40, 24),
+    ellipsoid('nose_dorsum', (0.0, -0.385, 4.91), (0.095, 0.135, 0.235), 36, 24),
+    ellipsoid('nose_tip', (0.0, -0.493, 4.76), (0.145, 0.135, 0.115), 36, 24),
+    ellipsoid('ear_R', (-0.425, 0.035, 4.92), (0.075, 0.045, 0.145), 32, 22),
+    ellipsoid('ear_L', (0.425, 0.035, 4.92), (0.075, 0.045, 0.145), 32, 22),
+]
+built.append(joined_voxel_union('body_head', head_parts))
+
+# Clavicles are respiratory landmarks: lung apices extend slightly above their
+# medial thirds.  Their double curve is modelled here instead of drawn in JS.
+for side in (-1, 1):
+    built.append(curve_tube('clavicle_%s' % ('R' if side < 0 else 'L'), [
+        (side * 0.09, -0.47, 3.36),
+        (side * 0.30, -0.49, 3.40),
+        (side * 0.55, -0.38, 3.38),
+        (side * 0.78, -0.19, 3.30),
+        (side * 0.90, -0.05, 3.25),
+    ], 0.038, resolution=18, around=3))
 
 # ---------------------------------------------------------------- rib cage
 sternum_top = CAGE_TOP - 0.24
@@ -193,9 +307,52 @@ for index in range(RIB_COUNT + 2):
     bpy.ops.object.transform_apply(location=True, scale=True)
     built.append(spine)
 
-# ------------------------------------------------------------------ airway
+# ------------------------------------------------------------------ upper airway
+# The original model began abruptly at the larynx and the web runtime patched
+# the missing face with a pink tube.  These connected nasal passages,
+# nasopharynx, oro-/laryngopharynx and laryngeal cartilages make the full route
+# an actual Blender-authored anatomical structure.
+for side in (-1, 1):
+    built.append(curve_tube('nasal_airway_%s' % ('R' if side < 0 else 'L'), [
+        (side * 0.055, -0.515, 4.745),
+        (side * 0.070, -0.365, 4.825),
+        (side * 0.060, -0.145, 4.900),
+        (side * 0.040, 0.065, 4.835),
+    ], 0.045, resolution=16, around=3))
+    # Inferior turbinate — a smaller mucosal roll that makes the nasal cavity
+    # read as a real passage rather than a pair of drinking straws.
+    built.append(curve_tube('nasal_turbinate_%s' % ('R' if side < 0 else 'L'), [
+        (side * 0.060, -0.330, 4.785),
+        (side * 0.075, -0.205, 4.810),
+        (side * 0.055, -0.075, 4.800),
+    ], 0.014, resolution=10, around=2))
+
+built.append(curve_tube('pharynx', [
+    (0, 0.080, 4.84), (0, 0.135, 4.60), (0, 0.125, 4.36),
+    (0, 0.090, 4.16), (0, 0.045, 4.00),
+], 0.083, resolution=18, around=3))
 built.append(curve_tube('larynx', [
-    (0, 0, 3.96), (0, -0.015, 3.88), (0, -0.01, 3.8), (0, 0, 3.73)], 0.075))
+    (0, 0.045, 4.01), (0, 0.015, 3.91), (0, -0.005, 3.81), (0, 0, 3.73)], 0.070,
+    resolution=14, around=3))
+
+# Epiglottis and the thyroid/cricoid framework are visible landmarks around the
+# airway lumen.  The posterior gap remains open, like real hyaline cartilage.
+epiglottis = ellipsoid('epiglottis', (0.0, 0.010, 4.085), (0.070, 0.026, 0.175), 36, 24)
+built.append(epiglottis)
+for name, z, rx_ring, ry_ring, arc_degrees in [
+    ('thyroid', 3.925, 0.095, 0.079, 255.0),
+    ('cricoid', 3.785, 0.078, 0.068, 315.0),
+]:
+    arc = []
+    arc_angle = math.radians(arc_degrees)
+    for step in range(20):
+        t = step / 19.0
+        angle = math.pi - arc_angle / 2.0 + arc_angle * t
+        arc.append((math.sin(angle) * rx_ring, math.cos(angle) * ry_ring, z))
+    built.append(curve_tube('laryngeal_cartilage_%s' % name, arc, 0.013,
+                            resolution=12, around=2))
+
+# ------------------------------------------------------------------ lower airway
 built.append(curve_tube('trachea', [
     (0, 0, 3.72), (0, 0, 3.4), (0, 0, 3.14), (0, 0, CARINA_Z)], 0.058))
 RING_ARC = math.radians(290.0)
@@ -210,36 +367,76 @@ for index in range(18):
         arc.append((math.sin(angle) * 0.066, math.cos(angle) * 0.061, z))
     built.append(curve_tube('tracheal_ring_%d' % (index + 1), arc, 0.010, resolution=6, around=2))
 
-# Main bronchi: the right is wider, shorter and more upright than the left.
-# The segmental branches are deliberately kept short of the pleural surface.
-# They are the conducting tree, not decorative rods painted across the lung.
-for side in (-1, 1):
-    right = side < 0
-    # right: ~25 degrees off vertical and short. left: ~45 degrees and longer.
-    hilum = (side * (0.22 if right else 0.34), -0.02,
-             CARINA_Z - (0.32 if right else 0.42))
-    built.append(curve_tube('bronchus_main_%s' % ('R' if right else 'L'),
-                            [(0, 0, CARINA_Z),
-                             (side * (0.11 if right else 0.18), -0.01, CARINA_Z - (0.24 if right else 0.17)),
-                             hilum],
-                            0.042 if right else 0.035))
-    # Two further generations inside the lung.
-    for branch in range(3 if right else 2):
-        lateral = 0.44 + branch * 0.045 + (0.07 if (not right and branch == 1) else 0.0)
-        end = (side * lateral, -0.035 + branch * 0.08,
-               hilum[2] - 0.14 - branch * 0.27)
-        if not right and branch == 1:
-            # The left lower-lobe bronchus turns posterolaterally below the
-            # oblique fissure immediately after the hilum; it must not run
-            # along the fissural plane.
-            middle = (side * 0.50, 0.035, 2.30)
-        else:
-            middle = ((hilum[0] + end[0]) / 2,
-                      (hilum[1] + end[1]) / 2,
-                      (hilum[2] + end[2]) / 2 + 0.04)
-        built.append(curve_tube('bronchus_%s_%d' % ('R' if right else 'L', branch + 1),
-                                [hilum, middle, end],
-                                0.014 - branch * 0.0025))
+# Main/lobar/segmental bronchi. Patient right is -X.  This follows the named
+# conducting topology rather than fanning every lobe from a single hub:
+#
+#   right main -> RUL + bronchus intermedius -> RML + RLL
+#   left main  -> LUL + LLL
+#
+# Segment names follow the usual B1-B10 convention; on the left B1+2 and B7+8
+# are represented as the common combined bronchi frequently taught in anatomy.
+def add_bronchus(name, points, radius):
+    # The diaphragmatic surface is strongly domed; a global "minimum lung Z"
+    # is not a safe basal-branch limit. Lift every route point to a local floor
+    # above the dome so the entire tube, not only its centreline, stays in lung.
+    safe = [(x, y, max(z, diaphragm_top(x, y) + 0.060)) for x, y, z in points]
+    built.append(curve_tube(name, safe, radius, resolution=9, around=2))
+
+
+carina = (0.0, 0.0, CARINA_Z)
+
+# Patient right: shorter, wider, more vertical.
+r_main_end = (-0.34, -0.018, 2.73)
+add_bronchus('bronchus_main_R', [carina, (-0.12, -0.008, 2.84), r_main_end], 0.042)
+rul_root = (-0.37, -0.020, 2.80)
+add_bronchus('bronchus_RUL', [r_main_end, rul_root], 0.017)
+for name, endpoint in [
+    ('bronchus_R_B1_apical', (-0.45, 0.015, 3.01)),
+    ('bronchus_R_B2_posterior', (-0.48, 0.110, 2.87)),
+    ('bronchus_R_B3_anterior', (-0.48, -0.120, 2.76)),
+]:
+    add_bronchus(name, [rul_root, endpoint], 0.0062)
+
+intermediate_end = (-0.34, 0.005, 2.37)
+add_bronchus('bronchus_intermedius_R', [r_main_end, (-0.31, -0.005, 2.54), intermediate_end], 0.031)
+rml_root = (-0.40, -0.040, 2.45)
+add_bronchus('bronchus_RML', [(-0.32, -0.005, 2.52), rml_root], 0.014)
+add_bronchus('bronchus_R_B4_lateral', [rml_root, (-0.54, -0.085, 2.47)], 0.0062)
+add_bronchus('bronchus_R_B5_medial', [rml_root, (-0.51, 0.010, 2.39)], 0.0062)
+
+rll_root = (-0.42, 0.035, 2.25)
+add_bronchus('bronchus_RLL', [intermediate_end, rll_root], 0.016)
+for name, endpoint in [
+    ('bronchus_R_B6_superior', (-0.51, 0.105, 2.46)),
+    ('bronchus_R_B7_medial_basal', (-0.50, -0.010, 2.18)),
+    ('bronchus_R_B8_anterior_basal', (-0.57, -0.095, 2.18)),
+    ('bronchus_R_B9_lateral_basal', (-0.60, 0.020, 2.18)),
+    ('bronchus_R_B10_posterior_basal', (-0.53, 0.135, 2.19)),
+]:
+    add_bronchus(name, [rll_root, endpoint], 0.0060)
+
+# Patient left: longer, narrower and more oblique under the aortic arch.
+l_main_end = (0.34, -0.018, 2.58)
+add_bronchus('bronchus_main_L', [carina, (0.17, -0.008, 2.80), l_main_end], 0.035)
+lul_root = (0.39, -0.025, 2.63)
+add_bronchus('bronchus_LUL', [l_main_end, lul_root], 0.016)
+for name, endpoint in [
+    ('bronchus_L_B1_2_apicoposterior', (0.50, 0.070, 2.88)),
+    ('bronchus_L_B3_anterior', (0.53, -0.110, 2.70)),
+    ('bronchus_L_B4_lingular_superior', (0.54, -0.095, 2.49)),
+    ('bronchus_L_B5_lingular_inferior', (0.53, -0.055, 2.37)),
+]:
+    add_bronchus(name, [lul_root, endpoint], 0.0062)
+
+lll_root = (0.43, 0.045, 2.31)
+add_bronchus('bronchus_LLL', [l_main_end, (0.39, 0.020, 2.43), lll_root], 0.016)
+for name, endpoint in [
+    ('bronchus_L_B6_superior', (0.52, 0.115, 2.47)),
+    ('bronchus_L_B7_8_anteromedial_basal', (0.55, -0.080, 2.18)),
+    ('bronchus_L_B9_lateral_basal', (0.59, 0.015, 2.17)),
+    ('bronchus_L_B10_posterior_basal', (0.53, 0.135, 2.19)),
+]:
+    add_bronchus(name, [lll_root, endpoint], 0.0060)
 
 # Pulmonary vessels at each hilum.  Blue carries deoxygenated blood away from
 # the heart; paired red veins return oxygenated blood.  These are not part of
@@ -260,9 +457,31 @@ for side in (-1, 1):
                                  (hilum_x, -0.055, 2.42 + dz * 0.35), vein_end],
                                 0.024, resolution=9, around=3))
 
+# -------------------------------------------------------------- mediastinum
+# The heart is not an interaction target, but showing its true leftward apex
+# explains the cardiac notch and prevents learners from imagining that the two
+# lungs meet in the centre of the chest.
+heart = ellipsoid('heart', (0.09, -0.015, 2.34), (0.30, 0.235, 0.43), 52, 36)
+for vert in heart.data.vertices:
+    x, y, z = vert.co
+    inferior = max(0.0, min(1.0, (2.45 - z) / 0.54))
+    vert.co.x += 0.105 * inferior
+    vert.co.y -= 0.025 * inferior
+    vert.co.x *= 1.0 - 0.20 * inferior
+    vert.co.y *= 1.0 - 0.16 * inferior
+heart.data.update()
+built.append(heart)
+built.append(curve_tube('great_aorta', [
+    (0.03, 0.01, 2.60), (0.01, 0.005, 2.82), (-0.06, 0.035, 2.97),
+    (-0.16, 0.095, 2.94),
+], 0.040, resolution=14, around=3))
+built.append(curve_tube('great_pulmonary_trunk', [
+    (0.03, -0.085, 2.57), (-0.02, -0.080, 2.72), (-0.09, -0.040, 2.78),
+], 0.036, resolution=12, around=3))
+
 # --------------------------------------------------------------- diaphragm
-angular_steps = 72
-radial_steps = 30
+angular_steps = 40
+radial_steps = 16
 rx, ry = cage_inner(DIAPHRAGM_BASE + 0.1)
 verts = [(0.0, 0.0, diaphragm_top(0.0, 0.0))]
 faces = []

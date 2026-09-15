@@ -2,9 +2,10 @@ import * as THREE from 'three';
 import { palette, mat, roundedBox, torus, dynamicDisplay } from '../SceneKit.js';
 import { cloneAnatomy } from '../AssetLibrary.js';
 
-// A standing cutaway model of the respiratory system. The head and abdomen are
-// solid; the front of the thorax is opened so the airway, lungs, rib cage and
-// diaphragm can be seen as real volumes inside it.
+// A standing clinical cutaway of the respiratory system. The head, neck and
+// posterior/lateral thorax are a translucent Blender-authored orientation
+// shell; the anterior thorax is truly open so the airway, lungs, rib cage,
+// mediastinum and diaphragm can be inspected from multiple angles.
 //
 // The anatomy itself is modelled in Blender and loaded as one glb — see
 // art-source/respiratory. Inside that model the lungs are carved out of the
@@ -24,8 +25,8 @@ const ORGAN_TEXT = {
 const CALLOUTS = {
   // box is in stage space; aim is a point in MODEL space on or just outside the
   // organ, chosen so a ray in from the box lands on a face a student can see.
-  nose: { box: [-2.75, 5.16, .8], aim: [0, 4.82, .56] },
-  throat: { box: [-2.75, 4.34, .8], aim: [0, 3.85, 0] },
+  nose: { box: [-2.75, 5.16, .8], aim: [0, 4.80, .48] },
+  throat: { box: [-2.75, 4.34, .8], aim: [0, 4.18, -.08] },
   trachea: { box: [-2.75, 3.52, .8], aim: [0, 3.5, 0] },
   bronchi: { box: [2.75, 3.34, .8], aim: [.4, 2.8, .04] },
   lungs: { box: [2.75, 2.74, .8], aim: [.75, 2.62, .05] },
@@ -217,6 +218,8 @@ export function buildRespiratory(api) {
     diaphragm: { clearcoat: .1, clearcoatRoughness: .52, roughness: .64, env: .42 },
     ribcage: { clearcoat: .04, clearcoatRoughness: .6, roughness: .62, env: .3 },
     spine: { clearcoat: .04, clearcoatRoughness: .6, roughness: .62, env: .3 },
+    body: { clearcoat: .06, clearcoatRoughness: .64, roughness: .62, env: .34 },
+    mediastinum: { clearcoat: .12, clearcoatRoughness: .48, roughness: .58, env: .46 },
   };
 
   /**
@@ -258,24 +261,53 @@ export function buildRespiratory(api) {
 
   const lungs = part('lungs');
   const airway = part('airway');
+  const bodyShell = part('body');
+  const mediastinum = part('mediastinum');
   const spine = part('spine');
   const ribShell = part('ribcage') || new THREE.Group();
   if (!ribShell.parent) organs.add(ribShell);
 
-  // A restrained pleural transparency makes the intrapulmonary tree visible
-  // without turning the parenchyma into glass.  Depth pre-pass remains on so
-  // the five lobes keep a coherent surface.
+  // Keep the patient's right lung close to natural opacity while the left is
+  // an explicit dissection window.  That preserves a realistic pleural
+  // surface and still exposes the intrapulmonary tree and cardiac notch.
   if (lungs) {
     lungs.traverse((child) => {
       if (!child.isMesh) return;
       const materials = Array.isArray(child.material) ? child.material : [child.material];
       for (const material of materials) {
+        const dissected = material.name?.includes('lung_clear');
         material.vertexColors = true;
         material.transparent = true;
-        material.opacity = .92;
-        material.depthWrite = true;
+        material.opacity = dissected ? .38 : .90;
+        material.depthWrite = !dissected;
+        material.side = THREE.DoubleSide;
         material.roughness = .54;
         material.clearcoat = .22;
+      }
+    });
+  }
+
+  if (bodyShell) {
+    bodyShell.renderOrder = -4;
+    bodyShell.traverse((child) => {
+      if (!child.isMesh) return;
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      for (const material of materials) {
+        material.transparent = true;
+        material.opacity = .28;
+        material.depthWrite = false;
+        material.side = THREE.DoubleSide;
+      }
+    });
+  }
+
+  if (mediastinum) {
+    mediastinum.traverse((child) => {
+      if (!child.isMesh) return;
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      for (const material of materials) {
+        material.transparent = true;
+        material.opacity = .94;
       }
     });
   }
@@ -311,68 +343,13 @@ export function buildRespiratory(api) {
   ribShell.add(ribHandle);
   api.entity('ribs', '肋骨', ribHandle, { adjustable: true, namePlate: false, physics: false });
 
-  // --------------------------------------------------------------- the body
-  const skinTone = 0xd8b59c;
-  const skin = { roughness: .56, metalness: .02, side: THREE.DoubleSide };
-  const abdomen = turned([
-    [0, .5], [.62, .52], [.76, .82], [.94, 1.34], [.96, 1.6], [0, 1.62],
-  ], skinTone, { roughness: .6 }, { depth: .8 });
-  model.add(abdomen);
-
-  const torso = turned([
-    [.96, 1.62], [.94, 2.05], [.98, 2.7], [1.02, 3.2], [.99, 3.5],
-    [.8, 3.76], [.5, 3.94], [.3, 4.06], [.27, 4.24], [0, 4.26],
-  ], skinTone, skin, { depth: .94, open: .44 });
-  model.add(torso);
+  // The Blender body shell carries its own thoracic morph.  The handle is only
+  // a timeline scrubber; it is not presented as a separate breathing muscle.
   const chestHandle = makeHandle(HANDLE_COLOUR);
   chestHandle.position.set(-1.26, 2.44, .28);
   chestHandle.rotation.z = Math.PI;
   model.add(chestHandle);
   api.entity('chest', '胸腔', chestHandle, { adjustable: true, namePlate: false, physics: false });
-
-  const neck = turned([
-    [0, 4.18], [.27, 4.2], [.29, 4.46], [0, 4.48],
-  ], skinTone, skin, { depth: .9, open: .26 });
-  model.add(neck);
-
-  const head = new THREE.Mesh(new THREE.SphereGeometry(.54, 36, 26), mat(skinTone, { roughness: .56 }));
-  head.scale.set(.78, 1.14, .96);
-  head.position.y = 4.94;
-  model.add(head);
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(.17, .34, 16), mat(skinTone, { roughness: .56 }));
-  // A cone points along +y; +PI/2 about x sends that to +z, towards the
-  // viewer. -PI/2 sent it to -z, burying the tip inside the skull and turning
-  // the flat base towards the camera.
-  nose.rotation.x = Math.PI / 2;
-  nose.position.set(0, 4.82, .56);
-  model.add(nose);
-  // Pharynx: from the top of the larynx up behind the nasal cavity. It leans
-  // back as it climbs, which is why the throat is behind the mouth.
-  const pharynx = tube([
-    [0, 3.94, .02], [0, 4.2, -.02], [0, 4.46, -.04], [0, 4.7, .04], [0, 4.86, .18],
-  ], .15, mat(0xdca3b4, { roughness: .46, clearcoat: .35 }), { segments: 18, radial: 14 });
-  organs.add(pharynx);
-
-  const boneTone = mat(0xf0e2d0, { roughness: .5, clearcoat: .14 });
-  for (const side of [-1, 1]) {
-    // The clavicle: the landmark a lung apex is measured against, and the only
-    // strut holding the shoulder off the chest. Its S-curve runs forward at the
-    // sternal end and back at the acromial end.
-    organs.add(tube([
-      [side * .1, 3.36, .44],
-      [side * .34, 3.4, .42],
-      [side * .58, 3.38, .28],
-      [side * .74, 3.32, .08],
-      [side * .82, 3.28, -.04],
-    ], .045, boneTone, { segments: 24, radial: 10 }));
-  }
-
-  for (const side of [-1, 1]) {
-    const shoulder = new THREE.Mesh(new THREE.SphereGeometry(.32, 22, 18), mat(skinTone, { roughness: .56 }));
-    shoulder.scale.set(.74, .58, .64);
-    shoulder.position.set(side * .84, 3.28, -.04);
-    model.add(shoulder);
-  }
 
   // Standard anterior-view orientation: the patient's right is on the
   // learner's left.  Never leave this implicit in an anatomy lesson.
@@ -390,7 +367,7 @@ export function buildRespiratory(api) {
   // Which mesh each callout is naming, so its leader can be landed on the
   // surface of that mesh rather than at a typed-in coordinate.
   const organMesh = {
-    nose, throat: airway, trachea: airway, bronchi: airway,
+    nose: airway, throat: airway, trachea: airway, bronchi: airway,
     lungs, diaphragm: diaphragmSheet,
   };
   const raycaster = new THREE.Raycaster();
@@ -511,6 +488,7 @@ export function buildRespiratory(api) {
   const HANDLES = new Set(['ribs', 'diaphragm', 'chest']);
   let wanted = 0;
   let held = 0;
+  let airflow = 0;
   let labelled = false;
 
   function breath() {
@@ -536,20 +514,19 @@ export function buildRespiratory(api) {
     setBreathMorph(lungs, value);
     setBreathMorph(airway, value);
     setBreathMorph(diaphragmSheet, value);
+    setBreathMorph(bodyShell, value);
 
     ribHandle.position.x = 1.26 + Math.max(value, 0) * .08 + Math.min(value, 0) * .04;
 
-    // The visible skin follows the rib excursion only subtly.  It is not the
-    // source of the breath, merely an external reference surface.
-    const skinAcross = 1 + Math.max(value, 0) * .035 + Math.min(value, 0) * .025;
-    const skinDepth = .94 * (1 + Math.max(value, 0) * .045 + Math.min(value, 0) * .03);
-    torso.scale.set(skinAcross, 1, skinDepth);
     chestHandle.position.x = -1.26 - Math.max(value, 0) * .08 - Math.min(value, 0) * .04;
 
-    const flowing = Math.abs(value) > .2;
+    // Airflow is proportional to volume change, not lung volume.  At either
+    // endpoint the model may be fully inflated/deflated but the arrows must
+    // disappear once motion stops (a brief end-inspiratory/expiratory pause).
+    const flowing = Math.abs(airflow) > .12;
     for (const arrow of airMarks) {
       arrow.visible = labelled && flowing;
-      arrow.rotation.set(value >= 0 ? Math.PI : 0, 0, 0);
+      arrow.rotation.set(airflow > 0 ? Math.PI : 0, 0, 0);
     }
     for (const arrow of moveMarks) {
       arrow.visible = labelled;
@@ -603,7 +580,14 @@ export function buildRespiratory(api) {
           plane.quaternion.copy(parentWorld.invert().multiply(cameraWorld));
         }
       }
-      if (Math.abs(next - held) < .01) return;
+      if (Math.abs(next - held) < .01) {
+        if (airflow !== 0) {
+          airflow = 0;
+          refresh();
+        }
+        return;
+      }
+      airflow = (next - held) / Math.max(dt, 1 / 240);
       held = next;
       refresh();
     },
@@ -622,6 +606,7 @@ export function buildRespiratory(api) {
         lungMorph: Number(Math.abs(value).toFixed(4)),
         inhaling: value > .45,
         exhaling: value < -.45,
+        airflow: Number(airflow.toFixed(2)),
         model: lungs ? 'blender' : 'missing',
       };
     },

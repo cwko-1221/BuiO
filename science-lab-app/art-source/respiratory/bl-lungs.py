@@ -63,7 +63,7 @@ def new_mesh(name, verts, faces):
     return obj
 
 
-def make_cavity(name, margin=0.91, segments=64, rings=40):
+def make_cavity(name, margin=0.88, segments=64, rings=40):
     """A closed solid of the inside of the chest, from the cage shape function."""
     verts = []
     for ring in range(rings + 1):

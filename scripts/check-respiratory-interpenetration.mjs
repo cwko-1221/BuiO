@@ -121,22 +121,79 @@ function readAccessor(json, bin, index) {
       }
     }
   }
+  if (accessor.normalized) {
+    const divisor = { 5120: 127, 5121: 255, 5122: 32767, 5123: 65535, 5125: 4294967295 }[accessor.componentType];
+    if (!divisor) throw new Error(`unsupported normalized component type ${accessor.componentType}`);
+    const signed = accessor.componentType === 5120 || accessor.componentType === 5122;
+    for (let i = 0; i < out.length; i += 1) {
+      out[i] = signed ? Math.max(out[i] / divisor, -1) : out[i] / divisor;
+    }
+  }
+  return out;
+}
+
+function multiplyMatrix(a, b) {
+  const out = new Float64Array(16);
+  for (let column = 0; column < 4; column += 1) {
+    for (let row = 0; row < 4; row += 1) {
+      let value = 0;
+      for (let k = 0; k < 4; k += 1) value += a[k * 4 + row] * b[column * 4 + k];
+      out[column * 4 + row] = value;
+    }
+  }
+  return out;
+}
+
+function localMatrix(node) {
+  if (node.matrix) return Float64Array.from(node.matrix);
+  const [x, y, z, w] = node.rotation || [0, 0, 0, 1];
+  const [sx, sy, sz] = node.scale || [1, 1, 1];
+  const [tx, ty, tz] = node.translation || [0, 0, 0];
+  const xx = x * x; const yy = y * y; const zz = z * z;
+  const xy = x * y; const xz = x * z; const yz = y * z;
+  const wx = w * x; const wy = w * y; const wz = w * z;
+  return Float64Array.from([
+    (1 - 2 * (yy + zz)) * sx, 2 * (xy + wz) * sx, 2 * (xz - wy) * sx, 0,
+    2 * (xy - wz) * sy, (1 - 2 * (xx + zz)) * sy, 2 * (yz + wx) * sy, 0,
+    2 * (xz + wy) * sz, 2 * (yz - wx) * sz, (1 - 2 * (xx + yy)) * sz, 0,
+    tx, ty, tz, 1,
+  ]);
+}
+
+function transformTriples(values, matrix, vector = false) {
+  const out = new Float64Array(values.length);
+  for (let i = 0; i < values.length; i += 3) {
+    const x = values[i]; const y = values[i + 1]; const z = values[i + 2];
+    out[i] = matrix[0] * x + matrix[4] * y + matrix[8] * z + (vector ? 0 : matrix[12]);
+    out[i + 1] = matrix[1] * x + matrix[5] * y + matrix[9] * z + (vector ? 0 : matrix[13]);
+    out[i + 2] = matrix[2] * x + matrix[6] * y + matrix[10] * z + (vector ? 0 : matrix[14]);
+  }
   return out;
 }
 
 /**
  * Every named part as a flat position array plus a triangle index array, in the
- * model's own coordinates. The five nodes in this file carry no transform of
- * their own, which is asserted rather than assumed — a node translation added
- * in Blender would silently shift a part out from under this whole check.
+ * model's own coordinates. Optimized glTF files may carry quantization restore
+ * transforms on nodes, so the checker resolves the full node hierarchy and
+ * applies it to base positions as points and morph deltas as vectors.
  */
 function readParts(json, bin) {
   const parts = new Map();
-  for (const node of json.nodes || []) {
+  const nodes = json.nodes || [];
+  const parent = new Map();
+  nodes.forEach((node, index) => (node.children || []).forEach((child) => parent.set(child, index)));
+  const worldCache = new Map();
+  const worldMatrix = (index) => {
+    if (worldCache.has(index)) return worldCache.get(index);
+    const local = localMatrix(nodes[index]);
+    const result = parent.has(index) ? multiplyMatrix(worldMatrix(parent.get(index)), local) : local;
+    worldCache.set(index, result);
+    return result;
+  };
+  for (let nodeIndex = 0; nodeIndex < nodes.length; nodeIndex += 1) {
+    const node = nodes[nodeIndex];
     if (node.mesh === undefined) continue;
-    for (const key of ['translation', 'rotation', 'scale', 'matrix']) {
-      if (node[key]) throw new Error(`node ${node.name} carries a ${key}; this checker assumes identity nodes`);
-    }
+    const matrix = worldMatrix(nodeIndex);
     const mesh = json.meshes[node.mesh];
     const positions = [];
     const indices = [];
@@ -146,7 +203,7 @@ function readParts(json, bin) {
     for (const primitive of mesh.primitives) {
       if (primitive.mode !== undefined && primitive.mode !== 4) throw new Error('only triangle primitives are handled');
       const offset = positions.length / 3;
-      const position = readAccessor(json, bin, primitive.attributes.POSITION);
+      const position = transformTriples(readAccessor(json, bin, primitive.attributes.POSITION), matrix);
       for (let i = 0; i < position.length; i += 1) positions.push(position[i]);
       const materialName = primitive.material === undefined ? null : json.materials?.[primitive.material]?.name;
       for (let i = 0; i < position.length / 3; i += 1) vertexMaterials.push(materialName);
@@ -155,7 +212,7 @@ function readParts(json, bin) {
       for (let targetIndex = 0; targetIndex < targetNames.length; targetIndex += 1) {
         const accessor = primitive.targets?.[targetIndex]?.POSITION;
         if (accessor === undefined) throw new Error(`node ${node.name} is missing morph ${targetNames[targetIndex]}`);
-        const delta = readAccessor(json, bin, accessor);
+        const delta = transformTriples(readAccessor(json, bin, accessor), matrix, true);
         morphs.get(targetNames[targetIndex]).push(...delta);
       }
     }
@@ -175,16 +232,13 @@ function readParts(json, bin) {
 // The anatomy is deformed by the morph targets exported from Blender.  The
 // checker reads those same POSITION deltas from the GLB; it does not maintain a
 // second handwritten approximation of respiratory motion.
-const TORSO_DEPTH = 0.94;
-const ABDOMEN_DEPTH = 0.80;
-const NECK_DEPTH = 0.90;
-
 function placed(part, v) {
   const out = part.positions.slice();
   if (Math.abs(v) > 1e-12) {
     const name = v > 0 ? 'Inhale' : 'Exhale';
     const delta = part.morphs.get(name);
-    if (part.name !== 'spine' && !delta) throw new Error(`part ${part.name} has no ${name} morph target`);
+    const animated = new Set(['airway', 'lungs', 'ribcage', 'diaphragm', 'body']);
+    if (animated.has(part.name) && !delta) throw new Error(`part ${part.name} has no ${name} morph target`);
     if (delta) {
       const weight = Math.abs(v);
       for (let i = 0; i < out.length; i += 1) out[i] += delta[i] * weight;
@@ -205,10 +259,9 @@ async function assertSceneMatches() {
     [/setBreathMorph\(lungs, value\);/, 'lung morph'],
     [/setBreathMorph\(airway, value\);/, 'airway morph'],
     [/setBreathMorph\(diaphragmSheet, value\);/, 'diaphragm morph'],
+    [/setBreathMorph\(bodyShell, value\);/, 'body-surface morph'],
     [/const inhale = Math\.max\(value, 0\);/, 'positive morph weight'],
     [/const exhale = Math\.max\(-value, 0\);/, 'negative morph weight'],
-    [/const skinAcross = 1 \+ Math\.max\(value, 0\) \* \.035 \+ Math\.min\(value, 0\) \* \.025;/, 'skin width'],
-    [/const skinDepth = \.94 \* \(1 \+ Math\.max\(value, 0\) \* \.045 \+ Math\.min\(value, 0\) \* \.03\);/, 'skin depth'],
   ];
   const missing = required.filter(([pattern]) => !pattern.test(source)).map(([, label]) => label);
   if (missing.length) {
@@ -222,38 +275,46 @@ async function assertSceneMatches() {
 
 // --------------------------------------------------- the body it all sits in
 //
-// The skin is lathed from these profiles in BodyScenes.js. The trailing point
-// that runs to radius 0 is the lathe's cap, not skin, so it is dropped: what is
-// wanted is the silhouette an organ must stay inside of.
-const ABDOMEN = [[0.62, 0.52], [0.76, 0.82], [0.94, 1.34], [0.96, 1.6]];
-const TORSO = [
-  [0.96, 1.62], [0.94, 2.05], [0.98, 2.7], [1.02, 3.2], [0.99, 3.5],
-  [0.8, 3.76], [0.5, 3.94], [0.3, 4.06], [0.27, 4.24],
+// Same (height, half-width, half-depth) rings as bl-skeleton.py.  The exported
+// skin has an anterior teaching window, so containment is evaluated against
+// the completed anatomical envelope these rings define.
+const BODY = [
+  [0.92, 0.82, 0.72], [1.18, 0.92, 0.80], [1.52, 0.96, 0.75],
+  [1.78, 1.00, 0.72], [2.10, 0.95, 0.84], [2.48, 0.98, 0.92],
+  [2.88, 1.00, 0.94], [3.22, 1.08, 0.90], [3.48, 1.02, 0.82],
+  [3.70, 0.78, 0.64], [3.88, 0.51, 0.44], [4.05, 0.34, 0.30],
 ];
-const NECK = [[0.27, 4.2], [0.29, 4.46]];
 
-function profileRadius(profile, y) {
-  if (y <= profile[0][1]) return profile[0][0];
-  if (y >= profile[profile.length - 1][1]) return profile[profile.length - 1][0];
-  for (let i = 1; i < profile.length; i += 1) {
-    const [r0, y0] = profile[i - 1];
-    const [r1, y1] = profile[i];
-    if (y <= y1) return r0 + (r1 - r0) * ((y - y0) / (y1 - y0));
+function bodyAxes(y) {
+  if (y <= BODY[0][0]) return { a: BODY[0][1], b: BODY[0][2] };
+  if (y >= BODY[BODY.length - 1][0]) return { a: BODY.at(-1)[1], b: BODY.at(-1)[2] };
+  for (let i = 1; i < BODY.length; i += 1) {
+    const [y0, a0, b0] = BODY[i - 1];
+    const [y1, a1, b1] = BODY[i];
+    if (y <= y1) {
+      const t = (y - y0) / (y1 - y0);
+      return { a: a0 + (a1 - a0) * t, b: b0 + (b1 - b0) * t };
+    }
   }
-  return profile[profile.length - 1][0];
+  return { a: BODY.at(-1)[1], b: BODY.at(-1)[2] };
 }
 
 /** Semi-axes of the skin in x and z at a height, for a breath value. */
 function shellAt(y, v) {
-  if (y >= 4.24) return { a: profileRadius(NECK, y), b: profileRadius(NECK, y) * NECK_DEPTH };
-  if (y >= 1.61) {
-    const r = profileRadius(TORSO, y);
-    const width = 1 + Math.max(v, 0) * .035 + Math.min(v, 0) * .025;
-    const depth = 1 + Math.max(v, 0) * .045 + Math.min(v, 0) * .03;
-    return { a: r * width, b: r * TORSO_DEPTH * depth };
+  if (y >= 4.36) {
+    const vertical = (y - 4.94) / 0.64;
+    const section = Math.sqrt(Math.max(0.0, 1.0 - vertical * vertical));
+    const a = Math.max(0.19, 0.45 * section);
+    const nose = 0.20 * Math.exp(-(((y - 4.78) / 0.19) ** 2));
+    return { a, b: Math.max(0.20, 0.41 * section + nose) };
   }
-  const r = profileRadius(ABDOMEN, y);
-  return { a: r, b: r * ABDOMEN_DEPTH };
+  if (y >= 4.05) return { a: 0.315, b: 0.265 };
+  const { a, b } = bodyAxes(y);
+  const width = 1 + Math.max(v, 0) * .020 + Math.min(v, 0) * .013;
+  // Posterior skin is fixed to the back; only the anterior shell recedes in
+  // expiration, so the symmetric envelope must not shrink behind the spine.
+  const depth = 1 + Math.max(v, 0) * .035;
+  return { a: a * width, b: b * depth };
 }
 
 // --------------------------------------------------------------- geometry
@@ -595,13 +656,11 @@ function checkDomeUnderLungs(lungs, diaphragm) {
 
 // ------------------------------------------------------------- check 3
 //
-// The bronchial tree must stay inside the lungs. The airway is one mesh from
-// the nostrils down, so "the bronchial tree" is defined as the airway vertices
-// that are inside the lungs in the resting pose — the intrapulmonary part. Those
-// are then required to stay inside at every breath. That is the right set: the
-// trachea above the carina is outside the lungs by design and must not be
-// judged, and a branch that starts inside and comes out is precisely the
-// failure being guarded against.
+// The bronchial tree must stay inside the lungs. Blender assigns every lobar
+// and segmental branch the dedicated `bronchus` material before joining the
+// airway mesh.  Therefore the set is independent of whether a vertex happened
+// to start inside the lung: an already-wrong branch can no longer disappear
+// from the test simply because the rest-pose point-in-mesh query rejected it.
 function insideLungs(columns, x, y, z) {
   const components = Array.isArray(columns) ? columns : [columns];
   return components.some((index) => {
@@ -612,17 +671,13 @@ function insideLungs(columns, x, y, z) {
   });
 }
 
-function bronchialSet(airway, lungs) {
-  const columns = lungComponentColumns(lungs);
+function bronchialSet(airway) {
   const p = airway.positions;
-  const inside = [];
+  const members = [];
   for (let i = 0; i < p.length; i += 3) {
-    // Pulmonary arteries and veins legitimately leave the lung at the hilum;
-    // this invariant is specifically for the conducting airway tree.
-    if (airway.vertexMaterials?.[i / 3] !== 'airway') continue;
-    if (insideLungs(columns, p[i], p[i + 1], p[i + 2])) inside.push(i / 3);
+    if (airway.vertexMaterials?.[i / 3] === 'bronchus') members.push(i / 3);
   }
-  return inside;
+  return members;
 }
 
 function checkBronchiInLungs(airway, lungs, members) {
@@ -677,13 +732,13 @@ export async function runRespiratoryInterpenetrationCheck({ log = console.log } 
   await assertSceneMatches();
   const { json, bin } = readGlb(await readFile(MODEL));
   const parts = readParts(json, bin);
-  for (const name of ['airway', 'spine', 'lungs', 'ribcage', 'diaphragm']) {
+  for (const name of ['airway', 'spine', 'lungs', 'ribcage', 'diaphragm', 'body', 'mediastinum']) {
     if (!parts.has(name)) throw new Error(`the model is missing its ${name}`);
   }
 
   // The intrapulmonary airway, fixed once from the resting pose so the set
   // being judged cannot shrink as the lungs move off it.
-  const members = bronchialSet(placed(parts.get('airway'), 0), placed(parts.get('lungs'), 0));
+  const members = bronchialSet(placed(parts.get('airway'), 0));
 
   const rows = [];
   for (let breath = -100; breath <= 100; breath += BREATH_STEP) {
@@ -693,19 +748,20 @@ export async function runRespiratoryInterpenetrationCheck({ log = console.log } 
     const diaphragm = placed(parts.get('diaphragm'), v);
     const airway = placed(parts.get('airway'), v);
     const spine = placed(parts.get('spine'), v);
+    const mediastinum = placed(parts.get('mediastinum'), v);
     rows.push({
       breath,
       cage: checkLungsInCage(lungs, ribcage),
       dome: checkDomeUnderLungs(lungs, diaphragm),
       bronchi: checkBronchiInLungs(airway, lungs, members),
-      body: checkInsideBody([lungs, ribcage, diaphragm, airway, spine], v),
+      body: checkInsideBody([lungs, ribcage, diaphragm, airway, spine, mediastinum], v),
     });
   }
 
   log('');
   log('Respiratory interpenetration check — clearance in model units (1 unit ~ 30 cm of body).');
   log(`Negative means one structure has entered another. Tolerance ${TOLERANCE}. `
-    + `${members.length} airway vertices are inside the lungs at rest and are held to it.`);
+    + `${members.length} Blender-tagged lobar/segmental bronchus vertices are tested.`);
   log('');
   log('breath   lungs-in-cage  dome-under-lungs  bronchi-in-lungs   inside-body   worst part');
   for (const row of rows) {

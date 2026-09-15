@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "vite build"
+    "check": "vite build",
+    "optimize:respiratory": "node scripts/optimize-respiratory-glb.mjs"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "0.20.0",

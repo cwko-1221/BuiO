@@ -10,8 +10,11 @@ const anatomy = new Map();
 let loadPromise = null;
 let anatomyPromise = null;
 
-// The parts the breathing station animates, as named on export.
-const ANATOMY_PARTS = ['lungs', 'ribcage', 'spine', 'airway', 'diaphragm'];
+// Blender export groups used by the breathing station. Body and mediastinum
+// are presentation layers too, even though only the body has a breath morph.
+const ANATOMY_PARTS = [
+  'lungs', 'ribcage', 'spine', 'airway', 'diaphragm', 'body', 'mediastinum',
+];
 
 /** Load the Blender respiratory model once. */
 export function loadRespiratoryModel() {
