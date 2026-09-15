@@ -328,7 +328,7 @@ export const experiments = [
     apparatus: ['呼吸系統模型板', '六個器官名牌', '肋骨', '橫膈膜', '胸腔'],
     curriculum: { items: '#31、#33', codes: ['4LS1', '5LS2'] },
     safety: '這是模型操作，沒有危險。不過真實的呼吸不該長時間憋住，做深呼吸時慢慢來就可以。',
-    modelNote: '模型代表站立時一次緩慢深呼吸。控制桿由完全呼氣至完全吸氣；橫膈膜穹頂下降約 5 厘米，肋骨前端及兩側分別呈泵柄式與桶柄式抬升。三個把手只是同一呼吸時間軸的不同觀察點，不表示胸腔本身是肌肉。安靜呼氣主要靠肺和胸壁的彈性回縮。肺略呈半透明，方便看見肺門內的支氣管和血管。',
+    modelNote: '模型代表站立時一次緩慢深呼吸。單一控制桿由呼氣末端移到吸氣末端；橫膈膜穹頂下降約 5 厘米，肋骨前端及兩側分別呈泵柄式與桶柄式抬升。各部分是同一呼吸週期的耦合運動，不可獨立控制。安靜呼氣主要靠肺和胸壁的彈性回縮。儀表同步顯示相對胸腔容積、肺泡壓與氣流方向；百分比是教學用正規化值，不是病人量度。',
     prediction: {
       prompt: '吸氣的時候，橫膈膜會怎樣移動？',
       options: ['向上升', '向下降', '不會移動'],
@@ -336,9 +336,9 @@ export const experiments = [
     },
     steps: [
       { verb: '標示', title: '認出呼吸系統的器官', instruction: '把六個器官名牌，拖到模型上對應的框裏。', cue: '拖動名牌到指著器官的框', hint: '順著空氣的路線想：空氣先經過哪裏，再到哪裏？', action: { type: 'label', subject: 'organ-labels', pairs: { 'chip-nose': 'slot-nose', 'chip-throat': 'slot-throat', 'chip-trachea': 'slot-trachea', 'chip-bronchi': 'slot-bronchi', 'chip-lungs': 'slot-lungs', 'chip-diaphragm': 'slot-diaphragm' } }, observation: '六個器官都標示好了：空氣沿鼻、喉、氣管、支氣管進入肺部。' },
-      { verb: '拖動', title: '吸氣：把肋骨拉向外', instruction: '向外拖動肋骨的紫色把手，做出吸氣的樣子。', cue: '向外（左右）拖動肋骨把手', hint: '留意其他部分：它們會不會自己跟著動？', action: { type: 'adjust', subject: 'ribs', min: 50, max: 100, unit: '', range: [-100, 100], start: 0 }, observation: '肋骨向外張開時，橫膈膜同時下降、胸腔一起擴大，肺也跟著脹起來。' },
-      { verb: '拖動', title: '呼氣：觀察橫膈膜放鬆', instruction: '向上拖動橫膈膜的紫色把手，慢慢回到呼氣末端。', cue: '向上拖動橫膈膜把手', hint: '留意穹頂變圓、肋骨回落，以及肺的彈性回縮。', action: { type: 'adjust', subject: 'diaphragm', min: -100, max: -50, unit: '', range: [-100, 100], start: 75, adjustAxis: 'vertical', invert: true }, observation: '橫膈膜放鬆並回升，肋骨回落向內；肺和胸壁的彈性回縮令肺內壓力上升，空氣流出。' },
-      { verb: '拖動', title: '由胸壁再看一次深吸氣', instruction: '拖動胸壁旁的時間軸把手，由呼氣末端慢慢移到吸氣末端。', cue: '向外拖動胸壁時間軸', hint: '這是觀察時間軸；比較胸壁外觀與內部肋骨、肺、橫膈膜的同步變化。', action: { type: 'adjust', subject: 'chest', min: 50, max: 100, unit: '', range: [-100, 100], start: -75 }, observation: '胸壁只是隨內部胸廓改變形狀；真正提供吸氣力量的是橫膈膜收縮及吸氣肌把肋骨抬起。' },
+      { verb: '拖動', title: '吸氣：沿時間軸向下', instruction: '把紫色呼吸時間軸控制桿慢慢向下拉到吸氣末端。', cue: '向下拖動唯一的呼吸時間軸', hint: '同時比較肋骨、橫膈膜、肺、容積、壓力與氣流。', action: { type: 'adjust', subject: 'breath', min: 50, max: 100, unit: '', range: [-100, 100], start: 0, adjustAxis: 'vertical', invert: true }, observation: '肋骨抬高向外，橫膈膜收縮下降；胸腔容積增加，肺泡壓短暫低於大氣壓，空氣流入。' },
+      { verb: '拖動', title: '呼氣：沿同一時間軸向上', instruction: '把同一控制桿慢慢向上推回呼氣末端。', cue: '向上拖動呼吸時間軸', hint: '停止拖動時，留意氣流會回到零。', action: { type: 'adjust', subject: 'breath', min: -100, max: -50, unit: '', range: [-100, 100], start: 75, adjustAxis: 'vertical', invert: true }, observation: '橫膈膜放鬆回升、肋骨回落；彈性回縮令肺泡壓短暫高於大氣壓，空氣流出，末端再次停止。' },
+      { verb: '比較', title: '比較呼氣末與吸氣末', instruction: '沿同一時間軸慢慢來回一次，並比較兩個末端。', cue: '用一個控制桿比較整套耦合運動', hint: '呼吸末端可以有容積差，但沒有氣流。', action: { type: 'adjust', subject: 'breath', min: 50, max: 100, unit: '', range: [-100, 100], start: -75, adjustAxis: 'vertical', invert: true }, observation: '胸壁只是隨胸廓改變形狀；吸氣動力來自橫膈膜和吸氣肌，兩個呼吸末端的氣流都回到零。' },
       { verb: '記錄', title: '記下吸氣時空氣的去向', instruction: '吸氣時空氣往哪裏走？記進數據表。', cue: '選出空氣的方向', hint: '看模型上的藍色箭嘴。', action: { type: 'record', subject: 'inhale-air', label: '吸氣時的空氣', unit: '', options: ['進入肺部', '離開肺部', '停在氣管'], answer: 0 }, observation: '吸氣的結果已記入數據表。' },
       { verb: '記錄', title: '記下呼氣時空氣的去向', instruction: '呼氣時空氣往哪裏走？記進數據表。', cue: '選出空氣的方向', hint: '箭嘴的方向調轉了。', action: { type: 'record', subject: 'exhale-air', label: '呼氣時的空氣', unit: '', options: ['進入肺部', '離開肺部', '停在氣管'], answer: 1 }, observation: '呼氣的結果已記入數據表，可以比較一呼一吸了。' },
     ],

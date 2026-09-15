@@ -275,7 +275,7 @@ export function buildRespiratory(api) {
       if (!child.isMesh) return;
       const materials = Array.isArray(child.material) ? child.material : [child.material];
       for (const material of materials) {
-        const dissected = material.name?.includes('lung_clear');
+        const dissected = material.name?.includes('lung_L');
         material.vertexColors = true;
         material.transparent = true;
         material.opacity = dissected ? .38 : .90;
@@ -330,26 +330,16 @@ export function buildRespiratory(api) {
     diaphragmPivot.add(diaphragmSheet);
   }
 
-  const diaphragmHandle = makeHandle(HANDLE_COLOUR);
-  diaphragmHandle.position.set(0, .04, 1.02);
-  diaphragmHandle.rotation.z = Math.PI / 2;
-  diaphragmPivot.add(diaphragmHandle);
-  api.entity('diaphragm', '橫膈膜', diaphragmHandle, {
+  // One breath, one control. Earlier revisions exposed three handles that all
+  // wrote the same value; that implied the ribs, diaphragm and chest could be
+  // driven independently. This single timeline is deliberately coupled.
+  const breathHandle = makeHandle(HANDLE_COLOUR);
+  breathHandle.position.set(0, .04, 1.02);
+  breathHandle.rotation.z = Math.PI / 2;
+  diaphragmPivot.add(breathHandle);
+  api.entity('breath', '呼吸時間軸', breathHandle, {
     adjustable: true, adjustAxis: 'vertical', namePlate: false, physics: false,
   });
-
-  const ribHandle = makeHandle(HANDLE_COLOUR);
-  ribHandle.position.set(1.26, 3.0, .28);
-  ribShell.add(ribHandle);
-  api.entity('ribs', '肋骨', ribHandle, { adjustable: true, namePlate: false, physics: false });
-
-  // The Blender body shell carries its own thoracic morph.  The handle is only
-  // a timeline scrubber; it is not presented as a separate breathing muscle.
-  const chestHandle = makeHandle(HANDLE_COLOUR);
-  chestHandle.position.set(-1.26, 2.44, .28);
-  chestHandle.rotation.z = Math.PI;
-  model.add(chestHandle);
-  api.entity('chest', '胸腔', chestHandle, { adjustable: true, namePlate: false, physics: false });
 
   // Standard anterior-view orientation: the patient's right is on the
   // learner's left.  Never leave this implicit in an anatomy lesson.
@@ -509,10 +499,10 @@ export function buildRespiratory(api) {
 
   // -------------------------------------------------------- the breath model
   const placed = new Set();
-  // The thorax moves as one piece, so there is one number for the whole of it:
-  // -100 fully out, +100 fully in. Every handle writes to this, and every part
-  // reads from it.
-  const HANDLES = new Set(['ribs', 'diaphragm', 'chest']);
+  // The thorax moves as one coupled system: -100 end-expiration, +100
+  // end-inspiration. Legacy subjects are accepted only while replaying an old
+  // saved experiment; the live scene exposes the single `breath` controller.
+  const HANDLES = new Set(['breath', 'ribs', 'diaphragm', 'chest']);
   let wanted = 0;
   let held = 0;
   let airflow = 0;
@@ -525,9 +515,14 @@ export function buildRespiratory(api) {
   function phaseText() {
     if (!labelled) return ['把六個器官名牌放進正確的框', '#8fb7c4'];
     const value = breath();
-    if (value > .45) return ['吸氣：肋骨向外、橫膈膜向下、胸腔擴大', '#8fd4e6'];
-    if (value < -.45) return ['呼氣：肋骨向內、橫膈膜向上、胸腔縮小', '#f0a37a'];
-    return ['拖動肋骨、橫膈膜和胸腔，做出一次呼吸', '#8fb7c4'];
+    const volume = Math.round(100 + value * 12);
+    if (Math.abs(airflow) <= .12) {
+      return [`暫停｜相對胸腔容積 ${volume}%｜肺泡壓＝大氣壓｜氣流 0`, '#8fb7c4'];
+    }
+    if (airflow > 0) {
+      return [`吸氣｜相對胸腔容積 ${volume}%｜肺泡壓＜大氣壓｜氣流 → 肺`, '#8fd4e6'];
+    }
+    return [`呼氣｜相對胸腔容積 ${volume}%｜肺泡壓＞大氣壓｜氣流 → 外`, '#f0a37a'];
   }
 
   function refresh() {
@@ -542,10 +537,6 @@ export function buildRespiratory(api) {
     setBreathMorph(airway, value);
     setBreathMorph(diaphragmSheet, value);
     setBreathMorph(bodyShell, value);
-
-    ribHandle.position.x = 1.26 + Math.max(value, 0) * .08 + Math.min(value, 0) * .04;
-
-    chestHandle.position.x = -1.26 - Math.max(value, 0) * .08 - Math.min(value, 0) * .04;
 
     // Airflow is proportional to volume change, not lung volume.  At either
     // endpoint the model may be fully inflated/deflated but the arrows must
@@ -628,6 +619,7 @@ export function buildRespiratory(api) {
         ribs: Math.round(held),
         diaphragm: Math.round(held),
         chest: Math.round(held),
+        breathControl: Math.round(held),
         breath: Number(value.toFixed(2)),
         ribMorph: Number(Math.abs(value).toFixed(4)),
         lungMorph: Number(Math.abs(value).toFixed(4)),

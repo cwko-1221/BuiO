@@ -515,8 +515,40 @@ solidify.thickness = 0.035
 # against; all muscle thickness must grow inferiorly, never into the lung.
 solidify.offset = -1
 bpy.ops.object.modifier_apply(modifier='Solidify')
+
+# Three real apertures: caval (T8), oesophageal (T10) and aortic (T12).
+# They are intentionally separate and placed in the correct anterior-to-
+# posterior order rather than painted as decorative spots on a solid sheet.
+for name, x, y, radius in [
+    ('caval', -0.18, -0.005, 0.060),
+    ('oesophageal', -0.055, 0.155, 0.052),
+    ('aortic', 0.000, 0.315, 0.058),
+]:
+    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=radius, depth=0.42,
+                                        location=(x, y, diaphragm_top(x, y) - 0.08))
+    cutter = bpy.context.active_object
+    cutter.name = 'CUT_' + name + '_hiatus'
+    boolean = diaphragm.modifiers.new('Hiatus_' + name, 'BOOLEAN')
+    boolean.operation = 'DIFFERENCE'
+    boolean.solver = 'EXACT'
+    boolean.object = cutter
+    bpy.context.view_layer.objects.active = diaphragm
+    bpy.ops.object.modifier_apply(modifier=boolean.name)
+    bpy.data.objects.remove(cutter, do_unlink=True)
+
 bpy.ops.object.shade_smooth()
 built.append(diaphragm)
+
+# Right and left crura arise from the upper lumbar spine and sweep anteriorly
+# around the aortic and oesophageal openings into the central tendon.
+built.append(curve_tube('diaphragm_crus_R', [
+    (-0.105, 0.365, 1.47), (-0.105, 0.315, 1.66),
+    (-0.085, 0.235, 1.83), (-0.045, 0.145, 1.98),
+], 0.030, resolution=12, around=3))
+built.append(curve_tube('diaphragm_crus_L', [
+    (0.105, 0.365, 1.52), (0.100, 0.315, 1.68),
+    (0.075, 0.235, 1.82), (0.030, 0.160, 1.94),
+], 0.027, resolution=12, around=3))
 
 # A thin central tendon sits in the shallow saddle between the two muscular
 # domes.  It is intentionally subtle: the tendon is visible in an atlas view

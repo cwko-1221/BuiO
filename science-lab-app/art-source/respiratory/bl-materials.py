@@ -32,6 +32,11 @@ PALETTE = {
     'cartilage': srgb(0xE4E7E6, 0.40),
     'lung':      srgb(0xC96070, 0.56),
     'lung_clear': srgb(0xC96070, 0.56),
+    'lung_RUL':  srgb(0xD16B78, 0.55),
+    'lung_RML':  srgb(0xC75B6C, 0.56),
+    'lung_RLL':  srgb(0xB94C61, 0.58),
+    'lung_LUL':  srgb(0xCE6877, 0.55),
+    'lung_LLL':  srgb(0xB74D62, 0.58),
     'airway':    srgb(0xE3A9AC, 0.44),
     'bronchus':  srgb(0xD98F94, 0.46),
     'muscle':    srgb(0xB3564A, 0.58),
@@ -44,8 +49,11 @@ PALETTE = {
 
 # prefix -> material, and which export group it joins
 ASSIGN = [
-    ('lung_L_',        'lung_clear','lungs'),
-    ('lung_',          'lung',      'lungs'),
+    ('lung_R_superior', 'lung_RUL', 'lungs'),
+    ('lung_R_middle',   'lung_RML', 'lungs'),
+    ('lung_R_inferior', 'lung_RLL', 'lungs'),
+    ('lung_L_superior', 'lung_LUL', 'lungs'),
+    ('lung_L_inferior', 'lung_LLL', 'lungs'),
     ('rib_',           'bone',      'ribcage'),
     ('costal_',        'cartilage', 'ribcage'),
     ('sternum',        'bone',      'ribcage'),
@@ -77,6 +85,8 @@ ASSIGN = [
 TEXTURE_BASE = {
     'bone': 0xD9C89A, 'cartilage': 0xE4E7E6, 'lung': 0xC96070,
     'lung_clear': 0xC96070,
+    'lung_RUL': 0xD16B78, 'lung_RML': 0xC75B6C, 'lung_RLL': 0xB94C61,
+    'lung_LUL': 0xCE6877, 'lung_LLL': 0xB74D62,
     'airway': 0xE3A9AC, 'bronchus': 0xD98F94,
     'muscle': 0xB3564A, 'tendon': 0xD7C8B6,
     'artery': 0x4779A8, 'vein': 0xB64351,

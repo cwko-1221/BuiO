@@ -231,6 +231,11 @@ export class LabRenderer {
     this.scene.background.set(0x0d6070);
     this.scene.fog.color.set(0x0d6070);
     this.controls.enabled = true;
+    const atlasView = definition.id === 'respiratory-system';
+    this.controls.minAzimuthAngle = atlasView ? -Infinity : -.52;
+    this.controls.maxAzimuthAngle = atlasView ? Infinity : .52;
+    this.controls.minPolarAngle = atlasView ? .62 : .75;
+    this.controls.maxPolarAngle = atlasView ? 1.58 : 1.18;
     this.cameraPreset = CAMERA_PRESETS[definition.id] || null;
     this.resetCamera(false);
     const bench = makeBench();

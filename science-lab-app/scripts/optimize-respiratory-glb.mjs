@@ -1,4 +1,4 @@
-import { copyFileSync, renameSync, rmSync, statSync } from 'node:fs';
+import { copyFileSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -11,10 +11,12 @@ const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
 
 function run(args) {
   const result = spawnSync(npx, ['--yes', '@gltf-transform/cli@4.5.0', ...args], {
-    cwd: dirname(source),
+    cwd: process.cwd(),
     encoding: 'utf8',
     stdio: 'inherit',
+    shell: process.platform === 'win32',
   });
+  if (result.error) throw result.error;
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
@@ -34,7 +36,7 @@ try {
     '--quantize-color', '8',
   ]);
   run(['validate', quantized]);
-  renameSync(quantized, source);
+  copyFileSync(quantized, source);
   console.log(`Optimized ${source}: ${statSync(`${work}-source.glb`).size} -> ${statSync(source).size} bytes`);
 } finally {
   for (const path of [`${work}-source.glb`, cleaned, quantized]) {
