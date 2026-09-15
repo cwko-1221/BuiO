@@ -38,6 +38,7 @@ npm run dev
 - `PORT`：HTTP 連接埠，預設為 `3000`
 - `NODE_ENV`：`development` 或 `production`
 - `SESSION_SECRET`：正式環境必須設定的 session 密鑰
+- `SESSION_MAX_AGE_DAYS`：登入 cookie 有效期，預設為 365 日；可按學校的裝置政策調短
 - `SUPABASE_DB_URL`：設定後使用 PostgreSQL；未設定時使用本機 JSON 資料庫
 - `CORS_ORIGINS`：正式環境允許的來源，以逗號分隔
 - `MOCK_AUTH`：只供非正式環境測試登入

@@ -19,6 +19,7 @@ const {
 } = require('../validators');
 
 const ADMIN_PASSWORD = '999999';
+const SESSION_POLICY_VERSION = 2;
 
 // The hub owns the language switch, but every other module is a separate page
 // load that needs the answer before its first paint. A readable cookie is the
@@ -71,6 +72,7 @@ router.post('/login', async (req, res, next) => {
     req.session.studentName = user.name;
     req.session.role = user.role || 'student';
     req.session.adminUnlocked = false;
+    req.session.sessionPolicyVersion = SESSION_POLICY_VERSION;
     stampLanguage(req, res, user.language);
 
     res.json({
@@ -122,6 +124,13 @@ router.get('/me', async (req, res, next) => {
   }
   if (!req.session.studentId) {
     return res.status(401).json({ success: false, message: '未登入' });
+  }
+  // Migrate existing sessions created with the former 24-hour cookie policy.
+  // Touching the session makes cookie-session send a fresh cookie with the
+  // current maxAge, so students do not need to log in again just for this
+  // configuration change.
+  if (req.session.sessionPolicyVersion !== SESSION_POLICY_VERSION) {
+    req.session.sessionPolicyVersion = SESSION_POLICY_VERSION;
   }
   try {
     const u = await users.findByIdSummary(req.session.studentId);

@@ -35,6 +35,13 @@ const corsOrigins = (process.env.CORS_ORIGINS || '')
   .map(s => s.trim())
   .filter(Boolean);
 
+// Keep students signed in across the school year. This remains configurable for
+// schools that want a shorter device-session lifetime.
+const configuredSessionDays = Number.parseInt(process.env.SESSION_MAX_AGE_DAYS || '365', 10);
+const sessionMaxAgeDays = Number.isFinite(configuredSessionDays) && configuredSessionDays >= 1 && configuredSessionDays <= 730
+  ? configuredSessionDays
+  : 365;
+
 module.exports = Object.freeze({
   env,
   isProd,
@@ -43,7 +50,7 @@ module.exports = Object.freeze({
   session: {
     secret: sessionSecret,
     secure: isProd,
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: sessionMaxAgeDays * 24 * 60 * 60 * 1000,
   },
   cors: {
     origins: corsOrigins,

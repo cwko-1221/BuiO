@@ -34,11 +34,16 @@ app.use(cors({
 // Trust Proxy: Vercel 等雲端平台的代理伺服器必備，才能正確傳遞 HTTPS Cookie
 app.set('trust proxy', 1);
 
+const configuredSessionDays = Number.parseInt(process.env.SESSION_MAX_AGE_DAYS || '365', 10);
+const sessionMaxAgeDays = Number.isFinite(configuredSessionDays) && configuredSessionDays >= 1 && configuredSessionDays <= 730
+    ? configuredSessionDays
+    : 365;
+
 // Session 設定
 app.use(session({
     name: 'session',
     keys: ['adaptive-math-secret-key-2024'],
-    maxAge: 24 * 60 * 60 * 1000, // 24 小時
+    maxAge: sessionMaxAgeDays * 24 * 60 * 60 * 1000, // 預設 365 日
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true
 }));
