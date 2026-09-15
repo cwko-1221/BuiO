@@ -374,6 +374,30 @@ export function buildRespiratory(api) {
   stage.updateWorldMatrix(true, true);
   const leaders = [];
 
+  function nearestSurfaceVertex(mesh, aimWorld) {
+    let best = null;
+    let bestDistance = Infinity;
+    const local = new THREE.Vector3();
+    const world = new THREE.Vector3();
+    mesh.updateWorldMatrix(true, true);
+    mesh.traverse((child) => {
+      if (!child.isMesh) return;
+      const position = child.geometry?.getAttribute('position');
+      if (!position) return;
+      child.updateWorldMatrix(true, false);
+      for (let index = 0; index < position.count; index += 1) {
+        local.fromBufferAttribute(position, index);
+        world.copy(local);
+        child.localToWorld(world);
+        const distance = world.distanceToSquared(aimWorld);
+        if (distance >= bestDistance) continue;
+        bestDistance = distance;
+        best = { host: child, local: local.clone(), distance: Math.sqrt(distance) };
+      }
+    });
+    return best;
+  }
+
   /**
    * Pin the end of a leader to the organ it names. The dot becomes a child of
    * the organ's own mesh, so when the chest moves the label keeps pointing at
@@ -391,9 +415,12 @@ export function buildRespiratory(api) {
     raycaster.far = start.distanceTo(aimWorld) * 2.4;
     const hit = raycaster.intersectObject(mesh, true)[0];
     if (!hit) {
-      // Silence here is how five wrong leaders shipped: the fallback looks
-      // plausible on screen while pointing at nothing.
-      console.warn('respiratory: the ' + organ + ' leader missed its organ and fell back to its aim point');
+      // Aiming through an open fissure can legitimately miss a thin branching
+      // structure. Land on the nearest actual vertex instead of silently
+      // falling back to an arbitrary point in empty space.
+      const nearest = nearestSurfaceVertex(mesh, aimWorld);
+      if (nearest) return nearest;
+      console.warn('respiratory: the ' + organ + ' leader has no renderable organ surface');
       return { host: stage, local: stage.worldToLocal(aimWorld.clone()) };
     }
     const host = hit.object;

@@ -40,9 +40,8 @@ export function cloneAnatomy(part) {
   if (!template) return null;
   const clone = template.clone(true);
   clone.name = `ANATOMY_${part}`;
-  clone.position.set(0, 0, 0);
-  clone.quaternion.identity();
-  clone.scale.setScalar(1);
+  // Keep the node TRS. glTF quantization restores mesh-space coordinates with
+  // this transform; clearing it makes the whole anatomy collapse near zero.
   clone.traverse((child) => {
     if (!child.isMesh) return;
     child.geometry = child.geometry.clone();
