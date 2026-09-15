@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import {
   palette, mat, roundedBox, cylinder, sphere, torus, makeBench, makeBeaker,
   makeBottle, makeTargetRing, makeWire, replaceWireGeometry, disposeObject, worldPosition,
@@ -78,13 +79,18 @@ export class LabRenderer {
     setLabelAnisotropy(this.renderer.capabilities.getMaxAnisotropy());
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    this.renderer.toneMappingExposure = .95;
     this.renderer.shadowMap.enabled = this.#quality() !== 'low';
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setClearColor(0x0b5260, 1);
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0b5360);
-    this.scene.fog = new THREE.FogExp2(0x0b5360, .025);
+    this.scene.fog = new THREE.FogExp2(0x0b5360, .012);
+
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    pmrem.compileEquirectangularShader();
+    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
+    pmrem.dispose();
     this.camera = new THREE.PerspectiveCamera(39, 1, .1, 120);
     this.camera.position.copy(DEFAULT_CAMERA);
     this.controls = new OrbitControls(this.camera, this.canvas);
@@ -149,13 +155,13 @@ export class LabRenderer {
 
   #buildEnvironment() {
     this.environment.clear();
-    const hemi = new THREE.HemisphereLight(0xb9fff3, 0x184b53, 2.2);
-    const key = new THREE.DirectionalLight(0xfff5d7, this.#quality() === 'low' ? 2.2 : 3.1);
+    const hemi = new THREE.HemisphereLight(0xdff3f7, 0x2a4048, .45);
+    const key = new THREE.DirectionalLight(0xfff0dc, this.#quality() === 'low' ? 1.4 : 1.8);
     key.position.set(-4, 10, 7);
     key.castShadow = this.#quality() !== 'low';
     key.shadow.mapSize.set(this.#quality() === 'low' ? 512 : 1024, this.#quality() === 'low' ? 512 : 1024);
     key.shadow.camera.left = -9; key.shadow.camera.right = 9; key.shadow.camera.top = 8; key.shadow.camera.bottom = -7;
-    const rim = new THREE.DirectionalLight(0x69b6ff, 1.3);
+    const rim = new THREE.DirectionalLight(0x9ecbe8, .55);
     rim.position.set(8, 5, -7);
     this.environment.add(hemi, key, rim);
 

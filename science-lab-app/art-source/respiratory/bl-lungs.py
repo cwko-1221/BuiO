@@ -162,6 +162,23 @@ def bisect(obj, normal, offset, keep_positive):
     obj.data.update()
 
 
+def MEDIASTINAL_HALF_AT(z):
+    """Half-width of the mediastinum at a given height.
+
+    Narrow at the thoracic inlet, widest across the heart, narrowing again at
+    the diaphragm — the shape of the space the lungs are moulded around.
+    """
+    HEART_TOP = 2.80
+    HEART_BOTTOM = 2.05
+    if z >= HEART_TOP:
+        t = min((z - HEART_TOP) / 0.62, 1.0)
+        return 0.30 - 0.20 * t
+    if z <= HEART_BOTTOM:
+        t = min((HEART_BOTTOM - z) / 0.35, 1.0)
+        return 0.30 - 0.16 * t
+    return 0.30
+
+
 def make_hull(name, side, notch):
     """An ovoid, tapered smoothly to a rounded apex and flattened medially."""
     bpy.ops.mesh.primitive_uv_sphere_add(segments=64, ring_count=44, radius=1.0)
@@ -181,10 +198,19 @@ def make_hull(name, side, notch):
         toward_midline = -side * x
         if toward_midline > 0.0:
             x += side * toward_midline * 0.45
+        # Then stand the whole lung off the midline by the width of the
+        # mediastinum at this height, and let nothing cross back over it. The
+        # old code used a fixed 0.30 offset with no clamp, so both lungs still
+        # reached x = 0 and met, leaving no room for the heart the cardiac
+        # notch was carved for.
+        reach = MEDIASTINAL_HALF_AT(z)
+        x += side * reach
+        if side * x < reach:
+            x = side * reach
         if notch > 0.0:
             near = max(0.0, -y / 0.44) * max(0.0, 1.0 - abs(up - 0.4) / 0.3)
             x += side * near * notch * 0.5
-        vert.co = Vector((x + side * 0.30, y, z))
+        vert.co = Vector((x, y, z))
     return obj
 
 

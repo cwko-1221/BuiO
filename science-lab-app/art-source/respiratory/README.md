@@ -13,8 +13,22 @@ Blender must be running with the MCP add-on enabled and its server started
     node science-lab-app/art-source/respiratory/blender-run.mjs science-lab-app/art-source/respiratory/bl-skeleton.py
     node science-lab-app/art-source/respiratory/blender-run.mjs science-lab-app/art-source/respiratory/bl-materials.py
 
-Run them in that order: each stage adds to the scene the previous one left, and
-the last one assigns materials, joins the parts and writes the glb.
+Run them in that order, **from a clean scene, every time**. The stages are not
+independent and re-running one on its own will quietly give you a broken model:
+
+- `bl-skeleton.py` clears what is already there, so running it alone drops the
+  lungs and exports a body with no lungs in it.
+- `bl-materials.py` *joins* the loose parts into the five final objects. Run it
+  twice and the second run finds the parts already consumed, so it exports
+  whatever is left — once, that was the diaphragm on its own.
+
+Both failures export successfully and report no error. Check the part list that
+`bl-materials.py` prints, and confirm all five are there, before believing an
+export. `node tmp/glb-bounds.mjs` will also list what actually landed in the file.
+
+If the export itself fails with `OSError: [Errno 22]` on the glb path, delete the
+file and run the stage again — a stale handle on the previous export blocks the
+write, and Blender reports it as an invalid argument rather than a lock.
 
 `bl-render.py` renders the scene from three angles into `tmp/bl-shots/`, which
 is how the model is checked by eye between passes.

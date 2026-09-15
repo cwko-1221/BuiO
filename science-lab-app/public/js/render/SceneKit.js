@@ -50,7 +50,11 @@ function drawLabelCanvas(text, color, background) {
 }
 
 export function mat(color, options = {}) {
-  const Material = options.transmission ? THREE.MeshPhysicalMaterial : THREE.MeshStandardMaterial;
+  const physical = options.transmission != null
+    || options.clearcoat != null
+    || options.sheen != null
+    || options.iridescence != null;
+  const Material = physical ? THREE.MeshPhysicalMaterial : THREE.MeshStandardMaterial;
   return new Material({
     color,
     roughness: options.roughness ?? .58,

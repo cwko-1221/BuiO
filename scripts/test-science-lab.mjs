@@ -208,7 +208,11 @@ const glbAssets = (await readdir(path.join(distRoot, 'assets'))).filter((file) =
 assert.equal(glbAssets.length, 2, 'production includes the equipment kit and the respiratory model');
 const glbBytes = (await Promise.all(glbAssets.map(async (file) => (await stat(path.join(distRoot, 'assets', file))).size)))
   .reduce((sum, size) => sum + size, 0);
-assert.ok(glbBytes < 2_500_000, `Blender models stay within the download budget (actual ${glbBytes} bytes)`);
+// Raised from 2.5 MB at the client's request: the respiratory model is meant
+// to stand up to a medical student's eye, and the anatomy that takes — twelve
+// ribs with a costal margin, a mediastinum, C-shaped tracheal cartilage — costs
+// geometry. Still one download, still cached after the first visit.
+assert.ok(glbBytes < 4_000_000, `Blender models stay within the download budget (actual ${glbBytes} bytes)`);
 const totalGzip = jsAssets.reduce(async (sumPromise, file) => {
   const sum = await sumPromise;
   const contents = await readFile(path.join(distRoot, 'assets', file));

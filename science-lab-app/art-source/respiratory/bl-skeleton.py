@@ -8,7 +8,7 @@ CAGE_TOP = 3.42
 CAGE_BOTTOM = 1.62
 DIAPHRAGM_BASE = 1.72
 DOME_RISE = {1: 0.54, -1: 0.46}
-RIB_COUNT = 9
+RIB_COUNT = 12
 CARINA_Z = 2.96
 
 
@@ -52,7 +52,7 @@ def flat_profile(name, half_width, half_depth):
     return obj
 
 
-def curve_tube(name, points, radius, resolution=12, smooth=True, profile=None):
+def curve_tube(name, points, radius, resolution=12, smooth=True, profile=None, around=2):
     """A bevelled curve converted to mesh: the clean way to build a rib or a duct."""
     curve = bpy.data.curves.new(name, 'CURVE')
     curve.dimensions = '3D'
@@ -62,7 +62,9 @@ def curve_tube(name, points, radius, resolution=12, smooth=True, profile=None):
         curve.bevel_object = profile
     else:
         curve.bevel_depth = radius
-        curve.bevel_resolution = 2
+        # Radial segments cost faces on every step of the sweep, so small ducts
+        # and rings get far fewer than a lung-sized form needs.
+        curve.bevel_resolution = around
     curve.use_fill_caps = True
     spline = curve.splines.new('NURBS')
     spline.points.add(len(points) - 1)
@@ -92,11 +94,11 @@ def rib_path(level, side, sweep=0.74, steps=9):
     rib is always outside the pleural space and can never cross a lung.
     """
     top = CAGE_TOP - level * (CAGE_TOP - CAGE_BOTTOM - 0.3)
-    drop = 0.09 + level * 0.2
+    drop = 0.34 + level * 0.36
     points = []
     for step in range(steps):
         t = step / (steps - 1)
-        z = top - drop * t
+        z = top - drop * (t ** 1.9)
         rx, ry = cage_inner(z)
         angle = math.pi * sweep * t
         points.append((
@@ -109,6 +111,8 @@ def rib_path(level, side, sweep=0.74, steps=9):
 
 drop_old()
 built = []
+# Where each rib's cartilage ends, so the false ribs below can join onto it.
+anterior_tip = {}
 rib_profile = flat_profile('ribProfile', 0.038, 0.016)
 costal_profile = flat_profile('costalProfile', 0.032, 0.015)
 
@@ -116,42 +120,64 @@ costal_profile = flat_profile('costalProfile', 0.032, 0.015)
 sternum_top = CAGE_TOP - 0.24
 for index in range(RIB_COUNT):
     level = index / (RIB_COUNT - 1)
+    floating = index >= 10
+    sweep = 0.30 if index == 11 else (0.42 if index == 10 else 0.74)
     for side in (-1, 1):
-        path = rib_path(level, side)
+        path = rib_path(level, side, sweep=sweep)
         built.append(curve_tube('rib_%d_%s' % (index + 1, 'R' if side > 0 else 'L'),
-                                path, 0.026, profile=rib_profile))
-        if index >= RIB_COUNT - 2:
-            continue  # the last pair floats free
+                                path, 0.026, resolution=10, profile=rib_profile))
+        if floating:
+            continue  # ribs 11 and 12 carry no cartilage
         tip = path[-1]
-        if index < 6:
-            target = (side * 0.09, -cage_inner(tip[2]).__getitem__(1) * 0.94, sternum_top - index * 0.2)
+        if index < 7:
+            # A true rib: its own cartilage runs up and in to the sternum.
+            target = (side * 0.09, -cage_inner(tip[2])[1] * 0.94, sternum_top - index * 0.17)
         else:
-            target = (side * 0.3, -cage_inner(tip[2])[1] * 0.98, tip[2] + 0.22)
+            # A false rib: its cartilage joins the one above, and the chain of
+            # those joins is the costal margin.
+            above = anterior_tip.get(index - 1, {}).get(side)
+            target = above if above else (side * 0.3, -cage_inner(tip[2])[1] * 0.98, tip[2] + 0.22)
+        anterior_tip.setdefault(index, {})[side] = (
+            (tip[0] + target[0]) / 2, (tip[1] + target[1]) / 2, (tip[2] + target[2]) / 2)
         mid = ((tip[0] + target[0]) / 2, (tip[1] + target[1]) / 2 - 0.05, (tip[2] + target[2]) / 2 - 0.04)
         built.append(curve_tube('costal_%d_%s' % (index + 1, 'R' if side > 0 else 'L'),
-                                [tip, mid, target], 0.022, profile=costal_profile))
+                                [tip, mid, target], 0.022, resolution=8, profile=costal_profile))
 
-# The breastbone: manubrium, body and xiphoid process.
-for name, half, z_at, depth in (('sternum_manubrium', (0.16, 0.045, 0.15), sternum_top + 0.02, 0),
-                                ('sternum_body', (0.12, 0.042, 0.44), sternum_top - 0.52, 0),
-                                ('sternum_xiphoid', (0.065, 0.034, 0.1), sternum_top - 1.04, 0)):
-    bpy.ops.mesh.primitive_cube_add(size=2.0)
-    obj = bpy.context.active_object
-    obj.name = name
-    obj.scale = half
-    obj.location = (0.0, -cage_inner(z_at)[1] * 0.95, z_at)
-    bpy.ops.object.transform_apply(location=True, scale=True)
-    bevel = obj.modifiers.new('Bevel', 'BEVEL')
-    bevel.width = 0.02
-    bevel.segments = 2
-    bpy.ops.object.modifier_apply(modifier='Bevel')
-    bpy.ops.object.shade_smooth()
-    built.append(obj)
+# The breastbone, as one continuous bone. Manubrium, body and xiphoid are
+# regions of a single sweep, not separate blocks: the sternal angle is the slight
+# backward kink where the first two meet, and the bone widens down the body
+# before tapering into the xiphoid.
+def sternum_front(z):
+    return -cage_inner(z)[1] * 0.95
+
+
+sternum_profile = flat_profile('sternumProfile', 0.075, 0.042)
+sternum_points = []
+for step in range(11):
+    t = step / 10.0
+    z = sternum_top + 0.16 - t * 1.30
+    # A shallow forward bow, kinked back a little at the manubriosternal joint.
+    bow = 0.030 * math.sin(math.pi * t) - (0.016 if 0.20 < t < 0.30 else 0.0)
+    sternum_points.append((0.0, sternum_front(z) - bow, z))
+sternum = curve_tube('sternum', sternum_points, 0.0, resolution=10, profile=sternum_profile)
+# Wide at the manubrium, widest across the body, tapering to the xiphoid tip.
+for vert in sternum.data.vertices:
+    t = (sternum_top + 0.16 - vert.co.z) / 1.30
+    if t < 0.16:
+        width = 1.30
+    elif t < 0.80:
+        width = 1.0 + 0.10 * (t - 0.16)
+    else:
+        width = max(1.06 - 3.4 * (t - 0.80), 0.34)
+    vert.co.x *= width
+built.append(sternum)
+bpy.data.objects.remove(sternum_profile, do_unlink=True)
 
 # The vertebral column, one body per rib pair.
 for index in range(RIB_COUNT + 2):
     z = CAGE_TOP - index * ((CAGE_TOP - CAGE_BOTTOM) / (RIB_COUNT + 1))
-    behind = cage_inner(z)[1] + 0.16
+    along = (CAGE_TOP - z) / (CAGE_TOP - CAGE_BOTTOM)
+    behind = 0.46 + 0.22 * math.sin(math.pi * min(max(along, 0.0), 1.0) ** 0.85)
     bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.095, depth=0.115)
     obj = bpy.context.active_object
     obj.name = 'vertebra_%d' % (index + 1)
@@ -169,35 +195,39 @@ for index in range(RIB_COUNT + 2):
 
 # ------------------------------------------------------------------ airway
 built.append(curve_tube('larynx', [
-    (0, 0, 3.96), (0, -0.015, 3.88), (0, -0.01, 3.8), (0, 0, 3.73)], 0.132))
+    (0, 0, 3.96), (0, -0.015, 3.88), (0, -0.01, 3.8), (0, 0, 3.73)], 0.075))
 built.append(curve_tube('trachea', [
-    (0, 0, 3.72), (0, 0, 3.4), (0, 0, 3.14), (0, 0, CARINA_Z)], 0.112))
-for index in range(9):
-    z = 3.64 - index * 0.085
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.125, minor_radius=0.019,
-                                     major_segments=18, minor_segments=6)
-    ring = bpy.context.active_object
-    ring.name = 'tracheal_ring_%d' % (index + 1)
-    ring.location = (0, 0, z)
-    ring.scale = (1, 0.92, 1)
-    bpy.ops.object.transform_apply(location=True, scale=True)
-    bpy.ops.object.shade_smooth()
-    built.append(ring)
+    (0, 0, 3.72), (0, 0, 3.4), (0, 0, 3.14), (0, 0, CARINA_Z)], 0.058))
+RING_ARC = math.radians(290.0)
+for index in range(18):
+    z = 3.66 - index * 0.039
+    # Swept as an arc rather than a closed torus, so the gap at the back is
+    # real geometry rather than a trick of the shading.
+    arc = []
+    for step in range(10):
+        t = step / 9.0
+        angle = math.pi - RING_ARC / 2 + RING_ARC * t
+        arc.append((math.sin(angle) * 0.066, math.cos(angle) * 0.061, z))
+    built.append(curve_tube('tracheal_ring_%d' % (index + 1), arc, 0.010, resolution=6, around=2))
 
 # Main bronchi: the right is wider, shorter and more upright than the left.
 for side in (-1, 1):
     right = side > 0
-    hilum = (side * 0.3, -0.02, CARINA_Z - (0.2 if right else 0.26))
+    # right: ~25 degrees off vertical and short. left: ~45 degrees and longer.
+    hilum = (side * (0.22 if right else 0.34), -0.02,
+             CARINA_Z - (0.47 if right else 0.34))
     built.append(curve_tube('bronchus_main_%s' % ('R' if right else 'L'),
-                            [(0, 0, CARINA_Z), (side * 0.16, -0.01, CARINA_Z - 0.1), hilum],
-                            0.085 if right else 0.072))
+                            [(0, 0, CARINA_Z),
+                             (side * (0.11 if right else 0.18), -0.01, CARINA_Z - (0.24 if right else 0.17)),
+                             hilum],
+                            0.042 if right else 0.035))
     # Two further generations inside the lung.
     for branch in range(3):
         spread = 0.34 + branch * 0.16
         end = (side * (0.52 + branch * 0.06), -0.06 + branch * 0.12, hilum[2] - 0.16 - branch * 0.3)
         built.append(curve_tube('bronchus_%s_%d' % ('R' if right else 'L', branch + 1),
                                 [hilum, ((hilum[0] + end[0]) / 2, (hilum[1] + end[1]) / 2, (hilum[2] + end[2]) / 2 + 0.04), end],
-                                0.05 - branch * 0.008))
+                                0.026 - branch * 0.005))
 
 # --------------------------------------------------------------- diaphragm
 resolution = 28
@@ -227,7 +257,7 @@ bpy.context.scene.collection.objects.link(diaphragm)
 bpy.context.view_layer.objects.active = diaphragm
 solidify = diaphragm.modifiers.new('Solidify', 'SOLIDIFY')
 solidify.thickness = 0.05
-solidify.offset = -1
+solidify.offset = 1
 bpy.ops.object.modifier_apply(modifier='Solidify')
 bpy.ops.object.shade_smooth()
 built.append(diaphragm)
