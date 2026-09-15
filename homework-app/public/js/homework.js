@@ -315,6 +315,13 @@ function syncEditor() {
   });
 }
 
+function studentStatusesIncomplete() {
+  return state.homeworks.some(homework => state.roster.some(student => {
+    const row = homework.statuses.find(item => item.studentId === student.id);
+    return !row?.status;
+  }));
+}
+
 function bindCommon() {
   document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => {
     state.view = button.dataset.view; state.message = '';
@@ -457,6 +464,10 @@ function bindStudent() {
   document.getElementById('addHomework')?.addEventListener('click', () => { syncEditor(); state.homeworks.push(emptyHomework(state.roster)); render(); });
   document.getElementById('submitRecord')?.addEventListener('click', async () => {
     syncEditor();
+    if (studentStatusesIncomplete()) {
+      setMessage(t('h.allStudentsNeedStatus'), 'error');
+      return;
+    }
     try { const result = await api('/records', { method: state.record ? 'PUT' : 'POST', body: JSON.stringify({ ...state.studentAssignment, date: state.studentDate, homeworks: state.homeworks }) }); state.record = result.record; state.homeworks = structuredClone(result.record.homeworks); setMessage(result.message); }
     catch (error) { setMessage(error.message, 'error'); }
   });

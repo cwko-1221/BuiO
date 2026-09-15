@@ -88,6 +88,7 @@ BuiI18n.register({
   'h.mySubject':     { 'zh-HK': '負責科目', 'en-US': 'My subject' },
   'h.lockedNotice':  { 'zh-HK': '過往日期只可查看，不能新增或修改。', 'en-US': 'Past dates are read-only — nothing can be added or changed.' },
   'h.savedNotice':   { 'zh-HK': '今天的記錄已儲存；科長仍可修改狀態或新增功課後再儲存。', 'en-US': 'Today’s return is saved. You can still change a status or add homework and save again.' },
+  'h.allStudentsNeedStatus': { 'zh-HK': '請為每位同學選擇狀態後才可提交。', 'en-US': 'Choose a status for every student before submitting.' },
   'h.saveShort':     { 'zh-HK': '儲存', 'en-US': 'Save' },
   'h.noRecordDate':  { 'zh-HK': '所選日期沒有欠交功課記錄。', 'en-US': 'No record for that date.' },
 

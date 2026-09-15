@@ -370,7 +370,7 @@ router.get('/records-pdf', requireTeacher, async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-function normalizeHomeworks(homeworks, rosterIds, statuses, { allowMadeUp = false, preservedHomeworks = [] } = {}) {
+function normalizeHomeworks(homeworks, rosterIds, statuses, { allowMadeUp = false, preservedHomeworks = [], requireAllStatuses = false } = {}) {
   if (!Array.isArray(homeworks) || homeworks.length < 1 || homeworks.length > 12) return { error: '請新增 1 至 12 份功課' };
   const allowedStatuses = new Set(statuses);
   const allowedStudents = new Set(rosterIds);
@@ -395,6 +395,7 @@ function normalizeHomeworks(homeworks, rosterIds, statuses, { allowMadeUp = fals
       if (!allowedStatuses.has(status)) return { error: '學生狀態資料不正確' };
       statusMap.set(studentId, status);
     }
+    if (requireAllStatuses && statusMap.size !== rosterIds.length) return { error: '請為所有學生選擇狀態' };
     normalized.push({
       id,
       title,
@@ -430,7 +431,7 @@ router.post('/records', async (req, res, next) => {
       req.body.homeworks,
       roster.map(student => student.id),
       isTeacher ? TEACHER_STATUSES : STUDENT_STATUSES,
-      { allowMadeUp: isTeacher },
+      { allowMadeUp: isTeacher, requireAllStatuses: !isTeacher },
     );
     if (result.error) return fail(res, 400, result.error);
     const record = await repo.createRecord({ ...assignment, date, homeworks: result.homeworks, createdBy: req.session.studentId });
@@ -461,7 +462,7 @@ router.put('/records', async (req, res, next) => {
       req.body.homeworks,
       roster.map(student => student.id),
       isTeacher ? TEACHER_STATUSES : STUDENT_STATUSES,
-      { allowMadeUp: isTeacher, preservedHomeworks: isTeacher ? [] : existing.homeworks },
+      { allowMadeUp: isTeacher, preservedHomeworks: isTeacher ? [] : existing.homeworks, requireAllStatuses: !isTeacher },
     );
     if (result.error) return fail(res, 400, result.error);
     const record = await repo.updateRecord({ ...assignment, date, homeworks: result.homeworks, updatedBy: req.session.studentId });

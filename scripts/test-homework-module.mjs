@@ -185,9 +185,8 @@ try {
   ];
   partialMonitorUpdate.homeworks[1].statuses = [];
   result = await request(monitor, '/api/homework/records', { method: 'PUT', body: partialMonitorUpdate });
-  assert.equal(result.response.status, 200, 'monitor can save with students left blank');
-  assert.equal(result.data.record.homeworks[0].statuses.find(row => row.studentId === 'S002').status, '', 'an omitted monitor status is stored as blank');
-  assert.ok(result.data.record.homeworks[1].statuses.every(row => row.status === ''), 'a homework can be submitted with every student blank');
+  assert.equal(result.response.status, 400, 'monitor must choose a status for every student');
+  assert.equal(result.data.message, '請為所有學生選擇狀態', 'monitor receives the all-students validation message');
   assert.equal((await request(monitor, '/api/homework/records', { method: 'PUT', body: { ...monitorUpdate, date: '2020-01-01' } })).response.status, 400, 'past record stays read-only');
   assert.equal((await request(monitor, '/api/homework/records', { method: 'POST', body: recordBody })).response.status, 409, 'duplicate create is rejected');
 
