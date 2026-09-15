@@ -39,10 +39,13 @@ async function ensureSchema() {
       TransactionID UUID PRIMARY KEY, StudentID VARCHAR(20) NOT NULL REFERENCES Users(StudentID) ON DELETE CASCADE,
       ActorID VARCHAR(20), Delta INTEGER NOT NULL, Kind VARCHAR(40) NOT NULL, BatchID UUID,
       IdempotencyKey VARCHAR(120), Note VARCHAR(240) NOT NULL DEFAULT '', Metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
-      CreatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      CreatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(), SeenAt TIMESTAMPTZ
     );
+    ALTER TABLE PetCurrencyLedger ADD COLUMN IF NOT EXISTS SeenAt TIMESTAMPTZ;
     CREATE UNIQUE INDEX IF NOT EXISTS idx_pet_ledger_idempotency
       ON PetCurrencyLedger(StudentID, IdempotencyKey) WHERE IdempotencyKey IS NOT NULL;
+    CREATE INDEX IF NOT EXISTS idx_pet_ledger_unseen_grants
+      ON PetCurrencyLedger(StudentID, CreatedAt) WHERE Kind='teacher_grant' AND SeenAt IS NULL;
     CREATE TABLE IF NOT EXISTS PetInstances (
       PetID UUID PRIMARY KEY, StudentID VARCHAR(20) NOT NULL REFERENCES Users(StudentID) ON DELETE CASCADE,
       SpeciesID VARCHAR(80) NOT NULL, XP INTEGER NOT NULL DEFAULT 0 CHECK (XP >= 0),
@@ -762,6 +765,57 @@ async function grantCoins(actorId, studentIds, amount, { note = '', idempotencyK
   const response = { batchId, count: uniqueIds.length, amount, total: amount * uniqueIds.length, balances }; writeJsonIdempotency(data, actorId, idempotencyKey, 'teacher_grant', response); store.save(); return clone(response);
 }
 
+async function listUnseenTeacherGrants(studentId) {
+  await ensureStudent(studentId);
+  if (config.db.mode === 'postgres') {
+    const { rows } = await getPool().query(
+      `SELECT TransactionID AS "transactionId", ActorID AS "actorId", Delta AS amount,
+              Note AS reason, CreatedAt AS "createdAt"
+       FROM PetCurrencyLedger
+       WHERE StudentID=$1 AND Kind='teacher_grant' AND SeenAt IS NULL
+       ORDER BY CreatedAt ASC, TransactionID ASC
+       LIMIT 100`,
+      [studentId],
+    );
+    return rows.map((row) => ({ ...row, amount: Number(row.amount), reason: String(row.reason || '') }));
+  }
+  return ensureJsonData().petCurrencyLedger
+    .filter((row) => row.studentId === studentId && row.kind === 'teacher_grant' && !row.seenAt)
+    .sort((left, right) => String(left.createdAt || '').localeCompare(String(right.createdAt || '')) || String(left.transactionId).localeCompare(String(right.transactionId)))
+    .slice(0, 100)
+    .map((row) => ({
+      transactionId: row.transactionId,
+      actorId: row.actorId || null,
+      amount: Number(row.delta),
+      reason: String(row.note || ''),
+      createdAt: row.createdAt,
+    }));
+}
+
+async function acknowledgeTeacherGrants(studentId, transactionIds) {
+  const ids = [...new Set((Array.isArray(transactionIds) ? transactionIds : []).map(String).filter(Boolean))].slice(0, 100);
+  if (!ids.length) return { count: 0 };
+  await ensureStudent(studentId);
+  if (config.db.mode === 'postgres') {
+    const result = await getPool().query(
+      `UPDATE PetCurrencyLedger SET SeenAt=NOW()
+       WHERE StudentID=$1 AND Kind='teacher_grant' AND SeenAt IS NULL
+         AND TransactionID::text=ANY($2::text[])`,
+      [studentId, ids],
+    );
+    return { count: result.rowCount || 0 };
+  }
+  const data = ensureJsonData();
+  const wanted = new Set(ids); let count = 0; const seenAt = nowIso();
+  for (const row of data.petCurrencyLedger) {
+    if (row.studentId === studentId && row.kind === 'teacher_grant' && !row.seenAt && wanted.has(String(row.transactionId))) {
+      row.seenAt = seenAt; count += 1;
+    }
+  }
+  if (count) store.save();
+  return { count };
+}
+
 // Ownership differs per table, so a single blanket predicate is wrong. In particular
 // PetCurrencyLedger.actorId is the *teacher* who issued a grant: matching on it would delete
 // the grant history of every student that teacher ever paid. Postgres does not do that
@@ -798,6 +852,7 @@ async function grantUnlimitedMoney(studentId, amount = 999999) {
 module.exports = {
   ensureSchema, ensureStudent, getBootstrap, hatchStarter, purchaseEgg, activatePet, feedPet,
   purchaseItem, setOutfit, saveRoom, getRoomSnapshot, listVisitableRooms, addReaction,
-  walletBalances, activePetLooks, grantCoins, grantUnlimitedMoney, purgeJsonStudent,
+  walletBalances, activePetLooks, grantCoins, listUnseenTeacherGrants, acknowledgeTeacherGrants,
+  grantUnlimitedMoney, purgeJsonStudent,
   hkDay, chooseRarity, chooseSpecies, stageForXp, validatePlacements,
 };

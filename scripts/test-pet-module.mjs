@@ -248,8 +248,16 @@ const repeatedGrant=await repo.grantCoins('T001',['S001','S002'],10000,{note:'�
 assert.equal(grant.batchId,repeatedGrant.batchId);
 assert.equal((await repo.getBootstrap('S001')).wallet.balance,10000);
 assert.equal(store.load().petCurrencyLedger.filter((row)=>row.kind==='teacher_grant').length,2);
+const studentOneGrants=await repo.listUnseenTeacherGrants('S001');
+const studentTwoGrants=await repo.listUnseenTeacherGrants('S002');
+assert.equal(studentOneGrants.length,1);assert.equal(studentOneGrants[0].actorId,'T001');
+assert.equal(studentOneGrants[0].amount,10000);assert.equal(studentOneGrants[0].reason,'測試獎勵');
+assert.deepEqual(await repo.acknowledgeTeacherGrants('S001',[studentTwoGrants[0].transactionId]),{count:0},'a student cannot acknowledge another student grant');
+assert.deepEqual(await repo.acknowledgeTeacherGrants('S001',[studentOneGrants[0].transactionId]),{count:1});
+assert.deepEqual(await repo.listUnseenTeacherGrants('S001'),[]);
+assert.equal((await repo.listUnseenTeacherGrants('S002')).length,1,'acknowledging one student must not hide another student notification');
 await repo.walletBalances(['S003']); assert.equal(store.load().petProfiles.some((row)=>row.studentId==='S003'),false);
-pass('teacher grant is immutable, whole-class-ready and idempotent');
+pass('teacher grant is immutable, whole-class-ready, idempotent and individually acknowledged');
 
 const starter=await repo.hatchStarter('S001',{idempotencyKey:'starter-1',random:()=>.99});
 const starterRetry=await repo.hatchStarter('S001',{idempotencyKey:'starter-1',random:()=>.01});

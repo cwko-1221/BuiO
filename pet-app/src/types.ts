@@ -140,6 +140,14 @@ export interface Bootstrap {
   wallet: { balance: number }; pets: PetInstance[]; inventory: InventoryStack[]; room: RoomState;
   catalog: Catalog; serverDay: string;
 }
+export interface TeacherGrantNotification {
+  transactionId: string;
+  actorId: string | null;
+  teacherName: string;
+  amount: number;
+  reason: string;
+  createdAt: string;
+}
 export interface Identity { id: string; name: string; role: 'student' | 'teacher'; className: string; classNo?: number | null; language: Locale }
 
 export const text = (localized: Localized | Record<Locale, string[]>, locale: Locale): string | string[] => localized[locale] ?? localized['zh-HK'];

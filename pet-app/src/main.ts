@@ -5,7 +5,7 @@ import { audio } from './audio';
 import { BedroomScene } from './game/BedroomScene';
 import { PetAvatar } from './game/PetAvatar';
 import { placeWearable } from './game/wearableLayout';
-import type { Bootstrap, Identity, InventoryStack, Locale, PetDefinition, PetInstance, RoomPlacement } from './types';
+import type { Bootstrap, Identity, InventoryStack, Locale, PetDefinition, PetInstance, RoomPlacement, TeacherGrantNotification } from './types';
 import { idempotencyKey } from './types';
 
 
@@ -39,7 +39,7 @@ const UI = {
     coins:'金幣', dust:'星塵', feed:'餵食', play:'一起玩', sleep:'休息', decorate:'佈置房間', save:'儲存佈置', private:'私人房間', class:'開放同班參觀',
     hatchTitle:'你的第一顆蛋正在等待！', hatchCopy:'蛋內藏着三隻完成版寵物之一。首次孵化完全免費。', hatch:'開始孵化',
     owned:'已擁有', locked:'未擁有', active:'主寵', choose:'選為主寵', buy:'購買', visitRoom:'參觀房間', back:'返回房間',
-    teacherTitle:'老師金幣中心', individual:'個別學生', wholeClass:'全班', preview:'預覽發放', confirm:'確認發放', amount:'每人金額', note:'備註（選填）',
+    teacherTitle:'老師金幣中心', individual:'個別學生', wholeClass:'全班', preview:'預覽發放', confirm:'確認發放', amount:'每人金額', note:'派發原因（選填）',
     empty:'暫時沒有內容。', daily:'今日經驗', probability:'目前開放 12 隻完成版寵物', pity:'保底', randomEgg:'隨機寵物蛋', directPet:'指定寵物',
   },
   'en-US': {
@@ -47,7 +47,7 @@ const UI = {
     coins:'Coins', dust:'Stardust', feed:'Feed', play:'Play', sleep:'Rest', decorate:'Decorate', save:'Save room', private:'Private room', class:'Open to class',
     hatchTitle:'Your first egg is waiting!', hatchCopy:'One of the three completed pets is inside. Your first hatch is free.', hatch:'Hatch now',
     owned:'Owned', locked:'Not owned', active:'Active', choose:'Make active', buy:'Buy', visitRoom:'Visit room', back:'Back to room',
-    teacherTitle:'Teacher Coin Centre', individual:'Students', wholeClass:'Whole class', preview:'Preview grant', confirm:'Confirm grant', amount:'Coins per student', note:'Note (optional)',
+    teacherTitle:'Teacher Coin Centre', individual:'Students', wholeClass:'Whole class', preview:'Preview grant', confirm:'Confirm grant', amount:'Coins per student', note:'Reason (optional)',
     empty:'Nothing here yet.', daily:'Daily XP', probability:'12 completed pets currently available', pity:'Pity', randomEgg:'Random pet egg', directPet:'Choose a pet',
   },
 } as const;
@@ -102,6 +102,7 @@ const REFUSALS: Record<string, string> = {
 
 class StudentApp {
   identity: Identity; state!: Bootstrap; locale: Locale; game?: Phaser.Game; tab = 'home'; selectedFurniture = ''; roomPlacements: RoomPlacement[] = [];
+  pendingGrantIds: string[] = [];
   visiting?: any;
   surfaceObserver?: ResizeObserver;
   constructor(identity: Identity) { this.identity = identity; this.locale = identity.language || 'zh-HK'; }
@@ -124,8 +125,14 @@ class StudentApp {
   }
 
   async start() {
-    this.state = await api.bootstrap(); this.roomPlacements = this.state.room.placements.map((item) => ({...item})); this.renderShell();
+    this.state = await api.bootstrap();
+    const grantNotifications = api.grantNotifications().catch((error) => {
+      console.warn('[pet] Could not load grant notifications', error); return { success: true as const, grants: [] as TeacherGrantNotification[] };
+    });
+    this.roomPlacements = this.state.room.placements.map((item) => ({...item})); this.renderShell();
     if (!this.state.profile.starterEggClaimed) this.renderHatch(); else this.openHome();
+    const { grants } = await grantNotifications;
+    if (grants.length) this.renderGrantNotifications(grants);
   }
   renderShell() {
     app.innerHTML = `<div class="pet-shell">
@@ -181,6 +188,7 @@ class StudentApp {
       if (action === 'set-visibility') return await this.setVisibility(button.dataset.id as 'private'|'class');
       if (action === 'open-feed') return await this.renderFeedPicker();
       if (action === 'open-outfit') return await this.renderOutfitPicker();
+      if (action === 'ack-grants') return await this.acknowledgeGrantNotifications(button as HTMLButtonElement);
       if (action === 'close-modal') { document.querySelector('#modalRoot')!.innerHTML=''; return; }
       if (action === 'add-furniture') { this.game?.events.emit('room:add-item',button.dataset.id); return; }
       if (action === 'grow-item') { if(this.selectedFurniture)this.game?.events.emit('room:grow-selected',this.selectedFurniture); return; }
@@ -307,6 +315,24 @@ class StudentApp {
     button.disabled=true;button.classList.add('loading');const result=await api.hatch(idempotencyKey());audio.sfx('hatch');this.celebrate(result.rarity==='epic'?'epic':'hatch');await this.reload();this.startBedroom();this.renderReveal(result.speciesId,result.rarity,result.duplicateCoins);
   }
   private renderReveal(speciesId:string,rarity:string,refund:number){const definition=this.state.catalog.pets.find((pet)=>pet.id===speciesId)!;const pet=this.state.pets.find((pet)=>pet.speciesId===speciesId);const stage=pet?.stage||1;this.modal(`<div class="reveal-card ${rarity}"><p class="eyebrow">${rarity.toUpperCase()}</p><img src="${definition.art[stage-1]}" alt=""><h2>${escapeHtml(this.petName(definition,stage))}</h2><p>${refund?`重複品種，退回 ${refund} 金幣`:`天賦：${escapeHtml(this.name(definition.talent))}`}</p><button class="primary" data-action="back-home">${this.t('back')}</button></div>`);}
+  private renderGrantNotifications(grants: TeacherGrantNotification[]) {
+    const zh=this.locale==='zh-HK';this.pendingGrantIds=grants.map((grant)=>grant.transactionId);
+    const total=grants.reduce((sum,grant)=>sum+grant.amount,0);
+    const rows=grants.map((grant)=>`<article class="grant-receipt">
+      <div class="grant-receipt-head"><span aria-hidden="true">🪙</span><div><b>${escapeHtml(grant.teacherName)}</b><small>${zh?'發給你':'sent you'}</small></div><strong>+${grant.amount.toLocaleString()}</strong></div>
+      <p><span>${zh?'原因':'Reason'}</span>${escapeHtml(grant.reason || (zh?'未有填寫原因':'No reason provided'))}</p>
+    </article>`).join('');
+    this.modal(`<div class="grant-notice" role="dialog" aria-modal="true" aria-labelledby="grantNoticeTitle"><span class="grant-notice-coin" aria-hidden="true">🪙</span><p class="eyebrow">${zh?'老師獎勵':'TEACHER REWARD'}</p><h2 id="grantNoticeTitle">${zh?'收到金幣！':'Coins received!'}</h2>${grants.length>1?`<p class="grant-total">${zh?`共 ${grants.length} 筆，合計`:`${grants.length} grants totalling`} <b>${total.toLocaleString()} 🪙</b></p>`:''}<div class="grant-receipt-list">${rows}</div><button class="primary" data-action="ack-grants">${zh?'知道了':'Got it'}</button></div>`,`grant-notice-modal`);
+  }
+  private async acknowledgeGrantNotifications(button: HTMLButtonElement) {
+    button.disabled=true;button.classList.add('loading');
+    try {
+      await api.acknowledgeGrantNotifications(this.pendingGrantIds);
+      this.pendingGrantIds=[];document.querySelector('#modalRoot')!.innerHTML='';
+    } catch (error) {
+      button.disabled=false;button.classList.remove('loading');throw error;
+    }
+  }
   /**
    * 'room' gives the play surface the whole width with its controls stacked above it.
    * 'full' hides the room entirely and gives the panel the whole screen — the browsing tabs

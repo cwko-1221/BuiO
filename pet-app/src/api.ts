@@ -1,4 +1,4 @@
-import type { Bootstrap, Identity, RoomPlacement } from './types';
+import type { Bootstrap, Identity, RoomPlacement, TeacherGrantNotification } from './types';
 
 // The shared runtime is loaded blocking in <head>, before this bundle runs.
 const t = (key: string) => (window as any).BuiI18n.t(key) as string;
@@ -27,6 +27,8 @@ export const api = {
   classRooms: () => request<any>('/api/pet/rooms/class'),
   room: (studentId: string) => request<any>(`/api/pet/rooms/${encodeURIComponent(studentId)}`),
   react: (studentId: string, reaction: string) => request<any>(`/api/pet/rooms/${encodeURIComponent(studentId)}/reactions`, { method: 'POST', body: JSON.stringify({ reaction }) }),
+  grantNotifications: () => request<{ success: true; grants: TeacherGrantNotification[] }>('/api/pet/grant-notifications'),
+  acknowledgeGrantNotifications: (transactionIds: string[]) => request<{ success: true; count: number }>('/api/pet/grant-notifications/acknowledge', { method: 'POST', body: JSON.stringify({ transactionIds }) }),
   teacherRoster: () => request<any>('/api/pet/teacher/roster'),
   grantPreview: (body: any) => request<any>('/api/pet/teacher/grants/preview', { method: 'POST', body: JSON.stringify(body) }),
   grantCommit: (body: any, key: string) => request<any>('/api/pet/teacher/grants/commit', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify(body) }),

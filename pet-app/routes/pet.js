@@ -111,6 +111,26 @@ router.post('/rooms/:studentId/reactions', requireStudent, asyncRoute(async (req
   sendResult(res, await repo.addReaction(req.params.studentId, req.session.studentId, String(req.body?.reaction || '')));
 }));
 
+router.get('/grant-notifications', requireStudent, asyncRoute(async (req, res) => {
+  const grants = await repo.listUnseenTeacherGrants(req.session.studentId);
+  const actorIds = [...new Set(grants.map((grant) => grant.actorId).filter(Boolean))];
+  const summaries = await Promise.all(actorIds.map(async (actorId) => [actorId, await users.findByIdSummary(actorId)]));
+  const teachers = new Map(summaries);
+  sendResult(res, {
+    grants: grants.map((grant) => ({
+      ...grant,
+      teacherName: teachers.get(grant.actorId)?.name || '老師',
+    })),
+  });
+}));
+
+router.post('/grant-notifications/acknowledge', requireStudent, asyncRoute(async (req, res) => {
+  if (!Array.isArray(req.body?.transactionIds)) {
+    return res.status(400).json({ success: false, message: '缺少金幣通知識別碼。' });
+  }
+  sendResult(res, await repo.acknowledgeTeacherGrants(req.session.studentId, req.body.transactionIds));
+}));
+
 async function teacherRoster() {
   const academicYear = await academicYears.getCurrentAcademicYear();
   const enrollments = (await academicYears.listEnrollments(academicYear)).filter((row) => row.role !== 'teacher');

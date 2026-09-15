@@ -1018,6 +1018,48 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
 .result-card p { font-size: var(--fs-body); color: var(--ink-soft); }
 .result-card .primary { width: 100%; }
 
+.modal-card.grant-notice-modal {
+  width: min(500px, 100%);
+  background:
+    radial-gradient(circle at 50% -10%, rgba(255, 213, 91, .34), transparent 46%),
+    var(--surface);
+}
+.grant-notice { display: grid; gap: var(--s2); width: 100%; justify-items: center; }
+.grant-notice-coin {
+  display: grid; place-items: center; width: 72px; height: 72px;
+  border-radius: 50%; background: linear-gradient(145deg, #fff4b7, #ffd34d);
+  border: 4px solid #fff8d6; box-shadow: 0 10px 24px rgba(173, 112, 0, .22);
+  font-size: 38px; line-height: 1;
+}
+.grant-notice h2 { font-size: var(--fs-title); line-height: 1.15; color: var(--coin-ink); }
+.grant-total { color: var(--ink-soft); font-size: var(--fs-small); }
+.grant-total b { color: var(--coin-ink); }
+.grant-receipt-list {
+  display: grid; gap: var(--s1); width: 100%; max-height: min(42vh, 360px);
+  overflow-y: auto; padding: 2px;
+}
+.grant-receipt {
+  display: grid; gap: var(--s1); padding: var(--s2); text-align: left;
+  border: 1px solid rgba(177, 126, 22, .22); border-radius: var(--r-md);
+  background: rgba(255, 250, 228, .86);
+}
+.grant-receipt-head { display: grid; grid-template-columns: auto 1fr auto; gap: var(--s1); align-items: center; }
+.grant-receipt-head > span { font-size: 28px; }
+.grant-receipt-head > div { display: grid; gap: 2px; min-width: 0; }
+.grant-receipt-head b { overflow-wrap: anywhere; color: var(--ink); }
+.grant-receipt-head small { color: var(--ink-quiet); font-weight: 700; }
+.grant-receipt-head strong { color: var(--coin-ink); font-size: var(--fs-title); white-space: nowrap; }
+.grant-receipt p {
+  display: grid; grid-template-columns: auto 1fr; gap: var(--s1); align-items: start;
+  padding-top: var(--s1); border-top: 1px solid rgba(177, 126, 22, .16);
+  color: var(--ink-soft); overflow-wrap: anywhere;
+}
+.grant-receipt p span {
+  color: var(--ink-quiet); font-size: var(--fs-micro); font-weight: 900;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.grant-notice .primary { width: 100%; }
+
 .celebration-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 90; }
 .celebration-layer i {
   position: absolute; left: var(--x); top: -20px; width: 10px; height: 18px;
