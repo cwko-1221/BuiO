@@ -167,16 +167,17 @@ def bisect(obj, normal, offset, keep_positive):
 def MEDIASTINAL_HALF_AT(z):
     """Half-width of the mediastinum at a given height.
 
-    Narrow at the thoracic inlet, widest across the heart, narrowing again at
-    the diaphragm — the shape of the space the lungs are moulded around.
+    Narrow at the thoracic inlet, widest in the lower central thorax, narrowing
+    again at the diaphragm — the normal cardiomediastinal contour the lungs are
+    moulded around. The contour is anatomical; no heart mesh is exported.
     """
-    HEART_TOP = 2.80
-    HEART_BOTTOM = 2.05
-    if z >= HEART_TOP:
-        t = min((z - HEART_TOP) / 0.62, 1.0)
+    WIDEST_TOP = 2.80
+    WIDEST_BOTTOM = 2.05
+    if z >= WIDEST_TOP:
+        t = min((z - WIDEST_TOP) / 0.62, 1.0)
         return 0.30 - 0.20 * t
-    if z <= HEART_BOTTOM:
-        t = min((HEART_BOTTOM - z) / 0.35, 1.0)
+    if z <= WIDEST_BOTTOM:
+        t = min((WIDEST_BOTTOM - z) / 0.35, 1.0)
         return 0.30 - 0.16 * t
     return 0.30
 
@@ -203,8 +204,8 @@ def make_hull(name, side, notch):
         # Then stand the whole lung off the midline by the width of the
         # mediastinum at this height, and let nothing cross back over it. The
         # old code used a fixed 0.30 offset with no clamp, so both lungs still
-        # reached x = 0 and met, leaving no room for the heart the cardiac
-        # notch was carved for.
+        # reached x = 0 and erased the normal central contour and left cardiac
+        # notch.
         reach = MEDIASTINAL_HALF_AT(z)
         x += side * reach
         if side * x < reach:

@@ -16,14 +16,16 @@ Blender must be running with the MCP add-on enabled and its server started
 Run them in that order, **from a clean scene, every time**. The stages are not
 independent and re-running one on its own will quietly give you a broken model:
 
-- `bl-skeleton.py` clears what is already there, so running it alone drops the
-  lungs and exports a body with no lungs in it.
-- `bl-materials.py` *joins* the loose parts into the five final objects. Run it
+- `bl-skeleton.py` keeps only the five lung-lobe source meshes and rebuilds the
+  airway, thoracic cage, body shell, spine and diaphragm around them. Running
+  it without a fresh `bl-lungs.py` result therefore uses stale or missing lungs.
+- `bl-materials.py` *joins* the loose parts into the six final objects. Run it
   twice and the second run finds the parts already consumed, so it exports
   whatever is left — once, that was the diaphragm on its own.
 
 Both failures export successfully and report no error. Check the part list that
-`bl-materials.py` prints, and confirm all five are there, before believing an
+`bl-materials.py` prints, and confirm `ribcage`, `airway`, `lungs`, `body`,
+`spine` and `diaphragm` are all there before believing an
 export. `node tmp/glb-bounds.mjs` will also list what actually landed in the file.
 
 If the export itself fails with `OSError: [Errno 22]` on the glb path, delete the
@@ -51,7 +53,10 @@ every part from those is what keeps the anatomy from intersecting itself:
   *differenced* with a solid of the diaphragm, which hollows the concave base
   each lung rests on. They are then bisected by the real oblique and horizontal
   fissure planes into three lobes on the right and two on the left, with the
-  cardiac notch on the left.
+  cardiac notch on the left. The notch and central cardiomediastinal contour
+  remain part of normal lung anatomy, but this lesson deliberately ships no
+  heart or central great-vessel mesh. Pulmonary artery and vein branches stop
+  at the hila.
 - **Ribs** sweep that same cavity ellipse at a fixed standoff, so a rib is
   outside the pleural space along its whole length. They are bevelled along a
   flat profile, because a rib is a band and not a rod.
@@ -77,7 +82,7 @@ written the way it is read off a reference plate.
 ## Budget
 
 The station's asset budget is checked by `scripts/test-science-lab.mjs`: the
-equipment kit and this model together must stay under 2.5 MB. This file is
-currently ~900 KB at roughly 19k faces. Watch the bevel profile resolution if
+equipment kit and this model together must stay under 4 MB. This file is
+currently ~2.15 MB at roughly 24k faces. Watch the bevel profile resolution if
 that grows — a profile curve's own `resolution_u` multiplies along every rib,
 which once turned the rib cage into 153k faces and a 7.5 MB export.

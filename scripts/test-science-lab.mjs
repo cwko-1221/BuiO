@@ -238,7 +238,7 @@ const glbBytes = (await Promise.all(glbAssets.map(async (file) => (await stat(pa
   .reduce((sum, size) => sum + size, 0);
 // Raised from 2.5 MB at the client's request: the respiratory model is meant
 // to stand up to a medical student's eye, and the anatomy that takes — twelve
-// ribs with a costal margin, a mediastinum, C-shaped tracheal cartilage — costs
+// ribs with a costal margin, five lung lobes and C-shaped tracheal cartilage — costs
 // geometry. Still one download, still cached after the first visit.
 assert.ok(glbBytes < 4_000_000, `Blender models stay within the download budget (actual ${glbBytes} bytes)`);
 
