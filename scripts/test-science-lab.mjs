@@ -252,10 +252,13 @@ assert.equal(sha256(distRespiratory), sha256(publicRespiratory),
 const respiratoryGlb = readGlbJson(publicRespiratory, 'respiratory model');
 assert.deepEqual(
   respiratoryGlb.nodes.map((node) => node.name).sort(),
-  ['airway', 'body', 'diaphragm', 'lungs', 'mediastinum', 'ribcage', 'spine'],
-  'respiratory GLB preserves all seven anatomical systems as semantic nodes',
+  ['airway', 'body', 'diaphragm', 'lungs', 'ribcage', 'spine'],
+  'respiratory GLB preserves all six required respiratory anatomy systems as semantic nodes',
 );
+assert.equal(respiratoryGlb.nodes.some((node) => node.name === 'mediastinum'), false,
+  'the respiratory lesson does not ship a cardiac/mediastinal mesh');
 const materialNames = respiratoryGlb.materials.map((material) => material.name);
+assert.equal(materialNames.includes('heart'), false, 'the respiratory lesson does not ship a heart material');
 const lobeMaterials = ['lung_LLL', 'lung_LUL', 'lung_RLL', 'lung_RML', 'lung_RUL'];
 for (const material of lobeMaterials) {
   assert.ok(materialNames.includes(material), `respiratory GLB preserves ${material} as a distinct lung lobe material`);

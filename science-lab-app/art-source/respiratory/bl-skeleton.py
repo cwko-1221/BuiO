@@ -457,27 +457,9 @@ for side in (-1, 1):
                                  (hilum_x, -0.055, 2.42 + dz * 0.35), vein_end],
                                 0.024, resolution=9, around=3))
 
-# -------------------------------------------------------------- mediastinum
-# The heart is not an interaction target, but showing its true leftward apex
-# explains the cardiac notch and prevents learners from imagining that the two
-# lungs meet in the centre of the chest.
-heart = ellipsoid('heart', (0.09, -0.015, 2.34), (0.30, 0.235, 0.43), 52, 36)
-for vert in heart.data.vertices:
-    x, y, z = vert.co
-    inferior = max(0.0, min(1.0, (2.45 - z) / 0.54))
-    vert.co.x += 0.105 * inferior
-    vert.co.y -= 0.025 * inferior
-    vert.co.x *= 1.0 - 0.20 * inferior
-    vert.co.y *= 1.0 - 0.16 * inferior
-heart.data.update()
-built.append(heart)
-built.append(curve_tube('great_aorta', [
-    (0.03, 0.01, 2.60), (0.01, 0.005, 2.82), (-0.06, 0.035, 2.97),
-    (-0.16, 0.095, 2.94),
-], 0.040, resolution=14, around=3))
-built.append(curve_tube('great_pulmonary_trunk', [
-    (0.03, -0.085, 2.57), (-0.02, -0.080, 2.72), (-0.09, -0.040, 2.78),
-], 0.036, resolution=12, around=3))
+# No heart or central great-vessel mass is included in this respiratory lesson.
+# The paired pulmonary artery/vein branches above stop at the hila, preserving
+# the respiratory landmarks without introducing a separate cardiac model.
 
 # --------------------------------------------------------------- diaphragm
 angular_steps = 40

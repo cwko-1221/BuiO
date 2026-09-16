@@ -44,7 +44,6 @@ PALETTE = {
     'artery':    srgb(0x4779A8, 0.42),
     'vein':      srgb(0xB64351, 0.42),
     'skin':      srgb(0xC9987E, 0.58),
-    'heart':     srgb(0x8F3340, 0.52),
 }
 
 # prefix -> material, and which export group it joins
@@ -74,9 +73,6 @@ ASSIGN = [
     ('bronchus_',      'bronchus',  'airway'),
     ('pulmonary_artery_', 'artery',  'airway'),
     ('pulmonary_vein_',   'vein',    'airway'),
-    ('heart',           'heart',     'mediastinum'),
-    ('great_aorta',     'vein',      'mediastinum'),
-    ('great_pulmonary_trunk', 'artery', 'mediastinum'),
     ('diaphragm',      'muscle',    'diaphragm'),
     ('central_tendon',  'tendon',    'diaphragm'),
 ]
@@ -90,7 +86,7 @@ TEXTURE_BASE = {
     'airway': 0xE3A9AC, 'bronchus': 0xD98F94,
     'muscle': 0xB3564A, 'tendon': 0xD7C8B6,
     'artery': 0x4779A8, 'vein': 0xB64351,
-    'skin': 0xC9987E, 'heart': 0x8F3340,
+    'skin': 0xC9987E,
 }
 
 
@@ -139,10 +135,6 @@ def tissue_texture(name, size=128):
                 pore = max(0.0, grain - 0.55) ** 2.0
                 amount = 0.018 * fine - 0.055 * pore
                 tint = (1.0, 0.93, 0.88)
-            elif name == 'heart':
-                fibre = math.sin((u * 32.0 + v * 7.0) * math.tau)
-                amount = 0.038 * fibre + 0.020 * fine
-                tint = (1.0, 0.82, 0.82)
             elif name == 'tendon':
                 fibre = math.sin((u * 38.0 - v * 10.0) * math.tau)
                 amount = 0.035 * fibre

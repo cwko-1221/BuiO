@@ -732,7 +732,7 @@ export async function runRespiratoryInterpenetrationCheck({ log = console.log } 
   await assertSceneMatches();
   const { json, bin } = readGlb(await readFile(MODEL));
   const parts = readParts(json, bin);
-  for (const name of ['airway', 'spine', 'lungs', 'ribcage', 'diaphragm', 'body', 'mediastinum']) {
+  for (const name of ['airway', 'spine', 'lungs', 'ribcage', 'diaphragm', 'body']) {
     if (!parts.has(name)) throw new Error(`the model is missing its ${name}`);
   }
 
@@ -748,13 +748,12 @@ export async function runRespiratoryInterpenetrationCheck({ log = console.log } 
     const diaphragm = placed(parts.get('diaphragm'), v);
     const airway = placed(parts.get('airway'), v);
     const spine = placed(parts.get('spine'), v);
-    const mediastinum = placed(parts.get('mediastinum'), v);
     rows.push({
       breath,
       cage: checkLungsInCage(lungs, ribcage),
       dome: checkDomeUnderLungs(lungs, diaphragm),
       bronchi: checkBronchiInLungs(airway, lungs, members),
-      body: checkInsideBody([lungs, ribcage, diaphragm, airway, spine, mediastinum], v),
+      body: checkInsideBody([lungs, ribcage, diaphragm, airway, spine], v),
     });
   }
 

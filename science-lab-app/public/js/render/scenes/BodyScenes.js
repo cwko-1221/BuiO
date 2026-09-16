@@ -4,8 +4,8 @@ import { cloneAnatomy } from '../AssetLibrary.js';
 
 // A standing clinical cutaway of the respiratory system. The head, neck and
 // posterior/lateral thorax are a translucent Blender-authored orientation
-// shell; the anterior thorax is truly open so the airway, lungs, rib cage,
-// mediastinum and diaphragm can be inspected from multiple angles.
+// shell; the anterior thorax is truly open so the airway, lungs, rib cage and
+// diaphragm can be inspected from multiple angles.
 //
 // The anatomy itself is modelled in Blender and loaded as one glb — see
 // art-source/respiratory. Inside that model the lungs are carved out of the
@@ -225,7 +225,6 @@ export function buildRespiratory(api) {
     ribcage: { clearcoat: .04, clearcoatRoughness: .6, roughness: .62, env: .3 },
     spine: { clearcoat: .04, clearcoatRoughness: .6, roughness: .62, env: .3 },
     body: { clearcoat: .06, clearcoatRoughness: .64, roughness: .62, env: .34 },
-    mediastinum: { clearcoat: .12, clearcoatRoughness: .48, roughness: .58, env: .46 },
   };
 
   /**
@@ -268,7 +267,6 @@ export function buildRespiratory(api) {
   const lungs = part('lungs');
   const airway = part('airway');
   const bodyShell = part('body');
-  const mediastinum = part('mediastinum');
   const spine = part('spine');
   const ribShell = part('ribcage') || new THREE.Group();
   if (!ribShell.parent) organs.add(ribShell);
@@ -303,17 +301,6 @@ export function buildRespiratory(api) {
         material.opacity = .28;
         material.depthWrite = false;
         material.side = THREE.DoubleSide;
-      }
-    });
-  }
-
-  if (mediastinum) {
-    mediastinum.traverse((child) => {
-      if (!child.isMesh) return;
-      const materials = Array.isArray(child.material) ? child.material : [child.material];
-      for (const material of materials) {
-        material.transparent = true;
-        material.opacity = .94;
       }
     });
   }
