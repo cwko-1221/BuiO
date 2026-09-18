@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { io } from 'socket.io-client';
 import styles from './ClassTeacher.module.css';
+import { createCompositeCanvas, renderShapeLayer } from '../utils/drawing';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 const STUDENTS_PER_PAGE = 12;
@@ -48,10 +49,16 @@ export default function ClassTeacher() {
             canvas.width = OFFSCREEN_WIDTH;
             canvas.height = OFFSCREEN_HEIGHT;
             const ctx = canvas.getContext('2d');
+            const shapeCanvas = document.createElement('canvas');
+            shapeCanvas.width = OFFSCREEN_WIDTH;
+            shapeCanvas.height = OFFSCREEN_HEIGHT;
+            const shapeCtx = shapeCanvas.getContext('2d');
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
+            shapeCtx.lineCap = 'round';
+            shapeCtx.lineJoin = 'round';
             // Canvas is transparent — strokes only, bg composited separately
-            offscreenCanvasesRef.current.set(studentId, { canvas, ctx });
+            offscreenCanvasesRef.current.set(studentId, { canvas, ctx, shapeCanvas, shapeCtx, shapes: [] });
         }
         return offscreenCanvasesRef.current.get(studentId);
     }, []);
@@ -108,10 +115,30 @@ export default function ClassTeacher() {
         });
 
         socketRef.current.on('draw', (data) => {
-            const { studentId, x, y, state, color, size, isEraser } = data;
+            const { studentId, id, x, y, state, shape, startX, startY, endX, endY, color, size, isEraser } = data;
             if (!studentId) return;
 
-            const { ctx } = getOrCreateOffscreen(studentId);
+            const offscreen = getOrCreateOffscreen(studentId);
+            const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
+
+            if (state === 'shape' && shape) {
+                const shapeObject = { id, shape, startX, startY, endX, endY, color: color || '#000000', size: size || 1.5 };
+                const existingIndex = shapes.findIndex((item) => item.id === id);
+                if (existingIndex >= 0) shapes[existingIndex] = shapeObject;
+                else shapes.push(shapeObject);
+                renderShapeLayer(shapeCtx, shapeCanvas, shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                return;
+            }
+
+            if (state === 'shape-move' && id) {
+                const shapeObject = shapes.find((item) => item.id === id);
+                if (shapeObject) {
+                    Object.assign(shapeObject, { startX, startY, endX, endY });
+                    renderShapeLayer(shapeCtx, shapeCanvas, shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                }
+                return;
+            }
+
             const localX = x * OFFSCREEN_WIDTH;
             const localY = y * OFFSCREEN_HEIGHT;
 
@@ -137,16 +164,20 @@ export default function ClassTeacher() {
 
         socketRef.current.on('student-clear', ({ studentId }) => {
             if (offscreenCanvasesRef.current.has(studentId)) {
-                const { ctx } = offscreenCanvasesRef.current.get(studentId);
+                const { ctx, shapeCanvas, shapeCtx, shapes } = offscreenCanvasesRef.current.get(studentId);
                 ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 // Only clear strokes — bg image is composited separately in render loop
+                shapes.length = 0;
+                renderShapeLayer(shapeCtx, shapeCanvas, shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
             }
         });
 
         socketRef.current.on('clear-board', () => {
-            for (const [, { ctx }] of offscreenCanvasesRef.current) {
+            for (const [, { ctx, shapeCanvas, shapeCtx, shapes }] of offscreenCanvasesRef.current) {
                 ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 // Only clear strokes — bg image is composited separately in render loop
+                shapes.length = 0;
+                renderShapeLayer(shapeCtx, shapeCanvas, shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
             }
         });
 
@@ -186,6 +217,9 @@ export default function ClassTeacher() {
                 }
                 // Draw student strokes on top
                 ctx.drawImage(offscreen.canvas, 0, 0, canvasEl.width, canvasEl.height);
+                if (offscreen.shapeCanvas) {
+                    ctx.drawImage(offscreen.shapeCanvas, 0, 0, canvasEl.width, canvasEl.height);
+                }
             }
 
             // Render zoom canvas
@@ -215,6 +249,9 @@ export default function ClassTeacher() {
                     }
                     // Draw student strokes on top
                     ctx.drawImage(offscreen.canvas, 0, 0, canvasEl.width, canvasEl.height);
+                    if (offscreen.shapeCanvas) {
+                        ctx.drawImage(offscreen.shapeCanvas, 0, 0, canvasEl.width, canvasEl.height);
+                    }
                 }
             }
 
@@ -276,10 +313,11 @@ export default function ClassTeacher() {
         if (studentId === 'teacher' || !offscreen?.canvas || !socketRef.current) return;
 
         teacherSyncVersion.current += 1;
+        const compositeCanvas = createCompositeCanvas(offscreen.canvas, offscreen.shapeCanvas);
         socketRef.current.emit('teacher-board-sync', {
             studentId,
             version: teacherSyncVersion.current,
-            imageData: offscreen.canvas.toDataURL('image/png')
+            imageData: compositeCanvas.toDataURL('image/png')
         });
     }, []);
 

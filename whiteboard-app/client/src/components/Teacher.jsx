@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { io } from 'socket.io-client';
 import styles from './Teacher.module.css';
+import { renderShapeLayer } from '../utils/drawing';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 const STUDENTS_PER_PAGE = 12;
@@ -59,12 +60,18 @@ export default function Teacher() {
             canvas.width = OFFSCREEN_WIDTH;
             canvas.height = OFFSCREEN_HEIGHT;
             const ctx = canvas.getContext('2d');
+            const shapeCanvas = document.createElement('canvas');
+            shapeCanvas.width = OFFSCREEN_WIDTH;
+            shapeCanvas.height = OFFSCREEN_HEIGHT;
+            const shapeCtx = shapeCanvas.getContext('2d');
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
+            shapeCtx.lineCap = 'round';
+            shapeCtx.lineJoin = 'round';
             // White background
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
-            offscreenCanvasesRef.current.set(studentId, { canvas, ctx });
+            offscreenCanvasesRef.current.set(studentId, { canvas, ctx, shapeCanvas, shapeCtx, shapes: [] });
         }
         return offscreenCanvasesRef.current.get(studentId);
     }, []);
@@ -92,10 +99,30 @@ export default function Teacher() {
         });
 
         socketRef.current.on('draw', (data) => {
-            const { studentId, x, y, state, color, size, isEraser } = data;
+            const { studentId, id, x, y, state, shape, startX, startY, endX, endY, color, size, isEraser } = data;
             if (!studentId) return;
 
-            const { ctx } = getOrCreateOffscreen(studentId);
+            const offscreen = getOrCreateOffscreen(studentId);
+            const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
+
+            if (state === 'shape' && shape) {
+                const shapeObject = { id, shape, startX, startY, endX, endY, color: color || '#000000', size: size || 1.5 };
+                const existingIndex = shapes.findIndex((item) => item.id === id);
+                if (existingIndex >= 0) shapes[existingIndex] = shapeObject;
+                else shapes.push(shapeObject);
+                renderShapeLayer(shapeCtx, shapeCanvas, shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                return;
+            }
+
+            if (state === 'shape-move' && id) {
+                const shapeObject = shapes.find((item) => item.id === id);
+                if (shapeObject) {
+                    Object.assign(shapeObject, { startX, startY, endX, endY });
+                    renderShapeLayer(shapeCtx, shapeCanvas, shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                }
+                return;
+            }
+
             const localX = x * OFFSCREEN_WIDTH;
             const localY = y * OFFSCREEN_HEIGHT;
 
@@ -121,21 +148,25 @@ export default function Teacher() {
 
         socketRef.current.on('student-clear', ({ studentId }) => {
             if (offscreenCanvasesRef.current.has(studentId)) {
-                const { ctx } = offscreenCanvasesRef.current.get(studentId);
+                const { ctx, shapeCanvas, shapeCtx, shapes } = offscreenCanvasesRef.current.get(studentId);
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                shapes.length = 0;
+                renderShapeLayer(shapeCtx, shapeCanvas, shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
             }
         });
 
         socketRef.current.on('clear-board', () => {
             // Clear all offscreen canvases
-            for (const [, { ctx }] of offscreenCanvasesRef.current) {
+            for (const [, { ctx, shapeCanvas, shapeCtx, shapes }] of offscreenCanvasesRef.current) {
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                shapes.length = 0;
+                renderShapeLayer(shapeCtx, shapeCanvas, shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
             }
         });
 
@@ -165,6 +196,9 @@ export default function Teacher() {
 
                 ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
                 ctx.drawImage(offscreen.canvas, 0, 0, canvasEl.width, canvasEl.height);
+                if (offscreen.shapeCanvas) {
+                    ctx.drawImage(offscreen.shapeCanvas, 0, 0, canvasEl.width, canvasEl.height);
+                }
             }
 
             // Render zoom canvas
@@ -186,6 +220,9 @@ export default function Teacher() {
 
                     ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
                     ctx.drawImage(offscreen.canvas, 0, 0, canvasEl.width, canvasEl.height);
+                    if (offscreen.shapeCanvas) {
+                        ctx.drawImage(offscreen.shapeCanvas, 0, 0, canvasEl.width, canvasEl.height);
+                    }
                 }
             }
 
