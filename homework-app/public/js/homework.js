@@ -18,8 +18,10 @@ const options = (items, selected, label = value => value, value = item => item) 
 const notice = () => state.message ? `<div class="notice ${state.messageType}">${escapeHtml(state.message)}</div>` : '';
 function setMessage(message, type = 'success') { state.message = message; state.messageType = type; render(); }
 
-function shell(content) {
+function shell(content, { messagePosition = 'top' } = {}) {
   const teacher = state.meta.role === 'teacher';
+  const topNotice = messagePosition === 'top' ? notice() : '';
+  const bottomNotice = messagePosition === 'bottom' && state.message ? `<div class="student-message-bottom">${notice()}</div>` : '';
   return `<div class="shell ${teacher ? '' : 'student-shell'}">
     <aside class="side">
       <div class="brand"><img src="/math-app/images/logo.png" alt="${escapeHtml(t('h.logoAlt'))}"><div><strong>${escapeHtml(t('h.school'))}</strong><span>LEARNING HUB</span></div></div>
@@ -34,7 +36,7 @@ function shell(content) {
     </aside>
     <main class="main">
       <header class="top"><div><h1>${escapeHtml(t('h.title'))}</h1><p>${escapeHtml(t(teacher ? 'h.subtitleTeacher' : 'h.subtitleMonitor'))}</p></div><span class="date-chip">${today}</span></header>
-      ${notice()}${content}
+      ${topNotice}${content}${bottomNotice}
     </main>
   </div>`;
 }
@@ -289,7 +291,7 @@ function renderStudent() {
     </div>
     ${locked ? `<div class="notice" style="margin-top:18px">${escapeHtml(t('h.lockedNotice'))}</div>` : state.record ? `<div class="notice" style="margin-top:18px">${escapeHtml(t('h.savedNotice'))}</div>` : ''}
   </section>
-  <section class="panel">${state.homeworks.length ? `${homeworkCards({ locked })}<div class="actions" style="margin-top:20px">${!locked ? `<button class="button secondary" id="addHomework">${escapeHtml(t('h.addHomework'))}</button><button class="button primary" id="submitRecord">${escapeHtml(t(state.record ? 'h.saveChanges' : 'h.saveShort'))}</button>` : ''}</div>` : `<div class="empty">${escapeHtml(t('h.noRecordDate'))}</div>`}</section>`);
+  <section class="panel">${state.homeworks.length ? `${homeworkCards({ locked })}<div class="actions" style="margin-top:20px">${!locked ? `<button class="button secondary" id="addHomework">${escapeHtml(t('h.addHomework'))}</button><button class="button primary" id="submitRecord">${escapeHtml(t(state.record ? 'h.saveChanges' : 'h.saveShort'))}</button>` : ''}</div>` : `<div class="empty">${escapeHtml(t('h.noRecordDate'))}</div>`}</section>`, { messagePosition: 'bottom' });
 }
 
 function syncEditor() {

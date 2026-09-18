@@ -306,6 +306,7 @@ button { cursor: pointer; }
 
 .notice.success { border-color: #bce6d7; background: #e6f6f1; color: #16825f; }
 .notice.error { border-color: #f5c7bd; background: #fff0ed; color: #973b2b; }
+.student-message-bottom { margin-top: 18px; }
 
 .homework-card {
   margin-top: 16px;
