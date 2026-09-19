@@ -11,7 +11,8 @@
  * [除法] div_2d_1d, div_3d_1d_z0_mid, div_3d_1d_z0_end, div_3d_2d
  * [分數] frac_2_add, frac_2_sub, frac_3_add, frac_3_sub,
  *         frac_convert, frac_expand, frac_reduce,
- *         frac_up_to_3_add, frac_up_to_3_sub, frac_3_mix
+ *         frac_up_to_3_add, frac_up_to_3_sub, frac_3_mix,
+ *         add_up_to_3n, sub_up_to_3n, mix_3n_4d
  */
 
 // ========================================
@@ -86,6 +87,9 @@ const TAG_INFO = {
     frac_up_to_3_add: { name: '最多3個同分母分數加法', category: '混合', symbol: '+' },
     frac_up_to_3_sub: { name: '最多3個同分母分數減法', category: '混合', symbol: '-' },
     frac_3_mix:     { name: '3個同分母分數加減混合', category: '混合', symbol: '±' },
+    add_up_to_3n:  { name: '不超過3個數的加法', category: '加法', symbol: '+' },
+    sub_up_to_3n:  { name: '不超過3個數的減法', category: '減法', symbol: '-' },
+    mix_3n_4d:     { name: '3個數的加減混合運算', category: '混合', symbol: '±' },
     // ----- Legacy tags still referenced by grade lists -----
     add_2d_nc:       { name: '兩位數加法 (無進位)', category: '加法', symbol: '+' },
     sub_2d_nc:       { name: '兩位數減法 (無退位)', category: '減法', symbol: '-' },
@@ -660,6 +664,57 @@ function generate_frac_3_mix() {
 // P4 出題邏輯
 // ========================================
 
+/** 不超過三個數的加法 — 使用四位數範圍，避免與低年級三位數題型重疊。 */
+function generate_add_up_to_3n() {
+    for (let attempt = 0; attempt < 200; attempt++) {
+        const count = randInt(2, 3);
+        const numbers = Array.from({ length: count }, () => randInt(1000, 9999));
+        const answer = numbers.reduce((total, number) => total + number, 0);
+        if (answer <= 99999) {
+            return {
+                a: numbers[0], b: numbers[1], c: numbers[2], answer,
+                text: numbers.join(' + '), symbol: '+'
+            };
+        }
+    }
+    return { a: 1234, b: 2345, c: 3456, answer: 7035, text: '1234 + 2345 + 3456', symbol: '+' };
+}
+
+/** 不超過三個數的減法 — 由左至右計算並保持結果為正數。 */
+function generate_sub_up_to_3n() {
+    for (let attempt = 0; attempt < 200; attempt++) {
+        const count = randInt(2, 3);
+        const numbers = [randInt(4000, 9999)];
+        for (let i = 1; i < count; i++) numbers.push(randInt(1000, 3000));
+        const answer = numbers.slice(1).reduce((total, number) => total - number, numbers[0]);
+        if (answer > 0) {
+            return {
+                a: numbers[0], b: numbers[1], c: numbers[2], answer,
+                text: numbers.join(' - '), symbol: '-'
+            };
+        }
+    }
+    return { a: 9000, b: 2000, c: 1000, answer: 6000, text: '9000 - 2000 - 1000', symbol: '-' };
+}
+
+/** 三個數的加減混合運算 — 由左至右計算並保持中間結果為正數。 */
+function generate_mix_3n_4d() {
+    for (let attempt = 0; attempt < 300; attempt++) {
+        const a = randInt(3000, 9999);
+        const b = randInt(1000, 3000);
+        const c = randInt(1000, 3000);
+        const op1 = Math.random() < 0.5 ? '+' : '-';
+        const step1 = op1 === '+' ? a + b : a - b;
+        if (step1 <= 0) continue;
+        const op2 = Math.random() < 0.5 ? '+' : '-';
+        const answer = op2 === '+' ? step1 + c : step1 - c;
+        if (answer > 0 && answer <= 99999) {
+            return { a, b, c, answer, text: `${a} ${op1} ${b} ${op2} ${c}`, symbol: '±' };
+        }
+    }
+    return { a: 5000, b: 2000, c: 1000, answer: 6000, text: '5000 + 2000 - 1000', symbol: '±' };
+}
+
 /** 2位數乘2位數 (無進位) — 所有部分積 < 10, 相加不進位 */
 function generate_mul_2d_2d_nc() {
     for (let i = 0; i < 300; i++) {
@@ -1019,6 +1074,9 @@ const GENERATORS = {
     frac_up_to_3_add: generate_frac_up_to_3_add,
     frac_up_to_3_sub: generate_frac_up_to_3_sub,
     frac_3_mix: generate_frac_3_mix,
+    add_up_to_3n: generate_add_up_to_3n,
+    sub_up_to_3n: generate_sub_up_to_3n,
+    mix_3n_4d: generate_mix_3n_4d,
     // Legacy tags still referenced by grade lists
     add_2d_nc: generate_add_2d_nc,
     sub_2d_nc: generate_sub_2d_nc,
