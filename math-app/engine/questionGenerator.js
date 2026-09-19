@@ -9,7 +9,9 @@
  * [減法] sub_2d_nc, sub_2d_b, sub_3d_b, sub_3d_z_mid
  * [乘法] mul_2x1, mul_3x1, mul_2x2_nc_nc, mul_2x2_c_c
  * [除法] div_2d_1d, div_3d_1d_z0_mid, div_3d_1d_z0_end, div_3d_2d
- * [分數] frac_2_add, frac_2_sub, frac_3_add, frac_3_sub
+ * [分數] frac_2_add, frac_2_sub, frac_3_add, frac_3_sub,
+ *         frac_convert, frac_expand, frac_reduce,
+ *         frac_up_to_3_add, frac_up_to_3_sub, frac_3_mix
  */
 
 // ========================================
@@ -78,6 +80,12 @@ const TAG_INFO = {
     div_3d_2d_b_r:   { name: '3位數÷2位數 (有退位、有餘數，只寫商)', category: '除法', symbol: '÷' },
     mix_4n_paren:    { name: '4個數四則混合 (含小括號)', category: '混合', symbol: '?' },
     mix_4n_brackets: { name: '4個數四則混合 (含中括號)', category: '混合', symbol: '?' },
+    frac_convert:   { name: '假分數與帶分數互化', category: '混合', symbol: '↔' },
+    frac_expand:    { name: '分數擴分', category: '混合', symbol: '↔' },
+    frac_reduce:    { name: '分數約分', category: '混合', symbol: '↔' },
+    frac_up_to_3_add: { name: '最多3個同分母分數加法', category: '混合', symbol: '+' },
+    frac_up_to_3_sub: { name: '最多3個同分母分數減法', category: '混合', symbol: '-' },
+    frac_3_mix:     { name: '3個同分母分數加減混合', category: '混合', symbol: '±' },
     // ----- Legacy tags still referenced by grade lists -----
     add_2d_nc:       { name: '兩位數加法 (無進位)', category: '加法', symbol: '+' },
     sub_2d_nc:       { name: '兩位數減法 (無退位)', category: '減法', symbol: '-' },
@@ -492,6 +500,162 @@ function generate_frac_3_sub() {
     };
 }
 
+function gcd(a, b) {
+    while (b) [a, b] = [b, a % b];
+    return Math.abs(a);
+}
+
+function fractionExpression(numbers, operators, denominator) {
+    return numbers.map((number, index) => {
+        if (index === 0) return `${number}/${denominator}`;
+        return `${operators[index - 1]} ${number}/${denominator}`;
+    }).join(' ');
+}
+
+/** 假分數與帶分數互化；答案格式可能是分數或帶分數。 */
+function generate_frac_convert() {
+    const denominator = randInt(3, 9);
+    if (Math.random() < 0.5) {
+        const whole = randInt(1, 3);
+        const numerator = randInt(1, denominator - 1);
+        const improperNumerator = whole * denominator + numerator;
+        return {
+            answer: whole + numerator / denominator,
+            answerType: 'mixed',
+            answerWhole: whole,
+            answerNumerator: numerator,
+            answerDenominator: denominator,
+            denominator,
+            text: `${improperNumerator}/${denominator} = ? 又 ?/${denominator}`,
+            symbol: '↔'
+        };
+    }
+
+    const whole = 1;
+    const numerator = randInt(1, denominator - 1);
+    return {
+        answer: whole + numerator / denominator,
+        answerType: 'fraction',
+        answerNumerator: whole * denominator + numerator,
+        answerDenominator: denominator,
+        denominator,
+        text: `${whole} 又 ${numerator}/${denominator} = ?/?`,
+        symbol: '↔'
+    };
+}
+
+function randomReducedFraction() {
+    let numerator, denominator;
+    do {
+        denominator = randInt(3, 6);
+        numerator = randInt(1, denominator - 1);
+    } while (gcd(numerator, denominator) !== 1);
+    return { numerator, denominator };
+}
+
+/** 擴分；答案要求輸入分子和分母。 */
+function generate_frac_expand() {
+    const { numerator, denominator } = randomReducedFraction();
+    const multiplier = randInt(2, 3);
+    return {
+        answer: numerator * multiplier / (denominator * multiplier),
+        answerType: 'fraction',
+        answerNumerator: numerator * multiplier,
+        answerDenominator: denominator * multiplier,
+        denominator: denominator * multiplier,
+        text: `${numerator}/${denominator} = ?/${denominator * multiplier}`,
+        symbol: '↔'
+    };
+}
+
+/** 約分；答案要求輸入分子和分母。 */
+function generate_frac_reduce() {
+    const { numerator, denominator } = randomReducedFraction();
+    const multiplier = randInt(2, 3);
+    return {
+        answer: numerator / denominator,
+        answerType: 'fraction',
+        answerNumerator: numerator,
+        answerDenominator: denominator,
+        denominator,
+        text: `${numerator * multiplier}/${denominator * multiplier} = ?/?`,
+        symbol: '↔'
+    };
+}
+
+function generate_frac_up_to_3_operation(operator) {
+    for (let attempt = 0; attempt < 200; attempt++) {
+        const denominator = randInt(4, 9);
+        const count = randInt(2, 3);
+        const numbers = Array.from({ length: count }, () => randInt(1, denominator - 1));
+        const operators = Array.from({ length: count - 1 }, () => operator);
+        const answer = numbers.slice(1).reduce((total, number, index) =>
+            operator === '+' ? total + number : total - number, numbers[0]);
+        if (answer > 0 && answer < denominator) {
+            return {
+                answer,
+                answerType: 'fraction',
+                answerNumerator: answer,
+                answerDenominator: denominator,
+                denominator,
+                text: fractionExpression(numbers, operators, denominator),
+                symbol: '±'
+            };
+        }
+    }
+    return {
+        answer: operator === '+' ? 3 : 1,
+        answerType: 'fraction',
+        answerNumerator: operator === '+' ? 3 : 1,
+        answerDenominator: 5,
+        denominator: 5,
+        text: operator === '+' ? '1/5 + 1/5 + 1/5' : '3/5 - 1/5 - 1/5',
+        symbol: operator
+    };
+}
+
+/** 最多三個同分母分數加法。 */
+function generate_frac_up_to_3_add() {
+    return generate_frac_up_to_3_operation('+');
+}
+
+/** 最多三個同分母分數減法。 */
+function generate_frac_up_to_3_sub() {
+    return generate_frac_up_to_3_operation('-');
+}
+
+/** 三個同分母分數，固定包含加法和減法的混合運算。 */
+function generate_frac_3_mix() {
+    for (let attempt = 0; attempt < 200; attempt++) {
+        const denominator = randInt(5, 9);
+        const numbers = Array.from({ length: 3 }, () => randInt(1, denominator - 1));
+        const operators = Math.random() < 0.5 ? ['+', '-'] : ['-', '+'];
+        const firstStep = numbers[0] + (operators[0] === '+' ? numbers[1] : -numbers[1]);
+        const answer = firstStep
+            + (operators[1] === '+' ? numbers[2] : -numbers[2]);
+        if (firstStep > 0 && answer > 0 && answer < denominator) {
+            return {
+                answer,
+                answerType: 'fraction',
+                answerNumerator: answer,
+                answerDenominator: denominator,
+                denominator,
+                text: fractionExpression(numbers, operators, denominator),
+                symbol: '±'
+            };
+        }
+    }
+    return {
+        answer: 4,
+        answerType: 'fraction',
+        answerNumerator: 4,
+        answerDenominator: 7,
+        denominator: 7,
+        text: '3/7 + 2/7 - 1/7',
+        symbol: '±'
+    };
+}
+
 // ========================================
 // P4 出題邏輯
 // ========================================
@@ -849,6 +1013,12 @@ const GENERATORS = {
     div_3d_2d_b_r: generate_div_3d_2d_b_r,
     mix_4n_paren: generate_mix_4n_paren,
     mix_4n_brackets: generate_mix_4n_brackets,
+    frac_convert: generate_frac_convert,
+    frac_expand: generate_frac_expand,
+    frac_reduce: generate_frac_reduce,
+    frac_up_to_3_add: generate_frac_up_to_3_add,
+    frac_up_to_3_sub: generate_frac_up_to_3_sub,
+    frac_3_mix: generate_frac_3_mix,
     // Legacy tags still referenced by grade lists
     add_2d_nc: generate_add_2d_nc,
     sub_2d_nc: generate_sub_2d_nc,
@@ -879,6 +1049,10 @@ function generateQuestion(tag) {
         c: result.c,
         denominator: result.denominator,
         answer: result.answer,
+        answerType: result.answerType || (tag.startsWith('frac_') ? 'fraction' : null),
+        answerWhole: result.answerWhole,
+        answerNumerator: result.answerNumerator ?? (tag.startsWith('frac_') ? result.answer : undefined),
+        answerDenominator: result.answerDenominator ?? result.denominator,
         questionText: result.text,
         symbol: result.symbol,
     };

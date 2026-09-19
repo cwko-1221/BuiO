@@ -22,7 +22,8 @@
     let isSubmittingQuiz = false;
     let answerLocked = false;
     let fractionAnswerMode = false;
-    let fractionPart = 'numerator';
+    let fractionAnswerType = 'fraction';
+    let fractionPart = 0;
 
     // ========================================
     // DOM Elements  
@@ -44,6 +45,8 @@
     const questionText = document.getElementById('question-text');
     const answerInput = document.getElementById('answer-input');
     const fractionAnswerFields = document.getElementById('fraction-answer-fields');
+    const fractionWholeField = document.getElementById('fraction-whole-field');
+    const fractionWholeInput = document.getElementById('fraction-whole-input');
     const fractionNumeratorInput = document.getElementById('fraction-numerator-input');
     const fractionDenominatorInput = document.getElementById('fraction-denominator-input');
     const submitBtn = document.getElementById('submit-answer-btn');
@@ -624,6 +627,23 @@
         return Boolean(q && q.tag && q.tag.startsWith('frac_'));
     }
 
+    function fractionInputs() {
+        return fractionAnswerType === 'mixed'
+            ? [fractionWholeInput, fractionNumeratorInput, fractionDenominatorInput]
+            : [fractionNumeratorInput, fractionDenominatorInput];
+    }
+
+    function fractionFormatFor(q) {
+        if (!isFractionQuestion(q)) return null;
+        return q.answerFormat || {
+            type: 'fraction',
+            fields: [
+                { name: 'numerator', maxLength: 1 },
+                { name: 'denominator', maxLength: 1 },
+            ],
+        };
+    }
+
     function showQuestion(idx) {
         const q = questions[idx];
         currentIndex = idx;
@@ -644,8 +664,10 @@
         tagEl.querySelector('span:first-child').textContent = categoryIcons[q.category] || '📐';
 
         // Clear input
-        fractionAnswerMode = isFractionQuestion(q);
-        fractionPart = 'numerator';
+        const fractionFormat = fractionFormatFor(q);
+        fractionAnswerMode = Boolean(fractionFormat);
+        fractionAnswerType = fractionFormat?.type || 'fraction';
+        fractionPart = 0;
         answerLocked = false;
         answerInput.value = '';
         answerInput.className = 'answer-input';
@@ -653,17 +675,30 @@
         answerInput.hidden = fractionAnswerMode;
         answerInput.disabled = false;
         if (fractionAnswerFields) fractionAnswerFields.hidden = !fractionAnswerMode;
+        if (fractionWholeField) fractionWholeField.hidden = fractionAnswerType !== 'mixed';
+        const fractionFieldConfig = new Map(
+            (fractionFormat?.fields || []).map(field => [field.name, field]),
+        );
+        if (fractionWholeInput) {
+            fractionWholeInput.value = '';
+            fractionWholeInput.className = 'answer-input fraction-part';
+            fractionWholeInput.style.borderColor = '';
+            fractionWholeInput.disabled = !fractionAnswerMode || fractionAnswerType !== 'mixed';
+            fractionWholeInput.maxLength = fractionFieldConfig.get('whole')?.maxLength || 1;
+        }
         if (fractionNumeratorInput) {
             fractionNumeratorInput.value = '';
             fractionNumeratorInput.className = 'answer-input fraction-part';
             fractionNumeratorInput.style.borderColor = '';
             fractionNumeratorInput.disabled = !fractionAnswerMode;
+            fractionNumeratorInput.maxLength = fractionFieldConfig.get('numerator')?.maxLength || 1;
         }
         if (fractionDenominatorInput) {
             fractionDenominatorInput.value = '';
             fractionDenominatorInput.className = 'answer-input fraction-part';
             fractionDenominatorInput.style.borderColor = '';
             fractionDenominatorInput.disabled = !fractionAnswerMode;
+            fractionDenominatorInput.maxLength = fractionFieldConfig.get('denominator')?.maxLength || 1;
         }
         submitBtn.disabled = false;
         setKeypadDisabled(false);
@@ -671,7 +706,7 @@
 
         // Focus input
         setTimeout(() => {
-            const firstInput = fractionAnswerMode ? fractionNumeratorInput : answerInput;
+            const firstInput = fractionAnswerMode ? fractionInputs()[0] : answerInput;
             firstInput.focus();
         }, 100);
 
@@ -693,11 +728,19 @@
         if (isSubmittingQuiz || answerLocked) return;
 
         const userAnswer = answerInput.value.trim();
+        const userWhole = fractionAnswerMode && fractionAnswerType === 'mixed'
+            ? fractionWholeInput.value.trim() : null;
         const userNumerator = fractionAnswerMode ? fractionNumeratorInput.value.trim() : null;
         const userDenominator = fractionAnswerMode ? fractionDenominatorInput.value.trim() : null;
-        if (fractionAnswerMode ? (userNumerator === '' || userDenominator === '') : userAnswer === '') {
+        const fractionIncomplete = fractionAnswerMode
+            && (userNumerator === '' || userDenominator === ''
+                || (fractionAnswerType === 'mixed' && userWhole === ''));
+        if (fractionIncomplete || (!fractionAnswerMode && userAnswer === '')) {
             if (fractionAnswerMode) {
-                if (userNumerator === '') {
+                if (fractionAnswerType === 'mixed' && userWhole === '') {
+                    fractionWholeInput.style.borderColor = 'var(--accent-amber)';
+                    fractionWholeInput.focus();
+                } else if (userNumerator === '') {
                     fractionNumeratorInput.style.borderColor = 'var(--accent-amber)';
                     fractionNumeratorInput.focus();
                 } else {
@@ -720,8 +763,11 @@
         answers[currentIndex] = {
             index: q.index,
             userAnswer: fractionAnswerMode
-                ? `${userNumerator}/${userDenominator}`
+                ? (fractionAnswerType === 'mixed'
+                    ? `${userWhole}又${userNumerator}/${userDenominator}`
+                    : `${userNumerator}/${userDenominator}`)
                 : parseFloat(userAnswer),
+            userWhole: fractionAnswerMode && fractionAnswerType === 'mixed' ? parseInt(userWhole, 10) : null,
             userNumerator: fractionAnswerMode ? parseInt(userNumerator, 10) : null,
             userDenominator: fractionAnswerMode ? parseInt(userDenominator, 10) : null,
             timeTaken: roundedTime,
@@ -732,6 +778,7 @@
         };
         totalQuizTime += roundedTime;
         answerInput.disabled = true;
+        if (fractionWholeInput) fractionWholeInput.disabled = true;
         if (fractionNumeratorInput) fractionNumeratorInput.disabled = true;
         if (fractionDenominatorInput) fractionDenominatorInput.disabled = true;
         updateDots();
@@ -760,6 +807,8 @@
                     answers: answers.filter(Boolean).map(answer => ({
                         index: answer.index,
                         userAnswer: answer.userAnswer,
+                        userWhole: answer.userWhole,
+                        userNumerator: answer.userNumerator,
                         userDenominator: answer.userDenominator,
                         timeTaken: answer.timeTaken
                     }))
@@ -803,36 +852,34 @@
         }
 
         if (fractionAnswerMode) {
-            const currentInput = fractionPart === 'numerator'
-                ? fractionNumeratorInput
-                : fractionDenominatorInput;
+            const inputs = fractionInputs();
+            const currentInput = inputs[fractionPart];
 
             if (key === 'clear') {
-                fractionNumeratorInput.value = '';
-                fractionDenominatorInput.value = '';
-                fractionPart = 'numerator';
-                fractionNumeratorInput.focus();
+                inputs.forEach(input => { input.value = ''; });
+                fractionPart = 0;
+                inputs[0].focus();
             } else if (key === 'backspace') {
-                if (fractionPart === 'denominator' && fractionDenominatorInput.value !== '') {
-                    fractionDenominatorInput.value = '';
-                    fractionDenominatorInput.focus();
-                } else {
-                    fractionPart = 'numerator';
-                    fractionNumeratorInput.value = '';
-                    fractionNumeratorInput.focus();
+                if (currentInput.value !== '') {
+                    currentInput.value = currentInput.value.slice(0, -1);
+                } else if (fractionPart > 0) {
+                    fractionPart -= 1;
+                    const previousInput = inputs[fractionPart];
+                    previousInput.value = previousInput.value.slice(0, -1);
+                    previousInput.focus();
                 }
             } else if (/^\d$/.test(key)) {
-                // P3 fractions use one-digit numerators/denominators. After
-                // entering the numerator, move directly to the denominator.
-                currentInput.value = key;
-                if (fractionPart === 'numerator') {
-                    fractionPart = 'denominator';
-                    fractionDenominatorInput.focus();
-                } else {
-                    fractionDenominatorInput.focus();
+                const maxLength = Number(currentInput.maxLength) || 1;
+                currentInput.value = currentInput.value === '0'
+                    ? key
+                    : currentInput.value + key;
+                if (currentInput.value.length >= maxLength && fractionPart < inputs.length - 1) {
+                    fractionPart += 1;
+                    inputs[fractionPart].focus();
                 }
             }
 
+            if (fractionWholeInput) fractionWholeInput.style.borderColor = '';
             fractionNumeratorInput.style.borderColor = '';
             fractionDenominatorInput.style.borderColor = '';
             return;
@@ -959,6 +1006,16 @@
             if (button) updateAnswerFromKey(button.dataset.key);
         });
     }
+
+    [fractionWholeInput, fractionNumeratorInput, fractionDenominatorInput]
+        .filter(Boolean)
+        .forEach((input, index) => {
+            input.addEventListener('focus', () => {
+                if (fractionAnswerMode) {
+                    fractionPart = fractionAnswerType === 'mixed' ? index : Math.max(0, index - 1);
+                }
+            });
+        });
 
 
     retryBtn.addEventListener('click', () => {

@@ -62,6 +62,9 @@ const P3_ONLY = [
 
 // ---- P4 (adds these to P1 + P2 + P3) ----
 const P4_ONLY = [
+  // 分數概念與進階運算
+  'frac_convert', 'frac_expand', 'frac_reduce',
+  'frac_up_to_3_add', 'frac_up_to_3_sub', 'frac_3_mix',
   // 整數多位數乘除
   'mul_2d_2d_nc', 'mul_2d_2d_c',
   'mul_3d_2d_nc', 'mul_3d_2d_c',

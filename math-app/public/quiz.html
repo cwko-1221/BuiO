@@ -6,8 +6,8 @@
     <meta name="description" content="杯澳四則特訓 - 四則運算練習" data-i18n-attr="content:m.quizDesc">
     <title data-i18n="m.quizTitle">練習中 ✦ 杯澳四則特訓</title>
     <script src="/shared/i18n.js?v=20260910-1"></script>
-    <script src="/shared/i18n/math.js?v=20260919-keypad-1"></script>
-    <link rel="stylesheet" href="/math-app/css/style.css?v=20260919-fraction-input-1">
+    <script src="/shared/i18n/math.js?v=20260919-fraction-conversion-1"></script>
+    <link rel="stylesheet" href="/math-app/css/style.css?v=20260919-fraction-conversion-1">
 </head>
 <body>
     <div class="page-container">
@@ -71,6 +71,12 @@
                                        placeholder="?" autocomplete="off" inputmode="none" readonly
                                        aria-readonly="true" data-i18n-attr="aria-label:m.answerDisplay">
                                 <div class="fraction-answer-fields" id="fraction-answer-fields" hidden>
+                                    <div class="fraction-whole-field" id="fraction-whole-field" hidden>
+                                        <input type="text" class="answer-input fraction-part" id="fraction-whole-input"
+                                               placeholder="?" autocomplete="off" inputmode="none" readonly
+                                               aria-label="整數部分">
+                                        <span class="fraction-mixed-divider" aria-hidden="true">又</span>
+                                    </div>
                                     <input type="text" class="answer-input fraction-part" id="fraction-numerator-input"
                                            placeholder="?" autocomplete="off" inputmode="none" readonly
                                            aria-label="分子">
@@ -167,6 +173,6 @@
         <div class="feedback-icon" id="feedback-icon">✅</div>
     </div>
 
-    <script src="/math-app/js/quiz.js?v=20260919-fraction-input-1"></script>
+    <script src="/math-app/js/quiz.js?v=20260919-fraction-conversion-1"></script>
 </body>
 </html>

@@ -615,6 +615,16 @@ a { color: var(--accent-blue); text-decoration: none; }
     gap: 8px;
 }
 
+.fraction-whole-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fraction-whole-field[hidden] {
+    display: none;
+}
+
 .fraction-answer-fields[hidden] {
     display: none;
 }
@@ -628,6 +638,12 @@ a { color: var(--accent-blue); text-decoration: none; }
 .fraction-divider {
     color: var(--text-primary);
     font-size: 2rem;
+    font-weight: 700;
+}
+
+.fraction-mixed-divider {
+    color: var(--text-primary);
+    font-size: 1.25rem;
     font-weight: 700;
 }
 

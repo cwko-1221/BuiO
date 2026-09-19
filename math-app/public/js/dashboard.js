@@ -527,10 +527,10 @@
             const list = byTier.get(tier.id) || [];
             if (!list.length) continue;                    // grade doesn't have this tier
 
-            // Gold currently contains 17 skills, which makes one radar too
-            // crowded to read. Keep the skill order but render two balanced
-            // charts for that tier only. Other tiers remain one chart each.
-            const lists = tier.id === 'gold' && list.length > 10
+            // Keep larger tiers readable by splitting any tier with more than
+            // ten skills into two balanced charts. This currently affects
+            // Gold and Diamond while leaving the smaller tiers unchanged.
+            const lists = list.length > 10
                 ? [list.slice(0, Math.ceil(list.length / 2)), list.slice(Math.ceil(list.length / 2))]
                 : [list];
 

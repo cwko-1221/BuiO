@@ -20,19 +20,56 @@ function isFractionQuestion(question) {
   return Boolean(question && question.tag && question.tag.startsWith('frac_'));
 }
 
-function gradeAnswer(question, rawUserAnswer, rawUserDenominator) {
+function fractionAnswerFormat(question) {
+  if (!isFractionQuestion(question)) return null;
+  const type = question.answerType || 'fraction';
+  const numerator = question.answerNumerator ?? question.correctAnswer;
+  const denominator = question.answerDenominator ?? question.denominator;
+  const fields = type === 'mixed'
+    ? [
+        { name: 'whole', maxLength: String(Math.abs(question.answerWhole || 0)).length },
+        { name: 'numerator', maxLength: String(Math.abs(numerator)).length },
+        { name: 'denominator', maxLength: String(Math.abs(denominator)).length },
+      ]
+    : [
+        { name: 'numerator', maxLength: String(Math.abs(numerator)).length },
+        { name: 'denominator', maxLength: String(Math.abs(denominator)).length },
+      ];
+  return { type, fields };
+}
+
+function gradeAnswer(question, rawUserAnswer, rawUserDenominator, rawUserNumerator, rawUserWhole) {
   if (isFractionQuestion(question)) {
-    const numerator = parseInt(rawUserAnswer, 10);
+    const numerator = parseInt(rawUserNumerator ?? rawUserAnswer, 10);
     const denominator = parseInt(rawUserDenominator, 10);
-    const valid = Number.isInteger(numerator) && Number.isInteger(denominator) && denominator !== 0;
+    const answerType = question.answerType || 'fraction';
+    const whole = answerType === 'mixed' ? parseInt(rawUserWhole, 10) : 0;
+    const expectedNumerator = question.answerNumerator ?? question.correctAnswer;
+    const expectedDenominator = question.answerDenominator ?? question.denominator;
+    const expectedWhole = question.answerWhole || 0;
+    const valid = Number.isInteger(numerator)
+      && Number.isInteger(denominator)
+      && denominator > 0
+      && numerator >= 0
+      && (answerType !== 'mixed' || numerator < denominator)
+      && (answerType !== 'mixed' || (Number.isInteger(whole) && whole >= 0));
     const isCorrect = valid
-      && numerator === question.correctAnswer
-      && denominator === question.denominator;
+      && numerator === expectedNumerator
+      && denominator === expectedDenominator
+      && (answerType !== 'mixed' || whole === expectedWhole);
+    const userValue = valid ? whole + numerator / denominator : null;
+    const correctValue = expectedWhole + expectedNumerator / expectedDenominator;
+    const userDisplay = valid
+      ? (answerType === 'mixed' ? `${whole}又${numerator}/${denominator}` : `${numerator}/${denominator}`)
+      : '';
+    const correctDisplay = answerType === 'mixed'
+      ? `${expectedWhole}又${expectedNumerator}/${expectedDenominator}`
+      : `${expectedNumerator}/${expectedDenominator}`;
     return {
-      userAnswer: valid ? numerator / denominator : null,
-      userAnswerDisplay: valid ? `${numerator}/${denominator}` : '',
-      correctAnswerValue: question.correctAnswer / question.denominator,
-      correctAnswerDisplay: `${question.correctAnswer}/${question.denominator}`,
+      userAnswer: userValue,
+      userAnswerDisplay: userDisplay,
+      correctAnswerValue: correctValue,
+      correctAnswerDisplay: correctDisplay,
       isCorrect,
     };
   }
@@ -124,6 +161,10 @@ router.get('/questions', async (req, res, next) => {
       questionText: q.questionText,
       correctAnswer: q.answer,
       denominator: q.denominator || null,
+      answerType: q.answerType || null,
+      answerWhole: q.answerWhole ?? null,
+      answerNumerator: q.answerNumerator ?? null,
+      answerDenominator: q.answerDenominator ?? null,
     }));
 
     res.json({
@@ -138,6 +179,7 @@ router.get('/questions', async (req, res, next) => {
         tagName: q.tagName,
         questionText: q.questionText,
         symbol: q.symbol,
+        answerFormat: fractionAnswerFormat(q),
       })),
       distribution: res.locals._distribution || null,
     });
@@ -166,7 +208,13 @@ router.post('/submit', async (req, res, next) => {
     for (const ans of answers) {
       const question = quiz.find(q => q.index === ans.index);
       if (!question) continue;
-      const gradedAnswer = gradeAnswer(question, ans.userAnswer, ans.userDenominator);
+      const gradedAnswer = gradeAnswer(
+        question,
+        ans.userAnswer,
+        ans.userDenominator,
+        ans.userNumerator,
+        ans.userWhole,
+      );
       const timeTaken = parseFloat(ans.timeTaken) || 0;
       if (gradedAnswer.isCorrect) correctCount++;
       totalTime += timeTaken;
@@ -223,7 +271,7 @@ router.post('/submit', async (req, res, next) => {
 router.post('/answer', async (req, res, next) => {
   try {
     const studentId = req.session.studentId;
-    const { index, userAnswer, userDenominator, timeTaken } = req.body;
+    const { index, userAnswer, userDenominator, userNumerator, userWhole, timeTaken } = req.body;
 
     const quiz = req.session.currentQuiz;
     if (!quiz || quiz.length === 0) {
@@ -233,7 +281,7 @@ router.post('/answer', async (req, res, next) => {
     if (!question) {
       return res.status(400).json({ success: false, message: `找不到第 ${index} 題` });
     }
-    const gradedAnswer = gradeAnswer(question, userAnswer, userDenominator);
+    const gradedAnswer = gradeAnswer(question, userAnswer, userDenominator, userNumerator, userWhole);
     const ts = Math.round(parseFloat(timeTaken)) || 0;
 
     await logs.insert({
