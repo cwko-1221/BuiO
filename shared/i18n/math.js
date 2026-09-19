@@ -137,6 +137,7 @@ BuiI18n.register({
   'm.tierGold':      { 'zh-HK': '金', 'en-US': 'Gold' },
   'm.tierDiamond':   { 'zh-HK': '鑽', 'en-US': 'Diamond' },
   'm.tierHeading':   { 'zh-HK': '{tier} 等級', 'en-US': '{tier} tier' },
+  'm.tierHeadingPart': { 'zh-HK': '{tier} 等級 · 第 {part} / {total} 圖', 'en-US': '{tier} tier · chart {part} of {total}' },
   'm.skillCount':    { 'zh-HK': '{count} 個能力', 'en-US': '{count} skills' },
   'm.accuracyAxis':  { 'zh-HK': '正確率 (%)', 'en-US': 'Accuracy (%)' },
   'm.accuracyTip':   { 'zh-HK': '正確率: {value}%', 'en-US': 'Accuracy: {value}%' },

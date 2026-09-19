@@ -14,7 +14,7 @@
     // ========================================
     let currentStudentId = '';
     let currentUserRole = '';            // 'teacher' | 'student'
-    let radarChartObjs = {};             // { bronze: Chart, silver: Chart, ... }
+    let radarChartObjs = {};             // { bronze: Chart, silver: Chart, gold-1: Chart, ... }
     let timeChartObj = null;
     let tierOrder = [                    // fallback; refreshed from /api/stats/tiers
         { id: 'bronze',  name: t('m.tierBronze') },
@@ -527,19 +527,32 @@
             const list = byTier.get(tier.id) || [];
             if (!list.length) continue;                    // grade doesn't have this tier
 
-            const cell = document.createElement('div');
-            cell.className = `radar-tier-cell ${tier.id}`;
-            cell.innerHTML = `
-                <div class="radar-tier-head">
-                    <span class="radar-tier-badge">${emojiFor[tier.id] || tier.name}</span>
-                    <span>${t('m.tierHeading', { tier: tier.name })}</span>
-                    <span class="radar-tier-subtitle">${t('m.skillCount', { count: list.length })}</span>
-                </div>
-                <div class="radar-tier-canvas-wrap"><canvas></canvas></div>
-            `;
-            grid.appendChild(cell);
-            const canvas = cell.querySelector('canvas');
-            radarChartObjs[tier.id] = new Chart(canvas, radarConfigFor(list));
+            // Gold currently contains 17 skills, which makes one radar too
+            // crowded to read. Keep the skill order but render two balanced
+            // charts for that tier only. Other tiers remain one chart each.
+            const lists = tier.id === 'gold' && list.length > 10
+                ? [list.slice(0, Math.ceil(list.length / 2)), list.slice(Math.ceil(list.length / 2))]
+                : [list];
+
+            lists.forEach((chartList, chartIndex) => {
+                const chartKey = lists.length > 1 ? `${tier.id}-${chartIndex + 1}` : tier.id;
+                const cell = document.createElement('div');
+                cell.className = `radar-tier-cell ${tier.id}${lists.length > 1 ? ' radar-tier-part' : ''}`;
+                const heading = lists.length > 1
+                    ? t('m.tierHeadingPart', { tier: tier.name, part: chartIndex + 1, total: lists.length })
+                    : t('m.tierHeading', { tier: tier.name });
+                cell.innerHTML = `
+                    <div class="radar-tier-head">
+                        <span class="radar-tier-badge">${emojiFor[tier.id] || tier.name}</span>
+                        <span>${heading}</span>
+                        <span class="radar-tier-subtitle">${t('m.skillCount', { count: chartList.length })}</span>
+                    </div>
+                    <div class="radar-tier-canvas-wrap"><canvas></canvas></div>
+                `;
+                grid.appendChild(cell);
+                const canvas = cell.querySelector('canvas');
+                radarChartObjs[chartKey] = new Chart(canvas, radarConfigFor(chartList));
+            });
         }
     }
 
