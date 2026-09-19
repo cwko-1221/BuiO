@@ -6,8 +6,8 @@
     <meta name="description" content="杯澳四則特訓 - 四則運算練習" data-i18n-attr="content:m.quizDesc">
     <title data-i18n="m.quizTitle">練習中 ✦ 杯澳四則特訓</title>
     <script src="/shared/i18n.js?v=20260910-1"></script>
-    <script src="/shared/i18n/math.js?v=20260910-1"></script>
-    <link rel="stylesheet" href="/math-app/css/style.css?v=20260910-i18n-1">
+    <script src="/shared/i18n/math.js?v=20260919-keypad-1"></script>
+    <link rel="stylesheet" href="/math-app/css/style.css?v=20260919-keypad-3">
 </head>
 <body>
     <div class="page-container">
@@ -56,18 +56,45 @@
 
                 <!-- Question Card -->
                 <div class="quiz-question-card glass-card-static" id="question-card">
-                    <div class="question-number" id="question-number"></div>
-                    <div class="question-tag" id="question-tag">
-                        <span>📐</span>
-                        <span id="question-tag-text"></span>
-                    </div>
-                    <div class="question-category" id="question-category"></div>
-                    <div class="question-text" id="question-text">23 + 45</div>
-                    <div class="answer-input-wrapper">
-                        <span class="equals-sign">=</span>
-                        <input type="number" class="answer-input" id="answer-input" 
-                               placeholder="?" autocomplete="off" inputmode="numeric">
-                        <button class="btn btn-primary" id="submit-answer-btn" data-i18n="m.submit">確認送出</button>
+                    <div class="quiz-interaction">
+                        <div class="quiz-prompt">
+                            <div class="question-number" id="question-number"></div>
+                            <div class="question-tag" id="question-tag">
+                                <span>📐</span>
+                                <span id="question-tag-text"></span>
+                            </div>
+                            <div class="question-category" id="question-category"></div>
+                            <div class="question-text" id="question-text">23 + 45</div>
+                            <div class="answer-input-wrapper">
+                                <span class="equals-sign">=</span>
+                                <input type="text" class="answer-input" id="answer-input"
+                                       placeholder="?" autocomplete="off" inputmode="none" readonly
+                                       aria-readonly="true" data-i18n-attr="aria-label:m.answerDisplay">
+                            </div>
+                        </div>
+                        <div class="answer-entry">
+                        <div class="number-keypad" id="number-keypad" role="group"
+                             data-i18n-attr="aria-label:m.numberKeypad">
+                            <button type="button" class="keypad-key" data-key="1">1</button>
+                            <button type="button" class="keypad-key" data-key="2">2</button>
+                            <button type="button" class="keypad-key" data-key="3">3</button>
+                            <button type="button" class="keypad-key" data-key="4">4</button>
+                            <button type="button" class="keypad-key" data-key="5">5</button>
+                            <button type="button" class="keypad-key" data-key="6">6</button>
+                            <button type="button" class="keypad-key" data-key="7">7</button>
+                            <button type="button" class="keypad-key" data-key="8">8</button>
+                            <button type="button" class="keypad-key" data-key="9">9</button>
+                            <button type="button" class="keypad-key keypad-action keypad-backspace" data-key="backspace"
+                                    data-i18n-attr="aria-label:m.backspace" aria-label="刪除上一位">⌫</button>
+                            <button type="button" class="keypad-key" data-key="0">0</button>
+                            <button type="button" class="keypad-key keypad-submit" id="submit-answer-btn" data-key="submit"
+                                    data-i18n-attr="aria-label:m.confirm">
+                                <span aria-hidden="true">↵</span>
+                                <span data-i18n="m.confirm">確認</span>
+                            </button>
+                        </div>
+                        <p class="keypad-hint" data-i18n="m.keypadHint">請按數字鍵輸入答案</p>
+                        </div>
                     </div>
                 </div>
 
@@ -131,6 +158,6 @@
         <div class="feedback-icon" id="feedback-icon">✅</div>
     </div>
 
-    <script src="/math-app/js/quiz.js?v=20260910-i18n-1"></script>
+    <script src="/math-app/js/quiz.js?v=20260919-keypad-1"></script>
 </body>
 </html>

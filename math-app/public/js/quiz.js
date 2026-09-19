@@ -40,6 +40,10 @@
     const questionText = document.getElementById('question-text');
     const answerInput = document.getElementById('answer-input');
     const submitBtn = document.getElementById('submit-answer-btn');
+    const numberKeypad = document.getElementById('number-keypad');
+    const keypadButtons = numberKeypad
+        ? [...numberKeypad.querySelectorAll('button[data-key]')]
+        : [];
 
     // Canvas Element
     const canvas = document.getElementById('scratchpad');
@@ -628,8 +632,10 @@
         // Clear input
         answerInput.value = '';
         answerInput.className = 'answer-input';
+        answerInput.style.borderColor = '';
         answerInput.disabled = false;
         submitBtn.disabled = false;
+        setKeypadDisabled(false);
         submitBtn.textContent = t('m.confirm');
 
         // Focus input
@@ -660,6 +666,7 @@
         const q = questions[currentIndex];
 
         submitBtn.disabled = true;
+        setKeypadDisabled(true);
         submitBtn.textContent = '⏳';
 
         try {
@@ -679,6 +686,7 @@
             if (!data.success) {
                 alert(data.message);
                 submitBtn.disabled = false;
+                setKeypadDisabled(false);
                 submitBtn.textContent = t('m.confirm');
                 startTimer();
                 return;
@@ -724,9 +732,39 @@
         } catch (error) {
             alert(t('m.submitFailed') + error.message);
             submitBtn.disabled = false;
+            setKeypadDisabled(false);
             submitBtn.textContent = t('m.confirm');
             startTimer();
         }
+    }
+
+    function setKeypadDisabled(disabled) {
+        keypadButtons.forEach(button => {
+            button.disabled = disabled;
+        });
+    }
+
+    function updateAnswerFromKey(key) {
+        if (answerInput.disabled) return;
+
+        if (key === 'submit') {
+            submitAnswer();
+            return;
+        }
+
+        if (key === 'clear') {
+            answerInput.value = '';
+        } else if (key === 'backspace') {
+            answerInput.value = answerInput.value.slice(0, -1);
+        } else if (/^\d$/.test(key)) {
+            // Avoid leading zeroes while still allowing 0 as an answer.
+            answerInput.value = answerInput.value === '0'
+                ? key
+                : answerInput.value + key;
+        }
+
+        answerInput.style.borderColor = '';
+        answerInput.focus();
     }
 
     function findNextUnanswered() {
@@ -829,15 +867,12 @@
     // ========================================
     // Event Listeners
     // ========================================
-    submitBtn.addEventListener('click', submitAnswer);
-
-    answerInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            submitAnswer();
-        }
-    });
-
+    if (numberKeypad) {
+        numberKeypad.addEventListener('click', (event) => {
+            const button = event.target.closest('button[data-key]');
+            if (button) updateAnswerFromKey(button.dataset.key);
+        });
+    }
 
 
     retryBtn.addEventListener('click', () => {

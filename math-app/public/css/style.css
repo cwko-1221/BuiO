@@ -517,6 +517,21 @@ a { color: var(--accent-blue); text-decoration: none; }
     justify-content: center;
 }
 
+.quiz-interaction {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(28px, 6vw, 84px);
+}
+
+.quiz-prompt {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .question-tag {
     display: inline-flex;
     align-items: center;
@@ -567,8 +582,16 @@ a { color: var(--accent-blue); text-decoration: none; }
     align-items: center;
     gap: 16px;
     justify-content: center;
-    margin-top: 32px;
+    margin-top: 24px;
     flex-wrap: wrap;
+}
+
+.answer-entry {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: auto;
+    flex-shrink: 0;
 }
 
 .answer-input {
@@ -590,6 +613,89 @@ a { color: var(--accent-blue); text-decoration: none; }
     border-color: var(--accent-purple);
     background: rgba(139, 92, 246, 0.08);
     box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+}
+
+.number-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(72px, 1fr));
+    gap: 8px;
+    width: min(100%, 304px);
+    padding: 10px;
+    margin-top: 0;
+    background: rgba(10, 14, 26, 0.35);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+}
+
+.keypad-key {
+    min-height: 56px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text-primary);
+    font: 700 1.25rem var(--font-primary);
+    cursor: pointer;
+    transition: transform var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.keypad-key:hover {
+    background: rgba(139, 92, 246, 0.2);
+    border-color: var(--border-accent);
+}
+
+.keypad-key:active {
+    transform: scale(0.95);
+}
+
+.keypad-key:focus-visible {
+    outline: 3px solid rgba(165, 180, 252, 0.75);
+    outline-offset: 2px;
+}
+
+.keypad-key:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.keypad-action {
+    color: var(--text-accent);
+    font-size: 0.95rem;
+}
+
+.keypad-backspace {
+    font-size: 1.45rem;
+}
+
+.keypad-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-color: transparent;
+    background: var(--gradient-primary);
+    color: white;
+    font-size: 0.95rem;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.22);
+}
+
+.keypad-submit span:first-child {
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.keypad-submit:hover {
+    background: var(--gradient-primary);
+    border-color: rgba(255, 255, 255, 0.25);
+    filter: brightness(1.12);
+}
+
+.keypad-hint {
+    margin-top: 10px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
 }
 
 .answer-input.correct {
@@ -1123,8 +1229,12 @@ a { color: var(--accent-blue); text-decoration: none; }
     .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
     .chart-section { grid-template-columns: 1fr; }
     .quiz-question-card { padding: 32px 20px; }
+    .quiz-interaction { grid-template-columns: 1fr; gap: 20px; }
+    .answer-entry { width: 100%; }
     .question-text { font-size: 2rem; }
     .answer-input { width: 160px; font-size: 1.4rem; }
+    .answer-input-wrapper { gap: 12px; }
+    .number-keypad { margin-top: 18px; }
     .results-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .result-stat-value { font-size: 1.3rem; }
     .login-card { padding: 32px 24px; }
@@ -1165,7 +1275,9 @@ a { color: var(--accent-blue); text-decoration: none; }
    Canvas Scratchpad
    ======================================== */
 .sketchpad-container {
-    margin: 24px 0;
+    width: calc(100% - 48px);
+    max-width: 960px;
+    margin: 24px auto;
     border-radius: var(--radius-lg);
     overflow: hidden;
     position: relative;
