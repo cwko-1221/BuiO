@@ -782,6 +782,10 @@ a { color: var(--accent-blue); text-decoration: none; }
     background: var(--accent-red);
 }
 
+.quiz-dot.answered {
+    background: var(--accent-blue);
+}
+
 /* ========================================
    Results Page (after quiz)
    ======================================== */

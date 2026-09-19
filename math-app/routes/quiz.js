@@ -142,18 +142,19 @@ router.post('/submit', async (req, res, next) => {
     }
 
     await withTransaction(async client => {
-      for (const g of graded) {
-        await logs.insert({
-          studentId,
-          tag: g.question.tag,
-          questionText: g.question.questionText,
-          correctAnswer: g.question.correctAnswer,
-          userAnswer: g.userAnswer,
-          isCorrect: g.isCorrect,
-          timeSpent: g.timeTaken,
-        }, { client });
-        await stats.recordAttempt(studentId, g.question.tag, g.isCorrect, { client });
-      }
+      await logs.insertMany(graded.map(g => ({
+        studentId,
+        tag: g.question.tag,
+        questionText: g.question.questionText,
+        correctAnswer: g.question.correctAnswer,
+        userAnswer: g.userAnswer,
+        isCorrect: g.isCorrect,
+        timeSpent: g.timeTaken,
+      })), { client });
+      await stats.recordAttempts(studentId, graded.map(g => ({
+        tag: g.question.tag,
+        isCorrect: g.isCorrect,
+      })), { client });
     });
 
     req.session.currentQuiz = null;

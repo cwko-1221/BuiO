@@ -53,6 +53,62 @@ async function recordAttempt(studentId, tag, isCorrect, { client } = {}) {
   store.save();
 }
 
+async function recordAttempts(studentId, attempts, { client } = {}) {
+  if (!attempts || attempts.length === 0) return;
+
+  const byTag = new Map();
+  for (const attempt of attempts) {
+    if (!attempt || !attempt.tag) continue;
+    const current = byTag.get(attempt.tag) || { totalAttempted: 0, totalCorrect: 0 };
+    current.totalAttempted += 1;
+    if (attempt.isCorrect) current.totalCorrect += 1;
+    byTag.set(attempt.tag, current);
+  }
+  if (byTag.size === 0) return;
+
+  if (config.db.mode === 'postgres') {
+    const runner = client || getPool();
+    const values = [studentId];
+    const placeholders = [];
+    let param = 2;
+    for (const [tag, totals] of byTag) {
+      placeholders.push(`($1,$${param},$${param + 1},$${param + 2})`);
+      values.push(tag, totals.totalAttempted, totals.totalCorrect);
+      param += 3;
+    }
+    await runner.query(`
+      WITH incoming (StudentID, Tag, TotalAttempted, TotalCorrect) AS (
+        VALUES ${placeholders.join(',')}
+      )
+      INSERT INTO StudentStats (StudentID, Tag, TotalAttempted, TotalCorrect, AccuracyRate)
+      SELECT StudentID, Tag, TotalAttempted, TotalCorrect,
+             ROUND(CAST(TotalCorrect AS NUMERIC) / NULLIF(TotalAttempted, 0) * 100, 2)
+      FROM incoming
+      ON CONFLICT (StudentID, Tag) DO UPDATE
+        SET TotalAttempted = StudentStats.TotalAttempted + EXCLUDED.TotalAttempted,
+            TotalCorrect = StudentStats.TotalCorrect + EXCLUDED.TotalCorrect,
+            AccuracyRate = ROUND(
+              CAST(StudentStats.TotalCorrect + EXCLUDED.TotalCorrect AS NUMERIC)
+              / NULLIF(StudentStats.TotalAttempted + EXCLUDED.TotalAttempted, 0) * 100, 2)`, values);
+    return;
+  }
+
+  const d = store.load();
+  for (const [tag, totals] of byTag) {
+    let s = d.studentStats.find(x => x.studentid === studentId && x.tag === tag);
+    if (!s) {
+      s = { studentid: studentId, tag, totalattempted: 0, totalcorrect: 0, accuracyrate: 0 };
+      d.studentStats.push(s);
+    }
+    s.totalattempted += totals.totalAttempted;
+    s.totalcorrect += totals.totalCorrect;
+    s.accuracyrate = s.totalattempted > 0
+      ? Math.round((s.totalcorrect / s.totalattempted) * 1000) / 10
+      : 0;
+  }
+  store.save();
+}
+
 async function overview(studentId, allTags) {
   if (config.db.mode === 'postgres') {
     const { rows } = await getPool().query(`
@@ -115,6 +171,7 @@ async function weaknesses(studentId, allTags, threshold = 70) {
 module.exports = {
   ensureTagsForStudent,
   recordAttempt,
+  recordAttempts,
   overview,
   tagBreakdown,
   weaknesses,

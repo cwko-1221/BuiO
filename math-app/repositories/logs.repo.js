@@ -30,6 +30,43 @@ async function insert(log, { client } = {}) {
   store.save();
 }
 
+async function insertMany(logs, { client } = {}) {
+  if (!logs || logs.length === 0) return;
+
+  if (config.db.mode === 'postgres') {
+    const runner = client || getPool();
+    const values = [];
+    const placeholders = logs.map((log, index) => {
+      const offset = index * 7;
+      values.push(
+        log.studentId, log.tag, log.questionText, log.correctAnswer,
+        log.userAnswer, !!log.isCorrect, log.timeSpent,
+      );
+      return `($${offset + 1},$${offset + 2},$${offset + 3},$${offset + 4},$${offset + 5},$${offset + 6},$${offset + 7})`;
+    });
+    await runner.query(`
+      INSERT INTO QuestionLogs (StudentID, Tag, Question, CorrectAnswer, UserAnswer, IsCorrect, TimeSpent)
+      VALUES ${placeholders.join(',')}`, values);
+    return;
+  }
+
+  const d = store.load();
+  for (const log of logs) {
+    d.questionLogs.push({
+      id: store.nextLogId(),
+      studentid: log.studentId,
+      tag: log.tag,
+      question: log.questionText,
+      correctanswer: log.correctAnswer,
+      useranswer: log.userAnswer,
+      iscorrect: !!log.isCorrect,
+      timespent: log.timeSpent,
+      timestamp: new Date().toISOString(),
+    });
+  }
+  store.save();
+}
+
 async function todayOverview(studentId, allTags) {
   if (config.db.mode === 'postgres') {
     const { rows } = await getPool().query(`
@@ -137,6 +174,7 @@ async function timeAnalysis(studentId, allTags) {
 
 module.exports = {
   insert,
+  insertMany,
   todayOverview,
   history,
   historyCount,

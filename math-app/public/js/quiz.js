@@ -19,6 +19,7 @@
     let questionStartTime = 0;
     let totalQuizTime = 0;
     let studentInfo = null;
+    let isSubmittingQuiz = false;
 
     // ========================================
     // DOM Elements  
@@ -536,6 +537,7 @@
             answers = new Array(questions.length).fill(null);
             currentIndex = 0;
             totalQuizTime = 0;
+            isSubmittingQuiz = false;
 
             buildDots();
             showQuestion(0);
@@ -585,7 +587,9 @@
             dots[i].className = 'quiz-dot';
             if (i === currentIndex) dots[i].classList.add('current');
             if (answers[i] !== null) {
-                dots[i].classList.add(answers[i].isCorrect ? 'correct' : 'incorrect');
+                if (answers[i].isCorrect === true) dots[i].classList.add('correct');
+                else if (answers[i].isCorrect === false) dots[i].classList.add('incorrect');
+                else dots[i].classList.add('answered');
             }
         }
     }
@@ -655,6 +659,8 @@
     // Submit Answer
     // ========================================
     async function submitAnswer() {
+        if (isSubmittingQuiz || answerInput.disabled) return;
+
         const userAnswer = answerInput.value.trim();
         if (userAnswer === '') {
             answerInput.style.borderColor = 'var(--accent-amber)';
@@ -664,77 +670,71 @@
 
         const timeTaken = stopTimer();
         const q = questions[currentIndex];
+        const roundedTime = Math.round(timeTaken * 10) / 10;
 
+        submitBtn.disabled = true;
+        setKeypadDisabled(true);
+        answers[currentIndex] = {
+                index: q.index,
+                userAnswer: parseFloat(userAnswer),
+                timeTaken: roundedTime,
+                isCorrect: null,
+                correctAnswer: null,
+                questionText: q.questionText,
+                tag: q.tag
+        };
+        totalQuizTime += roundedTime;
+        answerInput.disabled = true;
+        updateDots();
+
+        const nextUnanswered = answers.findIndex(answer => answer === null);
+        if (nextUnanswered !== -1) {
+            showQuestion(nextUnanswered);
+        } else {
+            await submitQuizAnswers();
+        }
+    }
+
+    async function submitQuizAnswers() {
+        if (isSubmittingQuiz) return;
+        isSubmittingQuiz = true;
         submitBtn.disabled = true;
         setKeypadDisabled(true);
         submitBtn.textContent = '⏳';
 
         try {
-            const res = await fetch('/api/quiz/answer', {
+            const res = await fetch('/api/quiz/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({
-                    index: q.index,
-                    userAnswer: parseFloat(userAnswer),
-                    timeTaken: Math.round(timeTaken * 10) / 10
+                    answers: answers.filter(Boolean).map(answer => ({
+                        index: answer.index,
+                        userAnswer: answer.userAnswer,
+                        timeTaken: answer.timeTaken
+                    }))
                 })
             });
-
             const data = await res.json();
-
-            if (!data.success) {
-                alert(data.message);
-                submitBtn.disabled = false;
-                setKeypadDisabled(false);
-                submitBtn.textContent = t('m.confirm');
-                startTimer();
-                return;
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || t('m.submitFailed'));
             }
 
-            const result = data.result;
-
-            // Store answer
-            answers[currentIndex] = {
-                index: q.index,
-                userAnswer: parseFloat(userAnswer),
-                timeTaken: Math.round(timeTaken * 10) / 10,
-                isCorrect: result.isCorrect,
-                correctAnswer: result.correctAnswer,
-                questionText: result.questionText,
-                tag: result.tag
-            };
-
-            totalQuizTime += timeTaken;
-
-            // Visual feedback
-            answerInput.disabled = true;
-            if (result.isCorrect) {
-                answerInput.classList.add('correct');
-                showFeedback('✅');
-            } else {
-                answerInput.classList.add('incorrect');
-                showFeedback('❌');
-            }
-
-            // Move to next question after delay
-            updateDots();
-
-            setTimeout(() => {
-                const nextUnanswered = findNextUnanswered();
-                if (nextUnanswered !== -1) {
-                    showQuestion(nextUnanswered);
-                } else {
-                    showResults();
-                }
-            }, 800);
-
+            const resultsByIndex = new Map((data.results || []).map(result => [result.index, result]));
+            answers = answers.map(answer => {
+                if (!answer) return answer;
+                const result = resultsByIndex.get(answer.index);
+                return result ? { ...answer, ...result } : answer;
+            });
+            isSubmittingQuiz = false;
+            showResults();
         } catch (error) {
+            isSubmittingQuiz = false;
             alert(t('m.submitFailed') + error.message);
-            submitBtn.disabled = false;
-            setKeypadDisabled(false);
-            submitBtn.textContent = t('m.confirm');
-            startTimer();
+            const failedAnswer = answers[currentIndex];
+            if (failedAnswer) totalQuizTime = Math.max(0, totalQuizTime - failedAnswer.timeTaken);
+            answers[currentIndex] = null;
+            showQuestion(currentIndex);
         }
     }
 
