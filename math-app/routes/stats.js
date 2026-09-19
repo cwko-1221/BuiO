@@ -8,6 +8,7 @@ const academicYears = require('../repositories/academic-years.repo');
 const stats = require('../repositories/stats.repo');
 const logs = require('../repositories/logs.repo');
 const { ALL_TAGS, TAG_INFO } = require('../engine/questionGenerator');
+const { DEFAULT_QUIZ_SIZE } = require('../engine/adaptiveEngine');
 const {
   tierForTag,
   TIER_ORDER,
@@ -94,7 +95,7 @@ router.get('/overview', async (req, res, next) => {
         totalQuestions,
         totalCorrect: parseInt(ov.totalcorrect) || 0,
         overallAccuracy: parseFloat(ov.overallaccuracy) || 0,
-        totalSessions: Math.floor(totalQuestions / 10),
+        totalSessions: Math.floor(totalQuestions / DEFAULT_QUIZ_SIZE),
         today: {
           questions: parseInt(td.todayquestions) || 0,
           correct: parseInt(td.todaycorrect) || 0,

@@ -6,11 +6,11 @@
  * 2. 累積作答未滿 50 題前，全部隨機出題，不啟用弱點分析
  * 3. 累積滿 50 題後，若某標籤正確率 < 70%，標記為「弱點標籤」
  * 4. 出題權重分配：
- *    - 60% 題目從弱點標籤中抽取
- *    - 40% 題目從其他標籤中隨機抽取
+ *    - 50% 題目從弱點標籤中抽取
+ *    - 50% 題目從其他標籤中隨機抽取
  * 5. 若無弱點標籤，則均勻分配
  * 6. 若全部都是弱點標籤，則全部從弱點中抽取
- * 7. 每次練習出 10 題
+ * 7. 每次練習出 6 題
  */
 
 const statsRepo = require('../repositories/stats.repo');
@@ -18,9 +18,9 @@ const { generateQuestion, ALL_TAGS } = require('./questionGenerator');
 
 const WEAKNESS_THRESHOLD = 70;  // 正確率低於此值視為弱點
 const MIN_ATTEMPTS_FOR_ADAPTIVE = 50; // 累積作答滿 50 題後才啟用弱點分析
-const WEAK_RATIO = 0.6;         // 弱點標籤佔比 60%
-const STRONG_RATIO = 0.4;       // 其他標籤佔比 40%
-const DEFAULT_QUIZ_SIZE = 10;   // 每次練習題數
+const WEAK_RATIO = 0.5;         // 弱點標籤佔比 50%
+const STRONG_RATIO = 0.5;       // 其他標籤佔比 50%
+const DEFAULT_QUIZ_SIZE = 6;    // 每次練習題數
 
 /**
  * 取得學生各標籤的統計資料
@@ -122,7 +122,7 @@ function weightedPick(tags, statsMap) {
  * 適性派題：生成一組題目
  * 
  * @param {string} studentId - 學生 ID
- * @param {number} count - 題目數量 (預設 10)
+ * @param {number} count - 題目數量 (預設 6)
  * @returns {{ questions: Array, distribution: Object }}
  */
 async function generateAdaptiveQuiz(studentId, count = DEFAULT_QUIZ_SIZE, opts = {}) {
@@ -157,7 +157,7 @@ async function generateAdaptiveQuiz(studentId, count = DEFAULT_QUIZ_SIZE, opts =
         weakCount = count;
         strongCount = 0;
     } else {
-        // 正常情況：60% 弱點，40% 其他
+        // 正常情況：50% 弱點，50% 其他
         weakCount = Math.round(count * WEAK_RATIO);
         strongCount = count - weakCount;
     }

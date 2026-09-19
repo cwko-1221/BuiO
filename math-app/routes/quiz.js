@@ -6,15 +6,15 @@ const router = express.Router();
 const logs = require('../repositories/logs.repo');
 const stats = require('../repositories/stats.repo');
 const { withTransaction } = require('../db/database');
-const { generateAdaptiveQuiz } = require('../engine/adaptiveEngine');
+const { generateAdaptiveQuiz, DEFAULT_QUIZ_SIZE } = require('../engine/adaptiveEngine');
 const { generateQuestion, TAG_INFO } = require('../engine/questionGenerator');
 const { scopeForStudent } = require('../engine/studentScope');
 const { requireAuth } = require('../middleware/auth');
 
-// A "random" (adaptive) practice session is 10 questions; if the student's
+// A "random" (adaptive) practice session is 6 questions; if the student's
 // today log count is >= this, they've finished at least one random session
 // today and the tag-picker / dashboard are unlocked.
-const DAILY_RANDOM_THRESHOLD = 10;
+const DAILY_RANDOM_THRESHOLD = DEFAULT_QUIZ_SIZE;
 
 async function studentGradeTags(studentId) {
   const scope = await scopeForStudent(studentId);
@@ -59,7 +59,8 @@ router.get('/grade-tags', async (req, res, next) => {
 router.get('/questions', async (req, res, next) => {
   try {
     const rawCount = parseInt(req.query.count, 10);
-    const count = Number.isFinite(rawCount) && rawCount > 0 ? Math.min(rawCount, 20) : 10;
+    const count = Number.isFinite(rawCount) && rawCount > 0
+      ? Math.min(rawCount, 20) : DEFAULT_QUIZ_SIZE;
     const studentId = req.session.studentId;
     const { classname, tags: allowedTags } = await studentGradeTags(studentId);
     const requestedTag = req.query.tag ? String(req.query.tag) : null;
