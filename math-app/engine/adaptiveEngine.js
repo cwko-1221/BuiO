@@ -3,19 +3,21 @@
  * 
  * 核心邏輯：
  * 1. 讀取學生的 StudentStats，計算各標籤正確率
- * 2. 若某標籤正確率 < 70%，標記為「弱點標籤」
- * 3. 出題權重分配：
+ * 2. 累積作答未滿 50 題前，全部隨機出題，不啟用弱點分析
+ * 3. 累積滿 50 題後，若某標籤正確率 < 70%，標記為「弱點標籤」
+ * 4. 出題權重分配：
  *    - 60% 題目從弱點標籤中抽取
  *    - 40% 題目從其他標籤中隨機抽取
- * 4. 若無弱點標籤，則均勻分配
- * 5. 若全部都是弱點標籤，則全部從弱點中抽取
- * 6. 每次練習出 10 題
+ * 5. 若無弱點標籤，則均勻分配
+ * 6. 若全部都是弱點標籤，則全部從弱點中抽取
+ * 7. 每次練習出 10 題
  */
 
 const statsRepo = require('../repositories/stats.repo');
 const { generateQuestion, ALL_TAGS } = require('./questionGenerator');
 
 const WEAKNESS_THRESHOLD = 70;  // 正確率低於此值視為弱點
+const MIN_ATTEMPTS_FOR_ADAPTIVE = 50; // 累積作答滿 50 題後才啟用弱點分析
 const WEAK_RATIO = 0.6;         // 弱點標籤佔比 60%
 const STRONG_RATIO = 0.4;       // 其他標籤佔比 40%
 const DEFAULT_QUIZ_SIZE = 10;   // 每次練習題數
@@ -66,7 +68,17 @@ async function analyzeWeaknesses(studentId, allowedTags = ALL_TAGS) {
         }
     }
 
-    return { weakTags, strongTags, stats: statsMap };
+    const totalAttempted = stats
+        .filter(s => allowSet.has(s.tag))
+        .reduce((sum, s) => sum + s.totalAttempted, 0);
+
+    return {
+        weakTags,
+        strongTags,
+        stats: statsMap,
+        totalAttempted,
+        adaptiveReady: totalAttempted >= MIN_ATTEMPTS_FOR_ADAPTIVE,
+    };
 }
 
 /**
@@ -117,12 +129,17 @@ async function generateAdaptiveQuiz(studentId, count = DEFAULT_QUIZ_SIZE, opts =
     // The caller resolves the tag pool: a bare classname would rebuild the grade
     // curriculum without the teacher's tier switches and quietly undo them.
     const allowedTags = opts.allowedTags || ALL_TAGS;
-    const { weakTags, strongTags, stats } = await analyzeWeaknesses(studentId, allowedTags);
+    const { weakTags, strongTags, stats, totalAttempted, adaptiveReady } =
+        await analyzeWeaknesses(studentId, allowedTags);
+    const effectiveWeakTags = adaptiveReady ? weakTags : [];
+    const effectiveStrongTags = adaptiveReady ? strongTags : allowedTags;
 
     const questions = [];
     const distribution = {
-        weakTags,
-        strongTags,
+        weakTags: effectiveWeakTags,
+        strongTags: effectiveStrongTags,
+        totalAttempted,
+        adaptiveReady,
         weakCount: 0,
         strongCount: 0,
         tagCounts: {},
@@ -131,7 +148,7 @@ async function generateAdaptiveQuiz(studentId, count = DEFAULT_QUIZ_SIZE, opts =
     // 決定各類型的題數
     let weakCount, strongCount;
 
-    if (weakTags.length === 0) {
+    if (!adaptiveReady || weakTags.length === 0) {
         // 無弱點：均勻分配所有標籤
         weakCount = 0;
         strongCount = count;
@@ -155,7 +172,7 @@ async function generateAdaptiveQuiz(studentId, count = DEFAULT_QUIZ_SIZE, opts =
 
     // 生成其他標籤題目（隨機選取）
     for (let i = 0; i < strongCount; i++) {
-        const pool = weakTags.length === 0 ? allowedTags : strongTags;
+        const pool = !adaptiveReady || weakTags.length === 0 ? allowedTags : strongTags;
         const tag = randomPick(pool);
         const q = generateQuestion(tag);
         questions.push(q);
@@ -179,6 +196,7 @@ module.exports = {
     analyzeWeaknesses,
     getStudentStats,
     WEAKNESS_THRESHOLD,
+    MIN_ATTEMPTS_FOR_ADAPTIVE,
     WEAK_RATIO,
     STRONG_RATIO,
     DEFAULT_QUIZ_SIZE,
