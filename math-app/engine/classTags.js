@@ -5,7 +5,23 @@
 // replace it. Edit the per-grade `_ONLY` arrays to reshape the curriculum;
 // the P1..P6 exports are built up automatically.
 
-const { ALL_TAGS } = require('./questionGenerator');
+const { ALL_TAGS, TAG_INFO } = require('./questionGenerator');
+
+const QUESTION_TYPE_ORDER = [
+  { id: 'add', name: '加法' },
+  { id: 'sub', name: '減法' },
+  { id: 'mul', name: '乘法' },
+  { id: 'div', name: '除法' },
+  { id: 'mix', name: '混合' },
+];
+const QUESTION_TYPE_IDS = QUESTION_TYPE_ORDER.map(t => t.id);
+const QUESTION_TYPE_BY_CATEGORY = new Map([
+  ['加法', 'add'],
+  ['減法', 'sub'],
+  ['乘法', 'mul'],
+  ['除法', 'div'],
+  ['混合', 'mix'],
+]);
 
 // ---- P1 (P1 tags) ----
 const P1_ONLY = [
@@ -105,19 +121,40 @@ function tiersForClass(classname) {
   return TIER_ORDER.filter(t => reached.has(t.id));
 }
 
-// The grade curriculum minus whatever tiers a teacher switched off for this
-// class/group. Falls back to the unfiltered list when a policy would leave a
-// student nothing to practise: the API refuses to save one, but a stale row
-// must never lock a child out of the app.
-function tagsForScope(classname, disabledTiers) {
+function questionTypeForTag(tag) {
+  return QUESTION_TYPE_BY_CATEGORY.get(TAG_INFO[tag]?.category) || null;
+}
+
+function questionTypesForClass(classname) {
+  const reached = new Set(tagsForClass(classname).map(questionTypeForTag));
+  return QUESTION_TYPE_ORDER.filter(type => reached.has(type.id));
+}
+
+// The grade curriculum minus whatever tiers or question types a teacher
+// switched off for this class/group. Falls back to the unfiltered list when a
+// policy would leave a student nothing to practise: the API refuses to save
+// one, but a stale row must never lock a child out of the app.
+function filterTagsForScope(classname, disabledTiers, disabledQuestionTypes) {
   const tags = tagsForClass(classname);
-  if (!disabledTiers || !disabledTiers.length) return tags;
-  const off = new Set(disabledTiers);
-  const kept = tags.filter(tag => !off.has(tierForTag(tag)));
+  const offTiers = new Set(disabledTiers || []);
+  const offQuestionTypes = new Set(disabledQuestionTypes || []);
+  if (!offTiers.size && !offQuestionTypes.size) return tags;
+  return tags.filter(tag => {
+    const tier = tierForTag(tag);
+    const questionType = questionTypeForTag(tag);
+    return !offTiers.has(tier) && !offQuestionTypes.has(questionType);
+  });
+}
+
+function tagsForScope(classname, disabledTiers, disabledQuestionTypes) {
+  const tags = tagsForClass(classname);
+  const kept = filterTagsForScope(classname, disabledTiers, disabledQuestionTypes);
   return kept.length ? kept : tags;
 }
 
 module.exports = {
   CLASS_TAGS, tagsForClass, normalizeClassname, tierForTag,
-  TIER_ORDER, TIER_IDS, tiersForClass, tagsForScope,
+  TIER_ORDER, TIER_IDS, tiersForClass,
+  QUESTION_TYPE_ORDER, QUESTION_TYPE_IDS, questionTypeForTag, questionTypesForClass,
+  filterTagsForScope, tagsForScope,
 };

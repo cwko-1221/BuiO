@@ -8,9 +8,20 @@ const academicYears = require('../repositories/academic-years.repo');
 const stats = require('../repositories/stats.repo');
 const logs = require('../repositories/logs.repo');
 const { ALL_TAGS, TAG_INFO } = require('../engine/questionGenerator');
-const { tierForTag, TIER_ORDER, TIER_IDS, tiersForClass, normalizeClassname } = require('../engine/classTags');
+const {
+  tierForTag,
+  TIER_ORDER,
+  TIER_IDS,
+  tiersForClass,
+  QUESTION_TYPE_ORDER,
+  QUESTION_TYPE_IDS,
+  questionTypesForClass,
+  filterTagsForScope,
+  normalizeClassname,
+} = require('../engine/classTags');
 const { scopeForStudent } = require('../engine/studentScope');
 const tierPolicy = require('../repositories/tier-policy.repo');
+const questionTypePolicy = require('../repositories/question-type-policy.repo');
 const { requireAuth, requireTeacher } = require('../middleware/auth');
 
 router.use(requireAuth);
@@ -268,6 +279,41 @@ function policyRows(students, policy) {
   return rows;
 }
 
+function questionTypePolicyRows(students, policy) {
+  const groupsByGrade = new Map();
+  const counts = new Map();
+  for (const s of students) {
+    const grade = normalizeClassname(s.className);
+    if (!grade) continue;
+    const group = String(s.mathGroup || '').trim();
+    if (!groupsByGrade.has(grade)) groupsByGrade.set(grade, new Set());
+    if (group) groupsByGrade.get(grade).add(group);
+    const bump = key => counts.set(key, (counts.get(key) || 0) + 1);
+    bump(questionTypePolicy.policyKey(grade, ''));
+    if (group) bump(questionTypePolicy.policyKey(grade, group));
+  }
+
+  const rows = [];
+  for (const grade of ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']) {
+    const questionTypes = questionTypesForClass(grade);
+    const groups = [...(groupsByGrade.get(grade) || [])].sort();
+    for (const group of ['', ...groups]) {
+      const key = questionTypePolicy.policyKey(grade, group);
+      rows.push({
+        className: grade,
+        mathGroup: group,
+        label: group ? grade + ' · ' + group : grade + '（全級）',
+        isGradeWide: !group,
+        questionTypes,
+        configured: Object.prototype.hasOwnProperty.call(policy, key),
+        disabled: questionTypePolicy.resolve(policy, grade, group),
+        studentCount: counts.get(key) || 0,
+      });
+    }
+  }
+  return rows;
+}
+
 async function respondWithPolicy(res, policy) {
   const students = await users.listForTeacher(ALL_TAGS, { includeTeachers: false });
   res.json({ success: true, tiers: TIER_ORDER, rows: policyRows(students, policy) });
@@ -304,10 +350,82 @@ router.put('/teacher/tier-policy', requireTeacher, async (req, res, next) => {
           message: '至少要保留一個級別，否則學生沒有題目可以做。',
         });
       }
+      const typePolicy = await questionTypePolicy.getPolicy();
+      const disabledQuestionTypes = questionTypePolicy.resolve(typePolicy, className, mathGroup);
+      if (!filterTagsForScope(className, raw, disabledQuestionTypes).length) {
+        return res.status(400).json({
+          success: false,
+          message: '目前的題目類型設定會令學生沒有可用題目，請先保留至少一種題型。',
+        });
+      }
     }
 
     const policy = await tierPolicy.setRule(className, mathGroup, raw === null ? null : raw);
     await respondWithPolicy(res, policy);
+  } catch (e) { next(e); }
+});
+
+// ----------------------------------------------------------------
+// Question type policy (teachers only)
+// ----------------------------------------------------------------
+async function respondWithQuestionTypePolicy(res, policy) {
+  const students = await users.listForTeacher(ALL_TAGS, { includeTeachers: false });
+  res.json({
+    success: true,
+    questionTypes: QUESTION_TYPE_ORDER,
+    rows: questionTypePolicyRows(students, policy),
+  });
+}
+
+router.get('/teacher/question-type-policy', requireTeacher, async (req, res, next) => {
+  try {
+    await respondWithQuestionTypePolicy(res, await questionTypePolicy.getPolicy());
+  } catch (e) { next(e); }
+});
+
+router.put('/teacher/question-type-policy', requireTeacher, async (req, res, next) => {
+  try {
+    const className = normalizeClassname(req.body?.className);
+    if (!className) {
+      return res.status(400).json({ success: false, message: '班級不正確，只支援 P1 至 P6。' });
+    }
+    const mathGroup = String(req.body?.mathGroup || '').trim().slice(0, 20);
+    const raw = req.body?.disabledQuestionTypes;
+
+    // null clears the rule, so the group follows its grade again.
+    if (raw !== null) {
+      if (!Array.isArray(raw)) {
+        return res.status(400).json({ success: false, message: '請提供要停用的題目類型。' });
+      }
+      const unknown = raw.filter(id => !QUESTION_TYPE_IDS.includes(id));
+      if (unknown.length) {
+        return res.status(400).json({ success: false, message: '未知的題目類型：' + unknown.join('、') });
+      }
+
+      const typeSet = new Set(raw);
+      if (questionTypesForClass(className).every(type => typeSet.has(type.id))) {
+        return res.status(400).json({
+          success: false,
+          message: '至少要保留一種題目類型，否則學生沒有題目可以做。',
+        });
+      }
+
+      const tiers = await tierPolicy.getPolicy();
+      const disabledTiers = tierPolicy.resolve(tiers, className, mathGroup);
+      if (!filterTagsForScope(className, disabledTiers, raw).length) {
+        return res.status(400).json({
+          success: false,
+          message: '目前的題目級別設定會令學生沒有可用題目，請先保留至少一個級別。',
+        });
+      }
+    }
+
+    const policy = await questionTypePolicy.setRule(
+      className,
+      mathGroup,
+      raw === null ? null : raw,
+    );
+    await respondWithQuestionTypePolicy(res, policy);
   } catch (e) { next(e); }
 });
 

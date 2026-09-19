@@ -6,8 +6,8 @@
     <meta name="description" content="杯澳四則特訓 - 學習儀表板" data-i18n-attr="content:m.dashDesc">
     <title data-i18n="m.dashTitle">學習儀表板 ✦ 杯澳四則特訓</title>
     <script src="/shared/i18n.js?v=20260910-1"></script>
-    <script src="/shared/i18n/math.js?v=20260910-1"></script>
-    <link rel="stylesheet" href="/math-app/css/style.css?v=20260910-i18n-1">
+    <script src="/shared/i18n/math.js?v=20260919-question-types-1"></script>
+    <link rel="stylesheet" href="/math-app/css/style.css?v=20260919-question-types-1">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style>
         /* Tier policy panel — teacher-only, sits above the student picker results. */
@@ -98,6 +98,21 @@
                 </div>
             </section>
 
+            <!-- Question type policy (teachers only) -->
+            <section id="question-type-policy-panel" class="tier-policy" hidden>
+                <div class="tier-policy-head">
+                    <div>
+                        <h2 data-i18n="m.questionTypePanelTitle">🧮 題目類型設定</h2>
+                        <p data-i18n="m.questionTypePanelLead">為每個年級或數學分組選擇可出的題目類型，例如只出乘法題。關掉的類型不會再出題。</p>
+                    </div>
+                    <button type="button" id="question-type-policy-toggle" class="tier-policy-toggle" aria-expanded="false" data-i18n="m.tierExpand">展開設定</button>
+                </div>
+                <div id="question-type-policy-body" hidden>
+                    <div id="question-type-policy-rows" class="tier-policy-rows" data-i18n="m.loadingDots">載入中…</div>
+                    <div id="question-type-policy-message" class="tier-policy-message" hidden></div>
+                </div>
+            </section>
+
             <!-- Loading -->
             <div id="loading-state">
                 <div class="loading-spinner"></div>
@@ -174,6 +189,6 @@
 
     </div>
 
-    <script src="/math-app/js/dashboard.js?v=20260910-i18n-1"></script>
+    <script src="/math-app/js/dashboard.js?v=20260919-question-types-1"></script>
 </body>
 </html>

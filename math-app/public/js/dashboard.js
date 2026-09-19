@@ -79,6 +79,7 @@
             if (data.student.role === 'teacher') {
                 // Teacher: existing student-picker flow.
                 initTierPolicyPanel();
+                initQuestionTypePolicyPanel();
                 await loadStudentList();
             } else {
                 // Student: skip the picker, show own stats immediately.
@@ -290,6 +291,154 @@
             renderTierPolicy();
             tierPolicyMessage(t('m.saveRetry'), 'error');
             console.error('儲存題目級別設定失敗:', e);
+        } finally {
+            el.dataset.busy = '';
+        }
+    }
+
+    // ========================================
+    // Question type policy (teacher only)
+    // ========================================
+    let questionTypePolicyRows = [];
+
+    function initQuestionTypePolicyPanel() {
+        const panel = document.getElementById('question-type-policy-panel');
+        const toggle = document.getElementById('question-type-policy-toggle');
+        const body = document.getElementById('question-type-policy-body');
+        if (!panel || !toggle || !body) return;
+
+        panel.hidden = false;
+        toggle.addEventListener('click', () => {
+            const opening = body.hidden;
+            body.hidden = !opening;
+            toggle.textContent = t(opening ? 'm.tierCollapse' : 'm.tierExpand');
+            toggle.setAttribute('aria-expanded', String(opening));
+            if (opening && !questionTypePolicyRows.length) loadQuestionTypePolicy();
+        });
+    }
+
+    async function loadQuestionTypePolicy() {
+        try {
+            const res = await fetch('/api/stats/teacher/question-type-policy', { credentials: 'include' });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || t('m.loadFailed'));
+            questionTypePolicyRows = data.rows || [];
+            renderQuestionTypePolicy();
+        } catch (e) {
+            const host = document.getElementById('question-type-policy-rows');
+            if (host) host.textContent = t('m.questionTypeLoadFailed');
+            console.error('載入題目類型設定失敗:', e);
+        }
+    }
+
+    function questionTypePolicyMessage(text, kind) {
+        const box = document.getElementById('question-type-policy-message');
+        if (!box) return;
+        box.hidden = !text;
+        box.textContent = text || '';
+        box.className = 'tier-policy-message' + (kind ? ' ' + kind : '');
+    }
+
+    const QUESTION_TYPE_EMOJI = { add: '➕', sub: '➖', mul: '✖️', div: '➗', mix: '🔀' };
+    const QUESTION_TYPE_LABELS = {
+        add: 'm.catAdd',
+        sub: 'm.catSub',
+        mul: 'm.catMul',
+        div: 'm.catDiv',
+        mix: 'm.catMix',
+    };
+
+    function renderQuestionTypePolicy() {
+        const host = document.getElementById('question-type-policy-rows');
+        if (!host) return;
+        host.innerHTML = '';
+
+        for (const row of questionTypePolicyRows) {
+            const off = new Set(row.disabled || []);
+            const el = document.createElement('div');
+            el.className = 'tier-policy-row' + (row.isGradeWide ? '' : ' group');
+
+            const name = document.createElement('div');
+            name.className = 'tier-policy-name';
+            name.textContent = row.label;
+            const count = document.createElement('small');
+            count.textContent = t('m.studentCount', { count: row.studentCount });
+            name.appendChild(count);
+            el.appendChild(name);
+
+            const switches = document.createElement('div');
+            switches.className = 'tier-policy-switches';
+            for (const type of row.questionTypes || []) {
+                const enabled = !off.has(type.id);
+                const label = document.createElement('label');
+                label.className = 'tier-policy-switch' + (enabled ? '' : ' off');
+                const box = document.createElement('input');
+                box.type = 'checkbox';
+                box.checked = enabled;
+                box.dataset.questionType = type.id;
+                box.addEventListener('change', () => saveQuestionTypePolicyRow(el, row));
+                label.appendChild(box);
+                const labelKey = QUESTION_TYPE_LABELS[type.id];
+                label.appendChild(document.createTextNode(
+                    (QUESTION_TYPE_EMOJI[type.id] || '') + ' ' +
+                    (labelKey ? t(labelKey) : (type.name || type.id))));
+                switches.appendChild(label);
+            }
+            el.appendChild(switches);
+
+            if (!row.isGradeWide) {
+                const note = document.createElement('div');
+                note.className = 'tier-policy-inherit';
+                if (row.configured) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = t('m.followYear');
+                    btn.addEventListener('click', () => saveQuestionTypePolicyRow(el, row, null));
+                    note.appendChild(btn);
+                } else {
+                    note.textContent = t('m.followingYear');
+                }
+                el.appendChild(note);
+            }
+
+            host.appendChild(el);
+        }
+    }
+
+    async function saveQuestionTypePolicyRow(el, row, disabled) {
+        const payload = disabled === null
+            ? null
+            : [...el.querySelectorAll('input[type="checkbox"]')]
+                .filter(box => !box.checked)
+                .map(box => box.dataset.questionType);
+
+        el.dataset.busy = '1';
+        questionTypePolicyMessage(t('m.saving'), '');
+        try {
+            const res = await fetch('/api/stats/teacher/question-type-policy', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    className: row.className,
+                    mathGroup: row.mathGroup,
+                    disabledQuestionTypes: payload,
+                }),
+            });
+            const data = await res.json();
+            if (!data.success) {
+                renderQuestionTypePolicy();
+                questionTypePolicyMessage(data.message || t('m.saveFailedDot'), 'error');
+                return;
+            }
+            questionTypePolicyRows = data.rows || questionTypePolicyRows;
+            renderQuestionTypePolicy();
+            questionTypePolicyMessage(t('m.savedFor', { label: row.label }), 'ok');
+            if (currentStudentId) reloadAllStats();
+        } catch (e) {
+            renderQuestionTypePolicy();
+            questionTypePolicyMessage(t('m.saveRetry'), 'error');
+            console.error('儲存題目類型設定失敗:', e);
         } finally {
             el.dataset.busy = '';
         }

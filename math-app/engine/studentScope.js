@@ -3,14 +3,15 @@
 /**
  * One answer to "what may this student be asked, and what may they see?".
  *
- * The grade curriculum and the teacher's tier switches have to agree across the
- * quiz engine, the tag picker and every stats endpoint — a child locked out of
- * 鑽石 questions must also stop seeing a 鑽 radar. Resolving both in one place is
- * what keeps those two from drifting apart.
+ * The grade curriculum and the teacher's tier/type switches have to agree across
+ * the quiz engine, the tag picker and every stats endpoint — a child locked out
+ * of 鑽石 questions must also stop seeing a 鑽 radar. Resolving all three in one
+ * place keeps those surfaces from drifting apart.
  */
 
 const users = require('../repositories/users.repo');
 const tierPolicy = require('../repositories/tier-policy.repo');
+const questionTypePolicy = require('../repositories/question-type-policy.repo');
 const { tagsForScope } = require('./classTags');
 
 async function scopeForStudent(studentId) {
@@ -18,7 +19,14 @@ async function scopeForStudent(studentId) {
   const classname = u?.classname || '';
   const mathGroup = u?.mathgroup || '';
   const disabledTiers = await tierPolicy.disabledTiersFor(classname, mathGroup);
-  return { classname, mathGroup, disabledTiers, tags: tagsForScope(classname, disabledTiers) };
+  const disabledQuestionTypes = await questionTypePolicy.disabledQuestionTypesFor(classname, mathGroup);
+  return {
+    classname,
+    mathGroup,
+    disabledTiers,
+    disabledQuestionTypes,
+    tags: tagsForScope(classname, disabledTiers, disabledQuestionTypes),
+  };
 }
 
 module.exports = { scopeForStudent };
