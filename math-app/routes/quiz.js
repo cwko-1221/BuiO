@@ -16,6 +16,37 @@ const { requireAuth } = require('../middleware/auth');
 // today and the tag-picker / dashboard are unlocked.
 const DAILY_RANDOM_THRESHOLD = DEFAULT_QUIZ_SIZE;
 
+function isFractionQuestion(question) {
+  return Boolean(question && question.tag && question.tag.startsWith('frac_'));
+}
+
+function gradeAnswer(question, rawUserAnswer, rawUserDenominator) {
+  if (isFractionQuestion(question)) {
+    const numerator = parseInt(rawUserAnswer, 10);
+    const denominator = parseInt(rawUserDenominator, 10);
+    const valid = Number.isInteger(numerator) && Number.isInteger(denominator) && denominator !== 0;
+    const isCorrect = valid
+      && numerator === question.correctAnswer
+      && denominator === question.denominator;
+    return {
+      userAnswer: valid ? numerator / denominator : null,
+      userAnswerDisplay: valid ? `${numerator}/${denominator}` : '',
+      correctAnswerValue: question.correctAnswer / question.denominator,
+      correctAnswerDisplay: `${question.correctAnswer}/${question.denominator}`,
+      isCorrect,
+    };
+  }
+
+  const userAnswer = parseFloat(rawUserAnswer);
+  return {
+    userAnswer,
+    userAnswerDisplay: userAnswer,
+    correctAnswerValue: question.correctAnswer,
+    correctAnswerDisplay: question.correctAnswer,
+    isCorrect: userAnswer === question.correctAnswer,
+  };
+}
+
 async function studentGradeTags(studentId) {
   const scope = await scopeForStudent(studentId);
   return { classname: scope.classname || null, tags: scope.tags };
@@ -92,6 +123,7 @@ router.get('/questions', async (req, res, next) => {
       tag: q.tag,
       questionText: q.questionText,
       correctAnswer: q.answer,
+      denominator: q.denominator || null,
     }));
 
     res.json({
@@ -134,12 +166,11 @@ router.post('/submit', async (req, res, next) => {
     for (const ans of answers) {
       const question = quiz.find(q => q.index === ans.index);
       if (!question) continue;
-      const userAnswer = parseFloat(ans.userAnswer);
-      const isCorrect = userAnswer === question.correctAnswer;
+      const gradedAnswer = gradeAnswer(question, ans.userAnswer, ans.userDenominator);
       const timeTaken = parseFloat(ans.timeTaken) || 0;
-      if (isCorrect) correctCount++;
+      if (gradedAnswer.isCorrect) correctCount++;
       totalTime += timeTaken;
-      graded.push({ question, userAnswer, isCorrect, timeTaken });
+      graded.push({ question, ...gradedAnswer, timeTaken });
     }
 
     await withTransaction(async client => {
@@ -147,7 +178,7 @@ router.post('/submit', async (req, res, next) => {
         studentId,
         tag: g.question.tag,
         questionText: g.question.questionText,
-        correctAnswer: g.question.correctAnswer,
+        correctAnswer: g.correctAnswerValue,
         userAnswer: g.userAnswer,
         isCorrect: g.isCorrect,
         timeSpent: g.timeTaken,
@@ -163,8 +194,8 @@ router.post('/submit', async (req, res, next) => {
     const results = graded.map(g => ({
       index: g.question.index,
       questionText: g.question.questionText,
-      correctAnswer: g.question.correctAnswer,
-      userAnswer: g.userAnswer,
+      correctAnswer: g.correctAnswerDisplay,
+      userAnswer: g.userAnswerDisplay,
       isCorrect: g.isCorrect,
       timeTaken: g.timeTaken,
       tag: g.question.tag,
@@ -192,7 +223,7 @@ router.post('/submit', async (req, res, next) => {
 router.post('/answer', async (req, res, next) => {
   try {
     const studentId = req.session.studentId;
-    const { index, userAnswer, timeTaken } = req.body;
+    const { index, userAnswer, userDenominator, timeTaken } = req.body;
 
     const quiz = req.session.currentQuiz;
     if (!quiz || quiz.length === 0) {
@@ -202,20 +233,19 @@ router.post('/answer', async (req, res, next) => {
     if (!question) {
       return res.status(400).json({ success: false, message: `找不到第 ${index} 題` });
     }
-    const parsed = parseFloat(userAnswer);
-    const isCorrect = parsed === question.correctAnswer;
+    const gradedAnswer = gradeAnswer(question, userAnswer, userDenominator);
     const ts = Math.round(parseFloat(timeTaken)) || 0;
 
     await logs.insert({
       studentId,
       tag: question.tag,
       questionText: question.questionText,
-      correctAnswer: question.correctAnswer,
-      userAnswer: parsed,
-      isCorrect,
+      correctAnswer: gradedAnswer.correctAnswerValue,
+      userAnswer: gradedAnswer.userAnswer,
+      isCorrect: gradedAnswer.isCorrect,
       timeSpent: ts,
     });
-    await stats.recordAttempt(studentId, question.tag, isCorrect);
+    await stats.recordAttempt(studentId, question.tag, gradedAnswer.isCorrect);
 
     req.session.currentQuiz = quiz.filter(q => q.index !== index);
 
@@ -224,9 +254,9 @@ router.post('/answer', async (req, res, next) => {
       result: {
         index,
         questionText: question.questionText,
-        correctAnswer: question.correctAnswer,
-        userAnswer: parsed,
-        isCorrect,
+        correctAnswer: gradedAnswer.correctAnswerDisplay,
+        userAnswer: gradedAnswer.userAnswerDisplay,
+        isCorrect: gradedAnswer.isCorrect,
         timeTaken: ts,
         tag: question.tag,
       },

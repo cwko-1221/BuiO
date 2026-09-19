@@ -56,6 +56,8 @@ const P3_ONLY = [
   'div_3d_1d_z0_mid', 'div_3d_1d_z0_end',
   // 基本整數混合四則
   'mix_3n_no_paren', 'mix_3n_paren',
+  // 同分母分數
+  'frac_2_add', 'frac_2_sub', 'frac_3_add', 'frac_3_sub',
 ];
 
 // ---- P4 (adds these to P1 + P2 + P3) ----

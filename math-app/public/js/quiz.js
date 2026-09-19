@@ -20,6 +20,9 @@
     let totalQuizTime = 0;
     let studentInfo = null;
     let isSubmittingQuiz = false;
+    let answerLocked = false;
+    let fractionAnswerMode = false;
+    let fractionPart = 'numerator';
 
     // ========================================
     // DOM Elements  
@@ -40,6 +43,9 @@
     const questionCategory = document.getElementById('question-category');
     const questionText = document.getElementById('question-text');
     const answerInput = document.getElementById('answer-input');
+    const fractionAnswerFields = document.getElementById('fraction-answer-fields');
+    const fractionNumeratorInput = document.getElementById('fraction-numerator-input');
+    const fractionDenominatorInput = document.getElementById('fraction-denominator-input');
     const submitBtn = document.getElementById('submit-answer-btn');
     const numberKeypad = document.getElementById('number-keypad');
     const keypadButtons = numberKeypad
@@ -614,6 +620,10 @@
     // ========================================
     // Show Question
     // ========================================
+    function isFractionQuestion(q) {
+        return Boolean(q && q.tag && q.tag.startsWith('frac_'));
+    }
+
     function showQuestion(idx) {
         const q = questions[idx];
         currentIndex = idx;
@@ -634,16 +644,36 @@
         tagEl.querySelector('span:first-child').textContent = categoryIcons[q.category] || '📐';
 
         // Clear input
+        fractionAnswerMode = isFractionQuestion(q);
+        fractionPart = 'numerator';
+        answerLocked = false;
         answerInput.value = '';
         answerInput.className = 'answer-input';
         answerInput.style.borderColor = '';
+        answerInput.hidden = fractionAnswerMode;
         answerInput.disabled = false;
+        if (fractionAnswerFields) fractionAnswerFields.hidden = !fractionAnswerMode;
+        if (fractionNumeratorInput) {
+            fractionNumeratorInput.value = '';
+            fractionNumeratorInput.className = 'answer-input fraction-part';
+            fractionNumeratorInput.style.borderColor = '';
+            fractionNumeratorInput.disabled = !fractionAnswerMode;
+        }
+        if (fractionDenominatorInput) {
+            fractionDenominatorInput.value = '';
+            fractionDenominatorInput.className = 'answer-input fraction-part';
+            fractionDenominatorInput.style.borderColor = '';
+            fractionDenominatorInput.disabled = !fractionAnswerMode;
+        }
         submitBtn.disabled = false;
         setKeypadDisabled(false);
         submitBtn.textContent = t('m.confirm');
 
         // Focus input
-        setTimeout(() => answerInput.focus(), 100);
+        setTimeout(() => {
+            const firstInput = fractionAnswerMode ? fractionNumeratorInput : answerInput;
+            firstInput.focus();
+        }, 100);
 
         // Clear canvas for new question. The grid is a preference and stays put;
         // the hint belongs to the question that has just gone.
@@ -659,32 +689,51 @@
     // Submit Answer
     // ========================================
     async function submitAnswer() {
-        if (isSubmittingQuiz || answerInput.disabled) return;
+        const q = questions[currentIndex];
+        if (isSubmittingQuiz || answerLocked) return;
 
         const userAnswer = answerInput.value.trim();
-        if (userAnswer === '') {
-            answerInput.style.borderColor = 'var(--accent-amber)';
-            answerInput.focus();
+        const userNumerator = fractionAnswerMode ? fractionNumeratorInput.value.trim() : null;
+        const userDenominator = fractionAnswerMode ? fractionDenominatorInput.value.trim() : null;
+        if (fractionAnswerMode ? (userNumerator === '' || userDenominator === '') : userAnswer === '') {
+            if (fractionAnswerMode) {
+                if (userNumerator === '') {
+                    fractionNumeratorInput.style.borderColor = 'var(--accent-amber)';
+                    fractionNumeratorInput.focus();
+                } else {
+                    fractionDenominatorInput.style.borderColor = 'var(--accent-amber)';
+                    fractionDenominatorInput.focus();
+                }
+            } else {
+                answerInput.style.borderColor = 'var(--accent-amber)';
+                answerInput.focus();
+            }
             return;
         }
 
         const timeTaken = stopTimer();
-        const q = questions[currentIndex];
         const roundedTime = Math.round(timeTaken * 10) / 10;
 
         submitBtn.disabled = true;
         setKeypadDisabled(true);
+        answerLocked = true;
         answers[currentIndex] = {
-                index: q.index,
-                userAnswer: parseFloat(userAnswer),
-                timeTaken: roundedTime,
-                isCorrect: null,
-                correctAnswer: null,
-                questionText: q.questionText,
-                tag: q.tag
+            index: q.index,
+            userAnswer: fractionAnswerMode
+                ? `${userNumerator}/${userDenominator}`
+                : parseFloat(userAnswer),
+            userNumerator: fractionAnswerMode ? parseInt(userNumerator, 10) : null,
+            userDenominator: fractionAnswerMode ? parseInt(userDenominator, 10) : null,
+            timeTaken: roundedTime,
+            isCorrect: null,
+            correctAnswer: null,
+            questionText: q.questionText,
+            tag: q.tag
         };
         totalQuizTime += roundedTime;
         answerInput.disabled = true;
+        if (fractionNumeratorInput) fractionNumeratorInput.disabled = true;
+        if (fractionDenominatorInput) fractionDenominatorInput.disabled = true;
         updateDots();
 
         const nextUnanswered = answers.findIndex(answer => answer === null);
@@ -711,6 +760,7 @@
                     answers: answers.filter(Boolean).map(answer => ({
                         index: answer.index,
                         userAnswer: answer.userAnswer,
+                        userDenominator: answer.userDenominator,
                         timeTaken: answer.timeTaken
                     }))
                 })
@@ -745,10 +795,46 @@
     }
 
     function updateAnswerFromKey(key) {
-        if (answerInput.disabled) return;
+        if (answerLocked) return;
 
         if (key === 'submit') {
             submitAnswer();
+            return;
+        }
+
+        if (fractionAnswerMode) {
+            const currentInput = fractionPart === 'numerator'
+                ? fractionNumeratorInput
+                : fractionDenominatorInput;
+
+            if (key === 'clear') {
+                fractionNumeratorInput.value = '';
+                fractionDenominatorInput.value = '';
+                fractionPart = 'numerator';
+                fractionNumeratorInput.focus();
+            } else if (key === 'backspace') {
+                if (fractionPart === 'denominator' && fractionDenominatorInput.value !== '') {
+                    fractionDenominatorInput.value = '';
+                    fractionDenominatorInput.focus();
+                } else {
+                    fractionPart = 'numerator';
+                    fractionNumeratorInput.value = '';
+                    fractionNumeratorInput.focus();
+                }
+            } else if (/^\d$/.test(key)) {
+                // P3 fractions use one-digit numerators/denominators. After
+                // entering the numerator, move directly to the denominator.
+                currentInput.value = key;
+                if (fractionPart === 'numerator') {
+                    fractionPart = 'denominator';
+                    fractionDenominatorInput.focus();
+                } else {
+                    fractionDenominatorInput.focus();
+                }
+            }
+
+            fractionNumeratorInput.style.borderColor = '';
+            fractionDenominatorInput.style.borderColor = '';
             return;
         }
 

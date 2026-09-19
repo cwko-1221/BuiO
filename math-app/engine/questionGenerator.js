@@ -9,6 +9,7 @@
  * [減法] sub_2d_nc, sub_2d_b, sub_3d_b, sub_3d_z_mid
  * [乘法] mul_2x1, mul_3x1, mul_2x2_nc_nc, mul_2x2_c_c
  * [除法] div_2d_1d, div_3d_1d_z0_mid, div_3d_1d_z0_end, div_3d_2d
+ * [分數] frac_2_add, frac_2_sub, frac_3_add, frac_3_sub
  */
 
 // ========================================
@@ -62,6 +63,10 @@ const TAG_INFO = {
     div_3d_1d_r:     { name: '3位數÷1位數 (有餘數，只寫商)', category: '除法', symbol: '÷' },
     mix_3n_no_paren: { name: '3個數四則混合 (先乘除後加減、無括號)', category: '混合', symbol: '?' },
     mix_3n_paren:    { name: '3個數四則混合 (有小括號)', category: '混合', symbol: '?' },
+    frac_2_add:      { name: '2個同分母分數加法', category: '加法', symbol: '+' },
+    frac_2_sub:      { name: '2個同分母分數減法', category: '減法', symbol: '-' },
+    frac_3_add:      { name: '3個同分母分數加法', category: '加法', symbol: '+' },
+    frac_3_sub:      { name: '3個同分母分數減法', category: '減法', symbol: '-' },
     // ----- P4 tags -----
     mul_2d_2d_nc:    { name: '2位數乘2位數 (無進位)', category: '乘法', symbol: '×' },
     mul_2d_2d_c:     { name: '2位數乘2位數 (有進位)', category: '乘法', symbol: '×' },
@@ -425,6 +430,68 @@ function generate_mix_3n_paren() {
     return { a: 5, b: 3, c: 4, answer: 32, text: '(5 + 3) × 4', symbol: '?' };
 }
 
+/** 將正整數 total 隨機拆成指定數量的正整數部分。 */
+function randomPositiveParts(total, count) {
+    const parts = [];
+    let remaining = total;
+    for (let i = 0; i < count - 1; i++) {
+        const value = randInt(1, remaining - (count - i - 1));
+        parts.push(value);
+        remaining -= value;
+    }
+    parts.push(remaining);
+    return parts;
+}
+
+/** 2個同分母分數加法，答案保留為分子供數字鍵盤輸入。 */
+function generate_frac_2_add() {
+    const denominator = randInt(3, 9);
+    const numeratorTotal = randInt(2, denominator - 1);
+    const [a, b] = randomPositiveParts(numeratorTotal, 2);
+    return {
+        a, b, denominator, answer: numeratorTotal,
+        text: `${a}/${denominator} + ${b}/${denominator}`,
+        symbol: '+'
+    };
+}
+
+/** 2個同分母分數減法，答案保留為分子供數字鍵盤輸入。 */
+function generate_frac_2_sub() {
+    const denominator = randInt(3, 9);
+    const a = randInt(2, denominator - 1);
+    const b = randInt(1, a - 1);
+    return {
+        a, b, denominator, answer: a - b,
+        text: `${a}/${denominator} - ${b}/${denominator}`,
+        symbol: '-'
+    };
+}
+
+/** 3個同分母分數加法，答案保留為分子供數字鍵盤輸入。 */
+function generate_frac_3_add() {
+    const denominator = randInt(4, 9);
+    const numeratorTotal = randInt(3, denominator - 1);
+    const [a, b, c] = randomPositiveParts(numeratorTotal, 3);
+    return {
+        a, b, c, denominator, answer: numeratorTotal,
+        text: `${a}/${denominator} + ${b}/${denominator} + ${c}/${denominator}`,
+        symbol: '+'
+    };
+}
+
+/** 3個同分母分數減法，答案保留為分子供數字鍵盤輸入。 */
+function generate_frac_3_sub() {
+    const denominator = randInt(5, 9);
+    const numeratorTotal = randInt(4, denominator - 1);
+    const [answer, b, c] = randomPositiveParts(numeratorTotal, 3);
+    const a = answer + b + c;
+    return {
+        a, b, c, denominator, answer,
+        text: `${a}/${denominator} - ${b}/${denominator} - ${c}/${denominator}`,
+        symbol: '-'
+    };
+}
+
 // ========================================
 // P4 出題邏輯
 // ========================================
@@ -767,6 +834,10 @@ const GENERATORS = {
     div_3d_1d_r: generate_div_3d_1d_r,
     mix_3n_no_paren: generate_mix_3n_no_paren,
     mix_3n_paren: generate_mix_3n_paren,
+    frac_2_add: generate_frac_2_add,
+    frac_2_sub: generate_frac_2_sub,
+    frac_3_add: generate_frac_3_add,
+    frac_3_sub: generate_frac_3_sub,
     // P4
     mul_2d_2d_nc: generate_mul_2d_2d_nc,
     mul_2d_2d_c: generate_mul_2d_2d_c,
@@ -789,7 +860,7 @@ const GENERATORS = {
 /**
  * 根據標籤生成一道題目
  * @param {string} tag - 微能力標籤
- * @returns {{ tag, category, tagName, a, b, answer, text, symbol }}
+ * @returns {{ tag, category, tagName, a, b, c, denominator, answer, text, symbol }}
  */
 function generateQuestion(tag) {
     if (!GENERATORS[tag]) {
@@ -805,6 +876,8 @@ function generateQuestion(tag) {
         tagName: info.name,
         a: result.a,
         b: result.b,
+        c: result.c,
+        denominator: result.denominator,
         answer: result.answer,
         questionText: result.text,
         symbol: result.symbol,

@@ -7,7 +7,7 @@
     <title data-i18n="m.quizTitle">練習中 ✦ 杯澳四則特訓</title>
     <script src="/shared/i18n.js?v=20260910-1"></script>
     <script src="/shared/i18n/math.js?v=20260919-keypad-1"></script>
-    <link rel="stylesheet" href="/math-app/css/style.css?v=20260919-keypad-3">
+    <link rel="stylesheet" href="/math-app/css/style.css?v=20260919-fraction-input-1">
 </head>
 <body>
     <div class="page-container">
@@ -70,6 +70,15 @@
                                 <input type="text" class="answer-input" id="answer-input"
                                        placeholder="?" autocomplete="off" inputmode="none" readonly
                                        aria-readonly="true" data-i18n-attr="aria-label:m.answerDisplay">
+                                <div class="fraction-answer-fields" id="fraction-answer-fields" hidden>
+                                    <input type="text" class="answer-input fraction-part" id="fraction-numerator-input"
+                                           placeholder="?" autocomplete="off" inputmode="none" readonly
+                                           aria-label="分子">
+                                    <span class="fraction-divider" aria-hidden="true">/</span>
+                                    <input type="text" class="answer-input fraction-part" id="fraction-denominator-input"
+                                           placeholder="?" autocomplete="off" inputmode="none" readonly
+                                           aria-label="分母">
+                                </div>
                             </div>
                         </div>
                         <div class="answer-entry">
@@ -158,6 +167,6 @@
         <div class="feedback-icon" id="feedback-icon">✅</div>
     </div>
 
-    <script src="/math-app/js/quiz.js?v=20260919-six-question-batch-1"></script>
+    <script src="/math-app/js/quiz.js?v=20260919-fraction-input-1"></script>
 </body>
 </html>
