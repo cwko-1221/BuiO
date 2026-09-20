@@ -8,8 +8,9 @@ const stats = require('../repositories/stats.repo');
 const { withTransaction } = require('../db/database');
 const { generateAdaptiveQuiz, DEFAULT_QUIZ_SIZE } = require('../engine/adaptiveEngine');
 const { generateQuestion, TAG_INFO } = require('../engine/questionGenerator');
+const { tagsForClass } = require('../engine/classTags');
 const { scopeForStudent } = require('../engine/studentScope');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireTeacher } = require('../middleware/auth');
 
 // A "random" (adaptive) practice session is 6 questions; if the student's
 // today log count is >= this, they've finished at least one random session
@@ -17,7 +18,22 @@ const { requireAuth } = require('../middleware/auth');
 const DAILY_RANDOM_THRESHOLD = DEFAULT_QUIZ_SIZE;
 
 function isFractionQuestion(question) {
-  return Boolean(question && question.tag && question.tag.startsWith('frac_'));
+  return Boolean(question && (
+    question.answerType === 'fraction'
+    || question.answerType === 'mixed'
+    || (question.tag && question.tag.startsWith('frac_'))
+  ));
+}
+
+function isDecimalArithmeticQuestion(question) {
+  return Boolean(question && [
+    'add_up_to_3n', 'sub_up_to_3n', 'mix_3n_4d',
+    'mul_by_powers10', 'mul_by_decimal_scales', 'mul_decimal_or_integer',
+    'div_by_powers10', 'div_by_decimal_scales', 'div_decimal_general',
+    'mix_decimal_or_integer_up_to_4',
+    'convert_decimal_fraction', 'convert_decimal_percent', 'convert_percent_fraction',
+    'linear_equation_easy_2',
+  ].includes(question.tag));
 }
 
 function fractionAnswerFormat(question) {
@@ -74,13 +90,20 @@ function gradeAnswer(question, rawUserAnswer, rawUserDenominator, rawUserNumerat
     };
   }
 
-  const userAnswer = parseFloat(rawUserAnswer);
+  const rawAnswer = String(rawUserAnswer ?? '').trim();
+  const decimalQuestion = isDecimalArithmeticQuestion(question);
+  const validDecimal = !decimalQuestion || /^\d+(?:\.\d{1,6})?$/.test(rawAnswer);
+  const userAnswer = decimalQuestion
+    ? (validDecimal ? Number(rawAnswer) : null)
+    : parseFloat(rawUserAnswer);
   return {
     userAnswer,
     userAnswerDisplay: userAnswer,
     correctAnswerValue: question.correctAnswer,
     correctAnswerDisplay: question.correctAnswer,
-    isCorrect: userAnswer === question.correctAnswer,
+    isCorrect: validDecimal && (decimalQuestion
+      ? Math.round(userAnswer * 1000000) === Math.round(question.correctAnswer * 1000000)
+      : userAnswer === question.correctAnswer),
   };
 }
 
@@ -96,6 +119,55 @@ async function todayRandomDone(studentId, tags) {
 }
 
 router.use(requireAuth);
+
+function teacherTopicGroups() {
+  const seen = new Set();
+  return ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'].map(grade => {
+    const topics = tagsForClass(grade)
+      .filter(tag => !seen.has(tag))
+      .map(tag => ({
+        tag,
+        name: TAG_INFO[tag]?.name || tag,
+        category: TAG_INFO[tag]?.category || '',
+      }));
+    tagsForClass(grade).forEach(tag => seen.add(tag));
+    return { grade, topics };
+  });
+}
+
+function exampleAnswerDisplay(question) {
+  if (question.answerType === 'mixed') {
+    const whole = question.answerWhole || 0;
+    const numerator = question.answerNumerator ?? 0;
+    const denominator = question.answerDenominator ?? question.denominator;
+    return `${whole}又${numerator}/${denominator}`;
+  }
+  if (question.answerType === 'fraction') {
+    const numerator = question.answerNumerator ?? question.answer;
+    const denominator = question.answerDenominator ?? question.denominator;
+    return `${numerator}/${denominator}`;
+  }
+  return String(question.answer);
+}
+
+router.get('/teacher/topics', requireTeacher, (req, res) => {
+  res.json({ success: true, groups: teacherTopicGroups() });
+});
+
+router.get('/teacher/topics/:tag/examples', requireTeacher, (req, res) => {
+  const allowedTags = new Set(teacherTopicGroups().flatMap(group => group.topics.map(topic => topic.tag)));
+  if (!allowedTags.has(req.params.tag)) {
+    return res.status(404).json({ success: false, message: '找不到這個課題。' });
+  }
+  const examples = Array.from({ length: 5 }, () => {
+    const question = generateQuestion(req.params.tag);
+    return {
+      questionText: question.questionText,
+      answer: exampleAnswerDisplay(question),
+    };
+  });
+  res.json({ success: true, examples });
+});
 
 // ----------------------------------------------------------------
 // GET /questions  — adaptive quiz
@@ -179,6 +251,7 @@ router.get('/questions', async (req, res, next) => {
         tagName: q.tagName,
         questionText: q.questionText,
         symbol: q.symbol,
+        answerType: q.answerType || null,
         answerFormat: fractionAnswerFormat(q),
       })),
       distribution: res.locals._distribution || null,

@@ -707,6 +707,10 @@ a { color: var(--accent-blue); text-decoration: none; }
     font-size: 1.45rem;
 }
 
+.number-keypad.decimal-mode .keypad-submit {
+    grid-column: 1 / -1;
+}
+
 .keypad-submit {
     display: inline-flex;
     align-items: center;
@@ -1053,7 +1057,7 @@ a { color: var(--accent-blue); text-decoration: none; }
     height: auto;
 }
 
-/* Radar tier grid — up to 4 mini radars (P1..P4 tiers) */
+/* Radar tier grid — one mini radar for each tier reached by the student */
 .radar-tier-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -1095,6 +1099,16 @@ a { color: var(--accent-blue); text-decoration: none; }
     background: linear-gradient(135deg, #38bdf8, #a855f7);
     color: #fff;
     box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35);
+}
+.radar-tier-cell.fire .radar-tier-badge {
+    background: linear-gradient(135deg, #f97316, #ef4444);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+}
+.radar-tier-cell.sun .radar-tier-badge {
+    background: linear-gradient(135deg, #facc15, #fb923c);
+    color: #422006;
+    box-shadow: 0 4px 14px rgba(250, 204, 21, 0.35);
 }
 .radar-tier-subtitle {
     font-size: 0.75rem;
@@ -1396,4 +1410,110 @@ canvas#scratchpad {
     display: block;
     filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
     animation: float 3s ease-in-out infinite;
+}
+
+/* Teacher question bank */
+.topic-bank-page { max-width: 1280px; }
+.topic-bank-header h1 {
+    margin: 0 0 8px;
+    font-size: 1.65rem;
+    font-weight: 800;
+}
+.topic-bank-header p {
+    color: var(--text-muted);
+    margin-bottom: 22px;
+}
+.topic-bank-toolbar { margin-bottom: 18px; }
+.topic-bank-toolbar input {
+    width: min(100%, 520px);
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    background: rgba(17, 24, 39, 0.8);
+    color: var(--text-primary);
+    font: inherit;
+}
+.topic-bank-toolbar input:focus {
+    outline: 2px solid rgba(139, 92, 246, 0.55);
+    border-color: var(--accent-purple);
+}
+.topic-bank-status {
+    padding: 16px 0;
+    color: var(--text-secondary);
+}
+.topic-grade-section { margin: 26px 0 34px; }
+.topic-grade-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.topic-grade-heading h2 { font-size: 1.2rem; margin: 0; }
+.topic-count { color: var(--text-muted); font-size: 0.82rem; }
+.topic-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 390px), 1fr));
+    gap: 9px;
+}
+.topic-card {
+    align-self: start;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.035);
+}
+.topic-card.open { border-color: rgba(139, 92, 246, 0.42); }
+.topic-toggle {
+    width: 100%;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    color: var(--text-primary);
+    border: 0;
+    background: transparent;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+.topic-toggle:hover, .topic-card.open .topic-toggle { background: rgba(139, 92, 246, 0.11); }
+.topic-toggle:focus-visible { outline: 2px solid var(--accent-purple); outline-offset: -2px; }
+.topic-name { flex: 1; font-weight: 600; }
+.topic-category {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+.topic-chevron { color: #c4b5fd; font-size: 1.15rem; }
+.topic-examples {
+    padding: 4px 14px 14px;
+    border-top: 1px solid var(--border-subtle);
+}
+.topic-example-list { list-style: none; display: grid; gap: 8px; }
+.topic-example-list li {
+    display: grid;
+    grid-template-columns: 74px minmax(0, 1fr);
+    gap: 3px 10px;
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.035);
+}
+.topic-example-number {
+    grid-row: span 2;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    padding-top: 2px;
+}
+.topic-example-question { overflow-wrap: anywhere; }
+.topic-example-answer { color: #a5b4fc; font-size: 0.88rem; overflow-wrap: anywhere; }
+.topic-examples-status { padding: 10px 2px; color: var(--text-muted); font-size: 0.88rem; }
+.topic-examples-status.error { color: #fca5a5; }
+
+@media (max-width: 560px) {
+    .topic-bank-header h1 { font-size: 1.35rem; }
+    .topic-toggle { gap: 8px; padding-inline: 10px; }
+    .topic-category { font-size: 0.7rem; }
+    .topic-example-list li { grid-template-columns: 1fr; }
+    .topic-example-number { grid-row: auto; }
 }

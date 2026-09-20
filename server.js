@@ -474,6 +474,7 @@ app.get(['/science-lab', '/science-lab/'], requireSession, (_req, res) => {
 app.get('/login.html',     (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'login.html')));
 app.get('/quiz.html',      (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'quiz.html')));
 app.get('/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'dashboard.html')));
+app.get('/teacher-topics.html', (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'teacher-topics.html')));
 app.get('/tag-picker.html',(req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'tag-picker.html')));
 app.get('/math',           (req, res) => {
   // Students land on the hub with the daily-random gate; teachers go

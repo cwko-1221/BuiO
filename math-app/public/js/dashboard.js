@@ -21,6 +21,8 @@
         { id: 'silver',  name: t('m.tierSilver') },
         { id: 'gold',    name: t('m.tierGold') },
         { id: 'diamond', name: t('m.tierDiamond') },
+        { id: 'fire',    name: t('m.tierFire') },
+        { id: 'sun',     name: t('m.tierSun') },
     ];
 
     // Build a compact tag label for radar / time-analysis charts.
@@ -77,6 +79,8 @@
             }
 
             if (data.student.role === 'teacher') {
+                const topicListNav = document.getElementById('teacher-topics-nav');
+                if (topicListNav) topicListNav.hidden = false;
                 // Teacher: existing student-picker flow.
                 initTierPolicyPanel();
                 initQuestionTypePolicyPanel();
@@ -194,7 +198,7 @@
         box.className = 'tier-policy-message' + (kind ? ' ' + kind : '');
     }
 
-    const TIER_EMOJI = { bronze: '🥉', silver: '🥈', gold: '🥇', diamond: '💎' };
+    const TIER_EMOJI = { bronze: '🥉', silver: '🥈', gold: '🥇', diamond: '💎', fire: '🔥', sun: '☀️' };
 
     function renderTierPolicy() {
         const host = document.getElementById('tier-policy-rows');
@@ -339,13 +343,14 @@
         box.className = 'tier-policy-message' + (kind ? ' ' + kind : '');
     }
 
-    const QUESTION_TYPE_EMOJI = { add: '➕', sub: '➖', mul: '✖️', div: '➗', mix: '🔀' };
+    const QUESTION_TYPE_EMOJI = { add: '➕', sub: '➖', mul: '✖️', div: '➗', mix: '🔀', algebra: '🧮' };
     const QUESTION_TYPE_LABELS = {
         add: 'm.catAdd',
         sub: 'm.catSub',
         mul: 'm.catMul',
         div: 'm.catDiv',
         mix: 'm.catMix',
+        algebra: 'm.catAlgebra',
     };
 
     function renderQuestionTypePolicy() {
@@ -502,7 +507,7 @@
     }
 
     // Render one small radar per tier the student actually has tags in.
-    // A P1 kid gets 銅 only; a P4 kid gets 銅/銀/金/鑽.
+    // A P1 kid gets 銅 only; higher grades inherit each previous tier.
     function renderTierRadars(stats) {
         const grid = document.getElementById('radar-tier-grid');
         if (!grid) return;
@@ -521,7 +526,7 @@
             byTier.get(t).push(s);
         }
 
-        const emojiFor = { bronze: '🥉', silver: '🥈', gold: '🥇', diamond: '💎' };
+        const emojiFor = { bronze: '🥉', silver: '🥈', gold: '🥇', diamond: '💎', fire: '🔥', sun: '☀️' };
 
         for (const tier of tierOrder) {
             const list = byTier.get(tier.id) || [];
@@ -679,7 +684,8 @@
 
         // Category icons
         const icons = {
-            [t('m.catAdd')]: '➕', [t('m.catSub')]: '➖', [t('m.catMul')]: '✖️', [t('m.catDiv')]: '➗'
+            [t('m.catAdd')]: '➕', [t('m.catSub')]: '➖', [t('m.catMul')]: '✖️',
+            [t('m.catDiv')]: '➗', [t('m.catAlgebra')]: '🧮'
         };
 
         for (const s of stats) {

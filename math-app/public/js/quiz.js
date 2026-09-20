@@ -24,6 +24,7 @@
     let fractionAnswerMode = false;
     let fractionAnswerType = 'fraction';
     let fractionPart = 0;
+    let decimalAnswerMode = false;
 
     // ========================================
     // DOM Elements  
@@ -54,6 +55,7 @@
     const keypadButtons = numberKeypad
         ? [...numberKeypad.querySelectorAll('button[data-key]')]
         : [];
+    const decimalKey = numberKeypad?.querySelector('[data-key="decimal"]');
 
     // Canvas Element
     const canvas = document.getElementById('scratchpad');
@@ -91,7 +93,8 @@
         [t('m.catAdd')]: '➕',
         [t('m.catSub')]: '➖',
         [t('m.catMul')]: '✖️',
-        [t('m.catDiv')]: '➗'
+        [t('m.catDiv')]: '➗',
+        [t('m.catAlgebra')]: '🧮'
     };
 
     // ========================================
@@ -624,7 +627,24 @@
     // Show Question
     // ========================================
     function isFractionQuestion(q) {
-        return Boolean(q && q.tag && q.tag.startsWith('frac_'));
+        return Boolean(q && (
+            q.answerFormat?.type === 'fraction'
+            || q.answerFormat?.type === 'mixed'
+            || q.answerType === 'fraction'
+            || q.answerType === 'mixed'
+            || (q.tag && q.tag.startsWith('frac_'))
+        ));
+    }
+
+    function isDecimalArithmeticQuestion(q) {
+        return Boolean(q && [
+            'add_up_to_3n', 'sub_up_to_3n', 'mix_3n_4d',
+            'mul_by_powers10', 'mul_by_decimal_scales', 'mul_decimal_or_integer',
+            'div_by_powers10', 'div_by_decimal_scales', 'div_decimal_general',
+            'mix_decimal_or_integer_up_to_4',
+            'convert_decimal_fraction', 'convert_decimal_percent', 'convert_percent_fraction',
+            'linear_equation_easy_2',
+        ].includes(q.tag));
     }
 
     function fractionInputs() {
@@ -667,6 +687,9 @@
         const fractionFormat = fractionFormatFor(q);
         fractionAnswerMode = Boolean(fractionFormat);
         fractionAnswerType = fractionFormat?.type || 'fraction';
+        decimalAnswerMode = isDecimalArithmeticQuestion(q)
+            && !fractionAnswerMode
+            && q.answerType !== 'number';
         fractionPart = 0;
         answerLocked = false;
         answerInput.value = '';
@@ -674,6 +697,10 @@
         answerInput.style.borderColor = '';
         answerInput.hidden = fractionAnswerMode;
         answerInput.disabled = false;
+        if (decimalAnswerMode) answerInput.maxLength = 16;
+        else answerInput.removeAttribute('maxlength');
+        if (decimalKey) decimalKey.hidden = !decimalAnswerMode;
+        if (numberKeypad) numberKeypad.classList.toggle('decimal-mode', decimalAnswerMode);
         if (fractionAnswerFields) fractionAnswerFields.hidden = !fractionAnswerMode;
         if (fractionWholeField) fractionWholeField.hidden = fractionAnswerType !== 'mixed';
         const fractionFieldConfig = new Map(
@@ -735,7 +762,8 @@
         const fractionIncomplete = fractionAnswerMode
             && (userNumerator === '' || userDenominator === ''
                 || (fractionAnswerType === 'mixed' && userWhole === ''));
-        if (fractionIncomplete || (!fractionAnswerMode && userAnswer === '')) {
+        const invalidDecimal = decimalAnswerMode && !/^\d+(?:\.\d{1,6})?$/.test(userAnswer);
+        if (fractionIncomplete || (!fractionAnswerMode && (userAnswer === '' || invalidDecimal))) {
             if (fractionAnswerMode) {
                 if (fractionAnswerType === 'mixed' && userWhole === '') {
                     fractionWholeInput.style.borderColor = 'var(--accent-amber)';
@@ -889,7 +917,17 @@
             answerInput.value = '';
         } else if (key === 'backspace') {
             answerInput.value = answerInput.value.slice(0, -1);
+        } else if (key === 'decimal' && decimalAnswerMode) {
+            if (!answerInput.value) {
+                answerInput.value = '0.';
+            } else if (!answerInput.value.includes('.')) {
+                answerInput.value += '.';
+            }
         } else if (/^\d$/.test(key)) {
+            if (decimalAnswerMode && answerInput.value.includes('.')) {
+                const decimalDigits = answerInput.value.split('.')[1].length;
+                if (decimalDigits >= 6) return;
+            }
             // Avoid leading zeroes while still allowing 0 as an answer.
             answerInput.value = answerInput.value === '0'
                 ? key

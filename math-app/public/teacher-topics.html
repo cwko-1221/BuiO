@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="P1 至 P6 數學題目列表" data-i18n-attr="content:m.topicBankTitle">
+    <title data-i18n="m.topicBankTitle">📚 P1–P6 題目列表</title>
+    <script src="/shared/i18n.js?v=20260910-1"></script>
+    <script src="/shared/i18n/math.js?v=20260920-topic-list-1"></script>
+    <link rel="stylesheet" href="/math-app/css/style.css?v=20260920-topic-list-1">
+</head>
+<body>
+    <div class="page-container">
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <img src="/math-app/images/logo.png" alt="校徽" class="logo-img" data-i18n-attr="alt:m.logoAlt">
+                <span data-i18n="m.appName">杯澳四則特訓</span>
+            </div>
+            <ul class="navbar-nav">
+                <li><a href="/dashboard.html" data-i18n="m.backToDashboard">← 返回教師儀表板</a></li>
+                <li><a href="/" data-i18n="m.home">🏠 回主頁</a></li>
+            </ul>
+            <div class="navbar-user">
+                <span id="teacher-name" data-i18n="m.loading">載入中...</span>
+                <div class="avatar" id="teacher-avatar">?</div>
+            </div>
+        </nav>
+
+        <main class="main-content topic-bank-page">
+            <header class="topic-bank-header">
+                <div>
+                    <h1 data-i18n="m.topicBankTitle">📚 P1–P6 題目列表</h1>
+                    <p data-i18n="m.topicBankLead">按課題首次納入年級分組；展開課題即可查看 5 個隨機例題及答案。</p>
+                </div>
+            </header>
+
+            <div class="topic-bank-toolbar">
+                <input id="topic-search" type="search" autocomplete="off"
+                       data-i18n-attr="placeholder:m.topicSearchPlaceholder"
+                       placeholder="搜尋課題名稱或類型…">
+            </div>
+            <div id="topic-bank-status" class="topic-bank-status" role="status" aria-live="polite"
+                 data-i18n="m.topicListLoading">正在載入題目列表…</div>
+            <div id="topic-grade-groups" class="topic-grade-groups"></div>
+        </main>
+    </div>
+    <script src="/math-app/js/teacher-topics.js?v=20260920-topic-list-1"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="m.pickerTitle">選擇題型 ✦ 杯澳四則特訓</title>
     <script src="/shared/i18n.js?v=20260910-1"></script>
-    <script src="/shared/i18n/math.js?v=20260910-1"></script>
+    <script src="/shared/i18n/math.js?v=20260920-sun-tier-1"></script>
     <link rel="stylesheet" href="/math-app/css/style.css?v=20260910-i18n-1">
     <style>
         body { min-height: 100vh; }
@@ -80,7 +80,7 @@
             }
             // Categories arrive already translated from the server, so the display
             // order is built from the same dictionary rather than Chinese literals.
-            const catOrder = ['m.catAdd','m.catSub','m.catMul','m.catDiv','m.catMix','m.catOther'].map(k => BuiI18n.t(k));
+            const catOrder = ['m.catAdd','m.catSub','m.catMul','m.catDiv','m.catMix','m.catAlgebra','m.catOther'].map(k => BuiI18n.t(k));
             const cats = [...byCategory.keys()].sort((a, b) => {
                 const ai = catOrder.indexOf(a), bi = catOrder.indexOf(b);
                 return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);

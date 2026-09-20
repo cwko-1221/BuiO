@@ -13,6 +13,7 @@ const QUESTION_TYPE_ORDER = [
   { id: 'mul', name: '乘法' },
   { id: 'div', name: '除法' },
   { id: 'mix', name: '混合' },
+  { id: 'algebra', name: '代數' },
 ];
 const QUESTION_TYPE_IDS = QUESTION_TYPE_ORDER.map(t => t.id);
 const QUESTION_TYPE_BY_CATEGORY = new Map([
@@ -21,6 +22,7 @@ const QUESTION_TYPE_BY_CATEGORY = new Map([
   ['乘法', 'mul'],
   ['除法', 'div'],
   ['混合', 'mix'],
+  ['代數', 'algebra'],
 ]);
 
 // ---- P1 (P1 tags) ----
@@ -75,19 +77,35 @@ const P4_ONLY = [
   'mix_4n_paren', 'mix_4n_brackets',
 ];
 
+// ---- P5 (adds unlike fractions, decimals, and fraction operations) ----
+const P5_ONLY = [
+  'frac_unlike_up_to_3_add', 'frac_unlike_up_to_3_sub', 'frac_unlike_3_mix',
+  'frac_mul_up_to_3', 'mul_by_powers10', 'mul_by_decimal_scales',
+  'mul_decimal_or_integer', 'frac_div_up_to_3', 'frac_3_mix_4ops',
+  'linear_equation_easy_1',
+];
+
+// ---- P6 (adds decimal division, mixed operations, and number conversions) ----
+const P6_ONLY = [
+  'div_by_powers10', 'div_by_decimal_scales', 'div_decimal_general',
+  'mix_decimal_or_integer_up_to_4', 'convert_decimal_fraction',
+  'convert_decimal_percent', 'convert_percent_fraction', 'linear_equation_easy_2',
+];
+
 // Build cumulative lists.
 const P1_TAGS = [...P1_ONLY];
 const P2_TAGS = [...P1_TAGS, ...P2_ONLY];
 const P3_TAGS = [...P2_TAGS, ...P3_ONLY];
 const P4_TAGS = [...P3_TAGS, ...P4_ONLY];
-// P5 and P6 mirror P4 until the user provides new specs.
+const P5_TAGS = [...P4_TAGS, ...P5_ONLY];
+const P6_TAGS = [...P5_TAGS, ...P6_ONLY];
 const CLASS_TAGS = {
   P1: P1_TAGS,
   P2: P2_TAGS,
   P3: P3_TAGS,
   P4: P4_TAGS,
-  P5: P4_TAGS,
-  P6: P4_TAGS,
+  P5: P5_TAGS,
+  P6: P6_TAGS,
 };
 
 function normalizeClassname(name) {
@@ -103,13 +121,15 @@ function tagsForClass(classname) {
 }
 
 // Tier metadata for grouping stats on the dashboard.
-// Bronze = the P1 skills, Silver = P2 additions, Gold = P3 additions,
-// Diamond = P4 additions. Higher grades inherit lower tiers.
+// Bronze = P1, Silver = P2, Gold = P3, Diamond = P4, Fire = P5, Sun = P6.
+// Higher grades inherit lower tiers.
 const TIERS = [
   { id: 'bronze',  name: '銅',   tags: new Set(P1_ONLY) },
   { id: 'silver',  name: '銀',   tags: new Set(P2_ONLY) },
   { id: 'gold',    name: '金',   tags: new Set(P3_ONLY) },
   { id: 'diamond', name: '鑽',   tags: new Set(P4_ONLY) },
+  { id: 'fire',    name: '火焰', tags: new Set(P5_ONLY) },
+  { id: 'sun',     name: '太陽', tags: new Set(P6_ONLY) },
 ];
 
 function tierForTag(tag) {
