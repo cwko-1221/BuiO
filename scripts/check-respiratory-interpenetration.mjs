@@ -224,6 +224,35 @@ function readParts(json, bin) {
       morphs: new Map([...morphs].map(([name, values]) => [name, Float64Array.from(values)])),
     });
   }
+  // The atlas exports each lobe as its own semantic mesh below a non-mesh
+  // `lungs` parent. Geometry checks still need the complete paired organ, so
+  // aggregate those five meshes without erasing their inspectable identities.
+  const lobeNames = ['lung_RUL', 'lung_RML', 'lung_RLL', 'lung_LUL', 'lung_LLL'];
+  if (!parts.has('lungs') && lobeNames.every((name) => parts.has(name))) {
+    const lobes = lobeNames.map((name) => parts.get(name));
+    const positions = [];
+    const indices = [];
+    const vertexMaterials = [];
+    const morphs = new Map([['Inhale', []], ['Exhale', []]]);
+    for (const lobe of lobes) {
+      const offset = positions.length / 3;
+      positions.push(...lobe.positions);
+      indices.push(...Array.from(lobe.indices, (index) => index + offset));
+      vertexMaterials.push(...lobe.vertexMaterials);
+      for (const name of morphs.keys()) {
+        const delta = lobe.morphs.get(name);
+        if (!delta) throw new Error(`${lobe.name} is missing its ${name} morph target`);
+        morphs.get(name).push(...delta);
+      }
+    }
+    parts.set('lungs', {
+      name: 'lungs',
+      positions: Float64Array.from(positions),
+      indices: Uint32Array.from(indices),
+      vertexMaterials,
+      morphs: new Map([...morphs].map(([name, values]) => [name, Float64Array.from(values)])),
+    });
+  }
   return parts;
 }
 
@@ -245,6 +274,104 @@ function placed(part, v) {
     }
   }
   return { name: part.name, positions: out, indices: part.indices, vertexMaterials: part.vertexMaterials };
+}
+
+// Fissure seams are duplicated deliberately: each neighbouring lobe owns its
+// own closed pleural surface. The two copies must remain coincident while they
+// breathe, otherwise a bright crack opens or one lobe visibly passes through
+// the other. These planes are bl-lungs.py's cuts expressed in glTF axes.
+const OBLIQUE = { normal: [0, 0.819, 0.573], offset: 1.994 };
+const HORIZONTAL = { normal: [0, 1, 0], offset: 2.62 };
+const FISSURES = [
+  ['lung_RUL', 'lung_RML', HORIZONTAL, (p) => planeValue(p, OBLIQUE) >= -0.004],
+  // Stay clear of the three-way fissure corner: quantization can place a
+  // corner vertex on either side of the horizontal plane without opening a
+  // visible seam. The two surfaces are compared along their actual shared arc.
+  ['lung_RUL', 'lung_RLL', OBLIQUE, (p) => planeValue(p, HORIZONTAL) >= 0.01],
+  ['lung_RML', 'lung_RLL', OBLIQUE, (p) => planeValue(p, HORIZONTAL) <= -0.01],
+  ['lung_LUL', 'lung_LLL', OBLIQUE, () => true],
+];
+
+function planeValue(point, plane) {
+  return point[0] * plane.normal[0] + point[1] * plane.normal[1] + point[2] * plane.normal[2] - plane.offset;
+}
+
+function seamIndices(part, plane, accept) {
+  const result = [];
+  for (let index = 0; index < part.positions.length; index += 3) {
+    const point = [part.positions[index], part.positions[index + 1], part.positions[index + 2]];
+    if (Math.abs(planeValue(point, plane)) <= 0.001 && accept(point)) result.push(index);
+  }
+  return result;
+}
+
+function nearestDistance(source, sourceIndices, target, targetIndices) {
+  let worst = 0;
+  for (const i of sourceIndices) {
+    let nearest = Infinity;
+    for (const j of targetIndices) {
+      const dx = source.positions[i] - target.positions[j];
+      const dy = source.positions[i + 1] - target.positions[j + 1];
+      const dz = source.positions[i + 2] - target.positions[j + 2];
+      nearest = Math.min(nearest, Math.hypot(dx, dy, dz));
+    }
+    worst = Math.max(worst, nearest);
+  }
+  return worst;
+}
+
+function checkFissureSeams(parts) {
+  const reports = [];
+  for (const [aName, bName, plane, accept] of FISSURES) {
+    const aBase = parts.get(aName); const bBase = parts.get(bName);
+    if (!aBase || !bBase) throw new Error(`missing semantic lobe for fissure ${aName}/${bName}`);
+    const aIndices = seamIndices(aBase, plane, accept);
+    const bIndices = seamIndices(bBase, plane, accept);
+    if (aIndices.length < 3 || bIndices.length < 3) {
+      throw new Error(`fissure ${aName}/${bName} has too few seam vertices (${aIndices.length}/${bIndices.length})`);
+    }
+    for (const breath of [-1, 0, 1]) {
+      const a = placed(aBase, breath); const b = placed(bBase, breath);
+      const mismatch = Math.max(
+        nearestDistance(a, aIndices, b, bIndices),
+        nearestDistance(b, bIndices, a, aIndices),
+      );
+      reports.push({ fissure: `${aName}/${bName}`, breath, mismatch, vertices: [aIndices.length, bIndices.length] });
+    }
+  }
+  return reports;
+}
+
+function boundsOf(part) {
+  const bounds = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };
+  for (let i = 0; i < part.positions.length; i += 3) {
+    for (let axis = 0; axis < 3; axis += 1) {
+      bounds.min[axis] = Math.min(bounds.min[axis], part.positions[i + axis]);
+      bounds.max[axis] = Math.max(bounds.max[axis], part.positions[i + axis]);
+    }
+  }
+  return bounds;
+}
+
+function assertLobeAnatomy(parts) {
+  const ids = ['lung_RUL', 'lung_RML', 'lung_RLL', 'lung_LUL', 'lung_LLL'];
+  for (const id of ids) if (!parts.has(id)) throw new Error(`missing semantic lung lobe ${id}`);
+  const bounds = Object.fromEntries(ids.map((id) => [id, boundsOf(parts.get(id))]));
+  for (const id of ids.filter((name) => name.startsWith('lung_R'))) {
+    if (bounds[id].max[0] >= 0) throw new Error(`${id} crosses the patient's midline`);
+  }
+  for (const id of ids.filter((name) => name.startsWith('lung_L'))) {
+    if (bounds[id].min[0] <= 0) throw new Error(`${id} crosses the patient's midline`);
+  }
+  if (bounds.lung_RUL.max[1] <= bounds.lung_RLL.max[1] + 0.3
+      || bounds.lung_LUL.max[1] <= bounds.lung_LLL.max[1] + 0.3) {
+    throw new Error('an upper lobe no longer reaches sufficiently above its lower lobe');
+  }
+  if (bounds.lung_RLL.min[1] >= bounds.lung_RUL.min[1] - 0.2
+      || bounds.lung_LLL.min[1] >= bounds.lung_LUL.min[1] - 0.08) {
+    throw new Error('a lower lobe no longer descends sufficiently below its upper lobe');
+  }
+  return bounds;
 }
 
 /**
@@ -735,6 +862,17 @@ export async function runRespiratoryInterpenetrationCheck({ log = console.log } 
   for (const name of ['airway', 'spine', 'lungs', 'ribcage', 'diaphragm', 'body']) {
     if (!parts.has(name)) throw new Error(`the model is missing its ${name}`);
   }
+  const lobeBounds = assertLobeAnatomy(parts);
+  const fissures = checkFissureSeams(parts);
+  const fissureTolerance = 0.0012;
+  for (const report of fissures) {
+    log(`fissure ${report.fissure.padEnd(21)} breath ${String(report.breath).padStart(2)}  mismatch ${f(report.mismatch)}`
+      + `  (${report.vertices.join('/')} seam vertices)`);
+  }
+  const fissureFailures = fissures.filter((report) => report.mismatch > fissureTolerance);
+  if (fissureFailures.length) {
+    throw new Error(`${fissureFailures.length} lobe fissure seam states exceed ${fissureTolerance}`);
+  }
 
   // The intrapulmonary airway, fixed once from the resting pose so the set
   // being judged cannot shrink as the lungs move off it.
@@ -811,7 +949,16 @@ export async function runRespiratoryInterpenetrationCheck({ log = console.log } 
   } else {
     log('No structure passes through another anywhere in the breath range.');
   }
-  return { ok: failures.length === 0, failures, rows, tolerance: TOLERANCE, bronchialVertices: members.length };
+  return {
+    ok: failures.length === 0,
+    failures,
+    rows,
+    tolerance: TOLERANCE,
+    fissures,
+    fissureTolerance,
+    lobeBounds,
+    bronchialVertices: members.length,
+  };
 }
 
 const invokedDirectly = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {
   palette, mat, roundedBox, cylinder, sphere, torus, makeBottle, makeBeaker,
-  makeButton, makeTargetRing, makeLabelSprite, dynamicDisplay,
+  makeButton, makeTargetRing, makeLabelSprite, configureLabelTexture, dynamicDisplay,
 } from '../SceneKit.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -1556,12 +1556,12 @@ function makeTemperatureDial(min, max) {
   face.position.y = .16;
 
   const canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 256;
+  canvas.width = 512;
+  canvas.height = 512;
+  const pixelScale = canvas.width / 256;
+  const centre = canvas.width / 2;
   const context = canvas.getContext('2d');
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
+  const texture = configureLabelTexture(new THREE.CanvasTexture(canvas));
   const dialTop = new THREE.Mesh(
     new THREE.CircleGeometry(.5, 48),
     new THREE.MeshStandardMaterial({ map: texture, roughness: .34, metalness: .02 }),
@@ -1594,30 +1594,30 @@ function makeTemperatureDial(min, max) {
   group.userData.setTemperature = (celsius) => {
     const span = (celsius - min) / (max - min);
     pointerPivot.rotation.y = THREE.MathUtils.lerp(-Math.PI * .72, Math.PI * .72, span);
-    context.clearRect(0, 0, 256, 256);
+    context.clearRect(0, 0, canvas.width, canvas.height);
     context.fillStyle = '#f7fbfa';
     context.beginPath();
-    context.arc(128, 128, 126, 0, Math.PI * 2);
+    context.arc(centre, centre, 126 * pixelScale, 0, Math.PI * 2);
     context.fill();
     for (let index = 0; index <= 11; index += 1) {
       const t = index / 11;
       const angle = THREE.MathUtils.lerp(Math.PI * .78, Math.PI * 2.22, t);
       const major = index % 2 === 0;
       context.strokeStyle = t < span ? '#e2724a' : '#9db9c1';
-      context.lineWidth = major ? 6 : 3;
+      context.lineWidth = (major ? 6 : 3) * pixelScale;
       context.beginPath();
-      context.moveTo(128 + Math.cos(angle) * 108, 128 + Math.sin(angle) * 108);
-      context.lineTo(128 + Math.cos(angle) * (major ? 84 : 92), 128 + Math.sin(angle) * (major ? 84 : 92));
+      context.moveTo(centre + Math.cos(angle) * 108 * pixelScale, centre + Math.sin(angle) * 108 * pixelScale);
+      context.lineTo(centre + Math.cos(angle) * (major ? 84 : 92) * pixelScale, centre + Math.sin(angle) * (major ? 84 : 92) * pixelScale);
       context.stroke();
     }
     context.fillStyle = '#0e3b46';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.font = '700 58px "Microsoft JhengHei", sans-serif';
-    context.fillText(`${Math.round(celsius)}`, 128, 116);
-    context.font = '600 30px "Microsoft JhengHei", sans-serif';
+    context.font = `700 ${58 * pixelScale}px "Microsoft JhengHei", sans-serif`;
+    context.fillText(`${Math.round(celsius)}`, centre, 116 * pixelScale);
+    context.font = `600 ${30 * pixelScale}px "Microsoft JhengHei", sans-serif`;
     context.fillStyle = '#5c8592';
-    context.fillText('°C', 128, 160);
+    context.fillText('°C', centre, 160 * pixelScale);
     texture.needsUpdate = true;
   };
   group.userData.setTemperature((min + max) / 2);

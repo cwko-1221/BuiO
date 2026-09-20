@@ -1,4 +1,4 @@
-import { copyFileSync, rmSync, statSync } from 'node:fs';
+import { copyFileSync, renameSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -36,7 +36,10 @@ try {
     '--quantize-color', '8',
   ]);
   run(['validate', quantized]);
-  copyFileSync(quantized, source);
+  // Swap the fully validated model into place atomically. Chromium on Windows
+  // can keep a served GLB open; copying over it fails even though replacing
+  // the directory entry is safe and prevents a half-written asset being read.
+  renameSync(quantized, source);
   console.log(`Optimized ${source}: ${statSync(`${work}-source.glb`).size} -> ${statSync(source).size} bytes`);
 } finally {
   for (const path of [`${work}-source.glb`, cleaned, quantized]) {

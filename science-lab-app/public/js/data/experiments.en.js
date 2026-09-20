@@ -318,7 +318,7 @@ export const experiments = [
     },
   },
   {
-    id: 'respiratory-system', number: 8, topic: 'Human Body', grades: 'P4–P6', minutes: 12,
+    id: 'respiratory-system', schema: 3, number: 8, topic: 'Human Body', grades: 'P4–P6', minutes: 16,
     title: 'The Breathing Machine', englishTitle: 'The Breathing Machine', color: '#ef7d8e', icon: 'lungs',
     observe: {
       title: 'Between one breath and the next',
@@ -327,11 +327,11 @@ export const experiments = [
       wonder: 'Air cannot walk in by itself. So what pulls it down into the lungs, and what pushes it back out?',
     },
     question: 'Which organs does air pass through on its way in and out of the lungs, and how does the body move it?',
-    objective: 'Name the parts of the respiratory system and what each one does, then model how the ribs, diaphragm and chest change as you breathe in and out.',
-    apparatus: ['Respiratory system board', 'Six organ name cards', 'Ribs', 'Diaphragm', 'Chest'],
+    objective: 'Name the respiratory organs, then model how the ribs, diaphragm and chest change as you breathe in and out.',
+    apparatus: ['Respiratory system board', 'Six organ name cards', 'Left and right lungs', 'Ribs', 'Diaphragm', 'Chest'],
     curriculum: { items: '#31, #33', codes: ['4LS1', '5LS2'] },
     safety: 'Working the model is perfectly safe. Real breathing should not be held for long stretches, though — take deep breaths slowly.',
-    modelNote: 'The model represents one slow deep breath while standing. One control runs from end-expiration to end-inspiration: the diaphragmatic domes descend about 5 cm while anterior and lateral ribs show pump-handle and bucket-handle elevation. Every part is coupled on the same breath cycle and cannot be driven independently. Quiet expiration is driven mainly by elastic recoil. The live instrument shows relative thoracic volume, alveolar pressure relation and airflow direction; the percentage is a normalized teaching value, not a patient measurement.',
+    modelNote: 'The model represents one slow deep breath while standing. Pupils identify the left and right lungs as whole organs; this activity does not ask them to identify or tap individual lobes. In anterior view, the patient’s right is on the learner’s left. One control runs from end-expiration to end-inspiration: the diaphragmatic domes descend about 5 cm while anterior and lateral ribs show pump-handle and bucket-handle elevation. Every part is coupled on the same breath cycle and cannot be driven independently. Quiet expiration is driven mainly by elastic recoil. The live instrument shows relative thoracic volume, alveolar pressure relation and airflow direction; the percentage is a normalized teaching value, not a patient measurement.',
     prediction: {
       prompt: 'When you breathe in, which way does the diaphragm move?',
       options: ['Upwards', 'Downwards', 'It does not move'],
@@ -339,6 +339,7 @@ export const experiments = [
     },
     steps: [
       { verb: 'Label', title: 'Name the parts of the system', instruction: 'Drag each of the six name cards onto the box that points to it.', cue: 'Drag a name card into the box pointing at that organ', hint: 'Follow the path of the air: where does it go first, and where next?', action: { type: 'label', subject: 'organ-labels', pairs: { 'chip-nose': 'slot-nose', 'chip-throat': 'slot-throat', 'chip-trachea': 'slot-trachea', 'chip-bronchi': 'slot-bronchi', 'chip-lungs': 'slot-lungs', 'chip-diaphragm': 'slot-diaphragm' } }, observation: 'All six parts are labelled: air travels nose to throat to trachea to bronchi to lungs.' },
+      { verb: 'Identify', title: 'Find the lungs', instruction: 'Tap either lung and watch the whole pair respond as the chest moves.', cue: 'Tap either side; both lungs highlight together', hint: 'In the front view, the patient’s right is on your left. You do not need to identify individual lobes.', action: { type: 'tap', subject: 'lungs' }, observation: 'Both lungs highlight together. Next, watch how the ribs and diaphragm move the breathing system.' },
       { verb: 'Drag', title: 'Inhale: move down the timeline', instruction: 'Pull the single purple breath-timeline control slowly down to end-inspiration.', cue: 'Drag the one breath timeline downward', hint: 'Compare ribs, diaphragm, lungs, volume, pressure and airflow together.', action: { type: 'adjust', subject: 'breath', min: 50, max: 100, unit: '', range: [-100, 100], start: 0, adjustAxis: 'vertical', invert: true }, observation: 'The ribs elevate and widen while the diaphragm contracts and descends. Thoracic volume rises, alveolar pressure briefly falls below atmosphere and air flows in.' },
       { verb: 'Drag', title: 'Exhale: move up the same timeline', instruction: 'Push the same control slowly up to end-expiration.', cue: 'Drag the breath timeline upward', hint: 'When you stop, notice that airflow returns to zero.', action: { type: 'adjust', subject: 'breath', min: -100, max: -50, unit: '', range: [-100, 100], start: 75, adjustAxis: 'vertical', invert: true }, observation: 'The diaphragm relaxes and rises while ribs fall. Elastic recoil briefly raises alveolar pressure above atmosphere, air flows out, then stops again.' },
       { verb: 'Compare', title: 'Compare both breath endpoints', instruction: 'Scrub slowly back and forth once on the same timeline and compare the endpoints.', cue: 'Use one control to compare the coupled system', hint: 'Volume differs at each endpoint, but airflow is zero at both.', action: { type: 'adjust', subject: 'breath', min: 50, max: 100, unit: '', range: [-100, 100], start: -75, adjustAxis: 'vertical', invert: true }, observation: 'The chest wall follows the thorax; inspiratory force comes from the diaphragm and inspiratory muscles, while airflow is zero at both breath endpoints.' },

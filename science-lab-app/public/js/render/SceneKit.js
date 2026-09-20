@@ -29,6 +29,16 @@ export function setLabelAnisotropy(value) {
   labelAnisotropy = Math.max(1, Math.floor(value) || 1);
 }
 
+/** Keep every canvas-rendered word/reading on the same sharp texture policy. */
+export function configureLabelTexture(texture) {
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = true;
+  texture.anisotropy = labelAnisotropy;
+  return texture;
+}
+
 /** One label atlas, shared by the billboard and the flat-plane label. */
 function drawLabelCanvas(text, color, background) {
   const canvas = document.createElement('canvas');
@@ -43,9 +53,7 @@ function drawLabelCanvas(text, color, background) {
   context.textBaseline = 'middle';
   context.font = '800 144px "Microsoft JhengHei", sans-serif';
   context.fillText(text, LABEL_WIDTH / 2, LABEL_HEIGHT / 2 + 6, LABEL_WIDTH - 156);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = labelAnisotropy;
+  const texture = configureLabelTexture(new THREE.CanvasTexture(canvas));
   return texture;
 }
 
@@ -364,44 +372,53 @@ export function replaceWireGeometry(mesh, start, end, radius = .045) {
 }
 
 /** A lit instrument panel whose reading can be rewritten in place. */
-export function dynamicDisplay(initialText, { width = 1024, height = 384, scale = [2.2, .82] } = {}) {
+export function dynamicDisplay(initialText, {
+  width = 1024, height = 384, scale = [2.2, .82], billboard = true,
+} = {}) {
+  // Keep a shared Retina-ready backing density even when a scene requests a
+  // small badge texture. Scale both axes together so its authored aspect ratio
+  // stays unchanged without paying a 4x texture-memory cost on tablets.
+  const resolutionScale = Math.max(1, 1024 / width, 384 / height);
   const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = Math.round(width * resolutionScale);
+  canvas.height = Math.round(height * resolutionScale);
+  const pixelWidth = canvas.width;
+  const pixelHeight = canvas.height;
   const context = canvas.getContext('2d');
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.minFilter = THREE.LinearFilter;
-  texture.anisotropy = labelAnisotropy;
-  const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
-  const sprite = new THREE.Sprite(material);
-  sprite.scale.set(scale[0], scale[1], 1);
-  sprite.userData.canvasTexture = texture;
-  sprite.userData.text = '';
-  sprite.userData.setText = (rawText, accent = '#60e0bb') => {
+  const texture = configureLabelTexture(new THREE.CanvasTexture(canvas));
+  const material = billboard
+    ? new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false })
+    : new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthTest: false });
+  const display = billboard
+    ? new THREE.Sprite(material)
+    : new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
+  display.scale.set(scale[0], scale[1], 1);
+  display.userData.canvasTexture = texture;
+  display.userData.text = '';
+  display.userData.setText = (rawText, accent = '#60e0bb') => {
     const text = window.BuiI18n?.sceneLabel?.(rawText) ?? rawText;
-    if (sprite.userData.text === `${text}|${accent}`) return;
-    sprite.userData.text = `${text}|${accent}`;
-    context.clearRect(0, 0, width, height);
-    const gradient = context.createLinearGradient(0, 0, width, height);
+    if (display.userData.text === `${text}|${accent}`) return;
+    display.userData.text = `${text}|${accent}`;
+    context.clearRect(0, 0, pixelWidth, pixelHeight);
+    const gradient = context.createLinearGradient(0, 0, pixelWidth, pixelHeight);
     gradient.addColorStop(0, '#082f39');
     gradient.addColorStop(1, '#0c4c58');
     context.fillStyle = gradient;
     context.beginPath();
-    context.roundRect(width * .01, height * .026, width * .98, height * .948, height * .156);
+    context.roundRect(pixelWidth * .01, pixelHeight * .026, pixelWidth * .98, pixelHeight * .948, pixelHeight * .156);
     context.fill();
     context.strokeStyle = accent;
-    context.lineWidth = Math.max(5, height * .036);
+    context.lineWidth = Math.max(5, pixelHeight * .036);
     context.stroke();
     context.fillStyle = '#dffdf5';
-    context.font = `700 ${Math.round(height * .43)}px "Microsoft JhengHei", sans-serif`;
+    context.font = `700 ${Math.round(pixelHeight * .43)}px "Microsoft JhengHei", sans-serif`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.fillText(text, width / 2, height / 2 + 3, width - 44);
+    context.fillText(text, pixelWidth / 2, pixelHeight / 2 + 3, pixelWidth - 44);
     texture.needsUpdate = true;
   };
-  sprite.userData.setText(initialText);
-  return sprite;
+  display.userData.setText(initialText);
+  return display;
 }
 
 export function makeLabelSprite(text, { color = '#123b45', background = '#fffdf7', scale = 1 } = {}) {

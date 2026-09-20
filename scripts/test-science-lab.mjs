@@ -192,6 +192,15 @@ const mainSource = await readFile(path.join(sourceRoot, 'js', 'main.js'), 'utf8'
 assert.match(mainSource, /getCompletedCount\(activeExperimentIds\)/, 'legacy completion records are filtered to active investigations');
 assert.match(mainSource, /getLastPlayed\(activeExperimentIds\)/, 'legacy last-played records cannot break the continue button');
 assert.match(mainSource, /if \(id \|\| currentExperiment\) showCatalog\(\)/, 'removed and unknown hashes return to the catalog');
+assert.match(mainSource, /\(saved\.definitionSchema \|\| 1\) === \(definition\.schema \|\| 1\)/,
+  'the renderer does not replay stale actions into a revised experiment scene');
+const simulationSource = await readFile(path.join(sourceRoot, 'js', 'simulation', 'LabSimulation.js'), 'utf8');
+assert.match(simulationSource, /definitionSchema: this\.definition\.schema \|\| 1/,
+  'saved investigations record the experiment definition schema');
+assert.match(simulationSource, /savedSchema !== expectedSchema/,
+  'an incompatible experiment step sequence restarts instead of skipping new teaching steps');
+const respiratoryDefinition = experiments.find((experiment) => experiment.id === 'respiratory-system');
+assert.equal(respiratoryDefinition.schema, 3, 'the whole-lung activity invalidates saved progress from the lobe-tap lesson');
 
 const sceneFiles = [
   path.join(sourceRoot, 'js', 'render', 'ExperimentScenes.js'),
@@ -250,10 +259,17 @@ assert.equal(sha256(distRespiratory), sha256(publicRespiratory),
   'the deployed respiratory GLB is byte-identical to the checked Blender export');
 
 const respiratoryGlb = readGlbJson(publicRespiratory, 'respiratory model');
+const respiratoryRootNames = respiratoryGlb.scenes[respiratoryGlb.scene].nodes
+  .map((index) => respiratoryGlb.nodes[index].name).sort();
+assert.deepEqual(
+  respiratoryRootNames,
+  ['airway', 'body', 'diaphragm', 'lungs', 'ribcage', 'spine'],
+  'the glTF scene keeps exactly six top-level respiratory systems',
+);
 assert.deepEqual(
   respiratoryGlb.nodes.map((node) => node.name).sort(),
-  ['airway', 'body', 'diaphragm', 'lungs', 'ribcage', 'spine'],
-  'respiratory GLB preserves all six required respiratory anatomy systems as semantic nodes',
+  ['airway', 'body', 'diaphragm', 'lung_LLL', 'lung_LUL', 'lung_RLL', 'lung_RML', 'lung_RUL', 'lungs', 'ribcage', 'spine'],
+  'respiratory GLB preserves six systems plus five independently addressable lung lobes',
 );
 assert.equal(respiratoryGlb.nodes.some((node) => node.name === 'mediastinum'), false,
   'the respiratory lesson does not ship a cardiac/mediastinal mesh');
@@ -264,16 +280,26 @@ for (const material of lobeMaterials) {
   assert.ok(materialNames.includes(material), `respiratory GLB preserves ${material} as a distinct lung lobe material`);
 }
 const lungNode = respiratoryGlb.nodes.find((node) => node.name === 'lungs');
-const lungMesh = respiratoryGlb.meshes[lungNode.mesh];
+assert.equal(lungNode.mesh, undefined, 'lungs is a semantic parent, not duplicate lung geometry');
 assert.deepEqual(
-  lungMesh.primitives.map((primitive) => materialNames[primitive.material]).sort(),
+  lungNode.children.map((index) => respiratoryGlb.nodes[index].name).sort(),
   [...lobeMaterials].sort(),
-  'the lung mesh ships exactly five lobe primitives',
+  'the lungs parent owns exactly five semantic lobe children',
 );
-for (const nodeName of ['ribcage', 'airway', 'lungs', 'body', 'diaphragm']) {
+for (const nodeName of ['ribcage', 'airway', 'body', 'diaphragm', ...lobeMaterials]) {
   const node = respiratoryGlb.nodes.find((candidate) => candidate.name === nodeName);
   assert.deepEqual(respiratoryGlb.meshes[node.mesh].extras?.targetNames, ['Inhale', 'Exhale'],
     `${nodeName}: Blender-authored inhale and exhale endpoints survive export`);
+  for (const primitive of respiratoryGlb.meshes[node.mesh].primitives) {
+    assert.equal(primitive.targets?.length, 2, `${nodeName}: every primitive carries both breath targets`);
+  }
+}
+for (const nodeName of lobeMaterials) {
+  const node = respiratoryGlb.nodes.find((candidate) => candidate.name === nodeName);
+  const mesh = respiratoryGlb.meshes[node.mesh];
+  assert.equal(mesh.primitives.length, 1, `${nodeName}: one anatomical lobe is one selectable mesh`);
+  assert.equal(materialNames[mesh.primitives[0].material], nodeName,
+    `${nodeName}: the semantic lobe node keeps its matching surface material`);
 }
 const totalGzip = jsAssets.reduce(async (sumPromise, file) => {
   const sum = await sumPromise;

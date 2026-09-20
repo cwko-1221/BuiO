@@ -3,16 +3,23 @@
 #
 # Each part is given its material BEFORE the parts are joined, so a joined mesh
 # keeps several material slots and exports as several primitives. That is how
-# the rib cage can be tan bone with white costal cartilage in one object.
+# the rib cage can be tan bone with white costal cartilage in one object. Lung
+# lobes are the deliberate exception: they remain five semantic child meshes
+# below one ``lungs`` parent so the atlas can identify and highlight each lobe.
 import bpy
 import math
 import os
 import random
 import re
+import time
 from mathutils import Matrix, Vector
 
-OUT = r"C:\Users\kochu\Documents\BuiO\science-lab-app\public\models\respiratory.glb"
-TEXTURE_DIR = r"C:\Users\kochu\Documents\BuiO\science-lab-app\art-source\respiratory\generated-textures"
+# Blender's Windows glTF writer is more reliable with normalized forward
+# slashes; pathlib-style paths also avoid accidental escape interpretation if
+# this source is executed through MCP.
+OUT = "C:/Users/kochu/Documents/BuiO/science-lab-app/public/models/respiratory.glb"
+EXPORT_OUT = OUT[:-4] + '.building.glb'
+TEXTURE_DIR = "C:/Users/kochu/Documents/BuiO/science-lab-app/art-source/respiratory/generated-textures"
 os.makedirs(TEXTURE_DIR, exist_ok=True)
 
 def srgb(hex_colour, roughness):
@@ -30,20 +37,25 @@ def srgb(hex_colour, roughness):
 PALETTE = {
     'bone':      srgb(0xD9C89A, 0.52),
     'cartilage': srgb(0xE4E7E6, 0.40),
-    'lung':      srgb(0xC96070, 0.56),
-    'lung_clear': srgb(0xC96070, 0.56),
-    'lung_RUL':  srgb(0xD16B78, 0.55),
-    'lung_RML':  srgb(0xC75B6C, 0.56),
-    'lung_RLL':  srgb(0xB94C61, 0.58),
-    'lung_LUL':  srgb(0xCE6877, 0.55),
-    'lung_LLL':  srgb(0xB74D62, 0.58),
+    # Healthy inflated lung tissue is a moist salmon-pink, not the dark red
+    # used by the earlier teaching model.  The lobe-to-lobe variation is kept
+    # subtle so the fissures remain readable without looking colour-coded.
+    'lung':      srgb(0xF0B7C0, 0.49),
+    'lung_clear': srgb(0xF0B7C0, 0.49),
+    'lung_RUL':  srgb(0xF3C0C8, 0.48),
+    'lung_RML':  srgb(0xEDB1BC, 0.49),
+    'lung_RLL':  srgb(0xE5A2AF, 0.51),
+    'lung_LUL':  srgb(0xF1BBC3, 0.48),
+    'lung_LLL':  srgb(0xE7A7B3, 0.51),
     'airway':    srgb(0xE3A9AC, 0.44),
     'bronchus':  srgb(0xD98F94, 0.46),
     'muscle':    srgb(0xB3564A, 0.58),
     'tendon':    srgb(0xD7C8B6, 0.48),
     'artery':    srgb(0x4779A8, 0.42),
     'vein':      srgb(0xB64351, 0.42),
-    'skin':      srgb(0xC9987E, 0.58),
+    'skin':      srgb(0xD8B49E, 0.58),
+    'skin_head': srgb(0xDDBAA4, 0.56),
+    'skin_detail': srgb(0x8E5E55, 0.62),
 }
 
 # prefix -> material, and which export group it joins
@@ -59,6 +71,8 @@ ASSIGN = [
     ('vertebra_',      'bone',      'spine'),
     ('spinous_',       'bone',      'spine'),
     ('clavicle_',      'bone',      'ribcage'),
+    ('face_detail_',   'skin_detail', 'body'),
+    ('body_head',      'skin_head', 'body'),
     ('body_',          'skin',      'body'),
     ('nasal_',         'airway',    'airway'),
     ('pharynx',        'airway',    'airway'),
@@ -77,16 +91,25 @@ ASSIGN = [
     ('central_tendon',  'tendon',    'diaphragm'),
 ]
 
+LOBE_NAMES = {
+    'lung_R_superior': 'lung_RUL',
+    'lung_R_middle': 'lung_RML',
+    'lung_R_inferior': 'lung_RLL',
+    'lung_L_superior': 'lung_LUL',
+    'lung_L_inferior': 'lung_LLL',
+}
+
 
 TEXTURE_BASE = {
-    'bone': 0xD9C89A, 'cartilage': 0xE4E7E6, 'lung': 0xC96070,
-    'lung_clear': 0xC96070,
-    'lung_RUL': 0xD16B78, 'lung_RML': 0xC75B6C, 'lung_RLL': 0xB94C61,
-    'lung_LUL': 0xCE6877, 'lung_LLL': 0xB74D62,
+    'bone': 0xD9C89A, 'cartilage': 0xE4E7E6, 'lung': 0xF0B7C0,
+    'lung_clear': 0xF0B7C0,
+    'lung_RUL': 0xF3C0C8, 'lung_RML': 0xEDB1BC, 'lung_RLL': 0xE5A2AF,
+    'lung_LUL': 0xF1BBC3, 'lung_LLL': 0xE7A7B3,
     'airway': 0xE3A9AC, 'bronchus': 0xD98F94,
     'muscle': 0xB3564A, 'tendon': 0xD7C8B6,
     'artery': 0x4779A8, 'vein': 0xB64351,
-    'skin': 0xC9987E,
+    'skin': 0xD8B49E,
+    'skin_head': 0xDDBAA4, 'skin_detail': 0x8E5E55,
 }
 
 
@@ -122,7 +145,10 @@ def tissue_texture(name, size=128):
                 # Fine pleural vessels over a moist pink parenchymal field.
                 vessel = max(0.0, grain) ** 5.0
                 amount = 0.035 * fine - 0.23 * vessel
-                tint = (1.0, 0.74, 0.78)
+                # Keep the albedo genuinely pink. The previous green/blue
+                # suppression turned even pale source colours into saturated
+                # red once ACES lighting was applied in the browser.
+                tint = (1.0, 0.97, 0.98)
             elif name == 'muscle':
                 fibre = math.sin((u * 52.0 + v * 8.0) * math.tau) * 0.5
                 amount = 0.055 * fibre + 0.025 * fine
@@ -131,7 +157,7 @@ def tissue_texture(name, size=128):
                 pore = max(0.0, grain - 0.72) * -0.18
                 amount = 0.035 * fine + pore
                 tint = (1.0, 0.98, 0.91)
-            elif name == 'skin':
+            elif name.startswith('skin'):
                 pore = max(0.0, grain - 0.55) ** 2.0
                 amount = 0.018 * fine - 0.055 * pore
                 tint = (1.0, 0.93, 0.88)
@@ -148,9 +174,17 @@ def tissue_texture(name, size=128):
             pixels[i + 3] = 1.0
     image.pixels.foreach_set(pixels)
     image.update()
-    image.filepath_raw = os.path.join(TEXTURE_DIR, image_name + '.png')
+    # Blender's Windows image writer rejects the mixed ``/`` + ``\\`` path
+    # produced by os.path.join when this script is executed through MCP.
+    image.filepath_raw = TEXTURE_DIR.rstrip('/') + '/' + image_name + '.png'
     image.file_format = 'PNG'
-    image.save()
+    try:
+        image.save()
+    except RuntimeError:
+        # A texture already embedded by a previous GLB preview can remain
+        # locked by Blender on Windows.  Packing the freshly generated pixels
+        # keeps the export deterministic and avoids downgrading to flat colour.
+        image.pack()
     return image
 
 
@@ -186,8 +220,8 @@ def paint_vessels(obj):
     layer = mesh.color_attributes.get('vessels')
     if layer is None:
         layer = mesh.color_attributes.new(name='vessels', type='FLOAT_COLOR', domain='POINT')
-    base = srgb(0xCF6B78, 0)[0][:3]
-    deep = srgb(0x8E3444, 0)[0][:3]
+    base = srgb(0xF0B7C0, 0)[0][:3]
+    deep = srgb(0xC86C80, 0)[0][:3]
     for index, vert in enumerate(mesh.vertices):
         x, y, z = vert.co
         # Three octaves of cheap trig noise reads as branching at this scale.
@@ -291,8 +325,8 @@ def deformed(part, co, inhale):
         y -= direction * (0.060 if inhale else 0.034) * front * (0.35 + 0.65 * mid)
         z += direction * (0.075 if inhale else 0.040) * front * mid
     elif part == 'diaphragm':
-        # Full control travel represents one slow deep breath: about 4.9 cm of
-        # inspiratory dome descent and 1.6 cm of expiratory rebound.
+        # The rim remains fixed to the chest wall while the domes flatten on
+        # inspiration and rebound on expiration.
         factor = 0.70 if inhale else 1.07
         dome = clamp01((z - DIAPHRAGM_BASE) / 0.54)
         x *= 1.0 + (0.025 if inhale else -0.090) * dome
@@ -307,8 +341,10 @@ def deformed(part, co, inhale):
         # at the anchored apex.
         contact = clamp01((2.55 - z) / 0.35)
         z += (floor_z - z) * contact
-        radial = (0.030 if inhale else -0.040) * (0.30 + 0.70 * basal)
-        depth = (0.040 if inhale else -0.045) * (0.30 + 0.70 * basal)
+        # A deep breath expands the lung contour enough to read at tablet scale
+        # without losing the anchored hila or leaving the rib cage.
+        radial = (0.065 if inhale else -0.055) * (0.30 + 0.70 * basal)
+        depth = (0.075 if inhale else -0.065) * (0.30 + 0.70 * basal)
         # The mediastinal/hilar surface is tethered; expansion is lateral from
         # that anchor rather than scaling the whole lung away from the carina.
         side = 1.0 if x >= 0.0 else -1.0
@@ -323,8 +359,8 @@ def deformed(part, co, inhale):
             floor_z = DIAPHRAGM_BASE + (z - DIAPHRAGM_BASE) * diaphragm_factor
             contact = clamp01((2.55 - z) / 0.35)
             z += (floor_z - z) * contact
-            radial = (0.030 if inhale else -0.040) * (0.30 + 0.70 * basal)
-            depth = (0.040 if inhale else -0.045) * (0.30 + 0.70 * basal)
+            radial = (0.065 if inhale else -0.055) * (0.30 + 0.70 * basal)
+            depth = (0.075 if inhale else -0.065) * (0.30 + 0.70 * basal)
             # The intrapulmonary tree uses the same continuous deformation as
             # the parenchyma around it, preserving its rest-pose containment.
             side = 1.0 if x >= 0.0 else -1.0
@@ -386,6 +422,24 @@ for obj in list(bpy.data.objects):
 
 made = []
 for group, members in groups.items():
+    if group == 'lungs':
+        lung_root = bpy.data.objects.new('lungs', None)
+        bpy.context.collection.objects.link(lung_root)
+        made.append(lung_root)
+        for obj in members:
+            source_name = next((name for name in LOBE_NAMES if obj.name.startswith(name)), None)
+            if source_name is None:
+                raise RuntimeError('unrecognised lung lobe source: ' + obj.name)
+            semantic_name = LOBE_NAMES[source_name]
+            obj.name = semantic_name
+            obj.data.name = semantic_name
+            ensure_uv(obj)
+            add_breath_shapes(obj, 'lungs')
+            for polygon in obj.data.polygons:
+                polygon.use_smooth = True
+            obj.parent = lung_root
+            made.append(obj)
+        continue
     bpy.ops.object.select_all(action='DESELECT')
     for obj in members:
         obj.select_set(True)
@@ -406,9 +460,14 @@ for obj in list(bpy.data.objects):
     if obj not in made:
         bpy.data.objects.remove(obj, do_unlink=True)
 
-bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.select_all(action='DESELECT')
+for obj in made:
+    obj.select_set(True)
 bpy.ops.export_scene.gltf(
-    filepath=OUT,
+    # Exporting directly over a GLB currently displayed by Chromium can fail
+    # with WinError 22.  Build beside it, then swap the complete file in one
+    # operation so the preview can never read a half-written model.
+    filepath=EXPORT_OUT,
     export_format='GLB',
     use_selection=True,
     export_apply=False,
@@ -422,8 +481,19 @@ bpy.ops.export_scene.gltf(
     export_cameras=False,
     export_lights=False,
 )
+for attempt in range(6):
+    try:
+        os.replace(EXPORT_OUT, OUT)
+        break
+    except OSError:
+        if attempt == 5:
+            raise
+        time.sleep(0.12)
 
 for obj in made:
+    if obj.type != 'MESH':
+        print('%-10s children=%d' % (obj.name, len(obj.children)))
+        continue
     slots = [s.material.name if s.material else '-' for s in obj.material_slots]
     print('%-10s faces=%5d  materials=%s' % (obj.name, len(obj.data.polygons), ','.join(slots)))
 print('exported', OUT)

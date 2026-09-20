@@ -21,7 +21,7 @@ const CAMERA_PRESETS = {
   'air-expansion': { position: [0, 5.35, 9.7], target: [0, 1.35, -.15] },
   // The breathing board stands upright, so this station is viewed head-on
   // rather than down onto a bench top.
-  'respiratory-system': { position: [0, 3.3, 10.9], target: [0, 3.05, .2] },
+  'respiratory-system': { position: [0, 3.8, 10.9], target: [0, 3.55, .2] },
   'water-filter': { position: [-.1, 7.55, 11.9], target: [.35, 1.3, .05] },
   'electric-crane': { position: [-.3, 7.35, 12.2], target: [.25, 1.25, 0] },
   'light-reflection': { position: [-.1, 7.15, 11.4], target: [.35, 1.7, .05] },
@@ -149,8 +149,19 @@ export class LabRenderer {
 
   #quality() {
     if (this.settings.quality === 'high' || this.settings.quality === 'low') return this.settings.quality;
-    const memory = navigator.deviceMemory || 4;
-    return memory <= 4 || matchMedia('(max-width: 720px)').matches ? 'low' : 'high';
+    // Safari on iPad does not expose deviceMemory. Treating the missing value
+    // as 4 GB forced every iPad into the low-resolution path and made all
+    // canvas text visibly soft. Only act on a real low-memory report.
+    const memory = Number(navigator.deviceMemory);
+    const lowMemory = Number.isFinite(memory) && memory > 0 && memory <= 2;
+    return lowMemory || matchMedia('(max-width: 520px)').matches ? 'low' : 'high';
+  }
+
+  #pixelRatio() {
+    const deviceRatio = Math.max(1, globalThis.devicePixelRatio || 1);
+    // 1.5x keeps labels legible even in the explicit low-quality mode, while
+    // 2x matches Retina iPads without the 3x/4x memory cost of some phones.
+    return Math.min(deviceRatio, this.#quality() === 'low' ? 1.5 : 2);
   }
 
   #buildEnvironment() {
@@ -443,7 +454,7 @@ export class LabRenderer {
       this.selectionHelper = null;
     }
     const entity = this.entities.get(this.currentStep?.action.subject);
-    if (!entity || entity.options.targetOnly) return;
+    if (!entity || entity.options.targetOnly || entity.options.surfaceHighlight) return;
     const box = new THREE.Box3().setFromObject(entity.object);
     this.selectionHelper = new THREE.Box3Helper(box, this.settings.highContrast ? 0xffd84f : 0x66f0c6);
     this.selectionHelper.material.transparent = true;
@@ -1314,7 +1325,7 @@ export class LabRenderer {
     if (this.renderer) {
       const quality = this.#quality();
       this.renderer.shadowMap.enabled = quality !== 'low';
-      this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, quality === 'low' ? 1 : 1.75));
+      this.renderer.setPixelRatio(this.#pixelRatio());
       this.resize();
     }
     this.#updateSelectionHelper();
@@ -1330,7 +1341,16 @@ export class LabRenderer {
 
   resetCamera(animate = true) {
     const aspect = this.canvas.clientWidth / Math.max(1, this.canvas.clientHeight);
-    const scale = this.mode === 'lab' && aspect < .9 ? Math.min(2.65, 1.1 / Math.max(.38, aspect)) : 1;
+    const respiratoryAtlas = this.cameraPreset === CAMERA_PRESETS['respiratory-system'];
+    // Respiratory labels and the rack reflow in portrait mode. Frame the
+    // thorax, not the empty margins around the full bench, so lung motion is
+    // large enough to study while the callouts still fit beside the body.
+    const portraitScale = respiratoryAtlas
+      ? Math.min(1.15, .65 / Math.max(.38, aspect))
+      : Math.min(2.65, 1.1 / Math.max(.38, aspect));
+    const scale = this.mode === 'lab'
+      ? (aspect < .9 ? portraitScale : respiratoryAtlas ? .85 : 1)
+      : 1;
     const target = this.cameraPreset ? new THREE.Vector3(...this.cameraPreset.target) : DEFAULT_TARGET.clone();
     const authoredPosition = this.cameraPreset ? new THREE.Vector3(...this.cameraPreset.position) : DEFAULT_CAMERA.clone();
     const position = target.clone().add(authoredPosition.sub(target).multiplyScalar(scale));
@@ -1348,8 +1368,7 @@ export class LabRenderer {
     if (!this.renderer) return;
     const width = this.canvas.clientWidth || innerWidth;
     const height = this.canvas.clientHeight || innerHeight;
-    const quality = this.#quality();
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, quality === 'low' ? 1 : 1.75));
+    this.renderer.setPixelRatio(this.#pixelRatio());
     this.renderer.setSize(width, height, false);
     this.camera.aspect = width / Math.max(1, height);
     this.camera.updateProjectionMatrix();

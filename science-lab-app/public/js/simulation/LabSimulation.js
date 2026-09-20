@@ -11,6 +11,7 @@ export class LabSimulation extends EventTarget {
     return {
       version: STATE_VERSION,
       experimentId: this.definition.id,
+      definitionSchema: this.definition.schema || 1,
       currentStep: 0,
       completedSteps: [],
       attempts: 0,
@@ -29,7 +30,10 @@ export class LabSimulation extends EventTarget {
   }
 
   #restore(candidate) {
-    if (!candidate || candidate.version !== STATE_VERSION || candidate.experimentId !== this.definition.id) {
+    const expectedSchema = this.definition.schema || 1;
+    const savedSchema = candidate?.definitionSchema || 1;
+    if (!candidate || candidate.version !== STATE_VERSION || candidate.experimentId !== this.definition.id
+        || savedSchema !== expectedSchema) {
       return this.#initialState();
     }
     const state = { ...this.#initialState(), ...candidate };

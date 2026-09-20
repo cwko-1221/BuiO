@@ -10,10 +10,10 @@ const anatomy = new Map();
 let loadPromise = null;
 let anatomyPromise = null;
 
-// Blender export groups used by the breathing station. Body and mediastinum
-// are presentation layers too, even though only the body has a breath morph.
+// Blender export groups used by the breathing station. The five named lung
+// lobes are child meshes of the lungs group and therefore clone with it.
 const ANATOMY_PARTS = [
-  'lungs', 'ribcage', 'spine', 'airway', 'diaphragm', 'body', 'mediastinum',
+  'lungs', 'ribcage', 'spine', 'airway', 'diaphragm', 'body',
 ];
 
 /** Load the Blender respiratory model once. */

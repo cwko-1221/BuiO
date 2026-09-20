@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { palette, mat, roundedBox, torus, dynamicDisplay } from '../SceneKit.js';
+import { palette, mat, roundedBox, torus, configureLabelTexture, dynamicDisplay } from '../SceneKit.js';
 import { cloneAnatomy } from '../AssetLibrary.js';
 
 // A standing clinical cutaway of the respiratory system. The head, neck and
@@ -22,6 +22,7 @@ const ORGAN_TEXT = {
   nose: '鼻', throat: '喉', trachea: '氣管',
   bronchi: '支氣管', lungs: '肺', diaphragm: '橫膈膜',
 };
+const LOBE_IDS = ['lung_RUL', 'lung_RML', 'lung_RLL', 'lung_LUL', 'lung_LLL'];
 const CALLOUTS = {
   // box is in stage space; aim is a point in MODEL space on or just outside the
   // organ, chosen so a ray in from the box lands on a face a student can see.
@@ -53,7 +54,10 @@ function makeTextPlane(text, {
   width = 1.15, height = .46, color = '#123b45', background = '#fffdf7',
   border = null, radius = .12, weight = 800, pad = .18,
 } = {}) {
-  const pixels = 256;
+  // These cards are inspected close-up on Retina tablets.  Their old
+  // ~300x120 backing canvas was magnified by WebGL and blurred Chinese
+  // strokes; 512 px per world unit keeps the glyph edges genuinely sharp.
+  const pixels = 512;
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(width * pixels);
   canvas.height = Math.round(height * pixels);
@@ -76,9 +80,7 @@ function makeTextPlane(text, {
   context.textBaseline = 'middle';
   context.fillText(label, canvas.width / 2, canvas.height / 2 + canvas.height * .02);
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
+  const texture = configureLabelTexture(new THREE.CanvasTexture(canvas));
   const plane = new THREE.Mesh(
     new THREE.PlaneGeometry(width, height),
     new THREE.MeshBasicMaterial({ map: texture, transparent: true }),
@@ -123,10 +125,13 @@ function makeLeader(from, to, colour = 0x4f8ba0) {
     new THREE.MeshBasicMaterial({ color: colour, transparent: true, opacity: .95 }),
   );
   const dot = new THREE.Mesh(
-    new THREE.SphereGeometry(.055, 14, 12),
+    // Keep the anatomical target visible.  The former marker was large enough
+    // to cover the nose and throat on iPad; this pin reads clearly without
+    // replacing the structure it names.
+    new THREE.SphereGeometry(.012, 14, 12),
     // Anatomical landmarks obey scene depth.  A dot hidden by a rib should not
     // float over it and teach the wrong spatial relationship.
-    new THREE.MeshBasicMaterial({ color: colour, depthTest: true, depthWrite: false, transparent: true }),
+    new THREE.MeshBasicMaterial({ color: colour, opacity: .68, depthTest: true, depthWrite: false, transparent: true }),
   );
   group.add(rod);
   group.userData.rod = rod;
@@ -191,11 +196,8 @@ function setBreathMorph(root, value) {
 export function buildRespiratory(api) {
   const stage = new THREE.Group();
   api.root.add(stage);
-  // Rotate complete label assemblies (card, outline and text) toward the
-  // camera. Rotating only the text plane makes it shear through its 3D card as
-  // soon as the learner leaves the anterior view.
-  const billboards = [];
-  const orientationMarkers = [];
+  // Cards are authored on the anterior plane and stay there while learners
+  // orbit the anatomy; no camera-facing billboard rotation is applied.
   const labelSlots = new Map();
   const labelChips = new Map();
 
@@ -282,7 +284,7 @@ export function buildRespiratory(api) {
         const dissected = material.name?.includes('lung_L');
         material.vertexColors = true;
         material.transparent = true;
-        material.opacity = dissected ? .38 : .90;
+        material.opacity = dissected ? .54 : .95;
         material.depthWrite = !dissected;
         material.side = THREE.DoubleSide;
         material.roughness = .54;
@@ -291,6 +293,32 @@ export function buildRespiratory(api) {
     });
   }
 
+  // Blender keeps five subtle internal lobe surfaces for anatomical shape,
+  // while the student interacts with the paired lungs as one organ target.
+  const lungLobes = new Map();
+  const lobeMaterialState = new Map();
+  for (const id of LOBE_IDS) {
+    const lobe = lungs?.getObjectByName(id);
+    if (!lobe) continue;
+    lungLobes.set(id, lobe);
+    lobe.traverse((child) => {
+      if (!child.isMesh) return;
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      for (const material of materials) {
+        lobeMaterialState.set(material, {
+          emissive: material.emissive?.clone(),
+          emissiveIntensity: material.emissiveIntensity,
+          opacity: material.opacity,
+          transparent: material.transparent,
+          depthWrite: material.depthWrite,
+        });
+      }
+    });
+  }
+  if (lungs) api.entity('lungs', '肺部', lungs, {
+    tappable: true, namePlate: false, physics: false, surfaceHighlight: true,
+  });
+
   if (bodyShell) {
     bodyShell.renderOrder = -4;
     bodyShell.traverse((child) => {
@@ -298,7 +326,7 @@ export function buildRespiratory(api) {
       const materials = Array.isArray(child.material) ? child.material : [child.material];
       for (const material of materials) {
         material.transparent = true;
-        material.opacity = .28;
+        material.opacity = material.name?.includes('skin_detail') ? .62 : material.name?.includes('skin_head') ? .36 : .15;
         material.depthWrite = false;
         material.side = THREE.DoubleSide;
       }
@@ -327,7 +355,9 @@ export function buildRespiratory(api) {
   // wrote the same value; that implied the ribs, diaphragm and chest could be
   // driven independently. This single timeline is deliberately coupled.
   const breathHandle = makeHandle(HANDLE_COLOUR);
-  breathHandle.position.set(0, .04, 1.02);
+  // Lift the touch target clear of the foreground teaching card/plinth while
+  // keeping it centered on the chest's single breathing timeline.
+  breathHandle.position.set(0, .54, 1.02);
   breathHandle.rotation.z = Math.PI / 2;
   diaphragmPivot.add(breathHandle);
   api.entity('breath', '呼吸時間軸', breathHandle, {
@@ -343,8 +373,6 @@ export function buildRespiratory(api) {
     });
     marker.position.set(x, 4.02, .92);
     stage.add(marker);
-    billboards.push(marker);
-    orientationMarkers.push({ marker, screenX: x });
   }
 
   // ---------------------------------------------------- callouts and cards
@@ -442,7 +470,6 @@ export function buildRespiratory(api) {
     ring.userData.ring = outline;
     ring.position.z = .05;
     slotBillboard.add(ring);
-    billboards.push(slotBillboard);
     slotBillboard.userData.screenLayout = { x: boxPosition.x, y: boxPosition.y, depth: boxPosition.z };
     labelSlots.set(organ, slotBillboard);
     leaders[leaders.length - 1].slot = slotBillboard;
@@ -463,12 +490,38 @@ export function buildRespiratory(api) {
     const face = makeTextPlane(ORGAN_TEXT[organ], { width: 1, height: .42, background: '#ffffff', border: '#2f9c86', radius: .08 });
     face.position.z = .045;
     chip.add(cardBody, face);
-    billboards.push(chip);
     labelChips.set(organ, chip);
     chip.position.set(-2.68 + index * 1.07, 0, .08);
     rack.add(chip);
     api.entity(`chip-${organ}`, ORGAN_TEXT[organ], chip, { draggable: true, namePlate: false, physics: false });
   });
+
+  // A one-row rack and wide instruction card get clipped in a portrait tablet
+  // viewport. Reflow only the presentation here; the six labels and their
+  // drag targets remain the same.
+  let compactViewport = null;
+  function syncViewportLayout() {
+    const compact = window.innerWidth < 700;
+    if (compact !== compactViewport) {
+      compactViewport = compact;
+      rackBoard.scale.set(compact ? 3.72 / 6.7 : 1, compact ? 1 / .94 : 1, 1);
+      rack.position.y = compact ? .48 : .28;
+      rackOrder.forEach((organ, index) => {
+        const chip = labelChips.get(organ);
+        if (!chip) return;
+        if (compact) {
+          chip.position.set([-1.08, 0, 1.08][index % 3], index < 3 ? .23 : -.23, .08);
+        } else {
+          chip.position.set(-2.68 + index * 1.07, 0, .08);
+        }
+        chip.scale.setScalar(compact ? .9 : 1);
+      });
+      for (const slot of labelSlots.values()) slot.scale.setScalar(compact ? .8 : 1);
+    }
+    // The mission card already carries the instruction in portrait mode; hide
+    // its duplicate 3D banner so it cannot collide with the app header.
+    readout.visible = labelled && !compact;
+  }
 
   // ------------------------------------------------------------- the arrows
   const airMarks = [];
@@ -493,8 +546,13 @@ export function buildRespiratory(api) {
   model.add(downArrow);
   moveMarks.push(downArrow);
 
-  const readout = dynamicDisplay('把六個器官名牌放進正確的框', { scale: [5.6, .64] });
-  readout.position.set(0, 5.72, 1.18);
+  // A wide high-resolution strip avoids horizontally squeezing Chinese glyphs
+  // on Retina iPads, while the smaller world-space height keeps the anatomy
+  // and the application header unobstructed.
+  const readout = dynamicDisplay('把六個器官名牌放進正確的框', {
+    width: 2048, height: 384, scale: [4.2, .54], billboard: false,
+  });
+  readout.position.set(0, 5.88, 1.18);
   stage.add(readout);
 
   // -------------------------------------------------------- the breath model
@@ -507,6 +565,27 @@ export function buildRespiratory(api) {
   let held = 0;
   let airflow = 0;
   let labelled = false;
+  let selectedLungs = false;
+
+  function restoreLobeMaterials() {
+    for (const [material, saved] of lobeMaterialState) {
+      if (material.emissive && saved.emissive) material.emissive.copy(saved.emissive);
+      material.emissiveIntensity = saved.emissiveIntensity;
+      material.opacity = saved.opacity;
+      material.transparent = saved.transparent;
+      material.depthWrite = saved.depthWrite;
+    }
+    selectedLungs = false;
+  }
+
+  function selectLungs() {
+    restoreLobeMaterials();
+    selectedLungs = true;
+    for (const material of lobeMaterialState.keys()) {
+      if (material.emissive) material.emissive.set(0xffc85a);
+      material.emissiveIntensity = .22;
+    }
+  }
 
   function breath() {
     return held / 100;
@@ -514,6 +593,7 @@ export function buildRespiratory(api) {
 
   function phaseText() {
     if (!labelled) return ['把六個器官名牌放進正確的框', '#8fb7c4'];
+    if (selectedLungs) return ['左右肺｜一呼一吸帶動空氣進出', '#f3c969'];
     const value = breath();
     const volume = Math.round(100 + value * 12);
     if (Math.abs(airflow) <= .12) {
@@ -567,10 +647,19 @@ export function buildRespiratory(api) {
 
   api.onPreview = (subject, value) => {
     if (!HANDLES.has(subject)) return;
+    if (selectedLungs) {
+      restoreLobeMaterials();
+      refresh();
+    }
     wanted = THREE.MathUtils.clamp(value, -100, 100);
   };
 
   api.onAction = (action) => {
+    if (action.type === 'tap' && action.subject === 'lungs') {
+      selectLungs();
+      refresh();
+      return;
+    }
     if (action.subject === LABEL_GROUP && (action.type === 'label-progress' || action.type === 'label')) {
       for (const organ of ORGANS) if (action.pairs?.[`chip-${organ}`]) placed.add(organ);
       labelled = placed.size >= ORGANS.length;
@@ -586,59 +675,25 @@ export function buildRespiratory(api) {
 
   refresh();
 
-  const cameraWorld = new THREE.Quaternion();
-  const parentWorld = new THREE.Quaternion();
-  const stageWorld = new THREE.Quaternion();
-  const inverseStageWorld = new THREE.Quaternion();
-  const rightLocal = new THREE.Vector3();
-  const towardWorld = new THREE.Vector3();
-  const towardLocal = new THREE.Vector3();
   const labelWorld = new THREE.Vector3();
   const labelLocal = new THREE.Vector3();
+  const frontWorld = new THREE.Vector3();
 
   /**
-   * Keep the annotation board in a camera-facing plane around the anatomy.
-   * Fixed world-space callouts collapse into a vertical pile in lateral view;
-   * this preserves the authored left/right rows while the anatomy itself is
-   * free to rotate through the full clinical atlas view.
+   * Keep callouts physically fixed on the anterior side of the model. The
+   * camera may orbit, but cards never swivel to chase it or turn their text.
    */
-  function updateCameraLabels() {
-    if (!api.camera) return;
+  function updateFixedLabels() {
     stage.updateWorldMatrix(true, true);
-    api.camera.getWorldQuaternion(cameraWorld);
-    stage.getWorldQuaternion(stageWorld);
-    inverseStageWorld.copy(stageWorld).invert();
-
-    rightLocal.set(1, 0, 0).applyQuaternion(cameraWorld).applyQuaternion(inverseStageWorld);
-    rightLocal.y = 0;
-    rightLocal.normalize();
-    api.camera.getWorldDirection(towardWorld).negate();
-    towardWorld.y = 0;
-    towardWorld.normalize();
-    towardLocal.copy(towardWorld).applyQuaternion(inverseStageWorld);
-    towardLocal.y = 0;
-    towardLocal.normalize();
 
     for (const slot of labelSlots.values()) {
       const layout = slot.userData.screenLayout;
-      slot.position.copy(rightLocal).multiplyScalar(layout.x).addScaledVector(towardLocal, layout.depth);
-      slot.position.y = layout.y;
+      const x = compactViewport ? Math.sign(layout.x) * 1.75 : layout.x;
+      slot.position.set(x, layout.y, layout.depth);
     }
 
-    // Right/left is useful in anterior and posterior views, but dishonest in a
-    // true lateral view where the two sides project onto one another.
-    const showLaterality = Math.abs(towardLocal.z) >= .5;
-    const posterior = towardLocal.z < 0;
-    for (const { marker, screenX } of orientationMarkers) {
-      marker.visible = showLaterality;
-      const x = posterior ? -screenX : screenX;
-      marker.position.copy(rightLocal).multiplyScalar(x).addScaledVector(towardLocal, .92);
-      marker.position.y = 4.02;
-    }
-
-    readout.position.copy(towardLocal).multiplyScalar(1.18).addScaledVector(rightLocal, -.28);
-    readout.position.y = 5.72;
     stage.updateWorldMatrix(true, true);
+    frontWorld.set(0, 0, 1).transformDirection(stage.matrixWorld);
 
     // A seated card follows its moving callout slot. Unseated cards remain on
     // the physical rack so the first task still behaves like a drag puzzle.
@@ -646,19 +701,15 @@ export function buildRespiratory(api) {
       const slot = labelSlots.get(organ);
       const chip = labelChips.get(organ);
       if (!slot || !chip) continue;
-      slot.getWorldPosition(labelWorld).addScaledVector(towardWorld, .065);
+      slot.getWorldPosition(labelWorld).addScaledVector(frontWorld, .065);
       labelLocal.copy(labelWorld);
       rack.worldToLocal(labelLocal);
       chip.position.copy(labelLocal);
     }
 
     for (const { edge, slot, side } of leaders) {
-      edge.copy(slot.position).addScaledVector(rightLocal, -side * BOX_W / 2);
-    }
-
-    for (const billboard of billboards) {
-      billboard.parent?.getWorldQuaternion(parentWorld);
-      billboard.quaternion.copy(parentWorld.invert().multiply(cameraWorld));
+      edge.copy(slot.position);
+      edge.x -= side * BOX_W * slot.scale.x / 2;
     }
   }
 
@@ -666,7 +717,8 @@ export function buildRespiratory(api) {
     update(time, dt = 1 / 60) {
       // A slow deep breath takes seconds, not a single UI frame.
       const next = THREE.MathUtils.damp(held, wanted, 2.4, dt);
-      updateCameraLabels();
+      syncViewportLayout();
+      updateFixedLabels();
       for (const { leader, edge, pin } of leaders) {
         pin.host.updateWorldMatrix(true, false);
         leader.userData.aimAt(edge, leader.userData.dot.getWorldPosition(labelWorld));
@@ -699,9 +751,11 @@ export function buildRespiratory(api) {
         inhaling: value > .45,
         exhaling: value < -.45,
         airflow: Number(airflow.toFixed(2)),
+        selectedLungs,
+        lungLobes: lungLobes.size,
         model: lungs ? 'blender' : 'missing',
       };
     },
-    dispose() {},
+    dispose() { restoreLobeMaterials(); },
   };
 }

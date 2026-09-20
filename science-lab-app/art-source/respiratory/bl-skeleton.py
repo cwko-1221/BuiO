@@ -87,17 +87,18 @@ def curve_tube(name, points, radius, resolution=12, smooth=True, profile=None, a
 def open_elliptical_shell(name, levels, segments=64, opening_degrees=92.0):
     """A thin posterior/lateral body shell with a true anterior cutaway.
 
-    ``levels`` is a list of ``(z, half_width, half_depth)`` rings.  Front is
-    -Y in Blender, so the missing sector is centred on -pi/2.  Building the
-    opening into the mesh is preferable to making a transparent solid torso:
-    the learner gets an unobstructed atlas view while the remaining skin still
-    supplies realistic depth and surface landmarks from oblique views.
+    ``levels`` is a list of ``(z, half_width, half_depth)`` rings.  A fourth
+    value may set the anterior opening for an individual ring.  Front is -Y in
+    Blender, so the missing sector is centred on -pi/2.  Letting the opening
+    narrow through the trapezius and neck removes the old detachable collar
+    silhouette while the wider chest window keeps the organs unobstructed.
     """
-    gap = math.radians(opening_degrees)
-    start = -math.pi / 2.0 + gap / 2.0
-    end = 3.0 * math.pi / 2.0 - gap / 2.0
     verts = []
-    for z, rx, ry in levels:
+    for level in levels:
+        z, rx, ry = level[:3]
+        gap = math.radians(level[3] if len(level) > 3 else opening_degrees)
+        start = -math.pi / 2.0 + gap / 2.0
+        end = 3.0 * math.pi / 2.0 - gap / 2.0
         for step in range(segments + 1):
             angle = start + (end - start) * step / segments
             verts.append((math.cos(angle) * rx, math.sin(angle) * ry, z))
@@ -125,13 +126,14 @@ def open_elliptical_shell(name, levels, segments=64, opening_degrees=92.0):
     return obj
 
 
-def ellipsoid(name, location, scale, segments=48, rings=32):
+def ellipsoid(name, location, scale, segments=48, rings=32, rotation=(0.0, 0.0, 0.0)):
     """Create an applied, smooth ellipsoid for joined anatomical landmarks."""
     bpy.ops.mesh.primitive_uv_sphere_add(
         segments=segments, ring_count=rings, radius=1.0, location=location)
     obj = bpy.context.active_object
     obj.name = name
     obj.scale = scale
+    obj.rotation_euler = rotation
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     bpy.ops.object.shade_smooth()
     return obj
@@ -195,29 +197,64 @@ costal_profile = flat_profile('costalProfile', 0.032, 0.015)
 # The anterior chest is open; the posterior/lateral skin and the head remain as
 # translucent orientation surfaces in the web scene.
 body_levels = [
-    (0.92, 0.82, 0.72), (1.18, 0.92, 0.80), (1.52, 0.96, 0.75),
-    (1.78, 1.00, 0.72), (2.10, 0.95, 0.84), (2.48, 0.98, 0.92),
-    (2.88, 1.00, 0.94), (3.22, 1.08, 0.90), (3.48, 1.02, 0.82),
-    (3.70, 0.78, 0.64), (3.88, 0.51, 0.44), (4.05, 0.34, 0.30),
+    # Pelvis, abdomen, thorax, shoulder slope and neck are one continuous
+    # surface.  The fourth number is the front opening at that height.
+    (0.10, 0.75, 0.58, 94), (0.28, 0.84, 0.65, 94),
+    (0.50, 0.83, 0.67, 94), (0.70, 0.78, 0.64, 94),
+    (0.88, 0.77, 0.65, 94),
+    (1.06, 0.83, 0.70, 94), (1.32, 0.88, 0.73, 94),
+    (1.60, 0.89, 0.72, 94), (1.84, 0.87, 0.70, 94),
+    (2.10, 0.90, 0.76, 94), (2.42, 0.95, 0.83, 94),
+    (2.74, 1.00, 0.88, 92), (3.00, 1.06, 0.89, 90),
+    (3.22, 1.12, 0.84, 86), (3.40, 1.05, 0.75, 80),
+    (3.56, 0.88, 0.63, 74), (3.70, 0.66, 0.48, 68),
+    (3.82, 0.45, 0.34, 62), (3.94, 0.32, 0.26, 58),
+    (4.10, 0.285, 0.23, 56), (4.26, 0.285, 0.225, 56),
+    (4.38, 0.315, 0.245, 58),
 ]
-built.append(open_elliptical_shell('body_trunk', body_levels))
-built.append(open_elliptical_shell('body_neck', [
-    (3.98, 0.31, 0.25), (4.18, 0.285, 0.235), (4.43, 0.30, 0.25),
-], segments=48, opening_degrees=70.0))
+built.append(open_elliptical_shell('body_trunk', body_levels, segments=72))
 
 # Overlapping volumes are voxel-fused into one continuous facial surface.  The
 # nose projects forward (-Y) with a sloping dorsum, alar tip and real nostril
 # entrance positions used by the upper-airway tubes below.
 head_parts = [
-    ellipsoid('head_cranium', (0.0, 0.055, 4.94), (0.43, 0.39, 0.61)),
-    ellipsoid('head_face', (0.0, -0.115, 4.84), (0.355, 0.31, 0.46)),
-    ellipsoid('head_chin', (0.0, -0.19, 4.50), (0.245, 0.215, 0.19), 40, 24),
-    ellipsoid('nose_dorsum', (0.0, -0.385, 4.91), (0.095, 0.135, 0.235), 36, 24),
-    ellipsoid('nose_tip', (0.0, -0.493, 4.76), (0.145, 0.135, 0.115), 36, 24),
-    ellipsoid('ear_R', (-0.425, 0.035, 4.92), (0.075, 0.045, 0.145), 32, 22),
-    ellipsoid('ear_L', (0.425, 0.035, 4.92), (0.075, 0.045, 0.145), 32, 22),
+    # Neck transition is fused into the head so the jaw grows naturally out of
+    # the neck instead of balancing on a visible tube.
+    ellipsoid('neck_base', (0.0, 0.025, 4.24), (0.305, 0.245, 0.25), 40, 28),
+    ellipsoid('neck_upper', (0.0, -0.005, 4.40), (0.285, 0.235, 0.23), 40, 28),
+    ellipsoid('head_cranium', (0.0, 0.065, 4.92), (0.365, 0.34, 0.49)),
+    ellipsoid('head_occiput', (0.0, 0.145, 4.89), (0.34, 0.30, 0.40), 44, 30),
+    ellipsoid('head_face', (0.0, -0.12, 4.72), (0.29, 0.235, 0.335), 44, 30),
+    ellipsoid('brow_R', (-0.135, -0.292, 4.86), (0.14, 0.065, 0.072), 32, 20),
+    ellipsoid('brow_L', (0.135, -0.292, 4.86), (0.14, 0.065, 0.072), 32, 20),
+    ellipsoid('cheek_R', (-0.16, -0.235, 4.71), (0.145, 0.12, 0.145), 36, 24),
+    ellipsoid('cheek_L', (0.16, -0.235, 4.71), (0.145, 0.12, 0.145), 36, 24),
+    ellipsoid('jaw_R', (-0.115, -0.145, 4.53), (0.155, 0.14, 0.19), 36, 24,
+              rotation=(0.0, math.radians(-7), math.radians(-5))),
+    ellipsoid('jaw_L', (0.115, -0.145, 4.53), (0.155, 0.14, 0.19), 36, 24,
+              rotation=(0.0, math.radians(7), math.radians(5))),
+    ellipsoid('head_chin', (0.0, -0.185, 4.40), (0.17, 0.15, 0.125), 40, 24),
+    ellipsoid('nose_dorsum', (0.0, -0.335, 4.80), (0.055, 0.082, 0.155), 36, 24,
+              rotation=(math.radians(-8), 0.0, 0.0)),
+    ellipsoid('nose_tip', (0.0, -0.405, 4.68), (0.088, 0.086, 0.068), 36, 24),
+    ellipsoid('ear_R', (-0.365, 0.015, 4.78), (0.055, 0.034, 0.12), 32, 22),
+    ellipsoid('ear_L', (0.365, 0.015, 4.78), (0.055, 0.034, 0.12), 32, 22),
 ]
-built.append(joined_voxel_union('body_head', head_parts))
+built.append(joined_voxel_union('body_head', head_parts, voxel=0.036))
+
+# Very small eyelid and mouth landmarks keep the translucent head recognisable
+# in the student view without giving the teaching model a cartoon expression.
+for side in (-1, 1):
+    built.append(curve_tube('face_detail_eye_%s' % ('R' if side < 0 else 'L'), [
+        (side * 0.225, -0.326, 4.825),
+        (side * 0.145, -0.344, 4.842),
+        (side * 0.065, -0.326, 4.825),
+    ], 0.008, resolution=12, around=3))
+built.append(curve_tube('face_detail_mouth', [
+    (-0.095, -0.328, 4.535),
+    (0.0, -0.344, 4.520),
+    (0.095, -0.328, 4.535),
+], 0.007, resolution=12, around=3))
 
 # Clavicles are respiratory landmarks: lung apices extend slightly above their
 # medial thirds.  Their double curve is modelled here instead of drawn in JS.

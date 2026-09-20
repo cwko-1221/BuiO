@@ -19,14 +19,23 @@ independent and re-running one on its own will quietly give you a broken model:
 - `bl-skeleton.py` keeps only the five lung-lobe source meshes and rebuilds the
   airway, thoracic cage, body shell, spine and diaphragm around them. Running
   it without a fresh `bl-lungs.py` result therefore uses stale or missing lungs.
-- `bl-materials.py` *joins* the loose parts into the six final objects. Run it
-  twice and the second run finds the parts already consumed, so it exports
+- `bl-materials.py` joins the loose parts into five system meshes and keeps the
+  five lung lobes as named child meshes of a sixth `lungs` parent. Run it twice
+  and the second run finds the source parts already consumed, so it exports
   whatever is left — once, that was the diaphragm on its own.
+
+After the three Blender stages, run `npm run optimize:respiratory` from
+`science-lab-app`. It validates and quantizes the GLB while retaining the
+breathing shape keys; rerun it after each Blender export. The optimized model is
+about 2.35 MB and keeps the two Blender assets within the production download
+budget.
 
 Both failures export successfully and report no error. Check the part list that
 `bl-materials.py` prints, and confirm `ribcage`, `airway`, `lungs`, `body`,
 `spine` and `diaphragm` are all there before believing an
-export. `node tmp/glb-bounds.mjs` will also list what actually landed in the file.
+export. Under `lungs`, also confirm `lung_RUL`, `lung_RML`, `lung_RLL`,
+`lung_LUL` and `lung_LLL`. `node tmp/glb-bounds.mjs` will also list what
+actually landed in the file.
 
 If the export itself fails with `OSError: [Errno 22]` on the glb path, delete the
 file and run the stage again — a stale handle on the previous export blocks the
@@ -82,7 +91,7 @@ written the way it is read off a reference plate.
 ## Budget
 
 The station's asset budget is checked by `scripts/test-science-lab.mjs`: the
-equipment kit and this model together must stay under 4 MB. This file is
-currently ~2.15 MB at roughly 24k faces. Watch the bevel profile resolution if
-that grows — a profile curve's own `resolution_u` multiplies along every rib,
-which once turned the rib cage into 153k faces and a 7.5 MB export.
+equipment kit and this model together must stay under 4 MB. Watch the bevel
+profile resolution if that grows — a profile curve's own `resolution_u`
+multiplies along every rib, which once turned the rib cage into 153k faces and
+a 7.5 MB export.

@@ -184,7 +184,8 @@ function startExperiment(id, { forceNew = false } = {}) {
   audio.unlock();
   currentExperiment = definition;
   const saved = !forceNew ? store.getSession(id) : null;
-  const canRestore = saved && !saved.complete && saved.currentStep > 0;
+  const canRestore = saved && !saved.complete && saved.currentStep > 0
+    && (saved.definitionSchema || 1) === (definition.schema || 1);
   simulation = new LabSimulation(definition, canRestore ? saved : null);
   bindSimulation();
   renderer.loadExperiment(definition, canRestore ? saved.actionHistory : []);
