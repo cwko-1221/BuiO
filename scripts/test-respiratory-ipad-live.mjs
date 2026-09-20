@@ -13,6 +13,14 @@ async function advanceStageTo(page, slide) {
     const current = await page.locator('#stageScreen:not([hidden])').getAttribute('data-slide').catch(() => null);
     if (current === slide) return;
     if (current === null) throw new Error(`stage closed before reaching ${slide}`);
+    const kind = await page.locator('#stageScreen').getAttribute('data-kind');
+    if (kind === 'chapter') {
+      // Chapter cards advance automatically; tapping their backdrop keeps
+      // this test independent of the configured motion-reduction delay.
+      await page.locator('#stageScreen').click({ position: { x: 20, y: 20 } });
+      await page.waitForTimeout(450);
+      continue;
+    }
     const next = page.locator('#stageNext:not([hidden])');
     if (!(await next.isEnabled())) {
       // A chapter card disables the button during its automatic cross-fade.
@@ -48,6 +56,11 @@ try {
 
   await page.goto(`${base}/science-lab/preview#respiratory-system`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.querySelector('#bootScreen')?.classList.contains('done'));
+  await advanceStageTo(page, 'observe-notice');
+  assert.equal(await page.locator('#stageScreen video').count(), 0,
+    'the respiratory observation flow goes directly to observation prompts without a video page');
+  assert.ok(await page.locator('#observeNotice li').count() >= 2,
+    'the no-video observation page still provides useful things to notice');
   await advanceStageTo(page, 'hypothesis');
   await page.locator('[data-prediction="1"]').click();
   await page.locator('#stageNext').click();

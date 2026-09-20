@@ -310,20 +310,6 @@ function syncVariableValue(value) {
   dom.slider.value = String(value);
 }
 
-const MEDIA_BASE = '/science-lab/media';
-let observationClips = null;
-
-async function loadObservationClips() {
-  if (observationClips) return observationClips;
-  try {
-    const response = await fetch(`${MEDIA_BASE}/index.json`, { credentials: 'include' });
-    observationClips = new Set(response.ok ? (await response.json()).clips || [] : []);
-  } catch {
-    observationClips = new Set();
-  }
-  return observationClips;
-}
-
 // --- slide stage ------------------------------------------------------------
 // One idea per screen. Each phase of the inquiry cycle is a short run of slides
 // rather than a dense dialog, so nothing on screen is smaller than a child will
@@ -427,49 +413,6 @@ function chapterSlide(step, title, note) {
   };
 }
 
-function videoSlide(definition) {
-  return {
-    kind: 'video',
-    id: 'observe-video',
-    kicker: t('sl.stepOneKicker'),
-    next: t('sl.watched'),
-    render() {
-      const wrap = element('div', 'stage-video');
-      wrap.append(element('h2', 'stage-heading', definition.observe.title));
-      const frame = element('div', 'stage-video-frame');
-      const video = document.createElement('video');
-      video.id = 'observeVideo';
-      video.className = 'stage-video-player';
-      video.playsInline = true;
-      video.controls = true;
-      video.preload = 'metadata';
-      video.hidden = true;
-      const fallback = element('div', 'stage-video-fallback');
-      fallback.id = 'observeFallback';
-      fallback.append(element('span', null, '◎'));
-      fallback.append(element('p', null, t('sl.noClip')));
-      frame.append(video, fallback);
-      wrap.append(frame);
-      wrap.append(element('p', 'stage-caption', definition.observe.caption));
-      this.video = video;
-      this.fallback = fallback;
-      return wrap;
-    },
-    async onEnter() {
-      const experimentId = definition.id;
-      const clips = await loadObservationClips();
-      const name = ['mp4', 'webm'].map((ext) => `${experimentId}.${ext}`).find((file) => clips.has(file));
-      if (!name || currentExperiment?.id !== experimentId || !this.video?.isConnected) return;
-      this.video.onloadeddata = () => { this.video.hidden = false; this.fallback.hidden = true; };
-      this.video.onerror = () => { this.video.hidden = true; this.fallback.hidden = false; };
-      this.video.src = `${MEDIA_BASE}/${name}`;
-    },
-    onLeave() {
-      this.video?.pause();
-    },
-  };
-}
-
 function noticeSlide(definition) {
   return {
     kind: 'notice',
@@ -477,7 +420,7 @@ function noticeSlide(definition) {
     kicker: t('sl.stepOneKicker'),
     render() {
       const wrap = element('div', 'stage-notice');
-      wrap.append(element('h2', 'stage-heading', t('sl.watchFor')));
+      wrap.append(element('h2', 'stage-heading', definition.observe.title));
       const list = element('ul', 'stage-list');
       list.id = 'observeNotice';
       for (const item of definition.observe.notice) list.append(element('li', null, item));
@@ -659,7 +602,6 @@ function openObservation() {
   if (!definition.observe) { openHypothesisOnly(); return; }
   runStage([
     chapterSlide(t('sl.chapterOne'), t('sl.chapterObserve'), t('sl.chapterObserveLead')),
-    videoSlide(definition),
     noticeSlide(definition),
     wonderSlide(definition),
     chapterSlide(t('sl.chapterTwo'), t('sl.chapterHypothesis'), t('sl.chapterHypothesisLead')),

@@ -10,7 +10,6 @@ export const experiments = [
     title: 'Density Tower', englishTitle: 'Density Tower', color: '#9b83ee', icon: 'density',
     observe: {
       title: 'Three liquids, one cylinder',
-      caption: 'In the clip, three liquids go into the same cylinder one after another, with no stirring at all.',
       notice: ['Do the three liquids mix into one colour?', 'Which one stays at the bottom?', 'Where does each object come to rest?'],
       wonder: 'Why do they settle into layers instead of mixing together?',
     },
@@ -53,7 +52,6 @@ export const experiments = [
     englishTitle: 'Filter Challenge', color: '#58bce5', icon: 'filter',
     observe: {
       title: 'Where a cup of muddy water goes',
-      caption: 'In the clip, a cup of muddy water is poured into a filter funnel and trickles into the collecting cup below.',
       notice: ['How does the colour change as it passes through?', 'What stays behind on top of the filter?', 'Does water coming out mean water you can drink?'],
       wonder: 'If water looks clear, does that mean it is safe?',
     },
@@ -96,7 +94,6 @@ export const experiments = [
     title: 'Circuit Crane', englishTitle: 'Circuit Crane', color: '#65a8ff', icon: 'circuit',
     observe: {
       title: 'A circuit that does not join up',
-      caption: 'In the clip a battery, a switch, a coil and a bulb sit on the bench, with one connection left undone.',
       notice: ['Is the bulb lit?', 'Do the iron clips beside the coil move at all?', 'What temperature is shown?'],
       wonder: 'How do you connect it so current flows through the coil and the core picks up the clips?',
     },
@@ -141,7 +138,6 @@ export const experiments = [
     title: 'Bounce the Beam', englishTitle: 'Bounce the Beam', color: '#f2c85b', icon: 'circuit',
     observe: {
       title: 'One torch, three surfaces',
-      caption: 'In the clip a torch shines at an angle onto a sample holder, and the sample is swapped between a mirror, crumpled foil and black card.',
       notice: ['Is the reflected light one beam, or many spreading out?', 'What changes when the material changes?', 'Which surface shows almost no reflection at all?'],
       wonder: 'Why does the same beam of light look so different coming off different surfaces?',
     },
@@ -185,7 +181,6 @@ export const experiments = [
     title: 'Conduction Race', englishTitle: 'Conduction Race', color: '#e8804f', icon: 'circuit',
     observe: {
       title: 'Three spoons, one cup of hot water',
-      caption: 'In the clip three spoons of different materials stand in the same cup of hot water, each with a small piece of butter on its handle.',
       notice: ['Which piece of butter starts to melt first?', 'Are the three spoons in the water to the same depth?', 'Where on the spoon is the butter, and how far from the water?'],
       wonder: 'The water only touches the lower half of the spoon — so why does the butter above it melt?',
     },
@@ -228,7 +223,6 @@ export const experiments = [
     title: 'Ramp Rally', englishTitle: 'Ramp Rally', color: '#f28b72', icon: 'ramp',
     observe: {
       title: 'One car, two surfaces',
-      caption: 'In the clip the same car is released from the same height, once onto a smooth surface and once onto a rough one.',
       notice: ['Does it start from the same height both times?', 'Which run goes further?', 'Does anyone push the car before it stops?'],
       wonder: 'Nobody pushed it — so why does the car stop at all?',
     },
@@ -279,7 +273,6 @@ export const experiments = [
     title: 'Warm Air, Cold Air', englishTitle: 'Warm Air, Cold Air', color: '#5ec8b0', icon: 'balloon',
     observe: {
       title: 'One balloon, two basins',
-      caption: 'In the clip a balloon is stretched over the neck of a rigid empty bottle, and the bottle is stood first in hot water and then in iced water.',
       notice: ['What does the balloon do in the hot water?', 'And in the iced water?', 'Does the bottle itself change shape?'],
       wonder: 'The balloon seals the neck — so how can it swell up and shrink again?',
     },
@@ -322,7 +315,6 @@ export const experiments = [
     title: 'The Breathing Machine', englishTitle: 'The Breathing Machine', color: '#ef7d8e', icon: 'lungs',
     observe: {
       title: 'Between one breath and the next',
-      caption: 'In the clip a child takes a deep breath in and lets it slowly out, with the camera held on their chest the whole time.',
       notice: ['As the breath goes in, does the chest swell or shrink?', 'Which way do the ribs move?', 'What happens to all of that on the way out?'],
       wonder: 'Air cannot walk in by itself. So what pulls it down into the lungs, and what pushes it back out?',
     },

@@ -121,9 +121,6 @@ BuiI18n.register({
   'sl.labMeta':      { 'zh-HK': '{topic} · {grades} · 約 {minutes} 分鐘', 'en-US': '{topic} · {grades} · about {minutes} min' },
 
   'sl.stepOneKicker': { 'zh-HK': '第一步 · 觀察 OBSERVE', 'en-US': 'STEP ONE · OBSERVE' },
-  'sl.watched':      { 'zh-HK': '看完了', 'en-US': 'Watched it' },
-  'sl.noClip':       { 'zh-HK': '這個探究的觀察影片尚未加入。先記住下面的問題，在實驗中親自觀察。', 'en-US': 'There is no clip for this inquiry yet. Keep the questions below in mind and watch for the answers as you work.' },
-  'sl.watchFor':     { 'zh-HK': '看的時候留意', 'en-US': 'Watch for' },
   'sl.myQuestion':   { 'zh-HK': '我的疑問是⋯⋯', 'en-US': 'What I am wondering is…' },
   'sl.toHypothesis': { 'zh-HK': '我要提出假說', 'en-US': 'Make my hypothesis' },
   'sl.stepTwoKicker': { 'zh-HK': '第二步 · 假說 HYPOTHESIS', 'en-US': 'STEP TWO · HYPOTHESIS' },

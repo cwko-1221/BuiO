@@ -8,7 +8,6 @@ export const experiments = [
     title: '密度彩虹塔', englishTitle: 'Density Tower', color: '#9b83ee', icon: 'density',
     observe: {
       title: '三種液體，一個量筒',
-      caption: '影片裡三種液體先後倒進同一個量筒，全程沒有攪拌。',
       notice: ['三種液體有沒有混成一種顏色？', '哪一種留在最底？', '放進去的物件停在哪一層？'],
       wonder: '為甚麼它們排成一層一層，而不是混在一起？',
     },
@@ -50,7 +49,6 @@ export const experiments = [
     title: '清澈不等於安全', englishTitle: 'Filter Challenge', color: '#58bce5', icon: 'filter',
     observe: {
       title: '一杯泥水的去向',
-      caption: '影片裡一杯泥水倒進濾斗，慢慢流進下面的收集杯。',
       notice: ['泥水流過濾層後顏色有甚麼變化？', '甚麼東西留在濾層上面？', '流出來的水是否就等於可以飲用？'],
       wonder: '看起來清澈的水，是不是就代表安全？',
     },
@@ -93,7 +91,6 @@ export const experiments = [
     title: '電磁起重機', englishTitle: 'Circuit Crane', color: '#65a8ff', icon: 'circuit',
     observe: {
       title: '一段接不上的電路',
-      caption: '影片裡電池、開關、線圈和燈泡放在枱上，其中一個接點沒有接好。',
       notice: ['燈泡有沒有亮？', '線圈旁邊的鐵夾有沒有動？', '溫度顯示是多少？'],
       wonder: '要怎樣接，電流才會通過線圈，讓鐵芯吸起鐵夾？',
     },
@@ -138,7 +135,6 @@ export const experiments = [
     title: '光的反射', englishTitle: 'Bounce the Beam', color: '#f2c85b', icon: 'circuit',
     observe: {
       title: '同一支電筒，三種表面',
-      caption: '影片裡電筒斜射到樣本架上，樣本換成鏡子、摺皺鋁箔和黑卡紙。',
       notice: ['反射的光是一條，還是散開很多條？', '換了物料後，反射光有甚麼改變？', '哪一種表面幾乎看不到反射光？'],
       wonder: '同一束光射到不同表面，為甚麼反射出來的樣子差這麼遠？',
     },
@@ -182,7 +178,6 @@ export const experiments = [
     title: '熱傳導比賽', englishTitle: 'Conduction Race', color: '#e8804f', icon: 'circuit',
     observe: {
       title: '三支匙，同一杯熱水',
-      caption: '影片裡三支不同材料的匙插在同一杯熱水中，每支匙柄上都放了一小塊牛油。',
       notice: ['哪一塊牛油最先開始融化？', '三支匙插在水中的深度是否一樣？', '牛油放在匙的哪一端？離水面有多遠？'],
       wonder: '水只碰到匙的下半截，為甚麼上面的牛油會融化？',
     },
@@ -225,7 +220,6 @@ export const experiments = [
     title: '斜台與摩擦挑戰', englishTitle: 'Ramp Rally', color: '#f28b72', icon: 'ramp',
     observe: {
       title: '同一部車，兩種路面',
-      caption: '影片裡同一部小車由同一高度放手，分別在光滑面和粗糙面上滑行。',
       notice: ['兩次出發的高度是否一樣？', '哪一次走得比較遠？', '車停下之前有沒有被推過？'],
       wonder: '沒有人推它，車最後為甚麼會停下來？',
     },
@@ -276,7 +270,6 @@ export const experiments = [
     title: '空氣的脹與縮', englishTitle: 'Warm Air, Cold Air', color: '#5ec8b0', icon: 'balloon',
     observe: {
       title: '一個氣球，兩盆水',
-      caption: '影片裡氣球套在一個硬身空膠樽的樽口上，膠樽先後垂直放進熱水和冰水中。',
       notice: ['膠樽放進熱水後，氣球有甚麼變化？', '換成冰水之後又怎樣？', '膠樽本身的形狀有沒有改變？'],
       wonder: '樽口被氣球封住了，為甚麼氣球還會脹大又縮小？',
     },
@@ -319,7 +312,6 @@ export const experiments = [
     title: '呼吸系統', englishTitle: 'The Breathing Machine', color: '#ef7d8e', icon: 'lungs',
     observe: {
       title: '一呼一吸之間',
-      caption: '影片裡一個小朋友深深吸一口氣，再慢慢呼出來，鏡頭一直照著他的胸口。',
       notice: ['吸氣時，胸口是脹起還是縮小？', '肋骨向哪個方向移動？', '呼氣的時候，這些變化又是怎樣？'],
       wonder: '空氣自己不會走路，是甚麼把它吸進肺裏，又把它推回體外？',
     },

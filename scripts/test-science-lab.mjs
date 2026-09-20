@@ -73,8 +73,10 @@ for (const experiment of experiments) {
 
   // Every station runs the same inquiry cycle: observe, hypothesise, test,
   // analyse and reflect, explain.
-  assert.ok(experiment.observe?.caption && experiment.observe?.wonder,
+  assert.ok(experiment.observe?.title && experiment.observe?.wonder,
     `${experiment.id}: observation phase sets up a question`);
+  assert.equal(Object.hasOwn(experiment.observe, 'caption'), false,
+    `${experiment.id}: the observation phase has no video-only caption`);
   assert.ok(Array.isArray(experiment.observe.notice) && experiment.observe.notice.length >= 2,
     `${experiment.id}: observation phase tells students what to look for`);
   assert.ok(experiment.analysis?.evidence, `${experiment.id}: analysis phase restates the evidence`);
@@ -308,12 +310,6 @@ const totalGzip = jsAssets.reduce(async (sumPromise, file) => {
 }, Promise.resolve(0));
 assert.ok(await totalGzip < 1400 * 1024, `compressed JS including local Rapier WASM stays below 1.4 MiB (actual ${await totalGzip} bytes)`);
 
-// Clips are optional, but the route that serves them and the note explaining
-// where they go must both exist, or a dropped-in file goes nowhere.
-const mediaReadme = await readFile(path.join(sourceRoot, 'media', 'README.md'), 'utf8');
-for (const experiment of experiments) {
-  assert.ok(mediaReadme.includes(`${experiment.id}.mp4`), `${experiment.id}: observation clip filename is documented`);
-}
 const mainPhaseSource = await readFile(path.join(sourceRoot, 'js', 'main.js'), 'utf8');
 assert.match(mainPhaseSource, /openObservation\(\)/, 'an investigation opens on its observation phase');
 assert.match(mainPhaseSource, /function openAnalysis\(/, 'analysis and reflection run before the explanation');
@@ -321,8 +317,10 @@ assert.match(mainPhaseSource, /function runStage\(/, 'the inquiry phases run as 
 assert.match(mainPhaseSource, /chapterSlide\(t\('sl\.chapterOne'\), t\('sl\.chapterObserve'\)/, 'the cycle opens by naming the observation phase');
 assert.match(mainPhaseSource, /chapterSlide\(t\('sl\.chapterTwo'\), t\('sl\.chapterHypothesis'\)/, 'the hypothesis phase is announced before it is asked');
 assert.match(mainPhaseSource, /chapterSlide\(t\('sl\.chapterFour'\), t\('sl\.chapterAnalyse'\)/, 'analysis is announced before the evidence is shown');
-assert.match(mainPhaseSource, /MEDIA_BASE = '\/science-lab\/media'/, 'observation clips load from the protected media route');
-for (const slide of ['videoSlide', 'noticeSlide', 'wonderSlide', 'hypothesisSlide', 'analysisSlide', 'reflectionSlide']) {
+assert.doesNotMatch(mainPhaseSource, /videoSlide|observe-video|stage-video|observeVideo|loadObservationClips|MEDIA_BASE/,
+  'the student experiment flow contains no video page or video loading code');
+assert.match(mainPhaseSource, /noticeSlide\(definition\)/, 'the first observation page shows the experiment-specific observation prompts');
+for (const slide of ['noticeSlide', 'wonderSlide', 'hypothesisSlide', 'analysisSlide', 'reflectionSlide']) {
   assert.ok(mainPhaseSource.includes(`function ${slide}(`), `the cycle has a dedicated ${slide}`);
 }
 
