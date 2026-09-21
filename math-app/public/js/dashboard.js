@@ -351,12 +351,13 @@
         div: 'm.catDiv',
         mix: 'm.catMix',
         algebra: 'm.catAlgebra',
+        integer: 'm.catInteger',
         fraction: 'm.catFraction',
         decimal: 'm.catDecimal',
     };
     const QUESTION_TYPE_GROUPS = [
         { label: 'm.questionTypeOperations', ids: ['add', 'sub', 'mul', 'div', 'mix', 'algebra'] },
-        { label: 'm.questionTypeNumberKinds', ids: ['fraction', 'decimal'] },
+        { label: 'm.questionTypeNumberKinds', ids: ['integer', 'fraction', 'decimal'] },
     ];
 
     function renderQuestionTypePolicy() {

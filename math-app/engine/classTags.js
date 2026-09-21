@@ -14,6 +14,7 @@ const QUESTION_TYPE_ORDER = [
   { id: 'div', name: '除法' },
   { id: 'mix', name: '混合' },
   { id: 'algebra', name: '代數' },
+  { id: 'integer', name: '整數' },
   { id: 'fraction', name: '分數' },
   { id: 'decimal', name: '小數' },
 ];
@@ -170,6 +171,9 @@ function questionTypesForTag(tag) {
   const types = [];
   const operation = questionTypeForTag(tag);
   if (operation) types.push(operation);
+  if (operation && operation !== 'algebra' && !FRACTION_TAGS.has(tag) && !DECIMAL_TAGS.has(tag)) {
+    types.push('integer');
+  }
   if (FRACTION_TAGS.has(tag)) types.push('fraction');
   if (DECIMAL_TAGS.has(tag)) types.push('decimal');
   return types;

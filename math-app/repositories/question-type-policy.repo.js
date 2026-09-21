@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Which question categories (operations, fractions, decimals) a class or
+ * Which question categories (operations, whole numbers, fractions, decimals) a class or
  * math group may receive. This mirrors the tier policy, but keeps the two
  * settings in separate PlatformSettings keys so existing tier data remains
  * unchanged.
