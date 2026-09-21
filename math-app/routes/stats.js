@@ -14,8 +14,8 @@ const {
   TIER_ORDER,
   TIER_IDS,
   tiersForClass,
-  QUESTION_TYPE_ORDER,
   QUESTION_TYPE_IDS,
+  QUESTION_TYPE_FILTER_ORDER,
   questionTypesForClass,
   filterTagsForScope,
   normalizeClassname,
@@ -373,7 +373,7 @@ async function respondWithQuestionTypePolicy(res, policy) {
   const students = await users.listForTeacher(ALL_TAGS, { includeTeachers: false });
   res.json({
     success: true,
-    questionTypes: QUESTION_TYPE_ORDER,
+    questionTypes: QUESTION_TYPE_FILTER_ORDER,
     rows: questionTypePolicyRows(students, policy),
   });
 }
@@ -401,6 +401,15 @@ router.put('/teacher/question-type-policy', requireTeacher, async (req, res, nex
       const unknown = raw.filter(id => !QUESTION_TYPE_IDS.includes(id));
       if (unknown.length) {
         return res.status(400).json({ success: false, message: '未知的題目類型：' + unknown.join('、') });
+      }
+
+      const availableTypeIds = new Set(questionTypesForClass(className).map(type => type.id));
+      const unavailable = raw.filter(id => id.includes(':') && !availableTypeIds.has(id));
+      if (unavailable.length) {
+        return res.status(400).json({
+          success: false,
+          message: `${className} 沒有以下運算組合：` + unavailable.join('、'),
+        });
       }
 
       const typeSet = new Set(raw);

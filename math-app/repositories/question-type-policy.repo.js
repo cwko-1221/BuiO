@@ -1,10 +1,9 @@
 'use strict';
 
 /**
- * Which question categories (operations, whole numbers, fractions, decimals) a class or
- * math group may receive. This mirrors the tier policy, but keeps the two
- * settings in separate PlatformSettings keys so existing tier data remains
- * unchanged.
+ * Which number-domain/operation combinations a class or math group may
+ * receive. This mirrors the tier policy, but keeps the two settings in
+ * separate PlatformSettings keys so existing tier data remains unchanged.
  */
 
 const config = require('../../config');

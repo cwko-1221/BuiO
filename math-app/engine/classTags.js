@@ -18,7 +18,6 @@ const QUESTION_TYPE_ORDER = [
   { id: 'fraction', name: '分數' },
   { id: 'decimal', name: '小數' },
 ];
-const QUESTION_TYPE_IDS = QUESTION_TYPE_ORDER.map(t => t.id);
 const QUESTION_TYPE_BY_CATEGORY = new Map([
   ['加法', 'add'],
   ['減法', 'sub'],
@@ -27,8 +26,27 @@ const QUESTION_TYPE_BY_CATEGORY = new Map([
   ['混合', 'mix'],
   ['代數', 'algebra'],
 ]);
-// Domain filters supplement operation filters. Decimal↔fraction conversion
-// belongs to both domains, so turning either one off excludes that exercise.
+const QUESTION_OPERATION_TYPES = QUESTION_TYPE_ORDER.filter(type =>
+  ['add', 'sub', 'mul', 'div', 'mix'].includes(type.id));
+const QUESTION_NUMBER_DOMAINS = ['integer', 'fraction', 'decimal'];
+const QUESTION_TYPE_FILTER_ORDER = [
+  ...QUESTION_NUMBER_DOMAINS.flatMap(domain => QUESTION_OPERATION_TYPES.map(operation => ({
+    id: `${domain}:${operation.id}`,
+    name: operation.name,
+    domain,
+    operation: operation.id,
+  }))),
+  { id: 'algebra', name: '代數', domain: 'algebra', operation: 'algebra' },
+];
+const LEGACY_QUESTION_TYPE_IDS = QUESTION_TYPE_ORDER.map(type => type.id);
+const QUESTION_TYPE_IDS = [...new Set([
+  ...LEGACY_QUESTION_TYPE_IDS,
+  ...QUESTION_TYPE_FILTER_ORDER.map(type => type.id),
+])];
+const QUESTION_TYPE_FILTER_BY_ID = new Map(QUESTION_TYPE_FILTER_ORDER.map(type => [type.id, type]));
+// Domain/operator filters are offered only when that combination exists in a
+// grade. Decimal↔fraction conversion belongs to both domains and needs both
+// matching mixed-operation choices enabled.
 const DECIMAL_TAGS = new Set([
   'add_up_to_3n', 'sub_up_to_3n', 'mix_3n_4d',
   'mul_by_powers10', 'mul_by_decimal_scales', 'mul_decimal_or_integer',
@@ -167,21 +185,32 @@ function questionTypeForTag(tag) {
   return QUESTION_TYPE_BY_CATEGORY.get(TAG_INFO[tag]?.category) || null;
 }
 
+function questionDomainsForTag(tag) {
+  const operation = questionTypeForTag(tag);
+  if (!operation || operation === 'algebra') return [];
+  const domains = [];
+  if (FRACTION_TAGS.has(tag)) domains.push('fraction');
+  if (DECIMAL_TAGS.has(tag)) domains.push('decimal');
+  if (!domains.length) domains.push('integer');
+  return domains;
+}
+
 function questionTypesForTag(tag) {
   const types = [];
   const operation = questionTypeForTag(tag);
-  if (operation) types.push(operation);
-  if (operation && operation !== 'algebra' && !FRACTION_TAGS.has(tag) && !DECIMAL_TAGS.has(tag)) {
-    types.push('integer');
+  if (operation === 'algebra') return [QUESTION_TYPE_FILTER_BY_ID.get('algebra')];
+  for (const domain of questionDomainsForTag(tag)) {
+    const type = QUESTION_TYPE_FILTER_BY_ID.get(`${domain}:${operation}`);
+    if (type) types.push(type);
   }
-  if (FRACTION_TAGS.has(tag)) types.push('fraction');
-  if (DECIMAL_TAGS.has(tag)) types.push('decimal');
   return types;
 }
 
 function questionTypesForClass(classname) {
-  const reached = new Set(tagsForClass(classname).flatMap(questionTypesForTag));
-  return QUESTION_TYPE_ORDER.filter(type => reached.has(type.id));
+  const reached = new Set(tagsForClass(classname)
+    .flatMap(questionTypesForTag)
+    .map(type => type.id));
+  return QUESTION_TYPE_FILTER_ORDER.filter(type => reached.has(type.id));
 }
 
 // The grade curriculum minus whatever tiers or question types a teacher
@@ -195,8 +224,12 @@ function filterTagsForScope(classname, disabledTiers, disabledQuestionTypes) {
   if (!offTiers.size && !offQuestionTypes.size) return tags;
   return tags.filter(tag => {
     const tier = tierForTag(tag);
+    const operation = questionTypeForTag(tag);
+    const domains = questionDomainsForTag(tag);
     const questionTypes = questionTypesForTag(tag);
-    return !offTiers.has(tier) && !questionTypes.some(type => offQuestionTypes.has(type));
+    const legacyDisabled = offQuestionTypes.has(operation) || domains.some(domain => offQuestionTypes.has(domain));
+    const specificDisabled = questionTypes.some(type => offQuestionTypes.has(type.id));
+    return !offTiers.has(tier) && !legacyDisabled && !specificDisabled;
   });
 }
 
@@ -209,6 +242,7 @@ function tagsForScope(classname, disabledTiers, disabledQuestionTypes) {
 module.exports = {
   CLASS_TAGS, tagsForClass, normalizeClassname, tierForTag,
   TIER_ORDER, TIER_IDS, tiersForClass,
-  QUESTION_TYPE_ORDER, QUESTION_TYPE_IDS, questionTypeForTag, questionTypesForTag, questionTypesForClass,
+  QUESTION_TYPE_ORDER, QUESTION_TYPE_IDS, QUESTION_TYPE_FILTER_ORDER,
+  questionTypeForTag, questionDomainsForTag, questionTypesForTag, questionTypesForClass,
   filterTagsForScope, tagsForScope,
 };

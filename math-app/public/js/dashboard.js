@@ -351,13 +351,12 @@
         div: 'm.catDiv',
         mix: 'm.catMix',
         algebra: 'm.catAlgebra',
-        integer: 'm.catInteger',
-        fraction: 'm.catFraction',
-        decimal: 'm.catDecimal',
     };
     const QUESTION_TYPE_GROUPS = [
-        { label: 'm.questionTypeOperations', ids: ['add', 'sub', 'mul', 'div', 'mix', 'algebra'] },
-        { label: 'm.questionTypeNumberKinds', ids: ['integer', 'fraction', 'decimal'] },
+        { label: 'm.catInteger', domain: 'integer' },
+        { label: 'm.catFraction', domain: 'fraction' },
+        { label: 'm.catDecimal', domain: 'decimal' },
+        { label: 'm.catAlgebra', domain: 'algebra' },
     ];
 
     function renderQuestionTypePolicy() {
@@ -380,9 +379,8 @@
 
             const typeGroups = document.createElement('div');
             typeGroups.className = 'question-type-groups';
-            const availableTypes = new Map((row.questionTypes || []).map(type => [type.id, type]));
             for (const group of QUESTION_TYPE_GROUPS) {
-                const types = group.ids.map(id => availableTypes.get(id)).filter(Boolean);
+                const types = (row.questionTypes || []).filter(type => type.domain === group.domain);
                 if (!types.length) continue;
                 const section = document.createElement('div');
                 section.className = 'question-type-group';
@@ -393,7 +391,11 @@
                 const switches = document.createElement('div');
                 switches.className = 'tier-policy-switches';
                 for (const type of types) {
-                    const enabled = !off.has(type.id);
+                    // New policies store exact domain/operator pairs. These
+                    // extra checks keep older broad operation/domain policies
+                    // visible until the teacher next saves the row.
+                    const enabled = !off.has(type.id) &&
+                        !off.has(type.operation) && !off.has(type.domain);
                     const label = document.createElement('label');
                     label.className = 'tier-policy-switch' + (enabled ? '' : ' off');
                     const box = document.createElement('input');
@@ -402,9 +404,9 @@
                     box.dataset.questionType = type.id;
                     box.addEventListener('change', () => saveQuestionTypePolicyRow(el, row));
                     label.appendChild(box);
-                    const labelKey = QUESTION_TYPE_LABELS[type.id];
+                    const labelKey = QUESTION_TYPE_LABELS[type.operation] || QUESTION_TYPE_LABELS[type.id];
                     label.appendChild(document.createTextNode(
-                        (QUESTION_TYPE_EMOJI[type.id] || '') + ' ' +
+                        (QUESTION_TYPE_EMOJI[type.operation] || '') + ' ' +
                         (labelKey ? t(labelKey) : (type.name || type.id))));
                     switches.appendChild(label);
                 }
