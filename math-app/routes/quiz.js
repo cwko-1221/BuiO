@@ -328,7 +328,9 @@ router.post('/submit', async (req, res, next) => {
         ans.userNumerator,
         ans.userWhole,
       );
-      const timeTaken = parseFloat(ans.timeTaken) || 0;
+      // QuestionLogs.TimeSpent is an integer column in Postgres. The client
+      // measures tenths of a second, so normalize batch timings like /answer.
+      const timeTaken = Math.max(0, Math.round(Number(ans.timeTaken) || 0));
       if (gradedAnswer.isCorrect) correctCount++;
       totalTime += timeTaken;
       graded.push({ question, ...gradedAnswer, timeTaken });
