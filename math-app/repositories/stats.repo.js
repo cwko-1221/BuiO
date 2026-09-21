@@ -72,10 +72,12 @@ async function recordAttempts(studentId, attempts, { client } = {}) {
     const placeholders = [];
     let param = 2;
     for (const [tag, totals] of byTag) {
-      placeholders.push(`($1,$${param},$${param + 1},$${param + 2},
-        ROUND(CAST($${param + 2} AS NUMERIC) / NULLIF($${param + 1}, 0) * 100, 2))`);
-      values.push(tag, totals.totalAttempted, totals.totalCorrect);
-      param += 3;
+      // Bind AccuracyRate separately. Reusing the TotalCorrect placeholder in
+      // a NUMERIC expression makes PostgreSQL infer incompatible types for it.
+      const accuracyRate = Math.round((totals.totalCorrect / totals.totalAttempted) * 10000) / 100;
+      placeholders.push(`($1,$${param},$${param + 1},$${param + 2},$${param + 3})`);
+      values.push(tag, totals.totalAttempted, totals.totalCorrect, accuracyRate);
+      param += 4;
     }
     await runner.query(`
       INSERT INTO StudentStats (StudentID, Tag, TotalAttempted, TotalCorrect, AccuracyRate)
