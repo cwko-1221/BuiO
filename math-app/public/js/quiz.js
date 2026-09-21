@@ -20,6 +20,7 @@
     let totalQuizTime = 0;
     let studentInfo = null;
     let isSubmittingQuiz = false;
+    let batchSubmissionPending = false;
     let answerLocked = false;
     let fractionAnswerMode = false;
     let fractionAnswerType = 'fraction';
@@ -550,6 +551,7 @@
             currentIndex = 0;
             totalQuizTime = 0;
             isSubmittingQuiz = false;
+            batchSubmissionPending = false;
 
             buildDots();
             showQuestion(0);
@@ -664,6 +666,38 @@
         };
     }
 
+    function appendFormattedMathText(element, value) {
+        element.replaceChildren();
+        const text = String(value ?? '');
+        const fractionPattern = /(\d+)\s*\/\s*(\d+)/g;
+        let cursor = 0;
+        let match;
+
+        while ((match = fractionPattern.exec(text)) !== null) {
+            if (match.index > cursor) {
+                element.appendChild(document.createTextNode(text.slice(cursor, match.index)));
+            }
+            const fraction = document.createElement('span');
+            fraction.className = 'display-fraction';
+            fraction.setAttribute('role', 'img');
+            fraction.setAttribute('aria-label', t('m.fractionAria', { n: match[1], d: match[2] }));
+            const numerator = document.createElement('span');
+            numerator.textContent = match[1];
+            const line = document.createElement('span');
+            line.className = 'display-fraction-line';
+            line.setAttribute('aria-hidden', 'true');
+            const denominator = document.createElement('span');
+            denominator.textContent = match[2];
+            fraction.append(numerator, line, denominator);
+            element.appendChild(fraction);
+            cursor = fractionPattern.lastIndex;
+        }
+
+        if (cursor < text.length) {
+            element.appendChild(document.createTextNode(text.slice(cursor)));
+        }
+    }
+
     function showQuestion(idx) {
         const q = questions[idx];
         currentIndex = idx;
@@ -677,7 +711,7 @@
         questionNumber.textContent = t('m.questionNo', { n: idx + 1 });
         questionTag.textContent = q.category;
         questionCategory.textContent = q.tagName;
-        questionText.textContent = q.questionText;
+        appendFormattedMathText(questionText, q.questionText);
 
         // Update tag icon
         const tagEl = document.getElementById('question-tag');
@@ -751,6 +785,10 @@
     // Submit Answer
     // ========================================
     async function submitAnswer() {
+        if (batchSubmissionPending) {
+            await submitQuizAnswers();
+            return;
+        }
         const q = questions[currentIndex];
         if (isSubmittingQuiz || answerLocked) return;
 
@@ -784,11 +822,10 @@
 
         const timeTaken = stopTimer();
         const roundedTime = Math.round(timeTaken * 10) / 10;
-
         submitBtn.disabled = true;
         setKeypadDisabled(true);
         answerLocked = true;
-        answers[currentIndex] = {
+        const attempt = {
             index: q.index,
             userAnswer: fractionAnswerMode
                 ? (fractionAnswerType === 'mixed'
@@ -799,23 +836,48 @@
             userNumerator: fractionAnswerMode ? parseInt(userNumerator, 10) : null,
             userDenominator: fractionAnswerMode ? parseInt(userDenominator, 10) : null,
             timeTaken: roundedTime,
-            isCorrect: null,
-            correctAnswer: null,
-            questionText: q.questionText,
-            tag: q.tag
         };
-        totalQuizTime += roundedTime;
-        answerInput.disabled = true;
-        if (fractionWholeInput) fractionWholeInput.disabled = true;
-        if (fractionNumeratorInput) fractionNumeratorInput.disabled = true;
-        if (fractionDenominatorInput) fractionDenominatorInput.disabled = true;
-        updateDots();
 
-        const nextUnanswered = answers.findIndex(answer => answer === null);
-        if (nextUnanswered !== -1) {
-            showQuestion(nextUnanswered);
-        } else {
-            await submitQuizAnswers();
+        try {
+            const response = await fetch('/api/quiz/grade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(attempt),
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || t('m.gradeFailed'));
+            }
+
+            answers[currentIndex] = {
+                ...attempt,
+                ...data.result,
+                timeTaken: roundedTime,
+                questionText: q.questionText,
+                tag: q.tag,
+            };
+            totalQuizTime += roundedTime;
+            answerInput.disabled = true;
+            if (fractionWholeInput) fractionWholeInput.disabled = true;
+            if (fractionNumeratorInput) fractionNumeratorInput.disabled = true;
+            if (fractionDenominatorInput) fractionDenominatorInput.disabled = true;
+            updateDots();
+            showFeedback(data.result.isCorrect ? '✅' : '❌');
+            await new Promise(resolve => setTimeout(resolve, 550));
+
+            const nextUnanswered = answers.findIndex(answer => answer === null);
+            if (nextUnanswered !== -1) {
+                showQuestion(nextUnanswered);
+            } else {
+                await submitQuizAnswers();
+            }
+        } catch (error) {
+            answerLocked = false;
+            submitBtn.disabled = false;
+            setKeypadDisabled(false);
+            startTimer();
+            alert(error.message || t('m.gradeFailed'));
         }
     }
 
@@ -844,7 +906,8 @@
             });
             const data = await res.json();
             if (!res.ok || !data.success) {
-                throw new Error(data.message || t('m.submitFailed'));
+                const requestRef = data.requestId ? `（參考編號：${data.requestId}）` : '';
+                throw new Error(`${data.message || t('m.submitFailed')}${requestRef}`);
             }
 
             const resultsByIndex = new Map((data.results || []).map(result => [result.index, result]));
@@ -854,14 +917,15 @@
                 return result ? { ...answer, ...result } : answer;
             });
             isSubmittingQuiz = false;
+            batchSubmissionPending = false;
             showResults();
         } catch (error) {
             isSubmittingQuiz = false;
+            batchSubmissionPending = true;
+            setKeypadDisabled(true);
+            submitBtn.disabled = false;
+            submitBtn.textContent = t('m.retrySubmit');
             alert(t('m.submitFailed') + error.message);
-            const failedAnswer = answers[currentIndex];
-            if (failedAnswer) totalQuizTime = Math.max(0, totalQuizTime - failedAnswer.timeTaken);
-            answers[currentIndex] = null;
-            showQuestion(currentIndex);
         }
     }
 
@@ -872,12 +936,11 @@
     }
 
     function updateAnswerFromKey(key) {
-        if (answerLocked) return;
-
         if (key === 'submit') {
             submitAnswer();
             return;
         }
+        if (answerLocked) return;
 
         if (fractionAnswerMode) {
             const inputs = fractionInputs();
@@ -1000,24 +1063,36 @@
         for (const ans of validAnswers) {
             const item = document.createElement('div');
             item.className = 'result-item';
-            
+
             const icon = ans.isCorrect ? '✅' : '❌';
             const iconClass = ans.isCorrect ? 'correct' : 'incorrect';
             const userAnsText = ans.skipped ? t('m.skipped') : ans.userAnswer;
             const correctAnsText = ans.correctAnswer !== null ? ans.correctAnswer : '?';
 
-            item.innerHTML = `
-                <div class="result-item-left">
-                    <div class="result-item-icon ${iconClass}">${icon}</div>
-                    <div class="result-item-question">${ans.questionText}</div>
-                </div>
-                <div class="result-item-answer">
-                    ${ans.isCorrect 
-                        ? `<span class="correct-answer">${userAnsText}</span>` 
-                        : `<span class="your-answer">${userAnsText}</span> → <span class="correct-answer">${correctAnsText}</span>`
-                    }
-                </div>
-            `;
+            const left = document.createElement('div');
+            left.className = 'result-item-left';
+            const resultIcon = document.createElement('div');
+            resultIcon.className = `result-item-icon ${iconClass}`;
+            resultIcon.textContent = icon;
+            const question = document.createElement('div');
+            question.className = 'result-item-question';
+            appendFormattedMathText(question, ans.questionText);
+            left.append(resultIcon, question);
+
+            const answer = document.createElement('div');
+            answer.className = 'result-item-answer';
+            const user = document.createElement('span');
+            user.className = ans.isCorrect ? 'correct-answer' : 'your-answer';
+            appendFormattedMathText(user, userAnsText);
+            answer.appendChild(user);
+            if (!ans.isCorrect) {
+                answer.appendChild(document.createTextNode(' → '));
+                const correct = document.createElement('span');
+                correct.className = 'correct-answer';
+                appendFormattedMathText(correct, correctAnsText);
+                answer.appendChild(correct);
+            }
+            item.append(left, answer);
             resultsDetail.appendChild(item);
         }
     }

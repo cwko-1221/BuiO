@@ -90,6 +90,9 @@ BuiI18n.register({
   'm.loadQFailed':   { 'zh-HK': '載入題目失敗: ', 'en-US': 'Could not load the questions: ' },
   'm.connectError':  { 'zh-HK': '連線失敗: ', 'en-US': 'Connection failed: ' },
   'm.submitFailed':  { 'zh-HK': '提交失敗: ', 'en-US': 'Submit failed: ' },
+  'm.gradeFailed':   { 'zh-HK': '答案批改失敗，請檢查連線後再試。', 'en-US': 'Could not check your answer. Check your connection and try again.' },
+  'm.retrySubmit':  { 'zh-HK': '重試提交', 'en-US': 'Retry submission' },
+  'm.fractionAria': { 'zh-HK': '{d}分之{n}', 'en-US': '{n} over {d}' },
 
   // --- teacher dashboard ------------------------------------------------
   'm.dashTitle':     { 'zh-HK': '學習儀表板 ✦ 杯澳四則特訓', 'en-US': 'Learning dashboard ✦ Pui O Arithmetic Drills' },

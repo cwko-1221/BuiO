@@ -259,6 +259,35 @@ router.get('/questions', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// POST /grade — check one answer without writing to the database. The client
+// batches the whole practice set to /submit after showing per-question feedback.
+router.post('/grade', (req, res) => {
+  const { index, userAnswer, userDenominator, userNumerator, userWhole, timeTaken } = req.body || {};
+  const quiz = req.session.currentQuiz;
+  if (!quiz || quiz.length === 0) {
+    return res.status(400).json({ success: false, message: '沒有進行中的測驗，請先取得題目' });
+  }
+  const question = quiz.find(q => q.index === Number(index));
+  if (!question) {
+    return res.status(400).json({ success: false, message: `找不到第 ${index} 題` });
+  }
+
+  const gradedAnswer = gradeAnswer(question, userAnswer, userDenominator, userNumerator, userWhole);
+  const ts = Math.max(0, Math.round(Number(timeTaken) || 0));
+  res.json({
+    success: true,
+    result: {
+      index: question.index,
+      questionText: question.questionText,
+      correctAnswer: gradedAnswer.correctAnswerDisplay,
+      userAnswer: gradedAnswer.userAnswerDisplay,
+      isCorrect: gradedAnswer.isCorrect,
+      timeTaken: ts,
+      tag: question.tag,
+    },
+  });
+});
+
 // ----------------------------------------------------------------
 // POST /submit  — batch grade + persist
 // ----------------------------------------------------------------
@@ -273,13 +302,24 @@ router.post('/submit', async (req, res, next) => {
     if (!quiz || quiz.length === 0) {
       return res.status(400).json({ success: false, message: '沒有進行中的測驗，請先取得題目' });
     }
+    if (answers.length !== quiz.length) {
+      return res.status(400).json({ success: false, message: '題目尚未全部作答，請完成後再提交。' });
+    }
+    const submittedIndices = new Set();
+    for (const answer of answers) {
+      const index = Number(answer?.index);
+      if (!quiz.some(question => question.index === index) || submittedIndices.has(index)) {
+        return res.status(400).json({ success: false, message: '答案資料不完整，請重新開始這組練習。' });
+      }
+      submittedIndices.add(index);
+    }
 
     const graded = [];
     let correctCount = 0;
     let totalTime = 0;
 
     for (const ans of answers) {
-      const question = quiz.find(q => q.index === ans.index);
+      const question = quiz.find(q => q.index === Number(ans.index));
       if (!question) continue;
       const gradedAnswer = gradeAnswer(
         question,

@@ -72,18 +72,14 @@ async function recordAttempts(studentId, attempts, { client } = {}) {
     const placeholders = [];
     let param = 2;
     for (const [tag, totals] of byTag) {
-      placeholders.push(`($1,$${param},$${param + 1},$${param + 2})`);
+      placeholders.push(`($1,$${param},$${param + 1},$${param + 2},
+        ROUND(CAST($${param + 2} AS NUMERIC) / NULLIF($${param + 1}, 0) * 100, 2))`);
       values.push(tag, totals.totalAttempted, totals.totalCorrect);
       param += 3;
     }
     await runner.query(`
-      WITH incoming (StudentID, Tag, TotalAttempted, TotalCorrect) AS (
-        VALUES ${placeholders.join(',')}
-      )
       INSERT INTO StudentStats (StudentID, Tag, TotalAttempted, TotalCorrect, AccuracyRate)
-      SELECT StudentID, Tag, TotalAttempted, TotalCorrect,
-             ROUND(CAST(TotalCorrect AS NUMERIC) / NULLIF(TotalAttempted, 0) * 100, 2)
-      FROM incoming
+      VALUES ${placeholders.join(',')}
       ON CONFLICT (StudentID, Tag) DO UPDATE
         SET TotalAttempted = StudentStats.TotalAttempted + EXCLUDED.TotalAttempted,
             TotalCorrect = StudentStats.TotalCorrect + EXCLUDED.TotalCorrect,
