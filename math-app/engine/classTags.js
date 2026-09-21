@@ -14,6 +14,8 @@ const QUESTION_TYPE_ORDER = [
   { id: 'div', name: '除法' },
   { id: 'mix', name: '混合' },
   { id: 'algebra', name: '代數' },
+  { id: 'fraction', name: '分數' },
+  { id: 'decimal', name: '小數' },
 ];
 const QUESTION_TYPE_IDS = QUESTION_TYPE_ORDER.map(t => t.id);
 const QUESTION_TYPE_BY_CATEGORY = new Map([
@@ -23,6 +25,19 @@ const QUESTION_TYPE_BY_CATEGORY = new Map([
   ['除法', 'div'],
   ['混合', 'mix'],
   ['代數', 'algebra'],
+]);
+// Domain filters supplement operation filters. Decimal↔fraction conversion
+// belongs to both domains, so turning either one off excludes that exercise.
+const DECIMAL_TAGS = new Set([
+  'add_up_to_3n', 'sub_up_to_3n', 'mix_3n_4d',
+  'mul_by_powers10', 'mul_by_decimal_scales', 'mul_decimal_or_integer',
+  'div_by_powers10', 'div_by_decimal_scales', 'div_decimal_general',
+  'mix_decimal_or_integer_up_to_4', 'convert_decimal_fraction',
+  'convert_decimal_percent',
+]);
+const FRACTION_TAGS = new Set([
+  ...ALL_TAGS.filter(tag => tag.startsWith('frac_')),
+  'convert_decimal_fraction', 'convert_percent_fraction',
 ]);
 
 // ---- P1 (P1 tags) ----
@@ -151,8 +166,17 @@ function questionTypeForTag(tag) {
   return QUESTION_TYPE_BY_CATEGORY.get(TAG_INFO[tag]?.category) || null;
 }
 
+function questionTypesForTag(tag) {
+  const types = [];
+  const operation = questionTypeForTag(tag);
+  if (operation) types.push(operation);
+  if (FRACTION_TAGS.has(tag)) types.push('fraction');
+  if (DECIMAL_TAGS.has(tag)) types.push('decimal');
+  return types;
+}
+
 function questionTypesForClass(classname) {
-  const reached = new Set(tagsForClass(classname).map(questionTypeForTag));
+  const reached = new Set(tagsForClass(classname).flatMap(questionTypesForTag));
   return QUESTION_TYPE_ORDER.filter(type => reached.has(type.id));
 }
 
@@ -167,8 +191,8 @@ function filterTagsForScope(classname, disabledTiers, disabledQuestionTypes) {
   if (!offTiers.size && !offQuestionTypes.size) return tags;
   return tags.filter(tag => {
     const tier = tierForTag(tag);
-    const questionType = questionTypeForTag(tag);
-    return !offTiers.has(tier) && !offQuestionTypes.has(questionType);
+    const questionTypes = questionTypesForTag(tag);
+    return !offTiers.has(tier) && !questionTypes.some(type => offQuestionTypes.has(type));
   });
 }
 
@@ -181,6 +205,6 @@ function tagsForScope(classname, disabledTiers, disabledQuestionTypes) {
 module.exports = {
   CLASS_TAGS, tagsForClass, normalizeClassname, tierForTag,
   TIER_ORDER, TIER_IDS, tiersForClass,
-  QUESTION_TYPE_ORDER, QUESTION_TYPE_IDS, questionTypeForTag, questionTypesForClass,
+  QUESTION_TYPE_ORDER, QUESTION_TYPE_IDS, questionTypeForTag, questionTypesForTag, questionTypesForClass,
   filterTagsForScope, tagsForScope,
 };

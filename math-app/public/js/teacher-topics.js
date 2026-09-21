@@ -8,6 +8,38 @@
     let topicEntries = [];
     let panelId = 0;
 
+    function appendFormattedMathText(element, value) {
+        element.replaceChildren();
+        const text = String(value ?? '');
+        const fractionPattern = /(\d+|\?)\s*\/\s*(\d+|\?)/g;
+        let cursor = 0;
+        let match;
+
+        while ((match = fractionPattern.exec(text)) !== null) {
+            if (match.index > cursor) {
+                element.appendChild(document.createTextNode(text.slice(cursor, match.index)));
+            }
+            const fraction = document.createElement('span');
+            fraction.className = 'display-fraction';
+            fraction.setAttribute('role', 'img');
+            fraction.setAttribute('aria-label', t('m.fractionAria', { n: match[1], d: match[2] }));
+            const numerator = document.createElement('span');
+            numerator.textContent = match[1];
+            const line = document.createElement('span');
+            line.className = 'display-fraction-line';
+            line.setAttribute('aria-hidden', 'true');
+            const denominator = document.createElement('span');
+            denominator.textContent = match[2];
+            fraction.append(numerator, line, denominator);
+            element.appendChild(fraction);
+            cursor = fractionPattern.lastIndex;
+        }
+
+        if (cursor < text.length) {
+            element.appendChild(document.createTextNode(text.slice(cursor)));
+        }
+    }
+
     init();
 
     async function init() {
@@ -138,10 +170,10 @@
                 number.textContent = t('m.exampleNumber', { n: index + 1 });
                 const question = document.createElement('span');
                 question.className = 'topic-example-question';
-                question.textContent = example.questionText;
+                appendFormattedMathText(question, example.questionText);
                 const answer = document.createElement('span');
                 answer.className = 'topic-example-answer';
-                answer.textContent = `${t('m.exampleAnswer')}${example.answer}`;
+                appendFormattedMathText(answer, `${t('m.exampleAnswer')}${example.answer}`);
                 item.append(number, question, answer);
                 list.appendChild(item);
             }

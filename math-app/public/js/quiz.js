@@ -669,7 +669,7 @@
     function appendFormattedMathText(element, value) {
         element.replaceChildren();
         const text = String(value ?? '');
-        const fractionPattern = /(\d+)\s*\/\s*(\d+)/g;
+        const fractionPattern = /(\d+|\?)\s*\/\s*(\d+|\?)/g;
         let cursor = 0;
         let match;
 
@@ -829,7 +829,7 @@
             index: q.index,
             userAnswer: fractionAnswerMode
                 ? (fractionAnswerType === 'mixed'
-                    ? `${userWhole}又${userNumerator}/${userDenominator}`
+                    ? `${userWhole} ${userNumerator}/${userDenominator}`
                     : `${userNumerator}/${userDenominator}`)
                 : parseFloat(userAnswer),
             userWhole: fractionAnswerMode && fractionAnswerType === 'mixed' ? parseInt(userWhole, 10) : null,

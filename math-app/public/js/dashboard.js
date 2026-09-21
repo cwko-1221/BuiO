@@ -351,7 +351,13 @@
         div: 'm.catDiv',
         mix: 'm.catMix',
         algebra: 'm.catAlgebra',
+        fraction: 'm.catFraction',
+        decimal: 'm.catDecimal',
     };
+    const QUESTION_TYPE_GROUPS = [
+        { label: 'm.questionTypeOperations', ids: ['add', 'sub', 'mul', 'div', 'mix', 'algebra'] },
+        { label: 'm.questionTypeNumberKinds', ids: ['fraction', 'decimal'] },
+    ];
 
     function renderQuestionTypePolicy() {
         const host = document.getElementById('question-type-policy-rows');
@@ -371,25 +377,40 @@
             name.appendChild(count);
             el.appendChild(name);
 
-            const switches = document.createElement('div');
-            switches.className = 'tier-policy-switches';
-            for (const type of row.questionTypes || []) {
-                const enabled = !off.has(type.id);
-                const label = document.createElement('label');
-                label.className = 'tier-policy-switch' + (enabled ? '' : ' off');
-                const box = document.createElement('input');
-                box.type = 'checkbox';
-                box.checked = enabled;
-                box.dataset.questionType = type.id;
-                box.addEventListener('change', () => saveQuestionTypePolicyRow(el, row));
-                label.appendChild(box);
-                const labelKey = QUESTION_TYPE_LABELS[type.id];
-                label.appendChild(document.createTextNode(
-                    (QUESTION_TYPE_EMOJI[type.id] || '') + ' ' +
-                    (labelKey ? t(labelKey) : (type.name || type.id))));
-                switches.appendChild(label);
+            const typeGroups = document.createElement('div');
+            typeGroups.className = 'question-type-groups';
+            const availableTypes = new Map((row.questionTypes || []).map(type => [type.id, type]));
+            for (const group of QUESTION_TYPE_GROUPS) {
+                const types = group.ids.map(id => availableTypes.get(id)).filter(Boolean);
+                if (!types.length) continue;
+                const section = document.createElement('div');
+                section.className = 'question-type-group';
+                const heading = document.createElement('div');
+                heading.className = 'question-type-group-title';
+                heading.textContent = t(group.label);
+                section.appendChild(heading);
+                const switches = document.createElement('div');
+                switches.className = 'tier-policy-switches';
+                for (const type of types) {
+                    const enabled = !off.has(type.id);
+                    const label = document.createElement('label');
+                    label.className = 'tier-policy-switch' + (enabled ? '' : ' off');
+                    const box = document.createElement('input');
+                    box.type = 'checkbox';
+                    box.checked = enabled;
+                    box.dataset.questionType = type.id;
+                    box.addEventListener('change', () => saveQuestionTypePolicyRow(el, row));
+                    label.appendChild(box);
+                    const labelKey = QUESTION_TYPE_LABELS[type.id];
+                    label.appendChild(document.createTextNode(
+                        (QUESTION_TYPE_EMOJI[type.id] || '') + ' ' +
+                        (labelKey ? t(labelKey) : (type.name || type.id))));
+                    switches.appendChild(label);
+                }
+                section.appendChild(switches);
+                typeGroups.appendChild(section);
             }
-            el.appendChild(switches);
+            el.appendChild(typeGroups);
 
             if (!row.isGradeWide) {
                 const note = document.createElement('div');

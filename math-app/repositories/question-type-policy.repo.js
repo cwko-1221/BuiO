@@ -1,9 +1,10 @@
 'use strict';
 
 /**
- * Which question categories (加法/減法/乘法/除法/混合) a class or math group
- * may receive. This mirrors the tier policy, but keeps the two settings in
- * separate PlatformSettings keys so existing tier data remains unchanged.
+ * Which question categories (operations, fractions, decimals) a class or
+ * math group may receive. This mirrors the tier policy, but keeps the two
+ * settings in separate PlatformSettings keys so existing tier data remains
+ * unchanged.
  */
 
 const config = require('../../config');

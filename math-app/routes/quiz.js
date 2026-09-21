@@ -76,10 +76,10 @@ function gradeAnswer(question, rawUserAnswer, rawUserDenominator, rawUserNumerat
     const userValue = valid ? whole + numerator / denominator : null;
     const correctValue = expectedWhole + expectedNumerator / expectedDenominator;
     const userDisplay = valid
-      ? (answerType === 'mixed' ? `${whole}又${numerator}/${denominator}` : `${numerator}/${denominator}`)
+      ? (answerType === 'mixed' ? `${whole} ${numerator}/${denominator}` : `${numerator}/${denominator}`)
       : '';
     const correctDisplay = answerType === 'mixed'
-      ? `${expectedWhole}又${expectedNumerator}/${expectedDenominator}`
+      ? `${expectedWhole} ${expectedNumerator}/${expectedDenominator}`
       : `${expectedNumerator}/${expectedDenominator}`;
     return {
       userAnswer: userValue,
@@ -140,7 +140,7 @@ function exampleAnswerDisplay(question) {
     const whole = question.answerWhole || 0;
     const numerator = question.answerNumerator ?? 0;
     const denominator = question.answerDenominator ?? question.denominator;
-    return `${whole}又${numerator}/${denominator}`;
+    return `${whole} ${numerator}/${denominator}`;
   }
   if (question.answerType === 'fraction') {
     const numerator = question.answerNumerator ?? question.answer;

@@ -560,7 +560,7 @@ function generate_frac_convert() {
             answerNumerator: numerator,
             answerDenominator: denominator,
             denominator,
-            text: `${improperNumerator}/${denominator} = ? 又 ?/${denominator}`,
+            text: `${improperNumerator}/${denominator} = ? ?/${denominator}`,
             symbol: '↔'
         };
     }
@@ -573,7 +573,7 @@ function generate_frac_convert() {
         answerNumerator: whole * denominator + numerator,
         answerDenominator: denominator,
         denominator,
-        text: `${whole} 又 ${numerator}/${denominator} = ?/?`,
+        text: `${whole} ${numerator}/${denominator} = ?/?`,
         symbol: '↔'
     };
 }
