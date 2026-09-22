@@ -32,6 +32,17 @@ export const MODULES = [
     roleAccess: ['student', 'teacher']
   },
   {
+    id: 'multiplication-checklist',
+    name: 'module_multiplication_name',
+    shortName: 'Tables Check',
+    description: 'module_multiplication_desc',
+    accent: 'amber',
+    icon: 'math',
+    metric: 'module_multiplication_metric',
+    status: 'module_multiplication_status',
+    roleAccess: ['teacher']
+  },
+  {
     id: 'science-lab',
     name: 'module_science_name',
     shortName: 'Science 3D',

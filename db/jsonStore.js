@@ -23,6 +23,10 @@ function load() {
   if (!Array.isArray(_data.users)) _data.users = [];
   if (!Array.isArray(_data.studentStats)) _data.studentStats = [];
   if (!Array.isArray(_data.questionLogs)) _data.questionLogs = [];
+  if (!Array.isArray(_data.multiplicationChecks)) _data.multiplicationChecks = [];
+  if (typeof _data._multiplicationCheckId !== 'number') {
+    _data._multiplicationCheckId = _data.multiplicationChecks.reduce((m, row) => Math.max(m, row.id || 0), 0);
+  }
   if (typeof _data._logId !== 'number') {
     _data._logId = _data.questionLogs.reduce((m, l) => Math.max(m, l.id || 0), 0);
   }

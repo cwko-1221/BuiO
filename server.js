@@ -107,6 +107,9 @@ app.use('/api/auth', require('./math-app/routes/auth'));
 app.use('/api/quiz', require('./math-app/routes/quiz'));
 app.use('/api/stats', require('./math-app/routes/stats'));
 
+// Multiplication table check list (teacher-only)
+app.use('/api/multiplication-checklist', require('./multiplication-app/routes/checklist'));
+
 // Missing-homework module
 app.use('/api/homework', require('./homework-app/routes/homework'));
 
@@ -272,6 +275,10 @@ app.use('/vendor', express.static(path.join(__dirname, 'node_modules', 'exceljs'
 app.use('/math-app/css', express.static(path.join(__dirname, 'math-app', 'public', 'css'), CACHE_APP));
 app.use('/math-app/js', express.static(path.join(__dirname, 'math-app', 'public', 'js'), CACHE_APP));
 app.use('/math-app/images', express.static(path.join(__dirname, 'math-app', 'public', 'images'), CACHE_MEDIA));
+
+// Multiplication table check list static assets
+app.use('/multiplication-checklist/css', express.static(path.join(__dirname, 'multiplication-app', 'public', 'css'), CACHE_APP));
+app.use('/multiplication-checklist/js', express.static(path.join(__dirname, 'multiplication-app', 'public', 'js'), CACHE_APP));
 
 // Chinese module static + page routes
 app.use('/chinese/css', express.static(path.join(__dirname, 'chinese-app', 'public', 'css'), CACHE_APP));
@@ -483,6 +490,12 @@ app.get('/math',           (req, res) => {
     return res.sendFile(path.join(__dirname, 'math-app', 'public', 'dashboard.html'));
   }
   res.sendFile(path.join(__dirname, 'math-app', 'public', 'hub.html'));
+});
+
+// Multiplication table check list — teachers only.
+app.get('/multiplication-checklist', requireSession, (req, res) => {
+  if (req.session.role !== 'teacher') return res.redirect('/');
+  res.sendFile(path.join(__dirname, 'multiplication-app', 'public', 'index.html'));
 });
 
 // Missing-homework module (teachers and appointed subject monitors only).

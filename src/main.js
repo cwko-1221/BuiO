@@ -259,6 +259,9 @@ async function openModule(moduleId, mode) {
     }
     setTimeout(() => { updateState({ mathSsoStatus: '' }); render(); }, 2000);
 
+  } else if (moduleId === 'multiplication-checklist') {
+    window.location.href = '/multiplication-checklist';
+
   } else if (moduleId === 'homework') {
     window.location.href = '/homework';
 

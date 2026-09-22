@@ -203,6 +203,9 @@ async function deleteById(studentId) {
   }
   d.studentStats = d.studentStats.filter(s => s.studentid !== studentId);
   d.questionLogs = d.questionLogs.filter(l => l.studentid !== studentId);
+  if (Array.isArray(d.multiplicationChecks)) {
+    d.multiplicationChecks = d.multiplicationChecks.filter(row => row.studentid !== studentId && row.teacherid !== studentId);
+  }
   store.save();
   // Pet Paradise owns the per-table deletion semantics for its own data; duplicating them
   // here is how the two copies drifted apart in the first place.
