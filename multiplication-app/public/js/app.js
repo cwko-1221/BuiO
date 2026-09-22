@@ -2,6 +2,7 @@ const app = document.getElementById('app');
 const { t, server } = window.BuiI18n;
 const TABLE_NUMBERS = [2, 3, 4, 5, 6, 7, 8, 9];
 const state = {
+  page: window.location.hash === '#records' ? 'records' : 'spin',
   group: '',
   groups: [],
   students: [],
@@ -10,6 +11,7 @@ const state = {
   spinCount: 1,
   draws: null,
   spinning: false,
+  spinPhase: 'idle',
   saving: false,
   loading: true,
   message: '',
@@ -47,6 +49,47 @@ function peopleLabel(count) {
 
 function tableName(tableNumber) {
   return tableNumber ? `${tableNumber}${t('x.timesSuffix')}` : '—';
+}
+
+function inverseWeight(successCount) {
+  return 1 / (1 + Math.max(0, Number(successCount) || 0));
+}
+
+function wheelSegments(type, draw) {
+  const items = type === 'student'
+    ? state.students.map(student => ({
+      key: String(student.id),
+      label: student.name,
+      successCount: student.totalSuccesses,
+    }))
+    : state.tableNumbers.map(number => ({
+      key: String(number),
+      label: tableName(number),
+      successCount: draw?.student?.successCounts?.[String(number)] || 0,
+    }));
+  const weighted = items.map(item => ({ ...item, weight: inverseWeight(item.successCount) }));
+  const totalWeight = weighted.reduce((sum, item) => sum + item.weight, 0);
+  if (!totalWeight) return [];
+  let cursor = 0;
+  return weighted.map(item => {
+    const start = cursor;
+    cursor += (item.weight / totalWeight) * 360;
+    return { ...item, start, end: cursor, mid: (start + cursor) / 2 };
+  });
+}
+
+function wheelGradient(type, segments) {
+  if (!segments.length) return 'conic-gradient(#dce6e8 0deg 360deg)';
+  const studentColors = ['#25a79c', '#74d1bd', '#ef977f', '#f6c978', '#73a7d8', '#a99eeb'];
+  const tableColors = ['#786cd4', '#a99eeb', '#ef977f', '#f6c978', '#25a79c', '#74d1bd'];
+  const colors = type === 'student' ? studentColors : tableColors;
+  return `conic-gradient(from -90deg, ${segments.map((segment, index) => `${colors[index % colors.length]} ${segment.start.toFixed(2)}deg ${segment.end.toFixed(2)}deg`).join(', ')})`;
+}
+
+function wheelTargetAngle(type, draw, target) {
+  const key = type === 'student' ? String(target?.id) : String(target);
+  const segment = wheelSegments(type, draw).find(item => item.key === key);
+  return segment ? -segment.mid : 0;
 }
 
 function maxSpinCount() {
@@ -128,18 +171,33 @@ function renderRecent() {
 }
 
 function rouletteValue(type, draw) {
-  if (type === 'student') return draw?.student?.name || (state.spinning ? t('x.spinning') : t('x.waitingStudent'));
-  return draw?.tableNumber ? tableName(draw.tableNumber) : (state.spinning ? t('x.spinning') : '—');
+  if (type === 'student') {
+    return draw?.student?.name || (state.spinning && state.spinPhase === 'students' ? t('x.spinning') : t('x.waitingStudent'));
+  }
+  return draw?.tableNumber
+    ? tableName(draw.tableNumber)
+    : (state.spinning && state.spinPhase === 'tables' ? t('x.spinning') : t('x.waitingTable'));
+}
+
+function renderWheelLabels(segments) {
+  return segments.map(segment => {
+    const label = escapeHtml(segment.label);
+    return '<span class="roulette-label" style="--segment-mid:' + segment.mid + 'deg;" title="' + label + '">' + label + '</span>';
+  }).join('');
 }
 
 function renderWheel(type, index, draw) {
   const isStudent = type === 'student';
+  const segments = wheelSegments(type, draw);
+  const angle = Number(isStudent ? draw?.studentAngle : draw?.tableAngle);
+  const segmentData = JSON.stringify(segments.map(({ key, label, successCount, start, end }) => ({ key, label, successCount, start, end })));
+  const labels = renderWheelLabels(segments);
   return `<div class="wheel-card ${isStudent ? 'student-wheel' : 'table-wheel'}">
     <div class="wheel-card-label">${escapeHtml(t(isStudent ? 'x.studentWheel' : 'x.tableWheel'))}</div>
     <div class="roulette-wrap">
       <span class="roulette-pointer" aria-hidden="true">▼</span>
-      <div class="roulette-disc" data-wheel-type="${type}" data-wheel-index="${index}" style="--spin-angle: 0deg;">
-        <span class="roulette-value">${escapeHtml(rouletteValue(type, draw))}</span>
+      <div class="roulette-disc" data-wheel-type="${type}" data-wheel-index="${index}" data-weighted-segments="${escapeHtml(segmentData)}" style="--spin-angle: ${Number.isFinite(angle) ? angle : 0}deg; background: ${escapeHtml(wheelGradient(type, segments))};">
+        ${labels}<span class="roulette-value">${escapeHtml(rouletteValue(type, draw))}</span>
       </div>
     </div>
   </div>`;
@@ -149,7 +207,7 @@ function renderWheelPair(index, draw) {
   const recorded = Boolean(draw?.recorded);
   const canRecord = Boolean(draw?.student && !recorded && !state.spinning && !state.saving);
   const status = state.spinning
-    ? t('x.spinning')
+    ? t(state.spinPhase === 'students' ? 'x.studentPhase' : 'x.tablePhase')
     : recorded
       ? t(draw.result === 'success' ? 'x.recordedSuccess' : 'x.recordedFailure')
       : t('x.waitingResult');
@@ -172,7 +230,7 @@ function renderDraw() {
   const countLocked = state.spinning || state.saving || (hasDraws && !allRecorded);
   const remaining = hasDraws ? state.draws.filter(draw => !draw.recorded).length : 0;
   const hint = state.message || (state.spinning
-    ? t('x.spinningHint')
+    ? t(state.spinPhase === 'students' ? 'x.studentSpinHint' : 'x.tableSpinHint')
     : allRecorded
       ? t('x.allSavedHint')
       : remaining < state.spinCount && remaining > 0
@@ -189,6 +247,20 @@ function renderDraw() {
   </section>`;
 }
 
+function renderRecordsPage() {
+  return `<div class="records-page">
+    <section class="records-panel panel"><div class="records-heading"><div><span class="eyebrow">SCORE TOTALS</span><h2>${escapeHtml(t('x.recordsTitle'))}</h2><p>${escapeHtml(t('x.recordsLead'))}</p></div><span class="group-chip">${escapeHtml(state.group ? groupName(state.group) : t('x.allGroups'))}</span></div>${renderTable()}</section>
+    <section class="recent-panel panel"><span class="eyebrow">RECENT CHECKS</span><h2>${escapeHtml(t('x.recentTitle'))}</h2>${renderRecent()}</section>
+  </div>`;
+}
+
+function setPage(page) {
+  if (!['spin', 'records'].includes(page) || state.page === page) return;
+  state.page = page;
+  window.history.replaceState(null, '', page === 'records' ? '#records' : '#spin');
+  render();
+}
+
 function render() {
   if (state.loading && !state.groups.length && !state.students.length) {
     app.innerHTML = `<div class="loading-shell"><div class="loading-spinner"></div><p>${escapeHtml(t('x.loading'))}</p></div>`;
@@ -199,9 +271,12 @@ function render() {
     <main class="main">
       <section class="hero"><div><span class="eyebrow">TEACHER TOOL</span><h1>${escapeHtml(t('x.title'))}</h1><p>${escapeHtml(t('x.subtitle'))}</p></div></section>
       ${state.messageType === 'error' && !state.draws ? `<div class="panel error-panel">${escapeHtml(state.message)}</div>` : ''}
+      <nav class="page-tabs panel" aria-label="${escapeHtml(t('x.title'))}">
+        <button class="page-tab ${state.page === 'spin' ? 'active' : ''}" data-page="spin" aria-selected="${state.page === 'spin'}">${escapeHtml(t('x.drawTitle'))}</button>
+        <button class="page-tab ${state.page === 'records' ? 'active' : ''}" data-page="records" aria-selected="${state.page === 'records'}">${escapeHtml(t('x.recordsTitle'))}</button>
+      </nav>
       <section class="controls panel"><div class="field"><label for="groupSelect">${escapeHtml(t('x.filterGroup'))}</label><select id="groupSelect"><option value="">${escapeHtml(t('x.allGroups'))}</option>${state.groups.map(group => `<option value="${escapeHtml(group)}" ${group === state.group ? 'selected' : ''}>${escapeHtml(group)}</option>`).join('')}</select></div><p class="group-note">${escapeHtml(t('x.groupNote'))}</p></section>
-      <div class="workspace">${renderDraw()}<section class="records-panel panel"><div class="records-heading"><div><span class="eyebrow">SCORE TOTALS</span><h2>${escapeHtml(t('x.recordsTitle'))}</h2><p>${escapeHtml(t('x.recordsLead'))}</p></div><span class="group-chip">${escapeHtml(state.group ? groupName(state.group) : t('x.allGroups'))}</span></div>${renderTable()}</section></div>
-      <section class="recent-panel panel"><span class="eyebrow">RECENT CHECKS</span><h2>${escapeHtml(t('x.recentTitle'))}</h2>${renderRecent()}</section>
+      ${state.page === 'records' ? renderRecordsPage() : `<div class="workspace single-column">${renderDraw()}</div>`}
     </main>
   </div>`;
   bindEvents();
@@ -211,51 +286,101 @@ function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-function sampleStudents(count) {
-  const pool = [...state.students];
-  for (let index = pool.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [pool[index], pool[swapIndex]] = [pool[swapIndex], pool[index]];
+function weightedPick(items, getSuccessCount) {
+  if (!items.length) return null;
+  const weighted = items.map(item => ({ item, weight: inverseWeight(getSuccessCount(item)) }));
+  const totalWeight = weighted.reduce((sum, entry) => sum + entry.weight, 0);
+  let cursor = Math.random() * totalWeight;
+  for (const entry of weighted) {
+    cursor -= entry.weight;
+    if (cursor <= 0) return entry.item;
   }
-  return pool.slice(0, count);
+  return weighted[weighted.length - 1].item;
 }
 
-function spin() {
+function sampleStudents(count) {
+  const pool = [...state.students];
+  const picked = [];
+  while (picked.length < count && pool.length) {
+    const student = weightedPick(pool, item => item.totalSuccesses);
+    if (!student) break;
+    picked.push(student);
+    pool.splice(pool.indexOf(student), 1);
+  }
+  return picked;
+}
+
+function sampleTable(student) {
+  return weightedPick(state.tableNumbers, number => student?.successCounts?.[String(number)] || 0);
+}
+
+function pause(duration) {
+  return new Promise(resolve => window.setTimeout(resolve, duration));
+}
+
+function normalizeDegrees(angle) {
+  return ((angle % 360) + 360) % 360;
+}
+
+function animateWheelGroup(type, targets) {
+  const discs = [...document.querySelectorAll(`.roulette-disc[data-wheel-type="${type}"]`)].sort((a, b) => Number(a.dataset.wheelIndex) - Number(b.dataset.wheelIndex));
+  const starts = discs.map(() => Math.random() * 360);
+  const ends = discs.map((disc, index) => {
+    const draw = state.draws?.[Number(disc.dataset.wheelIndex)];
+    const targetAngle = normalizeDegrees(wheelTargetAngle(type, draw, targets[index]));
+    const currentAngle = normalizeDegrees(starts[index]);
+    const landingTurn = (targetAngle - currentAngle + 360) % 360;
+    return starts[index] + (5.5 + Math.random() * 1.5) * 360 + landingTurn;
+  });
+  const duration = 1850;
+  const started = performance.now();
+
+  return new Promise(resolve => {
+    const tick = now => {
+      const progress = Math.min(1, (now - started) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      discs.forEach((disc, index) => {
+        const draw = state.draws?.[Number(disc.dataset.wheelIndex)];
+        const preview = type === 'student'
+          ? randomItem(state.students)?.name || t('x.spinning')
+          : tableName(randomItem(state.tableNumbers));
+        const value = disc.querySelector('.roulette-value');
+        if (value) value.textContent = preview;
+        disc.style.setProperty('--spin-angle', `${starts[index] + ((ends[index] - starts[index]) * eased)}deg`);
+        if (draw && progress === 1) draw[type === 'student' ? 'studentAngle' : 'tableAngle'] = ends[index];
+      });
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+        return;
+      }
+      resolve();
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+async function spin() {
   if (state.spinning || state.saving || !state.students.length) return;
   const count = Math.min(state.spinCount, state.students.length);
   state.spinning = true;
+  state.spinPhase = 'students';
   state.draws = Array.from({ length: count }, () => ({ student: null, tableNumber: null, recorded: false, result: null }));
   setMessage('');
   render();
 
-  const duration = 1850;
-  const started = performance.now();
-  const starts = Array.from({ length: count * 2 }, () => Math.random() * 360);
-  const turns = Array.from({ length: count * 2 }, (_, index) => 5.5 + (index % 2) * 1.25);
+  const students = sampleStudents(count);
+  await animateWheelGroup('student', students);
+  state.draws = state.draws.map((draw, index) => ({ ...draw, student: students[index] }));
+  state.spinPhase = 'tables';
+  render();
+  await pause(220);
 
-  const tick = now => {
-    const progress = Math.min(1, (now - started) / duration);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    document.querySelectorAll('.roulette-disc').forEach((disc, wheelIndex) => {
-      const type = disc.dataset.wheelType;
-      const preview = type === 'student'
-        ? randomItem(state.students)?.name || t('x.spinning')
-        : tableName(randomItem(state.tableNumbers));
-      const value = disc.querySelector('.roulette-value');
-      if (value) value.textContent = preview;
-      const angle = starts[wheelIndex] + (360 * turns[wheelIndex] * eased);
-      disc.style.setProperty('--spin-angle', `${angle}deg`);
-    });
-    if (progress < 1) {
-      requestAnimationFrame(tick);
-      return;
-    }
-    const picked = sampleStudents(count);
-    state.draws = picked.map(student => ({ student, tableNumber: randomItem(state.tableNumbers), recorded: false, result: null }));
-    state.spinning = false;
-    render();
-  };
-  requestAnimationFrame(tick);
+  const tables = state.draws.map(draw => sampleTable(draw.student));
+  await animateWheelGroup('table', tables);
+  state.draws = state.draws.map((draw, index) => ({ ...draw, tableNumber: tables[index] }));
+  state.spinning = false;
+  state.spinPhase = 'idle';
+  render();
 }
 
 async function record(index, result) {
@@ -285,6 +410,9 @@ async function record(index, result) {
 }
 
 function bindEvents() {
+  document.querySelectorAll('[data-page]').forEach(button => button.addEventListener('click', () => {
+    setPage(button.dataset.page);
+  }));
   document.getElementById('groupSelect')?.addEventListener('change', event => {
     state.group = event.target.value;
     state.draws = null;
@@ -301,6 +429,7 @@ function bindEvents() {
   document.getElementById('spinButton')?.addEventListener('click', spin);
   document.getElementById('clearDraw')?.addEventListener('click', () => {
     state.draws = null;
+    state.spinPhase = 'idle';
     setMessage('');
     render();
   });

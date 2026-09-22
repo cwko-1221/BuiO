@@ -129,6 +129,21 @@ select {
   gap: 24px;
   align-items: start;
 }
+.workspace.single-column { grid-template-columns: minmax(0, 1fr); }
+.records-page { display: grid; gap: 24px; }
+.page-tabs { display: flex; gap: 6px; padding: 6px; margin-bottom: 16px; }
+.page-tab {
+  flex: 1;
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 14px;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 900;
+}
+.page-tab.active { color: #fff; background: var(--teal); box-shadow: 0 8px 18px rgba(15, 139, 141, .2); }
+.page-tab:hover:not(.active) { color: var(--teal-dark); background: #eff8f7; }
 .draw-panel { padding: 28px; overflow: hidden; position: relative; }
 .draw-panel::after {
   content: "";
@@ -182,7 +197,33 @@ select {
 }
 .table-wheel .roulette-disc { background: repeating-conic-gradient(from -22.5deg, #786cd4 0deg 45deg, #a99eeb 45deg 90deg, #ef977f 90deg 135deg, #f6c978 135deg 180deg); }
 .roulette-disc::before { content: ""; position: absolute; inset: 13%; border: 1px dashed rgba(255, 255, 255, .75); border-radius: 50%; }
+.roulette-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  width: 62%;
+  min-height: 1.2em;
+  display: flex;
+  align-items: center;
+  padding-left: 31%;
+  overflow: hidden;
+  color: #fff;
+  font-size: clamp(.42rem, 1vw, .64rem);
+  font-weight: 900;
+  line-height: 1;
+  text-align: left;
+  text-shadow: 0 1px 3px rgba(25, 36, 58, .5);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transform-origin: 0 50%;
+  transform: translateY(-50%) rotate(var(--segment-mid));
+  pointer-events: none;
+}
+.table-wheel .roulette-label { font-size: clamp(.56rem, 1.2vw, .78rem); }
 .roulette-value {
+  position: relative;
+  z-index: 3;
   width: 67%;
   min-height: 67%;
   display: grid;

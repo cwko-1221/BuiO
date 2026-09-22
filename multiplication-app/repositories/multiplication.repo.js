@@ -47,7 +47,7 @@ function emptyCounts() {
   return Object.fromEntries(TABLE_NUMBERS.map(number => [String(number), 0]));
 }
 
-function mapStudent(student, counts = emptyCounts()) {
+function mapStudent(student, counts = emptyCounts(), successCounts = emptyCounts()) {
   return {
     id: student.id,
     name: student.name,
@@ -55,7 +55,9 @@ function mapStudent(student, counts = emptyCounts()) {
     classNo: student.classNo == null ? null : Number(student.classNo),
     mathGroup: normalizeGroup(student.mathGroup),
     counts,
+    successCounts,
     totalScore: Object.values(counts).reduce((sum, value) => sum + Number(value || 0), 0),
+    totalSuccesses: Object.values(successCounts).reduce((sum, value) => sum + Number(value || 0), 0),
   };
 }
 
@@ -79,7 +81,8 @@ async function listOverview(group = '') {
     const params = [selectedGroup];
     const { rows } = await getPool().query(`
       SELECT StudentID AS "studentId", TableNumber AS "tableNumber",
-             COALESCE(SUM(CASE WHEN IsSuccess = TRUE THEN 1 ELSE -1 END), 0)::int AS score
+             COALESCE(SUM(CASE WHEN IsSuccess = TRUE THEN 1 ELSE -1 END), 0)::int AS score,
+             COALESCE(SUM(CASE WHEN IsSuccess = TRUE THEN 1 ELSE 0 END), 0)::int AS "successCount"
       FROM MultiplicationChecks
       WHERE ($1 = '' OR StudentID IN (
         SELECT StudentID FROM Users
@@ -90,7 +93,9 @@ async function listOverview(group = '') {
     for (const row of rows) {
       const student = byStudent.get(row.studentId);
       if (student && TABLE_NUMBERS.includes(Number(row.tableNumber))) {
-        student.counts[String(row.tableNumber)] = Number(row.score) || 0;
+        const key = String(row.tableNumber);
+        student.counts[key] = Number(row.score) || 0;
+        student.successCounts[key] = Number(row.successCount) || 0;
       }
     }
   } else {
@@ -99,13 +104,20 @@ async function listOverview(group = '') {
       const student = byStudent.get(row.studentid);
       const tableNumber = Number(row.tableNumber);
       if (student && TABLE_NUMBERS.includes(tableNumber)) {
-        student.counts[String(tableNumber)] += row.isSuccess ? 1 : -1;
+        const key = String(tableNumber);
+        if (row.isSuccess) {
+          student.counts[key] += 1;
+          student.successCounts[key] += 1;
+        } else {
+          student.counts[key] -= 1;
+        }
       }
     }
   }
 
   students.forEach(student => {
     student.totalScore = Object.values(student.counts).reduce((sum, value) => sum + Number(value || 0), 0);
+    student.totalSuccesses = Object.values(student.successCounts).reduce((sum, value) => sum + Number(value || 0), 0);
   });
 
   const groups = [...new Set(allStudents.map(student => normalizeGroup(student.mathGroup)).filter(Boolean))]
