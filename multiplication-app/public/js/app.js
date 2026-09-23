@@ -115,7 +115,7 @@ function labelWidth(label, type) {
   return Math.min(max, Math.max(min, length * fontSize + 16));
 }
 
-function renderWheelSvg(type, segments) {
+function renderWheelSvg(type, segments, angle = 0) {
   const colors = wheelColors(type);
   const fontSize = type === 'student' ? 15 : 18;
   const sectors = segments.map((segment, index) => {
@@ -124,13 +124,21 @@ function renderWheelSvg(type, segments) {
     const height = type === 'student' ? 29 : 34;
     return `<path d="${sectorPath(segment.start, segment.end)}" fill="${colors[index % colors.length]}" stroke="#fff" stroke-width="2.5"/><g class="roulette-svg-label"><rect x="${(point.x - width / 2).toFixed(2)}" y="${(point.y - height / 2).toFixed(2)}" width="${width}" height="${height}" rx="${height / 2}" fill="#fff" fill-opacity=".94" stroke="#fff" stroke-width="1.5"/><text x="${point.x.toFixed(2)}" y="${point.y.toFixed(2)}" fill="#21304c" font-size="${fontSize}" font-weight="800" text-anchor="middle" dominant-baseline="central">${escapeHtml(segment.label)}</text></g>`;
   }).join('');
-  return `<svg class="roulette-svg" viewBox="0 0 240 240" aria-hidden="true"><g class="roulette-rotor">${sectors}<circle cx="120" cy="120" r="53" fill="#fff" fill-opacity=".94" stroke="#fff" stroke-width="5"/><circle cx="120" cy="120" r="57" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-dasharray="2 6"/></g></svg>`;
+  return `<svg class="roulette-svg" viewBox="0 0 240 240" aria-hidden="true"><g class="roulette-rotor" transform="rotate(${angle} 120 120)">${sectors}<circle cx="120" cy="120" r="53" fill="#fff" fill-opacity=".94" stroke="#fff" stroke-width="5"/><circle cx="120" cy="120" r="57" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-dasharray="2 6"/></g></svg>`;
 }
 
-function wheelTargetAngle(type, draw, target) {
+function wheelTargetAngle(type, disc, target) {
   const key = type === 'student' ? String(target?.id) : String(target);
-  const segment = wheelSegments(type, draw).find(item => item.key === key);
-  return segment ? -segment.mid : 0;
+  let segments = [];
+  try {
+    segments = JSON.parse(disc.dataset.weightedSegments || '[]');
+  } catch {
+    return 0;
+  }
+  const segment = segments.find(item => item.key === key);
+  if (!segment) return 0;
+  // The SVG sectors start at 12 o'clock and advance clockwise; center this exact sector under the pointer.
+  return -((Number(segment.start) + Number(segment.end)) / 2);
 }
 
 function maxSpinCount() {
@@ -232,7 +240,7 @@ function renderWheel(type, index, draw) {
     <div class="roulette-wrap ${isActive ? 'is-spinning' : ''}">
       <span class="roulette-pointer" aria-hidden="true">▼</span>
       <div class="roulette-disc" data-wheel-type="${type}" data-wheel-index="${index}" data-weighted-segments="${escapeHtml(segmentData)}" style="--spin-angle: ${Number.isFinite(angle) ? angle : 0}deg;">
-        ${renderWheelSvg(type, segments)}<span class="roulette-value">${escapeHtml(rouletteValue(type, draw))}</span>
+        ${renderWheelSvg(type, segments, Number.isFinite(angle) ? angle : 0)}<span class="roulette-value">${escapeHtml(rouletteValue(type, draw))}</span>
       </div>
     </div>
   </div>`;
@@ -423,10 +431,10 @@ function immersiveProgress(progress) {
 
 function animateWheelGroup(type, targets) {
   const discs = [...document.querySelectorAll(`.roulette-disc[data-wheel-type="${type}"]`)].sort((a, b) => Number(a.dataset.wheelIndex) - Number(b.dataset.wheelIndex));
-  const starts = discs.map(() => Math.random() * 360);
+  const starts = discs.map(disc => Number.parseFloat(disc.style.getPropertyValue('--spin-angle')) || 0);
   const ends = discs.map((disc, index) => {
     const draw = state.draws?.[Number(disc.dataset.wheelIndex)];
-    const targetAngle = normalizeDegrees(wheelTargetAngle(type, draw, targets[index]));
+    const targetAngle = normalizeDegrees(wheelTargetAngle(type, disc, targets[index]));
     const currentAngle = normalizeDegrees(starts[index]);
     const landingTurn = (targetAngle - currentAngle + 360) % 360;
     return starts[index] + (7.5 + Math.random() * 2.2 + ((index % 2) * .35)) * 360 + landingTurn;
@@ -454,7 +462,9 @@ function animateWheelGroup(type, targets) {
           : tableName(randomItem(state.tableNumbers));
         const value = disc.querySelector('.roulette-value');
         if (value) value.textContent = preview;
-        disc.style.setProperty('--spin-angle', `${starts[index] + ((ends[index] - starts[index]) * eased)}deg`);
+        const angle = starts[index] + ((ends[index] - starts[index]) * eased);
+        disc.style.setProperty('--spin-angle', `${angle}deg`);
+        disc.querySelector('.roulette-rotor')?.setAttribute('transform', `rotate(${angle} 120 120)`);
         if (draw && progress >= 1) draw[type === 'student' ? 'studentAngle' : 'tableAngle'] = ends[index];
       });
       if (elapsed < overallDuration) {
