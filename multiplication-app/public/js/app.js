@@ -78,12 +78,42 @@ function wheelSegments(type, draw) {
   });
 }
 
-function wheelGradient(type, segments) {
-  if (!segments.length) return 'conic-gradient(#dce6e8 0deg 360deg)';
-  const studentColors = ['#25a79c', '#74d1bd', '#ef977f', '#f6c978', '#73a7d8', '#a99eeb'];
-  const tableColors = ['#786cd4', '#a99eeb', '#ef977f', '#f6c978', '#25a79c', '#74d1bd'];
-  const colors = type === 'student' ? studentColors : tableColors;
-  return `conic-gradient(from -90deg, ${segments.map((segment, index) => `${colors[index % colors.length]} ${segment.start.toFixed(2)}deg ${segment.end.toFixed(2)}deg`).join(', ')})`;
+function wheelColors(type) {
+  return type === 'student'
+    ? ['#1f9f98', '#54c7b2', '#ee806c', '#f2bd55', '#5d95cf', '#8d7cda']
+    : ['#6456c7', '#9384e5', '#ee806c', '#f2bd55', '#1f9f98', '#54c7b2'];
+}
+
+function polarPoint(angle, radius) {
+  const radians = (angle * Math.PI) / 180;
+  return { x: 120 + radius * Math.sin(radians), y: 120 - radius * Math.cos(radians) };
+}
+
+function sectorPath(start, end, radius = 112) {
+  const from = polarPoint(start, radius);
+  const to = polarPoint(end, radius);
+  const largeArc = end - start > 180 ? 1 : 0;
+  return `M 120 120 L ${from.x.toFixed(2)} ${from.y.toFixed(2)} A ${radius} ${radius} 0 ${largeArc} 1 ${to.x.toFixed(2)} ${to.y.toFixed(2)} Z`;
+}
+
+function labelWidth(label, type) {
+  const length = Array.from(String(label)).length;
+  const fontSize = type === 'student' ? 15 : 18;
+  const min = type === 'student' ? 52 : 42;
+  const max = type === 'student' ? 92 : 68;
+  return Math.min(max, Math.max(min, length * fontSize + 16));
+}
+
+function renderWheelSvg(type, segments) {
+  const colors = wheelColors(type);
+  const fontSize = type === 'student' ? 15 : 18;
+  const sectors = segments.map((segment, index) => {
+    const point = polarPoint(segment.mid, type === 'student' ? 82 : 84);
+    const width = labelWidth(segment.label, type);
+    const height = type === 'student' ? 29 : 34;
+    return `<path d="${sectorPath(segment.start, segment.end)}" fill="${colors[index % colors.length]}" stroke="#fff" stroke-width="2.5"/><g class="roulette-svg-label"><rect x="${(point.x - width / 2).toFixed(2)}" y="${(point.y - height / 2).toFixed(2)}" width="${width}" height="${height}" rx="${height / 2}" fill="#fff" fill-opacity=".94" stroke="#fff" stroke-width="1.5"/><text x="${point.x.toFixed(2)}" y="${point.y.toFixed(2)}" fill="#21304c" font-size="${fontSize}" font-weight="800" text-anchor="middle" dominant-baseline="central">${escapeHtml(segment.label)}</text></g>`;
+  }).join('');
+  return `<svg class="roulette-svg" viewBox="0 0 240 240" aria-hidden="true"><g class="roulette-rotor">${sectors}<circle cx="120" cy="120" r="53" fill="#fff" fill-opacity=".94" stroke="#fff" stroke-width="5"/><circle cx="120" cy="120" r="57" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-dasharray="2 6"/></g></svg>`;
 }
 
 function wheelTargetAngle(type, draw, target) {
@@ -179,25 +209,19 @@ function rouletteValue(type, draw) {
     : (state.spinning && state.spinPhase === 'tables' ? t('x.spinning') : t('x.waitingTable'));
 }
 
-function renderWheelLabels(segments) {
-  return segments.map(segment => {
-    const label = escapeHtml(segment.label);
-    return '<span class="roulette-label" style="--segment-mid:' + segment.mid + 'deg;" title="' + label + '">' + label + '</span>';
-  }).join('');
-}
-
 function renderWheel(type, index, draw) {
   const isStudent = type === 'student';
   const segments = wheelSegments(type, draw);
   const angle = Number(isStudent ? draw?.studentAngle : draw?.tableAngle);
   const segmentData = JSON.stringify(segments.map(({ key, label, successCount, start, end }) => ({ key, label, successCount, start, end })));
-  const labels = renderWheelLabels(segments);
+  const activePhase = isStudent ? 'students' : 'tables';
+  const isActive = state.spinning && state.spinPhase === activePhase;
   return `<div class="wheel-card ${isStudent ? 'student-wheel' : 'table-wheel'}">
     <div class="wheel-card-label">${escapeHtml(t(isStudent ? 'x.studentWheel' : 'x.tableWheel'))}</div>
-    <div class="roulette-wrap">
+    <div class="roulette-wrap ${isActive ? 'is-spinning' : ''}">
       <span class="roulette-pointer" aria-hidden="true">▼</span>
-      <div class="roulette-disc" data-wheel-type="${type}" data-wheel-index="${index}" data-weighted-segments="${escapeHtml(segmentData)}" style="--spin-angle: ${Number.isFinite(angle) ? angle : 0}deg; background: ${escapeHtml(wheelGradient(type, segments))};">
-        ${labels}<span class="roulette-value">${escapeHtml(rouletteValue(type, draw))}</span>
+      <div class="roulette-disc" data-wheel-type="${type}" data-wheel-index="${index}" data-weighted-segments="${escapeHtml(segmentData)}" style="--spin-angle: ${Number.isFinite(angle) ? angle : 0}deg;">
+        ${renderWheelSvg(type, segments)}<span class="roulette-value">${escapeHtml(rouletteValue(type, draw))}</span>
       </div>
     </div>
   </div>`;
@@ -205,12 +229,16 @@ function renderWheel(type, index, draw) {
 
 function renderWheelPair(index, draw) {
   const recorded = Boolean(draw?.recorded);
-  const canRecord = Boolean(draw?.student && !recorded && !state.spinning && !state.saving);
+  const canRecord = Boolean(draw?.student && draw?.tableNumber && !recorded && !state.spinning && !state.saving);
   const status = state.spinning
     ? t(state.spinPhase === 'students' ? 'x.studentPhase' : 'x.tablePhase')
     : recorded
       ? t(draw.result === 'success' ? 'x.recordedSuccess' : 'x.recordedFailure')
-      : t('x.waitingResult');
+      : draw?.student && !draw?.tableNumber
+        ? t('x.readyForTable')
+        : draw?.tableNumber
+          ? t('x.waitingResult')
+          : t('x.readyForStudent');
   return `<article class="wheel-pair ${recorded ? 'recorded' : ''}">
     <div class="pair-heading"><strong>${escapeHtml(t('x.drawNumber', { n: index + 1 }))}</strong><span>${escapeHtml(status)}</span></div>
     <div class="wheel-pair-grid">${renderWheel('student', index, draw)}${renderWheel('table', index, draw)}</div>
@@ -226,11 +254,18 @@ function renderWheelPair(index, draw) {
 function renderDraw() {
   const hasDraws = Array.isArray(state.draws);
   const allRecorded = hasDraws && state.draws.length > 0 && state.draws.every(draw => draw.recorded);
-  const canStart = !state.spinning && !state.saving && state.students.length > 0 && (!hasDraws || allRecorded);
+  const studentsDrawn = hasDraws && state.draws.length > 0 && state.draws.every(draw => Boolean(draw.student));
+  const tablesDrawn = studentsDrawn && state.draws.every(draw => Boolean(draw.tableNumber));
+  const canSpinStudents = !state.spinning && !state.saving && state.students.length > 0 && (!hasDraws || allRecorded);
+  const canSpinTables = !state.spinning && !state.saving && studentsDrawn && !tablesDrawn;
   const countLocked = state.spinning || state.saving || (hasDraws && !allRecorded);
   const remaining = hasDraws ? state.draws.filter(draw => !draw.recorded).length : 0;
   const hint = state.message || (state.spinning
     ? t(state.spinPhase === 'students' ? 'x.studentSpinHint' : 'x.tableSpinHint')
+    : studentsDrawn && !tablesDrawn
+      ? t('x.tableReadyHint')
+      : tablesDrawn && !allRecorded
+        ? t('x.resultHint')
     : allRecorded
       ? t('x.allSavedHint')
       : remaining < state.spinCount && remaining > 0
@@ -242,7 +277,7 @@ function renderDraw() {
     <div class="panel-heading"><span class="eyebrow">WHEEL SPIN</span><h2>${escapeHtml(t('x.drawTitle'))}</h2><p>${escapeHtml(t('x.drawLead'))}</p></div>
     <div class="spin-settings"><div class="field"><label for="spinCount">${escapeHtml(t('x.spinCount'))}</label><select id="spinCount" ${countLocked ? 'disabled' : ''}>${Array.from({ length: maxSpinCount() }, (_, index) => index + 1).map(number => `<option value="${number}" ${number === state.spinCount ? 'selected' : ''}>${escapeHtml(peopleLabel(number))}</option>`).join('')}</select></div><p>${escapeHtml(t('x.spinCountHint'))}</p></div>
     <div class="wheel-pairs">${draws.map((draw, index) => renderWheelPair(index, draw)).join('')}</div>
-    <div class="draw-actions"><button class="primary-button" id="spinButton" ${canStart ? '' : 'disabled'}>${escapeHtml(allRecorded ? t('x.nextSpin') : t('x.spin'))}</button><button class="ghost-button" id="clearDraw" ${!hasDraws || state.spinning || state.saving ? 'disabled' : ''}>${escapeHtml(t('x.clear'))}</button></div>
+    <div class="draw-actions"><button class="primary-button" id="spinStudentsButton" ${canSpinStudents ? '' : 'disabled'}>${escapeHtml(allRecorded ? t('x.nextSpinStudents') : t('x.spinStudents'))}</button><button class="primary-button table-spin-button" id="spinTablesButton" ${canSpinTables ? '' : 'disabled'}>${escapeHtml(t('x.spinTables'))}</button><button class="ghost-button" id="clearDraw" ${!hasDraws || state.spinning || state.saving ? 'disabled' : ''}>${escapeHtml(t('x.clear'))}</button></div>
     <p class="draw-hint ${state.messageType}">${escapeHtml(hint)}</p>
   </section>`;
 }
@@ -314,12 +349,15 @@ function sampleTable(student) {
   return weightedPick(state.tableNumbers, number => student?.successCounts?.[String(number)] || 0);
 }
 
-function pause(duration) {
-  return new Promise(resolve => window.setTimeout(resolve, duration));
-}
-
 function normalizeDegrees(angle) {
   return ((angle % 360) + 360) % 360;
+}
+
+function immersiveProgress(progress) {
+  if (progress < .18) return .06 * Math.pow(progress / .18, 2);
+  if (progress < .78) return .06 + (.74 * ((progress - .18) / .6));
+  const finish = (progress - .78) / .22;
+  return .8 + (.2 * (1 - Math.pow(1 - finish, 1.55)));
 }
 
 function animateWheelGroup(type, targets) {
@@ -330,26 +368,29 @@ function animateWheelGroup(type, targets) {
     const targetAngle = normalizeDegrees(wheelTargetAngle(type, draw, targets[index]));
     const currentAngle = normalizeDegrees(starts[index]);
     const landingTurn = (targetAngle - currentAngle + 360) % 360;
-    return starts[index] + (5.5 + Math.random() * 1.5) * 360 + landingTurn;
+    return starts[index] + (7.5 + Math.random() * 2.2 + ((index % 2) * .35)) * 360 + landingTurn;
   });
-  const duration = 1850;
+  const baseDuration = type === 'student' ? 3200 : 2900;
+  const durations = discs.map((_, index) => baseDuration + ((index % 3) * 140) + (Math.random() * 180));
+  const overallDuration = Math.max(...durations, baseDuration);
   const started = performance.now();
 
   return new Promise(resolve => {
     const tick = now => {
-      const progress = Math.min(1, (now - started) / duration);
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const elapsed = now - started;
       discs.forEach((disc, index) => {
         const draw = state.draws?.[Number(disc.dataset.wheelIndex)];
+        const progress = Math.min(1, elapsed / durations[index]);
+        const eased = immersiveProgress(progress);
         const preview = type === 'student'
           ? randomItem(state.students)?.name || t('x.spinning')
           : tableName(randomItem(state.tableNumbers));
         const value = disc.querySelector('.roulette-value');
         if (value) value.textContent = preview;
         disc.style.setProperty('--spin-angle', `${starts[index] + ((ends[index] - starts[index]) * eased)}deg`);
-        if (draw && progress === 1) draw[type === 'student' ? 'studentAngle' : 'tableAngle'] = ends[index];
+        if (draw && progress >= 1) draw[type === 'student' ? 'studentAngle' : 'tableAngle'] = ends[index];
       });
-      if (progress < 1) {
+      if (elapsed < overallDuration) {
         requestAnimationFrame(tick);
         return;
       }
@@ -359,7 +400,7 @@ function animateWheelGroup(type, targets) {
   });
 }
 
-async function spin() {
+async function spinStudents() {
   if (state.spinning || state.saving || !state.students.length) return;
   const count = Math.min(state.spinCount, state.students.length);
   state.spinning = true;
@@ -371,11 +412,21 @@ async function spin() {
   const students = sampleStudents(count);
   await animateWheelGroup('student', students);
   state.draws = state.draws.map((draw, index) => ({ ...draw, student: students[index] }));
-  state.spinPhase = 'tables';
+  state.spinning = false;
+  state.spinPhase = 'students-ready';
   render();
-  await pause(220);
+}
 
-  const tables = state.draws.map(draw => sampleTable(draw.student));
+async function spinTables() {
+  if (state.spinning || state.saving) return;
+  const draws = state.draws;
+  if (!draws?.length || draws.some(draw => !draw.student || draw.tableNumber)) return;
+  state.spinning = true;
+  state.spinPhase = 'tables';
+  setMessage('');
+  render();
+
+  const tables = draws.map(draw => sampleTable(draw.student));
   await animateWheelGroup('table', tables);
   state.draws = state.draws.map((draw, index) => ({ ...draw, tableNumber: tables[index] }));
   state.spinning = false;
@@ -417,16 +468,19 @@ function bindEvents() {
     state.group = event.target.value;
     state.draws = null;
     state.spinCount = 1;
+    state.spinPhase = 'idle';
     loadData();
   });
   document.getElementById('spinCount')?.addEventListener('change', event => {
     state.spinCount = Number(event.target.value) || 1;
     normalizeSpinCount();
     state.draws = null;
+    state.spinPhase = 'idle';
     setMessage('');
     render();
   });
-  document.getElementById('spinButton')?.addEventListener('click', spin);
+  document.getElementById('spinStudentsButton')?.addEventListener('click', spinStudents);
+  document.getElementById('spinTablesButton')?.addEventListener('click', spinTables);
   document.getElementById('clearDraw')?.addEventListener('click', () => {
     state.draws = null;
     state.spinPhase = 'idle';
