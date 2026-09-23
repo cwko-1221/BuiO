@@ -1,6 +1,8 @@
 const app = document.getElementById('app');
 const { t, server } = window.BuiI18n;
 const TABLE_NUMBERS = [2, 3, 4, 5, 6, 7, 8, 9];
+const SOUND_PREFERENCE_KEY = 'multiplication-checklist-sound';
+let soundContext = null;
 const state = {
   page: window.location.hash === '#records' ? 'records' : 'spin',
   group: '',
@@ -14,9 +16,18 @@ const state = {
   spinPhase: 'idle',
   saving: false,
   loading: true,
+  soundEnabled: readSoundPreference(),
   message: '',
   messageType: '',
 };
+
+function readSoundPreference() {
+  try {
+    return window.localStorage.getItem(SOUND_PREFERENCE_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+}
 
 const escapeHtml = value => String(value ?? '')
   .replaceAll('&', '&amp;')
@@ -274,7 +285,7 @@ function renderDraw() {
   const pairCount = hasDraws ? state.draws.length : state.spinCount;
   const draws = hasDraws ? state.draws : Array.from({ length: pairCount }, () => null);
   return `<section class="draw-panel panel">
-    <div class="panel-heading"><span class="eyebrow">WHEEL SPIN</span><h2>${escapeHtml(t('x.drawTitle'))}</h2><p>${escapeHtml(t('x.drawLead'))}</p></div>
+    <div class="panel-heading draw-heading"><div><span class="eyebrow">WHEEL SPIN</span><h2>${escapeHtml(t('x.drawTitle'))}</h2><p>${escapeHtml(t('x.drawLead'))}</p></div><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="${state.soundEnabled}">${state.soundEnabled ? '🔊' : '🔇'} ${escapeHtml(t(state.soundEnabled ? 'x.soundOn' : 'x.soundOff'))}</button></div>
     <div class="spin-settings"><div class="field"><label for="spinCount">${escapeHtml(t('x.spinCount'))}</label><select id="spinCount" ${countLocked ? 'disabled' : ''}>${Array.from({ length: maxSpinCount() }, (_, index) => index + 1).map(number => `<option value="${number}" ${number === state.spinCount ? 'selected' : ''}>${escapeHtml(peopleLabel(number))}</option>`).join('')}</select></div><p>${escapeHtml(t('x.spinCountHint'))}</p></div>
     <div class="wheel-pairs">${draws.map((draw, index) => renderWheelPair(index, draw)).join('')}</div>
     <div class="draw-actions"><button class="primary-button" id="spinStudentsButton" ${canSpinStudents ? '' : 'disabled'}>${escapeHtml(allRecorded ? t('x.nextSpinStudents') : t('x.spinStudents'))}</button><button class="primary-button table-spin-button" id="spinTablesButton" ${canSpinTables ? '' : 'disabled'}>${escapeHtml(t('x.spinTables'))}</button><button class="ghost-button" id="clearDraw" ${!hasDraws || state.spinning || state.saving ? 'disabled' : ''}>${escapeHtml(t('x.clear'))}</button></div>
@@ -353,6 +364,56 @@ function normalizeDegrees(angle) {
   return ((angle % 360) + 360) % 360;
 }
 
+function getSoundContext() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!state.soundEnabled || !AudioContextClass) return null;
+  try {
+    soundContext ||= new AudioContextClass();
+    if (soundContext.state === 'suspended') soundContext.resume().catch(() => {});
+    return soundContext;
+  } catch {
+    return null;
+  }
+}
+
+function playTone(frequency, { at, duration = .12, volume = .035, type = 'sine' } = {}) {
+  const context = getSoundContext();
+  if (!context) return;
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  const startAt = Math.max(context.currentTime, at ?? context.currentTime);
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, startAt);
+  gain.gain.setValueAtTime(.0001, startAt);
+  gain.gain.exponentialRampToValueAtTime(volume, startAt + .008);
+  gain.gain.exponentialRampToValueAtTime(.0001, startAt + duration);
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(startAt);
+  oscillator.stop(startAt + duration + .015);
+}
+
+function playWheelTick(progress, wheelType) {
+  const pitch = (wheelType === 'student' ? 1150 : 1450) - (progress * 420);
+  playTone(pitch, { duration: .035, volume: .012, type: 'square' });
+}
+
+function playWheelLanding(wheelType) {
+  const context = getSoundContext();
+  if (!context) return;
+  const now = context.currentTime;
+  const notes = wheelType === 'student' ? [660, 880] : [784, 988, 1175];
+  notes.forEach((note, index) => playTone(note, { at: now + (index * .105), duration: .22, volume: .04 }));
+}
+
+function playRecordResult(result) {
+  const context = getSoundContext();
+  if (!context) return;
+  const now = context.currentTime;
+  const notes = result === 'success' ? [659, 831, 988] : [440, 370];
+  notes.forEach((note, index) => playTone(note, { at: now + (index * .11), duration: result === 'success' ? .19 : .22, volume: .035 }));
+}
+
 function immersiveProgress(progress) {
   if (progress < .18) return .06 * Math.pow(progress / .18, 2);
   if (progress < .78) return .06 + (.74 * ((progress - .18) / .6));
@@ -374,10 +435,16 @@ function animateWheelGroup(type, targets) {
   const durations = discs.map((_, index) => baseDuration + ((index % 3) * 140) + (Math.random() * 180));
   const overallDuration = Math.max(...durations, baseDuration);
   const started = performance.now();
+  let nextTickAt = started + 95;
 
   return new Promise(resolve => {
     const tick = now => {
       const elapsed = now - started;
+      const overallProgress = Math.min(1, elapsed / overallDuration);
+      if (now >= nextTickAt) {
+        playWheelTick(overallProgress, type);
+        nextTickAt = now + 72 + (overallProgress ** 2.2 * 265);
+      }
       discs.forEach((disc, index) => {
         const draw = state.draws?.[Number(disc.dataset.wheelIndex)];
         const progress = Math.min(1, elapsed / durations[index]);
@@ -394,6 +461,7 @@ function animateWheelGroup(type, targets) {
         requestAnimationFrame(tick);
         return;
       }
+      playWheelLanding(type);
       resolve();
     };
     requestAnimationFrame(tick);
@@ -402,6 +470,7 @@ function animateWheelGroup(type, targets) {
 
 async function spinStudents() {
   if (state.spinning || state.saving || !state.students.length) return;
+  if (state.soundEnabled) getSoundContext();
   const count = Math.min(state.spinCount, state.students.length);
   state.spinning = true;
   state.spinPhase = 'students';
@@ -421,6 +490,7 @@ async function spinTables() {
   if (state.spinning || state.saving) return;
   const draws = state.draws;
   if (!draws?.length || draws.some(draw => !draw.student || draw.tableNumber)) return;
+  if (state.soundEnabled) getSoundContext();
   state.spinning = true;
   state.spinPhase = 'tables';
   setMessage('');
@@ -447,6 +517,7 @@ async function record(index, result) {
       method: 'POST',
       body: JSON.stringify({ studentId: draw.student.id, tableNumber: draw.tableNumber, result }),
     });
+    playRecordResult(result);
     await loadData({ keepDraws: true });
     state.saving = false;
     setMessage(t(result === 'success' ? 'x.savedSuccess' : 'x.savedFailure'));
@@ -461,6 +532,16 @@ async function record(index, result) {
 }
 
 function bindEvents() {
+  document.getElementById('soundToggle')?.addEventListener('click', () => {
+    state.soundEnabled = !state.soundEnabled;
+    try {
+      window.localStorage.setItem(SOUND_PREFERENCE_KEY, state.soundEnabled ? 'on' : 'off');
+    } catch {
+      // Audio remains usable for this page even if the browser blocks local storage.
+    }
+    if (state.soundEnabled) getSoundContext();
+    render();
+  });
   document.querySelectorAll('[data-page]').forEach(button => button.addEventListener('click', () => {
     setPage(button.dataset.page);
   }));

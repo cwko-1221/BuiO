@@ -158,6 +158,9 @@ select {
 }
 .panel-heading { position: relative; z-index: 1; margin-bottom: 20px; }
 .panel-heading p { color: var(--muted); font-size: .9rem; margin-bottom: 0; }
+.draw-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.sound-toggle { flex: none; min-height: 38px; padding: 7px 12px; border: 1px solid rgba(15, 139, 141, .2); border-radius: 999px; color: var(--teal-dark); background: #eff8f7; font-size: .82rem; font-weight: 850; }
+.sound-toggle:hover { background: #e2f3f1; }
 .spin-settings {
   display: grid;
   grid-template-columns: minmax(150px, 190px) 1fr;
@@ -297,6 +300,8 @@ th:first-child { border-top-left-radius: 8px; }
   .back-link { display: inline-block; margin-top: 16px; }
   .controls { grid-template-columns: 1fr; gap: 14px; padding: 17px; }
   .draw-panel { padding: 20px 15px; }
+  .draw-heading { align-items: flex-start; }
+  .sound-toggle { padding: 6px 9px; font-size: .74rem; }
   .spin-settings { grid-template-columns: 1fr; gap: 8px; }
   .spin-settings p { margin: 0; }
   .wheel-pair { padding: 12px 8px; }

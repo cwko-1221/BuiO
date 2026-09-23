@@ -21,6 +21,8 @@
     'x.spinStudents': { 'zh-HK': '抽取學生', 'en-US': 'Draw students' },
     'x.nextSpinStudents': { 'zh-HK': '再抽學生', 'en-US': 'Draw students again' },
     'x.spinTables': { 'zh-HK': '抽取乘數表', 'en-US': 'Draw tables' },
+    'x.soundOn': { 'zh-HK': '音效開', 'en-US': 'Sound on' },
+    'x.soundOff': { 'zh-HK': '音效關', 'en-US': 'Sound off' },
     'x.clear': { 'zh-HK': '清除', 'en-US': 'Clear' },
     'x.waitingStudent': { 'zh-HK': '準備', 'en-US': 'Ready' },
     'x.waitingTable': { 'zh-HK': '準備', 'en-US': 'Ready' },
