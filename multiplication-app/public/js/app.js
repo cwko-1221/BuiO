@@ -433,11 +433,13 @@ function animateWheelGroup(type, targets) {
   const discs = [...document.querySelectorAll(`.roulette-disc[data-wheel-type="${type}"]`)].sort((a, b) => Number(a.dataset.wheelIndex) - Number(b.dataset.wheelIndex));
   const starts = discs.map(disc => Number.parseFloat(disc.style.getPropertyValue('--spin-angle')) || 0);
   const ends = discs.map((disc, index) => {
-    const draw = state.draws?.[Number(disc.dataset.wheelIndex)];
-    const targetAngle = normalizeDegrees(wheelTargetAngle(type, disc, targets[index]));
+    const wheelIndex = Number(disc.dataset.wheelIndex);
+    const draw = state.draws?.[wheelIndex];
+    const targetAngle = normalizeDegrees(wheelTargetAngle(type, disc, targets[wheelIndex]));
     const currentAngle = normalizeDegrees(starts[index]);
     const landingTurn = (targetAngle - currentAngle + 360) % 360;
-    return starts[index] + (7.5 + Math.random() * 2.2 + ((index % 2) * .35)) * 360 + landingTurn;
+    const fullTurns = 8 + Math.floor(Math.random() * 3) + (wheelIndex % 2);
+    return starts[index] + (fullTurns * 360) + landingTurn;
   });
   const baseDuration = type === 'student' ? 3200 : 2900;
   const durations = discs.map((_, index) => baseDuration + ((index % 3) * 140) + (Math.random() * 180));
