@@ -37,9 +37,6 @@
         .tier-policy-name { min-width: 150px; font-weight: 600; font-size: 0.9rem; }
         .tier-policy-name small { display: block; font-weight: 400; color: var(--text-muted); font-size: 0.75rem; }
         .tier-policy-switches { display: flex; gap: 14px; flex-wrap: wrap; }
-        .question-type-groups { display: grid; gap: 10px; flex: 1 1 420px; }
-        .question-type-group { display: grid; gap: 5px; }
-        .question-type-group-title { color: var(--text-muted); font-size: 0.76rem; font-weight: 700; }
         .tier-policy-switch { display: flex; align-items: center; gap: 5px; font-size: 0.85rem; cursor: pointer; }
         .tier-policy-switch input { cursor: pointer; }
         .tier-policy-switch.off { color: var(--text-muted); text-decoration: line-through; }
@@ -99,21 +96,6 @@
                 <div id="tier-policy-body" hidden>
                     <div id="tier-policy-rows" class="tier-policy-rows" data-i18n="m.loadingDots">載入中…</div>
                     <div id="tier-policy-message" class="tier-policy-message" hidden></div>
-                </div>
-            </section>
-
-            <!-- Question type policy (teachers only) -->
-            <section id="question-type-policy-panel" class="tier-policy" hidden>
-                <div class="tier-policy-head">
-                    <div>
-                        <h2 data-i18n="m.questionTypePanelTitle">🧮 題目類型設定</h2>
-                        <p data-i18n="m.questionTypePanelLead">按整數、分數、小數分組，只顯示該年級實際有的運算組合；關掉的題型不會再出題。</p>
-                    </div>
-                    <button type="button" id="question-type-policy-toggle" class="tier-policy-toggle" aria-expanded="false" data-i18n="m.tierExpand">展開設定</button>
-                </div>
-                <div id="question-type-policy-body" hidden>
-                    <div id="question-type-policy-rows" class="tier-policy-rows" data-i18n="m.loadingDots">載入中…</div>
-                    <div id="question-type-policy-message" class="tier-policy-message" hidden></div>
                 </div>
             </section>
 
@@ -193,6 +175,6 @@
 
     </div>
 
-    <script src="/math-app/js/dashboard.js?v=20260922-question-type-domains-3"></script>
+    <script src="/math-app/js/dashboard.js?v=20260924-topic-policy-1"></script>
 </body>
 </html>

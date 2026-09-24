@@ -1452,7 +1452,37 @@ canvas#scratchpad {
     color: var(--text-muted);
     margin-bottom: 22px;
 }
-.topic-bank-toolbar { margin-bottom: 18px; }
+.topic-policy-toolbar {
+    display: flex;
+    align-items: end;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    margin: 8px 0 18px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.035);
+}
+.topic-select-field { display: grid; gap: 5px; color: var(--text-muted); font-size: 0.8rem; font-weight: 700; }
+.topic-select-field select {
+    min-width: 130px;
+    padding: 9px 34px 9px 11px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font: inherit;
+}
+.topic-enabled-tiers { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-left: auto; }
+.topic-enabled-tiers-label { color: var(--text-muted); font-size: 0.82rem; }
+.topic-tier-badge { padding: 4px 9px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; background: rgba(167, 139, 250, 0.14); color: #c4b5fd; }
+.topic-tier-badge.bronze { color: #fdba74; background: rgba(251, 146, 60, 0.12); }
+.topic-tier-badge.silver { color: #cbd5e1; background: rgba(203, 213, 225, 0.12); }
+.topic-tier-badge.gold { color: #fde68a; background: rgba(250, 204, 21, 0.12); }
+.topic-tier-badge.diamond { color: #7dd3fc; background: rgba(56, 189, 248, 0.12); }
+.topic-tier-badge.fire { color: #fca5a5; background: rgba(248, 113, 113, 0.12); }
+.topic-tier-badge.sun { color: #fdba74; background: rgba(251, 146, 60, 0.12); }
+.topic-bank-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; }
 .topic-bank-toolbar input {
     width: min(100%, 520px);
     padding: 12px 14px;
@@ -1462,6 +1492,16 @@ canvas#scratchpad {
     color: var(--text-primary);
     font: inherit;
 }
+.topic-policy-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+.topic-follow-grade {
+    border: 0; background: none; color: #c4b5fd; cursor: pointer;
+    font: inherit; font-size: 0.85rem; text-decoration: underline;
+}
+.topic-follow-grade:disabled { opacity: 0.55; cursor: wait; }
+.topic-policy-note { margin: -2px 0 14px; color: var(--text-muted); font-size: 0.82rem; }
+.topic-policy-message { margin: 10px 0; color: var(--text-secondary); font-size: 0.88rem; }
+.topic-policy-message.error { color: #fca5a5; }
+.topic-policy-message.ok { color: #4ade80; }
 .topic-bank-toolbar input:focus {
     outline: 2px solid rgba(139, 92, 246, 0.55);
     border-color: var(--accent-purple);
@@ -1492,6 +1532,9 @@ canvas#scratchpad {
     background: rgba(255, 255, 255, 0.035);
 }
 .topic-card.open { border-color: rgba(139, 92, 246, 0.42); }
+.topic-card.disabled { background: rgba(255, 255, 255, 0.018); }
+.topic-card.disabled .topic-name { color: var(--text-muted); }
+.topic-card-head { display: flex; align-items: stretch; }
 .topic-toggle {
     width: 100%;
     min-height: 54px;
@@ -1506,6 +1549,14 @@ canvas#scratchpad {
     font: inherit;
     cursor: pointer;
 }
+.topic-card-head .topic-toggle { flex: 1; width: auto; min-width: 0; }
+.topic-enable {
+    display: flex; align-items: center; gap: 7px; flex: none;
+    padding: 0 14px; border-left: 1px solid var(--border-subtle);
+    color: var(--text-secondary); font-size: 0.78rem; cursor: pointer; white-space: nowrap;
+}
+.topic-enable input { accent-color: #8b5cf6; cursor: pointer; }
+.topic-enable input:disabled { cursor: wait; }
 .topic-toggle:hover, .topic-card.open .topic-toggle { background: rgba(139, 92, 246, 0.11); }
 .topic-toggle:focus-visible { outline: 2px solid var(--accent-purple); outline-offset: -2px; }
 .topic-name { flex: 1; font-weight: 600; }
@@ -1514,6 +1565,7 @@ canvas#scratchpad {
     font-size: 0.76rem;
     white-space: nowrap;
 }
+.topic-card-tier { padding: 3px 7px; font-size: 0.7rem; }
 .topic-chevron { color: #c4b5fd; font-size: 1.15rem; }
 .topic-examples {
     padding: 4px 14px 14px;
@@ -1545,4 +1597,10 @@ canvas#scratchpad {
     .topic-category { font-size: 0.7rem; }
     .topic-example-list li { grid-template-columns: 1fr; }
     .topic-example-number { grid-row: auto; }
+    .topic-policy-toolbar { align-items: stretch; }
+    .topic-select-field { flex: 1 1 calc(50% - 8px); }
+    .topic-select-field select { width: 100%; }
+    .topic-enabled-tiers { margin-left: 0; }
+    .topic-policy-actions { width: 100%; justify-content: space-between; }
+    .topic-enable { padding-inline: 9px; }
 }

@@ -14,6 +14,7 @@ const {
   TIER_ORDER,
   TIER_IDS,
   tiersForClass,
+  tagsForClass,
   QUESTION_TYPE_IDS,
   QUESTION_TYPE_FILTER_ORDER,
   questionTypesForClass,
@@ -23,6 +24,7 @@ const {
 const { scopeForStudent } = require('../engine/studentScope');
 const tierPolicy = require('../repositories/tier-policy.repo');
 const questionTypePolicy = require('../repositories/question-type-policy.repo');
+const topicPolicy = require('../repositories/topic-policy.repo');
 const { requireAuth, requireTeacher } = require('../middleware/auth');
 
 router.use(requireAuth);
@@ -32,27 +34,8 @@ function targetStudent(req) {
   return req.session.studentId;
 }
 
-// Students may only view their own analytics after completing today's
-// random practice. Teachers always pass (they're viewing someone else).
-async function requireDailyRandomForStudent(req, res) {
-  if (req.session.role === 'teacher') return true;
-  const uid = req.session.studentId;
-  const { tags } = await scopeForStudent(uid);
-  const t = await logs.todayOverview(uid, tags);
-  const n = Number(t.todayquestions) || 0;
-  if (n < 10) {
-    res.status(403).json({
-      success: false, gated: true,
-      message: `請先完成今天的隨機練習（${n}/10）。`,
-    });
-    return false;
-  }
-  return true;
-}
-
-// Restrict a student's dashboard to the tags in their grade's curriculum, minus
-// any tier their teacher switched off for their class or math group — the radar
-// must not draw a 鑽 chart for a child who is never asked a 鑽 question.
+// Restrict a student's dashboard to topics they can actually receive under the
+// curriculum, tier and individual-topic rules for their class or maths group.
 // Falls back to ALL_TAGS for unknown classes / staff / graduated.
 async function tagsForStudentId(studentId) {
   const { tags } = await scopeForStudent(studentId);
@@ -83,7 +66,6 @@ function enrichTag(row) {
 // ----------------------------------------------------------------
 router.get('/overview', async (req, res, next) => {
   try {
-    if (!(await requireDailyRandomForStudent(req, res))) return;
     const studentId = targetStudent(req);
     const tags = await tagsForStudentId(studentId);
     const ov = await stats.overview(studentId, tags);
@@ -117,7 +99,6 @@ router.get('/tiers', async (req, res, next) => {
 
 router.get('/tags', async (req, res, next) => {
   try {
-    if (!(await requireDailyRandomForStudent(req, res))) return;
     const studentId = targetStudent(req);
     const tags = await tagsForStudentId(studentId);
     const rows = await stats.tagBreakdown(studentId, tags);
@@ -132,7 +113,6 @@ router.get('/tags', async (req, res, next) => {
 // ----------------------------------------------------------------
 router.get('/history', async (req, res, next) => {
   try {
-    if (!(await requireDailyRandomForStudent(req, res))) return;
     const studentId = targetStudent(req);
     const limit = parseInt(req.query.limit) || 50;
     const offset = parseInt(req.query.offset) || 0;
@@ -168,7 +148,6 @@ router.get('/history', async (req, res, next) => {
 // ----------------------------------------------------------------
 router.get('/weaknesses', async (req, res, next) => {
   try {
-    if (!(await requireDailyRandomForStudent(req, res))) return;
     const studentId = targetStudent(req);
     const tags = await tagsForStudentId(studentId);
     const rows = await stats.weaknesses(studentId, tags);
@@ -185,7 +164,6 @@ router.get('/weaknesses', async (req, res, next) => {
 // ----------------------------------------------------------------
 router.get('/time-analysis', async (req, res, next) => {
   try {
-    if (!(await requireDailyRandomForStudent(req, res))) return;
     const studentId = targetStudent(req);
     const tags = await tagsForStudentId(studentId);
     const rows = await logs.timeAnalysis(studentId, tags);
@@ -351,14 +329,33 @@ router.put('/teacher/tier-policy', requireTeacher, async (req, res, next) => {
           message: '至少要保留一個級別，否則學生沒有題目可以做。',
         });
       }
-      const typePolicy = await questionTypePolicy.getPolicy();
-      const disabledQuestionTypes = questionTypePolicy.resolve(typePolicy, className, mathGroup);
-      if (!filterTagsForScope(className, raw, disabledQuestionTypes).length) {
-        return res.status(400).json({
-          success: false,
-          message: '目前的題目類型設定會令學生沒有可用題目，請先保留至少一種題型。',
-        });
-      }
+    }
+
+    const [currentTierPolicy, typePolicy, exactTopicPolicy] = await Promise.all([
+      tierPolicy.getPolicy(),
+      questionTypePolicy.getPolicy(),
+      topicPolicy.getPolicy(),
+    ]);
+    const candidateTierPolicy = { ...currentTierPolicy };
+    const tierKey = tierPolicy.policyKey(className, mathGroup);
+    if (raw === null) delete candidateTierPolicy[tierKey];
+    else candidateTierPolicy[tierKey] = raw;
+    const candidateDisabledTiers = tierPolicy.resolve(candidateTierPolicy, className, mathGroup);
+    const exactRule = topicPolicy.resolveRule(exactTopicPolicy, className, mathGroup);
+    const candidateTags = tagsForClass(className)
+      .filter(tag => !candidateDisabledTiers.includes(tierForTag(tag)));
+    const enabledTags = exactRule.configured
+      ? candidateTags.filter(tag => !exactRule.disabledTags.includes(tag))
+      : filterTagsForScope(
+        className,
+        candidateDisabledTiers,
+        questionTypePolicy.resolve(typePolicy, className, mathGroup),
+      );
+    if (!enabledTags.length) {
+      return res.status(400).json({
+        success: false,
+        message: '目前的題型設定會令學生沒有可用課題，請先保留至少一個課題。',
+      });
     }
 
     const policy = await tierPolicy.setRule(className, mathGroup, raw === null ? null : raw);
@@ -436,6 +433,134 @@ router.put('/teacher/question-type-policy', requireTeacher, async (req, res, nex
       raw === null ? null : raw,
     );
     await respondWithQuestionTypePolicy(res, policy);
+  } catch (e) { next(e); }
+});
+
+// ----------------------------------------------------------------
+// Topic policy (teachers only)
+// ----------------------------------------------------------------
+// The teacher chooses a grade/group first. We then show only the cumulative
+// curriculum topics whose tiers are enabled for that exact scope.
+async function buildTopicPolicyView(className, mathGroup) {
+  const [students, tierRules, legacyTypeRules, topicRules] = await Promise.all([
+    users.listForTeacher(ALL_TAGS, { includeTeachers: false }),
+    tierPolicy.getPolicy(),
+    questionTypePolicy.getPolicy(),
+    topicPolicy.getPolicy(),
+  ]);
+  const grade = normalizeClassname(className);
+  const group = String(mathGroup || '').trim();
+  const disabledTiers = tierPolicy.resolve(tierRules, grade, group);
+  const disabledQuestionTypes = questionTypePolicy.resolve(legacyTypeRules, grade, group);
+  const legacyAllowed = new Set(filterTagsForScope(grade, [], disabledQuestionTypes));
+  const rule = topicPolicy.resolveRule(topicRules, grade, group);
+  const availableTags = tagsForClass(grade)
+    .filter(tag => !disabledTiers.includes(tierForTag(tag)));
+  const topics = availableTags.map(tag => ({
+    tag,
+    name: TAG_INFO[tag]?.name || tag,
+    category: TAG_INFO[tag]?.category || '',
+    tier: tierForTag(tag),
+    enabled: rule.configured
+      ? !rule.disabledTags.includes(tag)
+      : legacyAllowed.has(tag),
+  }));
+  // Match the student-scope safety fallback if a stale rule disables every
+  // currently available tag (for example after a curriculum change).
+  if (topics.length && !topics.some(topic => topic.enabled)) {
+    topics.forEach(topic => { topic.enabled = true; });
+  }
+  const groups = [...new Set(students
+    .filter(student => normalizeClassname(student.className) === grade)
+    .map(student => String(student.mathGroup || '').trim())
+    .filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+
+  return {
+    success: true,
+    className: grade,
+    mathGroup: group,
+    groups,
+    enabledTiers: tiersForClass(grade).filter(tier => !disabledTiers.includes(tier.id)),
+    configured: rule.configured,
+    inherited: Boolean(group) && !rule.groupConfigured && rule.configured,
+    groupConfigured: rule.groupConfigured,
+    legacyDefaults: !rule.configured && legacyAllowed.size < tagsForClass(grade).length,
+    topics,
+  };
+}
+
+router.get('/teacher/topic-policy', requireTeacher, async (req, res, next) => {
+  try {
+    const className = normalizeClassname(req.query.className || 'P1');
+    if (!className) {
+      return res.status(400).json({ success: false, message: '班級不正確，只支援 P1 至 P6。' });
+    }
+    const mathGroup = String(req.query.mathGroup || '').trim().slice(0, 20);
+    res.json(await buildTopicPolicyView(className, mathGroup));
+  } catch (e) { next(e); }
+});
+
+router.put('/teacher/topic-policy', requireTeacher, async (req, res, next) => {
+  try {
+    const className = normalizeClassname(req.body?.className);
+    if (!className) {
+      return res.status(400).json({ success: false, message: '班級不正確，只支援 P1 至 P6。' });
+    }
+    const mathGroup = String(req.body?.mathGroup || '').trim().slice(0, 20);
+    const raw = req.body?.disabledTags;
+
+    if (raw === null) {
+      await topicPolicy.setRule(className, mathGroup, null);
+      return res.json(await buildTopicPolicyView(className, mathGroup));
+    }
+    if (!Array.isArray(raw)) {
+      return res.status(400).json({ success: false, message: '請提供要停用的課題。' });
+    }
+    const allGradeTags = new Set(tagsForClass(className));
+    const unknown = raw.filter(tag => typeof tag !== 'string' || !allGradeTags.has(tag));
+    if (unknown.length) {
+      return res.status(400).json({ success: false, message: '包含此年級沒有的課題，請重新載入。' });
+    }
+
+    const [tierRules, legacyTypeRules, topicRules] = await Promise.all([
+      tierPolicy.getPolicy(),
+      questionTypePolicy.getPolicy(),
+      topicPolicy.getPolicy(),
+    ]);
+    const disabledTiers = tierPolicy.resolve(tierRules, className, mathGroup);
+    const activeTags = new Set(tagsForClass(className)
+      .filter(tag => !disabledTiers.includes(tierForTag(tag))));
+    const unavailable = raw.filter(tag => !activeTags.has(tag));
+    if (unavailable.length) {
+      return res.status(400).json({ success: false, message: '設定已更新，請重新載入可出的課題。' });
+    }
+    const selectedOff = new Set(raw);
+    if (![...activeTags].some(tag => !selectedOff.has(tag))) {
+      return res.status(400).json({
+        success: false,
+        message: '至少要保留一個課題，否則學生沒有題目可以做。',
+      });
+    }
+
+    // Preserve disabled topics outside the current tier view. On first save,
+    // translate the old category-level rules into topic defaults so migrating
+    // the UI does not silently re-enable previously disabled question types.
+    const existingRule = topicPolicy.resolveRule(topicRules, className, mathGroup);
+    let previousDisabled;
+    if (existingRule.configured) {
+      previousDisabled = existingRule.disabledTags;
+    } else {
+      const oldDisabledTypes = questionTypePolicy.resolve(legacyTypeRules, className, mathGroup);
+      const oldAllowed = new Set(filterTagsForScope(className, [], oldDisabledTypes));
+      previousDisabled = tagsForClass(className).filter(tag => !oldAllowed.has(tag));
+    }
+    const mergedDisabled = [...new Set([
+      ...previousDisabled.filter(tag => !activeTags.has(tag)),
+      ...raw,
+    ])];
+
+    await topicPolicy.setRule(className, mathGroup, mergedDisabled);
+    res.json(await buildTopicPolicyView(className, mathGroup));
   } catch (e) { next(e); }
 });
 

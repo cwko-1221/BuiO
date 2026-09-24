@@ -30,20 +30,50 @@
             <header class="topic-bank-header">
                 <div>
                     <h1 data-i18n="m.topicBankTitle">📚 P1–P6 題目列表</h1>
-                    <p data-i18n="m.topicBankLead">按課題首次納入年級分組；展開課題即可查看 5 個隨機例題及答案。</p>
+                    <p data-i18n="m.topicBankLead">先選年級和數學分組，再按已開啟的題目級別勾選要出的課題；展開課題可查看 5 個例題及答案。</p>
                 </div>
             </header>
+
+            <div class="topic-policy-toolbar">
+                <label class="topic-select-field">
+                    <span data-i18n="m.topicGradeLabel">年級</span>
+                    <select id="topic-grade-select" aria-label="年級">
+                        <option value="P1">P1</option>
+                        <option value="P2">P2</option>
+                        <option value="P3">P3</option>
+                        <option value="P4">P4</option>
+                        <option value="P5">P5</option>
+                        <option value="P6">P6</option>
+                    </select>
+                </label>
+                <label class="topic-select-field">
+                    <span data-i18n="m.topicGroupLabel">數學分組</span>
+                    <select id="topic-group-select" aria-label="數學分組">
+                        <option value="" data-i18n="m.topicGroupAll">全級</option>
+                    </select>
+                </label>
+                <div id="topic-enabled-tiers" class="topic-enabled-tiers" aria-live="polite"></div>
+            </div>
 
             <div class="topic-bank-toolbar">
                 <input id="topic-search" type="search" autocomplete="off"
                        data-i18n-attr="placeholder:m.topicSearchPlaceholder"
                        placeholder="搜尋課題名稱或類型…">
+                <div class="topic-policy-actions">
+                    <span id="topic-policy-count" class="topic-count"></span>
+                    <button id="topic-follow-grade" class="topic-follow-grade" type="button" hidden
+                            data-i18n="m.topicFollowGrade">跟隨全級設定</button>
+                    <button id="topic-save" class="btn-primary" type="button"
+                            data-i18n="m.topicSave">儲存題型設定</button>
+                </div>
             </div>
+            <p id="topic-policy-note" class="topic-policy-note" hidden></p>
             <div id="topic-bank-status" class="topic-bank-status" role="status" aria-live="polite"
                  data-i18n="m.topicListLoading">正在載入題目列表…</div>
             <div id="topic-grade-groups" class="topic-grade-groups"></div>
+            <div id="topic-policy-message" class="topic-policy-message" role="status" aria-live="polite" hidden></div>
         </main>
     </div>
-    <script src="/math-app/js/teacher-topics.js?v=20260922-fraction-placeholders-1"></script>
+    <script src="/math-app/js/teacher-topics.js?v=20260924-topic-policy-1"></script>
 </body>
 </html>
