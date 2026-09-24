@@ -2,7 +2,11 @@
 
 require('dotenv').config({ quiet: true });
 
-const env = (process.env.NODE_ENV || 'development').toLowerCase();
+const rawEnv = String(process.env.NODE_ENV || '').trim().toLowerCase();
+const env = rawEnv || 'development';
+// A missing NODE_ENV is convenient for local startup, but it must not implicitly
+// unlock developer-only mutation routes in a deployed process.
+const isExplicitDevelopment = rawEnv === 'development';
 const isProd = env === 'production';
 
 function required(name) {
@@ -44,6 +48,7 @@ const sessionMaxAgeDays = Number.isFinite(configuredSessionDays) && configuredSe
 
 module.exports = Object.freeze({
   env,
+  isExplicitDevelopment,
   isProd,
   port: Number(process.env.PORT) || 3000,
   db: { mode, supabaseUrl },

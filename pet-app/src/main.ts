@@ -3,23 +3,19 @@ import './styles/main.css';
 import { api } from './api';
 import { audio } from './audio';
 import { BedroomScene } from './game/BedroomScene';
+import type { CoinPusherScene } from './game/CoinPusherScene';
 import { PetAvatar } from './game/PetAvatar';
+import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCascadeLabel, coinPusherStampProgress, coinPusherTimingStreakLabel, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
+import type { CoinPusherTimingStreakState } from './game/CoinPusherFeedback';
+import type { CoinPusherDropBeat } from './game/CoinPusherModel';
 import { placeWearable } from './game/wearableLayout';
 import type { Bootstrap, Identity, InventoryStack, Locale, PetDefinition, PetInstance, RoomPlacement, TeacherGrantNotification } from './types';
 import { idempotencyKey } from './types';
+import rapierWasmUrl from '@dimforge/rapier3d/rapier_wasm3d_bg.wasm?url';
 
 
-// iOS has ignored user-scalable=no since iOS 10, and touch-action: manipulation still permits
-// pinch — it only removes the double-tap zoom delay. Refusing the WebKit gesture events is the
-// only reliable way to decline a pinch, and it matters beyond appearance: once iOS claims the
-// touch stream for a zoom, a control holding a finger may never receive touchend, leaving it
-// stuck down.
-for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
-  document.addEventListener(type, event => event.preventDefault(), { passive: false });
-}
-document.addEventListener('touchmove', event => {
-  if (event.touches.length > 1) event.preventDefault();
-}, { passive: false });
+// Native browser zoom and multi-touch behavior stays enabled throughout the application.
+// Only the coin-pusher canvas scopes gestures with touch-action: none.
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[character]!));
@@ -28,6 +24,16 @@ const MYSTERY_PET_IDS = new Set([
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
   'doraemon', 'hello-kitty',
 ]);
+const COIN_PUSHER_DROP_COST = 1;
+type CoinPusherRewardOrigin = { x: number; y: number };
+type CoinPusherLandingFeedback = CoinPusherRewardOrigin & { pusherBeat: CoinPusherDropBeat };
+const COIN_PUSHER_STAMPS = [
+  { threshold: COIN_PUSHER_STAMP_THRESHOLDS[0], tier: 'bronze', rank: 'I', name: { 'zh-HK': '小爪新手', 'en-US': 'First Paw' }, title: { 'zh-HK': '第一枚入槽', 'en-US': 'First Catch' } },
+  { threshold: COIN_PUSHER_STAMP_THRESHOLDS[1], tier: 'silver', rank: 'II', name: { 'zh-HK': '銀仔高手', 'en-US': 'Coin Spotter' }, title: { 'zh-HK': '銀仔收藏家', 'en-US': 'Coin Collector' } },
+  { threshold: COIN_PUSHER_STAMP_THRESHOLDS[2], tier: 'gold', rank: 'III', name: { 'zh-HK': '推板大師', 'en-US': 'Pusher Master' }, title: { 'zh-HK': '百枚入帳', 'en-US': 'Century Catch' } },
+  { threshold: COIN_PUSHER_STAMP_THRESHOLDS[3], tier: 'crystal', rank: 'IV', name: { 'zh-HK': '水晶爪印', 'en-US': 'Crystal Paw' }, title: { 'zh-HK': '三百枚入帳', 'en-US': '300 Returned' } },
+  { threshold: COIN_PUSHER_STAMP_THRESHOLDS[4], tier: 'aurora', rank: 'V', name: { 'zh-HK': '傳奇推手', 'en-US': 'Arcade Legend' }, title: { 'zh-HK': '千枚傳奇', 'en-US': '1,000 Returned' } },
+];
 
 // The reduced-motion preference is stored per device; apply it before first paint so no
 // entrance animation ever runs for a child who has asked for stillness.
@@ -35,7 +41,7 @@ if (localStorage.getItem('pet-reduced-motion') === '1') document.documentElement
 
 const UI = {
   'zh-HK': {
-    title:'寵物樂園', home:'我的房間', collection:'寵物圖鑑', shop:'魔法商店', visit:'同班參觀', settings:'設定',
+    title:'寵物樂園', home:'我的房間', collection:'寵物圖鑑', shop:'魔法商店', coinPusher:'推銀仔', visit:'同班參觀', settings:'設定',
     coins:'金幣', dust:'星塵', feed:'餵食', play:'一起玩', sleep:'休息', decorate:'佈置房間', save:'儲存佈置', private:'私人房間', class:'開放同班參觀',
     hatchTitle:'你的第一顆蛋正在等待！', hatchCopy:'蛋內藏着三隻完成版寵物之一。首次孵化完全免費。', hatch:'開始孵化',
     owned:'已擁有', locked:'未擁有', active:'主寵', choose:'選為主寵', buy:'購買', visitRoom:'參觀房間', back:'返回房間',
@@ -43,7 +49,7 @@ const UI = {
     empty:'暫時沒有內容。', daily:'今日經驗', probability:'目前開放 12 隻完成版寵物', pity:'保底', randomEgg:'隨機寵物蛋', directPet:'指定寵物',
   },
   'en-US': {
-    title:'Pet Paradise', home:'My Room', collection:'Pet Collection', shop:'Magic Shop', visit:'Class Visits', settings:'Settings',
+    title:'Pet Paradise', home:'My Room', collection:'Pet Collection', shop:'Magic Shop', coinPusher:'Coin Pusher', visit:'Class Visits', settings:'Settings',
     coins:'Coins', dust:'Stardust', feed:'Feed', play:'Play', sleep:'Rest', decorate:'Decorate', save:'Save room', private:'Private room', class:'Open to class',
     hatchTitle:'Your first egg is waiting!', hatchCopy:'One of the three completed pets is inside. Your first hatch is free.', hatch:'Hatch now',
     owned:'Owned', locked:'Not owned', active:'Active', choose:'Make active', buy:'Buy', visitRoom:'Visit room', back:'Back to room',
@@ -103,6 +109,29 @@ const REFUSALS: Record<string, string> = {
 class StudentApp {
   identity: Identity; state!: Bootstrap; locale: Locale; game?: Phaser.Game; tab = 'home'; selectedFurniture = ''; roomPlacements: RoomPlacement[] = [];
   pendingGrantIds: string[] = [];
+  coinPusherView?: CoinPusherScene;
+  private coinPusherModel?: CoinPusherScene['model'];
+  private coinPusherInitPending = false;
+  private coinPusherGeneration = 0;
+  private coinPusherBusy = false;
+  private coinPusherReady = false;
+  private coinPusherWebglLost = false;
+  private coinPusherInitFailed = false;
+  private coinPusherPaymentInFlight = false;
+  private coinPusherStatusRevision = 0;
+  private coinPusherKeyboardLaneX = 0;
+  private coinPusherSceneModule?: Promise<typeof import('./game/CoinPusherScene')>;
+  private coinPusherModelModule?: Promise<typeof import('./game/CoinPusherModel')>;
+  private coinPusherWasmPreload?: HTMLLinkElement;
+  private coinPusherPreloadTimer?: number;
+  private coinPusherCascade = { count: 0, lastAt: 0 };
+  private coinPusherTimingStreak: CoinPusherTimingStreakState = { count: 0, best: 0 };
+  private coinPusherCooldown?: number;
+  private coinPusherReturnFocus?: HTMLElement;
+  private coinPusherPayoutSequence = 0;
+  private coinPusherPayoutQueue: Promise<void> = Promise.resolve();
+  private coinPusherTrayCatchUntil = 0;
+  private coinPusherPlays: { playId: string; remaining: number; reserved: number; generation: number }[] = [];
   visiting?: any;
   surfaceObserver?: ResizeObserver;
   constructor(identity: Identity) { this.identity = identity; this.locale = identity.language || 'zh-HK'; }
@@ -125,12 +154,25 @@ class StudentApp {
   }
 
   async start() {
+    const viewport = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
+    if (viewport && !viewport.content.includes('viewport-fit=cover')) {
+      viewport.content = `${viewport.content}, viewport-fit=cover`;
+    }
     this.state = await api.bootstrap();
     const grantNotifications = api.grantNotifications().catch((error) => {
       console.warn('[pet] Could not load grant notifications', error); return { success: true as const, grants: [] as TeacherGrantNotification[] };
     });
     this.roomPlacements = this.state.room.placements.map((item) => ({...item})); this.renderShell();
-    if (!this.state.profile.starterEggClaimed) this.renderHatch(); else this.openHome();
+    if (!this.state.profile.starterEggClaimed) this.renderHatch(); else {
+      this.openHome();
+      // A failed WASM/module evaluation is cached by the browser. An explicit retry therefore
+      // reloads the app once, preserving the student's session and returning directly to the
+      // arcade instead of repeating the same failed module evaluation in-place.
+      if (sessionStorage.getItem('pet-coin-pusher-retry') === '1') {
+        sessionStorage.removeItem('pet-coin-pusher-retry');
+        this.openTab('coinPusher');
+      }
+    }
     const { grants } = await grantNotifications;
     if (grants.length) this.renderGrantNotifications(grants);
   }
@@ -145,30 +187,102 @@ class StudentApp {
       <main class="pet-main" id="petMain" data-layout="room">
         <section class="room-stage">
           <div class="room-bar" id="roomBar"></div>
-          <section class="play-surface" id="playSurface"><div id="game-root"></div><div id="gameHud" class="game-hud"></div><div id="celebrationLayer" class="celebration-layer" aria-hidden="true"></div></section>
+          <section class="play-surface" id="playSurface"><div id="game-root"></div><div id="coin-pusher-root"></div><div id="gameHud" class="game-hud"></div><div id="celebrationLayer" class="celebration-layer" aria-hidden="true"></div></section>
         </section>
         <aside class="side-panel" id="sidePanel"></aside>
       </main>
       <nav class="pet-nav" aria-label="Pet Paradise">
-        ${[['home','home'],['collection','collection'],['shop','shop'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span>${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
+        ${[['home','home'],['collection','collection'],['shop','shop'],['coinPusher','coin-pusher'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span>${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
       </nav>
       <div class="toast-stack" id="toasts" aria-live="polite"></div>
       <div class="modal-root" id="modalRoot"></div>
     </div>`;
     app.addEventListener('click', this.handleClick);
+    app.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('pointerdown',this.handlePointerDown);
     document.addEventListener('pointermove',this.handlePointerMove);
     document.addEventListener('pointerup',this.handlePointerUp);
     document.addEventListener('pointercancel',this.handlePointerUp); app.addEventListener('change', this.handleChange); app.addEventListener('input', this.handleInput);
+    const coinPusherTab=app.querySelector<HTMLButtonElement>('[data-tab="coinPusher"]');
+    coinPusherTab?.addEventListener('pointerenter',this.scheduleCoinPusherPreload);
+    coinPusherTab?.addEventListener('pointerdown',this.primeCoinPusherOnPress);
+    coinPusherTab?.addEventListener('pointerleave',this.cancelCoinPusherPreload);
+    coinPusherTab?.addEventListener('focus',this.scheduleCoinPusherPreload);
+    coinPusherTab?.addEventListener('blur',this.cancelCoinPusherPreload);
   }
+  private loadCoinPusherSceneModule() {
+    return this.coinPusherSceneModule ??= import('./game/CoinPusherScene');
+  }
+  private loadCoinPusherModelModule() {
+    return this.coinPusherModelModule ??= import('./game/CoinPusherModel');
+  }
+  private startCoinPusherPreload() {
+    if(this.coinPusherSceneModule||document.visibilityState==='hidden')return;
+    // Rapier's glue module is only about 40KB; its 700KB+ compressed WASM normally starts after
+    // that module downloads. A user-intent-only fetch link lets the browser overlap both requests.
+    if(!this.coinPusherWasmPreload){
+      const preload=document.createElement('link');
+      preload.rel='preload';
+      preload.as='fetch';
+      preload.type='application/wasm';
+      preload.crossOrigin='anonymous';
+      preload.href=rapierWasmUrl;
+      preload.addEventListener('error',()=>{
+        if(this.coinPusherWasmPreload!==preload)return;
+        preload.remove();
+        this.coinPusherWasmPreload=undefined;
+      },{once:true});
+      this.coinPusherWasmPreload=preload;
+      document.head.append(preload);
+    }
+    void Promise.all([this.loadCoinPusherSceneModule(),this.loadCoinPusherModelModule()]).catch(()=>{
+      this.coinPusherSceneModule=undefined;
+      this.coinPusherModelModule=undefined;
+      this.coinPusherWasmPreload?.remove();
+      this.coinPusherWasmPreload=undefined;
+    });
+  }
+  private scheduleCoinPusherPreload = () => {
+    if(this.coinPusherPreloadTimer!==undefined||this.coinPusherSceneModule||document.visibilityState==='hidden')return;
+    // A brief hover/focus pause signals real intent; moving across the nav does not download
+    // the renderer and physics WASM for a feature the student never opens.
+    this.coinPusherPreloadTimer=window.setTimeout(()=>{
+      this.coinPusherPreloadTimer=undefined;
+      this.startCoinPusherPreload();
+    },260);
+  };
+  private primeCoinPusherOnPress = (event:PointerEvent) => {
+    if(event.button!==0||event.isPrimary===false)return;
+    this.cancelCoinPusherPreload();
+    this.startCoinPusherPreload();
+  };
+  private cancelCoinPusherPreload = () => {
+    if(this.coinPusherPreloadTimer===undefined)return;
+    window.clearTimeout(this.coinPusherPreloadTimer);
+    this.coinPusherPreloadTimer=undefined;
+  };
   private handleClick = async (event: Event) => {
     const button = (event.target as HTMLElement).closest<HTMLElement>('[data-action],[data-tab]'); if (!button) return;
     this.acknowledge(button); // visible response inside 100ms, before any await
     try {
       await audio.unlock(); audio.sfx('tap');
-      if (button.dataset.tab) return this.openTab(button.dataset.tab);
+      if (button.dataset.tab) {
+        if (this.tab==='coinPusher' && this.coinPusherPaymentInFlight) {
+          this.setCoinPusherStatus(this.coinPusherExitWaitMessage());
+          return;
+        }
+        return this.openTab(button.dataset.tab);
+      }
       const action = button.dataset.action!;
-      if (action === 'audio') { audio.setEnabled(!audio.enabled); button.innerHTML = icon(audio.enabled?'sound':'mute'); return; }
+      if (action === 'coin-pusher-exit' && this.coinPusherBusy) { this.setCoinPusherStatus(this.coinPusherExitWaitMessage()); return; }
+      if (action === 'audio') { audio.setEnabled(!audio.enabled); button.innerHTML = icon(audio.enabled?'sound':'mute'); button.setAttribute('aria-pressed',String(audio.enabled)); return; }
+      if (action === 'coin-pusher-exit') {
+        if (this.coinPusherPaymentInFlight) { this.toast(this.locale==='zh-HK'?'正在確認落幣，請稍候。':'Confirming your coin drop. Please wait.'); return; }
+        return this.openHome();
+      }
+      if (action === 'coin-pusher-drop') return this.dropCoinPusher(0);
+      if (action === 'coin-pusher-collection') return this.openCoinPusherCollection();
+      if (action === 'coin-pusher-init-retry') return this.retryCoinPusherInitialization();
       if (action === 'hatch') return await this.hatch(button as HTMLButtonElement);
       if (action === 'feed') return await this.feed(button.dataset.id!);
       if (action === 'play') { this.game?.events.emit('pet:emote','happy'); audio.sfx('happy',this.state.catalog.pets.findIndex((pet)=>pet.id===this.activePet()?.speciesId)); return; }
@@ -189,7 +303,7 @@ class StudentApp {
       if (action === 'open-feed') return await this.renderFeedPicker();
       if (action === 'open-outfit') return await this.renderOutfitPicker();
       if (action === 'ack-grants') return await this.acknowledgeGrantNotifications(button as HTMLButtonElement);
-      if (action === 'close-modal') { document.querySelector('#modalRoot')!.innerHTML=''; return; }
+      if (action === 'close-modal') { document.querySelector('#modalRoot')!.innerHTML=''; if(this.tab==='coinPusher'){const collectionButton=document.querySelector<HTMLButtonElement>('.coin-pusher-collection');collectionButton?.setAttribute('aria-expanded','false');collectionButton?.focus({preventScroll:true});} return; }
       if (action === 'add-furniture') { this.game?.events.emit('room:add-item',button.dataset.id); return; }
       if (action === 'grow-item') { if(this.selectedFurniture)this.game?.events.emit('room:grow-selected',this.selectedFurniture); return; }
       if (action === 'shrink-item') { if(this.selectedFurniture)this.game?.events.emit('room:shrink-selected',this.selectedFurniture); return; }
@@ -203,6 +317,38 @@ class StudentApp {
       if (action === 'unequip-slot') return await this.clearSlot(button.dataset.id!);
     } catch (error) { this.toast((error as Error).message,true); }
   };
+  private handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && document.querySelector('#modalRoot .coin-pusher-collection-panel')) {
+      event.preventDefault();
+      document.querySelector('#modalRoot')!.innerHTML = '';
+      const collectionButton = document.querySelector<HTMLButtonElement>('.coin-pusher-collection');
+      collectionButton?.setAttribute('aria-expanded', 'false');
+      collectionButton?.focus({ preventScroll: true });
+      return;
+    }
+    if (this.tab !== 'coinPusher' || event.target !== this.coinPusherView?.renderer.domElement) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      if (this.coinPusherPaymentInFlight) return;
+      this.openHome();
+      return;
+    }
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      const direction = event.key === 'ArrowLeft' ? -1 : 1;
+      this.coinPusherKeyboardLaneX = Math.max(-2.32, Math.min(2.32,
+        Number((this.coinPusherKeyboardLaneX + direction * .58).toFixed(2))));
+      this.coinPusherView?.aimAtWorldX(this.coinPusherKeyboardLaneX);
+      return;
+    }
+    // Keyboard alternative for players who cannot perform a touch swipe; the visible Drop
+    // button provides the same centre drop without requiring this canvas focus. Arrow keys
+    // select a lane first, so keyboard play has the same control over placement as a swipe.
+    if (!event.repeat && (event.key === 'ArrowDown' || event.key === ' ' || event.key === 'Enter')) {
+      event.preventDefault();
+      this.dropCoinPusher(this.coinPusherKeyboardLaneX);
+    }
+  };
   private handleChange = (event: Event) => { const target=event.target as HTMLInputElement|HTMLSelectElement;if(target.id==='roomVisibility')this.state.room.visibility=target.value as 'private'|'class';if(target.id==='roomTheme')this.state.room.themeId=target.value; };
   private handleInput = (event: Event) => { const target=event.target as HTMLInputElement;if(target.dataset.setting==='music'){audio.setLevels(Number(target.value),audio.sfxLevel);}if(target.dataset.setting==='sfx'){audio.setLevels(audio.musicLevel,Number(target.value));} };
   private acknowledge(element: HTMLElement) {
@@ -210,8 +356,9 @@ class StudentApp {
     window.setTimeout(()=>element.classList.remove('is-pressed'),200);
   }
   private openTab(tab: string) {
+    if(tab!=='coinPusher')this.cancelCoinPusherPreload();
     this.tab=tab;document.querySelectorAll('[data-tab]').forEach((item)=>{const on=(item as HTMLElement).dataset.tab===tab;item.classList.toggle('active',on);item.setAttribute('aria-current',on?'page':'false');});
-    if(tab==='home')this.openHome();else if(tab==='collection')this.renderCollection();else if(tab==='shop')this.renderShop('eggs');else if(tab==='visit')this.renderVisits();else this.renderSettings();
+    if(tab==='home')this.openHome();else if(tab==='collection')this.renderCollection();else if(tab==='shop')this.renderShop('eggs');else if(tab==='coinPusher')this.renderCoinPusher();else if(tab==='visit')this.renderVisits();else this.renderSettings();
   }
   private ensureGame() {
     if (this.game) return;
@@ -271,7 +418,10 @@ class StudentApp {
   }
 
   private startBedroom(roomOverride?: any, petOverride?: PetInstance) {
+    this.destroyCoinPusher(true);
     this.ensureGame(); const pet=petOverride||this.activePet();if(!pet)return;const definition=this.definition(pet)!;
+    document.querySelector<HTMLElement>('#game-root')!.style.display='block';
+    document.querySelector<HTMLElement>('#coin-pusher-root')!.style.display='none';
     const originalRoom=this.state.room;if(roomOverride)this.state.room={themeId:roomOverride.themeId,visibility:roomOverride.visibility,placements:roomOverride.placements};
     // Contain leaves bars above and below the room on a wide surface. Paint what is behind the
     // canvas with the room's own wall colour so they read as the room carrying on rather than as
@@ -292,6 +442,7 @@ class StudentApp {
     if(roomOverride)this.state.room=originalRoom;audio.setTheme('bedroom');
   }
   private openHome() {
+    if(!this.state.profile.starterEggClaimed&&!this.state.pets.length){this.tab='home';this.destroyCoinPusher();this.renderHatch();return;}
     this.visiting=undefined;this.tab='home';
     this.game?.events.emit('room:set-editing',false);
     document.querySelector('#petMain')?.removeAttribute('data-mode');
@@ -301,11 +452,16 @@ class StudentApp {
     // which is why the room came up blank until the tab was tapped a second time.
     this.setLayout('room');
     this.startBedroom();this.renderHomePanel();document.querySelector('#gameHud')!.innerHTML='';
+    const returnFocus=this.coinPusherReturnFocus;
+    this.coinPusherReturnFocus=undefined;
+    if(returnFocus?.isConnected) requestAnimationFrame(()=>returnFocus.focus({preventScroll:true}));
   }
   private renderHatch() {
     // Before the first hatch there is no Phaser scene, so the play surface would otherwise be a
     // dead rectangle on the very first screen a child sees. Dress it with a CSS hero instead.
     document.querySelector('#game-root')!.innerHTML=`<div class="stage-poster"><div class="poster-egg"><span></span></div><div class="poster-sparks" aria-hidden="true">${Array.from({length:10},(_,index)=>`<i style="--i:${index}"></i>`).join('')}</div></div>`;
+    document.querySelector<HTMLElement>('#game-root')!.style.display='block';
+    document.querySelector<HTMLElement>('#coin-pusher-root')!.style.display='none';
     // The poster lives in the play surface, so the copy sits in the bar above it — the side
     // panel is not rendered in room layout.
     this.setLayout('room');
@@ -343,6 +499,8 @@ class StudentApp {
    */
   private setLayout(mode: 'room' | 'full') {
     document.querySelector('#petMain')?.setAttribute('data-layout', mode);
+    document.querySelector('#petMain')?.removeAttribute('data-mode');
+    document.querySelector('.pet-shell')?.removeAttribute('data-screen');
     if (mode === 'room') {
       document.querySelector('#sidePanel')!.innerHTML = '';
     } else {
@@ -351,6 +509,7 @@ class StudentApp {
       // Nothing is visible, so stop rendering it: a hidden Phaser scene running at 60fps is
       // pure battery cost on a tablet.
       this.game?.scene.stop('Bedroom');
+      this.destroyCoinPusher(true);
     }
     // The canvas is sized to its container, so it has to be told the container changed.
     this.refreshStage();
@@ -660,6 +819,500 @@ class StudentApp {
     if(category!=='eggs')cards=`<div class="shop-grid">${list.map((item:any)=>{const owned=this.inventory(item.id)>0;const art=item.art||'';return `<article class="shop-card ${owned?'owned':''}">${art?`<img src="${art}" alt="" loading="lazy">`:`<div class="item-glyph ${item.category}">${icon(item.category==='food'?'food':item.kind||'spark')}</div>`}<h3>${escapeHtml(this.name(item.name))}</h3><p>${item.xp?`+${item.xp} XP`:item.kind||item.category}</p><button data-action="buy-item" data-id="${item.id}" ${owned&&!['food','furniture'].includes(item.category)?'disabled':''}>${owned&&!['food','furniture'].includes(item.category)?this.t('owned'):`${this.t('buy')} · ${item.price} ${this.t('coins')}`}</button></article>`}).join('')}</div>`;
     document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">MAGIC MARKET</p><h1>${this.t('shop')}</h1><div class="filter-row" role="tablist">${categories.map(([id,label])=>`<button data-action="shop-category" data-id="${id}" role="tab" aria-selected="${category===id}" class="${category===id?'active':''}">${label}</button>`).join('')}</div>${cards}</div>`;
   }
+  private renderCoinPusher() {
+    const zh=this.locale==='zh-HK';
+    this.coinPusherKeyboardLaneX=0;
+    const activeElement=document.activeElement;
+    if(activeElement instanceof HTMLElement && activeElement !== document.body && !activeElement.closest('.coin-pusher-hud')) {
+      this.coinPusherReturnFocus=activeElement;
+    }
+    this.destroyCoinPusher(true);
+    this.setLayout('room');
+    // The pusher uses the selected room's clean room art, not the editable bedroom scene:
+    // furniture placements and the pet stay in the actual room and are never drawn here.
+    if(this.game?.scene.isActive('Bedroom'))this.game.scene.sleep('Bedroom');
+    const bedroomCanvas=document.querySelector<HTMLElement>('#game-root');
+    if(bedroomCanvas)bedroomCanvas.style.display='none';
+    const theme=this.state.catalog.rooms.find((entry)=>entry.id===this.state.room.themeId);
+    const surface=document.querySelector<HTMLElement>('#playSurface');
+    if(surface&&theme){
+      // Keep the room centred and let the selected theme's starfield show at either side.
+      surface.style.backgroundColor=theme.primary;
+      surface.style.backgroundImage=`url("${theme.backdrop}")`;
+      surface.style.backgroundSize='cover';surface.style.backgroundPosition='center';surface.style.backgroundRepeat='no-repeat';
+      const roomBackdrop=document.createElement('div');
+      roomBackdrop.id='coin-pusher-room-backdrop';
+      roomBackdrop.setAttribute('aria-hidden','true');
+      const roomArt=document.createElement('img');
+      roomArt.className='coin-pusher-room-art';
+      roomArt.src=theme.art;
+      roomArt.alt='';
+      roomArt.draggable=false;
+      roomBackdrop.append(roomArt);
+      const coinRoot=document.querySelector<HTMLElement>('#coin-pusher-root');
+      if(coinRoot)surface.insertBefore(roomBackdrop,coinRoot);
+    }
+    document.querySelector('#petMain')?.setAttribute('data-mode','coin-pusher');
+    document.querySelector<HTMLElement>('.pet-shell')?.setAttribute('data-screen','coin-pusher');
+    const coinRoot=document.querySelector<HTMLElement>('#coin-pusher-root')!;
+    coinRoot.style.display='block';
+    coinRoot.innerHTML=`<div class="coin-pusher-loading" data-stage="assets" role="status" aria-live="polite"><div><span class="coin-pusher-spinner" aria-hidden="true"></span><b class="coin-pusher-loading-title">${zh?'正在載入 3D 推銀機…':'Loading the 3D coin pusher…'}</b><small class="coin-pusher-loading-detail">${zh?'準備機台和金幣物理效果':'Preparing the cabinet and coin physics'}</small></div></div>`;
+    coinRoot.setAttribute('aria-busy','true');
+    const audioIcon=icon(audio.enabled?'sound':'mute');
+    const stampProgress=this.coinPusherStampProgress();
+    const stampCount=stampProgress.unlockedCount;
+    const stampProgressCopy=stampProgress.nextThreshold
+      ? (zh?`下一枚紀念章：本階段 ${stampProgress.stepProgress}/${stampProgress.stepSize} 枚`:`Next keepsake: ${stampProgress.stepProgress}/${stampProgress.stepSize} this tier`)
+      : (zh?`已解鎖全部紀念章`:`All keepsakes unlocked`);
+    const statusCopy=zh?'正在載入推銀機…':'Loading the coin pusher…';
+    document.querySelector('#roomBar')!.innerHTML=`<div class="coin-pusher-hud">
+      <button class="coin-pusher-back" data-action="coin-pusher-exit" aria-label="${zh?'返回房間':'Back to room'}"><span aria-hidden="true">←</span><small>${zh?'房間':'Room'}</small></button>
+      <div class="coin-pusher-brand"><div class="coin-pusher-brand-heading"><small>PET ARCADE</small><strong>${this.t('coinPusher')}</strong></div><div class="coin-pusher-brand-status"><span id="coinPusherSystemStatus" role="status" aria-live="polite">${statusCopy}</span><small class="coin-pusher-keyboard-hint">${zh?'←／→ 揀位 · Space／↓ 落幣':'← / → aim · Space / ↓ drop'}</small></div></div>
+      <div class="coin-pusher-wallet" aria-label="${zh?'學生金幣餘額；每次落幣需要 1 枚；推出金幣會回到錢包':'Student coin balance; each drop costs 1 coin; payout coins return to the wallet'}">${icon('coin')}<span><small>${zh?'餘額':'BAL'}</small><b id="coinBalanceHud">${this.state.wallet.balance.toLocaleString()}</b></span></div>
+      <button type="button" class="coin-pusher-drop" data-action="coin-pusher-drop" aria-describedby="coinPusherSystemStatus" disabled>${icon('coin')}<small><span>${zh?'落幣':'Drop'}</span><b>−1</b></small></button>
+      <button type="button" class="coin-pusher-collection" data-action="coin-pusher-collection" data-progress-percent="${stampProgress.percent}" style="--stamp-progress:${stampProgress.percent}%" title="${stampProgressCopy}" aria-haspopup="dialog" aria-controls="modalRoot" aria-label="${zh?`爪印收藏，已解鎖 ${stampCount}/3 個；${stampProgressCopy}`: `Paw-stamp collection, ${stampCount}/3 unlocked; ${stampProgressCopy}`}"><span class="coin-pusher-collection-ring" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="18" cy="23" r="6"/><circle cx="31" cy="16" r="6"/><circle cx="44" cy="21" r="6"/><circle cx="51" cy="32" r="5"/><path d="M31.5 29c-9.1 0-18.5 10.2-18.5 18.1 0 5.8 4.8 8.8 10.6 6.5 4.7-1.8 8.7-1.8 13.4 0 5.8 2.3 10.6-.7 10.6-6.5C47.6 39.2 40.8 29 31.5 29Z"/></svg></span><small id="coinPusherCollectionCount">${stampCount}/3</small></button>
+      <button class="round-button coin-pusher-sound" data-action="audio" aria-label="${zh?'遊戲音效':'Game sound'}" aria-pressed="${audio.enabled}">${audioIcon}</button>
+    </div>`;
+    this.syncCoinPusherCollectionBadge();
+    // The navigation tab that opened the game is hidden in this view. Move focus to a visible
+    // control immediately, and only focus the canvas after loading if focus has not moved.
+    const backButton=document.querySelector<HTMLButtonElement>('.coin-pusher-back');
+    backButton?.focus({preventScroll:true});
+    this.syncCoinPusherControls();
+    const generation=this.coinPusherGeneration;
+    if(this.coinPusherInitPending){audio.setTheme('arcade');return;}
+    this.coinPusherInitPending=true;
+    this.cancelCoinPusherPreload();
+    void this.loadCoinPusherSceneModule().then(({CoinPusherScene})=>CoinPusherScene.create(
+      coinRoot,
+      (worldX) => {
+        if(generation!==this.coinPusherGeneration||this.coinPusherBusy)return;
+        this.dropCoinPusher(worldX);
+      },
+      (count, origins) => {
+        if(generation!==this.coinPusherGeneration)return;
+        audio.sfx('coin');
+        this.animateCoinTrayCatch(count, origins);
+        this.setCoinPusherStatus(this.locale==='zh-HK'
+          ? `銀仔已跌入坑槽 ×${count} · 正在確認獎勵…`
+          : `${count} coin${count===1?'':'s'} in the collection well · confirming payout…`);
+        void this.creditCoinPayout(count, generation, origins);
+      },
+      (available,reason) => {
+        if(generation!==this.coinPusherGeneration)return;
+        // Do not enable Drop until the asynchronous scene factory has returned its handle.
+        this.coinPusherReady=available&&!!this.coinPusherView;
+        this.coinPusherWebglLost=!available&&reason==='context-lost';
+        if(available)this.coinPusherInitFailed=false;
+        if(this.coinPusherWebglLost){
+          this.setCoinPusherStatus(zh?'3D 畫面暫停；圖像恢復前不能投幣。':'3D rendering paused. You cannot play until graphics are restored.');
+        } else if(available&&reason==='restored'){
+          this.setCoinPusherStatus(zh?'3D 畫面已恢復。':'3D rendering has been restored.');
+          const restoredRevision=this.coinPusherStatusRevision;
+          window.setTimeout(()=>{
+            if(generation!==this.coinPusherGeneration||this.coinPusherStatusRevision!==restoredRevision
+              ||!this.coinPusherReady||this.coinPusherWebglLost)return;
+            this.setCoinPusherStatus(this.coinPusherReadyMessage());
+          },1400);
+        }
+        this.syncCoinPusherControls();
+      },
+      (count, landings) => {
+        audio.sfx('arcadeLand', count);
+        if(landings.some((landing)=>landing.pusherBeat==='forward'))audio.sfx('arcadeTiming', count);
+        this.animateCoinPusherTimingCue(landings);
+      },
+      (direction) => audio.sfx('arcadeStroke', direction === 'forward' ? 0 : 4),
+      this.coinPusherModel,
+      () => {
+        if(generation!==this.coinPusherGeneration||this.tab!=='coinPusher')return;
+        const loading=coinRoot.querySelector<HTMLElement>('.coin-pusher-loading');
+        if(!loading)return;
+        loading.classList.add('is-preview-ready');
+        loading.dataset.stage='physics';
+        const loadingTitle=loading.querySelector<HTMLElement>('.coin-pusher-loading-title');
+        const loadingDetail=loading.querySelector<HTMLElement>('.coin-pusher-loading-detail');
+        if(loadingTitle)loadingTitle.textContent=zh?'機台畫面已準備好':'Cabinet preview ready';
+        if(loadingDetail)loadingDetail.textContent=zh?'正在啟動物理，片刻即可落幣':'Starting physics · drops unlock in a moment';
+        coinRoot.dataset.loadingStage='physics';
+        this.setCoinPusherStatus(zh?'機台已準備，正在啟動物理…':'Cabinet ready · starting physics…');
+      },
+    )).then((view)=>{
+      if(generation!==this.coinPusherGeneration){view.destroy();return;}
+      this.coinPusherInitPending=false;
+      this.coinPusherModel=view.model;
+      if(this.tab!=='coinPusher'){view.destroy(true);return;}
+      this.coinPusherView=view;
+      view.renderer.domElement.setAttribute('aria-label',zh
+        ?'互動式 3D 推銀仔機。在機台任意位置向下滑動，銀仔會從該水平位置落到推板上；亦可按向左／向右鍵揀位，再按向下鍵、空白鍵或 Enter 落幣。按 Escape 返回房間。'
+        :'Interactive 3D coin pusher. Swipe down anywhere to drop at that horizontal position, or use Left/Right to aim and Down, Space or Enter to drop. Press Escape to return to the room.');
+      view.renderer.domElement.setAttribute('role','application');
+      view.renderer.domElement.setAttribute('tabindex','0');
+      if(document.activeElement===backButton)view.renderer.domElement.focus({preventScroll:true});
+      if(!this.coinPusherWebglLost)this.coinPusherReady=true;
+      this.coinPusherInitFailed=false;coinRoot.setAttribute('aria-busy','false');
+      coinRoot.insertAdjacentHTML('beforeend',`<div class="coin-pusher-webgl-overlay" role="status" aria-live="polite" hidden><div><b>${zh?'3D 畫面暫停':'3D rendering paused'}</b><span>${zh?'圖像恢復後才可以落幣。':'Dropping is disabled until graphics return.'}</span></div></div>`);
+      if(!this.coinPusherWebglLost)this.setCoinPusherStatus(this.coinPusherReadyMessage());
+      this.syncCoinPusherControls();
+    }).catch((error)=>{
+      this.coinPusherSceneModule=undefined;
+      this.coinPusherModelModule=undefined;
+      if(generation!==this.coinPusherGeneration)return;
+      this.coinPusherInitPending=false;
+      if(this.tab!=='coinPusher')return;
+      console.warn('[pet] 3D coin pusher could not start',error);
+      this.coinPusherReady=false;this.coinPusherWebglLost=false;this.coinPusherInitFailed=true;
+      this.setCoinPusherStatus(zh?'3D 推銀機未能啟動':'3D coin pusher could not start');
+      coinRoot.setAttribute('aria-busy','false');
+      coinRoot.innerHTML=`<div class="coin-pusher-fallback" role="alert"><b>${zh?'3D 推幣機暫時未能啟動':'3D coin pusher could not start'}</b><span>${zh?'請檢查瀏覽器的 WebGL 支援，或重試。':'Check browser WebGL support, or retry.'}</span><button type="button" class="coin-pusher-retry" data-action="coin-pusher-init-retry">${zh?'重試載入':'Retry loading'}</button></div>`;
+      this.syncCoinPusherControls();
+    });
+    audio.setTheme('arcade');
+  }
+  private async authorizeCoinPusherDrop(generation:number) {
+    this.coinPusherPaymentInFlight=true;
+    try {
+      const result=await api.playCoinPusher(idempotencyKey());
+      if(generation!==this.coinPusherGeneration)return undefined;
+      this.state.wallet.balance=Number(result.balance);
+      this.updateWallet();
+      return result;
+    } catch(error) {
+      this.handleCoinPusherTransactionError(error as Error);
+      return undefined;
+    } finally {
+      this.coinPusherPaymentInFlight=false;
+      this.syncCoinPusherControls();
+    }
+  }
+  private async dropCoinPusher(worldX=0) {
+    const zh=this.locale==='zh-HK';
+    if(this.coinPusherBusy)return;
+    if(!this.coinPusherReady||this.coinPusherWebglLost||this.coinPusherInitFailed){this.syncCoinPusherControls();return;}
+    if(Number(this.state.wallet.balance) < COIN_PUSHER_DROP_COST){
+      this.setCoinPusherStatus(this.coinPusherInsufficientMessage());
+      this.toast(zh?'金幣唔夠；每次落幣需要 1 枚。':'Not enough coins. Each drop costs 1 coin.',true);
+      this.syncCoinPusherControls();
+      return;
+    }
+    const scene=this.coinPusherView;
+    if(!scene)return;
+    if(!scene.canDropCoin()){
+      // Capacity feedback is contextual, not a persistent machine status.
+      // Keep the HUD's balance/ready message clear while briefly explaining the rejected drop.
+      this.setCoinPusherStatus(this.coinPusherReadyMessage());
+      this.toast(zh?'機台暫時很擠，等一些銀仔落槽後再掃。':'The machine is crowded. Wait for a few coins to clear, then swipe again.');
+      return;
+    }
+    // A valid swipe or keyboard drop is also a fresh user gesture. Resume audio here because
+    // browsers may suspend Web Audio while the student backgrounds the app or locks the tablet.
+    void audio.unlock().catch(()=>undefined);
+    const generation=this.coinPusherGeneration;
+    this.coinPusherBusy=true;
+    this.setCoinPusherStatus(zh?'正在扣 1 金幣 · 請稍候…':'Charging 1 coin · please wait…');
+    const dropStatusRevision=this.coinPusherStatusRevision;
+    this.syncCoinPusherControls();
+    const playResult=await this.authorizeCoinPusherDrop(generation);
+    if(!playResult){
+      this.coinPusherBusy=false;
+      if(this.coinPusherStatusRevision===dropStatusRevision)this.setCoinPusherStatus(this.coinPusherReadyMessage());
+      this.syncCoinPusherControls();
+      return;
+    }
+    if(generation!==this.coinPusherGeneration||scene!==this.coinPusherView)return;
+    const dropId=scene.dropCoin(worldX);
+    if(dropId===undefined){
+      this.coinPusherBusy=false;
+      this.setCoinPusherStatus(this.coinPusherReadyMessage());
+      this.syncCoinPusherControls();
+      return;
+    }
+    if(playResult.playId)this.coinPusherPlays.push({playId:String(playResult.playId),remaining:Number(playResult.payoutCap)||100,reserved:0,generation});
+    audio.sfx('arcadeDrop');
+    if(this.coinPusherCooldown!==undefined)window.clearTimeout(this.coinPusherCooldown);
+    this.coinPusherCooldown=window.setTimeout(()=>{
+      this.coinPusherCooldown=undefined;
+      if(generation!==this.coinPusherGeneration)return;
+      this.coinPusherBusy=false;
+      if(this.coinPusherStatusRevision===dropStatusRevision)this.setCoinPusherStatus(this.coinPusherReadyMessage());
+      this.syncCoinPusherControls();
+    },220);
+  }
+  private retryCoinPusherInitialization() {
+    if(this.tab!=='coinPusher'||!this.coinPusherInitFailed)return;
+    sessionStorage.setItem('pet-coin-pusher-retry','1');
+    window.location.reload();
+  }
+  private setCoinPusherStatus(message:string) {
+    this.coinPusherStatusRevision+=1;
+    const status=document.querySelector<HTMLElement>('#coinPusherSystemStatus');
+    if(status)status.textContent=message;
+  }
+  private handleCoinPusherTransactionError(error:Error) {
+    const zh=this.locale==='zh-HK';
+    const insufficient=error.message==='Not enough coins';
+    this.setCoinPusherStatus(insufficient?this.coinPusherInsufficientMessage():(zh?'落幣未完成，金幣未扣除。':'Drop failed; no coin was charged.'));
+    this.toast(insufficient?(zh?'金幣唔夠；每次落幣需要 1 枚。':'Not enough coins. Each drop costs 1 coin.'):(zh?'落幣未完成，請稍後再試。':'Drop failed. Please try again.'),true);
+  }
+  private handleCoinPusherPayoutError(error:Error) {
+    const zh=this.locale==='zh-HK';
+    this.setCoinPusherStatus(zh?'推出獎勵未入帳；請稍後再試。':'Payout could not be credited; please try again later.');
+    this.toast(zh?'推出獎勵暫時未能入帳。':'Payout could not be credited.',true);
+  }
+  private coinPusherReadyMessage() {
+    const zh=this.locale==='zh-HK';
+    return Number(this.state.wallet.balance) < COIN_PUSHER_DROP_COST
+      ? this.coinPusherInsufficientMessage()
+      : zh?'下滑揀位 · 落幣 −1 · 入槽 +1':'Swipe to aim · drop −1 · tray +1';
+  }
+  private coinPusherInsufficientMessage() {
+    return this.locale==='zh-HK'?'金幣不足 · 每次落幣需要 1 枚':'Not enough coins · each drop costs 1';
+  }
+  private coinPusherPayoutMessage(count:number) {
+    return this.locale==='zh-HK'
+      ? `跌入坑槽 ×${count} · 獎勵會回到錢包`
+      : `${count} coin${count===1?'':'s'} in tray · returning to wallet`;
+  }
+  private coinPusherReturnedCoins() {
+    return Math.max(0, Math.floor(Number(this.state.coinPusherCollection?.returnedCoins) || 0));
+  }
+  private coinPusherStampCount(total = this.coinPusherReturnedCoins()) {
+    return this.coinPusherStampProgress(total).unlockedCount;
+  }
+  private coinPusherStampProgress(total = this.coinPusherReturnedCoins()) {
+    return coinPusherStampProgress(total);
+  }
+  private syncCoinPusherCollectionBadge() {
+    const button = document.querySelector<HTMLButtonElement>('.coin-pusher-collection');
+    if (!button) return;
+    const zh = this.locale === 'zh-HK';
+    const progress = this.coinPusherStampProgress();
+    const unlocked = progress.unlockedCount;
+    const progressCopy = progress.nextThreshold
+      ? (zh?`下一枚紀念章：本階段 ${progress.stepProgress}/${progress.stepSize} 枚`:`Next keepsake: ${progress.stepProgress}/${progress.stepSize} this tier`)
+      : (zh?`已解鎖全部紀念章`:`All keepsakes unlocked`);
+    const count = button.querySelector<HTMLElement>('#coinPusherCollectionCount');
+    if (count) count.textContent = `${unlocked}/${COIN_PUSHER_STAMPS.length}`;
+    button.dataset.progressPercent = String(progress.percent);
+    button.style.setProperty('--stamp-progress', `${progress.percent}%`);
+    button.title = progressCopy;
+    button.setAttribute('aria-label', zh
+      ? `爪印收藏，已解鎖 ${unlocked}/${COIN_PUSHER_STAMPS.length} 個；${progressCopy}`
+      : `Paw-stamp collection, ${unlocked}/${COIN_PUSHER_STAMPS.length} unlocked; ${progressCopy}`);
+  }
+  private openCoinPusherCollection() {
+    const zh = this.locale === 'zh-HK';
+    const total = this.coinPusherReturnedCoins();
+    const nextIndex = COIN_PUSHER_STAMPS.findIndex((stamp) => total < stamp.threshold);
+    const next = nextIndex >= 0 ? COIN_PUSHER_STAMPS[nextIndex] : undefined;
+    const progressState = this.coinPusherStampProgress(total);
+    const progress = progressState.percent;
+    const nextLabel = next ? `${progressState.stepProgress} / ${progressState.stepSize}` : undefined;
+    const stamps = COIN_PUSHER_STAMPS.map((stamp) => {
+      const unlocked = total >= stamp.threshold;
+      return `<article class="coin-pusher-stamp coin-pusher-stamp--${stamp.tier} ${unlocked ? 'is-unlocked' : 'is-locked'}" data-tier="${stamp.tier}" aria-label="${stamp.name[this.locale]} · ${stamp.threshold}">
+        <span class="coin-pusher-stamp-medallion" aria-hidden="true"><svg class="coin-pusher-stamp-paw" viewBox="0 0 64 64"><circle cx="18" cy="23" r="6"/><circle cx="31" cy="16" r="6"/><circle cx="44" cy="21" r="6"/><circle cx="51" cy="32" r="5"/><path d="M31.5 29c-9.1 0-18.5 10.2-18.5 18.1 0 5.8 4.8 8.8 10.6 6.5 4.7-1.8 8.7-1.8 13.4 0 5.8 2.3 10.6-.7 10.6-6.5C47.6 39.2 40.8 29 31.5 29Z"/></svg><small class="coin-pusher-stamp-rank">${stamp.rank}</small></span>
+        <b>${stamp.name[this.locale]}</b><small>${stamp.title[this.locale]}</small>
+        <em>${unlocked ? (zh ? '已解鎖' : 'Unlocked') : `${stamp.threshold} ${zh ? '枚' : 'coins'}`}</em>
+      </article>`;
+    }).join('');
+    this.modal(`<section class="coin-pusher-collection-panel" role="dialog" aria-modal="true" aria-labelledby="coinPusherCollectionTitle">
+      <header class="coin-pusher-collection-heading"><span aria-hidden="true">🐾</span><div><small>${zh ? '機台紀念章' : 'ARCADE KEEPSAKES'}</small><h2 id="coinPusherCollectionTitle">${zh ? '爪印收藏冊' : 'Paw-stamp collection'}</h2></div></header>
+      <p class="coin-pusher-collection-copy">${zh ? '只計算已確認並回到錢包的推出銀仔。爪印是紀念章，不會額外增加或扣除金幣。' : 'Only payout coins confirmed in your wallet count. Stamps are keepsakes; they never add or spend coins.'}</p>
+      <div class="coin-pusher-collection-progress"><div><b>${zh ? '已入帳銀仔' : 'Payout coins returned'}</b><strong id="coinPusherCollectionReturned">${total.toLocaleString()}</strong></div><small>${next ? (zh ? `下一枚本階段 ${nextLabel}` : `Next stamp ${nextLabel} this tier`) : (zh ? '已收集全部紀念章' : 'All keepsakes collected')}</small><div class="coin-pusher-progress-track" role="progressbar" aria-label="${zh ? '下一枚紀念章進度' : 'Progress to next keepsake'}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}"><span style="width:${progress}%"></span></div></div>
+      <div class="coin-pusher-stamp-grid">${stamps}</div>
+      <button type="button" class="primary coin-pusher-collection-close" data-action="close-modal">${zh ? '繼續玩' : 'Keep playing'}</button>
+    </section>`, 'coin-pusher-collection-modal');
+    const button = document.querySelector<HTMLButtonElement>('.coin-pusher-collection');
+    button?.setAttribute('aria-expanded', 'true');
+    document.querySelector<HTMLButtonElement>('#modalRoot .coin-pusher-collection-close')?.focus({ preventScroll: true });
+  }
+  private coinPusherExitWaitMessage() { return this.locale==='zh-HK'?'正在處理落幣，請稍候再返回房間':'Your drop is still processing. Please wait before leaving.'; }
+  private creditCoinPayout(count:number, generation:number, origins?:CoinPusherRewardOrigin[]) {
+    const play=this.coinPusherPlays.find((item)=>item.generation===generation&&item.remaining-item.reserved>0);
+    if(!play)return;
+    const available=Math.max(0,play.remaining-play.reserved);
+    const amount=Math.min(Math.max(0,Math.floor(count)),available,20);
+    if(amount<=0)return;
+    const eventId=`${play.playId}:${++this.coinPusherPayoutSequence}`;
+    const requestKey=idempotencyKey();
+    const payoutOrigins=origins?.slice(0,amount);
+    play.reserved+=amount;
+    const job=()=>this.submitCoinPusherPayout(play,amount,eventId,requestKey,generation,payoutOrigins).then(()=>undefined);
+    this.coinPusherPayoutQueue=this.coinPusherPayoutQueue.catch(()=>undefined).then(job);
+  }
+  private async submitCoinPusherPayout(play:{playId:string;remaining:number;reserved:number}, amount:number, eventId:string, requestKey:string, generation:number, origins?:CoinPusherRewardOrigin[], attempt=0):Promise<boolean> {
+    try {
+      const result=await api.payoutCoinPusher({playId:play.playId,eventId,amount},requestKey);
+      const previousStamps=this.coinPusherStampCount();
+      this.state.wallet.balance=Number(result.balance); this.updateWallet();
+      if(result.collection)this.state.coinPusherCollection={returnedCoins:Math.max(this.coinPusherReturnedCoins(),Number(result.collection.returnedCoins)||0)};
+      this.syncCoinPusherCollectionBadge();
+      play.reserved=Math.max(0,play.reserved-amount);
+      play.remaining=Number(result.remainingPayout);
+      if(play.remaining<=0&&play.reserved<=0)this.coinPusherPlays=this.coinPusherPlays.filter((entry)=>entry!==play);
+      const catchAnimationRemaining=Math.max(0,this.coinPusherTrayCatchUntil-performance.now());
+      if(catchAnimationRemaining>0)await new Promise((resolve)=>window.setTimeout(resolve,catchAnimationRemaining));
+      if(generation===this.coinPusherGeneration&&this.tab==='coinPusher'){
+        audio.sfx('arcadePayout');
+        this.animateCoinPayout(amount,origins);
+        this.setCoinPusherStatus(this.locale==='zh-HK'?`坑槽 +${amount} · 已回到錢包`:`Tray +${amount} · added to wallet`);
+        const unlockedStamps=this.coinPusherStampCount()>previousStamps
+          ?COIN_PUSHER_STAMPS.slice(previousStamps,this.coinPusherStampCount())
+          :[];
+        if(unlockedStamps.length){
+          const names=unlockedStamps.map((stamp)=>stamp.name[this.locale]);
+          const message=this.locale==='zh-HK'
+            ?names.length===1?`解鎖新爪印：${names[0]}！`:`連解鎖 ${names.length} 枚爪印：${names.join('、')}`
+            :names.length===1?`New paw-stamp: ${names[0]}!`:`${names.length} new paw-stamps: ${names.join(', ')}`;
+          this.toast(message);
+        }
+      }
+      return true;
+    } catch(error) {
+      if(attempt<1){
+        await new Promise((resolve)=>window.setTimeout(resolve,350));
+        return this.submitCoinPusherPayout(play,amount,eventId,requestKey,generation,origins,attempt+1);
+      }
+      play.reserved=Math.max(0,play.reserved-amount);
+      if(generation===this.coinPusherGeneration&&this.tab==='coinPusher')this.handleCoinPusherPayoutError(error as Error);
+      return false;
+    }
+  }
+  private animateCoinPayout(amount:number, origins?:CoinPusherRewardOrigin[]) {
+    const root=document.querySelector<HTMLElement>('#coin-pusher-root');
+    const wallet=document.querySelector<HTMLElement>('.coin-pusher-wallet');
+    if(!root||!wallet)return;
+    wallet.classList.remove('is-rewarded');
+    void wallet.offsetWidth;
+    wallet.classList.add('is-rewarded');
+    window.setTimeout(()=>wallet.classList.remove('is-rewarded'),850);
+    const reducedMotion=document.documentElement.classList.contains('reduced-motion')
+      || (typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const rootRect=root.getBoundingClientRect();
+    const walletRect=wallet.getBoundingClientRect();
+    const targetX=walletRect.left+walletRect.width/2-rootRect.left;
+    const targetY=walletRect.top+walletRect.height/2-rootRect.top;
+    const validOrigins=origins?.filter((origin)=>Number.isFinite(origin.x)&&Number.isFinite(origin.y))??[];
+    const payoutAt=performance.now();
+    this.coinPusherCascade=advanceCoinPusherCascade(this.coinPusherCascade,amount,payoutAt);
+    const cascadeLabel=coinPusherCascadeLabel(this.coinPusherCascade.count,this.locale);
+    if(cascadeLabel){
+      const center=validOrigins.length
+        ? validOrigins.reduce((sum,origin)=>({x:sum.x+origin.x/validOrigins.length,y:sum.y+origin.y/validOrigins.length}),{x:0,y:0})
+        : {x:rootRect.width*.5,y:rootRect.height*.72};
+      const safeMargin=Math.min(90,rootRect.width*.25);
+      const cascade=document.createElement('span');
+      cascade.className=`coin-pusher-cascade${reducedMotion?' is-static':''}`;
+      cascade.setAttribute('aria-hidden','true');
+      cascade.textContent=cascadeLabel;
+      cascade.style.left=`${Math.max(safeMargin,Math.min(rootRect.width-safeMargin,center.x))}px`;
+      cascade.style.top=`${Math.max(92,center.y-28)}px`;
+      root.append(cascade);
+      cascade.addEventListener('animationend',()=>cascade.remove(),{once:true});
+      window.setTimeout(()=>cascade.remove(),reducedMotion?1800:1350);
+    }
+    const visibleCoins=Math.min(amount,5);
+    for(let index=0;index<visibleCoins;index+=1){
+      const origin=origins?.[index];
+      const start=origin&&Number.isFinite(origin.x)&&Number.isFinite(origin.y)
+        ? origin
+        : {x:rootRect.width*.5,y:rootRect.height*.72};
+      const flyer=document.createElement('span');
+      flyer.className=`coin-pusher-reward-fly${reducedMotion?' is-static':''}`;
+      flyer.setAttribute('aria-hidden','true');
+      const label=amount>visibleCoins&&index===visibleCoins-1?`+${amount-visibleCoins+1}`:'+1';
+      flyer.innerHTML=`<i class="icon icon-coin"></i><b>${label}</b>`;
+      flyer.style.left=`${start.x}px`;
+      flyer.style.top=`${start.y}px`;
+      if(!reducedMotion){
+        flyer.style.setProperty('--coin-flight-x',`${targetX-start.x}px`);
+        flyer.style.setProperty('--coin-flight-y',`${targetY-start.y}px`);
+        flyer.style.animationDelay=`${index*75}ms`;
+      }
+      root.append(flyer);
+      flyer.addEventListener('animationend',()=>flyer.remove(),{once:true});
+      window.setTimeout(()=>flyer.remove(),1450+index*75);
+    }
+  }
+  private animateCoinTrayCatch(count:number, origins?:CoinPusherRewardOrigin[]) {
+    const root=document.querySelector<HTMLElement>('#coin-pusher-root');
+    if(!root)return;
+    const reducedMotion=document.documentElement.classList.contains('reduced-motion')
+      || (typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const validOrigins=origins?.filter((origin)=>Number.isFinite(origin.x)&&Number.isFinite(origin.y))??[];
+    const center=validOrigins.length
+      ? validOrigins.reduce((sum,origin)=>({x:sum.x+origin.x/validOrigins.length,y:sum.y+origin.y/validOrigins.length}),{x:0,y:0})
+      : {x:root.clientWidth*.5,y:root.clientHeight*.76};
+    const catchLabel=document.createElement('span');
+    catchLabel.className=`coin-pusher-tray-catch${reducedMotion?' is-static':''}`;
+    catchLabel.setAttribute('aria-hidden','true');
+    catchLabel.textContent=this.locale==='zh-HK'?`跌入坑槽 ×${count}`:`IN THE PIT ×${count}`;
+    catchLabel.style.left=`${center.x}px`;
+    catchLabel.style.top=`${center.y}px`;
+    root.append(catchLabel);
+    catchLabel.addEventListener('animationend',()=>catchLabel.remove(),{once:true});
+    window.setTimeout(()=>catchLabel.remove(),reducedMotion?900:980);
+    if(!reducedMotion)this.coinPusherTrayCatchUntil=Math.max(this.coinPusherTrayCatchUntil,performance.now()+760);
+  }
+  private animateCoinPusherTimingCue(landings:CoinPusherLandingFeedback[]) {
+    this.coinPusherTimingStreak=advanceCoinPusherTimingStreak(
+      this.coinPusherTimingStreak,landings.map((landing)=>landing.pusherBeat));
+    const forwardLandings=landings.filter((landing)=>landing.pusherBeat==='forward'
+      && Number.isFinite(landing.x)&&Number.isFinite(landing.y));
+    if(!forwardLandings.length)return;
+    const root=document.querySelector<HTMLElement>('#coin-pusher-root');
+    if(!root)return;
+    const center=forwardLandings.reduce((sum,landing)=>({x:sum.x+landing.x/forwardLandings.length,
+      y:sum.y+landing.y/forwardLandings.length}),{x:0,y:0});
+    const safeMargin=Math.min(104,root.clientWidth*.32);
+    const cue=document.createElement('span');
+    const streakLabel=coinPusherTimingStreakLabel(this.coinPusherTimingStreak.count,this.locale);
+    const reducedMotion=document.documentElement.classList.contains('reduced-motion')
+      || (typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    cue.className=`coin-pusher-timing-cue${streakLabel?' is-streaking':''}${reducedMotion?' is-static':''}`;
+    cue.dataset.beat='forward';
+    cue.dataset.streak=String(this.coinPusherTimingStreak.count);
+    cue.dataset.bestStreak=String(this.coinPusherTimingStreak.best);
+    cue.setAttribute('aria-hidden','true');
+    cue.textContent=streakLabel??(this.locale==='zh-HK'
+      ? `順勢接住${forwardLandings.length>1?` ×${forwardLandings.length}`:'！'}`
+      : `NICE TIMING${forwardLandings.length>1?` ×${forwardLandings.length}`:''}`);
+    cue.style.left=`${Math.max(safeMargin,Math.min(root.clientWidth-safeMargin,center.x))}px`;
+    cue.style.top=`${Math.max(104,Math.min(root.clientHeight-54,center.y-34))}px`;
+    root.querySelector('.coin-pusher-timing-cue')?.remove();
+    root.append(cue);
+    cue.addEventListener('animationend',()=>cue.remove(),{once:true});
+    window.setTimeout(()=>cue.remove(),1000);
+  }
+  private syncCoinPusherControls() {
+    const ready=this.coinPusherReady&&!this.coinPusherWebglLost&&!this.coinPusherInitFailed;
+    const root=document.querySelector<HTMLElement>('#coin-pusher-root');
+    if(root)root.setAttribute('aria-busy',String(!ready&&!this.coinPusherInitFailed));
+    const overlay=root?.querySelector<HTMLElement>('.coin-pusher-webgl-overlay');
+    if(overlay)overlay.hidden=!this.coinPusherWebglLost;
+    const dropButton=document.querySelector<HTMLButtonElement>('.coin-pusher-drop');
+    if(dropButton){
+      const canAfford=Number(this.state.wallet.balance) >= COIN_PUSHER_DROP_COST;
+      const disabled=!ready||this.coinPusherBusy||!canAfford;
+      dropButton.disabled=disabled;
+      dropButton.classList.toggle('is-insufficient',ready&&!this.coinPusherBusy&&!canAfford);
+      dropButton.setAttribute('aria-disabled',String(disabled));
+      dropButton.setAttribute('aria-label',!canAfford
+        ? (this.locale==='zh-HK'?'金幣不足；每次落幣需要 1 枚':'Not enough coins; each drop costs 1 coin')
+        : (this.locale==='zh-HK'?'落幣，扣 1 金幣':'Drop a coin; costs 1 coin'));
+      dropButton.title=!canAfford
+        ? (this.locale==='zh-HK'?'金幣不足':'Not enough coins')
+        : (this.locale==='zh-HK'?'落幣 −1；推出金幣回到錢包':'Drop −1; payout coins return to wallet');
+    }
+    const backButton=document.querySelector<HTMLButtonElement>('.coin-pusher-back');
+    if(backButton){
+      const blocked=this.coinPusherPaymentInFlight;
+      backButton.disabled=blocked;
+      backButton.setAttribute('aria-disabled',String(blocked));
+      backButton.title=blocked?this.coinPusherExitWaitMessage():(this.locale==='zh-HK'?'返回房間':'Back to room');
+    }
+  }
   private async buyEgg(body:any,button:HTMLButtonElement){button.disabled=true;let result;try{result=await api.buyEgg(body,idempotencyKey());}catch(error){button.disabled=false;throw error;}audio.sfx('hatch');this.celebrate(result.rarity==='epic'?'epic':'hatch');await this.reload();this.startBedroom();this.renderReveal(result.speciesId,result.rarity,result.duplicateCoins);}
   private async buyItem(itemId:string,button:HTMLButtonElement){button.disabled=true;try{await api.purchase({itemId,quantity:1},idempotencyKey());}catch(error){button.disabled=false;throw error;}audio.sfx('buy');await this.reload();this.updateWallet();this.renderShop(button.closest('.panel-scroll')?.querySelector('.filter-row .active')?.getAttribute('data-id')||'eggs');this.toast(this.locale==='zh-HK'?'購買成功！':'Purchase complete!');}
   private renderDecorator(){
@@ -767,7 +1420,32 @@ class StudentApp {
   }
   private renderSettings(){this.setLayout('full');const seg=(value:'private'|'class',label:string)=>`<button data-action="set-visibility" data-id="${value}" class="seg ${this.state.room.visibility===value?'on':''}">${escapeHtml(label)}</button>`;document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll settings-panel"><p class="eyebrow">COMFORT & ACCESS</p><h1>${this.t('settings')}</h1><div class="setting-row"><div><b>${this.locale==='zh-HK'?'房間參觀權限':'Room visits'}</b><small>${this.locale==='zh-HK'?'開放後，只有同班同學可以參觀你的房間。':'When opened, only classmates can visit your room.'}</small></div><div class="segmented-toggle">${seg('private',this.t('private'))}${seg('class',this.t('class'))}</div></div><label class="field"><span>${this.locale==='zh-HK'?'音樂音量':'Music volume'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.musicLevel}" data-setting="music"></label><label class="field"><span>${this.locale==='zh-HK'?'音效音量':'Sound effects'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.sfxLevel}" data-setting="sfx"></label><label class="toggle"><input type="checkbox" id="motionToggle" ${localStorage.getItem('pet-reduced-motion')==='1'?'checked':''}><span>${this.locale==='zh-HK'?'減少動畫':'Reduce motion'}</span></label><p class="privacy-note">${this.locale==='zh-HK'?'私隱：房間預設私人；公開後只有同班學生可參觀。系統沒有聊天、留言、交易或排行榜。':'Privacy: rooms are private by default. Only classmates can visit when opened. There is no chat, messaging, trading or leaderboard.'}</p></div>`;document.querySelector('#motionToggle')?.addEventListener('change',(event)=>{const on=(event.target as HTMLInputElement).checked;localStorage.setItem('pet-reduced-motion',on?'1':'0');document.documentElement.classList.toggle('reduced-motion',on);});}
   private async reload(){this.state=await api.bootstrap();this.roomPlacements=this.state.room.placements.map((item)=>({...item}));this.updateWallet();}
-  private updateWallet(){this.setValue('#coinBalance',this.state.wallet.balance.toLocaleString());}
+  private destroyCoinPusher(preserveModel=false){
+    if(!preserveModel)this.coinPusherGeneration+=1;
+    if(this.coinPusherCooldown!==undefined)window.clearTimeout(this.coinPusherCooldown);
+    this.coinPusherCooldown=undefined;
+    this.coinPusherBusy=false;
+    this.coinPusherCascade={count:0,lastAt:0};
+    this.coinPusherTimingStreak={count:0,best:0};
+    if(this.coinPusherView){
+      if(preserveModel)this.coinPusherModel=this.coinPusherView.model;
+      this.coinPusherView.destroy(preserveModel);
+      this.coinPusherView=undefined;
+      this.coinPusherInitPending=false;
+    }else if(!preserveModel){
+      this.coinPusherModel?.destroy();
+      this.coinPusherModel=undefined;
+      this.coinPusherInitPending=false;
+    }
+    if(!preserveModel)this.coinPusherPlays=[];
+    this.coinPusherReady=false;
+    this.coinPusherWebglLost=false;
+    this.coinPusherInitFailed=false;
+    document.querySelector('#coin-pusher-room-backdrop')?.remove();
+    const root=document.querySelector<HTMLElement>('#coin-pusher-root');
+    if(root)root.style.display='none';
+  }
+  private updateWallet(){const balance=this.state.wallet.balance.toLocaleString();this.setValue('#coinBalance',balance);this.setValue('#coinBalanceHud',balance);this.syncCoinPusherControls();}
   private setValue(selector:string,value:string){const node=document.querySelector<HTMLElement>(selector);if(!node)return;if(node.textContent===value){node.textContent=value;return;}node.textContent=value;node.classList.remove('bump');void node.offsetWidth;node.classList.add('bump');window.setTimeout(()=>node.classList.remove('bump'),400);}
   private toast(message:string,error=false){
     if(error&&this.locale==='zh-HK')message=REFUSALS[message]||message;const element=document.createElement('div');element.className=`toast ${error?'error':''}`;element.setAttribute('role',error?'alert':'status');element.textContent=message;document.querySelector('#toasts')?.append(element);window.setTimeout(()=>{element.classList.add('leaving');window.setTimeout(()=>element.remove(),200);},3000);}
@@ -791,9 +1469,9 @@ class TeacherApp {
       <main class="teacher-main">
         <section class="grant-panel" aria-labelledby="grantHeading">
           <div class="grant-head">
-            <p class="eyebrow">TEACHER-ISSUED ONLY</p>
+            <p class="eyebrow">TEACHER COIN CENTRE</p>
             <h1 id="grantHeading">${this.t('teacherTitle')}</h1>
-            <p class="caution">${zh?'只有這裏能產生金幣，發放後不能撤回。確認前請核對「人數 × 每人金額 = 總額」。':'Coins exist only here and a grant cannot be undone. Check students × coins each = total before you confirm.'}</p>
+            <p class="caution">${zh?'老師可在這裏發放金幣；推銀仔每次落幣扣 1 枚，推出的金幣會回到學生錢包。發放後不能撤回，確認前請核對「人數 × 每人金額 = 總額」。':'Teachers issue coins here; each coin-pusher drop costs 1 coin, and payout coins return to the student wallet. Grants cannot be undone, so check students × coins each = total.'}</p>
           </div>
           <div class="segmented" role="group" aria-label="${zh?'發放對象':'Grant scope'}">
             <button type="button" data-scope="students" class="active" aria-pressed="true">${this.t('individual')}</button>

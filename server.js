@@ -23,10 +23,8 @@ const PORT = config.port;
 // ----------------------------------------------------------------
 // Middleware
 // ----------------------------------------------------------------
-// Nothing was compressed on the way out. The game's own scripts are 979KB of text — 740KB of it
-// one generated geometry table — and a class of twelve fetching that is nine megabytes of
-// bandwidth for what gzip turns into 125KB. Already-compressed types (webp, audio) are skipped by
-// the middleware's own list, so the images are left alone.
+// Compress text assets on the way out; already-compressed WebP/audio are skipped by the middleware.
+// Rapier's large physics WASM is served from its build-time Brotli sidecar below, with gzip as fallback.
 app.use(compression());
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -388,19 +386,52 @@ app.get('/tower-defense/teacher', requireSession, (req, res) => {
 
 // Pet Paradise: hashed build assets are public; the application document is
 // protected by the platform session and switches UI according to the role.
-const petDist = path.join(__dirname, 'pet-app', 'dist');
+// A development-only override lets browser tests exercise an isolated production build
+// without replacing the workspace's currently served artifact while it is in use.
+const petDist = !config.isProd && process.env.PET_APP_DIST_DIR
+  ? path.resolve(process.env.PET_APP_DIST_DIR)
+  : path.join(__dirname, 'pet-app', 'dist');
 const setPetHeaders = (res, { document = false } = {}) => {
   res.set('X-Content-Type-Options', 'nosniff');
   res.set('Referrer-Policy', 'same-origin');
   res.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   if (document) {
-    res.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; media-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
+    // Rapier compiles its bundled WebAssembly module for the 3D coin-pusher physics. Allow
+    // WebAssembly compilation without enabling JavaScript eval or widening other directives.
+    res.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; media-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
   }
 };
 app.use('/pet/assets', (req, res, next) => {
-  const isHashedBuildFile = /-[A-Za-z0-9_-]{8,}\.(?:js|css|webp)$/i.test(req.path);
+  const isHashedBuildFile = /-[A-Za-z0-9_-]{8,}\.(?:js|css|webp|wasm)$/i.test(req.path);
   if (!isHashedBuildFile) return res.status(404).end();
   next();
+}, (req, res, next) => {
+  const fileName = path.basename(req.path);
+  if (!/rapier_wasm3d_bg.*-[A-Za-z0-9_-]{8,}\.wasm$/i.test(fileName)
+    || !['GET', 'HEAD'].includes(req.method)
+    || req.acceptsEncodings('br') !== 'br') return next();
+
+  const brotliPath = path.join(petDist, 'assets', `${fileName}.br`);
+  let stat;
+  try { stat = fs.statSync(brotliPath); }
+  catch { return next(); }
+
+  setPetHeaders(res);
+  res.vary('Accept-Encoding');
+  res.set({
+    'Content-Type': 'application/wasm',
+    'Content-Encoding': 'br',
+    'Content-Length': String(stat.size),
+    'Cache-Control': config.isProd ? 'public, max-age=31536000, immutable' : 'no-cache',
+  });
+  if (req.method === 'HEAD') return res.status(200).end();
+
+  const stream = fs.createReadStream(brotliPath);
+  stream.once('error', (error) => {
+    if (!res.headersSent) next(error);
+    else res.destroy(error);
+  });
+  stream.pipe(res);
 }, express.static(path.join(petDist, 'assets'), {
   maxAge: config.isProd ? '1y' : 0,
   immutable: config.isProd,

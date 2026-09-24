@@ -35,6 +35,7 @@
     "build:pet-redrawn-queue:all": "node scripts/build-redrawn-wearable-queue.mjs --all-stages",
     "check:pet": "node scripts/test-pet-module.mjs",
     "check:pet-live": "node scripts/test-pet-live.mjs",
+    "check:pet-coin-pusher-live": "node scripts/test-pet-coin-pusher-live.mjs",
     "check:pet-wearables-live": "node scripts/test-pet-wearables-live.mjs",
     "check:pet-redrawn-wearable-live": "node scripts/test-pet-redrawn-wearable-live.mjs",
     "dev:homework-fixture": "node scripts/start-homework-fixture.mjs",

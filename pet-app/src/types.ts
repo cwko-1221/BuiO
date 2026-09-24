@@ -138,7 +138,7 @@ export interface RoomState { themeId: string; visibility: 'private' | 'class'; p
 export interface Bootstrap {
   profile: { studentId: string; activePetId: string | null; starterEggClaimed: boolean; eggPity: number; stardust: number };
   wallet: { balance: number }; pets: PetInstance[]; inventory: InventoryStack[]; room: RoomState;
-  catalog: Catalog; serverDay: string;
+  catalog: Catalog; serverDay: string; coinPusherCollection?: { returnedCoins: number };
 }
 export interface TeacherGrantNotification {
   transactionId: string;

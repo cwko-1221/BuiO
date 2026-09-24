@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const config = require('../../config');
 const repo = require('../repositories/pet.repo');
 const academicYears = require('../../math-app/repositories/academic-years.repo');
 const users = require('../../math-app/repositories/users.repo');
@@ -8,11 +9,15 @@ const { requireAuth, requireTeacher } = require('../../math-app/middleware/auth'
 
 const router = express.Router();
 const mutationKey = (req) => String(req.get('Idempotency-Key') || req.body?.idempotencyKey || '').trim().slice(0, 120);
+const coinPusherMutationKey = (req) => {
+  const key = String(req.get('Idempotency-Key') || req.body?.idempotencyKey || '').trim();
+  return key && key.length <= 120 ? key : '';
+};
 const asyncRoute = (handler) => async (req, res, next) => { try { await handler(req, res); } catch (error) { next(error); } };
 
 function requireStudent(req, res, next) {
   if (!req.session?.studentId) return res.status(401).json({ success: false, message: '請先登入。' });
-  if (req.session.role === 'teacher') return res.status(403).json({ success: false, message: '學生功能只供學生使用。' });
+  if (req.session.role !== 'student') return res.status(403).json({ success: false, message: '學生功能只供學生使用。' });
   next();
 }
 
@@ -22,9 +27,11 @@ router.get('/bootstrap', requireStudent, asyncRoute(async (req, res) => {
   sendResult(res, await repo.getBootstrap(req.session.studentId));
 }));
 
-router.all('/dev/unlimited-money', requireStudent, asyncRoute(async (req, res) => {
-  sendResult(res, await repo.grantUnlimitedMoney(req.session.studentId, 999999));
-}));
+if (config.isExplicitDevelopment) {
+  router.post('/dev/unlimited-money', requireStudent, asyncRoute(async (req, res) => {
+    sendResult(res, await repo.grantUnlimitedMoney(req.session.studentId, 999999));
+  }));
+}
 
 router.post('/starter-egg/hatch', requireStudent, asyncRoute(async (req, res) => {
   const idempotencyKey = mutationKey(req);
@@ -37,6 +44,22 @@ router.post('/eggs/purchase', requireStudent, asyncRoute(async (req, res) => {
   const idempotencyKey = mutationKey(req);
   if (!idempotencyKey) return res.status(400).json({ success: false, message: '缺少防重複提交識別碼。' });
   sendResult(res, await repo.purchaseEgg(req.session.studentId, { kind, speciesId: String(req.body?.speciesId || ''), idempotencyKey }), 201);
+}));
+
+router.post('/coin-pusher/play', requireStudent, asyncRoute(async (req, res) => {
+  const idempotencyKey = coinPusherMutationKey(req);
+  if (!idempotencyKey) return res.status(400).json({ success: false, message: '缺少有效的防重複提交識別碼。' });
+  sendResult(res, await repo.playCoinPusher(req.session.studentId, { idempotencyKey }));
+}));
+
+router.post('/coin-pusher/payout', requireStudent, asyncRoute(async (req, res) => {
+  const idempotencyKey = coinPusherMutationKey(req);
+  if (!idempotencyKey) return res.status(400).json({ success: false, message: '缺少有效的防重複提交識別碼。' });
+  sendResult(res, await repo.payoutCoinPusher(req.session.studentId, {
+    playId: req.body?.playId, eventId: req.body?.eventId || req.body?.payoutEventId,
+    amount: req.body?.amount,
+    idempotencyKey,
+  }));
 }));
 
 router.post('/pets/:petId/activate', requireStudent, asyncRoute(async (req, res) => {

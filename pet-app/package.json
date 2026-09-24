@@ -4,13 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node tests/coin-pusher-build-artifact.test.js",
     "preview": "vite preview"
   },
   "dependencies": {
-    "phaser": "^4.2.1"
+    "@dimforge/rapier3d": "0.20.0",
+    "phaser": "^4.2.1",
+    "three": "0.179.1"
   },
   "devDependencies": {
+    "@types/three": "0.179.0",
     "typescript": "^5.9.2",
     "vite": "^8.2.1"
   }
