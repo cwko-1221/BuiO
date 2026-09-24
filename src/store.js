@@ -21,6 +21,7 @@ export const state = {
   subjectTeacherError: '',
   homeworkAccess: false,
   homeworkPending: [],
+  homeworkHistory: [],
   homeworkPendingLoaded: false,
 };
 

@@ -193,6 +193,7 @@ try {
   result = await request(nonMonitor, '/api/homework/pending');
   assert.equal(result.data.pending.length, 1, 'homepage reminder sees outstanding homework');
   assert.equal(result.data.pending[0].subjectName, '中文 A組', 'homepage reminder includes the subject and group');
+  assert.deepEqual(result.data.history, [], 'homepage reminder starts with no caught-up history');
   assert.equal((await request(nonMonitor, '/api/homework/records', { method: 'PUT', body: monitorUpdate })).response.status, 403, 'non-monitor cannot update record');
   // The monitor filed this record today and may still edit it, which is exactly why the delete has
   // to be refused separately: being allowed to correct a record is not being allowed to remove it.
@@ -215,7 +216,10 @@ try {
   assert.equal(pdfBuffer.subarray(0, 4).toString(), '%PDF', 'valid PDF download');
   assert.match(pdf.headers.get('content-disposition') || '', /attachment;.*\.pdf/i, 'PDF is downloadable');
   assert.ok(pdfBuffer.toString('latin1').includes('5DE54F5C7D19'), 'PDF contains the homework title 工作紙');
-  assert.equal((await request(nonMonitor, '/api/homework/pending')).data.pending.length, 0, 'made-up item leaves reminder');
+  const homeworkReminder = await request(nonMonitor, '/api/homework/pending');
+  assert.equal(homeworkReminder.data.pending.length, 0, 'made-up item leaves reminder');
+  assert.equal(homeworkReminder.data.history.length, 1, 'homepage reminder keeps caught-up history');
+  assert.equal(homeworkReminder.data.history[0].madeUp, true, 'history marks the item as caught up');
   result = await request(teacher, `/api/homework/analysis?academicYear=${year}&className=P4&studentId=S003`);
   assert.equal(result.data.rows[0].status, 'missing', 'analysis retains the original missing status');
   assert.equal(result.data.rows[0].madeUp, true, 'analysis shows the independent made-up flag');

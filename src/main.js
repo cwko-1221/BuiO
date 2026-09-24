@@ -766,6 +766,7 @@ function bindEvents() {
     state.mathSsoStatus = '';
     state.homeworkAccess = false;
     state.homeworkPending = [];
+    state.homeworkHistory = [];
     state.homeworkPendingLoaded = false;
     state.adminUnlocked = false;
     state.studentsLoaded = false;

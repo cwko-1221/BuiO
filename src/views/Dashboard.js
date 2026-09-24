@@ -50,14 +50,27 @@ function renderStudentDashboard() {
 
 function renderHomeworkReminder() {
   const pending = state.homeworkPending || [];
-  if (!pending.length) {
+  const history = state.homeworkHistory || [];
+  if (!pending.length && !history.length) {
     return `<div class="homework-reminder clear">${renderIcon('check')} ${t('homework_clear')}</div>`;
   }
-  return `<div class="homework-reminder">
-    <strong>${t('homework_pending', { count: pending.length })}</strong>
-    <ul>${pending.slice(0, 5).map(item => `<li>${escapeReminder(item.date)} · ${escapeReminder(item.subjectName || item.subject)} · ${escapeReminder(item.homework)}</li>`).join('')}</ul>
-    ${pending.length > 5 ? `<span>${t('homework_pending_more', { count: pending.length - 5 })}</span>` : ''}
+  return `<div class="homework-reminders">
+    ${pending.length ? `<div class="homework-reminder pending">
+      <strong>${t('homework_pending', { count: pending.length })}</strong>
+      ${renderHomeworkReminderList(pending, 'homework_pending_more')}
+    </div>` : ''}
+    ${history.length ? `<div class="homework-reminder history">
+      <strong>${t('homework_history', { count: history.length })}</strong>
+      ${renderHomeworkReminderList(history, 'homework_history_more')}
+    </div>` : ''}
   </div>`;
+}
+
+function renderHomeworkReminderList(items, moreKey) {
+  const renderItems = rows => `<ul>${rows.map(item => `<li>${escapeReminder(item.date)} · ${escapeReminder(item.subjectName || item.subject)} · ${escapeReminder(item.homework)}</li>`).join('')}</ul>`;
+  const visible = items.slice(0, 5);
+  const remaining = items.slice(5);
+  return `${renderItems(visible)}${remaining.length ? `<details class="homework-reminder-more"><summary>${t(moreKey, { count: remaining.length })}</summary>${renderItems(remaining)}</details>` : ''}`;
 }
 
 function escapeReminder(value) {

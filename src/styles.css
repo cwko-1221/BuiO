@@ -544,7 +544,13 @@ input:focus {
   color: #973b2b;
   line-height: 1.55;
 }
+.homework-reminders { max-width: 620px; }
 .homework-reminder strong { display: block; }
+.homework-reminder.history {
+  border-color: #f0d495;
+  background: #fff8e7;
+  color: #875800;
+}
 .homework-reminder.clear {
   display: flex;
   align-items: center;
@@ -555,6 +561,15 @@ input:focus {
 }
 .homework-reminder.clear svg { width: 18px; height: 18px; }
 .homework-reminder ul { margin: 8px 0 0; padding-left: 1.2rem; }
+.homework-reminder-more { margin-top: 8px; }
+.homework-reminder-more summary {
+  width: fit-content;
+  color: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+.homework-reminder-more summary:hover { text-decoration: underline; }
+.homework-reminder-more ul { margin-top: 6px; }
 
 .action-row {
   display: flex;

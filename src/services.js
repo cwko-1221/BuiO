@@ -37,15 +37,19 @@ export async function fetchHomeworkInfo() {
     const meta = await metaResponse.json();
     const homeworkAccess = Boolean(metaResponse.ok && meta.success && meta.canAccess);
     let homeworkPending = [];
+    let homeworkHistory = [];
     if (state.currentUser?.role === 'student') {
       const pendingResponse = await fetch('/api/homework/pending', { credentials: 'include' });
       const pending = await pendingResponse.json();
-      if (pendingResponse.ok && pending.success) homeworkPending = pending.pending || [];
+      if (pendingResponse.ok && pending.success) {
+        homeworkPending = pending.pending || [];
+        homeworkHistory = pending.history || [];
+      }
     }
-    updateState({ homeworkAccess, homeworkPending, homeworkPendingLoaded: true });
+    updateState({ homeworkAccess, homeworkPending, homeworkHistory, homeworkPendingLoaded: true });
     return homeworkAccess;
   } catch {
-    updateState({ homeworkAccess: false, homeworkPending: [], homeworkPendingLoaded: true });
+    updateState({ homeworkAccess: false, homeworkPending: [], homeworkHistory: [], homeworkPendingLoaded: true });
     return false;
   }
 }

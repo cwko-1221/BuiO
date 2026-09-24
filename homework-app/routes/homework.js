@@ -558,13 +558,20 @@ router.get('/pending', async (req, res, next) => {
     if (!user) return fail(res, 404, '找不到學生');
     const records = await repo.listRecords({ academicYear, className: user.classname || '' });
     const pending = [];
+    const history = [];
     for (const record of records) for (const homework of record.homeworks) {
       const item = homework.statuses.find(entry => entry.studentId === req.session.studentId);
-      if (item?.status === 'missing' && !item.madeUp) {
-        pending.push({ date: record.date, subject: record.subject, subjectName: subjectById(record.subject)?.name || record.subject, homework: homework.title });
-      }
+      if (item?.status !== 'missing') continue;
+      const reminder = {
+        date: record.date,
+        subject: record.subject,
+        subjectName: subjectById(record.subject)?.name || record.subject,
+        homework: homework.title,
+      };
+      if (item.madeUp) history.push({ ...reminder, madeUp: true });
+      else pending.push(reminder);
     }
-    res.json({ success: true, pending });
+    res.json({ success: true, pending, history });
   } catch (error) { next(error); }
 });
 
