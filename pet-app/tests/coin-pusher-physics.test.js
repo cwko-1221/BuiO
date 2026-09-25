@@ -542,6 +542,9 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
     { period: 25, offset: 2, lanes: [-1.44, -.72, 0, .72, 1.44] },
     { period: 31, offset: 17, lanes: [-.96, -.32, .32, .96] },
     { period: 37, offset: 5, lanes: [-2, -1, 0, 1, 2] },
+    // Exhaust the three-airborne safety cap with edge-to-edge drops before letting the same
+    // long run exercise dense pile contacts, plate riders, rail guards and the payout catcher.
+    { period: 6, offset: 0, lanes: [-2.3, 2.3, -1.8, 1.8, 0], burstCadence: true },
   ];
   let collectionEventCount = 0;
   let collectedTotal = 0;
@@ -561,6 +564,7 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
     let firstUnsupportedPusherContact = '';
     const plateContactFramesByCoin = new Map();
     const droppedAtFrame = new Map();
+    const acceptedDropFrames = [];
     const impactEventIds = new Set();
     let forwardBeatLandings = 0;
     let maxDropTumble = 0;
@@ -568,10 +572,16 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
       assert.equal(model.world.numInternalPgsIterations, 3, 'dense coin contacts use extra low-cost stability passes');
       for (let frame = 0; frame < 1800; frame += 1) {
         const dropIndex = Math.floor((frame - run.offset) / run.period);
-        if (frame >= run.offset && dropIndex < 36 && (frame - run.offset) % run.period === 0) {
-          const dropId = model.dropCoin(run.lanes[dropIndex % run.lanes.length]);
+        const dropWindow = frame >= run.offset && (frame - run.offset) % run.period === 0;
+        const shouldDrop = run.burstCadence
+          ? dropWindow && requestedDrops < 36 && model.canDropCoin()
+          : dropWindow && dropIndex < 36;
+        if (shouldDrop) {
+          const laneIndex = run.burstCadence ? requestedDrops : dropIndex;
+          const dropId = model.dropCoin(run.lanes[laneIndex % run.lanes.length]);
           assert.notEqual(dropId, undefined);
           droppedAtFrame.set(dropId, frame);
+          acceptedDropFrames.push(frame);
           requestedDrops += 1;
         }
         model.update(1000 / 60);
@@ -657,14 +667,19 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
         }
       }
       assert.equal(requestedDrops, 36, `run ${runIndex + 1} should exercise the full in-game drop cap`);
+      if (run.burstCadence) {
+        assert.ok(acceptedDropFrames[1] - acceptedDropFrames[0] <= 6
+          && acceptedDropFrames[2] - acceptedDropFrames[1] <= 6,
+        'the burst fixture must actually fill all three airborne slots at the fastest legal edge-to-edge cadence');
+      }
       assert.ok(impactEventIds.size > 0, `run ${runIndex + 1} should report real first coin impacts`);
       assert.ok(forwardBeatLandings > 0,
         `run ${runIndex + 1} should exercise the non-monetary forward-timing feedback`);
       assert.ok(maxDropTumble > .3, `run ${runIndex + 1}: a dropped coin should visibly tumble off-axis before landing`);
       assert.ok(!model.coins.some((coin) => !coin.dropped && coin.ridingPusher),
         `run ${runIndex + 1}: starter-deck coins must not be teleported as plate riders`);
-      assert.ok(maxUpwardSpeed <= .651,
-        `run ${runIndex + 1}: playfield rebound must stay at or below the 0.65m/s anti-pop cap (${maxUpwardSpeed.toFixed(2)}m/s; ${maxUpwardSpeedDetails})`);
+      assert.ok(maxUpwardSpeed <= .381,
+        `run ${runIndex + 1}: playfield rebound must stay at or below the 0.38m/s anti-pop cap (${maxUpwardSpeed.toFixed(2)}m/s; ${maxUpwardSpeedDetails})`);
       assert.ok(maxRiderSupportGap < .015,
         `run ${runIndex + 1}: every carried coin must remain supported by the plate (${maxRiderSupportGap.toFixed(3)}m)`);
       assert.equal(unsupportedPusherContacts, 0,

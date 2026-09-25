@@ -1873,6 +1873,18 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 4px 14px rgba(4,14,14,.42), inset 0 1px rgba(255,255,255,.24), 0 0 20px rgba(255,206,91,.52);
 }
 .coin-pusher-timing-cue.is-streaking::before { content: "✦"; color: #ffe6a0; }
+.coin-pusher-timing-cue.is-new-best {
+  color: #fff9df; border-color: rgba(255,244,183,.98);
+  background: linear-gradient(145deg, rgba(139,88,31,.98), rgba(85,56,33,.98));
+  box-shadow: 0 4px 14px rgba(4,14,14,.42), inset 0 1px rgba(255,255,255,.28), 0 0 24px rgba(255,218,104,.66);
+}
+.coin-pusher-timing-cue.is-new-best::before { content: "★"; color: #fff1a8; }
+.coin-pusher-timing-cue.is-guidance {
+  color: #e5f5ff; border-color: rgba(164,219,244,.82);
+  background: linear-gradient(145deg, rgba(39,67,88,.97), rgba(28,43,62,.97));
+  box-shadow: 0 4px 14px rgba(4,14,14,.42), inset 0 1px rgba(255,255,255,.2), 0 0 14px rgba(124,198,231,.22);
+}
+.coin-pusher-timing-cue.is-guidance::before { content: "↻"; color: #c7eaff; }
 .coin-pusher-timing-cue.is-static { animation: none; transform: translate(-50%,-50%); }
 @keyframes coin-pusher-timing-cue {
   0% { opacity: 0; transform: translate(-50%,-50%) scale(.72); }
@@ -1921,6 +1933,22 @@ input[type="range"]::-moz-range-thumb {
 .coin-pusher-collection-progress > div:first-child b { font-size: .85rem; }
 .coin-pusher-collection-progress > div:first-child strong { font-variant-numeric: tabular-nums; }
 .coin-pusher-collection-progress > small { color: #817466; font-size: .76rem; }
+.coin-pusher-collection-highlights { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.coin-pusher-personal-best {
+  min-height: 46px; padding: 7px 12px; display: flex; align-items: center; gap: 10px;
+  border: 1px solid rgba(207,165,72,.55); border-radius: 13px;
+  background: linear-gradient(105deg, #fff9e8, #f5ecd6 62%, #fffdf5);
+  box-shadow: inset 0 1px rgba(255,255,255,.9);
+}
+.coin-pusher-personal-best > span {
+  flex: 0 0 30px; width: 30px; height: 30px; display: grid; place-items: center;
+  color: #fff1b3; border: 1px solid #b9842f; border-radius: 50%;
+  background: linear-gradient(145deg, #d8a949, #866020); font-size: 1.05rem;
+  box-shadow: inset 0 1px rgba(255,255,255,.45), 0 2px 5px rgba(93,62,19,.16);
+}
+.coin-pusher-personal-best > div { min-width: 0; display: grid; gap: 2px; }
+.coin-pusher-personal-best small { color: #88734f; font-size: .59rem; font-weight: 900; letter-spacing: .08em; line-height: 1; }
+.coin-pusher-personal-best b { color: #49371d; font-size: .9rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .coin-pusher-progress-track { height: 8px; overflow: hidden; border-radius: 99px; background: #e8dfd0; }
 .coin-pusher-progress-track > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #d6a544, #e7c579); transition: width 240ms ease; }
 .coin-pusher-finish-current {
@@ -1991,6 +2019,11 @@ input[type="range"]::-moz-range-thumb {
   .coin-pusher-collection-heading h2 { font-size: 1.1rem; }
   .coin-pusher-collection-copy { font-size: .7rem; line-height: 1.12; }
   .coin-pusher-collection-progress { gap: 3px; padding: 5px 8px; }
+  .coin-pusher-collection-highlights { gap: 5px; }
+  .coin-pusher-personal-best { min-height: 30px; padding: 3px 7px; gap: 7px; }
+  .coin-pusher-personal-best > span { flex-basis: 22px; width: 22px; height: 22px; font-size: .8rem; }
+  .coin-pusher-personal-best small { font-size: .48rem; }
+  .coin-pusher-personal-best b { font-size: .68rem; }
   .coin-pusher-finish-current { min-height: 28px; gap: 6px; padding: 3px 6px; }
   .coin-pusher-finish-swatch { width: 32px; height: 18px; padding: 2px; gap: 2px; }
   .coin-pusher-finish-current-copy > small { font-size: .48rem; }
@@ -2018,6 +2051,11 @@ input[type="range"]::-moz-range-thumb {
   .coin-pusher-collection-copy { font-size: .78rem; line-height: 1.28; }
   .coin-pusher-collection-progress { gap: 5px; padding: 8px 10px; }
   .coin-pusher-collection-progress > small { font-size: .68rem; }
+  .coin-pusher-collection-highlights { gap: 7px; }
+  .coin-pusher-personal-best { min-height: 38px; padding: 5px 9px; gap: 8px; }
+  .coin-pusher-personal-best > span { flex-basis: 26px; width: 26px; height: 26px; }
+  .coin-pusher-personal-best small { font-size: .53rem; }
+  .coin-pusher-personal-best b { font-size: .76rem; }
   .coin-pusher-finish-current { min-height: 36px; gap: 8px; padding: 4px 8px; }
   .coin-pusher-finish-swatch { width: 40px; height: 23px; padding: 3px; gap: 2px; }
   .coin-pusher-stamp-grid { gap: 6px; }

@@ -4,7 +4,12 @@ import compactBackboardArtworkUrl from './assets/coin-pusher-backboard-mobile-v2
 import brushedMetalTextureUrl from './assets/coin-pusher-brushed-metal-v1.webp';
 import mintedCoinFaceTextureUrl from './assets/coin-pusher-minted-paw-desktop-v2.webp';
 import compactMintedCoinFaceTextureUrl from './assets/coin-pusher-minted-paw-mobile-v2.webp';
-import { COIN_PUSHER_CABINET_FINISHES, coinPusherCabinetFinish, coinPusherTravelProgress } from './CoinPusherFeedback';
+import {
+  COIN_PUSHER_CABINET_FINISHES,
+  coinPusherCabinetFinish,
+  coinPusherTrayImpactPulse,
+  coinPusherTravelProgress,
+} from './CoinPusherFeedback';
 import { createCoinPusherStarterLayout } from './CoinPusherLayout';
 import type { CoinPusherDropBeat, CoinPusherModel, CoinPusherModelSnapshot } from './CoinPusherModel';
 import {
@@ -277,6 +282,9 @@ export class CoinPusherScene {
   private cabinetBrassMaterial?: THREE.MeshStandardMaterial;
   private cabinetPaleGoldMaterial?: THREE.MeshStandardMaterial;
   private cabinetGlowMaterial?: THREE.MeshStandardMaterial;
+  private payoutWellGlow?: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
+  private payoutWellMark?: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
+  private payoutWellGlowStartedAt = Number.NEGATIVE_INFINITY;
   private keepsakeTier = -1;
   private lastPusherGlowProgress = -1;
   private readonly coinBody: THREE.InstancedMesh;
@@ -690,7 +698,11 @@ export class CoinPusherScene {
     if (reduceMotion !== this.reducedMotion) {
       this.reducedMotion = reduceMotion;
       model.setReducedMotion(reduceMotion);
-      if (reduceMotion) this.clearImpactBursts();
+      if (reduceMotion) {
+        this.clearImpactBursts();
+        if (this.payoutWellGlow) this.payoutWellGlow.material.opacity = 0;
+        this.payoutWellGlowStartedAt = Number.NEGATIVE_INFINITY;
+      }
     }
     // Keep the 60Hz Rapier fixed-step simulation while avoiding a full-rate render loop for
     // children who explicitly requested less motion.
@@ -703,7 +715,13 @@ export class CoinPusherScene {
       this.syncPusherGlow(model.pusherZ);
       this.syncCoins();
       const trayImpacts = this.collectTrayImpacts();
-      if (!this.reducedMotion && trayImpacts.length) this.sparkAtFront(trayImpacts, time);
+      if (trayImpacts.length) {
+        if (!this.reducedMotion) {
+          this.pulsePayoutWell(trayImpacts, time);
+          this.sparkAtFront(trayImpacts, time);
+        }
+      }
+      this.updatePayoutWellPulse(time);
       this.updateImpactBursts(time);
       if (this.aimMarker.classList.contains('is-visible')) {
         const laneX = Number(this.aimMarker.dataset.laneX);
@@ -726,6 +744,7 @@ export class CoinPusherScene {
       }
       for (const event of events) {
         if (event.type !== 'coins-collected') continue;
+        if (!this.reducedMotion) this.pulsePayoutWell(event.positions, time);
         const origins = event.positions.map((position) => this.projectPayoutOrigin(position));
         this.onCoinsFell(event.count, origins.length ? origins : [this.projectPayoutOrigin()]);
       }
@@ -1115,6 +1134,66 @@ export class CoinPusherScene {
     );
     prizeFloor.position.set(0, PAYOUT_TRAY_FLOOR_CENTER_Y + PAYOUT_TRAY_FLOOR_HALF_HEIGHT + .001, prizeTrayCenterZ);
     prizeFloor.receiveShadow = true; this.renderRoot.add(prizeFloor);
+    // Give the otherwise dark collection floor a quiet pet-arcade identity. This is only an
+    // inlay: it has no collider and sits well below the coin landing plane, so payout physics
+    // and the reward amount remain entirely server/model driven.
+    const payoutMarkMaterial = new THREE.MeshBasicMaterial({
+      color: 0xf0d99e,
+      transparent: true,
+      opacity: .3,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    this.materials.push(payoutMarkMaterial);
+    const payoutMarkZ = prizeTrayCenterZ - .08;
+    const payoutWellRing = new THREE.Mesh(
+      this.trackGeometry(new THREE.TorusGeometry(.38, .012, 8, 56).rotateX(-Math.PI / 2)),
+      payoutMarkMaterial,
+    );
+    payoutWellRing.position.set(0, PAYOUT_TRAY_FLOOR_TOP_Y + .012, payoutMarkZ);
+    payoutWellRing.scale.z = .72;
+    payoutWellRing.renderOrder = 2;
+    this.payoutWellMark = payoutWellRing;
+    this.renderRoot.add(payoutWellRing);
+    const payoutWellPaw = new THREE.Mesh(this.trackGeometry(this.coinPawGeometry()), payoutMarkMaterial);
+    payoutWellPaw.position.set(0, PAYOUT_TRAY_FLOOR_TOP_Y + .014, payoutMarkZ);
+    payoutWellPaw.scale.set(5.8, .08, 5.8);
+    payoutWellPaw.renderOrder = 3;
+    this.renderRoot.add(payoutWellPaw);
+    const payoutGlowCanvas = document.createElement('canvas');
+    payoutGlowCanvas.width = payoutGlowCanvas.height = 128;
+    const payoutGlowContext = payoutGlowCanvas.getContext('2d');
+    if (payoutGlowContext) {
+      const gradient = payoutGlowContext.createRadialGradient(64, 64, 2, 64, 64, 63);
+      gradient.addColorStop(0, 'rgba(255, 216, 135, .72)');
+      gradient.addColorStop(.3, 'rgba(255, 182, 76, .4)');
+      gradient.addColorStop(1, 'rgba(255, 160, 45, 0)');
+      payoutGlowContext.fillStyle = gradient;
+      payoutGlowContext.fillRect(0, 0, 128, 128);
+      const payoutGlowTexture = new THREE.CanvasTexture(payoutGlowCanvas);
+      payoutGlowTexture.colorSpace = THREE.SRGBColorSpace;
+      payoutGlowTexture.needsUpdate = true;
+      const payoutGlowMaterial = new THREE.MeshBasicMaterial({
+        map: payoutGlowTexture,
+        color: 0xffd58b,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+        toneMapped: false,
+      });
+      this.materials.push(payoutGlowMaterial);
+      const payoutGlow = new THREE.Mesh(
+        this.trackGeometry(new THREE.PlaneGeometry(1.8, 1.38).rotateX(-Math.PI / 2)),
+        payoutGlowMaterial,
+      );
+      payoutGlow.position.set(0, PAYOUT_TRAY_FLOOR_TOP_Y + .008, payoutMarkZ);
+      payoutGlow.frustumCulled = false;
+      payoutGlow.renderOrder = 1;
+      this.payoutWellGlow = payoutGlow;
+      this.renderRoot.add(payoutGlow);
+    }
     // A low gold reveal outlines the recessed catcher without standing in the coin's fall path.
     const wellSideRim = this.box(.034, .028, prizeTrayDepth, paleGold, .012);
     for (const side of [-1, 1]) {
@@ -1451,6 +1530,29 @@ export class CoinPusherScene {
       if (!liveIds.has(id)) { this.previousVerticalVelocity.delete(id); this.impactSparked.delete(id); }
     }
     return positions;
+  }
+
+  /** Light the catcher only from confirmed physical impacts, never from an attempted drop. */
+  private pulsePayoutWell(impacts: readonly { x: number; z: number }[], startedAt: number) {
+    const glow = this.payoutWellGlow;
+    if (!glow || impacts.length === 0) return;
+    const averageX = impacts.reduce((sum, impact) => sum + impact.x, 0) / impacts.length;
+    const averageZ = impacts.reduce((sum, impact) => sum + impact.z, 0) / impacts.length;
+    glow.position.x = THREE.MathUtils.clamp(averageX, -1.58, 1.58);
+    glow.position.z = THREE.MathUtils.clamp(
+      averageZ,
+      PAYOUT_TRAY_CENTER_Z - .34,
+      PAYOUT_TRAY_CENTER_Z + .34,
+    );
+    glow.material.opacity = .62;
+    this.payoutWellGlowStartedAt = startedAt;
+  }
+
+  private updatePayoutWellPulse(time: number) {
+    const age = time - this.payoutWellGlowStartedAt;
+    const pulse = coinPusherTrayImpactPulse(age);
+    if (this.payoutWellGlow) this.payoutWellGlow.material.opacity = .62 * pulse;
+    if (this.payoutWellMark) this.payoutWellMark.material.opacity = .3 + .42 * pulse;
   }
 
   /** Project each actual Rapier-settled coin so its payout flight starts where it landed. */

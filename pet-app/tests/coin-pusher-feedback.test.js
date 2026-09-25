@@ -14,9 +14,11 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
   });
   t.after(() => vite.close());
   const {
-    advanceCoinPusherTimingStreak, coinPusherCabinetFinish, coinPusherStampProgress, coinPusherTimingStreakLabel,
+    advanceCoinPusherTimingStreak, coinPusherCabinetFinish, coinPusherStampProgress,
+    coinPusherImpactPan, coinPusherTimingGuidanceLabel, coinPusherTimingRecordLabel, coinPusherTimingStreakLabel,
     coinPusherTravelProgress, coinPusherRewardFlightLabels, planCoinPusherRewardFlightDelays, COIN_PUSHER_CABINET_FINISHES,
-    COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS, COIN_PUSHER_STAMP_THRESHOLDS,
+    coinPusherTrayImpactPulse, COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS, COIN_PUSHER_STAMP_THRESHOLDS,
+    COIN_PUSHER_TRAY_PULSE_DURATION_MS,
   } = await vite.ssrLoadModule('/src/game/CoinPusherFeedback.ts');
   const dimensions = await vite.ssrLoadModule('/src/game/CoinPusherDimensions.ts');
 
@@ -32,6 +34,31 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
     'small solver excursions must not move the light beyond its front stop');
   assert.equal(coinPusherTravelProgress(Number.NaN), 0,
     'invalid visual progress must fall back to the safe idle color');
+
+  assert.equal(coinPusherTrayImpactPulse(-1), 0, 'the catcher glow must stay dark before a real impact');
+  assert.equal(coinPusherTrayImpactPulse(0), 0, 'the glow envelope must begin without a hard flash');
+  assert.equal(coinPusherTrayImpactPulse(COIN_PUSHER_TRAY_PULSE_DURATION_MS / 2), 1,
+    'the physical catch should reach a single smooth peak halfway through its pulse');
+  assert.equal(coinPusherTrayImpactPulse(COIN_PUSHER_TRAY_PULSE_DURATION_MS), 0,
+    'the catcher glow must finish within its bounded duration');
+  assert.equal(coinPusherTrayImpactPulse(COIN_PUSHER_TRAY_PULSE_DURATION_MS + 1), 0,
+    'the catcher glow must not linger after the reward catch');
+  assert.equal(coinPusherTrayImpactPulse(Number.NaN), 0, 'invalid timing must never make the tray glow stick on');
+  assert.ok(coinPusherTrayImpactPulse(60) > 0 && coinPusherTrayImpactPulse(60) < 1,
+    'the tray pulse should fade in and out smoothly instead of toggling');
+
+  assert.equal(coinPusherImpactPan([{ x: 195 }], 390), 0,
+    'a center-lane coin impact should keep its sound centered');
+  assert.equal(coinPusherImpactPan([{ x: 0 }], 390), -.72,
+    'left-edge impacts should pan left but stop before the hard stereo edge');
+  assert.equal(coinPusherImpactPan([{ x: 390 }], 390), .72,
+    'right-edge payouts should pan right but stop before the hard stereo edge');
+  assert.equal(coinPusherImpactPan([{ x: 97.5 }, { x: 292.5 }], 390), 0,
+    'a combined multi-coin catch should average its physical origin instead of favoring one coin');
+  assert.equal(coinPusherImpactPan([{ x: Number.NaN }], 390), 0,
+    'invalid projection data should safely fall back to centered audio');
+  assert.equal(coinPusherImpactPan([{ x: 20 }], 0), 0,
+    'a hidden or unmeasurable viewport should not create extreme audio placement');
 
   assert.deepEqual(COIN_PUSHER_STAMP_THRESHOLDS, [5, 25, 100, 300, 1000],
     'the keepsake ladder should provide both early and long-term cosmetic goals');
@@ -88,6 +115,17 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
   assert.deepEqual(secondHit, { count: 2, best: 2 }, 'consecutive real forward-stroke landings extend the streak');
   assert.equal(coinPusherTimingStreakLabel(secondHit.count, 'zh-HK'), '順勢接住 · 連中 ×2！');
   assert.equal(coinPusherTimingStreakLabel(secondHit.count, 'en'), 'NICE TIMING · STREAK ×2');
+  assert.equal(coinPusherTimingRecordLabel(firstHit.count, 0, 'zh-HK'), undefined,
+    'a single landing should not announce an unremarkable personal record');
+  assert.equal(coinPusherTimingRecordLabel(secondHit.count, firstHit.best, 'zh-HK'), '順勢接住 · 個人新紀錄 ×2！',
+    'a streak should celebrate only when it exceeds the previous personal best');
+  assert.equal(coinPusherTimingRecordLabel(secondHit.count, secondHit.best, 'en'), undefined,
+    'reaching an already-held best must not falsely announce a new record');
+  assert.equal(coinPusherTimingGuidanceLabel('home-pause', 'zh-HK'), '後停 · 等前推');
+  assert.equal(coinPusherTimingGuidanceLabel('front-pause', 'zh-HK'), '前停 · 等下一推');
+  assert.equal(coinPusherTimingGuidanceLabel('return', 'en'), 'RETURN · NEXT PUSH');
+  assert.equal(coinPusherTimingGuidanceLabel('forward', 'zh-HK'), undefined,
+    'the positive forward-stroke cue should stay distinct from neutral beat guidance');
   const missedBeat = advanceCoinPusherTimingStreak(secondHit, ['return', 'forward']);
   assert.deepEqual(missedBeat, { count: 1, best: 2 },
     'a non-forward landing breaks the current streak but preserves the session best');

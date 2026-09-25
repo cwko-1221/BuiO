@@ -6,8 +6,24 @@ import type { CoinPusherDropBeat } from './CoinPusherModel';
  * This is presentation feedback; it never changes the number of coins credited.
  */
 export const COIN_PUSHER_CASCADE_WINDOW_MS = 2500;
+export const COIN_PUSHER_TRAY_PULSE_DURATION_MS = 480;
 // Long-term cosmetic goals use only server-confirmed payout history; they never grant currency.
 export const COIN_PUSHER_STAMP_THRESHOLDS = [5, 25, 100, 300, 1000] as const;
+
+/** A soft, non-gameplay glow envelope for a coin that physically lands in the payout well. */
+export function coinPusherTrayImpactPulse(ageMs: number, durationMs = COIN_PUSHER_TRAY_PULSE_DURATION_MS) {
+  if (!Number.isFinite(ageMs) || !Number.isFinite(durationMs) || ageMs < 0 || durationMs <= 0 || ageMs >= durationMs) return 0;
+  return Math.sin(Math.PI * ageMs / durationMs) ** 1.4;
+}
+
+/** Map the physical catch position to a restrained stereo pan; invalid or unavailable geometry stays centered. */
+export function coinPusherImpactPan(origins: readonly { x: number }[], viewportWidth: number) {
+  if (!Number.isFinite(viewportWidth) || viewportWidth <= 0 || origins.length === 0) return 0;
+  const finiteXs = origins.map(({ x }) => x).filter(Number.isFinite);
+  if (finiteXs.length === 0) return 0;
+  const averageX = finiteXs.reduce((sum, x) => sum + x / finiteXs.length, 0);
+  return Math.max(-.72, Math.min(.72, (averageX / viewportWidth - .5) * 1.6));
+}
 
 export interface CoinPusherCabinetFinish {
   id: 'classic' | 'bronze' | 'silver' | 'gold' | 'crystal' | 'aurora';
@@ -65,6 +81,27 @@ export function coinPusherTimingStreakLabel(count: number, locale: string) {
   return locale === 'zh-HK'
     ? `順勢接住 · 連中 ×${streak}！`
     : `NICE TIMING · STREAK ×${streak}`;
+}
+
+export function coinPusherTimingRecordLabel(count: number, previousBest: number, locale: string) {
+  const streak = Math.floor(count);
+  const best = Math.floor(previousBest);
+  if (!Number.isFinite(streak) || !Number.isFinite(best) || streak < 2 || streak <= best) return undefined;
+  return locale === 'zh-HK'
+    ? `順勢接住 · 個人新紀錄 ×${streak}！`
+    : `NICE TIMING · NEW BEST ×${streak}`;
+}
+
+/** Explain the actual landing beat without framing a non-forward landing as a failure. */
+export function coinPusherTimingGuidanceLabel(beat: CoinPusherDropBeat, locale: string) {
+  if (beat === 'forward') return undefined;
+  const labels = {
+    'home-pause': { zh: '後停 · 等前推', en: 'REAR HOLD · NEXT PUSH' },
+    'front-pause': { zh: '前停 · 等下一推', en: 'FRONT HOLD · NEXT PUSH' },
+    return: { zh: '回程 · 等下一推', en: 'RETURN · NEXT PUSH' },
+  } as const;
+  const label = labels[beat];
+  return locale === 'zh-HK' ? label.zh : label.en;
 }
 
 /** Normalize the visible light sweep to the pusher's real travel, not a wall-clock timer. */

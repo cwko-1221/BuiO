@@ -5,7 +5,7 @@ import { audio } from './audio';
 import { BedroomScene } from './game/BedroomScene';
 import type { CoinPusherScene } from './game/CoinPusherScene';
 import { PetAvatar } from './game/PetAvatar';
-import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCabinetFinish, coinPusherCascadeLabel, coinPusherRewardFlightLabels, coinPusherStampProgress, coinPusherTimingStreakLabel, planCoinPusherRewardFlightDelays, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
+import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCabinetFinish, coinPusherCascadeLabel, coinPusherImpactPan, coinPusherRewardFlightLabels, coinPusherStampProgress, coinPusherTimingGuidanceLabel, coinPusherTimingRecordLabel, coinPusherTimingStreakLabel, planCoinPusherRewardFlightDelays, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
 import type { CoinPusherTimingStreakState } from './game/CoinPusherFeedback';
 import type { CoinPusherDropBeat } from './game/CoinPusherModel';
 import {
@@ -278,6 +278,7 @@ class StudentApp {
         plays: this.coinPusherPlays.map(({ playId, remaining }) => ({ playId, remaining })),
         payoutSequence: this.coinPusherPayoutSequence,
         pendingPayouts: this.coinPusherPendingPayouts.map((payout) => ({ ...payout })),
+        bestTimingStreak: this.coinPusherTimingStreak.best,
         ...(this.coinPusherPendingDrop ? { pendingDrop: { ...this.coinPusherPendingDrop,
           ...(this.coinPusherPendingDrop.result ? { result: { ...this.coinPusherPendingDrop.result } } : {}) } } : {}),
       };
@@ -421,13 +422,17 @@ class StudentApp {
       collectionButton?.focus({ preventScroll: true });
       return;
     }
-    if (this.tab !== 'coinPusher' || event.target !== this.coinPusherView?.renderer.domElement) return;
+    if (this.tab !== 'coinPusher') return;
     if (event.key === 'Escape') {
       event.preventDefault();
-      if (this.coinPusherPaymentInFlight) return;
+      if (this.coinPusherPaymentInFlight || this.coinPusherBusy) {
+        this.setCoinPusherStatus(this.coinPusherExitWaitMessage());
+        return;
+      }
       this.openHome();
       return;
     }
+    if (event.target !== this.coinPusherView?.renderer.domElement) return;
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault();
       const direction = event.key === 'ArrowLeft' ? -1 : 1;
@@ -987,6 +992,8 @@ class StudentApp {
       this.syncCoinPusherCollectionBadge();
       const restoreSession=inMemoryModel?undefined:savedSession;
       if(restoreSession){
+        const storedBest=restoreSession.bestTimingStreak;
+        this.coinPusherTimingStreak={count:0,best:Number.isSafeInteger(storedBest)&&storedBest!>=0?storedBest!:0};
         this.coinPusherPlays=restoreSession.plays.map((play)=>({
           ...play,reserved:0,generation,
         }));
@@ -1007,6 +1014,7 @@ class StudentApp {
       }
       this.coinPusherSessionRestored=!!restoreSession;
       coinRoot.dataset.sessionRestored=String(!!restoreSession);
+      coinRoot.dataset.bestTimingStreak=String(this.coinPusherTimingStreak.best);
       return this.loadCoinPusherSceneModule().then(({CoinPusherScene})=>CoinPusherScene.create(
       coinRoot,
       (worldX) => {
@@ -1042,9 +1050,11 @@ class StudentApp {
         this.syncCoinPusherControls();
       },
       (count, landings) => {
-        audio.sfx('arcadeLand', count);
-        if(landings.some((landing)=>landing.pusherBeat==='forward'))audio.sfx('arcadeTiming', count);
+        const pan=this.coinPusherStereoPan(landings);
+        audio.sfx('arcadeLand', count, pan);
         this.animateCoinPusherTimingCue(landings);
+        if(landings.some((landing)=>landing.pusherBeat==='forward'))
+          audio.sfx('arcadeTiming',Math.max(1,this.coinPusherTimingStreak.count),pan);
       },
       (direction) => audio.sfx('arcadeStroke', direction === 'forward' ? 0 : 4),
       this.coinPusherModel,
@@ -1238,9 +1248,11 @@ class StudentApp {
     if(this.coinPusherPendingDrop&&!this.coinPusherPendingDrop.applied)return zh
       ?'有一枚已付落幣待確認 · 重試不會重複扣幣'
       :'One paid drop needs confirmation · retry will not charge twice';
-    return Number(this.state.wallet.balance) < COIN_PUSHER_DROP_COST
-      ? this.coinPusherInsufficientMessage()
-      : zh?'下滑揀位 · 落幣 −1 · 入槽 +1':'Swipe to aim · drop −1 · tray +1';
+    if(Number(this.state.wallet.balance) < COIN_PUSHER_DROP_COST)return this.coinPusherInsufficientMessage();
+    const keyboardHintVisible=typeof window.matchMedia==='function'
+      && window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 760px)').matches;
+    if(keyboardHintVisible)return zh?'落幣 −1 · 入槽 +1':'Drop −1 · tray +1';
+    return zh?'揀位後向下滑落幣 · 入槽 +1':'Choose a lane · swipe down to drop';
   }
   private coinPusherInsufficientMessage() {
     return this.locale==='zh-HK'?'金幣不足 · 每次落幣需要 1 枚':'Not enough coins · each drop costs 1';
@@ -1258,6 +1270,10 @@ class StudentApp {
   }
   private coinPusherStampProgress(total = this.coinPusherReturnedCoins()) {
     return coinPusherStampProgress(total);
+  }
+  private coinPusherTimingBestCopy() {
+    const best = Math.max(0, Math.floor(this.coinPusherTimingStreak.best || 0));
+    return best > 0 ? `×${best}` : (this.locale === 'zh-HK' ? '尚未建立' : 'No record yet');
   }
   private syncCoinPusherCollectionBadge() {
     const button = document.querySelector<HTMLButtonElement>('.coin-pusher-collection');
@@ -1318,6 +1334,7 @@ class StudentApp {
     const progress = progressState.percent;
     const finish = coinPusherCabinetFinish(progressState.unlockedCount);
     const finishName = COIN_PUSHER_CABINET_FINISH_NAMES[progressState.unlockedCount][this.locale];
+    const timingBest = this.coinPusherTimingBestCopy();
     const finishStyle = `--finish-brass:#${finish.brass.toString(16).padStart(6,'0')};--finish-pale:#${finish.paleGold.toString(16).padStart(6,'0')};--finish-glow:#${finish.glow.toString(16).padStart(6,'0')}`;
     const nextLabel = next ? `${progressState.stepProgress} / ${progressState.stepSize}` : undefined;
     const stamps = COIN_PUSHER_STAMPS.map((stamp) => {
@@ -1332,7 +1349,10 @@ class StudentApp {
       <header class="coin-pusher-collection-heading"><span aria-hidden="true">🐾</span><div><small>${zh ? '機台紀念章' : 'ARCADE KEEPSAKES'}</small><h2 id="coinPusherCollectionTitle">${zh ? '爪印收藏冊' : 'Paw-stamp collection'}</h2></div></header>
       <p class="coin-pusher-collection-copy">${zh ? '只計算已確認並回到錢包的推出銀仔。每枚爪印會解鎖機台配色，只改外觀，不會額外增加或扣除金幣。' : 'Only confirmed wallet payouts count. Each paw stamp unlocks a cabinet finish; it changes looks only and never adds or spends coins.'}</p>
       <div class="coin-pusher-collection-progress"><div><b>${zh ? '已入帳銀仔' : 'Payout coins returned'}</b><strong id="coinPusherCollectionReturned">${total.toLocaleString()}</strong></div><small>${next ? (zh ? `下一枚本階段 ${nextLabel}` : `Next stamp ${nextLabel} this tier`) : (zh ? '已收集全部紀念章' : 'All keepsakes collected')}</small><div class="coin-pusher-progress-track" role="progressbar" aria-label="${zh ? '下一枚紀念章進度' : 'Progress to next keepsake'}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}"><span style="width:${progress}%"></span></div></div>
-      <div class="coin-pusher-finish-current" data-finish-tier="${progressState.unlockedCount}" style="${finishStyle}"><span class="coin-pusher-finish-swatch" aria-hidden="true"><i></i><i></i><i></i></span><span class="coin-pusher-finish-current-copy"><small>${zh ? '目前機台配色' : 'CURRENT CABINET FINISH'}</small><b>${finishName}</b></span></div>
+      <div class="coin-pusher-collection-highlights">
+        <div class="coin-pusher-personal-best" role="group" aria-label="${zh ? '個人推送技巧紀錄' : 'Personal timing record'}"><span aria-hidden="true">✦</span><div><small>${zh ? '最佳準確推送連中' : 'PERSONAL TIMING BEST'}</small><b id="coinPusherTimingBest" aria-live="polite">${timingBest}</b></div></div>
+        <div class="coin-pusher-finish-current" data-finish-tier="${progressState.unlockedCount}" style="${finishStyle}"><span class="coin-pusher-finish-swatch" aria-hidden="true"><i></i><i></i><i></i></span><span class="coin-pusher-finish-current-copy"><small>${zh ? '目前機台配色' : 'CURRENT CABINET FINISH'}</small><b>${finishName}</b></span></div>
+      </div>
       <div class="coin-pusher-stamp-grid">${stamps}</div>
       <button type="button" class="primary coin-pusher-collection-close" data-action="close-modal">${zh ? '繼續玩' : 'Keep playing'}</button>
     </section>`, 'coin-pusher-collection-modal');
@@ -1413,7 +1433,7 @@ class StudentApp {
         const unlockedStamps=this.coinPusherStampCount()>previousStamps
           ?COIN_PUSHER_STAMPS.slice(previousStamps,this.coinPusherStampCount())
           :[];
-        audio.sfx(unlockedStamps.length?'arcadeKeepsake':'arcadePayout');
+        audio.sfx(unlockedStamps.length?'arcadeKeepsake':'arcadePayout', amount, this.coinPusherStereoPan(origins));
         this.animateCoinPayout(amount,origins);
         this.setCoinPusherStatus(this.locale==='zh-HK'?`坑槽 +${amount} · 已回到錢包`:`Tray +${amount} · added to wallet`);
         if(unlockedStamps.length){
@@ -1433,6 +1453,11 @@ class StudentApp {
       if(generation===this.coinPusherGeneration&&this.tab==='coinPusher')this.handleCoinPusherPayoutError(error as Error);
       return false;
     }
+  }
+  private coinPusherStereoPan(origins?:readonly CoinPusherRewardOrigin[]) {
+    const root=document.querySelector<HTMLElement>('#coin-pusher-root');
+    const width=root?.clientWidth??0;
+    return origins?coinPusherImpactPan(origins,width):0;
   }
   private animateCoinPayout(amount:number, origins?:CoinPusherRewardOrigin[]) {
     const root=document.querySelector<HTMLElement>('#coin-pusher-root');
@@ -1575,26 +1600,36 @@ class StudentApp {
     return this.coinPusherTrayCatchCount;
   }
   private animateCoinPusherTimingCue(landings:CoinPusherLandingFeedback[]) {
+    const previousBest=this.coinPusherTimingStreak.best;
     this.coinPusherTimingStreak=advanceCoinPusherTimingStreak(
       this.coinPusherTimingStreak,landings.map((landing)=>landing.pusherBeat));
-    const forwardLandings=landings.filter((landing)=>landing.pusherBeat==='forward'
-      && Number.isFinite(landing.x)&&Number.isFinite(landing.y));
-    if(!forwardLandings.length)return;
+    if(this.coinPusherTimingStreak.best>previousBest)void this.persistCoinPusherSession();
+    const bestNode=document.querySelector<HTMLElement>('#coinPusherTimingBest');
+    if(bestNode)bestNode.textContent=this.coinPusherTimingBestCopy();
+    const validLandings=landings.filter((landing)=>Number.isFinite(landing.x)&&Number.isFinite(landing.y));
+    if(!validLandings.length)return;
+    const forwardLandings=validLandings.filter((landing)=>landing.pusherBeat==='forward');
+    const cueLandings=forwardLandings.length?forwardLandings:validLandings;
+    const cueBeat=forwardLandings.length?'forward':cueLandings[cueLandings.length-1].pusherBeat;
     const root=document.querySelector<HTMLElement>('#coin-pusher-root');
     if(!root)return;
-    const center=forwardLandings.reduce((sum,landing)=>({x:sum.x+landing.x/forwardLandings.length,
-      y:sum.y+landing.y/forwardLandings.length}),{x:0,y:0});
+    const center=cueLandings.reduce((sum,landing)=>({x:sum.x+landing.x/cueLandings.length,
+      y:sum.y+landing.y/cueLandings.length}),{x:0,y:0});
     const safeMargin=Math.min(104,root.clientWidth*.32);
     const cue=document.createElement('span');
     const streakLabel=coinPusherTimingStreakLabel(this.coinPusherTimingStreak.count,this.locale);
+    const recordLabel=coinPusherTimingRecordLabel(this.coinPusherTimingStreak.count,previousBest,this.locale);
+    const guidanceLabel=coinPusherTimingGuidanceLabel(cueBeat,this.locale);
     const reducedMotion=document.documentElement.classList.contains('reduced-motion')
       || (typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    cue.className=`coin-pusher-timing-cue${streakLabel?' is-streaking':''}${reducedMotion?' is-static':''}`;
-    cue.dataset.beat='forward';
+    cue.className=`coin-pusher-timing-cue${streakLabel?' is-streaking':''}${recordLabel?' is-new-best':''}${guidanceLabel?' is-guidance':''}${reducedMotion?' is-static':''}`;
+    cue.dataset.beat=cueBeat;
     cue.dataset.streak=String(this.coinPusherTimingStreak.count);
     cue.dataset.bestStreak=String(this.coinPusherTimingStreak.best);
+    cue.dataset.newBest=String(!!recordLabel);
+    root.dataset.bestTimingStreak=String(this.coinPusherTimingStreak.best);
     cue.setAttribute('aria-hidden','true');
-    cue.textContent=streakLabel??(this.locale==='zh-HK'
+    cue.textContent=guidanceLabel??recordLabel??streakLabel??(this.locale==='zh-HK'
       ? `順勢接住${forwardLandings.length>1?` ×${forwardLandings.length}`:'！'}`
       : `NICE TIMING${forwardLandings.length>1?` ×${forwardLandings.length}`:''}`);
     cue.style.left=`${Math.max(safeMargin,Math.min(root.clientWidth-safeMargin,center.x))}px`;
@@ -1761,7 +1796,7 @@ class StudentApp {
     this.coinPusherCascadeTimer=undefined;
     this.coinPusherCascadeCue?.remove();
     this.coinPusherCascadeCue=undefined;
-    this.coinPusherTimingStreak={count:0,best:0};
+    this.coinPusherTimingStreak={count:0,best:this.coinPusherTimingStreak.best};
     if(this.coinPusherTrayCatchTimer!==undefined)window.clearTimeout(this.coinPusherTrayCatchTimer);
     this.coinPusherTrayCatchTimer=undefined;
     this.coinPusherTrayCatchCue?.remove();

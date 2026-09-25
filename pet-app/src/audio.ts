@@ -103,18 +103,40 @@ export class AudioEngine {
     tick();
   }
 
-  private tone(frequency: number, duration: number, type: OscillatorType, gain: number, destination = this.sfxGain, delay = 0) {
+  private tone(
+    frequency: number,
+    duration: number,
+    type: OscillatorType,
+    gain: number,
+    destination = this.sfxGain,
+    delay = 0,
+    pan = 0,
+  ) {
     if (!this.context || !destination) return;
     const oscillator = this.context.createOscillator(); const envelope = this.context.createGain();
     const start = this.context.currentTime + delay; oscillator.type = type; oscillator.frequency.setValueAtTime(frequency, start);
     envelope.gain.setValueAtTime(.0001, start); envelope.gain.exponentialRampToValueAtTime(Math.max(.001, gain), start + .015); envelope.gain.exponentialRampToValueAtTime(.0001, start + duration);
-    oscillator.connect(envelope).connect(destination); oscillator.start(start); oscillator.stop(start + duration + .03);
+    oscillator.connect(envelope);
+    const stereoPan = Number.isFinite(pan) ? Math.max(-.72, Math.min(.72, pan)) : 0;
+    if (stereoPan && typeof this.context.createStereoPanner === 'function') {
+      const panner = this.context.createStereoPanner();
+      panner.pan.setValueAtTime(stereoPan, start);
+      envelope.connect(panner).connect(destination);
+    } else envelope.connect(destination);
+    oscillator.start(start); oscillator.stop(start + duration + .03);
   }
-  private noise(duration: number, gain: number, destination = this.sfxGain) {
+  private noise(duration: number, gain: number, destination = this.sfxGain, pan = 0) {
     if (!this.context || !destination) return;
     const length = Math.max(1, Math.floor(this.context.sampleRate * duration)); const buffer = this.context.createBuffer(1, length, this.context.sampleRate); const channel = buffer.getChannelData(0);
     for (let index = 0; index < length; index += 1) channel[index] = Math.random() * 2 - 1;
-    const source = this.context.createBufferSource(); const envelope = this.context.createGain(); source.buffer = buffer; envelope.gain.setValueAtTime(gain, this.context.currentTime); envelope.gain.exponentialRampToValueAtTime(.0001, this.context.currentTime + duration); source.connect(envelope).connect(destination); source.start();
+    const source = this.context.createBufferSource(); const envelope = this.context.createGain(); source.buffer = buffer; envelope.gain.setValueAtTime(gain, this.context.currentTime); envelope.gain.exponentialRampToValueAtTime(.0001, this.context.currentTime + duration); source.connect(envelope);
+    const stereoPan = Number.isFinite(pan) ? Math.max(-.72, Math.min(.72, pan)) : 0;
+    if (stereoPan && typeof this.context.createStereoPanner === 'function') {
+      const panner = this.context.createStereoPanner();
+      panner.pan.setValueAtTime(stereoPan, this.context.currentTime);
+      envelope.connect(panner).connect(destination);
+    } else envelope.connect(destination);
+    source.start();
   }
 
   private pusherStroke(direction: 'forward' | 'return', voice: number) {
@@ -147,13 +169,16 @@ export class AudioEngine {
     motor.stop(start + duration + .02); overtone.stop(start + duration + .02);
   }
 
-  sfx(name: SoundName, voice = 0) {
+  sfx(name: SoundName, voice = 0, pan = 0) {
     if (!this.enabled || !this.context || this.context.state !== 'running' || this.isDocumentHidden()) return;
     if (name === 'arcadeStroke') {
       this.pusherStroke(voice < 3 ? 'forward' : 'return', voice);
       return;
     }
-    const shift = 1 + ((voice % 7) - 3) * .035;
+    const timingRise = Number.isFinite(voice) ? Math.min(7, Math.max(0, Math.floor(voice) - 1)) : 0;
+    const shift = name === 'arcadeTiming'
+      ? 1 + timingRise * .018
+      : 1 + ((voice % 7) - 3) * .035;
     const notes: Partial<Record<SoundName, number[]>> = {
       tap: [540], buy: [420,620,840], coin: [820,1080], arcadeDrop: [220,440,660], arcadeLand: [880,1320], arcadeTiming: [1175,1568], arcadePayout: [659,784,988,1318], arcadeKeepsake: [784,988,1175,1568], hatch: [280,420,620,920], evolve: [330,440,660,880,1180],
       feed: [380,520], happy: [620,820,980], step: [160], attack: [240,180], skill: [420,680], hurt: [180,130],
@@ -164,10 +189,10 @@ export class AudioEngine {
     (notes[name] || [440]).forEach((frequency, index) => this.tone(frequency * shift,
       ['arcadeLand','arcadeTiming'].includes(name) ? .075 : name === 'arcadeKeepsake' ? .14 : .12 + index * .025,
       wave, gain, this.sfxGain,
-      index * (name === 'arcadeKeepsake' ? .055 : ['arcadePayout','arcadeLand','arcadeTiming'].includes(name) ? .045 : .07)));
+      index * (name === 'arcadeKeepsake' ? .055 : ['arcadePayout','arcadeLand','arcadeTiming'].includes(name) ? .045 : .07), pan));
     if (['attack','skill','hatch','evolve'].includes(name)) this.noise(.07, .035);
     else if (name === 'arcadeDrop') this.noise(.045, .018);
-    else if (name === 'arcadeLand') this.noise(.018, .006);
+    else if (name === 'arcadeLand') this.noise(.018, .006, this.sfxGain, pan);
     else if (name === 'arcadeKeepsake') this.noise(.06, .009);
   }
 }

@@ -110,6 +110,8 @@ try {
         ? 'coin-pusher-payout-reward-desktop.png'
         : stage === 'cascade'
           ? 'coin-pusher-cascade-desktop.png'
+        : stage === 'timing-guidance'
+          ? 'coin-pusher-beat-guidance-desktop.png'
         : stage === 'timing'
           ? 'coin-pusher-good-timing-desktop.png'
           : stage === 'timing-streak'
@@ -124,6 +126,7 @@ try {
   });
   await page.addInitScript((profileWebGL) => {
     const audioSweepTargets = window.__coinPusherAudioSweepTargets = [];
+    const audioPans = window.__coinPusherAudioPans = [];
     if (window.AudioContext) {
       const createOscillator = AudioContext.prototype.createOscillator;
       AudioContext.prototype.createOscillator = function (...args) {
@@ -136,6 +139,21 @@ try {
         };
         return oscillator;
       };
+      if (typeof AudioParam !== 'undefined'
+        && typeof AudioContext.prototype.createStereoPanner === 'function') {
+        const pannedParams = new WeakSet();
+        const createStereoPanner = AudioContext.prototype.createStereoPanner;
+        AudioContext.prototype.createStereoPanner = function (...args) {
+          const panner = createStereoPanner.apply(this, args);
+          pannedParams.add(panner.pan);
+          return panner;
+        };
+        const setValueAtTime = AudioParam.prototype.setValueAtTime;
+        AudioParam.prototype.setValueAtTime = function (value, time) {
+          if (pannedParams.has(this)) audioPans.push(Number(value));
+          return setValueAtTime.call(this, value, time);
+        };
+      }
     }
     if (!profileWebGL) return;
     const counters = window.__coinPusherWebglCalls = {};
@@ -518,8 +536,12 @@ try {
                 beat: node.dataset.beat, streak: Number(node.dataset.streak || 0),
                 bestStreak: Number(node.dataset.bestStreak || 0),
                 isStreaking: node.classList.contains('is-streaking'), width: rect.width, height: rect.height,
+                isNewBest: node.classList.contains('is-new-best'),
+                isGuidance: node.classList.contains('is-guidance'),
               });
-              const stage = Number(node.dataset.streak) >= 2 ? 'timing-streak' : 'timing';
+              const stage = node.dataset.beat !== 'forward'
+                ? 'timing-guidance'
+                : Number(node.dataset.streak) >= 2 ? 'timing-streak' : 'timing';
               void window.__capturePusherVisualStage?.(stage)?.catch(() => {});
             } else if (style.animationName !== 'none') requestAnimationFrame(captureTimingCue);
           };
@@ -642,8 +664,9 @@ try {
   assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-finish'), 'classic',
     'the initial scene palette must match the classic finish');
   assert.match(await drop.getAttribute('aria-label'), /1|−1|coin|金幣/i);
-  assert.match(await page.locator('#coinPusherSystemStatus').innerText(), /下滑揀位|Swipe to aim/,
-    'the ready status must teach the primary swipe-to-aim control');
+  const initialReadyStatus = await page.locator('#coinPusherSystemStatus').innerText();
+  assert.match(initialReadyStatus, /向下滑落幣|Swipe down to drop/,
+    `the ready status must explain that releasing a downward swipe drops the coin (actual: ${initialReadyStatus})`);
   const collectionButton = page.locator('.coin-pusher-collection');
   assert.equal(await collectionButton.isVisible(), true, 'paw-stamp collection must be discoverable from the HUD');
   assert.match(await collectionButton.getAttribute('aria-label'), /0\/5/,
@@ -723,9 +746,54 @@ try {
   await page.keyboard.press('ArrowRight');
   assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, playsBeforeKeyboardAim,
     'keyboard aiming must not charge until a drop key is pressed');
+  const coinCountBeforeKeyboardDrop = Number(await page.locator('#coin-pusher-root').getAttribute('data-coin-count'));
+  const landingCuesBeforeGraphicsLoss = await page.evaluate(() =>
+    window.__coinRewardDebug.filter((entry) => entry.type === 'timing-visible').length);
   await page.keyboard.press('Space');
   await waitFor(async () => requests.filter((url) => url.endsWith('/coin-pusher/play')).length >= 1, 'drop did not charge the wallet');
-  await page.waitForTimeout(300);
+  await waitFor(async () => Number(await page.locator('#coin-pusher-root').getAttribute('data-coin-count'))
+    === coinCountBeforeKeyboardDrop + 1,
+  'the authorized keyboard drop did not add its physical coin to the board');
+  const paidDropCountBeforeGraphicsLoss = requests.filter((url) => url.endsWith('/coin-pusher/play')).length;
+  const contextLossExtensionAvailable = await page.evaluate(() => {
+    const canvas = document.querySelector('#coin-pusher-root canvas');
+    const context = canvas?.getContext('webgl2');
+    const extension = context?.getExtension('WEBGL_lose_context');
+    if (!context || !extension) return false;
+    window.__coinPusherContextRecovery = {
+      lose: () => extension.loseContext(),
+      restore: () => extension.restoreContext(),
+      isLost: () => context.isContextLost(),
+    };
+    extension.loseContext();
+    return true;
+  });
+  assert.equal(contextLossExtensionAvailable, true,
+    'the live browser must expose WEBGL_lose_context so recovery tests invalidate real GPU resources');
+  await waitFor(async () => await drop.isDisabled(), 'an active paid drop must pause while WebGL is lost');
+  assert.match(await page.locator('#coinPusherSystemStatus').innerText(), /暫停|paused/i,
+    'WebGL loss during a paid drop must be clearly announced');
+  assert.equal(await page.evaluate(() => window.__coinPusherContextRecovery.isLost()), true,
+    'the paid-drop test must hold a genuinely lost WebGL context, not only dispatch a DOM event');
+  await page.waitForTimeout(350);
+  assert.equal(Number(await page.locator('#coin-pusher-root').getAttribute('data-coin-count')),
+    coinCountBeforeKeyboardDrop + 1,
+    'the airborne paid coin must remain in the saved physics world during graphics loss');
+  assert.equal(await page.evaluate(() => window.__coinRewardDebug.filter((entry) => entry.type === 'timing-visible').length),
+    landingCuesBeforeGraphicsLoss,
+    'the paused coin must not land, disappear or emit gameplay feedback while WebGL is unavailable');
+  assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, paidDropCountBeforeGraphicsLoss,
+    'graphics loss must not retry or double-charge the in-flight drop');
+  await page.evaluate(() => window.__coinPusherContextRecovery.restore());
+  await waitFor(async () => !(await drop.isDisabled()), 'the in-flight paid coin did not resume after WebGL restoration');
+  assert.equal(await page.evaluate(() => window.__coinPusherContextRecovery.isLost()), false,
+    'the browser must restore the actual WebGL context before play becomes available again');
+  await waitFor(() => page.evaluate((baseline) =>
+    window.__coinRewardDebug.filter((entry) => entry.type === 'timing-visible').length > baseline,
+  landingCuesBeforeGraphicsLoss),
+  'the coin paused in mid-air must resume through a real landing after WebGL restoration');
+  assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, paidDropCountBeforeGraphicsLoss,
+    'resuming an in-flight physical coin must not authorize a second paid drop');
   const box = await canvas.boundingBox();
   assert.ok(box, 'coin-pusher canvas must have a visible hit area');
   await page.mouse.move(box.x + box.width * .28, box.y + box.height * .3);
@@ -783,11 +851,16 @@ try {
     'the trajectory guide must clear with the landing preview after release');
   await waitFor(() => page.evaluate(() => window.__coinRewardDebug.some((entry) => entry.type === 'timing-visible')),
     'a coin landing during the forward push should show the non-monetary timing cue');
-  const timingCue = await page.evaluate(() => window.__coinRewardDebug.find((entry) => entry.type === 'timing-visible'));
+  const timingCue = await page.evaluate(() => window.__coinRewardDebug.find((entry) =>
+    entry.type === 'timing-visible' && entry.beat === 'forward'));
   assert.equal(timingCue.beat, 'forward', 'the timing cue must only follow a real coin landing during the forward stroke');
   assert.match(timingCue.text, /順勢接住|NICE TIMING/, 'the timing feedback should be localized and readable');
   assert.ok(timingCue.streak >= 1 && timingCue.bestStreak >= timingCue.streak,
     'the live timing cue must report the actual session streak without granting currency');
+  const physicalImpactPans = await page.evaluate(() => window.__coinPusherAudioPans);
+  assert.ok(physicalImpactPans.some((pan) => Math.abs(pan) >= .015)
+    && physicalImpactPans.every((pan) => Number.isFinite(pan) && Math.abs(pan) <= .72),
+  `a real off-centre keyboard drop should pan its physical impact without reaching the stereo edge (${JSON.stringify(physicalImpactPans)})`);
   await waitFor(() => capturedVisualStages.has('timing'), 'the forward-timing visual screenshot was not captured while visible');
   await waitFor(() => page.evaluate(() => window.__coinRewardDebug.some((entry) =>
     entry.type === 'timing-visible' && entry.streak >= 2)),
@@ -795,12 +868,25 @@ try {
   const timingStreakCue = await page.evaluate(() => window.__coinRewardDebug.find((entry) =>
     entry.type === 'timing-visible' && entry.streak >= 2));
   assert.equal(timingStreakCue.isStreaking, true, 'a live two-hit streak must receive the upgraded visual treatment');
+  assert.equal(timingStreakCue.isNewBest, true,
+    'a live two-hit streak that beats the saved record must announce the new personal best');
   await waitFor(() => capturedVisualStages.has('timing-streak'),
     'the upgraded timing streak screenshot was not captured while visible');
   for (let index = 0; index < 3; index += 1) {
     await page.keyboard.press('ArrowDown');
     await page.waitForTimeout(300);
   }
+  await waitFor(() => page.evaluate(() => window.__coinRewardDebug.some((entry) =>
+    entry.type === 'timing-visible' && entry.beat !== 'forward')),
+  'a real landing outside the forward beat should receive neutral timing guidance');
+  const beatGuidanceCue = await page.evaluate(() => window.__coinRewardDebug.find((entry) =>
+    entry.type === 'timing-visible' && entry.beat !== 'forward'));
+  assert.equal(beatGuidanceCue.isGuidance, true,
+    'non-forward landing guidance must use its distinct, neutral visual treatment');
+  assert.match(beatGuidanceCue.text, /等.*推|NEXT PUSH/,
+    'beat guidance must point the student toward the next forward push');
+  await waitFor(() => capturedVisualStages.has('timing-guidance'),
+    'the non-forward timing-guidance screenshot was not captured while visible');
   await page.waitForTimeout(700);
   const chargedDrops = requests.filter((url) => url.endsWith('/coin-pusher/play')).length;
   assert.ok(chargedDrops >= 1 && chargedDrops <= 5,
@@ -920,6 +1006,9 @@ try {
   await waitFor(async () => page.locator('.coin-pusher-collection-panel').isVisible(), 'collection panel did not reopen after payout');
   await waitFor(async () => Number(await page.locator('#coinPusherCollectionReturned').innerText()) === payoutCollectionTotal,
     'the collection total must match confirmed server payout coins');
+  const collectionTimingBest = Number(await page.locator('#coin-pusher-root').getAttribute('data-best-timing-streak'));
+  assert.equal(await page.locator('#coinPusherTimingBest').innerText(), collectionTimingBest > 0 ? `×${collectionTimingBest}` : '尚未建立',
+    'the on-demand keepsake book must show the local personal timing record without turning it into a leaderboard');
   const finishIds = ['classic', 'bronze', 'silver', 'gold', 'crystal', 'aurora'];
   const expectedFinishTier = Math.min(5, [5, 25, 100, 300, 1000]
     .filter((threshold) => payoutCollectionTotal >= threshold).length);
@@ -984,8 +1073,10 @@ try {
   assert.match(await page.locator('#coinPusherSystemStatus').innerText(), /暫停|paused/i);
   await page.evaluate(() => document.querySelector('#coin-pusher-root canvas').dispatchEvent(new Event('webglcontextrestored')));
   await waitFor(async () => !(await drop.isDisabled()), 'drop control did not recover after WebGL restore');
-  await waitFor(async () => /下滑揀位|Swipe to aim/.test(await page.locator('#coinPusherSystemStatus').innerText()),
-    'the temporary WebGL recovery message must return to the playable control hint');
+  await waitFor(async () => /落幣 −1 · 入槽 \+1/.test(await page.locator('#coinPusherSystemStatus').innerText()),
+    'desktop WebGL recovery must return to the wallet-return status, with keyboard controls shown separately');
+  assert.equal(await page.locator('.coin-pusher-keyboard-hint').isVisible(), true,
+    'desktop players must receive the keyboard-specific aiming and drop instructions');
 
   const viewports = [
     { name: 'desktop', width: 1440, height: 900 },
@@ -1316,12 +1407,49 @@ try {
     const lineTops = new Set(Array.from(range.getClientRects(), (rect) => Math.round(rect.top)));
     return { text: node.textContent.trim(), lines: lineTops.size };
   });
-  assert.match(touchHint.text, /下滑揀位|Swipe to aim/,
-    'touch players must see a direct swipe-to-aim instruction');
+  assert.match(touchHint.text, /揀位後向下滑落幣|Choose a lane · swipe down to drop/,
+    'touch players must see the lane-selecting swipe gesture, not only a generic drop hint');
   assert.ok(touchHint.lines <= 2,
     `the compact mobile control hint must fit the two-line status slot (${JSON.stringify(touchHint)})`);
   const touchAim = touchPage.locator('.coin-pusher-aim-marker');
   const touchGuide = touchPage.locator('.coin-pusher-aim-guide');
+  const touchContextLossSupported = await touchPage.evaluate(() => {
+    const canvas = document.querySelector('#coin-pusher-root canvas');
+    const context = canvas?.getContext('webgl2');
+    const extension = context?.getExtension('WEBGL_lose_context');
+    if (!context || !extension) return false;
+    window.__coinPusherContextRecovery = {
+      lose: () => extension.loseContext(),
+      restore: () => extension.restoreContext(),
+      isLost: () => context.isContextLost(),
+    };
+    return true;
+  });
+  assert.equal(touchContextLossSupported, true,
+    'the touch browser must expose WEBGL_lose_context so mobile recovery tests invalidate real GPU resources');
+  await dispatchTouchPointer(touchPage, 'pointerdown', .52, .28, 38);
+  await waitFor(async () => touchAim.evaluate((node) => node.classList.contains('is-visible')),
+    'context-loss touch test must first establish a live aim');
+  assert.equal(touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, 0,
+    'touch aiming before graphics loss must remain free');
+  await touchPage.evaluate(() => window.__coinPusherContextRecovery.lose());
+  await waitFor(async () => await touchPage.locator('.coin-pusher-drop').isDisabled(),
+    'touch controls must pause while the real WebGL context is lost');
+  assert.equal(await touchPage.evaluate(() => window.__coinPusherContextRecovery.isLost()), true,
+    'the touch interruption must hold a genuinely lost WebGL context');
+  await waitFor(async () => !(await touchAim.getAttribute('class')).includes('is-visible'),
+    'real graphics loss must clear a pending touch aim');
+  await dispatchTouchPointer(touchPage, 'pointerup', .52, .78, 38);
+  await touchPage.waitForTimeout(120);
+  assert.equal(touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, 0,
+    'releasing a touch gesture during real graphics loss must never charge the student wallet');
+  await touchPage.evaluate(() => window.__coinPusherContextRecovery.restore());
+  await waitFor(async () => !(await touchPage.locator('.coin-pusher-drop').isDisabled()),
+    'touch controls did not resume after restoring the real WebGL context');
+  assert.equal(await touchPage.evaluate(() => window.__coinPusherContextRecovery.isLost()), false,
+    'the mobile browser must restore the actual WebGL context before touch play resumes');
+  assert.equal(await touchGuide.getAttribute('class'), 'coin-pusher-aim-guide',
+    'restoration must leave no stale touch trajectory behind');
   await dispatchTouchPointer(touchPage, 'pointerdown', .52, .28, 39);
   await waitFor(async () => touchAim.evaluate((node) => node.classList.contains('is-visible')),
     'pointer-cancel test must first show the aim preview');
@@ -1537,10 +1665,13 @@ try {
     're-entering the saved board must not charge another coin');
 
   const coinsBeforeReload = await page.locator('#coin-pusher-root').getAttribute('data-coin-count');
+  const timingBestBeforeReload = Number(await page.locator('#coin-pusher-root').getAttribute('data-best-timing-streak'));
   const walletBeforeReloadResponse = await context.request.get('/api/pet/bootstrap');
   const walletBeforeReload = Number((await walletBeforeReloadResponse.json()).wallet.balance);
   const paidDropsBeforeReload = playRequestKeys.length;
   assert.ok(Number(coinsBeforeReload) > 0, 'the live board must expose its current physical coin count');
+  assert.ok(timingBestBeforeReload >= 2,
+    "the student's best physical forward-timing streak must be tracked independently of the live streak");
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('[data-tab="coinPusher"]').click();
   await page.locator('#coin-pusher-root canvas').waitFor();
@@ -1552,6 +1683,8 @@ try {
     'the restored board did not become playable');
   assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-coin-count'), coinsBeforeReload,
     'a reload must restore the same coins instead of rebuilding the starting pile');
+  assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-best-timing-streak'), String(timingBestBeforeReload),
+    'the per-student personal-best timing streak must survive a reload without affecting wallet currency');
   assert.equal(playRequestKeys.length, paidDropsBeforeReload,
     'reopening the saved session must not silently charge another coin');
   const walletAfterReloadResponse = await context.request.get('/api/pet/bootstrap');
@@ -1565,6 +1698,12 @@ try {
     `a reload must apply the cabinet finish from the latest server-confirmed stamp total (${returnedCoinsAfterReload})`);
   assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-finish'), finishIds[finishTierAfterReload],
     'the material finish after reload must match the authoritative collection milestone');
+  await collectionButton.click();
+  await waitFor(async () => page.locator('.coin-pusher-collection-panel').isVisible(),
+    'the keepsake book must reopen after the saved session reloads');
+  assert.equal(await page.locator('#coinPusherTimingBest').innerText(), `×${timingBestBeforeReload}`,
+    'the personal best shown in the collection book must survive the saved-session reload');
+  await page.locator('.coin-pusher-collection-close').click();
   const payoutKeysByEvent = new Map();
   for (const { eventId, requestKey } of payoutRequestEvents) {
     if (payoutKeysByEvent.has(eventId)) assert.equal(requestKey, payoutKeysByEvent.get(eventId),
@@ -1619,6 +1758,8 @@ try {
   const failureContext = await browser.newContext({ baseURL, viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
   await failureContext.addCookies(await context.cookies());
   const failurePage = await failureContext.newPage();
+  const failurePageRequests = [];
+  failurePage.on('request', (request) => failurePageRequests.push(request.url()));
   failurePage.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
   // The deliberately aborted WASM request emits a browser-level ERR_FAILED console line. It is
   // the expected fault injection, so keep application page errors while excluding that transport
@@ -1633,6 +1774,14 @@ try {
   await failurePage.locator('#coin-pusher-root canvas').waitFor({ timeout: 15000 });
   await waitFor(async () => !(await failurePage.locator('#coin-pusher-root').getAttribute('aria-busy') === 'true'), 'retry stayed busy after reload');
   assert.equal(await failurePage.locator('.coin-pusher-fallback').count(), 0, 'successful retry must remove the fallback');
+  const failurePagePaidDropsBeforeEscape = failurePageRequests.filter((url) => url.endsWith('/api/pet/coin-pusher/play')).length;
+  await failurePage.locator('.coin-pusher-drop').focus();
+  await failurePage.keyboard.press('Escape');
+  await waitFor(async () => failurePage.locator('#game-root canvas').isVisible(),
+    'Escape from a focused HUD control must return the student to the bedroom');
+  assert.equal(failurePageRequests.filter((url) => url.endsWith('/api/pet/coin-pusher/play')).length,
+    failurePagePaidDropsBeforeEscape,
+    'leaving the arcade with Escape must not authorize or charge a coin drop');
   await failureContext.close();
 
   assert.ok(requests.every((url) => /\/coin-pusher\/(play|payout)$/.test(url)), 'coin pusher may only call its play/payout endpoints');

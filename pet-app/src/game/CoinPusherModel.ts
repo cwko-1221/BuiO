@@ -160,8 +160,9 @@ const RIDER_EDGE_CLEARANCE = .012;
 const RIDER_ANCHOR_EPSILON = .0005;
 const PUSHER_MAX_PENETRATION_RECOVERY = .045;
 // Kinematic plate contacts can transfer sharp vertical impulses through a dense settled stack.
-// Keep the rebound below a visible pop while preserving the horizontal shove and coin tumble.
-const MAX_PLAYFIELD_REBOUND_SPEED = .65;
+// A 0.38 m/s cap limits the ballistic rise to under 8 mm, so ordinary stack collisions read as
+// a soft clink instead of the spontaneous coin pop players reported. Horizontal shove is intact.
+const MAX_PLAYFIELD_REBOUND_SPEED = .38;
 const MAX_REST_NUDGES = 72;
 // Keep anti-wedge torque gentle: large impulses can spin a thin disc at launch-scale rates and
 // turn a stationary, tilted coin into the sudden upward pop players report.

@@ -14,6 +14,7 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
     else Reflect.deleteProperty(globalThis, key);
   };
   const frequencies = [];
+  const panValues = [];
   const fakeWindow = {
     nextTimerId: 0,
     timers: new Map(),
@@ -45,6 +46,10 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
     gain = new FakeAudioParam();
     connect(destination) { return destination; }
   }
+  class FakeStereoPannerNode {
+    pan = new FakeAudioParam((value) => panValues.push(value));
+    connect(destination) { return destination; }
+  }
   class FakeOscillator {
     frequency = new FakeAudioParam((value) => frequencies.push(value));
     type = 'sine';
@@ -57,6 +62,7 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
     state = 'running';
     destination = {};
     gains = [];
+    panners = [];
     listeners = new Map();
     addEventListener(name, listener) {
       const listeners = this.listeners.get(name) ?? new Set();
@@ -69,6 +75,11 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
       const gain = new FakeGainNode();
       this.gains.push(gain);
       return gain;
+    }
+    createStereoPanner() {
+      const panner = new FakeStereoPannerNode();
+      this.panners.push(panner);
+      return panner;
     }
     createOscillator() { return new FakeOscillator(); }
   }
@@ -98,13 +109,37 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
   assert.equal(fakeWindow.timers.size, 1, 'the unlocked arcade should schedule exactly one next music beat');
 
   frequencies.length = 0;
+  audio.sfx('arcadeTiming', 1);
+  assert.deepEqual(frequencies, [1175, 1568], 'the first accurate landing should begin the chime at its clear home pitch');
+  frequencies.length = 0;
   const before = audio.context.gains.length;
   audio.sfx('arcadeTiming', 3);
-  assert.deepEqual(frequencies, [1175, 1568], 'a forward landing should play its own two-note chime');
+  assert.deepEqual(frequencies, [1175 * 1.036, 1568 * 1.036],
+    'consecutive accurate landings should raise the paired chime without changing its interval');
   const timingEnvelopes = audio.context.gains.slice(before);
   assert.equal(timingEnvelopes.length, 2, 'the timing cue should use two short voices, not a large chord');
   assert.ok(timingEnvelopes.every((node) => node.gain.ramps.includes(.045)),
     'the timing chime should stay softer than the regular payout sound');
+  assert.equal(audio.context.panners.length, 0, 'unpositioned UI and timing sounds should stay centered');
+  frequencies.length = 0;
+  audio.sfx('arcadeTiming', 50);
+  assert.deepEqual(frequencies, [1175 * 1.126, 1568 * 1.126],
+    'the timing pitch should stop at a musical ceiling instead of becoming piercing during a long streak');
+
+  frequencies.length = 0;
+  audio.sfx('arcadeLand', 2, -.9);
+  assert.deepEqual(frequencies, [880 * .965, 1320 * .965], 'a physical coin impact should keep its familiar two-note timbre');
+  assert.deepEqual(panValues, [-.72, -.72], 'left-lane landings should pan softly left and clamp before the hard stereo edge');
+  frequencies.length = 0;
+  audio.sfx('arcadePayout', 3, .64);
+  assert.deepEqual(frequencies, [659, 784, 988, 1318], 'a tray payout should keep its four-note reward fanfare');
+  assert.deepEqual(panValues.slice(2), [.64, .64, .64, .64], 'right-lane payouts should place the reward fanfare on the matching side');
+  const stereoPannerFactory = audio.context.createStereoPanner;
+  audio.context.createStereoPanner = undefined;
+  frequencies.length = 0;
+  audio.sfx('arcadeLand', 3, -.6);
+  assert.deepEqual(frequencies, [880, 1320], 'browsers without StereoPannerNode should preserve the impact sound');
+  audio.context.createStereoPanner = stereoPannerFactory;
 
   frequencies.length = 0;
   const keepsakeBefore = audio.context.gains.length;
