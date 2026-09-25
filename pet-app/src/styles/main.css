@@ -1823,7 +1823,7 @@ input[type="range"]::-moz-range-thumb {
 .coin-pusher-wallet.is-rewarded { animation: coin-wallet-reward-pop 720ms cubic-bezier(.2,.9,.25,1.2); }
 @keyframes coin-wallet-reward-pop {
   0%, 100% { transform: scale(1); filter: brightness(1); }
-  38% { transform: scale(1.13); filter: brightness(1.5); box-shadow: 0 0 22px rgba(255,211,94,.62); }
+  38% { transform: scale(1); filter: brightness(1.42); box-shadow: 0 0 22px rgba(255,211,94,.62); }
 }
 .coin-pusher-reward-fly {
   position: absolute; z-index: 12; min-width: 58px; height: 38px; padding: 4px 9px;

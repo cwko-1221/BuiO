@@ -965,7 +965,7 @@ class StudentApp {
       <div class="coin-pusher-brand"><div class="coin-pusher-brand-heading"><small>PET ARCADE</small><strong>${this.t('coinPusher')}</strong></div><div class="coin-pusher-brand-status"><span id="coinPusherSystemStatus" role="status" aria-live="polite">${statusCopy}</span><small class="coin-pusher-keyboard-hint">${zh?'←／→ 揀位 · Space／↓ 落幣':'← / → aim · Space / ↓ drop'}</small></div></div>
       <div class="coin-pusher-wallet" aria-label="${zh?'學生金幣餘額；每次落幣需要 1 枚；推出金幣會回到錢包':'Student coin balance; each drop costs 1 coin; payout coins return to the wallet'}">${icon('coin')}<span><small>${zh?'餘額':'BAL'}</small><b id="coinBalanceHud">${this.state.wallet.balance.toLocaleString()}</b></span></div>
       <button type="button" class="coin-pusher-drop" data-action="coin-pusher-drop" aria-describedby="coinPusherSystemStatus" disabled>${icon('coin')}<small><span>${zh?'落幣':'Drop'}</span><b>−1</b></small></button>
-      <button type="button" class="coin-pusher-collection" data-action="coin-pusher-collection" data-progress-percent="${stampProgress.percent}" style="--stamp-progress:${stampProgress.percent}%" title="${stampProgressCopy}" aria-haspopup="dialog" aria-controls="modalRoot" aria-label="${zh?`爪印收藏，已解鎖 ${stampCount}/3 個；${stampProgressCopy}`: `Paw-stamp collection, ${stampCount}/3 unlocked; ${stampProgressCopy}`}"><span class="coin-pusher-collection-ring" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="18" cy="23" r="6"/><circle cx="31" cy="16" r="6"/><circle cx="44" cy="21" r="6"/><circle cx="51" cy="32" r="5"/><path d="M31.5 29c-9.1 0-18.5 10.2-18.5 18.1 0 5.8 4.8 8.8 10.6 6.5 4.7-1.8 8.7-1.8 13.4 0 5.8 2.3 10.6-.7 10.6-6.5C47.6 39.2 40.8 29 31.5 29Z"/></svg></span><small id="coinPusherCollectionCount">${stampCount}/3</small></button>
+      <button type="button" class="coin-pusher-collection" data-action="coin-pusher-collection" data-progress-percent="${stampProgress.percent}" style="--stamp-progress:${stampProgress.percent}%" title="${stampProgressCopy}" aria-haspopup="dialog" aria-controls="modalRoot" aria-label="${zh?`爪印收藏，已解鎖 ${stampCount}/${COIN_PUSHER_STAMPS.length} 個；${stampProgressCopy}`: `Paw-stamp collection, ${stampCount}/${COIN_PUSHER_STAMPS.length} unlocked; ${stampProgressCopy}`}"><span class="coin-pusher-collection-ring" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="18" cy="23" r="6"/><circle cx="31" cy="16" r="6"/><circle cx="44" cy="21" r="6"/><circle cx="51" cy="32" r="5"/><path d="M31.5 29c-9.1 0-18.5 10.2-18.5 18.1 0 5.8 4.8 8.8 10.6 6.5 4.7-1.8 8.7-1.8 13.4 0 5.8 2.3 10.6-.7 10.6-6.5C47.6 39.2 40.8 29 31.5 29Z"/></svg></span><small id="coinPusherCollectionCount">${stampCount}/${COIN_PUSHER_STAMPS.length}</small></button>
       <button class="round-button coin-pusher-sound" data-action="audio" aria-label="${zh?'遊戲音效':'Game sound'}" aria-pressed="${audio.enabled}">${audioIcon}</button>
     </div>`;
     this.syncCoinPusherCollectionBadge();
@@ -1410,12 +1410,12 @@ class StudentApp {
       const catchAnimationRemaining=Math.max(0,this.coinPusherTrayCatchUntil-performance.now());
       if(catchAnimationRemaining>0)await new Promise((resolve)=>window.setTimeout(resolve,catchAnimationRemaining));
       if(generation===this.coinPusherGeneration&&this.tab==='coinPusher'){
-        audio.sfx('arcadePayout');
-        this.animateCoinPayout(amount,origins);
-        this.setCoinPusherStatus(this.locale==='zh-HK'?`坑槽 +${amount} · 已回到錢包`:`Tray +${amount} · added to wallet`);
         const unlockedStamps=this.coinPusherStampCount()>previousStamps
           ?COIN_PUSHER_STAMPS.slice(previousStamps,this.coinPusherStampCount())
           :[];
+        audio.sfx(unlockedStamps.length?'arcadeKeepsake':'arcadePayout');
+        this.animateCoinPayout(amount,origins);
+        this.setCoinPusherStatus(this.locale==='zh-HK'?`坑槽 +${amount} · 已回到錢包`:`Tray +${amount} · added to wallet`);
         if(unlockedStamps.length){
           const names=unlockedStamps.map((stamp)=>stamp.name[this.locale]);
           const message=this.locale==='zh-HK'

@@ -106,6 +106,16 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
   assert.ok(timingEnvelopes.every((node) => node.gain.ramps.includes(.045)),
     'the timing chime should stay softer than the regular payout sound');
 
+  frequencies.length = 0;
+  const keepsakeBefore = audio.context.gains.length;
+  audio.sfx('arcadeKeepsake', 3);
+  assert.deepEqual(frequencies, [784, 988, 1175, 1568],
+    'a confirmed cosmetic unlock should play a distinct ascending arcade fanfare');
+  const keepsakeEnvelopes = audio.context.gains.slice(keepsakeBefore);
+  assert.equal(keepsakeEnvelopes.length, 4, 'the keepsake fanfare should use four short voices');
+  assert.ok(keepsakeEnvelopes.every((node) => node.gain.ramps.includes(.07)),
+    'the unlock cue should remain softer than a full win sound');
+
   fakeDocument.hidden = true;
   fakeDocument.dispatch('visibilitychange');
   assert.equal(fakeWindow.timers.size, 0, 'backgrounding the app must stop the recurring music timer');
@@ -113,6 +123,8 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
   const backgroundFrequencyCount = frequencies.length;
   audio.sfx('arcadeTiming', 3);
   assert.equal(frequencies.length, backgroundFrequencyCount, 'backgrounded pages must not schedule game sound effects');
+  audio.sfx('arcadeKeepsake', 3);
+  assert.equal(frequencies.length, backgroundFrequencyCount, 'backgrounding must silence cosmetic unlock cues');
 
   fakeDocument.hidden = false;
   fakeDocument.dispatch('visibilitychange');
@@ -125,6 +137,8 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
   const mutedFrequencyCount = frequencies.length;
   audio.sfx('arcadeTiming', 3);
   assert.equal(frequencies.length, mutedFrequencyCount, 'mute must silence the forward-timing cue too');
+  audio.sfx('arcadeKeepsake', 3);
+  assert.equal(frequencies.length, mutedFrequencyCount, 'mute must silence cosmetic unlock cues');
 
   audio.setEnabled(true);
   assert.equal(fakeWindow.timers.size, 1, 'unmuting should restart one music timer');

@@ -1,4 +1,4 @@
-type SoundName = 'tap' | 'buy' | 'coin' | 'arcadeDrop' | 'arcadeLand' | 'arcadeTiming' | 'arcadePayout' | 'arcadeStroke' | 'hatch' | 'evolve' | 'feed' | 'happy' | 'step' | 'attack' | 'skill' | 'hurt' | 'win' | 'lose' | 'decorate' | 'reaction';
+type SoundName = 'tap' | 'buy' | 'coin' | 'arcadeDrop' | 'arcadeLand' | 'arcadeTiming' | 'arcadePayout' | 'arcadeKeepsake' | 'arcadeStroke' | 'hatch' | 'evolve' | 'feed' | 'happy' | 'step' | 'attack' | 'skill' | 'hurt' | 'win' | 'lose' | 'decorate' | 'reaction';
 
 const THEMES: Record<string, { tempo: number; root: number; scale: number[]; pattern: number[] }> = {
   bedroom: { tempo: 92, root: 60, scale: [0,2,4,7,9], pattern: [0,2,4,2,1,3,4,3] },
@@ -155,19 +155,20 @@ export class AudioEngine {
     }
     const shift = 1 + ((voice % 7) - 3) * .035;
     const notes: Partial<Record<SoundName, number[]>> = {
-      tap: [540], buy: [420,620,840], coin: [820,1080], arcadeDrop: [220,440,660], arcadeLand: [880,1320], arcadeTiming: [1175,1568], arcadePayout: [659,784,988,1318], hatch: [280,420,620,920], evolve: [330,440,660,880,1180],
+      tap: [540], buy: [420,620,840], coin: [820,1080], arcadeDrop: [220,440,660], arcadeLand: [880,1320], arcadeTiming: [1175,1568], arcadePayout: [659,784,988,1318], arcadeKeepsake: [784,988,1175,1568], hatch: [280,420,620,920], evolve: [330,440,660,880,1180],
       feed: [380,520], happy: [620,820,980], step: [160], attack: [240,180], skill: [420,680], hurt: [180,130],
       win: [440,554,660,880], lose: [330,260,196], decorate: [360,540], reaction: [620,780,1040],
     };
-    const wave: OscillatorType = ['hurt','attack','arcadeDrop'].includes(name) ? 'sawtooth' : ['arcadeLand','arcadeTiming'].includes(name) ? 'sine' : 'triangle';
-    const gain = name === 'arcadeDrop' ? .075 : name === 'arcadeLand' ? .055 : name === 'arcadeTiming' ? .045 : name === 'arcadePayout' ? .095 : .12;
+    const wave: OscillatorType = ['hurt','attack','arcadeDrop'].includes(name) ? 'sawtooth' : ['arcadeLand','arcadeTiming','arcadeKeepsake'].includes(name) ? 'sine' : 'triangle';
+    const gain = name === 'arcadeDrop' ? .075 : name === 'arcadeLand' ? .055 : name === 'arcadeTiming' ? .045 : name === 'arcadeKeepsake' ? .07 : name === 'arcadePayout' ? .095 : .12;
     (notes[name] || [440]).forEach((frequency, index) => this.tone(frequency * shift,
-      ['arcadeLand','arcadeTiming'].includes(name) ? .075 : .12 + index * .025,
+      ['arcadeLand','arcadeTiming'].includes(name) ? .075 : name === 'arcadeKeepsake' ? .14 : .12 + index * .025,
       wave, gain, this.sfxGain,
-      index * (['arcadePayout','arcadeLand','arcadeTiming'].includes(name) ? .045 : .07)));
+      index * (name === 'arcadeKeepsake' ? .055 : ['arcadePayout','arcadeLand','arcadeTiming'].includes(name) ? .045 : .07)));
     if (['attack','skill','hatch','evolve'].includes(name)) this.noise(.07, .035);
     else if (name === 'arcadeDrop') this.noise(.045, .018);
     else if (name === 'arcadeLand') this.noise(.018, .006);
+    else if (name === 'arcadeKeepsake') this.noise(.06, .009);
   }
 }
 
