@@ -26,7 +26,7 @@ export const PAYOUT_TRAY_FLOOR_HALF_DEPTH = .82;
 export const PAYOUT_TRAY_CATCHER_MARGIN = .12;
 // Extend the recessed floor beneath the drop opening so coins straddling the entry lip cannot
 // fall through an unsupported seam. The visible deck-to-tray gap remains unchanged.
-export const PAYOUT_TRAY_ENTRY_CATCH_OVERLAP = .24;
+export const PAYOUT_TRAY_ENTRY_CATCH_OVERLAP = .36;
 // Leave a full coin-radius-plus gap between the deck edge and the lowered tray floor so the
 // player sees the coin clear the table and fall before it lands in the payout well.
 export const PAYOUT_TRAY_DROP_GAP = .36;

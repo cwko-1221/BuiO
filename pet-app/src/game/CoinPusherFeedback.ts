@@ -9,6 +9,33 @@ export const COIN_PUSHER_CASCADE_WINDOW_MS = 2500;
 // Long-term cosmetic goals use only server-confirmed payout history; they never grant currency.
 export const COIN_PUSHER_STAMP_THRESHOLDS = [5, 25, 100, 300, 1000] as const;
 
+export interface CoinPusherCabinetFinish {
+  id: 'classic' | 'bronze' | 'silver' | 'gold' | 'crystal' | 'aurora';
+  brass: number;
+  paleGold: number;
+  glow: number;
+  glowEmissive: number;
+  homeGlow: number;
+  frontGlow: number;
+}
+
+/** Purely cosmetic finishes: index 0 is the default; each confirmed stamp unlocks one tier. */
+export const COIN_PUSHER_CABINET_FINISHES: readonly CoinPusherCabinetFinish[] = [
+  { id: 'classic', brass: 0xd0a45c, paleGold: 0xe6cf96, glow: 0x82cfc7, glowEmissive: 0x1a7168, homeGlow: 0x1a7168, frontGlow: 0xa85b1b },
+  { id: 'bronze', brass: 0xc47a59, paleGold: 0xecc08a, glow: 0xefa66b, glowEmissive: 0x814b31, homeGlow: 0x4e6962, frontGlow: 0xbd643b },
+  { id: 'silver', brass: 0x9eafc1, paleGold: 0xe5eef4, glow: 0x9bd8e8, glowEmissive: 0x316575, homeGlow: 0x286a75, frontGlow: 0x6287c9 },
+  { id: 'gold', brass: 0xdbb246, paleGold: 0xffe3a0, glow: 0xffd365, glowEmissive: 0x98661d, homeGlow: 0x7a7139, frontGlow: 0xd08124 },
+  { id: 'crystal', brass: 0x8db8c8, paleGold: 0xd5f3ff, glow: 0x9ce8ed, glowEmissive: 0x367282, homeGlow: 0x306976, frontGlow: 0x7760bc },
+  { id: 'aurora', brass: 0x75c6b4, paleGold: 0xcbf3d8, glow: 0x82edd3, glowEmissive: 0x24796d, homeGlow: 0x2b7184, frontGlow: 0x9d68bf },
+];
+
+export function coinPusherCabinetFinish(unlockedCount: number) {
+  const tier = Number.isFinite(unlockedCount)
+    ? Math.max(0, Math.min(COIN_PUSHER_CABINET_FINISHES.length - 1, Math.floor(unlockedCount)))
+    : 0;
+  return COIN_PUSHER_CABINET_FINISHES[tier];
+}
+
 export interface CoinPusherTimingStreakState {
   count: number;
   best: number;

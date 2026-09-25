@@ -159,6 +159,9 @@ export const PAYOUT_TRAY_CONFIRM_FRAMES = 18;
 const RIDER_EDGE_CLEARANCE = .012;
 const RIDER_ANCHOR_EPSILON = .0005;
 const PUSHER_MAX_PENETRATION_RECOVERY = .045;
+// Kinematic plate contacts can transfer sharp vertical impulses through a dense settled stack.
+// Keep the rebound below a visible pop while preserving the horizontal shove and coin tumble.
+const MAX_PLAYFIELD_REBOUND_SPEED = .65;
 const MAX_REST_NUDGES = 72;
 // Keep anti-wedge torque gentle: large impulses can spin a thin disc at launch-scale rates and
 // turn a stationary, tilted coin into the sudden upward pop players report.
@@ -299,7 +302,7 @@ export class CoinPusherModel {
         .setFrictionCombineRule(RAPIER.CoefficientCombineRule.Min)
         // A small contact margin gives the thin discs room to resolve against the moving slab
         // before numerical overlap becomes visible at its edges.
-        .setContactSkin(.01)
+        .setContactSkin(.004)
         .setRestitution(.025),
       this.pusherBody,
     );
@@ -311,7 +314,7 @@ export class CoinPusherModel {
         .setCollisionGroups(PUSHER_COLLISION_GROUPS)
         .setFriction(.45)
         .setFrictionCombineRule(RAPIER.CoefficientCombineRule.Min)
-        .setContactSkin(.01)
+        .setContactSkin(.004)
         .setRestitution(.025),
       this.pusherBody,
     );
@@ -465,16 +468,16 @@ export class CoinPusherModel {
       this.correctDeckPenetration();
       this.settleContactedDrops();
       this.enforcePusherRiders(pusherDelta);
+      this.limitPlayfieldRebound();
       this.stabilizeSettledCoins();
 
       for (let index = this.coins.length - 1; index >= 0; index -= 1) {
         const coin = this.coins[index];
         const position = coin.body.translation();
-        // Let the coin clear the deck edge completely before starting its visible fall.
-        if (!coin.falling && position.z - COIN_RADIUS > PLAYFIELD_FRONT) {
-          this.releasePusherRider(coin);
-          coin.falling = true;
-        }
+        // A flat, settled coin can stay solver-supported by the last sliver of tabletop forever:
+        // its tipping axes are deliberately locked while it is in the bed. Once its centre passes
+        // the edge, unlock those axes so gravity can tip it into the visible collection well.
+        if (!coin.falling && position.z > PLAYFIELD_FRONT) this.startPayoutFall(coin);
         if (coin.falling) {
           coin.fallAge += FIXED_STEP;
           if (coin.collected) coin.payoutAge += FIXED_STEP;
@@ -584,7 +587,7 @@ export class CoinPusherModel {
         // material value for a contact, without changing the pusher's transport or payout rules.
         .setRestitution(.025)
         .setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Min)
-        .setContactSkin(.008)
+        .setContactSkin(.004)
         .setCollisionGroups(COIN_COLLISION_GROUPS),
       body,
     );
@@ -926,7 +929,7 @@ export class CoinPusherModel {
     const halfHeight = COIN_RADIUS * Math.sqrt(Math.max(0, 1 - axisY * axisY))
       + COIN_HALF_THICKNESS * Math.abs(axisY);
     const bottom = position.y - halfHeight;
-    return bottom >= PUSHER_TOP_Y - .02 && bottom <= PUSHER_TOP_Y + .024;
+    return bottom >= PUSHER_TOP_Y - .02 && bottom <= PUSHER_TOP_Y + .012;
   }
 
   private isPusherRiderSupported(coin: PusherCoin, worldZ = coin.body.translation().z) {
@@ -952,6 +955,17 @@ export class CoinPusherModel {
     coin.pusherLocalX = 0;
     coin.pusherLocalZ = 0;
     coin.collider.setCollisionGroups(COIN_COLLISION_GROUPS);
+    coin.body.wakeUp();
+  }
+
+  private startPayoutFall(coin: PusherCoin) {
+    if (coin.falling) return;
+    this.releasePusherRider(coin);
+    coin.falling = true;
+    // Settled bed coins keep their pose stable until they are actually pushed over the deck lip.
+    // Re-enable roll/tip axes only at that boundary; without this, a face-up coin can remain
+    // balanced on the tabletop edge and never fall into the catcher.
+    coin.body.setEnabledRotations(true, true, true, true);
     coin.body.wakeUp();
   }
 
@@ -990,6 +1004,16 @@ export class CoinPusherModel {
       coin.body.setRotation({
         x: 0, y: Math.sin(heading / 2), z: 0, w: Math.cos(heading / 2),
       }, false);
+    }
+  }
+
+  /** Bound only upward playfield rebounds; gravity, horizontal shoves, and payout falls stay physical. */
+  private limitPlayfieldRebound() {
+    for (const coin of this.coins) {
+      if (coin.falling) continue;
+      const velocity = coin.body.linvel();
+      if (velocity.y <= MAX_PLAYFIELD_REBOUND_SPEED) continue;
+      coin.body.setLinvel({ x: velocity.x, y: MAX_PLAYFIELD_REBOUND_SPEED, z: velocity.z }, true);
     }
   }
 

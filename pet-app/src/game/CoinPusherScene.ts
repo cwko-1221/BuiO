@@ -4,7 +4,7 @@ import compactBackboardArtworkUrl from './assets/coin-pusher-backboard-mobile-v2
 import brushedMetalTextureUrl from './assets/coin-pusher-brushed-metal-v1.webp';
 import mintedCoinFaceTextureUrl from './assets/coin-pusher-minted-paw-desktop-v2.webp';
 import compactMintedCoinFaceTextureUrl from './assets/coin-pusher-minted-paw-mobile-v2.webp';
-import { coinPusherTravelProgress } from './CoinPusherFeedback';
+import { COIN_PUSHER_CABINET_FINISHES, coinPusherCabinetFinish, coinPusherTravelProgress } from './CoinPusherFeedback';
 import { createCoinPusherStarterLayout } from './CoinPusherLayout';
 import type { CoinPusherDropBeat, CoinPusherModel, CoinPusherModelSnapshot } from './CoinPusherModel';
 import {
@@ -97,6 +97,7 @@ export class CoinPusherScene {
     existingModel?: CoinPusherModel,
     onVisualPreviewReady: () => void = () => undefined,
     savedSnapshot?: CoinPusherModelSnapshot,
+    keepsakeTier = 0,
   ) {
     const notifyAvailability: WebGLAvailabilityCallback = (available, reason) => {
       try { onAvailability(available, reason); }
@@ -168,7 +169,7 @@ export class CoinPusherScene {
       if (existingModel) model = existingModel;
       // Build a complete procedural cabinet immediately. Optional artwork keeps downloading in
       // parallel, so a slow image request cannot hold the first useful 3D preview behind a veil.
-      view = new CoinPusherScene(root, compactViewport, onSwipe, onCoinsFell, notifyAvailability, notifyCoinImpact, notifyPusherStroke, renderer, model);
+      view = new CoinPusherScene(root, compactViewport, onSwipe, onCoinsFell, notifyAvailability, notifyCoinImpact, notifyPusherStroke, renderer, model, keepsakeTier);
       if (!model) {
         // Start compiling and warming the static cabinet while Rapier's WASM is still loading.
         // Render the deterministic starter pile behind a compact loading badge as soon as the
@@ -246,6 +247,10 @@ export class CoinPusherScene {
   private readonly pusherGlowFrontColor = new THREE.Color(0xa85b1b);
   private readonly pusherGlowColor = new THREE.Color();
   private pusherGlowMaterial?: THREE.MeshPhysicalMaterial | THREE.MeshStandardMaterial;
+  private cabinetBrassMaterial?: THREE.MeshStandardMaterial;
+  private cabinetPaleGoldMaterial?: THREE.MeshStandardMaterial;
+  private cabinetGlowMaterial?: THREE.MeshStandardMaterial;
+  private keepsakeTier = -1;
   private lastPusherGlowProgress = -1;
   private readonly coinBody: THREE.InstancedMesh;
   private readonly coinRings: THREE.InstancedMesh;
@@ -356,6 +361,7 @@ export class CoinPusherScene {
     onPusherStroke: PusherStrokeCallback,
     renderer: THREE.WebGLRenderer,
     model: CoinPusherModel | undefined,
+    keepsakeTier = 0,
     brushedMetalTexture?: THREE.Texture,
     backboardTexture?: THREE.Texture,
     mintedCoinFaceTexture?: THREE.Texture,
@@ -459,6 +465,7 @@ export class CoinPusherScene {
     this.renderRoot.add(this.pusher);
     this.addLights();
     this.buildCabinet();
+    this.setKeepsakeTier(keepsakeTier);
     this.buildPusher();
     this.pusher.position.z = this.simulation?.pusherZ ?? PUSHER_HOME_Z;
     this.syncPusherGlow(this.simulation?.pusherZ ?? PUSHER_HOME_Z);
@@ -503,6 +510,25 @@ export class CoinPusherScene {
 
   dropCoin(worldX: number) {
     return this.simulation?.dropCoin(worldX);
+  }
+
+  /** Apply the student's server-confirmed cosmetic collection tier to the shared cabinet trim. */
+  setKeepsakeTier(unlockedCount: number) {
+    const finish = coinPusherCabinetFinish(unlockedCount);
+    this.root.dataset.keepsakeTier = String(COIN_PUSHER_CABINET_FINISHES.indexOf(finish));
+    this.root.dataset.keepsakeFinish = finish.id;
+    if (this.keepsakeTier === COIN_PUSHER_CABINET_FINISHES.indexOf(finish)) return;
+    this.keepsakeTier = COIN_PUSHER_CABINET_FINISHES.indexOf(finish);
+    this.cabinetBrassMaterial?.color.setHex(finish.brass);
+    this.cabinetPaleGoldMaterial?.color.setHex(finish.paleGold);
+    if (this.cabinetGlowMaterial) {
+      this.cabinetGlowMaterial.color.setHex(finish.glow);
+      this.cabinetGlowMaterial.emissive.setHex(finish.glowEmissive);
+    }
+    this.pusherGlowHomeColor.setHex(finish.homeGlow);
+    this.pusherGlowFrontColor.setHex(finish.frontGlow);
+    this.lastPusherGlowProgress = -1;
+    this.syncPusherGlow(this.simulation?.pusherZ ?? PUSHER_HOME_Z);
   }
 
   canDropCoin() {
@@ -843,6 +869,9 @@ export class CoinPusherScene {
     const glow = this.material(0x82cfc7, .18, .26, {
       emissive: 0x1a7168, emissiveIntensity: .28, clearcoat: .72,
     });
+    this.cabinetBrassMaterial = brass;
+    this.cabinetPaleGoldMaterial = paleGold;
+    this.cabinetGlowMaterial = glow;
     this.pusherGlowMaterial = glow as THREE.MeshPhysicalMaterial | THREE.MeshStandardMaterial;
 
     // This alpha-only floor pass gives the otherwise transparent render a soft contact shadow
@@ -1262,15 +1291,17 @@ export class CoinPusherScene {
 
     // Guide shoes are carried by the plate and ride the two fixed side rails. This keeps the
     // visible linkage continuous from the rear stop through the full forward stroke.
+    const guideShoeMaterial = this.cabinetBrassMaterial ?? this.material(0xf0b343, .78, .18, {
+      clearcoat: .96, clearcoatRoughness: .1,
+    });
+    const guideFastenerMaterial = this.cabinetPaleGoldMaterial ?? this.material(0xffe0a0, .72, .16, { clearcoat: 1 });
     for (const side of [-1, 1]) {
-      const shoe = this.box(.14, .022, .28, this.material(0xf0b343, .78, .18, {
-        clearcoat: .96, clearcoatRoughness: .1,
-      }), .045);
+      const shoe = this.box(.14, .022, .28, guideShoeMaterial, .045);
       shoe.position.set(side * 2.57, .028, -.02); this.pusher.add(shoe);
       for (const z of [-.105, .065]) {
         const fastener = new THREE.Mesh(
           this.trackGeometry(new THREE.SphereGeometry(.009, 12, 8)),
-          this.material(0xffe0a0, .72, .16, { clearcoat: 1 }),
+          guideFastenerMaterial,
         );
           fastener.position.set(side * 2.57, .041, z); fastener.castShadow = true; this.pusher.add(fastener);
       }

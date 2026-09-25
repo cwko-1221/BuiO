@@ -115,6 +115,7 @@ try {
             : undefined;
     if (!fileName) return;
     capturingVisualStages.add(stage);
+    if (stage === 'tray') await page.waitForTimeout(120);
     await page.screenshot({ path: path.join(artifactDir, fileName), animations: 'allow' });
     capturingVisualStages.delete(stage);
     capturedVisualStages.add(stage);
@@ -532,6 +533,12 @@ try {
             type: 'tray-catch-inserted', at: performance.now(), text: node.innerText,
             width: nodeBounds.width, height: nodeBounds.height,
           });
+          window.__coinRewardDebug.push({
+            type: 'tray-catch-active', at: performance.now(), count: root.querySelectorAll('.coin-pusher-tray-catch').length,
+          });
+          new MutationObserver(() => window.__coinRewardDebug.push({
+            type: 'tray-catch-updated', at: performance.now(), text: node.innerText,
+          })).observe(node, { childList: true, characterData: true, subtree: true });
           let trayCatchCaptured = false;
           const captureTrayCatch = () => {
             if (!node.isConnected || trayCatchCaptured) return;
@@ -539,9 +546,11 @@ try {
             const rect = node.getBoundingClientRect();
             if (Number(style.opacity) > .25 && rect.width > 45 && rect.height > 18) {
               trayCatchCaptured = true;
+              const rootRect = root.getBoundingClientRect();
               window.__coinRewardDebug.push({
                 type: 'tray-catch-visible', at: performance.now(), text: node.innerText,
                 width: rect.width, height: rect.height,
+                top: rect.top - rootRect.top, bottom: rect.bottom - rootRect.top,
               });
               void window.__capturePusherVisualStage?.('tray')?.catch(() => {});
             } else if (style.animationName !== 'none') requestAnimationFrame(captureTrayCatch);
@@ -597,11 +606,17 @@ try {
   const initialBalance = Number((await page.locator('#coinBalanceHud').innerText()).replace(/,/g, ''));
   assert.equal(initialBalance, 999999, 'fixture must provide a known student wallet balance');
   assert.equal(await drop.isDisabled(), false, 'paid play must be enabled while the student has coins');
+  assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-tier'), '0',
+    'a new student must start with the default cabinet finish');
+  assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-finish'), 'classic',
+    'the initial scene palette must match the classic finish');
   assert.match(await drop.getAttribute('aria-label'), /1|−1|coin|金幣/i);
   assert.match(await page.locator('#coinPusherSystemStatus').innerText(), /下滑揀位|Swipe to aim/,
     'the ready status must teach the primary swipe-to-aim control');
   const collectionButton = page.locator('.coin-pusher-collection');
   assert.equal(await collectionButton.isVisible(), true, 'paw-stamp collection must be discoverable from the HUD');
+  assert.match(await collectionButton.getAttribute('aria-label'), /0\/5/,
+    'the collection badge must report all five cosmetic unlocks');
   const initialStampRing = await collectionButton.evaluate((button) => {
     const ring = button.querySelector(':scope > span');
     const bounds = ring?.getBoundingClientRect();
@@ -614,6 +629,10 @@ try {
   assert.equal(await collectionPanel.isVisible(), true, 'collection opens without leaving the game');
   assert.match(await collectionPanel.innerText(), /不會額外增加或扣除金幣/,
     'cosmetic keepsakes must explain that they never add or spend coins');
+  assert.match(await collectionPanel.innerText(), /配色|finish/i,
+    'the collection book must explain the visible cabinet-finish reward');
+  assert.equal(await page.locator('.coin-pusher-finish-current').getAttribute('data-finish-tier'), '0',
+    'the collection book must preview the currently applied classic finish');
   const stampPresentation = await page.locator('.coin-pusher-stamp').evaluateAll((cards) => cards.map((card) => {
     const medallion = card.querySelector('.coin-pusher-stamp-medallion');
     const bounds = medallion?.getBoundingClientRect();
@@ -746,6 +765,17 @@ try {
   await waitFor(() => capturedVisualStages.has('tray'),
     'the landed coin must visibly enter the collection well before its wallet payout');
   await waitFor(() => payoutTotal > 0, 'a collected coin must be returned to the student wallet');
+  const catchCueEntries = await page.evaluate(() => window.__coinRewardDebug.filter((entry) =>
+    ['tray-catch-active', 'tray-catch-updated'].includes(entry.type)));
+  assert.ok(catchCueEntries.filter((entry) => entry.type === 'tray-catch-active')
+    .every((entry) => entry.count === 1),
+  `a multi-coin catch must reuse one visible label instead of stacking duplicate bubbles (${JSON.stringify(catchCueEntries)})`);
+  const closePayoutPair = payoutTimes.some((time, index) => index > 0 && time - payoutTimes[index - 1] <= 760);
+  if (closePayoutPair) {
+    await waitFor(() => page.evaluate(() => window.__coinRewardDebug.some((entry) =>
+      entry.type === 'tray-catch-updated' && /×\s*2/.test(entry.text || ''))),
+    'closely spaced catches should combine into one readable ×2 tray cue');
+  }
   await waitFor(() => !!lostPayoutEventId
     && payoutRequestEvents.filter(({ eventId }) => eventId === lostPayoutEventId).length === 2,
   'a payout with a lost reply must be retried using the durable event');
@@ -801,6 +831,9 @@ try {
   assert.ok(payoutFlyBox.startX >= 0 && payoutFlyBox.startX <= payoutFlyBox.rootWidth
     && payoutFlyBox.startY >= payoutFlyBox.rootHeight * .4 && payoutFlyBox.startY <= payoutFlyBox.rootHeight,
   `the +1 flight must begin visibly inside the lower payout-well area (${JSON.stringify(payoutFlyBox)})`);
+  const visibleTrayCatch = await page.evaluate(() => window.__coinRewardDebug.find((entry) => entry.type === 'tray-catch-visible'));
+  assert.ok(visibleTrayCatch && visibleTrayCatch.bottom < payoutFlyBox.startY - 8,
+    `the combined catch cue must sit above the falling coin and leave its pit-to-wallet flight visible (${JSON.stringify({ catch: visibleTrayCatch, reward: payoutFlyBox })})`);
   const payoutSequence = await page.evaluate(() => {
     const events = window.__coinRewardDebug;
     return {
@@ -837,6 +870,19 @@ try {
   await waitFor(async () => page.locator('.coin-pusher-collection-panel').isVisible(), 'collection panel did not reopen after payout');
   await waitFor(async () => Number(await page.locator('#coinPusherCollectionReturned').innerText()) === payoutCollectionTotal,
     'the collection total must match confirmed server payout coins');
+  const finishIds = ['classic', 'bronze', 'silver', 'gold', 'crystal', 'aurora'];
+  const expectedFinishTier = Math.min(5, [5, 25, 100, 300, 1000]
+    .filter((threshold) => payoutCollectionTotal >= threshold).length);
+  await waitFor(async () => await page.locator('#coin-pusher-root').getAttribute('data-keepsake-tier') === String(expectedFinishTier),
+    'the live cabinet finish must follow server-confirmed payout milestones');
+  assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-finish'), finishIds[expectedFinishTier],
+    'the live material palette must match the earned stamp tier');
+  assert.equal(await page.locator('.coin-pusher-finish-current').getAttribute('data-finish-tier'), String(expectedFinishTier),
+    'the collection modal must preview the same finish that is applied to the 3D cabinet');
+  const finishSwatchColors = await page.locator('.coin-pusher-finish-swatch > i').evaluateAll((swatches) =>
+    swatches.map((swatch) => getComputedStyle(swatch).backgroundColor));
+  assert.equal(new Set(finishSwatchColors).size, 3,
+    'the collection preview must show three distinct metal and glow colors');
   assert.equal(await page.locator('.coin-pusher-progress-track').getAttribute('aria-valuenow'), String(expectedStampProgress),
     'the collection-book bar must agree with the HUD ring and total/next-threshold label');
   await page.locator('.coin-pusher-collection-close').click();
@@ -1336,6 +1382,8 @@ try {
     'the re-entered coin-pusher session did not become playable');
   assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-physics-session'), physicsSessionBeforeReentry,
     'leaving and re-entering must reconnect to the same Rapier world rather than reset the board');
+  assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-tier'), String(expectedFinishTier),
+    're-entering the bedroom must keep the server-confirmed cabinet finish');
   assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, paidDropsBeforeReentry,
     're-entering the saved board must not charge another coin');
 
@@ -1358,8 +1406,16 @@ try {
   assert.equal(playRequestKeys.length, paidDropsBeforeReload,
     'reopening the saved session must not silently charge another coin');
   const walletAfterReloadResponse = await context.request.get('/api/pet/bootstrap');
-  assert.equal(Number((await walletAfterReloadResponse.json()).wallet.balance), walletBeforeReload,
+  const bootstrapAfterReload = await walletAfterReloadResponse.json();
+  assert.equal(Number(bootstrapAfterReload.wallet.balance), walletBeforeReload,
     'reopening the saved session must preserve the authoritative student wallet balance');
+  const returnedCoinsAfterReload = Number(bootstrapAfterReload.coinPusherCollection?.returnedCoins) || 0;
+  const finishTierAfterReload = Math.min(5, [5, 25, 100, 300, 1000]
+    .filter((threshold) => returnedCoinsAfterReload >= threshold).length);
+  assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-tier'), String(finishTierAfterReload),
+    `a reload must apply the cabinet finish from the latest server-confirmed stamp total (${returnedCoinsAfterReload})`);
+  assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-finish'), finishIds[finishTierAfterReload],
+    'the material finish after reload must match the authoritative collection milestone');
   const payoutKeysByEvent = new Map();
   for (const { eventId, requestKey } of payoutRequestEvents) {
     if (payoutKeysByEvent.has(eventId)) assert.equal(requestKey, payoutKeysByEvent.get(eventId),

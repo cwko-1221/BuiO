@@ -5,7 +5,7 @@ import { audio } from './audio';
 import { BedroomScene } from './game/BedroomScene';
 import type { CoinPusherScene } from './game/CoinPusherScene';
 import { PetAvatar } from './game/PetAvatar';
-import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCascadeLabel, coinPusherStampProgress, coinPusherTimingStreakLabel, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
+import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCabinetFinish, coinPusherCascadeLabel, coinPusherStampProgress, coinPusherTimingStreakLabel, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
 import type { CoinPusherTimingStreakState } from './game/CoinPusherFeedback';
 import type { CoinPusherDropBeat } from './game/CoinPusherModel';
 import {
@@ -43,6 +43,14 @@ const COIN_PUSHER_STAMPS = [
   { threshold: COIN_PUSHER_STAMP_THRESHOLDS[3], tier: 'crystal', rank: 'IV', name: { 'zh-HK': '水晶爪印', 'en-US': 'Crystal Paw' }, title: { 'zh-HK': '三百枚入帳', 'en-US': '300 Returned' } },
   { threshold: COIN_PUSHER_STAMP_THRESHOLDS[4], tier: 'aurora', rank: 'V', name: { 'zh-HK': '傳奇推手', 'en-US': 'Arcade Legend' }, title: { 'zh-HK': '千枚傳奇', 'en-US': '1,000 Returned' } },
 ];
+const COIN_PUSHER_CABINET_FINISH_NAMES = [
+  { 'zh-HK': '經典紫金', 'en-US': 'Classic Brass' },
+  { 'zh-HK': '暖銅新飾', 'en-US': 'Warm Bronze' },
+  { 'zh-HK': '冰晶銀白', 'en-US': 'Glacier Silver' },
+  { 'zh-HK': '耀目金光', 'en-US': 'Radiant Gold' },
+  { 'zh-HK': '藍晶光澤', 'en-US': 'Crystal Blue' },
+  { 'zh-HK': '極光青綠', 'en-US': 'Aurora Teal' },
+] as const;
 
 // The reduced-motion preference is stored per device; apply it before first paint so no
 // entrance animation ever runs for a child who has asked for stillness.
@@ -142,6 +150,12 @@ class StudentApp {
   private coinPusherPayoutsQueued = new Set<string>();
   private coinPusherPayoutRetryTimer?: number;
   private coinPusherTrayCatchUntil = 0;
+  private coinPusherTrayCatchCue?: HTMLSpanElement;
+  private coinPusherTrayCatchTimer?: number;
+  private coinPusherTrayCatchCount = 0;
+  private coinPusherTrayCatchOriginX = 0;
+  private coinPusherTrayCatchOriginY = 0;
+  private coinPusherTrayCatchOriginCount = 0;
   private coinPusherPlays: { playId: string; remaining: number; reserved: number; generation: number }[] = [];
   private coinPusherPendingDrop?: StoredCoinPusherDrop;
   private coinPusherPendingPayouts: StoredCoinPusherPayout[] = [];
@@ -995,10 +1009,10 @@ class StudentApp {
       (count, origins) => {
         if(generation!==this.coinPusherGeneration)return;
         audio.sfx('coin');
-        this.animateCoinTrayCatch(count, origins);
+        const caughtCount=this.animateCoinTrayCatch(count, origins);
         this.setCoinPusherStatus(this.locale==='zh-HK'
-          ? `銀仔已跌入坑槽 ×${count} · 正在確認獎勵…`
-          : `${count} coin${count===1?'':'s'} in the collection well · confirming payout…`);
+          ? `銀仔已跌入坑槽 ×${caughtCount} · 正在確認獎勵…`
+          : `${caughtCount} coin${caughtCount===1?'':'s'} in the collection well · confirming payout…`);
         void this.creditCoinPayout(count, generation, origins);
       },
       (available,reason) => {
@@ -1041,6 +1055,7 @@ class StudentApp {
         this.setCoinPusherStatus(zh?'機台已準備，正在啟動物理…':'Cabinet ready · starting physics…');
       },
       restoreSession?.model,
+      this.coinPusherStampCount(),
     ));
     }).then((view)=>{
       if(!view)return;
@@ -1254,6 +1269,38 @@ class StudentApp {
     button.setAttribute('aria-label', zh
       ? `爪印收藏，已解鎖 ${unlocked}/${COIN_PUSHER_STAMPS.length} 個；${progressCopy}`
       : `Paw-stamp collection, ${unlocked}/${COIN_PUSHER_STAMPS.length} unlocked; ${progressCopy}`);
+    const returned = document.querySelector<HTMLElement>('#coinPusherCollectionReturned');
+    if (returned) returned.textContent = progress.total.toLocaleString();
+    const panelProgress = document.querySelector<HTMLElement>('.coin-pusher-progress-track');
+    if (panelProgress) {
+      panelProgress.setAttribute('aria-valuenow', String(progress.percent));
+      const fill = panelProgress.firstElementChild as HTMLElement | null;
+      if (fill) fill.style.width = `${progress.percent}%`;
+    }
+    const panelNext = document.querySelector<HTMLElement>('.coin-pusher-collection-progress > small');
+    if (panelNext) panelNext.textContent = progress.nextThreshold
+      ? (zh ? `下一枚本階段 ${progress.stepProgress} / ${progress.stepSize}` : `Next stamp ${progress.stepProgress} / ${progress.stepSize} this tier`)
+      : (zh ? '已收集全部紀念章' : 'All keepsakes collected');
+    const finish = coinPusherCabinetFinish(unlocked);
+    const finishPanel = document.querySelector<HTMLElement>('.coin-pusher-finish-current');
+    if (finishPanel) {
+      finishPanel.dataset.finishTier = String(unlocked);
+      finishPanel.style.setProperty('--finish-brass', `#${finish.brass.toString(16).padStart(6,'0')}`);
+      finishPanel.style.setProperty('--finish-pale', `#${finish.paleGold.toString(16).padStart(6,'0')}`);
+      finishPanel.style.setProperty('--finish-glow', `#${finish.glow.toString(16).padStart(6,'0')}`);
+      const finishName = finishPanel.querySelector<HTMLElement>('.coin-pusher-finish-current-copy > b');
+      if (finishName) finishName.textContent = COIN_PUSHER_CABINET_FINISH_NAMES[unlocked][this.locale];
+    }
+    document.querySelectorAll<HTMLElement>('.coin-pusher-stamp').forEach((card, index) => {
+      const stamp = COIN_PUSHER_STAMPS[index];
+      if (!stamp) return;
+      const isUnlocked = progress.total >= stamp.threshold;
+      card.classList.toggle('is-unlocked', isUnlocked);
+      card.classList.toggle('is-locked', !isUnlocked);
+      card.setAttribute('aria-label', `${stamp.name[this.locale]} · ${stamp.threshold} · ${isUnlocked ? (zh ? '已解鎖' : 'Unlocked') : (zh ? '未解鎖' : 'Locked')}`);
+      const state = card.querySelector<HTMLElement>('em');
+      if (state) state.textContent = isUnlocked ? (zh ? '已解鎖' : 'Unlocked') : `${stamp.threshold} ${zh ? '枚' : 'coins'}`;
+    });
   }
   private openCoinPusherCollection() {
     const zh = this.locale === 'zh-HK';
@@ -1262,6 +1309,9 @@ class StudentApp {
     const next = nextIndex >= 0 ? COIN_PUSHER_STAMPS[nextIndex] : undefined;
     const progressState = this.coinPusherStampProgress(total);
     const progress = progressState.percent;
+    const finish = coinPusherCabinetFinish(progressState.unlockedCount);
+    const finishName = COIN_PUSHER_CABINET_FINISH_NAMES[progressState.unlockedCount][this.locale];
+    const finishStyle = `--finish-brass:#${finish.brass.toString(16).padStart(6,'0')};--finish-pale:#${finish.paleGold.toString(16).padStart(6,'0')};--finish-glow:#${finish.glow.toString(16).padStart(6,'0')}`;
     const nextLabel = next ? `${progressState.stepProgress} / ${progressState.stepSize}` : undefined;
     const stamps = COIN_PUSHER_STAMPS.map((stamp) => {
       const unlocked = total >= stamp.threshold;
@@ -1273,8 +1323,9 @@ class StudentApp {
     }).join('');
     this.modal(`<section class="coin-pusher-collection-panel" role="dialog" aria-modal="true" aria-labelledby="coinPusherCollectionTitle">
       <header class="coin-pusher-collection-heading"><span aria-hidden="true">🐾</span><div><small>${zh ? '機台紀念章' : 'ARCADE KEEPSAKES'}</small><h2 id="coinPusherCollectionTitle">${zh ? '爪印收藏冊' : 'Paw-stamp collection'}</h2></div></header>
-      <p class="coin-pusher-collection-copy">${zh ? '只計算已確認並回到錢包的推出銀仔。爪印是紀念章，不會額外增加或扣除金幣。' : 'Only payout coins confirmed in your wallet count. Stamps are keepsakes; they never add or spend coins.'}</p>
+      <p class="coin-pusher-collection-copy">${zh ? '只計算已確認並回到錢包的推出銀仔。每枚爪印會解鎖機台配色，只改外觀，不會額外增加或扣除金幣。' : 'Only confirmed wallet payouts count. Each paw stamp unlocks a cabinet finish; it changes looks only and never adds or spends coins.'}</p>
       <div class="coin-pusher-collection-progress"><div><b>${zh ? '已入帳銀仔' : 'Payout coins returned'}</b><strong id="coinPusherCollectionReturned">${total.toLocaleString()}</strong></div><small>${next ? (zh ? `下一枚本階段 ${nextLabel}` : `Next stamp ${nextLabel} this tier`) : (zh ? '已收集全部紀念章' : 'All keepsakes collected')}</small><div class="coin-pusher-progress-track" role="progressbar" aria-label="${zh ? '下一枚紀念章進度' : 'Progress to next keepsake'}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}"><span style="width:${progress}%"></span></div></div>
+      <div class="coin-pusher-finish-current" data-finish-tier="${progressState.unlockedCount}" style="${finishStyle}"><span class="coin-pusher-finish-swatch" aria-hidden="true"><i></i><i></i><i></i></span><span class="coin-pusher-finish-current-copy"><small>${zh ? '目前機台配色' : 'CURRENT CABINET FINISH'}</small><b>${finishName}</b></span></div>
       <div class="coin-pusher-stamp-grid">${stamps}</div>
       <button type="button" class="primary coin-pusher-collection-close" data-action="close-modal">${zh ? '繼續玩' : 'Keep playing'}</button>
     </section>`, 'coin-pusher-collection-modal');
@@ -1342,6 +1393,7 @@ class StudentApp {
       this.state.wallet.balance=Number(result.balance); this.updateWallet();
       if(result.collection)this.state.coinPusherCollection={returnedCoins:Math.max(this.coinPusherReturnedCoins(),Number(result.collection.returnedCoins)||0)};
       this.syncCoinPusherCollectionBadge();
+      this.coinPusherView?.setKeepsakeTier(this.coinPusherStampCount());
       play.reserved=Math.max(0,play.reserved-amount);
       play.remaining=Number(result.remainingPayout);
       this.coinPusherPendingPayouts=this.coinPusherPendingPayouts.filter((entry)=>entry.eventId!==eventId);
@@ -1360,8 +1412,8 @@ class StudentApp {
         if(unlockedStamps.length){
           const names=unlockedStamps.map((stamp)=>stamp.name[this.locale]);
           const message=this.locale==='zh-HK'
-            ?names.length===1?`解鎖新爪印：${names[0]}！`:`連解鎖 ${names.length} 枚爪印：${names.join('、')}`
-            :names.length===1?`New paw-stamp: ${names[0]}!`:`${names.length} new paw-stamps: ${names.join(', ')}`;
+            ?names.length===1?`新爪印・機台配色已解鎖：${names[0]}！`:`連解鎖 ${names.length} 款爪印與機台配色：${names.join('、')}`
+            :names.length===1?`New cabinet finish unlocked: ${names[0]}!`:`${names.length} new paw-stamps and cabinet finishes: ${names.join(', ')}`;
           this.toast(message);
         }
       }
@@ -1431,25 +1483,65 @@ class StudentApp {
       window.setTimeout(()=>flyer.remove(),1450+index*75);
     }
   }
-  private animateCoinTrayCatch(count:number, origins?:CoinPusherRewardOrigin[]) {
+  private animateCoinTrayCatch(count:number, origins?:CoinPusherRewardOrigin[]):number {
     const root=document.querySelector<HTMLElement>('#coin-pusher-root');
-    if(!root)return;
+    if(!root)return Math.max(0,Math.floor(Number(count)||0));
     const reducedMotion=document.documentElement.classList.contains('reduced-motion')
       || (typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     const validOrigins=origins?.filter((origin)=>Number.isFinite(origin.x)&&Number.isFinite(origin.y))??[];
-    const center=validOrigins.length
-      ? validOrigins.reduce((sum,origin)=>({x:sum.x+origin.x/validOrigins.length,y:sum.y+origin.y/validOrigins.length}),{x:0,y:0})
+    let catchLabel=this.coinPusherTrayCatchCue;
+    const reusingCue=!!catchLabel&&catchLabel.isConnected&&catchLabel.parentElement===root;
+    if(!reusingCue){
+      if(this.coinPusherTrayCatchTimer!==undefined)window.clearTimeout(this.coinPusherTrayCatchTimer);
+      this.coinPusherTrayCatchCount=0;
+      this.coinPusherTrayCatchOriginX=0;
+      this.coinPusherTrayCatchOriginY=0;
+      this.coinPusherTrayCatchOriginCount=0;
+      catchLabel=document.createElement('span');
+      this.coinPusherTrayCatchCue=catchLabel;
+      catchLabel.className='coin-pusher-tray-catch';
+      catchLabel.setAttribute('aria-hidden','true');
+    }
+    this.coinPusherTrayCatchCount+=Math.max(0,Math.floor(Number(count)||0));
+    for(const origin of validOrigins){
+      this.coinPusherTrayCatchOriginX+=origin.x;
+      this.coinPusherTrayCatchOriginY+=origin.y;
+      this.coinPusherTrayCatchOriginCount+=1;
+    }
+    const center=this.coinPusherTrayCatchOriginCount
+      ? {x:this.coinPusherTrayCatchOriginX/this.coinPusherTrayCatchOriginCount,
+        y:this.coinPusherTrayCatchOriginY/this.coinPusherTrayCatchOriginCount}
       : {x:root.clientWidth*.5,y:root.clientHeight*.76};
-    const catchLabel=document.createElement('span');
-    catchLabel.className=`coin-pusher-tray-catch${reducedMotion?' is-static':''}`;
-    catchLabel.setAttribute('aria-hidden','true');
-    catchLabel.textContent=this.locale==='zh-HK'?`跌入坑槽 ×${count}`:`IN THE PIT ×${count}`;
-    catchLabel.style.left=`${center.x}px`;
-    catchLabel.style.top=`${center.y}px`;
-    root.append(catchLabel);
-    catchLabel.addEventListener('animationend',()=>catchLabel.remove(),{once:true});
-    window.setTimeout(()=>catchLabel.remove(),reducedMotion?900:980);
+    catchLabel!.classList.toggle('is-static',reducedMotion);
+    catchLabel!.classList.toggle('is-cascade',this.coinPusherTrayCatchCount>1);
+    catchLabel!.textContent=this.locale==='zh-HK'
+      ? `跌入坑槽 ×${this.coinPusherTrayCatchCount}`
+      : `IN THE PIT ×${this.coinPusherTrayCatchCount}`;
+    catchLabel!.style.left=`${center.x}px`;
+    // Lift the catch callout clear of the physical coin so both the tray landing and reward cue
+    // remain readable in the same moment.
+    const labelLift=Math.min(38,Math.max(20,root.clientHeight*.06));
+    catchLabel!.style.top=`${Math.max(72,center.y-labelLift)}px`;
+    if(reusingCue&&!reducedMotion){
+      catchLabel!.style.animation='none';
+      void catchLabel!.offsetWidth;
+      catchLabel!.style.animation='';
+    }
+    if(!reusingCue)root.append(catchLabel!);
+    if(this.coinPusherTrayCatchTimer!==undefined)window.clearTimeout(this.coinPusherTrayCatchTimer);
+    const cue=catchLabel!;
+    this.coinPusherTrayCatchTimer=window.setTimeout(()=>{
+      if(this.coinPusherTrayCatchCue!==cue)return;
+      cue.remove();
+      this.coinPusherTrayCatchCue=undefined;
+      this.coinPusherTrayCatchTimer=undefined;
+      this.coinPusherTrayCatchCount=0;
+      this.coinPusherTrayCatchOriginX=0;
+      this.coinPusherTrayCatchOriginY=0;
+      this.coinPusherTrayCatchOriginCount=0;
+    },reducedMotion?900:980);
     if(!reducedMotion)this.coinPusherTrayCatchUntil=Math.max(this.coinPusherTrayCatchUntil,performance.now()+760);
+    return this.coinPusherTrayCatchCount;
   }
   private animateCoinPusherTimingCue(landings:CoinPusherLandingFeedback[]) {
     this.coinPusherTimingStreak=advanceCoinPusherTimingStreak(
@@ -1635,6 +1727,15 @@ class StudentApp {
     this.coinPusherBusy=false;
     this.coinPusherCascade={count:0,lastAt:0};
     this.coinPusherTimingStreak={count:0,best:0};
+    if(this.coinPusherTrayCatchTimer!==undefined)window.clearTimeout(this.coinPusherTrayCatchTimer);
+    this.coinPusherTrayCatchTimer=undefined;
+    this.coinPusherTrayCatchCue?.remove();
+    this.coinPusherTrayCatchCue=undefined;
+    this.coinPusherTrayCatchCount=0;
+    this.coinPusherTrayCatchOriginX=0;
+    this.coinPusherTrayCatchOriginY=0;
+    this.coinPusherTrayCatchOriginCount=0;
+    this.coinPusherTrayCatchUntil=0;
     if(this.coinPusherView){
       if(preserveModel)this.coinPusherModel=this.coinPusherView.model;
       this.coinPusherView.destroy(preserveModel);

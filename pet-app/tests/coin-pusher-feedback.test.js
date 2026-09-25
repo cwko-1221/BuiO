@@ -14,8 +14,8 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
   });
   t.after(() => vite.close());
   const {
-    advanceCoinPusherTimingStreak, coinPusherStampProgress, coinPusherTimingStreakLabel,
-    coinPusherTravelProgress, COIN_PUSHER_STAMP_THRESHOLDS,
+    advanceCoinPusherTimingStreak, coinPusherCabinetFinish, coinPusherStampProgress, coinPusherTimingStreakLabel,
+    coinPusherTravelProgress, COIN_PUSHER_CABINET_FINISHES, COIN_PUSHER_STAMP_THRESHOLDS,
   } = await vite.ssrLoadModule('/src/game/CoinPusherFeedback.ts');
   const dimensions = await vite.ssrLoadModule('/src/game/CoinPusherDimensions.ts');
 
@@ -34,6 +34,20 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
 
   assert.deepEqual(COIN_PUSHER_STAMP_THRESHOLDS, [5, 25, 100, 300, 1000],
     'the keepsake ladder should provide both early and long-term cosmetic goals');
+  assert.deepEqual(COIN_PUSHER_CABINET_FINISHES.map((finish) => finish.id),
+    ['classic', 'bronze', 'silver', 'gold', 'crystal', 'aurora'],
+    'the default finish and five server-confirmed stamps should map to six ordered cabinet palettes');
+  assert.equal(coinPusherCabinetFinish(0).brass, 0xd0a45c,
+    'the unearned cabinet must preserve the original classic brass appearance');
+  assert.equal(coinPusherCabinetFinish(1).id, 'bronze', 'the first confirmed stamp should unlock bronze');
+  assert.equal(coinPusherCabinetFinish(5).id, 'aurora', 'the final confirmed stamp should unlock aurora');
+  assert.equal(coinPusherCabinetFinish(-5).id, 'classic', 'negative saved progress must not unlock a finish');
+  assert.equal(coinPusherCabinetFinish(99).id, 'aurora', 'finish tiers must clamp to the last unlocked palette');
+  assert.equal(coinPusherCabinetFinish(Number.NaN).id, 'classic', 'invalid progress must fall back to the default palette');
+  for (const field of ['brass', 'paleGold', 'glow']) {
+    assert.equal(new Set(COIN_PUSHER_CABINET_FINISHES.map((finish) => finish[field])).size, 6,
+      `each cabinet finish must visibly vary its ${field} treatment`);
+  }
   assert.deepEqual(coinPusherStampProgress(0), {
     total: 0, unlockedCount: 0, previousThreshold: 0, nextThreshold: 5, stepProgress: 0, stepSize: 5, percent: 0,
   });

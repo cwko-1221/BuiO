@@ -446,6 +446,45 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
     collectionModel.destroy();
   }
 
+  // A face-up starter coin has its tipping axes locked for a stable bed. Once a real shove moves
+  // its centre past the table lip, it must regain those axes and land in the lowered catcher
+  // rather than balancing on the deck edge or slipping through the entry seam.
+  const deckLipModel = new CoinPusherModel();
+  try {
+    for (const coin of deckLipModel.coins.splice(0)) deckLipModel.world.removeRigidBody(coin.body);
+    const edgeShovedCoin = deckLipModel.createCoin(
+      0,
+      .067,
+      dimensions.MAIN_DECK_FRONT_Z - .12,
+      false,
+    );
+    edgeShovedCoin.body.setLinvel({ x: 0, y: 0, z: 1.2 }, true);
+    let crossedDeckLip = false;
+    let edgePayoutCount = 0;
+    let edgePayoutOrigin;
+    for (let frame = 0; frame < 180 && edgePayoutCount === 0; frame += 1) {
+      deckLipModel.update(1000 / 60);
+      crossedDeckLip ||= edgeShovedCoin.falling;
+      for (const event of deckLipModel.drainEvents()) {
+        if (event.type !== 'coins-collected') continue;
+        edgePayoutCount += event.count;
+        edgePayoutOrigin = event.positions[0];
+      }
+    }
+    assert.equal(crossedDeckLip, true,
+      'a pushed face-up coin should enter its physical tipping fall when its centre crosses the deck lip');
+    assert.equal(edgeShovedCoin.collected, true,
+      'a coin that tips off the deck edge should settle inside the catcher instead of disappearing');
+    assert.equal(edgePayoutCount, 1,
+      'the edge coin should emit exactly one confirmed physical collection');
+    assert.ok(edgePayoutOrigin && edgePayoutOrigin.y <= -.2
+      && edgePayoutOrigin.z >= dimensions.PAYOUT_TRAY_CENTER_Z - dimensions.PAYOUT_TRAY_FLOOR_HALF_DEPTH
+        - dimensions.PAYOUT_TRAY_CATCHER_MARGIN - dimensions.PAYOUT_TRAY_ENTRY_CATCH_OVERLAP,
+    'the edge payout must originate from the recessed catcher beneath the deck lip');
+  } finally {
+    deckLipModel.destroy();
+  }
+
   const extendedTrayModel = new CoinPusherModel();
   try {
     for (const coin of extendedTrayModel.coins.splice(0)) extendedTrayModel.world.removeRigidBody(coin.body);
@@ -566,7 +605,7 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
           const velocity = coin.body.linvel();
           if (velocity.y > maxUpwardSpeed) {
             maxUpwardSpeed = velocity.y;
-            maxUpwardSpeedDetails = `frame=${frame}, id=${coin.id}, pos=${JSON.stringify(position)}, riding=${coin.ridingPusher}, nudges=${coin.restNudges}`;
+            maxUpwardSpeedDetails = `frame=${frame}, id=${coin.id}, pos=${JSON.stringify(position)}, tumbling=${coin.tumbling}, riding=${coin.ridingPusher}, nudges=${coin.restNudges}`;
           }
           if (position.z >= dimensions.MAIN_DECK_BACK_Z && position.z <= dimensions.MAIN_DECK_FRONT_Z) {
             worstSideEscape = Math.max(worstSideEscape, Math.abs(position.x) - 2.69);
@@ -624,9 +663,9 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
       assert.ok(maxDropTumble > .3, `run ${runIndex + 1}: a dropped coin should visibly tumble off-axis before landing`);
       assert.ok(!model.coins.some((coin) => !coin.dropped && coin.ridingPusher),
         `run ${runIndex + 1}: starter-deck coins must not be teleported as plate riders`);
-      assert.ok(maxUpwardSpeed < 1.75,
-        `run ${runIndex + 1}: the pile should not visibly pop a coin upward (${maxUpwardSpeed.toFixed(2)}m/s; ${maxUpwardSpeedDetails})`);
-      assert.ok(maxRiderSupportGap < .03,
+      assert.ok(maxUpwardSpeed <= .651,
+        `run ${runIndex + 1}: playfield rebound must stay at or below the 0.65m/s anti-pop cap (${maxUpwardSpeed.toFixed(2)}m/s; ${maxUpwardSpeedDetails})`);
+      assert.ok(maxRiderSupportGap < .015,
         `run ${runIndex + 1}: every carried coin must remain supported by the plate (${maxRiderSupportGap.toFixed(3)}m)`);
       assert.equal(unsupportedPusherContacts, 0,
         `run ${runIndex + 1}: a coin resting on the moving plate must stay attached (${firstUnsupportedPusherContact})`);
