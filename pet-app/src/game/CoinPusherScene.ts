@@ -6,7 +6,7 @@ import mintedCoinFaceTextureUrl from './assets/coin-pusher-minted-paw-desktop-v2
 import compactMintedCoinFaceTextureUrl from './assets/coin-pusher-minted-paw-mobile-v2.webp';
 import { coinPusherTravelProgress } from './CoinPusherFeedback';
 import { createCoinPusherStarterLayout } from './CoinPusherLayout';
-import type { CoinPusherDropBeat, CoinPusherModel } from './CoinPusherModel';
+import type { CoinPusherDropBeat, CoinPusherModel, CoinPusherModelSnapshot } from './CoinPusherModel';
 import {
   MAIN_DECK_BACK_Z,
   MAIN_DECK_FRONT_Z,
@@ -96,6 +96,7 @@ export class CoinPusherScene {
     onPusherStroke: PusherStrokeCallback = () => undefined,
     existingModel?: CoinPusherModel,
     onVisualPreviewReady: () => void = () => undefined,
+    savedSnapshot?: CoinPusherModelSnapshot,
   ) {
     const notifyAvailability: WebGLAvailabilityCallback = (available, reason) => {
       try { onAvailability(available, reason); }
@@ -180,7 +181,9 @@ export class CoinPusherScene {
           throw modelResult?.error ?? new Error('Coin-pusher physics module did not load');
         }
         const { CoinPusherModel: CoinPusherModelRuntime } = modelResult.module;
-        model = new CoinPusherModelRuntime();
+        model = savedSnapshot
+          ? CoinPusherModelRuntime.restoreSnapshot(savedSnapshot)
+          : new CoinPusherModelRuntime();
         view.attachModel(model);
       }
       const textures = await Promise.all([brushedMetalTask, backboardTask, mintedCoinTask]);
@@ -677,7 +680,7 @@ export class CoinPusherScene {
     // Portrait phones have far more height than the cabinet's landscape silhouette can use.
     // Spend a little of the cabinet's outer-rail margin to enlarge the playable deck, and tilt
     // down enough to make the coin rows legible without distorting swipe-to-world coordinates.
-    const halfWidth = compactPortrait ? 2.95 : 3.23;
+    const halfWidth = compactPortrait ? 2.78 : 3.23;
     const targetY = compactPortrait ? .43 : .22 + .26 * broadLandscape;
     const portrait = aspect < 1.1;
     // On landscape screens, center the framing between the rear coin bed and the front payout
@@ -1277,6 +1280,7 @@ export class CoinPusherScene {
   private syncCoins() {
     const physicsCoins = this.simulation?.coins;
     const count = Math.min(physicsCoins?.length ?? this.previewCoinLayout.length, MAX_COIN_INSTANCES);
+    this.root.dataset.coinCount = String(count);
     if (physicsCoins) delete this.root.dataset.previewCoinCount;
     else this.root.dataset.previewCoinCount = String(count);
     let coinTintsChanged = false;

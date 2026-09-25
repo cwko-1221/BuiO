@@ -74,6 +74,10 @@ process.once('exit', stopServer);
 
 const errors = [];
 const requests = [];
+const playRequestKeys = [];
+const payoutRequestEvents = [];
+let expectedLostTransactionReply = false;
+let lostPayoutEventId;
 const coinPusherModuleRequests = [];
 const coinPusherWasmResponseHeaders = [];
 let payoutTotal = 0;
@@ -89,6 +93,13 @@ try {
   browser = await chromium.launch({ headless: true, channel: 'chrome' });
   const context = await browser.newContext({ baseURL, viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
   const page = await context.newPage();
+  await page.route('**/api/pet/coin-pusher/payout', async (route) => {
+    const credited = await route.fetch();
+    assert.equal(credited.status(), 200, 'payout fault injection must happen after the server commits the reward');
+    lostPayoutEventId = route.request().postDataJSON().eventId;
+    await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ success: false, message: 'simulated lost payout reply' }) });
+  }, { times: 1 });
+  expectedLostTransactionReply = true;
   const capturingVisualStages = new Set();
   const capturedVisualStages = new Set();
   await page.exposeFunction('__capturePusherVisualStage', async (stage) => {
@@ -191,13 +202,27 @@ try {
     }
   }, profileStartup);
   page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
-  page.on('console', (message) => { if (message.type() === 'error') errors.push(`console: ${message.text()}`); });
+  page.on('console', (message) => {
+    if (message.type() !== 'error') return;
+    if (expectedLostTransactionReply && /503 \(Service Unavailable\)/i.test(message.text())) return;
+    errors.push(`console: ${message.text()}`);
+  });
   page.on('request', (request) => {
     const pathname = new URL(request.url()).pathname;
     if (/CoinPusherScene|CoinPusherModel|rapier_wasm3d_bg/i.test(pathname)) {
       coinPusherModuleRequests.push({ name: pathname.split('/').pop(), requestedAt: Date.now() });
     }
-    if (request.url().includes('/api/pet/coin-pusher/')) requests.push(request.url());
+    if (request.url().includes('/api/pet/coin-pusher/')) {
+      requests.push(request.url());
+      const headers = request.headers();
+      if (request.url().endsWith('/coin-pusher/play')) playRequestKeys.push(headers['idempotency-key']);
+      if (request.url().endsWith('/coin-pusher/payout')) {
+        try {
+          const body = JSON.parse(request.postData() || '{}');
+          payoutRequestEvents.push({ eventId: body.eventId, amount: Number(body.amount) || 0, requestKey: headers['idempotency-key'] });
+        } catch {}
+      }
+    }
   });
   page.on('response', (response) => {
     if (/rapier_wasm3d_bg.*\.wasm$/i.test(new URL(response.url()).pathname)) {
@@ -721,6 +746,19 @@ try {
   await waitFor(() => capturedVisualStages.has('tray'),
     'the landed coin must visibly enter the collection well before its wallet payout');
   await waitFor(() => payoutTotal > 0, 'a collected coin must be returned to the student wallet');
+  await waitFor(() => !!lostPayoutEventId
+    && payoutRequestEvents.filter(({ eventId }) => eventId === lostPayoutEventId).length === 2,
+  'a payout with a lost reply must be retried using the durable event');
+  expectedLostTransactionReply = false;
+  const lostPayoutAttempts = payoutRequestEvents.filter(({ eventId }) => eventId === lostPayoutEventId);
+  assert.equal(lostPayoutAttempts[0].requestKey, lostPayoutAttempts[1].requestKey,
+    'a committed payout retried after a lost response must reuse its original idempotency key');
+  const databaseAfterLostPayout = JSON.parse(await fs.readFile(databaseFile, 'utf8'));
+  const lostPayoutCredits = databaseAfterLostPayout.petCurrencyLedger.filter((row) =>
+    row.studentId === 'S001' && row.kind === 'coin_pusher_payout' && row.idempotencyKey === lostPayoutAttempts[0].requestKey);
+  assert.equal(lostPayoutCredits.length, 1, 'a lost payout response and retry must credit the wallet exactly once');
+  assert.equal(lostPayoutCredits[0].delta, lostPayoutAttempts[0].amount,
+    'the one wallet credit must match the server-confirmed physical collection amount');
   try {
     await waitFor(async () => page.evaluate(() => window.__coinStatusDebug.some(({ text }) => /已回到錢包|added to wallet/i.test(text || ''))),
       'the confirmed payout must update the student wallet status');
@@ -860,6 +898,9 @@ try {
         })));
       assert.ok(touchTargets.every(({ width, height }) => width >= 44 && height >= 44),
         `${viewport.name}: visible HUD controls must keep >=44px touch targets (${JSON.stringify(touchTargets)})`);
+    }
+    if (viewport.name === 'phone') {
+      await page.screenshot({ path: path.join(artifactDir, 'coin-pusher-phone-portrait-playtest.png'), animations: 'allow' });
     }
     const brandLayout = await page.locator('.coin-pusher-brand').evaluate((brand) => {
       const heading = brand.querySelector('.coin-pusher-brand-heading')?.getBoundingClientRect();
@@ -1297,6 +1338,74 @@ try {
     'leaving and re-entering must reconnect to the same Rapier world rather than reset the board');
   assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, paidDropsBeforeReentry,
     're-entering the saved board must not charge another coin');
+
+  const coinsBeforeReload = await page.locator('#coin-pusher-root').getAttribute('data-coin-count');
+  const walletBeforeReloadResponse = await context.request.get('/api/pet/bootstrap');
+  const walletBeforeReload = Number((await walletBeforeReloadResponse.json()).wallet.balance);
+  const paidDropsBeforeReload = playRequestKeys.length;
+  assert.ok(Number(coinsBeforeReload) > 0, 'the live board must expose its current physical coin count');
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-tab="coinPusher"]').click();
+  await page.locator('#coin-pusher-root canvas').waitFor();
+  await waitFor(async () => await page.locator('#coin-pusher-root').getAttribute('data-session-restored') === 'true',
+    "a page reload must reopen the student's saved Rapier session");
+  await waitFor(async () => !(await page.locator('#coin-pusher-root').getAttribute('aria-busy') === 'true'),
+    'the restored board did not finish rendering');
+  await waitFor(async () => !(await page.locator('.coin-pusher-drop').isDisabled()),
+    'the restored board did not become playable');
+  assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-coin-count'), coinsBeforeReload,
+    'a reload must restore the same coins instead of rebuilding the starting pile');
+  assert.equal(playRequestKeys.length, paidDropsBeforeReload,
+    'reopening the saved session must not silently charge another coin');
+  const walletAfterReloadResponse = await context.request.get('/api/pet/bootstrap');
+  assert.equal(Number((await walletAfterReloadResponse.json()).wallet.balance), walletBeforeReload,
+    'reopening the saved session must preserve the authoritative student wallet balance');
+  const payoutKeysByEvent = new Map();
+  for (const { eventId, requestKey } of payoutRequestEvents) {
+    if (payoutKeysByEvent.has(eventId)) assert.equal(requestKey, payoutKeysByEvent.get(eventId),
+      'a replayed payout event must keep its original idempotency key');
+    else payoutKeysByEvent.set(eventId, requestKey);
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  assert.deepEqual(page.viewportSize(), { width: 1440, height: 900 },
+    'desktop reload evidence must be captured at the named desktop viewport');
+  await page.screenshot({ path: path.join(artifactDir, 'coin-pusher-restored-after-reload-desktop.png'), animations: 'allow' });
+
+  const lostReplyPlayRoute = '**/api/pet/coin-pusher/play';
+  const playCountBeforeLostReply = playRequestKeys.length;
+  const coinCountBeforeLostReply = Number(await page.locator('#coin-pusher-root').getAttribute('data-coin-count'));
+  await page.route(lostReplyPlayRoute, async (route) => {
+    const charged = await route.fetch();
+    assert.equal(charged.status(), 200, 'fault injection must happen after the server committed the play');
+    await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ success: false, message: 'simulated lost reply' }) });
+  }, { times: 1 });
+  expectedLostTransactionReply = true;
+  await page.locator('.coin-pusher-drop').click();
+  await waitFor(async () => /結果未確認|Drop not confirmed/i.test(await page.locator('#coinPusherSystemStatus').textContent() || ''),
+    'a lost play response must leave a safe, retryable confirmation state');
+  await page.unroute(lostReplyPlayRoute);
+  expectedLostTransactionReply = false;
+  assert.equal(playRequestKeys.length, playCountBeforeLostReply + 1,
+    'the server must receive the first paid-drop attempt before the simulated reply loss');
+  const retriedDropKey = playRequestKeys.at(-1);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-tab="coinPusher"]').click();
+  await page.locator('#coin-pusher-root canvas').waitFor();
+  await waitFor(async () => await page.locator('#coin-pusher-root').getAttribute('data-session-restored') === 'true',
+    'the uncertain paid drop must survive a page reload in the saved student session');
+  await waitFor(() => playRequestKeys.length === playCountBeforeLostReply + 2,
+    'the restored session must automatically retry an uncertain paid drop');
+  await waitFor(async () => !(await page.locator('.coin-pusher-drop').isDisabled()),
+    'the retried paid drop did not complete');
+  assert.equal(playRequestKeys.at(-1), retriedDropKey,
+    'recovery after a reload must reuse the original idempotency key');
+  const databaseAfterLostReply = JSON.parse(await fs.readFile(databaseFile, 'utf8'));
+  const lostReplyCharges = databaseAfterLostReply.petCurrencyLedger.filter((row) =>
+    row.studentId === 'S001' && row.kind === 'coin_pusher_play' && row.idempotencyKey === retriedDropKey);
+  assert.equal(lostReplyCharges.length, 1, 'a lost response and retry must debit exactly once');
+  assert.equal(lostReplyCharges[0].delta, -1, 'a recovered play must still cost exactly one student coin');
+  assert.ok(Number(await page.locator('#coin-pusher-root').getAttribute('data-coin-count')) >= coinCountBeforeLostReply,
+    'the confirmed paid drop must remain on the restored physical board');
 
   // Force the real WASM failure path once. The retry intentionally reloads the document because
   // browsers cache a failed dynamic module evaluation; an in-place import would repeat the same

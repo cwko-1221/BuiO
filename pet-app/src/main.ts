@@ -8,6 +8,15 @@ import { PetAvatar } from './game/PetAvatar';
 import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCascadeLabel, coinPusherStampProgress, coinPusherTimingStreakLabel, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
 import type { CoinPusherTimingStreakState } from './game/CoinPusherFeedback';
 import type { CoinPusherDropBeat } from './game/CoinPusherModel';
+import {
+  loadCoinPusherSession as readCoinPusherSession,
+  saveCoinPusherSession as writeCoinPusherSession,
+} from './game/CoinPusherSessionStore';
+import type {
+  CoinPusherSession,
+  StoredCoinPusherDrop,
+  StoredCoinPusherPayout,
+} from './game/CoinPusherSessionStore';
 import { placeWearable } from './game/wearableLayout';
 import type { Bootstrap, Identity, InventoryStack, Locale, PetDefinition, PetInstance, RoomPlacement, TeacherGrantNotification } from './types';
 import { idempotencyKey } from './types';
@@ -130,8 +139,18 @@ class StudentApp {
   private coinPusherReturnFocus?: HTMLElement;
   private coinPusherPayoutSequence = 0;
   private coinPusherPayoutQueue: Promise<void> = Promise.resolve();
+  private coinPusherPayoutsQueued = new Set<string>();
+  private coinPusherPayoutRetryTimer?: number;
   private coinPusherTrayCatchUntil = 0;
   private coinPusherPlays: { playId: string; remaining: number; reserved: number; generation: number }[] = [];
+  private coinPusherPendingDrop?: StoredCoinPusherDrop;
+  private coinPusherPendingPayouts: StoredCoinPusherPayout[] = [];
+  private coinPusherAutosaveTimer?: number;
+  private coinPusherSession?: CoinPusherSession;
+  private coinPusherSessionLoading?: Promise<CoinPusherSession | undefined>;
+  private coinPusherSessionSaveQueue: Promise<void> = Promise.resolve();
+  private coinPusherPersistenceFailed = false;
+  private coinPusherSessionRestored = false;
   visiting?: any;
   surfaceObserver?: ResizeObserver;
   constructor(identity: Identity) { this.identity = identity; this.locale = identity.language || 'zh-HK'; }
@@ -159,6 +178,9 @@ class StudentApp {
       viewport.content = `${viewport.content}, viewport-fit=cover`;
     }
     this.state = await api.bootstrap();
+    document.addEventListener('visibilitychange', this.handleCoinPusherVisibility);
+    window.addEventListener('pagehide', this.handleCoinPusherPageHide);
+    window.addEventListener('online', this.retryPendingCoinPusherPayouts);
     const grantNotifications = api.grantNotifications().catch((error) => {
       console.warn('[pet] Could not load grant notifications', error); return { success: true as const, grants: [] as TeacherGrantNotification[] };
     });
@@ -216,6 +238,62 @@ class StudentApp {
   private loadCoinPusherModelModule() {
     return this.coinPusherModelModule ??= import('./game/CoinPusherModel');
   }
+  private loadCoinPusherStoredSession() {
+    return this.coinPusherSessionLoading ??= readCoinPusherSession(this.identity.id).then((session) => {
+      this.coinPusherSession = session;
+      return session;
+    });
+  }
+  private handleCoinPusherVisibility = () => {
+    if (document.visibilityState === 'hidden') void this.persistCoinPusherSession();
+    else void this.persistCoinPusherSession().then((saved)=>{if(saved)this.retryPendingCoinPusherPayouts();});
+  };
+  private handleCoinPusherPageHide = () => { void this.persistCoinPusherSession(); };
+  private async persistCoinPusherSession(): Promise<boolean> {
+    const model = this.coinPusherView?.model ?? this.coinPusherModel;
+    if (!model) return true;
+    const task = this.coinPusherSessionSaveQueue.catch(() => undefined).then(async () => {
+      const session: CoinPusherSession = {
+        version: 1,
+        studentId: this.identity.id,
+        updatedAt: Date.now(),
+        model: model.createSnapshot(),
+        plays: this.coinPusherPlays.map(({ playId, remaining }) => ({ playId, remaining })),
+        payoutSequence: this.coinPusherPayoutSequence,
+        pendingPayouts: this.coinPusherPendingPayouts.map((payout) => ({ ...payout })),
+        ...(this.coinPusherPendingDrop ? { pendingDrop: { ...this.coinPusherPendingDrop,
+          ...(this.coinPusherPendingDrop.result ? { result: { ...this.coinPusherPendingDrop.result } } : {}) } } : {}),
+      };
+      await writeCoinPusherSession(session);
+      this.coinPusherSession = session;
+      this.coinPusherPersistenceFailed = false;
+      this.syncCoinPusherControls();
+    });
+    this.coinPusherSessionSaveQueue = task;
+    try {
+      await task;
+      return true;
+    } catch (error) {
+      this.coinPusherPersistenceFailed = true;
+      console.warn('[pet] Could not persist coin-pusher session', error);
+      this.syncCoinPusherControls();
+      return false;
+    }
+  }
+  private startCoinPusherAutosave(generation: number) {
+    if (this.coinPusherAutosaveTimer !== undefined) window.clearInterval(this.coinPusherAutosaveTimer);
+    this.coinPusherAutosaveTimer = window.setInterval(() => {
+      if (generation === this.coinPusherGeneration) {
+        void this.persistCoinPusherSession().then((saved)=>{
+          if(!saved)return;
+          this.retryPendingCoinPusherPayouts();
+          if(this.tab==='coinPusher'&&!this.coinPusherBusy&&this.coinPusherPendingDrop&&!this.coinPusherPendingDrop.applied){
+            void this.dropCoinPusher(this.coinPusherPendingDrop.worldX,true);
+          }
+        });
+      }
+    }, 5000);
+  }
   private startCoinPusherPreload() {
     if(this.coinPusherSceneModule||document.visibilityState==='hidden')return;
     // Rapier's glue module is only about 40KB; its 700KB+ compressed WASM normally starts after
@@ -267,7 +345,7 @@ class StudentApp {
     try {
       await audio.unlock(); audio.sfx('tap');
       if (button.dataset.tab) {
-        if (this.tab==='coinPusher' && this.coinPusherPaymentInFlight) {
+        if (this.tab==='coinPusher' && (this.coinPusherPaymentInFlight||this.coinPusherBusy)) {
           this.setCoinPusherStatus(this.coinPusherExitWaitMessage());
           return;
         }
@@ -883,7 +961,32 @@ class StudentApp {
     if(this.coinPusherInitPending){audio.setTheme('arcade');return;}
     this.coinPusherInitPending=true;
     this.cancelCoinPusherPreload();
-    void this.loadCoinPusherSceneModule().then(({CoinPusherScene})=>CoinPusherScene.create(
+    const inMemoryModel=this.coinPusherModel;
+    void this.loadCoinPusherStoredSession().then((savedSession)=>{
+      if(generation!==this.coinPusherGeneration||this.tab!=='coinPusher')return undefined;
+      const restoreSession=inMemoryModel?undefined:savedSession;
+      if(restoreSession){
+        this.coinPusherPlays=restoreSession.plays.map((play)=>({
+          ...play,reserved:0,generation,
+        }));
+        this.coinPusherPendingPayouts=restoreSession.pendingPayouts.map((payout)=>({...payout}));
+        for(const payout of this.coinPusherPendingPayouts){
+          let play=this.coinPusherPlays.find((entry)=>entry.playId===payout.playId);
+          if(!play){
+            play={playId:payout.playId,remaining:100,reserved:0,generation};
+            this.coinPusherPlays.push(play);
+          }
+          play.reserved+=payout.amount;
+        }
+        this.coinPusherPendingDrop=restoreSession.pendingDrop?{
+          ...restoreSession.pendingDrop,
+          ...(restoreSession.pendingDrop.result?{result:{...restoreSession.pendingDrop.result}}:{}),
+        }:undefined;
+        this.coinPusherPayoutSequence=restoreSession.payoutSequence;
+      }
+      this.coinPusherSessionRestored=!!restoreSession;
+      coinRoot.dataset.sessionRestored=String(!!restoreSession);
+      return this.loadCoinPusherSceneModule().then(({CoinPusherScene})=>CoinPusherScene.create(
       coinRoot,
       (worldX) => {
         if(generation!==this.coinPusherGeneration||this.coinPusherBusy)return;
@@ -937,7 +1040,10 @@ class StudentApp {
         coinRoot.dataset.loadingStage='physics';
         this.setCoinPusherStatus(zh?'機台已準備，正在啟動物理…':'Cabinet ready · starting physics…');
       },
-    )).then((view)=>{
+      restoreSession?.model,
+    ));
+    }).then((view)=>{
+      if(!view)return;
       if(generation!==this.coinPusherGeneration){view.destroy();return;}
       this.coinPusherInitPending=false;
       this.coinPusherModel=view.model;
@@ -954,6 +1060,14 @@ class StudentApp {
       coinRoot.insertAdjacentHTML('beforeend',`<div class="coin-pusher-webgl-overlay" role="status" aria-live="polite" hidden><div><b>${zh?'3D 畫面暫停':'3D rendering paused'}</b><span>${zh?'圖像恢復後才可以落幣。':'Dropping is disabled until graphics return.'}</span></div></div>`);
       if(!this.coinPusherWebglLost)this.setCoinPusherStatus(this.coinPusherReadyMessage());
       this.syncCoinPusherControls();
+      this.startCoinPusherAutosave(generation);
+      if(!this.coinPusherSessionRestored){
+        void this.persistCoinPusherSession();
+      }
+      for(const payout of this.coinPusherPendingPayouts)this.queueCoinPusherPayout(payout,generation,true);
+      if(this.coinPusherPendingDrop&&!this.coinPusherPendingDrop.applied){
+        void this.dropCoinPusher(this.coinPusherPendingDrop.worldX,true);
+      }
     }).catch((error)=>{
       this.coinPusherSceneModule=undefined;
       this.coinPusherModelModule=undefined;
@@ -969,13 +1083,16 @@ class StudentApp {
     });
     audio.setTheme('arcade');
   }
-  private async authorizeCoinPusherDrop(generation:number) {
+  private async authorizeCoinPusherDrop(generation:number,requestKey:string,recovered=false) {
     this.coinPusherPaymentInFlight=true;
     try {
-      const result=await api.playCoinPusher(idempotencyKey());
+      const result=await api.playCoinPusher(requestKey);
       if(generation!==this.coinPusherGeneration)return undefined;
-      this.state.wallet.balance=Number(result.balance);
-      this.updateWallet();
+      if(recovered)await this.reload();
+      else{
+        this.state.wallet.balance=Number(result.balance);
+        this.updateWallet();
+      }
       return result;
     } catch(error) {
       this.handleCoinPusherTransactionError(error as Error);
@@ -985,11 +1102,13 @@ class StudentApp {
       this.syncCoinPusherControls();
     }
   }
-  private async dropCoinPusher(worldX=0) {
+  private async dropCoinPusher(worldX=0,recovered=false) {
     const zh=this.locale==='zh-HK';
     if(this.coinPusherBusy)return;
     if(!this.coinPusherReady||this.coinPusherWebglLost||this.coinPusherInitFailed){this.syncCoinPusherControls();return;}
-    if(Number(this.state.wallet.balance) < COIN_PUSHER_DROP_COST){
+    const existingPending=this.coinPusherPendingDrop&&!this.coinPusherPendingDrop.applied
+      ?this.coinPusherPendingDrop:undefined;
+    if(!existingPending&&Number(this.state.wallet.balance) < COIN_PUSHER_DROP_COST){
       this.setCoinPusherStatus(this.coinPusherInsufficientMessage());
       this.toast(zh?'金幣唔夠；每次落幣需要 1 枚。':'Not enough coins. Each drop costs 1 coin.',true);
       this.syncCoinPusherControls();
@@ -1009,32 +1128,61 @@ class StudentApp {
     void audio.unlock().catch(()=>undefined);
     const generation=this.coinPusherGeneration;
     this.coinPusherBusy=true;
-    this.setCoinPusherStatus(zh?'正在扣 1 金幣 · 請稍候…':'Charging 1 coin · please wait…');
+    this.setCoinPusherStatus(existingPending
+      ?(zh?'正在安全確認已付落幣…':'Safely confirming your paid drop…')
+      :(zh?'正在安全保存機台…':'Saving the arcade before your drop…'));
     const dropStatusRevision=this.coinPusherStatusRevision;
     this.syncCoinPusherControls();
-    const playResult=await this.authorizeCoinPusherDrop(generation);
+    let pending=existingPending;
+    if(!pending){
+      pending={requestKey:idempotencyKey(),worldX,applied:false};
+      this.coinPusherPendingDrop=pending;
+      if(!await this.persistCoinPusherSession()){
+        this.coinPusherPendingDrop=undefined;
+        this.coinPusherBusy=false;
+        this.setCoinPusherStatus(zh?'機台未能安全暫存，今次沒有扣幣。':'Could not safely save the arcade; no coin was charged.');
+        this.toast(zh?'暫存空間未能使用，請稍後再試。':'Arcade storage is unavailable. Please try again.',true);
+        this.syncCoinPusherControls();
+        return;
+      }
+    }
+    let playResult=pending.result;
+    if(!playResult)playResult=await this.authorizeCoinPusherDrop(generation,pending.requestKey,recovered||!!existingPending);
     if(!playResult){
       this.coinPusherBusy=false;
-      if(this.coinPusherStatusRevision===dropStatusRevision)this.setCoinPusherStatus(this.coinPusherReadyMessage());
+      if(this.coinPusherStatusRevision===dropStatusRevision)this.setCoinPusherStatus(zh
+        ?'落幣結果未確認；重試會安全核對，不會重複扣幣。'
+        :'Drop not confirmed. Retry to safely check it; you will not be charged twice.');
       this.syncCoinPusherControls();
       return;
     }
-    if(generation!==this.coinPusherGeneration||scene!==this.coinPusherView)return;
-    const dropId=scene.dropCoin(worldX);
+    pending.result={playId:String(playResult.playId),payoutCap:Number(playResult.payoutCap)||100};
+    if(generation!==this.coinPusherGeneration||scene!==this.coinPusherView){
+      this.coinPusherBusy=false;
+      void this.persistCoinPusherSession();
+      return;
+    }
+    const dropId=scene.dropCoin(pending.worldX);
     if(dropId===undefined){
       this.coinPusherBusy=false;
-      this.setCoinPusherStatus(this.coinPusherReadyMessage());
+      this.setCoinPusherStatus(zh?'落幣已確認，機台可接收時會放回盤面。':'Drop confirmed; it will enter the board when a slot is available.');
+      void this.persistCoinPusherSession();
       this.syncCoinPusherControls();
       return;
     }
-    if(playResult.playId)this.coinPusherPlays.push({playId:String(playResult.playId),remaining:Number(playResult.payoutCap)||100,reserved:0,generation});
+    this.coinPusherPlays.push({playId:pending.result.playId,remaining:pending.result.payoutCap,reserved:0,generation});
+    pending.applied=true;
+    const persisted=await this.persistCoinPusherSession();
     audio.sfx('arcadeDrop');
     if(this.coinPusherCooldown!==undefined)window.clearTimeout(this.coinPusherCooldown);
     this.coinPusherCooldown=window.setTimeout(()=>{
       this.coinPusherCooldown=undefined;
       if(generation!==this.coinPusherGeneration)return;
       this.coinPusherBusy=false;
-      if(this.coinPusherStatusRevision===dropStatusRevision)this.setCoinPusherStatus(this.coinPusherReadyMessage());
+      if(!persisted)this.setCoinPusherStatus(zh
+        ?'銀仔已落盤；正在重試保存局面，保存完成前暫停落幣。'
+        :'Coin is on the board. Saving will retry; drops pause until the board is safely stored.');
+      else if(this.coinPusherStatusRevision===dropStatusRevision)this.setCoinPusherStatus(this.coinPusherReadyMessage());
       this.syncCoinPusherControls();
     },220);
   }
@@ -1051,16 +1199,23 @@ class StudentApp {
   private handleCoinPusherTransactionError(error:Error) {
     const zh=this.locale==='zh-HK';
     const insufficient=error.message==='Not enough coins';
-    this.setCoinPusherStatus(insufficient?this.coinPusherInsufficientMessage():(zh?'落幣未完成，金幣未扣除。':'Drop failed; no coin was charged.'));
-    this.toast(insufficient?(zh?'金幣唔夠；每次落幣需要 1 枚。':'Not enough coins. Each drop costs 1 coin.'):(zh?'落幣未完成，請稍後再試。':'Drop failed. Please try again.'),true);
+    this.setCoinPusherStatus(insufficient?this.coinPusherInsufficientMessage():(zh
+      ?'落幣結果未確認；重試會安全核對，不會重複扣幣。'
+      :'Drop not confirmed. Retry to safely check it; you will not be charged twice.'));
+    this.toast(insufficient?(zh?'金幣唔夠；每次落幣需要 1 枚。':'Not enough coins. Each drop costs 1 coin.'):(zh
+      ?'網絡未能確認落幣；可安全重試。'
+      :'The drop could not be confirmed; it is safe to retry.'),true);
   }
   private handleCoinPusherPayoutError(error:Error) {
     const zh=this.locale==='zh-HK';
-    this.setCoinPusherStatus(zh?'推出獎勵未入帳；請稍後再試。':'Payout could not be credited; please try again later.');
-    this.toast(zh?'推出獎勵暫時未能入帳。':'Payout could not be credited.',true);
+    this.setCoinPusherStatus(zh?'推出獎勵已安全暫存，網絡恢復後會重試。':'Your payout is safely saved and will retry when the connection returns.');
+    this.toast(zh?'獎勵暫存中，請保持連線或稍後返回機台。':'Payout saved. Stay online or return to the arcade later.',true);
   }
   private coinPusherReadyMessage() {
     const zh=this.locale==='zh-HK';
+    if(this.coinPusherPendingDrop&&!this.coinPusherPendingDrop.applied)return zh
+      ?'有一枚已付落幣待確認 · 重試不會重複扣幣'
+      :'One paid drop needs confirmation · retry will not charge twice';
     return Number(this.state.wallet.balance) < COIN_PUSHER_DROP_COST
       ? this.coinPusherInsufficientMessage()
       : zh?'下滑揀位 · 落幣 −1 · 入槽 +1':'Swipe to aim · drop −1 · tray +1';
@@ -1136,12 +1291,51 @@ class StudentApp {
     if(amount<=0)return;
     const eventId=`${play.playId}:${++this.coinPusherPayoutSequence}`;
     const requestKey=idempotencyKey();
-    const payoutOrigins=origins?.slice(0,amount);
     play.reserved+=amount;
-    const job=()=>this.submitCoinPusherPayout(play,amount,eventId,requestKey,generation,payoutOrigins).then(()=>undefined);
+    const payout:StoredCoinPusherPayout={playId:play.playId,amount,eventId,requestKey};
+    this.coinPusherPendingPayouts.push(payout);
+    const payoutOrigins=origins?.slice(0,amount);
+    void this.persistCoinPusherSession().then((saved)=>{
+      if(!saved){
+        if(generation===this.coinPusherGeneration&&this.tab==='coinPusher')this.handleCoinPusherPayoutError(new Error('storage'));
+        return;
+      }
+      this.queueCoinPusherPayout(payout,generation,false,payoutOrigins);
+    });
+  }
+  private queueCoinPusherPayout(payout:StoredCoinPusherPayout,generation:number,recovered=false,origins?:CoinPusherRewardOrigin[]) {
+    if(this.coinPusherPayoutsQueued.has(payout.eventId))return;
+    let play=this.coinPusherPlays.find((entry)=>entry.playId===payout.playId);
+    if(!play){
+      play={playId:payout.playId,remaining:100,reserved:payout.amount,generation};
+      this.coinPusherPlays.push(play);
+    }
+    this.coinPusherPayoutsQueued.add(payout.eventId);
+    const job=async()=>{
+      const succeeded=await this.submitCoinPusherPayout(play!,payout,generation,origins,0,recovered);
+      this.coinPusherPayoutsQueued.delete(payout.eventId);
+      if(!succeeded)this.scheduleCoinPusherPayoutRetry();
+    };
     this.coinPusherPayoutQueue=this.coinPusherPayoutQueue.catch(()=>undefined).then(job);
   }
-  private async submitCoinPusherPayout(play:{playId:string;remaining:number;reserved:number}, amount:number, eventId:string, requestKey:string, generation:number, origins?:CoinPusherRewardOrigin[], attempt=0):Promise<boolean> {
+  private retryPendingCoinPusherPayouts = () => {
+    if(!this.coinPusherPendingPayouts.length||document.visibilityState==='hidden')return;
+    if(this.coinPusherPayoutRetryTimer!==undefined){
+      window.clearTimeout(this.coinPusherPayoutRetryTimer);
+      this.coinPusherPayoutRetryTimer=undefined;
+    }
+    const generation=this.coinPusherGeneration;
+    for(const payout of this.coinPusherPendingPayouts)this.queueCoinPusherPayout(payout,generation,true);
+  };
+  private scheduleCoinPusherPayoutRetry() {
+    if(this.coinPusherPayoutRetryTimer!==undefined||!this.coinPusherPendingPayouts.length)return;
+    this.coinPusherPayoutRetryTimer=window.setTimeout(()=>{
+      this.coinPusherPayoutRetryTimer=undefined;
+      this.retryPendingCoinPusherPayouts();
+    },5000);
+  }
+  private async submitCoinPusherPayout(play:{playId:string;remaining:number;reserved:number}, payout:StoredCoinPusherPayout, generation:number, origins?:CoinPusherRewardOrigin[], attempt=0, recovered=false):Promise<boolean> {
+    const {amount,eventId,requestKey}=payout;
     try {
       const result=await api.payoutCoinPusher({playId:play.playId,eventId,amount},requestKey);
       const previousStamps=this.coinPusherStampCount();
@@ -1150,7 +1344,10 @@ class StudentApp {
       this.syncCoinPusherCollectionBadge();
       play.reserved=Math.max(0,play.reserved-amount);
       play.remaining=Number(result.remainingPayout);
+      this.coinPusherPendingPayouts=this.coinPusherPendingPayouts.filter((entry)=>entry.eventId!==eventId);
       if(play.remaining<=0&&play.reserved<=0)this.coinPusherPlays=this.coinPusherPlays.filter((entry)=>entry!==play);
+      if(recovered)await this.reload();
+      await this.persistCoinPusherSession();
       const catchAnimationRemaining=Math.max(0,this.coinPusherTrayCatchUntil-performance.now());
       if(catchAnimationRemaining>0)await new Promise((resolve)=>window.setTimeout(resolve,catchAnimationRemaining));
       if(generation===this.coinPusherGeneration&&this.tab==='coinPusher'){
@@ -1172,9 +1369,8 @@ class StudentApp {
     } catch(error) {
       if(attempt<1){
         await new Promise((resolve)=>window.setTimeout(resolve,350));
-        return this.submitCoinPusherPayout(play,amount,eventId,requestKey,generation,origins,attempt+1);
+        return this.submitCoinPusherPayout(play,payout,generation,origins,attempt+1,recovered);
       }
-      play.reserved=Math.max(0,play.reserved-amount);
       if(generation===this.coinPusherGeneration&&this.tab==='coinPusher')this.handleCoinPusherPayoutError(error as Error);
       return false;
     }
@@ -1293,21 +1489,30 @@ class StudentApp {
     if(overlay)overlay.hidden=!this.coinPusherWebglLost;
     const dropButton=document.querySelector<HTMLButtonElement>('.coin-pusher-drop');
     if(dropButton){
+      const pending=!!this.coinPusherPendingDrop&&!this.coinPusherPendingDrop.applied;
       const canAfford=Number(this.state.wallet.balance) >= COIN_PUSHER_DROP_COST;
-      const disabled=!ready||this.coinPusherBusy||!canAfford;
+      const disabled=!ready||this.coinPusherBusy||this.coinPusherPersistenceFailed||(!pending&&!canAfford);
       dropButton.disabled=disabled;
-      dropButton.classList.toggle('is-insufficient',ready&&!this.coinPusherBusy&&!canAfford);
+      dropButton.classList.toggle('is-insufficient',ready&&!this.coinPusherBusy&&!pending&&!canAfford);
       dropButton.setAttribute('aria-disabled',String(disabled));
-      dropButton.setAttribute('aria-label',!canAfford
+      const label=dropButton.querySelector<HTMLElement>('small span');
+      const cost=dropButton.querySelector<HTMLElement>('small b');
+      if(label)label.textContent=pending?(this.locale==='zh-HK'?'確認':'Resume'):(this.locale==='zh-HK'?'落幣':'Drop');
+      if(cost)cost.textContent=pending?'↻':'−1';
+      dropButton.setAttribute('aria-label',pending
+        ?(this.locale==='zh-HK'?'安全確認已付落幣；不會再次扣金幣':'Safely resume paid drop; no second charge')
+        :!canAfford
         ? (this.locale==='zh-HK'?'金幣不足；每次落幣需要 1 枚':'Not enough coins; each drop costs 1 coin')
         : (this.locale==='zh-HK'?'落幣，扣 1 金幣':'Drop a coin; costs 1 coin'));
-      dropButton.title=!canAfford
+      dropButton.title=pending
+        ?(this.locale==='zh-HK'?'確認已付落幣，不會重複扣幣':'Resume the paid drop without charging twice')
+        :!canAfford
         ? (this.locale==='zh-HK'?'金幣不足':'Not enough coins')
         : (this.locale==='zh-HK'?'落幣 −1；推出金幣回到錢包':'Drop −1; payout coins return to wallet');
     }
     const backButton=document.querySelector<HTMLButtonElement>('.coin-pusher-back');
     if(backButton){
-      const blocked=this.coinPusherPaymentInFlight;
+      const blocked=this.coinPusherPaymentInFlight||this.coinPusherBusy;
       backButton.disabled=blocked;
       backButton.setAttribute('aria-disabled',String(blocked));
       backButton.title=blocked?this.coinPusherExitWaitMessage():(this.locale==='zh-HK'?'返回房間':'Back to room');
@@ -1421,6 +1626,9 @@ class StudentApp {
   private renderSettings(){this.setLayout('full');const seg=(value:'private'|'class',label:string)=>`<button data-action="set-visibility" data-id="${value}" class="seg ${this.state.room.visibility===value?'on':''}">${escapeHtml(label)}</button>`;document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll settings-panel"><p class="eyebrow">COMFORT & ACCESS</p><h1>${this.t('settings')}</h1><div class="setting-row"><div><b>${this.locale==='zh-HK'?'房間參觀權限':'Room visits'}</b><small>${this.locale==='zh-HK'?'開放後，只有同班同學可以參觀你的房間。':'When opened, only classmates can visit your room.'}</small></div><div class="segmented-toggle">${seg('private',this.t('private'))}${seg('class',this.t('class'))}</div></div><label class="field"><span>${this.locale==='zh-HK'?'音樂音量':'Music volume'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.musicLevel}" data-setting="music"></label><label class="field"><span>${this.locale==='zh-HK'?'音效音量':'Sound effects'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.sfxLevel}" data-setting="sfx"></label><label class="toggle"><input type="checkbox" id="motionToggle" ${localStorage.getItem('pet-reduced-motion')==='1'?'checked':''}><span>${this.locale==='zh-HK'?'減少動畫':'Reduce motion'}</span></label><p class="privacy-note">${this.locale==='zh-HK'?'私隱：房間預設私人；公開後只有同班學生可參觀。系統沒有聊天、留言、交易或排行榜。':'Privacy: rooms are private by default. Only classmates can visit when opened. There is no chat, messaging, trading or leaderboard.'}</p></div>`;document.querySelector('#motionToggle')?.addEventListener('change',(event)=>{const on=(event.target as HTMLInputElement).checked;localStorage.setItem('pet-reduced-motion',on?'1':'0');document.documentElement.classList.toggle('reduced-motion',on);});}
   private async reload(){this.state=await api.bootstrap();this.roomPlacements=this.state.room.placements.map((item)=>({...item}));this.updateWallet();}
   private destroyCoinPusher(preserveModel=false){
+    if(preserveModel)void this.persistCoinPusherSession();
+    if(this.coinPusherAutosaveTimer!==undefined)window.clearInterval(this.coinPusherAutosaveTimer);
+    this.coinPusherAutosaveTimer=undefined;
     if(!preserveModel)this.coinPusherGeneration+=1;
     if(this.coinPusherCooldown!==undefined)window.clearTimeout(this.coinPusherCooldown);
     this.coinPusherCooldown=undefined;
