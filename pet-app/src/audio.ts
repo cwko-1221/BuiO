@@ -1,4 +1,4 @@
-type SoundName = 'tap' | 'buy' | 'coin' | 'arcadeDrop' | 'arcadeLand' | 'arcadeTiming' | 'arcadePayout' | 'arcadeKeepsake' | 'arcadeStroke' | 'hatch' | 'evolve' | 'feed' | 'happy' | 'step' | 'attack' | 'skill' | 'hurt' | 'win' | 'lose' | 'decorate' | 'reaction';
+type SoundName = 'tap' | 'buy' | 'coin' | 'arcadeDrop' | 'arcadeLand' | 'arcadeRattle' | 'arcadeTiming' | 'arcadePayout' | 'arcadeKeepsake' | 'arcadeStroke' | 'hatch' | 'evolve' | 'feed' | 'happy' | 'step' | 'attack' | 'skill' | 'hurt' | 'win' | 'lose' | 'decorate' | 'reaction';
 
 const THEMES: Record<string, { tempo: number; root: number; scale: number[]; pattern: number[] }> = {
   bedroom: { tempo: 92, root: 60, scale: [0,2,4,7,9], pattern: [0,2,4,2,1,3,4,3] },
@@ -139,10 +139,16 @@ export class AudioEngine {
     source.start();
   }
 
-  private pusherStroke(direction: 'forward' | 'return', voice: number) {
+  private pusherStroke(direction: 'forward' | 'return', voice: number, strokeDurationSeconds: number) {
     if (!this.context || !this.sfxGain) return;
     const start = this.context.currentTime;
-    const duration = .34;
+    // Follow most of the model's smooth travel, then fade before its end pause. This keeps the
+    // motor cue attached to the moving plate without overlapping the opposite stroke.
+    const physicalDuration = Number.isFinite(strokeDurationSeconds)
+      ? Math.max(.3, Math.min(5, strokeDurationSeconds))
+      : 1.95;
+    const duration = physicalDuration * .84;
+    const attack = Math.min(.06, duration * .05);
     const pitch = 1 + ((voice % 5) - 2) * .018;
     const base = direction === 'forward' ? 86 : 101;
     const lowpass = this.context.createBiquadFilter();
@@ -151,7 +157,8 @@ export class AudioEngine {
     lowpass.frequency.exponentialRampToValueAtTime(185, start + duration);
     const envelope = this.context.createGain();
     envelope.gain.setValueAtTime(.0001, start);
-    envelope.gain.exponentialRampToValueAtTime(.032, start + .025);
+    envelope.gain.exponentialRampToValueAtTime(.006, start + attack);
+    envelope.gain.exponentialRampToValueAtTime(.0055, start + duration * .76);
     envelope.gain.exponentialRampToValueAtTime(.0001, start + duration);
     lowpass.connect(envelope).connect(this.sfxGain);
     const motor = this.context.createOscillator();
@@ -169,10 +176,10 @@ export class AudioEngine {
     motor.stop(start + duration + .02); overtone.stop(start + duration + .02);
   }
 
-  sfx(name: SoundName, voice = 0, pan = 0) {
+  sfx(name: SoundName, voice = 0, pan = 0, strokeDurationSeconds = 1.95) {
     if (!this.enabled || !this.context || this.context.state !== 'running' || this.isDocumentHidden()) return;
     if (name === 'arcadeStroke') {
-      this.pusherStroke(voice < 3 ? 'forward' : 'return', voice);
+      this.pusherStroke(voice < 3 ? 'forward' : 'return', voice, strokeDurationSeconds);
       return;
     }
     const timingRise = Number.isFinite(voice) ? Math.min(7, Math.max(0, Math.floor(voice) - 1)) : 0;
@@ -180,19 +187,20 @@ export class AudioEngine {
       ? 1 + timingRise * .018
       : 1 + ((voice % 7) - 3) * .035;
     const notes: Partial<Record<SoundName, number[]>> = {
-      tap: [540], buy: [420,620,840], coin: [820,1080], arcadeDrop: [220,440,660], arcadeLand: [880,1320], arcadeTiming: [1175,1568], arcadePayout: [659,784,988,1318], arcadeKeepsake: [784,988,1175,1568], hatch: [280,420,620,920], evolve: [330,440,660,880,1180],
+      tap: [540], buy: [420,620,840], coin: [820,1080], arcadeDrop: [220,440,660], arcadeLand: [880,1320], arcadeRattle: [659,988], arcadeTiming: [1175,1568], arcadePayout: [659,784,988,1318], arcadeKeepsake: [784,988,1175,1568], hatch: [280,420,620,920], evolve: [330,440,660,880,1180],
       feed: [380,520], happy: [620,820,980], step: [160], attack: [240,180], skill: [420,680], hurt: [180,130],
       win: [440,554,660,880], lose: [330,260,196], decorate: [360,540], reaction: [620,780,1040],
     };
-    const wave: OscillatorType = ['hurt','attack','arcadeDrop'].includes(name) ? 'sawtooth' : ['arcadeLand','arcadeTiming','arcadeKeepsake'].includes(name) ? 'sine' : 'triangle';
-    const gain = name === 'arcadeDrop' ? .075 : name === 'arcadeLand' ? .055 : name === 'arcadeTiming' ? .045 : name === 'arcadeKeepsake' ? .07 : name === 'arcadePayout' ? .095 : .12;
+    const wave: OscillatorType = ['hurt','attack','arcadeDrop'].includes(name) ? 'sawtooth' : ['arcadeLand','arcadeRattle','arcadeTiming','arcadeKeepsake'].includes(name) ? 'sine' : 'triangle';
+    const gain = name === 'arcadeDrop' ? .075 : name === 'arcadeLand' ? .055 : name === 'arcadeRattle' ? .032 : name === 'arcadeTiming' ? .045 : name === 'arcadeKeepsake' ? .07 : name === 'arcadePayout' ? .095 : .12;
     (notes[name] || [440]).forEach((frequency, index) => this.tone(frequency * shift,
-      ['arcadeLand','arcadeTiming'].includes(name) ? .075 : name === 'arcadeKeepsake' ? .14 : .12 + index * .025,
+      ['arcadeLand','arcadeRattle','arcadeTiming'].includes(name) ? .075 : name === 'arcadeKeepsake' ? .14 : .12 + index * .025,
       wave, gain, this.sfxGain,
-      index * (name === 'arcadeKeepsake' ? .055 : ['arcadePayout','arcadeLand','arcadeTiming'].includes(name) ? .045 : .07), pan));
+      index * (name === 'arcadeKeepsake' ? .055 : ['arcadePayout','arcadeLand','arcadeRattle','arcadeTiming'].includes(name) ? .045 : .07), pan));
     if (['attack','skill','hatch','evolve'].includes(name)) this.noise(.07, .035);
     else if (name === 'arcadeDrop') this.noise(.045, .018);
     else if (name === 'arcadeLand') this.noise(.018, .006, this.sfxGain, pan);
+    else if (name === 'arcadeRattle') this.noise(.025, .007, this.sfxGain, pan);
     else if (name === 'arcadeKeepsake') this.noise(.06, .009);
   }
 }

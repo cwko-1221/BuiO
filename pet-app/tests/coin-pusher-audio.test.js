@@ -38,9 +38,14 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
   class FakeAudioParam {
     value = 0;
     ramps = [];
+    events = [];
     constructor(onSet = () => undefined) { this.onSet = onSet; }
-    setValueAtTime(value) { this.value = value; this.onSet(value); this.ramps.push(value); }
-    exponentialRampToValueAtTime(value) { this.value = value; this.ramps.push(value); }
+    setValueAtTime(value, time = 0) {
+      this.value = value; this.onSet(value); this.ramps.push(value); this.events.push({ type: 'set', value, time });
+    }
+    exponentialRampToValueAtTime(value, time = 0) {
+      this.value = value; this.ramps.push(value); this.events.push({ type: 'exponential', value, time });
+    }
   }
   class FakeGainNode {
     gain = new FakeAudioParam();
@@ -54,8 +59,13 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
     frequency = new FakeAudioParam((value) => frequencies.push(value));
     type = 'sine';
     connect(destination) { return destination; }
-    start() {}
-    stop() {}
+    start(time = 0) { this.startedAt = time; }
+    stop(time = 0) { this.stoppedAt = time; }
+  }
+  class FakeBiquadFilterNode {
+    frequency = new FakeAudioParam();
+    type = 'lowpass';
+    connect(destination) { return destination; }
   }
   class FakeAudioContext {
     currentTime = 0;
@@ -63,6 +73,8 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
     destination = {};
     gains = [];
     panners = [];
+    oscillators = [];
+    filters = [];
     listeners = new Map();
     addEventListener(name, listener) {
       const listeners = this.listeners.get(name) ?? new Set();
@@ -81,7 +93,16 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
       this.panners.push(panner);
       return panner;
     }
-    createOscillator() { return new FakeOscillator(); }
+    createOscillator() {
+      const oscillator = new FakeOscillator();
+      this.oscillators.push(oscillator);
+      return oscillator;
+    }
+    createBiquadFilter() {
+      const filter = new FakeBiquadFilterNode();
+      this.filters.push(filter);
+      return filter;
+    }
   }
   Object.defineProperty(globalThis, 'AudioContext', { configurable: true, writable: true, value: FakeAudioContext });
   Object.defineProperty(globalThis, 'document', { configurable: true, writable: true, value: fakeDocument });
@@ -151,6 +172,45 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
   assert.ok(keepsakeEnvelopes.every((node) => node.gain.ramps.includes(.07)),
     'the unlock cue should remain softer than a full win sound');
 
+  const normalStrokeSeconds = 4.5 * .438;
+  const normalStrokeStart = audio.context.oscillators.length;
+  const normalStrokeGainStart = audio.context.gains.length;
+  audio.sfx('arcadeStroke', 0, 0, normalStrokeSeconds);
+  const normalStrokeVoices = audio.context.oscillators.slice(normalStrokeStart);
+  const normalStrokeSoundSeconds = normalStrokeSeconds * .84;
+  assert.equal(normalStrokeVoices.length, 2, 'the pusher should keep its soft two-voice motor timbre');
+  assert.ok(normalStrokeVoices.every((voice) => Math.abs(voice.stoppedAt - voice.startedAt - normalStrokeSoundSeconds - .02) < 1e-9),
+    'the motor sweep should follow most of the real forward stroke, then stop before the dwell');
+  assert.equal(normalStrokeVoices[0].frequency.ramps.at(-1), 86 * .964 * .68,
+    'the extended forward sweep should keep its familiar low final pitch');
+  const motorEnvelope = audio.context.gains[normalStrokeGainStart];
+  assert.ok(motorEnvelope.gain.ramps.includes(.006), 'the longer sweep should use a restrained peak level');
+  assert.equal(motorEnvelope.gain.events.at(-1).time, normalStrokeSoundSeconds,
+    'the motor envelope must fade out at the same time as its oscillator');
+
+  const reducedStrokeSeconds = normalStrokeSeconds / .6;
+  const reducedStrokeStart = audio.context.oscillators.length;
+  audio.sfx('arcadeStroke', 4, 0, reducedStrokeSeconds);
+  const reducedStrokeVoices = audio.context.oscillators.slice(reducedStrokeStart);
+  assert.ok(reducedStrokeVoices.every((voice) =>
+    Math.abs(voice.stoppedAt - voice.startedAt - reducedStrokeSeconds * .84 - .02) < 1e-9),
+  'the motor sweep should slow with the pusher when reduced motion lengthens the physical stroke');
+
+  const rattleOscillatorStart = audio.context.oscillators.length;
+  const rattlePannerStart = audio.context.panners.length;
+  const rattleGainStart = audio.context.gains.length;
+  audio.sfx('arcadeRattle', 4, .48);
+  const rattleVoices = audio.context.oscillators.slice(rattleOscillatorStart);
+  assert.equal(rattleVoices.length, 2, 'one real pusher contact should produce one compact metallic doublet');
+  assert.ok(rattleVoices.every((voice) => voice.type === 'sine' && Math.abs(voice.stoppedAt - voice.startedAt - .075 - .03) < 1e-9),
+    'the contact doublet should remain brief rather than masking the continuing pusher motor');
+  assert.deepEqual(frequencies.slice(-2), [659 * 1.035, 988 * 1.035],
+    'contact weight may color the metallic doublet without changing its interval');
+  assert.deepEqual(panValues.slice(rattlePannerStart), [.48, .48],
+    'the clink should come from the side where the pusher physically met the coins');
+  assert.ok(audio.context.gains[rattleGainStart].gain.ramps.includes(.032),
+    'the contact clink should be restrained beneath the landing and payout cues');
+
   fakeDocument.hidden = true;
   fakeDocument.dispatch('visibilitychange');
   assert.equal(fakeWindow.timers.size, 0, 'backgrounding the app must stop the recurring music timer');
@@ -174,6 +234,11 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
   assert.equal(frequencies.length, mutedFrequencyCount, 'mute must silence the forward-timing cue too');
   audio.sfx('arcadeKeepsake', 3);
   assert.equal(frequencies.length, mutedFrequencyCount, 'mute must silence cosmetic unlock cues');
+  const mutedOscillatorCount = audio.context.oscillators.length;
+  audio.sfx('arcadeStroke', 0, 0, normalStrokeSeconds);
+  assert.equal(audio.context.oscillators.length, mutedOscillatorCount, 'mute must silence the full-length pusher motor cue');
+  audio.sfx('arcadeRattle', 4, .48);
+  assert.equal(audio.context.oscillators.length, mutedOscillatorCount, 'mute must also silence physical coin-contact clinks');
 
   audio.setEnabled(true);
   assert.equal(fakeWindow.timers.size, 1, 'unmuting should restart one music timer');

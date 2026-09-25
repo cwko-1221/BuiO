@@ -1056,7 +1056,7 @@ class StudentApp {
         if(landings.some((landing)=>landing.pusherBeat==='forward'))
           audio.sfx('arcadeTiming',Math.max(1,this.coinPusherTimingStreak.count),pan);
       },
-      (direction) => audio.sfx('arcadeStroke', direction === 'forward' ? 0 : 4),
+      (direction, durationSeconds) => audio.sfx('arcadeStroke', direction === 'forward' ? 0 : 4, 0, durationSeconds),
       this.coinPusherModel,
       () => {
         if(generation!==this.coinPusherGeneration||this.tab!=='coinPusher')return;
@@ -1073,6 +1073,7 @@ class StudentApp {
       },
       restoreSession?.model,
       this.coinPusherStampCount(),
+      (count, origin) => audio.sfx('arcadeRattle', count, this.coinPusherStereoPan([origin])),
     ));
     }).then((view)=>{
       if(!view)return;

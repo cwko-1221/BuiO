@@ -79,7 +79,8 @@ type WebGLAvailabilityReason = 'context-lost' | 'restored';
 type WebGLAvailabilityCallback = (available: boolean, reason?: WebGLAvailabilityReason) => void;
 type CoinPayoutCallback = (count: number, origins: CoinPusherRewardOrigin[]) => void;
 type CoinImpactCallback = (count: number, landings: CoinPusherLandingFeedback[]) => void;
-type PusherStrokeCallback = (direction: 'forward' | 'return') => void;
+type PusherStrokeCallback = (direction: 'forward' | 'return', durationSeconds: number) => void;
+type PusherContactCallback = (count: number, origin: CoinPusherRewardOrigin) => void;
 type ImpactBurst = {
   points: THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial>;
   geometry: THREE.BufferGeometry;
@@ -103,6 +104,7 @@ export class CoinPusherScene {
     onVisualPreviewReady: () => void = () => undefined,
     savedSnapshot?: CoinPusherModelSnapshot,
     keepsakeTier = 0,
+    onPusherContact: PusherContactCallback = () => undefined,
   ) {
     const notifyAvailability: WebGLAvailabilityCallback = (available, reason) => {
       try { onAvailability(available, reason); }
@@ -112,9 +114,13 @@ export class CoinPusherScene {
       try { onCoinImpact(count, landings); }
       catch (error) { console.warn('[coin-pusher] coin impact callback failed', error); }
     };
-    const notifyPusherStroke: PusherStrokeCallback = (direction) => {
-      try { onPusherStroke(direction); }
+    const notifyPusherStroke: PusherStrokeCallback = (direction, durationSeconds) => {
+      try { onPusherStroke(direction, durationSeconds); }
       catch (error) { console.warn('[coin-pusher] pusher audio callback failed', error); }
+    };
+    const notifyPusherContact: PusherContactCallback = (count, origin) => {
+      try { onPusherContact(count, origin); }
+      catch (error) { console.warn('[coin-pusher] pusher contact callback failed', error); }
     };
     const notifyVisualPreviewReady = () => {
       try { onVisualPreviewReady(); }
@@ -174,7 +180,7 @@ export class CoinPusherScene {
       if (existingModel) model = existingModel;
       // Build a complete procedural cabinet immediately. Optional artwork keeps downloading in
       // parallel, so a slow image request cannot hold the first useful 3D preview behind a veil.
-      view = new CoinPusherScene(root, compactViewport, onSwipe, onCoinsFell, notifyAvailability, notifyCoinImpact, notifyPusherStroke, renderer, model, keepsakeTier);
+      view = new CoinPusherScene(root, compactViewport, onSwipe, onCoinsFell, notifyAvailability, notifyCoinImpact, notifyPusherStroke, renderer, model, keepsakeTier, notifyPusherContact);
       const activeView = view;
       for (const key of ['artworkAppliedAt', 'rendererWarmupStartedAt', 'rendererWarmupReadyAt', 'physicsModuleReadyAt', 'physicsReadyAt', 'rendererReadyAt']) {
         delete root.dataset[key];
@@ -271,6 +277,7 @@ export class CoinPusherScene {
   private readonly onAvailability: WebGLAvailabilityCallback;
   private readonly onCoinImpact: CoinImpactCallback;
   private readonly onPusherStroke: PusherStrokeCallback;
+  private readonly onPusherContact: PusherContactCallback;
   private resizeObserver?: ResizeObserver;
   private readonly geometries: THREE.BufferGeometry[] = [];
   private readonly materials: THREE.Material[] = [];
@@ -400,6 +407,7 @@ export class CoinPusherScene {
     renderer: THREE.WebGLRenderer,
     model: CoinPusherModel | undefined,
     keepsakeTier = 0,
+    onPusherContact: PusherContactCallback = () => undefined,
     brushedMetalTexture?: THREE.Texture,
     backboardTexture?: THREE.Texture,
     mintedCoinFaceTexture?: THREE.Texture,
@@ -412,6 +420,7 @@ export class CoinPusherScene {
     this.onAvailability = onAvailability;
     this.onCoinImpact = onCoinImpact;
     this.onPusherStroke = onPusherStroke;
+    this.onPusherContact = onPusherContact;
     this.simulation = model;
     if (model) root.dataset.physicsSession = String(modelSessionId(model));
     this.renderer = renderer;
@@ -729,7 +738,8 @@ export class CoinPusherScene {
       }
       const events = model.drainEvents();
       for (const event of events) {
-        if (event.type === 'pusher-stroke') this.onPusherStroke(event.direction);
+        if (event.type === 'pusher-stroke') this.onPusherStroke(event.direction, event.durationSeconds);
+        else if (event.type === 'pusher-contact') this.onPusherContact(event.count, this.projectWorldOrigin(event.position));
       }
       const coinLandings = events.filter((event) => event.type === 'coin-landed');
       if (coinLandings.length) {
@@ -737,7 +747,7 @@ export class CoinPusherScene {
           new THREE.Vector3(event.position.x, event.position.y + .04, event.position.z));
         if (!this.reducedMotion) this.sparkAtFront(impacts, time);
         const landingFeedback = coinLandings.map((event) => ({
-          ...this.projectPayoutOrigin(event.position),
+          ...this.projectWorldOrigin(event.position),
           pusherBeat: event.pusherBeat,
         }));
         this.onCoinImpact(coinLandings.length, landingFeedback);
@@ -745,8 +755,8 @@ export class CoinPusherScene {
       for (const event of events) {
         if (event.type !== 'coins-collected') continue;
         if (!this.reducedMotion) this.pulsePayoutWell(event.positions, time);
-        const origins = event.positions.map((position) => this.projectPayoutOrigin(position));
-        this.onCoinsFell(event.count, origins.length ? origins : [this.projectPayoutOrigin()]);
+        const origins = event.positions.map((position) => this.projectWorldOrigin(position));
+        this.onCoinsFell(event.count, origins.length ? origins : [this.projectWorldOrigin()]);
       }
       this.renderer.render(this.scene, this.camera);
     }
@@ -1556,7 +1566,7 @@ export class CoinPusherScene {
   }
 
   /** Project each actual Rapier-settled coin so its payout flight starts where it landed. */
-  private projectPayoutOrigin(position?: { x: number; y: number; z: number }): CoinPusherRewardOrigin {
+  private projectWorldOrigin(position?: { x: number; y: number; z: number }): CoinPusherRewardOrigin {
     const rect = this.root.getBoundingClientRect();
     const point = position
       ? new THREE.Vector3(position.x, position.y, position.z)

@@ -64,6 +64,13 @@ export type CoinPusherEvent =
   | {
     type: 'pusher-stroke';
     direction: 'forward' | 'return';
+    /** Wall-clock seconds expected for this stroke, including reduced-motion pacing. */
+    durationSeconds: number;
+  }
+  | {
+    type: 'pusher-contact';
+    count: number;
+    position: { x: number; y: number; z: number };
   }
   | {
     type: 'coins-collected';
@@ -88,6 +95,7 @@ export interface CoinPusherModelSnapshot {
   mechanismStarted: boolean;
   pushingForward: boolean;
   strokeDirection: 'stopped' | 'forward' | 'return';
+  pusherContactTriggered?: boolean;
   reducedMotion: boolean;
   nextId: number;
   pusherBodyHandle: number;
@@ -230,6 +238,7 @@ export class CoinPusherModel {
   private mechanismStarted = false;
   private pushingForward = true;
   private strokeDirection: 'stopped' | 'forward' | 'return' = 'stopped';
+  private pusherContactTriggered = false;
   private reducedMotion = false;
   private events: CoinPusherEvent[] = [];
   private readonly fixedColliders: Collider[] = [];
@@ -271,6 +280,7 @@ export class CoinPusherModel {
         this.mechanismStarted = snapshot.mechanismStarted;
         this.pushingForward = snapshot.pushingForward;
         this.strokeDirection = snapshot.strokeDirection;
+        this.pusherContactTriggered = snapshot.pusherContactTriggered === true;
         this.reducedMotion = snapshot.reducedMotion;
         this.nextId = snapshot.nextId;
         return;
@@ -338,6 +348,7 @@ export class CoinPusherModel {
       mechanismStarted: this.mechanismStarted,
       pushingForward: this.pushingForward,
       strokeDirection: this.strokeDirection,
+      pusherContactTriggered: this.pusherContactTriggered,
       reducedMotion: this.reducedMotion,
       nextId: this.nextId,
       pusherBodyHandle: this.pusherBody.handle,
@@ -454,7 +465,16 @@ export class CoinPusherModel {
       const strokeDirection = pusherDelta > 1e-8 ? 'forward' : pusherDelta < -1e-8 ? 'return' : 'stopped';
       if (strokeDirection !== this.strokeDirection) {
         this.strokeDirection = strokeDirection;
-        if (strokeDirection !== 'stopped') this.events.push({ type: 'pusher-stroke', direction: strokeDirection });
+        if (strokeDirection !== 'stopped') {
+          if (strokeDirection === 'forward') this.pusherContactTriggered = false;
+          const phase = strokeDirection === 'forward' ? PUSHER_FORWARD_STROKE_PHASE : PUSHER_RETURN_STROKE_PHASE;
+          const timeScale = this.reducedMotion ? REDUCED_MOTION_TIME_SCALE : 1;
+          this.events.push({
+            type: 'pusher-stroke',
+            direction: strokeDirection,
+            durationSeconds: PUSHER_PERIOD * phase / timeScale,
+          });
+        }
       }
       this.pusherBody.setNextKinematicTranslation({ x: 0, y: PUSHER_Y, z: this.pusherZ });
       // Rapier's kinematic friction is intentionally conservative here: it lets the fixed
@@ -471,6 +491,29 @@ export class CoinPusherModel {
       this.enforcePusherRiders(pusherDelta);
       this.limitPlayfieldRebound();
       this.stabilizeSettledCoins();
+      if (this.strokeDirection === 'forward' && !this.pusherContactTriggered) {
+        const contacts: PusherCoin[] = [];
+        this.world.contactPairsWith(this.pusherLipCollider, (otherCollider) => {
+          const coin = this.coins.find((candidate) => candidate.collider.handle === otherCollider.handle);
+          if (coin && !coin.falling && !coin.collected) contacts.push(coin);
+        });
+        if (contacts.length) {
+          this.pusherContactTriggered = true;
+          const position = contacts.reduce((total, coin) => {
+            const point = coin.body.translation();
+            return { x: total.x + point.x, y: total.y + point.y, z: total.z + point.z };
+          }, { x: 0, y: 0, z: 0 });
+          this.events.push({
+            type: 'pusher-contact',
+            count: contacts.length,
+            position: {
+              x: position.x / contacts.length,
+              y: position.y / contacts.length,
+              z: position.z / contacts.length,
+            },
+          });
+        }
+      }
 
       for (let index = this.coins.length - 1; index >= 0; index -= 1) {
         const coin = this.coins[index];

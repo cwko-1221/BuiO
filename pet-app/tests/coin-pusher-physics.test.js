@@ -57,13 +57,17 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
   let largestStrokeStep = 0;
   const predictedDropBeats = new Set();
   const pusherStrokes = [];
+  const pusherStrokeEvents = [];
+  const pusherContactEvents = [];
   for (let frame = 0; frame < 630; frame += 1) {
     predictedDropBeats.add(cycleModel.getPredictedDropBeat());
     const previousZ = cycleModel.pusherZ;
       cycleModel.update(1000 / 60);
-      pusherStrokes.push(...cycleModel.drainEvents()
-        .filter((event) => event.type === 'pusher-stroke')
-        .map((event) => event.direction));
+      const frameEvents = cycleModel.drainEvents();
+      const frameStrokeEvents = frameEvents.filter((event) => event.type === 'pusher-stroke');
+      pusherContactEvents.push(...frameEvents.filter((event) => event.type === 'pusher-contact'));
+      pusherStrokeEvents.push(...frameStrokeEvents);
+      pusherStrokes.push(...frameStrokeEvents.map((event) => event.direction));
       homeDwellFrames += Number(Math.abs(cycleModel.pusherZ - dimensions.PUSHER_HOME_Z) < 1e-9);
       frontDwellFrames += Number(Math.abs(cycleModel.pusherZ - dimensions.PUSHER_FORWARD_Z) < 1e-9);
       largestStrokeStep = Math.max(largestStrokeStep, Math.abs(cycleModel.pusherZ - previousZ));
@@ -75,8 +79,33 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
     'the predicted landing cue must cover the forward stroke, both end pauses, and the return stroke');
   assert.deepEqual(pusherStrokes.slice(0, 4), ['forward', 'return', 'forward', 'return'],
     'the audio cue must fire exactly when each alternating pusher stroke starts');
+  assert.ok(pusherStrokeEvents.slice(0, 4).every((event, index) =>
+    Math.abs(event.durationSeconds - (index % 2 === 0 ? 4.5 * .438 : 4.5 * .431)) < 1 / 60),
+  'stroke events should expose the matching real forward and return durations to the audio layer');
+  assert.ok(pusherContactEvents.length > 0, 'the pusher should report a real lip-to-coin contact during the crowded cycle');
+  assert.ok(pusherContactEvents.length <= pusherStrokes.filter((direction) => direction === 'forward').length,
+    'a pile contact cue must fire no more than once during each forward stroke');
+  assert.ok(pusherContactEvents.every((event) => event.count > 0
+    && Object.values(event.position).every(Number.isFinite)),
+  'contact feedback must be anchored to at least one finite, physically touching coin');
   } finally {
     cycleModel.destroy();
+  }
+  const reducedMotionModel = new CoinPusherModel();
+  try {
+    reducedMotionModel.setReducedMotion(true);
+    assert.notEqual(reducedMotionModel.dropCoin(0), undefined);
+    let reducedMotionStroke;
+    for (let frame = 0; frame < 90 && !reducedMotionStroke; frame += 1) {
+      reducedMotionModel.update(1000 / 60);
+      reducedMotionStroke = reducedMotionModel.drainEvents()
+        .find((event) => event.type === 'pusher-stroke');
+    }
+    assert.ok(reducedMotionStroke, 'reduced motion should still emit the first physical pusher stroke');
+    assert.ok(Math.abs(reducedMotionStroke.durationSeconds - (4.5 * .438 / .6)) < 1 / 60,
+      'the stroke duration sent to audio should include the reduced-motion time scale');
+  } finally {
+    reducedMotionModel.destroy();
   }
   const airborneLimitModel = new CoinPusherModel();
   try {
@@ -598,6 +627,11 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
             continue;
           }
           if (event.type === 'pusher-stroke') continue;
+          if (event.type === 'pusher-contact') {
+            assert.ok(event.count > 0 && Object.values(event.position).every(Number.isFinite),
+              'pusher clatter feedback must be anchored to real coin contact without affecting payout totals');
+            continue;
+          }
           assert.equal(event.type, 'coins-collected');
           assert.ok(event.count > 0, 'a collection event must contain at least one settled coin');
           assert.equal(event.positions.length, event.count,
