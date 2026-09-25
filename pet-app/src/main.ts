@@ -142,6 +142,8 @@ class StudentApp {
   private coinPusherWasmPreload?: HTMLLinkElement;
   private coinPusherPreloadTimer?: number;
   private coinPusherCascade = { count: 0, lastAt: 0 };
+  private coinPusherCascadeCue?: HTMLSpanElement;
+  private coinPusherCascadeTimer?: number;
   private coinPusherTimingStreak: CoinPusherTimingStreakState = { count: 0, best: 0 };
   private coinPusherCooldown?: number;
   private coinPusherReturnFocus?: HTMLElement;
@@ -1458,16 +1460,35 @@ class StudentApp {
     this.coinPusherCascade=advanceCoinPusherCascade(this.coinPusherCascade,amount,payoutAt);
     const cascadeLabel=coinPusherCascadeLabel(this.coinPusherCascade.count,this.locale);
     if(cascadeLabel){
-      const safeMargin=Math.min(90,rootRect.width*.25);
-      const cascade=document.createElement('span');
-      cascade.className=`coin-pusher-cascade${reducedMotion?' is-static':''}`;
-      cascade.setAttribute('aria-hidden','true');
-      cascade.textContent=cascadeLabel;
-      cascade.style.left=`${Math.max(safeMargin,Math.min(rootRect.width-safeMargin,collectionCenter.x))}px`;
-      cascade.style.top=`${Math.max(92,collectionCenter.y-28)}px`;
-      root.append(cascade);
-      cascade.addEventListener('animationend',()=>cascade.remove(),{once:true});
-      window.setTimeout(()=>cascade.remove(),reducedMotion?1800:1350);
+      let cascade=this.coinPusherCascadeCue;
+      const reusingCue=!!cascade&&cascade.isConnected&&cascade.parentElement===root;
+      if(!reusingCue){
+        cascade=document.createElement('span');
+        cascade.className='coin-pusher-cascade';
+        cascade.setAttribute('aria-hidden','true');
+        this.coinPusherCascadeCue=cascade;
+        root.append(cascade);
+      }
+      cascade!.classList.toggle('is-static',reducedMotion);
+      cascade!.textContent=cascadeLabel;
+      const hud=document.querySelector<HTMLElement>('.coin-pusher-hud')?.getBoundingClientRect();
+      const hudBottom=hud?hud.bottom-rootRect.top:Math.min(78,rootRect.height*.12);
+      const cueY=Math.min(rootRect.height-34,Math.max(hudBottom+46,rootRect.height*.16));
+      cascade!.style.left=`${rootRect.width*.5}px`;
+      cascade!.style.top=`${cueY}px`;
+      if(reusingCue&&!reducedMotion){
+        cascade!.style.animation='none';
+        void cascade!.offsetWidth;
+        cascade!.style.animation='';
+      }
+      if(this.coinPusherCascadeTimer!==undefined)window.clearTimeout(this.coinPusherCascadeTimer);
+      const cue=cascade!;
+      this.coinPusherCascadeTimer=window.setTimeout(()=>{
+        if(this.coinPusherCascadeCue!==cue)return;
+        cue.remove();
+        this.coinPusherCascadeCue=undefined;
+        this.coinPusherCascadeTimer=undefined;
+      },reducedMotion?1800:1700);
     }
     const rewardLabels=coinPusherRewardFlightLabels(amount,reducedMotion);
     for(let index=0;index<rewardLabels.length;index+=1){
@@ -1736,6 +1757,10 @@ class StudentApp {
     this.coinPusherCooldown=undefined;
     this.coinPusherBusy=false;
     this.coinPusherCascade={count:0,lastAt:0};
+    if(this.coinPusherCascadeTimer!==undefined)window.clearTimeout(this.coinPusherCascadeTimer);
+    this.coinPusherCascadeTimer=undefined;
+    this.coinPusherCascadeCue?.remove();
+    this.coinPusherCascadeCue=undefined;
     this.coinPusherTimingStreak={count:0,best:0};
     if(this.coinPusherTrayCatchTimer!==undefined)window.clearTimeout(this.coinPusherTrayCatchTimer);
     this.coinPusherTrayCatchTimer=undefined;

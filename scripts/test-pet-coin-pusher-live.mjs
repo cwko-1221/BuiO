@@ -91,7 +91,7 @@ try {
     catch { return false; }
   }, `server did not start\n${serverLogs}`);
   browser = await chromium.launch({ headless: true, channel: 'chrome' });
-  const context = await browser.newContext({ baseURL, viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  const context = await browser.newContext({ baseURL, viewport: { width: 1440, height: 900 }, deviceScaleFactor: 3 });
   const page = await context.newPage();
   await page.route('**/api/pet/coin-pusher/payout', async (route) => {
     const credited = await route.fetch();
@@ -108,6 +108,8 @@ try {
       ? 'coin-pusher-tray-catch-desktop.png'
       : stage === 'wallet'
         ? 'coin-pusher-payout-reward-desktop.png'
+        : stage === 'cascade'
+          ? 'coin-pusher-cascade-desktop.png'
         : stage === 'timing'
           ? 'coin-pusher-good-timing-desktop.png'
           : stage === 'timing-streak'
@@ -116,7 +118,7 @@ try {
     if (!fileName) return;
     capturingVisualStages.add(stage);
     if (stage === 'tray') await page.waitForTimeout(120);
-    await page.screenshot({ path: path.join(artifactDir, fileName), animations: 'allow' });
+    await page.screenshot({ path: path.join(artifactDir, fileName), animations: 'allow', scale: 'css' });
     capturingVisualStages.delete(stage);
     capturedVisualStages.add(stage);
   });
@@ -525,13 +527,31 @@ try {
           continue;
         }
         if (node.matches('.coin-pusher-cascade')) {
-          window.__coinRewardDebug.push({ type: 'cascade-inserted', at: performance.now(), text: node.innerText });
+          const cascadeLayout = () => {
+            const rect = node.getBoundingClientRect();
+            const rootRect = root.getBoundingClientRect();
+            const hud = document.querySelector('.coin-pusher-hud')?.getBoundingClientRect();
+            return {
+              activeCount: root.querySelectorAll('.coin-pusher-cascade').length,
+              top: rect.top - rootRect.top,
+              bottom: rect.bottom - rootRect.top,
+              hudGap: hud ? rect.top - hud.bottom : undefined,
+            };
+          };
+          window.__coinRewardDebug.push({ type: 'cascade-inserted', at: performance.now(), text: node.innerText, ...cascadeLayout() });
+          new MutationObserver(() => window.__coinRewardDebug.push({
+            type: 'cascade-updated', at: performance.now(), text: node.innerText, ...cascadeLayout(),
+          })).observe(node, { attributes: true, childList: true, characterData: true, subtree: true });
           const captureCascade = () => {
             if (!node.isConnected) return;
             const style = getComputedStyle(node);
             const rect = node.getBoundingClientRect();
-            if (Number(style.opacity) > .25 && rect.width > 50 && rect.height > 20) {
-              window.__coinRewardDebug.push({ type: 'cascade-visible', at: performance.now(), text: node.innerText, width: rect.width, height: rect.height });
+            if (Number(style.opacity) >= .82 && rect.width > 50 && rect.height > 20) {
+              window.__coinRewardDebug.push({
+                type: 'cascade-visible', at: performance.now(), text: node.innerText,
+                opacity: Number(style.opacity), width: rect.width, height: rect.height, ...cascadeLayout(),
+              });
+              void window.__capturePusherVisualStage?.('cascade')?.catch(() => {});
             } else if (style.animationName !== 'none') requestAnimationFrame(captureCascade);
           };
           requestAnimationFrame(captureCascade);
@@ -719,14 +739,26 @@ try {
     ['home-pause', 'forward', 'front-pause', 'return'].includes(node.dataset.beat)
       && Boolean(node.querySelector('.coin-pusher-aim-beat')?.textContent?.trim())),
   'the landing preview must label the pusher beat expected at impact');
-  const observedBeats = new Set();
-  const observeBeatsUntil = Date.now() + 5000;
-  while (Date.now() < observeBeatsUntil) {
-    const beat = await aimMarker.getAttribute('data-beat');
-    if (beat) observedBeats.add(beat);
-    await page.waitForTimeout(80);
-  }
-  assert.deepEqual([...observedBeats].sort(), ['forward', 'front-pause', 'home-pause', 'return'],
+  const observedBeats = await aimMarker.evaluate(async (node) => {
+    const beats = new Set([node.dataset.beat].filter(Boolean));
+    await new Promise((resolve) => {
+      const observer = new MutationObserver(() => {
+        if (node.dataset.beat) beats.add(node.dataset.beat);
+        if (beats.size === 4) {
+          window.clearTimeout(deadline);
+          observer.disconnect();
+          resolve(undefined);
+        }
+      });
+      const deadline = window.setTimeout(() => {
+        observer.disconnect();
+        resolve(undefined);
+      }, 10000);
+      observer.observe(node, { attributes: true, attributeFilter: ['data-beat'] });
+    });
+    return [...beats].sort();
+  });
+  assert.deepEqual(observedBeats, ['forward', 'front-pause', 'home-pause', 'return'],
     'the visible landing cue must update through the pusher cycle while the pointer stays aimed');
   const audibleStrokeTargets = await page.evaluate(() => window.__coinPusherAudioSweepTargets);
   assert.ok(audibleStrokeTargets.some((frequency) => frequency > 55 && frequency < 58),
@@ -909,6 +941,25 @@ try {
   if (hadCascadeWindow) {
     await waitFor(() => page.evaluate(() => window.__coinRewardDebug.some((entry) => entry.type === 'cascade-visible')),
       'a short chain of confirmed payouts must show a visible cosmetic cascade label');
+    await waitFor(() => capturedVisualStages.has('cascade'), 'the cascade callout screenshot was not captured while visible');
+    const cascadeAudit = await page.evaluate(() => {
+      const entries = window.__coinRewardDebug.filter((entry) =>
+        ['cascade-visible', 'cascade-updated'].includes(entry.type));
+      return {
+        maxActiveCount: Math.max(0, ...entries.map((entry) => Number(entry.activeCount) || 0)),
+        maxOpacity: Math.max(0, ...entries.map((entry) => Number(entry.opacity) || 0)),
+        minHudGap: Math.min(...entries.map((entry) => Number(entry.hudGap)).filter(Number.isFinite)),
+        labels: entries.map((entry) => entry.text),
+      };
+    });
+    assert.equal(cascadeAudit.maxActiveCount, 1,
+      `a payout chain must update one callout instead of stacking duplicates (${JSON.stringify(cascadeAudit)})`);
+    assert.ok(cascadeAudit.minHudGap >= 20,
+      `the cascade callout must sit clear of the responsive HUD (${JSON.stringify(cascadeAudit)})`);
+    assert.ok(cascadeAudit.maxOpacity >= .82,
+      `the cascade callout must be captured at a clearly visible point in its animation (${JSON.stringify(cascadeAudit)})`);
+    assert.ok(cascadeAudit.labels.some((label) => /×\d+/.test(label)),
+      `the reused cascade callout must retain its counted chain label (${JSON.stringify(cascadeAudit)})`);
   }
   assert.equal(Number((await page.locator('#coinBalanceHud').innerText()).replace(/,/g, '')),
     initialBalance - chargedDrops + payoutTotal,
@@ -944,16 +995,36 @@ try {
     { name: 'phone-narrow', width: 360, height: 780 },
     { name: 'phone-mini', width: 320, height: 700 },
   ];
+  const framePacingByViewport = [];
   for (const viewport of viewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    const emulatedDpr = 3;
     await page.waitForTimeout(150);
     const hud = await page.locator('.coin-pusher-hud').boundingBox();
     const viewportSize = page.viewportSize();
     assert.ok(hud && viewportSize && hud.x >= 0 && hud.y >= 0 && hud.x + hud.width <= viewportSize.width + 1 && hud.y + hud.height <= viewportSize.height + 1,
       `${viewport.name}: HUD must stay inside the viewport`);
+    const hudControlRects = await page.locator(
+      '.coin-pusher-back, .coin-pusher-brand-heading, .coin-pusher-brand-status, .coin-pusher-wallet, .coin-pusher-drop, .coin-pusher-collection, .coin-pusher-sound',
+    ).evaluateAll((elements) => elements.map((element) => {
+      const { x, y, width, height } = element.getBoundingClientRect();
+      return { label: element.className, x, y, right: x + width, bottom: y + height, width, height };
+    }));
+    for (let first = 0; first < hudControlRects.length; first += 1) {
+      for (let second = first + 1; second < hudControlRects.length; second += 1) {
+        const a = hudControlRects[first];
+        const b = hudControlRects[second];
+        const overlapX = Math.min(a.right, b.right) - Math.max(a.x, b.x);
+        const overlapY = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y);
+        assert.ok(overlapX <= 1 || overlapY <= 1,
+          `${viewport.name}: HUD controls and brand copy must not overlap (${JSON.stringify({ a, b })})`);
+      }
+    }
     if (viewport.name.startsWith('phone')) {
       if (viewport.width > 340) assert.ok(hud && hud.height <= 96,
         `${viewport.name}: compact controls and live status must leave most of the playfield unobstructed (${JSON.stringify(hud)})`);
+      if (viewport.width <= 380) assert.ok(hud && hud.height <= 116,
+        `${viewport.name}: the two-row compact HUD must leave most of the playfield unobstructed (${JSON.stringify(hud)})`);
       const touchTargets = await page.locator('.coin-pusher-back, .coin-pusher-drop, .coin-pusher-collection, .coin-pusher-sound')
         .evaluateAll((buttons) => buttons.map((button) => ({
           label: button.className,
@@ -980,6 +1051,7 @@ try {
         titleScrollWidth: title?.scrollWidth ?? 0,
         statusTop: status?.top ?? 0,
         statusRight: statusText?.right ?? 0,
+        statusTextWidth: statusText?.width ?? 0,
         hintLeft: getComputedStyle(hint).display === 'none' ? Number.POSITIVE_INFINITY : hintRect?.left ?? 0,
       };
     });
@@ -987,6 +1059,8 @@ try {
       `${viewport.name}: live status must sit below the brand heading, not collide with it`);
     if (viewport.name.startsWith('phone')) assert.ok(brandLayout.titleScrollWidth <= brandLayout.titleClientWidth + 1,
       `${viewport.name}: the game title must not be ellipsized (${JSON.stringify(brandLayout)})`);
+    if (viewport.width <= 340) assert.ok(brandLayout.statusTextWidth >= 80,
+      `${viewport.name}: the narrow-phone title and live status need a readable text column (${JSON.stringify(brandLayout)})`);
     assert.ok(brandLayout.statusRight <= brandLayout.hintLeft + 1,
       `${viewport.name}: the live status must not overlap the keyboard hint`);
     if (viewport.name.startsWith('phone')) assert.ok(brandLayout.headingHeight < 30,
@@ -1008,6 +1082,38 @@ try {
       assert.ok(walletAmount.textRight <= walletAmount.walletRight - 4,
         `${viewport.name}: the wallet balance must not clip against its border (${JSON.stringify(walletAmount)})`);
     }
+    const framePacing = await page.evaluate(async () => {
+      const timestamps = [];
+      await new Promise((resolve) => {
+        const sample = (time) => {
+          timestamps.push(time);
+          if (time - timestamps[0] >= 900) resolve(undefined);
+          else requestAnimationFrame(sample);
+        };
+        requestAnimationFrame(sample);
+      });
+      const intervals = timestamps.slice(1).map((time, index) => time - timestamps[index]).sort((a, b) => a - b);
+      const percentile = (ratio) => intervals.length
+        ? Number(intervals[Math.min(intervals.length - 1, Math.ceil(intervals.length * ratio) - 1)].toFixed(1))
+        : 0;
+      const canvas = document.querySelector('#coin-pusher-root canvas');
+      const durationMs = timestamps.length > 1 ? timestamps.at(-1) - timestamps[0] : 0;
+      return {
+        frames: timestamps.length,
+        averageFps: durationMs > 0 ? Number(((timestamps.length - 1) * 1000 / durationMs).toFixed(1)) : 0,
+        medianFrameMs: percentile(.5),
+        p95FrameMs: percentile(.95),
+        framesOver33Ms: intervals.filter((interval) => interval > 33.3).length,
+        devicePixelRatio: window.devicePixelRatio,
+        drawingBufferScale: canvas?.clientWidth ? Number((canvas.width / canvas.clientWidth).toFixed(2)) : 0,
+      };
+    });
+    framePacingByViewport.push({ viewport: viewport.name, ...framePacing });
+    const expectedDrawingBufferScale = Math.min(emulatedDpr, viewport.width < 620 ? 1.2 : 1.5);
+    assert.equal(framePacing.devicePixelRatio, emulatedDpr,
+      `${viewport.name}: browser must exercise a high-DPI display (${JSON.stringify(framePacing)})`);
+    assert.ok(Math.abs(framePacing.drawingBufferScale - expectedDrawingBufferScale) <= .02,
+      `${viewport.name}: renderer must cap the drawing buffer for high-DPI performance (${JSON.stringify({ framePacing, expectedDrawingBufferScale })})`);
     assert.ok(await drop.isVisible(), `${viewport.name}: paid-drop control must remain visible`);
     assert.ok(await collectionButton.isVisible(), `${viewport.name}: collection control must remain visible`);
     if (viewport.name.startsWith('phone')) {
@@ -1033,6 +1139,16 @@ try {
         `phone-landscape: the Continue button must stay visible without scrolling (${JSON.stringify({ closeBox, panelBox, panelOverflow })})`);
         assert.ok(panelOverflow.scrollHeight <= panelOverflow.clientHeight + 1,
           `phone-landscape: the full keepsake collection should fit without internal scrolling (${JSON.stringify(panelOverflow)})`);
+      }
+      if (viewport.width <= 380 && viewport.height <= 760) {
+        const closeBox = await page.locator('.coin-pusher-collection-close').boundingBox();
+        const panelOverflow = await page.locator('.modal-card.coin-pusher-collection-modal')
+          .evaluate((panel) => ({ clientHeight: panel.clientHeight, scrollHeight: panel.scrollHeight }));
+        assert.ok(closeBox && closeBox.y >= panelBox.y - 1
+          && closeBox.y + closeBox.height <= panelBox.y + panelBox.height + 1,
+        `${viewport.name}: the Continue button must be fully visible when the keepsake panel opens (${JSON.stringify({ closeBox, panelBox })})`);
+        assert.ok(panelOverflow.scrollHeight <= panelOverflow.clientHeight + 1,
+          `${viewport.name}: the full keepsake panel should fit without requiring a guessed scroll (${JSON.stringify(panelOverflow)})`);
       }
       const stampBoxes = await page.locator('.coin-pusher-stamp').evaluateAll((cards) => cards.map((card) => {
         const cardBox = card.getBoundingClientRect();
@@ -1521,7 +1637,7 @@ try {
 
   assert.ok(requests.every((url) => /\/coin-pusher\/(play|payout)$/.test(url)), 'coin pusher may only call its play/payout endpoints');
   assert.deepEqual(errors, [], `browser errors during coin-pusher flow: ${errors.join('; ')}`);
-  console.log(JSON.stringify({ pass: true, profileMode, pusherLoad: pusherLoadMetrics, pusherLoadingPreview, prewarmRequestsBeforeClick: modulesReadyBeforeClick, touchPreload: touchPreloadSummary, pusherLoadingLongTasks, pusherFirstFrameLongTasks, shaderWarmup, pusherCpuHotspots, pusherWebglCalls, pusherSlowProgramParameters, pusherShaderPrograms, pusherWebglCapabilities, requests: requests.length, payouts: payoutAmounts, payoutGapsMs: payoutTimes.slice(1).map((time, index) => time - payoutTimes[index]), touchDrops: touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, errors, viewports: viewports.map(({ name }) => name), bedroomCanvas }));
+  console.log(JSON.stringify({ pass: true, profileMode, pusherLoad: pusherLoadMetrics, pusherLoadingPreview, prewarmRequestsBeforeClick: modulesReadyBeforeClick, touchPreload: touchPreloadSummary, pusherLoadingLongTasks, pusherFirstFrameLongTasks, shaderWarmup, pusherCpuHotspots, pusherWebglCalls, pusherSlowProgramParameters, pusherShaderPrograms, pusherWebglCapabilities, framePacingByViewport, requests: requests.length, payouts: payoutAmounts, payoutGapsMs: payoutTimes.slice(1).map((time, index) => time - payoutTimes[index]), touchDrops: touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, errors, viewports: viewports.map(({ name }) => name), bedroomCanvas }));
 } catch (error) {
   console.error(JSON.stringify({ pass: false, message: error.message, errors, requests, serverLogs: serverLogs.slice(-4000) }));
   process.exitCode = 1;
