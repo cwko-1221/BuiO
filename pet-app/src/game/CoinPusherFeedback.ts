@@ -120,3 +120,34 @@ export function coinPusherCascadeLabel(amount: number, locale: string) {
   if (!Number.isFinite(count) || count < 2) return undefined;
   return locale === 'zh-HK' ? `連環推出 ×${count}` : `CASCADE ×${count}`;
 }
+
+export const COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS = 160;
+export const COIN_PUSHER_REWARD_FLIGHT_VISIBLE_LIMIT = 5;
+
+/** Space wallet-flight visuals so fast physical catches remain individually readable. */
+export function planCoinPusherRewardFlightDelays(amount: number, now: number, nextAvailableAt: number) {
+  const count = Number.isFinite(amount)
+    ? Math.min(COIN_PUSHER_REWARD_FLIGHT_VISIBLE_LIMIT, Math.max(0, Math.floor(amount)))
+    : 0;
+  const currentTime = Number.isFinite(now) ? now : 0;
+  const firstAvailableAt = Number.isFinite(nextAvailableAt)
+    ? Math.max(currentTime, nextAvailableAt)
+    : currentTime;
+  const delaysMs = Array.from({ length: count }, (_, index) =>
+    Math.max(0, Math.round(firstAvailableAt - currentTime + index * COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS)));
+  return {
+    delaysMs,
+    nextAvailableAt: firstAvailableAt + count * COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS,
+  };
+}
+
+/** Preserve the exact payout count while reducing simultaneous decorative chips to one static total. */
+export function coinPusherRewardFlightLabels(amount: number, reducedMotion = false) {
+  const total = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+  const visibleCount = Math.min(total, reducedMotion ? 1 : COIN_PUSHER_REWARD_FLIGHT_VISIBLE_LIMIT);
+  return Array.from({ length: visibleCount }, (_, index) => {
+    if (reducedMotion) return `+${total}`;
+    if (total > visibleCount && index === visibleCount - 1) return `+${total - visibleCount + 1}`;
+    return '+1';
+  });
+}

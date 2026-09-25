@@ -352,6 +352,11 @@ try {
   });
   const pusherLoadMetrics = await page.evaluate(() => {
     const startedAt = window.__coinPusherLoadStartedAt;
+    const root = document.querySelector('#coin-pusher-root');
+    const phaseOffset = (key) => {
+      const timestamp = Number(root.dataset[key]);
+      return Number.isFinite(timestamp) ? Math.round(timestamp - startedAt) : null;
+    };
     const resources = performance.getEntriesByType('resource')
       .filter((entry) => /CoinPusherScene|CoinPusherModel|rapier|coin-pusher-(?:brushed-metal|backboard|minted-paw)/i.test(entry.name))
       .map((entry) => ({
@@ -366,6 +371,11 @@ try {
     return {
       totalMs: Math.round(performance.now() - startedAt),
       visualPreviewOffsetMs: Math.round(previewAt - startedAt),
+      artworkAppliedOffsetMs: phaseOffset('artworkAppliedAt'),
+      rendererWarmupReadyOffsetMs: phaseOffset('rendererWarmupReadyAt'),
+      physicsModuleReadyOffsetMs: phaseOffset('physicsModuleReadyAt'),
+      physicsReadyOffsetMs: phaseOffset('physicsReadyAt'),
+      rendererReadyOffsetMs: phaseOffset('rendererReadyAt'),
       resources,
     };
   });
@@ -565,6 +575,7 @@ try {
           type: 'inserted', at: performance.now(), text: node.innerText,
           startX: nodeBounds.left + nodeBounds.width / 2 - rootBounds.left,
           startY: nodeBounds.top + nodeBounds.height / 2 - rootBounds.top,
+          animationDelayMs: Number.parseFloat(node.style.animationDelay || '0') || 0,
         };
         window.__coinRewardDebug.push(entry);
         let visibleCaptured = false;
@@ -775,6 +786,13 @@ try {
     await waitFor(() => page.evaluate(() => window.__coinRewardDebug.some((entry) =>
       entry.type === 'tray-catch-updated' && /×\s*2/.test(entry.text || ''))),
     'closely spaced catches should combine into one readable ×2 tray cue');
+    await waitFor(() => page.evaluate(() => {
+      const flights = window.__coinRewardDebug
+        .filter((entry) => entry.type === 'inserted')
+        .map((entry) => entry.at + (entry.animationDelayMs || 0))
+        .sort((a, b) => a - b);
+      return flights.length >= 2 && flights.slice(1).every((time, index) => time - flights[index] >= 150);
+    }), 'closely spaced payout animations must be queued so their +1 coins do not launch on top of each other');
   }
   await waitFor(() => !!lostPayoutEventId
     && payoutRequestEvents.filter(({ eventId }) => eventId === lostPayoutEventId).length === 2,
@@ -1373,6 +1391,11 @@ try {
   'bedroom canvas must be restored at its expected aspect-ratio size after exit');
   const physicsSessionBeforeReentry = await page.locator('#coin-pusher-root').getAttribute('data-physics-session');
   const paidDropsBeforeReentry = requests.filter((url) => url.endsWith('/coin-pusher/play')).length;
+  const collectionBeforeReentryResponse = await context.request.get('/api/pet/bootstrap');
+  assert.equal(collectionBeforeReentryResponse.status(), 200, 'the re-entry check must read the current server wallet snapshot');
+  const collectionBeforeReentry = Number((await collectionBeforeReentryResponse.json()).coinPusherCollection?.returnedCoins) || 0;
+  const finishTierBeforeReentry = Math.min(5, [5, 25, 100, 300, 1000]
+    .filter((threshold) => collectionBeforeReentry >= threshold).length);
   assert.ok(physicsSessionBeforeReentry, 'the active board must expose a stable simulation-session diagnostic');
   await page.locator('[data-tab="coinPusher"]').click();
   await page.locator('#coin-pusher-root canvas').waitFor();
@@ -1382,8 +1405,18 @@ try {
     'the re-entered coin-pusher session did not become playable');
   assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-physics-session'), physicsSessionBeforeReentry,
     'leaving and re-entering must reconnect to the same Rapier world rather than reset the board');
-  assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-tier'), String(expectedFinishTier),
+  const reentryCollectionState = await page.evaluate(() => ({
+    boardTier: document.querySelector('#coin-pusher-root')?.getAttribute('data-keepsake-tier'),
+    boardFinish: document.querySelector('#coin-pusher-root')?.getAttribute('data-keepsake-finish'),
+    hudCount: document.querySelector('#coinPusherCollectionCount')?.textContent?.trim(),
+    wallet: document.querySelector('#coinBalanceHud')?.textContent?.trim(),
+  }));
+  assert.equal(reentryCollectionState.hudCount, `${finishTierBeforeReentry}/5`,
+    `the re-entered HUD must refresh the latest server collection (${JSON.stringify({ ...reentryCollectionState, finishTierBeforeReentry, collectionBeforeReentry })})`);
+  assert.equal(reentryCollectionState.boardTier, String(finishTierBeforeReentry),
     're-entering the bedroom must keep the server-confirmed cabinet finish');
+  assert.equal(reentryCollectionState.boardFinish, finishIds[finishTierBeforeReentry],
+    'the cabinet material after re-entry must match the latest server-confirmed finish');
   assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, paidDropsBeforeReentry,
     're-entering the saved board must not charge another coin');
 

@@ -170,14 +170,57 @@ export class CoinPusherScene {
       // Build a complete procedural cabinet immediately. Optional artwork keeps downloading in
       // parallel, so a slow image request cannot hold the first useful 3D preview behind a veil.
       view = new CoinPusherScene(root, compactViewport, onSwipe, onCoinsFell, notifyAvailability, notifyCoinImpact, notifyPusherStroke, renderer, model, keepsakeTier);
-      if (!model) {
-        // Start compiling and warming the static cabinet while Rapier's WASM is still loading.
-        // Render the deterministic starter pile behind a compact loading badge as soon as the
-        // visual scene is ready; the full-screen veil still blocks input until physics is live.
-        const graphicsWarmup = view.prepareSceneGraphics().then((ready) => {
+      const activeView = view;
+      for (const key of ['artworkAppliedAt', 'rendererWarmupStartedAt', 'rendererWarmupReadyAt', 'physicsModuleReadyAt', 'physicsReadyAt', 'rendererReadyAt']) {
+        delete root.dataset[key];
+      }
+      const graphicsWarmup = model
+        ? Promise.resolve(false)
+        : activeView.prepareSceneGraphics().then((ready) => {
           if (ready) notifyVisualPreviewReady();
+          return ready;
         });
-        const [modelResult] = await Promise.all([modelTask, graphicsWarmup]);
+      const modelReadyTask = modelTask.then((result) => {
+        if (result && !('error' in result)) root.dataset.physicsModuleReadyAt = String(performance.now());
+        return result;
+      });
+      const artworkWarmup = Promise.all([brushedMetalTask, backboardTask, mintedCoinTask]).then(async (textures) => {
+        try {
+          // Keep renderer compilation serial: the static preview must finish before its final
+          // textures alter material programs. This final pass can then overlap Rapier's WASM.
+          await graphicsWarmup;
+        } catch (error) {
+          textures.forEach((texture) => texture?.dispose());
+          throw error;
+        }
+        if (activeView.destroyed) {
+          textures.forEach((texture) => texture?.dispose());
+          return;
+        }
+        [brushedMetalTexture, backboardTexture, mintedCoinFaceTexture] = textures;
+        if (brushedMetalTexture) {
+          brushedMetalTexture.colorSpace = THREE.SRGBColorSpace;
+          brushedMetalTexture.wrapS = THREE.RepeatWrapping;
+          brushedMetalTexture.wrapT = THREE.RepeatWrapping;
+          brushedMetalTexture.repeat.set(4, 4);
+          brushedMetalTexture.anisotropy = Math.min(renderer!.capabilities.getMaxAnisotropy(), 8);
+        }
+        if (backboardTexture) {
+          backboardTexture.colorSpace = THREE.SRGBColorSpace;
+          backboardTexture.anisotropy = Math.min(renderer!.capabilities.getMaxAnisotropy(), 8);
+        }
+        if (mintedCoinFaceTexture) {
+          mintedCoinFaceTexture.colorSpace = THREE.SRGBColorSpace;
+          mintedCoinFaceTexture.anisotropy = Math.min(renderer!.capabilities.getMaxAnisotropy(), 8);
+        }
+        activeView.applyArtwork(brushedMetalTexture, backboardTexture, mintedCoinFaceTexture);
+        await activeView.warmRendererPrograms();
+      });
+      if (!model) {
+        // Render the deterministic starter pile immediately, and warm the final textured shaders
+        // while Rapier initializes. Input stays locked until both the physical world and renderer
+        // are ready, but the expensive portions no longer sit back-to-back on the first-play path.
+        const [modelResult] = await Promise.all([modelReadyTask, graphicsWarmup, artworkWarmup]);
         if (!modelResult || 'error' in modelResult) {
           throw modelResult?.error ?? new Error('Coin-pusher physics module did not load');
         }
@@ -186,25 +229,9 @@ export class CoinPusherScene {
           ? CoinPusherModelRuntime.restoreSnapshot(savedSnapshot)
           : new CoinPusherModelRuntime();
         view.attachModel(model);
+      } else {
+        await artworkWarmup;
       }
-      const textures = await Promise.all([brushedMetalTask, backboardTask, mintedCoinTask]);
-      [brushedMetalTexture, backboardTexture, mintedCoinFaceTexture] = textures;
-      if (brushedMetalTexture) {
-        brushedMetalTexture.colorSpace = THREE.SRGBColorSpace;
-        brushedMetalTexture.wrapS = THREE.RepeatWrapping;
-        brushedMetalTexture.wrapT = THREE.RepeatWrapping;
-        brushedMetalTexture.repeat.set(4, 4);
-        brushedMetalTexture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
-      }
-      if (backboardTexture) {
-        backboardTexture.colorSpace = THREE.SRGBColorSpace;
-        backboardTexture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
-      }
-      if (mintedCoinFaceTexture) {
-        mintedCoinFaceTexture.colorSpace = THREE.SRGBColorSpace;
-        mintedCoinFaceTexture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
-      }
-      view.applyArtwork(brushedMetalTexture, backboardTexture, mintedCoinFaceTexture);
       await view.prepareRenderer();
       return view;
     } catch (error) {
@@ -284,6 +311,8 @@ export class CoinPusherScene {
   private lastFrame = 0;
   private reducedMotion = false;
   private rendererPrepared = false;
+  private rendererProgramsReady = false;
+  private warmedProgramCount = -1;
   private destroyed = false;
 
   private readonly onVisibilityChange = () => {
@@ -295,7 +324,8 @@ export class CoinPusherScene {
     // A swipe interrupted by graphics loss is a cancelled gesture, never a delayed coin charge.
     this.swipeStart = undefined;
     this.hideAimMarker();
-    this.renderer.setAnimationLoop(null); this.rendererPrepared = false; this.root.dataset.webgl = 'lost';
+    this.renderer.setAnimationLoop(null); this.rendererPrepared = false;
+    this.rendererProgramsReady = false; this.warmedProgramCount = -1; this.root.dataset.webgl = 'lost';
     this.onAvailability(false, 'context-lost');
   };
   private readonly onContextRestored = () => {
@@ -548,6 +578,7 @@ export class CoinPusherScene {
   private attachModel(model: CoinPusherModel) {
     this.simulation = model;
     this.root.dataset.physicsSession = String(modelSessionId(model));
+    this.root.dataset.physicsReadyAt = String(performance.now());
     model.setReducedMotion(this.reducedMotion);
     this.pusher.position.z = model.pusherZ;
     this.syncPusherGlow(model.pusherZ);
@@ -564,6 +595,8 @@ export class CoinPusherScene {
     this.brushedMetalTexture = brushedMetalTexture;
     this.backboardTexture = backboardTexture;
     this.mintedCoinFaceTexture = mintedCoinFaceTexture;
+    this.rendererProgramsReady = false;
+    this.warmedProgramCount = -1;
     if (brushedMetalTexture) {
       for (const material of this.brushedMetalMaterials) {
         material.map = brushedMetalTexture;
@@ -580,6 +613,7 @@ export class CoinPusherScene {
     this.addBackboardArtwork();
     this.root.dataset.artworkTextureCount = String([brushedMetalTexture, backboardTexture, mintedCoinFaceTexture].filter(Boolean).length);
     this.root.dataset.artworkReady = 'true';
+    this.root.dataset.artworkAppliedAt = String(performance.now());
   }
 
   /** Compile/render the cabinet and shared starter-pile preview while physics downloads. */
@@ -594,14 +628,29 @@ export class CoinPusherScene {
     return true;
   }
 
-  private async prepareRenderer(reason?: WebGLAvailabilityReason) {
+  private async warmRendererPrograms() {
+    if (this.destroyed || this.root.dataset.webgl === 'lost') return false;
+    this.root.dataset.rendererWarmupStartedAt ??= String(performance.now());
     await this.renderer.compileAsync(this.scene, this.camera);
-    if (this.destroyed || this.root.dataset.webgl === 'lost') return;
-    await this.primeProgramBindingsAcrossFrames();
+    if (this.destroyed || this.root.dataset.webgl === 'lost') return false;
+    const programCount = this.renderer.info.programs?.length ?? 0;
+    if (!this.rendererProgramsReady || programCount !== this.warmedProgramCount) {
+      await this.primeProgramBindingsAcrossFrames();
+      if (this.destroyed || this.root.dataset.webgl === 'lost') return false;
+      this.rendererProgramsReady = true;
+      this.warmedProgramCount = this.renderer.info.programs?.length ?? programCount;
+      this.root.dataset.rendererWarmupReadyAt = String(performance.now());
+    }
+    return true;
+  }
+
+  private async prepareRenderer(reason?: WebGLAvailabilityReason) {
+    await this.warmRendererPrograms();
     if (this.destroyed || this.root.dataset.webgl === 'lost') return;
     this.renderer.render(this.scene, this.camera);
     this.root.querySelector('.coin-pusher-loading')?.remove();
     delete this.root.dataset.loadingStage;
+    this.root.dataset.rendererReadyAt = String(performance.now());
     this.rendererPrepared = true;
     if (!document.hidden) {
       this.lastFrame = 0;

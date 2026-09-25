@@ -15,7 +15,8 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
   t.after(() => vite.close());
   const {
     advanceCoinPusherTimingStreak, coinPusherCabinetFinish, coinPusherStampProgress, coinPusherTimingStreakLabel,
-    coinPusherTravelProgress, COIN_PUSHER_CABINET_FINISHES, COIN_PUSHER_STAMP_THRESHOLDS,
+    coinPusherTravelProgress, coinPusherRewardFlightLabels, planCoinPusherRewardFlightDelays, COIN_PUSHER_CABINET_FINISHES,
+    COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS, COIN_PUSHER_STAMP_THRESHOLDS,
   } = await vite.ssrLoadModule('/src/game/CoinPusherFeedback.ts');
   const dimensions = await vite.ssrLoadModule('/src/game/CoinPusherDimensions.ts');
 
@@ -92,4 +93,27 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
     'a non-forward landing breaks the current streak but preserves the session best');
   assert.equal(coinPusherTimingStreakLabel(missedBeat.count, 'zh-HK'), undefined,
     'a single hit should keep the existing lightweight timing cue');
+
+  const firstRewardBurst = planCoinPusherRewardFlightDelays(2, 1000, 0);
+  assert.deepEqual(firstRewardBurst, {
+    delaysMs: [0, COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS],
+    nextAvailableAt: 1000 + COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS * 2,
+  }, 'coins caught together should receive distinct, evenly spaced wallet flights');
+  const overlappingBurst = planCoinPusherRewardFlightDelays(3, 1080, firstRewardBurst.nextAvailableAt);
+  assert.deepEqual(overlappingBurst, {
+    delaysMs: [240, 240 + COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS, 240 + COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS * 2],
+    nextAvailableAt: 1800,
+  }, 'a second physical catch must continue the visual queue instead of restarting on top of the first');
+  const cappedBurst = planCoinPusherRewardFlightDelays(8, 5000, 0);
+  assert.deepEqual(cappedBurst.delaysMs, [0, 160, 320, 480, 640],
+    'large payouts should cap the number of separate flight visuals while keeping a readable cadence');
+  assert.deepEqual(coinPusherRewardFlightLabels(8), ['+1', '+1', '+1', '+1', '+4'],
+    'the normal flight labels should account for every credited coin without spawning more than five chips');
+  assert.deepEqual(coinPusherRewardFlightLabels(8, true), ['+8'],
+    'reduced-motion players should get one static total instead of stacked non-moving reward chips');
+  assert.deepEqual(coinPusherRewardFlightLabels(0, true), [],
+    'empty reward events must never imply that any coins were earned');
+  assert.deepEqual(planCoinPusherRewardFlightDelays(Number.NaN, 5000, 0), {
+    delaysMs: [], nextAvailableAt: 5000,
+  }, 'invalid reward visuals must not create a flight or poison the next scheduled payout');
 });

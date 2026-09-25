@@ -5,7 +5,7 @@ import { audio } from './audio';
 import { BedroomScene } from './game/BedroomScene';
 import type { CoinPusherScene } from './game/CoinPusherScene';
 import { PetAvatar } from './game/PetAvatar';
-import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCabinetFinish, coinPusherCascadeLabel, coinPusherStampProgress, coinPusherTimingStreakLabel, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
+import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCabinetFinish, coinPusherCascadeLabel, coinPusherRewardFlightLabels, coinPusherStampProgress, coinPusherTimingStreakLabel, planCoinPusherRewardFlightDelays, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
 import type { CoinPusherTimingStreakState } from './game/CoinPusherFeedback';
 import type { CoinPusherDropBeat } from './game/CoinPusherModel';
 import {
@@ -156,6 +156,7 @@ class StudentApp {
   private coinPusherTrayCatchOriginX = 0;
   private coinPusherTrayCatchOriginY = 0;
   private coinPusherTrayCatchOriginCount = 0;
+  private coinPusherRewardVisualNextAt = 0;
   private coinPusherPlays: { playId: string; remaining: number; reserved: number; generation: number }[] = [];
   private coinPusherPendingDrop?: StoredCoinPusherDrop;
   private coinPusherPendingPayouts: StoredCoinPusherPayout[] = [];
@@ -976,8 +977,12 @@ class StudentApp {
     this.coinPusherInitPending=true;
     this.cancelCoinPusherPreload();
     const inMemoryModel=this.coinPusherModel;
-    void this.loadCoinPusherStoredSession().then((savedSession)=>{
+    const authoritativeStateRefresh=this.reload().catch((error)=>{
+      console.warn('[pet] Could not refresh the student wallet before coin-pusher entry',error);
+    });
+    void Promise.all([this.loadCoinPusherStoredSession(),authoritativeStateRefresh]).then(([savedSession])=>{
       if(generation!==this.coinPusherGeneration||this.tab!=='coinPusher')return undefined;
+      this.syncCoinPusherCollectionBadge();
       const restoreSession=inMemoryModel?undefined:savedSession;
       if(restoreSession){
         this.coinPusherPlays=restoreSession.plays.map((play)=>({
@@ -1443,44 +1448,49 @@ class StudentApp {
     const targetY=walletRect.top+walletRect.height/2-rootRect.top;
     const validOrigins=origins?.filter((origin)=>Number.isFinite(origin.x)&&Number.isFinite(origin.y))??[];
     const payoutAt=performance.now();
+    const collectionCenter=validOrigins.length
+      ?validOrigins.reduce((sum,origin)=>({x:sum.x+origin.x/validOrigins.length,y:sum.y+origin.y/validOrigins.length}),{x:0,y:0})
+      :{x:rootRect.width*.5,y:rootRect.height*.72};
+    const flightPlan=reducedMotion
+      ?undefined
+      :planCoinPusherRewardFlightDelays(amount,payoutAt,this.coinPusherRewardVisualNextAt);
+    if(flightPlan)this.coinPusherRewardVisualNextAt=flightPlan.nextAvailableAt;
     this.coinPusherCascade=advanceCoinPusherCascade(this.coinPusherCascade,amount,payoutAt);
     const cascadeLabel=coinPusherCascadeLabel(this.coinPusherCascade.count,this.locale);
     if(cascadeLabel){
-      const center=validOrigins.length
-        ? validOrigins.reduce((sum,origin)=>({x:sum.x+origin.x/validOrigins.length,y:sum.y+origin.y/validOrigins.length}),{x:0,y:0})
-        : {x:rootRect.width*.5,y:rootRect.height*.72};
       const safeMargin=Math.min(90,rootRect.width*.25);
       const cascade=document.createElement('span');
       cascade.className=`coin-pusher-cascade${reducedMotion?' is-static':''}`;
       cascade.setAttribute('aria-hidden','true');
       cascade.textContent=cascadeLabel;
-      cascade.style.left=`${Math.max(safeMargin,Math.min(rootRect.width-safeMargin,center.x))}px`;
-      cascade.style.top=`${Math.max(92,center.y-28)}px`;
+      cascade.style.left=`${Math.max(safeMargin,Math.min(rootRect.width-safeMargin,collectionCenter.x))}px`;
+      cascade.style.top=`${Math.max(92,collectionCenter.y-28)}px`;
       root.append(cascade);
       cascade.addEventListener('animationend',()=>cascade.remove(),{once:true});
       window.setTimeout(()=>cascade.remove(),reducedMotion?1800:1350);
     }
-    const visibleCoins=Math.min(amount,5);
-    for(let index=0;index<visibleCoins;index+=1){
-      const origin=origins?.[index];
+    const rewardLabels=coinPusherRewardFlightLabels(amount,reducedMotion);
+    for(let index=0;index<rewardLabels.length;index+=1){
+      const origin=reducedMotion?collectionCenter:origins?.[index];
       const start=origin&&Number.isFinite(origin.x)&&Number.isFinite(origin.y)
         ? origin
         : {x:rootRect.width*.5,y:rootRect.height*.72};
       const flyer=document.createElement('span');
       flyer.className=`coin-pusher-reward-fly${reducedMotion?' is-static':''}`;
       flyer.setAttribute('aria-hidden','true');
-      const label=amount>visibleCoins&&index===visibleCoins-1?`+${amount-visibleCoins+1}`:'+1';
+      const label=rewardLabels[index];
       flyer.innerHTML=`<i class="icon icon-coin"></i><b>${label}</b>`;
       flyer.style.left=`${start.x}px`;
       flyer.style.top=`${start.y}px`;
+      const delayMs=flightPlan?.delaysMs[index]??0;
       if(!reducedMotion){
         flyer.style.setProperty('--coin-flight-x',`${targetX-start.x}px`);
         flyer.style.setProperty('--coin-flight-y',`${targetY-start.y}px`);
-        flyer.style.animationDelay=`${index*75}ms`;
+        flyer.style.animationDelay=`${delayMs}ms`;
       }
       root.append(flyer);
       flyer.addEventListener('animationend',()=>flyer.remove(),{once:true});
-      window.setTimeout(()=>flyer.remove(),1450+index*75);
+      window.setTimeout(()=>flyer.remove(),reducedMotion?1800:1450+delayMs);
     }
   }
   private animateCoinTrayCatch(count:number, origins?:CoinPusherRewardOrigin[]):number {
@@ -1736,6 +1746,7 @@ class StudentApp {
     this.coinPusherTrayCatchOriginY=0;
     this.coinPusherTrayCatchOriginCount=0;
     this.coinPusherTrayCatchUntil=0;
+    this.coinPusherRewardVisualNextAt=0;
     if(this.coinPusherView){
       if(preserveModel)this.coinPusherModel=this.coinPusherView.model;
       this.coinPusherView.destroy(preserveModel);
