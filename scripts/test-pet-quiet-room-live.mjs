@@ -45,10 +45,12 @@ try {
   await nativePage.locator('[data-teacher-tool="quiet"]').click();
   await nativePage.locator('#quietStart:enabled').waitFor();
   await nativePage.locator('#quietMicTest').click();
-  await nativePage.waitForFunction(() => document.querySelector('#quietMicStatus').textContent.includes('麥克風偵測中'));
-  assert.match(await nativePage.locator('#quietLevelText').innerText(), /^\d+ \/ 100$/);
+  await nativePage.waitForFunction(() => document.querySelector('#quietSetupMicStatus').textContent.includes('麥克風偵測中'));
+  assert.equal(await nativePage.locator('#quietSettingsPage').isVisible(), true, 'microphone testing stays on setup');
+  assert.equal(await nativePage.locator('#quietCountdownPage').isVisible(), false);
+  assert.match(await nativePage.locator('#quietSetupLevelText').innerText(), /^\d+ \/ 100$/);
   await nativePage.locator('#quietMicTest').click();
-  await nativePage.waitForFunction(() => document.querySelector('#quietMicStatus').textContent === '麥克風已關閉');
+  await nativePage.waitForFunction(() => document.querySelector('#quietSetupMicStatus').textContent === '麥克風已關閉');
   await native.close();
   const nativeStudent = await browser.newContext({ baseURL });
   await nativeStudent.request.post('/api/auth/login', { data: { studentId: 'S001', password: 'student123' } });
@@ -65,6 +67,14 @@ try {
     window.__quietAmplitude = .001;
     window.__quietGains = new Set();
     window.__quietPenaltyNotes = [];
+    window.__quietWarningPeaks = [];
+    const createGain = AudioContext.prototype.createGain;
+    AudioContext.prototype.createGain = function () {
+      const gain = createGain.call(this);
+      const ramp = gain.gain.linearRampToValueAtTime.bind(gain.gain);
+      gain.gain.linearRampToValueAtTime = (value, time) => { window.__quietWarningPeaks.push(value); return ramp(value, time); };
+      return gain;
+    };
     const createOscillator = AudioContext.prototype.createOscillator;
     AudioContext.prototype.createOscillator = function () {
       const oscillator = createOscillator.call(this);
@@ -73,7 +83,7 @@ try {
       oscillator.frequency.setValueAtTime = (value, time) => { frequency = value; return setFrequency(value, time); };
       const start = oscillator.start.bind(oscillator);
       oscillator.start = time => {
-        if (oscillator.type === 'triangle') window.__quietPenaltyNotes.push({ frequency, time, state: this.state });
+        if (oscillator.type === 'square') window.__quietPenaltyNotes.push({ frequency, time, state: this.state, at: performance.now() });
         start(time);
       };
       return oscillator;
@@ -96,20 +106,10 @@ try {
   await page.goto('/pet', { waitUntil: 'networkidle' });
   await page.locator('[data-teacher-tool="quiet"]').click();
   await page.locator('#quietStart:enabled').waitFor();
-  assert.match(await page.locator('.quiet-room-badge').innerText(), /專注花園/);
-  assert.equal(await page.locator('.quiet-room-stage').getByRole('img', { name: /專注夥伴/ }).count(), 3);
-  assert.doesNotMatch(await page.locator('#teacherQuietMain').innerText(), /睡覺|美夢|入睡|夢鄉/);
-  const garden = await page.locator('.quiet-garden-scene').evaluate(el => getComputedStyle(el).backgroundImage.slice(5, -2));
-  assert.equal((await context.request.get(garden)).status(), 200);
-  await page.waitForFunction(() => Array.from(document.querySelectorAll('.quiet-pet')).every(el => {
-    const image = new Image(); image.src = getComputedStyle(el).backgroundImage.slice(5,-2); return image.complete;
-  }));
+  assert.equal(await page.locator('#quietThreshold').inputValue(), '30', 'default limit is stricter');
+  assert.equal(await page.locator('#quietSettingsPage').isVisible(), true);
+  assert.equal(await page.locator('#quietCountdownPage').isVisible(), false, 'setup does not show the countdown');
   await page.screenshot({ path: path.join(artifacts, '01-setup-desktop.png'), fullPage: true });
-  await page.locator('.quiet-room-stage').screenshot({ path: path.join(artifacts, '01-focus-garden-stage.png') });
-  await page.setViewportSize({ width: 1180, height: 820 });
-  await page.screenshot({ path: path.join(artifacts, '01-focus-garden-tablet.png') });
-  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'tablet has no horizontal overflow');
-  await page.setViewportSize({ width: 1440, height: 1000 });
   await page.locator('[data-quiet-scope="group"]').click();
   assert.match(await page.locator('#quietRecipients').innerText(), /共 1 人.*陳小星/);
   await page.locator('#quietSubject').selectOption('englishGroup');
@@ -121,17 +121,52 @@ try {
   await page.waitForFunction(() => document.querySelector('#quietStatus').textContent.includes('專注中'));
   assert.equal(await page.locator('#quietNew').isVisible(), false, 'new round cannot replace an active session');
   assert.match(await page.locator('#quietSessionInfo').innerText(), /5A · 中文 A組/);
-  await page.evaluate(() => window.__quietSetAmplitude(.5));
-  await page.waitForFunction(() => document.querySelector('#quietBreaches').textContent === '1');
+  assert.equal(await page.locator('#quietSettingsPage').isVisible(), false, 'starting hides all setting inputs');
+  assert.equal(await page.locator('#quietCountdownPage').isVisible(), true, 'starting opens the dedicated countdown');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'quietCountdownHeading', 'screen transition moves keyboard focus to the countdown');
+  assert.match(await page.locator('.quiet-room-badge').innerText(), /專注花園/);
+  assert.equal(await page.locator('.quiet-room-stage').getByRole('img', { name: /專注夥伴/ }).count(), 3);
+  assert.doesNotMatch(await page.locator('#teacherQuietMain').innerText(), /睡覺|美夢|入睡|夢鄉/);
+  const garden = await page.locator('.quiet-garden-scene').evaluate(el => getComputedStyle(el).backgroundImage.slice(5, -2));
+  assert.equal((await context.request.get(garden)).status(), 200);
+  await page.waitForFunction(() => Array.from(document.querySelectorAll('.quiet-pet')).every(el => {
+    const image = new Image(); image.src = getComputedStyle(el).backgroundImage.slice(5,-2); return image.complete;
+  }));
+  await page.locator('.quiet-room-stage').screenshot({ path: path.join(artifacts, '01-focus-garden-stage.png') });
+  await page.setViewportSize({ width: 1180, height: 820 });
+  await page.screenshot({ path: path.join(artifacts, '01-focus-garden-tablet.png') });
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'tablet has no horizontal overflow');
+  await page.setViewportSize({ width: 1440, height: 1000 });
+
+  let firstNoiseConfirmed = false;
+  await page.route('**/api/pet/teacher/quiet-room/*', async route => {
+    if (route.request().method() === 'POST' && route.request().postDataJSON()?.action === 'noise') await new Promise(resolve => setTimeout(resolve, 600));
+    await route.continue();
+  });
+  page.on('response', response => {
+    if (response.url().includes('/teacher/quiet-room/') && response.request().postDataJSON()?.action === 'noise') firstNoiseConfirmed = true;
+  });
+  await page.evaluate(() => {
+    window.__quietBurstAt = performance.now();
+    window.__quietSetAmplitude(.005);
+    setTimeout(() => window.__quietSetAmplitude(.001), 100);
+  });
+  await page.waitForFunction(() => document.querySelector('#quietBreaches').textContent === '1', null, { timeout: 1000 });
   assert.equal(await page.locator('#quietRewardLeft').innerText(), '13');
-  assert.deepEqual(await page.evaluate(() => window.__quietPenaltyNotes.map(note => note.frequency)), [660, 440, 330], 'one confirmed deduction plays one descending cue');
+  assert.equal(firstNoiseConfirmed, false, 'the counter and reward update immediately before a delayed server acknowledgement');
+  assert.ok(await page.evaluate(() => window.__quietPenaltyNotes[0].at - window.__quietBurstAt < 250), 'even a 100 ms low-amplitude burst alerts immediately');
+  assert.deepEqual(await page.evaluate(() => window.__quietPenaltyNotes.map(note => note.frequency)), [880, 660, 880], 'one burst plays one unmistakable three-beep warning');
+  assert.deepEqual(await page.evaluate(() => window.__quietWarningPeaks), [.22, .22, .22], 'warning voices are louder than the previous .09 gentle chime');
   assert.ok(await page.evaluate(() => window.__quietPenaltyNotes.every(note => note.state === 'running')), 'the start gesture unlocks actual Web Audio output');
+  await page.waitForTimeout(250);
+  await page.evaluate(() => window.__quietSetAmplitude(.5));
   await page.waitForTimeout(1800);
   assert.equal(await page.locator('#quietBreaches').innerText(), '1', 'sustained noise deducts once');
   assert.equal(await page.evaluate(() => window.__quietPenaltyNotes.length), 3, 'sustained noise does not repeat the cue');
   await page.screenshot({ path: path.join(artifacts, '02-live-noise.png') });
-  await page.locator('#quietQuickPause').click();
+  await page.locator('#quietPause').click();
   await page.waitForFunction(() => document.querySelector('#quietPause').textContent.includes('繼續') && !document.querySelector('#quietPause').disabled);
+  assert.equal(await page.locator('#quietSettingsPage').isVisible(), false, 'pausing stays on the countdown page');
   const frozen = await page.locator('#quietTime').innerText();
   await page.waitForTimeout(2300);
   assert.equal(await page.locator('#quietTime').innerText(), frozen);
@@ -139,13 +174,13 @@ try {
   assert.equal(await page.evaluate(() => window.__quietPenaltyNotes.length), 3, 'pausing silences penalty cues');
   await page.screenshot({ path: path.join(artifacts, '03-paused.png') });
   await page.evaluate(() => window.__quietSetAmplitude(.001));
-  await page.locator('#quietQuickPause').click();
+  await page.locator('#quietPause').click();
   await page.waitForFunction(() => document.querySelector('#quietStatus').textContent.includes('專注中'));
   await page.waitForTimeout(1400);
   await page.evaluate(() => window.__quietSetAmplitude(.5));
   await page.waitForFunction(() => document.querySelector('#quietBreaches').textContent === '2');
   assert.equal(await page.locator('#quietRewardLeft').innerText(), '6');
-  assert.deepEqual(await page.evaluate(() => window.__quietPenaltyNotes.map(note => note.frequency)), [660, 440, 330, 660, 440, 330], 'another burst after quiet and resume plays one more cue');
+  assert.deepEqual(await page.evaluate(() => window.__quietPenaltyNotes.map(note => note.frequency)), [880, 660, 880, 880, 660, 880], 'another burst after quiet and resume plays one more warning');
   await page.evaluate(() => window.__quietSetAmplitude(.001));
   await page.locator('#quietResult:not([hidden])').waitFor({ timeout: 30000 });
   assert.match(await page.locator('#quietResult').innerText(), /已發放給 1 人，每人 6 金幣/);
@@ -158,7 +193,11 @@ try {
   await page.screenshot({ path: path.join(artifacts, '04-completed.png') });
   console.log('✓ group selection, real Web Audio metering, repeated noise, pause/resume and exactly-once group payout');
 
-  await page.locator('#quietNew').click(); await page.locator('#quietMinutes').fill('0'); await page.locator('#quietSeconds').fill('10');
+  await page.locator('#quietNew').click();
+  assert.equal(await page.locator('#quietSettingsPage').isVisible(), true, 'completed challenge returns to setup');
+  assert.equal(await page.locator('#quietCountdownPage').isVisible(), false);
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'quietHeading');
+  await page.locator('#quietMinutes').fill('0'); await page.locator('#quietSeconds').fill('10');
   await page.locator('#quietReward').fill('9'); await page.locator('#quietStart').click();
   await page.locator('#quietResult:not([hidden])').waitFor({ timeout: 16000 });
   roster = await (await context.request.get('/api/pet/teacher/roster')).json();
@@ -170,6 +209,7 @@ try {
   await page.waitForFunction(() => document.querySelector('#quietStatus').textContent.includes('專注中'));
   await page.reload({ waitUntil: 'networkidle' }); await page.locator('[data-teacher-tool="quiet"]').click();
   await page.waitForFunction(() => document.querySelector('#quietStatus')?.textContent.includes('已暫停'));
+  assert.equal(await page.locator('#quietCountdownPage').isVisible(), true, 'reload restores the dedicated paused countdown');
   await page.locator('#quietCancel').click(); await page.locator('#quietConfirmCancel').click();
   await page.waitForFunction(() => document.querySelector('#quietStatus').textContent === '已結束');
   roster = await (await context.request.get('/api/pet/teacher/roster')).json(); assert.deepEqual(roster.students.map(row => row.balance), [15, 9, 0]);
@@ -180,7 +220,8 @@ try {
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no horizontal overflow');
   await page.locator('#quietMinutes').fill('0'); await page.locator('#quietSeconds').fill('20'); await page.locator('#quietStart').click();
   await page.waitForFunction(() => document.querySelector('#quietStatus').textContent.includes('專注中'));
-  await page.locator('#quietQuickPause').click();
+  assert.equal(await page.locator('#quietSettingsPage').isVisible(), false, 'mobile start opens only the countdown');
+  await page.locator('#quietPause').click();
   await page.waitForFunction(() => document.querySelector('#quietStatus').textContent.includes('已暫停'));
   await page.locator('#teacherQuietMain').evaluate(el => { el.scrollTop = 0; });
   await page.screenshot({ path: path.join(artifacts, '06-live-phone.png'), fullPage: true });

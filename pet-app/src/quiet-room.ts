@@ -23,7 +23,7 @@ export class QuietRoom {
   private context?: AudioContext;
   private source?: MediaStreamAudioSourceNode;
   private analyser?: AnalyserNode;
-  private samples = new Float32Array(2048);
+  private samples = new Float32Array(1024);
   private gate = new NoiseGate();
   private interval = 0;
   private frame = 0;
@@ -34,6 +34,7 @@ export class QuietRoom {
   private requestQueue: Promise<void> = Promise.resolve();
   private heartbeatPending = false;
   private feedbackUntil = 0;
+  private pendingNoise = new Set<string>();
   private pendingStart?: { key: string; settings: QuietSettings };
   private onVisibility = () => { if (document.hidden && this.monitoring) void this.pause(); };
   private onPageHide = () => {
@@ -87,11 +88,12 @@ export class QuietRoom {
 
   private render() {
     const active = this.session && ['running', 'paused'].includes(this.session.status);
+    const message = '<p id="quietMessage" class="quiet-message" role="status" aria-live="polite"></p>';
     this.root.innerHTML = `<div class="quiet-layout">
-      <section class="quiet-settings" aria-labelledby="quietHeading">
+      <section id="quietSettingsPage" class="quiet-settings" aria-labelledby="quietHeading" ${this.session ? 'hidden' : ''}>
         <div class="quiet-settings-heading"><span class="quiet-heading-mark">${quietIcon('leaf')}</span><p class="eyebrow">${this.t('課室工具 · 專注練習', 'CLASSROOM · FOCUS TIME')}</p></div>
-        <h1 id="quietHeading">${this.t('安靜房間', 'Quiet Room')}</h1>
-        <p class="quiet-intro">${this.t('和寵物夥伴一起，累積每一刻的專注。', 'A little focus, a little growth. Together.')}</p>
+        <h1 id="quietHeading" tabindex="-1">${this.t('安靜房間設定', 'Quiet Room Settings')}</h1>
+        <p class="quiet-intro">${this.t('先設定挑戰，再和寵物夥伴一起進入專注花園。', 'Set up your challenge, then enter the focus garden together.')}</p>
         <form id="quietForm" ${this.session ? 'hidden' : ''}>
           <fieldset><legend><span>1</span> ${this.t('選擇參加對象', 'Choose who joins')}</legend>
             <div class="segmented"><button type="button" data-quiet-scope="class" class="active" aria-pressed="true">${this.t('全班', 'Whole class')}</button><button type="button" data-quiet-scope="group" aria-pressed="false">${this.t('班內單一組別', 'One class group')}</button></div>
@@ -104,42 +106,46 @@ export class QuietRoom {
             <div class="quiet-pair"><label class="field"><span>${this.t('分鐘', 'Minutes')}</span><input id="quietMinutes" type="number" min="0" max="120" step="1" value="5" required></label><label class="field"><span>${this.t('秒', 'Seconds')}</span><input id="quietSeconds" type="number" min="0" max="59" step="1" value="0" required></label></div>
           </fieldset>
           <fieldset><legend><span>3</span> ${this.t('最高容許音量', 'Maximum sound level')}</legend>
-            <label class="quiet-range"><span>${this.t('輕聲', 'Soft')}</span><input id="quietThreshold" type="range" min="1" max="100" value="45" aria-label="${this.t('最高容許音量', 'Maximum sound level')}"><output id="quietThresholdValue">45 / 100</output></label>
+            <label class="quiet-range"><span>${this.t('嚴格', 'Strict')}</span><input id="quietThreshold" type="range" min="1" max="100" value="30" aria-label="${this.t('最高容許音量', 'Maximum sound level')}"><output id="quietThresholdValue">30 / 100</output></label>
             <button type="button" id="quietMicTest" class="text-button">🎙 ${this.t('先測試課室音量', 'Test classroom sound')}</button>
-            <p class="quiet-hint">${this.t('這是麥克風相對指數（非分貝）。可先測試，再調整門檻。', 'A relative microphone index, not dB. Test the room, then adjust the limit.')}</p>
+            <div class="quiet-setup-meter"><div class="quiet-meter-title"><b>${quietIcon('sound')} ${this.t('課室音量測試', 'Classroom sound test')}</b><span id="quietSetupLevelText" data-quiet-level>— / 100</span></div><div class="quiet-meter-track" role="meter" aria-label="${this.t('設定頁麥克風音量', 'Setup microphone level')}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="quietSetupMeterFill" data-quiet-fill></div><i class="quiet-limit-line" data-quiet-limit><span>${this.t('上限', 'LIMIT')}</span></i></div><p id="quietSetupMicStatus" class="quiet-hint" data-quiet-mic-status></p></div>
+            <p class="quiet-hint">${this.t('已提高偵測敏感度；數字越低越嚴格，到達上限即時超標。這是相對指數（非分貝），可先測試課室音量。', 'Enhanced sensitivity: lower is stricter. Reaching the limit triggers immediately. A relative index, not dB; test your room first.')}</p>
           </fieldset>
           <fieldset><legend><span>4</span> ${this.t('設定獎勵與懲罰', 'Choose reward & penalty')}</legend>
             <div class="quiet-pair"><label class="field"><span>${quietIcon('coin')} ${this.t('每人獎勵', 'Reward per student')}</span><input id="quietReward" type="number" min="1" max="10000" step="1" value="100" required></label><label class="field"><span>${quietIcon('alert')} ${this.t('每次超標扣減', 'Penalty per burst')}</span><input id="quietPenalty" type="number" min="1" max="10000" step="1" value="10" required></label></div>
             <p class="quiet-hint">${this.t('只扣本次獎勵，最低為 0；持續超標算一次，安靜 1 秒後可再觸發。', 'Deduct from this reward only, down to 0. One penalty per burst; 1 quiet second rearms detection.')}</p>
           </fieldset>
-          <button type="submit" id="quietStart" class="primary jumbo">${this.t('開始專注挑戰', 'Start focus time')} ${quietIcon('arrow')}</button>
+          <button type="submit" id="quietStart" class="primary jumbo">${this.t('開始挑戰，進入倒數頁', 'Start challenge & open timer')} ${quietIcon('arrow')}</button>
         </form>
-        <div id="quietSessionInfo" ${this.session ? '' : 'hidden'}>
-          <p class="quiet-target">${escape(this.session?.targetLabel)}</p>
-          <p>${this.session?.count || 0} ${this.t('名學生一起參加', 'students taking part')}</p>
-          <div class="quiet-rules"><span>${this.t('音量上限', 'Sound limit')} <b>${this.session?.threshold || 0} / 100</b></span><span>${this.t('起始獎勵', 'Starting reward')} <b>${this.session?.reward || 0} 🪙</b></span><span>${this.t('每次超標', 'Each burst')} <b>−${this.session?.penalty || 0} 🪙</b></span></div>
-          <p class="quiet-hint">${this.t('暫停時，倒數與扣分都會停止。', 'Pausing stops both the timer and penalties.')}</p>
-          <div class="quiet-controls"><button id="quietPause" class="primary jumbo" ${active ? '' : 'hidden'}>${this.session?.status === 'paused' ? this.t('▶ 繼續挑戰', '▶ Resume') : this.t('Ⅱ 暫停', 'Ⅱ Pause')}</button><button id="quietCancel" class="text-button" ${active ? '' : 'hidden'}>${this.t('結束本次挑戰（不發獎勵）', 'End challenge without rewards')}</button><button id="quietNew" class="primary jumbo" ${active ? 'hidden' : ''}>${this.t('再開一個安靜房間', 'Start another quiet room')}</button></div>
-          <div id="quietCancelConfirm" hidden><p>${this.t('確定結束？本次剩餘獎勵不會發放。', 'End this challenge? Remaining rewards will not be issued.')}</p><button type="button" id="quietConfirmCancel" class="secondary">${this.t('確定結束', 'End challenge')}</button><button type="button" id="quietKeep" class="text-button">${this.t('保留挑戰', 'Keep challenge')}</button></div>
-        </div>
-        <p id="quietMessage" class="quiet-message" role="status" aria-live="polite"></p>
+        ${this.session ? '' : message}
       </section>
-      <section class="quiet-room-stage" aria-label="${this.t('寵物專注花園', 'Pet focus garden')}">
-        <div class="quiet-stage-top"><div class="quiet-room-badge"><span class="quiet-garden-mark">${quietIcon('leaf')}</span><div><small>FOCUS GARDEN</small><b>${this.t('寵物專注花園', 'Pet Focus Garden')}</b></div></div><span id="quietStatus" class="quiet-status"></span></div>
-        <div class="quiet-focus-hero"><div class="quiet-focus-copy"><span class="quiet-focus-kicker">${this.t('一起安靜 · 一起成長', 'LESS NOISE · MORE FOCUS')}</span><h2 id="quietEncouragement" class="quiet-encouragement"></h2><p>${this.t('把注意力留給眼前的任務，讓努力一點一點累積。', 'Make space for the task in front of you. Every focused moment counts.')}</p><button type="button" id="quietQuickPause" class="secondary quiet-quick-pause" ${active ? '' : 'hidden'}>${this.t('Ⅱ 暫停', 'Ⅱ Pause')}</button></div>
+      <section id="quietCountdownPage" class="quiet-room-stage" aria-labelledby="quietCountdownHeading" ${this.session ? '' : 'hidden'}>
+        <div class="quiet-stage-top"><div class="quiet-room-badge"><span class="quiet-garden-mark">${quietIcon('leaf')}</span><div><small>FOCUS GARDEN</small><b id="quietCountdownHeading" tabindex="-1">${this.t('寵物專注花園', 'Pet Focus Garden')}</b></div></div><span id="quietStatus" class="quiet-status"></span></div>
+        <div class="quiet-focus-hero"><div class="quiet-focus-copy"><span class="quiet-focus-kicker">${this.t('一起安靜 · 一起成長', 'LESS NOISE · MORE FOCUS')}</span><h2 id="quietEncouragement" class="quiet-encouragement"></h2><p>${this.t('把注意力留給眼前的任務，讓努力一點一點累積。', 'Make space for the task in front of you. Every focused moment counts.')}</p><button id="quietPause" class="primary quiet-primary-pause" ${active ? '' : 'hidden'}>${this.session?.status === 'paused' ? this.t('▶ 繼續挑戰', '▶ Resume') : this.t('Ⅱ 暫停', 'Ⅱ Pause')}</button></div>
           <div class="quiet-clock"><div class="quiet-clock-face"><small>${this.t('挑戰剩餘時間', 'TIME REMAINING')}</small><strong id="quietTime">05:00</strong><span class="quiet-clock-caption">${this.t('每一刻，都是進步', 'ONE MOMENT AT A TIME')}</span></div><progress id="quietProgress" max="300" value="300" aria-label="${this.t('剩餘時間', 'Time left')}"></progress></div>
         </div>
         <div class="quiet-garden-scene" style="background-image:url('${gardenBackdrop}')"><div class="quiet-scene-label">${quietIcon('leaf')} ${this.t('你的專注夥伴', 'YOUR FOCUS COMPANIONS')}</div><div class="quiet-pets">${this.pets()}</div></div>
         <div class="quiet-dashboard"><div class="quiet-score"><div class="quiet-reward-card"><span class="quiet-stat-icon">${quietIcon('coin')}</span><span>${this.t('每人剩餘獎勵', 'COINS PER STUDENT')}</span><div class="quiet-stat-value"><strong id="quietRewardLeft">100</strong><small>${this.t('金幣', 'coins')}</small></div></div><div class="quiet-burst-card"><span class="quiet-stat-icon">${quietIcon('alert')}</span><span>${this.t('超標次數', 'NOISE BURSTS')}</span><div class="quiet-stat-value"><strong id="quietBreaches">0</strong><small>${this.t('次', 'bursts')}</small></div></div></div>
-          <div class="quiet-meter"><div class="quiet-meter-title"><b>${quietIcon('sound')} ${this.t('即時音量', 'Live sound')}</b><span id="quietLevelText">— / 100</span></div><div class="quiet-meter-track" role="meter" aria-label="${this.t('即時麥克風音量', 'Live microphone level')}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="quietMeterFill"></div><i id="quietLimitLine"><span>${this.t('上限', 'LIMIT')}</span></i></div><div class="quiet-waves" aria-hidden="true">${Array.from({ length: 28 }, () => '<i></i>').join('')}</div><p id="quietMicStatus" class="quiet-hint">${this.t('按開始或測試，啟用麥克風', 'Start or test to enable the microphone')}</p></div>
+          <div class="quiet-meter"><div class="quiet-meter-title"><b>${quietIcon('sound')} ${this.t('即時音量', 'Live sound')}</b><span id="quietLevelText" data-quiet-level>— / 100</span></div><div class="quiet-meter-track" role="meter" aria-label="${this.t('即時麥克風音量', 'Live microphone level')}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="quietMeterFill" data-quiet-fill></div><i id="quietLimitLine" class="quiet-limit-line" data-quiet-limit><span>${this.t('上限', 'LIMIT')}</span></i></div><div class="quiet-waves" aria-hidden="true">${Array.from({ length: 28 }, () => '<i></i>').join('')}</div><p id="quietMicStatus" class="quiet-hint" data-quiet-mic-status>${this.t('按開始或測試，啟用麥克風', 'Start or test to enable the microphone')}</p></div>
         </div>
         <div id="quietResult" class="quiet-result" role="status" hidden></div>
+        <div id="quietSessionInfo" ${this.session ? '' : 'hidden'}>
+          <div class="quiet-session-summary"><div>
+          <p class="quiet-target">${escape(this.session?.targetLabel)}</p>
+          <p class="quiet-hint">${this.session?.count || 0} ${this.t('名學生一起參加', 'students taking part')}</p></div>
+          <div class="quiet-rules"><span>${this.t('音量上限', 'Sound limit')} <b>${this.session?.threshold || 0} / 100</b></span><span>${this.t('起始獎勵', 'Starting reward')} <b>${this.session?.reward || 0} 🪙</b></span><span>${this.t('每次超標', 'Each burst')} <b>−${this.session?.penalty || 0} 🪙</b></span></div>
+          </div>
+          <div class="quiet-controls"><button id="quietCancel" class="text-button" ${active ? '' : 'hidden'}>${this.t('結束本次挑戰（不發獎勵）', 'End challenge without rewards')}</button><button id="quietNew" class="primary" ${active ? 'hidden' : ''}>${this.t('返回設定，開始新挑戰', 'Back to settings for a new challenge')}</button></div>
+          <div id="quietCancelConfirm" hidden><p>${this.t('確定結束？本次剩餘獎勵不會發放。', 'End this challenge? Remaining rewards will not be issued.')}</p><button type="button" id="quietConfirmCancel" class="secondary">${this.t('確定結束', 'End challenge')}</button><button type="button" id="quietKeep" class="text-button">${this.t('保留挑戰', 'Keep challenge')}</button></div>
+        </div>
+        ${this.session ? message : ''}
       </section>
     </div>`;
     this.bind();
     this.updateSelection();
     this.paint();
     this.root.scrollTop = 0;
+    this.element(this.session ? '#quietCountdownHeading' : '#quietHeading').focus({ preventScroll: true });
   }
 
   private bind() {
@@ -158,7 +164,6 @@ export class QuietRoom {
     }));
     this.element('#quietMicTest').addEventListener('click', () => void this.testMicrophone());
     this.element('#quietPause').addEventListener('click', () => { if (this.monitoring) void this.pause(); else void this.resume(); });
-    this.element('#quietQuickPause').addEventListener('click', () => { if (this.monitoring) void this.pause(); else void this.resume(); });
     this.element('#quietCancel').addEventListener('click', () => { this.element('#quietCancelConfirm').hidden = false; });
     this.element('#quietKeep').addEventListener('click', () => { this.element('#quietCancelConfirm').hidden = true; });
     this.element('#quietConfirmCancel').addEventListener('click', () => void this.cancel());
@@ -194,7 +199,7 @@ export class QuietRoom {
       this.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
       if (this.disposed || document.hidden) throw new Error(this.t('請返回此頁再啟用麥克風。', 'Return to this page to enable the microphone.'));
       this.source = this.context.createMediaStreamSource(this.stream);
-      this.analyser = this.context.createAnalyser(); this.analyser.fftSize = 2048;
+      this.analyser = this.context.createAnalyser(); this.analyser.fftSize = this.samples.length;
       this.source.connect(this.analyser); // No speakers or recording: analyse locally only.
       this.stream.getAudioTracks().forEach(track => track.addEventListener('ended', () => { if (this.monitoring) void this.pause(this.t('麥克風已中斷，挑戰已暫停。', 'Microphone disconnected. Challenge paused.')); else this.stopMicrophone(); }));
       this.context.addEventListener('statechange', () => { if (this.monitoring && this.context?.state !== 'running') void this.pause(this.t('音量偵測已中斷，挑戰已暫停。', 'Sound detection interrupted. Challenge paused.')); });
@@ -215,6 +220,7 @@ export class QuietRoom {
     this.stream?.getTracks().forEach(track => track.stop()); this.stream = undefined;
     this.source?.disconnect(); this.source = undefined; this.analyser = undefined;
     const context = this.context; this.context = undefined; void context?.close().catch(() => {});
+    this.feedbackUntil = 0;
     this.gate.reset();
   }
   private async testMicrophone() {
@@ -262,20 +268,17 @@ export class QuietRoom {
     if (!id) return Promise.resolve(false);
     const operation = this.requestQueue.then(async () => {
       if (this.disposed) return;
-      const previous = this.session;
       const { session } = await api.quietUpdate(id, action, eventId);
       if (this.disposed) return;
+      if (eventId) this.pendingNoise.delete(eventId);
       this.session = session; this.anchor = performance.now();
-      if (action === 'noise' && previous?.id === session.id && session.breaches > previous.breaches) {
-        const deduction = previous.remainingReward - session.remainingReward;
-        this.message(this.t(`音量超過上限，請一起回到專注。本次獎勵減少 ${deduction} 金幣。`, `Sound crossed the limit. Let's refocus. Reward reduced by ${deduction} coins.`));
-        this.playPenaltySound();
-      }
+      if (session.status !== 'running') this.pendingNoise.clear();
       if (session.status !== 'running') this.stopMicrophone();
       if (session.status === 'completed') { this.render(); await this.refreshWallets().catch(() => {}); }
       this.paint();
     });
     const handled = operation.then(() => true).catch(() => {
+      this.pendingNoise.clear();
       this.stopMicrophone();
       this.message(this.t('連線中斷，已停止偵測。重新連線後按「繼續挑戰」同步進度。', 'Connection interrupted. Resume after reconnecting to sync progress.'), true);
       this.paint();
@@ -322,38 +325,46 @@ export class QuietRoom {
     const context = this.context;
     if (!this.monitoring || !context || context.state !== 'running' || document.hidden) return;
     // Let the short cue and its room echo pass without rearming the noise gate.
-    this.feedbackUntil = performance.now() + 600;
+    this.feedbackUntil = performance.now() + 900;
     try {
-      [660, 440, 330].forEach((frequency, index) => {
+      [880, 660, 880].forEach((frequency, index) => {
         const oscillator = context.createOscillator();
         const gain = context.createGain();
-        const start = context.currentTime + index * .1;
-        oscillator.type = 'triangle'; oscillator.frequency.setValueAtTime(frequency, start);
+        const start = context.currentTime + index * .24;
+        oscillator.type = 'square'; oscillator.frequency.setValueAtTime(frequency, start);
         gain.gain.setValueAtTime(0, start);
-        gain.gain.linearRampToValueAtTime(.09, start + .012);
-        gain.gain.exponentialRampToValueAtTime(.0001, start + .14);
+        gain.gain.linearRampToValueAtTime(.22, start + .008);
+        gain.gain.setValueAtTime(.22, start + .14);
+        gain.gain.exponentialRampToValueAtTime(.0001, start + .18);
         oscillator.connect(gain); gain.connect(context.destination);
         oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
-        oscillator.start(start); oscillator.stop(start + .15);
+        oscillator.start(start); oscillator.stop(start + .19);
       });
     } catch { /* Audio playback must never interrupt monitoring or settlement. */ }
   }
 
   private animate = () => {
     if (this.disposed) return;
+    this.paintClock();
     if (this.analyser) {
       this.analyser.getFloatTimeDomainData(this.samples);
       const level = microphoneLevel(this.samples);
       const threshold = this.session?.threshold ?? this.settings().threshold;
-      this.element('#quietLevelText').textContent = `${level} / 100`;
-      this.element('#quietMeterFill').style.width = `${level}%`;
-      this.element('.quiet-meter-track').setAttribute('aria-valuenow', String(level));
-      this.element('.quiet-room-stage').classList.toggle('is-loud', level > threshold);
+      this.root.querySelectorAll('[data-quiet-level]').forEach(el => { el.textContent = `${level} / 100`; });
+      this.root.querySelectorAll<HTMLElement>('[data-quiet-fill]').forEach(el => { el.style.width = `${level}%`; });
+      this.root.querySelectorAll('.quiet-meter-track').forEach(el => { el.setAttribute('aria-valuenow', String(level)); });
+      this.element('.quiet-layout').classList.toggle('is-loud', level >= threshold);
       this.root.querySelectorAll<HTMLElement>('.quiet-waves i').forEach((bar, index) => {
         bar.style.height = `${4 + level * .32 * (.3 + .7 * Math.abs(Math.sin(index * .9 + performance.now() / 180)))}px`;
       });
       if (this.monitoring && !this.busy && this.session && performance.now() >= this.feedbackUntil && this.gate.sample(level, threshold, performance.now())) {
-        void this.sync('noise', idempotencyKey());
+        const eventId = idempotencyKey();
+        const deduction = Math.min(this.session.penalty, Math.max(0, this.session.remainingReward - this.pendingNoise.size * this.session.penalty));
+        this.pendingNoise.add(eventId);
+        this.message(this.t(`音量已達上限！請保持安靜。本次獎勵減少 ${deduction} 金幣。`, `Sound reached the limit! Please keep quiet. Reward reduced by ${deduction} coins.`));
+        this.playPenaltySound();
+        this.paint();
+        void this.sync('noise', eventId);
       }
     }
     this.paintClock();
@@ -377,22 +388,23 @@ export class QuietRoom {
     const settings = this.settings();
     const threshold = this.session?.threshold ?? settings.threshold;
     this.element('#quietThresholdValue').textContent = `${settings.threshold} / 100`;
-    this.element('#quietLimitLine').style.left = `${threshold}%`;
-    this.element('#quietRewardLeft').textContent = (this.session?.remainingReward ?? settings.reward).toLocaleString();
-    this.element('#quietBreaches').textContent = String(this.session?.breaches || 0);
+    this.root.querySelectorAll<HTMLElement>('[data-quiet-limit]').forEach(el => { el.style.left = `${threshold}%`; });
+    const pending = this.session?.status === 'running' ? this.pendingNoise.size : 0;
+    this.element('#quietRewardLeft').textContent = (this.session ? Math.max(0, this.session.remainingReward - pending * this.session.penalty) : settings.reward).toLocaleString();
+    this.element('#quietBreaches').textContent = String((this.session?.breaches || 0) + pending);
     const status = this.session?.status;
     this.element('#quietStatus').textContent = status === 'completed' ? this.t('挑戰完成', 'Complete') : status === 'cancelled' ? this.t('已結束', 'Ended') : this.monitoring ? this.t('專注中', 'Focus in progress') : status ? this.t('Ⅱ 已暫停', 'Ⅱ Paused') : this.t('準備開始', 'Ready to begin');
     this.element('#quietEncouragement').textContent = status === 'completed' ? this.t('每一份專注，\n都值得獎勵。', 'Your focus\ndeserves a reward.') : status === 'cancelled' ? this.t('下次，再一起\n累積專注。', 'Another chance\nto grow together.') : this.monitoring ? this.t('保持安靜，\n讓專注成長。', 'Keep it quiet.\nLet focus grow.') : status ? this.t('暫停一下，\n再一起出發。', 'Take a moment.\nThen keep going.') : this.t('讓專注，\n一點一點成長。', 'A little focus.\nA little growth.');
     this.element('#quietMicTest').innerHTML = quietIcon('sound') + ' ' + (this.stream ? this.t('停止音量測試', 'Stop sound test') : this.t('先測試課室音量', 'Test classroom sound'));
-    this.element('#quietMicStatus').textContent = this.stream ? this.t('麥克風偵測中 · 不錄音、不上傳聲音', 'Microphone active · no recording or audio upload') : this.t('麥克風已關閉', 'Microphone off');
+    this.root.querySelectorAll('[data-quiet-mic-status]').forEach(el => { el.textContent = this.stream ? this.t('麥克風偵測中 · 不錄音、不上傳聲音', 'Microphone active · no recording or audio upload') : this.t('麥克風已關閉', 'Microphone off'); });
     if (!this.stream) {
-      this.element('#quietMeterFill').style.width = '0%'; this.element('#quietLevelText').textContent = '— / 100';
-      this.element('.quiet-meter-track').setAttribute('aria-valuenow', '0');
-      this.element('.quiet-room-stage').classList.remove('is-loud');
+      this.root.querySelectorAll<HTMLElement>('[data-quiet-fill]').forEach(el => { el.style.width = '0%'; });
+      this.root.querySelectorAll('[data-quiet-level]').forEach(el => { el.textContent = '— / 100'; });
+      this.root.querySelectorAll('.quiet-meter-track').forEach(el => { el.setAttribute('aria-valuenow', '0'); });
+      this.element('.quiet-layout').classList.remove('is-loud');
       this.root.querySelectorAll<HTMLElement>('.quiet-waves i').forEach(bar => { bar.style.height = '4px'; });
     }
     this.element('#quietPause').textContent = this.monitoring ? this.t('Ⅱ 暫停', 'Ⅱ Pause') : this.t('▶ 繼續挑戰', '▶ Resume');
-    this.element('#quietQuickPause').textContent = this.element('#quietPause').textContent;
     this.root.querySelectorAll<HTMLElement>('[data-quiet-minutes]').forEach(button => button.classList.toggle('active', settings.durationSeconds === Number(button.dataset.quietMinutes) * 60));
     this.element('.quiet-room-stage').classList.toggle('is-paused', !this.monitoring);
     if (this.session?.payout) {

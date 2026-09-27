@@ -90,20 +90,29 @@ test('concurrent settlement pays the captured recipients once, survives reload, 
   assert.equal(child.status, 0, child.stderr);
 });
 
-test('microphone conversion and noise gate ignore spikes, sustained repeats, and reset cleanly', async () => {
+test('sensitive microphone scale triggers at the limit immediately, once per burst', async () => {
   const ts = require('../node_modules/typescript');
   const source = fs.readFileSync(path.resolve(__dirname, '../src/quiet-room-meter.ts'), 'utf8');
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
   const exported = {}; new Function('exports', js)(exported);
   assert.equal(exported.microphoneLevel(new Float32Array(2048)), 0);
   assert.equal(exported.microphoneLevel(new Float32Array(2048).fill(1)), 100);
+  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.001)), 20, 'quiet input receives the 12 dB sensitivity boost');
+  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.004)), 40, 'level 40 now trips at roughly one quarter of the previous input amplitude');
   const gate = new exported.NoiseGate();
-  assert.equal(gate.sample(70,45,0),false);
+  assert.equal(gate.sample(44,45,0),false);
+  assert.equal(gate.sample(45,45,1),true, 'touching the line triggers on the very first sample');
+  assert.equal(gate.sample(70,45,2),false, 'a louder continuation remains one burst');
   assert.equal(gate.sample(20,45,100),false);
   assert.equal(gate.sample(70,45,200),false);
-  assert.equal(gate.sample(70,45,900),true);
+  assert.equal(gate.sample(70,45,900),false);
   assert.equal(gate.sample(70,45,10000),false);
-  gate.sample(20,45,11000); gate.sample(20,45,12001);
-  gate.sample(70,45,13000); assert.equal(gate.sample(70,45,13700),true);
-  gate.reset();gate.sample(70,45,14000);assert.equal(gate.sample(70,45,14700),true);
+  gate.sample(42,45,11000); gate.sample(42,45,11999);
+  assert.equal(gate.sample(45,45,12000),false, 'a sub-second quiet gap does not rearm');
+  gate.sample(42,45,13000); gate.sample(43,45,13500);
+  assert.equal(gate.sample(45,45,14500),false, 'hovering close to the line breaks the quiet gap');
+  gate.sample(42,45,15000); gate.sample(42,45,16000);
+  assert.equal(gate.sample(45,45,16001),true, 'the next crossing fires immediately after one quiet second');
+  gate.reset(); assert.equal(gate.sample(70,45,17000),true, 'reset restores immediate detection');
+  gate.reset(); assert.equal(gate.sample(100,100,18000),true, 'the maximum line is reachable');
 });
