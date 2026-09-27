@@ -2,11 +2,12 @@ import Phaser from 'phaser';
 import './styles/main.css';
 import { api } from './api';
 import { QuietRoom } from './quiet-room';
+import { prizeIcon, prizeLabel, type ArcadePrize } from './game/ArcadePrizes';
 import { audio } from './audio';
 import { BedroomScene } from './game/BedroomScene';
 import type { CoinPusherScene } from './game/CoinPusherScene';
 import { PetAvatar } from './game/PetAvatar';
-import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCabinetFinish, coinPusherCascadeLabel, coinPusherImpactPan, coinPusherRewardFlightLabels, coinPusherStampProgress, coinPusherTimingGuidanceLabel, coinPusherTimingRecordLabel, coinPusherTimingStreakLabel, planCoinPusherRewardFlightDelays, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
+import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCalloutCenterX, coinPusherCabinetFinish, COIN_PUSHER_CABINET_FINISHES, coinPusherCascadeLabel, coinPusherDropTimingCueLabel, coinPusherImpactPan, coinPusherRewardFlightLabels, coinPusherStampProgress, coinPusherTimingGuidanceLabel, coinPusherTimingRecordLabel, coinPusherTimingStreakLabel, planCoinPusherRewardFlightDelays, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
 import type { CoinPusherTimingStreakState } from './game/CoinPusherFeedback';
 import type { CoinPusherDropBeat } from './game/CoinPusherModel';
 import {
@@ -63,7 +64,7 @@ const UI = {
     coins:'金幣', dust:'星塵', feed:'餵食', play:'一起玩', sleep:'休息', decorate:'佈置房間', save:'儲存佈置', private:'私人房間', class:'開放同班參觀',
     hatchTitle:'你的第一顆蛋正在等待！', hatchCopy:'蛋內藏着三隻完成版寵物之一。首次孵化完全免費。', hatch:'開始孵化',
     owned:'已擁有', locked:'未擁有', active:'主寵', choose:'選為主寵', buy:'購買', visitRoom:'參觀房間', back:'返回房間',
-    teacherTitle:'老師金幣中心', individual:'個別學生', wholeClass:'全班', preview:'預覽發放', confirm:'確認發放', amount:'每人金額', note:'派發原因（選填）',
+    teacherTitle:'老師金幣調整中心', individual:'個別學生', wholeClass:'全班', preview:'預覽調整', confirm:'確認調整', amount:'每人金額', note:'調整原因（選填）',
     empty:'暫時沒有內容。', daily:'今日經驗', probability:'目前開放 12 隻完成版寵物', pity:'保底', randomEgg:'隨機寵物蛋', directPet:'指定寵物',
   },
   'en-US': {
@@ -71,7 +72,7 @@ const UI = {
     coins:'Coins', dust:'Stardust', feed:'Feed', play:'Play', sleep:'Rest', decorate:'Decorate', save:'Save room', private:'Private room', class:'Open to class',
     hatchTitle:'Your first egg is waiting!', hatchCopy:'One of the three completed pets is inside. Your first hatch is free.', hatch:'Hatch now',
     owned:'Owned', locked:'Not owned', active:'Active', choose:'Make active', buy:'Buy', visitRoom:'Visit room', back:'Back to room',
-    teacherTitle:'Teacher Coin Centre', individual:'Students', wholeClass:'Whole class', preview:'Preview grant', confirm:'Confirm grant', amount:'Coins per student', note:'Reason (optional)',
+    teacherTitle:'Teacher Coin Adjustment Centre', individual:'Students', wholeClass:'Whole class', preview:'Preview adjustment', confirm:'Confirm adjustment', amount:'Coins per student', note:'Reason (optional)',
     empty:'Nothing here yet.', daily:'Daily XP', probability:'12 completed pets currently available', pity:'Pity', randomEgg:'Random pet egg', directPet:'Choose a pet',
   },
 } as const;
@@ -146,6 +147,7 @@ class StudentApp {
   private coinPusherCascadeCue?: HTMLSpanElement;
   private coinPusherCascadeTimer?: number;
   private coinPusherTimingStreak: CoinPusherTimingStreakState = { count: 0, best: 0 };
+  private coinPusherDropBeat?: CoinPusherDropBeat;
   private coinPusherCooldown?: number;
   private coinPusherReturnFocus?: HTMLElement;
   private coinPusherPayoutSequence = 0;
@@ -165,6 +167,12 @@ class StudentApp {
   private coinPusherPendingPayouts: StoredCoinPusherPayout[] = [];
   private coinPusherAutosaveTimer?: number;
   private coinPusherSession?: CoinPusherSession;
+  private arcadePrizes: ArcadePrize[] = [];
+  private arcadePendingPrizes: string[] = [];
+  private arcadePrizesQueued = new Set<string>();
+  private arcadeClaimedPrizes = new Set<string>();
+  private arcadeStockQueue: Promise<void> = Promise.resolve();
+  private arcadeRestock = 20;
   private coinPusherSessionLoading?: Promise<CoinPusherSession | undefined>;
   private coinPusherSessionSaveQueue: Promise<void> = Promise.resolve();
   private coinPusherPersistenceFailed = false;
@@ -279,6 +287,7 @@ class StudentApp {
         plays: this.coinPusherPlays.map(({ playId, remaining }) => ({ playId, remaining })),
         payoutSequence: this.coinPusherPayoutSequence,
         pendingPayouts: this.coinPusherPendingPayouts.map((payout) => ({ ...payout })),
+        pendingPrizes: [...this.arcadePendingPrizes],
         bestTimingStreak: this.coinPusherTimingStreak.best,
         ...(this.coinPusherPendingDrop ? { pendingDrop: { ...this.coinPusherPendingDrop,
           ...(this.coinPusherPendingDrop.result ? { result: { ...this.coinPusherPendingDrop.result } } : {}) } } : {}),
@@ -378,7 +387,13 @@ class StudentApp {
         return this.openHome();
       }
       if (action === 'coin-pusher-drop') return this.dropCoinPusher(0);
+      if (action === 'coin-pusher-reset-board') return this.resetCoinPusherBoard();
       if (action === 'coin-pusher-collection') return this.openCoinPusherCollection();
+      if (action === 'arcade-prize-bag') return await this.openArcadePrizeBag();
+      if (action === 'arcade-prize-picker') return this.openArcadePrizePicker(button.dataset.id!);
+      if (action === 'arcade-prize-confirm') return this.confirmArcadePrize(button.dataset.prize!, button.dataset.id!);
+      if (action === 'arcade-prize-redeem') return await this.redeemArcadePrize(button.dataset.prize!, button.dataset.id!, button as HTMLButtonElement);
+      if (action === 'coin-pusher-select-finish') return this.selectCoinPusherFinish(button.dataset.id || '');
       if (action === 'coin-pusher-init-retry') return this.retryCoinPusherInitialization();
       if (action === 'hatch') return await this.hatch(button as HTMLButtonElement);
       if (action === 'feed') return await this.feed(button.dataset.id!);
@@ -415,6 +430,20 @@ class StudentApp {
     } catch (error) { this.toast((error as Error).message,true); }
   };
   private handleKeydown = (event: KeyboardEvent) => {
+    const prizeDialog = document.querySelector<HTMLElement>('#modalRoot .arcade-prize-picker');
+    if (prizeDialog) {
+      if (event.key === 'Escape') {
+        event.preventDefault(); document.querySelector('#modalRoot')!.innerHTML = '';
+        document.querySelector<HTMLButtonElement>(this.tab === 'coinPusher' ? '.coin-pusher-collection' : '#roomBar [data-action="arcade-prize-bag"]')?.focus({ preventScroll: true });
+      } else if (event.key === 'Tab') {
+        const buttons = [...prizeDialog.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')];
+        const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+        if (buttons.length && (index < 0 || (!event.shiftKey && index === buttons.length - 1) || (event.shiftKey && index === 0))) {
+          event.preventDefault(); buttons[event.shiftKey ? buttons.length - 1 : 0].focus();
+        }
+      }
+      return;
+    }
     if (event.key === 'Escape' && document.querySelector('#modalRoot .coin-pusher-collection-panel')) {
       event.preventDefault();
       document.querySelector('#modalRoot')!.innerHTML = '';
@@ -439,7 +468,6 @@ class StudentApp {
       const direction = event.key === 'ArrowLeft' ? -1 : 1;
       this.coinPusherKeyboardLaneX = Math.max(-2.32, Math.min(2.32,
         Number((this.coinPusherKeyboardLaneX + direction * .58).toFixed(2))));
-      this.coinPusherView?.aimAtWorldX(this.coinPusherKeyboardLaneX);
       return;
     }
     // Keyboard alternative for players who cannot perform a touch swipe; the visible Drop
@@ -576,10 +604,10 @@ class StudentApp {
     const zh=this.locale==='zh-HK';this.pendingGrantIds=grants.map((grant)=>grant.transactionId);
     const total=grants.reduce((sum,grant)=>sum+grant.amount,0);
     const rows=grants.map((grant)=>`<article class="grant-receipt">
-      <div class="grant-receipt-head"><span aria-hidden="true">🪙</span><div><b>${escapeHtml(grant.teacherName)}</b><small>${zh?'發給你':'sent you'}</small></div><strong>+${grant.amount.toLocaleString()}</strong></div>
+      <div class="grant-receipt-head"><span aria-hidden="true">🪙</span><div><b>${escapeHtml(grant.teacherName)}</b><small>${grant.amount<0?(zh?'扣除金幣':'deducted coins'):(zh?'增加金幣':'added coins')}</small></div><strong>${grant.amount>0?'+':''}${grant.amount.toLocaleString()}</strong></div>
       <p><span>${zh?'原因':'Reason'}</span>${escapeHtml(grant.reason || (zh?'未有填寫原因':'No reason provided'))}</p>
     </article>`).join('');
-    this.modal(`<div class="grant-notice" role="dialog" aria-modal="true" aria-labelledby="grantNoticeTitle"><span class="grant-notice-coin" aria-hidden="true">🪙</span><p class="eyebrow">${zh?'老師獎勵':'TEACHER REWARD'}</p><h2 id="grantNoticeTitle">${zh?'收到金幣！':'Coins received!'}</h2>${grants.length>1?`<p class="grant-total">${zh?`共 ${grants.length} 筆，合計`:`${grants.length} grants totalling`} <b>${total.toLocaleString()} 🪙</b></p>`:''}<div class="grant-receipt-list">${rows}</div><button class="primary" data-action="ack-grants">${zh?'知道了':'Got it'}</button></div>`,`grant-notice-modal`);
+    this.modal(`<div class="grant-notice" role="dialog" aria-modal="true" aria-labelledby="grantNoticeTitle"><span class="grant-notice-coin" aria-hidden="true">🪙</span><p class="eyebrow">${zh?'老師金幣調整':'TEACHER COIN ADJUSTMENT'}</p><h2 id="grantNoticeTitle">${zh?'金幣已調整':'Coins adjusted'}</h2>${grants.length>1?`<p class="grant-total">${zh?`共 ${grants.length} 筆，淨變動`:`${grants.length} adjustments, net change`} <b>${total>0?'+':''}${total.toLocaleString()} 🪙</b></p>`:''}<div class="grant-receipt-list">${rows}</div><button class="primary" data-action="ack-grants">${zh?'知道了':'Got it'}</button></div>`,`grant-notice-modal`);
   }
   private async acknowledgeGrantNotifications(button: HTMLButtonElement) {
     button.disabled=true;button.classList.add('loading');
@@ -628,6 +656,7 @@ class StudentApp {
       // The button stays for every pet; species without finished wearable art get the
       // "not open yet" notice inside the picker rather than a missing action.
       ['open-outfit','spark',this.locale==='zh-HK'?'換裝':'Outfit'],
+      ['arcade-prize-bag','spark',this.locale==='zh-HK'?'獎品袋':'Prize bag'],
     ];
     // Identity rides in the top bar alongside the coin pill; the room bar carries only actions.
     document.querySelector('#petStatus')!.innerHTML=`<span class="rarity ${definition.rarity}">${definition.rarity}</span><b>${escapeHtml(this.petName(definition,pet.stage))}</b><span class="room-bar-stage">Stage ${pet.stage}/4</span><div class="progress" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progress}%"></i></div><small>${pet.xp.toLocaleString()} XP · ${this.t('daily')} ${dailyXp}/${this.state.catalog.dailyXpCap}</small>`;
@@ -968,9 +997,10 @@ class StudentApp {
     const statusCopy=zh?'正在載入推銀機…':'Loading the coin pusher…';
     document.querySelector('#roomBar')!.innerHTML=`<div class="coin-pusher-hud">
       <button class="coin-pusher-back" data-action="coin-pusher-exit" aria-label="${zh?'返回房間':'Back to room'}"><span aria-hidden="true">←</span><small>${zh?'房間':'Room'}</small></button>
-      <div class="coin-pusher-brand"><div class="coin-pusher-brand-heading"><small>PET ARCADE</small><strong>${this.t('coinPusher')}</strong></div><div class="coin-pusher-brand-status"><span id="coinPusherSystemStatus" role="status" aria-live="polite">${statusCopy}</span><small class="coin-pusher-keyboard-hint">${zh?'←／→ 揀位 · Space／↓ 落幣':'← / → aim · Space / ↓ drop'}</small></div></div>
+      <div class="coin-pusher-brand"><div class="coin-pusher-brand-heading"><small>PET ARCADE</small><strong>${this.t('coinPusher')}</strong></div><div class="coin-pusher-brand-status is-loading"><span id="coinPusherSystemStatus" role="status" aria-live="polite">${statusCopy}</span><small class="coin-pusher-keyboard-hint">${zh?'←／→ 揀位 · Space／↓ 落幣':'← / → aim · Space / ↓ drop'}</small></div></div>
       <div class="coin-pusher-wallet" aria-label="${zh?'學生金幣餘額；每次落幣需要 1 枚；推出金幣會回到錢包':'Student coin balance; each drop costs 1 coin; payout coins return to the wallet'}">${icon('coin')}<span><small>${zh?'餘額':'BAL'}</small><b id="coinBalanceHud">${this.state.wallet.balance.toLocaleString()}</b></span></div>
       <button type="button" class="coin-pusher-drop" data-action="coin-pusher-drop" aria-describedby="coinPusherSystemStatus" disabled>${icon('coin')}<small><span>${zh?'落幣':'Drop'}</span><b>−1</b></small></button>
+      <button type="button" class="coin-pusher-reset" data-action="coin-pusher-reset-board" aria-label="${zh?'重設盤面為三排金幣':'Reset board to three rows of coins'}" title="${zh?'只重設銀仔盤面，不會更改錢包':'Resets only the coin board; your wallet is unchanged'}" disabled><span aria-hidden="true">↻</span><small>${zh?'重設盤面':'Reset board'}</small></button>
       <button type="button" class="coin-pusher-collection" data-action="coin-pusher-collection" data-progress-percent="${stampProgress.percent}" style="--stamp-progress:${stampProgress.percent}%" title="${stampProgressCopy}" aria-haspopup="dialog" aria-controls="modalRoot" aria-label="${zh?`爪印收藏，已解鎖 ${stampCount}/${COIN_PUSHER_STAMPS.length} 個；${stampProgressCopy}`: `Paw-stamp collection, ${stampCount}/${COIN_PUSHER_STAMPS.length} unlocked; ${stampProgressCopy}`}"><span class="coin-pusher-collection-ring" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="18" cy="23" r="6"/><circle cx="31" cy="16" r="6"/><circle cx="44" cy="21" r="6"/><circle cx="51" cy="32" r="5"/><path d="M31.5 29c-9.1 0-18.5 10.2-18.5 18.1 0 5.8 4.8 8.8 10.6 6.5 4.7-1.8 8.7-1.8 13.4 0 5.8 2.3 10.6-.7 10.6-6.5C47.6 39.2 40.8 29 31.5 29Z"/></svg></span><small id="coinPusherCollectionCount">${stampCount}/${COIN_PUSHER_STAMPS.length}</small></button>
       <button class="round-button coin-pusher-sound" data-action="audio" aria-label="${zh?'遊戲音效':'Game sound'}" aria-pressed="${audio.enabled}">${audioIcon}</button>
     </div>`;
@@ -999,6 +1029,7 @@ class StudentApp {
           ...play,reserved:0,generation,
         }));
         this.coinPusherPendingPayouts=restoreSession.pendingPayouts.map((payout)=>({...payout}));
+        this.arcadePendingPrizes = [...new Set(restoreSession.pendingPrizes ?? [])];
         for(const payout of this.coinPusherPendingPayouts){
           let play=this.coinPusherPlays.find((entry)=>entry.playId===payout.playId);
           if(!play){
@@ -1019,6 +1050,7 @@ class StudentApp {
       return this.loadCoinPusherSceneModule().then(({CoinPusherScene})=>CoinPusherScene.create(
       coinRoot,
       (worldX) => {
+        if (document.querySelector('#modalRoot .modal-card')) return;
         if(generation!==this.coinPusherGeneration||this.coinPusherBusy)return;
         this.dropCoinPusher(worldX);
       },
@@ -1065,22 +1097,32 @@ class StudentApp {
         if(!loading)return;
         loading.classList.add('is-preview-ready');
         loading.dataset.stage='physics';
-        const loadingTitle=loading.querySelector<HTMLElement>('.coin-pusher-loading-title');
-        const loadingDetail=loading.querySelector<HTMLElement>('.coin-pusher-loading-detail');
-        if(loadingTitle)loadingTitle.textContent=zh?'機台畫面已準備好':'Cabinet preview ready';
-        if(loadingDetail)loadingDetail.textContent=zh?'正在啟動物理，片刻即可落幣':'Starting physics · drops unlock in a moment';
+        // The HUD is the single live progress source once the cabinet can be seen. Keep this
+        // transparent veil only to block input until Rapier is ready; a second card here used
+        // to overlap the HUD on narrow portrait screens.
+        loading.replaceChildren();
+        loading.removeAttribute('role');
+        loading.removeAttribute('aria-live');
+        loading.setAttribute('aria-hidden','true');
         coinRoot.dataset.loadingStage='physics';
-        this.setCoinPusherStatus(zh?'機台已準備，正在啟動物理…':'Cabinet ready · starting physics…');
+        this.setCoinPusherStatus(zh?'機台已準備，正在啟動物理…':'Cabinet ready · starting physics…',true);
       },
       restoreSession?.model,
       this.coinPusherStampCount(),
       (count, origin) => audio.sfx('arcadeRattle', count, this.coinPusherStereoPan([origin])),
+      this.coinPusherSelectedFinish(this.coinPusherStampCount()).id,
     ));
     }).then((view)=>{
       if(!view)return;
       if(generation!==this.coinPusherGeneration){view.destroy();return;}
       this.coinPusherInitPending=false;
       this.coinPusherModel=view.model;
+      view.setPrizeCatchListener((prize, origin) => {
+        if (!this.arcadePendingPrizes.includes(prize.id)) this.arcadePendingPrizes.push(prize.id);
+        void this.persistCoinPusherSession().then((saved) => { if (saved) this.queueArcadePrize(prize.id, origin); });
+      });
+      void this.refreshArcadePrizes(true).catch((error) => this.toast(error.message, true));
+      for (const prizeId of this.arcadePendingPrizes) this.queueArcadePrize(prizeId);
       if(this.tab!=='coinPusher'){view.destroy(true);return;}
       this.coinPusherView=view;
       view.renderer.domElement.setAttribute('aria-label',zh
@@ -1091,6 +1133,11 @@ class StudentApp {
       if(document.activeElement===backButton)view.renderer.domElement.focus({preventScroll:true});
       if(!this.coinPusherWebglLost)this.coinPusherReady=true;
       this.coinPusherInitFailed=false;coinRoot.setAttribute('aria-busy','false');
+      view.setDropBeatChangeListener((beat)=>{
+        if(generation!==this.coinPusherGeneration)return;
+        this.coinPusherDropBeat=beat;
+        this.syncCoinPusherControls();
+      });
       coinRoot.insertAdjacentHTML('beforeend',`<div class="coin-pusher-webgl-overlay" role="status" aria-live="polite" hidden><div><b>${zh?'3D 畫面暫停':'3D rendering paused'}</b><span>${zh?'圖像恢復後才可以落幣。':'Dropping is disabled until graphics return.'}</span></div></div>`);
       if(!this.coinPusherWebglLost)this.setCoinPusherStatus(this.coinPusherReadyMessage());
       this.syncCoinPusherControls();
@@ -1136,6 +1183,24 @@ class StudentApp {
       this.syncCoinPusherControls();
     }
   }
+  private async resetCoinPusherBoard() {
+    const zh=this.locale==='zh-HK';
+    const pendingDrop=!!this.coinPusherPendingDrop&&!this.coinPusherPendingDrop.applied;
+    if(this.coinPusherBusy||this.coinPusherPaymentInFlight||pendingDrop){
+      this.setCoinPusherStatus(zh?'正在確認落幣，請稍候再重設。':'A drop is being confirmed. Please wait before resetting.');
+      this.syncCoinPusherControls();
+      return;
+    }
+    const scene=this.coinPusherView;
+    if(!scene?.resetBoardToThreeRows())return;
+    const saved=await this.persistCoinPusherSession();
+    const message=saved
+      ?(zh?'盤面已重設為三排金幣；錢包及待入帳獎勵不變。':'Board reset to three rows; wallet and pending rewards are unchanged.')
+      :(zh?'盤面已重設，但未能儲存機台。':'Board reset, but the arcade session could not be saved.');
+    this.setCoinPusherStatus(message);
+    this.toast(message,!saved);
+    this.syncCoinPusherControls();
+  }
   private async dropCoinPusher(worldX=0,recovered=false) {
     const zh=this.locale==='zh-HK';
     if(this.coinPusherBusy)return;
@@ -1151,10 +1216,9 @@ class StudentApp {
     const scene=this.coinPusherView;
     if(!scene)return;
     if(!scene.canDropCoin()){
-      // Capacity feedback is contextual, not a persistent machine status.
-      // Keep the HUD's balance/ready message clear while briefly explaining the rejected drop.
-      this.setCoinPusherStatus(this.coinPusherReadyMessage());
-      this.toast(zh?'機台暫時很擠，等一些銀仔落槽後再掃。':'The machine is crowded. Wait for a few coins to clear, then swipe again.');
+      // The physical model only refuses input while it is being destroyed/replaced.
+      this.setCoinPusherStatus(zh?'機台正在準備，請稍候。':'The machine is getting ready. Please wait.');
+      this.toast(zh?'機台正在準備，請稍候。':'The machine is getting ready. Please wait.');
       return;
     }
     // A valid swipe or keyboard drop is also a fresh user gesture. Resume audio here because
@@ -1206,6 +1270,8 @@ class StudentApp {
     }
     this.coinPusherPlays.push({playId:pending.result.playId,remaining:pending.result.payoutCap,reserved:0,generation});
     pending.applied=true;
+    this.arcadeRestock = Math.max(0, this.arcadeRestock - 1);
+    if (this.arcadeRestock === 0) void this.refreshArcadePrizes(true).catch(() => undefined);
     const persisted=await this.persistCoinPusherSession();
     audio.sfx('arcadeDrop');
     if(this.coinPusherCooldown!==undefined)window.clearTimeout(this.coinPusherCooldown);
@@ -1225,10 +1291,13 @@ class StudentApp {
     sessionStorage.setItem('pet-coin-pusher-retry','1');
     window.location.reload();
   }
-  private setCoinPusherStatus(message:string) {
+  private setCoinPusherStatus(message:string,loading=false) {
     this.coinPusherStatusRevision+=1;
     const status=document.querySelector<HTMLElement>('#coinPusherSystemStatus');
-    if(status)status.textContent=message;
+    if(status){
+      status.textContent=message;
+      status.parentElement?.classList.toggle('is-loading',loading);
+    }
   }
   private handleCoinPusherTransactionError(error:Error) {
     const zh=this.locale==='zh-HK';
@@ -1253,8 +1322,8 @@ class StudentApp {
     if(Number(this.state.wallet.balance) < COIN_PUSHER_DROP_COST)return this.coinPusherInsufficientMessage();
     const keyboardHintVisible=typeof window.matchMedia==='function'
       && window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 760px)').matches;
-    if(keyboardHintVisible)return zh?'落幣 −1 · 入槽 +1':'Drop −1 · tray +1';
-    return zh?'揀位後向下滑落幣 · 入槽 +1':'Choose a lane · swipe down to drop';
+    if(keyboardHintVisible)return zh?'落幣 −1 · 每枚入槽 +10':'Drop −1 · each catch +10';
+    return zh?'揀位後向下滑落幣 · 入槽 +10':'Choose a lane · swipe down to drop · tray +10';
   }
   private coinPusherInsufficientMessage() {
     return this.locale==='zh-HK'?'金幣不足 · 每次落幣需要 1 枚':'Not enough coins · each drop costs 1';
@@ -1272,6 +1341,26 @@ class StudentApp {
   }
   private coinPusherStampProgress(total = this.coinPusherReturnedCoins()) {
     return coinPusherStampProgress(total);
+  }
+  private coinPusherFinishPreference?: string;
+  private coinPusherSelectedFinish(unlockedCount = this.coinPusherStampCount()) {
+    let preferred = this.coinPusherFinishPreference;
+    if (preferred === undefined) {
+      try { preferred = localStorage.getItem(`pet-coin-pusher-finish:${this.identity.id}`) || undefined; }
+      catch { preferred = undefined; }
+    }
+    return coinPusherCabinetFinish(unlockedCount, preferred);
+  }
+  private selectCoinPusherFinish(finishId: string) {
+    const unlockedCount = this.coinPusherStampCount();
+    const finish = coinPusherCabinetFinish(unlockedCount, finishId);
+    if (finish.id !== finishId) return;
+    this.coinPusherFinishPreference = finishId;
+    try { localStorage.setItem(`pet-coin-pusher-finish:${this.identity.id}`, finishId); }
+    catch (error) { console.warn('[pet] Could not save the cabinet finish preference', error); }
+    this.coinPusherView?.setKeepsakeTier(unlockedCount, finishId);
+    this.syncCoinPusherCollectionBadge();
+    audio.sfx('tap');
   }
   private coinPusherTimingBestCopy() {
     const best = Math.max(0, Math.floor(this.coinPusherTimingStreak.best || 0));
@@ -1306,16 +1395,23 @@ class StudentApp {
     if (panelNext) panelNext.textContent = progress.nextThreshold
       ? (zh ? `下一枚本階段 ${progress.stepProgress} / ${progress.stepSize}` : `Next stamp ${progress.stepProgress} / ${progress.stepSize} this tier`)
       : (zh ? '已收集全部紀念章' : 'All keepsakes collected');
-    const finish = coinPusherCabinetFinish(unlocked);
+    const finish = this.coinPusherSelectedFinish(unlocked);
+    const finishTier = COIN_PUSHER_CABINET_FINISHES.indexOf(finish);
     const finishPanel = document.querySelector<HTMLElement>('.coin-pusher-finish-current');
     if (finishPanel) {
-      finishPanel.dataset.finishTier = String(unlocked);
+      finishPanel.dataset.finishTier = String(finishTier);
+      finishPanel.dataset.finishId = finish.id;
       finishPanel.style.setProperty('--finish-brass', `#${finish.brass.toString(16).padStart(6,'0')}`);
       finishPanel.style.setProperty('--finish-pale', `#${finish.paleGold.toString(16).padStart(6,'0')}`);
       finishPanel.style.setProperty('--finish-glow', `#${finish.glow.toString(16).padStart(6,'0')}`);
       const finishName = finishPanel.querySelector<HTMLElement>('.coin-pusher-finish-current-copy > b');
-      if (finishName) finishName.textContent = COIN_PUSHER_CABINET_FINISH_NAMES[unlocked][this.locale];
+      if (finishName) finishName.textContent = COIN_PUSHER_CABINET_FINISH_NAMES[finishTier][this.locale];
     }
+    document.querySelectorAll<HTMLButtonElement>('.coin-pusher-finish-option').forEach((option) => {
+      const selected = option.dataset.finishId === finish.id;
+      option.classList.toggle('is-selected', selected);
+      option.setAttribute('aria-pressed', String(selected));
+    });
     document.querySelectorAll<HTMLElement>('.coin-pusher-stamp').forEach((card, index) => {
       const stamp = COIN_PUSHER_STAMPS[index];
       if (!stamp) return;
@@ -1334,11 +1430,23 @@ class StudentApp {
     const next = nextIndex >= 0 ? COIN_PUSHER_STAMPS[nextIndex] : undefined;
     const progressState = this.coinPusherStampProgress(total);
     const progress = progressState.percent;
-    const finish = coinPusherCabinetFinish(progressState.unlockedCount);
-    const finishName = COIN_PUSHER_CABINET_FINISH_NAMES[progressState.unlockedCount][this.locale];
+    const finish = this.coinPusherSelectedFinish(progressState.unlockedCount);
+    const finishTier = COIN_PUSHER_CABINET_FINISHES.indexOf(finish);
+    const finishName = COIN_PUSHER_CABINET_FINISH_NAMES[finishTier][this.locale];
     const timingBest = this.coinPusherTimingBestCopy();
     const finishStyle = `--finish-brass:#${finish.brass.toString(16).padStart(6,'0')};--finish-pale:#${finish.paleGold.toString(16).padStart(6,'0')};--finish-glow:#${finish.glow.toString(16).padStart(6,'0')}`;
     const nextLabel = next ? `${progressState.stepProgress} / ${progressState.stepSize}` : undefined;
+    const finishOptions = COIN_PUSHER_CABINET_FINISHES.map((option, index) => {
+      const unlocked = index <= progressState.unlockedCount;
+      const selected = option.id === finish.id;
+      const optionStyle = `--finish-brass:#${option.brass.toString(16).padStart(6,'0')};--finish-pale:#${option.paleGold.toString(16).padStart(6,'0')};--finish-glow:#${option.glow.toString(16).padStart(6,'0')}`;
+      const name = COIN_PUSHER_CABINET_FINISH_NAMES[index][this.locale];
+      const unlockText = index === 0 ? (zh ? '預設' : 'Default')
+        : unlocked ? (zh ? '已解鎖' : 'Unlocked')
+          : `${COIN_PUSHER_STAMP_THRESHOLDS[index - 1]} ${zh ? '枚' : 'coins'}`;
+      const label = `${name} · ${unlocked ? (selected ? (zh ? '目前使用' : 'Selected') : (zh ? '已解鎖' : 'Unlocked')) : unlockText}`;
+      return `<button type="button" class="coin-pusher-finish-option ${selected ? 'is-selected' : ''} ${unlocked ? 'is-unlocked' : 'is-locked'}" data-action="coin-pusher-select-finish" data-finish-id="${option.id}" data-id="${option.id}" aria-label="${label}" aria-pressed="${selected}" title="${label}" style="${optionStyle}" ${unlocked ? '' : 'disabled'}><span class="coin-pusher-finish-option-swatch" aria-hidden="true"><i></i><i></i><i></i></span><small>${name}</small></button>`;
+    }).join('');
     const stamps = COIN_PUSHER_STAMPS.map((stamp) => {
       const unlocked = total >= stamp.threshold;
       return `<article class="coin-pusher-stamp coin-pusher-stamp--${stamp.tier} ${unlocked ? 'is-unlocked' : 'is-locked'}" data-tier="${stamp.tier}" aria-label="${stamp.name[this.locale]} · ${stamp.threshold}">
@@ -1348,13 +1456,14 @@ class StudentApp {
       </article>`;
     }).join('');
     this.modal(`<section class="coin-pusher-collection-panel" role="dialog" aria-modal="true" aria-labelledby="coinPusherCollectionTitle">
-      <header class="coin-pusher-collection-heading"><span aria-hidden="true">🐾</span><div><small>${zh ? '機台紀念章' : 'ARCADE KEEPSAKES'}</small><h2 id="coinPusherCollectionTitle">${zh ? '爪印收藏冊' : 'Paw-stamp collection'}</h2></div></header>
+      <header class="coin-pusher-collection-heading"><span aria-hidden="true">🐾</span><div><small>${zh ? '機台紀念章' : 'ARCADE KEEPSAKES'}</small><h2 id="coinPusherCollectionTitle">${zh ? '爪印收藏冊' : 'Paw-stamp collection'}</h2></div><button type="button" class="arcade-prize-bag-link" data-action="arcade-prize-bag" aria-label="${zh ? '獎品袋・兌換獎品' : 'Prize bag · redeem prizes'}" title="${zh ? '獎品袋・兌換獎品' : 'Prize bag · redeem prizes'}">🎁</button></header>
       <p class="coin-pusher-collection-copy">${zh ? '只計算已確認並回到錢包的推出銀仔。每枚爪印會解鎖機台配色，只改外觀，不會額外增加或扣除金幣。' : 'Only confirmed wallet payouts count. Each paw stamp unlocks a cabinet finish; it changes looks only and never adds or spends coins.'}</p>
       <div class="coin-pusher-collection-progress"><div><b>${zh ? '已入帳銀仔' : 'Payout coins returned'}</b><strong id="coinPusherCollectionReturned">${total.toLocaleString()}</strong></div><small>${next ? (zh ? `下一枚本階段 ${nextLabel}` : `Next stamp ${nextLabel} this tier`) : (zh ? '已收集全部紀念章' : 'All keepsakes collected')}</small><div class="coin-pusher-progress-track" role="progressbar" aria-label="${zh ? '下一枚紀念章進度' : 'Progress to next keepsake'}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}"><span style="width:${progress}%"></span></div></div>
       <div class="coin-pusher-collection-highlights">
         <div class="coin-pusher-personal-best" role="group" aria-label="${zh ? '個人推送技巧紀錄' : 'Personal timing record'}"><span aria-hidden="true">✦</span><div><small>${zh ? '最佳準確推送連中' : 'PERSONAL TIMING BEST'}</small><b id="coinPusherTimingBest" aria-live="polite">${timingBest}</b></div></div>
-        <div class="coin-pusher-finish-current" data-finish-tier="${progressState.unlockedCount}" style="${finishStyle}"><span class="coin-pusher-finish-swatch" aria-hidden="true"><i></i><i></i><i></i></span><span class="coin-pusher-finish-current-copy"><small>${zh ? '目前機台配色' : 'CURRENT CABINET FINISH'}</small><b>${finishName}</b></span></div>
+      <div class="coin-pusher-finish-current" data-finish-tier="${finishTier}" data-finish-id="${finish.id}" style="${finishStyle}"><span class="coin-pusher-finish-swatch" aria-hidden="true"><i></i><i></i><i></i></span><span class="coin-pusher-finish-current-copy"><small>${zh ? '目前機台配色' : 'CURRENT CABINET FINISH'}</small><b>${finishName}</b></span></div>
       </div>
+      <div class="coin-pusher-finish-picker"><small>${zh ? '選擇已解鎖配色' : 'CHOOSE AN UNLOCKED FINISH'}</small><div class="coin-pusher-finish-options" role="group" aria-label="${zh ? '機台配色' : 'Cabinet finishes'}">${finishOptions}</div></div>
       <div class="coin-pusher-stamp-grid">${stamps}</div>
       <button type="button" class="primary coin-pusher-collection-close" data-action="close-modal">${zh ? '繼續玩' : 'Keep playing'}</button>
     </section>`, 'coin-pusher-collection-modal');
@@ -1399,6 +1508,7 @@ class StudentApp {
     this.coinPusherPayoutQueue=this.coinPusherPayoutQueue.catch(()=>undefined).then(job);
   }
   private retryPendingCoinPusherPayouts = () => {
+    if (document.visibilityState !== 'hidden') for (const prizeId of this.arcadePendingPrizes) this.queueArcadePrize(prizeId);
     if(!this.coinPusherPendingPayouts.length||document.visibilityState==='hidden')return;
     if(this.coinPusherPayoutRetryTimer!==undefined){
       window.clearTimeout(this.coinPusherPayoutRetryTimer);
@@ -1422,7 +1532,7 @@ class StudentApp {
       this.state.wallet.balance=Number(result.balance); this.updateWallet();
       if(result.collection)this.state.coinPusherCollection={returnedCoins:Math.max(this.coinPusherReturnedCoins(),Number(result.collection.returnedCoins)||0)};
       this.syncCoinPusherCollectionBadge();
-      this.coinPusherView?.setKeepsakeTier(this.coinPusherStampCount());
+      this.coinPusherView?.setKeepsakeTier(this.coinPusherStampCount(), this.coinPusherSelectedFinish().id);
       play.reserved=Math.max(0,play.reserved-amount);
       play.remaining=Number(result.remainingPayout);
       this.coinPusherPendingPayouts=this.coinPusherPendingPayouts.filter((entry)=>entry.eventId!==eventId);
@@ -1436,8 +1546,8 @@ class StudentApp {
           ?COIN_PUSHER_STAMPS.slice(previousStamps,this.coinPusherStampCount())
           :[];
         audio.sfx(unlockedStamps.length?'arcadeKeepsake':'arcadePayout', amount, this.coinPusherStereoPan(origins));
-        this.animateCoinPayout(amount,origins);
-        this.setCoinPusherStatus(this.locale==='zh-HK'?`坑槽 +${amount} · 已回到錢包`:`Tray +${amount} · added to wallet`);
+        this.animateCoinPayout(amount,origins,Number(result.earned));
+        this.setCoinPusherStatus(this.locale==='zh-HK'?`坑槽 +${result.earned} · 已回到錢包`:`Tray +${result.earned} · added to wallet`);
         if(unlockedStamps.length){
           const names=unlockedStamps.map((stamp)=>stamp.name[this.locale]);
           const message=this.locale==='zh-HK'
@@ -1461,7 +1571,7 @@ class StudentApp {
     const width=root?.clientWidth??0;
     return origins?coinPusherImpactPan(origins,width):0;
   }
-  private animateCoinPayout(amount:number, origins?:CoinPusherRewardOrigin[]) {
+  private animateCoinPayout(amount:number, origins:CoinPusherRewardOrigin[]|undefined, earned:number) {
     const root=document.querySelector<HTMLElement>('#coin-pusher-root');
     const wallet=document.querySelector<HTMLElement>('.coin-pusher-wallet');
     if(!root||!wallet)return;
@@ -1517,7 +1627,7 @@ class StudentApp {
         this.coinPusherCascadeTimer=undefined;
       },reducedMotion?1800:1700);
     }
-    const rewardLabels=coinPusherRewardFlightLabels(amount,reducedMotion);
+    const rewardLabels=coinPusherRewardFlightLabels(amount,reducedMotion,earned/amount);
     for(let index=0;index<rewardLabels.length;index+=1){
       const origin=reducedMotion?collectionCenter:origins?.[index];
       const start=origin&&Number.isFinite(origin.x)&&Number.isFinite(origin.y)
@@ -1575,17 +1685,18 @@ class StudentApp {
     catchLabel!.textContent=this.locale==='zh-HK'
       ? `跌入坑槽 ×${this.coinPusherTrayCatchCount}`
       : `IN THE PIT ×${this.coinPusherTrayCatchCount}`;
-    catchLabel!.style.left=`${center.x}px`;
+    if(!reusingCue)root.append(catchLabel!);
+    catchLabel!.style.left=`${coinPusherCalloutCenterX(center.x,catchLabel!.offsetWidth,root.clientWidth)}px`;
     // Lift the catch callout clear of the physical coin so both the tray landing and reward cue
     // remain readable in the same moment.
-    const labelLift=Math.min(38,Math.max(20,root.clientHeight*.06));
+    // Keep the catch count above the +1 wallet-flight chip even in short landscape viewports.
+    const labelLift=Math.min(58,Math.max(46,root.clientHeight*.06));
     catchLabel!.style.top=`${Math.max(72,center.y-labelLift)}px`;
     if(reusingCue&&!reducedMotion){
       catchLabel!.style.animation='none';
       void catchLabel!.offsetWidth;
       catchLabel!.style.animation='';
     }
-    if(!reusingCue)root.append(catchLabel!);
     if(this.coinPusherTrayCatchTimer!==undefined)window.clearTimeout(this.coinPusherTrayCatchTimer);
     const cue=catchLabel!;
     this.coinPusherTrayCatchTimer=window.setTimeout(()=>{
@@ -1617,7 +1728,6 @@ class StudentApp {
     if(!root)return;
     const center=cueLandings.reduce((sum,landing)=>({x:sum.x+landing.x/cueLandings.length,
       y:sum.y+landing.y/cueLandings.length}),{x:0,y:0});
-    const safeMargin=Math.min(104,root.clientWidth*.32);
     const cue=document.createElement('span');
     const streakLabel=coinPusherTimingStreakLabel(this.coinPusherTimingStreak.count,this.locale);
     const recordLabel=coinPusherTimingRecordLabel(this.coinPusherTimingStreak.count,previousBest,this.locale);
@@ -1634,10 +1744,10 @@ class StudentApp {
     cue.textContent=guidanceLabel??recordLabel??streakLabel??(this.locale==='zh-HK'
       ? `順勢接住${forwardLandings.length>1?` ×${forwardLandings.length}`:'！'}`
       : `NICE TIMING${forwardLandings.length>1?` ×${forwardLandings.length}`:''}`);
-    cue.style.left=`${Math.max(safeMargin,Math.min(root.clientWidth-safeMargin,center.x))}px`;
     cue.style.top=`${Math.max(104,Math.min(root.clientHeight-54,center.y-34))}px`;
     root.querySelector('.coin-pusher-timing-cue')?.remove();
     root.append(cue);
+    cue.style.left=`${coinPusherCalloutCenterX(center.x,cue.offsetWidth,root.clientWidth)}px`;
     cue.addEventListener('animationend',()=>cue.remove(),{once:true});
     window.setTimeout(()=>cue.remove(),1000);
   }
@@ -1652,8 +1762,12 @@ class StudentApp {
       const pending=!!this.coinPusherPendingDrop&&!this.coinPusherPendingDrop.applied;
       const canAfford=Number(this.state.wallet.balance) >= COIN_PUSHER_DROP_COST;
       const disabled=!ready||this.coinPusherBusy||this.coinPusherPersistenceFailed||(!pending&&!canAfford);
+      const timingCue=coinPusherDropTimingCueLabel(this.coinPusherDropBeat??'home-pause',this.locale);
+      const showingTimingCue=!!timingCue&&!pending&&!disabled;
       dropButton.disabled=disabled;
       dropButton.classList.toggle('is-insufficient',ready&&!this.coinPusherBusy&&!pending&&!canAfford);
+      dropButton.classList.toggle('is-good-timing',showingTimingCue);
+      dropButton.dataset.pusherBeat=this.coinPusherDropBeat??'unknown';
       dropButton.setAttribute('aria-disabled',String(disabled));
       const label=dropButton.querySelector<HTMLElement>('small span');
       const cost=dropButton.querySelector<HTMLElement>('small b');
@@ -1663,12 +1777,29 @@ class StudentApp {
         ?(this.locale==='zh-HK'?'安全確認已付落幣；不會再次扣金幣':'Safely resume paid drop; no second charge')
         :!canAfford
         ? (this.locale==='zh-HK'?'金幣不足；每次落幣需要 1 枚':'Not enough coins; each drop costs 1 coin')
+        :showingTimingCue
+        ? `${timingCue}；${this.locale==='zh-HK'?'落幣扣 1 金幣':'drop costs 1 coin'}`
         : (this.locale==='zh-HK'?'落幣，扣 1 金幣':'Drop a coin; costs 1 coin'));
       dropButton.title=pending
         ?(this.locale==='zh-HK'?'確認已付落幣，不會重複扣幣':'Resume the paid drop without charging twice')
         :!canAfford
         ? (this.locale==='zh-HK'?'金幣不足':'Not enough coins')
+        :showingTimingCue
+        ? `${timingCue}；${this.locale==='zh-HK'?'落幣扣 1 枚；推出金幣回到錢包':'drop costs 1; payouts return to the wallet'}`
         : (this.locale==='zh-HK'?'落幣 −1；推出金幣回到錢包':'Drop −1; payout coins return to wallet');
+    }
+    const resetButton=document.querySelector<HTMLButtonElement>('.coin-pusher-reset');
+    if(resetButton){
+      const pending=!!this.coinPusherPendingDrop&&!this.coinPusherPendingDrop.applied;
+      const disabled=!this.coinPusherView||this.coinPusherBusy||this.coinPusherPaymentInFlight
+        ||pending||this.coinPusherPersistenceFailed;
+      resetButton.disabled=disabled;
+      resetButton.setAttribute('aria-disabled',String(disabled));
+      resetButton.title=disabled&&pending
+        ?(this.locale==='zh-HK'?'先確認已付落幣，再重設盤面':'Confirm the paid drop before resetting the board')
+        :disabled&&this.coinPusherBusy
+        ?this.coinPusherExitWaitMessage()
+        :(this.locale==='zh-HK'?'重設為三排金幣；不會更改錢包':'Reset to three rows; your wallet is unchanged');
     }
     const backButton=document.querySelector<HTMLButtonElement>('.coin-pusher-back');
     if(backButton){
@@ -1784,6 +1915,97 @@ class StudentApp {
     await this.reload(); this.startBedroom(); this.renderHomePanel(); this.renderOutfitPicker();
   }
   private renderSettings(){this.setLayout('full');const seg=(value:'private'|'class',label:string)=>`<button data-action="set-visibility" data-id="${value}" class="seg ${this.state.room.visibility===value?'on':''}">${escapeHtml(label)}</button>`;document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll settings-panel"><p class="eyebrow">COMFORT & ACCESS</p><h1>${this.t('settings')}</h1><div class="setting-row"><div><b>${this.locale==='zh-HK'?'房間參觀權限':'Room visits'}</b><small>${this.locale==='zh-HK'?'開放後，只有同班同學可以參觀你的房間。':'When opened, only classmates can visit your room.'}</small></div><div class="segmented-toggle">${seg('private',this.t('private'))}${seg('class',this.t('class'))}</div></div><label class="field"><span>${this.locale==='zh-HK'?'音樂音量':'Music volume'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.musicLevel}" data-setting="music"></label><label class="field"><span>${this.locale==='zh-HK'?'音效音量':'Sound effects'}</span><input type="range" min="0" max="1" step="0.05" value="${audio.sfxLevel}" data-setting="sfx"></label><label class="toggle"><input type="checkbox" id="motionToggle" ${localStorage.getItem('pet-reduced-motion')==='1'?'checked':''}><span>${this.locale==='zh-HK'?'減少動畫':'Reduce motion'}</span></label><p class="privacy-note">${this.locale==='zh-HK'?'私隱：房間預設私人；公開後只有同班學生可參觀。系統沒有聊天、留言、交易或排行榜。':'Privacy: rooms are private by default. Only classmates can visit when opened. There is no chat, messaging, trading or leaderboard.'}</p></div>`;document.querySelector('#motionToggle')?.addEventListener('change',(event)=>{const on=(event.target as HTMLInputElement).checked;localStorage.setItem('pet-reduced-motion',on?'1':'0');document.documentElement.classList.toggle('reduced-motion',on);});}
+  private renderPicker(title: string, body: string, variant: string) {
+    this.modal(`<section class="picker ${variant}" role="dialog" aria-modal="true" aria-labelledby="arcadePickerTitle"><header class="picker-head"><h2 id="arcadePickerTitle">${escapeHtml(title)}</h2><button class="round-button" data-action="close-modal" aria-label="${this.locale === 'zh-HK' ? '關閉' : 'Close'}">✕</button></header><div class="picker-body">${body}</div></section>`, `framed ${variant}`);
+    document.querySelector<HTMLButtonElement>('#modalRoot button')?.focus({ preventScroll: true });
+  }
+  private refreshArcadePrizes(syncBoard = true) {
+    const task = this.arcadeStockQueue.catch(() => undefined).then(async () => {
+      const result = await api.arcadePrizes();
+      this.arcadePrizes = result.prizes;
+      this.arcadeRestock = result.dropsUntilRestock;
+      if (syncBoard) this.coinPusherView?.syncPrizes(result.prizes.filter((prize) =>
+        !this.arcadePendingPrizes.includes(prize.id) && !this.arcadeClaimedPrizes.has(prize.id)));
+    });
+    this.arcadeStockQueue = task;
+    return task;
+  }
+  private queueArcadePrize(prizeId: string, origin?: CoinPusherRewardOrigin) {
+    if (this.arcadePrizesQueued.has(prizeId)) return;
+    this.arcadePrizesQueued.add(prizeId);
+    // Share the ordinary payout queue: overlapping wallet responses cannot race each other.
+    this.coinPusherPayoutQueue = this.coinPusherPayoutQueue.catch(() => undefined).then(async () => {
+      try {
+        if (!await this.persistCoinPusherSession()) throw new Error('獎品暫存未完成。');
+        const result = await api.claimArcadePrize(prizeId);
+        this.arcadeClaimedPrizes.add(prizeId);
+        await this.reload();
+        this.arcadePendingPrizes = this.arcadePendingPrizes.filter((id) => id !== prizeId);
+        await this.persistCoinPusherSession();
+        const zh = this.locale === 'zh-HK';
+        const label = `${prizeIcon(result.kind)} ${prizeLabel(result.kind, zh)} ${result.earned ? '+50' : '+1'}`;
+        if (this.tab === 'coinPusher') {
+          if (result.earned) this.animateCoinPayout(1, origin ? [origin] : undefined, 50);
+          else {
+            const root = document.querySelector<HTMLElement>('#coin-pusher-root');
+            if (root) {
+              const chip = document.createElement('span'); chip.className = 'arcade-prize-reward';
+              chip.textContent = label;
+              chip.style.left = `${Math.max(80, Math.min(root.clientWidth - 80, origin?.x ?? root.clientWidth / 2))}px`;
+              chip.style.top = `${Math.min(root.clientHeight - 45, origin?.y ?? root.clientHeight * .7)}px`;
+              root.append(chip); window.setTimeout(() => chip.remove(), 1800);
+            }
+          }
+          audio.sfx('arcadeKeepsake'); this.setCoinPusherStatus(`${label} · ${zh ? (result.earned ? '已回到錢包' : '已放入獎品袋') : (result.earned ? 'Added to wallet' : 'Added to prize bag')}`);
+        } else this.toast(label);
+        await this.refreshArcadePrizes();
+      } catch (error) {
+        this.toast(this.locale === 'zh-HK' ? '獎品確認暫停，會自動重試；不會重複領獎。' : 'Prize confirmation paused; retrying safely.', true);
+        window.setTimeout(() => { if (this.arcadePendingPrizes.includes(prizeId)) this.queueArcadePrize(prizeId, origin); }, 5000);
+      } finally { this.arcadePrizesQueued.delete(prizeId); }
+    });
+  }
+  private async openArcadePrizeBag() {
+    const saved = await this.loadCoinPusherStoredSession();
+    if (!this.coinPusherModel && !this.coinPusherView) this.arcadePendingPrizes = [...new Set([...this.arcadePendingPrizes, ...(saved?.pendingPrizes ?? [])])];
+    for (const id of this.arcadePendingPrizes) this.queueArcadePrize(id);
+    await this.refreshArcadePrizes();
+    await this.reload();
+    const zh = this.locale === 'zh-HK';
+    const bag = this.arcadePrizes.filter((prize) => prize.status === 'bag' && prize.kind !== 'ruby');
+    const cards = bag.map((prize) => `<article class="arcade-prize-card"><span>${prizeIcon(prize.kind)}</span><b>${prizeLabel(prize.kind, zh)}</b><small>${zh ? '自選一件・不扣金幣' : 'Choose one · no coin cost'}</small><button class="primary" data-action="arcade-prize-picker" data-id="${escapeHtml(prize.id)}">${zh ? '選擇獎品' : 'Choose reward'}</button></article>`).join('');
+    this.renderPicker(zh ? '獎品袋' : 'Prize bag', `<div class="arcade-prize-bag"><p>${zh ? '紅寶石入槽 +50。寵物券換未擁有的 Common / Rare；飾物及家具券不限價格。' : 'Ruby catches award 50 coins. Pet vouchers unlock an unowned Common / Rare pet; item vouchers have no price cap.'}</p><div class="arcade-prize-grid">${cards || `<p>${zh ? '未有兌換券。把盤面的公仔推入幣槽吧！' : 'No vouchers yet. Push a figurine into the collection well!'}</p>`}</div><p class="arcade-prize-note">${zh ? `盤面獎品 ${this.arcadePrizes.filter((p) => p.status === 'board').length}/4 · 再落幣 ${this.arcadeRestock} 次可補貨。重設不會增加獎品。` : `Board prizes ${this.arcadePrizes.filter((p) => p.status === 'board').length}/4 · Restock in ${this.arcadeRestock} drops. Resetting never creates extra prizes.`}</p>${this.arcadePendingPrizes.length ? `<p role="status">${zh ? '仍有獎品等待網絡確認。' : 'Prize confirmation is pending.'}</p>` : ''}</div>`, 'arcade-prize-picker');
+  }
+  private arcadePrizeChoices(prize: ArcadePrize) {
+    if (prize.kind === 'pet') return this.state.catalog.pets.filter((pet) => ['common', 'rare'].includes(pet.rarity)
+      && !this.state.pets.some((owned) => owned.speciesId === pet.id)).map((pet) => ({ id: pet.id, label: this.petName(pet, 1), art: pet.art[0], detail: pet.rarity }));
+    const source = prize.kind === 'wearable' ? this.state.catalog.wearables : this.state.catalog.furniture;
+    return source.filter((item) => !this.state.inventory.some((owned) => owned.itemId === item.id && owned.quantity > 0))
+      .map((item) => ({ id: item.id, label: this.name(item.name), art: item.art, detail: `${item.price} 🪙` }));
+  }
+  private openArcadePrizePicker(prizeId: string) {
+    const prize = this.arcadePrizes.find((entry) => entry.id === prizeId && entry.status === 'bag');
+    if (!prize) return;
+    const zh = this.locale === 'zh-HK', choices = this.arcadePrizeChoices(prize);
+    this.renderPicker(`${prizeIcon(prize.kind)} ${prizeLabel(prize.kind, zh)}`, `<div class="arcade-prize-bag"><p>${zh ? '一張券可兌換一件未擁有的獎品，不扣金幣。' : 'One voucher unlocks one unowned reward without spending coins.'}</p><div class="arcade-prize-grid">${choices.map((item) => `<article class="arcade-prize-card">${item.art ? `<img src="${escapeHtml(item.art)}" alt="" loading="lazy">` : prizeIcon(prize.kind)}<b>${escapeHtml(item.label)}</b><small>${escapeHtml(item.detail)} · ${zh ? '券兌換免費' : 'Free with voucher'}</small><button class="primary" data-action="arcade-prize-confirm" data-prize="${escapeHtml(prizeId)}" data-id="${escapeHtml(item.id)}">${zh ? '選擇' : 'Select'}</button></article>`).join('') || `<p>${zh ? '你已擁有所有可兌換獎品。券會保留，日後有新物品可再用。' : 'You own all eligible rewards. Your voucher stays in the bag for future items.'}</p>`}</div><button data-action="arcade-prize-bag">${zh ? '返回獎品袋' : 'Back to prize bag'}</button></div>`, 'arcade-prize-picker');
+  }
+  private confirmArcadePrize(prizeId: string, itemId: string) {
+    const prize = this.arcadePrizes.find((p) => p.id === prizeId && p.status === 'bag');
+    const item = prize && this.arcadePrizeChoices(prize).find((entry) => entry.id === itemId);
+    if (!item || !prize) return;
+    const zh = this.locale === 'zh-HK';
+    this.renderPicker(zh ? '確認兌換' : 'Confirm redemption', `<div class="arcade-prize-bag"><h3>${escapeHtml(item.label)}</h3>${item.art ? `<img class="arcade-prize-preview" src="${escapeHtml(item.art)}" alt="">` : ''}<p>${zh ? `使用一張${prizeLabel(prize.kind)}，金幣不變。` : `Use one ${prizeLabel(prize.kind, false)}. Your coins stay unchanged.`}</p><button class="primary" data-action="arcade-prize-redeem" data-prize="${escapeHtml(prizeId)}" data-id="${escapeHtml(itemId)}">${zh ? '確認兌換' : 'Confirm redemption'}</button><button data-action="arcade-prize-picker" data-id="${escapeHtml(prizeId)}">${zh ? '返回選擇' : 'Back'}</button></div>`, 'arcade-prize-picker');
+  }
+  private async redeemArcadePrize(prizeId: string, itemId: string, button: HTMLButtonElement) {
+    button.disabled = true;
+    try {
+      await api.redeemArcadePrize(prizeId, itemId);
+      await this.reload(); audio.sfx('buy');
+      if (this.tab === 'home') { this.startBedroom(); this.renderHomePanel(); }
+      await this.openArcadePrizeBag();
+      this.toast(this.locale === 'zh-HK' ? '兌換成功！已放入你的收藏，沒有扣幣。' : 'Reward unlocked! No coins spent.');
+    } catch (error) { button.disabled = false; throw error; }
+  }
   private async reload(){this.state=await api.bootstrap();this.roomPlacements=this.state.room.placements.map((item)=>({...item}));this.updateWallet();}
   private destroyCoinPusher(preserveModel=false){
     if(preserveModel)void this.persistCoinPusherSession();
@@ -1799,6 +2021,7 @@ class StudentApp {
     this.coinPusherCascadeCue?.remove();
     this.coinPusherCascadeCue=undefined;
     this.coinPusherTimingStreak={count:0,best:this.coinPusherTimingStreak.best};
+    this.coinPusherDropBeat=undefined;
     if(this.coinPusherTrayCatchTimer!==undefined)window.clearTimeout(this.coinPusherTrayCatchTimer);
     this.coinPusherTrayCatchTimer=undefined;
     this.coinPusherTrayCatchCue?.remove();
@@ -1835,12 +2058,19 @@ class StudentApp {
   private celebrate(type:string){const layer=document.querySelector('#celebrationLayer')!;layer.innerHTML=Array.from({length:type==='epic'?42:24},(_,index)=>`<i style="--x:${Math.random()*100}%;--d:${Math.random()*.9}s;--c:${index%5}"></i>`).join('');window.setTimeout(()=>layer.innerHTML='',2200);}
 }
 
+type RosterFilterField = 'className' | 'chineseGroup' | 'englishGroup' | 'mathGroup';
+
 class TeacherApp {
   quietRoom?:QuietRoom;
-  identity:Identity; locale:Locale; roster:any; selected=new Set<string>();scope:'students'|'class'='students';
+  identity:Identity; locale:Locale; roster:any; selected=new Set<string>();scope:'students'|'class'|'group'='students';
+  filterField:RosterFilterField='className';filterValue='';
   constructor(identity:Identity){this.identity=identity;this.locale=identity.language||'zh-HK';}
   t(key:keyof typeof UI['zh-HK']){return UI[this.locale][key]||UI['zh-HK'][key];}
   zh(){return this.locale==='zh-HK';}
+  fieldLabel(field:RosterFilterField){const zh=this.zh();return ({className:zh?'班別':'Class',chineseGroup:zh?'中文組':'Chinese group',englishGroup:zh?'英文組':'English group',mathGroup:zh?'數學組':'Maths group'})[field];}
+  values(field:RosterFilterField){return [...new Set<string>(this.roster.students.map((student:any)=>String(student[field]||'').trim()).filter(Boolean))].sort((left:string,right:string)=>left.localeCompare(right,this.locale));}
+  options(field:RosterFilterField,includeAll=false){const all=includeAll?`<option value="">${this.zh()?`所有${this.fieldLabel(field)}`:`All ${this.fieldLabel(field).toLowerCase()}s`}</option>`:'';return all+this.values(field).map((value:string)=>`<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');}
+  filteredStudents(){return this.roster.students.filter((student:any)=>!this.filterValue||String(student[this.filterField]||'')===this.filterValue);}
   async start(){this.roster=await api.teacherRoster();this.render();}
   render(){
     this.quietRoom?.dispose();
@@ -1851,20 +2081,26 @@ class TeacherApp {
         <a href="/" class="brand"><span class="brand-mark">B</span><span><b>${zh?'老師寵物樂園':'Teacher Pet Paradise'}</b><small>${escapeHtml(this.identity.name)} · ${escapeHtml(this.roster.academicYear)}</small></span></a>
         <div class="teacher-summary"><span><b>${this.roster.students.length}</b><small>${zh?'名學生':'students'}</small></span><span><b>${this.roster.classes.length}</b><small>${zh?'個班別':'classes'}</small></span></div>
       </header>
-      <nav class="teacher-tool-tabs" aria-label="${zh?'老師工具':'Teacher tools'}"><button type="button" data-teacher-tool="coins" class="active" aria-pressed="true">🪙 ${zh?'發放金幣':'Coin grants'}</button><button type="button" data-teacher-tool="quiet" aria-pressed="false">${zh?'安靜房間':'Quiet Room'}</button></nav>
+      <nav class="teacher-tool-tabs" aria-label="${zh?'老師工具':'Teacher tools'}"><button type="button" data-teacher-tool="coins" class="active" aria-pressed="true">🪙 ${zh?'金幣調整':'Coin adjustments'}</button><button type="button" data-teacher-tool="quiet" aria-pressed="false">${zh?'安靜房間':'Quiet Room'}</button></nav>
       <main class="teacher-main" id="teacherCoinMain">
         <section class="grant-panel" aria-labelledby="grantHeading">
           <div class="grant-head">
             <p class="eyebrow">TEACHER COIN CENTRE</p>
             <h1 id="grantHeading">${this.t('teacherTitle')}</h1>
-            <p class="caution">${zh?'老師可在這裏發放金幣；推銀仔每次落幣扣 1 枚，推出的金幣會回到學生錢包。發放後不能撤回，確認前請核對「人數 × 每人金額 = 總額」。':'Teachers issue coins here; each coin-pusher drop costs 1 coin, and payout coins return to the student wallet. Grants cannot be undone, so check students × coins each = total.'}</p>
+            <p class="caution">${zh?'正數會增加金幣，負數會扣除金幣；調整後不能撤回。扣款不會令學生餘額低於 0，確認前請核對「人數 × 每人金額 = 總變動」。':'Positive amounts add coins and negative amounts deduct them. Adjustments cannot be undone, and deductions never take a wallet below zero.'}</p>
           </div>
           <div class="segmented" role="group" aria-label="${zh?'發放對象':'Grant scope'}">
             <button type="button" data-scope="students" class="active" aria-pressed="true">${this.t('individual')}</button>
             <button type="button" data-scope="class" aria-pressed="false">${this.t('wholeClass')}</button>
+            <button type="button" data-scope="group" aria-pressed="false">${zh?'科組':'Subject group'}</button>
           </div>
           <label class="field class-field" hidden><span>${zh?'班別':'Class'}</span><select id="classSelect">${this.roster.classes.map((name:string)=>`<option>${escapeHtml(name)}</option>`).join('')}</select></label>
-          <label class="field"><span>${this.t('amount')}</span><input id="grantAmount" type="number" inputmode="numeric" min="1" max="10000" value="250"></label>
+          <div class="group-field grant-group-fields" hidden>
+            <label class="field"><span>${zh?'科目':'Subject'}</span><select id="grantGroupField"><option value="chineseGroup">${zh?'中文組':'Chinese group'}</option><option value="englishGroup">${zh?'英文組':'English group'}</option><option value="mathGroup">${zh?'數學組':'Maths group'}</option></select></label>
+            <label class="field"><span>${zh?'組別':'Group'}</span><select id="grantGroupName">${this.options('chineseGroup')}</select></label>
+          </div>
+          <label class="field"><span>${this.t('amount')}</span><input id="grantAmount" type="number" inputmode="numeric" min="-10000" max="10000" value="250"></label>
+          <div class="amount-help"><span>${zh?'輸入負數代表扣除，例如 −100。':'Enter a negative number to deduct, for example −100.'}</span><button type="button" class="text-button" id="toggleAmountSign">${zh?'＋／− 切換':'Toggle + / −'}</button></div>
           <div class="preset-row">${[100,250,500,1000].map((value)=>`<button type="button" data-amount="${value}" class="${value===250?'active':''}">${value}</button>`).join('')}</div>
           <label class="field"><span>${this.t('note')}</span><input id="grantNote" maxlength="240" placeholder="${zh?'例如：課堂表現':'e.g. Great effort today'}"></label>
           <div class="grant-summary" id="grantSummary" aria-live="polite"><p><b id="grantSummaryLine">—</b><span id="grantSummaryHint"></span></p><strong id="grantSummaryTotal">—</strong></div>
@@ -1877,7 +2113,8 @@ class TeacherApp {
             <div class="roster-tools">
               <button type="button" class="text-button" id="selectAllStudents">${zh?'全選':'Select all'}</button>
               <button type="button" class="text-button" id="clearStudents">${zh?'清除':'Clear'}</button>
-              <select id="rosterClassFilter" aria-label="${zh?'篩選班別':'Filter class'}"><option value="">${zh?'所有班別':'All classes'}</option>${this.roster.classes.map((name:string)=>`<option>${escapeHtml(name)}</option>`).join('')}</select>
+              <select id="rosterFilterField" aria-label="${zh?'篩選類別':'Filter type'}"><option value="className">${zh?'按班別':'By class'}</option><option value="chineseGroup">${zh?'按中文組':'By Chinese group'}</option><option value="englishGroup">${zh?'按英文組':'By English group'}</option><option value="mathGroup">${zh?'按數學組':'By Maths group'}</option></select>
+              <select id="rosterFilterValue" aria-label="${zh?'篩選值':'Filter value'}">${this.options('className',true)}</select>
             </div>
           </div>
           <div class="student-roster" id="studentRoster">${this.studentRows()}</div>
@@ -1896,16 +2133,20 @@ class TeacherApp {
       if(quiet&&!this.quietRoom){
         this.quietRoom=new QuietRoom(document.querySelector<HTMLElement>('#teacherQuietMain')!,this.roster,this.locale,async()=>{
           this.roster=await api.teacherRoster();
-          document.querySelector('#studentRoster')!.innerHTML=this.studentRows(this.filter);
+          document.querySelector('#studentRoster')!.innerHTML=this.studentRows();
         });void this.quietRoom.init();
       }
     }));
   }
-  studentRows(filter=''){this.filter=filter;return this.roster.students.filter((student:any)=>!filter||student.className===filter).map((student:any)=>`<label class="student-wallet"><input type="checkbox" data-student="${student.studentId}" ${this.selected.has(student.studentId)?'checked':''}><span class="avatar-letter" aria-hidden="true">${escapeHtml(student.name).slice(0,1)}</span><span><b>${escapeHtml(student.name)}</b><small>${escapeHtml(student.className)} · ${student.classNo||'—'} · ${escapeHtml(student.studentId)}</small></span><strong>${Number(student.balance).toLocaleString()} 🪙</strong></label>`).join('');}
-  filter='';
+  studentRows(){return this.filteredStudents().map((student:any)=>{
+    const groups=[student.chineseGroup&&`${this.zh()?'中':'CHI'} ${student.chineseGroup}`,student.englishGroup&&`${this.zh()?'英':'ENG'} ${student.englishGroup}`,student.mathGroup&&`${this.zh()?'數':'MATH'} ${student.mathGroup}`].filter(Boolean).join(' · ');
+    const detail=[student.className,student.classNo||'—',groups,student.studentId].filter(Boolean).map(escapeHtml).join(' · ');
+    return `<label class="student-wallet"><input type="checkbox" data-student="${escapeHtml(student.studentId)}" ${this.selected.has(student.studentId)?'checked':''}><span class="avatar-letter" aria-hidden="true">${escapeHtml(student.name).slice(0,1)}</span><span><b>${escapeHtml(student.name)}</b><small>${detail}</small></span><strong>${Number(student.balance).toLocaleString()} 🪙</strong></label>`;
+  }).join('');}
   amount(){return Number((document.querySelector('#grantAmount') as HTMLInputElement)?.value||0);}
   recipientCount(){
     if(this.scope==='class'){const name=(document.querySelector('#classSelect') as HTMLSelectElement)?.value||'';return this.roster.students.filter((student:any)=>student.className===name).length;}
+    if(this.scope==='group'){const field=(document.querySelector('#grantGroupField') as HTMLSelectElement)?.value as RosterFilterField;const name=(document.querySelector('#grantGroupName') as HTMLSelectElement)?.value||'';return this.roster.students.filter((student:any)=>name&&String(student[field]||'')===name).length;}
     return this.selected.size;
   }
   updateSummary(){
@@ -1914,26 +2155,33 @@ class TeacherApp {
     const hint=document.querySelector('#grantSummaryHint');const total=document.querySelector('#grantSummaryTotal');
     const preview=document.querySelector<HTMLButtonElement>('#previewGrant');
     if(!summary||!line||!hint||!total||!preview)return;
-    const validAmount=Number.isFinite(amount)&&amount>=1&&amount<=10000;
+    const validAmount=Number.isInteger(amount)&&amount!==0&&amount>=-10000&&amount<=10000;
     const ok=validAmount&&count>0;
     summary.classList.toggle('blocked',!ok);
-    if(!count){line.textContent=zh?'未選擇學生':'No students selected';hint.textContent=zh?(this.scope==='class'?'請選擇班別。':'請在右邊剔選學生。'):(this.scope==='class'?'Pick a class.':'Tick students on the right.');total.textContent=zh?'請先選擇':'Select first';}
-    else if(!validAmount){line.textContent=zh?'金額必須在 1 至 10,000 之間':'Amount must be 1–10,000';hint.textContent='';total.textContent=zh?'金額無效':'Invalid';}
-    else{line.textContent=zh?`${count} 名學生 × 每人 ${amount.toLocaleString()} 金幣`:`${count} students × ${amount.toLocaleString()} coins each`;hint.textContent=zh?'按「預覽發放」核對名單。':'Preview to check the name list.';total.textContent=`${(count*amount).toLocaleString()} 🪙`;}
+    summary.classList.toggle('deduction',ok&&amount<0);
+    if(!count){line.textContent=zh?'未選擇學生':'No students selected';hint.textContent=zh?(this.scope==='class'?'請選擇班別。':this.scope==='group'?'請選擇科目及組別。':'請在右邊剔選學生。'):(this.scope==='class'?'Pick a class.':this.scope==='group'?'Pick a subject group.':'Tick students on the right.');total.textContent=zh?'請先選擇':'Select first';}
+    else if(!validAmount){line.textContent=zh?'金額須為 -10,000 至 10,000 之間的非零整數':'Amount must be a non-zero integer from -10,000 to 10,000';hint.textContent='';total.textContent=zh?'金額無效':'Invalid';}
+    else{const action=amount<0?(zh?'扣除':'Deduct'):(zh?'增加':'Add');line.textContent=zh?`${count} 名學生 × 每人${action} ${Math.abs(amount).toLocaleString()} 金幣`:`${action} ${Math.abs(amount).toLocaleString()} coins each for ${count} students`;hint.textContent=zh?'按「預覽調整」核對名單及餘額。':'Preview the names and balances before confirming.';total.textContent=`${amount>0?'+':''}${(count*amount).toLocaleString()} 🪙`;}
     preview.disabled=!ok;
   }
+  refreshGrantGroupOptions(){const field=(document.querySelector('#grantGroupField') as HTMLSelectElement)?.value as RosterFilterField;const select=document.querySelector<HTMLSelectElement>('#grantGroupName');if(!select)return;select.innerHTML=this.options(field);this.updateSummary();}
+  refreshRosterFilter(){const select=document.querySelector<HTMLSelectElement>('#rosterFilterValue');if(!select)return;select.innerHTML=this.options(this.filterField,true);this.filterValue='';document.querySelector('#studentRoster')!.innerHTML=this.studentRows();this.updateSummary();}
   bind(){
-    document.querySelectorAll<HTMLElement>('[data-scope]').forEach((button)=>button.addEventListener('click',()=>{this.scope=button.dataset.scope as any;document.querySelectorAll('[data-scope]').forEach((item)=>{const on=item===button;item.classList.toggle('active',on);item.setAttribute('aria-pressed',String(on));});(document.querySelector('.class-field') as HTMLElement).hidden=this.scope!=='class';this.updateSummary();}));
+    document.querySelectorAll<HTMLElement>('[data-scope]').forEach((button)=>button.addEventListener('click',()=>{this.scope=button.dataset.scope as any;document.querySelectorAll('[data-scope]').forEach((item)=>{const on=item===button;item.classList.toggle('active',on);item.setAttribute('aria-pressed',String(on));});(document.querySelector('.class-field') as HTMLElement).hidden=this.scope!=='class';(document.querySelector('.group-field') as HTMLElement).hidden=this.scope!=='group';this.updateSummary();}));
     document.querySelectorAll<HTMLElement>('[data-amount]').forEach((button)=>button.addEventListener('click',()=>{(document.querySelector('#grantAmount') as HTMLInputElement).value=button.dataset.amount!;document.querySelectorAll('[data-amount]').forEach((item)=>item.classList.toggle('active',item===button));this.updateSummary();}));
     document.querySelector('#grantAmount')?.addEventListener('input',()=>{const value=(document.querySelector('#grantAmount') as HTMLInputElement).value;document.querySelectorAll<HTMLElement>('[data-amount]').forEach((item)=>item.classList.toggle('active',item.dataset.amount===value));this.updateSummary();});
+    document.querySelector('#toggleAmountSign')?.addEventListener('click',()=>{const input=document.querySelector<HTMLInputElement>('#grantAmount')!;const current=Number(input.value)||250;input.value=String(current*-1);input.dispatchEvent(new Event('input'));});
     document.querySelector('#classSelect')?.addEventListener('change',()=>this.updateSummary());
+    document.querySelector('#grantGroupField')?.addEventListener('change',()=>this.refreshGrantGroupOptions());
+    document.querySelector('#grantGroupName')?.addEventListener('change',()=>this.updateSummary());
     document.querySelector('#studentRoster')?.addEventListener('change',(event)=>{const input=event.target as HTMLInputElement;if(input.dataset.student){if(input.checked)this.selected.add(input.dataset.student);else this.selected.delete(input.dataset.student);this.updateSummary();}});
-    document.querySelector('#rosterClassFilter')?.addEventListener('change',(event)=>{document.querySelector('#studentRoster')!.innerHTML=this.studentRows((event.target as HTMLSelectElement).value);this.updateSummary();});
-    document.querySelector('#selectAllStudents')?.addEventListener('click',()=>{this.roster.students.filter((student:any)=>!this.filter||student.className===this.filter).forEach((student:any)=>this.selected.add(student.studentId));document.querySelector('#studentRoster')!.innerHTML=this.studentRows(this.filter);this.updateSummary();});
-    document.querySelector('#clearStudents')?.addEventListener('click',()=>{this.selected.clear();document.querySelector('#studentRoster')!.innerHTML=this.studentRows(this.filter);this.updateSummary();});
+    document.querySelector('#rosterFilterField')?.addEventListener('change',(event)=>{this.filterField=(event.target as HTMLSelectElement).value as RosterFilterField;this.refreshRosterFilter();});
+    document.querySelector('#rosterFilterValue')?.addEventListener('change',(event)=>{this.filterValue=(event.target as HTMLSelectElement).value;document.querySelector('#studentRoster')!.innerHTML=this.studentRows();this.updateSummary();});
+    document.querySelector('#selectAllStudents')?.addEventListener('click',()=>{this.filteredStudents().forEach((student:any)=>this.selected.add(student.studentId));document.querySelector('#studentRoster')!.innerHTML=this.studentRows();this.updateSummary();});
+    document.querySelector('#clearStudents')?.addEventListener('click',()=>{this.selected.clear();document.querySelector('#studentRoster')!.innerHTML=this.studentRows();this.updateSummary();});
     document.querySelector('#previewGrant')?.addEventListener('click',()=>this.preview());
   }
-  body(){return {scope:this.scope,studentIds:[...this.selected],className:(document.querySelector('#classSelect') as HTMLSelectElement)?.value||'',amount:this.amount(),note:(document.querySelector('#grantNote') as HTMLInputElement).value};}
+  body(){return {scope:this.scope,studentIds:[...this.selected],className:(document.querySelector('#classSelect') as HTMLSelectElement)?.value||'',groupField:(document.querySelector('#grantGroupField') as HTMLSelectElement)?.value||'',groupName:(document.querySelector('#grantGroupName') as HTMLSelectElement)?.value||'',amount:this.amount(),note:(document.querySelector('#grantNote') as HTMLInputElement).value};}
   async preview(){
     const button=document.querySelector<HTMLButtonElement>('#previewGrant')!;button.disabled=true;
     const zh=this.zh();
@@ -1941,23 +2189,25 @@ class TeacherApp {
       const body=this.body();const result=await api.grantPreview(body);
       const shown=result.recipients.slice(0,10).map((item:any)=>escapeHtml(item.name)).join(zh?'、':', ');
       const overflow=result.recipients.length>10?(zh?` 及其餘 ${result.recipients.length-10} 人`:` and ${result.recipients.length-10} more`):'';
-      const heavy=result.total>=5000;
-      document.querySelector('#modalRoot')!.innerHTML=`<div class="modal-backdrop"><div class="modal-card grant-confirm" role="dialog" aria-modal="true" aria-labelledby="grantConfirmTitle">
+      const deduction=result.amount<0;const magnitude=Math.abs(result.amount);const totalMagnitude=Math.abs(result.total);const heavy=totalMagnitude>=5000;
+      const insufficient=(result.insufficient||[]).map((item:any)=>`${escapeHtml(item.name)} (${Number(item.balance).toLocaleString()} 🪙)`).join(zh?'、':', ');
+      document.querySelector('#modalRoot')!.innerHTML=`<div class="modal-backdrop"><div class="modal-card grant-confirm ${deduction?'deduction':''}" role="dialog" aria-modal="true" aria-labelledby="grantConfirmTitle">
         <span class="big-coin" aria-hidden="true">🪙</span>
-        <h2 id="grantConfirmTitle">${zh?'確認發放金幣':'Confirm coin grant'}</h2>
+        <h2 id="grantConfirmTitle">${deduction?(zh?'確認扣除金幣':'Confirm coin deduction'):(zh?'確認增加金幣':'Confirm coin grant')}</h2>
         <div class="equation">
           <span class="term"><b>${result.count}</b><small>${zh?'名學生':result.count===1?'student':'students'}</small></span>
           <span class="op" aria-hidden="true">×</span>
-          <span class="term"><b>${result.amount.toLocaleString()}</b><small>${zh?'每人金幣':'coins each'}</small></span>
+          <span class="term"><b>${magnitude.toLocaleString()}</b><small>${deduction?(zh?'每人扣除':'deduct each'):(zh?'每人增加':'add each')}</small></span>
         </div>
-        <div class="total"><small>${zh?'總共發放':'Total issued'}</small><strong>${result.total.toLocaleString()} 🪙</strong></div>
-        <p class="recipients">${zh?'收取名單':'Recipients'}：${shown}${overflow}</p>
-        ${heavy?`<p class="caution">${zh?`這是一次較大的發放，總共 ${result.total.toLocaleString()} 金幣。請再核對一次。`:`This is a large grant of ${result.total.toLocaleString()} coins. Please double-check.`}</p>`:''}
-        <button class="primary" id="commitGrant">${this.t('confirm')} · ${result.total.toLocaleString()} 🪙</button>
+        <div class="total"><small>${deduction?(zh?'總共扣除':'Total deducted'):(zh?'總共增加':'Total added')}</small><strong>${deduction?'-':'+'}${totalMagnitude.toLocaleString()} 🪙</strong></div>
+        <p class="recipients">${deduction?(zh?'受影響名單':'Affected students'):(zh?'收取名單':'Recipients')}：${shown}${overflow}</p>
+        ${insufficient?`<p class="deduction-blocker"><b>${zh?'餘額不足，無法扣款：':'Insufficient balance — deduction blocked:'}</b><span>${insufficient}</span></p>`:''}
+        ${heavy?`<p class="caution">${zh?`這是一次較大的${deduction?'扣款':'發放'}，合共 ${totalMagnitude.toLocaleString()} 金幣。請再核對一次。`:`This is a large ${deduction?'deduction':'grant'} of ${totalMagnitude.toLocaleString()} coins. Please double-check.`}</p>`:''}
+        <button class="primary" id="commitGrant" ${result.canCommit?'':'disabled'}>${result.canCommit?(deduction?(zh?'確認扣除':'Confirm deduction'):(zh?'確認增加':'Confirm grant')):(zh?'餘額不足，不能扣款':'Insufficient balance')} · ${totalMagnitude.toLocaleString()} 🪙</button>
         <button class="text-button" id="cancelGrant">${zh?'取消':'Cancel'}</button>
       </div></div>`;
       document.querySelector('#cancelGrant')?.addEventListener('click',()=>{document.querySelector('#modalRoot')!.innerHTML='';this.updateSummary();});
-      document.querySelector('#commitGrant')?.addEventListener('click',()=>this.commit(body));
+      if(result.canCommit)document.querySelector('#commitGrant')?.addEventListener('click',()=>this.commit(body));
     }catch(error){const message=document.querySelector('#grantMessage') as HTMLElement;message.classList.add('error');message.textContent=(error as Error).message;}
     finally{this.updateSummary();}
   }
@@ -1967,9 +2217,10 @@ class TeacherApp {
       const result=await api.grantCommit(body,idempotencyKey());audio.sfx('coin');
       document.querySelector('#modalRoot')!.innerHTML='';
       this.roster=await api.teacherRoster();this.selected.clear();
-      document.querySelector('#studentRoster')!.innerHTML=this.studentRows(this.filter);
+      document.querySelector('#studentRoster')!.innerHTML=this.studentRows();
       const message=document.querySelector('#grantMessage') as HTMLElement;message.classList.remove('error');
-      message.textContent=this.zh()?`已向 ${result.count} 名學生各發放 ${result.amount} 金幣，合共 ${(result.count*result.amount).toLocaleString()} 金幣。`:`Granted ${result.amount} coins to ${result.count} students — ${(result.count*result.amount).toLocaleString()} in total.`;
+      const magnitude=Math.abs(result.amount);const total=Math.abs(result.total);const deduction=result.amount<0;
+      message.textContent=this.zh()?(deduction?`已從 ${result.count} 名學生各扣除 ${magnitude.toLocaleString()} 金幣，合共 ${total.toLocaleString()} 金幣。`:`已向 ${result.count} 名學生各增加 ${magnitude.toLocaleString()} 金幣，合共 ${total.toLocaleString()} 金幣。`):(deduction?`Deducted ${magnitude.toLocaleString()} coins from ${result.count} students — ${total.toLocaleString()} in total.`:`Granted ${magnitude.toLocaleString()} coins to ${result.count} students — ${total.toLocaleString()} in total.`);
       this.updateSummary();
     }catch(error){button.disabled=false;button.textContent=(error as Error).message;}
   }

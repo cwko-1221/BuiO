@@ -3,6 +3,7 @@
 const express = require('express');
 const config = require('../../config');
 const repo = require('../repositories/pet.repo');
+const prizes = require('../repositories/arcade-prizes.repo');
 const quietRooms = require('../repositories/quiet-room.repo');
 const { catalog } = require('../lib/catalog');
 const academicYears = require('../../math-app/repositories/academic-years.repo');
@@ -27,6 +28,16 @@ function sendResult(res, result, status = 200) { res.status(status).json({ succe
 
 router.get('/bootstrap', requireStudent, asyncRoute(async (req, res) => {
   sendResult(res, await repo.getBootstrap(req.session.studentId));
+}));
+
+router.post('/coin-pusher/prizes', requireStudent, asyncRoute(async (req, res) => {
+  sendResult(res, await prizes.stock(req.session.studentId));
+}));
+router.post('/coin-pusher/prizes/:prizeId/claim', requireStudent, asyncRoute(async (req, res) => {
+  sendResult(res, await prizes.claim(req.session.studentId, req.params.prizeId));
+}));
+router.post('/coin-pusher/prizes/:prizeId/redeem', requireStudent, asyncRoute(async (req, res) => {
+  sendResult(res, await prizes.redeem(req.session.studentId, req.params.prizeId, String(req.body?.itemId || '')));
 }));
 
 if (config.isExplicitDevelopment) {
@@ -156,6 +167,14 @@ router.post('/grant-notifications/acknowledge', requireStudent, asyncRoute(async
   sendResult(res, await repo.acknowledgeTeacherGrants(req.session.studentId, req.body.transactionIds));
 }));
 
+const GRANT_GROUP_FIELDS = Object.freeze({
+  chineseGroup: '中文組',
+  englishGroup: '英文組',
+  mathGroup: '數學組',
+});
+
+const uniqueValues = (rows, field) => [...new Set(rows.map((row) => String(row[field] || '').trim()).filter(Boolean))].sort();
+
 async function teacherRoster() {
   const academicYear = await academicYears.getCurrentAcademicYear();
   const enrollments = (await academicYears.listEnrollments(academicYear)).filter((row) => row.role !== 'teacher');
@@ -163,6 +182,7 @@ async function teacherRoster() {
   return {
     academicYear,
     classes: [...new Set(enrollments.map((row) => row.className).filter(Boolean))].sort(),
+    groups: Object.fromEntries(Object.keys(GRANT_GROUP_FIELDS).map((field) => [field, uniqueValues(enrollments, field)])),
     students: enrollments.map((row) => ({ ...row, balance: balances.get(row.studentId) || 0 })),
     quietPets: catalog.pets.filter(row => ['starpatch-cat', 'cloud-ear-dog', 'crescent-rabbit'].includes(row.id)).map(row => {
       const layout = catalog.animationByPet?.[row.id] || catalog.animation;
@@ -181,14 +201,27 @@ async function resolveGrant(body) {
   const roster = await teacherRoster();
   let recipients;
   if (body?.scope === 'class') recipients = roster.students.filter((row) => row.className === String(body.className || ''));
+  else if (body?.scope === 'group') {
+    const groupField = String(body.groupField || '');
+    const groupName = String(body.groupName || '').trim();
+    if (!Object.hasOwn(GRANT_GROUP_FIELDS, groupField) || !groupName) {
+      throw Object.assign(new Error('請選擇中文組、英文組或數學組。'), { status: 400 });
+    }
+    recipients = roster.students.filter((row) => String(row[groupField] || '').trim() === groupName);
+  }
   else {
     const requested = new Set(Array.isArray(body?.studentIds) ? body.studentIds.map(String) : []);
     recipients = roster.students.filter((row) => requested.has(row.studentId));
   }
   if (!recipients.length) throw Object.assign(new Error('No eligible students selected'), { status: 400 });
   const amount = Number(body?.amount);
-  if (!Number.isInteger(amount) || amount < 1 || amount > 10000) throw Object.assign(new Error('Grant amount must be an integer from 1 to 10000'), { status: 400 });
-  return { roster, recipients, amount };
+  if (!Number.isInteger(amount) || amount === 0 || amount < -10000 || amount > 10000) throw Object.assign(new Error('每人金額必須是 -10,000 至 10,000 之間的非零整數。'), { status: 400 });
+  recipients = recipients.map((row) => ({
+    ...row,
+    nextBalance: Number(row.balance) + amount,
+    insufficient: Number(row.balance) + amount < 0,
+  }));
+  return { roster, recipients, amount, insufficient: recipients.filter((row) => row.insufficient) };
 }
 
 router.get('/teacher/roster', requireTeacher, asyncRoute(async (_req, res) => {
@@ -221,14 +254,24 @@ router.post('/teacher/quiet-room/:id', requireTeacher, asyncRoute(async (req, re
 }));
 
 router.post('/teacher/grants/preview', requireTeacher, asyncRoute(async (req, res) => {
-  const { roster, recipients, amount } = await resolveGrant(req.body);
-  sendResult(res, { academicYear: roster.academicYear, amount, count: recipients.length, total: recipients.length * amount, recipients });
+  const { roster, recipients, amount, insufficient } = await resolveGrant(req.body);
+  sendResult(res, {
+    academicYear: roster.academicYear,
+    amount,
+    action: amount < 0 ? 'deduction' : 'grant',
+    count: recipients.length,
+    total: recipients.length * amount,
+    canCommit: insufficient.length === 0,
+    insufficient,
+    recipients,
+  });
 }));
 
 router.post('/teacher/grants/commit', requireTeacher, asyncRoute(async (req, res) => {
   const idempotencyKey = mutationKey(req);
   if (!idempotencyKey) return res.status(400).json({ success: false, message: '缺少防重複提交識別碼。' });
-  const { recipients, amount } = await resolveGrant(req.body);
+  const { recipients, amount, insufficient } = await resolveGrant(req.body);
+  if (insufficient.length) throw Object.assign(new Error('部分學生的金幣餘額不足，未有扣除任何金幣。'), { status: 409 });
   sendResult(res, await repo.grantCoins(req.session.studentId, recipients.map((row) => row.studentId), amount, { note: String(req.body?.note || ''), idempotencyKey }), 201);
 }));
 

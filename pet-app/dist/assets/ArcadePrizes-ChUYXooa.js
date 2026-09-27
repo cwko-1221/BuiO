@@ -1,0 +1,1 @@
+var e=.22,t=.25;function n(e,t=!0){return t?{ruby:`紅寶石`,pet:`寵物券`,wearable:`飾物券`,furniture:`家具券`}[e]:{ruby:`Ruby`,pet:`Pet voucher`,wearable:`Accessory voucher`,furniture:`Furniture voucher`}[e]}var r=e=>({ruby:`💎`,pet:`🐱`,wearable:`🎀`,furniture:`🛋️`})[e];export{n as i,t as n,r,e as t};

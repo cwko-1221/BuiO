@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs';
 import { chromium } from 'playwright';
 
 /** Slots on the equipment board, and how many of them have no collection behind them yet. */
-const OUTFIT_SLOT_COUNT=9; const OUTFIT_SEALED_COUNT=4;
+const OUTFIT_SLOT_COUNT=9; const OUTFIT_SEALED_COUNT=5;
 const require=createRequire(import.meta.url); const { catalog }=require('../pet-app/lib/catalog.js');
 
 const reservePort = () => new Promise((resolve,reject)=>{const server=net.createServer();server.once('error',reject);server.listen(0,'127.0.0.1',()=>{const port=server.address().port;server.close(()=>resolve(port));});});
@@ -20,8 +20,8 @@ const tempDir=await fs.mkdtemp(path.join(os.tmpdir(),'buio-pet-live-')); const d
 const artifactDir=path.resolve(process.env.PET_PLAYTEST_DIR||'artifacts/pet-playtest'); await fs.mkdir(artifactDir,{recursive:true});
 await fs.writeFile(databaseFile,JSON.stringify({
   users:[
-    {studentid:'S001',name:'陳小星',passwordhash:bcrypt.hashSync('student123',4),role:'student',classname:'5A',classno:1,language:'zh-HK'},
-    {studentid:'S002',name:'李月兒',passwordhash:bcrypt.hashSync('student123',4),role:'student',classname:'5A',classno:2,language:'zh-HK'},
+    {studentid:'S001',name:'陳小星',passwordhash:bcrypt.hashSync('student123',4),role:'student',classname:'5A',classno:1,chinesegroup:'紅組',englishgroup:'增潤組',mathgroup:'甲組',language:'zh-HK'},
+    {studentid:'S002',name:'李月兒',passwordhash:bcrypt.hashSync('student123',4),role:'student',classname:'5A',classno:2,chinesegroup:'藍組',englishgroup:'增潤組',mathgroup:'乙組',language:'zh-HK'},
     {studentid:'T001',name:'黃老師',passwordhash:bcrypt.hashSync('teacher123',4),role:'teacher',classname:'',classno:null,language:'zh-HK'},
   ],studentStats:[],questionLogs:[],_logId:0,
 },null,2));
@@ -55,10 +55,10 @@ try {
   // Browsing tabs do not show the room at all.
   assert.equal(await page.locator('#petMain').getAttribute('data-layout'),'full');
   assert.equal(await page.locator('.room-stage').isVisible(),false);
-  assert.equal(await page.locator('.pet-card').count(),3);
+  assert.equal(await page.locator('.pet-card').count(),catalog.pets.length);
   await page.setViewportSize({width:1180,height:820}); await page.screenshot({path:path.join(artifactDir,'03-collection-ipad-landscape.png')});
   await page.locator('[data-tab="shop"]').click(); await page.locator('.shop-feature').waitFor();
-  assert.match(await page.locator('.shop-feature').innerText(),/3 隻完成版寵物/);
+  assert.match(await page.locator('.shop-feature').innerText(),/目前開放 \d+ 隻完成版寵物/);
 
   // The room tab now puts its controls in a bar above a full-width play surface rather than
   // in a side panel, so assert on the bar and that the room genuinely owns the full width.
@@ -161,20 +161,44 @@ try {
   teacherPage.on('console',(message)=>{if(message.type()==='error')errors.push(`teacher console: ${message.text()}`);});
   await teacherPage.goto('/pet',{waitUntil:'networkidle'}); await teacherPage.locator('.teacher-shell').waitFor();
   assert.equal(await teacherPage.locator('[data-student]').count(),2);
+  await teacherPage.locator('#rosterFilterField').selectOption('chineseGroup');
+  await teacherPage.locator('#rosterFilterValue').selectOption('紅組');
+  assert.equal(await teacherPage.locator('[data-student]').count(),1,'Chinese-group roster filter should narrow the visible wallets');
+  assert.equal(await teacherPage.locator('[data-student="S001"]').count(),1);
+  await teacherPage.locator('#rosterFilterValue').selectOption('');
+  await teacherPage.locator('[data-scope="group"]').click();
+  await teacherPage.locator('#grantGroupField').selectOption('englishGroup');
+  await teacherPage.locator('#grantGroupName').selectOption('增潤組');
+  assert.match(await teacherPage.locator('#grantSummaryLine').innerText(),/2 名學生/,'subject-group scope should include both students in that group');
+  await teacherPage.locator('[data-scope="students"]').click();
   await teacherPage.locator('[data-student="S001"]').check();
   await teacherPage.locator('#grantAmount').fill('2000'); await teacherPage.locator('#previewGrant').click();
   await teacherPage.locator('.grant-confirm').waitFor(); await teacherPage.screenshot({path:path.join(artifactDir,'08-teacher-grant-confirmation.png')});
   await teacherPage.locator('#commitGrant').click(); await teacherPage.locator('#grantMessage').waitFor();
   await teacherPage.waitForFunction(()=>document.querySelector('#grantMessage')?.textContent?.replace(/,/g,'').includes('2000'));
   await teacherPage.screenshot({path:path.join(artifactDir,'09-teacher-grant-complete.png')});
+  await teacherPage.locator('[data-student="S001"]').check();
+  await teacherPage.locator('#grantAmount').fill('-350'); await teacherPage.locator('#previewGrant').click();
+  await teacherPage.locator('.grant-confirm.deduction').waitFor();
+  assert.match(await teacherPage.locator('#grantConfirmTitle').innerText(),/扣除金幣/);
+  await teacherPage.screenshot({path:path.join(artifactDir,'10-teacher-deduction-confirmation.png')});
+  await teacherPage.locator('#commitGrant').click();
+  await teacherPage.waitForFunction(()=>document.querySelector('#grantMessage')?.textContent?.includes('扣除 350'));
+  await teacherPage.locator('[data-student="S001"]').check();
+  await teacherPage.locator('#grantAmount').fill('-2000'); await teacherPage.locator('#previewGrant').click();
+  await teacherPage.locator('.deduction-blocker').waitFor();
+  assert.equal(await teacherPage.locator('#commitGrant').isDisabled(),true,'an insufficient deduction must be blocked in preview');
+  await teacherPage.locator('#cancelGrant').click();
   await page.setViewportSize({width:1180,height:820}); await page.reload({waitUntil:'networkidle'});
-  await page.locator('#coinBalance').waitFor(); assert.equal((await page.locator('#coinBalance').innerText()).replace(/,/g,''),'2000');
+  await page.locator('#coinBalance').waitFor(); assert.equal((await page.locator('#coinBalance').innerText()).replace(/,/g,''),'1650');
+  if(await page.locator('[data-action="ack-grants"]').count()) await page.locator('[data-action="ack-grants"]').click();
   // A worn item has to ride the pose, not sit at a fixed spot on the canvas. The head travels up
   // to 45px on a 160px cell inside a single action, so a crown pinned to the resting anchors
   // slides off the head as soon as the creature breathes — and a crown whose size wobbles frame
   // to frame means the landmark track is spiking rather than tracking. Nothing about either is
   // visible from the DOM, so this reaches into the running scene.
-  const buy=await context.request.post('/api/pet/shop/purchase',{data:{itemId:'head-01',quantity:1},headers:{'Idempotency-Key':'live-crown'}});
+  const liveWearable=catalog.wearables[0].id;
+  const buy=await context.request.post('/api/pet/shop/purchase',{data:{itemId:liveWearable,quantity:1},headers:{'Idempotency-Key':'live-crown'}});
   assert.equal(buy.status(),201);
   // The purchase went through the API, so the open page still holds the old inventory.
   await page.reload({waitUntil:'networkidle'}); await page.locator('#game-root canvas').waitFor();
@@ -186,12 +210,14 @@ try {
   // and make it the active pet, so the outfit is checked against art that actually moves.
   const animated=catalog.pets.filter((pet)=>pet.animated&&pet.rarity!=='epic');
   assert.ok(animated.length,'no animated species to check a moving outfit against');
-  const wanted=animated[0].id;
-  await page.locator('[data-tab="shop"]').click();
-  await page.locator('[data-action="shop-category"][data-id="eggs"]').click();
-  const buyAnimated=page.locator(`[data-action="buy-direct-egg"][data-id="${wanted}"]`);
-  await buyAnimated.waitFor();
-  if(await buyAnimated.isEnabled()) {
+  const studentBootstrap=await (await context.request.get('/api/pet/bootstrap')).json();
+  let wanted=animated.find((pet)=>studentBootstrap.pets?.some((owned)=>owned.speciesId===pet.id))?.id;
+  if(!wanted) {
+    wanted=animated[0].id;
+    await page.locator('[data-tab="shop"]').click();
+    await page.locator('[data-action="shop-category"][data-id="eggs"]').click();
+    const buyAnimated=page.locator(`[data-action="buy-direct-egg"][data-id="${wanted}"]`);
+    await buyAnimated.waitFor();
     await buyAnimated.click();
     await page.waitForFunction((id)=>Boolean(document.querySelector(`[data-action="buy-direct-egg"][data-id="${id}"]`)?.hasAttribute('disabled')),
       wanted,{timeout:15000}).catch(()=>{});
@@ -219,8 +245,8 @@ try {
   await page.locator('[data-action="open-outfit"]').click(); await page.locator('.gear-board').waitFor();
   assert.equal(await page.locator('.gear-slot').count(),OUTFIT_SLOT_COUNT);
   assert.equal(await page.locator('.gear-slot.sealed').count(),OUTFIT_SEALED_COUNT);
-  await page.locator('.gear-tile[data-id="head-01"]').scrollIntoViewIfNeeded();
-  const tile=await page.locator('.gear-tile[data-id="head-01"]').boundingBox();
+  await page.locator(`.gear-tile[data-id="${liveWearable}"]`).scrollIntoViewIfNeeded();
+  const tile=await page.locator(`.gear-tile[data-id="${liveWearable}"]`).boundingBox();
   const target=await page.locator('.gear-slot[data-slot="head"]').boundingBox();
   await page.mouse.move(tile.x+tile.width/2,tile.y+tile.height/2); await page.mouse.down();
   for(let step=1;step<=6;step+=1){
@@ -261,6 +287,11 @@ try {
   await page.locator('.picker-head [data-action="close-modal"]').click();
 
   await page.reload({waitUntil:'networkidle'}); await page.locator('#game-root canvas').waitFor();
+  // Newer redrawn outfits are baked into the pet atlas, so there is no modular `worn` layer to
+  // sample after reload. Keep the movement checks for legacy layers and still verify the saved
+  // outfit through the room's active-pet payload for a baked atlas.
+  const hasModularWorn=await page.evaluate(()=>Boolean(window.__petGame?.scene?.getScene('Bedroom')?.avatar?.worn?.length));
+  if(hasModularWorn){
   await page.waitForFunction(()=>window.__petGame?.scene?.getScene('Bedroom')?.avatar?.worn?.length>0,null,{timeout:15000});
   const worn=await page.evaluate(async()=>{
     const avatar=window.__petGame.scene.getScene('Bedroom').avatar; const out=[];
@@ -305,6 +336,11 @@ try {
   assert.ok(worn[0].shaded,'the crown casts no contact shadow');
   assert.notEqual(worn[0].tint,0xffffff,'the crown is not picking up the room light');
   await page.screenshot({path:path.join(artifactDir,'10-outfit-ipad-landscape.png')});
+  } else {
+    const equipped=await page.evaluate(()=>window.__petGame?.scene?.getScene('Bedroom')?.model?.activePet?.equippedWearables?.length||0);
+    assert.ok(equipped>0,'the saved outfit is missing after reload');
+    await page.screenshot({path:path.join(artifactDir,'10-outfit-ipad-landscape.png')});
+  }
 
   // The child points at the floor and the pet goes there. It has to arrive, sort by the row it
   // stands on so the furniture in front of it covers it, never cross a wardrobe on the way, and

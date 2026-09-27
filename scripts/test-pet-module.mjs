@@ -259,6 +259,19 @@ assert.equal((await repo.listUnseenTeacherGrants('S002')).length,1,'acknowledgin
 await repo.walletBalances(['S003']); assert.equal(store.load().petProfiles.some((row)=>row.studentId==='S003'),false);
 pass('teacher grant is immutable, whole-class-ready, idempotent and individually acknowledged');
 
+const deduction=await repo.grantCoins('T001',['S001','S002'],-250,{note:'測試扣款',idempotencyKey:'deduct-1'});
+const repeatedDeduction=await repo.grantCoins('T001',['S001','S002'],-250,{note:'測試扣款',idempotencyKey:'deduct-1'});
+assert.equal(deduction.batchId,repeatedDeduction.batchId);
+assert.equal(deduction.action,'deduction');assert.equal(deduction.total,-500);
+assert.equal((await repo.getBootstrap('S001')).wallet.balance,9750);
+const ledgerBeforeBlockedDeduction=store.load().petCurrencyLedger.length;
+await assert.rejects(()=>repo.grantCoins('T001',['S001','S002'],-10000,{note:'不應部分扣款',idempotencyKey:'deduct-blocked'}),/餘額不足/);
+assert.equal((await repo.getBootstrap('S001')).wallet.balance,9750);
+assert.equal((await repo.getBootstrap('S002')).wallet.balance,9750);
+assert.equal(store.load().petCurrencyLedger.length,ledgerBeforeBlockedDeduction,'an insufficient group deduction must not change any wallet or ledger row');
+await assert.rejects(()=>repo.grantCoins('T001',['S001'],0,{idempotencyKey:'deduct-zero'}),/Invalid coin adjustment/);
+pass('teacher deductions are idempotent, ledgered and atomic without negative wallet balances');
+
 const starter=await repo.hatchStarter('S001',{idempotencyKey:'starter-1',random:()=>.99});
 const starterRetry=await repo.hatchStarter('S001',{idempotencyKey:'starter-1',random:()=>.01});
 assert.equal(starter.speciesId,starterRetry.speciesId); assert.equal(starter.rarity,'common');
