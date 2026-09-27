@@ -1,5 +1,8 @@
+import { createClock } from './clock.js';
 const app = document.querySelector('#app');
-let user, roster, session, events, offset = 0, busy = false, noticeTimer;
+const clock = createClock();
+let user, roster, session, events, busy = false, noticeTimer;
+let roundOffset = null, syncing, readyKey = '', armedKey = '', lastHeartbeat = 0;
 let connected = false, stateKey = '';
 const english = () => user?.language === 'en-US';
 const tr = (zh, en) => english() ? en : zh;
@@ -20,31 +23,67 @@ function notice(message) {
 function connection(live) {
   connected = live;
   const element = document.querySelector('#connection');
-  element.textContent = live ? tr('● 已連線', '● Connected') : tr('重新連線中…', 'Reconnecting…');
+  element.textContent = live ? clock.ready ? tr('● 已同步', '● Synchronized') : tr('同步中…', 'Synchronizing…') : tr('重新連線中…', 'Reconnecting…');
   element.classList.toggle('live', live);
   if (session) renderSession();
+  if (live) void prepareRound();
+}
+async function syncClock() {
+  if (!syncing) syncing = clock.sync(async () => (await api('/time')).serverNow).finally(() => { syncing = null; });
+  return syncing;
+}
+const serverTime = () => roundOffset === null ? clock.now() : performance.now() + roundOffset;
+const synchronized = () => clock.ready || roundOffset !== null;
+async function unready(id = session?.id, round = session?.round) {
+  if (!session || user.role !== 'student') return;
+  try { accept((await api(`/sessions/${id}/actions`, { action: 'unready', round })).session); }
+  catch { /* the server also detects the disconnected event stream */ }
+}
+async function prepareRound() {
+  if (!session || user.role !== 'student' || !connected || document.hidden) return;
+  const id = session.id, round = session.round;
+  if (session.phase === 'preparing' && readyKey !== `${id}:${round}`) {
+    readyKey = `${id}:${round}`;
+    try {
+      await syncClock();
+      if (session.id !== id || session.round !== round || session.phase !== 'preparing' || !connected || document.hidden) return;
+      accept((await api(`/sessions/${id}/actions`, { action: 'ready', round, clockReady: clock.ready, visible: true, rtt: clock.rtt })).session);
+    } catch (error) { if (session.id === id && session.round === round) { notice(error.message); void unready(id, round); } }
+  } else if (session.phase === 'scheduled' && armedKey !== `${id}:${round}`) {
+    armedKey = `${id}:${round}`;
+    if (!clock.ready || serverTime() >= session.countdownAt) { void unready(id, round); return; }
+    try {
+      accept((await api(`/sessions/${id}/actions`, { action: 'armed', round })).session);
+    } catch (error) { if (session.id === id && session.round === round) { notice(error.message); void unready(id, round); } }
+  }
 }
 function accept(next) {
   if (session?.id === next.id && session.revision > next.revision) return;
-  session = next; offset = next.serverNow - Date.now();
+  if (session?.id !== next.id || session?.round !== next.round) roundOffset = null;
+  session = next;
+  if (['scheduled', 'countdown', 'open'].includes(next.phase) && roundOffset === null && clock.ready) roundOffset = clock.offset;
+  if (['waiting', 'judged', 'ended'].includes(next.phase)) roundOffset = null;
   if (next.phase === 'ended') events?.close();
   renderSession();
+  void prepareRound();
 }
 async function enter(id) {
-  events?.close(); stateKey = '';
+  events?.close(); stateKey = ''; connected = false; readyKey = ''; armedKey = ''; roundOffset = null;
+  clock.invalidate(); await syncClock();
   if (user.role === 'student') accept((await api(`/sessions/${id}/actions`, { action: 'join' })).session);
   else accept((await api(`/sessions/${id}`)).session);
   history.replaceState(null, '', `/buzzer?session=${encodeURIComponent(id)}`);
   connection(false);
   events = new EventSource(`/api/buzzer/sessions/${id}/events`);
-  events.onopen = () => connection(true);
-  events.onerror = () => connection(false);
+  events.onopen = () => { lastHeartbeat = performance.now(); connection(true); };
+  events.onerror = () => { connection(false); clock.invalidate(); void unready(); };
+  events.addEventListener('heartbeat', () => { lastHeartbeat = performance.now(); });
   events.onmessage = event => {
     try { accept(JSON.parse(event.data)); } catch { notice(tr('未能更新課堂。', 'Could not update the classroom.')); }
   };
 }
 async function act(action, extra = {}) {
-  if (busy) return;
+  if (busy || !connected || !synchronized() || document.hidden) return;
   busy = true; stateKey = ''; renderSession();
   try { accept((await api(`/sessions/${session.id}/actions`, { action, round: session.round, ...extra })).session); }
   catch (error) {
@@ -53,28 +92,40 @@ async function act(action, extra = {}) {
   } finally { busy = false; stateKey = ''; renderSession(); }
 }
 function phase() {
-  return session.phase === 'countdown' && Date.now() + offset >= session.opensAt ? 'open' : session.phase;
+  if (['countdown', 'open'].includes(session.phase)) {
+    if (!synchronized() || roundOffset === null || serverTime() < session.countdownAt) return 'scheduled';
+    return serverTime() >= session.opensAt ? 'open' : 'countdown';
+  }
+  return session.phase;
 }
-function remaining() { return Math.max(1, Math.ceil((session.opensAt - Date.now() - offset) / 1000)); }
+function remaining() { return Math.min(3, Math.max(1, Math.ceil((session.opensAt - serverTime()) / 1000))); }
 function renderSession() {
   if (!session) return;
   const current = phase();
-  const key = JSON.stringify({ ...session, serverNow: 0, current, countdown: current === 'countdown' ? remaining() : 0, busy, connected });
+  const key = `${session.id}:${session.revision}:${current}:${current === 'countdown' ? remaining() : 0}:${busy}:${connected}:${clock.ready}:${document.hidden}`;
   if (key === stateKey) return;
   stateKey = key;
+  app.dataset.phase = current; app.dataset.round = session.round;
   const teacher = user.role === 'teacher';
   app.classList.toggle('student-main', !teacher);
   if (teacher) renderTeacher(current); else renderStudent(current);
-  document.querySelectorAll('[data-action]').forEach(button => button.addEventListener('click', () => {
-    const action = button.dataset.action;
-    void act(action === 'correct' || action === 'wrong' ? 'judge' : action,
-      action === 'correct' || action === 'wrong' ? { correct: action === 'correct' } : {});
-  }));
+  document.querySelectorAll('[data-action]').forEach(button => {
+    const activate = () => {
+      const action = button.dataset.action;
+      void act(action === 'correct' || action === 'wrong' ? 'judge' : action,
+        action === 'correct' || action === 'wrong' ? { correct: action === 'correct' } : {});
+    };
+    if (button.dataset.action === 'buzz') {
+      button.addEventListener('pointerdown', event => { if (event.button === 0) { event.preventDefault(); activate(); } });
+      button.addEventListener('click', event => { if (event.detail === 0) activate(); });
+    } else button.addEventListener('click', activate);
+  });
 }
-const button = (action, text, style = 'primary', disabled = false) => `<button type="button" class="${style}" data-action="${action}" ${disabled || busy || !connected ? 'disabled' : ''}>${text}</button>`;
+const button = (action, text, style = 'primary', disabled = false) => `<button type="button" class="${style}" data-action="${action}" ${disabled || busy || !connected || !synchronized() || document.hidden ? 'disabled' : ''}>${text}</button>`;
 function renderTeacher(current) {
   let stage;
-  if (current === 'waiting') stage = `<div class="stage-symbol">ϟ</div><h2>${tr('準備下一題', 'Ready for a question')}</h2><p>${tr('口頭提問後按「搶答」，全班倒數 3 秒後便可搶答。', 'Ask your question, then press Buzz. Students can buzz after a 3-second countdown.')}</p>${button('start', tr('搶答', 'Buzz'), 'primary', !session.participantCount)}`;
+  if (current === 'waiting') stage = `<div class="stage-symbol">ϟ</div><h2>${tr('準備下一題', 'Ready for a question')}</h2><p>${session.syncMessage ? tr(esc(session.syncMessage), 'A student went offline or was not synchronized. Check everyone is ready, then try again.') : tr('口頭提問後按「搶答」，全班同步倒數 3 秒後便可搶答。', 'Ask your question, then press Buzz. Students can buzz after a synchronized 3-second countdown.')}</p>${button('start', tr('搶答', 'Buzz'), 'primary', !session.participantCount)}`;
+  else if (current === 'preparing' || current === 'scheduled') stage = `<div class="stage-symbol">ϟ</div><h2>${tr('等待全班同步', 'Synchronizing the class')}</h2><p>${tr(`已準備 ${session.readyCount} / ${session.participantCount} 人`, `${session.readyCount} / ${session.participantCount} students ready`)}${current === 'preparing' && session.waitingFor?.length ? `<br>${tr('等待：', 'Waiting: ')}${session.waitingFor.map(esc).join('、')}` : ''}</p>${button('cancel', tr('取消本題', 'Cancel question'), 'cancel')}`;
   else if (current === 'countdown') stage = `<div class="countdown" role="timer">${remaining()}</div><p>${tr('倒數後開放搶答', 'Buzzing opens after the countdown')}</p>${button('cancel', tr('取消本題', 'Cancel question'), 'cancel')}`;
   else if (current === 'open') stage = `<div class="stage-symbol">ϟ</div><h2>${tr('等待學生搶答', 'Waiting for a buzz')}</h2><p>${tr('首位搶答的同學會即時顯示在這裡。', 'The first student to buzz will appear here.')}</p>${button('cancel', tr('取消本題', 'Cancel question'), 'cancel')}`;
   else if (current === 'claimed' || current === 'judged') stage = `<span class="eyebrow">${tr('成功搶答', 'FIRST TO BUZZ')}</span><div class="winner-name">${esc(session.winner?.name)}</div>${current === 'claimed'
@@ -87,6 +138,7 @@ function renderTeacher(current) {
 function renderStudent(current) {
   let content;
   if (current === 'waiting') content = `<h1>${tr('等待問題', 'Waiting for a question')}</h1>`;
+  else if (current === 'preparing' || current === 'scheduled') content = `<h1>${tr('準備搶答', 'Get ready to buzz')}</h1><p>${tr('等待全班同步', 'Synchronizing the class')}</p>`;
   else if (current === 'countdown') content = `<div class="countdown" role="timer">${remaining()}</div><p>${tr('準備搶答', 'Get ready to buzz')}</p>`;
   else if (current === 'open') content = `${button('buzz', tr('搶答', 'Buzz'), 'buzz-button')}<p style="margin-top:30px">${tr('按下按鈕，爭取回答！', 'Press the button to answer!')}</p>`;
   else if (current === 'claimed') content = session.winner?.studentId === user.id
@@ -146,13 +198,29 @@ async function init() {
   else if (user.role === 'teacher') {
     const active = (await api('/sessions')).sessions[0];
     if (active) await enter(active.id);
-    else { roster = await api('/roster'); connection(true); renderSetup(); }
+    else { roster = await api('/roster'); await syncClock(); connection(true); renderSetup(); }
   } else { connection(true); await renderList(); }
 }
+function frame() {
+  if (session && !document.hidden) renderSession();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
 setInterval(() => {
-  if (session) renderSession();
-  else if (user?.role === 'student' && document.visibilityState === 'visible') void renderList().catch(() => {});
+  if (!session && user?.role === 'student' && !document.hidden) void renderList().catch(() => {});
+  if (session && connected && performance.now() - lastHeartbeat > 4000) {
+    events?.close(); connection(false); clock.invalidate(); void unready();
+    setTimeout(() => { void enter(session.id).catch(error => notice(error.message)); }, 500);
+  }
+  if (session && connected && ['waiting', 'judged', 'claimed', 'countdown', 'open'].includes(session.phase) && !clock.ready) {
+    void syncClock().then(() => connection(true)).catch(error => notice(error.message));
+  }
 }, 1000);
+document.addEventListener('visibilitychange', () => {
+  if (!session) return;
+  if (document.hidden) { events?.close(); connection(false); clock.invalidate(); void unready(); }
+  else void enter(session.id).catch(error => notice(error.message));
+});
 window.addEventListener('pagehide', () => events?.close());
 window.addEventListener('pageshow', event => { if (event.persisted && session) void enter(session.id).catch(error => notice(error.message)); });
 init().catch(error => { notice(error.message); app.innerHTML = `<div class="loading">${tr('未能開啟課堂。', 'Could not open classroom.')} <a href="/buzzer">${tr('重試', 'Retry')}</a></div>`; });

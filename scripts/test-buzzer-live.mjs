@@ -6,6 +6,7 @@ import net from 'node:net';
 import { spawn } from 'node:child_process';
 import bcrypt from 'bcryptjs';
 import { chromium } from 'playwright';
+import { verifySynchronizedClass } from './buzzer-sync-scenarios.mjs';
 
 const port = await new Promise(resolve => {
   const server = net.createServer();
@@ -22,6 +23,8 @@ await fs.writeFile(databaseFile, JSON.stringify({ users: [
   { studentid: 'S001', name: '陳小星', role: 'student', classname: '5A', classno: 1, chinesegroup: 'A組', englishgroup: 'B組', mathgroup: 'A組', passwordhash: bcrypt.hashSync('student123', 4) },
   { studentid: 'S002', name: '李月兒', role: 'student', classname: '5A', classno: 2, chinesegroup: 'B組', englishgroup: 'B組', mathgroup: 'A組', passwordhash: bcrypt.hashSync('student123', 4) },
   { studentid: 'S003', name: '林小雲', role: 'student', classname: '5B', classno: 1, englishgroup: 'B組', passwordhash: bcrypt.hashSync('student123', 4) },
+  ...(process.argv.includes('--sync') ? Array.from({ length: 30 }, (_, i) => ({ studentid: `SYNC${String(i + 1).padStart(2, '0')}`,
+    name: `同步學生 ${i + 1}`, role: 'student', classname: '6A', classno: i + 1, passwordhash: bcrypt.hashSync('student123', 4) })) : []),
 ], studentStats: [], questionLogs: [], _logId: 0 }));
 let server, browser, logs = '';
 const start = async () => {
@@ -137,6 +140,7 @@ try {
   const disk = JSON.parse(await fs.readFile(databaseFile, 'utf8'));
   assert.equal(disk.petCurrencyLedger.filter(row => row.metadata?.buzzerSessionId === id).length, 2);
   assert.deepEqual(errors, [], 'no browser runtime errors');
+  if (process.argv.includes('--sync')) await verifySynchronizedClass({ browser, teacher, host, baseURL, artifacts });
   console.log('✓ portal entry and classes label; class/subject-group targeting; phone UI; realtime 3-second countdown; authenticated first-buzz race; correct/incorrect judgments; exactly-once pet coins; reload/restart; cancellation/end; English UI');
 } catch (error) { console.error(logs.slice(-7000)); throw error; }
 finally { await browser?.close(); await stop(); }
