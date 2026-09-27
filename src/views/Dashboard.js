@@ -49,28 +49,56 @@ function renderStudentDashboard() {
 }
 
 function renderHomeworkReminder() {
-  const pending = state.homeworkPending || [];
-  const history = state.homeworkHistory || [];
-  if (!pending.length && !history.length) {
+  const pending = uniqueHomeworkReminders(state.homeworkPending || []);
+  const history = uniqueHomeworkReminders(state.homeworkHistory || []);
+  const allRecords = uniqueHomeworkReminders([...pending, ...history])
+    .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  if (!allRecords.length) {
     return `<div class="homework-reminder clear">${renderIcon('check')} ${t('homework_clear')}</div>`;
   }
   return `<div class="homework-reminders">
-    ${pending.length ? `<div class="homework-reminder pending">
-      <strong>${t('homework_pending', { count: pending.length })}</strong>
-      ${renderHomeworkReminderList(pending, 'homework_pending_more')}
-    </div>` : ''}
-    ${history.length ? `<div class="homework-reminder history">
-      <strong>${t('homework_history', { count: history.length })}</strong>
-      ${renderHomeworkReminderList(history, 'homework_history_more')}
-    </div>` : ''}
+    <section class="homework-reminder ${pending.length ? 'pending' : 'clear'}">
+      ${pending.length
+        ? `<strong>${t('homework_pending', { count: pending.length })}</strong>${renderHomeworkReminderList(pending, 'homework_pending_more')}`
+        : `${renderIcon('check')} ${t('homework_clear')}`}
+    </section>
+    <section class="homework-reminder history">
+      <div class="homework-reminder-head">
+        <strong>${t('homework_total_records', { count: allRecords.length })}</strong>
+        <button type="button" class="homework-total-records-toggle" data-homework-total-toggle aria-expanded="false" aria-controls="homeworkTotalRecordsPanel">
+          <span data-homework-total-expand>${t('homework_expand')}</span>
+          <span data-homework-total-collapse hidden>${t('homework_collapse')}</span>
+        </button>
+      </div>
+      <div id="homeworkTotalRecordsPanel" class="homework-total-records-panel" hidden>${renderHomeworkReminderItems(allRecords)}</div>
+    </section>
   </div>`;
 }
 
+function renderHomeworkReminderItems(items) {
+  return `<ul>${items.map(item => `<li>${escapeReminder(item.date)} · ${escapeReminder(item.subjectName || item.subject)} · ${escapeReminder(item.homework)}</li>`).join('')}</ul>`;
+}
+
+function uniqueHomeworkReminders(items) {
+  const seen = new Set();
+  return items.filter(item => {
+    const key = homeworkReminderKey(item);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function homeworkReminderKey(item) {
+  return [item.date, item.subject || item.subjectName, item.homework]
+    .map(value => String(value ?? '').trim().toLocaleLowerCase())
+    .join('|');
+}
+
 function renderHomeworkReminderList(items, moreKey) {
-  const renderItems = rows => `<ul>${rows.map(item => `<li>${escapeReminder(item.date)} · ${escapeReminder(item.subjectName || item.subject)} · ${escapeReminder(item.homework)}</li>`).join('')}</ul>`;
   const visible = items.slice(0, 5);
   const remaining = items.slice(5);
-  return `${renderItems(visible)}${remaining.length ? `<details class="homework-reminder-more"><summary>${t(moreKey, { count: remaining.length })}</summary>${renderItems(remaining)}</details>` : ''}`;
+  return `${renderHomeworkReminderItems(visible)}${remaining.length ? `<details class="homework-reminder-more"><summary>${t(moreKey, { count: remaining.length })}</summary>${renderHomeworkReminderItems(remaining)}</details>` : ''}`;
 }
 
 function escapeReminder(value) {

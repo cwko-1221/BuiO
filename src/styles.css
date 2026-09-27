@@ -535,8 +535,8 @@ input:focus {
 }
 
 .homework-reminder {
-  margin: 18px 0 0;
-  max-width: 620px;
+  min-width: 0;
+  margin: 0;
   padding: 14px 16px;
   border: 1px solid #f5c7bd;
   border-radius: 8px;
@@ -544,22 +544,68 @@ input:focus {
   color: #973b2b;
   line-height: 1.55;
 }
-.homework-reminders { max-width: 620px; }
+.homework-reminders {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px;
+  max-width: 900px;
+  margin: 18px 0 0;
+}
 .homework-reminder strong { display: block; }
+.homework-reminder-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.homework-total-records-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  color: inherit;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.homework-total-records-toggle:hover { background: rgba(255, 255, 255, 0.9); }
+.homework-total-records-toggle:focus-visible { outline: 3px solid rgba(15, 139, 141, 0.28); outline-offset: 2px; }
+.homework-total-records-toggle[aria-expanded="true"] [data-homework-total-expand] { display: none; }
+.homework-total-records-toggle[aria-expanded="true"] [data-homework-total-collapse] { display: inline; }
+.homework-total-records-panel {
+  max-height: 340px;
+  margin-top: 12px;
+  padding-top: 12px;
+  overflow: auto;
+  border-top: 1px solid currentColor;
+}
+.homework-total-records-panel ul { margin: 0; }
 .homework-reminder.history {
   border-color: #f0d495;
   background: #fff8e7;
   color: #875800;
 }
-.homework-reminder.clear {
+.homework-reminder.clear,
+.homework-reminder-clear {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.homework-reminder.clear {
+  max-width: 620px;
+  margin-top: 18px;
   border-color: #bce6d7;
   background: #e6f6f1;
   color: #16825f;
 }
-.homework-reminder.clear svg { width: 18px; height: 18px; }
+.homework-reminder.clear svg,
+.homework-reminder-clear svg { width: 18px; height: 18px; flex: 0 0 auto; }
 .homework-reminder ul { margin: 8px 0 0; padding-left: 1.2rem; }
 .homework-reminder-more { margin-top: 8px; }
 .homework-reminder-more summary {
@@ -570,6 +616,11 @@ input:focus {
 }
 .homework-reminder-more summary:hover { text-decoration: underline; }
 .homework-reminder-more ul { margin-top: 6px; }
+
+@media (max-width: 720px) {
+  .homework-reminders { grid-template-columns: 1fr; }
+  .homework-reminder-head { align-items: flex-start; }
+}
 
 .action-row {
   display: flex;

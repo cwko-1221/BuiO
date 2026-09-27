@@ -371,6 +371,18 @@ function bindEvents() {
     });
   });
 
+  document.querySelectorAll('[data-homework-total-toggle]').forEach(button => {
+    button.addEventListener('click', () => {
+      const panel = document.getElementById(button.getAttribute('aria-controls'));
+      if (!panel) return;
+      const expanded = button.getAttribute('aria-expanded') === 'true';
+      button.setAttribute('aria-expanded', String(!expanded));
+      panel.hidden = expanded;
+      button.querySelector('[data-homework-total-expand]').hidden = !expanded;
+      button.querySelector('[data-homework-total-collapse]').hidden = expanded;
+    });
+  });
+
   document.getElementById('adminBtn')?.addEventListener('click', async () => {
     state.activeView = 'admin';
     state.studentsLoaded = false;
