@@ -26,7 +26,7 @@ const store = require('../db/jsonStore.js');
 const pass = (label) => console.log(`✓ ${label}`);
 const PREMIUM_PET_IDS = [
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan', 'doraemon',
-  'hello-kitty',
+  'hello-kitty', 'argentina-number-10',
 ];
 const EXPECTED_PET_IDS = [
   'starpatch-cat', 'cloud-ear-dog', 'golden-retriever-dog', 'pudding-pig',

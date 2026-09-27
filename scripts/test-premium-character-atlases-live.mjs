@@ -10,7 +10,7 @@ import { chromium } from 'playwright';
 
 const PET_IDS = [
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
-  'doraemon', 'hello-kitty',
+  'doraemon', 'hello-kitty', 'argentina-number-10',
 ];
 const reservePort = () => new Promise((resolve, reject) => {
   const socket = net.createServer(); socket.once('error', reject);
@@ -23,8 +23,12 @@ const port = await reservePort();
 const baseURL = `http://127.0.0.1:${port}`;
 const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'buio-premium-atlas-live-'));
 const databaseFile = path.join(tempDir, 'db.json');
+const servedDist = path.join(tempDir, 'pet-dist');
 const artifactDir = path.resolve('artifacts/premium-character-atlases/live');
 await fs.mkdir(artifactDir, { recursive: true });
+// Express' send module treats the `.codex` segment in a managed-worktree path as a hidden
+// path. Serve the exact production build from this isolated, dot-free directory instead.
+await fs.cp(path.resolve('pet-app/dist'), servedDist, { recursive: true });
 await fs.writeFile(databaseFile, JSON.stringify({
   users: [
     { studentid: 'S001', name: '高質素角色測試', passwordhash: bcrypt.hashSync('test', 4),
@@ -48,7 +52,8 @@ for (let index = 0; index < PET_IDS.length; index += 1) {
 const server = spawn(process.execPath, ['server.js'], {
   cwd: path.resolve('.'),
   env: { ...process.env, PORT: String(port), BUIO_JSON_DB_FILE: databaseFile,
-    MOCK_AUTH: '1', NODE_ENV: 'development', SUPABASE_DB_URL: '' },
+    MOCK_AUTH: '1', NODE_ENV: 'development', SUPABASE_DB_URL: '',
+    PET_APP_DIST_DIR: servedDist },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 let logs = '';
@@ -106,6 +111,11 @@ try {
 
     await page.goto('/pet/preview', { waitUntil: 'networkidle' });
     await page.locator('#game-root canvas').waitFor({ timeout: 15000 });
+    const grantAcknowledgement = page.locator('[data-action="ack-grants"]');
+    if (await grantAcknowledgement.isVisible().catch(() => false)) {
+      await grantAcknowledgement.click();
+      await page.locator('#modalRoot .modal-backdrop').waitFor({ state: 'detached' });
+    }
     await page.waitForFunction((speciesId) => {
       const scene = window.__petGame?.scene?.getScene('Bedroom');
       return scene?.avatar?.sprite?.texture?.key?.includes(speciesId);
@@ -248,6 +258,9 @@ try {
   await fs.writeFile(path.join(artifactDir, 'report.json'), JSON.stringify(report, null, 2));
   await context.close();
   console.log(`\nPremium character live playtest passed. Evidence: ${artifactDir}`);
+} catch (error) {
+  console.error(`Premium character live playtest failed. Server output:\n${logs}`);
+  throw error;
 } finally {
   if (browser) await browser.close().catch(() => {});
   server.kill('SIGTERM');
