@@ -91,8 +91,8 @@ function renderStudentSessionPanel(sessions) {
       ${sessions.map(s => `
         <div class="session-card">
           <div class="session-info">
-            <div class="session-teacher">${renderIcon('user')} ${s.teacherName}</div>
-            <div class="session-meta">${t('session_meta', { room: s.roomCode, time: formatTime(s.startTime) })}</div>
+            <div class="session-teacher">${renderIcon('user')} ${escapeReminder(s.teacherName)}</div>
+            <div class="session-meta">${s.type === 'buzzer' ? `${t('buzzer_class')} · ` : ''}${escapeReminder(t('session_meta', { room: s.roomCode, time: formatTime(s.startTime) }))}</div>
           </div>
           <button class="primary-action session-join-btn" data-session-id="${s.teacherId}">
             ${renderIcon('board')} ${t('join_class')}
@@ -114,7 +114,8 @@ function renderTeacherDashboard() {
 
   const user = state.currentUser;
   const sessions = getActiveSessions();
-  const mySession = sessions.find(s => s.teacherName === user.name);
+  const mySession = sessions.find(s => s.type !== 'buzzer' && s.teacherName === user.name);
+  const buzzerSession = sessions.find(s => s.type === 'buzzer');
 
   return `
     <section class="hero-board teacher">
@@ -122,6 +123,7 @@ function renderTeacherDashboard() {
         <h2>${t('teacher_welcome_title')}</h2>
         <p>${t('teacher_welcome_desc')}</p>
         <div class="action-row">
+          <button class="primary-action" id="openBuzzerBtn">${renderIcon('clock')} ${t(buzzerSession ? 'rejoin_buzzer' : 'open_buzzer')}</button>
           ${mySession
             ? `<button class="danger-action" id="endSessionBtn">${renderIcon('door')} ${t('end_board')}</button>
                <button class="secondary-action" id="rejoinBoardBtn">${renderIcon('board')} ${t('rejoin_board')}</button>`

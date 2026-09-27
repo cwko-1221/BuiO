@@ -55,19 +55,28 @@ export async function fetchHomeworkInfo() {
 }
 
 export function clearSession() {
+  activeSessionsCache = [];
   return fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
 }
 
 export async function fetchActiveSessions(onUpdate) {
   try {
-    const res = await fetch('/api/whiteboard/sessions');
-    const data = await res.json();
-    if (data.success) {
+    const results = await Promise.allSettled(['/api/whiteboard/sessions', '/api/buzzer/sessions'].map(async url => {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Session lookup failed');
+      return res.json();
+    }));
+    const sessions = results.flatMap((result, index) => {
+      const type = index === 0 ? 'whiteboard' : 'buzzer';
+      if (result.status !== 'fulfilled' || !result.value.success) return activeSessionsCache.filter(s => s.type === type);
+      return result.value.sessions.map(s => ({ ...s, type }));
+    });
+    {
       const oldStr = JSON.stringify(activeSessionsCache);
-      const newStr = JSON.stringify(data.sessions);
+      const newStr = JSON.stringify(sessions);
       if (oldStr !== newStr) {
-        activeSessionsCache = data.sessions;
-        if (onUpdate) onUpdate(data.sessions);
+        activeSessionsCache = sessions;
+        if (onUpdate) onUpdate(sessions);
       }
     }
   } catch (e) {}

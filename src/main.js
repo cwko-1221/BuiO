@@ -284,6 +284,9 @@ async function openModule(moduleId, mode) {
   } else if (moduleId === 'pet') {
     window.location.href = '/pet';
 
+  } else if (moduleId === 'buzzer') {
+    window.location.href = '/buzzer';
+
   } else if (moduleId === 'game') {
     window.location.href = '/games';
 
@@ -293,7 +296,7 @@ async function openModule(moduleId, mode) {
       // Same-tab nav — teachers leave the portal until they close the class.
       window.location.href = url;
     } else {
-      const sessions = getActiveSessions();
+      const sessions = getActiveSessions().filter(s => s.type !== 'buzzer');
       if (sessions.length === 0) {
         alert(t('no_live_class_alert'));
       } else {
@@ -306,6 +309,10 @@ async function openModule(moduleId, mode) {
 }
 
 function joinTeacherSession(session) {
+  if (session.type === 'buzzer') {
+    window.location.href = `/buzzer?session=${encodeURIComponent(session.id)}`;
+    return;
+  }
   const user = state.currentUser;
   const url = `${WHITEBOARD_BASE}/class-student?room=${encodeURIComponent(session.roomCode)}&name=${encodeURIComponent(user.name)}`;
   window.location.href = url;
@@ -779,6 +786,7 @@ function bindEvents() {
 
   // 老師：開啟白板
   document.getElementById('openBoardBtn')?.addEventListener('click', () => openModule('whiteboard', 'teacher'));
+  document.getElementById('openBuzzerBtn')?.addEventListener('click', () => openModule('buzzer', 'teacher'));
 
   // 老師：重新進入白板
   document.getElementById('rejoinBoardBtn')?.addEventListener('click', () => {

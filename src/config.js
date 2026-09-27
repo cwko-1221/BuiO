@@ -12,6 +12,16 @@ export const WHITEBOARD_BASE = '/whiteboard';
 // =============================================
 export const MODULES = [
   {
+    id: 'buzzer',
+    name: 'buzzer_class',
+    shortName: 'Buzz',
+    description: 'module_buzzer_desc',
+    accent: 'mint',
+    icon: 'clock',
+    status: 'module_buzzer_status',
+    roleAccess: ['teacher']
+  },
+  {
     id: 'homework',
     name: 'module_homework_name',
     shortName: 'Homework',

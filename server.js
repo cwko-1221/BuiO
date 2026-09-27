@@ -136,6 +136,7 @@ app.use('/api/tower-defense', require('./tower-defense-app/routes/questions'));
 
 // Persistent pet raising, room decoration and teacher-issued currency
 app.use('/api/pet', require('./pet-app/routes/pet'));
+app.use('/api/buzzer', require('./buzzer-app/routes'));
 
 // Whiteboard — HTTP + Socket.io. Build httpServer/io now so the whiteboard
 // module can register its /api/whiteboard/* routes BEFORE the catch-all
@@ -554,6 +555,12 @@ app.get('/report.html', (req, res) => {
   if (!req.session || !req.session.studentId) return res.redirect('/');
   if (req.session.role !== 'teacher') return res.redirect('/quiz.html');
   res.sendFile(path.join(__dirname, 'report-app', 'report.html'));
+});
+
+app.use('/buzzer/assets', express.static(path.join(__dirname, 'buzzer-app', 'public')));
+app.get('/buzzer', (req, res) => {
+  if (!req.session?.studentId) return res.redirect('/');
+  res.sendFile(path.join(__dirname, 'buzzer-app', 'public', 'index.html'));
 });
 
 // Whiteboard SPA — only fall back to index.html for HTML navigation requests
