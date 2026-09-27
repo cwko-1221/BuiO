@@ -392,10 +392,12 @@ app.get('/tower-defense/teacher', requireSession, (req, res) => {
 const petDist = !config.isProd && process.env.PET_APP_DIST_DIR
   ? path.resolve(process.env.PET_APP_DIST_DIR)
   : path.join(__dirname, 'pet-app', 'dist');
-const setPetHeaders = (res, { document = false } = {}) => {
+const setPetHeaders = (res, { document = false, microphone = false } = {}) => {
   res.set('X-Content-Type-Options', 'nosniff');
   res.set('Referrer-Policy', 'same-origin');
-  res.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  // Quiet Room needs a browser permission prompt on the teacher document. A denied
+  // policy rejects getUserMedia before the browser can ask the teacher for consent.
+  res.set('Permissions-Policy', `camera=(), microphone=${document && microphone ? '(self)' : '()'}, geolocation=()`);
   if (document) {
     // Rapier compiles its bundled WebAssembly module for the 3D coin-pusher physics. Allow
     // WebAssembly compilation without enabling JavaScript eval or widening other directives.
@@ -451,12 +453,12 @@ app.get('/pet/preview', async (req, res, next) => {
   } catch (err) {
     // Ignore error if schema not initialized
   }
-  setPetHeaders(res, { document: true });
+  setPetHeaders(res, { document: true, microphone: req.session.role === 'teacher' });
   res.set('Cache-Control', 'no-store');
   res.sendFile(path.join(petDist, 'index.html'));
 });
-app.get(['/pet', '/pet/'], requireSession, (_req, res) => {
-  setPetHeaders(res, { document: true });
+app.get(['/pet', '/pet/'], requireSession, (req, res) => {
+  setPetHeaders(res, { document: true, microphone: req.session.role === 'teacher' });
   res.set('Cache-Control', 'no-store');
   res.sendFile(path.join(petDist, 'index.html'));
 });

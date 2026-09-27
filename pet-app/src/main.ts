@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import './styles/main.css';
 import { api } from './api';
+import { QuietRoom } from './quiet-room';
 import { audio } from './audio';
 import { BedroomScene } from './game/BedroomScene';
 import type { CoinPusherScene } from './game/CoinPusherScene';
@@ -1835,19 +1836,23 @@ class StudentApp {
 }
 
 class TeacherApp {
+  quietRoom?:QuietRoom;
   identity:Identity; locale:Locale; roster:any; selected=new Set<string>();scope:'students'|'class'='students';
   constructor(identity:Identity){this.identity=identity;this.locale=identity.language||'zh-HK';}
   t(key:keyof typeof UI['zh-HK']){return UI[this.locale][key]||UI['zh-HK'][key];}
   zh(){return this.locale==='zh-HK';}
   async start(){this.roster=await api.teacherRoster();this.render();}
   render(){
+    this.quietRoom?.dispose();
+    this.quietRoom=undefined;
     const zh=this.zh();
     app.innerHTML=`<div class="teacher-shell">
       <header class="teacher-header">
-        <a href="/" class="brand"><span class="brand-mark">B</span><span><b>${this.t('teacherTitle')}</b><small>${escapeHtml(this.identity.name)} · ${escapeHtml(this.roster.academicYear)}</small></span></a>
+        <a href="/" class="brand"><span class="brand-mark">B</span><span><b>${zh?'老師寵物樂園':'Teacher Pet Paradise'}</b><small>${escapeHtml(this.identity.name)} · ${escapeHtml(this.roster.academicYear)}</small></span></a>
         <div class="teacher-summary"><span><b>${this.roster.students.length}</b><small>${zh?'名學生':'students'}</small></span><span><b>${this.roster.classes.length}</b><small>${zh?'個班別':'classes'}</small></span></div>
       </header>
-      <main class="teacher-main">
+      <nav class="teacher-tool-tabs" aria-label="${zh?'老師工具':'Teacher tools'}"><button type="button" data-teacher-tool="coins" class="active" aria-pressed="true">🪙 ${zh?'發放金幣':'Coin grants'}</button><button type="button" data-teacher-tool="quiet" aria-pressed="false">${zh?'安靜房間':'Quiet Room'}</button></nav>
+      <main class="teacher-main" id="teacherCoinMain">
         <section class="grant-panel" aria-labelledby="grantHeading">
           <div class="grant-head">
             <p class="eyebrow">TEACHER COIN CENTRE</p>
@@ -1878,9 +1883,23 @@ class TeacherApp {
           <div class="student-roster" id="studentRoster">${this.studentRows()}</div>
         </section>
       </main>
+      <main id="teacherQuietMain" class="teacher-quiet-main" hidden></main>
       <div class="modal-root" id="modalRoot"></div>
     </div>`;
     this.bind();this.updateSummary();
+    document.querySelectorAll<HTMLButtonElement>('[data-teacher-tool]').forEach(button=>button.addEventListener('click',()=>{
+      const quiet=button.dataset.teacherTool==='quiet';
+      document.querySelectorAll<HTMLElement>('[data-teacher-tool]').forEach(item=>{item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));});
+      document.querySelector<HTMLElement>('#teacherCoinMain')!.hidden=quiet;
+      document.querySelector<HTMLElement>('#teacherQuietMain')!.hidden=!quiet;
+      if(!quiet)this.quietRoom?.hide();
+      if(quiet&&!this.quietRoom){
+        this.quietRoom=new QuietRoom(document.querySelector<HTMLElement>('#teacherQuietMain')!,this.roster,this.locale,async()=>{
+          this.roster=await api.teacherRoster();
+          document.querySelector('#studentRoster')!.innerHTML=this.studentRows(this.filter);
+        });void this.quietRoom.init();
+      }
+    }));
   }
   studentRows(filter=''){this.filter=filter;return this.roster.students.filter((student:any)=>!filter||student.className===filter).map((student:any)=>`<label class="student-wallet"><input type="checkbox" data-student="${student.studentId}" ${this.selected.has(student.studentId)?'checked':''}><span class="avatar-letter" aria-hidden="true">${escapeHtml(student.name).slice(0,1)}</span><span><b>${escapeHtml(student.name)}</b><small>${escapeHtml(student.className)} · ${student.classNo||'—'} · ${escapeHtml(student.studentId)}</small></span><strong>${Number(student.balance).toLocaleString()} 🪙</strong></label>`).join('');}
   filter='';

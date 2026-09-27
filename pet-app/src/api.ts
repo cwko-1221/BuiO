@@ -1,4 +1,5 @@
 import type { Bootstrap, Identity, RoomPlacement, TeacherGrantNotification } from './types';
+import type { QuietSession, QuietSettings } from './quiet-room-types';
 
 // The shared runtime is loaded blocking in <head>, before this bundle runs.
 const t = (key: string) => (window as any).BuiI18n.t(key) as string;
@@ -12,6 +13,13 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const data = await response.json().catch(() => ({ success: false, message: t('pet.badResponse') }));
   if (!response.ok || data.success === false) throw new Error(data.message || t('pet.actionFailed'));
   return data as T;
+}
+
+async function quietRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 5000);
+  try { return await request<T>(url, { ...options, signal: controller.signal }); }
+  finally { window.clearTimeout(timeout); }
 }
 
 export const api = {
@@ -32,6 +40,9 @@ export const api = {
   grantNotifications: () => request<{ success: true; grants: TeacherGrantNotification[] }>('/api/pet/grant-notifications'),
   acknowledgeGrantNotifications: (transactionIds: string[]) => request<{ success: true; count: number }>('/api/pet/grant-notifications/acknowledge', { method: 'POST', body: JSON.stringify({ transactionIds }) }),
   teacherRoster: () => request<any>('/api/pet/teacher/roster'),
+  quietCurrent: () => quietRequest<{ session: QuietSession | null }>('/api/pet/teacher/quiet-room'),
+  quietStart: (body: QuietSettings, key: string) => quietRequest<{ session: QuietSession }>('/api/pet/teacher/quiet-room', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify(body) }),
+  quietUpdate: (id: string, action: string, eventId?: string) => quietRequest<{ session: QuietSession }>(`/api/pet/teacher/quiet-room/${encodeURIComponent(id)}`, { method: 'POST', body: JSON.stringify({ action, eventId }) }),
   grantPreview: (body: any) => request<any>('/api/pet/teacher/grants/preview', { method: 'POST', body: JSON.stringify(body) }),
   grantCommit: (body: any, key: string) => request<any>('/api/pet/teacher/grants/commit', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify(body) }),
 };

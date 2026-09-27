@@ -3,6 +3,8 @@
 const express = require('express');
 const config = require('../../config');
 const repo = require('../repositories/pet.repo');
+const quietRooms = require('../repositories/quiet-room.repo');
+const { catalog } = require('../lib/catalog');
 const academicYears = require('../../math-app/repositories/academic-years.repo');
 const users = require('../../math-app/repositories/users.repo');
 const { requireAuth, requireTeacher } = require('../../math-app/middleware/auth');
@@ -162,6 +164,11 @@ async function teacherRoster() {
     academicYear,
     classes: [...new Set(enrollments.map((row) => row.className).filter(Boolean))].sort(),
     students: enrollments.map((row) => ({ ...row, balance: balances.get(row.studentId) || 0 })),
+    quietPets: catalog.pets.filter(row => ['starpatch-cat', 'cloud-ear-dog', 'crescent-rabbit'].includes(row.id)).map(row => {
+      const layout = catalog.animationByPet?.[row.id] || catalog.animation;
+      const frame = layout.actions.find(action => action.name === 'idle' && action.facing === 'front')?.frames?.[0] ?? 0;
+      return { name: row.names, atlas: row.atlas[0], columns: layout.columns, rows: layout.rows, frame, focusFrame: frame };
+    }),
   };
 }
 
@@ -181,6 +188,31 @@ async function resolveGrant(body) {
 
 router.get('/teacher/roster', requireTeacher, asyncRoute(async (_req, res) => {
   sendResult(res, await teacherRoster());
+}));
+
+router.get('/teacher/quiet-room', requireTeacher, asyncRoute(async (req, res) => {
+  sendResult(res, { session: await quietRooms.current(req.session.studentId) });
+}));
+
+router.post('/teacher/quiet-room', requireTeacher, asyncRoute(async (req, res) => {
+  const body = req.body;
+  if (!['class', 'group'].includes(body?.scope)) throw Object.assign(new Error('請選擇全班或組別。'), { status: 400 });
+  const roster = await teacherRoster();
+  let recipients = roster.students.filter(row => row.className === body.className);
+  let label = String(body.className || '');
+  if (body.scope === 'group') {
+    const subjects = { chineseGroup: '中文', englishGroup: '英文', mathGroup: '數學' };
+    if (!Object.hasOwn(subjects, body.groupField) || typeof body.groupName !== 'string' || !body.groupName) {
+      throw Object.assign(new Error('請選擇科目及組別。'), { status: 400 });
+    }
+    recipients = recipients.filter(row => row[body.groupField] === body.groupName);
+    label += ` · ${subjects[body.groupField]} ${body.groupName}`;
+  }
+  sendResult(res, { session: await quietRooms.start(req.session.studentId, body, recipients.map(row => row.studentId), mutationKey(req), label) }, 201);
+}));
+
+router.post('/teacher/quiet-room/:id', requireTeacher, asyncRoute(async (req, res) => {
+  sendResult(res, { session: await quietRooms.update(req.session.studentId, req.params.id, req.body?.action, req.body?.eventId) });
 }));
 
 router.post('/teacher/grants/preview', requireTeacher, asyncRoute(async (req, res) => {
