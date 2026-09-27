@@ -3,6 +3,8 @@
 body { margin: 0; background: #f3f7f9; color: var(--buzz-ink); font-family: system-ui, 'Microsoft JhengHei', sans-serif; }
 button, select, input { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
+/* Keep vertical scrolling on short screens, but disallow pinch and double-tap zoom. */
+html.student-zoom-locked, .student-zoom-locked body, .student-zoom-locked body * { touch-action: pan-y; }
 button { cursor: pointer; }
 button:disabled { cursor: default; opacity: .48; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #d89024; outline-offset: 4px; }
@@ -60,7 +62,8 @@ input, select { width: 100%; border: 1px solid #cbdbe0; background: #fbfdfe; bor
 .student-stage { text-align: center; }
 .student-stage h1 { color: #537482; font-size: clamp(28px, 4vw, 40px); margin-bottom: 12px; }
 .student-stage p { color: #79909b; line-height: 1.8; }
-.buzz-button { width: clamp(220px, 32vw, 330px); height: clamp(220px, 32vw, 330px); border: 8px solid #b5e3df; border-radius: 50%; color: white; background: var(--buzz-teal); box-shadow: 0 14px 0 #096a6e, 0 25px 70px #078c8e2b; font-size: clamp(42px, 6vw, 62px); font-weight: 800; touch-action: manipulation; }
+.buzz-button { width: clamp(220px, 32vw, 330px); height: clamp(220px, 32vw, 330px); border: 8px solid #b5e3df; border-radius: 50%; color: white; background: var(--buzz-teal); box-shadow: 0 14px 0 #096a6e, 0 25px 70px #078c8e2b; font-size: clamp(42px, 6vw, 62px); font-weight: 800; }
+.student-zoom-locked .buzz-button { touch-action: none; }
 .buzz-button:active { transform: translateY(8px); box-shadow: 0 6px 0 #096a6e, 0 18px 45px #078c8e2b; }
 .buzz-button:disabled { opacity: .6; }
 .notice { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 20; background: #fff3ec; border: 1px solid #f1c5b6; color: #aa4530; padding: 14px 22px; border-radius: 14px; max-width: calc(100% - 32px); box-shadow: 0 10px 40px #163b4b18; font-size: 14px; }

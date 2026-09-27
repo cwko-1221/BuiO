@@ -4,6 +4,41 @@ const clock = createClock();
 let user, roster, session, events, busy = false, noticeTimer;
 let roundOffset = null, syncing, readyKey = '', armedKey = '', lastHeartbeat = 0;
 let connected = false, stateKey = '';
+let studentZoomLocked = false;
+function lockStudentZoom() {
+  if (studentZoomLocked) return;
+  studentZoomLocked = true;
+  document.documentElement.classList.add('student-zoom-locked');
+  document.querySelector('meta[name="viewport"]').content = 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no';
+  const capture = { passive: false, capture: true };
+  // WebKit can ignore viewport zoom limits; cancel its gesture events as well.
+  for (const type of ['gesturestart', 'gesturechange', 'gestureend', 'dblclick']) {
+    document.addEventListener(type, event => event.preventDefault(), capture);
+  }
+  let lastTap = null;
+  for (const type of ['touchstart', 'touchmove']) {
+    document.addEventListener(type, event => {
+      if (event.touches.length > 1) { event.preventDefault(); lastTap = null; }
+    }, capture);
+  }
+  document.addEventListener('touchcancel', () => { lastTap = null; }, capture);
+  document.addEventListener('touchend', event => {
+    if (event.touches.length) { lastTap = null; return; }
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    const now = performance.now();
+    if (lastTap && now - lastTap.time < 350 && Math.abs(touch.clientX - lastTap.x) < 40 && Math.abs(touch.clientY - lastTap.y) < 40) {
+      event.preventDefault();
+      lastTap = null;
+    } else lastTap = { time: now, x: touch.clientX, y: touch.clientY };
+  }, capture);
+  window.addEventListener('wheel', event => {
+    if (event.ctrlKey || event.metaKey) event.preventDefault();
+  }, capture);
+  window.addEventListener('keydown', event => {
+    if ((event.ctrlKey || event.metaKey) && (['+', '=', '-', '_', '0'].includes(event.key) || ['NumpadAdd', 'NumpadSubtract', 'Numpad0'].includes(event.code))) event.preventDefault();
+  }, capture);
+}
 const english = () => user?.language === 'en-US';
 const tr = (zh, en) => english() ? en : zh;
 const esc = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
@@ -136,6 +171,7 @@ function renderTeacher(current) {
     <div class="teacher-layout"><section class="panel stage" aria-live="polite"><div class="round-label">${tr(`第 ${session.round || 1} 題`, `Question ${session.round || 1}`)}</div>${stage}</section><aside class="panel roster"><h2>${tr('已加入學生', 'Joined students')} <span class="muted">${session.participantCount}</span></h2><div class="roster-list">${[...(session.participants || [])].sort((a, b) => b.score - a.score).map(row => `<div class="participant"><div>${esc(row.name)}<small>${tr(`成功搶答 ${row.successes} 次`, `${row.successes} successful buzzes`)}</small></div><b>${row.score} ${tr('分', 'pts')}</b></div>`).join('') || `<p class="roster-empty">${tr('學生可從平台「課堂」加入。', 'Students can join from Classes on the portal.')}</p>`}</div></aside></div>`;
 }
 function renderStudent(current) {
+  lockStudentZoom();
   let content;
   if (current === 'waiting') content = `<h1>${tr('等待問題', 'Waiting for a question')}</h1>`;
   else if (current === 'preparing' || current === 'scheduled') content = `<h1>${tr('準備搶答', 'Get ready to buzz')}</h1><p>${tr('等待全班同步', 'Synchronizing the class')}</p>`;
