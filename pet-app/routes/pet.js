@@ -166,8 +166,13 @@ async function teacherRoster() {
     students: enrollments.map((row) => ({ ...row, balance: balances.get(row.studentId) || 0 })),
     quietPets: catalog.pets.filter(row => ['starpatch-cat', 'cloud-ear-dog', 'crescent-rabbit'].includes(row.id)).map(row => {
       const layout = catalog.animationByPet?.[row.id] || catalog.animation;
-      const frame = layout.actions.find(action => action.name === 'idle' && action.facing === 'front')?.frames?.[0] ?? 0;
-      return { name: row.names, atlas: row.atlas[0], columns: layout.columns, rows: layout.rows, frame, focusFrame: frame };
+      const idle = layout.actions.find(action => action.name === 'idle' && action.facing === 'front')
+        || layout.actions.find(action => action.name === 'idle' && !action.facing);
+      const frames = idle?.frames?.length ? idle.frames
+        : Array.from({ length: idle?.length || 1 }, (_, index) => (idle?.start || 0) + index);
+      const frame = frames[0];
+      return { name: row.names, atlas: row.atlas[0], columns: layout.columns, rows: layout.rows, frame, focusFrame: frame,
+        idleClip: { frames, durations: idle?.durations, fps: layout.fps } };
     }),
   };
 }

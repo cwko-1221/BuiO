@@ -62,6 +62,12 @@ try {
   const context = await browser.newContext({ baseURL, viewport: { width: 1440, height: 1000 } });
   assert.equal((await context.request.get('/api/pet/teacher/quiet-room')).status(), 403);
   assert.equal((await context.request.post('/api/auth/login', { data: { studentId: 'T001', password: 'teacher123' } })).status(), 200);
+  const companionRoster = await (await context.request.get('/api/pet/teacher/roster')).json();
+  assert.equal(companionRoster.quietPets.length, 3);
+  for (const pet of companionRoster.quietPets) {
+    assert.deepEqual(pet.idleClip.frames, [0, 0, 4], 'companions publish their existing front idle clip');
+    assert.equal(pet.idleClip.fps, 8);
+  }
   assert.equal((await context.request.post('/api/pet/teacher/quiet-room', { data: { scope: 'group', className: '5A', groupField: '__proto__', groupName: 'x', durationSeconds: 10, threshold: 45, reward: 20, penalty: 7 }, headers: { 'Idempotency-Key': 'bad-group' } })).status(), 400);
   await context.addInitScript(() => {
     window.__quietAmplitude = .001;
@@ -102,6 +108,16 @@ try {
     };
   });
   const page = await context.newPage(); const errors = [];
+  const samplePetPositions = () => page.evaluate(async () => {
+    const pets = [...document.querySelectorAll('.quiet-pet')];
+    const positions = pets.map(() => new Set());
+    const start = performance.now();
+    while (performance.now() - start < 850) {
+      pets.forEach((pet, index) => positions[index].add(getComputedStyle(pet).backgroundPosition));
+      await new Promise(requestAnimationFrame);
+    }
+    return positions.map(values => [...values].sort());
+  });
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/pet', { waitUntil: 'networkidle' });
   await page.locator('[data-teacher-tool="quiet"]').click();
@@ -127,6 +143,12 @@ try {
   assert.match(await page.locator('.quiet-room-badge').innerText(), /專注花園/);
   assert.equal(await page.locator('.quiet-room-stage').getByRole('img', { name: /專注夥伴/ }).count(), 3);
   assert.doesNotMatch(await page.locator('#teacherQuietMain').innerText(), /睡覺|美夢|入睡|夢鄉/);
+  const idlePositions = await samplePetPositions();
+  assert.deepEqual(idlePositions, Array.from({ length: 3 }, () => ['0% 0%', '100% 0%']), 'all companions loop only the native awake idle poses');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(100);
+  assert.deepEqual(await samplePetPositions(), Array.from({ length: 3 }, () => ['0% 0%']), 'reduced motion keeps the resting idle frame');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   const garden = await page.locator('.quiet-garden-scene').evaluate(el => getComputedStyle(el).backgroundImage.slice(5, -2));
   assert.equal((await context.request.get(garden)).status(), 200);
   await page.waitForFunction(() => Array.from(document.querySelectorAll('.quiet-pet')).every(el => {
@@ -168,6 +190,7 @@ try {
   await page.waitForFunction(() => document.querySelector('#quietPause').textContent.includes('繼續') && !document.querySelector('#quietPause').disabled);
   assert.equal(await page.locator('#quietSettingsPage').isVisible(), false, 'pausing stays on the countdown page');
   const frozen = await page.locator('#quietTime').innerText();
+  assert.deepEqual(await samplePetPositions(), idlePositions, 'idle animations continue while the countdown is paused');
   await page.waitForTimeout(2300);
   assert.equal(await page.locator('#quietTime').innerText(), frozen);
   assert.equal(await page.locator('#quietBreaches').innerText(), '1');

@@ -36,6 +36,11 @@ export class QuietRoom {
   private feedbackUntil = 0;
   private pendingNoise = new Set<string>();
   private pendingStart?: { key: string; settings: QuietSettings };
+  private reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  private petAnimations: {
+    node: HTMLElement; columns: number; rows: number;
+    frames: number[]; holds: number[]; cycle: number; phase: number; frame: number;
+  }[] = [];
   private onVisibility = () => { if (document.hidden && this.monitoring) void this.pause(); };
   private onPageHide = () => {
     this.stopMicrophone();
@@ -76,13 +81,12 @@ export class QuietRoom {
   }
 
   private pets() {
-    return (this.roster.quietPets || []).map((pet: any, index: number) => {
-      // Older running servers may still publish a sleeping frame; always use an awake pose.
-      const frame = pet.focusFrame ?? 0;
+    return (this.roster.quietPets || []).map((pet: any) => {
+      const frame = pet.idleClip?.frames?.[0] ?? pet.focusFrame ?? 0;
       const x = frame % pet.columns;
       const y = Math.floor(frame / pet.columns);
       const name = pet.name[this.locale][0];
-      return `<div class="quiet-companion" style="--pet-delay:${index * .7}s"><div class="quiet-companion-art"><span class="quiet-pet" role="img" aria-label="${escape(this.t('專注夥伴：', 'Focus companion: ') + name)}" style="background-image:url('${escape(pet.atlas)}');background-size:${pet.columns * 100}% ${pet.rows * 100}%;background-position:${x / (pet.columns - 1) * 100}% ${y / (pet.rows - 1) * 100}%"></span><span class="quiet-pet-shadow" aria-hidden="true"></span></div><span class="quiet-companion-name">${escape(name)}</span></div>`;
+      return `<div class="quiet-companion"><div class="quiet-companion-art"><span class="quiet-pet" role="img" aria-label="${escape(this.t('專注夥伴：', 'Focus companion: ') + name)}" style="background-image:url('${escape(pet.atlas)}');background-size:${pet.columns * 100}% ${pet.rows * 100}%;background-position:${x / Math.max(1, pet.columns - 1) * 100}% ${y / Math.max(1, pet.rows - 1) * 100}%"></span><span class="quiet-pet-shadow" aria-hidden="true"></span></div><span class="quiet-companion-name">${escape(name)}</span></div>`;
     }).join('');
   }
 
@@ -141,6 +145,15 @@ export class QuietRoom {
         ${this.session ? message : ''}
       </section>
     </div>`;
+    this.petAnimations = Array.from(this.root.querySelectorAll<HTMLElement>('.quiet-pet'), (node, index) => {
+      const pet = this.roster.quietPets[index];
+      const frames: number[] = pet.idleClip?.frames?.length ? pet.idleClip.frames : [pet.focusFrame ?? 0];
+      // Atlas durations are additional holds, matching the existing PetAvatar animation.
+      const holds = frames.map((_, i) => 1000 / (pet.idleClip?.fps || 8) + (pet.idleClip?.durations?.[i] || 0));
+      const cycle = holds.reduce((sum, hold) => sum + hold, 0);
+      return { node, columns: pet.columns, rows: pet.rows, frames, holds, cycle,
+        phase: cycle * index / this.roster.quietPets.length, frame: frames[0] };
+    });
     this.bind();
     this.updateSelection();
     this.paint();
@@ -343,8 +356,23 @@ export class QuietRoom {
     } catch { /* Audio playback must never interrupt monitoring or settlement. */ }
   }
 
+  private animatePets(now: number) {
+    if (!this.session || this.root.hidden || document.hidden) return;
+    const reduced = this.reducedMotion.matches || document.documentElement.classList.contains('reduced-motion');
+    for (const pet of this.petAnimations) {
+      let remaining = reduced ? 0 : (now + pet.phase) % pet.cycle;
+      let index = 0;
+      while (index < pet.holds.length - 1 && remaining >= pet.holds[index]) remaining -= pet.holds[index++];
+      const frame = pet.frames[index];
+      if (pet.frame === frame) continue;
+      pet.frame = frame;
+      pet.node.style.backgroundPosition = `${frame % pet.columns / Math.max(1, pet.columns - 1) * 100}% ${Math.floor(frame / pet.columns) / Math.max(1, pet.rows - 1) * 100}%`;
+    }
+  }
+
   private animate = () => {
     if (this.disposed) return;
+    this.animatePets(performance.now());
     this.paintClock();
     if (this.analyser) {
       this.analyser.getFloatTimeDomainData(this.samples);
@@ -417,6 +445,7 @@ export class QuietRoom {
 
   dispose() {
     this.disposed = true; this.stopMicrophone(); clearInterval(this.interval); cancelAnimationFrame(this.frame);
+    this.petAnimations = [];
     document.removeEventListener('visibilitychange', this.onVisibility);
     window.removeEventListener('pagehide', this.onPageHide);
     window.removeEventListener('beforeunload', this.onBeforeUnload);
