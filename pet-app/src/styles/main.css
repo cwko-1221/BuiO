@@ -256,11 +256,12 @@ img { max-width: 100%; }
 .room-bar-stage { font-weight: 600; font-size: .82rem; color: var(--ink-soft); }
 .room-bar-identity .progress { flex: 1 1 140px; min-width: 120px; max-width: 320px; }
 
-/* One row of equal actions. Tablet-first: these are the primary controls of the app, so
+/* Six equal actions on one row (or two complete rows of three on phones). These are
+   the primary controls of the app, so
    they get a generous target rather than the 32px chips they replaced. */
 .room-bar-actions {
   display: grid; gap: var(--s1);
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 .room-bar-actions button {
   min-height: 56px; padding: var(--s1);
@@ -1295,8 +1296,7 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
   .wallet small { display: none; }
   .pet-main { position: relative; }
   .play-surface { min-height: 0; }
-  /* Five labels across 390px do not fit on one row; two rows of large targets beat five
-     cramped ones. */
+  /* Keep all six actions in two equal rows, never a ragged 5+1 or 4+2 layout. */
   .room-bar-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .room-bar { padding: var(--s1) var(--s2); }
   .room-bar-identity h1 { font-size: 1.05rem; }
