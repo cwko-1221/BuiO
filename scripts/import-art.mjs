@@ -90,7 +90,7 @@ const DEFAULT_PET_LAYOUT = {
 };
 const PREMIUM_PET_IDS = [
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan', 'doraemon',
-  'hello-kitty', 'argentina-number-10',
+  'hello-kitty', 'argentina-number-10', 'portugal-number-7',
 ];
 const PREMIUM_PET_LAYOUT = {
   columns: 8, rows: 5, cell: ATLAS_CELL, fps: 10,

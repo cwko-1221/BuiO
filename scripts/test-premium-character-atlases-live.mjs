@@ -10,7 +10,7 @@ import { chromium } from 'playwright';
 
 const PET_IDS = [
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
-  'doraemon', 'hello-kitty', 'argentina-number-10',
+  'doraemon', 'hello-kitty', 'argentina-number-10', 'portugal-number-7',
 ];
 const reservePort = () => new Promise((resolve, reject) => {
   const socket = net.createServer(); socket.once('error', reject);
