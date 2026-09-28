@@ -6,7 +6,9 @@ let soundContext = null;
 const state = {
   page: window.location.hash === '#records' ? 'records' : 'spin',
   group: '',
+  grade: '',
   groups: [],
+  grades: [],
   students: [],
   recent: [],
   tableNumbers: TABLE_NUMBERS,
@@ -52,6 +54,10 @@ const api = async (path, options = {}) => {
 
 function groupName(group) {
   return group || t('x.unassigned');
+}
+
+function gradeName(grade) {
+  return grade ? t(`x.grade${grade}`) : t('x.allGrades');
 }
 
 function peopleLabel(count) {
@@ -162,13 +168,21 @@ async function loadData({ keepDraws = false } = {}) {
   render();
   try {
     const requestedGroup = state.group;
-    const data = await api(`/?group=${encodeURIComponent(requestedGroup)}`);
+    const requestedGrade = state.grade;
+    const data = await api(`/?group=${encodeURIComponent(requestedGroup)}&grade=${encodeURIComponent(requestedGrade)}`);
     state.groups = data.groups || [];
+    state.grades = data.grades || [];
     state.students = data.students || [];
     state.recent = data.recent || [];
     state.tableNumbers = data.tableNumbers || TABLE_NUMBERS;
     if (requestedGroup && !state.groups.includes(requestedGroup)) {
       state.group = '';
+      state.draws = null;
+      state.spinCount = 1;
+      return loadData({ keepDraws: false });
+    }
+    if (requestedGrade && !state.grades.includes(requestedGrade)) {
+      state.grade = '';
       state.draws = null;
       state.spinCount = 1;
       return loadData({ keepDraws: false });
@@ -303,7 +317,7 @@ function renderDraw() {
 
 function renderRecordsPage() {
   return `<div class="records-page">
-    <section class="records-panel panel"><div class="records-heading"><div><span class="eyebrow">SCORE TOTALS</span><h2>${escapeHtml(t('x.recordsTitle'))}</h2><p>${escapeHtml(t('x.recordsLead'))}</p></div><span class="group-chip">${escapeHtml(state.group ? groupName(state.group) : t('x.allGroups'))}</span></div>${renderTable()}</section>
+    <section class="records-panel panel"><div class="records-heading"><div><span class="eyebrow">SCORE TOTALS</span><h2>${escapeHtml(t('x.recordsTitle'))}</h2><p>${escapeHtml(t('x.recordsLead'))}</p></div><div class="scope-chips"><span class="group-chip">${escapeHtml(state.grade ? gradeName(state.grade) : t('x.allGrades'))}</span><span class="group-chip">${escapeHtml(state.group ? groupName(state.group) : t('x.allGroups'))}</span></div></div>${renderTable()}</section>
     <section class="recent-panel panel"><span class="eyebrow">RECENT CHECKS</span><h2>${escapeHtml(t('x.recentTitle'))}</h2>${renderRecent()}</section>
   </div>`;
 }
@@ -329,7 +343,14 @@ function render() {
         <button class="page-tab ${state.page === 'spin' ? 'active' : ''}" data-page="spin" aria-selected="${state.page === 'spin'}">${escapeHtml(t('x.drawTitle'))}</button>
         <button class="page-tab ${state.page === 'records' ? 'active' : ''}" data-page="records" aria-selected="${state.page === 'records'}">${escapeHtml(t('x.recordsTitle'))}</button>
       </nav>
-      <section class="controls panel"><div class="field"><label for="groupSelect">${escapeHtml(t('x.filterGroup'))}</label><select id="groupSelect"><option value="">${escapeHtml(t('x.allGroups'))}</option>${state.groups.map(group => `<option value="${escapeHtml(group)}" ${group === state.group ? 'selected' : ''}>${escapeHtml(group)}</option>`).join('')}</select></div><p class="group-note">${escapeHtml(t('x.groupNote'))}</p></section>
+      <section class="controls panel filter-panel">
+        <div class="filter-heading"><div><span class="eyebrow">CLASS FILTER</span><h2>${escapeHtml(t('x.filterTitle'))}</h2><p>${escapeHtml(t('x.filterLead'))}</p></div><span class="filter-count"><i aria-hidden="true"></i>${escapeHtml(t('x.studentCount', { count: state.students.length }))}</span></div>
+        <div class="filter-fields">
+          <div class="field filter-field"><label for="gradeSelect"><span class="filter-index">01</span>${escapeHtml(t('x.filterGrade'))}</label><select id="gradeSelect"><option value="">${escapeHtml(t('x.allGrades'))}</option>${state.grades.map(grade => `<option value="${escapeHtml(grade)}" ${grade === state.grade ? 'selected' : ''}>${escapeHtml(gradeName(grade))}</option>`).join('')}</select></div>
+          <div class="field filter-field"><label for="groupSelect"><span class="filter-index">02</span>${escapeHtml(t('x.filterGroup'))}</label><select id="groupSelect"><option value="">${escapeHtml(t('x.allGroups'))}</option>${state.groups.map(group => `<option value="${escapeHtml(group)}" ${group === state.group ? 'selected' : ''}>${escapeHtml(group)}</option>`).join('')}</select></div>
+        </div>
+        <div class="filter-note"><span aria-hidden="true">✳</span><p class="group-note">${escapeHtml(t('x.groupNote'))}</p></div>
+      </section>
       ${state.page === 'records' ? renderRecordsPage() : `<div class="workspace single-column">${renderDraw()}</div>`}
     </main>
   </div>`;
@@ -559,6 +580,13 @@ function bindEvents() {
   }));
   document.getElementById('groupSelect')?.addEventListener('change', event => {
     state.group = event.target.value;
+    state.draws = null;
+    state.spinCount = 1;
+    state.spinPhase = 'idle';
+    loadData();
+  });
+  document.getElementById('gradeSelect')?.addEventListener('change', event => {
+    state.grade = event.target.value;
     state.draws = null;
     state.spinCount = 1;
     state.spinPhase = 'idle';

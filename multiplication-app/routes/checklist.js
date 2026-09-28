@@ -10,8 +10,8 @@ router.use(requireTeacher);
 router.get('/', async (req, res, next) => {
   try {
     const [overview, recent] = await Promise.all([
-      checklist.listOverview(req.query.group || ''),
-      checklist.listRecent(req.query.group || ''),
+      checklist.listOverview(req.query.group || '', req.query.grade || ''),
+      checklist.listRecent(req.query.group || '', req.query.grade || ''),
     ]);
     res.json({ success: true, ...overview, recent });
   } catch (error) {

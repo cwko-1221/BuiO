@@ -6,6 +6,7 @@ const { getPool } = require('../../math-app/db/database');
 const users = require('../../math-app/repositories/users.repo');
 
 const TABLE_NUMBERS = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9]);
+const GRADE_LEVELS = Object.freeze(['P1', 'P2', 'P3', 'P4', 'P5', 'P6']);
 let schemaPromise;
 
 async function ensureSchema() {
@@ -43,6 +44,11 @@ function normalizeGroup(value) {
   return String(value || '').trim();
 }
 
+function normalizeGrade(value) {
+  const grade = String(value || '').trim().toUpperCase();
+  return GRADE_LEVELS.includes(grade) ? grade : '';
+}
+
 function emptyCounts() {
   return Object.fromEntries(TABLE_NUMBERS.map(number => [String(number), 0]));
 }
@@ -52,6 +58,7 @@ function mapStudent(student, counts = emptyCounts(), successCounts = emptyCounts
     id: student.id,
     name: student.name,
     className: student.className || '',
+    grade: normalizeGrade(student.className),
     classNo: student.classNo == null ? null : Number(student.classNo),
     mathGroup: normalizeGroup(student.mathGroup),
     counts,
@@ -69,25 +76,29 @@ function sortStudents(students) {
   );
 }
 
-async function listOverview(group = '') {
+async function listOverview(group = '', grade = '') {
   await ensureSchema();
   const selectedGroup = normalizeGroup(group);
+  const selectedGrade = normalizeGrade(grade);
   const allStudents = await users.listForTeacher([], { includeTeachers: false });
   const students = allStudents
-    .filter(student => !selectedGroup || normalizeGroup(student.mathGroup) === selectedGroup)
+    .filter(student => (!selectedGroup || normalizeGroup(student.mathGroup) === selectedGroup)
+      && (!selectedGrade || normalizeGrade(student.className) === selectedGrade))
     .map(student => mapStudent(student));
 
   if (config.db.mode === 'postgres') {
-    const params = [selectedGroup];
+    const params = [selectedGroup, selectedGrade];
     const { rows } = await getPool().query(`
       SELECT StudentID AS "studentId", TableNumber AS "tableNumber",
              COALESCE(SUM(CASE WHEN IsSuccess = TRUE THEN 1 ELSE -1 END), 0)::int AS score,
              COALESCE(SUM(CASE WHEN IsSuccess = TRUE THEN 1 ELSE 0 END), 0)::int AS "successCount"
       FROM MultiplicationChecks
-      WHERE ($1 = '' OR StudentID IN (
+      WHERE StudentID IN (
         SELECT StudentID FROM Users
-        WHERE Role <> 'teacher' AND COALESCE(MathGroup, '') = $1
-      ))
+        WHERE Role <> 'teacher'
+          AND ($1 = '' OR COALESCE(MathGroup, '') = $1)
+          AND ($2 = '' OR UPPER(ClassName) = $2)
+      )
       GROUP BY StudentID, TableNumber`, params);
     const byStudent = new Map(students.map(student => [student.id, student]));
     for (const row of rows) {
@@ -123,12 +134,13 @@ async function listOverview(group = '') {
   const groups = [...new Set(allStudents.map(student => normalizeGroup(student.mathGroup)).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, 'zh-Hant'));
 
-  return { groups, students: sortStudents(students), tableNumbers: TABLE_NUMBERS };
+  return { groups, grades: GRADE_LEVELS, students: sortStudents(students), tableNumbers: TABLE_NUMBERS };
 }
 
-async function listRecent(group = '', limit = 24) {
+async function listRecent(group = '', grade = '', limit = 24) {
   await ensureSchema();
   const selectedGroup = normalizeGroup(group);
+  const selectedGrade = normalizeGrade(grade);
   const boundedLimit = Math.max(1, Math.min(100, Number(limit) || 24));
   if (config.db.mode === 'postgres') {
     const { rows } = await getPool().query(`
@@ -138,8 +150,9 @@ async function listRecent(group = '', limit = 24) {
       FROM MultiplicationChecks c
       JOIN Users u ON u.StudentID = c.StudentID
       WHERE ($1 = '' OR COALESCE(u.MathGroup, '') = $1)
+        AND ($2 = '' OR UPPER(COALESCE(u.ClassName, '')) = $2)
       ORDER BY c.CreatedAt DESC, c.ID DESC
-      LIMIT $2`, [selectedGroup, boundedLimit]);
+      LIMIT $3`, [selectedGroup, selectedGrade, boundedLimit]);
     return rows.map(row => ({
       ...row,
       tableNumber: Number(row.tableNumber),
@@ -153,8 +166,9 @@ async function listRecent(group = '', limit = 24) {
     .slice()
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt) || b.id - a.id)
     .filter(row => {
-      if (!selectedGroup) return true;
-      return normalizeGroup(userMap.get(row.studentid)?.mathgroup) === selectedGroup;
+      const student = userMap.get(row.studentid);
+      return (!selectedGroup || normalizeGroup(student?.mathgroup) === selectedGroup)
+        && (!selectedGrade || normalizeGrade(student?.classname) === selectedGrade);
     })
     .slice(0, boundedLimit)
     .map(row => ({
