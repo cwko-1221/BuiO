@@ -15,7 +15,7 @@ const CELL = 512;
 const ATLAS_SIZE = 4096;
 const ALPHA_THRESHOLD = 8;
 const MOTION_HEIGHT = 430;
-const WALK_BASELINES = [476, 480, 476, 470, 476, 480, 476, 470];
+const WALK_BASELINES = [475, 478, 475, 472, 475, 478, 475, 472];
 const IDLE_BASELINE = 478;
 const SPECIAL_BASELINE = 478;
 
@@ -23,7 +23,7 @@ const GROUPS = [
   { name: 'front-walk', file: 'front-walk-generated-v2.png', columns: 4, rows: 2, count: 8 },
   { name: 'right-walk', file: 'right-walk-generated-v2.png', columns: 4, rows: 2, count: 8 },
   { name: 'back-walk', file: 'back-walk-generated-v2.png', columns: 4, rows: 2, count: 8 },
-  { name: 'front-idle', file: 'front-idle-generated-v2.png', columns: 4, rows: 2, count: 8 },
+  { name: 'front-idle', file: 'front-idle-generated-v3.png', columns: 4, rows: 2, count: 8 },
   { name: 'specials', file: 'specials-generated-v2.png', columns: 5, rows: 1, count: 5 },
 ];
 
@@ -36,7 +36,7 @@ const median = (values) => {
   return sorted[Math.floor(sorted.length / 2)];
 };
 
-async function alphaBounds(buffer) {
+async function alphaBounds(buffer, threshold = ALPHA_THRESHOLD) {
   const { data, info } = await sharp(buffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   let left = info.width;
   let top = info.height;
@@ -45,7 +45,7 @@ async function alphaBounds(buffer) {
   let opaque = 0;
   for (let y = 0; y < info.height; y += 1) {
     for (let x = 0; x < info.width; x += 1) {
-      if (data[(y * info.width + x) * 4 + 3] <= ALPHA_THRESHOLD) continue;
+      if (data[(y * info.width + x) * 4 + 3] <= threshold) continue;
       left = Math.min(left, x);
       top = Math.min(top, y);
       right = Math.max(right, x);
@@ -57,66 +57,23 @@ async function alphaBounds(buffer) {
   return { left, top, width: right - left + 1, height: bottom - top + 1, right, bottom, opaque };
 }
 
-async function cleanCell(buffer, label) {
-  const { data, info } = await sharp(buffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  const pixels = info.width * info.height;
-  for (let i = 0; i < data.length; i += 4) {
-    if (data[i + 3] > ALPHA_THRESHOLD) continue;
-    data[i] = 0;
-    data[i + 1] = 0;
-    data[i + 2] = 0;
-    data[i + 3] = 0;
-  }
-  // A generated sheet can place two rows directly against their shared boundary. Retain only
-  // the intended connected character so a hair/boot fragment from the neighbouring slot can
-  // never survive merely because it crossed that boundary by one pixel.
-  const labels = new Int32Array(pixels).fill(-1);
-  const queue = new Int32Array(pixels);
-  const components = [];
-  for (let start = 0; start < pixels; start += 1) {
-    if (labels[start] >= 0 || data[start * 4 + 3] <= ALPHA_THRESHOLD) continue;
-    const id = components.length;
-    let head = 0;
-    let tail = 0;
-    labels[start] = id;
-    queue[tail++] = start;
-    while (head < tail) {
-      const current = queue[head++];
-      const x = current % info.width;
-      const y = Math.floor(current / info.width);
-      const neighbours = [
-        x > 0 ? current - 1 : -1,
-        x + 1 < info.width ? current + 1 : -1,
-        y > 0 ? current - info.width : -1,
-        y + 1 < info.height ? current + info.width : -1,
-      ];
-      for (const next of neighbours) {
-        if (next < 0 || labels[next] >= 0 || data[next * 4 + 3] <= ALPHA_THRESHOLD) continue;
-        labels[next] = id;
-        queue[tail++] = next;
-      }
+async function idleShape(buffer) {
+  const runtime = await sharp(buffer).resize(160, 160).png().toBuffer();
+  const bounds = await alphaBounds(runtime);
+  const { data } = await sharp(runtime).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  let bootArea = 0, bootWidth = 0, headWidth = 0;
+  for (let y = bounds.top; y <= bounds.bottom; y += 1) {
+    let rowWidth = 0;
+    for (let x = bounds.left; x <= bounds.right; x += 1) {
+      if (data[(y * 160 + x) * 4 + 3] > 16) rowWidth += 1;
     }
-    components.push(tail);
+    if (y >= bounds.bottom - 9) { bootArea += rowWidth; bootWidth = Math.max(bootWidth, rowWidth); }
+    if (y < bounds.top + bounds.height * .35) headWidth = Math.max(headWidth, rowWidth);
   }
-  assert(components.length > 0, `${label} contains no connected artwork`);
-  const intended = components.indexOf(Math.max(...components));
-  for (let pixel = 0; pixel < pixels; pixel += 1) {
-    if (labels[pixel] === intended || data[pixel * 4 + 3] === 0) continue;
-    data[pixel * 4] = 0;
-    data[pixel * 4 + 1] = 0;
-    data[pixel * 4 + 2] = 0;
-    data[pixel * 4 + 3] = 0;
-  }
-  const cleaned = await sharp(data, { raw: info }).png().toBuffer();
-  const bounds = await alphaBounds(cleaned);
-  assert(bounds && bounds.opaque > 1500, `${label} is empty or contains only fragments`);
-  assert(bounds.left >= 1 && bounds.right <= info.width - 2,
-  `${label} touches its raw source cell boundary: ${JSON.stringify({ bounds, width: info.width, height: info.height })}`);
-  const cropped = await sharp(cleaned).extract(bounds).png().toBuffer();
-  return { buffer: cropped, width: bounds.width, height: bounds.height, opaque: bounds.opaque };
+  return { height: bounds.height, bottom: bounds.bottom, bootArea, bootWidth, headWidth };
 }
 
-async function splitConnectedPoses(file, expected, label) {
+async function splitConnectedPoses(file, expected, label, rows = 1, padding = 4) {
   const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const pixels = info.width * info.height;
   const labels = new Int32Array(pixels).fill(-1);
@@ -155,11 +112,18 @@ async function splitConnectedPoses(file, expected, label) {
     }
     components.push({ id, count: tail, left, top, right, bottom });
   }
-  const poses = components.filter((component) => component.count > 5000).sort((a, b) => a.left - b.left);
+  const poseRow = (pose) => Math.min(rows - 1, Math.floor((pose.top + pose.bottom) / 2 / info.height * rows));
+  const poses = components.filter((component) => component.count > 5000)
+    .sort((a, b) => poseRow(a) - poseRow(b) || a.left - b.left);
   assert.equal(poses.length, expected, `${label} must contain exactly ${expected} connected poses`);
+  for (let row = 0; row < rows; row += 1) {
+    assert.equal(poses.filter((pose) => poseRow(pose) === row).length, expected / rows,
+      `${label} has an unexpected pose count in source row ${row}`);
+  }
   const frames = [];
   for (const pose of poses) {
-    const padding = 4;
+    assert(pose.left > 1 && pose.top > 1 && pose.right < info.width - 2 && pose.bottom < info.height - 2,
+      `${label} contains a clipped pose at the source image edge: ${JSON.stringify(pose)}`);
     const width = pose.right - pose.left + 1;
     const height = pose.bottom - pose.top + 1;
     const outputWidth = width + padding * 2;
@@ -178,6 +142,7 @@ async function splitConnectedPoses(file, expected, label) {
       width: outputWidth,
       height: outputHeight,
       opaque: pose.count,
+      sourceBounds: { left: pose.left, top: pose.top, right: pose.right, bottom: pose.bottom, width, height },
     });
   }
   return { frames, sourceWidth: info.width, sourceHeight: info.height };
@@ -185,28 +150,11 @@ async function splitConnectedPoses(file, expected, label) {
 
 async function splitGroup(group) {
   const file = path.join(RAW, group.file);
-  const metadata = await sharp(file).metadata();
-  if (group.name === 'specials') {
-    const connected = await splitConnectedPoses(file, group.count, group.file);
-    return { ...group, ...connected };
-  }
-  const frames = [];
-  for (let index = 0; index < group.count; index += 1) {
-    const column = index % group.columns;
-    const row = Math.floor(index / group.columns);
-    const left = Math.round(column * metadata.width / group.columns);
-    const right = Math.round((column + 1) * metadata.width / group.columns);
-    const top = Math.round(row * metadata.height / group.rows);
-    const bottom = Math.round((row + 1) * metadata.height / group.rows);
-    const rawCell = await sharp(file).extract({
-      left,
-      top,
-      width: right - left,
-      height: bottom - top,
-    }).png().toBuffer();
-    frames.push(await cleanCell(rawCell, `${group.name} frame ${index + 1}`));
-  }
-  return { ...group, sourceWidth: metadata.width, sourceHeight: metadata.height, frames };
+  // Generated rows are not exact grid cells: idle boots extend beyond y=512. Isolate
+  // whole connected characters BEFORE cropping, so neither boots nor neighbours are lost.
+  const connected = await splitConnectedPoses(file, group.count, group.file, group.rows,
+    group.name === 'specials' ? 4 : 0);
+  return { ...group, ...connected };
 }
 
 async function upperBodyCentre(buffer) {
@@ -231,11 +179,25 @@ async function makeTile(frame, scale, baseline, label) {
   const height = Math.max(1, Math.round(frame.height * scale));
   const centre = await upperBodyCentre(frame.buffer);
   const left = Math.round(CELL / 2 - centre * scale);
-  const top = Math.round(baseline - height);
+  let top = Math.round(baseline - height);
   assert(left >= 16 && top >= 16 && left + width <= CELL - 16 && top + height <= CELL - 16,
     `${label} leaves the 16px safety gutter (${left},${top},${width},${height})`);
   const resized = await sharp(frame.buffer).resize(width, height, { fit: 'fill', kernel: 'lanczos3' }).png().toBuffer();
-  const tile = await empty(CELL, CELL).composite([{ input: resized, left, top }]).png().toBuffer();
+  let tile = await empty(CELL, CELL).composite([{ input: resized, left, top }]).png().toBuffer();
+  if (label.includes('-walk frame ')) {
+    // A thin boot edge can disappear when the 512px slot is sampled at 160px. Align at the
+    // actual shipping resolution without increasing the authored low-amplitude gait arc.
+    const intendedBottom = Math.floor(baseline * 160 / CELL);
+    let matched = false;
+    for (const correction of [0, -1, 1, -2, 2, -3, 3, -4, 4]) {
+      const candidate = correction === 0 ? tile
+        : await empty(CELL, CELL).composite([{ input: resized, left, top: top + correction }]).png().toBuffer();
+      const runtime = await sharp(candidate).resize(160, 160).png().toBuffer();
+      if ((await alphaBounds(runtime, 16))?.bottom !== intendedBottom) continue;
+      tile = candidate; top += correction; matched = true; break;
+    }
+    assert(matched, `${label} cannot align its boot at runtime baseline ${intendedBottom}`);
+  }
   const bounds = await alphaBounds(tile);
   assert(bounds, `${label} disappeared during normalization`);
   return { tile, left, top, width, height, baseline, bounds };
@@ -275,10 +237,9 @@ await fs.mkdir(ARTIFACT, { recursive: true });
 
 const groups = [];
 for (const group of GROUPS) groups.push(await splitGroup(group));
-// The generator returned the second idle row at roughly 94% of the first row's scale even
-// though the pose itself is unchanged. Correct that source-sheet scale error before applying
-// the one shared motion scale; otherwise the avatar visibly shrinks during every blink.
-const idleReferenceHeight = median(groups[3].frames.slice(0, 4).map((frame) => frame.height));
+// Normalize COMPLETE idle poses to the front walk's full-body height. Measuring a cropped
+// cell disguises missing boots as a scale difference, inflating its head and shortening legs.
+const idleReferenceHeight = median(groups[0].frames.map((frame) => frame.height));
 groups[3].frames = await Promise.all(groups[3].frames.map(async (frame) => {
   const sourceCorrectionScale = idleReferenceHeight / frame.height;
   const width = Math.round(frame.width * sourceCorrectionScale);
@@ -369,6 +330,13 @@ for (const row of [0, 1, 2]) {
 const idleFrames = frames.filter((frame) => frame.row === 3);
 assert.ok(idleFrames.every((frame) => frame.baseline === IDLE_BASELINE), 'Idle baseline is not locked');
 assert.equal(new Set(idleFrames.map((frame) => hash(frame.tile))).size, 8, 'Idle frames collapsed to duplicates');
+const idleShapes = await Promise.all(idleFrames.map((frame) => idleShape(frame.tile)));
+const spread = (key) => Math.max(...idleShapes.map((s) => s[key])) - Math.min(...idleShapes.map((s) => s[key]));
+assert.equal(spread('bottom'), 0, 'Idle boots do not stay on the same baseline');
+assert(spread('height') <= 2 && spread('headWidth') <= 2, `Idle proportions change: ${JSON.stringify(idleShapes)}`);
+assert(spread('bootWidth') <= 3
+  && Math.max(...idleShapes.map((s) => s.bootArea)) / Math.min(...idleShapes.map((s) => s.bootArea)) <= 1.2,
+`Idle boots are missing or change silhouette: ${JSON.stringify(idleShapes)}`);
 const stageHashes = await Promise.all(Array.from({ length: 4 }, async (_, index) => hash(
   await fs.readFile(path.join(IMPORT, `pet-${PET_ID}-${index + 1}.png`)),
 )));
@@ -392,6 +360,7 @@ const report = {
   specialScale,
   walkBaselines: WALK_BASELINES,
   idleBaseline: IDLE_BASELINE,
+  idleShapes,
   stageHashes,
   sources: groups.map((group) => ({
     name: group.name,
@@ -401,6 +370,7 @@ const report = {
       width: frame.width,
       height: frame.height,
       opaque: frame.opaque,
+      sourceBounds: frame.sourceBounds,
       sourceCorrectionScale: frame.sourceCorrectionScale ?? 1,
     })),
   })),
@@ -410,10 +380,13 @@ const report = {
     allRequiredFramesPopulated: true,
     reservedFramesTransparent: true,
     noCellBoundaryPixels: true,
+    completeSourcePosesBeforePacking: true,
     sharedMotionScale: true,
     stableUpperBodyCentre: true,
     restrainedWalkArc: true,
     idleBaselineLocked: true,
+    idleBootsCompleteAndConsistent: true,
+    idleHeadBodyProportionsConsistent: true,
     distinctWalkFrames: true,
     distinctHalfCycles: true,
     stageCopiesIdentical: true,

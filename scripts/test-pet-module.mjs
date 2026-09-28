@@ -164,6 +164,7 @@ for(const petId of PREMIUM_PET_IDS) {
   }
 
   const idleHashes=new Set(),idleCentres=[],idleBottoms=[],idleHeights=[];
+  const idleBootAreas=[],idleBootWidths=[],idleHeadWidths=[];
   for(let column=0;column<8;column+=1) {
     const frame=await sharp(atlas).extract({left:column*160,top:3*160,width:160,height:160})
       .ensureAlpha().raw().toBuffer({resolveWithObject:true});
@@ -179,11 +180,31 @@ for(const petId of PREMIUM_PET_IDS) {
     }
     idleCentres.push(weightedX/weight);idleBottoms.push(bottom);idleHeights.push(bottom-top+1);
     idleHashes.add(createHash('sha256').update(data).digest('hex'));
+    // Equal total heights alone can hide a truncated pose that was enlarged afterwards.
+    // Argentina's old row split removed the boots from 24-27 but still passed that check.
+    if(petId==='argentina-number-10') {
+      let bootArea=0,bootWidth=0,headWidth=0;
+      for(let y=top;y<=bottom;y+=1) {
+        let rowWidth=0;
+        for(let x=left;x<=right;x+=1) if(data[(y*160+x)*info.channels+3]>16) rowWidth+=1;
+        if(y>=bottom-9) {bootArea+=rowWidth;bootWidth=Math.max(bootWidth,rowWidth);}
+        if(y<top+(bottom-top+1)*.35) headWidth=Math.max(headWidth,rowWidth);
+      }
+      idleBootAreas.push(bootArea);idleBootWidths.push(bootWidth);idleHeadWidths.push(headWidth);
+    }
   }
   assert.ok(idleHashes.size>=6,`${petId} idle lacks a breathe/blink progression`);
   assert.ok(Math.max(...idleCentres)-Math.min(...idleCentres)<4,`${petId} idle sways sideways`);
   assert.equal(Math.max(...idleBottoms)-Math.min(...idleBottoms),0,`${petId} idle feet move vertically`);
   assert.ok(Math.max(...idleHeights)-Math.min(...idleHeights)<=3,`${petId} idle changes character scale`);
+  if(petId==='argentina-number-10') {
+    assert.ok(Math.max(...idleBootAreas)/Math.min(...idleBootAreas)<=1.2,
+      `Argentina idle loses boot pixels between frames: ${idleBootAreas}`);
+    assert.ok(Math.max(...idleBootWidths)-Math.min(...idleBootWidths)<=3,
+      `Argentina idle changes footwear silhouette: ${idleBootWidths}`);
+    assert.ok(Math.max(...idleHeadWidths)-Math.min(...idleHeadWidths)<=2,
+      `Argentina idle changes head/body proportions: ${idleHeadWidths}`);
+  }
 }
 pass('premium eight-phase walks and idle cycles preserve clearance, gait and locked baselines');
 const redrawManifest=JSON.parse(await fs.readFile(path.join(artRoot,'outfit-atlases/manifest.json'),'utf8'));

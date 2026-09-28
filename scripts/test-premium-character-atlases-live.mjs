@@ -7,6 +7,7 @@ import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 import bcrypt from 'bcryptjs';
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 
 const PET_IDS = [
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
@@ -171,6 +172,7 @@ try {
         const avatar = window.__petGame.scene.getScene('Bedroom').avatar;
         values.push({ frame: Number(avatar.sprite.frame.name), x: Number(avatar.x.toFixed(2)),
           y: Number(avatar.y.toFixed(2)), action: avatar.current });
+        values.at(-1).scale = `${avatar.sprite.scaleX}:${avatar.sprite.scaleY}:${avatar.scaleX}:${avatar.scaleY}`;
         if (performance.now() - began >= 2800) { clearInterval(timer); resolve(values); }
       }, 35);
     }));
@@ -178,6 +180,50 @@ try {
       [24,25,26,27,28,29,30,31], `${petId} idle did not play every frame`);
     assert.equal(new Set(petReport.idle.map((sample) => `${sample.x}:${sample.y}`)).size, 1,
       `${petId} avatar position changes during idle`);
+    assert.equal(new Set(petReport.idle.map((sample) => sample.scale)).size, 1,
+      `${petId} sprite scale changes during idle`);
+
+    if (petId === 'argentina-number-10') {
+      // Capture actual animation frames, not setFrame() approximations. Freeze only once
+      // Phaser has naturally reached the requested frame, so short blink phases are visible.
+      const captures = [];
+      petReport.idleFrameCaptures = [];
+      for (let frame = 24; frame <= 31; frame += 1) {
+        const snapshot = await page.evaluate((target) => new Promise((resolve, reject) => {
+          const avatar = window.__petGame.scene.getScene('Bedroom').avatar;
+          const sprite = avatar.sprite;
+          const timeout = setTimeout(() => {
+            sprite.off('animationupdate', observe);
+            reject(new Error(`Idle frame ${target} was not reached`));
+          }, 5000);
+          function observe() {
+            if (Number(sprite.frame.name) !== target) return;
+            clearTimeout(timeout); sprite.off('animationupdate', observe); sprite.anims.pause();
+            const bounds = sprite.getBounds();
+            const canvas = sprite.scene.game.canvas;
+            const rect = canvas.getBoundingClientRect();
+            const camera = sprite.scene.cameras.main;
+            const sx = rect.width / canvas.width, sy = rect.height / canvas.height;
+            resolve({ frame: target, x: avatar.x, y: avatar.y,
+              scale: `${sprite.scaleX}:${sprite.scaleY}:${avatar.scaleX}:${avatar.scaleY}`,
+              clip: { x: rect.left + (bounds.x - camera.scrollX) * sx,
+                y: rect.top + (bounds.y - camera.scrollY) * sy,
+                width: bounds.width * sx, height: bounds.height * sy } });
+          }
+          sprite.on('animationupdate', observe); observe();
+        }), frame);
+        const screenshot = await page.screenshot({ clip: snapshot.clip,
+          path: path.join(artifactDir, `${petId}-idle-${frame}.png`) });
+        captures.push(await sharp(screenshot).resize(240, 280, { fit: 'contain', background: '#edf2f7' }).png().toBuffer());
+        petReport.idleFrameCaptures.push(snapshot);
+        await page.evaluate(() => window.__petGame.scene.getScene('Bedroom').avatar.sprite.anims.resume());
+      }
+      assert.equal(new Set(petReport.idleFrameCaptures.map((s) => `${s.x}:${s.y}:${s.scale}`)).size, 1,
+        'Argentina changes position or scale between captured idle frames');
+      await sharp({ create: { width: 960, height: 560, channels: 4, background: '#edf2f7' } })
+        .composite(captures.map((input, i) => ({ input, left: (i % 4) * 240, top: Math.floor(i / 4) * 280 })))
+        .png().toFile(path.join(artifactDir, `${petId}-idle-all-frames.png`));
+    }
 
     await page.getByRole('button', { name: '休息' }).click();
     await page.waitForFunction(() => {
