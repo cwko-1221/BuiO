@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { createPrizeVisual, loadPrizeVisuals, disposePrizeVisuals, type PrizeTemplates } from './ArcadePrizeVisual';
+import type { ArcadePrize } from './ArcadePrizes';
 import backboardArtworkUrl from './assets/coin-pusher-backboard-desktop-v2.webp';
 import compactBackboardArtworkUrl from './assets/coin-pusher-backboard-mobile-v2.webp';
 import brushedMetalTextureUrl from './assets/coin-pusher-brushed-metal-v1.webp';
@@ -10,16 +12,16 @@ import {
   coinPusherTrayImpactPulse,
   coinPusherTravelProgress,
 } from './CoinPusherFeedback';
-import { createCoinPusherStarterLayout } from './CoinPusherLayout';
+import { createCoinPusherStarterLayout, FIXED_DECK_TOP_Y } from './CoinPusherLayout';
 import type { CoinPusherDropBeat, CoinPusherModel, CoinPusherModelSnapshot } from './CoinPusherModel';
 import {
   MAIN_DECK_BACK_Z,
   MAIN_DECK_FRONT_Z,
+  MAIN_DECK_SUPPORT_FRONT_Z,
   PUSHER_FORWARD_Z,
   PUSHER_HOME_Z,
   PUSHER_HALF_DEPTH,
   PUSHER_LENGTH,
-  PUSHER_LIP_LOCAL_Z,
   PUSHER_SLOT_BOTTOM_Y,
   PUSHER_SLOT_HALF_WIDTH,
   PUSHER_SLOT_TOP_Y,
@@ -81,6 +83,7 @@ type CoinPayoutCallback = (count: number, origins: CoinPusherRewardOrigin[]) => 
 type CoinImpactCallback = (count: number, landings: CoinPusherLandingFeedback[]) => void;
 type PusherStrokeCallback = (direction: 'forward' | 'return', durationSeconds: number) => void;
 type PusherContactCallback = (count: number, origin: CoinPusherRewardOrigin) => void;
+type PusherBeatCallback = (beat: CoinPusherDropBeat) => void;
 type ImpactBurst = {
   points: THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial>;
   geometry: THREE.BufferGeometry;
@@ -89,6 +92,7 @@ type ImpactBurst = {
   velocities: Float32Array;
   startedAt: number;
   duration: number;
+  size: number;
 };
 
 /** Transparent Three.js cabinet rendered over the student's selected room artwork. */
@@ -105,6 +109,7 @@ export class CoinPusherScene {
     savedSnapshot?: CoinPusherModelSnapshot,
     keepsakeTier = 0,
     onPusherContact: PusherContactCallback = () => undefined,
+    selectedFinishId?: string,
   ) {
     const notifyAvailability: WebGLAvailabilityCallback = (available, reason) => {
       try { onAvailability(available, reason); }
@@ -180,8 +185,14 @@ export class CoinPusherScene {
       if (existingModel) model = existingModel;
       // Build a complete procedural cabinet immediately. Optional artwork keeps downloading in
       // parallel, so a slow image request cannot hold the first useful 3D preview behind a veil.
-      view = new CoinPusherScene(root, compactViewport, onSwipe, onCoinsFell, notifyAvailability, notifyCoinImpact, notifyPusherStroke, renderer, model, keepsakeTier, notifyPusherContact);
+      view = new CoinPusherScene(root, compactViewport, onSwipe, onCoinsFell, notifyAvailability, notifyCoinImpact, notifyPusherStroke, renderer, model, keepsakeTier, notifyPusherContact, undefined, undefined, undefined, selectedFinishId);
       const activeView = view;
+      // Load the texture-free toy collection alongside physics/artwork. A failed request uses
+      // the existing retry screen and never changes prize identities or wallet state.
+      const prizeArtworkTask = loadPrizeVisuals().then(templates => {
+        if (activeView.destroyed) { disposePrizeVisuals(templates); return; }
+        activeView.adoptPrizeArtwork(templates);
+      }).then(() => ({ ready: true }), (error: unknown) => ({ error }));
       for (const key of ['artworkAppliedAt', 'rendererWarmupStartedAt', 'rendererWarmupReadyAt', 'physicsModuleReadyAt', 'physicsReadyAt', 'rendererReadyAt']) {
         delete root.dataset[key];
       }
@@ -231,7 +242,8 @@ export class CoinPusherScene {
         // Render the deterministic starter pile immediately, and warm the final textured shaders
         // while Rapier initializes. Input stays locked until both the physical world and renderer
         // are ready, but the expensive portions no longer sit back-to-back on the first-play path.
-        const [modelResult] = await Promise.all([modelReadyTask, graphicsWarmup, artworkWarmup]);
+        const [modelResult, prizeResult] = await Promise.all([modelReadyTask, prizeArtworkTask, graphicsWarmup, artworkWarmup]);
+        if ('error' in prizeResult) throw prizeResult.error;
         if (!modelResult || 'error' in modelResult) {
           throw modelResult?.error ?? new Error('Coin-pusher physics module did not load');
         }
@@ -241,7 +253,8 @@ export class CoinPusherScene {
           : new CoinPusherModelRuntime();
         view.attachModel(model);
       } else {
-        await artworkWarmup;
+        const [prizeResult] = await Promise.all([prizeArtworkTask, artworkWarmup]);
+        if ('error' in prizeResult) throw prizeResult.error;
       }
       await view.prepareRenderer();
       return view;
@@ -278,6 +291,8 @@ export class CoinPusherScene {
   private readonly onCoinImpact: CoinImpactCallback;
   private readonly onPusherStroke: PusherStrokeCallback;
   private readonly onPusherContact: PusherContactCallback;
+  private onDropBeatChange?: PusherBeatCallback;
+  private currentDropBeat?: CoinPusherDropBeat;
   private resizeObserver?: ResizeObserver;
   private readonly geometries: THREE.BufferGeometry[] = [];
   private readonly materials: THREE.Material[] = [];
@@ -293,8 +308,12 @@ export class CoinPusherScene {
   private payoutWellMark?: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
   private payoutWellGlowStartedAt = Number.NEGATIVE_INFINITY;
   private keepsakeTier = -1;
+  private keepsakeFinishId?: string;
   private lastPusherGlowProgress = -1;
   private readonly coinBody: THREE.InstancedMesh;
+  private prizeVisuals = new Map<string, THREE.Group>();
+  private prizeTemplates = new Map<string, THREE.Group>();
+  private onPrizeFell: (prize: ArcadePrize, origin: CoinPusherRewardOrigin) => void = () => undefined;
   private readonly coinRings: THREE.InstancedMesh;
   private readonly coinInnerRings: THREE.InstancedMesh;
   private readonly coinStamps: THREE.InstancedMesh;
@@ -318,10 +337,6 @@ export class CoinPusherScene {
   private readonly impactBursts: ImpactBurst[] = [];
   private readonly previousVerticalVelocity = new Map<number, number>();
   private readonly impactSparked = new Set<number>();
-  private readonly aimGuide = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  private readonly aimGuideLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  private readonly aimMarker = document.createElement('div');
-  private readonly aimBeat = document.createElement('span');
   private swipeStart?: SwipeStart;
   private lastFrame = 0;
   private reducedMotion = false;
@@ -338,7 +353,6 @@ export class CoinPusherScene {
     event.preventDefault();
     // A swipe interrupted by graphics loss is a cancelled gesture, never a delayed coin charge.
     this.swipeStart = undefined;
-    this.hideAimMarker();
     this.renderer.setAnimationLoop(null); this.rendererPrepared = false;
     this.rendererProgramsReady = false; this.warmedProgramCount = -1; this.root.dataset.webgl = 'lost';
     this.onAvailability(false, 'context-lost');
@@ -355,22 +369,14 @@ export class CoinPusherScene {
     });
   };
   private readonly onPointerDown = (event: PointerEvent) => {
+    if (document.querySelector('#modalRoot .modal-card')) return;
     if (!this.simulation) return;
     if (event.button !== 0 && event.pointerType === 'mouse') return;
     if ((event.pointerType === 'touch' && !event.isPrimary) || this.swipeStart) return;
     const rect = this.renderer.domElement.getBoundingClientRect();
     const worldX = this.pointerXToWorld(event.clientX, rect);
     this.swipeStart = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, worldX };
-    this.updateAimMarkerAtWorldX(worldX);
     try { this.renderer.domElement.setPointerCapture(event.pointerId); } catch { /* Safari may decline capture after a context change. */ }
-  };
-  private readonly onPointerMove = (event: PointerEvent) => {
-    if (!this.simulation) return;
-    if (this.swipeStart && this.swipeStart.pointerId !== event.pointerId) return;
-    // A vertical swipe drops in its starting lane. Keep the preview locked to that lane even
-    // when a thumb drifts sideways, so the visual promise matches the actual drop calculation.
-    if (this.swipeStart) this.updateAimMarkerAtWorldX(this.swipeStart.worldX);
-    else this.updateAimMarker(event.clientX);
   };
   private readonly onPointerUp = (event: PointerEvent) => {
     const start = this.swipeStart;
@@ -379,7 +385,6 @@ export class CoinPusherScene {
     try { if (this.renderer.domElement.hasPointerCapture(event.pointerId)) this.renderer.domElement.releasePointerCapture(event.pointerId); } catch { /* Pointer may already have been cancelled. */ }
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
-    this.hideAimMarker();
     if (dy >= 44 && dy > Math.abs(dx) * 1.12) {
       this.onSwipe(start.worldX);
     }
@@ -387,14 +392,11 @@ export class CoinPusherScene {
   private readonly onPointerCancel = (event: PointerEvent) => {
     if (this.swipeStart && this.swipeStart.pointerId !== event.pointerId) return;
     this.swipeStart = undefined;
-    this.hideAimMarker();
   };
   private readonly onLostPointerCapture = (event: PointerEvent) => {
     if (!this.swipeStart || this.swipeStart.pointerId !== event.pointerId) return;
     this.swipeStart = undefined;
-    this.hideAimMarker();
   };
-  private readonly onPointerLeave = () => { if (!this.swipeStart) this.hideAimMarker(); };
 
   private constructor(
     root: HTMLElement,
@@ -411,6 +413,7 @@ export class CoinPusherScene {
     brushedMetalTexture?: THREE.Texture,
     backboardTexture?: THREE.Texture,
     mintedCoinFaceTexture?: THREE.Texture,
+    selectedFinishId?: string,
   ) {
     this.root = root;
     this.root.dataset.artworkReady = 'false';
@@ -433,25 +436,12 @@ export class CoinPusherScene {
     this.renderer.domElement.addEventListener('webglcontextlost', this.onContextLost);
     this.renderer.domElement.addEventListener('webglcontextrestored', this.onContextRestored);
     this.renderer.domElement.addEventListener('pointerdown', this.onPointerDown);
-    this.renderer.domElement.addEventListener('pointermove', this.onPointerMove);
     this.renderer.domElement.addEventListener('pointerup', this.onPointerUp);
     this.renderer.domElement.addEventListener('pointercancel', this.onPointerCancel);
     this.renderer.domElement.addEventListener('lostpointercapture', this.onLostPointerCapture);
-    this.renderer.domElement.addEventListener('pointerleave', this.onPointerLeave);
     // Keep the loading veil above the canvas while GPU programs compile. It is removed only
     // after compileAsync completes, so the first visible frame cannot trigger a long shader stall.
     root.append(this.renderer.domElement);
-    this.aimGuide.classList.add('coin-pusher-aim-guide');
-    this.aimGuide.setAttribute('aria-hidden', 'true');
-    this.aimGuide.setAttribute('preserveAspectRatio', 'none');
-    this.aimGuideLine.setAttribute('class', 'coin-pusher-aim-guide-line');
-    this.aimGuide.append(this.aimGuideLine);
-    root.append(this.aimGuide);
-    this.aimMarker.className = 'coin-pusher-aim-marker';
-    this.aimMarker.setAttribute('aria-hidden', 'true');
-    this.aimBeat.className = 'coin-pusher-aim-beat';
-    this.aimMarker.append(this.aimBeat);
-    root.append(this.aimMarker);
     this.scene.add(this.renderRoot);
     this.environmentTexture = this.studioEnvironment();
     this.scene.environment = this.environmentTexture;
@@ -512,7 +502,7 @@ export class CoinPusherScene {
     this.renderRoot.add(this.pusher);
     this.addLights();
     this.buildCabinet();
-    this.setKeepsakeTier(keepsakeTier);
+    this.setKeepsakeTier(keepsakeTier, selectedFinishId);
     this.buildPusher();
     this.pusher.position.z = this.simulation?.pusherZ ?? PUSHER_HOME_Z;
     this.syncPusherGlow(this.simulation?.pusherZ ?? PUSHER_HOME_Z);
@@ -536,11 +526,9 @@ export class CoinPusherScene {
     this.renderer.domElement.removeEventListener('webglcontextlost', this.onContextLost);
     this.renderer.domElement.removeEventListener('webglcontextrestored', this.onContextRestored);
     this.renderer.domElement.removeEventListener('pointerdown', this.onPointerDown);
-    this.renderer.domElement.removeEventListener('pointermove', this.onPointerMove);
     this.renderer.domElement.removeEventListener('pointerup', this.onPointerUp);
     this.renderer.domElement.removeEventListener('pointercancel', this.onPointerCancel);
     this.renderer.domElement.removeEventListener('lostpointercapture', this.onLostPointerCapture);
-    this.renderer.domElement.removeEventListener('pointerleave', this.onPointerLeave);
     if (this.root.contains(this.renderer.domElement)) this.root.replaceChildren();
     this.scene.environment = null;
     this.scene.clear();
@@ -559,13 +547,29 @@ export class CoinPusherScene {
     return this.simulation?.dropCoin(worldX);
   }
 
-  /** Apply the student's server-confirmed cosmetic collection tier to the shared cabinet trim. */
-  setKeepsakeTier(unlockedCount: number) {
-    const finish = coinPusherCabinetFinish(unlockedCount);
-    this.root.dataset.keepsakeTier = String(COIN_PUSHER_CABINET_FINISHES.indexOf(finish));
+  setPrizeCatchListener(listener: (prize: ArcadePrize, origin: CoinPusherRewardOrigin) => void) { this.onPrizeFell = listener; }
+  syncPrizes(prizes: ArcadePrize[]) { this.simulation?.syncPrizes(prizes); this.syncCoins(); }
+
+  resetBoardToThreeRows() {
+    if (this.destroyed || !this.simulation) return false;
+    if (!this.simulation.resetBoardToThreeRows()) return false;
+    this.pusher.position.z = this.simulation.pusherZ;
+    this.syncPusherGlow(this.simulation.pusherZ);
+    this.syncCoins();
+    return true;
+  }
+
+  /** Apply a server-earned tier and the student's selected unlocked finish to the shared trim. */
+  setKeepsakeTier(unlockedCount: number, selectedFinishId?: string) {
+    const tier = Number.isFinite(unlockedCount)
+      ? Math.max(0, Math.min(COIN_PUSHER_CABINET_FINISHES.length - 1, Math.floor(unlockedCount)))
+      : 0;
+    const finish = coinPusherCabinetFinish(tier, selectedFinishId);
+    this.root.dataset.keepsakeTier = String(tier);
     this.root.dataset.keepsakeFinish = finish.id;
-    if (this.keepsakeTier === COIN_PUSHER_CABINET_FINISHES.indexOf(finish)) return;
-    this.keepsakeTier = COIN_PUSHER_CABINET_FINISHES.indexOf(finish);
+    if (this.keepsakeTier === tier && this.keepsakeFinishId === finish.id) return;
+    this.keepsakeTier = tier;
+    this.keepsakeFinishId = finish.id;
     this.cabinetBrassMaterial?.color.setHex(finish.brass);
     this.cabinetPaleGoldMaterial?.color.setHex(finish.paleGold);
     if (this.cabinetGlowMaterial) {
@@ -582,14 +586,24 @@ export class CoinPusherScene {
     return !this.destroyed && Boolean(this.simulation?.canDropCoin());
   }
 
-  aimAtWorldX(worldX: number) {
-    if (!this.simulation || !Number.isFinite(worldX)) return;
-    this.updateAimMarkerAtWorldX(THREE.MathUtils.clamp(worldX, -MAX_DROP_X, MAX_DROP_X));
-  }
-
   get model() {
     if (!this.simulation) throw new Error('Coin-pusher physics is not ready');
     return this.simulation;
+  }
+
+  /** Notify the HUD when a newly dropped coin would land in a different pusher phase. */
+  setDropBeatChangeListener(listener?: PusherBeatCallback) {
+    this.onDropBeatChange = listener;
+    const beat = this.simulation?.getPredictedDropBeat();
+    if (beat !== undefined) {
+      this.currentDropBeat = beat;
+      this.notifyDropBeatChange(beat);
+    }
+  }
+
+  private notifyDropBeatChange(beat: CoinPusherDropBeat) {
+    try { this.onDropBeatChange?.(beat); }
+    catch (error) { console.warn('[coin-pusher] drop timing cue callback failed', error); }
   }
 
   private attachModel(model: CoinPusherModel) {
@@ -720,6 +734,11 @@ export class CoinPusherScene {
     this.lastFrame = time;
     if (!document.hidden) {
       model.update(delta);
+      const dropBeat = model.getPredictedDropBeat();
+      if (dropBeat !== this.currentDropBeat) {
+        this.currentDropBeat = dropBeat;
+        this.notifyDropBeatChange(dropBeat);
+      }
       this.pusher.position.z = model.pusherZ;
       this.syncPusherGlow(model.pusherZ);
       this.syncCoins();
@@ -727,25 +746,30 @@ export class CoinPusherScene {
       if (trayImpacts.length) {
         if (!this.reducedMotion) {
           this.pulsePayoutWell(trayImpacts, time);
-          this.sparkAtFront(trayImpacts, time);
+          this.sparkAtImpact(trayImpacts, time);
         }
       }
       this.updatePayoutWellPulse(time);
       this.updateImpactBursts(time);
-      if (this.aimMarker.classList.contains('is-visible')) {
-        const laneX = Number(this.aimMarker.dataset.laneX);
-        if (Number.isFinite(laneX)) this.updateAimMarkerAtWorldX(laneX);
-      }
       const events = model.drainEvents();
       for (const event of events) {
         if (event.type === 'pusher-stroke') this.onPusherStroke(event.direction, event.durationSeconds);
-        else if (event.type === 'pusher-contact') this.onPusherContact(event.count, this.projectWorldOrigin(event.position));
+        else if (event.type === 'pusher-contact') {
+          this.onPusherContact(event.count, this.projectWorldOrigin(event.position));
+          if (!this.reducedMotion) {
+            const sparkOriginCount = Math.min(4, Math.max(2, event.count));
+            const sparkOrigins = Array.from({ length: sparkOriginCount }, () =>
+              new THREE.Vector3(event.position.x, event.position.y + .025, event.position.z));
+            this.sparkAtImpact(sparkOrigins, time, .15);
+            this.root.dataset.pusherContactSparkAt = String(Math.round(time));
+          }
+        }
       }
       const coinLandings = events.filter((event) => event.type === 'coin-landed');
       if (coinLandings.length) {
         const impacts = coinLandings.map((event) =>
           new THREE.Vector3(event.position.x, event.position.y + .04, event.position.z));
-        if (!this.reducedMotion) this.sparkAtFront(impacts, time);
+        if (!this.reducedMotion) this.sparkAtImpact(impacts, time);
         const landingFeedback = coinLandings.map((event) => ({
           ...this.projectWorldOrigin(event.position),
           pusherBeat: event.pusherBeat,
@@ -753,6 +777,11 @@ export class CoinPusherScene {
         this.onCoinImpact(coinLandings.length, landingFeedback);
       }
       for (const event of events) {
+        if (event.type === 'prize-collected') {
+          if (!this.reducedMotion) this.pulsePayoutWell([event.position], time);
+          this.onPrizeFell(event.prize, this.projectWorldOrigin(event.position));
+          continue;
+        }
         if (event.type !== 'coins-collected') continue;
         if (!this.reducedMotion) this.pulsePayoutWell(event.positions, time);
         const origins = event.positions.map((position) => this.projectWorldOrigin(position));
@@ -807,7 +836,13 @@ export class CoinPusherScene {
     const projectedHalfHeight = halfHeight * Math.cos(pitch) + halfDepth * Math.sin(pitch);
     const verticalDistance = (projectedHalfHeight + .26) / tanHalfFov + nearOffset;
     const fitDistance = Math.max(horizontalDistance, verticalDistance);
-    const distance = fitDistance * (1 - .085 * broadLandscape);
+    // Wide screens otherwise spend too much of their height fitting the decorative
+    // cabinet shell, leaving the actual coin bed narrow. Reclaim a little of that
+    // non-playable margin on landscape viewports; the playfield stays undistorted,
+    // and swipe lane selection continues to use the camera's real projection below.
+    // Keep the far/front edge of the payout well visible on short landscape viewports. A larger
+    // zoom reclaim cropped the well and projected reward origins below the HUD/canvas on phones.
+    const distance = fitDistance * (1 - .03 * broadLandscape);
     this.camera.position.set(
       0,
       targetY + Math.sin(pitch) * distance,
@@ -827,69 +862,13 @@ export class CoinPusherScene {
   private pointerXToWorld(clientX: number, rect: DOMRect) {
     this.pointerNdc.x = ((clientX - rect.left) / rect.width) * 2 - 1;
     this.camera.updateMatrixWorld();
-    // Solve against the expected launch height and predicted landing depth. Only X is returned;
+    // Solve against the expected launch height and fixed backboard-side landing depth. Only X is returned;
     // CoinPusherModel owns the drop position, height, depth, and all subsequent motion.
     this.pointerHit.set(0, 2.65, this.model.getDropTargetZ()).applyMatrix4(this.camera.matrixWorldInverse);
     const viewDepth = Math.max(.001, -this.pointerHit.z);
     const halfFov = THREE.MathUtils.degToRad(this.camera.fov / 2);
     const worldX = this.pointerNdc.x * viewDepth * Math.tan(halfFov) * this.camera.aspect;
     return THREE.MathUtils.clamp(worldX, -MAX_DROP_X, MAX_DROP_X);
-  }
-
-  /** Show the predicted landing lane while the student aims, without changing game state. */
-  private updateAimMarker(clientX: number) {
-    const rect = this.renderer.domElement.getBoundingClientRect();
-    if (rect.width < 1 || rect.height < 1) return;
-    this.updateAimMarkerAtWorldX(this.pointerXToWorld(clientX, rect));
-  }
-
-  private updateAimMarkerAtWorldX(worldX: number) {
-    const rect = this.renderer.domElement.getBoundingClientRect();
-    if (rect.width < 1 || rect.height < 1) return;
-    const dropZ = this.model.getDropTargetZ();
-    const target = new THREE.Vector3(
-      worldX,
-      PUSHER_TOP_Y + .032,
-      dropZ,
-    );
-    const launch = new THREE.Vector3(worldX, 2.65, dropZ);
-    this.camera.updateMatrixWorld();
-    target.project(this.camera);
-    if (target.z < -1 || target.z > 1) { this.hideAimMarker(); return; }
-    launch.project(this.camera);
-    const toPixel = (point: THREE.Vector3) => ({
-      x: (point.x * .5 + .5) * rect.width,
-      y: (-point.y * .5 + .5) * rect.height,
-    });
-    const launchPixel = toPixel(launch);
-    const targetPixel = toPixel(target);
-    const viewBox = `0 0 ${rect.width} ${rect.height}`;
-    if (this.aimGuide.getAttribute('viewBox') !== viewBox) this.aimGuide.setAttribute('viewBox', viewBox);
-    this.aimGuideLine.setAttribute('x1', String(THREE.MathUtils.clamp(launchPixel.x, 0, rect.width)));
-    this.aimGuideLine.setAttribute('y1', String(THREE.MathUtils.clamp(launchPixel.y, 6, rect.height - 6)));
-    this.aimGuideLine.setAttribute('x2', String(THREE.MathUtils.clamp(targetPixel.x, 0, rect.width)));
-    this.aimGuideLine.setAttribute('y2', String(THREE.MathUtils.clamp(targetPixel.y, 0, rect.height)));
-    this.aimMarker.style.left = `${(target.x * .5 + .5) * rect.width}px`;
-    this.aimMarker.style.top = `${(-target.y * .5 + .5) * rect.height}px`;
-    this.aimMarker.dataset.laneX = worldX.toFixed(6);
-    const beat = this.model.getPredictedDropBeat();
-    const isChinese = document.documentElement.lang.toLowerCase().startsWith('zh');
-    const labels = {
-      'home-pause': isChinese ? 'Ⅱ 後停' : 'Ⅱ HOME HOLD',
-      forward: isChinese ? '↑ 前推' : '↑ PUSH',
-      'front-pause': isChinese ? 'Ⅱ 前停' : 'Ⅱ FRONT HOLD',
-      return: isChinese ? '↓ 回程' : '↓ RETURN',
-    } as const;
-    this.aimMarker.dataset.beat = beat;
-    this.aimBeat.textContent = labels[beat];
-    this.aimBeat.title = isChinese ? '預計硬幣落到推板時的推板節拍' : 'Pusher motion when the coin is expected to land';
-    this.aimGuide.classList.add('is-visible');
-    this.aimMarker.classList.add('is-visible');
-  }
-
-  private hideAimMarker() {
-    this.aimGuide.classList.remove('is-visible');
-    this.aimMarker.classList.remove('is-visible');
   }
 
   private addLights() {
@@ -999,23 +978,25 @@ export class CoinPusherScene {
     const deckDepth = MAIN_DECK_FRONT_Z - MAIN_DECK_BACK_Z;
     const deckCenterZ = (MAIN_DECK_FRONT_Z + MAIN_DECK_BACK_Z) / 2;
     const deck = this.box(5.48, .154, deckDepth, tray, .12);
-    deck.position.set(0, -.045, deckCenterZ); this.renderRoot.add(deck);
+    deck.position.set(0, FIXED_DECK_TOP_Y - .077, deckCenterZ); this.renderRoot.add(deck);
     const rearDeck = this.box(5.48, .154, REAR_DECK_HALF_DEPTH * 2, tray, .1);
-    rearDeck.position.set(0, -.045, REAR_DECK_CENTER_Z); this.renderRoot.add(rearDeck);
+    rearDeck.position.set(0, FIXED_DECK_TOP_Y - .077, REAR_DECK_CENTER_Z); this.renderRoot.add(rearDeck);
     const deckInsetMaterial = this.material(0x526675, .72, .29, { map: this.brushedMetalTexture, clearcoat: .68, clearcoatRoughness: .2 });
     this.brushedMetalMaterials.push(deckInsetMaterial);
     const deckInset = new THREE.Mesh(
-      this.trackGeometry(new THREE.PlaneGeometry(5.14, deckDepth + .02).rotateX(-Math.PI / 2)),
+      this.trackGeometry(new THREE.PlaneGeometry(5.14,
+        MAIN_DECK_SUPPORT_FRONT_Z - MAIN_DECK_BACK_Z + .02).rotateX(-Math.PI / 2)),
       deckInsetMaterial,
     );
-    deckInset.position.set(0, .0345, deckCenterZ); deckInset.receiveShadow = true; this.renderRoot.add(deckInset);
+    deckInset.position.set(0, FIXED_DECK_TOP_Y - .0005,
+      (MAIN_DECK_SUPPORT_FRONT_Z + MAIN_DECK_BACK_Z) / 2); deckInset.receiveShadow = true; this.renderRoot.add(deckInset);
     const rearDeckInsetMaterial = this.material(0x526675, .72, .32, { map: this.brushedMetalTexture, clearcoat: .54, clearcoatRoughness: .24 });
     this.brushedMetalMaterials.push(rearDeckInsetMaterial);
     const rearDeckInset = new THREE.Mesh(
       this.trackGeometry(new THREE.PlaneGeometry(5.14, REAR_DECK_HALF_DEPTH * 2 - .1).rotateX(-Math.PI / 2)),
       rearDeckInsetMaterial,
     );
-    rearDeckInset.position.set(0, .0345, REAR_DECK_CENTER_Z); rearDeckInset.receiveShadow = true; this.renderRoot.add(rearDeckInset);
+    rearDeckInset.position.set(0, FIXED_DECK_TOP_Y - .0005, REAR_DECK_CENTER_Z); rearDeckInset.receiveShadow = true; this.renderRoot.add(rearDeckInset);
 
     // A thick opaque rear case receives the retracted half of the compact pusher deck. Its
     // narrow horizontal slot clears the slab and low-profile guide shoes but is thinner than a
@@ -1386,11 +1367,12 @@ export class CoinPusherScene {
     // One continuous metal deck rests with its rear half inside the thick casing.
     // The forward stroke reveals the complete slab, whose leading edge reaches table midpoint.
     this.pusher.position.y = PUSHER_Y;
-    const plate = this.box(PUSHER_WIDTH, .04, PUSHER_LENGTH, this.material(0xc4d5dc, .9, .19, {
+    const plateBottomY = FIXED_DECK_TOP_Y + .005;
+    const plate = this.box(PUSHER_WIDTH, PUSHER_TOP_Y - plateBottomY, PUSHER_LENGTH, this.material(0xc4d5dc, .9, .19, {
       clearcoat: .98, clearcoatRoughness: .08, anisotropy: .58,
       emissive: 0x101c28, emissiveIntensity: .025,
     }), .035);
-    plate.position.set(0, 0, 0); this.pusher.add(plate);
+    plate.position.set(0, (PUSHER_TOP_Y + plateBottomY) / 2 - PUSHER_Y, 0); this.pusher.add(plate);
 
     // Long satin inlays and edge bevels make the whole plate legible as a manufactured board,
     // not a short metal strip appearing beneath the rear cabinet.
@@ -1405,17 +1387,6 @@ export class CoinPusherScene {
       const edgeInlay = this.box(.018, .004, PUSHER_LENGTH - .2, edgeMaterial, .003);
       edgeInlay.position.set(side * 2.42, .019, -.01); this.pusher.add(edgeInlay);
     }
-
-    // The front edge is a continuous bright impact lip across nearly the entire working width.
-    // Its slight leading reveal is under 4 mm and visually keys it to the moving solid slab.
-    const leadingLip = this.box(4.98, .1, .08, this.material(0x718b98, .92, .22, {
-      clearcoat: .94, clearcoatRoughness: .08, anisotropy: .36,
-    }), .045);
-    leadingLip.position.set(0, .045, PUSHER_LIP_LOCAL_Z); this.pusher.add(leadingLip);
-    const lipCap = this.box(4.9, .01, .018, this.material(0xe1eef0, .95, .14, {
-      clearcoat: 1, clearcoatRoughness: .05,
-    }), .008);
-    lipCap.position.set(0, .092, PUSHER_HALF_DEPTH - .01); this.pusher.add(lipCap);
 
     // Fine engraved guide ribs on the plate's visible top surface.
     const ribMaterial = this.material(0x6c8794, .9, .17, { clearcoat: .98, clearcoatRoughness: .08 });
@@ -1446,8 +1417,40 @@ export class CoinPusherScene {
     }
   }
 
+  private adoptPrizeArtwork(templates: PrizeTemplates) {
+    this.prizeTemplates = templates;
+    const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>();
+    templates.forEach(template => template.traverse(part => {
+      if (!(part instanceof THREE.Mesh)) return;
+      geometries.add(part.geometry);
+      (Array.isArray(part.material) ? part.material : [part.material]).forEach(m => materials.add(m));
+    }));
+    geometries.forEach(g => this.trackGeometry(g));
+    materials.forEach(m => this.materials.push(m));
+    this.syncCoins();
+  }
+
   private syncCoins() {
-    const physicsCoins = this.simulation?.coins;
+    const allCoins = this.simulation?.coins;
+    const livePrizes = new Set<string>();
+    for (const coin of allCoins ?? []) {
+      if (!coin.prize) continue;
+      const prize = coin.prize; livePrizes.add(prize.id);
+      let visual = this.prizeVisuals.get(prize.id);
+      if (!visual && this.prizeTemplates.size) {
+        visual = createPrizeVisual(prize, this.prizeTemplates);
+        this.prizeVisuals.set(prize.id, visual); this.renderRoot.add(visual);
+      }
+      if (!visual) continue;
+      const position = coin.body.translation(), rotation = coin.body.rotation();
+      visual.position.set(position.x, position.y, position.z);
+      visual.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
+    }
+    for (const [id, visual] of this.prizeVisuals) if (!livePrizes.has(id)) {
+      this.renderRoot.remove(visual); this.prizeVisuals.delete(id);
+    }
+    this.root.dataset.prizeCount = String(livePrizes.size);
+    const physicsCoins = allCoins?.filter((coin) => !coin.prize);
     const count = Math.min(physicsCoins?.length ?? this.previewCoinLayout.length, MAX_COIN_INSTANCES);
     this.root.dataset.coinCount = String(count);
     if (physicsCoins) delete this.root.dataset.previewCoinCount;
@@ -1579,8 +1582,8 @@ export class CoinPusherScene {
     };
   }
 
-  /** Short gold flecks radiate from real Rapier coin impacts; coin motion remains untouched. */
-  private sparkAtFront(impacts: THREE.Vector3[], startedAt: number) {
+  /** Short gold flecks radiate from real Rapier impacts; coin motion remains untouched. */
+  private sparkAtImpact(impacts: THREE.Vector3[], startedAt: number, size = .09) {
     const amount = Math.min(24, impacts.length * 6);
     const starts = new Float32Array(amount * 3);
     const velocities = new Float32Array(amount * 3);
@@ -1611,7 +1614,7 @@ export class CoinPusherScene {
     positions.setUsage(THREE.DynamicDrawUsage);
     geometry.setAttribute('position', positions);
     const material = new THREE.PointsMaterial({
-      color: 0xffe6a0, size: .09, sizeAttenuation: true, transparent: true,
+      color: 0xffe6a0, size, sizeAttenuation: true, transparent: true,
       opacity: .88, depthWrite: false, blending: THREE.AdditiveBlending,
     });
     this.materials.push(material);
@@ -1619,7 +1622,7 @@ export class CoinPusherScene {
     points.frustumCulled = false;
     points.renderOrder = 8;
     this.renderRoot.add(points);
-    this.impactBursts.push({ points, geometry, material, starts, velocities, startedAt, duration: .31 });
+    this.impactBursts.push({ points, geometry, material, starts, velocities, startedAt, duration: .31, size });
   }
 
   private updateImpactBursts(time: number) {
@@ -1640,7 +1643,7 @@ export class CoinPusherScene {
       }
       positions.needsUpdate = true;
       burst.material.opacity = .88 * (1 - progress) * (1 - progress * .16);
-      burst.material.size = .09 * (1 - progress * .22);
+      burst.material.size = burst.size * (1 - progress * .22);
       if (progress < 1) continue;
 
       this.renderRoot.remove(burst.points);
@@ -1661,15 +1664,21 @@ export class CoinPusherScene {
 
   private studioEnvironment() {
     const canvas = document.createElement('canvas');
-    canvas.width = 1024; canvas.height = 512;
+    // The studio cards are intentionally broad and soft, so compact devices do not need a
+    // desktop-sized reflection source. Keeping the same 2:1 composition at 512px cuts mobile
+    // PMREM work and texture memory without changing the cabinet materials or lighting.
+    const resolution = this.compactMaterials ? 512 : 1024;
+    const scale = resolution / 1024;
+    canvas.width = resolution; canvas.height = resolution / 2;
     const context = canvas.getContext('2d')!;
-    const ambience = context.createLinearGradient(0, 0, 0, canvas.height);
+    context.setTransform(scale, 0, 0, scale, 0, 0);
+    const ambience = context.createLinearGradient(0, 0, 0, 512);
     ambience.addColorStop(0, '#182434');
     ambience.addColorStop(.24, '#aab1b1');
     ambience.addColorStop(.43, '#d4c6a9');
     ambience.addColorStop(.61, '#52616d');
     ambience.addColorStop(1, '#111923');
-    context.fillStyle = ambience; context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = ambience; context.fillRect(0, 0, 1024, 512);
 
     const softbox = (x: number, y: number, width: number, height: number, tint: string, glow: number) => {
       context.save();
@@ -1693,6 +1702,7 @@ export class CoinPusherScene {
     texture.mapping = THREE.EquirectangularReflectionMapping;
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = Math.min(this.renderer.capabilities.getMaxAnisotropy(), 4);
+    this.root.dataset.environmentResolution = String(resolution);
     return texture;
   }
 
@@ -1850,14 +1860,19 @@ export class CoinPusherScene {
     options: THREE.MeshPhysicalMaterialParameters = {},
     premiumCoin = false,
   ): THREE.MeshStandardMaterial {
+    // Optional artwork arrives after the procedural preview; omit missing maps instead of
+    // passing `map: undefined` into Three.js, then apply the real texture when it finishes.
+    const definedOptions = Object.fromEntries(
+      Object.entries(options).filter(([, value]) => value !== undefined),
+    ) as THREE.MeshPhysicalMaterialParameters;
     let material: THREE.MeshStandardMaterial;
     if (premiumCoin && !this.compactMaterials) {
-      material = new THREE.MeshPhysicalMaterial({ color, metalness, roughness, ...options });
+      material = new THREE.MeshPhysicalMaterial({ color, metalness, roughness, ...definedOptions });
     } else {
       // Keep clearcoat on the hero coin faces on desktop. The cabinet and mobile/tablet scene use
       // standard PBR; thin low-opacity glazing still reads as tinted transparent enamel without
       // a transmission pass. Metalness, roughness, maps and bump detail remain on the playfield.
-      const standardOptions = { ...options };
+      const standardOptions = { ...definedOptions };
       delete standardOptions.anisotropy;
       delete standardOptions.clearcoat;
       delete standardOptions.clearcoatRoughness;
@@ -1915,11 +1930,9 @@ export class CoinPusherScene {
     this.renderer.domElement.removeEventListener('webglcontextlost', this.onContextLost);
     this.renderer.domElement.removeEventListener('webglcontextrestored', this.onContextRestored);
     this.renderer.domElement.removeEventListener('pointerdown', this.onPointerDown);
-    this.renderer.domElement.removeEventListener('pointermove', this.onPointerMove);
     this.renderer.domElement.removeEventListener('pointerup', this.onPointerUp);
     this.renderer.domElement.removeEventListener('pointercancel', this.onPointerCancel);
     this.renderer.domElement.removeEventListener('lostpointercapture', this.onLostPointerCapture);
-    this.renderer.domElement.removeEventListener('pointerleave', this.onPointerLeave);
     this.impactBursts.length = 0;
     this.root.replaceChildren();
     this.scene.environment = null;

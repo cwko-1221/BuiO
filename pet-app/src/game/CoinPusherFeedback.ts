@@ -10,6 +10,21 @@ export const COIN_PUSHER_TRAY_PULSE_DURATION_MS = 480;
 // Long-term cosmetic goals use only server-confirmed payout history; they never grant currency.
 export const COIN_PUSHER_STAMP_THRESHOLDS = [5, 25, 100, 300, 1000] as const;
 
+/** Keep a centered, variable-width callout fully inside the responsive game viewport. */
+export function coinPusherCalloutCenterX(centerX: number, calloutWidth: number, viewportWidth: number, edgePadding = 8) {
+  if (!Number.isFinite(viewportWidth) || viewportWidth <= 0) return 0;
+  const padding = Number.isFinite(edgePadding)
+    ? Math.max(0, Math.min(viewportWidth / 2, edgePadding))
+    : 0;
+  const availableWidth = Math.max(0, viewportWidth - padding * 2);
+  const measuredWidth = Number.isFinite(calloutWidth) ? Math.max(0, calloutWidth) : 0;
+  const halfWidth = Math.min(measuredWidth, availableWidth) / 2;
+  const minimum = padding + halfWidth;
+  const maximum = viewportWidth - padding - halfWidth;
+  const requested = Number.isFinite(centerX) ? centerX : viewportWidth / 2;
+  return Math.max(minimum, Math.min(maximum, requested));
+}
+
 /** A soft, non-gameplay glow envelope for a coin that physically lands in the payout well. */
 export function coinPusherTrayImpactPulse(ageMs: number, durationMs = COIN_PUSHER_TRAY_PULSE_DURATION_MS) {
   if (!Number.isFinite(ageMs) || !Number.isFinite(durationMs) || ageMs < 0 || durationMs <= 0 || ageMs >= durationMs) return 0;
@@ -45,10 +60,14 @@ export const COIN_PUSHER_CABINET_FINISHES: readonly CoinPusherCabinetFinish[] = 
   { id: 'aurora', brass: 0x75c6b4, paleGold: 0xcbf3d8, glow: 0x82edd3, glowEmissive: 0x24796d, homeGlow: 0x2b7184, frontGlow: 0x9d68bf },
 ];
 
-export function coinPusherCabinetFinish(unlockedCount: number) {
+export function coinPusherCabinetFinish(unlockedCount: number, preferredFinishId?: string) {
   const tier = Number.isFinite(unlockedCount)
     ? Math.max(0, Math.min(COIN_PUSHER_CABINET_FINISHES.length - 1, Math.floor(unlockedCount)))
     : 0;
+  const preferredIndex = preferredFinishId
+    ? COIN_PUSHER_CABINET_FINISHES.findIndex((finish) => finish.id === preferredFinishId)
+    : -1;
+  if (preferredIndex >= 0 && preferredIndex <= tier) return COIN_PUSHER_CABINET_FINISHES[preferredIndex];
   return COIN_PUSHER_CABINET_FINISHES[tier];
 }
 
@@ -90,6 +109,12 @@ export function coinPusherTimingRecordLabel(count: number, previousBest: number,
   return locale === 'zh-HK'
     ? `順勢接住 · 個人新紀錄 ×${streak}！`
     : `NICE TIMING · NEW BEST ×${streak}`;
+}
+
+/** Label only the forward stroke as a live, non-monetary drop-timing opportunity. */
+export function coinPusherDropTimingCueLabel(beat: CoinPusherDropBeat, locale: string) {
+  if (beat !== 'forward') return undefined;
+  return locale === 'zh-HK' ? '前推中 · 順勢落幣' : 'PUSH IN MOTION · DROP NOW';
 }
 
 /** Explain the actual landing beat without framing a non-forward landing as a failure. */
@@ -158,7 +183,8 @@ export function coinPusherCascadeLabel(amount: number, locale: string) {
   return locale === 'zh-HK' ? `連環推出 ×${count}` : `CASCADE ×${count}`;
 }
 
-export const COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS = 160;
+// Leave a little timing margin so callback/layout scheduling jitter never collapses queued +1s.
+export const COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS = 180;
 export const COIN_PUSHER_REWARD_FLIGHT_VISIBLE_LIMIT = 5;
 
 /** Space wallet-flight visuals so fast physical catches remain individually readable. */
@@ -178,13 +204,14 @@ export function planCoinPusherRewardFlightDelays(amount: number, now: number, ne
   };
 }
 
-/** Preserve the exact payout count while reducing simultaneous decorative chips to one static total. */
-export function coinPusherRewardFlightLabels(amount: number, reducedMotion = false) {
+/** Each physical catch has one chip; labels sum to the server-confirmed wallet reward. */
+export function coinPusherRewardFlightLabels(amount: number, reducedMotion = false, rewardPerCoin = 1) {
   const total = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+  if (!Number.isFinite(rewardPerCoin) || rewardPerCoin <= 0) return [];
   const visibleCount = Math.min(total, reducedMotion ? 1 : COIN_PUSHER_REWARD_FLIGHT_VISIBLE_LIMIT);
   return Array.from({ length: visibleCount }, (_, index) => {
-    if (reducedMotion) return `+${total}`;
-    if (total > visibleCount && index === visibleCount - 1) return `+${total - visibleCount + 1}`;
-    return '+1';
+    if (reducedMotion) return `+${total * rewardPerCoin}`;
+    if (total > visibleCount && index === visibleCount - 1) return `+${(total - visibleCount + 1) * rewardPerCoin}`;
+    return `+${rewardPerCoin}`;
   });
 }

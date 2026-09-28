@@ -59,6 +59,9 @@ await fs.writeFile(databaseFile, JSON.stringify({
     role: 'student', classname: '5A', classno: 1, language: 'zh-HK',
   }],
   studentStats: [], questionLogs: [], _logId: 0,
+  // This regression isolates ordinary +10 coins. Physical special prizes, their stock budget,
+  // wallet credits and voucher redemptions are covered by test-pet-arcade-prizes-live.mjs.
+  petArcadePrizes: [{ studentId: 'S001', state: { issued: 1000000, prizes: [] } }],
 }, null, 2));
 
 const server = spawn(process.execPath, ['server.js'], {
@@ -106,6 +109,8 @@ try {
     if (capturedVisualStages.has(stage) || capturingVisualStages.has(stage)) return;
     const fileName = stage === 'tray'
       ? 'coin-pusher-tray-catch-desktop.png'
+      : stage === 'pusher-contact'
+        ? 'coin-pusher-pusher-contact-desktop.png'
       : stage === 'wallet'
         ? 'coin-pusher-payout-reward-desktop.png'
         : stage === 'cascade'
@@ -120,6 +125,7 @@ try {
     if (!fileName) return;
     capturingVisualStages.add(stage);
     if (stage === 'tray') await page.waitForTimeout(120);
+    if (stage === 'pusher-contact') await page.waitForTimeout(80);
     await page.screenshot({ path: path.join(artifactDir, fileName), animations: 'allow', scale: 'css' });
     capturingVisualStages.delete(stage);
     capturedVisualStages.add(stage);
@@ -233,7 +239,7 @@ try {
     if (/CoinPusherScene|CoinPusherModel|rapier_wasm3d_bg/i.test(pathname)) {
       coinPusherModuleRequests.push({ name: pathname.split('/').pop(), requestedAt: Date.now() });
     }
-    if (request.url().includes('/api/pet/coin-pusher/')) {
+    if (/\/api\/pet\/coin-pusher\/(play|payout)$/.test(request.url())) {
       requests.push(request.url());
       const headers = request.headers();
       if (request.url().endsWith('/coin-pusher/play')) playRequestKeys.push(headers['idempotency-key']);
@@ -341,18 +347,39 @@ try {
         visualReady: root.dataset.visualPreviewReady,
         previewAt: Number(root.dataset.visualPreviewAt),
         previewCoinCount: Number(root.dataset.previewCoinCount),
+        environmentResolution: Number(root.dataset.environmentResolution),
         artworkReady: root.dataset.artworkReady,
         busy: root.getAttribute('aria-busy'),
         dropDisabled: document.querySelector('.coin-pusher-drop').disabled,
+        progressCardCount: root.querySelectorAll('.coin-pusher-loading > div').length,
+        progressVeilAriaHidden: root.querySelector('.coin-pusher-loading').getAttribute('aria-hidden'),
+        progressVeilPointerEvents: getComputedStyle(root.querySelector('.coin-pusher-loading')).pointerEvents,
+        hudLoadingIndicator: (() => {
+          const status = document.querySelector('#coinPusherSystemStatus');
+          const indicator = getComputedStyle(status.parentElement, '::before');
+          return status.parentElement.classList.contains('is-loading')
+            && indicator.content !== 'none' && indicator.content !== 'normal'
+            && Number.parseFloat(indicator.width) >= 10;
+        })(),
       };
     });
     assert.equal(pusherLoadingPreview.visualReady, 'true', 'the loading preview must only reveal after the cabinet has rendered');
     assert.equal(pusherLoadingPreview.artworkReady, 'false',
       'the first useful cabinet preview should not wait for optional high-resolution artwork');
-    assert.ok(pusherLoadingPreview.previewCoinCount >= 150,
-      `the physics-free preview must show the complete collision-safe starter pile (${JSON.stringify(pusherLoadingPreview)})`);
+  assert.equal(pusherLoadingPreview.previewCoinCount, 55,
+      `the physics-free preview must show the compact collision-safe starter pile (${JSON.stringify(pusherLoadingPreview)})`);
+    assert.equal(pusherLoadingPreview.environmentResolution, startViewport.width <= 1280 ? 512 : 1024,
+      'compact devices must use the tested half-size reflection source while desktop keeps full detail');
     assert.equal(pusherLoadingPreview.busy, 'true', 'the app must remain busy until Rapier and gameplay are ready');
     assert.equal(pusherLoadingPreview.dropDisabled, true, 'the preview must never allow a drop before physics is ready');
+    assert.equal(pusherLoadingPreview.progressCardCount, 0,
+      'the preview stage must not retain a second progress card over the responsive HUD');
+    assert.equal(pusherLoadingPreview.progressVeilAriaHidden, 'true',
+      'the transparent input-blocking veil must not duplicate the HUD live-status announcement');
+    assert.equal(pusherLoadingPreview.progressVeilPointerEvents, 'auto',
+      'the preview veil must still block touch drops until the physics world is ready');
+    assert.equal(pusherLoadingPreview.hudLoadingIndicator, true,
+      'a compact spinner and the single live loading message must remain in the HUD');
     assert.equal(requests.some((url) => url.endsWith('/coin-pusher/play')), false,
       'showing the starter-pile preview must never charge a student coin');
     await page.screenshot({
@@ -522,6 +549,12 @@ try {
     const captureStatus = () => window.__coinStatusDebug.push({ at: performance.now(), text: status?.textContent?.trim() });
     if (status) new MutationObserver(captureStatus).observe(status, { childList: true, characterData: true, subtree: true });
     captureStatus();
+    if (root) new MutationObserver(() => {
+      const at = Number(root.dataset.pusherContactSparkAt);
+      if (!Number.isFinite(at)) return;
+      window.__coinRewardDebug.push({ type: 'pusher-contact-spark', at, capturedAt: performance.now() });
+      void window.__capturePusherVisualStage?.('pusher-contact')?.catch(() => {});
+    }).observe(root, { attributes: true, attributeFilter: ['data-pusher-contact-spark-at'] });
     const observer = new MutationObserver((records) => {
       for (const record of records) for (const node of record.addedNodes) {
         if (!(node instanceof HTMLElement)) continue;
@@ -665,8 +698,10 @@ try {
     'the initial scene palette must match the classic finish');
   assert.match(await drop.getAttribute('aria-label'), /1|−1|coin|金幣/i);
   const initialReadyStatus = await page.locator('#coinPusherSystemStatus').innerText();
-  assert.match(initialReadyStatus, /向下滑落幣|Swipe down to drop/,
-    `the ready status must explain that releasing a downward swipe drops the coin (actual: ${initialReadyStatus})`);
+  assert.match(initialReadyStatus, /向下滑落幣|Swipe down|落幣 −1 · 每枚入槽 \+10|Drop −1 · each catch \+10/,
+    `the ready status must explain the active drop affordance (swipe on touch, wallet return on keyboard) (actual: ${initialReadyStatus})`);
+  assert.equal(await drop.getAttribute('data-pusher-beat'), 'home-pause',
+    'the idle desktop machine must not advertise a timing opportunity before its first paid drop');
   const collectionButton = page.locator('.coin-pusher-collection');
   assert.equal(await collectionButton.isVisible(), true, 'paw-stamp collection must be discoverable from the HUD');
   assert.match(await collectionButton.getAttribute('aria-label'), /0\/5/,
@@ -687,6 +722,12 @@ try {
     'the collection book must explain the visible cabinet-finish reward');
   assert.equal(await page.locator('.coin-pusher-finish-current').getAttribute('data-finish-tier'), '0',
     'the collection book must preview the currently applied classic finish');
+  assert.equal(await page.locator('.coin-pusher-finish-option').count(), 6,
+    'the collection book must offer every cabinet finish as a compact palette choice');
+  assert.equal(await page.locator('.coin-pusher-finish-option[data-finish-id="classic"]').isDisabled(), false,
+    'the default classic cabinet finish must always remain selectable');
+  assert.equal(await page.locator('.coin-pusher-finish-option[data-finish-id="bronze"]').isDisabled(), true,
+    'a finish that has not been earned must stay locked');
   const stampPresentation = await page.locator('.coin-pusher-stamp').evaluateAll((cards) => cards.map((card) => {
     const medallion = card.querySelector('.coin-pusher-stamp-medallion');
     const bounds = medallion?.getBoundingClientRect();
@@ -726,24 +767,10 @@ try {
 
   const playsBeforeKeyboardAim = requests.filter((url) => url.endsWith('/coin-pusher/play')).length;
   await page.keyboard.press('ArrowRight');
-  const keyboardAimLane = await page.locator('.coin-pusher-aim-marker').getAttribute('data-lane-x');
-  assert.equal(keyboardAimLane, '0.580000', 'Right Arrow must move the visible aim guide one lane to the right');
-  const aimGuide = page.locator('.coin-pusher-aim-guide');
-  const keyboardGuideLine = aimGuide.locator('line');
-  assert.equal(await aimGuide.getAttribute('class'), 'coin-pusher-aim-guide is-visible',
-    'keyboard aiming should show the same landing-lane guide as pointer aiming');
-  const keyboardGuide = await keyboardGuideLine.evaluate((line) => ({
-    x1: Number(line.getAttribute('x1')), x2: Number(line.getAttribute('x2')),
-    y1: Number(line.getAttribute('y1')), y2: Number(line.getAttribute('y2')),
-  }));
-  const keyboardGuideLength = Math.hypot(keyboardGuide.x1 - keyboardGuide.x2, keyboardGuide.y1 - keyboardGuide.y2);
-  assert.ok(keyboardGuideLength > 24
-    && Math.abs(keyboardGuide.x1 - keyboardGuide.x2) / keyboardGuideLength < .18,
-  `the perspective-projected drop guide should connect slot to target without drifting lanes (${JSON.stringify(keyboardGuide)})`);
   await page.keyboard.press('ArrowLeft');
-  assert.equal(await page.locator('.coin-pusher-aim-marker').getAttribute('data-lane-x'), '0.000000',
-    'Left Arrow must return the aim guide to the centre lane');
   await page.keyboard.press('ArrowRight');
+  assert.equal(await page.locator('.coin-pusher-aim-marker, .coin-pusher-aim-guide').count(), 0,
+    'keyboard lane selection must not draw a cursor or trajectory over the game');
   assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, playsBeforeKeyboardAim,
     'keyboard aiming must not charge until a drop key is pressed');
   const coinCountBeforeKeyboardDrop = Number(await page.locator('#coin-pusher-root').getAttribute('data-coin-count'));
@@ -794,84 +821,74 @@ try {
   'the coin paused in mid-air must resume through a real landing after WebGL restoration');
   assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, paidDropCountBeforeGraphicsLoss,
     'resuming an in-flight physical coin must not authorize a second paid drop');
+  await waitFor(async () => drop.evaluate((button) => button.dataset.pusherBeat === 'forward'
+    && button.classList.contains('is-good-timing') && !button.disabled),
+  'the desktop drop control must light only when physics predicts a forward-stroke landing');
+  const desktopTimingButton = await drop.evaluate((button) => ({
+    label: button.getAttribute('aria-label'),
+    cost: button.querySelector('small b')?.textContent,
+    shadow: getComputedStyle(button).boxShadow,
+  }));
+  assert.match(desktopTimingButton.label, /順勢落幣.*1 金幣|DROP NOW.*1 coin/i,
+    `the good-timing announcement must remain accessible and disclose its cost (${JSON.stringify(desktopTimingButton)})`);
+  assert.equal(desktopTimingButton.cost, '−1', 'a timing highlight must preserve the one-coin cost');
+  assert.match(desktopTimingButton.shadow, /90, 231, 183/,
+    'the desktop timing window must be visibly distinct without a playfield cursor');
+  await waitFor(async () => drop.evaluate((button) => button.dataset.pusherBeat !== 'forward'
+    && !button.classList.contains('is-good-timing')),
+  'the desktop timing highlight must clear as soon as the predicted landing beat changes');
   const box = await canvas.boundingBox();
   assert.ok(box, 'coin-pusher canvas must have a visible hit area');
+  const aimOverlay = page.locator('.coin-pusher-aim-marker, .coin-pusher-aim-guide');
   await page.mouse.move(box.x + box.width * .28, box.y + box.height * .3);
-  const aimMarker = page.locator('.coin-pusher-aim-marker');
-  await waitFor(async () => aimMarker.evaluate((node) => node.classList.contains('is-visible')
-    && Number(getComputedStyle(node).opacity) > .5), 'pointer aim must preview the predicted coin landing lane');
-  await waitFor(async () => aimGuide.evaluate((node) => node.classList.contains('is-visible')
-    && Number(getComputedStyle(node).opacity) > .5), 'pointer aim must show a visible drop path');
-  const aimBeat = aimMarker.locator('.coin-pusher-aim-beat');
-  await waitFor(async () => aimMarker.evaluate((node) =>
-    ['home-pause', 'forward', 'front-pause', 'return'].includes(node.dataset.beat)
-      && Boolean(node.querySelector('.coin-pusher-aim-beat')?.textContent?.trim())),
-  'the landing preview must label the pusher beat expected at impact');
-  const observedBeats = await aimMarker.evaluate(async (node) => {
-    const beats = new Set([node.dataset.beat].filter(Boolean));
-    await new Promise((resolve) => {
-      const observer = new MutationObserver(() => {
-        if (node.dataset.beat) beats.add(node.dataset.beat);
-        if (beats.size === 4) {
-          window.clearTimeout(deadline);
-          observer.disconnect();
-          resolve(undefined);
-        }
-      });
-      const deadline = window.setTimeout(() => {
-        observer.disconnect();
-        resolve(undefined);
-      }, 10000);
-      observer.observe(node, { attributes: true, attributeFilter: ['data-beat'] });
-    });
-    return [...beats].sort();
-  });
-  assert.deepEqual(observedBeats, ['forward', 'front-pause', 'home-pause', 'return'],
-    'the visible landing cue must update through the pusher cycle while the pointer stays aimed');
+  assert.equal(await aimOverlay.count(), 0, 'pointer movement must not show a cursor or trajectory overlay');
+  await waitFor(async () => (await page.evaluate(() => window.__coinPusherAudioSweepTargets))
+    .some((frequency) => frequency > 69 && frequency < 73),
+  'the audio check must wait until the real return stroke has played');
   const audibleStrokeTargets = await page.evaluate(() => window.__coinPusherAudioSweepTargets);
   assert.ok(audibleStrokeTargets.some((frequency) => frequency > 55 && frequency < 58),
     'the forward pusher stroke must generate its low mechanical pitch sweep');
   assert.ok(audibleStrokeTargets.some((frequency) => frequency > 69 && frequency < 73),
     'the return pusher stroke must generate its distinct low mechanical pitch sweep');
-  assert.ok(await aimBeat.isVisible(), 'the pusher timing label must stay readable beside the landing reticle');
-  const aimStartBox = await aimMarker.boundingBox();
-  assert.ok(aimStartBox && aimStartBox.width >= 40 && aimStartBox.height >= 40,
-    'the aim marker must remain large enough to read over the playfield');
-  await page.screenshot({ path: path.join(artifactDir, 'coin-pusher-aim-preview-desktop.png') });
+  await waitFor(() => capturedVisualStages.has('pusher-contact'),
+    'a real pusher-to-coin collision must capture its new physical impact sparkle');
+  assert.ok(Number(await page.locator('#coin-pusher-root').getAttribute('data-pusher-contact-spark-at')) > 0,
+    'the impact sparkle must be synchronized to a real pusher-contact frame');
+  assert.equal(await aimOverlay.count(), 0, 'the desktop playfield must remain clear of aiming graphics');
+  await page.screenshot({ path: path.join(artifactDir, 'coin-pusher-no-reticle-desktop.png') });
+  const timingVisibleCountBeforePointerSwipe = await page.evaluate(() =>
+    window.__coinRewardDebug.filter((entry) => entry.type === 'timing-visible').length);
+  const pointerPlaysBeforeSwipe = requests.filter((url) => url.endsWith('/coin-pusher/play')).length;
   await page.mouse.down();
-  const aimStartLane = await aimMarker.getAttribute('data-lane-x');
   await page.mouse.move(box.x + box.width * .31, box.y + box.height * .72, { steps: 4 });
-  const aimEndLane = await aimMarker.getAttribute('data-lane-x');
-  assert.equal(aimEndLane, aimStartLane,
-    'the world-space drop lane must stay locked to the swipe start while the thumb moves');
+  assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, pointerPlaysBeforeSwipe,
+    'a pointer swipe must remain free until a valid downward release');
+  assert.equal(await aimOverlay.count(), 0, 'a pointer swipe must not draw a reticle or trajectory');
   await page.mouse.up();
-  assert.equal(await aimMarker.getAttribute('class'), 'coin-pusher-aim-marker',
-    'the landing preview must clear as soon as the paid drop is committed');
-  assert.equal(await aimGuide.getAttribute('class'), 'coin-pusher-aim-guide',
-    'the trajectory guide must clear with the landing preview after release');
-  await waitFor(() => page.evaluate(() => window.__coinRewardDebug.some((entry) => entry.type === 'timing-visible')),
-    'a coin landing during the forward push should show the non-monetary timing cue');
-  const timingCue = await page.evaluate(() => window.__coinRewardDebug.find((entry) =>
-    entry.type === 'timing-visible' && entry.beat === 'forward'));
-  assert.equal(timingCue.beat, 'forward', 'the timing cue must only follow a real coin landing during the forward stroke');
-  assert.match(timingCue.text, /順勢接住|NICE TIMING/, 'the timing feedback should be localized and readable');
-  assert.ok(timingCue.streak >= 1 && timingCue.bestStreak >= timingCue.streak,
+  await waitFor(() => requests.filter((url) => url.endsWith('/coin-pusher/play')).length === pointerPlaysBeforeSwipe + 1,
+    'a valid desktop swipe must authorize exactly one drop on release');
+  await waitFor(() => page.evaluate((baseline) =>
+    window.__coinRewardDebug.filter((entry) => entry.type === 'timing-visible').length > baseline,
+  timingVisibleCountBeforePointerSwipe),
+  'a physical coin landing should show the non-monetary timing cue');
+  const timingCue = await page.evaluate((baseline) => window.__coinRewardDebug
+    .filter((entry) => entry.type === 'timing-visible').slice(baseline).at(-1), timingVisibleCountBeforePointerSwipe);
+  assert.ok(['forward', 'home-pause', 'front-pause', 'return'].includes(timingCue.beat),
+    'the timing feedback must report the actual physical landing beat');
+  if (timingCue.beat === 'forward') {
+    assert.match(timingCue.text, /順勢接住|NICE TIMING/, 'forward timing feedback should be localized and readable');
+    assert.ok(timingCue.streak >= 1, 'a forward landing should advance the live timing streak');
+  } else {
+    assert.match(timingCue.text, /等.*推|NEXT PUSH/, 'non-forward timing feedback should remain neutral and actionable');
+    assert.equal(timingCue.isGuidance, true, 'non-forward guidance must use its neutral visual treatment');
+  }
+  assert.ok(timingCue.bestStreak >= timingCue.streak,
     'the live timing cue must report the actual session streak without granting currency');
   const physicalImpactPans = await page.evaluate(() => window.__coinPusherAudioPans);
   assert.ok(physicalImpactPans.some((pan) => Math.abs(pan) >= .015)
     && physicalImpactPans.every((pan) => Number.isFinite(pan) && Math.abs(pan) <= .72),
   `a real off-centre keyboard drop should pan its physical impact without reaching the stereo edge (${JSON.stringify(physicalImpactPans)})`);
-  await waitFor(() => capturedVisualStages.has('timing'), 'the forward-timing visual screenshot was not captured while visible');
-  await waitFor(() => page.evaluate(() => window.__coinRewardDebug.some((entry) =>
-    entry.type === 'timing-visible' && entry.streak >= 2)),
-  'two consecutive physical forward-beat landings must visibly upgrade to a golden timing streak');
-  const timingStreakCue = await page.evaluate(() => window.__coinRewardDebug.find((entry) =>
-    entry.type === 'timing-visible' && entry.streak >= 2));
-  assert.equal(timingStreakCue.isStreaking, true, 'a live two-hit streak must receive the upgraded visual treatment');
-  assert.equal(timingStreakCue.isNewBest, true,
-    'a live two-hit streak that beats the saved record must announce the new personal best');
-  await waitFor(() => capturedVisualStages.has('timing-streak'),
-    'the upgraded timing streak screenshot was not captured while visible');
+  await waitFor(() => capturedVisualStages.has('timing'), 'the timing feedback screenshot was not captured while visible');
   for (let index = 0; index < 3; index += 1) {
     await page.keyboard.press('ArrowDown');
     await page.waitForTimeout(300);
@@ -902,15 +919,21 @@ try {
   const closePayoutPair = payoutTimes.some((time, index) => index > 0 && time - payoutTimes[index - 1] <= 760);
   if (closePayoutPair) {
     await waitFor(() => page.evaluate(() => window.__coinRewardDebug.some((entry) =>
-      entry.type === 'tray-catch-updated' && /×\s*2/.test(entry.text || ''))),
-    'closely spaced catches should combine into one readable ×2 tray cue');
-    await waitFor(() => page.evaluate(() => {
-      const flights = window.__coinRewardDebug
-        .filter((entry) => entry.type === 'inserted')
-        .map((entry) => entry.at + (entry.animationDelayMs || 0))
-        .sort((a, b) => a - b);
-      return flights.length >= 2 && flights.slice(1).every((time, index) => time - flights[index] >= 150);
-    }), 'closely spaced payout animations must be queued so their +1 coins do not launch on top of each other');
+      ['tray-catch-inserted', 'tray-catch-updated'].includes(entry.type)
+        && /×\s*[2-9]\d*/.test(entry.text || ''))),
+    'closely spaced catches should combine into one readable tray count of at least ×2');
+    try {
+      await waitFor(() => page.evaluate(() => {
+        const flights = window.__coinRewardDebug
+          .filter((entry) => entry.type === 'inserted')
+          .map((entry) => entry.at + (entry.animationDelayMs || 0))
+          .sort((a, b) => a - b);
+        return flights.length >= 2 && flights.slice(1).every((time, index) => time - flights[index] >= 150);
+      }), 'closely spaced payout animations must be queued so their +1 coins do not launch on top of each other');
+    } catch (error) {
+      const flights = await page.evaluate(() => window.__coinRewardDebug.filter((entry) => entry.type === 'inserted'));
+      throw new Error(`${error.message}; reward flights: ${JSON.stringify(flights)}`);
+    }
   }
   await waitFor(() => !!lostPayoutEventId
     && payoutRequestEvents.filter(({ eventId }) => eventId === lostPayoutEventId).length === 2,
@@ -923,8 +946,8 @@ try {
   const lostPayoutCredits = databaseAfterLostPayout.petCurrencyLedger.filter((row) =>
     row.studentId === 'S001' && row.kind === 'coin_pusher_payout' && row.idempotencyKey === lostPayoutAttempts[0].requestKey);
   assert.equal(lostPayoutCredits.length, 1, 'a lost payout response and retry must credit the wallet exactly once');
-  assert.equal(lostPayoutCredits[0].delta, lostPayoutAttempts[0].amount,
-    'the one wallet credit must match the server-confirmed physical collection amount');
+  assert.equal(lostPayoutCredits[0].delta, lostPayoutAttempts[0].amount * 10,
+    'the one wallet credit must reward ten coins per physical catch, including a lost-reply retry');
   try {
     await waitFor(async () => page.evaluate(() => window.__coinStatusDebug.some(({ text }) => /已回到錢包|added to wallet/i.test(text || ''))),
       'the confirmed payout must update the student wallet status');
@@ -963,7 +986,7 @@ try {
   });
   assert.ok(payoutFlyBox && payoutFlyBox.width > 30 && payoutFlyBox.height > 20,
     'confirmed wallet payouts must animate a visible +1 coin from the collection well');
-  assert.match(payoutFlyBox.text, /\+\d+/, 'the coin flying from the tray must visibly carry its credited +1 amount');
+  assert.match(payoutFlyBox.text, /^\+10$/, 'a caught coin must visibly carry its credited +10 reward');
   assert.ok(payoutFlyBox.startX >= 0 && payoutFlyBox.startX <= payoutFlyBox.rootWidth
     && payoutFlyBox.startY >= payoutFlyBox.rootHeight * .4 && payoutFlyBox.startY <= payoutFlyBox.rootHeight,
   `the +1 flight must begin visibly inside the lower payout-well area (${JSON.stringify(payoutFlyBox)})`);
@@ -992,6 +1015,11 @@ try {
       throw new Error(`${error.message}; confirmed collection=${payoutCollectionTotal}; toasts=${JSON.stringify(toastDebug)}`);
     }
   }
+  // The machine can legitimately deliver another earlier play's coin while the student reads
+  // the keepsake book. Freeze only this test's simulation during cosmetic assertions so a real
+  // tray payout cannot be mistaken for a finish-selection wallet mutation.
+  await page.evaluate(() => Object.defineProperty(document, 'hidden', { configurable: true, value: true }));
+  await page.waitForTimeout(1000);
   const expectedStampProgress = await page.evaluate((total) => {
     const thresholds = [5, 25, 100, 300, 1000];
     const unlocked = thresholds.filter((threshold) => total >= threshold).length;
@@ -1012,6 +1040,26 @@ try {
   const finishIds = ['classic', 'bronze', 'silver', 'gold', 'crystal', 'aurora'];
   const expectedFinishTier = Math.min(5, [5, 25, 100, 300, 1000]
     .filter((threshold) => payoutCollectionTotal >= threshold).length);
+  const finishWalletBeforeSelection = Number((await page.locator('#coinBalanceHud').innerText()).replace(/,/g, ''));
+  const requestsBeforeSelection = requests.length;
+  if (expectedFinishTier > 0) {
+    await page.locator('.coin-pusher-finish-option[data-finish-id="classic"]').click();
+    await waitFor(async () => await page.locator('#coin-pusher-root').getAttribute('data-keepsake-finish') === 'classic',
+      'selecting an earned earlier cabinet palette must apply it immediately');
+    assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-tier'), String(expectedFinishTier),
+      'choosing a cosmetic finish must not reduce the server-confirmed unlock tier');
+    await page.locator(`.coin-pusher-finish-option[data-finish-id="${finishIds[expectedFinishTier]}"]`).click();
+    await waitFor(async () => await page.locator('#coin-pusher-root').getAttribute('data-keepsake-finish') === finishIds[expectedFinishTier],
+      'the student must be able to switch back to the highest earned cabinet palette');
+    assert.equal(await page.locator(`.coin-pusher-finish-option[data-finish-id="${finishIds[expectedFinishTier]}"]`).isDisabled(), false,
+      'the newly earned palette must become selectable immediately');
+    assert.equal(await page.locator('.coin-pusher-finish-option[data-finish-id="silver"]').isDisabled(), expectedFinishTier < 2,
+      'higher finish buttons must remain locked until their own payout milestone');
+  }
+  assert.equal(Number((await page.locator('#coinBalanceHud').innerText()).replace(/,/g, '')), finishWalletBeforeSelection,
+    'changing a cabinet finish must not add or spend student coins');
+  assert.equal(requests.length, requestsBeforeSelection,
+    'cosmetic finish selection must be local and must not call the wallet API');
   await waitFor(async () => await page.locator('#coin-pusher-root').getAttribute('data-keepsake-tier') === String(expectedFinishTier),
     'the live cabinet finish must follow server-confirmed payout milestones');
   assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-finish'), finishIds[expectedFinishTier],
@@ -1025,6 +1073,7 @@ try {
   assert.equal(await page.locator('.coin-pusher-progress-track').getAttribute('aria-valuenow'), String(expectedStampProgress),
     'the collection-book bar must agree with the HUD ring and total/next-threshold label');
   await page.locator('.coin-pusher-collection-close').click();
+  await page.evaluate(() => { delete document.hidden; });
   const hadCascadeWindow = payoutAmounts.some((amount) => amount >= 2)
     || payoutTimes.some((time, index) => index > 0 && time - payoutTimes[index - 1] <= 2500);
   if (hadCascadeWindow) {
@@ -1054,18 +1103,12 @@ try {
     initialBalance - chargedDrops + payoutTotal,
     'the HUD wallet must equal starting coins minus drops plus payout coins');
 
-  const aimBeforeGraphicsLoss = page.locator('.coin-pusher-aim-marker');
+  const noAimOverlay = page.locator('.coin-pusher-aim-marker, .coin-pusher-aim-guide');
   const chargesBeforeGraphicsLoss = requests.filter((url) => url.endsWith('/coin-pusher/play')).length;
   await dispatchTouchPointer(page, 'pointerdown', .5, .3, 89);
-  await waitFor(async () => aimBeforeGraphicsLoss.evaluate((node) => node.classList.contains('is-visible')),
-    'an in-progress gesture must show its aim preview before WebGL loss');
-  assert.equal(await page.locator('.coin-pusher-aim-guide').getAttribute('class'), 'coin-pusher-aim-guide is-visible',
-    'the slot-to-lane guide must be visible before context loss');
+  assert.equal(await noAimOverlay.count(), 0, 'an in-progress gesture must not create an unwanted cursor overlay');
   await page.evaluate(() => document.querySelector('#coin-pusher-root canvas').dispatchEvent(new Event('webglcontextlost', { cancelable: true })));
-  await waitFor(async () => !(await aimBeforeGraphicsLoss.getAttribute('class')).includes('is-visible'),
-    'WebGL loss must clear an interrupted swipe preview');
-  assert.equal(await page.locator('.coin-pusher-aim-guide').getAttribute('class'), 'coin-pusher-aim-guide',
-    'WebGL loss must clear the slot-to-lane guide as well');
+  assert.equal(await noAimOverlay.count(), 0, 'WebGL loss must not leave a cursor overlay behind');
   await dispatchTouchPointer(page, 'pointerup', .5, .8, 89);
   assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, chargesBeforeGraphicsLoss,
     'a swipe interrupted by WebGL loss must never charge the student wallet');
@@ -1073,10 +1116,12 @@ try {
   assert.match(await page.locator('#coinPusherSystemStatus').innerText(), /暫停|paused/i);
   await page.evaluate(() => document.querySelector('#coin-pusher-root canvas').dispatchEvent(new Event('webglcontextrestored')));
   await waitFor(async () => !(await drop.isDisabled()), 'drop control did not recover after WebGL restore');
-  await waitFor(async () => /落幣 −1 · 入槽 \+1/.test(await page.locator('#coinPusherSystemStatus').innerText()),
-    'desktop WebGL recovery must return to the wallet-return status, with keyboard controls shown separately');
+  await waitFor(async () => !/暫停|paused|載入|loading/i.test(await page.locator('#coinPusherSystemStatus').innerText()),
+    'desktop WebGL recovery must restore the live status, even if an earned payout is finishing');
   assert.equal(await page.locator('.coin-pusher-keyboard-hint').isVisible(), true,
     'desktop players must receive the keyboard-specific aiming and drop instructions');
+  assert.match(await page.locator('.coin-pusher-keyboard-hint').innerText(), /Space.*落幣|Space.*drop/i,
+    'desktop keyboard controls must remain visible separately from live payout status');
 
   const viewports = [
     { name: 'desktop', width: 1440, height: 900 },
@@ -1313,7 +1358,7 @@ try {
   const touchModuleRequests = [];
   const touchPayoutAmounts = [];
   touchPage.on('request', (request) => {
-    if (request.url().includes('/api/pet/coin-pusher/')) touchRequests.push(request.url());
+    if (/\/api\/pet\/coin-pusher\/(play|payout)$/.test(request.url())) touchRequests.push(request.url());
     const pathname = new URL(request.url()).pathname;
     if (/CoinPusherScene|CoinPusherModel|rapier_wasm3d_bg/i.test(pathname)) {
       touchModuleRequests.push({ name: pathname.split('/').pop(), requestedAt: Date.now() });
@@ -1411,8 +1456,12 @@ try {
     'touch players must see the lane-selecting swipe gesture, not only a generic drop hint');
   assert.ok(touchHint.lines <= 2,
     `the compact mobile control hint must fit the two-line status slot (${JSON.stringify(touchHint)})`);
-  const touchAim = touchPage.locator('.coin-pusher-aim-marker');
-  const touchGuide = touchPage.locator('.coin-pusher-aim-guide');
+  const touchStartingBalance = Number((await touchPage.locator('#coinBalanceHud').innerText()).replace(/,/g, ''));
+  const touchPaidDropBaseline = touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length;
+  const touchDrop = touchPage.locator('.coin-pusher-drop');
+  assert.equal(await touchDrop.getAttribute('data-pusher-beat'), 'home-pause',
+    'the idle phone machine must not advertise a timing opportunity before its first paid drop');
+  const touchNoAimOverlay = touchPage.locator('.coin-pusher-aim-marker, .coin-pusher-aim-guide');
   const touchContextLossSupported = await touchPage.evaluate(() => {
     const canvas = document.querySelector('#coin-pusher-root canvas');
     const context = canvas?.getContext('webgl2');
@@ -1428,8 +1477,7 @@ try {
   assert.equal(touchContextLossSupported, true,
     'the touch browser must expose WEBGL_lose_context so mobile recovery tests invalidate real GPU resources');
   await dispatchTouchPointer(touchPage, 'pointerdown', .52, .28, 38);
-  await waitFor(async () => touchAim.evaluate((node) => node.classList.contains('is-visible')),
-    'context-loss touch test must first establish a live aim');
+  assert.equal(await touchNoAimOverlay.count(), 0, 'touch lane selection must not draw a cursor or trajectory');
   assert.equal(touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, 0,
     'touch aiming before graphics loss must remain free');
   await touchPage.evaluate(() => window.__coinPusherContextRecovery.lose());
@@ -1437,8 +1485,6 @@ try {
     'touch controls must pause while the real WebGL context is lost');
   assert.equal(await touchPage.evaluate(() => window.__coinPusherContextRecovery.isLost()), true,
     'the touch interruption must hold a genuinely lost WebGL context');
-  await waitFor(async () => !(await touchAim.getAttribute('class')).includes('is-visible'),
-    'real graphics loss must clear a pending touch aim');
   await dispatchTouchPointer(touchPage, 'pointerup', .52, .78, 38);
   await touchPage.waitForTimeout(120);
   assert.equal(touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, 0,
@@ -1448,83 +1494,52 @@ try {
     'touch controls did not resume after restoring the real WebGL context');
   assert.equal(await touchPage.evaluate(() => window.__coinPusherContextRecovery.isLost()), false,
     'the mobile browser must restore the actual WebGL context before touch play resumes');
-  assert.equal(await touchGuide.getAttribute('class'), 'coin-pusher-aim-guide',
-    'restoration must leave no stale touch trajectory behind');
+  assert.equal(await touchNoAimOverlay.count(), 0, 'graphics restoration must not add a cursor overlay');
   await dispatchTouchPointer(touchPage, 'pointerdown', .52, .28, 39);
-  await waitFor(async () => touchAim.evaluate((node) => node.classList.contains('is-visible')),
-    'pointer-cancel test must first show the aim preview');
   await dispatchTouchPointer(touchPage, 'pointercancel', .52, .28, 39);
-  await waitFor(async () => !(await touchAim.getAttribute('class')).includes('is-visible'),
-    'the aim preview must clear when the operating system cancels touch');
-  assert.equal(await touchPage.locator('.coin-pusher-aim-guide').getAttribute('class'), 'coin-pusher-aim-guide',
-    'a cancelled touch must clear the slot-to-lane guide too');
+  assert.equal(await touchNoAimOverlay.count(), 0, 'a cancelled touch must not leave any cursor UI');
   assert.equal(touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, 0,
     'an operating-system-cancelled swipe must not charge a coin');
   await dispatchTouchPointer(touchPage, 'pointerdown', .52, .28, 39);
-  await waitFor(async () => touchAim.evaluate((node) => node.classList.contains('is-visible')),
-    'lost-capture test must first show the aim preview');
   await dispatchTouchPointer(touchPage, 'lostpointercapture', .52, .28, 39);
-  await waitFor(async () => !(await touchAim.getAttribute('class')).includes('is-visible'),
-    'the aim preview must clear if touch capture is lost');
+  assert.equal(await touchNoAimOverlay.count(), 0, 'lost pointer capture must not leave cursor UI');
   assert.equal(touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, 0,
     'a lost touch capture must not charge a coin');
   await dispatchTouchPointer(touchPage, 'pointerdown', .48, .28, 50);
-  await waitFor(async () => touchAim.evaluate((node) => node.classList.contains('is-visible')),
-    'the primary finger must establish the aiming lane before a second finger touches');
-  const primaryAimLane = await touchAim.getAttribute('data-lane-x');
+  assert.equal(await touchNoAimOverlay.count(), 0, 'primary-finger lane selection must keep the playfield clear');
   await dispatchTouchPointer(touchPage, 'pointerdown', .76, .27, 51, false);
   await dispatchTouchPointer(touchPage, 'pointermove', .76, .74, 51, false);
   await dispatchTouchPointer(touchPage, 'pointerup', .76, .74, 51, false);
   await dispatchTouchPointer(touchPage, 'pointercancel', .76, .74, 51, false);
-  assert.equal(await touchAim.getAttribute('data-lane-x'), primaryAimLane,
-    'a secondary finger must not replace the primary finger\'s aimed lane');
-  assert.equal(await touchAim.evaluate((node) => node.classList.contains('is-visible')), true,
-    'a secondary pointerup or cancel must not clear the primary finger\'s aim');
+  assert.equal(await touchNoAimOverlay.count(), 0,
+    'secondary-finger gestures must not introduce a cursor or trajectory overlay');
   await touchPage.waitForTimeout(250);
   assert.equal(touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, 0,
     'a second finger swiping and cancelling must never charge a coin');
   await dispatchTouchPointer(touchPage, 'pointerup', .48, .3, 50);
-  await waitFor(async () => !(await touchAim.getAttribute('class')).includes('is-visible'),
-    'the primary finger must remain able to end its own gesture');
   assert.equal(touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, 0,
     'ending the primary gesture with a short tap must remain free');
   await dispatchTouchPointer(touchPage, 'pointerdown', .45, .3, 40);
   await dispatchTouchPointer(touchPage, 'pointerup', .45, .31, 40);
-  await waitFor(async () => !(await touchAim.getAttribute('class')).includes('is-visible'),
-    'a short tap must clear the aiming preview');
   assert.equal(touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, 0,
     'a touch tap without a valid downward swipe must not charge a coin');
   await dispatchTouchPointer(touchPage, 'pointerdown', .28, .3);
-  await waitFor(async () => touchAim.evaluate((node) => node.classList.contains('is-visible')),
-    'touch start must show the landing-lane preview');
-  await waitFor(async () => touchGuide.evaluate((node) => node.classList.contains('is-visible')
-    && Number(getComputedStyle(node).opacity) > .5), 'touch aiming must show the slot-to-lane guide');
-  const touchGuideCoordinates = await touchGuide.locator('line').evaluate((line) => ({
-    x1: Number(line.getAttribute('x1')), x2: Number(line.getAttribute('x2')),
-    y1: Number(line.getAttribute('y1')), y2: Number(line.getAttribute('y2')),
-  }));
-  const touchGuideLength = Math.hypot(
-    touchGuideCoordinates.x1 - touchGuideCoordinates.x2,
-    touchGuideCoordinates.y1 - touchGuideCoordinates.y2,
-  );
-  assert.ok(touchGuideLength > 24
-    && Math.abs(touchGuideCoordinates.x1 - touchGuideCoordinates.x2) / touchGuideLength < .18,
-  `phone touch guidance must retain a clear perspective-projected drop lane (${JSON.stringify(touchGuideCoordinates)})`);
-  const touchAimStart = await touchAim.boundingBox();
-  assert.ok(touchAimStart, 'touch aim marker must have a visible location');
-  const touchAimStartLane = await touchAim.getAttribute('data-lane-x');
+  assert.equal(await touchNoAimOverlay.count(), 0, 'touch lane selection must not add a cursor or trajectory overlay');
   await dispatchTouchPointer(touchPage, 'pointermove', .31, .72);
-  assert.equal(await touchAim.getAttribute('data-lane-x'), touchAimStartLane,
-    'touch drop lane must stay locked to the finger-down position');
+  assert.equal(await touchNoAimOverlay.count(), 0, 'touch movement must keep the playfield free of cursor graphics');
   assert.equal(touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, 0,
     'touch aiming and dragging must not charge before the swipe is released');
-  await touchPage.screenshot({ path: path.join(artifactDir, 'coin-pusher-aim-preview-phone.png') });
+  await touchPage.screenshot({ path: path.join(artifactDir, 'coin-pusher-no-reticle-phone.png') });
   await touchPage.evaluate(() => document.documentElement.classList.add('reduced-motion'));
   await dispatchTouchPointer(touchPage, 'pointerup', .31, .72);
-  assert.equal(await touchGuide.getAttribute('class'), 'coin-pusher-aim-guide',
-    'a completed phone swipe must clear the trajectory guide after charging once');
+  assert.equal(await touchNoAimOverlay.count(), 0, 'a completed phone swipe must leave the playfield free of cursor UI');
   await waitFor(() => touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length === 1,
     'a valid phone touch swipe must charge exactly one coin after release');
+  await waitFor(async () => touchDrop.evaluate((button) => button.dataset.pusherBeat === 'forward'
+    && button.classList.contains('is-good-timing') && !button.disabled),
+  'the portrait phone HUD must show the predicted forward-stroke cue on its drop control');
+  assert.match(await touchDrop.getAttribute('aria-label'), /順勢落幣.*1 金幣|DROP NOW.*1 coin/i,
+    'the touch drop cue must remain accessible and disclose the one-coin cost');
   const touchTimingCue = touchPage.locator('.coin-pusher-timing-cue');
   await waitFor(async () => touchTimingCue.evaluate((node) => node.dataset.beat === 'forward'
     && node.classList.contains('is-static') && getComputedStyle(node).opacity > .8),
@@ -1579,6 +1594,11 @@ try {
   assert.ok(touchTabletHud && touchTabletHud.x >= 0 && touchTabletHud.y >= 0
     && touchTabletHud.x + touchTabletHud.width <= 1181 && touchTabletHud.y + touchTabletHud.height <= 821,
   'touch-enabled iPad landscape HUD must stay inside the viewport');
+  await waitFor(async () => touchDrop.evaluate((button) => button.dataset.pusherBeat === 'forward'
+    && button.classList.contains('is-good-timing') && !button.disabled),
+  'the iPad landscape HUD must show the predicted forward-stroke cue on its drop control');
+  assert.match(await touchDrop.getAttribute('aria-label'), /順勢落幣.*1 金幣|DROP NOW.*1 coin/i,
+    'the iPad timing cue must remain accessible and disclose the one-coin cost');
   await waitFor(async () => !(await touchPage.locator('.coin-pusher-drop').isDisabled()),
     'touch controls did not re-enable after the landscape phone drop');
   await dispatchTouchPointer(touchPage, 'pointerdown', .68, .3, 42);
@@ -1590,6 +1610,9 @@ try {
     'a valid iPad landscape touch swipe must charge exactly one coin after release');
   await touchPage.setViewportSize({ width: 844, height: 390 });
   await touchPage.waitForTimeout(180);
+  await touchPage.bringToFront();
+  assert.equal(await touchPage.evaluate(() => document.hidden), false,
+    'the phone payout simulation must remain visible instead of being paused in a background tab');
   const landscapePayoutBaseline = touchPayoutAmounts.length;
   const landscapeFlyerBaseline = await touchPage.evaluate(() => window.__coinRewardDebug.length);
   const landscapeDropLanes = [.24, .38, .52, .66, .8, .9];
@@ -1604,22 +1627,72 @@ try {
     await dispatchTouchPointer(touchPage, 'pointerup', lane + .02, .74, pointerId);
     await waitFor(() => touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length === playCountBefore + 1,
       'a continued phone-landscape swipe must authorize one drop');
-    await page.waitForTimeout(360);
+    await touchPage.waitForTimeout(360);
   }
-  await waitFor(() => touchPayoutAmounts.length > landscapePayoutBaseline,
-    `the phone-landscape playfield must confirm a real collection-well payout after drops across the playfield (drops=${touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length}, payouts=${touchPayoutAmounts.length})`, 45000);
-  await waitFor(async () => touchPage.evaluate((baseline) => window.__coinRewardDebug.length > baseline,
-    landscapeFlyerBaseline),
-  `a confirmed phone-landscape payout must animate a coin to the wallet (${JSON.stringify({
-    payoutResponses: touchPayoutAmounts.slice(landscapePayoutBaseline),
-    status: await touchPage.locator('#coinPusherSystemStatus').innerText(),
-  })})`, 5000);
-  const landscapePayoutOrigin = await touchPage.evaluate(() => window.__coinRewardDebug.at(-1));
-  assert.match(landscapePayoutOrigin.text, /\+\d+/, 'the phone payout flight must show its credited amount');
-  assert.ok(landscapePayoutOrigin.x >= 0 && landscapePayoutOrigin.x <= landscapePayoutOrigin.rootWidth
-    && landscapePayoutOrigin.y >= landscapePayoutOrigin.rootHeight * .4 && landscapePayoutOrigin.y <= landscapePayoutOrigin.rootHeight,
-  `phone-landscape payout origin must stay visible in the lower collection well (${JSON.stringify(landscapePayoutOrigin)})`);
-  await touchPage.screenshot({ path: path.join(artifactDir, 'coin-pusher-payout-reward-phone-landscape.png'), animations: 'allow' });
+  const landscapePayoutDiagnostics = await touchPage.evaluate(() => ({
+    hidden: document.hidden,
+    coinCount: document.querySelector('#coin-pusher-root')?.getAttribute('data-coin-count'),
+    pusherBeat: document.querySelector('.coin-pusher-drop')?.getAttribute('data-pusher-beat'),
+    dropEnabled: !document.querySelector('.coin-pusher-drop')?.disabled,
+    wallet: document.querySelector('#coinBalanceHud')?.textContent?.trim(),
+    status: document.querySelector('#coinPusherSystemStatus')?.textContent?.trim(),
+  }));
+  await touchPage.screenshot({ path: path.join(artifactDir, 'coin-pusher-payout-attempt-phone-landscape.png') });
+  await waitFor(async () => !(await touchDrop.isDisabled()),
+    'the phone-landscape drop controls did not settle after the paid lane sweep');
+  await touchPage.waitForTimeout(1500);
+  const touchLandscapePaidDrops = touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length
+    - touchPaidDropBaseline;
+  const touchLandscapeEarnedCoins = touchPayoutAmounts.reduce((total, amount) => total + amount, 0);
+  const touchLandscapeWallet = Number((await touchPage.locator('#coinBalanceHud').innerText()).replace(/,/g, ''));
+  assert.equal(touchLandscapeWallet, touchStartingBalance - touchLandscapePaidDrops + touchLandscapeEarnedCoins,
+    'landscape drops may spend only their authorized coin and only confirmed tray coins may return to the wallet');
+  assert.ok(touchPayoutAmounts.length > 0,
+    'the touch student flow must confirm a real payout before testing subsequent landscape drops');
+  if (touchPayoutAmounts.length > landscapePayoutBaseline) {
+    await waitFor(async () => touchPage.evaluate((baseline) => window.__coinRewardDebug.length > baseline,
+      landscapeFlyerBaseline),
+    `a confirmed phone-landscape payout must animate a coin to the wallet (${JSON.stringify({
+      payoutResponses: touchPayoutAmounts.slice(landscapePayoutBaseline),
+      status: await touchPage.locator('#coinPusherSystemStatus').innerText(),
+    })})`, 5000);
+    const landscapePayoutOrigin = await touchPage.evaluate(() => window.__coinRewardDebug.at(-1));
+    assert.match(landscapePayoutOrigin.text, /\+\d+/, 'the phone payout flight must show its credited amount');
+    assert.ok(landscapePayoutOrigin.x >= 0 && landscapePayoutOrigin.x <= landscapePayoutOrigin.rootWidth
+      && landscapePayoutOrigin.y >= landscapePayoutOrigin.rootHeight * .4 && landscapePayoutOrigin.y <= landscapePayoutOrigin.rootHeight,
+    `phone-landscape payout origin must stay visible in the lower collection well (${JSON.stringify(landscapePayoutOrigin)})`);
+    const landscapePayoutCallouts = await touchPage.evaluate(() => {
+      const root = document.querySelector('#coin-pusher-root');
+      const rootRect = root.getBoundingClientRect();
+      const rectOf = (node) => {
+        if (!node) return undefined;
+        const rect = node.getBoundingClientRect();
+        return {
+          left: rect.left - rootRect.left, right: rect.right - rootRect.left,
+          top: rect.top - rootRect.top, bottom: rect.bottom - rootRect.top,
+          opacity: Number(getComputedStyle(node).opacity), text: node.textContent?.trim(),
+        };
+      };
+      const tray = rectOf(root.querySelector('.coin-pusher-tray-catch'));
+      const rewards = Array.from(root.querySelectorAll('.coin-pusher-reward-fly'))
+        .map(rectOf).filter((reward) => reward && reward.opacity > .25);
+      return { rootWidth: root.clientWidth, tray, rewards };
+    });
+    if (landscapePayoutCallouts.tray && landscapePayoutCallouts.tray.opacity > .25) {
+      assert.ok(landscapePayoutCallouts.tray.left >= 7
+        && landscapePayoutCallouts.tray.right <= landscapePayoutCallouts.rootWidth - 7,
+      `the phone-landscape catch label must stay inside the playfield (${JSON.stringify(landscapePayoutCallouts)})`);
+      for (const reward of landscapePayoutCallouts.rewards) {
+        const overlaps = landscapePayoutCallouts.tray.left < reward.right
+          && landscapePayoutCallouts.tray.right > reward.left
+          && landscapePayoutCallouts.tray.top < reward.bottom
+          && landscapePayoutCallouts.tray.bottom > reward.top;
+        assert.equal(overlaps, false,
+          `the phone-landscape catch label must not cover a visible +1 flight (${JSON.stringify({ tray: landscapePayoutCallouts.tray, reward })})`);
+      }
+    }
+    await touchPage.screenshot({ path: path.join(artifactDir, 'coin-pusher-payout-reward-phone-landscape.png'), animations: 'allow' });
+  }
   await waitFor(async () => !(await touchPage.locator('.coin-pusher-drop').isDisabled()),
     'touch exit test started before the iPad drop finished');
   await touchPage.locator('[data-action="coin-pusher-exit"]').tap();
@@ -1659,19 +1732,55 @@ try {
     `the re-entered HUD must refresh the latest server collection (${JSON.stringify({ ...reentryCollectionState, finishTierBeforeReentry, collectionBeforeReentry })})`);
   assert.equal(reentryCollectionState.boardTier, String(finishTierBeforeReentry),
     're-entering the bedroom must keep the server-confirmed cabinet finish');
-  assert.equal(reentryCollectionState.boardFinish, finishIds[finishTierBeforeReentry],
-    'the cabinet material after re-entry must match the latest server-confirmed finish');
+  assert.equal(reentryCollectionState.boardFinish,
+    finishIds[expectedFinishTier > 0 ? expectedFinishTier : finishTierBeforeReentry],
+    're-entry must preserve the selected cabinet finish even when later payouts unlock a higher tier');
   assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, paidDropsBeforeReentry,
     're-entering the saved board must not charge another coin');
 
-  const coinsBeforeReload = await page.locator('#coin-pusher-root').getAttribute('data-coin-count');
   const timingBestBeforeReload = Number(await page.locator('#coin-pusher-root').getAttribute('data-best-timing-streak'));
+  assert.ok(timingBestBeforeReload >= 2,
+    "the student's best physical forward-timing streak must be tracked independently of the live streak");
+  await collectionButton.click();
+  await page.locator('.coin-pusher-collection-panel').waitFor({ state: 'visible' });
+  const finishWalletBeforePreferenceSave = Number((await page.locator('#coinBalanceHud').innerText()).replace(/,/g, ''));
+  const requestsBeforePreferenceSave = requests.length;
+  const playsBeforePreferenceSave = requests.filter((url) => url.endsWith('/coin-pusher/play')).length;
+  const payoutsBeforePreferenceSave = payoutTotal;
+  await page.locator('.coin-pusher-finish-option[data-finish-id="classic"]').click();
+  await waitFor(async () => await page.locator('#coin-pusher-root').getAttribute('data-keepsake-finish') === 'classic',
+    "a previously earned finish must be previewable before saving the student's preference");
+  await page.locator('.coin-pusher-collection-close').click();
+  const waitForSettledPayouts = async () => {
+    const startedAt = Date.now();
+    let stableSince = startedAt;
+    let observedCoinCount = Number(await page.locator('#coin-pusher-root').getAttribute('data-coin-count'));
+    let observedPayoutTotal = payoutTotal;
+    while (Date.now() - stableSince < 1000 && Date.now() - startedAt < 15000) {
+      await page.waitForTimeout(100);
+      const currentCoinCount = Number(await page.locator('#coin-pusher-root').getAttribute('data-coin-count'));
+      if (currentCoinCount !== observedCoinCount || payoutTotal !== observedPayoutTotal) {
+        observedCoinCount = currentCoinCount;
+        observedPayoutTotal = payoutTotal;
+        stableSince = Date.now();
+      }
+    }
+    assert.ok(Date.now() - stableSince >= 1000,
+      'the physical board should finish its already-earned payout wave before persistence checks');
+  };
+  await waitForSettledPayouts();
+  const walletAfterPreferenceSave = Number((await page.locator('#coinBalanceHud').innerText()).replace(/,/g, ''));
+  assert.equal(walletAfterPreferenceSave, finishWalletBeforePreferenceSave + payoutTotal - payoutsBeforePreferenceSave,
+    'saving a finish preference may coincide with real physical payouts but must not change the wallet itself');
+  assert.equal(requests.filter((url) => url.endsWith('/coin-pusher/play')).length, playsBeforePreferenceSave,
+    'saving a finish preference must never add or spend a student coin');
+  assert.ok(requests.slice(requestsBeforePreferenceSave).every((url) => url.endsWith('/coin-pusher/payout')),
+    'only already-earned physical payouts may arrive while the finish preference is being saved');
+  const coinsBeforeReload = await page.locator('#coin-pusher-root').getAttribute('data-coin-count');
   const walletBeforeReloadResponse = await context.request.get('/api/pet/bootstrap');
   const walletBeforeReload = Number((await walletBeforeReloadResponse.json()).wallet.balance);
   const paidDropsBeforeReload = playRequestKeys.length;
   assert.ok(Number(coinsBeforeReload) > 0, 'the live board must expose its current physical coin count');
-  assert.ok(timingBestBeforeReload >= 2,
-    "the student's best physical forward-timing streak must be tracked independently of the live streak");
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('[data-tab="coinPusher"]').click();
   await page.locator('#coin-pusher-root canvas').waitFor();
@@ -1695,14 +1804,16 @@ try {
   const finishTierAfterReload = Math.min(5, [5, 25, 100, 300, 1000]
     .filter((threshold) => returnedCoinsAfterReload >= threshold).length);
   assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-tier'), String(finishTierAfterReload),
-    `a reload must apply the cabinet finish from the latest server-confirmed stamp total (${returnedCoinsAfterReload})`);
-  assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-finish'), finishIds[finishTierAfterReload],
-    'the material finish after reload must match the authoritative collection milestone');
+    `a reload must preserve the unlock tier from the latest server-confirmed stamp total (${returnedCoinsAfterReload})`);
+  assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-keepsake-finish'), 'classic',
+    "the student's selected unlocked finish must persist independently of earned stamp progress");
   await collectionButton.click();
   await waitFor(async () => page.locator('.coin-pusher-collection-panel').isVisible(),
     'the keepsake book must reopen after the saved session reloads');
   assert.equal(await page.locator('#coinPusherTimingBest').innerText(), `×${timingBestBeforeReload}`,
     'the personal best shown in the collection book must survive the saved-session reload');
+  assert.equal(await page.locator('.coin-pusher-finish-current').getAttribute('data-finish-id'), 'classic',
+    'the collection book must reflect the persisted student preference after reload');
   await page.locator('.coin-pusher-collection-close').click();
   const payoutKeysByEvent = new Map();
   for (const { eventId, requestKey } of payoutRequestEvents) {
@@ -1727,6 +1838,8 @@ try {
   await page.locator('.coin-pusher-drop').click();
   await waitFor(async () => /結果未確認|Drop not confirmed/i.test(await page.locator('#coinPusherSystemStatus').textContent() || ''),
     'a lost play response must leave a safe, retryable confirmation state');
+  assert.equal(await page.locator('.coin-pusher-reset').isDisabled(), true,
+    'reset must stay disabled while a charged drop still needs confirmation');
   await page.unroute(lostReplyPlayRoute);
   expectedLostTransactionReply = false;
   assert.equal(playRequestKeys.length, playCountBeforeLostReply + 1,
@@ -1782,6 +1895,206 @@ try {
   assert.equal(failurePageRequests.filter((url) => url.endsWith('/api/pet/coin-pusher/play')).length,
     failurePagePaidDropsBeforeEscape,
     'leaving the arcade with Escape must not authorize or charge a coin drop');
+
+  await failurePage.locator('[data-tab="coinPusher"]').click();
+  await failurePage.locator('#coin-pusher-root canvas').waitFor();
+  await waitFor(async () => !(await failurePage.locator('#coin-pusher-root').getAttribute('aria-busy') === 'true'),
+    'the reset-board fixture must finish loading before use');
+  const resetButton = failurePage.locator('.coin-pusher-reset');
+  const resetRequestsBefore = failurePageRequests.filter((url) => /\/api\/pet\/coin-pusher\/(play|payout)$/.test(url)).length;
+  for (const viewport of [
+    { width: 1440, height: 900, name: 'desktop' },
+    { width: 1180, height: 820, name: 'ipad-landscape' },
+    { width: 390, height: 844, name: 'phone' },
+  ]) {
+    await failurePage.setViewportSize({ width: viewport.width, height: viewport.height });
+    assert.equal(await resetButton.isVisible(), true, `reset must remain visible on ${viewport.name}`);
+    const bounds = await resetButton.evaluate((button) => {
+      const rect = button.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
+    });
+    assert.ok(bounds.left >= 0 && bounds.right <= viewport.width,
+      `reset control must fit ${viewport.name} without horizontal clipping (${JSON.stringify(bounds)})`);
+    assert.ok(bounds.width >= 34 && bounds.height >= 38,
+      `reset control must remain touchable on ${viewport.name} (${JSON.stringify(bounds)})`);
+  }
+  await failurePage.setViewportSize({ width: 1440, height: 900 });
+  assert.equal(await resetButton.isDisabled(), false, 'a ready board must allow a reset');
+  const resetWalletBefore = Number((await failurePage.locator('#coinBalanceHud').innerText()).replace(/,/g, ''));
+  await resetButton.click();
+  await waitFor(async () => {
+    const count = Number(await failurePage.locator('#coin-pusher-root').getAttribute('data-coin-count'));
+    const status = await failurePage.locator('#coinPusherSystemStatus').textContent() || '';
+    return count >= 27 && count <= 33 && /三排金幣|three rows/i.test(status);
+  }, 'reset must replace the board with exactly three rows of starter coins');
+  const resetCoinCount = Number(await failurePage.locator('#coin-pusher-root').getAttribute('data-coin-count'));
+  assert.equal(Number((await failurePage.locator('#coinBalanceHud').innerText()).replace(/,/g, '')), resetWalletBefore,
+    'reset must not spend or award student coins');
+  await failurePage.waitForTimeout(700);
+  assert.equal(failurePageRequests.filter((url) => /\/api\/pet\/coin-pusher\/(play|payout)$/.test(url)).length,
+    resetRequestsBefore,
+    'reset must not call either paid-play or payout endpoints');
+  await failurePage.reload({ waitUntil: 'networkidle' });
+  await failurePage.locator('[data-tab="coinPusher"]').click();
+  await failurePage.locator('#coin-pusher-root canvas').waitFor();
+  await waitFor(async () => await failurePage.locator('#coin-pusher-root').getAttribute('data-session-restored') === 'true',
+    'the three-row board must persist after a reload');
+  await waitFor(async () => !(await failurePage.locator('#coin-pusher-root').getAttribute('aria-busy') === 'true'),
+    'the reset board did not finish restoring');
+  assert.equal(Number(await failurePage.locator('#coin-pusher-root').getAttribute('data-coin-count')), resetCoinCount,
+    'reload must preserve the reset board instead of rebuilding a larger starter pile');
+  assert.equal(failurePageRequests.filter((url) => /\/api\/pet\/coin-pusher\/(play|payout)$/.test(url)).length,
+    resetRequestsBefore,
+    'restoring the reset board must not spend or award coins');
+
+  // Fresh worlds missed the student's real failure: IndexedDB also restores old cabinet
+  // colliders. Reopen a legacy full-length deck with coins already over the visible trough.
+  await page.goto('about:blank');
+  await failurePage.goto('/health');
+  const petRequire = createRequire(path.join(projectRoot, 'pet-app', 'package.json'));
+  const { createServer } = petRequire('vite');
+  const fixtureVite = await createServer({
+    root: path.join(projectRoot, 'pet-app'), server: { middlewareMode: true, hmr: false },
+    appType: 'custom', logLevel: 'error', ssr: { noExternal: ['@dimforge/rapier3d'] },
+  });
+  let legacyModel;
+  let legacySnapshot;
+  let carrierModel;
+  const carrierVisuals = [];
+  try {
+    const { CoinPusherModel } = await fixtureVite.ssrLoadModule('/src/game/CoinPusherModel.ts');
+    const { default: RAPIER } = await fixtureVite.ssrLoadModule('@dimforge/rapier3d');
+    const dimensions = await fixtureVite.ssrLoadModule('/src/game/CoinPusherDimensions.ts');
+    legacyModel = new CoinPusherModel();
+    for (const coin of legacyModel.coins.splice(0)) legacyModel.world.removeRigidBody(coin.body);
+    const legacyDeck = legacyModel.deckColliders[2];
+    legacyDeck.setHalfExtents({ x: 2.52, y: .08, z: 2 });
+    legacyDeck.parent().setTranslation({ x: 0, y: -.045, z: 0 }, true);
+    for (const [index, z] of [dimensions.MAIN_DECK_FRONT_Z + .015, 1.15, 1.8].entries()) {
+      legacyModel.createCoin((index - 1) * .6, .067, z, false);
+    }
+    const legacyBlade = legacyModel.world.createCollider(
+      RAPIER.ColliderDesc.cuboid(2.48, .0925, .04).setTranslation(0, -.0025, dimensions.PUSHER_LIP_LOCAL_Z),
+      legacyModel.pusherBody,
+    );
+    legacySnapshot = legacyModel.createSnapshot();
+    legacySnapshot.pusherLipColliderHandle = legacyBlade.handle;
+    delete legacySnapshot.geometryRevision;
+    carrierModel = new CoinPusherModel();
+    for (const coin of carrierModel.coins.splice(0)) carrierModel.world.removeRigidBody(coin.body);
+    const riderId = carrierModel.dropCoin(0);
+    for (let frame = 0; frame < 150; frame += 1) {
+      carrierModel.update(1000 / 60);
+      if (frame === 143) {
+        assert.equal(carrierModel.strokeDirection, 'return');
+        assert.equal(carrierModel.coins.find((coin) => coin.id === riderId).ridingPusher, true,
+          'the screenshot fixture must show a real dropped coin still carried on return');
+        carrierVisuals.push({ name: 'return-carrier', model: carrierModel.createSnapshot() });
+      }
+    }
+    carrierModel.destroy();
+    carrierModel = new CoinPusherModel();
+    for (const coin of carrierModel.coins.splice(0)) carrierModel.world.removeRigidBody(coin.body);
+    carrierModel.mechanismStarted = true;
+    carrierModel.elapsed = 1.9;
+    carrierModel.pusherZ = dimensions.PUSHER_FORWARD_Z;
+    carrierModel.pusherBody.setTranslation({ x: 0, y: .02, z: carrierModel.pusherZ }, true);
+    for (let index = 0; index < 5; index += 1) {
+      const coin = carrierModel.createCoin(0, .067, dimensions.REAR_CASE_FRONT_Z + .168 + .018 + index * .343, true);
+      coin.tumbling = false;
+      coin.body.setEnabledRotations(false, true, false, true);
+      carrierModel.attachPusherRider(coin);
+    }
+    for (let frame = 0; frame < 150; frame += 1) {
+      carrierModel.update(1000 / 60);
+      const stripped = carrierModel.coins.at(-1);
+      if (stripped.transferringToDeck && stripped.body.translation().y < .06) {
+        carrierVisuals.push({ name: 'backboard-strip', model: carrierModel.createSnapshot() });
+        break;
+      }
+    }
+    assert.equal(carrierVisuals.length, 2, 'both supported-return and physical edge-drop states need visual evidence');
+  } finally {
+    carrierModel?.destroy();
+    legacyModel?.destroy();
+    await fixtureVite.close();
+  }
+  const legacyPlayResponse = await failureContext.request.post('/api/pet/coin-pusher/play', {
+    data: {}, headers: { 'Idempotency-Key': require('node:crypto').randomUUID() },
+  });
+  assert.equal(legacyPlayResponse.status(), 200, 'the legacy board fixture needs a real previously charged play');
+  const legacyPlay = await legacyPlayResponse.json();
+  const legacyWalletBefore = Number((await (await failureContext.request.get('/api/pet/bootstrap')).json()).wallet.balance);
+  const writeFixtureSession = async (modelSnapshot) => failurePage.evaluate(async (session) => {
+    await new Promise((resolve, reject) => {
+      const open = indexedDB.open('buio-pet-coin-pusher', 1);
+      open.onerror = () => reject(open.error);
+      open.onsuccess = () => {
+        const db = open.result;
+        const transaction = db.transaction('studentSessions', 'readwrite');
+        transaction.objectStore('studentSessions').put(session);
+        transaction.oncomplete = () => { db.close(); resolve(); };
+        transaction.onerror = () => { db.close(); reject(transaction.error); };
+      };
+    });
+  }, {
+    version: 1, studentId: 'S001', updatedAt: Date.now(), model: modelSnapshot,
+    plays: [{ playId: legacyPlay.playId, remaining: legacyPlay.payoutCap }],
+    payoutSequence: 0, pendingPayouts: [], bestTimingStreak: 0,
+  });
+  await writeFixtureSession(legacySnapshot);
+  const legacyPayouts = [];
+  failurePage.on('response', (response) => {
+    if (!response.url().endsWith('/coin-pusher/payout')) return;
+    void response.json().then((body) => { if (body.success) legacyPayouts.push(Number(body.earned)); });
+  });
+  await failurePage.goto('/pet', { waitUntil: 'networkidle' });
+  await failurePage.locator('[data-tab="coinPusher"]').click();
+  await failurePage.locator('#coin-pusher-root canvas').waitFor();
+  assert.equal(await failurePage.locator('#coin-pusher-root').getAttribute('data-session-restored'), 'true',
+    'the legacy trough test must use the actual persisted-world restore path');
+  await failurePage.locator('.coin-pusher-reward-fly').first().waitFor({ state: 'visible' });
+  assert.equal(await failurePage.locator('.coin-pusher-reward-fly').first().innerText(), '+10',
+    'a restored trough coin must show the real +10 wallet animation');
+  await failurePage.screenshot({ path: path.join(artifactDir, 'coin-pusher-legacy-trough-plus-ten-desktop.png'), animations: 'allow' });
+  await waitFor(async () => Number(await failurePage.locator('#coin-pusher-root').getAttribute('data-coin-count')) === 0,
+    'all three old trough coins must disappear after their collection animation');
+  await waitFor(() => legacyPayouts.reduce((sum, earned) => sum + earned, 0) === 30,
+    'the three old trough coins must credit exactly thirty wallet coins');
+  const legacyWalletAfter = Number((await (await failureContext.request.get('/api/pet/bootstrap')).json()).wallet.balance);
+  assert.equal(legacyWalletAfter, legacyWalletBefore + 30, 'legacy geometry repair must credit each collected coin exactly once');
+  await failurePage.reload({ waitUntil: 'networkidle' });
+  await failurePage.locator('[data-tab="coinPusher"]').click();
+  await failurePage.locator('#coin-pusher-root canvas').waitFor();
+  await failurePage.waitForTimeout(700);
+  assert.equal(Number(await failurePage.locator('#coin-pusher-root').getAttribute('data-coin-count')), 0,
+    'collected legacy coins must not reappear when the repaired board reloads');
+  assert.equal(legacyPayouts.reduce((sum, earned) => sum + earned, 0), 30,
+    'reloading the repaired board must not replay +10 credits');
+
+  // Pause only the final visual fixtures at deterministic simulated poses. Keep the real
+  // student renderer/HUD and IndexedDB restore path; do not expose a production debug API.
+  await failureContext.addInitScript(() => Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }));
+  const carrierRequestsBefore = failurePageRequests.filter((url) => /\/api\/pet\/coin-pusher\/(play|payout)$/.test(url)).length;
+  for (const viewport of [
+    { width: 1440, height: 900, name: 'desktop' },
+    { width: 1180, height: 820, name: 'ipad-landscape' },
+    { width: 390, height: 844, name: 'phone' },
+  ]) {
+    await failurePage.setViewportSize({ width: viewport.width, height: viewport.height });
+    for (const visual of carrierVisuals) {
+      await failurePage.goto('/health');
+      await writeFixtureSession(visual.model);
+      await failurePage.goto('/pet', { waitUntil: 'networkidle' });
+      await failurePage.locator('[data-tab="coinPusher"]').click();
+      await waitFor(async () => await failurePage.locator('#coin-pusher-root').getAttribute('aria-busy') === 'false',
+        'the restored carrier visual must finish initializing');
+      assert.equal(Number(await failurePage.locator('#coin-pusher-root').getAttribute('data-coin-count')), visual.model.coins.length);
+      await failurePage.screenshot({ path: path.join(artifactDir, `coin-pusher-${visual.name}-${viewport.name}.png`), animations: 'allow' });
+    }
+  }
+  assert.equal(failurePageRequests.filter((url) => /\/api\/pet\/coin-pusher\/(play|payout)$/.test(url)).length,
+    carrierRequestsBefore, 'shelf carrier/edge-drop visual fixtures must not charge or award wallet coins');
   await failureContext.close();
 
   assert.ok(requests.every((url) => /\/coin-pusher\/(play|payout)$/.test(url)), 'coin pusher may only call its play/payout endpoints');

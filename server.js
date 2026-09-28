@@ -405,7 +405,7 @@ const setPetHeaders = (res, { document = false, microphone = false } = {}) => {
   }
 };
 app.use('/pet/assets', (req, res, next) => {
-  const isHashedBuildFile = /-[A-Za-z0-9_-]{8,}\.(?:js|css|webp|wasm)$/i.test(req.path);
+  const isHashedBuildFile = /-[A-Za-z0-9_-]{8,}\.(?:js|css|webp|wasm|glb)$/i.test(req.path);
   if (!isHashedBuildFile) return res.status(404).end();
   next();
 }, (req, res, next) => {

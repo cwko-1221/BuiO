@@ -27,6 +27,7 @@ export interface CoinPusherSession {
   plays: StoredCoinPusherPlay[];
   payoutSequence: number;
   pendingPayouts: StoredCoinPusherPayout[];
+  pendingPrizes?: string[];
   bestTimingStreak?: number;
   pendingDrop?: StoredCoinPusherDrop;
 }

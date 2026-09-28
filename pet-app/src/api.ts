@@ -1,4 +1,5 @@
 import type { Bootstrap, Identity, RoomPlacement, TeacherGrantNotification } from './types';
+import type { ArcadePrize, ArcadePrizeKind } from './game/ArcadePrizes';
 import type { QuietSession, QuietSettings } from './quiet-room-types';
 
 // The shared runtime is loaded blocking in <head>, before this bundle runs.
@@ -28,6 +29,10 @@ export const api = {
   hatch: (key: string) => request<any>('/api/pet/starter-egg/hatch', { method: 'POST', headers: { 'Idempotency-Key': key }, body: '{}' }),
   buyEgg: (body: { kind: 'random' | 'direct'; speciesId?: string }, key: string) => request<any>('/api/pet/eggs/purchase', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify(body) }),
   playCoinPusher: (key: string) => request<any>('/api/pet/coin-pusher/play', { method: 'POST', headers: { 'Idempotency-Key': key }, body: '{}' }),
+  arcadePrizes: () => request<{ prizes: ArcadePrize[]; dropsUntilRestock: number }>('/api/pet/coin-pusher/prizes', { method: 'POST', body: '{}' }),
+  claimArcadePrize: (prizeId: string) => request<{ prizeId: string; kind: ArcadePrizeKind; earned: number; balance: number; replayed?: boolean }>(`/api/pet/coin-pusher/prizes/${encodeURIComponent(prizeId)}/claim`, { method: 'POST', body: '{}' }),
+  redeemArcadePrize: (prizeId: string, itemId: string) => request<{ itemId: string }>(`/api/pet/coin-pusher/prizes/${encodeURIComponent(prizeId)}/redeem`, { method: 'POST', body: JSON.stringify({ itemId }) }),
+  // amount counts caught physical coins; earned is the server-priced wallet credit.
   payoutCoinPusher: (body: { playId: string; eventId: string; amount: number }, key: string) => request<{ earned: number; balance: number; remainingPayout: number; collection?: { returnedCoins: number } }>('/api/pet/coin-pusher/payout', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify(body) }),
   activatePet: (petId: string) => request<any>(`/api/pet/pets/${encodeURIComponent(petId)}/activate`, { method: 'POST', body: '{}' }),
   feed: (petId: string, foodId: string, key: string) => request<any>(`/api/pet/pets/${encodeURIComponent(petId)}/feed`, { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ foodId }) }),

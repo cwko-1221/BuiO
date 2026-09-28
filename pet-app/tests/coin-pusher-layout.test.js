@@ -22,9 +22,9 @@ test('loading preview and Rapier share the same collision-safe starter pile', as
 
   const baseLayer = coins.filter((coin) => Math.abs(coin.y - (FIXED_DECK_TOP_Y + COIN_HALF_THICKNESS)) < 1e-9);
   const upperLayer = coins.filter((coin) => Math.abs(coin.y - (FIXED_DECK_TOP_Y + COIN_HALF_THICKNESS * 3)) < 1e-9);
-  assert.equal(baseLayer.length, 132);
-  assert.equal(upperLayer.length, 25);
-  assert.equal(coins.length, 157);
+  assert.equal(baseLayer.length, 50, 'the compact cabinet should use a five-row base pile');
+  assert.equal(upperLayer.length, 5, 'the single upper layer should remain sparse and deterministic');
+  assert.equal(coins.length, 55, 'the starter bed should stay to five base rows and one sparse upper layer');
   assert.ok(coins.every(({ x, y, z }) => Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)));
   assert.ok(coins.every((coin) => Math.abs(coin.x) < 2.57
     && coin.z > dimensions.MAIN_DECK_BACK_Z && coin.z < dimensions.MAIN_DECK_FRONT_Z),

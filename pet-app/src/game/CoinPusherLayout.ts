@@ -3,7 +3,9 @@ import { PUSHER_HOME_Z, PUSHER_LIP_LOCAL_Z } from './CoinPusherDimensions';
 export const COIN_RADIUS = .168;
 export const COIN_HALF_THICKNESS = .032;
 export const COIN_SPACING = .352;
-export const FIXED_DECK_TOP_Y = .035;
+// Leave clearance below the raised moving shelf so coins can fall onto the stationary bed.
+export const FIXED_DECK_TOP_Y = -.075;
+export const FIXED_DECK_HALF_HEIGHT = .08;
 
 export interface CoinPusherLayoutPoint {
   x: number;
@@ -12,10 +14,16 @@ export interface CoinPusherLayoutPoint {
 }
 
 /** A deterministic, physics-free starter pile shared by the loading preview and Rapier. */
-export function createCoinPusherStarterLayout(): CoinPusherLayoutPoint[] {
-  const rows = 10;
+export function createCoinPusherStarterLayout(options: { rows?: number; upperLayerChance?: number } = {}): CoinPusherLayoutPoint[] {
+  const rows = options.rows ?? 5;
+  const upperLayerChance = options.upperLayerChance ?? .16;
+  if (!Number.isSafeInteger(rows) || rows < 1 || rows > 20
+    || !Number.isFinite(upperLayerChance) || upperLayerChance < 0 || upperLayerChance > 1) {
+    throw new RangeError('Invalid coin-pusher starter layout options');
+  }
   const rowStep = COIN_SPACING * Math.sqrt(3) / 2;
-  const startZ = PUSHER_HOME_Z + PUSHER_LIP_LOCAL_Z + .2;
+  // Keep the bed within the plate's full forward sweep and leave a shorter runway to the tray.
+  const startZ = PUSHER_HOME_Z + PUSHER_LIP_LOCAL_Z + .5;
   const minimumSpacing = COIN_RADIUS * 2 + .003;
   let randomState = 0x00c01bee;
   const random = () => {
@@ -26,7 +34,7 @@ export function createCoinPusherStarterLayout(): CoinPusherLayoutPoint[] {
 
   // A seeded, collision-checked hex pack breaks ruler-straight rows without starting discs overlapped.
   for (let row = 0; row < rows; row += 1) {
-    const columns = 12 + Math.floor(random() * 3);
+    const columns = 9 + Math.floor(random() * 3);
     const stagger = row % 2 ? COIN_SPACING / 2 : 0;
     const firstColumn = -Math.floor(columns / 2);
     for (let column = 0; column < columns; column += 1) {
@@ -50,7 +58,7 @@ export function createCoinPusherStarterLayout(): CoinPusherLayoutPoint[] {
 
   const stackedCoins: Array<{ x: number; z: number }> = [];
   for (const position of baseCoins) {
-    if (random() > .34) continue;
+    if (upperLayerChance <= 0 || random() > upperLayerChance) continue;
     const candidate = {
       x: position.x + (random() - .5) * .036,
       z: position.z + (random() - .5) * .036,

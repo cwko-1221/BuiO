@@ -172,7 +172,7 @@ test('the forward-timing chime is distinct, soft, and silenced by the arcade mut
   assert.ok(keepsakeEnvelopes.every((node) => node.gain.ramps.includes(.07)),
     'the unlock cue should remain softer than a full win sound');
 
-  const normalStrokeSeconds = 4.5 * .438;
+  const normalStrokeSeconds = 3.5 * .438;
   const normalStrokeStart = audio.context.oscillators.length;
   const normalStrokeGainStart = audio.context.gains.length;
   audio.sfx('arcadeStroke', 0, 0, normalStrokeSeconds);

@@ -15,12 +15,23 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
   t.after(() => vite.close());
   const {
     advanceCoinPusherTimingStreak, coinPusherCabinetFinish, coinPusherStampProgress,
-    coinPusherImpactPan, coinPusherTimingGuidanceLabel, coinPusherTimingRecordLabel, coinPusherTimingStreakLabel,
+    coinPusherCalloutCenterX, coinPusherDropTimingCueLabel, coinPusherImpactPan, coinPusherTimingGuidanceLabel, coinPusherTimingRecordLabel, coinPusherTimingStreakLabel,
     coinPusherTravelProgress, coinPusherRewardFlightLabels, planCoinPusherRewardFlightDelays, COIN_PUSHER_CABINET_FINISHES,
     coinPusherTrayImpactPulse, COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS, COIN_PUSHER_STAMP_THRESHOLDS,
     COIN_PUSHER_TRAY_PULSE_DURATION_MS,
   } = await vite.ssrLoadModule('/src/game/CoinPusherFeedback.ts');
   const dimensions = await vite.ssrLoadModule('/src/game/CoinPusherDimensions.ts');
+
+  assert.equal(coinPusherCalloutCenterX(22, 180, 320), 98,
+    'a long callout near the left edge must move inward far enough to stay visible');
+  assert.equal(coinPusherCalloutCenterX(298, 180, 320), 222,
+    'a long callout near the right edge must move inward far enough to stay visible');
+  assert.equal(coinPusherCalloutCenterX(-50, 500, 320), 160,
+    'a callout wider than a tiny viewport must be centered after its CSS width is constrained');
+  assert.equal(coinPusherCalloutCenterX(Number.NaN, 80, 320), 160,
+    'an invalid projected coin position must safely center its callout');
+  assert.equal(coinPusherCalloutCenterX(24, 80, 0), 0,
+    'a hidden viewport must not produce a non-finite callout position');
 
   assert.equal(coinPusherTravelProgress(dimensions.PUSHER_HOME_Z), 0,
     'the idle/home pusher should leave its rail glow at the cool end');
@@ -69,6 +80,14 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
     'the unearned cabinet must preserve the original classic brass appearance');
   assert.equal(coinPusherCabinetFinish(1).id, 'bronze', 'the first confirmed stamp should unlock bronze');
   assert.equal(coinPusherCabinetFinish(5).id, 'aurora', 'the final confirmed stamp should unlock aurora');
+  assert.equal(coinPusherCabinetFinish(2, 'classic').id, 'classic',
+    'a student may keep any previously unlocked finish instead of being forced to use the latest one');
+  assert.equal(coinPusherCabinetFinish(2, 'bronze').id, 'bronze',
+    'a student may choose an earned finish from the collection');
+  assert.equal(coinPusherCabinetFinish(1, 'gold').id, 'bronze',
+    'a persisted preference must fall back to the highest earned finish while gold remains locked');
+  assert.equal(coinPusherCabinetFinish(5, 'invalid').id, 'aurora',
+    'invalid preference data must safely use the highest earned finish');
   assert.equal(coinPusherCabinetFinish(-5).id, 'classic', 'negative saved progress must not unlock a finish');
   assert.equal(coinPusherCabinetFinish(99).id, 'aurora', 'finish tiers must clamp to the last unlocked palette');
   assert.equal(coinPusherCabinetFinish(Number.NaN).id, 'classic', 'invalid progress must fall back to the default palette');
@@ -121,6 +140,10 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
     'a streak should celebrate only when it exceeds the previous personal best');
   assert.equal(coinPusherTimingRecordLabel(secondHit.count, secondHit.best, 'en'), undefined,
     'reaching an already-held best must not falsely announce a new record');
+  assert.equal(coinPusherDropTimingCueLabel('forward', 'zh-HK'), '前推中 · 順勢落幣');
+  assert.equal(coinPusherDropTimingCueLabel('forward', 'en'), 'PUSH IN MOTION · DROP NOW');
+  assert.equal(coinPusherDropTimingCueLabel('return', 'zh-HK'), undefined,
+    'the live timing highlight must clear outside the forward stroke');
   assert.equal(coinPusherTimingGuidanceLabel('home-pause', 'zh-HK'), '後停 · 等前推');
   assert.equal(coinPusherTimingGuidanceLabel('front-pause', 'zh-HK'), '前停 · 等下一推');
   assert.equal(coinPusherTimingGuidanceLabel('return', 'en'), 'RETURN · NEXT PUSH');
@@ -139,11 +162,11 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
   }, 'coins caught together should receive distinct, evenly spaced wallet flights');
   const overlappingBurst = planCoinPusherRewardFlightDelays(3, 1080, firstRewardBurst.nextAvailableAt);
   assert.deepEqual(overlappingBurst, {
-    delaysMs: [240, 240 + COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS, 240 + COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS * 2],
-    nextAvailableAt: 1800,
+    delaysMs: [280, 280 + COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS, 280 + COIN_PUSHER_REWARD_FLIGHT_STAGGER_MS * 2],
+    nextAvailableAt: 1900,
   }, 'a second physical catch must continue the visual queue instead of restarting on top of the first');
   const cappedBurst = planCoinPusherRewardFlightDelays(8, 5000, 0);
-  assert.deepEqual(cappedBurst.delaysMs, [0, 160, 320, 480, 640],
+  assert.deepEqual(cappedBurst.delaysMs, [0, 180, 360, 540, 720],
     'large payouts should cap the number of separate flight visuals while keeping a readable cadence');
   assert.deepEqual(coinPusherRewardFlightLabels(8), ['+1', '+1', '+1', '+1', '+4'],
     'the normal flight labels should account for every credited coin without spawning more than five chips');
@@ -151,6 +174,12 @@ test('paw-stamp progress agrees with cumulative payout totals at each milestone'
     'reduced-motion players should get one static total instead of stacked non-moving reward chips');
   assert.deepEqual(coinPusherRewardFlightLabels(0, true), [],
     'empty reward events must never imply that any coins were earned');
+  assert.deepEqual(coinPusherRewardFlightLabels(1, false, 10), ['+10']);
+  assert.deepEqual(coinPusherRewardFlightLabels(3, false, 10), ['+10', '+10', '+10']);
+  assert.deepEqual(coinPusherRewardFlightLabels(8, false, 10), ['+10', '+10', '+10', '+10', '+40'],
+    'large catch batches must retain the exact credited reward without creating ten chips per coin');
+  assert.deepEqual(coinPusherRewardFlightLabels(3, true, 10), ['+30']);
+  assert.deepEqual(coinPusherRewardFlightLabels(1, false, Number.NaN), []);
   assert.deepEqual(planCoinPusherRewardFlightDelays(Number.NaN, 5000, 0), {
     delaysMs: [], nextAvailableAt: 5000,
   }, 'invalid reward visuals must not create a flight or poison the next scheduled payout');

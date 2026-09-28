@@ -5,7 +5,7 @@ const path = require('node:path');
 const { createServer } = require('vite');
 const test = require('node:test');
 
-test('a crowded pusher stroke keeps coins above the moving plate and tabletop', async (t) => {
+test('the compact backboard pusher keeps coins supported through its short stroke', async (t) => {
   const vite = await createServer({
     root: path.resolve(__dirname, '..'),
     server: { middlewareMode: true, hmr: false },
@@ -18,40 +18,71 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
   t.after(() => vite.close());
   const { CoinPusherModel, PAYOUT_TRAY_CONFIRM_FRAMES } = await vite.ssrLoadModule('/src/game/CoinPusherModel.ts');
   const dimensions = await vite.ssrLoadModule('/src/game/CoinPusherDimensions.ts');
+  const { FIXED_DECK_TOP_Y } = await vite.ssrLoadModule('/src/game/CoinPusherLayout.ts');
   const { advanceCoinPusherCascade, coinPusherCascadeLabel } = await vite.ssrLoadModule('/src/game/CoinPusherFeedback.ts');
-  const tableMidpoint = (dimensions.MAIN_DECK_BACK_Z + dimensions.MAIN_DECK_FRONT_Z) / 2;
   const extendedPusherFront = dimensions.PUSHER_FORWARD_Z + dimensions.PUSHER_LIP_LOCAL_Z;
   const deckDepth = dimensions.MAIN_DECK_FRONT_Z - dimensions.MAIN_DECK_BACK_Z;
   const plateShareOfTable = dimensions.PUSHER_LENGTH / deckDepth;
   const hiddenPlateTail = dimensions.PUSHER_HOME_Z - dimensions.PUSHER_HALF_DEPTH;
+  const visiblePlateFront = dimensions.PUSHER_HOME_Z + dimensions.PUSHER_HALF_DEPTH;
+  const forwardPlateRear = dimensions.PUSHER_FORWARD_Z - dimensions.PUSHER_HALF_DEPTH;
   const rearCaseClearance = hiddenPlateTail - dimensions.REAR_CASE_BACK_Z;
-  assert.ok(deckDepth >= 5.8 && deckDepth <= 5.9, `the extended playfield should provide a 5.84m runway (${deckDepth.toFixed(2)}m)`);
+  assert.ok(deckDepth >= 2.8 && deckDepth <= 3.0, `the compact playfield should be about 2.89m (${deckDepth.toFixed(2)}m)`);
   assert.ok(dimensions.PAYOUT_TRAY_FLOOR_CENTER_Y <= -.64,
-    'the collection well should sit clearly below the extended tabletop so coins visibly fall into it');
-  assert.ok(plateShareOfTable >= .29 && plateShareOfTable <= .31, 'the pusher slab should remain proportionate on the longer table');
+    'the collection well should sit clearly below the tabletop so coins visibly fall into it');
+  assert.ok(dimensions.PAYOUT_TRAY_FLOOR_HALF_DEPTH >= .35 && dimensions.PAYOUT_TRAY_FLOOR_HALF_DEPTH <= .42,
+    'the visible collection well should be compact rather than extending far beyond the cabinet');
+  assert.ok(plateShareOfTable >= .57 && plateShareOfTable <= .60, 'the pusher slab should stay substantial on the shorter table');
   assert.ok(rearCaseClearance >= .26 && rearCaseClearance <= .34, 'the thick rear housing should conceal the retracted plate without excess dead depth');
+  assert.ok(Math.abs(dimensions.PUSHER_HOME_Z - dimensions.REAR_CASE_FRONT_Z) < .001,
+    'the resting plate center should line up with the fascia so exactly half is recessed');
+  assert.ok(Math.abs(visiblePlateFront - dimensions.REAR_CASE_FRONT_Z - dimensions.PUSHER_HALF_DEPTH) < .001,
+    'the resting plate should show only its front half beyond the backboard');
+  assert.ok(Math.abs(forwardPlateRear - dimensions.REAR_CASE_FRONT_Z - dimensions.PUSHER_FORWARD_CLEARANCE) < .001,
+    'the forward stroke should stop once the entire plate is visible, without extending over the table');
+  assert.ok(Math.abs(dimensions.PUSHER_FORWARD_Z - dimensions.PUSHER_HOME_Z
+    - dimensions.PUSHER_HALF_DEPTH - dimensions.PUSHER_FORWARD_CLEARANCE) < .001,
+  'the pusher travel should equal half its depth plus the small full-clearance margin');
   const payoutFloorStart = dimensions.PAYOUT_TRAY_CENTER_Z - dimensions.PAYOUT_TRAY_FLOOR_HALF_DEPTH
     - dimensions.PAYOUT_TRAY_CATCHER_MARGIN;
   assert.ok(payoutFloorStart > dimensions.MAIN_DECK_FRONT_Z
-    && payoutFloorStart - dimensions.MAIN_DECK_FRONT_Z >= .33
-    && payoutFloorStart - dimensions.MAIN_DECK_FRONT_Z <= .39,
-  'the lowered payout well should leave a clearly visible full-coin-width drop slot beyond the longer deck edge');
+    && payoutFloorStart - dimensions.MAIN_DECK_FRONT_Z >= .25
+    && payoutFloorStart - dimensions.MAIN_DECK_FRONT_Z <= .31,
+  'the lowered payout well should leave a visible coin-width drop slot beyond the shorter deck edge');
   assert.ok(dimensions.PAYOUT_TRAY_FRONT_WALL_CENTER_Z + dimensions.PAYOUT_TRAY_WALL_HALF_DEPTH
     >= dimensions.PAYOUT_TRAY_CENTER_Z + dimensions.PAYOUT_TRAY_FLOOR_HALF_DEPTH + dimensions.PAYOUT_TRAY_CATCHER_MARGIN - .001,
   'the front wall should close the physical catch pit without leaving an escape seam');
-  assert.ok(Math.abs(extendedPusherFront - (tableMidpoint + dimensions.PUSHER_FRONT_LEAD)) < .04,
-    'the extended pusher should reach just beyond the longer table midpoint');
+  assert.ok(extendedPusherFront < dimensions.MAIN_DECK_FRONT_Z - 1.0,
+    'even fully exposed, the pusher should remain near the backboard instead of reaching over the shortened table');
   const cycleModel = new CoinPusherModel();
   try {
+  const halfTurnRoot = Math.SQRT1_2;
+  const xTiltedNormal = cycleModel.coinUpNormal({ x: halfTurnRoot, y: 0, z: 0, w: halfTurnRoot });
+  const zTiltedNormal = cycleModel.coinUpNormal({ x: 0, y: 0, z: halfTurnRoot, w: halfTurnRoot });
+  assert.ok(xTiltedNormal.z > .999 && Math.abs(xTiltedNormal.y) < .001,
+    'the anti-wedge correction must read the coin face normal in the world frame for an X tilt');
+  assert.ok(zTiltedNormal.x < -.999 && Math.abs(zTiltedNormal.y) < .001,
+    'the anti-wedge correction must read the coin face normal in the world frame for a Z tilt');
   for (let frame = 0; frame < 120; frame += 1) cycleModel.update(1000 / 60);
   assert.equal(cycleModel.pusherZ, dimensions.PUSHER_HOME_Z,
     'the pusher must stay at home until the first wallet-authorized coin is dropped');
+  assert.equal(cycleModel.getPredictedDropBeat(), 'home-pause',
+    'a stationary pre-play pusher must not advertise a forward-stroke timing window');
   const idleEvents = cycleModel.drainEvents();
   assert.equal(idleEvents.some((event) => event.type === 'pusher-stroke'), false,
     'an idle machine must not emit a stroke or move unowned coins toward the payout tray');
   assert.equal(idleEvents.some((event) => event.type === 'coins-collected'), false,
     'an idle machine must never produce a payout without a paid play');
-  assert.notEqual(cycleModel.dropCoin(0), undefined, 'the first paid drop must start the pusher mechanism');
+  const firstDropId = cycleModel.dropCoin(0);
+  assert.notEqual(firstDropId, undefined, 'the first paid drop must start the pusher mechanism');
+  const expectedBackboardLandingZ = dimensions.PUSHER_HOME_Z + .5;
+  const expectedDropSpawnZ = cycleModel.getDropTargetZ();
+  assert.ok(expectedBackboardLandingZ + .18 < dimensions.PUSHER_HOME_Z + dimensions.PUSHER_HALF_DEPTH
+    && expectedBackboardLandingZ - .18 > dimensions.PUSHER_FORWARD_Z - dimensions.PUSHER_HALF_DEPTH,
+  'the near-backboard landing point should stay fully supported by the plate through the whole stroke');
+  assert.ok(expectedDropSpawnZ < expectedBackboardLandingZ
+    && expectedDropSpawnZ > expectedBackboardLandingZ - .06,
+  'the coin spawn point must compensate for forward drift so impact remains near the backboard');
   let homeDwellFrames = 0;
   let frontDwellFrames = 0;
   let largestStrokeStep = 0;
@@ -59,30 +90,44 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
   const pusherStrokes = [];
   const pusherStrokeEvents = [];
   const pusherContactEvents = [];
+  let firstDropLanding;
   for (let frame = 0; frame < 630; frame += 1) {
     predictedDropBeats.add(cycleModel.getPredictedDropBeat());
     const previousZ = cycleModel.pusherZ;
       cycleModel.update(1000 / 60);
       const frameEvents = cycleModel.drainEvents();
+      firstDropLanding ??= frameEvents.find((event) => event.type === 'coin-landed' && event.coinId === firstDropId);
       const frameStrokeEvents = frameEvents.filter((event) => event.type === 'pusher-stroke');
+      assert.equal(cycleModel.pusherBody.numColliders(), 1,
+        'the moving board must stay one flat slab, without a folding blade or hidden front wall');
       pusherContactEvents.push(...frameEvents.filter((event) => event.type === 'pusher-contact'));
       pusherStrokeEvents.push(...frameStrokeEvents);
       pusherStrokes.push(...frameStrokeEvents.map((event) => event.direction));
       homeDwellFrames += Number(Math.abs(cycleModel.pusherZ - dimensions.PUSHER_HOME_Z) < 1e-9);
       frontDwellFrames += Number(Math.abs(cycleModel.pusherZ - dimensions.PUSHER_FORWARD_Z) < 1e-9);
       largestStrokeStep = Math.max(largestStrokeStep, Math.abs(cycleModel.pusherZ - previousZ));
+      assert.ok(cycleModel.pusherZ >= dimensions.PUSHER_HOME_Z - 1e-6
+        && cycleModel.pusherZ <= dimensions.PUSHER_FORWARD_Z + 1e-6,
+      'the pusher must never protrude farther than its fully visible position');
+      assert.ok(Math.abs(cycleModel.getDropTargetZ() - expectedDropSpawnZ) < .001,
+        'the coin landing point must stay fixed near the backboard through every pusher phase');
     }
+    assert.ok(firstDropLanding, 'Rapier must report the first drop after it physically contacts the plate');
+    assert.ok(Math.abs(firstDropLanding.position.z - expectedBackboardLandingZ) < .12,
+      `the first coin must physically land close to the backboard (${firstDropLanding.position.z.toFixed(3)}m)`);
+    assert.ok(firstDropLanding.position.z > dimensions.REAR_CASE_FRONT_Z + .24,
+      'the coin must land near the backboard without its tilted rim touching the rear fascia');
     assert.ok(homeDwellFrames >= 20, `the pusher should visibly pause at home (${homeDwellFrames} frames)`);
   assert.ok(frontDwellFrames >= 28, `the pusher should visibly pause at full extension (${frontDwellFrames} frames)`);
   assert.ok(largestStrokeStep < .03, `the new beat must not introduce a faster step (${largestStrokeStep.toFixed(4)}m)`);
   assert.deepEqual([...predictedDropBeats].sort(), ['forward', 'front-pause', 'home-pause', 'return'],
-    'the predicted landing cue must cover the forward stroke, both end pauses, and the return stroke');
+    'the pusher phase prediction must remain valid through both strokes and end pauses');
   assert.deepEqual(pusherStrokes.slice(0, 4), ['forward', 'return', 'forward', 'return'],
     'the audio cue must fire exactly when each alternating pusher stroke starts');
   assert.ok(pusherStrokeEvents.slice(0, 4).every((event, index) =>
-    Math.abs(event.durationSeconds - (index % 2 === 0 ? 4.5 * .438 : 4.5 * .431)) < 1 / 60),
+    Math.abs(event.durationSeconds - (index % 2 === 0 ? 3.5 * .438 : 3.5 * .431)) < 1 / 60),
   'stroke events should expose the matching real forward and return durations to the audio layer');
-  assert.ok(pusherContactEvents.length > 0, 'the pusher should report a real lip-to-coin contact during the crowded cycle');
+  assert.ok(pusherContactEvents.length > 0, 'the flat slab should report a real front-face coin contact during the crowded cycle');
   assert.ok(pusherContactEvents.length <= pusherStrokes.filter((direction) => direction === 'forward').length,
     'a pile contact cue must fire no more than once during each forward stroke');
   assert.ok(pusherContactEvents.every((event) => event.count > 0
@@ -102,27 +147,23 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
         .find((event) => event.type === 'pusher-stroke');
     }
     assert.ok(reducedMotionStroke, 'reduced motion should still emit the first physical pusher stroke');
-    assert.ok(Math.abs(reducedMotionStroke.durationSeconds - (4.5 * .438 / .6)) < 1 / 60,
+    assert.ok(Math.abs(reducedMotionStroke.durationSeconds - (3.5 * .438 / .6)) < 1 / 60,
       'the stroke duration sent to audio should include the reduced-motion time scale');
   } finally {
     reducedMotionModel.destroy();
   }
-  const airborneLimitModel = new CoinPusherModel();
+  const rapidDropModel = new CoinPusherModel();
   try {
-    const airborneIds = [-1, 0, 1].map((lane) => airborneLimitModel.dropCoin(lane));
-    assert.ok(airborneIds.every((id) => id !== undefined), 'the cabinet should allow three simultaneous flights');
-    assert.equal(airborneLimitModel.canDropCoin(), false, 'a fourth coin must wait until a real landing frees a flight slot');
-    assert.equal(airborneLimitModel.dropCoin(1.8), undefined, 'the airborne cap must reject extra drops before creating a body');
-    for (let frame = 0; frame < 120
-      && !airborneLimitModel.coins.some((coin) => airborneIds.includes(coin.id) && coin.impactReported); frame += 1) {
-      airborneLimitModel.update(1000 / 60);
-    }
-    assert.ok(airborneLimitModel.coins.some((coin) => airborneIds.includes(coin.id) && coin.impactReported),
-      'a flight slot should only free after Rapier reports physical contact');
-    assert.equal(airborneLimitModel.canDropCoin(), true, 'a confirmed landing should reopen one flight slot');
-    assert.notEqual(airborneLimitModel.dropCoin(1.8), undefined, 'a new coin should launch after a physical landing');
+    const rapidDropIds = Array.from({ length: 40 }, (_, index) => rapidDropModel.dropCoin((index % 9 - 4) * .42));
+    assert.ok(rapidDropIds.every((id) => id !== undefined), 'the board must accept more than the old 36-coin gameplay cap');
+    assert.equal(new Set(rapidDropIds).size, 40, 'each rapid drop must create its own physical coin');
+    assert.equal(rapidDropModel.canDropCoin(), true, 'new drops must not wait for airborne coins to land or enter the tray');
+    assert.equal(rapidDropModel.coins.filter((coin) => coin.dropped && !coin.impactReported).length, 40,
+      'all rapid drops should be allowed to remain in flight together');
+    assert.notEqual(rapidDropModel.dropCoin(1.8), undefined,
+      'a further drop must remain available before any of the burst coins settles');
   } finally {
-    airborneLimitModel.destroy();
+    rapidDropModel.destroy();
   }
   const snapshot = (model) => model.coins.map((coin) => {
     const position = coin.body.translation();
@@ -146,19 +187,25 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
   const repeatB = new CoinPusherModel();
   try {
     assert.deepEqual(snapshot(repeatA), snapshot(repeatB), 'the same starter seed should reproduce every coin transform');
+    const upperLayerBoundary = FIXED_DECK_TOP_Y + .08;
     const basePositions = repeatA.coins
-      .filter((coin) => !coin.dropped && coin.body.translation().y < .1)
+      .filter((coin) => !coin.dropped && coin.body.translation().y < upperLayerBoundary)
       .map((coin) => coin.body.translation());
-    const stackCount = repeatA.coins.filter((coin) => !coin.dropped && coin.body.translation().y >= .1).length;
-    assert.ok(basePositions.length >= 120 && basePositions.length <= 140, 'the longer table should start with a correspondingly longer coin bed');
-    assert.ok(stackCount >= 6 && stackCount <= 30, 'the upper layer should stay sparse and irregular');
+    const stackCount = repeatA.coins.filter((coin) => !coin.dropped && coin.body.translation().y >= upperLayerBoundary).length;
+    assert.equal(basePositions.length, 50, 'the compact table should start with a five-row coin bed');
+    assert.ok(stackCount >= 3 && stackCount <= 7, 'the single upper layer should stay sparse and irregular');
     const rearRowZ = Math.min(...basePositions.map((position) => position.z));
     const frontRowZ = Math.max(...basePositions.map((position) => position.z));
     const retractedLipZ = dimensions.PUSHER_HOME_Z + dimensions.PUSHER_LIP_LOCAL_Z;
-    assert.ok(rearRowZ - retractedLipZ >= .16 && rearRowZ - retractedLipZ <= .24,
-      'the rear coin row should begin at the pusher lip, not across a long empty gap');
-    assert.ok(dimensions.MAIN_DECK_FRONT_Z - frontRowZ < dimensions.PUSHER_FORWARD_Z - dimensions.PUSHER_HOME_Z,
-      'one full pusher stroke should be long enough to carry the front row over the payout edge');
+    const extendedLipZ = dimensions.PUSHER_FORWARD_Z + dimensions.PUSHER_LIP_LOCAL_Z;
+    assert.ok(rearRowZ - retractedLipZ >= .45 && rearRowZ - retractedLipZ <= .55,
+      'the rear coin row should remain ahead of the retracted lip with enough room for the plate to sweep under it');
+    assert.ok(extendedLipZ - rearRowZ >= .32 && extendedLipZ - rearRowZ <= .42,
+      'the forward plate stroke should pass beneath the rear coin row instead of missing the starter bed');
+    assert.ok(frontRowZ - rearRowZ <= .352 * Math.sqrt(3) / 2 * 4 + .04,
+      'the compact pile should occupy only five rows near the backboard');
+    assert.ok(frontRowZ < dimensions.MAIN_DECK_FRONT_Z - .35,
+      'the five-row starter pile should leave one coin-width runway before the closer payout edge');
     let minimumCenterDistance = Infinity;
     for (let first = 0; first < basePositions.length; first += 1) {
       for (let second = first + 1; second < basePositions.length; second += 1) {
@@ -293,8 +340,7 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
   const edgeRiderModel = new CoinPusherModel();
   try {
     for (const coin of edgeRiderModel.coins.splice(0)) edgeRiderModel.world.removeRigidBody(coin.body);
-    const edgeZ = dimensions.PUSHER_HOME_Z + dimensions.PUSHER_HALF_DEPTH
-      - .168 - .012 + .02;
+    const edgeZ = dimensions.PUSHER_HOME_Z + dimensions.PUSHER_HALF_DEPTH + .02;
     const edgeRider = edgeRiderModel.createCoin(0, .067, edgeZ, false);
     const ordinaryCollisionGroups = edgeRider.collider.collisionGroups();
     edgeRiderModel.attachPusherRider(edgeRider);
@@ -337,7 +383,8 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
       rider.update(1000 / 60);
       const coin = rider.coins.find((entry) => entry.id === riderId);
       if (!coin) break;
-      if (coin.ridingPusher && !coin.falling) {
+      const nearBackboard = coin.body.translation().z <= dimensions.REAR_CASE_FRONT_Z + .168 + .04;
+      if (coin.ridingPusher && !coin.falling && !nearBackboard) {
         const position = coin.body.translation();
         const relative = position.z - rider.pusherZ;
         if (!wasRiding) {
@@ -356,7 +403,7 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
     assert.ok(riderFrames >= 30, 'a dropped coin should become a rider on the pusher plate');
     assert.ok(segmentDrifts.length >= 1, 'the rider should have a continuous attached interval');
     assert.ok(Math.max(...segmentDrifts) < .005,
-      `a plate rider must preserve its local Z anchor (max drift ${Math.max(...segmentDrifts).toFixed(4)}m)`);
+      `a free plate rider must preserve its local Z anchor until backboard contact (max drift ${Math.max(...segmentDrifts).toFixed(4)}m)`);
   } finally {
     rider.destroy();
   }
@@ -408,8 +455,8 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
   assert.deepEqual(replayStates[0], replayStates[1], '60 and 30 Hz chunks must replay the same fixed-step state');
   assert.deepEqual(replayStates[0], replayStates[2], '60 and 120 Hz chunks must replay the same fixed-step state');
 
-  // A tray coin is collected once, and collected coins do not consume an active drop slot while
-  // they remain visible long enough for the renderer to show the payout.
+  // A coin is collected once after occupying the tray for 0.3s, even if it keeps spinning, and
+  // remains visible long enough for the renderer to show +1 before its physical body is cleared.
   const collectionModel = new CoinPusherModel();
   try {
     for (const coin of collectionModel.coins.splice(0)) collectionModel.world.removeRigidBody(coin.body);
@@ -427,16 +474,22 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
       trayCoin.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
       trayCoin.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
     }
-    for (let frame = 0; frame < 10; frame += 1) collectionModel.update(1000 / 60);
+    for (let frame = 0; frame < 10; frame += 1) {
+      trayCoins[0].body.setAngvel({ x: 0, y: 1.2, z: 0 }, true);
+      collectionModel.update(1000 / 60);
+    }
     assert.equal(collectionModel.drainEvents().some((event) => event.type === 'coins-collected'), false,
       'a coin must remain visible in the tray before its reward is confirmed');
     assert.equal(PAYOUT_TRAY_CONFIRM_FRAMES, 18,
-      'the tray should hold a settled coin for 0.3 seconds before starting the wallet animation');
-    for (let frame = 0; frame < 20; frame += 1) collectionModel.update(1000 / 60);
+      'a coin must dwell in the tray for 0.3 seconds before starting the wallet animation');
+    for (let frame = 0; frame < 20; frame += 1) {
+      trayCoins[0].body.setAngvel({ x: 0, y: 1.2, z: 0 }, true);
+      collectionModel.update(1000 / 60);
+    }
     const payoutEvents = collectionModel.drainEvents();
     assert.equal(payoutEvents.filter((event) => event.type === 'coins-collected')
       .reduce((count, event) => count + event.count, 0), 2,
-      'settled tray coins must emit one collection event each');
+      'each caught tray coin must emit one collection event, including coins still in motion');
     const payoutEvent = payoutEvents.find((event) => event.type === 'coins-collected');
     assert.ok(payoutEvent, 'settled tray coins must emit a payout event');
     assert.equal(coinPusherCascadeLabel(payoutEvent.count, 'zh-HK'), '連環推出 ×2',
@@ -471,6 +524,11 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
     assert.equal(collectionModel.drainEvents().length, 0, 'a collected coin must never emit twice');
     assert.notEqual(collectionModel.dropCoin(0), undefined,
       'a collected tray coin must not consume an active drop slot');
+    for (let frame = 0; frame < 110 && collectionModel.coins.includes(trayCoins[0]); frame += 1) {
+      collectionModel.update(1000 / 60);
+    }
+    assert.equal(trayCoins.some((coin) => collectionModel.coins.includes(coin)), false,
+      'physical coins should clear from the well shortly after the confirmed +1 presentation');
   } finally {
     collectionModel.destroy();
   }
@@ -530,12 +588,12 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
     trayEdgeCoin.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
     for (let frame = 0; frame < 36; frame += 1) extendedTrayModel.update(1000 / 60);
     assert.ok(extendedTrayModel.coins.includes(trayEdgeCoin),
-      'a coin near the front of the lengthened collection well must not be culled by a stale cabinet bound');
+    'a coin near the front of the collection well must not be culled by a stale cabinet bound');
     assert.equal(trayEdgeCoin.collected, true,
       'a coin that settles at the far end of the pit should still trigger one confirmed payout');
     assert.equal(extendedTrayModel.drainEvents().filter((event) => event.type === 'coins-collected')
       .reduce((count, event) => count + event.count, 0), 1,
-    'the extended pit must confirm its caught coin exactly once');
+    'the compact pit must confirm its caught coin exactly once');
   } finally {
     extendedTrayModel.destroy();
   }
@@ -567,12 +625,15 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
     trayEntryModel.destroy();
   }
 
+  // Bidirectional support and actual backboard-driven shelf stripping are covered in
+  // coin-pusher-carrier.test.js. Reversing by itself must never release a shelf coin.
+
   const runs = [
     { period: 25, offset: 2, lanes: [-1.44, -.72, 0, .72, 1.44] },
     { period: 31, offset: 17, lanes: [-.96, -.32, .32, .96] },
     { period: 37, offset: 5, lanes: [-2, -1, 0, 1, 2] },
-    // Exhaust the three-airborne safety cap with edge-to-edge drops before letting the same
-    // long run exercise dense pile contacts, plate riders, rail guards and the payout catcher.
+    // Exercise an unrestricted burst before letting the same long run stress dense pile
+    // contacts, plate riders, rail guards and the payout catcher.
     { period: 6, offset: 0, lanes: [-2.3, 2.3, -1.8, 1.8, 0], burstCadence: true },
   ];
   let collectionEventCount = 0;
@@ -586,6 +647,8 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
     let worstDeckPenetration = 0;
     let worstSideEscape = 0;
     let worstRearRiderPenetration = 0;
+    let minimumFasciaClearance = Infinity;
+    let worstFasciaDetails = '';
     let maxUpwardSpeed = 0;
     let maxUpwardSpeedDetails = '';
     let maxRiderSupportGap = 0;
@@ -597,17 +660,18 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
     const impactEventIds = new Set();
     let forwardBeatLandings = 0;
     let maxDropTumble = 0;
+    let runCollectedTotal = 0;
     try {
       assert.equal(model.world.numInternalPgsIterations, 3, 'dense coin contacts use extra low-cost stability passes');
       for (let frame = 0; frame < 1800; frame += 1) {
         const dropIndex = Math.floor((frame - run.offset) / run.period);
         const dropWindow = frame >= run.offset && (frame - run.offset) % run.period === 0;
         const shouldDrop = run.burstCadence
-          ? dropWindow && requestedDrops < 36 && model.canDropCoin()
+          ? dropWindow && requestedDrops < 42 && model.canDropCoin()
           : dropWindow && dropIndex < 36;
         if (shouldDrop) {
           const laneIndex = run.burstCadence ? requestedDrops : dropIndex;
-          const dropId = model.dropCoin(run.lanes[laneIndex % run.lanes.length]);
+      const dropId = model.dropCoin(run.lanes[laneIndex % run.lanes.length]);
           assert.notEqual(dropId, undefined);
           droppedAtFrame.set(dropId, frame);
           acceptedDropFrames.push(frame);
@@ -640,13 +704,33 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
             'payout origins must remain finite through a crowded run');
           collectionEventCount += 1;
           collectedTotal += event.count;
+          runCollectedTotal += event.count;
         }
 
         for (const coin of model.coins) {
-          if (coin.falling) continue;
+          if (coin.falling || coin.transferringToDeck) continue;
           const position = coin.body.translation();
           const rotation = coin.body.rotation();
           const velocity = coin.body.linvel();
+          const axisY = 1 - 2 * (rotation.x * rotation.x + rotation.z * rotation.z);
+          const halfHeight = .168 * Math.sqrt(Math.max(0, 1 - axisY * axisY)) + .032 * Math.abs(axisY);
+          const axisZ = 2 * (rotation.y * rotation.z + rotation.w * rotation.x);
+          const halfDepthZ = .168 * Math.sqrt(Math.max(0, 1 - axisZ * axisZ)) + .032 * Math.abs(axisZ);
+          const overlapsUpperFascia = position.y + halfHeight > dimensions.PUSHER_SLOT_TOP_Y
+            && position.y - halfHeight < dimensions.REAR_CASE_TOP_Y;
+          const overlapsLowerFascia = position.y - halfHeight < dimensions.PUSHER_SLOT_BOTTOM_Y
+            && position.y + halfHeight > dimensions.REAR_CASE_BOTTOM_Y;
+          if (Math.abs(position.x) < 2.88 + .168
+            && (overlapsUpperFascia || overlapsLowerFascia)) {
+            // The actual front face is the case's nominal face plus 4mm, from the modeled
+            // fascia center (-86mm) and half-depth (90mm). Check detached coins too: they
+            // are exactly where a hidden rear-wall jam can otherwise escape this test.
+            const clearance = position.z - (dimensions.REAR_CASE_FRONT_Z + .004 + halfDepthZ);
+            if (clearance < minimumFasciaClearance) {
+              minimumFasciaClearance = clearance;
+              worstFasciaDetails = `frame=${frame}, id=${coin.id}, pos=${JSON.stringify(position)}, rot=${JSON.stringify(rotation)}, riding=${coin.ridingPusher}`;
+            }
+          }
           if (velocity.y > maxUpwardSpeed) {
             maxUpwardSpeed = velocity.y;
             maxUpwardSpeedDetails = `frame=${frame}, id=${coin.id}, pos=${JSON.stringify(position)}, tumbling=${coin.tumbling}, riding=${coin.ridingPusher}, nudges=${coin.restNudges}`;
@@ -657,7 +741,7 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
           if (coin.ridingPusher) {
             worstRearRiderPenetration = Math.max(
               worstRearRiderPenetration,
-              dimensions.REAR_CASE_FRONT_Z + .168 + .012 - position.z,
+              dimensions.REAR_CASE_FRONT_Z + .004 + halfDepthZ + .006 - position.z,
             );
           }
           const dropFrame = droppedAtFrame.get(coin.id);
@@ -665,13 +749,13 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
             // X/Z quaternion energy is off-axis tumble; Y-only spin leaves both components zero.
             maxDropTumble = Math.max(maxDropTumble, Math.hypot(rotation.x, rotation.z));
           }
-          const axisY = 1 - 2 * (rotation.x * rotation.x + rotation.z * rotation.z);
-          const halfHeight = .168 * Math.sqrt(Math.max(0, 1 - axisY * axisY)) + .032 * Math.abs(axisY);
           const bottom = position.y - halfHeight;
           if (coin.ridingPusher) {
             maxRiderSupportGap = Math.max(maxRiderSupportGap, Math.abs(bottom - .035));
+            if (bottom - .035 > .012) assert.equal(model.hasVerticalPusherContact(coin), true,
+              'support hysteresis is only valid while Rapier still reports a real plate contact');
           }
-          if (coin.dropped && !coin.ridingPusher
+          if (coin.dropped && !coin.ridingPusher && !coin.transferringToDeck
             && Math.abs(position.x) < dimensions.PUSHER_WIDTH / 2 - .25
             && position.z > dimensions.REAR_CASE_FRONT_Z + .168 + .012 + .04
             && model.hasVerticalPusherContact(coin)
@@ -682,7 +766,8 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
           const overPlate = Math.abs(position.x) < dimensions.PUSHER_WIDTH / 2 - .18
             && Math.abs(position.z - model.pusherZ) < dimensions.PUSHER_HALF_DEPTH - .18;
 
-          if (overPlate) {
+          const onRaisedPlate = overPlate && bottom > FIXED_DECK_TOP_Y + .07;
+          if (onRaisedPlate) {
             const penetration = .041 - bottom;
             if (penetration > worstBoardPenetration) {
               worstBoardPenetration = penetration;
@@ -696,25 +781,28 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
             && position.z <= dimensions.MAIN_DECK_FRONT_Z
             && Math.abs(position.x) < 2.7
           ) {
-            worstDeckPenetration = Math.max(worstDeckPenetration, .035 - bottom);
+            worstDeckPenetration = Math.max(worstDeckPenetration, FIXED_DECK_TOP_Y - bottom);
           }
         }
       }
-      assert.equal(requestedDrops, 36, `run ${runIndex + 1} should exercise the full in-game drop cap`);
+      assert.equal(requestedDrops, run.burstCadence ? 42 : 36,
+        `run ${runIndex + 1} should accept every scheduled drop without a crowded-board cap`);
       if (run.burstCadence) {
         assert.ok(acceptedDropFrames[1] - acceptedDropFrames[0] <= 6
           && acceptedDropFrames[2] - acceptedDropFrames[1] <= 6,
-        'the burst fixture must actually fill all three airborne slots at the fastest legal edge-to-edge cadence');
+        'the burst fixture must accept fast consecutive drops without waiting for a landing');
+        assert.ok(runCollectedTotal > 0,
+          'even an unrestricted burst must produce real tray catches and wallet payout events');
       }
       assert.ok(impactEventIds.size > 0, `run ${runIndex + 1} should report real first coin impacts`);
       assert.ok(forwardBeatLandings > 0,
         `run ${runIndex + 1} should exercise the non-monetary forward-timing feedback`);
       assert.ok(maxDropTumble > .3, `run ${runIndex + 1}: a dropped coin should visibly tumble off-axis before landing`);
-      assert.ok(!model.coins.some((coin) => !coin.dropped && coin.ridingPusher),
-        `run ${runIndex + 1}: starter-deck coins must not be teleported as plate riders`);
+      assert.ok(!model.coins.some((coin) => !coin.dropped && coin.ridingPusher && coin.body.translation().y < .04),
+        `run ${runIndex + 1}: a lower-deck starter coin must not be teleported into the shelf carrier`);
       assert.ok(maxUpwardSpeed <= .381,
         `run ${runIndex + 1}: playfield rebound must stay at or below the 0.38m/s anti-pop cap (${maxUpwardSpeed.toFixed(2)}m/s; ${maxUpwardSpeedDetails})`);
-      assert.ok(maxRiderSupportGap < .015,
+      assert.ok(maxRiderSupportGap < .025,
         `run ${runIndex + 1}: every carried coin must remain supported by the plate (${maxRiderSupportGap.toFixed(3)}m)`);
       assert.equal(unsupportedPusherContacts, 0,
         `run ${runIndex + 1}: a coin resting on the moving plate must stay attached (${firstUnsupportedPusherContact})`);
@@ -725,6 +813,13 @@ test('a crowded pusher stroke keeps coins above the moving plate and tabletop', 
       assert.ok(worstSideEscape < .012, `run ${runIndex + 1}: coin crossed the side-wall inner face by ${worstSideEscape.toFixed(3)}m`);
       assert.ok(worstRearRiderPenetration < .012,
         `run ${runIndex + 1}: rider crossed the rear fascia by ${worstRearRiderPenetration.toFixed(3)}m`);
+      assert.ok(minimumFasciaClearance >= .005,
+        `run ${runIndex + 1}: coin lost its rear-fascia clearance (${minimumFasciaClearance.toFixed(3)}m; ${worstFasciaDetails})`);
+      const stalledEdgeCoins = model.coins.filter((coin) => coin.falling && coin.fallAge > 1
+        && coin.body.translation().z > dimensions.MAIN_DECK_SUPPORT_FRONT_Z
+        && coin.body.translation().y > FIXED_DECK_TOP_Y - .015);
+      assert.equal(stalledEdgeCoins.length, 0,
+        `run ${runIndex + 1}: coins over the front edge must tip into the tray instead of resting indefinitely (${stalledEdgeCoins.map((coin) => coin.id).join(', ')})`);
     } finally {
       model.destroy();
     }
