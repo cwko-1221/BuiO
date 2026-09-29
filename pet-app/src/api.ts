@@ -5,6 +5,13 @@ import type { QuietSession, QuietSettings } from './quiet-room-types';
 // The shared runtime is loaded blocking in <head>, before this bundle runs.
 const t = (key: string) => (window as any).BuiI18n.t(key) as string;
 
+export class ApiError extends Error {
+  constructor(message: string, public status: number, public retryAfterMs = 0, public requestId?: string) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(url, {
     credentials: 'include',
@@ -12,8 +19,21 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
   });
   const data = await response.json().catch(() => ({ success: false, message: t('pet.badResponse') }));
-  if (!response.ok || data.success === false) throw new Error(data.message || t('pet.actionFailed'));
+  if (!response.ok || data.success === false) {
+    const retryAfter = response.headers.get('Retry-After');
+    const seconds = retryAfter ? Number(retryAfter) : NaN;
+    const retryAfterMs = retryAfter ? Math.max(0, Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retryAfter) - Date.now()) : 0;
+    throw new ApiError(data.message || t('pet.actionFailed'), response.ok ? 502 : response.status,
+      Number.isFinite(retryAfterMs) ? retryAfterMs : 0, response.headers.get('X-Request-ID') || data.requestId || undefined);
+  }
   return data as T;
+}
+
+async function arcadeRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 15000);
+  try { return await request<T>(url, { ...options, signal: controller.signal }); }
+  finally { window.clearTimeout(timeout); }
 }
 
 async function quietRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
@@ -28,12 +48,12 @@ export const api = {
   bootstrap: () => request<Bootstrap & { success: true }>('/api/pet/bootstrap'),
   hatch: (key: string) => request<any>('/api/pet/starter-egg/hatch', { method: 'POST', headers: { 'Idempotency-Key': key }, body: '{}' }),
   buyEgg: (body: { kind: 'random' | 'direct'; speciesId?: string }, key: string) => request<any>('/api/pet/eggs/purchase', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify(body) }),
-  playCoinPusher: (key: string) => request<any>('/api/pet/coin-pusher/play', { method: 'POST', headers: { 'Idempotency-Key': key }, body: '{}' }),
+  playCoinPusher: (key: string) => arcadeRequest<any>('/api/pet/coin-pusher/play', { method: 'POST', headers: { 'Idempotency-Key': key }, body: '{}' }),
   arcadePrizes: () => request<{ prizes: ArcadePrize[]; dropsUntilRestock: number }>('/api/pet/coin-pusher/prizes', { method: 'POST', body: '{}' }),
-  claimArcadePrize: (prizeId: string) => request<{ prizeId: string; kind: ArcadePrizeKind; earned: number; balance: number; replayed?: boolean }>(`/api/pet/coin-pusher/prizes/${encodeURIComponent(prizeId)}/claim`, { method: 'POST', body: '{}' }),
+  claimArcadePrize: (prizeId: string) => arcadeRequest<{ prizeId: string; kind: ArcadePrizeKind; earned: number; balance: number; replayed?: boolean }>(`/api/pet/coin-pusher/prizes/${encodeURIComponent(prizeId)}/claim`, { method: 'POST', body: '{}' }),
   redeemArcadePrize: (prizeId: string, itemId: string) => request<{ itemId: string }>(`/api/pet/coin-pusher/prizes/${encodeURIComponent(prizeId)}/redeem`, { method: 'POST', body: JSON.stringify({ itemId }) }),
   // amount counts caught physical coins; earned is the server-priced wallet credit.
-  payoutCoinPusher: (body: { playId: string; eventId: string; amount: number }, key: string) => request<{ earned: number; balance: number; remainingPayout: number; collection?: { returnedCoins: number } }>('/api/pet/coin-pusher/payout', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify(body) }),
+  payoutCoinPusher: (body: { playId: string; eventId: string; amount: number }, key: string) => arcadeRequest<{ earned: number; balance: number; remainingPayout: number; collection?: { returnedCoins: number } }>('/api/pet/coin-pusher/payout', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify(body) }),
   activatePet: (petId: string) => request<any>(`/api/pet/pets/${encodeURIComponent(petId)}/activate`, { method: 'POST', body: '{}' }),
   feed: (petId: string, foodId: string, key: string) => request<any>(`/api/pet/pets/${encodeURIComponent(petId)}/feed`, { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ foodId }) }),
   setOutfit: (petId: string, wearableIds: string[]) => request<any>(`/api/pet/pets/${encodeURIComponent(petId)}/outfit`, { method: 'PUT', body: JSON.stringify({ wearableIds }) }),

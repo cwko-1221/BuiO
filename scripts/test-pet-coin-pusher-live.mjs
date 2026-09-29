@@ -59,7 +59,7 @@ await fs.writeFile(databaseFile, JSON.stringify({
     role: 'student', classname: '5A', classno: 1, language: 'zh-HK',
   }],
   studentStats: [], questionLogs: [], _logId: 0,
-  // This regression isolates ordinary +10 coins. Physical special prizes, their stock budget,
+  // This regression isolates ordinary +1 coins. Physical special prizes, their stock budget,
   // wallet credits and voucher redemptions are covered by test-pet-arcade-prizes-live.mjs.
   petArcadePrizes: [{ studentId: 'S001', state: { issued: 1000000, prizes: [] } }],
 }, null, 2));
@@ -698,7 +698,7 @@ try {
     'the initial scene palette must match the classic finish');
   assert.match(await drop.getAttribute('aria-label'), /1|−1|coin|金幣/i);
   const initialReadyStatus = await page.locator('#coinPusherSystemStatus').innerText();
-  assert.match(initialReadyStatus, /向下滑落幣|Swipe down|落幣 −1 · 每枚入槽 \+10|Drop −1 · each catch \+10/,
+  assert.match(initialReadyStatus, /向下滑落幣|Swipe down|落幣 −1 · 每枚入槽 \+1|Drop −1 · each catch \+1/,
     `the ready status must explain the active drop affordance (swipe on touch, wallet return on keyboard) (actual: ${initialReadyStatus})`);
   assert.equal(await drop.getAttribute('data-pusher-beat'), 'home-pause',
     'the idle desktop machine must not advertise a timing opportunity before its first paid drop');
@@ -946,8 +946,8 @@ try {
   const lostPayoutCredits = databaseAfterLostPayout.petCurrencyLedger.filter((row) =>
     row.studentId === 'S001' && row.kind === 'coin_pusher_payout' && row.idempotencyKey === lostPayoutAttempts[0].requestKey);
   assert.equal(lostPayoutCredits.length, 1, 'a lost payout response and retry must credit the wallet exactly once');
-  assert.equal(lostPayoutCredits[0].delta, lostPayoutAttempts[0].amount * 10,
-    'the one wallet credit must reward ten coins per physical catch, including a lost-reply retry');
+  assert.equal(lostPayoutCredits[0].delta, lostPayoutAttempts[0].amount,
+    'the one wallet credit must reward one coin per physical catch, including a lost-reply retry');
   try {
     await waitFor(async () => page.evaluate(() => window.__coinStatusDebug.some(({ text }) => /已回到錢包|added to wallet/i.test(text || ''))),
       'the confirmed payout must update the student wallet status');
@@ -986,7 +986,7 @@ try {
   });
   assert.ok(payoutFlyBox && payoutFlyBox.width > 30 && payoutFlyBox.height > 20,
     'confirmed wallet payouts must animate a visible +1 coin from the collection well');
-  assert.match(payoutFlyBox.text, /^\+10$/, 'a caught coin must visibly carry its credited +10 reward');
+  assert.match(payoutFlyBox.text, /^\+1$/, 'a caught coin must visibly carry its credited +1 reward');
   assert.ok(payoutFlyBox.startX >= 0 && payoutFlyBox.startX <= payoutFlyBox.rootWidth
     && payoutFlyBox.startY >= payoutFlyBox.rootHeight * .4 && payoutFlyBox.startY <= payoutFlyBox.rootHeight,
   `the +1 flight must begin visibly inside the lower payout-well area (${JSON.stringify(payoutFlyBox)})`);
@@ -2054,23 +2054,23 @@ try {
   assert.equal(await failurePage.locator('#coin-pusher-root').getAttribute('data-session-restored'), 'true',
     'the legacy trough test must use the actual persisted-world restore path');
   await failurePage.locator('.coin-pusher-reward-fly').first().waitFor({ state: 'visible' });
-  assert.equal(await failurePage.locator('.coin-pusher-reward-fly').first().innerText(), '+10',
-    'a restored trough coin must show the real +10 wallet animation');
-  await failurePage.screenshot({ path: path.join(artifactDir, 'coin-pusher-legacy-trough-plus-ten-desktop.png'), animations: 'allow' });
+  assert.equal(await failurePage.locator('.coin-pusher-reward-fly').first().innerText(), '+1',
+    'a restored trough coin must show the real +1 wallet animation');
+  await failurePage.screenshot({ path: path.join(artifactDir, 'coin-pusher-legacy-trough-plus-one-desktop.png'), animations: 'allow' });
   await waitFor(async () => Number(await failurePage.locator('#coin-pusher-root').getAttribute('data-coin-count')) === 0,
     'all three old trough coins must disappear after their collection animation');
-  await waitFor(() => legacyPayouts.reduce((sum, earned) => sum + earned, 0) === 30,
-    'the three old trough coins must credit exactly thirty wallet coins');
+  await waitFor(() => legacyPayouts.reduce((sum, earned) => sum + earned, 0) === 3,
+    'the three old trough coins must credit exactly three wallet coins');
   const legacyWalletAfter = Number((await (await failureContext.request.get('/api/pet/bootstrap')).json()).wallet.balance);
-  assert.equal(legacyWalletAfter, legacyWalletBefore + 30, 'legacy geometry repair must credit each collected coin exactly once');
+  assert.equal(legacyWalletAfter, legacyWalletBefore + 3, 'legacy geometry repair must credit each collected coin exactly once');
   await failurePage.reload({ waitUntil: 'networkidle' });
   await failurePage.locator('[data-tab="coinPusher"]').click();
   await failurePage.locator('#coin-pusher-root canvas').waitFor();
   await failurePage.waitForTimeout(700);
   assert.equal(Number(await failurePage.locator('#coin-pusher-root').getAttribute('data-coin-count')), 0,
     'collected legacy coins must not reappear when the repaired board reloads');
-  assert.equal(legacyPayouts.reduce((sum, earned) => sum + earned, 0), 30,
-    'reloading the repaired board must not replay +10 credits');
+  assert.equal(legacyPayouts.reduce((sum, earned) => sum + earned, 0), 3,
+    'reloading the repaired board must not replay +1 credits');
 
   // Pause only the final visual fixtures at deterministic simulated poses. Keep the real
   // student renderer/HUD and IndexedDB restore path; do not expose a production debug API.

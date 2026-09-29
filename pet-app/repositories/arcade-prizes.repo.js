@@ -6,6 +6,10 @@ const store = require('../../db/jsonStore');
 const { getPool, withTransaction } = require('../../math-app/db/database');
 const { catalog } = require('../lib/catalog');
 const KINDS = ['ruby', 'pet', 'wearable', 'furniture'];
+const STOCK_POLICY_VERSION = 2;
+const RESTOCK_DROPS = 100;
+const INITIAL_PRIZES = 1;
+const MAX_BOARD_PRIZES = 4;
 const fail = (message, status = 409) => { throw Object.assign(new Error(message), { status }); };
 const copy = (value) => JSON.parse(JSON.stringify(value));
 let schema;
@@ -85,12 +89,25 @@ async function mutate(studentId, action) {
 
 function stock(studentId) {
   return mutate(studentId, ({ state, plays }) => {
-    const budget = 4 + Math.floor(plays / 20);
-    while (state.issued < budget && state.prizes.filter((prize) => prize.status === 'board').length < 4) {
+    if (state.stockPolicyVersion !== STOCK_POLICY_VERSION) {
+      // Preserve existing prize identities, claims and vouchers. Start the slower
+      // schedule at adoption, rather than applying it retroactively to all plays
+      // (which could either freeze restocking or immediately flood the board).
+      const isNew = state.issued === 0 && state.prizes.length === 0;
+      state.stockBudget = state.issued + (isNew ? INITIAL_PRIZES : 0);
+      state.nextRestockPlay = plays + RESTOCK_DROPS;
+      state.stockPolicyVersion = STOCK_POLICY_VERSION;
+    }
+    if (plays >= state.nextRestockPlay) {
+      const intervals = Math.floor((plays - state.nextRestockPlay) / RESTOCK_DROPS) + 1;
+      state.stockBudget += intervals;
+      state.nextRestockPlay += intervals * RESTOCK_DROPS;
+    }
+    while (state.issued < state.stockBudget && state.prizes.filter((prize) => prize.status === 'board').length < MAX_BOARD_PRIZES) {
       state.prizes.push({ id: randomUUID(), kind: KINDS[state.issued % KINDS.length], variant: Math.floor(state.issued / 4) % 2, status: 'board' });
       state.issued += 1;
     }
-    return { prizes: state.prizes.filter((prize) => prize.status !== 'redeemed' && !(prize.kind === 'ruby' && prize.status === 'bag')), dropsUntilRestock: 20 - plays % 20 };
+    return { prizes: state.prizes.filter((prize) => prize.status !== 'redeemed' && !(prize.kind === 'ruby' && prize.status === 'bag')), dropsUntilRestock: state.nextRestockPlay - plays };
   });
 }
 

@@ -34,7 +34,25 @@ try {
   await page.goto('/pet'); await page.locator('[data-action="hatch"]').click();
   await page.locator('.reveal-card').waitFor(); await page.locator('[data-action="back-home"]').click();
   const bootstrap = () => context.request.get('/api/pet/bootstrap').then(r=>r.json());
+  const firstStock=await (await context.request.post('/api/pet/coin-pusher/prizes')).json();
+  assert.equal(firstStock.prizes.length,1,'new cabinet has one prize');
+  assert.equal(firstStock.dropsUntilRestock,100);
+  await page.locator('[data-tab="coinPusher"]').click();
+  await wait(async()=>await page.locator('#coin-pusher-root').getAttribute('data-prize-count')==='1','new cabinet renders only one prize');
+  await page.screenshot({path:path.join(artifacts,'new-cabinet-one-prize-desktop.png')});
+  await page.locator('.coin-pusher-reset').click();
+  assert.equal((await (await context.request.post('/api/pet/coin-pusher/prizes')).json()).prizes.length,1,'reset cannot mint extra initial prizes');
+  await page.locator('.coin-pusher-back').click();
+  // Earn the remaining three categories in this isolated fixture before running
+  // the existing artwork, catch, +50 and voucher-redemption regression.
+  for(let i=0;i<300;i++){
+    const response=await context.request.post('/api/pet/coin-pusher/play',{headers:{'Idempotency-Key':`prize-qa-${i}`},data:{}});
+    assert.equal(response.status(),200);
+    if(i===98){const beforeRestock=await (await context.request.post('/api/pet/coin-pusher/prizes')).json();assert.equal(beforeRestock.prizes.length,1);assert.equal(beforeRestock.dropsUntilRestock,1);}
+    if(i===99){const afterRestock=await (await context.request.post('/api/pet/coin-pusher/prizes')).json();assert.equal(afterRestock.prizes.length,2);assert.equal(afterRestock.dropsUntilRestock,100);}
+  }
   const initial = await bootstrap();
+  await page.reload(); // Clear the first preview's GLB byte cache before fault injection.
   let failedArtworkOnce=false,artworkRequests=0;
   await page.route('**/arcade-prizes-v2-*.glb',async route=>{
     artworkRequests++;
@@ -97,7 +115,7 @@ try {
   assert.ok(claims.filter(c=>c.kind==='ruby').length>=2,'lost committed ruby response was retried');
   const journal=JSON.parse(await fs.readFile(dbFile,'utf8'));
   assert.equal(journal.petCurrencyLedger.filter(x=>x.kind==='arcade_ruby').length,1);
-  assert.equal(journal.petCoinPusherPayouts.length,0,'prizes never additionally receive ordinary +10');
+  assert.equal(journal.petCoinPusherPayouts.length,0,'prizes never additionally receive ordinary +1');
   await page.reload(); await page.locator('[data-tab="coinPusher"]').click();
   await wait(async()=>await page.locator('#coin-pusher-root').getAttribute('aria-busy')==='false','restored cabinet ready');
   assert.equal(await page.locator('#coin-pusher-root').getAttribute('data-prize-count'),'0');
@@ -140,7 +158,7 @@ try {
   await page.locator('.arcade-prize-picker').first().waitFor();
   assert.equal(await page.locator('.arcade-prize-card').count(),0,'redeemed bag is accessible in bedroom');
   assert.deepEqual(errors,[]);
-  const report={pass:true,artworkRetry:true,artworkContextRecovery:true,rubyCredit:50,vouchersRedeemed:3,duplicateRubyCredits:0,viewports:['desktop','ipad-landscape','phone'],errors};
+  const report={pass:true,initialPrizes:1,restockDrops:100,artworkRetry:true,artworkContextRecovery:true,rubyCredit:50,vouchersRedeemed:3,duplicateRubyCredits:0,viewports:['desktop','ipad-landscape','phone'],errors};
   await fs.writeFile(path.join(artifacts,'report.json'),JSON.stringify(report,null,2)); console.log(JSON.stringify(report));
 } catch(error){
   await page?.screenshot({path:path.join(artifacts,'failure.png')}).catch(()=>{});

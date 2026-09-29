@@ -275,11 +275,12 @@ router.post('/teacher/grants/commit', requireTeacher, asyncRoute(async (req, res
   sendResult(res, await repo.grantCoins(req.session.studentId, recipients.map((row) => row.studentId), amount, { note: String(req.body?.note || ''), idempotencyKey }), 201);
 }));
 
-router.use((error, _req, res, next) => {
+router.use((error, req, res, next) => {
   if (res.headersSent) return next(error);
   const status = Number(error.status) || 500;
   if (status >= 500) console.error('[pet]', error.stack || error.message);
-  res.status(status).json({ success: false, message: status >= 500 ? '寵物樂園暫時未能完成操作。' : error.message });
+  if(req.path.startsWith('/coin-pusher/')&&status>=400)console.warn('[pet] Arcade request rejected',JSON.stringify({requestId:req.requestId,status,reason:String(error.message).slice(0,160)}));
+  res.status(status).json({ success: false, message: status >= 500 ? '寵物樂園暫時未能完成操作。' : error.message,requestId:req.requestId });
 });
 
 module.exports = router;

@@ -19,7 +19,7 @@ const nowIso = () => new Date().toISOString();
 const makeId = () => crypto.randomUUID();
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const COIN_PUSHER_DROP_COST = 1;
-const COIN_PUSHER_REWARD_PER_COIN = 10;
+const COIN_PUSHER_REWARD_PER_COIN = 1;
 const COIN_PUSHER_PAYOUT_EVENT_MAX = 20;
 const COIN_PUSHER_PAYOUT_CAP = 100;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

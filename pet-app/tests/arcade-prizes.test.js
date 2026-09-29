@@ -16,8 +16,17 @@ test('prizes are student-bound, budgeted, credited once and redeemed without coi
     const prizes = require('./pet-app/repositories/arcade-prizes.repo');
     const store = require('./db/jsonStore');
     (async () => {
-      await repo.grantUnlimitedMoney('S001', 100); await repo.ensureStudent('S002');
+      await repo.grantUnlimitedMoney('S001', 1000); await repo.ensureStudent('S002');
+      const first = await prizes.stock('S001');
+      assert.equal(first.prizes.length,1,'a new cabinet starts with one prize, not four');
+      assert.equal(first.dropsUntilRestock,100);
+      for(let i=0;i<99;i++) await repo.playCoinPusher('S001',{idempotencyKey:'initial-'+i});
+      const almost = await prizes.stock('S001');
+      assert.deepEqual(almost.prizes,first.prizes);assert.equal(almost.dropsUntilRestock,1);
+      for(let i=99;i<300;i++) await repo.playCoinPusher('S001',{idempotencyKey:'initial-'+i});
       const initial = await prizes.stock('S001');
+      assert.equal(initial.prizes.length,4,'300 paid drops unlock three more prizes');
+      assert.equal(initial.dropsUntilRestock,100);
       for (let i=0;i<8;i++) assert.deepEqual(await prizes.stock('S001'), initial);
       const [ruby, pet, wearable, furniture] = initial.prizes;
       await assert.rejects(prizes.claim('S002',ruby.id), {status:404});
@@ -25,7 +34,7 @@ test('prizes are student-bound, budgeted, credited once and redeemed without coi
       await assert.rejects(prizes.redeem('S001',pet.id,'cloud-ear-dog'), {status:409});
       const claimed = await Promise.all(Array.from({length:5},()=>prizes.claim('S001',ruby.id)));
       assert.equal(claimed[0].earned,50);
-      assert.equal((await repo.getBootstrap('S001')).wallet.balance,150);
+      assert.equal((await repo.getBootstrap('S001')).wallet.balance,750);
       assert.equal(store.load().petCurrencyLedger.filter(x=>x.kind==='arcade_ruby').length,1);
       assert.equal((await prizes.stock('S001')).prizes.length,3, 'claiming and reloading cannot mint another free ruby');
       const before = await repo.getBootstrap('S001');
@@ -39,12 +48,17 @@ test('prizes are student-bound, budgeted, credited once and redeemed without coi
       const sofa = [...before.catalog.furniture].filter(x=>!before.inventory.some(i=>i.itemId===x.id)).sort((a,b)=>b.price-a.price)[0];
       await prizes.redeem('S001',wearable.id,hat.id); await prizes.redeem('S001',furniture.id,sofa.id);
       const after = await repo.getBootstrap('S001');
-      assert.equal(after.wallet.balance,150); assert.equal(after.profile.eggPity,before.profile.eggPity);
+      assert.equal(after.wallet.balance,750); assert.equal(after.profile.eggPity,before.profile.eggPity);
       assert.equal(after.pets.filter(x=>x.speciesId===target.id).length,1);
       assert.equal(after.inventory.find(x=>x.itemId===hat.id).quantity,1);
       assert.equal(after.inventory.find(x=>x.itemId===sofa.id).quantity,1);
       assert.equal((await prizes.stock('S001')).prizes.length,0);
-      for(let i=0;i<20;i++) await repo.playCoinPusher('S001',{idempotencyKey:'drop-'+i});
+      for(let i=0;i<99;i++) await repo.playCoinPusher('S001',{idempotencyKey:'drop-'+i});
+      assert.equal((await prizes.stock('S001')).prizes.length,0,'99 drops cannot restock a prize');
+      // A replayed debit is not another paid drop and must not move the threshold.
+      await repo.playCoinPusher('S001',{idempotencyKey:'drop-98'});
+      assert.equal((await prizes.stock('S001')).dropsUntilRestock,1);
+      await repo.playCoinPusher('S001',{idempotencyKey:'drop-99'});
       const restocked = await prizes.stock('S001'); assert.equal(restocked.prizes.length,1);
       assert.equal(restocked.prizes[0].kind,'ruby'); assert.notEqual(restocked.prizes[0].id,ruby.id);
       for(let i=0;i<5;i++) assert.deepEqual(await prizes.stock('S001'),restocked);
@@ -55,6 +69,44 @@ test('prizes are student-bound, budgeted, credited once and redeemed without coi
   const child = spawnSync(process.execPath, ['-e', source], { cwd: path.resolve(__dirname, '../..'), encoding: 'utf8',
     env: { ...process.env, NODE_ENV: 'test', SUPABASE_DB_URL: '', BUIO_JSON_DB_FILE: path.join(temp, 'db.json') } });
   assert.equal(child.status, 0, child.stderr);
+});
+
+test('slower stock migration preserves old prizes and starts a fresh 100-drop schedule without a backlog', t => {
+  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'buio-prize-migration-'));
+  t.after(()=>fs.rmSync(temp,{recursive:true,force:true}));
+  const source=`
+    const assert=require('node:assert/strict');
+    const repo=require('./pet-app/repositories/pet.repo');
+    const prizes=require('./pet-app/repositories/arcade-prizes.repo');
+    const store=require('./db/jsonStore');
+    (async()=>{
+      await repo.grantUnlimitedMoney('S001',1000);
+      const data=store.load();
+      data.petCoinPusherPlays=Array.from({length:1000},(_,i)=>({studentId:'S001',playId:'historical-'+i}));
+      const existing=[
+        {id:'old-ruby',kind:'ruby',variant:0,status:'board'},
+        {id:'old-pet',kind:'pet',variant:0,status:'bag',claimResult:{prizeId:'old-pet',kind:'pet',earned:0,balance:1000}},
+        {id:'old-wearable',kind:'wearable',variant:0,status:'board'},
+        {id:'old-furniture',kind:'furniture',variant:0,status:'redeemed',itemId:'old-item'},
+      ];
+      data.petArcadePrizes=[{studentId:'S001',state:{issued:4,prizes:existing}}];store.save();
+      const adopted=await prizes.stock('S001');
+      assert.equal(adopted.prizes.length,3,'no prizes are backfilled from 1000 old drops');
+      assert.equal(adopted.dropsUntilRestock,100);
+      assert.deepEqual(store.load().petArcadePrizes[0].state.prizes,existing,'preserve board, bag and redeemed identities/results');
+      for(let i=0;i<8;i++)assert.deepEqual(await prizes.stock('S001'),adopted);
+      assert.equal((await repo.getBootstrap('S001')).wallet.balance,1000,'adoption changes no wallet money');
+      for(let i=0;i<99;i++)await repo.playCoinPusher('S001',{idempotencyKey:'new-policy-'+i});
+      const before=await prizes.stock('S001');assert.equal(before.prizes.length,3);assert.equal(before.dropsUntilRestock,1);
+      await repo.playCoinPusher('S001',{idempotencyKey:'new-policy-99'});
+      const after=await prizes.stock('S001');assert.equal(after.prizes.length,4);assert.equal(after.dropsUntilRestock,100);
+      assert.equal(after.prizes.at(-1).kind,'ruby');assert.equal(store.load().petArcadePrizes[0].state.issued,5);
+      assert.equal((await repo.getBootstrap('S001')).wallet.balance,900,'only paid drops affect this wallet');
+      console.log(JSON.stringify({pass:true}));
+    })().catch(error=>{console.error(error);process.exitCode=1});
+  `;
+  const child=spawnSync(process.execPath,['-e',source],{cwd:path.resolve(__dirname,'../..'),encoding:'utf8',env:{...process.env,NODE_ENV:'test',SUPABASE_DB_URL:'',BUIO_JSON_DB_FILE:path.join(temp,'db.json')}});
+  assert.equal(child.status,0,child.stderr);
 });
 
 test('physical prizes reset/save with the same identities and emit only their own trough catch', async (t) => {
@@ -84,7 +136,7 @@ test('physical prizes reset/save with the same identities and emit only their ow
     assert.equal(caught.length,4, 'all four tall prizes must reach the recessed trough and be confirmed');
     assert.equal(new Set(caught.map(e=>e.prize.id)).size,4);
     assert.ok(caught.every(e=>Math.abs(e.position.z-PAYOUT_TRAY_CENTER_Z)<.6));
-    assert.equal(events.filter(e=>e.type==='coins-collected').length,0,'prizes must never also earn ordinary +10');
+    assert.equal(events.filter(e=>e.type==='coins-collected').length,0,'prizes must never also earn ordinary +1');
     assert.equal(model.coins.filter(c=>c.prize).length,0,'confirmed trophies disappear after the catch animation');
   } finally { model.destroy(); }
 });

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import './styles/main.css';
 import { api } from './api';
+import { CoinPusherSettlementRetries, settledCoinPusherRemaining, type SettlementError } from './game/CoinPusherSettlement';
 import { QuietRoom } from './quiet-room';
 import { prizeIcon, prizeLabel, type ArcadePrize } from './game/ArcadePrizes';
 import { audio } from './audio';
@@ -154,6 +155,8 @@ class StudentApp {
   private coinPusherPayoutQueue: Promise<void> = Promise.resolve();
   private coinPusherPayoutsQueued = new Set<string>();
   private coinPusherPayoutRetryTimer?: number;
+  private coinPusherSettlementRetries = new CoinPusherSettlementRetries();
+  private coinPusherSettlementNoticeShown = false;
   private coinPusherTrayCatchUntil = 0;
   private coinPusherTrayCatchCue?: HTMLSpanElement;
   private coinPusherTrayCatchTimer?: number;
@@ -172,7 +175,7 @@ class StudentApp {
   private arcadePrizesQueued = new Set<string>();
   private arcadeClaimedPrizes = new Set<string>();
   private arcadeStockQueue: Promise<void> = Promise.resolve();
-  private arcadeRestock = 20;
+  private arcadeRestock = 100;
   private coinPusherSessionLoading?: Promise<CoinPusherSession | undefined>;
   private coinPusherSessionSaveQueue: Promise<void> = Promise.resolve();
   private coinPusherPersistenceFailed = false;
@@ -1166,15 +1169,21 @@ class StudentApp {
   }
   private async authorizeCoinPusherDrop(generation:number,requestKey:string,recovered=false) {
     this.coinPusherPaymentInFlight=true;
-    try {
+    // Paid drops and all rewards share one wallet-response lane. A slow payout
+    // reply must not overwrite the balance from a newer debit (or vice versa).
+    const task=this.coinPusherPayoutQueue.catch(()=>undefined).then(async()=>{
       const result=await api.playCoinPusher(requestKey);
       if(generation!==this.coinPusherGeneration)return undefined;
-      if(recovered)await this.reload();
+      if(recovered)await this.reload().catch(error=>console.warn('[pet] Paid drop; wallet refresh deferred',error));
       else{
         this.state.wallet.balance=Number(result.balance);
         this.updateWallet();
       }
       return result;
+    });
+    this.coinPusherPayoutQueue=task.then(()=>undefined,()=>undefined);
+    try {
+      return await task;
     } catch(error) {
       this.handleCoinPusherTransactionError(error as Error);
       return undefined;
@@ -1296,6 +1305,7 @@ class StudentApp {
     const status=document.querySelector<HTMLElement>('#coinPusherSystemStatus');
     if(status){
       status.textContent=message;
+      status.title=message;
       status.parentElement?.classList.toggle('is-loading',loading);
     }
   }
@@ -1309,10 +1319,22 @@ class StudentApp {
       ?'網絡未能確認落幣；可安全重試。'
       :'The drop could not be confirmed; it is safe to retry.'),true);
   }
-  private handleCoinPusherPayoutError(error:Error) {
+  private handleCoinPusherPayoutError(error:SettlementError) {
     const zh=this.locale==='zh-HK';
-    this.setCoinPusherStatus(zh?'推出獎勵已安全暫存，網絡恢復後會重試。':'Your payout is safely saved and will retry when the connection returns.');
-    this.toast(zh?'獎勵暫存中，請保持連線或稍後返回機台。':'Payout saved. Stay online or return to the arcade later.',true);
+    const status=error.status??0;
+    const auth=status===401||status===403;
+    const permanent=status>=400&&status<500&&status!==408&&status!==429;
+    const message=auth
+      ?(zh?'獎勵已保留，請重新登入後返回機台確認。':'Rewards saved. Sign in again, then return to the arcade.')
+      :permanent
+        ?(zh?'獎勵已保留待核對，已停止自動重試；請通知老師。':'Rewards saved for review. Automatic retries paused; please tell your teacher.')
+        :(zh?'獎勵已暫存，連線恢復後會自動入帳。':'Rewards saved; they will settle when the connection returns.');
+    this.setCoinPusherStatus(message);
+    if(!this.coinPusherSettlementNoticeShown){
+      this.coinPusherSettlementNoticeShown=true;
+      this.toast(message,permanent);
+      console.warn('[pet] Arcade settlement deferred', {status,requestId:error.requestId,reason:error.message});
+    }
   }
   private coinPusherReadyMessage() {
     const zh=this.locale==='zh-HK';
@@ -1322,8 +1344,8 @@ class StudentApp {
     if(Number(this.state.wallet.balance) < COIN_PUSHER_DROP_COST)return this.coinPusherInsufficientMessage();
     const keyboardHintVisible=typeof window.matchMedia==='function'
       && window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 760px)').matches;
-    if(keyboardHintVisible)return zh?'落幣 −1 · 每枚入槽 +10':'Drop −1 · each catch +10';
-    return zh?'揀位後向下滑落幣 · 入槽 +10':'Choose a lane · swipe down to drop · tray +10';
+    if(keyboardHintVisible)return zh?'落幣 −1 · 每枚入槽 +1':'Drop −1 · each catch +1';
+    return zh?'揀位後向下滑落幣 · 入槽 +1':'Choose a lane · swipe down to drop · tray +1';
   }
   private coinPusherInsufficientMessage() {
     return this.locale==='zh-HK'?'金幣不足 · 每次落幣需要 1 枚':'Not enough coins · each drop costs 1';
@@ -1494,6 +1516,7 @@ class StudentApp {
   }
   private queueCoinPusherPayout(payout:StoredCoinPusherPayout,generation:number,recovered=false,origins?:CoinPusherRewardOrigin[]) {
     if(this.coinPusherPayoutsQueued.has(payout.eventId))return;
+    if(!navigator.onLine||!this.coinPusherSettlementRetries.canAttempt(payout.eventId)){this.scheduleCoinPusherPayoutRetry();return;}
     let play=this.coinPusherPlays.find((entry)=>entry.playId===payout.playId);
     if(!play){
       play={playId:payout.playId,remaining:100,reserved:payout.amount,generation};
@@ -1501,9 +1524,19 @@ class StudentApp {
     }
     this.coinPusherPayoutsQueued.add(payout.eventId);
     const job=async()=>{
-      const succeeded=await this.submitCoinPusherPayout(play!,payout,generation,origins,0,recovered);
-      this.coinPusherPayoutsQueued.delete(payout.eventId);
-      if(!succeeded)this.scheduleCoinPusherPayoutRetry();
+      try {
+        if(!navigator.onLine||!this.coinPusherSettlementRetries.canAttempt(payout.eventId))return;
+        if(!await this.persistCoinPusherSession()){
+          this.coinPusherSettlementRetries.fail(payout.eventId,new Error('storage'));
+          return;
+        }
+        await this.submitCoinPusherPayout(play!,payout,generation,origins,0,recovered);
+      } catch(error) {
+        console.warn('[pet] Settlement presentation/save deferred',error);
+      } finally {
+        this.coinPusherPayoutsQueued.delete(payout.eventId);
+        this.scheduleCoinPusherPayoutRetry();
+      }
     };
     this.coinPusherPayoutQueue=this.coinPusherPayoutQueue.catch(()=>undefined).then(job);
   }
@@ -1518,26 +1551,44 @@ class StudentApp {
     for(const payout of this.coinPusherPendingPayouts)this.queueCoinPusherPayout(payout,generation,true);
   };
   private scheduleCoinPusherPayoutRetry() {
-    if(this.coinPusherPayoutRetryTimer!==undefined||!this.coinPusherPendingPayouts.length)return;
+    const ids=[...this.coinPusherPendingPayouts.map(p=>p.eventId),...this.arcadePendingPrizes];
+    if(this.coinPusherPayoutRetryTimer!==undefined||!ids.length||!navigator.onLine||document.visibilityState==='hidden')return;
+    const nextAt=this.coinPusherSettlementRetries.nextAttempt(ids);
+    if(!Number.isFinite(nextAt))return;
     this.coinPusherPayoutRetryTimer=window.setTimeout(()=>{
       this.coinPusherPayoutRetryTimer=undefined;
       this.retryPendingCoinPusherPayouts();
-    },5000);
+    },Math.max(1000,nextAt-Date.now()));
   }
   private async submitCoinPusherPayout(play:{playId:string;remaining:number;reserved:number}, payout:StoredCoinPusherPayout, generation:number, origins?:CoinPusherRewardOrigin[], attempt=0, recovered=false):Promise<boolean> {
     const {amount,eventId,requestKey}=payout;
+    let result:Awaited<ReturnType<typeof api.payoutCoinPusher>>;
     try {
-      const result=await api.payoutCoinPusher({playId:play.playId,eventId,amount},requestKey);
+      result=await api.payoutCoinPusher({playId:play.playId,eventId,amount},requestKey);
+    } catch(error) {
+      const failure=error as SettlementError;
+      if(attempt<1&&!failure.retryAfterMs&&(!failure.status||failure.status===408||failure.status>=500)){
+        await new Promise((resolve)=>window.setTimeout(resolve,350));
+        return this.submitCoinPusherPayout(play,payout,generation,origins,attempt+1,true);
+      }
+      this.coinPusherSettlementRetries.fail(eventId,failure);
+      if(generation===this.coinPusherGeneration&&this.tab==='coinPusher')this.handleCoinPusherPayoutError(failure);
+      return false;
+    }
+    // A committed payout is complete even if the subsequent bootstrap refresh fails.
+    // Never resend it or decrement its reservation again because of a UI/save error.
+    this.coinPusherSettlementRetries.succeed(eventId);
       const previousStamps=this.coinPusherStampCount();
-      this.state.wallet.balance=Number(result.balance); this.updateWallet();
+      if(!recovered){this.state.wallet.balance=Number(result.balance);this.updateWallet();}
       if(result.collection)this.state.coinPusherCollection={returnedCoins:Math.max(this.coinPusherReturnedCoins(),Number(result.collection.returnedCoins)||0)};
       this.syncCoinPusherCollectionBadge();
       this.coinPusherView?.setKeepsakeTier(this.coinPusherStampCount(), this.coinPusherSelectedFinish().id);
       play.reserved=Math.max(0,play.reserved-amount);
-      play.remaining=Number(result.remainingPayout);
+      play.remaining=settledCoinPusherRemaining(play.remaining,Number(result.remainingPayout));
       this.coinPusherPendingPayouts=this.coinPusherPendingPayouts.filter((entry)=>entry.eventId!==eventId);
       if(play.remaining<=0&&play.reserved<=0)this.coinPusherPlays=this.coinPusherPlays.filter((entry)=>entry!==play);
-      if(recovered)await this.reload();
+      if(!this.coinPusherPendingPayouts.length&&!this.arcadePendingPrizes.length)this.coinPusherSettlementNoticeShown=false;
+      if(recovered)await this.reload().catch(error=>console.warn('[pet] Settled payout; wallet refresh deferred',error));
       await this.persistCoinPusherSession();
       const catchAnimationRemaining=Math.max(0,this.coinPusherTrayCatchUntil-performance.now());
       if(catchAnimationRemaining>0)await new Promise((resolve)=>window.setTimeout(resolve,catchAnimationRemaining));
@@ -1557,14 +1608,6 @@ class StudentApp {
         }
       }
       return true;
-    } catch(error) {
-      if(attempt<1){
-        await new Promise((resolve)=>window.setTimeout(resolve,350));
-        return this.submitCoinPusherPayout(play,payout,generation,origins,attempt+1,recovered);
-      }
-      if(generation===this.coinPusherGeneration&&this.tab==='coinPusher')this.handleCoinPusherPayoutError(error as Error);
-      return false;
-    }
   }
   private coinPusherStereoPan(origins?:readonly CoinPusherRewardOrigin[]) {
     const root=document.querySelector<HTMLElement>('#coin-pusher-root');
@@ -1932,16 +1975,20 @@ class StudentApp {
   }
   private queueArcadePrize(prizeId: string, origin?: CoinPusherRewardOrigin) {
     if (this.arcadePrizesQueued.has(prizeId)) return;
+    if(!navigator.onLine||!this.coinPusherSettlementRetries.canAttempt(prizeId)){this.scheduleCoinPusherPayoutRetry();return;}
     this.arcadePrizesQueued.add(prizeId);
     // Share the ordinary payout queue: overlapping wallet responses cannot race each other.
     this.coinPusherPayoutQueue = this.coinPusherPayoutQueue.catch(() => undefined).then(async () => {
       try {
+        if(!navigator.onLine||!this.coinPusherSettlementRetries.canAttempt(prizeId))return;
         if (!await this.persistCoinPusherSession()) throw new Error('獎品暫存未完成。');
         const result = await api.claimArcadePrize(prizeId);
+        this.coinPusherSettlementRetries.succeed(prizeId);
         this.arcadeClaimedPrizes.add(prizeId);
-        await this.reload();
         this.arcadePendingPrizes = this.arcadePendingPrizes.filter((id) => id !== prizeId);
+        if(!this.coinPusherPendingPayouts.length&&!this.arcadePendingPrizes.length)this.coinPusherSettlementNoticeShown=false;
         await this.persistCoinPusherSession();
+        await this.reload().catch(error=>console.warn('[pet] Prize settled; wallet refresh deferred',error));
         const zh = this.locale === 'zh-HK';
         const label = `${prizeIcon(result.kind)} ${prizeLabel(result.kind, zh)} ${result.earned ? '+50' : '+1'}`;
         if (this.tab === 'coinPusher') {
@@ -1958,11 +2005,13 @@ class StudentApp {
           }
           audio.sfx('arcadeKeepsake'); this.setCoinPusherStatus(`${label} · ${zh ? (result.earned ? '已回到錢包' : '已放入獎品袋') : (result.earned ? 'Added to wallet' : 'Added to prize bag')}`);
         } else this.toast(label);
-        await this.refreshArcadePrizes();
+        await this.refreshArcadePrizes().catch(error=>console.warn('[pet] Prize settled; stock refresh deferred',error));
       } catch (error) {
-        this.toast(this.locale === 'zh-HK' ? '獎品確認暫停，會自動重試；不會重複領獎。' : 'Prize confirmation paused; retrying safely.', true);
-        window.setTimeout(() => { if (this.arcadePendingPrizes.includes(prizeId)) this.queueArcadePrize(prizeId, origin); }, 5000);
-      } finally { this.arcadePrizesQueued.delete(prizeId); }
+        if(this.arcadePendingPrizes.includes(prizeId)){
+          this.coinPusherSettlementRetries.fail(prizeId,error as SettlementError);
+          this.handleCoinPusherPayoutError(error as SettlementError);
+        }else console.warn('[pet] Prize presentation deferred',error);
+      } finally { this.arcadePrizesQueued.delete(prizeId);this.scheduleCoinPusherPayoutRetry(); }
     });
   }
   private async openArcadePrizeBag() {
