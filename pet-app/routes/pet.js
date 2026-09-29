@@ -228,6 +228,14 @@ router.get('/teacher/roster', requireTeacher, asyncRoute(async (_req, res) => {
   sendResult(res, await teacherRoster());
 }));
 
+router.get('/teacher/coin-pusher/settings', requireTeacher, asyncRoute(async (_req, res) => {
+  sendResult(res, await repo.getCoinPusherSettings());
+}));
+
+router.put('/teacher/coin-pusher/settings', requireTeacher, asyncRoute(async (req, res) => {
+  sendResult(res, await repo.updateCoinPusherSettings(req.session.studentId, { rewardPerCoin: req.body?.rewardPerCoin }));
+}));
+
 router.get('/teacher/quiet-room', requireTeacher, asyncRoute(async (req, res) => {
   sendResult(res, { session: await quietRooms.current(req.session.studentId) });
 }));

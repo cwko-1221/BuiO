@@ -57,6 +57,19 @@ test('production Rapier WASM has a valid compact Brotli sidecar for mobile deliv
     `maximum-quality Brotli should keep the mobile physics download under 28.5% of its raw size (${compressed.length}/${wasm.length})`);
 });
 
+test('the HTML entrypoint loads the teacher reward settings and scoped gesture lock', () => {
+  const html = fs.readFileSync(path.join(distRoot, 'index.html'), 'utf8');
+  const entry = html.match(/<script[^>]*type="module"[^>]*src="\/pet\/([^"<>]+)"/);
+  assert.ok(entry, 'production HTML must link a module entrypoint');
+  // Lazy battle code shares the API/audio module with the entrypoint. Inspect
+  // exactly the entry and modules linked by this HTML, excluding stale bundles.
+  const linked = [entry[1], ...Array.from(html.matchAll(/<link[^>]*rel="modulepreload"[^>]*href="\/pet\/([^"<>]+)"/g), match => match[1])];
+  const client = linked.map(file => fs.readFileSync(path.join(distRoot, file), 'utf8')).join('\n');
+  for (const marker of ['/api/pet/teacher/coin-pusher/settings', 'coinPusherRewardPerCoin', 'coin-pusher-input-locked']) {
+    assert.ok(client.includes(marker), `${marker} must be in the currently linked client, not just an old asset`);
+  }
+});
+
 test('production desktop coin-pusher artwork stays within its cold-load transfer budget', () => {
   const assetsDir = path.join(distRoot, 'assets');
   const budgets = [

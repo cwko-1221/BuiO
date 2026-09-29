@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import './styles/main.css';
 import { api } from './api';
 import { CoinPusherSettlementRetries, settledCoinPusherRemaining, type SettlementError } from './game/CoinPusherSettlement';
+import { lockCoinPusherBrowserInteractions } from './game/CoinPusherBrowserInteractions';
+import { CoinPusherTeacherSettings } from './teacher/CoinPusherSettings';
 import { QuietRoom } from './quiet-room';
 import { prizeIcon, prizeLabel, type ArcadePrize } from './game/ArcadePrizes';
 import { audio } from './audio';
@@ -26,8 +28,8 @@ import { idempotencyKey } from './types';
 import rapierWasmUrl from '@dimforge/rapier3d/rapier_wasm3d_bg.wasm?url';
 
 
-// Native browser zoom and multi-touch behavior stays enabled throughout the application.
-// Only the coin-pusher canvas scopes gestures with touch-action: none.
+// The coin-pusher locks native zoom/selection for its lifetime; other pages retain
+// their normal browser gestures, including after returning to the bedroom.
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[character]!));
@@ -130,6 +132,7 @@ class StudentApp {
   identity: Identity; state!: Bootstrap; locale: Locale; game?: Phaser.Game; tab = 'home'; selectedFurniture = ''; roomPlacements: RoomPlacement[] = [];
   pendingGrantIds: string[] = [];
   coinPusherView?: CoinPusherScene;
+  private releaseCoinPusherBrowserInteractions?: () => void;
   private coinPusherModel?: CoinPusherScene['model'];
   private coinPusherInitPending = false;
   private coinPusherGeneration = 0;
@@ -961,6 +964,7 @@ class StudentApp {
     }
     this.destroyCoinPusher(true);
     this.setLayout('room');
+    this.releaseCoinPusherBrowserInteractions = lockCoinPusherBrowserInteractions();
     // The pusher uses the selected room's clean room art, not the editable bedroom scene:
     // furniture placements and the pet stay in the actual room and are never drawn here.
     if(this.game?.scene.isActive('Bedroom'))this.game.scene.sleep('Bedroom');
@@ -1177,6 +1181,9 @@ class StudentApp {
       if(recovered)await this.reload().catch(error=>console.warn('[pet] Paid drop; wallet refresh deferred',error));
       else{
         this.state.wallet.balance=Number(result.balance);
+        if(Number.isInteger(result.rewardPerCoin)&&result.rewardPerCoin>=1&&result.rewardPerCoin<=100){
+          this.state.coinPusherSettings={rewardPerCoin:result.rewardPerCoin,updatedBy:null,updatedAt:null};
+        }
         this.updateWallet();
       }
       return result;
@@ -1344,8 +1351,9 @@ class StudentApp {
     if(Number(this.state.wallet.balance) < COIN_PUSHER_DROP_COST)return this.coinPusherInsufficientMessage();
     const keyboardHintVisible=typeof window.matchMedia==='function'
       && window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 760px)').matches;
-    if(keyboardHintVisible)return zh?'落幣 −1 · 每枚入槽 +1':'Drop −1 · each catch +1';
-    return zh?'揀位後向下滑落幣 · 入槽 +1':'Choose a lane · swipe down to drop · tray +1';
+    const reward=this.state.coinPusherSettings?.rewardPerCoin??1;
+    if(keyboardHintVisible)return zh?`落幣 −1 · 每枚入槽 +${reward}`:`Drop −1 · each catch +${reward}`;
+    return zh?`揀位後向下滑落幣 · 入槽 +${reward}`:`Choose a lane · swipe down to drop · tray +${reward}`;
   }
   private coinPusherInsufficientMessage() {
     return this.locale==='zh-HK'?'金幣不足 · 每次落幣需要 1 枚':'Not enough coins · each drop costs 1';
@@ -1495,7 +1503,9 @@ class StudentApp {
   }
   private coinPusherExitWaitMessage() { return this.locale==='zh-HK'?'正在處理落幣，請稍候再返回房間':'Your drop is still processing. Please wait before leaving.'; }
   private creditCoinPayout(count:number, generation:number, origins?:CoinPusherRewardOrigin[]) {
-    const play=this.coinPusherPlays.find((item)=>item.generation===generation&&item.remaining-item.reserved>0);
+    // New catches use the latest paid play's captured rate, so unused old budgets
+    // cannot mask a teacher change. Already queued events keep their original playId.
+    const play=this.coinPusherPlays.slice().reverse().find((item)=>item.generation===generation&&item.remaining-item.reserved>0);
     if(!play)return;
     const available=Math.max(0,play.remaining-play.reserved);
     const amount=Math.min(Math.max(0,Math.floor(count)),available,20);
@@ -2057,6 +2067,8 @@ class StudentApp {
   }
   private async reload(){this.state=await api.bootstrap();this.roomPlacements=this.state.room.placements.map((item)=>({...item}));this.updateWallet();}
   private destroyCoinPusher(preserveModel=false){
+    this.releaseCoinPusherBrowserInteractions?.();
+    this.releaseCoinPusherBrowserInteractions=undefined;
     if(preserveModel)void this.persistCoinPusherSession();
     if(this.coinPusherAutosaveTimer!==undefined)window.clearInterval(this.coinPusherAutosaveTimer);
     this.coinPusherAutosaveTimer=undefined;
@@ -2111,6 +2123,7 @@ type RosterFilterField = 'className' | 'chineseGroup' | 'englishGroup' | 'mathGr
 
 class TeacherApp {
   quietRoom?:QuietRoom;
+  private coinPusherSettings?:CoinPusherTeacherSettings;
   identity:Identity; locale:Locale; roster:any; selected=new Set<string>();scope:'students'|'class'|'group'='students';
   filterField:RosterFilterField='className';filterValue='';
   constructor(identity:Identity){this.identity=identity;this.locale=identity.language||'zh-HK';}
@@ -2124,13 +2137,14 @@ class TeacherApp {
   render(){
     this.quietRoom?.dispose();
     this.quietRoom=undefined;
+    this.coinPusherSettings=undefined;
     const zh=this.zh();
     app.innerHTML=`<div class="teacher-shell">
       <header class="teacher-header">
         <a href="/" class="brand"><span class="brand-mark">B</span><span><b>${zh?'老師寵物樂園':'Teacher Pet Paradise'}</b><small>${escapeHtml(this.identity.name)} · ${escapeHtml(this.roster.academicYear)}</small></span></a>
         <div class="teacher-summary"><span><b>${this.roster.students.length}</b><small>${zh?'名學生':'students'}</small></span><span><b>${this.roster.classes.length}</b><small>${zh?'個班別':'classes'}</small></span></div>
       </header>
-      <nav class="teacher-tool-tabs" aria-label="${zh?'老師工具':'Teacher tools'}"><button type="button" data-teacher-tool="coins" class="active" aria-pressed="true">🪙 ${zh?'金幣調整':'Coin adjustments'}</button><button type="button" data-teacher-tool="quiet" aria-pressed="false">${zh?'安靜房間':'Quiet Room'}</button></nav>
+      <nav class="teacher-tool-tabs" aria-label="${zh?'老師工具':'Teacher tools'}"><button type="button" data-teacher-tool="coins" class="active" aria-pressed="true">🪙 ${zh?'金幣調整':'Coin adjustments'}</button><button type="button" data-teacher-tool="quiet" aria-pressed="false">${zh?'安靜房間':'Quiet Room'}</button><button type="button" data-teacher-tool="arcade" aria-pressed="false">${zh?'推銀仔設定':'Coin-pusher settings'}</button></nav>
       <main class="teacher-main" id="teacherCoinMain">
         <section class="grant-panel" aria-labelledby="grantHeading">
           <div class="grant-head">
@@ -2170,20 +2184,27 @@ class TeacherApp {
         </section>
       </main>
       <main id="teacherQuietMain" class="teacher-quiet-main" hidden></main>
+      <main id="teacherArcadeMain" class="teacher-arcade-main" hidden></main>
       <div class="modal-root" id="modalRoot"></div>
     </div>`;
     this.bind();this.updateSummary();
     document.querySelectorAll<HTMLButtonElement>('[data-teacher-tool]').forEach(button=>button.addEventListener('click',()=>{
       const quiet=button.dataset.teacherTool==='quiet';
+      const arcade=button.dataset.teacherTool==='arcade';
       document.querySelectorAll<HTMLElement>('[data-teacher-tool]').forEach(item=>{item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));});
-      document.querySelector<HTMLElement>('#teacherCoinMain')!.hidden=quiet;
+      document.querySelector<HTMLElement>('#teacherCoinMain')!.hidden=quiet||arcade;
       document.querySelector<HTMLElement>('#teacherQuietMain')!.hidden=!quiet;
+      document.querySelector<HTMLElement>('#teacherArcadeMain')!.hidden=!arcade;
       if(!quiet)this.quietRoom?.hide();
       if(quiet&&!this.quietRoom){
         this.quietRoom=new QuietRoom(document.querySelector<HTMLElement>('#teacherQuietMain')!,this.roster,this.locale,async()=>{
           this.roster=await api.teacherRoster();
           document.querySelector('#studentRoster')!.innerHTML=this.studentRows();
         });void this.quietRoom.init();
+      }
+      if(arcade&&!this.coinPusherSettings){
+        this.coinPusherSettings=new CoinPusherTeacherSettings(document.querySelector<HTMLElement>('#teacherArcadeMain')!,this.locale);
+        void this.coinPusherSettings.init();
       }
     }));
   }

@@ -1409,6 +1409,15 @@ try {
   const touchTabBox = await touchTab.boundingBox();
   assert.ok(touchTabBox, 'the touch arcade tab must be visible before the student presses it');
   const touchInput = await touchContext.newCDPSession(touchPage);
+  // Both sides of the ordering assertion must use Chrome's clock. Node Date.now()
+  // and the renderer's wall clock can differ by a few milliseconds on Windows.
+  const touchBrowserRequestTimes = [];
+  touchInput.on('Network.requestWillBeSent', ({ request, wallTime }) => {
+    if (/CoinPusherScene|CoinPusherModel|rapier_wasm3d_bg/i.test(new URL(request.url).pathname)) {
+      touchBrowserRequestTimes.push(wallTime * 1000);
+    }
+  });
+  await touchInput.send('Network.enable');
   await touchInput.send('Input.dispatchTouchEvent', {
     type: 'touchStart',
     touchPoints: [{ x: touchTabBox.x + touchTabBox.width / 2, y: touchTabBox.y + touchTabBox.height / 2, id: 41, force: 1 }],
@@ -1424,7 +1433,8 @@ try {
   }));
   assert.ok(touchPreClick.pointerDownAt && touchPreClick.clickAt === undefined && touchPreClick.canvasCount === 0,
     'pointer-down preloading must remain invisible until the student commits the click');
-  assert.ok(touchModuleRequests.every(({ requestedAt }) => requestedAt >= touchPreClick.pointerDownAt),
+  assert.equal(touchBrowserRequestTimes.length, touchModuleRequests.length, 'all preload requests need browser-clock timestamps');
+  assert.ok(touchBrowserRequestTimes.every(requestedAt => requestedAt >= touchPreClick.pointerDownAt),
     'touch module downloads must begin only after the explicit pointer-down intent');
   assert.equal(touchRequests.filter((url) => url.endsWith('/coin-pusher/play')).length, 0,
     'warming physics on pointer-down must never spend a student coin');

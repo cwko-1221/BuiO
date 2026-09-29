@@ -135,10 +135,12 @@ export interface RoomPlacement {
   size?: number;
 }
 export interface RoomState { themeId: string; visibility: 'private' | 'class'; placements: RoomPlacement[]; updatedAt?: string }
+export interface CoinPusherSettings { rewardPerCoin: number; updatedBy: string | null; updatedAt: string | null }
 export interface Bootstrap {
   profile: { studentId: string; activePetId: string | null; starterEggClaimed: boolean; eggPity: number; stardust: number };
   wallet: { balance: number }; pets: PetInstance[]; inventory: InventoryStack[]; room: RoomState;
   catalog: Catalog; serverDay: string; coinPusherCollection?: { returnedCoins: number };
+  coinPusherSettings?: CoinPusherSettings;
 }
 export interface TeacherGrantNotification {
   transactionId: string;

@@ -129,3 +129,98 @@ test('paid coin-pusher has JSON/Postgres tables, row locks, and shared limits', 
     'PetIdempotency', 'FOR UPDATE', 'COIN_PUSHER_PAYOUT_CAP', 'petCoinPusherPlays', 'petCoinPusherPayouts',
   ]) assert.ok(source.includes(marker), `missing parity guard: ${marker}`);
 });
+
+test('school reward settings persist, validate integers, and snapshot each authorized play', t => {
+  const result = runFixture(t, `
+    const repo=require(${JSON.stringify(repoPath)}), store=require(${JSON.stringify(storePath)});
+    (async()=>{
+      const defaultSettings=await repo.getCoinPusherSettings();
+      await repo.grantUnlimitedMoney('coin-test-student',20);
+      const original=await repo.playCoinPusher('coin-test-student',{idempotencyKey:'old-play'});
+      const updated=await repo.updateCoinPusherSettings('teacher-1',{rewardPerCoin:7});
+      const bootstrap=await repo.getBootstrap('coin-test-student');
+      const fresh=await repo.playCoinPusher('coin-test-student',{idempotencyKey:'new-play',rewardPerCoin:999});
+      const payout=await repo.payoutCoinPusher('coin-test-student',{playId:fresh.playId,eventId:'new-catch',amount:3,idempotencyKey:'new-catch',rewardPerCoin:999});
+      await repo.updateCoinPusherSettings('teacher-2',{rewardPerCoin:100});
+      const retry=await repo.payoutCoinPusher('coin-test-student',{playId:fresh.playId,eventId:'new-catch',amount:3,idempotencyKey:'new-catch-retry'});
+      const later=await repo.payoutCoinPusher('coin-test-student',{playId:fresh.playId,eventId:'later',amount:1,idempotencyKey:'later'});
+      const old=await repo.payoutCoinPusher('coin-test-student',{playId:original.playId,eventId:'old',amount:1,idempotencyKey:'old'});
+      const playRetry=await repo.playCoinPusher('coin-test-student',{idempotencyKey:'old-play'});
+      const errors=[];
+      for(const value of [0,-1,101,1.5,'7',null,true]){try{await repo.updateCoinPusherSettings('teacher-1',{rewardPerCoin:value});}catch(error){errors.push(error.status);}}
+      // Missing rates on legacy persisted plays retain the previous default, not the new global rate.
+      delete store.load().petCoinPusherPlays.find(play=>play.playId===original.playId).rewardPerCoin;
+      const legacy=await repo.payoutCoinPusher('coin-test-student',{playId:original.playId,eventId:'legacy-default',amount:1,idempotencyKey:'legacy-default'});
+      store.save();
+      process.stdout.write(JSON.stringify({defaultSettings,updated,bootstrap,payout,retry,later,old,original,playRetry,legacy,errors,settings:await repo.getCoinPusherSettings(),ledger:store.load().petCurrencyLedger}));
+    })().catch(error=>{console.error(error.stack);process.exitCode=1});
+  `);
+  assert.equal(result.defaultSettings.rewardPerCoin, 1);
+  assert.equal(result.updated.rewardPerCoin, 7);
+  assert.equal(result.updated.updatedBy, 'teacher-1');
+  assert.ok(result.updated.updatedAt);
+  assert.equal(result.bootstrap.coinPusherSettings.rewardPerCoin, 7);
+  assert.equal(result.payout.earned, 21);
+  assert.equal(result.payout.balance, 39);
+  assert.equal(result.payout.collection.returnedCoins, 3, 'stamp progress counts physical coins, not reward value');
+  assert.deepEqual(result.retry, result.payout, 'teacher change does not reprice a committed event');
+  assert.equal(result.later.earned, 7, 'unfinished play keeps its captured rate after settings change');
+  assert.equal(result.old.earned, 1);
+  assert.equal(result.legacy.earned, 1);
+  assert.deepEqual(result.original, result.playRetry, 'lost play response keeps the original price and debit');
+  assert.equal(result.settings.rewardPerCoin, 100);
+  assert.equal(result.settings.updatedBy, 'teacher-2');
+  assert.deepEqual(result.errors, Array(7).fill(400));
+  assert.deepEqual(result.ledger.filter(row => row.kind === 'coin_pusher_payout').map(row => [row.delta, row.metadata.rewardPerCoin]), [[21,7],[7,7],[1,1],[1,1]]);
+});
+
+test('Postgres query contract snapshots prices and replays old payout responses after a settings change', t => {
+  const result = runFixture(t, `
+    const assert=require('node:assert/strict');
+    const config=require('./config');config.db.mode='postgres';
+    let settings, balance=20, ddl='';const plays=new Map(),cached=new Map(),events=new Map(),ledger=[];
+    const query=async(sql,args=[])=>{
+      const reply=(rows=[])=>({rows,rowCount:rows.length});
+      if(sql.includes('CREATE TABLE IF NOT EXISTS PetProfiles')){ddl=sql;return reply();}
+      if(sql.startsWith('WITH profile AS'))return reply();
+      if(sql.startsWith('INSERT INTO PetCoinPusherSettings')){settings={rewardPerCoin:args[0],updatedBy:args[1],updatedAt:'saved'};return reply([settings]);}
+      if(sql.includes('FROM PetCoinPusherSettings'))return reply(settings?[settings]:[]);
+      if(sql.startsWith('SELECT Kind AS kind,Response AS response FROM PetIdempotency'))return reply(cached.has(args[1])?[cached.get(args[1])]:[]);
+      if(sql.startsWith('SELECT Balance AS balance FROM PetWallets'))return reply([{balance}]);
+      if(sql.startsWith('UPDATE PetWallets')){balance=args[1];return reply();}
+      if(sql.startsWith('INSERT INTO PetCurrencyLedger')){ledger.push({delta:args[2],metadata:JSON.parse(args[5])});return reply();}
+      if(sql.startsWith('INSERT INTO PetCoinPusherPlays')){assert.ok(sql.includes('RewardPerCoin'));plays.set(args[0],{playId:args[0],payoutTotal:0,rewardPerCoin:args[3]});return reply();}
+      if(sql.startsWith('INSERT INTO PetIdempotency')){cached.set(args[1],{kind:args[2],response:JSON.parse(args[3])});return reply();}
+      if(sql.includes('FROM PetCoinPusherPlays WHERE')){assert.ok(sql.includes('RewardPerCoin AS "rewardPerCoin"'));return reply(plays.has(args[0])?[plays.get(args[0])]:[]);}
+      if(sql.includes('FROM PetCoinPusherPayouts WHERE')&&sql.includes('EventID='))return reply(events.has(args[1])?[events.get(args[1])]:[]);
+      if(sql.includes('SUM(Amount)'))return reply([{returnedCoins:[...events.values()].reduce((sum,event)=>sum+event.amount,0)}]);
+      if(sql.startsWith('UPDATE PetCoinPusherPlays')){plays.get(args[0]).payoutTotal=args[1];return reply();}
+      if(sql.startsWith('INSERT INTO PetCoinPusherPayouts')){events.set(args[3],{playId:args[1],amount:args[4],response:JSON.parse(args[5])});return reply();}
+      throw new Error('Unexpected query: '+sql);
+    };
+    const dbPath=require.resolve('./math-app/db/database');require(dbPath);require.cache[dbPath].exports={getPool:()=>({query}),withTransaction:fn=>fn({query})};
+    const repo=require(${JSON.stringify(repoPath)});
+    (async()=>{
+      await repo.ensureStudent('pg-student');
+      const defaults=await repo.getCoinPusherSettings();
+      await repo.updateCoinPusherSettings('teacher',{rewardPerCoin:9});
+      const play=await repo.playCoinPusher('pg-student',{idempotencyKey:'play'});
+      await repo.updateCoinPusherSettings('teacher',{rewardPerCoin:2});
+      const payout=await repo.payoutCoinPusher('pg-student',{playId:play.playId,eventId:'event',amount:3,idempotencyKey:'payout'});
+      const replay=await repo.payoutCoinPusher('pg-student',{playId:play.playId,eventId:'event',amount:3,idempotencyKey:'replay'});
+      const playReplay=await repo.playCoinPusher('pg-student',{idempotencyKey:'play'});
+      const fresh=await repo.playCoinPusher('pg-student',{idempotencyKey:'fresh'});
+      process.stdout.write(JSON.stringify({defaults,play,payout,replay,playReplay,fresh,balance,ledger,migration:ddl.includes('ALTER TABLE PetCoinPusherPlays ADD COLUMN IF NOT EXISTS RewardPerCoin INTEGER NOT NULL DEFAULT 1')}));
+    })().catch(error=>{console.error(error.stack);process.exitCode=1});
+  `);
+  assert.equal(result.defaults.rewardPerCoin, 1);
+  assert.equal(result.migration, true, 'old tables gain a compatible default without changing payouts');
+  assert.equal(result.play.rewardPerCoin, 9);
+  assert.equal(result.payout.earned, 27);
+  assert.equal(result.payout.balance, 46);
+  assert.deepEqual(result.replay, result.payout);
+  assert.deepEqual(result.playReplay, result.play);
+  assert.equal(result.fresh.rewardPerCoin, 2);
+  assert.equal(result.balance, 45);
+  assert.deepEqual(result.ledger.map(row => row.delta), [-1,27,-1]);
+});

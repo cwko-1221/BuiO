@@ -9,7 +9,7 @@ const { catalog, indexes, WEARABLE_PET_IDS } = require('../lib/catalog');
 const JSON_KEYS = [
   'petProfiles', 'petWallets', 'petCurrencyLedger', 'petInstances',
   'petInventory', 'petRoomLayouts', 'petRoomReactions', 'petCoinPusherPlays', 'petCoinPusherPayouts',
-  'petIdempotency', 'petArcadePrizes',
+  'petIdempotency', 'petArcadePrizes', 'petCoinPusherSettings',
 ];
 
 const hkDay = (date = new Date()) => new Intl.DateTimeFormat('en-CA', {
@@ -20,6 +20,7 @@ const makeId = () => crypto.randomUUID();
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const COIN_PUSHER_DROP_COST = 1;
 const COIN_PUSHER_REWARD_PER_COIN = 1;
+const COIN_PUSHER_REWARD_MAX = 100;
 const COIN_PUSHER_PAYOUT_EVENT_MAX = 20;
 const COIN_PUSHER_PAYOUT_CAP = 100;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -87,6 +88,13 @@ async function ensureSchema() {
       IdempotencyKey VARCHAR(120) NOT NULL, PayoutTotal INTEGER NOT NULL DEFAULT 0
         CHECK (PayoutTotal >= 0 AND PayoutTotal <= ${COIN_PUSHER_PAYOUT_CAP}),
       CreatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(), UNIQUE(StudentID, IdempotencyKey)
+    );
+    ALTER TABLE PetCoinPusherPlays ADD COLUMN IF NOT EXISTS RewardPerCoin INTEGER NOT NULL DEFAULT ${COIN_PUSHER_REWARD_PER_COIN}
+      CHECK (RewardPerCoin BETWEEN 1 AND ${COIN_PUSHER_REWARD_MAX});
+    CREATE TABLE IF NOT EXISTS PetCoinPusherSettings (
+      SettingID INTEGER PRIMARY KEY CHECK (SettingID=1),
+      RewardPerCoin INTEGER NOT NULL CHECK (RewardPerCoin BETWEEN 1 AND ${COIN_PUSHER_REWARD_MAX}),
+      UpdatedBy VARCHAR(20) NOT NULL, UpdatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
     CREATE TABLE IF NOT EXISTS PetCoinPusherPayouts (
       PayoutID UUID PRIMARY KEY, PlayID UUID NOT NULL REFERENCES PetCoinPusherPlays(PlayID) ON DELETE CASCADE,
@@ -259,18 +267,20 @@ async function getBootstrap(studentId) {
   await ensureStudent(studentId);
   if (config.db.mode === 'postgres') {
     const pool = getPool();
-    const [profileResult, walletResult, petsResult, inventoryResult, roomResult, coinPusherResult] = await Promise.all([
+    const [profileResult, walletResult, petsResult, inventoryResult, roomResult, coinPusherResult, coinPusherSettings] = await Promise.all([
       pool.query(`SELECT StudentID AS "studentId", ActivePetID AS "activePetId", StarterEggClaimed AS "starterEggClaimed", EggPity AS "eggPity", Stardust AS stardust FROM PetProfiles WHERE StudentID=$1`, [studentId]),
       pool.query(`SELECT Balance AS balance FROM PetWallets WHERE StudentID=$1`, [studentId]),
       pool.query(`SELECT PetID AS "petId",SpeciesID AS "speciesId",XP AS xp,Stage AS stage,DailyXP AS "dailyXp",DailyXPDate AS "dailyXpDate",EquippedSkills AS "equippedSkills",EquippedWearables AS "equippedWearables" FROM PetInstances WHERE StudentID=$1 ORDER BY CreatedAt`, [studentId]),
       pool.query(`SELECT ItemID AS "itemId",Quantity AS quantity FROM PetInventory WHERE StudentID=$1 AND Quantity>0`, [studentId]),
       pool.query(`SELECT ThemeID AS "themeId",Visibility AS visibility,Placements AS placements,UpdatedAt AS "updatedAt" FROM PetRoomLayouts WHERE StudentID=$1`, [studentId]),
       pool.query(`SELECT COALESCE(SUM(Amount),0) AS "returnedCoins" FROM PetCoinPusherPayouts WHERE StudentID=$1`, [studentId]),
+      getCoinPusherSettings(pool),
     ]);
     const pets = releasedPets(petsResult.rows);
     const profile = releasedProfile(profileResult.rows[0], pets);
-    return { profile, wallet: { balance: Number(walletResult.rows[0]?.balance) || 0 }, pets, inventory: inventoryResult.rows.map((row) => ({ ...row, quantity: Number(row.quantity) })), room: roomResult.rows[0], catalog: catalogFor(pets), serverDay: hkDay(), coinPusherCollection: { returnedCoins: Number(coinPusherResult.rows[0]?.returnedCoins) || 0 } };
+    return { profile, wallet: { balance: Number(walletResult.rows[0]?.balance) || 0 }, pets, inventory: inventoryResult.rows.map((row) => ({ ...row, quantity: Number(row.quantity) })), room: roomResult.rows[0], catalog: catalogFor(pets), serverDay: hkDay(), coinPusherSettings, coinPusherCollection: { returnedCoins: Number(coinPusherResult.rows[0]?.returnedCoins) || 0 } };
   }
+  const coinPusherSettings = await getCoinPusherSettings();
   const data = ensureJsonData();
   const storedProfile = data.petProfiles.find((row) => row.studentId === studentId);
   const pets = releasedPets(data.petInstances.filter((row) => row.studentId === studentId));
@@ -281,7 +291,7 @@ async function getBootstrap(studentId) {
     pets,
     inventory: data.petInventory.filter((row) => row.studentId === studentId && row.quantity > 0),
     room: data.petRoomLayouts.find((row) => row.studentId === studentId),
-    catalog: catalogFor(pets), serverDay: hkDay(),
+    catalog: catalogFor(pets), serverDay: hkDay(), coinPusherSettings,
     coinPusherCollection: { returnedCoins: data.petCoinPusherPayouts
       .filter((row) => row.studentId === studentId)
       .reduce((total, row) => total + (Number(row.amount) || 0), 0) },
@@ -433,6 +443,33 @@ async function purchaseEgg(studentId, options = {}) {
   return config.db.mode === 'postgres' ? applyPostgresEgg(studentId, { ...options, directSpeciesId }) : applyJsonEgg(studentId, { ...options, directSpeciesId });
 }
 
+async function getCoinPusherSettings(runner) {
+  await ensureSchema();
+  const row = config.db.mode === 'postgres'
+    ? (await (runner || getPool()).query(`SELECT RewardPerCoin AS "rewardPerCoin",UpdatedBy AS "updatedBy",UpdatedAt AS "updatedAt" FROM PetCoinPusherSettings WHERE SettingID=1`)).rows[0]
+    : ensureJsonData().petCoinPusherSettings.find(entry => entry.settingId === 1);
+  return { rewardPerCoin: Number(row?.rewardPerCoin) || COIN_PUSHER_REWARD_PER_COIN, updatedBy: row?.updatedBy || null, updatedAt: row?.updatedAt || null };
+}
+
+async function updateCoinPusherSettings(actorId, { rewardPerCoin } = {}) {
+  if (!Number.isInteger(rewardPerCoin) || rewardPerCoin < 1 || rewardPerCoin > COIN_PUSHER_REWARD_MAX) {
+    throw Object.assign(new Error('Reward per coin must be an integer from 1 to 100'), { status: 400 });
+  }
+  await ensureSchema();
+  if (config.db.mode === 'postgres') {
+    const result = await getPool().query(`INSERT INTO PetCoinPusherSettings (SettingID,RewardPerCoin,UpdatedBy) VALUES (1,$1,$2)
+      ON CONFLICT (SettingID) DO UPDATE SET RewardPerCoin=EXCLUDED.RewardPerCoin,UpdatedBy=EXCLUDED.UpdatedBy,UpdatedAt=NOW()
+      RETURNING RewardPerCoin AS "rewardPerCoin",UpdatedBy AS "updatedBy",UpdatedAt AS "updatedAt"`, [rewardPerCoin, actorId]);
+    return result.rows[0];
+  }
+  const data = ensureJsonData();
+  const row = { settingId: 1, rewardPerCoin, updatedBy: actorId, updatedAt: nowIso() };
+  const index = data.petCoinPusherSettings.findIndex(entry => entry.settingId === 1);
+  if (index < 0) data.petCoinPusherSettings.push(row); else data.petCoinPusherSettings[index] = row;
+  store.save();
+  return { rewardPerCoin, updatedBy: actorId, updatedAt: row.updatedAt };
+}
+
 async function playCoinPusher(studentId, { idempotencyKey } = {}) {
   idempotencyKey = String(idempotencyKey || '').trim();
   if (!idempotencyKey || idempotencyKey.length > 120) throw Object.assign(new Error('Idempotency key is required'), { status: 400 });
@@ -457,14 +494,15 @@ async function playCoinPusher(studentId, { idempotencyKey } = {}) {
     }
     const balance = Number(walletResult.rows[0].balance);
     if (balance < COIN_PUSHER_DROP_COST) throw Object.assign(new Error('Not enough coins'), { status: 409 });
+    const { rewardPerCoin } = await getCoinPusherSettings(client);
     const nextBalance = balance - COIN_PUSHER_DROP_COST;
     const playId = makeId();
     await client.query(`UPDATE PetWallets SET Balance=$2,UpdatedAt=NOW() WHERE StudentID=$1`, [studentId, nextBalance]);
     await client.query(`INSERT INTO PetCurrencyLedger (TransactionID,StudentID,ActorID,Delta,Kind,IdempotencyKey,Metadata) VALUES ($1,$2,$2,$3,$4,$5,$6::jsonb)`, [
-      makeId(), studentId, -COIN_PUSHER_DROP_COST, kind, idempotencyKey, JSON.stringify({ playId, payoutCap: COIN_PUSHER_PAYOUT_CAP }),
+      makeId(), studentId, -COIN_PUSHER_DROP_COST, kind, idempotencyKey, JSON.stringify({ playId, payoutCap: COIN_PUSHER_PAYOUT_CAP, rewardPerCoin }),
     ]);
-    await client.query(`INSERT INTO PetCoinPusherPlays (PlayID,StudentID,IdempotencyKey,PayoutTotal) VALUES ($1,$2,$3,0)`, [playId, studentId, idempotencyKey]);
-    const response = { cost: COIN_PUSHER_DROP_COST, balance: nextBalance, playId, payoutCap: COIN_PUSHER_PAYOUT_CAP };
+    await client.query(`INSERT INTO PetCoinPusherPlays (PlayID,StudentID,IdempotencyKey,PayoutTotal,RewardPerCoin) VALUES ($1,$2,$3,0,$4)`, [playId, studentId, idempotencyKey, rewardPerCoin]);
+    const response = { cost: COIN_PUSHER_DROP_COST, balance: nextBalance, playId, payoutCap: COIN_PUSHER_PAYOUT_CAP, rewardPerCoin };
     await client.query(`INSERT INTO PetIdempotency (ActorID,IdempotencyKey,Kind,Response) VALUES ($1,$2,$3,$4::jsonb)`, [studentId, idempotencyKey, kind, JSON.stringify(response)]);
     return response;
   });
@@ -474,14 +512,16 @@ async function playCoinPusher(studentId, { idempotencyKey } = {}) {
   const wallet = data.petWallets.find((row) => row.studentId === studentId);
   if (!wallet) throw Object.assign(new Error('Student wallet not found'), { status: 404 });
   if (wallet.balance < COIN_PUSHER_DROP_COST) throw Object.assign(new Error('Not enough coins'), { status: 409 });
+  // No awaits after reading the price in the synchronous JSON wallet mutation.
+  const rewardPerCoin = Number(data.petCoinPusherSettings.find(entry => entry.settingId === 1)?.rewardPerCoin) || COIN_PUSHER_REWARD_PER_COIN;
   const playId = makeId();
   wallet.balance -= COIN_PUSHER_DROP_COST; wallet.updatedAt = nowIso();
   data.petCurrencyLedger.push({
     transactionId: makeId(), studentId, actorId: studentId, delta: -COIN_PUSHER_DROP_COST,
-    kind, idempotencyKey, metadata: { playId, payoutCap: COIN_PUSHER_PAYOUT_CAP }, createdAt: nowIso(),
+    kind, idempotencyKey, metadata: { playId, payoutCap: COIN_PUSHER_PAYOUT_CAP, rewardPerCoin }, createdAt: nowIso(),
   });
-  data.petCoinPusherPlays.push({ playId, studentId, idempotencyKey, payoutTotal: 0, createdAt: nowIso() });
-  const response = { cost: COIN_PUSHER_DROP_COST, balance: wallet.balance, playId, payoutCap: COIN_PUSHER_PAYOUT_CAP };
+  data.petCoinPusherPlays.push({ playId, studentId, idempotencyKey, payoutTotal: 0, rewardPerCoin, createdAt: nowIso() });
+  const response = { cost: COIN_PUSHER_DROP_COST, balance: wallet.balance, playId, payoutCap: COIN_PUSHER_PAYOUT_CAP, rewardPerCoin };
   writeJsonIdempotency(data, studentId, idempotencyKey, kind, response);
   store.save();
   return clone(response);
@@ -498,8 +538,8 @@ async function payoutCoinPusher(studentId, { playId, eventId, amount, idempotenc
   }
   const kind = 'coin_pusher_payout';
   // amount and payout limits count physical catches, not wallet currency. Keep
-  // old saved events and collection progress compatible; only new credits change.
-  const earned = payout * COIN_PUSHER_REWARD_PER_COIN;
+  // old saved events and collection progress compatible. Price comes from the
+  // authorized play, never from the student request or a later teacher change.
   await ensureStudent(studentId);
   if (config.db.mode === 'postgres') return withTransaction(async (client) => {
     await ensureStudent(studentId, client);
@@ -508,7 +548,7 @@ async function payoutCoinPusher(studentId, { playId, eventId, amount, idempotenc
       if (cached.rows[0].kind !== kind) throw Object.assign(new Error('Idempotency key already used'), { status: 409 });
       return cached.rows[0].response;
     }
-    const playResult = await client.query(`SELECT PlayID AS "playId",PayoutTotal AS "payoutTotal" FROM PetCoinPusherPlays WHERE PlayID=$1 AND StudentID=$2 FOR UPDATE`, [normalizedPlayId, studentId]);
+    const playResult = await client.query(`SELECT PlayID AS "playId",PayoutTotal AS "payoutTotal",RewardPerCoin AS "rewardPerCoin" FROM PetCoinPusherPlays WHERE PlayID=$1 AND StudentID=$2 FOR UPDATE`, [normalizedPlayId, studentId]);
     if (!playResult.rowCount) throw Object.assign(new Error('Coin-pusher play not found'), { status: 404 });
     const walletResult = await client.query(`SELECT Balance AS balance FROM PetWallets WHERE StudentID=$1 FOR UPDATE`, [studentId]);
     if (!walletResult.rowCount) throw Object.assign(new Error('Student wallet not found'), { status: 404 });
@@ -526,13 +566,15 @@ async function payoutCoinPusher(studentId, { playId, eventId, amount, idempotenc
     }
     const paid = Number(playResult.rows[0].payoutTotal || 0);
     if (paid + payout > COIN_PUSHER_PAYOUT_CAP) throw Object.assign(new Error('Coin-pusher payout limit reached'), { status: 409 });
+    const rewardPerCoin = Number(playResult.rows[0].rewardPerCoin) || COIN_PUSHER_REWARD_PER_COIN;
+    const earned = payout * rewardPerCoin;
     const nextBalance = Number(walletResult.rows[0].balance) + earned;
     const collectionResult = await client.query(`SELECT COALESCE(SUM(Amount),0) AS "returnedCoins" FROM PetCoinPusherPayouts WHERE StudentID=$1`, [studentId]);
     const returnedCoins = (Number(collectionResult.rows[0]?.returnedCoins) || 0) + payout;
-    const response = { earned, balance: nextBalance, playId: normalizedPlayId, eventId: normalizedEventId, remainingPayout: COIN_PUSHER_PAYOUT_CAP - paid - payout, collection: { returnedCoins } };
+    const response = { earned, rewardPerCoin, balance: nextBalance, playId: normalizedPlayId, eventId: normalizedEventId, remainingPayout: COIN_PUSHER_PAYOUT_CAP - paid - payout, collection: { returnedCoins } };
     await client.query(`UPDATE PetWallets SET Balance=$2,UpdatedAt=NOW() WHERE StudentID=$1`, [studentId, nextBalance]);
     await client.query(`UPDATE PetCoinPusherPlays SET PayoutTotal=$2 WHERE PlayID=$1 AND StudentID=$3`, [normalizedPlayId, paid + payout, studentId]);
-    await client.query(`INSERT INTO PetCurrencyLedger (TransactionID,StudentID,ActorID,Delta,Kind,IdempotencyKey,Metadata) VALUES ($1,$2,$2,$3,$4,$5,$6::jsonb)`, [makeId(), studentId, earned, kind, idempotencyKey, JSON.stringify({ playId: normalizedPlayId, eventId: normalizedEventId, caughtCoins: payout })]);
+    await client.query(`INSERT INTO PetCurrencyLedger (TransactionID,StudentID,ActorID,Delta,Kind,IdempotencyKey,Metadata) VALUES ($1,$2,$2,$3,$4,$5,$6::jsonb)`, [makeId(), studentId, earned, kind, idempotencyKey, JSON.stringify({ playId: normalizedPlayId, eventId: normalizedEventId, caughtCoins: payout, rewardPerCoin })]);
     await client.query(`INSERT INTO PetCoinPusherPayouts (PayoutID,PlayID,StudentID,EventID,Amount,Response) VALUES ($1,$2,$3,$4,$5,$6::jsonb)`, [makeId(), normalizedPlayId, studentId, normalizedEventId, payout, JSON.stringify(response)]);
     await client.query(`INSERT INTO PetIdempotency (ActorID,IdempotencyKey,Kind,Response) VALUES ($1,$2,$3,$4::jsonb)`, [studentId, idempotencyKey, kind, JSON.stringify(response)]);
     return response;
@@ -549,14 +591,16 @@ async function payoutCoinPusher(studentId, { playId, eventId, amount, idempotenc
   }
   const paid = Number(play.payoutTotal || 0);
   if (paid + payout > COIN_PUSHER_PAYOUT_CAP) throw Object.assign(new Error('Coin-pusher payout limit reached'), { status: 409 });
+  const rewardPerCoin = Number(play.rewardPerCoin) || COIN_PUSHER_REWARD_PER_COIN;
+  const earned = payout * rewardPerCoin;
   const wallet = data.petWallets.find((row) => row.studentId === studentId);
   if (!wallet) throw Object.assign(new Error('Student wallet not found'), { status: 404 });
   wallet.balance = Number(wallet.balance) + earned; wallet.updatedAt = nowIso(); play.payoutTotal = paid + payout;
-  data.petCurrencyLedger.push({ transactionId: makeId(), studentId, actorId: studentId, delta: earned, kind, idempotencyKey, metadata: { playId: normalizedPlayId, eventId: normalizedEventId, caughtCoins: payout }, createdAt: nowIso() });
+  data.petCurrencyLedger.push({ transactionId: makeId(), studentId, actorId: studentId, delta: earned, kind, idempotencyKey, metadata: { playId: normalizedPlayId, eventId: normalizedEventId, caughtCoins: payout, rewardPerCoin }, createdAt: nowIso() });
   const returnedCoins = data.petCoinPusherPayouts
     .filter((row) => row.studentId === studentId)
     .reduce((total, row) => total + (Number(row.amount) || 0), 0) + payout;
-  const response = { earned, balance: Number(wallet.balance), playId: normalizedPlayId, eventId: normalizedEventId, remainingPayout: COIN_PUSHER_PAYOUT_CAP - paid - payout, collection: { returnedCoins } };
+  const response = { earned, rewardPerCoin, balance: Number(wallet.balance), playId: normalizedPlayId, eventId: normalizedEventId, remainingPayout: COIN_PUSHER_PAYOUT_CAP - paid - payout, collection: { returnedCoins } };
   data.petCoinPusherPayouts.push({ payoutId: makeId(), playId: normalizedPlayId, studentId, eventId: normalizedEventId, amount: payout, response: clone(response), createdAt: nowIso() });
   writeJsonIdempotency(data, studentId, idempotencyKey, kind, response); store.save(); return clone(response);
 }
@@ -1017,6 +1061,7 @@ async function grantUnlimitedMoney(studentId, amount = 999999) {
 module.exports = {
   ensureSchema, ensureStudent, getBootstrap, hatchStarter, purchaseEgg, activatePet, feedPet,
   playCoinPusher, payoutCoinPusher, purchaseItem, setOutfit, saveRoom, getRoomSnapshot, listVisitableRooms, addReaction,
+  getCoinPusherSettings, updateCoinPusherSettings,
   walletBalances, activePetLooks, grantCoins, listUnseenTeacherGrants, acknowledgeTeacherGrants,
   grantUnlimitedMoney, purgeJsonStudent,
   hkDay, chooseRarity, chooseSpecies, stageForXp, validatePlacements,
