@@ -1,10 +1,10 @@
-/** Device-relative microphone index, with 12 dB classroom sensitivity boost (not physical dB). */
+/** Device-relative microphone index without added gain; 100 is near full-scale input, not physical dB. */
 export function microphoneLevel(samples: Float32Array): number {
   if (!samples.length) return 0;
   let sum = 0;
   for (const sample of samples) sum += sample * sample;
   const rms = Math.sqrt(sum / samples.length);
-  return Math.round(Math.max(0, Math.min(100, (20 * Math.log10(Math.max(rms, 0.00001)) + 72) / 60 * 100)));
+  return Math.round(Math.max(0, Math.min(100, (20 * Math.log10(Math.max(rms, 0.00001)) + 60) / 60 * 100)));
 }
 
 /** Trigger at the limit on the first sample; rearm after 1 quiet second with hysteresis. */

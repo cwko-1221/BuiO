@@ -90,15 +90,17 @@ test('concurrent settlement pays the captured recipients once, survives reload, 
   assert.equal(child.status, 0, child.stderr);
 });
 
-test('sensitive microphone scale triggers at the limit immediately, once per burst', async () => {
+test('reduced microphone sensitivity preserves headroom and triggers at the limit immediately, once per burst', async () => {
   const ts = require('../node_modules/typescript');
   const source = fs.readFileSync(path.resolve(__dirname, '../src/quiet-room-meter.ts'), 'utf8');
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
   const exported = {}; new Function('exports', js)(exported);
   assert.equal(exported.microphoneLevel(new Float32Array(2048)), 0);
   assert.equal(exported.microphoneLevel(new Float32Array(2048).fill(1)), 100);
-  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.001)), 20, 'quiet input receives the 12 dB sensitivity boost');
-  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.004)), 40, 'level 40 now trips at roughly one quarter of the previous input amplitude');
+  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.001)), 0, 'quiet input has no artificial sensitivity boost');
+  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.004)), 20, 'the same input reads 20 points lower');
+  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.25)), 80, 'input that previously saturated at 100 retains headroom');
+  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.5)), 90, 'even half-scale input remains below the maximum limit');
   const gate = new exported.NoiseGate();
   assert.equal(gate.sample(44,45,0),false);
   assert.equal(gate.sample(45,45,1),true, 'touching the line triggers on the very first sample');
