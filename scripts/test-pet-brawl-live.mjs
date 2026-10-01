@@ -13,7 +13,7 @@ import {stepBattle} from '../pet-app/lib/brawl/simulation.mjs';
 import {INPUT as I} from '../pet-app/lib/brawl/catalog.mjs';
 
 const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-brawl-live-'));
-const dbFile=path.join(temp,'db.json'),artifacts=path.resolve(process.env.PET_BRAWL_LIVE_OUT||'artifacts/pet-playtest/brawl-v5/flow-regression');
+const dbFile=path.join(temp,'db.json'),artifacts=path.resolve(process.env.PET_BRAWL_LIVE_OUT||'artifacts/pet-playtest/brawl-v6/flow-regression');
 await fs.mkdir(artifacts,{recursive:true});
 await fs.writeFile(dbFile,JSON.stringify({users:[
   {studentid:'S001',name:'大亂鬥測試',passwordhash:bcrypt.hashSync('test',4),role:'student',classname:'5A',language:'zh-HK'},
@@ -50,7 +50,7 @@ try{
   assert.equal(await page.locator('.brawl-fighter').count(),3);
   await page.locator('#brawlDifficulty').selectOption('hard');assert.equal(await page.locator('[data-brawl="start"]').first().isDisabled(),true);assert.ok((await page.locator('[data-brawl="start"]').first().innerText()).includes('標準'));await page.locator('#brawlDifficulty').selectOption('easy');
   for(const [w,h] of [[1440,900],[1180,820],[1024,768]]){await page.setViewportSize({width:w,height:h});await shot(`lobby-${w}`);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);}
-  await page.locator('[data-brawl="filter"][data-id="all"]').click();await page.locator('[data-brawl="fighter"][data-id="dragon-ball-goku"]').click();assert.equal(await page.locator('[data-brawl="start"]').first().isDisabled(),true);await page.locator('[data-brawl="filter"][data-id="owned"]').click();await page.locator('[data-brawl="fighter"][data-id="starpatch-cat"]').click();
+  await page.locator('[data-brawl="filter"][data-id="all"]').click();await page.locator('[data-brawl="fighter"][data-id="thunderhorn-goat"]').click();assert.equal(await page.locator('[data-brawl="start"]').first().isDisabled(),true);await page.locator('[data-brawl="filter"][data-id="owned"]').click();await page.locator('[data-brawl="fighter"][data-id="starpatch-cat"]').click();
   await page.locator('[data-brawl="mode"][data-id="practice"]').click();assert.equal(await page.locator('[data-brawl="start"]').first().isEnabled(),true);
   await page.locator('[data-brawl="start"]').first().click();await ready();
   const before=await state();await page.keyboard.down('KeyD');await page.waitForTimeout(250);await page.keyboard.up('KeyD');const moved=await state();assert.ok(moved.actors[0].x>before.actors[0].x+2000);

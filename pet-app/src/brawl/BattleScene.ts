@@ -43,7 +43,7 @@ export class BattleScene extends Phaser.Scene {
     this.runtime.loaded();this.draw(16);
   }
   private get player(){return this.runtime.state.actors.find(a=>a.id===this.runtime.playerId)||this.runtime.state.actors[0];}
-  private get catKit(){return ['brawl-v3','brawl-v4','brawl-v5'].includes(this.runtime.state.version);}
+  private get catKit(){return ['brawl-v3','brawl-v4','brawl-v5','brawl-v6'].includes(this.runtime.state.version);}
   private get zh(){return this.runtime.locale==='zh-HK';}
   receiveEvents(events:any[],tick:number){if(tick===this.deliveredTick)return;this.deliveredTick=tick;this.feedback.events+=events.length;this.eventQueue.push(...events);if(this.eventQueue.length>256)this.eventQueue.splice(0,this.eventQueue.length-256);}
   update(_time:number,delta:number){if(!this.runtime||!this.fx)return;if(!this.runtime.paused()&&this.runtime.state.status==='playing'){this.accumulator+=Math.min(delta,250);let steps=0;while(this.accumulator>=1000/60&&steps++<15){this.runtime.step();this.accumulator-=1000/60;if(this.runtime.state.status!=='playing')break;}}else this.accumulator=0;this.draw(Math.min(delta,50));}

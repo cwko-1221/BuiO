@@ -9,13 +9,13 @@ import * as v2 from '../pet-app/lib/brawl/legacy/v2/simulation.mjs';
 import {INPUT as I,VERSION,FIGHTERS,fightersForVersion} from '../pet-app/lib/brawl/catalog.mjs';
 import {brawlSound} from '../pet-app/lib/brawl/sound.mjs';
 import {playBot,botInput} from './pet-brawl-bot.mjs';
-const out='artifacts/pet-playtest/brawl-v5/cat-regression';await fs.mkdir(out,{recursive:true});
+const out='artifacts/pet-playtest/brawl-v6/cat-regression';await fs.mkdir(out,{recursive:true});
 const ticks=(s,n)=>{const events=[];for(let t=0;t<n;t++){stepBattle(s);events.push(...s.events);}return events;};
 const arena=()=>{const s=createBattle({mode:'practice'});s.actors[0].x=56000;return s;};
 const cast=(s,key)=>{stepBattle(s,key);return [...s.events,...ticks(s,100)];};
 const castGuarded=(s,target)=>{const events=[];for(let n=0;n<101;n++){target.action='guard';target.facing=-1;stepBattle(s,n===0?I.SKILL1:0);events.push(...s.events);}return events;};
 const reports=[];
-assert.equal(VERSION,'brawl-v5');assert.equal(fightersForVersion('brawl-v2')[0].skills[0].kind,'dash');
+assert.equal(VERSION,'brawl-v6');assert.equal(fightersForVersion('brawl-v2')[0].skills[0].kind,'dash');
 assert.notEqual(FIGHTERS[0].skills[0].kind,FIGHTERS[2].skills[0].kind);
 assert.notEqual(FIGHTERS[0].skills[1].kind,FIGHTERS[2].skills[1].kind);
 // Guarded foe, intervening enemy and lane separation: a precise back attack.

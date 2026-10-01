@@ -19,7 +19,7 @@ export function botInput(s){const p=s.actors[0];if(s.status==='ko')return I.RETR
  }
  const incoming=s.projectiles.find(a=>a.team===1&&Math.abs(a.y-p.y)<2700&&(p.x-a.x)*a.dx>0&&Math.abs(a.x-p.x)<15000);
  if(incoming&&p.z===0)return mask|I.JUMP;
- if(Math.abs(dy)<24){const cat=p.kind==='starpatch-cat'&&['brawl-v3','brawl-v4','brawl-v5'].includes(s.version);if(cat&&target.starMarkOwner===p.id&&target.starMarkUntil>s.tick&&p.cooldowns[1]===0&&p.mp>=3500&&Math.abs(dx)<280)mask|=I.SKILL2;else if(p.cooldowns[0]===0&&p.mp>=2000&&Math.abs(dx)<(ranged?570:cat?230:200))mask|=I.SKILL1;else if(p.cooldowns[1]===0&&p.mp>=3500&&Math.abs(dx)<(cat?280:130))mask|=I.SKILL2;
+ if(Math.abs(dy)<24){const cat=p.kind==='starpatch-cat'&&['brawl-v3','brawl-v4','brawl-v5','brawl-v6'].includes(s.version);if(cat&&target.starMarkOwner===p.id&&target.starMarkUntil>s.tick&&p.cooldowns[1]===0&&p.mp>=3500&&Math.abs(dx)<280)mask|=I.SKILL2;else if(p.cooldowns[0]===0&&p.mp>=2000&&Math.abs(dx)<(ranged?570:cat?230:200))mask|=I.SKILL1;else if(p.cooldowns[1]===0&&p.mp>=3500&&Math.abs(dx)<(cat?280:130))mask|=I.SKILL2;
  if(Math.abs(dx)<95&&s.tick%12<6)mask|=I.ATTACK;}
  return mask;
 }
