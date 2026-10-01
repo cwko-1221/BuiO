@@ -16,6 +16,25 @@ function handle(res, err) {
   res.status(status).json({ success: false, message: err.message || 'Server error' });
 }
 
+function parseQuestionImage(value) {
+  if (value == null || value === '') return null;
+  const match = String(value).match(/^data:image\/(?:jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/);
+  if (!match) {
+    const err = new Error('題目圖片格式無效，請重新選擇圖片。');
+    err.statusCode = 400;
+    throw err;
+  }
+  const encoded = match[1];
+  const padding = encoded.endsWith('==') ? 2 : encoded.endsWith('=') ? 1 : 0;
+  const byteLength = Math.floor(encoded.length * 3 / 4) - padding;
+  if (byteLength > 256 * 1024) {
+    const err = new Error('每張題目圖片不能超過 256 KB。');
+    err.statusCode = 400;
+    throw err;
+  }
+  return value;
+}
+
 // Validate & normalise the questions payload from the set editor.
 function parseQuestions(body) {
   const raw = Array.isArray(body?.questions) ? body.questions : [];
@@ -25,7 +44,8 @@ function parseQuestions(body) {
       .map(c => String(c || '').trim())
       .filter(Boolean);
     const correctIndex = Number(q?.correctIndex);
-    return { question, choices, correctIndex };
+    const image = parseQuestionImage(q?.image);
+    return { question, choices, correctIndex, image };
   }).filter(q => q.question);
 
   for (const q of questions) {

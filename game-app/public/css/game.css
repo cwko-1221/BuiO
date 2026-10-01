@@ -249,9 +249,11 @@ input, select, textarea { font-family: inherit; }
 .q-overlay.open { display: flex; }
 .q-box {
   background: #fff; border-radius: 20px; padding: 22px; width: 100%; max-width: 560px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow); max-height: calc(100dvh - 32px); overflow-y: auto;
 }
 .q-text { font-size: 22px; font-weight: 800; margin-bottom: 18px; text-align: center; }
+.q-image { display: block; max-width: 100%; max-height: min(34vh, 280px); object-fit: contain; margin: 0 auto 16px; border-radius: 8px; }
+#qImage[hidden] { display: none; }
 .q-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 480px) { .q-choices { grid-template-columns: 1fr; } }
 .q-choice {
@@ -342,6 +344,7 @@ input, select, textarea { font-family: inherit; }
 .set-preview-question { padding: 9px 0; border-bottom: 1px solid var(--line); }
 .set-preview-question:last-child { border-bottom: 0; }
 .set-preview-question strong { display: block; margin-bottom: 7px; font-size: 14px; }
+.set-preview-image { display: block; max-width: 100%; max-height: 160px; object-fit: contain; margin: 8px 0; border-radius: 8px; }
 .set-preview-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 10px; }
 .set-preview-choices span {
   min-width: 0; padding: 5px 7px; border-radius: 7px; color: #5d6880; font-size: 13px;
@@ -395,6 +398,11 @@ input, select, textarea { font-family: inherit; }
   margin-bottom: 8px; outline: none;
 }
 .editor-q input[type="text"]:focus { border-color: var(--mint); }
+.q-image-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 2px 0 10px; }
+.q-image-tools .muted { font-size: 12px; }
+.q-image-remove { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: var(--coral); font-size: 18px; font-weight: 800; }
+.q-editor-image { display: block; max-width: min(100%, 360px); max-height: 220px; object-fit: contain; margin: 0 0 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.q-editor-image[hidden] { display: none; }
 .choice-line { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .choice-line input[type="radio"] { width: 20px; height: 20px; accent-color: var(--mint); flex-shrink: 0; }
 .choice-line input[type="text"] { margin-bottom: 0; }

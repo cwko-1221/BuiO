@@ -139,6 +139,7 @@ const { t, server: serverText, lang: uiLang } = window.BuiI18n;
       preview.innerHTML = detail.questions.map((q, index) => `
         <div class="set-preview-question">
           <strong>${index + 1}. ${escapeHtml(q.question)}</strong>
+          ${q.image ? `<img class="set-preview-image" src="${escapeHtml(q.image)}" alt="${escapeHtml(t('g.questionImageAlt'))}" loading="lazy">` : ''}
           <div class="set-preview-choices">
             ${q.choices.map((choice, choiceIndex) => `
               <span class="${choiceIndex === q.correctIndex ? 'correct' : ''}">
@@ -152,6 +153,44 @@ const { t, server: serverText, lang: uiLang } = window.BuiI18n;
   }
 
   // ---------------- set editor ----------------
+  const QUESTION_IMAGE_MAX_BYTES = 256 * 1024;
+  const QUESTION_IMAGE_MAX_SOURCE_BYTES = 16 * 1024 * 1024;
+
+  async function normalizeQuestionImage(blob) {
+    if (!blob || blob.size > QUESTION_IMAGE_MAX_SOURCE_BYTES) throw new Error(t('g.imageTooLarge'));
+    const objectUrl = URL.createObjectURL(blob);
+    try {
+      const image = new Image();
+      const loaded = new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error(t('g.imageInvalid')));
+      });
+      image.src = objectUrl;
+      await loaded;
+      const maxWidth = 1280;
+      const maxHeight = 960;
+      let scale = Math.min(1, maxWidth / image.naturalWidth, maxHeight / image.naturalHeight);
+      for (let resize = 0; resize < 5; resize++, scale *= 0.82) {
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error(t('g.imageInvalid'));
+        context.fillStyle = '#fff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        for (const quality of [0.86, 0.78, 0.7, 0.62, 0.54]) {
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          const base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+          if (Math.floor(base64.length * 3 / 4) <= QUESTION_IMAGE_MAX_BYTES) return dataUrl;
+        }
+      }
+      throw new Error(t('g.imageTooLarge'));
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+
   function questionBlock(q = {}) {
     const div = document.createElement('div');
     div.className = 'editor-q';
@@ -160,6 +199,13 @@ const { t, server: serverText, lang: uiLang } = window.BuiI18n;
       <div class="q-num"></div>
       <button class="del-q" title="${escapeHtml(t('g.deleteQuestion'))}">✕</button>
       <input type="text" class="q-question" maxlength="200" placeholder="${escapeHtml(t('g.questionPh'))}" value="${escapeHtml(q.question || '')}">
+      <div class="q-image-tools">
+        <input type="file" class="q-image-input" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+        <button class="btn secondary small q-image-pick" type="button">${escapeHtml(t(q.image ? 'g.questionImageChange' : 'g.questionImageAdd'))}</button>
+        <button class="q-image-remove" type="button" aria-label="${escapeHtml(t('g.questionImageRemove'))}" title="${escapeHtml(t('g.questionImageRemove'))}" hidden>✕</button>
+        <span class="muted">${escapeHtml(t('g.questionImageHint'))}</span>
+      </div>
+      <img class="q-editor-image" alt="${escapeHtml(t('g.questionImageAlt'))}" hidden>
       ${[0, 1, 2, 3].map(i => `
         <div class="choice-line">
           <input type="radio" name="" value="${i}" ${q.correctIndex === i ? 'checked' : ''} title="${escapeHtml(t('g.correctAnswer'))}">
@@ -167,6 +213,32 @@ const { t, server: serverText, lang: uiLang } = window.BuiI18n;
         </div>`).join('')}
     `;
     div.querySelector('.del-q').addEventListener('click', () => { div.remove(); renumber(); });
+    const imagePreview = div.querySelector('.q-editor-image');
+    const imageRemove = div.querySelector('.q-image-remove');
+    const imagePick = div.querySelector('.q-image-pick');
+    const imageInput = div.querySelector('.q-image-input');
+    function setQuestionImage(image) {
+      div.dataset.image = image || '';
+      imagePreview.hidden = !image;
+      imageRemove.hidden = !image;
+      imagePick.textContent = t(image ? 'g.questionImageChange' : 'g.questionImageAdd');
+      if (image) imagePreview.src = image;
+      else imagePreview.removeAttribute('src');
+    }
+    setQuestionImage(q.image || '');
+    imagePick.addEventListener('click', () => imageInput.click());
+    imageRemove.addEventListener('click', () => setQuestionImage(''));
+    imageInput.addEventListener('change', async () => {
+      const file = imageInput.files?.[0];
+      imageInput.value = '';
+      if (!file) return;
+      try {
+        setQuestionImage(await normalizeQuestionImage(file));
+        $('editorError').textContent = '';
+      } catch (error) {
+        $('editorError').textContent = error.message || t('g.imageInvalid');
+      }
+    });
     return div;
   }
 
@@ -232,22 +304,45 @@ const { t, server: serverText, lang: uiLang } = window.BuiI18n;
       await workbook.xlsx.load(await file.arrayBuffer());
       const sheet = workbook.worksheets[0];
       if (!sheet) throw new Error(t('g.excelNoSheet'));
-      const firstValue = excelCellText(sheet.getCell(1, 1)).toLowerCase();
-      const firstDataRow = firstValue === 'question' ? 2 : 1;
+      const headers = new Map();
+      sheet.getRow(1).eachCell((cell, column) => headers.set(excelCellText(cell).toLowerCase(), column));
+      const hasHeader = headers.has('question');
+      const columns = {
+        question: headers.get('question') || 1,
+        optionA: headers.get('optiona') || 2,
+        optionB: headers.get('optionb') || 3,
+        optionC: headers.get('optionc') || 4,
+        optionD: headers.get('optiond') || 5,
+        correctAnswer: headers.get('correctanswer') || 6,
+        image: headers.get('image') || headers.get('picture') || headers.get('圖片') || 7,
+      };
+      const firstDataRow = hasHeader ? 2 : 1;
+      const imageByRow = new Map();
+      for (const embedded of sheet.getImages()) {
+        const imageRow = Math.floor(embedded.range.tl.row) + 1;
+        const imageColumn = Math.floor(embedded.range.tl.col) + 1;
+        if (imageColumn !== columns.image) continue;
+        const media = workbook.getImage(Number(embedded.imageId));
+        const mime = { jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif' }[media.extension];
+        const imageBlob = media.buffer
+          ? new Blob([media.buffer], { type: mime })
+          : media.base64 ? await (await fetch(`data:${mime};base64,${media.base64}`)).blob() : null;
+        if (!imageBlob) throw new Error(t('g.excelImageInvalid', { row: imageRow }));
+        imageByRow.set(imageRow, await normalizeQuestionImage(imageBlob));
+      }
       const questions = [];
       for (let rowNumber = firstDataRow; rowNumber <= sheet.rowCount; rowNumber++) {
         const row = sheet.getRow(rowNumber);
-        const values = Array.from({ length: 6 }, (_, index) => excelCellText(row.getCell(index + 1)));
-        if (values.every(value => !value)) continue;
-        const [question, ...rest] = values;
-        const choices = rest.slice(0, 4);
-        const correctAnswer = rest[4].toUpperCase();
+        const question = excelCellText(row.getCell(columns.question));
+        const choices = ['optionA', 'optionB', 'optionC', 'optionD'].map(key => excelCellText(row.getCell(columns[key])));
+        const correctAnswer = excelCellText(row.getCell(columns.correctAnswer)).toUpperCase();
+        if (!question && choices.every(value => !value) && !correctAnswer && !imageByRow.has(rowNumber)) continue;
         if (!question) throw new Error(t('g.excelNoQuestion',{row:rowNumber}));
         if (choices.some(choice => !choice)) throw new Error(t('g.excelNoOptions',{row:rowNumber}));
         if (!['A', 'B', 'C', 'D'].includes(correctAnswer)) {
           throw new Error(t('g.excelBadAnswer',{row:rowNumber}));
         }
-        questions.push({ question, choices, correctIndex: correctAnswer.charCodeAt(0) - 65 });
+        questions.push({ question, choices, correctIndex: correctAnswer.charCodeAt(0) - 65, image: imageByRow.get(rowNumber) || null });
       }
       if (!questions.length) throw new Error(t('g.excelEmpty'));
       $('editorQuestions').innerHTML = '';
@@ -276,6 +371,7 @@ const { t, server: serverText, lang: uiLang } = window.BuiI18n;
         { header: 'optionC', key: 'optionC', width: 22 },
         { header: 'optionD', key: 'optionD', width: 22 },
         { header: 'correctAnswer', key: 'correctAnswer', width: 18 },
+        { header: 'image', key: 'image', width: 24 },
       ];
       sheet.addRow({
         question: t('g.qSample'),
@@ -284,13 +380,35 @@ const { t, server: serverText, lang: uiLang } = window.BuiI18n;
         optionC: '56',
         optionD: '64',
         correctAnswer: 'C',
+        image: '',
       });
+      sheet.getRow(2).height = 72;
+      sheet.getCell('G1').note = t('g.excelImageNote');
+      const sampleCanvas = document.createElement('canvas');
+      sampleCanvas.width = 320;
+      sampleCanvas.height = 180;
+      const sampleContext = sampleCanvas.getContext('2d');
+      sampleContext.fillStyle = '#f3f9ff';
+      sampleContext.fillRect(0, 0, sampleCanvas.width, sampleCanvas.height);
+      sampleContext.fillStyle = '#182747';
+      sampleContext.font = 'bold 22px sans-serif';
+      sampleContext.fillText('7 × 8 = ?', 18, 31);
+      for (let row = 0; row < 7; row++) {
+        for (let column = 0; column < 8; column++) {
+          sampleContext.beginPath();
+          sampleContext.fillStyle = (row + column) % 2 ? '#43c5d2' : '#8a75ef';
+          sampleContext.arc(35 + column * 34, 58 + row * 16, 5, 0, Math.PI * 2);
+          sampleContext.fill();
+        }
+      }
+      const sampleImageId = workbook.addImage({ base64: sampleCanvas.toDataURL('image/png').split(',')[1], extension: 'png' });
+      sheet.addImage(sampleImageId, { tl: { col: 6, row: 1 }, ext: { width: 156, height: 88 } });
       const header = sheet.getRow(1);
       header.font = { bold: true, color: { argb: 'FFFFFFFF' } };
       header.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F8F70' } };
       header.alignment = { vertical: 'middle', horizontal: 'center' };
       header.height = 24;
-      sheet.autoFilter = 'A1:F1';
+      sheet.autoFilter = 'A1:G1';
       sheet.getColumn(6).eachCell((cell, rowNumber) => {
         if (rowNumber > 1) cell.dataValidation = {
           type: 'list',
@@ -329,7 +447,7 @@ const { t, server: serverText, lang: uiLang } = window.BuiI18n;
       });
       const checkedIdx = radios.findIndex(r => r.checked);
       const correctIndex = checkedIdx >= 0 && idxMap[checkedIdx] !== undefined ? idxMap[checkedIdx] : -1;
-      questions.push({ question, choices: filled, correctIndex });
+      questions.push({ question, choices: filled, correctIndex, image: div.dataset.image || null });
     }
     $('editorError').textContent = '';
     try {

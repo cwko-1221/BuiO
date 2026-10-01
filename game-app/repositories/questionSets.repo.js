@@ -33,13 +33,13 @@ async function listSets(teacherId) {
   }));
 }
 
-async function getSetWithQuestions(setId) {
+async function getSetWithQuestions(setId, { includeImages = true } = {}) {
   const pool = requirePg();
   const { rows: sets } = await pool.query(
     'SELECT id, title, created_by FROM game_question_sets WHERE id = $1', [setId]);
   if (!sets[0]) return null;
   const { rows } = await pool.query(`
-    SELECT id, question, choices, correct_index
+    SELECT id, question, choices, correct_index${includeImages ? ', image_data' : ''}
       FROM game_questions
      WHERE set_id = $1
      ORDER BY order_index, id`, [setId]);
@@ -62,15 +62,16 @@ async function createSet({ teacherId, title, questions }) {
     const setId = rows[0].id;
     if (questions.length) {
       await client.query(
-        `INSERT INTO game_questions (set_id, question, choices, correct_index, order_index)
-         SELECT $1, q, c::jsonb, i, ord
-         FROM unnest($2::text[], $3::text[], $4::int[], $5::int[]) AS t(q, c, i, ord)`,
+        `INSERT INTO game_questions (set_id, question, choices, correct_index, order_index, image_data)
+         SELECT $1, q, c::jsonb, i, ord, img
+         FROM unnest($2::text[], $3::text[], $4::int[], $5::int[], $6::text[]) AS t(q, c, i, ord, img)`,
         [
           setId,
           questions.map(q => q.question),
           questions.map(q => JSON.stringify(q.choices)),
           questions.map(q => q.correctIndex),
           questions.map((_, index) => index),
+          questions.map(q => q.image || null),
         ],
       );
     }
@@ -100,15 +101,16 @@ async function replaceSetQuestions({ setId, teacherId, title, questions }) {
     await client.query('DELETE FROM game_questions WHERE set_id = $1', [setId]);
     if (questions.length) {
       await client.query(
-        `INSERT INTO game_questions (set_id, question, choices, correct_index, order_index)
-         SELECT $1, q, c::jsonb, i, ord
-         FROM unnest($2::text[], $3::text[], $4::int[], $5::int[]) AS t(q, c, i, ord)`,
+        `INSERT INTO game_questions (set_id, question, choices, correct_index, order_index, image_data)
+         SELECT $1, q, c::jsonb, i, ord, img
+         FROM unnest($2::text[], $3::text[], $4::int[], $5::int[], $6::text[]) AS t(q, c, i, ord, img)`,
         [
           setId,
           questions.map(q => q.question),
           questions.map(q => JSON.stringify(q.choices)),
           questions.map(q => q.correctIndex),
           questions.map((_, index) => index),
+          questions.map(q => q.image || null),
         ],
       );
     }
@@ -135,6 +137,7 @@ function mapQuestion(r) {
     question: r.question,
     choices: Array.isArray(r.choices) ? r.choices : JSON.parse(r.choices),
     correctIndex: r.correct_index,
+    image: r.image_data || null,
   };
 }
 

@@ -34,7 +34,7 @@ router.get('/sets', requireTeacherOrPreview, async (req, res, next) => {
     if (req.session?.role === 'teacher' && setsRepo.pgAvailable()) {
       const rows = await setsRepo.listSets(req.session.studentId);
       const detailed = await Promise.all(rows.map(async row => {
-        const set = await setsRepo.getSetWithQuestions(row.id);
+        const set = await setsRepo.getSetWithQuestions(row.id, { includeImages: false });
         const supportsTowerDefense = !!set?.questions?.length
           && set.questions.every(question => question.choices.length === 4);
         return {

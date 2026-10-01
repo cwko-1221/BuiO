@@ -350,13 +350,17 @@ refreshAudioButton();
 $('answerBtn').addEventListener('click',openQuestion);$('qClose').addEventListener('click',closeQuestion);
 function openQuestion(){
   if(!scene||frozen||scene.finished)return;frozen=true;scene.resumeControl();
-  $('qFeedback').textContent='';$('qFeedback').className='q-feedback';$('qClose').style.display='none';$('qOverlay').classList.add('open');
+  $('qFeedback').textContent='';$('qFeedback').className='q-feedback';$('qClose').style.display='none';$('qImage').hidden=true;$('qImage').removeAttribute('src');$('qOverlay').classList.add('open');
   if(preview)return renderQuestion({question:t('g.qSample'),choices:['48','54','56','64']});
   $('qText').textContent='';$('qChoices').innerHTML=`<div class="muted" style="grid-column:1/-1;text-align:center">${escapeHtml(t('g.qLoading'))}</div>`;
   socket.emit('player:question',res=>{if(!res?.ok)return closeQuestion();renderQuestion(res);});
 }
 function renderQuestion(res){
-  $('qText').textContent=res.question;$('qChoices').innerHTML='';res.choices.forEach((c,i)=>{const b=document.createElement('button');b.className='q-choice';b.textContent=c;b.onclick=()=>answer(i);$('qChoices').appendChild(b);});
+  $('qText').textContent=res.question;
+  const image=$('qImage');
+  image.hidden=!res.image;
+  if(res.image)image.src=res.image;else image.removeAttribute('src');
+  $('qChoices').innerHTML='';res.choices.forEach((c,i)=>{const b=document.createElement('button');b.className='q-choice';b.textContent=c;b.onclick=()=>answer(i);$('qChoices').appendChild(b);});
 }
 function answer(choice){
   const buttons=[...$('qChoices').children];buttons.forEach(b=>b.disabled=true);

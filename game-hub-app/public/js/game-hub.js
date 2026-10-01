@@ -98,13 +98,50 @@ async function deleteSet(setId){
   }catch(error){$('teacherHubError').textContent=error.message||t('gh.deleteFailed');}
 }
 
+const QUESTION_IMAGE_MAX_BYTES=256*1024;
+const QUESTION_IMAGE_MAX_SOURCE_BYTES=16*1024*1024;
+
+async function normalizeQuestionImage(blob){
+  if(!blob||blob.size>QUESTION_IMAGE_MAX_SOURCE_BYTES)throw new Error(t('gh.imageTooLarge'));
+  const objectUrl=URL.createObjectURL(blob);
+  try{
+    const image=new Image();
+    const loaded=new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error(t('gh.imageInvalid')));});
+    image.src=objectUrl;await loaded;
+    let scale=Math.min(1,1280/image.naturalWidth,960/image.naturalHeight);
+    for(let resize=0;resize<5;resize++,scale*=.82){
+      const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
+      const context=canvas.getContext('2d');if(!context)throw new Error(t('gh.imageInvalid'));
+      context.fillStyle='#fff';context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(image,0,0,canvas.width,canvas.height);
+      for(const quality of [.86,.78,.7,.62,.54]){
+        const dataUrl=canvas.toDataURL('image/jpeg',quality),base64=dataUrl.slice(dataUrl.indexOf(',')+1);
+        if(Math.floor(base64.length*3/4)<=QUESTION_IMAGE_MAX_BYTES)return dataUrl;
+      }
+    }
+    throw new Error(t('gh.imageTooLarge'));
+  }finally{URL.revokeObjectURL(objectUrl);}
+}
+
 function questionBlock(question={}){
   const block=document.createElement('article');
   const blockId=++questionSequence;
   const choices=Array.isArray(question.choices)?question.choices:['','','',''];
   block.className='editor-question';
-  block.innerHTML=`<div class="question-head"><strong class="question-number"></strong><button type="button" class="remove-question" aria-label="${escapeHtml(t('gh.removeQuestion'))}">${escapeHtml(t('gh.delete'))}</button></div><label class="question-field"><span>${escapeHtml(t('gh.questionLabel'))}</span><input class="q-question" type="text" maxlength="200" placeholder="${escapeHtml(t('gh.questionPh'))}" value="${escapeHtml(question.question||'')}"></label><div class="choice-grid">${[0,1,2,3].map(index=>`<label class="choice-field"><input type="radio" name="correct-${blockId}" value="${index}" ${question.correctIndex===index?'checked':''}><span>${String.fromCharCode(65+index)}</span><input class="q-choice-input" type="text" maxlength="80" placeholder="${escapeHtml(t('gh.choicePh',{letter:String.fromCharCode(65+index)}))}" value="${escapeHtml(choices[index]||'')}"></label>`).join('')}</div>`;
+  block.innerHTML=`<div class="question-head"><strong class="question-number"></strong><button type="button" class="remove-question" aria-label="${escapeHtml(t('gh.removeQuestion'))}">${escapeHtml(t('gh.delete'))}</button></div><label class="question-field"><span>${escapeHtml(t('gh.questionLabel'))}</span><input class="q-question" type="text" maxlength="200" placeholder="${escapeHtml(t('gh.questionPh'))}" value="${escapeHtml(question.question||'')}"></label><div class="question-image-tools"><input class="q-image-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden><button class="editor-tool-button q-image-pick" type="button"></button><button class="q-image-remove" type="button" aria-label="${escapeHtml(t('gh.questionImageRemove'))}" title="${escapeHtml(t('gh.questionImageRemove'))}" hidden>✕</button><span>${escapeHtml(t('gh.questionImageHint'))}</span></div><img class="q-image-preview" alt="${escapeHtml(t('gh.questionImageAlt'))}" hidden><div class="choice-grid">${[0,1,2,3].map(index=>`<label class="choice-field"><input type="radio" name="correct-${blockId}" value="${index}" ${question.correctIndex===index?'checked':''}><span>${String.fromCharCode(65+index)}</span><input class="q-choice-input" type="text" maxlength="80" placeholder="${escapeHtml(t('gh.choicePh',{letter:String.fromCharCode(65+index)}))}" value="${escapeHtml(choices[index]||'')}"></label>`).join('')}</div>`;
   block.querySelector('.remove-question').addEventListener('click',()=>{block.remove();renumberQuestions();});
+  const imagePreview=block.querySelector('.q-image-preview'),imageRemove=block.querySelector('.q-image-remove'),imagePick=block.querySelector('.q-image-pick'),imageInput=block.querySelector('.q-image-input');
+  function setQuestionImage(image){
+    block.dataset.image=image||'';imagePreview.hidden=!image;imageRemove.hidden=!image;
+    imagePick.textContent=t(image?'gh.questionImageChange':'gh.questionImageAdd');
+    if(image)imagePreview.src=image;else imagePreview.removeAttribute('src');
+  }
+  setQuestionImage(question.image||'');
+  imagePick.addEventListener('click',()=>imageInput.click());imageRemove.addEventListener('click',()=>setQuestionImage(''));
+  imageInput.addEventListener('change',async()=>{
+    const file=imageInput.files?.[0];imageInput.value='';if(!file)return;
+    try{setQuestionImage(await normalizeQuestionImage(file));$('editorError').textContent='';}
+    catch(error){$('editorError').textContent=error.message||t('gh.imageInvalid');}
+  });
   return block;
 }
 
@@ -149,15 +186,27 @@ async function importExcelQuestions(event){
     await loadExcelJs();
     const workbook=new ExcelJS.Workbook();await workbook.xlsx.load(await file.arrayBuffer());const sheet=workbook.worksheets[0];
     if(!sheet)throw new Error(t('gh.excelNoSheet'));
-    const firstDataRow=excelCellText(sheet.getCell(1,1)).toLowerCase()==='question'?2:1;const questions=[];
+    const headers=new Map();sheet.getRow(1).eachCell((cell,column)=>headers.set(excelCellText(cell).toLowerCase(),column));
+    const hasHeader=headers.has('question');
+    const columns={question:headers.get('question')||1,optionA:headers.get('optiona')||2,optionB:headers.get('optionb')||3,optionC:headers.get('optionc')||4,optionD:headers.get('optiond')||5,correctAnswer:headers.get('correctanswer')||6,image:headers.get('image')||headers.get('picture')||headers.get('圖片')||7};
+    const firstDataRow=hasHeader?2:1,imageByRow=new Map();
+    for(const embedded of sheet.getImages()){
+      const imageRow=Math.floor(embedded.range.tl.row)+1,imageColumn=Math.floor(embedded.range.tl.col)+1;
+      if(imageColumn!==columns.image)continue;
+      const media=workbook.getImage(Number(embedded.imageId)),mime={jpeg:'image/jpeg',png:'image/png',gif:'image/gif'}[media.extension];
+      const imageBlob=media.buffer?new Blob([media.buffer],{type:mime}):media.base64?await(await fetch(`data:${mime};base64,${media.base64}`)).blob():null;
+      if(!imageBlob)throw new Error(t('gh.excelImageInvalid',{row:imageRow}));
+      imageByRow.set(imageRow,await normalizeQuestionImage(imageBlob));
+    }
+    const questions=[];
     for(let rowNumber=firstDataRow;rowNumber<=sheet.rowCount;rowNumber++){
-      const values=Array.from({length:6},(_,index)=>excelCellText(sheet.getRow(rowNumber).getCell(index+1)));
-      if(values.every(value=>!value))continue;
-      const [question,...rest]=values,choices=rest.slice(0,4),correctAnswer=rest[4].toUpperCase();
+      const row=sheet.getRow(rowNumber),question=excelCellText(row.getCell(columns.question));
+      const choices=['optionA','optionB','optionC','optionD'].map(key=>excelCellText(row.getCell(columns[key]))),correctAnswer=excelCellText(row.getCell(columns.correctAnswer)).toUpperCase();
+      if(!question&&choices.every(value=>!value)&&!correctAnswer&&!imageByRow.has(rowNumber))continue;
       if(!question)throw new Error(t('gh.excelNoQuestion',{row:rowNumber}));
       if(choices.some(choice=>!choice))throw new Error(t('gh.excelNoOptions',{row:rowNumber}));
       if(!['A','B','C','D'].includes(correctAnswer))throw new Error(t('gh.excelBadAnswer',{row:rowNumber}));
-      questions.push({question,choices,correctIndex:correctAnswer.charCodeAt(0)-65});
+      questions.push({question,choices,correctIndex:correctAnswer.charCodeAt(0)-65,image:imageByRow.get(rowNumber)||null});
     }
     if(!questions.length)throw new Error(t('gh.excelEmpty'));
     $('editorQuestions').innerHTML='';questions.forEach(addQuestion);
@@ -172,10 +221,16 @@ async function downloadExcelTemplate(){
     await loadExcelJs();
     const workbook=new ExcelJS.Workbook();workbook.creator='BuiO';
     const sheet=workbook.addWorksheet('Questions',{views:[{state:'frozen',ySplit:1}]});
-    sheet.columns=[{header:'question',key:'question',width:42},{header:'optionA',key:'optionA',width:22},{header:'optionB',key:'optionB',width:22},{header:'optionC',key:'optionC',width:22},{header:'optionD',key:'optionD',width:22},{header:'correctAnswer',key:'correctAnswer',width:18}];
-    sheet.addRow({question:t('gh.templateSample'),optionA:'48',optionB:'54',optionC:'56',optionD:'64',correctAnswer:'C'});
+    sheet.columns=[{header:'question',key:'question',width:42},{header:'optionA',key:'optionA',width:22},{header:'optionB',key:'optionB',width:22},{header:'optionC',key:'optionC',width:22},{header:'optionD',key:'optionD',width:22},{header:'correctAnswer',key:'correctAnswer',width:18},{header:'image',key:'image',width:24}];
+    sheet.addRow({question:t('gh.templateSample'),optionA:'48',optionB:'54',optionC:'56',optionD:'64',correctAnswer:'C',image:''});
+    sheet.getRow(2).height=72;sheet.getCell('G1').note=t('gh.excelImageNote');
+    const sampleCanvas=document.createElement('canvas');sampleCanvas.width=320;sampleCanvas.height=180;
+    const sampleContext=sampleCanvas.getContext('2d');sampleContext.fillStyle='#f3f9ff';sampleContext.fillRect(0,0,320,180);sampleContext.fillStyle='#182747';sampleContext.font='bold 22px sans-serif';sampleContext.fillText('7 × 8 = ?',18,31);
+    for(let row=0;row<7;row++)for(let column=0;column<8;column++){sampleContext.beginPath();sampleContext.fillStyle=(row+column)%2?'#43c5d2':'#8a75ef';sampleContext.arc(35+column*34,58+row*16,5,0,Math.PI*2);sampleContext.fill();}
+    const sampleImageId=workbook.addImage({base64:sampleCanvas.toDataURL('image/png').split(',')[1],extension:'png'});
+    sheet.addImage(sampleImageId,{tl:{col:6,row:1},ext:{width:156,height:88}});
     const header=sheet.getRow(1);header.font={bold:true,color:{argb:'FFFFFFFF'}};header.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF5146A7'}};header.alignment={vertical:'middle',horizontal:'center'};header.height=25;
-    sheet.autoFilter='A1:F1';sheet.getColumn(6).eachCell((cell,rowNumber)=>{if(rowNumber>1)cell.dataValidation={type:'list',allowBlank:false,formulae:['"A,B,C,D"']};});
+    sheet.autoFilter='A1:G1';sheet.getColumn(6).eachCell((cell,rowNumber)=>{if(rowNumber>1)cell.dataValidation={type:'list',allowBlank:false,formulae:['"A,B,C,D"']};});
     const buffer=await workbook.xlsx.writeBuffer();const url=URL.createObjectURL(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
     const link=document.createElement('a');link.href=url;link.download='BuiO-question-bank-template.xlsx';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('excelImportStatus').textContent=t('gh.templateDone');
   }catch(error){$('editorError').textContent=error.message||t('gh.templateFailed');}
@@ -188,7 +243,7 @@ async function saveSet(){
     const questions=blocks.map((block,index)=>{
       const question=block.querySelector('.q-question').value.trim();const choices=[...block.querySelectorAll('.q-choice-input')].map(input=>input.value.trim());const checked=block.querySelector('input[type="radio"]:checked');
       if(!question)throw new Error(t('gh.needQuestion',{n:index+1}));if(choices.some(choice=>!choice))throw new Error(t('gh.needChoices',{n:index+1}));if(!checked)throw new Error(t('gh.needAnswer',{n:index+1}));
-      return{question,choices,correctIndex:Number(checked.value)};
+      return{question,choices,correctIndex:Number(checked.value),image:block.dataset.image||null};
     });
     const setBeingEdited=editingSetId;const response=await fetch(setBeingEdited?`/api/game/teacher/sets/${encodeURIComponent(setBeingEdited)}`:'/api/game/teacher/sets',{method:setBeingEdited?'PUT':'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({title,questions})});
     const data=await response.json();if(!response.ok||!data.success)throw new Error(data.message||t('gh.saveFailed'));

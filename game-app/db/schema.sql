@@ -18,8 +18,11 @@ create table if not exists public.game_questions (
   question text not null,
   choices jsonb not null,               -- array of 2-4 answer strings
   correct_index integer not null check (correct_index between 0 and 3),
-  order_index integer not null default 0
+  order_index integer not null default 0,
+  image_data text
 );
+
+alter table public.game_questions add column if not exists image_data text;
 
 create index if not exists game_questions_set_idx on public.game_questions(set_id);
 create index if not exists game_question_sets_creator_idx on public.game_question_sets(created_by);

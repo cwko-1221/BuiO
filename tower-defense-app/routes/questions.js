@@ -37,6 +37,7 @@ function shuffledQuestion(question) {
   }
   return {
     prompt: question.question,
+    image: question.image || null,
     choices: entries.map(entry => entry.choice),
     correctIndex: entries.findIndex(entry => entry.correct),
   };
@@ -116,8 +117,8 @@ router.post('/question', (req, res) => {
   if (!gameSession) return;
   const now = Date.now();
   if (gameSession.active && !gameSession.active.used && gameSession.active.expiresAt > now) {
-    const { token, prompt, choices, expiresAt, baseReward } = gameSession.active;
-    return res.json({ success: true, question: { token, prompt, choices, expiresAt, baseReward } });
+    const { token, prompt, image, choices, expiresAt, baseReward } = gameSession.active;
+    return res.json({ success: true, question: { token, prompt, image, choices, expiresAt, baseReward } });
   }
   if (gameSession.cursor >= gameSession.order.length) {
     gameSession.cursor = 0;
@@ -132,8 +133,8 @@ router.post('/question', (req, res) => {
     expiresAt: now + QUESTION_TTL_MS,
     used: false,
   };
-  const { token, prompt, choices, expiresAt, baseReward } = gameSession.active;
-  res.json({ success: true, question: { token, prompt, choices, expiresAt, baseReward } });
+  const { token, prompt, image, choices, expiresAt, baseReward } = gameSession.active;
+  res.json({ success: true, question: { token, prompt, image, choices, expiresAt, baseReward } });
 });
 
 router.post('/answer', (req, res) => {

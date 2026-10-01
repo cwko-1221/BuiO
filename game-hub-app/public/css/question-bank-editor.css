@@ -80,6 +80,11 @@ body.modal-open { overflow: hidden; }
 .set-title-field span, .question-field span { color: #aeb6d5; font-size: 9px; font-weight: 800; }
 .set-title-field input, .question-field input { width: 100%; padding: 12px 13px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255, 255, 255, .035); outline: none; }
 .set-title-field input:focus, .question-field input:focus, .choice-field:focus-within { border-color: rgba(92, 232, 224, .52); box-shadow: 0 0 0 3px rgba(92, 232, 224, .07); }
+.question-image-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 9px 0 7px; }
+.question-image-tools > span { color: var(--muted); font-size: 8px; }
+.q-image-remove { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255, 255, 255, .04); color: var(--coral); cursor: pointer; font-weight: 900; }
+.q-image-preview { display: block; max-width: min(100%, 380px); max-height: 220px; object-fit: contain; margin: 7px 0 10px; border: 1px solid var(--line); border-radius: 9px; background: #fff; }
+.q-image-preview[hidden] { display: none; }
 .excel-toolbar { display: flex; align-items: center; gap: 8px; margin: 14px 0 17px; padding: 10px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255, 255, 255, .022); }
 .editor-tool-button { padding: 8px 11px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255, 255, 255, .045); cursor: pointer; font-size: 9px; font-weight: 900; }
 .editor-tool-button.primary { border-color: rgba(92, 232, 224, .3); background: rgba(92, 232, 224, .1); color: var(--cyan); }

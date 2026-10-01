@@ -297,10 +297,12 @@ function cycleSpeed(){if(!simulation)return;simulation.setSpeed(simulation.state
 
 async function openQuestion(){
   if(!simulation||!questionSessionId||$('questionPanel').classList.contains('open'))return;
-  await audio.unlock();$('questionPanel').classList.add('open');$('questionPrompt').textContent=t('td.quizFetching');$('questionChoices').innerHTML='';$('questionFeedback').textContent='';answering=false;
+  await audio.unlock();$('questionPanel').classList.add('open');$('questionPrompt').textContent=t('td.quizFetching');$('questionImage').hidden=true;$('questionImage').removeAttribute('src');$('questionChoices').innerHTML='';$('questionFeedback').textContent='';answering=false;
   try{
     const data=await api('/question',{method:'POST',body:{sessionId:questionSessionId}});activeQuestion=data.question;questionDeadline=activeQuestion.expiresAt;
-    $('questionPrompt').textContent=activeQuestion.prompt;$('questionReward').textContent=t('td.quizReward',{coins:Math.floor(activeQuestion.baseReward*simulation.quizRules.quizGoldMultiplier)});
+    $('questionPrompt').textContent=activeQuestion.prompt;
+    const questionImage=$('questionImage');questionImage.hidden=!activeQuestion.image;if(activeQuestion.image)questionImage.src=activeQuestion.image;
+    $('questionReward').textContent=t('td.quizReward',{coins:Math.floor(activeQuestion.baseReward*simulation.quizRules.quizGoldMultiplier)});
     $('questionChoices').innerHTML=activeQuestion.choices.map((choice,index)=>`<button class="choice-button" data-choice="${index}"><span>${String.fromCharCode(65+index)}</span>${escapeHtml(choice)}</button>`).join('');
     document.querySelectorAll('[data-choice]').forEach(button=>button.addEventListener('click',()=>answerQuestion(Number(button.dataset.choice))));
     clearInterval(questionTimer);questionTimer=setInterval(updateQuestionTimer,100);updateQuestionTimer();

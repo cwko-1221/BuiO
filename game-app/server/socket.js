@@ -470,6 +470,7 @@ module.exports = function (io, app) {
       ack?.({
         ok: true,
         question: q.question,
+        image: q.image || null,
         choices: order.map(i => q.choices[i]),
       });
     });

@@ -136,6 +136,7 @@ BuiI18n.register({
   // --- quiz panel -------------------------------------------------------
   'td.quizLoading':    { 'zh-HK': '載入題目中…', 'en-US': 'Loading the question…' },
   'td.quizFetching':   { 'zh-HK': '正在取得題目…', 'en-US': 'Fetching a question…' },
+  'td.questionImageAlt': { 'zh-HK': '題目圖片', 'en-US': 'Question image' },
   'td.quizReward':     { 'zh-HK': '答對 +{coins} 晶幣起', 'en-US': 'Correct: +{coins} coins or more' },
   'td.quizRewardDefault': { 'zh-HK': '答對 +45 晶幣', 'en-US': 'Correct: +45 coins' },
   'td.quizCorrect':    { 'zh-HK': '答對！獲得 {coins} 晶幣 · 知識鑰匙 {have}/{need}', 'en-US': 'Correct! +{coins} coins · knowledge keys {have}/{need}' },
