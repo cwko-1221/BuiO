@@ -327,7 +327,16 @@ const afterFeed=await repo.getBootstrap('S001');
 assert.equal(afterFeed.pets[0].dailyXp,90); assert.equal(afterFeed.inventory.find((row)=>row.itemId==='apple-slice').quantity,1);
 assert.equal(afterFeed.wallet.balance,beforeFood-175);
 assert.deepEqual([399,400,1099,1100,2099,2100].map(repo.stageForXp),[1,2,2,3,3,4]);
+// Shared visual consumers are temporarily pinned to the first form, without changing the
+// evolution value stored for the student's pet.
+const storedPet=store.load().petInstances.find((row)=>row.studentId==='S001'&&row.petId===pet.id);
+const storedStage=storedPet.stage; storedPet.stage=4; store.save();
+const displayLook=(await repo.activePetLooks(['S001'])).get('S001');
+assert.ok(displayLook); assert.equal(displayLook.stage,1);
+assert.equal((await repo.getBootstrap('S001')).pets.find((row)=>row.id===pet.id).stage,4);
+storedPet.stage=storedStage; store.save();
 pass('food consumption, idempotency, Hong Kong daily XP cap and four stages');
+pass('evolution progress stays stored while shared pet art is pinned to Stage 1');
 
 const second=await repo.purchaseEgg('S001',{kind:'direct',speciesId:'starpatch-cat',idempotencyKey:'direct-second'});
 assert.ok(second.pet);

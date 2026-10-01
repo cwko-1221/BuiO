@@ -10,6 +10,7 @@ import { audio } from './audio';
 import { BedroomScene } from './game/BedroomScene';
 import type { CoinPusherScene } from './game/CoinPusherScene';
 import { PetAvatar } from './game/PetAvatar';
+import { DISPLAY_PET_STAGE, displayPetStage, petForDisplay } from './game/petDisplay';
 import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCalloutCenterX, coinPusherCabinetFinish, COIN_PUSHER_CABINET_FINISHES, coinPusherCascadeLabel, coinPusherDropTimingCueLabel, coinPusherImpactPan, coinPusherRewardFlightLabels, coinPusherStampProgress, coinPusherTimingGuidanceLabel, coinPusherTimingRecordLabel, coinPusherTimingStreakLabel, planCoinPusherRewardFlightDelays, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
 import type { CoinPusherTimingStreakState } from './game/CoinPusherFeedback';
 import type { CoinPusherDropBeat } from './game/CoinPusherModel';
@@ -554,7 +555,7 @@ class StudentApp {
 
   private startBedroom(roomOverride?: any, petOverride?: PetInstance) {
     this.destroyCoinPusher(true);
-    this.ensureGame(); const pet=petOverride||this.activePet();if(!pet)return;const definition=this.definition(pet)!;
+    this.ensureGame(); const sourcePet=petOverride||this.activePet();if(!sourcePet)return;const pet=petForDisplay(sourcePet);const definition=this.definition(sourcePet)!;
     document.querySelector<HTMLElement>('#game-root')!.style.display='block';
     document.querySelector<HTMLElement>('#coin-pusher-root')!.style.display='none';
     const originalRoom=this.state.room;if(roomOverride)this.state.room={themeId:roomOverride.themeId,visibility:roomOverride.visibility,placements:roomOverride.placements};
@@ -605,7 +606,7 @@ class StudentApp {
   private async hatch(button: HTMLButtonElement) {
     button.disabled=true;button.classList.add('loading');const result=await api.hatch(idempotencyKey());audio.sfx('hatch');this.celebrate(result.rarity==='epic'?'epic':'hatch');await this.reload();this.startBedroom();this.renderReveal(result.speciesId,result.rarity,result.duplicateCoins);
   }
-  private renderReveal(speciesId:string,rarity:string,refund:number){const definition=this.state.catalog.pets.find((pet)=>pet.id===speciesId)!;const pet=this.state.pets.find((pet)=>pet.speciesId===speciesId);const stage=pet?.stage||1;this.modal(`<div class="reveal-card ${rarity}"><p class="eyebrow">${rarity.toUpperCase()}</p><img src="${definition.art[stage-1]}" alt=""><h2>${escapeHtml(this.petName(definition,stage))}</h2><p>${refund?`重複品種，退回 ${refund} 金幣`:`天賦：${escapeHtml(this.name(definition.talent))}`}</p><button class="primary" data-action="back-home">${this.t('back')}</button></div>`);}
+  private renderReveal(speciesId:string,rarity:string,refund:number){const definition=this.state.catalog.pets.find((pet)=>pet.id===speciesId)!;const stage=DISPLAY_PET_STAGE;this.modal(`<div class="reveal-card ${rarity}"><p class="eyebrow">${rarity.toUpperCase()}</p><img src="${definition.art[stage-1]}" alt=""><h2>${escapeHtml(this.petName(definition,stage))}</h2><p>${refund?`重複品種，退回 ${refund} 金幣`:`天賦：${escapeHtml(this.name(definition.talent))}`}</p><button class="primary" data-action="back-home">${this.t('back')}</button></div>`);}
   private renderGrantNotifications(grants: TeacherGrantNotification[]) {
     const zh=this.locale==='zh-HK';this.pendingGrantIds=grants.map((grant)=>grant.transactionId);
     const total=grants.reduce((sum,grant)=>sum+grant.amount,0);
@@ -651,7 +652,7 @@ class StudentApp {
   }
 
   private renderHomePanel() {
-    const pet=this.activePet();const definition=this.definition(pet);if(!pet||!definition){this.renderHatch();return;}const next=this.state.catalog.evolutionThresholds[pet.stage]||pet.xp;const previous=this.state.catalog.evolutionThresholds[pet.stage-1]||0;const progress=pet.stage===4?100:Math.round(((pet.xp-previous)/(next-previous))*100);
+    const pet=this.activePet();const definition=this.definition(pet);if(!pet||!definition){this.renderHatch();return;}const next=this.state.catalog.evolutionThresholds[pet.stage]||pet.xp;const previous=this.state.catalog.evolutionThresholds[pet.stage-1]||0;const progress=pet.stage===4?100:Math.round(((pet.xp-previous)/(next-previous))*100);const stage=displayPetStage(pet.stage);
     this.setLayout('room');
     const dailyXp=pet.dailyXpDate===this.state.serverDay?pet.dailyXp:0;
     const actions: [string,string,string][] = [
@@ -665,7 +666,7 @@ class StudentApp {
       ['arcade-prize-bag','spark',this.locale==='zh-HK'?'獎品袋':'Prize bag'],
     ];
     // Identity rides in the top bar alongside the coin pill; the room bar carries only actions.
-    document.querySelector('#petStatus')!.innerHTML=`<span class="rarity ${definition.rarity}">${definition.rarity}</span><b>${escapeHtml(this.petName(definition,pet.stage))}</b><span class="room-bar-stage">Stage ${pet.stage}/4</span><div class="progress" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progress}%"></i></div><small>${pet.xp.toLocaleString()} XP · ${this.t('daily')} ${dailyXp}/${this.state.catalog.dailyXpCap}</small>`;
+    document.querySelector('#petStatus')!.innerHTML=`<span class="rarity ${definition.rarity}">${definition.rarity}</span><b>${escapeHtml(this.petName(definition,stage))}</b><span class="room-bar-stage">Stage ${stage}/4</span><div class="progress" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progress}%"></i></div><small>${pet.xp.toLocaleString()} XP · ${this.t('daily')} ${dailyXp}/${this.state.catalog.dailyXpCap}</small>`;
     document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-actions">${actions.map(([action,glyph,label])=>`<button data-action="${action}">${icon(glyph)}<span>${escapeHtml(label)}</span></button>`).join('')}</div>`;
   }
 
@@ -691,15 +692,16 @@ class StudentApp {
    * better than a creature wearing them in the wrong places.
    */
   private previewFigure(definition:PetDefinition,pet:PetInstance) {
+    const stage=displayPetStage(pet.stage);
     const layout=this.state.catalog.animationByPet?.[definition.id] ?? this.state.catalog.animation;
-    const fullOutfit=PetAvatar.fullOutfitUrl(definition,pet.stage,pet.equippedWearables,this.state.catalog.outfitAtlases);
-    const atlas=fullOutfit||definition.atlas?.[pet.stage-1];
-    const anchors=definition.anchors?.[pet.stage-1];
+    const fullOutfit=PetAvatar.fullOutfitUrl(definition,stage,pet.equippedWearables,this.state.catalog.outfitAtlases);
+    const atlas=fullOutfit||definition.atlas?.[stage-1];
+    const anchors=definition.anchors?.[stage-1];
     if(!layout||!atlas||!anchors) {
-      return `<img src="${definition.art[pet.stage-1]}" alt="" draggable="false">`;
+      return `<img src="${definition.art[stage-1]}" alt="" draggable="false">`;
     }
     const registered=pet.equippedWearables.flatMap((id)=>{
-      const entry=this.state.catalog.redrawnWearables[`${definition.id}:${pet.stage}:${id}`];
+      const entry=this.state.catalog.redrawnWearables[`${definition.id}:${stage}:${id}`];
       return entry?[{id,entry}]:[];
     });
     const hiddenSlots=new Set(registered.flatMap(({entry})=>entry.occludes||[]));
@@ -713,11 +715,11 @@ class StudentApp {
     // registered piece; unfinished slots and auras continue through the established placement.
     const legacyIds=fullOutfit
       ? PetAvatar.legacyWearableIds(
-        definition,pet.stage,pet.equippedWearables.filter((id)=>id.startsWith('aura-')),
+        definition,stage,pet.equippedWearables.filter((id)=>id.startsWith('aura-')),
         this.state.catalog.wearables,this.state.catalog.redrawnWearables,
       )
       : PetAvatar.legacyWearableIds(
-        definition,pet.stage,pet.equippedWearables,this.state.catalog.wearables,
+        definition,stage,pet.equippedWearables,this.state.catalog.wearables,
         this.state.catalog.redrawnWearables,
       );
     const pieces=legacyIds.map((id)=>{
@@ -944,7 +946,7 @@ class StudentApp {
   }
   private async feed(foodId:string){const pet=this.activePet()!;const result=await api.feed(pet.id,foodId,idempotencyKey());audio.sfx('feed');this.game?.events.emit('pet:emote',result.evolved?'evolve':'eat');if(result.evolved){audio.sfx('evolve');this.celebrate('evolve');}await this.reload();this.startBedroom();this.renderHomePanel();this.renderFeedPicker();}
   private async activate(petId:string){await api.activatePet(petId);await this.reload();audio.sfx('happy');this.renderCollection();}
-  private renderCollection() { this.setLayout('full');const owned=new Map(this.state.pets.map((pet)=>[pet.speciesId,pet]));const forms=this.state.catalog.pets.length*4;document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">${this.state.catalog.pets.length} SPECIES · ${forms} FORMS</p><h1>${this.t('collection')}</h1><div class="collection-grid">${this.state.catalog.pets.map((definition)=>{const pet=owned.get(definition.id);const stage=pet?.stage||1;const mystery=MYSTERY_PET_IDS.has(definition.id);return `<article class="pet-card ${definition.rarity} ${pet?'':'locked'} ${mystery?'mystery-pet':''}" data-species-id="${definition.id}"><div class="pet-art"><img src="${definition.art[stage-1]}" alt="" loading="lazy"></div><span class="rarity ${definition.rarity}">${definition.rarity}</span><h3>${mystery?'???':escapeHtml(this.petName(definition,stage))}</h3><p>${pet?`Stage ${stage} · ${pet.xp} XP`:this.t('locked')}</p>${pet?`<button data-action="activate" data-id="${pet.id}" ${pet.id===this.state.profile.activePetId?'disabled':''}>${pet.id===this.state.profile.activePetId?this.t('active'):this.t('choose')}</button>`:''}</article>`}).join('')}</div></div>`; }
+  private renderCollection() { this.setLayout('full');const owned=new Map(this.state.pets.map((pet)=>[pet.speciesId,pet]));const forms=this.state.catalog.pets.length*4;document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">${this.state.catalog.pets.length} SPECIES · ${forms} FORMS</p><h1>${this.t('collection')}</h1><div class="collection-grid">${this.state.catalog.pets.map((definition)=>{const pet=owned.get(definition.id);const stage=pet?displayPetStage(pet.stage):DISPLAY_PET_STAGE;const mystery=MYSTERY_PET_IDS.has(definition.id);return `<article class="pet-card ${definition.rarity} ${pet?'':'locked'} ${mystery?'mystery-pet':''}" data-species-id="${definition.id}"><div class="pet-art"><img src="${definition.art[stage-1]}" alt="" loading="lazy"></div><span class="rarity ${definition.rarity}">${definition.rarity}</span><h3>${mystery?'???':escapeHtml(this.petName(definition,stage))}</h3><p>${pet?`Stage ${stage} · ${pet.xp} XP`:this.t('locked')}</p>${pet?`<button data-action="activate" data-id="${pet.id}" ${pet.id===this.state.profile.activePetId?'disabled':''}>${pet.id===this.state.profile.activePetId?this.t('active'):this.t('choose')}</button>`:''}</article>`}).join('')}</div></div>`; }
   private renderShop(category='eggs') {
     this.setLayout('full');const categories=this.locale==='zh-HK'
       ?[['eggs','寵物蛋'],['food','食物'],['wearables','服飾'],['rooms','房間'],['furniture','家具']]
@@ -1948,7 +1950,7 @@ class StudentApp {
       throw error;
     }
   }
-  private async renderVisits(){this.setLayout('full');document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">CLASS VISITS</p><h1>${this.t('visit')}</h1><div class="loading-card">${this.locale==='zh-HK'?'正在尋找開放房間…':'Finding open rooms…'}</div></div>`;const data=await api.classRooms();document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">${escapeHtml(data.className||'CLASS')}</p><h1>${this.t('visit')}</h1><div class="visit-grid">${data.rooms.length?data.rooms.map((room:any)=>`<article class="visit-card"><div class="avatar-letter">${escapeHtml(room.ownerName).slice(0,1)}</div><div><h3>${escapeHtml(room.ownerName)}</h3><p>${room.activePet?escapeHtml(this.petName(this.state.catalog.pets.find((pet)=>pet.id===room.activePet.speciesId)!,room.activePet.stage)):this.locale==='zh-HK'?'尚未孵化':'No pet yet'}</p></div><button data-action="visit-room" data-id="${room.ownerStudentId}">${this.t('visitRoom')}</button></article>`).join(''):`<div class="empty-state">${this.locale==='zh-HK'?'暫時沒有同學開放房間。':'No classmates have opened their rooms yet.'}</div>`}</div></div>`;}
+  private async renderVisits(){this.setLayout('full');document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">CLASS VISITS</p><h1>${this.t('visit')}</h1><div class="loading-card">${this.locale==='zh-HK'?'正在尋找開放房間…':'Finding open rooms…'}</div></div>`;const data=await api.classRooms();document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">${escapeHtml(data.className||'CLASS')}</p><h1>${this.t('visit')}</h1><div class="visit-grid">${data.rooms.length?data.rooms.map((room:any)=>`<article class="visit-card"><div class="avatar-letter">${escapeHtml(room.ownerName).slice(0,1)}</div><div><h3>${escapeHtml(room.ownerName)}</h3><p>${room.activePet?escapeHtml(this.petName(this.state.catalog.pets.find((pet)=>pet.id===room.activePet.speciesId)!,displayPetStage(room.activePet.stage))):this.locale==='zh-HK'?'尚未孵化':'No pet yet'}</p></div><button data-action="visit-room" data-id="${room.ownerStudentId}">${this.t('visitRoom')}</button></article>`).join(''):`<div class="empty-state">${this.locale==='zh-HK'?'暫時沒有同學開放房間。':'No classmates have opened their rooms yet.'}</div>`}</div></div>`;}
   private async visitRoom(studentId:string){const data=await api.room(studentId);this.visiting=data.room;this.setLayout('room');if(data.room.activePet)this.startBedroom(data.room,data.room.activePet);document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-identity visitor-panel"><p class="eyebrow">VISITING</p><h1>${escapeHtml(data.room.ownerName)}</h1><p>${this.locale==='zh-HK'?'只可觀看和送出每日一個表情；沒有留言或聊天。':'View the room and send one daily reaction. There are no messages or chat.'}</p><div class="reaction-row">${this.state.catalog.reactions.map((reaction,index)=>`<button data-action="reaction" data-owner="${studentId}" data-id="${reaction}"><span>${['♥','★','!','👏','✿','✦'][index]}</span><small>${data.room.reactions?.[reaction]||0}</small></button>`).join('')}</div><button class="secondary" data-action="back-home">${this.t('back')}</button></div>`;}
   private async react(owner:string,reaction:string){const result=await api.react(owner,reaction);audio.sfx('reaction');this.celebrate('reaction');document.querySelectorAll('[data-action="reaction"]').forEach((button)=>{const id=(button as HTMLElement).dataset.id!;button.querySelector('small')!.textContent=String(result.reactions[id]||0);});}
   /** Put a piece on. Anything already in that slot comes off, since a slot holds one thing. */

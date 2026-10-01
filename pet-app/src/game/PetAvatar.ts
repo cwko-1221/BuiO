@@ -4,6 +4,7 @@ import type {
   RedrawnWearableAtlas, WearableDefinition,
 } from '../types';
 import { SLOT_LAYOUT, UNMEASURED, placeWearable, type SlotLayout } from './wearableLayout';
+import { petForDisplay } from './petDisplay';
 
 /** Unpack a base64 motion track into signed bytes. Four per atlas cell, or nothing if absent. */
 function decodeMotion(encoded?: string | null) {
@@ -311,6 +312,10 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     } = {},
   ) {
     super(scene, x, y);
+    // Keep this guard at the renderer boundary as well as in BedroomScene. Any future scene that
+    // constructs an avatar directly will still use the temporary Stage 1 art-release gate.
+    const displayPet = petForDisplay(pet);
+    const stage = displayPet.stage;
     const { layout, fallbackTexture, scale = 1, wearables, ambient, outfitAtlases, redrawnWearables } = options;
     this.ambient = ambient;
     this.layout = layout;
@@ -320,44 +325,44 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     this.shadow = scene.add.ellipse(0, 30, 112, 30, 0x263547, 0.18);
     this.add(this.shadow);
 
-    const outfitUrl = PetAvatar.fullOutfitUrl(definition, pet.stage, pet.equippedWearables, outfitAtlases);
+    const outfitUrl = PetAvatar.fullOutfitUrl(definition, stage, displayPet.equippedWearables, outfitAtlases);
     const outfitKey = outfitUrl
-      ? PetAvatar.fullOutfitKey(definition, pet.stage, pet.equippedWearables)
+      ? PetAvatar.fullOutfitKey(definition, stage, displayPet.equippedWearables)
       : undefined;
-    const registeredAuraIds = (pet.equippedWearables ?? []).filter((id) => (
-      id.startsWith('aura-') && Boolean(redrawnWearables?.[`${definition.id}:${pet.stage}:${id}`])
+    const registeredAuraIds = (displayPet.equippedWearables ?? []).filter((id) => (
+      id.startsWith('aura-') && Boolean(redrawnWearables?.[`${definition.id}:${stage}:${id}`])
     ));
     // Complete physical outfits never contain an aura. If an aura has an exact redraw, compose
     // it over that complete outfit as the base; otherwise retain the existing complete outfit
     // path and let only unregistered auras use their compatibility art.
-    const redrawnIds = outfitUrl ? registeredAuraIds : pet.equippedWearables;
+    const redrawnIds = outfitUrl ? registeredAuraIds : displayPet.equippedWearables;
     const redrawnKey = layout && (!outfitUrl || registeredAuraIds.length)
       ? PetAvatar.composeRedrawnAtlas(
-        scene, definition, pet.stage, redrawnIds, layout, redrawnWearables, outfitKey,
+        scene, definition, stage, redrawnIds, layout, redrawnWearables, outfitKey,
       )
       : undefined;
     const key = outfitUrl
       ? redrawnKey ?? outfitKey!
-      : redrawnKey ?? PetAvatar.atlasKey(definition, pet.stage);
+      : redrawnKey ?? PetAvatar.atlasKey(definition, stage);
     if (layout && scene.textures.exists(key)) {
       this.fullOutfit = Boolean(outfitUrl);
       this.textureKey = key;
       // Animation keys include the texture identity. A nude and a dressed sheet use the same
       // frame numbers but must never share cached Phaser animations backed by different art.
       this.animationPrefix = key;
-      this.registerAnimations(definition, pet.stage, layout);
+      this.registerAnimations(definition, stage, layout);
       this.sprite = scene.add.sprite(0, 0, key, 0).setOrigin(0.5, FOOT_ORIGIN);
       // Atlas cells are authored small so the sheets stay manageable; scale to stage presence.
-      this.sprite.setScale((250 / layout.frameHeight) * (1 + (pet.stage - 1) * 0.06));
+      this.sprite.setScale((250 / layout.frameHeight) * (1 + (stage - 1) * 0.06));
       if (ambient !== undefined) this.sprite.setTint(ambient);
       this.add(this.sprite);
     } else {
       this.staticArt = fallbackTexture && scene.textures.exists(fallbackTexture)
         ? scene.add.image(0, 0, fallbackTexture).setOrigin(0.5, 0.82)
-        : this.fallbackBody(definition, pet.stage);
+        : this.fallbackBody(definition, stage);
       if (this.staticArt instanceof Phaser.GameObjects.Image) {
         const max = Math.max(this.staticArt.width, this.staticArt.height);
-        this.staticArt.setScale((230 / Math.max(1, max)) * (1 + (pet.stage - 1) * 0.08));
+        this.staticArt.setScale((230 / Math.max(1, max)) * (1 + (stage - 1) * 0.08));
       }
       this.add(this.staticArt);
     }
@@ -370,15 +375,15 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     const legacyIds = this.fullOutfit
       ? PetAvatar.legacyWearableIds(
         definition,
-        pet.stage,
-        pet.equippedWearables.filter((id) => id.startsWith('aura-')),
+        stage,
+        displayPet.equippedWearables.filter((id) => id.startsWith('aura-')),
         wearables,
         redrawnWearables,
       )
       : PetAvatar.legacyWearableIds(
-        definition, pet.stage, pet.equippedWearables, wearables, redrawnWearables,
+        definition, stage, displayPet.equippedWearables, wearables, redrawnWearables,
       );
-    this.addWearables(legacyIds, definition, pet.stage, wearables);
+    this.addWearables(legacyIds, definition, stage, wearables);
     scene.add.existing(this);
     this.play('idle');
   }

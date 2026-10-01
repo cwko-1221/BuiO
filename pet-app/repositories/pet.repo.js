@@ -24,6 +24,9 @@ const COIN_PUSHER_REWARD_MAX = 100;
 const COIN_PUSHER_PAYOUT_EVENT_MAX = 20;
 const COIN_PUSHER_PAYOUT_CAP = 100;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+// Evolution data remains authoritative in PetInstances. This value only gates artwork returned
+// to visual consumers while the later-stage art release is paused.
+const PET_DISPLAY_STAGE = 1;
 
 let schemaPromise;
 async function ensureSchema() {
@@ -920,15 +923,16 @@ async function activePetLooks(studentIds) {
     const activeId = profiles.find((row) => row.studentId === studentId)?.activePetId;
     const pet = mine.find((row) => row.id === activeId) || mine[0];
     const definition = indexes.pets.get(pet.speciesId);
-    const atlas = definition?.atlas?.[pet.stage - 1];
+    const displayStage = PET_DISPLAY_STAGE;
+    const atlas = definition?.atlas?.[displayStage - 1];
     if (!atlas) continue;
     // Only the pieces this species has a fitted redraw for. One without is not drawn at all rather
     // than pinned on at a guess, which is the same rule the pet's own room follows.
     const layers = pet.equippedWearables
-      .map((itemId) => catalog.redrawnWearables[`${pet.speciesId}:${pet.stage}:${itemId}`])
+      .map((itemId) => catalog.redrawnWearables[`${pet.speciesId}:${displayStage}:${itemId}`])
       .filter((entry) => entry?.patch)
       .map((entry) => entry.patch);
-    looks.set(studentId, { speciesId: pet.speciesId, stage: pet.stage, atlas, layers });
+    looks.set(studentId, { speciesId: pet.speciesId, stage: displayStage, atlas, layers });
   }
   return looks;
 }

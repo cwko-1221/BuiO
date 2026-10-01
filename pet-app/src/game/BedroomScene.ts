@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { PetAvatar } from './PetAvatar';
+import { DISPLAY_PET_STAGE, petForDisplay } from './petDisplay';
 import { sizedFootprint, SIZE_STEPS } from '../furniture-size';
 import type { Bootstrap, FurnitureDefinition, PetDefinition, PetFacing, PetInstance, RoomPlacement } from '../types';
 
@@ -207,11 +208,12 @@ export class BedroomScene extends Phaser.Scene {
     if (room && !this.textures.exists(this.roomTextureKey)) this.load.image(this.roomTextureKey, room.art);
 
     // Prefer the animated atlas; fall back to the static form art only if it is unavailable.
-    const stage = this.model.activePet.stage;
+    const displayPet = petForDisplay(this.model.activePet);
+    const stage = DISPLAY_PET_STAGE;
     const layout = catalog.animationByPet?.[this.model.petDefinition.id] ?? catalog.animation;
     if (!PetAvatar.preload(
       this, this.model.petDefinition, stage, layout,
-      this.model.activePet.equippedWearables, catalog.outfitAtlases,
+      displayPet.equippedWearables, catalog.outfitAtlases,
     )) {
       this.petTextureKey = `pet:${this.model.petDefinition.id}:${stage}`;
       if (!this.textures.exists(this.petTextureKey)) this.load.image(this.petTextureKey, this.model.petDefinition.art[stage - 1]);
@@ -221,14 +223,14 @@ export class BedroomScene extends Phaser.Scene {
     // around that sheet; unregistered items continue through the compatibility path below.
     if (this.model.petDefinition.animated) {
       PetAvatar.preloadRedrawnWearables(
-        this, this.model.petDefinition, stage, this.model.activePet.equippedWearables,
+        this, this.model.petDefinition, stage, displayPet.equippedWearables,
         catalog.redrawnWearables,
       );
     }
     // Load the established directional artwork as a compatibility path. The avatar filters out
     // items that have an approved redraw (or are already baked into a complete outfit), while
     // keeping every other wardrobe item and all auras available during the redraw rollout.
-    PetAvatar.preloadWearables(this, this.model.activePet.equippedWearables, catalog.wearables);
+    PetAvatar.preloadWearables(this, displayPet.equippedWearables, catalog.wearables);
 
     // Real furniture art, one texture per distinct item actually placed in the room.
     for (const itemId of new Set(this.placements.map((placement) => placement.itemId))) {
@@ -253,7 +255,7 @@ export class BedroomScene extends Phaser.Scene {
     const home = this.petCentre(this.petSpot);
     const layout = this.model.bootstrap.catalog.animationByPet?.[this.model.petDefinition.id]
       ?? this.model.bootstrap.catalog.animation;
-    this.avatar = new PetAvatar(this, home.x, home.y, this.model.petDefinition, this.model.activePet, {
+    this.avatar = new PetAvatar(this, home.x, home.y, this.model.petDefinition, petForDisplay(this.model.activePet), {
       layout,
       fallbackTexture: this.petTextureKey && this.textures.exists(this.petTextureKey) ? this.petTextureKey : undefined,
       scale: PET_SCALE * this.depthScale(this.petSpot.y),
