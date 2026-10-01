@@ -37,7 +37,8 @@ const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>'"]/g, (
 const icon = (name: string) => `<span class="icon icon-${name}" aria-hidden="true"></span>`;
 const MYSTERY_PET_IDS = new Set([
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
-  'doraemon', 'hello-kitty', 'argentina-number-10', 'portugal-number-7',
+  'doraemon', 'hello-kitty', 'argentina-number-10', 'portugal-number-7', 'pikachu',
+  'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
 ]);
 const COIN_PUSHER_DROP_COST = 1;
 type CoinPusherRewardOrigin = { x: number; y: number };

@@ -246,6 +246,12 @@ const PET_LIBRARY = [
   ['hello-kitty','epic','light',['Hello Kitty','Hello Kitty','Hello Kitty','Hello Kitty'],['Hello Kitty','Hello Kitty','Hello Kitty','Hello Kitty'],'友情蝴蝶結','Friendship Bow','#ed3348','hello-kitty',9999],
   ['argentina-number-10','epic','football',['阿根廷10號','阿根廷10號','阿根廷10號','阿根廷10號'],['Argentina No. 10','Argentina No. 10','Argentina No. 10','Argentina No. 10'],'黃金左腳','Golden Left Foot','#74b9e6','football-star',9999],
   ['portugal-number-7','epic','football',['葡萄牙7號','葡萄牙7號','葡萄牙7號','葡萄牙7號'],['Portugal No. 7','Portugal No. 7','Portugal No. 7','Portugal No. 7'],'飛翼射手','Wing Striker','#bd252b','football-star',9999],
+  ['pikachu','epic','electric',['比卡超','比卡超','比卡超','比卡超'],['Pikachu','Pikachu','Pikachu','Pikachu'],'十萬伏特','Thunderbolt','#f6cd3e','pikachu',9999],
+  ['dragon-ball-frieza','epic','cosmic',['弗利沙','弗利沙','弗利沙','弗利沙'],['Frieza','Frieza','Frieza','Frieza'],'宇宙帝王','Galactic Emperor','#9861d8','frieza',9999],
+  ['one-piece-luffy','epic','adventure',['路飛','路飛','路飛','路飛'],['Monkey D. Luffy','Monkey D. Luffy','Monkey D. Luffy','Monkey D. Luffy'],'草帽船長','Straw Hat Captain','#e2443e','luffy',9999],
+  ['spy-family-anya','epic','psychic',['安妮亞','安妮亞','安妮亞','安妮亞'],['Anya Forger','Anya Forger','Anya Forger','Anya Forger'],'讀心小星星','Little Telepath','#ef9fb2','anya',9999],
+  ['one-punch-saitama','epic','hero',['埼玉','埼玉','埼玉','埼玉'],['Saitama','Saitama','Saitama','Saitama'],'一拳超人','One Punch Man','#eccb39','saitama',9999],
+  ['naruto-uzumaki','epic','ninja',['漩渦鳴人','漩渦鳴人','漩渦鳴人','漩渦鳴人'],['Naruto Uzumaki','Naruto Uzumaki','Naruto Uzumaki','Naruto Uzumaki'],'木葉忍者','Leaf Ninja','#f39331','naruto',9999],
 ].map(([id, rarity, element, namesZh, namesEn, talentZh, talentEn, color, body, directPrice]) => ({
   id, rarity, element, names: { 'zh-HK': namesZh, 'en-US': namesEn },
   talent: { 'zh-HK': talentZh, 'en-US': talentEn }, color, body,
@@ -273,7 +279,8 @@ const RELEASED_PET_IDS = new Set([
   'starpatch-cat', 'cloud-ear-dog', 'pudding-pig', 'crescent-rabbit', 'spark-hamster',
   'mossback-turtle', 'leaftail-fox', 'thunderhorn-goat', 'bubble-otter', 'snowfeather-penguin', 'coral-seal',
   'golden-retriever-dog', 'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
-  'doraemon', 'hello-kitty', 'argentina-number-10', 'portugal-number-7',
+  'doraemon', 'hello-kitty', 'argentina-number-10', 'portugal-number-7', 'pikachu',
+  'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
 ]);
 const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
 

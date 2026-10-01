@@ -11,8 +11,14 @@ import sharp from 'sharp';
 
 const PET_IDS = [
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
-  'doraemon', 'hello-kitty', 'argentina-number-10', 'portugal-number-7',
+  'doraemon', 'hello-kitty', 'argentina-number-10', 'portugal-number-7', 'pikachu',
+  'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
 ];
+const selectedPet = process.argv.find((arg) => arg.startsWith('--pet='))?.slice(6);
+const selectedPets = process.argv.find((arg) => arg.startsWith('--pets='))?.slice(7).split(',');
+const RUN_PET_IDS = selectedPets || (selectedPet ? [selectedPet] : PET_IDS);
+assert(RUN_PET_IDS.length && RUN_PET_IDS.every(id=>PET_IDS.includes(id)), 'Unknown premium character selection');
+const NEW_PET_IDS = new Set(['pikachu','dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki']);
 const reservePort = () => new Promise((resolve, reject) => {
   const socket = net.createServer(); socket.once('error', reject);
   socket.listen(0, '127.0.0.1', () => {
@@ -44,7 +50,7 @@ process.env.BUIO_JSON_DB_FILE = databaseFile;
 process.env.SUPABASE_DB_URL = '';
 const require = createRequire(import.meta.url);
 const repo = require('../pet-app/repositories/pet.repo.js');
-for (let index = 0; index < PET_IDS.length; index += 1) {
+for (let index = 0; index < RUN_PET_IDS.length; index += 1) {
   await repo.grantCoins('T001', ['S001'], 9999, {
     note: 'premium atlas live QA', idempotencyKey: `premium-atlas-grant-${index}`,
   });
@@ -83,7 +89,7 @@ try {
   await page.addInitScript(() => localStorage.setItem('pet-reduced-motion', '0'));
   const report = { fps: 10, pets: {}, errors };
 
-  for (const petId of PET_IDS) {
+  for (const petId of RUN_PET_IDS) {
     await page.goto('/pet/preview', { waitUntil: 'networkidle' });
     const prepared = await page.evaluate(async (speciesId) => {
       const request = async (url, options = {}) => {
@@ -107,6 +113,9 @@ try {
         pet = result.pet;
       }
       await request(`/api/pet/pets/${encodeURIComponent(pet.id)}/activate`, { method: 'POST', body: '{}' });
+      // Empty only this disposable QA room so furniture cannot hide a gait or missing foot.
+      await request('/api/pet/room', { method:'PUT',
+        body:JSON.stringify({themeId:state.room.themeId,visibility:'private',placements:[]}) });
       return { petId: pet.id };
     }, petId);
 
@@ -128,6 +137,7 @@ try {
       { facing: 'right', target: { x: 11.5, y: 6.8 } },
       { facing: 'back', target: { x: 7, y: 3.2 } },
     ];
+    if (NEW_PET_IDS.has(petId)) runs.push({ facing: 'left', target: { x: 2.5, y: 6.8 } });
     for (const run of runs) {
       await page.evaluate(({ target }) => {
         const scene = window.__petGame.scene.getScene('Bedroom');
@@ -138,32 +148,59 @@ try {
         return avatar?.current === 'walk' && avatar?.facing === facing;
       }, run.facing, { timeout: 5000 });
       const sampling = page.evaluate(async () => new Promise((resolve) => {
-        const values = []; const began = performance.now(); let idleSince = 0;
+        const values = [], captures = new Map(); const began = performance.now(); let idleSince = 0;
+        const scene = window.__petGame.scene.getScene('Bedroom');
+        function capture() {
+          const avatar = scene.avatar, sprite = avatar.sprite, frame = Number(sprite.frame.name);
+          if (avatar.current !== 'walk' || captures.has(frame)) return;
+          const bounds = sprite.getBounds(), camera = scene.cameras.main;
+          const crop = document.createElement('canvas');
+          crop.width = Math.ceil(bounds.width + 8); crop.height = Math.ceil(bounds.height + 8);
+          crop.getContext('2d').drawImage(scene.game.canvas,
+            bounds.x-camera.scrollX-4, bounds.y-camera.scrollY-4,
+            crop.width,crop.height,0,0,crop.width,crop.height);
+          captures.set(frame,{frame,png:crop.toDataURL('image/png')});
+        }
+        scene.game.events.on('postrender',capture);
         const timer = setInterval(() => {
           const avatar = window.__petGame.scene.getScene('Bedroom').avatar;
           values.push({ at: Math.round(performance.now() - began), frame: Number(avatar.sprite.frame.name),
             x: Number(avatar.x.toFixed(2)), y: Number(avatar.y.toFixed(2)),
-            facing: avatar.facing, action: avatar.current });
+            facing: avatar.facing, action: avatar.current, flipX: avatar.sprite.flipX });
           if (avatar.current === 'idle') idleSince ||= performance.now(); else idleSince = 0;
           if ((idleSince && performance.now() - idleSince >= 450) || performance.now() - began >= 4500) {
-            clearInterval(timer); resolve(values);
+            clearInterval(timer); scene.game.events.off('postrender',capture);
+            resolve({values,captures:[...captures.values()]});
           }
         }, 30);
       }));
       await page.waitForTimeout(360);
       await page.locator('.room-stage').screenshot({ path: path.join(artifactDir, `${petId}-${run.facing}-walk.png`) });
-      const samples = await sampling;
+      const { values: samples, captures: walkCaptures } = await sampling;
       const frames = [...new Set(samples.filter((sample) => sample.action === 'walk').map((sample) => sample.frame))];
       const moving = samples.filter((sample) => sample.action === 'walk');
       assert.equal(frames.length, 8, `${petId} ${run.facing} played ${frames.length}/8 frames: ${frames}`);
       assert.ok(moving.every((sample) => sample.facing === run.facing), `${petId} changed facing mid-run`);
+      assert.ok(moving.every((sample) => sample.flipX === (run.facing === 'left')),
+        `${petId} ${run.facing} uses the wrong sprite flip`);
       const stopped = samples.filter((sample) => sample.action === 'idle');
       assert.ok(stopped.length >= 4, `${petId} ${run.facing} did not settle into idle`);
       assert.ok(stopped.every((sample) => sample.frame >= 24 && sample.frame <= 31),
         `${petId} ${run.facing} settled outside its idle cycle`);
       assert.equal(new Set(stopped.map((sample) => `${sample.x}:${sample.y}`)).size, 1,
         `${petId} moves after stopping`);
-      petReport.directions[run.facing] = { frames, samples };
+      assert.equal(walkCaptures.length,8,`${petId} ${run.facing}: missing rendered walk evidence`);
+      walkCaptures.sort((a,b)=>a.frame-b.frame);
+      const walkTiles=[];
+      for(const capture of walkCaptures) {
+        const png=Buffer.from(capture.png.split(',')[1],'base64');
+        await fs.writeFile(path.join(artifactDir,`${petId}-${run.facing}-frame-${capture.frame}.png`),png);
+        walkTiles.push(await sharp(png).resize(240,280,{fit:'contain',background:'#edf2f7'}).png().toBuffer());
+      }
+      await sharp({create:{width:960,height:560,channels:4,background:'#edf2f7'}})
+        .composite(walkTiles.map((input,i)=>({input,left:(i%4)*240,top:Math.floor(i/4)*280})))
+        .png().toFile(path.join(artifactDir,`${petId}-${run.facing}-all-frames.png`));
+      petReport.directions[run.facing] = { frames, samples, capturedFrames:walkCaptures.map(c=>c.frame) };
     }
 
     petReport.idle = await page.evaluate(async () => new Promise((resolve) => {
@@ -183,7 +220,7 @@ try {
     assert.equal(new Set(petReport.idle.map((sample) => sample.scale)).size, 1,
       `${petId} sprite scale changes during idle`);
 
-    if (petId === 'argentina-number-10') {
+    if (petId === 'argentina-number-10' || NEW_PET_IDS.has(petId)) {
       // Capture actual animation frames, not setFrame() approximations. Freeze only once
       // Phaser has naturally reached the requested frame, so short blink phases are visible.
       const captures = [];
@@ -219,7 +256,7 @@ try {
         await page.evaluate(() => window.__petGame.scene.getScene('Bedroom').avatar.sprite.anims.resume());
       }
       assert.equal(new Set(petReport.idleFrameCaptures.map((s) => `${s.x}:${s.y}:${s.scale}`)).size, 1,
-        'Argentina changes position or scale between captured idle frames');
+        `${petId} changes position or scale between captured idle frames`);
       await sharp({ create: { width: 960, height: 560, channels: 4, background: '#edf2f7' } })
         .composite(captures.map((input, i) => ({ input, left: (i % 4) * 240, top: Math.floor(i / 4) * 280 })))
         .png().toFile(path.join(artifactDir, `${petId}-idle-all-frames.png`));
@@ -233,7 +270,7 @@ try {
     await page.locator('.room-stage').screenshot({ path: path.join(artifactDir, `${petId}-rest.png`) });
     petReport.rest = { action: 'sleep', frame: 34 };
     report.pets[petId] = petReport;
-    console.log(`✓ ${petId}: front/right/back 8-frame walk, fixed idle position, rest frame 34`);
+    console.log(`✓ ${petId}: ${Object.keys(petReport.directions).join('/')} 8-frame walk, fixed idle position, rest frame 34`);
   }
 
   await page.locator('[data-tab="shop"]').first().click();
@@ -253,6 +290,7 @@ try {
     assert.equal(card.mystery, true, `${card.petId} shop card lacks mystery styling`);
     assert.equal(card.title, '???', `${card.petId} leaks its name in the shop`);
     assert.notEqual(card.filter, 'none', `${card.petId} shop art is not a silhouette`);
+    assert.match(card.filter,/brightness\(0\)/,`${card.petId} shop silhouette is not black`);
   }
   const normalCard = await page.evaluate(() => {
     const button = document.querySelector('[data-action="buy-direct-egg"][data-id="starpatch-cat"]');
@@ -285,6 +323,7 @@ try {
     assert.equal(card.mystery, true, `${card.petId} collection card lacks mystery styling`);
     assert.equal(card.title, '???', `${card.petId} leaks its name in the collection`);
     assert.notEqual(card.filter, 'none', `${card.petId} collection art is not a silhouette`);
+    assert.match(card.filter,/brightness\(0\)/,`${card.petId} collection silhouette is not black`);
   }
   const normalCollectionCard = await page.evaluate(() => {
     const card = document.querySelector('.pet-card[data-species-id="starpatch-cat"]');
@@ -301,7 +340,7 @@ try {
   console.log(`✓ collection hides all ${PET_IDS.length} special characters as black silhouettes named ???`);
 
   assert.deepEqual(errors, [], `browser errors: ${errors.join('\n')}`);
-  await fs.writeFile(path.join(artifactDir, 'report.json'), JSON.stringify(report, null, 2));
+  await fs.writeFile(path.join(artifactDir, selectedPet ? `report-${selectedPet}.json` : 'report.json'), JSON.stringify(report, null, 2));
   await context.close();
   console.log(`\nPremium character live playtest passed. Evidence: ${artifactDir}`);
 } catch (error) {

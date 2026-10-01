@@ -26,8 +26,11 @@ const store = require('../db/jsonStore.js');
 const pass = (label) => console.log(`✓ ${label}`);
 const PREMIUM_PET_IDS = [
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan', 'doraemon',
-  'hello-kitty', 'argentina-number-10', 'portugal-number-7',
+  'hello-kitty', 'argentina-number-10', 'portugal-number-7', 'pikachu',
+  'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
 ];
+const FIXED_RIG_PET_IDS = new Set(['pikachu','dragon-ball-frieza','one-piece-luffy',
+  'spy-family-anya','one-punch-saitama','naruto-uzumaki']);
 const EXPECTED_PET_IDS = [
   'starpatch-cat', 'cloud-ear-dog', 'golden-retriever-dog', 'pudding-pig',
   'crescent-rabbit', 'bubble-otter', 'mossback-turtle', 'spark-hamster',
@@ -182,7 +185,7 @@ for(const petId of PREMIUM_PET_IDS) {
     idleHashes.add(createHash('sha256').update(data).digest('hex'));
     // Equal total heights alone can hide a truncated pose that was enlarged afterwards.
     // Argentina's old row split removed the boots from 24-27 but still passed that check.
-    if(petId==='argentina-number-10') {
+    if(petId==='argentina-number-10' || FIXED_RIG_PET_IDS.has(petId)) {
       let bootArea=0,bootWidth=0,headWidth=0;
       for(let y=top;y<=bottom;y+=1) {
         let rowWidth=0;
@@ -197,13 +200,13 @@ for(const petId of PREMIUM_PET_IDS) {
   assert.ok(Math.max(...idleCentres)-Math.min(...idleCentres)<4,`${petId} idle sways sideways`);
   assert.equal(Math.max(...idleBottoms)-Math.min(...idleBottoms),0,`${petId} idle feet move vertically`);
   assert.ok(Math.max(...idleHeights)-Math.min(...idleHeights)<=3,`${petId} idle changes character scale`);
-  if(petId==='argentina-number-10') {
+  if(petId==='argentina-number-10' || FIXED_RIG_PET_IDS.has(petId)) {
     assert.ok(Math.max(...idleBootAreas)/Math.min(...idleBootAreas)<=1.2,
-      `Argentina idle loses boot pixels between frames: ${idleBootAreas}`);
+      `${petId} idle loses boot pixels between frames: ${idleBootAreas}`);
     assert.ok(Math.max(...idleBootWidths)-Math.min(...idleBootWidths)<=3,
-      `Argentina idle changes footwear silhouette: ${idleBootWidths}`);
+      `${petId} idle changes footwear silhouette: ${idleBootWidths}`);
     assert.ok(Math.max(...idleHeadWidths)-Math.min(...idleHeadWidths)<=2,
-      `Argentina idle changes head/body proportions: ${idleHeadWidths}`);
+      `${petId} idle changes head/body proportions: ${idleHeadWidths}`);
   }
 }
 pass('premium eight-phase walks and idle cycles preserve clearance, gait and locked baselines');
@@ -303,6 +306,14 @@ const nezuko=await repo.purchaseEgg('S004',{kind:'direct',speciesId:'nezuko-kama
 assert.equal(nezuko.rarity,'epic'); assert.equal(nezuko.balance,0); assert.ok(nezuko.pet);
 await assert.rejects(()=>repo.setOutfit('S004',nezuko.pet.id,['head-03']),/cannot wear outfits yet/);
 pass('starter egg, special direct-purchase price and closed Nezuko outfit system');
+for(const petId of FIXED_RIG_PET_IDS) {
+  await repo.grantCoins('T001',['S004'],9999,{note:'隱藏角色測試',idempotencyKey:`hidden-grant-${petId}`});
+  const result=await repo.purchaseEgg('S004',{kind:'direct',speciesId:petId,idempotencyKey:`hidden-buy-${petId}`});
+  assert.equal(result.pet.speciesId,petId);
+  assert.equal(result.balance,0,`${petId} did not charge exactly 9999`);
+  await assert.rejects(()=>repo.setOutfit('S004',result.pet.id,['head-03']),/cannot wear outfits yet/);
+}
+pass('six hidden characters purchase for 9999 and reject outfits through the real repository');
 
 const draws=[];
 for(let index=0;index<10;index+=1) draws.push(await repo.purchaseEgg('S002',{kind:'random',idempotencyKey:`release-draw-${index}`,random:()=>.99}));
