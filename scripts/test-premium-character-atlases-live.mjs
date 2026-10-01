@@ -8,6 +8,7 @@ import { createRequire } from 'node:module';
 import bcrypt from 'bcryptjs';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
+import crypto from 'node:crypto';
 
 const PET_IDS = [
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
@@ -88,6 +89,20 @@ try {
   });
   await page.addInitScript(() => localStorage.setItem('pet-reduced-motion', '0'));
   const report = { fps: 10, pets: {}, errors };
+  report.servedAssetHashes = {};
+  const {catalog}=require('../pet-app/lib/catalog.js');
+  for(const id of RUN_PET_IDS){
+    const pet=catalog.pets.find(p=>p.id===id);report.servedAssetHashes[id]=[];
+    for(const url of [...pet.atlas,...pet.art]){
+      const relative=url.split('?')[0].replace('/pet/','');
+      const expected=await fs.readFile(path.join(servedDist,relative));
+      const response=await fetch(baseURL+url);assert(response.ok,'Missing served character asset '+url);
+      const bytes=Buffer.from(await response.arrayBuffer());
+      const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+      assert.equal(sha(bytes),sha(expected),'Live server served stale character art');
+      report.servedAssetHashes[id].push({url,hash:sha(bytes)});
+    }
+  }
 
   for (const petId of RUN_PET_IDS) {
     await page.goto('/pet/preview', { waitUntil: 'networkidle' });

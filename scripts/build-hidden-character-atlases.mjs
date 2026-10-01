@@ -7,7 +7,10 @@ import { HIDDEN_CHARACTERS, renderHiddenCharacter } from './pet-art/hidden-chara
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const CELL = 512, WALK_BASELINES = [475,478,475,472,475,478,475,472];
-const selected = process.argv.find(a=>a.startsWith('--pet='))?.slice(6);
+// Only the previously shipped Pikachu remains in this legacy native-rig pipeline.
+// Generated raster characters must never be silently overwritten by vector artwork.
+const selected = process.argv.find(a=>a.startsWith('--pet='))?.slice(6) ?? 'pikachu';
+assert.equal(selected, 'pikachu', 'Use build-generated-hidden-character-atlases.mjs for the five raster characters');
 assert(!selected || HIDDEN_CHARACTERS.some(c=>c.id===selected), 'Unknown character');
 const characters = HIDDEN_CHARACTERS.filter(c=>!selected || c.id===selected);
 const empty = (w,h,bg='#00000000') => sharp({create:{width:w,height:h,channels:4,background:bg}});
