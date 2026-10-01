@@ -1,6 +1,8 @@
-type SoundName = 'tap' | 'buy' | 'coin' | 'arcadeDrop' | 'arcadeLand' | 'arcadeRattle' | 'arcadeTiming' | 'arcadePayout' | 'arcadeKeepsake' | 'arcadeStroke' | 'hatch' | 'evolve' | 'feed' | 'happy' | 'step' | 'attack' | 'skill' | 'hurt' | 'win' | 'lose' | 'decorate' | 'reaction';
+type SoundName = 'brawlBlock' | 'brawlHeavy' | 'brawlWarning' | 'tap' | 'buy' | 'coin' | 'arcadeDrop' | 'arcadeLand' | 'arcadeRattle' | 'arcadeTiming' | 'arcadePayout' | 'arcadeKeepsake' | 'arcadeStroke' | 'hatch' | 'evolve' | 'feed' | 'happy' | 'step' | 'attack' | 'skill' | 'hurt' | 'win' | 'lose' | 'decorate' | 'reaction';
 
+import {brawlSound} from '../lib/brawl/sound.mjs';
 const THEMES: Record<string, { tempo: number; root: number; scale: number[]; pattern: number[] }> = {
+  brawl: { tempo: 118, root: 55, scale: [0,2,3,7,9], pattern: [0,0,3,2,4,3,2,1] },
   bedroom: { tempo: 92, root: 60, scale: [0,2,4,7,9], pattern: [0,2,4,2,1,3,4,3] },
   shop: { tempo: 116, root: 65, scale: [0,2,4,7,9], pattern: [0,1,2,4,3,2,1,3] },
   arcade: { tempo: 128, root: 72, scale: [0,2,4,7,9], pattern: [0,4,2,3,4,2,1,3] },
@@ -14,6 +16,9 @@ export class AudioEngine {
   private timer = 0;
   private step = 0;
   private theme = 'bedroom';
+  private brawlBuffers=new Map<string,AudioBuffer>();
+  private brawlVoices=0;
+  brawlSoundsPlayed=0;
   enabled = localStorage.getItem('pet-audio-muted') !== '1';
   musicLevel = Number(localStorage.getItem('pet-music-level') ?? .36);
   sfxLevel = Number(localStorage.getItem('pet-sfx-level') ?? .58);
@@ -85,6 +90,16 @@ export class AudioEngine {
   }
 
   setTheme(theme: string) { this.theme = THEMES[theme] ? theme : 'bedroom'; this.step = 0; }
+  brawl(cue:string,pan=0,level=1){
+    const context=this.context,destination=this.sfxGain;
+    if(!context||!destination||context.state!=='running'||!this.enabled||this.isDocumentHidden()||this.brawlVoices>=24)return;
+    let buffer=this.brawlBuffers.get(cue);
+    if(!buffer){const samples=brawlSound(cue,context.sampleRate);buffer=context.createBuffer(1,samples.length,context.sampleRate);buffer.copyToChannel(samples as Float32Array<ArrayBuffer>,0);this.brawlBuffers.set(cue,buffer);}
+    const source=context.createBufferSource(),gain=context.createGain(),panner=context.createStereoPanner();source.buffer=buffer;
+    gain.gain.value=Math.max(0,Math.min(.85,level*.55));panner.pan.value=Math.max(-.7,Math.min(.7,pan));
+    source.connect(gain).connect(panner).connect(destination);this.brawlVoices++;this.brawlSoundsPlayed++;
+    source.onended=()=>{this.brawlVoices--;source.disconnect();gain.disconnect();panner.disconnect();};source.start();
+  }
   private startLoop() {
     if (!this.context || !this.enabled || this.musicLevel <= 0 || this.isDocumentHidden()) return;
     const tick = () => {
@@ -97,6 +112,12 @@ export class AudioEngine {
       this.tone(440 * Math.pow(2, (midi - 69) / 12), duration * .82, 'triangle', .08, this.music);
       if (this.step % 4 === 0) this.tone(440 * Math.pow(2, (theme.root - 24 - 69) / 12), duration * 1.8, 'sine', .06, this.music);
       if (this.step % 2 === 0) this.noise(.025, .025, this.music);
+      if(this.theme==='brawl'){
+        if(this.step%4===0)this.tone(62,.15,'sine',.22,this.music);
+        if(this.step%4===2)this.noise(.09,.075,this.music);
+        this.noise(.018,.026,this.music);
+        if(this.step%8===0)for(const offset of [0,3,7])this.tone(440*Math.pow(2,(theme.root+offset-69)/12),duration*5,'triangle',.035,this.music);
+      }
       this.step += 1;
       this.timer = window.setTimeout(tick, duration * 1000);
     };
@@ -187,6 +208,7 @@ export class AudioEngine {
       ? 1 + timingRise * .018
       : 1 + ((voice % 7) - 3) * .035;
     const notes: Partial<Record<SoundName, number[]>> = {
+      brawlBlock:[350,720],brawlHeavy:[145,100,65],brawlWarning:[660,880,660],
       tap: [540], buy: [420,620,840], coin: [820,1080], arcadeDrop: [220,440,660], arcadeLand: [880,1320], arcadeRattle: [659,988], arcadeTiming: [1175,1568], arcadePayout: [659,784,988,1318], arcadeKeepsake: [784,988,1175,1568], hatch: [280,420,620,920], evolve: [330,440,660,880,1180],
       feed: [380,520], happy: [620,820,980], step: [160], attack: [240,180], skill: [420,680], hurt: [180,130],
       win: [440,554,660,880], lose: [330,260,196], decorate: [360,540], reaction: [620,780,1040],

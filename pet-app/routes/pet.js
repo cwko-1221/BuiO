@@ -11,6 +11,7 @@ const users = require('../../math-app/repositories/users.repo');
 const { requireAuth, requireTeacher } = require('../../math-app/middleware/auth');
 
 const router = express.Router();
+router.use('/brawl', require('./brawl'));
 const mutationKey = (req) => String(req.get('Idempotency-Key') || req.body?.idempotencyKey || '').trim().slice(0, 120);
 const coinPusherMutationKey = (req) => {
   const key = String(req.get('Idempotency-Key') || req.body?.idempotencyKey || '').trim();

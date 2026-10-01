@@ -1,0 +1,6 @@
+import type {StoredBattle} from './types';
+let database:Promise<IDBDatabase>|undefined;
+function open(){return database??=new Promise<IDBDatabase>((resolve,reject)=>{const request=indexedDB.open('buio-pet-brawl',1);request.onupgradeneeded=()=>request.result.createObjectStore('sessions',{keyPath:'studentId'});request.onsuccess=()=>resolve(request.result);request.onerror=()=>{database=undefined;reject(request.error);};});}
+export async function loadBattle(studentId:string):Promise<StoredBattle|undefined>{const db=await open();return new Promise((resolve,reject)=>{const q=db.transaction('sessions').objectStore('sessions').get(studentId);q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error);});}
+export async function saveBattle(value:StoredBattle){const db=await open();return new Promise<void>((resolve,reject)=>{const tx=db.transaction('sessions','readwrite');tx.objectStore('sessions').put(value);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
+export async function clearBattle(studentId:string){const db=await open();return new Promise<void>((resolve,reject)=>{const tx=db.transaction('sessions','readwrite');tx.objectStore('sessions').delete(studentId);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}

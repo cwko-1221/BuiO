@@ -190,6 +190,7 @@ async function updateLanguage(studentId, language) {
 }
 
 async function deleteById(studentId) {
+  await require('../../pet-app/repositories/brawl-duel.repo').cancelForStudent(studentId);
   if (config.db.mode === 'postgres') {
     await getPool().query('DELETE FROM QuestionLogs WHERE StudentID = $1', [studentId]);
     await getPool().query('DELETE FROM StudentStats WHERE StudentID = $1', [studentId]);

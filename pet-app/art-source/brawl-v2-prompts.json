@@ -1,0 +1,33 @@
+{
+  "mode": "built-in image_gen",
+  "date": "2026-10-01",
+  "prompts": [
+    {
+      "name": "Sunny",
+      "prompt": "Production game background, panoramic ORIGINAL 2D side-scrolling belt-scroller arena for a premium cute pet action game, Sunlit Training Grounds. A SINGLE EXTRA WIDE continuous 4:1 panorama, target 4096 by 1024 or widest supported landscape. Hand-painted richly detailed storybook videogame art, warm sunlight, golden meadow and wooden training village, distant mountains and aqueduct, varied giant oak trees, pennants, wooden watchtower, archery targets only at the distant back fence, village gate at far right. The entire lower half is a continuous FLAT unobstructed walkable sandy dirt arena band, viewed from a shallow side angle with ground depth; horizon/back edge at 43% height, arena floor between 46%-80% height. No obstacles in this band. Four distinct stretches flow seamlessly left to right: oak shade, sunny village path, training banners, fortress gateway. Consistent ground baseline and perspective throughout, beautiful atmospheric depth, saturated but tasteful color, sharp painted textures, distant objects lower contrast. Decorated grass/flowers only bottom border and back fence. No characters, no animals, no UI, no words, no watermark. This is shipped game scenery, not a mockup or illustration with a central subject."
+    },
+    {
+      "name": "Forest",
+      "prompt": "Production ORIGINAL game scenery for a premium cute pet 2D belt-scrolling action game. A single continuous EXTRA WIDE horizontal panorama, landscape ratio 3:1, widest possible. Windbell Woods: enchanting deep emerald forest at dusk, enormous trees and layered misty foliage, blue green light shafts, fireflies, hanging tiny wind bells only high up, a distant wooden footbridge, mossy stone ruins and an ancient open tree arch at the far right. A shallow side-angle ground arena: the walkable unobstructed brown mossy dirt trail spans continuously across the entire width, from 49% to 82% of image height. Distant back treeline starts 45% height; small decorative foreground plants ONLY bottom 15%. Keep 49-82% free of tree trunks and obstacles, flat consistent ground baseline. Four distinct scenic stretches smoothly flow from left to right: fern forest, misty blue grove, old bridge, ancient tree gate. Rich hand-painted storybook videogame art, beautiful atmospheric depth, sharp textures and strong readable saturated teal/green colors, substantial lateral environmental variation. No figures, characters, animals, UI, words, watermark or panels. A shippable scrolling background, no central illustration subject."
+    },
+    {
+      "name": "Cave",
+      "prompt": "Create a SINGLE extra-wide panoramic ORIGINAL hand-painted game background, 3:1 horizontal landscape, widest resolution possible, for a premium cute pet 2D side-scrolling belt-scroller action game. Starcrystal Cavern: vast magical underground crystalline hall, deep navy/violet rock, glowing blue/cyan/amethyst crystals, distant underground waterfall, ruined stone arches, at the far right an enormous ancient guardian doorway. Four visually varied stretches seamlessly progress left to right: luminous entrance, crystalline underground lake, ancient columns, guardian hall. Continuous FLAT unobstructed walkable stone arena floor across entire image. Back edge/horizon precisely at 48% height, broad stone floor extends to 82% height, subtle mottled slate with thin blue glowing cracks. Floor must occupy a full one third of the image height, no rocks, pillars or obstacles inside this band. Decorative close crystals ONLY bottom 15% and distant back wall. Shallow side angle, rich depth, exquisite atmospheric painting, sharp videogame textures, vivid luminous color but soft enough to read character action. No characters, figures, UI, words, watermark, split panels or central subject. A beautiful shipped scrolling game level."
+    }
+  ],
+  "originals": [
+    "imagegen/brawl-v2/sunny.png",
+    "imagegen/brawl-v2/forest.png",
+    "imagegen/brawl-v2/cave.png",
+    "imagegen/brawl-v2/effects.png"
+  ],
+  "shippingAssets": {
+    "worlds": {
+      "sunny-training": "/pet/assets/art/brawl/world-sunny-training-2d700535659d.webp",
+      "windbell-forest": "/pet/assets/art/brawl/world-windbell-forest-7fff8f6ba115.webp",
+      "starcrystal-cave": "/pet/assets/art/brawl/world-starcrystal-cave-672014170573.webp"
+    },
+    "effects": "/pet/assets/art/brawl/effects-a43b5661984a.webp"
+  },
+  "effectsPrompt": "brawl-v2-effects-prompt.md"
+}

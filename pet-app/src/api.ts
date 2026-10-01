@@ -1,4 +1,6 @@
 import type { Bootstrap, Identity, RoomPlacement, TeacherGrantNotification } from './types';
+import type { BrawlCatalog, BrawlProgress, BrawlRun, BrawlReceipt } from './brawl/types';
+import type { InputFrame } from '../lib/brawl/simulation.mjs';
 import type { ArcadePrize, ArcadePrizeKind } from './game/ArcadePrizes';
 import type { QuietSession, QuietSettings } from './quiet-room-types';
 
@@ -44,6 +46,12 @@ async function quietRequest<T>(url: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
+  brawlCatalog: () => request<BrawlCatalog>('/api/pet/brawl/catalog'),
+  brawlAccess: (body: {petId:string;fighterId:string;mode:string}) => request<{allowed:boolean}>('/api/pet/brawl/access', {method:'POST',body:JSON.stringify(body)}),
+  brawlProgress: () => request<BrawlProgress>('/api/pet/brawl/progress'),
+  brawlStart: (body: { petId: string; stageId: string; difficulty: string }, key: string) => arcadeRequest<{ run: BrawlRun }>('/api/pet/brawl/runs', { method:'POST', headers:{'Idempotency-Key':key}, body:JSON.stringify(body) }),
+  brawlFinish: (id: string, body: {version:string;inputs:InputFrame[];endTick:number}, key: string) => arcadeRequest<{ receipt: BrawlReceipt }>(`/api/pet/brawl/runs/${encodeURIComponent(id)}/finish`, {method:'POST',headers:{'Idempotency-Key':key},body:JSON.stringify(body)}),
+  brawlAbandon: (id: string) => request<{ run: BrawlRun }>(`/api/pet/brawl/runs/${encodeURIComponent(id)}/abandon`, {method:'POST',body:'{}'}),
   identity: async () => (await request<{ student: Identity }>('/api/auth/me')).student,
   bootstrap: () => request<Bootstrap & { success: true }>('/api/pet/bootstrap'),
   hatch: (key: string) => request<any>('/api/pet/starter-egg/hatch', { method: 'POST', headers: { 'Idempotency-Key': key }, body: '{}' }),

@@ -1,0 +1,8 @@
+import type {Fighter,Stage} from '../../lib/brawl/catalog.mjs';
+import type {BattleOptions,BattleResult,InputFrame} from '../../lib/brawl/simulation.mjs';
+export interface BrawlAssets {fighters:Record<string,{pages:string[];frameWidth?:number;frameHeight?:number;originY?:number;runtime?:'pet';clips:Record<string,{page:number;start:number;count:number;frames?:number[];durations?:number[]}>}>;enemies:{url:string;rows:Record<string,number>};backgrounds:Record<string,string>;worlds?:Record<string,string>;effects?:{url:string;frameSize:number;clips:Record<string,{start:number;count:number}>};frameSize:number}
+export interface BrawlCatalog {enabled:boolean;version:string;fighters:Fighter[];stages:Stage[];assets:BrawlAssets}
+export interface BrawlRun {id:string;petId:string;options:BattleOptions;createdAt:string;expiresAt:string;status:string}
+export interface BrawlProgress {day:string;best:Record<string,{stars:number;seconds:number;clears:number}>;rewardsRemaining:number;activeRun:BrawlRun|null}
+export interface BrawlReceipt extends BattleResult {runId:string;rewards:{coins:number;xp:number};rewardsRemaining:number;day:string}
+export interface StoredBattle {version:string;studentId:string;run:BrawlRun;inputs:InputFrame[];endTick:number;updatedAt:number;finishKey:string}

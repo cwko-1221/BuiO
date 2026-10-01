@@ -228,6 +228,7 @@ img { max-width: 100%; }
    full — the room is not shown at all; the panel takes the screen.
    The panel used to be a permanent second column, which on an iPad surrendered ~340px of
    room width on every screen, including the one where the room is the entire point. */
+.icon-brawl::before { content: '✦'; color: #b77738; }
 .pet-main {
   flex: 1; min-height: 0;
   display: grid;

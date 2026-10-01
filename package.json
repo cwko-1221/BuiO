@@ -34,6 +34,11 @@
     "build:pet-redrawn-queue": "node scripts/build-redrawn-wearable-queue.mjs",
     "build:pet-redrawn-queue:all": "node scripts/build-redrawn-wearable-queue.mjs --all-stages",
     "check:pet": "node scripts/test-pet-module.mjs",
+    "check:pet-brawl": "node scripts/test-pet-brawl.mjs",
+    "check:pet-brawl-live": "node scripts/test-pet-brawl-live.mjs",
+    "check:pet-brawl-pvp": "node scripts/test-pet-brawl-pvp.mjs",
+    "check:pet-brawl-pvp-live": "node scripts/test-pet-brawl-pvp-live.mjs",
+    "build:pet-brawl-assets": "node scripts/build-pet-brawl-assets.mjs",
     "check:buzzer-live": "node scripts/test-buzzer-live.mjs",
     "check:buzzer-clock": "node scripts/test-buzzer-clock.mjs",
     "check:buzzer-sync": "node scripts/test-buzzer-clock.mjs && node scripts/test-buzzer-live.mjs --sync",
@@ -53,7 +58,9 @@
     "build:room-shape": "node scripts/room-shape.mjs",
     "room:corners": "node scripts/room-corners.mjs",
     "fit": "node scripts/fit-preview.mjs",
-    "check:chinese-tone": "node scripts/test-chinese-tone.mjs"
+    "check:chinese-tone": "node scripts/test-chinese-tone.mjs",
+    "check:pet-brawl-roster": "node scripts/test-pet-brawl-roster.mjs",
+    "check:pet-brawl-roster-live": "node scripts/test-pet-brawl-roster-live.mjs"
   },
   "dependencies": {
     "@google-cloud/text-to-speech": "^6.4.1",

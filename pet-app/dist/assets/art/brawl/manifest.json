@@ -1,0 +1,322 @@
+{
+  "version": "brawl-v2",
+  "frameSize": 256,
+  "fighters": {
+    "starpatch-cat": {
+      "pages": [
+        "/pet/assets/art/brawl/starpatch-cat-a-515bbd9c0360.webp",
+        "/pet/assets/art/brawl/starpatch-cat-b-891c91e1bc26.webp"
+      ],
+      "clips": {
+        "idle": {
+          "page": 0,
+          "start": 0,
+          "count": 8
+        },
+        "walk": {
+          "page": 0,
+          "start": 8,
+          "count": 8
+        },
+        "run": {
+          "page": 0,
+          "start": 16,
+          "count": 8
+        },
+        "attack1": {
+          "page": 0,
+          "start": 24,
+          "count": 8
+        },
+        "attack2": {
+          "page": 0,
+          "start": 32,
+          "count": 8
+        },
+        "attack3": {
+          "page": 1,
+          "start": 40,
+          "count": 8
+        },
+        "jump": {
+          "page": 0,
+          "start": 40,
+          "count": 8
+        },
+        "air": {
+          "page": 0,
+          "start": 48,
+          "count": 8
+        },
+        "guard": {
+          "page": 1,
+          "start": 0,
+          "count": 4
+        },
+        "break": {
+          "page": 1,
+          "start": 4,
+          "count": 4
+        },
+        "hit": {
+          "page": 1,
+          "start": 8,
+          "count": 4
+        },
+        "fall": {
+          "page": 1,
+          "start": 12,
+          "count": 4
+        },
+        "rise": {
+          "page": 1,
+          "start": 16,
+          "count": 4
+        },
+        "skill1": {
+          "page": 1,
+          "start": 24,
+          "count": 8
+        },
+        "skill2": {
+          "page": 1,
+          "start": 32,
+          "count": 8
+        },
+        "win": {
+          "page": 1,
+          "start": 48,
+          "count": 8
+        }
+      }
+    },
+    "cloud-ear-dog": {
+      "pages": [
+        "/pet/assets/art/brawl/cloud-ear-dog-a-f5de038000c9.webp",
+        "/pet/assets/art/brawl/cloud-ear-dog-b-f60dda8fb9e1.webp"
+      ],
+      "clips": {
+        "idle": {
+          "page": 0,
+          "start": 0,
+          "count": 8
+        },
+        "walk": {
+          "page": 0,
+          "start": 8,
+          "count": 8
+        },
+        "run": {
+          "page": 0,
+          "start": 16,
+          "count": 8
+        },
+        "attack1": {
+          "page": 0,
+          "start": 24,
+          "count": 8
+        },
+        "attack2": {
+          "page": 0,
+          "start": 32,
+          "count": 8
+        },
+        "attack3": {
+          "page": 1,
+          "start": 40,
+          "count": 8
+        },
+        "jump": {
+          "page": 0,
+          "start": 48,
+          "count": 8
+        },
+        "air": {
+          "page": 0,
+          "start": 56,
+          "count": 8
+        },
+        "guard": {
+          "page": 1,
+          "start": 0,
+          "count": 4
+        },
+        "break": {
+          "page": 1,
+          "start": 4,
+          "count": 4
+        },
+        "hit": {
+          "page": 1,
+          "start": 8,
+          "count": 4
+        },
+        "fall": {
+          "page": 1,
+          "start": 12,
+          "count": 4
+        },
+        "rise": {
+          "page": 1,
+          "start": 16,
+          "count": 4
+        },
+        "skill1": {
+          "page": 1,
+          "start": 24,
+          "count": 8
+        },
+        "skill2": {
+          "page": 1,
+          "start": 32,
+          "count": 8
+        },
+        "win": {
+          "page": 1,
+          "start": 56,
+          "count": 8
+        }
+      }
+    },
+    "pudding-pig": {
+      "pages": [
+        "/pet/assets/art/brawl/pudding-pig-a-d88bdea4b117.webp",
+        "/pet/assets/art/brawl/pudding-pig-b-32107c17646d.webp"
+      ],
+      "clips": {
+        "idle": {
+          "page": 0,
+          "start": 0,
+          "count": 8
+        },
+        "walk": {
+          "page": 0,
+          "start": 8,
+          "count": 8
+        },
+        "run": {
+          "page": 0,
+          "start": 16,
+          "count": 8
+        },
+        "attack1": {
+          "page": 0,
+          "start": 24,
+          "count": 8
+        },
+        "attack2": {
+          "page": 0,
+          "start": 32,
+          "count": 8
+        },
+        "attack3": {
+          "page": 1,
+          "start": 40,
+          "count": 8
+        },
+        "jump": {
+          "page": 0,
+          "start": 48,
+          "count": 8
+        },
+        "air": {
+          "page": 0,
+          "start": 56,
+          "count": 8
+        },
+        "guard": {
+          "page": 1,
+          "start": 0,
+          "count": 4
+        },
+        "break": {
+          "page": 1,
+          "start": 4,
+          "count": 4
+        },
+        "hit": {
+          "page": 1,
+          "start": 8,
+          "count": 4
+        },
+        "fall": {
+          "page": 1,
+          "start": 12,
+          "count": 4
+        },
+        "rise": {
+          "page": 1,
+          "start": 16,
+          "count": 4
+        },
+        "skill1": {
+          "page": 1,
+          "start": 24,
+          "count": 8
+        },
+        "skill2": {
+          "page": 1,
+          "start": 32,
+          "count": 8
+        },
+        "win": {
+          "page": 1,
+          "start": 56,
+          "count": 8
+        }
+      }
+    }
+  },
+  "enemies": {
+    "url": "/pet/assets/art/brawl/enemies-f3521aa38573.webp",
+    "rows": {
+      "mushroom": 0,
+      "thrower": 1,
+      "shield": 2,
+      "slime": 3,
+      "puppet": 4,
+      "squirrel": 5,
+      "golem": 6
+    }
+  },
+  "backgrounds": {
+    "sunny-training": "/pet/assets/art/brawl/sunny-training-c173a8efada1.webp",
+    "windbell-forest": "/pet/assets/art/brawl/windbell-forest-3e0161c4fe86.webp",
+    "starcrystal-cave": "/pet/assets/art/brawl/starcrystal-cave-682afdef9d89.webp"
+  },
+  "worlds": {
+    "sunny-training": "/pet/assets/art/brawl/world-sunny-training-2d700535659d.webp",
+    "windbell-forest": "/pet/assets/art/brawl/world-windbell-forest-7fff8f6ba115.webp",
+    "starcrystal-cave": "/pet/assets/art/brawl/world-starcrystal-cave-672014170573.webp"
+  },
+  "effects": {
+    "url": "/pet/assets/art/brawl/effects-a43b5661984a.webp",
+    "frameSize": 181,
+    "clips": {
+      "slash": {
+        "start": 0,
+        "count": 8
+      },
+      "burst": {
+        "start": 8,
+        "count": 8
+      },
+      "bolt": {
+        "start": 16,
+        "count": 8
+      },
+      "vortex": {
+        "start": 24,
+        "count": 8
+      },
+      "shock": {
+        "start": 32,
+        "count": 8
+      },
+      "dust": {
+        "start": 40,
+        "count": 8
+      }
+    }
+  }
+}

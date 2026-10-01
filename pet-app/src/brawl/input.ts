@@ -1,0 +1,19 @@
+import {INPUT as I} from '../../lib/brawl/catalog.mjs';
+const keys:Record<string,number>={KeyA:I.LEFT,ArrowLeft:I.LEFT,KeyD:I.RIGHT,ArrowRight:I.RIGHT,KeyW:I.UP,ArrowUp:I.UP,KeyS:I.DOWN,ArrowDown:I.DOWN,KeyJ:I.ATTACK,KeyK:I.JUMP,KeyL:I.GUARD,KeyU:I.SKILL1,KeyI:I.SKILL2,ShiftLeft:I.RUN,ShiftRight:I.RUN};
+export class BattleInput {
+  private keySet=new Set<string>();private pointers=new Map<number,number>();private joystickPointer?:number;private stick=0;private pendingPress=0;private abort=new AbortController();
+  constructor(private root:HTMLElement,private enabled:()=>boolean,private pause:()=>void){const signal=this.abort.signal;
+    window.addEventListener('keydown',event=>{if(event.code==='Escape'&&this.enabled()){event.preventDefault();this.pause();return;}if(!keys[event.code]||!this.enabled()||(event.target instanceof HTMLElement&&event.target.matches('input,select,textarea,button:focus-visible')))return;event.preventDefault();this.keySet.add(event.code);if(!event.repeat)this.pendingPress|=keys[event.code];},{signal});
+    window.addEventListener('keyup',event=>{this.keySet.delete(event.code);},{signal});
+    root.addEventListener('pointerdown',event=>{const target=(event.target as HTMLElement).closest<HTMLElement>('[data-battle-key],[data-stick]');if(!target||!this.enabled())return;event.preventDefault();target.setPointerCapture(event.pointerId);
+      if(target.hasAttribute('data-stick')){this.joystickPointer=event.pointerId;this.updateStick(event,target);}else{const bit=Number(target.dataset.battleKey);this.pointers.set(event.pointerId,bit);this.pendingPress|=bit;target.classList.add('held');}},{signal});
+    root.addEventListener('pointermove',event=>{if(event.pointerId===this.joystickPointer){const stick=root.querySelector<HTMLElement>('[data-stick]');if(stick)this.updateStick(event,stick);}},{signal});
+    const release=(event:PointerEvent)=>{if(event.type==='pointercancel')this.pendingPress&=~(this.pointers.get(event.pointerId)||0);this.pointers.delete(event.pointerId);if(event.pointerId===this.joystickPointer){this.joystickPointer=undefined;this.stick=0;root.querySelector<HTMLElement>('.brawl-stick-knob')?.style.setProperty('transform','translate(0px,0px)');}root.querySelectorAll<HTMLElement>('[data-battle-key]').forEach(button=>button.classList.toggle('held',[...this.pointers.values()].includes(Number(button.dataset.battleKey))));};
+    root.addEventListener('pointerup',release,{signal});root.addEventListener('pointercancel',release,{signal});root.addEventListener('lostpointercapture',release,{signal});
+    window.addEventListener('blur',()=>{this.clear();this.pause();},{signal});
+  }
+  private updateStick(event:PointerEvent,element:HTMLElement){const r=element.getBoundingClientRect(),x=(event.clientX-r.left-r.width/2)/(r.width/2),y=(event.clientY-r.top-r.height/2)/(r.height/2);let mask=0;if(x<-.28)mask|=I.LEFT;if(x>.28)mask|=I.RIGHT;if(y<-.28)mask|=I.UP;if(y>.28)mask|=I.DOWN;if(Math.hypot(x,y)>.85)mask|=I.RUN;this.stick=mask;element.querySelector<HTMLElement>('.brawl-stick-knob')?.style.setProperty('transform',`translate(${Math.max(-1,Math.min(1,x))*28}px,${Math.max(-1,Math.min(1,y))*28}px)`);}
+  read(){let mask=this.stick|this.pendingPress;this.pendingPress=0;for(const key of this.keySet)mask|=keys[key]||0;for(const bit of this.pointers.values())mask|=bit;return mask;}
+  clear(){this.keySet.clear();this.pointers.clear();this.stick=0;this.pendingPress=0;this.joystickPointer=undefined;this.root.querySelectorAll('.held').forEach(e=>e.classList.remove('held'));this.root.querySelector<HTMLElement>('.brawl-stick-knob')?.style.setProperty('transform','translate(0px,0px)');}
+  destroy(){this.clear();this.abort.abort();}
+}

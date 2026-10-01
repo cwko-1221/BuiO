@@ -9,6 +9,8 @@ import { prizeIcon, prizeLabel, type ArcadePrize } from './game/ArcadePrizes';
 import { audio } from './audio';
 import { BedroomScene } from './game/BedroomScene';
 import type { CoinPusherScene } from './game/CoinPusherScene';
+import type { BrawlController } from './brawl/controller';
+import { PvPClient } from './brawl/pvp-client';
 import { PetAvatar } from './game/PetAvatar';
 import { DISPLAY_PET_STAGE, displayPetStage, petForDisplay } from './game/petDisplay';
 import { advanceCoinPusherCascade, advanceCoinPusherTimingStreak, coinPusherCalloutCenterX, coinPusherCabinetFinish, COIN_PUSHER_CABINET_FINISHES, coinPusherCascadeLabel, coinPusherDropTimingCueLabel, coinPusherImpactPan, coinPusherRewardFlightLabels, coinPusherStampProgress, coinPusherTimingGuidanceLabel, coinPusherTimingRecordLabel, coinPusherTimingStreakLabel, planCoinPusherRewardFlightDelays, COIN_PUSHER_STAMP_THRESHOLDS } from './game/CoinPusherFeedback';
@@ -65,7 +67,7 @@ if (localStorage.getItem('pet-reduced-motion') === '1') document.documentElement
 
 const UI = {
   'zh-HK': {
-    title:'寵物樂園', home:'我的房間', collection:'寵物圖鑑', shop:'魔法商店', coinPusher:'推銀仔', visit:'同班參觀', settings:'設定',
+    title:'寵物樂園', home:'我的房間', collection:'寵物圖鑑', shop:'魔法商店', coinPusher:'推銀仔', brawl:'大亂鬥', visit:'同班參觀', settings:'設定',
     coins:'金幣', dust:'星塵', feed:'餵食', play:'一起玩', sleep:'休息', decorate:'佈置房間', save:'儲存佈置', private:'私人房間', class:'開放同班參觀',
     hatchTitle:'你的第一顆蛋正在等待！', hatchCopy:'蛋內藏着三隻完成版寵物之一。首次孵化完全免費。', hatch:'開始孵化',
     owned:'已擁有', locked:'未擁有', active:'主寵', choose:'選為主寵', buy:'購買', visitRoom:'參觀房間', back:'返回房間',
@@ -73,7 +75,7 @@ const UI = {
     empty:'暫時沒有內容。', daily:'今日經驗', probability:'目前開放 12 隻完成版寵物', pity:'保底', randomEgg:'隨機寵物蛋', directPet:'指定寵物',
   },
   'en-US': {
-    title:'Pet Paradise', home:'My Room', collection:'Pet Collection', shop:'Magic Shop', coinPusher:'Coin Pusher', visit:'Class Visits', settings:'Settings',
+    title:'Pet Paradise', home:'My Room', collection:'Pet Collection', shop:'Magic Shop', coinPusher:'Coin Pusher', brawl:'Pet Brawl', visit:'Class Visits', settings:'Settings',
     coins:'Coins', dust:'Stardust', feed:'Feed', play:'Play', sleep:'Rest', decorate:'Decorate', save:'Save room', private:'Private room', class:'Open to class',
     hatchTitle:'Your first egg is waiting!', hatchCopy:'One of the three completed pets is inside. Your first hatch is free.', hatch:'Hatch now',
     owned:'Owned', locked:'Not owned', active:'Active', choose:'Make active', buy:'Buy', visitRoom:'Visit room', back:'Back to room',
@@ -131,6 +133,9 @@ const REFUSALS: Record<string, string> = {
 };
 
 class StudentApp {
+  private pvp?:PvPClient;
+  private brawlController?: BrawlController;
+  private brawlGeneration = 0;
   identity: Identity; state!: Bootstrap; locale: Locale; game?: Phaser.Game; tab = 'home'; selectedFurniture = ''; roomPlacements: RoomPlacement[] = [];
   pendingGrantIds: string[] = [];
   coinPusherView?: CoinPusherScene;
@@ -212,6 +217,10 @@ class StudentApp {
       viewport.content = `${viewport.content}, viewport-fit=cover`;
     }
     this.state = await api.bootstrap();
+    this.pvp=new PvPClient(this.identity);
+    this.pvp.addEventListener('match',()=>{void this.reload().catch(()=>{});void this.openLiveDuel();});
+    this.pvp.addEventListener('result',()=>void this.reload());
+    void this.pvp.start();
     document.addEventListener('visibilitychange', this.handleCoinPusherVisibility);
     window.addEventListener('pagehide', this.handleCoinPusherPageHide);
     window.addEventListener('online', this.retryPendingCoinPusherPayouts);
@@ -248,7 +257,7 @@ class StudentApp {
         <aside class="side-panel" id="sidePanel"></aside>
       </main>
       <nav class="pet-nav" aria-label="Pet Paradise">
-        ${[['home','home'],['collection','collection'],['shop','shop'],['coinPusher','coin-pusher'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span>${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
+        ${[['home','home'],['collection','collection'],['shop','shop'],['coinPusher','coin-pusher'],['brawl','brawl'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span>${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
       </nav>
       <div class="toast-stack" id="toasts" aria-live="polite"></div>
       <div class="modal-root" id="modalRoot"></div>
@@ -493,9 +502,29 @@ class StudentApp {
     window.setTimeout(()=>element.classList.remove('is-pressed'),200);
   }
   private openTab(tab: string) {
+    if(this.pvp?.session&&!['finished','cancelled'].includes(this.pvp.session.phase)&&tab!=='brawl'){this.toast(this.locale==='zh-HK'?'請先完成或投降本次同學對戰。':'Finish or surrender your live duel first.');return;}
+    this.pvp?.setBusy(tab==='coinPusher');
+    if(tab!=='brawl'){this.brawlGeneration++;this.brawlController?.destroy();this.brawlController=undefined;}
     if(tab!=='coinPusher')this.cancelCoinPusherPreload();
     this.tab=tab;document.querySelectorAll('[data-tab]').forEach((item)=>{const on=(item as HTMLElement).dataset.tab===tab;item.classList.toggle('active',on);item.setAttribute('aria-current',on?'page':'false');});
-    if(tab==='home')this.openHome();else if(tab==='collection')this.renderCollection();else if(tab==='shop')this.renderShop('eggs');else if(tab==='coinPusher')this.renderCoinPusher();else if(tab==='visit')this.renderVisits();else this.renderSettings();
+    if(tab==='home')this.openHome();else if(tab==='collection')this.renderCollection();else if(tab==='shop')this.renderShop('eggs');else if(tab==='coinPusher')this.renderCoinPusher();else if(tab==='brawl')void this.renderBrawl();else if(tab==='visit')this.renderVisits();else this.renderSettings();
+  }
+  private async openLiveDuel(){
+    if(!this.pvp?.session)return;
+    if(this.brawlController?.onlineId===this.pvp.session.match.id){this.brawlController.reconnectOnline();return;}
+    if(this.tab==='coinPusher'||this.brawlController?.localBusy){await this.pvp.leave().catch(()=>{});this.toast(this.locale==='zh-HK'?'正在遊戲，未能開場；雙方入場費已退回。':'Could not start while playing. Both entry fees were refunded.');return;}
+    this.openTab('brawl');
+  }
+  private async renderBrawl() {
+    const generation=++this.brawlGeneration;
+    this.brawlController?.destroy();this.brawlController=undefined;
+    this.destroyCoinPusher(true);this.setLayout('room');this.ensureGame();this.game!.scene.stop('Bedroom');
+    document.querySelector('#roomBar')!.innerHTML='';document.querySelector('#gameHud')!.innerHTML='';
+    document.querySelector<HTMLElement>('#game-root')!.style.display='block';document.querySelector<HTMLElement>('#coin-pusher-root')!.style.display='none';
+    try {const {BrawlController}=await import('./brawl/controller');if(generation!==this.brawlGeneration||this.tab!=='brawl')return;
+      this.brawlController=new BrawlController(this.game!,this.identity,()=>this.state,()=>this.reload(),()=>this.openTab('shop'),this.pvp);
+      await this.brawlController.open();if(this.pvp?.session&&!['finished','cancelled'].includes(this.pvp.session.phase))this.brawlController.openOnline(this.pvp.session);this.refreshStage();
+    }catch(error){if(generation===this.brawlGeneration)this.toast((error as Error).message);}
   }
   private ensureGame() {
     if (this.game) return;
@@ -579,6 +608,7 @@ class StudentApp {
     if(roomOverride)this.state.room=originalRoom;audio.setTheme('bedroom');
   }
   private openHome() {
+    this.brawlGeneration++;this.brawlController?.destroy();this.brawlController=undefined;
     if(!this.state.profile.starterEggClaimed&&!this.state.pets.length){this.tab='home';this.destroyCoinPusher();this.renderHatch();return;}
     this.visiting=undefined;this.tab='home';
     this.game?.events.emit('room:set-editing',false);
@@ -594,6 +624,9 @@ class StudentApp {
     if(returnFocus?.isConnected) requestAnimationFrame(()=>returnFocus.focus({preventScroll:true}));
   }
   private renderHatch() {
+    // Opening the Brawl lobby may create Phaser before the first pet exists.
+    // Release that canvas before the poster replaces its parent content.
+    if(this.game){this.game.destroy(true);this.game=undefined;this.surfaceObserver?.disconnect();this.surfaceObserver=undefined;delete (window as unknown as {__petGame?:Phaser.Game}).__petGame;}
     // Before the first hatch there is no Phaser scene, so the play surface would otherwise be a
     // dead rectangle on the very first screen a child sees. Dress it with a CSS hero instead.
     document.querySelector('#game-root')!.innerHTML=`<div class="stage-poster"><div class="poster-egg"><span></span></div><div class="poster-sparks" aria-hidden="true">${Array.from({length:10},(_,index)=>`<i style="--i:${index}"></i>`).join('')}</div></div>`;
@@ -2068,7 +2101,7 @@ class StudentApp {
       this.toast(this.locale === 'zh-HK' ? '兌換成功！已放入你的收藏，沒有扣幣。' : 'Reward unlocked! No coins spent.');
     } catch (error) { button.disabled = false; throw error; }
   }
-  private async reload(){this.state=await api.bootstrap();this.roomPlacements=this.state.room.placements.map((item)=>({...item}));this.updateWallet();}
+  private async reload(){this.state=await api.bootstrap();this.roomPlacements=this.state.room.placements.map((item)=>({...item}));this.updateWallet();void this.pvp?.ping(true).catch(()=>{});}
   private destroyCoinPusher(preserveModel=false){
     this.releaseCoinPusherBrowserInteractions?.();
     this.releaseCoinPusherBrowserInteractions=undefined;

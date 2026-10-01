@@ -174,6 +174,7 @@ io.engine.use(sessionMiddleware);
 require('./whiteboard-app/server/socket')(io, app);
 require('./game-app/server/socket')(io, app);   // namespace /game
 require('./tower-defense-app/server/socket')(io, app); // namespace /tower-defense
+require('./pet-app/server/duel')(io); // student presence, invitations and authoritative duels
 
 // ----------------------------------------------------------------
 // Health / debug

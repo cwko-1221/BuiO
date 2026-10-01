@@ -1,0 +1,10 @@
+'use strict';
+const express=require('express');const repo=require('../repositories/brawl.repo');const router=express.Router();
+router.use((req,res,next)=>{if(!req.session?.studentId)return res.status(401).json({success:false,message:'請先登入。'});if(req.session.role!=='student')return res.status(403).json({success:false,message:'學生功能只供學生使用。'});next();});
+const route=fn=>async(req,res,next)=>{try{res.json({success:true,...await fn(req)});}catch(e){next(e);}};
+router.get('/catalog',route(()=>repo.getCatalog()));router.get('/progress',route(req=>repo.getProgress(req.session.studentId)));
+router.post('/access',route(req=>repo.access(req.session.studentId,req.body)));
+router.post('/runs',route(req=>repo.start(req.session.studentId,req.body,req.get('Idempotency-Key'))));
+router.post('/runs/:id/finish',route(req=>repo.finish(req.session.studentId,req.params.id,req.body,req.get('Idempotency-Key'))));
+router.post('/runs/:id/abandon',route(req=>repo.abandon(req.session.studentId,req.params.id)));
+module.exports=router;
