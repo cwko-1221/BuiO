@@ -168,15 +168,15 @@ try {
   page.on('response', response => {
     if (response.url().includes('/teacher/quiet-room/') && response.request().postDataJSON()?.action === 'noise') firstNoiseConfirmed = true;
   });
-  await page.evaluate(() => window.__quietSetAmplitude(.005));
-  await page.waitForFunction(() => parseInt(document.querySelector('#quietLevelText').textContent, 10) >= 10);
+  await page.evaluate(() => window.__quietSetAmplitude(.012));
+  await page.waitForFunction(() => parseInt(document.querySelector('#quietLevelText').textContent, 10) === 0);
   await page.waitForTimeout(200);
-  assert.equal(await page.locator('#quietBreaches').innerText(), '0', 'sound that previously exceeded 30 is tolerated at the same limit');
+  assert.equal(await page.locator('#quietBreaches').innerText(), '0', 'the previous crossing sound reads below the limit');
   assert.equal(await page.locator('#quietRewardLeft').innerText(), '20');
   assert.equal(await page.evaluate(() => window.__quietPenaltyNotes.length), 0, 'tolerated sound produces no warning');
   await page.evaluate(() => {
     window.__quietBurstAt = performance.now();
-    window.__quietSetAmplitude(.02);
+    window.__quietSetAmplitude(.4);
     setTimeout(() => window.__quietSetAmplitude(.001), 100);
   });
   await page.waitForFunction(() => document.querySelector('#quietBreaches').textContent === '1', null, { timeout: 1000 });
@@ -238,7 +238,7 @@ try {
   await page.evaluate(() => window.__quietSetAmplitude(.5));
   await page.locator('#quietStart').click();
   await page.waitForFunction(() => document.querySelector('#quietStatus').textContent.includes('專注中'));
-  await page.waitForFunction(() => parseInt(document.querySelector('#quietLevelText').textContent, 10) >= 80);
+  await page.waitForFunction(() => parseInt(document.querySelector('#quietLevelText').textContent, 10) >= 45);
   await page.waitForTimeout(300);
   assert.ok(parseInt(await page.locator('#quietLevelText').innerText(), 10) < 100, 'strong input that previously saturated now stays below 100');
   assert.equal(await page.locator('#quietBreaches').innerText(), '0', 'the maximum limit tolerates strong sound without a penalty');
