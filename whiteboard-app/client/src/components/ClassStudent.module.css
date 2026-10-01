@@ -24,6 +24,62 @@
     overflow: hidden;
 }
 
+.buzzerRow {
+    order: 0;
+    position: relative;
+    z-index: 61;
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 60px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.45rem max(0.75rem, env(safe-area-inset-right)) 0.45rem max(0.75rem, env(safe-area-inset-left));
+    background: #fff7ed;
+    border-bottom: 1px solid #fed7aa;
+}
+
+.buzzerStatus {
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.7rem;
+    color: #9a3412;
+    font-size: 0.9rem;
+}
+
+.buzzerStatus strong { font-weight: 800; }
+.buzzerStatus span { color: #57534e; }
+.buzzerStatus small { flex-basis: 100%; color: #dc2626; font-size: 0.75rem; }
+
+.buzzerPressBtn {
+    flex: 0 0 auto;
+    min-width: 104px;
+    min-height: 44px;
+    padding: 0.55rem 1rem;
+    border: 0;
+    border-radius: 0.65rem;
+    background: #ea580c;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    box-shadow: 0 3px 8px rgba(194, 65, 12, 0.22);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.buzzerPressBtn:hover:not(:disabled) { background: #c2410c; }
+.buzzerPressBtn:disabled { background: #9ca3af; box-shadow: none; cursor: not-allowed; }
+
+@media (max-width: 420px) {
+    .buzzerRow { gap: 0.45rem; padding-top: 0.35rem; padding-bottom: 0.35rem; }
+    .buzzerStatus { gap: 0.15rem 0.45rem; font-size: 0.8rem; }
+    .buzzerPressBtn { min-width: 90px; padding-inline: 0.65rem; font-size: 0.9rem; }
+}
+
 .bgCanvas {
     position: absolute;
     top: 0;
@@ -56,6 +112,23 @@
     z-index: 2;
 }
 
+.buzzerBoardLock {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    background: rgba(249, 250, 251, 0.66);
+    color: #374151;
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    font-weight: 800;
+    pointer-events: auto;
+}
+
+.buzzerBoardLock span { font-size: 0.9em; }
+
 /* Toolbar */
 .toolbar {
     order: 2;
@@ -74,6 +147,11 @@
     gap: 0.75rem;
     z-index: 50;
     border-top: 1px solid #f3f4f6;
+}
+
+.toolbarLocked {
+    opacity: 0.55;
+    pointer-events: none;
 }
 
 .toolBtn {

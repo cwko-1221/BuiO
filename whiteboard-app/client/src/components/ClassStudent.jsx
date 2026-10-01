@@ -15,6 +15,13 @@ const SHAPE_OPTIONS = [
     { id: 'diamond', label: 'Diamond', icon: Diamond },
 ];
 
+function appendStrokePoint(stroke, x, y, width, height) {
+    if (!stroke || !Number.isFinite(x) || !Number.isFinite(y)) return;
+    const previous = stroke.points[stroke.points.length - 1];
+    if (previous && Math.hypot((x - previous.x) * width, (y - previous.y) * height) < 0.75) return;
+    stroke.points.push({ x, y });
+}
+
 export default function ClassStudent() {
     const [searchParams] = useSearchParams();
     const roomId = searchParams.get('room');
@@ -24,6 +31,13 @@ export default function ClassStudent() {
     const [joined, setJoined] = useState(!!urlName);
     const [error, setError] = useState('');
     const [locked, setLocked] = useState(false);
+    const [buzzerState, setBuzzerState] = useState(null);
+    const [buzzerNow, setBuzzerNow] = useState(Date.now());
+    const [buzzerClockOffset, setBuzzerClockOffset] = useState(0);
+    const [buzzerPending, setBuzzerPending] = useState(false);
+    const [buzzerNotice, setBuzzerNotice] = useState('');
+    const buzzerSubmitted = buzzerPending || !!buzzerState?.submitted;
+    const buzzerLocked = buzzerPending || !!buzzerState?.locked;
 
     const [activeTool, setActiveTool] = useState('pen'); // 'pen' | 'shape' | 'eraser'
     const [penColor, setPenColor] = useState(PEN_COLORS[0]);
@@ -38,6 +52,11 @@ export default function ClassStudent() {
     const shapeStartRef = useRef(null);
     const shapeDragRef = useRef(null);
     const shapeObjectsRef = useRef([]);
+    const drawingHistoryRef = useRef([]);
+    const activeStudentStrokeRef = useRef(null);
+    const activeTeacherStrokeRef = useRef(null);
+    const baseDrawingImageDataRef = useRef(null);
+    const baseDrawingImageRef = useRef(null);
     const selectedShapeIdRef = useRef(null);
     const studentLastPos = useRef({ x: 0, y: 0 });
     const teacherLastPos = useRef({ x: 0, y: 0 });
@@ -49,14 +68,25 @@ export default function ClassStudent() {
     const contextRef = useRef(null);
     const shapeContextRef = useRef(null);
     const renderShapesRef = useRef(() => {});
+    const redrawDrawingLayerRef = useRef(() => {});
     const socketRef = useRef(null);
     const joinedRef = useRef(false);
     const bgImageRef = useRef(null);     // stored HTMLImageElement
+    const buzzerRoundIdRef = useRef(null);
+    const pendingBoardSnapshotRef = useRef(null);
+    const boardRestoreVersionRef = useRef(0);
+    const boardRestoringRef = useRef(false);
 
     useEffect(() => { activeToolRef.current = activeTool; }, [activeTool]);
     useEffect(() => { penColorRef.current = penColor; }, [penColor]);
     useEffect(() => { selectedShapeRef.current = selectedShape; }, [selectedShape]);
     useEffect(() => { joinedRef.current = joined; }, [joined]);
+
+    useEffect(() => {
+        if (!buzzerState?.active) return undefined;
+        const timer = window.setInterval(() => setBuzzerNow(Date.now()), 200);
+        return () => window.clearInterval(timer);
+    }, [buzzerState?.active, buzzerState?.roundId]);
 
     // Draw background image onto the BACKGROUND canvas (separate from drawing layer)
     const drawBackground = useCallback(() => {
@@ -85,6 +115,127 @@ export default function ClassStudent() {
         img.src = imageData;
     }, [drawBackground]);
 
+    const redrawDrawingLayer = useCallback(() => {
+        const canvas = canvasRef.current;
+        const ctx = contextRef.current;
+        if (!canvas || !ctx) return;
+        const rect = canvas.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const dpr = window.devicePixelRatio || 1;
+
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.globalCompositeOperation = 'source-over';
+        if (baseDrawingImageRef.current?.complete && baseDrawingImageRef.current.naturalWidth > 0) {
+            ctx.drawImage(baseDrawingImageRef.current, 0, 0, rect.width, rect.height);
+        }
+
+        for (const stroke of drawingHistoryRef.current) {
+            if (!stroke.points?.length) continue;
+            ctx.save();
+            ctx.globalCompositeOperation = stroke.isEraser ? 'destination-out' : 'source-over';
+            ctx.strokeStyle = stroke.color || '#111827';
+            ctx.lineWidth = stroke.size || 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(stroke.points[0].x * rect.width, stroke.points[0].y * rect.height);
+            if (stroke.points.length === 1) {
+                ctx.lineTo(stroke.points[0].x * rect.width, stroke.points[0].y * rect.height);
+            } else {
+                for (let index = 1; index < stroke.points.length; index += 1) {
+                    ctx.lineTo(stroke.points[index].x * rect.width, stroke.points[index].y * rect.height);
+                }
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+        ctx.restore();
+    }, []);
+    redrawDrawingLayerRef.current = redrawDrawingLayer;
+
+    const restoreBoardSnapshot = useCallback((snapshot) => {
+        const canvas = canvasRef.current;
+        const ctx = contextRef.current;
+        if (!canvas || !ctx) {
+            pendingBoardSnapshotRef.current = snapshot;
+            return;
+        }
+
+        const restoreVersion = ++boardRestoreVersionRef.current;
+        boardRestoringRef.current = true;
+        shapeObjectsRef.current = Array.isArray(snapshot?.shapes)
+            ? snapshot.shapes.map((shape) => ({ ...shape }))
+            : [];
+        selectedShapeIdRef.current = null;
+        renderShapesRef.current();
+
+        const isPng = (value) => typeof value === 'string' && value.startsWith('data:image/png;base64,');
+        const hasStrokeState = Array.isArray(snapshot?.strokes)
+            && (snapshot.baseImageData === null || isPng(snapshot.baseImageData));
+        if (hasStrokeState) {
+            baseDrawingImageDataRef.current = isPng(snapshot.baseImageData) ? snapshot.baseImageData : null;
+            baseDrawingImageRef.current = null;
+            drawingHistoryRef.current = snapshot.strokes.map((stroke) => ({
+                ...stroke,
+                points: Array.isArray(stroke.points) ? stroke.points.map((point) => ({ ...point })) : [],
+            }));
+        } else {
+            baseDrawingImageDataRef.current = isPng(snapshot?.imageData) ? snapshot.imageData : null;
+            baseDrawingImageRef.current = null;
+            drawingHistoryRef.current = [];
+        }
+        activeStudentStrokeRef.current = null;
+        activeTeacherStrokeRef.current = null;
+
+        if (!baseDrawingImageDataRef.current) {
+            redrawDrawingLayerRef.current();
+            boardRestoringRef.current = false;
+            return;
+        }
+        const image = new Image();
+        image.onload = () => {
+            if (restoreVersion !== boardRestoreVersionRef.current) return;
+            const currentCanvas = canvasRef.current;
+            const currentContext = contextRef.current;
+            if (!currentCanvas || !currentContext) {
+                boardRestoringRef.current = false;
+                return;
+            }
+            baseDrawingImageRef.current = image;
+            redrawDrawingLayerRef.current();
+            boardRestoringRef.current = false;
+        };
+        image.onerror = () => {
+            if (restoreVersion === boardRestoreVersionRef.current) boardRestoringRef.current = false;
+        };
+        image.src = baseDrawingImageDataRef.current;
+    }, []);
+
+    const publishBoardSnapshot = useCallback(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || !socketRef.current || !joinedRef.current) return;
+        try {
+            const imageData = canvas.toDataURL('image/png');
+            const strokes = drawingHistoryRef.current.map((stroke) => ({
+                ...stroke,
+                points: stroke.points.map((point) => ({ ...point })),
+            }));
+            const vectorPointCount = strokes.reduce((total, stroke) => total + stroke.points.length, 0);
+            const useRasterFallback = strokes.length > 2_000 || vectorPointCount > 60_000;
+            socketRef.current.emit('student-board-snapshot', {
+                imageData,
+                baseImageData: useRasterFallback ? imageData : baseDrawingImageDataRef.current,
+                strokes: useRasterFallback ? [] : strokes,
+                shapes: shapeObjectsRef.current.map((shape) => ({ ...shape })),
+            });
+        } catch (error) {
+            console.warn('[WB] Could not save student board snapshot:', error);
+        }
+    }, []);
+
     // Initialize Socket and Canvas
     useEffect(() => {
         if (!joined || !roomId) return;
@@ -101,6 +252,26 @@ export default function ClassStudent() {
             setJoined(false);
         });
 
+        socket.on('student-board-snapshot', (snapshot) => {
+            restoreBoardSnapshot(snapshot);
+        });
+
+        socket.on('buzzer-player-state', (state) => {
+            if (state.serverNow) setBuzzerClockOffset(state.serverNow - Date.now());
+            if (buzzerRoundIdRef.current !== state.roundId) {
+                buzzerRoundIdRef.current = state.roundId;
+                setBuzzerPending(false);
+                setBuzzerNotice('');
+            }
+            setBuzzerState(state);
+            setBuzzerPending(false);
+        });
+
+        socket.on('buzzer-error', (message) => {
+            setBuzzerNotice(String(message || '搶答操作未能完成。'));
+            setBuzzerPending(false);
+        });
+
         // Receive background image from server
         socket.on('room-image', (imageData) => {
             loadAndDrawImage(imageData);
@@ -108,6 +279,14 @@ export default function ClassStudent() {
 
         // Handle teacher clearing ALL boards — only clear the drawing layer
         socket.on('clear-board', () => {
+            boardRestoreVersionRef.current += 1;
+            boardRestoringRef.current = false;
+            pendingBoardSnapshotRef.current = null;
+            baseDrawingImageDataRef.current = null;
+            baseDrawingImageRef.current = null;
+            drawingHistoryRef.current = [];
+            activeStudentStrokeRef.current = null;
+            activeTeacherStrokeRef.current = null;
             const ctx = contextRef.current;
             const canvas = canvasRef.current;
             if (ctx && canvas) {
@@ -144,12 +323,26 @@ export default function ClassStudent() {
             const canvas = canvasRef.current;
             if (!ctx || !canvas) return;
 
-            ctx.save();
             const { x, y, state, color, size, isEraser } = data;
             const rect = canvas.getBoundingClientRect();
             const cssX = x * rect.width;
             const cssY = y * rect.height;
 
+            if (state === 'start') {
+                const stroke = {
+                    color: color || '#ef4444',
+                    size: isEraser ? size * 2 : size,
+                    isEraser: !!isEraser,
+                    points: [{ x, y }],
+                };
+                drawingHistoryRef.current.push(stroke);
+                activeTeacherStrokeRef.current = stroke;
+            } else if (state === 'move' || state === 'end') {
+                appendStrokePoint(activeTeacherStrokeRef.current, x, y, rect.width, rect.height);
+            }
+
+            if (state !== 'start' && state !== 'move' && state !== 'end') return;
+            ctx.save();
             if (isEraser) {
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.lineWidth = size * 2;
@@ -167,15 +360,15 @@ export default function ClassStudent() {
                 ctx.lineTo(cssX, cssY);
                 ctx.stroke();
                 teacherLastPos.current = { x: cssX, y: cssY };
-            } else if (state === 'move') {
+            } else if (state === 'move' || state === 'end') {
                 ctx.beginPath();
                 ctx.moveTo(teacherLastPos.current.x, teacherLastPos.current.y);
                 ctx.lineTo(cssX, cssY);
                 ctx.stroke();
                 teacherLastPos.current = { x: cssX, y: cssY };
             }
-            
             ctx.restore();
+            if (state === 'end') activeTeacherStrokeRef.current = null;
         });
 
         // Reconcile the complete stroke layer after every teacher gesture. This
@@ -195,12 +388,17 @@ export default function ClassStudent() {
                 const canvas = canvasRef.current;
                 if (!ctx || !canvas) return;
 
-                ctx.save();
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-                ctx.restore();
+                boardRestoreVersionRef.current += 1;
+                boardRestoringRef.current = false;
+                baseDrawingImageDataRef.current = imageData;
+                baseDrawingImageRef.current = image;
+                drawingHistoryRef.current = [];
+                activeStudentStrokeRef.current = null;
+                activeTeacherStrokeRef.current = null;
+                shapeObjectsRef.current = [];
+                selectedShapeIdRef.current = null;
+                renderShapesRef.current();
+                redrawDrawingLayerRef.current();
             };
 
             image.src = imageData;
@@ -209,81 +407,93 @@ export default function ClassStudent() {
         // Setup DRAWING Canvas (transparent — strokes only)
         const canvas = canvasRef.current;
         let handleResize;
+        let resizeObserver;
         if (canvas) {
             handleResize = () => {
                 const rect = canvas.getBoundingClientRect();
+                if (!rect.width || !rect.height) return;
                 const dpr = window.devicePixelRatio || 1;
+                const nextWidth = Math.round(rect.width * dpr);
+                const nextHeight = Math.round(rect.height * dpr);
+                const shapeCanvas = shapeCanvasRef.current;
+                const dimensionsChanged = canvas.width !== nextWidth || canvas.height !== nextHeight
+                    || (shapeCanvas && (shapeCanvas.width !== nextWidth || shapeCanvas.height !== nextHeight));
+                if (!dimensionsChanged) return;
 
-                // Save existing drawing before resizing
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = canvas.width;
-                tempCanvas.height = canvas.height;
-                const tempCtx = tempCanvas.getContext('2d');
-                if (canvas.width > 0 && canvas.height > 0) {
-                    tempCtx.drawImage(canvas, 0, 0);
-                }
+                canvas.width = nextWidth;
+                canvas.height = nextHeight;
 
-                canvas.width = Math.round(rect.width * dpr);
-                canvas.height = Math.round(rect.height * dpr);
-
-                const ctx = canvas.getContext('2d');
-                ctx.scale(dpr, dpr);
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
 
                 contextRef.current = ctx;
 
-                const shapeCanvas = shapeCanvasRef.current;
                 if (shapeCanvas) {
-                    shapeCanvas.width = Math.round(rect.width * dpr);
-                    shapeCanvas.height = Math.round(rect.height * dpr);
+                    shapeCanvas.width = nextWidth;
+                    shapeCanvas.height = nextHeight;
                     const shapeCtx = shapeCanvas.getContext('2d');
-                    shapeCtx.scale(dpr, dpr);
+                    shapeCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
                     shapeCtx.lineCap = 'round';
                     shapeCtx.lineJoin = 'round';
                     shapeContextRef.current = shapeCtx;
                     renderShapesRef.current();
                 }
 
-                // Restore previous strokes (no background — canvas stays transparent)
-                if (tempCanvas.width > 0 && tempCanvas.height > 0) {
-                    ctx.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
+                // Replay normalized pen strokes at the new resolution so every
+                // resize stays crisp instead of repeatedly scaling a bitmap.
+                redrawDrawingLayerRef.current();
+                const latestStudentPoint = activeStudentStrokeRef.current?.points.at(-1);
+                if (latestStudentPoint) {
+                    studentLastPos.current = {
+                        x: latestStudentPoint.x * rect.width,
+                        y: latestStudentPoint.y * rect.height,
+                    };
+                }
+                const latestTeacherPoint = activeTeacherStrokeRef.current?.points.at(-1);
+                if (latestTeacherPoint) {
+                    teacherLastPos.current = {
+                        x: latestTeacherPoint.x * rect.width,
+                        y: latestTeacherPoint.y * rect.height,
+                    };
                 }
 
                 // Also resize the background canvas
                 drawBackground();
+                if (pendingBoardSnapshotRef.current) {
+                    const snapshot = pendingBoardSnapshotRef.current;
+                    pendingBoardSnapshotRef.current = null;
+                    restoreBoardSnapshot(snapshot);
+                }
             };
 
             handleResize();
+            if (typeof ResizeObserver !== 'undefined') {
+                resizeObserver = new ResizeObserver(handleResize);
+                resizeObserver.observe(canvas);
+            }
             window.addEventListener('resize', handleResize);
         }
 
         return () => {
+            if (resizeObserver) resizeObserver.disconnect();
             if (handleResize) {
                 window.removeEventListener('resize', handleResize);
             }
             socket.disconnect();
         };
-    }, [joined, roomId, name, drawBackground, loadAndDrawImage]);
+    }, [joined, roomId, name, drawBackground, loadAndDrawImage, restoreBoardSnapshot]);
 
     const getCoordinates = useCallback((e) => {
         if (!canvasRef.current) return { x: 0, y: 0 };
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
-
-        let x, y;
-
-        // Use offsetX/Y if available for pinpoint accuracy
-        if (e.offsetX !== undefined && e.offsetY !== undefined) {
-            x = e.offsetX;
-            y = e.offsetY;
-        } else {
-            // Fallback for older devices/Safari
-            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
-            x = clientX - rect.left;
-            y = clientY - rect.top;
-        }
+        // Use viewport coordinates against the canvas's current rect. offsetX/Y
+        // are target-relative and can drift when the canvas is resized/reflowed.
+        const pointer = e.touches?.[0] || e;
+        const x = (Number.isFinite(pointer.clientX) ? pointer.clientX : rect.left) - rect.left;
+        const y = (Number.isFinite(pointer.clientY) ? pointer.clientY : rect.top) - rect.top;
 
         return {
             x: x / rect.width,
@@ -318,7 +528,8 @@ export default function ClassStudent() {
                 isEraser: activeToolRef.current === 'eraser'
             });
         }
-    }, []);
+        if (state === 'end') publishBoardSnapshot();
+    }, [publishBoardSnapshot]);
 
     const renderShapes = useCallback((preview = null) => {
         const canvas = shapeCanvasRef.current;
@@ -436,7 +647,8 @@ export default function ClassStudent() {
             ...shapeObject,
             isEraser: false
         });
-    }, []);
+        publishBoardSnapshot();
+    }, [publishBoardSnapshot]);
 
     const emitShapeMoveEvent = useCallback((shapeObject) => {
         if (!socketRef.current || !joinedRef.current) return;
@@ -446,7 +658,36 @@ export default function ClassStudent() {
             ...shapeObject,
             isEraser: false
         });
-    }, []);
+        publishBoardSnapshot();
+    }, [publishBoardSnapshot]);
+
+    useEffect(() => {
+        if (!buzzerLocked) return;
+
+        if (isDrawing.current && !boardRestoringRef.current) {
+            if (shapeDragRef.current) {
+                const movedShape = shapeObjectsRef.current.find((shape) => shape.id === shapeDragRef.current.id);
+                if (movedShape) emitShapeMoveEvent(movedShape);
+            } else if (!shapeStartRef.current && canvasRef.current) {
+                const rect = canvasRef.current.getBoundingClientRect();
+                if (rect.width && rect.height) {
+                    emitDrawEvent('end', {
+                        x: studentLastPos.current.x / rect.width,
+                        y: studentLastPos.current.y / rect.height,
+                        rawX: studentLastPos.current.x,
+                        rawY: studentLastPos.current.y,
+                    });
+                }
+            }
+        }
+
+        isDrawing.current = false;
+        activePointerId.current = null;
+        activeStudentStrokeRef.current = null;
+        shapeStartRef.current = null;
+        shapeDragRef.current = null;
+        renderShapesRef.current();
+    }, [buzzerLocked, emitDrawEvent, emitShapeMoveEvent]);
 
     // Native event listeners for iPad pen reliability
     useEffect(() => {
@@ -468,7 +709,7 @@ export default function ClassStudent() {
             isDrawing.current = true;
 
             // Block drawing when locked
-            if (locked) {
+            if (locked || buzzerLocked || boardRestoringRef.current) {
                 isDrawing.current = false;
                 return;
             }
@@ -505,6 +746,16 @@ export default function ClassStudent() {
                 ctx.stroke();
             }
 
+            const isEraser = activeToolRef.current === 'eraser';
+            const stroke = {
+                color: penColorRef.current,
+                size: isEraser ? 20 : 3,
+                isEraser,
+                points: [{ x: coords.x, y: coords.y }],
+            };
+            drawingHistoryRef.current.push(stroke);
+            activeStudentStrokeRef.current = stroke;
+
             emitDrawEvent('start', coords);
         };
 
@@ -536,6 +787,8 @@ export default function ClassStudent() {
                 ctx.stroke();
                 studentLastPos.current = { x: coords.rawX, y: coords.rawY };
             }
+            const rect = canvas.getBoundingClientRect();
+            appendStrokePoint(activeStudentStrokeRef.current, coords.x, coords.y, rect.width, rect.height);
 
             emitDrawEvent('move', coords);
         };
@@ -585,6 +838,10 @@ export default function ClassStudent() {
             isDrawing.current = false;
             activePointerId.current = null;
 
+            const rect = canvas.getBoundingClientRect();
+            appendStrokePoint(activeStudentStrokeRef.current, coords.x, coords.y, rect.width, rect.height);
+            activeStudentStrokeRef.current = null;
+
             emitDrawEvent('end', coords);
         };
 
@@ -609,7 +866,7 @@ export default function ClassStudent() {
             canvas.removeEventListener('pointercancel', handlePointerUp);
             canvas.removeEventListener('touchstart', handleTouchStart);
         };
-    }, [joined, locked, getCoordinates, setupContextMode, emitDrawEvent, drawShapePreview, emitShapeEvent, emitShapeMoveEvent, findShapeAtPoint, renderShapes, updateDraggedShape]);
+        }, [joined, locked, buzzerLocked, getCoordinates, setupContextMode, emitDrawEvent, drawShapePreview, emitShapeEvent, emitShapeMoveEvent, findShapeAtPoint, renderShapes, updateDraggedShape]);
 
 
     const [clearProgress, setClearProgress] = useState(0);
@@ -623,6 +880,11 @@ export default function ClassStudent() {
             ctx.clearRect(0, 0, rect.width, rect.height);
             // Only clear strokes — background canvas stays intact
         }
+        baseDrawingImageDataRef.current = null;
+        baseDrawingImageRef.current = null;
+        drawingHistoryRef.current = [];
+        activeStudentStrokeRef.current = null;
+        activeTeacherStrokeRef.current = null;
         shapeObjectsRef.current = [];
         selectedShapeIdRef.current = null;
         const shapeCanvas = shapeCanvasRef.current;
@@ -651,6 +913,21 @@ export default function ClassStudent() {
         if (clearProgress < 100) {
             setClearProgress(0);
         }
+    };
+
+    const buzzerSecondsLeft = buzzerState?.active
+        ? Math.max(0, Math.ceil((buzzerState.endsAt - (buzzerNow + buzzerClockOffset)) / 1000))
+        : 0;
+
+    const pressBuzzer = () => {
+        if (!buzzerState?.active || buzzerPending || buzzerState.submitted || buzzerSecondsLeft <= 0) return;
+        isDrawing.current = false;
+        activePointerId.current = null;
+        shapeStartRef.current = null;
+        shapeDragRef.current = null;
+        setBuzzerPending(true);
+        setBuzzerNotice('');
+        socketRef.current?.emit('buzzer-press');
     };
 
     if (!roomId) {
@@ -698,9 +975,38 @@ export default function ClassStudent() {
 
     return (
         <div className={styles.container}>
+            {buzzerState?.roundId && (
+                <div className={styles.buzzerRow} aria-live="polite">
+                    <div className={styles.buzzerStatus}>
+                        <strong>{buzzerState.active ? '⚡ 限時搶答' : '⚡ 搶答結果'}</strong>
+                        <span>
+                            {buzzerState.active
+                                ? buzzerSubmitted ? `已提交 · 倒數 ${buzzerSecondsLeft} 秒` : `倒數 ${buzzerSecondsLeft} 秒`
+                                : buzzerState.verdict === 'correct'
+                                    ? `答對了！獲得 ${buzzerState.coins} 金幣`
+                                    : buzzerState.verdict === 'wrong'
+                                        ? '答案錯誤，未獲金幣'
+                                        : buzzerLocked
+                                            ? buzzerSubmitted ? '已提交，等待老師關閉結果' : '時間到，畫面已鎖定，等待老師關閉結果'
+                                            : buzzerState.dismissed ? '結果已關閉，畫面已解鎖' : '等待搶答結果'}
+                        </span>
+                        {buzzerNotice && <small>{buzzerNotice}</small>}
+                    </div>
+                    {buzzerState.active && (
+                        <button
+                            type="button"
+                            className={styles.buzzerPressBtn}
+                            onClick={pressBuzzer}
+                            disabled={buzzerSubmitted || buzzerSecondsLeft <= 0}
+                        >
+                            {buzzerPending ? '提交中…' : buzzerSubmitted ? '已提交' : '搶答'}
+                        </button>
+                    )}
+                </div>
+            )}
             {/* Toolbar - hidden when locked */}
             {!locked && (
-            <div className={styles.toolbar}>
+            <div className={`${styles.toolbar} ${buzzerLocked ? styles.toolbarLocked : ''}`} aria-disabled={buzzerLocked}>
                 <button
                     className={`${styles.toolBtn} ${activeTool === 'pen' ? styles.active : ''}`}
                     style={{ color: activeTool === 'pen' ? penColor : undefined }}
@@ -825,8 +1131,14 @@ export default function ClassStudent() {
                 <canvas
                     ref={canvasRef}
                     className={styles.canvas}
-                    style={locked ? { pointerEvents: 'none' } : {}}
+                    style={locked || buzzerLocked ? { pointerEvents: 'none' } : {}}
                 />
+                {buzzerLocked && (
+                    <div className={styles.buzzerBoardLock} aria-live="polite">
+                        <span aria-hidden="true">🔒</span>
+                        <strong>{buzzerSubmitted ? '已提交' : '搶答時間結束'}</strong>
+                    </div>
+                )}
             </div>
 
             {/* Lock Overlay */}

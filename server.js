@@ -26,7 +26,7 @@ const PORT = config.port;
 // Compress text assets on the way out; already-compressed WebP/audio are skipped by the middleware.
 // Rapier's large physics WASM is served from its build-time Brotli sidecar below, with gzip as fallback.
 app.use(compression());
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '16mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
   origin: (origin, cb) => {
@@ -39,14 +39,15 @@ app.use(cors({
 }));
 app.set('trust proxy', 1);
 
-app.use(session({
+const sessionMiddleware = session({
   name: 'session',
   keys: [config.session.secret],
   maxAge: config.session.maxAge,
   secure: config.session.secure,
   httpOnly: true,
   sameSite: 'lax',
-}));
+});
+app.use(sessionMiddleware);
 
 // Give every request a safe correlation id and record API latency. Request bodies,
 // query strings and cookies are intentionally excluded because they may contain
@@ -167,6 +168,9 @@ const io = new Server(httpServer, {
   pingInterval: 4000,
   pingTimeout: 6000,
 });
+// Share the signed login session with Socket.IO so whiteboard classroom events
+// can be tied to the same student account used by Pet Park rewards.
+io.engine.use(sessionMiddleware);
 require('./whiteboard-app/server/socket')(io, app);
 require('./game-app/server/socket')(io, app);   // namespace /game
 require('./tower-defense-app/server/socket')(io, app); // namespace /tower-defense

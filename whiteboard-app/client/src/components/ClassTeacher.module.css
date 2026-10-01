@@ -55,6 +55,22 @@
     gap: 0.75rem;
 }
 
+.buzzerBtn {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+    padding: 0.45rem 0.8rem;
+    border-radius: 0.45rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.buzzerBtn:hover:not(:disabled) { background: #ffedd5; }
+.buzzerBtn:disabled { cursor: default; }
+.buzzerBtnActive { background: #ffedd5; color: #9a3412; }
+
 .uploadBtn {
     background-color: #dbeafe;
     color: #2563eb;
@@ -171,6 +187,173 @@
     min-height: 0;
 }
 
+.buzzerResults {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.buzzerResultsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex: 0 0 auto;
+    padding: 0.75rem 1rem;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 0.75rem;
+}
+
+.buzzerResultsHeader h2 { margin: 0 0 0.2rem; color: #9a3412; font-size: 1.1rem; }
+.buzzerResultsHeader p { margin: 0; color: #78716c; font-size: 0.85rem; }
+
+.buzzerCloseBtn,
+.rewardCancelBtn {
+    border: 1px solid #d1d5db;
+    border-radius: 0.45rem;
+    background: #fff;
+    color: #4b5563;
+    padding: 0.5rem 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.buzzerResultsGrid {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    grid-auto-rows: minmax(0, 1fr);
+    align-content: start;
+    gap: 0.85rem;
+    padding: 0.2rem;
+}
+
+.buzzerResponseCard {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+    border: 2px solid #fed7aa;
+    border-radius: 0.8rem;
+    box-shadow: 0 4px 12px rgba(124, 45, 18, 0.09);
+}
+
+.buzzerResponseHeader {
+    min-height: 2.65rem;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.7rem;
+    background: #fff7ed;
+    border-bottom: 1px solid #fed7aa;
+}
+
+.buzzerStudentName { flex: 1; min-width: 0; overflow: hidden; color: #292524; text-overflow: ellipsis; white-space: nowrap; }
+.buzzerResponseCanvas {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    min-height: 120px;
+    background: #fff;
+}
+
+.buzzerGradeArea {
+    flex: 0 0 auto;
+    padding: 0.65rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.buzzerGradeButtons,
+.rewardActions { display: flex; gap: 0.5rem; }
+.buzzerGradeButtons button,
+.rewardConfirmBtn {
+    flex: 1;
+    border: 0;
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.5rem;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.correctBtn,
+.rewardConfirmBtn { background: #059669; }
+.correctBtn:hover,
+.rewardConfirmBtn:hover:not(:disabled) { background: #047857; }
+.wrongBtn { background: #ef4444; }
+.wrongBtn:hover { background: #dc2626; }
+.rewardConfirmBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.rewardEditor { display: grid; gap: 0.45rem; color: #374151; font-size: 0.82rem; }
+.rewardEditor label { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-weight: 600; }
+.rewardEditor input { width: 110px; padding: 0.45rem 0.55rem; border: 1px solid #d1d5db; border-radius: 0.4rem; font-size: 1rem; }
+.rewardEditor small { color: #9a3412; line-height: 1.35; }
+.rewardEditor .rewardError { color: #dc2626; }
+.rewardActions { margin-top: 0.15rem; }
+.rewardCancelBtn { flex: 0 0 auto; }
+.buzzerCorrectResult,
+.buzzerWrongResult { padding: 0.6rem; border-radius: 0.5rem; font-weight: 700; text-align: center; }
+.buzzerCorrectResult { background: #d1fae5; color: #047857; }
+.buzzerWrongResult { background: #fee2e2; color: #b91c1c; }
+.buzzerNoResponses { flex: 1; display: grid; place-items: center; color: #78716c; font-size: 1.15rem; }
+
+.buzzerSetupOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(17, 24, 39, 0.55);
+    backdrop-filter: blur(4px);
+}
+
+.buzzerSetupCard {
+    position: relative;
+    width: min(100%, 420px);
+    display: grid;
+    gap: 0.9rem;
+    padding: 1.6rem;
+    border-radius: 1rem;
+    background: white;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+}
+
+.buzzerSetupCard h2 { margin: 0; color: #9a3412; }
+.buzzerSetupCard p { margin: -0.45rem 0 0.15rem; color: #6b7280; font-size: 0.9rem; }
+.buzzerSetupCard label { display: grid; gap: 0.4rem; color: #374151; font-size: 0.88rem; font-weight: 700; }
+.buzzerSetupCard input { width: 100%; box-sizing: border-box; padding: 0.65rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; }
+.buzzerSetupWarning,
+.buzzerSetupCard .buzzerSetupError { margin: 0; font-size: 0.82rem; line-height: 1.4; }
+.buzzerSetupWarning { color: #9a3412; }
+.buzzerSetupCard .buzzerSetupError { color: #dc2626; }
+.buzzerStartBtn { border: 0; border-radius: 0.55rem; padding: 0.75rem; background: #ea580c; color: white; font-size: 1rem; font-weight: 700; cursor: pointer; }
+.buzzerStartBtn:hover { background: #c2410c; }
+.buzzerSetupClose { position: absolute; top: 0.65rem; right: 0.75rem; border: 0; background: transparent; color: #6b7280; font-size: 1.5rem; cursor: pointer; }
+
+@media (max-width: 900px) {
+    .header { flex-wrap: wrap; gap: 0.5rem; padding: 0.65rem 0.8rem; }
+    .headerCenter { display: none; }
+    .headerRight { width: 100%; flex-wrap: wrap; justify-content: flex-start; gap: 0.45rem; }
+    .headerRight .qrContainer { margin-left: auto; }
+}
+
+@media (max-width: 560px) {
+    .gridArea { padding: 0.65rem; }
+    .buzzerResultsHeader { align-items: flex-start; padding: 0.65rem; }
+    .buzzerResultsHeader p { max-width: 240px; line-height: 1.35; }
+    .buzzerCloseBtn { padding: 0.4rem 0.55rem; font-size: 0.8rem; }
+    .buzzerResultsGrid { grid-template-columns: 1fr; }
+    .buzzerResponseCanvas { max-height: 34vh; }
+}
+
 .emptyState {
     flex: 1;
     display: flex;
@@ -237,6 +420,7 @@
     flex-shrink: 0;
 }
 
+.tileName { flex: 1; min-width: 0; }
 .dot {
     width: 7px;
     height: 7px;
@@ -412,6 +596,21 @@
     height: 100%;
     display: block;
     background-color: white;
+}
+
+.teacherBoardImage {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+}
+
+.teacherBoardCanvas {
+    z-index: 1;
+    background-color: transparent;
 }
 
 /* ── QR Modal ── */
