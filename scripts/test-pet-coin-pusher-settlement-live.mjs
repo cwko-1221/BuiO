@@ -16,7 +16,7 @@ const port=await new Promise(resolve=>{const s=net.createServer();s.listen(0,'12
 const baseURL=`http://127.0.0.1:${port}`;
 const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-payout-qa-'));
 const databaseFile=path.join(temp,'db.json');
-const artifacts=path.resolve(process.env.PET_PLAYTEST_DIR||'artifacts/pet-playtest/settlement-20260929');
+const artifacts=path.resolve(process.env.PET_PLAYTEST_DIR||'tmp/pet-playtest/settlement');
 await fs.mkdir(artifacts,{recursive:true});
 await fs.writeFile(databaseFile,JSON.stringify({users:[{studentid:'S001',name:'派彩測試',passwordhash:bcrypt.hashSync('test',4),role:'student',classname:'5A',language:'en-US'}],studentStats:[],questionLogs:[],_logId:0,petArcadePrizes:[{studentId:'S001',state:{issued:1000000,prizes:[]}}]}));
 const server=spawn(process.execPath,['server.js'],{cwd:root,env:{...process.env,PORT:String(port),BUIO_JSON_DB_FILE:databaseFile,MOCK_AUTH:'1',NODE_ENV:'development',SUPABASE_DB_URL:''},stdio:['ignore','pipe','pipe']});
@@ -76,6 +76,40 @@ try {
   assert.equal((await bootstrap(first.context)).wallet.balance,dropsBefore-12,'continuous keyboard drops cost exactly one each');
   await first.context.close();report.staleResponse=true;report.continuousPaidDrops=12;
 
+  // Reconcile legacy outboxes against real 409s. An exhausted play needs just
+  // one request, not one per saved catch; decisions must survive a page reload.
+  const cap=await contextFor({width:1024,height:768});page=cap.p;
+  const capFresh=await play(cap.context),capPending=Array.from({length:5},()=>event(full.playId));
+  const capGood=event(capFresh.playId),capBalance=(await bootstrap(cap.context)).wallet.balance;
+  await seed(page,[{playId:full.playId,remaining:100},{playId:capFresh.playId,remaining:100}],[...capPending,capGood]);
+  const capAttempts=[];
+  page.on('request',r=>{if(r.url().endsWith('/coin-pusher/payout'))capAttempts.push(r.postDataJSON());});
+  await open(page);
+  await wait(async()=>{const s=await saved(page);return s.pendingPayouts.length===5&&s.pendingPayouts.every(p=>p.rejection?.reason==='Coin-pusher payout limit reached');},'exhausted outbox saved for review');
+  assert.equal(capAttempts.filter(p=>p.playId===full.playId).length,1,'spent play cannot flood server with queued catches');
+  assert.equal((await saved(page)).plays.find(p=>p.playId===full.playId).remaining,0,'stop allocating new catches to a spent play');
+  assert.equal((await bootstrap(cap.context)).wallet.balance,capBalance+1,'only the valid catch credits the wallet');
+  assert.deepEqual((await saved(page)).pendingPayouts.map(({rejection,...p})=>p),capPending,'rejected event identities are retained unchanged');
+  await page.screenshot({path:path.join(artifacts,'exhausted-play-ipad.png')});
+  const capRequestCount=capAttempts.length;
+  await open(page);await page.evaluate(()=>window.dispatchEvent(new Event('online')));await page.waitForTimeout(5500);
+  assert.equal(capAttempts.length,capRequestCount,'reload, online and autosave never replay rejected catches');
+  assert.equal((await saved(page)).pendingPayouts.length,5,'rejected catches remain available for review');
+  await cap.context.close();report.exhaustedPlayRequests=1;report.durableCapRejection=true;
+
+  const conflict=await contextFor({width:390,height:844});page=conflict.p;
+  const mismatch={...old,amount:2,requestKey:randomUUID()};
+  await seed(page,[{playId:full.playId,remaining:100}],[mismatch]);
+  let conflictAttempts=0;
+  page.on('request',r=>{if(r.url().endsWith('/coin-pusher/payout'))conflictAttempts++;});
+  const conflictBalance=(await bootstrap(conflict.context)).wallet.balance;
+  await open(page);await wait(async()=>(await saved(page)).pendingPayouts[0]?.rejection?.reason==='Payout event already used','conflicting catch saved for review');
+  await page.screenshot({path:path.join(artifacts,'conflicting-event-phone.png')});
+  await open(page);await page.waitForTimeout(5500);
+  assert.equal(conflictAttempts,1,'an event collision cannot replay across reloads');
+  assert.equal((await bootstrap(conflict.context)).wallet.balance,conflictBalance,'conflicts never produce duplicate credits');
+  await conflict.context.close();report.durableConflictRejection=true;
+
   // Five simultaneous catch events would formerly create five red toasts and
   // 10 requests per retry cycle. Verify one notification and shared backoff.
   const outage=await contextFor({width:1180,height:820});page=outage.p;
@@ -132,6 +166,7 @@ try {
     await page.screenshot({path:path.join(artifacts,`status-${status}-phone.png`)});
     if(status===429){reject=false;await wait(async()=>(await saved(page)).pendingPayouts.length===0,'rate limit recovery');assert.ok(attempts[1]-attempts[0]>=5800,'Retry-After respected');}
     else{await page.evaluate(()=>window.dispatchEvent(new Event('online')));await page.waitForTimeout(3500);assert.equal(attempts.length,1,'terminal rejections do not loop even on an online event');}
+    if(status===409){await open(page);await page.waitForTimeout(5500);assert.equal(attempts.length,1,'generic permanent rejection persists across reloads');assert.equal((await saved(page)).pendingPayouts[0].rejection.status,409);}
     await test.context.close();report[`status${status}`]=true;
   }
   const data=JSON.parse(await fs.readFile(databaseFile,'utf8'));
