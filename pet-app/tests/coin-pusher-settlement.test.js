@@ -46,3 +46,33 @@ test('API failures preserve status, Retry-After and correlation id; malformed re
   global.fetch=async()=>new Response(JSON.stringify({success:false,message:'signed out'}),{status:401});
   await assert.rejects(api.payoutCoinPusher({playId:'play',eventId:'event',amount:1},'key'),error=>error.status===401);
 });
+
+test('terminal payout decisions persist; exhausted plays block their whole outbox without losing evidence', async t => {
+  const vite=await createServer({root:path.resolve(__dirname,'..'),server:{middlewareMode:true,hmr:false,ws:false},appType:'custom',logLevel:'error'});
+  t.after(()=>vite.close());
+  const {rejectCoinPusherPayout,coinPusherPayoutEventId}=await vite.ssrLoadModule('/src/game/CoinPusherSettlement.ts');
+  const event=(playId,eventId)=>({playId,eventId,amount:1,requestKey:`key-${eventId}`});
+  const capEvents=[event('spent','a'),event('spent','b'),event('fresh','c')];
+  const error=Object.assign(new Error('Coin-pusher payout limit reached'),{status:409,requestId:'trace-cap'});
+  const rejected=rejectCoinPusherPayout(capEvents,capEvents[0],error);
+  assert.equal(rejected.exhaustedPlay,true);
+  assert.equal(capEvents[0].rejection.requestId,'trace-cap');
+  assert.deepEqual(capEvents[1].rejection,capEvents[0].rejection,'all queued catches on a spent play stop');
+  assert.equal(capEvents[2].rejection,undefined,'other paid plays can still settle');
+  const restored=JSON.parse(JSON.stringify(capEvents));
+  assert.deepEqual(restored,capEvents,'review evidence survives the exact session JSON representation');
+  assert.deepEqual(restored.map(e=>[e.eventId,e.requestKey,e.amount]),[['a','key-a',1],['b','key-b',1],['c','key-c',1]],'never rewrite or reassign an uncertain reward');
+
+  const mismatch=[event('play','old'),event('play','new')];
+  rejectCoinPusherPayout(mismatch,mismatch[0],Object.assign(new Error('Payout event already used'),{status:409}));
+  assert.equal(mismatch[0].rejection.status,409);
+  assert.equal(mismatch[1].rejection,undefined,'a conflicting event does not reject unrelated catches');
+  for(const status of [0,401,403,408,429,500,503]){
+    const pending=[event('play',String(status))];
+    assert.equal(rejectCoinPusherPayout(pending,pending[0],Object.assign(new Error('recoverable'),{status})),undefined);
+    assert.equal(pending[0].rejection,undefined,'sign-in and network failures remain recoverable');
+  }
+  const ids=Array.from({length:100},()=>coinPusherPayoutEventId('same-play'));
+  assert.equal(new Set(ids).size,100,'new tabs or restored counters cannot repeat catch IDs');
+  assert.ok(ids.every(id=>id.startsWith('same-play:')&&id.length<=120));
+});

@@ -1,3 +1,12 @@
+import { idempotencyKey } from '../types';
+import type { StoredCoinPusherPayout } from './CoinPusherSessionStore';
+
+// A counter from an old snapshot or another tab can repeat. Keep each new catch
+// globally unique while retries retain the event identity already in the outbox.
+export function coinPusherPayoutEventId(playId: string): string {
+  return `${playId}:${idempotencyKey()}`;
+}
+
 // A cached idempotent response describes the original commit, not today's budget.
 export function settledCoinPusherRemaining(current: number, response: number): number {
   return Math.max(0, Math.min(current, Number.isFinite(response) ? response : current));
@@ -7,6 +16,23 @@ export interface SettlementError extends Error {
   status?: number;
   retryAfterMs?: number;
   requestId?: string;
+}
+
+export function rejectCoinPusherPayout(
+  pending: StoredCoinPusherPayout[], payout: StoredCoinPusherPayout, error: SettlementError,
+) {
+  const status = error.status ?? 0;
+  // Authentication can be repaired by signing in. Network/rate-limit failures
+  // still use backoff. Only persist a rejection which a retry cannot repair.
+  if (status < 400 || status >= 500 || [401, 403, 408, 429].includes(status)) return undefined;
+  const rejection = { status, reason: error.message, ...(error.requestId ? { requestId: error.requestId } : {}) };
+  const exhaustedPlay = status === 409 && error.message === 'Coin-pusher payout limit reached';
+  for (const entry of pending) {
+    if (entry.eventId === payout.eventId || (exhaustedPlay && entry.playId === payout.playId)) {
+      entry.rejection = rejection;
+    }
+  }
+  return { rejection, exhaustedPlay };
 }
 
 // Shared circuit breaker for the durable coin/prize outbox. New catches must not

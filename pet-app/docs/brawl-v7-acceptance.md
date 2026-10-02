@@ -22,3 +22,5 @@ Windows Chrome，1024×768 觸控模擬；全部測試使用隔離 JSON 學生�
 來源腳本：test-pet-brawl-elemental.mjs、test-pet-brawl-elemental-live.mjs、test-pet-brawl-roster.mjs、test-pet-brawl-roster-live.mjs、test-pet-brawl.mjs、test-pet-brawl-live.mjs、test-pet-brawl-cat.mjs、test-pet-brawl-pvp.mjs。證據目錄 artifacts/pet-playtest/brawl-v7/ 包含 JSON、50 張招式截圖、showcase.png 及正常速度 elemental-showcase.webm。
 
 悟空／鳴人等隱藏角色只在私有 fixture 展示招式，公開選角及 API 仍關閉。未在實體 iPad Safari 或 PostgreSQL 真實連線執行本次驗收。
+
+整合遠端的縮放／文字選取防護及推銀仔結算修正後，重新通過 TypeScript、Vite、50 招渲染與六招正常速度效能、桌面／iPad／手機橫向多觸點與退出還原，以及 7 項結算／production artifact 檢查。發佈使用此整合版本的圖集與入口。

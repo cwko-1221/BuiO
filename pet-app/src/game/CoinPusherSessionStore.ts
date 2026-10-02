@@ -10,6 +10,8 @@ export interface StoredCoinPusherPayout {
   amount: number;
   eventId: string;
   requestKey: string;
+  // Keep rejected rewards for review, but never put them back on the automatic outbox.
+  rejection?: { status: number; reason: string; requestId?: string };
 }
 
 export interface StoredCoinPusherDrop {

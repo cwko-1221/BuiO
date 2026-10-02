@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import './styles/main.css';
 import { api } from './api';
-import { CoinPusherSettlementRetries, settledCoinPusherRemaining, type SettlementError } from './game/CoinPusherSettlement';
+import { CoinPusherSettlementRetries, coinPusherPayoutEventId, rejectCoinPusherPayout, settledCoinPusherRemaining, type SettlementError } from './game/CoinPusherSettlement';
 import { lockCoinPusherBrowserInteractions } from './game/CoinPusherBrowserInteractions';
 import { CoinPusherTeacherSettings } from './teacher/CoinPusherSettings';
 import { QuietRoom } from './quiet-room';
@@ -1086,6 +1086,14 @@ class StudentApp {
           ...(restoreSession.pendingDrop.result?{result:{...restoreSession.pendingDrop.result}}:{}),
         }:undefined;
         this.coinPusherPayoutSequence=restoreSession.payoutSequence;
+        // Terminal server decisions survive page reloads. Old saves without this
+        // field still get one reconciliation attempt, then become durable too.
+        for(const payout of this.coinPusherPendingPayouts){
+          if(payout.rejection?.reason==='Coin-pusher payout limit reached'){
+            const play=this.coinPusherPlays.find((entry)=>entry.playId===payout.playId);
+            if(play)play.remaining=0;
+          }
+        }
       }
       this.coinPusherSessionRestored=!!restoreSession;
       coinRoot.dataset.sessionRestored=String(!!restoreSession);
@@ -1189,6 +1197,8 @@ class StudentApp {
         void this.persistCoinPusherSession();
       }
       for(const payout of this.coinPusherPendingPayouts)this.queueCoinPusherPayout(payout,generation,true);
+      const rejected=this.coinPusherPendingPayouts.find((payout)=>payout.rejection)?.rejection;
+      if(rejected)this.handleCoinPusherPayoutError(Object.assign(new Error(rejected.reason),rejected));
       if(this.coinPusherPendingDrop&&!this.coinPusherPendingDrop.applied){
         void this.dropCoinPusher(this.coinPusherPendingDrop.worldX,true);
       }
@@ -1546,7 +1556,8 @@ class StudentApp {
     const available=Math.max(0,play.remaining-play.reserved);
     const amount=Math.min(Math.max(0,Math.floor(count)),available,20);
     if(amount<=0)return;
-    const eventId=`${play.playId}:${++this.coinPusherPayoutSequence}`;
+    this.coinPusherPayoutSequence+=1; // Retain the legacy save field, not its event-ID scheme.
+    const eventId=coinPusherPayoutEventId(play.playId);
     const requestKey=idempotencyKey();
     play.reserved+=amount;
     const payout:StoredCoinPusherPayout={playId:play.playId,amount,eventId,requestKey};
@@ -1561,7 +1572,7 @@ class StudentApp {
     });
   }
   private queueCoinPusherPayout(payout:StoredCoinPusherPayout,generation:number,recovered=false,origins?:CoinPusherRewardOrigin[]) {
-    if(this.coinPusherPayoutsQueued.has(payout.eventId))return;
+    if(payout.rejection||this.coinPusherPayoutsQueued.has(payout.eventId))return;
     if(!navigator.onLine||!this.coinPusherSettlementRetries.canAttempt(payout.eventId)){this.scheduleCoinPusherPayoutRetry();return;}
     let play=this.coinPusherPlays.find((entry)=>entry.playId===payout.playId);
     if(!play){
@@ -1571,7 +1582,7 @@ class StudentApp {
     this.coinPusherPayoutsQueued.add(payout.eventId);
     const job=async()=>{
       try {
-        if(!navigator.onLine||!this.coinPusherSettlementRetries.canAttempt(payout.eventId))return;
+        if(payout.rejection||!navigator.onLine||!this.coinPusherSettlementRetries.canAttempt(payout.eventId))return;
         if(!await this.persistCoinPusherSession()){
           this.coinPusherSettlementRetries.fail(payout.eventId,new Error('storage'));
           return;
@@ -1597,7 +1608,7 @@ class StudentApp {
     for(const payout of this.coinPusherPendingPayouts)this.queueCoinPusherPayout(payout,generation,true);
   };
   private scheduleCoinPusherPayoutRetry() {
-    const ids=[...this.coinPusherPendingPayouts.map(p=>p.eventId),...this.arcadePendingPrizes];
+    const ids=[...this.coinPusherPendingPayouts.filter(p=>!p.rejection).map(p=>p.eventId),...this.arcadePendingPrizes];
     if(this.coinPusherPayoutRetryTimer!==undefined||!ids.length||!navigator.onLine||document.visibilityState==='hidden')return;
     const nextAt=this.coinPusherSettlementRetries.nextAttempt(ids);
     if(!Number.isFinite(nextAt))return;
@@ -1618,6 +1629,11 @@ class StudentApp {
         return this.submitCoinPusherPayout(play,payout,generation,origins,attempt+1,true);
       }
       this.coinPusherSettlementRetries.fail(eventId,failure);
+      const rejected=rejectCoinPusherPayout(this.coinPusherPendingPayouts,payout,failure);
+      if(rejected){
+        if(rejected.exhaustedPlay)play.remaining=0;
+        await this.persistCoinPusherSession();
+      }
       if(generation===this.coinPusherGeneration&&this.tab==='coinPusher')this.handleCoinPusherPayoutError(failure);
       return false;
     }

@@ -65,7 +65,7 @@ test('the HTML entrypoint loads the teacher reward settings and scoped gesture l
   // exactly the entry and modules linked by this HTML, excluding stale bundles.
   const linked = [entry[1], ...Array.from(html.matchAll(/<link[^>]*rel="modulepreload"[^>]*href="\/pet\/([^"<>]+)"/g), match => match[1])];
   const client = linked.map(file => fs.readFileSync(path.join(distRoot, file), 'utf8')).join('\n');
-  for (const marker of ['/api/pet/teacher/coin-pusher/settings', 'coinPusherRewardPerCoin', 'coin-pusher-input-locked']) {
+  for (const marker of ['/api/pet/teacher/coin-pusher/settings', 'coinPusherRewardPerCoin', 'coin-pusher-input-locked', 'Coin-pusher payout limit reached', 'rejection']) {
     assert.ok(client.includes(marker), `${marker} must be in the currently linked client, not just an old asset`);
   }
 });
