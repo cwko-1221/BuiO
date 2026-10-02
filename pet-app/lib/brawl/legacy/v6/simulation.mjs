@@ -1,10 +1,9 @@
-import {VERSION,TICKS,MAX_TICKS,INPUT as I,VALID_MASK,FIGHTERS,ENEMIES,STAGES,DIFFICULTIES,fighterById as releasedFighterById,combatFighterById as fighterById,stageById} from './catalog.mjs';
-import * as legacy from './legacy/simulation.mjs';
-import * as v2 from './legacy/v2/simulation.mjs';
-import * as v3 from './legacy/v3/simulation.mjs';
-import * as v4 from './legacy/v4/simulation.mjs';
-import * as v5 from './legacy/v5/simulation.mjs';
-import * as v6 from './legacy/v6/simulation.mjs';
+import {VERSION,TICKS,MAX_TICKS,INPUT as I,VALID_MASK,FIGHTERS,ENEMIES,STAGES,DIFFICULTIES,fighterById,stageById} from './catalog.mjs';
+import * as legacy from '../simulation.mjs';
+import * as v2 from '../v2/simulation.mjs';
+import * as v3 from '../v3/simulation.mjs';
+import * as v4 from '../v4/simulation.mjs';
+import * as v5 from '../v5/simulation.mjs';
 import {abilityDuration,setupAbility,updateAbility,tickFields,tickAbilityProjectile,tickStatuses} from './abilities.mjs';
 const combat={impact,melee,projectile};
 const U=100;
@@ -21,10 +20,9 @@ export function createBattle(options={}){
   if(options.version==='brawl-v3')return v3.createBattle(options);
   if(options.version==='brawl-v4')return v4.createBattle(options);
   if(options.version==='brawl-v5')return v5.createBattle(options);
-  if(options.version==='brawl-v6')return v6.createBattle(options);
   if(options.version&&options.version!==VERSION)throw new Error('Unsupported battle version');
   const {fighterId=FIGHTERS[0].id,stageId=STAGES[0].id,difficulty='easy',mode='campaign',seed=1,opponentId=FIGHTERS[1].id}=options;
-  if(!releasedFighterById(fighterId)||!stageById(stageId)||!DIFFICULTIES[difficulty]||!['campaign','practice','tutorial','duel','pvp'].includes(mode)||!releasedFighterById(opponentId))throw new Error('Invalid battle settings');
+  if(!fighterById(fighterId)||!stageById(stageId)||!DIFFICULTIES[difficulty]||!['campaign','practice','tutorial','duel','pvp'].includes(mode)||!fighterById(opponentId))throw new Error('Invalid battle settings');
   const s={version:VERSION,seed:seed>>>0,rng:(seed>>>0)||1,fighterId,stageId,difficulty,mode,opponentId,tick:0,nextId:1,zone:0,spawned:0,total:6,spawnAt:0,status:'playing',retries:0,cleared:false,actors:[],projectiles:[],fields:[],events:[],pickups:[],lesson:0,bossAdds:false,lastMask:0,freeze:0,comboHits:0,comboUntil:0,bestCombo:0,kills:0};
   s.actors.push(actor(s,fighterId,0,190,455));
   if(mode==='duel'||mode==='pvp'){s.actors.push(actor(s,opponentId,1,920,455));if(mode==='pvp')s.actors[1].human=true;}
@@ -118,28 +116,25 @@ function ai(s,a){
   a.lastThink=s.tick;const p=s.actors[0],dx=(p.x-a.x)/U,dy=(p.y-a.y)/U,e=fighterById(a.kind)||ENEMIES[a.kind];let mask=0;
   if(Math.abs(dx)>1&&['idle','walk','run','guard','jump'].includes(a.action))a.facing=Math.sign(dx);
   const busy=s.actors.filter(t=>t.team===1&&t.id!==a.id&&t.hp>0&&t.action.startsWith('attack')).length;
-  const fighter=fighterById(a.kind),available=fighter?.skills.map((k,n)=>({k,n})).filter(({k,n})=>!a.cooldowns[n]&&a.mp>=k.mp*U)||[];
-  const range=fighter?(available.length?Math.min(310,Math.max(105,...available.map(({k})=>(k.range||160)*.65))):85):a.kind==='thrower'||a.kind==='squirrel'?320:a.boss&&(a.phase+1)%2===0?300:(e.range||85);
+  const range=a.kind==='thrower'||a.kind==='squirrel'?320:a.boss&&(a.phase+1)%2===0?300:(e.range||85);
   if(Math.abs(dy)>18)mask|=dy>0?I.DOWN:I.UP;
   if(Math.abs(dx)>range*.85)mask|=dx>0?I.RIGHT:I.LEFT;
   else if(Math.abs(dx)<80&&a.kind==='thrower')mask|=dx>0?I.LEFT:I.RIGHT;
   if(Math.abs(dx)<range&&Math.abs(dy)<26&&s.tick>=a.nextAttack&&busy<DIFFICULTIES[s.difficulty].slots){
     mask|=I.ATTACK;a.nextAttack=s.tick+DIFFICULTIES[s.difficulty].reaction+40+Math.floor(random(s)*45);
-    if(fighter){const choices=available.filter(({k})=>Math.abs(dx)<=Math.max(150,k.range||150));const choice=choices[Math.floor(random(s)*choices.length)];if(choice&&random(s)<.75)mask=choice.n===0?I.SKILL1:I.SKILL2;else if(Math.abs(dx)>110)mask=dx>0?I.RIGHT:I.LEFT;}else if(a.kind==='shield'&&random(s)<.28)mask=I.GUARD;
+    if(fighterById(a.kind)&&random(s)<.45){const kit=fighterById(a.kind).skills,choices=kit.map((k,n)=>({k,n})).filter(({k,n})=>!a.cooldowns[n]&&a.mp>=k.mp*U&&(Math.abs(dx)<=Math.max(100,k.range||100)));const choice=choices[Math.floor(random(s)*choices.length)];if(choice)mask=choice.n===0?I.SKILL1:I.SKILL2;}else if(a.kind==='shield'&&random(s)<.28)mask=I.GUARD;
   }
   if(a.kind==='slime'&&s.tick%120<6)mask|=I.JUMP;
   a.aiMask=mask;return mask;
 }
 function updateActor(s,a,mask){
-  if(a.hp>0&&a.freezeUntil>s.tick){a.lastMask=mask;return;}
-  if(a.shockUntil>s.tick)mask&=~(I.SKILL1|I.SKILL2);
   if(a.hp<=0){a.actionTick++;return;}
   a.cooldowns=a.cooldowns.map(c=>Math.max(0,c-1));a.invuln=Math.max(0,a.invuln-1);
   a.mp=Math.min(10000,a.mp+10);if(a.action!=='guard')a.guard=Math.min(10000,a.guard+25);
   const pressed=mask&~a.lastMask;a.lastMask=mask;
   if(a.kind==='starpatch-cat'&&a.action==='skill1'&&a.actionTick>=6&&(pressed&I.SKILL2))a.catQueueUntil=s.tick+30;
   if(a.stop>0){a.stop--;return;}
-  if((a.z>0||a.vz>0)&&!(a.action==='skill2'&&a.kind==='starpatch-cat')&&!(a.action.startsWith('skill')&&['leap','sky-shot'].includes(fighterById(a.kind)?.skills[a.skill]?.mechanic))){a.z+=a.vz;a.vz-=36;if(a.z<=0){a.z=0;a.vz=0;s.events.push({type:'land',actor:a.id});if(a.action==='jump')begin(s,a,'idle',0);}}
+  if((a.z>0||a.vz>0)&&!(a.action==='skill2'&&a.kind==='starpatch-cat')&&!(a.action.startsWith('skill')&&fighterById(a.kind)?.skills[a.skill]?.mechanic==='leap')){a.z+=a.vz;a.vz-=36;if(a.z<=0){a.z=0;a.vz=0;s.events.push({type:'land',actor:a.id});if(a.action==='jump')begin(s,a,'idle',0);}}
   const moving=(mask&(I.LEFT|I.RIGHT|I.UP|I.DOWN))!==0;
   if(pressed&I.GUARD){a.guardCombo=s.tick;a.guardDirection=false;}
   if(s.tick-a.guardCombo<=24&&(mask&(a.facing===1?I.RIGHT:I.LEFT)))a.guardDirection=true;
@@ -206,7 +201,6 @@ export function stepBattle(s,mask=0,opponentMask=0){
   if(s.version==='brawl-v3')return v3.stepBattle(s,mask);
   if(s.version==='brawl-v4')return v4.stepBattle(s,mask,opponentMask);
   if(s.version==='brawl-v5')return v5.stepBattle(s,mask,opponentMask);
-  if(s.version==='brawl-v6')return v6.stepBattle(s,mask,opponentMask);
   if(!Number.isInteger(mask)||mask<0||mask>VALID_MASK)throw new Error('Invalid input');
   if(s.mode==='pvp'&&(!Number.isInteger(opponentMask)||opponentMask<0||opponentMask>1023||mask>1023))throw new Error('Invalid multiplayer input');
   if(['won','lost','draw'].includes(s.status))return s;
@@ -216,7 +210,7 @@ export function stepBattle(s,mask=0,opponentMask=0){
   mask|=s.frozenPress||0;s.frozenPress=0;
   if(s.mode==='pvp'){opponentMask|=s.frozenOpponent||0;s.frozenOpponent=0;}
   if(s.status==='ko'){
-    if(mask&I.RETRY&&s.retries===0){s.retries++;s.actors=[s.actors[0]];const p=s.actors[0];p.hp=p.maxHp;p.mp=p.guard=10000;p.x=(s.zone*1280+190)*U;p.y=455*U;p.z=p.vz=p.stop=p.knock=p.hitChain=p.runDirection=0;p.invuln=90;p.cooldowns=[0,0];p.shield=p.counterDamage=p.slowUntil=p.rootUntil=p.hasteUntil=p.burnUntil=p.readUntil=p.starMarkUntil=p.freezeUntil=p.shockUntil=p.wetUntil=p.freezeReadyAt=0;p.bufferUntil=-1;p.guardCombo=p.lastHit=-999;p.guardDirection=p.queued=false;p.lastTap=[-99,-99];begin(s,p,'idle',0);p.lastMask=0;s.projectiles=[];s.fields=[];s.pickups=[];s.status='playing';wave(s);s.events.push({type:'retry'});}
+    if(mask&I.RETRY&&s.retries===0){s.retries++;s.actors=[s.actors[0]];const p=s.actors[0];p.hp=p.maxHp;p.mp=p.guard=10000;p.x=(s.zone*1280+190)*U;p.y=455*U;p.z=p.vz=p.stop=p.knock=p.hitChain=p.runDirection=0;p.invuln=90;p.cooldowns=[0,0];p.shield=p.counterDamage=p.slowUntil=p.rootUntil=p.hasteUntil=p.burnUntil=p.readUntil=p.starMarkUntil=0;p.bufferUntil=-1;p.guardCombo=p.lastHit=-999;p.guardDirection=p.queued=false;p.lastTap=[-99,-99];begin(s,p,'idle',0);p.lastMask=0;s.projectiles=[];s.fields=[];s.pickups=[];s.status='playing';wave(s);s.events.push({type:'retry'});}
     else if(mask&I.END)s.status='lost';return s;
   }
   if(s.tick>=MAX_TICKS){s.status='lost';return s;}
@@ -250,10 +244,10 @@ export function stepBattle(s,mask=0,opponentMask=0){
   }
   return s;
 }
-export function battleResult(s){if(s.version==='brawl-v1')return legacy.battleResult(s);if(s.version==='brawl-v2')return v2.battleResult(s);if(s.version==='brawl-v3')return v3.battleResult(s);if(s.version==='brawl-v4')return v4.battleResult(s);if(s.version==='brawl-v5')return v5.battleResult(s);if(s.version==='brawl-v6')return v6.battleResult(s);return {outcome:s.status,ticks:s.tick,seconds:Math.round(s.tick/TICKS),retries:s.retries,hp:s.actors[0].hp,bestCombo:s.bestCombo,kills:s.kills,stars:s.status==='won'&&s.mode==='campaign'?1+Number(s.retries===0)+Number(s.tick<=18000&&s.actors[0].hp>=s.actors[0].maxHp*.4):0};}
+export function battleResult(s){if(s.version==='brawl-v1')return legacy.battleResult(s);if(s.version==='brawl-v2')return v2.battleResult(s);if(s.version==='brawl-v3')return v3.battleResult(s);if(s.version==='brawl-v4')return v4.battleResult(s);if(s.version==='brawl-v5')return v5.battleResult(s);return {outcome:s.status,ticks:s.tick,seconds:Math.round(s.tick/TICKS),retries:s.retries,hp:s.actors[0].hp,bestCombo:s.bestCombo,kills:s.kills,stars:s.status==='won'&&s.mode==='campaign'?1+Number(s.retries===0)+Number(s.tick<=18000&&s.actors[0].hp>=s.actors[0].maxHp*.4):0};}
 export function replayBattle(options,inputs,endTick,{terminal=true}={}){
   if(options.version==='brawl-v1')return legacy.replayBattle(options,inputs,endTick,{terminal});
-  if(options.version==='brawl-v2')return v2.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v3')return v3.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v4')return v4.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v5')return v5.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v6')return v6.replayBattle(options,inputs,endTick,{terminal});
+  if(options.version==='brawl-v2')return v2.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v3')return v3.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v4')return v4.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v5')return v5.replayBattle(options,inputs,endTick,{terminal});
   if(!Number.isInteger(endTick)||endTick<0||endTick>MAX_TICKS||!Array.isArray(inputs)||inputs.length>MAX_TICKS+1)throw new Error('Invalid replay size');
   let previous=-1;for(const f of inputs){if(!f||!Number.isInteger(f.tick)||f.tick<=previous||f.tick<1||f.tick>endTick||!Number.isInteger(f.mask)||f.mask<0||f.mask>VALID_MASK)throw new Error('Invalid replay input');previous=f.tick;}
   const s=createBattle(options);let index=0,mask=0;

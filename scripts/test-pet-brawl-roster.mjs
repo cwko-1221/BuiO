@@ -9,7 +9,7 @@ import {FIGHTERS,VERSION,HIDDEN_FIGHTER_IDS,INPUT as I,fightersForVersion} from 
 import * as v5 from '../pet-app/lib/brawl/legacy/v5/simulation.mjs';
 import {createBattle,stepBattle,replayBattle,battleResult} from '../pet-app/lib/brawl/simulation.mjs';
 const require=createRequire(import.meta.url),published=require('../pet-app/lib/catalog').catalog;
-assert.equal(VERSION,'brawl-v6');assert.equal(FIGHTERS.length,12);assert.equal(HIDDEN_FIGHTER_IDS.length,13);
+assert.equal(VERSION,'brawl-v7');assert.equal(FIGHTERS.length,12);assert.equal(HIDDEN_FIGHTER_IDS.length,13);
 assert.deepEqual([...HIDDEN_FIGHTER_IDS].sort(),published.pets.filter(p=>p.rarity==='epic').map(p=>p.id).sort());
 assert.deepEqual(FIGHTERS.map(f=>f.id).sort(),published.pets.filter(p=>!HIDDEN_FIGHTER_IDS.includes(p.id)).map(p=>p.id).sort());
 assert.equal(new Set(FIGHTERS.flatMap(f=>f.skills.map(k=>k.kind))).size,24);
@@ -22,13 +22,13 @@ for(const f of fightersForVersion('brawl-v5')){
  for(let tick=1;tick<=400;tick++){const frame=log.find(f=>f.tick===tick);if(frame)mask=frame.mask;v5.stepBattle(old,mask);stepBattle(routed,mask);}
  assert.deepEqual(routed,old);assert.deepEqual(replayBattle(options,log,400,{terminal:false}),old);assert.deepEqual(battleResult(routed),v5.battleResult(old));
 }
-console.log('✓ Historical v5 logs retain their exact 19-fighter simulation; newly closed characters cannot start v6 battles');
+console.log('✓ Historical v5 logs retain their exact 19-fighter simulation; newly closed characters cannot start v7 battles');
 console.log('✓ Exact released roster, 24 named skills; all 13 hidden fighters are closed, rarity and v1–v4 archives');
 const coverage=[];
 for(const f of FIGHTERS){
   for(const [n,k] of f.skills.entries()){
     const s=createBattle({fighterId:f.id,mode:'practice'}),p=s.actors[0],t=s.actors[1];p.hp=p.maxHp-30;
-    const distant=['leap','trap','blast','target-blast','field','retreat'].includes(k.mechanic);
+    const distant=['leap','trap','blast','target-blast','field','retreat','tornado','lob','fissure','rain','barrage'].includes(k.mechanic);
     t.x=p.x+(distant?k.mechanic==='retreat'?0:k.range:Math.min(120,k.range||60))*100;t.y=p.y+(k.spread?.[0]||0)*100;
     const initial=t.hp,startMp=p.mp,bit=n?I.SKILL2:I.SKILL1;stepBattle(s,bit);
     assert.equal(p.mp,startMp-k.mp*100,f.id+' mana cost');assert.equal(p.cooldowns[n],k.cooldown);
@@ -40,7 +40,7 @@ for(const f of FIGHTERS){
     assert.ok(releases>0,f.id+' skill '+n+' released');
     if(k.mechanic!=='buff'&&k.damage>0)assert.ok(t.hp<initial,f.id+' '+k.kind+' damages its intended target');
     if(k.shield)assert.equal(shield,k.shield);if(k.haste)assert.equal(haste,k.haste);if(k.counter)assert.equal(counter,k.counter);if(k.heal)assert.ok(p.hp>p.maxHp-30);
-    if(k.slowTicks)assert.ok(slow);if(k.rootTicks)assert.ok(root);if(k.markTicks)assert.ok(mark);if(k.mechanic==='projectile')assert.ok(projectiles);if(['trap','blast','target-blast','field','clones','retreat'].includes(k.mechanic))assert.ok(fields);
+    if(k.slowTicks)assert.ok(slow);if(k.rootTicks)assert.ok(root);if(k.markTicks)assert.ok(mark);if(['projectile','wave','lob'].includes(k.mechanic))assert.ok(projectiles);if(['trap','blast','target-blast','field','clones','retreat','tornado','fissure','rain','sanctuary','barrage'].includes(k.mechanic))assert.ok(fields);
     coverage.push({fighter:f.id,skill:k.kind,damage:initial-t.hp,shield,haste,counter,fields,projectiles});
   }
   // Legal input logs include movement, skills and an aerial attack, with no fixture edits.
@@ -74,6 +74,6 @@ try{await petRepo.ensureStudent('S001');await petRepo.ensureStudent('S002');cons
   }
   assert.equal((await duels.player('S001')).pets.length,12,'Owned hidden pets stay outside the invitation selector');assert.ok(d.petWallets.every(w=>w.balance===900));console.log('✓ All 13 owned hidden fighters are closed in every mode, AI opponents and paid duels; rejected requests charge nothing');
   const c=await repo.getCatalog();assert.equal(c.fighters.length,12);assert.equal(Object.keys(c.assets.fighters).length,12);assert.equal(d.petCurrencyLedger.length,0,'access and free modes charge nothing');
-  await fs.mkdir('artifacts/pet-playtest/brawl-v6',{recursive:true});await fs.writeFile('artifacts/pet-playtest/brawl-v6/skill-coverage.json',JSON.stringify(coverage,null,2));
+  await fs.mkdir('artifacts/pet-playtest/brawl-v7',{recursive:true});await fs.writeFile('artifacts/pet-playtest/brawl-v7/skill-coverage.json',JSON.stringify(coverage,null,2));
   console.log('✓ All 12 open owned fighters authorized in every mode; foreign / spoofed / unowned selections rejected, no charges');
 }finally{await fs.rm(temp,{recursive:true,force:true});}

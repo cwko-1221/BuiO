@@ -23,7 +23,7 @@ const d=store.load(),ids=['S001','S002','S003'],petIds=ids.map(()=>randomUUID())
 for(let n=0;n<3;n++){d.petWallets.find(w=>w.studentId===ids[n]).balance=5000;d.petInstances.push({petId:petIds[n],studentId:ids[n],speciesId:fighters[n],xp:0,stage:1,equippedSkills:[],equippedWearables:[]});}store.save();
 const balances=()=>ids.map(id=>d.petWallets.find(w=>w.studentId===id).balance);
 const entries=()=>d.petCurrencyLedger.filter(l=>l.kind==='brawl_duel_entry').length;
-const meta=()=>({id:randomUUID(),version:'brawl-v6',stageId:'sunny-training',seed:1,players:ids.slice(0,2).map((id,n)=>({id,petId:petIds[n],fighterId:fighters[n],name:id}))});
+const meta=()=>({id:randomUUID(),version:'brawl-v7',stageId:'sunny-training',seed:1,players:ids.slice(0,2).map((id,n)=>({id,petId:petIds[n],fighterId:fighters[n],name:id}))});
 let server,io,duels,sockets=[];
 try{
   const baseline=balances();let m=meta();d.petWallets[1].balance=499;store.save();await assert.rejects(repo.charge(m),/不足/);assert.deepEqual(balances(),[5000,499,5000]);assert.equal(entries(),0);d.petWallets[1].balance=5000;

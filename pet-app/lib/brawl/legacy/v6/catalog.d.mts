@@ -10,6 +10,3 @@ export const HIDDEN_FIGHTER_IDS:readonly string[];
 export function fightersForVersion(version:string):Fighter[];
 export function fighterById(id:string):Fighter|undefined;
 export function stageById(id:string):Stage|undefined;
-
-export const ALL_FIGHTERS:Fighter[];
-export function combatFighterById(id:string):Fighter|undefined;

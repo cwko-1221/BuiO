@@ -1,0 +1,28 @@
+{
+  "version": "brawl-v7",
+  "date": "2026-10-03",
+  "tool": "native image_gen.imagegen",
+  "transparent_background": true,
+  "sources": [
+    {
+      "file": "imagegen/brawl-v7/elemental-fx.png",
+      "generationBrief": "Transparent RGBA 2D arcade action VFX atlas, 4 columns × 3 rows, isolated sprites with clear transparent gutters; bold luminous hand-painted anime arcade silhouettes inspired by the scale and clarity of LF2 without copying its art. In row order: horizontal flame plume, fireball, ground fire eruption, tall ice crystal cluster; ice blizzard, huge vertical lightning bolt, blue-white ki beam head, swirling blue-white spiral sphere; golden charge aura, broad tidal wave, leaf tornado, purple cosmic explosion. No text, borders, backgrounds or checkerboards. Effects fill the center of each cell; preserve transparency and avoid overlap."
+    },
+    {
+      "file": "imagegen/brawl-v7/character-fx.png",
+      "prompt": "Production-ready TRANSPARENT RGBA 2D action-game effects sprite atlas, EXACT layout 4 equal columns x 2 equal rows, eight isolated effects, intended 1024x512 landscape. EXTREMELY IMPORTANT leave a wide TRANSPARENT moat around EVERY individual sprite: 20% empty margin within every cell, no effect touches another cell, no overlapping sprites. No text, labels, frames, background or painted checkerboard. Bold detailed hand-painted arcade anime action VFX with bright luminous cores and readable dramatic silhouettes. Row 1 left to right: 1 white and pale-cyan WIND TORNADO made of swirling vapor and airy cloud streaks, no snow or ice, tall spiraling conical shape; 2 EARTH ROCK ERUPTION, huge jagged brown and tan stone pillars with flying pebbles and dust, no flame, rises from the ground; 3 brown MUD MORTAR projectile sphere with gold highlights, mud droplets and earthy chunks, no purple or magic, traveling right; 4 luminous violet-white crescent MOON DISC with sparkling lunar star trail, not a full circular ball. Row 2 left to right: 5 a spectacular pink RIBBON BOW projectile with a long flowing ribbon streamer trailing to the left and pink heart sparkles; 6 an enormous twisting green ROOT ERUPTION, gnarled vines and bright green leaves rising from the ground; 7 horizontal PINK BLOODFLAME PLUME with brilliant white/pink core and dark magenta licking flames, narrow origin on left and broad roaring flame on the right; 8 huge horizontal WHITE/GOLD PRESSURE SHOCKWAVE, oval wavefront on right with rushing white air streaks left, suitable for a superpowered punch. Authentic transparent alpha, rich organic texture and fine luminous edges. Each fills only the CENTER 60% of its cell; all outer 20% borders of every cell are entirely empty transparent, nothing cut off."
+    }
+  ],
+  "output": {
+    "file": "../public/assets/art/brawl/elemental-aa3b659851e1.webp",
+    "frameSize": 256,
+    "columns": 4,
+    "rows": 5,
+    "frames": 20,
+    "gutter": 16,
+    "contentSize": 224,
+    "encoding": "lossless WebP"
+  },
+  "build": "node scripts/build-pet-brawl-elemental-effects.mjs",
+  "presentation": "Multiple pooled sprites plus procedural graphics animate each skill's charge, body, trail, secondary elements and impacts. Hitboxes and timing belong to the shared simulation."
+}

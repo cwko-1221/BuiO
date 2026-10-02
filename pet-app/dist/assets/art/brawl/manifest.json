@@ -318,5 +318,31 @@
         "count": 8
       }
     }
+  },
+  "elementalFx": {
+    "url": "/pet/assets/art/brawl/elemental-aa3b659851e1.webp",
+    "frameSize": 256,
+    "frames": {
+      "fire-plume": 0,
+      "fireball": 1,
+      "fire-eruption": 2,
+      "ice-crystal": 3,
+      "blizzard": 4,
+      "lightning": 5,
+      "ki-head": 6,
+      "spiral-orb": 7,
+      "gold-aura": 8,
+      "tidal-wave": 9,
+      "leaf-storm": 10,
+      "cosmic-burst": 11,
+      "wind-tornado": 12,
+      "rock-eruption": 13,
+      "mud-ball": 14,
+      "moon-disc": 15,
+      "ribbon-bow": 16,
+      "root-eruption": 17,
+      "bloodflame": 18,
+      "pressure-wave": 19
+    }
   }
 }

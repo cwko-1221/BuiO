@@ -26,7 +26,7 @@ assert.ok(target.hp<target.maxHp-16);assert.ok(p.phase>=3);
 pass('buffered three-hit attacks cause real damage');
 for(const f of FIGHTERS.slice(0,3)){
   s=practice(f.id);p=s.actors[0];p.x=56000;
-  stepBattle(s,I.SKILL1);assert.equal(p.action,'skill1');assert.equal(p.mp,8000);
+  stepBattle(s,I.SKILL1);assert.equal(p.action,'skill1');assert.equal(p.mp,10000-f.skills[0].mp*100);
   ticks(s,45);const cooldown=p.cooldowns[0];stepBattle(s,I.SKILL1);assert.ok(p.cooldowns[0]<cooldown,'cannot bypass cooldown');
   ticks(s,5);stepBattle(s,I.SKILL2);assert.equal(p.action,'skill2');assert.ok(p.mp<6000);
 }

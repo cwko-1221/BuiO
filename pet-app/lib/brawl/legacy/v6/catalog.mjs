@@ -1,13 +1,11 @@
-import {ELEMENTAL_KITS,ELEMENTAL_ROLES} from './elemental-kits.mjs';
-import {FIGHTERS as V1_FIGHTERS} from './legacy/catalog.mjs';
-import {FIGHTERS as V2_FIGHTERS} from './legacy/v2/catalog.mjs';
-import {FIGHTERS as V3_FIGHTERS} from './legacy/v3/catalog.mjs';
-import {FIGHTERS as V4_FIGHTERS} from './legacy/v4/catalog.mjs';
-import {FIGHTERS as V5_FIGHTERS} from './legacy/v5/catalog.mjs';
-import {FIGHTERS as V6_FIGHTERS} from './legacy/v6/catalog.mjs';
+import {FIGHTERS as V1_FIGHTERS} from '../catalog.mjs';
+import {FIGHTERS as V2_FIGHTERS} from '../v2/catalog.mjs';
+import {FIGHTERS as V3_FIGHTERS} from '../v3/catalog.mjs';
+import {FIGHTERS as V4_FIGHTERS} from '../v4/catalog.mjs';
+import {FIGHTERS as V5_FIGHTERS} from '../v5/catalog.mjs';
 import {EXTRA_FIGHTERS} from './fighter-roster.mjs';
-export const VERSION = 'brawl-v7';
-export const SUPPORTED_VERSIONS = Object.freeze(['brawl-v1','brawl-v2','brawl-v3','brawl-v4','brawl-v5','brawl-v6',VERSION]);
+export const VERSION = 'brawl-v6';
+export const SUPPORTED_VERSIONS = Object.freeze(['brawl-v1','brawl-v2','brawl-v3','brawl-v4','brawl-v5',VERSION]);
 export const WORLD = Object.freeze({width:5120,zoneWidth:1280,floorTop:345,floorBottom:565});
 export const TICKS = 60;
 export const MAX_TICKS = 36000;
@@ -15,13 +13,12 @@ export const INPUT = Object.freeze({LEFT:1,RIGHT:2,UP:4,DOWN:8,ATTACK:16,JUMP:32
 export const VALID_MASK = 4095;
 // Hidden guest characters remain in Pet Paradise but are closed in every Brawl mode.
 export const HIDDEN_FIGHTER_IDS = Object.freeze(['nezuko-kamado','dragon-ball-goku','crayon-shin-chan','doraemon','hello-kitty','argentina-number-10','portugal-number-7','pikachu','dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki']);
-export const ALL_FIGHTERS = Object.freeze([
+export const FIGHTERS = Object.freeze([
   {id:'starpatch-cat',name:{'zh-HK':'星斑貓','en-US':'Starpatch Cat'},role:{'zh-HK':'換位追擊','en-US':'Agile hunter'},hp:100,speed:240,damage:[8,8,14],rarity:'common',color:0xf5c36a,skills:[{name:{'zh-HK':'星影換位','en-US':'Starstep'},description:{'zh-HK':'閃到前方近敵背後抓擊，留下 4 秒星印。沒有目標時只向前閃避。','en-US':'Blink behind a nearby foe and claw it, leaving a 4-second star mark. With no target, blink forward to evade.'},damage:18,mp:20,cooldown:180,kind:'blink',range:230},{name:{'zh-HK':'獵星連爪','en-US':'Starhunt Claws'},description:{'zh-HK':'躍起追擊單一敵人，連抓三次；優先追蹤星印，末擊消耗星印增傷。','en-US':'Leap at one foe for three claw strikes. Prioritize a marked foe; the finisher consumes its mark for bonus damage.'},damage:30,mp:35,cooldown:420,kind:'flurry',range:280}]},
-  {id:'cloud-ear-dog',name:{'zh-HK':'雲耳狗','en-US':'Cloud-ear Dog'},role:ELEMENTAL_ROLES['cloud-ear-dog'],hp:100,speed:210,damage:[7,7,12],rarity:'common',color:0x94cfe8,skills:ELEMENTAL_KITS['cloud-ear-dog']},
-  {id:'pudding-pig',name:{'zh-HK':'布丁豬','en-US':'Pudding Pig'},role:ELEMENTAL_ROLES['pudding-pig'],hp:120,speed:180,damage:[10,10,18],rarity:'common',color:0xf3a992,skills:ELEMENTAL_KITS['pudding-pig']},
+  {id:'cloud-ear-dog',name:{'zh-HK':'雲耳狗','en-US':'Cloud-ear Dog'},role:{'zh-HK':'遠程牽制','en-US':'Wind caster'},hp:100,speed:210,damage:[7,7,12],rarity:'common',color:0x94cfe8,skills:[{name:{'zh-HK':'雲風彈','en-US':'Cloud Bolt'},damage:18,mp:20,cooldown:180,kind:'bolt',range:600},{name:{'zh-HK':'旋風推開','en-US':'Wind Vortex'},damage:6,mp:35,cooldown:420,kind:'vortex',range:165}]},
+  {id:'pudding-pig',name:{'zh-HK':'布丁豬','en-US':'Pudding Pig'},role:{'zh-HK':'重擊控制','en-US':'Heavy guardian'},hp:120,speed:180,damage:[10,10,18],rarity:'common',color:0xf3a992,skills:[{name:{'zh-HK':'布丁衝撞','en-US':'Pudding Charge'},damage:28,mp:20,cooldown:180,kind:'dash',range:200},{name:{'zh-HK':'大地踏踏','en-US':'Earth Stomp'},damage:30,mp:35,cooldown:420,kind:'stomp',range:125}]},
   ...EXTRA_FIGHTERS,
-]);
-export const FIGHTERS = Object.freeze(ALL_FIGHTERS.filter(f=>!HIDDEN_FIGHTER_IDS.includes(f.id)));
+].filter(f=>!HIDDEN_FIGHTER_IDS.includes(f.id)));
 export const ENEMIES = Object.freeze({
   mushroom:{hp:40,damage:6,speed:115,range:65}, thrower:{hp:32,damage:5,speed:90,range:440},
   shield:{hp:80,damage:9,speed:80,range:80}, slime:{hp:50,damage:8,speed:145,range:80},
@@ -35,8 +32,5 @@ export const STAGES = Object.freeze([
 export const DIFFICULTIES = Object.freeze({easy:{hp:80,damage:65,reaction:27,slots:1,telegraph:54},normal:{hp:100,damage:100,reaction:18,slots:2,telegraph:42},hard:{hp:120,damage:125,reaction:12,slots:3,telegraph:27}});
 export const CLIPS = Object.freeze({idle:[0,8],walk:[8,8],run:[16,8],attack1:[24,8],attack2:[32,8],attack3:[40,8],jump:[48,8],air:[56,8],guard:[64,4],break:[68,4],hit:[72,4],fall:[76,4],rise:[80,4],skill1:[88,8],skill2:[96,8],win:[104,8]});
 export const fighterById = id => FIGHTERS.find(f=>f.id===id);
-export const fightersForVersion = version => version==='brawl-v1'?V1_FIGHTERS:version==='brawl-v2'?V2_FIGHTERS:version==='brawl-v3'?V3_FIGHTERS:version==='brawl-v4'?V4_FIGHTERS:version==='brawl-v5'?V5_FIGHTERS:version==='brawl-v6'?V6_FIGHTERS:FIGHTERS;
+export const fightersForVersion = version => version==='brawl-v1'?V1_FIGHTERS:version==='brawl-v2'?V2_FIGHTERS:version==='brawl-v3'?V3_FIGHTERS:version==='brawl-v4'?V4_FIGHTERS:version==='brawl-v5'?V5_FIGHTERS:FIGHTERS;
 export const stageById = id => STAGES.find(s=>s.id===id);
-
-// Combat lookup includes unreleased kits for internal QA; launch permissions use fighterById.
-export const combatFighterById = id => ALL_FIGHTERS.find(f=>f.id===id);
