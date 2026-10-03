@@ -12,7 +12,7 @@ import {INPUT as I,VERSION} from '../pet-app/lib/brawl/catalog.mjs';
 
 const fighters=['one-piece-luffy','spy-family-anya','doraemon','argentina-number-10','naruto-uzumaki'];
 const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-utility-live-')),dbFile=path.join(temp,'db.json');
-const out=path.resolve(process.env.PET_PLAYTEST_DIR||'artifacts/pet-playtest/skills-v10/browser');await fs.mkdir(out,{recursive:true});
+const out=path.resolve(process.env.PET_PLAYTEST_DIR||'artifacts/pet-playtest/skills-v11/browser');await fs.mkdir(out,{recursive:true});
 await fs.writeFile(dbFile,JSON.stringify({users:[{studentid:'S001',name:'技能測試',passwordhash:bcrypt.hashSync('test',4),role:'student',classname:'5A',language:'zh-HK'}],studentStats:[],questionLogs:[],_logId:0}));
 process.env.BUIO_JSON_DB_FILE=dbFile;process.env.SUPABASE_DB_URL='';
 const require=createRequire(import.meta.url),pets=require('../pet-app/repositories/pet.repo'),store=require('../db/jsonStore');await pets.ensureStudent('S001');
@@ -67,9 +67,9 @@ try{
  pass('Homing football visibly turns back toward a rear target in a different depth lane and lands exactly once');
 
  await start('naruto-uzumaki');await input(I.SKILL1);await ticks(130);s=await state();const clones=s.actors.filter(a=>a.cloneOwner);assert.equal(clones.length,2);assert.ok(clones.every(a=>a.x>50000));
- const labels=await page.evaluate(()=>[...window.__petGame.scene.getScene('Brawl').views.values()].filter(v=>v.status.visible).map(v=>v.status.text));assert.equal(labels.filter(t=>t.includes('分身 2/2')).length,2);await shot('10-naruto-ai-clones');
+ const labels=await page.evaluate(()=>[...window.__petGame.scene.getScene('Brawl').views.values()].filter(v=>v.status.visible).map(v=>v.status.text));assert.ok(!labels.some(t=>/分身|Clone|\d+\.\d+s/.test(t)));const hidden=await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');return scene.runtime.state.actors.filter(a=>a.cloneOwner).every(a=>!scene.views.get(a.id).status.visible);});assert.ok(hidden);await shot('10-naruto-ai-clones');
  await ticks(clones[0].cloneExpires-s.tick);s=await state();assert.equal(s.actors.filter(a=>a.cloneOwner).length,0);await shot('11-naruto-expiry-smoke');
  await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.runtime.state.actors[0].mp=0;scene.runtime.state.actors[0].cooldowns=[0,0];scene.runtime.changed();});assert.match(await page.locator('#brawlCooldown0').innerText(),/MP 不足/);assert.equal(await page.locator(`[data-battle-key="${I.SKILL1}"]`).getAttribute('aria-disabled'),'true');await shot('12-mana-state');
- pass('Two distinct Naruto actors pursue without owner movement, display hit/lifetime labels, expire with smoke, and skill buttons clearly show insufficient MP');
+ pass('Two distinct Naruto actors pursue without owner movement, have no clone labels or countdowns, expire after three seconds with smoke, and skill buttons clearly show insufficient MP');
  assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);assert.equal(JSON.parse(await fs.readFile(dbFile,'utf8')).petWallets[0].balance,2500);for(const name of ['failure.txt','failure.json','failure.png'])await fs.rm(path.join(out,name),{force:true});await fs.writeFile(path.join(out,'results.json'),JSON.stringify({pass:true,checks,errors,failures,version:VERSION},null,2));
 }catch(error){if(page){await shot('failure');await fs.writeFile(path.join(out,'failure.json'),JSON.stringify(await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');return {state:scene.runtime.state,paused:scene.runtime.paused(),update:scene.update.toString(),sysUpdate:scene.sys.sceneUpdate.toString()};}),null,2));}await fs.writeFile(path.join(out,'failure.txt'),error.stack+'\n'+logs);throw error;}finally{await browser?.close();server.kill();await new Promise(r=>server.once('exit',r));const resolved=path.resolve(temp);assert.ok(resolved.startsWith(path.join(os.tmpdir(),'buio-utility-live-')));await fs.rm(resolved,{recursive:true,force:true});}

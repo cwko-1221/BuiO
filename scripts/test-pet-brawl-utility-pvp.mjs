@@ -32,10 +32,10 @@ try{
  assert.ok(sockets.every(s=>s.frame.state.actors.filter(a=>a.cloneOwner).length===2),'both clients receive actual clone actors');
  await input(0,I.ATTACK);await advance(85);assert.equal(room.state.actors[1].flightShots,0);assert.equal(room.state.actors[1].hp,110);
  assert.ok(events.every(log=>log.filter(e=>e.type==='airRay').length===3),'both clients receive exactly three rays');
- await input(0,0);await advance(530);assert.equal(room.state.actors.filter(a=>a.cloneOwner).length,0);assert.equal(room.state.actors[1].flightUntil,0);
+ await input(0,0);await advance(75);assert.equal(room.state.actors.filter(a=>a.cloneOwner).length,0);assert.ok(room.state.tick>=180&&room.state.tick<240);await advance(70);assert.equal(room.state.actors[1].flightUntil,0);
  assert.ok(events.every(log=>log.filter(e=>e.type==='cloneSmoke'&&!e.spawn).length===2),'two removal smoke events reach each client');
  assert.equal(room.state.status,'playing');assert.equal(room.state.kills,0);assert.deepEqual(sockets[0].frame.state,sockets[1].frame.state);assert.deepEqual(sockets[0].frame.state,JSON.parse(JSON.stringify(room.state)));
  assert.deepEqual(ids.map(id=>d.petWallets.find(w=>w.studentId===id).balance),[4500,4500]);assert.equal(d.petCurrencyLedger.filter(l=>l.kind==='brawl_duel_entry').length,2);
  await request(sockets[0],'duel:leave',{matchId:mid});assert.equal(room.meta.status,'finished');assert.equal(room.meta.winnerIndex,1);
- console.log('✓ Real v10 socket duel synchronizes two AI clones, exactly three aerial rays, flight immunity, expiry/smoke and identical authoritative states; each wallet pays 500 once');
+ console.log('✓ Real v11 socket duel synchronizes two AI clones, exactly three aerial rays, flight immunity, expiry/smoke and identical authoritative states; each wallet pays 500 once');
 }finally{for(const socket of sockets)socket.disconnect();duels?.close();await new Promise(r=>io.close(r));const resolved=path.resolve(temp);assert.ok(resolved.startsWith(path.join(os.tmpdir(),'buio-utility-pvp-')));await fs.rm(resolved,{recursive:true,force:true});}

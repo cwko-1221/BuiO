@@ -4,12 +4,13 @@ import sharp from 'sharp';
 import {VERSION,FIGHTERS,STAGES,INPUT as I,fightersForVersion} from '../pet-app/lib/brawl/catalog.mjs';
 import {createBattle,stepBattle,replayBattle,battleResult} from '../pet-app/lib/brawl/simulation.mjs';
 import * as v9 from '../pet-app/lib/brawl/legacy/v9/simulation.mjs';
+import * as v10 from '../pet-app/lib/brawl/legacy/v10/simulation.mjs';
 
 const run=(s,n,mask=0,other=0)=>{const events=[];for(let i=0;i<n;i++){stepBattle(s,mask,other);events.push(...s.events);}return events;};
 const wait=(s,condition,limit=400,mask=0,other=0)=>{const events=[];while(!condition()&&limit-->0){stepBattle(s,mask,other);events.push(...s.events);}assert.ok(condition(),'condition completed within its tick budget');return events;};
 const arena=(fighter,opponent='dragon-ball-goku')=>createBattle({mode:'pvp',fighterId:fighter,opponentId:opponent});
 const pass=text=>console.log('✓ '+text);
-assert.equal(VERSION,'brawl-v10');
+assert.equal(VERSION,'brawl-v11');
 
 // These isolated fixtures change starting positions, never damage results. All
 // effects below are produced by the real input and shared simulation paths.
@@ -57,22 +58,22 @@ for(const [behind,depth,invuln] of [[true,220,0],[false,-110,120],[true,0,0]]){
 }
 pass('Homing football hits a running target behind the shooter, tracks across the full depth, and waits through hit protection');
 
-s=createBattle({mode:'practice',fighterId:'naruto-uzumaki'});[a,b]=s.actors;b.x=a.x+44000;
+s=createBattle({mode:'practice',fighterId:'naruto-uzumaki'});[a,b]=s.actors;b.x=a.x+18000;
 events=run(s,1,I.SKILL1);events.push(...wait(s,()=>s.actors.filter(t=>t.cloneOwner).length===2));
-let clones=s.actors.filter(t=>t.cloneOwner);const ids=clones.map(t=>t.id),expires=clones[0].cloneExpires;assert.equal(expires-s.tick,600);assert.ok(clones.every(t=>t.hp===2&&t.team===a.team));assert.equal(s.fields.length,0);
-const ownerX=a.x;events.push(...run(s,300));assert.equal(a.x,ownerX);assert.ok(ids.every(id=>events.some(e=>e.type==='hit'&&e.source===id)),'both clones approach and strike without owner inputs');assert.ok(events.filter(e=>ids.includes(e.source)).every(e=>!e.mpGain));
-events.push(...run(s,expires-s.tick));assert.equal(s.actors.filter(t=>t.cloneOwner).length,0);assert.equal(events.filter(e=>e.type==='cloneSmoke'&&!e.spawn).length,2);
+let clones=s.actors.filter(t=>t.cloneOwner);const ids=clones.map(t=>t.id),expires=clones[0].cloneExpires;assert.equal(expires-s.tick,180);assert.ok(clones.every(t=>t.hp===1&&t.team===a.team));assert.equal(s.fields.length,0);
+const ownerX=a.x;events.push(...run(s,120));assert.equal(a.x,ownerX);assert.ok(ids.every(id=>events.some(e=>e.type==='hit'&&e.source===id)),'both clones approach and strike without owner inputs');assert.ok(events.filter(e=>ids.includes(e.source)).every(e=>!e.mpGain));
+events.push(...run(s,expires-s.tick-1));assert.equal(s.actors.filter(t=>t.cloneOwner).length,2,'clones still exist on tick 179');events.push(...run(s,1));assert.equal(s.actors.filter(t=>t.cloneOwner).length,0);assert.equal(events.filter(e=>e.type==='cloneSmoke'&&!e.spawn).length,2);
 s=arena('doraemon','naruto-uzumaki');[a,b]=s.actors;a.x=20000;b.x=80000;run(s,1,0,I.SKILL1);wait(s,()=>s.actors.filter(t=>t.cloneOwner).length===2);
 clones=s.actors.filter(t=>t.cloneOwner);const clone=clones[0];clone.y=34500;clones[1].y=56500;a.y=34500;a.invuln=500;
-for(let n=0;n<2;n++){
+for(let n=0;n<1;n++){
  a.x=clone.x-5500;a.facing=1;events=run(s,1,I.ATTACK);events.push(...run(s,30));
  assert.ok(events.some(e=>e.type==='hit'&&e.source===a.id&&e.actor===clone.id&&e.damage===1));
- if(!n)assert.equal(clone.hp,1);else assert.ok(events.some(e=>e.type==='cloneSmoke'&&!e.spawn&&e.actor===clone.id));
+ assert.ok(events.some(e=>e.type==='cloneSmoke'&&!e.spawn&&e.actor===clone.id));
 }
 assert.ok(!s.actors.includes(clone));assert.equal(s.kills,0);assert.equal(s.pickups.length,0);assert.equal(s.status,'playing');
 s=createBattle({mode:'practice',fighterId:'naruto-uzumaki'});run(s,1,I.SKILL1);wait(s,()=>s.actors.length===4);a=s.actors[0];a.cooldowns[0]=0;a.mp=10000;run(s,45);run(s,1,I.SKILL1);run(s,15);assert.equal(s.actors.filter(t=>t.cloneOwner).length,2,'recasting replaces rather than duplicates clones');
 a.hp=0;events=run(s,1);assert.equal(s.actors.filter(t=>t.cloneOwner).length,0);assert.equal(events.filter(e=>e.type==='cloneSmoke'&&!e.spawn).length,2);
-pass('Two autonomous real clones pursue and attack, each expires at ten seconds or its second hit with smoke, and clones grant no MP, kills or pickups; recasts and owner death clean up');
+pass('Two autonomous real clones pursue and attack, each expires at three seconds or its first hit with smoke, and clones grant no MP, kills or pickups; recasts and owner death clean up');
 
 // Unmodified starting states and only legal input frames exercise authoritative
 // saves/replay separately from the isolated positioning fixtures above.
@@ -86,12 +87,12 @@ for(const id of changed)for(const mode of ['practice','duel','campaign','pvp']){
  }
  assert.ok(s.tick>0);assert.deepEqual(replayBattle(options,log,s.tick,{terminal:false}),s);
 }
-for(const f of fightersForVersion('brawl-v9'))for(const mode of ['practice','campaign']){
- const options={version:'brawl-v9',mode,fighterId:f.id,stageId:STAGES[14].id,seed:987},log=[{tick:1,mask:I.RIGHT},{tick:60,mask:0},{tick:61,mask:I.SKILL1},{tick:62,mask:0},{tick:160,mask:I.SKILL2},{tick:161,mask:0}],old=v9.createBattle(options);let mask=0;
- for(let tick=1;tick<=400;tick++){const frame=log.find(f=>f.tick===tick);if(frame)mask=frame.mask;v9.stepBattle(old,mask);}
- assert.deepEqual(replayBattle(options,log,400,{terminal:false}),old);assert.deepEqual(battleResult(old),v9.battleResult(old));
+for(const [version,archive] of [['brawl-v9',v9],['brawl-v10',v10]])for(const f of fightersForVersion(version))for(const mode of ['practice','campaign']){
+ const options={version,mode,fighterId:f.id,stageId:STAGES[14].id,seed:987},log=[{tick:1,mask:I.RIGHT},{tick:60,mask:0},{tick:61,mask:I.SKILL1},{tick:62,mask:0},{tick:160,mask:I.SKILL2},{tick:161,mask:0}],old=archive.createBattle(options);let mask=0;
+ for(let tick=1;tick<=400;tick++){const frame=log.find(f=>f.tick===tick);if(frame)mask=frame.mask;archive.stepBattle(old,mask);}
+ assert.deepEqual(replayBattle(options,log,400,{terminal:false}),old);assert.deepEqual(battleResult(old),archive.battleResult(old));
 }
-pass('All five changed fighters replay deterministically in four modes; all 25 archived v9 fighters retain exact skills, NPC combat and results');
+pass('All five changed fighters replay deterministically in four modes; all 25 archived v9/v10 fighters retain exact skills, NPC combat and results');
 
 const manifest=JSON.parse(await fs.readFile('pet-app/public/assets/art/brawl/manifest.json','utf8'));
 for(const name of ['gum-pistol','gum-gatling']){

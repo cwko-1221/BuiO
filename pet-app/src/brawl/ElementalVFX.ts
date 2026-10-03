@@ -10,13 +10,30 @@ export class ElementalVFX {
   private g:Phaser.GameObjects.Graphics;
   private sprites:Phaser.GameObjects.Image[]=[];
   private used=0;private bursts:Burst[]=[];
-  stats={sprites:0,peak:0,beamWidth:0,flameLength:0};
+  stats={sprites:0,peak:0,beamWidth:0,flameLength:0,atlasFrames:{} as Record<string,number[]>};
   constructor(private scene:Phaser.Scene,private assets:BrawlAssets,private reduced:boolean){this.g=scene.add.graphics().setDepth(9900);}
   destroy(){this.g.destroy();this.sprites.forEach(s=>s.destroy());this.sprites=[];this.bursts=[];}
   event(event:any){
+    if(event.type==='cloneSmoke')event={...event,kind:'shadow-clones',element:'chakra'};
+    if(event.type==='catStrike')event={...event,kind:'flurry',element:'light'};
+    if(event.type==='skillRelease'&&event.kind==='blink')event={...event,element:'light'};
+    if(this.hasAtlas(event.kind)&&['abilityPulse','skillRelease','cloneSmoke','catStrike','abilityLink'].includes(event.type)){
+      if(this.bursts.length>=32)this.bursts.shift();this.bursts.push({event,age:0,life:event.type==='catStrike'?.28:.65});return;
+    }
     if(event.element&&(['abilityPulse','abilityLink','reflect','elementStatus','airRay','mindStun'].includes(event.type)||event.type==='skillRelease'&&['scan','buff'].includes(event.mechanic))){
       if(this.bursts.length>=32)this.bursts.shift();this.bursts.push({event,age:0,life:event.type==='abilityLink'?.32:.65});
     }
+  }
+  private hasAtlas(kind:string){return !!this.assets.skillFx?.[kind]&&this.scene.textures.exists('brawl-skill-'+kind);}
+  // Reuse the bounded sprite pool. Transparent padding is excluded from the
+  // requested visible size; mirror the anchor as well as the pixels.
+  private atlas(kind:string,frame:number,x:number,y:number,width:number,height?:number,alpha=1,flip=false,angle=0){
+    const clip=this.assets.skillFx?.[kind];if(!clip||!this.hasAtlas(kind)||this.used>=72)return false;
+    frame=Math.max(0,Math.min(clip.frames-1,Math.floor(frame)));
+    let image=this.sprites[this.used++];if(!image){image=this.scene.add.image(x,y,'brawl-skill-'+kind,frame);this.sprites.push(image);}
+    const w=width/clip.widthRatio,h=height?height/(clip.heightRatio||.9):w*clip.frameHeight/clip.frameWidth;
+    image.setTexture('brawl-skill-'+kind,frame).setOrigin(flip?1-clip.originX:clip.originX,clip.originY??.5).setVisible(true).setPosition(x,y).setDisplaySize(w,h).setAlpha(alpha).setFlipX(flip).setRotation(angle).setDepth(9950);
+    const frames=this.stats.atlasFrames[kind]??=[];if(!frames.includes(frame))frames.push(frame);return true;
   }
   private sprite(frame:string,x:number,y:number,w:number,h=w,alpha=1,flip=false,angle=0){
     const index=this.assets.elementalFx?.frames[frame];if(index===undefined||!this.scene.textures.exists('brawl-elemental')||this.used>=72)return;
@@ -36,6 +53,10 @@ export class ElementalVFX {
   private charge(a:Actor,k:any,time:number){
     const q=Math.min(1,a.actionTick/(k.windup||12)),x=a.x/100,y=a.y/100-a.z/100,color=C[k.element]||0xffffff;
     if(k.mechanic==='stretch'){this.stretch(a,k,-1);return;}
+    if(this.hasAtlas(k.kind)){
+      const above=!!k.orb,ground=this.assets.skillFx?.[k.kind].anchor==='ground';
+      this.atlas(k.kind,Math.min(2,Math.floor(q*3)),ground||above?x:x+a.facing*42,ground?y:above?y-205:y-85,above?180:ground?135:70,undefined,.65+q*.35,a.facing<0);return;
+    }
     if(k.mechanic==='flamethrower'){
       this.sprite(k.effect==='bloodflame'?'bloodflame':'fireball',x+a.facing*(40+q*15),y-85,25+q*55,30+q*60,.3+q*.5,a.facing<0);
       this.g.fillStyle(color,q*.22).fillCircle(x+a.facing*42,y-85,20+q*20);
@@ -49,6 +70,13 @@ export class ElementalVFX {
   }
   private channel(a:Actor,k:any,time:number){
     const x=a.x/100+a.facing*48,y=a.y/100-a.z/100-85,face=a.facing,range=k.range-48,color=k.effect==='cosmic'?0xd578ff:k.effect==='bloodflame'?0xff6eba:C[k.element]||0xffffff;
+    if(k.mechanic!=='stretch'&&this.hasAtlas(k.kind)){
+      const frame=3+Math.floor((a.actionTick-Number(k.windup||12))/4)%3;
+      const height=k.mechanic==='beam'?(k.beamWidth||120)*1.25:(k.depth||56)*2.2;
+      this.atlas(k.kind,frame,x,y,range,height,1,face<0);
+      if(k.mechanic==='beam')this.stats.beamWidth=Math.max(this.stats.beamWidth,k.beamWidth||120);
+      else this.stats.flameLength=Math.max(this.stats.flameLength,range);return;
+    }
     if(k.mechanic==='flamethrower'){
       const length=range*(.92+.05*Math.sin(time*13)),height=(k.depth||56)*2.2;
       this.sprite(k.effect==='bloodflame'?'bloodflame':'fire-plume',x+face*length*.47,y,length*1.2,height*1.35,.95,face<0);
@@ -78,30 +106,31 @@ export class ElementalVFX {
     const face=a.facing,x=a.x/100+face*30,y=a.y/100-a.z/100-85,range=k.range-30;
     let sprite=this.sprites[this.used++];if(!sprite){sprite=this.scene.add.image(x,y,'brawl-skill-'+k.kind);this.sprites.push(sprite);}
     const frame=q<0?0:k.pulses>1?(q<35?1+(Math.floor(q/3)%5):Math.min(7,6+Math.floor((q-35)/8))):Math.min(7,1+Math.floor(q*7/18));
-    sprite.setTexture('brawl-skill-'+k.kind,frame).setOrigin(face<0?1-clip.originX:clip.originX,.5).setPosition(x,y).setDisplaySize(range/clip.widthRatio,k.pulses>1?245:155).setFlipX(face<0).setAlpha(1).setRotation(0).setDepth(9950).setVisible(true);return true;
+    sprite.setTexture('brawl-skill-'+k.kind,frame).setOrigin(face<0?1-clip.originX:clip.originX,.5).setPosition(x,y).setDisplaySize(range/clip.widthRatio,k.pulses>1?245:155).setFlipX(face<0).setAlpha(1).setRotation(0).setDepth(9950).setVisible(true);const frames=this.stats.atlasFrames[k.kind]??=[];if(!frames.includes(frame))frames.push(frame);return true;
   }
   draw(s:BattleState,time:number,dt:number){
     this.used=0;this.g.clear();
-    if(!['brawl-v7','brawl-v8','brawl-v9','brawl-v10'].includes(s.version)){this.sprites.forEach(sprite=>sprite.setVisible(false));this.bursts=[];this.stats.sprites=0;return;}
-    for(const a of s.actors){const fighter=s.version===VERSION?combatFighterById(a.kind):fightersForVersion(s.version).find(f=>f.id===a.kind),k=(fighter?.skills[a.skill]||(['brawl-v9','brawl-v10'].includes(s.version)?enemyKit(a):undefined)) as any,x=a.x/100,y=a.y/100-(a.flightUntil>s.tick?Math.min(a.z/100,a.y/100-250):a.z/100);
-      if(k?.element&&(a.action.startsWith('skill')||!fighter&&a.action.startsWith('attack'))){
+    if(!['brawl-v7','brawl-v8','brawl-v9','brawl-v10','brawl-v11'].includes(s.version)){this.sprites.forEach(sprite=>sprite.setVisible(false));this.bursts=[];this.stats.sprites=0;return;}
+    for(const a of s.actors){const fighter=s.version===VERSION?combatFighterById(a.kind):fightersForVersion(s.version).find(f=>f.id===a.kind),k=(fighter?.skills[a.skill]||(['brawl-v9','brawl-v10',VERSION].includes(s.version)?enemyKit(a):undefined)) as any,x=a.x/100,y=a.y/100-(a.flightUntil>s.tick?Math.min(a.z/100,a.y/100-300):a.z/100);
+      if(k&&(k.element||this.hasAtlas(k.kind))&&(a.action.startsWith('skill')||!fighter&&a.action.startsWith('attack'))){
         const wind=Number(k.windup||12),end=wind+(Number(k.pulses||1)-1)*Number(k.period||8)+18;
         if(a.actionTick<wind)this.charge(a,k,time);
         else if(['flamethrower','beam','stretch'].includes(k.mechanic!)&&a.actionTick<end)this.channel(a,k,time);
-        if(k.mechanic==='rasengan'&&a.actionTick>=wind)this.orb('spiral-orb',x+a.facing*65,y-80,Number(k.size||62),time,C.chakra);
-        if(k.mechanic==='orbit'){const color=C[k.element]||C.physical;for(let n=0;n<3;n++){const angle=time*9+n*2.1,cx=x+Math.cos(angle)*Number(k.range)*.6,cy=y-60+Math.sin(angle)*40;this.ball(cx,cy,24,color,time);}}
+        if(k.mechanic==='rasengan'&&a.actionTick>=wind&&!this.atlas(k.kind,3+Math.floor(a.actionTick/3)%3,x+a.facing*65,y-80,Number(k.size||62)*2.2,undefined,1,a.facing<0))this.orb('spiral-orb',x+a.facing*65,y-80,Number(k.size||62),time,C.chakra);
+        if(k.mechanic==='orbit'){const color=C[k.element]||C.physical;for(let n=0;n<3;n++){const angle=time*9+n*2.1,cx=x+Math.cos(angle)*Number(k.range)*.6,cy=y-60+Math.sin(angle)*40;if(!this.atlas(k.kind,3+Math.floor(s.tick/4)%3,cx,cy,74))this.ball(cx,cy,24,color,time);}}
       }
-      if(a.readUntil>s.tick){this.g.lineStyle(3,C.psychic,.9).strokeEllipse(x,y-70,135,175);this.heart(x,y-180,17,C.psychic,1);}
-      if(a.wardUntil>s.tick){this.g.lineStyle(5,C.psychic,.85).strokeEllipse(x,y-70,155,195);for(let n=0;n<a.wardMeleeLeft;n++){const angle=time*3+n*Math.PI*2/3;this.heart(x+Math.cos(angle)*80,y-75+Math.sin(angle)*92,14,C.psychic,.9);}}
+      if(a.readUntil>s.tick&&!this.atlas('mind-scan',3+Math.floor(s.tick/5)%3,x,y-160,92)){this.g.lineStyle(3,C.psychic,.9).strokeEllipse(x,y-70,135,175);this.heart(x,y-180,17,C.psychic,1);}
+      if(a.wardUntil>s.tick&&!this.atlas('foreseen-counter',Math.floor(s.tick/6)%2?5:2,x,y-75,180,200,.85)){this.g.lineStyle(5,C.psychic,.85).strokeEllipse(x,y-70,155,195);for(let n=0;n<a.wardMeleeLeft;n++){const angle=time*3+n*Math.PI*2/3;this.heart(x+Math.cos(angle)*80,y-75+Math.sin(angle)*92,14,C.psychic,.9);}}
       if(a.mindStunUntil>s.tick)for(let n=0;n<3;n++){const angle=time*5+n*2.1;this.g.fillStyle(C.psychic,.95).fillCircle(x+Math.cos(angle)*40,y-155+Math.sin(angle)*12,6);}
-      if(a.flightUntil>s.tick){const bottom=y,rotorY=bottom-158;this.g.lineStyle(5,0xdec87d,1).lineBetween(x,rotorY,x,rotorY+20);this.g.fillStyle(0xffe894,.9).fillEllipse(x,rotorY,60+Math.sin(time*40)*25,7).fillCircle(x,rotorY,6);this.g.lineStyle(2,C.wind,.4).strokeEllipse(x,rotorY,94,16);}
+      if(a.flightUntil>s.tick&&!this.atlas('take-copter',3+Math.floor(s.tick/2)%3,x,y-158,80)){const bottom=y,rotorY=bottom-158;this.g.lineStyle(5,0xdec87d,1).lineBetween(x,rotorY,x,rotorY+20);this.g.fillStyle(0xffe894,.9).fillEllipse(x,rotorY,60+Math.sin(time*40)*25,7).fillCircle(x,rotorY,6);this.g.lineStyle(2,C.wind,.4).strokeEllipse(x,rotorY,94,16);}
       if(a.rootUntil>s.tick&&a.wetUntil>s.tick)this.g.fillStyle(C.water,.12).fillEllipse(x,y-65,135,180).lineStyle(4,C.water,.9).strokeEllipse(x,y-65,135,180);
       if(a.hp>0&&a.freezeUntil>s.tick){this.sprite('ice-crystal',x,y-75,190,240,.8);this.g.lineStyle(4,C.ice,.8).strokeEllipse(x,y,120,32);for(let n=0;n<4;n++)this.g.fillStyle(0xebfdff,.8).fillCircle(x+Math.cos(n*1.6+time)*63,y-80+Math.sin(n*1.6+time)*65,3);}
       if(a.hp>0&&a.burnUntil>s.tick){this.sprite('fire-eruption',x,y-52,125,150,this.reduced?.6:.6+Math.sin(time*7)*.08);this.g.fillStyle(C.fire,.12).fillEllipse(x,y-65,105,145);if(!this.reduced)for(let n=0;n<3;n++){const q=(time*1.5+n/3)%1;this.g.fillStyle(n%2?0xfff0a0:C.fire,1-q).fillCircle(x+Math.sin(n*3+time)*38,y-25-q*120,3);}}
       if(a.wetUntil>s.tick)for(let n=0;n<3;n++)this.g.fillStyle(C.water,.8).fillEllipse(x-27+n*27,y-40+(time*50+n*17)%40,7,14);
-      if(a.shield>0&&a.shieldUntil>s.tick){const ward=fighter?.skills.find(k=>k.mechanic==='buff'&&(k.shield||k.counter)),color=C[String(ward?.element||'nature')]||C.nature;this.g.fillStyle(color,.1).fillEllipse(x,y-70,140,190).lineStyle(4,color,.75).strokeEllipse(x,y-70,140,190);}
+      if(a.shield>0&&a.shieldUntil>s.tick){const ward=fighter?.skills.find(k=>k.mechanic==='buff'&&(k.shield||k.counter)),color=C[String(ward?.element||'nature')]||C.nature;if(ward&&this.atlas(ward.kind,Math.floor(s.tick/6)%2?5:2,x+a.facing*32,y-70,150,175,.85))continue;this.g.fillStyle(color,.1).fillEllipse(x,y-70,140,190).lineStyle(4,color,.75).strokeEllipse(x,y-70,140,190);}
     }
-    for(const p of s.projectiles){if(!p.skill?.element)continue;const k=p.skill,x=p.x/100,y=p.y/100-p.z/100-38,dir=Math.sign(p.dx)||1,color=C[k.element]||C.physical,size=k.size||35;
+    for(const p of s.projectiles){if(!p.skill?.element)continue;const k=p.skill,x=p.x/100,y=p.y/100-p.z/100-(k.effect==='wave'?0:38),dir=Math.sign(p.dx)||1,color=C[k.element]||C.physical,size=k.size||35;
+      if(this.atlas(k.kind,2+Math.floor(s.tick/5)%2,x,y,k.effect==='wave'?260:k.kind==='serious-punch'?250:Math.max(90,size*(k.orb?2.4:2.9)),undefined,1,dir<0))continue;
       if(['ball','power-ball'].includes(k.effect)){if(k.effect==='power-ball')this.sprite('fireball',x-dir*45,y,160,95,.9,dir<0);this.ball(x,y,size*.75,color,time);}
       else if(k.effect==='bubble'){this.g.fillStyle(C.water,.12).fillCircle(x,y,size).lineStyle(4,C.water,.9).strokeCircle(x,y,size).lineStyle(2,0xffffff,.9).beginPath().arc(x-4,y-4,size*.8,3.2,4.9).strokePath();}
       else if(k.effect==='flame'||k.effect==='mud')this.sprite(k.effect==='flame'?'fireball':'mud-ball',x,y,size*2.8,size*2.2,.95,dir<0);
@@ -115,12 +144,20 @@ export class ElementalVFX {
     }
     for(const f of s.fields||[])this.field(f,s,time);
     for(const b of this.bursts){b.age+=dt;const e=b.event,q=b.age/b.life,color=C[e.element]||C.light,alpha=1-q;
-      if(e.type==='skillRelease'&&e.mechanic==='scan'){
+      if(this.hasAtlas(e.kind)){
+        const ground=this.assets.skillFx?.[e.kind].anchor==='ground',caster=s.actors.find(a=>a.id===e.actor),face=e.facing??caster?.facing??1,frame=Math.min(7,3+Math.floor(q*5));
+        // Releases are small flashes; damaging fields/projectiles own the large visual.
+        const size=e.type==='cloneSmoke'?170:e.type==='catStrike'?160:e.type==='abilityPulse'?Math.min(310,(e.size||90)*2):e.mechanic==='scan'?220:e.mechanic==='buff'?170:95;
+        if(e.type==='abilityLink'){const dx=e.x-e.fromX,dy=e.y-e.fromY;this.atlas(e.kind,frame,e.fromX,e.fromY-75,Math.hypot(dx,dy),90,alpha,false,Math.atan2(dy,dx));}
+        else this.atlas(e.kind,frame,e.x,e.y-(ground?0:75),size,undefined,alpha,face<0);
+        if(e.kind==='blink'&&e.fromX!==undefined)this.atlas(e.kind,frame,e.fromX,e.fromY-75,135,undefined,alpha,face<0);
+        if(e.mechanic==='scan')this.g.lineStyle(5,color,alpha*.6).strokeEllipse(e.x,e.y-65,e.range*2*q,e.range*.65*q);
+      }else if(e.type==='skillRelease'&&e.mechanic==='scan'){
         this.sprite('cosmic-burst',e.x,e.y-75,180,180,alpha*.35,false,time);
         for(let n=0;n<3;n++){const r=e.range*Math.min(1,q+n*.16);this.g.lineStyle(7-n*2,color,alpha*.75).strokeEllipse(e.x,e.y-65,r*2,r*.65);}
         for(let n=0;n<5;n++){const angle=time*4+n*1.26;this.heart(e.x+Math.cos(angle)*e.range*q*.8,e.y-65+Math.sin(angle)*e.range*q*.26,9,color,alpha);}
       }else if(e.type==='airRay'){
-        const fromY=Math.max(250,e.y-e.z)-80,endY=e.toY-70;this.g.lineStyle(12,C.wind,alpha*.35).lineBetween(e.x,fromY,e.toX,endY).lineStyle(5,0xffffff,alpha).lineBetween(e.x,fromY,e.toX,endY);this.orb('ki-head',e.toX,endY,22,time,C.wind,alpha);
+        const fromY=Math.max(300,e.y-e.z)-80,endY=e.toY-70;this.g.lineStyle(12,C.wind,alpha*.35).lineBetween(e.x,fromY,e.toX,endY).lineStyle(5,0xffffff,alpha).lineBetween(e.x,fromY,e.toX,endY);this.orb('ki-head',e.toX,endY,22,time,C.wind,alpha);
       }else if(e.type==='reflect'&&e.toX!==undefined){this.bolt(e.x,e.y-75,e.toX,e.toY-75,C.psychic,alpha,time);
       }else if(e.type==='skillRelease'&&e.mechanic==='buff'){
         this.sprite('gold-aura',e.x,e.y-75,160+q*70,210+q*50,alpha*.4);
@@ -140,6 +177,11 @@ export class ElementalVFX {
     const x=f.x/100,y=f.y/100,r=f.radius,color=C[f.element]||C.physical,armed=s.tick>=f.starts;
     this.g.lineStyle(armed?3:2,color,armed?.5:.9).strokeEllipse(x,y,r*2,r*.72).fillStyle(color,armed?.09:.13).fillEllipse(x,y,r*2,r*.72);
     if(!armed){const q=(s.tick-f.spawnedAt)/Math.max(1,f.starts-f.spawnedAt);this.g.lineStyle(4,0xffffff,.65).beginPath().arc(x,y,r*.55,-Math.PI/2,-Math.PI/2+Math.PI*2*q).strokePath();return;}
+    if(this.hasAtlas(f.kind)){
+      const age=s.tick-f.starts,remaining=f.expires-s.tick,frame=remaining<16?6+Math.floor((16-remaining)/8):f.mechanic==='eruption'?Math.min(5,3+Math.floor(age/6)):3+Math.floor(age/5)%3;
+      const width=f.mechanic==='eruption'?Math.max(150,r*2.2):r*2, height=f.element==='lightning'?350:f.mechanic==='eruption'?260:f.mechanic==='tornado'?r*2.4:f.effect==='bubble'?r*2:undefined;
+      this.atlas(f.kind,frame,x,y,width,height,Math.min(1,remaining/12),f.facing<0);return;
+    }
     if(f.mechanic==='eruption'){
       if(f.element==='ice'){
         const grow=Math.min(1,(s.tick-f.starts+1)/8),fade=Math.min(1,(f.expires-s.tick)/16);

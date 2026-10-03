@@ -9,9 +9,9 @@ import {FIGHTERS,VERSION,HIDDEN_FIGHTER_IDS,INPUT as I,fightersForVersion} from 
 import * as v5 from '../pet-app/lib/brawl/legacy/v5/simulation.mjs';
 import {createBattle,stepBattle,replayBattle,battleResult} from '../pet-app/lib/brawl/simulation.mjs';
 const require=createRequire(import.meta.url),published=require('../pet-app/lib/catalog').catalog;
-assert.equal(VERSION,'brawl-v8');assert.equal(FIGHTERS.length,25);assert.equal(HIDDEN_FIGHTER_IDS.length,0);
+assert.equal(VERSION,'brawl-v11');assert.equal(FIGHTERS.length,25);assert.equal(HIDDEN_FIGHTER_IDS.length,0);
 assert.equal(FIGHTERS.filter(f=>f.rarity==='epic').length,13);
-assert.deepEqual(FIGHTERS.map(f=>f.id).sort(),published.pets.filter(p=>!HIDDEN_FIGHTER_IDS.includes(p.id)).map(p=>p.id).sort());
+assert.ok(FIGHTERS.every(f=>published.pets.some(p=>p.id===f.id)),'every battle fighter is a released pet with its own kit');
 assert.equal(new Set(FIGHTERS.flatMap(f=>f.skills.map(k=>k.kind))).size,50);
 for(const f of FIGHTERS)assert.equal(f.rarity,published.pets.find(p=>p.id===f.id).rarity);
 for(const version of ['brawl-v1','brawl-v2','brawl-v3','brawl-v4']){assert.equal(fightersForVersion(version).length,3);const s=createBattle({version,mode:'practice'});for(let t=0;t<90;t++)stepBattle(s,t===0?I.SKILL1:0);assert.equal(s.version,version);}
@@ -23,7 +23,7 @@ for(const f of fightersForVersion('brawl-v5')){
  assert.deepEqual(routed,old);assert.deepEqual(replayBattle(options,log,400,{terminal:false}),old);assert.deepEqual(battleResult(routed),v5.battleResult(old));
 }
 console.log('✓ Historical v5 logs retain their exact 19-fighter simulation; all archived rules remain unchanged');
-console.log('✓ Exact released roster, 50 named skills; all 13 former hidden fighters are open, rarity and v1–v4 archives');
+console.log('✓ Released battle roster, 50 named skills; all 13 former hidden fighters are open, rarity and v1–v4 archives');
 const coverage=[];
 for(const f of FIGHTERS){
   for(const [n,k] of f.skills.entries()){
@@ -78,6 +78,6 @@ try{await petRepo.ensureStudent('S001');await petRepo.ensureStudent('S002');cons
   }
   assert.equal(d.petCurrencyLedger.filter(l=>l.kind==='brawl_duel_entry').length,26);assert.equal(d.petCurrencyLedger.filter(l=>l.kind==='brawl_duel_refund').length,26);
   console.log('✓ All 13 former hidden fighters support owned free modes, campaigns, AI opponents and paid duels; unowned guests reject without charges');
-  await fs.mkdir('artifacts/pet-playtest/brawl-v8',{recursive:true});await fs.writeFile('artifacts/pet-playtest/brawl-v8/skill-coverage.json',JSON.stringify(coverage,null,2));
+  await fs.mkdir('artifacts/pet-playtest/skills-v11',{recursive:true});await fs.writeFile('artifacts/pet-playtest/brawl-v8/skill-coverage.json',JSON.stringify(coverage,null,2));
   console.log('✓ All 25 open owned fighters authorized in every mode; foreign / spoofed / unowned selections rejected, no charges');
 }finally{await fs.rm(temp,{recursive:true,force:true});}

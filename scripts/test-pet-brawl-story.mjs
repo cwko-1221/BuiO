@@ -52,5 +52,5 @@ for(const stage of STAGES){
 }
 assert.equal(ids.size,100);
 assert.ok(Object.isFrozen(ADVENTURE.chapters[0].sections[0].scene.lines[0].text));
-assert.equal(VERSION,'brawl-v10','story revisions do not change verified combat rules');
+assert.equal(VERSION,'brawl-v11','current combat version supports the required adventure story');
 console.log(JSON.stringify({pass:true,chapters:20,sections:80,scenes:100,lines,locales:2,storyRevision:STORY_REVISION,combatRules:VERSION}));

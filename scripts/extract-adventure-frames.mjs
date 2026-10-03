@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 // A painted weapon can extend beyond an approximate grid. Recover each whole
 // connected pose before making uniform slots; never cut its limbs at cell edges.
-export async function extractAdventureFrames(file){
+export async function extractAdventureFrames(file,{minRatio=.18}={}){
  const {data,info}=await sharp(file).ensureAlpha().raw().toBuffer({resolveWithObject:true}),w=info.width,h=info.height,seen=new Uint8Array(w*h),queue=new Int32Array(w*h),parts=[];
  for(let i=0;i<w*h;i++){
   if(seen[i]||data[i*4+3]<8)continue;let head=0,tail=1;queue[0]=i;seen[i]=1;const pixels=[];let minX=w,minY=h,maxX=0,maxY=0;
@@ -11,7 +11,7 @@ export async function extractAdventureFrames(file){
   if(pixels.length>=80)parts.push({pixels,minX,minY,maxX,maxY,cx:(minX+maxX)/2,cy:(minY+maxY)/2});
  }
  parts.sort((a,b)=>b.pixels.length-a.pixels.length);
- if(parts.length<8||parts[7].pixels.length<parts[0].pixels.length*.18)throw Error(`${file}: cannot isolate eight complete bodies (${parts.slice(0,10).map(p=>p.pixels.length).join(',')})`);
+ if(parts.length<8||parts[7].pixels.length<parts[0].pixels.length*minRatio)throw Error(`${file}: cannot isolate eight complete bodies (${parts.slice(0,10).map(p=>p.pixels.length).join(',')})`);
  const bodies=parts.slice(0,8).sort((a,b)=>a.cy-b.cy),ordered=[...bodies.slice(0,4).sort((a,b)=>a.cx-b.cx),...bodies.slice(4).sort((a,b)=>a.cx-b.cx)];
  if(ordered.slice(0,4).some(p=>p.cy>h*.55)||ordered.slice(4).some(p=>p.cy<h*.45))throw Error(`${file}: unexpected animation layout`);
  for(const prop of parts.slice(8)){

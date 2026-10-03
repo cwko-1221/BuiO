@@ -1,0 +1,616 @@
+[
+  {
+    "id": "blink",
+    "fighter": "starpatch-cat",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A golden starlight teleport slash: one large luminous five-point star with a curled cat-claw-shaped comet streak, fine glitter, peach-gold inked edges; disappear and reappear through sparkling star shards. Distinct from lightning or a plain ring.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/blink.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "a0fc19236546063b9ba9a08d01066976849607af17418b4409277415164c7ba0"
+  },
+  {
+    "id": "flurry",
+    "fighter": "starpatch-cat",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: Three layered curved golden claw slashes, sharp tapered talon arcs with warm white impact flashes and a central five-point star burst. An unmistakable triple feline scratch, animated sequential slashes then stronger final star impact.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/flurry.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "93ef643550d8b3f49eec57f3954c830c138b5c9f50f1134c54954293360ab4e8"
+  },
+  {
+    "id": "gale-blades",
+    "fighter": "cloud-ear-dog",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: One sculpted cyan-white crescent AIR BLADE with a bright cutting leading edge, translucent curving wind ribbons and small vapor filaments. NOT a plain line or solid triangle. Sweep and curl around an aerodynamic scythe shape.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/gale-blades.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "42b92efa0749b3ca97693e75464fa6611a318955c31818b5e04d4f4c83b74754"
+  },
+  {
+    "id": "cyclone-eye",
+    "fighter": "cloud-ear-dog",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A tall dense cyan-white tornado, a wide swirling crown tapering into a compact ground funnel, many overlapping wind ribbons, teal translucent interior, tiny orbiting dust flecks. A readable spiral volume, anchored to the ground.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/cyclone-eye.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "4810bec981cbdf52f6645a6d2852d53f07b5d0e5ff13febceabae01520358770"
+  },
+  {
+    "id": "seismic-fault",
+    "fighter": "pudding-pig",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A jagged brown rock ridge violently erupting upward from fractured ground: chunky angular stone slabs, warm sandstone faces, dark cracks, flying chips and dense tan dust. One complete ridge per frame, no scenery floor rectangle.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/seismic-fault.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "ce28574990bc77b55c817105acd063da77f2a70651e9cc4863733aae6ba5a020"
+  },
+  {
+    "id": "mud-mortar",
+    "fighter": "pudding-pig",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A heavy rotating brown MUD CANNONBALL with an irregular wet clay surface, sculpted shiny drips and suspended clods, amber highlights, trailing curved brown mud ribbons; late frames burst into a chunky mud splash around the central clod.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/mud-mortar.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "e5090bf772157cbcc325e142dc292d1635dcb9cf0f70608bc30ab52146fec2df"
+  },
+  {
+    "id": "fetch",
+    "fighter": "golden-retriever-dog",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A cheerful polished red-orange dog fetch ball with bright cream seam, believable round volume, honey-gold spiraling speed trail and sparkling rebound arcs. One unmistakable FETCH BALL, not a soccer ball, rotating and flashing on ricochet.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/fetch.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "d65a0ddb181dd0f27c037ce6c865b453b6f0a8a21a3773d85c08d068700759ee"
+  },
+  {
+    "id": "rally",
+    "fighter": "golden-retriever-dog",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A brilliant golden translucent protective aegis shaped as an oval shield with a pawprint jewel in its center, layered golden bevels, luminous sunlit border, orbiting little shields, shining reflective facets; shield forms then pulses.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/rally.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "ac596adbd71e85bbb113958c599a559184997b2b938080e3ec3de8e32c52fa2a"
+  },
+  {
+    "id": "moon-disc",
+    "fighter": "crescent-rabbit",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A broad elegant silver-violet crescent moon blade with beveled luminous silver edge, lavender moonlight trailing ribbons and star specks; the crescent spins through different readable orientations without becoming a circular icon.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/moon-disc.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "0a28a939bbd640bf462903e4bf2a2d3245a6fd4437dc04590ed822f79e4fe7b0"
+  },
+  {
+    "id": "moonfall",
+    "fighter": "crescent-rabbit",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A silver-violet moon meteor descends into a crescent-shaped luminous ground seal, then erupts into a towering lavender-white starlight column and crystalline star fragments. Ground-anchored vertical impact, layered beautiful cosmic material.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/moonfall.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "4f4419d3ae382d3a4034c3be3fb0a6178d5004127326b37dfc1f30bf4d6d8008"
+  },
+  {
+    "id": "bubble-volley",
+    "fighter": "bubble-otter",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A large pearlescent aqua soap bubble with realistic spherical iridescent sheen, multiple curved white reflection highlights, tiny droplets and a short translucent water wake. Different rotation and ripples, glossy 3D bubble, not a line circle.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/bubble-volley.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "d4de7bc31e5db72817fb4a42577f265f270ceff162cdf504f96b892cc41cef68"
+  },
+  {
+    "id": "bubble-snare",
+    "fighter": "bubble-otter",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A tall transparent aqua bubble prison with interlaced pearl-white water ribbons around the shell, bubbly crown and water droplets at the base. Hollow center so an enemy can be visible inside; water dome forms, swells and ripples.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/bubble-snare.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "2bcc851056bbb4080a14fbf943a6c88b8c157903338eaedb711e9e67b1f0ac0a"
+  },
+  {
+    "id": "shell-counter",
+    "fighter": "mossback-turtle",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A substantial luminous emerald turtle-shell shield with carved hexagonal scutes, moss-green glossy ridges, warm earth-brown bevels, amber glints and protective green energy curling around the shell. NOT a simple hexagonal outline.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/shell-counter.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "2982abce1697ba45362ab55714c542545200398cc45bcda5a6a89cc0f1590f8c"
+  },
+  {
+    "id": "moss-garden",
+    "fighter": "mossback-turtle",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: Twisting moss-green roots and vines erupt into a low broad circular thornless fortress, detailed curling wood, fresh little leaves, glowing green sap, soft earth chips. Hollow central space, sculpted botanical roots move and interweave.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/moss-garden.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "3603a5064d7871033f86523c1b665bd9838125c5cdaf1f701d6fcb43b47fb0ce"
+  },
+  {
+    "id": "flame-breath",
+    "fighter": "spark-hamster",
+    "anchor": "left",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A forceful right-facing FIRE BREATH plume: narrow source at left, swelling into a wide roaring golden-white core and deep orange-red twisting flame tongues toward right, black-edged anime cel shading, incandescent embers. Coherent connected plume; ignite, expand, ripple fiercely, settle, extinguish.",
+    "source": "pet-app/art-source/skills-v11/flame-breath.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [],
+    "sourceHash": "68416908063da518200887c83af96a07f7bb2497496b9b15cdd27343303ed2f7"
+  },
+  {
+    "id": "blazing-nut",
+    "fighter": "spark-hamster",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A clearly recognizable acorn engulfed in an orange-white flame cocoon, detailed brown nut shell and textured cap, fiery comet trail, golden sparks; spins then bursts in a pet-game explosion, no grim violence.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/blazing-nut.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "bc9b128a6e159428783a33006a97f1b0de3ddc9156d61b1a1f125e657d6d08c6"
+  },
+  {
+    "id": "leaf-blade",
+    "fighter": "leaftail-fox",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: An emerald leaf-shaped curved boomerang blade, detailed leaf veins and sharp glowing jade edge, sweeping green ribbon wake and smaller spinning leaves; turns through eight graceful flight orientations. Organic elegant volume.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/leaf-blade.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "3fa201b87ae359d8ad830b81d3f6a9a4cbc455140477424208df8c7234a1128b"
+  },
+  {
+    "id": "leaf-tempest",
+    "fighter": "leaftail-fox",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A lush green leaf tornado with many crisp individually painted maple-like leaves spiralling around layered jade wind ribbons, tall twisting hollow funnel, golden pollen flecks and curled vines at its base. Rich foliage movement.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/leaf-tempest.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "6fd6a42abc6de0945e512af009ff0e9e8d0811ef8f1d33e45766b871ee51bed7"
+  },
+  {
+    "id": "glacial-wall",
+    "fighter": "snowfeather-penguin",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A towering cyan ice-crystal pillar eruption with several jagged angular translucent spikes, cobalt core shadows, bright white beveled facets, cracks, small frozen shards and frosty vapor; ground anchored, grows to a formidable ice wall.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/glacial-wall.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "71046d240faa544ef63912beb4cf58e78ee7b4726aa1f190b9ea363586b5b77a"
+  },
+  {
+    "id": "polar-blizzard",
+    "fighter": "snowfeather-penguin",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A fierce silver-blue blizzard vortex with layered spiral snow ribbons, jagged small ice shards, detailed six-point snowflakes, blue-white luminous cold core and low frosty mist. Tall airy three-dimensional swirling column.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/polar-blizzard.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "7fd3e16c78c9f886f9d0b7a67a09c550ab6f8a8a63924d38c500f653ef26982f"
+  },
+  {
+    "id": "horn-lightning",
+    "fighter": "thunderhorn-goat",
+    "anchor": "left",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A thick right-facing jagged GOLDEN LIGHTNING arc with branching forked bolts, white-hot core, amber corona and fine blue electric sparks; connected forked energy from left toward right, three-dimensional glowing electrical plasma.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/horn-lightning.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "d84bfb8d353b602f75c3b7200dd845e4e9c2b232e453a3a0399038d36e145960"
+  },
+  {
+    "id": "storm-verdict",
+    "fighter": "thunderhorn-goat",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A colossal blue-white lightning pillar falling vertically onto a jagged golden thunder seal, multiple branching bolts, an explosive golden-white base flash and blue electric shards. Ground anchored, readable vertical plasma impact.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/storm-verdict.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "ae8545fe5559685b7f824da661863fdeb7141edc68d418dfd3f871ec544ee891"
+  },
+  {
+    "id": "tidal-bore",
+    "fighter": "coral-seal",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A magnificent right-facing turquoise tidal wave with a thick curling crest, luminous translucent aquamarine body, cobalt depth shadows, detailed white foam curls and flying droplets. Full sculpted ocean-wave volume without scenery.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/tidal-bore.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "f4027ae7aea197d713f3f1c000a42312434c7c76131e9f4db5c608424bda2c88"
+  },
+  {
+    "id": "coral-pool",
+    "fighter": "coral-seal",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A soothing aquamarine healing tide pool effect: elliptical luminous water ripples, small pink and turquoise coral sprigs around its border, rising pearl bubbles, soft seafoam ribbons, bright pastel droplets. Hollow center and visible watery depth.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/coral-pool.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "3f51d68f286b9eb2e8667a8b1c898c7ebf19e85b9ab7c46a63b643510d211226"
+  },
+  {
+    "id": "bloodflame-torrent",
+    "fighter": "nezuko-kamado",
+    "anchor": "left",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A tremendous right-facing PINK BLOODFLAME plume: narrow rose-pink source at left, expanding white-hot pink core with crimson-magenta flame tongues, dark plum shaded contours and delicate cherry blossom sparks. Ornate explosive flame, not gore.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/bloodflame-torrent.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "c25e69f01a2bd72d403c5d04c71eea1482c28ce418632dbb2d3cdd63150ceef3"
+  },
+  {
+    "id": "blood-bloom",
+    "fighter": "nezuko-kamado",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: An explosive pink-red flame blossom erupts upward from a glowing rose ground seal, curling magenta flame petals around white-hot center, petal-shaped sparks and sharp crimson embers; elegant flower-shaped inferno, no blood or gore.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/blood-bloom.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "30af103dfbcfc02bbad10dbe058cfdb90db5e31d7b7ab3cb6f34dd9707c4c5e8"
+  },
+  {
+    "id": "kamehameha",
+    "fighter": "dragon-ball-goku",
+    "anchor": "left",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A mighty right-facing KAMEHAMEHA energy beam, bright white rounded dense leading head at right connected to a wide cyan-cobalt plasma body reaching left; braided energy streams, turbulent sculpted blue waves, electric blue filaments. An immense powerful substantial anime blast, not a thin line. Charge, expand, huge pulse, roiling sustained body, stronger peak, turbulence, withdraw, recovery.",
+    "source": "pet-app/art-source/skills-v11/kamehameha.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [],
+    "sourceHash": "526a65b71533b56dad3e869e85a7b82033d695f24d93afe673e22664c793366e"
+  },
+  {
+    "id": "spirit-bomb",
+    "fighter": "dragon-ball-goku",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A giant luminous blue-white SPIRIT BOMB sphere with a brilliantly layered spherical core, turquoise swirling cloud bands, tiny starlike sparks, softly translucent outer energy shell, beautiful volume and dense blue shadows. Gathers and expands, rotates, reaches explosive brightness, then contracts.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/spirit-bomb.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "2095555edbb3e69633a29b3ac16d5fd6ceba7540b31752a6c112fca9d870f764"
+  },
+  {
+    "id": "cheeky-cyclone",
+    "fighter": "crayon-shin-chan",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A playful rainbow-gold star tornado, thick gold-pink-blue swirling ribbons around a tall funnel, many crisp colorful five-point stars and funny zigzag confetti. Polished substantial volume, lively joyful animated motion, no character.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/cheeky-cyclone.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "fb572a1c46c9148562a021313b928695f6b3c9194bc17a8a30d27b651449a9da"
+  },
+  {
+    "id": "action-beam",
+    "fighter": "crayon-shin-chan",
+    "anchor": "left",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A huge right-facing golden hero beam with a blazing white-gold leading head, dense yellow-orange braided energy body and large sharp five-point star bursts interwoven in its wake. Bright brave anime hero blast with sculpted golden waves.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/action-beam.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "c14dd920808e128046f9568d2b948619425cc8306a6a28b45d361c0cf7fc0aba"
+  },
+  {
+    "id": "air-cannon",
+    "fighter": "doraemon",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A powerful right-facing compressed-air shell: sculpted translucent pale-cyan WHITE WIND bullet, thick rounded compressed-air head, layered concentric shockwave cones and vapor spirals trailing left. Strong luminous volume, compressed pressure impact, no cannon or character.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/air-cannon.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "b9497a5e169a2ccca6d8b71a94e9e94dd08e92e7bfe497c3f063233c10a4f47c"
+  },
+  {
+    "id": "take-copter",
+    "fighter": "doraemon",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A detailed small golden bamboo helicopter rotor gadget with a slim golden stem beneath it, two realistic varnished bamboo blades, brass-like central hub, shifting rotor orientations, semitransparent wind-disc arcs and rising turquoise lift wisps. One isolated rotor gadget, NO character or head.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/take-copter.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "05a651aa8f343253338215ec64d0a22f6183b41a64f960940b9f69a7ec8e6b8d"
+  },
+  {
+    "id": "ribbon-flight",
+    "fighter": "hello-kitty",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: An ornate glossy cherry-red satin bow projectile with two rounded bow loops, a small heartlike central knot, two flowing long pink ribbon tails, pearly highlights, heart-shaped tiny sparkles. Detailed fabric shading and graceful rotating ribbon motion.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/ribbon-flight.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "954343b3ce1c6bbd2f9bce8bb1d7eb1400444b59a404ccc13e79511faa05eb49"
+  },
+  {
+    "id": "friendship-glow",
+    "fighter": "hello-kitty",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A beautiful pink friendship sanctuary: hollow rose translucent heart-shaped protective dome rising over an elliptical pink-gold ground ring, detailed small floating hearts, satin ribbon wisps and soft golden sparkles; rich pearlescent materials.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/friendship-glow.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "ab16624b216073c6010c230b6d80b600eae6edf531c64ed017fd4329e7afca62"
+  },
+  {
+    "id": "orbit-dribble",
+    "fighter": "argentina-number-10",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A crisp shaded black-and-white soccer ball with recognizable pentagon leather panels, blue-white Argentina-colored curling orbit ribbons and bright golden sparks; ball spins through eight orientations, energetic polished sporty texture.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/orbit-dribble.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "7b0f8bd632ee4cac7edc55b439dd27946763a07509c3867b33fcd00a875bfdd8"
+  },
+  {
+    "id": "curved-shot",
+    "fighter": "argentina-number-10",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A shaded detailed black-and-white soccer ball tracing a dramatic CURVED cyan-white comet wake, two curling blue motion ribbons and golden speed flashes, distinct from straight fire shot; rotating leather paneling always clearly visible.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/curved-shot.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "8f6c68427d64ce089edf7561debf730867fd818791e6626adc6ab5e2d65edd93"
+  },
+  {
+    "id": "bicycle-cannon",
+    "fighter": "portugal-number-7",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A powerful soccer-ball ground impact, one clear shaded black-and-white leather ball above a broad red-gold explosive shockwave splash, angular luminous pressure shards and white speed crescents. Dynamic soccer kick detonation, no player body.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/bicycle-cannon.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "60535e9eaa7550bf81c2770c2b5200f37e3826b66d63469ef9d6cf67d7c94389"
+  },
+  {
+    "id": "power-kick",
+    "fighter": "portugal-number-7",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A powerful right-facing black-and-white soccer ball with rich leather paneling, brilliant orange-red roaring flame comet trail streaming left, white-hot compact core and gold sparks. Straight explosive fire-powered free kick, no character.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/power-kick.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "c4e9c3f98af29309bcf13a6bdc586a9a09fecf9b0e7e5ece85761519fd2c8f40"
+  },
+  {
+    "id": "electro-ball",
+    "fighter": "pikachu",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A brilliant GOLD ELECTRIC SPHERE, spherical white-yellow layered core with swirling golden electrical bands and jagged branching lightning wrapped around its surface, amber shaded depth and tiny blue sparks. Dense round three-dimensional electric plasma orb.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/electro-ball.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "5966c9cf978a2fe20caf1e522387a9f6f7038d5b3ffea9534f4c476a717005c9"
+  },
+  {
+    "id": "thunderbolt",
+    "fighter": "pikachu",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: An explosive golden lightning strike, huge branching white-yellow thunder pillar from above into a brilliant yellow ground impact, thick zigzag plasma branches and sharp star-shaped electric shards. Distinct sunny-yellow palette rather than blue storm.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/thunderbolt.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "fc34e842a3f6d823a47a3a79eeb9e2fd68bdce548ef254fbccca9eb4aef4b4c6"
+  },
+  {
+    "id": "death-beam",
+    "fighter": "dragon-ball-frieza",
+    "anchor": "left",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A precise right-facing MAGENTA DEATH BEAM: a narrow intense red-pink white-hot plasma shaft, violet corona, sharp pointed luminous head and thin twisting pink energy filaments. Elegantly deadly precise beam, clearly slimmer than massive cyan Kamehameha; no gore.\nClean cel-shaded anime game rendering. Eight SMALL isolated effects in 4 by 2 layout, enormous transparent gutters. Entire art fits within half of each slot. No fists, people, arms, text or background. Sharp magenta needle beam.",
+    "source": "pet-app/art-source/skills-v11/death-beam.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [],
+    "sourceHash": "59e8683dcbf12916e22e1b3b88b71c2b48962518e08f6e65d1758bdf452bac55"
+  },
+  {
+    "id": "emperor-orb",
+    "fighter": "dragon-ball-frieza",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A huge ominous royal-purple energy sphere with brilliant white-magenta center, deep violet outer layers, curling dark-purple gravity ribbons, tiny star motes and crackling pink lightning veins. Grand three-dimensional cosmic orb, not a flat disk.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/emperor-orb.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "74a6d16884b26ac8e88d7bfaa43a341a1ac43fd75c21fa910a561ed23d048bc6"
+  },
+  {
+    "id": "mind-scan",
+    "fighter": "spy-family-anya",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A delicate but brilliant pink PSYCHIC TARGET MARK: a small bright four-point star inside sculpted nested lavender-pink rings, tiny heart-shaped psychic sparks and curved scanning filaments. Hollow center, elegant precise layered luminous material, no eye or text.\nEight SMALL completely separated frames on 4 by 2 sheet. Clean shaded anime style. HUGE transparent gutters. Each target mark is a hollow rose-pink psychic halo with star motif and delicate sparkle accents; NO readable text, labels, numerals, character, background or limbs. Entire art maximum HALF the width and height of each cell.",
+    "source": "pet-app/art-source/skills-v11/mind-scan.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [],
+    "sourceHash": "cf512f8ba61bfbad5f565851b8785490f8f56c8f0f0f9886689aad15e63d13fa"
+  },
+  {
+    "id": "foreseen-counter",
+    "fighter": "spy-family-anya",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A luminous pink psychic REFLECTION SHIELD: tall hollow rose-colored translucent oval shell with three beautifully shaded pink hearts orbiting its border, pearly facets and silver-pink light ribbons. Protective hollow interior, pulse and reflected burst.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/foreseen-counter.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "5f88ddec81b961020b32fc906ba39f102e20375901e4a1acda98fe5a25572093"
+  },
+  {
+    "id": "consecutive-punches",
+    "fighter": "one-punch-saitama",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A right-facing WHITE PRESSURE FIST projectile: a large sculpted white-gold clenched energy fist with anatomically readable knuckles and thumb, dense ivory shockwave ripples and tapered orange speed streaks trailing left. An energetic anime punch, not a rectangle.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/consecutive-punches.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "c373b09a6810cb9dce22a148f25a60f862a06b769fe2cd1945d02c43e40cdc0c"
+  },
+  {
+    "id": "serious-punch",
+    "fighter": "one-punch-saitama",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: An overwhelming right-facing serious-punch PRESSURE WAVE: dense white-hot golden spherical pressure front with sculpted curling ivory cloud slabs, orange concentric shockwave crescents, sharp white impact petals and flying bright pressure shards. Huge heavy explosion, no character.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/serious-punch.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "ca65ae2aaa84cec5ae878838ffcc9e365db22bfe70139a27f74b731c67597674"
+  },
+  {
+    "id": "shadow-clones",
+    "fighter": "naruto-uzumaki",
+    "anchor": "ground",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: A stylized ninja summoning SMOKE PUFF, dense rounded pearl-white smoke curls with pale lavender shaded pockets, small turquoise chakra glints, and a clear rising plume; puff swells from ground, billows, opens, disperses into distinct wisps. No person, silhouette, writing or countdown.\nSTYLE AND SPACING PRIORITY: Match the supplied reference ONLY in bold clean ink contours and premium shaded anime-game rendering, do NOT draw its fists or arms. Use cel-shaded sculpted forms with hard readable edges; no noisy photographic clouds. The EIGHT isolated effect poses are SMALL, surrounded by vast transparent space. Maximum art width and height HALF of each of the 4 x 2 slots. Leave 100 pixels completely empty between adjacent silhouettes. Do not stretch the sprites to fill the canvas. All effects, glows and sparks end cleanly inside each pose.",
+    "source": "pet-app/art-source/skills-v11/shadow-clones.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [
+      "pet-app/art-source/skills-v10/gum-pistol.webp"
+    ],
+    "sourceHash": "03a97eafa1d7e7ed243b17f31a0ff3b2a3d97d978efc0dbd82a36f06dc5f24d2"
+  },
+  {
+    "id": "rasengan",
+    "fighter": "naruto-uzumaki",
+    "anchor": "center",
+    "prompt": "Use case: production anime game EFFECT sprite animation. Create EXACTLY EIGHT distinct complete temporal frames in FOUR COLUMNS and TWO ROWS on a landscape 2:1 canvas with GENUINELY TRANSPARENT background. Fixed equal square slots. IMPORTANT: EACH effect including ALL sparks must fit inside the INNER 65% of its slot. Leave wide visible completely transparent gutters on all sides including outer canvas edges. No clipping, touching or overlap between poses. Row-major order: anticipation/gather; form; build; strong release; strongest expressive peak; follow-through; settle; recovery. Keep coherent materials, common facing and ONE consistent scale, with meaningful changing shape through all eight frames. Effects only, NO character, scenery, letters, labels, numbers, grids, borders, opaque panels or checkerboard. Premium hand-painted anime game art with crisp inked silhouette, beautifully shaded substantial volume, fine detailed material textures, layered translucent highlights and explosive impact. No simplistic vector symbols or flat generic circles. Ensure all eight frames have substantial visible painted content. SUBJECT: One dense truly SPHERICAL blue-cyan Rasengan chakra ball with curved white spiral filaments wrapping across a rounded surface, shaded cobalt underside, white luminous upper hemisphere and turbulent translucent outer shell. A believable 3D sphere, not a flat pinwheel disk; gathers, grows, churns, shines, spirals outward, contracts.",
+    "source": "pet-app/art-source/skills-v11/rasengan.png",
+    "generator": "builtin:image_gen.imagegen",
+    "transparent_background": true,
+    "references": [],
+    "sourceHash": "511b3a18c39090b8eca98637a9d84aac2e2c71445fb5d6abea4a4408a8fe79cc"
+  }
+]
