@@ -13,8 +13,9 @@ export const TICKS = 60;
 export const MAX_TICKS = 36000;
 export const INPUT = Object.freeze({LEFT:1,RIGHT:2,UP:4,DOWN:8,ATTACK:16,JUMP:32,GUARD:64,SKILL1:128,SKILL2:256,RUN:512,RETRY:1024,END:2048});
 export const VALID_MASK = 4095;
-// Hidden guest characters remain in Pet Paradise but are closed in every Brawl mode.
-export const HIDDEN_FIGHTER_IDS = Object.freeze(['nezuko-kamado','dragon-ball-goku','crayon-shin-chan','doraemon','hello-kitty','argentina-number-10','portugal-number-7','pikachu','dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki']);
+// All published pets, including the former hidden guests, are open in Brawl.
+// Ownership checks still apply in every mode.
+export const HIDDEN_FIGHTER_IDS = Object.freeze([]);
 export const ALL_FIGHTERS = Object.freeze([
   {id:'starpatch-cat',name:{'zh-HK':'星斑貓','en-US':'Starpatch Cat'},role:{'zh-HK':'換位追擊','en-US':'Agile hunter'},hp:100,speed:240,damage:[8,8,14],rarity:'common',color:0xf5c36a,skills:[{name:{'zh-HK':'星影換位','en-US':'Starstep'},description:{'zh-HK':'閃到前方近敵背後抓擊，留下 4 秒星印。沒有目標時只向前閃避。','en-US':'Blink behind a nearby foe and claw it, leaving a 4-second star mark. With no target, blink forward to evade.'},damage:18,mp:20,cooldown:180,kind:'blink',range:230},{name:{'zh-HK':'獵星連爪','en-US':'Starhunt Claws'},description:{'zh-HK':'躍起追擊單一敵人，連抓三次；優先追蹤星印，末擊消耗星印增傷。','en-US':'Leap at one foe for three claw strikes. Prioritize a marked foe; the finisher consumes its mark for bonus damage.'},damage:30,mp:35,cooldown:420,kind:'flurry',range:280}]},
   {id:'cloud-ear-dog',name:{'zh-HK':'雲耳狗','en-US':'Cloud-ear Dog'},role:ELEMENTAL_ROLES['cloud-ear-dog'],hp:100,speed:210,damage:[7,7,12],rarity:'common',color:0x94cfe8,skills:ELEMENTAL_KITS['cloud-ear-dog']},
@@ -38,5 +39,5 @@ export const fighterById = id => FIGHTERS.find(f=>f.id===id);
 export const fightersForVersion = version => version==='brawl-v1'?V1_FIGHTERS:version==='brawl-v2'?V2_FIGHTERS:version==='brawl-v3'?V3_FIGHTERS:version==='brawl-v4'?V4_FIGHTERS:version==='brawl-v5'?V5_FIGHTERS:version==='brawl-v6'?V6_FIGHTERS:FIGHTERS;
 export const stageById = id => STAGES.find(s=>s.id===id);
 
-// Combat lookup includes unreleased kits for internal QA; launch permissions use fighterById.
+// Combat lookup and launch roster include all published kits; launch checks ownership.
 export const combatFighterById = id => ALL_FIGHTERS.find(f=>f.id===id);

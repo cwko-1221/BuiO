@@ -9,7 +9,7 @@ import {randomUUID} from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import {chromium} from 'playwright';
 import sharp from 'sharp';
-import {ALL_FIGHTERS,FIGHTERS,HIDDEN_FIGHTER_IDS} from '../pet-app/lib/brawl/catalog.mjs';
+import {ALL_FIGHTERS,FIGHTERS} from '../pet-app/lib/brawl/catalog.mjs';
 import {createBattle} from '../pet-app/lib/brawl/simulation.mjs';
 const out=path.resolve('artifacts/pet-playtest/brawl-v7/elemental-browser');await fs.mkdir(out,{recursive:true});
 const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-elemental-browser-')),dbFile=path.join(temp,'db.json');
@@ -21,15 +21,15 @@ const manifest=JSON.parse(await fs.readFile('pet-app/public/assets/art/brawl/man
 const port=await new Promise(resolve=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
 const server=spawn(process.execPath,['server.js'],{cwd:path.resolve('.'),env:{...process.env,PORT:String(port),MOCK_AUTH:'0',NODE_ENV:'development',PET_APP_DIST_DIR:process.env.PET_APP_DIST_DIR||path.resolve('pet-app/dist')},stdio:['ignore','pipe','pipe']});
 let logs='',browser,context;server.stdout.on('data',d=>logs+=d);server.stderr.on('data',d=>logs+=d);const errors=[],failed=[],coverage=[],performance=[];
-function stateFor(f){const s=createBattle({mode:'practice'});s.fighterId=f.id;Object.assign(s.actors[0],{kind:f.id,x:32000,hp:f.hp,maxHp:f.hp});s.actors[1].x=62000;return s;}
+function stateFor(f){const s=createBattle({mode:'practice',fighterId:f.id});s.actors[0].x=32000;s.actors[1].x=62000;return s;}
 try{
   const baseURL=`http://127.0.0.1:${port}`;for(let n=0;n<200;n++){try{if((await fetch(baseURL+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   browser=await chromium.launch({channel:'chrome',headless:true});context=await browser.newContext({baseURL,viewport:{width:1024,height:768},hasTouch:true,recordVideo:{dir:path.join(out,'video'),size:{width:1024,height:768}}});
   assert.equal((await context.request.post('/api/auth/login',{data:{studentId:'S001',password:'test'}})).status(),200);
-  const catalog=await (await context.request.get('/api/pet/brawl/catalog')).json();assert.equal(catalog.fighters.length,12);
-  for(const fighterId of HIDDEN_FIGHTER_IDS){const pet=d.petInstances.find(p=>p.speciesId===fighterId);assert.equal((await context.request.post('/api/pet/brawl/access',{data:{petId:pet.petId,fighterId,mode:'practice'}})).status(),403);}
+  const catalog=await (await context.request.get('/api/pet/brawl/catalog')).json();assert.equal(catalog.fighters.length,25);
+  for(const fighter of FIGHTERS.filter(f=>f.rarity==='epic')){const pet=d.petInstances.find(p=>p.speciesId===fighter.id);assert.equal((await context.request.post('/api/pet/brawl/access',{data:{petId:pet.petId,fighterId:fighter.id,mode:'practice'}})).status(),200);}
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('requestfailed',r=>{if(!r.failure()?.errorText.includes('ERR_ABORTED'))failed.push(r.url());});page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
-  await page.goto('/pet');await page.locator('[data-tab="brawl"]').click();await page.locator('.brawl-fighter').first().waitFor();assert.equal(await page.locator('.brawl-fighter').count(),12);
+  await page.goto('/pet');await page.locator('[data-tab="brawl"]').click();await page.locator('.brawl-fighter').first().waitFor();assert.equal(await page.locator('.brawl-fighter').count(),25);
   await page.locator('[data-brawl="mode"][data-id="practice"]').click();await page.locator('[data-brawl="start"]').first().click();await page.waitForFunction(()=>window.__petGame?.scene.isActive('Brawl')&&!document.querySelector('.brawl-loading'));
   async function reset(f,n,manual=true){
     const token=randomUUID(),initial=stateFor(f),k=f.skills[n],p=initial.actors[0],target=initial.actors[1],distant=['fissure','rain','lob','tornado','field','trap','barrage','sky-shot'].includes(k.mechanic);
@@ -37,7 +37,7 @@ try{
     await page.evaluate(({initial,assets,f,token})=>{
       const scene=window.__petGame.scene.getScene('Brawl');if(scene.__normalUpdate)scene.update=scene.__normalUpdate;
       const runtime={...scene.runtime};Object.assign(runtime.state,initial);runtime.assets=assets;runtime.qaToken=token;scene.scene.restart(runtime);
-      // Only this isolated fixture previews closed kits; no public launch bypass exists.
+      // Isolated effect-position fixture; public owned selection is verified separately.
       document.querySelector('.brawl-player-hud>b').textContent=f.name['zh-HK'];
       document.querySelectorAll('.brawl-skill span').forEach((el,n)=>el.textContent=f.skills[n].name['zh-HK']);
     },{initial,assets,f,token});
@@ -56,7 +56,7 @@ try{
     assert.ok(info.atlas&&info.texture.includes(f.id));assert.ok(info.peak<=72);if(k.kind==='kamehameha')assert.equal(info.beamWidth,150);if(k.kind==='flame-breath')assert.ok(info.flameLength>290);if(k.kind==='rasengan'||k.mechanic==='scan'||k.mechanic==='buff')assert.ok(info.peak>=1);
     await page.screenshot({path:path.join(out,f.id+`-skill${n+1}.png`)});coverage.push({fighter:f.id,skill:k.kind,...info});
   }
-  console.log('✓ All 50 kits render, including 150px Kamehameha and a large held Rasengan; the public roster and API still close all 13 guests');
+  console.log('✓ All 50 kits render, including 150px Kamehameha and a large held Rasengan; the public roster and owned API open all 25 fighters');
   for(const [id,n] of [['spark-hamster',0],['snowfeather-penguin',0],['thunderhorn-goat',1],['coral-seal',0],['dragon-ball-goku',0],['naruto-uzumaki',1]]){
     const f=ALL_FIGHTERS.find(f=>f.id===id);await reset(f,n,false);
     await page.evaluate(()=>{window.__fxFrameTimes=[];const end=performance.now()+1400;function frame(t){window.__fxFrameTimes.push(t);if(t<end)requestAnimationFrame(frame);}requestAnimationFrame(frame);});

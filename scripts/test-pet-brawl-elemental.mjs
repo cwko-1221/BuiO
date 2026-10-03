@@ -1,20 +1,20 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import sharp from 'sharp';
-import {ALL_FIGHTERS,FIGHTERS,HIDDEN_FIGHTER_IDS,INPUT as I} from '../pet-app/lib/brawl/catalog.mjs';
+import {ALL_FIGHTERS,FIGHTERS,HIDDEN_FIGHTER_IDS,fightersForVersion,INPUT as I} from '../pet-app/lib/brawl/catalog.mjs';
 import {createBattle,stepBattle,replayBattle} from '../pet-app/lib/brawl/simulation.mjs';
 import * as v6 from '../pet-app/lib/brawl/legacy/v6/simulation.mjs';
 import {brawlSound} from '../pet-app/lib/brawl/sound.mjs';
 const out='artifacts/pet-playtest/brawl-v7';await fs.mkdir(out,{recursive:true});
 function fixture(fighterId){
-  // Internal kit QA only: public launch APIs never permit guest characters.
+  // Isolated positioning fixture; every kit is available through public ownership checks.
   const f=ALL_FIGHTERS.find(f=>f.id===fighterId),s=createBattle({mode:'practice'});
   Object.assign(s.actors[0],{kind:f.id,hp:f.hp-30,maxHp:f.hp});s.fighterId=f.id;return s;
 }
 const run=(s,n,mask=0)=>{const events=[];for(let t=0;t<n;t++){stepBattle(s,mask);events.push(...s.events);}return events;};
-assert.equal(ALL_FIGHTERS.length,25);assert.equal(FIGHTERS.length,12);
+assert.equal(ALL_FIGHTERS.length,25);assert.equal(FIGHTERS.length,25);
 assert.equal(new Set(ALL_FIGHTERS.flatMap(f=>f.skills.map(k=>k.kind))).size,50);
-for(const id of HIDDEN_FIGHTER_IDS)assert.throws(()=>createBattle({fighterId:id}),/Invalid battle settings/);
+assert.equal(HIDDEN_FIGHTER_IDS.length,0);for(const f of FIGHTERS)assert.equal(createBattle({fighterId:f.id}).actors[0].kind,f.id);
 const rows=[];
 for(const f of ALL_FIGHTERS)for(const [n,k] of f.skills.entries()){
   const s=fixture(f.id),p=s.actors[0],t=s.actors[1];
@@ -34,7 +34,7 @@ for(const f of ALL_FIGHTERS)for(const [n,k] of f.skills.entries()){
   if(k.element==='water'&&k.damage>0)assert.ok(status.wetUntil);if(k.burnTicks)assert.ok(status.burnUntil);if(k.freezeTicks)assert.ok(status.freezeUntil);if(k.shockTicks)assert.ok(status.shockUntil);
   rows.push({fighter:f.id,skill:k.kind,element:k.element||'star',mechanic:k.mechanic||k.kind,damage:initial-t.hp,fields,projectiles,...status});
 }
-console.log('✓ 50 distinct named skills: real damage/support, elemental statuses, costs and finite physics; 13 guests stay closed');
+console.log('✓ 50 distinct named skills: real damage/support, elemental statuses, costs and finite physics; all 25 fighters are open');
 let s=fixture('spark-hamster'),p=s.actors[0],t=s.actors[1];t.x=p.x+30000;stepBattle(s,I.SKILL1|I.RIGHT);const start=p.x;run(s,60,I.RIGHT);assert.equal(p.x,start);assert.ok(t.hp<t.maxHp&&t.burnUntil>s.tick);
 s=fixture('spark-hamster');p=s.actors[0];t=s.actors[1];t.x=p.x+30000;t.y=p.y+12000;stepBattle(s,I.SKILL1);run(s,120);assert.equal(t.hp,t.maxHp);
 console.log('✓ Flame channel stays stationary, burns at range, and respects its widening depth cone');
@@ -50,7 +50,7 @@ console.log('✓ Golden shield reflects a real enemy projectile, spends shield a
 s=fixture('pudding-pig');p=s.actors[0];t=s.actors[1];t.x=p.x+32000;stepBattle(s,I.SKILL2);run(s,40);assert.equal(t.hp,t.maxHp);run(s,70);assert.ok(t.hp<t.maxHp&&s.fields.length>0);
 s=fixture('naruto-uzumaki');p=s.actors[0];t=s.actors[1];t.x=p.x+18000;stepBattle(s,I.SKILL2);const hits=run(s,160).filter(e=>e.type==='hit');assert.equal(hits.length,4);assert.equal(t.maxHp-t.hp,33);assert.equal(hits.at(-1).heavy,true);
 console.log('✓ Mortar waits for its flight, then leaves a hazard; Rasengan lands three grinding hits and a distinct knockdown finisher');
-for(const f of FIGHTERS){const options={version:'brawl-v6',fighterId:f.id,mode:'practice',seed:817},log=[{tick:1,mask:I.RIGHT},{tick:50,mask:0},{tick:51,mask:I.SKILL1},{tick:52,mask:0},{tick:160,mask:I.SKILL2},{tick:161,mask:0}],old=v6.createBattle(options);let mask=0;for(let tick=1;tick<=350;tick++){const frame=log.find(f=>f.tick===tick);if(frame)mask=frame.mask;v6.stepBattle(old,mask);}assert.deepEqual(replayBattle(options,log,350,{terminal:false}),old);}
+for(const f of fightersForVersion('brawl-v6')){const options={version:'brawl-v6',fighterId:f.id,mode:'practice',seed:817},log=[{tick:1,mask:I.RIGHT},{tick:50,mask:0},{tick:51,mask:I.SKILL1},{tick:52,mask:0},{tick:160,mask:I.SKILL2},{tick:161,mask:0}],old=v6.createBattle(options);let mask=0;for(let tick=1;tick<=350;tick++){const frame=log.find(f=>f.tick===tick);if(frame)mask=frame.mask;v6.stepBattle(old,mask);}assert.deepEqual(replayBattle(options,log,350,{terminal:false}),old);}
 console.log('✓ Every v6 fighter replays its original skills exactly after the v7 redesign');
 const manifest=JSON.parse(await fs.readFile('pet-app/public/assets/art/brawl/manifest.json','utf8')),file='pet-app/public/'+manifest.elementalFx.url.replace('/pet/',''),meta=await sharp(file).metadata();assert.equal(meta.width,1024);assert.equal(meta.height,1280);assert.ok(meta.hasAlpha);assert.equal(Object.keys(manifest.elementalFx.frames).length,20);
 for(let n=0;n<20;n++){const {data,info}=await sharp(file).extract({left:n%4*256,top:Math.floor(n/4)*256,width:256,height:256}).raw().toBuffer({resolveWithObject:true});let occupied=0;for(let y=0;y<256;y++)for(let x=0;x<256;x++){const alpha=data[(y*256+x)*info.channels+3];if(x<16||x>=240||y<16||y>=240)assert.equal(alpha,0);if(alpha>20)occupied++;}assert.ok(occupied>2000);}
