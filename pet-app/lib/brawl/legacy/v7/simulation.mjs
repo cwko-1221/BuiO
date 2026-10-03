@@ -1,11 +1,10 @@
 import {VERSION,TICKS,MAX_TICKS,INPUT as I,VALID_MASK,FIGHTERS,ENEMIES,STAGES,DIFFICULTIES,fighterById as releasedFighterById,combatFighterById as fighterById,stageById} from './catalog.mjs';
-import * as legacy from './legacy/simulation.mjs';
-import * as v2 from './legacy/v2/simulation.mjs';
-import * as v3 from './legacy/v3/simulation.mjs';
-import * as v4 from './legacy/v4/simulation.mjs';
-import * as v5 from './legacy/v5/simulation.mjs';
-import * as v6 from './legacy/v6/simulation.mjs';
-import * as v7 from './legacy/v7/simulation.mjs';
+import * as legacy from '../simulation.mjs';
+import * as v2 from '../v2/simulation.mjs';
+import * as v3 from '../v3/simulation.mjs';
+import * as v4 from '../v4/simulation.mjs';
+import * as v5 from '../v5/simulation.mjs';
+import * as v6 from '../v6/simulation.mjs';
 import {abilityDuration,setupAbility,updateAbility,tickFields,tickAbilityProjectile,tickStatuses} from './abilities.mjs';
 const combat={impact,melee,projectile};
 const U=100;
@@ -23,7 +22,6 @@ export function createBattle(options={}){
   if(options.version==='brawl-v4')return v4.createBattle(options);
   if(options.version==='brawl-v5')return v5.createBattle(options);
   if(options.version==='brawl-v6')return v6.createBattle(options);
-  if(options.version==='brawl-v7')return v7.createBattle(options);
   if(options.version&&options.version!==VERSION)throw new Error('Unsupported battle version');
   const {fighterId=FIGHTERS[0].id,stageId=STAGES[0].id,difficulty='easy',mode='campaign',seed=1,opponentId=FIGHTERS[1].id}=options;
   if(!releasedFighterById(fighterId)||!stageById(stageId)||!DIFFICULTIES[difficulty]||!['campaign','practice','tutorial','duel','pvp'].includes(mode)||!releasedFighterById(opponentId))throw new Error('Invalid battle settings');
@@ -60,23 +58,21 @@ function attack(s,a,n=0){
   begin(s,a,a.z>0?'air':`attack${n+1}`,a.z>0?24:a.boss?a.windup+40:Math.max(a.windup+14,20+(n===2?10:0)+(a.kind==='pudding-pig'?4:0)+enemyDelay));a.queued=false;
   s.events.push({type:'swing',actor:a.id,combo:n,air:a.z>0,rush:a.rush});
 }
-function impact(s,a,t,damage,knock=0,down=false,chain=false,options={}){
-  if(t.hp<=0||!options.dot&&t.invuln>0&&!(chain&&t.invulnSource===a.id&&t.action==='hit')||a.team===t.team)return false;
+function impact(s,a,t,damage,knock=0,down=false,chain=false){
+  if(t.hp<=0||t.invuln>0&&!(chain&&t.invulnSource===a.id&&t.action==='hit')||a.team===t.team)return false;
   const d=DIFFICULTIES[s.difficulty];if(a.team===1&&!fighterById(a.kind))damage=Math.round(damage*d.damage/100);
   const facing=a.x===t.x?-t.facing:Math.sign(a.x-t.x);
-  const blocked=!options.dot&&t.action==='guard'&&t.facing===facing&&t.guard>0&&t.z===0;
-  if(!options.dot&&t.counterDamage&&t.counterUntil>s.tick&&Math.abs(a.x-t.x)<=(t.counterRange||150)*U&&Math.abs(a.y-t.y)<=60*U&&t.facing===facing){const retaliation=t.counterDamage;t.counterDamage=0;t.invuln=Math.max(t.invuln,12);s.events.push({type:'counter',actor:t.id,source:a.id,effect:t.counterEffect,x:t.x/U,y:t.y/U});impact(s,t,a,retaliation,8,false,false,{skill:true});return false;}
+  const blocked=t.action==='guard'&&t.facing===facing&&t.guard>0&&t.z===0;
+  if(t.counterDamage&&t.counterUntil>s.tick&&Math.abs(a.x-t.x)<=(t.counterRange||150)*U&&Math.abs(a.y-t.y)<=60*U&&t.facing===facing){const retaliation=t.counterDamage;t.counterDamage=0;t.invuln=Math.max(t.invuln,12);s.events.push({type:'counter',actor:t.id,source:a.id,effect:t.counterEffect,x:t.x/U,y:t.y/U});impact(s,t,a,retaliation,8,false);return false;}
   if(t.shield>0&&t.shieldUntil>s.tick){const absorbed=Math.min(t.shield,damage);t.shield-=absorbed;damage-=absorbed;s.events.push({type:'barrier',actor:t.id,damage:absorbed,x:t.x/U,y:t.y/U});if(damage<=0)return false;}
-  if(!options.dot&&!blocked&&t.readOwner===a.id&&t.readUntil>s.tick){damage+=3;t.readUntil=0;}
+  if(!blocked&&t.readOwner===a.id&&t.readUntil>s.tick){damage+=3;t.readUntil=0;}
   if(blocked){t.guard=Math.max(0,t.guard-damage*200);damage=Math.max(1,Math.floor(damage*.2));if(t.guard===0)begin(s,t,'break',45);}
-  t.hp=Math.max(0,t.hp-damage);if(!options.dot){a.stop=down?3:1;t.stop=down?7:4;s.freeze=Math.max(s.freeze,down?4:2);}
-  if(!options.dot&&(a.team===0||a.human)&&!blocked){a.comboHits=s.tick<=(a.comboUntil||0)?(a.comboHits||0)+1:1;a.comboUntil=s.tick+120;a.bestCombo=Math.max(a.bestCombo||0,a.comboHits);if(a.team===0){s.comboHits=s.tick<=s.comboUntil?s.comboHits+1:1;s.comboUntil=s.tick+120;s.bestCombo=Math.max(s.bestCombo,s.comboHits);}}
-  // Basic strikes reward engaging at close range; skills and damage over time never refund their cost.
-  if(!options.dot&&!options.skill&&!blocked&&fighterById(a.kind))a.mp=Math.min(10000,a.mp+Math.min(200,damage*10));
-  if(!options.dot&&!blocked){t.hitChain=s.tick-t.lastHit<120?t.hitChain+1:1;t.lastHit=s.tick;t.knock=(a.x<=t.x?1:-1)*knock*U;
+  t.hp=Math.max(0,t.hp-damage);a.stop=down?3:1;t.stop=down?7:4;s.freeze=Math.max(s.freeze,down?4:2);
+  if((a.team===0||a.human)&&!blocked){a.comboHits=s.tick<=(a.comboUntil||0)?(a.comboHits||0)+1:1;a.comboUntil=s.tick+120;a.bestCombo=Math.max(a.bestCombo||0,a.comboHits);if(a.team===0){s.comboHits=s.tick<=s.comboUntil?s.comboHits+1:1;s.comboUntil=s.tick+120;s.bestCombo=Math.max(s.bestCombo,s.comboHits);}a.mp=Math.min(10000,a.mp+damage*20);}
+  if(!blocked){t.hitChain=s.tick-t.lastHit<120?t.hitChain+1:1;t.lastHit=s.tick;t.knock=(a.x<=t.x?1:-1)*knock*U;
     if((!t.boss||t.action==='idle'||t.action==='walk')&&t.action!=='fall'){if(down||t.hitChain>=4){begin(s,t,'fall',30);t.hitChain=0;if(t.team===0||t.human){t.invuln=42;t.invulnSource=a.id;}t.vz=Math.max(t.vz,420);t.z=Math.max(t.z,1);}else {begin(s,t,'hit',12);if(t.team===0||t.human){t.invuln=10;t.invulnSource=a.id;}}}
   }
-  s.events.push({type:options.dot?'statusTick':blocked?'block':'hit',element:options.element,actor:t.id,source:a.id,damage,heavy:down,x:t.x/U,y:t.y/U,z:t.z/U});
+  s.events.push({type:blocked?'block':'hit',actor:t.id,source:a.id,damage,heavy:down,x:t.x/U,y:t.y/U,z:t.z/U});
   if(t.hp===0){begin(s,t,'fall',36);s.events.push({type:'ko',actor:t.id,x:t.x/U,y:t.y/U});if(t.team===1&&!t.dummy){s.kills++;if(s.mode==='campaign'&&s.kills%3===0)s.pickups.push({id:s.nextId++,kind:s.kills%6===0?'health':'mana',x:t.x,y:t.y,expires:s.tick+1200});}}
   return true;
 }
@@ -87,7 +83,7 @@ function projectile(s,a,damage,range,speed=500,depthOffset=0,ground=false){s.pro
 function catStrike(s,a,target,damage,phase,finisher=false,mark=false){
   if(!target||target.hp<=0||Math.abs(target.x-a.x)>100*U||Math.abs(target.y-a.y)>40*U||target.z>=65*U)return;
   const empowered=finisher&&target.starMarkOwner===a.id&&target.starMarkUntil>s.tick;
-  const hp=target.hp,eventStart=s.events.length;impact(s,a,target,damage+(empowered?6:0),finisher?10:2,finisher,s.mode==='pvp'&&a.skill===1,{skill:true});
+  const hp=target.hp,eventStart=s.events.length;impact(s,a,target,damage+(empowered?6:0),finisher?10:2,finisher,s.mode==='pvp'&&a.skill===1);
   const hit=s.events.slice(eventStart).some(e=>e.type==='hit'&&e.actor===target.id&&e.source===a.id);
   if(hp>target.hp&&hit){if(mark){target.starMarkOwner=a.id;target.starMarkUntil=s.tick+240;}if(empowered)target.starMarkUntil=0;}
   s.events.push({type:'catStrike',actor:a.id,target:target.id,phase,empowered:!!empowered,x:target.x/U,y:target.y/U,z:target.z/U});
@@ -135,11 +131,11 @@ function ai(s,a){
   a.aiMask=mask;return mask;
 }
 function updateActor(s,a,mask){
-  if(a.hp>0&&a.freezeUntil>s.tick){a.invuln=Math.max(0,a.invuln-1);a.lastMask=mask;return;}
+  if(a.hp>0&&a.freezeUntil>s.tick){a.lastMask=mask;return;}
   if(a.shockUntil>s.tick)mask&=~(I.SKILL1|I.SKILL2);
   if(a.hp<=0){a.actionTick++;return;}
   a.cooldowns=a.cooldowns.map(c=>Math.max(0,c-1));a.invuln=Math.max(0,a.invuln-1);
-  a.mpRegenCarry=(a.mpRegenCarry||0)+200;const manaGain=Math.floor(a.mpRegenCarry/TICKS);a.mpRegenCarry%=TICKS;a.mp=Math.min(10000,a.mp+manaGain);if(a.action!=='guard')a.guard=Math.min(10000,a.guard+25);
+  a.mp=Math.min(10000,a.mp+10);if(a.action!=='guard')a.guard=Math.min(10000,a.guard+25);
   const pressed=mask&~a.lastMask;a.lastMask=mask;
   if(a.kind==='starpatch-cat'&&a.action==='skill1'&&a.actionTick>=6&&(pressed&I.SKILL2))a.catQueueUntil=s.tick+30;
   if(a.stop>0){a.stop--;return;}
@@ -211,7 +207,6 @@ export function stepBattle(s,mask=0,opponentMask=0){
   if(s.version==='brawl-v4')return v4.stepBattle(s,mask,opponentMask);
   if(s.version==='brawl-v5')return v5.stepBattle(s,mask,opponentMask);
   if(s.version==='brawl-v6')return v6.stepBattle(s,mask,opponentMask);
-  if(s.version==='brawl-v7')return v7.stepBattle(s,mask,opponentMask);
   if(!Number.isInteger(mask)||mask<0||mask>VALID_MASK)throw new Error('Invalid input');
   if(s.mode==='pvp'&&(!Number.isInteger(opponentMask)||opponentMask<0||opponentMask>1023||mask>1023))throw new Error('Invalid multiplayer input');
   if(['won','lost','draw'].includes(s.status))return s;
@@ -221,7 +216,7 @@ export function stepBattle(s,mask=0,opponentMask=0){
   mask|=s.frozenPress||0;s.frozenPress=0;
   if(s.mode==='pvp'){opponentMask|=s.frozenOpponent||0;s.frozenOpponent=0;}
   if(s.status==='ko'){
-    if(mask&I.RETRY&&s.retries===0){s.retries++;s.actors=[s.actors[0]];const p=s.actors[0];p.hp=p.maxHp;p.mp=p.guard=10000;p.x=(s.zone*1280+190)*U;p.y=455*U;p.z=p.vz=p.stop=p.knock=p.hitChain=p.runDirection=0;p.invuln=90;p.cooldowns=[0,0];p.mpRegenCarry=p.burnNext=p.chill=p.chillUntil=0;p.shield=p.counterDamage=p.slowUntil=p.rootUntil=p.hasteUntil=p.burnUntil=p.readUntil=p.starMarkUntil=p.freezeUntil=p.shockUntil=p.wetUntil=p.freezeReadyAt=0;p.bufferUntil=-1;p.guardCombo=p.lastHit=-999;p.guardDirection=p.queued=false;p.lastTap=[-99,-99];begin(s,p,'idle',0);p.lastMask=0;s.projectiles=[];s.fields=[];s.pickups=[];s.status='playing';wave(s);s.events.push({type:'retry'});}
+    if(mask&I.RETRY&&s.retries===0){s.retries++;s.actors=[s.actors[0]];const p=s.actors[0];p.hp=p.maxHp;p.mp=p.guard=10000;p.x=(s.zone*1280+190)*U;p.y=455*U;p.z=p.vz=p.stop=p.knock=p.hitChain=p.runDirection=0;p.invuln=90;p.cooldowns=[0,0];p.shield=p.counterDamage=p.slowUntil=p.rootUntil=p.hasteUntil=p.burnUntil=p.readUntil=p.starMarkUntil=p.freezeUntil=p.shockUntil=p.wetUntil=p.freezeReadyAt=0;p.bufferUntil=-1;p.guardCombo=p.lastHit=-999;p.guardDirection=p.queued=false;p.lastTap=[-99,-99];begin(s,p,'idle',0);p.lastMask=0;s.projectiles=[];s.fields=[];s.pickups=[];s.status='playing';wave(s);s.events.push({type:'retry'});}
     else if(mask&I.END)s.status='lost';return s;
   }
   if(s.tick>=MAX_TICKS){s.status='lost';return s;}
@@ -255,10 +250,10 @@ export function stepBattle(s,mask=0,opponentMask=0){
   }
   return s;
 }
-export function battleResult(s){if(s.version==='brawl-v1')return legacy.battleResult(s);if(s.version==='brawl-v2')return v2.battleResult(s);if(s.version==='brawl-v3')return v3.battleResult(s);if(s.version==='brawl-v4')return v4.battleResult(s);if(s.version==='brawl-v5')return v5.battleResult(s);if(s.version==='brawl-v6')return v6.battleResult(s);if(s.version==='brawl-v7')return v7.battleResult(s);return {outcome:s.status,ticks:s.tick,seconds:Math.round(s.tick/TICKS),retries:s.retries,hp:s.actors[0].hp,bestCombo:s.bestCombo,kills:s.kills,stars:s.status==='won'&&s.mode==='campaign'?1+Number(s.retries===0)+Number(s.tick<=18000&&s.actors[0].hp>=s.actors[0].maxHp*.4):0};}
+export function battleResult(s){if(s.version==='brawl-v1')return legacy.battleResult(s);if(s.version==='brawl-v2')return v2.battleResult(s);if(s.version==='brawl-v3')return v3.battleResult(s);if(s.version==='brawl-v4')return v4.battleResult(s);if(s.version==='brawl-v5')return v5.battleResult(s);if(s.version==='brawl-v6')return v6.battleResult(s);return {outcome:s.status,ticks:s.tick,seconds:Math.round(s.tick/TICKS),retries:s.retries,hp:s.actors[0].hp,bestCombo:s.bestCombo,kills:s.kills,stars:s.status==='won'&&s.mode==='campaign'?1+Number(s.retries===0)+Number(s.tick<=18000&&s.actors[0].hp>=s.actors[0].maxHp*.4):0};}
 export function replayBattle(options,inputs,endTick,{terminal=true}={}){
   if(options.version==='brawl-v1')return legacy.replayBattle(options,inputs,endTick,{terminal});
-  if(options.version==='brawl-v2')return v2.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v3')return v3.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v4')return v4.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v5')return v5.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v6')return v6.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v7')return v7.replayBattle(options,inputs,endTick,{terminal});
+  if(options.version==='brawl-v2')return v2.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v3')return v3.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v4')return v4.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v5')return v5.replayBattle(options,inputs,endTick,{terminal});if(options.version==='brawl-v6')return v6.replayBattle(options,inputs,endTick,{terminal});
   if(!Number.isInteger(endTick)||endTick<0||endTick>MAX_TICKS||!Array.isArray(inputs)||inputs.length>MAX_TICKS+1)throw new Error('Invalid replay size');
   let previous=-1;for(const f of inputs){if(!f||!Number.isInteger(f.tick)||f.tick<=previous||f.tick<1||f.tick>endTick||!Number.isInteger(f.mask)||f.mask<0||f.mask>VALID_MASK)throw new Error('Invalid replay input');previous=f.tick;}
   const s=createBattle(options);let index=0,mask=0;

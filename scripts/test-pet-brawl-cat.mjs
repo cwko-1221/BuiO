@@ -9,13 +9,13 @@ import * as v2 from '../pet-app/lib/brawl/legacy/v2/simulation.mjs';
 import {INPUT as I,VERSION,FIGHTERS,fightersForVersion} from '../pet-app/lib/brawl/catalog.mjs';
 import {brawlSound} from '../pet-app/lib/brawl/sound.mjs';
 import {playBot,botInput} from './pet-brawl-bot.mjs';
-const out='artifacts/pet-playtest/brawl-v7/cat-regression';await fs.mkdir(out,{recursive:true});
+const out='artifacts/pet-playtest/brawl-v8/cat-regression';await fs.mkdir(out,{recursive:true});
 const ticks=(s,n)=>{const events=[];for(let t=0;t<n;t++){stepBattle(s);events.push(...s.events);}return events;};
 const arena=()=>{const s=createBattle({mode:'practice'});s.actors[0].x=56000;return s;};
 const cast=(s,key)=>{stepBattle(s,key);return [...s.events,...ticks(s,100)];};
 const castGuarded=(s,target)=>{const events=[];for(let n=0;n<101;n++){target.action='guard';target.facing=-1;stepBattle(s,n===0?I.SKILL1:0);events.push(...s.events);}return events;};
 const reports=[];
-assert.equal(VERSION,'brawl-v7');assert.equal(fightersForVersion('brawl-v2')[0].skills[0].kind,'dash');
+assert.equal(VERSION,'brawl-v8');assert.equal(fightersForVersion('brawl-v2')[0].skills[0].kind,'dash');
 assert.notEqual(FIGHTERS[0].skills[0].kind,FIGHTERS[2].skills[0].kind);
 assert.notEqual(FIGHTERS[0].skills[1].kind,FIGHTERS[2].skills[1].kind);
 // Guarded foe, intervening enemy and lane separation: a precise back attack.
@@ -56,8 +56,8 @@ s=arena();stepBattle(s,I.SKILL2);s.actors[1].x=110000;const misses=ticks(s,100);
 s=arena();stepBattle(s,I.SKILL2);s.actors[1].hp=0;s.actors[1].action='fall';ticks(s,100);assert.equal(s.actors[0].z,0);assert.equal(s.actors[0].action,'idle');
 // Empty casts, cost/cooldown, edge clamps, deterministic side and mark expiry.
 for(const key of [I.SKILL1,I.SKILL2]){
-  s=createBattle({mode:'practice'});p=s.actors[0];stepBattle(s,key);assert.equal(p.mp,key===I.SKILL1?8000:6500);const e=ticks(s,100);assert.equal(e.some(e=>e.type==='hit'),false);assert.equal(p.z,0);
-  const mp=p.mp;stepBattle(s,key);assert.equal(p.action,'idle');assert.equal(p.mp,mp+10);
+  s=createBattle({mode:'practice'});p=s.actors[0];stepBattle(s,key);assert.equal(p.mp,10000-FIGHTERS[0].skills[key===I.SKILL1?0:1].mp*100);const e=ticks(s,100);assert.equal(e.some(e=>e.type==='hit'),false);assert.equal(p.z,0);
+  const mp=p.mp,expectedGain=Math.floor(((p.mpRegenCarry||0)+200)/60);stepBattle(s,key);assert.equal(p.action,'idle');assert.equal(p.mp,mp+expectedGain);
   s=arena();p=s.actors[0];p.mp=100;stepBattle(s,key);assert.equal(p.action,'idle');
   for(const facing of [-1,1]){s=createBattle({mode:'practice'});p=s.actors[0];p.x=facing===1?123000:5000;p.facing=facing;s.actors=[];s.actors.push(p);cast(s,key);assert.ok(p.x>=4500&&p.x<=123500);assert.equal(p.z,0);}
 }

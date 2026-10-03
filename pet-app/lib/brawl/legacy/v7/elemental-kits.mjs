@@ -1,6 +1,6 @@
 const L=(zh,en)=>({'zh-HK':zh,'en-US':en});
-const k=(zh,en,description,english,kind,mechanic,damage,mp,cooldown,range,extra={})=>({name:L(zh,en),description:L(description,english),kind,mechanic,damage,mp:Math.ceil(mp*1.25),cooldown,range,...extra});
-// v8 budgets stronger elemental utility with 25% higher MP costs.
+const k=(zh,en,description,english,kind,mechanic,damage,mp,cooldown,range,extra={})=>({name:L(zh,en),description:L(description,english),kind,mechanic,damage,mp,cooldown,range,...extra});
+// Each pair has a distinct tactical purpose. Guest kits stay outside the released roster.
 export const ELEMENTAL_KITS={
   'cloud-ear-dog':[
     k('裂空風刃','Gale Blades','三道穿透風刃分路飛出，可在遠處打斷敵陣。','Three piercing air blades travel in separate lanes.','gale-blades','projectile',8,20,210,600,{spread:[-30,0,30],pierce:true,speed:610,element:'wind',effect:'wind',size:36}),
@@ -21,13 +21,13 @@ export const ELEMENTAL_KITS={
     k('龜殼反彈','Shell Counter','巨型龜殼護陣抵擋一次近身攻擊並反擊。','A giant shell ward blocks and counters one close attack.','shell-counter','buff',16,20,240,150,{counter:16,shield:10,buffTicks:100,effect:'shield',element:'earth'}),
     k('藤根圍城','Root Fortress','大片藤根纏住並侵蝕地面敵人；跳起可穿過。','A root garden snares and wears down grounded foes; jump to bypass.','moss-garden','field',4,36,480,160,{radius:155,period:36,life:180,slowTicks:70,rootTicks:18,effect:'leaves',element:'nature'})],
   'spark-hamster':[
-    k('烈焰噴吐','Flame Breath','持續噴出擴大的火焰，命中後灼燒；施放時不能移動。','Channel a widening flame plume that burns foes while stationary.','flame-breath','flamethrower',6,28,270,370,{pulses:5,period:10,windup:18,duration:83,depth:56,burnTicks:180,effect:'flame',element:'fire'}),
-    k('爆炎果實','Blazing Nut','高拋燃燒果實，炸開後留下短暫火海。','Lob a blazing nut that explodes and leaves a fire patch.','blazing-nut','lob',20,38,480,340,{flight:36,height:190,radius:105,life:140,period:35,fieldDamage:3,burnTicks:180,effect:'flame',element:'fire',size:40})],
+    k('烈焰噴吐','Flame Breath','持續噴出擴大的火焰，命中後灼燒；施放時不能移動。','Channel a widening flame plume that burns foes while stationary.','flame-breath','flamethrower',6,28,270,370,{pulses:5,period:10,windup:18,duration:83,depth:56,burnTicks:90,effect:'flame',element:'fire'}),
+    k('爆炎果實','Blazing Nut','高拋燃燒果實，炸開後留下短暫火海。','Lob a blazing nut that explodes and leaves a fire patch.','blazing-nut','lob',20,38,480,340,{flight:36,height:190,radius:105,life:140,period:35,fieldDamage:3,burnTicks:90,effect:'flame',element:'fire',size:40})],
   'leaftail-fox':[
     k('葉刃回旋','Returning Leaves','兩片葉刃分路穿透敵人後返回。','Two leaf blades pierce separate lanes before returning.','leaf-blade','projectile',8,22,210,490,{spread:[-20,20],returning:true,pierce:true,effect:'leaves',element:'nature',speed:510,size:34}),
     k('森羅葉暴','Leaf Tempest','綠色葉龍捲牽引敵人，並削弱移動速度。','A leaf tornado draws foes inward and slows movement.','leaf-tempest','tornado',5,38,480,230,{radius:130,life:155,period:27,speed:65,pull:2,slowTicks:55,effect:'leaves',element:'nature'})],
   'snowfeather-penguin':[
-    k('冰柱長城','Glacial Wall','五根巨大冰柱依次冒出，命中短暫冰封；有地面預警。','Five giant ice columns erupt after warnings and briefly freeze foes.','glacial-wall','fissure',10,27,270,440,{columns:5,gap:76,interval:10,radius:58,arm:24,life:110,freezeTicks:72,slowTicks:100,effect:'ice',element:'ice'}),
+    k('冰柱長城','Glacial Wall','五根巨大冰柱依次冒出，命中短暫冰封；有地面預警。','Five giant ice columns erupt after warnings and briefly freeze foes.','glacial-wall','fissure',10,27,270,440,{columns:5,gap:76,interval:10,radius:58,arm:24,life:110,freezeTicks:28,slowTicks:100,effect:'ice',element:'ice'}),
     k('極地暴風雪','Polar Blizzard','暴風雪緩慢前進，反覆降下冰晶；連續受寒會冰封。','A moving blizzard drops ice shards; repeated chill freezes foes.','polar-blizzard','tornado',5,42,510,280,{radius:150,life:160,period:30,speed:55,slowTicks:100,effect:'ice',element:'ice'})],
   'thunderhorn-goat':[
     k('雷角連鎖','Horn Lightning','雷電跳至最多三個近敵，濕身目標受額外電擊。','Lightning jumps through three foes; soaked targets take an extra shock.','horn-lightning','chain',18,25,240,380,{jumps:3,jumpRange:230,shockTicks:18,effect:'electric',element:'lightning'}),
@@ -36,8 +36,8 @@ export const ELEMENTAL_KITS={
     k('洶湧巨浪','Tidal Bore','寬闊巨浪穿透並擊退前方敵人，同時使其濕身。','A broad tidal wave pierces, pushes and soaks foes.','tidal-bore','wave',18,25,240,600,{speed:340,pierce:true,depth:62,size:95,knock:13,wetTicks:180,effect:'wave',element:'water'}),
     k('珊瑚潮池','Coral Sanctuary','治療潮池分段回復最多 12 HP，並減慢池內敵人。','A coral pool heals up to 12 HP over time and slows enemies inside.','coral-pool','sanctuary',0,40,540,0,{heal:3,radius:145,period:45,life:181,slowTicks:40,effect:'wave',element:'water'})],
   'nezuko-kamado':[
-    k('血焰噴流','Bloodflame Torrent','向前噴出粉紅血焰，持續灼燒多條路線。','Channel pink bloodflame across several depth lanes.','bloodflame-torrent','flamethrower',6,30,270,400,{pulses:5,period:10,windup:18,duration:83,depth:60,burnTicks:240,effect:'bloodflame',element:'fire'}),
-    k('爆血花火','Exploding Blood','三朵血焰花在近敵周圍延時爆開，形成火焰封鎖。','Three bloodflame blooms detonate around a foe after warnings.','blood-bloom','rain',15,42,510,400,{columns:3,gap:75,interval:12,radius:100,arm:30,life:105,burnTicks:180,effect:'bloodflame',element:'fire'})],
+    k('血焰噴流','Bloodflame Torrent','向前噴出粉紅血焰，持續灼燒多條路線。','Channel pink bloodflame across several depth lanes.','bloodflame-torrent','flamethrower',6,30,270,400,{pulses:5,period:10,windup:18,duration:83,depth:60,burnTicks:120,effect:'bloodflame',element:'fire'}),
+    k('爆血花火','Exploding Blood','三朵血焰花在近敵周圍延時爆開，形成火焰封鎖。','Three bloodflame blooms detonate around a foe after warnings.','blood-bloom','rain',15,42,510,400,{columns:3,gap:75,interval:12,radius:100,arm:30,life:105,burnTicks:90,effect:'bloodflame',element:'fire'})],
   'dragon-ball-goku':[
     k('龜波氣功','Kamehameha','先聚氣，再放出粗大持續氣功波，穿透遠處敵陣；不能邊走邊放。','Gather ki, then unleash a massive sustained beam through distant formations while stationary.','kamehameha','beam',6,40,360,760,{pulses:6,period:10,windup:32,duration:106,depth:64,beamWidth:150,knock:4,effect:'ki',element:'ki'}),
     k('元氣玉','Spirit Bomb','高舉巨大能量球，緩慢拋出，命中後大範圍炸開。','Raise a giant energy sphere, launch it slowly and explode over a wide area.','spirit-bomb','projectile',28,48,600,650,{windup:38,duration:64,speed:230,size:90,depth:65,splash:190,splashDamage:10,orb:true,effect:'ki',element:'ki'})],

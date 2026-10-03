@@ -37,6 +37,8 @@
     "check:pet-brawl": "node scripts/test-pet-brawl.mjs",
     "check:pet-brawl-live": "node scripts/test-pet-brawl-live.mjs",
     "check:pet-brawl-input-live": "node scripts/test-pet-brawl-browser-interactions-live.mjs",
+    "check:pet-brawl-balance": "node scripts/test-pet-brawl-balance.mjs",
+    "check:pet-brawl-balance-live": "node scripts/test-pet-brawl-balance-live.mjs",
     "check:pet-brawl-pvp": "node scripts/test-pet-brawl-pvp.mjs",
     "check:pet-brawl-pvp-live": "node scripts/test-pet-brawl-pvp-live.mjs",
     "build:pet-brawl-assets": "node scripts/build-pet-brawl-assets.mjs",

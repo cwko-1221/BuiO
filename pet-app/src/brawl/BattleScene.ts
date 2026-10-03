@@ -1,12 +1,12 @@
 import Phaser from 'phaser';
-import {CLIPS,stageById,fightersForVersion,combatFighterById} from '../../lib/brawl/catalog.mjs';
+import {VERSION,CLIPS,stageById,fightersForVersion,combatFighterById} from '../../lib/brawl/catalog.mjs';
 import type {Actor,BattleState} from '../../lib/brawl/simulation.mjs';
 import type {BrawlAssets} from './types';
 import {ElementalVFX} from './ElementalVFX';
 import {audio} from '../audio';
 interface SceneData {state:BattleState;playerId?:number;assets:BrawlAssets;locale:string;paused:()=>boolean;step:(mask?:number)=>void;loaded:()=>void;failed:()=>void;changed:()=>void}
 interface Effect {kind:string;x:number;y:number;age:number;life:number;color:number;size:number;angle:number;vx:number;vy:number;gravity:number;sprite?:Phaser.GameObjects.Image}
-interface View {sprite:Phaser.GameObjects.Image;shadow:Phaser.GameObjects.Ellipse;bar:Phaser.GameObjects.Graphics;trailTick:number;x:number;y:number;z:number}
+interface View {sprite:Phaser.GameObjects.Image;shadow:Phaser.GameObjects.Ellipse;bar:Phaser.GameObjects.Graphics;status:Phaser.GameObjects.Text;frozen?:boolean;trailTick:number;x:number;y:number;z:number}
 const gold=0xffd36a,white=0xfff7dc,blue=0x74e9ff,red=0xff7259,earth=0xdec398;
 export class BattleScene extends Phaser.Scene {
   private elemental?:ElementalVFX;
@@ -46,7 +46,7 @@ export class BattleScene extends Phaser.Scene {
     this.runtime.loaded();this.draw(16);
   }
   private get player(){return this.runtime.state.actors.find(a=>a.id===this.runtime.playerId)||this.runtime.state.actors[0];}
-  private get catKit(){return ['brawl-v3','brawl-v4','brawl-v5','brawl-v6','brawl-v7'].includes(this.runtime.state.version);}
+  private get catKit(){return ['brawl-v3','brawl-v4','brawl-v5','brawl-v6','brawl-v7','brawl-v8'].includes(this.runtime.state.version);}
   private get zh(){return this.runtime.locale==='zh-HK';}
   receiveEvents(events:any[],tick:number){if(tick===this.deliveredTick)return;this.deliveredTick=tick;this.feedback.events+=events.length;this.eventQueue.push(...events);if(this.eventQueue.length>256)this.eventQueue.splice(0,this.eventQueue.length-256);}
   update(_time:number,delta:number){if(!this.runtime||!this.fx)return;if(!this.runtime.paused()&&this.runtime.state.status==='playing'){this.accumulator+=Math.min(delta,250);let steps=0;while(this.accumulator>=1000/60&&steps++<15){this.runtime.step();this.accumulator-=1000/60;if(this.runtime.state.status!=='playing')break;}}else this.accumulator=0;this.draw(Math.min(delta,50));}
@@ -63,7 +63,7 @@ export class BattleScene extends Phaser.Scene {
     else if(action.startsWith('attack')&&(a.team===0||a.human)){const start=a.windup||6;index=a.actionTick<start?Math.floor(a.actionTick/start*3):3+Math.floor((a.actionTick-start)/Math.max(1,a.actionDuration-start)*(c.count-3));index=Math.min(c.count-1,index);}
     else index=Math.min(c.count-1,Math.floor(a.actionTick/Math.max(1,a.actionDuration||48)*c.count));index=Phaser.Math.Clamp(index,0,c.count-1);return {key:`brawl-${a.kind}-${c.page}`,frame:c.frames?.[index]??c.start+index};
   }
-  private fighter(a?:Actor){return this.runtime.state.version==='brawl-v7'?combatFighterById(a?.kind||''):fightersForVersion(this.runtime.state.version).find(f=>f.id===a?.kind);}
+  private fighter(a?:Actor){return this.runtime.state.version===VERSION?combatFighterById(a?.kind||''):fightersForVersion(this.runtime.state.version).find(f=>f.id===a?.kind);}
   private color(a?:Actor){return this.fighter(a)?.color||(a&&a.id!==this.player.id?red:gold);}
   private rarityScale(a?:Actor){const rarity=this.fighter(a)?.rarity;return rarity==='epic'?1.45:rarity==='rare'?1.2:1;}
   private abilityVisual(e:any,a?:Actor){if(e.element||e.fieldId)return;const color=this.color(a),scale=this.rarityScale(a),x=e.x??(a?.x||0)/100,y=(e.y??(a?.y||0)/100)-55,face=e.facing??a?.facing??1;
@@ -82,6 +82,7 @@ export class BattleScene extends Phaser.Scene {
   private showBanner(title:string,subtitle:string){this.tweens.killTweensOf(this.banner);this.banner.removeAll(true);const plate=this.add.graphics().fillStyle(0x17273b,.84).fillRoundedRect(-245,-34,490,88,14).lineStyle(2,gold,.7).strokeRoundedRect(-245,-34,490,88,14);const text=this.add.text(0,-15,title,{fontFamily:'sans-serif',fontSize:'28px',fontStyle:'bold',color:'#fff3cd'}).setOrigin(.5);const sub=this.add.text(0,27,subtitle,{fontFamily:'sans-serif',fontSize:'12px',color:'#b7d7df'}).setOrigin(.5);this.banner.add([plate,text,sub]).setAlpha(0);this.tweens.add({targets:this.banner,alpha:1,duration:180,hold:1700,yoyo:true});}
   private consume(){const s=this.runtime.state;let audible=0;for(const e of this.eventQueue.splice(0)){this.elemental?.event(e);const a=s.actors.find(a=>a.id===e.actor),source=s.actors.find(a=>a.id===e.source),x=e.x??(a?.x||0)/100,y=e.y??(a?.y||0)/100,z=e.z??(a?.z||0)/100,color=this.color(source||a),pan=(x-this.cameras.main.scrollX-640)/640;let cue='';
     if(e.type==='hit'||e.type==='block'){this.feedback.hits++;cue=e.type==='block'?'guard':e.heavy?'heavy':'hit';this.burst(x,y-z-65,e.type==='block'?blue:color,!!e.heavy);this.label(x,y-z-120,e.type==='block'?`${e.damage} · BLOCK`:String(e.damage),e.type==='block'?'#c9f8ff':source&&source.id!==this.player.id?'#ffb4a1':'#fff1b6',!!e.heavy);const view=this.views.get(e.actor);if(view){view.sprite.setTint(e.type==='block'?blue:white).setTintMode(Phaser.TintModes.FILL);this.time.delayedCall(75,()=>{if(view.sprite.active)view.sprite.clearTint();});}if(!this.reduced)this.cameras.main.shake(e.heavy?110:55,e.heavy?.0045:.0015);}
+    else if(e.type==='statusTick'){this.label(x,y-z-112,`${e.damage} · ${this.runtime.locale==='zh-HK'?'灼燒':'BURN'}`,'#ffb87c');}
     else if(e.type==='strike'&&a){cue='whoosh';this.effect('slash',x+a.facing*65,y-z-65,this.color(a),e.combo===2||e.air?115:75,.22,a.facing);}
     else if(e.type==='jump'){cue='jump';this.effect('dust',x,y,earth,35,.35);}
     else if(e.type==='land'){cue='land';this.effect('dust',x,y,earth,30,.3);}
@@ -104,11 +105,13 @@ export class BattleScene extends Phaser.Scene {
   }}
   private draw(delta:number){const s=this.runtime.state,dt=this.runtime.paused()&&s.status==='playing'?0:delta/1000;this.visualTime+=dt;const player=this.player,width=s.mode==='campaign'?5120:1280,camera=this.cameras.main;
     this.lookAhead=Phaser.Math.Linear(this.lookAhead,player.facing*90,1-Math.exp(-delta/280));const target=Phaser.Math.Clamp(player.x/100-580+this.lookAhead,0,width-1280),before=camera.scrollX;camera.scrollX=Phaser.Math.Linear(camera.scrollX,target,1-Math.exp(-delta/110));this.feedback.cameraDistance+=Math.abs(before-camera.scrollX);
-    if(s.zone!==this.lastZone){this.lastZone=s.zone;this.runtime.changed();}const alive=new Set(s.actors.map(a=>a.id));for(const [id,v] of this.views)if(!alive.has(id)){v.sprite.destroy();v.shadow.destroy();v.bar.destroy();this.views.delete(id);}this.ground.clear();
+    if(s.zone!==this.lastZone){this.lastZone=s.zone;this.runtime.changed();}const alive=new Set(s.actors.map(a=>a.id));for(const [id,v] of this.views)if(!alive.has(id)){v.sprite.destroy();v.shadow.destroy();v.bar.destroy();v.status.destroy();this.views.delete(id);}this.ground.clear();
     for(const a of s.actors){const f=this.frame(a);let v=this.views.get(a.id);const size=a.boss&&!a.dummy?246:a.dummy?190:this.runtime.assets.fighters[a.kind]?180:166;let x=a.x/100,y=a.y/100,z=a.z/100;
-      if(!v){v={sprite:this.add.image(x,y,f.key,f.frame).setOrigin(.5,.9),shadow:this.add.ellipse(x,y,size*.46,16,0x152036,.28),bar:this.add.graphics(),trailTick:-1,x,y,z};this.views.set(a.id,v);}if(s.mode==='pvp'&&Math.hypot(x-v.x,y-v.y)<180){const blend=1-Math.exp(-delta/40);x=Phaser.Math.Linear(v.x,x,blend);y=Phaser.Math.Linear(v.y,y,blend);z=Phaser.Math.Linear(v.z,z,blend);}v.x=x;v.y=y;v.z=z;const overlap=a.id!==player.id&&a.y>=player.y&&a.y-player.y<4500&&Math.abs(a.x-player.x)<(a.boss?8500:5000)&&Math.abs(a.z-player.z)<5000;
+      if(!v){v={sprite:this.add.image(x,y,f.key,f.frame).setOrigin(.5,.9),shadow:this.add.ellipse(x,y,size*.46,16,0x152036,.28),bar:this.add.graphics(),status:this.add.text(x,y,'',{fontFamily:'sans-serif',fontSize:'18px',fontStyle:'bold',color:'#f1faff',backgroundColor:'#13253e',padding:{x:6,y:3},stroke:'#13253e',strokeThickness:2}).setOrigin(.5,1).setDepth(10005),trailTick:-1,x,y,z};this.views.set(a.id,v);}if(s.mode==='pvp'&&Math.hypot(x-v.x,y-v.y)<180){const blend=1-Math.exp(-delta/40);x=Phaser.Math.Linear(v.x,x,blend);y=Phaser.Math.Linear(v.y,y,blend);z=Phaser.Math.Linear(v.z,z,blend);}v.x=x;v.y=y;v.z=z;const overlap=a.id!==player.id&&a.y>=player.y&&a.y-player.y<4500&&Math.abs(a.x-player.x)<(a.boss?8500:5000)&&Math.abs(a.z-player.z)<5000;
       const asset=this.runtime.assets.fighters[a.kind],pet=asset?.runtime==='pet',attacking=a.action.startsWith('attack')||a.action.startsWith('skill'),pulse=pet&&attacking?Math.sin(a.actionTick/Math.max(1,a.actionDuration)*Math.PI):0;
       v.sprite.setTexture(f.key,f.frame).setOrigin(.5,asset?.originY||.9).setDisplaySize(size*(1+pulse*.07),size*(1-pulse*.04)).setFlipX(this.runtime.assets.fighters[a.kind]?a.facing<0:a.facing>0).setPosition(x,y-z).setDepth(y).setAlpha(a.hp<=0?Math.max(0,1-a.actionTick/42):overlap?.6:a.invuln>0&&s.tick%8<4?.55:1).setAngle(a.action==='fall'?a.facing*18:a.action==='hit'?a.facing*-5:pet&&attacking?a.facing*pulse*8:0);
+      const statusLabels:[[string,string],number][]=[[[this.runtime.locale==='zh-HK'?'冰封':'Frozen','#a6eeff'],a.freezeUntil],[[this.runtime.locale==='zh-HK'?'燃燒':'Burning','#ffc285'],a.burnUntil],[[this.runtime.locale==='zh-HK'?'束縛':'Rooted','#baf6b8'],a.rootUntil],[[this.runtime.locale==='zh-HK'?'麻痺':'Shocked','#fff4a5'],a.shockUntil],[[this.runtime.locale==='zh-HK'?'濕身':'Wet','#b3e8ff'],a.wetUntil],[[this.runtime.locale==='zh-HK'?'減速':'Slowed','#d0def5'],a.slowUntil]];const active=statusLabels.filter(([,until])=>until>s.tick).slice(0,2);v.status.setVisible(a.hp>0&&active.length>0).setPosition(x,y-size*.9-z-12).setText(active.map(([[label],until])=>`${label} ${((until-s.tick)/60).toFixed(1)}s`).join('\n')).setColor(active[0]?.[0][1]||'#ffffff');
+      if(a.freezeUntil>s.tick){v.sprite.setTint(0x8ce4ff);v.frozen=true;}else if(v.frozen){v.sprite.clearTint();v.frozen=false;}
       v.shadow.setPosition(x,y).setDepth(y-1).setScale(Math.max(.4,1-z/200)).setAlpha(a.hp<=0?.1:.28);v.bar.clear().setDepth(y+1);if(a.id!==player.id&&!a.boss&&a.hp>0&&(a.hp<a.maxHp||Math.abs(a.x-player.x)<23000)){v.bar.fillStyle(0x1b263b,.8).fillRoundedRect(x-28,y-size*.9-z,56,6,3);v.bar.fillStyle(0xff9e77).fillRoundedRect(x-28,y-size*.9-z,56*a.hp/a.maxHp,6,3);}
       if(a.id===player.id)this.ground.lineStyle(2,gold,.55).strokeEllipse(x,y,56,17).fillStyle(gold,.9).fillTriangle(x-5,y+15,x+5,y+15,x,y+21);
       const catLeap=a.kind==='starpatch-cat'&&this.catKit&&a.action==='skill2'&&a.actionTick>=6&&a.actionTick<=31;

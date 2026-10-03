@@ -11,7 +11,7 @@ import {chromium} from 'playwright';
 import sharp from 'sharp';
 import {ALL_FIGHTERS,FIGHTERS} from '../pet-app/lib/brawl/catalog.mjs';
 import {createBattle} from '../pet-app/lib/brawl/simulation.mjs';
-const out=path.resolve('artifacts/pet-playtest/brawl-v7/elemental-browser');await fs.mkdir(out,{recursive:true});
+const out=path.resolve('artifacts/pet-playtest/brawl-v8/elemental-browser');await fs.mkdir(out,{recursive:true});
 const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-elemental-browser-')),dbFile=path.join(temp,'db.json');
 await fs.writeFile(dbFile,JSON.stringify({users:[{studentid:'S001',name:'招式驗證',passwordhash:bcrypt.hashSync('test',4),role:'student',classname:'5A',language:'zh-HK'}],studentStats:[],questionLogs:[],_logId:0}));
 process.env.BUIO_JSON_DB_FILE=dbFile;process.env.SUPABASE_DB_URL='';
@@ -39,7 +39,7 @@ try{
       const runtime={...scene.runtime};Object.assign(runtime.state,initial);runtime.assets=assets;runtime.qaToken=token;scene.scene.restart(runtime);
       // Isolated effect-position fixture; public owned selection is verified separately.
       document.querySelector('.brawl-player-hud>b').textContent=f.name['zh-HK'];
-      document.querySelectorAll('.brawl-skill span').forEach((el,n)=>el.textContent=f.skills[n].name['zh-HK']);
+      document.querySelectorAll('.brawl-skill .brawl-skill-name').forEach((el,n)=>el.textContent=f.skills[n].name['zh-HK']);
     },{initial,assets,f,token});
     try{await page.waitForFunction(({id,token})=>{const scene=window.__petGame.scene.getScene('Brawl');return scene.runtime.qaToken===token&&scene.views.get(1)?.sprite.texture.key.includes(id)&&scene.elemental&&window.__petGame.scene.isActive('Brawl');},{id:f.id,token});}catch(error){const snapshot=await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');return {active:window.__petGame.scene.isActive('Brawl'),token:scene.runtime?.qaToken,kind:scene.runtime?.state.actors[0].kind,views:[...scene.views.entries()].map(([id,v])=>({id,texture:v.sprite.texture.key})),failed:scene.loadFailed,body:document.body.innerText.slice(-1500)};});await fs.writeFile(path.join(out,'reset-failure.json'),JSON.stringify({fighter:f.id,token,snapshot,errors,failed},null,2));await page.screenshot({path:path.join(out,'reset-failure.png')});throw error;}
     if(manual)await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.__normalUpdate=scene.update;scene.update=(_time,delta)=>scene.draw(Math.min(delta,50));});

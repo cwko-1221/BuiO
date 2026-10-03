@@ -15,13 +15,13 @@ function status(s,a,t,k){
   if(k.slowTicks)t.slowUntil=Math.max(t.slowUntil||0,s.tick+k.slowTicks);
   if(k.rootTicks)t.rootUntil=Math.max(t.rootUntil||0,s.tick+(t.boss?Math.min(12,k.rootTicks):k.rootTicks));
   if(k.wetTicks||k.element==='water')t.wetUntil=s.tick+(k.wetTicks||150);
-  if(k.burnTicks){const fresh=!(t.burnUntil>s.tick);t.burnOwner=a.id;t.burnUntil=Math.max(t.burnUntil||0,s.tick+k.burnTicks);if(fresh){t.burnNext=s.tick+30;s.events.push({type:'elementStatus',actor:t.id,element:'fire',x:t.x/U,y:t.y/U});}}
+  if(k.burnTicks){t.burnOwner=a.id;t.burnUntil=Math.max(t.burnUntil||0,s.tick+k.burnTicks);t.burnNext=Math.max(t.burnNext||0,s.tick+30);}
   if(k.markTicks){t.readOwner=a.id;t.readUntil=s.tick+k.markTicks;}
   if(k.element==='ice'){
     t.slowUntil=Math.max(t.slowUntil||0,s.tick+(k.slowTicks||90));
     t.chill=s.tick<(t.chillUntil||0)?(t.chill||0)+1:1;t.chillUntil=s.tick+100;
     if((k.freezeTicks||t.chill>=2)&&s.tick>=(t.freezeReadyAt||0)){
-      t.freezeUntil=s.tick+(t.boss?24:k.freezeTicks||60);t.freezeReadyAt=t.freezeUntil+180;t.chill=0;
+      t.freezeUntil=s.tick+(t.boss?12:k.freezeTicks||28);t.freezeReadyAt=t.freezeUntil+150;t.chill=0;
       s.events.push({type:'elementStatus',actor:t.id,element:'ice',x:t.x/U,y:t.y/U});
     }
   }
@@ -29,7 +29,7 @@ function status(s,a,t,k){
 }
 function hit(s,a,t,k,c,damage=k.damage,down=false,chain=false){
   const soaked=k.element==='lightning'&&t.wetUntil>s.tick;
-  const landed=c.impact(s,a,t,damage+(soaked?3:0),k.knock??(down?11:3),down,chain,{skill:true,element:k.element});
+  const landed=c.impact(s,a,t,damage+(soaked?3:0),k.knock??(down?11:3),down,chain);
   if(landed){status(s,a,t,k);if(soaked){t.wetUntil=0;s.events.push({type:'elementStatus',actor:t.id,element:'lightning',x:t.x/U,y:t.y/U});}}
   return landed;
 }
@@ -154,7 +154,7 @@ export function tickAbilityProjectile(s,p,c){
 export function tickStatuses(s,c){
   for(const t of s.actors){
     if(t.shieldUntil<=s.tick)t.shield=0;if(t.counterUntil<=s.tick)t.counterDamage=0;
-    if(t.burnUntil>=s.tick&&t.burnNext<=s.tick&&t.hp>0){const a=s.actors.find(a=>a.id===t.burnOwner);if(a)c.impact(s,a,t,2,0,false,false,{dot:true,skill:true,element:'fire'});t.burnNext=s.tick+30;}
+    if(t.burnUntil>=s.tick&&t.burnNext<=s.tick&&t.hp>0){const a=s.actors.find(a=>a.id===t.burnOwner);if(a)c.impact(s,a,t,2,0,false);t.burnNext=s.tick+30;}
     if(t.hp>0&&t.shield>0&&t.reflectUntil>s.tick)for(const p of s.projectiles)if(t.shield>0&&p.team!==t.team&&!p.lob&&(p.reflections||0)<2&&Math.abs(p.x-t.x)<75*U&&Math.abs(p.y-t.y)<55*U&&(p.x-t.x)*t.facing>=-20*U){p.owner=t.id;p.team=t.team;p.dx=-p.dx;p.dy=-(p.dy||0);p.returning=false;p.hitIds=[];p.reflections=(p.reflections||0)+1;t.shield=Math.max(0,t.shield-3);s.events.push({type:'reflect',actor:t.id,element:'light',x:p.x/U,y:p.y/U});}
   }
 }

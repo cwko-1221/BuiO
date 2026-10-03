@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import {combatFighterById} from '../../lib/brawl/catalog.mjs';
+import {VERSION,fightersForVersion,combatFighterById} from '../../lib/brawl/catalog.mjs';
 import type {Actor,BattleState} from '../../lib/brawl/simulation.mjs';
 import type {BrawlAssets} from './types';
 type Burst={event:any;age:number;life:number};
@@ -72,8 +72,8 @@ export class ElementalVFX {
   }
   draw(s:BattleState,time:number,dt:number){
     this.used=0;this.g.clear();
-    if(s.version!=='brawl-v7'){this.sprites.forEach(sprite=>sprite.setVisible(false));this.bursts=[];this.stats.sprites=0;return;}
-    for(const a of s.actors){const k=combatFighterById(a.kind)?.skills[a.skill] as any,x=a.x/100,y=a.y/100-a.z/100;
+    if(!['brawl-v7','brawl-v8'].includes(s.version)){this.sprites.forEach(sprite=>sprite.setVisible(false));this.bursts=[];this.stats.sprites=0;return;}
+    for(const a of s.actors){const fighter=s.version===VERSION?combatFighterById(a.kind):fightersForVersion(s.version).find(f=>f.id===a.kind),k=fighter?.skills[a.skill] as any,x=a.x/100,y=a.y/100-a.z/100;
       if(k?.element&&a.action.startsWith('skill')){
         const wind=Number(k.windup||12),end=wind+(Number(k.pulses||1)-1)*Number(k.period||8)+18;
         if(a.actionTick<wind)this.charge(a,k,time);
@@ -82,10 +82,10 @@ export class ElementalVFX {
         if(k.mechanic==='orbit'){const color=C[k.element]||C.physical;for(let n=0;n<3;n++){const angle=time*9+n*2.1,cx=x+Math.cos(angle)*Number(k.range)*.6,cy=y-60+Math.sin(angle)*40;this.ball(cx,cy,24,color,time);}}
       }
       if(a.rootUntil>s.tick&&a.wetUntil>s.tick)this.g.fillStyle(C.water,.12).fillEllipse(x,y-65,135,180).lineStyle(4,C.water,.9).strokeEllipse(x,y-65,135,180);
-      if(a.freezeUntil>s.tick)this.sprite('ice-crystal',x,y-65,155,210,.78);
-      if(a.burnUntil>s.tick)this.sprite('fire-eruption',x,y-24,75,90,.6);
+      if(a.hp>0&&a.freezeUntil>s.tick){this.sprite('ice-crystal',x,y-75,190,240,.8);this.g.lineStyle(4,C.ice,.8).strokeEllipse(x,y,120,32);for(let n=0;n<4;n++)this.g.fillStyle(0xebfdff,.8).fillCircle(x+Math.cos(n*1.6+time)*63,y-80+Math.sin(n*1.6+time)*65,3);}
+      if(a.hp>0&&a.burnUntil>s.tick){this.sprite('fire-eruption',x,y-52,125,150,this.reduced?.6:.6+Math.sin(time*7)*.08);this.g.fillStyle(C.fire,.12).fillEllipse(x,y-65,105,145);if(!this.reduced)for(let n=0;n<3;n++){const q=(time*1.5+n/3)%1;this.g.fillStyle(n%2?0xfff0a0:C.fire,1-q).fillCircle(x+Math.sin(n*3+time)*38,y-25-q*120,3);}}
       if(a.wetUntil>s.tick)for(let n=0;n<3;n++)this.g.fillStyle(C.water,.8).fillEllipse(x-27+n*27,y-40+(time*50+n*17)%40,7,14);
-      if(a.shield>0&&a.shieldUntil>s.tick){const ward=combatFighterById(a.kind)?.skills.find(k=>k.mechanic==='buff'&&(k.shield||k.counter)),color=C[String(ward?.element||'nature')]||C.nature;this.g.fillStyle(color,.1).fillEllipse(x,y-70,140,190).lineStyle(4,color,.75).strokeEllipse(x,y-70,140,190);}
+      if(a.shield>0&&a.shieldUntil>s.tick){const ward=fighter?.skills.find(k=>k.mechanic==='buff'&&(k.shield||k.counter)),color=C[String(ward?.element||'nature')]||C.nature;this.g.fillStyle(color,.1).fillEllipse(x,y-70,140,190).lineStyle(4,color,.75).strokeEllipse(x,y-70,140,190);}
     }
     for(const p of s.projectiles){if(!p.skill?.element)continue;const k=p.skill,x=p.x/100,y=p.y/100-p.z/100-38,dir=Math.sign(p.dx)||1,color=C[k.element]||C.physical,size=k.size||35;
       if(['ball','power-ball'].includes(k.effect)){if(k.effect==='power-ball')this.sprite('fireball',x-dir*45,y,160,95,.9,dir<0);this.ball(x,y,size*.75,color,time);}

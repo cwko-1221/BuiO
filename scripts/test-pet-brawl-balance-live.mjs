@@ -1,0 +1,47 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import net from 'node:net';
+import {spawn} from 'node:child_process';
+import {createRequire} from 'node:module';
+import {randomUUID} from 'node:crypto';
+import bcrypt from 'bcryptjs';
+import {chromium} from 'playwright';
+import {FIGHTERS,VERSION} from '../pet-app/lib/brawl/catalog.mjs';
+
+const out=path.resolve('artifacts/pet-playtest/brawl-v8/balance-browser');await fs.mkdir(out,{recursive:true});
+const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-brawl-balance-')),dbFile=path.join(temp,'db.json');
+await fs.writeFile(dbFile,JSON.stringify({users:[{studentid:'S001',name:'屬性平衡測試',passwordhash:bcrypt.hashSync('test',4),role:'student',classname:'5A',language:'zh-HK'}],studentStats:[],questionLogs:[],_logId:0}));
+process.env.BUIO_JSON_DB_FILE=dbFile;process.env.SUPABASE_DB_URL='';
+const require=createRequire(import.meta.url),repo=require('../pet-app/repositories/pet.repo.js'),store=require('../db/jsonStore.js');await repo.ensureStudent('S001');const fixture=store.load();
+for(const f of FIGHTERS)fixture.petInstances.push({petId:randomUUID(),studentId:'S001',speciesId:f.id,xp:0,stage:1,dailyXp:0,dailyXpDate:'',equippedSkills:[],equippedWearables:[]});
+Object.assign(fixture.petProfiles[0],{activePetId:fixture.petInstances[0].petId,starterEggClaimed:true});fixture.petWallets[0].balance=2500;store.save();
+const port=await new Promise(resolve=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
+const server=spawn(process.execPath,['server.js'],{cwd:path.resolve('.'),env:{...process.env,PORT:String(port),MOCK_AUTH:'0',NODE_ENV:'development',PET_APP_DIST_DIR:process.env.PET_APP_DIST_DIR||path.resolve('pet-app/dist')},stdio:['ignore','pipe','pipe']});let logs='',browser,page;server.stdout.on('data',d=>logs+=d);server.stderr.on('data',d=>logs+=d);
+const errors=[],failures=[],checks=[];const pass=label=>{checks.push(label);console.log('✓ '+label);};
+const shot=name=>page.screenshot({path:path.join(out,name+'.png')});
+const skill=n=>page.locator(`[data-battle-key="${n?256:128}"]`);
+const tap=async n=>{const r=await skill(n).boundingBox();await page.touchscreen.tap(r.x+r.width/2,r.y+r.height/2);};
+const info=()=>page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl'),s=scene.runtime.state;return {tick:s.tick,version:s.version,mp:s.actors[0].mp,cooldowns:s.actors[0].cooldowns,casts:scene.feedback.casts,statuses:s.actors.filter(a=>a.id!==1).map(a=>({hp:a.hp,burnUntil:a.burnUntil,freezeUntil:a.freezeUntil,label:scene.views.get(a.id)?.status.text})),vfx:scene.elemental.stats};});
+async function enter(id){await page.locator(`[data-brawl="fighter"][data-id="${id}"]`).click();await page.locator('[data-brawl="mode"][data-id="practice"]').click();await page.locator('[data-brawl="start"]').first().click();await page.waitForFunction(()=>window.__petGame?.scene.isActive('Brawl')&&!document.querySelector('.brawl-loading'));await page.waitForFunction(()=>document.querySelector('[data-battle-key="128"]')?.dataset.state==='ready');assert.equal((await info()).version,VERSION);}
+async function leave(){await page.keyboard.press('Escape');await page.locator('[data-brawl="lobby"]').click();await page.locator('.brawl-roster-head').waitFor();}
+try{
+  const baseURL=`http://127.0.0.1:${port}`;for(let i=0;i<200;i++){try{if((await fetch(baseURL+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
+  browser=await chromium.launch({channel:'chrome',headless:true});const context=await browser.newContext({baseURL,viewport:{width:1024,height:768},hasTouch:true});assert.equal((await context.request.post('/api/auth/login',{data:{studentId:'S001',password:'test'}})).status(),200);
+  page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('requestfailed',r=>{if(!r.failure()?.errorText.includes('ERR_ABORTED'))failures.push(r.url());});
+  await page.goto('/pet');await page.locator('[data-tab="brawl"]').click();await page.locator('.brawl-roster-head').waitFor();await enter('dragon-ball-goku');await shot('01-ready-ipad');
+  const sizes=await page.locator('.brawl-buttons button').evaluateAll(bs=>bs.map(b=>({name:b.textContent,width:b.getBoundingClientRect().width,height:b.getBoundingClientRect().height})));assert.ok(sizes.every(b=>b.width>=88&&b.height>=88));assert.equal(await skill(0).getAttribute('aria-disabled'),'false');assert.match(await skill(0).textContent(),/50 MP/);assert.match(await skill(1).textContent(),/60 MP/);
+  await tap(0);await page.waitForFunction(()=>document.querySelector('[data-battle-key="128"]')?.dataset.state==='cooldown');await page.waitForFunction(()=>document.querySelector('[data-battle-key="256"]')?.dataset.state==='mana');assert.match(await skill(0).textContent(),/冷卻 \d+\.\ds/);assert.match(await skill(1).textContent(),/MP 不足/);assert.equal(await skill(1).getAttribute('aria-disabled'),'true');
+  const progress=await skill(0).evaluate(b=>({ratio:Number(b.style.getPropertyValue('--cooldown')),width:b.querySelector('.brawl-skill-progress>span').getBoundingClientRect().width}));assert.ok(progress.ratio>0&&progress.ratio<=1&&progress.width>0);
+  const before=await info();await tap(1);await page.keyboard.press('KeyI');await page.waitForTimeout(150);const after=await info();assert.equal(after.casts,before.casts);assert.equal(after.cooldowns[1],0);assert.ok(after.mp<6000);await shot('02-cooldown-and-low-mp-ipad');pass('iPad buttons are at least 88px; skill cost, cooldown seconds/progress and MP shortage are readable; blocked touch and keyboard casts spend no MP');
+  await page.keyboard.press('Escape');const paused=await info(),countdown=await skill(0).textContent();await page.waitForTimeout(250);assert.equal((await info()).tick,paused.tick);assert.equal(await skill(0).textContent(),countdown);await page.locator('[data-brawl="continue"]').click();await page.keyboard.down('KeyU');await page.waitForFunction(()=>document.querySelector('[data-battle-key="128"]')?.dataset.state==='ready');const casts=(await info()).casts;await page.keyboard.down('KeyU');await page.waitForTimeout(100);await page.keyboard.up('KeyU');assert.equal((await info()).casts,casts,'A key held from an unavailable state must not cast through auto-repeat');assert.equal(await skill(0).getAttribute('aria-disabled'),'false');pass('Cooldown stops during local pause, reaches zero and returns the button to its ready state');await leave();
+
+  await enter('spark-hamster');await page.keyboard.down('KeyD');await page.waitForTimeout(600);await page.keyboard.up('KeyD');await tap(0);
+  await page.waitForFunction(()=>{const scene=window.__petGame.scene.getScene('Brawl'),s=scene.runtime.state;return s.actors[1].burnUntil>s.tick&&scene.views.get(s.actors[1].id)?.status.text.includes('燃燒');});await page.waitForTimeout(450);const burning=await info();assert.equal(await skill(1).getAttribute('data-state'),'busy');assert.match(await skill(1).textContent(),/動作中/);assert.ok(burning.statuses[0].burnUntil-burning.tick>90);assert.match(burning.statuses[0].label,/燃燒 \d\.\ds/);await shot('03-burning-ipad');const hp=burning.statuses[0].hp;await page.waitForTimeout(750);assert.ok((await info()).statuses[0].hp<hp);pass('A normal touch cast visibly sets the enemy on fire; its status countdown remains after the flame and burning continues to deal damage');await leave();
+
+  await enter('snowfeather-penguin');await tap(0);await page.waitForFunction(()=>{const scene=window.__petGame.scene.getScene('Brawl'),s=scene.runtime.state;return s.actors[1].freezeUntil>s.tick&&scene.views.get(s.actors[1].id)?.status.text.includes('冰封');});const frozen=await info();assert.ok(frozen.statuses[0].freezeUntil-frozen.tick>40);await shot('04-frozen-ipad');await page.waitForFunction(()=>{const s=window.__petGame.scene.getScene('Brawl').runtime.state;return s.actors[1].freezeUntil<=s.tick;});pass('Ice columns freeze the enemy for a visible interval, show a countdown and thaw automatically');await leave();
+
+  await page.setViewportSize({width:667,height:375});await enter('dragon-ball-goku');await tap(0);await page.waitForFunction(()=>document.querySelector('[data-battle-key="256"]')?.dataset.state==='mana');const bounds=await page.locator('.brawl-buttons button').evaluateAll(bs=>bs.map(b=>{const r=b.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};}));assert.ok(bounds.every(b=>b.x>=0&&b.y>=0&&b.x+b.w<=667&&b.y+b.h<=375));await shot('05-phone-landscape');pass('The cooldown and MP states fit on a phone in landscape without clipping');
+  assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);assert.equal(JSON.parse(await fs.readFile(dbFile,'utf8')).petWallets[0].balance,2500);await fs.writeFile(path.join(out,'results.json'),JSON.stringify({pass:true,checks,sizes,progress,burning,frozen,errors,failures},null,2));
+}catch(error){await shot('failure').catch(()=>{});await fs.writeFile(path.join(out,'failure.txt'),error.stack+'\n'+logs);throw error;}finally{await browser?.close();server.kill();await new Promise(r=>server.once('exit',r));const absolute=path.resolve(temp);assert.ok(absolute.startsWith(path.join(os.tmpdir(),'buio-brawl-balance-')));await fs.rm(absolute,{recursive:true,force:true});}

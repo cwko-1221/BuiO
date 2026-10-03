@@ -9,7 +9,7 @@ import {randomUUID} from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import {chromium} from 'playwright';
 import {FIGHTERS} from '../pet-app/lib/brawl/catalog.mjs';
-const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-roster-browser-')),dbFile=path.join(temp,'db.json'),out=path.resolve('artifacts/pet-playtest/brawl-v7/browser');await fs.mkdir(out,{recursive:true});
+const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-roster-browser-')),dbFile=path.join(temp,'db.json'),out=path.resolve('artifacts/pet-playtest/brawl-v8/browser');await fs.mkdir(out,{recursive:true});
 await fs.writeFile(dbFile,JSON.stringify({users:['S001','S002','S003'].map((id,n)=>({studentid:id,name:['全角色測試','稀有對戰測試','未購買測試'][n],passwordhash:bcrypt.hashSync('test',4),role:'student',classname:'5A',language:'zh-HK'})),studentStats:[],questionLogs:[],_logId:0}));
 process.env.BUIO_JSON_DB_FILE=dbFile;process.env.SUPABASE_DB_URL='';
 const require=createRequire(import.meta.url),pets=require('../pet-app/repositories/pet.repo'),store=require('../db/jsonStore');for(const id of ['S001','S002','S003'])await pets.ensureStudent(id);

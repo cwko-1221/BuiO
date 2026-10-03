@@ -5,7 +5,7 @@ import {ALL_FIGHTERS,FIGHTERS,HIDDEN_FIGHTER_IDS,fightersForVersion,INPUT as I} 
 import {createBattle,stepBattle,replayBattle} from '../pet-app/lib/brawl/simulation.mjs';
 import * as v6 from '../pet-app/lib/brawl/legacy/v6/simulation.mjs';
 import {brawlSound} from '../pet-app/lib/brawl/sound.mjs';
-const out='artifacts/pet-playtest/brawl-v7';await fs.mkdir(out,{recursive:true});
+const out='artifacts/pet-playtest/brawl-v8';await fs.mkdir(out,{recursive:true});
 function fixture(fighterId){
   // Isolated positioning fixture; every kit is available through public ownership checks.
   const f=ALL_FIGHTERS.find(f=>f.id===fighterId),s=createBattle({mode:'practice'});

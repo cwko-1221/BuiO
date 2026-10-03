@@ -13,7 +13,7 @@ import {stepBattle} from '../pet-app/lib/brawl/simulation.mjs';
 import {INPUT as I} from '../pet-app/lib/brawl/catalog.mjs';
 
 const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-brawl-live-'));
-const dbFile=path.join(temp,'db.json'),artifacts=path.resolve(process.env.PET_BRAWL_LIVE_OUT||'artifacts/pet-playtest/brawl-v7/flow-regression');
+const dbFile=path.join(temp,'db.json'),artifacts=path.resolve(process.env.PET_BRAWL_LIVE_OUT||'artifacts/pet-playtest/brawl-v8/flow-regression');
 await fs.mkdir(artifacts,{recursive:true});
 await fs.writeFile(dbFile,JSON.stringify({users:[
   {studentid:'S001',name:'大亂鬥測試',passwordhash:bcrypt.hashSync('test',4),role:'student',classname:'5A',language:'zh-HK'},
