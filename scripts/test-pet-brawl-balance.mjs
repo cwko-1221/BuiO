@@ -12,10 +12,29 @@ s=createBattle({mode:'practice',fighterId:'dragon-ball-goku'});p=s.actors[0];ste
 for(const [id,e] of Object.entries(ENEMIES)){assert.ok(e.hp>=oldEnemies[id].hp*1.14);assert.ok(e.damage>oldEnemies[id].damage);}
 console.log('✓ All 50 skills cost 25% more MP, idle recovery is exactly 2 MP/sec, the ultimate cannot follow a beam without saving MP, and enemies are stronger');
 
+for(const f of FIGHTERS){
+  const battle=createBattle({mode:'practice',fighterId:f.id}),a=battle.actors[0],b=battle.actors[1];a.mp=5000;b.x=a.x+5500;let hit;
+  for(let tick=0;tick<20&&!hit;tick++){const before=a.mp,passive=Math.floor(((a.mpRegenCarry||0)+200)/60);stepBattle(battle,tick===0?I.ATTACK:0);hit=battle.events.find(e=>e.type==='hit'&&e.source===a.id);if(hit){assert.equal(hit.mpGain,Math.min(200,hit.damage*10));assert.equal(a.mp,before+passive+hit.mpGain);}}
+  assert.ok(hit,f.id+' should regain MP on a real basic hit');
+}
+for(const mode of ['miss','guard','full']){
+  const battle=createBattle({mode:'pvp'}),a=battle.actors[0],b=battle.actors[1];a.mp=mode==='full'?10000:5000;b.x=a.x+(mode==='miss'?40000:5500);b.facing=-1;
+  const events=run(battle,20,I.ATTACK,mode==='guard'?I.GUARD:0);assert.equal(events.some(e=>e.mpGain>0),false,mode+' must not show a false reward');
+}
+{
+  const battle=createBattle({mode:'pvp',opponentId:'pudding-pig'}),a=battle.actors[1];a.mp=5000;a.x=battle.actors[0].x+5500;const events=run(battle,20,0,I.ATTACK);assert.ok(events.some(e=>e.source===a.id&&e.mpGain===100),'The second human also earns MP');
+}
+{
+  const battle=createBattle({mode:'practice',fighterId:'pudding-pig'}),a=battle.actors[0],b=battle.actors[1];a.mp=5000;let heavy;
+  for(let tick=0;tick<120&&!heavy;tick++){b.x=a.x+5500;b.readOwner=a.id;b.readUntil=battle.tick+120;stepBattle(battle,I.ATTACK);heavy=battle.events.find(e=>e.type==='hit'&&e.damage>20);}
+  assert.ok(heavy);assert.equal(heavy.mpGain,200,'Even an empowered heavy hit is capped at 2 MP');
+}
+console.log('✓ All 25 fighters regain a small amount of MP on basic hits; both human slots work, heavy hits cap at 2 MP, and misses, guarded hits and full MP show no reward');
+
 s=createBattle({mode:'pvp',fighterId:'spark-hamster',opponentId:'dragon-ball-goku'});p=s.actors[0];let t=s.actors[1];t.x=p.x+28000;stepBattle(s,I.SKILL1);
 let dotDuringChannel=false;const fireLog=[];
 for(let i=0;i<95;i++){stepBattle(s);fireLog.push(...s.events);if(p.action==='skill1'&&s.events.some(e=>e.type==='statusTick'))dotDuringChannel=true;}
-assert.ok(dotDuringChannel,'Repeated flame hits must not postpone burn damage');assert.ok(t.burnUntil-s.tick>=120);assert.ok(fireLog.filter(e=>e.type==='statusTick').length>=2);
+assert.equal(fireLog.some(e=>e.mpGain>0),false,'Flames and burning must not refund skill MP');assert.ok(dotDuringChannel,'Repeated flame hits must not postpone burn damage');assert.ok(t.burnUntil-s.tick>=120);assert.ok(fireLog.filter(e=>e.type==='statusTick').length>=2);
 const before=t.hp,combo=s.comboHits,mp=p.mp;Object.assign(t,{invuln:600,invulnSource:-1,action:'guard',facing:-1,guard:10000,counterDamage:50,counterUntil:s.tick+200});s.freeze=0;const later=run(s,60,0,I.GUARD);assert.equal(before-t.hp,4);assert.equal(s.comboHits,combo);assert.ok(p.mp-mp<=200);assert.equal(later.some(e=>e.type==='counter'),false);assert.equal(later.some(e=>e.type==='hit'||e.type==='block'),false);
 assert.equal(t.action,'guard','Burn must not create a perpetual stun');
 run(s,200);const expired=t.hp;run(s,60);assert.equal(t.hp,expired);

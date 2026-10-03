@@ -72,11 +72,11 @@ function impact(s,a,t,damage,knock=0,down=false,chain=false,options={}){
   t.hp=Math.max(0,t.hp-damage);if(!options.dot){a.stop=down?3:1;t.stop=down?7:4;s.freeze=Math.max(s.freeze,down?4:2);}
   if(!options.dot&&(a.team===0||a.human)&&!blocked){a.comboHits=s.tick<=(a.comboUntil||0)?(a.comboHits||0)+1:1;a.comboUntil=s.tick+120;a.bestCombo=Math.max(a.bestCombo||0,a.comboHits);if(a.team===0){s.comboHits=s.tick<=s.comboUntil?s.comboHits+1:1;s.comboUntil=s.tick+120;s.bestCombo=Math.max(s.bestCombo,s.comboHits);}}
   // Basic strikes reward engaging at close range; skills and damage over time never refund their cost.
-  if(!options.dot&&!options.skill&&!blocked&&fighterById(a.kind))a.mp=Math.min(10000,a.mp+Math.min(200,damage*10));
+  let mpGain=0;if(!options.dot&&!options.skill&&!blocked&&fighterById(a.kind)){const before=a.mp;a.mp=Math.min(10000,a.mp+Math.min(200,damage*10));mpGain=a.mp-before;}
   if(!options.dot&&!blocked){t.hitChain=s.tick-t.lastHit<120?t.hitChain+1:1;t.lastHit=s.tick;t.knock=(a.x<=t.x?1:-1)*knock*U;
     if((!t.boss||t.action==='idle'||t.action==='walk')&&t.action!=='fall'){if(down||t.hitChain>=4){begin(s,t,'fall',30);t.hitChain=0;if(t.team===0||t.human){t.invuln=42;t.invulnSource=a.id;}t.vz=Math.max(t.vz,420);t.z=Math.max(t.z,1);}else {begin(s,t,'hit',12);if(t.team===0||t.human){t.invuln=10;t.invulnSource=a.id;}}}
   }
-  s.events.push({type:options.dot?'statusTick':blocked?'block':'hit',element:options.element,actor:t.id,source:a.id,damage,heavy:down,x:t.x/U,y:t.y/U,z:t.z/U});
+  s.events.push({type:options.dot?'statusTick':blocked?'block':'hit',element:options.element,...(mpGain?{mpGain}:{}),actor:t.id,source:a.id,damage,heavy:down,x:t.x/U,y:t.y/U,z:t.z/U});
   if(t.hp===0){begin(s,t,'fall',36);s.events.push({type:'ko',actor:t.id,x:t.x/U,y:t.y/U});if(t.team===1&&!t.dummy){s.kills++;if(s.mode==='campaign'&&s.kills%3===0)s.pickups.push({id:s.nextId++,kind:s.kills%6===0?'health':'mana',x:t.x,y:t.y,expires:s.tick+1200});}}
   return true;
 }
