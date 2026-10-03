@@ -6,7 +6,7 @@ import * as v8 from '../pet-app/lib/brawl/legacy/v8/simulation.mjs';
 import {ENEMIES as oldEnemies} from '../pet-app/lib/brawl/legacy/v7/catalog.mjs';
 
 const run=(s,n,mask=0,opponent=0)=>{const events=[];for(let i=0;i<n;i++){stepBattle(s,mask,opponent);events.push(...s.events);}return events;};
-assert.equal(VERSION,'brawl-v9');
+assert.equal(VERSION,'brawl-v10');
 for(const f of FIGHTERS)for(const [n,k] of f.skills.entries())assert.equal(k.mp,Math.ceil(fightersForVersion('brawl-v7').find(old=>old.id===f.id).skills[n].mp*1.25));
 let s=createBattle({mode:'practice'}),p=s.actors[0];p.mp=1000;run(s,600);assert.equal(p.mp,3000);
 s=createBattle({mode:'practice',fighterId:'dragon-ball-goku'});p=s.actors[0];stepBattle(s,I.SKILL1);run(s,130);stepBattle(s,I.SKILL2);assert.equal(p.action,'idle');assert.ok(p.mp<6000);
@@ -63,4 +63,4 @@ for(const f of fightersForVersion('brawl-v8')){
  assert.deepEqual(replayBattle(options,log,400,{terminal:false}),old);assert.deepEqual(battleResult(old),v8.battleResult(old));
 }
 console.log('✓ All 25 archived v8 fighters retain their exact original MP, hit-reward and status rules');
-console.log('✓ v9 elemental combat replays deterministically and all 25 archived v7 fighters retain their exact original rules');
+console.log('✓ v10 elemental combat replays deterministically and all 25 archived v7 fighters retain their exact original rules');

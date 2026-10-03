@@ -6,7 +6,7 @@ const nearest=(s,a,range,depth=85)=>foes(s,a).filter(t=>Math.abs(t.x-a.x)<=range
 const wind=k=>k.windup??12;
 export function abilityDuration(k){return k.duration??Math.max(38,wind(k)+((k.volleys||k.pulses||1)-1)*(k.interval||k.period||8)+20);}
 export function setupAbility(s,a,k){
-  const target=nearest(s,a,k.range,k.perfectSeek?220:85);a.abilityFacing=a.facing;
+  const target=nearest(s,a,k.range);a.abilityFacing=a.facing;
   a.abilityMotion={x:a.x,y:a.y,toX:bound(s,a.x+a.facing*k.range*U),toY:a.y,target:target?.id||0};
   a.abilityCaught=0;a.abilityContact=-1;
 }
@@ -16,7 +16,7 @@ function status(s,a,t,k){
   if(k.rootTicks&&(!k.enemy||s.tick>=(t.rootReadyAt||0))){t.rootUntil=Math.max(t.rootUntil||0,s.tick+(t.boss?Math.min(12,k.rootTicks):k.rootTicks));if(k.enemy)t.rootReadyAt=t.rootUntil+90;}
   if(k.wetTicks||k.element==='water')t.wetUntil=s.tick+(k.wetTicks||150);
   if(k.burnTicks){const fresh=!(t.burnUntil>s.tick);t.burnOwner=a.id;t.burnUntil=Math.max(t.burnUntil||0,s.tick+k.burnTicks);if(fresh){t.burnNext=s.tick+30;s.events.push({type:'elementStatus',actor:t.id,element:'fire',x:t.x/U,y:t.y/U});}}
-  if(k.markTicks){t.readOwner=a.id;t.readUntil=s.tick+k.markTicks;t.readBonus=k.markBonus||3;t.readStun=k.markStun||0;}
+  if(k.markTicks){t.readOwner=a.id;t.readUntil=s.tick+k.markTicks;}
   if(k.element==='ice'){
     t.slowUntil=Math.max(t.slowUntil||0,s.tick+(k.slowTicks||90));
     t.chill=s.tick<(t.chillUntil||0)?(t.chill||0)+1:1;t.chillUntil=s.tick+100;
@@ -30,7 +30,7 @@ function status(s,a,t,k){
 function hit(s,a,t,k,c,damage=k.damage,down=false,chain=false){
   const soaked=k.element==='lightning'&&t.wetUntil>s.tick;
   const before=s.events.length;
-  const landed=c.impact(s,a,t,damage+(soaked?3:0),k.knock??(down?11:3),down,chain,{skill:true,element:k.element,ranged:['projectile','wave','beam','lob','rain','fissure','flamethrower','barrage','field','tornado','eruption'].includes(k.mechanic)});
+  const landed=c.impact(s,a,t,damage+(soaked?3:0),k.knock??(down?11:3),down,chain,{skill:true,element:k.element});
   if(landed&&s.events.slice(before).some(e=>e.type==='hit'&&e.actor===t.id&&e.source===a.id)){status(s,a,t,k);if(soaked){t.wetUntil=0;s.events.push({type:'elementStatus',actor:t.id,element:'lightning',x:t.x/U,y:t.y/U});}}
   return landed;
 }
@@ -42,7 +42,6 @@ function line(s,a,k,c,damage=k.damage,down=false,chain=false){
     if(dx>=-15*U&&dx<=k.range*U&&Math.abs(t.y-a.y)<=depth*U&&t.z<65*U)hit(s,a,t,k,c,damage,down,chain);}
 }
 function buff(s,a,k){const until=s.tick+(k.buffTicks||150);
-  if(k.ward){a.wardUntil=until;a.wardMeleeLeft=3;a.wardRangedLeft=1;}
   if(k.shield){a.shield=k.shield;a.shieldUntil=until;}
   if(k.reflect)a.reflectUntil=until;
   if(k.haste){a.haste=k.haste;a.hasteUntil=until;}
@@ -54,7 +53,7 @@ function field(s,a,k,extra={},announce=true){
 }
 function shot(s,a,k,c,lane=0,extra={}){
   c.projectile(s,a,k.damage,k.range,k.speed||500,lane);
-  const p=s.projectiles.at(-1);Object.assign(p,{ability:true,style:k.effect,element:k.element,skill:{...k},startX:a.x,returning:false,speed:k.speed||500,dy:0,bounces:0,...extra});if(k.perfectSeek){p.lockedTarget=a.abilityMotion.target;p.expires=s.tick+600;p.remaining=10000000;}return p;
+  const p=s.projectiles.at(-1);Object.assign(p,{ability:true,style:k.effect,element:k.element,skill:{...k},startX:a.x,returning:false,speed:k.speed||500,dy:0,bounces:0,...extra});return p;
 }
 function pulse(s,a,k,x,y,size){s.events.push({type:'abilityPulse',actor:a.id,effect:k.effect,element:k.element,x:x/U,y:y/U,size,kind:k.kind});}
 export function updateAbility(s,a,k,t,c){
@@ -91,9 +90,7 @@ export function updateAbility(s,a,k,t,c){
     }else if(['trap','field','tornado','barrage'].includes(k.mechanic))field(s,a,k);
     else if(k.mechanic==='sanctuary'){buff(s,a,k);field(s,a,k,{x:a.x,y:a.y,starts:s.tick,next:s.tick,mechanic:'sanctuary'});}
     else if(k.mechanic==='buff'){buff(s,a,k);release(s,a,k);}
-    else if(k.mechanic==='scan'){release(s,a,k);for(const target of foes(s,a))if(Math.abs(target.x-a.x)<=k.range*U&&Math.abs(target.y-a.y)<=85*U)status(s,a,target,k);}
-    else if(k.mechanic==='flight'){a.flightUntil=s.tick+k.life;a.flightShots=3;a.flightNextShot=s.tick;a.z=220*U;a.vz=0;release(s,a,k);}
-    else if(k.mechanic==='summon'){c.summon(s,a,k);release(s,a,k);}
+    else if(k.mechanic==='scan'){release(s,a,k);area(s,a,k,c);}
     else if(k.mechanic==='chain'){
       let origin=a;const visited=new Set();release(s,a,k);
       for(let n=0;n<(k.jumps||3);n++){
@@ -138,15 +135,6 @@ function projectileBurst(s,p,a,k,c,directId=0){
 }
 export function tickAbilityProjectile(s,p,c){
   const a=s.actors.find(a=>a.id===p.owner);if(!a){p.remaining=0;return;}const k=p.skill;
-  if(k.perfectSeek){
-    let target=foes(s,a).find(t=>t.id===p.lockedTarget);
-    if(!target){target=nearest(s,{...a,x:p.x,y:p.y},5120,220);p.lockedTarget=target?.id;}
-    if(!target||s.tick>=p.expires){p.remaining=0;return;}
-    const dx=target.x-p.x,dy=target.y-p.y,d=Math.max(1,Math.abs(dx)+Math.abs(dy)),move=Math.min(d,p.speed*U/60);
-    p.dx=Math.round(dx/d*move);p.dy=Math.round(dy/d*move);p.x+=p.dx;p.y+=p.dy;
-    if(Math.abs(target.x-p.x)<k.size*U&&Math.abs(target.y-p.y)<30*U&&target.z<65*U&&!target.invuln){const before=s.events.length,landed=hit(s,a,target,k,c,p.damage);if(landed||s.events.slice(before).some(e=>e.type==='reflect'&&e.actor===target.id&&e.source===a.id)){p.hitIds.push(target.id);p.remaining=0;}}
-    return;
-  }
   if(p.lob){p.age++;const q=clamp(p.age/p.flight,0,1);p.x=bound(s,p.fromX+(p.toX-p.fromX)*q);p.y=Math.round(p.fromY+(p.toY-p.fromY)*q);p.z=Math.round((p.height||k.height||170)*U*4*q*(1-q)+45*U*(1-q));if(q===1){p.z=0;p.remaining=0;projectileBurst(s,p,a,k,c);}return;}
   if(p.returning){const dx=a.x-p.x,dy=a.y-p.y;
     if(Math.abs(dx)<30*U&&Math.abs(dy)<30*U){a.mp=Math.min(10000,a.mp+(k.catchMp||0));p.remaining=0;s.events.push({type:'catch',actor:a.id,effect:k.effect,x:p.x/U,y:p.y/U});return;}
@@ -154,9 +142,7 @@ export function tickAbilityProjectile(s,p,c){
   }else if(k.seek){const t=nearest(s,{...a,x:p.x,y:p.y},450,110);if(t)p.dy=clamp(Math.round((t.y-p.y)*.035),-180,180);}
   p.x+=p.dx;p.y+=p.dy||0;p.remaining-=Math.abs(p.dx)+Math.abs(p.dy||0);
   for(const t of foes(s,a))if(!p.hitIds.includes(t.id)&&Math.abs(t.x-p.x)<(k.size||36)*U&&Math.abs(t.y-p.y)<(k.depth||30)*U&&t.z<65*U){
-    const before=s.events.length,landed=hit(s,a,t,k,c,p.damage,!!k.down);
-    if(s.events.slice(before).some(e=>e.type==='reflect'&&e.actor===t.id&&e.source===a.id)){p.hitIds.push(t.id);p.remaining=0;return;}
-    if(landed){p.hitIds.push(t.id);if(k.splash)projectileBurst(s,p,a,k,c,t.id);
+    if(hit(s,a,t,k,c,p.damage,!!k.down)){p.hitIds.push(t.id);if(k.splash)projectileBurst(s,p,a,k,c,t.id);
       const next=k.ricochets>p.bounces?foes(s,a).filter(e=>!p.hitIds.includes(e.id)&&Math.abs(e.x-p.x)<260*U&&Math.abs(e.y-p.y)<100*U).sort((l,r)=>Math.abs(l.x-p.x)+Math.abs(l.y-p.y)-Math.abs(r.x-p.x)-Math.abs(r.y-p.y)||l.id-r.id)[0]:null;
       if(next){const dx=next.x-p.x,dy=next.y-p.y,d=Math.max(1,Math.abs(dx)+Math.abs(dy));p.dx=Math.round(dx/d*p.speed*U/60);p.dy=Math.round(dy/d*p.speed*U/60);p.bounces++;}
       else if(!k.pierce)p.remaining=0;

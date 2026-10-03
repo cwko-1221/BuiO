@@ -14,14 +14,14 @@ export class ElementalVFX {
   constructor(private scene:Phaser.Scene,private assets:BrawlAssets,private reduced:boolean){this.g=scene.add.graphics().setDepth(9900);}
   destroy(){this.g.destroy();this.sprites.forEach(s=>s.destroy());this.sprites=[];this.bursts=[];}
   event(event:any){
-    if(event.element&&(['abilityPulse','abilityLink','reflect','elementStatus'].includes(event.type)||event.type==='skillRelease'&&['scan','buff'].includes(event.mechanic))){
+    if(event.element&&(['abilityPulse','abilityLink','reflect','elementStatus','airRay','mindStun'].includes(event.type)||event.type==='skillRelease'&&['scan','buff'].includes(event.mechanic))){
       if(this.bursts.length>=32)this.bursts.shift();this.bursts.push({event,age:0,life:event.type==='abilityLink'?.32:.65});
     }
   }
   private sprite(frame:string,x:number,y:number,w:number,h=w,alpha=1,flip=false,angle=0){
     const index=this.assets.elementalFx?.frames[frame];if(index===undefined||!this.scene.textures.exists('brawl-elemental')||this.used>=72)return;
     let s=this.sprites[this.used++];if(!s){s=this.scene.add.image(x,y,'brawl-elemental',index);this.sprites.push(s);}
-    s.setVisible(true).setFrame(index).setPosition(x,y).setDisplaySize(w,h).setAlpha(alpha).setFlipX(flip).setRotation(angle).setDepth(9950);
+    s.setTexture('brawl-elemental',index).setOrigin(.5,.5).setVisible(true).setFrame(index).setPosition(x,y).setDisplaySize(w,h).setAlpha(alpha).setFlipX(flip).setRotation(angle).setDepth(9950);
   }
   private orb(frame:string,x:number,y:number,r:number,time:number,color:number,alpha=1){
     this.g.fillStyle(color,.14*alpha).fillCircle(x,y,r*1.3).fillStyle(color,.18*alpha).fillCircle(x,y,r);
@@ -35,6 +35,7 @@ export class ElementalVFX {
   }
   private charge(a:Actor,k:any,time:number){
     const q=Math.min(1,a.actionTick/(k.windup||12)),x=a.x/100,y=a.y/100-a.z/100,color=C[k.element]||0xffffff;
+    if(k.mechanic==='stretch'){this.stretch(a,k,-1);return;}
     if(k.mechanic==='flamethrower'){
       this.sprite(k.effect==='bloodflame'?'bloodflame':'fireball',x+a.facing*(40+q*15),y-85,25+q*55,30+q*60,.3+q*.5,a.facing<0);
       this.g.fillStyle(color,q*.22).fillCircle(x+a.facing*42,y-85,20+q*20);
@@ -66,15 +67,23 @@ export class ElementalVFX {
       for(let n=0;n<5;n++){const offset=(n-2)*width*.16,run=(time*530+n*90)%range;this.g.lineStyle(3,0xffffff,.6).lineBetween(x+face*run,y+offset,x+face*Math.min(range,run+70),y+offset);}
       this.stats.beamWidth=Math.max(this.stats.beamWidth,width);
     }else if(k.mechanic==='stretch'){
+      if(this.stretch(a,k,a.actionTick-Number(k.windup||12)))return;
       const end=x+face*range,offset=k.pulses>1?Math.sin(time*25)*34:0;
       this.g.lineStyle(23,0xbb6454,.8).lineBetween(x,y,end,y+offset).lineStyle(13,0xffc2a3,1).lineBetween(x,y-3,end,y+offset-3);
       this.g.fillStyle(0xffc2a3,1).fillRoundedRect(end-30,y+offset-25,60,48,13).lineStyle(3,0x7d3c32,1).strokeRoundedRect(end-30,y+offset-25,60,48,13);
     }
   }
+  private stretch(a:Actor,k:any,q:number){
+    const clip=this.assets.skillFx?.[k.kind];if(!clip||!this.scene.textures.exists('brawl-skill-'+k.kind)||this.used>=72)return false;
+    const face=a.facing,x=a.x/100+face*30,y=a.y/100-a.z/100-85,range=k.range-30;
+    let sprite=this.sprites[this.used++];if(!sprite){sprite=this.scene.add.image(x,y,'brawl-skill-'+k.kind);this.sprites.push(sprite);}
+    const frame=q<0?0:k.pulses>1?(q<35?1+(Math.floor(q/3)%5):Math.min(7,6+Math.floor((q-35)/8))):Math.min(7,1+Math.floor(q*7/18));
+    sprite.setTexture('brawl-skill-'+k.kind,frame).setOrigin(face<0?1-clip.originX:clip.originX,.5).setPosition(x,y).setDisplaySize(range/clip.widthRatio,k.pulses>1?245:155).setFlipX(face<0).setAlpha(1).setRotation(0).setDepth(9950).setVisible(true);return true;
+  }
   draw(s:BattleState,time:number,dt:number){
     this.used=0;this.g.clear();
-    if(!['brawl-v7','brawl-v8','brawl-v9'].includes(s.version)){this.sprites.forEach(sprite=>sprite.setVisible(false));this.bursts=[];this.stats.sprites=0;return;}
-    for(const a of s.actors){const fighter=s.version===VERSION?combatFighterById(a.kind):fightersForVersion(s.version).find(f=>f.id===a.kind),k=(fighter?.skills[a.skill]||(s.version===VERSION?enemyKit(a):undefined)) as any,x=a.x/100,y=a.y/100-a.z/100;
+    if(!['brawl-v7','brawl-v8','brawl-v9','brawl-v10'].includes(s.version)){this.sprites.forEach(sprite=>sprite.setVisible(false));this.bursts=[];this.stats.sprites=0;return;}
+    for(const a of s.actors){const fighter=s.version===VERSION?combatFighterById(a.kind):fightersForVersion(s.version).find(f=>f.id===a.kind),k=(fighter?.skills[a.skill]||(['brawl-v9','brawl-v10'].includes(s.version)?enemyKit(a):undefined)) as any,x=a.x/100,y=a.y/100-(a.flightUntil>s.tick?Math.min(a.z/100,a.y/100-250):a.z/100);
       if(k?.element&&(a.action.startsWith('skill')||!fighter&&a.action.startsWith('attack'))){
         const wind=Number(k.windup||12),end=wind+(Number(k.pulses||1)-1)*Number(k.period||8)+18;
         if(a.actionTick<wind)this.charge(a,k,time);
@@ -82,6 +91,10 @@ export class ElementalVFX {
         if(k.mechanic==='rasengan'&&a.actionTick>=wind)this.orb('spiral-orb',x+a.facing*65,y-80,Number(k.size||62),time,C.chakra);
         if(k.mechanic==='orbit'){const color=C[k.element]||C.physical;for(let n=0;n<3;n++){const angle=time*9+n*2.1,cx=x+Math.cos(angle)*Number(k.range)*.6,cy=y-60+Math.sin(angle)*40;this.ball(cx,cy,24,color,time);}}
       }
+      if(a.readUntil>s.tick){this.g.lineStyle(3,C.psychic,.9).strokeEllipse(x,y-70,135,175);this.heart(x,y-180,17,C.psychic,1);}
+      if(a.wardUntil>s.tick){this.g.lineStyle(5,C.psychic,.85).strokeEllipse(x,y-70,155,195);for(let n=0;n<a.wardMeleeLeft;n++){const angle=time*3+n*Math.PI*2/3;this.heart(x+Math.cos(angle)*80,y-75+Math.sin(angle)*92,14,C.psychic,.9);}}
+      if(a.mindStunUntil>s.tick)for(let n=0;n<3;n++){const angle=time*5+n*2.1;this.g.fillStyle(C.psychic,.95).fillCircle(x+Math.cos(angle)*40,y-155+Math.sin(angle)*12,6);}
+      if(a.flightUntil>s.tick){const bottom=y,rotorY=bottom-158;this.g.lineStyle(5,0xdec87d,1).lineBetween(x,rotorY,x,rotorY+20);this.g.fillStyle(0xffe894,.9).fillEllipse(x,rotorY,60+Math.sin(time*40)*25,7).fillCircle(x,rotorY,6);this.g.lineStyle(2,C.wind,.4).strokeEllipse(x,rotorY,94,16);}
       if(a.rootUntil>s.tick&&a.wetUntil>s.tick)this.g.fillStyle(C.water,.12).fillEllipse(x,y-65,135,180).lineStyle(4,C.water,.9).strokeEllipse(x,y-65,135,180);
       if(a.hp>0&&a.freezeUntil>s.tick){this.sprite('ice-crystal',x,y-75,190,240,.8);this.g.lineStyle(4,C.ice,.8).strokeEllipse(x,y,120,32);for(let n=0;n<4;n++)this.g.fillStyle(0xebfdff,.8).fillCircle(x+Math.cos(n*1.6+time)*63,y-80+Math.sin(n*1.6+time)*65,3);}
       if(a.hp>0&&a.burnUntil>s.tick){this.sprite('fire-eruption',x,y-52,125,150,this.reduced?.6:.6+Math.sin(time*7)*.08);this.g.fillStyle(C.fire,.12).fillEllipse(x,y-65,105,145);if(!this.reduced)for(let n=0;n<3;n++){const q=(time*1.5+n/3)%1;this.g.fillStyle(n%2?0xfff0a0:C.fire,1-q).fillCircle(x+Math.sin(n*3+time)*38,y-25-q*120,3);}}
@@ -106,6 +119,9 @@ export class ElementalVFX {
         this.sprite('cosmic-burst',e.x,e.y-75,180,180,alpha*.35,false,time);
         for(let n=0;n<3;n++){const r=e.range*Math.min(1,q+n*.16);this.g.lineStyle(7-n*2,color,alpha*.75).strokeEllipse(e.x,e.y-65,r*2,r*.65);}
         for(let n=0;n<5;n++){const angle=time*4+n*1.26;this.heart(e.x+Math.cos(angle)*e.range*q*.8,e.y-65+Math.sin(angle)*e.range*q*.26,9,color,alpha);}
+      }else if(e.type==='airRay'){
+        const fromY=Math.max(250,e.y-e.z)-80,endY=e.toY-70;this.g.lineStyle(12,C.wind,alpha*.35).lineBetween(e.x,fromY,e.toX,endY).lineStyle(5,0xffffff,alpha).lineBetween(e.x,fromY,e.toX,endY);this.orb('ki-head',e.toX,endY,22,time,C.wind,alpha);
+      }else if(e.type==='reflect'&&e.toX!==undefined){this.bolt(e.x,e.y-75,e.toX,e.toY-75,C.psychic,alpha,time);
       }else if(e.type==='skillRelease'&&e.mechanic==='buff'){
         this.sprite('gold-aura',e.x,e.y-75,160+q*70,210+q*50,alpha*.4);
         this.g.lineStyle(5,color,alpha).strokeEllipse(e.x,e.y-70,135+q*65,180+q*75);

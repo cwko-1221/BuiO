@@ -64,8 +64,8 @@ html.brawl-input-locked * {
 .brawl-battle .brawl-skill[data-state=cooldown] .brawl-skill-status{color:#b8dfff;font-variant-numeric:tabular-nums}
 .brawl-battle .brawl-skill[data-state=mana]{border-color:#c98a62;background:repeating-linear-gradient(125deg,#172a3d 0 12px,#203047 12px 24px)}
 .brawl-battle .brawl-skill[data-state=mana] .brawl-skill-status{color:#ffd3a7}
-.brawl-battle .brawl-skill:is([data-state=frozen],[data-state=shocked],[data-state=air],[data-state=busy],[data-state=locked]){border-color:#607489;background:linear-gradient(145deg,#293b51,#15263a)}
-.brawl-battle .brawl-skill:is([data-state=frozen],[data-state=shocked],[data-state=air],[data-state=busy],[data-state=locked]) .brawl-skill-status{color:#cee5f6}
+.brawl-battle .brawl-skill:is([data-state=stunned],[data-state=frozen],[data-state=shocked],[data-state=air],[data-state=busy],[data-state=locked]){border-color:#607489;background:linear-gradient(145deg,#293b51,#15263a)}
+.brawl-battle .brawl-skill:is([data-state=stunned],[data-state=frozen],[data-state=shocked],[data-state=air],[data-state=busy],[data-state=locked]) .brawl-skill-status{color:#cee5f6}
 .brawl-battle .brawl-stick{border-color:#82afce90;background:radial-gradient(circle,#34597870,#152e4970);box-shadow:inset 0 0 25px #09182f55,0 4px 20px #06182c45}
 .brawl-battle .brawl-stick-knob{background:radial-gradient(circle at 35% 25%,#a3cce0c9,#486e96bc);border-color:#c3e1ee95;box-shadow:inset 0 1px 0 #ffffff70,0 5px 14px #071b3360}
 @media(any-pointer:coarse) and (min-width:768px){

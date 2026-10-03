@@ -45,14 +45,14 @@ export const ELEMENTAL_KITS={
     k('屁屁龍捲風','Cheeky Cyclone','彩色星星龍捲將敵人吸進搞怪風暴。','A colorful star cyclone pulls foes into a playful storm.','cheeky-cyclone','tornado',5,28,270,210,{radius:130,life:140,period:24,speed:85,pull:2.4,effect:'stars',element:'wind'}),
     k('動感光線','Action Beam','寬闊金色光束以三段星光重擊前方敵人。','A broad golden beam strikes in three bursts of star energy.','action-beam','beam',10,40,450,560,{pulses:3,period:10,windup:24,duration:65,depth:56,beamWidth:125,effect:'stars',element:'light'})],
   'doraemon':[
-    k('空氣炮','Air Cannon','強力空氣炮造成 35 傷害，把命中目標推開約半個場地；牆邊會停止。','A powerful air cannon deals 35 damage and pushes its target about half an arena, stopping at walls.','air-cannon','projectile',35,25,240,720,{speed:720,knock:224,size:65,splash:100,splashDamage:8,effect:'wind',element:'wind'}),
-    k('竹蜻蜓','Take-copter','飛上天空 4 秒，期間不受攻擊；按普通攻擊可射出 3 次射線。','Fly safely above attacks for four seconds. Basic attack fires up to three aerial rays.','take-copter','flight',0,40,600,900,{life:240,effect:'copter',element:'wind'})],
+    k('空氣炮','Air Cannon','巨大的壓縮空氣球擊退目標，並震開周圍。','A compressed-air sphere knocks back its target and bursts outward.','air-cannon','projectile',23,25,240,580,{speed:650,knock:15,size:55,splash:90,splashDamage:5,effect:'wind',element:'wind'}),
+    k('任意門砲陣','Anywhere Barrage','前方開啟任意門，從出口分三次射出空氣砲。','Open a door ahead that fires three air-cannon bursts.','anywhere-barrage','barrage',9,40,480,260,{volleys:3,period:18,arm:22,life:100,radius:75,shotRange:420,speed:620,size:38,effect:'portal',element:'wind'})],
   'hello-kitty':[
     k('蝴蝶結飛舞','Ribbon Flight','三條蝴蝶結分路飛出再返回，帶出心形光點。','Three ribbons travel along separate lanes and back with heart glints.','ribbon-flight','projectile',7,22,210,450,{spread:[-34,0,34],returning:true,pierce:true,effect:'ribbon',element:'light',speed:440,size:35}),
     k('友誼心光','Friendship Sanctuary','心光結界持續回復最多 12 HP，並獲得 12 點護盾。','A heart sanctuary restores up to 12 HP over time and grants a 12-point shield.','friendship-glow','sanctuary',0,42,540,0,{heal:3,shield:12,buffTicks:160,radius:145,period:45,life:181,effect:'heart',element:'light'})],
   'argentina-number-10':[
     k('連環盤球','Orbit Dribble','足球繞身四圈，從不同角度擦過敵人，最後踢開。','Orbit the ball four times around defenders before a final kick.','orbit-dribble','orbit',6,25,240,170,{pulses:4,period:9,finisher:10,effect:'ball',element:'physical'}),
-    k('追蹤巧射','Homing Shot','足球鎖定敵人持續追蹤，連身後的目標也會追上；暫時無敵時會等待。','Lock a football onto a foe, including one behind you. It pursues until contact, waiting through temporary invulnerability.','curved-shot','projectile',25,36,450,1280,{perfectSeek:true,speed:570,size:36,effect:'ball',element:'physical'})],
+    k('弧線巧射','Curved Shot','高速弧線球緩緩轉彎；換路線仍可閃避。','A fast curve ball steers gently and can be dodged by changing lanes.','curved-shot','projectile',25,36,450,650,{seek:true,speed:570,size:36,effect:'ball',element:'physical'})],
   'portugal-number-7':[
     k('凌空倒掛','Bicycle Cannon','躍起倒掛射球，在前方落點轟出衝擊波。','Leap into a bicycle kick that blasts the marked landing point.','bicycle-cannon','sky-shot',24,28,270,290,{height:145,windup:8,duration:52,radius:100,effect:'ball',element:'physical'}),
     k('強力自由球','Power Free Kick','明顯蓄力後射出帶火尾的足球，穿透並擊退敵人。','Wind up, then fire a blazing-tailed football that pierces and knocks foes back.','power-kick','projectile',28,42,480,720,{windup:28,duration:50,speed:940,knock:15,pierce:true,size:43,effect:'power-ball',element:'physical'})],
@@ -66,13 +66,13 @@ export const ELEMENTAL_KITS={
     k('橡膠手槍','Gum-Gum Pistol','拳頭拉長至遠處，收回時留下橡膠殘影。','Stretch a fist across the arena, leaving an elastic afterimage.','gum-pistol','stretch',23,25,240,450,{depth:35,windup:18,beamWidth:48,effect:'elastic',element:'physical'}),
     k('橡膠機關槍','Gum-Gum Gatling','原地連發六記伸縮長拳，打擊前方寬闊路線。','Fire six stretching punches across a broad forward lane while stationary.','gum-gatling','stretch',5,40,480,390,{pulses:6,period:7,windup:20,duration:70,depth:52,beamWidth:50,effect:'elastic',element:'physical'})],
   'spy-family-anya':[
-    k('心聲標記','Mind Mark','標記附近敵人 4 秒；首次成功命中增加 8 傷害，並暈眩 1 秒。','Mark nearby foes for four seconds. Your first successful hit adds eight damage and stuns for one second.','mind-scan','scan',0,22,240,250,{markTicks:240,markBonus:8,markStun:60,effect:'psychic',element:'psychic'}),
-    k('預知結界','Foreseen Ward','5 秒內反彈 3 次近身傷害；反彈 1 次遠攻則用盡結界。','For five seconds, reflect three melee hits. Reflecting one ranged hit consumes the ward.','foreseen-counter','buff',0,35,600,170,{ward:true,buffTicks:300,effect:'psychic',element:'psychic'})],
+    k('心聲掃描','Mind Scan','大型讀心波標記近敵 4 秒；下一次命中附加 3 傷害。','A telepathic pulse marks nearby foes; your next hit adds three damage.','mind-scan','scan',6,22,240,250,{markTicks:240,effect:'psychic',element:'psychic'}),
+    k('預知結界','Foreseen Ward','讀心護盾反射飛彈，並反擊一次近身攻擊。','A telepathic shield reflects projectiles and counters one close attack.','foreseen-counter','buff',12,35,450,170,{counter:12,reflect:true,haste:1.2,shield:16,buffTicks:130,effect:'psychic',element:'psychic'})],
   'one-punch-saitama':[
     k('普通連續拳','Consecutive Punches','四記拳壓化成高速衝擊彈，擊中遠處敵人。','Four punches launch fast pressure projectiles at distant foes.','consecutive-punches','projectile',7,28,270,440,{volleys:4,interval:7,windup:12,duration:55,speed:800,size:40,effect:'impact',element:'physical'}),
     k('認真一拳','Serious Punch','長時間蓄力後釋放巨大擴散拳壓波，擊倒整條路線。','After a long charge, launch an immense pressure wave that knocks down a whole lane.','serious-punch','wave',38,48,570,800,{depth:80,size:125,windup:36,duration:66,speed:650,pierce:true,down:true,knock:17,effect:'impact',element:'physical'})],
   'naruto-uzumaki':[
-    k('多重影分身術','Shadow Clone Squad','召喚 2 個自主追敵並攻擊的分身；各受傷 2 次或 10 秒後化煙消失。','Summon two clones that independently pursue and attack foes. Each disappears in smoke after two hits or ten seconds.','shadow-clones','summon',0,30,720,155,{clones:2,life:600,effect:'smoke',element:'chakra'}),
+    k('多重影分身','Shadow Clone Squad','三個影分身在不同路線現身，交錯攻擊敵陣。','Three shadow clones appear in separate lanes and strike in alternating bursts.','shadow-clones','clones',5,30,360,155,{clones:3,period:32,life:140,effect:'smoke',element:'chakra'}),
     k('螺旋丸','Rasengan','手掌聚起螺旋球再推進；命中後連續捲擊，最後炸開擊倒。','Gather a swirling sphere in your palm, advance, grind a caught foe, then detonate.','rasengan','rasengan',5,42,510,300,{windup:24,duration:84,finisher:18,pulses:3,period:9,size:62,effect:'spiral',element:'chakra'})]
 };
 
@@ -83,7 +83,7 @@ export const ELEMENTAL_ROLES={
   'spark-hamster':L('爆炎煉金','Flame alchemist'),'leaftail-fox':L('森林風暴','Forest stormcaller'),
   'snowfeather-penguin':L('冰雪封路','Glacial controller'),'thunderhorn-goat':L('雷雲術士','Storm sorcerer'),
   'coral-seal':L('潮汐支援','Tidal guardian'),'dragon-ball-goku':L('巨型氣功','Ki powerhouse'),
-  'naruto-uzumaki':L('分身螺旋','Clone vortex'),'doraemon':L('空中砲手','Aerial artillery'),
+  'naruto-uzumaki':L('分身螺旋','Clone vortex'),'doraemon':L('空間砲陣','Portal artillery'),
   'nezuko-kamado':L('血焰術士','Bloodflame caster'),'pikachu':L('電球雷暴','Electric storm'),
   'one-punch-saitama':L('拳壓風暴','Pressure striker')
 };

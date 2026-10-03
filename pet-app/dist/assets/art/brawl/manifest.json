@@ -669,5 +669,23 @@
     "chapters": 20,
     "sections": 80,
     "version": "adventure-v9"
+  },
+  "skillFx": {
+    "gum-pistol": {
+      "url": "/pet/assets/art/brawl/skill-gum-pistol-e1ec5d16c33e.webp",
+      "frameWidth": 512,
+      "frameHeight": 256,
+      "frames": 8,
+      "widthRatio": 0.6971153846153847,
+      "originX": 0.03125
+    },
+    "gum-gatling": {
+      "url": "/pet/assets/art/brawl/skill-gum-gatling-b184cf0edbf5.webp",
+      "frameWidth": 512,
+      "frameHeight": 256,
+      "frames": 8,
+      "widthRatio": 0.5210755813953488,
+      "originX": 0.03125
+    }
   }
 }

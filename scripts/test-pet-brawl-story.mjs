@@ -45,5 +45,5 @@ for(const stage of STAGES){
 }
 assert.equal(ids.size,100);
 assert.ok(Object.isFrozen(ADVENTURE.chapters[0].sections[0].scene.lines[0].text));
-assert.equal(VERSION,'brawl-v9','new encounters use a versioned combat ruleset');
+assert.equal(VERSION,'brawl-v10','new encounters use a versioned combat ruleset');
 console.log(JSON.stringify({pass:true,chapters:20,sections:80,scenes:100,lines,locales:2,combatRules:VERSION}));
