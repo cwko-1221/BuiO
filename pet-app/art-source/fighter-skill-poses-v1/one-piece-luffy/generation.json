@@ -1,0 +1,43 @@
+{
+  "id": "one-piece-luffy",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character one-piece-luffy; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (橡膠手槍), eight frames read left-to-right across two consecutive rows: 1. feet spread, right fist to waist; 2. right shoulder twists backwards; 3. right fist pulled behind ribs; 4. deep coiled shoulder stance, left hand balances; 5. thrust right shoulder and short fist forward towards right; 6. right fist extended, shoulder follows punch recoil; 7. draw fist back to waist; 8. normal stance. Sequence 2 (橡膠機關槍), eight frames read left-to-right across two consecutive rows: 1. feet brace, both fists to waist; 2. both shoulders coil; 3. fists drawn back, focused grin; 4. both fists primed beside ribs; 5. right fist thrusts forward, left fist draws back; 6. left fist thrusts forward, right fist draws back; 7. both fists return beside ribs; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/one-piece-luffy/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/one-piece-luffy/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "feet spread, right fist to waist",
+      "right shoulder twists backwards",
+      "right fist pulled behind ribs",
+      "deep coiled shoulder stance, left hand balances",
+      "thrust right shoulder and short fist forward towards right",
+      "right fist extended, shoulder follows punch recoil",
+      "draw fist back to waist",
+      "normal stance"
+    ],
+    [
+      "feet brace, both fists to waist",
+      "both shoulders coil",
+      "fists drawn back, focused grin",
+      "both fists primed beside ribs",
+      "right fist thrusts forward, left fist draws back",
+      "left fist thrusts forward, right fist draws back",
+      "both fists return beside ribs",
+      "normal stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-21ed06ed-6150-4f8e-bbca-150b4ea0c39f.png",
+  "rawSha256": "091741a5434180f40839d166aba01bd15cd02d23baec8f00f025ec78dfe3388f",
+  "referenceHashes": [
+    "7966223740fd23ac1c206f5cf3c9311d801b16af341c46aac4cd056d6e2aa274",
+    "d69173f47d7d9371760eaf6ceb476be417d4ee948ba6c7fcc857e13310222584"
+  ]
+}

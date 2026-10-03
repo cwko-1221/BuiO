@@ -20,10 +20,10 @@ function completeAssets(manifest,fighters){
     assets.fighters[pet.id]={pages:[pet.atlas[0]],clips,frameWidth:layout.frameWidth,frameHeight:layout.frameHeight,originY:pet.anchors?.[0]?.bottom||.94,runtime:'pet'};
   }
   // Battle-only poses extend the current published pet; other actions stay live.
-  for(const [id,animation] of Object.entries(manifest.fighterSkillAnimations||{})){
+  for(const [id,entry] of Object.entries(manifest.fighterSkillAnimations||{}))for(const animation of Array.isArray(entry)?entry:[entry]){
     const fighter=assets.fighters[id];if(!fighter)continue;
-    if(animation.frameWidth!==fighter.frameWidth||animation.frameHeight!==fighter.frameHeight)throw new Error('Incompatible battle pose dimensions: '+id);
     const page=fighter.pages.length;fighter.pages.push(animation.url);
+    (fighter.pageLayouts??={})[page]={frameWidth:animation.frameWidth,frameHeight:animation.frameHeight};
     for(const [name,clip] of Object.entries(animation.clips))fighter.clips[name]={...clip,page};
   }
   return assets;

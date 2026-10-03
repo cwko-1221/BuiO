@@ -1,0 +1,42 @@
+{
+  "id": "dragon-ball-frieza",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: precise-object-edit. Edit this existing 4-column 4-row, 16-frame Frieza character casting atlas. Remove ONLY the purple beam extending from the pointing fingertip in frame 5 (row 2 column 1) and every floating coloured glow/spark. Keep the exact sixteen full-body character poses, body proportions, face, costume, shading, scale and layout unchanged. Reconstruct the tiny fingertip as a clean outlined pointing finger without any beam. Keep genuinely transparent alpha, no background, no effects. This is one clean production character pose atlas.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/dragon-ball-frieza/edit-input.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "stand sideways to right, hand near chest",
+      "raise right index finger",
+      "index finger aims beside face",
+      "finger fully aimed to right",
+      "extend index finger straight right firing thin death beam",
+      "hold precise pointing gesture, tail curves behind",
+      "draw pointing hand back",
+      "normal stance"
+    ],
+    [
+      "right palm cups near waist",
+      "lift right palm to chest",
+      "palm lifts by face",
+      "right palm overhead supporting giant orb",
+      "throw palm forward launching orb to right",
+      "hand extended, tail counters weight",
+      "draw arm back",
+      "normal stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-3aca5e83-b2d8-4976-a1cb-6a9003154d16.png",
+  "rawSha256": "c0134e6adfadaa4ccdbb7c4e2ba9c56468b731a5cf5f0b2108406af16437f816",
+  "referenceHashes": [
+    "c6e659cb572fff838132e63adff2ecf1502b7e78ee72dd237c9fabf41f81d63e"
+  ],
+  "initialPrompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character dragon-ball-frieza; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (死亡光線), eight frames read left-to-right across two consecutive rows: 1. stand sideways to right, hand near chest; 2. raise right index finger; 3. index finger aims beside face; 4. finger fully aimed to right; 5. extend index finger straight right firing thin death beam; 6. hold precise pointing gesture, tail curves behind; 7. draw pointing hand back; 8. normal stance. Sequence 2 (帝王能量球), eight frames read left-to-right across two consecutive rows: 1. right palm cups near waist; 2. lift right palm to chest; 3. palm lifts by face; 4. right palm overhead supporting giant orb; 5. throw palm forward launching orb to right; 6. hand extended, tail counters weight; 7. draw arm back; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses."
+}

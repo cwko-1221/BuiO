@@ -20,7 +20,7 @@ const d=store.load();for(const f of ALL_FIGHTERS)d.petInstances.push({petId:rand
 const manifest=JSON.parse(await fs.readFile('pet-app/public/assets/art/brawl/manifest.json','utf8')),assets=require('../pet-app/lib/brawl/assets.cjs').completeAssets(manifest,ALL_FIGHTERS);
 const port=await new Promise(resolve=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
 const server=spawn(process.execPath,['server.js'],{cwd:path.resolve('.'),env:{...process.env,PORT:String(port),MOCK_AUTH:'0',NODE_ENV:'development',PET_APP_DIST_DIR:process.env.PET_APP_DIST_DIR||path.resolve('pet-app/dist')},stdio:['ignore','pipe','pipe']});
-let logs='',browser,context;server.stdout.on('data',d=>logs+=d);server.stderr.on('data',d=>logs+=d);const errors=[],failed=[],coverage=[],performance=[],animation=[];
+let logs='',browser,context;server.stdout.on('data',d=>logs+=d);server.stderr.on('data',d=>logs+=d);const errors=[],failed=[],coverage=[],performance=[],animation=[],casts=[];
 function stateFor(f){const s=createBattle({mode:'practice',fighterId:f.id});s.actors[0].x=32000;s.actors[1].x=62000;return s;}
 try{
   const baseURL=`http://127.0.0.1:${port}`;for(let n=0;n<200;n++){try{if((await fetch(baseURL+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
@@ -71,6 +71,38 @@ try{
     await page.screenshot({path:path.join(out,f.id+`-skill${n+1}${face<0?'-left':''}.png`)});coverage.push({fighter:f.id,skill:k.kind,face,...info});
   }
   console.log('✓ All 49 active dedicated skill textures animate; thick Kamehameha keeps its mirrored beam head; the public roster and owned API open all 25 fighters');
+  // Exercise every declared pose against the live renderer, at actual simulation times.
+  for(const face of [1,-1])for(const f of ALL_FIGHTERS.filter(f=>f.id!=='pikachu'))for(const [n,k] of f.skills.entries()){
+    const clip=assets.fighters[f.id].clips['skill'+(n+1)];assert.equal(clip.count,8);assert.equal(clip.emitters.length,8);
+    await reset(f,n,true,face);await page.evaluate(n=>{const scene=window.__petGame.scene.getScene('Brawl');scene.runtime.state.actors[1].y=scene.runtime.state.actors[0].y-10000;scene.runtime.step(n?256:128);scene.draw(0);scene.__castTick=scene.runtime.state.tick-scene.runtime.state.actors[0].actionTick;scene.__playedCast=[Number(scene.views.get(1).sprite.frame.name)-scene.runtime.assets.fighters[scene.runtime.state.fighterId].clips['skill'+(n+1)].start];},n);
+    const duration=k.mechanic==='flight'?k.life+Number(k.windup||12):await page.evaluate(()=>window.__petGame.scene.getScene('Brawl').runtime.state.actors[0].actionDuration);
+    const release=k.kind==='blink'?6:k.kind==='flurry'?16:k.mechanic==='sky-shot'?Number(k.windup||12)+Math.floor((duration-Number(k.windup||12)-8)*.45):Number(k.windup||12);
+    const targets=face>0?[1,Math.max(2,Math.floor(release*.65)),release+2,duration-2]:[release+2,duration-2];
+    for(const [phase,target] of targets.entries()){
+      const snap=await page.evaluate(({target,start,flight})=>{
+        const scene=window.__petGame.scene.getScene('Brawl'),s=scene.runtime.state,a=s.actors[0];let safety=0;
+        while((flight?s.tick-scene.__castTick:a.actionTick)<target&&safety++<300){scene.runtime.step(0);scene.draw(16);const v=scene.views.get(a.id).sprite;if(a.action.startsWith('skill')||a.flightUntil>s.tick)scene.__playedCast.push(Number(v.frame.name)-start);}
+        scene.draw(0);const v=scene.views.get(a.id).sprite;
+        return {action:a.action,tick:a.actionTick,pose:Number(v.frame.name)-start,texture:v.texture.key,width:v.displayWidth,height:v.displayHeight,angle:v.angle,flip:v.flipX,footY:v.y,expectedFoot:a.y/100-(a.flightUntil>s.tick?Math.min(a.z/100,a.y/100-300)*(q=>q*q*(3-2*q))(Math.max(0,Math.min(1,(s.tick-(a.flightUntil-240))/8))):a.z/100),played:[...new Set(scene.__playedCast)],emitter:scene.elemental.stats.emitters};
+      },{target,start:clip.start,flight:k.mechanic==='flight'});
+      assert.ok(snap.action.startsWith('skill')||k.mechanic==='flight',JSON.stringify({fighter:f.id,skill:k.kind,target,snap}));assert.equal(snap.texture,'brawl-'+f.id+'-'+clip.page);assert.equal(snap.width,clip.displaySize||180);assert.equal(snap.height,clip.displaySize||180);assert.equal(snap.angle,0);assert.equal(snap.flip,face<0);assert.ok(Math.abs(snap.footY-snap.expectedFoot)<.1);
+      if(phase===targets.length-1)assert.deepEqual(snap.played.sort((a,b)=>a-b),[0,1,2,3,4,5,6,7],f.id+': all casting poses play');
+      if(face>0||phase===0)await page.screenshot({path:path.join(out,'cast-'+f.id+'-skill'+(n+1)+'-'+(face>0?'right':'left')+'-'+phase+'.png')});
+      casts.push({fighter:f.id,skill:k.kind,face,phase,...snap});
+    }
+  }
+  console.log('✓ All 48 skills of the 24 redrawn characters play eight poses in both directions, at fixed scale and foot anchor');
+  // Remote movement is interpolated; held effects must follow the rendered hand.
+  const naruto=ALL_FIGHTERS.find(f=>f.id==='naruto-uzumaki');await reset(naruto,1,true);
+  const remoteAnchor=await page.evaluate(wind=>{
+    const scene=window.__petGame.scene.getScene('Brawl'),s=scene.runtime.state,a=s.actors[0];s.actors[1].y=a.y-10000;scene.runtime.step(256);
+    for(let n=0;n<wind+6;n++){scene.runtime.step(0);scene.draw(16);}s.mode='pvp';const v=scene.views.get(a.id);v.x-=40;v.y+=10;scene.draw(16);
+    const emitter=scene.elemental.stats.emitters.rasengan,point=scene.runtime.assets.fighters[a.kind].clips.skill2.emitters[emitter.index];
+    const orb=scene.elemental.sprites.find(i=>i.visible&&i.texture.key==='brawl-skill-rasengan');
+    return {offset:v.x-a.x/100,emitter,orb:{x:orb.x,y:orb.y},expected:{x:v.x+a.facing*point.x,y:v.y-v.z+point.y}};
+  },Number(naruto.skills[1].windup));
+  assert.ok(Math.abs(remoteAnchor.offset)>10);assert.ok(Math.hypot(remoteAnchor.orb.x-remoteAnchor.expected.x,remoteAnchor.orb.y-remoteAnchor.expected.y)<.1);await page.screenshot({path:path.join(out,'pvp-hand-anchor.png')});
+  console.log('✓ Held Rasengan follows the interpolated character hand during remote movement');
   const goku=ALL_FIGHTERS.find(f=>f.id==='dragon-ball-goku'),poseClip=assets.fighters[goku.id].clips.skill1;
   assert.equal(poseClip.count,8);assert.equal(poseClip.page,1);assert.equal(poseClip.emitters.length,8);
   for(const face of [1,-1]){
@@ -115,7 +147,7 @@ try{
   const panels=await Promise.all(picks.map(async (name,n)=>({input:await sharp(path.join(out,name+'.png')).resize(768,576).toBuffer(),left:n%2*768,top:Math.floor(n/2)*576})));
   await sharp({create:{width:1536,height:1152,channels:4,background:'#142337'}}).composite(panels).png().toFile(path.join(out,'showcase.png'));
   for(const name of ['reset-failure.json','reset-failure.png','failure.txt'])await fs.rm(path.join(out,name),{force:true});
-  await fs.writeFile(path.join(out,'results.json'),JSON.stringify({pass:true,coverage,animation,performance,errors,failed,publicFighters:FIGHTERS.length},null,2));
+  await fs.writeFile(path.join(out,'results.json'),JSON.stringify({pass:true,coverage,casts,remoteAnchor,animation,performance,errors,failed,publicFighters:FIGHTERS.length},null,2));
   await context.close();context=undefined;await page.video().saveAs(path.join(out,'elemental-showcase.webm'));
   console.log('✓ Clean scene disposal, no page/asset failures, unchanged wallet and captured screenshots/video');
 }catch(error){await fs.writeFile(path.join(out,'failure.txt'),error.stack+'\n'+logs);throw error;}finally{await context?.close();await browser?.close();server.kill();await new Promise(r=>server.once('exit',r));assert.ok(path.resolve(temp).startsWith(path.join(os.tmpdir(),'buio-elemental-browser-')));await fs.rm(temp,{recursive:true,force:true});}

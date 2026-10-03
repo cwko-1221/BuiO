@@ -1,0 +1,43 @@
+{
+  "id": "starpatch-cat",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character starpatch-cat; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (星影換位), eight frames read left-to-right across two consecutive rows: 1. lower stealth crouch; 2. curl shoulders, ears back; 3. deep coiled pounce; 4. pounce ready, one paw raised; 5. spring forward with both claws; 6. extended hunting leap, forepaws reaching; 7. land in low three-paw crouch; 8. settle back into stance. Sequence 2 (獵星連爪), eight frames read left-to-right across two consecutive rows: 1. crouch with forepaws lifted; 2. coil torso for claw swipe; 3. right paw drawn back; 4. eyes focus, claws exposed; 5. right forepaw sweeping forward; 6. left forepaw sweeping forward; 7. both claws crossing forward; 8. paws return to floor. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/starpatch-cat/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/starpatch-cat/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "lower stealth crouch",
+      "curl shoulders, ears back",
+      "deep coiled pounce",
+      "pounce ready, one paw raised",
+      "spring forward with both claws",
+      "extended hunting leap, forepaws reaching",
+      "land in low three-paw crouch",
+      "settle back into stance"
+    ],
+    [
+      "crouch with forepaws lifted",
+      "coil torso for claw swipe",
+      "right paw drawn back",
+      "eyes focus, claws exposed",
+      "right forepaw sweeping forward",
+      "left forepaw sweeping forward",
+      "both claws crossing forward",
+      "paws return to floor"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-04876a60-3171-4204-ae0e-530ca512b477.png",
+  "rawSha256": "0445d48a7887a90cc43ef018fcd7c19ade9aaa6b07201feba7e8dddba2fe95f8",
+  "referenceHashes": [
+    "9545bf2f7cafa27125aff1f7e07e5119640afca84d4d7166e29c3689c9c6b595",
+    "1aeda34206fa563f2210ec3dda8813093c2bbdb262f4ec0e6f15de3ded6e1ffe"
+  ]
+}

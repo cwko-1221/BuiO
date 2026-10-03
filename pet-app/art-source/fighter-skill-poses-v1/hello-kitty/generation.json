@@ -1,0 +1,43 @@
+{
+  "id": "hello-kitty",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character hello-kitty; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (蝴蝶結飛舞), eight frames read left-to-right across two consecutive rows: 1. raise right paw to red bow; 2. hold paw beside bow; 3. pull small red ribbon from bow; 4. ribbon held back by shoulder; 5. throw ribbon towards right with open paw; 6. open paw extended, bow remains on head; 7. paw lowers; 8. standing normally. Sequence 2 (友誼心光), eight frames read left-to-right across two consecutive rows: 1. hands together at chest; 2. close eyes, hands press heart; 3. hands rise to face; 4. palms cup gently at chest; 5. open both hands out offering friendship; 6. palms spread wide with warm eyes; 7. hands lower gently; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/hello-kitty/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/hello-kitty/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "raise right paw to red bow",
+      "hold paw beside bow",
+      "pull small red ribbon from bow",
+      "ribbon held back by shoulder",
+      "throw ribbon towards right with open paw",
+      "open paw extended, bow remains on head",
+      "paw lowers",
+      "standing normally"
+    ],
+    [
+      "hands together at chest",
+      "close eyes, hands press heart",
+      "hands rise to face",
+      "palms cup gently at chest",
+      "open both hands out offering friendship",
+      "palms spread wide with warm eyes",
+      "hands lower gently",
+      "normal stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-d8cca368-2316-4e75-8068-eff4cb0223eb.png",
+  "rawSha256": "c5b36ea730836267465d863aef8b290edacf4ce032a1c217bd7d6847177c4117",
+  "referenceHashes": [
+    "a4f3d6d17984b2e33668fdde9fb11e46bddf959ccad5fac5ac1663116aab4858",
+    "a441da15f808ee1590d1f580ee6c6dc601923110135286005ba406c747f4080d"
+  ]
+}

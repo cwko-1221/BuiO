@@ -1,0 +1,43 @@
+{
+  "id": "leaftail-fox",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character leaftail-fox; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (葉刃回旋), eight frames read left-to-right across two consecutive rows: 1. lower shoulders, leaf tail curls; 2. leaf tail draws back to left; 3. tail raised behind torso; 4. tail twisted ready to lash; 5. sweep leaf tail to right in strong arc; 6. tail fully extended to right; 7. tail unwinds; 8. four-paw stance. Sequence 2 (森羅葉暴), eight frames read left-to-right across two consecutive rows: 1. paws brace, tail rises; 2. tail coils in spiral; 3. raise head with ears alert; 4. tail high, forepaw lifted; 5. tail sweeps broadly overhead; 6. tail circles behind while body planted; 7. tail lowers gradually; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/leaftail-fox/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/leaftail-fox/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "lower shoulders, leaf tail curls",
+      "leaf tail draws back to left",
+      "tail raised behind torso",
+      "tail twisted ready to lash",
+      "sweep leaf tail to right in strong arc",
+      "tail fully extended to right",
+      "tail unwinds",
+      "four-paw stance"
+    ],
+    [
+      "paws brace, tail rises",
+      "tail coils in spiral",
+      "raise head with ears alert",
+      "tail high, forepaw lifted",
+      "tail sweeps broadly overhead",
+      "tail circles behind while body planted",
+      "tail lowers gradually",
+      "normal stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-b93c5d87-2d43-4d4d-94e0-71b855ca30cd.png",
+  "rawSha256": "8057438503285f0ded20846997efedd18597c63d126a093bf14db9c524270946",
+  "referenceHashes": [
+    "12a8a783ae979aed9327deb8971d0f7b81583c720745f98664c666eb0a4d7830",
+    "134deb6f6da755b67e2529b45bd2cd96556fcf67063ecac51df455faa203900d"
+  ]
+}

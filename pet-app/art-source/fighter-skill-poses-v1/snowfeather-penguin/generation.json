@@ -1,0 +1,43 @@
+{
+  "id": "snowfeather-penguin",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character snowfeather-penguin; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (冰柱長城), eight frames read left-to-right across two consecutive rows: 1. flippers close to chest; 2. right flipper raised; 3. both flippers high; 4. flippers poised downward; 5. slam both flippers downward towards ice floor; 6. flippers pushed towards ground, low crouch; 7. raise torso from crouch; 8. relaxed standing. Sequence 2 (極地暴風雪), eight frames read left-to-right across two consecutive rows: 1. flippers fold inward; 2. flippers begin spreading; 3. lift both flippers high; 4. head tilts upwards; 5. flippers spread outward summoning blizzard; 6. hold wide flippers, feathers flutter; 7. flippers slowly lower; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/snowfeather-penguin/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/snowfeather-penguin/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "flippers close to chest",
+      "right flipper raised",
+      "both flippers high",
+      "flippers poised downward",
+      "slam both flippers downward towards ice floor",
+      "flippers pushed towards ground, low crouch",
+      "raise torso from crouch",
+      "relaxed standing"
+    ],
+    [
+      "flippers fold inward",
+      "flippers begin spreading",
+      "lift both flippers high",
+      "head tilts upwards",
+      "flippers spread outward summoning blizzard",
+      "hold wide flippers, feathers flutter",
+      "flippers slowly lower",
+      "normal stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-a273417a-cb76-4261-87fc-72d2aceeaf15.png",
+  "rawSha256": "b6d0cd70055cfe5c2fa5864aada0a01f38eec8649728fd93e19457e4d912bed1",
+  "referenceHashes": [
+    "c52123d26ab0006eb22cd9939132caed84b48bef424dff373b0124dea3ca7a3b",
+    "c24272362c8fe25a25b219e4eac23ee4f5faa3d5f5bc10eb2ba942fb09920704"
+  ]
+}

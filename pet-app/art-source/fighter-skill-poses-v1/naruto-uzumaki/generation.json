@@ -1,0 +1,42 @@
+{
+  "id": "naruto-uzumaki",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: precise-object-edit. Edit ONLY the hand seal in the first eight poses (first two rows) of this existing Naruto 4 by 4, 16-frame sprite atlas. In frames 2 through 6, make the familiar shadow-clone cross hand sign: the extended index and middle fingers of one hand form a short vertical pair, the index and middle fingers of the other hand form a horizontal pair crossing them at right angles, a clear small plus-shaped finger seal held at chest level. Both hands visible and naturally attached to the same wrists. Keep the exact same face, hair, headband, jacket, colours, sixteen body poses, layout, and eight Rasengan poses in the last two rows unchanged. Clean production chibi animation sprites on genuine transparent alpha. No effects, glow, labels or background.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/naruto-uzumaki/edit-input.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "hands raise to chest",
+      "cross index and middle fingers into signature clone seal",
+      "hold exact crossed-finger seal close to chest",
+      "knees bend, intense eyes, seal held",
+      "signature crossed-finger seal with arms firm",
+      "seal held as smoke appears separately",
+      "release fingers and lower hands",
+      "normal ninja stance"
+    ],
+    [
+      "right palm cups by waist, left hand circles above it",
+      "right palm remains cupped, left hand rotates around it",
+      "left fingers shape sphere above right palm",
+      "right palm drawn back at hip, eyes focused",
+      "drive right open palm forward towards right carrying sphere separately",
+      "right palm thrust forward, left arm behind to balance",
+      "draw palm in as sphere ends",
+      "normal ninja stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-b4536603-51d0-46e6-aad6-d8cdf635c4c9.png",
+  "initialPrompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character naruto-uzumaki; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (多重影分身術), eight frames read left-to-right across two consecutive rows: 1. hands raise to chest; 2. cross index and middle fingers into signature clone seal; 3. hold exact crossed-finger seal close to chest; 4. knees bend, intense eyes, seal held; 5. signature crossed-finger seal with arms firm; 6. seal held as smoke appears separately; 7. release fingers and lower hands; 8. normal ninja stance. Sequence 2 (螺旋丸), eight frames read left-to-right across two consecutive rows: 1. right palm cups by waist, left hand circles above it; 2. right palm remains cupped, left hand rotates around it; 3. left fingers shape sphere above right palm; 4. right palm drawn back at hip, eyes focused; 5. drive right open palm forward towards right carrying sphere separately; 6. right palm thrust forward, left arm behind to balance; 7. draw palm in as sphere ends; 8. normal ninja stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "rawSha256": "0265f0b0dd2ae751a727c6b3433d9e679a559996b1d724771957fe622f340b51",
+  "referenceHashes": [
+    "2399ff03f0ee4cb02729f8e28feb3890dfec79247054cbe01a8ccd7b4ad91e3d"
+  ]
+}

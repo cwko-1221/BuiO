@@ -1,0 +1,661 @@
+[
+  {
+    "id": "starpatch-cat",
+    "name": "星斑貓",
+    "width": 256,
+    "height": 256,
+    "originY": 0.9,
+    "skills": [
+      {
+        "kind": "blink",
+        "name": "星影換位",
+        "windup": 12,
+        "range": 230
+      },
+      {
+        "kind": "flurry",
+        "name": "獵星連爪",
+        "windup": 12,
+        "range": 280
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/starpatch-cat/seed.png"
+  },
+  {
+    "id": "cloud-ear-dog",
+    "name": "雲耳狗",
+    "width": 256,
+    "height": 256,
+    "originY": 0.9,
+    "skills": [
+      {
+        "kind": "gale-blades",
+        "name": "裂空風刃",
+        "mechanic": "projectile",
+        "windup": 12,
+        "range": 600,
+        "element": "wind"
+      },
+      {
+        "kind": "cyclone-eye",
+        "name": "龍捲風眼",
+        "mechanic": "tornado",
+        "windup": 12,
+        "range": 240,
+        "element": "wind"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/cloud-ear-dog/seed.png"
+  },
+  {
+    "id": "pudding-pig",
+    "name": "布丁豬",
+    "width": 256,
+    "height": 256,
+    "originY": 0.9,
+    "skills": [
+      {
+        "kind": "seismic-fault",
+        "name": "裂地震波",
+        "mechanic": "fissure",
+        "windup": 12,
+        "range": 420,
+        "element": "earth"
+      },
+      {
+        "kind": "mud-mortar",
+        "name": "泥漿砲彈",
+        "mechanic": "lob",
+        "windup": 12,
+        "range": 320,
+        "element": "earth"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/pudding-pig/seed.png"
+  },
+  {
+    "id": "golden-retriever-dog",
+    "name": "金毛犬",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "skills": [
+      {
+        "kind": "fetch",
+        "name": "彈力追獵",
+        "mechanic": "projectile",
+        "windup": 12,
+        "range": 440,
+        "element": "physical"
+      },
+      {
+        "kind": "rally",
+        "name": "金光守護",
+        "mechanic": "buff",
+        "windup": 12,
+        "range": 0,
+        "element": "light"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/golden-retriever-dog/seed.png"
+  },
+  {
+    "id": "crescent-rabbit",
+    "name": "月芽兔",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "skills": [
+      {
+        "kind": "moon-disc",
+        "name": "月牙光輪",
+        "mechanic": "projectile",
+        "windup": 12,
+        "range": 510,
+        "element": "lunar"
+      },
+      {
+        "kind": "moonfall",
+        "name": "月落星雨",
+        "mechanic": "rain",
+        "windup": 12,
+        "range": 420,
+        "element": "lunar"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/crescent-rabbit/seed.png"
+  },
+  {
+    "id": "bubble-otter",
+    "name": "泡泡水獺",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "skills": [
+      {
+        "kind": "bubble-volley",
+        "name": "泡泡連彈",
+        "mechanic": "projectile",
+        "windup": 12,
+        "range": 470,
+        "element": "water"
+      },
+      {
+        "kind": "bubble-snare",
+        "name": "泡泡牢籠",
+        "mechanic": "trap",
+        "windup": 12,
+        "range": 190,
+        "element": "water"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/bubble-otter/seed.png"
+  },
+  {
+    "id": "mossback-turtle",
+    "name": "苔背龜",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "skills": [
+      {
+        "kind": "shell-counter",
+        "name": "龜殼反彈",
+        "mechanic": "buff",
+        "windup": 12,
+        "range": 150,
+        "element": "earth"
+      },
+      {
+        "kind": "moss-garden",
+        "name": "藤根圍城",
+        "mechanic": "field",
+        "windup": 12,
+        "range": 160,
+        "element": "nature"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/mossback-turtle/seed.png"
+  },
+  {
+    "id": "spark-hamster",
+    "name": "火花鼠",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "skills": [
+      {
+        "kind": "flame-breath",
+        "name": "烈焰噴吐",
+        "mechanic": "flamethrower",
+        "windup": 18,
+        "duration": 83,
+        "range": 370,
+        "element": "fire"
+      },
+      {
+        "kind": "blazing-nut",
+        "name": "爆炎果實",
+        "mechanic": "lob",
+        "windup": 12,
+        "range": 340,
+        "element": "fire"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/spark-hamster/seed.png"
+  },
+  {
+    "id": "leaftail-fox",
+    "name": "葉尾狐",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "skills": [
+      {
+        "kind": "leaf-blade",
+        "name": "葉刃回旋",
+        "mechanic": "projectile",
+        "windup": 12,
+        "range": 490,
+        "element": "nature"
+      },
+      {
+        "kind": "leaf-tempest",
+        "name": "森羅葉暴",
+        "mechanic": "tornado",
+        "windup": 12,
+        "range": 230,
+        "element": "nature"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/leaftail-fox/seed.png"
+  },
+  {
+    "id": "snowfeather-penguin",
+    "name": "雪羽企鵝",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "skills": [
+      {
+        "kind": "glacial-wall",
+        "name": "冰柱長城",
+        "mechanic": "fissure",
+        "windup": 12,
+        "range": 440,
+        "element": "ice"
+      },
+      {
+        "kind": "polar-blizzard",
+        "name": "極地暴風雪",
+        "mechanic": "tornado",
+        "windup": 12,
+        "range": 280,
+        "element": "ice"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/snowfeather-penguin/seed.png"
+  },
+  {
+    "id": "thunderhorn-goat",
+    "name": "雷角羊",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "skills": [
+      {
+        "kind": "horn-lightning",
+        "name": "雷角連鎖",
+        "mechanic": "chain",
+        "windup": 12,
+        "range": 380,
+        "element": "lightning"
+      },
+      {
+        "kind": "storm-verdict",
+        "name": "天雷審判",
+        "mechanic": "rain",
+        "windup": 12,
+        "range": 450,
+        "element": "lightning"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/thunderhorn-goat/seed.png"
+  },
+  {
+    "id": "coral-seal",
+    "name": "珊瑚海豹",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "skills": [
+      {
+        "kind": "tidal-bore",
+        "name": "洶湧巨浪",
+        "mechanic": "wave",
+        "windup": 12,
+        "range": 600,
+        "element": "water"
+      },
+      {
+        "kind": "coral-pool",
+        "name": "珊瑚潮池",
+        "mechanic": "sanctuary",
+        "windup": 12,
+        "range": 0,
+        "element": "water"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/coral-seal/seed.png"
+  },
+  {
+    "id": "nezuko-kamado",
+    "name": "竈門禰豆子",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9375,
+    "skills": [
+      {
+        "kind": "bloodflame-torrent",
+        "name": "血焰噴流",
+        "mechanic": "flamethrower",
+        "windup": 18,
+        "duration": 83,
+        "range": 400,
+        "element": "fire"
+      },
+      {
+        "kind": "blood-bloom",
+        "name": "爆血花火",
+        "mechanic": "rain",
+        "windup": 12,
+        "range": 400,
+        "element": "fire"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/nezuko-kamado/seed.png"
+  },
+  {
+    "id": "dragon-ball-goku",
+    "name": "孫悟空",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9375,
+    "skills": [
+      {
+        "kind": "kamehameha",
+        "name": "龜波氣功",
+        "mechanic": "beam",
+        "windup": 32,
+        "duration": 106,
+        "range": 760,
+        "element": "ki"
+      },
+      {
+        "kind": "spirit-bomb",
+        "name": "元氣玉",
+        "mechanic": "projectile",
+        "windup": 38,
+        "duration": 64,
+        "range": 650,
+        "element": "ki"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/dragon-ball-goku/seed.png"
+  },
+  {
+    "id": "crayon-shin-chan",
+    "name": "蠟筆小新",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9375,
+    "skills": [
+      {
+        "kind": "cheeky-cyclone",
+        "name": "屁屁龍捲風",
+        "mechanic": "tornado",
+        "windup": 12,
+        "range": 210,
+        "element": "wind"
+      },
+      {
+        "kind": "action-beam",
+        "name": "動感光線",
+        "mechanic": "beam",
+        "windup": 24,
+        "duration": 65,
+        "range": 560,
+        "element": "light"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/crayon-shin-chan/seed.png"
+  },
+  {
+    "id": "doraemon",
+    "name": "多啦A夢",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9375,
+    "skills": [
+      {
+        "kind": "air-cannon",
+        "name": "空氣炮",
+        "mechanic": "projectile",
+        "windup": 12,
+        "range": 720,
+        "element": "wind"
+      },
+      {
+        "kind": "take-copter",
+        "name": "竹蜻蜓",
+        "mechanic": "flight",
+        "windup": 12,
+        "range": 900,
+        "element": "wind"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/doraemon/seed.png"
+  },
+  {
+    "id": "hello-kitty",
+    "name": "Hello Kitty",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9375,
+    "skills": [
+      {
+        "kind": "ribbon-flight",
+        "name": "蝴蝶結飛舞",
+        "mechanic": "projectile",
+        "windup": 12,
+        "range": 450,
+        "element": "light"
+      },
+      {
+        "kind": "friendship-glow",
+        "name": "友誼心光",
+        "mechanic": "sanctuary",
+        "windup": 12,
+        "range": 0,
+        "element": "light"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/hello-kitty/seed.png"
+  },
+  {
+    "id": "argentina-number-10",
+    "name": "阿根廷10號",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "skills": [
+      {
+        "kind": "orbit-dribble",
+        "name": "連環盤球",
+        "mechanic": "orbit",
+        "windup": 12,
+        "range": 170,
+        "element": "physical"
+      },
+      {
+        "kind": "curved-shot",
+        "name": "追蹤巧射",
+        "mechanic": "projectile",
+        "windup": 12,
+        "range": 1280,
+        "element": "physical"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/argentina-number-10/seed.png"
+  },
+  {
+    "id": "portugal-number-7",
+    "name": "葡萄牙7號",
+    "width": 160,
+    "height": 160,
+    "originY": 0.925,
+    "skills": [
+      {
+        "kind": "bicycle-cannon",
+        "name": "凌空倒掛",
+        "mechanic": "sky-shot",
+        "windup": 8,
+        "duration": 52,
+        "range": 290,
+        "element": "physical"
+      },
+      {
+        "kind": "power-kick",
+        "name": "強力自由球",
+        "mechanic": "projectile",
+        "windup": 28,
+        "duration": 50,
+        "range": 720,
+        "element": "physical"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/portugal-number-7/seed.png"
+  },
+  {
+    "id": "pikachu",
+    "name": "比卡超",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "skills": [
+      {
+        "kind": "electro-ball",
+        "name": "電球",
+        "mechanic": "projectile",
+        "windup": 12,
+        "range": 540,
+        "element": "lightning"
+      },
+      {
+        "kind": "thunderbolt",
+        "name": "十萬伏特",
+        "mechanic": "rain",
+        "windup": 12,
+        "range": 350,
+        "element": "lightning"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/pikachu/seed.png",
+    "skipCastArt": true
+  },
+  {
+    "id": "dragon-ball-frieza",
+    "name": "弗利沙",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "skills": [
+      {
+        "kind": "death-beam",
+        "name": "死亡光線",
+        "mechanic": "beam",
+        "windup": 12,
+        "duration": 32,
+        "range": 800,
+        "element": "ki"
+      },
+      {
+        "kind": "emperor-orb",
+        "name": "帝王能量球",
+        "mechanic": "projectile",
+        "windup": 12,
+        "range": 600,
+        "element": "ki"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/dragon-ball-frieza/seed.png"
+  },
+  {
+    "id": "one-piece-luffy",
+    "name": "路飛",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "skills": [
+      {
+        "kind": "gum-pistol",
+        "name": "橡膠手槍",
+        "mechanic": "stretch",
+        "windup": 18,
+        "range": 450,
+        "element": "physical"
+      },
+      {
+        "kind": "gum-gatling",
+        "name": "橡膠機關槍",
+        "mechanic": "stretch",
+        "windup": 20,
+        "duration": 70,
+        "range": 390,
+        "element": "physical"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/one-piece-luffy/seed.png"
+  },
+  {
+    "id": "spy-family-anya",
+    "name": "安妮亞",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "skills": [
+      {
+        "kind": "mind-scan",
+        "name": "心聲標記",
+        "mechanic": "scan",
+        "windup": 12,
+        "range": 250,
+        "element": "psychic"
+      },
+      {
+        "kind": "foreseen-counter",
+        "name": "預知結界",
+        "mechanic": "buff",
+        "windup": 12,
+        "range": 170,
+        "element": "psychic"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/spy-family-anya/seed.png"
+  },
+  {
+    "id": "one-punch-saitama",
+    "name": "埼玉",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "skills": [
+      {
+        "kind": "consecutive-punches",
+        "name": "普通連續拳",
+        "mechanic": "projectile",
+        "windup": 12,
+        "duration": 55,
+        "range": 440,
+        "element": "physical"
+      },
+      {
+        "kind": "serious-punch",
+        "name": "認真一拳",
+        "mechanic": "wave",
+        "windup": 36,
+        "duration": 66,
+        "range": 800,
+        "element": "physical"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/one-punch-saitama/seed.png"
+  },
+  {
+    "id": "naruto-uzumaki",
+    "name": "漩渦鳴人",
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "skills": [
+      {
+        "kind": "shadow-clones",
+        "name": "多重影分身術",
+        "mechanic": "summon",
+        "windup": 12,
+        "range": 155,
+        "element": "chakra"
+      },
+      {
+        "kind": "rasengan",
+        "name": "螺旋丸",
+        "mechanic": "rasengan",
+        "windup": 24,
+        "duration": 84,
+        "range": 300,
+        "element": "chakra"
+      }
+    ],
+    "seed": "pet-app/art-source/fighter-skill-poses-v1/naruto-uzumaki/seed.png"
+  }
+]

@@ -1,0 +1,42 @@
+{
+  "id": "doraemon",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: precise-object-edit. Edit the existing 16-frame 4 by 4 Doraemon casting animation atlas. Change ONLY the yellow bamboo-copter rotor in frames 10 through 16 (the last two rows): remove the entire little yellow rotor, blades and shaft from above the blue head. Keep the character, pose, hands, head contour, blue fur, face, pocket, clothes, air cannon in the first eight frames, proportions, exact 4 by 4 layout and transparent background unchanged. Render the clean round blue head underneath. The game will draw a separate animated golden rotor sprite on top of the head. No replacement gadget, no new effects, no scenery. Keep all sixteen poses intact.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/doraemon/edit-input.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "reach one hand towards front pocket",
+      "pull out a short grey air cannon cuff on right hand",
+      "raise cannon hand level with face",
+      "aim barrel to right, other hand supports",
+      "cannon recoils with hand and chest leaned back",
+      "cannon pointing right, body follows recoil",
+      "lower cannon back towards pocket",
+      "normal stance"
+    ],
+    [
+      "reach right hand to pocket",
+      "bring hand above head, fit small yellow copter stem",
+      "hands lower, legs ready to lift",
+      "arms spread slightly, feet leave ground",
+      "floating upright arms spread, copter stem on head without rotor blades",
+      "floating pose, feet tucked and arm aims right",
+      "feet start lowering, hands at sides",
+      "normal stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-726a59c7-ab96-4a4b-bb3c-3fc0279d22f9.png",
+  "rawSha256": "204de36c057564531fd1cb960c334431b531b3fa6accdbaf276e4596b4baaee2",
+  "referenceHashes": [
+    "310910c12073bae5d074b4175303e17b0f4364b4015cd192bb31256d2d7eb0f5"
+  ],
+  "initialPrompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character doraemon; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (空氣炮), eight frames read left-to-right across two consecutive rows: 1. reach one hand towards front pocket; 2. pull out a short grey air cannon cuff on right hand; 3. raise cannon hand level with face; 4. aim barrel to right, other hand supports; 5. cannon recoils with hand and chest leaned back; 6. cannon pointing right, body follows recoil; 7. lower cannon back towards pocket; 8. normal stance. Sequence 2 (竹蜻蜓), eight frames read left-to-right across two consecutive rows: 1. reach right hand to pocket; 2. bring hand above head, fit small yellow copter stem; 3. hands lower, legs ready to lift; 4. arms spread slightly, feet leave ground; 5. floating upright arms spread, copter stem on head without rotor blades; 6. floating pose, feet tucked and arm aims right; 7. feet start lowering, hands at sides; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses."
+}

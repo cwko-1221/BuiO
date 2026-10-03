@@ -1,0 +1,33 @@
+{
+  "id": "dragon-ball-goku",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character dragon-ball-goku; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 8 separate full-body poses on a 4-column, 2-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (元氣玉), eight frames read left-to-right across two consecutive rows: 1. bend knees, palms lift; 2. both palms rise above shoulders; 3. arms stretch high overhead; 4. palms fully overhead gathering huge spirit bomb; 5. swing both palms forward and downward throwing overhead bomb; 6. arms follow through aimed right; 7. draw arms back and stand; 8. relaxed fighting stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.\nCritical corrections: CHIBI proportions must exactly match the small approved Kamehameha caster in reference 1, oversized head and short body. There must be genuine transparent alpha, no coloured background, no shadow, no vignette, absolutely no scenery. Same 8 Spirit Bomb poses in a 4 by 2 atlas, no effects. Do not draw realistic adult body proportions.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/dragon-ball-goku/casting-reference.png",
+    "pet-app/art-source/fighter-skill-poses-v1/dragon-ball-goku/seed.png"
+  ],
+  "rows": 2,
+  "columns": 4,
+  "actions": [
+    [
+      "bend knees, palms lift",
+      "both palms rise above shoulders",
+      "arms stretch high overhead",
+      "palms fully overhead gathering huge spirit bomb",
+      "swing both palms forward and downward throwing overhead bomb",
+      "arms follow through aimed right",
+      "draw arms back and stand",
+      "relaxed fighting stance"
+    ]
+  ],
+  "skills": [
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-2ab25c92-c22a-4b77-af1d-feab41bbe4bb.png",
+  "rawSha256": "eb07133de614e63b3cc59b0d220292668c0ad508bf39cb3ba1eb4a73b2be0a55",
+  "referenceHashes": [
+    "d41b2107cde28c53c19aaa87915ad2d553e0c6d9efe66b4a333d078662e086ae",
+    "4799d85f4302525150d8c0600bc9768deea8432d24815cf7db023448d9888dca"
+  ],
+  "initialPrompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character dragon-ball-goku; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 8 separate full-body poses on a 4-column, 2-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (元氣玉), eight frames read left-to-right across two consecutive rows: 1. bend knees, palms lift; 2. both palms rise above shoulders; 3. arms stretch high overhead; 4. palms fully overhead gathering huge spirit bomb; 5. swing both palms forward and downward throwing overhead bomb; 6. arms follow through aimed right; 7. draw arms back and stand; 8. relaxed fighting stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses."
+}

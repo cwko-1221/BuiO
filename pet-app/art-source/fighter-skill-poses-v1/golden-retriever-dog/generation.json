@@ -1,0 +1,43 @@
+{
+  "id": "golden-retriever-dog",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character golden-retriever-dog; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (彈力追獵), eight frames read left-to-right across two consecutive rows: 1. grip a small gold tennis ball in mouth; 2. draw head and ball back; 3. coil neck to right; 4. ball at mouth ready to launch; 5. flick head forward, mouth open without ball; 6. head stretched forward, tail high; 7. draw head back; 8. friendly stance. Sequence 2 (金光守護), eight frames read left-to-right across two consecutive rows: 1. paws plant, chest rises; 2. raise one front paw; 3. chest proud and head raised; 4. ears perk, confident guarding stance; 5. bark with chest lifted; 6. proud bark, one paw forward; 7. lower front paw; 8. relaxed guarding stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/golden-retriever-dog/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/golden-retriever-dog/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "grip a small gold tennis ball in mouth",
+      "draw head and ball back",
+      "coil neck to right",
+      "ball at mouth ready to launch",
+      "flick head forward, mouth open without ball",
+      "head stretched forward, tail high",
+      "draw head back",
+      "friendly stance"
+    ],
+    [
+      "paws plant, chest rises",
+      "raise one front paw",
+      "chest proud and head raised",
+      "ears perk, confident guarding stance",
+      "bark with chest lifted",
+      "proud bark, one paw forward",
+      "lower front paw",
+      "relaxed guarding stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-ab80909d-0004-4a3c-b7b4-a571789faaaf.png",
+  "rawSha256": "314d0c38e2611337faa5dc867c2df6cb5cc776ef1f3857f6b3c5aae8e12dfca8",
+  "referenceHashes": [
+    "e6372f7f2d939dc1d30116366e07d5e464872bd135545eab3d99f5f1ae141b4a",
+    "7218e6b8d7499a9f33c52ba9bc934175593e75008ab11f5ceaecba99a12e4c07"
+  ]
+}

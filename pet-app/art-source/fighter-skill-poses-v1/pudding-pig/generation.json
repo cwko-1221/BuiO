@@ -1,0 +1,43 @@
+{
+  "id": "pudding-pig",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character pudding-pig; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (裂地震波), eight frames read left-to-right across two consecutive rows: 1. lower body, tense front legs; 2. lift forelegs slightly; 3. forelegs high, hind legs planted; 4. forelegs prepared to slam; 5. front hooves hit floor hard; 6. low heavy impact crouch; 7. lift head from impact; 8. normal stance. Sequence 2 (泥漿砲彈), eight frames read left-to-right across two consecutive rows: 1. snout draws back, mouth closed; 2. cheeks puff, belly swells; 3. head angles up; 4. snout angles up, cheeks fully puffed; 5. spit an upward mortar shot from snout; 6. head follows projectile upwards; 7. exhale and lower head; 8. relaxed stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/pudding-pig/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/pudding-pig/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "lower body, tense front legs",
+      "lift forelegs slightly",
+      "forelegs high, hind legs planted",
+      "forelegs prepared to slam",
+      "front hooves hit floor hard",
+      "low heavy impact crouch",
+      "lift head from impact",
+      "normal stance"
+    ],
+    [
+      "snout draws back, mouth closed",
+      "cheeks puff, belly swells",
+      "head angles up",
+      "snout angles up, cheeks fully puffed",
+      "spit an upward mortar shot from snout",
+      "head follows projectile upwards",
+      "exhale and lower head",
+      "relaxed stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-01f517ad-bf32-48cf-b970-f4026af2bc7d.png",
+  "rawSha256": "225d3214cf16d116bceef9e71c89eb906683906081c87ffcd5523b74eb02bdca",
+  "referenceHashes": [
+    "035b930a92343b29f22715e28a87a10996c6c835f4212ece48f06ed448876bce",
+    "dd9135a74c4b3c755b2d38b030d1770fd1d7277a7968774fcf8907958c29b0ad"
+  ]
+}

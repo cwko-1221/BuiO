@@ -1,0 +1,43 @@
+{
+  "id": "argentina-number-10",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character argentina-number-10; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (連環盤球), eight frames read left-to-right across two consecutive rows: 1. bend knees in football stance; 2. right foot draws back; 3. left foot shifts and torso leans; 4. right foot raised ready to tap orbit ball; 5. right boot taps forward without drawn ball; 6. left boot taps forward, arms balancing; 7. legs settle from dribble; 8. standing normally. Sequence 2 (追蹤巧射), eight frames read left-to-right across two consecutive rows: 1. feet apart, focus on ball ahead; 2. left support foot forward; 3. right kicking leg draws back; 4. right boot coiled behind, arms balance; 5. right instep kicks forward, no drawn ball; 6. kicking leg extends high in curved follow-through; 7. right boot lowers; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/argentina-number-10/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/argentina-number-10/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "bend knees in football stance",
+      "right foot draws back",
+      "left foot shifts and torso leans",
+      "right foot raised ready to tap orbit ball",
+      "right boot taps forward without drawn ball",
+      "left boot taps forward, arms balancing",
+      "legs settle from dribble",
+      "standing normally"
+    ],
+    [
+      "feet apart, focus on ball ahead",
+      "left support foot forward",
+      "right kicking leg draws back",
+      "right boot coiled behind, arms balance",
+      "right instep kicks forward, no drawn ball",
+      "kicking leg extends high in curved follow-through",
+      "right boot lowers",
+      "normal stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-fb50c5db-ec41-451b-87d8-1c8f7d410927.png",
+  "rawSha256": "771614dada066076b2229ddd833669506793291e21c3d7d7085ec5559e02cb87",
+  "referenceHashes": [
+    "4304bebd9f49a04512fc1035ea207ab50e978abf81c3ff2711f1a6b17a0a8b6c",
+    "6093273a6fcb373f845239952f58677d6f5438c089c15cb5525d43630704e8f9"
+  ]
+}

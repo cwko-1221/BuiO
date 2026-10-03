@@ -1,0 +1,43 @@
+{
+  "id": "crayon-shin-chan",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character crayon-shin-chan; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (屁屁龍捲風), eight frames read left-to-right across two consecutive rows: 1. turn torso right, knees bent; 2. wiggle hips back with shorts on; 3. hips rotate, arms at sides; 4. knees deep, hips ready to spin; 5. hips sweep around right, fully clothed; 6. hips sweep around left with comic confident face; 7. straighten knees; 8. normal cheeky stance. Sequence 2 (動感光線), eight frames read left-to-right across two consecutive rows: 1. feet apart, fists at waist; 2. cross forearms at chest; 3. raise crossed forearms to face; 4. one hand grips other wrist aiming right; 5. extend open palm right in superhero beam pose; 6. hold superhero palm beam pose; 7. draw arms back to chest; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/crayon-shin-chan/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/crayon-shin-chan/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "turn torso right, knees bent",
+      "wiggle hips back with shorts on",
+      "hips rotate, arms at sides",
+      "knees deep, hips ready to spin",
+      "hips sweep around right, fully clothed",
+      "hips sweep around left with comic confident face",
+      "straighten knees",
+      "normal cheeky stance"
+    ],
+    [
+      "feet apart, fists at waist",
+      "cross forearms at chest",
+      "raise crossed forearms to face",
+      "one hand grips other wrist aiming right",
+      "extend open palm right in superhero beam pose",
+      "hold superhero palm beam pose",
+      "draw arms back to chest",
+      "normal stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-67e37d1b-4aef-4b25-b1cb-d5762adcd615.png",
+  "rawSha256": "bd8d30bcd82402430fbac9caa1fba8f5cc1f98f0111486fdbb12aae0a5985485",
+  "referenceHashes": [
+    "92bd7f1e21e11d7b5b97deebf7a5e8b9e790ab295effe8e15f7b19800b5b3dbe",
+    "a855b9a6cacab7b2ea39e1843e8ebdbd6a62df4ec46fa8984e8787285e35c9af"
+  ]
+}

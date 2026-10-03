@@ -1,0 +1,43 @@
+{
+  "id": "bubble-otter",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character bubble-otter; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (泡泡連彈), eight frames read left-to-right across two consecutive rows: 1. cup both paws before chest; 2. draw cupped paws back; 3. lift paws to mouth; 4. mouth and paws together, inhale; 5. blow bubbles from mouth towards right; 6. blow again with cheeks puffed; 7. paws open as breath ends; 8. return to holding stance. Sequence 2 (泡泡牢籠), eight frames read left-to-right across two consecutive rows: 1. spread paws around tiny held bubble; 2. draw paws apart; 3. raise paws with cupping gesture; 4. paws stretched apart forming cage; 5. push both palms out right; 6. palms closed inward as if trapping; 7. lower arms gently; 8. relaxed stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/bubble-otter/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/bubble-otter/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "cup both paws before chest",
+      "draw cupped paws back",
+      "lift paws to mouth",
+      "mouth and paws together, inhale",
+      "blow bubbles from mouth towards right",
+      "blow again with cheeks puffed",
+      "paws open as breath ends",
+      "return to holding stance"
+    ],
+    [
+      "spread paws around tiny held bubble",
+      "draw paws apart",
+      "raise paws with cupping gesture",
+      "paws stretched apart forming cage",
+      "push both palms out right",
+      "palms closed inward as if trapping",
+      "lower arms gently",
+      "relaxed stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-430b01b3-77fe-4c24-b5c9-3bc31ab5b980.png",
+  "rawSha256": "6d3c25a9f3ee34b763ed007ef24b6bc826b3b1d1da1b6b8361cb4d82c4ac8165",
+  "referenceHashes": [
+    "ae14d8e903bf408a3abdf1f5403122102c2034c56145d3499b3f45728975689b",
+    "dad5f0b0ae1079939f0a71f7b5a125fc9ec01691ed457d2c3818bca31b8055d9"
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-04",
+  "generatedWith": "built-in image_gen",
+  "redrawnCharacters": 24,
+  "newSkillAnimations": 47,
+  "newPoses": 376,
+  "approvedKamehamehaPosesPreserved": 8,
+  "pikachu": "Shipped artwork retained by user request",
+  "browser": {
+    "pass": true,
+    "fxCasts": 100,
+    "castingSequences": 96,
+    "poseSnapshots": 288,
+    "kamehamehaSnapshots": 34,
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "engine": "Chrome with touch emulation",
+    "physicalIpadSafariTested": false,
+    "remoteHandAnchor": {
+      "offset": -26.812801841425596,
+      "emitter": {
+        "x": 469.1771981585744,
+        "y": 386.4832004603564,
+        "index": 5
+      },
+      "orb": {
+        "x": 469.1771981585744,
+        "y": 386.4832004603564
+      },
+      "expected": {
+        "x": 469.17719815857436,
+        "y": 386.48320046035644
+      }
+    },
+    "performance": [
+      {
+        "id": "spark-hamster",
+        "fps": 60,
+        "ticks": 95,
+        "casts": 1,
+        "hits": 5,
+        "peak": 6
+      },
+      {
+        "id": "snowfeather-penguin",
+        "fps": 60,
+        "ticks": 95,
+        "casts": 1,
+        "hits": 1,
+        "peak": 10
+      },
+      {
+        "id": "thunderhorn-goat",
+        "fps": 60.00428602043028,
+        "ticks": 96,
+        "casts": 1,
+        "hits": 3,
+        "peak": 6
+      },
+      {
+        "id": "coral-seal",
+        "fps": 60,
+        "ticks": 96,
+        "casts": 1,
+        "hits": 1,
+        "peak": 2
+      },
+      {
+        "id": "dragon-ball-goku",
+        "fps": 60,
+        "ticks": 147,
+        "casts": 1,
+        "hits": 6,
+        "peak": 2
+      },
+      {
+        "id": "naruto-uzumaki",
+        "fps": 60.008572653236676,
+        "ticks": 99,
+        "casts": 1,
+        "hits": 4,
+        "peak": 4
+      }
+    ],
+    "errors": [],
+    "failedAssets": []
+  },
+  "utility": {
+    "pass": true,
+    "checks": [
+      "Owned Luffy selected through the lobby; both new sprites load and animate, including correctly mirrored left-facing Gatling",
+      "Anya mark, bonus hit, visible stun label, three-heart ward and remaining-charge HUD render on iPad",
+      "Real touch activates four-second Take-copter and aerial ray; held keyboard fires the remaining two; landing restores attack text and iPad controls are at least 64px",
+      "Homing football visibly turns back toward a rear target in a different depth lane and lands exactly once",
+      "Two distinct Naruto actors pursue without owner movement, have no clone labels or countdowns, expire after three seconds with smoke, and skill buttons clearly show insufficient MP"
+    ],
+    "errors": [],
+    "failures": [],
+    "version": "brawl-v11"
+  },
+  "checks": [
+    "TypeScript --noEmit",
+    "Vite production build",
+    "test-pet-brawl-roster.mjs",
+    "test-pet-brawl-skill-fx-live.mjs",
+    "test-pet-brawl-utility-live.mjs",
+    "Published asset byte equality over HTTP"
+  ],
+  "gameplayVersion": "brawl-v11",
+  "evidenceDirectory": "artifacts/pet-playtest/skill-poses-v1"
+}

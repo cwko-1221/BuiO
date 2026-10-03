@@ -1,0 +1,43 @@
+{
+  "id": "coral-seal",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character coral-seal; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (洶湧巨浪), eight frames read left-to-right across two consecutive rows: 1. flippers drawn back; 2. chest rises; 3. flippers stretch backwards; 4. head and chest lean back; 5. sweep both flippers forward pushing tidal wave; 6. flippers forward, body leans right; 7. flippers lower; 8. seated seal stance. Sequence 2 (珊瑚潮池), eight frames read left-to-right across two consecutive rows: 1. bring flippers together; 2. flippers cupped at chest; 3. close eyes and raise flippers; 4. flippers spread gently upwards; 5. open flippers in welcoming wide gesture; 6. hold healing gesture calmly; 7. close flippers gently; 8. seated stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/coral-seal/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/coral-seal/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "flippers drawn back",
+      "chest rises",
+      "flippers stretch backwards",
+      "head and chest lean back",
+      "sweep both flippers forward pushing tidal wave",
+      "flippers forward, body leans right",
+      "flippers lower",
+      "seated seal stance"
+    ],
+    [
+      "bring flippers together",
+      "flippers cupped at chest",
+      "close eyes and raise flippers",
+      "flippers spread gently upwards",
+      "open flippers in welcoming wide gesture",
+      "hold healing gesture calmly",
+      "close flippers gently",
+      "seated stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-18d67b69-1d1a-4774-b344-a7961534246e.png",
+  "rawSha256": "c9beab7714b70593839a959fafbb803da9f4a3044436b524d3bdca6b206209a5",
+  "referenceHashes": [
+    "d6db6e7267c076bf650395f297f39030e8c21cb66594be9fa7531dd297c1e661",
+    "a863e2fe043a1e0773187979dda975a5676446a7f17ca819955609d39f61e9ed"
+  ]
+}

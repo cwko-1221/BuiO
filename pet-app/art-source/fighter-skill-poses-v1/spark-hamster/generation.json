@@ -1,0 +1,43 @@
+{
+  "id": "spark-hamster",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character spark-hamster; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (烈焰噴吐), eight frames read left-to-right across two consecutive rows: 1. draw head back and inhale; 2. paws held at chest, cheeks inflate; 3. neck lifts, mouth starts opening; 4. mouth wide, body braced; 5. lean forward and breathe from mouth to right; 6. sustain open-mouth breath with paws braced; 7. mouth closes, cheeks deflate; 8. relaxed stance. Sequence 2 (爆炎果實), eight frames read left-to-right across two consecutive rows: 1. hold a small nut between both paws; 2. draw nut back beside head; 3. lift nut higher; 4. nut poised above shoulder; 5. throw nut to right, empty paws extended; 6. empty paws follow the throwing arc; 7. arms lower; 8. relaxed stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/spark-hamster/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/spark-hamster/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "draw head back and inhale",
+      "paws held at chest, cheeks inflate",
+      "neck lifts, mouth starts opening",
+      "mouth wide, body braced",
+      "lean forward and breathe from mouth to right",
+      "sustain open-mouth breath with paws braced",
+      "mouth closes, cheeks deflate",
+      "relaxed stance"
+    ],
+    [
+      "hold a small nut between both paws",
+      "draw nut back beside head",
+      "lift nut higher",
+      "nut poised above shoulder",
+      "throw nut to right, empty paws extended",
+      "empty paws follow the throwing arc",
+      "arms lower",
+      "relaxed stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-f792897a-58f8-4cb7-851a-298ed03cec05.png",
+  "rawSha256": "883c13e3260b44509ef6ef6ddc877903f16257d4efcb57175137f856974a21d2",
+  "referenceHashes": [
+    "895650f41c040051897311b89662634a7725ae1058134f2833498266497d131a",
+    "0a89ebb8b2aaaf21aa84b7b44eef0dcfd98d75579cb8382ffca1ac0a1f309a67"
+  ]
+}

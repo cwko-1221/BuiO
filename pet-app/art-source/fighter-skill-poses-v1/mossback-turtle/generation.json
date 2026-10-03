@@ -1,0 +1,43 @@
+{
+  "id": "mossback-turtle",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character mossback-turtle; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (龜殼反彈), eight frames read left-to-right across two consecutive rows: 1. lower head; 2. head pulls towards shell; 3. draw front legs inside shell; 4. nearly tucked, eyes just visible; 5. fully protected shell, no added spikes; 6. shell braces, eyes peer out; 7. extend head and forelegs; 8. normal four-legged stance. Sequence 2 (藤根圍城), eight frames read left-to-right across two consecutive rows: 1. head down, forelegs brace; 2. raise right foreleg; 3. reach foreleg high; 4. foreleg poised above ground; 5. stamp foreleg into ground; 6. both forelegs pressed firmly to ground; 7. head lifts, foreleg relaxes; 8. standing normally. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/mossback-turtle/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/mossback-turtle/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "lower head",
+      "head pulls towards shell",
+      "draw front legs inside shell",
+      "nearly tucked, eyes just visible",
+      "fully protected shell, no added spikes",
+      "shell braces, eyes peer out",
+      "extend head and forelegs",
+      "normal four-legged stance"
+    ],
+    [
+      "head down, forelegs brace",
+      "raise right foreleg",
+      "reach foreleg high",
+      "foreleg poised above ground",
+      "stamp foreleg into ground",
+      "both forelegs pressed firmly to ground",
+      "head lifts, foreleg relaxes",
+      "standing normally"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-afcda492-27e8-4534-a6ea-1c643f788e78.png",
+  "rawSha256": "b21131fab01a80b99ab3683cb07fdd59714b332f262506f5e923106b7459a159",
+  "referenceHashes": [
+    "ada1fe1bbe0331b3083e8a99e10b7dc7d4101d3b6fd2704f44ab8479a6c5134c",
+    "12611bc6fb39ff013aee61c681866d0c0396437d53ed347aedabdec6acfe964c"
+  ]
+}

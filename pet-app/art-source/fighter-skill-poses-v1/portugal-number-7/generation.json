@@ -1,0 +1,43 @@
+{
+  "id": "portugal-number-7",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character portugal-number-7; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (凌空倒掛), eight frames read left-to-right across two consecutive rows: 1. crouch for jump; 2. jump preparing scissors kick; 3. lean torso back, right knee high; 4. lean further back for bicycle kick; 5. horizontal midair bicycle kick, right boot high aiming right; 6. other boot scissors overhead, body horizontal; 7. body rotates upright, legs lower; 8. upright landing stance. Sequence 2 (強力自由球), eight frames read left-to-right across two consecutive rows: 1. stand with left support foot forward; 2. draw right leg back; 3. right leg further back, arms balancing; 4. strong coiled kicking posture; 5. powerful right-foot kick aimed right without ball; 6. right boot extended in high follow-through; 7. lower kicking leg; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/portugal-number-7/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/portugal-number-7/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "crouch for jump",
+      "jump preparing scissors kick",
+      "lean torso back, right knee high",
+      "lean further back for bicycle kick",
+      "horizontal midair bicycle kick, right boot high aiming right",
+      "other boot scissors overhead, body horizontal",
+      "body rotates upright, legs lower",
+      "upright landing stance"
+    ],
+    [
+      "stand with left support foot forward",
+      "draw right leg back",
+      "right leg further back, arms balancing",
+      "strong coiled kicking posture",
+      "powerful right-foot kick aimed right without ball",
+      "right boot extended in high follow-through",
+      "lower kicking leg",
+      "normal stance"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-f38bc897-ab03-48ce-b4fc-739d6d2d0075.png",
+  "rawSha256": "c9e45a45e35d0f5cffbf6d9fd18f77a128b85c4eab91ed9fbf6dda00d73db9f0",
+  "referenceHashes": [
+    "dcc1a3aa36692c63d668743fa2ab71c794d89e444c00f90d8e16e27c1ff4ab6a",
+    "925aba5a40032749909c875fd9adfd657afa66f99148acd24fe19680d2c59404"
+  ]
+}

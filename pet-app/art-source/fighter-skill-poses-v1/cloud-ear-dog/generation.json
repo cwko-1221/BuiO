@@ -1,0 +1,43 @@
+{
+  "id": "cloud-ear-dog",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character cloud-ear-dog; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (裂空風刃), eight frames read left-to-right across two consecutive rows: 1. lean back and inhale; 2. chest expands and ears lift; 3. raise head with mouth slightly open; 4. open mouth, cheeks puffed; 5. blow sharply right, paws braced; 6. continue blowing right with ears streaming; 7. exhale follow-through; 8. mouth closes, relax. Sequence 2 (龍捲風眼), eight frames read left-to-right across two consecutive rows: 1. lower head, gather wind with ears; 2. ears rise outward; 3. forepaws spread, tail circles; 4. lean back into howl; 5. head up, sustained howl; 6. howling with ears fluttering; 7. lower head and release breath; 8. stand relaxed. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/cloud-ear-dog/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/cloud-ear-dog/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "lean back and inhale",
+      "chest expands and ears lift",
+      "raise head with mouth slightly open",
+      "open mouth, cheeks puffed",
+      "blow sharply right, paws braced",
+      "continue blowing right with ears streaming",
+      "exhale follow-through",
+      "mouth closes, relax"
+    ],
+    [
+      "lower head, gather wind with ears",
+      "ears rise outward",
+      "forepaws spread, tail circles",
+      "lean back into howl",
+      "head up, sustained howl",
+      "howling with ears fluttering",
+      "lower head and release breath",
+      "stand relaxed"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-95bef090-3a6d-4c34-82a4-735a499e6862.png",
+  "rawSha256": "394972a1491fa41afdaa8eeac9852b30234bdf093d26179b323024e2a73019c0",
+  "referenceHashes": [
+    "dfb216003b8346f76f157406e0399620b9fd5e8215d0b752247107d2dd9cfffc",
+    "84470d2d2ef6cc5d4a3431f2bd163acf7cbad3033d010358101c327def542681"
+  ]
+}

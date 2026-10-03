@@ -1,0 +1,1021 @@
+[
+  {
+    "id": "starpatch-cat",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character starpatch-cat; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (星影換位), eight frames read left-to-right across two consecutive rows: 1. lower stealth crouch; 2. curl shoulders, ears back; 3. deep coiled pounce; 4. pounce ready, one paw raised; 5. spring forward with both claws; 6. extended hunting leap, forepaws reaching; 7. land in low three-paw crouch; 8. settle back into stance. Sequence 2 (獵星連爪), eight frames read left-to-right across two consecutive rows: 1. crouch with forepaws lifted; 2. coil torso for claw swipe; 3. right paw drawn back; 4. eyes focus, claws exposed; 5. right forepaw sweeping forward; 6. left forepaw sweeping forward; 7. both claws crossing forward; 8. paws return to floor. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/starpatch-cat/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/starpatch-cat/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "lower stealth crouch",
+        "curl shoulders, ears back",
+        "deep coiled pounce",
+        "pounce ready, one paw raised",
+        "spring forward with both claws",
+        "extended hunting leap, forepaws reaching",
+        "land in low three-paw crouch",
+        "settle back into stance"
+      ],
+      [
+        "crouch with forepaws lifted",
+        "coil torso for claw swipe",
+        "right paw drawn back",
+        "eyes focus, claws exposed",
+        "right forepaw sweeping forward",
+        "left forepaw sweeping forward",
+        "both claws crossing forward",
+        "paws return to floor"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-04876a60-3171-4204-ae0e-530ca512b477.png",
+    "rawSha256": "0445d48a7887a90cc43ef018fcd7c19ade9aaa6b07201feba7e8dddba2fe95f8",
+    "referenceHashes": [
+      "9545bf2f7cafa27125aff1f7e07e5119640afca84d4d7166e29c3689c9c6b595",
+      "1aeda34206fa563f2210ec3dda8813093c2bbdb262f4ec0e6f15de3ded6e1ffe"
+    ]
+  },
+  {
+    "id": "cloud-ear-dog",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character cloud-ear-dog; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (裂空風刃), eight frames read left-to-right across two consecutive rows: 1. lean back and inhale; 2. chest expands and ears lift; 3. raise head with mouth slightly open; 4. open mouth, cheeks puffed; 5. blow sharply right, paws braced; 6. continue blowing right with ears streaming; 7. exhale follow-through; 8. mouth closes, relax. Sequence 2 (龍捲風眼), eight frames read left-to-right across two consecutive rows: 1. lower head, gather wind with ears; 2. ears rise outward; 3. forepaws spread, tail circles; 4. lean back into howl; 5. head up, sustained howl; 6. howling with ears fluttering; 7. lower head and release breath; 8. stand relaxed. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/cloud-ear-dog/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/cloud-ear-dog/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "lean back and inhale",
+        "chest expands and ears lift",
+        "raise head with mouth slightly open",
+        "open mouth, cheeks puffed",
+        "blow sharply right, paws braced",
+        "continue blowing right with ears streaming",
+        "exhale follow-through",
+        "mouth closes, relax"
+      ],
+      [
+        "lower head, gather wind with ears",
+        "ears rise outward",
+        "forepaws spread, tail circles",
+        "lean back into howl",
+        "head up, sustained howl",
+        "howling with ears fluttering",
+        "lower head and release breath",
+        "stand relaxed"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-95bef090-3a6d-4c34-82a4-735a499e6862.png",
+    "rawSha256": "394972a1491fa41afdaa8eeac9852b30234bdf093d26179b323024e2a73019c0",
+    "referenceHashes": [
+      "dfb216003b8346f76f157406e0399620b9fd5e8215d0b752247107d2dd9cfffc",
+      "84470d2d2ef6cc5d4a3431f2bd163acf7cbad3033d010358101c327def542681"
+    ]
+  },
+  {
+    "id": "pudding-pig",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character pudding-pig; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (裂地震波), eight frames read left-to-right across two consecutive rows: 1. lower body, tense front legs; 2. lift forelegs slightly; 3. forelegs high, hind legs planted; 4. forelegs prepared to slam; 5. front hooves hit floor hard; 6. low heavy impact crouch; 7. lift head from impact; 8. normal stance. Sequence 2 (泥漿砲彈), eight frames read left-to-right across two consecutive rows: 1. snout draws back, mouth closed; 2. cheeks puff, belly swells; 3. head angles up; 4. snout angles up, cheeks fully puffed; 5. spit an upward mortar shot from snout; 6. head follows projectile upwards; 7. exhale and lower head; 8. relaxed stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/pudding-pig/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/pudding-pig/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "lower body, tense front legs",
+        "lift forelegs slightly",
+        "forelegs high, hind legs planted",
+        "forelegs prepared to slam",
+        "front hooves hit floor hard",
+        "low heavy impact crouch",
+        "lift head from impact",
+        "normal stance"
+      ],
+      [
+        "snout draws back, mouth closed",
+        "cheeks puff, belly swells",
+        "head angles up",
+        "snout angles up, cheeks fully puffed",
+        "spit an upward mortar shot from snout",
+        "head follows projectile upwards",
+        "exhale and lower head",
+        "relaxed stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-01f517ad-bf32-48cf-b970-f4026af2bc7d.png",
+    "rawSha256": "225d3214cf16d116bceef9e71c89eb906683906081c87ffcd5523b74eb02bdca",
+    "referenceHashes": [
+      "035b930a92343b29f22715e28a87a10996c6c835f4212ece48f06ed448876bce",
+      "dd9135a74c4b3c755b2d38b030d1770fd1d7277a7968774fcf8907958c29b0ad"
+    ]
+  },
+  {
+    "id": "golden-retriever-dog",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character golden-retriever-dog; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (彈力追獵), eight frames read left-to-right across two consecutive rows: 1. grip a small gold tennis ball in mouth; 2. draw head and ball back; 3. coil neck to right; 4. ball at mouth ready to launch; 5. flick head forward, mouth open without ball; 6. head stretched forward, tail high; 7. draw head back; 8. friendly stance. Sequence 2 (金光守護), eight frames read left-to-right across two consecutive rows: 1. paws plant, chest rises; 2. raise one front paw; 3. chest proud and head raised; 4. ears perk, confident guarding stance; 5. bark with chest lifted; 6. proud bark, one paw forward; 7. lower front paw; 8. relaxed guarding stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/golden-retriever-dog/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/golden-retriever-dog/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "grip a small gold tennis ball in mouth",
+        "draw head and ball back",
+        "coil neck to right",
+        "ball at mouth ready to launch",
+        "flick head forward, mouth open without ball",
+        "head stretched forward, tail high",
+        "draw head back",
+        "friendly stance"
+      ],
+      [
+        "paws plant, chest rises",
+        "raise one front paw",
+        "chest proud and head raised",
+        "ears perk, confident guarding stance",
+        "bark with chest lifted",
+        "proud bark, one paw forward",
+        "lower front paw",
+        "relaxed guarding stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-ab80909d-0004-4a3c-b7b4-a571789faaaf.png",
+    "rawSha256": "314d0c38e2611337faa5dc867c2df6cb5cc776ef1f3857f6b3c5aae8e12dfca8",
+    "referenceHashes": [
+      "e6372f7f2d939dc1d30116366e07d5e464872bd135545eab3d99f5f1ae141b4a",
+      "7218e6b8d7499a9f33c52ba9bc934175593e75008ab11f5ceaecba99a12e4c07"
+    ]
+  },
+  {
+    "id": "crescent-rabbit",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character crescent-rabbit; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (月牙光輪), eight frames read left-to-right across two consecutive rows: 1. raise front paws to chest; 2. hold palms curved close together; 3. turn shoulders to right; 4. draw throwing paw back; 5. sweep paw forward to right; 6. paw extended at shoulder level; 7. lower throwing paw; 8. upright rabbit stance. Sequence 2 (月落星雨), eight frames read left-to-right across two consecutive rows: 1. close eyes, palms together; 2. raise both paws slowly; 3. paws at eye level; 4. reach both paws overhead; 5. paws spread overhead to call moon rain; 6. hold overhead prayer, ears lifted; 7. lower paws gently; 8. settle upright. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/crescent-rabbit/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/crescent-rabbit/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "raise front paws to chest",
+        "hold palms curved close together",
+        "turn shoulders to right",
+        "draw throwing paw back",
+        "sweep paw forward to right",
+        "paw extended at shoulder level",
+        "lower throwing paw",
+        "upright rabbit stance"
+      ],
+      [
+        "close eyes, palms together",
+        "raise both paws slowly",
+        "paws at eye level",
+        "reach both paws overhead",
+        "paws spread overhead to call moon rain",
+        "hold overhead prayer, ears lifted",
+        "lower paws gently",
+        "settle upright"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-ec55050f-9061-419c-bd3e-034bcb14a754.png",
+    "rawSha256": "c00197fec6e329158287183a6e3844c21273c0b6fbc3db0bfc51ec35bb2172cf",
+    "referenceHashes": [
+      "b077e91302dcd6024f6c787fd52d882b7c4aedb26f478c4f4e254fca62a9fea2",
+      "f853bbbbfdfd558e6a2728a0c74bda1cb552ea383b5e8a3565cbc35703357ab1"
+    ]
+  },
+  {
+    "id": "bubble-otter",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character bubble-otter; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (泡泡連彈), eight frames read left-to-right across two consecutive rows: 1. cup both paws before chest; 2. draw cupped paws back; 3. lift paws to mouth; 4. mouth and paws together, inhale; 5. blow bubbles from mouth towards right; 6. blow again with cheeks puffed; 7. paws open as breath ends; 8. return to holding stance. Sequence 2 (泡泡牢籠), eight frames read left-to-right across two consecutive rows: 1. spread paws around tiny held bubble; 2. draw paws apart; 3. raise paws with cupping gesture; 4. paws stretched apart forming cage; 5. push both palms out right; 6. palms closed inward as if trapping; 7. lower arms gently; 8. relaxed stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/bubble-otter/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/bubble-otter/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "cup both paws before chest",
+        "draw cupped paws back",
+        "lift paws to mouth",
+        "mouth and paws together, inhale",
+        "blow bubbles from mouth towards right",
+        "blow again with cheeks puffed",
+        "paws open as breath ends",
+        "return to holding stance"
+      ],
+      [
+        "spread paws around tiny held bubble",
+        "draw paws apart",
+        "raise paws with cupping gesture",
+        "paws stretched apart forming cage",
+        "push both palms out right",
+        "palms closed inward as if trapping",
+        "lower arms gently",
+        "relaxed stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-430b01b3-77fe-4c24-b5c9-3bc31ab5b980.png",
+    "rawSha256": "6d3c25a9f3ee34b763ed007ef24b6bc826b3b1d1da1b6b8361cb4d82c4ac8165",
+    "referenceHashes": [
+      "ae14d8e903bf408a3abdf1f5403122102c2034c56145d3499b3f45728975689b",
+      "dad5f0b0ae1079939f0a71f7b5a125fc9ec01691ed457d2c3818bca31b8055d9"
+    ]
+  },
+  {
+    "id": "mossback-turtle",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character mossback-turtle; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (龜殼反彈), eight frames read left-to-right across two consecutive rows: 1. lower head; 2. head pulls towards shell; 3. draw front legs inside shell; 4. nearly tucked, eyes just visible; 5. fully protected shell, no added spikes; 6. shell braces, eyes peer out; 7. extend head and forelegs; 8. normal four-legged stance. Sequence 2 (藤根圍城), eight frames read left-to-right across two consecutive rows: 1. head down, forelegs brace; 2. raise right foreleg; 3. reach foreleg high; 4. foreleg poised above ground; 5. stamp foreleg into ground; 6. both forelegs pressed firmly to ground; 7. head lifts, foreleg relaxes; 8. standing normally. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/mossback-turtle/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/mossback-turtle/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "lower head",
+        "head pulls towards shell",
+        "draw front legs inside shell",
+        "nearly tucked, eyes just visible",
+        "fully protected shell, no added spikes",
+        "shell braces, eyes peer out",
+        "extend head and forelegs",
+        "normal four-legged stance"
+      ],
+      [
+        "head down, forelegs brace",
+        "raise right foreleg",
+        "reach foreleg high",
+        "foreleg poised above ground",
+        "stamp foreleg into ground",
+        "both forelegs pressed firmly to ground",
+        "head lifts, foreleg relaxes",
+        "standing normally"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-afcda492-27e8-4534-a6ea-1c643f788e78.png",
+    "rawSha256": "b21131fab01a80b99ab3683cb07fdd59714b332f262506f5e923106b7459a159",
+    "referenceHashes": [
+      "ada1fe1bbe0331b3083e8a99e10b7dc7d4101d3b6fd2704f44ab8479a6c5134c",
+      "12611bc6fb39ff013aee61c681866d0c0396437d53ed347aedabdec6acfe964c"
+    ]
+  },
+  {
+    "id": "spark-hamster",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character spark-hamster; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (烈焰噴吐), eight frames read left-to-right across two consecutive rows: 1. draw head back and inhale; 2. paws held at chest, cheeks inflate; 3. neck lifts, mouth starts opening; 4. mouth wide, body braced; 5. lean forward and breathe from mouth to right; 6. sustain open-mouth breath with paws braced; 7. mouth closes, cheeks deflate; 8. relaxed stance. Sequence 2 (爆炎果實), eight frames read left-to-right across two consecutive rows: 1. hold a small nut between both paws; 2. draw nut back beside head; 3. lift nut higher; 4. nut poised above shoulder; 5. throw nut to right, empty paws extended; 6. empty paws follow the throwing arc; 7. arms lower; 8. relaxed stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/spark-hamster/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/spark-hamster/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "draw head back and inhale",
+        "paws held at chest, cheeks inflate",
+        "neck lifts, mouth starts opening",
+        "mouth wide, body braced",
+        "lean forward and breathe from mouth to right",
+        "sustain open-mouth breath with paws braced",
+        "mouth closes, cheeks deflate",
+        "relaxed stance"
+      ],
+      [
+        "hold a small nut between both paws",
+        "draw nut back beside head",
+        "lift nut higher",
+        "nut poised above shoulder",
+        "throw nut to right, empty paws extended",
+        "empty paws follow the throwing arc",
+        "arms lower",
+        "relaxed stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-f792897a-58f8-4cb7-851a-298ed03cec05.png",
+    "rawSha256": "883c13e3260b44509ef6ef6ddc877903f16257d4efcb57175137f856974a21d2",
+    "referenceHashes": [
+      "895650f41c040051897311b89662634a7725ae1058134f2833498266497d131a",
+      "0a89ebb8b2aaaf21aa84b7b44eef0dcfd98d75579cb8382ffca1ac0a1f309a67"
+    ]
+  },
+  {
+    "id": "leaftail-fox",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character leaftail-fox; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (葉刃回旋), eight frames read left-to-right across two consecutive rows: 1. lower shoulders, leaf tail curls; 2. leaf tail draws back to left; 3. tail raised behind torso; 4. tail twisted ready to lash; 5. sweep leaf tail to right in strong arc; 6. tail fully extended to right; 7. tail unwinds; 8. four-paw stance. Sequence 2 (森羅葉暴), eight frames read left-to-right across two consecutive rows: 1. paws brace, tail rises; 2. tail coils in spiral; 3. raise head with ears alert; 4. tail high, forepaw lifted; 5. tail sweeps broadly overhead; 6. tail circles behind while body planted; 7. tail lowers gradually; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/leaftail-fox/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/leaftail-fox/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "lower shoulders, leaf tail curls",
+        "leaf tail draws back to left",
+        "tail raised behind torso",
+        "tail twisted ready to lash",
+        "sweep leaf tail to right in strong arc",
+        "tail fully extended to right",
+        "tail unwinds",
+        "four-paw stance"
+      ],
+      [
+        "paws brace, tail rises",
+        "tail coils in spiral",
+        "raise head with ears alert",
+        "tail high, forepaw lifted",
+        "tail sweeps broadly overhead",
+        "tail circles behind while body planted",
+        "tail lowers gradually",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-b93c5d87-2d43-4d4d-94e0-71b855ca30cd.png",
+    "rawSha256": "8057438503285f0ded20846997efedd18597c63d126a093bf14db9c524270946",
+    "referenceHashes": [
+      "12a8a783ae979aed9327deb8971d0f7b81583c720745f98664c666eb0a4d7830",
+      "134deb6f6da755b67e2529b45bd2cd96556fcf67063ecac51df455faa203900d"
+    ]
+  },
+  {
+    "id": "snowfeather-penguin",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character snowfeather-penguin; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (冰柱長城), eight frames read left-to-right across two consecutive rows: 1. flippers close to chest; 2. right flipper raised; 3. both flippers high; 4. flippers poised downward; 5. slam both flippers downward towards ice floor; 6. flippers pushed towards ground, low crouch; 7. raise torso from crouch; 8. relaxed standing. Sequence 2 (極地暴風雪), eight frames read left-to-right across two consecutive rows: 1. flippers fold inward; 2. flippers begin spreading; 3. lift both flippers high; 4. head tilts upwards; 5. flippers spread outward summoning blizzard; 6. hold wide flippers, feathers flutter; 7. flippers slowly lower; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/snowfeather-penguin/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/snowfeather-penguin/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "flippers close to chest",
+        "right flipper raised",
+        "both flippers high",
+        "flippers poised downward",
+        "slam both flippers downward towards ice floor",
+        "flippers pushed towards ground, low crouch",
+        "raise torso from crouch",
+        "relaxed standing"
+      ],
+      [
+        "flippers fold inward",
+        "flippers begin spreading",
+        "lift both flippers high",
+        "head tilts upwards",
+        "flippers spread outward summoning blizzard",
+        "hold wide flippers, feathers flutter",
+        "flippers slowly lower",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-a273417a-cb76-4261-87fc-72d2aceeaf15.png",
+    "rawSha256": "b6d0cd70055cfe5c2fa5864aada0a01f38eec8649728fd93e19457e4d912bed1",
+    "referenceHashes": [
+      "c52123d26ab0006eb22cd9939132caed84b48bef424dff373b0124dea3ca7a3b",
+      "c24272362c8fe25a25b219e4eac23ee4f5faa3d5f5bc10eb2ba942fb09920704"
+    ]
+  },
+  {
+    "id": "thunderhorn-goat",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character thunderhorn-goat; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (雷角連鎖), eight frames read left-to-right across two consecutive rows: 1. lower head, front legs brace; 2. horns angle right; 3. horns tilt forward more; 4. head fully lowered, eyes intense; 5. thrust glowing-blue horns forward with feet planted; 6. hold horns aiming right; 7. lift head and relax horns; 8. normal stance. Sequence 2 (天雷審判), eight frames read left-to-right across two consecutive rows: 1. raise head and horns; 2. lift one foreleg; 3. horns point diagonally upwards; 4. head tilts to sky; 5. lift horns fully skyward to summon lightning; 6. hold skyward horns with front hoof raised; 7. lower hoof and head; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/thunderhorn-goat/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/thunderhorn-goat/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "lower head, front legs brace",
+        "horns angle right",
+        "horns tilt forward more",
+        "head fully lowered, eyes intense",
+        "thrust glowing-blue horns forward with feet planted",
+        "hold horns aiming right",
+        "lift head and relax horns",
+        "normal stance"
+      ],
+      [
+        "raise head and horns",
+        "lift one foreleg",
+        "horns point diagonally upwards",
+        "head tilts to sky",
+        "lift horns fully skyward to summon lightning",
+        "hold skyward horns with front hoof raised",
+        "lower hoof and head",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-f280595d-f2b2-456f-9269-57cafbc8f374.png",
+    "rawSha256": "3dd523f006fd56f8b93793eec02b34c8918739a5f86df26ff4a455278182b17b",
+    "referenceHashes": [
+      "cd1726c59848892a3bb3bd192524907f866a10ef3595e258330bf2bde0da67d0",
+      "d78ad071e1d53ad0614bcf78f8f57d967226b38f6a660c566d0547d377b0251f"
+    ]
+  },
+  {
+    "id": "coral-seal",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character coral-seal; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (洶湧巨浪), eight frames read left-to-right across two consecutive rows: 1. flippers drawn back; 2. chest rises; 3. flippers stretch backwards; 4. head and chest lean back; 5. sweep both flippers forward pushing tidal wave; 6. flippers forward, body leans right; 7. flippers lower; 8. seated seal stance. Sequence 2 (珊瑚潮池), eight frames read left-to-right across two consecutive rows: 1. bring flippers together; 2. flippers cupped at chest; 3. close eyes and raise flippers; 4. flippers spread gently upwards; 5. open flippers in welcoming wide gesture; 6. hold healing gesture calmly; 7. close flippers gently; 8. seated stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/coral-seal/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/coral-seal/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "flippers drawn back",
+        "chest rises",
+        "flippers stretch backwards",
+        "head and chest lean back",
+        "sweep both flippers forward pushing tidal wave",
+        "flippers forward, body leans right",
+        "flippers lower",
+        "seated seal stance"
+      ],
+      [
+        "bring flippers together",
+        "flippers cupped at chest",
+        "close eyes and raise flippers",
+        "flippers spread gently upwards",
+        "open flippers in welcoming wide gesture",
+        "hold healing gesture calmly",
+        "close flippers gently",
+        "seated stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-18d67b69-1d1a-4774-b344-a7961534246e.png",
+    "rawSha256": "c9beab7714b70593839a959fafbb803da9f4a3044436b524d3bdca6b206209a5",
+    "referenceHashes": [
+      "d6db6e7267c076bf650395f297f39030e8c21cb66594be9fa7531dd297c1e661",
+      "a863e2fe043a1e0773187979dda975a5676446a7f17ca819955609d39f61e9ed"
+    ]
+  },
+  {
+    "id": "nezuko-kamado",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character nezuko-kamado; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (血焰噴流), eight frames read left-to-right across two consecutive rows: 1. bend knees, one palm drawn back; 2. palm cups near hip; 3. draw hand further back, bamboo stays in mouth; 4. fingers spread, ready to cast from hand; 5. thrust open right palm towards right; 6. hold outstretched casting palm, kimono streams; 7. draw casting hand in; 8. return to guarding stance. Sequence 2 (爆血花火), eight frames read left-to-right across two consecutive rows: 1. hands together at chest; 2. raise one open hand; 3. both hands form circle overhead; 4. palms turn up at peak; 5. sweep both palms up summoning bloodfire rain; 6. hold upward open palms; 7. lower arms smoothly; 8. guarding stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/nezuko-kamado/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/nezuko-kamado/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "bend knees, one palm drawn back",
+        "palm cups near hip",
+        "draw hand further back, bamboo stays in mouth",
+        "fingers spread, ready to cast from hand",
+        "thrust open right palm towards right",
+        "hold outstretched casting palm, kimono streams",
+        "draw casting hand in",
+        "return to guarding stance"
+      ],
+      [
+        "hands together at chest",
+        "raise one open hand",
+        "both hands form circle overhead",
+        "palms turn up at peak",
+        "sweep both palms up summoning bloodfire rain",
+        "hold upward open palms",
+        "lower arms smoothly",
+        "guarding stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-085874b7-2ee8-41e4-bb3d-08bab52acd5f.png",
+    "rawSha256": "afca8cf6c6aa150aaef73fef03c4c3767c485ae5c96415566ab103b1e8773ca1",
+    "referenceHashes": [
+      "e7b24632be69e02ded4d49942b251be62cbca9cc1d57b88d006c3634d2a49359",
+      "f7f71e202a4f3c2e194d5aeda9990f801c15b4ade5d5f41f6f1eec89cb16c096"
+    ]
+  },
+  {
+    "id": "dragon-ball-goku",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character dragon-ball-goku; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 8 separate full-body poses on a 4-column, 2-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (元氣玉), eight frames read left-to-right across two consecutive rows: 1. bend knees, palms lift; 2. both palms rise above shoulders; 3. arms stretch high overhead; 4. palms fully overhead gathering huge spirit bomb; 5. swing both palms forward and downward throwing overhead bomb; 6. arms follow through aimed right; 7. draw arms back and stand; 8. relaxed fighting stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.\nCritical corrections: CHIBI proportions must exactly match the small approved Kamehameha caster in reference 1, oversized head and short body. There must be genuine transparent alpha, no coloured background, no shadow, no vignette, absolutely no scenery. Same 8 Spirit Bomb poses in a 4 by 2 atlas, no effects. Do not draw realistic adult body proportions.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/dragon-ball-goku/casting-reference.png",
+      "pet-app/art-source/fighter-skill-poses-v1/dragon-ball-goku/seed.png"
+    ],
+    "rows": 2,
+    "columns": 4,
+    "actions": [
+      [
+        "bend knees, palms lift",
+        "both palms rise above shoulders",
+        "arms stretch high overhead",
+        "palms fully overhead gathering huge spirit bomb",
+        "swing both palms forward and downward throwing overhead bomb",
+        "arms follow through aimed right",
+        "draw arms back and stand",
+        "relaxed fighting stance"
+      ]
+    ],
+    "skills": [
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-2ab25c92-c22a-4b77-af1d-feab41bbe4bb.png",
+    "rawSha256": "eb07133de614e63b3cc59b0d220292668c0ad508bf39cb3ba1eb4a73b2be0a55",
+    "referenceHashes": [
+      "d41b2107cde28c53c19aaa87915ad2d553e0c6d9efe66b4a333d078662e086ae",
+      "4799d85f4302525150d8c0600bc9768deea8432d24815cf7db023448d9888dca"
+    ],
+    "initialPrompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character dragon-ball-goku; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 8 separate full-body poses on a 4-column, 2-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (元氣玉), eight frames read left-to-right across two consecutive rows: 1. bend knees, palms lift; 2. both palms rise above shoulders; 3. arms stretch high overhead; 4. palms fully overhead gathering huge spirit bomb; 5. swing both palms forward and downward throwing overhead bomb; 6. arms follow through aimed right; 7. draw arms back and stand; 8. relaxed fighting stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses."
+  },
+  {
+    "id": "crayon-shin-chan",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character crayon-shin-chan; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (屁屁龍捲風), eight frames read left-to-right across two consecutive rows: 1. turn torso right, knees bent; 2. wiggle hips back with shorts on; 3. hips rotate, arms at sides; 4. knees deep, hips ready to spin; 5. hips sweep around right, fully clothed; 6. hips sweep around left with comic confident face; 7. straighten knees; 8. normal cheeky stance. Sequence 2 (動感光線), eight frames read left-to-right across two consecutive rows: 1. feet apart, fists at waist; 2. cross forearms at chest; 3. raise crossed forearms to face; 4. one hand grips other wrist aiming right; 5. extend open palm right in superhero beam pose; 6. hold superhero palm beam pose; 7. draw arms back to chest; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/crayon-shin-chan/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/crayon-shin-chan/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "turn torso right, knees bent",
+        "wiggle hips back with shorts on",
+        "hips rotate, arms at sides",
+        "knees deep, hips ready to spin",
+        "hips sweep around right, fully clothed",
+        "hips sweep around left with comic confident face",
+        "straighten knees",
+        "normal cheeky stance"
+      ],
+      [
+        "feet apart, fists at waist",
+        "cross forearms at chest",
+        "raise crossed forearms to face",
+        "one hand grips other wrist aiming right",
+        "extend open palm right in superhero beam pose",
+        "hold superhero palm beam pose",
+        "draw arms back to chest",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-67e37d1b-4aef-4b25-b1cb-d5762adcd615.png",
+    "rawSha256": "bd8d30bcd82402430fbac9caa1fba8f5cc1f98f0111486fdbb12aae0a5985485",
+    "referenceHashes": [
+      "92bd7f1e21e11d7b5b97deebf7a5e8b9e790ab295effe8e15f7b19800b5b3dbe",
+      "a855b9a6cacab7b2ea39e1843e8ebdbd6a62df4ec46fa8984e8787285e35c9af"
+    ]
+  },
+  {
+    "id": "doraemon",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: precise-object-edit. Edit the existing 16-frame 4 by 4 Doraemon casting animation atlas. Change ONLY the yellow bamboo-copter rotor in frames 10 through 16 (the last two rows): remove the entire little yellow rotor, blades and shaft from above the blue head. Keep the character, pose, hands, head contour, blue fur, face, pocket, clothes, air cannon in the first eight frames, proportions, exact 4 by 4 layout and transparent background unchanged. Render the clean round blue head underneath. The game will draw a separate animated golden rotor sprite on top of the head. No replacement gadget, no new effects, no scenery. Keep all sixteen poses intact.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/doraemon/edit-input.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "reach one hand towards front pocket",
+        "pull out a short grey air cannon cuff on right hand",
+        "raise cannon hand level with face",
+        "aim barrel to right, other hand supports",
+        "cannon recoils with hand and chest leaned back",
+        "cannon pointing right, body follows recoil",
+        "lower cannon back towards pocket",
+        "normal stance"
+      ],
+      [
+        "reach right hand to pocket",
+        "bring hand above head, fit small yellow copter stem",
+        "hands lower, legs ready to lift",
+        "arms spread slightly, feet leave ground",
+        "floating upright arms spread, copter stem on head without rotor blades",
+        "floating pose, feet tucked and arm aims right",
+        "feet start lowering, hands at sides",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-726a59c7-ab96-4a4b-bb3c-3fc0279d22f9.png",
+    "rawSha256": "204de36c057564531fd1cb960c334431b531b3fa6accdbaf276e4596b4baaee2",
+    "referenceHashes": [
+      "310910c12073bae5d074b4175303e17b0f4364b4015cd192bb31256d2d7eb0f5"
+    ],
+    "initialPrompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character doraemon; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (空氣炮), eight frames read left-to-right across two consecutive rows: 1. reach one hand towards front pocket; 2. pull out a short grey air cannon cuff on right hand; 3. raise cannon hand level with face; 4. aim barrel to right, other hand supports; 5. cannon recoils with hand and chest leaned back; 6. cannon pointing right, body follows recoil; 7. lower cannon back towards pocket; 8. normal stance. Sequence 2 (竹蜻蜓), eight frames read left-to-right across two consecutive rows: 1. reach right hand to pocket; 2. bring hand above head, fit small yellow copter stem; 3. hands lower, legs ready to lift; 4. arms spread slightly, feet leave ground; 5. floating upright arms spread, copter stem on head without rotor blades; 6. floating pose, feet tucked and arm aims right; 7. feet start lowering, hands at sides; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses."
+  },
+  {
+    "id": "hello-kitty",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character hello-kitty; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (蝴蝶結飛舞), eight frames read left-to-right across two consecutive rows: 1. raise right paw to red bow; 2. hold paw beside bow; 3. pull small red ribbon from bow; 4. ribbon held back by shoulder; 5. throw ribbon towards right with open paw; 6. open paw extended, bow remains on head; 7. paw lowers; 8. standing normally. Sequence 2 (友誼心光), eight frames read left-to-right across two consecutive rows: 1. hands together at chest; 2. close eyes, hands press heart; 3. hands rise to face; 4. palms cup gently at chest; 5. open both hands out offering friendship; 6. palms spread wide with warm eyes; 7. hands lower gently; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/hello-kitty/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/hello-kitty/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "raise right paw to red bow",
+        "hold paw beside bow",
+        "pull small red ribbon from bow",
+        "ribbon held back by shoulder",
+        "throw ribbon towards right with open paw",
+        "open paw extended, bow remains on head",
+        "paw lowers",
+        "standing normally"
+      ],
+      [
+        "hands together at chest",
+        "close eyes, hands press heart",
+        "hands rise to face",
+        "palms cup gently at chest",
+        "open both hands out offering friendship",
+        "palms spread wide with warm eyes",
+        "hands lower gently",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-d8cca368-2316-4e75-8068-eff4cb0223eb.png",
+    "rawSha256": "c5b36ea730836267465d863aef8b290edacf4ce032a1c217bd7d6847177c4117",
+    "referenceHashes": [
+      "a4f3d6d17984b2e33668fdde9fb11e46bddf959ccad5fac5ac1663116aab4858",
+      "a441da15f808ee1590d1f580ee6c6dc601923110135286005ba406c747f4080d"
+    ]
+  },
+  {
+    "id": "argentina-number-10",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character argentina-number-10; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (連環盤球), eight frames read left-to-right across two consecutive rows: 1. bend knees in football stance; 2. right foot draws back; 3. left foot shifts and torso leans; 4. right foot raised ready to tap orbit ball; 5. right boot taps forward without drawn ball; 6. left boot taps forward, arms balancing; 7. legs settle from dribble; 8. standing normally. Sequence 2 (追蹤巧射), eight frames read left-to-right across two consecutive rows: 1. feet apart, focus on ball ahead; 2. left support foot forward; 3. right kicking leg draws back; 4. right boot coiled behind, arms balance; 5. right instep kicks forward, no drawn ball; 6. kicking leg extends high in curved follow-through; 7. right boot lowers; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/argentina-number-10/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/argentina-number-10/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "bend knees in football stance",
+        "right foot draws back",
+        "left foot shifts and torso leans",
+        "right foot raised ready to tap orbit ball",
+        "right boot taps forward without drawn ball",
+        "left boot taps forward, arms balancing",
+        "legs settle from dribble",
+        "standing normally"
+      ],
+      [
+        "feet apart, focus on ball ahead",
+        "left support foot forward",
+        "right kicking leg draws back",
+        "right boot coiled behind, arms balance",
+        "right instep kicks forward, no drawn ball",
+        "kicking leg extends high in curved follow-through",
+        "right boot lowers",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-fb50c5db-ec41-451b-87d8-1c8f7d410927.png",
+    "rawSha256": "771614dada066076b2229ddd833669506793291e21c3d7d7085ec5559e02cb87",
+    "referenceHashes": [
+      "4304bebd9f49a04512fc1035ea207ab50e978abf81c3ff2711f1a6b17a0a8b6c",
+      "6093273a6fcb373f845239952f58677d6f5438c089c15cb5525d43630704e8f9"
+    ]
+  },
+  {
+    "id": "portugal-number-7",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character portugal-number-7; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (凌空倒掛), eight frames read left-to-right across two consecutive rows: 1. crouch for jump; 2. jump preparing scissors kick; 3. lean torso back, right knee high; 4. lean further back for bicycle kick; 5. horizontal midair bicycle kick, right boot high aiming right; 6. other boot scissors overhead, body horizontal; 7. body rotates upright, legs lower; 8. upright landing stance. Sequence 2 (強力自由球), eight frames read left-to-right across two consecutive rows: 1. stand with left support foot forward; 2. draw right leg back; 3. right leg further back, arms balancing; 4. strong coiled kicking posture; 5. powerful right-foot kick aimed right without ball; 6. right boot extended in high follow-through; 7. lower kicking leg; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/portugal-number-7/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/portugal-number-7/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "crouch for jump",
+        "jump preparing scissors kick",
+        "lean torso back, right knee high",
+        "lean further back for bicycle kick",
+        "horizontal midair bicycle kick, right boot high aiming right",
+        "other boot scissors overhead, body horizontal",
+        "body rotates upright, legs lower",
+        "upright landing stance"
+      ],
+      [
+        "stand with left support foot forward",
+        "draw right leg back",
+        "right leg further back, arms balancing",
+        "strong coiled kicking posture",
+        "powerful right-foot kick aimed right without ball",
+        "right boot extended in high follow-through",
+        "lower kicking leg",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-f38bc897-ab03-48ce-b4fc-739d6d2d0075.png",
+    "rawSha256": "c9e45a45e35d0f5cffbf6d9fd18f77a128b85c4eab91ed9fbf6dda00d73db9f0",
+    "referenceHashes": [
+      "dcc1a3aa36692c63d668743fa2ab71c794d89e444c00f90d8e16e27c1ff4ab6a",
+      "925aba5a40032749909c875fd9adfd657afa66f99148acd24fe19680d2c59404"
+    ]
+  },
+  {
+    "id": "dragon-ball-frieza",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: precise-object-edit. Edit this existing 4-column 4-row, 16-frame Frieza character casting atlas. Remove ONLY the purple beam extending from the pointing fingertip in frame 5 (row 2 column 1) and every floating coloured glow/spark. Keep the exact sixteen full-body character poses, body proportions, face, costume, shading, scale and layout unchanged. Reconstruct the tiny fingertip as a clean outlined pointing finger without any beam. Keep genuinely transparent alpha, no background, no effects. This is one clean production character pose atlas.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/dragon-ball-frieza/edit-input.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "stand sideways to right, hand near chest",
+        "raise right index finger",
+        "index finger aims beside face",
+        "finger fully aimed to right",
+        "extend index finger straight right firing thin death beam",
+        "hold precise pointing gesture, tail curves behind",
+        "draw pointing hand back",
+        "normal stance"
+      ],
+      [
+        "right palm cups near waist",
+        "lift right palm to chest",
+        "palm lifts by face",
+        "right palm overhead supporting giant orb",
+        "throw palm forward launching orb to right",
+        "hand extended, tail counters weight",
+        "draw arm back",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-3aca5e83-b2d8-4976-a1cb-6a9003154d16.png",
+    "rawSha256": "c0134e6adfadaa4ccdbb7c4e2ba9c56468b731a5cf5f0b2108406af16437f816",
+    "referenceHashes": [
+      "c6e659cb572fff838132e63adff2ecf1502b7e78ee72dd237c9fabf41f81d63e"
+    ],
+    "initialPrompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character dragon-ball-frieza; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (死亡光線), eight frames read left-to-right across two consecutive rows: 1. stand sideways to right, hand near chest; 2. raise right index finger; 3. index finger aims beside face; 4. finger fully aimed to right; 5. extend index finger straight right firing thin death beam; 6. hold precise pointing gesture, tail curves behind; 7. draw pointing hand back; 8. normal stance. Sequence 2 (帝王能量球), eight frames read left-to-right across two consecutive rows: 1. right palm cups near waist; 2. lift right palm to chest; 3. palm lifts by face; 4. right palm overhead supporting giant orb; 5. throw palm forward launching orb to right; 6. hand extended, tail counters weight; 7. draw arm back; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses."
+  },
+  {
+    "id": "one-piece-luffy",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character one-piece-luffy; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (橡膠手槍), eight frames read left-to-right across two consecutive rows: 1. feet spread, right fist to waist; 2. right shoulder twists backwards; 3. right fist pulled behind ribs; 4. deep coiled shoulder stance, left hand balances; 5. thrust right shoulder and short fist forward towards right; 6. right fist extended, shoulder follows punch recoil; 7. draw fist back to waist; 8. normal stance. Sequence 2 (橡膠機關槍), eight frames read left-to-right across two consecutive rows: 1. feet brace, both fists to waist; 2. both shoulders coil; 3. fists drawn back, focused grin; 4. both fists primed beside ribs; 5. right fist thrusts forward, left fist draws back; 6. left fist thrusts forward, right fist draws back; 7. both fists return beside ribs; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/one-piece-luffy/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/one-piece-luffy/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "feet spread, right fist to waist",
+        "right shoulder twists backwards",
+        "right fist pulled behind ribs",
+        "deep coiled shoulder stance, left hand balances",
+        "thrust right shoulder and short fist forward towards right",
+        "right fist extended, shoulder follows punch recoil",
+        "draw fist back to waist",
+        "normal stance"
+      ],
+      [
+        "feet brace, both fists to waist",
+        "both shoulders coil",
+        "fists drawn back, focused grin",
+        "both fists primed beside ribs",
+        "right fist thrusts forward, left fist draws back",
+        "left fist thrusts forward, right fist draws back",
+        "both fists return beside ribs",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-21ed06ed-6150-4f8e-bbca-150b4ea0c39f.png",
+    "rawSha256": "091741a5434180f40839d166aba01bd15cd02d23baec8f00f025ec78dfe3388f",
+    "referenceHashes": [
+      "7966223740fd23ac1c206f5cf3c9311d801b16af341c46aac4cd056d6e2aa274",
+      "d69173f47d7d9371760eaf6ceb476be417d4ee948ba6c7fcc857e13310222584"
+    ]
+  },
+  {
+    "id": "spy-family-anya",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character spy-family-anya; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (心聲標記), eight frames read left-to-right across two consecutive rows: 1. hand lifts to right temple; 2. two fingers touch temple; 3. eyes close and concentrate; 4. eyes reopen focused, fingers at temple; 5. point left index finger towards right marking target; 6. hold pointing finger, right hand at temple; 7. lower pointing hand; 8. normal stance. Sequence 2 (預知結界), eight frames read left-to-right across two consecutive rows: 1. hands come to chest; 2. eyes close, palms together; 3. palms spread beside face; 4. cross arms protectively before chest; 5. both palms open forward projecting ward; 6. palms remain open at chest height; 7. hands lower smoothly; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/spy-family-anya/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/spy-family-anya/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "hand lifts to right temple",
+        "two fingers touch temple",
+        "eyes close and concentrate",
+        "eyes reopen focused, fingers at temple",
+        "point left index finger towards right marking target",
+        "hold pointing finger, right hand at temple",
+        "lower pointing hand",
+        "normal stance"
+      ],
+      [
+        "hands come to chest",
+        "eyes close, palms together",
+        "palms spread beside face",
+        "cross arms protectively before chest",
+        "both palms open forward projecting ward",
+        "palms remain open at chest height",
+        "hands lower smoothly",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-30e234db-9300-44da-a064-e5721576a0c3.png",
+    "rawSha256": "e3df03fd7702f8bfc49e98e02df18af36499dadb2e95ed2ca6e6f52530731393",
+    "referenceHashes": [
+      "571a37f0f857b6fe5ef2d68a678948ff7546c7d8fa6d457b5fc75e206d8aefa8",
+      "caa7e6675d26f73afd9a6905d77204509b54fda45e3ab541423369be1a1f4f5b"
+    ]
+  },
+  {
+    "id": "one-punch-saitama",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character one-punch-saitama; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (普通連續拳), eight frames read left-to-right across two consecutive rows: 1. feet brace, fists at waist; 2. draw right fist back; 3. left fist at chest, right shoulder coils; 4. both fists poised beside ribs; 5. right gloved fist punches right; 6. left gloved fist punches right; 7. fists return to chest; 8. normal stance. Sequence 2 (認真一拳), eight frames read left-to-right across two consecutive rows: 1. feet wide, right fist slowly draws back; 2. torso twists, cape trails left; 3. right fist tucked deeply at waist; 4. deep planted serious punching stance; 5. right gloved fist drives hard towards right; 6. fist fully extended, torso follows, cape blows back; 7. draw fist back deliberately; 8. normal stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/one-punch-saitama/seed.png",
+      "pet-app/art-source/fighter-skill-poses-v1/one-punch-saitama/reference-canvas.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "feet brace, fists at waist",
+        "draw right fist back",
+        "left fist at chest, right shoulder coils",
+        "both fists poised beside ribs",
+        "right gloved fist punches right",
+        "left gloved fist punches right",
+        "fists return to chest",
+        "normal stance"
+      ],
+      [
+        "feet wide, right fist slowly draws back",
+        "torso twists, cape trails left",
+        "right fist tucked deeply at waist",
+        "deep planted serious punching stance",
+        "right gloved fist drives hard towards right",
+        "fist fully extended, torso follows, cape blows back",
+        "draw fist back deliberately",
+        "normal stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-b884dd40-53ef-4556-8903-ece15c221405.png",
+    "rawSha256": "d1258ff567d1fbcc9e4bb47106d71d108cb3565da7015d2210dfea4c63228fa9",
+    "referenceHashes": [
+      "2237df0495f0a2aaf3a5a40ebea8ccd64811693052571a225f141ef7d08be92d",
+      "7131e72b5007467ab57cabe5c2f6490ca7b847440122d2e96fc5fbaad0427f11"
+    ]
+  },
+  {
+    "id": "naruto-uzumaki",
+    "tool": "built-in image_gen",
+    "prompt": "Use case: precise-object-edit. Edit ONLY the hand seal in the first eight poses (first two rows) of this existing Naruto 4 by 4, 16-frame sprite atlas. In frames 2 through 6, make the familiar shadow-clone cross hand sign: the extended index and middle fingers of one hand form a short vertical pair, the index and middle fingers of the other hand form a horizontal pair crossing them at right angles, a clear small plus-shaped finger seal held at chest level. Both hands visible and naturally attached to the same wrists. Keep the exact same face, hair, headband, jacket, colours, sixteen body poses, layout, and eight Rasengan poses in the last two rows unchanged. Clean production chibi animation sprites on genuine transparent alpha. No effects, glow, labels or background.",
+    "references": [
+      "pet-app/art-source/fighter-skill-poses-v1/naruto-uzumaki/edit-input.png"
+    ],
+    "rows": 4,
+    "columns": 4,
+    "actions": [
+      [
+        "hands raise to chest",
+        "cross index and middle fingers into signature clone seal",
+        "hold exact crossed-finger seal close to chest",
+        "knees bend, intense eyes, seal held",
+        "signature crossed-finger seal with arms firm",
+        "seal held as smoke appears separately",
+        "release fingers and lower hands",
+        "normal ninja stance"
+      ],
+      [
+        "right palm cups by waist, left hand circles above it",
+        "right palm remains cupped, left hand rotates around it",
+        "left fingers shape sphere above right palm",
+        "right palm drawn back at hip, eyes focused",
+        "drive right open palm forward towards right carrying sphere separately",
+        "right palm thrust forward, left arm behind to balance",
+        "draw palm in as sphere ends",
+        "normal ninja stance"
+      ]
+    ],
+    "skills": [
+      "skill1",
+      "skill2"
+    ],
+    "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-b4536603-51d0-46e6-aad6-d8cdf635c4c9.png",
+    "initialPrompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character naruto-uzumaki; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (多重影分身術), eight frames read left-to-right across two consecutive rows: 1. hands raise to chest; 2. cross index and middle fingers into signature clone seal; 3. hold exact crossed-finger seal close to chest; 4. knees bend, intense eyes, seal held; 5. signature crossed-finger seal with arms firm; 6. seal held as smoke appears separately; 7. release fingers and lower hands; 8. normal ninja stance. Sequence 2 (螺旋丸), eight frames read left-to-right across two consecutive rows: 1. right palm cups by waist, left hand circles above it; 2. right palm remains cupped, left hand rotates around it; 3. left fingers shape sphere above right palm; 4. right palm drawn back at hip, eyes focused; 5. drive right open palm forward towards right carrying sphere separately; 6. right palm thrust forward, left arm behind to balance; 7. draw palm in as sphere ends; 8. normal ninja stance. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+    "rawSha256": "0265f0b0dd2ae751a727c6b3433d9e679a559996b1d724771957fe622f340b51",
+    "referenceHashes": [
+      "2399ff03f0ee4cb02729f8e28feb3890dfec79247054cbe01a8ccd7b4ad91e3d"
+    ]
+  }
+]

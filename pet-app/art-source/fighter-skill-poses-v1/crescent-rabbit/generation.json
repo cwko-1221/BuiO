@@ -1,0 +1,43 @@
+{
+  "id": "crescent-rabbit",
+  "tool": "built-in image_gen",
+  "prompt": "Use case: identity-preserve. Asset type: complete production battle-character casting-pose sprite atlas. Reference 1 is the approved shipped character crescent-rabbit; reference 2 is its transparent edit canvas. Preserve exactly its recognizable face, palette, costume markings, hairstyle, body proportions, species, and rendering style. Redraw only action poses. Output ONE coherent atlas containing exactly 16 separate full-body poses on a 4-column, 4-row grid. Transparent background with genuine alpha, no labels, frames, scenery, floor shadows, glow, beams or particles. Generous transparent gutters between cells. Every pose stays entirely within its own cell, same character scale throughout, screen-right action direction, stable body mass and planted feet baseline (except the explicit bicycle/flight pose). Smooth action changes and physically convincing shoulders, paws, ears, tails, clothing and recoil. Cute chibi polished shaded game art matching the reference, readable at 160 pixels. The atlas is animation frames, not a poster. Keep full hands, toes, fins, tail, ears and accessories visible, no overlapping neighboring poses. Do not include large energy orbs, flames, elongated rubber arms, footballs or effects because separate sprites render those. Small physical props explicitly specified may be drawn. Sequence 1 (月牙光輪), eight frames read left-to-right across two consecutive rows: 1. raise front paws to chest; 2. hold palms curved close together; 3. turn shoulders to right; 4. draw throwing paw back; 5. sweep paw forward to right; 6. paw extended at shoulder level; 7. lower throwing paw; 8. upright rabbit stance. Sequence 2 (月落星雨), eight frames read left-to-right across two consecutive rows: 1. close eyes, palms together; 2. raise both paws slowly; 3. paws at eye level; 4. reach both paws overhead; 5. paws spread overhead to call moon rain; 6. hold overhead prayer, ears lifted; 7. lower paws gently; 8. settle upright. Each sequence must visibly progress anticipation, gathering force, release, follow-through, recovery rather than duplicate standing poses.",
+  "references": [
+    "pet-app/art-source/fighter-skill-poses-v1/crescent-rabbit/seed.png",
+    "pet-app/art-source/fighter-skill-poses-v1/crescent-rabbit/reference-canvas.png"
+  ],
+  "rows": 4,
+  "columns": 4,
+  "actions": [
+    [
+      "raise front paws to chest",
+      "hold palms curved close together",
+      "turn shoulders to right",
+      "draw throwing paw back",
+      "sweep paw forward to right",
+      "paw extended at shoulder level",
+      "lower throwing paw",
+      "upright rabbit stance"
+    ],
+    [
+      "close eyes, palms together",
+      "raise both paws slowly",
+      "paws at eye level",
+      "reach both paws overhead",
+      "paws spread overhead to call moon rain",
+      "hold overhead prayer, ears lifted",
+      "lower paws gently",
+      "settle upright"
+    ]
+  ],
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "source": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-ec55050f-9061-419c-bd3e-034bcb14a754.png",
+  "rawSha256": "c00197fec6e329158287183a6e3844c21273c0b6fbc3db0bfc51ec35bb2172cf",
+  "referenceHashes": [
+    "b077e91302dcd6024f6c787fd52d882b7c4aedb26f478c4f4e254fca62a9fea2",
+    "f853bbbbfdfd558e6a2728a0c74bda1cb552ea383b5e8a3565cbc35703357ab1"
+  ]
+}
