@@ -8,12 +8,12 @@ import {createRequire} from 'node:module';
 import {spawn} from 'node:child_process';
 import bcrypt from 'bcryptjs';
 import {chromium} from 'playwright';
-import {ADVENTURE,storyText} from '../pet-app/lib/brawl/story.mjs';
+import {ADVENTURE,STORY_REVISION,storyText} from '../pet-app/lib/brawl/story.mjs';
 import {INPUT,DIFFICULTIES,FIGHTERS} from '../pet-app/lib/brawl/catalog.mjs';
 import {botInput} from './pet-brawl-bot.mjs';
 
 const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-adventure-live-'));
-const dbFile=path.join(temp,'db.json'),artifacts=path.resolve('artifacts/pet-playtest/adventure-v9');
+const dbFile=path.join(temp,'db.json'),artifacts=path.resolve(process.env.PET_PLAYTEST_DIR||'artifacts/pet-playtest/adventure-story-v2');
 await fs.mkdir(artifacts,{recursive:true});
 await fs.writeFile(dbFile,JSON.stringify({users:[{studentid:'S001',name:'冒險測試',passwordhash:bcrypt.hashSync('test',4),role:'student',classname:'5A',language:'zh-HK'}],studentStats:[],questionLogs:[],_logId:0}));
 process.env.BUIO_JSON_DB_FILE=dbFile;process.env.SUPABASE_DB_URL='';
@@ -33,6 +33,8 @@ async function ready(){await page.waitForFunction(()=>window.__petGame?.scene.is
 async function frozen(){const before=await state();await page.keyboard.down('KeyD');await page.keyboard.press('KeyU');await page.waitForTimeout(180);await page.keyboard.up('KeyD');assert.deepEqual(await state(),before,'reading pauses timers, MP, input and enemies');}
 async function readScene(scene,chapter){
   await overlay().waitFor();assert.equal(await overlay().getAttribute('data-scene'),scene.id);
+  assert.equal(await page.locator('[data-brawl="story-skip"]').count(),0,'stories have no skip action');
+  if(scene.kind!=='ending')assert.ok((await page.locator('.brawl-story-objective').innerText()).includes(chapter.sections.find(s=>s.id===scene.id).objective['zh-HK']));
   const start=Number(await overlay().getAttribute('data-line'));
   for(let n=start;n<scene.lines.length;n++){
     assert.equal(await page.locator('#brawlStoryLine').innerText(),storyText(scene.lines[n].text,'zh-HK',chapter.number===1?'布丁豬':chapter.number===11||chapter.number===13?'金毛犬':'星斑貓'));
@@ -81,9 +83,13 @@ try{
         await page.setViewportSize({width:size[0],height:size[1]});await shot('opening-'+size.join('x'));
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
         const rect=await page.locator('[data-brawl="story-next"]').boundingBox();assert.ok(rect.height>=52);
+        const panel=await page.locator('.brawl-story-panel').boundingBox();assert.ok(rect.y>=panel.y&&rect.y+rect.height<=panel.y+panel.height,'continue button must stay fully visible');
       }
       await page.setViewportSize({width:1180,height:820});
+      await page.keyboard.press('Escape');assert.equal(await overlay().getAttribute('data-line'),'0');
       await page.keyboard.press('Enter');assert.equal(await overlay().getAttribute('data-line'),'1');
+      await page.evaluate(()=>document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',repeat:true,bubbles:true,cancelable:true})));
+      assert.equal(await overlay().getAttribute('data-line'),'1','held keys cannot consume multiple lines');
       await page.locator('[data-brawl="story-back"]').click();assert.equal(await overlay().getAttribute('data-line'),'0');
       await page.locator('[data-brawl="story-next"]').click();
       await page.locator('[data-brawl="lobby"]').click();await page.locator('[data-brawl="resume"]').waitFor();await page.reload();
@@ -129,22 +135,48 @@ try{
   await page.locator('[data-brawl="act"][data-id="0"]').click();
   await page.locator('[data-brawl="story-review"][data-stage="starcrystal-cave"]').click();await overlay().waitFor();
   await page.locator('[data-brawl="story-review-scene"][data-scene="starcrystal-end"]').click();
-  assert.ok((await page.locator('#brawlStoryLine').innerText()).includes('共鳴星印'));await shot('completed-story-review');
+  assert.equal(await page.locator('#brawlStoryLine').innerText(),ADVENTURE.chapters[2].ending.lines[0].text['zh-HK']);await shot('completed-story-review');
   await page.keyboard.press('Escape');await overlay().waitFor({state:'hidden'});
   assert.equal(await page.locator('[data-brawl="start"]:enabled').count(),4);
   await page.locator('[data-brawl="start"]').first().click();await ready();await overlay().waitFor();
-  await page.setViewportSize({width:768,height:1024});await page.locator('[data-brawl="story-skip"]').click();
-  assert.ok((await page.locator('.brawl-story-help').innerText()).includes('橫向'));assert.equal((await state()).tick,0);
-  await page.setViewportSize({width:1180,height:820});await page.locator('[data-brawl="story-skip"]').click();await overlay().waitFor({state:'hidden'});
+  assert.equal(await page.locator('[data-brawl="story-skip"]').count(),0);
+  // An obsolete UI action must be ignored, not merely hidden.
+  await page.evaluate(()=>{const b=document.createElement('button');b.dataset.brawl='story-skip';b.textContent='obsolete action';document.querySelector('.brawl-story-overlay').append(b);b.click();b.remove();});
+  assert.equal(await overlay().getAttribute('data-line'),'0');assert.equal((await state()).tick,0);
+  await page.keyboard.press('Escape');assert.equal(await overlay().getAttribute('data-line'),'0');
+  await page.setViewportSize({width:768,height:1024});
+  for(let n=1;n<ADVENTURE.chapters[0].sections[0].scene.lines.length;n++)await page.locator('[data-brawl="story-next"]').click();
+  const lastLine=String(ADVENTURE.chapters[0].sections[0].scene.lines.length-1);
+  await page.locator('[data-brawl="story-next"]').click();
+  assert.ok((await page.locator('.brawl-story-help').innerText()).includes('橫向'));
+  assert.equal(await overlay().getAttribute('data-line'),lastLine);assert.equal((await state()).tick,0);
+  await page.locator('[data-brawl="lobby"]').click();await page.locator('[data-brawl="resume"]').waitFor();await page.reload();
+  await page.locator('[data-tab="brawl"]').click();await page.locator('[data-brawl="resume"]').click();await ready();await overlay().waitFor();
+  assert.equal(await overlay().getAttribute('data-line'),lastLine,'save-and-return cannot complete an unread scene');
+  assert.equal((await state()).tick,0);
+  await page.setViewportSize({width:1180,height:820});await page.locator('[data-brawl="story-next"]').click();await overlay().waitFor({state:'hidden'});
   await page.waitForFunction(()=>window.__petGame.scene.getScene('Brawl').runtime.state.tick>0);
   await page.keyboard.press('Escape');await page.locator('[data-brawl="lobby"]').click();await page.locator('[data-brawl="abandon"]').click();
-  pass('Completed story review, skip dialogue, portrait combat guard and replayed chapter');
+  pass('Completed review, no skip button or obsolete action, Escape/repeat-key protection, portrait guard and saved mandatory dialogue');
+  // Migrate an actual in-progress IndexedDB save: its old completed flag and
+  // line index must not skip the rewritten story or change its combat replay.
+  await page.locator('[data-brawl="start"]').first().click();await ready();await overlay().waitFor();
+  for(let n=0;n<ADVENTURE.chapters[0].sections[0].scene.lines.length;n++)await page.locator('[data-brawl="story-next"]').click();
+  await overlay().waitFor({state:'hidden'});await page.waitForFunction(()=>window.__petGame.scene.getScene('Brawl').runtime.state.tick>=30);
+  await page.keyboard.press('Escape');await page.locator('[data-brawl="continue"]').waitFor();
+  const beforeMigration=await state();await page.locator('[data-brawl="lobby"]').click();await page.locator('[data-brawl="resume"]').waitFor();
+  await page.evaluate(()=>new Promise((resolve,reject)=>{const request=indexedDB.open('buio-pet-brawl',1);request.onerror=()=>reject(request.error);request.onsuccess=()=>{const db=request.result,tx=db.transaction('sessions','readwrite'),store=tx.objectStore('sessions'),q=store.get('S001');q.onsuccess=()=>{const saved=q.result;saved.story={revision:1,seen:['sunny-1'],active:{id:'sunny-1',index:99}};store.put(saved);};tx.oncomplete=()=>{db.close();resolve();};tx.onerror=()=>reject(tx.error);};}));
+  await page.reload();await page.locator('[data-tab="brawl"]').click();await page.locator('[data-brawl="resume"]').click();await ready();await overlay().waitFor();
+  assert.equal(await overlay().getAttribute('data-line'),'0');assert.deepEqual(await state(),beforeMigration,'migration preserves verified combat');await frozen();
+  await page.locator('[data-brawl="lobby"]').click();await page.locator('[data-brawl="abandon"]').click();
+  pass('Old IndexedDB story save rereads current dialogue from line zero while retaining the exact combat replay');
+
   const final=JSON.parse(await fs.readFile(dbFile,'utf8'));
   assert.equal(final.petCurrencyLedger.filter(l=>l.kind==='brawl_win').length,3);
   assert.equal(final.petInstances.reduce((total,p)=>total+p.xp,0),30);
   assert.equal(final.petBrawlRuns.filter(r=>r.result?.outcome==='won').length,20);
   assert.deepEqual(errors,[]);
-  const report={pass:true,chapters:20,sections:80,scenes:seen,checks,errors,physicalIpadVerified:false};
+  const report={pass:true,storyRevision:STORY_REVISION,chapters:20,sections:80,scenes:seen,checks,errors,physicalIpadVerified:false};
   await fs.writeFile(path.join(artifacts,'story-report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report));
 }catch(error){await shot('failure').catch(()=>{});console.error(JSON.stringify({pass:false,error:error.stack,errors,logs:logs.slice(-1600)}));process.exitCode=1;}
 finally{await browser?.close();server.kill();}

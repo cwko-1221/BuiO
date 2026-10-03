@@ -1,34 +1,163 @@
-// Long-form original dialogue. Each chapter supplies four encounter scenes and
-// a resolution; its physical setting and combat cast come from adventure-design.
-export const STORY_ACT2=[
- {number:4,summary:['樂園重新亮起，一封寫著嚮導名字的舊信，卻讓旅程走向另一片海。','The paradise lights return, but an old letter addressed to the guide leads toward another sea.'],scenes:[
-  [['narrator','歸航的船上掛滿星燈。大家都在慶祝，雲耳卻反覆撫摸頸上的藍鈴，像在等一個沒有赴約的人。','Star lamps adorn the homebound boats. While everyone celebrates, Cloud-Ear keeps touching his blue bell.'],['guide','我也應該高興的。可是鈴一響，就會想起一座橋……和一隻沒有握住的手。','I should be happy. But the bell reminds me of a bridge… and a hand I failed to hold.'],['paperfox','別急著替記憶編答案。我叫紙尾，負責畫航圖。先看看這封積壓了一年的信。','I am Papertail, the harbor cartographer. Before guessing at memories, look at this letter, undelivered for a year.'],['hero','收件人是雲耳。寄件人的名字，為甚麼被塗掉了？','It is addressed to Cloud-Ear. Why has the sender’s name been crossed out?']],
-  [['paperfox','封信街的紙甲衛兵只准已登記的名字通過。近來，登記冊每天都少幾頁。','The paper sentries admit only registered names. Pages have been disappearing from their register.'],['guide','這裏的路我明明沒走過，卻知道第三個路口要轉彎。我到底忘了多少？','I have never been here, yet I know the third turning. How much have I forgotten?'],['hero','先讓衛兵恢復正常，再找原本的登記。知道得少，也可以一步一步查清楚。','Free the sentries first, then find the original register. We can uncover the truth one step at a time.']],
-  [['narrator','舊郵局裏，信封像受驚的鳥四處飛散。紙尾在一枚舊郵戳上，找到與藍鈴相同的星橋圖案。','Envelopes flutter through the old post office. Papertail finds a stamp bearing the same bridge as the blue bell.'],['paperfox','一年前，星橋發生過事故。從那天起，所有寄給「月舟」的信，都退回了。','An accident struck Starbridge a year ago. Since then, every letter to “Moonferry” has been returned.'],['guide','月舟……這個名字讓我很難過。可是我連他是誰，都說不出來。','Moonferry… That name hurts. Yet I cannot even say who he is.']],
-  [['letter-knight','停止投遞！寄件人不存在，這封信便不應該存在！','Stop the delivery! If the sender does not exist, neither should this letter!'],['paperfox','一本名冊不能決定誰曾經活過。信沒有收到，約定也不會自動消失。','A register cannot decide who once lived. An unanswered letter does not erase a promise.'],['letter-knight','守則只教我把錯誤封住。若我放行，又害了一個人怎麼辦？','My orders tell me to seal mistakes away. What if letting it through hurts someone?'],['hero','那就跟我們一起確認。你可以守護這封信，不必永遠扣住它。','Then help us check the truth. You can protect the letter without holding it forever.'],['guide','我想知道答案。即使那是我做錯的事，也請讓我親自讀完。','I want the answer. Even if I made a mistake, please let me read it myself.']],
- ],ending:[['letter-knight','封印解開了……原來我守著的，不是錯信，是一個一直等不到的回覆。','The seal is broken… I was guarding an answer that never arrived.'],['guide','信上只剩一句：「答應我，別讓名字再次消失。」下面的墨水，被海潮洗掉了。','Only one sentence remains: “Promise me—do not let names disappear again.” The tide has washed away the rest.'],['paperfox','原件曾經泡在雨葉沼澤。我會跟你們同行，但雲耳，別把看見的東西藏起來。','The original was soaked in Rainleaf Marsh. I will come with you, Cloud-Ear. Please do not hide what you find.'],['hero','從今天開始，我們不只尋找星光，也尋找星光曾經照著的人。','From today, we seek not only starlight, but the people it once shone upon.'],['narrator','紙尾畫下新航線。藍鈴響了一聲，很輕，卻像遠方有人終於聽見了。','Papertail draws a new route. The blue bell rings softly, as if someone far away has finally heard.']]},
- {number:5,summary:['泥水藏著被沖走的名字，守護沼澤的雨苔鷺拒絕再相信外來者。','The marsh holds washed-away names, and its guardian refuses to trust another outsider.'],scenes:[
-  [['narrator','沼澤的雨沒有停過。木牌上的名字被泡成空白，渡口仍放著等人來接的行李。','Rain never stops in the marsh. Names have washed off the signs, and luggage waits for owners who never return.'],['paperfox','這些不是垃圾，是有人回家的證明。小心雨葉蛙，它們的種子會讓腳步變慢。','These are traces of someone’s way home. Reed frogs fire seeds that can slow your steps.'],['hero','先把渡口清出來。等我們找回名字，還要有人能從這裏回家。','Clear the landing first. When we recover their names, they will need a way home.']],
-  [['guide','這塊布上的縫線，跟我的郵袋一樣。可是我記得自己從來沒有郵袋。','The stitching on this cloth matches my mailbag… but I do not remember owning a mailbag.'],['paperfox','你剛才說「我的」。記憶沒有全不見，身體還記得你做過的事。','You just said “my.” Your memory is not entirely gone. Your body remembers what you did.'],['hero','不用逼自己一次想起全部。先把每一件找到的東西保存好。','You do not have to remember everything at once. Let’s keep every piece we find safe.']],
-  [['narrator','水潭底的字緩緩浮起：「第七次投遞，雲耳、月舟。」另一行寫著：「星晶承載已達上限。」','Words rise from the pool: “Seventh delivery: Cloud-Ear and Moonferry.” Another line reads: “Crystal capacity exceeded.”'],['guide','我不是第一次見他。我們曾經……一起送過很多人的願望。','We did not meet only once. We… carried many people’s wishes together.'],['paperfox','星晶會滿？樂園從沒告訴過大家這件事。雨苔鷺一定知道更多。','The crystal can fill up? Nobody in the paradise told us. The heron must know more.']],
-  [['reed-heron','你們又來取走名字？上一次，拿走的人說是為了保護，卻再也沒有送回來！','Have you come to take more names? Last time, someone promised protection, then never returned them!'],['guide','上一次……是我來過嗎？如果是，請把我做的事告訴我。','Was I here last time? If I was, please tell me what I did.'],['reed-heron','你連承諾都忘了，叫我怎樣相信你？','You forgot your promise. How can I trust you?'],['hero','我不能替他證明過去。但今天，渡口已經重新打開，我們會把找到的東西留下。','I cannot prove his past. But today we reopened the landing, and we will leave what we find with you.'],['paperfox','請先讓黯霧離開你的翅膀。等你能清楚說話，我們才有機會把這件事做好。','First, let us free your wings from the mist. Then we can hear you clearly and put things right.']],
- ],ending:[['reed-heron','雲耳曾帶走願望，不是名字。名字消失，是那座新機器啟動以後的事。','Cloud-Ear carried wishes, not names. The names vanished after a new machine was started.'],['guide','謝謝你仍願意告訴我。我不會要求你立刻原諒，只會把今天答應的事做好。','Thank you for telling me. I will not ask for instant forgiveness. I will keep today’s promise.'],['paperfox','泥下還有一本潮汐古城的航誌。機器的零件，是沿著水路運走的。','A Sunken-Tide log lies beneath the mud. The machine’s parts were shipped along the waterway.'],['hero','把航誌帶上，名字留在渡口。我們查清楚以後，會回來讀給大家聽。','Take the log, leave the names here. When we learn the truth, we will return to read it to everyone.'],['narrator','雨苔鷺把失去名字的木牌重新立起，暫時只寫上：「有人正在回家的路上。」','The heron raises the blank signs again. For now, they say: “Someone is on the way home.”']]},
- {number:6,summary:['海潮封住古城，沉潮龜用堅硬的貝殼守著一個無法履行的承諾。','The tide seals an ancient city, where a turtle guards a promise he cannot fulfill.'],scenes:[
-  [['narrator','水晶罩隔開海水，古城的街道仍能行走。鐘聲卻困在水裏，每家門前都有未拆的信。','Crystal domes hold back the sea. The streets remain passable, but bells and unopened letters wait in silence.'],['tideguide','我是渡潮，替這裏照顧潮汐。城門已經關了一年，說是等所有人都安全，才准離開。','I am Tideway, the tide keeper. The gate has been shut for a year, until everyone is declared safe.'],['hero','如果安全的條件永遠達不到，這裏就變成另一座牢籠了。','If that condition can never be met, the city becomes a prison.']],
-  [['tideguide','潮甲蟹習慣正面守住，從側邊繞過去。泡泡水母會留下水氣，要小心後面的電流。','Crabs defend from the front. Circle around them. Jelly bubbles leave water that can carry an electric shock.'],['paperfox','這裏的敵人都帶著郵局的封條。誰把「不要離開」寫成了整座城的命令？','These guards wear postal seals. Who turned “do not leave” into an order for a whole city?'],['guide','那封條是月舟的習慣……他以前總會替淋濕的信，再包一層紙。','Moonferry used those seals… He always wrapped rain-soaked letters in another layer of paper.']],
-  [['narrator','淹沒的廣場上，一顆記憶珍珠映出兩名郵差。月舟把自己的披風披在年幼的雲耳身上。','A memory pearl shows two couriers. Moonferry wraps his cloak around a younger Cloud-Ear.'],['guide','他不是陌生人。他照顧過我，教我認路……我怎麼能連這些都忘記？','He was not a stranger. He cared for me and taught me the routes… How could I forget him?'],['tideguide','記憶被拿走，不代表感情是假的。先把珍珠收好，這是你們確實相遇過的證明。','Losing a memory does not make the bond false. Keep the pearl. It proves that you knew each other.']],
-  [['tide-shell','門不能開！我答應過月舟，絕不讓任何人再被風暴帶走。','The gate must stay closed! I promised Moonferry that no one would be taken by a storm again.'],['hero','我們也想守護大家。但這座城需要選擇，不是永遠等待你的許可。','We want to protect them too. But the city needs a choice, not endless permission to wait.'],['tide-shell','我一放手，就會失去他們。你們沒有看過星橋崩裂時，那些墜落的燈！','If I let go, I will lose them. You never saw the lamps falling when Starbridge broke!'],['guide','我也在那座橋上。如果你一直害怕，請先讓我聽見完整的經過。','I was on that bridge too. If you are afraid, please let me hear what truly happened.'],['tideguide','沉潮，我會和你一起看潮。城門開了，也不表示你再也不用守護。','Deep-Tide, I will watch the sea with you. Opening the gate does not mean abandoning your duty.']],
- ],ending:[['tide-shell','星橋崩裂那晚，月舟救了雲耳。他自己卻留在橋另一端，抱著裝滿願望的箱子。','That night, Moonferry saved Cloud-Ear. He stayed on the far side with a chest full of wishes.'],['guide','不是我沒握住他……是他先把我推回了安全的地方。','It was not simply a hand I failed to hold… He pushed me back to safety.'],['paperfox','郵局的紀錄只寫「投遞完成」。有人把救人的經過，整段刪掉了。','The postal record says only “Delivery completed.” Someone erased the rescue entirely.'],['tideguide','珊瑚書庫保管原始記錄。我陪大家去，那裏的墨流連舊日的聲音也能留下。','Coral Archive keeps the original records. I will come. Its ink can preserve the voices of the past.'],['narrator','潮門緩緩打開。第一次有人離開時，沉潮龜沒有閉上眼睛，而是向他們說了再見。','The tide gate opens. As the first travelers leave, the turtle watches and says goodbye.']]},
- {number:7,summary:['書庫保留過去，卻用空白掩蓋了最重要的一頁；月舟的目的第一次露出輪廓。','The archive preserves history but hides its most important page. Moonferry’s purpose begins to emerge.'],scenes:[
-  [['narrator','書頁在水裏自行翻動，每一冊都記著某人的願望。一本薄薄的藍色日記，一直跟著雲耳漂浮。','Books turn their own pages underwater. A thin blue diary keeps drifting after Cloud-Ear.'],['guide','日記認得我，書上的字卻不肯亮起。像是有人不許我讀自己的過去。','The diary knows me, but its words will not light. Someone is keeping me from my own past.'],['paperfox','先找借閱印記。書不會自己封住，總有人留下了開鎖的方法。','Find its lending seal first. Someone locked it, so someone left a way to open it.']],
-  [['tideguide','墨流會遮住視線，跟著書架上的金邊走。遇到紙甲衛兵，別一直撞它的盾。','Ink may obscure the path. Follow the gold shelf edges, and do not charge straight into paper shields.'],['paperfox','這本新書叫《零痛苦試驗》，作者的印章跟月舟的封條一樣。','This new book is called “The Zero-Pain Trial.” Its author’s stamp matches Moonferry’s seal.'],['hero','拿走痛苦，聽起來很好。可是書裏怎麼連快樂的回憶，也列成要移除的東西？','Removing pain sounds kind. Why does the book also list happy memories for removal?']],
-  [['guide','藍色日記亮了……「雲耳第一次獨自投遞，月舟在終點等他。」我那時一定很開心。','The diary lights up… “Cloud-Ear’s first solo delivery. Moonferry waits at the finish.” I must have been happy.'],['paperfox','下一頁卻是空白。不是因為沒寫，是紙纖維裏所有的墨，都被抽走了。','The next page is blank. It was written, but every trace of ink has been drawn from the fibers.'],['hero','空白不會替任何人減輕責任。我們需要知道，那晚的願望為甚麼失控。','A blank page cannot remove responsibility. We need to know why the wishes went out of control.']],
-  [['ink-octopus','過去會讓人痛。我照命令刪掉一頁，就是替你們省下一次傷心。','The past can hurt. Erasing a page saves you another sorrow.'],['guide','那一頁也許有讓我害怕的事，但也有把我救回來的人。','That page may frighten me. It also holds the person who saved me.'],['ink-octopus','你們只在乎記得。若記得會讓人彼此怨恨呢？','You care only about remembering. What if remembering makes people hate each other?'],['paperfox','怨恨要靠事情的經過來解開。把經過拿走，大家只能一直猜。','We need the truth to untangle resentment. Without it, all we can do is guess.'],['hero','請把那一頁交還。答案應該由讀過的人，自己選擇怎樣面對。','Return the page. Those who read it must choose how to face the answer.']],
- ],ending:[['ink-octopus','月舟帶走了一台「靜願機」。它原本只抽走過量的恐懼，後來卻開始抽走名字。','Moonferry took a Quiet-Wish Engine. It first removed excess fear, then began removing names.'],['guide','日記最後一句是他寫的：「只要還有牽掛，痛苦就會回來。」','His final diary line says: “As long as bonds remain, pain will return.”'],['tideguide','他想保護大家，卻開始把彼此的牽掛也當成危險。','He wanted to protect everyone, but began treating their bonds as a danger.'],['paperfox','還有一張去暴雨燈塔的回執。月舟在那裏留下過一封回信，我們不能再讓它被刪掉。','A receipt points to Storm Beacon. Moonferry left a reply there. We cannot let that be erased too.'],['narrator','藍色日記被小心收進郵袋。雲耳第一次沒有躲開那一頁空白，而是在旁邊寫下了今天。','Cloud-Ear puts the diary in his mailbag. Beside its blank page, he writes down today.']]},
- {number:8,summary:['暴風阻隔了回信，也阻隔了嚮導的坦白。舊友的聲音終於穿過燈塔。','A storm blocks the reply and the guide’s confession. An old friend’s voice finally reaches the beacon.'],scenes:[
-  [['narrator','燈塔照著所有返航的船，自己的訊號卻已經中斷一年。未送出的回信堆滿石階。','The lighthouse guides returning ships, yet its own signal has been broken for a year. Unsent replies cover the steps.'],['paperfox','我的父親在這裏等過一封信，直到離開也沒有等到。這次，我不會讓回覆再遲到。','My father waited here for a letter that never came. This time, I will not let an answer arrive too late.'],['guide','紙尾……我有些記憶已經回來了。但我還不知道，應該從哪裏說起。','Papertail… Some memories have returned. I do not know where to begin.']],
-  [['tideguide','先修斷掉的燈纜。暴風守燈者把風全引來這裏，怕訊號一出去就會惹來追兵。','Repair the lamp cable. The keeper draws the storm here, afraid that a signal will bring pursuers.'],['hero','那些紙鳶是傳訊用的。黯霧把它們變成了風彈，像是害怕任何人聽見真相。','Those kites once carried messages. The mist turns them into attacks, as if it fears the truth being heard.'],['paperfox','如果雲耳已經記起一些事，為甚麼還要由我們一路猜？','If Cloud-Ear remembers something, why are we still being made to guess?']],
-  [['guide','我記得星橋的箱子太重，也記得月舟說「先把你送回去」。但每次往後想，頭就很痛。','I remember a chest too heavy for the bridge. Moonferry said, “Let me get you home first.” Remembering more hurts.'],['paperfox','我不是要你一次說完。我只是希望，当你害怕時，也把我們當成能商量的人。','I do not need every answer at once. I need you to trust us when you are afraid.'],['hero','把訊號送出去。等風停下，我們會給這次談話留足夠的時間。','Send the signal. When the wind settles, we will give this conversation the time it needs.']],
-  [['beacon-heron','燈不能再亮！月舟說過，回覆會讓人重新牽掛，牽掛就會受傷！','The lamp must stay dark! Moonferry said replies renew our bonds, and bonds bring hurt!'],['paperfox','沒有回覆也會受傷。只是那種傷，守著燈的人看不見。','Silence hurts too. The keeper of the lamp simply cannot see that hurt.'],['beacon-heron','我守了一年，不能在最後放壞人進來！','I have guarded it for a year. I cannot let the wrong people in now!'],['guide','月舟的聲音在燈裏。如果你真想守護他，讓他自己說完。','Moonferry’s voice is in the lamp. If you want to protect him, let him finish speaking.'],['hero','我們會擋住這場風暴，也會讓那封回信抵達。','We will hold back the storm and let that reply reach its destination.']],
- ],ending:[['moon','雲耳，如果你收到這段聲音，別來找我。星晶需要有人保管所有人的恐懼，我正在找另一種方法。','Cloud-Ear, if you hear this, do not look for me. The crystal makes someone carry everyone’s fear. I am seeking another way.'],['guide','他不是想消失。他是怕我知道，他一直在替大家承受甚麼。','He did not want to vanish. He was afraid I would discover what he had been carrying for everyone.'],['paperfox','但那台機器已經開始拿走名字。想法再好，也不能把後果藏起來。','But the engine is already taking names. Good intentions cannot hide the consequences.'],['tideguide','回信裏有熔火工坊的圖樣。面具和機器，都是在那裏造出來的。','The reply contains a forge diagram. Both the mask and the engine were made there.'],['narrator','第一道訊號穿過雲層。紙尾仍沒有說原諒，但她把航圖放在雲耳旁邊，沒有收回自己的座位。','The first signal pierces the clouds. Papertail has not forgiven him, but leaves the map—and a place beside him.']]},
+// Chapters 5–8: rescue residents and recover the water crystal.
+export const STORY_ACT2 = [
+  {
+    number:5, title:['沼澤裏的藍箱子','The Blue Crate in the Marsh'],
+    summary:['沿水流尋找掉下的晶石箱。沼澤守門人不肯開閘，水位還在上升。','Follow the current to the fallen crystal crate. The marsh keeper refuses to open the floodgate as the water keeps rising.'],
+    sections:[
+      ['漂來的箱蓋','A Floating Crate Lid','沿水邊找到藍箱子的痕跡','Follow the water and look for traces of the blue crate'],
+      ['淹水小徑','Flooded Path','突破小徑，讓被困居民走到高處','Clear the path so trapped residents can reach higher ground'],
+      ['通往潮城的水道','The Channel to Tide City','檢查排水口，確認箱子漂往哪裏','Inspect the drain and find where the crate drifted'],
+      ['關著的水閘','The Closed Floodgate','擊敗雨苔鷺，打開水閘降低水位','Defeat the Rain-Moss Heron and open the floodgate'],
+    ],
+    scenes:[
+      [
+        ['narrator','沼澤渡口的水越漲越高。紙尾在蘆葦間找到一塊藍色木板，上面有發電機的編號。','Water is rising around the marsh landing. Papertail finds a blue plank among the reeds, marked with the generator’s serial number.'],
+        ['paperfox','這是水晶石的箱蓋！水往東邊流，我們跟著找。','This is the water crystal’s crate lid! The current flows east. Let us follow it.'],
+        ['guide','先看看路上有沒有人被水困住。找晶石，也不能漏掉需要幫忙的居民。','Check for anyone trapped by the flood along the way. We must help residents while looking for the crystal.'],
+      ],
+      [
+        ['hero','前面的居民爬上石頭了。守衛堵住高地入口，他們沒法離開。','Those residents have climbed onto rocks. Guards are blocking the entrance to higher ground, so they cannot get out.'],
+        ['paperfox','我在地圖上畫出安全小徑。你們開路，我帶大家去渡口的高台。','I will mark a safe path on my map. Clear the way, and I will guide everyone to the raised landing.'],
+        ['guide','水閘本來會自動排水，今天卻被鎖住。有人把避風命令用錯了地方。','The floodgate normally drains extra water automatically. Today it is locked. Someone’s shelter order is making the flood worse.'],
+      ],
+      [
+        ['narrator','排水口卡著藍箱子的鐵扣。水道盡頭的路牌寫著「潮汐古城」。','A metal clasp from the blue crate is caught at the drain. A sign at the end of the channel points to Sunken-Tide City.'],
+        ['hero','箱子被沖到潮城去了。先開水閘，讓水退下來，我們才能安全過去。','The crate drifted into Tide City. We need to open the floodgate and lower the water before crossing safely.'],
+        ['paperfox','我聽到守門人在說「誰也不能出去」。可是關著水閘，居民反而更危險。','The keeper keeps saying nobody may leave. But closing the floodgate puts the residents in more danger.'],
+      ],
+      [
+        ['reed-heron','黑核通知：風暴期間所有出口必須關閉。水閘也是出口，不能開！','Black Core says all exits must remain closed during the storm. A floodgate is an exit, so it must stay shut!'],
+        ['guide','水已經淹到居民腳邊。開閘排水，才是現在最安全的做法。','The flood is reaching the residents. Opening the gate to drain the water is the safest thing to do now.'],
+        ['reed-heron','命令沒有說可以排水。再靠近，我就攔住你們！','The order did not say I could drain the water. Come any closer and I will stop you!'],
+        ['hero','紙尾，先帶居民退後。我們打停守門人，解除封閘命令。','Papertail, guide the residents back. We will stop the keeper and lift the order sealing the gate.'],
+      ],
+    ],
+    ending:[
+      ['narrator','水閘打開，淹水慢慢退去。居民走上高台，向紙尾道謝。','The floodgate opens and the water slowly drops. The residents reach higher ground and thank Papertail.'],
+      ['reed-heron','我只顧著照命令做，沒有看看水位。對不起，我會留下來檢查每一道水閘。','I followed the order without checking the water level. I am sorry. I will stay and inspect every floodgate.'],
+      ['hero','有危險時要看清楚現場，也要聽居民的話。謝謝你願意幫忙補救。','When there is danger, check what is happening and listen to the residents. Thank you for helping put things right.'],
+      ['guide','水晶石漂進潮城，還有居民被轉移到那裏。我們跟著這條水道走。','The water crystal drifted into Tide City, and some residents were transferred there too. We will follow this channel.'],
+      ['paperfox','地圖上多了一條安全的路。爸爸回家時，也一定用得上。','Our map now has another safe route. Father will be able to use it when he comes home too.'],
+    ],
+  },
+  {
+    number:6, title:['泡泡屋裏出不去的人','Trapped Inside the Bubble Houses'],
+    summary:['潮城居民被鎖在避難泡泡屋。跟嚮導渡潮一起開門，查問藍箱子的去向。','Tide City residents are locked inside shelter domes. Help Tideway open the doors and trace the blue crate.'],
+    sections:[
+      ['潮城入口','Tide City Entrance','找到渡潮，確認居民被困的位置','Find Tideway and locate the trapped residents'],
+      ['鎖門的珊瑚街','Locked Coral Street','突破街道守衛，讓渡潮到達泡泡屋','Clear the street so Tideway can reach the shelter domes'],
+      ['藍箱子的收據','The Blue Crate Receipt','讀取收據，確認水晶石的下一站','Read the receipt and find the water crystal’s next destination'],
+      ['沉潮龜的門禁','The Turtle’s Locked Gates','擊敗沉潮龜，解除泡泡屋的門禁','Defeat the Sunken-Tide Turtle and unlock the shelter domes'],
+    ],
+    scenes:[
+      [
+        ['tideguide','我是渡潮。潮城的泡泡屋能讓大家在水底呼吸，可是今天門全被鎖了，居民出不來！','I am Tideway. Our bubble houses let residents breathe underwater, but every door has been locked today. Nobody can get out!'],
+        ['hero','我們從沼澤來，正在找一個裝水晶石的藍箱子。先幫大家開門，再查貨物。','We came from the marsh looking for a blue crystal crate. Let us help open the doors before checking the cargo.'],
+        ['tideguide','沉潮龜掌管門禁。他收到黑核命令後，連送食物的人也不讓進去。','The Sunken-Tide Turtle controls the locks. Since receiving Black Core’s order, he will not even let food deliveries through.'],
+      ],
+      [
+        ['paperfox','窗裏的小朋友在招手。他們不是想冒險，只是想拿到晚餐、和家人聯絡。','The children at that window are waving. They do not want an adventure. They just need dinner and a way to contact their families.'],
+        ['tideguide','我帶著備用鑰匙，但守衛不讓我接近門鎖。請幫我打開這條街。','I have spare keys, but the guards will not let me reach the locks. Please help clear this street.'],
+        ['guide','我們開路，渡潮分發食物。紙尾記下每戶需要甚麼，別讓任何人被漏下。','We will clear the way while Tideway delivers food. Papertail, record what each household needs so nobody is forgotten.'],
+      ],
+      [
+        ['narrator','貨站留著一張收據：藍箱子從沼澤打撈上岸，隨即被送往暴雨燈塔。','A receipt remains at the depot. The blue crate was recovered from the marsh and immediately shipped to Storm Beacon.'],
+        ['hero','我們慢了一步，水晶石已經去燈塔了。這張轉送命令，也蓋著黑核的印章。','We are one step behind. The water crystal has gone to the lighthouse, and Black Core stamped the transfer order too.'],
+        ['tideguide','珊瑚書庫保存所有送貨副本。先救出居民，我陪你們去查是誰改了路線。','Coral Archive keeps copies of every delivery record. Once the residents are free, I will help you investigate who changed the route.'],
+      ],
+      [
+        ['tide-shell','泡泡屋安全，門不用開！居民留在裏面，黑核就不用擔心他們。','The bubble houses are safe. Their doors must stay closed! Black Core cannot worry about residents who stay inside.'],
+        ['tideguide','他們缺食物，也找不到家人。你有沒有問過他們需要甚麼？','They need food and cannot find their families. Have you asked what they actually need?'],
+        ['tide-shell','黑核命令我拒絕所有開門要求。靠近控制台的，全部攔下！','Black Core ordered me to refuse every request to open a door. Stop anyone approaching the control panel!'],
+        ['hero','渡潮，準備備用鑰匙。我們停下他的攻擊，讓大家能自己選擇去留。','Tideway, get the spare keys ready. We will stop his attacks so the residents can decide where to go.'],
+      ],
+    ],
+    ending:[
+      ['narrator','控制晶片被取下，泡泡屋的門打開了。有居民選擇留下休息，也有人跟渡潮去找家人。','The control chip is removed and the dome doors open. Some residents choose to rest; others go with Tideway to find their families.'],
+      ['tide-shell','我以為把門關好就能保護大家。原來門可以防水，也會把人困住。','I thought closed doors protected everyone. I forgot that a door which keeps water out can also trap people inside.'],
+      ['paperfox','請把轉移居民的名單交給我。有人正在找爸爸，我也正在找。','Please give me the transferred residents’ list. Other people are looking for their fathers, just as I am.'],
+      ['tideguide','我會安排船送願意回家的居民。然後帶你們去珊瑚書庫，查水晶石的轉送命令。','I will arrange boats for residents who want to go home. Then I will take you to Coral Archive to check the crystal’s transfer order.'],
+      ['guide','兩處都收到同一種錯誤命令。我們要找出黑核是甚麼，才能阻止其他地方被封鎖。','Two places received the same harmful orders. We need to learn what Black Core is before it locks down more towns.'],
+    ],
+  },
+  {
+    number:7, title:['被塗黑的送貨紀錄','The Blotted-Out Delivery Record'],
+    summary:['書庫的紀錄被墨水蓋住。找回原始副本，發現黑核是一部會自動發命令的機器。','Ink has covered the archive records. Find the original copies and discover that Black Core is an automatic command machine.'],
+    sections:[
+      ['漂書走廊','Floating-Book Hall','保護尚未被塗黑的送貨副本','Protect the delivery copies that have not been covered in ink'],
+      ['墨水書架','Ink-Covered Shelves','穿過書架，找到編號為一號的設計圖','Cross the shelves and find the blueprint numbered one'],
+      ['備份讀室','The Backup Reading Room','核對黑核的設計圖與燈塔收據','Compare Black Core’s blueprint with the lighthouse receipt'],
+      ['章魚的保密命令','The Archivist’s Secrecy Order','擊敗墨卷章魚，阻止他銷毀紀錄','Defeat the Ink Archivist and stop the records from being destroyed'],
+    ],
+    scenes:[
+      [
+        ['tideguide','這裏是珊瑚書庫。所有船運紀錄都存兩份，原件壞了也能查副本。','This is Coral Archive. Every shipping record has two copies, so we can still check it if the original is damaged.'],
+        ['paperfox','好多頁都被墨水蓋住了。有人專挑昨晚的紀錄，其他日期卻沒有事。','Many pages are covered in ink. Someone targeted last night’s records, leaving the other dates untouched.'],
+        ['hero','先把乾淨的副本收好。只要留下證據，就能弄清楚命令從哪裏來。','Save the clean copies first. As long as the evidence survives, we can find out where the orders came from.'],
+      ],
+      [
+        ['guide','工具盒的晶片寫著「黑核一號」。這張設計圖也是一號，右下角有燭鱗的簽名。','Our chip says “Black Core 1.” This blueprint has the same number and Emberscale’s signature in the corner.'],
+        ['hero','圖上說黑核能讀取天氣資料，再自動指揮守衛。原來黑核是一部機器。','The diagram says Black Core reads weather reports and sends orders to guards automatically. So Black Core is a machine.'],
+        ['paperfox','可是它怎麼知道居民願不願意搬走？這張圖沒有畫能接收居民意見的地方。','But how can it know whether residents want to move? The diagram shows no way for people to send it their views.'],
+      ],
+      [
+        ['tideguide','備份收據確認了：水晶石在燈塔，用來供電給黑核的天氣訊號站。','The backup receipt confirms it: the water crystal powers Black Core’s weather signal station at the lighthouse.'],
+        ['guide','設計圖寫著「試作，尚未完成測試」。為甚麼一部未測好的機器，已經能指揮整個樂園？','The blueprint says “Prototype. Testing unfinished.” Why is an untested machine already giving orders across the park?'],
+        ['narrator','墨卷章魚帶著墨水瓶出現。他要把剩下的副本一起塗黑，不准任何人查看。','The Ink Archivist arrives carrying an ink bottle. He intends to blot out the remaining copies so nobody can read them.'],
+      ],
+      [
+        ['ink-octopus','黑核要求刪除運貨資料。資料不見，就不會再有人追問！','Black Core ordered the shipping records erased. If the records vanish, nobody can ask questions about them!'],
+        ['hero','有人因為這些命令找不到家人。我們需要資料，才能把他們接回去。','These orders have separated families. We need the records to help bring them back together.'],
+        ['ink-octopus','我負責保管資料，也必須服從命令。退後，墨水要灑下去了！','I must protect the records, but I must also obey commands. Stand back. I am about to pour the ink!'],
+        ['paperfox','請你們攔住他。我把副本包好，絕不讓爸爸的去向也被塗掉！','Please stop him. I will wrap up the copies so the record of Father’s whereabouts is not erased too!'],
+      ],
+    ],
+    ending:[
+      ['ink-octopus','晶片讓我把「保管」變成了「銷毀」。謝謝你們保住副本，我會重新整理紀錄。','The chip made me destroy the records I was meant to protect. Thank you for saving the copies. I will organize them again.'],
+      ['guide','我們有設計圖和收據了。去燈塔取回水晶石，再去工坊找燭鱗，問他怎樣停掉黑核。','We have the blueprint and receipt. We will recover the water crystal, then ask Emberscale at the forge how to stop Black Core.'],
+      ['paperfox','收據也寫著月舟批准了搬運。我想親口問他：爸爸在哪裏，為甚麼不讓爸爸回家？','The receipt says Moonferry approved the shipment. I want to ask him where Father is and why he cannot come home.'],
+      ['tideguide','我先留在潮城照顧居民，保持無線電聯絡。你們到燈塔後，記得把電台接通。','I will stay in Tide City to help the residents and keep a radio ready. Please restore the transmitter when you reach the lighthouse.'],
+      ['hero','我們會把查到的消息告訴大家。這次不讓任何人只能等命令。','We will share what we discover. Nobody should be left with orders to follow and no way to ask questions.'],
+    ],
+  },
+  {
+    number:8, title:['燈塔頂的水晶石','The Crystal at the Lighthouse'],
+    summary:['修復燈塔通訊，取回第一顆晶石。預警內容和現場天氣不符，事情還沒結束。','Restore the lighthouse radio and recover the first crystal. The warnings do not match the weather, so the mystery continues.'],
+    sections:[
+      ['風浪石階','Windswept Steps','穿過海邊石階，前往訊號站','Cross the seaside steps and reach the signal station'],
+      ['被剪斷的電纜','Cut Radio Cables','讓雲耳接上電纜，恢復居民通訊','Protect Cloud-Ear while he reconnects the residents’ radio'],
+      ['假的全區警報','The False Park-Wide Alarm','保存天氣警報，檢查晶石電源的位置','Save the weather alert and locate its crystal power supply'],
+      ['守燈者的封鎖','The Keeper’s Lockdown','擊敗風暴守燈者，取回水晶石','Defeat the Storm Beacon Keeper and recover the water crystal'],
+    ],
+    scenes:[
+      [
+        ['narrator','燈塔旁有海風和陣雨，但遠處的樂園仍然晴朗。電台卻不斷說「全區即將被大風暴吹毀」。','Wind and showers sweep the lighthouse, but the distant park remains sunny. The radio keeps warning that a huge storm will destroy every district.'],
+        ['hero','局部下雨不等於全區有災難。我們要查清楚這個警報用了甚麼資料。','Rain in one place does not mean every district is in danger. We need to check what information this warning is using.'],
+        ['guide','先上訊號站。那裏有水晶石，也有可以聯絡渡潮的電台。','First, reach the signal station. It holds the water crystal and the transmitter we need to contact Tideway.'],
+      ],
+      [
+        ['paperfox','電纜的斷口很整齊，跟森林的風鈴繩一樣。有人不想讓居民互相通話。','The cables have clean cuts, like the bell cords in the forest. Someone does not want residents talking to one another.'],
+        ['guide','工具袋裏有接線鉗。紙尾，你爸爸準備得很周全，我可以用它修好電台。','There are wire cutters in the tool bag. Your father came well prepared, Papertail. I can use them to repair the transmitter.'],
+        ['hero','你們修電纜，我攔住守衛。接通後，先通知大家我們正在找回晶石。','Repair the cables while I hold off the guards. Once the radio works, tell everyone we are recovering the crystals.'],
+      ],
+      [
+        ['guide','電台通了！渡潮說潮城天氣正常。黑核的全區警報，至少有一部分是錯的。','The radio works! Tideway says the weather in Tide City is normal. At least part of Black Core’s park-wide warning is wrong.'],
+        ['paperfox','我把警報錄下來。控制台的影片沒有日期，日後要拿原始資料核對。','I will record the warning. The video on the console has no date, so we need the original footage to check it.'],
+        ['narrator','藍色晶石就在燈塔頂。守燈者守住電源台，不肯讓任何人靠近。','The blue crystal is at the lighthouse summit. The keeper guards its power stand and refuses to let anyone near it.'],
+      ],
+      [
+        ['beacon-heron','水晶石供應警報站的電力。黑核說不能停止警報，也不能恢復居民通訊！','The water crystal powers the warning station. Black Core says the alerts must continue and the residents’ radio must stay off!'],
+        ['hero','沒有通訊，大家怎知道哪裏安全？你的警報還把晴天的潮城也算進去了。','Without a radio, how can anyone find safe places? Your warning even includes Tide City, where the weather is clear.'],
+        ['beacon-heron','收到命令：移走發電晶石的人，全都要被攔下！','Order received: stop anyone trying to remove the power crystal!'],
+        ['guide','我們保存了警報，也修好了電台。現在打停守燈者，把晶石送回真正需要它的地方。','We saved the warning and repaired the radio. Now stop the keeper so we can return the crystal where it belongs.'],
+      ],
+    ],
+    ending:[
+      ['narrator','第一顆水晶石回到雲耳的工具盒。燈塔換上備用電池，居民電台繼續運作。','The first crystal is safely inside Cloud-Ear’s toolbox. Backup batteries keep the lighthouse and residents’ radio working.'],
+      ['beacon-heron','原來關掉居民通訊會讓大家更害怕。我會播放各地確認過的消息，停止重複假警報。','Silencing the residents only made them more afraid. I will broadcast reports checked by each district instead of repeating false alerts.'],
+      ['paperfox','渡潮收到消息了！港口和潮城的居民知道有人在幫忙，終於不用亂猜。','Tideway received our message! People at the harbor and in Tide City know help is coming instead of having to guess.'],
+      ['guide','還有火、風、雷三顆晶石。我們去熔火工坊，問燭鱗怎樣關掉他設計的黑核。','Three crystals remain: fire, wind, and thunder. We will ask Emberscale at Ember Forge how to shut down the Black Core he designed.'],
+      ['hero','晶石追回一顆，通訊也修好了。接下來找設計者，讓錯誤命令一次停下來。','We recovered one crystal and restored the radio. Next, find the inventor so we can stop the harmful orders at their source.'],
+    ],
+  },
 ];

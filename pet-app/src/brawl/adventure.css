@@ -14,3 +14,8 @@
 @media(prefers-reduced-motion:reduce){.brawl-story-overlay{backdrop-filter:none}.brawl-adventure-progress i.current{box-shadow:none}}
 
 @media(max-height:600px) and (orientation:landscape){.brawl-story-heading{padding:12px 24px}.brawl-story-heading>p{font-size:10px;line-height:1.2;margin-bottom:5px}.brawl-story-heading h2{font-size:20px;line-height:1.2;margin-bottom:4px}.brawl-story-heading small{font-size:12px;line-height:1.4}.brawl-story-section-rail{margin-top:8px}.brawl-story-section-rail span{font-size:11px;padding:6px 8px}.brawl-story-conversation{min-height:125px;padding:12px 24px}.brawl-story-speaker{margin-bottom:6px}.brawl-story-footer button{min-height:52px}.brawl-story-footer .brawl-story-exit{font-size:11px}}
+
+.brawl-story-objective{margin:0;padding:12px 30px;background:#081e304d;border-bottom:1px solid #a9c8e325;color:#dce9df;font-size:15px;line-height:1.6;display:flex;gap:12px}.brawl-story-objective b{flex-shrink:0;color:#f8d17f}
+@media(max-width:700px){.brawl-story-objective{padding:10px 20px;font-size:13px;gap:9px}}
+@media(max-height:600px) and (orientation:landscape){.brawl-story-objective{padding:8px 24px;font-size:13px}}
+@media(max-height:600px) and (orientation:landscape){.brawl-story-footer{position:sticky;bottom:0;z-index:1;background:#122c40}.brawl-story-conversation{min-height:110px;padding-top:10px;padding-bottom:10px}}

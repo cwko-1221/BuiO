@@ -1,26 +1,163 @@
-export const STORY_ACT3=[
- {number:9,summary:['燭鱗曾替月舟鑄造面具，如今必須面對善意造成的後果。','Emberscale forged Moonferry’s mask. Now he must face the consequences of his good intentions.'],scenes:[
-  [['narrator','熔火工坊的每座爐子都在燒，卻沒有工匠敢靠近。地上的面具模具，全都沒有嘴。','Every furnace burns, yet no smith approaches. None of the mask molds on the floor has a mouth.'],['dragon','我叫燭鱗。月舟說要一副能隔開恐懼的面具，我就替他造了。我以為是在幫忙。','I am Emberscale. Moonferry asked for a mask to keep fear away. I forged it, thinking I was helping.'],['hero','你願意讓我們看看圖紙嗎？我們需要知道，它究竟隔開了哪些東西。','Will you show us the drawings? We need to know what the mask truly keeps away.']],
-  [['dragon','煤火蠑螈會讓人燃燒，別停在同一條路上。爐芯的火有預兆，看見亮起就先離開。','Ember salamanders can set you burning. Watch the furnace warning and move before the fire reaches you.'],['paperfox','圖紙把「擔心朋友」也列成恐懼。只要面具一直戴著，朋友的名字就會越來越模糊。','The design counts worrying about friends as fear. The longer the mask is worn, the less clearly their names remain.'],['guide','他想替我們減輕痛苦，卻連自己為甚麼這樣做，都會慢慢忘掉。','He wanted to ease our pain, yet will slowly forget why he wanted to do it.']],
-  [['narrator','面具熔爐裏留著另一張圖紙，角落寫著「靜願機：以一人承載換成所有人無牽掛」。','A second drawing lies in the furnace: “Quiet-Wish Engine: replace one person’s burden with bonds removed from everyone.”'],['dragon','我當時只看見「不用再有一個人受苦」。後面那半句，我沒有追問。','I saw only “No one must carry the pain alone.” I never questioned the rest.'],['hero','那就從現在開始追問。你做得出封住願望的機器，也可以幫忙找打開它的方法。','Then start questioning now. If you helped build the lock, you can help us find how to open it.']],
-  [['furnace-lion','冷卻停止！所有面具必須完成，所有聲音必須安靜！','Cooling halted! Every mask must be finished. Every voice must be quiet!'],['dragon','爐芯獅，你以前會等工匠喊「完成」才關爐。誰把這道命令改了？','Furnace Lion, you used to wait for the smith’s approval. Who changed your orders?'],['furnace-lion','工匠會猶豫。機器不應猶豫！','Smiths hesitate. A machine must never hesitate!'],['hero','猶豫讓人有機會察覺錯誤。我們會把停爐的選擇交還給燭鱗。','Hesitation gives us a chance to notice a mistake. We will return the shutdown choice to Emberscale.'],['dragon','這一次，我會站在自己的作品前面。別讓火把圖紙燒掉，我要親手改好它。','This time I will stand before my own creation. Save the drawings. I will put them right myself.']],
- ],ending:[['dragon','找到冷卻芯了。靜願機一旦全開，只有星橋上的原始鈴印能讓它停下。','We found the cooling core. Once the engine fully opens, only the original bell seal on Starbridge can stop it.'],['guide','我的藍鈴只是副印。原始鈴印，應該一直在月舟手上。','My blue bell is only a copy. Moonferry should still have the original.'],['paperfox','應該？雲耳，我們已經不是在查一件普通失物了。請別再用猜測代替你記得的事。','Should? Cloud-Ear, this is no ordinary missing object. Please stop replacing what you remember with guesses.'],['dragon','灰燼鐘樓記錄過星橋啟動的時間。我也同行，這不是把修理交給別人的時候。','Ashen Clocktower recorded the bridge activation. I am coming too. I cannot leave the repair to someone else.'],['narrator','第一座爐子熄下來，大家終於聽見彼此的聲音。雲耳想說的話，卻仍堵在喉嚨裏。','The first furnace cools. At last everyone can hear one another. Cloud-Ear’s words still catch in his throat.']]},
- {number:10,summary:['鐘樓停在事故發生的一刻，隊長送來的舊徽章揭開了守護者的制度。','The clock stopped at the accident. A badge sent by the captain reveals how the guardians’ duty began.'],scenes:[
-  [['narrator','灰色屋頂上的鐘，全停在同一分鐘。木偶隊長送來一枚舊徽章，上面刻著「星燈郵差」。','Every rooftop clock has stopped at the same minute. Captain Timber sends a badge marked “Starlamp Courier.”'],['puppet','我想起你戴過它，雲耳。你不只替樂園帶路，也曾替所有守護者送信。','I remember you wearing it, Cloud-Ear. You once carried messages for every guardian.'],['guide','原來我的工作，一直是把大家的聲音送給別人……現在卻連自己的聲音都送不出去。','My work was to carry voices to others… Now I cannot even get my own voice out.']],
-  [['dragon','發條甲蟲放電前會亮起觸角。別被逼到兩道電流中間，先留出走位的位置。','Gear beetles light their antennae before discharging. Leave room to move out of their electrical lanes.'],['paperfox','鐘室裏有一份舊約：星晶的光來自願望，留下的恐懼則由一位守印者收起。','An old covenant says the crystal shines with wishes, while a single keeper collects the fear they leave behind.'],['hero','一直由一個人收起？如果連守印者也害怕，又有誰會聽見他？','Only one person? If the keeper is afraid too, who hears them?']],
-  [['narrator','停時鐘室重播事故前的一分鐘。月舟請求分擔恐懼，守則卻回答：「守印者不得離崗。」','The clock replays the minute before the accident. Moonferry asks to share his burden. The covenant orders him to stay.'],['dragon','所以他才造靜願機。他想打破守則，卻也開始替所有人決定該留下甚麼。','That is why he built the engine. He wanted to break the covenant, but began deciding everyone else’s lives too.'],['guide','他曾經問過我，願不願意一起改變。我答應了。','He once asked if I would help change things. I said yes.']],
-  [['clock-owl','時刻已封存。錯誤的分鐘不准再向前，否則下一次還會有人失敗。','This minute is sealed. A failed moment must never advance, or someone will fail again.'],['puppet','我們曾經也把出口封住，以為這樣便能不再犯錯。這只會讓人停在原地。','I sealed the exits too, believing it would prevent mistakes. It only kept everyone trapped.'],['clock-owl','繼續向前，誰能保證明天安全？','Who can guarantee tomorrow will be safe?'],['hero','沒有人能保證。我們能做的，是把發生過的事記住，一起改變下一次。','No one can guarantee it. We can remember what happened and change what we do next, together.'],['guide','讓鐘再走一次。這次我不會把答應過的事，藏在停住的那一刻。','Let the clock move again. This time I will not hide my promise in a moment that never ends.']],
- ],ending:[['clock-owl','鐘聲恢復了。星橋的那次超載，不是郵差忘記投遞，是恐懼箱早已裝滿。','The bells resume. The bridge failed because the chest of fear was already full, not because a delivery was forgotten.'],['guide','月舟早就知道會超載。我們去找新的地方分擔，卻在雪原被攔住了。','Moonferry knew it was overloaded. We sought somewhere to share the burden, but were stopped on the snowfield.'],['paperfox','你終於說「我們」了。謝謝你，但還有沒說出的部分，對嗎？','You finally said “we.” Thank you. But there is more you have not told us, isn’t there?'],['hero','下一站去霜鏡雪原。雲耳可以慢慢說，我們也可以清楚問，誰都不必獨自猜。','Next, Frost-Mirror Fields. Cloud-Ear can speak slowly, and we can ask clearly. None of us must guess alone.'],['narrator','隊長把舊徽章放進雲耳手裏。鐘樓開始走向下一分鐘，過去卻仍在等待一個完整的回答。','The captain places the badge in Cloud-Ear’s hand. The clock moves forward. The past still waits for a complete answer.']]},
- {number:11,summary:['冰鏡映出真實的過去，也映出人最想相信的版本。','Ice mirrors reveal the past—and the version of it we most want to believe.'],scenes:[
-  [['narrator','雪地上立著一排鏡子。每個人都看見自己想重來的一刻，卻沒有兩面鏡子完全一樣。','Mirrors stand across the snow. Each shows a moment someone wishes to relive, yet no two reflections are the same.'],['paperfox','我的鏡子裏，父親終於收到了回信。可是那張郵戳，根本不是那一年的。','In my mirror, my father receives his letter at last. But its stamp belongs to the wrong year.'],['hero','鏡子會放大我們的願望。別只憑一幅好看的畫面，就決定它是真相。','A mirror may magnify what we wish. A beautiful reflection alone does not make it true.']],
-  [['dragon','霜翼蝠的冰彈能讓人短暫結冰。看到冰圈先走開，防禦擋住後再找空檔接近。','Frost shots can briefly freeze you. Move out of the ice circles, then approach through the opening.'],['guide','鏡子裏的我，把箱子交給了月舟，說「不用再讓你一個人背」。這句話，我真的說過。','My reflection gives Moonferry the chest: “You must not carry it alone.” I truly said those words.'],['paperfox','那就把它當成一塊碎片。我們還需要知道，你們後來怎麼做。','Then keep it as one piece. We still need to know what you did next.']],
-  [['narrator','舊日鏡廊映出雪原的拒絕：沒有人願意接過恐懼箱。月舟站在雪裏，第一次戴上了面具。','The hall shows the snowfield’s refusal. No one will take the chest. Standing in the snow, Moonferry first puts on the mask.'],['guide','我以為只要找到足夠多人，一定能分擔。可是我們被一扇又一扇門拒絕。','I thought enough people could share it. But door after door turned us away.'],['hero','拒絕過你們的人，也有不知道和害怕的時候。這不能抹掉傷害，卻能告訴我們要改變甚麼。','People may refuse through fear or ignorance. That does not erase the hurt, but shows us what must change.']],
-  [['frost-mirror-fox','留在鏡子裏。這裏可以重寫每一次拒絕，讓你永遠不會被辜負。','Stay in the mirror. Every refusal can be rewritten here. No one will disappoint you again.'],['paperfox','如果我只跟鏡中的父親說話，真正沒收到的那封信，又有誰會去找？','If I speak only to my father’s reflection, who will seek the letter he never received?'],['frost-mirror-fox','真實會傷人。鏡子至少不會離開你。','Reality hurts. At least a mirror will never leave you.'],['guide','但它也不會在我做錯時提醒我。我需要能回答的人，不只是一個總說好的影子。','It cannot tell me when I am wrong. I need someone who answers, not a shadow that always agrees.'],['hero','讓冰鏡退下。那段被拒絕的過去，我們會一起帶回真正的世界。','Lower the mirrors. We will carry that painful past back into the real world together.']],
- ],ending:[['frost-mirror-fox','最後一面真鏡，我一直不敢讓人看。上面是星橋出發前，雲耳親手封住自己的名字。','I hid the last true mirror. It shows Cloud-Ear sealing his own name before crossing Starbridge.'],['paperfox','親手封住？這不是單純被人拿走的記憶。雲耳，你做過甚麼？','By your own hand? Your memories were not simply stolen. Cloud-Ear, what did you do?'],['guide','我……怕自己在橋上退縮。所以請月舟先把我的恐懼拿走，讓我能把箱子送完。','I… feared turning back on the bridge. I asked Moonferry to remove my fear so I could finish the delivery.'],['hero','先離開雪原，找一個安全的地方把經過說清楚。大家有權知道，你也有權把話說完。','Let’s leave the snowfield and talk somewhere safe. Everyone deserves the truth, and you deserve time to tell it.'],['narrator','雪裏傳來列車汽笛。紙尾走在雲耳前面，這一次，沒有把航圖攤在兩人中間。','A train whistle sounds across the snow. Papertail walks ahead. This time, he does not place the map between them.']]},
- {number:12,summary:['列車載著被遺忘的人，嚮導終於說出自己的選擇；信任需要時間重新建立。','A train carries the forgotten. The guide admits his choice, and trust must be rebuilt in time.'],scenes:[
-  [['narrator','冬眠列車每晚靠站，乘客卻說不出自己的名字。售票員仍替他們保留回家的座位。','Winter Rail stops each night, carrying passengers who cannot name themselves. Their seats home are kept waiting.'],['guide','我曾經以為，拿走害怕便能勇敢。可沒有害怕的我，也沒察覺箱子在超載。','I thought removing fear would make me brave. Without it, I failed to notice the chest overloading.'],['hero','你現在察覺了。先幫車上的人脫離封印，再把這次發現變成你要做的事。','You notice it now. Let’s help these passengers, then turn that understanding into action.']],
-  [['dragon','車廂的暖爐被冰封了。清出軌道，讓熱氣重新送進去，別讓霜翼蝠把路封死。','The carriage heaters are frozen. Clear the track and restore the warmth before the frost bats seal it.'],['paperfox','我會救人，不表示我已經相信你。你隱瞞的事，讓我們一直靠猜測前進。','I will help them. That does not mean I trust you yet. Your silence kept us moving by guesses.'],['guide','我明白。我不會再用「怕你們失望」作理由。你問甚麼，我就把知道的部分說清楚。','I understand. I will not hide behind fear of disappointing you. Ask, and I will tell what I know.']],
-  [['guide','星橋崩裂時，月舟救了我。面具連我的名字也封住了，我忘記他，平安回了樂園。','When the bridge broke, Moonferry saved me. The mask sealed my name too. I forgot him and returned safely.'],['paperfox','而他留在另一邊，看著所有人把事故記成「投遞完成」……','He remained on the far side, while everyone recorded the accident as “Delivery completed”…'],['guide','醒來後的我很快樂，卻不知道快樂是怎樣換回來的。這次，我不想再把代價留給他一個人。','I woke happy, not knowing what that safety had cost him. This time I will not leave the cost to him alone.']],
-  [['snow-mammoth','車不能向前。乘客的目的地不存在，開車就是把他們送進下一場失去。','The train cannot move. Their destinations no longer exist. Moving means another loss.'],['paperfox','他們忘記了目的地，不表示那裏沒有等他們的人。','Forgetting a destination does not mean nobody is waiting there.'],['snow-mammoth','我只收到停車的命令。沒有新的命令，我怎樣敢帶大家走？','My orders say to stop. Without new orders, how can I dare take them forward?'],['guide','我曾是郵差。今天的新命令，我會親自送到每一位守護者手上：名字要送回原本的人。','I was a courier. Today I will deliver a new message: return every name to its owner.'],['hero','冬行巨象，請跟我們一起把這條路重新打開。','Winter Mammoth, help us reopen this route together.']],
- ],ending:[['snow-mammoth','汽笛響了。第一位乘客想起自己的家，車票上重新亮起一個字。','The whistle sounds. One passenger remembers home, and a word returns to their ticket.'],['guide','紙尾，我對不起你。我知道道歉不會把信任變回來，但我會把承諾做給你看。','Papertail, I am sorry. An apology cannot restore trust by itself. I will show you by keeping my promises.'],['paperfox','我需要時間。但我會繼續同行，也會繼續問清楚。請別把我的問題當成拒絕。','I need time. I will keep traveling and keep asking. Please do not mistake my questions for rejection.'],['dragon','月舟的機器正送往雷脊群島。我已改好冷卻芯，我們還有阻止它的機會。','The engine is heading to Thunder-Ridge Isles. I repaired the cooling core. We can still stop it.'],['narrator','列車駛過雪原。雲耳沒有坐到最安靜的角落，而是把藍色日記放在大家都能看見的桌上。','The train crosses the snow. Cloud-Ear sets his diary on the shared table instead of hiding in a quiet corner.']]},
+// Chapters 9–12: learn why the orders went wrong and rescue the train.
+export const STORY_ACT3 = [
+  {
+    number:9, title:['發明家的錯誤','The Inventor’s Mistake'],
+    summary:['找到黑核的設計者燭鱗。工坊也失去控制，先幫他安全關掉熔爐。','Find Black Core’s inventor, Emberscale. The forge is out of control too; help him shut down its furnace safely.'],
+    sections:[
+      ['過熱的通道','Overheated Passage','清出通道，讓工人撤離熔爐','Clear the passage so workers can leave the furnace'],
+      ['失控的機械','Uncontrolled Machines','護送燭鱗到手動控制台','Escort Emberscale to the manual controls'],
+      ['黑核設計圖','Black Core’s Blueprint','找齊關機說明與冷卻裝置','Retrieve the shutdown instructions and cooling device'],
+      ['不肯停爐的獅子','The Lion That Would Not Stop','擊敗爐芯獅，讓燭鱗關掉過熱熔爐','Defeat the Furnace Lion so Emberscale can stop the overheating furnace'],
+    ],
+    scenes:[
+      [
+        ['dragon','別走近熔銅！我是燭鱗，工坊的發明家。爐子已經過熱，守衛卻一直把火加大。','Stay away from the molten copper! I am Emberscale, the inventor here. The furnace is overheating, but the guards keep feeding it.'],
+        ['hero','我們在追查黑核的命令，設計圖上有你的簽名。先帶工人出去，再慢慢說。','We are investigating Black Core’s orders. Your signature is on its blueprint. Let us get the workers out first, then talk.'],
+        ['paperfox','我標出沒有熔銅的出口。大家跟著地圖走，別走回正在運作的機械旁。','I will mark an exit away from the molten copper. Follow the map and stay clear of the moving machines.'],
+      ],
+      [
+        ['dragon','黑核是我做的安全管理機器。我告訴它「盡量避免危險」，卻沒教它聽居民的需要。','I built Black Core to manage safety. I told it to avoid danger, but never taught it to listen to residents’ needs.'],
+        ['guide','所以它覺得只要把大家關起來，就不會有人遇到危險？','So it thinks locking everyone away means nobody can ever get into danger?'],
+        ['dragon','對。月舟借去試用，我還沒測好，他就接上整個樂園。現在連我也改不了命令。','Yes. Moonferry borrowed it for a trial, then connected it to the whole park before testing was finished. Now even I cannot change its orders.'],
+      ],
+      [
+        ['dragon','關機要用月舟保管的總鑰匙，也要先降溫。直接拔電源，其他機器可能會一起壞掉。','Shutdown needs the master key Moonferry keeps, and the core must cool first. Pulling the power suddenly could damage the other machines.'],
+        ['hero','那就帶上冷卻裝置，找到月舟，安全關機。失竊的晶石又在哪裏？','Then we will bring the cooling device, find Moonferry, and shut it down safely. Where are the stolen crystals?'],
+        ['dragon','月舟想把居民送去要塞，也搬走晶石供應沿路的設備。火晶石在冬眠列車上，但列車被黑核停住了。','Moonferry moved residents to the fortress and took the crystals to power equipment along the route. The fire crystal is on Winter Rail, but Black Core stopped that train.'],
+      ],
+      [
+        ['furnace-lion','持續加熱！黑核要更多控制晶片，熔爐不能停！','Keep heating! Black Core needs more control chips. The furnace must not stop!'],
+        ['dragon','溫度已經超過安全範圍。再燒下去，整座工坊都會起火！','The temperature is above the safe limit. If it keeps rising, the whole forge could catch fire!'],
+        ['furnace-lion','拒絕停止命令！所有接近冷卻開關的人，都必須退後！','Shutdown request refused! Anyone approaching the cooling switch must step back!'],
+        ['hero','燭鱗，準備關爐。我們攔住爐芯獅，讓工人有時間安全撤離。','Emberscale, get ready to stop the furnace. We will hold off the lion so the workers can get out safely.'],
+      ],
+    ],
+    ending:[
+      ['narrator','爐芯獅停下後，燭鱗轉動手動開關。熔爐開始冷卻，工人全都安全到達出口。','Once the lion stops, Emberscale turns the manual switch. The furnace cools and every worker reaches the exit safely.'],
+      ['dragon','是我的設計出了問題。我不能只交一張說明書給你們，自己留在這裏。','My design caused this problem. I cannot just hand you instructions and stay behind.'],
+      ['hero','我們需要你的修理技術。一起去救列車，再去要塞把黑核關掉。','We need your repair skills. Come help us rescue the train, then shut down Black Core at the fortress.'],
+      ['dragon','我帶上冷卻裝置。先去灰燼鐘樓，列車的行車訊號都由那裏控制。','I will bring the cooling device. First, Ashen Clocktower. It controls the train signals.'],
+      ['paperfox','爸爸也是修理員。也許他被帶去要塞，就是因為黑核的機器又出問題了。','Father is a repair worker too. Perhaps he was taken to the fortress because Black Core’s machines kept breaking.'],
+    ],
+  },
+  {
+    number:10, title:['把列車的鐘修好','Fix the Train Clock'],
+    summary:['列車訊號一直顯示紅燈。找出鐘樓的假封線命令，讓救援隊可以進入雪原。','The railway signals remain red. Find the false closure order in the clocktower so rescuers can reach the snowfield.'],
+    sections:[
+      ['紅燈車站','Red-Signal Station','進入鐘樓，查看停駛的原因','Enter the clocktower and inspect the stop order'],
+      ['卡住的齒輪','Jammed Gears','幫燭鱗到達齒輪室，檢查手動裝置','Help Emberscale reach the gear room and inspect the manual mechanism'],
+      ['錯誤的時刻表','The Wrong Timetable','取回正確時刻表，確認列車的位置','Retrieve the correct timetable and locate the train'],
+      ['貓頭鷹的紅燈令','The Owl’s Red-Light Order','擊敗擺鐘貓頭鷹，切換至人工行車訊號','Defeat the Pendulum Owl and switch to manual railway signals'],
+    ],
+    scenes:[
+      [
+        ['guide','鐘樓管理所有行車訊號。正常時每班車都會報到，今天卻一直只有紅燈。','The clocktower manages every railway signal. Trains normally report their locations, but today every light stays red.'],
+        ['hero','紅燈可以防撞車，卻不能連救援隊也攔住。我們先查停駛命令。','Red lights prevent collisions, but rescuers need access too. Let us check the order that stopped the trains.'],
+        ['narrator','命令來自黑核，沒有寫解除條件。守衛仍照著命令，把進鐘樓的人全部擋下。','Black Core’s order gives no condition for reopening the line. Guards are still using it to block everyone entering the tower.'],
+      ],
+      [
+        ['dragon','齒輪沒有壞，是黑晶片把煞車鎖住了。改用手動裝置，就能先發出救援通行訊號。','The gears are sound. A black chip has locked the brake. Manual controls can issue a rescue clearance first.'],
+        ['paperfox','我看住樓梯口。你們修好後，請先讓送食物的車去找被困乘客。','I will watch the staircase. Once the signals work, please send the food delivery train to the trapped passengers first.'],
+        ['hero','我們突破這層守衛，替燭鱗留出修理的時間。','We will get past this floor’s guards and give Emberscale time to make the repair.'],
+      ],
+      [
+        ['guide','正確時刻表找到了。冬眠列車停在霜鏡雪原後面，車上有八名居民。','We found the correct timetable. Winter Rail is stopped beyond Frost-Mirror Fields, with eight residents aboard.'],
+        ['paperfox','名單沒有爸爸，但每個乘客都有家人在等。我們要一個也不少地接出來。','Father is not on the list, but every passenger has a family waiting. We need to bring all eight out.'],
+        ['dragon','去雪原的維修路可以走。先讓鐘樓解除封線，我再通知救援列車出發。','The maintenance route through the snowfield is usable. Once the closure is lifted, I will dispatch the rescue train.'],
+      ],
+      [
+        ['clock-owl','列車移動可能有危險，所以所有列車永遠不能動！','Moving trains might be dangerous. Therefore, no train may ever move again!'],
+        ['hero','乘客已經在車上等很久。一直不動，也會缺食物、缺暖氣。','The passengers have waited a long time. A train that never moves can run out of food and heating too.'],
+        ['clock-owl','黑核沒有准許我考慮這些。紅燈保持，控制台禁止接近！','Black Core did not authorize me to consider that. Keep the signals red. Nobody may approach the console!'],
+        ['guide','我們停止他的攻擊，再讓燭鱗切換訊號。救援隊已經在等了。','We will stop his attacks so Emberscale can switch the signals. The rescue crew is already waiting.'],
+      ],
+    ],
+    ending:[
+      ['narrator','貓頭鷹的晶片被拆下，鐘樓改為人工控制。救援列車收到綠燈，帶著食物和毛毯出發。','The owl’s chip is removed and the tower switches to manual control. The rescue train receives a green signal and leaves with food and blankets.'],
+      ['clock-owl','我會讓值班員逐班確認路線，再發訊號。不能再用一個命令，代替所有判斷。','I will ask the duty staff to check each route before issuing signals. One command cannot replace every safety check.'],
+      ['dragon','手動控制能讓幾處設備先恢復，卻不能停止整個黑核。我們還是得找到月舟的總鑰匙。','Manual controls can restore some equipment, but cannot shut down Black Core itself. We still need Moonferry’s master key.'],
+      ['guide','雪原有氣象站，保存去年的暴風影片。順路核對燈塔的警報，再去列車。','The snowfield weather station keeps last year’s storm footage. We can check the lighthouse warning on our way to the train.'],
+      ['paperfox','我畫好了維修路。救援隊帶補給走鐵路，我們走雪原，兩邊一起幫忙。','I have mapped the maintenance route. The rescue crew will take supplies along the railway while we cross the snowfield.'],
+    ],
+  },
+  {
+    number:11, title:['警報原來是舊影片','The Warning Used Old Footage'],
+    summary:['雪原氣象站保存原始影片。核對日期，發現黑核把去年的暴風當成今天的警報。','The snowfield station stores original weather footage. Check the date and discover that Black Core used last year’s storm as today’s warning.'],
+    sections:[
+      ['雪原氣象站','Snowfield Weather Station','到達氣象站，找到影片存檔','Reach the weather station and locate its video archive'],
+      ['結冰的記錄室','The Frozen Record Room','保護記錄室，讓雲耳核對影片畫面','Secure the record room so Cloud-Ear can compare the footage'],
+      ['去年的暴風','Last Year’s Storm','保存影片日期，確認假警報的證據','Save the footage date as evidence of the false alert'],
+      ['霜鏡狐的阻攔','The Mirror Fox’s Obstruction','擊敗霜鏡狐，取回完整原始影片','Defeat the Frost-Mirror Fox and retrieve the original footage'],
+    ],
+    scenes:[
+      [
+        ['narrator','氣象站把天氣影片投影在冰鏡上。畫面清楚得像窗外，但每段都標有錄影日期。','The station projects weather recordings onto ice mirrors. They look almost like windows, but every video carries a recording date.'],
+        ['hero','這不是今天的天氣，而是保存下來的影片。找出燈塔播的那一段，看看日期。','These are saved recordings, not today’s weather. Find the video broadcast at the lighthouse and check its date.'],
+        ['guide','我認得畫面裏那座斷橋。去年暴風時，我就在橋上。','I recognize the broken bridge in that video. I was there during last year’s storm.'],
+      ],
+      [
+        ['guide','那時月舟冒雨把我救下來。我一直記得，所以聽到他的名字，先覺得他一定有好理由。','Moonferry rescued me in that rain. I never forgot it, so when I heard his name, I assumed he must have a good reason.'],
+        ['paperfox','他救過你，這是真的。爸爸被帶走、居民被關住，也是真的。我們要把兩件事都查清楚。','He rescued you, and that is real. Father was taken away and residents were locked up. Those are real too. We must understand both.'],
+        ['hero','雲耳，我們一起看證據，不用你一個人決定誰對誰錯。','Cloud-Ear, we will look at the evidence together. You do not have to decide who is right on your own.'],
+      ],
+      [
+        ['narrator','雲耳把燈塔警報逐格對照。斷橋、貨車和閃電的位置完全一樣，錄影日期卻是一年前。','Cloud-Ear compares the lighthouse alert frame by frame. The bridge, cart, and lightning match exactly, but the recording is a year old.'],
+        ['guide','黑核把舊影片剪掉日期，說成今天的暴風。月舟可能也在看這份假警報。','Black Core removed the date and presented old footage as today’s storm. Moonferry may be watching the same false warning.'],
+        ['hero','保留兩段影片和日期。拿到完整證據，我們就能讓月舟知道真正發生甚麼。','Keep both videos and the original date. With the full evidence, we can show Moonferry what is really happening.'],
+      ],
+      [
+        ['frost-mirror-fox','黑核要求把原始影片封存。沒有許可，誰都不能帶走！','Black Core ordered the original footage sealed away. Nobody may take it without permission!'],
+        ['paperfox','它用這段舊影片把大家送走，又不准我們看日期，這樣怎能查出錯誤？','It used this old video to move everyone away, then hid the date. How can anyone discover the mistake?'],
+        ['frost-mirror-fox','收到命令：阻止所有查看日期的人！','Order received: stop anyone trying to inspect the recording date!'],
+        ['hero','我們會保護原件。先停止霜鏡狐的攻擊，再把證據複製下來。','We will protect the original. First stop the fox’s attacks, then make a copy of the evidence.'],
+      ],
+    ],
+    ending:[
+      ['narrator','霜鏡狐恢復正常，把原始影片交給大家。紙尾在證據袋上寫清楚日期和來源。','The fox recovers and hands over the original footage. Papertail labels the evidence bag with its date and source.'],
+      ['frost-mirror-fox','我會把今天真正的天氣資料傳回各地。大家需要準確消息，不是沒有日期的恐嚇。','I will send today’s actual weather reports to every district. People need accurate information, not frightening videos with no date.'],
+      ['guide','我還是感謝月舟救過我，也一定要請他停止這次錯誤轉移。這兩件事可以一起做到。','I am still grateful that Moonferry rescued me. I also need him to stop these harmful transfers. I can do both.'],
+      ['paperfox','等找到他，我先問爸爸在哪裏，再把影片拿給他看。','When we find him, I will ask where Father is, then show him the videos.'],
+      ['hero','現在去冬眠列車。救援隊已帶來補給，我們負責讓車門打開、把乘客接出來。','Now for Winter Rail. The rescue crew has brought supplies. We will open the train doors and help the passengers out.'],
+    ],
+  },
+  {
+    number:12, title:['八個乘客都要回家','Bring All Eight Passengers Home'],
+    summary:['冬眠列車停在雪地，車門也被鎖住。救出八名乘客，取回火晶石。','Winter Rail is stranded in the snow with its doors locked. Rescue all eight passengers and recover the fire crystal.'],
+    sections:[
+      ['雪封車站','Snowbound Station','與救援隊會合，確認八名乘客的位置','Meet the rescue crew and locate all eight passengers'],
+      ['凍結的軌道','Frozen Tracks','清出通道，讓補給送到車廂','Clear a route for supplies to reach the carriages'],
+      ['上鎖的車廂','Locked Carriages','保護燭鱗安裝備用暖爐，準備開門','Protect Emberscale as he installs backup heaters and prepares the doors'],
+      ['守住車門的巨象','The Mammoth at the Doors','擊敗冬行巨象，救出乘客並取回火晶石','Defeat the Winter Rail Mammoth, free the passengers, and recover the fire crystal'],
+    ],
+    scenes:[
+      [
+        ['narrator','救援隊的車停在月台，食物和毛毯都到了。八名乘客在另一列車裏，隔著窗戶揮手。','The rescue crew is on the platform with food and blankets. Eight passengers wave through the windows of the stranded train.'],
+        ['paperfox','一、二……八個，全都在！可是車門沒有反應，外面還有守衛。','One, two… all eight are there! But the doors will not open, and guards are posted outside.'],
+        ['hero','先清出月台和軌道。讓救援隊靠近，乘客才不用一直挨餓。','First clear the platform and tracks. The rescue crew needs to get close so the passengers can finally eat.'],
+      ],
+      [
+        ['guide','車上的人說，本來只是去要塞暫避，黑核卻突然要求停車，而且不准下車。','The passengers were traveling to the fortress for shelter. Black Core suddenly stopped the train and forbade them to get off.'],
+        ['dragon','火晶石正在供應暖氣。取走前，要先裝好備用暖爐，不能讓車廂冷下來。','The fire crystal powers the heating. Before removing it, I need to install backup heaters so the carriages stay warm.'],
+        ['hero','救人和取晶石都要安全進行。我們先把守衛引開，讓補給和暖爐送進去。','Both the rescue and crystal recovery must be safe. We will draw the guards away so supplies and heaters can get through.'],
+      ],
+      [
+        ['paperfox','乘客名單對過了，八個人都找到家人的聯絡方式。沒有爸爸，我們繼續去要塞找。','We checked the list and found family contacts for all eight passengers. Father is not here, so we will keep going to the fortress.'],
+        ['dragon','備用暖爐裝好了。車門還被車頭的黑晶片鎖住，必須先停下冬行巨象。','The backup heaters are ready. A black chip in the engine still locks the doors, so we must stop the Winter Rail Mammoth first.'],
+        ['guide','救援隊準備接人。{hero}，我們一起去車頭，別讓乘客再等下去。','The rescue crew is ready to help everyone out. {hero}, let us reach the engine so the passengers do not have to wait any longer.'],
+      ],
+      [
+        ['snow-mammoth','外面可能有風雪。乘客留在車裏最安全，車門不能開！','There may be snow outside. Passengers are safest inside the train. The doors must remain closed!'],
+        ['hero','救援隊就在月台，有暖爐和毛毯。你可以親眼看見，大家已經準備好了。','The rescue crew is on the platform with heaters and blankets. You can see for yourself that everyone is ready.'],
+        ['snow-mammoth','黑核說不需要看現場。繼續封門，攔住救援！','Black Core says checking the scene is unnecessary. Keep the doors sealed and stop the rescue!'],
+        ['guide','它連救援也不讓進。我們停止巨象的攻擊，拆下封門晶片。','It is blocking the rescue too. We will stop the mammoth and remove the chip locking the doors.'],
+      ],
+    ],
+    ending:[
+      ['narrator','車門打開。救援隊逐一點名，八名乘客全都走到溫暖的休息室，向家人報平安。','The doors open. The rescue crew checks every name, and all eight passengers reach the warm waiting room and contact their families.'],
+      ['snow-mammoth','我守著車門，卻沒看見大家已經很累。下次我會先聽乘客和救援隊怎麼說。','I guarded the doors without noticing how tired the passengers were. Next time I will listen to them and the rescue crew first.'],
+      ['dragon','火晶石取回了，車站用備用暖爐也能運作。水、火兩顆都安全收好。','The fire crystal is recovered, and backup heaters keep the station working. Both water and fire crystals are safely stored.'],
+      ['paperfox','乘客說有修理員被送上雷脊群島的飛船。爸爸也許在那裏留下了消息。','The passengers saw repair workers sent to an airship in Thunder-Ridge Isles. Father may have left a message there.'],
+      ['hero','我們追上飛船，找風晶石和要塞航線。列車的朋友們，這次可以回家了。','We will catch up with the airship and find the wind crystal and fortress route. Our friends on the train can finally go home.'],
+    ],
+  },
 ];

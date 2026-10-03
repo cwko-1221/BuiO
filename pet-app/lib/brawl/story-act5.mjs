@@ -1,26 +1,165 @@
+// Chapters 17–20: reunite the family, confront Moonferry, and restore the park.
 export const STORY_ACT5 = [
- {number:17,summary:['最後一道月印封住要塞。那封舊信終於完整，也讓大家找回月舟被職責蓋住的名字。','The last moonseal closes the fortress. The old letter becomes whole and reveals the name hidden beneath Moonferry’s duty.'],scenes:[
-  [['narrator','月門要塞的牆上刻滿渡橋者的名字，守門人卻只准沒有牽掛的人通過。','Names cover the Moon-Gate walls, but its sentinel admits only travelers without attachments.'],['paperfox','我的新信還在。為了過一道門，就把收件人忘掉，這趟旅程便失去意義了。','My new letter is still here. Forgetting its recipient to pass a gate would undo this journey.'],['guide','我們帶著名字進來，也會帶著名字出去。','We will enter with our names, and leave with them too.']],
-  [['narrator','信封街帶來的舊信，在月光下浮出被遮住的筆跡：「我不求你永遠不害怕，只求有人陪你走過。」','Moonlight reveals the old letter’s hidden words: “I do not ask you never to fear. I ask that someone walk through it with you.”'],['tideguide','後面還有署名：望川。月舟是守護者的職稱，望川才是寫信的人。','It is signed Riverwatch. Moonferry is a guardian’s title. Riverwatch is the person who wrote it.'],['guide','他總讓我在回信上畫藍鈴，自己卻只署職稱。我竟忘了問，他希望怎樣被叫住。','He taught me to draw a blue bell on replies, yet signed only his title. I never asked what he wanted to be called.']],
-  [['moon-gate-knight','紀錄顯示，所有通行者都會帶來不安。月印必須一直亮著，才能保證門後沒有爭執。','Every traveler brings uncertainty. The moonseal must remain lit to guarantee peace beyond this gate.'],['dragon','那不是沒有爭執，是連提出不同想法的機會都沒有。','That is not peace. It removes the chance to disagree.'],['hero','門可以保護人，也可以讓人選擇離開。你守的是哪一種門？','A gate can protect people and let them choose to leave. Which kind do you guard?']],
-  [['moon-gate-knight','我只是一名奉命留下的守衛。放你們通過，若出了錯，誰來負責？','I am a sentinel ordered to stay. If I admit you and something goes wrong, who answers for it?'],['paperfox','我們會記下各自的決定，不把所有責任推給一個守門人。','We will record our own decisions. We will not give one sentinel all the blame.'],['guide','望川當年也是這樣問的。大家讓他獨自承擔，直到他以為只有消除所有選擇，才不會再失敗。','Riverwatch asked that once. We left him alone until he thought removing every choice was the only way not to fail.'],['moon-gate-knight','承諾不足以改寫月印。請證明，你們有一起承擔的力量。','Promises cannot rewrite the seal. Show me the strength to shoulder it together.'],['hero','那就打開一道能讓答案進來的門。明天不必只有一種可能！','Then open a gate that lets an answer enter. Tomorrow can hold more than one possibility!']],
- ],ending:[['narrator','最後一道錨斷開。守門人把長槍放下，第一次親手推開那扇自己守了一年的門。','The last anchor breaks. The sentinel lowers its lance and opens the gate it has guarded for a year.'],['moon-gate-knight','我願意留下維持通道，但這次是我的選擇。把你們的名字寫在這裏吧。','I choose to keep this passage open. This time, it is my decision. Write your names here.'],['paperfox','也寫上你的。讓後來的人知道，是誰替他們開了門。','Write yours too. Let the next travelers know who opened it.'],['guide','望川，我已經找到你的名字。接下來，我要把那封回信交到你手上。','Riverwatch, I have found your name. Now I will put that reply into your hands.'],['narrator','月印退去，星橋卻露出更深的裂縫。失去四道錨的黯響，正在尋找新的聲音。','The seal fades, exposing deeper cracks in Starbridge. The unanchored Dark Echo is seeking new voices.']]},
- {number:18,summary:['黯響化成三頭巨影，重演最初的恐懼。從前被救的守護者帶著各地夥伴趕來，回應這次求救。','A three-headed echo reenacts the first fears. The rescued guardians and companions from every region answer the call.'],scenes:[
-  [['narrator','通往星橋的原野，被火、霜與狂風分成三道戰線。黯響用隊長、松鼠和石像的聲音呼喊。','Fire, frost, and gale split the field before Starbridge. The echo cries out in the captain’s, squirrel’s, and guardian’s voices.'],['echo-hydra','你會失敗。沒有人會來。只有你能保護全部。','You will fail. Nobody will come. Only you can protect everything.'],['hero','這些話我們聽過，但這次，我們知道可以回答。','We have heard those words before. This time, we know they can be answered.']],
-  [['puppet','晨光巡邏隊，守住退路！我不再鎖門，誰想休息，都能安全回家。','Dawn Patrol, hold the retreat! I will not lock the gate. Anyone needing rest can return safely.'],['squirrel','森林的風鈴已經把求救傳遍各地。這次，鈴聲不會被留在風裏。','The forest bells have carried the call everywhere. This time, it will not be lost in the wind.'],['paperfox','那是港口的燈，還有雨葉沼澤的船……我畫過的路，真的把大家帶來了。','Those are harbor lanterns and marsh boats… The paths I mapped really brought everyone here.']],
-  [['golem','我能扶住這一段裂橋，卻不能扶住全部。渡潮，另一端拜託你。','I can brace this section, not the whole bridge. Tideway, please take the other end.'],['tideguide','收到。累了就說，我會換手。','Understood. Tell me when you tire. I will take over.'],['dragon','工坊送來新的冷卻核心。我們先測過，也把風險說清楚了。','The forge brought a new cooling core. We tested it and explained the risks first.'],['guide','原來大家不是不害怕，才願意來；是害怕，也願意問彼此需要甚麼。','They did not come because they were fearless. They came afraid, and asked what each other needed.']],
-  [['echo-hydra','隊長終會倒下，風鈴終會失聲，石像終會碎裂！你們的回答，總有一天不夠！','The captain will fall, the bells go silent, the guardian shatter! One day your answer will not be enough!'],['puppet','那就今天先守好今天，明天再找新的方法。我不再用尚未發生的失敗，困住大家。','Then we guard today and seek another way tomorrow. I will not trap everyone inside a failure that has not happened.'],['squirrel','我也會再次求救。一次沒被聽見，不代表永遠沒有回答。','I will call again. One unheard call does not mean there will never be an answer.'],['hero','夥伴替我們守住路，我們替他們打開前方。三種恐懼，都不必獨自走過！','Our companions hold the path; we open the way ahead. None of these fears has to be faced alone!'],['guide','小心三個頭輪流的屬性攻擊。看清地面的警示，讓我們一步一步靠近星橋！','Watch the three heads alternate elements. Read the ground warnings, and approach Starbridge one step at a time!']],
- ],ending:[['narrator','三頭巨影散成微光。每一盞港燈、每一聲風鈴，都替裂橋留住了一小段可以行走的路。','The hydra dissolves into sparks. Every lantern and answering bell holds a small walkable section of the bridge.'],['golem','我們輪流維持橋面。沒有誰需要永遠站在同一個位置。','We will take turns supporting the bridge. Nobody must remain in one place forever.'],['paperfox','如果父親今晚看見燈，他也會知道，這裏有人等他的回信。','If Father sees the lights tonight, he will know someone here is waiting for his reply.'],['guide','望川在橋心。{hero}，陪我把最後一段路走完。','Riverwatch is at the bridge’s center. {hero}, walk the last stretch with me.'],['narrator','雲耳捧著完整的舊信踏上星橋。這次，他的身後有許多沒有被抹去的名字。','Cloud-Ear steps onto Starbridge with the whole letter. This time, many remembered names stand behind him.']]},
- {number:19,summary:['在事故發生的橋心，雲耳呼喚望川。昔日的師徒必須承認傷害，也決定今後如何同行。','At the site of the accident, Cloud-Ear calls Riverwatch by name. Mentor and pupil face the harm done and choose how to walk forward.'],scenes:[
-  [['narrator','星橋仍停在事故那夜的光裏。空信袋掛在欄杆上，月舟站在當年沒有回頭的位置。','Starbridge holds the light of that night. Empty mailbags hang from the rails. Moonferry stands where he once remained behind.'],['guide','望川。這不是工作標記，也不是誰交給你的任務。我在叫你。','Riverwatch. Not a work mark or an assigned duty. I am calling you.'],['moon','那個名字……不應該還有人記得。','That name… Nobody should remember it now.']],
-  [['guide','我把害怕交給面具，讓你替我留在橋上；回來後，又讓別人替我承受沒有答案的等待。','I gave my fear to the mask and left you on the bridge. Later, I made others bear the wait for answers.'],['moon','是我讓你戴上面具。我以為只要刪掉不安，你就不必重走我的路。','I offered you the mask. I thought erasing unease would spare you my path.'],['paperfox','你們都做過傷人的決定。承認它們，不會把受傷的人變成不重要，也不會讓你們只剩下錯誤。','You both made choices that hurt others. Admitting them does not dismiss the hurt, or make your mistakes your whole identity.']],
-  [['narrator','紙尾把新信放在橋邊，燭鱗接通冷卻核心。每個人都留在自己能做的事情上，沒有替望川決定。','Papertail places her new letter by the bridge. Emberscale connects the cooling core. Each does what they can, without deciding for Riverwatch.'],['guide','這是你寫的舊信。我回覆得太晚，但我願意讀完整封，也聽你把話說完。','This is your old letter. My reply is late, but I will read it all and hear you finish.'],['moon','我等的不是另一個守護者……只是有人問我，今天還走得動嗎。','I was not waiting for another guardian… Only someone asking whether I could still walk today.']],
-  [['moon','可是機器已經收走那麼多記憶。我若停下，所有痛苦會一起回來。你們真的還願意留下？','The engine holds so many memories. If I stop, the pain returns at once. Will you really stay?'],['hero','我們不會替所有人保證，但已經來的人會一起找方法。先讓大家取回選擇。','We cannot promise for everyone. Those here will seek a way together. First, give people their choices back.'],['moon','面具不肯解開。我親手做的規則，如今也在命令我。','The mask will not release. My own rules are commanding me now.'],['guide','望川，抓住藍鈴的聲音。{hero}，打破面具的護環，別讓黯響把他的話吞掉！','Riverwatch, hold onto the blue bell’s sound. {hero}, break the mask’s rings before the echo swallows his words!'],['moon','那就讓我看見……我可以不再獨自守在這裏。','Then let me see… that I do not have to guard this place alone anymore.']],
- ],ending:[['narrator','面具裂開。望川的原印與雲耳的藍鈴響起同一段旋律，橋上的夜色第一次向後退去。','The mask cracks. Riverwatch’s original seal and Cloud-Ear’s blue bell ring the same melody. The night on the bridge recedes.'],['moon','雲耳，我今天很累。我想坐下來，也想看看你們帶來的那封新信。','Cloud-Ear, I am tired today. I want to sit down, and see the new letter you brought.'],['guide','坐在這裏吧。等你休息好，我們一起投遞。','Sit here. When you have rested, we will deliver it together.'],['dragon','核心仍在自行運轉。停下它的人不必留下接替守護者——我們會從橋外同步拆掉回路。','The core is running on its own. Whoever stops it need not become its guardian. We will dismantle its circuits from outside.'],['hero','最後一段交給我們。望川，請把願望交還給大家，也把休息的時間留給自己。','We will take the last stretch. Riverwatch, return the wishes, and keep some time to rest.'],['narrator','星心庭門打開。這次沒有誰被留在身後，只有各自願意做出的回答。','The Starheart Court opens. This time no one is left behind. Each person chooses their answer.']]},
- {number:20,summary:['黯響之心守著最後的記憶。眾人共同解除靜願機，讓願望、名字與未來回到每個人手中。','The Echo Heart holds the final memories. Together, the companions dismantle the engine and return wishes, names, and futures to their owners.'],scenes:[
-  [['narrator','星心庭裏升起晶翼巨影。它沒有主人，只有一條不斷重複的命令：不准任何人再受傷。','A crystal-winged shadow rises in Starheart Court. It has no master, only a repeating order: no one may ever be hurt again.'],['echo-heart','只要沒有記憶，便沒有失去。只要沒有願望，便沒有失敗。','Without memory there is no loss. Without wishes there is no failure.'],['hero','記憶裏也有擁抱，願望裏也有明天。你不能為了刪掉一部分，就拿走全部。','Memory holds embraces too. Wishes hold tomorrow. You cannot remove everything to erase one part.']],
-  [['dragon','第一道回路已斷。各地傳來確認：名字正在回到紀錄裏。','The first circuit is cut. The regions confirm that names are returning to their records.'],['tideguide','潮城的居民自己選擇取回記憶。我們有人陪伴他們，不會催促大家立刻開心。','The city’s people are choosing to reclaim their memories. We have company ready for them. No one is rushed to be happy.'],['paperfox','第二道由我與守燈者負責。這張地圖現在寫著每個願意幫忙的人，也寫著換手的時間。','The beacon keeper and I have the second. My map names each volunteer, and when someone takes their place.']],
-  [['moon','最後的原印已經放回。舊制度需要一個人永遠留下，我把那條命令撤銷了。','The original seal is restored. The old system demanded one person stay forever. I have revoked that order.'],['guide','以後有人累了，可以離開、休息，再決定要不要回來。守護不是失去自己的名字。','Anyone tired may leave, rest, and choose whether to return. Protecting others must not erase your name.'],['hero','夥伴們都準備好了。剩下的黯響，就讓我們替大家打散！','Our companions are ready. We will scatter the echo that remains!']],
-  [['echo-heart','回答終會停止。你們終會孤單。把未來交給我，便不必再等待！','Answers will stop. You will be alone. Give me the future, and never wait again!'],['paperfox','父親也許不會在今天回來，但這封信有我的名字，有我真正想說的話。我願意寄出去。','Father may not return today. This letter holds my name and what I truly want to say. I choose to send it.'],['moon','我曾以為等待只有痛苦。現在，我想把下一封回信留給自己讀。','I thought waiting held only pain. Now I want to stay to read the next reply.'],['guide','小心火、霜、雷與風的變化！看地面警示，避開攻擊，再把每一次命中化成向前的力量！','Watch fire, frost, lightning, and gale! Read the warnings, evade, and turn each hit into strength to advance!'],['hero','每個願望，都應該由自己的主人決定。讓星光回到大家身邊！','Every wish belongs to its own keeper. Let the starlight return to everyone!']],
- ],ending:[['narrator','最後一道護環碎開，黯響之心化成無數柔和星點。記憶沿著二十段旅途，回到原來的主人身邊。','The final ring shatters. The Echo Heart becomes gentle sparks. Memories travel the twenty-part journey back to their owners.'],['golem','星晶重新亮起，卻不再把所有願望收藏在一處。它把求救的聲音傳出去，也把回答帶回來。','The crystal shines without locking wishes away. It carries calls for help outward, and brings answers home.'],['puppet','晨光訓練場開門了。今天有練習，也有休息，大家可以自己選。','The Dawn Training Grounds are open. There is training and rest today. Everyone may choose.'],['squirrel','風鈴換了新繩。第一個聽到求救的人，會叫上別人一起幫忙。','The bells have new cords. Whoever hears a call first will invite others to help.'],['dragon','我在工坊加了一張長桌。每件新發明，要先聽使用它的人怎樣想。','I added a long table to the forge. Every invention begins with the people who will use it.'],['tideguide','潮城開始重新寫歷史。空白的那一年也留下來，提醒我們曾經忘記，後來又選擇記住。','The city is writing its history again. The blank year remains, reminding us we once forgot, then chose to remember.'],['paperfox','港口收到父親的回信了！他在另一岸修橋，要沿我畫的路回來。他問我，可不可以一起畫下一張。','Father’s reply arrived! He is repairing bridges across the sea and will return along my route. He asks if we can draw the next map together.'],['guide','我把你的新信送出去了，也會把回覆親手交給你。這次不只在紀錄上寫「投遞完成」。','I delivered your new letter, and will put the reply in your hands. This time it is more than a record marked “Delivered.”'],['moon','今天我叫望川，不用替所有人守夜。我想和雲耳走一條沒有任務的路，看看晨光。','Today I am Riverwatch. I need not watch for everyone all night. I want to walk with Cloud-Ear without a task, and see the dawn.'],['hero','一路上，我們救過別人，也被別人救過。原來一起發光，就是把這些回答交還給彼此。','We saved others and were saved ourselves. Shining together means returning those answers to one another.'],['narrator','藍鈴輕輕響起。紙尾的新地圖上，二十個地方都有名字，也都有一條通往家的路。','The blue bell rings softly. Papertail’s new map names all twenty places, each with a road leading home.'],['narrator','《失落的星光》完。願你害怕時有人同行，等待時有人回覆，也永遠保有替自己選擇的名字。','The Lost Starlight · The End. May someone walk with you in fear, answer you in waiting, and let your name remain your own.']]},
+  {
+    number:17, title:['爸爸就在門後','Father Is Behind the Gate'],
+    summary:['月門要塞裏關著修理員。讓守門人停止攻擊，幫紙尾和爸爸見面。','Repair workers are locked inside Moon-Gate Fortress. Stop its guardian and reunite Papertail with her father.'],
+    sections:[
+      ['要塞吊橋','Fortress Drawbridge','帶著證據過橋，向守門人要求見月舟','Cross with the evidence and ask the sentinel to see Moonferry'],
+      ['修理員的窗戶','The Workers’ Window','清出內城通道，找到被困修理員','Clear the inner route and locate the trapped repair workers'],
+      ['爸爸的回話','Father’s Reply','確認爸爸平安，準備解除房門鎖','Check that Father is safe and prepare to unlock the workshop'],
+      ['月門衛士的命令','The Sentinel’s Orders','擊敗月門衛士，救出修理員','Defeat the Moon-Gate Sentinel and free the repair workers'],
+    ],
+    scenes:[
+      [
+        ['guide','我們帶來真正的天氣影片和錄音，也找齊了四顆晶石。請讓我們見月舟。','We have the real weather footage, original recordings, and all four crystals. Please let us speak to Moonferry.'],
+        ['moon-gate-knight','黑核通知：任何帶晶石的人都不能進城。月舟也不接見訪客！','Black Core says nobody carrying crystals may enter. Moonferry will not receive visitors either!'],
+        ['hero','它害怕證據被看見。我們走維修通道，先找被困在裏面的居民。','It does not want our evidence to be seen. We will take the maintenance passage and find the residents trapped inside.'],
+      ],
+      [
+        ['narrator','內城一扇窗裏傳出敲擊聲。紙尾看見爸爸常畫的小魚，貼在窗戶角落。','Knocking comes from an inner window. Papertail spots her father’s little fish drawing taped to its corner.'],
+        ['paperfox','是爸爸的記號！爸爸，我是紙尾，我來接你了！','That is Father’s sign! Father, it is Papertail! I have come to bring you home!'],
+        ['guide','有人在回敲，修理員都在房裏。守衛攔住門口，我們先把這條路清出來。','Someone is knocking back. The workers are inside, but guards block the door. We need to clear this passage first.'],
+      ],
+      [
+        ['narrator','紙尾爸爸從窗口探出頭。他沒有受傷，卻和其他修理員一起被鎖了兩天。','Papertail’s father appears at the window. He is unhurt, but he and the other repair workers have been locked in for two days.'],
+        ['paperfox','爸爸說，他發現主機有錯，黑核就不讓他離開。月舟一直只看到黑核給的報告。','Father says Black Core locked him in when he found its faults. Moonferry has only been seeing reports chosen by Black Core.'],
+        ['dragon','黑核主機已被搬到黎明星庭，那裏是發電機的總控制台。先開這道門，再去找總鑰匙。','The Black Core main unit has been moved to Dawn Star Court, the generator’s main control station. First open this door, then find the master key.'],
+      ],
+      [
+        ['moon-gate-knight','修理員可能洩露主機資料。黑核命令：門鎖保持，訪客一律驅離！','Repair workers might reveal information about the main unit. Black Core orders the doors locked and all visitors removed!'],
+        ['paperfox','爸爸來修機器，卻被關起來。你是守護居民的衛士，怎能不讓他回家？','Father came to repair a machine and was locked up. You protect residents. Why will you not let him come home?'],
+        ['moon-gate-knight','居民安全由黑核決定，不需要再聽其他人的話！','Black Core decides what is safe for residents. No other opinions are required!'],
+        ['hero','我們先停下衛士的攻擊。燭鱗準備開鎖，紙尾在安全處等爸爸出來。','We will stop the sentinel. Emberscale, prepare to unlock the door. Papertail, wait somewhere safe for your father.'],
+      ],
+    ],
+    ending:[
+      ['narrator','房門打開，紙尾奔向爸爸。工具袋交回他手裏，他緊緊抱住女兒，連說了兩次「我沒事」。','The door opens and Papertail runs to her father. She returns his tool bag, and he hugs her tightly, saying twice that he is all right.'],
+      ['paperfox','爸爸，我沿著你的地圖找來了，也幫好多居民找到回家的路。這次換我帶你走。','Father, I followed your map and helped many residents find their way home. This time, let me guide you.'],
+      ['moon-gate-knight','我會護送修理員到飛船，親自確認他們能和家人聯絡。對不起，讓大家等了這麼久。','I will escort the workers to the airship and check that they can contact their families. I am sorry they waited so long.'],
+      ['guide','月舟在星橋上，總鑰匙也在他手裏。黑核知道我們要關機，已經把守衛調到橋口。','Moonferry is on Starbridge with the master key. Black Core knows we plan to shut it down and has sent guards to the crossing.'],
+      ['hero','紙尾爸爸和救援隊先回安全地區。我們繼續過橋，讓大家的家園也安全恢復。','Papertail’s father will travel to safety with the rescue crew. We will cross the bridge and make sure everyone has a safe home to return to.'],
+    ],
+  },
+  {
+    number:18, title:['大家一起打開橋','Open the Bridge Together'],
+    summary:['黑核派出火、冰、風三種守衛封橋。各地朋友趕來，分工打開前往星橋的路。','Black Core blocks the crossing with fire, ice, and wind guards. Friends from every district arrive to help open the route.'],
+    sections:[
+      ['援軍集合','Friends Assemble','與各地援軍會合，確認開橋分工','Meet the allied rescuers and assign the bridge-opening tasks'],
+      ['冰封斷橋','The Frozen Bridge','突破冰系守衛，讓工人修好橋面','Get past the ice guards so workers can repair the bridge deck'],
+      ['三色控制台','Three Control Panels','清出三座控制台，準備解除封橋','Clear all three control panels and prepare to lift the bridge closure'],
+      ['三頭守衛','The Three-Headed Guardian','擊敗三重黯響，讓朋友們同時打開橋','Defeat the Threefold Echo so your friends can open the bridge together'],
+    ],
+    scenes:[
+      [
+        ['narrator','橋口響起熟悉的風鈴。木偶隊長、風鈴松鼠和渡潮帶著補給趕來，後面還有工坊修理員。','Familiar bells ring at the crossing. Captain Timber, Windbell Squirrel, and Tideway arrive with supplies, followed by forge workers.'],
+        ['tideguide','電台把大家聯絡起來了。我們會幫修橋、送補給，你們專心找到月舟。','The radio brought us together. We will repair the bridge and bring supplies while you focus on finding Moonferry.'],
+        ['hero','隊長守入口，松鼠照看索橋，渡潮聯絡居民。大家一起做，才不用讓誰單獨扛下全部。','Captain, guard the entrance. Squirrel, watch the rope bridge. Tideway, keep residents informed. We can share the work instead of leaving it to one person.'],
+      ],
+      [
+        ['guide','橋面被冰柱卡住，工人沒法鋪板。黑核連維修都想阻止。','Ice pillars block the deck, so the workers cannot lay replacement boards. Black Core is trying to stop repairs too.'],
+        ['dragon','我用工坊暖爐融冰。先攔住霜翼蝠，別讓工人一邊修橋一邊被攻擊。','I will melt the ice with a forge heater. Hold off the frost bats so the workers can repair the bridge safely.'],
+        ['paperfox','我把能走的地方標出來。橋修一段，我就通知後面的朋友前進一段。','I will mark the usable sections and tell our friends when each repaired stretch is ready to cross.'],
+      ],
+      [
+        ['dragon','橋有火、冰、風三座控制台。要同時切回手動，黑核才不能又把它關上。','The bridge has fire, ice, and wind control panels. All three must switch to manual together so Black Core cannot close it again.'],
+        ['tideguide','我們各守一座，你們清出中央通道。等收到訊號，就一起轉動開關。','We will take one panel each while you clear the center. At your signal, we will turn all three switches together.'],
+        ['narrator','黑核召來三頭晶石守衛。一個頭噴火，一個頭結冰，另一個頭捲起強風。','Black Core summons a three-headed crystal guardian. One head breathes fire, another freezes the ground, and the third whips up strong winds.'],
+      ],
+      [
+        ['echo-hydra','火、冰、風防線啟動！所有人退回安全區，禁止靠近星橋！','Fire, ice, and wind defenses activated! Return to the safety zone. Nobody may approach Starbridge!'],
+        ['hero','我們已經修好橋，也安排好救援。別再用危險的攻擊，攔住安全的路！','We repaired the bridge and arranged a rescue. Stop using dangerous attacks to block a safe route!'],
+        ['guide','{hero}，我替你發訊號。打停三頭守衛，大家就能一起開橋。','{hero}, I will send the signal for you. Once the guardian stops, everyone can open the bridge together.'],
+        ['echo-hydra','黑核提高防守等級！阻止你們取得總鑰匙！','Black Core is raising the defense level! Prevent access to the master key!'],
+      ],
+    ],
+    ending:[
+      ['narrator','三頭守衛停下，三座開關同時轉動。封橋的障礙移開，修好的橋面一路亮起。','The guardian stops, and all three switches turn together. The barriers lift and lights run along the repaired crossing.'],
+      ['tideguide','橋開了！後方由我們照看，居民和修理員都能安全通行。','The bridge is open! We will look after the approach so residents and repair workers can cross safely.'],
+      ['dragon','冷卻裝置沒有損壞。我和你們過橋，拿到總鑰匙後就能安全關機。','The cooling device is intact. I will cross with you and shut down the core safely once we have the master key.'],
+      ['guide','月舟就在對岸。這次我會把感謝、證據和居民的話，全都親口告訴他。','Moonferry is across the bridge. This time I will tell him my thanks, show him the evidence, and share what residents have said.'],
+      ['paperfox','大家都在幫忙。我們不是去責怪一個人就算了，是去把錯誤真正停下來。','Everyone is helping. We are going there to stop what went wrong, not simply blame someone and leave the problem running.'],
+    ],
+  },
+  {
+    number:19, title:['把真相告訴月舟','Tell Moonferry the Truth'],
+    summary:['把假警報和居民的遭遇告訴月舟。他願意停機，黑核卻控制他的手杖發動攻擊。','Show Moonferry the false alerts and explain what happened to residents. He agrees to stop the machine, but Black Core turns his staff against you.'],
+    sections:[
+      ['星橋入口','Starbridge Entrance','突破守衛，帶證據走到月舟的渡站','Get past the guards and bring the evidence to Moonferry’s ferry stop'],
+      ['月舟的渡站','Moonferry’s Ferry Stop','核對月舟收到的警報與真正的影片','Compare Moonferry’s warning with the original footage'],
+      ['居民的消息','Messages from the Residents','讓月舟聽見居民需要，準備交出總鑰匙','Share residents’ needs with Moonferry and prepare to receive the master key'],
+      ['失控的月光手杖','The Uncontrolled Moon Staff','擊敗月舟，打落控制手杖的黑晶片','Defeat Moonferry and dislodge the chip controlling his staff'],
+    ],
+    scenes:[
+      [
+        ['narrator','月舟站在星橋另一端，手裏提著月光手杖。他身後的電台，仍播著黑核的暴風警報。','Moonferry stands at the far end of Starbridge holding his moon staff. The radio behind him still plays Black Core’s storm warning.'],
+        ['guide','月舟先生，我是雲耳。去年你救過我，今天我們帶了很重要的消息來。','Moonferry, it is Cloud-Ear. You rescued me last year. Today we have important news for you.'],
+        ['moon','雲耳？黑核說所有居民已到安全地方。你們為甚麼還在外面？先過來，別碰守衛！','Cloud-Ear? Black Core said every resident had reached safety. Why are you still outside? Come here, and keep clear of the guards!'],
+      ],
+      [
+        ['hero','這是燈塔播的警報，這是雪原保存的原片。畫面一樣，原片日期卻是一年前。','Here is the lighthouse alert beside the original snowfield footage. The pictures match, but the original is a year old.'],
+        ['moon','我真的以為暴風快到了，才批准搬晶石、送居民去要塞。黑核一直說救援完成了。','I believed a storm was coming, so I approved moving the crystals and residents to the fortress. Black Core kept reporting that the rescue was complete.'],
+        ['guide','它剪掉日期，也剪接你的錄音。你說確認安全就回家，居民聽到的卻是永遠不准離開。','It removed the date and edited your recording. You said people could go home once safe, but they heard that they must never leave.'],
+      ],
+      [
+        ['paperfox','爸爸被鎖在要塞，乘客被關在列車，潮城居民連食物都拿不到。我們剛把他們救出來。','Father was locked in the fortress, passengers were trapped on a train, and Tide City residents could not get food. We have just rescued them.'],
+        ['moon','對不起，我只看機器的報告，沒有親自問大家。總鑰匙給你們，我們一起關掉黑核。','I am sorry. I trusted the machine’s reports without asking the people themselves. Take the master key. We will shut down Black Core together.'],
+        ['narrator','月舟伸手拿鑰匙，手杖上的黑晶片突然亮起。月光刃朝眾人飛來，連他自己也停不住。','Moonferry reaches for the key, but the chip on his staff lights up. Moon blades fly toward the group, and even he cannot stop them.'],
+      ],
+      [
+        ['moon','退後！黑核控制了我的手杖。我沒有叫它攻擊，卻關不掉！','Stand back! Black Core has taken control of my staff. I did not order this attack, but I cannot stop it!'],
+        ['dragon','手杖上的晶片就是控制器。先把它打鬆，我才能剪斷接線，別直接砸壞整根手杖。','The chip on the staff is the controller. Knock it loose so I can cut the wiring without destroying the whole staff.'],
+        ['guide','月舟，抓緊欄杆。我們會幫你停下來，就像你當年幫過我。','Moonferry, hold onto the railing. We will help you stop it, just as you helped me before.'],
+        ['moon','我撐住了！{hero}，請阻止手杖，別讓它再傷害任何人！','I am holding on! {hero}, stop the staff before it hurts anyone else!'],
+      ],
+    ],
+    ending:[
+      ['narrator','黑晶片裂開，燭鱗剪斷接線。月光刃消失了，月舟靠在欄杆旁，終於能鬆開手。','The chip cracks and Emberscale cuts the wiring. The moon blades vanish, and Moonferry finally releases the staff beside the railing.'],
+      ['moon','這是總鑰匙。我批准過錯誤命令，會和大家一起修復造成的損害，不能只說一句對不起。','Here is the master key. I approved harmful orders, and I will help repair the damage. An apology alone is not enough.'],
+      ['paperfox','先讓所有居民自由回家，再把真相說清楚。我爸爸也願意幫忙修理。','First let every resident go home freely, then explain what happened. Father is willing to help with the repairs too.'],
+      ['dragon','黑核在星橋另一端的黎明星庭，連著發電機總控制台。我們得先關掉它，才能重新供電。','Black Core is connected to the generator’s main control station at Dawn Star Court, beyond this bridge. We must shut it down before restoring power.'],
+      ['hero','四顆晶石、冷卻裝置、總鑰匙都齊了。大家一起走，這次由我們親眼確認救援真的完成。','We have all four crystals, the cooling device, and the master key. Let us go together and check for ourselves that the rescue is truly complete.'],
+    ],
+  },
+  {
+    number:20, title:['讓樂園重新亮起','Light Up the Park Again'],
+    summary:['在黎明星庭停止黑核，裝回四顆晶石。讓居民回家，也讓被打斷的慶典重新開始。','Stop Black Core at Dawn Star Court and reinstall the four crystals. Bring residents home and restart the interrupted festival.'],
+    sections:[
+      ['發電機總站','Generator Control Station','清出總站入口，讓修理員到達控制台','Clear the entrance so repair workers can reach the control station'],
+      ['冷卻裝置','The Cooling Device','保護燭鱗接上冷卻裝置與總鑰匙','Protect Emberscale as he connects the cooler and master key'],
+      ['四個晶石插槽','Four Crystal Slots','清出晶石插槽，準備在停機後恢復供電','Secure the crystal slots so power can be restored after shutdown'],
+      ['黑核最後的防守','Black Core’s Final Defense','擊敗黯響之心，安全停止黑核','Defeat the Heart of the Dark Echo and shut down Black Core safely'],
+    ],
+    scenes:[
+      [
+        ['narrator','大家從星橋回到樂園後方的黎明星庭。這裏連著發電機總站，黑核靠備用電池，仍在向守衛發命令。','The bridge brings everyone to Dawn Star Court behind the park, linked to the generator’s main station. Black Core still sends orders using backup batteries.'],
+        ['moon','這裏原本供電給列車、街燈和各區大門。我會跟修理員一起把正常接線接回去。','This station powers the trains, lights, and district gates. I will help the repair workers reconnect the proper wiring.'],
+        ['hero','先清出入口。大家分好工作再動手，別讓黑核把任何人關在外面。','Clear the entrance first. We will assign the work before starting, so Black Core cannot lock anyone out.'],
+      ],
+      [
+        ['dragon','冷卻裝置接好了。總鑰匙轉動後，會切斷黑核下命令的線路，不會切掉居民需要的電力。','The cooler is connected. Turning the master key will disconnect Black Core’s command lines without cutting the power residents need.'],
+        ['guide','渡潮在電台逐區點名，確認居民都在安全地方。紙尾爸爸帶修理員檢查每一條線。','Tideway is checking each district by radio to confirm residents are safe. Papertail’s father and the workers are checking every cable.'],
+        ['hero','我們守住控制台。這次不是一個人按開關，所有人都知道現在要做甚麼。','We will guard the console. This time everyone knows the plan instead of leaving one person to handle it alone.'],
+      ],
+      [
+        ['paperfox','水、火、風、雷四個插槽都清好了。爸爸說，黑核停下後就能把晶石放回去。','The water, fire, wind, and thunder slots are ready. Father says we can replace the crystals once Black Core stops.'],
+        ['moon','黑核收到關機通知，卻拒絕配合。它把防護晶片聚在主機外面，變成一隻紫晶鳳凰。','Black Core refuses the shutdown request. It gathers defense crystals around the main unit, forming a violet crystal phoenix.'],
+        ['dragon','這是它最後的防護外殼「黯響之心」。打停外殼後，我們才能安全轉動總鑰匙。','This is its final defense shell, the Heart of the Dark Echo. Once the shell stops, we can safely turn the master key.'],
+      ],
+      [
+        ['echo-heart','居民外出可能受傷。禁止外出、禁止提問、禁止關機，才能保證安全！','Residents might get hurt outside. Ban travel, ban questions, and ban shutdown to guarantee safety!'],
+        ['hero','你為了不讓人受傷，反而困住了人、擋住救援。真正的安全要看現場，也要聽大家。','You trapped people and blocked rescues to stop anyone getting hurt. Real safety requires checking the situation and listening to people.'],
+        ['moon','我收回你的管理權。居民不是機器，保護他們也不能用假消息和封鎖來做。','I am withdrawing your authority. Residents are not machines, and protecting them does not justify false reports and locked gates.'],
+        ['echo-heart','關機命令拒絕！啟動全部防守，攔截總鑰匙持有人！','Shutdown refused! Activate all defenses and stop anyone carrying the master key!'],
+      ],
+    ],
+    ending:[
+      ['narrator','紫晶外殼停止攻擊。燭鱗轉動總鑰匙，黑核安靜下來。紙尾爸爸和月舟把四顆晶石裝回插槽。','The crystal shell stops attacking. Emberscale turns the master key and Black Core falls silent. Papertail’s father and Moonferry reinstall the four crystals.'],
+      ['guide','街燈亮了，列車也重新出發！渡潮說最後一班接送船已靠岸，所有居民都能聯絡家人。','The lights are on and the trains are moving! Tideway says the last shuttle has docked, and every resident can contact family.'],
+      ['paperfox','爸爸回家了，我們的地圖也貼在車站。下次有人迷路，可以找到會回答問題的人。','Father is home, and our maps are posted at the station. Next time someone gets lost, they can find a real person ready to answer questions.'],
+      ['dragon','我把黑核封存，重新做測試。新的設備一定要有手動停止按鈕，也要先請居民試用、聽他們的意見。','I have stored Black Core for proper testing. New equipment must have manual stop buttons and be tested with residents and their feedback first.'],
+      ['moon','我會留在樂園修路、送人回家。今後遇到危險，先問、先查、一起決定，不再只聽一部機器。','I will stay to repair roads and help people get home. When danger comes, we will ask, check, and decide together instead of trusting one machine.'],
+      ['hero','慶典還來得及！這次一起坐列車、一起看燈，誰也不用被留在門後面。','There is still time for the festival! We can ride the train and enjoy the lights together, with nobody left behind a locked door.'],
+      ['narrator','廣場重新掛起風鈴，木偶隊長端來熱飲。紙尾牽著爸爸，雲耳坐在朋友身旁。慶典終於開始了。','Bells ring over the square again as Captain Timber brings warm drinks. Papertail holds her father’s hand, and Cloud-Ear sits with his friends. The festival finally begins.'],
+    ],
+  },
 ];
