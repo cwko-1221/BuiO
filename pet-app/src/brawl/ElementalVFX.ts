@@ -3,18 +3,20 @@ import Phaser from 'phaser';
 import {VERSION,fightersForVersion,combatFighterById} from '../../lib/brawl/catalog.mjs';
 import type {Actor,BattleState} from '../../lib/brawl/simulation.mjs';
 import type {BrawlAssets} from './types';
+import {kamehamehaPose} from './Kamehameha';
 type Burst={event:any;age:number;life:number};
 const C:Record<string,number>={fire:0xff8f28,ice:0x70e5ff,lightning:0xffdd58,water:0x55d9ef,wind:0xadf6ff,earth:0xc99862,nature:0x89eb67,lunar:0xcbb8ff,light:0xffd76a,physical:0xffe1a0,ki:0x56dfff,chakra:0x55cfff,psychic:0xff8fcf};
-// Kamehameha retains its original layered beam, charge orb and flowing light trails.
+// The thick Kamehameha uses a continuous beam; character poses load separately.
 export const usesDedicatedSkillFx=(kind:string)=>kind!=='kamehameha';
 // Disposable presentation only: the shared simulation owns all hitboxes and statuses.
 export class ElementalVFX {
   private g:Phaser.GameObjects.Graphics;
   private sprites:Phaser.GameObjects.Image[]=[];
   private used=0;private bursts:Burst[]=[];
+  private beamPoints:Phaser.Math.Vector2[]=[];
   stats={sprites:0,peak:0,beamWidth:0,flameLength:0,atlasFrames:{} as Record<string,number[]>};
   constructor(private scene:Phaser.Scene,private assets:BrawlAssets,private reduced:boolean){this.g=scene.add.graphics().setDepth(9900);}
-  destroy(){this.g.destroy();this.sprites.forEach(s=>s.destroy());this.sprites=[];this.bursts=[];}
+  destroy(){this.g.destroy();this.sprites.forEach(s=>s.destroy());this.sprites=[];this.bursts=[];this.beamPoints=[];}
   event(event:any){
     if(event.type==='cloneSmoke')event={...event,kind:'shadow-clones',element:'chakra'};
     if(event.type==='catStrike')event={...event,kind:'flurry',element:'light'};
@@ -34,13 +36,13 @@ export class ElementalVFX {
     frame=Math.max(0,Math.min(clip.frames-1,Math.floor(frame)));
     let image=this.sprites[this.used++];if(!image){image=this.scene.add.image(x,y,'brawl-skill-'+kind,frame);this.sprites.push(image);}
     const w=width/clip.widthRatio,h=height?height/(clip.heightRatio||.9):w*clip.frameHeight/clip.frameWidth;
-    image.setTexture('brawl-skill-'+kind,frame).setOrigin(flip?1-clip.originX:clip.originX,clip.originY??.5).setVisible(true).setPosition(x,y).setDisplaySize(w,h).setAlpha(alpha).setFlipX(flip).setRotation(angle).setDepth(9950);
+    image.setTexture('brawl-skill-'+kind,frame).setOrigin(flip?1-clip.originX:clip.originX,clip.originY??.5).setVisible(true).setPosition(x,y).setDisplaySize(w,h).setAlpha(alpha).setFlipX(flip).setRotation(angle).setBlendMode(Phaser.BlendModes.NORMAL).setDepth(9950);
     const frames=this.stats.atlasFrames[kind]??=[];if(!frames.includes(frame))frames.push(frame);return true;
   }
-  private sprite(frame:string,x:number,y:number,w:number,h=w,alpha=1,flip=false,angle=0){
+  private sprite(frame:string,x:number,y:number,w:number,h=w,alpha=1,flip=false,angle=0,blend=Phaser.BlendModes.NORMAL){
     const index=this.assets.elementalFx?.frames[frame];if(index===undefined||!this.scene.textures.exists('brawl-elemental')||this.used>=72)return;
     let s=this.sprites[this.used++];if(!s){s=this.scene.add.image(x,y,'brawl-elemental',index);this.sprites.push(s);}
-    s.setTexture('brawl-elemental',index).setOrigin(.5,.5).setVisible(true).setFrame(index).setPosition(x,y).setDisplaySize(w,h).setAlpha(alpha).setFlipX(flip).setRotation(angle).setDepth(9950);
+    s.setTexture('brawl-elemental',index).setOrigin(.5,.5).setVisible(true).setFrame(index).setPosition(x,y).setDisplaySize(w,h).setAlpha(alpha).setFlipX(flip).setRotation(angle).setBlendMode(blend).setDepth(9950);
   }
   private orb(frame:string,x:number,y:number,r:number,time:number,color:number,alpha=1){
     this.g.fillStyle(color,.14*alpha).fillCircle(x,y,r*1.3).fillStyle(color,.18*alpha).fillCircle(x,y,r);
@@ -52,8 +54,53 @@ export class ElementalVFX {
     for(const width of [17,7,2]){this.g.lineStyle(width,width===2?0xffffff:color,alpha*(width===17?.18:.9)).beginPath();
       for(let n=0;n<=12;n++){const q=n/12,j=n===0||n===12?0:Math.sin(n*7+time*18)*18;const px=x+(tx-x)*q+j,py=y+(ty-y)*q+j*.45;n?this.g.lineTo(px,py):this.g.moveTo(px,py);}this.g.strokePath();}
   }
+  private kiCharge(a:Actor,k:any,time:number){
+    const p=kamehamehaPose(a,k,this.assets),q=p.charge,bodyY=a.y/100-a.z/100;
+    this.sprite('gold-aura',a.x/100,bodyY-74,140+q*55,190+q*35,.18+q*.23);
+    // Energy appears once both hands reach the waist; it never jumps from the front.
+    if(p.index===0)return;
+    const radius=(9+q*q*28)*(this.reduced?1:1+Math.sin(time*13)*.025);
+    for(const [size,alpha] of [[1.65,.08],[1.3,.18],[1,.28]])this.g.fillStyle(C.ki,alpha).fillCircle(p.x,p.y,radius*size);
+    this.sprite('ki-head',p.x,p.y,radius*2.6,radius*2.6,.7+q*.3,a.facing<0,0,Phaser.BlendModes.ADD);
+    this.g.fillStyle(0xffffff,.75).fillCircle(p.x,p.y,radius*.33);
+    for(let n=0;n<(this.reduced?2:7);n++){
+      const angle=n*Math.PI*2/7+time*.8,travel=(time*1.8+n/7)%1,r=radius+68*(1-travel);
+      this.g.lineStyle(2,n%2?C.ki:0xffffff,travel*.75).lineBetween(p.x+Math.cos(angle)*r,p.y+Math.sin(angle)*r,p.x+Math.cos(angle)*(r+9),p.y+Math.sin(angle)*(r+9));
+    }
+    this.g.lineStyle(2,0xb6f6ff,.7).strokeCircle(p.x,p.y,radius*(1.05+.1*Math.sin(time*8)));
+  }
+  private kiBeam(a:Actor,k:any,time:number){
+    const p=kamehamehaPose(a,k,this.assets),face=a.facing,end=a.x/100+face*(k.range-12),length=Math.abs(end-p.x);
+    const width=k.beamWidth||150,energy=p.envelope,alpha=.15+.85*energy,pulse=this.reduced?1:1+.025*Math.sin(time*16);
+    const bodyWidth=width*(.48+.52*energy)*pulse;
+    if(!this.beamPoints.length)this.beamPoints=Array.from({length:58},()=>new Phaser.Math.Vector2());
+    // Each band is one continuous ribbon. No repeated energy-ball tiles or joins.
+    for(const [scale,opacity,color] of [[1.55,.06,0x149dff],[1.28,.16,C.ki],[1,.4,0x30cdff],[.78,.65,0x92f4ff],[.48,.97,0xffffff]]){
+      for(let i=0;i<=28;i++){
+        const q=i/28,x=p.x+face*length*q,flare=.36+.64*(1-Math.exp(-q*9));
+        const ripple=this.reduced?0:Math.sin(q*12-time*9)*bodyWidth*.016*Math.sin(q*Math.PI);
+        const half=bodyWidth*scale*flare*.5;
+        this.beamPoints[i].set(x,p.y-half+ripple);this.beamPoints[57-i].set(x,p.y+half+ripple);
+      }
+      this.g.fillStyle(color,opacity*alpha).fillPoints(this.beamPoints,true);
+    }
+    // Fine uninterrupted currents run through the core, flowing from the palms.
+    for(let n=0;n<(this.reduced?1:4);n++){
+      this.g.lineStyle(n?2:3,n%2?0xc0faff:0xffffff,alpha*.6).beginPath();
+      for(let i=0;i<=28;i++){
+        const q=i/28,x=p.x+face*length*q,y=p.y+((n-1.5)*.1+Math.sin(q*9-time*12+n)*.075)*bodyWidth*Math.sin(q*Math.PI);
+        i?this.g.lineTo(x,y):this.g.moveTo(x,y);
+      }
+      this.g.strokePath();
+    }
+    this.g.fillStyle(C.ki,alpha*.28).fillEllipse(end,p.y,bodyWidth*1.4,bodyWidth*1.25);
+    this.sprite('ki-head',end,p.y,bodyWidth*1.65,bodyWidth*1.6,alpha,face<0);
+    this.g.fillStyle(0xc9fbff,alpha*.8).fillCircle(p.x,p.y,bodyWidth*.17).fillStyle(0xffffff,alpha).fillCircle(p.x,p.y,bodyWidth*.075);
+    this.stats.beamWidth=Math.max(this.stats.beamWidth,width);
+  }
   private charge(a:Actor,k:any,time:number){
     const q=Math.min(1,a.actionTick/(k.windup||12)),x=a.x/100,y=a.y/100-a.z/100,color=C[k.element]||0xffffff;
+    if(k.kind==='kamehameha'){this.kiCharge(a,k,time);return;}
     if(k.mechanic==='stretch'){this.stretch(a,k,-1);return;}
     if(this.hasAtlas(k.kind)){
       const above=!!k.orb,ground=this.assets.skillFx?.[k.kind].anchor==='ground';
@@ -72,6 +119,7 @@ export class ElementalVFX {
   }
   private channel(a:Actor,k:any,time:number){
     const x=a.x/100+a.facing*48,y=a.y/100-a.z/100-85,face=a.facing,range=k.range-48,color=k.effect==='cosmic'?0xd578ff:k.effect==='bloodflame'?0xff6eba:C[k.element]||0xffffff;
+    if(k.kind==='kamehameha'){this.kiBeam(a,k,time);return;}
     if(k.mechanic!=='stretch'&&this.hasAtlas(k.kind)){
       const frame=3+Math.floor((a.actionTick-Number(k.windup||12))/4)%3;
       const height=k.mechanic==='beam'?(k.beamWidth||120)*1.25:(k.depth||56)*2.2;
@@ -108,7 +156,7 @@ export class ElementalVFX {
     const face=a.facing,x=a.x/100+face*30,y=a.y/100-a.z/100-85,range=k.range-30;
     let sprite=this.sprites[this.used++];if(!sprite){sprite=this.scene.add.image(x,y,'brawl-skill-'+k.kind);this.sprites.push(sprite);}
     const frame=q<0?0:k.pulses>1?(q<35?1+(Math.floor(q/3)%5):Math.min(7,6+Math.floor((q-35)/8))):Math.min(7,1+Math.floor(q*7/18));
-    sprite.setTexture('brawl-skill-'+k.kind,frame).setOrigin(face<0?1-clip.originX:clip.originX,.5).setPosition(x,y).setDisplaySize(range/clip.widthRatio,k.pulses>1?245:155).setFlipX(face<0).setAlpha(1).setRotation(0).setDepth(9950).setVisible(true);const frames=this.stats.atlasFrames[k.kind]??=[];if(!frames.includes(frame))frames.push(frame);return true;
+    sprite.setTexture('brawl-skill-'+k.kind,frame).setOrigin(face<0?1-clip.originX:clip.originX,.5).setPosition(x,y).setDisplaySize(range/clip.widthRatio,k.pulses>1?245:155).setFlipX(face<0).setAlpha(1).setRotation(0).setBlendMode(Phaser.BlendModes.NORMAL).setDepth(9950).setVisible(true);const frames=this.stats.atlasFrames[k.kind]??=[];if(!frames.includes(frame))frames.push(frame);return true;
   }
   draw(s:BattleState,time:number,dt:number){
     this.used=0;this.g.clear();

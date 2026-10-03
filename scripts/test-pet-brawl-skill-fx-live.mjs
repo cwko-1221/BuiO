@@ -20,7 +20,7 @@ const d=store.load();for(const f of ALL_FIGHTERS)d.petInstances.push({petId:rand
 const manifest=JSON.parse(await fs.readFile('pet-app/public/assets/art/brawl/manifest.json','utf8')),assets=require('../pet-app/lib/brawl/assets.cjs').completeAssets(manifest,ALL_FIGHTERS);
 const port=await new Promise(resolve=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
 const server=spawn(process.execPath,['server.js'],{cwd:path.resolve('.'),env:{...process.env,PORT:String(port),MOCK_AUTH:'0',NODE_ENV:'development',PET_APP_DIST_DIR:process.env.PET_APP_DIST_DIR||path.resolve('pet-app/dist')},stdio:['ignore','pipe','pipe']});
-let logs='',browser,context;server.stdout.on('data',d=>logs+=d);server.stderr.on('data',d=>logs+=d);const errors=[],failed=[],coverage=[],performance=[];
+let logs='',browser,context;server.stdout.on('data',d=>logs+=d);server.stderr.on('data',d=>logs+=d);const errors=[],failed=[],coverage=[],performance=[],animation=[];
 function stateFor(f){const s=createBattle({mode:'practice',fighterId:f.id});s.actors[0].x=32000;s.actors[1].x=62000;return s;}
 try{
   const baseURL=`http://127.0.0.1:${port}`;for(let n=0;n<200;n++){try{if((await fetch(baseURL+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
@@ -30,7 +30,7 @@ try{
   for(const fighter of FIGHTERS.filter(f=>f.rarity==='epic')){const pet=d.petInstances.find(p=>p.speciesId===fighter.id);assert.equal((await context.request.post('/api/pet/brawl/access',{data:{petId:pet.petId,fighterId:fighter.id,mode:'practice'}})).status(),200);}
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('requestfailed',r=>{if(!r.failure()?.errorText.includes('ERR_ABORTED'))failed.push(r.url());});page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   await page.goto('/pet');await page.locator('[data-tab="brawl"]').click();await page.locator('.brawl-fighter').first().waitFor();assert.equal(await page.locator('.brawl-fighter').count(),25);
-  await page.locator('[data-brawl="mode"][data-id="practice"]').click();await page.locator('[data-brawl="start"]').first().click();await page.waitForFunction(()=>window.__petGame?.scene.isActive('Brawl')&&!document.querySelector('.brawl-loading'));
+  await page.locator('.brawl-fighter[data-id="dragon-ball-goku"]').click();await page.locator('[data-brawl="mode"][data-id="practice"]').click();await page.locator('[data-brawl="start"]').first().click();await page.waitForFunction(()=>window.__petGame?.scene.isActive('Brawl')&&!document.querySelector('.brawl-loading'));
   async function reset(f,n,manual=true,face=1){
     const token=randomUUID(),initial=stateFor(f),k=f.skills[n],p=initial.actors[0],target=initial.actors[1],distant=['fissure','rain','lob','tornado','field','trap','barrage','sky-shot'].includes(k.mechanic);
     p.facing=face;if(face<0)p.x=100000;target.x=Math.max(4500,Math.min(120000,p.x+face*(distant?k.range+(k.mechanic==='barrage'?100:0):k.mechanic==='rasengan'?180:260)*100));target.y=p.y+(k.spread?.[0]||0)*100;
@@ -40,6 +40,7 @@ try{
       // Isolated effect-position fixture; public owned selection is verified separately.
       document.querySelector('.brawl-player-hud>b').textContent=f.name['zh-HK'];
       document.querySelectorAll('.brawl-skill .brawl-skill-name').forEach((el,n)=>el.textContent=f.skills[n].name['zh-HK']);
+      f.skills.forEach((k,n)=>document.getElementById('brawlCost'+n).textContent=k.mp+' MP');
     },{initial,assets,f,token});
     try{await page.waitForFunction(({id,token})=>{const scene=window.__petGame.scene.getScene('Brawl');return scene.runtime.qaToken===token&&scene.views.get(1)?.sprite.texture.key.includes(id)&&scene.elemental&&window.__petGame.scene.isActive('Brawl');},{id:f.id,token});}catch(error){const snapshot=await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');return {active:window.__petGame.scene.isActive('Brawl'),token:scene.runtime?.qaToken,kind:scene.runtime?.state.actors[0].kind,views:[...scene.views.entries()].map(([id,v])=>({id,texture:v.sprite.texture.key})),failed:scene.loadFailed,body:document.body.innerText.slice(-1500)};});await fs.writeFile(path.join(out,'reset-failure.json'),JSON.stringify({fighter:f.id,token,snapshot,errors,failed},null,2));await page.screenshot({path:path.join(out,'reset-failure.png')});throw error;}
     if(manual)await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.__normalUpdate=scene.update;scene.update=(_time,delta)=>scene.draw(Math.min(delta,50));scene.sys.sceneUpdate=scene.update;});
@@ -69,22 +70,52 @@ try{
     if(k.kind==='flame-breath')assert.ok(info.flameLength>290);if(k.kind==='rasengan'||k.mechanic==='scan'||k.mechanic==='buff')assert.ok(info.peak>=1);
     await page.screenshot({path:path.join(out,f.id+`-skill${n+1}${face<0?'-left':''}.png`)});coverage.push({fighter:f.id,skill:k.kind,face,...info});
   }
-  console.log('✓ All 49 active dedicated skill textures animate; classic 150px Kamehameha restores its charge orb and mirrored beam head; the public roster and owned API open all 25 fighters');
+  console.log('✓ All 49 active dedicated skill textures animate; thick Kamehameha keeps its mirrored beam head; the public roster and owned API open all 25 fighters');
+  const goku=ALL_FIGHTERS.find(f=>f.id==='dragon-ball-goku'),poseClip=assets.fighters[goku.id].clips.skill1;
+  assert.equal(poseClip.count,8);assert.equal(poseClip.page,1);assert.equal(poseClip.emitters.length,8);
+  for(const face of [1,-1]){
+    await reset(goku,0,true,face);await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.runtime.state.actors[1].y=scene.runtime.state.actors[0].y-10000;scene.runtime.step(128);});const played=new Set();
+    for(const target of [3,10,18,27,32,34,38,43,49,56,70,84,96,99,101,105,107]){
+      const snap=await page.evaluate(({target,face,emitters})=>{
+        const scene=window.__petGame.scene.getScene('Brawl'),s=scene.runtime.state,p=s.actors[0];let safety=0;
+        while(p.action==='skill1'&&p.actionTick<target&&safety++<250){scene.runtime.step(0);scene.draw(16);}
+        scene.draw(0);const view=scene.views.get(p.id).sprite,pose=Number(view.frame.name),emitter=emitters[pose],rect=scene.game.canvas.getBoundingClientRect(),width=scene.game.scale.gameSize.width,height=scene.game.scale.gameSize.height;
+        const start=emitter?p.x/100+face*emitter.x:0,y=emitter?p.y/100-p.z/100+emitter.y:0,end=p.x/100+face*(760-12);
+        return {target,face,action:p.action,tick:p.actionTick,texture:view.texture.key,pose,flip:view.flipX,angle:view.angle,footY:view.y,width:view.displayWidth,height:view.displayHeight,
+          headCount:scene.elemental.sprites.filter(i=>i.visible&&i.texture.key==='brawl-elemental'&&Number(i.frame.name)===6).length,
+          samples:[.28,.38,.48,.58,.68,.78].map(q=>({x:Math.round(rect.left+(start+(end-start)*q-scene.cameras.main.scrollX)*rect.width/width),y:Math.round(rect.top+y*rect.height/height)}))};
+      },{target,face,emitters:poseClip.emitters});
+      if(snap.action==='skill1'){played.add(snap.pose);assert.ok(snap.texture.endsWith('-1'));assert.equal(snap.angle,0);assert.equal(snap.flip,face<0);assert.equal(snap.width,180);assert.equal(snap.height,180);}
+      const file=path.join(out,`goku-cast-${face>0?'right':'left'}-${String(target).padStart(3,'0')}.png`),screen=await page.screenshot({path:file});
+      if([43,56,70,84].includes(target)){
+        assert.equal(snap.headCount,1,'one beam head and no repeated tiles');
+        const {data,info}=await sharp(screen).removeAlpha().raw().toBuffer({resolveWithObject:true});
+        snap.coreColors=snap.samples.map(({x,y})=>[...data.subarray((y*info.width+x)*info.channels,(y*info.width+x)*info.channels+3)]);
+        assert.ok(snap.coreColors.every(c=>c.length===3&&c[0]>210&&c[1]>240&&c[2]>240),'continuous white core: '+JSON.stringify(snap));
+      }
+      animation.push(snap);
+    }
+    assert.deepEqual([...played].sort(),[0,1,2,3,4,5,6,7],'anticipation, charge, release, hold and recovery all play');
+  }
+  await page.evaluate(()=>localStorage.setItem('pet-reduced-motion','1'));await reset(goku,0,true);
+  const reduced=await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.runtime.step(128);for(let n=0;n<55;n++){scene.runtime.step(0);scene.draw(16);}return {enabled:scene.reduced&&scene.elemental.reduced,beamWidth:scene.elemental.stats.beamWidth};});
+  assert.equal(reduced.enabled,true);assert.equal(reduced.beamWidth,150);await page.screenshot({path:path.join(out,'goku-reduced-motion.png')});await page.evaluate(()=>localStorage.removeItem('pet-reduced-motion'));
+  console.log('✓ Eight planted character poses in both directions, 34 timeline screenshots, an uninterrupted white core at four sustained moments and reduced-motion rendering');
   for(const [id,n] of [['spark-hamster',0],['snowfeather-penguin',0],['thunderhorn-goat',1],['coral-seal',0],['dragon-ball-goku',0],['naruto-uzumaki',1]]){
     const f=ALL_FIGHTERS.find(f=>f.id===id);await reset(f,n,false);
-    await page.evaluate(()=>{window.__fxFrameTimes=[];const end=performance.now()+1400;function frame(t){window.__fxFrameTimes.push(t);if(t<end)requestAnimationFrame(frame);}requestAnimationFrame(frame);});
-    await page.keyboard.down(n?'KeyI':'KeyU');await page.waitForTimeout(85);await page.keyboard.up(n?'KeyI':'KeyU');await page.waitForTimeout(1350);
+    await page.evaluate(duration=>{window.__fxFrameTimes=[];const end=performance.now()+duration;function frame(t){window.__fxFrameTimes.push(t);if(t<end)requestAnimationFrame(frame);}requestAnimationFrame(frame);},id==='dragon-ball-goku'?2100:1400);
+    if(id==='dragon-ball-goku'){await page.locator('[data-battle-key="128"]').tap();await page.waitForTimeout(2200);}else{await page.keyboard.down(n?'KeyI':'KeyU');await page.waitForTimeout(85);await page.keyboard.up(n?'KeyI':'KeyU');await page.waitForTimeout(1350);}
     const measured=await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl'),times=window.__fxFrameTimes;return {fps:(times.length-1)*1000/(times.at(-1)-times[0]),ticks:scene.runtime.state.tick,casts:scene.feedback.casts,hits:scene.feedback.hits,peak:scene.elemental.stats.peak};});
     assert.ok(measured.ticks>=45&&measured.casts>0&&measured.fps>=25,JSON.stringify({id,...measured}));performance.push({id,...measured});
   }
-  console.log('✓ Real keyboard casts at normal simulation speed; all six heavy effects maintain at least 25fps in Chrome touch emulation');
+  console.log('✓ Real keyboard and touch casts at normal simulation speed; all six heavy effects maintain at least 25fps in Chrome touch emulation');
   await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');window.__disposedVfx=scene.elemental;scene.scene.stop();});await page.waitForFunction(()=>window.__disposedVfx.sprites.length===0);
   assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);assert.equal(JSON.parse(await fs.readFile(dbFile,'utf8')).petWallets[0].balance,2500);
   const picks=['spark-hamster-skill1','snowfeather-penguin-skill1','dragon-ball-goku-skill1','naruto-uzumaki-skill2'];
   const panels=await Promise.all(picks.map(async (name,n)=>({input:await sharp(path.join(out,name+'.png')).resize(768,576).toBuffer(),left:n%2*768,top:Math.floor(n/2)*576})));
   await sharp({create:{width:1536,height:1152,channels:4,background:'#142337'}}).composite(panels).png().toFile(path.join(out,'showcase.png'));
   for(const name of ['reset-failure.json','reset-failure.png','failure.txt'])await fs.rm(path.join(out,name),{force:true});
-  await fs.writeFile(path.join(out,'results.json'),JSON.stringify({pass:true,coverage,performance,errors,failed,publicFighters:FIGHTERS.length},null,2));
+  await fs.writeFile(path.join(out,'results.json'),JSON.stringify({pass:true,coverage,animation,performance,errors,failed,publicFighters:FIGHTERS.length},null,2));
   await context.close();context=undefined;await page.video().saveAs(path.join(out,'elemental-showcase.webm'));
   console.log('✓ Clean scene disposal, no page/asset failures, unchanged wallet and captured screenshots/video');
 }catch(error){await fs.writeFile(path.join(out,'failure.txt'),error.stack+'\n'+logs);throw error;}finally{await context?.close();await browser?.close();server.kill();await new Promise(r=>server.once('exit',r));assert.ok(path.resolve(temp).startsWith(path.join(os.tmpdir(),'buio-elemental-browser-')));await fs.rm(temp,{recursive:true,force:true});}

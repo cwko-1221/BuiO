@@ -1215,5 +1215,52 @@
       "originY": 0.5,
       "anchor": "center"
     }
+  },
+  "fighterSkillAnimations": {
+    "dragon-ball-goku": {
+      "url": "/pet/assets/art/brawl/goku-kamehameha-poses-5f5d10687156.webp",
+      "frameWidth": 160,
+      "frameHeight": 160,
+      "clips": {
+        "skill1": {
+          "start": 0,
+          "count": 8,
+          "emitters": [
+            {
+              "x": 43.18,
+              "y": -65.3
+            },
+            {
+              "x": -20.16,
+              "y": -56.74
+            },
+            {
+              "x": -22.84,
+              "y": -52.81
+            },
+            {
+              "x": -23.73,
+              "y": -57.81
+            },
+            {
+              "x": 69.22,
+              "y": -67.8
+            },
+            {
+              "x": 69.58,
+              "y": -75.65
+            },
+            {
+              "x": 67.8,
+              "y": -75.29
+            },
+            {
+              "x": 42.64,
+              "y": -64.94
+            }
+          ]
+        }
+      }
+    }
   }
 }

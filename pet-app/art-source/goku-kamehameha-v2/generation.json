@@ -1,0 +1,18 @@
+{
+  "tool": "Codex built-in imagegen",
+  "prompt": "Use case: identity-preserve. Asset type: production transparent 2D browser fighting-game character animation sheet. Input image 1 is the approved in-game Son Goku seed, image 2 is the transparent working reference canvas. Repaint this SAME Goku into ONE COMPLETE EIGHT-POSE KAMEHAMEHA ANIMATION, a strict 4-column by 2-row grid (eight equal cells), chronological row-major. Same recognizable face, black spiky hair, orange gi, blue undershirt, blue belt/wristbands/boots, same youthful chibi proportions and crisp outlined cel-shaded illustration. Full body visible in every cell, every pose faces RIGHT in three-quarter SIDE VIEW, never front-facing. Camera and character body proportions identical across all frames. Feet share a baseline in their cells, body hip centre stays in the same location; generous transparent margins and gutters, no grid lines, scenery, shadow floor, text, labels or numbering. Frame 1: turn into wide stable fighting stance, elbows start bending. Frame 2: bend knees and draw BOTH cupped hands back together to LEFT waist, look right determined. Frame 3: deeper grounded stance, BOTH cupped hands held at rear-left hip, elbows bent, gather energy. Frame 4: peak charge, BOTH hands still close together at rear waist, torso twisted but head looking right. Frame 5: powerful push transition, torso leans forward, BOTH forearms and palms extend to RIGHT at chest height, feet planted. Frame 6: sustained firing pose, BOTH arms fully extended RIGHT, palms close together open facing RIGHT, knees bent and stable. Frame 7: tiny recoil/breath variation of frame 6, SAME planted feet and SAME hand location, both arms remain outstretched RIGHT. Frame 8: gentle recovery, elbows soften and hands lower, settle back into stance while looking right. Hands must be anatomically clear as TWO hands, no extra arms or fingers. Important: render ONLY the character, NO energy ball, glow, aura, beam, dust or effects because these are animated by the engine. Every cell is an isolated full-body coherent character, not eight different characters. A genuine transparent background. Keep max standing heights uniform; crouching genuinely lowers body instead of resizing it. Eight unique sequential poses in one sheet.",
+  "references": [
+    "seed.png",
+    "reference-canvas.png"
+  ],
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "frames": 8
+  },
+  "hashes": {
+    "raw.png": "428b497628004b60e52370c5dd8003f1414e09b5914af227d6075daba313fecf",
+    "seed.png": "4799d85f4302525150d8c0600bc9768deea8432d24815cf7db023448d9888dca",
+    "reference-canvas.png": "eee8d9680a2d6046d67351b4df04279fe88c7153baf288f6f09c393c8d730bfc"
+  }
+}

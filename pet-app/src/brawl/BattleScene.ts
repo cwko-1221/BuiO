@@ -4,6 +4,7 @@ import {VERSION,CLIPS,stageById,fightersForVersion,combatFighterById} from '../.
 import type {Actor,BattleState} from '../../lib/brawl/simulation.mjs';
 import type {BrawlAssets} from './types';
 import {ElementalVFX,usesDedicatedSkillFx} from './ElementalVFX';
+import {kamehamehaPose} from './Kamehameha';
 import {audio} from '../audio';
 interface SceneData {state:BattleState;playerId?:number;assets:BrawlAssets;locale:string;paused:()=>boolean;step:(mask?:number)=>void;loaded:()=>void;failed:()=>void;changed:()=>void}
 interface Effect {kind:string;x:number;y:number;age:number;life:number;color:number;size:number;angle:number;vx:number;vy:number;gravity:number;sprite?:Phaser.GameObjects.Image}
@@ -59,6 +60,10 @@ export class BattleScene extends Phaser.Scene {
   private enemyTextureKey(url:string){return 'brawl-enemies-'+url.split('/').at(-1);}
   private frame(a:Actor){const assets=this.runtime.assets.fighters[a.kind];let action=a.action;
     if(!assets){const sheet=this.runtime.assets.enemySprites?.[a.kind],row=sheet?.row??this.runtime.assets.enemies.rows[a.kind]??0,key=sheet?this.enemyTextureKey(sheet.url):'brawl-enemies',attacking=a.action.startsWith('attack');return {key,frame:row*8+(sheet?(attacking?(a.actionTick<(a.windup||6)?4:Math.min(7,5+Math.floor((a.actionTick-(a.windup||6))/14))):a.action==='walk'||a.action==='run'?1+Math.floor(a.moveTick/9)%3:0):(attacking?4+Math.min(3,Math.floor(a.actionTick/Math.max(1,a.actionDuration)*4)):Math.floor(this.runtime.state.tick/9)%4))};}
+    if(a.kind==='dragon-ball-goku'&&action==='skill1'&&assets.clips.skill1.emitters){
+      const c=assets.clips.skill1,{index}=kamehamehaPose(a,this.fighter(a)?.skills[0],this.runtime.assets);
+      return {key:`brawl-${a.kind}-${c.page}`,frame:c.start+index};
+    }
     if(a.kind==='starpatch-cat'&&this.catKit){
       if(action==='skill1'){const c=assets.clips.attack1,index=a.actionTick<6?1:Math.min(7,3+Math.floor((a.actionTick-6)/4));return {key:`brawl-${a.kind}-${c.page}`,frame:c.start+index};}
       if(action==='skill2'){const t=a.actionTick,c=assets.clips[t<6?'skill1':t<16?'jump':t<=31?'skill2':'rise'],index=t<6?Math.min(3,t):t<16?2:t<=31?2+(Math.floor((t-16)%7/2)%4):Math.min(3,Math.floor((t-32)/4));return {key:`brawl-${a.kind}-${c.page}`,frame:c.start+index};}
@@ -117,7 +122,7 @@ export class BattleScene extends Phaser.Scene {
     if(s.zone!==this.lastZone){this.lastZone=s.zone;this.runtime.changed();}const alive=new Set(s.actors.map(a=>a.id));for(const [id,v] of this.views)if(!alive.has(id)){v.sprite.destroy();v.shadow.destroy();v.bar.destroy();v.status.destroy();this.views.delete(id);}this.ground.clear();
     for(const a of s.actors){const f=this.frame(a);let v=this.views.get(a.id);const size=a.boss&&!a.dummy?246:a.dummy?190:this.runtime.assets.fighters[a.kind]?180:166;let x=a.x/100,y=a.y/100,z=a.z/100;if(a.flightUntil>s.tick)z=Math.min(z,y-300);
       if(!v){v={sprite:this.add.image(x,y,f.key,f.frame).setOrigin(.5,.9),shadow:this.add.ellipse(x,y,size*.46,16,0x152036,.28),bar:this.add.graphics(),status:this.add.text(x,y,'',{fontFamily:'sans-serif',fontSize:'18px',fontStyle:'bold',color:'#f1faff',backgroundColor:'#13253e',padding:{x:6,y:3},stroke:'#13253e',strokeThickness:2}).setOrigin(.5,1).setDepth(10005),trailTick:-1,x,y,z};this.views.set(a.id,v);}if(s.mode==='pvp'&&Math.hypot(x-v.x,y-v.y)<180){const blend=1-Math.exp(-delta/40);x=Phaser.Math.Linear(v.x,x,blend);y=Phaser.Math.Linear(v.y,y,blend);z=Phaser.Math.Linear(v.z,z,blend);}v.x=x;v.y=y;v.z=z;const overlap=a.id!==player.id&&a.y>=player.y&&a.y-player.y<4500&&Math.abs(a.x-player.x)<(a.boss?8500:5000)&&Math.abs(a.z-player.z)<5000;
-      const asset=this.runtime.assets.fighters[a.kind],pet=asset?.runtime==='pet',attacking=a.action.startsWith('attack')||a.action.startsWith('skill'),pulse=pet&&attacking?Math.sin(a.actionTick/Math.max(1,a.actionDuration)*Math.PI):0;
+      const asset=this.runtime.assets.fighters[a.kind],pet=asset?.runtime==='pet',attacking=a.action.startsWith('attack')||a.action.startsWith('skill'),customCast=a.kind==='dragon-ball-goku'&&a.action==='skill1'&&!!asset?.clips.skill1.emitters,pulse=pet&&attacking&&!customCast?Math.sin(a.actionTick/Math.max(1,a.actionDuration)*Math.PI):0;
       v.sprite.setTexture(f.key,f.frame).setOrigin(.5,asset?.originY||.9).setDisplaySize(size*(1+pulse*.07),size*(1-pulse*.04)).setFlipX(this.runtime.assets.fighters[a.kind]||this.runtime.assets.enemySprites?.[a.kind]?a.facing<0:a.facing>0).setPosition(x,y-z).setDepth(y).setAlpha(a.hp<=0?Math.max(0,1-a.actionTick/42):overlap?.6:a.invuln>0&&s.tick%8<4?.55:1).setAngle(a.action==='fall'?a.facing*18:a.action==='hit'?a.facing*-5:pet&&attacking?a.facing*pulse*8:0);
       const statusLabels:[[string,string],number][]=[[[this.runtime.locale==='zh-HK'?'暈眩':'Stunned','#ffa8dd'],a.mindStunUntil],[[this.runtime.locale==='zh-HK'?'冰封':'Frozen','#a6eeff'],a.freezeUntil],[[this.runtime.locale==='zh-HK'?'燃燒':'Burning','#ffc285'],a.burnUntil],[[this.runtime.locale==='zh-HK'?'束縛':'Rooted','#baf6b8'],a.rootUntil],[[this.runtime.locale==='zh-HK'?'麻痺':'Shocked','#fff4a5'],a.shockUntil],[[this.runtime.locale==='zh-HK'?'濕身':'Wet','#b3e8ff'],a.wetUntil],[[this.runtime.locale==='zh-HK'?'減速':'Slowed','#d0def5'],a.slowUntil]];const active=statusLabels.filter(([,until])=>until>s.tick).slice(0,2);v.status.setVisible(a.hp>0&&active.length>0).setPosition(x,y-size*.9-z-12).setText(active.map(([[label],until])=>`${label} ${((until-s.tick)/60).toFixed(1)}s`).join('\n')).setColor(active[0]?.[0][1]||'#ffffff');
       if(a.cloneOwner){v.status.setVisible(false);}
@@ -142,7 +147,11 @@ export class BattleScene extends Phaser.Scene {
     else{const shock=a.boss&&a.kind==='golem'&&a.phase%2===0,range=shock?420:a.boss?155:85;g.fillStyle(red,alpha).fillEllipse(x+(shock?0:a.facing*range*.5),y,range*2,shock?155:a.boss?105:52).lineStyle(3,red,.7).strokeEllipse(x+(shock?0:a.facing*range*.5),y,range*2,shock?155:a.boss?105:52);g.lineStyle(3,gold,.9).strokeEllipse(x,y,range*q*2,(shock?155:60)*q);}}
     if(a.action==='guard')g.lineStyle(3,blue,.7).strokeEllipse(x+a.facing*27,y-65,24,105);if(a.action==='skill1'&&a.actionTick>=10&&a.actionTick<28&&(this.fighter(a)?.skills[0].kind==='dash'||a.kind==='starpatch-cat'&&!this.catKit))g.lineStyle(4,color,.55).lineBetween(x-a.facing*120,y-25,x+a.facing*45,y-25).lineStyle(2,white,.8).lineBetween(x-a.facing*70,y-48,x+a.facing*35,y-48);
     const tick=this.runtime.state.tick;if(a.shield>0&&a.shieldUntil>tick)g.lineStyle(3,color,.65).strokeEllipse(x,y-65,90,145);if(a.hasteUntil>tick)g.lineStyle(2,color,.6).strokeEllipse(x,y,75,23);if(a.slowUntil>tick||a.rootUntil>tick)g.lineStyle(3,blue,.7).strokeEllipse(x,y,58,20);if(a.counterDamage&&a.counterUntil>tick)g.lineStyle(4,white,.8).beginPath().arc(x,y-65,66,Phaser.Math.DegToRad(a.facing>0?-65:115),Phaser.Math.DegToRad(a.facing>0?65:245)).strokePath();
-    const kit=this.fighter(a)?.skills[a.skill];if(kit?.mechanic&&a.action.startsWith('skill')&&a.actionTick<Number(kit.windup||12)){const range=kit.range,depth=Number(kit.depth||35),col=a.team===this.player.team?color:red;g.fillStyle(col,.15).fillRoundedRect(a.facing>0?x:x-range,y-depth,range,depth*2,8).lineStyle(2,col,.6).strokeRoundedRect(a.facing>0?x:x-range,y-depth,range,depth*2,8);}
+    const kit=this.fighter(a)?.skills[a.skill];if(kit?.mechanic&&a.action.startsWith('skill')&&a.actionTick<Number(kit.windup||12)){const range=kit.range,depth=Number(kit.depth||35),col=a.team===this.player.team?color:red;if(kit.kind==='kamehameha'){
+        const power=a.actionTick/Number(kit.windup||32),from=x+a.facing*55,to=x+a.facing*range;
+        g.lineStyle(2,blue,.18+power*.2).lineBetween(from,y-depth,to,y-depth).lineBetween(from,y+depth,to,y+depth);
+        g.lineStyle(2,blue,.2).strokeEllipse(x,y,58+power*28,18+power*8);
+      }else g.fillStyle(col,.15).fillRoundedRect(a.facing>0?x:x-range,y-depth,range,depth*2,8).lineStyle(2,col,.6).strokeRoundedRect(a.facing>0?x:x-range,y-depth,range,depth*2,8);}
     if(a.readUntil>tick)g.lineStyle(2,0xf59bc3,.9).strokeCircle(x,y-170,12);
     if(a.starMarkUntil>this.runtime.state.tick&&a.hp>0)g.lineStyle(2,gold,.8).strokeEllipse(x,y,58,18);
   }

@@ -19,6 +19,13 @@ function completeAssets(manifest,fighters){
     clip('skill1',[...idle.slice(0,2),...happy,...surprise,...walk.slice(0,3)]);clip('skill2',[...idle.slice(0,2),...surprise,...happy,...walk.slice(0,3)]);clip('win',happy);
     assets.fighters[pet.id]={pages:[pet.atlas[0]],clips,frameWidth:layout.frameWidth,frameHeight:layout.frameHeight,originY:pet.anchors?.[0]?.bottom||.94,runtime:'pet'};
   }
+  // Battle-only poses extend the current published pet; other actions stay live.
+  for(const [id,animation] of Object.entries(manifest.fighterSkillAnimations||{})){
+    const fighter=assets.fighters[id];if(!fighter)continue;
+    if(animation.frameWidth!==fighter.frameWidth||animation.frameHeight!==fighter.frameHeight)throw new Error('Incompatible battle pose dimensions: '+id);
+    const page=fighter.pages.length;fighter.pages.push(animation.url);
+    for(const [name,clip] of Object.entries(animation.clips))fighter.clips[name]={...clip,page};
+  }
   return assets;
 }
 module.exports={completeAssets};
