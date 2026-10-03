@@ -52,11 +52,24 @@ try{
     if(k.mechanic==='beam')tick=Number(k.windup)+10;
     if(k.mechanic==='trap')tick=12+k.arm+3;
     if(k.mechanic==='barrage')tick=12+k.arm+20;
-    const info=await page.evaluate(({n,tick})=>{const scene=window.__petGame.scene.getScene('Brawl');scene.runtime.step(n?256:128);for(let i=0;i<tick;i++){scene.runtime.step(0);scene.draw(16);}return {...scene.elemental.stats,texture:scene.views.get(1).sprite.texture.key,atlas:scene.textures.exists('brawl-elemental'),tick:scene.runtime.state.tick};},{n,tick});
-    assert.ok(info.atlas&&info.texture.includes(f.id));assert.ok(info.atlasFrames[k.kind]?.length>=2,JSON.stringify({skill:k.kind,info}));const textures=await page.evaluate(()=>window.__petGame.textures.getTextureKeys().filter(k=>k.startsWith('brawl-skill-')));assert.equal(textures.length,2,'only the selected fighter’s two dedicated textures load');assert.ok(info.peak<=72);const mirrored=await page.evaluate(kind=>window.__petGame.scene.getScene('Brawl').elemental.sprites.filter(s=>s.visible&&s.texture.key==='brawl-skill-'+kind).map(s=>s.flipX),k.kind);if(face<0&&['beam','flamethrower','stretch','rasengan'].includes(k.mechanic))assert.ok(mirrored.includes(true),k.kind+': correct mirror');if(k.kind==='kamehameha')assert.equal(info.beamWidth,150);if(k.kind==='flame-breath')assert.ok(info.flameLength>290);if(k.kind==='rasengan'||k.mechanic==='scan'||k.mechanic==='buff')assert.ok(info.peak>=1);
+    const classic=k.kind==='kamehameha';
+    const info=await page.evaluate(({n,tick,classic,windup})=>{const scene=window.__petGame.scene.getScene('Brawl');let chargeFrames=[];scene.runtime.step(n?256:128);for(let i=0;i<tick;i++){scene.runtime.step(0);scene.draw(16);if(classic&&scene.runtime.state.actors[0].actionTick>0&&scene.runtime.state.actors[0].actionTick<windup)chargeFrames=scene.elemental.sprites.filter(s=>s.visible&&s.texture.key==='brawl-elemental').map(s=>Number(s.frame.name));}return {...scene.elemental.stats,texture:scene.views.get(1).sprite.texture.key,atlas:scene.textures.exists('brawl-elemental'),tick:scene.runtime.state.tick,chargeFrames,beamHeads:classic?scene.elemental.sprites.filter(s=>s.visible&&s.texture.key==='brawl-elemental'&&s.displayWidth>200).map(s=>({x:s.x,flipX:s.flipX})):[],playerX:scene.runtime.state.actors[0].x/100};},{n,tick,classic,windup:Number(k.windup||12)});
+    assert.ok(info.atlas&&info.texture.includes(f.id));
+    const textures=await page.evaluate(()=>window.__petGame.textures.getTextureKeys().filter(k=>k.startsWith('brawl-skill-')));
+    assert.equal(textures.length,f.id==='dragon-ball-goku'?1:2,'only active dedicated textures for the selected fighter load');assert.ok(info.peak<=72);
+    if(classic){
+      assert.equal(info.atlasFrames[k.kind],undefined);assert.ok(!textures.includes('brawl-skill-kamehameha'));
+      assert.ok(info.chargeFrames.includes(assets.elementalFx.frames['gold-aura'])&&info.chargeFrames.includes(assets.elementalFx.frames['ki-head']),'original aura and charge orb: '+JSON.stringify(info.chargeFrames));
+      assert.equal(info.beamWidth,150);assert.ok(info.beamHeads.some(s=>Math.abs(s.x-(info.playerX+face*(k.range-12)))<1&&s.flipX===(face<0)),'original beam head position and direction');
+    }else{
+      assert.ok(info.atlasFrames[k.kind]?.length>=2,JSON.stringify({skill:k.kind,info}));
+      const mirrored=await page.evaluate(kind=>window.__petGame.scene.getScene('Brawl').elemental.sprites.filter(s=>s.visible&&s.texture.key==='brawl-skill-'+kind).map(s=>s.flipX),k.kind);
+      if(face<0&&['beam','flamethrower','stretch','rasengan'].includes(k.mechanic))assert.ok(mirrored.includes(true),k.kind+': correct mirror');
+    }
+    if(k.kind==='flame-breath')assert.ok(info.flameLength>290);if(k.kind==='rasengan'||k.mechanic==='scan'||k.mechanic==='buff')assert.ok(info.peak>=1);
     await page.screenshot({path:path.join(out,f.id+`-skill${n+1}${face<0?'-left':''}.png`)});coverage.push({fighter:f.id,skill:k.kind,face,...info});
   }
-  console.log('✓ All 50 dedicated eight-frame skill textures animate, including 150px Kamehameha and a large held Rasengan; the public roster and owned API open all 25 fighters');
+  console.log('✓ All 49 active dedicated skill textures animate; classic 150px Kamehameha restores its charge orb and mirrored beam head; the public roster and owned API open all 25 fighters');
   for(const [id,n] of [['spark-hamster',0],['snowfeather-penguin',0],['thunderhorn-goat',1],['coral-seal',0],['dragon-ball-goku',0],['naruto-uzumaki',1]]){
     const f=ALL_FIGHTERS.find(f=>f.id===id);await reset(f,n,false);
     await page.evaluate(()=>{window.__fxFrameTimes=[];const end=performance.now()+1400;function frame(t){window.__fxFrameTimes.push(t);if(t<end)requestAnimationFrame(frame);}requestAnimationFrame(frame);});

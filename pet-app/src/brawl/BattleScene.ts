@@ -3,7 +3,7 @@ import {chapterByStage} from '../../lib/brawl/story.mjs';
 import {VERSION,CLIPS,stageById,fightersForVersion,combatFighterById} from '../../lib/brawl/catalog.mjs';
 import type {Actor,BattleState} from '../../lib/brawl/simulation.mjs';
 import type {BrawlAssets} from './types';
-import {ElementalVFX} from './ElementalVFX';
+import {ElementalVFX,usesDedicatedSkillFx} from './ElementalVFX';
 import {audio} from '../audio';
 interface SceneData {state:BattleState;playerId?:number;assets:BrawlAssets;locale:string;paused:()=>boolean;step:(mask?:number)=>void;loaded:()=>void;failed:()=>void;changed:()=>void}
 interface Effect {kind:string;x:number;y:number;age:number;life:number;color:number;size:number;angle:number;vx:number;vy:number;gravity:number;sprite?:Phaser.GameObjects.Image}
@@ -28,7 +28,7 @@ export class BattleScene extends Phaser.Scene {
     const areas=assets.areas?.[state.stageId];if(areas){for(const [zone,url] of areas.slice(0,state.mode==='campaign'?4:1).entries()){const key=`brawl-bg-${state.stageId}-${zone}`;if(!this.textures.exists(key)){this.load.image(key,url);this.ownedTextures.push(key);}}}else{const key=`brawl-bg-${state.stageId}`;if(!this.textures.exists(key)){this.load.image(key,assets.worlds?.[state.stageId]||assets.backgrounds[state.stageId]);this.ownedTextures.push(key);}}
     if(assets.effects&&!this.textures.exists('brawl-vfx')){this.load.spritesheet('brawl-vfx',assets.effects.url,{frameWidth:assets.effects.frameSize,frameHeight:assets.effects.frameSize});this.ownedTextures.push('brawl-vfx');}
     if(assets.elementalFx&&!this.textures.exists('brawl-elemental')){this.load.spritesheet('brawl-elemental',assets.elementalFx.url,{frameWidth:assets.elementalFx.frameSize,frameHeight:assets.elementalFx.frameSize});this.ownedTextures.push('brawl-elemental');}
-    for(const kind of new Set(ids.flatMap(id=>(fightersForVersion(state.version).find(f=>f.id===id)?.skills||[]).map(k=>k.kind)))){const fx=assets.skillFx?.[kind];if(!fx)continue;const key='brawl-skill-'+kind;if(!this.textures.exists(key)){this.load.spritesheet(key,fx.url,{frameWidth:fx.frameWidth,frameHeight:fx.frameHeight});this.ownedTextures.push(key);}}
+    for(const kind of new Set(ids.flatMap(id=>(fightersForVersion(state.version).find(f=>f.id===id)?.skills||[]).map(k=>k.kind)))){const fx=assets.skillFx?.[kind];if(!fx||!usesDedicatedSkillFx(kind))continue;const key='brawl-skill-'+kind;if(!this.textures.exists(key)){this.load.spritesheet(key,fx.url,{frameWidth:fx.frameWidth,frameHeight:fx.frameHeight});this.ownedTextures.push(key);}}
     this.load.on('loaderror',this.onLoadError);
   }
   create(){this.load.off('loaderror',this.onLoadError);this.events.once('shutdown',()=>{this.elemental?.destroy();this.elemental=undefined;this.load.off('loaderror',this.onLoadError);this.effects=[];this.eventQueue=[];this.views.clear();this.clones.clear();for(const key of this.ownedTextures)if(this.textures.exists(key))this.textures.remove(key);});if(this.loadFailed){this.runtime.failed();return;}

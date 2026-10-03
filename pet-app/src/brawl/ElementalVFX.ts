@@ -5,6 +5,8 @@ import type {Actor,BattleState} from '../../lib/brawl/simulation.mjs';
 import type {BrawlAssets} from './types';
 type Burst={event:any;age:number;life:number};
 const C:Record<string,number>={fire:0xff8f28,ice:0x70e5ff,lightning:0xffdd58,water:0x55d9ef,wind:0xadf6ff,earth:0xc99862,nature:0x89eb67,lunar:0xcbb8ff,light:0xffd76a,physical:0xffe1a0,ki:0x56dfff,chakra:0x55cfff,psychic:0xff8fcf};
+// Kamehameha retains its original layered beam, charge orb and flowing light trails.
+export const usesDedicatedSkillFx=(kind:string)=>kind!=='kamehameha';
 // Disposable presentation only: the shared simulation owns all hitboxes and statuses.
 export class ElementalVFX {
   private g:Phaser.GameObjects.Graphics;
@@ -24,7 +26,7 @@ export class ElementalVFX {
       if(this.bursts.length>=32)this.bursts.shift();this.bursts.push({event,age:0,life:event.type==='abilityLink'?.32:.65});
     }
   }
-  private hasAtlas(kind:string){return !!this.assets.skillFx?.[kind]&&this.scene.textures.exists('brawl-skill-'+kind);}
+  private hasAtlas(kind:string){return usesDedicatedSkillFx(kind)&&!!this.assets.skillFx?.[kind]&&this.scene.textures.exists('brawl-skill-'+kind);}
   // Reuse the bounded sprite pool. Transparent padding is excluded from the
   // requested visible size; mirror the anchor as well as the pixels.
   private atlas(kind:string,frame:number,x:number,y:number,width:number,height?:number,alpha=1,flip=false,angle=0){
