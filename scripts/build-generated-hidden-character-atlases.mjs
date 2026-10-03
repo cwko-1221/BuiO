@@ -7,12 +7,13 @@ import {connectedPoses,upperCentre,bounds} from './pet-art/generated-character-s
 import {oppositeSaitamaLegs} from './pet-art/saitama-opposite-legs.mjs';
 
 const ROOT=path.resolve(import.meta.dirname,'..'),CELL=512;
-const IDS=['dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki'];
+const IDS=['dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi'];
 const GROUPS=['front-walk','right-walk','back-walk','front-idle','specials'];
 const WALK=[475,478,475,472,475,478,475,472];
 // Whole-sheet generation can return otherwise coherent poses out of temporal order.
 // Reorder complete poses, never crop/mirror costume details to conceal a bad gait.
 const FRAME_ORDERS={
+ 'monchhichi':{'back-walk':[0,1,2,7,4,5,6,3]},
  'dragon-ball-frieza':{'front-walk':[0,1,2,7,4,5,6,3],'back-walk':[0,1,6,3,7,5,2,4]},
  'one-punch-saitama':{'back-walk':[0,1,2,4,3,5,6,7]},
  'spy-family-anya':{
@@ -114,8 +115,13 @@ for(const id of IDS.filter(id=>!selected||id===selected)){
  for(let row=0;row<5;row++)await review(frames.filter(f=>f.group===GROUPS[row]),row===4?5:4,path.join(artifact,GROUPS[row]+'.png'),GROUPS[row]);
  await review(frames,8,path.join(artifact,'contact-sheet.png'),id);
  const idle=await Promise.all(frames.slice(24,32).map(f=>idleShape(f.tile)));
+ const front=id==='monchhichi'?await Promise.all(frames.slice(0,8).map(f=>idleShape(f.tile))):null;
  const spread=k=>Math.max(...idle.map(f=>f[k]))-Math.min(...idle.map(f=>f[k]));
  const errors=[];
+ if(front){
+  if(Math.abs(median(front.map(f=>f.headWidth))-median(idle.map(f=>f.headWidth)))>2)errors.push('front-to-idle head scale jump; regenerate from matching walk sheet');
+  if(Math.abs(median(front.map(f=>f.height))-median(idle.map(f=>f.height)))>4)errors.push('front-to-idle body scale jump; regenerate from matching walk sheet');
+ }
  const supportChecks={};
  for(const row of [0,2]) {
   const supports=await Promise.all(frames.slice(row*8,row*8+8).map(f=>supportSide(f.tile)));

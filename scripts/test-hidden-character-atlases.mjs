@@ -8,7 +8,7 @@ import {HIDDEN_CHARACTERS,renderHiddenCharacter} from './pet-art/hidden-characte
 const ROOT=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url);
 const {catalog}=require('../pet-app/lib/catalog.js');
 const sha=buffer=>crypto.createHash('sha256').update(buffer).digest('hex');
-for(const character of HIDDEN_CHARACTERS) {
+for(const character of [...HIDDEN_CHARACTERS,{id:'monchhichi'}]) {
  const generated=character.id!=='pikachu';
  const source=path.join(ROOT,'pet-app/art-source/imagegen/baked-wearables',character.id+(generated?'-perfect-v2':'-native-v1'));
  const artifact=path.join(ROOT,'artifacts/premium-character-atlases',character.id,generated?'generated-v2':'');

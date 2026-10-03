@@ -28,9 +28,10 @@ const PREMIUM_PET_IDS = [
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan', 'doraemon',
   'hello-kitty', 'argentina-number-10', 'portugal-number-7', 'pikachu',
   'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
+  'monchhichi',
 ];
 const FIXED_RIG_PET_IDS = new Set(['pikachu','dragon-ball-frieza','one-piece-luffy',
-  'spy-family-anya','one-punch-saitama','naruto-uzumaki']);
+  'spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi']);
 const EXPECTED_PET_IDS = [
   'starpatch-cat', 'cloud-ear-dog', 'golden-retriever-dog', 'pudding-pig',
   'crescent-rabbit', 'bubble-otter', 'mossback-turtle', 'spark-hamster',
@@ -313,7 +314,7 @@ for(const petId of FIXED_RIG_PET_IDS) {
   assert.equal(result.balance,0,`${petId} did not charge exactly 9999`);
   await assert.rejects(()=>repo.setOutfit('S004',result.pet.id,['head-03']),/cannot wear outfits yet/);
 }
-pass('six hidden characters purchase for 9999 and reject outfits through the real repository');
+pass(`${FIXED_RIG_PET_IDS.size} hidden characters purchase for 9999 and reject outfits through the real repository`);
 
 const draws=[];
 for(let index=0;index<10;index+=1) draws.push(await repo.purchaseEgg('S002',{kind:'random',idempotencyKey:`release-draw-${index}`,random:()=>.99}));

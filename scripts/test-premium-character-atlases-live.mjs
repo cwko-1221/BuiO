@@ -14,12 +14,13 @@ const PET_IDS = [
   'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
   'doraemon', 'hello-kitty', 'argentina-number-10', 'portugal-number-7', 'pikachu',
   'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
+  'monchhichi',
 ];
 const selectedPet = process.argv.find((arg) => arg.startsWith('--pet='))?.slice(6);
 const selectedPets = process.argv.find((arg) => arg.startsWith('--pets='))?.slice(7).split(',');
 const RUN_PET_IDS = selectedPets || (selectedPet ? [selectedPet] : PET_IDS);
 assert(RUN_PET_IDS.length && RUN_PET_IDS.every(id=>PET_IDS.includes(id)), 'Unknown premium character selection');
-const NEW_PET_IDS = new Set(['pikachu','dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki']);
+const NEW_PET_IDS = new Set(['pikachu','dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi']);
 const reservePort = () => new Promise((resolve, reject) => {
   const socket = net.createServer(); socket.once('error', reject);
   socket.listen(0, '127.0.0.1', () => {
@@ -32,7 +33,8 @@ const baseURL = `http://127.0.0.1:${port}`;
 const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'buio-premium-atlas-live-'));
 const databaseFile = path.join(tempDir, 'db.json');
 const servedDist = path.join(tempDir, 'pet-dist');
-const artifactDir = path.resolve('artifacts/premium-character-atlases/live');
+const artifactDir = path.resolve(process.argv.find(arg=>arg.startsWith('--artifacts='))?.slice(12)
+  || 'artifacts/premium-character-atlases/live');
 await fs.mkdir(artifactDir, { recursive: true });
 // Express' send module treats the `.codex` segment in a managed-worktree path as a hidden
 // path. Serve the exact production build from this isolated, dot-free directory instead.

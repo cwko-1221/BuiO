@@ -252,6 +252,7 @@ const PET_LIBRARY = [
   ['spy-family-anya','epic','psychic',['安妮亞','安妮亞','安妮亞','安妮亞'],['Anya Forger','Anya Forger','Anya Forger','Anya Forger'],'讀心小星星','Little Telepath','#ef9fb2','anya',9999],
   ['one-punch-saitama','epic','hero',['埼玉','埼玉','埼玉','埼玉'],['Saitama','Saitama','Saitama','Saitama'],'一拳超人','One Punch Man','#eccb39','saitama',9999],
   ['naruto-uzumaki','epic','ninja',['漩渦鳴人','漩渦鳴人','漩渦鳴人','漩渦鳴人'],['Naruto Uzumaki','Naruto Uzumaki','Naruto Uzumaki','Naruto Uzumaki'],'木葉忍者','Leaf Ninja','#f39331','naruto',9999],
+  ['monchhichi','epic','friendship',['Monchhichi','Monchhichi','Monchhichi','Monchhichi'],['Monchhichi','Monchhichi','Monchhichi','Monchhichi'],'絨毛擁抱','Fluffy Hug','#965c36','monchhichi',9999],
 ].map(([id, rarity, element, namesZh, namesEn, talentZh, talentEn, color, body, directPrice]) => ({
   id, rarity, element, names: { 'zh-HK': namesZh, 'en-US': namesEn },
   talent: { 'zh-HK': talentZh, 'en-US': talentEn }, color, body,
@@ -281,6 +282,7 @@ const RELEASED_PET_IDS = new Set([
   'golden-retriever-dog', 'nezuko-kamado', 'dragon-ball-goku', 'crayon-shin-chan',
   'doraemon', 'hello-kitty', 'argentina-number-10', 'portugal-number-7', 'pikachu',
   'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
+  'monchhichi',
 ]);
 const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
 
