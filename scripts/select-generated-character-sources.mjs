@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 const root=path.resolve(import.meta.dirname,'..');
-const ids=new Set(['dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi']);
+const ids=new Set(['dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi','dynasty-warriors-zhao-yun','sword-art-online-kirito']);
 const groups=new Set(['front-walk','right-walk','back-walk','front-idle','specials']);
 assert(process.argv[2], 'Pass a local source-selection JSON array');
 const selections=JSON.parse(await fs.readFile(path.resolve(process.argv[2]),'utf8'));

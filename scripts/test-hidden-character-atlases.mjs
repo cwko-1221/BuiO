@@ -5,10 +5,12 @@ import path from 'node:path';
 import {createRequire} from 'node:module';
 import sharp from 'sharp';
 import {HIDDEN_CHARACTERS,renderHiddenCharacter} from './pet-art/hidden-character-rigs.mjs';
+import {oppositeZhaoLegs} from './pet-art/zhao-yun-opposite-legs.mjs';
 const ROOT=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url);
 const {catalog}=require('../pet-app/lib/catalog.js');
 const sha=buffer=>crypto.createHash('sha256').update(buffer).digest('hex');
-for(const character of [...HIDDEN_CHARACTERS,{id:'monchhichi'}]) {
+for(const character of [...HIDDEN_CHARACTERS,{id:'monchhichi'},
+ {id:'dynasty-warriors-zhao-yun'},{id:'sword-art-online-kirito'}]) {
  const generated=character.id!=='pikachu';
  const source=path.join(ROOT,'pet-app/art-source/imagegen/baked-wearables',character.id+(generated?'-perfect-v2':'-native-v1'));
  const artifact=path.join(ROOT,'artifacts/premium-character-atlases',character.id,generated?'generated-v2':'');
@@ -17,6 +19,11 @@ for(const character of [...HIDDEN_CHARACTERS,{id:'monchhichi'}]) {
  assert.equal(meta.width,4096);assert.equal(meta.height,4096);assert.equal(meta.channels,4);assert(meta.hasAlpha);
  const report=JSON.parse(await fs.readFile(path.join(artifact,'build-report.json'),'utf8'));
  assert.equal(report.atlasHash,sha(atlas));
+ if(character.id==='dynasty-warriors-zhao-yun')for(const frame of [4,5]){
+  const before=await fs.readFile(path.join(source,'processed',String(frame).padStart(2,'0')+'-before-opposite.png'));
+  assert.equal(sha(before),report.frames[frame].oppositeLegCorrection.inputHash);
+  assert.equal(sha(await oppositeZhaoLegs(before)),report.frames[frame].hash);
+ }
  assert.equal(new Set(report.frames.slice(0,32).map(f=>f.scale)).size,1,character.id+': per-frame motion scaling');
  for(let frame=0;frame<64;frame++){
  const {data}=await sharp(atlas).extract({left:frame%8*512,top:Math.floor(frame/8)*512,width:512,height:512}).ensureAlpha().raw().toBuffer({resolveWithObject:true});

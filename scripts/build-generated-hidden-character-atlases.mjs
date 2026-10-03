@@ -5,14 +5,17 @@ import crypto from 'node:crypto';
 import sharp from 'sharp';
 import {connectedPoses,upperCentre,bounds} from './pet-art/generated-character-source.mjs';
 import {oppositeSaitamaLegs} from './pet-art/saitama-opposite-legs.mjs';
+import {oppositeZhaoLegs} from './pet-art/zhao-yun-opposite-legs.mjs';
 
 const ROOT=path.resolve(import.meta.dirname,'..'),CELL=512;
-const IDS=['dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi'];
+const IDS=['dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi','dynasty-warriors-zhao-yun','sword-art-online-kirito'];
 const GROUPS=['front-walk','right-walk','back-walk','front-idle','specials'];
 const WALK=[475,478,475,472,475,478,475,472];
 // Whole-sheet generation can return otherwise coherent poses out of temporal order.
 // Reorder complete poses, never crop/mirror costume details to conceal a bad gait.
 const FRAME_ORDERS={
+ 'dynasty-warriors-zhao-yun':{'back-walk':[0,5,2,3,4,1,6,7]},
+ 'sword-art-online-kirito':{'back-walk':[0,1,2,7,4,5,6,3]},
  'monchhichi':{'back-walk':[0,1,2,7,4,5,6,3]},
  'dragon-ball-frieza':{'front-walk':[0,1,2,7,4,5,6,3],'back-walk':[0,1,6,3,7,5,2,4]},
  'one-punch-saitama':{'back-walk':[0,1,2,4,3,5,6,7]},
@@ -83,7 +86,11 @@ for(const id of IDS.filter(id=>!selected||id===selected)){
   const poses=await connectedPoses(raw,name==='specials'?5:8,name==='specials'?1:2);
   // Convert generated raster pixel density to 512px logical source units.
   // This is ONE uniform conversion for the entire sheet, never per-frame resizing.
-  const density=name==='specials'?1:1024/poses.sourceHeight;
+  // These spacing-only side revisions have a wider transparent gutter. Calibrate
+  // the page's single pixel density to the approved 500px logical standing height;
+  // every pose on that page retains the same conversion (never individual fitting).
+  const gutterCalibration=['dynasty-warriors-zhao-yun','sword-art-online-kirito'].includes(id)&&name==='right-walk';
+  const density=name==='specials'?1:gutterCalibration?500/median(poses.frames.map(f=>f.height)):1024/poses.sourceHeight;
   const order=FRAME_ORDERS[id]?.[name]??poses.frames.map((_,i)=>i);
   assert.equal(new Set(order).size,poses.frames.length,'Invalid complete-pose ordering');
   const frames=await Promise.all(order.map(async sourcePhase=>{
@@ -94,7 +101,8 @@ for(const id of IDS.filter(id=>!selected||id===selected)){
  }
  const motion=groups.slice(0,4).flatMap(g=>g.frames);
  const extents=await Promise.all(motion.map(async f=>{const c=await upperCentre(f.buffer);return Math.max(c,f.width-c);}));
- const motionScale=Math.min(430/Math.max(...motion.map(f=>f.height)),238/Math.max(...extents));
+ const referenceHeight=id==='dynasty-warriors-zhao-yun'?508:0;
+ const motionScale=Math.min(430/Math.max(referenceHeight,...motion.map(f=>f.height)),238/Math.max(...extents));
  const upright=groups[4].frames.filter((_,i)=>[0,1,4].includes(i));
  const specialExtents=await Promise.all(groups[4].frames.map(async f=>{const c=await upperCentre(f.buffer);return Math.max(c,f.width-c);}));
  const specialScale=Math.min(median(groups[0].frames.map(f=>f.height))*motionScale/median(upright.map(f=>f.height)),238/Math.max(...specialExtents),430/Math.max(...groups[4].frames.map(f=>f.height)));
@@ -112,10 +120,18 @@ for(const id of IDS.filter(id=>!selected||id===selected)){
   f.hash=hash(f.tile);f.oppositeLegCorrection=true;
   await fs.writeFile(path.join(source,'processed','05.png'),f.tile);
  }
+ if(id==='dynasty-warriors-zhao-yun')for(const index of [4,5]){
+  const f=frames[index],inputHash=hash(f.tile);
+  await fs.writeFile(path.join(source,'processed',String(index).padStart(2,'0')+'-before-opposite.png'),f.tile);
+  f.tile=await oppositeZhaoLegs(f.tile);
+  f.bounds=await bounds(f.tile);f.runtime=await bounds(await sharp(f.tile).resize(160,160).png().toBuffer(),16);
+  f.hash=hash(f.tile);f.oppositeLegCorrection={method:'symmetric trouser/knee-guard seam',upperUnchangedThrough:385,axisTwice:500,inputHash};
+  await fs.writeFile(path.join(source,'processed',String(index).padStart(2,'0')+'.png'),f.tile);
+ }
  for(let row=0;row<5;row++)await review(frames.filter(f=>f.group===GROUPS[row]),row===4?5:4,path.join(artifact,GROUPS[row]+'.png'),GROUPS[row]);
  await review(frames,8,path.join(artifact,'contact-sheet.png'),id);
  const idle=await Promise.all(frames.slice(24,32).map(f=>idleShape(f.tile)));
- const front=id==='monchhichi'?await Promise.all(frames.slice(0,8).map(f=>idleShape(f.tile))):null;
+ const front=['monchhichi','dynasty-warriors-zhao-yun','sword-art-online-kirito'].includes(id)?await Promise.all(frames.slice(0,8).map(f=>idleShape(f.tile))):null;
  const spread=k=>Math.max(...idle.map(f=>f[k]))-Math.min(...idle.map(f=>f[k]));
  const errors=[];
  if(front){

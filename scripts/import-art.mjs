@@ -93,6 +93,7 @@ const PREMIUM_PET_IDS = [
   'hello-kitty', 'argentina-number-10', 'portugal-number-7', 'pikachu',
   'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
   'monchhichi',
+  'dynasty-warriors-zhao-yun', 'sword-art-online-kirito',
 ];
 const PREMIUM_PET_LAYOUT = {
   columns: 8, rows: 5, cell: ATLAS_CELL, fps: 10,

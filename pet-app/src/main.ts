@@ -42,6 +42,7 @@ const MYSTERY_PET_IDS = new Set([
   'doraemon', 'hello-kitty', 'argentina-number-10', 'portugal-number-7', 'pikachu',
   'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
   'monchhichi',
+  'dynasty-warriors-zhao-yun', 'sword-art-online-kirito',
 ]);
 const COIN_PUSHER_DROP_COST = 1;
 type CoinPusherRewardOrigin = { x: number; y: number };

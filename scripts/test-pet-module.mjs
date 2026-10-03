@@ -29,9 +29,11 @@ const PREMIUM_PET_IDS = [
   'hello-kitty', 'argentina-number-10', 'portugal-number-7', 'pikachu',
   'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
   'monchhichi',
+  'dynasty-warriors-zhao-yun', 'sword-art-online-kirito',
 ];
 const FIXED_RIG_PET_IDS = new Set(['pikachu','dragon-ball-frieza','one-piece-luffy',
-  'spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi']);
+  'spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi',
+  'dynasty-warriors-zhao-yun','sword-art-online-kirito']);
 const EXPECTED_PET_IDS = [
   'starpatch-cat', 'cloud-ear-dog', 'golden-retriever-dog', 'pudding-pig',
   'crescent-rabbit', 'bubble-otter', 'mossback-turtle', 'spark-hamster',
