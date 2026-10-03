@@ -1,3 +1,4 @@
+import {enemyKit} from '../../lib/brawl/enemy-combat.mjs';
 import Phaser from 'phaser';
 import {VERSION,fightersForVersion,combatFighterById} from '../../lib/brawl/catalog.mjs';
 import type {Actor,BattleState} from '../../lib/brawl/simulation.mjs';
@@ -72,9 +73,9 @@ export class ElementalVFX {
   }
   draw(s:BattleState,time:number,dt:number){
     this.used=0;this.g.clear();
-    if(!['brawl-v7','brawl-v8'].includes(s.version)){this.sprites.forEach(sprite=>sprite.setVisible(false));this.bursts=[];this.stats.sprites=0;return;}
-    for(const a of s.actors){const fighter=s.version===VERSION?combatFighterById(a.kind):fightersForVersion(s.version).find(f=>f.id===a.kind),k=fighter?.skills[a.skill] as any,x=a.x/100,y=a.y/100-a.z/100;
-      if(k?.element&&a.action.startsWith('skill')){
+    if(!['brawl-v7','brawl-v8','brawl-v9'].includes(s.version)){this.sprites.forEach(sprite=>sprite.setVisible(false));this.bursts=[];this.stats.sprites=0;return;}
+    for(const a of s.actors){const fighter=s.version===VERSION?combatFighterById(a.kind):fightersForVersion(s.version).find(f=>f.id===a.kind),k=(fighter?.skills[a.skill]||(s.version===VERSION?enemyKit(a):undefined)) as any,x=a.x/100,y=a.y/100-a.z/100;
+      if(k?.element&&(a.action.startsWith('skill')||!fighter&&a.action.startsWith('attack'))){
         const wind=Number(k.windup||12),end=wind+(Number(k.pulses||1)-1)*Number(k.period||8)+18;
         if(a.actionTick<wind)this.charge(a,k,time);
         else if(['flamethrower','beam','stretch'].includes(k.mechanic!)&&a.actionTick<end)this.channel(a,k,time);

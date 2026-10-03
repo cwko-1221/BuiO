@@ -282,7 +282,24 @@
   "backgrounds": {
     "sunny-training": "/pet/assets/art/brawl/sunny-training-c173a8efada1.webp",
     "windbell-forest": "/pet/assets/art/brawl/windbell-forest-3e0161c4fe86.webp",
-    "starcrystal-cave": "/pet/assets/art/brawl/starcrystal-cave-682afdef9d89.webp"
+    "starcrystal-cave": "/pet/assets/art/brawl/starcrystal-cave-682afdef9d89.webp",
+    "starlamp-harbor": "/pet/assets/art/brawl/adventure-starlamp-harbor-card-e0c0dd3c6b2a.webp",
+    "rainleaf-marsh": "/pet/assets/art/brawl/adventure-rainleaf-marsh-card-767c44a2d3fa.webp",
+    "sunken-tide-city": "/pet/assets/art/brawl/adventure-sunken-tide-city-card-282807db92ca.webp",
+    "coral-archive": "/pet/assets/art/brawl/adventure-coral-archive-card-0cccb06049c3.webp",
+    "storm-beacon": "/pet/assets/art/brawl/adventure-storm-beacon-card-4dc37b2cfc72.webp",
+    "ember-forge": "/pet/assets/art/brawl/adventure-ember-forge-card-ddd4b63bd019.webp",
+    "ashen-clocktower": "/pet/assets/art/brawl/adventure-ashen-clocktower-card-7ad638c176e8.webp",
+    "frost-mirror-field": "/pet/assets/art/brawl/adventure-frost-mirror-field-card-8a2f970686ae.webp",
+    "winter-rail": "/pet/assets/art/brawl/adventure-winter-rail-card-13f26dba0989.webp",
+    "thunder-ridge": "/pet/assets/art/brawl/adventure-thunder-ridge-card-0a7f780da46f.webp",
+    "hanging-garden": "/pet/assets/art/brawl/adventure-hanging-garden-card-4a50b3393856.webp",
+    "hourglass-labyrinth": "/pet/assets/art/brawl/adventure-hourglass-labyrinth-card-4405d85a6ed1.webp",
+    "nameless-theater": "/pet/assets/art/brawl/adventure-nameless-theater-card-61383e501cc6.webp",
+    "moon-gate-fortress": "/pet/assets/art/brawl/adventure-moon-gate-fortress-card-6b32b56b6e61.webp",
+    "echo-battlefield": "/pet/assets/art/brawl/adventure-echo-battlefield-card-f66269879ba0.webp",
+    "starbridge-duel": "/pet/assets/art/brawl/adventure-starbridge-duel-card-83ef5a20d9f3.webp",
+    "dawn-star-court": "/pet/assets/art/brawl/adventure-dawn-star-court-card-2e0ad0022972.webp"
   },
   "worlds": {
     "sunny-training": "/pet/assets/art/brawl/world-sunny-training-2d700535659d.webp",
@@ -344,5 +361,313 @@
       "bloodflame": 18,
       "pressure-wave": 19
     }
+  },
+  "areas": {
+    "sunny-training": [
+      "/pet/assets/art/brawl/adventure-sunny-training-1-df55f1047bc0.webp",
+      "/pet/assets/art/brawl/adventure-sunny-training-2-436ae0d12690.webp",
+      "/pet/assets/art/brawl/adventure-sunny-training-3-0f8d9204d6d7.webp",
+      "/pet/assets/art/brawl/adventure-sunny-training-4-cff0679d5f91.webp"
+    ],
+    "windbell-forest": [
+      "/pet/assets/art/brawl/adventure-windbell-forest-1-30d4c6e4c97e.webp",
+      "/pet/assets/art/brawl/adventure-windbell-forest-2-3ff5a484b83d.webp",
+      "/pet/assets/art/brawl/adventure-windbell-forest-3-2e6dc3d2220f.webp",
+      "/pet/assets/art/brawl/adventure-windbell-forest-4-22b09f873c7c.webp"
+    ],
+    "starcrystal-cave": [
+      "/pet/assets/art/brawl/adventure-starcrystal-cave-1-21aa295dc3a2.webp",
+      "/pet/assets/art/brawl/adventure-starcrystal-cave-2-3b9d23e03485.webp",
+      "/pet/assets/art/brawl/adventure-starcrystal-cave-3-8d4fbe78eb65.webp",
+      "/pet/assets/art/brawl/adventure-starcrystal-cave-4-f0adb463efef.webp"
+    ],
+    "starlamp-harbor": [
+      "/pet/assets/art/brawl/adventure-starlamp-harbor-1-e7657e7c491d.webp",
+      "/pet/assets/art/brawl/adventure-starlamp-harbor-2-a295cba064f5.webp",
+      "/pet/assets/art/brawl/adventure-starlamp-harbor-3-2d02bbd1d898.webp",
+      "/pet/assets/art/brawl/adventure-starlamp-harbor-4-1d4f14ccfc0e.webp"
+    ],
+    "rainleaf-marsh": [
+      "/pet/assets/art/brawl/adventure-rainleaf-marsh-1-5f97d25897f2.webp",
+      "/pet/assets/art/brawl/adventure-rainleaf-marsh-2-89ec7b78e855.webp",
+      "/pet/assets/art/brawl/adventure-rainleaf-marsh-3-abcd2316b787.webp",
+      "/pet/assets/art/brawl/adventure-rainleaf-marsh-4-48efdbb15e30.webp"
+    ],
+    "sunken-tide-city": [
+      "/pet/assets/art/brawl/adventure-sunken-tide-city-1-0144cb74233d.webp",
+      "/pet/assets/art/brawl/adventure-sunken-tide-city-2-6e5ff56e54e8.webp",
+      "/pet/assets/art/brawl/adventure-sunken-tide-city-3-b102706136bc.webp",
+      "/pet/assets/art/brawl/adventure-sunken-tide-city-4-499620b3aa75.webp"
+    ],
+    "coral-archive": [
+      "/pet/assets/art/brawl/adventure-coral-archive-1-5d7e136972a7.webp",
+      "/pet/assets/art/brawl/adventure-coral-archive-2-39253de2aa5a.webp",
+      "/pet/assets/art/brawl/adventure-coral-archive-3-863d164d8556.webp",
+      "/pet/assets/art/brawl/adventure-coral-archive-4-bd955c58f97b.webp"
+    ],
+    "storm-beacon": [
+      "/pet/assets/art/brawl/adventure-storm-beacon-1-c50bfda8fa39.webp",
+      "/pet/assets/art/brawl/adventure-storm-beacon-2-08d29876a727.webp",
+      "/pet/assets/art/brawl/adventure-storm-beacon-3-973d9650ef36.webp",
+      "/pet/assets/art/brawl/adventure-storm-beacon-4-ed327bec8e10.webp"
+    ],
+    "ember-forge": [
+      "/pet/assets/art/brawl/adventure-ember-forge-1-2544cb718597.webp",
+      "/pet/assets/art/brawl/adventure-ember-forge-2-647d7e51d83d.webp",
+      "/pet/assets/art/brawl/adventure-ember-forge-3-e399e50cd59d.webp",
+      "/pet/assets/art/brawl/adventure-ember-forge-4-96ce48875b7c.webp"
+    ],
+    "ashen-clocktower": [
+      "/pet/assets/art/brawl/adventure-ashen-clocktower-1-ef75b0ee27de.webp",
+      "/pet/assets/art/brawl/adventure-ashen-clocktower-2-351690269721.webp",
+      "/pet/assets/art/brawl/adventure-ashen-clocktower-3-670085bd337a.webp",
+      "/pet/assets/art/brawl/adventure-ashen-clocktower-4-363ff218c922.webp"
+    ],
+    "frost-mirror-field": [
+      "/pet/assets/art/brawl/adventure-frost-mirror-field-1-56201b2f2051.webp",
+      "/pet/assets/art/brawl/adventure-frost-mirror-field-2-c17231616aa6.webp",
+      "/pet/assets/art/brawl/adventure-frost-mirror-field-3-a0a0db48f4ae.webp",
+      "/pet/assets/art/brawl/adventure-frost-mirror-field-4-8541095079a6.webp"
+    ],
+    "winter-rail": [
+      "/pet/assets/art/brawl/adventure-winter-rail-1-b6d61b83092f.webp",
+      "/pet/assets/art/brawl/adventure-winter-rail-2-64f43fb2598b.webp",
+      "/pet/assets/art/brawl/adventure-winter-rail-3-debc87cc9448.webp",
+      "/pet/assets/art/brawl/adventure-winter-rail-4-c549e08d3703.webp"
+    ],
+    "thunder-ridge": [
+      "/pet/assets/art/brawl/adventure-thunder-ridge-1-bcae7db3bef5.webp",
+      "/pet/assets/art/brawl/adventure-thunder-ridge-2-580091e64a05.webp",
+      "/pet/assets/art/brawl/adventure-thunder-ridge-3-73de28857a63.webp",
+      "/pet/assets/art/brawl/adventure-thunder-ridge-4-fabaa5b9d2e4.webp"
+    ],
+    "hanging-garden": [
+      "/pet/assets/art/brawl/adventure-hanging-garden-1-91fd3d3e7ca8.webp",
+      "/pet/assets/art/brawl/adventure-hanging-garden-2-21db88d38065.webp",
+      "/pet/assets/art/brawl/adventure-hanging-garden-3-c15bdde5464d.webp",
+      "/pet/assets/art/brawl/adventure-hanging-garden-4-e6a3967af5a9.webp"
+    ],
+    "hourglass-labyrinth": [
+      "/pet/assets/art/brawl/adventure-hourglass-labyrinth-1-e517b98086ea.webp",
+      "/pet/assets/art/brawl/adventure-hourglass-labyrinth-2-fe2f81cf34b5.webp",
+      "/pet/assets/art/brawl/adventure-hourglass-labyrinth-3-c44b73cb5093.webp",
+      "/pet/assets/art/brawl/adventure-hourglass-labyrinth-4-cb1e6cb33b99.webp"
+    ],
+    "nameless-theater": [
+      "/pet/assets/art/brawl/adventure-nameless-theater-1-bbea5f3c58c9.webp",
+      "/pet/assets/art/brawl/adventure-nameless-theater-2-7a460cf32cc2.webp",
+      "/pet/assets/art/brawl/adventure-nameless-theater-3-9cb71d6aff27.webp",
+      "/pet/assets/art/brawl/adventure-nameless-theater-4-7e5923c9b0d0.webp"
+    ],
+    "moon-gate-fortress": [
+      "/pet/assets/art/brawl/adventure-moon-gate-fortress-1-b4af0c4d78aa.webp",
+      "/pet/assets/art/brawl/adventure-moon-gate-fortress-2-7e970a1b9ed2.webp",
+      "/pet/assets/art/brawl/adventure-moon-gate-fortress-3-17eef13db168.webp",
+      "/pet/assets/art/brawl/adventure-moon-gate-fortress-4-4d6c053feb3f.webp"
+    ],
+    "echo-battlefield": [
+      "/pet/assets/art/brawl/adventure-echo-battlefield-1-731b2ff573d8.webp",
+      "/pet/assets/art/brawl/adventure-echo-battlefield-2-2e816c56f159.webp",
+      "/pet/assets/art/brawl/adventure-echo-battlefield-3-b8d3f0073464.webp",
+      "/pet/assets/art/brawl/adventure-echo-battlefield-4-a944e5a8cd97.webp"
+    ],
+    "starbridge-duel": [
+      "/pet/assets/art/brawl/adventure-starbridge-duel-1-028b0a6e2073.webp",
+      "/pet/assets/art/brawl/adventure-starbridge-duel-2-97a3eae35282.webp",
+      "/pet/assets/art/brawl/adventure-starbridge-duel-3-d0bbe582ecf6.webp",
+      "/pet/assets/art/brawl/adventure-starbridge-duel-4-023e322992fb.webp"
+    ],
+    "dawn-star-court": [
+      "/pet/assets/art/brawl/adventure-dawn-star-court-1-25aba6c35b34.webp",
+      "/pet/assets/art/brawl/adventure-dawn-star-court-2-36590a969daa.webp",
+      "/pet/assets/art/brawl/adventure-dawn-star-court-3-0ad937e9bf11.webp",
+      "/pet/assets/art/brawl/adventure-dawn-star-court-4-9314a9f3cec5.webp"
+    ]
+  },
+  "enemySprites": {
+    "paper-sentry": {
+      "url": "/pet/assets/art/brawl/adventure-paper-sentry-4820cc2b0ae9.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "reed-frog": {
+      "url": "/pet/assets/art/brawl/adventure-reed-frog-85bb88a3581a.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "tide-crab": {
+      "url": "/pet/assets/art/brawl/adventure-tide-crab-17fe0f90bb64.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "bubble-jelly": {
+      "url": "/pet/assets/art/brawl/adventure-bubble-jelly-7e9350e00e5b.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "ember-salamander": {
+      "url": "/pet/assets/art/brawl/adventure-ember-salamander-94525a1373a4.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "gear-beetle": {
+      "url": "/pet/assets/art/brawl/adventure-gear-beetle-d19221bf7a89.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "frost-bat": {
+      "url": "/pet/assets/art/brawl/adventure-frost-bat-b592a83fb5b6.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "storm-kite": {
+      "url": "/pet/assets/art/brawl/adventure-storm-kite-70b802ca1853.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "root-pod": {
+      "url": "/pet/assets/art/brawl/adventure-root-pod-597e834c08e3.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "sand-scarab": {
+      "url": "/pet/assets/art/brawl/adventure-sand-scarab-20027ccde3f3.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "blank-puppet": {
+      "url": "/pet/assets/art/brawl/adventure-blank-puppet-e65264295ebe.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "echo-wisp": {
+      "url": "/pet/assets/art/brawl/adventure-echo-wisp-45568512ccb5.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "letter-knight": {
+      "url": "/pet/assets/art/brawl/adventure-letter-knight-34e917297192.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "reed-heron": {
+      "url": "/pet/assets/art/brawl/adventure-reed-heron-58547bb1ae15.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "tide-shell": {
+      "url": "/pet/assets/art/brawl/adventure-tide-shell-3ade110da2ba.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "ink-octopus": {
+      "url": "/pet/assets/art/brawl/adventure-ink-octopus-84e5040e8ac3.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "beacon-heron": {
+      "url": "/pet/assets/art/brawl/adventure-beacon-heron-1aebfdaa774d.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "furnace-lion": {
+      "url": "/pet/assets/art/brawl/adventure-furnace-lion-4cbfbad23d3a.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "clock-owl": {
+      "url": "/pet/assets/art/brawl/adventure-clock-owl-c74b274e6ccd.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "frost-mirror-fox": {
+      "url": "/pet/assets/art/brawl/adventure-frost-mirror-fox-7a412eaf5c71.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "snow-mammoth": {
+      "url": "/pet/assets/art/brawl/adventure-snow-mammoth-4a60b2aace66.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "thunder-ray": {
+      "url": "/pet/assets/art/brawl/adventure-thunder-ray-dc48f90d7ec4.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "root-stag": {
+      "url": "/pet/assets/art/brawl/adventure-root-stag-8c9c556c47b5.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "hourglass-sphinx": {
+      "url": "/pet/assets/art/brawl/adventure-hourglass-sphinx-1b1aba170001.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "moon-gate-knight": {
+      "url": "/pet/assets/art/brawl/adventure-moon-gate-knight-f7e18a46491f.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "echo-hydra": {
+      "url": "/pet/assets/art/brawl/adventure-echo-hydra-a055dfe04671.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "moon-ferryman": {
+      "url": "/pet/assets/art/brawl/adventure-moon-ferryman-d7d29dfc7643.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "echo-heart": {
+      "url": "/pet/assets/art/brawl/adventure-echo-heart-6967e467b837.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    },
+    "blank-marionette": {
+      "url": "/pet/assets/art/brawl/adventure-blank-marionette-0304b5038117.webp",
+      "row": 0,
+      "rows": 1,
+      "frames": 8
+    }
+  },
+  "storyPortraits": {
+    "paperfox": "/pet/assets/art/brawl/adventure-portrait-paperfox-47a42f772214.webp",
+    "dragon": "/pet/assets/art/brawl/adventure-portrait-dragon-cfee732ad77f.webp",
+    "tideguide": "/pet/assets/art/brawl/adventure-portrait-tideguide-48bc941ab1bc.webp"
+  },
+  "adventure": {
+    "chapters": 20,
+    "sections": 80,
+    "version": "adventure-v9"
   }
 }

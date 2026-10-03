@@ -13,7 +13,7 @@ export function setupAbility(s,a,k){
 function release(s,a,k,extra={}){s.events.push({type:'skillRelease',actor:a.id,skill:a.skill,kind:k.kind,mechanic:k.mechanic,effect:k.effect,element:k.element,range:k.range,x:a.x/U,y:a.y/U,facing:a.facing,...extra});}
 function status(s,a,t,k){
   if(k.slowTicks)t.slowUntil=Math.max(t.slowUntil||0,s.tick+k.slowTicks);
-  if(k.rootTicks)t.rootUntil=Math.max(t.rootUntil||0,s.tick+(t.boss?Math.min(12,k.rootTicks):k.rootTicks));
+  if(k.rootTicks&&(!k.enemy||s.tick>=(t.rootReadyAt||0))){t.rootUntil=Math.max(t.rootUntil||0,s.tick+(t.boss?Math.min(12,k.rootTicks):k.rootTicks));if(k.enemy)t.rootReadyAt=t.rootUntil+90;}
   if(k.wetTicks||k.element==='water')t.wetUntil=s.tick+(k.wetTicks||150);
   if(k.burnTicks){const fresh=!(t.burnUntil>s.tick);t.burnOwner=a.id;t.burnUntil=Math.max(t.burnUntil||0,s.tick+k.burnTicks);if(fresh){t.burnNext=s.tick+30;s.events.push({type:'elementStatus',actor:t.id,element:'fire',x:t.x/U,y:t.y/U});}}
   if(k.markTicks){t.readOwner=a.id;t.readUntil=s.tick+k.markTicks;}
@@ -25,12 +25,13 @@ function status(s,a,t,k){
       s.events.push({type:'elementStatus',actor:t.id,element:'ice',x:t.x/U,y:t.y/U});
     }
   }
-  if(k.shockTicks)t.shockUntil=Math.max(t.shockUntil||0,s.tick+(t.boss?10:k.shockTicks));
+  if(k.shockTicks&&(!k.enemy||s.tick>=(t.shockReadyAt||0))){t.shockUntil=Math.max(t.shockUntil||0,s.tick+(t.boss?10:k.shockTicks));if(k.enemy)t.shockReadyAt=t.shockUntil+90;}
 }
 function hit(s,a,t,k,c,damage=k.damage,down=false,chain=false){
   const soaked=k.element==='lightning'&&t.wetUntil>s.tick;
+  const before=s.events.length;
   const landed=c.impact(s,a,t,damage+(soaked?3:0),k.knock??(down?11:3),down,chain,{skill:true,element:k.element});
-  if(landed){status(s,a,t,k);if(soaked){t.wetUntil=0;s.events.push({type:'elementStatus',actor:t.id,element:'lightning',x:t.x/U,y:t.y/U});}}
+  if(landed&&s.events.slice(before).some(e=>e.type==='hit'&&e.actor===t.id&&e.source===a.id)){status(s,a,t,k);if(soaked){t.wetUntil=0;s.events.push({type:'elementStatus',actor:t.id,element:'lightning',x:t.x/U,y:t.y/U});}}
   return landed;
 }
 function area(s,a,k,c,x=a.x,y=a.y,r=k.radius||k.range,damage=k.damage,down=false,chain=false){

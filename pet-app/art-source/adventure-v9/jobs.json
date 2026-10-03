@@ -1,0 +1,897 @@
+[
+  {
+    "id": "bg-starlamp-harbor",
+    "kind": "background",
+    "chapter": 4,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 4, Starlamp Harbor. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A magical seaside postal harbor at twilight, warm star lanterns, paper-letter stalls, a weathered postal tower and sealed sea gate. Top-left panel: Homebound Dock, the entry area; top-right: Sealed-Letter Street, a deeper area with a new landmark; bottom-left: Old Post Office, reveal the chapter mystery with another new landmark; bottom-right: Harbor Gate, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-starlamp-harbor.webp",
+    "generatedAt": "2026-10-03T06:18:46.951Z",
+    "sourcePngSha256": "1de46c40a8f4457c59df5104638af6b1b8574207c8eef92f5f819fa2e86f86e9",
+    "archiveSha256": "b59fff26ee7602b6327abff9e198f881b006c924707eef3f4358f61db7c98f06"
+  },
+  {
+    "id": "bg-rainleaf-marsh",
+    "kind": "background",
+    "chapter": 5,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 5, Rainleaf Marsh. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A lush rain-soaked wetland, giant lily pads, purple moss, lost glowing letter fragments under water, a broad reed shrine. Top-left panel: Rainleaf Landing, the entry area; top-right: Moss Trail, a deeper area with a new landmark; bottom-left: Pool of Names, reveal the chapter mystery with another new landmark; bottom-right: Reed Altar, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-rainleaf-marsh.webp",
+    "generatedAt": "2026-10-03T06:22:40.920Z",
+    "sourcePngSha256": "59bbbc6015ec7411014f81243abe1c52fddeda840caa3b573ddfac5d05b64bb5",
+    "archiveSha256": "da49ededc265534ca943bbe35a1d42b9fd86ea5b936cea6ce7a2631b8e3626b7"
+  },
+  {
+    "id": "bg-sunken-tide-city",
+    "kind": "background",
+    "chapter": 6,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 6, Sunken-Tide City. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A breathable magical underwater city with azure domes, coral columns, flooded courtyard reflected in pearl glass, huge shell gate. Top-left panel: Tide-Gate Street, the entry area; top-right: Coral Guardway, a deeper area with a new landmark; bottom-left: Drowned Square, reveal the chapter mystery with another new landmark; bottom-right: Shell Court, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-sunken-tide-city.webp",
+    "generatedAt": "2026-10-03T06:22:41.386Z",
+    "sourcePngSha256": "af02fbb3872bc573c1b5a8ee236f354b59f324538d8e1e1e23bc0c8b2a232cc3",
+    "archiveSha256": "e43494017b8701051e27e70c85c26da827df76c780f69072e280ffba91d9df38"
+  },
+  {
+    "id": "bg-coral-archive",
+    "kind": "background",
+    "chapter": 7,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 7, Coral Archive. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: An underwater coral library, floating illuminated books, indigo ink streams, shelves of shell-bound letters, a circular empty-book dais. Top-left panel: Drifting-Book Hall, the entry area; top-right: Inkflow Shelves, a deeper area with a new landmark; bottom-left: Sealed Reading Room, reveal the chapter mystery with another new landmark; bottom-right: Wordless Lectern, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-coral-archive.webp",
+    "generatedAt": "2026-10-03T06:22:41.872Z",
+    "sourcePngSha256": "97d3d53ca131cfa3c8a08a4b8db923e264587b771fbe7022eee520bf3fdca080",
+    "archiveSha256": "b96d6a426f34e068581dce38db89a643252b786c43d7fc1650377070052762e5"
+  },
+  {
+    "id": "bg-storm-beacon",
+    "kind": "background",
+    "chapter": 8,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 8, Storm Beacon. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A dramatic stormy lighthouse, broad stone sea walkways, broken golden cables, blue-white signal lenses and a windswept beacon platform. Top-left panel: Storm Steps, the entry area; top-right: Broken-Cable Deck, a deeper area with a new landmark; bottom-left: Silent Lamp Room, reveal the chapter mystery with another new landmark; bottom-right: Beacon Summit, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-storm-beacon.webp",
+    "generatedAt": "2026-10-03T06:22:42.353Z",
+    "sourcePngSha256": "931e7a4a5f7b328ec1e2ca7c3d8fef74ad92509568c352eeca8b5e2f6b57d549",
+    "archiveSha256": "842037f9f6a62a4826446174dacc250dbf6c912ca08ad0acdf95ae8c8468cbd0"
+  },
+  {
+    "id": "bg-ember-forge",
+    "kind": "background",
+    "chapter": 9,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 9, Ember Forge. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A grand fantasy forge with molten copper channels, gear machinery, cooling mask moulds, warm orange sparks and a lion-shaped furnace gate. Top-left panel: Copper Channel, the entry area; top-right: Coalwork Hall, a deeper area with a new landmark; bottom-left: Mask Furnace, reveal the chapter mystery with another new landmark; bottom-right: Furnace Gate, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-ember-forge.webp",
+    "generatedAt": "2026-10-03T06:31:08.278Z",
+    "sourcePngSha256": "31fb42c650982f17c7b936c4fd73be979c466ddee44f0da6c22162fd66015e9a",
+    "archiveSha256": "2fce7983cd6d4f4bda211489ded50cdb9cd4a024110848263b48e59a9e871e76"
+  },
+  {
+    "id": "bg-ashen-clocktower",
+    "kind": "background",
+    "chapter": 10,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 10, Ashen Clocktower. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A bronze astronomical clocktower over ash-grey rooftops, giant exposed gears, stopped ivory clock faces, floating golden pendulum hall. Top-left panel: Ashen Entry, the entry area; top-right: Clockwork Steps, a deeper area with a new landmark; bottom-left: Stopped-Clock Room, reveal the chapter mystery with another new landmark; bottom-right: Pendulum Deck, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-ashen-clocktower.webp",
+    "generatedAt": "2026-10-03T06:31:08.776Z",
+    "sourcePngSha256": "5280087c633a9a2335eb3f75b9530a7771810748b517201b5b391e24fc090f07",
+    "archiveSha256": "635243dba74759909a0494a3d2adc24f79a3955d3a707e0d0582a81482c8575c"
+  },
+  {
+    "id": "bg-frost-mirror-field",
+    "kind": "background",
+    "chapter": 11,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 11, Frost-Mirror Fields. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A sparkling snowfield under aurora, enormous ice mirrors reflecting indistinct memories, sapphire crystal arches and silver-blue mirror shrine. Top-left panel: Snow Camp, the entry area; top-right: Reflection Path, a deeper area with a new landmark; bottom-left: Memory-Mirror Hall, reveal the chapter mystery with another new landmark; bottom-right: Mirror Heart, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-frost-mirror-field.webp",
+    "generatedAt": "2026-10-03T06:31:09.242Z",
+    "sourcePngSha256": "f26c2cf655c5a4075bb758d4568f9259889cb8a8576758922e7a333d182774c8",
+    "archiveSha256": "818e63231b55987701527884882b7d61f715531c5175e3ac1ee8e2156187990b"
+  },
+  {
+    "id": "bg-winter-rail",
+    "kind": "background",
+    "chapter": 12,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 12, Winter Rail. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A magical snowbound railway through mountains, broad station platforms, ice-blue track bridges, warm abandoned train carriages and a mammoth-shaped steam engine. Top-left panel: Snowbound Station, the entry area; top-right: Frozen Track, a deeper area with a new landmark; bottom-left: Nameless Carriage, reveal the chapter mystery with another new landmark; bottom-right: Winter Engine, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-winter-rail.webp",
+    "generatedAt": "2026-10-03T06:31:09.750Z",
+    "sourcePngSha256": "a630fda61b4ed9014099fbe18dc33b30a951d565d77b8e240fddfa93cd1a61c1",
+    "archiveSha256": "d0415690397607a676ba1f36c0cff2412f099a42878a84c87094fa02cc6b1dee"
+  },
+  {
+    "id": "bg-thunder-ridge",
+    "kind": "background",
+    "chapter": 13,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 13, Thunder-Ridge Isles. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: Floating storm islands above cobalt clouds, brass lightning rods, sweeping airship sail bridges, an amber star compass and electric sky mast. Top-left panel: Thunder Landing, the entry area; top-right: Electric-Sail Bridge, a deeper area with a new landmark; bottom-left: Broken-Star Eye, reveal the chapter mystery with another new landmark; bottom-right: Thunder Mast, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-thunder-ridge.webp",
+    "generatedAt": "2026-10-03T06:35:52.896Z",
+    "sourcePngSha256": "ad22d7d196f34f80415eb99c2f2feb09d4b850b940115c5ad4f7122660492b46",
+    "archiveSha256": "4a694d9a8115a2179c1bd8242380223ea31d9bcb7e58c1442d65a0d4ffb04296"
+  },
+  {
+    "id": "bg-hanging-garden",
+    "kind": "background",
+    "chapter": 14,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 14, Hanging Gardens. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A surreal suspended garden, upside-down flowering trees, violet roots and glasshouses of nostalgic scenes, golden antler-shaped garden crown. Top-left panel: Inverted Court, the entry area; top-right: Dreamroot Walk, a deeper area with a new landmark; bottom-left: Yesterday’s Glasshouse, reveal the chapter mystery with another new landmark; bottom-right: Unfading Crown, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-hanging-garden.webp",
+    "generatedAt": "2026-10-03T06:35:53.354Z",
+    "sourcePngSha256": "b1db7583559f35bae43f10edbf763097618b1c95cf78d4b6837a714d6175b96d",
+    "archiveSha256": "24dae63998b94f29eea2ce656f1a32707d13bde287684b58be9f098c9cdb7b52"
+  },
+  {
+    "id": "bg-hourglass-labyrinth",
+    "kind": "background",
+    "chapter": 15,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 15, Hourglass Labyrinth. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: An elegant golden desert labyrinth with ancient sandstone walks, hanging hourglasses, lapis inlays, soft dunes and a giant time-glass courtyard. Top-left panel: Sandflow Gate, the entry area; top-right: Repeating Walk, a deeper area with a new landmark; bottom-left: Tomorrow’s Chamber, reveal the chapter mystery with another new landmark; bottom-right: Hourglass Heart, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-hourglass-labyrinth.webp",
+    "generatedAt": "2026-10-03T06:35:53.871Z",
+    "sourcePngSha256": "a553293f2df009bbfb8d4a694c8c83235aa3af87d4c7c3cab1fa94660d59f842",
+    "archiveSha256": "f6895c7bb4e3defbb37bddf945c5efa67529935dccbf3c0c7f1c24644af086c8"
+  },
+  {
+    "id": "bg-nameless-theater",
+    "kind": "background",
+    "chapter": 16,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 16, Nameless Theater. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: An opulent abandoned midnight theatre, faded tickets, velvet violet curtains, masks without names, empty golden audience seats and an illuminated blank stage. Top-left panel: Faded-Ticket Lobby, the entry area; top-right: Changing Backstage, a deeper area with a new landmark; bottom-left: Nameless Seats, reveal the chapter mystery with another new landmark; bottom-right: Blank Stage, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-nameless-theater.webp",
+    "generatedAt": "2026-10-03T06:35:54.373Z",
+    "sourcePngSha256": "d2fd63fee27fd3cb17076a5e360ca71aeeae101f7bbaa1bb7ac88ff29b6cc6ff",
+    "archiveSha256": "f4090aa20864e56c33f3c7b78a537b35de38c154b4ea5b68eb0e92cd334645d6"
+  },
+  {
+    "id": "bg-moon-gate-fortress",
+    "kind": "background",
+    "chapter": 17,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 17, Moon-Gate Fortress. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A silver crescent fortress above violet clouds, broad moonstone bridges, locked wish emblems, broken star seals and a glowing crescent gate. Top-left panel: Moon-Gate Bridge, the entry area; top-right: Sealed-Wish Walk, a deeper area with a new landmark; bottom-left: Broken-Seal Court, reveal the chapter mystery with another new landmark; bottom-right: Sentinel’s Promise, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-moon-gate-fortress.webp",
+    "generatedAt": "2026-10-03T06:43:16.484Z",
+    "sourcePngSha256": "ae36c399c5a35c15fa57b672c14c3d9864911c6d5ce6fe8aca24372bdb492fdf",
+    "archiveSha256": "f6bf288cb3684291445612b8d6ae7163107e5543b7195740c62886ac86bb428c"
+  },
+  {
+    "id": "bg-echo-battlefield",
+    "kind": "background",
+    "chapter": 18,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 18, Echo Battlefield. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A vast fractured star battlefield, orange courage crystals, cyan trust bridge, jade harmony ruins, three interwoven luminous elemental streams at a central violet core. Top-left panel: Courage Ruins, the entry area; top-right: Trust Bridge, a deeper area with a new landmark; bottom-left: Harmony Court, reveal the chapter mystery with another new landmark; bottom-right: Threefold Core, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-echo-battlefield.webp",
+    "generatedAt": "2026-10-03T06:43:16.967Z",
+    "sourcePngSha256": "969cf4055ae25443e239d609b03bbde3d7b53e26c87d53feb06092ee058a1c65",
+    "archiveSha256": "d7f1c3cf9e851f24c5be44ad5b4a98cb279835c9272c2b869d84df9fe68e0fa1"
+  },
+  {
+    "id": "bg-starbridge-duel",
+    "kind": "background",
+    "chapter": 19,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 19, Starbridge Crossing. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: An epic moonlit star bridge over a cosmic ocean, broken but traversable silver platforms, an old lantern ferry stop, floating unopened letters and a vast full moon. Top-left panel: Broken-Star Entry, the entry area; top-right: Moonferry’s Stop, a deeper area with a new landmark; bottom-left: Unsent-Letter Deck, reveal the chapter mystery with another new landmark; bottom-right: End of the Bridge, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-starbridge-duel.webp",
+    "generatedAt": "2026-10-03T06:43:17.417Z",
+    "sourcePngSha256": "37e0de3dd31bb9285c0637e1ef64dd0c0773f216b09e0579a70befdd7defc5db",
+    "archiveSha256": "8c2d1bc19ce324e4c4df2c480b1da2cb67edca4f99ed37936062492a3439e39e"
+  },
+  {
+    "id": "bg-dawn-star-court",
+    "kind": "background",
+    "chapter": 20,
+    "prompt": "Use case: stylized-concept. Asset type: ONE finished 2D beat-em-up game background panorama source for chapter 20, Dawn Star Court. Original high-quality hand-painted fantasy animation style, a friendly epic pet-adventure world with cinematic depth, rich subtle texture, no characters and no writing. Output ONE landscape 16:9 canvas arranged as an EXACT borderless 2 by 2 grid of FOUR equal landscape panels. Each panel is a different consecutive area of the SAME chapter world; these will be cropped and placed left-to-right as one scrolling level. World concept: A breathtaking celestial dawn courtyard, shattered dark crystal giving way to warm golden starlight, four elemental wish streams, a huge luminous starheart altar and a sunrise paradise horizon. Top-left panel: Relit Star Gate, the entry area; top-right: Companions’ Path, a deeper area with a new landmark; bottom-left: Ring of Wishes, reveal the chapter mystery with another new landmark; bottom-right: Dawn Starheart, the spectacular guardian arena. Every panel must have a DIFFERENT recognisable environment composition while preserving coherent materials, light and architecture. All panels share the same straight-on side-view camera with a little ground depth like LF2. Top 55 percent is distant scenery. Lower 60–82 percent is a broad unobstructed flat playable ground band. Bottom is modest foreground trim. Every panel has uninterrupted safe ground from left edge to right edge. Place architecture and props behind or above playable ground; no holes, stair climbing, scenery obstacles or platforms blocking movement. Equal boundaries at canvas centre; no borders, no gutters, no numbers, no text, no UI, no watermark. Polished production environment art, no concept-board annotations.",
+    "source": "pet-app/art-source/adventure-v9/bg-dawn-star-court.webp",
+    "generatedAt": "2026-10-03T06:43:17.951Z",
+    "sourcePngSha256": "9f0a808c33985f2fec541c4bd06cc3ef99a637a5fb4bfac81c06a26679c6e31e",
+    "archiveSha256": "79228b3ae58d9abac51ddeb1056c051b0f384a5f00381da609e329d67d9cd8b8"
+  },
+  {
+    "id": "seed-paper-sentry",
+    "kind": "seed",
+    "enemy": "paper-sentry",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A small folded cream paper crane automaton, scarlet wax-seal shield, brass letter-opener spear, origami joints, vigilant curious face. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-paper-sentry.webp",
+    "generatedAt": "2026-10-03T06:57:35.804Z",
+    "sourcePngSha256": "79620189a55588bb7a92c0370c2593f6079896d2c0f7e5ec80a179d238db32cc",
+    "archiveSha256": "94c38529b262072b2d33ddf2a61ad58a7596e63ee61dda1fbf6d93492ecf7b10"
+  },
+  {
+    "id": "seed-reed-frog",
+    "kind": "seed",
+    "enemy": "reed-frog",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A round moss-green tree frog with a lily-pad hood, seed-pod blowpipe, tiny turquoise cheeks, raindrops on leaf cloak. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-reed-frog.webp",
+    "generatedAt": "2026-10-03T06:57:36.262Z",
+    "sourcePngSha256": "267be6602b8ab5eaa684ff7479bb8073e32db88d6ddf89cf217966c9efb3379f",
+    "archiveSha256": "4589899a9459e07de105474f38ea7ca8000e802405ac9c86bde6ab9f489a0dea"
+  },
+  {
+    "id": "seed-tide-crab",
+    "kind": "seed",
+    "enemy": "tide-crab",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A rounded turquoise hermit crab, pearlescent seashell shield, one broad coral claw, sandy feet, warm amber eyes. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-tide-crab.webp",
+    "generatedAt": "2026-10-03T06:57:36.762Z",
+    "sourcePngSha256": "5013c8e846d14047b64f0fda716f1520a1767e265699dd6066bd10a45fc892d2",
+    "archiveSha256": "1a23c0611f1dd53e4df0da3a922aece0e73eb1556ec5e80b30bce30545f1eb27"
+  },
+  {
+    "id": "seed-bubble-jelly",
+    "kind": "seed",
+    "enemy": "bubble-jelly",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A floating blue jellyfish with a translucent bell, bright mint inner core, four ribbon tentacles, tiny book-shaped satchel. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-bubble-jelly.webp",
+    "generatedAt": "2026-10-03T06:57:37.239Z",
+    "sourcePngSha256": "a526c882cafa04bb11259ea29a1ad0466246507dfd0ae326a2487b45948643fb",
+    "archiveSha256": "c66c2726ac3525785028f8d0d4d79219374051c0df7cf53262a67d974a2a409c"
+  },
+  {
+    "id": "seed-ember-salamander",
+    "kind": "seed",
+    "enemy": "ember-salamander",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A stocky orange-red salamander, glowing charcoal back plates, tiny smoky horns, golden flame tail, cute determined face. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-ember-salamander.webp",
+    "generatedAt": "2026-10-03T07:03:25.548Z",
+    "sourcePngSha256": "92ab8d9ba839a6f1a61f616bb06c0e18196e197819f36c6008a51a2c91d5096c",
+    "archiveSha256": "77285afb66584d601937c65d0f79aacf939636eb4ad15d5ec6884264e134b94e"
+  },
+  {
+    "id": "seed-gear-beetle",
+    "kind": "seed",
+    "enemy": "gear-beetle",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A small brass clockwork beetle, indigo wing shell, copper winding key on back, electric cyan antenna tips, stubby segmented legs. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-gear-beetle.webp",
+    "generatedAt": "2026-10-03T07:03:26.010Z",
+    "sourcePngSha256": "3fa78f02c9a1eca727de7124f476a992d60142447c6d56edd805522905cf775a",
+    "archiveSha256": "4b081cfb21eb8bf1dcc1a9fd40e37c6397ec70034cd2845cad562b37641c801c"
+  },
+  {
+    "id": "seed-frost-bat",
+    "kind": "seed",
+    "enemy": "frost-bat",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A fluffy pale-blue bat with snowflake shaped wings, small lavender ears, frost crystal necklace and bright expressive face. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-frost-bat.webp",
+    "generatedAt": "2026-10-03T07:03:26.481Z",
+    "sourcePngSha256": "479a0b2fdaa41ea226f601fb42ed04017d0362e93cee66c442415ca804c4707a",
+    "archiveSha256": "1059d790406cb6e80b0473e9be50506ff8bcce791fa37ed94120404bc3d5c83a"
+  },
+  {
+    "id": "seed-storm-kite",
+    "kind": "seed",
+    "enemy": "storm-kite",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A living bird-shaped indigo kite, gold lightning zigzag markings, flowing fabric tail ribbons, ivory beak and mischievous eyes. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-storm-kite.webp",
+    "generatedAt": "2026-10-03T07:03:27.054Z",
+    "sourcePngSha256": "b106e9f1a17caaf922ff3fdfbc665ccceeb1619d5cbd8c1e6cdf619bac799c4d",
+    "archiveSha256": "cd9fc6884f5ee89d85055a79a0722a7d027d3a181c7986021b77dbe067ab0f85"
+  },
+  {
+    "id": "seed-root-pod",
+    "kind": "seed",
+    "enemy": "root-pod",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A walking mauve flower bud with curling root feet, thick leaf shield petals, glowing chartreuse pollen seeds and sleepy golden eyes. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-root-pod.webp",
+    "generatedAt": "2026-10-03T07:07:34.184Z",
+    "sourcePngSha256": "7e9b031fafa4b385928a225f4921e31fd8c942b533b50480366082fee1f985f0",
+    "archiveSha256": "2a1cf387905db1a9721f286b367d821958ee1e4b186e3caffc443d64c6a0e6aa"
+  },
+  {
+    "id": "seed-sand-scarab",
+    "kind": "seed",
+    "enemy": "sand-scarab",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A terracotta scarab with a tiny hourglass dome on its shell, sandy segmented feet, amber-glass pincers and an emerald eye marking. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-sand-scarab.webp",
+    "generatedAt": "2026-10-03T07:07:34.651Z",
+    "sourcePngSha256": "f88bf19dfcbeb6bf9782f5edc0d03898bc739dbebbbd92c2b9445b39dc33f1b8",
+    "archiveSha256": "9f91261b572b160b0a1b9914a728e45cfeca5ce59fd7ff1683d7d46835f1fbc5"
+  },
+  {
+    "id": "seed-blank-puppet",
+    "kind": "seed",
+    "enemy": "blank-puppet",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A small cream wooden theatre puppet with a blank porcelain oval mask, violet ribbon limbs, a single glowing blue eye and a faded ticket scarf. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-blank-puppet.webp",
+    "generatedAt": "2026-10-03T07:07:35.121Z",
+    "sourcePngSha256": "aee74fa77e0813b4d7e9e650964dcfe1903172f3c974c8a52dcdcfd6ed4f2190",
+    "archiveSha256": "ac63676be8c9c5fc4e7db12845ef4465a995ff343418039a0326f748ef387df3"
+  },
+  {
+    "id": "seed-echo-wisp",
+    "kind": "seed",
+    "enemy": "echo-wisp",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body minion character: A soft smoky violet wisp in the silhouette of a little fox, floating fractured crystal crescent ears, amber eyes, trailing starlight ribbons. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-echo-wisp.webp",
+    "generatedAt": "2026-10-03T07:07:35.650Z",
+    "sourcePngSha256": "8f94b7f672df50901731f2f1346f1bbd436f4c2ace534a8dd10289f6d49bc49b",
+    "archiveSha256": "ad277ea3b1245f674980cf2a224ceaf0f5fdb4dbdfa6d5859fed64ca0b5f9f4a"
+  },
+  {
+    "id": "seed-letter-knight",
+    "kind": "seed",
+    "enemy": "letter-knight",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A stout cream origami knight, huge ruby wax-seal chest emblem, brass nib lance, folded envelope cape, rounded helmet and warm glowing eyes. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-letter-knight.webp",
+    "generatedAt": "2026-10-03T07:15:03.604Z",
+    "sourcePngSha256": "3fabb5cea992fbb6d261983c1fdfd33dd2f7ccba14240c1cae2330752c6a64b4",
+    "archiveSha256": "11aadc2d398e80fc3bcee0d73897d185e79c48373fb5161e8ec9759ce94d2ddf"
+  },
+  {
+    "id": "seed-reed-heron",
+    "kind": "seed",
+    "enemy": "reed-heron",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: An elegant moss-green heron mage, pale jade reed crest, broad lily-pad cape, wooden staff topped with a rain pearl, protective stern expression. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-reed-heron.webp",
+    "generatedAt": "2026-10-03T07:15:04.100Z",
+    "sourcePngSha256": "8c3265c7d70a3d8dc1d0d480147b82c21ebc3c7d79b4c567156c73b972644dd3",
+    "archiveSha256": "d9fed0e96407debe63e614dbae5c4f4c301c2fd6920c6646564883224da4bc60"
+  },
+  {
+    "id": "seed-tide-shell",
+    "kind": "seed",
+    "enemy": "tide-shell",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A massive friendly-looking turquoise sea turtle guardian, coral temple shell, pearl gate markings, broad stone flippers, ancient glowing aqua eyes. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-tide-shell.webp",
+    "generatedAt": "2026-10-03T07:15:04.623Z",
+    "sourcePngSha256": "a44276c37e72f024d7473ec5f0b16e197bc9cba3ddf3a9995e16976b3ba33b31",
+    "archiveSha256": "3f528d26efea4888b8706a437d0902d80a580d6b8e7ddc9c5056e92ed8e137a4"
+  },
+  {
+    "id": "seed-ink-octopus",
+    "kind": "seed",
+    "enemy": "ink-octopus",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A deep indigo octopus librarian, parchment scroll tentacles, gold spectacles, ink bottle cap, magical floating tiny books and lavender runes. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-ink-octopus.webp",
+    "generatedAt": "2026-10-03T07:15:05.113Z",
+    "sourcePngSha256": "f92ed3dd743244d4aed3cad4a3bd8edb0a6b99a59a498153f5a979a651ebc6be",
+    "archiveSha256": "0380a58a434a5fc866be778e90180697ddd8a7945df5d25266bd49d3d8c5a5de"
+  },
+  {
+    "id": "seed-beacon-heron",
+    "kind": "seed",
+    "enemy": "beacon-heron",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A tall storm-blue heron lighthouse keeper, brass lantern breastplate, yellow rain cape, wind-swept white crest and resolute face. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-beacon-heron.webp",
+    "generatedAt": "2026-10-03T07:21:20.044Z",
+    "sourcePngSha256": "55ba78eae137fc5b3fd607a19fd752182d80e7fd69f3f6b89621b803aa1af53f",
+    "archiveSha256": "53a39a55e0b1f22855229f50fc669050d71eb3bce21d8680d13a505f013aff66"
+  },
+  {
+    "id": "seed-furnace-lion",
+    "kind": "seed",
+    "enemy": "furnace-lion",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A rounded brass automaton lion, molten orange furnace window chest, elaborate blazing mane, heavy charcoal paws, forge insignia and fierce amber eyes. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-furnace-lion.webp",
+    "generatedAt": "2026-10-03T07:21:20.577Z",
+    "sourcePngSha256": "e0acf9d0e202945b08db19cbfd09207b42f3bd4e238aeabadbc5d2b4a68dfca3",
+    "archiveSha256": "0a9082571a6c0a3d5921b4a36abba1325c22c96fa17af6161aa5eaf4f821094f"
+  },
+  {
+    "id": "seed-clock-owl",
+    "kind": "seed",
+    "enemy": "clock-owl",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A wide-eyed bronze clockwork owl, silver pendulum waist, ivory clock-face chest, big layered brass wings, teal glass eye lenses and gear feather crown. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-clock-owl.webp",
+    "generatedAt": "2026-10-03T07:21:21.070Z",
+    "sourcePngSha256": "e88a0d6b53b329b21c5f82e28c1779583dc37c2e78f4be23cc7ab2dca3e4db29",
+    "archiveSha256": "9a0020361d1324b6b7b4b8b59176c928e76052dbe0f9c4cc8dd2d045892d930d"
+  },
+  {
+    "id": "seed-frost-mirror-fox",
+    "kind": "seed",
+    "enemy": "frost-mirror-fox",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: An elegant arctic fox guardian with four flowing translucent ice tails, silver mirror shoulder plates, sapphire forehead crystal and sorrowful blue eyes. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-frost-mirror-fox.webp",
+    "generatedAt": "2026-10-03T07:21:21.577Z",
+    "sourcePngSha256": "873bd75f467ba58f40002fa3111773d4c21a359684d648523857615a982eb7b0",
+    "archiveSha256": "832e622a824d5674b578d945375335216bc50f7ce6f4af68524d65ba8f865ac8"
+  },
+  {
+    "id": "seed-snow-mammoth",
+    "kind": "seed",
+    "enemy": "snow-mammoth",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A stocky pale-blue woolly mammoth locomotive guardian, brass rail conductor helmet, frosted steam-engine saddle, icy tusks and soft violet eyes. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-snow-mammoth.webp",
+    "generatedAt": "2026-10-03T07:30:14.917Z",
+    "sourcePngSha256": "7e6264a1977f64095fd0c819dc6c87a546f69640f03ce22623a5e452eb43394e",
+    "archiveSha256": "a80efe17b1bbf38e04b8e1c244f2cc1ad5b253850f4e771158fe17842c5ef5e0"
+  },
+  {
+    "id": "seed-thunder-ray",
+    "kind": "seed",
+    "enemy": "thunder-ray",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A majestic violet manta ray sky pirate, expansive living sail wings with gold lightning veins, tiny brass compass harness, luminous cyan eyes and ribbon tail. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-thunder-ray.webp",
+    "generatedAt": "2026-10-03T07:30:15.383Z",
+    "sourcePngSha256": "18d7e0fb716fc84c7d99080cf2413ed0de90ad7b51c351aaab8edfe7beb80c95",
+    "archiveSha256": "a3aceaa9b29da195b4432e464dfd2697cee5946144ff3f8693693f6fb5fac532"
+  },
+  {
+    "id": "seed-root-stag",
+    "kind": "seed",
+    "enemy": "root-stag",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A dignified white stag with golden branching antlers hung with purple blossoms, verdant root armour, pink flower chest seal, dark gentle eyes and curling vine hooves. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-root-stag.webp",
+    "generatedAt": "2026-10-03T07:30:15.851Z",
+    "sourcePngSha256": "49d6b3f3d71bb7a9257796be7652fe54c6b6e1c2bb681bf18468a274f11e2569",
+    "archiveSha256": "9fe8024d6671a45a56700366af25431f343b3e1a048b6bc1260af14b4cb6f3ec"
+  },
+  {
+    "id": "seed-hourglass-sphinx",
+    "kind": "seed",
+    "enemy": "hourglass-sphinx",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A compact ochre winged sphinx lion, transparent amber hourglass chest, lapis feather wings, ornate brass mask crown, sandstone paws and inquisitive green eyes. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-hourglass-sphinx.webp",
+    "generatedAt": "2026-10-03T07:30:16.333Z",
+    "sourcePngSha256": "f76b8f80dee372a5d823d0f664d60a01c51bd66515533a55b8b80666e7e625a6",
+    "archiveSha256": "cc759d17ec6a5ad30e07162f0548e6be5332212dcb7b348970e16907dc730293"
+  },
+  {
+    "id": "seed-blank-marionette",
+    "kind": "seed",
+    "enemy": "blank-marionette",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A towering but charming ivory wooden theatre marionette, smooth porcelain crescent mask, purple silk cape with faded stars, silver joint rings and prismatic glowing eye. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-blank-marionette.webp",
+    "sourcePngSha256": "14e0aabd7c9d908941365b3835e7ad2f14ea7af0af024e63603f0491519cca73",
+    "archiveSha256": "e497c3403376c5cd48b2a463d28f5ba86b8643614544fde79c448452c155c3e0"
+  },
+  {
+    "id": "seed-moon-gate-knight",
+    "kind": "seed",
+    "enemy": "moon-gate-knight",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A silver and midnight-blue armoured rabbit knight, crescent moon shoulder shield, long pale ears, star lantern visor, curved silver glaive and sweeping indigo cape. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-moon-gate-knight.webp",
+    "generatedAt": "2026-10-03T07:36:16.793Z",
+    "sourcePngSha256": "721496da5bcaf29256a5d33b97038122806394ea9d30ec776a2f4e341763c720",
+    "archiveSha256": "6fd32338e6dc180f8d7911af87270d2d909a81239fc2db31bcb88fd119fef4dd"
+  },
+  {
+    "id": "seed-echo-hydra",
+    "kind": "seed",
+    "enemy": "echo-hydra",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A rounded violet crystal dragon with three expressive heads, one orange flame head, one icy cyan head, one jade wind head, cracked starlight belly and sturdy feet. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-echo-hydra.webp",
+    "generatedAt": "2026-10-03T07:36:17.274Z",
+    "sourcePngSha256": "9a96023d0e2a61ec6e109b22966015da1bfa1ebd51307d24812b15aa5094de42",
+    "archiveSha256": "98a635a2c9ec1480319de65d69197f6ecad2359bbbe6125a1e69ed8c278395af"
+  },
+  {
+    "id": "seed-moon-ferryman",
+    "kind": "seed",
+    "enemy": "moon-ferryman",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: An adult silver fox ferryman in a moon-blue travelling cloak, long ears, kind tired violet eyes, a cracked porcelain moon mask pushed to one side, silver lantern staff and star-thread scarf. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-moon-ferryman.webp",
+    "generatedAt": "2026-10-03T07:36:17.754Z",
+    "sourcePngSha256": "e09aa5f2c909e93b722dc01ec00b45f1256155c57ad88e6cb0d6057c620dfaf3",
+    "archiveSha256": "448ed61799e69556a4f7f8b377ca449e16ebf9961a4912dfc8e48573404ea039"
+  },
+  {
+    "id": "seed-echo-heart",
+    "kind": "seed",
+    "enemy": "echo-heart",
+    "prompt": "Use case: stylized-concept. Asset type: approved-source character seed for a 2D pet-adventure fighting game. Create ONE original full-body boss character: A magnificent floating dark-crystal phoenix spirit, violet and midnight-blue shards, bright cyan star-heart, crown of four coloured elemental orbit rings, wide luminous feather wings, readable mystical face, no horror. Premium cute fantasy hand-painted animation style, polished soft 3D-like volume matching a collectible pet game, crisp readable silhouette and strong colour identity, charming expressive face, family-friendly. Strict three-quarter SIDE VIEW facing RIGHT, feet on one level baseline; combat-ready neutral idle pose, limbs clearly separated, all equipment belongs to the same body. Character fills roughly 75 percent of a square canvas, bottom-centred, generous empty transparent margin around extremities. Complete body and all limbs visible, consistent gravity and believable joints. Actual transparent background. No scenery, no floor, no ground shadow, no glow cloud outside the body, no particles, no border, no writing, no watermark. One character only, not a sheet.",
+    "source": "pet-app/art-source/adventure-v9/seed-echo-heart.webp",
+    "generatedAt": "2026-10-03T07:51:47.734Z",
+    "sourcePngSha256": "1fdc183476e0fa42a50e5ffe904ec57cf06427c5d5e1bc8b2772bbc291203ee8",
+    "archiveSha256": "743e4307ae717795213e87c949abaebc3d9e1ed3581f29418ec92ae373f6e257"
+  },
+  {
+    "id": "anim-paper-sentry",
+    "kind": "animation",
+    "enemy": "paper-sentry",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-paper-sentry.webp",
+    "generatedAt": "2026-10-03T07:41:40.366Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-paper-sentry.webp",
+      "pet-app/art-source/adventure-v9/seed-paper-sentry.webp"
+    ],
+    "sourcePngSha256": "e3fc0cbe1c3170164ff6a9d10a13d832b1ee56ad21e44ac17594227435073b2d",
+    "archiveSha256": "2ceb0e4178f7571d2baeeeb5fa06312e653a798108260ec48241fc76b975b51b"
+  },
+  {
+    "id": "anim-reed-frog",
+    "kind": "animation",
+    "enemy": "reed-frog",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-reed-frog.webp",
+    "generatedAt": "2026-10-03T07:41:40.840Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-reed-frog.webp",
+      "pet-app/art-source/adventure-v9/seed-reed-frog.webp"
+    ],
+    "sourcePngSha256": "56b93af6e959a6f114d08001949c16ce9be8e1b9f0320d0f04969cf6c4321074",
+    "archiveSha256": "bd0701e24457b8736ffab04ede13298f0e5dfd132bcc4a93dde6645f4a942100"
+  },
+  {
+    "id": "anim-tide-crab",
+    "kind": "animation",
+    "enemy": "tide-crab",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-tide-crab.webp",
+    "generatedAt": "2026-10-03T07:41:41.319Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-tide-crab.webp",
+      "pet-app/art-source/adventure-v9/seed-tide-crab.webp"
+    ],
+    "sourcePngSha256": "aec50d5f589fecd392f58f175ac41ccff35051e706aaaf21fe23a7ecefffe51f",
+    "archiveSha256": "855981568eeb40983635a7cc8956ac19c4a827c9ef207ae644146ba194383556"
+  },
+  {
+    "id": "anim-bubble-jelly",
+    "kind": "animation",
+    "enemy": "bubble-jelly",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-bubble-jelly.webp",
+    "generatedAt": "2026-10-03T07:41:41.825Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-bubble-jelly.webp",
+      "pet-app/art-source/adventure-v9/seed-bubble-jelly.webp"
+    ],
+    "sourcePngSha256": "1cbe096a0874ee40db9a6a44d573dc580dd0306dca418cfb772c1d799e57a457",
+    "archiveSha256": "f23fca8652be42c60328587392b48c767de778f09250ce5b6f769860cc805edb"
+  },
+  {
+    "id": "anim-ember-salamander",
+    "kind": "animation",
+    "enemy": "ember-salamander",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-ember-salamander.webp",
+    "generatedAt": "2026-10-03T08:03:29.513Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-ember-salamander.webp",
+      "pet-app/art-source/adventure-v9/seed-ember-salamander.webp"
+    ],
+    "sourcePngSha256": "3d98a39890955ce110a98c4cc5dd2c94cc4187b4dc8b657be0eb944e3472f2e0",
+    "archiveSha256": "da9b37cd20cf025c44645e3816bc40c38c58eaec4b4531c33d267942f8130ce1"
+  },
+  {
+    "id": "anim-gear-beetle",
+    "kind": "animation",
+    "enemy": "gear-beetle",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-gear-beetle.webp",
+    "generatedAt": "2026-10-03T08:03:29.990Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-gear-beetle.webp",
+      "pet-app/art-source/adventure-v9/seed-gear-beetle.webp"
+    ],
+    "sourcePngSha256": "910b8724518d21d96ccdb404a59fd8eecf101a28792d1cb4f93320eef0456197",
+    "archiveSha256": "344641456c5ee058fca76f2ce9a40b7ee5ce55fab5f5c5dd08ae7d8207c54cec"
+  },
+  {
+    "id": "anim-frost-bat",
+    "kind": "animation",
+    "enemy": "frost-bat",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-frost-bat.webp",
+    "generatedAt": "2026-10-03T08:03:30.480Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-frost-bat.webp",
+      "pet-app/art-source/adventure-v9/seed-frost-bat.webp"
+    ],
+    "sourcePngSha256": "eece31fa2f822f4c78260aeb5959c62f7cdb67cf500bc6f16d47e21587970317",
+    "archiveSha256": "a2274a9b6bc3a04bda8e9de3e25b5bedf2295352028489faa02357104b946e2c"
+  },
+  {
+    "id": "anim-storm-kite",
+    "kind": "animation",
+    "enemy": "storm-kite",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-storm-kite.webp",
+    "generatedAt": "2026-10-03T08:03:30.960Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-storm-kite.webp",
+      "pet-app/art-source/adventure-v9/seed-storm-kite.webp"
+    ],
+    "sourcePngSha256": "5c8515d4c9eab031a6fa0b73692f256152f5fead2bd827b1ea923b0d6a7dfa72",
+    "archiveSha256": "eec991f254c3f97c395b8b96475a72ecf28292ba627ce55a1b7dcdbd8624c1a6"
+  },
+  {
+    "id": "anim-root-pod",
+    "kind": "animation",
+    "enemy": "root-pod",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-root-pod.webp",
+    "generatedAt": "2026-10-03T08:09:15.792Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-root-pod.webp",
+      "pet-app/art-source/adventure-v9/seed-root-pod.webp"
+    ],
+    "sourcePngSha256": "bc66ad8f118edcaf468e81022db3a98bb946776bc75a43d568c1e8154c7828c2",
+    "archiveSha256": "d6b1e22d87315dd96b3b2fb1cc049447144e8ed9f718d7012e6735d5cf4e5e76"
+  },
+  {
+    "id": "anim-sand-scarab",
+    "kind": "animation",
+    "enemy": "sand-scarab",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-sand-scarab.webp",
+    "generatedAt": "2026-10-03T08:09:16.245Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-sand-scarab.webp",
+      "pet-app/art-source/adventure-v9/seed-sand-scarab.webp"
+    ],
+    "sourcePngSha256": "029bdd71067f7034efbfd460d7ec93116304f3aa85beba51be817c749dca5fc3",
+    "archiveSha256": "95eb6c282984d1f5be5a8ecb0099664b70959416560562915b4337634ab06a7c"
+  },
+  {
+    "id": "anim-blank-puppet",
+    "kind": "animation",
+    "enemy": "blank-puppet",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-blank-puppet.webp",
+    "generatedAt": "2026-10-03T08:09:16.717Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-blank-puppet.webp",
+      "pet-app/art-source/adventure-v9/seed-blank-puppet.webp"
+    ],
+    "sourcePngSha256": "d19ba19f200638e805f065501412cb63b1c6d58c47bd0d0454dcae663eaf2ea9",
+    "archiveSha256": "a246fc7da4f5c2d3e48c6072ff4aba3beabb306bdbc0bbdcd1e62c4f800782e4"
+  },
+  {
+    "id": "anim-echo-wisp",
+    "kind": "animation",
+    "enemy": "echo-wisp",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-echo-wisp.webp",
+    "generatedAt": "2026-10-03T08:09:17.243Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-echo-wisp.webp",
+      "pet-app/art-source/adventure-v9/seed-echo-wisp.webp"
+    ],
+    "sourcePngSha256": "876236439c600991c19969eddef51d33a560674aa4012a1b30b1b173f17f3950",
+    "archiveSha256": "dc26f640dbea55aeb3d9fea0fbe81f233490e8001ab985b3670020be2acd9888"
+  },
+  {
+    "id": "anim-letter-knight",
+    "kind": "animation",
+    "enemy": "letter-knight",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-letter-knight.webp",
+    "generatedAt": "2026-10-03T08:14:49.478Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-letter-knight.webp",
+      "pet-app/art-source/adventure-v9/seed-letter-knight.webp"
+    ],
+    "sourcePngSha256": "1b7e64a8369e997cd103282bdcae52348fb1b1b9ab81e30ef619789493377bdd",
+    "archiveSha256": "f983c0f31f1b454c8578b2a85b336bc18501fb14f1051d10b06165be0278dcb5"
+  },
+  {
+    "id": "anim-reed-heron",
+    "kind": "animation",
+    "enemy": "reed-heron",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-reed-heron.webp",
+    "generatedAt": "2026-10-03T08:14:49.967Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-reed-heron.webp",
+      "pet-app/art-source/adventure-v9/seed-reed-heron.webp"
+    ],
+    "sourcePngSha256": "d86e5853d425c5fc77d0f4b1e192aaa2066d9ec9f696c3bed8378d1c43522ce8",
+    "archiveSha256": "4eb87276be1905cc3de237084596e3b9f79d011e0068d0b9d05101a2bd507d4f"
+  },
+  {
+    "id": "anim-tide-shell",
+    "kind": "animation",
+    "enemy": "tide-shell",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-tide-shell.webp",
+    "generatedAt": "2026-10-03T08:14:50.419Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-tide-shell.webp",
+      "pet-app/art-source/adventure-v9/seed-tide-shell.webp"
+    ],
+    "sourcePngSha256": "5095a67d28aa941ff548da42c91ceced9d2516bc5a0a858d9fbe19ac73ed3a68",
+    "archiveSha256": "de4abc71803ca55f91a61cf3c53aed6961ec10761ef156c12c986c26878e767d"
+  },
+  {
+    "id": "anim-ink-octopus",
+    "kind": "animation",
+    "enemy": "ink-octopus",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-ink-octopus.webp",
+    "generatedAt": "2026-10-03T08:14:50.897Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-ink-octopus.webp",
+      "pet-app/art-source/adventure-v9/seed-ink-octopus.webp"
+    ],
+    "sourcePngSha256": "88e45f4febfbb72c567738eafde4273d6c179e41235ffe62cc0e404d7f6b5772",
+    "archiveSha256": "0a51c15aa3a8833455dd65a88052f8f1ac9428f6b4dbea3bbc41d08c3344309c"
+  },
+  {
+    "id": "portrait-paperfox",
+    "kind": "portrait",
+    "speaker": "paperfox",
+    "prompt": "Use case: stylized-concept. An original full-body supporting character for a premium cute pet fantasy story: Papertail, a cheerful rust-orange fox cartographer with cream muzzle, round amber spectacles, blue traveling cape, a folded map and little satchel of envelopes. Polished hand-painted animation illustration with soft three-dimensional volume, clean readable silhouette, gentle expressive face, friendly epic-adventure costume matching original magical animal guardians. Three-quarter right-facing view, relaxed storytelling pose, entire character and equipment visible. Character fills 75 percent of square canvas with transparent margins. True transparent background, no floor, no shadow, no particles, no text or watermark, one character only.",
+    "source": "pet-app/art-source/adventure-v9/portrait-paperfox.webp",
+    "generatedAt": "2026-10-03T07:51:48.199Z",
+    "sourcePngSha256": "5c935ad3ba59e1e87a0e12d9d28a8bbb3d781ecf4fae00dff021d744eb6cb936",
+    "archiveSha256": "be8c14de034975b2baab837da7a2ef8639e6aa65e66ef706fcd0ff3c8780765a"
+  },
+  {
+    "id": "portrait-dragon",
+    "kind": "portrait",
+    "speaker": "dragon",
+    "prompt": "Use case: stylized-concept. An original full-body supporting character for a premium cute pet fantasy story: Emberscale, a friendly copper-red little salamander dragon forge artist with small curved horns, leather smith apron, brass goggles on forehead, repair hammer and blue cooling crystal. Polished hand-painted animation illustration with soft three-dimensional volume, clean readable silhouette, gentle expressive face, friendly epic-adventure costume matching original magical animal guardians. Three-quarter right-facing view, relaxed storytelling pose, entire character and equipment visible. Character fills 75 percent of square canvas with transparent margins. True transparent background, no floor, no shadow, no particles, no text or watermark, one character only.",
+    "source": "pet-app/art-source/adventure-v9/portrait-dragon.webp",
+    "generatedAt": "2026-10-03T07:51:48.681Z",
+    "sourcePngSha256": "a856af4fbbee4eeb3a97c828f1a56b2dbffab5363c21e051a95dd713fa7543e3",
+    "archiveSha256": "393f28035b15a34e7b26abd19acabdfc9da2f96e77123c645cad269489ad5171"
+  },
+  {
+    "id": "portrait-tideguide",
+    "kind": "portrait",
+    "speaker": "tideguide",
+    "prompt": "Use case: stylized-concept. An original full-body supporting character for a premium cute pet fantasy story: Tideway, a gentle blue-grey sea otter guide in a teal sailor coat, pearl brooch and shell lantern, warm expression. Polished hand-painted animation illustration with soft three-dimensional volume, clean readable silhouette, gentle expressive face, friendly epic-adventure costume matching original magical animal guardians. Three-quarter right-facing view, relaxed storytelling pose, entire character and equipment visible. Character fills 75 percent of square canvas with transparent margins. True transparent background, no floor, no shadow, no particles, no text or watermark, one character only.",
+    "source": "pet-app/art-source/adventure-v9/portrait-tideguide.webp",
+    "generatedAt": "2026-10-03T07:51:49.182Z",
+    "sourcePngSha256": "55d8133280dba8adf75284703d6786f90321d6a6ae2db6ad1efbb2d4dcdffa5b",
+    "archiveSha256": "78a2e76ea6868e30b8704d4e35bc63270cafb0325a2b429c3941f46c1d35dec2"
+  },
+  {
+    "id": "anim-beacon-heron",
+    "kind": "animation",
+    "enemy": "beacon-heron",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-beacon-heron.webp",
+    "generatedAt": "2026-10-03T08:21:49.752Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-beacon-heron.webp",
+      "pet-app/art-source/adventure-v9/seed-beacon-heron.webp"
+    ],
+    "sourcePngSha256": "d194ce07a9471f4f760aea77e9a32b633f6ce2538c1943062496dcd80734cfa2",
+    "archiveSha256": "0fe4281c648b249eb3fda1065d754ecaced4250e5e3ea5fc20db3177e8f3327f"
+  },
+  {
+    "id": "anim-furnace-lion",
+    "kind": "animation",
+    "enemy": "furnace-lion",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-furnace-lion.webp",
+    "generatedAt": "2026-10-03T08:21:50.220Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-furnace-lion.webp",
+      "pet-app/art-source/adventure-v9/seed-furnace-lion.webp"
+    ],
+    "sourcePngSha256": "225d7354a02e7605d715d174e7b265e9f003c71252e079afdefa82b409521920",
+    "archiveSha256": "f5c4ea48c8cd4effeb33aae57a4b5b46892771405978a2d611c9fd1cb0dd470d"
+  },
+  {
+    "id": "anim-clock-owl",
+    "kind": "animation",
+    "enemy": "clock-owl",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-clock-owl.webp",
+    "generatedAt": "2026-10-03T08:21:50.704Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-clock-owl.webp",
+      "pet-app/art-source/adventure-v9/seed-clock-owl.webp"
+    ],
+    "sourcePngSha256": "bf9ee07546fad1b1929950cb007499aba3ff15110bea131824eb6fb7dabb2eca",
+    "archiveSha256": "834cb7da21a6d0f8ca763ba1cc5c4a8d52df8630784a13a247fa8f4b9a72e979"
+  },
+  {
+    "id": "anim-frost-mirror-fox",
+    "kind": "animation",
+    "enemy": "frost-mirror-fox",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-frost-mirror-fox.webp",
+    "generatedAt": "2026-10-03T08:21:51.199Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-frost-mirror-fox.webp",
+      "pet-app/art-source/adventure-v9/seed-frost-mirror-fox.webp"
+    ],
+    "sourcePngSha256": "95ef29d5962273cca0ecf3ac7e7f794343ada513cebb7e685393af99b0977228",
+    "archiveSha256": "860c69085509c20728f09e447f8f7fb77954a2433352449062324f32368fb62e"
+  },
+  {
+    "id": "anim-snow-mammoth",
+    "kind": "animation",
+    "enemy": "snow-mammoth",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes. Critical layout correction: The previous large poses can touch neighboring cells. Make ALL eight characters distinctly SMALLER: every complete pose, including the longest extended tusks, wings, staff or tails, occupies at most 62 percent of its cell width and 70 percent of its cell height. Leave broad completely transparent gutters between ALL neighboring poses, at least 60 pixels for a 1792 by 896 output. No two poses or their appendages may touch. A complete source character repeated as eight isolated silhouettes with large empty breathing room; readable details are more important than filling the canvas. Keep the EXACT eight frames, four columns by two rows, consistent common scale and lower baseline.",
+    "generatedAt": "2026-10-03T08:40:01.345Z",
+    "source": "pet-app/art-source/adventure-v9/anim-snow-mammoth.webp",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-snow-mammoth.webp",
+      "pet-app/art-source/adventure-v9/seed-snow-mammoth.webp"
+    ],
+    "sourcePngSha256": "6d91f3c182e02e05d0ccc6cb497685e018f226e304c69cb3b059f519c168d74a",
+    "archiveSha256": "b5819415a48f70724d357ad4366db639609c99bb02e5bc39786e1089f6a0614c"
+  },
+  {
+    "id": "anim-thunder-ray",
+    "kind": "animation",
+    "enemy": "thunder-ray",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes. CRITICAL SMALLER LAYOUT: all eight complete character silhouettes MUST be wholly isolated from each other. Use 4 columns x 2 rows on a 2048x1024 transparent sheet. Each complete pose occupies at most 58% of its 512x512 cell width and 66% height. Shrink the entire character coherently including ALL wings, tail, horns and lightning accessories. At least 80 pixels of completely transparent gutter between ANY two opaque silhouettes. No connecting lightning, aura or wingtip across cells. Eight distinct silhouettes, equal scale, common baseline, no clipping, no textual labels.",
+    "generatedAt": "2026-10-03T08:42:10.694Z",
+    "source": "pet-app/art-source/adventure-v9/anim-thunder-ray.webp",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-thunder-ray.webp",
+      "pet-app/art-source/adventure-v9/seed-thunder-ray.webp"
+    ],
+    "sourcePngSha256": "f3de0a169fdd2408de3b327c713b051766a603647e47616242e1a5fdd6ed2bb5",
+    "archiveSha256": "790eaf55c334996fdab4191e9bfd13301621ec97e07f66885e9cc70c34282f23"
+  },
+  {
+    "id": "anim-root-stag",
+    "kind": "animation",
+    "enemy": "root-stag",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-root-stag.webp",
+    "generatedAt": "2026-10-03T08:27:36.623Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-root-stag.webp",
+      "pet-app/art-source/adventure-v9/seed-root-stag.webp"
+    ],
+    "sourcePngSha256": "15bff798247b4d5227285d5ac8323e334ea100ff9ecbc4a26fa860ba85444f0c",
+    "archiveSha256": "1f20add3154a21c9de2c352029a70e50088819e900a7bdbef59170825fc00c91"
+  },
+  {
+    "id": "anim-hourglass-sphinx",
+    "kind": "animation",
+    "enemy": "hourglass-sphinx",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes.",
+    "source": "pet-app/art-source/adventure-v9/anim-hourglass-sphinx.webp",
+    "generatedAt": "2026-10-03T08:27:37.122Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-hourglass-sphinx.webp",
+      "pet-app/art-source/adventure-v9/seed-hourglass-sphinx.webp"
+    ],
+    "sourcePngSha256": "7bc33bf743dfbd3537f49902536f8460664bdade3ef47e3255419b7ecfa9c5c5",
+    "archiveSha256": "7adec7d321b481d9e320e30444454f2229b7bb730273de44a347709a23040c46"
+  },
+  {
+    "id": "anim-moon-gate-knight",
+    "kind": "animation",
+    "enemy": "moon-gate-knight",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes. Critical layout correction: The previous large poses can touch neighboring cells. Make ALL eight characters distinctly SMALLER: every complete pose, including the longest extended tusks, wings, staff or tails, occupies at most 62 percent of its cell width and 70 percent of its cell height. Leave broad completely transparent gutters between ALL neighboring poses, at least 60 pixels for a 1792 by 896 output. No two poses or their appendages may touch. A complete source character repeated as eight isolated silhouettes with large empty breathing room; readable details are more important than filling the canvas. Keep the EXACT eight frames, four columns by two rows, consistent common scale and lower baseline.",
+    "source": "pet-app/art-source/adventure-v9/anim-moon-gate-knight.webp",
+    "generatedAt": "2026-10-03T08:40:01.809Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-moon-gate-knight.webp",
+      "pet-app/art-source/adventure-v9/seed-moon-gate-knight.webp"
+    ],
+    "sourcePngSha256": "7baca59ede5fd12ec8dba38eda2fb319b8751a9f7893edb70c4b87c7c6d49f34",
+    "archiveSha256": "234765888000f507297b14ad5b11c8f7261966099ea6e5ef90f7f370c4b76112"
+  },
+  {
+    "id": "anim-echo-hydra",
+    "kind": "animation",
+    "enemy": "echo-hydra",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes. Critical layout correction: The previous large poses can touch neighboring cells. Make ALL eight characters distinctly SMALLER: every complete pose, including the longest extended tusks, wings, staff or tails, occupies at most 62 percent of its cell width and 70 percent of its cell height. Leave broad completely transparent gutters between ALL neighboring poses, at least 60 pixels for a 1792 by 896 output. No two poses or their appendages may touch. A complete source character repeated as eight isolated silhouettes with large empty breathing room; readable details are more important than filling the canvas. Keep the EXACT eight frames, four columns by two rows, consistent common scale and lower baseline.",
+    "source": "pet-app/art-source/adventure-v9/anim-echo-hydra.webp",
+    "generatedAt": "2026-10-03T08:40:02.274Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-echo-hydra.webp",
+      "pet-app/art-source/adventure-v9/seed-echo-hydra.webp"
+    ],
+    "sourcePngSha256": "4b2e00033463cce544019d989920e9d6a2c727cf4b985b9ec801d9ef665c2934",
+    "archiveSha256": "b568be45748620c89acc30d47112ebecc390ff2cd557886f28c0937bdbdd7cc6"
+  },
+  {
+    "id": "anim-moon-ferryman",
+    "kind": "animation",
+    "enemy": "moon-ferryman",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes. Critical layout correction: The previous large poses can touch neighboring cells. Make ALL eight characters distinctly SMALLER: every complete pose, including the longest extended tusks, wings, staff or tails, occupies at most 62 percent of its cell width and 70 percent of its cell height. Leave broad completely transparent gutters between ALL neighboring poses, at least 60 pixels for a 1792 by 896 output. No two poses or their appendages may touch. A complete source character repeated as eight isolated silhouettes with large empty breathing room; readable details are more important than filling the canvas. Keep the EXACT eight frames, four columns by two rows, consistent common scale and lower baseline.",
+    "source": "pet-app/art-source/adventure-v9/anim-moon-ferryman.webp",
+    "generatedAt": "2026-10-03T08:40:02.781Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-moon-ferryman.webp",
+      "pet-app/art-source/adventure-v9/seed-moon-ferryman.webp"
+    ],
+    "sourcePngSha256": "98ef0f7a00b7386ca776db4791fca9fed96475e6183618710429ef23cbcb9f34",
+    "archiveSha256": "165c59a8cdbda5f5265effb9b5a7b4b87c87d29eb897dbb0fa24dd493944014a"
+  },
+  {
+    "id": "anim-echo-heart",
+    "kind": "animation",
+    "enemy": "echo-heart",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes. Critical layout correction: The previous large poses can touch neighboring cells. Make ALL eight characters distinctly SMALLER: every complete pose, including the longest extended tusks, wings, staff or tails, occupies at most 62 percent of its cell width and 70 percent of its cell height. Leave broad completely transparent gutters between ALL neighboring poses, at least 60 pixels for a 1792 by 896 output. No two poses or their appendages may touch. A complete source character repeated as eight isolated silhouettes with large empty breathing room; readable details are more important than filling the canvas. Keep the EXACT eight frames, four columns by two rows, consistent common scale and lower baseline.",
+    "source": "pet-app/art-source/adventure-v9/anim-echo-heart.webp",
+    "generatedAt": "2026-10-03T08:40:03.264Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-echo-heart.webp",
+      "pet-app/art-source/adventure-v9/seed-echo-heart.webp"
+    ],
+    "sourcePngSha256": "d451362ab98144bd60b7c0c9710b1cde04dfd5f09d378557333a9cfc09779256",
+    "archiveSha256": "774a8d6f79ec149cff414a0aacfe644310a6a5b86fbfbcb0a841a1187258390e"
+  },
+  {
+    "id": "anim-blank-marionette",
+    "kind": "animation",
+    "enemy": "blank-marionette",
+    "prompt": "Use case: stylized-concept. Production sprite animation sheet edit, based EXACTLY on the approved source character in the references. The first reference is a larger transparent work canvas with this character; the second is its detailed source. Create the WHOLE eight-frame animation in ONE edit. Output ONE landscape 2:1 transparent canvas with an EXACT four-column by two-row grid, EIGHT equal square frame slots, reading left-to-right then top-to-bottom. Recompose the work canvas into this layout. Repeat the SAME original character eight times with the SAME proportions, detailed costume, colours, anatomy, expressive face, equipment and RIGHT-facing three-quarter side-view. No redesign, no new limbs, no rotation to front view. Each complete pose fits strictly inside its own square, with at least 12 percent transparent padding on all edges. Feet share a bottom baseline, body stays centred; airborne creatures keep one stable hover baseline. Top row: frame 1 neutral idle matching the seed; frame 2 first walking or wingbeat pose; frame 3 passing step or relaxed wingbeat; frame 4 opposite walking or wingbeat pose. Bottom row: frame 5 clearly crouched, gathering an attack with equipment pulled back; frame 6 decisive rightward attack release, expressive forward body pose; frame 7 attack follow-through with different limb and equipment posture; frame 8 relaxed recovery towards idle. Natural believable weight shift, coherent joints, readable differences. Keep long ears, wings, weapons, tails and floating equipment wholly inside each cell; all belong to this same character. NO external attack effect, no particle clouds, no floor or shadow. Transparent negative space separates all eight poses. No text, no labels, no numbers, no visible grid lines, no borders, no scenery, no poster layout. Maintain the seed's polished hand-painted fantasy animation style with soft three-dimensional volume and crisp silhouettes. Critical layout correction: The previous large poses can touch neighboring cells. Make ALL eight characters distinctly SMALLER: every complete pose, including the longest extended tusks, wings, staff or tails, occupies at most 62 percent of its cell width and 70 percent of its cell height. Leave broad completely transparent gutters between ALL neighboring poses, at least 60 pixels for a 1792 by 896 output. No two poses or their appendages may touch. A complete source character repeated as eight isolated silhouettes with large empty breathing room; readable details are more important than filling the canvas. Keep the EXACT eight frames, four columns by two rows, consistent common scale and lower baseline.",
+    "source": "pet-app/art-source/adventure-v9/anim-blank-marionette.webp",
+    "generatedAt": "2026-10-03T08:40:03.748Z",
+    "references": [
+      "pet-app/art-source/adventure-v9/ref-blank-marionette.webp",
+      "pet-app/art-source/adventure-v9/seed-blank-marionette.webp"
+    ],
+    "sourcePngSha256": "205056ea74302e2cd6b4fdf123a0226564b65b9763202f1ae288b25f9e349330",
+    "archiveSha256": "d41e811347480796253ab8571ffbb4b2108f4c925681e2fd7f5ebd3845e3b531"
+  }
+]

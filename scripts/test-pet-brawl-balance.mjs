@@ -2,14 +2,15 @@ import assert from 'node:assert/strict';
 import {FIGHTERS,ENEMIES,VERSION,INPUT as I,fightersForVersion} from '../pet-app/lib/brawl/catalog.mjs';
 import {createBattle,stepBattle,replayBattle,battleResult} from '../pet-app/lib/brawl/simulation.mjs';
 import * as v7 from '../pet-app/lib/brawl/legacy/v7/simulation.mjs';
+import * as v8 from '../pet-app/lib/brawl/legacy/v8/simulation.mjs';
 import {ENEMIES as oldEnemies} from '../pet-app/lib/brawl/legacy/v7/catalog.mjs';
 
 const run=(s,n,mask=0,opponent=0)=>{const events=[];for(let i=0;i<n;i++){stepBattle(s,mask,opponent);events.push(...s.events);}return events;};
-assert.equal(VERSION,'brawl-v8');
+assert.equal(VERSION,'brawl-v9');
 for(const f of FIGHTERS)for(const [n,k] of f.skills.entries())assert.equal(k.mp,Math.ceil(fightersForVersion('brawl-v7').find(old=>old.id===f.id).skills[n].mp*1.25));
 let s=createBattle({mode:'practice'}),p=s.actors[0];p.mp=1000;run(s,600);assert.equal(p.mp,3000);
 s=createBattle({mode:'practice',fighterId:'dragon-ball-goku'});p=s.actors[0];stepBattle(s,I.SKILL1);run(s,130);stepBattle(s,I.SKILL2);assert.equal(p.action,'idle');assert.ok(p.mp<6000);
-for(const [id,e] of Object.entries(ENEMIES)){assert.ok(e.hp>=oldEnemies[id].hp*1.14);assert.ok(e.damage>oldEnemies[id].damage);}
+for(const [id,e] of Object.entries(ENEMIES).filter(([id])=>oldEnemies[id])){assert.ok(e.hp>=oldEnemies[id].hp*1.14);assert.ok(e.damage>oldEnemies[id].damage);}
 console.log('✓ All 50 skills cost 25% more MP, idle recovery is exactly 2 MP/sec, the ultimate cannot follow a beam without saving MP, and enemies are stronger');
 
 for(const f of FIGHTERS){
@@ -56,4 +57,10 @@ for(const f of fightersForVersion('brawl-v7')){
   for(let tick=1;tick<=400;tick++){const frame=log.find(f=>f.tick===tick);if(frame)mask=frame.mask;v7.stepBattle(old,mask);}
   assert.deepEqual(replayBattle(options,log,400,{terminal:false}),old);assert.deepEqual(battleResult(old),v7.battleResult(old));
 }
-console.log('✓ v8 elemental combat replays deterministically and all 25 archived v7 fighters retain their exact original rules');
+for(const f of fightersForVersion('brawl-v8')){
+ const options={version:'brawl-v8',mode:'practice',fighterId:f.id,seed:987},log=[{tick:1,mask:I.RIGHT},{tick:50,mask:0},{tick:51,mask:I.SKILL1},{tick:52,mask:0},{tick:160,mask:I.SKILL2},{tick:161,mask:0}],old=v8.createBattle(options);let mask=0;
+ for(let tick=1;tick<=400;tick++){const frame=log.find(f=>f.tick===tick);if(frame)mask=frame.mask;v8.stepBattle(old,mask);}
+ assert.deepEqual(replayBattle(options,log,400,{terminal:false}),old);assert.deepEqual(battleResult(old),v8.battleResult(old));
+}
+console.log('✓ All 25 archived v8 fighters retain their exact original MP, hit-reward and status rules');
+console.log('✓ v9 elemental combat replays deterministically and all 25 archived v7 fighters retain their exact original rules');

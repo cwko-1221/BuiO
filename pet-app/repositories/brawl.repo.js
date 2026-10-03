@@ -53,23 +53,23 @@ async function start(studentId,body,key){key=validKey(key);if(!body||typeof body
   return mutate(studentId,null,key,ctx=>{const old=ctx.runs.find(r=>r.key===key);if(old){if(old.requestDigest!==digest(request))fail('這個識別碼已用於其他設定。');return {run:publicRun(old)};}
     const pet=ctx.pets.find(p=>p.petId===request.petId);if(!pet||!c.fighterById(pet.speciesId))fail('請選擇自己擁有的出戰寵物。',403);
     if(!available(ctx.progress,request.stageId,request.difficulty,c))fail('請先完成前一關或標準難度。',403);
-    for(const r of ctx.runs.filter(r=>r.status==='active')){if(Date.parse(r.expiresAt)>Date.now())fail('你有未完成的闖關，請繼續或先放棄。');r.status='expired';ctx.dirtyRuns.push(r);}
+    for(const r of ctx.runs.filter(r=>r.status==='active')){if(Date.parse(r.expiresAt)>Date.now())fail('你有未完成的冒險，請繼續或先放棄。');r.status='expired';ctx.dirtyRuns.push(r);}
     const run={id:randomUUID(),studentId,petId:pet.petId,key,requestDigest:digest(request),options:{fighterId:pet.speciesId,stageId:request.stageId,difficulty:request.difficulty,mode:'campaign',seed:randomBytes(4).readUInt32LE(0)},version:c.VERSION,status:'active',createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+86400000).toISOString()};ctx.dirtyRuns.push(run);return {run:publicRun(run)};});
 }
-async function readRun(studentId,id){await ensure();let run;if(config.db.mode==='postgres'){run=(await getPool().query('SELECT State AS state FROM PetBrawlRuns WHERE StudentID=$1 AND RunID::text=$2',[studentId,id])).rows[0]?.state;}else run=store.load().petBrawlRuns.find(r=>r.studentId===studentId&&r.id===id);if(!run)fail('找不到這次闖關。',404);return copy(run);}
-async function finish(studentId,id,body,key){validKey(key);if(!body||typeof body!=='object'||Array.isArray(body))fail('無效的闖關紀錄。',400);const run=await readRun(studentId,id),c=await definitions;
-  if(body.version!==run.version||!c.SUPPORTED_VERSIONS.includes(body.version))fail('這次闖關的規則版本不能驗證。',409);
-  if(Buffer.byteLength(JSON.stringify(body))>1048576)fail('闖關紀錄過大。',413);const logDigest=digest({version:body.version,endTick:body.endTick,inputs:body.inputs});
-  if(run.result){if(run.finishDigest!==logDigest)fail('這次闖關已結算其他紀錄。');return {receipt:run.result};}
-  if(run.status!=='active'||Date.parse(run.expiresAt)<=Date.now())fail('這次闖關已結束或到期。');
+async function readRun(studentId,id){await ensure();let run;if(config.db.mode==='postgres'){run=(await getPool().query('SELECT State AS state FROM PetBrawlRuns WHERE StudentID=$1 AND RunID::text=$2',[studentId,id])).rows[0]?.state;}else run=store.load().petBrawlRuns.find(r=>r.studentId===studentId&&r.id===id);if(!run)fail('找不到這次冒險。',404);return copy(run);}
+async function finish(studentId,id,body,key){validKey(key);if(!body||typeof body!=='object'||Array.isArray(body))fail('無效的冒險紀錄。',400);const run=await readRun(studentId,id),c=await definitions;
+  if(body.version!==run.version||!c.SUPPORTED_VERSIONS.includes(body.version))fail('這次冒險的規則版本不能驗證。',409);
+  if(Buffer.byteLength(JSON.stringify(body))>1048576)fail('冒險紀錄過大。',413);const logDigest=digest({version:body.version,endTick:body.endTick,inputs:body.inputs});
+  if(run.result){if(run.finishDigest!==logDigest)fail('這次冒險已結算其他紀錄。');return {receipt:run.result};}
+  if(run.status!=='active'||Date.parse(run.expiresAt)<=Date.now())fail('這次冒險已結束或到期。');
   const result=await verify({...run.options,version:run.version},body.inputs,body.endTick);
-  return mutate(studentId,id,null,ctx=>{const current=ctx.runs.find(r=>r.id===id);if(!current)fail('找不到這次闖關。',404);if(current.result){if(current.finishDigest!==logDigest)fail('這次闖關已結算其他紀錄。');return {receipt:current.result};}
-    if(current.status!=='active'||Date.parse(current.expiresAt)<=Date.now())fail('這次闖關已結束或到期。');const pet=ctx.pets.find(p=>p.petId===current.petId);if(!pet)fail('出戰寵物已不存在。',404);
+  return mutate(studentId,id,null,ctx=>{const current=ctx.runs.find(r=>r.id===id);if(!current)fail('找不到這次冒險。',404);if(current.result){if(current.finishDigest!==logDigest)fail('這次冒險已結算其他紀錄。');return {receipt:current.result};}
+    if(current.status!=='active'||Date.parse(current.expiresAt)<=Date.now())fail('這次冒險已結束或到期。');const pet=ctx.pets.find(p=>p.petId===current.petId);if(!pet)fail('出戰寵物已不存在。',404);
     const rewards={coins:0,xp:0};if(result.outcome==='won'){
       const k=current.options.stageId+':'+current.options.difficulty,previous=ctx.progress[k];ctx.progress[k]={stars:Math.max(previous?.stars||0,result.stars),seconds:Math.min(previous?.seconds??Infinity,result.seconds),clears:(previous?.clears||0)+1};
       if(ctx.wins<3){rewards.coins=5;const used=pet.dailyXpDate===ctx.day?Number(pet.dailyXp):0;rewards.xp=Math.min(10,Math.max(0,100-used));pet.xp=Number(pet.xp)+rewards.xp;pet.dailyXp=used+rewards.xp;pet.dailyXpDate=ctx.day;pet.stage=petRepo.stageForXp(pet.xp);ctx.dirtyPets.push(pet);ctx.wins++;ctx.balance+=5;ctx.ledger.push({id:randomUUID(),runId:id});}}
     current.status='finished';current.finishDigest=logDigest;current.result={runId:id,...result,rewards,rewardsRemaining:3-ctx.wins,day:ctx.day};current.finishedAt=new Date().toISOString();ctx.dirtyRuns.push(current);return {receipt:current.result};});
 }
-async function abandon(studentId,id){return mutate(studentId,id,null,ctx=>{const run=ctx.runs.find(r=>r.id===id);if(!run)fail('找不到這次闖關。',404);if(run.status==='active'){run.status='abandoned';ctx.dirtyRuns.push(run);}return {run:publicRun(run)};});}
+async function abandon(studentId,id){return mutate(studentId,id,null,ctx=>{const run=ctx.runs.find(r=>r.id===id);if(!run)fail('找不到這次冒險。',404);if(run.status==='active'){run.status='abandoned';ctx.dirtyRuns.push(run);}return {run:publicRun(run)};});}
 async function access(studentId,body){const c=await definitions;if(c.HIDDEN_FIGHTER_IDS.includes(body?.fighterId))fail('隱藏角色暫未開放大亂鬥。',403);if(!body||!['practice','tutorial','duel','campaign'].includes(body.mode)||typeof body.petId!=='string'||!c.fighterById(body.fighterId))fail('無效的出戰設定。',400);if(!(await getCatalog()).enabled)fail('大亂鬥暫時未開放。',403);const p=await require('./brawl-duel.repo').player(studentId);if(!p.pets.some(p=>p.petId===body.petId&&p.fighterId===body.fighterId))fail('請先在寵物樂園擁有這隻角色，才可出戰。',403);return {allowed:true,fighterId:body.fighterId};}
 module.exports={access,getCatalog,getProgress,start,finish,abandon,readRun};

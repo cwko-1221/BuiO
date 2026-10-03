@@ -43,8 +43,8 @@ const stopped=s.tick;stepBattle(s,I.RETRY);assert.equal(s.tick,stopped);
 pass('one current-wave retry only, full restoration and terminal freeze');
 
 const matrix=[];
-for(const f of FIGHTERS.slice(0,3))for(const st of STAGES)for(const difficulty of Object.keys(DIFFICULTIES)){
-  const options={mode:'campaign',fighterId:f.id,stageId:st.id,difficulty,seed:st.id==='starcrystal-cave'?4:1};
+for(const f of FIGHTERS.slice(0,4))for(const st of STAGES)for(const difficulty of Object.keys(DIFFICULTIES)){
+  const options={mode:'campaign',fighterId:f.id,stageId:st.id,difficulty,seed:1};
   const played=playBot(options);const replayed=replayBattle(options,played.inputs,played.endTick);
   assert.deepEqual(battleResult(replayed),played.result);
   matrix.push({fighter:f.id,stage:st.id,difficulty,seed:options.seed,...played.result});
@@ -56,7 +56,7 @@ assert.throws(()=>replayBattle({},[{tick:1,mask:4294967296}],1));
 assert.throws(()=>replayBattle({},[{tick:2,mask:1},{tick:1,mask:2}],2));
 assert.throws(()=>replayBattle({},[],20),/not complete/);
 assert.throws(()=>replayBattle({},[],36001));
-pass('27 full legal campaign logs replay identically; incomplete and malformed logs rejected');
+pass('240 full legal campaign logs replay identically; incomplete and malformed logs rejected');
 
 const assets=JSON.parse(await fs.readFile('pet-app/public/assets/art/brawl/manifest.json','utf8'));
 for(const f of FIGHTERS.slice(0,3)){

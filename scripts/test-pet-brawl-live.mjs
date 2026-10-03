@@ -35,6 +35,8 @@ const shot=name=>page.screenshot({path:path.join(artifacts,name+'.png')});
 const state=()=>page.evaluate(()=>structuredClone(window.__petGame.scene.getScene('Brawl').runtime.state));
 async function ready(){await page.waitForFunction(()=>{const scene=window.__petGame?.scene.keys.Brawl;return scene?.sys.isActive()&&scene.fx&&!document.querySelector('.brawl-loading');});}
 async function openBrawl(){await page.locator('[data-tab="brawl"]').click();await page.locator('.brawl-fighter').first().waitFor();}
+async function dismissStory(){if(await page.locator('[data-brawl="story-skip"]').count()){await page.locator('[data-brawl="story-skip"]').click();await page.locator('.brawl-story-overlay').waitFor({state:'hidden'});}}
+async function playFrames(frames){await page.evaluate(async frames=>{const r=window.__petGame.scene.getScene('Brawl').runtime;r.paused=()=>true;for(const mask of frames){const skip=document.querySelector('[data-brawl="story-skip"]');if(skip){skip.click();await new Promise(resolve=>setTimeout(resolve,0));}r.step(mask);}},frames);}
 async function leave(){await page.keyboard.press('Escape');await page.locator('[data-brawl="lobby"]').click();await page.locator('.brawl-fighter').first().waitFor();}
 try{
   const baseURL=`http://127.0.0.1:${port}`,deadline=Date.now()+20000;
@@ -89,7 +91,7 @@ try{
   pass('catalog and texture failures offer working retries; cloud-ear dog reloads successfully');
 
   await page.locator('[data-brawl="fighter"][data-id="pudding-pig"]').click();await page.locator('[data-brawl="mode"][data-id="campaign"]').click();
-  await page.locator('[data-brawl="start"]').first().click();await ready();await page.keyboard.down('KeyD');await page.waitForTimeout(200);await page.keyboard.up('KeyD');await page.keyboard.press('Escape');
+  await page.locator('[data-brawl="start"]').first().click();await ready();await dismissStory();await page.keyboard.down('KeyD');await page.waitForTimeout(200);await page.keyboard.up('KeyD');await page.keyboard.press('Escape');
   const saved=await state();await page.locator('[data-brawl="lobby"]').click();await page.reload();await openBrawl();await page.locator('[data-brawl="resume"]').click();await ready();
   const restored=await state();assert.equal(restored.tick,saved.tick);assert.deepEqual(restored.actors,saved.actors);assert.equal(restored.fighterId,'pudding-pig');await shot('resume-ipad');
   pass('IndexedDB restores the exact campaign tick and actors after reload');
@@ -101,16 +103,16 @@ try{
     await page.locator('[data-brawl="continue"]').click();await page.keyboard.press('Escape');
     const copy=await state(),masks=[];let bossIndex=-1;
     while(!['won','lost'].includes(copy.status)&&copy.tick<36000){const mask=botInput(copy);masks.push(mask);stepBattle(copy,mask);if(copy.zone===3&&copy.actors.some(a=>a.boss&&a.action.startsWith('attack')&&a.actionTick===15)&&bossIndex<0)bossIndex=masks.length;}
-    if(bossIndex>0){await page.evaluate(frames=>{const r=window.__petGame.scene.getScene('Brawl').runtime;frames.forEach(m=>r.step(m));document.querySelector('.brawl-modal').style.visibility='hidden';},masks.slice(0,bossIndex));await page.waitForFunction(()=>{const scene=window.__petGame.scene.getScene('Brawl');return Math.abs(scene.cameras.main.scrollX-Math.max(0,Math.min(3840,scene.runtime.state.actors[0].x/100-580+scene.runtime.state.actors[0].facing*90)))<1;});await shot('campaign-boss-ipad');await page.evaluate(()=>document.querySelector('.brawl-modal').style.visibility='');}
+    if(bossIndex>0){await playFrames(masks.slice(0,bossIndex));await page.evaluate(()=>{const modal=document.querySelector('.brawl-modal');if(modal)modal.style.visibility='hidden';});await page.waitForFunction(()=>{const scene=window.__petGame.scene.getScene('Brawl');return Math.abs(scene.cameras.main.scrollX-Math.max(0,Math.min(3840,scene.runtime.state.actors[0].x/100-580+scene.runtime.state.actors[0].facing*90)))<1;});await shot('campaign-boss-ipad');await page.evaluate(()=>{const modal=document.querySelector('.brawl-modal');if(modal)modal.style.visibility='';});}
     let rejectSettlement=true;
     const block=async route=>{if(rejectSettlement){rejectSettlement=false;await route.abort('failed');}else await route.continue();};
     await page.route('**/api/pet/brawl/runs/*/finish',block);
-    await page.evaluate(frames=>{const r=window.__petGame.scene.getScene('Brawl').runtime;frames.forEach(m=>r.step(m));},masks.slice(Math.max(0,bossIndex)));
+    await playFrames(masks.slice(Math.max(0,bossIndex)));if(copy.status==='won'){await page.locator('[data-brawl="story-skip"]').waitFor();await dismissStory();}
     await page.locator('[data-brawl="finish-retry"]').waitFor();await page.unroute('**/api/pet/brawl/runs/*/finish',block);
     await page.locator('[data-brawl="finish-retry"]').click();await page.locator('[data-brawl="again"]').waitFor({timeout:20000});
     won=copy.status==='won';if(won){await shot('campaign-reward-ipad');assert.ok((await page.locator('.brawl-result-rewards').innerText()).includes('+5'));}
     await page.locator('[data-brawl="again"]').click();
-    if(!won){await page.locator('[data-brawl="start"]').first().click();await ready();await page.keyboard.press('Escape');}
+    if(!won){await page.locator('[data-brawl="start"]').first().click();await ready();await dismissStory();await page.keyboard.press('Escape');}
   }
   assert.equal(won,true,'campaign wins using legal inputs');
   const final=JSON.parse(await fs.readFile(dbFile,'utf8'));assert.equal(final.petCurrencyLedger.filter(l=>l.kind==='brawl_win').length,1);assert.equal(final.petInstances.find(p=>p.petId===petId).xp,2210);
