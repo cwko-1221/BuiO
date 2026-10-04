@@ -1,0 +1,13 @@
+{
+  "pass": true,
+  "report": [
+    {
+      "url": "/pet/assets/controller-DOT1IVyW.js",
+      "status": 200
+    },
+    {
+      "url": "/pet/assets/index-Cqw8iLRV.js",
+      "status": 200
+    }
+  ]
+}

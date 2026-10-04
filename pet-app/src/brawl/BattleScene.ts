@@ -6,7 +6,7 @@ import type {BrawlAssets} from './types';
 import {ElementalVFX,usesDedicatedSkillFx} from './ElementalVFX';
 import {skillPose,flightPose,actorHeight} from './SkillPose';
 import {audio} from '../audio';
-import {battleViewportWidth,battleCameraScroll,panoramaPlacement} from './panorama-layout.mjs';
+import {battleViewportWidth,battleCameraScroll,smoothCameraLookAhead,panoramaPlacement} from './panorama-layout.mjs';
 import {basicAttackPose} from './basic-attack-pose.mjs';
 interface SceneData {state:BattleState;playerId?:number;assets:BrawlAssets;locale:string;paused:()=>boolean;step:(mask?:number)=>void;loaded:()=>void;failed:()=>void;changed:()=>void}
 interface Effect {kind:string;x:number;y:number;age:number;life:number;color:number;size:number;angle:number;vx:number;vy:number;gravity:number;sprite?:Phaser.GameObjects.Image}
@@ -20,11 +20,11 @@ export class BattleScene extends Phaser.Scene {
   private fx!:Phaser.GameObjects.Graphics;private ground!:Phaser.GameObjects.Graphics;private ambient!:Phaser.GameObjects.Graphics;
   private arrow!:Phaser.GameObjects.Text;private comboText!:Phaser.GameObjects.Text;private banner!:Phaser.GameObjects.Container;
   private ownedTextures:string[]=[];private loadFailed=false;private lastZone=-1;private hudTick=-1;private victoryAt=-1;
-  private effects:Effect[]=[];private bolts=new Map<number,Phaser.GameObjects.Image>();private eventQueue:any[]=[];private lookAhead=80;private visualTime=0;private deliveredTick=-1;private reduced=false;
+  private effects:Effect[]=[];private bolts=new Map<number,Phaser.GameObjects.Image>();private eventQueue:any[]=[];private lookAhead=80;private lookAheadVelocity=0;private visualTime=0;private deliveredTick=-1;private reduced=false;
   feedback={events:0,hits:0,casts:0,particles:0,cameraDistance:0};
   constructor(){super('Brawl');}
   private readonly onLoadError=()=>{this.loadFailed=true;};
-  init(data:SceneData){this.runtime=data;this.background=undefined;this.viewportWidth=1280;this.resizing=false;this.accumulator=0;this.views.clear();this.clones.clear();this.bolts.clear();this.effects=[];this.eventQueue=[];this.ownedTextures=[];this.lastZone=-1;this.loadFailed=false;this.hudTick=-1;this.victoryAt=-1;this.visualTime=0;this.deliveredTick=-1;this.lookAhead=80;this.feedback={events:0,hits:0,casts:0,particles:0,cameraDistance:0};this.reduced=localStorage.getItem('pet-reduced-motion')==='1'||matchMedia('(prefers-reduced-motion: reduce)').matches;}
+  init(data:SceneData){this.runtime=data;this.background=undefined;this.viewportWidth=1280;this.resizing=false;this.accumulator=0;this.views.clear();this.clones.clear();this.bolts.clear();this.effects=[];this.eventQueue=[];this.ownedTextures=[];this.lastZone=-1;this.loadFailed=false;this.hudTick=-1;this.victoryAt=-1;this.visualTime=0;this.deliveredTick=-1;this.lookAhead=80;this.lookAheadVelocity=0;this.feedback={events:0,hits:0,casts:0,particles:0,cameraDistance:0};this.reduced=localStorage.getItem('pet-reduced-motion')==='1'||matchMedia('(prefers-reduced-motion: reduce)').matches;}
   preload(){const {state,assets}=this.runtime;const ids=[state.fighterId,...(['duel','pvp'].includes(state.mode)?[state.opponentId]:[])];
     for(const id of new Set(ids))assets.fighters[id].pages.forEach((url,page)=>{const key=`brawl-${id}-${page}`;if(!this.textures.exists(key)){const layout=assets.fighters[id].pageLayouts?.[page];this.load.spritesheet(key,url,{frameWidth:layout?.frameWidth||assets.fighters[id].frameWidth||256,frameHeight:layout?.frameHeight||assets.fighters[id].frameHeight||256});this.ownedTextures.push(key);}});
     if((['practice','tutorial'].includes(state.mode)||state.mode==='campaign'&&stageById(state.stageId)!.enemies.concat(stageById(state.stageId)!.boss).some(k=>!assets.enemySprites?.[k]))&&!this.textures.exists('brawl-enemies')){this.load.spritesheet('brawl-enemies',assets.enemies.url,{frameWidth:256,frameHeight:256});this.ownedTextures.push('brawl-enemies');}
@@ -133,9 +133,9 @@ export class BattleScene extends Phaser.Scene {
   }if(manaGained>0){const p=this.player;this.label(p.x/100-p.facing*30,p.y/100-p.z/100-175,`MP +${Number((manaGained/100).toFixed(2))}`,'#92e8ff');}}
   private draw(delta:number){const s=this.runtime.state,dt=this.runtime.paused()&&s.status==='playing'?0:delta/1000;this.visualTime+=dt;const player=this.player;
     this.banner.setVisible(!(player.flightUntil>s.tick));const width=s.mode==='campaign'?5120:1280,camera=this.cameras.main;
-    // Follow world movement immediately. Only the directional look-ahead eases,
-    // so walking, sprinting and skill movement cannot outrun a trailing camera.
-    this.lookAhead=Phaser.Math.Linear(this.lookAhead,player.facing*90,1-Math.exp(-delta/100));const before=camera.scrollX;camera.scrollX=battleCameraScroll(player.x/100,this.viewportWidth,width,this.lookAhead);this.feedback.cameraDistance+=Math.abs(before-camera.scrollX);this.positionBackground();
+    // Follow world movement immediately; ease the directional offset separately
+    // so turning is gentle while walking, sprinting and skills remain in view.
+    const look=smoothCameraLookAhead(this.lookAhead,this.lookAheadVelocity,player.facing*90,delta);this.lookAhead=look.offset;this.lookAheadVelocity=look.velocity;const before=camera.scrollX;camera.scrollX=battleCameraScroll(player.x/100,this.viewportWidth,width,this.lookAhead);this.feedback.cameraDistance+=Math.abs(before-camera.scrollX);this.positionBackground();
     if(s.zone!==this.lastZone){this.lastZone=s.zone;this.runtime.changed();}const alive=new Set(s.actors.map(a=>a.id));for(const [id,v] of this.views)if(!alive.has(id)){v.sprite.destroy();v.shadow.destroy();v.bar.destroy();v.status.destroy();this.views.delete(id);}this.ground.clear();
     for(const a of s.actors){const f=this.frame(a);let v=this.views.get(a.id);const bodySize=a.boss&&!a.dummy?246:a.dummy?190:this.runtime.assets.fighters[a.kind]?180:166,size=f.cast?.displaySize||bodySize;let x=a.x/100,y=a.y/100,z=actorHeight(a,s.tick);
       if(!v){v={sprite:this.add.image(x,y,f.key,f.frame).setOrigin(.5,.9),shadow:this.add.ellipse(x,y,bodySize*.46,16,0x152036,.28),bar:this.add.graphics(),status:this.add.text(x,y,'',{fontFamily:'sans-serif',fontSize:'18px',fontStyle:'bold',color:'#f1faff',backgroundColor:'#13253e',padding:{x:6,y:3},stroke:'#13253e',strokeThickness:2}).setOrigin(.5,1).setDepth(10005),trailTick:-1,x,y,z};this.views.set(a.id,v);}if(s.mode==='pvp'&&Math.hypot(x-v.x,y-v.y)<180){const blend=1-Math.exp(-delta/40);x=Phaser.Math.Linear(v.x,x,blend);y=Phaser.Math.Linear(v.y,y,blend);z=Phaser.Math.Linear(v.z,z,blend);}v.x=x;v.y=y;v.z=z;const overlap=a.id!==player.id&&a.y>=player.y&&a.y-player.y<4500&&Math.abs(a.x-player.x)<(a.boss?8500:5000)&&Math.abs(a.z-player.z)<5000;

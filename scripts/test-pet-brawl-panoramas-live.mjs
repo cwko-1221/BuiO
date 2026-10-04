@@ -16,7 +16,7 @@ const require=createRequire(import.meta.url),pets=require('../pet-app/repositori
 const fixture=store.load();for(const [id,roster] of [['S001',FIGHTERS],['S002',FIGHTERS.filter(f=>f.id==='monchhichi')]]){for(const f of roster)fixture.petInstances.push({petId:randomUUID(),studentId:id,speciesId:f.id,xp:0,stage:1,dailyXp:0,dailyXpDate:'',equippedSkills:[],equippedWearables:[]});Object.assign(fixture.petProfiles.find(p=>p.studentId===id),{activePetId:fixture.petInstances.find(p=>p.studentId===id).petId,starterEggClaimed:true});fixture.petWallets.find(w=>w.studentId===id).balance=2500;}store.save();
 const port=await new Promise(resolve=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
 const server=spawn(process.execPath,['server.js'],{cwd:path.resolve('.'),env:{...process.env,PORT:String(port),MOCK_AUTH:'0',NODE_ENV:'development',PET_APP_DIST_DIR:process.env.PET_APP_DIST_DIR||path.resolve('pet-app/dist')},stdio:['ignore','pipe','pipe']});let logs='',browser;server.stdout.on('data',d=>logs+=d);server.stderr.on('data',d=>logs+=d);
-const errors=[],failed=[],results=[];const pass=label=>{console.log('✓ '+label);results.push(label);};const balances=async()=>{const d=JSON.parse(await fs.readFile(dbFile,'utf8'));return ['S001','S002'].map(id=>d.petWallets.find(p=>p.studentId===id).balance);};
+const errors=[],failed=[],results=[],turnReport=[];const pass=label=>{console.log('✓ '+label);results.push(label);};const balances=async()=>{const d=JSON.parse(await fs.readFile(dbFile,'utf8'));return ['S001','S002'].map(id=>d.petWallets.find(p=>p.studentId===id).balance);};
 const ready=async p=>p.waitForFunction(()=>window.__petGame?.scene.isActive('Brawl')&&!document.querySelector('.brawl-loading'));
 const leave=async p=>{await p.keyboard.press('Escape');await p.locator('[data-brawl="lobby"]').click();await p.locator('.brawl-roster-head').waitFor();};
 // Fixtures below move only temporary preview state to audit renderer coverage;
@@ -60,10 +60,35 @@ try{
    const walkEnd=await audit(page);covered(walkEnd);
    assert.ok(Math.abs((walkEnd.playerX-walkStart.playerX)-(walkEnd.camera-walkStart.camera))<.01,'Real held movement keeps actor and camera displacement equal');
    assert.ok(Math.abs((walkEnd.camera-walkStart.camera)+(walkEnd.x-walkStart.x))<.01,'Real held movement keeps background and camera displacement equal');
+   await page.evaluate(()=>{
+    const scene=window.__petGame.scene.getScene('Brawl');scene.lookAhead=90;scene.lookAheadVelocity=0;scene.draw(0);scene.__turnFrames=[];scene.__turnUpdate=scene.sys.sceneUpdate;
+    scene.sys.sceneUpdate=(time,delta)=>{const p=scene.runtime.state.actors[0],before={x:p.x/100,face:p.facing,offset:scene.lookAhead,camera:scene.cameras.main.scrollX};scene.__turnUpdate(time,delta);scene.__turnFrames.push({delta:Math.min(delta,50),before,after:{x:p.x/100,face:p.facing,offset:scene.lookAhead,camera:scene.cameras.main.scrollX},viewport:scene.viewportWidth});};
+   });
+   for(const key of ['KeyA','KeyD','KeyA','KeyD']){await page.keyboard.down(key);await page.waitForTimeout(160);await page.keyboard.up(key);}
+   const turns=await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.sys.sceneUpdate=scene.__turnUpdate;return scene.__turnFrames;});
+   const firstFlip=turns.find(f=>f.before.face===1&&f.after.face===-1);assert.ok(firstFlip);assert.ok(Math.abs(firstFlip.after.offset-firstFlip.before.offset)<6,'Actual first direction change starts gently');
+   assert.ok(turns.filter(f=>f.before.face!==f.after.face).length>=4,'Actual repeated keyboard turns reach the renderer');
+   let tracking=0;
+   for(const f of turns){
+    const pan=f.after.offset-f.before.offset;assert.ok(Math.abs(pan)<=340*f.delta/1000+.01,'No rapid directional camera pan');
+    if(f.before.camera>1&&f.after.camera>1&&f.before.camera<1280-f.viewport-1&&f.after.camera<1280-f.viewport-1){assert.ok(Math.abs((f.after.camera-f.before.camera)-(f.after.x-f.before.x)-pan)<.01,'Actual movement follows immediately during a smooth turn');tracking++;}
+   }
+   assert.ok(tracking>=6);turnReport.push({kind:'actual keyboard reversals',frames:turns});
+   pass('Actual repeated direction changes pan gently while character movement still tracks immediately');
    await page.locator('[data-battle-key="16"]').tap();
    assert.ok((await page.locator('.brawl-buttons button,[data-stick]').evaluateAll(ns=>ns.map(n=>n.getBoundingClientRect().height))).every(h=>h>=64));
   }
   await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.__normalUpdate=scene.sys.sceneUpdate;scene.__changed=scene.runtime.changed;scene.runtime.changed=()=>{};scene.sys.sceneUpdate=(_t,d)=>scene.draw(Math.min(d,50));scene.runtime.state.mode='campaign';scene.runtime.state.actors[0].y=45500;});
+  if(index===0){
+   await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.__previewUpdate=scene.sys.sceneUpdate;scene.sys.sceneUpdate=()=>{};scene.runtime.state.actors[0].x=260000;scene.runtime.state.actors[0].facing=1;scene.lookAhead=90;scene.lookAheadVelocity=0;scene.resizeViewport();scene.draw(0);scene.runtime.state.actors[0].facing=-1;});
+   let frame=0;
+   for(const checkpoint of [1,24,72]){
+    const samples=await page.evaluate(count=>{const scene=window.__petGame.scene.getScene('Brawl'),samples=[];for(let n=0;n<count;n++){scene.draw(1000/60);samples.push({offset:scene.lookAhead,camera:scene.cameras.main.scrollX,background:scene.background.x});}return samples;},checkpoint-frame);
+    turnReport.push({kind:'stationary turn',checkpoint,samples});covered(await audit(page));await page.screenshot({path:path.join(out,'smooth-turn-frame'+checkpoint+'.png')});frame=checkpoint;
+   }
+   assert.ok(Math.abs(turnReport.at(-1).samples.at(-1).offset+90)<5,'Smooth pan reaches the new direction');
+   await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.sys.sceneUpdate=scene.__previewUpdate;scene.lookAhead=90;scene.lookAheadVelocity=0;scene.runtime.state.actors[0].facing=1;});
+  }
   for(const size of index===0?devices:[devices[0]]){
    await page.setViewportSize(size);await page.waitForTimeout(120);
    const controls=await page.locator('.brawl-buttons button,[data-stick]').evaluateAll(ns=>ns.map(n=>({height:n.getBoundingClientRect().height,width:n.getBoundingClientRect().width})));
@@ -108,6 +133,6 @@ try{
  await page.locator('[data-tab="home"]').click();await page.screenshot({path:path.join(out,'bedroom-restored-ipad.png')});
  assert.deepEqual(await balances(),[2500,2500]);assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);
  pass('Keyboard and touch controls work; mandatory campaign story, wallets and the restored room remain valid; no console or asset failures');
- await fs.writeFile(path.join(out,'results.json'),JSON.stringify({pass:true,devices,results,report,errors,failed},null,2));
+ await fs.writeFile(path.join(out,'results.json'),JSON.stringify({pass:true,devices,results,report,turnReport,errors,failed},null,2));
 }catch(error){await fs.writeFile(path.join(out,'failure.txt'),error.stack+'\n'+logs);throw error;}
 finally{await browser?.close();server.kill();await new Promise(r=>server.once('exit',r));assert.ok(path.resolve(temp).startsWith(path.join(os.tmpdir(),'buio-roster-browser-')));await fs.rm(temp,{recursive:true,force:true});}
