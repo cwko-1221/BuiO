@@ -1,0 +1,546 @@
+{
+  "version": "panoramas-v2",
+  "mode": "built-in image_gen; mechanical unfolding into one full background",
+  "scenes": [
+    {
+      "id": "sunny-training",
+      "chapter": 1,
+      "url": "/pet/assets/art/brawl/panorama-wide-sunny-training-06f1799cf07f.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "fc88928101ab232cf0a065dbb7dda7379de64ffbe18aaec085f13b0def29de95",
+      "repairSha256": "06d1adca1fbdba11b8365aeb38e5842f1676c69f2aa3c270db2b2635a9364367",
+      "fullSha256": "1b4aa1d588808cf1b888f78d5fd57fba16ecc0b1b17b6486d8a4e1e47649d7c7",
+      "publishedSha256": "06f1799cf07fb185b9c55b09036f8e9bb6aee0167f8e207c74c2868dff8be747",
+      "bytes": 480574
+    },
+    {
+      "id": "windbell-forest",
+      "chapter": 2,
+      "url": "/pet/assets/art/brawl/panorama-wide-windbell-forest-adf632cef097.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "73ba95bc8e6198c03b00e7079ea69340b2ab8c07197493f4301a00b109aca171",
+      "repairSha256": "bee7c94a620c156088df7cc0abc35ec9afd0aad99db58e5655c9ddac0c532967",
+      "fullSha256": "806362acb6c62e7ae75f5e18da221124f588120200a5be731176727d3c4c9423",
+      "publishedSha256": "adf632cef0977c4c9cda3b5a4bb4a82db6b371ed9d968692110998492c98bf45",
+      "bytes": 755032
+    },
+    {
+      "id": "starcrystal-cave",
+      "chapter": 3,
+      "url": "/pet/assets/art/brawl/panorama-wide-starcrystal-cave-668c52eeafd5.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "9db68e10d5b0d7e8a692a97358f5976e10f78e4e64e96b8f297840bc6cda9655",
+      "repairSha256": "fd5fbc3888b728ee2c48633ecaf1c45387b4aca9ec4ea37c9165e33c09e81727",
+      "fullSha256": "a61f517843a4b5675737c1457086d15b8f9e9c1bfedbf4fdc76583877103e415",
+      "publishedSha256": "668c52eeafd585a197c979c8c375351b4481e8d212777cf63add5df70715b351",
+      "bytes": 689894
+    },
+    {
+      "id": "starlamp-harbor",
+      "chapter": 4,
+      "url": "/pet/assets/art/brawl/panorama-wide-starlamp-harbor-d6086eea8dbe.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "594f7f7061ae1ddbd58f4231c78c8952b6ba4c3e20e5aac404dfe857ddd7a3ad",
+      "repairSha256": "b6a9797b254bdfa77842100851adcdbaa05e5bfcb185f6271cdc85b672b64e32",
+      "fullSha256": "ed3af0458853e067e5ad1b8b40335ea49d5559080aa375078cc2d948f30394a6",
+      "publishedSha256": "d6086eea8dbed91a695bbc7def9ff32915b95daf67b432fb523efa38fc3e1918",
+      "bytes": 635758
+    },
+    {
+      "id": "rainleaf-marsh",
+      "chapter": 5,
+      "url": "/pet/assets/art/brawl/panorama-wide-rainleaf-marsh-39a3ceaf9eb4.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "fe3d69ee7b7daecaba5d1f41b4351483c0902e052317ceb9f0a6ebf1938c2544",
+      "repairSha256": "0d5cac6a41bfcc1e7aebd5fe541deb14f74051a09f34227a631fe15405e3af4e",
+      "fullSha256": "0d5358590ba5b4ddfec172469a81f0b5cc575dfb06acb379e225b6792307f38f",
+      "publishedSha256": "39a3ceaf9eb47c1e7b4998ec80271b10bc25843e0d192f2e9de6ba66f16b434a",
+      "bytes": 777032
+    },
+    {
+      "id": "sunken-tide-city",
+      "chapter": 6,
+      "url": "/pet/assets/art/brawl/panorama-wide-sunken-tide-city-6b618f97f152.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "95e17081d8fbd4c4b7a72eb9bb0c8182c481cfb9e24093678b6f435413ef1d83",
+      "repairSha256": "9395a43d1e2b43c220cf752b6c4c47a916ed7c43b5359000af40c14dbc7f4f67",
+      "fullSha256": "dd240b3dfa61d11c6a211f157479e70a705beee648cf46a4ed8be2f6376385b3",
+      "publishedSha256": "6b618f97f152b1181691239708547735ef03a8c8ba72e2b3982abfe5549ca3a8",
+      "bytes": 696888
+    },
+    {
+      "id": "coral-archive",
+      "chapter": 7,
+      "url": "/pet/assets/art/brawl/panorama-wide-coral-archive-8fe338dc4fd1.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "43b6b228720a4312dee3cf0794fbbf32c43022e790735fde59b96d44464cf51c",
+      "repairSha256": "f405ed75077f74d874dd5a1a8a47bc500576e41e76f6a5384f6611e164ad6591",
+      "fullSha256": "3d1887bdb893eec6f052025e3839a9786b49735b133adc9b4c2892893469b221",
+      "publishedSha256": "8fe338dc4fd1643e88c3143c1aa0bb03f0ce5fae84f4a235a76da1d063e72ed4",
+      "bytes": 731302
+    },
+    {
+      "id": "storm-beacon",
+      "chapter": 8,
+      "url": "/pet/assets/art/brawl/panorama-wide-storm-beacon-44ffa9a8c3e6.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "961845be2fae8c38c8b16b4ec5c5fdad8558ed31b189db1c807369dad019f2f6",
+      "repairSha256": "e889437def0dd24cb6b63e85cd87835dff1640fc2552d6f2b09c8b264bde84d2",
+      "fullSha256": "e01c0aaa8f9a452dd1808abd74680a6cbd9c5a5464aeb87fc34d0395170e8eeb",
+      "publishedSha256": "44ffa9a8c3e6eacf7a401e3fd1d1dcd4c7317f615dbf1ef8cab92e8ce2b91977",
+      "bytes": 707636
+    },
+    {
+      "id": "ember-forge",
+      "chapter": 9,
+      "url": "/pet/assets/art/brawl/panorama-wide-ember-forge-942d7738ea88.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "eaefca11738f085b62d831595cd3dd56ce1f3efec5a2bf096d349f24ee6f5eb7",
+      "repairSha256": "dc44548dd12e70bbda6dbdcbf32258b2ca67f6d918eca4d2fe74ebb6b309f7e6",
+      "fullSha256": "13b613139c18c8c3a157c972759731b7ccf975f0238790c4694aef19434e8379",
+      "publishedSha256": "942d7738ea882f26dbcb995e0627fb3f962c4202ed3a3387068fb103ea070fde",
+      "bytes": 635074
+    },
+    {
+      "id": "ashen-clocktower",
+      "chapter": 10,
+      "url": "/pet/assets/art/brawl/panorama-wide-ashen-clocktower-930a4b4f9b47.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "a360cf6fbe959ed545cbdb1c491b812b84f58368a977e171b7f9ed9ceb1465a2",
+      "repairSha256": "af170ff311895edf5faa6cd4ff468e927cbd9d44c779539e79449a3799f6e560",
+      "fullSha256": "ea7b62e408e09c4ad78b70dc754e41d3ac5a4779e248c4e9fb6c3f1b4e2d0368",
+      "publishedSha256": "930a4b4f9b47cf965f1dfe518c02adacf76d89e2774e7ae843ca7d6bb4916470",
+      "bytes": 667744
+    },
+    {
+      "id": "frost-mirror-field",
+      "chapter": 11,
+      "url": "/pet/assets/art/brawl/panorama-wide-frost-mirror-field-f4f68694d435.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "d83235033ccfb0de57e2847a1c9139243a763783d29975405c5033949abc9ef7",
+      "repairSha256": "30217479929d838ffd880450b48f80854e179a9663341ae63decf29a77303bc1",
+      "fullSha256": "3764b60b5246f94c61a68e6d6f47da53f35383164f58e66b9b64425bed9a48a2",
+      "publishedSha256": "f4f68694d43579ea6ccf58e8510c714c8f4c50bff6078bc3ce3481c467692c83",
+      "bytes": 575370
+    },
+    {
+      "id": "winter-rail",
+      "chapter": 12,
+      "url": "/pet/assets/art/brawl/panorama-wide-winter-rail-3d48f0cebcd9.webp",
+      "width": 3342,
+      "height": 469,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1671,
+          "height": 469
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1671,
+          "height": 469
+        }
+      ],
+      "sourceSha256": "0b02397eb7e4b3eda6dd0dab6bf342adde074d87d0f96d07190d9b7cbcc86484",
+      "repairSha256": "4cfedaa95aaeebcc94692940eae51505c3dc76fa34e66535bdccfbff562d2d26",
+      "fullSha256": "8390174780c49c5aa4e95c3b3953d237ced70c52d1f5d5a6182b075ff7ac9922",
+      "publishedSha256": "3d48f0cebcd959da4f59ad6fb72d88769cd461911d713176fb24abc031ed2206",
+      "bytes": 618462
+    },
+    {
+      "id": "thunder-ridge",
+      "chapter": 13,
+      "url": "/pet/assets/art/brawl/panorama-wide-thunder-ridge-8fe27803b38f.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "a14e8d0d84560793397699266fbd7e5b0a9fd64c6d5af6abc532040772fc6785",
+      "repairSha256": "42df9be922910f7ec6bbd1bf83bab354ade099fa9a65e7283579e5816bfa87a4",
+      "fullSha256": "031d505c409b0f17db9de127b35a25aa7489dade093e7d00290e3f5487012515",
+      "publishedSha256": "8fe27803b38fb30e3c0881b0aebb2f4471c00a66050c9e6687852a712955db98",
+      "bytes": 560402
+    },
+    {
+      "id": "hanging-garden",
+      "chapter": 14,
+      "url": "/pet/assets/art/brawl/panorama-wide-hanging-garden-4c1092437b74.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "f6fea01b4d70ce8a80854b37319ee483ac46fde7dc8a2781f2c022ad7b2ddece",
+      "repairSha256": "3b182a5d8617ffcb1419aa9628d8b350676e32657faa6a18bd88ad026609925a",
+      "fullSha256": "2be7e8dc7e0262f7175449222074dc9e4e2fca510f35db2cf92a9f798456a59a",
+      "publishedSha256": "4c1092437b74384b0265c8c42271895fd9f8e4d097e69cb9f1065536a924be1f",
+      "bytes": 693778
+    },
+    {
+      "id": "hourglass-labyrinth",
+      "chapter": 15,
+      "url": "/pet/assets/art/brawl/panorama-wide-hourglass-labyrinth-40506e600382.webp",
+      "width": 3342,
+      "height": 469,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1671,
+          "height": 469
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1671,
+          "height": 469
+        }
+      ],
+      "sourceSha256": "bb9ec6dd14c3b2440343d3a2dc50861fda12b957b570331f32fbf73aaa6f3c43",
+      "repairSha256": "7ba4bf271741d6845a77598389829db840a678c9541da51f831a1f49da4dd3d2",
+      "fullSha256": "89dd192c98bff506f47c48500fdc0d19fe68a3744cea89c5f25703b0dc124666",
+      "publishedSha256": "40506e600382ed7fa3bce54e1dccc19e115627dce71a985c00b6a95a80467fc4",
+      "bytes": 453360
+    },
+    {
+      "id": "nameless-theater",
+      "chapter": 16,
+      "url": "/pet/assets/art/brawl/panorama-wide-nameless-theater-8c33c8c8438b.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "82b3f1690f10699f7319b7fa778715082e4238e1fc9c5958445e8bc86d4f3f3c",
+      "repairSha256": "310c1b5d56749e9512cc31211141372aafd5a0dabb173c705000dd77e445a95c",
+      "fullSha256": "6d3ea7d4bb4ecc3751e8cc6e554c03233154f7d7950bd02991f6d24ceb758aff",
+      "publishedSha256": "8c33c8c8438b8f631b78ad91c606848a787a1ce2bf887282c467d97fed8c05f1",
+      "bytes": 704452
+    },
+    {
+      "id": "moon-gate-fortress",
+      "chapter": 17,
+      "url": "/pet/assets/art/brawl/panorama-wide-moon-gate-fortress-5981f4dc5f34.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "8163dc380d6ca998c904b6d7361845c004aa4f6b59aa5e4238e61b54bff28caf",
+      "repairSha256": "fa8c9044af010088c26e7074ba23d3e83069512e499c5232a8d1d4bdc76533c2",
+      "fullSha256": "f01ff9a52b3d47db9d9cfa3d0b5e8fc992a6e0a161c6d1ac672581fcfbda0d40",
+      "publishedSha256": "5981f4dc5f34d26904efb28412b45480b319efdd443e3db3d61821dff5814bb6",
+      "bytes": 553528
+    },
+    {
+      "id": "echo-battlefield",
+      "chapter": 18,
+      "url": "/pet/assets/art/brawl/panorama-wide-echo-battlefield-67752a52b753.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "2ecdcefed5ba99699dabe60c382cb17b70d0e899bd099c1505321c189e405fde",
+      "repairSha256": "724809dff4f8cc388a1d484e09fddec37aecd62a8139040384c0673025e2782a",
+      "fullSha256": "f21432070129721801864d8ae09eae6383a864f4f57e43b454658c7b39f5803f",
+      "publishedSha256": "67752a52b7530825fc6e82028efbdf3f8c9f36b724f6554acc03f6623fdf6366",
+      "bytes": 559628
+    },
+    {
+      "id": "starbridge-duel",
+      "chapter": 19,
+      "url": "/pet/assets/art/brawl/panorama-wide-starbridge-duel-f0103d4db3f4.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "0578a35a28f6e185c72f21e65a5beb1e8efc272bb65b2d2fd69b09fc7aae48f9",
+      "repairSha256": "00b90d0eab6557c68a6b9cf9f9eaa819b76ae9108c0507f4878c2c84c6cf61fc",
+      "fullSha256": "4e96e00fa5ea5a90ef6f3e0e733f37b3f3f6ae2383f724d8a5aa4686f8b36b9c",
+      "publishedSha256": "f0103d4db3f4f5c35c6df5de0b8f7056e7b3aeb7411b83ca360be301ea204169",
+      "bytes": 717082
+    },
+    {
+      "id": "dawn-star-court",
+      "chapter": 20,
+      "url": "/pet/assets/art/brawl/panorama-wide-dawn-star-court-1b9b1f77d170.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45,
+      "rows": [
+        {
+          "left": 0,
+          "top": 0,
+          "width": 1672,
+          "height": 470
+        },
+        {
+          "left": 0,
+          "top": 471,
+          "width": 1672,
+          "height": 470
+        }
+      ],
+      "sourceSha256": "8b5befde600dd29cbe9127b05be83d812e533cbbc938482c15a9369b9d40891b",
+      "repairSha256": "f098f28e2255efdb4dbd1c20c152e93435993e65c080ed93d343d24c282f23e4",
+      "fullSha256": "09298a2d3fe3d594ba6a27687e16bb5708626b7375891b00dac8fd3b41f77090",
+      "publishedSha256": "1b9b1f77d17003df5d630ec8e44c662854d6c570db9c9630bc27f4ae663a942a",
+      "bytes": 551712
+    }
+  ]
+}

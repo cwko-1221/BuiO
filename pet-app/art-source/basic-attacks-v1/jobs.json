@@ -1,0 +1,1518 @@
+[
+  {
+    "id": "starpatch-cat-ground",
+    "fighterId": "starpatch-cat",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "short lead-paw claw jab"
+      },
+      {
+        "action": "attack2",
+        "move": "opposite-paw crossing claw swipe"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/starpatch-cat/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/starpatch-cat/seed.png",
+      "pet-app/art-source/basic-attacks-v1/starpatch-cat/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Starpatch Cat. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: short lead-paw claw jab. Last two rows are one coherent eight-frame move: opposite-paw crossing claw swipe. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "starpatch-cat-finish-air",
+    "fighterId": "starpatch-cat",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "low hip turn into a broad double-paw rake"
+      },
+      {
+        "action": "air",
+        "move": "tucked leap opening both paws into a downward claw rake"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/starpatch-cat/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/starpatch-cat/seed.png",
+      "pet-app/art-source/basic-attacks-v1/starpatch-cat/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Starpatch Cat. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: low hip turn into a broad double-paw rake. Last two rows are one coherent eight-frame move: tucked leap opening both paws into a downward claw rake. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "cloud-ear-dog-ground",
+    "fighterId": "cloud-ear-dog",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "quick front-paw boxing tap"
+      },
+      {
+        "action": "attack2",
+        "move": "turning opposite-paw palm strike with flowing floppy ears"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/seed.png",
+      "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Cloud-ear Dog. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: quick front-paw boxing tap. Last two rows are one coherent eight-frame move: turning opposite-paw palm strike with flowing floppy ears. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "cloud-ear-dog-finish-air",
+    "fighterId": "cloud-ear-dog",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "compact shoulder-led two-paw shove"
+      },
+      {
+        "action": "air",
+        "move": "small airborne double-paw downward strike"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/seed.png",
+      "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Cloud-ear Dog. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: compact shoulder-led two-paw shove. Last two rows are one coherent eight-frame move: small airborne double-paw downward strike. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "pudding-pig-ground",
+    "fighterId": "pudding-pig",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "short hoof jab from a planted sumo stance"
+      },
+      {
+        "action": "attack2",
+        "move": "low sideways hoof kick"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/pudding-pig/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/pudding-pig/seed.png",
+      "pet-app/art-source/basic-attacks-v1/pudding-pig/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Pudding Pig. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: short hoof jab from a planted sumo stance. Last two rows are one coherent eight-frame move: low sideways hoof kick. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "pudding-pig-finish-air",
+    "fighterId": "pudding-pig",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted rising double-hoof palm strike with a proud belly turn"
+      },
+      {
+        "action": "air",
+        "move": "tucked airborne downward double-hoof hammer"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/pudding-pig/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/pudding-pig/seed.png",
+      "pet-app/art-source/basic-attacks-v1/pudding-pig/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Pudding Pig. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted rising double-hoof palm strike with a proud belly turn. Last two rows are one coherent eight-frame move: tucked airborne downward double-hoof hammer. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "golden-retriever-dog-ground",
+    "fighterId": "golden-retriever-dog",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "eager lead-paw jab"
+      },
+      {
+        "action": "attack2",
+        "move": "athletic opposite-paw hook with a swishing tail"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/golden-retriever-dog/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/golden-retriever-dog/seed.png",
+      "pet-app/art-source/basic-attacks-v1/golden-retriever-dog/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Golden Retriever. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: eager lead-paw jab. Last two rows are one coherent eight-frame move: athletic opposite-paw hook with a swishing tail. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "golden-retriever-dog-finish-air",
+    "fighterId": "golden-retriever-dog",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "braced double-paw forehand shove"
+      },
+      {
+        "action": "air",
+        "move": "springing diagonal front-paw strike"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/golden-retriever-dog/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/golden-retriever-dog/seed.png",
+      "pet-app/art-source/basic-attacks-v1/golden-retriever-dog/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Golden Retriever. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: braced double-paw forehand shove. Last two rows are one coherent eight-frame move: springing diagonal front-paw strike. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "crescent-rabbit-ground",
+    "fighterId": "crescent-rabbit",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "fast forepaw jab"
+      },
+      {
+        "action": "attack2",
+        "move": "high side kick with long ears following the turn"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/crescent-rabbit/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/crescent-rabbit/seed.png",
+      "pet-app/art-source/basic-attacks-v1/crescent-rabbit/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Crescent Rabbit. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: fast forepaw jab. Last two rows are one coherent eight-frame move: high side kick with long ears following the turn. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "crescent-rabbit-finish-air",
+    "fighterId": "crescent-rabbit",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "low pivot into a long hind-leg roundhouse"
+      },
+      {
+        "action": "air",
+        "move": "tucked midair rabbit kick extending both hind feet"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/crescent-rabbit/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/crescent-rabbit/seed.png",
+      "pet-app/art-source/basic-attacks-v1/crescent-rabbit/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Crescent Rabbit. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: low pivot into a long hind-leg roundhouse. Last two rows are one coherent eight-frame move: tucked midair rabbit kick extending both hind feet. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "bubble-otter-ground",
+    "fighterId": "bubble-otter",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "playful lead-paw palm tap"
+      },
+      {
+        "action": "attack2",
+        "move": "turning reverse-paw palm with the otter tail balancing"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/bubble-otter/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/bubble-otter/seed.png",
+      "pet-app/art-source/basic-attacks-v1/bubble-otter/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Bubble Otter. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: playful lead-paw palm tap. Last two rows are one coherent eight-frame move: turning reverse-paw palm with the otter tail balancing. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "bubble-otter-finish-air",
+    "fighterId": "bubble-otter",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "compact double-paw push with a twisting torso"
+      },
+      {
+        "action": "air",
+        "move": "tucked airborne palm strike with its tail curling back"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/bubble-otter/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/bubble-otter/seed.png",
+      "pet-app/art-source/basic-attacks-v1/bubble-otter/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Bubble Otter. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: compact double-paw push with a twisting torso. Last two rows are one coherent eight-frame move: tucked airborne palm strike with its tail curling back. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "mossback-turtle-ground",
+    "fighterId": "mossback-turtle",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "slow deliberate foreleg jab"
+      },
+      {
+        "action": "attack2",
+        "move": "planted backhand foreleg swipe"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/mossback-turtle/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/mossback-turtle/seed.png",
+      "pet-app/art-source/basic-attacks-v1/mossback-turtle/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Mossback Turtle. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: slow deliberate foreleg jab. Last two rows are one coherent eight-frame move: planted backhand foreleg swipe. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "mossback-turtle-finish-air",
+    "fighterId": "mossback-turtle",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "quarter-turn shell shoulder bash while the head stays visible"
+      },
+      {
+        "action": "air",
+        "move": "tucked airborne shell-and-foreleg downward strike"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/mossback-turtle/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/mossback-turtle/seed.png",
+      "pet-app/art-source/basic-attacks-v1/mossback-turtle/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Mossback Turtle. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: quarter-turn shell shoulder bash while the head stays visible. Last two rows are one coherent eight-frame move: tucked airborne shell-and-foreleg downward strike. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "spark-hamster-ground",
+    "fighterId": "spark-hamster",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "tiny rapid paw jab"
+      },
+      {
+        "action": "attack2",
+        "move": "opposite paw uppercut"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/spark-hamster/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/spark-hamster/seed.png",
+      "pet-app/art-source/basic-attacks-v1/spark-hamster/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Spark Hamster. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: tiny rapid paw jab. Last two rows are one coherent eight-frame move: opposite paw uppercut. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "spark-hamster-finish-air",
+    "fighterId": "spark-hamster",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "both small paws hammering downward from a wound-up torso"
+      },
+      {
+        "action": "air",
+        "move": "tucked airborne foot-and-paw dive"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/spark-hamster/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/spark-hamster/seed.png",
+      "pet-app/art-source/basic-attacks-v1/spark-hamster/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Spark Hamster. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: both small paws hammering downward from a wound-up torso. Last two rows are one coherent eight-frame move: tucked airborne foot-and-paw dive. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "leaftail-fox-ground",
+    "fighterId": "leaftail-fox",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "one sharp forepaw rake"
+      },
+      {
+        "action": "attack2",
+        "move": "reverse forepaw hook with leafy tail counterbalancing"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/leaftail-fox/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/leaftail-fox/seed.png",
+      "pet-app/art-source/basic-attacks-v1/leaftail-fox/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Leaftail Fox. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: one sharp forepaw rake. Last two rows are one coherent eight-frame move: reverse forepaw hook with leafy tail counterbalancing. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "leaftail-fox-finish-air",
+    "fighterId": "leaftail-fox",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "body pivot into a broad leafy-tail-assisted paw swipe"
+      },
+      {
+        "action": "air",
+        "move": "airborne diagonal pounce with both paws extended"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/leaftail-fox/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/leaftail-fox/seed.png",
+      "pet-app/art-source/basic-attacks-v1/leaftail-fox/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Leaftail Fox. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: body pivot into a broad leafy-tail-assisted paw swipe. Last two rows are one coherent eight-frame move: airborne diagonal pounce with both paws extended. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "snowfeather-penguin-ground",
+    "fighterId": "snowfeather-penguin",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "short lead-flipper slap"
+      },
+      {
+        "action": "attack2",
+        "move": "opposite-flipper backhand slap"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/snowfeather-penguin/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/snowfeather-penguin/seed.png",
+      "pet-app/art-source/basic-attacks-v1/snowfeather-penguin/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Snowfeather Penguin. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: short lead-flipper slap. Last two rows are one coherent eight-frame move: opposite-flipper backhand slap. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "snowfeather-penguin-finish-air",
+    "fighterId": "snowfeather-penguin",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted sideways whole-body flipper sweep"
+      },
+      {
+        "action": "air",
+        "move": "airborne two-flipper downward slam with feet tucked"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/snowfeather-penguin/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/snowfeather-penguin/seed.png",
+      "pet-app/art-source/basic-attacks-v1/snowfeather-penguin/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Snowfeather Penguin. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted sideways whole-body flipper sweep. Last two rows are one coherent eight-frame move: airborne two-flipper downward slam with feet tucked. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "thunderhorn-goat-ground",
+    "fighterId": "thunderhorn-goat",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "quick front-hoof jab"
+      },
+      {
+        "action": "attack2",
+        "move": "turning opposite-hoof swipe"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/thunderhorn-goat/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/thunderhorn-goat/seed.png",
+      "pet-app/art-source/basic-attacks-v1/thunderhorn-goat/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Thunderhorn Goat. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: quick front-hoof jab. Last two rows are one coherent eight-frame move: turning opposite-hoof swipe. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "thunderhorn-goat-finish-air",
+    "fighterId": "thunderhorn-goat",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "compact planted forward horn-butt, small head movement only"
+      },
+      {
+        "action": "air",
+        "move": "airborne downward front-hoof stomp with horns visible"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/thunderhorn-goat/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/thunderhorn-goat/seed.png",
+      "pet-app/art-source/basic-attacks-v1/thunderhorn-goat/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Thunderhorn Goat. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: compact planted forward horn-butt, small head movement only. Last two rows are one coherent eight-frame move: airborne downward front-hoof stomp with horns visible. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "coral-seal-ground",
+    "fighterId": "coral-seal",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "lead-flipper slap"
+      },
+      {
+        "action": "attack2",
+        "move": "opposite-flipper crossing slap"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/coral-seal/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/coral-seal/seed.png",
+      "pet-app/art-source/basic-attacks-v1/coral-seal/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Coral Seal. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: lead-flipper slap. Last two rows are one coherent eight-frame move: opposite-flipper crossing slap. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "coral-seal-finish-air",
+    "fighterId": "coral-seal",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted torso roll into a broad double-flipper strike"
+      },
+      {
+        "action": "air",
+        "move": "arched airborne belly-and-flipper downward strike"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/coral-seal/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/coral-seal/seed.png",
+      "pet-app/art-source/basic-attacks-v1/coral-seal/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Coral Seal. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted torso roll into a broad double-flipper strike. Last two rows are one coherent eight-frame move: arched airborne belly-and-flipper downward strike. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "nezuko-kamado-ground",
+    "fighterId": "nezuko-kamado",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "fast low shin kick"
+      },
+      {
+        "action": "attack2",
+        "move": "rotating high heel kick"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/nezuko-kamado/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/nezuko-kamado/seed.png",
+      "pet-app/art-source/basic-attacks-v1/nezuko-kamado/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Nezuko Kamado. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: fast low shin kick. Last two rows are one coherent eight-frame move: rotating high heel kick. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "nezuko-kamado-finish-air",
+    "fighterId": "nezuko-kamado",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted full-body spinning roundhouse kick, kimono and long hair following"
+      },
+      {
+        "action": "air",
+        "move": "midair downward heel axe kick"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/nezuko-kamado/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/nezuko-kamado/seed.png",
+      "pet-app/art-source/basic-attacks-v1/nezuko-kamado/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Nezuko Kamado. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted full-body spinning roundhouse kick, kimono and long hair following. Last two rows are one coherent eight-frame move: midair downward heel axe kick. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells."
+  },
+  {
+    "id": "dragon-ball-goku-ground",
+    "fighterId": "dragon-ball-goku",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "martial-arts lead-fist jab"
+      },
+      {
+        "action": "attack2",
+        "move": "rear-fist straight punch with a clear hip twist"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-goku/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-goku/seed.png",
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-goku/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Son Goku. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: martial-arts lead-fist jab. Last two rows are one coherent eight-frame move: rear-fist straight punch with a clear hip twist. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "dragon-ball-goku-finish-air",
+    "fighterId": "dragon-ball-goku",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted rising roundhouse kick with orange gi folds following"
+      },
+      {
+        "action": "air",
+        "move": "midair downward clenched-fist hammer with bent knees"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-goku/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-goku/seed.png",
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-goku/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Son Goku. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted rising roundhouse kick with orange gi folds following. Last two rows are one coherent eight-frame move: midair downward clenched-fist hammer with bent knees. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "crayon-shin-chan-ground",
+    "fighterId": "crayon-shin-chan",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "cheeky short fist poke"
+      },
+      {
+        "action": "attack2",
+        "move": "comic sideways foot kick"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/crayon-shin-chan/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/crayon-shin-chan/seed.png",
+      "pet-app/art-source/basic-attacks-v1/crayon-shin-chan/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Shin-chan. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: cheeky short fist poke. Last two rows are one coherent eight-frame move: comic sideways foot kick. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "crayon-shin-chan-finish-air",
+    "fighterId": "crayon-shin-chan",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "exaggerated planted bum-first hip bump toward the right, face still visible"
+      },
+      {
+        "action": "air",
+        "move": "tucked airborne feet-first silly kick"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/crayon-shin-chan/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/crayon-shin-chan/seed.png",
+      "pet-app/art-source/basic-attacks-v1/crayon-shin-chan/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Shin-chan. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: exaggerated planted bum-first hip bump toward the right, face still visible. Last two rows are one coherent eight-frame move: tucked airborne feet-first silly kick. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "doraemon-ground",
+    "fighterId": "doraemon",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "round white-hand lead-palm jab"
+      },
+      {
+        "action": "attack2",
+        "move": "opposite white-palm shove with round blue torso twist"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/doraemon/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/doraemon/seed.png",
+      "pet-app/art-source/basic-attacks-v1/doraemon/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Doraemon. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: round white-hand lead-palm jab. Last two rows are one coherent eight-frame move: opposite white-palm shove with round blue torso twist. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "doraemon-finish-air",
+    "fighterId": "doraemon",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "braced double-white-palm push, bell and red collar visible"
+      },
+      {
+        "action": "air",
+        "move": "airborne bent-knee double-white-palm downward strike"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/doraemon/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/doraemon/seed.png",
+      "pet-app/art-source/basic-attacks-v1/doraemon/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Doraemon. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: braced double-white-palm push, bell and red collar visible. Last two rows are one coherent eight-frame move: airborne bent-knee double-white-palm downward strike. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "hello-kitty-ground",
+    "fighterId": "hello-kitty",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "small lead-paw jab with her red bow visible"
+      },
+      {
+        "action": "attack2",
+        "move": "cute opposite-paw crossing punch"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/hello-kitty/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/hello-kitty/seed.png",
+      "pet-app/art-source/basic-attacks-v1/hello-kitty/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Hello Kitty. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: small lead-paw jab with her red bow visible. Last two rows are one coherent eight-frame move: cute opposite-paw crossing punch. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "hello-kitty-finish-air",
+    "fighterId": "hello-kitty",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted whole-body double-paw palm shove"
+      },
+      {
+        "action": "air",
+        "move": "midair diagonal two-paw strike with red dress fluttering"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/hello-kitty/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/hello-kitty/seed.png",
+      "pet-app/art-source/basic-attacks-v1/hello-kitty/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Hello Kitty. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted whole-body double-paw palm shove. Last two rows are one coherent eight-frame move: midair diagonal two-paw strike with red dress fluttering. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "argentina-number-10-ground",
+    "fighterId": "argentina-number-10",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "short inside-foot tap kick as if nudging an unseen ball"
+      },
+      {
+        "action": "attack2",
+        "move": "turning outside-foot kick"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/argentina-number-10/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/argentina-number-10/seed.png",
+      "pet-app/art-source/basic-attacks-v1/argentina-number-10/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Argentina No. 10. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: short inside-foot tap kick as if nudging an unseen ball. Last two rows are one coherent eight-frame move: turning outside-foot kick. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "argentina-number-10-finish-air",
+    "fighterId": "argentina-number-10",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted powerful instep football-style strike aimed just in front, no ball"
+      },
+      {
+        "action": "air",
+        "move": "midair side volley kick toward the right, no ball"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/argentina-number-10/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/argentina-number-10/seed.png",
+      "pet-app/art-source/basic-attacks-v1/argentina-number-10/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Argentina No. 10. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted powerful instep football-style strike aimed just in front, no ball. Last two rows are one coherent eight-frame move: midair side volley kick toward the right, no ball. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "portugal-number-7-ground",
+    "fighterId": "portugal-number-7",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "quick toe-poke football-style kick, no ball"
+      },
+      {
+        "action": "attack2",
+        "move": "compact step-over into a sideways sole kick"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/portugal-number-7/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/portugal-number-7/seed.png",
+      "pet-app/art-source/basic-attacks-v1/portugal-number-7/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Portugal No. 7. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: quick toe-poke football-style kick, no ball. Last two rows are one coherent eight-frame move: compact step-over into a sideways sole kick. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "portugal-number-7-finish-air",
+    "fighterId": "portugal-number-7",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted forceful laces strike with kicking-leg follow-through, no ball"
+      },
+      {
+        "action": "air",
+        "move": "midair scissor-style volley with one boot striking right, no ball"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/portugal-number-7/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/portugal-number-7/seed.png",
+      "pet-app/art-source/basic-attacks-v1/portugal-number-7/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Portugal No. 7. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted forceful laces strike with kicking-leg follow-through, no ball. Last two rows are one coherent eight-frame move: midair scissor-style volley with one boot striking right, no ball. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "dragon-ball-frieza-ground",
+    "fighterId": "dragon-ball-frieza",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "sharp one-handed short jab"
+      },
+      {
+        "action": "attack2",
+        "move": "tail-balanced backhand strike"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-frieza/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-frieza/seed.png",
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-frieza/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Frieza. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: sharp one-handed short jab. Last two rows are one coherent eight-frame move: tail-balanced backhand strike. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "dragon-ball-frieza-finish-air",
+    "fighterId": "dragon-ball-frieza",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted turning heel kick with long tail curving behind"
+      },
+      {
+        "action": "air",
+        "move": "midair diagonal tail-balanced boot kick"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-frieza/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-frieza/seed.png",
+      "pet-app/art-source/basic-attacks-v1/dragon-ball-frieza/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Frieza. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted turning heel kick with long tail curving behind. Last two rows are one coherent eight-frame move: midair diagonal tail-balanced boot kick. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "one-piece-luffy-ground",
+    "fighterId": "one-piece-luffy",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "compact elastic lead-fist jab stretching only slightly beyond normal arm length"
+      },
+      {
+        "action": "attack2",
+        "move": "opposite-fist hook with straw hat and red vest following torso twist"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/one-piece-luffy/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/one-piece-luffy/seed.png",
+      "pet-app/art-source/basic-attacks-v1/one-piece-luffy/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Monkey D. Luffy. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: compact elastic lead-fist jab stretching only slightly beyond normal arm length. Last two rows are one coherent eight-frame move: opposite-fist hook with straw hat and red vest following torso twist. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "one-piece-luffy-finish-air",
+    "fighterId": "one-piece-luffy",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted wound-up heavy straight punch with fist visibly larger but still close-range"
+      },
+      {
+        "action": "air",
+        "move": "midair diagonal downward clenched-fist punch with bent knees"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/one-piece-luffy/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/one-piece-luffy/seed.png",
+      "pet-app/art-source/basic-attacks-v1/one-piece-luffy/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Monkey D. Luffy. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted wound-up heavy straight punch with fist visibly larger but still close-range. Last two rows are one coherent eight-frame move: midair diagonal downward clenched-fist punch with bent knees. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "spy-family-anya-ground",
+    "fighterId": "spy-family-anya",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "small determined straight punch"
+      },
+      {
+        "action": "attack2",
+        "move": "playful opposite-hand palm slap"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/spy-family-anya/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/spy-family-anya/seed.png",
+      "pet-app/art-source/basic-attacks-v1/spy-family-anya/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Anya Forger. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: small determined straight punch. Last two rows are one coherent eight-frame move: playful opposite-hand palm slap. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "spy-family-anya-finish-air",
+    "fighterId": "spy-family-anya",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted brave double-palm shove with pink hair and black-gold hair ornaments bouncing"
+      },
+      {
+        "action": "air",
+        "move": "tucked midair small boot kick toward right"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/spy-family-anya/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/spy-family-anya/seed.png",
+      "pet-app/art-source/basic-attacks-v1/spy-family-anya/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Anya Forger. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted brave double-palm shove with pink hair and black-gold hair ornaments bouncing. Last two rows are one coherent eight-frame move: tucked midair small boot kick toward right. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "one-punch-saitama-ground",
+    "fighterId": "one-punch-saitama",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "casual short lead-hand jab with almost no torso motion"
+      },
+      {
+        "action": "attack2",
+        "move": "nonchalant opposite-hand straight punch"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/one-punch-saitama/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/one-punch-saitama/seed.png",
+      "pet-app/art-source/basic-attacks-v1/one-punch-saitama/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Saitama. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: casual short lead-hand jab with almost no torso motion. Last two rows are one coherent eight-frame move: nonchalant opposite-hand straight punch. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "one-punch-saitama-finish-air",
+    "fighterId": "one-punch-saitama",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted serious straight punch with clear shoulder and hip commitment, cape following"
+      },
+      {
+        "action": "air",
+        "move": "midair compact downward gloved-fist hammer"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/one-punch-saitama/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/one-punch-saitama/seed.png",
+      "pet-app/art-source/basic-attacks-v1/one-punch-saitama/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Saitama. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted serious straight punch with clear shoulder and hip commitment, cape following. Last two rows are one coherent eight-frame move: midair compact downward gloved-fist hammer. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "naruto-uzumaki-ground",
+    "fighterId": "naruto-uzumaki",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "ninja lead-fist jab"
+      },
+      {
+        "action": "attack2",
+        "move": "turning reverse elbow strike"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/naruto-uzumaki/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/naruto-uzumaki/seed.png",
+      "pet-app/art-source/basic-attacks-v1/naruto-uzumaki/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Naruto Uzumaki. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: ninja lead-fist jab. Last two rows are one coherent eight-frame move: turning reverse elbow strike. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "naruto-uzumaki-finish-air",
+    "fighterId": "naruto-uzumaki",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted high ninja roundhouse kick with headband ties following"
+      },
+      {
+        "action": "air",
+        "move": "midair downward heel kick with tucked opposite knee"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/naruto-uzumaki/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/naruto-uzumaki/seed.png",
+      "pet-app/art-source/basic-attacks-v1/naruto-uzumaki/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Naruto Uzumaki. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted high ninja roundhouse kick with headband ties following. Last two rows are one coherent eight-frame move: midair downward heel kick with tucked opposite knee. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "monchhichi-ground",
+    "fighterId": "monchhichi",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "small tan-hand plush jab"
+      },
+      {
+        "action": "attack2",
+        "move": "opposite soft-hand crossing slap with red star bib visible"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/monchhichi/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/monchhichi/seed.png",
+      "pet-app/art-source/basic-attacks-v1/monchhichi/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Monchhichi. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: small tan-hand plush jab. Last two rows are one coherent eight-frame move: opposite soft-hand crossing slap with red star bib visible. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "monchhichi-finish-air",
+    "fighterId": "monchhichi",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted two-tan-palm forward shove with plush body sway"
+      },
+      {
+        "action": "air",
+        "move": "tucked midair soft double-foot kick with bib and tuft visible"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/monchhichi/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/monchhichi/seed.png",
+      "pet-app/art-source/basic-attacks-v1/monchhichi/side.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Monchhichi. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted two-tan-palm forward shove with plush body sway. Last two rows are one coherent eight-frame move: tucked midair soft double-foot kick with bib and tuft visible. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences."
+  },
+  {
+    "id": "dynasty-warriors-zhao-yun-ground",
+    "fighterId": "dynasty-warriors-zhao-yun",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "short compact silver-blue spear thrust, shaft balanced behind torso"
+      },
+      {
+        "action": "attack2",
+        "move": "short controlled horizontal spear sweep to the right"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/seed.png",
+      "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/side.png",
+      "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/weapon-reference.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Zhao Yun. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: short compact silver-blue spear thrust, shaft balanced behind torso. Last two rows are one coherent eight-frame move: short controlled horizontal spear sweep to the right. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences. Image 4 is the approved in-game weapon-holding pose: match the exact silver-blue spear or black and pale-blue dual sword shapes, scale, grip and outfit. Use compact close-range weapon motions, with natural wrist, shoulder and cape movement."
+  },
+  {
+    "id": "dynasty-warriors-zhao-yun-finish-air",
+    "fighterId": "dynasty-warriors-zhao-yun",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted diagonal rising spear slash close in front, no giant magical reach"
+      },
+      {
+        "action": "air",
+        "move": "airborne diagonal downward spear strike with cloak and tassel following"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/seed.png",
+      "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/side.png",
+      "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/weapon-reference.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Zhao Yun. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted diagonal rising spear slash close in front, no giant magical reach. Last two rows are one coherent eight-frame move: airborne diagonal downward spear strike with cloak and tassel following. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences. Image 4 is the approved in-game weapon-holding pose: match the exact silver-blue spear or black and pale-blue dual sword shapes, scale, grip and outfit. Use compact close-range weapon motions, with natural wrist, shoulder and cape movement."
+  },
+  {
+    "id": "sword-art-online-kirito-ground",
+    "fighterId": "sword-art-online-kirito",
+    "sheet": "ground",
+    "actions": [
+      "attack1",
+      "attack2"
+    ],
+    "moves": [
+      {
+        "action": "attack1",
+        "move": "short right-hand dark-sword horizontal cut"
+      },
+      {
+        "action": "attack2",
+        "move": "opposite pale-blue sword backhand cut"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/seed.png",
+      "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/side.png",
+      "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/weapon-reference.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Kirito. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: short right-hand dark-sword horizontal cut. Last two rows are one coherent eight-frame move: opposite pale-blue sword backhand cut. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences. Image 4 is the approved in-game weapon-holding pose: match the exact silver-blue spear or black and pale-blue dual sword shapes, scale, grip and outfit. Use compact close-range weapon motions, with natural wrist, shoulder and cape movement."
+  },
+  {
+    "id": "sword-art-online-kirito-finish-air",
+    "fighterId": "sword-art-online-kirito",
+    "sheet": "finish-air",
+    "actions": [
+      "attack3",
+      "air"
+    ],
+    "moves": [
+      {
+        "action": "attack3",
+        "move": "planted crossed twin-sword X slash close in front, black coat follows"
+      },
+      {
+        "action": "air",
+        "move": "airborne diagonal downward twin-sword slash with bent knees"
+      }
+    ],
+    "columns": 4,
+    "rows": 4,
+    "frameCount": 16,
+    "referencePaths": [
+      "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/reference-canvas.png",
+      "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/seed.png",
+      "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/side.png",
+      "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/weapon-reference.png"
+    ],
+    "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Kirito. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted crossed twin-sword X slash close in front, black coat follows. Last two rows are one coherent eight-frame move: airborne diagonal downward twin-sword slash with bent knees. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences. Image 4 is the approved in-game weapon-holding pose: match the exact silver-blue spear or black and pale-blue dual sword shapes, scale, grip and outfit. Use compact close-range weapon motions, with natural wrist, shoulder and cape movement."
+  }
+]

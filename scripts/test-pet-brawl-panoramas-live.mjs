@@ -9,7 +9,7 @@ import {randomUUID} from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import {chromium} from 'playwright';
 import {FIGHTERS,STAGES} from '../pet-app/lib/brawl/catalog.mjs';
-const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-roster-browser-')),dbFile=path.join(temp,'db.json'),out=path.resolve(process.env.PET_PLAYTEST_DIR||'artifacts/pet-playtest/panoramas-v1');await fs.mkdir(out,{recursive:true});
+const temp=await fs.mkdtemp(path.join(os.tmpdir(),'buio-roster-browser-')),dbFile=path.join(temp,'db.json'),out=path.resolve(process.env.PET_PLAYTEST_DIR||'artifacts/pet-playtest/panoramas-v2');await fs.mkdir(out,{recursive:true});
 await fs.writeFile(dbFile,JSON.stringify({users:['S001','S002','S003'].map((id,n)=>({studentid:id,name:['全角色測試','稀有對戰測試','未購買測試'][n],passwordhash:bcrypt.hashSync('test',4),role:'student',classname:'5A',language:'zh-HK'})),studentStats:[],questionLogs:[],_logId:0}));
 process.env.BUIO_JSON_DB_FILE=dbFile;process.env.SUPABASE_DB_URL='';
 const require=createRequire(import.meta.url),pets=require('../pet-app/repositories/pet.repo'),store=require('../db/jsonStore');for(const id of ['S001','S002','S003'])await pets.ensureStudent(id);
@@ -30,6 +30,8 @@ const audit=async page=>page.evaluate(()=>{
 function covered(info){
  assert.equal(info.missing,0);assert.equal(info.backgrounds,1);assert.equal(info.frame,'__BASE');assert.equal(info.scrollFactor,0);
  assert.ok(Math.abs(info.scaleX-info.scaleY)<1e-9);assert.ok(Math.abs(info.width/info.height-info.sourceWidth/info.sourceHeight)<1e-9);
+ assert.ok(Math.abs(info.height-720)<.01&&Math.abs(info.y)<.01,'The full painting is height-fitted without scenery zoom');
+ assert.ok(info.sourceWidth/info.sourceHeight>=5120/720,'Artwork spans the complete level at natural height');
  assert.ok(Math.abs(info.x+Math.max(0,info.camera))<.01,'Painted floor follows the camera at full world speed');
  const target=info.viewport>=info.world?(info.world-info.viewport)/2:Math.max(0,Math.min(info.world-info.viewport,info.playerX-info.viewport*.453125+info.lookAhead));
  assert.ok(Math.abs(info.camera-target)<.01,'Camera reaches the player target in the same render frame');
@@ -81,6 +83,10 @@ try{
     if(index===0||zone===0||zone===3)await page.screenshot({path:path.join(out,`${String(index+1).padStart(2,'0')}-${stage.id}-${size.width}x${size.height}-zone${zone+1}.png`)});
    }
   }
+  for(const join of [1280,2560,3840]){
+   await page.evaluate(join=>{const scene=window.__petGame.scene.getScene('Brawl');scene.runtime.state.actors[0].x=(join+scene.viewportWidth*.453125-scene.lookAhead-scene.viewportWidth/2)*100;scene.draw(16);},join);
+   covered(await audit(page));await page.screenshot({path:path.join(out,`${String(index+1).padStart(2,'0')}-${stage.id}-join${join/1280}.png`)});
+  }
   if(index===0){
    await page.setViewportSize({width:768,height:1024});await page.keyboard.press('Escape');await page.locator('[data-brawl="continue"]').click();
    assert.ok((await page.locator('.brawl-notice').innerText()).includes('橫向'));await page.setViewportSize(devices[0]);await page.locator('[data-brawl="continue"]').click();
@@ -90,7 +96,7 @@ try{
   await leave(page);assert.equal(await page.evaluate(()=>window.__petGame.scale.gameSize.width),1280);assert.equal(await page.evaluate(()=>window.__petGame.scale.gameSize.height),720);
   console.log('  panorama '+stage.id);
  }
- pass('Twenty chapters render exactly one complete image with uniform scaling and seamless camera movement through all four sections');
+ pass('Twenty chapters render one full-level image at natural height; all four sections and three scenery joins are captured with immediate camera movement');
  pass('Five landscape device sizes fill the canvas, rotation keeps the existing portrait guard, and leaving restores the bedroom canvas');
  // A real campaign opening remains mandatory, with the new panorama behind it.
  await page.locator('[data-brawl="mode"][data-id="campaign"]').click();await page.locator('[data-brawl="act"][data-id="0"]').click();await page.locator('[data-brawl="start"][data-stage="sunny-training"]').click();await ready(page);await page.locator('.brawl-story-overlay').waitFor();

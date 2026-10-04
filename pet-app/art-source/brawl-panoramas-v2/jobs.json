@@ -1,0 +1,722 @@
+[
+  {
+    "id": "sunny-training",
+    "chapter": 1,
+    "name": {
+      "zh-HK": "陽光訓練場",
+      "en-US": "Sunlit Training Grounds"
+    },
+    "sections": [
+      {
+        "zh-HK": "晨光廣場",
+        "en-US": "Dawn Square"
+      },
+      {
+        "zh-HK": "木偶防線",
+        "en-US": "Puppet Line"
+      },
+      {
+        "zh-HK": "星屑長廊",
+        "en-US": "Stardust Walk"
+      },
+      {
+        "zh-HK": "隊長的誓言",
+        "en-US": "The Captain’s Promise"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Paint a ground-dominated fighting-game environment using this exact2x2layout. Four consecutive16:9camera views of one sunny pet training village. No panel borders. View1 upperleft tinyvillage fountain; view2 upperright small targetpuppets; view3 lowerleft tinycrystal woodland; view4 lowerright compact wooden guardian gate. One continuous side-view panorama folded into four views; identical ground level and colour across them; edge areas clear to connect naturally.\nTHE MAIN SUBJECT IS THE WIDE EMPTY FIGHTING FLOOR. At least SIXTY PERCENT of EACH view is clear level EARTH FLOOR, not sky. Near scenery is miniature, confined to the top forty percent of each view, far away. Buildings140pixels high inside720pixelview, tiny fountain90pixels, small trees160pixels. The near objects are backdrop decoration, not the main subject.\nKeep all of the supplied tan area as unobstructed flat fine-textured earth. Paint clear horizontal ground behind and in front, absolutely no central perspective road. All little houses, training props, gate and greenery behind the groundrear edge in the top blue band. Compact distant mountains and clouds. Golden sunny painted storybook fantasy with detailed natural materials, skyblue/leafygreen/gold.\nNo characters, text, UI, gutters, obstacles, stairs, holes, giant foreground architecture, duplicated tree groups. Flat earthy terrain is the majority of every view. Requested2560x1440layout:exactfour equal1280x720views; upperleft thenupperright thenlowerleft thenlowerright. Each whole ROW is one uninterrupted 2560x720 panorama; the two rows will form one long scene. The left and right quarters of a row must connect with no seams, no abrupt horizon or lighting changes. Right edge of upper row matches left edge of lower row. The rear fighting-floor edge is fixed at the supplied blue/tan boundary in EACH ROW; keep the whole lower tan area free.",
+    "references": [
+      "references/balanced-floor-layout.png"
+    ],
+    "source": "sources/sunny-training.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "fc88928101ab232cf0a065dbb7dda7379de64ffbe18aaec085f13b0def29de95",
+    "referenceSha256": "a5b12ab8c975c2775c66a0025415d5e1067185c037976f2a89067a036d5282e2"
+  },
+  {
+    "id": "windbell-forest",
+    "chapter": 2,
+    "name": {
+      "zh-HK": "風鈴森林",
+      "en-US": "Windbell Woods"
+    },
+    "sections": [
+      {
+        "zh-HK": "無聲林口",
+        "en-US": "Silent Trail"
+      },
+      {
+        "zh-HK": "逆風樹道",
+        "en-US": "Headwind Path"
+      },
+      {
+        "zh-HK": "失落鈴橋",
+        "en-US": "Lost Bell Bridge"
+      },
+      {
+        "zh-HK": "風鈴樹頂",
+        "en-US": "Bell Treetop"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all trees, bridge, cave props and architecture much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/windbell-forest/before.png"
+    ],
+    "source": "sources/windbell-forest.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "73ba95bc8e6198c03b00e7079ea69340b2ab8c07197493f4301a00b109aca171",
+    "referenceSha256": "43c5d89755ecad0a306887863b6902ad86e23b30dcbb1f471778009749c40a10"
+  },
+  {
+    "id": "starcrystal-cave",
+    "chapter": 3,
+    "name": {
+      "zh-HK": "星晶洞穴",
+      "en-US": "Starcrystal Cavern"
+    },
+    "sections": [
+      {
+        "zh-HK": "微光洞口",
+        "en-US": "Glimmer Entrance"
+      },
+      {
+        "zh-HK": "裂晶迴廊",
+        "en-US": "Cracked Hall"
+      },
+      {
+        "zh-HK": "願望迴聲",
+        "en-US": "Chamber of Wishes"
+      },
+      {
+        "zh-HK": "星心祭壇",
+        "en-US": "Starlight Altar"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all trees, bridge, cave props and architecture much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/starcrystal-cave/before.png"
+    ],
+    "source": "sources/starcrystal-cave.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "9db68e10d5b0d7e8a692a97358f5976e10f78e4e64e96b8f297840bc6cda9655",
+    "referenceSha256": "588859ace4d31390147dd287c334c8697d54ec2eaf6b5dfbaf824f123646c534"
+  },
+  {
+    "id": "starlamp-harbor",
+    "chapter": 4,
+    "name": {
+      "zh-HK": "星燈港",
+      "en-US": "Starlamp Harbor"
+    },
+    "sections": [
+      {
+        "zh-HK": "歸航碼頭",
+        "en-US": "Homebound Dock"
+      },
+      {
+        "zh-HK": "封信街道",
+        "en-US": "Sealed-Letter Street"
+      },
+      {
+        "zh-HK": "舊郵局",
+        "en-US": "Old Post Office"
+      },
+      {
+        "zh-HK": "燈港大門",
+        "en-US": "Harbor Gate"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, trees, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/starlamp-harbor/before.png"
+    ],
+    "source": "sources/starlamp-harbor.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "594f7f7061ae1ddbd58f4231c78c8952b6ba4c3e20e5aac404dfe857ddd7a3ad",
+    "referenceSha256": "358ebfa655801076b353136fafc234e3d47a7f118d84cba43c89e664c3e969ec"
+  },
+  {
+    "id": "rainleaf-marsh",
+    "chapter": 5,
+    "name": {
+      "zh-HK": "雨葉沼澤",
+      "en-US": "Rainleaf Marsh"
+    },
+    "sections": [
+      {
+        "zh-HK": "雨葉渡口",
+        "en-US": "Rainleaf Landing"
+      },
+      {
+        "zh-HK": "毒苔小徑",
+        "en-US": "Moss Trail"
+      },
+      {
+        "zh-HK": "沉字水潭",
+        "en-US": "Pool of Names"
+      },
+      {
+        "zh-HK": "蘆葦祭台",
+        "en-US": "Reed Altar"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, trees, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/rainleaf-marsh/before.png"
+    ],
+    "source": "sources/rainleaf-marsh.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "fe3d69ee7b7daecaba5d1f41b4351483c0902e052317ceb9f0a6ebf1938c2544",
+    "referenceSha256": "327b3379a1cf1deda181b6e848160160ed65ffef636774bc6f89f54d280dc963"
+  },
+  {
+    "id": "sunken-tide-city",
+    "chapter": 6,
+    "name": {
+      "zh-HK": "潮汐古城",
+      "en-US": "Sunken-Tide City"
+    },
+    "sections": [
+      {
+        "zh-HK": "潮門外街",
+        "en-US": "Tide-Gate Street"
+      },
+      {
+        "zh-HK": "珊瑚守道",
+        "en-US": "Coral Guardway"
+      },
+      {
+        "zh-HK": "淹沒廣場",
+        "en-US": "Drowned Square"
+      },
+      {
+        "zh-HK": "貝殼王庭",
+        "en-US": "Shell Court"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, trees, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/sunken-tide-city/before.png"
+    ],
+    "source": "sources/sunken-tide-city.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "95e17081d8fbd4c4b7a72eb9bb0c8182c481cfb9e24093678b6f435413ef1d83",
+    "referenceSha256": "87d36d81559cf31a38456d0fde95dde3a8d74a5d44d4e7751f2f65ba506e64d3"
+  },
+  {
+    "id": "coral-archive",
+    "chapter": 7,
+    "name": {
+      "zh-HK": "珊瑚書庫",
+      "en-US": "Coral Archive"
+    },
+    "sections": [
+      {
+        "zh-HK": "漂書走廊",
+        "en-US": "Drifting-Book Hall"
+      },
+      {
+        "zh-HK": "墨流書架",
+        "en-US": "Inkflow Shelves"
+      },
+      {
+        "zh-HK": "封存讀室",
+        "en-US": "Sealed Reading Room"
+      },
+      {
+        "zh-HK": "無字書壇",
+        "en-US": "Wordless Lectern"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, trees, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/coral-archive/before.png"
+    ],
+    "source": "sources/coral-archive.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "43b6b228720a4312dee3cf0794fbbf32c43022e790735fde59b96d44464cf51c",
+    "referenceSha256": "3e1c47468e63ac448d04a4e3f1bf61155770ed7b4f3f9db24c45bb3bce2a1abd"
+  },
+  {
+    "id": "storm-beacon",
+    "chapter": 8,
+    "name": {
+      "zh-HK": "暴雨燈塔",
+      "en-US": "Storm Beacon"
+    },
+    "sections": [
+      {
+        "zh-HK": "風浪石階",
+        "en-US": "Storm Steps"
+      },
+      {
+        "zh-HK": "斷纜平台",
+        "en-US": "Broken-Cable Deck"
+      },
+      {
+        "zh-HK": "失訊燈室",
+        "en-US": "Silent Lamp Room"
+      },
+      {
+        "zh-HK": "暴風燈頂",
+        "en-US": "Beacon Summit"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/storm-beacon/before.png"
+    ],
+    "source": "sources/storm-beacon.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "961845be2fae8c38c8b16b4ec5c5fdad8558ed31b189db1c807369dad019f2f6",
+    "referenceSha256": "d9e4865aa65f07fe384ed3abdaede87da86a8ff53103114fd303635d468064a0"
+  },
+  {
+    "id": "ember-forge",
+    "chapter": 9,
+    "name": {
+      "zh-HK": "熔火工坊",
+      "en-US": "Ember Forge"
+    },
+    "sections": [
+      {
+        "zh-HK": "熔銅通道",
+        "en-US": "Copper Channel"
+      },
+      {
+        "zh-HK": "煤火機廊",
+        "en-US": "Coalwork Hall"
+      },
+      {
+        "zh-HK": "面具熔爐",
+        "en-US": "Mask Furnace"
+      },
+      {
+        "zh-HK": "爐芯之門",
+        "en-US": "Furnace Gate"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/ember-forge/before.png"
+    ],
+    "source": "sources/ember-forge.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "eaefca11738f085b62d831595cd3dd56ce1f3efec5a2bf096d349f24ee6f5eb7",
+    "referenceSha256": "56d7dce197263fe889c3b460c5f4cbadbda0f24d70364fd2902f88449de80a28"
+  },
+  {
+    "id": "ashen-clocktower",
+    "chapter": 10,
+    "name": {
+      "zh-HK": "灰燼鐘樓",
+      "en-US": "Ashen Clocktower"
+    },
+    "sections": [
+      {
+        "zh-HK": "灰鐘入口",
+        "en-US": "Ashen Entry"
+      },
+      {
+        "zh-HK": "發條長階",
+        "en-US": "Clockwork Steps"
+      },
+      {
+        "zh-HK": "停時鐘室",
+        "en-US": "Stopped-Clock Room"
+      },
+      {
+        "zh-HK": "擺鐘平台",
+        "en-US": "Pendulum Deck"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/ashen-clocktower/before.png"
+    ],
+    "source": "sources/ashen-clocktower.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "a360cf6fbe959ed545cbdb1c491b812b84f58368a977e171b7f9ed9ceb1465a2",
+    "referenceSha256": "235b6954ad8809f2497b77ed9052951c74c5e1b477c5fbb4724f36d95110e8bd"
+  },
+  {
+    "id": "frost-mirror-field",
+    "chapter": 11,
+    "name": {
+      "zh-HK": "霜鏡雪原",
+      "en-US": "Frost-Mirror Fields"
+    },
+    "sections": [
+      {
+        "zh-HK": "碎雪營地",
+        "en-US": "Snow Camp"
+      },
+      {
+        "zh-HK": "映影冰道",
+        "en-US": "Reflection Path"
+      },
+      {
+        "zh-HK": "往日鏡廊",
+        "en-US": "Memory-Mirror Hall"
+      },
+      {
+        "zh-HK": "霜鏡之心",
+        "en-US": "Mirror Heart"
+      }
+    ],
+    "prompt": "CRITICAL LAYOUT: EXACT2x2, overall16:9. Floor rear edges at y=20% and y=70% of the WHOLE canvas. Compact distant scenery is confined to y0–20% and y50–70%. All the rest of the canvas (y20–50%, y70–100%) is level, fine-textured empty fighting floor. SIXTY PERCENT OF EACH ROW MUST BE FLOOR. Tiny compact skyline; distant small architecture. Use case: stylized-concept. OVERALL CANVAS ASPECT RATIO MUST BE16:9, matching the supplied2560x1440layout. FOUR equal16:9landscape camera views in an exact2x2arrangement. Upperleft=view1, upperright=view2, lowerleft=view3, lowerright=view4. Paint a ground-dominated fighting-game environment. These four views are four consecutive parts of ONE complete side-scrolling panorama. No borders or gutters. Same perspective, lighting, ground level, materials and distant horizon everywhere. Right edge of each view matches the left edge of the next view at the same height. Keep joining edges free of close trees, buildings and large props for80pixels. Many unique scenery details, no repeated chunks.\nEnvironment concept: A sparkling snowfield under aurora, enormous ice mirrors reflecting indistinct memories, sapphire crystal arches and silver-blue mirror shrine.\nThe four story locations in consecutive order VIEW1→VIEW2→VIEW3→VIEW4: Snow Camp → Reflection Path → Memory-Mirror Hall → Mirror Heart. Clear recognisable unique landmarks in each view, small enough for their natural environment scale. Rich premium hand-painted fantasy, sharp organic materials, readable atmospheric depth. Palette, lighting, sky/high vault/mist and FLOOR MATERIAL must suit this chapter. Layout colours are guides; replace all colours with appropriate art.\nTHE MAIN SUBJECT IS THE BROAD EMPTY FIGHTING FLOOR. At least SIXTY PERCENT of EACH row is clear level fine-textured ground, slightly viewed from above, not a thin path. Near scenery is compact and confined to top forty percent of each row. Buildings about140pixels high inside720pixelview, small trees160pixels, small landmark props100pixels. Background decoration stands behind the battle lane. No giant foreground architecture. Preserve the entire lower zone as unobstructed natural floor with identical rear-edge height throughout both rows. No central perspective roads, stairs, obstacles, holes, water gaps or objects in fighting lane.\nNo characters, text, UI, foreground objects or duplicated tiles. Requested2560x1440drawing, OVERALL16:9ASPECT, four1280x720landscape views arranged2x2. Each row connects its two views organically without a dividing line. Flat ground and atmosphere continue at all joining edges; never copy the same scenery to create length. KEEP OVERALL CANVAS16:9, same shape as the input layout.\n\nCRITICAL LAYOUT: EXACT2x2, overall16:9. Floor rear edges at y=20% and y=70% of the WHOLE canvas. Compact distant scenery is confined to y0–20% and y50–70%. All the rest of the canvas (y20–50%, y70–100%) is level, fine-textured empty fighting floor. SIXTY PERCENT OF EACH ROW MUST BE FLOOR. Tiny compact skyline; distant small architecture. ",
+    "references": [
+      "references/balanced-floor-layout.png"
+    ],
+    "source": "sources/frost-mirror-field.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "d83235033ccfb0de57e2847a1c9139243a763783d29975405c5033949abc9ef7",
+    "referenceSha256": "a5b12ab8c975c2775c66a0025415d5e1067185c037976f2a89067a036d5282e2"
+  },
+  {
+    "id": "winter-rail",
+    "chapter": 12,
+    "name": {
+      "zh-HK": "冬眠列車",
+      "en-US": "Winter Rail"
+    },
+    "sections": [
+      {
+        "zh-HK": "雪封車站",
+        "en-US": "Snowbound Station"
+      },
+      {
+        "zh-HK": "凍結軌道",
+        "en-US": "Frozen Track"
+      },
+      {
+        "zh-HK": "無名車廂",
+        "en-US": "Nameless Carriage"
+      },
+      {
+        "zh-HK": "冬行車頭",
+        "en-US": "Winter Engine"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/winter-rail/before.png"
+    ],
+    "source": "sources/winter-rail.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "0b02397eb7e4b3eda6dd0dab6bf342adde074d87d0f96d07190d9b7cbcc86484",
+    "referenceSha256": "da66da6c10c470c2a0d64de2d0128b8457e976250b9acf36a47ea6e30b1e7f9f"
+  },
+  {
+    "id": "thunder-ridge",
+    "chapter": 13,
+    "name": {
+      "zh-HK": "雷脊群島",
+      "en-US": "Thunder-Ridge Isles"
+    },
+    "sections": [
+      {
+        "zh-HK": "雷港懸台",
+        "en-US": "Thunder Landing"
+      },
+      {
+        "zh-HK": "電帆索橋",
+        "en-US": "Electric-Sail Bridge"
+      },
+      {
+        "zh-HK": "折星風眼",
+        "en-US": "Broken-Star Eye"
+      },
+      {
+        "zh-HK": "雷帆主桅",
+        "en-US": "Thunder Mast"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/thunder-ridge/before.png"
+    ],
+    "source": "sources/thunder-ridge.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "a14e8d0d84560793397699266fbd7e5b0a9fd64c6d5af6abc532040772fc6785",
+    "referenceSha256": "91901c1f83c9b9a367eda4cc4aa196b4d5fc5309dc04b9e0c4de54ae8ce8f718"
+  },
+  {
+    "id": "hanging-garden",
+    "chapter": 14,
+    "name": {
+      "zh-HK": "倒懸花園",
+      "en-US": "Hanging Gardens"
+    },
+    "sections": [
+      {
+        "zh-HK": "倒樹庭院",
+        "en-US": "Inverted Court"
+      },
+      {
+        "zh-HK": "纏夢花道",
+        "en-US": "Dreamroot Walk"
+      },
+      {
+        "zh-HK": "昨日溫室",
+        "en-US": "Yesterday’s Glasshouse"
+      },
+      {
+        "zh-HK": "不散花冠",
+        "en-US": "Unfading Crown"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/hanging-garden/before.png"
+    ],
+    "source": "sources/hanging-garden.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "f6fea01b4d70ce8a80854b37319ee483ac46fde7dc8a2781f2c022ad7b2ddece",
+    "referenceSha256": "c5fbd0abdab9bb614c22374a8f2c2cb82cff5bf2c1d22c5283b16c634832bc15"
+  },
+  {
+    "id": "hourglass-labyrinth",
+    "chapter": 15,
+    "name": {
+      "zh-HK": "沙漏迷宮",
+      "en-US": "Hourglass Labyrinth"
+    },
+    "sections": [
+      {
+        "zh-HK": "流砂門廊",
+        "en-US": "Sandflow Gate"
+      },
+      {
+        "zh-HK": "重複石道",
+        "en-US": "Repeating Walk"
+      },
+      {
+        "zh-HK": "未來沙室",
+        "en-US": "Tomorrow’s Chamber"
+      },
+      {
+        "zh-HK": "沙漏心庭",
+        "en-US": "Hourglass Heart"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/hourglass-labyrinth/before.png"
+    ],
+    "source": "sources/hourglass-labyrinth.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "bb9ec6dd14c3b2440343d3a2dc50861fda12b957b570331f32fbf73aaa6f3c43",
+    "referenceSha256": "8fdc6e85ff69ffb1050f8cd4d3f15e849dc4a185051b37798fa9d800f52d56e9"
+  },
+  {
+    "id": "nameless-theater",
+    "chapter": 16,
+    "name": {
+      "zh-HK": "無名劇院",
+      "en-US": "Nameless Theater"
+    },
+    "sections": [
+      {
+        "zh-HK": "褪票大廳",
+        "en-US": "Faded-Ticket Lobby"
+      },
+      {
+        "zh-HK": "換角後台",
+        "en-US": "Changing Backstage"
+      },
+      {
+        "zh-HK": "失名觀眾席",
+        "en-US": "Nameless Seats"
+      },
+      {
+        "zh-HK": "空白舞台",
+        "en-US": "Blank Stage"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/nameless-theater/before.png"
+    ],
+    "source": "sources/nameless-theater.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "82b3f1690f10699f7319b7fa778715082e4238e1fc9c5958445e8bc86d4f3f3c",
+    "referenceSha256": "5922514c95e83a73b426692489fd793a2239a738f30517da73dd10aa29cb3825"
+  },
+  {
+    "id": "moon-gate-fortress",
+    "chapter": 17,
+    "name": {
+      "zh-HK": "月門要塞",
+      "en-US": "Moon-Gate Fortress"
+    },
+    "sections": [
+      {
+        "zh-HK": "月門吊橋",
+        "en-US": "Moon-Gate Bridge"
+      },
+      {
+        "zh-HK": "封願城道",
+        "en-US": "Sealed-Wish Walk"
+      },
+      {
+        "zh-HK": "碎印內庭",
+        "en-US": "Broken-Seal Court"
+      },
+      {
+        "zh-HK": "月衛之誓",
+        "en-US": "Sentinel’s Promise"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/moon-gate-fortress/before.png"
+    ],
+    "source": "sources/moon-gate-fortress.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "8163dc380d6ca998c904b6d7361845c004aa4f6b59aa5e4238e61b54bff28caf",
+    "referenceSha256": "a1624c1125fa5442c2cd0e85fd2ed477b4033f245e951478987b6bf239fc7bfb"
+  },
+  {
+    "id": "echo-battlefield",
+    "chapter": 18,
+    "name": {
+      "zh-HK": "回聲戰場",
+      "en-US": "Echo Battlefield"
+    },
+    "sections": [
+      {
+        "zh-HK": "勇氣殘道",
+        "en-US": "Courage Ruins"
+      },
+      {
+        "zh-HK": "信任斷橋",
+        "en-US": "Trust Bridge"
+      },
+      {
+        "zh-HK": "共鳴碎庭",
+        "en-US": "Harmony Court"
+      },
+      {
+        "zh-HK": "三響核心",
+        "en-US": "Threefold Core"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/echo-battlefield/before.png"
+    ],
+    "source": "sources/echo-battlefield.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "2ecdcefed5ba99699dabe60c382cb17b70d0e899bd099c1505321c189e405fde",
+    "referenceSha256": "72d213e0e5fe76e63f443248a3ac00f77768a9600f3a13b1a71375f0af0e9786"
+  },
+  {
+    "id": "starbridge-duel",
+    "chapter": 19,
+    "name": {
+      "zh-HK": "星橋決戰",
+      "en-US": "Starbridge Crossing"
+    },
+    "sections": [
+      {
+        "zh-HK": "裂星橋口",
+        "en-US": "Broken-Star Entry"
+      },
+      {
+        "zh-HK": "月舟舊站",
+        "en-US": "Moonferry’s Stop"
+      },
+      {
+        "zh-HK": "未寄信台",
+        "en-US": "Unsent-Letter Deck"
+      },
+      {
+        "zh-HK": "星橋盡頭",
+        "en-US": "End of the Bridge"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/starbridge-duel/before.png"
+    ],
+    "source": "sources/starbridge-duel.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "0578a35a28f6e185c72f21e65a5beb1e8efc272bb65b2d2fd69b09fc7aae48f9",
+    "referenceSha256": "2ffea364c9d4062c3e6792e5b6480930398129d2cd1da1bcca04a2526a451e9a"
+  },
+  {
+    "id": "dawn-star-court",
+    "chapter": 20,
+    "name": {
+      "zh-HK": "黎明星庭",
+      "en-US": "Dawn Star Court"
+    },
+    "sections": [
+      {
+        "zh-HK": "重光星門",
+        "en-US": "Relit Star Gate"
+      },
+      {
+        "zh-HK": "同行長路",
+        "en-US": "Companions’ Path"
+      },
+      {
+        "zh-HK": "萬願之環",
+        "en-US": "Ring of Wishes"
+      },
+      {
+        "zh-HK": "黎明星心",
+        "en-US": "Dawn Starheart"
+      }
+    ],
+    "prompt": "Use case: precise-object-edit. Edit this EXACT 2x2 environment sheet. Keep exact 16:9 canvas, four story places, matching art style and colour palette. Move the rear edge of the flat fighting FLOOR UP to 40% of the height of EACH ROW. In the WHOLE SHEET the two floor rear edges must be at y=20% and y=70% of canvas height. This is the only required composition correction. REDRAW all the skyline, architecture and landmark props much smaller, high in each row, compact distant landscape within its top 40%. The lower SIXTY PERCENT OF EACH ROW is unobstructed fine-textured level floor, not cliffs/water/structures. Preserve two rows and four unique sequential camera views; all seams connect at identical ground level. Do not crop, zoom or distort. The four landmarks remain small but recognisable. No characters, text, borders or gutters. Clear fighting floor at every x from y20% to50%, and from y70% to100% of the sheet. FLOOR dominates, scenery is compact. KEEP OVERALL16:9.",
+    "references": [
+      "revisions/dawn-star-court/before.png"
+    ],
+    "source": "sources/dawn-star-court.png",
+    "layout": "folded-panorama",
+    "floorLine": 0.45,
+    "generationMode": "built-in image_gen",
+    "sourceSha256": "8b5befde600dd29cbe9127b05be83d812e533cbbc938482c15a9369b9d40891b",
+    "referenceSha256": "25713f6be94769374eba5b51a538da6a0f0930c7c77dfd157591f3be7f724236"
+  }
+]

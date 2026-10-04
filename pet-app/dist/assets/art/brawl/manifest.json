@@ -280,26 +280,26 @@
     }
   },
   "backgrounds": {
-    "sunny-training": "/pet/assets/art/brawl/panorama-sunny-training-card-433fcd7226f9.webp",
-    "windbell-forest": "/pet/assets/art/brawl/panorama-windbell-forest-card-a4580f89be26.webp",
-    "starcrystal-cave": "/pet/assets/art/brawl/panorama-starcrystal-cave-card-0d001f49efc5.webp",
-    "starlamp-harbor": "/pet/assets/art/brawl/panorama-starlamp-harbor-card-3a2a683ced46.webp",
-    "rainleaf-marsh": "/pet/assets/art/brawl/panorama-rainleaf-marsh-card-95184d4ed6d1.webp",
-    "sunken-tide-city": "/pet/assets/art/brawl/panorama-sunken-tide-city-card-5d906635803c.webp",
-    "coral-archive": "/pet/assets/art/brawl/panorama-coral-archive-card-9e25df9773f0.webp",
-    "storm-beacon": "/pet/assets/art/brawl/panorama-storm-beacon-card-2be5df88cbd0.webp",
-    "ember-forge": "/pet/assets/art/brawl/panorama-ember-forge-card-a9a3edaed6b6.webp",
-    "ashen-clocktower": "/pet/assets/art/brawl/panorama-ashen-clocktower-card-5157a0038c86.webp",
-    "frost-mirror-field": "/pet/assets/art/brawl/panorama-frost-mirror-field-card-6b8aaf2a17e2.webp",
-    "winter-rail": "/pet/assets/art/brawl/panorama-winter-rail-card-b7aab8bf4781.webp",
-    "thunder-ridge": "/pet/assets/art/brawl/panorama-thunder-ridge-card-2cc6c053e150.webp",
-    "hanging-garden": "/pet/assets/art/brawl/panorama-hanging-garden-card-af0765746bc9.webp",
-    "hourglass-labyrinth": "/pet/assets/art/brawl/panorama-hourglass-labyrinth-card-a1451206e63b.webp",
-    "nameless-theater": "/pet/assets/art/brawl/panorama-nameless-theater-card-f830d8001fd4.webp",
-    "moon-gate-fortress": "/pet/assets/art/brawl/panorama-moon-gate-fortress-card-5b3a02945fda.webp",
-    "echo-battlefield": "/pet/assets/art/brawl/panorama-echo-battlefield-card-aa71d9c21de9.webp",
-    "starbridge-duel": "/pet/assets/art/brawl/panorama-starbridge-duel-card-2626810d5074.webp",
-    "dawn-star-court": "/pet/assets/art/brawl/panorama-dawn-star-court-card-97008e684e1e.webp"
+    "sunny-training": "/pet/assets/art/brawl/panorama-wide-sunny-training-card-03255fe29057.webp",
+    "windbell-forest": "/pet/assets/art/brawl/panorama-wide-windbell-forest-card-8af1206cc1f4.webp",
+    "starcrystal-cave": "/pet/assets/art/brawl/panorama-wide-starcrystal-cave-card-6e1e65ad1443.webp",
+    "starlamp-harbor": "/pet/assets/art/brawl/panorama-wide-starlamp-harbor-card-376ba071f940.webp",
+    "rainleaf-marsh": "/pet/assets/art/brawl/panorama-wide-rainleaf-marsh-card-0d9b5f378f73.webp",
+    "sunken-tide-city": "/pet/assets/art/brawl/panorama-wide-sunken-tide-city-card-3c0ca0fd0026.webp",
+    "coral-archive": "/pet/assets/art/brawl/panorama-wide-coral-archive-card-4a8376e533e1.webp",
+    "storm-beacon": "/pet/assets/art/brawl/panorama-wide-storm-beacon-card-503c11a4139a.webp",
+    "ember-forge": "/pet/assets/art/brawl/panorama-wide-ember-forge-card-cb85641922d9.webp",
+    "ashen-clocktower": "/pet/assets/art/brawl/panorama-wide-ashen-clocktower-card-990b06690805.webp",
+    "frost-mirror-field": "/pet/assets/art/brawl/panorama-wide-frost-mirror-field-card-fd6367bb5643.webp",
+    "winter-rail": "/pet/assets/art/brawl/panorama-wide-winter-rail-card-18162f21e7cc.webp",
+    "thunder-ridge": "/pet/assets/art/brawl/panorama-wide-thunder-ridge-card-c5bac0d6e10e.webp",
+    "hanging-garden": "/pet/assets/art/brawl/panorama-wide-hanging-garden-card-33d5e9b790ff.webp",
+    "hourglass-labyrinth": "/pet/assets/art/brawl/panorama-wide-hourglass-labyrinth-card-04f83b74e234.webp",
+    "nameless-theater": "/pet/assets/art/brawl/panorama-wide-nameless-theater-card-7c0349407b9b.webp",
+    "moon-gate-fortress": "/pet/assets/art/brawl/panorama-wide-moon-gate-fortress-card-202aa0c81fbf.webp",
+    "echo-battlefield": "/pet/assets/art/brawl/panorama-wide-echo-battlefield-card-0bf0c35ad621.webp",
+    "starbridge-duel": "/pet/assets/art/brawl/panorama-wide-starbridge-duel-card-97de288d1461.webp",
+    "dawn-star-court": "/pet/assets/art/brawl/panorama-wide-dawn-star-court-card-e4d36ce66c82.webp"
   },
   "worlds": {
     "sunny-training": "/pet/assets/art/brawl/world-sunny-training-2d700535659d.webp",
@@ -669,7 +669,7 @@
     "chapters": 20,
     "sections": 80,
     "version": "adventure-v9",
-    "backgroundVersion": "panoramas-v1"
+    "backgroundVersion": "panoramas-v2"
   },
   "skillFx": {
     "gum-pistol": {
@@ -3781,124 +3781,1314 @@
   },
   "panoramas": {
     "sunny-training": {
-      "url": "/pet/assets/art/brawl/panorama-sunny-training-542108cf0ebe.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-sunny-training-06f1799cf07f.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "windbell-forest": {
-      "url": "/pet/assets/art/brawl/panorama-windbell-forest-c48548126868.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-windbell-forest-adf632cef097.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "starcrystal-cave": {
-      "url": "/pet/assets/art/brawl/panorama-starcrystal-cave-43c454a80007.webp",
-      "width": 2048,
-      "height": 684,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-starcrystal-cave-668c52eeafd5.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "starlamp-harbor": {
-      "url": "/pet/assets/art/brawl/panorama-starlamp-harbor-155097755bf9.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-starlamp-harbor-d6086eea8dbe.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "rainleaf-marsh": {
-      "url": "/pet/assets/art/brawl/panorama-rainleaf-marsh-20eedf5350fe.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-rainleaf-marsh-39a3ceaf9eb4.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "sunken-tide-city": {
-      "url": "/pet/assets/art/brawl/panorama-sunken-tide-city-b4bc1dbb6ee1.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-sunken-tide-city-6b618f97f152.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "coral-archive": {
-      "url": "/pet/assets/art/brawl/panorama-coral-archive-3ae0267f0b01.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-coral-archive-8fe338dc4fd1.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "storm-beacon": {
-      "url": "/pet/assets/art/brawl/panorama-storm-beacon-0e07cd18e48e.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-storm-beacon-44ffa9a8c3e6.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "ember-forge": {
-      "url": "/pet/assets/art/brawl/panorama-ember-forge-8668d6ab4e9a.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-ember-forge-942d7738ea88.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "ashen-clocktower": {
-      "url": "/pet/assets/art/brawl/panorama-ashen-clocktower-17a53a792811.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-ashen-clocktower-930a4b4f9b47.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "frost-mirror-field": {
-      "url": "/pet/assets/art/brawl/panorama-frost-mirror-field-6c9142c89642.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-frost-mirror-field-f4f68694d435.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "winter-rail": {
-      "url": "/pet/assets/art/brawl/panorama-winter-rail-e875e932fd1d.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-winter-rail-3d48f0cebcd9.webp",
+      "width": 3342,
+      "height": 469,
+      "floorLine": 0.45
     },
     "thunder-ridge": {
-      "url": "/pet/assets/art/brawl/panorama-thunder-ridge-16680f894ac6.webp",
-      "width": 2048,
-      "height": 684,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-thunder-ridge-8fe27803b38f.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "hanging-garden": {
-      "url": "/pet/assets/art/brawl/panorama-hanging-garden-9f2e19862293.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-hanging-garden-4c1092437b74.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "hourglass-labyrinth": {
-      "url": "/pet/assets/art/brawl/panorama-hourglass-labyrinth-e8cc0941396e.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-hourglass-labyrinth-40506e600382.webp",
+      "width": 3342,
+      "height": 469,
+      "floorLine": 0.45
     },
     "nameless-theater": {
-      "url": "/pet/assets/art/brawl/panorama-nameless-theater-5aa86e97ec8f.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-nameless-theater-8c33c8c8438b.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "moon-gate-fortress": {
-      "url": "/pet/assets/art/brawl/panorama-moon-gate-fortress-c8428070c44b.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-moon-gate-fortress-5981f4dc5f34.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "echo-battlefield": {
-      "url": "/pet/assets/art/brawl/panorama-echo-battlefield-b46cfc77fc3b.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-echo-battlefield-67752a52b753.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "starbridge-duel": {
-      "url": "/pet/assets/art/brawl/panorama-starbridge-duel-012333a22bf1.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-starbridge-duel-f0103d4db3f4.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     },
     "dawn-star-court": {
-      "url": "/pet/assets/art/brawl/panorama-dawn-star-court-7b644ec6ff9a.webp",
-      "width": 2048,
-      "height": 683,
-      "floorLine": 0.53
+      "url": "/pet/assets/art/brawl/panorama-wide-dawn-star-court-1b9b1f77d170.webp",
+      "width": 3344,
+      "height": 470,
+      "floorLine": 0.45
     }
+  },
+  "fighterAttackAnimations": {
+    "starpatch-cat": [
+      {
+        "url": "/pet/assets/art/brawl/starpatch-cat-normal-ground-b346cfb2349b.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/starpatch-cat-normal-finish-air-7b8961e95703.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          }
+        }
+      }
+    ],
+    "cloud-ear-dog": [
+      {
+        "url": "/pet/assets/art/brawl/cloud-ear-dog-normal-ground-a264612e45a4.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/cloud-ear-dog-normal-finish-air-87315d686f68.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          }
+        }
+      }
+    ],
+    "pudding-pig": [
+      {
+        "url": "/pet/assets/art/brawl/pudding-pig-normal-ground-54bb9aa95d4c.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/pudding-pig-normal-finish-air-7fd40b4689d8.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 270,
+            "originY": 0.9333333333333333
+          }
+        }
+      }
+    ],
+    "golden-retriever-dog": [
+      {
+        "url": "/pet/assets/art/brawl/golden-retriever-dog-normal-ground-f854479f2280.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/golden-retriever-dog-normal-finish-air-460e44f4ca2e.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      }
+    ],
+    "crescent-rabbit": [
+      {
+        "url": "/pet/assets/art/brawl/crescent-rabbit-normal-ground-ac72324ca83c.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/crescent-rabbit-normal-finish-air-0352ebacb006.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      }
+    ],
+    "bubble-otter": [
+      {
+        "url": "/pet/assets/art/brawl/bubble-otter-normal-ground-999ec9e7089f.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/bubble-otter-normal-finish-air-e03d6bc29398.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      }
+    ],
+    "mossback-turtle": [
+      {
+        "url": "/pet/assets/art/brawl/mossback-turtle-normal-ground-31da24c2d449.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/mossback-turtle-normal-finish-air-a5c67f393d2d.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      }
+    ],
+    "spark-hamster": [
+      {
+        "url": "/pet/assets/art/brawl/spark-hamster-normal-ground-91274c676756.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/spark-hamster-normal-finish-air-b0abbc346fd1.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      }
+    ],
+    "leaftail-fox": [
+      {
+        "url": "/pet/assets/art/brawl/leaftail-fox-normal-ground-72177ca078a6.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/leaftail-fox-normal-finish-air-0f5c2156bd80.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      }
+    ],
+    "snowfeather-penguin": [
+      {
+        "url": "/pet/assets/art/brawl/snowfeather-penguin-normal-ground-dc32425f0e54.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/snowfeather-penguin-normal-finish-air-3acd2964a5e4.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      }
+    ],
+    "thunderhorn-goat": [
+      {
+        "url": "/pet/assets/art/brawl/thunderhorn-goat-normal-ground-15a04ea88134.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/thunderhorn-goat-normal-finish-air-20b8b4b2a810.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      }
+    ],
+    "coral-seal": [
+      {
+        "url": "/pet/assets/art/brawl/coral-seal-normal-ground-6fc846cfab0a.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/coral-seal-normal-finish-air-32ede4bdf0cd.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89846875
+          }
+        }
+      }
+    ],
+    "nezuko-kamado": [
+      {
+        "url": "/pet/assets/art/brawl/nezuko-kamado-normal-ground-73e97565bdfa.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/nezuko-kamado-normal-finish-air-abfd3d603f47.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          }
+        }
+      }
+    ],
+    "dragon-ball-goku": [
+      {
+        "url": "/pet/assets/art/brawl/dragon-ball-goku-normal-ground-c082dce60583.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/dragon-ball-goku-normal-finish-air-7f60ad3a43ac.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          }
+        }
+      }
+    ],
+    "crayon-shin-chan": [
+      {
+        "url": "/pet/assets/art/brawl/crayon-shin-chan-normal-ground-6cc8c9f2a333.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/crayon-shin-chan-normal-finish-air-b07ff4d2698e.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          }
+        }
+      }
+    ],
+    "doraemon": [
+      {
+        "url": "/pet/assets/art/brawl/doraemon-normal-ground-5d1952793400.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/doraemon-normal-finish-air-3a35f99b23f1.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          }
+        }
+      }
+    ],
+    "hello-kitty": [
+      {
+        "url": "/pet/assets/art/brawl/hello-kitty-normal-ground-a50021d4a8a2.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/hello-kitty-normal-finish-air-d91bf45b8394.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8984375
+          }
+        }
+      }
+    ],
+    "argentina-number-10": [
+      {
+        "url": "/pet/assets/art/brawl/argentina-number-10-normal-ground-c876895efa98.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/argentina-number-10-normal-finish-air-3629d99ddde3.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      }
+    ],
+    "portugal-number-7": [
+      {
+        "url": "/pet/assets/art/brawl/portugal-number-7-normal-ground-412a24295f49.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89453125
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89453125
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/portugal-number-7-normal-finish-air-a5144c02bf34.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89453125
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.89453125
+          }
+        }
+      }
+    ],
+    "dragon-ball-frieza": [
+      {
+        "url": "/pet/assets/art/brawl/dragon-ball-frieza-normal-ground-d1e5efa638a9.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/dragon-ball-frieza-normal-finish-air-f2db91b989fe.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      }
+    ],
+    "one-piece-luffy": [
+      {
+        "url": "/pet/assets/art/brawl/one-piece-luffy-normal-ground-64135bb1cfe6.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/one-piece-luffy-normal-finish-air-519ff8817708.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      }
+    ],
+    "spy-family-anya": [
+      {
+        "url": "/pet/assets/art/brawl/spy-family-anya-normal-ground-fc037f3d3831.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/spy-family-anya-normal-finish-air-252f920edcb6.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      }
+    ],
+    "one-punch-saitama": [
+      {
+        "url": "/pet/assets/art/brawl/one-punch-saitama-normal-ground-1d203eda16e5.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/one-punch-saitama-normal-finish-air-dcc2080276de.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      }
+    ],
+    "naruto-uzumaki": [
+      {
+        "url": "/pet/assets/art/brawl/naruto-uzumaki-normal-ground-4e627f7e8fbe.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/naruto-uzumaki-normal-finish-air-33bf751495b6.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      }
+    ],
+    "monchhichi": [
+      {
+        "url": "/pet/assets/art/brawl/monchhichi-normal-ground-39c549891221.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/monchhichi-normal-finish-air-74c0ae49d2c2.webp",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 288,
+            "originY": 0.8945625
+          }
+        }
+      }
+    ],
+    "dynasty-warriors-zhao-yun": [
+      {
+        "url": "/pet/assets/art/brawl/dynasty-warriors-zhao-yun-normal-ground-bcd7a29dd10d.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9297083333333334
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9297083333333334
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/dynasty-warriors-zhao-yun-normal-finish-air-1dc056dc5683.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9297083333333334
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9297083333333334
+          }
+        }
+      }
+    ],
+    "sword-art-online-kirito": [
+      {
+        "url": "/pet/assets/art/brawl/sword-art-online-kirito-normal-ground-025c0d1a56b9.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9297083333333334
+          },
+          "attack2": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9297083333333334
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/sword-art-online-kirito-normal-finish-air-869d921b11cc.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9297083333333334
+          },
+          "air": {
+            "start": 8,
+            "count": 8,
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9297083333333334
+          }
+        }
+      }
+    ]
   }
 }

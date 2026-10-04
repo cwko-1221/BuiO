@@ -1,0 +1,46 @@
+{
+  "pass": true,
+  "results": [
+    "28 open fighters, including all 16 hidden guests, owned/all/locked filters and 60px iPad selection buttons",
+    "Unowned fighters remain previews; all five modes and direct API requests reject them",
+    "All 28 open battle atlases and all 56 ability effects render on the iPad viewport without a missing frame",
+    "Zhao Yun and Monchhichi synchronize in a real two-student duel; refusal is free and acceptance charges exactly 500 each",
+    "No page errors, console errors or failed sprite requests"
+  ],
+  "errors": [],
+  "failed": [],
+  "sizes": [
+    {
+      "text": "冒險",
+      "height": 60
+    },
+    {
+      "text": "學習操作",
+      "height": 60
+    },
+    {
+      "text": "練習場",
+      "height": 60
+    },
+    {
+      "text": "AI 對戰",
+      "height": 60
+    },
+    {
+      "text": "同學對戰",
+      "height": 60
+    },
+    {
+      "text": "已擁有",
+      "height": 60
+    },
+    {
+      "text": "全部",
+      "height": 60
+    },
+    {
+      "text": "未擁有",
+      "height": 60
+    }
+  ]
+}

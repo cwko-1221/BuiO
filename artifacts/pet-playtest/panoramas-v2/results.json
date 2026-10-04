@@ -1,0 +1,3586 @@
+{
+  "pass": true,
+  "devices": [
+    {
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "width": 1194,
+      "height": 834
+    },
+    {
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "width": 844,
+      "height": 390
+    },
+    {
+      "width": 1920,
+      "height": 810
+    }
+  ],
+  "results": [
+    "Twenty chapters render one full-level image at natural height; all four sections and three scenery joins are captured with immediate camera movement",
+    "Five landscape device sizes fill the canvas, rotation keeps the existing portrait guard, and leaving restores the bedroom canvas",
+    "Keyboard and touch controls work; mandatory campaign story, wallets and the restored room remain valid; no console or asset failures"
+  ],
+  "report": [
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1194,
+        "height": 834
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1031,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1194,
+        "height": 833.828125
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1194,
+        "height": 834
+      }
+    },
+    {
+      "device": {
+        "width": 1194,
+        "height": 834
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1031,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1202.828125,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1202.828125,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1194,
+        "height": 833.828125
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1194,
+        "height": 834
+      }
+    },
+    {
+      "device": {
+        "width": 1194,
+        "height": 834
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1031,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2482.828125,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2482.828125,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1194,
+        "height": 833.828125
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1194,
+        "height": 834
+      }
+    },
+    {
+      "device": {
+        "width": 1194,
+        "height": 834
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1031,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4089,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4089,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1194,
+        "height": 833.828125
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1194,
+        "height": 834
+      }
+    },
+    {
+      "device": {
+        "width": 1280,
+        "height": 720
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1280,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      }
+    },
+    {
+      "device": {
+        "width": 1280,
+        "height": 720
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1280,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1090,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1090,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      }
+    },
+    {
+      "device": {
+        "width": 1280,
+        "height": 720
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1280,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2370,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2370,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      }
+    },
+    {
+      "device": {
+        "width": 1280,
+        "height": 720
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1280,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -3840,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 3840,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720
+      }
+    },
+    {
+      "device": {
+        "width": 844,
+        "height": 390
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1558,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 843.90625,
+        "height": 390
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390
+      }
+    },
+    {
+      "device": {
+        "width": 844,
+        "height": 390
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1558,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -964.03125,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 964.03125,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 843.90625,
+        "height": 390
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390
+      }
+    },
+    {
+      "device": {
+        "width": 844,
+        "height": 390
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1558,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2244.03125,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2244.03125,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 843.90625,
+        "height": 390
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390
+      }
+    },
+    {
+      "device": {
+        "width": 844,
+        "height": 390
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1558,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -3562,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 3562,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 843.90625,
+        "height": 390
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390
+      }
+    },
+    {
+      "device": {
+        "width": 1920,
+        "height": 810
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1707,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 809.828125
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 810
+      }
+    },
+    {
+      "device": {
+        "width": 1920,
+        "height": 810
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1707,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -896.515625,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 896.515625,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 809.828125
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 810
+      }
+    },
+    {
+      "device": {
+        "width": 1920,
+        "height": 810
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1707,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2176.515625,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2176.515625,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 809.828125
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 810
+      }
+    },
+    {
+      "device": {
+        "width": 1920,
+        "height": 810
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunny-training",
+      "viewport": 1707,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -3413,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 3413,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 809.828125
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 810
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "windbell-forest",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "windbell-forest",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "windbell-forest",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "windbell-forest",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starcrystal-cave",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starcrystal-cave",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starcrystal-cave",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starcrystal-cave",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starlamp-harbor",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starlamp-harbor",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starlamp-harbor",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starlamp-harbor",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "rainleaf-marsh",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "rainleaf-marsh",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "rainleaf-marsh",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "rainleaf-marsh",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunken-tide-city",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunken-tide-city",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunken-tide-city",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "sunken-tide-city",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "coral-archive",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "coral-archive",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "coral-archive",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "coral-archive",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "storm-beacon",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "storm-beacon",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "storm-beacon",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "storm-beacon",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "ember-forge",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "ember-forge",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "ember-forge",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "ember-forge",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "ashen-clocktower",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "ashen-clocktower",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "ashen-clocktower",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "ashen-clocktower",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "frost-mirror-field",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "frost-mirror-field",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "frost-mirror-field",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "frost-mirror-field",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "winter-rail",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.535181236673774,
+      "scaleY": 1.535181236673774,
+      "x": 0,
+      "y": 0,
+      "width": 5130.575692963753,
+      "height": 720,
+      "sourceWidth": 3342,
+      "sourceHeight": 469,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "winter-rail",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.535181236673774,
+      "scaleY": 1.535181236673774,
+      "x": -1235,
+      "y": 0,
+      "width": 5130.575692963753,
+      "height": 720,
+      "sourceWidth": 3342,
+      "sourceHeight": 469,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "winter-rail",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.535181236673774,
+      "scaleY": 1.535181236673774,
+      "x": -2515,
+      "y": 0,
+      "width": 5130.575692963753,
+      "height": 720,
+      "sourceWidth": 3342,
+      "sourceHeight": 469,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "winter-rail",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.535181236673774,
+      "scaleY": 1.535181236673774,
+      "x": -4160,
+      "y": 0,
+      "width": 5130.575692963753,
+      "height": 720,
+      "sourceWidth": 3342,
+      "sourceHeight": 469,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "thunder-ridge",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "thunder-ridge",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "thunder-ridge",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "thunder-ridge",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "hanging-garden",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "hanging-garden",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "hanging-garden",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "hanging-garden",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "hourglass-labyrinth",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.535181236673774,
+      "scaleY": 1.535181236673774,
+      "x": 0,
+      "y": 0,
+      "width": 5130.575692963753,
+      "height": 720,
+      "sourceWidth": 3342,
+      "sourceHeight": 469,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "hourglass-labyrinth",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.535181236673774,
+      "scaleY": 1.535181236673774,
+      "x": -1235,
+      "y": 0,
+      "width": 5130.575692963753,
+      "height": 720,
+      "sourceWidth": 3342,
+      "sourceHeight": 469,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "hourglass-labyrinth",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.535181236673774,
+      "scaleY": 1.535181236673774,
+      "x": -2515,
+      "y": 0,
+      "width": 5130.575692963753,
+      "height": 720,
+      "sourceWidth": 3342,
+      "sourceHeight": 469,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "hourglass-labyrinth",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.535181236673774,
+      "scaleY": 1.535181236673774,
+      "x": -4160,
+      "y": 0,
+      "width": 5130.575692963753,
+      "height": 720,
+      "sourceWidth": 3342,
+      "sourceHeight": 469,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "nameless-theater",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "nameless-theater",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "nameless-theater",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "nameless-theater",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "moon-gate-fortress",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "moon-gate-fortress",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "moon-gate-fortress",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "moon-gate-fortress",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "echo-battlefield",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "echo-battlefield",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "echo-battlefield",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "echo-battlefield",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starbridge-duel",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starbridge-duel",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starbridge-duel",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "starbridge-duel",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 0,
+      "playerX": 300,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "dawn-star-court",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": 0,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 0,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 1,
+      "playerX": 1580,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "dawn-star-court",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -1235,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 1235,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 2,
+      "playerX": 2860,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "dawn-star-court",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -2515,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 2515,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    },
+    {
+      "device": {
+        "width": 1024,
+        "height": 768
+      },
+      "zone": 3,
+      "playerX": 5030,
+      "lookAhead": 90,
+      "world": 5120,
+      "missing": 0,
+      "stage": "dawn-star-court",
+      "viewport": 960,
+      "backgrounds": 1,
+      "scaleX": 1.5319148936170213,
+      "scaleY": 1.5319148936170213,
+      "x": -4160,
+      "y": 0,
+      "width": 5122.723404255319,
+      "height": 720,
+      "sourceWidth": 3344,
+      "sourceHeight": 470,
+      "scrollFactor": 0,
+      "frame": "__BASE",
+      "camera": 4160,
+      "canvas": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "parent": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 768
+      }
+    }
+  ],
+  "errors": [],
+  "failed": []
+}

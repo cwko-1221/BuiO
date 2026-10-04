@@ -1,0 +1,49 @@
+{
+  "id": "sword-art-online-kirito-ground",
+  "fighterId": "sword-art-online-kirito",
+  "sheet": "ground",
+  "actions": [
+    "attack1",
+    "attack2"
+  ],
+  "moves": [
+    {
+      "action": "attack1",
+      "move": "short right-hand dark-sword horizontal cut"
+    },
+    {
+      "action": "attack2",
+      "move": "opposite pale-blue sword backhand cut"
+    }
+  ],
+  "columns": 4,
+  "rows": 4,
+  "frameCount": 16,
+  "referencePaths": [
+    "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/reference-canvas.png",
+    "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/seed.png",
+    "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/side.png",
+    "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/weapon-reference.png"
+  ],
+  "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Kirito. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: short right-hand dark-sword horizontal cut. Last two rows are one coherent eight-frame move: opposite pale-blue sword backhand cut. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences. Image 4 is the approved in-game weapon-holding pose: match the exact silver-blue spear or black and pale-blue dual sword shapes, scale, grip and outfit. Use compact close-range weapon motions, with natural wrist, shoulder and cape movement.",
+  "mode": "built-in imagegen",
+  "sourceHash": "08331623898eb66a17c38cb5b7cb2c7863a13f2331d63b566031d8786f02ddea",
+  "references": [
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/reference-canvas.png",
+      "sha256": "72289acf593af0f6293130c5098e37c793ac424b31297562d132fe9a197c8b68"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/seed.png",
+      "sha256": "e50adfa78c4f0975ee0cb1c95ba134ba7725c6391bd358bdb000c643fcd71c94"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/side.png",
+      "sha256": "dae12419096a613d057ee9ef56a6fdc31823b7bcba8c6282dc33bc7106856d37"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/weapon-reference.png",
+      "sha256": "997f8c347f4636d938997cc67ca9e8d2c45d23e661a62f7aa6047d6ebde75128"
+    }
+  ]
+}

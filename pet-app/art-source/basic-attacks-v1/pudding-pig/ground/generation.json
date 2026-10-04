@@ -1,0 +1,44 @@
+{
+  "id": "pudding-pig-ground",
+  "fighterId": "pudding-pig",
+  "sheet": "ground",
+  "actions": [
+    "attack1",
+    "attack2"
+  ],
+  "moves": [
+    {
+      "action": "attack1",
+      "move": "short hoof jab from a planted sumo stance"
+    },
+    {
+      "action": "attack2",
+      "move": "low sideways hoof kick"
+    }
+  ],
+  "columns": 4,
+  "rows": 4,
+  "frameCount": 16,
+  "referencePaths": [
+    "pet-app/art-source/basic-attacks-v1/pudding-pig/reference-canvas.png",
+    "pet-app/art-source/basic-attacks-v1/pudding-pig/seed.png",
+    "pet-app/art-source/basic-attacks-v1/pudding-pig/side.png"
+  ],
+  "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Pudding Pig. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: short hoof jab from a planted sumo stance. Last two rows are one coherent eight-frame move: low sideways hoof kick. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells.",
+  "mode": "built-in imagegen",
+  "sourceHash": "761510179b7a11387ed9e081db256319136a2793a5d614dcace87b6d6da6ff2e",
+  "references": [
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/pudding-pig/reference-canvas.png",
+      "sha256": "dd9135a74c4b3c755b2d38b030d1770fd1d7277a7968774fcf8907958c29b0ad"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/pudding-pig/seed.png",
+      "sha256": "035b930a92343b29f22715e28a87a10996c6c835f4212ece48f06ed448876bce"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/pudding-pig/side.png",
+      "sha256": "280fecc7c600a0c9a6b3f004c2acc04636c0d3ed780e8aea31642a4e15ad0387"
+    }
+  ]
+}

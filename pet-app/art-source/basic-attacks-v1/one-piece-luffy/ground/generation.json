@@ -1,0 +1,44 @@
+{
+  "id": "one-piece-luffy-ground",
+  "fighterId": "one-piece-luffy",
+  "sheet": "ground",
+  "actions": [
+    "attack1",
+    "attack2"
+  ],
+  "moves": [
+    {
+      "action": "attack1",
+      "move": "compact elastic lead-fist jab stretching only slightly beyond normal arm length"
+    },
+    {
+      "action": "attack2",
+      "move": "opposite-fist hook with straw hat and red vest following torso twist"
+    }
+  ],
+  "columns": 4,
+  "rows": 4,
+  "frameCount": 16,
+  "referencePaths": [
+    "pet-app/art-source/basic-attacks-v1/one-piece-luffy/reference-canvas.png",
+    "pet-app/art-source/basic-attacks-v1/one-piece-luffy/seed.png",
+    "pet-app/art-source/basic-attacks-v1/one-piece-luffy/side.png"
+  ],
+  "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Monkey D. Luffy. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: compact elastic lead-fist jab stretching only slightly beyond normal arm length. Last two rows are one coherent eight-frame move: opposite-fist hook with straw hat and red vest following torso twist. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences.",
+  "mode": "built-in imagegen",
+  "sourceHash": "e13d379377482f265b8c903a80033537a6a8b6690732f9715f64eb384bac025b",
+  "references": [
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/one-piece-luffy/reference-canvas.png",
+      "sha256": "d69173f47d7d9371760eaf6ceb476be417d4ee948ba6c7fcc857e13310222584"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/one-piece-luffy/seed.png",
+      "sha256": "7966223740fd23ac1c206f5cf3c9311d801b16af341c46aac4cd056d6e2aa274"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/one-piece-luffy/side.png",
+      "sha256": "8580fd25a15e684d9d643d1201b24e25f7c29ac4c6c1d96ffb3ca9722a1a7450"
+    }
+  ]
+}

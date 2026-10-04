@@ -1,0 +1,44 @@
+{
+  "id": "argentina-number-10-finish-air",
+  "fighterId": "argentina-number-10",
+  "sheet": "finish-air",
+  "actions": [
+    "attack3",
+    "air"
+  ],
+  "moves": [
+    {
+      "action": "attack3",
+      "move": "planted powerful instep football-style strike aimed just in front, no ball"
+    },
+    {
+      "action": "air",
+      "move": "midair side volley kick toward the right, no ball"
+    }
+  ],
+  "columns": 4,
+  "rows": 4,
+  "frameCount": 16,
+  "referencePaths": [
+    "pet-app/art-source/basic-attacks-v1/argentina-number-10/reference-canvas.png",
+    "pet-app/art-source/basic-attacks-v1/argentina-number-10/seed.png",
+    "pet-app/art-source/basic-attacks-v1/argentina-number-10/side.png"
+  ],
+  "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Argentina No. 10. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted powerful instep football-style strike aimed just in front, no ball. Last two rows are one coherent eight-frame move: midair side volley kick toward the right, no ball. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences.",
+  "mode": "built-in imagegen",
+  "sourceHash": "52fd0f4f7ee38f298896178e7dda00257724b3e3e1d07616a99e19e6547dbe00",
+  "references": [
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/argentina-number-10/reference-canvas.png",
+      "sha256": "6093273a6fcb373f845239952f58677d6f5438c089c15cb5525d43630704e8f9"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/argentina-number-10/seed.png",
+      "sha256": "4304bebd9f49a04512fc1035ea207ab50e978abf81c3ff2711f1a6b17a0a8b6c"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/argentina-number-10/side.png",
+      "sha256": "a01226dcde3dce3a597281cd6e3f557ec85ba4e0fb4e3f1087a95c99a78d247d"
+    }
+  ]
+}

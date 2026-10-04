@@ -1,0 +1,44 @@
+{
+  "id": "spark-hamster-ground",
+  "fighterId": "spark-hamster",
+  "sheet": "ground",
+  "actions": [
+    "attack1",
+    "attack2"
+  ],
+  "moves": [
+    {
+      "action": "attack1",
+      "move": "tiny rapid paw jab"
+    },
+    {
+      "action": "attack2",
+      "move": "opposite paw uppercut"
+    }
+  ],
+  "columns": 4,
+  "rows": 4,
+  "frameCount": 16,
+  "referencePaths": [
+    "pet-app/art-source/basic-attacks-v1/spark-hamster/reference-canvas.png",
+    "pet-app/art-source/basic-attacks-v1/spark-hamster/seed.png",
+    "pet-app/art-source/basic-attacks-v1/spark-hamster/side.png"
+  ],
+  "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Spark Hamster. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: tiny rapid paw jab. Last two rows are one coherent eight-frame move: opposite paw uppercut. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells.",
+  "mode": "built-in imagegen",
+  "sourceHash": "1a18e9ca339a2a53acbc81c3f241b7f02d9940ac2315c8e79990b19c378823bf",
+  "references": [
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/spark-hamster/reference-canvas.png",
+      "sha256": "0a89ebb8b2aaaf21aa84b7b44eef0dcfd98d75579cb8382ffca1ac0a1f309a67"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/spark-hamster/seed.png",
+      "sha256": "895650f41c040051897311b89662634a7725ae1058134f2833498266497d131a"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/spark-hamster/side.png",
+      "sha256": "f8c5d64f9b9826b83835c31868dbca1261d81f29530d45c7c21839ba49dd6dd1"
+    }
+  ]
+}

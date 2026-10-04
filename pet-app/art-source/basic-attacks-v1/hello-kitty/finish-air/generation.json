@@ -1,0 +1,44 @@
+{
+  "id": "hello-kitty-finish-air",
+  "fighterId": "hello-kitty",
+  "sheet": "finish-air",
+  "actions": [
+    "attack3",
+    "air"
+  ],
+  "moves": [
+    {
+      "action": "attack3",
+      "move": "planted whole-body double-paw palm shove"
+    },
+    {
+      "action": "air",
+      "move": "midair diagonal two-paw strike with red dress fluttering"
+    }
+  ],
+  "columns": 4,
+  "rows": 4,
+  "frameCount": 16,
+  "referencePaths": [
+    "pet-app/art-source/basic-attacks-v1/hello-kitty/reference-canvas.png",
+    "pet-app/art-source/basic-attacks-v1/hello-kitty/seed.png",
+    "pet-app/art-source/basic-attacks-v1/hello-kitty/side.png"
+  ],
+  "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Hello Kitty. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted whole-body double-paw palm shove. Last two rows are one coherent eight-frame move: midair diagonal two-paw strike with red dress fluttering. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences.",
+  "mode": "built-in imagegen",
+  "sourceHash": "78b426bf17533bb2917c0a68308e1d0c0e8b2732d6a5117a61b7d284e7d94ebc",
+  "references": [
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/hello-kitty/reference-canvas.png",
+      "sha256": "a441da15f808ee1590d1f580ee6c6dc601923110135286005ba406c747f4080d"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/hello-kitty/seed.png",
+      "sha256": "a4f3d6d17984b2e33668fdde9fb11e46bddf959ccad5fac5ac1663116aab4858"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/hello-kitty/side.png",
+      "sha256": "735ecc66827b9801a5e96bd655440e07514a5b9be5345314c7943877eb77baba"
+    }
+  ]
+}

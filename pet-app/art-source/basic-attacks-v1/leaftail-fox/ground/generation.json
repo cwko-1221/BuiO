@@ -1,0 +1,44 @@
+{
+  "id": "leaftail-fox-ground",
+  "fighterId": "leaftail-fox",
+  "sheet": "ground",
+  "actions": [
+    "attack1",
+    "attack2"
+  ],
+  "moves": [
+    {
+      "action": "attack1",
+      "move": "one sharp forepaw rake"
+    },
+    {
+      "action": "attack2",
+      "move": "reverse forepaw hook with leafy tail counterbalancing"
+    }
+  ],
+  "columns": 4,
+  "rows": 4,
+  "frameCount": 16,
+  "referencePaths": [
+    "pet-app/art-source/basic-attacks-v1/leaftail-fox/reference-canvas.png",
+    "pet-app/art-source/basic-attacks-v1/leaftail-fox/seed.png",
+    "pet-app/art-source/basic-attacks-v1/leaftail-fox/side.png"
+  ],
+  "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Leaftail Fox. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: one sharp forepaw rake. Last two rows are one coherent eight-frame move: reverse forepaw hook with leafy tail counterbalancing. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells.",
+  "mode": "built-in imagegen",
+  "sourceHash": "c6e7c981cef43b5809ff3cd1f049b3652d94d8fc173c194e2cb3240c01f7b759",
+  "references": [
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/leaftail-fox/reference-canvas.png",
+      "sha256": "134deb6f6da755b67e2529b45bd2cd96556fcf67063ecac51df455faa203900d"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/leaftail-fox/seed.png",
+      "sha256": "12a8a783ae979aed9327deb8971d0f7b81583c720745f98664c666eb0a4d7830"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/leaftail-fox/side.png",
+      "sha256": "7bb177732bf2521457067c8732f38cd32b5243180ff06209f295b474e2c5e324"
+    }
+  ]
+}

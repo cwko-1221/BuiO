@@ -7,6 +7,7 @@ import {ElementalVFX,usesDedicatedSkillFx} from './ElementalVFX';
 import {skillPose,flightPose,actorHeight} from './SkillPose';
 import {audio} from '../audio';
 import {battleViewportWidth,battleCameraScroll,panoramaPlacement} from './panorama-layout.mjs';
+import {basicAttackPose} from './basic-attack-pose.mjs';
 interface SceneData {state:BattleState;playerId?:number;assets:BrawlAssets;locale:string;paused:()=>boolean;step:(mask?:number)=>void;loaded:()=>void;failed:()=>void;changed:()=>void}
 interface Effect {kind:string;x:number;y:number;age:number;life:number;color:number;size:number;angle:number;vx:number;vy:number;gravity:number;sprite?:Phaser.GameObjects.Image}
 interface View {sprite:Phaser.GameObjects.Image;shadow:Phaser.GameObjects.Ellipse;bar:Phaser.GameObjects.Graphics;status:Phaser.GameObjects.Text;frozen?:boolean;trailTick:number;x:number;y:number;z:number}
@@ -73,6 +74,10 @@ export class BattleScene extends Phaser.Scene {
       return {key:`brawl-${a.kind}-${c.page}`,frame:c.start+index,cast:c};
     }
     if(a.flightUntil>0&&this.runtime.state.tick<a.flightUntil+45&&a.z>0&&assets.clips.flight){const {clip:c,index}=flightPose(a,this.fighter(a)?.skills[1],this.runtime.assets,this.runtime.state.tick);return {key:`brawl-${a.kind}-${c!.page}`,frame:c!.start+index,cast:c};}
+    if(['attack1','attack2','attack3','air'].includes(action)&&assets.clips[action]?.poseTimeline==='strike'){
+      const c=assets.clips[action],index=basicAttackPose(a.actionTick,a.windup,a.actionDuration,c.count);
+      return {key:`brawl-${a.kind}-${c.page}`,frame:c.frames?.[index]??c.start+index,cast:c};
+    }
     if(a.kind==='starpatch-cat'&&this.catKit){
       if(action==='skill1'){const c=assets.clips.attack1,index=a.actionTick<6?1:Math.min(7,3+Math.floor((a.actionTick-6)/4));return {key:`brawl-${a.kind}-${c.page}`,frame:c.start+index};}
       if(action==='skill2'){const t=a.actionTick,c=assets.clips[t<6?'skill1':t<16?'jump':t<=31?'skill2':'rise'],index=t<6?Math.min(3,t):t<16?2:t<=31?2+(Math.floor((t-16)%7/2)%4):Math.min(3,Math.floor((t-32)/4));return {key:`brawl-${a.kind}-${c.page}`,frame:c.start+index};}

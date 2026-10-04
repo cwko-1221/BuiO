@@ -1,0 +1,128 @@
+{
+  "pass": true,
+  "chapters": 20,
+  "report": [
+    {
+      "stage": "sunny-training",
+      "missing": 0,
+      "background": "brawl-bg-sunny-training",
+      "tick": 1
+    },
+    {
+      "stage": "windbell-forest",
+      "missing": 0,
+      "background": "brawl-bg-windbell-forest",
+      "tick": 1
+    },
+    {
+      "stage": "starcrystal-cave",
+      "missing": 0,
+      "background": "brawl-bg-starcrystal-cave",
+      "tick": 1
+    },
+    {
+      "stage": "starlamp-harbor",
+      "missing": 0,
+      "background": "brawl-bg-starlamp-harbor",
+      "tick": 1
+    },
+    {
+      "stage": "rainleaf-marsh",
+      "missing": 0,
+      "background": "brawl-bg-rainleaf-marsh",
+      "tick": 2
+    },
+    {
+      "stage": "sunken-tide-city",
+      "missing": 0,
+      "background": "brawl-bg-sunken-tide-city",
+      "tick": 1
+    },
+    {
+      "stage": "coral-archive",
+      "missing": 0,
+      "background": "brawl-bg-coral-archive",
+      "tick": 1
+    },
+    {
+      "stage": "storm-beacon",
+      "missing": 0,
+      "background": "brawl-bg-storm-beacon",
+      "tick": 1
+    },
+    {
+      "stage": "ember-forge",
+      "missing": 0,
+      "background": "brawl-bg-ember-forge",
+      "tick": 1
+    },
+    {
+      "stage": "ashen-clocktower",
+      "missing": 0,
+      "background": "brawl-bg-ashen-clocktower",
+      "tick": 1
+    },
+    {
+      "stage": "frost-mirror-field",
+      "missing": 0,
+      "background": "brawl-bg-frost-mirror-field",
+      "tick": 1
+    },
+    {
+      "stage": "winter-rail",
+      "missing": 0,
+      "background": "brawl-bg-winter-rail",
+      "tick": 1
+    },
+    {
+      "stage": "thunder-ridge",
+      "missing": 0,
+      "background": "brawl-bg-thunder-ridge",
+      "tick": 1
+    },
+    {
+      "stage": "hanging-garden",
+      "missing": 0,
+      "background": "brawl-bg-hanging-garden",
+      "tick": 1
+    },
+    {
+      "stage": "hourglass-labyrinth",
+      "missing": 0,
+      "background": "brawl-bg-hourglass-labyrinth",
+      "tick": 1
+    },
+    {
+      "stage": "nameless-theater",
+      "missing": 0,
+      "background": "brawl-bg-nameless-theater",
+      "tick": 1
+    },
+    {
+      "stage": "moon-gate-fortress",
+      "missing": 0,
+      "background": "brawl-bg-moon-gate-fortress",
+      "tick": 1
+    },
+    {
+      "stage": "echo-battlefield",
+      "missing": 0,
+      "background": "brawl-bg-echo-battlefield",
+      "tick": 1
+    },
+    {
+      "stage": "starbridge-duel",
+      "missing": 0,
+      "background": "brawl-bg-starbridge-duel",
+      "tick": 1
+    },
+    {
+      "stage": "dawn-star-court",
+      "missing": 0,
+      "background": "brawl-bg-dawn-star-court",
+      "tick": 1
+    }
+  ],
+  "errors": [],
+  "failed": []
+}

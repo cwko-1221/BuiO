@@ -26,6 +26,15 @@ function completeAssets(manifest,fighters){
     (fighter.pageLayouts??={})[page]={frameWidth:animation.frameWidth,frameHeight:animation.frameHeight};
     for(const [name,clip] of Object.entries(animation.clips))fighter.clips[name]={...clip,page};
   }
+  for(const [id,entry] of Object.entries(manifest.fighterAttackAnimations||{}))for(const animation of entry){
+    const fighter=assets.fighters[id];if(!fighter)continue;
+    const page=fighter.pages.length;fighter.pages.push(animation.url);
+    (fighter.pageLayouts??={})[page]={frameWidth:animation.frameWidth,frameHeight:animation.frameHeight};
+    for(const [name,clip] of Object.entries(animation.clips))fighter.clips[name]={...clip,page};
+  }
+  // The owner explicitly excluded new Pikachu artwork. Keep its published frames
+  // and apply the same anticipation/contact/recovery timing to those poses.
+  for(const name of ['attack1','attack2','attack3','air'])if(assets.fighters.pikachu?.clips[name])assets.fighters.pikachu.clips[name].poseTimeline='strike';
   return assets;
 }
 module.exports={completeAssets};

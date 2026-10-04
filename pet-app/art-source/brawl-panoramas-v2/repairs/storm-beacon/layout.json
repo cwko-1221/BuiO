@@ -1,0 +1,12 @@
+{
+  "width": 3344,
+  "height": 470,
+  "patchWidth": 400,
+  "centres": [
+    836,
+    1672,
+    2508,
+    418
+  ],
+  "role": "First three cells are actual adjacent scenery; fourth is unchanged style reference only"
+}

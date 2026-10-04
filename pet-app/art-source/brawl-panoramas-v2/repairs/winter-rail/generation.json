@@ -1,0 +1,8 @@
+{
+  "mode": "built-in image_gen",
+  "prompt": "Use case: precise-object-edit. Repair visible vertical scenery joins in this EXACT2x2sheet of background crops. Top-left, top-right and bottom-left are three different joins from ONE chapter panorama in the depicted environment. Bottom-right is an UNCHANGED style reference. Preserve the exact2x2layout, relative scenery scale, original horizon, ground position, lighting, palette and positions of buildings/trees. Do not recompose or enlarge anything.\nIn each of the first THREE cells, repair ONLY the narrow central vertical strip where two adjacent scenes meet: remove straight colour boundaries, blend sky and distant mountain shapes into a natural continuous landscape, connect grass/fence and the flat fighting floor naturally. Preserve everything to the far left and right of each cell so it will match the surrounding original painting. Retain the same height of the rear fighting-floor edge on both sides. No new characters, objects, buildings or scene-wide changes. Keep the bottom-right cell unchanged.\nThe result should look like three crops of naturally continuous painted scenery, with no seams, dividing lines, stretched pixels, blur, duplicated landmarks or ghost images. Same polished detailed painted fantasy artwork. Exact canvas shape and cells, no gutters, text, frames, UI or borders.",
+  "reference": "before.png",
+  "referenceSha256": "039eb70949f43cb5c105759279094506af782b42c39ab4b0db0a34b667211ce6",
+  "source": "raw.png",
+  "sourceSha256": "4cfedaa95aaeebcc94692940eae51505c3dc76fa34e66535bdccfbff562d2d26"
+}

@@ -1,0 +1,640 @@
+[
+  {
+    "id": "starpatch-cat",
+    "name": {
+      "zh-HK": "星斑貓",
+      "en-US": "Starpatch Cat"
+    },
+    "width": 256,
+    "height": 256,
+    "originY": 0.9,
+    "seed": "pet-app/art-source/basic-attacks-v1/starpatch-cat/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/brawl/starpatch-cat-a-515bbd9c0360.webp",
+      "page": 0,
+      "frame": 0
+    },
+    "styles": [
+      "short lead-paw claw jab",
+      "opposite-paw crossing claw swipe",
+      "low hip turn into a broad double-paw rake",
+      "tucked leap opening both paws into a downward claw rake"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "cloud-ear-dog",
+    "name": {
+      "zh-HK": "雲耳狗",
+      "en-US": "Cloud-ear Dog"
+    },
+    "width": 256,
+    "height": 256,
+    "originY": 0.9,
+    "seed": "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/brawl/cloud-ear-dog-a-f5de038000c9.webp",
+      "page": 0,
+      "frame": 0
+    },
+    "styles": [
+      "quick front-paw boxing tap",
+      "turning opposite-paw palm strike with flowing floppy ears",
+      "compact shoulder-led two-paw shove",
+      "small airborne double-paw downward strike"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "pudding-pig",
+    "name": {
+      "zh-HK": "布丁豬",
+      "en-US": "Pudding Pig"
+    },
+    "width": 256,
+    "height": 256,
+    "originY": 0.9,
+    "seed": "pet-app/art-source/basic-attacks-v1/pudding-pig/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/brawl/pudding-pig-a-d88bdea4b117.webp",
+      "page": 0,
+      "frame": 0
+    },
+    "styles": [
+      "short hoof jab from a planted sumo stance",
+      "low sideways hoof kick",
+      "planted rising double-hoof palm strike with a proud belly turn",
+      "tucked airborne downward double-hoof hammer"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "golden-retriever-dog",
+    "name": {
+      "zh-HK": "金毛犬",
+      "en-US": "Golden Retriever"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "seed": "pet-app/art-source/basic-attacks-v1/golden-retriever-dog/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/golden-retriever-dog-1-atlas-312267ed14.webp?v=766814c3",
+      "page": 0,
+      "frame": 5
+    },
+    "styles": [
+      "eager lead-paw jab",
+      "athletic opposite-paw hook with a swishing tail",
+      "braced double-paw forehand shove",
+      "springing diagonal front-paw strike"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "crescent-rabbit",
+    "name": {
+      "zh-HK": "月芽兔",
+      "en-US": "Crescent Rabbit"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "seed": "pet-app/art-source/basic-attacks-v1/crescent-rabbit/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/crescent-rabbit-1-atlas-531197fde1.webp?v=4f182684",
+      "page": 0,
+      "frame": 5
+    },
+    "styles": [
+      "fast forepaw jab",
+      "high side kick with long ears following the turn",
+      "low pivot into a long hind-leg roundhouse",
+      "tucked midair rabbit kick extending both hind feet"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "bubble-otter",
+    "name": {
+      "zh-HK": "泡泡水獺",
+      "en-US": "Bubble Otter"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "seed": "pet-app/art-source/basic-attacks-v1/bubble-otter/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/bubble-otter-1-atlas-6e27bfdb37.webp?v=5d40216f",
+      "page": 0,
+      "frame": 5
+    },
+    "styles": [
+      "playful lead-paw palm tap",
+      "turning reverse-paw palm with the otter tail balancing",
+      "compact double-paw push with a twisting torso",
+      "tucked airborne palm strike with its tail curling back"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "mossback-turtle",
+    "name": {
+      "zh-HK": "苔背龜",
+      "en-US": "Mossback Turtle"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "seed": "pet-app/art-source/basic-attacks-v1/mossback-turtle/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/mossback-turtle-1-atlas-dc031451c7.webp?v=60ef58b3",
+      "page": 0,
+      "frame": 5
+    },
+    "styles": [
+      "slow deliberate foreleg jab",
+      "planted backhand foreleg swipe",
+      "quarter-turn shell shoulder bash while the head stays visible",
+      "tucked airborne shell-and-foreleg downward strike"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "spark-hamster",
+    "name": {
+      "zh-HK": "火花鼠",
+      "en-US": "Spark Hamster"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "seed": "pet-app/art-source/basic-attacks-v1/spark-hamster/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/spark-hamster-1-atlas-aaf62ad12e.webp?v=5c904f06",
+      "page": 0,
+      "frame": 5
+    },
+    "styles": [
+      "tiny rapid paw jab",
+      "opposite paw uppercut",
+      "both small paws hammering downward from a wound-up torso",
+      "tucked airborne foot-and-paw dive"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "leaftail-fox",
+    "name": {
+      "zh-HK": "葉尾狐",
+      "en-US": "Leaftail Fox"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "seed": "pet-app/art-source/basic-attacks-v1/leaftail-fox/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/leaftail-fox-1-atlas-ca69f9c6df.webp?v=f11b042b",
+      "page": 0,
+      "frame": 5
+    },
+    "styles": [
+      "one sharp forepaw rake",
+      "reverse forepaw hook with leafy tail counterbalancing",
+      "body pivot into a broad leafy-tail-assisted paw swipe",
+      "airborne diagonal pounce with both paws extended"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "snowfeather-penguin",
+    "name": {
+      "zh-HK": "雪羽企鵝",
+      "en-US": "Snowfeather Penguin"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "seed": "pet-app/art-source/basic-attacks-v1/snowfeather-penguin/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/snowfeather-penguin-1-atlas-2f51664825.webp?v=d52e2868",
+      "page": 0,
+      "frame": 5
+    },
+    "styles": [
+      "short lead-flipper slap",
+      "opposite-flipper backhand slap",
+      "planted sideways whole-body flipper sweep",
+      "airborne two-flipper downward slam with feet tucked"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "thunderhorn-goat",
+    "name": {
+      "zh-HK": "雷角羊",
+      "en-US": "Thunderhorn Goat"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "seed": "pet-app/art-source/basic-attacks-v1/thunderhorn-goat/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/thunderhorn-goat-1-atlas-71150e2abd.webp?v=f960132d",
+      "page": 0,
+      "frame": 5
+    },
+    "styles": [
+      "quick front-hoof jab",
+      "turning opposite-hoof swipe",
+      "compact planted forward horn-butt, small head movement only",
+      "airborne downward front-hoof stomp with horns visible"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "coral-seal",
+    "name": {
+      "zh-HK": "珊瑚海豹",
+      "en-US": "Coral Seal"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9688,
+    "seed": "pet-app/art-source/basic-attacks-v1/coral-seal/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/coral-seal-1-atlas-6a9a40c0bf.webp?v=2be8622e",
+      "page": 0,
+      "frame": 5
+    },
+    "styles": [
+      "lead-flipper slap",
+      "opposite-flipper crossing slap",
+      "planted torso roll into a broad double-flipper strike",
+      "arched airborne belly-and-flipper downward strike"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "nezuko-kamado",
+    "name": {
+      "zh-HK": "竈門禰豆子",
+      "en-US": "Nezuko Kamado"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9375,
+    "seed": "pet-app/art-source/basic-attacks-v1/nezuko-kamado/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/nezuko-kamado-1-atlas-f05eddc60f.webp?v=a9039950",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "fast low shin kick",
+      "rotating high heel kick",
+      "planted full-body spinning roundhouse kick, kimono and long hair following",
+      "midair downward heel axe kick"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "dragon-ball-goku",
+    "name": {
+      "zh-HK": "孫悟空",
+      "en-US": "Son Goku"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9375,
+    "seed": "pet-app/art-source/basic-attacks-v1/dragon-ball-goku/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/dragon-ball-goku-1-atlas-e4320d147a.webp?v=9a6e8d30",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "martial-arts lead-fist jab",
+      "rear-fist straight punch with a clear hip twist",
+      "planted rising roundhouse kick with orange gi folds following",
+      "midair downward clenched-fist hammer with bent knees"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "crayon-shin-chan",
+    "name": {
+      "zh-HK": "蠟筆小新",
+      "en-US": "Shin-chan"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9375,
+    "seed": "pet-app/art-source/basic-attacks-v1/crayon-shin-chan/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/crayon-shin-chan-1-atlas-88bf83600e.webp?v=60404f7d",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "cheeky short fist poke",
+      "comic sideways foot kick",
+      "exaggerated planted bum-first hip bump toward the right, face still visible",
+      "tucked airborne feet-first silly kick"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "doraemon",
+    "name": {
+      "zh-HK": "多啦A夢",
+      "en-US": "Doraemon"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9375,
+    "seed": "pet-app/art-source/basic-attacks-v1/doraemon/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/doraemon-1-atlas-1bba6e4ccc.webp?v=98155437",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "round white-hand lead-palm jab",
+      "opposite white-palm shove with round blue torso twist",
+      "braced double-white-palm push, bell and red collar visible",
+      "airborne bent-knee double-white-palm downward strike"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "hello-kitty",
+    "name": {
+      "zh-HK": "Hello Kitty",
+      "en-US": "Hello Kitty"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9375,
+    "seed": "pet-app/art-source/basic-attacks-v1/hello-kitty/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/hello-kitty-1-atlas-41feb3cbe3.webp?v=b8b385e5",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "small lead-paw jab with her red bow visible",
+      "cute opposite-paw crossing punch",
+      "planted whole-body double-paw palm shove",
+      "midair diagonal two-paw strike with red dress fluttering"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "argentina-number-10",
+    "name": {
+      "zh-HK": "阿根廷10號",
+      "en-US": "Argentina No. 10"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/basic-attacks-v1/argentina-number-10/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/argentina-number-10-1-atlas-a735ec0bda.webp?v=dbe91251",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "short inside-foot tap kick as if nudging an unseen ball",
+      "turning outside-foot kick",
+      "planted powerful instep football-style strike aimed just in front, no ball",
+      "midair side volley kick toward the right, no ball"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "portugal-number-7",
+    "name": {
+      "zh-HK": "葡萄牙7號",
+      "en-US": "Portugal No. 7"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.925,
+    "seed": "pet-app/art-source/basic-attacks-v1/portugal-number-7/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/portugal-number-7-1-atlas-7b91aa3b89.webp?v=4e7a0bc8",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "quick toe-poke football-style kick, no ball",
+      "compact step-over into a sideways sole kick",
+      "planted forceful laces strike with kicking-leg follow-through, no ball",
+      "midair scissor-style volley with one boot striking right, no ball"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "pikachu",
+    "name": {
+      "zh-HK": "比卡超",
+      "en-US": "Pikachu"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/basic-attacks-v1/pikachu/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/pikachu-1-atlas-268cb38a36.webp?v=e2dd5c77",
+      "page": 0,
+      "frame": 24
+    },
+    "skipRedraw": true
+  },
+  {
+    "id": "dragon-ball-frieza",
+    "name": {
+      "zh-HK": "弗利沙",
+      "en-US": "Frieza"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/basic-attacks-v1/dragon-ball-frieza/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/dragon-ball-frieza-1-atlas-5017dcd860.webp?v=7b835648",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "sharp one-handed short jab",
+      "tail-balanced backhand strike",
+      "planted turning heel kick with long tail curving behind",
+      "midair diagonal tail-balanced boot kick"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "one-piece-luffy",
+    "name": {
+      "zh-HK": "路飛",
+      "en-US": "Monkey D. Luffy"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/basic-attacks-v1/one-piece-luffy/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/one-piece-luffy-1-atlas-390c748003.webp?v=bfabf76e",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "compact elastic lead-fist jab stretching only slightly beyond normal arm length",
+      "opposite-fist hook with straw hat and red vest following torso twist",
+      "planted wound-up heavy straight punch with fist visibly larger but still close-range",
+      "midair diagonal downward clenched-fist punch with bent knees"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "spy-family-anya",
+    "name": {
+      "zh-HK": "安妮亞",
+      "en-US": "Anya Forger"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/basic-attacks-v1/spy-family-anya/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/spy-family-anya-1-atlas-26436e03d5.webp?v=c9202df0",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "small determined straight punch",
+      "playful opposite-hand palm slap",
+      "planted brave double-palm shove with pink hair and black-gold hair ornaments bouncing",
+      "tucked midair small boot kick toward right"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "one-punch-saitama",
+    "name": {
+      "zh-HK": "埼玉",
+      "en-US": "Saitama"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/basic-attacks-v1/one-punch-saitama/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/one-punch-saitama-1-atlas-22db53a850.webp?v=2c395119",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "casual short lead-hand jab with almost no torso motion",
+      "nonchalant opposite-hand straight punch",
+      "planted serious straight punch with clear shoulder and hip commitment, cape following",
+      "midair compact downward gloved-fist hammer"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "naruto-uzumaki",
+    "name": {
+      "zh-HK": "漩渦鳴人",
+      "en-US": "Naruto Uzumaki"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/basic-attacks-v1/naruto-uzumaki/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/naruto-uzumaki-1-atlas-b767814d6e.webp?v=be561e38",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "ninja lead-fist jab",
+      "turning reverse elbow strike",
+      "planted high ninja roundhouse kick with headband ties following",
+      "midair downward heel kick with tucked opposite knee"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "monchhichi",
+    "name": {
+      "zh-HK": "Monchhichi",
+      "en-US": "Monchhichi"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/basic-attacks-v1/monchhichi/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/monchhichi-1-atlas-2f5393b73e.webp?v=e820e35b",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "small tan-hand plush jab",
+      "opposite soft-hand crossing slap with red star bib visible",
+      "planted two-tan-palm forward shove with plush body sway",
+      "tucked midair soft double-foot kick with bib and tuft visible"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "dynasty-warriors-zhao-yun",
+    "name": {
+      "zh-HK": "趙雲",
+      "en-US": "Zhao Yun"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/dynasty-warriors-zhao-yun-1-atlas-acce94adf6.webp?v=c392362f",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "short compact silver-blue spear thrust, shaft balanced behind torso",
+      "short controlled horizontal spear sweep to the right",
+      "planted diagonal rising spear slash close in front, no giant magical reach",
+      "airborne diagonal downward spear strike with cloak and tassel following"
+    ],
+    "skipRedraw": false
+  },
+  {
+    "id": "sword-art-online-kirito",
+    "name": {
+      "zh-HK": "桐人",
+      "en-US": "Kirito"
+    },
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/basic-attacks-v1/sword-art-online-kirito/seed.png",
+    "sourceIdle": {
+      "url": "/pet/assets/art/sprites/sword-art-online-kirito-1-atlas-7efead8bcf.webp?v=b0f68bc3",
+      "page": 0,
+      "frame": 24
+    },
+    "styles": [
+      "short right-hand dark-sword horizontal cut",
+      "opposite pale-blue sword backhand cut",
+      "planted crossed twin-sword X slash close in front, black coat follows",
+      "airborne diagonal downward twin-sword slash with bent knees"
+    ],
+    "skipRedraw": false
+  }
+]

@@ -1,0 +1,35 @@
+{
+  "id": "argentina-number-10-ground",
+  "mode": "approved sprite assembly",
+  "reason": "Built-in image generation rejected this ground sheet with moderation category public-figure. Existing approved kicking art is reused.",
+  "source": "pet-app/art-source/fighter-skill-poses-v1/argentina-number-10/raw.png",
+  "sourceHash": "ee3c9327acf06a031b874bf48a37ffa40d0f7d4497d5a9c5efdb4c4e46bd5c1d",
+  "approvedSourceHash": "771614dada066076b2229ddd833669506793291e21c3d7d7085ec5559e02cb87",
+  "calibrationSource": "pet-app/art-source/basic-attacks-v1/argentina-number-10/finish-air/raw.png",
+  "calibrationHash": "52fd0f4f7ee38f298896178e7dda00257724b3e3e1d07616a99e19e6547dbe00",
+  "selectedFrames": [
+    0,
+    1,
+    2,
+    4,
+    5,
+    6,
+    2,
+    0,
+    8,
+    9,
+    11,
+    12,
+    13,
+    14,
+    10,
+    8
+  ],
+  "sharedSourceScale": 1.0149532710280373,
+  "columns": 4,
+  "rows": 4,
+  "actions": [
+    "attack1",
+    "attack2"
+  ]
+}

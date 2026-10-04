@@ -1,0 +1,49 @@
+{
+  "id": "dynasty-warriors-zhao-yun-finish-air",
+  "fighterId": "dynasty-warriors-zhao-yun",
+  "sheet": "finish-air",
+  "actions": [
+    "attack3",
+    "air"
+  ],
+  "moves": [
+    {
+      "action": "attack3",
+      "move": "planted diagonal rising spear slash close in front, no giant magical reach"
+    },
+    {
+      "action": "air",
+      "move": "airborne diagonal downward spear strike with cloak and tassel following"
+    }
+  ],
+  "columns": 4,
+  "rows": 4,
+  "frameCount": 16,
+  "referencePaths": [
+    "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/reference-canvas.png",
+    "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/seed.png",
+    "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/side.png",
+    "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/weapon-reference.png"
+  ],
+  "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Zhao Yun. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: planted diagonal rising spear slash close in front, no giant magical reach. Last two rows are one coherent eight-frame move: airborne diagonal downward spear strike with cloak and tassel following. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells. Layout map: row 1 = move A frames 1,2,3,4; row 2 = move A frames 5,6,7,8; row 3 = move B frames 1,2,3,4; row 4 = move B frames 5,6,7,8. EXACTLY FOUR FIGURES ACROSS EACH ROW. FOUR ROWS. SIXTEEN FIGURES TOTAL. Never draw eight columns or duplicate the sequences. Image 4 is the approved in-game weapon-holding pose: match the exact silver-blue spear or black and pale-blue dual sword shapes, scale, grip and outfit. Use compact close-range weapon motions, with natural wrist, shoulder and cape movement.",
+  "mode": "built-in imagegen",
+  "sourceHash": "cbdb0af54929f39a21818b46ce6798e83ebd961888d5101dd0d1c6c825100234",
+  "references": [
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/reference-canvas.png",
+      "sha256": "026e60fa324ae21c8abee1b7f246fbd1019733affb83e424832b95d20e69536c"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/seed.png",
+      "sha256": "12f23fbd09ac8254b1e72128d49064ffd9160cc605ebc45c2b228af90f157bdc"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/side.png",
+      "sha256": "2ba2e579f933af719628bc96ecc7c382e4137f6a1ba00326935bb0fb585629e2"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/dynasty-warriors-zhao-yun/weapon-reference.png",
+      "sha256": "f042c17ad00713534f632ed453bfcc4e207be1a7f3750c6a3f4574d862c84ef3"
+    }
+  ]
+}

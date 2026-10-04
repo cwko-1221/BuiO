@@ -1,0 +1,44 @@
+{
+  "id": "cloud-ear-dog-finish-air",
+  "fighterId": "cloud-ear-dog",
+  "sheet": "finish-air",
+  "actions": [
+    "attack3",
+    "air"
+  ],
+  "moves": [
+    {
+      "action": "attack3",
+      "move": "compact shoulder-led two-paw shove"
+    },
+    {
+      "action": "air",
+      "move": "small airborne double-paw downward strike"
+    }
+  ],
+  "columns": 4,
+  "rows": 4,
+  "frameCount": 16,
+  "referencePaths": [
+    "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/reference-canvas.png",
+    "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/seed.png",
+    "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/side.png"
+  ],
+  "prompt": "Use case: identity-preserve. EDIT the approved pet character reference into a premium transparent 2D fighting-game NORMAL ATTACK animation sheet for Cloud-ear Dog. All inputs show the SAME approved in-game character; preserve its exact face, palette, costume, anatomy, proportions, animal/toy species or human identity, silhouette family and all defining accessories. The larger transparent reference canvas is an identity reference, not an output layout. Output EXACTLY SIXTEEN complete full-body frames in FOUR COLUMNS and FOUR ROWS, read left-to-right top-to-bottom. First two rows are one coherent eight-frame move: compact shoulder-led two-paw shove. Last two rows are one coherent eight-frame move: small airborne double-paw downward strike. For EACH eight-frame move: frame 1 alert ready pose matching seed, frame 2 slight weight shift and limb preparation, frame 3 clear anticipation with striking limb drawn back, frame 4 the actual contact pose aiming RIGHT just within close melee reach, frame 5 full extension of that same strike, frame 6 follow-through with torso and ears/hair/clothes/tail naturally following the movement, frame 7 controlled limb recovery, frame 8 return to the same alert ready pose. Ground attacks keep supporting feet planted on a shared baseline; aerial attack is a compact airborne pose without a floor or jumping trail, with the lowest boot/paw at the same sprite anchor height. Every figure faces RIGHT in a coherent three-quarter/profile view; no accidental left-facing, front-facing or back-facing frames. All SIXTEEN cells use one shared body scale; whole hair, ears, tail, fingers, weapons and clothing fit inside each cell with generous clear transparent gutters, no touching neighbouring cells. Keep weapons and limbs within normal close-range reach; no skill beams, long rubber missiles, projectiles, clones, victims, elemental glow, speed lines or baked impact effects. Motion comes from real hand-drawn anatomy and pose changes, with strong readable anticipation/contact/recovery and expressive but consistent posture. Smooth polished chibi painted illustration matching the approved seed, crisp edges and detailed shading at game scale. GENUINE alpha transparency everywhere outside the characters, including holes and gaps. No opaque background, fake checkerboard, labels, numbers, grid lines, text, shadows, scenery, extra characters, props or missing cells.",
+  "mode": "built-in imagegen",
+  "sourceHash": "93aa78502453be1e5e6e0067ee2d7d81bf8ae91494fb6af679337f318cb052c3",
+  "references": [
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/reference-canvas.png",
+      "sha256": "84470d2d2ef6cc5d4a3431f2bd163acf7cbad3033d010358101c327def542681"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/seed.png",
+      "sha256": "dfb216003b8346f76f157406e0399620b9fd5e8215d0b752247107d2dd9cfffc"
+    },
+    {
+      "path": "pet-app/art-source/basic-attacks-v1/cloud-ear-dog/side.png",
+      "sha256": "193047385c1099c6c58e3e1ed4b0a1d9da6c85e5378bd82d984e14381cdad464"
+    }
+  ]
+}

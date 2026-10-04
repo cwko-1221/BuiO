@@ -1,0 +1,513 @@
+{
+  "pass": true,
+  "requests": 101,
+  "artAssets": 94,
+  "manifestSha256": "20061a6b61b19e1740a2743396fc703ff617e41fe164bace7b2cf87ff4a7ed9e",
+  "checks": [
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-sunny-training-card-03255fe29057.webp",
+      "bytes": 42302,
+      "sha256": "03255fe2905754020ca93ad7ff8e9957d946c9be722b2e3b0c36ffc18d9fc8a8"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-windbell-forest-card-8af1206cc1f4.webp",
+      "bytes": 70882,
+      "sha256": "8af1206cc1f40a07606ef7d2889fb7d0451664ee5c817e41dd74b5067f58d061"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-starcrystal-cave-card-6e1e65ad1443.webp",
+      "bytes": 62762,
+      "sha256": "6e1e65ad1443b8f2cae61e76b5c7fad22992221feea4f0420c6fb3cccc60b0bd"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-starlamp-harbor-card-376ba071f940.webp",
+      "bytes": 58398,
+      "sha256": "376ba071f94037252bc6141eab36fc337f6850dbc8bc071cc8c1f6738a2ea421"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-rainleaf-marsh-card-0d9b5f378f73.webp",
+      "bytes": 72470,
+      "sha256": "0d9b5f378f738cc3c3fac560ff11dcce1626b24d07e6d812c8c91919b267b15e"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-sunken-tide-city-card-3c0ca0fd0026.webp",
+      "bytes": 63876,
+      "sha256": "3c0ca0fd0026ebc6c3f58bc2e4531b728cf4c92715c84be079fe8506d42a242a"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-coral-archive-card-4a8376e533e1.webp",
+      "bytes": 66050,
+      "sha256": "4a8376e533e1b6d30e0c6f17abfe55d7938ebcbbfd32a508e05f77c691feaa6b"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-storm-beacon-card-503c11a4139a.webp",
+      "bytes": 64298,
+      "sha256": "503c11a4139a7ee63543853e60db583d84b384f4781c7056adf05ef51c51fe25"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-ember-forge-card-cb85641922d9.webp",
+      "bytes": 58506,
+      "sha256": "cb85641922d9f559d95ab4b48e6eb1f9c05b47e986bb0c133e61215cec9fb3dc"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-ashen-clocktower-card-990b06690805.webp",
+      "bytes": 59194,
+      "sha256": "990b06690805129993caaee4f799b5cca34af5b513f399e790b8c42422a17dca"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-frost-mirror-field-card-fd6367bb5643.webp",
+      "bytes": 50406,
+      "sha256": "fd6367bb56430bdc9c06b3d9fad84cbcef0d56b922e6141d15495a457cb84fa0"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-winter-rail-card-18162f21e7cc.webp",
+      "bytes": 60866,
+      "sha256": "18162f21e7cc9547c68f0d36477431abd0b07195717f544a4584c893fe1c0ec0"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-thunder-ridge-card-c5bac0d6e10e.webp",
+      "bytes": 55918,
+      "sha256": "c5bac0d6e10e98c804e87b26a8bd5be3e883936117e21bb48ce546651c3aa585"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-hanging-garden-card-33d5e9b790ff.webp",
+      "bytes": 64434,
+      "sha256": "33d5e9b790ff417f99a8accac1e7ba98b4aee2a063d12cdd66f71dc0b822fb54"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-hourglass-labyrinth-card-04f83b74e234.webp",
+      "bytes": 40892,
+      "sha256": "04f83b74e234e96e52a5744ca013320bc1ee4239bd765f87c29a01b634a5a13c"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-nameless-theater-card-7c0349407b9b.webp",
+      "bytes": 64158,
+      "sha256": "7c0349407b9b32daf638f8993cb3985e63c1b26dd47b4f0241cce88ad6c0b8fe"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-moon-gate-fortress-card-202aa0c81fbf.webp",
+      "bytes": 46750,
+      "sha256": "202aa0c81fbfa1bb62aca8b05afea275277e02b377e32ef865b9a3f7c57c5c1e"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-echo-battlefield-card-0bf0c35ad621.webp",
+      "bytes": 53476,
+      "sha256": "0bf0c35ad62184b7836ba00af01ce3b2735eb443256a57c70e424bffc013e928"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-starbridge-duel-card-97de288d1461.webp",
+      "bytes": 65052,
+      "sha256": "97de288d1461ab4a4807362608ab181ab226ad7161e1b012064d4310128730e8"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-dawn-star-court-card-e4d36ce66c82.webp",
+      "bytes": 55070,
+      "sha256": "e4d36ce66c8286cfcb48fb229937e46e81be884addc180df7ce70f4e9c04847b"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-sunny-training-06f1799cf07f.webp",
+      "bytes": 480574,
+      "sha256": "06f1799cf07fb185b9c55b09036f8e9bb6aee0167f8e207c74c2868dff8be747"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-windbell-forest-adf632cef097.webp",
+      "bytes": 755032,
+      "sha256": "adf632cef0977c4c9cda3b5a4bb4a82db6b371ed9d968692110998492c98bf45"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-starcrystal-cave-668c52eeafd5.webp",
+      "bytes": 689894,
+      "sha256": "668c52eeafd585a197c979c8c375351b4481e8d212777cf63add5df70715b351"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-starlamp-harbor-d6086eea8dbe.webp",
+      "bytes": 635758,
+      "sha256": "d6086eea8dbed91a695bbc7def9ff32915b95daf67b432fb523efa38fc3e1918"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-rainleaf-marsh-39a3ceaf9eb4.webp",
+      "bytes": 777032,
+      "sha256": "39a3ceaf9eb47c1e7b4998ec80271b10bc25843e0d192f2e9de6ba66f16b434a"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-sunken-tide-city-6b618f97f152.webp",
+      "bytes": 696888,
+      "sha256": "6b618f97f152b1181691239708547735ef03a8c8ba72e2b3982abfe5549ca3a8"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-coral-archive-8fe338dc4fd1.webp",
+      "bytes": 731302,
+      "sha256": "8fe338dc4fd1643e88c3143c1aa0bb03f0ce5fae84f4a235a76da1d063e72ed4"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-storm-beacon-44ffa9a8c3e6.webp",
+      "bytes": 707636,
+      "sha256": "44ffa9a8c3e6eacf7a401e3fd1d1dcd4c7317f615dbf1ef8cab92e8ce2b91977"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-ember-forge-942d7738ea88.webp",
+      "bytes": 635074,
+      "sha256": "942d7738ea882f26dbcb995e0627fb3f962c4202ed3a3387068fb103ea070fde"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-ashen-clocktower-930a4b4f9b47.webp",
+      "bytes": 667744,
+      "sha256": "930a4b4f9b47cf965f1dfe518c02adacf76d89e2774e7ae843ca7d6bb4916470"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-frost-mirror-field-f4f68694d435.webp",
+      "bytes": 575370,
+      "sha256": "f4f68694d43579ea6ccf58e8510c714c8f4c50bff6078bc3ce3481c467692c83"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-winter-rail-3d48f0cebcd9.webp",
+      "bytes": 618462,
+      "sha256": "3d48f0cebcd959da4f59ad6fb72d88769cd461911d713176fb24abc031ed2206"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-thunder-ridge-8fe27803b38f.webp",
+      "bytes": 560402,
+      "sha256": "8fe27803b38fb30e3c0881b0aebb2f4471c00a66050c9e6687852a712955db98"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-hanging-garden-4c1092437b74.webp",
+      "bytes": 693778,
+      "sha256": "4c1092437b74384b0265c8c42271895fd9f8e4d097e69cb9f1065536a924be1f"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-hourglass-labyrinth-40506e600382.webp",
+      "bytes": 453360,
+      "sha256": "40506e600382ed7fa3bce54e1dccc19e115627dce71a985c00b6a95a80467fc4"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-nameless-theater-8c33c8c8438b.webp",
+      "bytes": 704452,
+      "sha256": "8c33c8c8438b8f631b78ad91c606848a787a1ce2bf887282c467d97fed8c05f1"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-moon-gate-fortress-5981f4dc5f34.webp",
+      "bytes": 553528,
+      "sha256": "5981f4dc5f34d26904efb28412b45480b319efdd443e3db3d61821dff5814bb6"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-echo-battlefield-67752a52b753.webp",
+      "bytes": 559628,
+      "sha256": "67752a52b7530825fc6e82028efbdf3f8c9f36b724f6554acc03f6623fdf6366"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-starbridge-duel-f0103d4db3f4.webp",
+      "bytes": 717082,
+      "sha256": "f0103d4db3f4f5c35c6df5de0b8f7056e7b3aeb7411b83ca360be301ea204169"
+    },
+    {
+      "url": "/pet/assets/art/brawl/panorama-wide-dawn-star-court-1b9b1f77d170.webp",
+      "bytes": 551712,
+      "sha256": "1b9b1f77d17003df5d630ec8e44c662854d6c570db9c9630bc27f4ae663a942a"
+    },
+    {
+      "url": "/pet/assets/art/brawl/starpatch-cat-normal-ground-b346cfb2349b.webp",
+      "bytes": 769760,
+      "sha256": "b346cfb2349bb40f9cc21605bc80d6483e89fd2090d8f0c6e2c9c0cb442fd823"
+    },
+    {
+      "url": "/pet/assets/art/brawl/starpatch-cat-normal-finish-air-7b8961e95703.webp",
+      "bytes": 748474,
+      "sha256": "7b8961e957033bc1a10d683f1deec303021d68ed02ca007324f9fdba90a1a4b5"
+    },
+    {
+      "url": "/pet/assets/art/brawl/cloud-ear-dog-normal-ground-a264612e45a4.webp",
+      "bytes": 713922,
+      "sha256": "a264612e45a43d135ce6bd3919cae8725557dc137d5d56b021ac01fe6698125e"
+    },
+    {
+      "url": "/pet/assets/art/brawl/cloud-ear-dog-normal-finish-air-87315d686f68.webp",
+      "bytes": 842706,
+      "sha256": "87315d686f68e4ada31e71cf9d58b625a837c793049076aaaabf95483968fa9c"
+    },
+    {
+      "url": "/pet/assets/art/brawl/pudding-pig-normal-ground-54bb9aa95d4c.webp",
+      "bytes": 652516,
+      "sha256": "54bb9aa95d4ce8d0056c1bb2addd6edb862045ec5f03a694fdb587a588afbdc7"
+    },
+    {
+      "url": "/pet/assets/art/brawl/pudding-pig-normal-finish-air-7fd40b4689d8.webp",
+      "bytes": 593440,
+      "sha256": "7fd40b4689d84f8ffdabf9faf92c061c4c716b98ce96098c8b2aa0cc9dd6831e"
+    },
+    {
+      "url": "/pet/assets/art/brawl/golden-retriever-dog-normal-ground-f854479f2280.webp",
+      "bytes": 313938,
+      "sha256": "f854479f2280cadffbe69add8e29960c2ca8992defeb29be39ed3a98f157d218"
+    },
+    {
+      "url": "/pet/assets/art/brawl/golden-retriever-dog-normal-finish-air-460e44f4ca2e.webp",
+      "bytes": 283244,
+      "sha256": "460e44f4ca2ef908007a66cce3cad9104c3c7eb8de5fd6004fc7cfce46499a7b"
+    },
+    {
+      "url": "/pet/assets/art/brawl/crescent-rabbit-normal-ground-ac72324ca83c.webp",
+      "bytes": 331556,
+      "sha256": "ac72324ca83c4373b7f2a76a4a7d4d55864b79fcfd318fc9203f5443f2a1e62e"
+    },
+    {
+      "url": "/pet/assets/art/brawl/crescent-rabbit-normal-finish-air-0352ebacb006.webp",
+      "bytes": 325286,
+      "sha256": "0352ebacb006e0d06225f6bf53e1b98af1d83f4b7638ec2f7cb599a465c9910b"
+    },
+    {
+      "url": "/pet/assets/art/brawl/bubble-otter-normal-ground-999ec9e7089f.webp",
+      "bytes": 353400,
+      "sha256": "999ec9e7089fb04e950b2ae4b397357be4321ccb23b992c6f103a0f2023e3f3f"
+    },
+    {
+      "url": "/pet/assets/art/brawl/bubble-otter-normal-finish-air-e03d6bc29398.webp",
+      "bytes": 317552,
+      "sha256": "e03d6bc29398bb9e045b2241402b762016e81f5f2be443fb57da23865e708648"
+    },
+    {
+      "url": "/pet/assets/art/brawl/mossback-turtle-normal-ground-31da24c2d449.webp",
+      "bytes": 457724,
+      "sha256": "31da24c2d449462900fc34187dea8363a54f15938377aaabc5114f0215d0168f"
+    },
+    {
+      "url": "/pet/assets/art/brawl/mossback-turtle-normal-finish-air-a5c67f393d2d.webp",
+      "bytes": 395864,
+      "sha256": "a5c67f393d2d13b6d6790b02c7f71063106f7badc6948fedb20e783c23099a60"
+    },
+    {
+      "url": "/pet/assets/art/brawl/spark-hamster-normal-ground-91274c676756.webp",
+      "bytes": 426910,
+      "sha256": "91274c676756557b4a8dda4df5ee6601ab827d22f01c373c3d72e020a8eb422b"
+    },
+    {
+      "url": "/pet/assets/art/brawl/spark-hamster-normal-finish-air-b0abbc346fd1.webp",
+      "bytes": 296468,
+      "sha256": "b0abbc346fd16d4fc30bfb1a46208d0ea3ee6b791371e91ef875f9a9b1e5198f"
+    },
+    {
+      "url": "/pet/assets/art/brawl/leaftail-fox-normal-ground-72177ca078a6.webp",
+      "bytes": 420312,
+      "sha256": "72177ca078a6e9364eee57d27a0cf38220b4bde09318b68e0fdb6e20fd53008d"
+    },
+    {
+      "url": "/pet/assets/art/brawl/leaftail-fox-normal-finish-air-0f5c2156bd80.webp",
+      "bytes": 383500,
+      "sha256": "0f5c2156bd80fdf2d7925d01a6bd71c8c99ff9a8416142f8aab43023c7cc1a84"
+    },
+    {
+      "url": "/pet/assets/art/brawl/snowfeather-penguin-normal-ground-dc32425f0e54.webp",
+      "bytes": 326238,
+      "sha256": "dc32425f0e548abd87e7dfc065ee547aea4a78b3a769af6b73876af54af26ace"
+    },
+    {
+      "url": "/pet/assets/art/brawl/snowfeather-penguin-normal-finish-air-3acd2964a5e4.webp",
+      "bytes": 284542,
+      "sha256": "3acd2964a5e4456cc221fc0db3475639c1df7739732b635dd7084f8bb5a28d83"
+    },
+    {
+      "url": "/pet/assets/art/brawl/thunderhorn-goat-normal-ground-15a04ea88134.webp",
+      "bytes": 340812,
+      "sha256": "15a04ea88134c9cb539dc64fcde40409ba20e23232ba4ca800f77b2ac985eaaf"
+    },
+    {
+      "url": "/pet/assets/art/brawl/thunderhorn-goat-normal-finish-air-20b8b4b2a810.webp",
+      "bytes": 303506,
+      "sha256": "20b8b4b2a8108642fb0ec0f217907338d7b99a08e5963a5ebd8e9ae76dd8221a"
+    },
+    {
+      "url": "/pet/assets/art/brawl/coral-seal-normal-ground-6fc846cfab0a.webp",
+      "bytes": 319802,
+      "sha256": "6fc846cfab0ac38c4d9d87bc3a03f8867d8fd659e71fbb4c1186b9cc6673a8d8"
+    },
+    {
+      "url": "/pet/assets/art/brawl/coral-seal-normal-finish-air-32ede4bdf0cd.webp",
+      "bytes": 321492,
+      "sha256": "32ede4bdf0cd23486c8771c0b7229a2b81c5c135db068ab9814306057542f0a8"
+    },
+    {
+      "url": "/pet/assets/art/brawl/nezuko-kamado-normal-ground-73e97565bdfa.webp",
+      "bytes": 393384,
+      "sha256": "73e97565bdfa20f31a2f10739eab52feac512b3da741d334eaf63dd68f93adb9"
+    },
+    {
+      "url": "/pet/assets/art/brawl/nezuko-kamado-normal-finish-air-abfd3d603f47.webp",
+      "bytes": 403772,
+      "sha256": "abfd3d603f47ed7db9c778cec2c8e99cf5d7b27b58a4e1442932191d42d18498"
+    },
+    {
+      "url": "/pet/assets/art/brawl/dragon-ball-goku-normal-ground-c082dce60583.webp",
+      "bytes": 293578,
+      "sha256": "c082dce605831d2676c9e837c8da33289ebdeb7a18a52b81e42a9e5962d451ff"
+    },
+    {
+      "url": "/pet/assets/art/brawl/dragon-ball-goku-normal-finish-air-7f60ad3a43ac.webp",
+      "bytes": 271286,
+      "sha256": "7f60ad3a43acd67d59b5bff4888e05a214ef2cc8c0af6e5fba07cb8abaac6e17"
+    },
+    {
+      "url": "/pet/assets/art/brawl/crayon-shin-chan-normal-ground-6cc8c9f2a333.webp",
+      "bytes": 296228,
+      "sha256": "6cc8c9f2a3338ddfeb2e1120e89904078c7816e7b817aff8d8a78a8ef4fcf52c"
+    },
+    {
+      "url": "/pet/assets/art/brawl/crayon-shin-chan-normal-finish-air-b07ff4d2698e.webp",
+      "bytes": 308082,
+      "sha256": "b07ff4d2698e66c2c4f2c962fac6ef6876deb779bc9bad9b6a67f61b3c1ed1df"
+    },
+    {
+      "url": "/pet/assets/art/brawl/doraemon-normal-ground-5d1952793400.webp",
+      "bytes": 351462,
+      "sha256": "5d1952793400cae5f0d40cdff12d513627884006ac7a04c2ff13015bcdde3558"
+    },
+    {
+      "url": "/pet/assets/art/brawl/doraemon-normal-finish-air-3a35f99b23f1.webp",
+      "bytes": 367944,
+      "sha256": "3a35f99b23f1701e15d19e05a52ba64af0255d99a938fe7e80323688acceac48"
+    },
+    {
+      "url": "/pet/assets/art/brawl/hello-kitty-normal-ground-a50021d4a8a2.webp",
+      "bytes": 289108,
+      "sha256": "a50021d4a8a22c5da0f63bdd0927425cba55d801903d396ad23ad24ef99c6548"
+    },
+    {
+      "url": "/pet/assets/art/brawl/hello-kitty-normal-finish-air-d91bf45b8394.webp",
+      "bytes": 287434,
+      "sha256": "d91bf45b839404587f9ddccb763a772e872bd249b55094d3681fec7a673a4028"
+    },
+    {
+      "url": "/pet/assets/art/brawl/argentina-number-10-normal-ground-c876895efa98.webp",
+      "bytes": 251158,
+      "sha256": "c876895efa98343ff3ab3e464197d7206931ca3df7cdbee34cf9dcf3894af73a"
+    },
+    {
+      "url": "/pet/assets/art/brawl/argentina-number-10-normal-finish-air-3629d99ddde3.webp",
+      "bytes": 285486,
+      "sha256": "3629d99ddde397aca04b0d591220037b72e2ae7845c590f645ba00707650269d"
+    },
+    {
+      "url": "/pet/assets/art/brawl/portugal-number-7-normal-ground-412a24295f49.webp",
+      "bytes": 253844,
+      "sha256": "412a24295f49fbf958a8765a6fc29fbe3ae089ea7111e2b221908f622a99af95"
+    },
+    {
+      "url": "/pet/assets/art/brawl/portugal-number-7-normal-finish-air-a5144c02bf34.webp",
+      "bytes": 252250,
+      "sha256": "a5144c02bf34c9add4544703e650fff81061cf3f14e25a85d951ced623980cf0"
+    },
+    {
+      "url": "/pet/assets/art/brawl/dragon-ball-frieza-normal-ground-d1e5efa638a9.webp",
+      "bytes": 260562,
+      "sha256": "d1e5efa638a9a7e1167672f51acd93b9d47cbe158e82d3f2fc9a27e6c9b2a32b"
+    },
+    {
+      "url": "/pet/assets/art/brawl/dragon-ball-frieza-normal-finish-air-f2db91b989fe.webp",
+      "bytes": 236220,
+      "sha256": "f2db91b989fe52dd7bc8bbe60c560e233a4c5689fdb5b02c7f99408128838efe"
+    },
+    {
+      "url": "/pet/assets/art/brawl/one-piece-luffy-normal-ground-64135bb1cfe6.webp",
+      "bytes": 312362,
+      "sha256": "64135bb1cfe625ed0aa4440ad3771c48f8a10db7026e305ee7a8e38483280fdc"
+    },
+    {
+      "url": "/pet/assets/art/brawl/one-piece-luffy-normal-finish-air-519ff8817708.webp",
+      "bytes": 336250,
+      "sha256": "519ff881770868aca061361a18a7829a0f72633fd5ae54f6a8608367a37bb429"
+    },
+    {
+      "url": "/pet/assets/art/brawl/spy-family-anya-normal-ground-fc037f3d3831.webp",
+      "bytes": 279036,
+      "sha256": "fc037f3d3831361b0c9271f99fc034b2d719964f567eb1bfd66e9f638b1c2250"
+    },
+    {
+      "url": "/pet/assets/art/brawl/spy-family-anya-normal-finish-air-252f920edcb6.webp",
+      "bytes": 259388,
+      "sha256": "252f920edcb674242dd87ee96049db4a56250137eafd2eac9e68051389307f28"
+    },
+    {
+      "url": "/pet/assets/art/brawl/one-punch-saitama-normal-ground-1d203eda16e5.webp",
+      "bytes": 322020,
+      "sha256": "1d203eda16e5652ae68338f271473c9512bdae8d671371a2fcc3548dabd36ff6"
+    },
+    {
+      "url": "/pet/assets/art/brawl/one-punch-saitama-normal-finish-air-dcc2080276de.webp",
+      "bytes": 294420,
+      "sha256": "dcc2080276ded76243a399caa0b21a040ee9c8abd891503594f9afea6dccee4c"
+    },
+    {
+      "url": "/pet/assets/art/brawl/naruto-uzumaki-normal-ground-4e627f7e8fbe.webp",
+      "bytes": 283728,
+      "sha256": "4e627f7e8fbe989f96d999bd75b7e188804ce6469a9836e57248286796db5174"
+    },
+    {
+      "url": "/pet/assets/art/brawl/naruto-uzumaki-normal-finish-air-33bf751495b6.webp",
+      "bytes": 240274,
+      "sha256": "33bf751495b6366d7ce81a7cc3aa5c5b0e6e8c8e46418ecb8a983c0818a5ae67"
+    },
+    {
+      "url": "/pet/assets/art/brawl/monchhichi-normal-ground-39c549891221.webp",
+      "bytes": 275218,
+      "sha256": "39c5498912214c0019824e21eea358105d7365aba92ccb3116a789b4bcb41cd1"
+    },
+    {
+      "url": "/pet/assets/art/brawl/monchhichi-normal-finish-air-74c0ae49d2c2.webp",
+      "bytes": 266560,
+      "sha256": "74c0ae49d2c249eb53fedecfba15dde86e1b15754062194cd1d1effa962fcf5f"
+    },
+    {
+      "url": "/pet/assets/art/brawl/dynasty-warriors-zhao-yun-normal-ground-bcd7a29dd10d.webp",
+      "bytes": 436308,
+      "sha256": "bcd7a29dd10d1fb26a863d2a16c562c1007055d6776c5a6bd60237ce2720d4c3"
+    },
+    {
+      "url": "/pet/assets/art/brawl/dynasty-warriors-zhao-yun-normal-finish-air-1dc056dc5683.webp",
+      "bytes": 384058,
+      "sha256": "1dc056dc568350f5b74005bf4046c5b323062e29b1bf4e89b267d8a1ba6c04f8"
+    },
+    {
+      "url": "/pet/assets/art/brawl/sword-art-online-kirito-normal-ground-025c0d1a56b9.webp",
+      "bytes": 301024,
+      "sha256": "025c0d1a56b9c2f8553190508e2dc0b744adeaf8791400a852c857b99a68058d"
+    },
+    {
+      "url": "/pet/assets/art/brawl/sword-art-online-kirito-normal-finish-air-869d921b11cc.webp",
+      "bytes": 312236,
+      "sha256": "869d921b11cc6fb73b7d1a64f1b448ecddf369b4eb787ec15a03afac9b633e18"
+    },
+    {
+      "url": "/pet/assets/index-D9pley3H.js",
+      "bytes": 198707,
+      "sha256": "fe2170f127b231f025f95a2f5e411b3df1911b37a85e2e19e6bde22f3dd8301f"
+    },
+    {
+      "url": "/pet/assets/phaser-P1E8uaLi.js",
+      "bytes": 1374829,
+      "sha256": "7d1ea2187a4452e8f5383d740ae7e67d8e11400e3a8f268a76d28596f3277f24"
+    },
+    {
+      "url": "/pet/assets/catalog-BJRtFLYp.js",
+      "bytes": 342402,
+      "sha256": "d1b31c586de67193d75f9f19f402e851d2eb4b2e9d820afd5d803fa08293da91"
+    },
+    {
+      "url": "/pet/assets/ArcadePrizes-ChUYXooa.js",
+      "bytes": 325,
+      "sha256": "84e0dbe514ff2e3f8955c4d838ccd6feff64f5adfb2056c0291e9f99601678f8"
+    },
+    {
+      "url": "/pet/assets/CoinPusherDimensions-CGhVOq-R.js",
+      "bytes": 500,
+      "sha256": "535198baa1545a313df99030b4a8990811f1dd7cd058ba28ce21c63883e049de"
+    },
+    {
+      "url": "/pet/assets/preload-helper-BHI4SsMM.js",
+      "bytes": 5027,
+      "sha256": "31ddd7c533caedc1ac62ab4155d835620782fc8fb80652901790531bbc9b9c73"
+    },
+    {
+      "url": "/pet/assets/index-BDF8T54t.css",
+      "bytes": 110932,
+      "sha256": "c44fb556783f463bf1647c50a089e787dfe55b43cb2ae81eb17f335ceeb7642d"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "width": 3344,
+  "height": 470,
+  "originalSha256": "d83235033ccfb0de57e2847a1c9139243a763783d29975405c5033949abc9ef7",
+  "repairSha256": "30217479929d838ffd880450b48f80854e179a9663341ae63decf29a77303bc1",
+  "fullSha256": "3764b60b5246f94c61a68e6d6f47da53f35383164f58e66b9b64425bed9a48a2",
+  "mode": "Uniform crop normalization and feathered assembly of three built-in image_gen repairs; fourth reference cell is never applied"
+}
