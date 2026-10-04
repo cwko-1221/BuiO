@@ -394,9 +394,7 @@ app.get('/tower-defense/teacher', requireSession, (req, res) => {
 // protected by the platform session and switches UI according to the role.
 // A development-only override lets browser tests exercise an isolated production build
 // without replacing the workspace's currently served artifact while it is in use.
-const petDist = !config.isProd && process.env.PET_APP_DIST_DIR
-  ? path.resolve(process.env.PET_APP_DIST_DIR)
-  : path.join(__dirname, 'pet-app', 'dist');
+const petDist = require('./pet-app/lib/published-dist.cjs').petDistDirectory();
 const setPetHeaders = (res, { document = false, microphone = false } = {}) => {
   res.set('X-Content-Type-Options', 'nosniff');
   res.set('Referrer-Policy', 'same-origin');
