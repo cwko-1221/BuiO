@@ -30,7 +30,7 @@ function status(s,a,t,k){
 function hit(s,a,t,k,c,damage=k.damage,down=false,chain=false){
   const soaked=k.element==='lightning'&&t.wetUntil>s.tick;
   const before=s.events.length;
-  const landed=c.impact(s,a,t,damage+(soaked?3:0),k.knock??(down?11:3),down,chain,{skill:true,element:k.element,holdCombo:k.mechanic==='weapon-combo'||k.mechanic==='hug',ranged:k.kind==='banana-prank'||['projectile','wave','beam','lob','rain','fissure','flamethrower','barrage','field','tornado','eruption'].includes(k.mechanic)});
+  const landed=c.impact(s,a,t,damage+(soaked?3:0),k.knock??(down?11:3),down,chain,{skill:true,element:k.element,holdCombo:k.mechanic==='weapon-combo',ranged:['projectile','wave','beam','lob','rain','fissure','flamethrower','barrage','field','tornado','eruption'].includes(k.mechanic)});
   if(landed&&s.events.slice(before).some(e=>e.type==='hit'&&e.actor===t.id&&e.source===a.id)){status(s,a,t,k);if(soaked){t.wetUntil=0;s.events.push({type:'elementStatus',actor:t.id,element:'lightning',x:t.x/U,y:t.y/U});}}
   return landed;
 }
@@ -65,20 +65,7 @@ export function updateAbility(s,a,k,t,c){
     const n=q/(k.period||8),pulses=k.pulses||1;
     if(q>=0&&Number.isInteger(n)&&n<pulses){release(s,a,k,{phase:n});const damage=n===pulses-1?k.finisher||k.damage:k.damage;
       if(k.mechanic==='orbit')area(s,a,k,c,a.x,a.y,k.range,damage,n===pulses-1,true);else line(s,a,k,c,damage,k.mechanic==='weapon-combo'?n===pulses-1:!!k.down,pulses>1);}
-  }else if(k.mechanic==='hug'){
-    if(q===0){
-      release(s,a,k);
-      const target=foes(s,a).filter(t=>(t.x-a.x)*a.facing>=-15*U&&(t.x-a.x)*a.facing<=k.range*U&&Math.abs(t.y-a.y)<=(k.depth||42)*U&&t.z<65*U).sort((l,r)=>Math.abs(l.x-a.x)+Math.abs(l.y-a.y)-Math.abs(r.x-a.x)-Math.abs(r.y-a.y)||l.id-r.id)[0];
-      if(target){const before=s.events.length;hit(s,a,target,{...k,knock:0},c,k.damage,false,true);if(s.events.slice(before).some(e=>e.type==='hit'&&e.actor===target.id&&e.source===a.id))a.abilityCaught=target.id;}
-    }
-    if(q===(k.period||20)){
-      const target=s.actors.find(t=>t.id===a.abilityCaught);
-      if(target&&target.hp>0&&Math.abs(target.x-a.x)<=k.range*U&&Math.abs(target.y-a.y)<=(k.depth||42)*U&&target.z<65*U){
-        const before=s.events.length;hit(s,a,target,{...k,knock:9},c,k.finisher,true,true);
-        if(s.events.slice(before).some(e=>e.type==='hit'&&e.actor===target.id&&e.source===a.id)){const amount=Math.min(k.heal,a.maxHp-a.hp);a.hp+=amount;s.events.push({type:'hugHeal',actor:a.id,kind:k.kind,element:k.element,amount,x:a.x/U,y:a.y/U});pulse(s,a,k,target.x,target.y,90);}
-      }
-    }
-  }else if(k.mechanic==='lob'||k.mechanic==='peel-trap'){
+  }else if(k.mechanic==='lob'){
     if(q===0){release(s,a,k);const p=shot(s,a,k,c,0,{lob:true,flight:k.flight||36,age:0,fromX:a.x,fromY:a.y,toX:a.abilityMotion.toX,toY:a.y,remaining:k.range*U});p.z=45*U;}
   }else if(k.mechanic==='sky-shot'){
     const flight=a.actionDuration-start-8,progress=clamp(q/flight,0,1);
@@ -122,7 +109,7 @@ export function updateAbility(s,a,k,t,c){
 }
 export function tickFields(s,c){
   for(const f of s.fields){
-    const a=s.actors.find(a=>a.id===f.owner);if(!a||a.hp<=0){f.expires=0;continue;}const k=f.skill;if(f.kind==='banana-prank'&&s.tick>=f.expires)continue;
+    const a=s.actors.find(a=>a.id===f.owner);if(!a||a.hp<=0){f.expires=0;continue;}const k=f.skill;
     if(f.mechanic==='tornado')f.x=bound(s,f.x+f.facing*(k.speed||60)*U/60);
     if(f.mechanic==='weapon-ward'){f.x=a.x;f.y=a.y;}
     if(k.pull&&s.tick>=f.starts)for(const t of foes(s,a))if(Math.abs(t.x-f.x)<f.radius*U&&Math.abs(t.y-f.y)<75*U&&t.z<35*U){const dx=f.x-t.x,dy=f.y-t.y,d=Math.max(U,Math.abs(dx)+Math.abs(dy)),pull=k.pull*U*(t.boss?.2:1);t.x=bound(s,t.x+dx/d*pull);t.y=clamp(Math.round(t.y+dy/d*pull),345*U,565*U);}
@@ -139,7 +126,7 @@ export function tickFields(s,c){
       pulse(s,a,k,f.x,f.y,f.radius);f.next=s.tick+(k.period||30);
     }else if(f.mechanic==='trap'){
       const target=foes(s,a).find(t=>Math.abs(t.x-f.x)<=f.radius*U&&Math.abs(t.y-f.y)<=50*U&&t.z<25*U&&!t.invuln);
-      if(target){hit(s,a,target,k,c,k.damage,k.kind==='banana-prank');f.expires=0;pulse(s,a,k,f.x,f.y,f.radius);}
+      if(target){hit(s,a,target,k,c);f.expires=0;pulse(s,a,k,f.x,f.y,f.radius);}
     }else if(!f.fired){area(s,a,k,c,f.x,f.y,f.radius,k.damage,k.element!=='ice');f.fired=true;f.next=f.expires+1;pulse(s,a,k,f.x,f.y,f.radius);}
   }
   s.fields=s.fields.filter(f=>f.expires>s.tick);
@@ -158,7 +145,6 @@ export function interceptProjectile(s,p){
 }
 function projectileBurst(s,p,a,k,c,directId=0){
   const r=k.radius||k.splash||100;
-  if(k.mechanic==='peel-trap'){field(s,a,{...k,mechanic:'trap'},{x:p.x,y:p.y,mechanic:'trap'},false);return;}
   if(p.lob)area(s,a,k,c,p.x,p.y,r,k.damage,true);
   else if(k.splash)area(s,a,{...k,ignoreIds:[directId]},c,p.x,p.y,k.splash,k.splashDamage);
   pulse(s,a,k,p.x,p.y,r);

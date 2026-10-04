@@ -1,0 +1,80 @@
+[
+  {
+    "id": "monchhichi",
+    "name": {
+      "zh-HK": "Monchhichi",
+      "en-US": "Monchhichi"
+    },
+    "rarity": "epic",
+    "hp": 110,
+    "speed": 220,
+    "damage": [
+      8,
+      8,
+      13
+    ],
+    "airDamage": 13,
+    "color": 15050566,
+    "role": {
+      "zh-HK": "蕉皮絨抱",
+      "en-US": "Plush trickster"
+    },
+    "skills": [
+      {
+        "name": {
+          "zh-HK": "蕉皮惡作劇",
+          "en-US": "Banana Peel Prank"
+        },
+        "description": {
+          "zh-HK": "拋出香蕉皮，落地後保留 4 秒；敵人踩中會受 18 傷害、滑倒及減速 1.5 秒，蕉皮隨即消失。",
+          "en-US": "Toss a banana peel that waits for four seconds after landing. One enemy who steps on it takes eighteen damage, trips and slows for 1.5 seconds; the peel is consumed."
+        },
+        "kind": "banana-prank",
+        "mechanic": "peel-trap",
+        "damage": 18,
+        "mp": 33,
+        "cooldown": 300,
+        "range": 310,
+        "flight": 32,
+        "height": 115,
+        "radius": 72,
+        "life": 240,
+        "arm": 12,
+        "slowTicks": 90,
+        "windup": 16,
+        "duration": 52,
+        "effect": "banana",
+        "element": "physical"
+      },
+      {
+        "name": {
+          "zh-HK": "絨毛抱抱",
+          "en-US": "Plush Hug"
+        },
+        "description": {
+          "zh-HK": "原地抱住前方一名近敵，兩段傷害共 22；抱抱完成才回復 12 HP，末擊擊倒。可被打斷，對 Boss 的束縛較短。",
+          "en-US": "Embrace one nearby foe without moving for two hits totalling twenty-two damage. Only a completed hug heals twelve HP and knocks down; attacks can interrupt it, and bosses resist the hold."
+        },
+        "kind": "plush-hug",
+        "mechanic": "hug",
+        "damage": 8,
+        "mp": 50,
+        "cooldown": 540,
+        "range": 160,
+        "finisher": 14,
+        "heal": 12,
+        "rootTicks": 42,
+        "windup": 16,
+        "duration": 58,
+        "period": 20,
+        "depth": 42,
+        "effect": "hug",
+        "element": "light"
+      }
+    ],
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/monchhichi-brawl-v13/monchhichi/seed.png"
+  }
+]

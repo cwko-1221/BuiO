@@ -1,0 +1,7 @@
+{
+  "mode": "built-in imagegen",
+  "transparent_background": true,
+  "rows": 2,
+  "prompt": "Use case: illustration-story. Production anime fighting-game sprite VFX with real alpha transparency. EXACTLY EIGHT complete isolated effects in strict FOUR columns TWO rows. Equal cells, at least 60px actually empty transparent gutters on all sides; keep all glow within each effect, no effects touching one another. Premium LF2/LFO spectacular painted VFX, crisp yellow-gold silhouette and brilliant white edge, visible banana-peel motif. One common scale, charge stages at least half mature width. Reading order: 1 compact golden spiral around one yellow banana peel, 2 bright compact yellow peel with gentle golden speed loop, 3 rotating three-flap yellow peel with orange-white throw crescent, 4 a clearly recognizable yellow banana peel resting on a small golden floor ellipse, 5 same grounded peel with softly pulsing gold outline and orange star glints, 6 grounded peel with brighter armed halo, 7 sudden dramatic banana-yellow WHITE comic impact starburst with three curved peel shapes, 8 smaller fading golden starburst and tiny close peel flecks. No text, no exclamation marks, characters, limbs, UI, scenery, floor texture, smoke background, checkerboard or opaque rectangles. TRUE transparent background, including all gaps between effects and inside their circular swirls. Entire eight effects isolated and inside their cells.",
+  "sourceHash": "7e437208d07b9b8a4b80776c64c4c8421eb8d7833abb58469796b473d3f40e32"
+}

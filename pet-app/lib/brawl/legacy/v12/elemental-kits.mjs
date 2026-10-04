@@ -2,9 +2,6 @@ const L=(zh,en)=>({'zh-HK':zh,'en-US':en});
 const k=(zh,en,description,english,kind,mechanic,damage,mp,cooldown,range,extra={})=>({name:L(zh,en),description:L(description,english),kind,mechanic,damage,mp:Math.ceil(mp*1.25),cooldown,range,...extra});
 // v8 budgets stronger elemental utility with 25% higher MP costs.
 export const ELEMENTAL_KITS={
-  'monchhichi':[
-    k('蕉皮惡作劇','Banana Peel Prank','拋出香蕉皮，落地後保留 4 秒；敵人踩中會受 18 傷害、滑倒及減速 1.5 秒，蕉皮隨即消失。','Toss a banana peel that waits for four seconds after landing. One enemy who steps on it takes eighteen damage, trips and slows for 1.5 seconds; the peel is consumed.','banana-prank','peel-trap',18,26,300,310,{flight:32,height:115,radius:72,life:240,arm:12,slowTicks:90,windup:16,duration:52,effect:'banana',element:'physical'}),
-    k('絨毛抱抱','Plush Hug','原地抱住前方一名近敵，兩段傷害共 22；抱抱完成才回復 12 HP，末擊擊倒。可被打斷，對 Boss 的束縛較短。','Embrace one nearby foe without moving for two hits totalling twenty-two damage. Only a completed hug heals twelve HP and knocks down; attacks can interrupt it, and bosses resist the hold.','plush-hug','hug',8,40,540,160,{finisher:14,heal:12,rootTicks:42,windup:16,duration:58,period:20,depth:42,effect:'hug',element:'light'})],
   'dynasty-warriors-zhao-yun':[
     k('龍牙三式','Dragon Fang Three Forms','原地三段長槍突刺，最後一擊擊倒；銀龍槍芒可攻擊前方較遠的敵人。','Three stationary spear thrusts. The last strike knocks down foes within the long spear reach.','dragon-fang','weapon-combo',7,26,270,280,{pulses:3,period:10,finisher:12,windup:14,duration:56,depth:38,knock:3,effect:'spear',element:'wind'}),
     k('銀龍護陣','Silver Dragon Ward','銀龍繞身 2.5 秒，每半秒吹擊周圍敵人，並擋下最多 2 個遠攻投射物。','A silver dragon circles you for 2.5 seconds, striking nearby foes every half second and intercepting up to two enemy projectiles.','silver-dragon-ward','weapon-ward',5,42,600,0,{radius:180,life:150,period:30,blocks:2,windup:20,duration:48,effect:'dragon-ward',element:'wind',slowTicks:45})],
@@ -86,7 +83,6 @@ export const ELEMENTAL_KITS={
 };
 
 export const ELEMENTAL_ROLES={
-  'monchhichi':L('蕉皮絨抱','Plush trickster'),
   'dynasty-warriors-zhao-yun':L('銀龍槍陣','Silver dragon guardian'),'sword-art-online-kirito':L('雙劍連斬','Dual-blade striker'),
   'cloud-ear-dog':L('風刃龍捲','Gale caster'),'pudding-pig':L('裂地泥砲','Earth artillery'),
   'golden-retriever-dog':L('彈射護衛','Ricochet guardian'),'crescent-rabbit':L('月光星術','Lunar caster'),

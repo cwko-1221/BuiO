@@ -1,6 +1,5 @@
 import {ELEMENTAL_KITS,ELEMENTAL_ROLES} from './elemental-kits.mjs';
 export const EXTRA_FIGHTERS=Object.freeze([
-  {id:'monchhichi',name:{'zh-HK':'Monchhichi','en-US':'Monchhichi'},rarity:'epic',hp:110,speed:220,damage:[8,8,13],airDamage:13,color:0xe5a746,role:ELEMENTAL_ROLES.monchhichi,skills:ELEMENTAL_KITS.monchhichi},
   {id:'dynasty-warriors-zhao-yun',name:{'zh-HK':'趙雲','en-US':'Zhao Yun'},rarity:'epic',hp:116,speed:205,damage:[9,9,14],airDamage:14,color:0x64c7ed,role:ELEMENTAL_ROLES['dynasty-warriors-zhao-yun'],skills:ELEMENTAL_KITS['dynasty-warriors-zhao-yun']},
   {id:'sword-art-online-kirito',name:{'zh-HK':'桐人','en-US':'Kirito'},rarity:'epic',hp:100,speed:245,damage:[8,8,13],airDamage:13,color:0x64dac9,role:ELEMENTAL_ROLES['sword-art-online-kirito'],skills:ELEMENTAL_KITS['sword-art-online-kirito']},
   {...{"id":"golden-retriever-dog","name":{"zh-HK":"金毛犬","en-US":"Golden Retriever"},"rarity":"common","hp":110,"speed":215,"color":14988376,"damage":[8,8,14],"airDamage":14,"role":{"zh-HK":"接球護衛","en-US":"Fetch guardian"}},role:ELEMENTAL_ROLES["golden-retriever-dog"]||{"zh-HK":"接球護衛","en-US":"Fetch guardian"},skills:ELEMENTAL_KITS["golden-retriever-dog"]},

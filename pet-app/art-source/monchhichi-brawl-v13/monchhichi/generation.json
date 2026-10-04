@@ -1,0 +1,21 @@
+{
+  "mode": "built-in imagegen",
+  "transparent_background": true,
+  "rows": 4,
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "prompt": "Use case: identity-preserve. Production transparent chibi fighting-game casting sprite sheet based on the approved Monchhichi toy pet references. Preserve EXACT brown fuzzy plush fur, round tan face, small black eyes, cheeks, round ears, small tuft on head, little plush tail, tan hands/feet and the red bib with its white star badge. Same friendly toy proportions and face in ALL SIXTEEN frames, not a human or a different monkey. Strict FOUR columns FOUR rows, 16 complete full-body poses read left to right top to bottom. All face RIGHT in three-quarter/profile view, all feet on the same baseline, one shared body scale. Generous genuinely transparent gutters; whole hands/banana/tail inside each cell. No words, grid lines, scenery, floor, drop shadows, magical light or motion effects. FIRST EIGHT frames Banana Peel Prank: 1 relaxed alert stance, 2 reach tan hand beside bib as if reaching for a banana, 3 hold one yellow banana peel in right hand behind waist, 4 turn torso back to prepare a gentle underarm throw with that peel, 5 swing arm forward and release the peel toward RIGHT with open empty hand (do not draw the airborne peel), 6 hand follows forward/up after release, 7 bring arm back to side with satisfied smile, 8 return alert stance. LAST EIGHT frames Plush Hug: 9 relax arms by sides, 10 raise both arms beside chest, 11 widen both arms to prepare an embrace, 12 bend knees gently with arms open to RIGHT, 13 wrap BOTH arms around EMPTY SPACE immediately to right of chest, 14 squeeze the hug with clear forward leaning shoulders, 15 loosen arms into an open-handed finish toward right, 16 return relaxed ready stance. Do not include a victim, clones or any second character. No hearts, energy or glowing rings baked into the character. Friendly clean high-quality plush illustration matching the approved reference silhouette.",
+  "referencedImages": [
+    {
+      "file": "reference-canvas.png",
+      "sha256": "2e5070a6614a7e5247cc2def8f564cd90d7e9b35b9503cfa874a4f385a7b66a5"
+    },
+    {
+      "file": "side.png",
+      "sha256": "dc2724f5683c78c6bfe3d1045aa3250c462b30971979ba0133aafe6d136674e1"
+    }
+  ],
+  "sourceHash": "789c93ac922da4342ed476171f5644c121f7f635a6ff6843cd7ee0b5096d0d02"
+}

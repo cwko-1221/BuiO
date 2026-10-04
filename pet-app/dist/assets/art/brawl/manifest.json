@@ -1258,6 +1258,28 @@
       "originX": 0.03125,
       "originY": 0.5,
       "anchor": "left"
+    },
+    "banana-prank": {
+      "url": "/pet/assets/art/brawl/skill-banana-prank-d6c79553fc02.webp",
+      "frameWidth": 512,
+      "frameHeight": 256,
+      "frames": 8,
+      "widthRatio": 0.530440414507772,
+      "heightRatio": 0.8749999999999999,
+      "originX": 0.5,
+      "originY": 0.9375,
+      "anchor": "ground"
+    },
+    "plush-hug": {
+      "url": "/pet/assets/art/brawl/skill-plush-hug-1420360dd314.webp",
+      "frameWidth": 512,
+      "frameHeight": 256,
+      "frames": 8,
+      "widthRatio": 0.4486143187066975,
+      "heightRatio": 0.8750000000000001,
+      "originX": 0.5,
+      "originY": 0.5,
+      "anchor": "center"
     }
   },
   "fighterSkillAnimations": {
@@ -3659,6 +3681,97 @@
             {
               "x": 56.01,
               "y": -41.36
+            }
+          ]
+        }
+      }
+    },
+    "monchhichi": {
+      "url": "/pet/assets/art/brawl/monchhichi-casts-02cc660f6343.webp",
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "clips": {
+        "skill1": {
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 288,
+          "originY": 0.8984375,
+          "emitterRole": "hand",
+          "emitters": [
+            {
+              "x": 6.73,
+              "y": -36.43
+            },
+            {
+              "x": 7.61,
+              "y": -63.06
+            },
+            {
+              "x": -46.94,
+              "y": -48.87
+            },
+            {
+              "x": -44.04,
+              "y": -91.41
+            },
+            {
+              "x": 54.75,
+              "y": -70.31
+            },
+            {
+              "x": 47.42,
+              "y": -99.49
+            },
+            {
+              "x": 16.81,
+              "y": -32.46
+            },
+            {
+              "x": 14.3,
+              "y": -28.12
+            }
+          ]
+        },
+        "skill2": {
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 288,
+          "originY": 0.8984375,
+          "emitterRole": "hand",
+          "emitters": [
+            {
+              "x": 17.27,
+              "y": -35.16
+            },
+            {
+              "x": 5.71,
+              "y": -59.27
+            },
+            {
+              "x": 48.47,
+              "y": -67.5
+            },
+            {
+              "x": 47.57,
+              "y": -68.44
+            },
+            {
+              "x": 21.57,
+              "y": -51.35
+            },
+            {
+              "x": 20.27,
+              "y": -44.2
+            },
+            {
+              "x": 49.39,
+              "y": -68.22
+            },
+            {
+              "x": 18.92,
+              "y": -37.97
             }
           ]
         }

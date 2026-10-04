@@ -1,20 +1,19 @@
 import {ADVENTURE_CHAPTER_DESIGNS,ADVENTURE_MINIONS,ADVENTURE_BOSSES} from './adventure-design.mjs';
 import {ELEMENTAL_KITS,ELEMENTAL_ROLES} from './elemental-kits.mjs';
-import {FIGHTERS as V1_FIGHTERS} from './legacy/catalog.mjs';
-import {FIGHTERS as V2_FIGHTERS} from './legacy/v2/catalog.mjs';
-import {FIGHTERS as V3_FIGHTERS} from './legacy/v3/catalog.mjs';
-import {FIGHTERS as V4_FIGHTERS} from './legacy/v4/catalog.mjs';
-import {FIGHTERS as V5_FIGHTERS} from './legacy/v5/catalog.mjs';
-import {FIGHTERS as V6_FIGHTERS} from './legacy/v6/catalog.mjs';
-import {FIGHTERS as V7_FIGHTERS} from './legacy/v7/catalog.mjs';
-import {FIGHTERS as V9_FIGHTERS} from './legacy/v9/catalog.mjs';
-import {FIGHTERS as V8_FIGHTERS} from './legacy/v8/catalog.mjs';
-import {FIGHTERS as V10_FIGHTERS} from './legacy/v10/catalog.mjs';
-import {FIGHTERS as V11_FIGHTERS} from './legacy/v11/catalog.mjs';
-import {FIGHTERS as V12_FIGHTERS} from './legacy/v12/catalog.mjs';
+import {FIGHTERS as V1_FIGHTERS} from '../catalog.mjs';
+import {FIGHTERS as V2_FIGHTERS} from '../v2/catalog.mjs';
+import {FIGHTERS as V3_FIGHTERS} from '../v3/catalog.mjs';
+import {FIGHTERS as V4_FIGHTERS} from '../v4/catalog.mjs';
+import {FIGHTERS as V5_FIGHTERS} from '../v5/catalog.mjs';
+import {FIGHTERS as V6_FIGHTERS} from '../v6/catalog.mjs';
+import {FIGHTERS as V7_FIGHTERS} from '../v7/catalog.mjs';
+import {FIGHTERS as V9_FIGHTERS} from '../v9/catalog.mjs';
+import {FIGHTERS as V8_FIGHTERS} from '../v8/catalog.mjs';
+import {FIGHTERS as V10_FIGHTERS} from '../v10/catalog.mjs';
+import {FIGHTERS as V11_FIGHTERS} from '../v11/catalog.mjs';
 import {EXTRA_FIGHTERS} from './fighter-roster.mjs';
-export const VERSION = 'brawl-v13';
-export const SUPPORTED_VERSIONS = Object.freeze(['brawl-v1','brawl-v2','brawl-v3','brawl-v4','brawl-v5','brawl-v6','brawl-v7','brawl-v8','brawl-v9','brawl-v10','brawl-v11','brawl-v12',VERSION]);
+export const VERSION = 'brawl-v12';
+export const SUPPORTED_VERSIONS = Object.freeze(['brawl-v1','brawl-v2','brawl-v3','brawl-v4','brawl-v5','brawl-v6','brawl-v7','brawl-v8','brawl-v9','brawl-v10','brawl-v11',VERSION]);
 export const WORLD = Object.freeze({width:5120,zoneWidth:1280,floorTop:345,floorBottom:565});
 export const TICKS = 60;
 export const MAX_TICKS = 36000;
@@ -46,7 +45,7 @@ export const STAGES=Object.freeze(ADVENTURE_CHAPTER_DESIGNS.map(d=>({...((d.numb
 export const DIFFICULTIES = Object.freeze({easy:{hp:80,damage:65,reaction:27,slots:1,telegraph:54},normal:{hp:100,damage:100,reaction:18,slots:2,telegraph:42},hard:{hp:120,damage:125,reaction:12,slots:3,telegraph:27}});
 export const CLIPS = Object.freeze({idle:[0,8],walk:[8,8],run:[16,8],attack1:[24,8],attack2:[32,8],attack3:[40,8],jump:[48,8],air:[56,8],guard:[64,4],break:[68,4],hit:[72,4],fall:[76,4],rise:[80,4],skill1:[88,8],skill2:[96,8],win:[104,8]});
 export const fighterById = id => FIGHTERS.find(f=>f.id===id);
-export const fightersForVersion = version => version==='brawl-v1'?V1_FIGHTERS:version==='brawl-v2'?V2_FIGHTERS:version==='brawl-v3'?V3_FIGHTERS:version==='brawl-v4'?V4_FIGHTERS:version==='brawl-v5'?V5_FIGHTERS:version==='brawl-v6'?V6_FIGHTERS:version==='brawl-v7'?V7_FIGHTERS:version==='brawl-v8'?V8_FIGHTERS:version==='brawl-v9'?V9_FIGHTERS:version==='brawl-v10'?V10_FIGHTERS:version==='brawl-v11'?V11_FIGHTERS:version==='brawl-v12'?V12_FIGHTERS:FIGHTERS;
+export const fightersForVersion = version => version==='brawl-v1'?V1_FIGHTERS:version==='brawl-v2'?V2_FIGHTERS:version==='brawl-v3'?V3_FIGHTERS:version==='brawl-v4'?V4_FIGHTERS:version==='brawl-v5'?V5_FIGHTERS:version==='brawl-v6'?V6_FIGHTERS:version==='brawl-v7'?V7_FIGHTERS:version==='brawl-v8'?V8_FIGHTERS:version==='brawl-v9'?V9_FIGHTERS:version==='brawl-v10'?V10_FIGHTERS:version==='brawl-v11'?V11_FIGHTERS:FIGHTERS;
 export const stageById = id => STAGES.find(s=>s.id===id);
 
 // Combat lookup and launch roster include all published kits; launch checks ownership.

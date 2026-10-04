@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import {extractAdventureFrames} from './extract-adventure-frames.mjs';
-const source='pet-app/art-source/brawl-newcomers-v12',out='pet-app/public/assets/art/brawl',evidence='artifacts/pet-playtest/newcomers-v12/fx';
+const option=(name,fallback)=>{const n=process.argv.indexOf(name);return n>=0?process.argv[n+1]:fallback;};
+const source=option('--source','pet-app/art-source/brawl-newcomers-v12'),out='pet-app/public/assets/art/brawl',evidence=option('--evidence','artifacts/pet-playtest/newcomers-v12/fx');
 fs.mkdirSync(evidence,{recursive:true});
 const file=path.join(out,'manifest.json'),manifest=JSON.parse(fs.readFileSync(file)),report=[];
 for(const job of JSON.parse(fs.readFileSync(source+'/jobs.json'))){

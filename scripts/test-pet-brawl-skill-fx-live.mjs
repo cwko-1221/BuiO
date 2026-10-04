@@ -32,7 +32,7 @@ try{
   await page.goto('/pet');await page.locator('[data-tab="brawl"]').click();await page.locator('.brawl-fighter').first().waitFor();assert.equal(await page.locator('.brawl-fighter').count(),FIGHTERS.length);
   await page.locator('.brawl-fighter[data-id="dragon-ball-goku"]').click();await page.locator('[data-brawl="mode"][data-id="practice"]').click();await page.locator('[data-brawl="start"]').first().click();await page.waitForFunction(()=>window.__petGame?.scene.isActive('Brawl')&&!document.querySelector('.brawl-loading'));
   async function reset(f,n,manual=true,face=1){
-    const token=randomUUID(),initial=stateFor(f),k=f.skills[n],p=initial.actors[0],target=initial.actors[1],distant=['fissure','rain','lob','tornado','field','trap','barrage','sky-shot'].includes(k.mechanic);
+    const token=randomUUID(),initial=stateFor(f),k=f.skills[n],p=initial.actors[0],target=initial.actors[1],distant=['fissure','rain','peel-trap','lob','tornado','field','trap','barrage','sky-shot'].includes(k.mechanic);
     p.facing=face;if(face<0)p.x=100000;target.x=Math.max(4500,Math.min(120000,p.x+face*(distant?k.range+(k.mechanic==='barrage'?100:0):k.mechanic==='rasengan'?180:260)*100));target.y=p.y+(k.spread?.[0]||0)*100;
     await page.evaluate(({initial,assets,f,token})=>{
       const scene=window.__petGame.scene.getScene('Brawl');if(scene.__normalUpdate){scene.update=scene.__normalUpdate;scene.sys.sceneUpdate=scene.update;}
@@ -48,6 +48,7 @@ try{
   for(const face of [1,-1])for(const f of ALL_FIGHTERS)for(const [n,k] of f.skills.entries()){
     await reset(f,n,true,face);let tick=Number(k.windup||12)+20;
     if(['fissure','rain'].includes(k.mechanic))tick=12+k.arm+(k.columns-1)*k.interval+2;
+    if(k.mechanic==='peel-trap')tick=Number(k.windup)+k.flight+k.arm+8;
     if(k.mechanic==='lob')tick=12+Math.floor(k.flight*.55);
     if(k.mechanic==='rasengan')tick=Number(k.windup)+16;
     if(k.mechanic==='beam')tick=Number(k.windup)+10;
@@ -70,7 +71,7 @@ try{
     if(k.kind==='flame-breath')assert.ok(info.flameLength>290);if(k.kind==='rasengan'||k.mechanic==='scan'||k.mechanic==='buff')assert.ok(info.peak>=1);
     await page.screenshot({path:path.join(out,f.id+`-skill${n+1}${face<0?'-left':''}.png`)});coverage.push({fighter:f.id,skill:k.kind,face,...info});
   }
-  console.log('✓ All 53 active dedicated skill textures animate; thick Kamehameha keeps its mirrored beam head; the public roster and owned API open all 27 fighters');
+  console.log('✓ All 55 active dedicated skill textures animate; thick Kamehameha keeps its mirrored beam head; the public roster and owned API open all 28 fighters');
   // Exercise every declared pose against the live renderer, at actual simulation times.
   for(const face of [1,-1])for(const f of ALL_FIGHTERS.filter(f=>f.id!=='pikachu'))for(const [n,k] of f.skills.entries()){
     const clip=assets.fighters[f.id].clips['skill'+(n+1)];assert.equal(clip.count,8);assert.equal(clip.emitters.length,8);
@@ -91,7 +92,7 @@ try{
       casts.push({fighter:f.id,skill:k.kind,face,phase,...snap});
     }
   }
-  console.log('✓ All 52 skills of the 26 redrawn characters play eight poses in both directions, at fixed scale and foot anchor');
+  console.log('✓ All 54 skills of the 27 redrawn characters play eight poses in both directions, at fixed scale and foot anchor');
   // Remote movement is interpolated; held effects must follow the rendered hand.
   const naruto=ALL_FIGHTERS.find(f=>f.id==='naruto-uzumaki');await reset(naruto,1,true);
   const remoteAnchor=await page.evaluate(wind=>{

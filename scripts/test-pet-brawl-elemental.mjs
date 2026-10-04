@@ -12,13 +12,13 @@ function fixture(fighterId){
   Object.assign(s.actors[0],{kind:f.id,hp:f.hp-30,maxHp:f.hp});s.fighterId=f.id;return s;
 }
 const run=(s,n,mask=0)=>{const events=[];for(let t=0;t<n;t++){stepBattle(s,mask);events.push(...s.events);}return events;};
-assert.equal(ALL_FIGHTERS.length,27);assert.equal(FIGHTERS.length,27);
-assert.equal(new Set(ALL_FIGHTERS.flatMap(f=>f.skills.map(k=>k.kind))).size,54);
+assert.equal(ALL_FIGHTERS.length,28);assert.equal(FIGHTERS.length,28);
+assert.equal(new Set(ALL_FIGHTERS.flatMap(f=>f.skills.map(k=>k.kind))).size,56);
 assert.equal(HIDDEN_FIGHTER_IDS.length,0);for(const f of FIGHTERS)assert.equal(createBattle({fighterId:f.id}).actors[0].kind,f.id);
 const rows=[];
 for(const f of ALL_FIGHTERS)for(const [n,k] of f.skills.entries()){
   const s=fixture(f.id),p=s.actors[0],t=s.actors[1];
-  const distant=['fissure','rain','lob','tornado','field','trap','barrage','sky-shot'].includes(k.mechanic);
+  const distant=['fissure','rain','peel-trap','lob','tornado','field','trap','barrage','sky-shot'].includes(k.mechanic);
   t.x=p.x+(distant?k.range+(k.mechanic==='barrage'?100:0):Math.min(180,k.range||80))*100;t.y=p.y+(k.spread?.[0]||0)*100;
   const initial=t.hp;stepBattle(s,n?I.SKILL2:I.SKILL1);assert.equal(p.mp,10000-k.mp*100);assert.equal(p.cooldowns[n],k.cooldown);
   let status={},fields=0,projectiles=0,releases=0;
@@ -34,7 +34,7 @@ for(const f of ALL_FIGHTERS)for(const [n,k] of f.skills.entries()){
   if(k.element==='water'&&k.damage>0)assert.ok(status.wetUntil);if(k.burnTicks)assert.ok(status.burnUntil);if(k.freezeTicks)assert.ok(status.freezeUntil);if(k.shockTicks)assert.ok(status.shockUntil);
   rows.push({fighter:f.id,skill:k.kind,element:k.element||'star',mechanic:k.mechanic||k.kind,damage:initial-t.hp,fields,projectiles,...status});
 }
-console.log('✓ 54 distinct named skills: real damage/support, elemental statuses, costs and finite physics; all 27 fighters are open');
+console.log('✓ 56 distinct named skills: real damage/support, elemental statuses, costs and finite physics; all 28 fighters are open');
 let s=fixture('spark-hamster'),p=s.actors[0],t=s.actors[1];t.x=p.x+30000;stepBattle(s,I.SKILL1|I.RIGHT);const start=p.x;run(s,60,I.RIGHT);assert.equal(p.x,start);assert.ok(t.hp<t.maxHp&&t.burnUntil>s.tick);
 s=fixture('spark-hamster');p=s.actors[0];t=s.actors[1];t.x=p.x+30000;t.y=p.y+12000;stepBattle(s,I.SKILL1);run(s,120);assert.equal(t.hp,t.maxHp);
 console.log('✓ Flame channel stays stationary, burns at range, and respects its widening depth cone');

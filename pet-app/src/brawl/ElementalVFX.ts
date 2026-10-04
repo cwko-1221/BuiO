@@ -128,6 +128,11 @@ export class ElementalVFX {
   private channel(a:Actor,k:any,time:number){
     const p=this.source(a,k),x=p.x,y=p.y,face=a.facing,range=Math.abs((this.positions?.get(a.id)?.x??a.x/100)+face*(k.range-12)-x),color=k.effect==='cosmic'?0xd578ff:k.effect==='bloodflame'?0xff6eba:C[k.element]||0xffffff;
     if(k.kind==='kamehameha'){this.kiBeam(a,k,time);return;}
+    if(k.mechanic==='hug'&&this.hasAtlas(k.kind)){
+      const q=a.actionTick-Number(k.windup||16),finished=q>=Number(k.period||20);
+      const frame=finished?6:q<4?3:4+Math.floor(q/5)%2,fade=Math.min(1,(a.actionDuration-a.actionTick-5)/8);
+      this.atlas(k.kind,frame,x+face*25,y-8,finished?200:160,finished?200:170,Math.max(0,fade)*(finished?1:.85),face<0);return;
+    }
     if(k.mechanic==='weapon-combo'&&this.hasAtlas(k.kind)){
       const phase=Math.floor((a.actionTick-Number(k.windup||12))/Number(k.period||4)),last=Number(k.pulses||1)-1;
       const finishing=phase>=last,frame=finishing?6:3+phase%2,fade=Math.min(1,(a.actionDuration-a.actionTick-4)/10);
@@ -174,11 +179,12 @@ export class ElementalVFX {
   draw(s:BattleState,time:number,dt:number,positions?:ReadonlyMap<number,{x:number;y:number;z:number}>){
     this.currentTick=s.tick;this.positions=positions;this.used=0;this.g.clear();
     const alive=new Set(s.projectiles.map(p=>p.id));for(const id of this.launches.keys())if(!alive.has(id))this.launches.delete(id);
-    if(!['brawl-v7','brawl-v8','brawl-v9','brawl-v10','brawl-v11',VERSION].includes(s.version)){this.sprites.forEach(sprite=>sprite.setVisible(false));this.bursts=[];this.stats.sprites=0;return;}
-    for(const a of s.actors){const fighter=s.version===VERSION?combatFighterById(a.kind):fightersForVersion(s.version).find(f=>f.id===a.kind),k=(fighter?.skills[a.skill]||(['brawl-v9','brawl-v10','brawl-v11',VERSION].includes(s.version)?enemyKit(a):undefined)) as any,x=a.x/100,y=a.y/100-actorHeight(a,s.tick);
+    if(!['brawl-v7','brawl-v8','brawl-v9','brawl-v10','brawl-v11','brawl-v12',VERSION].includes(s.version)){this.sprites.forEach(sprite=>sprite.setVisible(false));this.bursts=[];this.stats.sprites=0;return;}
+    for(const a of s.actors){const fighter=s.version===VERSION?combatFighterById(a.kind):fightersForVersion(s.version).find(f=>f.id===a.kind),k=(fighter?.skills[a.skill]||(['brawl-v9','brawl-v10','brawl-v11','brawl-v12',VERSION].includes(s.version)?enemyKit(a):undefined)) as any,x=a.x/100,y=a.y/100-actorHeight(a,s.tick);
       if(k&&(k.element||this.hasAtlas(k.kind))&&(a.action.startsWith('skill')||!fighter&&a.action.startsWith('attack'))){
         const wind=Number(k.windup||12),end=wind+(Number(k.pulses||1)-1)*Number(k.period||8)+18;
         if(a.actionTick<wind)this.charge(a,k,time);
+        else if(k.mechanic==='hug'&&a.actionTick<a.actionDuration-5)this.channel(a,k,time);
         else if(['flamethrower','beam','stretch','weapon-combo'].includes(k.mechanic!)&&a.actionTick<end)this.channel(a,k,time);
         if(k.mechanic==='rasengan'&&a.actionTick>=wind&&a.actionTick<a.actionDuration-6){const p=this.source(a,k),fade=Math.min(1,(a.actionDuration-a.actionTick-6)/8);if(!this.atlas(k.kind,3+Math.floor(a.actionTick/3)%3,p.x,p.y,Number(k.size||62)*2.2,undefined,fade,a.facing<0))this.orb('spiral-orb',p.x,p.y,Number(k.size||62),time,C.chakra,fade);}
         if(k.mechanic==='orbit'){const color=C[k.element]||C.physical;for(let n=0;n<3;n++){const angle=time*9+n*2.1,cx=x+Math.cos(angle)*Number(k.range)*.6,cy=y-60+Math.sin(angle)*40;if(!this.atlas(k.kind,3+Math.floor(s.tick/4)%3,cx,cy,74))this.ball(cx,cy,24,color,time);}}
@@ -197,7 +203,8 @@ export class ElementalVFX {
     for(const p of s.projectiles){if(!p.skill?.element)continue;const k=p.skill;let x=p.x/100,y=p.y/100-p.z/100-(k.effect==='wave'?0:38);
       if(!this.launches.has(p.id)){const caster=s.actors.find(a=>a.id===p.owner);if(caster&&caster.action.startsWith('skill')&&caster.skill>=0){const origin=this.source(caster,k);this.launches.set(p.id,{tick:s.tick,x:origin.x-x,y:origin.y-y});}}
       const launch=this.launches.get(p.id);if(launch){const q=Math.max(0,1-(s.tick-launch.tick)/8),fade=q*q*(3-2*q);x+=launch.x*fade;y+=launch.y*fade;}
-      const dir=Math.sign(p.dx)||1,color=C[k.element]||C.physical,size=k.size||35;
+      const dir=Math.sign(p.dx)||(p.toX<p.fromX?-1:1),color=C[k.element]||C.physical,size=k.size||35;
+      if(k.kind==='banana-prank'&&this.atlas(k.kind,2,x,y,105,100,1,dir<0))continue;
       if(this.atlas(k.kind,(p as any).visualFrame??2+Math.floor(s.tick/5)%2,x,y,k.effect==='wave'?260:k.kind==='serious-punch'?250:Math.max(90,size*(k.orb?2.4:2.9)),undefined,1,dir<0))continue;
       if(['ball','power-ball'].includes(k.effect)){if(k.effect==='power-ball')this.sprite('fireball',x-dir*45,y,160,95,.9,dir<0);this.ball(x,y,size*.75,color,time);}
       else if(k.effect==='bubble'){this.g.fillStyle(C.water,.12).fillCircle(x,y,size).lineStyle(4,C.water,.9).strokeCircle(x,y,size).lineStyle(2,0xffffff,.9).beginPath().arc(x-4,y-4,size*.8,3.2,4.9).strokePath();}
@@ -247,10 +254,10 @@ export class ElementalVFX {
     if(f.mechanic==='clones')return;
     const x=f.x/100,y=f.y/100,r=f.radius,color=C[f.element]||C.physical,armed=s.tick>=f.starts;
     this.g.lineStyle(armed?3:2,color,armed?.5:.9).strokeEllipse(x,y,r*2,r*.72).fillStyle(color,armed?.09:.13).fillEllipse(x,y,r*2,r*.72);
-    if(!armed){const q=(s.tick-f.spawnedAt)/Math.max(1,f.starts-f.spawnedAt);this.g.lineStyle(4,0xffffff,.65).beginPath().arc(x,y,r*.55,-Math.PI/2,-Math.PI/2+Math.PI*2*q).strokePath();return;}
+    if(!armed){if(f.kind==='banana-prank')this.atlas(f.kind,3,x,y,r*2,90,.7,f.facing<0);const q=(s.tick-f.spawnedAt)/Math.max(1,f.starts-f.spawnedAt);this.g.lineStyle(4,0xffffff,.65).beginPath().arc(x,y,r*.55,-Math.PI/2,-Math.PI/2+Math.PI*2*q).strokePath();return;}
     if(this.hasAtlas(f.kind)){
       const age=s.tick-f.starts,remaining=f.expires-s.tick,frame=remaining<16?6+Math.floor((16-remaining)/8):f.mechanic==='eruption'?Math.min(5,3+Math.floor(age/6)):3+Math.floor(age/5)%3;
-      const width=f.mechanic==='eruption'?Math.max(150,r*2.2):r*2, height=f.mechanic==='weapon-ward'?260:f.element==='lightning'?350:f.mechanic==='eruption'?260:f.mechanic==='tornado'?r*2.4:f.effect==='bubble'?r*2:undefined;
+      const width=f.mechanic==='eruption'?Math.max(150,r*2.2):r*2, height=f.kind==='banana-prank'?90:f.mechanic==='weapon-ward'?260:f.element==='lightning'?350:f.mechanic==='eruption'?260:f.mechanic==='tornado'?r*2.4:f.effect==='bubble'?r*2:undefined;
       this.atlas(f.kind,frame,x,y,width,height,Math.min(1,remaining/12),f.facing<0);return;
     }
     if(f.mechanic==='eruption'){

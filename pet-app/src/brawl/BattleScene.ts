@@ -53,7 +53,7 @@ export class BattleScene extends Phaser.Scene {
     this.runtime.loaded();this.draw(16);
   }
   private get player(){return this.runtime.state.actors.find(a=>a.id===this.runtime.playerId)||this.runtime.state.actors[0];}
-  private get catKit(){return ['brawl-v3','brawl-v4','brawl-v5','brawl-v6','brawl-v7','brawl-v8','brawl-v9','brawl-v10','brawl-v11',VERSION].includes(this.runtime.state.version);}
+  private get catKit(){return ['brawl-v3','brawl-v4','brawl-v5','brawl-v6','brawl-v7','brawl-v8','brawl-v9','brawl-v10','brawl-v11','brawl-v12',VERSION].includes(this.runtime.state.version);}
   private get zh(){return this.runtime.locale==='zh-HK';}
   receiveEvents(events:any[],tick:number){if(tick===this.deliveredTick)return;this.deliveredTick=tick;this.feedback.events+=events.length;this.eventQueue.push(...events);if(this.eventQueue.length>256)this.eventQueue.splice(0,this.eventQueue.length-256);}
   update(_time:number,delta:number){if(!this.runtime||!this.fx)return;if(!this.runtime.paused()&&this.runtime.state.status==='playing'){this.accumulator+=Math.min(delta,250);let steps=0;while(this.accumulator>=1000/60&&steps++<15){this.runtime.step();this.accumulator-=1000/60;if(this.runtime.state.status!=='playing')break;}}else this.accumulator=0;this.draw(Math.min(delta,50));}
@@ -107,6 +107,7 @@ export class BattleScene extends Phaser.Scene {
     else if(e.type==='abilityPulse'){if(e.element==='lightning')cue='lightning';this.effect(e.effect,x,y-12,color,(e.size||90)*this.rarityScale(a),.55);this.effect('shock',x,y,color,(e.size||80)*.8,.5);}
     else if(e.type==='abilityLink'){this.effect('lightning',e.fromX,e.fromY-55,color,Math.hypot(x-e.fromX,y-e.fromY),.3,Math.atan2(y-e.fromY,x-e.fromX));}
     else if(e.type==='barrier'||e.type==='counter'){cue='guard';this.effect(e.effect||'shield',x,y-65,this.color(a),75,.45);this.label(x,y-120,e.type==='counter'?(this.zh?'反擊':'COUNTER'):`${e.damage} · SHIELD`,'#ccfaff');}
+    else if(e.type==='hugHeal'&&e.amount>0){cue='pickup';this.label(x,y-125,'+'+e.amount+' HP','#b5ffb7');this.effect('ring',x,y-60,0xffd978,70,.45);}
     else if(e.type==='catch'){cue='pickup';this.effect(e.effect,x,y-45,color,45,.35);}
     else if(e.type==='catStrike'&&a){cue='claw';const slash=this.runtime.assets.effects?.clips.slash;for(let i=0;i<(e.phase===2?2:1);i++){this.effect('slash',x,y-z-70,e.empowered?white:gold,e.phase===2?98:72,.28,a.facing);const fx=this.effects.at(-1);if(fx?.sprite&&slash)fx.sprite.setRotation((e.phase%2?-.55:.55)+(i?-.9:0));}if(e.empowered)this.effect('star',x,y-z-80,0xd9baff,65,.4);}
     else if(e.type==='warning'){cue='warning';if(a?.boss)this.label(x,y-200,'!','#ffbe92',true);}
@@ -136,7 +137,7 @@ export class BattleScene extends Phaser.Scene {
     this.consume();this.drawEffects(dt);this.drawMarks();this.drawFields();this.drawProjectiles();this.elemental?.draw(s,this.visualTime,dt,this.views);this.drawPickups();this.drawAmbient();this.arrow.setPosition((s.zone+1)*1280-110,465+Math.sin(this.visualTime*5)*8).setVisible(s.cleared&&s.zone<3&&s.mode==='campaign');const hits=s.mode==='pvp'?player.comboHits||0:s.comboHits,until=s.mode==='pvp'?player.comboUntil||0:s.comboUntil;this.comboText.setText(hits>1&&s.tick<until?`${hits} HITS\n${hits>=10?'SUPER COMBO':hits>=5?'GREAT COMBO':'COMBO'}`:'');if(s.tick-this.hudTick>=6||s.tick<this.hudTick){this.hudTick=s.tick;this.runtime.changed();}
   }
   private actorFX(a:Actor){const g=this.ground,x=a.x/100,y=a.y/100,color=this.color(a);if(a.team!==this.player.team&&a.action.startsWith('attack')&&a.actionTick<(a.windup||6)){const q=a.actionTick/(a.windup||6),alpha=.18+.12*Math.sin(this.visualTime*20);
-    const k=['brawl-v9','brawl-v10','brawl-v11',VERSION].includes(this.runtime.state.version)?a.enemyAttack:undefined,face=a.abilityFacing||a.facing;
+    const k=['brawl-v9','brawl-v10','brawl-v11','brawl-v12',VERSION].includes(this.runtime.state.version)?a.enemyAttack:undefined,face=a.abilityFacing||a.facing;
     if(k){
       const colors:Record<string,number>={fire:0xff9b31,ice:0x72e3ff,water:0x65dcec,nature:0x9bdd67,lightning:0xffdf6d,lunar:0xd2b4ff,psychic:0xfab0df,wind:0xb3f3fc,earth:0xdfb484},c=colors[k.element]||gold;
       if(k.mechanic==='flamethrower'){g.fillStyle(c,alpha).fillTriangle(x,y,x+face*k.range,y-k.depth,x+face*k.range,y+k.depth).lineStyle(3,c,.8).lineBetween(x,y,x+face*k.range,y-k.depth).lineBetween(x,y,x+face*k.range,y+k.depth);}

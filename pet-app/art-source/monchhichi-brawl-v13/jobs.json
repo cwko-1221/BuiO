@@ -1,0 +1,12 @@
+[
+  {
+    "id": "banana-prank",
+    "source": "pet-app/art-source/monchhichi-brawl-v13/effects/banana-prank/raw.png",
+    "anchor": "ground"
+  },
+  {
+    "id": "plush-hug",
+    "source": "pet-app/art-source/monchhichi-brawl-v13/effects/plush-hug/raw.png",
+    "anchor": "center"
+  }
+]

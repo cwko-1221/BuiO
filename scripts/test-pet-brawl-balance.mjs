@@ -6,7 +6,7 @@ import * as v8 from '../pet-app/lib/brawl/legacy/v8/simulation.mjs';
 import {ENEMIES as oldEnemies} from '../pet-app/lib/brawl/legacy/v7/catalog.mjs';
 
 const run=(s,n,mask=0,opponent=0)=>{const events=[];for(let i=0;i<n;i++){stepBattle(s,mask,opponent);events.push(...s.events);}return events;};
-assert.equal(VERSION,'brawl-v12');
+assert.equal(VERSION,'brawl-v13');
 for(const f of FIGHTERS)for(const [n,k] of f.skills.entries()){const old=fightersForVersion('brawl-v7').find(old=>old.id===f.id);if(old)assert.equal(k.mp,Math.ceil(old.skills[n].mp*1.25));else assert.ok(k.mp>=30&&k.mp<=60);}
 let s=createBattle({mode:'practice'}),p=s.actors[0];p.mp=1000;run(s,600);assert.equal(p.mp,3000);
 s=createBattle({mode:'practice',fighterId:'dragon-ball-goku'});p=s.actors[0];stepBattle(s,I.SKILL1);run(s,130);stepBattle(s,I.SKILL2);assert.equal(p.action,'idle');assert.ok(p.mp<6000);
@@ -30,7 +30,7 @@ for(const mode of ['miss','guard','full']){
   for(let tick=0;tick<120&&!heavy;tick++){b.x=a.x+5500;b.readOwner=a.id;b.readUntil=battle.tick+120;stepBattle(battle,I.ATTACK);heavy=battle.events.find(e=>e.type==='hit'&&e.damage>20);}
   assert.ok(heavy);assert.equal(heavy.mpGain,200,'Even an empowered heavy hit is capped at 2 MP');
 }
-console.log('✓ All 27 fighters regain a small amount of MP on basic hits; both human slots work, heavy hits cap at 2 MP, and misses, guarded hits and full MP show no reward');
+console.log('✓ All 28 fighters regain a small amount of MP on basic hits; both human slots work, heavy hits cap at 2 MP, and misses, guarded hits and full MP show no reward');
 
 s=createBattle({mode:'pvp',fighterId:'spark-hamster',opponentId:'dragon-ball-goku'});p=s.actors[0];let t=s.actors[1];t.x=p.x+28000;stepBattle(s,I.SKILL1);
 let dotDuringChannel=false;const fireLog=[];

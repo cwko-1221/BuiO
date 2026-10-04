@@ -1,0 +1,519 @@
+{
+  "version": "brawl-v13",
+  "artMode": "built-in imagegen",
+  "newFighters": [
+    "monchhichi"
+  ],
+  "castingPoses": 16,
+  "effectFrames": 16,
+  "publicFighters": 28,
+  "skills": 56,
+  "tests": {
+    "monchhichiCombatAndArchive": true,
+    "alphaGutters": true,
+    "completePublishedRoster": true,
+    "rosterOwnershipFees": true,
+    "newcomerRegression": true,
+    "elementalRegression": true,
+    "balanceRegression": true,
+    "utilityRegression": true,
+    "storyRegression": true,
+    "typecheck": true,
+    "productionBuild": true,
+    "allSkillsBrowser": {
+      "pass": true,
+      "facingSkillCasts": 112,
+      "poseSequences": 108,
+      "poseSnapshots": 324,
+      "gokuTimelineSnapshots": 34,
+      "errors": [],
+      "failed": [],
+      "performance": [
+        {
+          "id": "spark-hamster",
+          "fps": 59.99011927447268,
+          "ticks": 100,
+          "casts": 1,
+          "hits": 5,
+          "peak": 5
+        },
+        {
+          "id": "snowfeather-penguin",
+          "fps": 60,
+          "ticks": 98,
+          "casts": 1,
+          "hits": 1,
+          "peak": 10
+        },
+        {
+          "id": "thunderhorn-goat",
+          "fps": 60,
+          "ticks": 95,
+          "casts": 1,
+          "hits": 3,
+          "peak": 6
+        },
+        {
+          "id": "coral-seal",
+          "fps": 60.025725310847754,
+          "ticks": 99,
+          "casts": 1,
+          "hits": 1,
+          "peak": 2
+        },
+        {
+          "id": "dragon-ball-goku",
+          "fps": 59.99714299319147,
+          "ticks": 147,
+          "casts": 1,
+          "hits": 6,
+          "peak": 2
+        },
+        {
+          "id": "naruto-uzumaki",
+          "fps": 59.99571459181462,
+          "ticks": 101,
+          "casts": 1,
+          "hits": 4,
+          "peak": 4
+        }
+      ]
+    },
+    "realTouchUtility": {
+      "pass": true,
+      "checks": [
+        "Owned Luffy selected through the lobby; both new sprites load and animate, including correctly mirrored left-facing Gatling",
+        "Anya mark, bonus hit, visible stun label, three-heart ward and remaining-charge HUD render on iPad",
+        "Real touch activates four-second Take-copter and aerial ray; held keyboard fires the remaining two; landing restores attack text and iPad controls are at least 64px",
+        "Homing football visibly turns back toward a rear target in a different depth lane and lands exactly once",
+        "Two distinct Naruto actors pursue without owner movement, have no clone labels or countdowns, expire after three seconds with smoke, and skill buttons clearly show insufficient MP",
+        "Owned Zhao Yun casts through real iPad touches: three stationary spear hits, cooldown countdown, animated moving dragon ward and two-charge HUD; the third projectile lands",
+        "Owned Kirito casts both blade colors and sixteen real sword hits through iPad touches; all action controls remain at least 64px",
+        "Owned Monchhichi throws an animated peel through an iPad touch; it lands with a waiting HUD, then trips a crossing foe once and consumes the trap",
+        "The plush embrace renders hold and finishing-heart sprites, shows +12 HP only after its second hit and grants no healing when it misses",
+        {
+          "fighter": "dynasty-warriors-zhao-yun",
+          "fps": 60.00247432883822,
+          "casts": 1,
+          "ticks": 109
+        },
+        {
+          "fighter": "sword-art-online-kirito",
+          "fps": 59.99876291210488,
+          "casts": 1,
+          "ticks": 111
+        },
+        {
+          "fighter": "monchhichi",
+          "fps": 60,
+          "casts": 1,
+          "ticks": 111
+        },
+        "All three newcomer ultimates also run at normal simulation speed with real touches and at least 25fps"
+      ],
+      "errors": [],
+      "failures": []
+    },
+    "publicRosterAndPaidDuel": {
+      "pass": true,
+      "guest": "monchhichi",
+      "checks": [
+        "28 open fighters, including all 16 hidden guests, owned/all/locked filters and 60px iPad selection buttons",
+        "Unowned fighters remain previews; all five modes and direct API requests reject them",
+        "All 28 open battle atlases and all 56 ability effects render on the iPad viewport without a missing frame",
+        "Zhao Yun and Monchhichi synchronize in a real two-student duel; refusal is free and acceptance charges exactly 500 each",
+        "No page errors, console errors or failed sprite requests"
+      ],
+      "errors": [],
+      "failed": []
+    }
+  },
+  "assets": [
+    {
+      "url": "/pet/assets/art/brawl/monchhichi-casts-02cc660f6343.webp",
+      "sha256": "02cc660f6343f8235f59f71d723512030265c31e38f5cb84d81cf89f33ff6c1a"
+    },
+    {
+      "url": "/pet/assets/art/brawl/skill-banana-prank-d6c79553fc02.webp",
+      "sha256": "d6c79553fc028682ac970b485c068f6fd7f88e3d291fa9acf73718a41a735636"
+    },
+    {
+      "url": "/pet/assets/art/brawl/skill-plush-hug-1420360dd314.webp",
+      "sha256": "1420360dd314a23ee2ac33e9ee293c7b6ecf16ad224132264a049d7409fdf9ca"
+    }
+  ],
+  "sourceSheets": [
+    {
+      "kind": "banana-prank",
+      "sha256": "7e437208d07b9b8a4b80776c64c4c8421eb8d7833abb58469796b473d3f40e32"
+    },
+    {
+      "kind": "plush-hug",
+      "sha256": "08c10424d142383c3ed13f089edce202f29d5de141283ba97977dd31bd4b5223"
+    }
+  ],
+  "normalization": {
+    "character": [
+      {
+        "id": "monchhichi",
+        "name": "monchhichi-casts-02cc660f6343.webp",
+        "bytes": 243720,
+        "sourceHash": "789c93ac922da4342ed476171f5644c121f7f635a6ff6843cd7ee0b5096d0d02",
+        "scale": 0.44483985765124556,
+        "desired": 0.44483985765124556,
+        "frames": [
+          {
+            "frame": 0,
+            "scale": 0.44483985765124556,
+            "left": 87,
+            "top": 105,
+            "width": 71,
+            "height": 125,
+            "emitter": {
+              "x": 6.73,
+              "y": -36.43
+            }
+          },
+          {
+            "frame": 1,
+            "scale": 0.44483985765124556,
+            "left": 86,
+            "top": 105,
+            "width": 75,
+            "height": 125,
+            "emitter": {
+              "x": 7.61,
+              "y": -63.06
+            }
+          },
+          {
+            "frame": 2,
+            "scale": 0.44483985765124556,
+            "left": 68,
+            "top": 106,
+            "width": 92,
+            "height": 124,
+            "emitter": {
+              "x": -46.94,
+              "y": -48.87
+            }
+          },
+          {
+            "frame": 3,
+            "scale": 0.44483985765124556,
+            "left": 57,
+            "top": 105,
+            "width": 107,
+            "height": 125,
+            "emitter": {
+              "x": -44.04,
+              "y": -91.41
+            }
+          },
+          {
+            "frame": 4,
+            "scale": 0.44483985765124556,
+            "left": 82,
+            "top": 105,
+            "width": 105,
+            "height": 125,
+            "emitter": {
+              "x": 54.75,
+              "y": -70.31
+            }
+          },
+          {
+            "frame": 5,
+            "scale": 0.44483985765124556,
+            "left": 87,
+            "top": 104,
+            "width": 90,
+            "height": 126,
+            "emitter": {
+              "x": 47.42,
+              "y": -99.49
+            }
+          },
+          {
+            "frame": 6,
+            "scale": 0.44483985765124556,
+            "left": 86,
+            "top": 105,
+            "width": 74,
+            "height": 125,
+            "emitter": {
+              "x": 16.81,
+              "y": -32.46
+            }
+          },
+          {
+            "frame": 7,
+            "scale": 0.44483985765124556,
+            "left": 87,
+            "top": 105,
+            "width": 70,
+            "height": 125,
+            "emitter": {
+              "x": 14.3,
+              "y": -28.12
+            }
+          },
+          {
+            "frame": 8,
+            "scale": 0.44483985765124556,
+            "left": 86,
+            "top": 105,
+            "width": 71,
+            "height": 125,
+            "emitter": {
+              "x": 17.27,
+              "y": -35.16
+            }
+          },
+          {
+            "frame": 9,
+            "scale": 0.44483985765124556,
+            "left": 86,
+            "top": 105,
+            "width": 76,
+            "height": 125,
+            "emitter": {
+              "x": 5.71,
+              "y": -59.27
+            }
+          },
+          {
+            "frame": 10,
+            "scale": 0.44483985765124556,
+            "left": 86,
+            "top": 105,
+            "width": 93,
+            "height": 125,
+            "emitter": {
+              "x": 48.47,
+              "y": -67.5
+            }
+          },
+          {
+            "frame": 11,
+            "scale": 0.44483985765124556,
+            "left": 87,
+            "top": 113,
+            "width": 89,
+            "height": 117,
+            "emitter": {
+              "x": 47.57,
+              "y": -68.44
+            }
+          },
+          {
+            "frame": 12,
+            "scale": 0.44483985765124556,
+            "left": 82,
+            "top": 103,
+            "width": 81,
+            "height": 127,
+            "emitter": {
+              "x": 21.57,
+              "y": -51.35
+            }
+          },
+          {
+            "frame": 13,
+            "scale": 0.44483985765124556,
+            "left": 83,
+            "top": 107,
+            "width": 85,
+            "height": 123,
+            "emitter": {
+              "x": 20.27,
+              "y": -44.2
+            }
+          },
+          {
+            "frame": 14,
+            "scale": 0.44483985765124556,
+            "left": 85,
+            "top": 104,
+            "width": 97,
+            "height": 126,
+            "emitter": {
+              "x": 49.39,
+              "y": -68.22
+            }
+          },
+          {
+            "frame": 15,
+            "scale": 0.44483985765124556,
+            "left": 84,
+            "top": 105,
+            "width": 76,
+            "height": 125,
+            "emitter": {
+              "x": 18.92,
+              "y": -37.97
+            }
+          }
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "banana-prank",
+        "file": "skill-banana-prank-d6c79553fc02.webp",
+        "source": "pet-app/art-source/monchhichi-brawl-v13/effects/banana-prank/raw.png",
+        "sourceHash": "7e437208d07b9b8a4b80776c64c4c8421eb8d7833abb58469796b473d3f40e32",
+        "bytes": 489406,
+        "scale": 0.5803108808290155,
+        "anchor": "ground",
+        "poses": [
+          {
+            "x": 48,
+            "y": 48,
+            "width": 375,
+            "height": 371
+          },
+          {
+            "x": 498,
+            "y": 89,
+            "width": 361,
+            "height": 315
+          },
+          {
+            "x": 916,
+            "y": 71,
+            "width": 409,
+            "height": 339
+          },
+          {
+            "x": 1364,
+            "y": 172,
+            "width": 374,
+            "height": 224
+          },
+          {
+            "x": 54,
+            "y": 559,
+            "width": 384,
+            "height": 252
+          },
+          {
+            "x": 487,
+            "y": 484,
+            "width": 399,
+            "height": 328
+          },
+          {
+            "x": 898,
+            "y": 456,
+            "width": 468,
+            "height": 386
+          },
+          {
+            "x": 1414,
+            "y": 534,
+            "width": 278,
+            "height": 250
+          }
+        ]
+      },
+      {
+        "id": "plush-hug",
+        "file": "skill-plush-hug-1420360dd314.webp",
+        "source": "pet-app/art-source/monchhichi-brawl-v13/effects/plush-hug/raw.png",
+        "sourceHash": "08c10424d142383c3ed13f089edce202f29d5de141283ba97977dd31bd4b5223",
+        "bytes": 505818,
+        "scale": 0.5173210161662818,
+        "anchor": "center",
+        "poses": [
+          {
+            "x": 80,
+            "y": 103,
+            "width": 289,
+            "height": 274
+          },
+          {
+            "x": 466,
+            "y": 68,
+            "width": 402,
+            "height": 334
+          },
+          {
+            "x": 906,
+            "y": 63,
+            "width": 419,
+            "height": 329
+          },
+          {
+            "x": 1355,
+            "y": 47,
+            "width": 402,
+            "height": 356
+          },
+          {
+            "x": 34,
+            "y": 480,
+            "width": 389,
+            "height": 343
+          },
+          {
+            "x": 457,
+            "y": 453,
+            "width": 412,
+            "height": 381
+          },
+          {
+            "x": 887,
+            "y": 435,
+            "width": 444,
+            "height": 433
+          },
+          {
+            "x": 1350,
+            "y": 509,
+            "width": 409,
+            "height": 317
+          }
+        ]
+      }
+    ]
+  },
+  "limitation": "Chrome 1024×768 touch emulation; physical iPad Safari not measured.",
+  "productionDelivery": {
+    "pass": true,
+    "version": "brawl-v13",
+    "fighters": 28,
+    "verified": [
+      {
+        "url": "/pet/assets/art/brawl/monchhichi-casts-02cc660f6343.webp",
+        "bytes": 243720,
+        "sha256": "02cc660f6343f8235f59f71d723512030265c31e38f5cb84d81cf89f33ff6c1a"
+      },
+      {
+        "url": "/pet/assets/art/brawl/skill-banana-prank-d6c79553fc02.webp",
+        "bytes": 489406,
+        "sha256": "d6c79553fc028682ac970b485c068f6fd7f88e3d291fa9acf73718a41a735636"
+      },
+      {
+        "url": "/pet/assets/art/brawl/skill-plush-hug-1420360dd314.webp",
+        "bytes": 505818,
+        "sha256": "1420360dd314a23ee2ac33e9ee293c7b6ecf16ad224132264a049d7409fdf9ca"
+      },
+      {
+        "url": "/pet/assets/catalog-rBWxQeIt.js",
+        "bytes": 342402,
+        "sha256": "77873291df0213aa6b5c216b9ef3d4b1cc2a66f5899637066b7581641dd9ba0d"
+      },
+      {
+        "url": "/pet/assets/controller-BKvaFCbV.js",
+        "bytes": 587421,
+        "sha256": "1e8b3d52c1943696a9364f77543956fa42f56aa6363301517a457dcec153bafd"
+      },
+      {
+        "url": "/pet/assets/index-BpCo7qNU.js",
+        "bytes": 198707,
+        "sha256": "5c57e8d0e2a341b2e34048ea248822ca04286e0b648f533d1b164eb685c1f747"
+      }
+    ]
+  }
+}
