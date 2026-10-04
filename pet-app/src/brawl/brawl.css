@@ -77,3 +77,23 @@ html.brawl-input-locked * {
 }
 @media(max-width:700px){.brawl-battle .brawl-buttons .brawl-skill{width:114px;height:80px}.brawl-skill-name{font-size:13px;top:25px;height:30px}.brawl-skill-element,.brawl-skill-cost{font-size:10px}.brawl-battle .brawl-skill .brawl-skill-status{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.brawl-battle .brawl-buttons button{transition:none}}
+
+/* Short landscape screens keep the fighting lane visible and all touch targets >=64px. */
+@media(orientation:landscape) and (max-height:500px){
+ .brawl-controls{left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(6px,env(safe-area-inset-bottom))}
+ .brawl-buttons{gap:8px}.brawl-basic-buttons,.brawl-skill-buttons{gap:8px}
+ .brawl-battle .brawl-buttons button,.brawl-battle .brawl-buttons button.brawl-attack{width:64px;height:64px;font-size:13px}
+ .brawl-battle .brawl-buttons .brawl-skill{width:124px;height:64px;border-radius:15px}
+ .brawl-battle .brawl-stick{width:96px;height:96px}.brawl-stick-knob{width:48px;height:48px}
+ .brawl-skill-name{top:21px;height:20px;font-size:13px}
+ .brawl-skill-element,.brawl-skill-cost{top:4px;font-size:10px;line-height:12px}
+ .brawl-battle .brawl-skill .brawl-skill-status{bottom:7px;font-size:10px;line-height:12px}
+ .brawl-battle .brawl-skill .brawl-skill-key{bottom:7px;width:16px;height:16px;font-size:9px}
+ .brawl-hud{inset:8px 12px auto;gap:8px}.brawl-player-hud{min-width:145px;padding:7px 10px}
+ .brawl-player-hud>b{font-size:12px;margin-bottom:4px}.brawl-meter{height:12px;margin-top:4px}.brawl-meter span{line-height:12px;font-size:9px}
+ .brawl-objective{min-width:160px;padding:7px 12px}.brawl-objective>b{font-size:12px}.brawl-objective small{font-size:10px}
+ .brawl-toolbar{gap:8px}.brawl-pause{width:64px;height:64px}
+ .brawl-unlimited{top:90px;left:12px;min-height:64px;font-size:12px}
+ .brawl-hint{top:92px;font-size:10px;padding:5px 10px;max-width:55%}
+ .brawl-keyboard-note{display:none}
+}

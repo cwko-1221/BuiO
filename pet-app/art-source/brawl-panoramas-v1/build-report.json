@@ -1,0 +1,286 @@
+{
+  "version": "panoramas-v1",
+  "generationMode": "built-in image_gen",
+  "scenes": [
+    {
+      "chapter": 1,
+      "id": "sunny-training",
+      "url": "/pet/assets/art/brawl/panorama-sunny-training-542108cf0ebe.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 503666,
+      "floorLine": 0.53,
+      "sourceSha256": "dc2e674302a460a4703af3717c49cc2b8eba5bdcd5de066cdadee782ad035a3d"
+    },
+    {
+      "chapter": 2,
+      "id": "windbell-forest",
+      "url": "/pet/assets/art/brawl/panorama-windbell-forest-c48548126868.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 637578,
+      "floorLine": 0.53,
+      "sourceSha256": "c04c75df349a491285a9f288058246a40154a06478695f058e28420977e0ecf6"
+    },
+    {
+      "chapter": 3,
+      "id": "starcrystal-cave",
+      "url": "/pet/assets/art/brawl/panorama-starcrystal-cave-43c454a80007.webp",
+      "native": {
+        "width": 2170,
+        "height": 725
+      },
+      "width": 2048,
+      "height": 684,
+      "bytes": 526136,
+      "floorLine": 0.53,
+      "sourceSha256": "356bb3d3416a2c7f46d882777e5e51979d8670b6fd6ea61bc7a84446408b0142"
+    },
+    {
+      "chapter": 4,
+      "id": "starlamp-harbor",
+      "url": "/pet/assets/art/brawl/panorama-starlamp-harbor-155097755bf9.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 524358,
+      "floorLine": 0.53,
+      "sourceSha256": "dbd9d18ecdd3ab446ca9b77821fe39e3dfb6a62a3dd5b4d3c5af05214024a4f6"
+    },
+    {
+      "chapter": 5,
+      "id": "rainleaf-marsh",
+      "url": "/pet/assets/art/brawl/panorama-rainleaf-marsh-20eedf5350fe.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 615700,
+      "floorLine": 0.53,
+      "sourceSha256": "d57515e6bb0e5fad12cbc38e9996b166a5e04abafb9582ec881a16274d91b93c"
+    },
+    {
+      "chapter": 6,
+      "id": "sunken-tide-city",
+      "url": "/pet/assets/art/brawl/panorama-sunken-tide-city-b4bc1dbb6ee1.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 576986,
+      "floorLine": 0.53,
+      "sourceSha256": "0b744ce33860cb35aa41440c126c084961231347513dffb482b3a48a17e01811"
+    },
+    {
+      "chapter": 7,
+      "id": "coral-archive",
+      "url": "/pet/assets/art/brawl/panorama-coral-archive-3ae0267f0b01.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 586386,
+      "floorLine": 0.53,
+      "sourceSha256": "c7edf985958cfbf21f3244eb2009d27f30787be1c88e5661ee25e18563762df5"
+    },
+    {
+      "chapter": 8,
+      "id": "storm-beacon",
+      "url": "/pet/assets/art/brawl/panorama-storm-beacon-0e07cd18e48e.webp",
+      "native": {
+        "width": 2171,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 582904,
+      "floorLine": 0.53,
+      "sourceSha256": "bcffd7a255c7fc3522180accff558a0da3b9b8abe8eca8ef42dbef6f7e7cfbf0"
+    },
+    {
+      "chapter": 9,
+      "id": "ember-forge",
+      "url": "/pet/assets/art/brawl/panorama-ember-forge-8668d6ab4e9a.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 569986,
+      "floorLine": 0.53,
+      "sourceSha256": "1b5196d3509561b543e78a3ebee29992f5fa3cb4d391c59a378123f7dc277c40"
+    },
+    {
+      "chapter": 10,
+      "id": "ashen-clocktower",
+      "url": "/pet/assets/art/brawl/panorama-ashen-clocktower-17a53a792811.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 595272,
+      "floorLine": 0.53,
+      "sourceSha256": "f19313bb779ea1922dcd9d05bea5777c24d77d518aaa82a835a283450f41c2df"
+    },
+    {
+      "chapter": 11,
+      "id": "frost-mirror-field",
+      "url": "/pet/assets/art/brawl/panorama-frost-mirror-field-6c9142c89642.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 585546,
+      "floorLine": 0.53,
+      "sourceSha256": "0e8e51e98aae04cf2b5b7f7856a98bdffdd9ec16cd4419c2341f38b671aac442"
+    },
+    {
+      "chapter": 12,
+      "id": "winter-rail",
+      "url": "/pet/assets/art/brawl/panorama-winter-rail-e875e932fd1d.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 597520,
+      "floorLine": 0.53,
+      "sourceSha256": "84772faed7492d8970afc313c37d8f7224434c2fe98df09c3160844a738bf541"
+    },
+    {
+      "chapter": 13,
+      "id": "thunder-ridge",
+      "url": "/pet/assets/art/brawl/panorama-thunder-ridge-16680f894ac6.webp",
+      "native": {
+        "width": 2170,
+        "height": 725
+      },
+      "width": 2048,
+      "height": 684,
+      "bytes": 582346,
+      "floorLine": 0.53,
+      "sourceSha256": "70f686a2d5f47669b1eed85023bb9170f2e6438920a037c033de6471ec720080"
+    },
+    {
+      "chapter": 14,
+      "id": "hanging-garden",
+      "url": "/pet/assets/art/brawl/panorama-hanging-garden-9f2e19862293.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 585894,
+      "floorLine": 0.53,
+      "sourceSha256": "f59aae25d8d8000025aa27a54679014add522ca780a29185794694b5d3338786"
+    },
+    {
+      "chapter": 15,
+      "id": "hourglass-labyrinth",
+      "url": "/pet/assets/art/brawl/panorama-hourglass-labyrinth-e8cc0941396e.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 475740,
+      "floorLine": 0.53,
+      "sourceSha256": "d46c0850d3e370841dd689151f89ada97d7148dc9d882961f6fc3c31921e2804"
+    },
+    {
+      "chapter": 16,
+      "id": "nameless-theater",
+      "url": "/pet/assets/art/brawl/panorama-nameless-theater-5aa86e97ec8f.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 498972,
+      "floorLine": 0.53,
+      "sourceSha256": "3ef64266545198f8b6cc56b8dde8f2c3c90c557dab2f843a887ba40462af53e8"
+    },
+    {
+      "chapter": 17,
+      "id": "moon-gate-fortress",
+      "url": "/pet/assets/art/brawl/panorama-moon-gate-fortress-c8428070c44b.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 553820,
+      "floorLine": 0.53,
+      "sourceSha256": "06c2cc102493dcb6d4d30a42ebf8db2618aa827cf28b2be61bad56be46f0c171"
+    },
+    {
+      "chapter": 18,
+      "id": "echo-battlefield",
+      "url": "/pet/assets/art/brawl/panorama-echo-battlefield-b46cfc77fc3b.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 565506,
+      "floorLine": 0.53,
+      "sourceSha256": "8b28935360c261c937bef63e2cc5164f13824c507bf1adb3d0b6732053b046f1"
+    },
+    {
+      "chapter": 19,
+      "id": "starbridge-duel",
+      "url": "/pet/assets/art/brawl/panorama-starbridge-duel-012333a22bf1.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 588284,
+      "floorLine": 0.53,
+      "sourceSha256": "67ba41c19d991d20dffd6351cf9b38afc95d3cc29e50bb1095ae7f79c0dd6b16"
+    },
+    {
+      "chapter": 20,
+      "id": "dawn-star-court",
+      "url": "/pet/assets/art/brawl/panorama-dawn-star-court-7b644ec6ff9a.webp",
+      "native": {
+        "width": 2172,
+        "height": 724
+      },
+      "width": 2048,
+      "height": 683,
+      "bytes": 579130,
+      "floorLine": 0.53,
+      "sourceSha256": "b087c0a53f5ed13d6802a6bf32800a2539ff67aa7e6f1f95046c35dc307485ce"
+    }
+  ]
+}

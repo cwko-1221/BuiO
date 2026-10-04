@@ -6,12 +6,15 @@ import type {BrawlAssets} from './types';
 import {ElementalVFX,usesDedicatedSkillFx} from './ElementalVFX';
 import {skillPose,flightPose,actorHeight} from './SkillPose';
 import {audio} from '../audio';
+import {battleViewportWidth,battleCameraScroll,panoramaPlacement} from './panorama-layout.mjs';
 interface SceneData {state:BattleState;playerId?:number;assets:BrawlAssets;locale:string;paused:()=>boolean;step:(mask?:number)=>void;loaded:()=>void;failed:()=>void;changed:()=>void}
 interface Effect {kind:string;x:number;y:number;age:number;life:number;color:number;size:number;angle:number;vx:number;vy:number;gravity:number;sprite?:Phaser.GameObjects.Image}
 interface View {sprite:Phaser.GameObjects.Image;shadow:Phaser.GameObjects.Ellipse;bar:Phaser.GameObjects.Graphics;status:Phaser.GameObjects.Text;frozen?:boolean;trailTick:number;x:number;y:number;z:number}
 const gold=0xffd36a,white=0xfff7dc,blue=0x74e9ff,red=0xff7259,earth=0xdec398;
 export class BattleScene extends Phaser.Scene {
   private elemental?:ElementalVFX;
+  private background?:Phaser.GameObjects.Image;private viewportWidth=1280;private resizing=false;
+  private readonly onViewportResize=()=>this.resizeViewport();
   private runtime!:SceneData;private accumulator=0;private views=new Map<number,View>();
   private fx!:Phaser.GameObjects.Graphics;private ground!:Phaser.GameObjects.Graphics;private ambient!:Phaser.GameObjects.Graphics;
   private arrow!:Phaser.GameObjects.Text;private comboText!:Phaser.GameObjects.Text;private banner!:Phaser.GameObjects.Container;
@@ -20,37 +23,42 @@ export class BattleScene extends Phaser.Scene {
   feedback={events:0,hits:0,casts:0,particles:0,cameraDistance:0};
   constructor(){super('Brawl');}
   private readonly onLoadError=()=>{this.loadFailed=true;};
-  init(data:SceneData){this.runtime=data;this.accumulator=0;this.views.clear();this.clones.clear();this.bolts.clear();this.effects=[];this.eventQueue=[];this.ownedTextures=[];this.lastZone=-1;this.loadFailed=false;this.hudTick=-1;this.victoryAt=-1;this.visualTime=0;this.deliveredTick=-1;this.lookAhead=80;this.feedback={events:0,hits:0,casts:0,particles:0,cameraDistance:0};this.reduced=localStorage.getItem('pet-reduced-motion')==='1'||matchMedia('(prefers-reduced-motion: reduce)').matches;}
+  init(data:SceneData){this.runtime=data;this.background=undefined;this.viewportWidth=1280;this.resizing=false;this.accumulator=0;this.views.clear();this.clones.clear();this.bolts.clear();this.effects=[];this.eventQueue=[];this.ownedTextures=[];this.lastZone=-1;this.loadFailed=false;this.hudTick=-1;this.victoryAt=-1;this.visualTime=0;this.deliveredTick=-1;this.lookAhead=80;this.feedback={events:0,hits:0,casts:0,particles:0,cameraDistance:0};this.reduced=localStorage.getItem('pet-reduced-motion')==='1'||matchMedia('(prefers-reduced-motion: reduce)').matches;}
   preload(){const {state,assets}=this.runtime;const ids=[state.fighterId,...(['duel','pvp'].includes(state.mode)?[state.opponentId]:[])];
     for(const id of new Set(ids))assets.fighters[id].pages.forEach((url,page)=>{const key=`brawl-${id}-${page}`;if(!this.textures.exists(key)){const layout=assets.fighters[id].pageLayouts?.[page];this.load.spritesheet(key,url,{frameWidth:layout?.frameWidth||assets.fighters[id].frameWidth||256,frameHeight:layout?.frameHeight||assets.fighters[id].frameHeight||256});this.ownedTextures.push(key);}});
     if((['practice','tutorial'].includes(state.mode)||state.mode==='campaign'&&stageById(state.stageId)!.enemies.concat(stageById(state.stageId)!.boss).some(k=>!assets.enemySprites?.[k]))&&!this.textures.exists('brawl-enemies')){this.load.spritesheet('brawl-enemies',assets.enemies.url,{frameWidth:256,frameHeight:256});this.ownedTextures.push('brawl-enemies');}
     const stage=stageById(state.stageId)!;
     for(const kind of new Set(state.mode==='campaign'?[...stage.enemies,stage.boss]:[])){const sheet=assets.enemySprites?.[kind];if(sheet){const key=this.enemyTextureKey(sheet.url);if(!this.textures.exists(key)&&!this.ownedTextures.includes(key)){this.load.spritesheet(key,sheet.url,{frameWidth:256,frameHeight:256});this.ownedTextures.push(key);}}}
-    const areas=assets.areas?.[state.stageId];if(areas){for(const [zone,url] of areas.slice(0,state.mode==='campaign'?4:1).entries()){const key=`brawl-bg-${state.stageId}-${zone}`;if(!this.textures.exists(key)){this.load.image(key,url);this.ownedTextures.push(key);}}}else{const key=`brawl-bg-${state.stageId}`;if(!this.textures.exists(key)){this.load.image(key,assets.worlds?.[state.stageId]||assets.backgrounds[state.stageId]);this.ownedTextures.push(key);}}
+    const panorama=assets.panoramas?.[state.stageId],key=`brawl-bg-${state.stageId}`;if(!this.textures.exists(key)){this.load.image(key,panorama?.url||assets.worlds?.[state.stageId]||assets.backgrounds[state.stageId]);this.ownedTextures.push(key);}
     if(assets.effects&&!this.textures.exists('brawl-vfx')){this.load.spritesheet('brawl-vfx',assets.effects.url,{frameWidth:assets.effects.frameSize,frameHeight:assets.effects.frameSize});this.ownedTextures.push('brawl-vfx');}
     if(assets.elementalFx&&!this.textures.exists('brawl-elemental')){this.load.spritesheet('brawl-elemental',assets.elementalFx.url,{frameWidth:assets.elementalFx.frameSize,frameHeight:assets.elementalFx.frameSize});this.ownedTextures.push('brawl-elemental');}
     for(const kind of new Set(ids.flatMap(id=>(fightersForVersion(state.version).find(f=>f.id===id)?.skills||[]).map(k=>k.kind)))){const fx=assets.skillFx?.[kind];if(!fx||!usesDedicatedSkillFx(kind))continue;const key='brawl-skill-'+kind;if(!this.textures.exists(key)){this.load.spritesheet(key,fx.url,{frameWidth:fx.frameWidth,frameHeight:fx.frameHeight});this.ownedTextures.push(key);}}
     this.load.on('loaderror',this.onLoadError);
   }
-  create(){this.load.off('loaderror',this.onLoadError);this.events.once('shutdown',()=>{this.elemental?.destroy();this.elemental=undefined;this.load.off('loaderror',this.onLoadError);this.effects=[];this.eventQueue=[];this.views.clear();this.clones.clear();for(const key of this.ownedTextures)if(this.textures.exists(key))this.textures.remove(key);});if(this.loadFailed){this.runtime.failed();return;}
-    const {state}=this.runtime,width=state.mode==='campaign'?5120:1280;
-    const areaMode=!!this.runtime.assets.areas?.[state.stageId],areaCount=areaMode&&state.mode==='campaign'?4:1;
-    for(let zone=0;zone<areaCount;zone++){
-      const key=areaMode?`brawl-bg-${state.stageId}-${zone}`:`brawl-bg-${state.stageId}`,texture=this.textures.get(key),source=texture.getSourceImage(),w=areaMode?1280:width,cx=areaMode?zone*1280+640:width/2;
-      const bands=state.stageId==='windbell-forest'?[.60,.78]:state.stageId==='starcrystal-cave'?[.51,.80]:stageById(state.stageId)!.chapter>3?[.60,.82]:[.56,.80],top=Math.round(source.height*bands[0]),bottom=Math.round(source.height*bands[1]);
-      texture.add('sky',0,0,0,source.width,top);texture.add('floor',0,0,top,source.width,bottom-top);
-      texture.add('front',0,0,bottom,source.width,source.height-bottom);
-      this.add.image(cx,172.5,key,'sky').setDisplaySize(w,345).setDepth(0);
-      this.add.image(cx,455,key,'floor').setDisplaySize(w,220).setDepth(0);
-      this.add.image(cx,642.5,key,'front').setDisplaySize(w,155).setDepth(650);
-    }
-    this.cameras.main.setBounds(0,0,width,720);this.cameras.main.scrollX=Phaser.Math.Clamp(state.actors[0].x/100-520,0,width-1280);
+  create(){this.load.off('loaderror',this.onLoadError);this.events.once('shutdown',()=>{this.scale.off(Phaser.Scale.Events.RESIZE,this.onViewportResize);this.background=undefined;this.scale.setGameSize(1280,720);this.elemental?.destroy();this.elemental=undefined;this.load.off('loaderror',this.onLoadError);this.effects=[];this.eventQueue=[];this.views.clear();this.clones.clear();for(const key of this.ownedTextures)if(this.textures.exists(key))this.textures.remove(key);});if(this.loadFailed){this.runtime.failed();return;}
+    const {state}=this.runtime;
+    this.background=this.add.image(0,0,`brawl-bg-${state.stageId}`).setOrigin(0).setScrollFactor(0).setDepth(0);
+    this.resizeViewport();this.scale.on(Phaser.Scale.Events.RESIZE,this.onViewportResize);
     this.ambient=this.add.graphics().setDepth(2);this.ground=this.add.graphics().setDepth(330);this.fx=this.add.graphics().setDepth(9999);this.elemental=new ElementalVFX(this,this.runtime.assets,this.reduced);
     this.arrow=this.add.text(1150,400,'GO  ››',{fontFamily:'sans-serif',fontSize:'32px',fontStyle:'bold',color:'#fff1b7',stroke:'#3c4f55',strokeThickness:6}).setDepth(9998).setOrigin(.5);
     this.comboText=this.add.text(1230,150,'',{fontFamily:'sans-serif',fontSize:'30px',fontStyle:'bold',color:'#ffe49b',stroke:'#383047',strokeThickness:5,align:'right'}).setOrigin(1,0).setScrollFactor(0).setDepth(10001);
     this.banner=this.add.container(640,135).setScrollFactor(0).setDepth(10002);
     this.showBanner(state.mode==='campaign'?chapterByStage(state.stageId)!.sections[state.zone].title[this.zh?'zh-HK':'en-US']:stageById(state.stageId)!.name[this.zh?'zh-HK':'en-US'],state.mode==='campaign'?`${state.zone+1} / 4 · ADVENTURE`:'PET BRAWL');
-    this.runtime.loaded();this.draw(16);
+    this.comboText.setX(this.viewportWidth-50);this.banner.setX(this.viewportWidth/2);this.runtime.loaded();this.draw(16);
+  }
+  private resizeViewport(){
+    if(this.resizing||!this.background)return;this.resizing=true;
+    try{const parent=document.getElementById('game-root')?.getBoundingClientRect(),width=battleViewportWidth(parent?.width||1280,parent?.height||720),world=this.runtime.state.mode==='campaign'?5120:1280;
+      this.viewportWidth=width;if(this.scale.gameSize.width!==width||this.scale.gameSize.height!==720)this.scale.setGameSize(width,720);
+      const camera=this.cameras.main;camera.setSize(width,720).setBounds(Math.min(0,(world-width)/2),0,Math.max(world,width),720);
+      camera.scrollX=battleCameraScroll(this.player.x/100,width,world,this.lookAhead);camera.scrollY=0;
+      this.comboText?.setX(width-50);this.banner?.setX(width/2);this.positionBackground();
+    }finally{this.resizing=false;}
+  }
+  private positionBackground(){
+    if(!this.background)return;const source=this.background.texture.getSourceImage(),state=this.runtime.state;
+    const layout=panoramaPlacement(source.width,source.height,this.viewportWidth,this.cameras.main.scrollX,state.mode==='campaign'?5120:1280,this.runtime.assets.panoramas?.[state.stageId]?.floorLine);
+    this.background.setScale(layout.scale).setPosition(layout.x,layout.y);
   }
   private get player(){return this.runtime.state.actors.find(a=>a.id===this.runtime.playerId)||this.runtime.state.actors[0];}
   private get catKit(){return ['brawl-v3','brawl-v4','brawl-v5','brawl-v6','brawl-v7','brawl-v8','brawl-v9','brawl-v10','brawl-v11','brawl-v12',VERSION].includes(this.runtime.state.version);}
@@ -93,7 +101,7 @@ export class BattleScene extends Phaser.Scene {
   private ghost(a:Actor,v:View){if(this.reduced)return;const ghost=this.add.image(v.sprite.x,v.sprite.y,v.sprite.texture.key,v.sprite.frame.name).setOrigin(v.sprite.originX,v.sprite.originY).setDisplaySize(v.sprite.displayWidth,v.sprite.displayHeight).setFlipX(v.sprite.flipX).setTint(this.color(a)).setAlpha(.28).setDepth(a.y/100-.5);this.tweens.add({targets:ghost,alpha:0,duration:210,onComplete:()=>ghost.destroy()});}
   private label(x:number,y:number,text:string,color:string,heavy=false){const label=this.add.text(x,y,text,{fontSize:heavy?'32px':'23px',fontFamily:'sans-serif',fontStyle:'bold',color,stroke:'#302e46',strokeThickness:5}).setOrigin(.5).setDepth(10000);this.tweens.add({targets:label,y:y-55,x:x+(this.feedback.hits%2?12:-12),alpha:0,duration:650,ease:'Cubic.Out',onComplete:()=>label.destroy()});}
   private showBanner(title:string,subtitle:string){this.tweens.killTweensOf(this.banner);this.banner.removeAll(true);const plate=this.add.graphics().fillStyle(0x17273b,.84).fillRoundedRect(-245,-34,490,88,14).lineStyle(2,gold,.7).strokeRoundedRect(-245,-34,490,88,14);const text=this.add.text(0,-15,title,{fontFamily:'sans-serif',fontSize:'28px',fontStyle:'bold',color:'#fff3cd'}).setOrigin(.5);const sub=this.add.text(0,27,subtitle,{fontFamily:'sans-serif',fontSize:'12px',color:'#b7d7df'}).setOrigin(.5);this.banner.add([plate,text,sub]).setAlpha(0);this.tweens.add({targets:this.banner,alpha:1,duration:180,hold:1700,yoyo:true});}
-  private consume(){const s=this.runtime.state;let audible=0,manaGained=0;for(const e of this.eventQueue.splice(0)){this.elemental?.event(e.type==='abilityLink'?{...e,kind:'horn-lightning'}:e);if(e.source===this.player.id&&e.mpGain>0)manaGained+=e.mpGain;const a=s.actors.find(a=>a.id===e.actor),source=s.actors.find(a=>a.id===e.source),x=e.x??(a?.x||0)/100,y=e.y??(a?.y||0)/100,z=e.z??(a?.z||0)/100,color=this.color(source||a),pan=(x-this.cameras.main.scrollX-640)/640;let cue='';
+  private consume(){const s=this.runtime.state;let audible=0,manaGained=0;for(const e of this.eventQueue.splice(0)){this.elemental?.event(e.type==='abilityLink'?{...e,kind:'horn-lightning'}:e);if(e.source===this.player.id&&e.mpGain>0)manaGained+=e.mpGain;const a=s.actors.find(a=>a.id===e.actor),source=s.actors.find(a=>a.id===e.source),x=e.x??(a?.x||0)/100,y=e.y??(a?.y||0)/100,z=e.z??(a?.z||0)/100,color=this.color(source||a),pan=(x-this.cameras.main.scrollX-this.viewportWidth/2)/(this.viewportWidth/2);let cue='';
     if(e.type==='hit'||e.type==='block'){this.feedback.hits++;cue=e.type==='block'?'guard':e.heavy?'heavy':'hit';this.burst(x,y-z-65,e.type==='block'?blue:color,!!e.heavy);this.label(x,y-z-120,e.type==='block'?`${e.damage} · BLOCK`:String(e.damage),e.type==='block'?'#c9f8ff':source&&source.id!==this.player.id?'#ffb4a1':'#fff1b6',!!e.heavy);const view=this.views.get(e.actor);if(view){view.sprite.setTint(e.type==='block'?blue:white).setTintMode(Phaser.TintModes.FILL);this.time.delayedCall(75,()=>{if(view.sprite.active)view.sprite.clearTint();});}if(!this.reduced)this.cameras.main.shake(e.heavy?110:55,e.heavy?.0045:.0015);}
     else if(e.type==='statusTick'){this.label(x,y-z-112,`${e.damage} · ${this.runtime.locale==='zh-HK'?'灼燒':'BURN'}`,'#ffb87c');}
     else if(e.type==='strike'&&a){cue='whoosh';this.effect('slash',x+a.facing*65,y-z-65,this.color(a),e.combo===2||e.air?115:75,.22,a.facing);}
@@ -120,7 +128,7 @@ export class BattleScene extends Phaser.Scene {
   }if(manaGained>0){const p=this.player;this.label(p.x/100-p.facing*30,p.y/100-p.z/100-175,`MP +${Number((manaGained/100).toFixed(2))}`,'#92e8ff');}}
   private draw(delta:number){const s=this.runtime.state,dt=this.runtime.paused()&&s.status==='playing'?0:delta/1000;this.visualTime+=dt;const player=this.player;
     this.banner.setVisible(!(player.flightUntil>s.tick));const width=s.mode==='campaign'?5120:1280,camera=this.cameras.main;
-    this.lookAhead=Phaser.Math.Linear(this.lookAhead,player.facing*90,1-Math.exp(-delta/280));const target=Phaser.Math.Clamp(player.x/100-580+this.lookAhead,0,width-1280),before=camera.scrollX;camera.scrollX=Phaser.Math.Linear(camera.scrollX,target,1-Math.exp(-delta/110));this.feedback.cameraDistance+=Math.abs(before-camera.scrollX);
+    this.lookAhead=Phaser.Math.Linear(this.lookAhead,player.facing*90,1-Math.exp(-delta/280));const target=battleCameraScroll(player.x/100,this.viewportWidth,width,this.lookAhead),before=camera.scrollX;camera.scrollX=Phaser.Math.Linear(camera.scrollX,target,1-Math.exp(-delta/110));this.feedback.cameraDistance+=Math.abs(before-camera.scrollX);this.positionBackground();
     if(s.zone!==this.lastZone){this.lastZone=s.zone;this.runtime.changed();}const alive=new Set(s.actors.map(a=>a.id));for(const [id,v] of this.views)if(!alive.has(id)){v.sprite.destroy();v.shadow.destroy();v.bar.destroy();v.status.destroy();this.views.delete(id);}this.ground.clear();
     for(const a of s.actors){const f=this.frame(a);let v=this.views.get(a.id);const bodySize=a.boss&&!a.dummy?246:a.dummy?190:this.runtime.assets.fighters[a.kind]?180:166,size=f.cast?.displaySize||bodySize;let x=a.x/100,y=a.y/100,z=actorHeight(a,s.tick);
       if(!v){v={sprite:this.add.image(x,y,f.key,f.frame).setOrigin(.5,.9),shadow:this.add.ellipse(x,y,bodySize*.46,16,0x152036,.28),bar:this.add.graphics(),status:this.add.text(x,y,'',{fontFamily:'sans-serif',fontSize:'18px',fontStyle:'bold',color:'#f1faff',backgroundColor:'#13253e',padding:{x:6,y:3},stroke:'#13253e',strokeThickness:2}).setOrigin(.5,1).setDepth(10005),trailTick:-1,x,y,z};this.views.set(a.id,v);}if(s.mode==='pvp'&&Math.hypot(x-v.x,y-v.y)<180){const blend=1-Math.exp(-delta/40);x=Phaser.Math.Linear(v.x,x,blend);y=Phaser.Math.Linear(v.y,y,blend);z=Phaser.Math.Linear(v.z,z,blend);}v.x=x;v.y=y;v.z=z;const overlap=a.id!==player.id&&a.y>=player.y&&a.y-player.y<4500&&Math.abs(a.x-player.x)<(a.boss?8500:5000)&&Math.abs(a.z-player.z)<5000;

@@ -280,26 +280,26 @@
     }
   },
   "backgrounds": {
-    "sunny-training": "/pet/assets/art/brawl/sunny-training-c173a8efada1.webp",
-    "windbell-forest": "/pet/assets/art/brawl/windbell-forest-3e0161c4fe86.webp",
-    "starcrystal-cave": "/pet/assets/art/brawl/starcrystal-cave-682afdef9d89.webp",
-    "starlamp-harbor": "/pet/assets/art/brawl/adventure-starlamp-harbor-card-e0c0dd3c6b2a.webp",
-    "rainleaf-marsh": "/pet/assets/art/brawl/adventure-rainleaf-marsh-card-767c44a2d3fa.webp",
-    "sunken-tide-city": "/pet/assets/art/brawl/adventure-sunken-tide-city-card-282807db92ca.webp",
-    "coral-archive": "/pet/assets/art/brawl/adventure-coral-archive-card-0cccb06049c3.webp",
-    "storm-beacon": "/pet/assets/art/brawl/adventure-storm-beacon-card-4dc37b2cfc72.webp",
-    "ember-forge": "/pet/assets/art/brawl/adventure-ember-forge-card-ddd4b63bd019.webp",
-    "ashen-clocktower": "/pet/assets/art/brawl/adventure-ashen-clocktower-card-7ad638c176e8.webp",
-    "frost-mirror-field": "/pet/assets/art/brawl/adventure-frost-mirror-field-card-8a2f970686ae.webp",
-    "winter-rail": "/pet/assets/art/brawl/adventure-winter-rail-card-13f26dba0989.webp",
-    "thunder-ridge": "/pet/assets/art/brawl/adventure-thunder-ridge-card-0a7f780da46f.webp",
-    "hanging-garden": "/pet/assets/art/brawl/adventure-hanging-garden-card-4a50b3393856.webp",
-    "hourglass-labyrinth": "/pet/assets/art/brawl/adventure-hourglass-labyrinth-card-4405d85a6ed1.webp",
-    "nameless-theater": "/pet/assets/art/brawl/adventure-nameless-theater-card-61383e501cc6.webp",
-    "moon-gate-fortress": "/pet/assets/art/brawl/adventure-moon-gate-fortress-card-6b32b56b6e61.webp",
-    "echo-battlefield": "/pet/assets/art/brawl/adventure-echo-battlefield-card-f66269879ba0.webp",
-    "starbridge-duel": "/pet/assets/art/brawl/adventure-starbridge-duel-card-83ef5a20d9f3.webp",
-    "dawn-star-court": "/pet/assets/art/brawl/adventure-dawn-star-court-card-2e0ad0022972.webp"
+    "sunny-training": "/pet/assets/art/brawl/panorama-sunny-training-card-433fcd7226f9.webp",
+    "windbell-forest": "/pet/assets/art/brawl/panorama-windbell-forest-card-a4580f89be26.webp",
+    "starcrystal-cave": "/pet/assets/art/brawl/panorama-starcrystal-cave-card-0d001f49efc5.webp",
+    "starlamp-harbor": "/pet/assets/art/brawl/panorama-starlamp-harbor-card-3a2a683ced46.webp",
+    "rainleaf-marsh": "/pet/assets/art/brawl/panorama-rainleaf-marsh-card-95184d4ed6d1.webp",
+    "sunken-tide-city": "/pet/assets/art/brawl/panorama-sunken-tide-city-card-5d906635803c.webp",
+    "coral-archive": "/pet/assets/art/brawl/panorama-coral-archive-card-9e25df9773f0.webp",
+    "storm-beacon": "/pet/assets/art/brawl/panorama-storm-beacon-card-2be5df88cbd0.webp",
+    "ember-forge": "/pet/assets/art/brawl/panorama-ember-forge-card-a9a3edaed6b6.webp",
+    "ashen-clocktower": "/pet/assets/art/brawl/panorama-ashen-clocktower-card-5157a0038c86.webp",
+    "frost-mirror-field": "/pet/assets/art/brawl/panorama-frost-mirror-field-card-6b8aaf2a17e2.webp",
+    "winter-rail": "/pet/assets/art/brawl/panorama-winter-rail-card-b7aab8bf4781.webp",
+    "thunder-ridge": "/pet/assets/art/brawl/panorama-thunder-ridge-card-2cc6c053e150.webp",
+    "hanging-garden": "/pet/assets/art/brawl/panorama-hanging-garden-card-af0765746bc9.webp",
+    "hourglass-labyrinth": "/pet/assets/art/brawl/panorama-hourglass-labyrinth-card-a1451206e63b.webp",
+    "nameless-theater": "/pet/assets/art/brawl/panorama-nameless-theater-card-f830d8001fd4.webp",
+    "moon-gate-fortress": "/pet/assets/art/brawl/panorama-moon-gate-fortress-card-5b3a02945fda.webp",
+    "echo-battlefield": "/pet/assets/art/brawl/panorama-echo-battlefield-card-aa71d9c21de9.webp",
+    "starbridge-duel": "/pet/assets/art/brawl/panorama-starbridge-duel-card-2626810d5074.webp",
+    "dawn-star-court": "/pet/assets/art/brawl/panorama-dawn-star-court-card-97008e684e1e.webp"
   },
   "worlds": {
     "sunny-training": "/pet/assets/art/brawl/world-sunny-training-2d700535659d.webp",
@@ -668,7 +668,8 @@
   "adventure": {
     "chapters": 20,
     "sections": 80,
-    "version": "adventure-v9"
+    "version": "adventure-v9",
+    "backgroundVersion": "panoramas-v1"
   },
   "skillFx": {
     "gum-pistol": {
@@ -3776,6 +3777,128 @@
           ]
         }
       }
+    }
+  },
+  "panoramas": {
+    "sunny-training": {
+      "url": "/pet/assets/art/brawl/panorama-sunny-training-542108cf0ebe.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "windbell-forest": {
+      "url": "/pet/assets/art/brawl/panorama-windbell-forest-c48548126868.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "starcrystal-cave": {
+      "url": "/pet/assets/art/brawl/panorama-starcrystal-cave-43c454a80007.webp",
+      "width": 2048,
+      "height": 684,
+      "floorLine": 0.53
+    },
+    "starlamp-harbor": {
+      "url": "/pet/assets/art/brawl/panorama-starlamp-harbor-155097755bf9.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "rainleaf-marsh": {
+      "url": "/pet/assets/art/brawl/panorama-rainleaf-marsh-20eedf5350fe.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "sunken-tide-city": {
+      "url": "/pet/assets/art/brawl/panorama-sunken-tide-city-b4bc1dbb6ee1.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "coral-archive": {
+      "url": "/pet/assets/art/brawl/panorama-coral-archive-3ae0267f0b01.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "storm-beacon": {
+      "url": "/pet/assets/art/brawl/panorama-storm-beacon-0e07cd18e48e.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "ember-forge": {
+      "url": "/pet/assets/art/brawl/panorama-ember-forge-8668d6ab4e9a.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "ashen-clocktower": {
+      "url": "/pet/assets/art/brawl/panorama-ashen-clocktower-17a53a792811.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "frost-mirror-field": {
+      "url": "/pet/assets/art/brawl/panorama-frost-mirror-field-6c9142c89642.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "winter-rail": {
+      "url": "/pet/assets/art/brawl/panorama-winter-rail-e875e932fd1d.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "thunder-ridge": {
+      "url": "/pet/assets/art/brawl/panorama-thunder-ridge-16680f894ac6.webp",
+      "width": 2048,
+      "height": 684,
+      "floorLine": 0.53
+    },
+    "hanging-garden": {
+      "url": "/pet/assets/art/brawl/panorama-hanging-garden-9f2e19862293.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "hourglass-labyrinth": {
+      "url": "/pet/assets/art/brawl/panorama-hourglass-labyrinth-e8cc0941396e.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "nameless-theater": {
+      "url": "/pet/assets/art/brawl/panorama-nameless-theater-5aa86e97ec8f.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "moon-gate-fortress": {
+      "url": "/pet/assets/art/brawl/panorama-moon-gate-fortress-c8428070c44b.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "echo-battlefield": {
+      "url": "/pet/assets/art/brawl/panorama-echo-battlefield-b46cfc77fc3b.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "starbridge-duel": {
+      "url": "/pet/assets/art/brawl/panorama-starbridge-duel-012333a22bf1.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
+    },
+    "dawn-star-court": {
+      "url": "/pet/assets/art/brawl/panorama-dawn-star-court-7b644ec6ff9a.webp",
+      "width": 2048,
+      "height": 683,
+      "floorLine": 0.53
     }
   }
 }

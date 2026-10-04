@@ -1,0 +1,768 @@
+[
+  {
+    "id": "sunny-training",
+    "chapter": 1,
+    "name": {
+      "zh-HK": "陽光訓練場",
+      "en-US": "Sunlit Training Grounds"
+    },
+    "sections": [
+      {
+        "zh-HK": "晨光廣場",
+        "en-US": "Dawn Square"
+      },
+      {
+        "zh-HK": "木偶防線",
+        "en-US": "Puppet Line"
+      },
+      {
+        "zh-HK": "星屑長廊",
+        "en-US": "Stardust Walk"
+      },
+      {
+        "zh-HK": "隊長的誓言",
+        "en-US": "The Captain’s Promise"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 1: Sunlit Training Grounds. Environment concept: A sunlit pet training village, abandoned obstacle course, footprints of stardust, sealed wooden gate. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Dawn Square → Puppet Line → Stardust Walk → The Captain’s Promise. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "references/forest.png",
+      "references/cave.png"
+    ],
+    "source": "sources/sunny-training.png",
+    "floorLine": 0.53,
+    "revision": {
+      "mode": "built-in image_gen edit",
+      "prompt": "Edit this SINGLE continuous wide training-village panorama. Preserve its polished painted style, warm colour, unique left-to-right village/puppet obstacles/stardust path/wooden guardian gate, and native very wide 3:1 composition. Correct the side-scrolling game layout: MOVE THE BACK EDGE OF THE FIGHTING FLOOR UP TO 45 PERCENT OF THE IMAGE HEIGHT, at every horizontal position. The ENTIRE LOWER 55 PERCENT must be one broad uninterrupted flat horizontal tan-earth fighting floor. ALL buildings, fences, trees, training props and gates stand BEHIND that back edge, in the TOP 45 PERCENT, made smaller and moved upward as needed. No obstacles or props in the lower 55 percent. The floor is level, viewed slightly from above, with subtle painted dirt texture, not perspective lines converging to a central road. Keep all four story landmarks visible above the floor. The top can use compact sky and distant trees, but the lower half must be ground across every part of the panorama. ONE landscape, no separate panels, no grids, no duplication, no characters, no text, no stretching. Deliver an organically recomposed full scene, not cropped or squashed.\n",
+      "input": "drafts/sunny-training-initial.png"
+    },
+    "generationMode": "built-in image_gen, followed by targeted layout edit",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "dc2e674302a460a4703af3717c49cc2b8eba5bdcd5de066cdadee782ad035a3d"
+  },
+  {
+    "id": "windbell-forest",
+    "chapter": 2,
+    "name": {
+      "zh-HK": "風鈴森林",
+      "en-US": "Windbell Woods"
+    },
+    "sections": [
+      {
+        "zh-HK": "無聲林口",
+        "en-US": "Silent Trail"
+      },
+      {
+        "zh-HK": "逆風樹道",
+        "en-US": "Headwind Path"
+      },
+      {
+        "zh-HK": "失落鈴橋",
+        "en-US": "Lost Bell Bridge"
+      },
+      {
+        "zh-HK": "風鈴樹頂",
+        "en-US": "Bell Treetop"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 2: Windbell Woods. Environment concept: A jade forest of silent bells, wind-bent trees, mossy stone bridge, huge guardian bell tree. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Silent Trail → Headwind Path → Lost Bell Bridge → Bell Treetop. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/windbell-forest.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "c04c75df349a491285a9f288058246a40154a06478695f058e28420977e0ecf6"
+  },
+  {
+    "id": "starcrystal-cave",
+    "chapter": 3,
+    "name": {
+      "zh-HK": "星晶洞穴",
+      "en-US": "Starcrystal Cavern"
+    },
+    "sections": [
+      {
+        "zh-HK": "微光洞口",
+        "en-US": "Glimmer Entrance"
+      },
+      {
+        "zh-HK": "裂晶迴廊",
+        "en-US": "Cracked Hall"
+      },
+      {
+        "zh-HK": "願望迴聲",
+        "en-US": "Chamber of Wishes"
+      },
+      {
+        "zh-HK": "星心祭壇",
+        "en-US": "Starlight Altar"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 3: Starcrystal Cavern. Environment concept: A blue-violet crystal cavern of captured wishes, cracked reflecting crystals and an ancient star altar. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Glimmer Entrance → Cracked Hall → Chamber of Wishes → Starlight Altar. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/starcrystal-cave.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2170,
+      "height": 725
+    },
+    "sourceSha256": "356bb3d3416a2c7f46d882777e5e51979d8670b6fd6ea61bc7a84446408b0142"
+  },
+  {
+    "id": "starlamp-harbor",
+    "chapter": 4,
+    "name": {
+      "zh-HK": "星燈港",
+      "en-US": "Starlamp Harbor"
+    },
+    "sections": [
+      {
+        "zh-HK": "歸航碼頭",
+        "en-US": "Homebound Dock"
+      },
+      {
+        "zh-HK": "封信街道",
+        "en-US": "Sealed-Letter Street"
+      },
+      {
+        "zh-HK": "舊郵局",
+        "en-US": "Old Post Office"
+      },
+      {
+        "zh-HK": "燈港大門",
+        "en-US": "Harbor Gate"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 4: Starlamp Harbor. Environment concept: A magical seaside postal harbor at twilight, warm star lanterns, paper-letter stalls, a weathered postal tower and sealed sea gate. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Homebound Dock → Sealed-Letter Street → Old Post Office → Harbor Gate. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/starlamp-harbor.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "dbd9d18ecdd3ab446ca9b77821fe39e3dfb6a62a3dd5b4d3c5af05214024a4f6"
+  },
+  {
+    "id": "rainleaf-marsh",
+    "chapter": 5,
+    "name": {
+      "zh-HK": "雨葉沼澤",
+      "en-US": "Rainleaf Marsh"
+    },
+    "sections": [
+      {
+        "zh-HK": "雨葉渡口",
+        "en-US": "Rainleaf Landing"
+      },
+      {
+        "zh-HK": "毒苔小徑",
+        "en-US": "Moss Trail"
+      },
+      {
+        "zh-HK": "沉字水潭",
+        "en-US": "Pool of Names"
+      },
+      {
+        "zh-HK": "蘆葦祭台",
+        "en-US": "Reed Altar"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 5: Rainleaf Marsh. Environment concept: A lush rain-soaked wetland, giant lily pads, purple moss, lost glowing letter fragments under water, a broad reed shrine. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Rainleaf Landing → Moss Trail → Pool of Names → Reed Altar. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/rainleaf-marsh.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "d57515e6bb0e5fad12cbc38e9996b166a5e04abafb9582ec881a16274d91b93c"
+  },
+  {
+    "id": "sunken-tide-city",
+    "chapter": 6,
+    "name": {
+      "zh-HK": "潮汐古城",
+      "en-US": "Sunken-Tide City"
+    },
+    "sections": [
+      {
+        "zh-HK": "潮門外街",
+        "en-US": "Tide-Gate Street"
+      },
+      {
+        "zh-HK": "珊瑚守道",
+        "en-US": "Coral Guardway"
+      },
+      {
+        "zh-HK": "淹沒廣場",
+        "en-US": "Drowned Square"
+      },
+      {
+        "zh-HK": "貝殼王庭",
+        "en-US": "Shell Court"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 6: Sunken-Tide City. Environment concept: A breathable magical underwater city with azure domes, coral columns, flooded courtyard reflected in pearl glass, huge shell gate. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Tide-Gate Street → Coral Guardway → Drowned Square → Shell Court. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/sunken-tide-city.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "0b744ce33860cb35aa41440c126c084961231347513dffb482b3a48a17e01811"
+  },
+  {
+    "id": "coral-archive",
+    "chapter": 7,
+    "name": {
+      "zh-HK": "珊瑚書庫",
+      "en-US": "Coral Archive"
+    },
+    "sections": [
+      {
+        "zh-HK": "漂書走廊",
+        "en-US": "Drifting-Book Hall"
+      },
+      {
+        "zh-HK": "墨流書架",
+        "en-US": "Inkflow Shelves"
+      },
+      {
+        "zh-HK": "封存讀室",
+        "en-US": "Sealed Reading Room"
+      },
+      {
+        "zh-HK": "無字書壇",
+        "en-US": "Wordless Lectern"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 7: Coral Archive. Environment concept: An underwater coral library, floating illuminated books, indigo ink streams, shelves of shell-bound letters, a circular empty-book dais. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Drifting-Book Hall → Inkflow Shelves → Sealed Reading Room → Wordless Lectern. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/coral-archive.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "c7edf985958cfbf21f3244eb2009d27f30787be1c88e5661ee25e18563762df5"
+  },
+  {
+    "id": "storm-beacon",
+    "chapter": 8,
+    "name": {
+      "zh-HK": "暴雨燈塔",
+      "en-US": "Storm Beacon"
+    },
+    "sections": [
+      {
+        "zh-HK": "風浪石階",
+        "en-US": "Storm Steps"
+      },
+      {
+        "zh-HK": "斷纜平台",
+        "en-US": "Broken-Cable Deck"
+      },
+      {
+        "zh-HK": "失訊燈室",
+        "en-US": "Silent Lamp Room"
+      },
+      {
+        "zh-HK": "暴風燈頂",
+        "en-US": "Beacon Summit"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 8: Storm Beacon. Environment concept: A dramatic stormy lighthouse, broad stone sea walkways, broken golden cables, blue-white signal lenses and a windswept beacon platform. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Storm Steps → Broken-Cable Deck → Silent Lamp Room → Beacon Summit. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/storm-beacon.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2171,
+      "height": 724
+    },
+    "sourceSha256": "bcffd7a255c7fc3522180accff558a0da3b9b8abe8eca8ef42dbef6f7e7cfbf0"
+  },
+  {
+    "id": "ember-forge",
+    "chapter": 9,
+    "name": {
+      "zh-HK": "熔火工坊",
+      "en-US": "Ember Forge"
+    },
+    "sections": [
+      {
+        "zh-HK": "熔銅通道",
+        "en-US": "Copper Channel"
+      },
+      {
+        "zh-HK": "煤火機廊",
+        "en-US": "Coalwork Hall"
+      },
+      {
+        "zh-HK": "面具熔爐",
+        "en-US": "Mask Furnace"
+      },
+      {
+        "zh-HK": "爐芯之門",
+        "en-US": "Furnace Gate"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 9: Ember Forge. Environment concept: A grand fantasy forge with molten copper channels, gear machinery, cooling mask moulds, warm orange sparks and a lion-shaped furnace gate. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Copper Channel → Coalwork Hall → Mask Furnace → Furnace Gate. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/ember-forge.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "1b5196d3509561b543e78a3ebee29992f5fa3cb4d391c59a378123f7dc277c40"
+  },
+  {
+    "id": "ashen-clocktower",
+    "chapter": 10,
+    "name": {
+      "zh-HK": "灰燼鐘樓",
+      "en-US": "Ashen Clocktower"
+    },
+    "sections": [
+      {
+        "zh-HK": "灰鐘入口",
+        "en-US": "Ashen Entry"
+      },
+      {
+        "zh-HK": "發條長階",
+        "en-US": "Clockwork Steps"
+      },
+      {
+        "zh-HK": "停時鐘室",
+        "en-US": "Stopped-Clock Room"
+      },
+      {
+        "zh-HK": "擺鐘平台",
+        "en-US": "Pendulum Deck"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 10: Ashen Clocktower. Environment concept: A bronze astronomical clocktower over ash-grey rooftops, giant exposed gears, stopped ivory clock faces, floating golden pendulum hall. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Ashen Entry → Clockwork Steps → Stopped-Clock Room → Pendulum Deck. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/ashen-clocktower.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "f19313bb779ea1922dcd9d05bea5777c24d77d518aaa82a835a283450f41c2df"
+  },
+  {
+    "id": "frost-mirror-field",
+    "chapter": 11,
+    "name": {
+      "zh-HK": "霜鏡雪原",
+      "en-US": "Frost-Mirror Fields"
+    },
+    "sections": [
+      {
+        "zh-HK": "碎雪營地",
+        "en-US": "Snow Camp"
+      },
+      {
+        "zh-HK": "映影冰道",
+        "en-US": "Reflection Path"
+      },
+      {
+        "zh-HK": "往日鏡廊",
+        "en-US": "Memory-Mirror Hall"
+      },
+      {
+        "zh-HK": "霜鏡之心",
+        "en-US": "Mirror Heart"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 11: Frost-Mirror Fields. Environment concept: A sparkling snowfield under aurora, enormous ice mirrors reflecting indistinct memories, sapphire crystal arches and silver-blue mirror shrine. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Snow Camp → Reflection Path → Memory-Mirror Hall → Mirror Heart. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/frost-mirror-field.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "0e8e51e98aae04cf2b5b7f7856a98bdffdd9ec16cd4419c2341f38b671aac442"
+  },
+  {
+    "id": "winter-rail",
+    "chapter": 12,
+    "name": {
+      "zh-HK": "冬眠列車",
+      "en-US": "Winter Rail"
+    },
+    "sections": [
+      {
+        "zh-HK": "雪封車站",
+        "en-US": "Snowbound Station"
+      },
+      {
+        "zh-HK": "凍結軌道",
+        "en-US": "Frozen Track"
+      },
+      {
+        "zh-HK": "無名車廂",
+        "en-US": "Nameless Carriage"
+      },
+      {
+        "zh-HK": "冬行車頭",
+        "en-US": "Winter Engine"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 12: Winter Rail. Environment concept: A magical snowbound railway through mountains, broad station platforms, ice-blue track bridges, warm abandoned train carriages and a mammoth-shaped steam engine. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Snowbound Station → Frozen Track → Nameless Carriage → Winter Engine. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/winter-rail.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "84772faed7492d8970afc313c37d8f7224434c2fe98df09c3160844a738bf541"
+  },
+  {
+    "id": "thunder-ridge",
+    "chapter": 13,
+    "name": {
+      "zh-HK": "雷脊群島",
+      "en-US": "Thunder-Ridge Isles"
+    },
+    "sections": [
+      {
+        "zh-HK": "雷港懸台",
+        "en-US": "Thunder Landing"
+      },
+      {
+        "zh-HK": "電帆索橋",
+        "en-US": "Electric-Sail Bridge"
+      },
+      {
+        "zh-HK": "折星風眼",
+        "en-US": "Broken-Star Eye"
+      },
+      {
+        "zh-HK": "雷帆主桅",
+        "en-US": "Thunder Mast"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 13: Thunder-Ridge Isles. Environment concept: Floating storm islands above cobalt clouds, brass lightning rods, sweeping airship sail bridges, an amber star compass and electric sky mast. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Thunder Landing → Electric-Sail Bridge → Broken-Star Eye → Thunder Mast. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/thunder-ridge.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2170,
+      "height": 725
+    },
+    "sourceSha256": "70f686a2d5f47669b1eed85023bb9170f2e6438920a037c033de6471ec720080"
+  },
+  {
+    "id": "hanging-garden",
+    "chapter": 14,
+    "name": {
+      "zh-HK": "倒懸花園",
+      "en-US": "Hanging Gardens"
+    },
+    "sections": [
+      {
+        "zh-HK": "倒樹庭院",
+        "en-US": "Inverted Court"
+      },
+      {
+        "zh-HK": "纏夢花道",
+        "en-US": "Dreamroot Walk"
+      },
+      {
+        "zh-HK": "昨日溫室",
+        "en-US": "Yesterday’s Glasshouse"
+      },
+      {
+        "zh-HK": "不散花冠",
+        "en-US": "Unfading Crown"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 14: Hanging Gardens. Environment concept: A surreal suspended garden, upside-down flowering trees, violet roots and glasshouses of nostalgic scenes, golden antler-shaped garden crown. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Inverted Court → Dreamroot Walk → Yesterday’s Glasshouse → Unfading Crown. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/hanging-garden.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "f59aae25d8d8000025aa27a54679014add522ca780a29185794694b5d3338786"
+  },
+  {
+    "id": "hourglass-labyrinth",
+    "chapter": 15,
+    "name": {
+      "zh-HK": "沙漏迷宮",
+      "en-US": "Hourglass Labyrinth"
+    },
+    "sections": [
+      {
+        "zh-HK": "流砂門廊",
+        "en-US": "Sandflow Gate"
+      },
+      {
+        "zh-HK": "重複石道",
+        "en-US": "Repeating Walk"
+      },
+      {
+        "zh-HK": "未來沙室",
+        "en-US": "Tomorrow’s Chamber"
+      },
+      {
+        "zh-HK": "沙漏心庭",
+        "en-US": "Hourglass Heart"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 15: Hourglass Labyrinth. Environment concept: An elegant golden desert labyrinth with ancient sandstone walks, hanging hourglasses, lapis inlays, soft dunes and a giant time-glass courtyard. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Sandflow Gate → Repeating Walk → Tomorrow’s Chamber → Hourglass Heart. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/hourglass-labyrinth.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "d46c0850d3e370841dd689151f89ada97d7148dc9d882961f6fc3c31921e2804"
+  },
+  {
+    "id": "nameless-theater",
+    "chapter": 16,
+    "name": {
+      "zh-HK": "無名劇院",
+      "en-US": "Nameless Theater"
+    },
+    "sections": [
+      {
+        "zh-HK": "褪票大廳",
+        "en-US": "Faded-Ticket Lobby"
+      },
+      {
+        "zh-HK": "換角後台",
+        "en-US": "Changing Backstage"
+      },
+      {
+        "zh-HK": "失名觀眾席",
+        "en-US": "Nameless Seats"
+      },
+      {
+        "zh-HK": "空白舞台",
+        "en-US": "Blank Stage"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 16: Nameless Theater. Environment concept: An opulent abandoned midnight theatre, faded tickets, velvet violet curtains, masks without names, empty golden audience seats and an illuminated blank stage. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Faded-Ticket Lobby → Changing Backstage → Nameless Seats → Blank Stage. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/nameless-theater.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "3ef64266545198f8b6cc56b8dde8f2c3c90c557dab2f843a887ba40462af53e8"
+  },
+  {
+    "id": "moon-gate-fortress",
+    "chapter": 17,
+    "name": {
+      "zh-HK": "月門要塞",
+      "en-US": "Moon-Gate Fortress"
+    },
+    "sections": [
+      {
+        "zh-HK": "月門吊橋",
+        "en-US": "Moon-Gate Bridge"
+      },
+      {
+        "zh-HK": "封願城道",
+        "en-US": "Sealed-Wish Walk"
+      },
+      {
+        "zh-HK": "碎印內庭",
+        "en-US": "Broken-Seal Court"
+      },
+      {
+        "zh-HK": "月衛之誓",
+        "en-US": "Sentinel’s Promise"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 17: Moon-Gate Fortress. Environment concept: A silver crescent fortress above violet clouds, broad moonstone bridges, locked wish emblems, broken star seals and a glowing crescent gate. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Moon-Gate Bridge → Sealed-Wish Walk → Broken-Seal Court → Sentinel’s Promise. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/moon-gate-fortress.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "06c2cc102493dcb6d4d30a42ebf8db2618aa827cf28b2be61bad56be46f0c171"
+  },
+  {
+    "id": "echo-battlefield",
+    "chapter": 18,
+    "name": {
+      "zh-HK": "回聲戰場",
+      "en-US": "Echo Battlefield"
+    },
+    "sections": [
+      {
+        "zh-HK": "勇氣殘道",
+        "en-US": "Courage Ruins"
+      },
+      {
+        "zh-HK": "信任斷橋",
+        "en-US": "Trust Bridge"
+      },
+      {
+        "zh-HK": "共鳴碎庭",
+        "en-US": "Harmony Court"
+      },
+      {
+        "zh-HK": "三響核心",
+        "en-US": "Threefold Core"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 18: Echo Battlefield. Environment concept: A vast fractured star battlefield, orange courage crystals, cyan trust bridge, jade harmony ruins, three interwoven luminous elemental streams at a central violet core. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Courage Ruins → Trust Bridge → Harmony Court → Threefold Core. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/echo-battlefield.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "8b28935360c261c937bef63e2cc5164f13824c507bf1adb3d0b6732053b046f1"
+  },
+  {
+    "id": "starbridge-duel",
+    "chapter": 19,
+    "name": {
+      "zh-HK": "星橋決戰",
+      "en-US": "Starbridge Crossing"
+    },
+    "sections": [
+      {
+        "zh-HK": "裂星橋口",
+        "en-US": "Broken-Star Entry"
+      },
+      {
+        "zh-HK": "月舟舊站",
+        "en-US": "Moonferry’s Stop"
+      },
+      {
+        "zh-HK": "未寄信台",
+        "en-US": "Unsent-Letter Deck"
+      },
+      {
+        "zh-HK": "星橋盡頭",
+        "en-US": "End of the Bridge"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 19: Starbridge Crossing. Environment concept: An epic moonlit star bridge over a cosmic ocean, broken but traversable silver platforms, an old lantern ferry stop, floating unopened letters and a vast full moon. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Broken-Star Entry → Moonferry’s Stop → Unsent-Letter Deck → End of the Bridge. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/starbridge-duel.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "67ba41c19d991d20dffd6351cf9b38afc95d3cc29e50bb1095ae7f79c0dd6b16"
+  },
+  {
+    "id": "dawn-star-court",
+    "chapter": 20,
+    "name": {
+      "zh-HK": "黎明星庭",
+      "en-US": "Dawn Star Court"
+    },
+    "sections": [
+      {
+        "zh-HK": "重光星門",
+        "en-US": "Relit Star Gate"
+      },
+      {
+        "zh-HK": "同行長路",
+        "en-US": "Companions’ Path"
+      },
+      {
+        "zh-HK": "萬願之環",
+        "en-US": "Ring of Wishes"
+      },
+      {
+        "zh-HK": "黎明星心",
+        "en-US": "Dawn Starheart"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Production environment for a premium 2D side-scrolling pet beat-em-up. Create ONE COMPLETE CONTINUOUS VERY WIDE 3:1 PANORAMA, ideally 2172 by 724 pixels or another native 3:1 raster. NOT a sprite sheet, NOT a grid, NOT four panels, NOT a collage, NOT repeated tiles. A single uninterrupted landscape drawing from the far left edge to the far right edge, with consistent straight-on side-view perspective and a little floor depth like LF2. Match the polished warm hand-painted fantasy illustration quality of the reference images; references are STYLE ONLY, not a layout to copy. Chapter 20: Dawn Star Court. Environment concept: A breathtaking celestial dawn courtyard, shattered dark crystal giving way to warm golden starlight, four elemental wish streams, a huge luminous starheart altar and a sunrise paradise horizon. Across this ONE landscape, gradually travel through these recognisable landmarks left-to-right: Relit Star Gate → Companions’ Path → Ring of Wishes → Dawn Starheart. Architecture, terrain and lighting connect naturally; transitions blend inside the painting with no dividing lines or repeated tree/building groups. Layout priority: the ENTIRE LOWER 55 PERCENT of the canvas is one broad level horizontal fighting floor, viewed slightly from above, with subtle natural surface texture. The straight back edge of this floor stays at 45 percent height across the entire width. ALL buildings, story props, trees and cliffs are confined to the TOP 45 PERCENT, behind this edge; compact sky and small distant architecture. No central-perspective road, no obstacles, holes, stairs, platforms or slopes in the lower 55 percent. Maintain the same floor elevation across the whole panorama. The left opening area must be as fully drawn as the right guardian arena; no empty filler. Rich cinematic colour and readable depth, sharp organic brush detail, atmospheric perspective, family-friendly adventure, cohesive materials. No characters, enemies, letters, signs with readable text, UI, watermark, borders, frame lines or gutter. Most importantly render one naturally wide composition at its native aspect ratio, never stretch a narrower scene.",
+    "references": [
+      "sources/sunny-training.png"
+    ],
+    "source": "sources/dawn-star-court.png",
+    "floorLine": 0.53,
+    "generationMode": "built-in image_gen",
+    "nativeSize": {
+      "width": 2172,
+      "height": 724
+    },
+    "sourceSha256": "b087c0a53f5ed13d6802a6bf32800a2539ff67aa7e6f1f95046c35dc307485ce"
+  }
+]
