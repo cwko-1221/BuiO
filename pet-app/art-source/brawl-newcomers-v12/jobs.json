@@ -1,0 +1,22 @@
+[
+  {
+    "id": "dragon-fang",
+    "source": "pet-app/art-source/brawl-newcomers-v12/effects/dragon-fang/raw.png",
+    "anchor": "left"
+  },
+  {
+    "id": "silver-dragon-ward",
+    "source": "pet-app/art-source/brawl-newcomers-v12/effects/silver-dragon-ward/raw.png",
+    "anchor": "ground"
+  },
+  {
+    "id": "crossblade-wave",
+    "source": "pet-app/art-source/brawl-newcomers-v12/effects/crossblade-wave/raw.png",
+    "anchor": "left"
+  },
+  {
+    "id": "starburst-stream",
+    "source": "pet-app/art-source/brawl-newcomers-v12/effects/starburst-stream/raw.png",
+    "anchor": "left"
+  }
+]

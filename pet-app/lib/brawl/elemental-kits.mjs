@@ -2,6 +2,12 @@ const L=(zh,en)=>({'zh-HK':zh,'en-US':en});
 const k=(zh,en,description,english,kind,mechanic,damage,mp,cooldown,range,extra={})=>({name:L(zh,en),description:L(description,english),kind,mechanic,damage,mp:Math.ceil(mp*1.25),cooldown,range,...extra});
 // v8 budgets stronger elemental utility with 25% higher MP costs.
 export const ELEMENTAL_KITS={
+  'dynasty-warriors-zhao-yun':[
+    k('龍牙三式','Dragon Fang Three Forms','原地三段長槍突刺，最後一擊擊倒；銀龍槍芒可攻擊前方較遠的敵人。','Three stationary spear thrusts. The last strike knocks down foes within the long spear reach.','dragon-fang','weapon-combo',7,26,270,280,{pulses:3,period:10,finisher:12,windup:14,duration:56,depth:38,knock:3,effect:'spear',element:'wind'}),
+    k('銀龍護陣','Silver Dragon Ward','銀龍繞身 2.5 秒，每半秒吹擊周圍敵人，並擋下最多 2 個遠攻投射物。','A silver dragon circles you for 2.5 seconds, striking nearby foes every half second and intercepting up to two enemy projectiles.','silver-dragon-ward','weapon-ward',5,42,600,0,{radius:180,life:150,period:30,blocks:2,windup:20,duration:48,effect:'dragon-ward',element:'wind',slowTicks:45})],
+  'sword-art-online-kirito':[
+    k('交叉劍波','Crossblade Wave','雙劍各揮出一道穿透劍波，命中後減速 1 秒；可從遠處壓制敵人。','Send two piercing sword waves from your dual blades. Hits slow foes for one second.','crossblade-wave','projectile',12,27,270,540,{volleys:2,interval:9,pierce:true,speed:720,size:45,windup:16,duration:48,effect:'sword-wave',element:'wind',slowTicks:60}),
+    k('星爆氣流斬','Starburst Stream','原地交替揮動雙劍進行 16 段近身斬擊，末擊 12 傷害並擊倒；出招時可被打斷。','Alternate both swords through sixteen close-range strikes. The final strike deals twelve damage and knocks down; the sequence can be interrupted.','starburst-stream','weapon-combo',2,48,660,190,{pulses:16,period:4,finisher:12,windup:18,duration:94,depth:48,knock:0,effect:'dual-blade',element:'physical'})],
   'cloud-ear-dog':[
     k('裂空風刃','Gale Blades','三道穿透風刃分路飛出，可在遠處打斷敵陣。','Three piercing air blades travel in separate lanes.','gale-blades','projectile',8,20,210,600,{spread:[-30,0,30],pierce:true,speed:610,element:'wind',effect:'wind',size:36}),
     k('龍捲風眼','Cyclone Eye','召出移動的龍捲風，吸引附近敵人並連續吹擊。','Send a moving cyclone that pulls nearby foes into repeated gusts.','cyclone-eye','tornado',5,38,480,240,{radius:115,life:150,period:24,speed:95,pull:2.5,element:'wind',effect:'wind'})],
@@ -77,6 +83,7 @@ export const ELEMENTAL_KITS={
 };
 
 export const ELEMENTAL_ROLES={
+  'dynasty-warriors-zhao-yun':L('銀龍槍陣','Silver dragon guardian'),'sword-art-online-kirito':L('雙劍連斬','Dual-blade striker'),
   'cloud-ear-dog':L('風刃龍捲','Gale caster'),'pudding-pig':L('裂地泥砲','Earth artillery'),
   'golden-retriever-dog':L('彈射護衛','Ricochet guardian'),'crescent-rabbit':L('月光星術','Lunar caster'),
   'bubble-otter':L('水泡禁錮','Bubble jailer'),'mossback-turtle':L('大地守城','Earth sentinel'),

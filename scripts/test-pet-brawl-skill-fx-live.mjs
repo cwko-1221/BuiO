@@ -26,10 +26,10 @@ try{
   const baseURL=`http://127.0.0.1:${port}`;for(let n=0;n<200;n++){try{if((await fetch(baseURL+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   browser=await chromium.launch({channel:'chrome',headless:true});context=await browser.newContext({baseURL,viewport:{width:1024,height:768},hasTouch:true,recordVideo:{dir:path.join(out,'video'),size:{width:1024,height:768}}});
   assert.equal((await context.request.post('/api/auth/login',{data:{studentId:'S001',password:'test'}})).status(),200);
-  const catalog=await (await context.request.get('/api/pet/brawl/catalog')).json();assert.equal(catalog.fighters.length,25);
+  const catalog=await (await context.request.get('/api/pet/brawl/catalog')).json();assert.equal(catalog.fighters.length,FIGHTERS.length);
   for(const fighter of FIGHTERS.filter(f=>f.rarity==='epic')){const pet=d.petInstances.find(p=>p.speciesId===fighter.id);assert.equal((await context.request.post('/api/pet/brawl/access',{data:{petId:pet.petId,fighterId:fighter.id,mode:'practice'}})).status(),200);}
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('requestfailed',r=>{if(!r.failure()?.errorText.includes('ERR_ABORTED'))failed.push(r.url());});page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
-  await page.goto('/pet');await page.locator('[data-tab="brawl"]').click();await page.locator('.brawl-fighter').first().waitFor();assert.equal(await page.locator('.brawl-fighter').count(),25);
+  await page.goto('/pet');await page.locator('[data-tab="brawl"]').click();await page.locator('.brawl-fighter').first().waitFor();assert.equal(await page.locator('.brawl-fighter').count(),FIGHTERS.length);
   await page.locator('.brawl-fighter[data-id="dragon-ball-goku"]').click();await page.locator('[data-brawl="mode"][data-id="practice"]').click();await page.locator('[data-brawl="start"]').first().click();await page.waitForFunction(()=>window.__petGame?.scene.isActive('Brawl')&&!document.querySelector('.brawl-loading'));
   async function reset(f,n,manual=true,face=1){
     const token=randomUUID(),initial=stateFor(f),k=f.skills[n],p=initial.actors[0],target=initial.actors[1],distant=['fissure','rain','lob','tornado','field','trap','barrage','sky-shot'].includes(k.mechanic);
@@ -70,7 +70,7 @@ try{
     if(k.kind==='flame-breath')assert.ok(info.flameLength>290);if(k.kind==='rasengan'||k.mechanic==='scan'||k.mechanic==='buff')assert.ok(info.peak>=1);
     await page.screenshot({path:path.join(out,f.id+`-skill${n+1}${face<0?'-left':''}.png`)});coverage.push({fighter:f.id,skill:k.kind,face,...info});
   }
-  console.log('✓ All 49 active dedicated skill textures animate; thick Kamehameha keeps its mirrored beam head; the public roster and owned API open all 25 fighters');
+  console.log('✓ All 53 active dedicated skill textures animate; thick Kamehameha keeps its mirrored beam head; the public roster and owned API open all 27 fighters');
   // Exercise every declared pose against the live renderer, at actual simulation times.
   for(const face of [1,-1])for(const f of ALL_FIGHTERS.filter(f=>f.id!=='pikachu'))for(const [n,k] of f.skills.entries()){
     const clip=assets.fighters[f.id].clips['skill'+(n+1)];assert.equal(clip.count,8);assert.equal(clip.emitters.length,8);
@@ -91,7 +91,7 @@ try{
       casts.push({fighter:f.id,skill:k.kind,face,phase,...snap});
     }
   }
-  console.log('✓ All 48 skills of the 24 redrawn characters play eight poses in both directions, at fixed scale and foot anchor');
+  console.log('✓ All 52 skills of the 26 redrawn characters play eight poses in both directions, at fixed scale and foot anchor');
   // Remote movement is interpolated; held effects must follow the rendered hand.
   const naruto=ALL_FIGHTERS.find(f=>f.id==='naruto-uzumaki');await reset(naruto,1,true);
   const remoteAnchor=await page.evaluate(wind=>{

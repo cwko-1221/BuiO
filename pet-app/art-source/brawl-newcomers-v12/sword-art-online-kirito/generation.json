@@ -1,0 +1,23 @@
+{
+  "mode": "built-in imagegen",
+  "transparent_background": true,
+  "rows": 4,
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "initialPrompt": "Use case: illustration-story. Production transparent chibi battle casting sprite sheet, not a poster. References are the shipped identity and side view; preserve EXACT character, youthful face, head/body ratio, costume, colors, hairstyle, boots, and equipment. 16 full-body poses in a strict FOUR-column FOUR-row grid, read left to right then top to bottom, generous transparent gutters. All poses face RIGHT in a readable three-quarter side view. ONE common character scale, stable anatomy and boot baseline throughout. All weapons fully inside their cell with ample clearance. Real alpha background. No words, labels, panels, scenery, ground, trails, magical light, energy effects, shadows or duplicated limbs. Animate shoulders, hands, chest and legs clearly. Kirito from the two references: straight short black hair, large dark eyes, long black coat with silver piping and buckle, black trousers and boots. Draw his dual swords from the back: one dark charcoal Elucidator-style straight sword and one cool jade-blue straight sword, clearly one in EACH hand, recognizable hilts, not duplicated. First eight frames Crossblade Wave: 1 ready swords down at each side, 2 draw both blades backward by hips, 3 twist torso lifting swords toward shoulders, 4 cross both blades in front of chest, 5 sweeping dark sword outward to right, 6 second jade sword sweep outward in the opposite diagonal, 7 both blades stretched through the crossed follow-through, 8 recover dual-sword ready stance. Last eight Starburst Stream: 9 low dual-blade guard, 10 draw right blade up behind head and left blade low behind hip, 11 coil torso with both swords back, 12 tense poised attack stance, 13 powerful descending right-hand sword slash, 14 alternating left-hand rising sword slash, 15 emphatic final X slash BOTH swords extended to right, 16 recover stable dual-blade guard. These are stationary attacks: boots stay grounded. Keep consistent youthful proportions and identical clean costume panels; no laser beams or glow baked into the steel swords.",
+  "prompt": "Use case: precise-object-edit. Edit this exact transparent 16-pose FOUR by FOUR Kirito casting sheet. The two swords are already drawn, one in each hand. Remove ONLY the EXTRA short sword handles sticking up behind the shoulders/back in every frame, to prevent four visible sword handles. Keep the TWO swords in his hands completely unchanged. Keep coat collar, shoulder seams, cross straps, silver buckle, hair, face, limbs, all sixteen exact poses and 4 by 4 layout unchanged. Do not remove hands, the held swords, or the collar. Keep two held swords in every frame and genuinely transparent background.",
+  "referencedImages": [
+    {
+      "file": "reference-canvas.png",
+      "sha256": "72289acf593af0f6293130c5098e37c793ac424b31297562d132fe9a197c8b68"
+    },
+    {
+      "file": "side.png",
+      "sha256": "dae12419096a613d057ee9ef56a6fdc31823b7bcba8c6282dc33bc7106856d37"
+    }
+  ],
+  "sourceHash": "57159b22033126d5f919ebec507d719e08291bbc36d5b6258046fcae8c9efeda",
+  "revisionInput": "edit-input.png"
+}

@@ -23,6 +23,7 @@ export function skillPose(a:Actor,k:any,assets:BrawlAssets,tick=0){
   if(k?.kind==='flurry')index=t<6?Math.min(3,Math.floor(t/6*4)):t<16?3:t<23?4:t<30?5:t<34?6:7;
   else if(t<release)index=Math.min(3,Math.floor(t/release*4));
   else if(t>=duration-5)index=7;
+  else if(k?.mechanic==='weapon-combo'){const phase=Math.floor((t-release)/Number(k.period||4));index=phase>=Number(k.pulses)-1?6:4+phase%2;}
   else {
     const pulses=Number(k?.pulses||k?.volleys||1),period=Number(k?.period||k?.interval||8),end=release+(pulses-1)*period+4;
     if(pulses>1&&t<end)index=(t-release)%period<2?4:5+Math.floor((t-release)/period)%2;

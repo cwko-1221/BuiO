@@ -1,0 +1,20 @@
+[
+  {
+    "id": "dynasty-warriors-zhao-yun",
+    "type": "character",
+    "input": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-b1208e09-16b5-4c97-b552-af081cb42273.png",
+    "prompt": "Use case: precise-object-edit. Edit this exact transparent 16-pose FOUR by FOUR Zhao Yun animation sheet. Change ONLY frame 11, which is row THREE column THREE: its overhead spear currently wrongly has a large silver blade on EACH end. Keep its RIGHT silver blade and tassel intact. Remove the LEFT silver blade and tassel, replacing them with the plain short dark spear butt, so it is the same SINGLE-ENDED spear as the other fifteen poses. Keep both hands, grip, shaft angle and length, character, silver-blue armor, ponytail, all other fifteen frames, every pose position and the 4 by 4 layout unchanged. No other redraw or glow. Preserve genuine transparency."
+  },
+  {
+    "id": "sword-art-online-kirito",
+    "type": "character",
+    "input": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-ac30db3e-83e7-4436-bf5a-ee2eb27ecb37.png",
+    "prompt": "Use case: precise-object-edit. Edit this exact transparent 16-pose FOUR by FOUR Kirito casting sheet. The two swords are already drawn, one in each hand. Remove ONLY the EXTRA short sword handles sticking up behind the shoulders/back in every frame, to prevent four visible sword handles. Keep the TWO swords in his hands completely unchanged. Keep coat collar, shoulder seams, cross straps, silver buckle, hair, face, limbs, all sixteen exact poses and 4 by 4 layout unchanged. Do not remove hands, the held swords, or the collar. Keep two held swords in every frame and genuinely transparent background."
+  },
+  {
+    "id": "silver-dragon-ward",
+    "type": "effect",
+    "input": "C:\\Users\\kochu\\.codex\\generated_images\\01a0e8d4-0f68-73c1-9a1f-5fa4a5f3b1a8\\exec-b4ed9495-320c-4ad7-b015-e6197bc8f443.png",
+    "prompt": "Use case: background-extraction. Keep the EIGHT complete silver-cyan dragon and bottom rune-ring effects in this FOUR-column TWO-row sprite sheet. Remove the ENTIRE continuous blue-grey background and all diffuse sheet-wide haze. Replace it with ACTUAL TRANSPARENT ALPHA, including between cells and in each empty dragon circle. Keep the dragon heads, whiskers, bright scales, tails, crisp adjacent cyan wind ribbons, small close sparkle shards and rune circles intact, at precisely the same positions and sizes. Do not put any solid or checkerboard background in the pixels. No scenery or characters. Eight isolated VFX sprites, clean transparent gutters."
+  }
+]

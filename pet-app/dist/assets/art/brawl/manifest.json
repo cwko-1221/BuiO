@@ -1214,6 +1214,50 @@
       "originX": 0.5,
       "originY": 0.5,
       "anchor": "center"
+    },
+    "dragon-fang": {
+      "url": "/pet/assets/art/brawl/skill-dragon-fang-8db557db6450.webp",
+      "frameWidth": 512,
+      "frameHeight": 256,
+      "frames": 8,
+      "widthRatio": 0.6017228739002932,
+      "heightRatio": 0.875,
+      "originX": 0.03125,
+      "originY": 0.5,
+      "anchor": "left"
+    },
+    "silver-dragon-ward": {
+      "url": "/pet/assets/art/brawl/skill-silver-dragon-ward-38c0b3f97660.webp",
+      "frameWidth": 512,
+      "frameHeight": 256,
+      "frames": 8,
+      "widthRatio": 0.3465792181069959,
+      "heightRatio": 0.875,
+      "originX": 0.5,
+      "originY": 0.9375,
+      "anchor": "ground"
+    },
+    "crossblade-wave": {
+      "url": "/pet/assets/art/brawl/skill-crossblade-wave-cf87a62734b7.webp",
+      "frameWidth": 512,
+      "frameHeight": 256,
+      "frames": 8,
+      "widthRatio": 0.47036384976525825,
+      "heightRatio": 0.8750000000000001,
+      "originX": 0.03125,
+      "originY": 0.5,
+      "anchor": "left"
+    },
+    "starburst-stream": {
+      "url": "/pet/assets/art/brawl/skill-starburst-stream-430f965f65c3.webp",
+      "frameWidth": 512,
+      "frameHeight": 256,
+      "frames": 8,
+      "widthRatio": 0.47692307692307695,
+      "heightRatio": 0.875,
+      "originX": 0.03125,
+      "originY": 0.5,
+      "anchor": "left"
     }
   },
   "fighterSkillAnimations": {
@@ -3433,6 +3477,188 @@
             {
               "x": -0.96,
               "y": -44.98
+            }
+          ]
+        }
+      }
+    },
+    "dynasty-warriors-zhao-yun": {
+      "url": "/pet/assets/art/brawl/dynasty-warriors-zhao-yun-casts-90e7d7a6a62a.webp",
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "clips": {
+        "skill1": {
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 288,
+          "originY": 0.8984375,
+          "emitterRole": "weapon",
+          "emitters": [
+            {
+              "x": 103,
+              "y": -51.62
+            },
+            {
+              "x": -77.39,
+              "y": -139.32
+            },
+            {
+              "x": -81.88,
+              "y": -83.88
+            },
+            {
+              "x": 105.7,
+              "y": -91.12
+            },
+            {
+              "x": 129.98,
+              "y": -69.72
+            },
+            {
+              "x": 116.21,
+              "y": -127.69
+            },
+            {
+              "x": 118.05,
+              "y": -23.63
+            },
+            {
+              "x": 16.71,
+              "y": -144.06
+            }
+          ]
+        },
+        "skill2": {
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 288,
+          "originY": 0.8984375,
+          "emitterRole": "hand",
+          "emitters": [
+            {
+              "x": 23.65,
+              "y": -92.66
+            },
+            {
+              "x": -7.19,
+              "y": -105.44
+            },
+            {
+              "x": 13.29,
+              "y": -114.96
+            },
+            {
+              "x": 24.25,
+              "y": -82.39
+            },
+            {
+              "x": 9.38,
+              "y": -88.97
+            },
+            {
+              "x": -0.34,
+              "y": -88.67
+            },
+            {
+              "x": -6.31,
+              "y": -71.34
+            },
+            {
+              "x": 38.28,
+              "y": -70.6
+            }
+          ]
+        }
+      }
+    },
+    "sword-art-online-kirito": {
+      "url": "/pet/assets/art/brawl/sword-art-online-kirito-casts-9aefd4fe70e3.webp",
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "clips": {
+        "skill1": {
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 288,
+          "originY": 0.8984375,
+          "emitterRole": "weapon",
+          "emitters": [
+            {
+              "x": 70.87,
+              "y": -21.89
+            },
+            {
+              "x": 72.04,
+              "y": -13.96
+            },
+            {
+              "x": 70.8,
+              "y": -141.73
+            },
+            {
+              "x": 19.9,
+              "y": -77.28
+            },
+            {
+              "x": 119.58,
+              "y": -117.09
+            },
+            {
+              "x": 97.14,
+              "y": -126.84
+            },
+            {
+              "x": 131.7,
+              "y": -51.47
+            },
+            {
+              "x": 69.28,
+              "y": -21.11
+            }
+          ]
+        },
+        "skill2": {
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 288,
+          "originY": 0.8984375,
+          "emitterRole": "hand",
+          "emitters": [
+            {
+              "x": 27.57,
+              "y": -48.5
+            },
+            {
+              "x": -8.5,
+              "y": -102.94
+            },
+            {
+              "x": 0.4,
+              "y": -51.01
+            },
+            {
+              "x": 30.45,
+              "y": -83.07
+            },
+            {
+              "x": 21.16,
+              "y": -46.85
+            },
+            {
+              "x": 17.64,
+              "y": -68.51
+            },
+            {
+              "x": 57.36,
+              "y": -61.77
+            },
+            {
+              "x": 56.01,
+              "y": -41.36
             }
           ]
         }

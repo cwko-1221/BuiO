@@ -1,0 +1,157 @@
+[
+  {
+    "id": "dynasty-warriors-zhao-yun",
+    "name": {
+      "zh-HK": "趙雲",
+      "en-US": "Zhao Yun"
+    },
+    "rarity": "epic",
+    "hp": 116,
+    "speed": 205,
+    "damage": [
+      9,
+      9,
+      14
+    ],
+    "airDamage": 14,
+    "color": 6604781,
+    "role": {
+      "zh-HK": "銀龍槍陣",
+      "en-US": "Silver dragon guardian"
+    },
+    "skills": [
+      {
+        "name": {
+          "zh-HK": "龍牙三式",
+          "en-US": "Dragon Fang Three Forms"
+        },
+        "description": {
+          "zh-HK": "原地三段長槍突刺，最後一擊擊倒；銀龍槍芒可攻擊前方較遠的敵人。",
+          "en-US": "Three stationary spear thrusts. The last strike knocks down foes within the long spear reach."
+        },
+        "kind": "dragon-fang",
+        "mechanic": "weapon-combo",
+        "damage": 7,
+        "mp": 33,
+        "cooldown": 270,
+        "range": 280,
+        "pulses": 3,
+        "period": 10,
+        "finisher": 12,
+        "windup": 14,
+        "duration": 56,
+        "depth": 38,
+        "knock": 3,
+        "effect": "spear",
+        "element": "wind"
+      },
+      {
+        "name": {
+          "zh-HK": "銀龍護陣",
+          "en-US": "Silver Dragon Ward"
+        },
+        "description": {
+          "zh-HK": "銀龍繞身 2.5 秒，每半秒吹擊周圍敵人，並擋下最多 2 個遠攻投射物。",
+          "en-US": "A silver dragon circles you for 2.5 seconds, striking nearby foes every half second and intercepting up to two enemy projectiles."
+        },
+        "kind": "silver-dragon-ward",
+        "mechanic": "weapon-ward",
+        "damage": 5,
+        "mp": 53,
+        "cooldown": 600,
+        "range": 0,
+        "radius": 180,
+        "life": 150,
+        "period": 30,
+        "blocks": 2,
+        "windup": 20,
+        "duration": 48,
+        "effect": "dragon-ward",
+        "element": "wind",
+        "slowTicks": 45
+      }
+    ],
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/brawl-newcomers-v12/dynasty-warriors-zhao-yun/seed.png"
+  },
+  {
+    "id": "sword-art-online-kirito",
+    "name": {
+      "zh-HK": "桐人",
+      "en-US": "Kirito"
+    },
+    "rarity": "epic",
+    "hp": 100,
+    "speed": 245,
+    "damage": [
+      8,
+      8,
+      13
+    ],
+    "airDamage": 13,
+    "color": 6609609,
+    "role": {
+      "zh-HK": "雙劍連斬",
+      "en-US": "Dual-blade striker"
+    },
+    "skills": [
+      {
+        "name": {
+          "zh-HK": "交叉劍波",
+          "en-US": "Crossblade Wave"
+        },
+        "description": {
+          "zh-HK": "雙劍各揮出一道穿透劍波，命中後減速 1 秒；可從遠處壓制敵人。",
+          "en-US": "Send two piercing sword waves from your dual blades. Hits slow foes for one second."
+        },
+        "kind": "crossblade-wave",
+        "mechanic": "projectile",
+        "damage": 12,
+        "mp": 34,
+        "cooldown": 270,
+        "range": 540,
+        "volleys": 2,
+        "interval": 9,
+        "pierce": true,
+        "speed": 720,
+        "size": 45,
+        "windup": 16,
+        "duration": 48,
+        "effect": "sword-wave",
+        "element": "wind",
+        "slowTicks": 60
+      },
+      {
+        "name": {
+          "zh-HK": "星爆氣流斬",
+          "en-US": "Starburst Stream"
+        },
+        "description": {
+          "zh-HK": "原地交替揮動雙劍進行 16 段近身斬擊，末擊 12 傷害並擊倒；出招時可被打斷。",
+          "en-US": "Alternate both swords through sixteen close-range strikes. The final strike deals twelve damage and knocks down; the sequence can be interrupted."
+        },
+        "kind": "starburst-stream",
+        "mechanic": "weapon-combo",
+        "damage": 2,
+        "mp": 60,
+        "cooldown": 660,
+        "range": 190,
+        "pulses": 16,
+        "period": 4,
+        "finisher": 12,
+        "windup": 18,
+        "duration": 94,
+        "depth": 48,
+        "knock": 0,
+        "effect": "dual-blade",
+        "element": "physical"
+      }
+    ],
+    "width": 160,
+    "height": 160,
+    "originY": 0.9313,
+    "seed": "pet-app/art-source/brawl-newcomers-v12/sword-art-online-kirito/seed.png"
+  }
+]

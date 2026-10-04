@@ -1,0 +1,8 @@
+{
+  "mode": "built-in imagegen",
+  "transparent_background": true,
+  "prompt": "Use case: illustration-story. Repair this transparent 8-frame silver-cyan dragon spear VFX sheet for a fighting game. Preserve its magnificent crisp silver dragon blade, white-hot core, blue ribbons, painterly quality and all eight stages. Strict FOUR columns TWO rows. EACH frame must be fully isolated, inside its own equal rectangular cell, with at least 60 pixels of actual transparent empty gutter on ALL four sides. Reduce each effect's size to fit; never allow wisps, sparks, haze or alpha to touch neighbouring frames. Exactly EIGHT independent effects, reading order: 1 compact spear glint, 2 compressed blue spear charge, 3 growing silver dragon charge, 4 first dragon-headed thrust, 5 second dragon-headed thrust, 6 third low sweeping thrust, 7 powerful wide dragon-jaw finisher, 8 fading tapered spear trail. In EVERY stage the bright pointed leading edge or dragon head points RIGHT and the emission/trail starts LEFT. All energy must remain a coherent connected isolated silhouette. Keep one common effect scale, charge frames at least half the mature width; keep the dragon-jaw finisher smaller than the cell, 60px empty gutters especially row 2 frames 1 and 2. Real alpha transparency, no background, no blue haze between effects, no checkerboard, no text, no frame lines, no characters. This is a sprite sheet, not a poster.",
+  "referencedImages": [
+    "raw.png"
+  ]
+}

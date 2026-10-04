@@ -1,0 +1,23 @@
+{
+  "mode": "built-in imagegen",
+  "transparent_background": true,
+  "rows": 4,
+  "skills": [
+    "skill1",
+    "skill2"
+  ],
+  "initialPrompt": "Use case: illustration-story. Production transparent chibi battle casting sprite sheet, not a poster. References are the shipped identity and side view; preserve EXACT character, youthful face, head/body ratio, costume, colors, hairstyle, boots, and equipment. 16 full-body poses in a strict FOUR-column FOUR-row grid, read left to right then top to bottom, generous transparent gutters. All poses face RIGHT in a readable three-quarter side view. ONE common character scale, stable anatomy and boot baseline throughout. All weapons fully inside their cell with ample clearance. Real alpha background. No words, labels, panels, scenery, ground, trails, magical light, energy effects, shadows or duplicated limbs. Animate shoulders, hands, chest and legs clearly. Zhao Yun from the two references: brown-black high ponytail, blue ribbons, ornate silver armor, cobalt-blue tunic and panels, silver-black boots, the long ornate silver dragon spear carried on his back in the source. Draw that SAME spear held in his two hands, preserving its recognizable silver blade and blue tassel. First eight frames form Dragon Fang Three Forms: 1 ready guard spear diagonal, 2 coil torso and pull spear back, 3 deepen stance drawing the spear behind waist, 4 poised frontward aim, 5 first straight two-handed jab to right, 6 retract and perform a second high jab to right, 7 wide low finishing spear thrust with torso follow-through, 8 recover upright spear guard. Last eight form Silver Dragon Ward: 9 lift spear from ready guard, 10 bring spear overhead with both hands, 11 turn spear in a horizontal overhead sweep, 12 broad spear sweep with braced legs, 13 bring spear to upright in front of chest, 14 settled two-handed vertical guard, 15 draw spear diagonally back as guard ends, 16 recover original upright ready stance. Feet stay on the same baseline; spear ends must NEVER extend below the boots. Keep body size unchanged even in broad spear motions.",
+  "prompt": "Use case: precise-object-edit. Edit this exact transparent 16-pose FOUR by FOUR Zhao Yun animation sheet. Change ONLY frame 11, which is row THREE column THREE: its overhead spear currently wrongly has a large silver blade on EACH end. Keep its RIGHT silver blade and tassel intact. Remove the LEFT silver blade and tassel, replacing them with the plain short dark spear butt, so it is the same SINGLE-ENDED spear as the other fifteen poses. Keep both hands, grip, shaft angle and length, character, silver-blue armor, ponytail, all other fifteen frames, every pose position and the 4 by 4 layout unchanged. No other redraw or glow. Preserve genuine transparency.",
+  "referencedImages": [
+    {
+      "file": "reference-canvas.png",
+      "sha256": "026e60fa324ae21c8abee1b7f246fbd1019733affb83e424832b95d20e69536c"
+    },
+    {
+      "file": "side.png",
+      "sha256": "2ba2e579f933af719628bc96ecc7c382e4137f6a1ba00326935bb0fb585629e2"
+    }
+  ],
+  "sourceHash": "a1196d5c803f27e711c0776b93962aa671a93999449c5cfcff92ba5c4000625b",
+  "revisionInput": "edit-input.png"
+}

@@ -30,7 +30,7 @@ function status(s,a,t,k){
 function hit(s,a,t,k,c,damage=k.damage,down=false,chain=false){
   const soaked=k.element==='lightning'&&t.wetUntil>s.tick;
   const before=s.events.length;
-  const landed=c.impact(s,a,t,damage+(soaked?3:0),k.knock??(down?11:3),down,chain,{skill:true,element:k.element,ranged:['projectile','wave','beam','lob','rain','fissure','flamethrower','barrage','field','tornado','eruption'].includes(k.mechanic)});
+  const landed=c.impact(s,a,t,damage+(soaked?3:0),k.knock??(down?11:3),down,chain,{skill:true,element:k.element,holdCombo:k.mechanic==='weapon-combo',ranged:['projectile','wave','beam','lob','rain','fissure','flamethrower','barrage','field','tornado','eruption'].includes(k.mechanic)});
   if(landed&&s.events.slice(before).some(e=>e.type==='hit'&&e.actor===t.id&&e.source===a.id)){status(s,a,t,k);if(soaked){t.wetUntil=0;s.events.push({type:'elementStatus',actor:t.id,element:'lightning',x:t.x/U,y:t.y/U});}}
   return landed;
 }
@@ -60,11 +60,11 @@ function pulse(s,a,k,x,y,size){s.events.push({type:'abilityPulse',actor:a.id,eff
 export function updateAbility(s,a,k,t,c){
   const start=wind(k),q=t-start;
   if(k.mechanic==='projectile'||k.mechanic==='wave'){
-    if(q>=0&&q%(k.interval||10)===0&&q/(k.interval||10)<(k.volleys||1)){release(s,a,k,{phase:q/(k.interval||10)});for(const lane of k.spread||[0])shot(s,a,k,c,lane);}
-  }else if(['beam','stretch','orbit','flamethrower'].includes(k.mechanic)){
+    if(q>=0&&q%(k.interval||10)===0&&q/(k.interval||10)<(k.volleys||1)){release(s,a,k,{phase:q/(k.interval||10)});for(const lane of k.spread||[0])shot(s,a,k,c,lane,k.kind==='crossblade-wave'?{visualFrame:3+q/(k.interval||10)%2}:{});}
+  }else if(['beam','stretch','orbit','flamethrower','weapon-combo'].includes(k.mechanic)){
     const n=q/(k.period||8),pulses=k.pulses||1;
     if(q>=0&&Number.isInteger(n)&&n<pulses){release(s,a,k,{phase:n});const damage=n===pulses-1?k.finisher||k.damage:k.damage;
-      if(k.mechanic==='orbit')area(s,a,k,c,a.x,a.y,k.range,damage,n===pulses-1,true);else line(s,a,k,c,damage,!!k.down,pulses>1);}
+      if(k.mechanic==='orbit')area(s,a,k,c,a.x,a.y,k.range,damage,n===pulses-1,true);else line(s,a,k,c,damage,k.mechanic==='weapon-combo'?n===pulses-1:!!k.down,pulses>1);}
   }else if(k.mechanic==='lob'){
     if(q===0){release(s,a,k);const p=shot(s,a,k,c,0,{lob:true,flight:k.flight||36,age:0,fromX:a.x,fromY:a.y,toX:a.abilityMotion.toX,toY:a.y,remaining:k.range*U});p.z=45*U;}
   }else if(k.mechanic==='sky-shot'){
@@ -89,6 +89,7 @@ export function updateAbility(s,a,k,t,c){
         const y=k.mechanic==='fissure'?a.y:clamp(centerY+offset*22*U,345*U,565*U),starts=s.tick+k.arm+n*k.interval;
         field(s,a,k,{x:bound(s,x),y,mechanic:'eruption',starts,next:starts,expires:starts+48},n===0);}
     }else if(['trap','field','tornado','barrage'].includes(k.mechanic))field(s,a,k);
+    else if(k.mechanic==='weapon-ward')field(s,a,k,{x:a.x,y:a.y,blocksLeft:k.blocks||2});
     else if(k.mechanic==='sanctuary'){buff(s,a,k);field(s,a,k,{x:a.x,y:a.y,starts:s.tick,next:s.tick,mechanic:'sanctuary'});}
     else if(k.mechanic==='buff'){buff(s,a,k);release(s,a,k);}
     else if(k.mechanic==='scan'){release(s,a,k);for(const target of foes(s,a))if(Math.abs(target.x-a.x)<=k.range*U&&Math.abs(target.y-a.y)<=85*U)status(s,a,target,k);}
@@ -110,6 +111,7 @@ export function tickFields(s,c){
   for(const f of s.fields){
     const a=s.actors.find(a=>a.id===f.owner);if(!a||a.hp<=0){f.expires=0;continue;}const k=f.skill;
     if(f.mechanic==='tornado')f.x=bound(s,f.x+f.facing*(k.speed||60)*U/60);
+    if(f.mechanic==='weapon-ward'){f.x=a.x;f.y=a.y;}
     if(k.pull&&s.tick>=f.starts)for(const t of foes(s,a))if(Math.abs(t.x-f.x)<f.radius*U&&Math.abs(t.y-f.y)<75*U&&t.z<35*U){const dx=f.x-t.x,dy=f.y-t.y,d=Math.max(U,Math.abs(dx)+Math.abs(dy)),pull=k.pull*U*(t.boss?.2:1);t.x=bound(s,t.x+dx/d*pull);t.y=clamp(Math.round(t.y+dy/d*pull),345*U,565*U);}
     if(s.tick<f.next||s.tick<f.starts)continue;
     if(f.mechanic==='sanctuary'){
@@ -118,7 +120,7 @@ export function tickFields(s,c){
         pulse(s,a,k,f.x,f.y,f.radius);f.pulses++;}f.next=s.tick+k.period;
     }else if(f.mechanic==='barrage'){
       if(f.pulses<(k.volleys||3)){const proxy={...a,x:f.x,y:f.y,facing:f.facing};shot(s,proxy,{...k,range:k.shotRange},c);f.pulses++;pulse(s,a,k,f.x,f.y,70);}f.next=s.tick+k.period;
-    }else if(['field','tornado','clones'].includes(f.mechanic)){
+    }else if(['field','tornado','clones','weapon-ward'].includes(f.mechanic)){
       if(f.mechanic==='clones'){for(const t of foes(s,a))if(Math.abs(t.x-f.x)<=k.range*U&&(t.x-f.x)*f.facing>=-20*U&&Math.abs(t.y-f.y)<=42*U&&t.z<45*U)hit(s,a,t,k,c);}
       else area(s,a,k,c,f.x,f.y,f.radius,k.damage);
       pulse(s,a,k,f.x,f.y,f.radius);f.next=s.tick+(k.period||30);
@@ -128,6 +130,18 @@ export function tickFields(s,c){
     }else if(!f.fired){area(s,a,k,c,f.x,f.y,f.radius,k.damage,k.element!=='ice');f.fired=true;f.next=f.expires+1;pulse(s,a,k,f.x,f.y,f.radius);}
   }
   s.fields=s.fields.filter(f=>f.expires>s.tick);
+}
+// Check the full swept segment before a fast projectile can damage its target.
+export function interceptProjectile(s,p){
+  if(p.remaining<=0||p.z>=65*U)return false;
+  for(const f of s.fields){
+    if(f.mechanic!=='weapon-ward'||f.team===p.team||!f.blocksLeft||s.tick<f.starts||s.tick>=f.expires)continue;
+    const owner=s.actors.find(a=>a.id===f.owner);if(!owner||owner.hp<=0)continue;
+    const rx=f.radius*U,ry=78*U,x=(p.x-owner.x)/rx,y=(p.y-owner.y)/ry,dx=(p.dx||0)/rx,dy=(p.dy||0)/ry,q=clamp(-(x*dx+y*dy)/(dx*dx+dy*dy||1),0,1);
+    if((x+q*dx)**2+(y+q*dy)**2>1)continue;
+    p.remaining=0;f.blocksLeft--;s.events.push({type:'wardBlock',actor:owner.id,kind:f.kind,element:f.element,x:(p.x+q*(p.dx||0))/U,y:(p.y+q*(p.dy||0))/U,remaining:f.blocksLeft});return true;
+  }
+  return false;
 }
 function projectileBurst(s,p,a,k,c,directId=0){
   const r=k.radius||k.splash||100;

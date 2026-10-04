@@ -5,8 +5,9 @@ import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import {findCells,keepPose} from './sheet-cells.mjs';
 
-const root='pet-app/art-source/fighter-skill-poses-v1',out='pet-app/public/assets/art/brawl';
-const evidence='artifacts/pet-playtest/skill-poses-v1',roster=JSON.parse(fs.readFileSync(root+'/roster.json'));
+const option=(name,fallback)=>{const n=process.argv.indexOf(name);return n>=0?process.argv[n+1]:fallback;};
+const root=option('--source','pet-app/art-source/fighter-skill-poses-v1'),out='pet-app/public/assets/art/brawl';
+const evidence=option('--evidence','artifacts/pet-playtest/skill-poses-v1'),roster=JSON.parse(fs.readFileSync(root+'/roster.json'));
 const landmarks=JSON.parse(fs.readFileSync(root+'/landmarks.json'));
 const manifest=JSON.parse(fs.readFileSync(out+'/manifest.json')),reports=[];
 manifest.skillFx['take-copter'].originY=.9;

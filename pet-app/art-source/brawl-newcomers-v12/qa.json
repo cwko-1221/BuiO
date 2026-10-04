@@ -1,0 +1,165 @@
+{
+  "version": "brawl-v12",
+  "artMode": "built-in imagegen",
+  "newFighters": [
+    "dynasty-warriors-zhao-yun",
+    "sword-art-online-kirito"
+  ],
+  "castingPoses": 32,
+  "effectFrames": 32,
+  "publicFighters": 27,
+  "skills": 54,
+  "tests": {
+    "newcomerCombat": true,
+    "rosterOwnershipFees": true,
+    "elementalRegression": true,
+    "balanceRegression": true,
+    "utilityRegression": true,
+    "storyRegression": true,
+    "typecheck": true,
+    "productionBuild": true,
+    "allSkillsBrowser": {
+      "pass": true,
+      "facingSkillCasts": 108,
+      "poseSequences": 104,
+      "poseSnapshots": 312,
+      "gokuTimelineSnapshots": 34,
+      "errors": [],
+      "failed": [],
+      "performance": [
+        {
+          "id": "spark-hamster",
+          "fps": 60.00428602043028,
+          "ticks": 96,
+          "casts": 1,
+          "hits": 5,
+          "peak": 6
+        },
+        {
+          "id": "snowfeather-penguin",
+          "fps": 60,
+          "ticks": 95,
+          "casts": 1,
+          "hits": 1,
+          "peak": 10
+        },
+        {
+          "id": "thunderhorn-goat",
+          "fps": 60.00428602043028,
+          "ticks": 100,
+          "casts": 1,
+          "hits": 3,
+          "peak": 6
+        },
+        {
+          "id": "coral-seal",
+          "fps": 60.01285989854919,
+          "ticks": 98,
+          "casts": 1,
+          "hits": 1,
+          "peak": 2
+        },
+        {
+          "id": "dragon-ball-goku",
+          "fps": 59.99428625845125,
+          "ticks": 147,
+          "casts": 1,
+          "hits": 6,
+          "peak": 2
+        },
+        {
+          "id": "naruto-uzumaki",
+          "fps": 59.99142979574421,
+          "ticks": 96,
+          "casts": 1,
+          "hits": 4,
+          "peak": 4
+        }
+      ]
+    },
+    "realTouchUtility": {
+      "pass": true,
+      "checks": [
+        "Owned Luffy selected through the lobby; both new sprites load and animate, including correctly mirrored left-facing Gatling",
+        "Anya mark, bonus hit, visible stun label, three-heart ward and remaining-charge HUD render on iPad",
+        "Real touch activates four-second Take-copter and aerial ray; held keyboard fires the remaining two; landing restores attack text and iPad controls are at least 64px",
+        "Homing football visibly turns back toward a rear target in a different depth lane and lands exactly once",
+        "Two distinct Naruto actors pursue without owner movement, have no clone labels or countdowns, expire after three seconds with smoke, and skill buttons clearly show insufficient MP",
+        "Owned Zhao Yun casts through real iPad touches: three stationary spear hits, cooldown countdown, animated moving dragon ward and two-charge HUD; the third projectile lands",
+        "Owned Kirito casts both blade colors and sixteen real sword hits through iPad touches; all action controls remain at least 64px",
+        {
+          "fighter": "dynasty-warriors-zhao-yun",
+          "fps": 60.01500375093779,
+          "casts": 1,
+          "ticks": 111
+        },
+        {
+          "fighter": "sword-art-online-kirito",
+          "fps": 60,
+          "casts": 1,
+          "ticks": 112
+        },
+        "Both newcomer ultimates also run at normal simulation speed with real touches and at least 25fps"
+      ],
+      "errors": [],
+      "failures": []
+    },
+    "publicRosterAndPaidDuel": {
+      "pass": true,
+      "checks": [
+        "27 open fighters, including all 15 hidden guests, owned/all/locked filters and 60px iPad selection buttons",
+        "Unowned fighters remain previews; all five modes and direct API requests reject them",
+        "All 27 open battle atlases and all 54 ability effects render on the iPad viewport without a missing frame",
+        "Zhao Yun and Kirito synchronize in a real two-student duel; refusal is free and acceptance charges exactly 500 each",
+        "No page errors, console errors or failed sprite requests"
+      ],
+      "errors": [],
+      "failed": []
+    }
+  },
+  "assets": [
+    {
+      "url": "/pet/assets/art/brawl/dynasty-warriors-zhao-yun-casts-90e7d7a6a62a.webp",
+      "sha256": "90e7d7a6a62ab953b7ddcd30c7d14f8c1559a5b382320c16d92df895b0048c9a"
+    },
+    {
+      "url": "/pet/assets/art/brawl/sword-art-online-kirito-casts-9aefd4fe70e3.webp",
+      "sha256": "9aefd4fe70e39469fd4ad1eed7dd958f130dd7158fd16df98ea43163a5862b63"
+    },
+    {
+      "url": "/pet/assets/art/brawl/skill-dragon-fang-8db557db6450.webp",
+      "sha256": "8db557db64508875c6c8c62c5a2281b8cbf60e420f069268a9cf5a30dde11d4a"
+    },
+    {
+      "url": "/pet/assets/art/brawl/skill-silver-dragon-ward-38c0b3f97660.webp",
+      "sha256": "38c0b3f976601d82634fb6376af0dd45a5c4fa8ea68ce37c9b5e043bb1e74441"
+    },
+    {
+      "url": "/pet/assets/art/brawl/skill-crossblade-wave-cf87a62734b7.webp",
+      "sha256": "cf87a62734b7e7d06e4c736cc0d3644c79d9fee62c2382dd501003b988bc04b0"
+    },
+    {
+      "url": "/pet/assets/art/brawl/skill-starburst-stream-430f965f65c3.webp",
+      "sha256": "430f965f65c36d7fb3a4c7568a65e9273055c5b82d53af4e86a2219de0b74004"
+    }
+  ],
+  "sourceSheets": [
+    {
+      "kind": "dragon-fang",
+      "sha256": "1fe8e2353dba47436266106df3ee9e8faa235e799fcbc25df5812188453494a1"
+    },
+    {
+      "kind": "silver-dragon-ward",
+      "sha256": "4571939165168c9efb3c28c233d32f0bf1a740c5be489d786e2e0f967474760c"
+    },
+    {
+      "kind": "crossblade-wave",
+      "sha256": "d5ba8ad17b9fda82b62ec1ac02367aafe79e34646f6fb3b44b20fdb8d70e9450"
+    },
+    {
+      "kind": "starburst-stream",
+      "sha256": "fe626998ad887d9e0ae6a822fc47a6f25278ea38f403268efa40a85dfa9bd4c2"
+    }
+  ],
+  "limitation": "Chrome 1024×768 touch emulation; physical iPad Safari not measured."
+}
