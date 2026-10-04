@@ -12,10 +12,10 @@ export function battleCameraScroll(playerX,viewportWidth,worldWidth,lookAhead=0)
 // One uniform scale, one image. Align the painted floor and crop only outer scenery.
 export function panoramaPlacement(imageWidth,imageHeight,viewportWidth,scrollX,worldWidth,floorLine=.53){
  const floor=clamp(floorLine,.35,.7);
- const scale=Math.max(viewportWidth/imageWidth,FLOOR_TOP/(imageHeight*floor),(BATTLE_HEIGHT-FLOOR_TOP)/(imageHeight*(1-floor)));
+ const scale=Math.max(Math.max(viewportWidth,worldWidth)/imageWidth,FLOOR_TOP/(imageHeight*floor),(BATTLE_HEIGHT-FLOOR_TOP)/(imageHeight*(1-floor)));
  const width=imageWidth*scale,height=imageHeight*scale,travel=Math.max(0,width-viewportWidth),cameraTravel=Math.max(0,worldWidth-viewportWidth);
- const progress=cameraTravel?clamp(scrollX/cameraTravel,0,1):0;
- // A short practice/PvP arena uses the opening scenery without sweeping an entire chapter.
- const pan=worldWidth>1280?travel:Math.min(travel,cameraTravel*.35);
- return {x:-pan*progress,y:FLOOR_TOP-height*floor,scale,width,height};
+ // The painted fighting floor is part of the world, so it must move pixel-for-pixel
+ // with the camera. Shrinking camera progress to the image's travel caused slow drift.
+ const pan=clamp(scrollX,0,Math.min(travel,cameraTravel));
+ return {x:-pan,y:FLOOR_TOP-height*floor,scale,width,height};
 }

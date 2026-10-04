@@ -16,6 +16,7 @@ for(const stage of STAGES){
    assert.ok(l.x<=.0001);assert.ok(l.x+l.width>=vw-.0001);assert.ok(l.y<=.0001);assert.ok(l.y+l.height>=720-.0001);
    assert.ok(Math.abs(l.y+p.height*p.floorLine*l.scale-FLOOR_TOP)<.0001,'Painted floor remains aligned');
    assert.ok(Math.abs(l.width/l.height-p.width/p.height)<1e-9,'Uniform image scaling');
+   if(world>vw){assert.ok(Math.abs(l.x+scroll)<.0001,'The entire scene tracks world camera movement pixel-for-pixel');}
    if(vw>=world)assert.equal(scroll,(world-vw)/2);
    else assert.ok(scroll>=0&&scroll<=world-vw);
   }

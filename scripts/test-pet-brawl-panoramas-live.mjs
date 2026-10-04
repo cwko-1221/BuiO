@@ -24,11 +24,15 @@ const leave=async p=>{await p.keyboard.press('Escape');await p.locator('[data-br
 const devices=[{width:1024,height:768},{width:1194,height:834},{width:1280,height:720},{width:844,height:390},{width:1920,height:810}];
 const audit=async page=>page.evaluate(()=>{
  const scene=window.__petGame.scene.getScene('Brawl'),bg=scene.background,camera=scene.cameras.main,source=bg.texture.getSourceImage(),canvas=window.__petGame.canvas.getBoundingClientRect(),parent=document.getElementById('game-root').getBoundingClientRect();
- return {missing:scene.children.list.filter(o=>o.texture?.key==='__MISSING').length,stage:scene.runtime.state.stageId,viewport:scene.viewportWidth,backgrounds:scene.children.list.filter(o=>o.type==='Image'&&o.texture?.key.startsWith('brawl-bg-')).length,scaleX:bg.scaleX,scaleY:bg.scaleY,x:bg.x,y:bg.y,width:bg.displayWidth,height:bg.displayHeight,sourceWidth:source.width,sourceHeight:source.height,scrollFactor:bg.scrollFactorX,frame:bg.frame.name,camera:camera.scrollX,canvas:{x:canvas.x,y:canvas.y,width:canvas.width,height:canvas.height},parent:{x:parent.x,y:parent.y,width:parent.width,height:parent.height}};
+ const player=scene.runtime.state.actors.find(a=>a.id===scene.runtime.playerId)||scene.runtime.state.actors[0];
+ return {playerX:player.x/100,lookAhead:scene.lookAhead,world:scene.runtime.state.mode==='campaign'?5120:1280,missing:scene.children.list.filter(o=>o.texture?.key==='__MISSING').length,stage:scene.runtime.state.stageId,viewport:scene.viewportWidth,backgrounds:scene.children.list.filter(o=>o.type==='Image'&&o.texture?.key.startsWith('brawl-bg-')).length,scaleX:bg.scaleX,scaleY:bg.scaleY,x:bg.x,y:bg.y,width:bg.displayWidth,height:bg.displayHeight,sourceWidth:source.width,sourceHeight:source.height,scrollFactor:bg.scrollFactorX,frame:bg.frame.name,camera:camera.scrollX,canvas:{x:canvas.x,y:canvas.y,width:canvas.width,height:canvas.height},parent:{x:parent.x,y:parent.y,width:parent.width,height:parent.height}};
 });
 function covered(info){
  assert.equal(info.missing,0);assert.equal(info.backgrounds,1);assert.equal(info.frame,'__BASE');assert.equal(info.scrollFactor,0);
  assert.ok(Math.abs(info.scaleX-info.scaleY)<1e-9);assert.ok(Math.abs(info.width/info.height-info.sourceWidth/info.sourceHeight)<1e-9);
+ assert.ok(Math.abs(info.x+Math.max(0,info.camera))<.01,'Painted floor follows the camera at full world speed');
+ const target=info.viewport>=info.world?(info.world-info.viewport)/2:Math.max(0,Math.min(info.world-info.viewport,info.playerX-info.viewport*.453125+info.lookAhead));
+ assert.ok(Math.abs(info.camera-target)<.01,'Camera reaches the player target in the same render frame');
  assert.ok(info.x<=.01&&info.x+info.width>=info.viewport-.01);assert.ok(info.y<=.01&&info.y+info.height>=719.99);
  assert.ok(Math.abs(info.canvas.width-info.parent.width)<=2&&Math.abs(info.canvas.height-info.parent.height)<=2,'Landscape canvas fills its parent proportionally');
 }
@@ -46,9 +50,14 @@ try{
   await page.locator('[data-brawl="act"][data-id="'+Math.floor(index/4)+'"]').click();
   await page.locator('[data-brawl="start"][data-stage="'+stage.id+'"]').click();await ready(page);
   if(index===0){
+   await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.runtime.state.actors[0].x=60000;scene.runtime.state.actors[0].facing=1;scene.lookAhead=90;scene.resizeViewport();scene.draw(16);});
+   const walkStart=await audit(page);
    const before=await page.evaluate(()=>window.__petGame.scene.getScene('Brawl').runtime.state.actors[0].x);
    await page.keyboard.down('KeyD');await page.waitForTimeout(180);await page.keyboard.up('KeyD');
    assert.ok(await page.evaluate(x=>window.__petGame.scene.getScene('Brawl').runtime.state.actors[0].x>x,before));
+   const walkEnd=await audit(page);covered(walkEnd);
+   assert.ok(Math.abs((walkEnd.playerX-walkStart.playerX)-(walkEnd.camera-walkStart.camera))<.01,'Real held movement keeps actor and camera displacement equal');
+   assert.ok(Math.abs((walkEnd.camera-walkStart.camera)+(walkEnd.x-walkStart.x))<.01,'Real held movement keeps background and camera displacement equal');
    await page.locator('[data-battle-key="16"]').tap();
    assert.ok((await page.locator('.brawl-buttons button,[data-stick]').evaluateAll(ns=>ns.map(n=>n.getBoundingClientRect().height))).every(h=>h>=64));
   }
@@ -58,6 +67,14 @@ try{
    const controls=await page.locator('.brawl-buttons button,[data-stick]').evaluateAll(ns=>ns.map(n=>({height:n.getBoundingClientRect().height,width:n.getBoundingClientRect().width})));
    assert.ok(controls.every(r=>r.height>=64&&r.width>=64));
    if(size.height<=500)assert.ok((await page.locator('.brawl-controls').boundingBox()).height<=145,'Compact phone controls keep the lane visible');
+   // Real renderer displacement at interior world positions, independent of zone
+   // labels: the camera and floor must travel 180 world pixels with the actor.
+   await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.lookAhead=90;scene.runtime.state.actors[0].facing=1;scene.runtime.state.actors[0].x=260000;scene.resizeViewport();scene.draw(16);});
+   const motionStart=await audit(page);
+   await page.evaluate(()=>{const scene=window.__petGame.scene.getScene('Brawl');scene.runtime.state.actors[0].x+=18000;scene.draw(16);});
+   const motionEnd=await audit(page);covered(motionEnd);
+   assert.ok(Math.abs(motionEnd.camera-motionStart.camera-180)<.01,'Camera follows actor displacement without trailing '+JSON.stringify({device:size,motionStart,motionEnd}));
+   assert.ok(Math.abs(motionEnd.x-motionStart.x+180)<.01,'Background moves opposite the actor at full camera speed');
    for(const zone of [0,1,2,3]){
     await page.evaluate(zone=>{const scene=window.__petGame.scene.getScene('Brawl'),s=scene.runtime.state;s.zone=zone;s.actors[0].x=(zone===3?5030:zone*1280+300)*100;scene.resizeViewport();scene.draw(16);},zone);
     const info=await audit(page);covered(info);report.push({device:size,zone,...info});
