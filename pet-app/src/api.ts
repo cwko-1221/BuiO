@@ -3,6 +3,7 @@ import type { BrawlCatalog, BrawlProgress, BrawlRun, BrawlReceipt } from './braw
 import type { InputFrame } from '../lib/brawl/simulation.mjs';
 import type { ArcadePrize, ArcadePrizeKind } from './game/ArcadePrizes';
 import type { QuietSession, QuietSettings } from './quiet-room-types';
+import type { PetAccessStatus, PetAccessSettings, PetAccessUpdate } from './access-types';
 
 // The shared runtime is loaded blocking in <head>, before this bundle runs.
 const t = (key: string) => (window as any).BuiI18n.t(key) as string;
@@ -22,6 +23,7 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   });
   const data = await response.json().catch(() => ({ success: false, message: t('pet.badResponse') }));
   if (!response.ok || data.success === false) {
+    if (data.code === 'PET_APP_LOCKED' && data.access) window.dispatchEvent(new CustomEvent('pet:access', { detail: data.access }));
     const retryAfter = response.headers.get('Retry-After');
     const seconds = retryAfter ? Number(retryAfter) : NaN;
     const retryAfterMs = retryAfter ? Math.max(0, Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retryAfter) - Date.now()) : 0;
@@ -46,6 +48,10 @@ async function quietRequest<T>(url: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
+  petAccess: () => quietRequest<{ access: PetAccessStatus }>('/api/pet/access'),
+  teacherAccess: () => request<PetAccessSettings>('/api/pet/teacher/access'),
+  updatePetAccess: (body: PetAccessUpdate) => request<PetAccessSettings>('/api/pet/teacher/access', { method: 'POST', body: JSON.stringify(body) }),
+  cancelPetAccess: (id: string) => request<PetAccessSettings>(`/api/pet/teacher/access/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: '{}' }),
   brawlCatalog: () => request<BrawlCatalog>('/api/pet/brawl/catalog'),
   brawlAccess: (body: {petId:string;fighterId:string;mode:string}) => request<{allowed:boolean}>('/api/pet/brawl/access', {method:'POST',body:JSON.stringify(body)}),
   brawlProgress: () => request<BrawlProgress>('/api/pet/brawl/progress'),

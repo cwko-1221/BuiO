@@ -344,9 +344,15 @@ export class CoinPusherScene {
   private rendererProgramsReady = false;
   private warmedProgramCount = -1;
   private destroyed = false;
+  private accessLocked = false;
+  setAccessLocked(locked: boolean) {
+    this.accessLocked = locked; this.swipeStart = undefined; this.lastFrame = 0;
+    if (locked) this.renderer.setAnimationLoop(null);
+    else if (!document.hidden && this.rendererPrepared && !this.destroyed) this.renderer.setAnimationLoop(this.animate);
+  }
 
   private readonly onVisibilityChange = () => {
-    if (document.hidden) this.renderer.setAnimationLoop(null);
+    if (document.hidden || this.accessLocked) this.renderer.setAnimationLoop(null);
     else if (this.rendererPrepared) { this.lastFrame = 0; this.renderer.setAnimationLoop(this.animate); }
   };
   private readonly onContextLost = (event: Event) => {
@@ -716,7 +722,7 @@ export class CoinPusherScene {
 
   private animate = (time: number) => {
     const model = this.simulation;
-    if (this.destroyed || !model) return;
+    if (this.destroyed || this.accessLocked || !model) return;
     const reduceMotion = this.isReducedMotionRequested();
     if (reduceMotion !== this.reducedMotion) {
       this.reducedMotion = reduceMotion;

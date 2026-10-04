@@ -1,9 +1,12 @@
 import Phaser from 'phaser';
 import './styles/main.css';
+import './styles/access.css';
 import { api } from './api';
 import { CoinPusherSettlementRetries, coinPusherPayoutEventId, rejectCoinPusherPayout, settledCoinPusherRemaining, type SettlementError } from './game/CoinPusherSettlement';
 import { lockCoinPusherBrowserInteractions } from './game/CoinPusherBrowserInteractions';
 import { CoinPusherTeacherSettings } from './teacher/CoinPusherSettings';
+import { PetAccessTeacherSettings } from './teacher/PetAccessSettings';
+import { PetAccessGate } from './PetAccessGate';
 import { QuietRoom } from './quiet-room';
 import { prizeIcon, prizeLabel, type ArcadePrize } from './game/ArcadePrizes';
 import { audio } from './audio';
@@ -135,6 +138,7 @@ const REFUSALS: Record<string, string> = {
 };
 
 class StudentApp {
+  private accessLocked = false;
   private pvp?:PvPClient;
   private brawlController?: BrawlController;
   private brawlGeneration = 0;
@@ -195,6 +199,21 @@ class StudentApp {
   visiting?: any;
   surfaceObserver?: ResizeObserver;
   constructor(identity: Identity) { this.identity = identity; this.locale = identity.language || 'zh-HK'; }
+  setAccessLocked(locked: boolean) {
+    this.accessLocked = locked;
+    this.pvp?.setAccessLocked(locked);
+    this.brawlController?.setAccessLocked(locked);
+    this.coinPusherView?.setAccessLocked(locked);
+    for (const scene of this.game?.scene.getScenes(true) || []) scene.input.keyboard?.resetKeys();
+    audio.setAccessLocked(locked);
+    if (locked) { this.game?.loop.sleep(); void this.persistCoinPusherSession(); }
+    else {
+      if (this.game?.isBooted) this.game.loop.wake();
+      if (this.coinPusherPendingDrop && !this.coinPusherPendingDrop.applied) void this.dropCoinPusher(this.coinPusherPendingDrop.worldX, true);
+      this.retryPendingCoinPusherPayouts();
+      if(this.state)void api.bootstrap().then(state=>{this.state=state;this.updateWallet();}).catch(()=>{});
+    }
+  }
   t(key: keyof typeof UI['zh-HK']) { return UI[this.locale][key] || UI['zh-HK'][key]; }
   name(localized: Record<Locale,string>) { return localized[this.locale] || localized['zh-HK']; }
   petName(definition: PetDefinition, stage: number) { return definition.names[this.locale]?.[stage - 1] || definition.names['zh-HK'][stage - 1]; }
@@ -220,8 +239,9 @@ class StudentApp {
     }
     this.state = await api.bootstrap();
     this.pvp=new PvPClient(this.identity);
-    this.pvp.addEventListener('match',()=>{void this.reload().catch(()=>{});void this.openLiveDuel();});
-    this.pvp.addEventListener('result',()=>void this.reload());
+    this.pvp.setAccessLocked(this.accessLocked);
+    this.pvp.addEventListener('match',()=>{void this.reload().catch(()=>{});if(!this.accessLocked)void this.openLiveDuel();});
+    this.pvp.addEventListener('result',()=>void this.reload().catch(()=>{}));
     void this.pvp.start();
     document.addEventListener('visibilitychange', this.handleCoinPusherVisibility);
     window.addEventListener('pagehide', this.handleCoinPusherPageHide);
@@ -512,6 +532,7 @@ class StudentApp {
     if(tab==='home')this.openHome();else if(tab==='collection')this.renderCollection();else if(tab==='shop')this.renderShop('eggs');else if(tab==='coinPusher')this.renderCoinPusher();else if(tab==='brawl')void this.renderBrawl();else if(tab==='visit')this.renderVisits();else this.renderSettings();
   }
   private async openLiveDuel(){
+    if(this.accessLocked)return;
     if(!this.pvp?.session)return;
     if(this.brawlController?.onlineId===this.pvp.session.match.id){this.brawlController.reconnectOnline();return;}
     if(this.tab==='coinPusher'||this.brawlController?.localBusy){await this.pvp.leave().catch(()=>{});this.toast(this.locale==='zh-HK'?'正在遊戲，未能開場；雙方入場費已退回。':'Could not start while playing. Both entry fees were refunded.');return;}
@@ -525,6 +546,7 @@ class StudentApp {
     document.querySelector<HTMLElement>('#game-root')!.style.display='block';document.querySelector<HTMLElement>('#coin-pusher-root')!.style.display='none';
     try {const {BrawlController}=await import('./brawl/controller');if(generation!==this.brawlGeneration||this.tab!=='brawl')return;
       this.brawlController=new BrawlController(this.game!,this.identity,()=>this.state,()=>this.reload(),()=>this.openTab('shop'),this.pvp);
+      this.brawlController.setAccessLocked(this.accessLocked);
       await this.brawlController.open();if(this.pvp?.session&&!['finished','cancelled'].includes(this.pvp.session.phase))this.brawlController.openOnline(this.pvp.session);this.refreshStage();
     }catch(error){if(generation===this.brawlGeneration)this.toast((error as Error).message);}
   }
@@ -559,6 +581,8 @@ class StudentApp {
     // browser checks reach the live scene through here to assert what is actually on screen.
     (window as unknown as { __petGame?: Phaser.Game }).__petGame = this.game;
     this.game.scene.add('Bedroom',BedroomScene,false);
+    this.game.events.on(Phaser.Core.Events.READY,()=>{if(this.accessLocked)this.game?.loop.sleep();});
+    document.addEventListener('visibilitychange',()=>{if(this.accessLocked)this.game?.loop.sleep();});
     this.game.events.on('room:placements',(placements:RoomPlacement[])=>{this.roomPlacements=placements.map((item)=>({...item}));this.refreshDecorStrip();});
     this.game.events.on('room:selected',(id:string)=>{this.selectedFurniture=id;document.querySelector('#furnitureActions')?.classList.add('visible');});
   }
@@ -1178,6 +1202,7 @@ class StudentApp {
       for (const prizeId of this.arcadePendingPrizes) this.queueArcadePrize(prizeId);
       if(this.tab!=='coinPusher'){view.destroy(true);return;}
       this.coinPusherView=view;
+      view.setAccessLocked(this.accessLocked);
       view.renderer.domElement.setAttribute('aria-label',zh
         ?'互動式 3D 推銀仔機。在機台任意位置向下滑動，銀仔會從該水平位置落到推板上；亦可按向左／向右鍵揀位，再按向下鍵、空白鍵或 Enter 落幣。按 Escape 返回房間。'
         :'Interactive 3D coin pusher. Swipe down anywhere to drop at that horizontal position, or use Left/Right to aim and Down, Space or Enter to drop. Press Escape to return to the room.');
@@ -1266,6 +1291,7 @@ class StudentApp {
     this.syncCoinPusherControls();
   }
   private async dropCoinPusher(worldX=0,recovered=false) {
+    if(this.accessLocked)return;
     const zh=this.locale==='zh-HK';
     if(this.coinPusherBusy)return;
     if(!this.coinPusherReady||this.coinPusherWebglLost||this.coinPusherInitFailed){this.syncCoinPusherControls();return;}
@@ -1610,7 +1636,7 @@ class StudentApp {
     for(const payout of this.coinPusherPendingPayouts)this.queueCoinPusherPayout(payout,generation,true);
   };
   private scheduleCoinPusherPayoutRetry() {
-    const ids=[...this.coinPusherPendingPayouts.filter(p=>!p.rejection).map(p=>p.eventId),...this.arcadePendingPrizes];
+    const ids=[...this.coinPusherPendingPayouts.filter(p=>!p.rejection).map(p=>p.eventId),...(this.accessLocked?[]:this.arcadePendingPrizes)];
     if(this.coinPusherPayoutRetryTimer!==undefined||!ids.length||!navigator.onLine||document.visibilityState==='hidden')return;
     const nextAt=this.coinPusherSettlementRetries.nextAttempt(ids);
     if(!Number.isFinite(nextAt))return;
@@ -2038,12 +2064,14 @@ class StudentApp {
     return task;
   }
   private queueArcadePrize(prizeId: string, origin?: CoinPusherRewardOrigin) {
+    if(this.accessLocked)return;
     if (this.arcadePrizesQueued.has(prizeId)) return;
     if(!navigator.onLine||!this.coinPusherSettlementRetries.canAttempt(prizeId)){this.scheduleCoinPusherPayoutRetry();return;}
     this.arcadePrizesQueued.add(prizeId);
     // Share the ordinary payout queue: overlapping wallet responses cannot race each other.
     this.coinPusherPayoutQueue = this.coinPusherPayoutQueue.catch(() => undefined).then(async () => {
       try {
+        if(this.accessLocked)return;
         if(!navigator.onLine||!this.coinPusherSettlementRetries.canAttempt(prizeId))return;
         if (!await this.persistCoinPusherSession()) throw new Error('獎品暫存未完成。');
         const result = await api.claimArcadePrize(prizeId);
@@ -2071,6 +2099,7 @@ class StudentApp {
         } else this.toast(label);
         await this.refreshArcadePrizes().catch(error=>console.warn('[pet] Prize settled; stock refresh deferred',error));
       } catch (error) {
+        if((error as SettlementError).status===423)return;
         if(this.arcadePendingPrizes.includes(prizeId)){
           this.coinPusherSettlementRetries.fail(prizeId,error as SettlementError);
           this.handleCoinPusherPayoutError(error as SettlementError);
@@ -2178,6 +2207,7 @@ type RosterFilterField = 'className' | 'chineseGroup' | 'englishGroup' | 'mathGr
 class TeacherApp {
   quietRoom?:QuietRoom;
   private coinPusherSettings?:CoinPusherTeacherSettings;
+  private accessSettings?:PetAccessTeacherSettings;
   identity:Identity; locale:Locale; roster:any; selected=new Set<string>();scope:'students'|'class'|'group'='students';
   filterField:RosterFilterField='className';filterValue='';
   constructor(identity:Identity){this.identity=identity;this.locale=identity.language||'zh-HK';}
@@ -2192,13 +2222,14 @@ class TeacherApp {
     this.quietRoom?.dispose();
     this.quietRoom=undefined;
     this.coinPusherSettings=undefined;
+    this.accessSettings?.dispose();this.accessSettings=undefined;
     const zh=this.zh();
     app.innerHTML=`<div class="teacher-shell">
       <header class="teacher-header">
         <a href="/" class="brand"><span class="brand-mark">B</span><span><b>${zh?'老師寵物樂園':'Teacher Pet Paradise'}</b><small>${escapeHtml(this.identity.name)} · ${escapeHtml(this.roster.academicYear)}</small></span></a>
         <div class="teacher-summary"><span><b>${this.roster.students.length}</b><small>${zh?'名學生':'students'}</small></span><span><b>${this.roster.classes.length}</b><small>${zh?'個班別':'classes'}</small></span></div>
       </header>
-      <nav class="teacher-tool-tabs" aria-label="${zh?'老師工具':'Teacher tools'}"><button type="button" data-teacher-tool="coins" class="active" aria-pressed="true">🪙 ${zh?'金幣調整':'Coin adjustments'}</button><button type="button" data-teacher-tool="quiet" aria-pressed="false">${zh?'安靜房間':'Quiet Room'}</button><button type="button" data-teacher-tool="arcade" aria-pressed="false">${zh?'推銀仔設定':'Coin-pusher settings'}</button></nav>
+      <nav class="teacher-tool-tabs" aria-label="${zh?'老師工具':'Teacher tools'}"><button type="button" data-teacher-tool="coins" class="active" aria-pressed="true">🪙 ${zh?'金幣調整':'Coin adjustments'}</button><button type="button" data-teacher-tool="quiet" aria-pressed="false">${zh?'安靜房間':'Quiet Room'}</button><button type="button" data-teacher-tool="arcade" aria-pressed="false">${zh?'推銀仔設定':'Coin-pusher settings'}</button><button type="button" data-teacher-tool="access" aria-pressed="false">${zh?'樂園鎖定':'Paradise access'}</button></nav>
       <main class="teacher-main" id="teacherCoinMain">
         <section class="grant-panel" aria-labelledby="grantHeading">
           <div class="grant-head">
@@ -2239,16 +2270,19 @@ class TeacherApp {
       </main>
       <main id="teacherQuietMain" class="teacher-quiet-main" hidden></main>
       <main id="teacherArcadeMain" class="teacher-arcade-main" hidden></main>
+      <main id="teacherAccessMain" class="teacher-access-main" hidden></main>
       <div class="modal-root" id="modalRoot"></div>
     </div>`;
     this.bind();this.updateSummary();
     document.querySelectorAll<HTMLButtonElement>('[data-teacher-tool]').forEach(button=>button.addEventListener('click',()=>{
       const quiet=button.dataset.teacherTool==='quiet';
       const arcade=button.dataset.teacherTool==='arcade';
+      const access=button.dataset.teacherTool==='access';
       document.querySelectorAll<HTMLElement>('[data-teacher-tool]').forEach(item=>{item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));});
-      document.querySelector<HTMLElement>('#teacherCoinMain')!.hidden=quiet||arcade;
+      document.querySelector<HTMLElement>('#teacherCoinMain')!.hidden=quiet||arcade||access;
       document.querySelector<HTMLElement>('#teacherQuietMain')!.hidden=!quiet;
       document.querySelector<HTMLElement>('#teacherArcadeMain')!.hidden=!arcade;
+      document.querySelector<HTMLElement>('#teacherAccessMain')!.hidden=!access;
       if(!quiet)this.quietRoom?.hide();
       if(quiet&&!this.quietRoom){
         this.quietRoom=new QuietRoom(document.querySelector<HTMLElement>('#teacherQuietMain')!,this.roster,this.locale,async()=>{
@@ -2260,6 +2294,7 @@ class TeacherApp {
         this.coinPusherSettings=new CoinPusherTeacherSettings(document.querySelector<HTMLElement>('#teacherArcadeMain')!,this.locale);
         void this.coinPusherSettings.init();
       }
+      if(access&&!this.accessSettings){this.accessSettings=new PetAccessTeacherSettings(document.querySelector<HTMLElement>('#teacherAccessMain')!,this.locale);void this.accessSettings.init();}
     }));
   }
   studentRows(){return this.filteredStudents().map((student:any)=>{
@@ -2353,7 +2388,12 @@ class TeacherApp {
 async function boot() {
   try {
     const identity = await api.identity();
-    if (identity.role === 'teacher') await new TeacherApp(identity).start(); else await new StudentApp(identity).start();
+    if (identity.role === 'teacher') await new TeacherApp(identity).start();
+    else {
+      const student=new StudentApp(identity);
+      const gate=new PetAccessGate(app,identity.language||'zh-HK',()=>student.start(),locked=>student.setAccessLocked(locked));
+      await gate.init();
+    }
   } catch (error) {
     const say = (key: string) => (window as any).BuiI18n.t(key) as string;
     app.innerHTML = `<main class="fatal-screen"><span>🥚</span><h1>${escapeHtml(say('pet.fatalTitle'))}</h1><p>${escapeHtml((error as Error).message)}</p><a href="/">${escapeHtml(say('pet.backHome'))}</a></main>`;

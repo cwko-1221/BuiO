@@ -16,6 +16,8 @@ export class AudioEngine {
   private timer = 0;
   private step = 0;
   private theme = 'bedroom';
+  private accessLocked = false;
+  setAccessLocked(locked: boolean) { this.accessLocked = locked; this.updateLevels(); this.syncMusicLoop(); }
   private brawlBuffers=new Map<string,AudioBuffer>();
   private brawlVoices=0;
   brawlSoundsPlayed=0;
@@ -34,7 +36,7 @@ export class AudioEngine {
   private readonly onAudioStateChange = () => this.syncMusicLoop();
 
   private isDocumentHidden() {
-    return typeof document !== 'undefined' && document.hidden;
+    return this.accessLocked || (typeof document !== 'undefined' && document.hidden);
   }
 
   private stopMusicLoop() {

@@ -5,13 +5,13 @@ const config = require('../../config');
 const repo = require('../repositories/pet.repo');
 const prizes = require('../repositories/arcade-prizes.repo');
 const quietRooms = require('../repositories/quiet-room.repo');
+const accessLocks = require('../repositories/access-lock.repo');
 const { catalog } = require('../lib/catalog');
 const academicYears = require('../../math-app/repositories/academic-years.repo');
 const users = require('../../math-app/repositories/users.repo');
 const { requireAuth, requireTeacher } = require('../../math-app/middleware/auth');
 
 const router = express.Router();
-router.use('/brawl', require('./brawl'));
 const mutationKey = (req) => String(req.get('Idempotency-Key') || req.body?.idempotencyKey || '').trim().slice(0, 120);
 const coinPusherMutationKey = (req) => {
   const key = String(req.get('Idempotency-Key') || req.body?.idempotencyKey || '').trim();
@@ -26,6 +26,35 @@ function requireStudent(req, res, next) {
 }
 
 function sendResult(res, result, status = 200) { res.status(status).json({ success: true, ...result }); }
+
+router.get('/access', requireStudent, asyncRoute(async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  sendResult(res, { access: await accessLocks.studentStatus(req.session.studentId) });
+}));
+router.get('/teacher/access', requireTeacher, asyncRoute(async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  sendResult(res, await accessLocks.teacherSettings());
+}));
+router.post('/teacher/access', requireTeacher, asyncRoute(async (req, res) => {
+  sendResult(res, await accessLocks.update(req.session.studentId, req.body));
+}));
+router.post('/teacher/access/:id/cancel', requireTeacher, asyncRoute(async (req, res) => {
+  sendResult(res, await accessLocks.cancel(req.params.id));
+}));
+
+// Gate every student surface, including future routes and the brawl sub-router. Previously
+// paid coin receipts can still settle; this exception cannot buy or start another play.
+router.use(async (req, res, next) => {
+  if (req.session?.role !== 'student' || req.path.startsWith('/teacher/') || (req.method === 'POST' && req.path === '/coin-pusher/payout')) return next();
+  try {
+    await accessLocks.assertAllowed(req.session.studentId);
+    next();
+  } catch (error) {
+    if (error.code === 'PET_APP_LOCKED') return res.status(423).set('Cache-Control', 'no-store').json({ success: false, code: error.code, message: error.message, access: error.access });
+    next(error);
+  }
+});
+router.use('/brawl', require('./brawl'));
 
 router.get('/bootstrap', requireStudent, asyncRoute(async (req, res) => {
   sendResult(res, await repo.getBootstrap(req.session.studentId));
