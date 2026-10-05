@@ -28,6 +28,11 @@ let joining = false;
 let stateThrottle = new PlayerStateThrottle();
 let lastHudAt = -Infinity;
 let lastFrame = null;
+let previewPenalty = new window.BuiGameQuestionPenalty();
+let answerCooldownUntil = 0;
+let answerCooldownTimer = null;
+let questionCloseTimer = null;
+let questionRequest = 0;
 let startMeta = null;
 let selectedAvatar = normaliseAvatar();
 let gameSettings = { maxEnergy:100, energyPerCorrect:25, infiniteEnergy:false };
@@ -120,6 +125,9 @@ function startGame(seed,durationSec,startedAt,resume,settings){
   scene=null;
   stateThrottle = new PlayerStateThrottle();
   lastHudAt = -Infinity;
+  closeQuestion();
+  previewPenalty = new window.BuiGameQuestionPenalty();
+  setAnswerCooldown(resume?.answerPenalty?.cooldownMs || 0);
   const hooks={
     name:me.name||'Koko', energy:startingEnergy, maxEnergy:gameSettings.maxEnergy,
     avatar:selectedAvatar,
@@ -327,12 +335,51 @@ for(const eventName of ['pointerdown','keydown','touchstart']) window.addEventLi
 refreshAudioButton();
 
 $('answerBtn').addEventListener('click',openQuestion);$('qClose').addEventListener('click',closeQuestion);
+function refreshAnswerCooldown(){
+  const seconds=Math.max(0,Math.ceil((answerCooldownUntil-performance.now())/1000));
+  const button=$('answerBtn');
+  button.disabled=seconds>0;
+  button.querySelector('[data-i18n="g.answer"]').textContent=seconds?t('g.qCooldownShort',{seconds}):t('g.answer');
+  button.querySelector('small').textContent=t(seconds?'g.qCooldownWait':'g.answerSub');
+  button.setAttribute('aria-label',seconds?t('g.qCooldown',{seconds}):t('g.answerAria'));
+  const status=$('qCooldown');
+  status.hidden=!seconds;
+  const text=seconds?t('g.qCooldown',{seconds}):'';
+  if(status.textContent!==text)status.textContent=text;
+  if(!seconds){
+    clearInterval(answerCooldownTimer);answerCooldownTimer=null;
+    if($('qFeedback').dataset.penalty==='true')$('qFeedback').textContent=t('g.qCooldownReady');
+  }
+}
+function setAnswerCooldown(milliseconds){
+  clearInterval(answerCooldownTimer);answerCooldownTimer=null;
+  answerCooldownUntil=performance.now()+Math.max(0,Number(milliseconds)||0);
+  refreshAnswerCooldown();
+  if(milliseconds>0)answerCooldownTimer=setInterval(refreshAnswerCooldown,200);
+}
+function showQuestionCooldown(res){
+  $('qText').textContent=t('g.qCooldownTitle');
+  $('qChoices').innerHTML='';
+  $('qFeedback').textContent=t('g.qWrongPenalty');
+  $('qFeedback').className='q-feedback bad';
+  $('qFeedback').dataset.penalty='true';
+  $('qClose').style.display='';
+  setAnswerCooldown(res.cooldownMs);
+}
 function openQuestion(){
-  if(!scene||frozen||scene.finished)return;frozen=true;scene.resumeControl();
+  if(!scene||frozen||scene.finished||performance.now()<answerCooldownUntil)return;
+  const request=++questionRequest;
+  frozen=true;scene.resumeControl();
+  clearTimeout(questionCloseTimer);questionCloseTimer=null;
+  delete $('qFeedback').dataset.penalty;
   $('qFeedback').textContent='';$('qFeedback').className='q-feedback';$('qClose').style.display='none';$('qImage').hidden=true;$('qImage').removeAttribute('src');$('qOverlay').classList.add('open');
   if(preview)return renderQuestion({question:t('g.qSample'),choices:['48','54','56','64']});
   $('qText').textContent='';$('qChoices').innerHTML=`<div class="muted" style="grid-column:1/-1;text-align:center">${escapeHtml(t('g.qLoading'))}</div>`;
-  socket.emit('player:question',res=>{if(!res?.ok)return closeQuestion();renderQuestion(res);});
+  socket.emit('player:question',res=>{
+    if(request!==questionRequest||!scene||!frozen)return;
+    if(res?.reason==='answer-cooldown')return showQuestionCooldown(res);
+    if(!res?.ok)return closeQuestion();renderQuestion(res);
+  });
 }
 function renderQuestion(res){
   $('qText').textContent=res.question;
@@ -342,18 +389,26 @@ function renderQuestion(res){
   $('qChoices').innerHTML='';res.choices.forEach((c,i)=>{const b=document.createElement('button');b.className='q-choice';b.textContent=c;b.onclick=()=>answer(i);$('qChoices').appendChild(b);});
 }
 function answer(choice){
-  const buttons=[...$('qChoices').children];buttons.forEach(b=>b.disabled=true);
+  const buttons=[...$('qChoices').children];
+  if(!scene||!frozen||buttons[choice]?.disabled||!buttons[choice]||performance.now()<answerCooldownUntil)return;
+  buttons.forEach(b=>b.disabled=true);
+  const request=questionRequest;
   if(preview)return applyAnswer({
     correct:choice===2,
     correctChoice:2,
-    gain:gameSettings.infiniteEnergy?0:gameSettings.energyPerCorrect,
+    gain:choice===2&&!gameSettings.infiniteEnergy?gameSettings.energyPerCorrect:0,
     energy:gameSettings.infiniteEnergy
       ? gameSettings.maxEnergy
-      : Math.min(gameSettings.maxEnergy,(lastFrame?.energy||40)+gameSettings.energyPerCorrect),
+      : Math.min(gameSettings.maxEnergy,(lastFrame?.energy??40)+(choice===2?gameSettings.energyPerCorrect:0)),
     streak:1,
     infiniteEnergy:gameSettings.infiniteEnergy,
+    ...previewPenalty.recordAnswer(choice===2,performance.now()),
   },choice,buttons);
-  socket.emit('player:answer',{choice},res=>{if(!res?.ok)return closeQuestion();applyAnswer(res,choice,buttons);});
+  socket.emit('player:answer',{choice},res=>{
+    if(request!==questionRequest||!scene||!frozen)return;
+    if(res?.reason==='answer-cooldown')return showQuestionCooldown(res);
+    if(!res?.ok)return closeQuestion();applyAnswer(res,choice,buttons);
+  });
 }
 function applyAnswer(res,choice,buttons){
   gameAudio.play(res.correct?'correct':'wrong');
@@ -361,11 +416,14 @@ function applyAnswer(res,choice,buttons){
   const fb=$('qFeedback');
   fb.textContent=res.correct
     ? (res.infiniteEnergy?t('g.qRightInfinite'):t('g.qRight',{gain:res.gain}))
-    :t('g.qWrong');
+    :t(res.cooldownMs>0?'g.qWrongPenalty':'g.qWrong');
   fb.classList.add(res.correct?'good':'bad');scene.setEnergy(res.energy);
-  if(res.correct)setTimeout(closeQuestion,800);else $('qClose').style.display='';
+  if(res.cooldownMs>0){fb.dataset.penalty='true';setAnswerCooldown(res.cooldownMs);}
+  if(res.correct)questionCloseTimer=setTimeout(closeQuestion,800);else $('qClose').style.display='';
 }
 function closeQuestion(){
+  questionRequest++;
+  clearTimeout(questionCloseTimer);questionCloseTimer=null;
   $('qOverlay').classList.remove('open');frozen=false;scene?.resumeControl();
   if(document.activeElement instanceof HTMLElement)document.activeElement.blur();
   $('gameCanvas').focus({preventScroll:true});
@@ -378,6 +436,7 @@ function toast(message,gold=false){const el=document.createElement('div');el.cla
 // the fallback look for a child who has not hatched a pet yet, at their default values.
 
 function showResults(leaderboard,{personal=false,place=null}={}){
+  closeQuestion();setAnswerCooldown(0);
   phaserGame?.destroy(true);phaserGame=null;scene=null;const list=$('resultsList');list.innerHTML='';
   leaderboard.forEach(row=>{const d=document.createElement('div');d.className=`result-row${row.rank<=3?` top${row.rank}`:''}`;d.innerHTML=`<div class="rank">${['🥇','🥈','🥉'][row.rank-1]||row.rank}</div><div class="name">${escapeHtml(row.name)}${row.finished?' 🏁':''}</div><div class="stat">✓${row.correct} ✗${row.wrong}</div><div class="height">${Math.round((row.bestProgress??row.bestHeight??0)*100)}%</div>`;list.appendChild(d);});
   $('resultEmoji').textContent=personal?'🏆':'🏁';

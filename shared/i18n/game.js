@@ -58,6 +58,12 @@ BuiI18n.register({
   'g.qRightInfinite': { 'zh-HK': '答啱喇！無限能量保持開啟 ⚡', 'en-US': 'Correct! Unlimited energy stays on ⚡' },
   'g.qRight':        { 'zh-HK': '答啱喇！能量 +{gain} ⚡', 'en-US': 'Correct! Energy +{gain} ⚡' },
   'g.qWrong':        { 'zh-HK': '差少少，再試下一題！', 'en-US': 'So close — try the next one!' },
+  'g.qWrongPenalty': { 'zh-HK': '連續答錯 3 題，休息一下。', 'en-US': 'Three incorrect answers in a row. Take a short break.' },
+  'g.qCooldown':     { 'zh-HK': '{seconds} 秒後可以再答題。', 'en-US': 'You can answer again in {seconds} seconds.' },
+  'g.qCooldownShort': { 'zh-HK': '{seconds} 秒', 'en-US': '{seconds}s' },
+  'g.qCooldownWait': { 'zh-HK': '稍等一下', 'en-US': 'Please wait' },
+  'g.qCooldownReady': { 'zh-HK': '可以再答題了！', 'en-US': 'You can answer again!' },
+  'g.qCooldownTitle': { 'zh-HK': '答題暫停', 'en-US': 'Answers paused' },
 
   // --- results ----------------------------------------------------------
   'g.gameOver':      { 'zh-HK': '遊戲結束', 'en-US': 'Game over' },

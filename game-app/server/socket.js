@@ -16,6 +16,7 @@ const setsRepo = require('../repositories/questionSets.repo');
 const petRepo = require('../../pet-app/repositories/pet.repo');
 const demoSet = require('../lib/demoSet');
 const crystalSet = require('../../tower-defense-app/lib/defaultQuestions');
+const GameQuestionPenalty = require('../../shared/game-question-penalty');
 
 const DEFAULT_GAME_SETTINGS = Object.freeze({
   maxEnergy: 100,
@@ -313,6 +314,7 @@ module.exports = function (io, app) {
           correct: 0,
           wrong: 0,
           streak: 0,
+          questionPenalty: new GameQuestionPenalty(),
           finishedAt: null,
           pendingQuestion: null,
           avatar: normaliseAvatar(avatar, pet),
@@ -355,6 +357,7 @@ module.exports = function (io, app) {
               bestHeight: player.bestProgress ?? player.bestHeight,
               altitude: player.altitude || 0,
               checkpoint: player.checkpoint,
+              answerPenalty: player.questionPenalty.snapshot(),
               finished: !!player.finishedAt
             }
           : null,
@@ -378,6 +381,8 @@ module.exports = function (io, app) {
       const room = rooms.get(socket.data.code);
       const player = room?.players.get(socket.data.playerKey);
       if (!room || !player || room.phase !== 'playing') return ack?.({ ok: false });
+      const penalty = player.questionPenalty.snapshot();
+      if (penalty.cooldownMs) return ack?.({ ok: false, reason: 'answer-cooldown', ...penalty });
 
       const q = room.questions[Math.floor(Math.random() * room.questions.length)];
       const order = shuffled(q.choices.map((_, i) => i));
@@ -394,11 +399,15 @@ module.exports = function (io, app) {
       const room = rooms.get(socket.data.code);
       const player = room?.players.get(socket.data.playerKey);
       if (!room || !player || room.phase !== 'playing') return ack?.({ ok: false });
+      const penalty = player.questionPenalty.snapshot();
+      if (penalty.cooldownMs) return ack?.({ ok: false, reason: 'answer-cooldown', ...penalty });
       const pending = player.pendingQuestion;
       if (!pending) return ack?.({ ok: false });
+      const selected = Number(choice);
+      if (!Number.isInteger(selected) || selected < 0 || selected >= pending.order.length) return ack?.({ ok: false });
       player.pendingQuestion = null;
 
-      const picked = pending.order[Number(choice)];
+      const picked = pending.order[selected];
       const correct = picked === pending.qRef.correctIndex;
       let gain = 0;
       if (correct) {
@@ -421,6 +430,7 @@ module.exports = function (io, app) {
         maxEnergy: room.settings.maxEnergy,
         infiniteEnergy: room.settings.infiniteEnergy,
         correctChoice: pending.order.indexOf(pending.qRef.correctIndex),
+        ...player.questionPenalty.recordAnswer(correct),
       });
     });
 

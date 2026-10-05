@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+
+const require=createRequire(import.meta.url);
+const GameQuestionPenalty=require('../shared/game-question-penalty');
+const penalty=new GameQuestionPenalty();
+assert.deepEqual(penalty.snapshot(0),{wrongStreak:0,cooldownMs:0});
+assert.deepEqual(penalty.recordAnswer(false,100),{wrongStreak:1,cooldownMs:0});
+assert.deepEqual(penalty.recordAnswer(false,200),{wrongStreak:2,cooldownMs:0});
+assert.deepEqual(penalty.recordAnswer(true,300),{wrongStreak:0,cooldownMs:0},'a correct answer resets consecutive mistakes');
+penalty.recordAnswer(false,400);
+penalty.recordAnswer(false,500);
+assert.deepEqual(penalty.recordAnswer(false,600),{wrongStreak:3,cooldownMs:5000});
+assert.deepEqual(penalty.recordAnswer(true,1000),{wrongStreak:3,cooldownMs:4600},'answers cannot reset an active punishment');
+assert.deepEqual(penalty.recordAnswer(false,1100),{wrongStreak:3,cooldownMs:4500},'attempts during cooldown cannot extend it');
+assert.deepEqual(penalty.snapshot(5599),{wrongStreak:3,cooldownMs:1},'the entire five seconds must pass');
+assert.deepEqual(penalty.snapshot(5600),{wrongStreak:0,cooldownMs:0},'expiry starts a fresh streak');
+assert.deepEqual(penalty.recordAnswer(false,5601),{wrongStreak:1,cooldownMs:0});
+penalty.recordAnswer(false,5602);
+assert.deepEqual(penalty.recordAnswer(false,5603),{wrongStreak:3,cooldownMs:5000},'another three consecutive mistakes trigger another punishment');
+assert.deepEqual(new GameQuestionPenalty().snapshot(5603),{wrongStreak:0,cooldownMs:0},'each player has an independent streak');
+console.log('Question penalty passed: three consecutive errors, exact five-second lock, correct-answer reset, repeated groups and independent players.');

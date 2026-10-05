@@ -185,6 +185,7 @@ input, select, textarea { font-family: inherit; }
 }
 .answer-btn-float:hover { filter: brightness(1.06); transform: translateY(-2px); }
 .answer-btn-float:active { transform: translateY(6px); box-shadow: 0 3px 0 #c66f12, 0 7px 16px rgba(63,44,17,.24); }
+.answer-btn-float:disabled { cursor: wait; filter: saturate(.55); transform: none; }
 .answer-btn-float .zap { grid-row: 1 / 3; display: grid; place-items: center; width: 34px; height: 42px; border-radius: 11px; background: rgba(255,255,255,.35); font-size: 23px; }
 .answer-btn-float small { font-size: 9px; opacity: .72; letter-spacing: .04em; }
 
@@ -268,6 +269,7 @@ input, select, textarea { font-family: inherit; }
 .q-feedback { text-align: center; font-weight: 900; font-size: 18px; margin-top: 14px; min-height: 24px; }
 .q-feedback.good { color: var(--mint-dark); }
 .q-feedback.bad { color: var(--coral); }
+.q-cooldown { margin-top: 8px; text-align: center; color: var(--ink); font-size: 16px; font-weight: 700; }
 .q-close { margin-top: 12px; }
 
 /* ---------- results ---------- */

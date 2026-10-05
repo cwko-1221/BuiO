@@ -6,8 +6,9 @@
   <title data-i18n="g.pageTitle">唔好望落嚟 | BuiO 遊戲</title>
   <script src="/shared/i18n.js?v=20260910-1"></script>
   <script src="/shared/server-i18n.js?v=20260910-1"></script>
-  <script src="/shared/i18n/game.js?v=20261001-question-images-1"></script>
-  <link rel="stylesheet" href="/game/css/game.css?v=20261001-question-images-1">
+  <script src="/shared/i18n/game.js?v=20261006-answer-cooldown-1"></script>
+  <script src="/shared/game-question-penalty.js?v=20261006-answer-cooldown-1"></script>
+  <link rel="stylesheet" href="/game/css/game.css?v=20261006-answer-cooldown-1">
 </head>
 <body>
 
@@ -89,6 +90,7 @@
         <img id="qImage" class="q-image" alt="題目圖片" data-i18n-attr="alt:g.questionImageAlt" hidden>
         <div id="qChoices" class="q-choices"></div>
         <div id="qFeedback" class="q-feedback"></div>
+        <div id="qCooldown" class="q-cooldown" role="status" aria-live="polite" hidden></div>
         <button id="qClose" class="btn secondary q-close" style="display:none" data-i18n="g.keepClimbing">繼續爬山 🧗</button>
       </div>
     </div>
@@ -109,6 +111,6 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/game/vendor/phaser/phaser.min.js"></script>
-  <script type="module" src="/game/js/v2/main.js?v=20261005-no-ghosts-1"></script>
+  <script type="module" src="/game/js/v2/main.js?v=20261006-answer-cooldown-1"></script>
 </body>
 </html>
