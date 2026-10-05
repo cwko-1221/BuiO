@@ -1,5 +1,6 @@
 import { buildCourse, validateCourse } from './course.js?v=20260907-ipad-perf-3';
-import { GameScene } from './GameScene.js?v=20260910-wire-1';
+import { GameScene } from './GameScene.js?v=20261005-no-ghosts-1';
+import { PlayerStateThrottle } from './PlayerStateThrottle.js?v=20261005-no-ghosts-1';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 import { normaliseAvatar } from './avatar.js?v=20260907-side-climber-1';
 
@@ -24,12 +25,9 @@ let scene = null;
 let frozen = false;
 let roomsTimer = null;
 let joining = false;
-let lastNet = 0;
-let lastNetworkMotion = null;
-let lastNetworkFacing = null;
-let lastNetworkPose = null;
+let stateThrottle = new PlayerStateThrottle();
+let lastHudAt = -Infinity;
 let lastFrame = null;
-let pendingLooks = null;
 let startMeta = null;
 let selectedAvatar = normaliseAvatar();
 let gameSettings = { maxEnergy:100, energyPerCorrect:25, infiniteEnergy:false };
@@ -101,11 +99,6 @@ async function joinRoom(code){
 }
 
 socket.on('game:start',({seed,durationSec,startedAt,settings})=>startGame(seed,durationSec,startedAt,null,settings));
-// Identities arrive on their own channel, and ahead of the round starting — so before there is a
-// scene to give them to. Whatever came early waits here until there is.
-socket.on('game:looks',list=>{ pendingLooks=list; scene?.setLooks(list); });
-socket.on('game:positions',list=>scene?.updateGhosts(list,startMeta?.playerKey));
-socket.on('game:position',row=>scene?.updateGhostRow(row,startMeta?.playerKey));
 socket.on('game:crumble',({id})=>scene?.triggerCrumble(id,false));
 socket.on('game:summit',({name,place})=>toast(t('g.summitOther',{name,place:ordinal(place)}),true));
 socket.on('game:over',({leaderboard})=>showResults(leaderboard));
@@ -125,6 +118,8 @@ function startGame(seed,durationSec,startedAt,resume,settings){
   startMeta={...(startMeta||{}),seed,durationSec,startedAt:startedAt||Date.now(),course};
   if(phaserGame)phaserGame.destroy(true);
   scene=null;
+  stateThrottle = new PlayerStateThrottle();
+  lastHudAt = -Infinity;
   const hooks={
     name:me.name||'Koko', energy:startingEnergy, maxEnergy:gameSettings.maxEnergy,
     avatar:selectedAvatar,
@@ -147,9 +142,6 @@ function startGame(seed,durationSec,startedAt,resume,settings){
     },
     onReady:s=>{
       scene=s;
-      // Kept rather than consumed: the server sends this just before the round starts, so it can
-      // arrive while the previous scene is still standing, and the one built next still needs it.
-      if(pendingLooks)s.setLooks(pendingLooks);
       if(Number.isFinite(resume?.x)&&Number.isFinite(resume?.y))s.setPlayerPosition(resume.x,resume.y);
       else if(preview&&Number.isFinite(previewAltitude)) {
         const checkpoint=course.checkpoints.sort((a,b)=>Math.abs(a.altitude-previewAltitude)-Math.abs(b.altitude-previewAltitude))[0];
@@ -200,7 +192,11 @@ function setHud(id,value){
 
 function updateHudAndNetwork(state){
   lastFrame=state;
-  const now=Date.now(); const left=Math.max(0,startMeta.durationSec-(now-startMeta.startedAt)/1000);
+  const now=Date.now();
+  if(!preview && stateThrottle.shouldSend(state,now)) socket.volatile.emit('player:state',state);
+  if(now-lastHudAt<100)return;
+  lastHudAt=now;
+  const left=Math.max(0,startMeta.durationSec-(now-startMeta.startedAt)/1000);
   setHud('timerPill',`⏱ ${Math.floor(left/60)}:${String(Math.floor(left%60)).padStart(2,'0')}`);
   setHud('heightPill',t('g.height',{metres:Math.round(state.altitude)}));
   setHud('stagePill',`${String(state.zoneIndex+1).padStart(2,'0')} · ${state.zoneName}`);
@@ -213,23 +209,6 @@ function updateHudAndNetwork(state){
     $('energyFill').classList.toggle('low',energyPercent<20);
   }
   setHud('energyText',gameSettings.infiniteEnergy?'∞':String(Math.round(state.energy)));
-  if(!preview){
-    const motionChanged=state.animation!==lastNetworkMotion;
-    const facingChanged=state.facing!==lastNetworkFacing;
-    const moved=!lastNetworkPose||Math.hypot(state.x-lastNetworkPose.x,state.y-lastNetworkPose.y)>.2;
-    const active=moved||state.animation!=='idle';
-    // Matched to the server's broadcast tick: sending faster than the room is relayed only means
-    // frames that are overwritten before anyone sees them, paid for out of the iPad's own radio
-    // and the class's shared Wi-Fi airtime. A turn or a jump still leaves immediately, below.
-    const due=now-lastNet>=(active?33:100);
-    if(due||motionChanged||facingChanged){
-      lastNet=now;
-      lastNetworkMotion=state.animation;
-      lastNetworkFacing=state.facing;
-      lastNetworkPose={x:state.x,y:state.y};
-      socket.volatile.emit('player:state',state);
-    }
-  }
 }
 
 // iOS ignores user-scalable=no (since iOS 10) and touch-action: manipulation still permits a

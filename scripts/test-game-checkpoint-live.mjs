@@ -16,7 +16,7 @@ page.on('pageerror',error=>errors.push(error.message));
 page.on('response',response=>{
   if(response.status()<400)return;
   const url=new URL(response.url());
-  if((url.pathname==='/api/auth/me'&&response.status()===401)||url.pathname==='/favicon.ico')return;
+  if((['/api/auth/me','/api/game/my-pet'].includes(url.pathname)&&response.status()===401)||url.pathname==='/favicon.ico')return;
   errors.push(`${response.status()} ${url.pathname}`);
 });
 

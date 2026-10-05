@@ -9,30 +9,13 @@ import { CAT_WORLD, CAT_PLAYER, collideWithPlayer } from './collisionFilters.js'
 import { checkpointPayload, resolveCheckpoint } from './checkpoint-state.js?v=20260719-flag-checkpoints';
 import { RouteAutoplay } from './RouteAutoplay.js?v=20260717-switchback-playtest';
 import { beginCrumbleFall, CrumblePlatformState } from './CrumblePlatform.js?v=20260725-crumble-wake';
-import { RemoteGhostState, SURFACE_TOLERANCE } from './RemoteGhostState.js?v=20260908-net-30hz-1';
+import { WorldRenderWindow } from './WorldRenderWindow.js?v=20261005-no-ghosts-1';
 import { timedHazardState } from './timed-hazards.js?v=20260719-power20-lasers';
 import { accessoryGlyph, avatarTint, normaliseAvatar } from './avatar.js?v=20260907-side-climber-1';
-import { definePetAnims, destroyLayers, makeLayers, petAnim, petKeys, petOf, queuePet, syncLayers }
+import { definePetAnims, makeLayers, petAnim, petKeys, petOf, queuePet, syncLayers }
   from './petAvatar.js?v=20260907-side-climber-1';
 
-// How wide a column of the course one floor-lookup bucket covers. The course is 5600 wide, so
-// this is a couple of dozen buckets holding a handful of platforms each — enough to turn "which
-// platform is under this climber" from a walk of every body in the world into a walk of one column.
-const FLOOR_BUCKET = 256;
-
-// The order is the wire format: a climber's movement arrives as its index here, not as its name.
-// game-app/server/socket.js holds the same list, and scripts/test-game-network.mjs fails if the
-// two ever drift apart.
-const ANIMATIONS = ['idle', 'run', 'jump', 'fall', 'land', 'celebrate'];
-
-/** Whether two avatars would draw the same climber. */
-function sameLook(a,b) {
-  return !!a && !!b
-    && a.character===b.character
-    && a.accessory===b.accessory
-    && a.pet?.atlas===b.pet?.atlas
-    && (a.pet?.layers||[]).join()===(b.pet?.layers||[]).join();
-}
+const STAGE_NAMES = Object.values(ZONE_NAMES);
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -49,14 +32,9 @@ export class GameScene extends Phaser.Scene {
     this.coyote = 0;
     this.grounded = false;
     this.dropUntil = 0;
-    this.lastNet = 0;
     this.dynamicObjects = [];
     this.crumbleObjects = new Map();
     this.launcherCooldowns = new Map();
-    this.ghosts = new Map();
-    this.looks = new Map();
-    this.byIndex = new Map();
-    this.floorBuckets = null;
     this.groundContacts = new Map();
     this.leftContacts = new Map();
     this.rightContacts = new Map();
@@ -79,8 +57,6 @@ export class GameScene extends Phaser.Scene {
     const versioned = url => `${url}${url.includes('?')?'&':'?'}v=${assetVersion}`;
     this.load.image('sky-v2', '/game/images/game/sky-panorama.webp');
     this.load.image('player-v2', '/game/images/v2/characters/player-idle.webp');
-    // The climber's own pet, if they have one. Other climbers' pets are fetched as they appear,
-    // since who else is on the mountain is not known until they are.
     this.myPet = petOf(this.avatar);
     if (this.myPet) queuePet(this, this.myPet);
     for (const cp of this.course.checkpoints) {
@@ -121,6 +97,11 @@ export class GameScene extends Phaser.Scene {
     this.createHazards();
     this.createCheckpoints();
     this.createSummit();
+    const movingSprites = new Set([
+      ...this.dynamicObjects.map(item => item.sprite),
+      ...Array.from(this.crumbleObjects.values(), item => item.sprite)
+    ]);
+    this.renderWindow = new WorldRenderWindow(this.children.list.filter(object => !movingSprites.has(object)));
     this.createPlayer();
     this.bindInputs();
     this.bindCollisions();
@@ -539,7 +520,6 @@ export class GameScene extends Phaser.Scene {
     Body.setStatic(item.body,true);
     // Unconditional: a long stall can carry the state machine from falling to ready in one
     // call, skipping the removal, and this is the moment the body is put back where it belongs.
-    this.floorBuckets=null;
     if (item.removed) {
       Composite.add(this.matter.world.localWorld,item.body);
       item.removed=false;
@@ -558,7 +538,6 @@ export class GameScene extends Phaser.Scene {
       } else if (result.changed&&result.phase==='hidden') {
         this.clearCrumbleContacts(item.obj.id);
         Composite.remove(this.matter.world.localWorld,item.body,true);
-        this.floorBuckets=null;
         item.removed=true;
         item.sprite.setVisible(false);
       } else if (result.changed&&result.phase==='ready') {
@@ -574,6 +553,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time, deltaMs) {
+    this.renderWindow?.update(this.cameras.main,time);
     this.updateHazards(time);
     if (!this.player || this.finished || this.hooks.isFrozen?.()) return;
     const dt = Math.min(deltaMs,34)/1000;
@@ -584,8 +564,13 @@ export class GameScene extends Phaser.Scene {
 
     const vy = this.playerBody.velocity.y;
     const wasGrounded = this.grounded;
-    const under = [...this.groundContacts.values()].filter(body => !body.isSensor);
-    this.grounded = under.length > 0 && vy >= -1.5;
+    let hasGround = false, conveyorBody = null;
+    for (const body of this.groundContacts.values()) {
+      if (body.isSensor) continue;
+      hasGround = true;
+      if (!conveyorBody && body.courseObject?.behavior?.type === 'conveyor') conveyorBody = body;
+    }
+    this.grounded = hasGround && vy >= -1.5;
     if (this.grounded && time<(this.launcherBoostUntil||0)) this.launcherBoostUntil=0;
     if (!this.grounded) this.peakFallSpeed=Math.max(this.peakFallSpeed,vy);
     if (this.grounded&&!wasGrounded) {
@@ -604,7 +589,6 @@ export class GameScene extends Phaser.Scene {
     const target = dir * 5.6;
     const nextVx = Phaser.Math.Linear(this.playerBody.velocity.x,target,this.grounded?.2:.085);
     this.setPlayerVelocity(nextVx,null);
-    const conveyorBody = under.find(b => b.courseObject?.behavior?.type === 'conveyor');
     if (conveyorBody && this.grounded) this.setPlayerVelocity(nextVx + conveyorBody.courseObject.behavior.speed,null);
     if (this.hooks.infiniteEnergy) this.energy=this.maxEnergy;
     else if (dir && this.energy > 0) this.energy = Math.max(0,this.energy-4.3*dt);
@@ -690,20 +674,6 @@ export class GameScene extends Phaser.Scene {
     const playing=this.player.anims.currentAnim?.key||'';
     const midJump=playing.endsWith('jump')||playing.endsWith('doubleJump');
     if (!midJump || !this.player.anims.isPlaying) this.player.play(this.playerAnimName(motion),true);
-    for (const ghost of this.ghosts.values()) {
-      // The floor depends on where the last snapshot put them, not on the frame: between snapshots
-      // — thirty a second while running, ten while standing still — the answer cannot change.
-      if (ghost.floorAtX!==ghost.state.snapX||ghost.floorAtY!==ghost.state.snapY) {
-        ghost.floorAtX=ghost.state.snapX;
-        ghost.floorAtY=ghost.state.snapY;
-        ghost.floorY=this.ghostFloorY(ghost.state);
-      }
-      const pose=ghost.state.sample(time,deltaMs,ghost.floorY);
-      ghost.sprite.setPosition(pose.x,pose.y);
-      ghost.accessory?.setPosition(pose.x,pose.y-39);
-      ghost.label.setPosition(pose.x,pose.y+40);
-      syncLayers(ghost.layers,ghost.sprite);
-    }
 
     if (this.player.y > this.course.world.height + 180 || this.player.x < -100 || this.player.x > this.course.world.width+100) this.respawn();
     const altitude = Math.max(0,(this.course.startAltitudeY-this.player.y)/5);
@@ -723,7 +693,7 @@ export class GameScene extends Phaser.Scene {
       x:this.player.x,y:this.player.y,velocityX:this.playerBody.velocity.x,velocityY:this.playerBody.velocity.y,
       energy:this.energy,progress:this.progress,altitude,animation:motion,
       avatar:this.avatar,
-      facing:this.player.flipX?-1:1,zoneIndex,zoneName:Object.values(ZONE_NAMES)[zoneIndex],
+      facing:this.player.flipX?-1:1,zoneIndex,zoneName:STAGE_NAMES[zoneIndex],
       checkpoint:checkpointPayload(this.checkpoint)
     });
   }
@@ -802,202 +772,4 @@ export class GameScene extends Phaser.Scene {
     this.hooks.onFinish?.();
   }
 
-  // Highest standable surface under a ghost, as a sprite-centre y limit.
-  // The player compound's collider bottom sits 41px below the sprite centre
-  // at rest (centre-of-mass offset + contact slop, measured empirically).
-  // Downward prediction is clamped against the real course geometry, so a
-  // falling ghost lands on the platform it is actually heading for instead
-  // of trailing the fall or sinking into artwork, and a sender's
-  // landing-penetration frames are lifted back to the surface. Crumbled
-  // platforms turn dynamic while falling and drop out of the static filter
-  // automatically.
-  ghostFloorY(state) {
-    const bucket=this.floorBucketAt(state.snapX);
-    if (!bucket) return Infinity;
-    const feetY=state.snapY+41;
-    let floor=Infinity;
-    for (const body of bucket) {
-      // Not baked into the index: a crumbling platform turns dynamic where it stands, and must
-      // stop being a floor for that whole fall without the column being rebuilt.
-      if (!body.isStatic||body.isSensor) continue;
-      const b=body.bounds;
-      if (state.snapX<b.min.x-2||state.snapX>b.max.x+2) continue;
-      if (b.min.y<feetY-SURFACE_TOLERANCE||b.min.y>=floor) continue;   // tops above the feet are walls beside the ghost
-      floor=b.min.y;
-    }
-    return floor-41;
-  }
-
-  /**
-   * The static bodies standing in one column of the course.
-   *
-   * This used to ask Matter for every body in the world — a fresh 300-entry array, walked in full,
-   * for each remote climber on every frame. In a class of 25 that is a quarter of a million bounds
-   * tests a second and 1,400 throwaway arrays, all to answer a question about one column. The
-   * columns are built once and rebuilt only when a body actually joins or leaves the world, which
-   * is a crumbling platform vanishing and coming back.
-   */
-  floorBucketAt(x) {
-    if (!this.floorBuckets) this.rebuildFloorBuckets();
-    return this.floorBuckets.get(Math.floor(x/FLOOR_BUCKET));
-  }
-
-  rebuildFloorBuckets() {
-    this.floorBuckets=new Map();
-    for (const body of Phaser.Physics.Matter.Matter.Composite.allBodies(this.matter.world.localWorld)) {
-      if (body.isSensor) continue;
-      const b=body.bounds;
-      const from=Math.floor((b.min.x-2)/FLOOR_BUCKET), to=Math.floor((b.max.x+2)/FLOOR_BUCKET);
-      for (let column=from;column<=to;column++) {
-        let bucket=this.floorBuckets.get(column);
-        if (!bucket) this.floorBuckets.set(column,bucket=[]);
-        bucket.push(body);
-      }
-    }
-  }
-
-  /**
-   * One climber's row, as it comes off the wire.
-   *
-   * `[index, x, y, vx, vy, state, seq]`, where state carries the movement, which way they face and
-   * whether they have finished, in five bits. The names of these fields are not sent — the room
-   * agreed on the order instead — and the climber is a number, resolved back to who they are
-   * through the roster that arrived on 'game:looks'.
-   */
-  decodePosition(row) {
-    if (!Array.isArray(row)) return row;   // a spelt-out row, from a server not yet updated
-    const id = this.byIndex.get(row[0]);
-    if (!id) return null;                  // somebody whose roster entry has not arrived yet
-    const state = row[5] | 0;
-    return {
-      id,
-      x: row[1], y: row[2], vx: row[3], vy: row[4],
-      facing: state & 1 ? -1 : 1,
-      animation: ANIMATIONS[(state >> 1) & 7] || 'idle',
-      f: !!(state & 16),
-      seq: row[6],
-    };
-  }
-
-  /** One climber, relayed the moment they turned or jumped rather than waiting for the tick. */
-  updateGhostRow(row, myId) {
-    const decoded = this.decodePosition(row);
-    if (decoded) this.updateGhost(decoded, myId);
-  }
-
-  updateGhosts(list, myId) {
-    const seen = new Set();
-    for (const wireRow of list) {
-      const row = this.decodePosition(wireRow);
-      if (!row || row.id === myId) continue;
-      seen.add(row.id);
-      this.updateGhost(row,myId);
-    }
-    for (const [id,ghost] of this.ghosts) if (!seen.has(id)) {
-      ghost.sprite.destroy();
-      ghost.accessory?.destroy();
-      destroyLayers(ghost.layers);
-      ghost.label.destroy();
-      this.ghosts.delete(id);
-    }
-  }
-
-  /**
-   * Fetch another climber's pet.
-   *
-   * Who else is on the mountain is not known until they appear, so their creature cannot be loaded
-   * up front with everything else. It is asked for on sight and the climber wears the plain outfit
-   * until it lands, which is a second at most and never blocks the game.
-   */
-  ensurePet(pet) {
-    if (!pet) return false;
-    const { atlas } = petKeys(pet);
-    if (this.textures.exists(atlas)) return true;
-    this.petsPending ??= new Set();
-    if (this.petsPending.has(atlas)) return false;
-    this.petsPending.add(atlas);
-    if (!queuePet(this,pet)) { this.petsPending.delete(atlas); return this.textures.exists(atlas); }
-    this.load.once('complete',()=>{
-      this.petsPending.delete(atlas);
-      // Anyone still wearing the plain outfit who now has a creature to wear puts it on.
-      for (const ghost of this.ghosts.values()) {
-        if (!ghost.animPrefix && petOf(ghost.avatar)) this.dressGhost(ghost,ghost.avatar,ghost.sprite.x,ghost.sprite.y);
-      }
-    });
-    this.load.start();
-    return false;
-  }
-
-  /** Build (or rebuild) how one other climber looks, keeping where they are and how they move. */
-  dressGhost(ghost,avatar,x,y) {
-    ghost.sprite?.destroy();
-    ghost.accessory?.destroy();
-    destroyLayers(ghost.layers);
-    ghost.accessory=null;
-    ghost.layers=[];
-    const pet=petOf(avatar);
-    if (pet && this.ensurePet(pet)) {
-      const atlasKey=petKeys(pet).atlas;
-      definePetAnims(this,atlasKey);
-      ghost.animPrefix=atlasKey;
-      ghost.sprite=this.add.sprite(x,y,atlasKey,0).setDisplaySize(88,88).setAlpha(.55).setDepth(80);
-      ghost.layers=makeLayers(this,pet,80);
-      for (const layer of ghost.layers) layer.setDisplaySize(88,88).setAlpha(.55);
-    } else {
-      ghost.animPrefix=null;
-      ghost.sprite=this.add.sprite(x,y,'player-idle-1').setDisplaySize(68,70).setAlpha(.55).setDepth(80);
-      ghost.sprite.setTint(avatarTint(avatar));
-      ghost.accessory=this.add.text(x,y-39,accessoryGlyph(avatar),{
-        fontFamily:'"Segoe UI Emoji","Apple Color Emoji",sans-serif',
-        fontSize:'22px',
-        stroke:'#24314d',
-        strokeThickness:3,
-      }).setOrigin(.5).setAlpha(.72).setDepth(85);
-    }
-    ghost.avatar=avatar;
-  }
-
-  /**
-   * Who the other climbers are, as told by the server when it changes.
-   *
-   * Names and pets used to arrive stapled to every position frame, which meant re-deriving an
-   * avatar and string-joining its wearable list once per ghost per frame just to notice that
-   * nothing had changed. Both live here now, and a ghost is re-dressed only when this says so.
-   */
-  setLooks(list) {
-    for (const row of list||[]) {
-      if (!row?.id) continue;
-      this.looks.set(row.id,{name:String(row.name??''),avatar:normaliseAvatar(row.avatar)});
-      // The number every position frame for this climber will arrive under.
-      if (Number.isInteger(row.n)) this.byIndex.set(row.n,row.id);
-    }
-    for (const [id,ghost] of this.ghosts) {
-      const look=this.looks.get(id);
-      if (!look) continue;
-      if (ghost.label.text!==look.name) ghost.label.setText(look.name);
-      if (!sameLook(look.avatar,ghost.avatar)) {
-        ghost.avatar=look.avatar;
-        this.dressGhost(ghost,look.avatar,ghost.sprite.x,ghost.sprite.y);
-      }
-    }
-  }
-
-  updateGhost(row,myId) {
-    if (!row||row.id===myId) return;
-    let ghost=this.ghosts.get(row.id);
-    if (!ghost) {
-      // A position for somebody whose look has not arrived yet. Positions repeat many times a
-      // second and the look is on its way, so the next frame draws them.
-      const look=this.looks.get(row.id);
-      if (!look) return;
-      const label=this.add.text(row.x,row.y+40,look.name,{fontFamily:'Microsoft JhengHei',fontSize:'14px',fontStyle:'bold',color:'#dff8ff',stroke:'#24314d',strokeThickness:4}).setOrigin(.5).setDepth(90);
-      ghost={label,layers:[],state:new RemoteGhostState(row,this.time.now),avatar:look.avatar};
-      this.dressGhost(ghost,look.avatar,row.x,row.y);
-      this.ghosts.set(row.id,ghost);
-    } else if (!ghost.state.push(row,this.time.now)) return;
-    ghost.sprite.setFlipX(row.facing<0);
-    const motion=row.animation||'idle';
-    const key=ghost.animPrefix?petAnim(ghost.animPrefix,motion):motion;
-    if (this.anims.exists(key)) ghost.sprite.play(key,true);
-  }
 }

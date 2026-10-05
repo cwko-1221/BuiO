@@ -123,21 +123,22 @@ record('WebSocket compression',
 
 // ---- which client the browsers are being handed --------------------------------------------
 const main = await textOf('/game/js/v2/main.js');
-const ghost = await textOf('/game/js/v2/RemoteGhostState.js');
+const scene = await textOf('/game/js/v2/GameScene.js');
+const throttle = await textOf('/game/js/v2/PlayerStateThrottle.js');
 const css = await textOf('/game/css/game.css');
 
 const markers = [
-  ['slim position protocol', main, "game:looks",
-    'names and pets travel on their own channel instead of on every frame'],
-  ['30Hz client send rate', main, 'active?33:100',
-    'the browser sends at the rate the room is relayed, not twice it'],
-  ['matching dead reckoning', ghost, 'BASE_LEAD_MS = 32',
-    'the ghost lead matches the 33ms cadence'],
+  ['10Hz client movement rate', throttle, 'active ? 100 : 250',
+    'movement is sent to the teacher at 10Hz, idle poses at 4Hz'],
+  ['viewport culling', scene, 'this.renderWindow?.update',
+    'the renderer submits nearby world artwork'],
   ['double-tap guard', main, 'lastTap',
     'a second tap in the same spot cannot zoom the page'],
   ['play surface does not pan', css, 'overscroll-behavior: none',
     'no rubber band, so no pinch can start from one'],
 ];
+record('remote ghosts removed', !!main && !!scene && !main.includes("socket.on('game:positions'") && !scene.includes('updateGhost('),
+  'students no longer receive or render other climbers');
 for (const [name, source, marker, why] of markers) {
   record(name, source.includes(marker), source ? why : 'could not read the file to check');
 }

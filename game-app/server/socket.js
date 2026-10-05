@@ -9,7 +9,7 @@
 //   - serving questions (choices shuffled per player) and validating answers,
 //     so the correct answer never reaches the client before answering
 //   - awarding energy for correct answers (with streak bonus)
-//   - relaying player positions to the host board and other players
+//   - relaying player positions to the host board
 //   - recording summit finishes and building the final leaderboard
 
 const setsRepo = require('../repositories/questionSets.repo');
@@ -24,38 +24,8 @@ const DEFAULT_GAME_SETTINGS = Object.freeze({
 });
 const CHARACTER_IDS = new Set(['blue', 'mint', 'coral', 'violet']);
 const ACCESSORY_IDS = new Set(['none', 'cap', 'crown', 'star']);
-// 30Hz, not 60. Every climber's own movement is simulated locally, so this rate decides only how
-// smoothly the OTHER climbers read — and their turns, jumps and landings do not wait for it, they
-// are relayed the moment they happen. Halving it halves what 25 iPads receive and parse, at the
-// cost of about three pixels of extra lag on a running ghost, which the dead reckoning in
-// RemoteGhostState absorbs. Below roughly 20Hz the smoothing starts to show.
-const POSITION_BROADCAST_MS = 33;
-// The teacher's mountain board wants about 10 refreshes a second to read as movement rather than
-// as a slideshow; this divides the tick down to it, so it follows the tick rate.
-const HOST_POSITION_DIVISOR = 3;
-
-const playerRoom = code => `${code}:players`;
-
-// The order is the wire format: a climber's movement travels as its index here, not as its name.
-// game-app/public/js/v2/main.js holds the same list, and scripts/test-game-network.mjs fails if
-// the two ever drift apart.
+const POSITION_BROADCAST_MS = 100;
 const ANIMATIONS = ['idle', 'run', 'jump', 'fall', 'land', 'celebrate'];
-
-// Facing, movement and whether they have finished, in one small number. Three fields of JSON —
-// `"facing":-1,"animation":"celebrate","f":true` — is forty-odd characters for what is five bits.
-const packState = (p) => (p.finishedAt ? 16 : 0)
-  | (Math.max(0, ANIMATIONS.indexOf(p.animation || 'idle')) << 1)
-  | (p.facing < 0 ? 1 : 0);
-
-// What moves, and nothing else.
-//
-// A name and a pet — an atlas URL plus one URL per worn piece — came to some 400 of the 570 bytes
-// this used to weigh, and none of it changes during a climb. Riding on every frame, in a class of
-// 25, that was the bulk of everything a room sent, and it went out sixty times a second. Identity
-// travels separately now, as 'game:looks', on the few occasions it changes.
-//
-// A tenth of a world pixel is finer than any screen here can show, and writing it that way costs a
-// third of the characters of an unrounded double.
 function realtimePosition(p) {
   return {
     id: p.key,
@@ -66,27 +36,6 @@ function realtimePosition(p) {
     facing: p.facing || 1, animation: p.animation || 'idle',
     seq: p.stateSeq || 0, f: !!p.finishedAt,
   };
-}
-
-/**
- * The same thing, as an array, for the twenty-five browsers rather than the one teacher.
- *
- * Compression would have made the field names free, but the socket is terminated by a CDN that
- * does not carry permessage-deflate through, so the names are paid for in full on every frame:
- * `{"id":"s:S001","x":1234.5,...}` spends more than half its characters saying what each number
- * is. A room already knows — the order below is the agreement — and a climber is numbered rather
- * than named, so the key that was nine characters is one.
- */
-function positionRow(p) {
-  return [
-    p.index,
-    Math.round((p.x || 0) * 10) / 10,
-    Math.round((p.y || 0) * 10) / 10,
-    Math.round((p.vx || 0) * 100) / 100,
-    Math.round((p.vy || 0) * 100) / 100,
-    packState(p),
-    p.stateSeq || 0,
-  ];
 }
 
 function clampInteger(value, min, max, fallback) {
@@ -113,8 +62,7 @@ function normaliseSettings(raw = {}) {
 /**
  * A player's look. The character and trinket are the child's own choice and come from the client;
  * the pet does not. A pet is worked out here from the student's own account, so nobody can climb
- * the mountain wearing somebody else's creature, and so the other players' ghosts show the right
- * one too — they never talk to the pet module themselves.
+ * the mountain wearing somebody else's creature.
  */
 function normaliseAvatar(raw = {}, pet = null) {
   const character = CHARACTER_IDS.has(raw.character) ? raw.character : 'blue';
@@ -193,21 +141,6 @@ module.exports = function (io, app) {
       .map(p => ({ name: p.name, studentId: p.studentId, avatar: p.avatar }));
   }
 
-  // Who the other climbers are. Players never received the lobby roster — the only way they learned
-  // a name or a pet was off the position frames — so it is sent to them here instead, on the few
-  // occasions it can change: the round starting, somebody arriving or coming back, somebody
-  // changing what they climb as.
-  function playerLooks(room) {
-    return [...room.players.values()]
-      .filter(p => p.connected)
-      .map(p => ({ n: p.index, id: p.key, name: p.name, avatar: p.avatar }));
-  }
-
-  function sendLooks(room) {
-    if (!room || room.phase !== 'playing') return;
-    nsp.to(playerRoom(room.code)).emit('game:looks', playerLooks(room));
-  }
-
   function endGame(room, reason) {
     if (room.phase === 'ended') return;
     room.phase = 'ended';
@@ -284,8 +217,6 @@ module.exports = function (io, app) {
           settings: gameSettings,
           players: new Map(),                   // playerKey -> player state
           crumbles: new Map(),                  // object id -> next allowed trigger time
-          nextIndex: 0,                         // the number a climber travels as, for this room
-          positionTick: 0,
         };
         rooms.set(code, room);
         socket.data.role = 'host';
@@ -311,35 +242,27 @@ module.exports = function (io, app) {
       if (room.players.size === 0) return ack?.({ ok: false, message: '未有學生加入。' });
       room.phase = 'playing';
       room.startedAt = Date.now();
-      sendLooks(room);
       nsp.to(room.code).emit('game:start', {
         seed: room.seed,
         durationSec: room.durationSec,
         startedAt: room.startedAt,
         settings: room.settings,
       });
-      // Players receive one compact room snapshot every 16ms. This keeps a
-      // 20-player room near 60 Socket.IO callbacks per client instead of
-      // relaying up to 1,200 individual callbacks every second.
+      // Only the teacher needs room positions. Students simulate their own climb locally.
       room.posTimer = setInterval(() => {
-        const hostTick = ++room.positionTick % HOST_POSITION_DIVISOR === 0;
-        const rows=[]; const hostPositions=hostTick?[]:null;
+        const hostPositions=[];
         for (const p of room.players.values()) {
           // A player who joins after the round starts has not sent a world
           // position yet. Do not briefly render the placeholder (0, 0),
           // which is beside the summit on this fixed map.
           if (!p.connected || !p.stateSeq) continue;
-          rows.push(positionRow(p));
-          // The teacher's board reads names and ranks and is one browser refreshed ten times a
-          // second, so it keeps the spelt-out form the page was written against.
-          if (hostTick) hostPositions.push({ ...realtimePosition(p),
+          hostPositions.push({ ...realtimePosition(p),
             name: p.name,
             progress: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
             h: Math.round((p.bestProgress ?? p.bestHeight) * 1000) / 1000,
             altitude: Math.round((p.altitude || 0) * 10) / 10 });
         }
-        nsp.to(playerRoom(room.code)).volatile.emit('game:positions',rows);
-        if (hostTick) nsp.to(room.hostSocket).volatile.emit('game:positions',hostPositions);
+        nsp.to(room.hostSocket).volatile.emit('game:positions',hostPositions);
       }, POSITION_BROADCAST_MS);
       room.endTimer = setTimeout(() => endGame(room, 'time'), room.durationSec * 1000);
       ack?.({ ok: true });
@@ -374,9 +297,6 @@ module.exports = function (io, app) {
       const isNewPlayer = !player;
       if (!player) {
         player = {
-          // Handed out once and kept for the round, reconnects included: it is the name every
-          // position frame goes out under, and the browsers learn it from 'game:looks'.
-          index: room.nextIndex++,
           key,
           name: cleanName,
           studentId: studentId || null,
@@ -413,12 +333,8 @@ module.exports = function (io, app) {
       socket.data.code = room.code;
       socket.data.playerKey = key;
       socket.join(room.code);
-      socket.join(playerRoom(room.code));
 
       nsp.to(room.hostSocket).emit('lobby:roster', roster(room));
-      // Mid-round arrivals are the reason this goes to everyone and not just the newcomer: the
-      // others have never seen this child, and the newcomer has never seen any of them.
-      sendLooks(room);
       ack?.({
         ok: true,
         playerKey: key,
@@ -453,7 +369,6 @@ module.exports = function (io, app) {
       // since it is not the client's to change.
       player.avatar = normaliseAvatar(avatar, player.avatar?.pet || null);
       nsp.to(room.hostSocket).emit('lobby:roster', roster(room));
-      sendLooks(room);
       ack?.({ ok: true, avatar: player.avatar });
     });
 
@@ -516,8 +431,6 @@ module.exports = function (io, app) {
       const room = rooms.get(socket.data.code);
       const player = room?.players.get(socket.data.playerKey);
       if (!room || !player || room.phase !== 'playing') return;
-      const previousAnimation=player.animation;
-      const previousFacing=player.facing;
       player.x = Number(x) || 0;
       player.y = Number(y) || 0;
       player.vx = Number(velocityX) || 0;
@@ -536,12 +449,6 @@ module.exports = function (io, app) {
         player.energy = room.settings.maxEnergy;
       } else if (Number.isFinite(e)) {
         player.energy = Math.min(Math.max(e, 0), room.settings.maxEnergy);
-      }
-      // Jump, landing and direction changes bypass the next 20ms aggregate
-      // tick. They are rare, so this improves responsiveness without turning
-      // a 20-player room into hundreds of per-player events every frame.
-      if (player.animation!==previousAnimation||player.facing!==previousFacing) {
-        socket.to(playerRoom(room.code)).volatile.emit('game:position',positionRow(player));
       }
     });
 

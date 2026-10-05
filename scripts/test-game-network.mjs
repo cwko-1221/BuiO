@@ -1,85 +1,34 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { RemoteGhostState } from '../game-app/public/js/v2/RemoteGhostState.js';
+import { PlayerStateThrottle } from '../game-app/public/js/v2/PlayerStateThrottle.js';
 
-const moving=new RemoteGhostState({x:100,y:200,seq:1,animation:'run'},1000);
-assert.equal(moving.push({x:126,y:190,seq:2,animation:'jump'},1020),true);
-const first=moving.sample(1036,16);
-assert.ok(first.x>100&&first.x<126&&first.y<200&&first.y>190,'zero-velocity updates should interpolate without overshooting');
-assert.equal(first.targetX,126);
-assert.equal(first.targetY,190);
-assert.equal(moving.push({x:90,y:210,seq:2},1050),false,'stale snapshot must be ignored');
+const state = { x:100, y:200, animation:'idle', facing:1, checkpoint:{id:'checkpoint-0'} };
+const throttle = new PlayerStateThrottle();
+assert.equal(throttle.shouldSend(state,0),true,'a new round sends its first pose');
+assert.equal(throttle.shouldSend(state,100),false,'idle updates do not flood the teacher');
+assert.equal(throttle.shouldSend(state,250),true,'idle progress stays current');
 
-const reset=new RemoteGhostState({x:0,y:0,vx:0,vy:0,seq:1},0);
-reset.push({x:500,y:600,seq:2},20);
-assert.deepEqual(reset.sample(20,16),{x:500,y:600,targetX:500,targetY:600},'checkpoint reset should snap immediately');
+state.animation='run';
+state.x=110;
+assert.equal(throttle.shouldSend(state,260),true,'starting to move is sent immediately');
+state.x=120;
+assert.equal(throttle.shouldSend(state,300),false,'continuous movement is limited to 10Hz');
+assert.equal(throttle.shouldSend(state,360),true);
 
-const landing=new RemoteGhostState({x:0,y:80,seq:1,animation:'fall'},0);
-landing.push({x:0,y:100,seq:2,animation:'idle'},20);
-for(let i=0;i<8;i++) assert.ok(landing.sample(20+i*16,16).y<=100,'a landing must never be predicted below the real ground position');
+state.animation='jump';
+assert.equal(throttle.shouldSend(state,361),true,'jump transitions bypass the movement throttle');
+state.facing=-1;
+assert.equal(throttle.shouldSend(state,362),true,'direction changes are sent immediately');
+state.checkpoint={id:'checkpoint-1'};
+assert.equal(throttle.shouldSend(state,363),true,'checkpoint unlocks are saved immediately');
+state.x+=500;
+assert.equal(throttle.shouldSend(state,364),true,'checkpoint resets do not wait for the next tick');
+assert.equal(throttle.shouldSend(state,365),false,'an unchanged jump does not produce repeated events');
+assert.equal(new PlayerStateThrottle().shouldSend(state,365),true,'restarting the scene clears the previous round throttle');
 
-// Dead reckoning: a runner leads its snapshot horizontally so the ghost hides
-// the send/broadcast/render pipeline delay.
-const runner=new RemoteGhostState({x:100,y:200,seq:1,animation:'run',vx:5.6,vy:0},0);
-const led=runner.sample(10,16);
-assert.ok(led.targetX>110,'a moving runner must lead its snapshot');
-assert.equal(led.targetY,200,'grounded motion must never lead vertically');
-
-// The lead is capped: when packets stop, the ghost holds instead of flying on.
-const stalled=runner.sample(5000,16);
-assert.ok(stalled.targetX-100<=5.6*120/(1000/60)+1e-9,'extrapolation must cap at the maximum lead');
-
-// Falls are predicted too, but a floor limit from the course geometry caps
-// them so the ghost lands on the platform instead of sinking through it.
-const faller=new RemoteGhostState({x:0,y:80,seq:1,animation:'fall',vx:0,vy:11},0);
-assert.ok(faller.sample(30,16).targetY>80,'a falling player should lead downward when unobstructed');
-const capped=new RemoteGhostState({x:0,y:80,seq:1,animation:'fall',vx:0,vy:11},0);
-assert.equal(capped.sample(30,16,92).targetY,92,'a predicted fall must stop exactly at the floor limit');
-const oddFloor=new RemoteGhostState({x:0,y:80,seq:1,animation:'fall',vx:0,vy:11},0);
-assert.equal(oddFloor.sample(30,16,60).targetY,66,'a floor estimate may lift the ghost at most the 14px surface tolerance above its snapshot');
-assert.equal(faller.isFalling(),true);
-
-// Hard landings briefly broadcast a platform-penetrating position from the
-// sender's physics solver; the floor limit lifts those back to the surface.
-const penetrated=new RemoteGhostState({x:0,y:105.7,seq:1,animation:'land',vx:0,vy:0},0);
-assert.equal(penetrated.sample(10,16,100).targetY,100,'sender landing penetration must be lifted back to the surface');
-
-// Rising players lead upward so remote jumps read immediately.
-const jumper=new RemoteGhostState({x:0,y:300,seq:1,animation:'jump',vx:0,vy:-12},0);
-assert.ok(jumper.sample(10,16).targetY<300,'a rising jump should lead upward');
-assert.equal(jumper.isFalling(),false);
-
-// The wire agreement. A climber's movement travels as an index into this list and its position
-// as an array whose order nobody transmits, so the two sides holding different lists would not
-// fail loudly — the ghosts would simply run when they were standing still. Both are read as text
-// rather than imported, because one is CommonJS and the other a browser module.
-const listIn = (file) => {
-  const source = readFileSync(new URL(file, import.meta.url), 'utf8');
-  const match = source.match(/const ANIMATIONS = \[([^\]]*)\]/);
-  assert.ok(match, `no ANIMATIONS list found in ${file}`);
-  return match[1].split(',').map((entry) => entry.trim().replace(/^'|'$/g, '')).filter(Boolean);
-};
-const serverAnimations = listIn('../game-app/server/socket.js');
-const clientAnimations = listIn('../game-app/public/js/v2/GameScene.js');
-assert.deepEqual(clientAnimations, serverAnimations,
-  'the animation order is the wire format; the server and the browser must agree on it');
-assert.ok(serverAnimations.length <= 8, 'the packed state field leaves three bits for the movement');
-
-// And the packing itself, both ways, so the five bits keep meaning what they say.
-const pack = (animation, facing, finished) => (finished ? 16 : 0)
-  | (serverAnimations.indexOf(animation) << 1) | (facing < 0 ? 1 : 0);
-const unpack = (state) => ({
-  facing: state & 1 ? -1 : 1,
-  animation: clientAnimations[(state >> 1) & 7] || 'idle',
-  f: !!(state & 16),
-});
-for (const animation of serverAnimations) {
-  for (const facing of [1, -1]) {
-    for (const finished of [false, true]) {
-      assert.deepEqual(unpack(pack(animation, facing, finished)), { animation, facing, f: finished },
-        `${animation}/${facing}/${finished} must survive the round trip`);
-    }
-  }
+const moving = new PlayerStateThrottle();
+let sent=0;
+for(let time=0;time<1000;time+=10) {
+  if(moving.shouldSend({x:time,y:0,animation:'run',facing:1},time))sent++;
 }
-
-console.log('Remote ghost network state passed: bounded lead, floor-clamped falls, stale-packet rejection, teleport snap and a wire format both sides agree on.');
+assert.equal(sent,10,'steady running sends ten updates per second');
+console.log('Player state throttling passed: 10Hz movement, 4Hz idle, immediate jumps, turns, checkpoint saves and resets.');
