@@ -7,7 +7,7 @@ import * as v11 from '../pet-app/lib/brawl/legacy/v11/simulation.mjs';
 import {interceptProjectile} from '../pet-app/lib/brawl/elemental-combat.mjs';
 const zhao='dynasty-warriors-zhao-yun',kirito='sword-art-online-kirito';
 const run=(s,n,mask=0,other=0)=>{const events=[];for(let t=0;t<n;t++){stepBattle(s,t===0?mask:0,t===0?other:0);events.push(...s.events.map(e=>({...e,tick:s.tick})));}return events;};
-assert.equal(VERSION,'brawl-v13');assert.ok([zhao,kirito].every(id=>FIGHTERS.find(f=>f.id===id)?.skills.length===2));
+assert.equal(VERSION,'brawl-v14');assert.ok([zhao,kirito].every(id=>FIGHTERS.find(f=>f.id===id)?.skills.length===2));
 // Compare the archive itself with the approved previous implementation, then
 // verify routing, resumable states and authoritative input replays for every pet.
 const archiveHashes={

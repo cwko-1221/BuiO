@@ -9,7 +9,7 @@ import {FIGHTERS,VERSION,HIDDEN_FIGHTER_IDS,INPUT as I,fightersForVersion} from 
 import * as v5 from '../pet-app/lib/brawl/legacy/v5/simulation.mjs';
 import {createBattle,stepBattle,replayBattle,battleResult} from '../pet-app/lib/brawl/simulation.mjs';
 const require=createRequire(import.meta.url),published=require('../pet-app/lib/catalog').catalog;
-assert.equal(VERSION,'brawl-v13');assert.equal(FIGHTERS.length,28);assert.equal(HIDDEN_FIGHTER_IDS.length,0);
+assert.equal(VERSION,'brawl-v14');assert.equal(FIGHTERS.length,28);assert.equal(HIDDEN_FIGHTER_IDS.length,0);
 assert.equal(FIGHTERS.filter(f=>f.rarity==='epic').length,16);
 assert.ok(FIGHTERS.every(f=>published.pets.some(p=>p.id===f.id)),'every battle fighter is a released pet with its own kit');
 assert.equal(new Set(FIGHTERS.flatMap(f=>f.skills.map(k=>k.kind))).size,56);

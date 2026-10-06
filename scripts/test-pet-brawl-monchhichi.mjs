@@ -20,7 +20,7 @@ const archiveHashes={
   "simulation.d.mts": "b6f73eb460aca5a19c9ff34e848e152f2f86f043d0b8e33b3eca5451a67ed233",
   "simulation.mjs": "6185159fa0b867bfaa7e29aed83ccce17050440bf1fc4781878b99e4e90a0fcc"
 };
-assert.equal(VERSION,'brawl-v13');assert.equal(fighter.rarity,'epic');
+assert.equal(VERSION,'brawl-v14');assert.equal(fighter.rarity,'epic');
 for(const [file,expected] of Object.entries(archiveHashes)){
  const source=fs.readFileSync('pet-app/lib/brawl/legacy/v12/'+file,'utf8').replaceAll('\r\n','\n');
  assert.equal(createHash('sha256').update(source).digest('hex'),expected,file+' approved v12 archive');

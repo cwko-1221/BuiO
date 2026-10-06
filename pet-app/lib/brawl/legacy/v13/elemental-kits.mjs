@@ -81,7 +81,7 @@ export const ELEMENTAL_KITS={
     k('普通連續拳','Consecutive Punches','四記拳壓化成高速衝擊彈，擊中遠處敵人。','Four punches launch fast pressure projectiles at distant foes.','consecutive-punches','projectile',7,28,270,440,{volleys:4,interval:7,windup:12,duration:55,speed:800,size:40,effect:'impact',element:'physical'}),
     k('認真一拳','Serious Punch','長時間蓄力後釋放巨大擴散拳壓波，擊倒整條路線。','After a long charge, launch an immense pressure wave that knocks down a whole lane.','serious-punch','wave',38,48,570,800,{depth:80,size:125,windup:36,duration:66,speed:650,pierce:true,down:true,knock:17,effect:'impact',element:'physical'})],
   'naruto-uzumaki':[
-    k('多重影分身術','Shadow Clone Squad','召喚 2 個自主追敵並攻擊的分身；各受攻擊 2 次或 3 秒後化煙消失。','Summon two clones that independently pursue and attack foes. Each disappears in smoke after two hits or three seconds.','shadow-clones','summon',0,30,720,155,{clones:2,life:180,effect:'smoke',element:'chakra'}),
+    k('多重影分身術','Shadow Clone Squad','召喚 2 個自主追敵並攻擊的分身；各受攻擊一次或 3 秒後化煙消失。','Summon two clones that independently pursue and attack foes. Each disappears in smoke after one hit or three seconds.','shadow-clones','summon',0,30,720,155,{clones:2,life:180,effect:'smoke',element:'chakra'}),
     k('螺旋丸','Rasengan','手掌聚起螺旋球再推進；命中後連續捲擊，最後炸開擊倒。','Gather a swirling sphere in your palm, advance, grind a caught foe, then detonate.','rasengan','rasengan',5,42,510,300,{windup:24,duration:84,finisher:18,pulses:3,period:9,size:62,effect:'spiral',element:'chakra'})]
 };
 

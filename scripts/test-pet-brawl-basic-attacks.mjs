@@ -9,7 +9,7 @@ import {auditSingleBody} from './sprite-body-audit.mjs';
 const require=createRequire(import.meta.url),manifest=JSON.parse(await fs.readFile('pet-app/public/assets/art/brawl/manifest.json','utf8')),assets=require('../pet-app/lib/brawl/assets.cjs').completeAssets(manifest,FIGHTERS);
 const report=JSON.parse(await fs.readFile('pet-app/art-source/basic-attacks-v1/build-report.json','utf8'));
 if(!process.argv.includes('--partial')){assert.equal(report.fighters,27);assert.equal(report.frames,864);assert.equal(Object.keys(manifest.fighterAttackAnimations).length,27);}
-assert.equal(VERSION,'brawl-v13');assert.equal(manifest.fighterAttackAnimations.pikachu,undefined);
+assert.equal(VERSION,'brawl-v14');assert.equal(manifest.fighterAttackAnimations.pikachu,undefined);
 for(const r of report.reports){
  assert.equal(r.frames.length,32);assert.equal(new Set(r.frames.map(p=>p.scale)).size,1,'One scale across all four attacks');
  for(const p of r.pages){const c=await sharp('pet-app/public/'+p.url.slice('/pet/'.length)).ensureAlpha().raw().toBuffer({resolveWithObject:true});assert.ok(c.info.width<=2048&&c.info.height<=2048);assert.equal(c.info.width,p.frameWidth*4);assert.equal(c.info.height,p.frameHeight*4);

@@ -9,7 +9,7 @@ export function summonClones(s,owner,k,createActor){
   for(let n=0;n<2;n++){
     const x=clamp(owner.x+owner.facing*(55+n*45)*U,45*U,right(s)),y=clamp(owner.y+(n?30:-30)*U,345*U,565*U);
     const a=createActor(s,owner.kind,owner.team,x/U,y/U);
-    Object.assign(a,{cloneOwner:owner.id,cloneExpires:s.tick+k.life,hp:2,maxHp:2,mp:0,facing:owner.facing,nextAttack:s.tick+12+n*9});
+    Object.assign(a,{cloneOwner:owner.id,cloneExpires:s.tick+k.life,hp:1,maxHp:1,mp:0,facing:owner.facing,nextAttack:s.tick+12+n*9});
     s.actors.push(a);s.events.push({type:'cloneSmoke',actor:a.id,x:x/U,y:y/U,spawn:true});
   }
 }
