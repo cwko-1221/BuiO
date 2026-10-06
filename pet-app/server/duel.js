@@ -18,7 +18,7 @@ module.exports=function register(io,options={}){
   const available=id=>online(id)&&!all(id).some(m=>m.busy)&&![...rooms.values()].some(r=>!terminal(r.meta)&&r.meta.players.some(p=>p.id===id));
   const studentRoom=id=>'student:'+id;
   const send=(id,event,payload)=>ns.to(studentRoom(id)).emit(event,payload);
-  function publicPeers(id){const peers=new Map();for(const m of members.values()){const p=m.profile;if(p.id===id||!online(p.id))continue;peers.set(p.id,{id:p.id,name:p.name,className:p.className,rank:p.rank,available:available(p.id)&&!reserved.has(p.id)&&p.pets.length>0,hasFighter:p.pets.length>0});}return [...peers.values()].sort((a,b)=>a.className.localeCompare(b.className)||a.name.localeCompare(b.name));}
+  function publicPeers(id){const peers=new Map(),own=all(id)[0]?.profile;for(const m of members.values()){const p=m.profile;if(p.id===id||!online(p.id))continue;peers.set(p.id,{id:p.id,name:p.name,className:p.className,rank:p.rank,rankTerms:own?.rank&&p.rank?ranking.quote([own.rank,p.rank]):undefined,available:available(p.id)&&!reserved.has(p.id)&&p.pets.length>0,hasFighter:p.pets.length>0});}return [...peers.values()].sort((a,b)=>a.className.localeCompare(b.className)||a.name.localeCompare(b.name));}
   function presence(){for(const id of new Set([...members.values()].map(m=>m.profile.id)))send(id,'duel:peers',{peers:publicPeers(id),fee:repo.FEE});}
   function noticeInvite(inv){for(const id of [inv.from.id,inv.to.id])send(id,'duel:invitation',inv);}
   function closeInvite(inv,status,message){if(inv.status!=='pending')return;inv.status=status;inv.message=message;inv.closedAt=now();for(const id of [inv.from.id,inv.to.id])if(reserved.get(id)===inv.id)reserved.delete(id);noticeInvite(inv);presence();}
@@ -68,10 +68,10 @@ module.exports=function register(io,options={}){
       if(now()-(lastInvite.get(id)||-Infinity)<3000)fail('請稍候再邀請同學。',429);
       // Fetch current pet ownership/balance, not the connection's cached profile.
       const [from,to]=await Promise.all([repo.player(id),repo.player(body.targetId)]);
-      if(mode==='ranked')ranking.assertSameTier([from.rank,to.rank]);
+      const rankTerms=mode==='ranked'?ranking.quote([from.rank,to.rank]):undefined,fee=rankTerms?.fee||repo.FEE;
       if(!available(id)||!available(to.id)||reserved.has(id)||reserved.has(to.id))fail('同學目前無法接受邀請。');
-      const pet=from.pets.find(p=>p.petId===body.petId);if(!pet)fail('請選擇自己擁有的出戰寵物。',403);if(!to.pets.length)fail('同學暫時沒有可出戰的寵物。');if(from.balance<repo.FEE)fail('你需要 500 金幣才能邀請對戰。');
-      const inv={id:randomUUID(),mode,rankTier:mode==='ranked'?from.rank.tier:undefined,from:{id:from.id,name:from.name,className:from.className,fighterId:pet.fighterId},to:{id:to.id,name:to.name},petId:pet.petId,stageId:body.stageId,status:'pending',fee:repo.FEE,expiresAt:now()+inviteMs};
+      const pet=from.pets.find(p=>p.petId===body.petId);if(!pet)fail('請選擇自己擁有的出戰寵物。',403);if(!to.pets.length)fail('同學暫時沒有可出戰的寵物。');if(from.balance<fee)fail('你需要 '+fee+' 金幣才能邀請對戰。');
+      const inv={id:randomUUID(),mode,rankTerms,rankTier:mode==='ranked'?from.rank.tier:undefined,from:{id:from.id,name:from.name,className:from.className,fighterId:pet.fighterId},to:{id:to.id,name:to.name},petId:pet.petId,stageId:body.stageId,status:'pending',fee,expiresAt:now()+inviteMs};
       invites.set(inv.id,inv);inviteKeys.set(key,inv.id);reserved.set(id,inv.id);reserved.set(to.id,inv.id);lastInvite.set(id,now());noticeInvite(inv);presence();return {invitation:inv};
     });
     handle('duel:reply',async body=>{
@@ -85,7 +85,7 @@ module.exports=function register(io,options={}){
       if(!available(inv.from.id)||!available(id))fail('其中一位同學已離線或正在遊戲。');
       inv.status='accepting';let charged=null;
       try{const receiver=await repo.player(id),pet=receiver.pets.find(p=>p.petId===body.petId);if(!pet)fail('請使用自己擁有的出戰寵物。',403);
-        const meta={id:randomUUID(),inviteId:inv.id,mode:inv.mode,rankTier:inv.rankTier,version:catalog.VERSION,stageId:inv.stageId,seed:randomBytes(4).readUInt32LE(0),players:[{id:inv.from.id,name:inv.from.name,petId:inv.petId,fighterId:inv.from.fighterId},{id,name:receiver.name,petId:pet.petId,fighterId:pet.fighterId}]};
+        const meta={id:randomUUID(),inviteId:inv.id,mode:inv.mode,rankTerms:inv.rankTerms,rankTier:inv.rankTier,version:catalog.VERSION,stageId:inv.stageId,seed:randomBytes(4).readUInt32LE(0),players:[{id:inv.from.id,name:inv.from.name,petId:inv.petId,fighterId:inv.from.fighterId},{id,name:receiver.name,petId:pet.petId,fighterId:pet.fighterId}]};
         charged=await repo.charge(meta,()=>inv.status==='accepting'&&inv.expiresAt>now()&&available(inv.from.id)&&available(id));
         await Promise.all(meta.players.map(p=>accessLocks.assertAllowed(p.id)));
         const r={meta:charged,state:sim.createBattle({mode:'pvp',fighterId:meta.players[0].fighterId,opponentId:meta.players[1].fighterId,stageId:meta.stageId,difficulty:'normal',seed:meta.seed}),phase:'preparing',controllers:[null,null],ready:[false,false],masks:[0,0],pressed:[0,0],seq:[-1,-1],inputAt:[0,0],createdAt:now(),frameSeq:0,events:[],clockAt:now(),accumulator:0};rooms.set(meta.id,r);

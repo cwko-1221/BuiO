@@ -11,11 +11,21 @@ let schema;
 
 async function ensure() {
   await pets.ensureSchema();
-  if (config.db.mode === 'json') { store.load().petBrawlRanks ??= []; return; }
+  if (config.db.mode === 'json') {
+    const d = store.load(); d.petBrawlRanks ??= [];
+    if (d.petBrawlRanks.some(p => p.schemaVersion !== 2)) {
+      const before = copy(d.petBrawlRanks);
+      try { for (const p of d.petBrawlRanks) rules.migrate(p); store.save(); }
+      catch (error) { d.petBrawlRanks = before; throw error; }
+    }
+    return;
+  }
   schema ??= getPool().query(`CREATE TABLE IF NOT EXISTS PetBrawlRanks (
     StudentID VARCHAR(20) PRIMARY KEY REFERENCES Users(StudentID) ON DELETE CASCADE,
     State JSONB NOT NULL, UpdatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW()
-  );`).catch(error => { schema = null; throw error; });
+  );`).then(() => getPool().query(`UPDATE PetBrawlRanks SET State=State || jsonb_build_object(
+    'schemaVersion',2,'points',GREATEST(0,COALESCE((State->>'points')::integer,COALESCE((State->>'tierWins')::integer,0)*5))),UpdatedAt=NOW()
+    WHERE COALESCE(State->>'schemaVersion','1') <> '2'`)).catch(error => { schema = null; throw error; });
   await schema;
 }
 async function profiles(ids) {
@@ -34,10 +44,11 @@ function jsonProfiles(ids) {
   const rows = store.load().petBrawlRanks;
   return ids.map(id => { let p = rows.find(row => row.studentId === id); if (!p) { p = rules.initial(id); rows.push(p); } return p; });
 }
-function assertSameTier(rows, expectedTier) {
-  if (rows.length !== 2 || rows[0].tier !== rows[1].tier || (expectedTier != null && rows.some(p => p.tier !== expectedTier))) {
-    throw Object.assign(new Error('排名對戰只限相同級別；級別已改變，請重新邀請。'), { status: 409 });
+function quote(rows, expected) {
+  if (rows.length !== 2 || (expected && rows.some((p, i) => p.tier !== expected.tiers?.[i]))) {
+    throw Object.assign(new Error('對戰級別已改變，請重新邀請；雙方均未扣入場費。'), { status: 409 });
   }
+  return rules.terms(rows[0].tier, rows[1].tier);
 }
 async function payPg(client, profile, at) {
   const plan = rules.rewardPlan(profile, at); if (!plan) return 0;
@@ -63,24 +74,27 @@ function payJson(profile, at) {
 }
 async function savePg(client, p) { await client.query('UPDATE PetBrawlRanks SET State=$2::jsonb,UpdatedAt=NOW() WHERE StudentID=$1', [p.studentId, JSON.stringify(p)]); }
 function recordResult(state, rows, at) {
+  const terms = state.rankTerms || quote(state.players.map(player => rows.find(p => p.studentId === player.id)));
+  const value = state.winnerIndex == null ? 0 : terms.winPoints[state.winnerIndex];
   return state.players.map((player, index) => {
-    const profile = rows.find(p => p.studentId === player.id), beforeTier = profile.tier;
-    rules.record(profile, state.winnerIndex == null ? null : state.winnerIndex === index, at);
-    return { studentId: player.id, beforeTier, promoted: profile.tier > beforeTier, ...rules.publicRank(profile) };
+    const profile = rules.migrate(rows.find(p => p.studentId === player.id)), beforeTier = profile.tier, beforePoints = profile.points;
+    const pointsDelta = state.winnerIndex == null ? 0 : state.winnerIndex === index ? value : -value;
+    rules.record(profile, state.winnerIndex == null ? null : state.winnerIndex === index, pointsDelta, at);
+    return { studentId: player.id, beforeTier, beforePoints, pointsDelta, promoted: profile.tier > beforeTier, ...rules.publicRank(profile) };
   });
 }
 async function finishPg(client, state, at = Date.now()) {
   const rows = await lockProfiles(client, state.players.map(p => p.id).sort());
   for (const row of rows) await payPg(client, row, at);
   const results = recordResult(state, rows, at);
-  for (const row of rows) { const coins = await payPg(client, row, at); await savePg(client, row); results.find(r => r.studentId === row.studentId).promotionCoins = coins; }
+  for (const row of rows) { const coins = await payPg(client, row, at); await savePg(client, row); Object.assign(results.find(r => r.studentId === row.studentId), rules.publicRank(row), { promotionCoins: coins }); }
   state.rankResults = results;
 }
 function finishJson(state, at = Date.now()) {
   const rows = jsonProfiles(state.players.map(p => p.id));
   for (const row of rows) payJson(row, at);
   const results = recordResult(state, rows, at);
-  for (const row of rows) results.find(r => r.studentId === row.studentId).promotionCoins = payJson(row, at);
+  for (const row of rows) { const coins = payJson(row, at); Object.assign(results.find(r => r.studentId === row.studentId), rules.publicRank(row), { promotionCoins: coins }); }
   state.rankResults = results;
 }
 async function currentStudents() {
@@ -121,4 +135,4 @@ async function overview(studentId) {
   return { academicYear, day: rules.hkDay(), tiers: rules.TIERS, self: rules.publicRank(ranks.find(p => p.studentId === studentId)), leaderboard,
     position: leaderboard.find(p => p.studentId === studentId)?.position || null };
 }
-module.exports = { ensure, profiles, lockProfiles, jsonProfiles, assertSameTier, finishPg, finishJson, distribute, overview, publicRank: rules.publicRank };
+module.exports = { ensure, profiles, lockProfiles, jsonProfiles, quote, finishPg, finishJson, distribute, overview, publicRank: rules.publicRank };
