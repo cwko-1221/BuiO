@@ -1,5 +1,5 @@
 .teacher-access-main,.pet-access-overlay {--access-ink:#304f4a;--access-forest:#416d61;--access-cream:#fffdf5;--access-mist:#eef1e3;--access-gold:#bd8d32;color:var(--access-ink)}
-.teacher-access-main {padding:24px;max-width:1380px;margin:0 auto}
+.teacher-access-main {flex:1;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding:24px;max-width:1380px;margin:0 auto}
 .teacher-access-main .primary,.pet-access-overlay .primary {background:var(--access-forest);color:var(--access-cream);border:1px solid var(--access-forest);box-shadow:0 5px 12px #416d611c}
 .teacher-access-main .secondary,.pet-access-overlay .secondary {background:var(--access-mist);color:var(--access-ink);border:1px solid #c8d5bf;box-shadow:none}
 .teacher-access-main [hidden],.pet-access-overlay[hidden] {display:none!important}

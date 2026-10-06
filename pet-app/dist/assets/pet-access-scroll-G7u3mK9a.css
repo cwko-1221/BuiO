@@ -1,0 +1,10 @@
+/* Production safety net for the teacher access view. The global app shell keeps
+   body overflow hidden so the active teacher panel must own vertical scrolling. */
+.teacher-access-main {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}

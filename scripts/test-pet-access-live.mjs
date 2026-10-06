@@ -123,6 +123,11 @@ try {
   await teacher.setViewportSize({ width: 834, height: 1194 }); await shot(teacher, '05-teacher-ipad-portrait');
   await teacher.setViewportSize({ width: 390, height: 844 });
   assert.equal(await teacher.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  const accessScroller = teacher.locator('#teacherAccessMain');
+  const accessScrollMetrics = await accessScroller.evaluate((node) => ({ clientHeight: node.clientHeight, scrollHeight: node.scrollHeight }));
+  assert.ok(accessScrollMetrics.scrollHeight > accessScrollMetrics.clientHeight, JSON.stringify(accessScrollMetrics));
+  const accessScrollTop = await accessScroller.evaluate((node) => { node.scrollTop = node.scrollHeight; return node.scrollTop; });
+  assert.ok(accessScrollTop > 0, `teacher access page did not scroll: ${accessScrollTop}`);
   const sizes = await teacher.locator('.pet-access-submit, .pet-access-unlock, [data-access="cancel"], .pet-access-class').evaluateAll(nodes => nodes.map(n => n.getBoundingClientRect().height));
   assert.ok(sizes.every(h => h >= 52), JSON.stringify(sizes)); await shot(teacher, '06-teacher-mobile');
   await teacher.locator('[data-access="cancel"]').click(); await teacher.locator('.pet-access-empty').waitFor();
