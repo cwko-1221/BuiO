@@ -1153,6 +1153,9 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
 .segmented button { background: transparent; width: 100%; min-height: 48px; }
 .grant-group-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s1); }
 .grant-group-fields:not([hidden]) { display: grid; }
+.grant-group-fields .grant-grade-field { grid-column: 1 / -1; margin-bottom: 0; }
+.grant-group-fields .field { min-width: 0; }
+.grant-group-fields .field select { min-width: 0; min-height: 56px; }
 .amount-help {
   display: flex; align-items: center; justify-content: space-between; gap: var(--s1);
   margin-top: calc(var(--s1) * -1); margin-bottom: var(--s2);
@@ -1263,6 +1266,7 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
   font-size: var(--fs-micro); color: var(--ink-soft); line-height: 1.6;
   max-width: 40ch;
 }
+.grant-confirm .grant-target { padding: var(--s1) var(--s2); border-radius: var(--r-pill); background: var(--chip); color: var(--ink); font-weight: 900; }
 .grant-confirm .caution {
   width: 100%; padding: var(--s2); border-radius: var(--r-md);
   border: 1px solid #f0d7b4; background: #fff6e4;

@@ -51,6 +51,7 @@
     "check:buzzer-clock": "node scripts/test-buzzer-clock.mjs",
     "check:buzzer-sync": "node scripts/test-buzzer-clock.mjs && node scripts/test-buzzer-live.mjs --sync",
     "check:pet-live": "node scripts/test-pet-live.mjs",
+    "check:pet-grant-grade-live": "node scripts/test-pet-grant-grade-live.mjs",
     "check:pet-quiet-room": "node --test pet-app/tests/quiet-room.test.js",
     "check:pet-quiet-room-live": "node scripts/test-pet-quiet-room-live.mjs",
     "check:pet-coin-pusher-live": "node scripts/test-pet-coin-pusher-live.mjs",

@@ -2214,6 +2214,13 @@ class TeacherApp {
   t(key:keyof typeof UI['zh-HK']){return UI[this.locale][key]||UI['zh-HK'][key];}
   zh(){return this.locale==='zh-HK';}
   fieldLabel(field:RosterFilterField){const zh=this.zh();return ({className:zh?'班別':'Class',chineseGroup:zh?'中文組':'Chinese group',englishGroup:zh?'英文組':'English group',mathGroup:zh?'數學組':'Maths group'})[field];}
+  groupLabel(grade:string,field:string,name:string){
+    const subject=({chineseGroup:this.zh()?'中文':'Chinese',englishGroup:this.zh()?'英文':'English',mathGroup:this.zh()?'數學':'Maths'} as Record<string,string>)[field]||'';
+    if(!grade||!subject||!name)return '';
+    const group=this.zh()?(name.endsWith('組')?name:`${name}組`):name;
+    return `${grade} ${subject} ${group}`;
+  }
+  grantGroupLabel(){return this.groupLabel((document.querySelector<HTMLSelectElement>('#grantGroupGrade'))?.value||'',(document.querySelector<HTMLSelectElement>('#grantGroupField'))?.value||'',(document.querySelector<HTMLSelectElement>('#grantGroupName'))?.value||'');}
   values(field:RosterFilterField){return [...new Set<string>(this.roster.students.map((student:any)=>String(student[field]||'').trim()).filter(Boolean))].sort((left:string,right:string)=>left.localeCompare(right,this.locale));}
   options(field:RosterFilterField,includeAll=false){const all=includeAll?`<option value="">${this.zh()?`所有${this.fieldLabel(field)}`:`All ${this.fieldLabel(field).toLowerCase()}s`}</option>`:'';return all+this.values(field).map((value:string)=>`<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');}
   filteredStudents(){return this.roster.students.filter((student:any)=>!this.filterValue||String(student[this.filterField]||'')===this.filterValue);}
@@ -2244,8 +2251,9 @@ class TeacherApp {
           </div>
           <label class="field class-field" hidden><span>${zh?'班別':'Class'}</span><select id="classSelect">${this.roster.classes.map((name:string)=>`<option>${escapeHtml(name)}</option>`).join('')}</select></label>
           <div class="group-field grant-group-fields" hidden>
+            <label class="field grant-grade-field"><span>${zh?'年級':'Grade'}</span><select id="grantGroupGrade"><option value="">${zh?'請選擇年級':'Select a grade'}</option>${this.roster.grades.map((grade:string)=>`<option value="${escapeHtml(grade)}">${escapeHtml(grade)}</option>`).join('')}</select></label>
             <label class="field"><span>${zh?'科目':'Subject'}</span><select id="grantGroupField"><option value="chineseGroup">${zh?'中文組':'Chinese group'}</option><option value="englishGroup">${zh?'英文組':'English group'}</option><option value="mathGroup">${zh?'數學組':'Maths group'}</option></select></label>
-            <label class="field"><span>${zh?'組別':'Group'}</span><select id="grantGroupName">${this.options('chineseGroup')}</select></label>
+            <label class="field"><span>${zh?'組別':'Group'}</span><select id="grantGroupName" disabled><option value="">${zh?'請先選擇年級':'Select a grade first'}</option></select></label>
           </div>
           <label class="field"><span>${this.t('amount')}</span><input id="grantAmount" type="number" inputmode="numeric" min="-10000" max="10000" value="250"></label>
           <div class="amount-help"><span>${zh?'輸入負數代表扣除，例如 −100。':'Enter a negative number to deduct, for example −100.'}</span><button type="button" class="text-button" id="toggleAmountSign">${zh?'＋／− 切換':'Toggle + / −'}</button></div>
@@ -2305,7 +2313,7 @@ class TeacherApp {
   amount(){return Number((document.querySelector('#grantAmount') as HTMLInputElement)?.value||0);}
   recipientCount(){
     if(this.scope==='class'){const name=(document.querySelector('#classSelect') as HTMLSelectElement)?.value||'';return this.roster.students.filter((student:any)=>student.className===name).length;}
-    if(this.scope==='group'){const field=(document.querySelector('#grantGroupField') as HTMLSelectElement)?.value as RosterFilterField;const name=(document.querySelector('#grantGroupName') as HTMLSelectElement)?.value||'';return this.roster.students.filter((student:any)=>name&&String(student[field]||'')===name).length;}
+    if(this.scope==='group'){const grade=document.querySelector<HTMLSelectElement>('#grantGroupGrade')?.value||'';const field=(document.querySelector('#grantGroupField') as HTMLSelectElement)?.value as RosterFilterField;const name=(document.querySelector('#grantGroupName') as HTMLSelectElement)?.value||'';return this.roster.students.filter((student:any)=>grade&&name&&student.grade===grade&&String(student[field]||'').trim()===name).length;}
     return this.selected.size;
   }
   updateSummary(){
@@ -2318,12 +2326,20 @@ class TeacherApp {
     const ok=validAmount&&count>0;
     summary.classList.toggle('blocked',!ok);
     summary.classList.toggle('deduction',ok&&amount<0);
-    if(!count){line.textContent=zh?'未選擇學生':'No students selected';hint.textContent=zh?(this.scope==='class'?'請選擇班別。':this.scope==='group'?'請選擇科目及組別。':'請在右邊剔選學生。'):(this.scope==='class'?'Pick a class.':this.scope==='group'?'Pick a subject group.':'Tick students on the right.');total.textContent=zh?'請先選擇':'Select first';}
+    if(!count){line.textContent=zh?'未選擇學生':'No students selected';hint.textContent=zh?(this.scope==='class'?'請選擇班別。':this.scope==='group'?'請選擇年級、科目及組別。':'請在右邊剔選學生。'):(this.scope==='class'?'Pick a class.':this.scope==='group'?'Pick a grade, subject and group.':'Tick students on the right.');total.textContent=zh?'請先選擇':'Select first';}
     else if(!validAmount){line.textContent=zh?'金額須為 -10,000 至 10,000 之間的非零整數':'Amount must be a non-zero integer from -10,000 to 10,000';hint.textContent='';total.textContent=zh?'金額無效':'Invalid';}
-    else{const action=amount<0?(zh?'扣除':'Deduct'):(zh?'增加':'Add');line.textContent=zh?`${count} 名學生 × 每人${action} ${Math.abs(amount).toLocaleString()} 金幣`:`${action} ${Math.abs(amount).toLocaleString()} coins each for ${count} students`;hint.textContent=zh?'按「預覽調整」核對名單及餘額。':'Preview the names and balances before confirming.';total.textContent=`${amount>0?'+':''}${(count*amount).toLocaleString()} 🪙`;}
+    else{const action=amount<0?(zh?'扣除':'Deduct'):(zh?'增加':'Add');line.textContent=zh?`${count} 名學生 × 每人${action} ${Math.abs(amount).toLocaleString()} 金幣`:`${action} ${Math.abs(amount).toLocaleString()} coins each for ${count} students`;const target=this.scope==='group'?this.grantGroupLabel():'';hint.textContent=`${target?`${target} · `:''}${zh?'按「預覽調整」核對名單及餘額。':'Preview the names and balances before confirming.'}`;total.textContent=`${amount>0?'+':''}${(count*amount).toLocaleString()} 🪙`;}
     preview.disabled=!ok;
   }
-  refreshGrantGroupOptions(){const field=(document.querySelector('#grantGroupField') as HTMLSelectElement)?.value as RosterFilterField;const select=document.querySelector<HTMLSelectElement>('#grantGroupName');if(!select)return;select.innerHTML=this.options(field);this.updateSummary();}
+  refreshGrantGroupOptions(){
+    const grade=document.querySelector<HTMLSelectElement>('#grantGroupGrade')?.value||'';
+    const field=document.querySelector<HTMLSelectElement>('#grantGroupField')?.value as RosterFilterField;
+    const select=document.querySelector<HTMLSelectElement>('#grantGroupName');if(!select)return;
+    const groups=[...new Set<string>(this.roster.students.filter((student:any)=>grade&&student.grade===grade).map((student:any)=>String(student[field]||'').trim()).filter(Boolean))].sort((left,right)=>left.localeCompare(right,this.locale));
+    const placeholder=!grade?(this.zh()?'請先選擇年級':'Select a grade first'):groups.length?(this.zh()?'請選擇組別':'Select a group'):(this.zh()?'此年級未有該科組別':'No groups for this grade and subject');
+    select.innerHTML=`<option value="">${placeholder}</option>`+groups.map(name=>`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
+    select.disabled=!groups.length;this.updateSummary();
+  }
   refreshRosterFilter(){const select=document.querySelector<HTMLSelectElement>('#rosterFilterValue');if(!select)return;select.innerHTML=this.options(this.filterField,true);this.filterValue='';document.querySelector('#studentRoster')!.innerHTML=this.studentRows();this.updateSummary();}
   bind(){
     document.querySelectorAll<HTMLElement>('[data-scope]').forEach((button)=>button.addEventListener('click',()=>{this.scope=button.dataset.scope as any;document.querySelectorAll('[data-scope]').forEach((item)=>{const on=item===button;item.classList.toggle('active',on);item.setAttribute('aria-pressed',String(on));});(document.querySelector('.class-field') as HTMLElement).hidden=this.scope!=='class';(document.querySelector('.group-field') as HTMLElement).hidden=this.scope!=='group';this.updateSummary();}));
@@ -2331,6 +2347,7 @@ class TeacherApp {
     document.querySelector('#grantAmount')?.addEventListener('input',()=>{const value=(document.querySelector('#grantAmount') as HTMLInputElement).value;document.querySelectorAll<HTMLElement>('[data-amount]').forEach((item)=>item.classList.toggle('active',item.dataset.amount===value));this.updateSummary();});
     document.querySelector('#toggleAmountSign')?.addEventListener('click',()=>{const input=document.querySelector<HTMLInputElement>('#grantAmount')!;const current=Number(input.value)||250;input.value=String(current*-1);input.dispatchEvent(new Event('input'));});
     document.querySelector('#classSelect')?.addEventListener('change',()=>this.updateSummary());
+    document.querySelector('#grantGroupGrade')?.addEventListener('change',()=>this.refreshGrantGroupOptions());
     document.querySelector('#grantGroupField')?.addEventListener('change',()=>this.refreshGrantGroupOptions());
     document.querySelector('#grantGroupName')?.addEventListener('change',()=>this.updateSummary());
     document.querySelector('#studentRoster')?.addEventListener('change',(event)=>{const input=event.target as HTMLInputElement;if(input.dataset.student){if(input.checked)this.selected.add(input.dataset.student);else this.selected.delete(input.dataset.student);this.updateSummary();}});
@@ -2340,12 +2357,13 @@ class TeacherApp {
     document.querySelector('#clearStudents')?.addEventListener('click',()=>{this.selected.clear();document.querySelector('#studentRoster')!.innerHTML=this.studentRows();this.updateSummary();});
     document.querySelector('#previewGrant')?.addEventListener('click',()=>this.preview());
   }
-  body(){return {scope:this.scope,studentIds:[...this.selected],className:(document.querySelector('#classSelect') as HTMLSelectElement)?.value||'',groupField:(document.querySelector('#grantGroupField') as HTMLSelectElement)?.value||'',groupName:(document.querySelector('#grantGroupName') as HTMLSelectElement)?.value||'',amount:this.amount(),note:(document.querySelector('#grantNote') as HTMLInputElement).value};}
+  body(){return {scope:this.scope,studentIds:[...this.selected],className:(document.querySelector('#classSelect') as HTMLSelectElement)?.value||'',grade:document.querySelector<HTMLSelectElement>('#grantGroupGrade')?.value||'',groupField:(document.querySelector('#grantGroupField') as HTMLSelectElement)?.value||'',groupName:(document.querySelector('#grantGroupName') as HTMLSelectElement)?.value||'',amount:this.amount(),note:(document.querySelector('#grantNote') as HTMLInputElement).value};}
   async preview(){
     const button=document.querySelector<HTMLButtonElement>('#previewGrant')!;button.disabled=true;
     const zh=this.zh();
     try{
       const body=this.body();const result=await api.grantPreview(body);
+      const groupTarget=body.scope==='group'?this.groupLabel(body.grade,body.groupField,body.groupName):'';
       const shown=result.recipients.slice(0,10).map((item:any)=>escapeHtml(item.name)).join(zh?'、':', ');
       const overflow=result.recipients.length>10?(zh?` 及其餘 ${result.recipients.length-10} 人`:` and ${result.recipients.length-10} more`):'';
       const deduction=result.amount<0;const magnitude=Math.abs(result.amount);const totalMagnitude=Math.abs(result.total);const heavy=totalMagnitude>=5000;
@@ -2353,6 +2371,7 @@ class TeacherApp {
       document.querySelector('#modalRoot')!.innerHTML=`<div class="modal-backdrop"><div class="modal-card grant-confirm ${deduction?'deduction':''}" role="dialog" aria-modal="true" aria-labelledby="grantConfirmTitle">
         <span class="big-coin" aria-hidden="true">🪙</span>
         <h2 id="grantConfirmTitle">${deduction?(zh?'確認扣除金幣':'Confirm coin deduction'):(zh?'確認增加金幣':'Confirm coin grant')}</h2>
+        ${groupTarget?`<p class="grant-target">${escapeHtml(groupTarget)}</p>`:''}
         <div class="equation">
           <span class="term"><b>${result.count}</b><small>${zh?'名學生':result.count===1?'student':'students'}</small></span>
           <span class="op" aria-hidden="true">×</span>

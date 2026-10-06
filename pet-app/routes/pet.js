@@ -204,14 +204,22 @@ const GRANT_GROUP_FIELDS = Object.freeze({
 });
 
 const uniqueValues = (rows, field) => [...new Set(rows.map((row) => String(row[field] || '').trim()).filter(Boolean))].sort();
+// Enrolments normally use P1–P6; older class lists also use names such as 5A or P5B.
+const gradeFromClass = (className) => {
+  const match = String(className || '').trim().toUpperCase().match(/^P?([1-6])(?:[A-Z])?$/);
+  return match ? `P${match[1]}` : '';
+};
 
 async function teacherRoster() {
   const academicYear = await academicYears.getCurrentAcademicYear();
-  const enrollments = (await academicYears.listEnrollments(academicYear)).filter((row) => row.role !== 'teacher');
+  const enrollments = (await academicYears.listEnrollments(academicYear))
+    .filter((row) => row.role !== 'teacher')
+    .map((row) => ({ ...row, grade: gradeFromClass(row.className) }));
   const balances = await repo.walletBalances(enrollments.map((row) => row.studentId));
   return {
     academicYear,
     classes: [...new Set(enrollments.map((row) => row.className).filter(Boolean))].sort(),
+    grades: uniqueValues(enrollments, 'grade'),
     groups: Object.fromEntries(Object.keys(GRANT_GROUP_FIELDS).map((field) => [field, uniqueValues(enrollments, field)])),
     students: enrollments.map((row) => ({ ...row, balance: balances.get(row.studentId) || 0 })),
     quietPets: catalog.pets.filter(row => ['starpatch-cat', 'cloud-ear-dog', 'crescent-rabbit'].includes(row.id)).map(row => {
@@ -232,12 +240,16 @@ async function resolveGrant(body) {
   let recipients;
   if (body?.scope === 'class') recipients = roster.students.filter((row) => row.className === String(body.className || ''));
   else if (body?.scope === 'group') {
+    const grade = String(body.grade || '').trim().toUpperCase();
     const groupField = String(body.groupField || '');
     const groupName = String(body.groupName || '').trim();
+    if (!/^P[1-6]$/.test(grade) || !roster.grades.includes(grade)) {
+      throw Object.assign(new Error('請選擇有效年級，再選擇科目及組別。'), { status: 400 });
+    }
     if (!Object.hasOwn(GRANT_GROUP_FIELDS, groupField) || !groupName) {
       throw Object.assign(new Error('請選擇中文組、英文組或數學組。'), { status: 400 });
     }
-    recipients = roster.students.filter((row) => String(row[groupField] || '').trim() === groupName);
+    recipients = roster.students.filter((row) => row.grade === grade && String(row[groupField] || '').trim() === groupName);
   }
   else {
     const requested = new Set(Array.isArray(body?.studentIds) ? body.studentIds.map(String) : []);

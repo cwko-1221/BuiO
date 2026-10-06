@@ -167,6 +167,7 @@ try {
   assert.equal(await teacherPage.locator('[data-student="S001"]').count(),1);
   await teacherPage.locator('#rosterFilterValue').selectOption('');
   await teacherPage.locator('[data-scope="group"]').click();
+  await teacherPage.locator('#grantGroupGrade').selectOption('P5');
   await teacherPage.locator('#grantGroupField').selectOption('englishGroup');
   await teacherPage.locator('#grantGroupName').selectOption('增潤組');
   assert.match(await teacherPage.locator('#grantSummaryLine').innerText(),/2 名學生/,'subject-group scope should include both students in that group');
