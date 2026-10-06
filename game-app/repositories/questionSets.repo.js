@@ -16,6 +16,20 @@ function pgAvailable() {
   return config.db.mode === 'postgres';
 }
 
+let imageSchemaPromise;
+async function ensureQuestionImages(pool) {
+  if (!imageSchemaPromise) imageSchemaPromise = (async () => {
+    const { rows } = await pool.query(`
+      SELECT 1 FROM information_schema.columns
+       WHERE table_schema = 'public' AND table_name = 'game_questions'
+         AND column_name = 'image_data'`);
+    if (!rows.length) {
+      await pool.query('ALTER TABLE public.game_questions ADD COLUMN IF NOT EXISTS image_data text');
+    }
+  })().catch(error => { imageSchemaPromise = null; throw error; });
+  await imageSchemaPromise;
+}
+
 async function listSets(teacherId) {
   const pool = requirePg();
   const { rows } = await pool.query(`
@@ -38,6 +52,7 @@ async function getSetWithQuestions(setId, { includeImages = true } = {}) {
   const { rows: sets } = await pool.query(
     'SELECT id, title, created_by FROM game_question_sets WHERE id = $1', [setId]);
   if (!sets[0]) return null;
+  if (includeImages) await ensureQuestionImages(pool);
   const { rows } = await pool.query(`
     SELECT id, question, choices, correct_index${includeImages ? ', image_data' : ''}
       FROM game_questions
@@ -53,6 +68,7 @@ async function getSetWithQuestions(setId, { includeImages = true } = {}) {
 
 async function createSet({ teacherId, title, questions }) {
   const pool = requirePg();
+  if (questions.length) await ensureQuestionImages(pool);
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -87,6 +103,7 @@ async function createSet({ teacherId, title, questions }) {
 
 async function replaceSetQuestions({ setId, teacherId, title, questions }) {
   const pool = requirePg();
+  if (questions.length) await ensureQuestionImages(pool);
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
