@@ -1,10 +1,10 @@
-/** Device-relative microphone index, shifted down about 30 points (not physical dB). */
+/** Device-relative microphone index (not physical dB). */
 export function microphoneLevel(samples: Float32Array): number {
   if (!samples.length) return 0;
   let sum = 0;
   for (const sample of samples) sum += sample * sample;
   const rms = Math.sqrt(sum / samples.length);
-  return Math.round(Math.max(0, Math.min(100, (20 * Math.log10(Math.max(rms, 0.00001)) + 36) / 60 * 100)));
+  return Math.round(Math.max(0, Math.min(100, (20 * Math.log10(Math.max(rms, 0.00001)) + 54) / 60 * 100)));
 }
 
 /** Trigger at the limit on the first sample; rearm after 1 quiet second with hysteresis. */

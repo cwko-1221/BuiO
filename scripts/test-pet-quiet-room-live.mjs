@@ -169,9 +169,12 @@ try {
     if (response.url().includes('/teacher/quiet-room/') && response.request().postDataJSON()?.action === 'noise') firstNoiseConfirmed = true;
   });
   await page.evaluate(() => window.__quietSetAmplitude(.012));
-  await page.waitForFunction(() => parseInt(document.querySelector('#quietLevelText').textContent, 10) === 0);
+  await page.waitForFunction(() => {
+    const level = parseInt(document.querySelector('#quietLevelText').textContent, 10);
+    return level >= 18 && level < 30;
+  });
   await page.waitForTimeout(200);
-  assert.equal(await page.locator('#quietBreaches').innerText(), '0', 'the previous crossing sound reads below the limit');
+  assert.equal(await page.locator('#quietBreaches').innerText(), '0', 'a formerly silent sound now has a measurable reading but stays below the limit');
   assert.equal(await page.locator('#quietRewardLeft').innerText(), '20');
   assert.equal(await page.evaluate(() => window.__quietPenaltyNotes.length), 0, 'tolerated sound produces no warning');
   await page.evaluate(() => {

@@ -90,17 +90,17 @@ test('concurrent settlement pays the captured recipients once, survives reload, 
   assert.equal(child.status, 0, child.stderr);
 });
 
-test('microphone readings are about 30 points lower and threshold crossing stays immediate', async () => {
+test('microphone readings increase about 30 points and threshold crossing stays immediate', async () => {
   const ts = require('../node_modules/typescript');
   const source = fs.readFileSync(path.resolve(__dirname, '../src/quiet-room-meter.ts'), 'utf8');
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
   const exported = {}; new Function('exports', js)(exported);
   assert.equal(exported.microphoneLevel(new Float32Array(2048)), 0);
-  assert.equal(exported.microphoneLevel(new Float32Array(2048).fill(1)), 60, 'full-scale input also reads 30 points lower');
+  assert.equal(exported.microphoneLevel(new Float32Array(2048).fill(1)), 90);
   assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.001)), 0, 'quiet input has no artificial sensitivity boost');
-  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.004)), 0, 'quiet input stays at the floor');
-  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.25)), 40, 'strong input reads about 30 points lower');
-  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.5)), 50, 'half-scale input reads about 30 points lower');
+  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.004)), 10, 'the same sound reads about 30 points higher');
+  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.25)), 70);
+  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.5)), 80);
   const gate = new exported.NoiseGate();
   assert.equal(gate.sample(44,45,0),false);
   assert.equal(gate.sample(45,45,1),true, 'touching the line triggers on the very first sample');
