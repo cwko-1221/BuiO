@@ -242,6 +242,7 @@ class StudentApp {
     this.pvp.setAccessLocked(this.accessLocked);
     this.pvp.addEventListener('match',()=>{void this.reload().catch(()=>{});if(!this.accessLocked)void this.openLiveDuel();});
     this.pvp.addEventListener('result',()=>void this.reload().catch(()=>{}));
+    this.pvp.addEventListener('wallet',()=>void this.reload().catch(()=>{}));
     void this.pvp.start();
     document.addEventListener('visibilitychange', this.handleCoinPusherVisibility);
     window.addEventListener('pagehide', this.handleCoinPusherPageHide);

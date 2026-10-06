@@ -48,6 +48,7 @@ async function quietRequest<T>(url: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
+  brawlRanking: () => request<import('./brawl/ranking-types').RankedOverview>('/api/pet/brawl/ranking'),
   petAccess: () => quietRequest<{ access: PetAccessStatus }>('/api/pet/access'),
   teacherAccess: () => request<PetAccessSettings>('/api/pet/teacher/access'),
   updatePetAccess: (body: PetAccessUpdate) => request<PetAccessSettings>('/api/pet/teacher/access', { method: 'POST', body: JSON.stringify(body) }),

@@ -9,7 +9,7 @@ const { catalog, indexes, WEARABLE_PET_IDS } = require('../lib/catalog');
 const JSON_KEYS = [
   'petProfiles', 'petWallets', 'petCurrencyLedger', 'petInstances',
   'petInventory', 'petRoomLayouts', 'petRoomReactions', 'petCoinPusherPlays', 'petCoinPusherPayouts',
-  'petIdempotency', 'petArcadePrizes', 'petBrawlRuns', 'petBrawlProgress', 'petBrawlDailyRewards', 'petCoinPusherSettings',
+  'petIdempotency', 'petArcadePrizes', 'petBrawlRuns', 'petBrawlProgress', 'petBrawlDailyRewards', 'petCoinPusherSettings', 'petBrawlRanks',
 ];
 
 const hkDay = (date = new Date()) => new Intl.DateTimeFormat('en-CA', {
@@ -268,6 +268,7 @@ const releasedProfile = (profile, pets) => {
 
 async function getBootstrap(studentId) {
   await ensureStudent(studentId);
+  await require('./brawl-ranking.repo').distribute(Date.now(), studentId);
   if (config.db.mode === 'postgres') {
     const pool = getPool();
     const [profileResult, walletResult, petsResult, inventoryResult, roomResult, coinPusherResult, coinPusherSettings] = await Promise.all([
@@ -1036,7 +1037,7 @@ async function acknowledgeTeacherGrants(studentId, transactionIds) {
 // a grant record belongs to the student who received it.
 function purgeJsonStudent(studentId) {
   const data = ensureJsonData();
-  const ownedByStudentId = ['petProfiles', 'petWallets', 'petCurrencyLedger', 'petInstances', 'petInventory', 'petRoomLayouts', 'petCoinPusherPlays', 'petCoinPusherPayouts', 'petArcadePrizes', 'petBrawlRuns', 'petBrawlProgress', 'petBrawlDailyRewards'];
+  const ownedByStudentId = ['petProfiles', 'petWallets', 'petCurrencyLedger', 'petInstances', 'petInventory', 'petRoomLayouts', 'petCoinPusherPlays', 'petCoinPusherPayouts', 'petArcadePrizes', 'petBrawlRuns', 'petBrawlProgress', 'petBrawlDailyRewards', 'petBrawlRanks'];
   for (const key of ownedByStudentId) data[key] = data[key].filter((row) => row.studentId !== studentId);
   // Idempotency records are namespaced by the actor that created them.
   data.petIdempotency = data.petIdempotency.filter((row) => row.actorId !== studentId);
