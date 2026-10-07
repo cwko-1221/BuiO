@@ -16,6 +16,7 @@ import { definePetAnims, makeLayers, petAnim, petKeys, petOf, queuePet, syncLaye
   from './petAvatar.js?v=20260907-side-climber-1';
 
 const STAGE_NAMES = Object.values(ZONE_NAMES);
+const JUMP_ENERGY_COST = 5;
 
 export class GameScene extends Phaser.Scene {
   constructor(course, hooks = {}) {
@@ -624,7 +625,7 @@ export class GameScene extends Phaser.Scene {
     // a late second jump from adding height and bypassing several platforms.
     if (launcherFlight && this.actions.jumpQueued > 0) {
       this.actions.jumpQueued=0;
-    } else if (this.actions.jumpQueued > 0 && this.energy >= 8) {
+    } else if (this.actions.jumpQueued > 0 && this.energy >= JUMP_ENERGY_COST) {
       if (downHeld && this.grounded) {
         this.dropUntil = time + 240; this.playerParts.main.isSensor = true; this.groundContacts.clear(); this.setPlayerVelocity(null,2.2); this.actions.jumpQueued = 0;
       } else if (this.coyote > 0 || this.airJump > 0) {
@@ -632,7 +633,7 @@ export class GameScene extends Phaser.Scene {
         // A second-jump input must never cancel a stronger slingshot launch.
         this.setPlayerVelocity(null,Math.min(vy,air ? -10.8 : -12.2));
         if (air) this.airJump--;
-        if (!this.hooks.infiniteEnergy) this.energy -= 8;
+        if (!this.hooks.infiniteEnergy) this.energy -= JUMP_ENERGY_COST;
         this.actions.jumpQueued = 0; this.coyote = 0;
         this.player.play(this.playerAnimName(air ? 'doubleJump' : 'jump'),true);
         this.hooks.onEffect?.(air?'doubleJump':'jump',this.player.x,this.player.y);

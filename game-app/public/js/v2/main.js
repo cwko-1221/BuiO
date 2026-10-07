@@ -1,5 +1,5 @@
 import { buildCourse, validateCourse } from './course.js?v=20260907-ipad-perf-3';
-import { GameScene } from './GameScene.js?v=20261005-no-ghosts-1';
+import { GameScene } from './GameScene.js?v=20261007-jump-energy-5';
 import { PlayerStateThrottle } from './PlayerStateThrottle.js?v=20261005-no-ghosts-1';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 import { normaliseAvatar } from './avatar.js?v=20260907-side-climber-1';
