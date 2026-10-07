@@ -34,7 +34,7 @@ async function locked(actorId, operation) {
     const save = async session => client.query(`INSERT INTO PetQuietRooms(SessionID,ActorID,StartKey,State)
       VALUES($1,$2,$3,$4::jsonb) ON CONFLICT(SessionID) DO UPDATE SET State=EXCLUDED.State,UpdatedAt=NOW()`,
     [session.id, actorId, session.startKey, JSON.stringify(session)]);
-    return operation(sessions, save, client);
+    return operation(sessions, save, client, async rows => { for (const row of rows) await save(row); });
   });
   const work = queue.then(async () => {
     const sessions = store.load().petQuietRooms;
@@ -43,7 +43,12 @@ async function locked(actorId, operation) {
       if (index < 0) sessions.push(session); else sessions[index] = session;
       store.save();
     };
-    return operation(sessions.filter(row => row.actorId === actorId).map(row => structuredClone(row)), save, null);
+    const saveMany = async rows => {
+      const data = store.load(), before = data.petQuietRooms, changes = new Map(rows.map(row => [row.id, row]));
+      data.petQuietRooms = before.map(row => changes.get(row.id) || row).concat(rows.filter(row => !before.some(old => old.id === row.id)));
+      try { store.save(); } catch (error) { data.petQuietRooms = before; throw error; }
+    };
+    return operation(sessions.filter(row => row.actorId === actorId).map(row => structuredClone(row)), save, null, saveMany);
   });
   queue = work.catch(() => {});
   return work;
@@ -113,12 +118,33 @@ async function current(actorId) {
 }
 
 async function update(actorId, id, action, eventId) {
+  if (action === 'restart') return restart(actorId, id, eventId);
   return locked(actorId, async (sessions, save, client) => {
     const session = sessions.find(row => row.id === id);
     if (!session) fail('找不到安靜房間。', 404);
     transition(session, action, Date.now(), eventId);
     await settle(session, client); await save(session);
     return view(session);
+  });
+}
+
+async function restart(actorId, id, key) {
+  if (typeof key !== 'string' || !key || key.length > 120) fail('缺少有效的防重複提交識別碼。');
+  return locked(actorId, async (sessions, save, client, saveMany) => {
+    const previous = sessions.find(row => row.id === id);
+    if (!previous) fail('找不到安靜房間。', 404);
+    // A round can have only one successor, even with retries or two teacher tabs.
+    const existing = sessions.find(row => row.restartOf === id);
+    if (existing) { advance(existing, Date.now()); await settle(existing, client); await save(existing); return view(existing); }
+    if (sessions.some(row => row.startKey === key || row.id !== id && ['running', 'paused'].includes(row.status))) fail('已有另一個挑戰，請重新載入。', 409);
+    const now = Date.now(), options = settings(previous);
+    const next = { id: randomUUID(), actorId, startKey: key, restartOf: id, ...options, targetLabel: previous.targetLabel,
+      studentIds: [...previous.studentIds], status: 'running', remainingMs: options.durationSeconds * 1000,
+      remainingReward: options.reward, breaches: 0, events: [], lastNoiseAt: null, lastTick: now, createdAt: Math.max(now, previous.createdAt + 1), payout: null };
+    // Restarting discards the unfinished reward; completed payouts remain untouched.
+    if (['running', 'paused'].includes(previous.status)) previous.status = 'cancelled';
+    await saveMany([previous, next]);
+    return view(next);
   });
 }
 

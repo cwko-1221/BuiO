@@ -11,7 +11,7 @@ const port = await new Promise(resolve => { const socket = net.createServer(); s
 const baseURL = `http://127.0.0.1:${port}`;
 const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'pet-quiet-live-'));
 const databaseFile = path.join(temp, 'db.json');
-const artifacts = path.resolve('artifacts/pet-playtest/quiet-room');
+const artifacts = path.resolve(process.env.PET_QUIET_ROOM_OUT || 'artifacts/pet-playtest/quiet-room');
 await fs.mkdir(artifacts, { recursive: true });
 await fs.writeFile(databaseFile, JSON.stringify({ users: [
   { studentid: 'T001', name: '黃老師', role: 'teacher', passwordhash: bcrypt.hashSync('teacher123', 4), language: 'zh-HK' },
@@ -225,6 +225,85 @@ try {
   await page.screenshot({ path: path.join(artifacts, '04-completed.png') });
   console.log('✓ group selection, real Web Audio metering, repeated noise, pause/resume and exactly-once group payout');
 
+  const savedRounds = async () => JSON.parse(await fs.readFile(databaseFile, 'utf8')).petQuietRooms;
+  const currentRound = async () => (await (await context.request.get('/api/pet/teacher/quiet-room')).json()).session;
+  await page.locator('#quietRestart').click();
+  await page.waitForFunction(() => document.querySelector('#quietStatus').textContent.includes('專注中'));
+  let repeated = await currentRound();
+  assert.notEqual(repeated.id, session.id); assert.equal(repeated.durationSeconds, 20); assert.equal(repeated.reward, 20);
+  assert.equal(repeated.remainingReward, 20); assert.equal(repeated.breaches, 0); assert.equal(repeated.count, 1);
+  assert.equal(repeated.targetLabel, session.targetLabel); assert.equal(repeated.threshold, session.threshold); assert.equal(repeated.penalty, 7);
+  assert.equal((await savedRounds()).find(row => row.id === session.id).payout.amount, 6);
+  assert.equal((await (await context.request.get('/api/pet/teacher/roster')).json()).students[0].balance, 6);
+  console.log('✓ completed challenge repeats with original group/settings and a full reward without duplicating the previous payout');
+  await page.evaluate(() => window.__quietSetAmplitude(.5));
+  await page.waitForFunction(() => document.querySelector('#quietBreaches').textContent === '1');
+  await page.locator('#quietPause').click();
+  await page.waitForFunction(() => document.querySelector('#quietPause').textContent.includes('繼續') && !document.querySelector('#quietPause').disabled);
+  await page.evaluate(() => window.__quietSetAmplitude(.001));
+  assert.equal(await page.locator('#quietRewardLeft').innerText(), '13');
+  await page.locator('#quietRestart').click(); assert.equal(await page.locator('#quietRestartConfirm').isVisible(), true);
+  await page.locator('#quietKeepRestart').click(); assert.equal(await page.locator('#quietRestartConfirm').isVisible(), false);
+  assert.equal((await currentRound()).id, repeated.id);
+  await page.evaluate(() => { window.__quietOriginalMicrophone = navigator.mediaDevices.getUserMedia; navigator.mediaDevices.getUserMedia = async () => { throw new DOMException('Denied', 'NotAllowedError'); }; });
+  await page.locator('#quietRestart').click(); await page.locator('#quietConfirmRestart').click();
+  await page.waitForFunction(() => document.querySelector('#quietMessage').textContent.includes('允許麥克風') && !document.querySelector('#quietRestart').disabled);
+  assert.equal((await currentRound()).id, repeated.id); assert.equal((await currentRound()).status, 'paused');
+  assert.equal((await currentRound()).remainingReward, 13);
+  await page.evaluate(() => { navigator.mediaDevices.getUserMedia = window.__quietOriginalMicrophone; });
+  for (const [name, width, height] of [['ipad',1180,820],['phone',390,844]]) {
+    await page.setViewportSize({width,height});
+    for (const selector of ['#quietRestart','#quietPause']) assert.ok((await page.locator(selector).boundingBox()).height >= 56);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await page.locator('#teacherQuietMain').evaluate(el => { el.scrollTop=0; });
+    await page.screenshot({path:path.join(artifacts,'repeat-paused-'+name+'.png'),fullPage:true});
+  }
+  await page.setViewportSize({width:1440,height:1000});
+  const roundCount=(await savedRounds()).length;
+  await page.locator('#quietRestart').click();
+  await page.locator('#quietConfirmRestart').evaluate(button => { button.click(); button.click(); });
+  await page.waitForFunction(() => document.querySelector('#quietStatus').textContent.includes('專注中') && !document.querySelector('#quietRestart').disabled);
+  let next = await currentRound(); assert.notEqual(next.id,repeated.id);
+  assert.equal(next.breaches,0); assert.equal(next.remainingReward,20); assert.equal(next.count,1);
+  assert.ok(next.remainingMs>17000); assert.equal((await savedRounds()).length,roundCount+1);
+  assert.equal((await savedRounds()).find(row=>row.id===repeated.id).status,'cancelled');
+  assert.equal((await savedRounds()).find(row=>row.id===repeated.id).payout,null);
+  console.log('✓ paused restart has a keep/confirm choice, preserves a denied microphone round, resets its timer/penalties and handles double clicks once; iPad/phone controls stay at least 56px');
+  let loseRestartResponse=true;
+  const lostRestart=async route=>{
+    if(loseRestartResponse && route.request().postDataJSON()?.action==='restart') { loseRestartResponse=false; await route.fetch(); await route.abort('failed'); }
+    else await route.fallback();
+  };
+  await page.route('**/api/pet/teacher/quiet-room/*',lostRestart);
+  const beforeLost=(await savedRounds()).length;
+  await page.locator('#quietRestart').click(); await page.locator('#quietConfirmRestart').click();
+  await page.waitForFunction(() => document.querySelector('#quietStatus').textContent.includes('已暫停') && !document.querySelector('#quietRestart').disabled);
+  const recovered=await currentRound(); assert.notEqual(recovered.id,next.id); assert.equal(recovered.status,'paused');
+  assert.equal((await savedRounds()).length,beforeLost+1); assert.equal(recovered.breaches,0); assert.equal(recovered.remainingReward,20);
+  await page.unroute('**/api/pet/teacher/quiet-room/*',lostRestart);
+  await page.locator('#quietPause').click(); await page.waitForFunction(() => document.querySelector('#quietStatus').textContent.includes('專注中'));
+  assert.equal((await currentRound()).id,recovered.id);
+  let releaseResponse, notifyCreated;
+  const created=new Promise(resolve=>{notifyCreated=resolve;});
+  const release=new Promise(resolve=>{releaseResponse=resolve;});
+  const delayedRestart=async route=>{
+    if(route.request().postDataJSON()?.action==='restart') { const response=await route.fetch(); notifyCreated(); await release; await route.fulfill({response}); }
+    else await route.fallback();
+  };
+  await page.route('**/api/pet/teacher/quiet-room/*',delayedRestart);
+  await page.locator('#quietRestart').click(); await page.locator('#quietConfirmRestart').click(); await created;
+  await page.locator('[data-teacher-tool="coins"]').click(); releaseResponse();
+  await page.waitForFunction(() => document.querySelector('#quietStatus').textContent.includes('已暫停') && !document.querySelector('#quietRestart').disabled);
+  const background=await currentRound(); assert.notEqual(background.id,recovered.id); assert.equal(background.status,'paused');
+  await page.unroute('**/api/pet/teacher/quiet-room/*',delayedRestart);
+  await page.locator('[data-teacher-tool="quiet"]').click();
+  const backgroundClock=await page.locator('#quietTime').innerText(); await page.waitForTimeout(600); assert.equal(await page.locator('#quietTime').innerText(),backgroundClock);
+  await page.locator('#quietCancel').click(); await page.locator('#quietConfirmCancel').click();
+  await page.waitForFunction(() => document.querySelector('#quietStatus').textContent==='已結束');
+  assert.equal((await (await context.request.get('/api/pet/teacher/roster')).json()).students[0].balance,6);
+  console.log('✓ a lost restart response recovers the single new round paused; resume keeps its identity and cancellation never grants coins');
+  console.log('✓ switching teacher tools while restart loads pauses the new round instead of running without its microphone');
+
   await page.locator('#quietNew').click();
   assert.equal(await page.locator('#quietSettingsPage').isVisible(), true, 'completed challenge returns to setup');
   assert.equal(await page.locator('#quietCountdownPage').isVisible(), false);
@@ -287,7 +366,11 @@ try {
   assert.deepEqual(errors, []);
   console.log('✓ student permissions, reward notifications, mobile layout and no browser runtime errors');
   console.log(`Screenshots: ${artifacts}`);
+  await fs.writeFile(path.join(artifacts,'browser-report.json'),JSON.stringify({passed:true,errors,restartCompleted:true,restartPaused:true,microphoneDenialPreservesRound:true,lostResponseRecovered:true,doubleClickCreatesOneRound:true,backgroundSwitchPaused:true,responsiveControls:true,existingQuietFlowsPassed:true},null,2)+'\n');
   }
+} catch (error) {
+  for (const [i,context] of (browser?.contexts() || []).entries()) for (const [j,page] of context.pages().entries()) await page.screenshot({path:path.join(artifacts,`failure-${i}-${j}.png`)}).catch(()=>{});
+  await fs.writeFile(path.join(artifacts,'browser-report.json'),JSON.stringify({passed:false,error:error.stack,logs},null,2)+'\n'); throw error;
 } finally {
   await browser?.close(); server.kill();
 }

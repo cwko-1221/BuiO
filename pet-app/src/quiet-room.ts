@@ -36,6 +36,7 @@ export class QuietRoom {
   private feedbackUntil = 0;
   private pendingNoise = new Set<string>();
   private pendingStart?: { key: string; settings: QuietSettings };
+  private pendingRestart?: { id: string; key: string };
   private reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   private petAnimations: {
     node: HTMLElement; columns: number; rows: number;
@@ -125,7 +126,7 @@ export class QuietRoom {
       </section>
       <section id="quietCountdownPage" class="quiet-room-stage" aria-labelledby="quietCountdownHeading" ${this.session ? '' : 'hidden'}>
         <div class="quiet-stage-top"><div class="quiet-room-badge"><span class="quiet-garden-mark">${quietIcon('leaf')}</span><div><small>FOCUS GARDEN</small><b id="quietCountdownHeading" tabindex="-1">${this.t('寵物專注花園', 'Pet Focus Garden')}</b></div></div><span id="quietStatus" class="quiet-status"></span></div>
-        <div class="quiet-focus-hero"><div class="quiet-focus-copy"><span class="quiet-focus-kicker">${this.t('一起安靜 · 一起成長', 'LESS NOISE · MORE FOCUS')}</span><h2 id="quietEncouragement" class="quiet-encouragement"></h2><p>${this.t('把注意力留給眼前的任務，讓努力一點一點累積。', 'Make space for the task in front of you. Every focused moment counts.')}</p><button id="quietPause" class="primary quiet-primary-pause" ${active ? '' : 'hidden'}>${this.session?.status === 'paused' ? this.t('▶ 繼續挑戰', '▶ Resume') : this.t('Ⅱ 暫停', 'Ⅱ Pause')}</button></div>
+        <div class="quiet-focus-hero"><div class="quiet-focus-copy"><span class="quiet-focus-kicker">${this.t('一起安靜 · 一起成長', 'LESS NOISE · MORE FOCUS')}</span><h2 id="quietEncouragement" class="quiet-encouragement"></h2><p>${this.t('把注意力留給眼前的任務，讓努力一點一點累積。', 'Make space for the task in front of you. Every focused moment counts.')}</p><div class="quiet-primary-actions"><button id="quietPause" class="primary quiet-primary-pause" ${active ? '' : 'hidden'}>${this.session?.status === 'paused' ? this.t('▶ 繼續挑戰', '▶ Resume') : this.t('Ⅱ 暫停', 'Ⅱ Pause')}</button><button id="quietRestart" class="secondary quiet-repeat" ${this.session ? '' : 'hidden'}>${this.t('↻ 再來一次', '↻ Try again')}</button></div><div id="quietRestartConfirm" class="quiet-restart-confirm" hidden><p>${this.t('重新開始會放棄本次尚未發放的獎勵，倒數、超標次數和獎勵會重設；參加學生及設定保持相同。', 'Restarting discards this unfinished reward and resets the timer, noise bursts and reward. Students and settings stay the same.')}</p><div><button id="quietConfirmRestart" class="primary">${this.t('確定重新開始', 'Restart challenge')}</button><button id="quietKeepRestart" class="secondary">${this.t('保留本次挑戰', 'Keep this challenge')}</button></div></div></div>
           <div class="quiet-clock"><div class="quiet-clock-face"><small>${this.t('挑戰剩餘時間', 'TIME REMAINING')}</small><strong id="quietTime">05:00</strong><span class="quiet-clock-caption">${this.t('每一刻，都是進步', 'ONE MOMENT AT A TIME')}</span></div><progress id="quietProgress" max="300" value="300" aria-label="${this.t('剩餘時間', 'Time left')}"></progress></div>
         </div>
         <div class="quiet-garden-scene" style="background-image:url('${gardenBackdrop}')"><div class="quiet-scene-label">${quietIcon('leaf')} ${this.t('你的專注夥伴', 'YOUR FOCUS COMPANIONS')}</div><div class="quiet-pets">${this.pets()}</div></div>
@@ -177,10 +178,19 @@ export class QuietRoom {
     }));
     this.element('#quietMicTest').addEventListener('click', () => void this.testMicrophone());
     this.element('#quietPause').addEventListener('click', () => { if (this.monitoring) void this.pause(); else void this.resume(); });
+    this.element('#quietRestart').addEventListener('click', () => {
+      if (this.busy || !this.session) return;
+      if (!this.pendingRestart && ['running', 'paused'].includes(this.session.status)) {
+        this.element('#quietRestartConfirm').hidden = false;
+        this.element('#quietConfirmRestart').focus({ preventScroll: true });
+      } else void this.restart();
+    });
+    this.element('#quietConfirmRestart').addEventListener('click', () => void this.restart());
+    this.element('#quietKeepRestart').addEventListener('click', () => { this.element('#quietRestartConfirm').hidden = true; this.element('#quietRestart').focus({ preventScroll: true }); });
     this.element('#quietCancel').addEventListener('click', () => { this.element('#quietCancelConfirm').hidden = false; });
     this.element('#quietKeep').addEventListener('click', () => { this.element('#quietCancelConfirm').hidden = true; });
     this.element('#quietConfirmCancel').addEventListener('click', () => void this.cancel());
-    this.element('#quietNew').addEventListener('click', () => { this.session = null; this.pendingStart = undefined; this.render(); });
+    this.element('#quietNew').addEventListener('click', () => { this.session = null; this.pendingStart = undefined; this.pendingRestart = undefined; this.render(); });
   }
 
   private settings(): QuietSettings {
@@ -324,6 +334,41 @@ export class QuietRoom {
     if (this.busy) return;
     this.setBusy(true); this.stopMicrophone(); await this.sync('cancel'); this.setBusy(false);
     if (this.session?.status === 'cancelled' || this.session?.status === 'completed') this.render();
+  }
+  private async restart() {
+    if (this.busy || !this.session) return;
+    this.setBusy(true); this.stopMicrophone(); this.message('');
+    try {
+      // Drain pending noise/heartbeat acknowledgements before replacing the round.
+      await this.requestQueue;
+      await this.microphone();
+      if (this.disposed) return;
+      this.pendingRestart ??= { id: this.session.id, key: idempotencyKey() };
+      const { session } = await api.quietUpdate(this.pendingRestart.id, 'restart', this.pendingRestart.key);
+      if (this.disposed) { this.stopMicrophone(); return; }
+      this.session = session; this.pendingRestart = undefined; this.pendingNoise.clear();
+      this.anchor = performance.now(); this.monitoring = session.status === 'running' && !!this.stream && !document.hidden && !this.root.hidden; this.gate.reset();
+      if (!this.monitoring) {
+        this.stopMicrophone();
+        if (session.status === 'running') this.session = (await api.quietUpdate(session.id, 'pause')).session;
+      }
+      if (this.disposed) return;
+      this.render();
+      this.message(this.monitoring ? this.t('新一輪已開始，倒數和獎勵已重設。', 'New round started. Timer and reward reset.') : this.t('新一輪已暫停，返回此頁後可繼續。', 'New round paused. Return to this page to resume.'));
+    } catch (error) {
+      this.stopMicrophone();
+      // A response can be lost after the server creates the successor. Recover it
+      // paused so retrying cannot duplicate a round or run without a microphone.
+      try {
+        const current = (await api.quietCurrent()).session;
+        if (current && !this.disposed) {
+          this.session = current.status === 'running' ? (await api.quietUpdate(current.id, 'pause')).session : current;
+          if (this.pendingRestart && current.id !== this.pendingRestart.id) this.pendingRestart = undefined;
+          this.render();
+        }
+      } catch { /* Keep the same restart key available for a safe retry. */ }
+      if (!this.disposed) this.message((error as Error).message, true);
+    } finally { if (!this.disposed) { this.setBusy(false); this.paint(); } }
   }
   private setBusy(value: boolean) {
     this.busy = value;
