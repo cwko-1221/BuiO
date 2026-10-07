@@ -66,6 +66,19 @@ try {
 
   await teacher.locator('[data-teacher-tool="access"]').click();
   await teacher.locator('[data-access-class][value="5A"]').waitFor();
+  assert.equal(await teacher.locator('[data-access-period]').count(), 9);
+  await teacher.locator('[data-access-class][value="5A"]').check();
+  await teacher.locator('[name="accessMode"][value="lesson"]').check();
+  await teacher.locator('.pet-access-submit').click();
+  await teacher.locator('.pet-access-message').filter({ hasText: '已設定每日上課時間鎖定' }).waitFor();
+  const lessonSettings = await (await tc.request.get('/api/pet/teacher/access')).json();
+  const lessonRule = lessonSettings.rules.find(r => r.kind === 'lesson');
+  assert.deepEqual(lessonRule.periods, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  await shot(teacher, '00b-teacher-lesson-schedule');
+  await teacher.locator('[data-access="unlock"]').click();
+  await teacher.locator('.pet-access-message').filter({ hasText: '已解鎖' }).waitFor();
+  pass('teacher can save all nine recurring lesson periods and unlock removes the schedule');
+  await teacher.locator('[name="accessMode"][value="lock"]').check();
   await teacher.locator('.teacher-header').scrollIntoViewIfNeeded();await shot(teacher,'00-teacher-access-overview');
   await teacher.locator('[data-access-class][value="5A"]').check();
   await a.locator('[data-tab="brawl"]').click(); await a.locator('[data-brawl="mode"][data-id="practice"]').click();

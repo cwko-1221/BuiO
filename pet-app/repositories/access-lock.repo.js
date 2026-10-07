@@ -102,9 +102,9 @@ async function update(actorId, body) {
     // Unlock is explicit: clear active locks AND upcoming reservations for just these classes.
     let next = rules.filter(r => !r.endsAt || Date.parse(r.endsAt) > s.now);
     if (values.action === 'unlock') return next.map(r => ({ ...r, classes: r.classes.filter(c => !values.classes.includes(c)) })).filter(r => r.classes.length);
-    // Setting a new immediate duration replaces that class's current lock, so a previous
-    // indefinite lock cannot silently defeat the newly chosen automatic unlock time.
-    if (values.action === 'lock') next = next.map(r => Date.parse(r.startsAt) <= s.now ? { ...r, classes: r.classes.filter(c => !values.classes.includes(c)) } : r).filter(r => r.classes.length);
+    // Setting a new immediate lock or recurring lesson schedule replaces that class's
+    // current rule, so an older lock cannot silently defeat the newly chosen policy.
+    if (values.action === 'lock' || values.action === 'lesson') next = next.map(r => Date.parse(r.startsAt) <= s.now ? { ...r, classes: r.classes.filter(c => !values.classes.includes(c)) } : r).filter(r => r.classes.length);
     if (next.length >= 500) throw Object.assign(new Error('預約太多，請先取消不再需要的鎖定。'), { status: 400 });
     const { action, ...rule } = values;
     next.push({ ...rule, id: randomUUID(), academicYear: s.academicYear, actorId, createdAt: new Date(s.now).toISOString(), kind: action });
