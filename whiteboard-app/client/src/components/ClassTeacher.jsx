@@ -4,6 +4,10 @@ import { QRCodeSVG } from 'qrcode.react';
 import { io } from 'socket.io-client';
 import styles from './ClassTeacher.module.css';
 import { createCompositeCanvas, renderShapeLayer } from '../utils/drawing';
+import { watchRoomConnection } from '../utils/roomConnection';
+import ConnectionNotice from './ConnectionNotice';
+import AudienceButton from './AudienceButton';
+import { initialRoomAudience, saveRoomAudience } from '../utils/roomAudience';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 const STUDENTS_PER_PAGE = 12;
@@ -25,6 +29,7 @@ export default function ClassTeacher() {
     const [uploadedImage, setUploadedImage] = useState(null); // base64 string
     const [uploading, setUploading] = useState(false);
     const [locked, setLocked] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState('connecting');
     const [showBuzzerSetup, setShowBuzzerSetup] = useState(false);
     const [buzzerDisplayCount, setBuzzerDisplayCount] = useState(3);
     const [buzzerDurationSeconds, setBuzzerDurationSeconds] = useState(30);
@@ -137,10 +142,14 @@ export default function ClassTeacher() {
         if (!roomId) return;
 
         socketRef.current = io(SERVER_URL);
+        const stopWatchingConnection = watchRoomConnection(socketRef.current, setConnectionStatus);
+        socketRef.current.on('lock-board', () => setLocked(true));
+        socketRef.current.on('unlock-board', () => setLocked(false));
 
         socketRef.current.on('connect', () => {
-            socketRef.current.emit('join-room', { roomId, name: 'Teacher', isTeacher: true, roomType: 'class' });
+            socketRef.current.emit('join-room', { roomId, name: 'Teacher', isTeacher: true, roomType: 'class', audienceRules: initialRoomAudience(roomId) });
         });
+        socketRef.current.on('room-audience', data => saveRoomAudience(roomId, data.audienceRules));
 
         socketRef.current.on('student-list', (list) => {
             setStudents(list);
@@ -280,6 +289,7 @@ export default function ClassTeacher() {
         socketRef.current.on('buzzer-error', (message) => setBuzzerError(String(message || '搶答操作未能完成。')));
 
         return () => {
+            stopWatchingConnection();
             if (socketRef.current) socketRef.current.disconnect();
         };
     }, [roomId, getOrCreateOffscreen]);
@@ -667,6 +677,7 @@ export default function ClassTeacher() {
 
     return (
         <div className={styles.container}>
+            <ConnectionNotice status={connectionStatus} />
             {/* Header */}
             <header className={styles.header}>
                 <div className={styles.headerLeft}>
@@ -681,6 +692,7 @@ export default function ClassTeacher() {
                 </div>
 
                 <div className={styles.headerRight}>
+                    <AudienceButton roomId={roomId} serverUrl={SERVER_URL} />
                     <button
                         className={`${styles.buzzerBtn} ${buzzerState?.active ? styles.buzzerBtnActive : ''}`}
                         onClick={() => !buzzerState?.active && setShowBuzzerSetup(true)}

@@ -4,6 +4,10 @@ import { QRCodeSVG } from 'qrcode.react';
 import { io } from 'socket.io-client';
 import styles from './Teacher.module.css';
 import { renderShapeLayer } from '../utils/drawing';
+import { watchRoomConnection } from '../utils/roomConnection';
+import ConnectionNotice from './ConnectionNotice';
+import AudienceButton from './AudienceButton';
+import { initialRoomAudience, saveRoomAudience } from '../utils/roomAudience';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 const STUDENTS_PER_PAGE = 12;
@@ -22,6 +26,7 @@ export default function Teacher() {
     const [zoomedStudent, setZoomedStudent] = useState(null); // socketId or null
     const [showLargeQR, setShowLargeQR] = useState(false);
     const [locked, setLocked] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState('connecting');
 
     // Teacher drawing state
     const [teacherActiveTool, setTeacherActiveTool] = useState('pen');
@@ -81,10 +86,14 @@ export default function Teacher() {
         if (!roomId) return;
 
         socketRef.current = io(SERVER_URL);
+        const stopWatchingConnection = watchRoomConnection(socketRef.current, setConnectionStatus);
+        socketRef.current.on('lock-board', () => setLocked(true));
+        socketRef.current.on('unlock-board', () => setLocked(false));
 
         socketRef.current.on('connect', () => {
-            socketRef.current.emit('join-room', { roomId, name: 'Teacher', isTeacher: true });
+            socketRef.current.emit('join-room', { roomId, name: 'Teacher', isTeacher: true, audienceRules: initialRoomAudience(roomId) });
         });
+        socketRef.current.on('room-audience', data => saveRoomAudience(roomId, data.audienceRules));
 
         socketRef.current.on('student-list', (list) => {
             setStudents(list);
@@ -171,6 +180,7 @@ export default function Teacher() {
         });
 
         return () => {
+            stopWatchingConnection();
             if (socketRef.current) socketRef.current.disconnect();
         };
     }, [roomId, getOrCreateOffscreen]);
@@ -383,6 +393,7 @@ export default function Teacher() {
 
     return (
         <div className={styles.container}>
+            <ConnectionNotice status={connectionStatus} />
             {/* Header */}
             <header className={styles.header}>
                 <div className={styles.headerLeft}>
@@ -397,6 +408,7 @@ export default function Teacher() {
                 </div>
 
                 <div className={styles.headerRight}>
+                    <AudienceButton roomId={roomId} serverUrl={SERVER_URL} />
                     <button
                         className={styles.teachingBtn}
                         onClick={() => setZoomedStudent('teacher')}

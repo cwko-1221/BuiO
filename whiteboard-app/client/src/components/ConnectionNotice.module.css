@@ -1,0 +1,12 @@
+.notice {
+    order: -1;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    padding: 0.35rem 0.75rem;
+    background: #fff7ed;
+    border-bottom: 1px solid #fed7aa;
+    color: #9a3412;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    text-align: center;
+}

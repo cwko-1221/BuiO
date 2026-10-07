@@ -4,6 +4,8 @@ import { io } from 'socket.io-client';
 import { Pen, Eraser, Trash2, Lock, Shapes, Triangle, Square, Circle, Diamond } from 'lucide-react';
 import styles from './Student.module.css';
 import { drawShape, shapeContainsPoint } from '../utils/drawing';
+import { watchRoomConnection } from '../utils/roomConnection';
+import ConnectionNotice from './ConnectionNotice';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 const PEN_COLORS = ['#111827', '#ef4444', '#f97316', '#eab308', '#22c55e', '#0ea5e9', '#2563eb', '#7c3aed', '#ec4899'];
@@ -24,6 +26,7 @@ export default function Student() {
     const [joined, setJoined] = useState(!!paramName);
     const [error, setError] = useState('');
     const [locked, setLocked] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState('connecting');
 
     const [activeTool, setActiveTool] = useState('pen'); // 'pen' | 'shape' | 'eraser'
     const [penColor, setPenColor] = useState(PEN_COLORS[0]);
@@ -61,6 +64,7 @@ export default function Student() {
         if (!joined || !roomId) return;
 
         socketRef.current = io(SERVER_URL);
+        const stopWatchingConnection = watchRoomConnection(socketRef.current, setConnectionStatus);
 
         socketRef.current.on('connect', () => {
             socketRef.current.emit('join-room', { roomId, name, isTeacher: false });
@@ -173,6 +177,7 @@ export default function Student() {
             handleResize();
             window.addEventListener('resize', handleResize);
             return () => {
+                stopWatchingConnection();
                 window.removeEventListener('resize', handleResize);
                 if (socketRef.current) socketRef.current.disconnect();
             };
@@ -620,6 +625,7 @@ export default function Student() {
 
     return (
         <div className={styles.container}>
+            <ConnectionNotice status={connectionStatus} />
             {/* Toolbar - hidden when locked */}
             {!locked && (
             <div className={styles.toolbar}>

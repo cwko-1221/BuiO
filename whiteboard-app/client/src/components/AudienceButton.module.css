@@ -1,0 +1,4 @@
+.wrapper { position: relative; }
+.button { padding: .45rem .8rem; background: #ccfbf1; color: #0f766e; border: 0; border-radius: .4rem; font-size: .85rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.button:disabled { opacity: .6; cursor: default; }
+.error { position: absolute; top: calc(100% + 8px); right: 0; z-index: 90; width: 240px; padding: 10px; border-radius: 8px; background: #fef2f2; color: #b91c1c; font-size: .8rem; box-shadow: 0 3px 12px #0002; }

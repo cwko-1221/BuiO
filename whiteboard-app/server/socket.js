@@ -1,11 +1,17 @@
 const serverI18n = require('../../shared/server-i18n');
 const { randomUUID } = require('crypto');
+const audience = require('../../shared/classroom-audience');
+const { requireTeacher } = require('../../math-app/middleware/auth');
 
 const MAX_BUZZER_DISPLAY_COUNT = 12;
 const MIN_BUZZER_DURATION_SECONDS = 10;
 const MAX_BUZZER_DURATION_SECONDS = 300;
+const TEACHER_RECONNECT_GRACE_MS = 10 * 60 * 1000;
 
-module.exports = function(io, app) {
+module.exports = function(io, app, {
+  teacherReconnectGraceMs = TEACHER_RECONNECT_GRACE_MS,
+  rosterProvider = audience.roster,
+} = {}) {
   // A room holds students who may have chosen different languages, so the
   // notice is rendered per socket rather than broadcast as one string.
   const notifyRoom = (roomId, message) => {
@@ -18,11 +24,32 @@ module.exports = function(io, app) {
   };
 
   const rooms = new Map();
+  const fail = (message, status = 403) => { throw Object.assign(new Error(message), { status }); };
+  const wrap = handler => async (req, res) => {
+    try { await handler(req, res); }
+    catch (error) { res.status(error.status || 503).json({ success: false, message: error.status ? error.message : '未能讀取課堂設定，請稍後重試。' }); }
+  };
+
+  function canSee(room, session, students = []) {
+    if (!room.audienceRules.length || session?.role === 'teacher') return true;
+    return session?.role === 'student' && audience.matchesRules(
+      students.find(row => row.studentId === session.studentId), room.audienceRules,
+    );
+  }
+
+  function requireOwner(room, session) {
+    if (!room) fail('課堂已關閉，請重新開啟。', 404);
+    if (session?.role !== 'teacher' || room.ownerId !== String(session.studentId)) fail('只可設定自己的課堂。');
+  }
 
   function getRoom(roomId) {
     if (!rooms.has(roomId)) {
       rooms.set(roomId, {
         teacherSocket: null,
+        ownerId: null,
+        audienceRules: [],
+        teacherReconnectTimer: null,
+        teacherDisconnectedAt: null,
         students: new Map(), // stable participant key -> { name, studentId, sockets: Set }
         studentSocketKeys: new Map(), // socket id -> stable participant key
         studentBoards: new Map(), // stable participant key -> last saved board snapshot
@@ -35,6 +62,28 @@ module.exports = function(io, app) {
       });
     }
     return rooms.get(roomId);
+  }
+
+  function emitTeacherConnection(roomId, target = roomId) {
+    const room = rooms.get(roomId);
+    if (!room) return;
+    io.to(target).emit('teacher-connection', {
+      connected: !!room.teacherSocket,
+      reconnecting: !!room.teacherReconnectTimer,
+      reconnectUntil: room.teacherDisconnectedAt === null
+        ? null
+        : room.teacherDisconnectedAt + teacherReconnectGraceMs,
+    });
+  }
+
+  function endRoom(roomId, message) {
+    const room = rooms.get(roomId);
+    if (!room) return;
+    clearTimeout(room.teacherReconnectTimer);
+    clearTimeout(room.buzzerTimer);
+    rooms.delete(roomId);
+    io.to(roomId).emit('clear-board');
+    notifyRoom(roomId, message);
   }
 
   function emitStudentList(roomId) {
@@ -163,80 +212,157 @@ module.exports = function(io, app) {
   }
 
   // Room type lookup endpoint (used by whiteboard client)
-  app.get('/api/room-type/:roomId', (req, res) => {
+  app.get('/api/classroom-audience/options', requireTeacher, wrap(async (_req, res) => {
+    res.json({ success: true, ...await rosterProvider() });
+  }));
+
+  app.get('/api/whiteboard/sessions/:roomId/audience', requireTeacher, wrap(async (req, res) => {
     const room = rooms.get(req.params.roomId);
-    res.json(room ? { exists: true, type: room.type } : { exists: false, type: null });
-  });
+    requireOwner(room, req.session);
+    res.json({ success: true, audienceRules: room.audienceRules, audienceLabel: audience.describeRules(room.audienceRules) });
+  }));
+
+  app.put('/api/whiteboard/sessions/:roomId/audience', requireTeacher, wrap(async (req, res) => {
+    const roomId = req.params.roomId;
+    const room = rooms.get(roomId);
+    requireOwner(room, req.session);
+    const rules = audience.normalizeRules(req.body?.audienceRules);
+    const { students } = await rosterProvider();
+    if (rules.length && !students.some(student => audience.matchesRules(student, rules))) fail('所選班級或組別沒有學生。', 400);
+    if (rooms.get(roomId) !== room) fail('課堂已關閉，請重新開啟。', 404);
+    room.audienceRules = rules;
+    // Enforce the new scope for connected students too, while keeping saved
+    // boards available if their accounts become eligible again later.
+    for (const [key, participant] of room.students) {
+      if (canSee(room, { role: 'student', studentId: participant.studentId }, students)) continue;
+      for (const id of participant.sockets) {
+        const client = io.sockets.sockets.get(id);
+        if (client) {
+          const lang = serverI18n.resolveLang({ headers: client.handshake.headers });
+          client.emit('error', lang === 'en-US' ? serverI18n.translate('你不屬於這個課堂。') : '你不屬於這個課堂。');
+          client.leave(roomId);
+          room.studentSocketKeys.delete(id);
+        }
+      }
+      room.students.delete(key);
+    }
+    emitStudentList(roomId);
+    const payload = { audienceRules: rules, audienceLabel: audience.describeRules(rules) };
+    if (room.teacherSocket) io.to(room.teacherSocket).emit('room-audience', payload);
+    res.json({ success: true, ...payload });
+  }));
+
+  app.get('/api/room-type/:roomId', wrap(async (req, res) => {
+    const room = rooms.get(req.params.roomId);
+    const students = room?.audienceRules.length && req.session?.role === 'student' ? (await rosterProvider()).students : [];
+    res.json(room && canSee(room, req.session, students) ? { exists: true, type: room.type } : { exists: false, type: null });
+  }));
 
   // ========================================
   // 白板課堂 API (供 Portal 查詢)
   // ========================================
-  app.get('/api/whiteboard/sessions', (req, res) => {
+  app.get('/api/whiteboard/sessions', wrap(async (req, res) => {
     const activeSessions = [];
+    const needsRoster = req.session?.role === 'student' && [...rooms.values()].some(room => room.audienceRules.length);
+    const students = needsRoster ? (await rosterProvider()).students : [];
     for (const [roomId, room] of rooms.entries()) {
+      if (!canSee(room, req.session, students)) continue;
       activeSessions.push({
         teacherId: roomId,
         teacherName: roomId,
         roomCode: roomId,
         startTime: room.startTime,
-        active: !!room.teacherSocket
+        active: !!room.teacherSocket || !!room.teacherReconnectTimer,
+        teacherConnected: !!room.teacherSocket,
+        audienceLabel: audience.describeRules(room.audienceRules),
       });
     }
     res.json({ success: true, sessions: activeSessions });
-  });
+  }));
 
-  app.post('/api/whiteboard/sessions/end', (req, res) => {
-    const { roomId } = req.body;
+  app.post('/api/whiteboard/sessions/end', wrap(async (req, res) => {
+    const { roomId } = req.body || {};
     if (roomId) {
       const room = rooms.get(roomId);
-      if (room?.buzzerTimer) clearTimeout(room.buzzerTimer);
-      rooms.delete(roomId);
-      io.to(roomId).emit('clear-board');
-      notifyRoom(roomId, '老師已結束課堂');
+      if (room?.ownerId) requireOwner(room, req.session);
+      endRoom(roomId, '老師已結束課堂');
     }
     res.json({ success: true });
-  });
+  }));
 
   io.on('connection', (socket) => {
     console.log(`[WB] User connected: ${socket.id}`);
 
-    socket.on('join-room', ({ roomId, name, isTeacher, roomType }) => {
-      socket.join(roomId);
-      socket.data.roomId = roomId;
-      socket.data.name = name;
-      socket.data.isTeacher = isTeacher;
-      socket.data.role = socket.request.session?.role || null;
-      socket.data.studentId = socket.data.role === 'student' && socket.request.session?.studentId
-        ? String(socket.request.session.studentId)
-        : null;
-      console.log(`[WB] ${name} (${isTeacher ? 'Teacher' : 'Student'}) joined room: ${roomId}`);
-      const room = getRoom(roomId);
-      if (isTeacher) {
-        room.teacherSocket = socket.id;
-        if (roomType) room.type = roomType;
-        if (room.image) socket.emit('room-image', room.image);
-        emitStudentList(roomId);
-        emitBuzzerState(roomId);
-        for (const participantKey of room.studentBoards.keys()) emitBoardSnapshotToSocket(roomId, participantKey, socket.id);
-      } else {
-        const participantKey = socket.data.studentId ? `student:${socket.data.studentId}` : `guest:${socket.id}`;
-        socket.data.studentKey = participantKey;
-        let participant = room.students.get(participantKey);
-        if (!participant) {
-          participant = { name, studentId: socket.data.studentId, sockets: new Set() };
-          room.students.set(participantKey, participant);
-        } else if (name) {
-          participant.name = name;
+    socket.on('join-room', async ({ roomId, name, isTeacher, roomType, audienceRules } = {}) => {
+      try {
+        const session = socket.request.session || {};
+        const existingRoom = rooms.get(roomId);
+        if (isTeacher) {
+          if (session.role === 'student') fail('只可設定自己的課堂。');
+          if (existingRoom?.ownerId && (session.role !== 'teacher' || existingRoom.ownerId !== String(session.studentId))) fail('只可設定自己的課堂。');
+          if (!existingRoom && audienceRules !== undefined && audience.normalizeRules(audienceRules).length && session.role !== 'teacher') fail('請先以老師帳戶登入。');
+        } else if (existingRoom?.audienceRules.length) {
+          const { students } = await rosterProvider();
+          if (rooms.get(roomId) !== existingRoom) fail('課堂已關閉，請重新開啟。', 404);
+          if (!canSee(existingRoom, session, students)) fail('你不屬於這個課堂。');
         }
-        participant.sockets.add(socket.id);
-        room.studentSocketKeys.set(socket.id, participantKey);
-        emitStudentList(roomId);
-        if (room.image) socket.emit('room-image', room.image);
-        if (room.locked) socket.emit('lock-board');
-        emitBuzzerState(roomId);
-        emitBoardSnapshot(roomId, participantKey, socket.id);
+        // Only teachers create rooms. A student reconnecting after an actual
+        // end/expiry must not silently create an empty replacement classroom.
+        if (!isTeacher && !rooms.has(roomId)) {
+          const lang = serverI18n.resolveLang({ headers: socket.handshake.headers });
+          const message = '老師尚未開啟課堂，或課堂已關閉';
+          socket.emit('error', lang === 'en-US' ? serverI18n.translate(message) : message);
+          return;
+        }
+        socket.join(roomId);
+        socket.data.roomId = roomId;
+        socket.data.name = name;
+        socket.data.isTeacher = isTeacher;
+        socket.data.role = socket.request.session?.role || null;
+        socket.data.studentId = socket.data.role === 'student' && socket.request.session?.studentId
+          ? String(socket.request.session.studentId)
+          : null;
+        console.log(`[WB] ${name} (${isTeacher ? 'Teacher' : 'Student'}) joined room: ${roomId}`);
+        const room = getRoom(roomId);
+        if (isTeacher) {
+          if (!existingRoom) room.audienceRules = audience.normalizeRules(audienceRules);
+          if (session.role === 'teacher') room.ownerId = String(session.studentId);
+          clearTimeout(room.teacherReconnectTimer);
+          room.teacherReconnectTimer = null;
+          room.teacherDisconnectedAt = null;
+          room.teacherSocket = socket.id;
+          if (roomType) room.type = roomType;
+          if (room.image) socket.emit('room-image', room.image);
+          emitStudentList(roomId);
+          emitBuzzerState(roomId);
+          for (const participantKey of room.studentBoards.keys()) emitBoardSnapshotToSocket(roomId, participantKey, socket.id);
+          emitTeacherConnection(roomId);
+          socket.emit('room-audience', { audienceRules: room.audienceRules, audienceLabel: audience.describeRules(room.audienceRules) });
+        } else {
+          const participantKey = socket.data.studentId ? `student:${socket.data.studentId}` : `guest:${socket.id}`;
+          socket.data.studentKey = participantKey;
+          let participant = room.students.get(participantKey);
+          if (!participant) {
+            participant = { name, studentId: socket.data.studentId, sockets: new Set() };
+            room.students.set(participantKey, participant);
+          } else if (name) {
+            participant.name = name;
+          }
+          participant.sockets.add(socket.id);
+          room.studentSocketKeys.set(socket.id, participantKey);
+          emitStudentList(roomId);
+          if (room.image) socket.emit('room-image', room.image);
+          emitBuzzerState(roomId);
+          emitBoardSnapshot(roomId, participantKey, socket.id);
+          emitTeacherConnection(roomId, socket.id);
+        }
+        socket.emit(room.locked ? 'lock-board' : 'unlock-board');
+        socket.to(roomId).emit('user-joined', { name, isTeacher });
+      } catch (error) {
+        const lang = serverI18n.resolveLang({ headers: socket.handshake.headers });
+        const message = error.status ? error.message : '未能讀取課堂設定，請稍後重試。';
+        socket.emit('error', lang === 'en-US' ? serverI18n.translate(message) : message);
       }
-      socket.to(roomId).emit('user-joined', { name, isTeacher });
     });
 
     socket.on('buzzer-start', ({ displayCount, durationSeconds } = {}) => {
@@ -449,20 +575,26 @@ module.exports = function(io, app) {
       }
     });
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
       const roomId = socket.data.roomId;
       if (!roomId) return;
       const room = rooms.get(roomId);
       if (!room) return;
 
       if (socket.data.isTeacher && room.teacherSocket === socket.id) {
-        // Closing the teacher tab ends the lesson: clear the room, evict
-        // students, and tell anyone polling /api/whiteboard/sessions that
-        // there is no active session anymore.
-        clearTimeout(room.buzzerTimer);
-        rooms.delete(roomId);
-        io.to(roomId).emit('clear-board');
-        notifyRoom(roomId, '老師已結束課堂');
+        // A transport timeout is not an instruction to end the lesson. Keep
+        // the same room and board state while the teacher reconnects.
+        room.teacherSocket = null;
+        room.teacherDisconnectedAt = Date.now();
+        room.teacherReconnectTimer = setTimeout(() => {
+          // A replaced room or a newer teacher connection must not be expired
+          // by an old socket's timer.
+          if (rooms.get(roomId) !== room || room.teacherSocket) return;
+          endRoom(roomId, '老師連線中斷超過保留時間，課堂已關閉，請重新加入新課堂');
+        }, teacherReconnectGraceMs);
+        room.teacherReconnectTimer.unref?.();
+        emitTeacherConnection(roomId);
+        console.log(`[WB] Teacher disconnected (${reason}); retaining room for reconnect: ${roomId}`);
         return;
       }
 
@@ -472,7 +604,7 @@ module.exports = function(io, app) {
       participant?.sockets.delete(socket.id);
       if (participantKey && participant && participant.sockets.size === 0) room.students.delete(participantKey);
       emitStudentList(roomId);
-      if (!room.teacherSocket && room.students.size === 0) rooms.delete(roomId);
+      if (!room.teacherSocket && !room.teacherReconnectTimer && room.students.size === 0) rooms.delete(roomId);
       socket.to(roomId).emit('user-left', { name: socket.data.name });
     });
   });

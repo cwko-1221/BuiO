@@ -1,0 +1,29 @@
+.classroom-audience-dialog {
+    width: min(660px, calc(100vw - 32px));
+    max-height: calc(100dvh - 40px);
+    box-sizing: border-box;
+    margin: auto;
+    padding: 24px;
+    overflow: auto;
+    border: 0;
+    border-radius: 16px;
+    background: #fff;
+    color: #172033;
+    box-shadow: 0 16px 60px #0003;
+    font: inherit;
+}
+.classroom-audience-dialog::backdrop { background: #17203388; }
+.classroom-audience-dialog h2 { margin: 0 0 18px; font-size: 1.3rem; }
+.classroom-audience-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.classroom-audience-dialog-actions button {
+    padding: 10px 18px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #334155;
+    font: inherit;
+    cursor: pointer;
+}
+.classroom-audience-dialog-actions button[type="submit"] { background: #0f8a8d; color: #fff; border-color: #0f8a8d; }
+.classroom-audience-dialog-actions button:disabled { opacity: .5; cursor: default; }
+.classroom-audience-dialog-error { color: #b91c1c; font-size: .9rem; }

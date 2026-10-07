@@ -4,6 +4,8 @@ import { io } from 'socket.io-client';
 import { Pen, Eraser, Trash2, Lock, Shapes, Triangle, Square, Circle, Diamond } from 'lucide-react';
 import styles from './ClassStudent.module.css';
 import { drawShape, shapeContainsPoint } from '../utils/drawing';
+import { watchRoomConnection } from '../utils/roomConnection';
+import ConnectionNotice from './ConnectionNotice';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 const PEN_COLORS = ['#111827', '#ef4444', '#f97316', '#eab308', '#22c55e', '#0ea5e9', '#2563eb', '#7c3aed', '#ec4899'];
@@ -31,6 +33,7 @@ export default function ClassStudent() {
     const [joined, setJoined] = useState(!!urlName);
     const [error, setError] = useState('');
     const [locked, setLocked] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState('connecting');
     const [buzzerState, setBuzzerState] = useState(null);
     const [buzzerNow, setBuzzerNow] = useState(Date.now());
     const [buzzerClockOffset, setBuzzerClockOffset] = useState(0);
@@ -242,6 +245,7 @@ export default function ClassStudent() {
 
         const socket = io(SERVER_URL);
         socketRef.current = socket;
+        const stopWatchingConnection = watchRoomConnection(socket, setConnectionStatus);
 
         socket.on('connect', () => {
             socket.emit('join-room', { roomId, name, isTeacher: false });
@@ -477,6 +481,7 @@ export default function ClassStudent() {
         }
 
         return () => {
+            stopWatchingConnection();
             if (resizeObserver) resizeObserver.disconnect();
             if (handleResize) {
                 window.removeEventListener('resize', handleResize);
@@ -975,6 +980,7 @@ export default function ClassStudent() {
 
     return (
         <div className={styles.container}>
+            <ConnectionNotice status={connectionStatus} />
             {buzzerState?.roundId && (
                 <div className={styles.buzzerRow} aria-live="polite">
                     <div className={styles.buzzerStatus}>

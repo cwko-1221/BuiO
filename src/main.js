@@ -293,8 +293,17 @@ async function openModule(moduleId, mode) {
   } else if (moduleId === 'whiteboard') {
     if (role === 'teacher') {
       const url = `${WHITEBOARD_BASE}/class-teacher?room=${encodeURIComponent(user.name)}`;
-      // Same-tab nav — teachers leave the portal until they close the class.
-      window.location.href = url;
+      const existing = getActiveSessions().find(session => session.type !== 'buzzer' && session.teacherName === user.name);
+      if (existing) window.location.href = url;
+      else void import('../shared/classroom-audience-dialog.mjs').then(async ({ openAudienceDialog }) => {
+        const audienceRules = await openAudienceDialog({
+          title: currentLanguage() === 'en-US' ? 'Whiteboard classroom visibility' : '白板課堂可見範圍',
+          confirmLabel: currentLanguage() === 'en-US' ? 'Start class' : '開始課堂', language: currentLanguage(),
+        });
+        if (audienceRules === null) return;
+        sessionStorage.setItem(`whiteboard-audience:${user.name}`, JSON.stringify(audienceRules));
+        window.location.href = url;
+      }).catch(error => alert(error.message));
     } else {
       const sessions = getActiveSessions().filter(s => s.type !== 'buzzer');
       if (sessions.length === 0) {

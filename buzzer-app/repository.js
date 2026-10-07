@@ -5,11 +5,10 @@ const { EventEmitter } = require('events');
 const config = require('../config');
 const store = require('../db/jsonStore');
 const { getPool, withTransaction } = require('../math-app/db/database');
-const years = require('../math-app/repositories/academic-years.repo');
+const { normalizeRules, matchesRules, describeRules, roster } = require('../shared/classroom-audience');
 const users = require('../math-app/repositories/users.repo');
 const pet = require('../pet-app/repositories/pet.repo');
 
-const GROUPS = { chineseGroup: '中文', englishGroup: '英文', mathGroup: '數學' };
 const fail = (message, status = 400) => { throw Object.assign(new Error(message), { status }); };
 let schemaPromise;
 let queue = Promise.resolve();
@@ -31,12 +30,6 @@ async function ensureSchema() {
   ); CREATE INDEX IF NOT EXISTS idx_buzzer_teacher ON BuzzerSessions(TeacherID);`)
     .catch(error => { schemaPromise = null; throw error; });
   await schemaPromise;
-}
-
-async function roster() {
-  const academicYear = await years.getCurrentAcademicYear();
-  const students = (await years.listEnrollments(academicYear)).filter(row => row.role !== 'teacher');
-  return { academicYear, students, classes: [...new Set(students.map(row => row.className).filter(Boolean))].sort() };
 }
 
 async function all() {
@@ -83,7 +76,8 @@ async function locked(operation, id) {
 
 function allowed(session, user) {
   return user.role === 'teacher' ? session.teacherId === user.studentId
-    : user.role === 'student' && session.eligible.some(row => row.studentId === user.studentId);
+    : user.role === 'student' && ((Array.isArray(session.audienceRules) && !session.audienceRules.length)
+      || session.eligible.some(row => row.studentId === user.studentId));
 }
 
 function view(session, user) {
@@ -100,6 +94,7 @@ function view(session, user) {
     serverNow: Date.now(), createdAt: session.createdAt, revision: session.revision || 0,
   };
   if (user.role === 'teacher') {
+    if (Array.isArray(session.audienceRules)) result.audienceRules = session.audienceRules;
     result.participants = session.participants;
     result.waitingFor = session.participants.filter(row => !(session.readyIds || []).includes(row.studentId)).map(row => row.name);
   }
@@ -117,21 +112,23 @@ async function sessions(user) {
 async function create(user, body) {
   const points = Number(body.points);
   if (!Number.isInteger(points) || points < 1 || points > 10000) fail('每題分數須為 1 至 10000 的整數。');
-  const { students } = await roster();
-  let eligible = students.filter(row => row.className === body.className);
-  let targetLabel = String(body.className || '');
-  if (body.groupField) {
-    if (!Object.hasOwn(GROUPS, body.groupField) || !body.groupName) fail('請選擇有效的科目組別。');
-    eligible = eligible.filter(row => row[body.groupField] === body.groupName);
-    targetLabel += ` · ${GROUPS[body.groupField]} ${body.groupName}`;
+  let input = body.audienceRules;
+  if (!Object.hasOwn(body, 'audienceRules') && body.className) {
+    if (body.groupField && !body.groupName) fail('請選擇有效的科目組別。');
+    input = [{ classNames: [body.className], groupField: body.groupField || '',
+      groupNames: body.groupField ? [body.groupName] : [] }];
   }
-  if (!eligible.length) fail('所選班級或組別沒有學生。');
+  const audienceRules = normalizeRules(input);
+  const { students } = await roster();
+  const eligible = students.filter(row => matchesRules(row, audienceRules));
+  const targetLabel = describeRules(audienceRules);
+  if (audienceRules.length && !eligible.length) fail('所選班級或組別沒有學生。');
   const teacher = await users.findByIdSummary(user.studentId);
   return locked(async (rows, save) => {
     const existing = rows.find(row => row.teacherId === user.studentId && row.phase !== 'ended');
     if (existing) return view(existing, user);
     const session = { id: randomUUID(), teacherId: user.studentId, teacherName: teacher?.name || '老師',
-      targetLabel, points, eligible: eligible.map(row => ({ studentId: row.studentId, name: row.name })),
+      targetLabel, points, audienceRules, eligible: eligible.map(row => ({ studentId: row.studentId, name: row.name })),
       participants: [], phase: 'waiting', round: 0, opensAt: null, winnerId: null, verdict: null,
       createdAt: Date.now(), history: [] };
     await save(session);
@@ -195,6 +192,7 @@ async function fastAction(id, user, body, receivedAt) {
   const { rows } = await getPool().query(`WITH changed AS (
     UPDATE BuzzerSessions SET State=State || ${fields} || jsonb_build_object('revision',COALESCE((State->>'revision')::integer,0)+1),UpdatedAt=NOW()
     WHERE SessionID::text=$1 AND (State->>'round')::integer=$3
+      AND (State->'audienceRules'='[]'::jsonb OR State->'eligible' @> jsonb_build_array(jsonb_build_object('studentId',$2::text)))
       AND State->'participants' @> jsonb_build_array(jsonb_build_object('studentId',$2::text)) AND $5::integer>=0 AND ${condition}
     RETURNING State
   ) SELECT State AS state,pg_notify('buio_buzzer',$6) FROM changed`, [id, user.studentId, Number(body.round), receivedAt, rtt, `${id}:${origin}`]);
@@ -268,8 +266,9 @@ async function action(id, user, body) {
       }
       if (!existing) {
         if (!['waiting', 'judged'].includes(session.phase)) fail('本題已開始，請待本題結束後加入。', 409);
-        const student = session.eligible.find(row => row.studentId === user.studentId);
-        session.participants.push({ ...student, successes: 0, score: 0 });
+        const student = session.eligible.find(row => row.studentId === user.studentId)
+          || await users.findByIdSummary(user.studentId);
+        session.participants.push({ studentId: user.studentId, name: student?.name || user.studentId, successes: 0, score: 0 });
       }
     } else if (type === 'start') {
       if (Number(body.round) !== session.round) fail('題目已更新，請重試。', 409);

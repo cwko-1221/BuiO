@@ -232,6 +232,14 @@ const EXACT = new Map(Object.entries({
   '任教老師必須是現有教師帳戶': 'The assigned teacher must be an existing teacher account',
   '你未獲委任教授此班別及科目': 'You are not assigned to teach this class and subject',
   '老師已結束課堂': 'Your teacher has ended the class',
+  '課堂可見範圍設定不正確。': 'The classroom visibility settings are invalid.',
+  '未能讀取課堂設定，請稍後重試。': 'Could not load classroom settings. Please try again shortly.',
+  '課堂已關閉，請重新開啟。': 'The classroom has closed. Please open it again.',
+  '只可設定自己的課堂。': 'You can only configure your own classroom.',
+  '你不屬於這個課堂。': 'You are not eligible to join this classroom.',
+  '所選班級或組別沒有學生。': 'There are no students in the selected classes or groups.',
+  '老師尚未開啟課堂，或課堂已關閉': 'Your teacher has not started the class, or it has already closed',
+  '老師連線中斷超過保留時間，課堂已關閉，請重新加入新課堂': 'The class closed because the teacher did not reconnect in time. Please join a new class',
   '預覽學生': 'Preview student',
 
   // --- homework subjects (sent as `name` on each subject row) -----------

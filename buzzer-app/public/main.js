@@ -1,7 +1,9 @@
 import { createClock } from './clock.js';
+import { mountAudienceEditor } from '/shared/classroom-audience-editor.mjs';
 const app = document.querySelector('#app');
 const clock = createClock();
 let user, roster, session, events, busy = false, noticeTimer;
+let audienceEditor;
 let roundOffset = null, syncing, readyKey = '', armedKey = '', lastHeartbeat = 0;
 let connected = false, stateKey = '';
 let studentZoomLocked = false;
@@ -140,6 +142,7 @@ function renderSession() {
   const key = `${session.id}:${session.revision}:${current}:${current === 'countdown' ? remaining() : 0}:${busy}:${connected}:${clock.ready}:${document.hidden}`;
   if (key === stateKey) return;
   stateKey = key;
+  audienceEditor?.destroy(); audienceEditor = null;
   app.dataset.phase = current; app.dataset.round = session.round;
   const teacher = user.role === 'teacher';
   app.classList.toggle('student-main', !teacher);
@@ -187,33 +190,28 @@ function renderStudent(current) {
   app.innerHTML = `<section class="student-room"><div class="student-stats">${tr('成功搶答數', 'Successful buzzes')} <strong id="successes">${session.me?.successes || 0}</strong><br>${tr('得到分數', 'Points earned')} <strong id="score">${session.me?.score || 0}</strong> · ${tr('金幣', 'coins')}</div><div class="student-stage" aria-live="polite">${content}</div></section>`;
 }
 function renderSetup() {
-  app.innerHTML = `<section class="setup"><span class="eyebrow">${tr('全班一起，準備搶答', 'READY, SET, BUZZ')}</span><h1>${tr('開啟搶答課堂', 'Open a buzz classroom')}</h1><p class="lead">${tr('選擇班級及組別，答對即可獲得 pet-app 金幣。', 'Choose a class and group. Correct answers earn pet-app coins.')}</p><form class="panel" id="setupForm"><h2>${tr('課堂設定', 'Class settings')}</h2><div class="form-grid">
-    <label>${tr('班級', 'Class')}<select id="className" required>${roster.classes.map(name => `<option value="${esc(name)}">${esc(name)}</option>`).join('')}</select></label>
-    <label>${tr('組別', 'Group')}<select id="groupField"><option value="">${tr('全班', 'Whole class')}</option><option value="chineseGroup">${tr('中文組別', 'Chinese group')}</option><option value="englishGroup">${tr('英文組別', 'English group')}</option><option value="mathGroup">${tr('數學組別', 'Math group')}</option></select></label>
-    <label id="groupLabel" hidden>${tr('選擇組別', 'Choose group')}<select id="groupName"></select></label>
-    <label>${tr('每題分數', 'Points per question')}<input id="points" type="number" min="1" max="10000" step="1" value="10" required><span class="hint">${tr('1 分 = 1 pet-app 金幣', '1 point = 1 pet-app coin')}</span></label></div><div class="recipients" id="recipients"></div><button class="primary" type="submit" id="createClass">${tr('開始課堂', 'Start class')}</button></form></section>`;
-  const classInput = document.querySelector('#className'), fieldInput = document.querySelector('#groupField'), groupInput = document.querySelector('#groupName');
-  function selected() { return roster.students.filter(row => row.className === classInput.value && (!fieldInput.value || row[fieldInput.value] === groupInput.value)); }
-  function preview() {
-    const students = selected();
-    document.querySelector('#recipients').textContent = tr(`共 ${students.length} 人`, `${students.length} students`) + (students.length ? ` · ${students.map(row => row.name).join('、')}` : '');
-    document.querySelector('#createClass').disabled = !students.length;
-  }
-  function groups() {
-    document.querySelector('#groupLabel').hidden = !fieldInput.value;
-    const names = [...new Set(roster.students.filter(row => row.className === classInput.value).map(row => row[fieldInput.value]).filter(Boolean))].sort();
-    groupInput.innerHTML = names.map(name => `<option value="${esc(name)}">${esc(name)}</option>`).join('');
-    preview();
-  }
-  classInput.addEventListener('change', groups); fieldInput.addEventListener('change', groups); groupInput.addEventListener('change', preview); groups();
+  audienceEditor?.destroy();
+  app.innerHTML = `<section class="setup"><span class="eyebrow">${tr('全班一起，準備搶答', 'READY, SET, BUZZ')}</span><h1>${tr('開啟搶答課堂', 'Open a buzz classroom')}</h1><p class="lead">${tr('預設所有學生可加入；可選填班級及科目組別範圍，答對即可獲得 pet-app 金幣。', 'All students can join by default. Optionally choose classes and subject groups. Correct answers earn pet-app coins.')}</p><form class="panel" id="setupForm"><h2>${tr('課堂設定', 'Class settings')}</h2><div class="form-grid">
+    <label>${tr('每題分數', 'Points per question')}<input id="points" type="number" min="1" max="10000" step="1" value="10" required><span class="hint">${tr('1 分 = 1 pet-app 金幣', '1 point = 1 pet-app coin')}</span></label></div><div id="audienceEditor" style="margin-bottom:24px"></div><button class="primary" type="submit" id="createClass">${tr('開始課堂', 'Start class')}</button></form></section>`;
+  const submit = document.querySelector('#createClass');
+  let creating = false, restrictedEmpty = false;
+  audienceEditor = mountAudienceEditor(document.querySelector('#audienceEditor'), {
+    roster, rules: [], language: user.language || 'zh-HK',
+    onChange(rules, count) {
+      const restricted = rules.length > 0 && rules.every(rule => rule.classNames.length || rule.groupNames.length);
+      restrictedEmpty = restricted && count === 0;
+      submit.disabled = creating || restrictedEmpty;
+    },
+  });
   document.querySelector('#setupForm').addEventListener('submit', async event => {
     event.preventDefault();
-    const submit = document.querySelector('#createClass'); submit.disabled = true;
+    if (creating || restrictedEmpty) return;
+    creating = true; submit.disabled = true;
     try {
-      const data = await api('/sessions', { className: classInput.value, groupField: fieldInput.value,
-        groupName: fieldInput.value ? groupInput.value : '', points: Number(document.querySelector('#points').value) });
+      const data = await api('/sessions', { audienceRules: audienceEditor.getRules(), points: Number(document.querySelector('#points').value) });
       await enter(data.session.id);
-    } catch (error) { notice(error.message); submit.disabled = false; }
+    } catch (error) { notice(error.message); }
+    finally { creating = false; submit.disabled = restrictedEmpty; }
   });
 }
 async function renderList() {
