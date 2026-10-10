@@ -89,7 +89,9 @@ async function uploadToSupabase(path, buffer, contentType) {
 }
 
 function recordingParts(path) {
-  const match = /^([A-Za-z0-9_-]{1,20})\/([\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12})\/([\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12})\/(practice|assessment)\.(webm|wav|ogg|mp4)$/i.exec(String(path || ''));
+  // "done" exists in an older saved attempt. It is read-only compatibility;
+  // the upload route continues to accept only practice and assessment.
+  const match = /^([A-Za-z0-9_-]{1,20})\/([\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12})\/([\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12})\/(practice|assessment|done)\.(webm|wav|ogg|mp4)$/i.exec(String(path || ''));
   return match ? { studentId: match[1], assignmentId: match[2], itemId: match[3], phase: match[4] } : null;
 }
 

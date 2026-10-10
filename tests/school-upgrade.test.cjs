@@ -134,6 +134,8 @@ test('recording readers reject traversal and distinguish images from student aud
   const protectedUrl = storage.protectRecordingUrl('https://test.supabase.co/storage/v1/object/public/recordings/' + object);
   assert.match(protectedUrl, /^\/api\/chinese\/recordings\?path=/);
   assert.equal(storage.protectRecordingUrl(protectedUrl), protectedUrl);
+  assert.equal(storage.recordingParts(object.replace('practice', 'done')).phase, 'done');
+  assert.match(storage.protectRecordingUrl('https://test.supabase.co/storage/v1/object/public/recordings/' + object.replace('practice', 'done')), /^\/api\/chinese\/recordings/);
   assert.equal(storage.protectRecordingUrl('https://evil.example/voice.wav'), null);
   assert.equal(storage.recordingParts('../S1/' + object), null);
   assert.equal(storage.recordingParts(object.replace('practice', '../../bank')), null);

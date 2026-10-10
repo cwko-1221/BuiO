@@ -31,6 +31,7 @@
 - `server_only_data_20261010`：48 張現有 public 資料表啟用 RLS，撤回 anon/authenticated 不需要的資料表及 sequence 權限，限制 postgres 建立新表時的預設授權；新增 question-images bucket。
 - `operation_receipts_20261010`：新增只有後端可讀寫的 PlatformOperationReceipts。後端使用 postgres 角色及平台 cookie 登入，沒有假設使用 Supabase Auth 的 `auth.uid()` 政策。
 - `private_recordings_20261010`：必須在程式部署及舊音檔／圖片授權讀取確認後，才關閉 recordings bucket 的 public 標記。業務紀錄及舊音檔路徑不重寫。
+- 遷移前核對 389 個 Storage 物件：385 個正式階段音檔、1 個歷史 done.webm、3 張題目圖片；歷史格式只允許授權讀取，新的上傳仍限制 practice／assessment。
 
 ## 索引決策
 
