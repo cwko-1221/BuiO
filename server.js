@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const { assetStatic } = require('./shared/asset-static');
 const session = require('cookie-session');
 const cors = require('cors');
 const crypto = require('crypto');
@@ -15,7 +16,8 @@ const { version: APP_VERSION } = require('./package.json');
 const config = require('./config');
 const serverI18n = require('./shared/server-i18n');
 const db = require('./db');                  // JSON seed-on-boot side effect (json mode only)
-const { queryWithRetry } = require('./math-app/db/database');
+const { queryWithDeadline } = require('./math-app/db/database');
+const { requests } = require('./shared/request-metrics');
 
 const app = express();
 const PORT = config.port;
@@ -48,6 +50,14 @@ const sessionMiddleware = session({
   sameSite: 'lax',
 });
 app.use(sessionMiddleware);
+app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'private, no-store'); next(); });
+app.use('/api', (req, res, next) => {
+  const expectedAccount = req.get('X-BuiO-Account');
+  if (expectedAccount && !['GET','HEAD','OPTIONS'].includes(req.method) && req.session?.studentId !== expectedAccount) {
+    return res.status(403).json({ success: false, code: 'ACCOUNT_CHANGED', message: '登入帳戶已變更，請重新載入。' });
+  }
+  next();
+});
 
 // Give every request a safe correlation id and record API latency. Request bodies,
 // query strings and cookies are intentionally excluded because they may contain
@@ -57,11 +67,12 @@ app.use((req, res, next) => {
   const requestId = crypto.randomUUID();
   const started = process.hrtime.bigint();
   req.requestId = requestId;
+  const metrics = { requestId, sqlCount: 0, sqlMs: 0, poolWaitMs: 0, phases: {} };
   res.setHeader('X-Request-ID', requestId);
 
   const isApiRequest = req.path.startsWith('/api/');
   const isLoginRequest = req.path === '/api/auth/login';
-  const safePath = isLoginRequest
+  const safePath = req.path.startsWith('/api/room-type/') ? '/api/room-type/:roomId' : isLoginRequest
     ? req.path
     : req.path.split('/').slice(0, 4).join('/') || '/';
   req.logPath = safePath;
@@ -69,13 +80,19 @@ app.use((req, res, next) => {
   res.on('finish', () => {
     if (!isApiRequest) return;
     const durationMs = Math.round(Number(process.hrtime.bigint() - started) / 1e6);
-    if (isLoginRequest || res.statusCode >= 500 || durationMs >= 1000) {
+    const rate = Number(process.env.REQUEST_METRICS_SAMPLE_RATE ?? '0.02');
+    if (isLoginRequest || res.statusCode >= 500 || durationMs >= 1000 || Math.random() < Math.max(0, Math.min(1, rate || 0))) {
       console.log('[request]', JSON.stringify({
         requestId,
         method: req.method,
         path: safePath,
         status: res.statusCode,
         durationMs,
+        responseBytes: Number(res.getHeader('Content-Length')) || null,
+        sqlCount: metrics.sqlCount,
+        sqlMs: Math.round(metrics.sqlMs),
+        poolWaitMs: Math.round(metrics.poolWaitMs),
+        phases: Object.fromEntries(Object.entries(metrics.phases).map(([key, value]) => [key, Math.round(value)])),
       }));
     }
   });
@@ -92,7 +109,7 @@ app.use((req, res, next) => {
     }));
   });
 
-  next();
+  requests.run(metrics, next);
 });
 
 // Every route below answers in Chinese. When the reader has chosen English,
@@ -162,16 +179,26 @@ const io = new Server(httpServer, {
   // stream of them, since the context carries over between frames. The threshold leaves the small
   // control messages alone, where the header would cost more than the saving.
   perMessageDeflate: { threshold: 512 },
-  // Fast disconnect detection: ping every 4s, declare dead after 6s of silence.
-  // Matters when the teacher closes the tab without an explicit "end class"
-  // click — default 20s pingTimeout left students stuck for too long.
+  // Keep short heartbeat intervals, but tolerate a brief school-network outage.
+  // Explicit teacher end remains immediate; each room owns its reconnect policy.
   pingInterval: 4000,
-  pingTimeout: 6000,
+  pingTimeout: 20000,
 });
 // Share the signed login session with Socket.IO so whiteboard classroom events
 // can be tied to the same student account used by Pet Park rewards.
 io.engine.use(sessionMiddleware);
-require('./whiteboard-app/server/socket')(io, app);
+const whiteboard = require('./whiteboard-app/server/socket')(io, app);
+const { requireAuth } = require('./math-app/middleware/auth');
+app.get('/api/classroom/sessions', requireAuth, async (req, res, next) => {
+  try {
+    const results = await Promise.allSettled([
+      whiteboard.listSessions(req.session),
+      require('./buzzer-app/repository').sessions(req.session),
+    ]);
+    const [whiteboards, buzzers] = results.map(result => result.status === 'fulfilled' ? result.value : null);
+    res.set('Cache-Control', 'no-store').json({ success: true, whiteboards, buzzers, partial: results.some(result => result.status === 'rejected') });
+  } catch (error) { next(error); }
+});
 require('./game-app/server/socket')(io, app);   // namespace /game
 require('./tower-defense-app/server/socket')(io, app); // namespace /tower-defense
 require('./pet-app/server/duel')(io); // student presence, invitations and authoritative duels
@@ -179,6 +206,9 @@ require('./pet-app/server/duel')(io); // student presence, invitations and autho
 // ----------------------------------------------------------------
 // Health / debug
 // ----------------------------------------------------------------
+app.get('/health/live', (_req, res) => {
+  res.set('Cache-Control', 'no-store').json({ status: 'ok' });
+});
 const healthHandler = async (req, res) => {
   const started = process.hrtime.bigint();
   try {
@@ -186,7 +216,7 @@ const healthHandler = async (req, res) => {
     if (config.db.mode === 'json') {
       summary = { connected: true, type: 'json-local', userCount: db._load().users.length };
     } else {
-      const result = await queryWithRetry('SELECT 1 AS ok', [], { label: 'health' });
+      const result = await queryWithDeadline('SELECT 1 AS ok', [], 3000);
       summary = {
         connected: result.rows?.[0]?.ok === 1 || result.rows?.[0]?.ok === '1',
         type: 'postgres',
@@ -268,25 +298,26 @@ app.get('/api/network/ip', (req, res) => {
 //         forgotten version bump cannot strand a class on stale code for a month
 const CACHE_VENDOR = { maxAge: '30d', immutable: true };
 const CACHE_MEDIA  = { maxAge: '30d' };
-const CACHE_APP    = { maxAge: '1h' };
+const CACHE_APP    = { maxAge: 0, setHeaders: res => res.setHeader('Cache-Control', 'public, no-cache') };
 
 // One i18n runtime and one dictionary per module, shared by every page on the
 // platform so the hub's language switch reaches all of them.
-app.use('/shared', express.static(path.join(__dirname, 'shared'), CACHE_APP));
-app.use('/src', express.static(path.join(__dirname, 'src'), CACHE_APP));
-app.use('/vendor', express.static(path.join(__dirname, 'node_modules', 'exceljs', 'dist'), CACHE_VENDOR));
+app.use('/shared', assetStatic(path.join(__dirname, 'shared'), CACHE_APP));
+app.use('/src', assetStatic(path.join(__dirname, 'src'), CACHE_APP));
+app.use('/vendor', assetStatic(path.join(__dirname, 'node_modules', 'exceljs', 'dist'), CACHE_VENDOR));
+app.use('/vendor/phaser/4.2.1', assetStatic(path.join(__dirname, 'node_modules', 'phaser', 'dist'), CACHE_VENDOR));
 
-app.use('/math-app/css', express.static(path.join(__dirname, 'math-app', 'public', 'css'), CACHE_APP));
-app.use('/math-app/js', express.static(path.join(__dirname, 'math-app', 'public', 'js'), CACHE_APP));
-app.use('/math-app/images', express.static(path.join(__dirname, 'math-app', 'public', 'images'), CACHE_MEDIA));
+app.use('/math-app/css', assetStatic(path.join(__dirname, 'math-app', 'public', 'css'), CACHE_APP));
+app.use('/math-app/js', assetStatic(path.join(__dirname, 'math-app', 'public', 'js'), CACHE_APP));
+app.use('/math-app/images', assetStatic(path.join(__dirname, 'math-app', 'public', 'images'), CACHE_MEDIA));
 
 // Multiplication table check list static assets
-app.use('/multiplication-checklist/css', express.static(path.join(__dirname, 'multiplication-app', 'public', 'css'), CACHE_APP));
-app.use('/multiplication-checklist/js', express.static(path.join(__dirname, 'multiplication-app', 'public', 'js'), CACHE_APP));
+app.use('/multiplication-checklist/css', assetStatic(path.join(__dirname, 'multiplication-app', 'public', 'css'), CACHE_APP));
+app.use('/multiplication-checklist/js', assetStatic(path.join(__dirname, 'multiplication-app', 'public', 'js'), CACHE_APP));
 
 // Chinese module static + page routes
-app.use('/chinese/css', express.static(path.join(__dirname, 'chinese-app', 'public', 'css'), CACHE_APP));
-app.use('/chinese/js', express.static(path.join(__dirname, 'chinese-app', 'public', 'js'), CACHE_APP));
+app.use('/chinese/css', assetStatic(path.join(__dirname, 'chinese-app', 'public', 'css'), CACHE_APP));
+app.use('/chinese/js', assetStatic(path.join(__dirname, 'chinese-app', 'public', 'js'), CACHE_APP));
 
 function requireSession(req, res, next) {
   if (!req.session || !req.session.studentId) return res.redirect('/');
@@ -297,97 +328,97 @@ function requireTeacherPage(req, res, next) {
   if (req.session.role !== 'teacher') return res.redirect('/chinese/student');
   next();
 }
-app.get('/chinese', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'chinese-app', 'public', 'index.html')));
-app.get('/chinese/teacher', requireTeacherPage, (req, res) => res.sendFile(path.join(__dirname, 'chinese-app', 'public', 'teacher.html')));
-app.get('/chinese/student', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'chinese-app', 'public', 'student.html')));
-app.get('/chinese/practice', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'chinese-app', 'public', 'practice.html')));
+app.get('/chinese', requireSession, (req, res) => res.sendFile(path.join('chinese-app', 'public', 'index.html'), { root: __dirname }));
+app.get('/chinese/teacher', requireTeacherPage, (req, res) => res.sendFile(path.join('chinese-app', 'public', 'teacher.html'), { root: __dirname }));
+app.get('/chinese/student', requireSession, (req, res) => res.sendFile(path.join('chinese-app', 'public', 'student.html'), { root: __dirname }));
+app.get('/chinese/practice', requireSession, (req, res) => res.sendFile(path.join('chinese-app', 'public', 'practice.html'), { root: __dirname }));
 
 // English module static + page routes
-app.use('/english/css', express.static(path.join(__dirname, 'english-app', 'public', 'css'), CACHE_APP));
-app.use('/english/js', express.static(path.join(__dirname, 'english-app', 'public', 'js'), CACHE_APP));
+app.use('/english/css', assetStatic(path.join(__dirname, 'english-app', 'public', 'css'), CACHE_APP));
+app.use('/english/js', assetStatic(path.join(__dirname, 'english-app', 'public', 'js'), CACHE_APP));
 
 function requireTeacherPageEn(req, res, next) {
   if (!req.session || !req.session.studentId) return res.redirect('/');
   if (req.session.role !== 'teacher') return res.redirect('/english/student');
   next();
 }
-app.get('/english', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'index.html')));
-app.get('/english/teacher', requireTeacherPageEn, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'teacher.html')));
-app.get('/english/student', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'student.html')));
-app.get('/english/practice', requireSession, (req, res) => res.sendFile(path.join(__dirname, 'english-app', 'public', 'practice.html')));
+app.get('/english', requireSession, (req, res) => res.sendFile(path.join('english-app', 'public', 'index.html'), { root: __dirname }));
+app.get('/english/teacher', requireTeacherPageEn, (req, res) => res.sendFile(path.join('english-app', 'public', 'teacher.html'), { root: __dirname }));
+app.get('/english/student', requireSession, (req, res) => res.sendFile(path.join('english-app', 'public', 'student.html'), { root: __dirname }));
+app.get('/english/practice', requireSession, (req, res) => res.sendFile(path.join('english-app', 'public', 'practice.html'), { root: __dirname }));
 
 // Phonics Express static assets + role-aware pages
-app.use('/phonics/css', express.static(path.join(__dirname, 'phonics-app', 'public', 'css'), CACHE_APP));
-app.use('/phonics/js', express.static(path.join(__dirname, 'phonics-app', 'public', 'js'), CACHE_APP));
+app.use('/phonics/css', assetStatic(path.join(__dirname, 'phonics-app', 'public', 'css'), CACHE_APP));
+app.use('/phonics/js', assetStatic(path.join(__dirname, 'phonics-app', 'public', 'js'), CACHE_APP));
 app.get('/phonics', requireSession, (req, res) => {
   const page = req.session.role === 'teacher' ? 'teacher.html' : 'index.html';
-  res.sendFile(path.join(__dirname, 'phonics-app', 'public', page));
+  res.sendFile(path.join('phonics-app', 'public', page), { root: __dirname });
 });
 app.get('/phonics/student', requireSession, (_req, res) => {
-  res.sendFile(path.join(__dirname, 'phonics-app', 'public', 'index.html'));
+  res.sendFile(path.join('phonics-app', 'public', 'index.html'), { root: __dirname });
 });
 app.get('/phonics/teacher', requireSession, (req, res) => {
   if (req.session.role !== 'teacher') return res.redirect('/phonics');
-  res.sendFile(path.join(__dirname, 'phonics-app', 'public', 'teacher.html'));
+  res.sendFile(path.join('phonics-app', 'public', 'teacher.html'), { root: __dirname });
 });
 
 // Game module static + page routes
-app.use('/game/css', express.static(path.join(__dirname, 'game-app', 'public', 'css'), CACHE_APP));
-app.use('/game/js', express.static(path.join(__dirname, 'game-app', 'public', 'js'), CACHE_APP));
-app.use('/game/images', express.static(path.join(__dirname, 'game-app', 'public', 'images'), CACHE_MEDIA));
-app.use('/game/vendor/phaser', express.static(path.join(__dirname, 'node_modules', 'phaser', 'dist'), CACHE_VENDOR));
+app.use('/game/css', assetStatic(path.join(__dirname, 'game-app', 'public', 'css'), CACHE_APP));
+app.use('/game/js', assetStatic(path.join(__dirname, 'game-app', 'public', 'js'), CACHE_APP));
+app.use('/game/images', assetStatic(path.join(__dirname, 'game-app', 'public', 'images'), CACHE_MEDIA));
+app.use('/game/vendor/phaser', assetStatic(path.join(__dirname, 'node_modules', 'phaser', 'dist'), CACHE_VENDOR));
 app.get('/game/preview', (req, res, next) => {
   if (config.isProd) return next();
-  res.sendFile(path.join(__dirname, 'game-app', 'public', 'play.html'));
+  res.sendFile(path.join('game-app', 'public', 'play.html'), { root: __dirname });
 });
 app.get('/game', requireSession, (req, res) => {
   if (req.session.role === 'teacher') {
-    return res.sendFile(path.join(__dirname, 'game-app', 'public', 'host.html'));
+    return res.sendFile(path.join('game-app', 'public', 'host.html'), { root: __dirname });
   }
-  res.sendFile(path.join(__dirname, 'game-app', 'public', 'play.html'));
+  res.sendFile(path.join('game-app', 'public', 'play.html'), { root: __dirname });
 });
 app.get('/game/host', requireSession, (req, res) => {
   if (req.session.role !== 'teacher') return res.redirect('/game');
-  res.sendFile(path.join(__dirname, 'game-app', 'public', 'host.html'));
+  res.sendFile(path.join('game-app', 'public', 'host.html'), { root: __dirname });
 });
 app.get('/game/host/preview', (req, res, next) => {
   if (config.isProd) return next();
-  res.sendFile(path.join(__dirname, 'game-app', 'public', 'host.html'));
+  res.sendFile(path.join('game-app', 'public', 'host.html'), { root: __dirname });
 });
 
 // Unified quiz-game lobby
-app.use('/games/css', express.static(path.join(__dirname, 'game-hub-app', 'public', 'css'), CACHE_APP));
-app.use('/games/js', express.static(path.join(__dirname, 'game-hub-app', 'public', 'js'), CACHE_APP));
+app.use('/games/css', assetStatic(path.join(__dirname, 'game-hub-app', 'public', 'css'), CACHE_APP));
+app.use('/games/js', assetStatic(path.join(__dirname, 'game-hub-app', 'public', 'js'), CACHE_APP));
 app.get('/games/preview', (req, res, next) => {
   if (config.isProd) return next();
-  res.sendFile(path.join(__dirname, 'game-hub-app', 'public', 'index.html'));
+  res.sendFile(path.join('game-hub-app', 'public', 'index.html'), { root: __dirname });
 });
 app.get('/games', requireSession, (_req, res) => {
-  res.sendFile(path.join(__dirname, 'game-hub-app', 'public', 'index.html'));
+  res.sendFile(path.join('game-hub-app', 'public', 'index.html'), { root: __dirname });
 });
 
 // Tower defense module
-app.use('/tower-defense/css', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'css'), CACHE_APP));
-app.use('/tower-defense/js', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'js'), CACHE_APP));
-app.use('/tower-defense/assets', express.static(path.join(__dirname, 'tower-defense-app', 'public', 'assets'), { maxAge: process.env.NODE_ENV === 'production' ? '30d' : 0 }));
-app.use('/tower-defense/vendor/phaser', express.static(path.join(__dirname, 'node_modules', 'phaser', 'dist'), CACHE_VENDOR));
+app.use('/tower-defense/css', assetStatic(path.join(__dirname, 'tower-defense-app', 'public', 'css'), CACHE_APP));
+app.use('/tower-defense/js', assetStatic(path.join(__dirname, 'tower-defense-app', 'public', 'js'), CACHE_APP));
+app.use('/tower-defense/assets', assetStatic(path.join(__dirname, 'tower-defense-app', 'public', 'assets'), { maxAge: process.env.NODE_ENV === 'production' ? '30d' : 0 }));
+app.use('/tower-defense/vendor/phaser', assetStatic(path.join(__dirname, 'node_modules', 'phaser', 'dist'), CACHE_VENDOR));
 app.get('/tower-defense/preview', (req, res, next) => {
   if (config.isProd) return next();
-  res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'index.html'));
+  res.sendFile(path.join('tower-defense-app', 'public', 'index.html'), { root: __dirname });
 });
 app.get('/tower-defense/teacher/preview', (req, res, next) => {
   if (config.isProd) return next();
-  res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'teacher.html'));
+  res.sendFile(path.join('tower-defense-app', 'public', 'teacher.html'), { root: __dirname });
 });
 app.get('/tower-defense', requireSession, (req, res) => {
   if (req.session.role === 'teacher') {
-    return res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'teacher.html'));
+    return res.sendFile(path.join('tower-defense-app', 'public', 'teacher.html'), { root: __dirname });
   }
-  res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'index.html'));
+  res.sendFile(path.join('tower-defense-app', 'public', 'index.html'), { root: __dirname });
 });
 app.get('/tower-defense/teacher', requireSession, (req, res) => {
   if (req.session.role !== 'teacher') return res.redirect('/tower-defense');
-  res.sendFile(path.join(__dirname, 'tower-defense-app', 'public', 'teacher.html'));
+  res.sendFile(path.join('tower-defense-app', 'public', 'teacher.html'), { root: __dirname });
 });
 
 // Pet Paradise: hashed build assets are public; the application document is
@@ -438,7 +469,7 @@ app.use('/pet/assets', (req, res, next) => {
     else res.destroy(error);
   });
   stream.pipe(res);
-}, express.static(path.join(petDist, 'assets'), {
+}, assetStatic(path.join(petDist, 'assets'), {
   maxAge: config.isProd ? '1y' : 0,
   immutable: config.isProd,
   setHeaders: (res) => setPetHeaders(res),
@@ -458,12 +489,12 @@ app.get('/pet/preview', async (req, res, next) => {
   }
   setPetHeaders(res, { document: true, microphone: req.session.role === 'teacher' });
   res.set('Cache-Control', 'no-store');
-  res.sendFile(path.join(petDist, 'index.html'));
+  res.sendFile('index.html', { root: petDist });
 });
 app.get(['/pet', '/pet/'], requireSession, (req, res) => {
   setPetHeaders(res, { document: true, microphone: req.session.role === 'teacher' });
   res.set('Cache-Control', 'no-store');
-  res.sendFile(path.join(petDist, 'index.html'));
+  res.sendFile('index.html', { root: petDist });
 });
 
 // Wonder Lab: only versioned build assets are public. The HTML entry remains
@@ -479,7 +510,7 @@ const setScienceLabHeaders = (res, { document = false } = {}) => {
     res.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' blob:; media-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
   }
 };
-app.use('/science-lab/assets', express.static(path.join(scienceLabDist, 'assets'), {
+app.use('/science-lab/assets', assetStatic(path.join(scienceLabDist, 'assets'), {
   maxAge: config.isProd ? '1y' : 0,
   immutable: config.isProd,
   setHeaders: (res) => setScienceLabHeaders(res),
@@ -499,7 +530,7 @@ app.get('/science-lab/media/index.json', (_req, res) => {
 // Observation clips are served straight from source, not through the bundler:
 // they are large, they change independently of the code, and keeping them out
 // of dist means a rebuild never re-commits a binary.
-app.use('/science-lab/media', express.static(scienceLabMedia, {
+app.use('/science-lab/media', assetStatic(scienceLabMedia, {
   maxAge: config.isProd ? '30d' : 0,
   setHeaders: (res) => setScienceLabHeaders(res),
 }));
@@ -507,37 +538,37 @@ app.get('/science-lab/preview', (req, res, next) => {
   if (config.isProd) return next();
   setScienceLabHeaders(res, { document: true });
   res.set('Cache-Control', 'no-store');
-  res.sendFile(path.join(scienceLabDist, 'index.html'));
+  res.sendFile('index.html', { root: scienceLabDist });
 });
 app.get(['/science-lab', '/science-lab/'], requireSession, (_req, res) => {
   setScienceLabHeaders(res, { document: true });
   res.set('Cache-Control', 'no-store');
-  res.sendFile(path.join(scienceLabDist, 'index.html'));
+  res.sendFile('index.html', { root: scienceLabDist });
 });
 
-app.get('/login.html',     (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'login.html')));
-app.get('/quiz.html',      (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'quiz.html')));
-app.get('/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'dashboard.html')));
-app.get('/teacher-topics.html', (req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'teacher-topics.html')));
-app.get('/tag-picker.html',(req, res) => res.sendFile(path.join(__dirname, 'math-app', 'public', 'tag-picker.html')));
+app.get('/login.html',     (req, res) => res.sendFile(path.join('math-app', 'public', 'login.html'), { root: __dirname }));
+app.get('/quiz.html',      (req, res) => res.sendFile(path.join('math-app', 'public', 'quiz.html'), { root: __dirname }));
+app.get('/dashboard.html', (req, res) => res.sendFile(path.join('math-app', 'public', 'dashboard.html'), { root: __dirname }));
+app.get('/teacher-topics.html', (req, res) => res.sendFile(path.join('math-app', 'public', 'teacher-topics.html'), { root: __dirname }));
+app.get('/tag-picker.html',(req, res) => res.sendFile(path.join('math-app', 'public', 'tag-picker.html'), { root: __dirname }));
 app.get('/math',           (req, res) => {
   // Students land on the hub with the daily-random gate; teachers go
   // straight to the dashboard.
   if (req.session?.role === 'teacher') {
-    return res.sendFile(path.join(__dirname, 'math-app', 'public', 'dashboard.html'));
+    return res.sendFile(path.join('math-app', 'public', 'dashboard.html'), { root: __dirname });
   }
-  res.sendFile(path.join(__dirname, 'math-app', 'public', 'hub.html'));
+  res.sendFile(path.join('math-app', 'public', 'hub.html'), { root: __dirname });
 });
 
 // Multiplication table check list — teachers only.
 app.get('/multiplication-checklist', requireSession, (req, res) => {
   if (req.session.role !== 'teacher') return res.redirect('/');
-  res.sendFile(path.join(__dirname, 'multiplication-app', 'public', 'index.html'));
+  res.sendFile(path.join('multiplication-app', 'public', 'index.html'), { root: __dirname });
 });
 
 // Missing-homework module (teachers and appointed subject monitors only).
-app.use('/homework/css', express.static(path.join(__dirname, 'homework-app', 'public', 'css'), CACHE_APP));
-app.use('/homework/js', express.static(path.join(__dirname, 'homework-app', 'public', 'js'), CACHE_APP));
+app.use('/homework/css', assetStatic(path.join(__dirname, 'homework-app', 'public', 'css'), CACHE_APP));
+app.use('/homework/js', assetStatic(path.join(__dirname, 'homework-app', 'public', 'js'), CACHE_APP));
 app.get('/homework', requireSession, async (req, res, next) => {
   try {
     if (req.session.role !== 'teacher') {
@@ -550,36 +581,47 @@ app.get('/homework', requireSession, async (req, res, next) => {
         return res.status(403).send(serverI18n.resolveLang(req) === 'en-US' ? serverI18n.translate(message) : message);
       }
     }
-    res.sendFile(path.join(__dirname, 'homework-app', 'public', 'index.html'));
+    res.sendFile(path.join('homework-app', 'public', 'index.html'), { root: __dirname });
   } catch (error) { next(error); }
 });
 
 // Report (teacher only)
-app.use('/report-app', express.static(path.join(__dirname, 'report-app')));
+const reportTeacherOnly = (req, res, next) => {
+  if (!req.session?.studentId) return res.status(401).send('請先登入');
+  if (req.session.role !== 'teacher') return res.status(403).send('只限老師使用');
+  next();
+};
+app.use('/report-app', reportTeacherOnly);
+app.get('/report-app/report.html', (_req, res) => res.redirect('/report.html'));
+app.use('/report-app/js', assetStatic(path.join(__dirname, 'report-app', 'js')));
+app.use('/report-app/css', assetStatic(path.join(__dirname, 'report-app', 'css')));
 app.get('/report.html', (req, res) => {
   if (!req.session || !req.session.studentId) return res.redirect('/');
   if (req.session.role !== 'teacher') return res.redirect('/quiz.html');
-  res.sendFile(path.join(__dirname, 'report-app', 'report.html'));
+  res.set('Cache-Control', 'no-store').sendFile('report-app/report.html', { root: __dirname });
 });
 
-app.use('/buzzer/assets', express.static(path.join(__dirname, 'buzzer-app', 'public')));
+app.use('/buzzer/assets', assetStatic(path.join(__dirname, 'buzzer-app', 'public')));
 app.get('/buzzer', (req, res) => {
   if (!req.session?.studentId) return res.redirect('/');
-  res.sendFile(path.join(__dirname, 'buzzer-app', 'public', 'index.html'));
+  res.sendFile(path.join('buzzer-app', 'public', 'index.html'), { root: __dirname });
 });
 
 // Whiteboard SPA — only fall back to index.html for HTML navigation requests
 const whiteboardDist = path.join(__dirname, 'whiteboard-app', 'client', 'dist');
-app.use('/whiteboard', express.static(whiteboardDist));
+app.use('/whiteboard', requireSession);
+app.use('/whiteboard', assetStatic(whiteboardDist, {
+  setHeaders(res, file) { res.set('Cache-Control', file.endsWith('.html') ? 'no-store' : 'private, max-age=3600'); },
+}));
 app.use('/whiteboard', (req, res, next) => {
   if (req.method === 'GET' && req.accepts('html')) {
-    return res.sendFile(path.join(whiteboardDist, 'index.html'));
+    return res.set('Cache-Control', 'no-store').sendFile('index.html', { root: whiteboardDist });
   }
   next();
 });
 
 // Portal entry
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/', (req, res) => res.sendFile(path.join('index.html'), { root: __dirname }));
 
 // ----------------------------------------------------------------
 // 404 + global error handler

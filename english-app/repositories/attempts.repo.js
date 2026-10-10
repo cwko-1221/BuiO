@@ -44,24 +44,18 @@ async function ensure({ assignmentId, studentId }) {
     }
     const { rows: created } = await client.query(
       `INSERT INTO eng_attempts (assignment_id, student_id)
-       VALUES ($1, $2) RETURNING id, status, score`,
+       VALUES ($1, $2) ON CONFLICT (assignment_id, student_id)
+       DO UPDATE SET assignment_id=EXCLUDED.assignment_id RETURNING id, status, score`,
       [assignmentId, studentId]
     );
     const attemptId = created[0].id;
-    const { rows: aitems } = await client.query(
-      `SELECT id FROM eng_assignment_items WHERE assignment_id = $1 ORDER BY order_index`,
-      [assignmentId]
-    );
-    const items = [];
-    for (const ai of aitems) {
-      const { rows: ins } = await client.query(
-        `INSERT INTO eng_attempt_items (attempt_id, assignment_item_id)
-         VALUES ($1, $2)
-         RETURNING id, assignment_item_id, correct, hearts_left, attempts_used`,
-        [attemptId, ai.id]
-      );
-      items.push(mapAttemptItem(ins[0]));
-    }
+    await client.query(`INSERT INTO eng_attempt_items (attempt_id, assignment_item_id)
+      SELECT $1, id FROM eng_assignment_items WHERE assignment_id=$2
+      ORDER BY order_index ON CONFLICT (attempt_id, assignment_item_id) DO NOTHING`, [attemptId, assignmentId]);
+    const { rows: savedItems } = await client.query(`SELECT i.id, i.assignment_item_id, i.correct, i.hearts_left, i.attempts_used
+      FROM eng_attempt_items i JOIN eng_assignment_items ai ON ai.id=i.assignment_item_id
+      WHERE i.attempt_id=$1 ORDER BY ai.order_index`, [attemptId]);
+    const items = savedItems.map(mapAttemptItem);
     return { id: attemptId, status: created[0].status, score: created[0].score, items };
   });
 }

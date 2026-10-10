@@ -1,0 +1,25 @@
+{
+  "loads": [
+    {
+      "concurrentStudents": 30,
+      "flowP95Ms": 245.1851999999999,
+      "environment": "isolated local JSON fixture; login + questions + submit + replay; not Render/Supabase p95"
+    },
+    {
+      "concurrentStudents": 60,
+      "flowP95Ms": 515.1490999999999,
+      "environment": "isolated local JSON fixture; login + questions + submit + replay; not Render/Supabase p95"
+    }
+  ],
+  "offlineSeconds": 10,
+  "lostResponseReplay": true,
+  "accountIsolation": true,
+  "recordingReload": true,
+  "catalogDefers3d": true,
+  "catalogTransferBytes": 63036,
+  "network": {
+    "downloadMbps": 1,
+    "uploadKbps": 256,
+    "latencyMs": 300
+  }
+}

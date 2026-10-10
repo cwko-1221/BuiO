@@ -1,9 +1,8 @@
 import './pvp.css';
-import {FIGHTERS,STAGES} from '../../lib/brawl/catalog.mjs';
 import type {BattleState} from '../../lib/brawl/simulation.mjs';
 import type {Identity} from '../types';
 import type {RankProfile,RankResult,RankedTerms} from './ranking-types';
-import {rankBadge,rankTermsText} from './ranking-ui';
+import {rankBadge,rankTermsText} from './rank-display';
 interface Socket {connected:boolean;connect():void;on(event:string,fn:(payload?:any)=>void):void;emit(event:string,payload:any,ack?:(result:any)=>void):void;disconnect():void}
 export interface OnlinePeer {rankTerms?:RankedTerms;id:string;name:string;className:string;available:boolean;hasFighter:boolean;rank:RankProfile}
 export interface DuelInvitation {rankTerms?:RankedTerms;id:string;mode?:'friendly'|'ranked';rankTier?:number;from:{id:string;name:string;className:string;fighterId:string};to:{id:string;name:string};petId:string;stageId:string;status:string;fee:number;expiresAt:number;message?:string;matchId?:string}
@@ -53,7 +52,11 @@ export class PvPClient extends EventTarget {
   input(mask:number,force=false){if(this.accessLocked)mask=0;if(!this.socket?.connected||!this.session||!['playing','countdown'].includes(this.session.phase))return;const time=performance.now();if(!force&&mask===this.lastMask&&time-this.lastSent<100)return;this.lastMask=mask;this.lastSent=time;this.socket.emit('duel:input',{matchId:this.session.match.id,seq:++this.sequence,mask:mask&1023});}
   async leave(){if(this.session)await this.request('duel:leave',{matchId:this.session.match.id});}
   clearResult(){sessionStorage.removeItem('pet-live-duel:'+this.identity.id);this.session=undefined;this.invitation=undefined;this.lastFrame=-1;this.setBusy(false);void this.ping(true).catch(()=>{});}
-  private renderInvitation(){const inv=this.invitation!;if(inv.status!=='pending')return;const incoming=inv.to.id===this.identity.id,pets=this.self?.pets||[],locale=this.identity.language||'zh-HK';if(!pets.some(p=>p.petId===this.selectedPet))this.selectedPet=pets[0]?.petId||'';
+  private async renderInvitation(){const inv=this.invitation!;if(inv.status!=='pending')return;
+    const labels=await import('../../lib/brawl/catalog.mjs').catch(()=>null);
+    if(!labels||this.closed||this.invitation!==inv||inv.status!=='pending')return;
+    const {FIGHTERS,STAGES}=labels;
+    const incoming=inv.to.id===this.identity.id,pets=this.self?.pets||[],locale=this.identity.language||'zh-HK';if(!pets.some(p=>p.petId===this.selectedPet))this.selectedPet=pets[0]?.petId||'';
     const current=this.notifications.querySelector('.pvp-invite-card');if(current?.getAttribute('data-invite-id')===inv.id)return;current?.remove();
     const card=document.createElement('section');card.className='pvp-invite-card';card.setAttribute('data-invite-id',inv.id);card.setAttribute('role',incoming?'alertdialog':'status');card.setAttribute('aria-labelledby','duelInviteTitle');
     card.innerHTML=`<p class="pvp-eyebrow">PET BRAWL · ${inv.mode==='ranked'?this.t('排名對戰','RANKED DUEL'):this.t('自由對戰','FREE DUEL')}</p><h2 id="duelInviteTitle">${incoming?(inv.mode==='ranked'?this.t('收到排名對戰邀請','Ranked duel invitation'):this.t('收到對戰邀請','Duel invitation')):this.t('等待同學回覆','Waiting for a reply')}</h2>${inv.mode==='ranked'?`<p>${inv.rankTerms?`${rankBadge(inv.rankTerms.tiers[0],locale)} vs ${rankBadge(inv.rankTerms.tiers[1],locale)}<br>${rankTermsText(inv.rankTerms,incoming?1:0,locale)}`:rankBadge(inv.rankTier??0,locale)} · ${this.t('正式計入排名；開場後投降會判負。','Counts toward rankings; surrender after starting is a loss.')}</p>`:''}<p><b>${esc(incoming?inv.from.name:inv.to.name)}</b> · ${esc(STAGES.find(s=>s.id===inv.stageId)?.name[locale])}</p><p>${this.t('接受邀請後，雙方各支付','Once accepted, each student pays')} <strong>${inv.fee} ${this.t('金幣','coins')}</strong>。${this.t('拒絕或逾時不扣款。','Declining or expiry costs nothing.')}</p><small>${this.t('剩餘','Remaining')} <span data-duel-countdown>${Math.max(0,Math.ceil((inv.expiresAt-Date.now())/1000))}</span>s</small>

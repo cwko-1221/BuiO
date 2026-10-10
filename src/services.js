@@ -2,6 +2,14 @@ import { state, updateState } from './store.js';
 import { t } from './i18n.js';
 
 let activeSessionsCache = [];
+let sessionRequest = null;
+let sessionGeneration = 0;
+let nextSessionPoll = 0;
+let sessionFailures = 0;
+const sessionListeners = new Set();
+const refreshSessions = () => { nextSessionPoll = 0; };
+addEventListener('online', refreshSessions);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshSessions(); });
 
 export function getActiveSessions() {
   return activeSessionsCache;
@@ -55,34 +63,51 @@ export async function fetchHomeworkInfo() {
 }
 
 export function clearSession() {
+  window.BuiReliable?.clear();
+  sessionGeneration++;
+  sessionRequest = null;
+  nextSessionPoll = 0;
+  sessionListeners.clear();
   activeSessionsCache = [];
   return fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
 }
 
 export async function fetchActiveSessions(onUpdate) {
-  try {
-    const results = await Promise.allSettled(['/api/whiteboard/sessions', '/api/buzzer/sessions'].map(async url => {
-      const res = await fetch(url);
+  if (!state.loggedIn || document.hidden || Date.now() < nextSessionPoll) return;
+  if (onUpdate) sessionListeners.add(onUpdate);
+  if (sessionRequest) return sessionRequest;
+  const generation = sessionGeneration;
+  const accountId = state.currentUser?.id;
+  sessionRequest = (async () => {
+    try {
+      const res = await fetch('/api/classroom/sessions', { credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(12000) });
       if (!res.ok) throw new Error('Session lookup failed');
-      return res.json();
-    }));
-    const sessions = results.flatMap((result, index) => {
-      const type = index === 0 ? 'whiteboard' : 'buzzer';
-      if (result.status !== 'fulfilled' || !result.value.success) return activeSessionsCache.filter(s => s.type === type);
-      return result.value.sessions.map(s => ({ ...s, type }));
-    });
-    {
-      const oldStr = JSON.stringify(activeSessionsCache);
-      const newStr = JSON.stringify(sessions);
-      if (oldStr !== newStr) {
+      const data = await res.json();
+      if (!data.success) throw new Error('Session lookup failed');
+      if (generation !== sessionGeneration || state.currentUser?.id !== accountId || !state.loggedIn) return;
+      const sessions = ['whiteboard', 'buzzer'].flatMap((type, index) => {
+        const rows = index === 0 ? data.whiteboards : data.buzzers;
+        return Array.isArray(rows) ? rows.map(row => ({ ...row, type })) : activeSessionsCache.filter(row => row.type === type);
+      });
+      sessionFailures = data.partial ? sessionFailures + 1 : 0;
+      if (JSON.stringify(activeSessionsCache) !== JSON.stringify(sessions)) {
         activeSessionsCache = sessions;
-        if (onUpdate) onUpdate(sessions);
+        for (const listener of sessionListeners) listener(sessions);
+      }
+    } catch { sessionFailures++; }
+    finally {
+      if (generation === sessionGeneration) {
+        nextSessionPoll = Date.now() + Math.min(30000, 10000 * 2 ** Math.min(sessionFailures, 2)) + Math.random() * 1000;
+        sessionRequest = null;
+        sessionListeners.clear();
       }
     }
-  } catch (e) {}
+  })();
+  return sessionRequest;
 }
 
 export function endTeacherSession(roomId) {
+  nextSessionPoll = 0;
   return fetch('/api/whiteboard/sessions/end', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

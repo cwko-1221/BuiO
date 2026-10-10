@@ -14,6 +14,7 @@ const assignments = require('../repositories/assignments.repo');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
 router.use(requireAuth);
+router.use((_req, res, next) => { res.set('Cache-Control', 'private, no-store'); next(); });
 
 function handle(res, err, fallbackStatus = 500) {
   const status = err.statusCode || fallbackStatus;
@@ -89,6 +90,10 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     if (!assignmentId || !itemId) {
       return res.status(400).json({ success: false, message: '缺少 assignmentId 或 itemId' });
     }
+    if (req.session.role !== 'student') return res.status(403).json({ success: false, message: '只有學生可以提交錄音。' });
+    if (!['practice', 'assessment'].includes(phase)) return res.status(400).json({ success: false, message: '錄音階段不正確。' });
+    const item = await assignments.getAccessibleItem({ assignmentId, itemId, studentId: req.session.studentId });
+    if (!item) return res.status(404).json({ success: false, message: '找不到題目' });
     const out = await storage.uploadRecording({
       studentId: req.session.studentId,
       assignmentId, itemId, phase,
@@ -97,6 +102,27 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     });
     res.json({ success: true, ...out });
   } catch (e) { handle(res, e, 400); }
+});
+
+router.get('/recordings', async (req, res) => {
+  try {
+    const path = String(req.query.path || '');
+    const parts = storage.recordingParts(path);
+    if (!parts || !await assignments.canReadRecording({ ...parts, viewerId: req.session.studentId, viewerRole: req.session.role })) {
+      return res.status(404).json({ success: false, message: '找不到錄音' });
+    }
+    res.redirect(302, await storage.signedObjectUrl(path));
+  } catch (error) { handle(res, error); }
+});
+
+router.get('/legacy-image', async (req, res) => {
+  try {
+    const path = String(req.query.path || '');
+    if (!['teacher', 'student'].includes(req.session.role) || !storage.isLegacyImagePath(path)) {
+      return res.status(404).json({ success: false, message: '找不到圖片' });
+    }
+    res.redirect(302, await storage.signedObjectUrl(path));
+  } catch (error) { handle(res, error); }
 });
 
 module.exports = router;

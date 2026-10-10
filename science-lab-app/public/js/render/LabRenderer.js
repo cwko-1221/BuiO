@@ -128,8 +128,6 @@ export class LabRenderer {
       onImpact: (strength) => this.audio?.play('impact', { level: .025 + strength * .08 }),
     });
     await this.physics.init();
-    this.assetKit = await loadScienceLabKit();
-    this.anatomyKit = await loadRespiratoryModel();
     this.#buildEnvironment();
     this.#bindInput();
     this.canvas.addEventListener('webglcontextlost', (event) => {
@@ -145,6 +143,14 @@ export class LabRenderer {
     this.resize();
     this.loadCatalog();
     this.renderer.setAnimationLoop((time) => this.#frame(time));
+  }
+
+  async prepareExperiment(definition) {
+    if (definition.id === 'respiratory-system') {
+      this.anatomyKit ||= await loadRespiratoryModel();
+    } else {
+      this.assetKit ||= await loadScienceLabKit();
+    }
   }
 
   #quality() {

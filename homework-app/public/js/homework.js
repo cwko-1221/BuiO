@@ -9,7 +9,7 @@ const escapeHtml = value => String(value ?? '').replaceAll('&', '&amp;').replace
 const subjectName = id => state.meta?.subjects.find(subject => subject.id === id)?.name || id;
 const subjectsFor = grade => state.meta.subjects.filter(subject => !subject.grades || subject.grades.includes(grade));
 const api = async (path, options = {}) => {
-  const response = await fetch(`/api/homework${path}`, { credentials: 'include', ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
+  const response = await (window.BuiReliable?.request || fetch)(`/api/homework${path}`, { credentials: 'include', ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
   const data = await response.json().catch(() => ({ success: false, message: t('h.badResponse') }));
   if (!response.ok || !data.success) throw Object.assign(new Error(data.message || t('h.actionFailed')), { status: response.status });
   return data;
@@ -486,6 +486,10 @@ function render() {
 
 async function boot() {
   try {
+    if (window.BuiReliable) {
+      const session = await fetch('/api/auth/me', { credentials: 'include' }).then(response => response.json());
+      if (session.student?.id) { window.BuiReliable.remember(session.student.id); await window.BuiReliable.resume().catch(() => {}); }
+    }
     state.meta = await api('/meta');
     if (!state.meta.canAccess) throw new Error(t('h.notMonitor'));
     filterState.monitors.academicYear = filterState.records.academicYear = filterState.analysis.academicYear = filterState.classAnalysis.academicYear = state.meta.currentAcademicYear;

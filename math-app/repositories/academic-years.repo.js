@@ -152,7 +152,22 @@ async function listEnrollments(academicYear) {
 }
 
 async function findEnrollment(academicYear, studentId) {
-  return (await listEnrollments(academicYear)).find(row => row.studentId === studentId) || null;
+  await ensureSchema();
+  if (config.db.mode === 'postgres') {
+    const { rows } = await getPool().query(`
+      SELECT e.AcademicYear AS "academicYear", e.StudentID AS "studentId",
+        COALESCE(NULLIF(e.Name, ''), u.Name) AS name, u.Role AS role,
+        e.ClassName AS "className", e.ClassNo AS "classNo",
+        e.ChineseGroup AS "chineseGroup", e.EnglishGroup AS "englishGroup", e.MathGroup AS "mathGroup"
+      FROM StudentAcademicYears e JOIN Users u ON u.StudentID=e.StudentID
+      WHERE e.AcademicYear=$1 AND e.StudentID=$2`, [academicYear, studentId]);
+    return rows[0] ? { ...rows[0], classNo: rows[0].classNo == null ? null : Number(rows[0].classNo) } : null;
+  }
+  const data = ensureJsonData();
+  const row = data.studentAcademicYears.find(item => item.academicYear === academicYear && item.studentId === studentId);
+  if (!row) return null;
+  const user = data.users.find(item => item.studentid === studentId);
+  return { ...row, name: row.name || user?.name || studentId, role: user?.role || 'student' };
 }
 
 async function upsertCurrentStudent(user, opts = {}) {

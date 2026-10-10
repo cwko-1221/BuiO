@@ -13,6 +13,15 @@ data/*.json
 
 # Logs
 *.log
+*.js.br
+*.js.gz
+*.css.br
+*.css.gz
+*.json.br
+*.json.gz
+*.svg.br
+*.svg.gz
+*.wasm.gz
 npm-debug.log*
 
 # Scratch. Screenshots, renders and QA evidence land here; scripts that write into it

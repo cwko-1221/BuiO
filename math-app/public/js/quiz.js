@@ -13,6 +13,7 @@
     // State
     // ========================================
     let questions = [];
+    let quizId = null;
     let currentIndex = 0;
     let answers = []; // { index, userAnswer, timeTaken }
     let timer = null;
@@ -113,6 +114,8 @@
             }
             const data = await res.json();
             studentInfo = data.student;
+            window.BuiReliable?.remember(studentInfo.id);
+            await window.BuiReliable?.resume().catch(() => {});
             studentNameEl.textContent = studentInfo.name;
             studentAvatarEl.textContent = studentInfo.name[0];
         } catch {
@@ -547,6 +550,7 @@
             }
 
             questions = data.questions;
+            quizId = data.quizId || null;
             answers = new Array(questions.length).fill(null);
             currentIndex = 0;
             totalQuizTime = 0;
@@ -889,9 +893,9 @@
         submitBtn.textContent = '⏳';
 
         try {
-            const res = await fetch('/api/quiz/submit', {
+            const res = await (window.BuiReliable?.request || fetch)('/api/quiz/submit', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...(quizId ? { 'Idempotency-Key': quizId } : {}) },
                 credentials: 'include',
                 body: JSON.stringify({
                     answers: answers.filter(Boolean).map(answer => ({

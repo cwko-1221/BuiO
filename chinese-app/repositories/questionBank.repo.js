@@ -1,6 +1,7 @@
 'use strict';
 
 const config = require('../../config');
+const { protectImageUrl } = require('../../chinese-app/lib/storage');
 const { getPool } = require('../../math-app/db/database');
 
 function requirePg() {
@@ -92,7 +93,7 @@ function mapRow(r) {
     traditionalText: r.traditional_text,
     englishMeaning: r.english_meaning,
     emoji: r.emoji || null,
-    imageUrl: r.image_url || null,
+    imageUrl: protectImageUrl(r.image_url),
   };
 }
 

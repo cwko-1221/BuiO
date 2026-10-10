@@ -34,7 +34,7 @@ const server = spawn(process.execPath, ['server.js'], {
   cwd: path.resolve('.'),
   env: {
     ...process.env,
-    PORT: String(port), BUIO_JSON_DB_FILE: dbFile, SUPABASE_DB_URL: '', NODE_ENV: 'development',
+    PORT: String(port), BUIO_JSON_DB_FILE: dbFile, SUPABASE_DB_URL: '', NODE_ENV: 'development', ADMIN_PASSWORD: 'fixture-admin-secret',
     GOOGLE_API_KEY: '', GOOGLE_CREDENTIALS_JSON: '', GOOGLE_APPLICATION_CREDENTIALS: '',
   },
   stdio: ['ignore', 'pipe', 'pipe'],
@@ -181,7 +181,7 @@ try {
     method: 'PUT', body: { academicYear: '2025-26', className: 'P1', accent: 'fr-fr' },
   })).response.status, 400, 'unsupported accents are rejected');
 
-  result = await request(teacher, '/api/auth/unlock-admin', { method: 'POST', body: { password: '999999' } });
+  result = await request(teacher, '/api/auth/unlock-admin', { method: 'POST', body: { password: 'fixture-admin-secret' } });
   const updatedCookie = (typeof result.response.headers.getSetCookie === 'function'
     ? result.response.headers.getSetCookie()
     : [result.response.headers.get('set-cookie')].filter(Boolean))

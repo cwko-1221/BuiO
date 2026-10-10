@@ -1,0 +1,16 @@
+{
+  "environment": "isolated PGlite PostgreSQL engine; synthetic rows; 50-row write batches; not production p95",
+  "candidate": "existing unique(studentid,eventid) extended with INCLUDE(amount); no additional steady-state index",
+  "rows": 30000,
+  "before": {
+    "readP95Ms": 3.373,
+    "writeBatchP95Ms": 1.865199999999959
+  },
+  "after": {
+    "readP95Ms": 3.075,
+    "writeBatchP95Ms": 3.229500000000371
+  },
+  "readImprovement": 0.08834865105247558,
+  "writeRegression": 0.7314497104870481,
+  "gate": false
+}

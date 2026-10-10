@@ -29,7 +29,7 @@ async function fixture(t, teacherReconnectGraceMs = 2000) {
   const app = express();
   app.use(express.json());
   app.use((req, _res, next) => {
-    req.session = { role: req.get('x-test-role') || 'teacher', studentId: req.get('x-test-id') || 'T1' };
+    req.session = req.get('x-test-role') === 'anonymous' ? null : { role: req.get('x-test-role') || 'teacher', studentId: req.get('x-test-id') || 'T1' };
     next();
   });
   const server = createServer(app);
@@ -91,8 +91,25 @@ async function fixture(t, teacherReconnectGraceMs = 2000) {
     return socket;
   }
 
-  return { api, client, join };
+  return { api, client, join, baseUrl };
 }
+
+test('anonymous sockets and HTTP requests cannot create or list classrooms', async t => {
+  const f = await fixture(t);
+  assert.equal((await f.api('/api/whiteboard/sessions',undefined,{role:'anonymous'})).status,401);
+  const socket = connectSocket(f.baseUrl,{autoConnect:false,forceNew:true,reconnection:false,transports:['websocket'],auth:{}});
+  t.after(()=>socket.disconnect());
+  const rejected=nextEvent(socket,'connect_error');socket.connect();assert.match((await rejected).message,/登入/);
+});
+
+test('binary PNG snapshots remain lossless through teacher and student reconnects', async t => {
+  const f=await fixture(t);const teacher=await f.join('teacher','T1');const student=await f.join();
+  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jm1cAAAAASUVORK5CYII=','base64');
+  const board=nextEvent(teacher,'student-board-snapshot');student.emit('student-board-snapshot',{imageData:png,baseImageData:null,strokes:[],shapes:[]});
+  assert.deepEqual(Buffer.from((await board).imageData),png);student.disconnect();
+  const restored=await f.client();const received=nextEvent(restored,'student-board-snapshot');restored.emit('join-room',{roomId:'lesson',isTeacher:false});
+  assert.deepEqual(Buffer.from((await received).imageData),png);
+});
 
 const snapshot = {
   imageData: 'data:image/png;base64,AAAA',

@@ -6,6 +6,7 @@ import styles from './ClassStudent.module.css';
 import { drawShape, shapeContainsPoint } from '../utils/drawing';
 import { watchRoomConnection } from '../utils/roomConnection';
 import ConnectionNotice from './ConnectionNotice';
+import { pngToWire, pngFromWire } from '../utils/pngWire';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 const PEN_COLORS = ['#111827', '#ef4444', '#f97316', '#eab308', '#22c55e', '#0ea5e9', '#2563eb', '#7c3aed', '#ec4899'];
@@ -175,6 +176,7 @@ export default function ClassStudent() {
         selectedShapeIdRef.current = null;
         renderShapesRef.current();
 
+        snapshot = { ...snapshot, imageData: pngFromWire(snapshot?.imageData), baseImageData: pngFromWire(snapshot?.baseImageData) };
         const isPng = (value) => typeof value === 'string' && value.startsWith('data:image/png;base64,');
         const hasStrokeState = Array.isArray(snapshot?.strokes)
             && (snapshot.baseImageData === null || isPng(snapshot.baseImageData));
@@ -229,8 +231,8 @@ export default function ClassStudent() {
             const vectorPointCount = strokes.reduce((total, stroke) => total + stroke.points.length, 0);
             const useRasterFallback = strokes.length > 2_000 || vectorPointCount > 60_000;
             socketRef.current.emit('student-board-snapshot', {
-                imageData,
-                baseImageData: useRasterFallback ? imageData : baseDrawingImageDataRef.current,
+                imageData: pngToWire(imageData),
+                baseImageData: pngToWire(useRasterFallback ? imageData : baseDrawingImageDataRef.current),
                 strokes: useRasterFallback ? [] : strokes,
                 shapes: shapeObjectsRef.current.map((shape) => ({ ...shape })),
             });

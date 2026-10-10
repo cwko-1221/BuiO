@@ -146,8 +146,9 @@ async function replaceMonitors({ academicYear, className, subject, studentIds, c
     try {
       await client.query('BEGIN');
       await client.query('DELETE FROM HomeworkMonitors WHERE AcademicYear=$1 AND ClassName=$2 AND Subject=$3', [academicYear, className, subject]);
-      for (const studentId of studentIds) await client.query(`INSERT INTO HomeworkMonitors
-        (AcademicYear,ClassName,Subject,StudentID,CreatedBy) VALUES ($1,$2,$3,$4,$5)`, [academicYear, className, subject, studentId, createdBy]);
+      await client.query(`INSERT INTO HomeworkMonitors
+        (AcademicYear,ClassName,Subject,StudentID,CreatedBy)
+        SELECT $1,$2,$3,id,$5 FROM unnest($4::text[]) AS ids(id)`, [academicYear, className, subject, studentIds, createdBy]);
       await client.query('COMMIT');
     } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); }
   } else {
@@ -226,11 +227,11 @@ async function replaceSubjectTeachers({ academicYear, className, assignments, up
     try {
       await client.query('BEGIN');
       await client.query('DELETE FROM HomeworkSubjectTeachers WHERE AcademicYear=$1 AND ClassName=$2', [academicYear, className]);
-      for (const assignment of assignments) {
-        await client.query(`INSERT INTO HomeworkSubjectTeachers
-          (AcademicYear, ClassName, Subject, TeacherID, CreatedBy, UpdatedBy)
-          VALUES ($1,$2,$3,$4,$5,$5)`, [academicYear, className, assignment.subject, assignment.teacherId, updatedBy]);
-      }
+      await client.query(`INSERT INTO HomeworkSubjectTeachers
+        (AcademicYear, ClassName, Subject, TeacherID, CreatedBy, UpdatedBy)
+        SELECT $1,$2,x.subject,x."teacherId",$4,$4
+        FROM jsonb_to_recordset($3::jsonb) AS x(subject text, "teacherId" text)`,
+      [academicYear, className, JSON.stringify(assignments), updatedBy]);
       await client.query('COMMIT');
     } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); }
   } else {
@@ -304,10 +305,10 @@ function mapRecord(row) {
   };
 }
 
-async function findRecord({ academicYear, className, subject, date }) {
+async function findRecord({ academicYear, className, subject, date }, { client } = {}) {
   await ensureSchema();
   if (config.db.mode === 'postgres') {
-    const { rows } = await getPool().query(`SELECT ID AS id, AcademicYear AS "academicYear", ClassName AS "className",
+    const { rows } = await (client || getPool()).query(`SELECT ID AS id, AcademicYear AS "academicYear", ClassName AS "className",
       Subject AS subject, RecordDate AS date, Homeworks AS homeworks, CreatedBy AS "createdBy",
       SubmittedAt AS "submittedAt", UpdatedBy AS "updatedBy", UpdatedAt AS "updatedAt"
       FROM HomeworkRecords WHERE AcademicYear=$1 AND ClassName=$2 AND Subject=$3 AND RecordDate=$4`, [academicYear, className, subject, date]);
@@ -316,14 +317,14 @@ async function findRecord({ academicYear, className, subject, date }) {
   return mapRecord(jsonData().homeworkRecords.find(row => row.academicYear === academicYear && row.className === className && row.subject === subject && row.date === date));
 }
 
-async function createRecord(payload) {
+async function createRecord(payload, { client } = {}) {
   await ensureSchema();
   if (config.db.mode === 'postgres') {
-    const { rows } = await getPool().query(`INSERT INTO HomeworkRecords
+    await (client || getPool()).query(`INSERT INTO HomeworkRecords
       (AcademicYear,ClassName,Subject,RecordDate,Homeworks,CreatedBy,UpdatedBy)
       VALUES ($1,$2,$3,$4,$5::jsonb,$6,$6) RETURNING ID AS id`,
       [payload.academicYear, payload.className, payload.subject, payload.date, JSON.stringify(payload.homeworks), payload.createdBy]);
-    return findRecord(payload);
+    return findRecord(payload, { client });
   }
   const data = jsonData();
   if (await findRecord(payload)) throw Object.assign(new Error('Record exists'), { code: 'RECORD_EXISTS' });
@@ -333,14 +334,14 @@ async function createRecord(payload) {
   return findRecord(payload);
 }
 
-async function updateRecord(payload) {
+async function updateRecord(payload, { client } = {}) {
   await ensureSchema();
   if (config.db.mode === 'postgres') {
-    const result = await getPool().query(`UPDATE HomeworkRecords SET Homeworks=$1::jsonb, UpdatedBy=$2, UpdatedAt=NOW()
+    const result = await (client || getPool()).query(`UPDATE HomeworkRecords SET Homeworks=$1::jsonb, UpdatedBy=$2, UpdatedAt=NOW()
       WHERE AcademicYear=$3 AND ClassName=$4 AND Subject=$5 AND RecordDate=$6`,
       [JSON.stringify(payload.homeworks), payload.updatedBy, payload.academicYear, payload.className, payload.subject, payload.date]);
     if (!result.rowCount) return null;
-    return findRecord(payload);
+    return findRecord(payload, { client });
   }
   const row = jsonData().homeworkRecords.find(item => item.academicYear === payload.academicYear && item.className === payload.className && item.subject === payload.subject && item.date === payload.date);
   if (!row) return null;

@@ -350,13 +350,11 @@ async function loadInitialData() {
         let payload = await ReportAPI.loadData();
 
         // One-time migration: preserve an existing browser-only import first;
-        // otherwise seed the historical embedded reports into the server DB.
+        // The server database is authoritative; historical exports are retained
+        // outside the source repository rather than shipped to every browser.
         if (payload.records.length === 0) {
             let legacyRecords = [];
             if (DataManager.loadFromStorage()) {
-                legacyRecords = [...DataManager.records];
-            } else if (typeof PRELOAD_DATA !== 'undefined' && PRELOAD_DATA.length > 0) {
-                DataManager.parsePreloadData(PRELOAD_DATA);
                 legacyRecords = [...DataManager.records];
             }
 

@@ -8,7 +8,7 @@
     const isForm = opts.body instanceof FormData;
     const headers = { Accept: 'application/json', ...(opts.headers || {}) };
     if (opts.body && !isForm) headers['Content-Type'] = 'application/json';
-    const res = await fetch(path, {
+    const res = await (window.BuiReliable?.request || fetch)(path, {
       credentials: 'same-origin',
       method: opts.method || 'GET',
       body: opts.body && !isForm ? JSON.stringify(opts.body) : opts.body,
@@ -26,7 +26,7 @@
   }
 
   async function getMe() {
-    try { return (await api('/api/auth/me')).student; }
+    try { const me = (await api('/api/auth/me')).student; window.BuiReliable?.remember(me.id); window.BuiReliable?.resume().catch(() => {}); return me; }
     catch { return null; }
   }
 

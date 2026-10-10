@@ -31,7 +31,7 @@ await writeFile(dbFile, JSON.stringify({
 
 const server = spawn(process.execPath, ['server.js'], {
   cwd: path.resolve('.'),
-  env: { ...process.env, PORT: String(port), BUIO_JSON_DB_FILE: dbFile, SUPABASE_DB_URL: '', NODE_ENV: 'development' },
+  env: { ...process.env, PORT: String(port), BUIO_JSON_DB_FILE: dbFile, SUPABASE_DB_URL: '', NODE_ENV: 'development', ADMIN_PASSWORD: 'fixture-admin-secret' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 let output = '';
@@ -239,7 +239,7 @@ try {
   assert.equal(result.response.status, 403, 'academic-year upgrade requires an unlocked Admin session');
   result = await request(teacher, '/api/auth/unlock-admin', { method: 'POST', body: { password: '123456' } });
   assert.equal(result.response.status, 401, 'wrong Admin password is rejected');
-  result = await request(teacher, '/api/auth/unlock-admin', { method: 'POST', body: { password: '999999' } });
+  result = await request(teacher, '/api/auth/unlock-admin', { method: 'POST', body: { password: 'fixture-admin-secret' } });
   assert.equal(result.response.status, 200, 'Admin password unlocks the session');
   teacher = (typeof result.response.headers.getSetCookie === 'function'
     ? result.response.headers.getSetCookie()

@@ -4,6 +4,14 @@ const config = require('../../config');
 const store = require('../../db/jsonStore');
 const { getPool } = require('../db/database');
 
+// Hong Kong has no daylight-saving changes. Keep the database predicate on the
+// timestamp itself, so existing time indexes remain usable in either DB mode.
+function hongKongDayBounds(now = new Date()) {
+  const day = new Date(now.getTime() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const start = new Date(`${day}T00:00:00+08:00`);
+  return { start: start.toISOString(), end: new Date(start.getTime() + 86400000).toISOString() };
+}
+
 async function insert(log, { client } = {}) {
   const params = [
     log.studentId, log.tag, log.questionText, log.correctAnswer,
@@ -68,6 +76,7 @@ async function insertMany(logs, { client } = {}) {
 }
 
 async function todayOverview(studentId, allTags) {
+  const { start, end } = hongKongDayBounds();
   if (config.db.mode === 'postgres') {
     const { rows } = await getPool().query(`
       SELECT COUNT(*) AS todayquestions,
@@ -77,13 +86,13 @@ async function todayOverview(studentId, allTags) {
                   ELSE 0 END AS todayaccuracy,
              COALESCE(ROUND(CAST(AVG(TimeSpent) AS NUMERIC), 1), 0) AS avgtime
       FROM QuestionLogs
-      WHERE StudentID = $1 AND CAST(Timestamp AS DATE) = CURRENT_DATE AND Tag = ANY($2::text[])`,
-      [studentId, allTags]);
+      WHERE StudentID = $1 AND Timestamp >= $3 AND Timestamp < $4 AND Tag = ANY($2::text[])`,
+      [studentId, allTags, start, end]);
     return rows[0];
   }
-  const today = new Date().toISOString().slice(0, 10);
   const logs = store.load().questionLogs.filter(
-    l => l.studentid === studentId && allTags.includes(l.tag) && (l.timestamp || '').startsWith(today));
+    l => l.studentid === studentId && allTags.includes(l.tag)
+      && Date.parse(l.timestamp) >= Date.parse(start) && Date.parse(l.timestamp) < Date.parse(end));
   const tq = logs.length;
   const tc = logs.filter(l => l.iscorrect).length;
   const avg = tq > 0 ? Math.round((logs.reduce((a, l) => a + (l.timespent || 0), 0) / tq) * 10) / 10 : 0;
@@ -96,10 +105,12 @@ async function todayOverview(studentId, allTags) {
 }
 
 async function history(studentId, allTags, { limit = 50, offset = 0, tag = null } = {}) {
+  limit = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 50));
+  offset = Math.max(0, Number.parseInt(offset, 10) || 0);
   if (config.db.mode === 'postgres') {
     const params = [studentId, allTags];
     let sql = `
-      SELECT LogID AS logid, Tag AS tag, QuestionText AS questiontext,
+      SELECT ID AS logid, Tag AS tag, Question AS questiontext,
              CorrectAnswer AS correctanswer, UserAnswer AS useranswer,
              IsCorrect AS iscorrect, TimeSpent AS timetaken, Timestamp AS timestamp
       FROM QuestionLogs

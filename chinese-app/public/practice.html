@@ -11,7 +11,8 @@
 </head>
 <body>
   <div id="root"></div>
-  <script src="/chinese/js/common.js"></script>
+  <script src="/shared/reliable-request.js?v=20261010"></script>
+  <script src="/chinese/js/common.js?v=20261010"></script>
   <script>
     const { api, el, toast, renderTopbar, ensureAuth } = ChineseApp;
     const t = BuiI18n.t;
@@ -239,13 +240,19 @@
       form.append('itemId', itemId);
       form.append('phase', phase);
       try {
-        const res = await fetch('/api/chinese/upload', { method: 'POST', body: form, credentials: 'same-origin' });
+        const ext = mimeType.includes('wav') ? 'wav' : mimeType.includes('ogg') ? 'ogg' : (mimeType.includes('mp4') || mimeType.includes('m4a')) ? 'mp4' : 'webm';
+        const recordingPath = `${state.me.id}/${assignmentId}/${itemId}/${phase}.${ext}`;
+        const patch = { [phase === 'practice' ? 'speechRecordingUrl' : 'assessmentRecordingUrl']: `/api/chinese/recordings?path=${encodeURIComponent(recordingPath)}` };
+        const res = await (window.BuiReliable?.request || fetch)('/api/chinese/upload', {
+          method: 'POST', body: form, credentials: 'same-origin',
+          followUp: { url: `/api/chinese/student/attempts/${state.attemptId}/items/${itemId}`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch) },
+        });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
           if (res.status === 501) return null; // storage not configured — soft fail
           throw new Error(data.message || t('c.uploadFailed'));
         }
-        return data.publicUrl || null;
+        return data.publicUrl || patch[phase === 'practice' ? 'speechRecordingUrl' : 'assessmentRecordingUrl'];
       } catch (e) { console.warn('upload skipped:', e.message); return null; }
     }
 

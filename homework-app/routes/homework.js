@@ -425,6 +425,11 @@ router.post('/records', async (req, res, next) => {
       if (date !== todayHongKong()) return fail(res, 400, '科長只可填報今天的記錄；過去日期只供查閱');
       if (!(await isMonitor(req.session.studentId, assignment.academicYear, assignment.className, assignment.subject))) return fail(res, 403, '你未獲委任為此科科長');
     }
+    const receipts = require('../../shared/operation-receipts');
+    const key = req.get('Idempotency-Key');
+    const op = key ? receipts.operation(req.session.studentId, key, 'homework_create', req.body) : null;
+    const cached = op ? await receipts.read(op) : null;
+    if (cached) return res.status(201).json(cached);
     if (await repo.findRecord({ ...assignment, date })) return fail(res, 409, '此日期的記錄已建立，請使用修改功能');
     const roster = await repo.listStudents(assignment.academicYear, assignment.className, assignment.subject);
     const result = normalizeHomeworks(
@@ -434,8 +439,9 @@ router.post('/records', async (req, res, next) => {
       { allowMadeUp: isTeacher, requireAllStatuses: !isTeacher },
     );
     if (result.error) return fail(res, 400, result.error);
-    const record = await repo.createRecord({ ...assignment, date, homeworks: result.homeworks, createdBy: req.session.studentId });
-    res.status(201).json({ success: true, message: isTeacher ? '老師記錄已新增' : '欠交功課記錄已儲存', record });
+    const persist = async client => ({ success: true, message: isTeacher ? '老師記錄已新增' : '欠交功課記錄已儲存',
+      record: await repo.createRecord({ ...assignment, date, homeworks: result.homeworks, createdBy: req.session.studentId }, { client }) });
+    res.status(201).json(op ? await receipts.run(op, persist) : await persist(null));
   } catch (error) {
     if (error.code === '23505' || error.code === 'RECORD_EXISTS') return fail(res, 409, '此日期的記錄已儲存');
     next(error);
@@ -455,6 +461,11 @@ router.put('/records', async (req, res, next) => {
       if (date !== todayHongKong()) return fail(res, 400, '科長只可修改今天的記錄；過往日期只供查看');
       if (!(await isMonitor(req.session.studentId, assignment.academicYear, assignment.className, assignment.subject))) return fail(res, 403, '你沒有此班別及科目的科長權限');
     }
+    const receipts = require('../../shared/operation-receipts');
+    const key = req.get('Idempotency-Key');
+    const op = key ? receipts.operation(req.session.studentId, key, 'homework_update', req.body) : null;
+    const cached = op ? await receipts.read(op) : null;
+    if (cached) return res.json(cached);
     const existing = await repo.findRecord({ ...assignment, date });
     if (!existing) return fail(res, 404, '找不到記錄');
     const roster = await repo.listStudents(assignment.academicYear, assignment.className, assignment.subject);
@@ -465,8 +476,9 @@ router.put('/records', async (req, res, next) => {
       { allowMadeUp: isTeacher, preservedHomeworks: isTeacher ? [] : existing.homeworks, requireAllStatuses: !isTeacher },
     );
     if (result.error) return fail(res, 400, result.error);
-    const record = await repo.updateRecord({ ...assignment, date, homeworks: result.homeworks, updatedBy: req.session.studentId });
-    res.json({ success: true, message: '記錄已更新', record });
+    const persist = async client => ({ success: true, message: '記錄已更新',
+      record: await repo.updateRecord({ ...assignment, date, homeworks: result.homeworks, updatedBy: req.session.studentId }, { client }) });
+    res.json(op ? await receipts.run(op, persist) : await persist(null));
   } catch (error) { next(error); }
 });
 

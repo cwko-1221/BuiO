@@ -1,7 +1,7 @@
 const serverI18n = require('../../shared/server-i18n');
 const { randomUUID } = require('crypto');
 const audience = require('../../shared/classroom-audience');
-const { requireTeacher } = require('../../math-app/middleware/auth');
+const { requireAuth, requireTeacher } = require('../../math-app/middleware/auth');
 
 const MAX_BUZZER_DISPLAY_COUNT = 12;
 const MIN_BUZZER_DURATION_SECONDS = 10;
@@ -24,6 +24,7 @@ module.exports = function(io, app, {
   };
 
   const rooms = new Map();
+  app.use('/api/whiteboard', requireAuth);
   const fail = (message, status = 403) => { throw Object.assign(new Error(message), { status }); };
   const wrap = handler => async (req, res) => {
     try { await handler(req, res); }
@@ -31,6 +32,7 @@ module.exports = function(io, app, {
   };
 
   function canSee(room, session, students = []) {
+    if (!session?.studentId || !['teacher', 'student'].includes(session.role)) return false;
     if (!room.audienceRules.length || session?.role === 'teacher') return true;
     return session?.role === 'student' && audience.matchesRules(
       students.find(row => row.studentId === session.studentId), room.audienceRules,
@@ -119,6 +121,12 @@ module.exports = function(io, app, {
       && typeof shape.color === 'string' && /^#[\da-f]{3,8}$/i.test(shape.color)
       && Number.isFinite(shape.size) && shape.size >= 0 && shape.size <= 100)
       .map(({ id, shape, startX, startY, endX, endY, color, size }) => ({ id, shape, startX, startY, endX, endY, color, size }));
+  }
+
+  function isPngSnapshot(value) {
+    if (typeof value === 'string') return value.startsWith('data:image/png;base64,') && value.length <= 5_000_000;
+    return Buffer.isBuffer(value) && value.length >= 8 && value.length <= 3_750_000
+      && value.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]));
   }
 
   function normalizeBoardStrokes(strokes) {
@@ -252,7 +260,7 @@ module.exports = function(io, app, {
     res.json({ success: true, ...payload });
   }));
 
-  app.get('/api/room-type/:roomId', wrap(async (req, res) => {
+  app.get('/api/room-type/:roomId', requireAuth, wrap(async (req, res) => {
     const room = rooms.get(req.params.roomId);
     const students = room?.audienceRules.length && req.session?.role === 'student' ? (await rosterProvider()).students : [];
     res.json(room && canSee(room, req.session, students) ? { exists: true, type: room.type } : { exists: false, type: null });
@@ -261,12 +269,12 @@ module.exports = function(io, app, {
   // ========================================
   // 白板課堂 API (供 Portal 查詢)
   // ========================================
-  app.get('/api/whiteboard/sessions', wrap(async (req, res) => {
+  async function listSessions(session) {
     const activeSessions = [];
-    const needsRoster = req.session?.role === 'student' && [...rooms.values()].some(room => room.audienceRules.length);
+    const needsRoster = session?.role === 'student' && [...rooms.values()].some(room => room.audienceRules.length);
     const students = needsRoster ? (await rosterProvider()).students : [];
     for (const [roomId, room] of rooms.entries()) {
-      if (!canSee(room, req.session, students)) continue;
+      if (!canSee(room, session, students)) continue;
       activeSessions.push({
         teacherId: roomId,
         teacherName: roomId,
@@ -277,28 +285,40 @@ module.exports = function(io, app, {
         audienceLabel: audience.describeRules(room.audienceRules),
       });
     }
-    res.json({ success: true, sessions: activeSessions });
+    return activeSessions;
+  }
+  app.get('/api/whiteboard/sessions', wrap(async (req, res) => {
+    res.json({ success: true, sessions: await listSessions(req.session) });
   }));
 
-  app.post('/api/whiteboard/sessions/end', wrap(async (req, res) => {
+  app.post('/api/whiteboard/sessions/end', requireTeacher, wrap(async (req, res) => {
     const { roomId } = req.body || {};
     if (roomId) {
       const room = rooms.get(roomId);
-      if (room?.ownerId) requireOwner(room, req.session);
+      if (room) requireOwner(room, req.session);
       endRoom(roomId, '老師已結束課堂');
     }
     res.json({ success: true });
   }));
 
+  io.use((socket, next) => {
+    const session = socket.request.session;
+    next(session?.studentId && ['teacher', 'student'].includes(session.role)
+      ? undefined : new Error('請先登入'));
+  });
   io.on('connection', (socket) => {
     console.log(`[WB] User connected: ${socket.id}`);
 
     socket.on('join-room', async ({ roomId, name, isTeacher, roomType, audienceRules } = {}) => {
       try {
         const session = socket.request.session || {};
+        if (!session.studentId || !['teacher', 'student'].includes(session.role)) fail('請先登入。', 401);
+        if (typeof roomId !== 'string' || !roomId.trim() || roomId.length > 100 || /[\x00-\x1f]/.test(roomId)) fail('課堂編號不正確。', 400);
+        isTeacher = isTeacher === true;
+        name = String(session.studentName || session.studentId).slice(0, 120);
         const existingRoom = rooms.get(roomId);
         if (isTeacher) {
-          if (session.role === 'student') fail('只可設定自己的課堂。');
+          if (session.role !== 'teacher') fail('只可設定自己的課堂。');
           if (existingRoom?.ownerId && (session.role !== 'teacher' || existingRoom.ownerId !== String(session.studentId))) fail('只可設定自己的課堂。');
           if (!existingRoom && audienceRules !== undefined && audience.normalizeRules(audienceRules).length && session.role !== 'teacher') fail('請先以老師帳戶登入。');
         } else if (existingRoom?.audienceRules.length) {
@@ -322,7 +342,7 @@ module.exports = function(io, app, {
         socket.data.studentId = socket.data.role === 'student' && socket.request.session?.studentId
           ? String(socket.request.session.studentId)
           : null;
-        console.log(`[WB] ${name} (${isTeacher ? 'Teacher' : 'Student'}) joined room: ${roomId}`);
+        console.log('[WB] Participant joined', { role: isTeacher ? 'teacher' : 'student' });
         const room = getRoom(roomId);
         if (isTeacher) {
           if (!existingRoom) room.audienceRules = audience.normalizeRules(audienceRules);
@@ -505,16 +525,11 @@ module.exports = function(io, app, {
       const roomId = socket.data.roomId;
       const room = roomId ? rooms.get(roomId) : null;
       const participantKey = room?.studentSocketKeys.get(socket.id);
-      const isPngSnapshot = typeof data?.imageData === 'string'
-        && data.imageData.startsWith('data:image/png;base64,')
-        && data.imageData.length <= 5_000_000;
-      if (!room || socket.data.isTeacher || !participantKey || !isPngSnapshot) return;
+      if (!room || socket.data.isTeacher || !participantKey || !isPngSnapshot(data?.imageData)) return;
 
       const hasVectorState = Array.isArray(data.strokes)
         && (data.baseImageData === null
-          || (typeof data.baseImageData === 'string'
-            && data.baseImageData.startsWith('data:image/png;base64,')
-            && data.baseImageData.length <= 5_000_000));
+          || isPngSnapshot(data.baseImageData));
       room.studentBoards.set(participantKey, {
         imageData: data.imageData,
         baseImageData: hasVectorState ? data.baseImageData : data.imageData,
@@ -608,4 +623,5 @@ module.exports = function(io, app, {
       socket.to(roomId).emit('user-left', { name: socket.data.name });
     });
   });
+  return { listSessions };
 };

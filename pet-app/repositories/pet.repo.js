@@ -271,18 +271,21 @@ async function getBootstrap(studentId) {
   await require('./brawl-ranking.repo').distribute(Date.now(), studentId);
   if (config.db.mode === 'postgres') {
     const pool = getPool();
-    const [profileResult, walletResult, petsResult, inventoryResult, roomResult, coinPusherResult, coinPusherSettings] = await Promise.all([
-      pool.query(`SELECT StudentID AS "studentId", ActivePetID AS "activePetId", StarterEggClaimed AS "starterEggClaimed", EggPity AS "eggPity", Stardust AS stardust FROM PetProfiles WHERE StudentID=$1`, [studentId]),
-      pool.query(`SELECT Balance AS balance FROM PetWallets WHERE StudentID=$1`, [studentId]),
-      pool.query(`SELECT PetID AS "petId",SpeciesID AS "speciesId",XP AS xp,Stage AS stage,DailyXP AS "dailyXp",DailyXPDate AS "dailyXpDate",EquippedSkills AS "equippedSkills",EquippedWearables AS "equippedWearables" FROM PetInstances WHERE StudentID=$1 ORDER BY CreatedAt`, [studentId]),
-      pool.query(`SELECT ItemID AS "itemId",Quantity AS quantity FROM PetInventory WHERE StudentID=$1 AND Quantity>0`, [studentId]),
-      pool.query(`SELECT ThemeID AS "themeId",Visibility AS visibility,Placements AS placements,UpdatedAt AS "updatedAt" FROM PetRoomLayouts WHERE StudentID=$1`, [studentId]),
-      pool.query(`SELECT COALESCE(SUM(Amount),0) AS "returnedCoins" FROM PetCoinPusherPayouts WHERE StudentID=$1`, [studentId]),
+    const [snapshot, coinPusherSettings] = await Promise.all([
+      pool.query(`SELECT
+        (SELECT row_to_json(p) FROM (SELECT StudentID AS "studentId",ActivePetID AS "activePetId",StarterEggClaimed AS "starterEggClaimed",EggPity AS "eggPity",Stardust AS stardust FROM PetProfiles WHERE StudentID=$1) p) AS profile,
+        (SELECT Balance FROM PetWallets WHERE StudentID=$1) AS balance,
+        (SELECT COALESCE(json_agg(p), '[]'::json) FROM (SELECT PetID AS "petId",SpeciesID AS "speciesId",XP AS xp,Stage AS stage,DailyXP AS "dailyXp",DailyXPDate AS "dailyXpDate",EquippedSkills AS "equippedSkills",EquippedWearables AS "equippedWearables" FROM PetInstances WHERE StudentID=$1 ORDER BY CreatedAt) p) AS pets,
+        (SELECT COALESCE(json_agg(i), '[]'::json) FROM (SELECT ItemID AS "itemId",Quantity AS quantity FROM PetInventory WHERE StudentID=$1 AND Quantity>0) i) AS inventory,
+        (SELECT row_to_json(r) FROM (SELECT ThemeID AS "themeId",Visibility AS visibility,Placements AS placements,UpdatedAt AS "updatedAt" FROM PetRoomLayouts WHERE StudentID=$1) r) AS room,
+        (SELECT COALESCE(SUM(Amount),0) FROM PetCoinPusherPayouts WHERE StudentID=$1) AS "returnedCoins"`, [studentId]),
       getCoinPusherSettings(pool),
     ]);
-    const pets = releasedPets(petsResult.rows);
-    const profile = releasedProfile(profileResult.rows[0], pets);
-    return { profile, wallet: { balance: Number(walletResult.rows[0]?.balance) || 0 }, pets, inventory: inventoryResult.rows.map((row) => ({ ...row, quantity: Number(row.quantity) })), room: roomResult.rows[0], catalog: catalogFor(pets), serverDay: hkDay(), coinPusherSettings, coinPusherCollection: { returnedCoins: Number(coinPusherResult.rows[0]?.returnedCoins) || 0 } };
+    const row = snapshot.rows[0];
+    const pets = releasedPets(row.pets);
+    const profile = releasedProfile(row.profile, pets);
+    const room = row.room && { ...row.room, updatedAt: new Date(row.room.updatedAt).toISOString() };
+    return { profile, wallet: { balance: Number(row.balance) || 0 }, pets, inventory: row.inventory.map(item => ({ ...item, quantity: Number(item.quantity) })), room, catalog: catalogFor(pets), serverDay: hkDay(), coinPusherSettings, coinPusherCollection: { returnedCoins: Number(row.returnedCoins) || 0 } };
   }
   const coinPusherSettings = await getCoinPusherSettings();
   const data = ensureJsonData();
@@ -939,11 +942,26 @@ async function activePetLooks(studentIds) {
 }
 
 async function grantCoins(actorId, studentIds, amount, { note = '', idempotencyKey } = {}) {
-  const uniqueIds = [...new Set(studentIds)];
+  const uniqueIds = [...new Set(studentIds)].sort();
   if (!uniqueIds.length || !Number.isInteger(amount) || amount === 0 || amount < -10000 || amount > 10000 || !idempotencyKey) throw Object.assign(new Error('Invalid coin adjustment request'), { status: 400 });
+  // Finish schema initialization before borrowing a transaction connection.
+  // Otherwise a full pool of first-time grants could wait on schema work that
+  // itself needs another connection from that same pool.
+  if (config.db.mode === 'postgres') await ensureSchema();
   if (config.db.mode === 'postgres') return withTransaction(async (client) => {
+    // Serialize replays before any wallet changes. Concurrent requests with the
+    // same key return the first committed response, even if its HTTP reply was lost.
+    await client.query(`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, [`${actorId}:${idempotencyKey}`]);
     const cached = await client.query(`SELECT Response AS response FROM PetIdempotency WHERE ActorID=$1 AND IdempotencyKey=$2`, [actorId, idempotencyKey]); if (cached.rows[0]) return cached.rows[0].response;
-    for (const studentId of uniqueIds) await ensureStudent(studentId, client);
+    const missing = uniqueIds.filter(id => !provisionedStudents.has(id));
+    if (missing.length) await client.query(`WITH ids AS (SELECT unnest($1::text[]) AS id),
+      profile AS (INSERT INTO PetProfiles(StudentID) SELECT id FROM ids ORDER BY id ON CONFLICT DO NOTHING),
+      wallet AS (INSERT INTO PetWallets(StudentID) SELECT id FROM ids ORDER BY id ON CONFLICT DO NOTHING),
+      layout AS (INSERT INTO PetRoomLayouts(StudentID,Placements) SELECT id,$2::jsonb FROM ids ORDER BY id ON CONFLICT DO NOTHING)
+      INSERT INTO PetInventory(StudentID,ItemID,Quantity)
+      SELECT r."studentId",r."itemId",1 FROM jsonb_to_recordset($3::jsonb) AS r("studentId" text,"itemId" text)
+      ORDER BY r."studentId",r."itemId" ON CONFLICT DO NOTHING`,
+      [missing, JSON.stringify(starterPlacements()), JSON.stringify(missing.flatMap(id => starterInventoryRows(id).map(row => ({ studentId: id, itemId: row.itemId }))))]);
     const locked = await client.query(
       `SELECT StudentID AS "studentId", Balance AS balance
        FROM PetWallets WHERE StudentID=ANY($1::text[])
@@ -954,12 +972,14 @@ async function grantCoins(actorId, studentIds, amount, { note = '', idempotencyK
       .filter((row) => Number(row.balance) + amount < 0)
       .map((row) => String(row.studentId));
     if (insufficient.length) throw Object.assign(new Error('部分學生的金幣餘額不足，未有扣除任何金幣。'), { status: 409, insufficientStudentIds: insufficient });
+    if (locked.rows.length !== uniqueIds.length) throw Object.assign(new Error('學生帳戶已變更，未有調整任何金幣。'), { status: 409 });
     const batchId = makeId(); const balances = [];
-    for (const studentId of uniqueIds) {
-      const updated = await client.query(`UPDATE PetWallets SET Balance=Balance+$2,UpdatedAt=NOW() WHERE StudentID=$1 RETURNING Balance AS balance`, [studentId, amount]);
-      balances.push({ studentId, balance: Number(updated.rows[0].balance) });
-      await client.query(`INSERT INTO PetCurrencyLedger (TransactionID,StudentID,ActorID,Delta,Kind,BatchID,Note,Metadata) VALUES ($1,$2,$3,$4,'teacher_grant',$5,$6,$7::jsonb)`, [makeId(), studentId, actorId, amount, batchId, String(note).slice(0,240), JSON.stringify({ idempotencyKey, action: amount < 0 ? 'deduction' : 'grant' })]);
-    }
+    const updated = await client.query(`UPDATE PetWallets SET Balance=Balance+$2,UpdatedAt=NOW() WHERE StudentID=ANY($1::text[]) RETURNING StudentID AS "studentId",Balance AS balance`, [uniqueIds, amount]);
+    const byId = new Map(updated.rows.map(row => [row.studentId, Number(row.balance)]));
+    for (const studentId of uniqueIds) balances.push({ studentId, balance: byId.get(studentId) });
+    await client.query(`INSERT INTO PetCurrencyLedger(TransactionID,StudentID,ActorID,Delta,Kind,BatchID,Note,Metadata)
+      SELECT gen_random_uuid(),id,$2,$3,'teacher_grant',$4,$5,$6::jsonb FROM unnest($1::text[]) AS id`,
+      [uniqueIds,actorId,amount,batchId,String(note).slice(0,240),JSON.stringify({idempotencyKey,action:amount<0?'deduction':'grant'})]);
     const response = { batchId, count: uniqueIds.length, amount, total: amount * uniqueIds.length, action: amount < 0 ? 'deduction' : 'grant', balances };
     await client.query(`INSERT INTO PetIdempotency (ActorID,IdempotencyKey,Kind,Response) VALUES ($1,$2,'teacher_grant',$3::jsonb)`, [actorId, idempotencyKey, JSON.stringify(response)]); return response;
   });

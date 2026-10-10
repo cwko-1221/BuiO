@@ -63,7 +63,7 @@
     "check:tower-defense-live": "node scripts/test-tower-defense-live.mjs",
     "check:game-hub-live": "node scripts/test-game-hub-live.mjs",
     "build:game-assets": "node scripts/generate-reference-extensions.mjs && node scripts/generate-fixed-bricks.mjs && node scripts/build-game-assets.mjs && node scripts/analyze-game-geometry.mjs && node scripts/pack-game-atlases.mjs",
-    "postinstall": "npm --prefix whiteboard-app/client install && npm --prefix whiteboard-app/client run build && npm --prefix science-lab-app install && npm --prefix science-lab-app run build && npm --prefix pet-app install && npm --prefix pet-app run build",
+    "postinstall": "npm --prefix whiteboard-app/client ci --include=dev --no-audit --no-fund && npm --prefix whiteboard-app/client run build && npm --prefix science-lab-app ci --include=dev --no-audit --no-fund && npm --prefix science-lab-app run build && npm --prefix pet-app ci --include=dev --no-audit --no-fund && npm --prefix pet-app run build && node scripts/precompress-assets.mjs",
     "import:art": "node scripts/import-art.mjs",
     "build:art-prompts": "node scripts/build-art-prompts.mjs",
     "build:room-shape": "node scripts/room-shape.mjs",
@@ -74,7 +74,8 @@
     "check:pet-brawl-roster-live": "node scripts/test-pet-brawl-roster-live.mjs",
     "check:pet-brawl-elemental": "node scripts/test-pet-brawl-elemental.mjs",
     "check:pet-brawl-elemental-live": "node scripts/test-pet-brawl-elemental-live.mjs",
-    "build:pet-brawl-elemental-fx": "node scripts/build-pet-brawl-elemental-effects.mjs"
+    "build:pet-brawl-elemental-fx": "node scripts/build-pet-brawl-elemental-effects.mjs",
+    "check:school-upgrade": "node --test tests/school-upgrade.test.cjs"
   },
   "dependencies": {
     "@google-cloud/text-to-speech": "^6.4.1",
@@ -89,12 +90,13 @@
     "microsoft-cognitiveservices-speech-sdk": "^1.51.0",
     "multer": "^2.2.0",
     "pg": "^8.21.0",
-    "phaser": "^4.2.1",
+    "phaser": "4.2.1",
     "sharp": "^0.35.2",
     "socket.io": "^4.8.3",
     "to-jyutping": "^3.1.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "playwright": "^1.52.0"
   },
   "overrides": {

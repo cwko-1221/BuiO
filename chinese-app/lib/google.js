@@ -2,6 +2,10 @@
 
 let textToSpeech;
 let _ttsClient = null;
+const crypto = require('node:crypto');
+const { createAsyncCache } = require('../../shared/async-cache');
+const audioCache = createAsyncCache();
+const { measurePhase } = require('../../shared/request-metrics');
 
 function lazyLoad() {
   if (!textToSpeech) {
@@ -47,26 +51,33 @@ async function synthesize(text, opts = {}) {
   const languageCode = opts.languageCode || 'yue-HK';
   const ssmlGender = opts.ssmlGender || 'FEMALE';
   const speakingRate = opts.speakingRate || 0.9;
-  const [response] = await ttsClient().synthesizeSpeech({
+  const request = {
     input: { text },
     voice: { languageCode, ssmlGender },
     audioConfig: { audioEncoding: 'MP3', speakingRate },
-  });
-  if (!response.audioContent) throw new Error('Google TTS did not return audio.');
-  return Buffer.from(response.audioContent);
+  };
+  return cachedSpeech(request);
 }
 
 async function synthesizeSsml(ssml, opts = {}) {
   const languageCode = opts.languageCode || 'en-GB';
   const ssmlGender = opts.ssmlGender || 'FEMALE';
   const speakingRate = opts.speakingRate || 0.9;
-  const [response] = await ttsClient().synthesizeSpeech({
+  const request = {
     input: { ssml },
     voice: { languageCode, ssmlGender },
     audioConfig: { audioEncoding: 'MP3', speakingRate },
-  });
+  };
+  return cachedSpeech(request);
+}
+
+async function cachedSpeech(request) {
+  const key = crypto.createHash('sha256').update(JSON.stringify(request)).digest('hex');
+  return audioCache.get(key, async () => {
+  const [response] = await measurePhase('tts', () => ttsClient().synthesizeSpeech(request));
   if (!response.audioContent) throw new Error('Google TTS did not return audio.');
   return Buffer.from(response.audioContent);
+  });
 }
 
 async function synthesizeCantonese(text) {

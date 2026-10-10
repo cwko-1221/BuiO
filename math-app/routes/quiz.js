@@ -5,7 +5,8 @@ const router = express.Router();
 
 const logs = require('../repositories/logs.repo');
 const stats = require('../repositories/stats.repo');
-const { withTransaction } = require('../db/database');
+const receipts = require('../../shared/operation-receipts');
+const crypto = require('node:crypto');
 const { generateAdaptiveQuiz, DEFAULT_QUIZ_SIZE } = require('../engine/adaptiveEngine');
 const { generateQuestion, TAG_INFO } = require('../engine/questionGenerator');
 const { tagsForClass } = require('../engine/classTags');
@@ -238,10 +239,12 @@ router.get('/questions', async (req, res, next) => {
       answerNumerator: q.answerNumerator ?? null,
       answerDenominator: q.answerDenominator ?? null,
     }));
+    req.session.currentQuizId = crypto.randomUUID();
 
     res.json({
       success: true,
       mode: requestedTag ? 'tag' : 'random',
+      quizId: req.session.currentQuizId,
       requestedTag,
       count: full.length,
       questions: full.map((q, idx) => ({
@@ -298,10 +301,18 @@ router.post('/submit', async (req, res, next) => {
     if (!Array.isArray(answers)) {
       return res.status(400).json({ success: false, message: '請提供答案陣列' });
     }
+    const key = req.get('Idempotency-Key') || req.session.currentQuizId;
+    const op = key ? receipts.operation(studentId, key, 'math_submit', answers) : null;
+    const cached = op ? await receipts.read(op) : null;
+    if (cached) {
+      if (req.session.currentQuizId === key) req.session.currentQuiz = null;
+      return res.json(cached);
+    }
     const quiz = req.session.currentQuiz;
     if (!quiz || quiz.length === 0) {
       return res.status(400).json({ success: false, message: '沒有進行中的測驗，請先取得題目' });
     }
+    if (key && req.session.currentQuizId && key !== req.session.currentQuizId) return res.status(409).json({ success: false, message: '測驗已更改，請重新載入。' });
     if (answers.length !== quiz.length) {
       return res.status(400).json({ success: false, message: '題目尚未全部作答，請完成後再提交。' });
     }
@@ -336,7 +347,7 @@ router.post('/submit', async (req, res, next) => {
       graded.push({ question, ...gradedAnswer, timeTaken });
     }
 
-    await withTransaction(async client => {
+    const persist = async client => {
       await logs.insertMany(graded.map(g => ({
         studentId,
         tag: g.question.tag,
@@ -350,9 +361,7 @@ router.post('/submit', async (req, res, next) => {
         tag: g.question.tag,
         isCorrect: g.isCorrect,
       })), { client });
-    });
-
-    req.session.currentQuiz = null;
+    };
 
     const results = graded.map(g => ({
       index: g.question.index,
@@ -364,7 +373,7 @@ router.post('/submit', async (req, res, next) => {
       tag: g.question.tag,
     }));
 
-    res.json({
+    const response = {
       success: true,
       message: '答案已提交',
       summary: {
@@ -376,7 +385,11 @@ router.post('/submit', async (req, res, next) => {
         avgTime: results.length > 0 ? Math.round((totalTime / results.length) * 10) / 10 : 0,
       },
       results,
-    });
+    };
+    if (op) await receipts.run(op, async client => { await persist(client); return response; });
+    else { const { withTransaction } = require('../db/database'); await withTransaction(persist); }
+    if (!key || req.session.currentQuizId === key) req.session.currentQuiz = null;
+    res.json(response);
   } catch (e) { next(e); }
 });
 

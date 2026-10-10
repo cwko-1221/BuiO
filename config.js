@@ -61,4 +61,5 @@ module.exports = Object.freeze({
     origins: corsOrigins,
   },
   mockAuth: !isProd && process.env.MOCK_AUTH === '1',
+  adminPassword: process.env.ADMIN_PASSWORD || null,
 });

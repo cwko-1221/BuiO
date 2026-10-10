@@ -67,7 +67,8 @@ export class GameScene extends Phaser.Scene {
     // fixed map version is therefore appended to force browsers to fetch the
     // matching atlas after an art/map deployment instead of showing retired
     // blue slab frames from an older cache.
-    for (const page of ATLAS_PAGES) this.load.atlas(page.key,versioned(page.image),versioned(page.json));
+    const neededPages = new Set(this.course.usedAssets.map(id => ATLAS_INDEX[id]?.key));
+    for (const page of ATLAS_PAGES) if (neededPages.has(page.key)) this.load.atlas(page.key,versioned(page.image),versioned(page.json));
     const strips = { idle:['idle-strip-4',4], run:['run-strip-8',8], air:['air-strip-6',6], land:['fall-land-strip-4',4], celebrate:['celebrate-strip-4',4] };
     for (const [name,[dir,count]] of Object.entries(strips)) {
       for (let i=1;i<=count;i++) this.load.image(`player-${name}-${i}`,`/game/images/v2/characters/frames/${dir}/${String(i).padStart(2,'0')}.png`);

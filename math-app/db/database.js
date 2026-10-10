@@ -2,6 +2,7 @@
 
 const { Pool } = require('pg');
 const config = require('../../config');
+const { instrumentPool, measurePhase } = require('../../shared/request-metrics');
 
 let pool = null;
 
@@ -66,19 +67,16 @@ function elapsedMs(started) {
 function getPool() {
   if (config.db.mode !== 'postgres') return null;
   if (!pool) {
-    // The service and the database are in different regions (Render ohio / Supabase
-    // ap-southeast-1), so a round-trip is ~220ms and opening a fresh connection costs several
-    // of them for the TCP and TLS handshakes — roughly a second before the first query runs.
-    // Keeping connections alive and idle-open is therefore worth far more here than it would
-    // be co-located, and an explicit max keeps a full class from queueing on the default.
-    pool = new Pool({
+    // Render and Supabase are both in Singapore. Keep the pool bounded and
+    // measure acquisition separately from SQL before changing its capacity.
+    pool = instrumentPool(new Pool({
       connectionString: config.db.supabaseUrl,
       ssl: { rejectUnauthorized: false },
       max: 10,
       keepAlive: true,
       idleTimeoutMillis: 60000,
       connectionTimeoutMillis: 15000,
-    });
+    }));
     pool.on('error', err => {
       dbLog('error', 'pool_error', {
         code: err?.code || null,
@@ -140,18 +138,42 @@ async function withTransaction(fn) {
   if (config.db.mode !== 'postgres') {
     return fn({ query: async () => ({ rows: [] }) });
   }
-  const client = await getPool().connect();
+  return measurePhase('transaction', async () => {
+    const client = await getPool().connect();
+    try {
+      await client.query('BEGIN');
+      const result = await fn(client);
+      await client.query('COMMIT');
+      return result;
+    } catch (e) {
+      try { await client.query('ROLLBACK'); } catch {}
+      throw e;
+    } finally {
+      client.release();
+    }
+  });
+}
+
+// A diagnostic must not wait through the normal retry budget. Destroy an
+// acquired connection on timeout, and return a late acquisition to the pool.
+async function queryWithDeadline(text, params = [], timeoutMs = 3000) {
+  let client, expired = false, released = false, timer;
+  const release = destroy => { if (client && !released) { released = true; client.release(destroy); } };
+  const work = (async () => {
+    client = await getPool().connect();
+    if (expired) { release(false); return; }
+    try { return await client.query(text, params); }
+    finally { release(expired); }
+  })();
   try {
-    await client.query('BEGIN');
-    const result = await fn(client);
-    await client.query('COMMIT');
-    return result;
-  } catch (e) {
-    try { await client.query('ROLLBACK'); } catch {}
-    throw e;
-  } finally {
-    client.release();
-  }
+    return await Promise.race([work, new Promise((_, reject) => {
+      timer = setTimeout(() => {
+        expired = true;
+        release(true);
+        reject(Object.assign(new Error('Database diagnostic timed out'), { retryable: true, code: 'ETIMEDOUT' }));
+      }, timeoutMs);
+    })]);
+  } finally { clearTimeout(timer); }
 }
 
 async function close() {
@@ -161,6 +183,7 @@ async function close() {
 module.exports = {
   getPool,
   queryWithRetry,
+  queryWithDeadline,
   withTransaction,
   close,
   isTransientDatabaseError,

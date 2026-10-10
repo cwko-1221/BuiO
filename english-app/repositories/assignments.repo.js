@@ -2,6 +2,7 @@
 
 const config = require('../../config');
 const { getPool, withTransaction } = require('../../math-app/db/database');
+const { protectImageUrl } = require('../../chinese-app/lib/storage');
 
 function requirePg() {
   if (config.db.mode !== 'postgres') {
@@ -17,7 +18,7 @@ function mapItem(r) {
     id: r.id,
     word: r.word,
     hint: r.hint || '',
-    imageUrl: r.image_url || null,
+    imageUrl: protectImageUrl(r.image_url),
     orderIndex: r.order_index,
   };
 }
@@ -100,14 +101,10 @@ async function create({ teacherId, targetClassname, targetGroup, title, status, 
       [targetClassname, targetGroup, title, status, teacherId]
     );
     const assignmentId = aRows[0].id;
-    for (const it of items) {
-      await client.query(
-        `INSERT INTO eng_assignment_items
-           (assignment_id, word, hint, image_url, order_index)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [assignmentId, it.word, it.hint || null, it.imageUrl || null, it.orderIndex]
-      );
-    }
+    await client.query(`INSERT INTO eng_assignment_items (assignment_id, word, hint, image_url, order_index)
+      SELECT $1, x.word, NULLIF(x.hint,''), NULLIF(x."imageUrl",''), x."orderIndex"
+      FROM jsonb_to_recordset($2::jsonb) AS x(word text, hint text, "imageUrl" text, "orderIndex" integer)
+      ORDER BY x."orderIndex"`, [assignmentId, JSON.stringify(items)]);
     return { id: assignmentId, createdAt: aRows[0].created_at };
   });
 }

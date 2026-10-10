@@ -18,7 +18,7 @@ function loadExcelJs() {
 import { MATH_QUIZ_URL, MATH_DASHBOARD_URL, WHITEBOARD_BASE, MODULES, iconSvg } from './config.js';
 import { state, updateState } from './store.js';
 import { t, I18N, currentLanguage } from './i18n.js';
-import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, fetchSubjectTeacherSettings, loginApi, fetchHomeworkInfo } from './services.js';
+import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, fetchSubjectTeacherSettings, loginApi, fetchHomeworkInfo } from './services.js?v=20261010';
 import { renderTopbar, renderShell } from './views/Shell.js';
 import { renderDashboard } from './views/Dashboard.js';
 import { renderModulesPage } from './views/Modules.js';

@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { io } from 'socket.io-client';
 import styles from './ClassTeacher.module.css';
 import { createCompositeCanvas, renderShapeLayer } from '../utils/drawing';
+import { pngFromWire } from '../utils/pngWire';
 import { watchRoomConnection } from '../utils/roomConnection';
 import ConnectionNotice from './ConnectionNotice';
 import AudienceButton from './AudienceButton';
@@ -214,6 +215,7 @@ export default function ClassTeacher() {
         });
 
         socketRef.current.on('student-board-snapshot', ({ studentId, imageData, shapes }) => {
+            imageData = pngFromWire(imageData);
             if (!studentId) return;
             const offscreen = getOrCreateOffscreen(studentId);
             const version = (offscreen.snapshotVersion || 0) + 1;

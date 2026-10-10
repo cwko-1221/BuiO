@@ -1,4 +1,5 @@
 'use strict';
+const admin = require('../../shared/admin-auth');
 
 function requireAuth(req, res, next) {
   if (!req.session || !req.session.studentId) {
@@ -15,7 +16,7 @@ function requireTeacher(req, res, next) {
 }
 
 function requireAdminUnlocked(req, res, next) {
-  if (!req.session?.adminUnlocked) {
+  if (!admin.unlocked(req.session)) {
     return res.status(403).json({ success: false, message: '請先輸入 Admin 密碼' });
   }
   next();

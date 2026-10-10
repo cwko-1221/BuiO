@@ -2,6 +2,7 @@
 
 const config = require('../../config');
 const { getPool, withTransaction } = require('../../math-app/db/database');
+const { protectImageUrl } = require('../lib/storage');
 
 function requirePg() {
   if (config.db.mode !== 'postgres') {
@@ -18,7 +19,7 @@ function mapItem(r) {
     traditionalText: r.traditional_text,
     jyutping: r.jyutping,
     englishMeaning: r.english_meaning,
-    imageUrl: r.image_url || null,
+    imageUrl: protectImageUrl(r.image_url),
     orderIndex: r.order_index,
   };
 }
@@ -102,14 +103,10 @@ async function create({ teacherId, targetClassname, targetGroup, title, status, 
       [targetClassname, targetGroup, title, status, teacherId]
     );
     const assignmentId = aRows[0].id;
-    for (const it of items) {
-      await client.query(
-        `INSERT INTO ncs_assignment_items
-           (assignment_id, traditional_text, jyutping, english_meaning, image_url, order_index)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [assignmentId, it.traditionalText, it.jyutping, it.englishMeaning, it.imageUrl || null, it.orderIndex]
-      );
-    }
+    await client.query(`INSERT INTO ncs_assignment_items (assignment_id, traditional_text, jyutping, english_meaning, image_url, order_index)
+      SELECT $1, x."traditionalText", x.jyutping, x."englishMeaning", NULLIF(x."imageUrl",''), x."orderIndex"
+      FROM jsonb_to_recordset($2::jsonb) AS x("traditionalText" text, jyutping text, "englishMeaning" text, "imageUrl" text, "orderIndex" integer)
+      ORDER BY x."orderIndex"`, [assignmentId, JSON.stringify(items)]);
     return { id: assignmentId, createdAt: aRows[0].created_at };
   });
 }
@@ -187,7 +184,19 @@ async function listGroupSummary() {
   }));
 }
 
+async function canReadRecording({ studentId, assignmentId, itemId, viewerId, viewerRole }) {
+  const { rows } = await requirePg().query(`
+    SELECT 1 FROM ncs_assignment_items i
+    JOIN ncs_assignments a ON a.id=i.assignment_id
+    JOIN ncs_attempts at ON at.assignment_id=a.id AND at.student_id=$3
+    WHERE a.id=$1 AND i.id=$2
+      AND (($5='student' AND at.student_id=$4) OR ($5='teacher' AND a.created_by=$4))
+    LIMIT 1`, [assignmentId, itemId, studentId, viewerId, viewerRole]);
+  return rows.length > 0;
+}
+
 module.exports = {
+  canReadRecording,
   listForTeacher,
   listForStudent,
   getOne,

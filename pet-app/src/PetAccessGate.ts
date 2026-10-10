@@ -15,6 +15,7 @@ export class PetAccessGate {
   private timer?: number;
   private abort = new AbortController();
   private signature = '';
+  private failures = 0;
   constructor(private app: HTMLElement, private locale: Locale, private startApp: () => Promise<void>, private setLocked: (locked: boolean) => void) {
     this.root.className = 'pet-access-overlay'; this.root.setAttribute('role', 'dialog');
     this.root.setAttribute('aria-modal', 'true'); this.root.setAttribute('aria-labelledby', 'petAccessTitle');
@@ -40,7 +41,10 @@ export class PetAccessGate {
     window.addEventListener('pet:access', event => { this.revision++; void this.apply((event as CustomEvent<PetAccessStatus>).detail); }, { signal });
     window.addEventListener('online', () => void this.check(), { signal });
     window.addEventListener('pageshow', () => void this.check(), { signal });
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) void this.check(); }, { signal });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) clearTimeout(this.timer);
+      else { this.setBlocked(true); void this.check(); }
+    }, { signal });
     this.root.addEventListener('click', event => { if ((event.target as HTMLElement).closest('[data-access-check]')) void this.check(); }, { signal });
     window.addEventListener('pagehide', event => { if (!event.persisted) this.dispose(); }, { signal });
     this.render('checking');
@@ -83,22 +87,25 @@ export class PetAccessGate {
     } else this.setBlocked(false);
   }
   private async check() {
-    if (this.checking || this.abort.signal.aborted) return;
+    if (this.checking || this.abort.signal.aborted || document.hidden) return;
     this.checking = true; clearTimeout(this.timer);
     const revision = this.revision;
     try {
       const { access } = await api.petAccess();
+      this.failures = 0;
       if (revision === this.revision) await this.apply(access);
       const status = this.root.querySelector('.pet-access-lock-status');
       if (status) status.textContent = access.locked ? this.t('已檢查：仍在鎖定中。', 'Checked: still locked.') : '';
     } catch {
+      this.failures++;
       if (this.access?.locked) {
         const status = this.root.querySelector('.pet-access-lock-status');
         if (status) status.textContent = this.t('正在重新連線，請稍候。', 'Reconnecting. Please wait.');
       } else { this.setBlocked(true); this.render('error'); }
     } finally {
       this.checking = false;
-      if (!this.abort.signal.aborted) this.timer = window.setTimeout(() => void this.check(), 2000);
+      if (!this.abort.signal.aborted && !document.hidden) this.timer = window.setTimeout(() => void this.check(),
+        Math.min(30000, 2000 * 2 ** Math.min(this.failures, 4)) + Math.random() * 500);
     }
   }
   private dispose() { this.abort.abort(); clearTimeout(this.timer); }

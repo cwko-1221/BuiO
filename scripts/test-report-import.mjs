@@ -107,6 +107,16 @@ try {
     'student access must be rejected');
 
   const teacherCookie = await login('T900');
+  for (const url of ['/report-app/report.html', '/report-app/js/preloadData.js', '/report-app/private/historical-preload.json']) {
+    assert.ok([401, 403, 404].includes((await fetch(`${base}${url}`, { redirect: 'manual' })).status), 'anonymous report bypass must be blocked');
+    assert.equal((await fetch(`${base}${url}`, { headers: { Cookie: studentCookie }, redirect: 'manual' })).status, 403);
+  }
+  assert.equal((await fetch(`${base}/report-app/js/preloadData.js`, { headers: { Cookie: teacherCookie } })).status, 404);
+  assert.equal((await fetch(`${base}/report-app/private/historical-preload.json`, { headers: { Cookie: teacherCookie } })).status, 404);
+  assert.equal((await fetch(`${base}/report.html`, { headers: { Cookie: teacherCookie } })).status, 200);
+  assert.equal((await fetch(`${base}/api/whiteboard/sessions`)).status, 401);
+  assert.equal((await fetch(`${base}/api/classroom/sessions`, { headers: { Cookie: studentCookie } })).status, 200);
+  assert.equal((await fetch(`${base}/health/live`)).status, 200);
   let response = await fetch(`${base}/api/report/data`, { headers: { Cookie: teacherCookie } });
   assert.deepEqual((await response.json()).records, []);
 

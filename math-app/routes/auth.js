@@ -18,7 +18,8 @@ const {
   isSupportedLanguage,
 } = require('../validators');
 
-const ADMIN_PASSWORD = '999999';
+const admin = require('../../shared/admin-auth');
+const adminFailures = new Map();
 const SESSION_POLICY_VERSION = 2;
 
 // The hub owns the language switch, but every other module is a separate page
@@ -39,13 +40,11 @@ function stampLanguage(req, res, language) {
 }
 
 function adminPasswordMatches(value) {
-  const received = Buffer.from(String(value || ''));
-  const expected = Buffer.from(ADMIN_PASSWORD);
-  return received.length === expected.length && crypto.timingSafeEqual(received, expected);
+  return admin.matches(value);
 }
 
 function requireAdminUnlocked(req, res, next) {
-  if (!req.session?.adminUnlocked) {
+  if (!admin.unlocked(req.session)) {
     return res.status(403).json({ success: false, message: '請先輸入 Admin 密碼' });
   }
   next();
@@ -65,7 +64,7 @@ router.post('/login', async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ success: false, message: '學號不存在' });
     }
-    if (!bcrypt.compareSync(password, user.passwordhash)) {
+    if (!await bcrypt.compare(password, user.passwordhash)) {
       return res.status(401).json({ success: false, message: '密碼錯誤' });
     }
     req.session.studentId = user.studentid;
@@ -100,15 +99,23 @@ router.post('/logout', (req, res) => {
 });
 
 router.get('/admin-status', requireTeacher, (req, res) => {
-  res.json({ success: true, unlocked: Boolean(req.session.adminUnlocked) });
+  res.json({ success: true, unlocked: admin.unlocked(req.session), configured: Boolean(config.adminPassword) });
 });
 
 router.post('/unlock-admin', requireTeacher, (req, res) => {
+  if (!config.adminPassword) return res.status(503).json({ success: false, message: 'Admin 密碼尚未設定，請聯絡管理員。' });
+  const now = Date.now(), key = String(req.session.studentId);
+  for (const [id, entry] of adminFailures) if (entry.expires <= now) adminFailures.delete(id);
+  const entry = adminFailures.get(key) || { count: 0, expires: now + 15 * 60 * 1000 };
+  if (entry.count >= 5) { res.set('Retry-After', String(Math.ceil((entry.expires - now) / 1000))); return res.status(429).json({ success: false, message: '嘗試次數過多，請稍後再試。' }); }
   if (!adminPasswordMatches(req.body?.password)) {
+    entry.count++; if (adminFailures.size < 4096 || adminFailures.has(key)) adminFailures.set(key, entry);
     req.session.adminUnlocked = false;
     return res.status(401).json({ success: false, message: 'Admin 密碼不正確' });
   }
   req.session.adminUnlocked = true;
+  req.session.adminRevision = admin.revision();
+  adminFailures.delete(key);
   res.json({ success: true, message: 'Admin 已解鎖' });
 });
 

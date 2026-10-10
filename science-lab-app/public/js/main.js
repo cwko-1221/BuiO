@@ -6,7 +6,6 @@ const t = window.BuiI18n.t;
 import { LabSimulation } from './simulation/LabSimulation.js';
 import { ProgressStore } from './persistence/ProgressStore.js';
 import { AudioEngine } from './audio/AudioEngine.js';
-import { LabRenderer } from './render/LabRenderer.js';
 import { FallbackRenderer } from './render/FallbackRenderer.js';
 import { illustrationSvg } from './ui/illustrations.js';
 
@@ -48,6 +47,8 @@ const dom = {
 let store;
 let audio;
 let renderer;
+let rendererPromise;
+let selectionRevision = 0;
 let simulation;
 let currentExperiment;
 let selectedPrediction = null;
@@ -73,32 +74,6 @@ async function boot() {
   }
   store = new ProgressStore(studentId);
   audio = new AudioEngine(settings.sound);
-  setBoot(35, t('sl.bootApparatus'));
-  try {
-    renderer = new LabRenderer($('#labCanvas'), {
-      settings,
-      audio,
-      onAction: (action) => simulation?.dispatchAction(action) || { accepted: false },
-      onPreview: ({ subject, value }) => {
-        simulation?.previewVariable(subject, value);
-        syncVariableValue(value);
-      },
-      onHover: showInteractionLabel,
-      onContextIssue: (message) => showToast(message, 'try'),
-    });
-    await renderer.init();
-  } catch {
-    document.body.classList.add('no-webgl');
-    renderer = new FallbackRenderer($('#labCanvas'), {
-      onAction: (action) => simulation?.dispatchAction(action) || { accepted: false },
-      onPreview: ({ subject, value }) => {
-        simulation?.previewVariable(subject, value);
-        syncVariableValue(value);
-      },
-    });
-    await renderer.init();
-    showToast(t('sl.fallbackNotice'), 'try');
-  }
   if (location.pathname.endsWith('/preview')) {
     window.__scienceLabTest = {
       getState: () => simulation?.serialize() || null,
@@ -176,9 +151,48 @@ function renderProgress() {
   dom.continue.querySelector('span').textContent = t(complete ? 'sl.continueMine' : 'sl.startFirst');
 }
 
-function startExperiment(id, { forceNew = false } = {}) {
+async function ensureRenderer() {
+  if (!rendererPromise) rendererPromise = (async () => {
+    const options = {
+      settings, audio,
+      onAction: (action) => simulation?.dispatchAction(action) || { accepted: false },
+      onPreview: ({ subject, value }) => { simulation?.previewVariable(subject, value); syncVariableValue(value); },
+      onHover: showInteractionLabel,
+      onContextIssue: (message) => showToast(message, 'try'),
+    };
+    try {
+      const { LabRenderer } = await import('./render/LabRenderer.js');
+      renderer = new LabRenderer($('#labCanvas'), options);
+      await renderer.init();
+    } catch {
+      try { renderer?.dispose?.(); } catch { /* init can fail before the scene exists */ }
+      document.body.classList.add('no-webgl');
+      renderer = new FallbackRenderer($('#labCanvas'), options);
+      await renderer.init();
+      showToast(t('sl.fallbackNotice'), 'try');
+    }
+    return renderer;
+  })().catch(error => { rendererPromise = null; throw error; });
+  return rendererPromise;
+}
+
+async function startExperiment(id, { forceNew = false } = {}) {
   const definition = experimentById.get(id);
-  if (!definition || !renderer) return;
+  if (!definition) return;
+  const revision = ++selectionRevision;
+  dom.boot.classList.remove('done');
+  setBoot(35, t('sl.bootApparatus'));
+  try {
+    await ensureRenderer();
+    if (revision !== selectionRevision) return;
+    await renderer.prepareExperiment?.(definition);
+    if (revision !== selectionRevision) return;
+  } catch {
+    if (revision === selectionRevision) showToast(t('sl.tryDefault'), 'try');
+    return;
+  } finally {
+    if (revision === selectionRevision) dom.boot.classList.add('done');
+  }
   cancelPhenomenon();
   closeAllDialogs();
   audio.unlock();
@@ -767,6 +781,8 @@ function setMissionCollapsed(collapsed) {
 }
 
 function showCatalog({ canonicalize = true } = {}) {
+  selectionRevision++;
+  dom.boot.classList.add('done');
   cancelPhenomenon();
   closeAllDialogs();
   currentExperiment = null;
@@ -777,7 +793,7 @@ function showCatalog({ canonicalize = true } = {}) {
   dom.observation.hidden = true;
   dom.recordPanel.hidden = true;
   dom.lab.classList.remove('mission-open');
-  renderer.loadCatalog();
+  renderer?.loadCatalog();
   renderCards($('.filter-chip.active')?.dataset.filter || 'all');
   renderProgress();
   if (canonicalize) history.replaceState(null, '', `${location.pathname}${location.search}`);

@@ -264,6 +264,7 @@ try {
   assert.ok(interactionLabelSize >= 16, `apparatus labels must be readable (actual ${interactionLabelSize}px)`);
   await completeWithAccessibleControls(page, { lingerMs: 1200 });
   assert.equal((await page.locator('#resultStars').textContent()).trim(), '★★★', 'independent completion receives three stars');
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('#bootScreen')).visibility === 'hidden');
   await page.screenshot({ path: path.join(qaDirectory, 'density-result-live.png'), fullPage: true });
 
   // Place and connect: verify that the coil is physically mounted before the
@@ -335,6 +336,7 @@ try {
   }));
   assert.ok(mobileLayout.scrollWidth <= mobileLayout.clientWidth, `mobile overflow: ${JSON.stringify(mobileLayout)}`);
   assert.ok(mobileLayout.minimumCardHeight >= 180, `mobile cards are too compressed: ${JSON.stringify(mobileLayout)}`);
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('#bootScreen')).visibility === 'hidden');
   await page.screenshot({ path: path.join(qaDirectory, 'catalog-mobile-live.png'), fullPage: true });
 
   // Portrait phones must expose the actual 3D apparatus, not merely the
@@ -370,6 +372,7 @@ try {
     }));
     throw new Error(`portrait physical drag failed: ${JSON.stringify(diagnostic)}\n${error.message}`);
   }
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('#bootScreen')).visibility === 'hidden');
   await page.screenshot({ path: path.join(qaDirectory, 'lab-portrait-live.png'), fullPage: true });
 
   // Short landscape phones retain a usable playfield and non-overlapping HUD.
@@ -406,6 +409,7 @@ try {
     }));
     throw new Error(`landscape physical drag failed: ${JSON.stringify(diagnostic)}\n${error.message}`);
   }
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('#bootScreen')).visibility === 'hidden');
   await page.screenshot({ path: path.join(qaDirectory, 'lab-landscape-live.png'), fullPage: true });
 
   // Repeated entry must keep the disposable world and shared environment stable.
@@ -422,6 +426,7 @@ try {
   assert.equal(catalogStats.background, '#0b5260', 'catalog restores its background after a lab scene');
   await completeWithAccessibleControls(page);
   await page.evaluate(() => document.querySelector('#resultDialog')?.close());
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('#bootScreen')).visibility === 'hidden');
   await page.screenshot({ path: path.join(qaDirectory, 'density-repeat-live.png'), fullPage: true });
 
   // Devices with WebGL disabled still receive a generated cartoon scene and

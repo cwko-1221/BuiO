@@ -2,6 +2,7 @@
 
 const config = require('../../config');
 const { getPool, withTransaction } = require('../../math-app/db/database');
+const { protectRecordingUrl } = require('../lib/storage');
 
 function requirePg() {
   if (config.db.mode !== 'postgres') {
@@ -19,14 +20,14 @@ function mapAttemptItem(r) {
     handwritingCorrect: r.handwriting_correct,
     speechTranscript: r.speech_transcript,
     speechCorrect: r.speech_correct,
-    speechRecordingUrl: r.speech_recording_url,
+    speechRecordingUrl: protectRecordingUrl(r.speech_recording_url),
     speechPronunciationScore: r.speech_pronunciation_score == null ? null : Number(r.speech_pronunciation_score),
     speechPronunciationStatus: r.speech_pronunciation_status,
     speechAudioQuality: r.speech_audio_quality,
     speechPronunciationProvider: r.speech_pronunciation_provider,
     assessmentTranscript: r.assessment_transcript,
     assessmentCorrect: r.assessment_correct,
-    assessmentRecordingUrl: r.assessment_recording_url,
+    assessmentRecordingUrl: protectRecordingUrl(r.assessment_recording_url),
     assessmentPronunciationScore: r.assessment_pronunciation_score == null ? null : Number(r.assessment_pronunciation_score),
     assessmentPronunciationStatus: r.assessment_pronunciation_status,
     assessmentAudioQuality: r.assessment_audio_quality,
@@ -61,29 +62,23 @@ async function ensure({ assignmentId, studentId }) {
     }
     const { rows: created } = await client.query(
       `INSERT INTO ncs_attempts (assignment_id, student_id)
-       VALUES ($1, $2) RETURNING id, status, score`,
+       VALUES ($1, $2) ON CONFLICT (assignment_id, student_id)
+       DO UPDATE SET assignment_id=EXCLUDED.assignment_id RETURNING id, status, score`,
       [assignmentId, studentId]
     );
     const attemptId = created[0].id;
-    const { rows: aitems } = await client.query(
-      `SELECT id FROM ncs_assignment_items WHERE assignment_id = $1 ORDER BY order_index`,
-      [assignmentId]
-    );
-    const items = [];
-    for (const ai of aitems) {
-      const { rows: ins } = await client.query(
-        `INSERT INTO ncs_attempt_items (attempt_id, assignment_item_id)
-         VALUES ($1, $2)
-         RETURNING id, assignment_item_id, handwriting_correct, speech_transcript, speech_correct,
-                   speech_recording_url, speech_pronunciation_score, speech_pronunciation_status,
-                   speech_audio_quality, speech_pronunciation_provider,
-                   assessment_transcript, assessment_correct, assessment_recording_url,
-                   assessment_pronunciation_score, assessment_pronunciation_status,
-                   assessment_audio_quality, assessment_pronunciation_provider`,
-        [attemptId, ai.id]
-      );
-      items.push(mapAttemptItem(ins[0]));
-    }
+    await client.query(`INSERT INTO ncs_attempt_items (attempt_id, assignment_item_id)
+      SELECT $1, id FROM ncs_assignment_items WHERE assignment_id=$2
+      ORDER BY order_index ON CONFLICT (attempt_id, assignment_item_id) DO NOTHING`, [attemptId, assignmentId]);
+    const { rows: savedItems } = await client.query(`SELECT i.id, i.assignment_item_id, i.handwriting_correct, i.speech_transcript, i.speech_correct,
+        i.speech_recording_url, i.speech_pronunciation_score, i.speech_pronunciation_status,
+        i.speech_audio_quality, i.speech_pronunciation_provider,
+        i.assessment_transcript, i.assessment_correct, i.assessment_recording_url,
+        i.assessment_pronunciation_score, i.assessment_pronunciation_status,
+        i.assessment_audio_quality, i.assessment_pronunciation_provider
+      FROM ncs_attempt_items i JOIN ncs_assignment_items ai ON ai.id=i.assignment_item_id
+      WHERE i.attempt_id=$1 ORDER BY ai.order_index`, [attemptId]);
+    const items = savedItems.map(mapAttemptItem);
     return { id: attemptId, status: created[0].status, score: created[0].score, items };
   });
 }

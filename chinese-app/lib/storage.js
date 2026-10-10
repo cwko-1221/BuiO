@@ -3,7 +3,7 @@
 // Storage routing:
 //   - Recordings always go to Supabase (audio blobs, too big for Git).
 //   - Images go to GitHub when GITHUB_IMAGE_REPO + GITHUB_TOKEN are set,
-//     otherwise fall back to Supabase Storage.
+//     otherwise fall back to the public question-images bucket.
 
 const github = require('./githubStorage');
 
@@ -50,8 +50,7 @@ async function uploadRecording({ studentId, assignmentId, itemId, phase, buffer,
   const { error } = await c.storage.from('recordings')
     .upload(path, buffer, { contentType: contentType || 'audio/webm', upsert: true });
   if (error) throw error;
-  const { data } = c.storage.from('recordings').getPublicUrl(path);
-  return { path, publicUrl: data.publicUrl };
+  return { path, publicUrl: protectRecordingUrl(path) };
 }
 
 // ----- Images (GitHub preferred, Supabase fallback) -----
@@ -82,11 +81,49 @@ async function uploadToSupabase(path, buffer, contentType) {
     throw new Error('Image storage not configured (set GITHUB_IMAGE_REPO + GITHUB_TOKEN or Supabase env vars).');
   }
   const c = client();
-  const { error } = await c.storage.from('recordings')
+  const { error } = await c.storage.from('question-images')
     .upload(path, buffer, { contentType, upsert: false });
   if (error) throw error;
-  const { data } = c.storage.from('recordings').getPublicUrl(path);
+  const { data } = c.storage.from('question-images').getPublicUrl(path);
   return { path, publicUrl: data.publicUrl };
 }
 
-module.exports = { isStorageConfigured, uploadRecording, uploadItemImage, uploadBankImage };
+function recordingParts(path) {
+  const match = /^([A-Za-z0-9_-]{1,20})\/([\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12})\/([\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12})\/(practice|assessment)\.(webm|wav|ogg|mp4)$/i.exec(String(path || ''));
+  return match ? { studentId: match[1], assignmentId: match[2], itemId: match[3], phase: match[4] } : null;
+}
+
+function objectPath(value) {
+  if (!value) return null;
+  const raw = String(value);
+  if (recordingParts(raw)) return raw;
+  try {
+    const url = new URL(raw, 'https://buio.invalid');
+    if (url.origin === 'https://buio.invalid' && url.pathname === '/api/chinese/recordings') return url.searchParams.get('path');
+    if (supabaseUrl() && url.origin !== new URL(supabaseUrl()).origin) return null;
+    const prefix = '/storage/v1/object/public/recordings/';
+    return url.pathname.startsWith(prefix) ? decodeURIComponent(url.pathname.slice(prefix.length)) : null;
+  } catch { return null; }
+}
+
+function protectRecordingUrl(value) {
+  const path = objectPath(value);
+  return recordingParts(path) ? `/api/chinese/recordings?path=${encodeURIComponent(path)}` : null;
+}
+
+function isLegacyImagePath(path) {
+  return /^(?:bank\/[A-Za-z0-9_-]+|items\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+)\.(?:jpe?g|png|webp|gif|avif|svg|bmp|heic|heif)$/i.test(String(path || ''));
+}
+
+function protectImageUrl(value) {
+  const path = objectPath(value);
+  return isLegacyImagePath(path) ? `/api/chinese/legacy-image?path=${encodeURIComponent(path)}` : value || null;
+}
+
+async function signedObjectUrl(path) {
+  const { data, error } = await client().storage.from('recordings').createSignedUrl(path, 300);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
+module.exports = { isStorageConfigured, uploadRecording, uploadItemImage, uploadBankImage, protectRecordingUrl, protectImageUrl, recordingParts, isLegacyImagePath, signedObjectUrl };
