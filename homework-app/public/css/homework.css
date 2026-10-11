@@ -197,14 +197,12 @@ button { cursor: pointer; }
 .filters.three { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
 .homework-export-settings {
   display: grid;
-  grid-template-columns: minmax(160px, 0.7fr) minmax(0, 1.3fr);
+  grid-template-columns: minmax(160px, 320px);
   align-items: start;
   gap: 14px;
   margin-top: 20px;
 }
 .homework-export-settings .field { min-width: 0; }
-.homework-export-settings small { margin: 0; overflow-wrap: anywhere; }
-.homework-export-settings input[type="file"] { min-width: 0; max-width: 100%; }
 .field input[readonly], .field select:disabled { background: #f4f8fa; color: var(--muted); }
 .field { display: grid; gap: 9px; }
 .field label { color: var(--ink); font-size: 0.92rem; font-weight: 780; }

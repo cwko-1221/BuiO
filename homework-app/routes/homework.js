@@ -2,7 +2,6 @@
 
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
 const repo = require('../repositories/homework.repo');
 const { buildClassAnalysis } = require('../lib/class-analysis');
 const { buildExport, reportPeriod, GRADES } = require('../lib/excel-export');
@@ -607,17 +606,7 @@ router.get('/class-analysis', requireTeacher, async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-const templateUpload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 8 * 1024 * 1024, files: 1, fields: 8 },
-  fileFilter: (req, file, done) => done(/\.xlsx$/i.test(file.originalname) ? null : new Error('請上載 .xlsx 格式的總表'), /\.xlsx$/i.test(file.originalname)),
-}).single('template');
-
-router.post('/class-analysis/export', requireTeacher, (req, res, next) => {
-  templateUpload(req, res, error => error
-    ? fail(res, 400, error.code === 'LIMIT_FILE_SIZE' ? 'Excel 範本不能超過 8 MB' : error.message)
-    : next());
-}, async (req, res, next) => {
+router.post('/class-analysis/export', requireTeacher, async (req, res, next) => {
   try {
     const period = reportPeriod(req.body);
     const scope = String(req.body.scope || 'all');
@@ -630,7 +619,7 @@ router.post('/class-analysis/export', requireTeacher, (req, res, next) => {
     const reports = classes.map((className, index) => ({
       className, ...buildClassAnalysis(rosters[index], records.filter(record => record.className === className)),
     }));
-    const { buffer, filename } = await buildExport({ period, scope, reports, templateBuffer: req.file?.buffer });
+    const { buffer, filename } = await buildExport({ period, scope, reports });
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Disposition': `attachment; filename="homework.xlsx"; filename*=UTF-8''${encodeURIComponent(filename)}`,

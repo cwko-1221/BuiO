@@ -248,15 +248,14 @@ async function exportClassAnalysis() {
   if (state.exporting) return;
   if (!validClassPeriod()) return setMessage(t('h.badPeriod'), 'error');
   const f = { ...filterState.classAnalysis };
-  const form = new FormData();
-  for (const key of ['academicYear', 'dateFrom', 'dateTo', 'mode', 'week']) form.append(key, f[key]);
-  form.append('scope', f.exportScope === 'all' ? 'all' : f.className);
-  if (state.exportTemplate) form.append('template', state.exportTemplate);
+  const body = { academicYear: f.academicYear, dateFrom: f.dateFrom, dateTo: f.dateTo, mode: f.mode, week: f.week,
+    scope: f.exportScope === 'all' ? 'all' : f.className };
   state.exporting = true;
   state.message = '';
   render();
   try {
-    const response = await fetch('/api/homework/class-analysis/export', { method: 'POST', credentials: 'include', body: form });
+    const response = await fetch('/api/homework/class-analysis/export', { method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (!response.ok) throw new Error((await response.json().catch(() => ({}))).message || t('h.exportFailed'));
     const url = URL.createObjectURL(await response.blob());
     const encodedName = response.headers.get('Content-Disposition')?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
@@ -310,7 +309,6 @@ function renderClassAnalysis() {
     <p class="hint">${escapeHtml(t('h.weekHint'))}</p>
     <div class="homework-export-settings">
       <div class="field"><label for="classAnalysisScope">${escapeHtml(t('h.exportScope'))}</label><select id="classAnalysisScope">${options(['all', 'class'], f.exportScope, scope => t(scope === 'all' ? 'h.exportAllClasses' : 'h.exportSelectedClass', { className: f.className }))}</select></div>
-      <div class="field"><label for="classAnalysisTemplate">${escapeHtml(t('h.excelTemplate'))}</label><input id="classAnalysisTemplate" type="file" accept=".xlsx"><small class="hint">${escapeHtml(state.exportTemplate?.name || t('h.defaultTemplate'))}</small>${state.exportTemplate ? `<button type="button" id="clearExportTemplate" class="button secondary">${escapeHtml(t('h.useDefaultTemplate'))}</button>` : ''}</div>
     </div>
     <p class="hint">${escapeHtml(t('h.exportHint'))}</p>
     <div class="actions" style="margin-top:16px"><button class="button primary" id="runClassAnalysis" ${!validClassPeriod() ? 'disabled' : ''}>${escapeHtml(t('h.showClassStats'))}</button><button class="button secondary" id="exportClassAnalysis" ${state.exporting || !validClassPeriod() ? 'disabled' : ''}>${escapeHtml(t(state.exporting ? 'h.exporting' : 'h.exportExcel'))}</button></div>
@@ -526,13 +524,6 @@ function bindTeacher() {
     };
     classAnalysisTo.onchange = () => { filterState.classAnalysis.dateTo = classAnalysisTo.value; resetClassAnalysis(); };
     classAnalysisScope.onchange = () => { filterState.classAnalysis.exportScope = classAnalysisScope.value; };
-    classAnalysisTemplate.onchange = () => {
-      const file = classAnalysisTemplate.files[0];
-      if (file && (!/\.xlsx$/i.test(file.name) || file.size > 8 * 1024 * 1024)) return setMessage(t('h.badTemplate'), 'error');
-      state.exportTemplate = file || null;
-      render();
-    };
-    document.getElementById('clearExportTemplate')?.addEventListener('click', () => { state.exportTemplate = null; render(); });
     runClassAnalysis.onclick = loadClassAnalysis;
     document.getElementById('exportClassAnalysis').onclick = exportClassAnalysis;
   }

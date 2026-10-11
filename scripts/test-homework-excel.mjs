@@ -8,8 +8,9 @@ import { defaultWeekPeriod, weekEnd } from '../homework-app/public/js/report-per
 
 const require = createRequire(import.meta.url);
 const ExcelJS = require('exceljs');
+const JSZip = require('jszip');
 const bcrypt = require('bcryptjs');
-const { reportPeriod } = require('../homework-app/lib/excel-export');
+const { reportPeriod, buildExport } = require('../homework-app/lib/excel-export');
 const root = path.resolve(import.meta.dirname, '..');
 const temp = await mkdtemp(path.join(tmpdir(), 'buio-homework-excel-'));
 const qaDir = process.env.HOMEWORK_EXCEL_QA_DIR;
@@ -19,7 +20,7 @@ const academicYear = '2026-27';
 const user = (id, name, className, classNo) => ({ studentid: id, name, role: className ? 'student' : 'teacher', classname: className || '', classno: classNo,
   passwordhash: bcrypt.hashSync('123456', 4), chinesegroup: 'A', englishgroup: 'A', mathgroup: 'A', language: 'zh-HK' });
 const users = [user('T001', '測試老師'), user('S002', '王美賢 Akbar Adeena', 'P4', 2), user('S030', '三十號同學', 'P4', 30),
-  user('S000', '未編號同學', 'P4', null), user('S004', '沒有欠交的同學', 'P4', 4), user('S101', '一年級同學', 'P1', 1),
+  user('S000', '未編號同學', 'P4', null), user('S004', '零欠交同學', 'P4', 4), user('S101', '一年級同學', 'P1', 1),
   user('S501', '五年級同學', 'P5', 1), user('S601', '六年級同學', 'P6', 1)];
 let recordId = 0;
 const record = (date, statuses, className = 'P4', amount = 1) => ({ id: ++recordId, academicYear, className, subject: 'music', date,
@@ -52,11 +53,27 @@ const login = async studentId => {
 };
 let cookie;
 const period = { academicYear, mode: 'week', week: '7', dateFrom: '2026-09-04', dateTo: '2026-10-16', scope: 'all' };
-const exportFile = async (values, template, session = cookie) => {
-  const body = new FormData();
-  for (const [key, value] of Object.entries(values)) body.append(key, value);
-  if (template) body.append('template', new Blob([template]), '總表.xlsx');
-  return fetch(`${base}/api/homework/class-analysis/export`, { method: 'POST', headers: { Cookie: session || '' }, body });
+const exportFile = async (values, session = cookie) => {
+  return fetch(`${base}/api/homework/class-analysis/export`, { method: 'POST',
+    headers: { Cookie: session || '', 'Content-Type': 'application/json' }, body: JSON.stringify(values) });
+};
+const assertTemplateLayout = (sheet, reference) => {
+  assert.deepEqual(sheet.views, reference.views, 'template zoom and normal, unfrozen view are preserved');
+  assert.deepEqual(sheet.properties, reference.properties, 'default row/column dimensions are preserved');
+  assert.deepEqual(sheet.pageSetup, reference.pageSetup, 'paper size, margins, scale and print settings are preserved');
+  for (let col = 1; col <= 14; col++) {
+    assert.equal(sheet.getColumn(col).width, reference.getColumn(col).width, 'every column width, including the legend, is preserved');
+    assert.deepEqual(sheet.getColumn(col).style, reference.getColumn(col).style);
+  }
+  for (let row = 1; row <= reference.rowCount; row++) {
+    assert.equal(sheet.getRow(row).height, reference.getRow(row).height, `row ${row} is not auto-sized`);
+    for (let col = 1; col <= 14; col++) {
+      const { fill: actualFill, ...actualStyle } = sheet.getCell(row, col).style;
+      const { fill: expectedFill, ...expectedStyle } = reference.getCell(row, col).style;
+      assert.deepEqual(actualStyle, expectedStyle, `${sheet.name}!${sheet.getCell(row, col).address} keeps its exact font, size, borders, alignment and number format`);
+      if (row <= 4 || col === 1 || col === 14) assert.deepEqual(actualFill, expectedFill);
+    }
+  }
 };
 try {
   for (let attempt = 0; ; attempt++) {
@@ -69,17 +86,32 @@ try {
   assert.deepEqual(defaultWeekPeriod(academicYear, '2026-10-11'), { dateFrom: '2026-09-04', dateTo: '2026-10-09', week: '6', mode: 'week' });
   assert.throws(() => reportPeriod({ ...period, dateTo: '2026-10-09' }), /不一致/);
   cookie = await login('T001');
-  assert.equal((await exportFile(period, null, '')).status, 401, 'login is required');
-  assert.equal((await exportFile(period, null, await login('S002'))).status, 403, 'student cannot export');
-  const source = await workbook(await readFile(path.join(root, 'homework-app/templates/summary-t1.xlsx')));
+  assert.equal((await exportFile(period, '')).status, 401, 'login is required');
+  assert.equal((await exportFile(period, await login('S002'))).status, 403, 'student cannot export');
+  const sourceBuffer = await readFile(path.join(root, 'homework-app/templates/summary-t1.xlsx'));
+  const source = await workbook(sourceBuffer);
   const response = await exportFile(period);
   assert.equal(response.status, 200);
   assert.match(response.headers.get('content-type'), /spreadsheetml/);
   assert.match(decodeURIComponent(response.headers.get('content-disposition')), /wk7\.xlsx/);
   const week7Buffer = Buffer.from(await response.arrayBuffer());
   const week7 = await workbook(week7Buffer);
+  const sourceZip = await JSZip.loadAsync(sourceBuffer);
+  const exportedZip = await JSZip.loadAsync(week7Buffer);
+  const originalStyles = await sourceZip.file('xl/styles.xml').async('string');
+  const exportedStyles = await exportedZip.file('xl/styles.xml').async('string');
+  for (const section of ['fonts', 'fills', 'borders', 'cellStyleXfs', 'cellStyles']) {
+    const pattern = new RegExp(`<${section}\\b[^>]*>[\\s\\S]*?</${section}>`);
+    assert.equal(exportedStyles.match(pattern)?.[0], originalStyles.match(pattern)?.[0], `${section} is retained verbatim, including the default font`);
+  }
+  for (const name of Object.keys(sourceZip.files).filter(name => /^xl\/(worksheets\/|printerSettings\/|theme\/|sharedStrings\.xml)/.test(name) && !sourceZip.files[name].dir)) {
+    assert.deepEqual(await exportedZip.file(name).async('nodebuffer'), await sourceZip.file(name).async('nodebuffer'), `${name} is preserved byte-for-byte`);
+  }
+  assert.equal(exportedZip.file('xl/calcChain.xml'), null, 'old formula chain is removed so new totals recalculate');
   assert.ok(week7.getWorksheet('wk7'), 'week7 is added');
   const summary = week7.getWorksheet('wk7');
+  assert.deepEqual(week7.worksheets.map(sheet => sheet.name), [...source.worksheets.map(sheet => sheet.name), 'wk7'], 'only a summary is added, with no detail sheet');
+  assertTemplateLayout(summary, source.getWorksheet('wk6'));
   assert.deepEqual([...summary.model.merges].sort(), [...source.getWorksheet('wk6').model.merges].sort(), 'new week keeps merged titles and grade headers');
   assert.equal(summary.getCell('A3').value, '欠交功課紀錄 (4/9/2026-16/10/2026)');
   assert.equal(summary.getCell('H6').value, '王美賢\nAdeena', 'matching template name is kept');
@@ -87,10 +119,13 @@ try {
   assert.equal(summary.getCell('I34').value, 3, 'student 30 is not overwritten by totals');
   assert.equal(summary.getCell('I35').value, 1, 'unnumbered student is included');
   assert.deepEqual(summary.getCell('I36').value, { formula: 'SUM(I5:I35)', result: 8 });
-  assert.equal(summary.getCell('I8').value, 0, 'zero-missing student remains in roster');
-  assert.equal(summary.getCell('C5').fill.fgColor.argb, 'FFFFFF00');
-  assert.equal(summary.getCell('K5').fill.fgColor.argb, 'FFE6B8B7');
-  assert.equal(summary.getCell('M5').fill.fgColor.argb, 'FFA6A6A6');
+  assert.equal(summary.getCell('I8').value, null, 'zero counts stay blank as in the template');
+  assert.equal(summary.getCell('H8').value, '零欠交同學', 'zero-missing student remains in roster');
+  assert.equal(summary.getCell('H36').value, null, 'no new total label is added');
+  assert.deepEqual(summary.getCell('I36').style, source.getWorksheet('wk6').getCell('I34').style, 'extended totals use the exact template style without added bold text');
+  assert.deepEqual(summary.getCell('C5').fill, source.getWorksheet('wk6').getCell('N5').fill);
+  assert.deepEqual(summary.getCell('K5').fill, source.getWorksheet('wk6').getCell('N6').fill);
+  assert.deepEqual(summary.getCell('M5').fill, source.getWorksheet('wk6').getCell('N7').fill);
   for (const original of source.worksheets) {
     const exported = week7.getWorksheet(original.name);
     assert.ok(exported);
@@ -101,14 +136,22 @@ try {
       assert.deepEqual(exported.getCell(row, col).style, original.getCell(row, col).style, `${original.name} style is preserved`);
     }
   }
-  const details = week7.getWorksheet('wk7_明細');
-  assert.equal(details.rowCount, 34, '31 missing records plus 3 headers');
-  assert.equal(details.getCell('G4').value, '=SUM(A1:A2)', 'homework text stays text, not a formula');
-  assert.ok(details.getCell('A4').value instanceof Date, 'date is a typed Excel date');
+  const normalReports = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'].map(className => ({ className, totalMissing: 2,
+    rows: [{ id: `${className}-2`, name: className === 'P4' ? '王美賢 Akbar Adeena' : className === 'P1' ? '<測試 & 同學>' : className === 'P2' ? '=1+1' : '測試同學', className, classNo: 2, missingCount: 2 }] }));
+  const normal = await workbook((await buildExport({ period: reportPeriod(period), reports: normalReports })).buffer);
+  const normalSummary = normal.getWorksheet('wk7');
+  assertTemplateLayout(normalSummary, source.getWorksheet('wk6'));
+  assert.equal(normalSummary.rowCount, source.getWorksheet('wk6').rowCount, 'normal rosters keep the original total row and table size');
+  assert.equal(normalSummary.getCell('I34').value.result, 2);
+  assert.equal(normalSummary.getCell('A34').value, source.getWorksheet('wk6').getCell('A34').value);
+  assert.equal(normalSummary.getCell('B6').value, '<測試 & 同學>', 'XML-sensitive names remain literal text');
+  assert.equal(normalSummary.getCell('D6').value, '=1+1', 'names cannot become formulas');
   const customResponse = await exportFile({ ...period, mode: 'custom', scope: 'P4', dateFrom: '2026-09-08', dateTo: '2026-09-24' });
   assert.equal(customResponse.status, 200);
   const custom = await workbook(Buffer.from(await customResponse.arrayBuffer()));
   const customSheet = custom.getWorksheet('自選20260908-20260924_P4');
+  assertTemplateLayout(customSheet, source.getWorksheet('wk6'));
+  assert.ok(custom.worksheets.every(sheet => !sheet.name.includes('明細')));
   assert.equal(customSheet.getCell('I6').value, 1);
   assert.equal(customSheet.getCell('I34').value, 2, 'both boundary dates are included');
   assert.equal(customSheet.getCell('I36').value.result, 3);
@@ -117,16 +160,16 @@ try {
   assert.equal(analysis.totalMissing, customSheet.getCell('I36').value.result, 'Excel reconciles to displayed class analysis');
   const week6 = await exportFile({ ...period, week: '6', dateTo: '2026-10-09', scope: 'P4' });
   assert.equal((await workbook(Buffer.from(await week6.arrayBuffer()))).getWorksheet('wk6_P4').getCell('I36').value.result, 6, 'Week6 excludes Week7 records');
-  const appended = await exportFile({ ...period, week: '8', dateTo: '2026-10-23' }, week7Buffer);
+  const appended = await exportFile({ ...period, week: '8', dateTo: '2026-10-23' });
   assert.equal(appended.status, 200);
   const week8 = await workbook(Buffer.from(await appended.arrayBuffer()));
-  assert.equal(week8.getWorksheet('wk7').getCell('I36').value.result, 8, 'uploaded Week7 is kept');
   assert.equal(week8.getWorksheet('wk8').getCell('I36').value.result, 9, 'Week8 adds the next period');
-  const repeated = await exportFile(period, week7Buffer);
-  assert.equal((await workbook(Buffer.from(await repeated.arrayBuffer()))).worksheets.filter(sheet => sheet.name === 'wk7').length, 1, 're-export updates the selected sheet once');
+  assert.ok(week8.worksheets.every(sheet => !sheet.name.includes('明細')));
+  const repeated = await exportFile({ ...period, week: '6', dateTo: '2026-10-09' });
+  assert.equal((await workbook(Buffer.from(await repeated.arrayBuffer()))).worksheets.filter(sheet => sheet.name === 'wk6').length, 1, 'an existing week is updated once');
   assert.equal((await exportFile({ ...period, mode: 'custom', dateFrom: '2026-09-24', dateTo: '2026-09-08' })).status, 400);
   assert.equal((await exportFile({ ...period, week: '0' })).status, 400);
-  assert.equal((await exportFile(period, Buffer.from('not an Excel file'))).status, 400);
+  assert.equal((await exportFile({})).status, 400);
   if (qaDir) { await mkdir(qaDir, { recursive: true }); await writeFile(path.join(qaDir, 'week7-fixture.xlsx'), week7Buffer); }
 
   if (process.argv.includes('--browser')) {
@@ -140,6 +183,8 @@ try {
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(`${base}/homework`);
       await page.locator('[data-view="class-analysis"]').click();
+      assert.equal(await page.locator('#classAnalysisTemplate, #clearExportTemplate, input[type="file"]').count(), 0, 'template upload controls are removed');
+      assert.equal(await page.getByText('上載上一份總表', { exact: false }).count(), 0);
       await page.locator('#classAnalysisWeek').selectOption('7');
       assert.equal(await page.locator('#classAnalysisFrom').inputValue(), '2026-09-04');
       assert.equal(await page.locator('#classAnalysisTo').inputValue(), '2026-10-16');
@@ -149,7 +194,10 @@ try {
       const download = await downloadPromise;
       assert.match(download.suggestedFilename(), /wk7\.xlsx$/);
       await download.saveAs(path.join(temp, 'browser.xlsx'));
-      assert.equal((await workbook(await readFile(path.join(temp, 'browser.xlsx')))).getWorksheet('wk7').getCell('I36').value.result, 8);
+      const browserBook = await workbook(await readFile(path.join(temp, 'browser.xlsx')));
+      assert.equal(browserBook.getWorksheet('wk7').getCell('I36').value.result, 8);
+      assertTemplateLayout(browserBook.getWorksheet('wk7'), source.getWorksheet('wk6'));
+      assert.ok(browserBook.worksheets.every(sheet => !sheet.name.includes('明細')));
       await page.locator('#classAnalysisMode').selectOption('custom');
       await page.locator('#classAnalysisFrom').fill('2026-09-08');
       await page.locator('#classAnalysisTo').fill('2026-09-24');
@@ -164,25 +212,24 @@ try {
       assert.match(customDownload.suggestedFilename(), /自選20260908-20260924_P4/);
       await customDownload.saveAs(path.join(temp, 'browser-custom.xlsx'));
       assert.equal((await workbook(await readFile(path.join(temp, 'browser-custom.xlsx')))).getWorksheet('自選20260908-20260924_P4').getCell('I36').value.result, 3);
-      await page.locator('#classAnalysisTemplate').setInputFiles(path.join(temp, 'browser.xlsx'));
       await page.locator('#classAnalysisMode').selectOption('week');
       await page.locator('#classAnalysisFrom').fill('2026-09-04');
       await page.locator('#classAnalysisWeek').selectOption('8');
-      const uploadedDownloadPromise = page.waitForEvent('download');
+      const nextWeekDownloadPromise = page.waitForEvent('download');
       await page.locator('#exportClassAnalysis').click();
-      const uploadedDownload = await uploadedDownloadPromise;
-      await uploadedDownload.saveAs(path.join(temp, 'browser-week8.xlsx'));
-      const uploaded = await workbook(await readFile(path.join(temp, 'browser-week8.xlsx')));
-      assert.ok(uploaded.getWorksheet('wk7'));
-      assert.ok(uploaded.getWorksheet('wk8_P4'));
+      const nextWeekDownload = await nextWeekDownloadPromise;
+      await nextWeekDownload.saveAs(path.join(temp, 'browser-week8.xlsx'));
+      const nextWeek = await workbook(await readFile(path.join(temp, 'browser-week8.xlsx')));
+      assert.ok(nextWeek.getWorksheet('wk8_P4'));
+      assert.ok(nextWeek.worksheets.every(sheet => !sheet.name.includes('明細')));
       await page.setViewportSize({ width: 390, height: 844 });
       if (qaDir) await page.screenshot({ path: path.join(qaDir, 'mobile.png'), fullPage: true });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'mobile controls fit');
       assert.deepEqual(errors, [], 'no browser runtime errors');
     } finally { await browser.close(); }
-    console.log('Desktop/mobile Excel download, week/custom selection and uploaded template passed.');
+    console.log('Desktop/mobile Excel downloads and week/custom selection passed, with no template upload or detail sheets.');
   }
-  console.log('Homework Excel tests passed: dates, counts, old sheets/styles, permissions, uploads and zero/unnumbered/class-30 students.');
+  console.log('Homework Excel tests passed: exact template fonts/layout, summary-only sheets, dates, counts, permissions and zero/unnumbered/class-30 students.');
 } catch (error) {
   console.error(logs.slice(-4000));
   throw error;
