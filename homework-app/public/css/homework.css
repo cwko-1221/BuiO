@@ -197,7 +197,7 @@ button { cursor: pointer; }
 .filters.three { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
 .homework-export-settings {
   display: grid;
-  grid-template-columns: minmax(160px, 320px);
+  grid-template-columns: repeat(2, minmax(160px, 320px));
   align-items: start;
   gap: 14px;
   margin-top: 20px;
