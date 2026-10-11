@@ -21,7 +21,7 @@ function reportPeriod(input = {}) {
   if (!['week', 'custom'].includes(mode)) throw badRequest('請選擇按周次或自選日期');
   const week = Number(input.week);
   if (mode === 'week') {
-    if (!Number.isInteger(week) || week < 1 || week > 53) throw badRequest('請選擇正確的周次');
+    if (!Number.isInteger(week) || week < 6 || week > 53) throw badRequest('請選擇第 6 周或之後的周次');
     const expectedTo = new Date(Date.parse(`${dateFrom}T00:00:00Z`) + (week - 1) * 7 * DAY).toISOString().slice(0, 10);
     if (dateTo !== expectedTo) throw badRequest('周次與日期範圍不一致，請重新選擇周次');
   }
@@ -144,4 +144,4 @@ async function buildExport({ period, scope = 'all', reports }) {
   return { buffer, filename: `欠交功課_${period.academicYear}_${sheetName}.xlsx`, sheetName };
 }
 
-module.exports = { buildExport, reportPeriod, GRADES };
+module.exports = { buildExport, reportPeriod, GRADES, TEMPLATE, cloneSheet, isSummarySheet };

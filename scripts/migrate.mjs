@@ -88,6 +88,12 @@ const SCHEMA_SQL = `
     UpdatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (AcademicYear, ClassName)
   );
+  CREATE TABLE IF NOT EXISTS HomeworkReportStates (
+    AcademicYear VARCHAR(10) PRIMARY KEY,
+    Revision INTEGER NOT NULL,
+    State JSONB NOT NULL,
+    UpdatedAt TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
 `;
 
 const CONSTRAINTS_SQL = `

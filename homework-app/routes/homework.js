@@ -2,9 +2,11 @@
 
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const repo = require('../repositories/homework.repo');
 const { buildClassAnalysis } = require('../lib/class-analysis');
 const { buildExport, reportPeriod, GRADES } = require('../lib/excel-export');
+const weeklyReports = require('../lib/weekly-reports');
 const academicYearsRepo = require('../../math-app/repositories/academic-years.repo');
 const { requireAuth, requireTeacher, requireAdminUnlocked } = require('../../math-app/middleware/auth');
 const {
@@ -598,12 +600,19 @@ router.get('/class-analysis', requireTeacher, async (req, res, next) => {
     if (!isAcademicYear(academicYear) || !/^P[1-6]$/.test(className) || !isIsoDate(dateFrom) || !isIsoDate(dateTo) || dateFrom > dateTo) {
       return fail(res, 400, '請選擇正確的學年、班級及日期範圍');
     }
+    if (req.query.mode === 'week') {
+      const period = reportPeriod(req.query);
+      return res.json({ success: true, ...await weeklyReports.preview(period, className) });
+    }
     const [students, records] = await Promise.all([
       repo.listClassStudents(academicYear, className),
       repo.listRecords({ academicYear, className, dateFrom, dateTo }),
     ]);
     res.json({ success: true, ...buildClassAnalysis(students, records) });
-  } catch (error) { next(error); }
+  } catch (error) {
+    if (error.status >= 400 && error.status < 500) return fail(res, error.status, error.message);
+    next(error);
+  }
 });
 
 router.post('/class-analysis/export', requireTeacher, async (req, res, next) => {
@@ -611,15 +620,20 @@ router.post('/class-analysis/export', requireTeacher, async (req, res, next) => 
     const period = reportPeriod(req.body);
     const scope = String(req.body.scope || 'all');
     if (scope !== 'all' && !GRADES.includes(scope)) return fail(res, 400, '請選擇正確的匯出班別');
-    const classes = scope === 'all' ? GRADES : [scope];
-    const [rosters, records] = await Promise.all([
-      Promise.all(classes.map(className => repo.listClassStudents(period.academicYear, className))),
-      repo.listRecords({ ...period, className: scope === 'all' ? '' : scope }),
-    ]);
-    const reports = classes.map((className, index) => ({
-      className, ...buildClassAnalysis(rosters[index], records.filter(record => record.className === className)),
-    }));
-    const { buffer, filename } = await buildExport({ period, scope, reports });
+    let result;
+    if (period.mode === 'week') result = await weeklyReports.generate(period, req.session.studentId);
+    else {
+      const classes = scope === 'all' ? GRADES : [scope];
+      const [rosters, records] = await Promise.all([
+        Promise.all(classes.map(className => repo.listClassStudents(period.academicYear, className))),
+        repo.listRecords({ ...period, className: scope === 'all' ? '' : scope }),
+      ]);
+      const reports = classes.map((className, index) => ({
+        className, ...buildClassAnalysis(rosters[index], records.filter(record => record.className === className)),
+      }));
+      result = await buildExport({ period, scope, reports });
+    }
+    const { buffer, filename } = result;
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Disposition': `attachment; filename="homework.xlsx"; filename*=UTF-8''${encodeURIComponent(filename)}`,
@@ -627,7 +641,37 @@ router.post('/class-analysis/export', requireTeacher, async (req, res, next) => 
     });
     res.send(Buffer.from(buffer));
   } catch (error) {
-    if (error.status === 400) return fail(res, 400, error.message);
+    if (error.status >= 400 && error.status < 500) return fail(res, error.status, error.message);
+    next(error);
+  }
+});
+
+const reportUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024, files: 1, fields: 7 },
+  fileFilter: (req, file, done) => done(/\.xlsx$/i.test(file.originalname) ? null : new Error('請上載 .xlsx 總表。'), /\.xlsx$/i.test(file.originalname)),
+}).single('workbook');
+
+router.post('/class-analysis/report-upload', requireTeacher, (req, res, next) => reportUpload(req, res, error => {
+  if (error) return fail(res, 400, error.code === 'LIMIT_FILE_SIZE' ? 'Excel 不能超過 8 MB。' : error.message);
+  next();
+}), async (req, res, next) => {
+  try {
+    if (!req.file) return fail(res, 400, '請選擇最新的 Excel 總表。');
+    if (!/^\d+$/.test(String(req.body.revision ?? ''))) return fail(res, 400, '請先載入本周總表再上載。');
+    const period = reportPeriod({ ...req.body, mode: 'week' });
+    const result = await weeklyReports.upload(period, req.file.buffer, req.session.studentId, req.body.revision);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    if (error.status >= 400 && error.status < 500) return fail(res, error.status, error.message);
+    next(error);
+  }
+});
+
+router.post('/class-analysis/report-tasks/:id', requireTeacher, async (req, res, next) => {
+  try {
+    if (!isAcademicYear(req.body.academicYear) || typeof req.body.done !== 'boolean' || !/^[a-f0-9]{64}$/.test(req.params.id)) return fail(res, 400, '待辦設定不正確。');
+    res.json({ success: true, ...await weeklyReports.setTaskDone(req.body.academicYear, req.params.id, req.body.done, req.session.studentId) });
+  } catch (error) {
+    if (error.status >= 400 && error.status < 500) return fail(res, error.status, error.message);
     next(error);
   }
 });

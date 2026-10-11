@@ -11,8 +11,9 @@ const setAttribute = (xml, name, value) => xml.replace(/^<[^>]+>/, tag => {
 });
 const cells = /<c\b[^>]*?(?:\/>|>[\s\S]*?<\/c>)/g;
 const columnNumber = letters => [...letters].reduce((n, letter) => n * 26 + letter.charCodeAt(0) - 64, 0);
+const partPath = target => target.startsWith('/') ? target.slice(1) : require('node:path').posix.normalize(`xl/${target}`);
 
-async function writeTemplate({ templateBuffer, source, summary, totalRow }) {
+async function writeTemplate({ templateBuffer, source, summary, totalRow, templateTotalRow = source.rowCount }) {
   const JSZip = require('jszip');
   const zip = await JSZip.loadAsync(templateBuffer);
   const read = name => zip.file(name).async('string');
@@ -23,7 +24,7 @@ async function writeTemplate({ templateBuffer, source, summary, totalRow }) {
   const sourceTag = sheetTags.find(tag => attribute(tag, 'name') === source.name);
   const relationships = relsXml.match(/<Relationship\b[^>]*\/>/g);
   const sourceRel = relationships.find(tag => attribute(tag, 'Id') === attribute(sourceTag, 'r:id'));
-  const sourcePath = `xl/${attribute(sourceRel, 'Target')}`;
+  const sourcePath = partPath(attribute(sourceRel, 'Target'));
   const sourceXml = await read(sourcePath);
   const originalRows = sourceXml.match(/<row\b[^>]*>[\s\S]*?<\/row>/g);
   const rowsByNumber = new Map(originalRows.map(row => [Number(attribute(row, 'r')), row]));
@@ -33,7 +34,7 @@ async function writeTemplate({ templateBuffer, source, summary, totalRow }) {
   const formats = xfSection.match(/<xf\b[^>]*?(?:\/>|>[\s\S]*?<\/xf>)/g);
   const originalFormatCount = formats.length;
   const styleIndex = new Map(formats.map((xf, index) => [xf, index]));
-  const legendFills = ['N5', 'N6', 'N7', 'N8'].map(address => {
+  const legendFills = Array.from({ length: 7 }, (_, index) => `N${index + 5}`).map(address => {
     const cellXml = rowsByNumber.get(Number(address.slice(1))).match(cells).find(xml => attribute(xml, 'r') === address);
     return { fill: JSON.stringify(source.getCell(address).fill), id: Number(attribute(formats[Number(attribute(cellXml, 's'))], 'fillId')) };
   });
@@ -71,15 +72,22 @@ async function writeTemplate({ templateBuffer, source, summary, totalRow }) {
   const updatedRows = originalRows.map(row => {
     const n = Number(attribute(row, 'r'));
     if (n < 5) return row.replace(cells, cell => ['A2', 'A3'].includes(attribute(cell, 'r')) ? writeCell(cell, n, n) : cell);
+    if (totalRow !== templateTotalRow && n >= templateTotalRow && n <= totalRow) {
+      const referenceRow = n === totalRow ? templateTotalRow : 5;
+      const referenceCells = rowsByNumber.get(referenceRow).match(cells);
+      return setAttribute(row, 'ht', summary.getRow(n).height || source.getRow(referenceRow).height)
+        .replace(cells, cell => columnNumber(attribute(cell, 'r').match(/^[A-Z]+/)[0]) <= 13
+          ? writeCell(referenceCells.find(raw => attribute(raw, 'r').match(/^[A-Z]+/)[0] === attribute(cell, 'r').match(/^[A-Z]+/)[0]) || cell, n, referenceRow) : cell);
+    }
     return row.replace(cells, cell => writeCell(cell, n, n));
   });
   for (let n = source.rowCount + 1; n <= totalRow; n++) {
-    const referenceRow = n === totalRow ? source.rowCount : 5;
+    const referenceRow = n === totalRow ? templateTotalRow : 5;
     const row = setAttribute(rowsByNumber.get(referenceRow), 'r', n);
     updatedRows.push(row.replace(cells, cell => writeCell(cell, n, referenceRow)));
   }
   const summaryXml = sourceXml.replace(/<sheetData>[\s\S]*?<\/sheetData>/, `<sheetData>${updatedRows.join('')}</sheetData>`)
-    .replace(/<dimension\b[^>]*\/>/, tag => setAttribute(tag, 'ref', `A1:N${totalRow}`));
+    .replace(/<dimension\b[^>]*\/>/, tag => setAttribute(tag, 'ref', `A1:N${Math.max(totalRow, source.rowCount)}`));
   if (formats.length !== originalFormatCount) {
     const section = setAttribute(xfSection.replace('</cellXfs>', `${formats.slice(originalFormatCount).join('')}</cellXfs>`), 'count', formats.length);
     stylesXml = stylesXml.replace(xfSection, section);
@@ -91,7 +99,7 @@ async function writeTemplate({ templateBuffer, source, summary, totalRow }) {
   let activeTab;
   if (existingTag) {
     const rel = relationships.find(tag => attribute(tag, 'Id') === attribute(existingTag, 'r:id'));
-    outputPath = `xl/${attribute(rel, 'Target')}`;
+    outputPath = partPath(attribute(rel, 'Target'));
     activeTab = sheetTags.indexOf(existingTag);
   } else {
     const nextPart = 1 + Math.max(...Object.keys(zip.files).map(name => Number(name.match(/^xl\/worksheets\/sheet(\d+)\.xml$/)?.[1]) || 0));

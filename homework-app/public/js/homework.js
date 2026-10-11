@@ -58,7 +58,7 @@ const filterState = {
   monitors: { academicYear: '', className: 'P4', subject: 'chinese-a' },
   records: { academicYear: '', className: 'P4', subject: 'chinese-a', date: today },
   analysis: { academicYear: '', className: 'P4', studentId: '' },
-  classAnalysis: { academicYear: '', className: 'P4', dateFrom: '', dateTo: today, mode: 'week', week: '1', exportScope: 'all' },
+  classAnalysis: { academicYear: '', className: 'P4', dateFrom: '', dateTo: today, mode: 'week', week: '6', exportScope: 'all' },
 };
 
 async function loadMonitorRoster() {
@@ -216,16 +216,21 @@ function renderAnalysis() {
 }
 
 async function loadClassAnalysis() {
-  const f = filterState.classAnalysis;
+  const f = { ...filterState.classAnalysis };
+  const request = state.classAnalysisRequest = (state.classAnalysisRequest || 0) + 1;
   if (!validClassPeriod()) return setMessage(t('h.badPeriod'), 'error');
   try {
-    const result = await api(`/class-analysis?academicYear=${encodeURIComponent(f.academicYear)}&className=${f.className}&dateFrom=${f.dateFrom}&dateTo=${f.dateTo}`);
+    const result = await api(`/class-analysis?academicYear=${encodeURIComponent(f.academicYear)}&className=${f.className}&dateFrom=${f.dateFrom}&dateTo=${f.dateTo}&mode=${f.mode}&week=${f.week}`);
+    if (request !== state.classAnalysisRequest) return;
     state.classAnalysisRows = result.rows;
     state.classAnalysisTotal = result.totalMissing;
+    state.weeklyReport = f.mode === 'week' ? result : null;
     state.message = ''; state.readRecovery = null;
   } catch (error) {
+    if (request !== state.classAnalysisRequest) return;
     state.classAnalysisRows = [];
     state.classAnalysisTotal = 0;
+    state.weeklyReport = null;
     state.message = ''; state.readRecovery = { error, retry: loadClassAnalysis };
   }
   render();
@@ -237,11 +242,15 @@ function validClassPeriod() {
 }
 
 function resetClassAnalysis() {
+  state.classAnalysisRequest = (state.classAnalysisRequest || 0) + 1;
   state.classAnalysisRows = [];
   state.classAnalysisTotal = 0;
+  state.weeklyReport = null;
+  state.reportFile = null;
   state.message = '';
   state.readRecovery = null;
   render();
+  if (validClassPeriod()) loadClassAnalysis();
 }
 
 async function exportClassAnalysis() {
@@ -249,7 +258,7 @@ async function exportClassAnalysis() {
   if (!validClassPeriod()) return setMessage(t('h.badPeriod'), 'error');
   const f = { ...filterState.classAnalysis };
   const body = { academicYear: f.academicYear, dateFrom: f.dateFrom, dateTo: f.dateTo, mode: f.mode, week: f.week,
-    scope: f.exportScope === 'all' ? 'all' : f.className };
+    scope: f.mode === 'week' || f.exportScope === 'all' ? 'all' : f.className };
   state.exporting = true;
   state.message = '';
   render();
@@ -266,6 +275,7 @@ async function exportClassAnalysis() {
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
+    if (f.mode === 'week') await loadClassAnalysis();
     state.message = t('h.exportSuccess');
     state.messageType = 'success';
   } catch (error) {
@@ -277,8 +287,49 @@ async function exportClassAnalysis() {
   }
 }
 
+async function uploadWeeklyReport() {
+  if (state.uploading || state.exporting || !state.reportFile || !state.weeklyReport) return;
+  const f = { ...filterState.classAnalysis };
+  const body = new FormData();
+  for (const key of ['academicYear', 'week', 'dateFrom', 'dateTo']) body.append(key, f[key]);
+  body.append('revision', state.weeklyReport.revision);
+  body.append('workbook', state.reportFile);
+  state.uploading = true;
+  render();
+  try {
+    const response = await fetch('/api/homework/class-analysis/report-upload', { method: 'POST', credentials: 'include', body });
+    const result = await response.json();
+    if (!response.ok || !result.success) throw new Error(result.message || t('h.actionFailed'));
+    state.reportFile = null;
+    await loadClassAnalysis();
+    state.message = t('h.reportUploadSuccess');
+    state.messageType = 'success';
+  } catch (error) { state.message = error.message; state.messageType = 'error'; }
+  finally { state.uploading = false; render(); }
+}
+
+function reportTasksHtml() {
+  const report = state.weeklyReport;
+  if (!report) return '';
+  const tasks = report.tasks || [];
+  const taskRow = task => `<label class="report-task ${task.done ? 'done' : ''}">
+    <input type="checkbox" class="report-task-done" data-task="${escapeHtml(task.id)}" ${task.done ? 'checked' : ''} ${task.preview || state.taskSaving || state.uploading || state.exporting ? 'disabled' : ''}>
+    <span><strong>${escapeHtml(task.name)}</strong><small>${escapeHtml(task.className)} · ${escapeHtml(task.classNo ? t('h.classNoSuffix', { no: task.classNo }) : t('h.noClassNo'))} · Week ${task.week} · ${escapeHtml(t('h.reportTaskCount', { count: task.count }))}</small></span>
+    <span class="report-task-action ${task.action}">${escapeHtml(t(`h.reportAction.${task.action}`))}${task.preview ? `<small>${escapeHtml(t('h.reportTaskPreview'))}</small>` : ''}</span>
+  </label>`;
+  const pending = tasks.filter(task => !task.done);
+  const done = tasks.filter(task => task.done);
+  return `<section class="panel report-tasks"><div class="panel-head"><div><h2>${escapeHtml(t('h.reportTasksTitle', { count: pending.length }))}</h2><p class="hint">${escapeHtml(t('h.reportTasksHint'))}</p></div></div>
+    ${pending.length ? pending.map(taskRow).join('') : `<div class="empty">${escapeHtml(t('h.reportNoTasks'))}</div>`}
+    ${done.length ? `<details class="report-completed"><summary>${escapeHtml(t('h.reportCompleted', { count: done.length }))}</summary>${done.map(taskRow).join('')}</details>` : ''}
+  </section>`;
+}
+
 function renderClassAnalysis() {
   const f = filterState.classAnalysis;
+  const weekly = f.mode === 'week';
+  const report = state.weeklyReport;
+  const latest = report?.versions?.[0];
   const rows = state.classAnalysisRows || [];
   const studentCards = rows.map(row => {
     const records = row.missingRecords || [];
@@ -290,7 +341,7 @@ function renderClassAnalysis() {
         <span>${escapeHtml(record.homework)}</span>
         <span class="class-analysis-record-status"><span class="status-tag missing">${escapeHtml(t('h.statusMissing'))}</span>${record.madeUp ? `<span class="status-tag made-up">${escapeHtml(t('h.madeUp'))}</span>` : ''}</span>
       </div>`).join('')}
-    </div>` : `<div class="class-analysis-empty">${escapeHtml(t('h.classAnalysisNoMissing'))}</div>`;
+    </div>` : `<div class="class-analysis-empty">${escapeHtml(t(weekly && row.missingCount ? 'h.baselineDetailsUnavailable' : 'h.classAnalysisNoMissing'))}</div>`;
     return `<details class="class-analysis-student">
       <summary><span class="class-analysis-student-name"><strong>${escapeHtml(row.name)}</strong><small>${escapeHtml(row.id)}</small></span><span class="class-analysis-student-count">${escapeHtml(t('h.missingCount'))}：<strong>${row.missingCount}</strong></span></summary>
       ${details}
@@ -302,18 +353,20 @@ function renderClassAnalysis() {
       <div class="field"><label for="classAnalysisYear">${escapeHtml(t('h.year'))}</label><select id="classAnalysisYear">${options(state.meta.academicYears, f.academicYear)}</select></div>
       <div class="field"><label for="classAnalysisClass">${escapeHtml(t('h.class'))}</label><select id="classAnalysisClass">${options(grades, f.className)}</select></div>
       <div class="field"><label for="classAnalysisMode">${escapeHtml(t('h.periodMode'))}</label><select id="classAnalysisMode">${options(['week', 'custom'], f.mode, mode => t(mode === 'week' ? 'h.byWeek' : 'h.customPeriod'))}</select></div>
-      <div class="field"><label for="classAnalysisWeek">${escapeHtml(t('h.week'))}</label><select id="classAnalysisWeek" ${f.mode === 'custom' ? 'disabled' : ''}>${options(Array.from({ length: 53 }, (_, index) => String(index + 1)), f.week, week => `Week ${week}`)}</select></div>
-      <div class="field"><label for="classAnalysisFrom">${escapeHtml(t(f.mode === 'week' ? 'h.cumulativeFrom' : 'h.from'))}</label><input id="classAnalysisFrom" type="date" value="${f.dateFrom}"></div>
+      <div class="field"><label for="classAnalysisWeek">${escapeHtml(t('h.week'))}</label><select id="classAnalysisWeek" ${f.mode === 'custom' ? 'disabled' : ''}>${options(Array.from({ length: 48 }, (_, index) => String(index + 6)), f.week, week => `Week ${week}`)}</select></div>
+      <div class="field"><label for="classAnalysisFrom">${escapeHtml(t(f.mode === 'week' ? 'h.cumulativeFrom' : 'h.from'))}</label><input id="classAnalysisFrom" type="date" value="${f.dateFrom}" ${weekly ? 'readonly' : ''}></div>
       <div class="field"><label for="classAnalysisTo">${escapeHtml(t('h.to'))}</label><input id="classAnalysisTo" type="date" value="${f.dateTo}" ${f.mode === 'week' ? 'readonly' : ''}></div>
     </div>
     <p class="hint">${escapeHtml(t('h.weekHint'))}</p>
     <div class="homework-export-settings">
-      <div class="field"><label for="classAnalysisScope">${escapeHtml(t('h.exportScope'))}</label><select id="classAnalysisScope">${options(['all', 'class'], f.exportScope, scope => t(scope === 'all' ? 'h.exportAllClasses' : 'h.exportSelectedClass', { className: f.className }))}</select></div>
+      <div class="field"><label for="classAnalysisScope">${escapeHtml(t('h.exportScope'))}</label><select id="classAnalysisScope" ${weekly ? 'disabled' : ''}>${options(['all', 'class'], weekly ? 'all' : f.exportScope, scope => t(scope === 'all' ? 'h.exportAllClasses' : 'h.exportSelectedClass', { className: f.className }))}</select></div>
     </div>
-    <p class="hint">${escapeHtml(t('h.exportHint'))}</p>
-    <div class="actions" style="margin-top:16px"><button class="button primary" id="runClassAnalysis" ${!validClassPeriod() ? 'disabled' : ''}>${escapeHtml(t('h.showClassStats'))}</button><button class="button secondary" id="exportClassAnalysis" ${state.exporting || !validClassPeriod() ? 'disabled' : ''}>${escapeHtml(t(state.exporting ? 'h.exporting' : 'h.exportExcel'))}</button></div>
-    ${rows.length ? `<div class="analysis-total">${t('h.classTotal', { count: state.classAnalysisTotal || 0 })}</div><div class="class-analysis-students">${studentCards}</div>` : `<div class="empty" style="margin-top:20px">${escapeHtml(t('h.pickPeriod'))}</div>`}
-  </section>`);
+    <p class="hint">${escapeHtml(t(weekly ? 'h.weeklyExportHint' : 'h.exportHint'))}</p>
+    ${weekly && report ? `<p class="report-version">${escapeHtml(t('h.reportBaseVersion', { week: report.baselineWeek }))}${latest ? ` · ${escapeHtml(t('h.reportLatestVersion', { week: latest.week, kind: t(latest.kind === 'uploaded' ? 'h.reportUploaded' : 'h.reportGenerated') }))}` : ''}</p>` : ''}
+    <div class="actions" style="margin-top:16px"><button class="button primary" id="runClassAnalysis" ${!validClassPeriod() ? 'disabled' : ''}>${escapeHtml(t('h.showClassStats'))}</button><button class="button secondary" id="exportClassAnalysis" ${state.exporting || state.uploading || !validClassPeriod() ? 'disabled' : ''}>${escapeHtml(t(state.exporting ? 'h.exporting' : weekly ? Number(f.week) === 6 ? 'h.downloadBaseline' : 'h.generateWeekly' : 'h.exportExcel'))}</button></div>
+    ${weekly && Number(f.week) >= 7 ? `<div class="report-upload"><div class="field"><label for="weeklyReportFile">${escapeHtml(t('h.reportUploadLabel', { week: f.week }))}</label><input id="weeklyReportFile" type="file" accept=".xlsx" ${state.uploading || state.exporting ? 'disabled' : ''}>${state.reportFile ? `<small>${escapeHtml(state.reportFile.name)}</small>` : ''}</div><button class="button secondary" id="uploadWeeklyReport" ${!state.reportFile || !report || state.uploading || state.exporting ? 'disabled' : ''}>${escapeHtml(t(state.uploading ? 'h.reportUploading' : 'h.reportUpload'))}</button><p class="hint">${escapeHtml(t('h.reportUploadHint'))}</p></div>` : ''}
+  </section>${weekly ? reportTasksHtml() : ''}
+  <section class="panel">${rows.length ? `<div class="analysis-total">${t('h.classTotal', { count: state.classAnalysisTotal || 0 })}</div><div class="class-analysis-students">${studentCards}</div>` : `<div class="empty" style="margin-top:20px">${escapeHtml(t('h.pickPeriod'))}</div>`}</section>`);
 }
 
 function emptyHomework(roster, defaultStatus = '') {
@@ -385,7 +438,7 @@ function bindCommon() {
     else if (state.view === 'monitors') loadMonitorRoster();
     else if (state.view === 'records') loadTeacherRecord();
     else if (state.view === 'analysis') loadAnalysisStudents();
-    else { state.classAnalysisRows = []; state.classAnalysisTotal = 0; render(); }
+    else { resetClassAnalysis(); }
   }));
   document.querySelectorAll('.status-options input:not([data-made-up])').forEach(input => input.addEventListener('change', () => {
     if (input.checked) {
@@ -509,7 +562,10 @@ function bindTeacher() {
     classAnalysisClass.onchange = () => { filterState.classAnalysis.className = classAnalysisClass.value; resetClassAnalysis(); };
     classAnalysisMode.onchange = () => {
       filterState.classAnalysis.mode = classAnalysisMode.value;
-      if (classAnalysisMode.value === 'week') filterState.classAnalysis.dateTo = weekEnd(filterState.classAnalysis.dateFrom, filterState.classAnalysis.week);
+      if (classAnalysisMode.value === 'week') {
+        filterState.classAnalysis.dateFrom = defaultWeekPeriod(filterState.classAnalysis.academicYear, today).dateFrom;
+        filterState.classAnalysis.dateTo = weekEnd(filterState.classAnalysis.dateFrom, filterState.classAnalysis.week);
+      }
       resetClassAnalysis();
     };
     classAnalysisWeek.onchange = () => {
@@ -526,6 +582,26 @@ function bindTeacher() {
     classAnalysisScope.onchange = () => { filterState.classAnalysis.exportScope = classAnalysisScope.value; };
     runClassAnalysis.onclick = loadClassAnalysis;
     document.getElementById('exportClassAnalysis').onclick = exportClassAnalysis;
+    document.getElementById('weeklyReportFile')?.addEventListener('change', event => {
+      const file = event.target.files[0];
+      if (file && (!/\.xlsx$/i.test(file.name) || file.size > 8 * 1024 * 1024)) return setMessage(t('h.reportBadFile'), 'error');
+      state.reportFile = file || null;
+      render();
+    });
+    document.getElementById('uploadWeeklyReport')?.addEventListener('click', uploadWeeklyReport);
+    document.querySelectorAll('.report-task-done').forEach(input => input.addEventListener('change', async () => {
+      state.taskSaving = true;
+      const done = input.checked;
+      render();
+      try {
+        const response = await fetch(`/api/homework/class-analysis/report-tasks/${input.dataset.task}`, { method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ academicYear: filterState.classAnalysis.academicYear, done }) });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || t('h.actionFailed'));
+        await loadClassAnalysis();
+      } catch (error) { state.message = error.message; state.messageType = 'error'; }
+      finally { state.taskSaving = false; render(); }
+    }));
   }
 }
 
