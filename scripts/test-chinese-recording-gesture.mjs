@@ -123,10 +123,13 @@ const mocks = String.raw`
 `;
 
 const testHtml = practiceHtml
+  // This harness replaces fetch and tests recording gestures, not the durable
+  // outbox (covered separately). Keep it independent of external DNS/assets.
+  .replace(/<script src="\/shared\/reliable-request\.js[^>]*><\/script>/, '')
   .replace(/<link rel="stylesheet"[^>]*>/, '')
   .replace(/<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/hanzi-writer[^>]*><\/script>/, '')
   .replace(
-    '<script src="/chinese/js/common.js"></script>',
+    /<script src="\/chinese\/js\/common\.js(?:\?[^\"]*)?"><\/script>/,
     `<script>${commonJs}<\/script><script>${mocks}<\/script>`,
   );
 
@@ -142,6 +145,15 @@ const browser = await chromium.launch({
 });
 try {
   const page = await browser.newPage({ hasTouch: true, isMobile: true });
+  const localAssets = new Map(await Promise.all([
+    ['i18n.js', 'text/javascript'], ['i18n/chinese.js', 'text/javascript'],
+    ['loading.js', 'text/javascript'], ['loading.css', 'text/css'],
+  ].map(async ([name, contentType]) => [`/shared/${name}`, { contentType, body: await readFile(new URL(`../shared/${name}`, import.meta.url), 'utf8') }])));
+  localAssets.set('/chinese/css/style.css', { contentType: 'text/css', body: await readFile(new URL('../chinese-app/public/css/style.css', import.meta.url), 'utf8') });
+  await page.route('http://chinese-recording.test/**', route => {
+    const asset = localAssets.get(new URL(route.request().url()).pathname);
+    return asset ? route.fulfill(asset) : route.continue();
+  });
   const testUrl = 'http://chinese-recording.test/chinese/practice?assignmentId=a1';
   await page.route(testUrl, route => route.fulfill({ contentType: 'text/html', body: testHtml }));
   await page.goto(testUrl, { waitUntil: 'domcontentloaded' });

@@ -9,6 +9,10 @@ const folders = ['src', 'shared/i18n', 'report-app/js', 'report-app/css', 'buzze
   'game-app/public/js', 'game-app/public/css', 'tower-defense-app/public/js', 'tower-defense-app/public/css',
   'whiteboard-app/client/dist/assets', 'science-lab-app/dist/assets', 'pet-app/dist/assets'];
 let files = 0, before = 0, after = 0;
+async function writeChanged(file, bytes) {
+  const existing = await fs.readFile(file).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
+  if (!existing?.equals(bytes)) await fs.writeFile(file, bytes);
+}
 async function compress(file) {
   if (!/\.(js|css|json|svg|wasm)$/.test(file)) return;
   const input = await fs.readFile(file);
@@ -17,8 +21,8 @@ async function compress(file) {
   const previous = await fs.stat(file + '.br').catch(() => null);
   if (previous && previous.size < br.length && previous.mtimeMs >= (await fs.stat(file)).mtimeMs) br = await fs.readFile(file + '.br');
   const gz = gzipSync(input, { level: 6 });
-  if (br.length < input.length) await fs.writeFile(file + '.br', br);
-  if (gz.length < input.length) await fs.writeFile(file + '.gz', gz);
+  if (br.length < input.length) await writeChanged(file + '.br', br);
+  if (gz.length < input.length) await writeChanged(file + '.gz', gz);
   files++; before += input.length; after += Math.min(input.length, br.length);
 }
 async function walk(folder) {
@@ -29,5 +33,5 @@ async function walk(folder) {
   }
 }
 for (const folder of folders) await walk(path.join(root, folder));
-for (const file of ['shared/i18n.js', 'shared/reliable-request.js', 'node_modules/phaser/dist/phaser.min.js', 'node_modules/exceljs/dist/exceljs.min.js']) await compress(path.join(root, file));
+for (const file of ['shared/i18n.js', 'shared/reliable-request.js', 'shared/loading.js', 'shared/loading.css', 'node_modules/phaser/dist/phaser.min.js', 'node_modules/exceljs/dist/exceljs.min.js']) await compress(path.join(root, file));
 console.log(JSON.stringify({ files, originalBytes: before, brotliBytes: after }));

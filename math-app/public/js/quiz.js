@@ -545,8 +545,7 @@
             const data = await res.json();
 
             if (!data.success) {
-                alert(t('m.loadQFailed') + data.message);
-                return;
+                throw Object.assign(new Error(data.message || t('m.loadQFailed')), { status: res.status });
             }
 
             questions = data.questions;
@@ -563,7 +562,7 @@
             startTimer();
 
         } catch (error) {
-            alert(t('m.connectError') + error.message);
+            window.BuiLoading.recover(error, loadQuestions, loadingState);
         }
     }
 

@@ -13,7 +13,7 @@ function loadExcelJs() {
       document.head.appendChild(script);
     });
   }
-  return excelJsPromise;
+  return window.BuiLoading.run(excelJsPromise);
 }
 'use strict';
 
@@ -262,8 +262,11 @@ const { t, server: serverText, lang: uiLang } = window.BuiI18n;
     if (setId) {
       $('editorTitle').textContent = t('g.editorEdit');
       const res = await fetch(`/api/game/teacher/sets/${setId}`, { credentials: 'include' });
-      const data = await res.json();
-      if (!data.success) { alert(serverText(data.message) || t('g.loadFailed')); return; }
+      let data;
+      try {
+        data = await res.json();
+        if (!res.ok || !data.success) throw Object.assign(new Error(data.message || t('g.loadFailed')), { status: res.status });
+      } catch (error) { window.BuiLoading.recover(error, () => openEditor(setId)); return; }
       $('editorSetTitle').value = data.set.title;
       data.set.questions.forEach(addQuestion);
     } else {

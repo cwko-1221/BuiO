@@ -208,6 +208,7 @@ function normalizeSpinCount() {
 }
 
 function setMessage(message, type = '') {
+  if (type === 'error' && window.BuiLoading?.notify(message)) { state.message = ''; return; }
   state.message = message;
   state.messageType = type;
 }
@@ -242,7 +243,8 @@ async function loadData({ keepDraws = false } = {}) {
   } catch (error) {
     state.students = [];
     state.recent = [];
-    setMessage(error.message || t('x.actionFailed'), 'error');
+    setMessage('');
+    window.BuiLoading.recover(error, () => loadData({ keepDraws }));
   } finally {
     state.loading = false;
     render();

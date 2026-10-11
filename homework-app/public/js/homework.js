@@ -15,8 +15,8 @@ const api = async (path, options = {}) => {
   return data;
 };
 const options = (items, selected, label = value => value, value = item => item) => items.map(item => `<option value="${escapeHtml(value(item))}" ${value(item) === selected ? 'selected' : ''}>${escapeHtml(label(item))}</option>`).join('');
-const notice = () => state.message ? `<div class="notice ${state.messageType}">${escapeHtml(state.message)}</div>` : '';
-function setMessage(message, type = 'success') { state.message = message; state.messageType = type; render(); }
+const notice = () => state.readRecovery ? '<div data-homework-read-status></div>' : state.message ? `<div class="notice ${state.messageType}">${escapeHtml(state.message)}</div>` : '';
+function setMessage(message, type = 'success') { if (type === 'error' && window.BuiLoading?.notify(message)) return; state.message = message; state.messageType = type; render(); }
 
 function shell(content, { messagePosition = 'top' } = {}) {
   const teacher = state.meta.role === 'teacher';
@@ -67,8 +67,8 @@ async function loadMonitorRoster() {
       api(`/monitors?academicYear=${encodeURIComponent(f.academicYear)}&className=${encodeURIComponent(f.className)}&subject=${encodeURIComponent(f.subject)}`),
     ]);
     state.roster = students.students.map(student => ({ ...student, selected: monitors.monitors.some(monitor => monitor.studentId === student.id) }));
-    state.message = '';
-  } catch (error) { state.roster = []; state.message = error.message; state.messageType = 'error'; }
+    state.message = ''; state.readRecovery = null;
+  } catch (error) { state.roster = []; state.message = ''; state.readRecovery = { error, retry: loadMonitorRoster }; }
   render();
 }
 
@@ -95,8 +95,8 @@ async function loadTeacherRecord() {
     state.roster = roster.students;
     state.record = result.record;
     state.homeworks = result.record?.homeworks ? structuredClone(result.record.homeworks) : [];
-    state.message = '';
-  } catch (error) { state.record = null; state.homeworks = []; state.message = error.message; state.messageType = 'error'; }
+    state.message = ''; state.readRecovery = null;
+  } catch (error) { state.record = null; state.homeworks = []; state.message = ''; state.readRecovery = { error, retry: loadTeacherRecord }; }
   render();
 }
 
@@ -108,13 +108,12 @@ async function loadTeacherClasses() {
     state.teacherClasses = result.assignments || [];
     state.teacherClassesTotal = result.totalMissing || 0;
     state.teacherClassesLoaded = true;
-    state.message = '';
+    state.message = ''; state.readRecovery = null;
   } catch (error) {
     state.teacherClasses = [];
     state.teacherClassesTotal = 0;
     state.teacherClassesLoaded = true;
-    state.message = error.message;
-    state.messageType = 'error';
+    state.message = ''; state.readRecovery = { error, retry: loadTeacherClasses };
   }
   render();
 }
@@ -183,8 +182,8 @@ async function loadAnalysisStudents() {
     state.analysisStudents = (result.students || []).filter(student => student.className === filterState.analysis.className);
     if (!state.analysisStudents.some(student => student.id === filterState.analysis.studentId)) filterState.analysis.studentId = state.analysisStudents[0]?.id || '';
     state.analysisRows = [];
-    state.message = '';
-  } catch (error) { state.analysisStudents = []; state.message = t('h.rosterFailed'); state.messageType = 'error'; }
+    state.message = ''; state.readRecovery = null;
+  } catch (error) { state.analysisStudents = []; state.message = ''; state.readRecovery = { error, retry: loadAnalysisStudents }; }
   render();
 }
 
@@ -194,8 +193,8 @@ async function loadAnalysis() {
   try {
     const result = await api(`/analysis?academicYear=${encodeURIComponent(f.academicYear)}&className=${f.className}&studentId=${encodeURIComponent(f.studentId)}`);
     state.analysisRows = result.rows;
-    state.message = '';
-  } catch (error) { state.analysisRows = []; state.message = error.message; state.messageType = 'error'; }
+    state.message = ''; state.readRecovery = null;
+  } catch (error) { state.analysisRows = []; state.message = ''; state.readRecovery = { error, retry: loadAnalysis }; }
   render();
 }
 
@@ -220,12 +219,11 @@ async function loadClassAnalysis() {
     const result = await api(`/class-analysis?academicYear=${encodeURIComponent(f.academicYear)}&className=${f.className}&dateFrom=${f.dateFrom}&dateTo=${f.dateTo}`);
     state.classAnalysisRows = result.rows;
     state.classAnalysisTotal = result.totalMissing;
-    state.message = '';
+    state.message = ''; state.readRecovery = null;
   } catch (error) {
     state.classAnalysisRows = [];
     state.classAnalysisTotal = 0;
-    state.message = error.message;
-    state.messageType = 'error';
+    state.message = ''; state.readRecovery = { error, retry: loadClassAnalysis };
   }
   render();
 }
@@ -275,8 +273,8 @@ async function loadStudentRecord() {
     state.roster = roster.students;
     state.record = result.record;
     state.homeworks = result.record?.homeworks ? structuredClone(result.record.homeworks) : (state.studentDate === today ? [emptyHomework(roster.students)] : []);
-    state.message = '';
-  } catch (error) { state.record = null; state.homeworks = []; state.message = error.message; state.messageType = 'error'; }
+    state.message = ''; state.readRecovery = null;
+  } catch (error) { state.record = null; state.homeworks = []; state.message = ''; state.readRecovery = { error, retry: loadStudentRecord }; }
   render();
 }
 
@@ -482,6 +480,7 @@ function render() {
     : renderStudent();
   bindCommon();
   if (state.meta.role === 'teacher') bindTeacher(); else bindStudent();
+  if (state.readRecovery) window.BuiLoading.recover(state.readRecovery.error, state.readRecovery.retry, document.querySelector('[data-homework-read-status]'));
 }
 
 async function boot() {
@@ -499,6 +498,6 @@ async function boot() {
     else {
       state.studentAssignment = state.meta.assignments[0]; state.studentDate = today; await loadStudentRecord();
     }
-  } catch (error) { app.innerHTML = `<div class="loading"><div><h2>${escapeHtml(t('h.entryFailed'))}</h2><p>${escapeHtml(error.message)}</p><a href="/">${escapeHtml(t('h.backHome'))}</a></div></div>`; }
+  } catch (error) { window.BuiLoading.recover(error, undefined, app); }
 }
 boot();

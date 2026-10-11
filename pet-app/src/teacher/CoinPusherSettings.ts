@@ -65,7 +65,7 @@ export class CoinPusherTeacherSettings {
       this.busy = false; this.root.setAttribute('aria-busy', 'false');
       // Leave saving disabled: an unavailable setting must not look like a loaded default.
       retry.hidden = false;
-      this.message(this.zh ? '未能載入設定，請重試。' : 'Could not load settings. Please retry.', true);
+      this.message(this.zh ? '正在準備全校設定… 請再試一次。' : 'Preparing school settings… Please try again.');
     }
   }
   private async save() {

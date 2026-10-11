@@ -53,6 +53,7 @@ const api = async (path, body) => {
   return data;
 };
 function notice(message) {
+  if (window.BuiLoading?.notify(message)) return;
   const element = document.querySelector('#notice');
   element.textContent = message; element.hidden = false;
   clearTimeout(noticeTimer); noticeTimer = setTimeout(() => { element.hidden = true; }, 4500);
@@ -257,4 +258,4 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pagehide', () => events?.close());
 window.addEventListener('pageshow', event => { if (event.persisted && session) void enter(session.id).catch(error => notice(error.message)); });
-init().catch(error => { notice(error.message); app.innerHTML = `<div class="loading">${tr('未能開啟課堂。', 'Could not open classroom.')} <a href="/buzzer">${tr('重試', 'Retry')}</a></div>`; });
+init().catch(error => window.BuiLoading.recover(error, undefined, app));

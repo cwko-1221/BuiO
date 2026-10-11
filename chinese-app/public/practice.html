@@ -2,6 +2,8 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/shared/loading.css?v=20261011-1">
+    <script src="/shared/loading.js?v=20261011-1"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title data-i18n="c.practiceTitle">練習 ・ 粵語學習</title>
   <script src="/shared/i18n.js?v=20260910-1"></script>
@@ -212,7 +214,7 @@
         if (attempt.status === 'completed') { state.phase = 'done'; state.finalScore = attempt.score; }
         render();
       } catch (e) {
-        root.innerHTML = `<p class="muted" style="padding:24px">${e.message}</p>`;
+        window.BuiLoading.recover(e, undefined, root);
       }
     }
 
@@ -274,7 +276,7 @@
         }
         if (!res.ok) {
           const d = await res.json().catch(() => ({}));
-          state.message = d.message || t('c.readFailed');
+          window.BuiLoading.recover(Object.assign(new Error(d.message || t('c.readFailed')), { status: res.status }), playTts, undefined, { automatic: false });
           render(); return;
         }
         const blob = await res.blob();
@@ -284,7 +286,7 @@
         rec.ttsAudio = audio;
         audio.onended = stopTts; audio.onerror = stopTts;
         await audio.play();
-      } catch (e) { state.message = e.message; render(); }
+      } catch (e) { window.BuiLoading.recover(e, playTts, undefined, { automatic: false }); render(); }
     }
 
     async function startRecording() {
@@ -624,7 +626,7 @@
       const initialContainer = document.getElementById('hanzi-writer-target');
       if (!initialContainer) return;
       if (typeof HanziWriter === 'undefined') {
-        initialContainer.textContent = t('c.hanziFailed');
+        window.BuiLoading.recover(new Error('Hanzi asset loading'), undefined, initialContainer);
         return;
       }
       initialContainer.innerHTML = '';
@@ -645,11 +647,12 @@
           strokeColor: '#16a34a', radicalColor: '#16a34a', outlineColor: '#e2e8f0',
           drawingColor: '#16a34a', showHintAfterMisses: 3, highlightOnComplete: false,
           highlightColor: '#16a34a',
-          charDataLoader: (c, on, onErr) => fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2/${encodeURIComponent(c)}.json`)
-            .then(r => { if (!r.ok) throw new Error('char data ' + r.status); return r.json(); })
+          charDataLoader: (c, on, onErr) => window.BuiLoading.run(() => fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2/${encodeURIComponent(c)}.json`)
+            .then(r => { if (!r.ok) throw Object.assign(new Error('char data ' + r.status), { status: r.status }); return r.json(); }))
             .then(on)
             .catch(e => {
-              container.textContent = t('c.noStrokeData', { char: c });
+              if (e.status === 404) container.textContent = t('c.noStrokeData', { char: c });
+              else window.BuiLoading.recover(e, initChar, container);
               if (typeof onErr === 'function') onErr(e);
             }),
         });
@@ -675,7 +678,7 @@
       initChar();
     }
 
-    init().catch(e => toast(e.message, 'error'));
+    init().catch(e => window.BuiLoading.recover(e, undefined, root));
   </script>
 </body>
 </html>

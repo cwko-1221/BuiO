@@ -198,6 +198,7 @@ export class BedroomScene extends Phaser.Scene {
     this.petStep = undefined;
   }
   preload() {
+    (window as any).BuiLoading?.watchScene(this);
     const catalog = this.model.bootstrap.catalog;
     const room = catalog.rooms.find((entry) => entry.id === this.model.bootstrap.room.themeId);
     // Key textures by identity, never by role. Phaser skips any load whose key is already in

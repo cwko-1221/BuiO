@@ -9,5 +9,5 @@ const MESSAGES = {
 export default function ConnectionNotice({ status }) {
     const message = MESSAGES[status];
     if (!message) return null;
-    return <div className={styles.notice} role="status" aria-live="polite">{message}</div>;
+    return <div className={styles.notice} role="status" aria-live="polite"><span className="buio-spinner" aria-hidden="true" />{message}</div>;
 }

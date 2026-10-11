@@ -27,10 +27,11 @@
 
   async function getMe() {
     try { const me = (await api('/api/auth/me')).student; window.BuiReliable?.remember(me.id); window.BuiReliable?.resume().catch(() => {}); return me; }
-    catch { return null; }
+    catch (error) { if ([401, 403].includes(error.status)) return null; throw error; }
   }
 
   function toast(message, type = '') {
+    if (window.BuiLoading?.notify(message)) return;
     let el = document.querySelector('.toast');
     if (!el) {
       el = document.createElement('div');

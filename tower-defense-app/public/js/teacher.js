@@ -27,7 +27,7 @@ async function loadSets(){
       selectedSet=data.sets[index];document.querySelectorAll('[data-set]').forEach(item=>item.classList.toggle('selected',item===button));
       $('createClassroomBtn').disabled=false;$('createClassroomBtn').querySelector('small').textContent=t('td.usingBank',{title:selectedSet.title});
     }));
-  }catch(error){list.innerHTML=`<div class="room-empty error">${escapeHtml(error.message)}</div>`;}
+  }catch(error){window.BuiLoading.recover(error,loadSets,list);}
 }
 
 async function createClassroom(){

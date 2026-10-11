@@ -6,7 +6,7 @@ export { rankBadge, rankName, rankTermsText } from './rank-display';
 const esc = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 export function rankSummary(data: RankedOverview | undefined, locale: Locale) {
   const zh = locale === 'zh-HK', t = (z: string, e: string) => zh ? z : e;
-  if (!data) return `<section class="rank-summary rank-error"><h2>${t('排名資料暫未載入', 'Rankings could not load')}</h2><button data-brawl="rank-refresh">${t('重新載入排名', 'Reload rankings')}</button></section>`;
+  if (!data) return `<section class="rank-summary" role="status"><h2><span class="buio-spinner" aria-hidden="true"></span> ${t('正在準備排名…', 'Preparing rankings…')}</h2><button data-brawl="rank-refresh">${t('重新載入排名', 'Reload rankings')}</button></section>`;
   const p = data.self, next = data.tiers[p.tier + 1];
   const progress = p.pointsToPromote ? `${p.points} / ${p.pointsToPromote} ${t('分', 'points')}` : `${p.points} ${t('分', 'points')}`;
   return `<section class="rank-summary" aria-label="${t('我的排名', 'My ranking')}">

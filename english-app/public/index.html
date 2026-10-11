@@ -2,6 +2,8 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/shared/loading.css?v=20261011-1">
+    <script src="/shared/loading.js?v=20261011-1"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title data-i18n="e.loadingTitle">英文拼字 ・ 載入中</title>
   <script src="/shared/i18n.js?v=20260910-1"></script>
@@ -22,7 +24,7 @@
       if (!me) { location.replace('/'); return; }
       if (me.role === 'teacher') location.replace('/english/teacher');
       else location.replace('/english/student');
-    })();
+    })().catch(error => window.BuiLoading.recover(error));
   </script>
 </body>
 </html>

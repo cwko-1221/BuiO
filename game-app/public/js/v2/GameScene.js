@@ -54,6 +54,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   preload() {
+    window.BuiLoading?.watchScene(this);
     const assetVersion = encodeURIComponent(this.course.mapVersion);
     const versioned = url => `${url}${url.includes('?')?'&':'?'}v=${assetVersion}`;
     this.load.image('sky-v2', '/game/images/game/sky-panorama.webp');

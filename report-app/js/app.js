@@ -107,6 +107,7 @@ async function handleFiles(fileList) {
         showToast(t('r.pickXls'), 'error');
         return;
     }
+    const loadingDone = window.BuiLoading.begin(undefined, { write: true });
 
     const progress = document.getElementById('upload-progress');
     const progressFill = document.getElementById('progress-fill');
@@ -142,6 +143,7 @@ async function handleFiles(fileList) {
 
     progress.classList.add('hidden');
     progressFill.style.width = '0%';
+    loadingDone();
 
     if (successCount > 0) {
         showToast(t('r.uploaded', { count: successCount }) + (errorCount > 0 ? t('r.uploadedFailed', { count: errorCount }) : ''), 'success');
@@ -236,6 +238,7 @@ function initExport() {
 
 /* ---------- Toast ---------- */
 function showToast(message, type = 'info') {
+    if (window.BuiLoading?.notify(message)) return;
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.className = `toast ${type}`;
@@ -336,15 +339,15 @@ function initAuth() {
 let reportAppInitialized = false;
 
 async function loadInitialData() {
-    if (reportAppInitialized) return;
-    reportAppInitialized = true;
-    initUpload();
-    initExport();
-
-    StudentView.init();
-    ClassView.init();
-    SubjectView.init();
-    CompareView.init();
+    if (!reportAppInitialized) {
+        reportAppInitialized = true;
+        initUpload();
+        initExport();
+        StudentView.init();
+        ClassView.init();
+        SubjectView.init();
+        CompareView.init();
+    }
 
     try {
         let payload = await ReportAPI.loadData();
@@ -375,7 +378,8 @@ async function loadInitialData() {
         refreshHomeView();
     } catch (error) {
         console.error('Assessment server data load failed:', error);
-        showToast(error.message || t('r.loadFailed'), 'error');
+        window.BuiLoading.recover(error, loadInitialData);
+        return;
     }
     
     // Auto switch to student view on load exactly like the root behavior!

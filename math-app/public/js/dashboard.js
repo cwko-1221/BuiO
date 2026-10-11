@@ -103,8 +103,8 @@
                 await reloadAllStats();
             }
 
-        } catch {
-            window.location.href = '/';
+        } catch (error) {
+            window.BuiLoading.recover(error, undefined, document.getElementById('loading-state'));
             return;
         }
 
@@ -184,7 +184,7 @@
             renderTierPolicy();
         } catch (e) {
             const host = document.getElementById('tier-policy-rows');
-            if (host) host.textContent = t('m.tierLoadFailed');
+            if (host) window.BuiLoading.recover(e, loadTierPolicy, host);
             console.error('載入題目級別設定失敗:', e);
         }
     }

@@ -13,7 +13,7 @@ function loadExcelJs() {
       document.head.appendChild(script);
     });
   }
-  return excelJsPromise;
+  return window.BuiLoading.run(excelJsPromise);
 }
 import { MATH_QUIZ_URL, MATH_DASHBOARD_URL, WHITEBOARD_BASE, MODULES, iconSvg } from './config.js';
 import { state, updateState } from './store.js';

@@ -17,7 +17,7 @@ function loadExcelJs() {
       document.head.appendChild(script);
     });
   }
-  return excelJsPromise;
+  return window.BuiLoading.run(excelJsPromise);
 }
 const $=id=>document.getElementById(id);
 const preview=location.pathname.endsWith('/preview');
@@ -68,7 +68,7 @@ async function loadQuestionSets(preselectId=null){
       const set=questionSets.find(item=>String(item.id)===String(preselectId));
       if(button&&set)selectSet(set,button);
     }
-  }catch(error){list.innerHTML=`<div class="empty-state error">${escapeHtml(error.message)}</div>`;}
+  }catch(error){window.BuiLoading.recover(error,()=>loadQuestionSets(preselectId),list);}
 }
 
 function selectSet(set,button){
@@ -167,7 +167,7 @@ async function openEditor(setId=null){
       $('editorSetTitle').value='';for(let index=0;index<3;index++)addQuestion();
     }
     $('questionBankModal').hidden=false;document.body.classList.add('modal-open');setTimeout(()=>$('editorSetTitle').focus(),0);
-  }catch(error){$('teacherHubError').textContent=error.message||t('gh.editorLoadFailed');editingSetId=null;}
+  }catch(error){window.BuiLoading.recover(error,()=>openEditor(setId),$('teacherHubError'));editingSetId=null;}
 }
 
 function excelCellText(cell){
@@ -315,5 +315,5 @@ function joinRoom(game,code){
   else location.href=preview?`/tower-defense/preview?classroom=1&${params}`:`/tower-defense?${params}`;
 }
 
-init();
+init().catch(error=>window.BuiLoading.recover(error));
 window.__gameHub={get role(){return role;},get rooms(){return rooms;},get selectedSet(){return selectedSet;},get selectedGame(){return selectedGame;}};

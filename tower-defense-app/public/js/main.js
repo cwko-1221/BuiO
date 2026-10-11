@@ -289,7 +289,7 @@ function handleGameEvent(event){
 
 function playThrottled(name,interval){const now=performance.now();if(now-(lastSoundAt.get(name)||0)<interval)return;lastSoundAt.set(name,now);audio.sfx(name);}
 function showBanner(text){const banner=$('waveBanner');banner.textContent=text;banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');}
-function showToast(message,type=''){const toast=document.createElement('div');toast.className=`toast ${type}`;toast.textContent=message;$('toastStack').append(toast);setTimeout(()=>toast.remove(),2600);}
+function showToast(message,type=''){if(window.BuiLoading?.notify(message))return;const toast=document.createElement('div');toast.className=`toast ${type}`;toast.textContent=message;$('toastStack').append(toast);setTimeout(()=>toast.remove(),2600);}
 
 function beginWave(){if(!simulation)return;const result=simulation.startWave();handleActionResult(result);}
 function togglePause(){if(!simulation)return;simulation.togglePause();updateHud(simulation.state,true);audio.sfx('ui');}

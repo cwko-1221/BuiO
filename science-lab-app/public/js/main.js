@@ -68,8 +68,8 @@ async function boot() {
     studentId = await resolveStudentId();
   } catch (error) {
     console.error('3D laboratory initialization failed.', error);
-    setBoot(100, t('sl.bootExpired'));
-    setTimeout(() => { location.href = '/'; }, 900);
+    if ([401, 403].includes(error.status)) { location.href = '/'; return; }
+    window.BuiLoading.recover(error, undefined, dom.boot);
     return;
   }
   store = new ProgressStore(studentId);
@@ -110,7 +110,7 @@ async function resolveStudentId() {
   try {
     const response = await fetch('/api/auth/me', { credentials: 'include' });
     if (!response.ok) {
-      throw new Error('session unavailable');
+      throw Object.assign(new Error('session unavailable'), { status: response.status });
     }
     const data = await response.json();
     const id = data?.student?.id || data?.student?.studentId;
@@ -187,8 +187,8 @@ async function startExperiment(id, { forceNew = false } = {}) {
     if (revision !== selectionRevision) return;
     await renderer.prepareExperiment?.(definition);
     if (revision !== selectionRevision) return;
-  } catch {
-    if (revision === selectionRevision) showToast(t('sl.tryDefault'), 'try');
+  } catch (error) {
+    if (revision === selectionRevision) window.BuiLoading.recover(error, () => startExperiment(id, { forceNew }));
     return;
   } finally {
     if (revision === selectionRevision) dom.boot.classList.add('done');

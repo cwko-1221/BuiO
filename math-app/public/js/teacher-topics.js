@@ -58,7 +58,7 @@
             followGradeButton.addEventListener('click', followGradeSettings);
             await loadTopics(gradeSelect.value, '');
         } catch (error) {
-            status.textContent = error.message || t('m.topicListFailed');
+            window.BuiLoading.recover(error, undefined, status);
             console.error('載入題目列表失敗:', error);
         }
     }
@@ -100,7 +100,7 @@
             filterTopics();
         } catch (error) {
             if (thisRequest !== requestId) return;
-            status.textContent = error.message || t('m.topicListFailed');
+            window.BuiLoading.recover(error, () => loadTopics(gradeSelect.value, groupSelect.value), status);
             console.error('載入題目設定失敗:', error);
         } finally {
             if (thisRequest === requestId) setControlsDisabled(false);
@@ -281,10 +281,7 @@
             panel.replaceChildren(list);
             card.dataset.loaded = '1';
         } catch (error) {
-            const failed = document.createElement('p');
-            failed.className = 'topic-examples-status error';
-            failed.textContent = error.message || t('m.examplesFailed');
-            panel.replaceChildren(failed);
+            window.BuiLoading.recover(error, () => loadExamples(tag, card, panel), panel);
             console.error('載入課題例題失敗:', error);
         } finally {
             delete card.dataset.loading;
@@ -394,6 +391,7 @@
     }
 
     function setMessage(text, kind) {
+        if (kind === 'error' && window.BuiLoading?.notify(text)) return;
         policyMessage.hidden = !text;
         policyMessage.textContent = text || '';
         policyMessage.className = 'topic-policy-message' + (kind ? ` ${kind}` : '');

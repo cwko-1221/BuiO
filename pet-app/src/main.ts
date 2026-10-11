@@ -540,6 +540,7 @@ class StudentApp {
     this.openTab('brawl');
   }
   private async renderBrawl() {
+    const loadingDone = (window as any).BuiLoading?.begin(this.locale==='zh-HK'?'正在準備對戰素材…':'Preparing battle assets…');
     const generation=++this.brawlGeneration;
     this.brawlController?.destroy();this.brawlController=undefined;
     this.destroyCoinPusher(true);this.setLayout('room');this.ensureGame();this.game!.scene.stop('Bedroom');
@@ -549,7 +550,8 @@ class StudentApp {
       this.brawlController=new BrawlController(this.game!,this.identity,()=>this.state,()=>this.reload(),()=>this.openTab('shop'),this.pvp);
       this.brawlController.setAccessLocked(this.accessLocked);
       await this.brawlController.open();if(this.pvp?.session&&!['finished','cancelled'].includes(this.pvp.session.phase))this.brawlController.openOnline(this.pvp.session);this.refreshStage();
-    }catch(error){if(generation===this.brawlGeneration)this.toast((error as Error).message);}
+    }catch(error){if(generation===this.brawlGeneration)(window as any).BuiLoading?.recover(error);}
+    finally { loadingDone?.(); }
   }
   private ensureGame() {
     if (this.game) return;
@@ -1238,9 +1240,9 @@ class StudentApp {
       if(this.tab!=='coinPusher')return;
       console.warn('[pet] 3D coin pusher could not start',error);
       this.coinPusherReady=false;this.coinPusherWebglLost=false;this.coinPusherInitFailed=true;
-      this.setCoinPusherStatus(zh?'3D 推銀機未能啟動':'3D coin pusher could not start');
+      this.setCoinPusherStatus(zh?'正在準備 3D 推銀機…':'Preparing the 3D coin pusher…',true);
       coinRoot.setAttribute('aria-busy','false');
-      coinRoot.innerHTML=`<div class="coin-pusher-fallback" role="alert"><b>${zh?'3D 推幣機暫時未能啟動':'3D coin pusher could not start'}</b><span>${zh?'請檢查瀏覽器的 WebGL 支援，或重試。':'Check browser WebGL support, or retry.'}</span><button type="button" class="coin-pusher-retry" data-action="coin-pusher-init-retry">${zh?'重試載入':'Retry loading'}</button></div>`;
+      coinRoot.innerHTML=`<div class="coin-pusher-fallback" role="status"><span class="buio-spinner" aria-hidden="true"></span><b>${zh?'正在準備 3D 推幣機…':'Preparing the 3D coin pusher…'}</b><span>${zh?'請檢查瀏覽器的 WebGL 支援，或重試。':'Check browser WebGL support, or retry.'}</span><button type="button" class="coin-pusher-retry" data-action="coin-pusher-init-retry">${zh?'重試載入':'Retry loading'}</button></div>`;
       this.syncCoinPusherControls();
     });
     audio.setTheme('arcade');
@@ -2198,6 +2200,7 @@ class StudentApp {
   private updateWallet(){const balance=this.state.wallet.balance.toLocaleString();this.setValue('#coinBalance',balance);this.setValue('#coinBalanceHud',balance);this.syncCoinPusherControls();}
   private setValue(selector:string,value:string){const node=document.querySelector<HTMLElement>(selector);if(!node)return;if(node.textContent===value){node.textContent=value;return;}node.textContent=value;node.classList.remove('bump');void node.offsetWidth;node.classList.add('bump');window.setTimeout(()=>node.classList.remove('bump'),400);}
   private toast(message:string,error=false){
+    if ((window as any).BuiLoading?.notify(message)) return;
     if(error&&this.locale==='zh-HK')message=REFUSALS[message]||message;const element=document.createElement('div');element.className=`toast ${error?'error':''}`;element.setAttribute('role',error?'alert':'status');element.textContent=message;document.querySelector('#toasts')?.append(element);window.setTimeout(()=>{element.classList.add('leaving');window.setTimeout(()=>element.remove(),200);},3000);}
   private modal(content:string,variant=''){const root=document.querySelector('#modalRoot')!;root.innerHTML=`<div class="modal-backdrop"><div class="modal-card ${variant}">${content}</div></div>`;root.querySelector('[data-action="back-home"]')?.addEventListener('click',()=>{root.innerHTML='';this.openHome();});}
   private celebrate(type:string){const layer=document.querySelector('#celebrationLayer')!;layer.innerHTML=Array.from({length:type==='epic'?42:24},(_,index)=>`<i style="--x:${Math.random()*100}%;--d:${Math.random()*.9}s;--c:${index%5}"></i>`).join('');window.setTimeout(()=>layer.innerHTML='',2200);}
@@ -2415,8 +2418,7 @@ async function boot() {
       await gate.init();
     }
   } catch (error) {
-    const say = (key: string) => (window as any).BuiI18n.t(key) as string;
-    app.innerHTML = `<main class="fatal-screen"><span>🥚</span><h1>${escapeHtml(say('pet.fatalTitle'))}</h1><p>${escapeHtml((error as Error).message)}</p><a href="/">${escapeHtml(say('pet.backHome'))}</a></main>`;
+    (window as any).BuiLoading.recover(error, undefined, app);
   }
 }
 boot();

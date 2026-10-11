@@ -49,6 +49,7 @@ function shuffle(items) {
 
 let toastTimer;
 function toast(message) {
+  if (window.BuiLoading?.notify(message)) return;
   const node = $('#toast');
   node.textContent = message;
   node.classList.add('show');
@@ -116,9 +117,8 @@ async function speakEntryAudio(entry, options = {}) {
     if (requestSequence !== state.audioSequence) return false;
     return await playAudio(url);
   } catch (error) {
-    $('#audioStatus').textContent = error.message;
-    $('#audioStatus').classList.add('error');
-    toast(error.message);
+    $('#audioStatus').classList.remove('error');
+    window.BuiLoading.recover(error, () => speakEntryAudio(entry, options), $('#audioStatus'), { automatic: false });
     return false;
   }
 }
@@ -374,7 +374,7 @@ async function init() {
     renderLevels();
   } catch (error) {
     if (error.status === 401) return location.replace('/');
-    $('#levelGrid').innerHTML = `<div class="panel" style="padding:24px">${escapeHtml(error.message)}</div>`;
+    window.BuiLoading.recover(error, init, $('#levelGrid'));
   }
 }
 

@@ -23,6 +23,7 @@ export class BattleScene extends Phaser.Scene {
   }
 
   preload() {
+    window.BuiLoading?.watchScene(this);
     this.load.image(`td-map-${this.sim.map.id}`,MAP_ART[this.sim.map.id]);
     this.load.spritesheet(TOWER_ART.key,TOWER_ART.src,{frameWidth:TOWER_ART.frameWidth,frameHeight:TOWER_ART.frameHeight});
     this.load.spritesheet(ENEMY_ART.key,ENEMY_ART.src,{frameWidth:ENEMY_ART.frameWidth,frameHeight:ENEMY_ART.frameHeight});

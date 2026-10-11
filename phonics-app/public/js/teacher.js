@@ -17,6 +17,7 @@ async function api(path, options = {}) {
 
 let toastTimer;
 function toast(message) {
+  if (window.BuiLoading?.notify(message)) return;
   const node = $('#toast');
   node.textContent = message;
   node.classList.add('show');
@@ -90,7 +91,8 @@ async function loadSummary({ preserveClass = true } = {}) {
     updateAccentControls();
   } catch (error) {
     if (error.status === 401 || error.status === 403) return location.replace('/');
-    $('#studentRows').innerHTML = `<tr><td class="empty-row" colspan="6">${escapeHtml(error.message)}</td></tr>`;
+    $('#studentRows').innerHTML = '<tr><td colspan="6" data-summary-loading></td></tr>';
+    window.BuiLoading.recover(error, () => loadSummary({ preserveClass }), $('[data-summary-loading]'));
   }
 }
 
