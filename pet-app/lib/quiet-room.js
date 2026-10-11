@@ -10,6 +10,9 @@ function settings(body) {
     if (!Number.isInteger(value) || value < min || value > max) fail(`${key}: ${min}–${max}`);
     result[key] = value;
   }
+  const adjustment = body?.readingAdjustment === undefined ? 0 : body.readingAdjustment;
+  if (!Number.isInteger(adjustment) || adjustment < -50 || adjustment > 50) fail('readingAdjustment: -50–50');
+  result.readingAdjustment = adjustment;
   return result;
 }
 

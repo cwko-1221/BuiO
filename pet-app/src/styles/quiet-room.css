@@ -40,6 +40,11 @@
 .quiet-range > span { font-size:12px;flex-shrink:0;color:#687563; }
 .quiet-range input { width:100%;min-width:48px;accent-color:#527151;min-height:44px;box-shadow:none;background:transparent; }
 .quiet-range output { font-weight:700;min-width:64px;color:#426044;font-size:12px; }
+.quiet-adjustment { margin-top:12px;padding:14px;border:1px solid #dce4d2;border-radius:12px;background:linear-gradient(135deg,#eef3e7,#f9faf2); }
+.quiet-adjustment-title { display:flex;align-items:center;justify-content:space-between;gap:12px;color:#426044;font-size:12px;font-weight:700; }
+.quiet-adjustment-title output { flex-shrink:0;font-variant-numeric:tabular-nums;padding:4px 8px;border:1px solid #d4dfcc;border-radius:8px;background:#fffdf7; }
+.quiet-adjustment .quiet-range > span { font-size:11px; }
+.quiet-adjustment-presets { gap:6px; }
 .quiet-settings .text-button { color:#476a4b;font-size:12px;min-height:44px; }
 .quiet-settings .text-button .quiet-icon { width:14px;height:14px; }
 .quiet-settings .primary { background:linear-gradient(135deg,#42664e,#2e5341);box-shadow:0 4px 10px #31553d20;border:1px solid #345941;font-size:14px;border-radius:14px; }

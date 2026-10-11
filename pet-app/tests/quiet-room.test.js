@@ -40,9 +40,11 @@ test('lost monitoring lease pauses the session instead of counting a long unatte
   assert.equal(session.remainingMs, 3000);
 });
 
-test('settings reject invalid durations, thresholds and fractional rewards', () => {
+test('settings validate sound adjustment and preserve the default for older clients', () => {
   const valid = { durationSeconds: 10, threshold: 45, reward: 100, penalty: 10 };
-  assert.deepEqual(settings(valid), valid);
+  assert.deepEqual(settings(valid), { ...valid, readingAdjustment: 0 }, 'older clients keep the existing calibration');
+  for (const readingAdjustment of [-50, -30, 0, 30, 50]) assert.equal(settings({ ...valid, readingAdjustment }).readingAdjustment, readingAdjustment);
+  for (const readingAdjustment of [-51, 51, 1.5, '30', null, NaN]) assert.throws(() => settings({ ...valid, readingAdjustment }));
   for (const change of [{ durationSeconds: 0 }, { durationSeconds: 7201 }, { threshold: 0 }, { threshold: 101 }, { reward: 1.5 }, { reward: 10001 }, { penalty: -1 }]) assert.throws(() => settings({ ...valid, ...change }));
 });
 
@@ -56,10 +58,11 @@ test('concurrent settlement pays the captured recipients once, survives reload, 
     const store=require('./db/jsonStore');
     let now=100000;Date.now=()=>now;
     (async()=>{
-      const options={durationSeconds:10,threshold:45,reward:20,penalty:7};
+      const options={durationSeconds:10,threshold:45,readingAdjustment:-30,reward:20,penalty:7};
       const s=await repo.start('T001',options,['S001','S002'],'start-1','5A');
       const again=await repo.start('T001',options,['S003'],'start-1','5B');
       assert.equal(again.id,s.id);
+      assert.equal(again.readingAdjustment,-30);
       await assert.rejects(repo.start('T001',options,['S003'],'start-2','5B'));
       await assert.rejects(repo.update('OTHER',s.id,'noise','bad'),e=>e.status===404);
       now+=1000;await repo.update('T001',s.id,'noise','n1');
@@ -75,6 +78,7 @@ test('concurrent settlement pays the captured recipients once, survives reload, 
       delete require.cache[require.resolve('./pet-app/repositories/quiet-room.repo')];
       const loaded=require('./pet-app/repositories/quiet-room.repo');
       assert.equal((await loaded.current('T001')).payout.total,26);
+      assert.equal((await loaded.current('T001')).readingAdjustment,-30);
       assert.equal(store.load().petCurrencyLedger.length,2);
       const cancelled=await loaded.start('T001',options,['S003'],'cancel-me','5B');
       await loaded.update('T001',cancelled.id,'cancel');
@@ -97,7 +101,7 @@ test('restart preserves participants and settings, resets penalties, never pays 
     const assert=require('node:assert/strict'), repo=require('./pet-app/repositories/quiet-room.repo'), store=require('./db/jsonStore');
     let now=100000;Date.now=()=>now;
     (async()=>{
-      const options={durationSeconds:10,threshold:75,reward:20,penalty:7};
+      const options={durationSeconds:10,threshold:75,readingAdjustment:30,reward:20,penalty:7};
       const original=await repo.start('T001',options,['S001','S002'],'first','5A · 中文 A組');
       now+=1000;await repo.update('T001',original.id,'noise','noise-1');
       await repo.update('T001',original.id,'pause');
@@ -124,14 +128,16 @@ test('restart preserves participants and settings, resets penalties, never pays 
       const other=await repo.start('T001',options,['S003'],'manual-start','5B');
       await assert.rejects(repo.update('T001',completed.id,'restart','stale'),e=>e.status===409);
       await repo.update('T001',other.id,'cancel');
+      delete data.petQuietRooms.find(row=>row.id===other.id).readingAdjustment;
       const cancelled=await repo.update('T001',other.id,'restart','cancelled-repeat');assert.equal(cancelled.status,'running');assert.equal(cancelled.count,1);
+      assert.equal(cancelled.readingAdjustment,0,'older rounds repeat with the original calibration');
       assert.equal(data.petCurrencyLedger.length,4);
     })().catch(e=>{console.error(e);process.exitCode=1});
   `], { cwd: path.resolve(__dirname, '../..'), env: { ...process.env, NODE_ENV: 'test', SUPABASE_DB_URL: '', BUIO_JSON_DB_FILE: path.join(temp, 'db.json') }, encoding: 'utf8' });
   assert.equal(child.status, 0, child.stderr);
 });
 
-test('microphone readings increase about 30 points and threshold crossing stays immediate', async () => {
+test('microphone calibration adjusts readings before clipping and threshold crossing stays immediate', async () => {
   const ts = require('../node_modules/typescript');
   const source = fs.readFileSync(path.resolve(__dirname, '../src/quiet-room-meter.ts'), 'utf8');
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
@@ -142,6 +148,13 @@ test('microphone readings increase about 30 points and threshold crossing stays 
   assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.004)), 10, 'the same sound reads about 30 points higher');
   assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.25)), 70);
   assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.5)), 80);
+  const sound = new Float32Array(1024).fill(.25);
+  assert.equal(exported.microphoneLevel(sound, -30), 40);
+  assert.equal(exported.microphoneLevel(sound, 30), 100);
+  assert.equal(exported.microphoneLevel(sound, 50), 100, 'adjusted readings are capped at 100');
+  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(.004), -30), 0, 'adjusted readings cannot fall below zero');
+  assert.equal(exported.microphoneLevel(new Float32Array(1024), 50), 0, 'boosting sensitivity keeps actual silence at zero');
+  assert.equal(exported.microphoneLevel(new Float32Array(1024).fill(2), -30), 70, 'reducing sensitivity recovers headroom before saturation');
   const gate = new exported.NoiseGate();
   assert.equal(gate.sample(44,45,0),false);
   assert.equal(gate.sample(45,45,1),true, 'touching the line triggers on the very first sample');

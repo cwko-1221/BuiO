@@ -3,6 +3,7 @@ export interface QuietSession {
   status: 'running' | 'paused' | 'completed' | 'cancelled';
   durationSeconds: number;
   threshold: number;
+  readingAdjustment?: number;
   reward: number;
   penalty: number;
   remainingMs: number;
@@ -14,5 +15,5 @@ export interface QuietSession {
 }
 export interface QuietSettings {
   scope: 'class' | 'group'; className: string; groupField: string; groupName: string;
-  durationSeconds: number; threshold: number; reward: number; penalty: number;
+  durationSeconds: number; threshold: number; readingAdjustment: number; reward: number; penalty: number;
 }

@@ -5,6 +5,15 @@ import type { QuietSession, QuietSettings } from './quiet-room-types';
 import './styles/quiet-room.css';
 import gardenBackdrop from './assets/quiet-focus-garden-v1.webp';
 
+const adjustmentStorageKey = 'pet-quiet-reading-adjustment';
+function savedReadingAdjustment(): number {
+  try {
+    const value = Number(localStorage.getItem(adjustmentStorageKey));
+    return Number.isInteger(value) && value >= -50 && value <= 50 ? value : 0;
+  } catch { return 0; }
+}
+const signedAdjustment = (value: number) => value > 0 ? `+${value}` : String(value);
+
 const escape = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 const quietIcon = (name: 'leaf' | 'coin' | 'sound' | 'alert' | 'arrow') => {
   const paths = {
@@ -37,6 +46,7 @@ export class QuietRoom {
   private pendingNoise = new Set<string>();
   private pendingStart?: { key: string; settings: QuietSettings };
   private pendingRestart?: { id: string; key: string };
+  private readingAdjustment = savedReadingAdjustment();
   private reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   private petAnimations: {
     node: HTMLElement; columns: number; rows: number;
@@ -112,9 +122,15 @@ export class QuietRoom {
           </fieldset>
           <fieldset><legend><span>3</span> ${this.t('最高容許音量', 'Maximum sound level')}</legend>
             <label class="quiet-range"><span>${this.t('嚴格', 'Strict')}</span><input id="quietThreshold" type="range" min="1" max="100" value="30" aria-label="${this.t('最高容許音量', 'Maximum sound level')}"><span>${this.t('寬鬆', 'Lenient')}</span><output id="quietThresholdValue">30 / 100</output></label>
+            <div class="quiet-adjustment">
+              <div class="quiet-adjustment-title"><label for="quietReadingAdjustment">${this.t('音量讀數調整', 'Sound reading adjustment')}</label><output id="quietReadingAdjustmentValue" for="quietReadingAdjustment">${signedAdjustment(this.readingAdjustment)} ${this.t('點', 'points')}</output></div>
+              <div class="quiet-range"><span>${this.t('讀數較低', 'Lower')}</span><input id="quietReadingAdjustment" type="range" min="-50" max="50" step="1" value="${this.readingAdjustment}" aria-describedby="quietAdjustmentHint"><span>${this.t('讀數較高', 'Higher')}</span></div>
+              <div class="quiet-presets quiet-adjustment-presets">${[-30, 0, 30].map(value => `<button type="button" data-quiet-adjustment="${value}" aria-pressed="${this.readingAdjustment === value}">${value === 0 ? this.t('還原', 'Reset') : `${signedAdjustment(value)} ${this.t('點', 'points')}`}</button>`).join('')}</div>
+              <p id="quietAdjustmentHint" class="quiet-hint">${this.t('同樣聲音，向左讀數較低、更寬鬆；向右讀數較高、更嚴格。0 保持目前讀數；這個裝置會記住設定。', 'For the same sound, left reads lower and is more lenient; right reads higher and is stricter. 0 keeps the current reading. This device remembers your setting.')}</p>
+            </div>
             <button type="button" id="quietMicTest" class="text-button">🎙 ${this.t('先測試課室音量', 'Test classroom sound')}</button>
             <div class="quiet-setup-meter"><div class="quiet-meter-title"><b>${quietIcon('sound')} ${this.t('課室音量測試', 'Classroom sound test')}</b><span id="quietSetupLevelText" data-quiet-level>— / 100</span></div><div class="quiet-meter-track" role="meter" aria-label="${this.t('設定頁麥克風音量', 'Setup microphone level')}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="quietSetupMeterFill" data-quiet-fill></div><i class="quiet-limit-line" data-quiet-limit><span>${this.t('上限', 'LIMIT')}</span></i></div><p id="quietSetupMicStatus" class="quiet-hint" data-quiet-mic-status></p></div>
-            <p class="quiet-hint">${this.t('已降低偵測敏感度，同樣聲音的讀數較低；向右調高可容許更多聲音，到達上限仍即時超標。這是相對指數（非分貝），可先測試課室音量。', 'Microphone sensitivity is reduced, so the same sound reads lower. Move right to allow more sound; reaching the limit still triggers immediately. A relative index, not dB; test your room first.')}</p>
+            <p class="quiet-hint">${this.t('讀數維持 0–100，到達音量上限即時超標。這是相對指數（非分貝），可先測試課室音量再調整。', 'Readings stay within 0–100; reaching the sound limit triggers immediately. A relative index, not dB; test your classroom before adjusting.')}</p>
           </fieldset>
           <fieldset><legend><span>4</span> ${this.t('設定獎勵與懲罰', 'Choose reward & penalty')}</legend>
             <div class="quiet-pair"><label class="field"><span>${quietIcon('coin')} ${this.t('每人獎勵', 'Reward per student')}</span><input id="quietReward" type="number" min="1" max="10000" step="1" value="100" required></label><label class="field"><span>${quietIcon('alert')} ${this.t('每次超標扣減', 'Penalty per burst')}</span><input id="quietPenalty" type="number" min="1" max="10000" step="1" value="10" required></label></div>
@@ -138,7 +154,7 @@ export class QuietRoom {
           <div class="quiet-session-summary"><div>
           <p class="quiet-target">${escape(this.session?.targetLabel)}</p>
           <p class="quiet-hint">${this.session?.count || 0} ${this.t('名學生一起參加', 'students taking part')}</p></div>
-          <div class="quiet-rules"><span>${this.t('音量上限', 'Sound limit')} <b>${this.session?.threshold || 0} / 100</b></span><span>${this.t('起始獎勵', 'Starting reward')} <b>${this.session?.reward || 0} 🪙</b></span><span>${this.t('每次超標', 'Each burst')} <b>−${this.session?.penalty || 0} 🪙</b></span></div>
+          <div class="quiet-rules"><span>${this.t('音量上限', 'Sound limit')} <b>${this.session?.threshold || 0} / 100</b></span><span>${this.t('讀數調整', 'Reading adjustment')} <b>${signedAdjustment(this.session?.readingAdjustment ?? 0)} ${this.t('點', 'points')}</b></span><span>${this.t('起始獎勵', 'Starting reward')} <b>${this.session?.reward || 0} 🪙</b></span><span>${this.t('每次超標', 'Each burst')} <b>−${this.session?.penalty || 0} 🪙</b></span></div>
           </div>
           <div class="quiet-controls"><button id="quietCancel" class="text-button" ${active ? '' : 'hidden'}>${this.t('結束本次挑戰（不發獎勵）', 'End challenge without rewards')}</button><button id="quietNew" class="primary" ${active ? 'hidden' : ''}>${this.t('返回設定，開始新挑戰', 'Back to settings for a new challenge')}</button></div>
           <div id="quietCancelConfirm" hidden><p>${this.t('確定結束？本次剩餘獎勵不會發放。', 'End this challenge? Remaining rewards will not be issued.')}</p><button type="button" id="quietConfirmCancel" class="secondary">${this.t('確定結束', 'End challenge')}</button><button type="button" id="quietKeep" class="text-button">${this.t('保留挑戰', 'Keep challenge')}</button></div>
@@ -171,6 +187,11 @@ export class QuietRoom {
     for (const id of ['#quietClass', '#quietSubject']) this.element(id).addEventListener('change', () => this.updateSelection());
     this.element('#quietGroup').addEventListener('change', () => this.updateRecipients());
     this.element('#quietThreshold').addEventListener('input', () => this.paint());
+    this.element('#quietReadingAdjustment').addEventListener('input', () => this.adjustReading());
+    this.root.querySelectorAll<HTMLButtonElement>('[data-quiet-adjustment]').forEach(button => button.addEventListener('click', () => {
+      this.element<HTMLInputElement>('#quietReadingAdjustment').value = button.dataset.quietAdjustment!;
+      this.adjustReading();
+    }));
     for (const id of ['#quietMinutes', '#quietSeconds', '#quietReward']) this.element(id).addEventListener('input', () => this.paint());
     this.root.querySelectorAll<HTMLButtonElement>('[data-quiet-minutes]').forEach(button => button.addEventListener('click', () => {
       this.element<HTMLInputElement>('#quietMinutes').value = button.dataset.quietMinutes!;
@@ -198,7 +219,13 @@ export class QuietRoom {
     return { scope: this.element('#quietGroupFields').hidden ? 'class' : 'group', className: value('#quietClass'),
       groupField: value('#quietSubject'), groupName: value('#quietGroup'),
       durationSeconds: Number(value('#quietMinutes')) * 60 + Number(value('#quietSeconds')),
-      threshold: Number(value('#quietThreshold')), reward: Number(value('#quietReward')), penalty: Number(value('#quietPenalty')) };
+      threshold: Number(value('#quietThreshold')), readingAdjustment: Number(value('#quietReadingAdjustment')),
+      reward: Number(value('#quietReward')), penalty: Number(value('#quietPenalty')) };
+  }
+  private adjustReading() {
+    this.readingAdjustment = this.settings().readingAdjustment;
+    try { localStorage.setItem(adjustmentStorageKey, String(this.readingAdjustment)); } catch { /* Session settings still work when storage is unavailable. */ }
+    this.paint();
   }
   private updateSelection() {
     const body = this.settings();
@@ -421,7 +448,7 @@ export class QuietRoom {
     this.paintClock();
     if (this.analyser) {
       this.analyser.getFloatTimeDomainData(this.samples);
-      const level = microphoneLevel(this.samples);
+      const level = microphoneLevel(this.samples, this.session ? this.session.readingAdjustment ?? 0 : this.readingAdjustment);
       const threshold = this.session?.threshold ?? this.settings().threshold;
       this.root.querySelectorAll('[data-quiet-level]').forEach(el => { el.textContent = `${level} / 100`; });
       this.root.querySelectorAll<HTMLElement>('[data-quiet-fill]').forEach(el => { el.style.width = `${level}%`; });
@@ -461,6 +488,11 @@ export class QuietRoom {
     const settings = this.settings();
     const threshold = this.session?.threshold ?? settings.threshold;
     this.element('#quietThresholdValue').textContent = `${settings.threshold} / 100`;
+    this.element('#quietReadingAdjustmentValue').textContent = `${signedAdjustment(settings.readingAdjustment)} ${this.t('點', 'points')}`;
+    this.root.querySelectorAll<HTMLButtonElement>('[data-quiet-adjustment]').forEach(button => {
+      const selected = Number(button.dataset.quietAdjustment) === settings.readingAdjustment;
+      button.classList.toggle('active', selected); button.setAttribute('aria-pressed', String(selected));
+    });
     this.root.querySelectorAll<HTMLElement>('[data-quiet-limit]').forEach(el => { el.style.left = `${threshold}%`; });
     const pending = this.session?.status === 'running' ? this.pendingNoise.size : 0;
     this.element('#quietRewardLeft').textContent = (this.session ? Math.max(0, this.session.remainingReward - pending * this.session.penalty) : settings.reward).toLocaleString();
