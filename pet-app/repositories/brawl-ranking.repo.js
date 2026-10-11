@@ -106,10 +106,21 @@ async function currentStudents() {
 // and once per minute; the durable reward cursor catches up after server downtime.
 async function distribute(at = Date.now(), onlyId) {
   await ensure();
-  const { students } = await currentStudents();
-  const eligible = new Set(students.map(row => row.studentId).filter(id => !onlyId || id === onlyId));
   if (config.db.mode === 'postgres') {
-    const rows = (await getPool().query('SELECT State AS state FROM PetBrawlRanks WHERE StudentID=ANY($1::text[])', [[...eligible]])).rows.map(r => r.state).filter(p => rules.rewardPlan(p, at));
+    await academicYears.ensureSchema();
+    // Select eligible, unpaid profiles inside Postgres. A minute with no rewards
+    // due returns no rows instead of the full school roster and every rank.
+    const rows = (await getPool().query(`SELECT r.State AS state FROM PetBrawlRanks r
+      JOIN StudentAcademicYears e ON e.StudentID=r.StudentID AND e.AcademicYear=COALESCE(
+        (SELECT NULLIF(SettingValue,'') FROM PlatformSettings WHERE SettingKey='currentAcademicYear'),$1)
+      JOIN Users u ON u.StudentID=r.StudentID
+      WHERE u.Role IS DISTINCT FROM 'teacher' AND e.ClassName <> 'Graduated'
+        AND ($4::text IS NULL OR r.StudentID=$4)
+        AND COALESCE(($3::integer[])[(r.State->>'tier')::integer+1],0)>0
+        AND (COALESCE(r.State->>'rewardDay','')<$2 OR
+          (r.State->>'rewardDay'=$2 AND COALESCE((r.State->>'rewardPaid')::integer,0)<
+            ($3::integer[])[(r.State->>'tier')::integer+1]))`,
+    [academicYears.INITIAL_ACADEMIC_YEAR, rules.hkDay(at), rules.TIERS.map(t => t.dailyCoins), onlyId || null])).rows.map(r => r.state).filter(p => rules.rewardPlan(p, at));
     let amount = 0;
     for (const p of rows) amount += await withTransaction(async client => {
       const wallet = await client.query('SELECT StudentID FROM PetWallets WHERE StudentID=$1 FOR UPDATE', [p.studentId]);
@@ -120,6 +131,8 @@ async function distribute(at = Date.now(), onlyId) {
     });
     return amount;
   }
+  const { students } = await currentStudents();
+  const eligible = new Set(students.map(row => row.studentId).filter(id => !onlyId || id === onlyId));
   const d = store.load(), rows = d.petBrawlRanks.filter(p => eligible.has(p.studentId) && rules.rewardPlan(p, at));
   if (!rows.length) return 0;
   const before = copy(d.petBrawlRanks), wallets = copy(d.petWallets), length = d.petCurrencyLedger.length;

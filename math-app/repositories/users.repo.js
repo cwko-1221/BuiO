@@ -195,6 +195,7 @@ async function deleteById(studentId) {
     await getPool().query('DELETE FROM QuestionLogs WHERE StudentID = $1', [studentId]);
     await getPool().query('DELETE FROM StudentStats WHERE StudentID = $1', [studentId]);
     await getPool().query('DELETE FROM Users WHERE StudentID = $1', [studentId]);
+    academicYears.notifyEnrollmentChanged();
     return;
   }
   const d = store.load();
@@ -211,6 +212,7 @@ async function deleteById(studentId) {
   // Pet Paradise owns the per-table deletion semantics for its own data; duplicating them
   // here is how the two copies drifted apart in the first place.
   require('../../pet-app/repositories/pet.repo').purgeJsonStudent(studentId);
+  academicYears.notifyEnrollmentChanged();
 }
 
 async function upgradeAllStudents() {
