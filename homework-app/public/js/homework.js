@@ -1,3 +1,5 @@
+import { defaultWeekPeriod, weekEnd } from './report-period.mjs';
+
 const app = document.getElementById('app');
 const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const { t } = window.BuiI18n;
@@ -56,7 +58,7 @@ const filterState = {
   monitors: { academicYear: '', className: 'P4', subject: 'chinese-a' },
   records: { academicYear: '', className: 'P4', subject: 'chinese-a', date: today },
   analysis: { academicYear: '', className: 'P4', studentId: '' },
-  classAnalysis: { academicYear: '', className: 'P4', dateFrom: '', dateTo: today },
+  classAnalysis: { academicYear: '', className: 'P4', dateFrom: '', dateTo: today, mode: 'week', week: '1', exportScope: 'all' },
 };
 
 async function loadMonitorRoster() {
@@ -215,6 +217,7 @@ function renderAnalysis() {
 
 async function loadClassAnalysis() {
   const f = filterState.classAnalysis;
+  if (!validClassPeriod()) return setMessage(t('h.badPeriod'), 'error');
   try {
     const result = await api(`/class-analysis?academicYear=${encodeURIComponent(f.academicYear)}&className=${f.className}&dateFrom=${f.dateFrom}&dateTo=${f.dateTo}`);
     state.classAnalysisRows = result.rows;
@@ -226,6 +229,53 @@ async function loadClassAnalysis() {
     state.message = ''; state.readRecovery = { error, retry: loadClassAnalysis };
   }
   render();
+}
+
+function validClassPeriod() {
+  const f = filterState.classAnalysis;
+  return Boolean(f.dateFrom && f.dateTo && f.dateFrom <= f.dateTo);
+}
+
+function resetClassAnalysis() {
+  state.classAnalysisRows = [];
+  state.classAnalysisTotal = 0;
+  state.message = '';
+  state.readRecovery = null;
+  render();
+}
+
+async function exportClassAnalysis() {
+  if (state.exporting) return;
+  if (!validClassPeriod()) return setMessage(t('h.badPeriod'), 'error');
+  const f = { ...filterState.classAnalysis };
+  const form = new FormData();
+  for (const key of ['academicYear', 'dateFrom', 'dateTo', 'mode', 'week']) form.append(key, f[key]);
+  form.append('scope', f.exportScope === 'all' ? 'all' : f.className);
+  if (state.exportTemplate) form.append('template', state.exportTemplate);
+  state.exporting = true;
+  state.message = '';
+  render();
+  try {
+    const response = await fetch('/api/homework/class-analysis/export', { method: 'POST', credentials: 'include', body: form });
+    if (!response.ok) throw new Error((await response.json().catch(() => ({}))).message || t('h.exportFailed'));
+    const url = URL.createObjectURL(await response.blob());
+    const encodedName = response.headers.get('Content-Disposition')?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = encodedName ? decodeURIComponent(encodedName) : 'homework.xlsx';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    state.message = t('h.exportSuccess');
+    state.messageType = 'success';
+  } catch (error) {
+    state.message = error.message;
+    state.messageType = 'error';
+  } finally {
+    state.exporting = false;
+    render();
+  }
 }
 
 function renderClassAnalysis() {
@@ -252,10 +302,18 @@ function renderClassAnalysis() {
     <div class="filters">
       <div class="field"><label for="classAnalysisYear">${escapeHtml(t('h.year'))}</label><select id="classAnalysisYear">${options(state.meta.academicYears, f.academicYear)}</select></div>
       <div class="field"><label for="classAnalysisClass">${escapeHtml(t('h.class'))}</label><select id="classAnalysisClass">${options(grades, f.className)}</select></div>
-      <div class="field"><label for="classAnalysisFrom">${escapeHtml(t('h.from'))}</label><input id="classAnalysisFrom" type="date" value="${f.dateFrom}"></div>
-      <div class="field"><label for="classAnalysisTo">${escapeHtml(t('h.to'))}</label><input id="classAnalysisTo" type="date" value="${f.dateTo}" max="${today}"></div>
+      <div class="field"><label for="classAnalysisMode">${escapeHtml(t('h.periodMode'))}</label><select id="classAnalysisMode">${options(['week', 'custom'], f.mode, mode => t(mode === 'week' ? 'h.byWeek' : 'h.customPeriod'))}</select></div>
+      <div class="field"><label for="classAnalysisWeek">${escapeHtml(t('h.week'))}</label><select id="classAnalysisWeek" ${f.mode === 'custom' ? 'disabled' : ''}>${options(Array.from({ length: 53 }, (_, index) => String(index + 1)), f.week, week => `Week ${week}`)}</select></div>
+      <div class="field"><label for="classAnalysisFrom">${escapeHtml(t(f.mode === 'week' ? 'h.cumulativeFrom' : 'h.from'))}</label><input id="classAnalysisFrom" type="date" value="${f.dateFrom}"></div>
+      <div class="field"><label for="classAnalysisTo">${escapeHtml(t('h.to'))}</label><input id="classAnalysisTo" type="date" value="${f.dateTo}" ${f.mode === 'week' ? 'readonly' : ''}></div>
     </div>
-    <div class="actions" style="margin-top:16px"><button class="button primary" id="runClassAnalysis">${escapeHtml(t('h.showClassStats'))}</button></div>
+    <p class="hint">${escapeHtml(t('h.weekHint'))}</p>
+    <div class="homework-export-settings">
+      <div class="field"><label for="classAnalysisScope">${escapeHtml(t('h.exportScope'))}</label><select id="classAnalysisScope">${options(['all', 'class'], f.exportScope, scope => t(scope === 'all' ? 'h.exportAllClasses' : 'h.exportSelectedClass', { className: f.className }))}</select></div>
+      <div class="field"><label for="classAnalysisTemplate">${escapeHtml(t('h.excelTemplate'))}</label><input id="classAnalysisTemplate" type="file" accept=".xlsx"><small class="hint">${escapeHtml(state.exportTemplate?.name || t('h.defaultTemplate'))}</small>${state.exportTemplate ? `<button type="button" id="clearExportTemplate" class="button secondary">${escapeHtml(t('h.useDefaultTemplate'))}</button>` : ''}</div>
+    </div>
+    <p class="hint">${escapeHtml(t('h.exportHint'))}</p>
+    <div class="actions" style="margin-top:16px"><button class="button primary" id="runClassAnalysis" ${!validClassPeriod() ? 'disabled' : ''}>${escapeHtml(t('h.showClassStats'))}</button><button class="button secondary" id="exportClassAnalysis" ${state.exporting || !validClassPeriod() ? 'disabled' : ''}>${escapeHtml(t(state.exporting ? 'h.exporting' : 'h.exportExcel'))}</button></div>
     ${rows.length ? `<div class="analysis-total">${t('h.classTotal', { count: state.classAnalysisTotal || 0 })}</div><div class="class-analysis-students">${studentCards}</div>` : `<div class="empty" style="margin-top:20px">${escapeHtml(t('h.pickPeriod'))}</div>`}
   </section>`);
 }
@@ -447,14 +505,36 @@ function bindTeacher() {
   } else {
     classAnalysisYear.onchange = () => {
       filterState.classAnalysis.academicYear = classAnalysisYear.value;
-      filterState.classAnalysis.dateFrom = `${classAnalysisYear.value.slice(0, 4)}-09-01`;
-      state.classAnalysisRows = [];
+      Object.assign(filterState.classAnalysis, defaultWeekPeriod(classAnalysisYear.value, today));
+      resetClassAnalysis();
+    };
+    classAnalysisClass.onchange = () => { filterState.classAnalysis.className = classAnalysisClass.value; resetClassAnalysis(); };
+    classAnalysisMode.onchange = () => {
+      filterState.classAnalysis.mode = classAnalysisMode.value;
+      if (classAnalysisMode.value === 'week') filterState.classAnalysis.dateTo = weekEnd(filterState.classAnalysis.dateFrom, filterState.classAnalysis.week);
+      resetClassAnalysis();
+    };
+    classAnalysisWeek.onchange = () => {
+      filterState.classAnalysis.week = classAnalysisWeek.value;
+      filterState.classAnalysis.dateTo = weekEnd(filterState.classAnalysis.dateFrom, classAnalysisWeek.value);
+      resetClassAnalysis();
+    };
+    classAnalysisFrom.onchange = () => {
+      filterState.classAnalysis.dateFrom = classAnalysisFrom.value;
+      if (filterState.classAnalysis.mode === 'week') filterState.classAnalysis.dateTo = weekEnd(classAnalysisFrom.value, filterState.classAnalysis.week);
+      resetClassAnalysis();
+    };
+    classAnalysisTo.onchange = () => { filterState.classAnalysis.dateTo = classAnalysisTo.value; resetClassAnalysis(); };
+    classAnalysisScope.onchange = () => { filterState.classAnalysis.exportScope = classAnalysisScope.value; };
+    classAnalysisTemplate.onchange = () => {
+      const file = classAnalysisTemplate.files[0];
+      if (file && (!/\.xlsx$/i.test(file.name) || file.size > 8 * 1024 * 1024)) return setMessage(t('h.badTemplate'), 'error');
+      state.exportTemplate = file || null;
       render();
     };
-    classAnalysisClass.onchange = () => { filterState.classAnalysis.className = classAnalysisClass.value; state.classAnalysisRows = []; render(); };
-    classAnalysisFrom.onchange = () => { filterState.classAnalysis.dateFrom = classAnalysisFrom.value; state.classAnalysisRows = []; render(); };
-    classAnalysisTo.onchange = () => { filterState.classAnalysis.dateTo = classAnalysisTo.value; state.classAnalysisRows = []; render(); };
+    document.getElementById('clearExportTemplate')?.addEventListener('click', () => { state.exportTemplate = null; render(); });
     runClassAnalysis.onclick = loadClassAnalysis;
+    document.getElementById('exportClassAnalysis').onclick = exportClassAnalysis;
   }
 }
 
@@ -492,7 +572,7 @@ async function boot() {
     state.meta = await api('/meta');
     if (!state.meta.canAccess) throw new Error(t('h.notMonitor'));
     filterState.monitors.academicYear = filterState.records.academicYear = filterState.analysis.academicYear = filterState.classAnalysis.academicYear = state.meta.currentAcademicYear;
-    filterState.classAnalysis.dateFrom = `${state.meta.currentAcademicYear.slice(0, 4)}-09-01`;
+    Object.assign(filterState.classAnalysis, defaultWeekPeriod(state.meta.currentAcademicYear, today));
     state.teacherClassYear = state.meta.currentAcademicYear;
     if (state.meta.role === 'teacher') await loadMonitorRoster();
     else {

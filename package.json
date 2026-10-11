@@ -18,6 +18,7 @@
     "check:security": "npm audit --omit=dev --audit-level=low",
     "check:tower-defense": "node scripts/test-tower-defense.mjs",
     "check:homework": "node scripts/test-homework-module.mjs",
+    "check:homework-excel": "node scripts/test-homework-excel.mjs",
     "check:phonics": "node scripts/test-phonics-module.mjs",
     "check:phonics-browser": "node scripts/test-phonics-browser.mjs",
     "check:chinese-recording": "node scripts/test-chinese-recording-gesture.mjs",

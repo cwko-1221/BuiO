@@ -2,7 +2,10 @@
 
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const repo = require('../repositories/homework.repo');
+const { buildClassAnalysis } = require('../lib/class-analysis');
+const { buildExport, reportPeriod, GRADES } = require('../lib/excel-export');
 const academicYearsRepo = require('../../math-app/repositories/academic-years.repo');
 const { requireAuth, requireTeacher, requireAdminUnlocked } = require('../../math-app/middleware/auth');
 const {
@@ -600,31 +603,44 @@ router.get('/class-analysis', requireTeacher, async (req, res, next) => {
       repo.listClassStudents(academicYear, className),
       repo.listRecords({ academicYear, className, dateFrom, dateTo }),
     ]);
-    const counts = new Map(students.map(student => [student.id, 0]));
-    const missingRecords = new Map(students.map(student => [student.id, []]));
-    for (const record of records) for (const homework of record.homeworks || []) for (const item of homework.statuses || []) {
-      if (item.status === 'missing' && counts.has(item.studentId)) {
-        counts.set(item.studentId, counts.get(item.studentId) + 1);
-        missingRecords.get(item.studentId).push({
-          date: record.date,
-          subject: record.subject,
-          subjectName: subjectById(record.subject)?.name || record.subject,
-          homeworkId: homework.id,
-          homework: homework.title,
-          madeUp: Boolean(item.madeUp),
-        });
-      }
-    }
-    res.json({
-      success: true,
-      rows: students.map(student => ({
-        ...student,
-        missingCount: counts.get(student.id) || 0,
-        missingRecords: missingRecords.get(student.id) || [],
-      })),
-      totalMissing: [...counts.values()].reduce((sum, count) => sum + count, 0),
-    });
+    res.json({ success: true, ...buildClassAnalysis(students, records) });
   } catch (error) { next(error); }
+});
+
+const templateUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024, files: 1, fields: 8 },
+  fileFilter: (req, file, done) => done(/\.xlsx$/i.test(file.originalname) ? null : new Error('請上載 .xlsx 格式的總表'), /\.xlsx$/i.test(file.originalname)),
+}).single('template');
+
+router.post('/class-analysis/export', requireTeacher, (req, res, next) => {
+  templateUpload(req, res, error => error
+    ? fail(res, 400, error.code === 'LIMIT_FILE_SIZE' ? 'Excel 範本不能超過 8 MB' : error.message)
+    : next());
+}, async (req, res, next) => {
+  try {
+    const period = reportPeriod(req.body);
+    const scope = String(req.body.scope || 'all');
+    if (scope !== 'all' && !GRADES.includes(scope)) return fail(res, 400, '請選擇正確的匯出班別');
+    const classes = scope === 'all' ? GRADES : [scope];
+    const [rosters, records] = await Promise.all([
+      Promise.all(classes.map(className => repo.listClassStudents(period.academicYear, className))),
+      repo.listRecords({ ...period, className: scope === 'all' ? '' : scope }),
+    ]);
+    const reports = classes.map((className, index) => ({
+      className, ...buildClassAnalysis(rosters[index], records.filter(record => record.className === className)),
+    }));
+    const { buffer, filename } = await buildExport({ period, scope, reports, templateBuffer: req.file?.buffer });
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="homework.xlsx"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      'Cache-Control': 'private, no-store',
+    });
+    res.send(Buffer.from(buffer));
+  } catch (error) {
+    if (error.status === 400) return fail(res, 400, error.message);
+    next(error);
+  }
 });
 
 module.exports = router;
