@@ -3,6 +3,9 @@
 const config = require('../../config');
 const store = require('../../db/jsonStore');
 const { getPool } = require('../db/database');
+const { EventEmitter } = require('node:events');
+const events = new EventEmitter();
+const notifyEnrollmentChanged = () => events.emit('changed');
 
 const INITIAL_ACADEMIC_YEAR = '2025-26';
 
@@ -170,6 +173,21 @@ async function findEnrollment(academicYear, studentId) {
   return { ...row, name: row.name || user?.name || studentId, role: user?.role || 'student' };
 }
 
+// Access checks need only the authoritative student-to-class mapping, not names,
+// class numbers or subject groups for the whole school.
+async function listStudentClasses(academicYear) {
+  await ensureSchema();
+  if (config.db.mode === 'postgres') {
+    const { rows } = await getPool().query(`
+      SELECT e.StudentID AS "studentId", e.ClassName AS "className"
+      FROM StudentAcademicYears e JOIN Users u ON u.StudentID=e.StudentID
+      WHERE e.AcademicYear=$1 AND u.Role IS DISTINCT FROM 'teacher'`, [academicYear]);
+    return rows;
+  }
+  return (await listEnrollments(academicYear)).filter(row => row.role !== 'teacher')
+    .map(row => ({ studentId: row.studentId, className: row.className || '' }));
+}
+
 async function upsertCurrentStudent(user, opts = {}) {
   await ensureSchema();
   const academicYear = await getCurrentAcademicYear();
@@ -185,6 +203,8 @@ async function upsertCurrentStudent(user, opts = {}) {
       academicYear, user.studentId, user.name || user.studentId, user.className || '', user.classNo,
       user.chineseGroup || '', user.englishGroup || '', user.mathGroup || '',
     ]);
+    // A bulk import notifies once after its surrounding transaction commits.
+    if (!opts.client) notifyEnrollmentChanged();
     return;
   }
   const data = ensureJsonData();
@@ -197,6 +217,7 @@ async function upsertCurrentStudent(user, opts = {}) {
   if (index >= 0) data.studentAcademicYears[index] = snapshot;
   else data.studentAcademicYears.push(snapshot);
   store.save();
+  notifyEnrollmentChanged();
 }
 
 async function updateCurrentEnrollment(studentId, field, value) {
@@ -210,11 +231,12 @@ async function updateCurrentEnrollment(studentId, field, value) {
   if (config.db.mode === 'postgres') {
     await getPool().query(`UPDATE StudentAcademicYears SET ${column}=$1, UpdatedAt=NOW()
       WHERE AcademicYear=$2 AND StudentID=$3`, [value, academicYear, studentId]);
+    notifyEnrollmentChanged();
     return;
   }
   const data = ensureJsonData();
   const row = data.studentAcademicYears.find(item => item.academicYear === academicYear && item.studentId === studentId);
-  if (row) { row[field] = value; store.save(); }
+  if (row) { row[field] = value; store.save(); notifyEnrollmentChanged(); }
 }
 
 async function promoteAllStudents() {
@@ -254,6 +276,7 @@ async function promoteAllStudents() {
     data.platformSettings.currentAcademicYear = next;
     store.save();
   }
+  notifyEnrollmentChanged();
   return { previousAcademicYear: current, currentAcademicYear: next };
 }
 
@@ -263,6 +286,9 @@ module.exports = {
   getCurrentAcademicYear,
   listAcademicYears,
   listEnrollments,
+  listStudentClasses,
+  events,
+  notifyEnrollmentChanged,
   findEnrollment,
   upsertCurrentStudent,
   updateCurrentEnrollment,

@@ -14,6 +14,9 @@ process.env.BUIO_JSON_DB_FILE=path.join(temp,'db.json');process.env.SUPABASE_DB_
 await fs.writeFile(process.env.BUIO_JSON_DB_FILE,JSON.stringify({users:[1,2,3].map(n=>({studentid:'S00'+n,name:'同學'+n,classname:'5A',role:'student'})).concat({studentid:'T001',name:'老師',role:'teacher'}),studentStats:[],questionLogs:[],_logId:0}));
 const require=createRequire(import.meta.url),pets=require('../pet-app/repositories/pet.repo'),repo=require('../pet-app/repositories/brawl-duel.repo'),store=require('../db/jsonStore');
 const {Server}=require('socket.io');
+const accessLocks=require('../pet-app/repositories/access-lock.repo');
+const originalStatuses=accessLocks.studentStatuses;let accessChecks=0;
+accessLocks.studentStatuses=(...args)=>{accessChecks++;return originalStatuses(...args);};
 const {io:client}=createRequire(path.resolve('whiteboard-app/client/package.json'))('socket.io-client');
 const checks=[],pass=label=>{checks.push(label);console.log('✓ '+label);};
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
@@ -54,7 +57,13 @@ try{
   const rejected=client(url+'/pet-brawl',{extraHeaders:{'x-test-student':'T001'},transports:['websocket'],reconnection:false});await new Promise(r=>rejected.once('connect_error',r));rejected.close();
   const [a,b,c]=await Promise.all(ids.map(connect));
   const request=(sock,event,data)=>new Promise((resolve,reject)=>sock.timeout(3000).emit(event,data,(error,response)=>error?reject(error):resolve(response)));
-  const ping=sock=>request(sock,'duel:presence',{active:true,busy:false,refresh:true});await Promise.all([a,b,c].map(ping));
+  const ping=sock=>request(sock,'duel:presence',{active:true,busy:false,refresh:true});
+  const background=sock=>request(sock,'duel:presence',{active:false,busy:false});
+  await Promise.all([a,b,c].map(background));const idleChecks=accessChecks;await delay(1100);
+  assert.equal(accessChecks,idleChecks,'background idle sockets must not trigger access reads');
+  await ping(a);assert.ok(accessChecks>idleChecks,'returning to the foreground checks access immediately');
+  await Promise.all([a,b,c].map(ping));
+  pass('background idle sockets stop access reads and foreground return checks immediately');
   assert.equal((await ping(a)).peers.length,2);
   const invite=async()=>{time+=4000;await Promise.all([a,b].map(ping));const r=await request(a,'duel:invite',{targetId:ids[1],petId:petIds[0],stageId:'sunny-training',key:randomUUID()});assert.equal(r.success,true,JSON.stringify(r));return r.invitation;};
   let inv=await invite();assert.equal((await request(c,'duel:reply',{inviteId:inv.id,accept:false})).success,false);assert.deepEqual(balances(),baseline);
@@ -68,6 +77,9 @@ try{
   const accept=async()=>{inv=await invite();const response=await request(b,'duel:reply',{inviteId:inv.id,accept:true,petId:petIds[1]});assert.equal(response.success,true,JSON.stringify(response));return response.session.match.id;};
   let mid=await accept(),r=duels.rooms.get(mid);assert.deepEqual(balances(),[4500,4500,5000]);const entryCount=entries();assert.equal((await request(b,'duel:reply',{inviteId:inv.id,accept:true,petId:petIds[1]})).success,true);assert.equal(entries(),entryCount);assert.equal((await request(c,'duel:ready',{matchId:mid})).success,false);
   await request(a,'duel:ready',{matchId:mid});await request(b,'duel:ready',{matchId:mid});await until(()=>r.phase==='playing');
+  await Promise.all([a,b,c].map(background));const matchChecks=accessChecks;await delay(1100);
+  assert.ok(accessChecks>matchChecks,'an unfinished match keeps access protection even with hidden pages');
+  await Promise.all([a,b,c].map(ping));
   a.emit('duel:input',{matchId:mid,seq:1,mask:I.RIGHT});b.emit('duel:input',{matchId:mid,seq:1,mask:I.LEFT});await delay(30);time+=150;await until(()=>r.state.tick>0);assert.ok(r.state.actors[0].x>19000);assert.ok(r.state.actors[1].x<92000);
   const seq=r.seq[0];await request(a,'duel:ready',{matchId:mid});assert.equal(r.seq[0],seq);c.emit('duel:input',{matchId:mid,seq:999,mask:I.SKILL1});a.emit('duel:input',{matchId:mid,seq:999,mask:1024});await delay(35);assert.equal(r.seq[0],seq);
   a.emit('duel:input',{matchId:mid,seq:2,mask:I.JUMP});a.emit('duel:input',{matchId:mid,seq:3,mask:0});await delay(20);time+=50;await until(()=>r.state.actors[0].z>0);

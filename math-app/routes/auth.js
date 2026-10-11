@@ -291,6 +291,7 @@ router.post('/register-students-batch', requireTeacher, async (req, res, next) =
           await academicYears.upsertCurrentStudent({ ...s }, { client });
         }
       });
+      academicYears.notifyEnrollmentChanged();
     }
 
     res.json({

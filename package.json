@@ -37,6 +37,7 @@
     "build:pet-redrawn-queue:all": "node scripts/build-redrawn-wearable-queue.mjs --all-stages",
     "check:pet": "node scripts/test-pet-module.mjs",
     "check:pet-access": "node --test pet-app/tests/access-lock.test.js",
+    "check:pet-egress": "node --test pet-app/tests/database-egress.test.cjs",
     "check:pet-access-live": "node scripts/test-pet-access-live.mjs",
     "check:pet-brawl": "node scripts/test-pet-brawl.mjs",
     "check:pet-brawl-adventure": "node scripts/test-pet-brawl-adventure.mjs",

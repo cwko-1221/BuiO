@@ -9,6 +9,9 @@ const years = require('../../math-app/repositories/academic-years.repo');
 const { validate, statusFor } = require('../lib/access-lock.cjs');
 const events = new EventEmitter();
 let schemaPromise, cache, loading, revision = 0, queue = Promise.resolve();
+const SNAPSHOT_TTL_MS = 30000;
+function invalidate() { revision++; cache = null; loading = null; }
+years.events.on('changed', () => { invalidate(); events.emit('changed'); });
 
 async function ensureSchema() {
   if (config.db.mode !== 'postgres') return;
@@ -29,16 +32,19 @@ async function readRules(academicYear, client = null) {
   return structuredClone((store.load().petAccessLocks || []).filter(r => r.academicYear === academicYear));
 }
 
-// Coalesce a classroom's status polls. Evaluate dates on every call, even inside this short cache.
+// Time boundaries are evaluated on every call; they do not require another SQL
+// read. Local rule/enrollment writes invalidate immediately. The TTL also picks
+// up out-of-process changes without downloading the roster every second.
 async function snapshot(fresh = false) {
-  if (!fresh && cache && Date.now() - cache.at < 750) return cache;
+  if (!fresh && cache && Date.now() - cache.at < SNAPSHOT_TTL_MS) return cache;
   if (!fresh && loading) return loading;
   const generation = revision;
   const work = (async () => {
     const academicYear = await years.getCurrentAcademicYear();
-    const [enrollments, rules] = await Promise.all([years.listEnrollments(academicYear), readRules(academicYear)]);
-    const result = { academicYear, enrollments: enrollments.filter(r => r.role !== 'teacher'), rules, at: Date.now() };
-    if (generation === revision) cache = result;
+    const [enrollments, rules] = await Promise.all([years.listStudentClasses(academicYear), readRules(academicYear)]);
+    if (generation !== revision) return snapshot();
+    const result = { academicYear, enrollments, rules, at: Date.now() };
+    cache = result;
     return result;
   })();
   loading = work;
@@ -92,7 +98,7 @@ async function mutate(operation) {
   const work = config.db.mode === 'postgres' ? withTransaction(run) : queue.then(() => run(null));
   queue = work.catch(() => {});
   const result = await work;
-  revision++; cache = null; loading = null;
+  invalidate();
   events.emit('changed');
   return result;
 }

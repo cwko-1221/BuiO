@@ -34,7 +34,7 @@ module.exports=function register(io,options={}){
   async function refreshAccess(){
     if(accessRefreshing){accessAgain=true;return;}accessRefreshing=true;
     try{
-      const ids=[...new Set([...members.values()].map(m=>m.profile.id).concat([...rooms.values()].filter(r=>!terminal(r.meta)).flatMap(r=>r.meta.players.map(p=>p.id))))];
+      const ids=[...new Set([...members.values()].filter(m=>m.active&&now()-m.seenAt<25000).map(m=>m.profile.id).concat([...rooms.values()].filter(r=>!terminal(r.meta)).flatMap(r=>r.meta.players.map(p=>p.id))))];
       if(!ids.length)return;
       const statuses=await accessLocks.studentStatuses(ids);
       for(const [id,access] of statuses){for(const m of all(id)){const changed=m.locked!==access.locked;m.locked=access.locked;if(changed)send(id,'pet:access',access);}
@@ -54,6 +54,7 @@ module.exports=function register(io,options={}){
     const m={socket,profile:socket.data.profile,active:false,busy:false,locked:false,seenAt:now(),inputCount:0,windowAt:now()};members.set(socket.id,m);
     const handle=(event,fn)=>socket.on(event,async(body={},ack)=>{try{if(now()>socket.data.expiresAt)fail('登入已到期，請重新登入。',401);if(['duel:invite','duel:reply','duel:ready'].includes(event))await accessLocks.assertAllowed(id);const value=await fn(body);if(typeof ack==='function')ack({success:true,...value});}catch(e){if(typeof ack==='function')ack({success:false,status:e.status||500,code:e.code,access:e.access,message:e.status?e.message:'對戰暫時未能完成操作，請重試。'});}});
     handle('duel:presence',async body=>{if(typeof body.active!=='boolean'||typeof body.busy!=='boolean')fail('無效的在線狀態。',400);m.active=body.active;m.busy=body.busy;m.seenAt=now();
+      if(m.active)await refreshAccess();
       if(body.refresh===true)m.profile=await repo.player(id);
       const pending=invites.get(reserved.get(id));if(pending?.status==='pending'&&(!online(id)||m.busy))closeInvite(pending,'cancelled','同學已離線或正在遊戲，邀請已取消。雙方均未扣款。');
       const match=[...rooms.values()].find(r=>!terminal(r.meta)&&r.meta.players.some(p=>p.id===id));let result=null;if(!match&&typeof body.matchId==='string'){const previous=await repo.read(body.matchId);if(previous&&terminal(previous)&&previous.players.some(p=>p.id===id))result={match:previous,winnerIndex:previous.winnerIndex??null,refunded:!!previous.refunded};}presence();return {peers:publicPeers(id),self:{...m.profile,fee:repo.FEE},invitation:pending?.status==='pending'?pending:null,session:match?info(match,id):null,result};});
