@@ -308,23 +308,6 @@ async function uploadWeeklyReport() {
   finally { state.uploading = false; render(); }
 }
 
-function reportTasksHtml() {
-  const report = state.weeklyReport;
-  if (!report) return '';
-  const tasks = report.tasks || [];
-  const taskRow = task => `<label class="report-task ${task.done ? 'done' : ''}">
-    <input type="checkbox" class="report-task-done" data-task="${escapeHtml(task.id)}" ${task.done ? 'checked' : ''} ${task.preview || state.taskSaving || state.uploading || state.exporting ? 'disabled' : ''}>
-    <span><strong>${escapeHtml(task.name)}</strong><small>${escapeHtml(task.className)} · ${escapeHtml(task.classNo ? t('h.classNoSuffix', { no: task.classNo }) : t('h.noClassNo'))} · Week ${task.week} · ${escapeHtml(t('h.reportTaskCount', { count: task.count }))}</small></span>
-    <span class="report-task-action ${task.action}">${escapeHtml(t(`h.reportAction.${task.action}`))}${task.preview ? `<small>${escapeHtml(t('h.reportTaskPreview'))}</small>` : ''}</span>
-  </label>`;
-  const pending = tasks.filter(task => !task.done);
-  const done = tasks.filter(task => task.done);
-  return `<section class="panel report-tasks"><div class="panel-head"><div><h2>${escapeHtml(t('h.reportTasksTitle', { count: pending.length }))}</h2><p class="hint">${escapeHtml(t('h.reportTasksHint'))}</p></div></div>
-    ${pending.length ? pending.map(taskRow).join('') : `<div class="empty">${escapeHtml(t('h.reportNoTasks'))}</div>`}
-    ${done.length ? `<details class="report-completed"><summary>${escapeHtml(t('h.reportCompleted', { count: done.length }))}</summary>${done.map(taskRow).join('')}</details>` : ''}
-  </section>`;
-}
-
 function renderClassAnalysis() {
   const f = filterState.classAnalysis;
   const weekly = f.mode === 'week';
@@ -365,7 +348,7 @@ function renderClassAnalysis() {
     ${weekly && report ? `<p class="report-version">${escapeHtml(t('h.reportBaseVersion', { week: report.baselineWeek }))}${latest ? ` · ${escapeHtml(t('h.reportLatestVersion', { week: latest.week, kind: t(latest.kind === 'uploaded' ? 'h.reportUploaded' : 'h.reportGenerated') }))}` : ''}</p>` : ''}
     <div class="actions" style="margin-top:16px"><button class="button primary" id="runClassAnalysis" ${!validClassPeriod() ? 'disabled' : ''}>${escapeHtml(t('h.showClassStats'))}</button><button class="button secondary" id="exportClassAnalysis" ${state.exporting || state.uploading || !validClassPeriod() ? 'disabled' : ''}>${escapeHtml(t(state.exporting ? 'h.exporting' : weekly ? Number(f.week) === 6 ? 'h.downloadBaseline' : 'h.generateWeekly' : 'h.exportExcel'))}</button></div>
     ${weekly && Number(f.week) >= 7 ? `<div class="report-upload"><div class="field"><label for="weeklyReportFile">${escapeHtml(t('h.reportUploadLabel', { week: f.week }))}</label><input id="weeklyReportFile" type="file" accept=".xlsx" ${state.uploading || state.exporting ? 'disabled' : ''}>${state.reportFile ? `<small>${escapeHtml(state.reportFile.name)}</small>` : ''}</div><button class="button secondary" id="uploadWeeklyReport" ${!state.reportFile || !report || state.uploading || state.exporting ? 'disabled' : ''}>${escapeHtml(t(state.uploading ? 'h.reportUploading' : 'h.reportUpload'))}</button><p class="hint">${escapeHtml(t('h.reportUploadHint'))}</p></div>` : ''}
-  </section>${weekly ? reportTasksHtml() : ''}
+  </section>
   <section class="panel">${rows.length ? `<div class="analysis-total">${t('h.classTotal', { count: state.classAnalysisTotal || 0 })}</div><div class="class-analysis-students">${studentCards}</div>` : `<div class="empty" style="margin-top:20px">${escapeHtml(t('h.pickPeriod'))}</div>`}</section>`);
 }
 
@@ -589,19 +572,6 @@ function bindTeacher() {
       render();
     });
     document.getElementById('uploadWeeklyReport')?.addEventListener('click', uploadWeeklyReport);
-    document.querySelectorAll('.report-task-done').forEach(input => input.addEventListener('change', async () => {
-      state.taskSaving = true;
-      const done = input.checked;
-      render();
-      try {
-        const response = await fetch(`/api/homework/class-analysis/report-tasks/${input.dataset.task}`, { method: 'POST', credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ academicYear: filterState.classAnalysis.academicYear, done }) });
-        const result = await response.json();
-        if (!response.ok || !result.success) throw new Error(result.message || t('h.actionFailed'));
-        await loadClassAnalysis();
-      } catch (error) { state.message = error.message; state.messageType = 'error'; }
-      finally { state.taskSaving = false; render(); }
-    }));
   }
 }
 

@@ -666,14 +666,4 @@ router.post('/class-analysis/report-upload', requireTeacher, (req, res, next) =>
   }
 });
 
-router.post('/class-analysis/report-tasks/:id', requireTeacher, async (req, res, next) => {
-  try {
-    if (!isAcademicYear(req.body.academicYear) || typeof req.body.done !== 'boolean' || !/^[a-f0-9]{64}$/.test(req.params.id)) return fail(res, 400, '待辦設定不正確。');
-    res.json({ success: true, ...await weeklyReports.setTaskDone(req.body.academicYear, req.params.id, req.body.done, req.session.studentId) });
-  } catch (error) {
-    if (error.status >= 400 && error.status < 500) return fail(res, error.status, error.message);
-    next(error);
-  }
-});
-
 module.exports = router;

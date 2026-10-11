@@ -13,6 +13,46 @@ const cells = /<c\b[^>]*?(?:\/>|>[\s\S]*?<\/c>)/g;
 const columnNumber = letters => [...letters].reduce((n, letter) => n * 26 + letter.charCodeAt(0) - 64, 0);
 const partPath = target => target.startsWith('/') ? target.slice(1) : require('node:path').posix.normalize(`xl/${target}`);
 
+async function upsertSheet(zip, name, xml, sourcePath) {
+  const read = path => zip.file(path).async('string');
+  let workbookXml = await read('xl/workbook.xml');
+  let relsXml = await read('xl/_rels/workbook.xml.rels');
+  let typesXml = await read('[Content_Types].xml');
+  const sheetTags = workbookXml.match(/<sheet\b[^>]*\/>/g);
+  const relationships = relsXml.match(/<Relationship\b[^>]*\/>/g);
+  const existingTag = sheetTags.find(tag => attribute(tag, 'name') === name);
+  let outputPath;
+  let index;
+  if (existingTag) {
+    const rel = relationships.find(tag => attribute(tag, 'Id') === attribute(existingTag, 'r:id'));
+    outputPath = partPath(attribute(rel, 'Target'));
+    index = sheetTags.indexOf(existingTag);
+  } else {
+    const nextPart = 1 + Math.max(...Object.keys(zip.files).map(path => Number(path.match(/^xl\/worksheets\/sheet(\d+)\.xml$/)?.[1]) || 0));
+    const nextId = 1 + Math.max(...sheetTags.map(tag => Number(attribute(tag, 'sheetId'))));
+    const nextRel = `rId${1 + Math.max(...relationships.map(tag => Number(attribute(tag, 'Id').slice(3))))}`;
+    outputPath = `xl/worksheets/sheet${nextPart}.xml`;
+    index = sheetTags.length;
+    workbookXml = workbookXml.replace('</sheets>', `<sheet name="${escapeXml(name)}" sheetId="${nextId}" r:id="${nextRel}"/></sheets>`);
+    relsXml = relsXml.replace('</Relationships>', `<Relationship Id="${nextRel}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${nextPart}.xml"/></Relationships>`);
+    typesXml = typesXml.replace('</Types>', `<Override PartName="/${outputPath}" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>`);
+    if (sourcePath) {
+      const sourceRels = sourcePath.replace('/worksheets/', '/worksheets/_rels/') + '.rels';
+      if (zip.file(sourceRels)) zip.file(outputPath.replace('/worksheets/', '/worksheets/_rels/') + '.rels', await zip.file(sourceRels).async('nodebuffer'));
+    }
+    if (zip.file('docProps/app.xml')) {
+      const appXml = await read('docProps/app.xml');
+      zip.file('docProps/app.xml', appXml.replace(/<HeadingPairs>[\s\S]*?<\/HeadingPairs>/, section => section.replace(/<vt:i4>\d+<\/vt:i4>/, `<vt:i4>${sheetTags.length + 1}</vt:i4>`))
+        .replace(/<TitlesOfParts>[\s\S]*?<\/TitlesOfParts>/, section => section.replace(/size="\d+"/, `size="${sheetTags.length + 1}"`).replace('</vt:vector>', `<vt:lpstr>${escapeXml(name)}</vt:lpstr></vt:vector>`)));
+    }
+  }
+  zip.file(outputPath, xml);
+  zip.file('xl/workbook.xml', workbookXml);
+  zip.file('xl/_rels/workbook.xml.rels', relsXml);
+  zip.file('[Content_Types].xml', typesXml);
+  return index;
+}
+
 async function writeTemplate({ templateBuffer, source, summary, totalRow, templateTotalRow = source.rowCount }) {
   const JSZip = require('jszip');
   const zip = await JSZip.loadAsync(templateBuffer);
@@ -94,29 +134,10 @@ async function writeTemplate({ templateBuffer, source, summary, totalRow, templa
     zip.file('xl/styles.xml', stylesXml);
   }
 
-  const existingTag = sheetTags.find(tag => attribute(tag, 'name') === summary.name);
-  let outputPath;
-  let activeTab;
-  if (existingTag) {
-    const rel = relationships.find(tag => attribute(tag, 'Id') === attribute(existingTag, 'r:id'));
-    outputPath = partPath(attribute(rel, 'Target'));
-    activeTab = sheetTags.indexOf(existingTag);
-  } else {
-    const nextPart = 1 + Math.max(...Object.keys(zip.files).map(name => Number(name.match(/^xl\/worksheets\/sheet(\d+)\.xml$/)?.[1]) || 0));
-    const nextId = 1 + Math.max(...sheetTags.map(tag => Number(attribute(tag, 'sheetId'))));
-    const nextRel = `rId${1 + Math.max(...relationships.map(tag => Number(attribute(tag, 'Id').slice(3))))}`;
-    outputPath = `xl/worksheets/sheet${nextPart}.xml`;
-    activeTab = sheetTags.length;
-    workbookXml = workbookXml.replace('</sheets>', `<sheet name="${escapeXml(summary.name)}" sheetId="${nextId}" r:id="${nextRel}"/></sheets>`);
-    relsXml = relsXml.replace('</Relationships>', `<Relationship Id="${nextRel}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${nextPart}.xml"/></Relationships>`);
-    typesXml = typesXml.replace('</Types>', `<Override PartName="/${outputPath}" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>`);
-    const sourceRels = sourcePath.replace('/worksheets/', '/worksheets/_rels/') + '.rels';
-    if (zip.file(sourceRels)) zip.file(outputPath.replace('/worksheets/', '/worksheets/_rels/') + '.rels', await zip.file(sourceRels).async('nodebuffer'));
-    const appXml = await read('docProps/app.xml');
-    zip.file('docProps/app.xml', appXml.replace(/<HeadingPairs>[\s\S]*?<\/HeadingPairs>/, section => section.replace(/<vt:i4>\d+<\/vt:i4>/, `<vt:i4>${sheetTags.length + 1}</vt:i4>`))
-      .replace(/<TitlesOfParts>[\s\S]*?<\/TitlesOfParts>/, section => section.replace(/size="\d+"/, `size="${sheetTags.length + 1}"`).replace('</vt:vector>', `<vt:lpstr>${escapeXml(summary.name)}</vt:lpstr></vt:vector>`)));
-  }
-  zip.file(outputPath, summaryXml);
+  const activeTab = await upsertSheet(zip, summary.name, summaryXml, sourcePath);
+  workbookXml = await read('xl/workbook.xml');
+  relsXml = await read('xl/_rels/workbook.xml.rels');
+  typesXml = await read('[Content_Types].xml');
   // The old calculation chain does not describe updated/new total formulas.
   zip.remove('xl/calcChain.xml');
   relsXml = relsXml.replace(/<Relationship\b[^>]*Type="[^"]*\/calcChain"[^>]*\/>/g, '');
@@ -129,4 +150,4 @@ async function writeTemplate({ templateBuffer, source, summary, totalRow, templa
   return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
 }
 
-module.exports = { writeTemplate };
+module.exports = { writeTemplate, upsertSheet, escapeXml, attribute, setAttribute, partPath };

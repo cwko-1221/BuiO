@@ -12,6 +12,8 @@ const JSZip = require('jszip');
 const bcrypt = require('bcryptjs');
 const { reportPeriod, cloneSheet } = require('../homework-app/lib/excel-export');
 const { writeTemplate } = require('../homework-app/lib/xlsx-template');
+const { attribute, partPath, escapeXml } = require('../homework-app/lib/xlsx-template');
+const { writeTasksSheet, TASK_SHEET_NAME } = require('../homework-app/lib/report-tasks-sheet');
 const { openReport, checkArchive } = require('../homework-app/lib/weekly-reports');
 const root = path.resolve(import.meta.dirname, '..');
 const temp = await mkdtemp(path.join(tmpdir(), 'buio-homework-excel-'));
@@ -108,6 +110,28 @@ const assertTemplateLayout = (sheet, reference) => {
   }
 };
 const taskActions = (data, id) => data.tasks.filter(task => task.studentId === id).map(task => task.action).sort();
+const taskRows = sheet => Array.from({ length: Math.max(0, sheet.rowCount - 4) }, (_, i) => i + 5)
+  .filter(r => sheet.getCell(r, 9).value).map(r => ({ row: r, id: sheet.getCell(r, 9).value, name: sheet.getCell(r, 4).value,
+    action: sheet.getCell(r, 6).value, status: sheet.getCell(r, 7).value, notes: sheet.getCell(r, 8).value }));
+async function editTaskCells(buffer, edits) {
+  const book = await workbook(buffer);
+  const rows = taskRows(book.getWorksheet(TASK_SHEET_NAME));
+  const zip = await JSZip.loadAsync(buffer);
+  const tag = (await zip.file('xl/workbook.xml').async('string')).match(/<sheet\b[^>]*\/>/g).find(tag => attribute(tag, 'name') === TASK_SHEET_NAME);
+  const rel = (await zip.file('xl/_rels/workbook.xml.rels').async('string')).match(/<Relationship\b[^>]*\/>/g).find(rel => attribute(rel, 'Id') === attribute(tag, 'r:id'));
+  const file = partPath(attribute(rel, 'Target'));
+  let xml = await zip.file(file).async('string');
+  for (const edit of edits) {
+    const r = rows.find(row => row.id === edit.id)?.row;
+    assert.ok(r, 'teacher edit targets an existing Excel task');
+    for (const [column, value] of [['G', edit.status], ['H', edit.notes]]) if (value !== undefined) {
+      const pattern = new RegExp(`<c\\b[^>]*r="${column}${r}"[^>]*?(?:\\/>|>[\\s\\S]*?<\\/c>)`);
+      xml = xml.replace(pattern, raw => `<c r="${column}${r}" s="${attribute(raw, 's')}" t="inlineStr"><is><t>${escapeXml(value)}</t></is></c>`);
+    }
+  }
+  zip.file(file, xml);
+  return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+}
 try {
   await start();
   assert.equal(weekEnd(period.dateFrom, 6), '2026-10-09');
@@ -135,7 +159,13 @@ try {
   const week7Buffer = await download(period);
   const week7 = await workbook(week7Buffer);
   const summary = week7.getWorksheet('wk7');
-  assert.deepEqual(week7.worksheets.map(s => s.name), [...sourceBook.worksheets.map(s => s.name), 'wk7']);
+  assert.deepEqual(week7.worksheets.map(s => s.name), [...sourceBook.worksheets.map(s => s.name), 'wk7', TASK_SHEET_NAME]);
+  const actions7 = week7.getWorksheet(TASK_SHEET_NAME);
+  assert.deepEqual(taskRows(actions7).filter(row => row.name === '翟家朗 Jace').map(row => row.action), ['通知家長', '留堂班', '記缺點'], 'all crossed tiers are listed in Excel');
+  assert.equal(taskRows(actions7).length, initialPreview.tasks.length);
+  assert.ok(taskRows(actions7).every(row => row.status === '待處理'));
+  assert.ok(actions7.getColumn(9).hidden, 'stable task identifiers are not shown to teachers');
+  assert.deepEqual(actions7.getCell('G5').dataValidation.formulae, ['"待處理,已處理"']);
   assertTemplateLayout(summary, source);
   assert.equal(summary.getCell('A3').value, '欠交功課紀錄 (4/9/2026-16/10/2026)');
   assert.equal(summary.getCell('I5').value, 10, 'baseline 4 plus 6 new records, including caught-up records');
@@ -175,7 +205,10 @@ try {
   const teacherSheet = cloneSheet(repeated, teacherSource, 'wk7');
   for (const address of ['J6', 'K6']) teacherSheet.getCell(address).fill = structuredClone(teacherSource.getCell('N8').fill);
   teacherSheet.getCell('K5').fill = structuredClone(teacherSource.getCell('N9').fill);
-  const teacherBuffer = await writeTemplate({ templateBuffer: await download(period), source: teacherSource, summary: teacherSheet, totalRow: 36 });
+  const parentTask = saved7.tasks.find(task => task.studentId === 'S401' && task.action === 'parent');
+  const notedTask = saved7.tasks.find(task => task.studentId === 'S601' && task.action === 'detention');
+  const teacherBuffer = await editTaskCells(await writeTemplate({ templateBuffer: await download(period), source: teacherSource, summary: teacherSheet, totalRow: 36 }),
+    [{ id: parentTask.id, status: '已處理' }, { id: notedTask.id, notes: '安排星期五留堂' }]);
   const teacherPath = path.join(temp, 'teacher-latest.xlsx');
   await writeFile(teacherPath, teacherBuffer);
   // A late entry after download must not be swallowed by the upload watermark.
@@ -190,6 +223,7 @@ try {
   assert.equal((await upload(sourceBuffer, 7, beforeUpload.revision)).status, 400);
   assert.equal((await upload(Buffer.from('not excel'), 7, beforeUpload.revision)).status, 400);
   assert.equal((await upload(teacherBuffer, 7, beforeUpload.revision, cookie, 'bad.xls')).status, 400);
+  assert.equal((await upload(await editTaskCells(teacherBuffer, [{ id: parentTask.id, status: '錯誤狀態' }]), 7, beforeUpload.revision)).status, 400);
   const uploaded = await upload(teacherBuffer, 7, beforeUpload.revision);
   assert.equal(uploaded.status, 200, await uploaded.clone().text());
   const uploadedState = await uploaded.json();
@@ -199,8 +233,7 @@ try {
   const stored = JSON.parse(await readFile(dbFile, 'utf8')).homeworkReportStates[0].state;
   assert.deepEqual(Buffer.from(stored.versions[0].file, 'base64'), teacherBuffer, 'teacher file stored exactly');
   const task = uploadedState.tasks.find(item => item.studentId === 'S401' && item.action === 'parent');
-  const toggle = await fetch(`${base}/api/homework/class-analysis/report-tasks/${task.id}`, { method: 'POST', headers: { Cookie: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ academicYear, done: true }) });
-  assert.equal(toggle.status, 200);
+  assert.ok(task.done, 'the Excel status column marks parent notification as handled');
   await stop(); await start(); cookie = await login('T001');
   const afterRestart = await preview(8);
   assert.equal(afterRestart.baselineWeek, 7);
@@ -213,6 +246,11 @@ try {
   assert.equal(s8.getCell('K6').value, 9);
   assert.deepEqual(s8.getCell('K5').fill, teacherSheet.getCell('N9').fill, 'a count-cell-only detention marker is preserved without a new tier');
   assert.deepEqual(s8.getCell('J6').fill, teacherSheet.getCell('N8').fill);
+  const rows8 = taskRows(week8.getWorksheet(TASK_SHEET_NAME));
+  assert.ok(!rows8.some(row => row.id === parentTask.id), 'handled Excel task is not carried into the next pending list');
+  assert.ok(!rows8.some(row => row.id === saved7.tasks.find(task => task.studentId === 'S502' && task.action === 'detention').id));
+  assert.equal(rows8.find(row => row.id === notedTask.id).notes, '安排星期五留堂', 'teacher notes carry into the next Excel version');
+  assert.equal(week8.worksheets.filter(sheet => sheet.name === TASK_SHEET_NAME).length, 1, 'one action sheet, not a new duplicate each week');
   assert.equal((await preview(8)).tasks.length, uploadedState.tasks.length, 'same tiers create no repeat tasks');
   assert.deepEqual(await download(period), teacherBuffer, 'historical downloads return the saved file without changing the chain');
   assert.equal((await upload(teacherBuffer, 7, (await preview(8)).revision)).status, 400, 'cannot upload older week over newer report');
@@ -229,6 +267,12 @@ try {
   assert.equal(customSheet.getCell('I34').value, 2);
   assert.equal(customSheet.getCell('I36').value.result, 3);
   assert.ok(custom.worksheets.every(sheet => !sheet.name.includes('明細')));
+  assert.equal(custom.getWorksheet(TASK_SHEET_NAME), undefined, 'custom dates do not include weekly tasks');
+  const empty = await workbook(await writeTasksSheet(sourceBuffer, [], reportPeriod(period), 'wk6'));
+  assert.equal(empty.getWorksheet(TASK_SHEET_NAME).getCell('A5').value, '沒有待處理事項');
+  const literal = await workbook(await writeTasksSheet(sourceBuffer, [{ ...parentTask, name: '=1+1 <學生>', done: false, notes: '=2+2 & 備註' }], reportPeriod(period), 'wk6'));
+  assert.equal(literal.getWorksheet(TASK_SHEET_NAME).getCell('D5').value, '=1+1 <學生>');
+  assert.equal(literal.getWorksheet(TASK_SHEET_NAME).getCell('H5').value, '=2+2 & 備註', 'Excel notes stay literal text, not formulas');
   assert.equal((await exportFile({ ...customPeriod, dateFrom: '2026-09-24', dateTo: '2026-09-08' })).status, 400);
   const zipBomb = Buffer.from(sourceBuffer);
   const central = zipBomb.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02]));
@@ -251,7 +295,8 @@ try {
       await page.locator('.analysis-total').waitFor();
       assert.equal(await page.locator('#classAnalysisFrom').getAttribute('readonly'), '');
       await page.locator('#classAnalysisWeek').selectOption('9');
-      await page.locator('.report-tasks').waitFor();
+      await page.locator('.analysis-total').waitFor();
+      assert.equal(await page.locator('.report-tasks, .report-task-done').count(), 0, 'no pending actions on the website');
       assert.equal(await page.locator('#classAnalysisTo').inputValue(), '2026-10-30');
       const downloadPromise = page.waitForEvent('download');
       await page.locator('#exportClassAnalysis').click();
@@ -259,23 +304,21 @@ try {
       assert.match(dl.suggestedFilename(), /wk9\.xlsx$/);
       await page.locator('#exportClassAnalysis:not([disabled])').waitFor();
       const downloaded = await download(forWeek(9));
+      const actions9 = taskRows((await workbook(downloaded)).getWorksheet(TASK_SHEET_NAME));
+      const pendingId = actions9[0].id;
       const uploadPath = path.join(temp, 'browser-upload.xlsx');
-      await writeFile(uploadPath, downloaded);
+      await writeFile(uploadPath, await editTaskCells(downloaded, [{ id: pendingId, status: '已處理' }]));
       await page.locator('#runClassAnalysis').click();
       await page.locator('.analysis-total').waitFor();
       await page.locator('#weeklyReportFile').setInputFiles(uploadPath);
       await page.locator('#uploadWeeklyReport').click();
       await page.getByText('最新總表已儲存，下周會沿用此版本。').waitFor();
-      const pending = page.locator('.report-tasks > .report-task input:not([disabled])').first();
-      const pendingId = await pending.getAttribute('data-task');
-      await page.locator(`.report-task-done[data-task="${pendingId}"]`).click();
-      await page.locator(`.report-completed input[data-task="${pendingId}"]`).waitFor({ state: 'attached' });
-      await page.locator('.report-task-done:not([disabled])').first().waitFor();
       assert.ok((await preview(9)).tasks.find(item => item.id === pendingId).done);
-      if (qaDir) await page.locator('.report-tasks').screenshot({ path: path.join(qaDir, 'desktop.png') });
+      assert.equal(await page.locator('.report-tasks, .report-task-done').count(), 0);
+      if (qaDir) await page.screenshot({ path: path.join(qaDir, 'desktop.png') });
       await page.setViewportSize({ width: 390, height: 844 });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'mobile controls fit');
-      if (qaDir) await page.locator('.report-tasks').screenshot({ path: path.join(qaDir, 'mobile.png') });
+      if (qaDir) await page.screenshot({ path: path.join(qaDir, 'mobile.png') });
       await page.locator('#classAnalysisMode').selectOption('custom');
       await page.locator('#classAnalysisFrom').fill('2026-09-08');
       await page.locator('#classAnalysisTo').fill('2026-09-24');
@@ -286,7 +329,7 @@ try {
       assert.equal(await page.locator('#weeklyReportFile, .report-tasks').count(), 0, 'custom-date reports do not create weekly actions or uploads');
       assert.deepEqual(errors, []);
     } finally { await browser.close(); }
-    console.log('Browser: weeks from 6, download/upload, persistent actions, custom dates and mobile fit passed.');
+    console.log('Browser: Excel-only actions, no website task panel, download/upload, custom dates and mobile fit passed.');
   }
   console.log('Excel: immutable Week 6, exact fonts/layout, incremental weeks, all crossed tiers, manual marks, no duplicate actions, late records, persistence and access controls passed.');
 } catch (error) { console.error(logs.slice(-3000)); throw error; }

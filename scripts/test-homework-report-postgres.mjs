@@ -15,7 +15,6 @@ require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: {
   } }),
 } };
 const repo = require('../homework-app/repositories/reports.repo');
-const reports = require('../homework-app/lib/weekly-reports');
 try {
   const initial = await repo.getState('2026-27');
   assert.deepEqual(initial, { revision: 0, versions: [], tasks: [] });
@@ -29,7 +28,9 @@ try {
   const writes = await Promise.allSettled([repo.saveState('2026-27', saved, 1), repo.saveState('2026-27', saved, 1)]);
   assert.equal(writes.filter(item => item.status === 'fulfilled').length, 1, 'only one concurrent update wins');
   assert.equal(writes.find(item => item.status === 'rejected').reason.status, 409);
-  await reports.setTaskDone('2026-27', 'a'.repeat(64), true, 'T001');
+  const updated = await repo.getState('2026-27');
+  Object.assign(updated.tasks[0], { done: true, doneBy: 'T001' });
+  await repo.saveState('2026-27', updated, updated.revision);
   const done = await repo.getState('2026-27');
   assert.equal(done.revision, 3);
   assert.ok(done.tasks[0].done);

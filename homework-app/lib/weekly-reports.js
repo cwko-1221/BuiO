@@ -7,6 +7,7 @@ const reportRepo = require('../repositories/reports.repo');
 const { GRADES, TEMPLATE, cloneSheet, isSummarySheet, reportPeriod } = require('./excel-export');
 const { buildClassAnalysis } = require('./class-analysis');
 const { writeTemplate } = require('./xlsx-template');
+const { writeTasksSheet, applyTaskSheet, TASK_SHEET_NAME } = require('./report-tasks-sheet');
 const DAY = 86400000;
 const ACTIONS = [{ threshold: 5, action: 'parent', legend: 'N5' }, { threshold: 8, action: 'detention', legend: 'N6' }, { threshold: 10, action: 'demerit', legend: 'N7' }];
 const invalid = message => Object.assign(new Error(message), { status: 400 });
@@ -185,7 +186,9 @@ async function generate(period, userId) {
   if (data.state.versions.some(item => item.week > period.week)) {
     const saved = data.state.versions.find(item => item.week === period.week);
     if (!saved) throw invalid('已有較新周次，不能補建較早周次。');
-    return { buffer: Buffer.from(saved.file, 'base64'), filename: `欠交功課_${period.academicYear}_wk${period.week}.xlsx`, state: publicState(data.state) };
+    const original = Buffer.from(saved.file, 'base64');
+    const buffer = data.book.getWorksheet(TASK_SHEET_NAME) ? original : await writeTasksSheet(original, data.state.tasks, period, data.source.name);
+    return { buffer, filename: `欠交功課_${period.academicYear}_wk${period.week}.xlsx`, state: publicState(data.state) };
   }
   const summary = cloneSheet(data.book, data.source, `wk${period.week}`);
   summary.getCell('A3').value = `欠交功課紀錄 (${period.dateFrom.split('-').reverse().map(Number).join('/')}-${period.dateTo.split('-').reverse().map(Number).join('/')})`;
@@ -215,9 +218,10 @@ async function generate(period, userId) {
     if (!data.source.getCell(data.templateTotalRow, column).value?.formula) continue;
     summary.getCell(data.totalRow, column).value = { formula: `SUM(${summary.getColumn(column).letter}5:${summary.getColumn(column).letter}${data.totalRow - 1})`, result: data.reports[grade].totalMissing };
   }
-  const buffer = await writeTemplate({ templateBuffer: data.buffer, source: data.source, summary, totalRow: data.totalRow, templateTotalRow: data.templateTotalRow });
   const now = new Date().toISOString();
   for (const candidate of data.candidates) if (!data.state.tasks.some(task => task.id === candidate.id)) data.state.tasks.push({ ...candidate, createdAt: now });
+  const summaryBuffer = await writeTemplate({ templateBuffer: data.buffer, source: data.source, summary, totalRow: data.totalRow, templateTotalRow: data.templateTotalRow });
+  const buffer = await writeTasksSheet(summaryBuffer, data.state.tasks, period, summary.name);
   const snapshot = { week: period.week, period, kind: 'generated', savedAt: now, savedBy: userId, hash: fingerprint(buffer), file: buffer.toString('base64'),
     observed: Object.fromEntries(Object.entries(data.current).map(([id, row]) => [id, row.missingCount])) };
   data.state.versions = data.state.versions.filter(item => item.week !== period.week).concat(snapshot);
@@ -231,6 +235,7 @@ async function upload(period, buffer, userId, expectedRevision) {
   if (Number(expectedRevision) !== data.state.revision) throw Object.assign(new Error('總表已更新，請重新載入後再上載。'), { status: 409 });
   if (data.state.versions.some(item => item.week > period.week)) throw invalid('已有較新周次，不能以較早版本取代。');
   const opened = await openReport(buffer, period);
+  applyTaskSheet(opened.book, data.state.tasks, userId);
   const entries = entriesFor(opened.source, opened.totalRow, data.rosters);
   for (const entry of entries) if (entry.detention) for (const task of data.state.tasks) {
     if (task.studentKey === entry.key && task.action === 'detention' && !task.done) Object.assign(task, { done: true, doneBy: userId, doneAt: new Date().toISOString(), resolvedByUpload: true });
@@ -243,12 +248,4 @@ async function upload(period, buffer, userId, expectedRevision) {
   return publicState(await reportRepo.saveState(period.academicYear, data.state, data.state.revision));
 }
 
-async function setTaskDone(academicYear, id, done, userId) {
-  const state = await reportRepo.getState(academicYear);
-  const task = state.tasks.find(item => item.id === id);
-  if (!task) throw Object.assign(new Error('找不到待處理事項。'), { status: 404 });
-  Object.assign(task, { done, doneBy: done ? userId : null, doneAt: done ? new Date().toISOString() : null });
-  return publicState(await reportRepo.saveState(academicYear, state, state.revision));
-}
-
-module.exports = { preview, generate, upload, setTaskDone, openReport, checkArchive, nextStatus };
+module.exports = { preview, generate, upload, openReport, checkArchive, nextStatus };
