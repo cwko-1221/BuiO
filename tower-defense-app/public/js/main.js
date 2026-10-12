@@ -14,7 +14,8 @@ document.addEventListener('touchmove', event => {
 import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, WORLD, towerStats } from './content.js?v=20260809-path-grid-1';
 import { TowerDefenseSimulation } from './simulation.js?v=20260809-path-grid-1';
 import { BattleScene } from './BattleScene.js?v=20260809-path-grid-1';
-import { CrystalAudio } from './audio.js?v=20260802-2';
+import { CrystalAudio } from './audio.js?v=20261013-start-recovery-1';
+import { requestJson, startQuestionSession } from './session-start.js?v=20261013-start-recovery-1';
 import { MAP_ART, MAP_THUMB, TOWER_ART, atlasPosition } from './assets.js?v=20260817-thumbs';
 
 const $=id=>document.getElementById(id);
@@ -38,6 +39,15 @@ let roomsTimer=null,joining=false,classroomStarted=false,lastClassroomStateAt=0;
 let simulation=null,scene=null,phaserGame=null,questionSessionId=null;
 let selectedTowerId=null,panelSignature='',questionTimer=null,questionDeadline=0,activeQuestion=null,answering=false;
 let lastHudSignature='',lastSoundAt=new Map(),modalWasPaused=false;
+let deploymentAbort=null,sessionStartKey=null,audioFailureReported=false;
+let lastSelectedMap=null,mapSelectionRequest=0;
+
+function unlockAudio(){
+  // Safari can leave resume() pending until the student's next tap. Sound must
+  // never hold up a teacher-triggered start or a question request.
+  void audio.unlock().catch(error=>{if(!audioFailureReported){audioFailureReported=true;console.warn('[tower-defense] audio unavailable',error);}});
+}
+function cancelDeployment(){deploymentAbort?.abort();deploymentAbort=null;sessionStartKey=null;}
 
 function loadProfile(){
   try{
@@ -50,11 +60,14 @@ function saveProfile(){localStorage.setItem(profileKey,JSON.stringify(profile));
 function showScreen(id){document.querySelectorAll('.screen').forEach(screen=>screen.classList.toggle('active',screen.id===id));}
 function requestHeaders(){return previewRoute?{'x-buio-preview':'1'}:{};}
 
-async function api(path,{method='GET',body}={}){
-  const response=await fetch(`/api/tower-defense${path}`,{method,credentials:'include',headers:{...requestHeaders(),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
-  const data=await response.json().catch(()=>({success:false,message:t('td.badResponse')}));
-  if(!response.ok||data.success===false)throw new Error(serverText(data.message)||t('td.connectFailed'));
-  return data;
+async function api(path,{method='GET',body,signal}={}){
+  try{return await requestJson(`/api/tower-defense${path}`,{method,signal,credentials:'include',headers:{...requestHeaders(),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});}
+  catch(error){
+    if(error.code==='REQUEST_TIMEOUT')error.message=t('td.syncTimeout');
+    else if(error.code==='BAD_RESPONSE')error.message=t('td.badResponse');
+    else if(error.status)error.message=serverText(error.message)||t('td.connectFailed');
+    throw error;
+  }
 }
 
 function renderMenu(){
@@ -99,29 +112,37 @@ async function loadRooms(){
 
 async function joinRoom(code){
   if(joining||!socket)return;joining=true;$('joinError').textContent='';await loadIdentity();
-  socket.emit('player:join',{code,name:me.name,studentId:me.studentId},response=>{
+  const previousMap=classroom?.code===code?(selectedMap||lastSelectedMap):null;
+  socket.timeout(10000).emit('player:join',{code,name:me.name,studentId:me.studentId},(error,response)=>{
     joining=false;
-    if(!response?.ok){$('joinError').textContent=serverText(response?.message)||t('td.joinFailed');loadRooms();return;}
+    if(error||!response?.ok){$('joinError').textContent=serverText(response?.message)||t('td.joinFailed');loadRooms();return;}
     clearInterval(roomsTimer);
+    if(classroom?.code!==response.code){cancelDeployment();lastSelectedMap=null;}
+    mapSelectionRequest++;
     classroom={code:response.code,hostName:response.hostName,setTitle:response.setTitle,phase:response.phase};
     classroomStarted=response.phase==='playing';selectedMap=response.mapId||null;
     $('classroomHost').textContent=teacherLabel(response.hostName);$('classroomSet').textContent=response.setTitle;
+    if(simulation){emitClassroomState(simulation.state.phase==='won'?'won':simulation.state.phase==='lost'?'lost':'playing',true);return;}
     $('deploymentStatus').textContent=t(classroomStarted?'td.pickThenDeploy':'td.pickFirst');
     showScreen('menuScreen');renderMenu();
     if(classroomStarted&&selectedMap)startCampaign();
+    else if(previousMap&&!selectedMap)selectBattlefield(previousMap);
   });
 }
 
 function selectBattlefield(mapId){
-  if(!MAPS[mapId]||simulation)return;
+  if(!MAPS[mapId]||simulation||deploymentAbort)return;
+  lastSelectedMap=mapId;
+  const request=++mapSelectionRequest;
   selectedMap=mapId;renderMenu();audio.sfx('ui');
   if(preview){
     const button=$('startCampaignBtn');button.disabled=false;button.classList.remove('classroom-wait');button.querySelector('span').textContent=t('td.previewThisMap');$('deploymentStatus').textContent=t('td.previewLead');
     return;
   }
   $('deploymentStatus').textContent=t('td.syncingMap');
-  socket.emit('player:select-map',{mapId},response=>{
-    if(!response?.ok){selectedMap=null;renderMenu();$('deploymentStatus').textContent=serverText(response?.message)||t('td.mapPickFailed');return;}
+  socket.timeout(10000).emit('player:select-map',{mapId},(error,response)=>{
+    if(request!==mapSelectionRequest)return;
+    if(error||!response?.ok){selectedMap=null;renderMenu();$('deploymentStatus').textContent=serverText(response?.message)||t('td.mapPickFailed');return;}
     $('deploymentStatus').textContent=t(response.shouldStart?'td.deploying':'td.readyWaiting');
     if(response.shouldStart)startCampaign();
   });
@@ -178,14 +199,19 @@ function bindTowerCard(button){
 }
 
 async function startCampaign(){
-  if(!selectedMap||(!preview&&!classroomStarted))return;
+  if(!selectedMap||deploymentAbort||(!preview&&!classroomStarted))return;
+  const controller=deploymentAbort=new AbortController();
+  sessionStartKey ||= crypto.randomUUID?.() || Array.from(crypto.getRandomValues(new Uint8Array(16)),value=>value.toString(16).padStart(2,'0')).join('');
+  const mapId=selectedMap;
   const button=$('startCampaignBtn');button.disabled=true;button.querySelector('span').textContent=t('td.syncingBank');
   try{
-    await audio.unlock();
-    const response=await api('/session',{method:'POST',body:{roomCode:classroom?.code||undefined}});
+    unlockAudio();
+    const response=await startQuestionSession(api,{roomCode:classroom?.code||undefined,startRequestId:sessionStartKey},controller.signal);
+    if(controller.signal.aborted||(!preview&&!classroomStarted))return;
     questionSessionId=response.sessionId;
+    sessionStartKey=null;
     teardownGame();
-    simulation=new TowerDefenseSimulation({mapId:selectedMap,seed:Date.now()});
+    simulation=new TowerDefenseSimulation({mapId,seed:Date.now()});
     showScreen('gameScreen');
     $('mapChapter').textContent=t('td.chapterTier',{chapter:MAPS[selectedMap].chapter,tier:DIFFICULTIES.guardian.name});
     $('mapName').textContent=MAPS[selectedMap].name;
@@ -198,14 +224,26 @@ async function startCampaign(){
     });
     phaserGame=new Phaser.Game({
       type:Phaser.AUTO,parent:'gameCanvas',width:1280,height:720,transparent:true,
+      // CrystalAudio owns all sound. Phaser must not create a second context.
+      audio:{noAudio:true},
       scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH,width:1280,height:720},
       render:{antialias:true,roundPixels:false,pixelArt:false},scene:[battleScene],fps:{target:60,min:30},
     });
     audio.startMusic(MAPS[selectedMap].weather);
     emitClassroomState('playing',true);
     updateHud(simulation.state,true);showBanner(t('td.mapBanner',{map:MAPS[selectedMap].name,lanes:MAPS[selectedMap].paths.length}));showToast(t('td.bankToast',{title:response.set.title}),'success');
-  }catch(error){console.error('[tower-defense] unable to start campaign',error);window.__towerDefense.lastError=error.message;showToast(error.message,'error');showScreen('menuScreen');}
-  finally{if(preview){button.disabled=false;button.querySelector('span').textContent=t('td.previewThisMap');}}
+  }catch(error){
+    if(controller.signal.aborted)return;
+    console.error('[tower-defense] unable to start campaign',error);window.__towerDefense.lastError=error.message;
+    showToast(error.message,'error');$('deploymentStatus').textContent=t('td.retryDeployHint');showScreen('menuScreen');
+  }finally{
+    if(deploymentAbort===controller){
+      deploymentAbort=null;
+      button.disabled=!preview&&(!classroomStarted||!selectedMap);
+      button.classList.toggle('classroom-wait',button.disabled);
+      button.querySelector('span').textContent=t(preview?'td.previewThisMap':'td.retryDeploy');
+    }
+  }
 }
 
 function teardownGame(){
@@ -297,7 +335,7 @@ function cycleSpeed(){if(!simulation)return;simulation.setSpeed(simulation.state
 
 async function openQuestion(){
   if(!simulation||!questionSessionId||$('questionPanel').classList.contains('open'))return;
-  await audio.unlock();$('questionPanel').classList.add('open');$('questionPrompt').textContent=t('td.quizFetching');$('questionImage').hidden=true;$('questionImage').removeAttribute('src');$('questionChoices').innerHTML='';$('questionFeedback').textContent='';answering=false;
+  unlockAudio();$('questionPanel').classList.add('open');$('questionPrompt').textContent=t('td.quizFetching');$('questionImage').hidden=true;$('questionImage').removeAttribute('src');$('questionChoices').innerHTML='';$('questionFeedback').textContent='';answering=false;
   try{
     const data=await api('/question',{method:'POST',body:{sessionId:questionSessionId}});activeQuestion=data.question;questionDeadline=activeQuestion.expiresAt;
     $('questionPrompt').textContent=activeQuestion.prompt;
@@ -346,6 +384,7 @@ function finishCampaign(won){
 }
 
 function returnToCampaign(){
+  cancelDeployment();
   teardownGame();
   if(!preview){location.href='/';return;}
   showScreen('menuScreen');renderMenu();
@@ -367,7 +406,8 @@ function bindUi(){
     const point=clientToWorld(event.clientX,event.clientY);
     if(point){scene.setPlacementPointer(point.x,point.y,true);scene.handleWorldClick(point.x,point.y);}
   });
-  const toggleAudio=async()=>{await audio.unlock();const muted=audio.toggle();$('audioBtn').textContent=$('menuAudioBtn').textContent=muted?'×':'♪';};$('audioBtn').addEventListener('click',toggleAudio);$('menuAudioBtn').addEventListener('click',toggleAudio);
+  const toggleAudio=()=>{unlockAudio();const muted=audio.toggle();$('audioBtn').textContent=$('menuAudioBtn').textContent=muted?'×':'♪';};$('audioBtn').addEventListener('click',toggleAudio);$('menuAudioBtn').addEventListener('click',toggleAudio);
+  for(const type of ['click','touchend','keydown'])document.addEventListener(type,()=>{if(audio.context?.state!=='running')unlockAudio();},{capture:true,passive:true});
   document.addEventListener('keydown',event=>{
     if(!$('gameScreen').classList.contains('active'))return;
     if($('questionPanel').classList.contains('open')){const index=['a','b','c','d'].indexOf(event.key.toLowerCase());if(index>=0)answerQuestion(index);return;}
@@ -385,17 +425,19 @@ function bindUi(){
 }
 
 if(socket){
+  socket.on('connect',()=>{if(classroom?.code)joinRoom(classroom.code);});
   socket.on('classroom:start',payload=>{
     classroomStarted=true;if(classroom)classroom.phase='playing';
-    if(selectedMap)startCampaign();else $('deploymentStatus').textContent=t('td.startedPickNow');
+    if(selectedMap){if(!simulation)startCampaign();}else $('deploymentStatus').textContent=t('td.startedPickNow');
   });
   socket.on('classroom:ended',()=>{
+    classroomStarted=false;if(classroom)classroom.phase='ended';cancelDeployment();
     if(!simulation){location.href='/';return;}
     simulation.togglePause(true);emitClassroomState(simulation.state.phase==='won'?'won':'playing',true);
     $('endEyebrow').textContent=t('td.classEnded');$('endTitle').textContent=t('td.classEndedTitle');$('endDescription').textContent=t('td.classEndedBody');
     $('endModal').classList.add('open');
   });
-  socket.on('classroom:closed',({message})=>{alert(serverText(message)||t('td.roomClosed'));location.href='/';});
+  socket.on('classroom:closed',({message})=>{classroomStarted=false;cancelDeployment();alert(serverText(message)||t('td.roomClosed'));location.href='/';});
 }
 
 renderMenu();renderTowerDock();bindUi();

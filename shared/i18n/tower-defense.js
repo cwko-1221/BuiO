@@ -56,6 +56,9 @@ BuiI18n.register({
   'td.mapPickFailed':  { 'zh-HK': '無法選擇戰場。', 'en-US': 'That battlefield could not be chosen.' },
   'td.startedPickNow': { 'zh-HK': '老師已開始，選擇戰場後立即部署', 'en-US': 'Your teacher has started — pick a battlefield to deploy now' },
   'td.syncingBank':    { 'zh-HK': '正在同步題庫…', 'en-US': 'Syncing the question bank…' },
+  'td.syncTimeout':    { 'zh-HK': '同步等候逾時，請再試一次。', 'en-US': 'Syncing took too long. Please try again.' },
+  'td.retryDeploy':    { 'zh-HK': '重新部署', 'en-US': 'Retry deployment' },
+  'td.retryDeployHint': { 'zh-HK': '未能完成同步，請按重新部署再試一次。', 'en-US': 'Syncing did not finish. Tap Retry deployment to try again.' },
   'td.entrances':      { 'zh-HK': '{count} 個入口', 'en-US': '{count} entrances' },
   'td.campaignRecord': { 'zh-HK': '戰役進度 <b>{done}/3</b> · 最高分 <b>{best}</b> · 累積答對 <b>{correct}</b>', 'en-US': 'Campaign <b>{done}/3</b> · Best score <b>{best}</b> · Correct answers <b>{correct}</b>' },
 

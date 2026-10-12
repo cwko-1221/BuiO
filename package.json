@@ -18,6 +18,7 @@
     "check:checkpoint-live": "node scripts/test-game-checkpoint-live.mjs",
     "check:security": "npm audit --omit=dev --audit-level=low",
     "check:tower-defense": "node scripts/test-tower-defense.mjs",
+    "check:tower-defense-start": "node scripts/test-tower-defense-start.mjs",
     "check:homework": "node scripts/test-homework-module.mjs",
     "check:homework-excel": "node scripts/test-homework-excel.mjs",
     "check:homework-report-postgres": "node scripts/test-homework-report-postgres.mjs",

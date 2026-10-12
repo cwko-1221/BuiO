@@ -7,6 +7,7 @@ export class CrystalAudio {
     this.muted=localStorage.getItem('buio-td-muted')==='1';
     this.musicTimer=null;
     this.musicStep=0;
+    this.musicTheme=null;
   }
 
   async unlock() {
@@ -24,7 +25,8 @@ export class CrystalAudio {
       this.master.connect(this.context.destination);
       this.refreshMute();
     }
-    if (this.context.state==='suspended') await this.context.resume();
+    if (this.context.state!=='running' && this.context.state!=='closed') await this.context.resume();
+    if (this.context.state==='running' && this.musicTheme && !this.musicTimer) this.startMusic(this.musicTheme);
   }
 
   refreshMute() {
@@ -41,7 +43,7 @@ export class CrystalAudio {
   }
 
   tone({ frequency=440,endFrequency=frequency,duration=.12,type='sine',gain=.18,when=0,pan=0 }={}) {
-    if (!this.context||this.muted) return;
+    if (!this.context||this.context.state!=='running'||this.muted) return;
     const start=this.context.currentTime+when;
     const oscillator=this.context.createOscillator();
     const envelope=this.context.createGain();
@@ -61,7 +63,7 @@ export class CrystalAudio {
   }
 
   noise({ duration=.16,gain=.12,highpass=400,when=0 }={}) {
-    if (!this.context||this.muted) return;
+    if (!this.context||this.context.state!=='running'||this.muted) return;
     const frames=Math.max(1,Math.floor(this.context.sampleRate*duration));
     const buffer=this.context.createBuffer(1,frames,this.context.sampleRate);
     const data=buffer.getChannelData(0);
@@ -107,12 +109,13 @@ export class CrystalAudio {
 
   startMusic(theme='stars') {
     this.stopMusic();
-    if (!this.context) return;
+    this.musicTheme=theme;
+    if (!this.context || this.context.state!=='running') return;
     const scales={ stars:[196,247,294,370,440,294,247,330],fireflies:[174,220,261,330,392,330,261,220],embers:[146,174,220,261,293,261,220,174] };
     const scale=scales[theme]||scales.stars;
     this.musicStep=0;
     const tick=()=>{
-      if (!this.context||this.muted) return;
+      if (!this.context||this.context.state!=='running'||this.muted) return;
       const note=scale[this.musicStep++%scale.length];
       const start=this.context.currentTime;
       const oscillator=this.context.createOscillator();
@@ -136,5 +139,6 @@ export class CrystalAudio {
   stopMusic() {
     if (this.musicTimer) clearInterval(this.musicTimer);
     this.musicTimer=null;
+    this.musicTheme=null;
   }
 }

@@ -9,6 +9,7 @@ const { findPlayerForOwner, rooms } = require('../lib/classrooms');
 
 const router = express.Router();
 const sessions = new Map();
+const starts = new Map();
 const QUESTION_TTL_MS = 20_000;
 const SESSION_TTL_MS = 2 * 60 * 60 * 1000;
 
@@ -89,6 +90,16 @@ router.post('/session', async (req, res, next) => {
     } else if (!isPreview(req)) {
       return res.status(400).json({ success: false, message: '請先加入老師建立的塔防房間。' });
     }
+    const requestId = req.body?.startRequestId;
+    if (requestId !== undefined && (typeof requestId !== 'string' || !/^[A-Za-z0-9_-]{16,80}$/.test(requestId))) {
+      return res.status(400).json({ success: false, message: '開始請求識別碼不正確。' });
+    }
+    const startKey = requestId ? JSON.stringify([ownerOf(req), roomCode, requestId]) : null;
+    const existing = startKey && sessions.get(starts.get(startKey));
+    if (existing) {
+      existing.touchedAt = Date.now();
+      return res.status(201).json({ success: true, sessionId: existing.id, set: publicSet(existing.set) });
+    }
     const id = crypto.randomUUID();
     const order = set.questions.map((_, index) => index);
     for (let index = order.length - 1; index > 0; index--) {
@@ -99,6 +110,7 @@ router.post('/session', async (req, res, next) => {
       id,
       owner: ownerOf(req),
       roomCode: roomCode || null,
+      startKey,
       set,
       order,
       cursor: 0,
@@ -108,6 +120,7 @@ router.post('/session', async (req, res, next) => {
       active: null,
       touchedAt: Date.now(),
     });
+    if (startKey) starts.set(startKey, id);
     res.status(201).json({ success: true, sessionId: id, set: publicSet(set) });
   } catch (error) { next(error); }
 });
@@ -169,7 +182,10 @@ router.post('/answer', (req, res) => {
 
 setInterval(() => {
   const cutoff = Date.now() - SESSION_TTL_MS;
-  for (const [id, session] of sessions) if (session.touchedAt < cutoff) sessions.delete(id);
+  for (const [id, session] of sessions) if (session.touchedAt < cutoff) {
+    sessions.delete(id);
+    if (session.startKey) starts.delete(session.startKey);
+  }
 }, 10 * 60 * 1000).unref();
 
 module.exports = router;
