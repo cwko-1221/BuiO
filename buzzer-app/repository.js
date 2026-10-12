@@ -255,7 +255,12 @@ async function action(id, user, body) {
     const type = body.action;
     if (['start', 'judge', 'cancel', 'end'].includes(type) && !teacher) fail('只有老師可以操作。', 403);
     if (['join', 'buzz', 'ready', 'armed'].includes(type) && user.role !== 'student') fail('只有學生可以搶答。', 403);
-    if (session.phase === 'ended') fail('老師已結束課堂。', 409);
+    if (session.phase === 'ended') {
+      // beforeunload/pagehide or an unload fallback may deliver the same close
+      // twice. Ownership and teacher-only checks above still apply to replays.
+      if (type === 'end') return view(session, user);
+      fail('老師已結束課堂。', 409);
+    }
     if (type === 'join') {
       const existing = session.participants.some(row => row.studentId === user.studentId);
       if (existing && ['preparing', 'scheduled', 'countdown'].includes(session.phase)) {

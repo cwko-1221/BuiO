@@ -81,6 +81,26 @@ test('an unrestricted room can start with an empty roster', async () => {
   assert.deepEqual(await repo.sessions(student('LATE')), []);
 });
 
+test('only the owner can close a classroom; duplicate exits preserve results and revision', async () => {
+  const { repo, data } = fixture();
+  const room = await repo.create(teacher, { points: 10 });
+  await repo.action(room.id, student('S1'), { action: 'join' });
+  data.buzzerSessions[0].participants[0].score = 20;
+  data.buzzerSessions[0].participants[0].successes = 2;
+  data.petCurrencyLedger.push({ transactionId: 'earned-before-close', delta: 20 });
+  await assert.rejects(repo.action(room.id, student('S1'), { action: 'end' }), { status: 403 });
+  await assert.rejects(repo.action(room.id, { studentId: 'T2', role: 'teacher' }, { action: 'end' }), { status: 403 });
+  const ended = await repo.action(room.id, teacher, { action: 'end' });
+  assert.equal(ended.phase, 'ended');
+  const duplicate = await repo.action(room.id, teacher, { action: 'end' });
+  assert.deepEqual({ ...duplicate, serverNow: 0 }, { ...ended, serverNow: 0 }, 'a duplicate exit must not create another revision');
+  assert.deepEqual(await repo.sessions(student('S1')), []);
+  assert.equal((await repo.get(room.id, student('S1'))).me.score, 20);
+  assert.deepEqual(data.petCurrencyLedger, [{ transactionId: 'earned-before-close', delta: 20 }]);
+  await assert.rejects(repo.action(room.id, student('S1'), { action: 'end' }), { status: 403 });
+  await assert.rejects(repo.action(room.id, teacher, { action: 'start', round: ended.round }), { status: 409 });
+});
+
 test('multiple classes and groups use OR across subjects and AND within each rule', async () => {
   const { repo, data, currentStudents } = fixture();
   const rules = [

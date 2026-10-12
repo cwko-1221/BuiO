@@ -15,7 +15,7 @@ const port = await new Promise(resolve => {
 const baseURL = `http://127.0.0.1:${port}`;
 const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'buio-buzzer-'));
 const databaseFile = path.join(temporary, 'db.json');
-const artifacts = path.resolve('artifacts/buzzer-qa');
+const artifacts = path.resolve(process.env.BUZZER_QA_OUT || 'artifacts/buzzer-qa');
 await fs.mkdir(artifacts, { recursive: true });
 await fs.writeFile(databaseFile, JSON.stringify({ users: [
   { studentid: 'T001', name: '陳老師', role: 'teacher', passwordhash: bcrypt.hashSync('teacher123', 4) },
@@ -125,7 +125,9 @@ try {
   await action(teacher, { action: 'judge', round: 3, correct: true });
   assert.equal(await balance(s1) + await balance(s2), 40);
   await stop(); await start();
-  await host.reload(); await host.locator('[data-action="start"]:enabled').waitFor();
+  // A transient server restart is recoverable; an intentional teacher-page
+  // reload now ends class, just like the whiteboard, so keep this page open.
+  await host.locator('[data-action="start"]:enabled').waitFor();
   current = await snapshot(teacher);
   assert.equal(current.round, 3);
   assert.equal(current.participants.reduce((total, row) => total + row.score, 0), 40);
@@ -139,13 +141,54 @@ try {
   await student1.getByRole('heading', { name: '課堂已結束' }).waitFor();
   assert.equal((await (await s1.request.get('/api/buzzer/sessions')).json()).sessions.length, 0);
   assert.equal((await action(s1, { action: 'join' })).status(), 409);
+  assert.equal((await action(teacher, { action: 'end' })).status(), 200, 'duplicate owner exits are harmless');
   await english.goto('/buzzer');
   await english.getByRole('heading', { name: 'Open a buzz classroom' }).waitFor();
   assert.equal(await english.locator('#createClass').innerText(), 'Start class');
   const disk = JSON.parse(await fs.readFile(databaseFile, 'utf8'));
   assert.equal(disk.petCurrencyLedger.filter(row => row.metadata?.buzzerSessionId === id).length, 2);
+
+  const openClass = async hostPage => {
+    const response = await teacher.request.post('/api/buzzer/sessions', { data: { audienceRules: [], points: 7 } });
+    assert.equal(response.status(), 200);
+    const sessionId = (await response.json()).session.id;
+    await hostPage.goto(`/buzzer?session=${sessionId}`);
+    await hostPage.locator('[data-action="start"]').waitFor();
+    await student1.goto(`/buzzer?session=${sessionId}`);
+    await student1.getByRole('heading', { name: '等待問題', exact: true }).waitFor();
+    return sessionId;
+  };
+  const readClass = async sessionId => (await (await teacher.request.get(`/api/buzzer/sessions/${sessionId}`)).json()).session;
+  let closingId = await openClass(host);
+  await student2.goto(`/buzzer?session=${closingId}`);
+  await student2.getByRole('heading', { name: '等待問題', exact: true }).waitFor();
+  await student2.close();
+  assert.equal((await readClass(closingId)).phase, 'waiting', 'closing a student page never ends class');
+  await host.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  assert.equal((await readClass(closingId)).phase, 'waiting', 'backgrounding the teacher page never ends class');
+  await host.evaluate(() => { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); });
+  await host.locator('[data-action="start"]:enabled').waitFor();
+  await host.close({ runBeforeUnload: true });
+  await student1.getByRole('heading', { name: '課堂已結束', exact: true }).waitFor();
+  assert.equal((await readClass(closingId)).phase, 'ended', 'native beforeunload Beacon closes the saved classroom');
+  assert.equal((await (await s1.request.get('/api/classroom/sessions')).json()).buzzers.length, 0, 'portal discovery removes the class');
+  await student1.screenshot({ path: path.join(artifacts, '05-teacher-tab-close.png') });
+
+  const fallbackHost = await teacher.newPage();
+  fallbackHost.on('pageerror', error => errors.push(error.message));
+  await fallbackHost.addInitScript(() => { navigator.sendBeacon = () => false; });
+  closingId = await openClass(fallbackHost);
+  await fallbackHost.goto('/');
+  await student1.getByRole('heading', { name: '課堂已結束', exact: true }).waitFor();
+  assert.equal((await readClass(closingId)).phase, 'ended', 'keepalive fallback closes class when the teacher leaves');
+  closingId = await openClass(fallbackHost);
+  await fallbackHost.reload();
+  await student1.getByRole('heading', { name: '課堂已結束', exact: true }).waitFor();
+  assert.equal((await readClass(closingId)).phase, 'ended', 'teacher refresh matches whiteboard page-exit behavior');
+  assert.equal(await balance(s1) + await balance(s2), 40, 'closing classrooms never loses or duplicates earned coins');
+  await student1.screenshot({ path: path.join(artifacts, '06-teacher-reload-close.png') });
   assert.deepEqual(errors, [], 'no browser runtime errors');
-  if (process.argv.includes('--sync')) await verifySynchronizedClass({ browser, teacher, host, baseURL, artifacts });
-  console.log('✓ portal entry and classes label; class/subject-group targeting; phone UI; realtime 3-second countdown; authenticated first-buzz race; correct/incorrect judgments; exactly-once pet coins; reload/restart; cancellation/end; English UI');
+  if (process.argv.includes('--sync')) await verifySynchronizedClass({ browser, teacher, host: fallbackHost, baseURL, artifacts });
+  console.log('✓ portal entry and classes label; class/subject-group targeting; phone UI; realtime 3-second countdown; authenticated first-buzz race; correct/incorrect judgments; exactly-once pet coins; student reload/server restart; cancellation/end; English UI; teacher tab close/navigation/refresh with Beacon and keepalive; student close/background safety');
 } catch (error) { console.error(logs.slice(-7000)); throw error; }
 finally { await browser?.close(); await stop(); }

@@ -1,4 +1,5 @@
 import { createClock } from './clock.js';
+import { watchTeacherSessionExit } from './session-lifecycle.mjs';
 import { mountAudienceEditor } from '/shared/classroom-audience-editor.mjs';
 const app = document.querySelector('#app');
 const clock = createClock();
@@ -257,5 +258,6 @@ document.addEventListener('visibilitychange', () => {
   else void enter(session.id).catch(error => notice(error.message));
 });
 window.addEventListener('pagehide', () => events?.close());
+watchTeacherSessionExit(() => user, () => session);
 window.addEventListener('pageshow', event => { if (event.persisted && session) void enter(session.id).catch(error => notice(error.message)); });
 init().catch(error => window.BuiLoading.recover(error, undefined, app));
