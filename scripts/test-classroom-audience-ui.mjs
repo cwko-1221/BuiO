@@ -17,7 +17,7 @@ import { chromium, expect } from 'playwright/test';
 
 const project = fileURLToPath(new URL('..', import.meta.url));
 const clientRoot = path.join(project, 'whiteboard-app/client');
-const artifacts = path.join(project, 'artifacts/classroom-audience-qa');
+const artifacts = path.resolve(process.env.CLASSROOM_AUDIENCE_QA_OUT || path.join(project, 'artifacts/classroom-audience-qa'));
 const require = createRequire(import.meta.url);
 const clientRequire = createRequire(path.join(clientRoot, 'package.json'));
 const { io: connectSocket } = clientRequire('socket.io-client');
@@ -53,6 +53,16 @@ yearsStub.exports = new Proxy({}, {
   },
 });
 require.cache[yearsPath] = yearsStub;
+// Auth middleware imports the unrelated Admin unlock guard. Whiteboard uses
+// requireAuth/requireTeacher only; keep that guard from loading real config.
+const adminPath = require.resolve('../shared/admin-auth');
+const adminStub = new Module(adminPath);
+adminStub.filename = adminPath;
+adminStub.loaded = true;
+adminStub.exports = new Proxy({}, {
+  get() { throw new Error('Whiteboard fixture must never access Admin credentials'); },
+});
+require.cache[adminPath] = adminStub;
 const registerWhiteboard = require('../whiteboard-app/server/socket');
 
 function assertDataIsolation() {
@@ -129,6 +139,7 @@ function createFixture(dist) {
       name: req.session.studentId === 'T1' ? 'lesson' : `Fixture ${req.session.studentId}`, language: 'zh-HK' } });
   });
   app.get('/api/homework/meta', (_req, res) => res.json({ success: true, canAccess: false }));
+  app.get('/api/homework/pending', (_req, res) => res.json({ success: true, pending: [], history: [] }));
   app.get('/api/stats/teacher/all-users', (_req, res) => res.json({ success: true,
     students: roster.students, academicYears: ['fixture-only'], currentAcademicYear: 'fixture-only' }));
   app.get('/api/pet/teacher/roster', (_req, res) => res.json({ success: true, students: roster.students }));
@@ -174,7 +185,9 @@ function createFixture(dist) {
     socket.request.session = sessionFromCookies(socket.request.headers);
     next();
   });
-  registerWhiteboard(io, app, { rosterProvider: async () => structuredClone(roster), teacherReconnectGraceMs: 100 });
+  const whiteboard = registerWhiteboard(io, app, { rosterProvider: async () => structuredClone(roster), teacherReconnectGraceMs: 100 });
+  app.get('/api/classroom/sessions', async (req, res) => res.json({ success: true,
+    whiteboards: await whiteboard.listSessions(req.session), buzzers: [], partial: false }));
   io.on('connection', socket => socket.on('__fixture-barrier', acknowledge => acknowledge()));
   app.use('/shared', express.static(path.join(project, 'shared')));
   app.use('/src', express.static(path.join(project, 'src')));
@@ -543,6 +556,35 @@ async function testPortalLauncher() {
   await expect.poll(async () => (await teacher.request.get('/api/whiteboard/sessions/lesson/audience')).status()).toBe(200);
   assert.deepEqual((await api(teacher, '/api/whiteboard/sessions/lesson/audience')).audienceRules, [],
     'actual portal main.js starts a default-all room through the React socket');
+
+  // Guard the data -> UI boundary too: differently versioned ESM imports used
+  // to populate one services cache while Dashboard read an empty second copy.
+  const student = await contextFor('S1');
+  const studentPage = await student.newPage();
+  const studentRequests = [];
+  studentPage.on('request', request => studentRequests.push(new URL(request.url()).pathname));
+  await studentPage.goto('/');
+  const join = studentPage.locator('[data-session-id="lesson"]');
+  await expect(join).toBeVisible({ timeout: 15000 });
+  await expect(studentPage.locator('.session-teacher')).toHaveText('lesson');
+  assert.equal(studentRequests.filter(url => url === '/src/services.js').length, 1,
+    'the portal and Dashboard share exactly one services module');
+  assert.equal(studentRequests.filter(url => url === '/src/main.js').length, 1,
+    'Admin imports must not start a second portal entrypoint');
+  assert.equal(studentRequests.filter(url => url === '/api/auth/me').length, 1,
+    'the portal initializes the signed-in student once');
+  const studentShot = path.join(artifacts, '11-student-portal-visible-class.png');
+  await studentPage.screenshot({ path: studentShot, fullPage: true });screenshots.push(studentShot);
+  await Promise.all([studentPage.waitForURL('**/whiteboard/class-student?room=lesson&name=*'), join.click()]);
+  await expect(page.getByText('S1', { exact: true }).first()).toBeVisible();
+  await studentPage.close();
+
+  const teacherPortal = await teacher.newPage();
+  await teacherPortal.goto('/');
+  await expect(teacherPortal.locator('#endSessionBtn')).toBeVisible({ timeout: 15000 });
+  await expect(teacherPortal.locator('#rejoinBoardBtn')).toBeVisible();
+  await teacherPortal.close();
+  console.log('PASS classroom discovery: the real student dashboard shows the teacher room and joins it; teacher dashboard shows end/rejoin; ESM/cache/startup instances stay shared');
   await teacher.request.post('/api/whiteboard/sessions/end', { data: { roomId: 'lesson' } });
   await page.goto('/');
   await expect(page.locator('#openBoardBtn')).toBeVisible();
@@ -660,4 +702,5 @@ try {
     && path.basename(temporary).startsWith('buio-classroom-audience-ui-'), 'cleanup stays inside the generated temporary directory');
   await fs.rm(temporary, { recursive: true, force: true });
   delete require.cache[yearsPath];
+  delete require.cache[adminPath];
 }
