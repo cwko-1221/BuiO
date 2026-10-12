@@ -1,16 +1,6 @@
-/* iOS ignores user-scalable=no, so every zoom has to be refused another way, and a drag is the
-   road to the one that is hardest to refuse: once iOS has started panning it owns the touch
-   sequence, a second finger turns that pan into a pinch, and preventDefault from then on is
-   ignored. So nothing on the play surface pans. Nothing there scrolls either — the game screen is
-   fixed to the viewport and the question sheet is a centred card — so the only thing a drag could
-   ever produce is the rubber band, and through it that pinch.
-   The pages that genuinely scroll are the join and results screens and the teacher's page, which
-   this stylesheet also serves: those keep pan-y, which refuses the pinch while leaving the swipe.
-   overscroll-behavior stops the bounce at the ends of them.
-   The double tap is refused in v2/main.js, by a guard that depends on no CSS value at all: which
-   of these values an iPad honours for it has moved around between versions. */
+/* The early touch guard handles Safari gestures, including during slow startup.
+   Gameplay has no native panning; join/results and the host page retain scrolling. */
 html, body { touch-action: pan-y; overscroll-behavior: none; }
-#gameScreen, .hud, .q-overlay, .q-box, .q-choices { touch-action: none; }
 /* Controls and the answer button are pure targets: no long-press callout and no selection
    highlight when a child rests a finger on the label. Buttons that sit in a scrolling list (the
    results, the teacher's roster) still let a vertical swipe through; the ones inside the game
@@ -22,6 +12,7 @@ html, body { touch-action: pan-y; overscroll-behavior: none; }
   -webkit-tap-highlight-color: transparent;
 }
 .q-overlay, .q-box { -webkit-user-select: none; user-select: none; }
+#gameScreen, #gameScreen * { touch-action: none; }
 
 /* BuiO Game module — 唔好望落嚟 (Don't Look Down) */
 
@@ -243,34 +234,41 @@ input, select, textarea { font-family: inherit; }
 
 /* ---------- question modal ---------- */
 .q-overlay {
-  position: absolute; inset: 0; z-index: 10; display: none;
+  position: fixed; inset: 0; z-index: 10; display: none;
   align-items: center; justify-content: center; background: rgba(15, 22, 40, .82);
-  padding: 16px;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  min-height: 0; overflow: hidden;
 }
 .q-overlay.open { display: flex; }
+.q-fit { position: relative; flex: none; }
 .q-box {
-  background: #fff; border-radius: 20px; padding: 22px; width: 100%; max-width: 560px;
-  box-shadow: var(--shadow); max-height: calc(100dvh - 32px); overflow-y: auto;
+  position: absolute; top: 0; left: 0; transform-origin: top left;
+  background: #fff; border-radius: 20px; padding: 20px; width: 640px;
+  box-shadow: var(--shadow); overflow: visible;
 }
-.q-text { font-size: 22px; font-weight: 800; margin-bottom: 18px; text-align: center; }
-.q-image { display: block; max-width: 100%; max-height: min(34vh, 280px); object-fit: contain; margin: 0 auto 16px; border-radius: 8px; }
+.q-prompt, .q-response { min-width: 0; }
+.q-box.q-landscape-image { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 20px; align-items: center; }
+.q-text { font-size: 22px; font-weight: 800; margin-bottom: 12px; text-align: center; overflow-wrap: anywhere; }
+.q-image { display: block; max-width: 100%; max-height: var(--q-image-height, 280px); object-fit: contain; margin: 0 auto 12px; border-radius: 8px; }
+.q-landscape-image .q-image { margin-bottom: 0; }
 #qImage[hidden] { display: none; }
-.q-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.q-choices { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 @media (max-width: 480px) { .q-choices { grid-template-columns: 1fr; } }
 .q-choice {
   border: 2px solid var(--line); background: #f8fafd; border-radius: 14px;
-  padding: 16px 12px; font-size: 18px; font-weight: 700; color: var(--ink);
+  padding: 12px; font-size: 18px; font-weight: 700; color: var(--ink);
+  min-width: 0; white-space: normal; overflow-wrap: anywhere;
   transition: transform .08s;
 }
 .q-choice:active { transform: scale(.97); }
 .q-choice.correct { background: #d9f7ec; border-color: var(--mint); }
 .q-choice.wrong { background: #ffe3e3; border-color: var(--coral); }
 .q-choice:disabled { cursor: default; }
-.q-feedback { text-align: center; font-weight: 900; font-size: 18px; margin-top: 14px; min-height: 24px; }
+.q-feedback { text-align: center; font-weight: 900; font-size: 18px; margin-top: 12px; min-height: 24px; overflow-wrap: anywhere; }
 .q-feedback.good { color: var(--mint-dark); }
 .q-feedback.bad { color: var(--coral); }
-.q-cooldown { margin-top: 8px; text-align: center; color: var(--ink); font-size: 16px; font-weight: 700; }
-.q-close { margin-top: 12px; }
+.q-cooldown { margin-top: 8px; text-align: center; color: var(--ink); font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
+.q-close { margin-top: 10px; white-space: normal; overflow-wrap: anywhere; }
 
 /* ---------- results ---------- */
 .results-list { text-align: left; margin: 18px 0; max-height: 46vh; overflow: auto; }

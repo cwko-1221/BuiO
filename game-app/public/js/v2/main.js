@@ -3,6 +3,7 @@ import { GameScene } from './GameScene.js?v=20261007-jump-energy-5';
 import { PlayerStateThrottle } from './PlayerStateThrottle.js?v=20261005-no-ghosts-1';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 import { normaliseAvatar } from './avatar.js?v=20260907-side-climber-1';
+import { QuestionLayout } from './QuestionLayout.js?v=20261012-ipad-fit-1';
 
 const { t, server: serverText, lang: uiLang } = window.BuiI18n;
 
@@ -16,6 +17,7 @@ function ordinal(place) {
 }
 
 const $ = id => document.getElementById(id);
+const questionLayout = new QuestionLayout($('qOverlay'));
 const gameAudio = new GameAudio();
 window.__gameAudio = gameAudio;
 const socket = io('/game');
@@ -219,64 +221,7 @@ function updateHudAndNetwork(state){
   setHud('energyText',gameSettings.infiniteEnergy?'∞':String(Math.round(state.energy)));
 }
 
-// iOS ignores user-scalable=no (since iOS 10) and touch-action: manipulation still permits a
-// pinch — it only drops the double-tap delay. Refusing the WebKit gesture events is the only
-// reliable way to decline one, and it is not cosmetic: when iOS claims the touch stream for a
-// zoom, the button holding a finger can stop receiving pointer events entirely, so the
-// direction stays pressed and further taps do nothing because it is already held.
-// Capture phase, because Phaser owns the canvas: a listener that waits for the bubble never
-// runs if the game surface stops the event on its way up.
-for(const type of ['gesturestart','gesturechange','gestureend']){
-  document.addEventListener(type,event=>event.preventDefault(),{passive:false,capture:true});
-}
-document.addEventListener('touchmove',event=>{
-  if(event.touches.length>1){event.preventDefault();return;}
-  // A one-finger drag on the play surface, too. Nothing there scrolls — the game screen is fixed
-  // to the viewport and the question sheet is a centred card — so the only thing such a drag can
-  // produce is iOS's rubber band, and that is the opening for the pinch this file cannot refuse:
-  // once iOS has begun a pan it owns the sequence and stops listening to preventDefault. The
-  // controls drive themselves from pointer events, which this does not touch.
-  if(event.target?.closest?.('#gameScreen'))event.preventDefault();
-},{passive:false,capture:true});
-
-// An iPad in a keyboard case reaches the same zoom by another road: a two-finger pinch on the
-// trackpad arrives as a wheel event carrying ctrlKey, and cmd with +, -, or 0 resizes the page
-// from the hardware keyboard. Neither leaves a mark on a plain touch iPad, so both stay.
-window.addEventListener('wheel',event=>{if(event.ctrlKey||event.metaKey)event.preventDefault();},{passive:false,capture:true});
-window.addEventListener('keydown',event=>{
-  if(!(event.ctrlKey||event.metaKey))return;
-  if(['+','=','-','_','0'].includes(event.key)||['NumpadAdd','NumpadSubtract','Numpad0'].includes(event.code))
-    event.preventDefault();
-});
-
-// The double tap, again, without trusting CSS.
-//
-// touch-action is meant to settle this, but which values an iPad honours for the double tap has
-// moved around between versions, and the question sheet is exactly where a child taps twice: once
-// on an answer, once more because the first did not seem to take. Two taps in the same spot within
-// a third of a second is the browser's zoom gesture and nothing else — the first tap has already
-// been handled by then, so refusing the second costs nothing.
-//
-// Two quick taps in DIFFERENT places are two answers being changed, or two buttons, and are left
-// alone. So is anything inside the climb's own controls: they are touch-action: none, they cannot
-// zoom, and a fast double tap there is a double jump.
-let lastTap={time:0,x:0,y:0};
-document.addEventListener('touchend',event=>{
-  if(event.target?.closest?.('.touch-controls,#gameCanvas'))return;
-  const touch=event.changedTouches[0];
-  if(!touch)return;
-  // performance.now(), not event.timeStamp: what unit and origin a touch event's timestamp
-  // carries has differed between WebKit versions, and a guard that quietly measures the wrong
-  // thing would never fire on the one browser it exists for.
-  const now=performance.now();
-  const sameSpot=Math.abs(touch.clientX-lastTap.x)<40&&Math.abs(touch.clientY-lastTap.y)<40;
-  if(now-lastTap.time<300&&sameSpot){
-    event.preventDefault();
-    lastTap={time:0,x:0,y:0};
-    return;
-  }
-  lastTap={time:now,x:touch.clientX,y:touch.clientY};
-},{passive:false,capture:true});
+// Gesture protection lives in the early head script, before any game downloads.
 
 // Every held control registers a release here, so the state can be cleared without depending
 // on which element the pointer happened to end on.
@@ -350,6 +295,7 @@ function refreshAnswerCooldown(){
     clearInterval(answerCooldownTimer);answerCooldownTimer=null;
     if($('qFeedback').dataset.penalty==='true')$('qFeedback').textContent=t('g.qCooldownReady');
   }
+  questionLayout.fit();
 }
 function setAnswerCooldown(milliseconds){
   clearInterval(answerCooldownTimer);answerCooldownTimer=null;
@@ -365,6 +311,7 @@ function showQuestionCooldown(res){
   $('qFeedback').dataset.penalty='true';
   $('qClose').style.display='';
   setAnswerCooldown(res.cooldownMs);
+  questionLayout.fit();
 }
 function openQuestion(){
   if(!scene||frozen||scene.finished||performance.now()<answerCooldownUntil)return;
@@ -375,6 +322,7 @@ function openQuestion(){
   $('qFeedback').textContent='';$('qFeedback').className='q-feedback';$('qClose').style.display='none';$('qImage').hidden=true;$('qImage').removeAttribute('src');$('qOverlay').classList.add('open');
   if(preview)return renderQuestion({question:t('g.qSample'),choices:['48','54','56','64']});
   $('qText').textContent='';$('qChoices').innerHTML=`<div class="muted" style="grid-column:1/-1;text-align:center">${escapeHtml(t('g.qLoading'))}</div>`;
+  questionLayout.fit();
   socket.emit('player:question',res=>{
     if(request!==questionRequest||!scene||!frozen)return;
     if(res?.reason==='answer-cooldown')return showQuestionCooldown(res);
@@ -387,6 +335,7 @@ function renderQuestion(res){
   image.hidden=!res.image;
   if(res.image)image.src=res.image;else image.removeAttribute('src');
   $('qChoices').innerHTML='';res.choices.forEach((c,i)=>{const b=document.createElement('button');b.className='q-choice';b.textContent=c;b.onclick=()=>answer(i);$('qChoices').appendChild(b);});
+  questionLayout.fit();
 }
 function answer(choice){
   const buttons=[...$('qChoices').children];
@@ -420,6 +369,7 @@ function applyAnswer(res,choice,buttons){
   fb.classList.add(res.correct?'good':'bad');scene.setEnergy(res.energy);
   if(res.cooldownMs>0){fb.dataset.penalty='true';setAnswerCooldown(res.cooldownMs);}
   if(res.correct)questionCloseTimer=setTimeout(closeQuestion,800);else $('qClose').style.display='';
+  questionLayout.fit();
 }
 function closeQuestion(){
   questionRequest++;
