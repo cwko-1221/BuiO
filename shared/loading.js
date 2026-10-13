@@ -5,6 +5,7 @@
   if (window.BuiLoading) return;
   const nativeFetch = window.fetch.bind(window);
   const jobs = new Map(), recoveries = new WeakMap(), panels = new Map();
+  const reads = new Map();
   let sequence = 0, status, showTimer, hideTimer, slowTimer, offlineDone;
   const english = () => (window.BuiI18n?.lang || document.documentElement.lang || '').startsWith('en');
   const say = (zh, en) => english() ? en : zh;
@@ -55,11 +56,11 @@
     const done = begin(label, options);
     try { return await (typeof task === 'function' ? task() : task); } finally { done(); }
   }
-  function watchScene(scene) {
+  function watchScene(scene, { recoverOnError = true } = {}) {
     const label = say('正在載入遊戲素材…', 'Loading game assets…');
     const done = begin(label);
     const progress = value => done.update(`${label} ${Math.round(value * 100)}%`);
-    const failed = () => recover(new Error('Game asset loading'));
+    const failed = () => { if (recoverOnError) recover(new Error('Game asset loading')); };
     const finish = () => { done(); scene.load.off('progress', progress); scene.load.off('loaderror', failed); scene.load.off('complete', finish); scene.events.off('create', finish); scene.events.off('shutdown', finish); scene.events.off('destroy', finish); };
     scene.load.on('progress', progress); scene.load.on('loaderror', failed); scene.load.once('complete', finish);
     scene.events.once('create', finish); scene.events.once('shutdown', finish); scene.events.once('destroy', finish);
@@ -93,7 +94,7 @@
     }
     return response;
   }
-  async function request(input, options = {}) {
+  async function request(input, options = {}, policy = {}) {
     let url;
     try { url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url, location.href); } catch { return nativeFetch(input, options); }
     if (url.origin !== location.origin) return nativeFetch(input, options);
@@ -101,6 +102,9 @@
     const read = method === 'GET' || method === 'HEAD';
     const background = /^\/api\/(?:classroom\/sessions|active-(?:whiteboard|buzzer)-sessions|games\/rooms|tower-defense\/classrooms|pet\/(?:access|pvp\/status|brawl\/pvp\/status)|buzzer\/sessions)$/.test(url.pathname);
     const safeRetry = read && /^\/api\//.test(url.pathname) && !options.keepalive && !background;
+    const api = /^\/api\//.test(url.pathname) && !options.keepalive;
+    const timeoutMs = policy.timeoutMs || (background ? 8000 : read ? 15000 : 60000);
+    const retries = policy.retries ?? 3;
     const signal = options.signal || input?.signal;
     // Streaming consumers must be able to own their connection lifetime.
     if (new Headers(options.headers || input?.headers).get('Accept')?.includes('text/event-stream')) return nativeFetch(input, options);
@@ -112,18 +116,34 @@
         const controller = new AbortController();
         const abort = () => controller.abort(signal?.reason);
         signal?.addEventListener('abort', abort, { once: true });
-        const timeout = safeRetry ? setTimeout(() => controller.abort(new DOMException('Read timed out', 'TimeoutError')), 20000) : null;
+        let timedOut = false;
+        const timeout = api ? setTimeout(() => { timedOut = true; controller.abort(new DOMException('Request timed out', 'TimeoutError')); }, timeoutMs) : null;
         let retryDelay;
         try {
-          const response = await nativeFetch(input, { ...options, signal: safeRetry ? controller.signal : signal });
-          if (!safeRetry || !transientStatuses.has(response.status) || attempt >= 3) return background ? response : trackBody(response, !read);
+          let response = await nativeFetch(input, { ...options, signal: api ? controller.signal : signal });
+          // Headers are not a completed JSON read. Keep the same deadline and
+          // caller cancellation alive through a stalled or truncated body.
+          if (api && response.headers.get('Content-Type')?.includes('json') && method !== 'HEAD') {
+            const bytes = await response.arrayBuffer();
+            if (bytes.byteLength && (response.ok || transientStatuses.has(response.status))) JSON.parse(new TextDecoder().decode(bytes));
+            const original = response;
+            response = new Response([204,205,304].includes(original.status) ? null : bytes,
+              { status: original.status, statusText: original.statusText, headers: original.headers });
+            for (const property of ['url', 'redirected', 'type']) {
+              try { Object.defineProperty(response, property, { value: original[property] }); } catch {}
+            }
+          }
+          if (!safeRetry || !transientStatuses.has(response.status) || attempt >= retries) return background ? response : trackBody(response, !read);
           const retryAfter = response.headers.get('Retry-After');
           const seconds = Number(retryAfter);
           const indicated = retryAfter ? (Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retryAfter) - Date.now()) : 0;
           retryDelay = Math.max(600 * 2 ** attempt, Math.min(12000, Number.isFinite(indicated) ? Math.max(0, indicated) : 0));
           try { await response.body?.cancel(); } catch { /* response already consumed */ }
         } catch (error) {
-          if (!safeRetry || signal?.aborted || attempt >= 3) throw error;
+          // Safari can discard AbortSignal.reason when a body read is aborted.
+          if (signal?.aborted) throw signal.reason || error;
+          if (timedOut) error = new DOMException('Request timed out', 'TimeoutError');
+          if (!safeRetry || signal?.aborted || attempt >= retries) throw error;
           retryDelay = 600 * 2 ** attempt;
         } finally {
           clearTimeout(timeout); signal?.removeEventListener('abort', abort);
@@ -131,6 +151,29 @@
         await wait(retryDelay + Math.random() * 200, signal);
       }
     } finally { done(); }
+  }
+  function sharedRequest(input, options = {}, policy = {}) {
+    let url;
+    try { url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url, location.href); }
+    catch { return request(input, options, policy); }
+    const method = String(options.method || input?.method || 'GET').toUpperCase();
+    if (url.origin !== location.origin) return request(input, options, policy);
+    // Share concurrent bootstrap/identity reads within this page, never a
+    // completed response or another account's session. Writes end the batch.
+    if (!['GET', 'HEAD'].includes(method)) {
+      reads.clear();
+      return request(input, options, policy).finally(() => reads.clear());
+    }
+    const shared = /^\/api\/(?:auth\/me|pet\/(?:bootstrap|brawl\/catalog)|classroom\/sessions|homework\/meta)$/.test(url.pathname);
+    if (!shared || options.signal || input?.signal) return request(input, options, policy);
+    const key = JSON.stringify([url.href, method, options.credentials || 'same-origin', options.cache,
+      [...new Headers(options.headers || input?.headers).entries()].sort(), policy]);
+    let pending = reads.get(key);
+    if (!pending) {
+      pending = request(input, options, policy).finally(() => { if (reads.get(key) === pending) reads.delete(key); });
+      reads.set(key, pending);
+    }
+    return pending.then(response => response.clone());
   }
   // Safe API reads have already used their bounded retries. A recovery panel
   // waits for an explicit action instead of continually polling a failed page.
@@ -205,8 +248,8 @@
     }
   }
   function ready() { bootDone?.(); bootDone = null; }
-  window.BuiLoading = { begin, run, watchScene, fetch: request, recover, notify, ready, isTechnical: value => technical.test(String(value?.message || value || '')) };
-  window.fetch = request;
+  window.BuiLoading = { begin, run, watchScene, fetch: sharedRequest, recover, notify, ready, isTechnical: value => technical.test(String(value?.message || value || '')) };
+  window.fetch = sharedRequest;
   let bootDone = begin(say('正在準備畫面…', 'Preparing the page…'));
   window.addEventListener('load', ready, { once: true });
   window.addEventListener('offline', () => { offlineDone ||= begin(say('正在等候網絡連線…', 'Waiting for a connection…')); });

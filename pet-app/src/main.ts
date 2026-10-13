@@ -569,6 +569,7 @@ class StudentApp {
     this.game = new Phaser.Game({
       type: Phaser.AUTO, parent:'game-root', transparent:true,
       render:{antialias:true,pixelArt:false},
+      loader:{maxParallelDownloads:4,timeout:20000,maxRetries:1},
       scale:{ mode:Phaser.Scale.FIT, autoCenter:Phaser.Scale.CENTER_BOTH, parent:'game-root', width:1280, height:720, expandParent:false },
       physics:{default:'arcade',arcade:{debug:false,gravity:{x:0,y:0}}}, audio:{noAudio:true},
     });

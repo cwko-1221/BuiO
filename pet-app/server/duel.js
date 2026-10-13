@@ -19,13 +19,14 @@ module.exports=function register(io,options={}){
   const studentRoom=id=>'student:'+id;
   const send=(id,event,payload)=>ns.to(studentRoom(id)).emit(event,payload);
   function publicPeers(id){const peers=new Map(),own=all(id)[0]?.profile;for(const m of members.values()){const p=m.profile;if(p.id===id||!online(p.id))continue;peers.set(p.id,{id:p.id,name:p.name,className:p.className,rank:p.rank,rankTerms:own?.rank&&p.rank?ranking.quote([own.rank,p.rank]):undefined,available:available(p.id)&&!reserved.has(p.id)&&p.pets.length>0,hasFighter:p.pets.length>0});}return [...peers.values()].sort((a,b)=>a.className.localeCompare(b.className)||a.name.localeCompare(b.name));}
-  function presence(){for(const id of new Set([...members.values()].map(m=>m.profile.id)))send(id,'duel:peers',{peers:publicPeers(id),fee:repo.FEE});}
+  const peerSnapshots=new Map();
+  function presence(){const ids=new Set([...members.values()].map(m=>m.profile.id));for(const id of peerSnapshots.keys())if(!ids.has(id))peerSnapshots.delete(id);for(const id of ids){const payload={peers:publicPeers(id),fee:repo.FEE},signature=JSON.stringify(payload);if(peerSnapshots.get(id)!==signature){peerSnapshots.set(id,signature);send(id,'duel:peers',payload);}}}
   function noticeInvite(inv){for(const id of [inv.from.id,inv.to.id])send(id,'duel:invitation',inv);}
   function closeInvite(inv,status,message){if(inv.status!=='pending')return;inv.status=status;inv.message=message;inv.closedAt=now();for(const id of [inv.from.id,inv.to.id])if(reserved.get(id)===inv.id)reserved.delete(id);noticeInvite(inv);presence();}
   function info(r,id){return {match:r.meta,playerIndex:r.meta.players.findIndex(p=>p.id===id),phase:r.phase,startAt:r.startAt||0,state:r.state};}
   function announceMatch(r){for(const p of r.meta.players)send(p.id,'duel:match',info(r,p.id));}
   const accountRemoved=({id,match})=>{const r=match&&rooms.get(match.id);if(r){r.meta=match;r.phase='cancelled';for(const p of match.players)send(p.id,'duel:result',{match,winnerIndex:null,refunded:true});}for(const m of all(id))m.socket.disconnect(true);presence();};repo.events.on('accountRemoved',accountRemoved);
-  function broadcast(r){r.frameSeq++;const data={matchId:r.meta.id,frameSeq:r.frameSeq,phase:r.phase,startAt:r.startAt||0,reconnectUntil:r.reconnectUntil||0,state:r.state,events:r.events.splice(0)};for(const p of r.meta.players)send(p.id,'duel:frame',data);}
+  function broadcast(r,volatile=false){r.frameSeq++;const data={matchId:r.meta.id,frameSeq:r.frameSeq,phase:r.phase,startAt:r.startAt||0,reconnectUntil:r.reconnectUntil||0,state:r.state,events:r.events.splice(0)};r.broadcastAt=now();for(const p of r.meta.players){const target=ns.to(studentRoom(p.id));(volatile?target.volatile:target).emit('duel:frame',data);}}
   async function finish(r,reason,winnerIndex=null,refund=false){if(r.finishing||terminal(r.meta))return;r.finishing=true;r.phase='settling';broadcast(r);
     try{r.meta=await repo.finalize(r.meta.id,{status:refund?'cancelled':'finished',reason,winnerIndex,finishedAt:new Date(now()).toISOString(),ticks:r.state.tick},refund);r.phase=r.meta.status;for(const rank of r.meta.rankResults||[])for(const m of all(rank.studentId))m.profile.rank=rank;for(const p of r.meta.players)send(p.id,'duel:result',{match:r.meta,winnerIndex,refunded:!!r.meta.refunded});presence();}
     catch(e){r.finishing=false;r.finishRetry={reason,winnerIndex,refund};r.retryAt=now()+1000;console.error('[pet-duel] could not settle match:',e.message);}
@@ -121,7 +122,13 @@ module.exports=function register(io,options={}){
       r.accumulator+=Math.min(250,time-r.clockAt);r.clockAt=time;let frames=0;
       while(r.accumulator>=1000/60&&frames++<15){const masks=r.masks.map((mask,i)=>time-r.inputAt[i]<400?mask|r.pressed[i]:r.pressed[i]);r.pressed=[0,0];sim.stepBattle(r.state,masks[0],masks[1]);r.events.push(...r.state.events);r.accumulator-=1000/60;
         if(['won','lost','draw'].includes(r.state.status)){broadcast(r);void finish(r,'battle_complete',r.state.status==='draw'?null:r.state.status==='won'?0:1);break;}
-        if(r.state.tick%3===0)broadcast(r);
+      }
+      // Catch up the simulation at 60 Hz, but send only the latest display
+      // state. Congested transports must not queue old frames behind new ones.
+      if(r.phase==='playing'&&!r.finishing&&time>=(r.broadcastDueAt||0)){
+        const due=r.broadcastDueAt;
+        broadcast(r,true);
+        r.broadcastDueAt=due?due+(Math.floor((time-due)/50)+1)*50:time+50;
       }
     }
     if(sweeping)return;sweeping=true;
