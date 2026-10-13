@@ -53,15 +53,16 @@ app.post('/api/tower-defense/session', (req, res, next) => {
   next();
 });
 app.use('/api/tower-defense', questions);
-app.get(['/tower-defense', '/tower-defense/preview'], (_req, res) => res.sendFile(resolve(root, 'tower-defense-app/public/index.html')));
-app.get('/tower-defense/teacher/preview', (_req, res) => res.sendFile(resolve(root, 'tower-defense-app/public/teacher.html')));
+// Managed worktrees live under .codex; sendFile otherwise ignores that ancestor.
+app.get(['/tower-defense', '/tower-defense/preview'], (_req, res) => res.sendFile(resolve(root, 'tower-defense-app/public/index.html'), { dotfiles: 'allow' }));
+app.get('/tower-defense/teacher/preview', (_req, res) => res.sendFile(resolve(root, 'tower-defense-app/public/teacher.html'), { dotfiles: 'allow' }));
 if (baseline) {
   app.get('/tower-defense/js/main.js', (_req, res) => res.type('js').send(execFileSync('git',
     ['show', 'f6d569ec:tower-defense-app/public/js/main.js'], { encoding: 'utf8' })));
 }
 app.use('/tower-defense', express.static(resolve(root, 'tower-defense-app/public')));
 app.use('/shared', express.static(resolve(root, 'shared')));
-app.get('/vendor/phaser/4.2.1/phaser.min.js', (_req, res) => res.sendFile(resolve(root, 'node_modules/phaser/dist/phaser.min.js')));
+app.get('/vendor/phaser/4.2.1/phaser.min.js', (_req, res) => res.sendFile(resolve(root, 'node_modules/phaser/dist/phaser.min.js'), { dotfiles: 'allow' }));
 app.use((error, _req, res, _next) => res.status(error.statusCode || 500).json({ success: false, message: error.message }));
 const server = createServer(app), io = new Server(server);
 register(io, app);
@@ -117,7 +118,15 @@ async function student(browser, owner, room, { audio = 'pending' } = {}) {
   page.on('pageerror', error => console.error('CLIENT ERROR', owner, error.message));
   page.on('dialog', dialog => void dialog.dismiss());
   await page.goto(`${base}/tower-defense?autojoin=1&room=${room.code}`);
-  await page.waitForSelector('#menuScreen.active');
+  try { await page.waitForSelector('#menuScreen.active'); }
+  catch (error) {
+    await page.screenshot({ path: resolve(output, `${owner}-join-failure.png`) });
+    console.error('JOIN DIAGNOSTIC', owner, await page.evaluate(() => ({ url: location.href,
+      classroom: window.__towerDefense?.classroom, screen: document.querySelector('.screen.active')?.id,
+      error: document.querySelector('#joinError')?.textContent,
+      scripts: [...document.scripts].map(s => s.src) })));
+    throw error;
+  }
   await page.locator('[data-map="starport"]').tap();
   await page.waitForFunction(() => window.__towerDefense.classroom?.phase === 'lobby');
   for (let i = 0; i < 100 && !rooms.get(room.code)?.players.get(`s:${owner}`)?.mapId; i++) await page.waitForTimeout(20);
@@ -197,6 +206,28 @@ try {
         room.teacher.emit('host:close'); await context.close();
       }
       if (baseline) continue;
+
+      // A missing download retries only missing textures, preserving the bank
+      // session and keeping simulation time frozen until the canvas is ready.
+      {
+        const room = await classroom(), owner = `${engine}-asset-recovery`;
+        const { context, page } = await student(browser, owner, room);
+        let blocked = true;
+        await page.route('**/tower-defense/assets/maps/starport.webp', route => blocked ? route.abort('failed') : route.continue());
+        await emit(room.teacher, 'host:start');
+        await page.locator('.buio-loading-panel').waitFor();
+        assert.equal(await page.evaluate(() => window.__towerDefense.scene), null);
+        const firstSession = responses.get(owner)[0].sessionId;
+        await page.screenshot({ path: resolve(output, `${engine}-asset-recovery-loading.png`) });
+        blocked = false;
+        await deployed(page);
+        await page.locator('.buio-loading-panel').waitFor({ state: 'hidden' });
+        assert.equal(attempts.get(owner), 1);
+        assert.equal(responses.get(owner)[0].sessionId, firstSession);
+        await page.screenshot({ path: resolve(output, `${engine}-asset-recovered.png`) });
+        reports.push({ engine, scenario: 'missing asset recovers without reload or new bank session', requests: 1 });
+        room.teacher.emit('host:close'); await context.close();
+      }
 
       for (const [scenario, policy] of [['lost-response', { drop: true }], ['temporary-failure', { fail: 1 }], ['manual-retry', { fail: 2 }]]) {
         const room = await classroom(), owner = `${engine}-${scenario}`;

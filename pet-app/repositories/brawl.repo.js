@@ -62,7 +62,7 @@ async function finish(studentId,id,body,key){validKey(key);if(!body||typeof body
   if(Buffer.byteLength(JSON.stringify(body))>1048576)fail('冒險紀錄過大。',413);const logDigest=digest({version:body.version,endTick:body.endTick,inputs:body.inputs});
   if(run.result){if(run.finishDigest!==logDigest)fail('這次冒險已結算其他紀錄。');return {receipt:run.result};}
   if(run.status!=='active'||Date.parse(run.expiresAt)<=Date.now())fail('這次冒險已結束或到期。');
-  const result=await verify({...run.options,version:run.version},body.inputs,body.endTick);
+  const result=await verify({...run.options,version:run.version},body.inputs,body.endTick,`${studentId}:${id}:${logDigest}`);
   return mutate(studentId,id,null,ctx=>{const current=ctx.runs.find(r=>r.id===id);if(!current)fail('找不到這次冒險。',404);if(current.result){if(current.finishDigest!==logDigest)fail('這次冒險已結算其他紀錄。');return {receipt:current.result};}
     if(current.status!=='active'||Date.parse(current.expiresAt)<=Date.now())fail('這次冒險已結束或到期。');const pet=ctx.pets.find(p=>p.petId===current.petId);if(!pet)fail('出戰寵物已不存在。',404);
     const rewards={coins:0,xp:0};if(result.outcome==='won'){

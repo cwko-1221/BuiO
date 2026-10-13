@@ -2,10 +2,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
-import { chromium } from 'playwright';
+import { chromium, webkit } from 'playwright';
 
 const root = path.resolve(import.meta.dirname, '..');
-const output = path.join(root, 'tmp', 'loading-qa');
+const useWebkit = process.env.BUIO_LOADING_ENGINE === 'webkit';
+const output = path.join(root, 'tmp', useWebkit ? 'loading-qa-webkit' : 'loading-qa');
 await fs.mkdir(output, { recursive: true });
 const counts = new Map();
 const html = `<!doctype html><html lang="zh-HK"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/shared/loading.css"><script src="/shared/loading.js"></script><script type="module" src="/slow-bootstrap.js"></script><style>body{margin:0;background:#f3f7fc;color:#254b61;font:16px system-ui}main{max-width:720px;margin:90px auto;padding:26px}h1{font-size:26px}.card{background:white;padding:32px;border-radius:22px;box-shadow:0 8px 30px #254b6112}input{padding:12px;border:1px solid #aac5d3;border-radius:10px;width:200px}</style></head><body><main><h1>BuiO 載入流程驗證</h1><div class="card" id="content"><p class="loading-card">正在準備內容…</p><label>保留中的輸入 <input id="draft" value="尚未儲存的內容"></label></div></main></body></html>`;
@@ -21,10 +22,21 @@ const server = http.createServer(async (req, res) => {
     res.setHeader('Content-Type', 'text/javascript'); setTimeout(() => res.end('window.bootFinished=true;'), 1700); return;
   }
   res.setHeader('Content-Type', 'application/json');
+  if (url.pathname === '/api/body-stall' || url.pathname === '/api/post-body-stall' || url.pathname === '/api/abort-body' || url.pathname === '/api/pet/access') {
+    if (count === 1 || url.pathname !== '/api/body-stall') { res.flushHeaders(); res.write('{"success":'); return; }
+    res.end(JSON.stringify({ success: true, recovered: true })); return;
+  }
+  if (url.pathname === '/api/body-invalid') {
+    res.end(count === 1 ? '{"success":' : JSON.stringify({ success: true, recovered: true })); return;
+  }
+  if (url.pathname === '/api/auth/me') {
+    setTimeout(() => res.end(JSON.stringify({ success: true, student: { id: 'fixture' } })), 150); return;
+  }
   if (url.pathname === '/api/body') {
     res.write('{"value":'); setTimeout(() => res.end('42}'), 1300); return;
   }
   if (url.pathname === '/api/retry' && count === 1) { res.statusCode = 503; res.end('{"success":false}'); return; }
+  if (url.pathname === '/api/retry') { setTimeout(() => res.end('{"value":42}'), 700); return; }
   if (url.pathname === '/api/write' || url.pathname === '/api/abort') { res.statusCode = 503; res.end('{"success":false}'); return; }
   if (url.pathname === '/api/unauthorized') { res.statusCode = 401; res.end('{}'); return; }
   if (url.pathname === '/api/missing') { res.statusCode = 404; res.end('{}'); return; }
@@ -33,7 +45,7 @@ const server = http.createServer(async (req, res) => {
 });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const base = `http://127.0.0.1:${server.address().port}`;
-const browser = await chromium.launch({ headless: true, channel: 'chrome' });
+const browser = await (useWebkit ? webkit : chromium).launch({ headless: true, ...(useWebkit ? {} : { channel: 'chrome' }) });
 const context = await browser.newContext({ viewport: { width: 1100, height: 760 } });
 const page = await context.newPage();
 const status = page.locator('#buio-loading-status');
@@ -47,6 +59,34 @@ try {
   await page.waitForFunction(() => window.bootFinished);
   await status.waitFor({ state: 'hidden' });
   pass('animation is visible before a deferred module finishes');
+  const recovery = await page.evaluate(async () => {
+    const data = await (await window.BuiLoading.fetch('/api/body-stall', {}, { timeoutMs: 500, retries: 1 })).json();
+    const repaired = await (await window.BuiLoading.fetch('/api/body-invalid', {}, { timeoutMs: 1000, retries: 1 })).json();
+    const controller = new AbortController(); setTimeout(() => controller.abort(), 80);
+    let cancelled, uncertain;
+    try { await window.BuiLoading.fetch('/api/abort-body', { signal: controller.signal }, { timeoutMs: 1000 }); } catch (e) { cancelled = e.name; }
+    try { await window.BuiLoading.fetch('/api/post-body-stall', { method: 'POST', body: '{}' }, { timeoutMs: 500 }); } catch (e) { uncertain = e.name; }
+    const copies = await Promise.all([fetch('/api/auth/me'), fetch('/api/auth/me')]);
+    return { data, repaired, cancelled, uncertain, copies: await Promise.all(copies.map(r => r.json())) };
+  });
+  assert.equal(recovery.data.recovered, true); assert.equal(recovery.repaired.recovered, true);
+  assert.equal(recovery.cancelled, 'AbortError'); assert.equal(recovery.uncertain, 'TimeoutError');
+  assert.equal(counts.get('/api/body-stall'), 2); assert.equal(counts.get('/api/body-invalid'), 2);
+  assert.equal(counts.get('/api/abort-body'), 1); assert.equal(counts.get('/api/post-body-stall'), 1);
+  assert.equal(counts.get('/api/auth/me'), 1); assert.equal(recovery.copies[0].student.id, 'fixture');
+  assert.equal(recovery.copies[1].student.id, 'fixture');
+  pass('stalled/truncated JSON recovers, caller cancellation stops retries, uncertain writes do not replay, and duplicate reads share one download');
+
+  await page.evaluate(async () => {
+    await fetch('/api/auth/me');
+    try { await BuiLoading.fetch('/api/pet/access', {}, { timeoutMs: 500 }); }
+    catch (error) { return; }
+    throw new Error('background request unexpectedly completed');
+  });
+  assert.equal(counts.get('/api/auth/me'), 2, 'a completed identity response is never cached');
+  assert.equal(counts.get('/api/pet/access'), 1, 'background timeout releases polling without multiplying requests');
+  pass('completed identity reads are fresh and stalled background polls terminate without retries');
+
 
   for (let cycle = 0; cycle < 2; cycle++) {
     const task = page.evaluate(() => fetch('/api/slow').then(r => r.json()));

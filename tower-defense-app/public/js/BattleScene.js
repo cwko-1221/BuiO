@@ -23,14 +23,21 @@ export class BattleScene extends Phaser.Scene {
   }
 
   preload() {
-    window.BuiLoading?.watchScene(this);
-    this.load.image(`td-map-${this.sim.map.id}`,MAP_ART[this.sim.map.id]);
-    this.load.spritesheet(TOWER_ART.key,TOWER_ART.src,{frameWidth:TOWER_ART.frameWidth,frameHeight:TOWER_ART.frameHeight});
-    this.load.spritesheet(ENEMY_ART.key,ENEMY_ART.src,{frameWidth:ENEMY_ART.frameWidth,frameHeight:ENEMY_ART.frameHeight});
-    this.load.spritesheet(BOSS_ART.key,BOSS_ART.src,{frameWidth:BOSS_ART.frameWidth,frameHeight:BOSS_ART.frameHeight});
+    this.assetsReady=false;
+    window.BuiLoading?.watchScene(this,{recoverOnError:false});
+    const mapKey=`td-map-${this.sim.map.id}`;
+    if(!this.textures.exists(mapKey))this.load.image(mapKey,MAP_ART[this.sim.map.id]);
+    for(const art of [TOWER_ART,ENEMY_ART,BOSS_ART]){
+      if(!this.textures.exists(art.key))this.load.spritesheet(art.key,art.src,{frameWidth:art.frameWidth,frameHeight:art.frameHeight});
+    }
   }
 
   create() {
+    this.events.once('shutdown',()=>this.cleanup());
+    if([`td-map-${this.sim.map.id}`,TOWER_ART.key,ENEMY_ART.key,BOSS_ART.key].some(key=>!this.textures.exists(key))){
+      this.hooks.onLoadFailed?.(new Error('Game asset loading interrupted'));
+      return;
+    }
     this.cameras.main.setBackgroundColor(this.sim.map.palette.sky);
     this.createFxTextures();
     this.drawMap();
@@ -46,7 +53,7 @@ export class BattleScene extends Phaser.Scene {
     });
     this.input.on('pointerout',()=>{this.previewPoint.visible=false;this.drawPlacementPreview();});
     this.input.on('pointerdown',pointer=>this.handleWorldClick(pointer.worldX,pointer.worldY));
-    this.events.on('shutdown',()=>this.cleanup());
+    this.assetsReady=true;
     this.hooks.onReady?.(this);
   }
 
@@ -100,6 +107,7 @@ export class BattleScene extends Phaser.Scene {
   }
 
   update(_time,deltaMs) {
+    if(!this.assetsReady)return;
     this.sim.update(deltaMs/1000);
     this.syncTowers();this.syncEnemies();this.syncProjectiles();this.updateWeather(deltaMs/1000);
     const events=this.sim.drainEvents();

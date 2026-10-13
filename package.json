@@ -81,7 +81,8 @@
     "check:pet-brawl-elemental-live": "node scripts/test-pet-brawl-elemental-live.mjs",
     "build:pet-brawl-elemental-fx": "node scripts/build-pet-brawl-elemental-effects.mjs",
     "check:school-upgrade": "node --test tests/school-upgrade.test.cjs",
-    "check:loading": "node scripts/test-loading-live.mjs"
+    "check:loading": "node scripts/test-loading-live.mjs",
+    "check:classroom-performance": "node --test pet-app/tests/classroom-verifier.test.cjs && node scripts/test-pet-classroom-network.mjs"
   },
   "dependencies": {
     "@google-cloud/text-to-speech": "^6.4.1",

@@ -48,6 +48,18 @@ try{
   const stick=await b.locator('[data-stick]').boundingBox(),jump=await b.locator('[data-battle-key="32"]').boundingBox(),cdp=await contexts[1].newCDPSession(b),touchBefore=await state(b);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,x:stick.x+stick.width*.1,y:stick.y+stick.height/2},{id:2,x:jump.x+jump.width/2,y:jump.y+jump.height/2}]});await b.waitForTimeout(200);const touched=await state(b);assert.ok(touched.actors[1].x<touchBefore.actors[1].x);assert.ok(touched.actors[1].z>0);await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await shot(b,'05-ipad-multitouch');
   const matchId=await a.evaluate(()=>sessionStorage.getItem('pet-live-duel:S001'));await a.reload();await playReady(a);assert.equal(await a.evaluate(()=>sessionStorage.getItem('pet-live-duel:S001')),matchId);assert.deepEqual(await balances(),[3000,3000]);assert.equal((await data()).petCurrencyLedger.filter(l=>l.kind==='brawl_duel_entry').length,2);
+  if(process.env.PET_BRAWL_PROFILE==='1'){
+    await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+    const metrics=await b.evaluate(async()=>{
+      const scene=window.__petGame.scene.getScene('Brawl'),samples=[],frames=[];const draw=scene.draw;
+      scene.draw=function(...args){const start=performance.now();const result=draw.apply(this,args);samples.push(performance.now()-start);return result;};
+      await new Promise(resolve=>{let start,last;const sample=time=>{start??=time;if(last)frames.push(time-last);last=time;if(time-start<5000)requestAnimationFrame(sample);else resolve();};requestAnimationFrame(sample);});
+      scene.draw=draw;const p95=rows=>[...rows].sort((a,b)=>a-b)[Math.floor(rows.length*.95)]||0;
+      return {frames:frames.length,fps:frames.length*1000/frames.reduce((a,b)=>a+b,0),frameP95Ms:p95(frames),drawP95Ms:p95(samples),stallsOver100Ms:frames.filter(ms=>ms>100).length};
+    });
+    await cdp.send('Emulation.setCPUThrottlingRate',{rate:1});await shot(b,'08-ipad-frame-profile');
+    await fs.writeFile(path.join(artifacts,'frame-profile.json'),JSON.stringify(metrics,null,2));console.log('FRAME_PROFILE',JSON.stringify(metrics));
+  }
   await a.keyboard.press('Escape');const tick=(await state(b)).tick;await b.waitForTimeout(250);assert.ok((await state(b)).tick>tick);await a.locator('[data-brawl="pvp-leave"]').click();await b.locator('[data-brawl="again"]').waitFor();assert.ok((await b.locator('#brawlDialogTitle').innerText()).includes('勝利'));assert.deepEqual(await balances(),[3000,3000]);await shot(b,'06-duel-victory');
   // Blurring a finished duel must leave its result visible, with no settlement request loop.
   await b.evaluate(()=>window.dispatchEvent(new Event('blur')));assert.ok((await b.locator('#brawlDialogTitle').innerText()).includes('勝利'));await Promise.all(pages.map(lobbyAgain));

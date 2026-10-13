@@ -40,6 +40,7 @@ let simulation=null,scene=null,phaserGame=null,questionSessionId=null;
 let selectedTowerId=null,panelSignature='',questionTimer=null,questionDeadline=0,activeQuestion=null,answering=false;
 let lastHudSignature='',lastSoundAt=new Map(),modalWasPaused=false;
 let deploymentAbort=null,sessionStartKey=null,audioFailureReported=false;
+let assetRetry=null,assetRecovery=null;
 let lastSelectedMap=null,mapSelectionRequest=0;
 
 function unlockAudio(){
@@ -216,7 +217,18 @@ async function startCampaign(){
     $('mapChapter').textContent=t('td.chapterTier',{chapter:MAPS[selectedMap].chapter,tier:DIFFICULTIES.guardian.name});
     $('mapName').textContent=MAPS[selectedMap].name;
     const battleScene=new BattleScene(simulation,{
-      onReady:readyScene=>{scene=readyScene;},
+      onReady:readyScene=>{
+        scene=readyScene;audio.startMusic(MAPS[mapId].weather);
+        assetRetry?.resolve();assetRetry=null;
+        assetRecovery?.();assetRecovery=null;
+      },
+      onLoadFailed:error=>{
+        scene=null;audio.stopMusic();
+        if(assetRetry){assetRetry.reject(error);assetRetry=null;return;}
+        assetRecovery=window.BuiLoading?.recover(error,()=>new Promise((resolve,reject)=>{
+          assetRetry={resolve,reject};battleScene.scene.restart();
+        }),undefined,{automatic:true});
+      },
       onState:updateHud,
       onEvent:handleGameEvent,
       onTowerSelected:tower=>{selectedTowerId=tower?.id||null;document.querySelectorAll('[data-tower]').forEach(button=>button.classList.remove('selected'));renderTowerPanel(tower,true);},
@@ -228,8 +240,8 @@ async function startCampaign(){
       audio:{noAudio:true},
       scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH,width:1280,height:720},
       render:{antialias:true,roundPixels:false,pixelArt:false},scene:[battleScene],fps:{target:60,min:30},
+      loader:{maxParallelDownloads:4,timeout:20000,maxRetries:1},
     });
-    audio.startMusic(MAPS[selectedMap].weather);
     emitClassroomState('playing',true);
     updateHud(simulation.state,true);showBanner(t('td.mapBanner',{map:MAPS[selectedMap].name,lanes:MAPS[selectedMap].paths.length}));showToast(t('td.bankToast',{title:response.set.title}),'success');
   }catch(error){
@@ -247,6 +259,8 @@ async function startCampaign(){
 }
 
 function teardownGame(){
+  assetRecovery?.();assetRecovery=null;
+  assetRetry?.reject(new DOMException('Game closed','AbortError'));assetRetry=null;
   clearInterval(questionTimer);questionTimer=null;activeQuestion=null;answering=false;
   $('questionPanel').classList.remove('open');$('endModal').classList.remove('open');$('towerPanel').classList.remove('open');
   if(phaserGame){phaserGame.destroy(true);phaserGame=null;}scene=null;simulation=null;selectedTowerId=null;panelSignature='';lastHudSignature='';
