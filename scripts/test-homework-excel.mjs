@@ -14,7 +14,7 @@ const { reportPeriod, cloneSheet } = require('../homework-app/lib/excel-export')
 const { writeTemplate } = require('../homework-app/lib/xlsx-template');
 const { attribute, partPath, escapeXml } = require('../homework-app/lib/xlsx-template');
 const { writeTasksSheet, TASK_SHEET_NAME } = require('../homework-app/lib/report-tasks-sheet');
-const { openReport, checkArchive } = require('../homework-app/lib/weekly-reports');
+const { openReport, checkArchive, nextStatus } = require('../homework-app/lib/weekly-reports');
 const root = path.resolve(import.meta.dirname, '..');
 const temp = await mkdtemp(path.join(tmpdir(), 'buio-homework-excel-'));
 const qaDir = process.env.HOMEWORK_EXCEL_QA_DIR;
@@ -38,6 +38,7 @@ const records = [record('2026-09-04', [missing('S002')]), record('2026-09-08', [
   record('2026-10-16', [missing('S000')]), record('2026-10-10', [missing('S501'), missing('S502'), missing('S511')], 'P5'),
   record('2026-10-10', [missing('S101')], 'P1', 5), record('2026-10-10', [missing('S601')], 'P6', 8),
   record('2026-10-17', [missing('S501'), missing('S502')], 'P5'), record('2026-10-24', [missing('S502')], 'P5')];
+records.push(record('2026-10-11', [missing('S511')], 'P5'));
 const dbFile = path.join(temp, 'fixture.json');
 await writeFile(dbFile, JSON.stringify({ users, platformSettings: { currentAcademicYear: academicYear },
   studentAcademicYears: users.filter(s => s.role === 'student').map(s => ({ academicYear, studentId: s.studentid,
@@ -147,6 +148,20 @@ try {
   const sourceBuffer = await readFile(path.join(root, 'homework-app/templates/summary-t1.xlsx'));
   const sourceBook = await workbook(sourceBuffer);
   const source = sourceBook.getWorksheet('wk6');
+  assert.equal(source.getCell('K15').value, 9);
+  assert.deepEqual(source.getCell('J15').fill, source.getCell('N8').fill, 'the original name records one completed detention');
+  assert.deepEqual(source.getCell('K15').fill, source.getCell('N6').fill, 'the original 9-count warning is separate from the name');
+  for (let mark = 1; mark <= 4; mark++) {
+    const marked = cloneSheet(sourceBook, source, `marker-test-${mark}`);
+    marked.getCell('J15').fill = structuredClone(source.getCell(`N${mark + 7}`).fill);
+    for (const nextCount of [9, 11]) {
+      const status = nextStatus(marked, { row: 15, column: 10, previousCount: 9, detention: mark }, nextCount);
+      assert.deepEqual(status.nameFill, marked.getCell('J15').fill, `completed detention ${mark} stays on the name at ${nextCount}`);
+      assert.deepEqual(status.fill, source.getCell(nextCount === 9 ? 'N6' : 'N7').fill);
+      assert.deepEqual(status.actions.map(action => action.action), nextCount === 9 ? [] : ['demerit']);
+    }
+    sourceBook.removeWorksheet(marked.id);
+  }
   assert.deepEqual(await download(forWeek(6)), sourceBuffer, 'Week 6 is the exact original file, not re-saved');
   const baseline = await preview(6);
   assert.equal(baseline.rows.find(row => row.id === 'S401').missingCount, 4);
@@ -172,8 +187,9 @@ try {
   assert.equal(summary.getCell('I6').value, 1);
   assert.equal(summary.getCell('K5').value, 5);
   assert.equal(summary.getCell('K6').value, 8);
-  assert.equal(summary.getCell('K15').value, 10);
-  for (const [address, legend] of [['H5', 'N7'], ['I5', 'N7'], ['J5', 'N5'], ['J6', 'N6'], ['J15', 'N7']]) assert.deepEqual(summary.getCell(address).fill, source.getCell(legend).fill);
+  assert.equal(summary.getCell('K15').value, 11, '9 plus 2 new records matches the reported case');
+  assert.deepEqual(summary.getCell('J15').style, source.getCell('J15').style, 'name keeps its exact green completed-detention style');
+  for (const [address, legend] of [['H5', 'N7'], ['I5', 'N7'], ['J5', 'N5'], ['J6', 'N6'], ['K15', 'N7']]) assert.deepEqual(summary.getCell(address).fill, source.getCell(legend).fill);
   for (const address of ['J22', 'K22', 'J31', 'K31']) assert.deepEqual(summary.getCell(address).style, source.getCell(address).style, 'manual old detention markers stay unchanged');
   assert.equal(summary.getCell('H8').value, source.getCell('H8').value, 'zero-missing students stay in the original report');
   assert.equal(summary.getCell('H34').value, '三十號同學');
@@ -199,7 +215,23 @@ try {
   assert.deepEqual(taskActions(saved7, 'S511'), ['demerit'], 'manual detention at 9 only adds the new 10 tier');
   const repeated = await workbook(await download(period));
   assert.equal(repeated.getWorksheet('wk7').getCell('I5').value, 10, 'repeated export does not double-count');
+  assert.deepEqual(repeated.getWorksheet('wk7').getCell('J15').style, source.getCell('J15').style, 'repeated exports keep the green name');
   assert.equal((await preview(7)).tasks.length, saved7.tasks.length, 'repeated export does not duplicate actions');
+  // Simulate a platform-generated Week 7 saved by the old two-cell paint bug.
+  const brokenBook = await workbook(week7Buffer);
+  const brokenSheet = cloneSheet(brokenBook, brokenBook.getWorksheet('wk7'), 'wk7');
+  brokenSheet.getCell('J15').fill = structuredClone(source.getCell('N7').fill);
+  const brokenBuffer = await writeTemplate({ templateBuffer: week7Buffer, source: summary, summary: brokenSheet, totalRow: 36 });
+  await stop();
+  const legacyFixture = JSON.parse(await readFile(dbFile, 'utf8'));
+  legacyFixture.homeworkReportStates[0].state.versions.find(version => version.week === 7).file = brokenBuffer.toString('base64');
+  await writeFile(dbFile, JSON.stringify(legacyFixture));
+  await start(); cookie = await login('T001');
+  const repaired = await workbook(await download(period));
+  assert.deepEqual(repaired.getWorksheet('wk7').getCell('J15').style, source.getCell('J15').style, 'regenerating an affected platform version restores the previous green name');
+  assert.equal(repaired.getWorksheet('wk7').getCell('K15').value, 11, 'repair never changes missing counts');
+  assert.deepEqual(repaired.getWorksheet('wk7').getCell('K15').fill, source.getCell('N7').fill);
+  assert.equal((await preview(7)).tasks.length, saved7.tasks.length, 'repair does not duplicate escalation actions');
   // Teacher annotates the generated report, retaining the native Excel styles.
   const teacherSource = repeated.getWorksheet('wk7');
   const teacherSheet = cloneSheet(repeated, teacherSource, 'wk7');
@@ -246,6 +278,8 @@ try {
   assert.equal(s8.getCell('K6').value, 9);
   assert.deepEqual(s8.getCell('K5').fill, teacherSheet.getCell('N9').fill, 'a count-cell-only detention marker is preserved without a new tier');
   assert.deepEqual(s8.getCell('J6').fill, teacherSheet.getCell('N8').fill);
+  assert.deepEqual(s8.getCell('J15').style, source.getCell('J15').style, 'green name persists into subsequent weeks');
+  assert.deepEqual(s8.getCell('K15').fill, source.getCell('N7').fill);
   const rows8 = taskRows(week8.getWorksheet(TASK_SHEET_NAME));
   assert.ok(!rows8.some(row => row.id === parentTask.id), 'handled Excel task is not carried into the next pending list');
   assert.ok(!rows8.some(row => row.id === saved7.tasks.find(task => task.studentId === 'S502' && task.action === 'detention').id));
@@ -256,7 +290,8 @@ try {
   assert.equal((await upload(teacherBuffer, 7, (await preview(8)).revision)).status, 400, 'cannot upload older week over newer report');
   const week9 = await workbook(await download(forWeek(9)));
   assert.equal(week9.getWorksheet('wk9').getCell('K6').value, 10);
-  assert.deepEqual(week9.getWorksheet('wk9').getCell('J6').fill, source.getCell('N7').fill);
+  assert.deepEqual(week9.getWorksheet('wk9').getCell('J6').fill, source.getCell('N8').fill, 'a teacher-uploaded green name survives the next tier');
+  assert.deepEqual(week9.getWorksheet('wk9').getCell('K6').fill, source.getCell('N7').fill, 'only the count changes to grey at the new tier');
   assert.deepEqual(taskActions(await preview(9), 'S502'), ['demerit', 'detention']);
   assert.deepEqual(await download(forWeek(6)), sourceBuffer, 'baseline stays immutable after every workflow');
   const customPeriod = { ...period, mode: 'custom', scope: 'P4', dateFrom: '2026-09-08', dateTo: '2026-09-24' };
@@ -384,7 +419,7 @@ try {
     } finally { await browser.close(); }
     console.log('Browser: simple class analysis, separate export page, independent filters, original/weekly/custom downloads, Excel-only actions, uploads and mobile fit passed.');
   }
-  console.log('Excel: immutable Week 6, exact fonts/layout, incremental weeks, all crossed tiers, manual marks, no duplicate actions, late records, persistence and access controls passed.');
+  console.log('Excel: immutable Week 6, exact fonts/layout, independent name/count colours, all detention marks, legacy regeneration, incremental weeks, all crossed tiers, no duplicate actions, late records, persistence and access controls passed.');
 } catch (error) { console.error(logs.slice(-3000)); throw error; }
 finally {
   await stop();

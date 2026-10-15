@@ -69,10 +69,10 @@ async function openReport(buffer, period) {
   return { book, source, totalRow };
 }
 
-function detentionMarker(sheet, row, column) {
+function detentionMarker(sheet, row, column, nameOnly = false) {
   const label = String(sheet.getCell(row, column).value || '').match(/已留堂\s*([1-4])\s*次/);
   if (label) return Number(label[1]);
-  const colors = [column, column + 1].map(c => fg(sheet.getCell(row, c).fill));
+  const colors = (nameOnly ? [column] : [column, column + 1]).map(c => fg(sheet.getCell(row, c).fill));
   for (let r = 5; r <= Math.min(30, sheet.rowCount); r++) {
     const marker = String(sheet.getCell(r, 14).value || '').match(/已留堂\s*([1-4])\s*次/);
     const fill = sheet.getCell(r, 14).fill;
@@ -101,14 +101,27 @@ function entriesFor(source, totalRow, rosters) {
 
 function nextStatus(source, entry, nextCount) {
   const previousFill = source.getCell(entry.row, entry.column).fill;
+  const previousCountFill = source.getCell(entry.row, entry.column + 1).fill;
   const oldLevel = entry.detention ? ACTIONS.filter(item => entry.previousCount >= item.threshold).length
     : ACTIONS.findIndex(item => fg(source.getCell(item.legend).fill) === fg(previousFill)) + 1;
   const nextLevel = ACTIONS.filter(item => nextCount >= item.threshold).length;
-  // A manual detention marker remains unless a NEW numeric level is reached.
-  if (entry.detention && nextLevel <= oldLevel) return { fill: previousFill, actions: [] };
+  // Without a new tier, keep each cell's own style (name and count may differ).
+  if (entry.detention && nextLevel <= oldLevel) return { fill: previousCountFill, nameFill: previousFill, actions: [] };
   const fill = nextLevel ? source.getCell(ACTIONS[nextLevel - 1].legend).fill : previousFill;
-  const changed = fg(previousFill) !== fg(fill);
-  return { fill, actions: changed && nextLevel > oldLevel ? ACTIONS.slice(oldLevel, nextLevel) : [] };
+  // A name records completed detentions independently of the current count tier.
+  const nameFill = detentionMarker(source, entry.row, entry.column, true) ? previousFill : fill;
+  const changed = fg(previousFill) !== fg(nameFill) || fg(previousCountFill) !== fg(fill);
+  return { fill, nameFill, actions: changed && nextLevel > oldLevel ? ACTIONS.slice(oldLevel, nextLevel) : [] };
+}
+
+function previousNameFill(source, entry) {
+  if (!source) return;
+  for (let row = 5; row <= source.rowCount; row++) {
+    if ((Number(source.getCell(row, 1).value) || null) !== entry.classNo
+      || !sameName(String(source.getCell(row, entry.column).value || ''), entry.displayName)) continue;
+    if (detentionMarker(source, row, entry.column, true)) return source.getCell(row, entry.column).fill;
+    return;
+  }
 }
 
 async function inputs(period) {
@@ -129,6 +142,13 @@ async function inputs(period) {
 async function prepare(period) {
   const data = await inputs(period);
   const { book, source, state, rosters, current, version } = data;
+  // Repair only platform-generated reports affected by the old two-cell paint.
+  // Never infer changes to a teacher-uploaded version or restore older marks
+  // past the immediately preceding weekly sheet.
+  const previousSource = version?.kind === 'generated' ? book.worksheets
+    .filter(sheet => isSummarySheet(sheet) && /^wk\s*\d+$/i.test(sheet.name)
+      && Number(sheet.name.match(/\d+/)[0]) < version.week)
+    .sort((a, b) => Number(b.name.match(/\d+/)[0]) - Number(a.name.match(/\d+/)[0]))[0] : null;
   const entries = entriesFor(source, data.totalRow, rosters);
   const historical = period.week > 6 && state.versions.some(item => item.week > period.week) && version?.week === period.week;
   let totalRow = data.totalRow;
@@ -151,12 +171,21 @@ async function prepare(period) {
     const observed = current[entry.id]?.missingCount || 0;
     entry.missingCount = period.week === 6 || historical ? entry.previousCount : Math.max(0, entry.previousCount + observed - (version?.observed?.[entry.id] || 0));
     entry.missingRecords = current[entry.id]?.missingRecords || [];
-    if (period.week === 6 || historical) { entry.fill = source.getCell(entry.row, entry.column).fill; continue; }
+    if (period.week === 6 || historical) {
+      entry.fill = source.getCell(entry.row, entry.column + 1).fill;
+      entry.nameFill = source.getCell(entry.row, entry.column).fill;
+      continue;
+    }
     const reached = ACTIONS.filter(item => entry.missingCount >= item.threshold);
     const status = entry.added
       ? { fill: reached.length ? source.getCell(reached.at(-1).legend).fill : { type: 'pattern', pattern: 'none' }, actions: reached }
       : nextStatus(source, entry, entry.missingCount);
     entry.fill = status.fill;
+    entry.nameFill = status.nameFill || status.fill;
+    if (!entry.added && fg(source.getCell(entry.row, entry.column).fill) === fg(source.getCell(entry.row, entry.column + 1).fill)
+      && ACTIONS.some(action => fg(source.getCell(action.legend).fill) === fg(source.getCell(entry.row, entry.column).fill))) {
+      entry.nameFill = previousNameFill(previousSource, entry) || entry.nameFill;
+    }
     for (const action of status.actions) candidates.push({ id: fingerprint(`${period.academicYear}|${entry.key}|${action.threshold}`),
       academicYear: period.academicYear, studentId: entry.id, studentKey: entry.key, name: entry.name, className: entry.className,
       classNo: entry.classNo, week: period.week, count: entry.missingCount, threshold: action.threshold, action: action.action, done: false });
@@ -201,10 +230,8 @@ async function generate(period, userId) {
       summary.getRow(entry.row).height = data.source.getRow(5).height;
     }
     if (entry.missingCount !== entry.previousCount || entry.added) summary.getCell(entry.row, entry.column + 1).value = entry.missingCount || null;
-    if (entry.added || fg(entry.fill) !== fg(data.source.getCell(entry.row, entry.column).fill)) {
-      summary.getCell(entry.row, entry.column).fill = structuredClone(entry.fill);
-      summary.getCell(entry.row, entry.column + 1).fill = structuredClone(entry.fill);
-    }
+    for (const [column, fill] of [[entry.column, entry.nameFill], [entry.column + 1, entry.fill]])
+      if (entry.added || fg(fill) !== fg(data.source.getCell(entry.row, column).fill)) summary.getCell(entry.row, column).fill = structuredClone(fill);
   }
   if (data.totalRow !== data.templateTotalRow) {
     for (let c = 1; c <= 13; c++) {
