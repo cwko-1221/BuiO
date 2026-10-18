@@ -30,6 +30,8 @@
     let gradeSocket = null;
     let socketLibrary = null;
     let pageLeaving = false;
+    let cancelFeedback = null;
+    const waitingForSocket = new Set();
 
     function connectFeedback() {
         gradeSocket?.disconnect(); gradeSocket = null;
@@ -52,39 +54,71 @@
                 transports: ['websocket', 'polling'], tryAllTransports: true,
                 timeout: 4000, reconnectionAttempts: 2,
             });
+            gradeSocket.on('connect', () => { for (const send of waitingForSocket) send(gradeSocket); });
         }).catch(() => {});
     }
 
-    async function gradeOverHttp(attempt) {
-        // /grade is a pure read, unlike /submit. It can safely retry once if a
-        // response is lost; never apply this retry policy to saving the results.
-        for (let tries = 0; ; tries++) {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 2500);
-            try {
-                const response = await fetch('/api/quiz/grade', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include', signal: controller.signal,
-                    body: JSON.stringify({ ...attempt, quizId }),
-                });
-                const data = await response.json();
-                if (response.ok || ![408,429,500,502,503,504].includes(response.status) || tries > 0) return data;
-            } catch (error) { if (tries > 0 || pageLeaving) throw error; }
-            finally { clearTimeout(timeout); }
-        }
-    }
-
     async function gradeFeedback(attempt) {
-        const request = async () => {
-            if (gradeSocket?.connected) {
-                const data = await new Promise(resolve => gradeSocket.timeout(1200).emit('quiz:grade', { ...attempt, quizId }, (error, data) => resolve(error ? null : data)));
-                if (data && (data.success || (data.status < 500 && ![408,429].includes(data.status)))) return data;
-            }
-            return gradeOverHttp(attempt);
-        };
+        const request = () => new Promise((resolve, reject) => {
+            const payload = { ...attempt, quizId };
+            const controllers = new Set(), timers = new Set();
+            let settled = false, socketSent = false, httpCount = 0;
+            const later = (fn, ms) => { const timer = setTimeout(fn, ms); timers.add(timer); };
+            const cancel = () => finish(null, new DOMException('Navigation cancelled feedback', 'AbortError'));
+            const finish = (data, error) => {
+                if (settled) return;
+                settled = true;
+                for (const timer of timers) clearTimeout(timer);
+                waitingForSocket.delete(sendSocket);
+                for (const controller of controllers) controller.abort(new DOMException('Feedback finished', 'AbortError'));
+                if (cancelFeedback === cancel) cancelFeedback = null;
+                error ? reject(error) : resolve(data);
+            };
+            const accept = (data, status) => {
+                if (settled) return true;
+                if (data?.success && data.result?.index === payload.index && typeof data.result.isCorrect === 'boolean') {
+                    finish(data); return true;
+                }
+                if (data?.success === false && ![408,425,429,500,502,503,504].includes(status)) {
+                    finish({ ...data, status }); return true;
+                }
+                return false;
+            };
+            const sendHttp = async () => {
+                if (settled || pageLeaving || httpCount >= 2) return;
+                httpCount++;
+                const controller = new AbortController(); controllers.add(controller);
+                // This is pure feedback, never the final marks submission. A
+                // backup can run without cancelling a slow valid first reply.
+                if (httpCount === 1) later(sendHttp, 2500);
+                try {
+                    const response = await fetch('/api/quiz/grade', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include', signal: controller.signal, body: JSON.stringify(payload),
+                    });
+                    if (!accept(await response.json(), response.status)) void sendHttp();
+                } catch { if (!settled) void sendHttp(); }
+                finally { controllers.delete(controller); }
+            };
+            const sendSocket = socket => {
+                if (settled || socketSent || !socket.connected || socket.auth?.quizId !== payload.quizId) return;
+                socketSent = true;
+                // Keep late acknowledgements eligible until the shared budget
+                // ends. HTTP fallback must not discard a valid server answer.
+                socket.timeout(15000).emit('quiz:grade', payload, (error, data) => {
+                    if (!error && !accept(data, data?.status)) void sendHttp();
+                });
+            };
+            cancelFeedback = cancel;
+            waitingForSocket.add(sendSocket);
+            later(() => finish(null, Object.assign(Error('Feedback unavailable'), { code: 'FEEDBACK_UNAVAILABLE' })), 15000);
+            later(() => showGradeNotice(t('m.feedbackWaiting')), 2000);
+            if (gradeSocket?.connected) { sendSocket(gradeSocket); later(sendHttp, 900); }
+            else void sendHttp();
+        });
         return window.BuiLoading ? window.BuiLoading.run(request) : request();
     }
-    window.addEventListener('pagehide', () => { pageLeaving = true; gradeSocket?.disconnect(); });
+    window.addEventListener('pagehide', () => { pageLeaving = true; cancelFeedback?.(); gradeSocket?.disconnect(); });
     window.addEventListener('pageshow', event => { if (event.persisted) { pageLeaving = false; if (quizId) connectFeedback(); } });
 
     // ========================================
@@ -112,6 +146,11 @@
     const fractionNumeratorInput = document.getElementById('fraction-numerator-input');
     const fractionDenominatorInput = document.getElementById('fraction-denominator-input');
     const submitBtn = document.getElementById('submit-answer-btn');
+    const gradeNotice = document.getElementById('grade-status');
+    function showGradeNotice(message = '') {
+        gradeNotice.textContent = message;
+        gradeNotice.hidden = !message;
+    }
     const numberKeypad = document.getElementById('number-keypad');
     const keypadButtons = numberKeypad
         ? [...numberKeypad.querySelectorAll('button[data-key]')]
@@ -674,8 +713,8 @@
     // ========================================
     // Timer
     // ========================================
-    function startTimer() {
-        questionStartTime = Date.now();
+    function startTimer(elapsed = 0) {
+        questionStartTime = Date.now() - elapsed * 1000;
         clearInterval(timer);
         timer = setInterval(() => {
             const elapsed = Math.floor((Date.now() - questionStartTime) / 1000);
@@ -827,6 +866,8 @@
         submitBtn.disabled = false;
         setKeypadDisabled(false);
         submitBtn.textContent = t('m.confirm');
+        submitBtn.removeAttribute('aria-busy');
+        showGradeNotice();
 
         // Focus input
         setTimeout(() => {
@@ -888,6 +929,9 @@
         submitBtn.disabled = true;
         setKeypadDisabled(true);
         answerLocked = true;
+        showGradeNotice();
+        submitBtn.textContent = '⏳';
+        submitBtn.setAttribute('aria-busy', 'true');
         const attempt = {
             index: q.index,
             userAnswer: fractionAnswerMode
@@ -904,8 +948,9 @@
         try {
             const data = await gradeFeedback(attempt);
             if (!data.success) {
-                throw new Error(data.message || t('m.gradeFailed'));
+                throw Object.assign(new Error(data.message || t('m.gradeFailed')), { status: data.status });
             }
+            showGradeNotice();
 
             answers[currentIndex] = {
                 ...attempt,
@@ -933,8 +978,10 @@
             answerLocked = false;
             submitBtn.disabled = false;
             setKeypadDisabled(false);
-            startTimer();
-            alert(error.message || t('m.gradeFailed'));
+            submitBtn.removeAttribute('aria-busy');
+            submitBtn.textContent = t('m.retryGrade');
+            startTimer(timeTaken);
+            if (!pageLeaving) showGradeNotice([401,403].includes(error.status) ? t('m.feedbackSignIn') : [400,409].includes(error.status) ? error.message : t('m.feedbackRetry'));
         }
     }
 

@@ -91,6 +91,10 @@ BuiI18n.register({
   'm.connectError':  { 'zh-HK': '連線失敗: ', 'en-US': 'Connection failed: ' },
   'm.submitFailed':  { 'zh-HK': '提交失敗: ', 'en-US': 'Submit failed: ' },
   'm.gradeFailed':   { 'zh-HK': '答案批改失敗，請檢查連線後再試。', 'en-US': 'Could not check your answer. Check your connection and try again.' },
+  'm.retryGrade':    { 'zh-HK': '重試判分', 'en-US': 'Retry' },
+  'm.feedbackWaiting': { 'zh-HK': '正在確認答案，輸入仍保留在此頁。', 'en-US': 'Checking your answer. Your input is still on this page.' },
+  'm.feedbackRetry': { 'zh-HK': '暫時未能確認答案，輸入已保留。請按「重試判分」。', 'en-US': 'Your answer could not be confirmed. Your input is kept. Select Retry.' },
+  'm.feedbackSignIn': { 'zh-HK': '登入已到期，輸入仍保留在此頁。請返回主頁重新登入。', 'en-US': 'Your sign-in has expired. Your input is still on this page. Return Home to sign in.' },
   'm.retrySubmit':  { 'zh-HK': '重試提交', 'en-US': 'Retry submission' },
   'm.fractionAria': { 'zh-HK': '{d}分之{n}', 'en-US': '{n} over {d}' },
 
