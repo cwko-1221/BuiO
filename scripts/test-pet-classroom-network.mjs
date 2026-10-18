@@ -71,7 +71,7 @@ try {
   const before = rooms.map(r => r.state.tick);
   await wait(1200);
   const counts = events.slice(0, 24).map(list => list.filter(e => e.event === 'duel:frame').length);
-  assert.ok(counts.every(n => n >= 18 && n <= 28), JSON.stringify(counts));
+  assert.ok(counts.every(n => n >= 32 && n <= 40), JSON.stringify(counts));
   assert.ok(rooms.every((r, i) => r.state.tick - before[i] >= 55), 'all 12 authoritative simulations progress');
 
   // Inject actual server transport backpressure: frames drop instead of queuing.

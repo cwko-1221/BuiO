@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && node tests/coin-pusher-build-artifact.test.js",
+    "build": "tsc --noEmit && vite build && node ../scripts/pack-pet-brawl-runtime.mjs && node tests/coin-pusher-build-artifact.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

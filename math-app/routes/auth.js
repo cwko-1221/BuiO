@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const bcrypt = require('bcryptjs');
+const passwords = require('../../shared/passwords.cjs');
 const crypto = require('crypto');
 const router = express.Router();
 
@@ -64,7 +64,7 @@ router.post('/login', async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ success: false, message: '學號不存在' });
     }
-    if (!await bcrypt.compare(password, user.passwordhash)) {
+    if (!await passwords.compare(password, user.passwordhash)) {
       return res.status(401).json({ success: false, message: '密碼錯誤' });
     }
     req.session.studentId = user.studentid;
@@ -205,7 +205,7 @@ router.post('/register-student', requireTeacher, async (req, res, next) => {
     if (targetRole === 'teacher' && !req.session.adminUnlocked) {
       return res.status(403).json({ success: false, message: '請先輸入 Admin 密碼' });
     }
-    const passwordHash = bcrypt.hashSync(password, 10);
+    const passwordHash = await passwords.hash(password, 10);
 
     await users.insert({
       studentId: id, name, passwordHash, role: targetRole,
@@ -278,15 +278,20 @@ router.post('/register-students-batch', requireTeacher, async (req, res, next) =
     }
 
     if (toCreate.length > 0 || toUpdate.length > 0) {
+      // Password work may queue behind classroom logins. Do it before taking a
+      // database connection/transaction, so it cannot hold Supabase row locks.
+      const hashes = new Map();
+      for (const s of toCreate) hashes.set(s.studentId, await passwords.hash(s.password || '123456', 10));
+      for (const s of toUpdate) if (s.passwordProvided) hashes.set(s.studentId, await passwords.hash(s.password, 10));
       await withTransaction(async client => {
         for (const s of toCreate) {
-          const passwordHash = await bcrypt.hash(s.password || '123456', 10);
+          const passwordHash = hashes.get(s.studentId);
           await users.insert({ ...s, passwordHash, role: 'student' }, { client });
           await academicYears.upsertCurrentStudent({ ...s }, { client });
           await stats.ensureTagsForStudent(s.studentId, ALL_TAGS, { client });
         }
         for (const s of toUpdate) {
-          const passwordHash = s.passwordProvided ? await bcrypt.hash(s.password, 10) : null;
+          const passwordHash = hashes.get(s.studentId) || null;
           await users.updateStudentProfile({ ...s, passwordHash }, { client });
           await academicYears.upsertCurrentStudent({ ...s }, { client });
         }

@@ -8,6 +8,7 @@ const rules=Promise.all([import('../lib/brawl/catalog.mjs'),import('../lib/brawl
 const fail=(message,status=409)=>{throw Object.assign(new Error(message),{status});};
 const terminal=s=>['finished','cancelled'].includes(s.status);
 const actionBits=16|32|128|256;
+const displayPeriod=1000/30;
 module.exports=function register(io,options={}){
   const ns=io.of('/pet-brawl'),members=new Map(),invites=new Map(),reserved=new Map(),rooms=new Map(),inviteKeys=new Map(),lastInvite=new Map();
   const now=options.now||Date.now,inviteMs=options.inviteMs||60000,prepareMs=options.prepareMs||30000,reconnectMs=options.reconnectMs||20000,countdownMs=options.countdownMs??3000;
@@ -26,7 +27,8 @@ module.exports=function register(io,options={}){
   function info(r,id){return {match:r.meta,playerIndex:r.meta.players.findIndex(p=>p.id===id),phase:r.phase,startAt:r.startAt||0,state:r.state};}
   function announceMatch(r){for(const p of r.meta.players)send(p.id,'duel:match',info(r,p.id));}
   const accountRemoved=({id,match})=>{const r=match&&rooms.get(match.id);if(r){r.meta=match;r.phase='cancelled';for(const p of match.players)send(p.id,'duel:result',{match,winnerIndex:null,refunded:true});}for(const m of all(id))m.socket.disconnect(true);presence();};repo.events.on('accountRemoved',accountRemoved);
-  function broadcast(r,volatile=false){r.frameSeq++;const data={matchId:r.meta.id,frameSeq:r.frameSeq,phase:r.phase,startAt:r.startAt||0,reconnectUntil:r.reconnectUntil||0,state:r.state,events:r.events.splice(0)};r.broadcastAt=now();for(const p of r.meta.players){const target=ns.to(studentRoom(p.id));(volatile?target.volatile:target).emit('duel:frame',data);}}
+  const frame=r=>({matchId:r.meta.id,frameSeq:r.frameSeq,phase:r.phase,startAt:r.startAt||0,reconnectUntil:r.reconnectUntil||0,state:r.state});
+  function broadcast(r,volatile=false){r.frameSeq++;const data={...frame(r),events:r.events.splice(0)};r.broadcastAt=now();const target=ns.to(r.meta.players.map(p=>studentRoom(p.id)));(volatile?target.volatile:target).emit('duel:frame',data);}
   async function finish(r,reason,winnerIndex=null,refund=false){if(r.finishing||terminal(r.meta))return;r.finishing=true;r.phase='settling';broadcast(r);
     try{r.meta=await repo.finalize(r.meta.id,{status:refund?'cancelled':'finished',reason,winnerIndex,finishedAt:new Date(now()).toISOString(),ticks:r.state.tick},refund);r.phase=r.meta.status;for(const rank of r.meta.rankResults||[])for(const m of all(rank.studentId))m.profile.rank=rank;for(const p of r.meta.players)send(p.id,'duel:result',{match:r.meta,winnerIndex,refunded:!!r.meta.refunded});presence();}
     catch(e){r.finishing=false;r.finishRetry={reason,winnerIndex,refund};r.retryAt=now()+1000;console.error('[pet-duel] could not settle match:',e.message);}
@@ -96,12 +98,14 @@ module.exports=function register(io,options={}){
     });
     handle('duel:cancel',body=>{const inv=invites.get(body.inviteId);if(!inv||inv.from.id!==id)fail('找不到你的邀請。',404);if(inv.status==='pending')closeInvite(inv,'cancelled','邀請已取消，雙方均未扣款。');else if(inv.status==='accepting'||inv.status==='accepted')fail('同學已接受，請先完成這場對戰。');return {invitation:inv};});
     const own=matchId=>{const r=rooms.get(matchId),index=r?.meta.players.findIndex(p=>p.id===id)??-1;if(!r||index<0||terminal(r.meta))fail('找不到你的進行中對戰。',404);return {r,index};};
+    handle('duel:sync',body=>{const r=rooms.get(body.matchId);if(!r||!r.meta.players.some(p=>p.id===id))fail('找不到你的進行中對戰。',404);return terminal(r.meta)?{result:{match:r.meta,winnerIndex:r.meta.winnerIndex??null,refunded:!!r.meta.refunded}}:{frame:{...frame(r),events:[]}};});
     handle('duel:ready',body=>{const {r,index}=own(body.matchId);if(r.controllers[index]&&r.controllers[index]!==socket.id&&members.has(r.controllers[index]))fail('這個帳戶已在另一個分頁或裝置操作對戰。');if(r.ready[index]&&r.controllers[index]===socket.id)return {session:info(r,id)};r.controllers[index]=socket.id;r.ready[index]=true;r.seq[index]=-1;r.masks[index]=r.pressed[index]=0;r.inputAt[index]=now();
       if(r.ready.every(Boolean)&&r.controllers.every(s=>members.has(s))){r.startAt=now()+countdownMs;r.phase='countdown';r.clockAt=now();r.accumulator=0;r.reconnectUntil=0;}broadcast(r);return {session:info(r,id)};});
     socket.on('duel:input',body=>{try{const {r,index}=own(body?.matchId);if(r.controllers[index]!==socket.id||!['playing','countdown'].includes(r.phase))return;
       if(m.locked)return;
       if(!Number.isSafeInteger(body.seq)||body.seq<=r.seq[index]||!Number.isInteger(body.mask)||body.mask<0||body.mask>1023)return;
       if(now()-m.windowAt>1000){m.windowAt=now();m.inputCount=0;}if(++m.inputCount>120)return;
+      if(body.mask!==r.masks[index])r.inputDirty=true;
       r.pressed[index]|=body.mask&~r.masks[index]&actionBits;r.masks[index]=body.mask;r.seq[index]=body.seq;r.inputAt[index]=now();
     }catch{}});
     handle('duel:leave',async body=>{const {r,index}=own(body.matchId);const statuses=await accessLocks.studentStatuses(r.meta.players.map(p=>p.id));const locked=[...statuses.values()].some(s=>s.locked);await finish(r,locked?'pet_app_locked':r.started?'surrender':'preparation_cancelled',locked?null:r.started?1-index:null,locked||!r.started);return {};});
@@ -123,12 +127,14 @@ module.exports=function register(io,options={}){
       while(r.accumulator>=1000/60&&frames++<15){const masks=r.masks.map((mask,i)=>time-r.inputAt[i]<400?mask|r.pressed[i]:r.pressed[i]);r.pressed=[0,0];sim.stepBattle(r.state,masks[0],masks[1]);r.events.push(...r.state.events);r.accumulator-=1000/60;
         if(['won','lost','draw'].includes(r.state.status)){broadcast(r);void finish(r,'battle_complete',r.state.status==='draw'?null:r.state.status==='won'?0:1);break;}
       }
-      // Catch up the simulation at 60 Hz, but send only the latest display
-      // state. Congested transports must not queue old frames behind new ones.
-      if(r.phase==='playing'&&!r.finishing&&time>=(r.broadcastDueAt||0)){
-        const due=r.broadcastDueAt;
+      // Send the first authoritative step after an input transition immediately.
+      // Held movement has a 30 Hz display budget; no extra simulation steps or
+      // queued old display frames are introduced by input or congestion.
+      if(r.phase==='playing'&&!r.finishing&&frames>0&&(r.inputDirty||time>=(r.broadcastDueAt||0))){
+        const urgent=r.inputDirty,due=r.broadcastDueAt;
+        r.inputDirty=false;
         broadcast(r,true);
-        r.broadcastDueAt=due?due+(Math.floor((time-due)/50)+1)*50:time+50;
+        r.broadcastDueAt=!due||urgent?time+displayPeriod:due+(Math.floor((time-due)/displayPeriod)+1)*displayPeriod;
       }
     }
     if(sweeping)return;sweeping=true;

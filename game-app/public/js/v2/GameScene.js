@@ -54,11 +54,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    window.BuiLoading?.watchScene(this);
+    window.BuiLoading?.watchScene(this,{recoverOnError:false});
+    this.loadFailed=false;
+    this.load.on('loaderror',()=>{this.loadFailed=true;});
     const assetVersion = encodeURIComponent(this.course.mapVersion);
     const versioned = url => `${url}${url.includes('?')?'&':'?'}v=${assetVersion}`;
     this.load.image('sky-v2', '/game/images/game/sky-panorama.webp');
-    this.load.image('player-v2', '/game/images/v2/characters/player-idle.webp');
     this.myPet = petOf(this.avatar);
     if (this.myPet) queuePet(this, this.myPet);
     for (const cp of this.course.checkpoints) {
@@ -71,7 +72,9 @@ export class GameScene extends Phaser.Scene {
     const neededPages = new Set(this.course.usedAssets.map(id => ATLAS_INDEX[id]?.key));
     for (const page of ATLAS_PAGES) if (neededPages.has(page.key)) this.load.atlas(page.key,versioned(page.image),versioned(page.json));
     const strips = { idle:['idle-strip-4',4], run:['run-strip-8',8], air:['air-strip-6',6], land:['fall-land-strip-4',4], celebrate:['celebrate-strip-4',4] };
-    for (const [name,[dir,count]] of Object.entries(strips)) {
+    // An owned pet supplies every movement. Do not download or decode the
+    // unused climber's 26 individual images as well.
+    for (const [name,[dir,count]] of this.myPet ? [] : Object.entries(strips)) {
       for (let i=1;i<=count;i++) this.load.image(`player-${name}-${i}`,`/game/images/v2/characters/frames/${dir}/${String(i).padStart(2,'0')}.png`);
     }
     for (const id of this.course.usedAssets) {
@@ -80,6 +83,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
+    if(this.loadFailed){this.hooks.onLoadError?.();return;}
     this.matter.world.setBounds(0, 0, this.course.world.width, this.course.world.height + 500, 120, true, true, true, false);
     this.matter.world.engine.positionIterations = 8;
     this.matter.world.engine.velocityIterations = 6;
@@ -181,6 +185,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   createPlayerAnimations() {
+    if(this.myPet)return;
     const create = (key, prefix, count, frameRate, repeat = -1) => {
       if (this.anims.exists(key)) return;
       this.anims.create({ key, frames:Array.from({length:count},(_,i)=>({key:`player-${prefix}-${i+1}`})), frameRate, repeat });
@@ -556,6 +561,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(time, deltaMs) {
+    if(this.loadFailed)return;
     this.renderWindow?.update(this.cameras.main,time);
     this.updateHazards(time);
     if (!this.player || this.finished || this.hooks.isFrozen?.()) return;
