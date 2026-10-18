@@ -33,5 +33,5 @@ async function walk(folder) {
   }
 }
 for (const folder of folders) await walk(path.join(root, folder));
-for (const file of ['shared/i18n.js', 'shared/reliable-request.js', 'shared/loading.js', 'shared/loading.css', 'node_modules/phaser/dist/phaser.min.js', 'node_modules/exceljs/dist/exceljs.min.js']) await compress(path.join(root, file));
+for (const file of ['shared/i18n.js', 'shared/reliable-request.js', 'shared/loading.js', 'shared/loading.css', 'node_modules/phaser/dist/phaser.min.js', 'node_modules/exceljs/dist/exceljs.min.js', 'node_modules/chart.js/dist/chart.umd.js']) await compress(path.join(root, file));
 console.log(JSON.stringify({ files, originalBytes: before, brotliBytes: after }));

@@ -256,7 +256,7 @@
   window.addEventListener('online', () => { offlineDone?.(); offlineDone = null; });
   window.addEventListener('pagehide', () => { jobs.clear(); renderStatus(); });
   window.addEventListener('error', event => {
-    if (event.target?.matches?.('script[src],link[rel="stylesheet"]')) {
+    if (event.target?.matches?.('script[src]:not([data-bui-optional]),link[rel="stylesheet"]')) {
       ready(); recover(new Error('Resource loading'), undefined);
     }
   }, true);

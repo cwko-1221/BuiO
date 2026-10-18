@@ -31,7 +31,6 @@ export async function checkSession() {
           },
           loggedIn: true
         });
-        await fetchHomeworkInfo();
         return true;
       }
     }
@@ -40,26 +39,28 @@ export async function checkSession() {
 }
 
 export async function fetchHomeworkInfo() {
-  try {
-    const metaResponse = await fetch('/api/homework/meta', { credentials: 'include' });
-    const meta = await metaResponse.json();
-    const homeworkAccess = Boolean(metaResponse.ok && meta.success && meta.canAccess);
-    let homeworkPending = [];
-    let homeworkHistory = [];
-    if (state.currentUser?.role === 'student') {
-      const pendingResponse = await fetch('/api/homework/pending', { credentials: 'include' });
-      const pending = await pendingResponse.json();
-      if (pendingResponse.ok && pending.success) {
-        homeworkPending = pending.pending || [];
-        homeworkHistory = pending.history || [];
-      }
-    }
-    updateState({ homeworkAccess, homeworkPending, homeworkHistory, homeworkPendingLoaded: true });
-    return homeworkAccess;
-  } catch {
-    updateState({ homeworkAccess: false, homeworkPending: [], homeworkHistory: [], homeworkPendingLoaded: true });
-    return false;
-  }
+  const generation = sessionGeneration, accountId = state.currentUser?.id;
+  if (!state.loggedIn || !accountId) return false;
+  const current = () => generation === sessionGeneration && state.loggedIn && state.currentUser?.id === accountId;
+  const read = async url => {
+    const response = await fetch(url, { credentials: 'include' });
+    const data = await response.json();
+    if (!response.ok || !data.success) throw Error('Homework information unavailable');
+    return data;
+  };
+  // Neither request depends on the other. Publish each part as it arrives,
+  // without delaying the authenticated portal or another account's session.
+  const access = read('/api/homework/meta').then(meta => {
+    if (current()) updateState({ homeworkAccess: Boolean(meta.canAccess) });
+    return Boolean(meta.canAccess);
+  }).catch(() => false);
+  const pending = state.currentUser.role === 'student'
+    ? read('/api/homework/pending').then(data => {
+        if (current()) updateState({ homeworkPending: data.pending || [], homeworkHistory: data.history || [], homeworkPendingLoaded: true, homeworkPendingError: false });
+      }).catch(() => { if (current()) updateState({ homeworkPendingLoaded: true, homeworkPendingError: true }); })
+    : Promise.resolve();
+  const [canAccess] = await Promise.all([access, pending]);
+  return canAccess;
 }
 
 export function clearSession() {

@@ -23,6 +23,7 @@ export const state = {
   homeworkPending: [],
   homeworkHistory: [],
   homeworkPendingLoaded: false,
+  homeworkPendingError: false,
 };
 
 export function updateState(newState) {

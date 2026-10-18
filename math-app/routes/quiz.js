@@ -18,95 +18,7 @@ const { requireAuth, requireTeacher } = require('../middleware/auth');
 // today and the tag-picker / dashboard are unlocked.
 const DAILY_RANDOM_THRESHOLD = DEFAULT_QUIZ_SIZE;
 
-function isFractionQuestion(question) {
-  return Boolean(question && (
-    question.answerType === 'fraction'
-    || question.answerType === 'mixed'
-    || (question.tag && question.tag.startsWith('frac_'))
-  ));
-}
-
-function isDecimalArithmeticQuestion(question) {
-  return Boolean(question && [
-    'add_up_to_3n', 'sub_up_to_3n', 'mix_3n_4d',
-    'mul_by_powers10', 'mul_by_decimal_scales', 'mul_decimal_or_integer',
-    'div_by_powers10', 'div_by_decimal_scales', 'div_decimal_general',
-    'mix_decimal_or_integer_up_to_4',
-    'convert_decimal_fraction', 'convert_decimal_percent', 'convert_percent_fraction',
-    'linear_equation_easy_2',
-  ].includes(question.tag));
-}
-
-function fractionAnswerFormat(question) {
-  if (!isFractionQuestion(question)) return null;
-  const type = question.answerType || 'fraction';
-  const numerator = question.answerNumerator ?? question.correctAnswer;
-  const denominator = question.answerDenominator ?? question.denominator;
-  const fields = type === 'mixed'
-    ? [
-        { name: 'whole', maxLength: String(Math.abs(question.answerWhole || 0)).length },
-        { name: 'numerator', maxLength: String(Math.abs(numerator)).length },
-        { name: 'denominator', maxLength: String(Math.abs(denominator)).length },
-      ]
-    : [
-        { name: 'numerator', maxLength: String(Math.abs(numerator)).length },
-        { name: 'denominator', maxLength: String(Math.abs(denominator)).length },
-      ];
-  return { type, fields };
-}
-
-function gradeAnswer(question, rawUserAnswer, rawUserDenominator, rawUserNumerator, rawUserWhole) {
-  if (isFractionQuestion(question)) {
-    const numerator = parseInt(rawUserNumerator ?? rawUserAnswer, 10);
-    const denominator = parseInt(rawUserDenominator, 10);
-    const answerType = question.answerType || 'fraction';
-    const whole = answerType === 'mixed' ? parseInt(rawUserWhole, 10) : 0;
-    const expectedNumerator = question.answerNumerator ?? question.correctAnswer;
-    const expectedDenominator = question.answerDenominator ?? question.denominator;
-    const expectedWhole = question.answerWhole || 0;
-    const valid = Number.isInteger(numerator)
-      && Number.isInteger(denominator)
-      && denominator > 0
-      && numerator >= 0
-      && (answerType !== 'mixed' || numerator < denominator)
-      && (answerType !== 'mixed' || (Number.isInteger(whole) && whole >= 0));
-    const isCorrect = valid
-      && numerator === expectedNumerator
-      && denominator === expectedDenominator
-      && (answerType !== 'mixed' || whole === expectedWhole);
-    const userValue = valid ? whole + numerator / denominator : null;
-    const correctValue = expectedWhole + expectedNumerator / expectedDenominator;
-    const userDisplay = valid
-      ? (answerType === 'mixed' ? `${whole} ${numerator}/${denominator}` : `${numerator}/${denominator}`)
-      : '';
-    const correctDisplay = answerType === 'mixed'
-      ? `${expectedWhole} ${expectedNumerator}/${expectedDenominator}`
-      : `${expectedNumerator}/${expectedDenominator}`;
-    return {
-      userAnswer: userValue,
-      userAnswerDisplay: userDisplay,
-      correctAnswerValue: correctValue,
-      correctAnswerDisplay: correctDisplay,
-      isCorrect,
-    };
-  }
-
-  const rawAnswer = String(rawUserAnswer ?? '').trim();
-  const decimalQuestion = isDecimalArithmeticQuestion(question);
-  const validDecimal = !decimalQuestion || /^\d+(?:\.\d{1,6})?$/.test(rawAnswer);
-  const userAnswer = decimalQuestion
-    ? (validDecimal ? Number(rawAnswer) : null)
-    : parseFloat(rawUserAnswer);
-  return {
-    userAnswer,
-    userAnswerDisplay: userAnswer,
-    correctAnswerValue: question.correctAnswer,
-    correctAnswerDisplay: question.correctAnswer,
-    isCorrect: validDecimal && (decimalQuestion
-      ? Math.round(userAnswer * 1000000) === Math.round(question.correctAnswer * 1000000)
-      : userAnswer === question.correctAnswer),
-  };
-}
+const { gradeAnswer, fractionAnswerFormat, gradeQuizAnswer } = require('../engine/quiz-grading');
 
 async function studentGradeTags(studentId) {
   const scope = await scopeForStudent(studentId);
@@ -265,30 +177,8 @@ router.get('/questions', async (req, res, next) => {
 // POST /grade — check one answer without writing to the database. The client
 // batches the whole practice set to /submit after showing per-question feedback.
 router.post('/grade', (req, res) => {
-  const { index, userAnswer, userDenominator, userNumerator, userWhole, timeTaken } = req.body || {};
-  const quiz = req.session.currentQuiz;
-  if (!quiz || quiz.length === 0) {
-    return res.status(400).json({ success: false, message: '沒有進行中的測驗，請先取得題目' });
-  }
-  const question = quiz.find(q => q.index === Number(index));
-  if (!question) {
-    return res.status(400).json({ success: false, message: `找不到第 ${index} 題` });
-  }
-
-  const gradedAnswer = gradeAnswer(question, userAnswer, userDenominator, userNumerator, userWhole);
-  const ts = Math.max(0, Math.round(Number(timeTaken) || 0));
-  res.json({
-    success: true,
-    result: {
-      index: question.index,
-      questionText: question.questionText,
-      correctAnswer: gradedAnswer.correctAnswerDisplay,
-      userAnswer: gradedAnswer.userAnswerDisplay,
-      isCorrect: gradedAnswer.isCorrect,
-      timeTaken: ts,
-      tag: question.tag,
-    },
-  });
+  const { status, ...data } = gradeQuizAnswer(req.session, req.body || {});
+  res.status(status).json(data);
 });
 
 // ----------------------------------------------------------------

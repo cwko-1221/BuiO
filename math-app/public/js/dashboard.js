@@ -8,6 +8,23 @@
 
     // The shared runtime loads blocking in <head>, so the dictionary is ready.
     const t = window.BuiI18n.t;
+    let chartLibrary;
+    function chartReady() {
+        return chartLibrary ||= new Promise((resolve, reject) => {
+            if (window.Chart) { resolve(); return; }
+            const script = document.createElement('script');
+            script.dataset.buiOptional = '';
+            script.src = '/vendor/chart.js/4.4.7/chart.umd.js'; script.async = true;
+            const fail = () => { clearTimeout(timeout); script.remove(); chartLibrary = null; reject(Error('Chart loading failed')); };
+            const timeout = setTimeout(fail, 8000);
+            script.onload = () => { clearTimeout(timeout); resolve(); };
+            script.onerror = fail;
+            document.head.append(script);
+        });
+    }
+    function drawWhenReady(draw, target) {
+        chartReady().then(draw).catch(error => window.BuiLoading.recover(error, () => chartReady().then(draw), target));
+    }
 
     // ========================================
     // State
@@ -335,22 +352,19 @@
     // ========================================
     async function loadTagStats() {
         if (!currentStudentId) return;
+        const studentId = currentStudentId;
         try {
             // Refresh tier metadata once per dashboard load (cached after).
-            if (!loadTagStats._tiersFetched) {
-                try {
-                    const r = await fetch('/api/stats/tiers', { credentials: 'include' });
-                    const d = await r.json();
+            const tiers = loadTagStats._tiersFetched ? Promise.resolve() : fetch('/api/stats/tiers', { credentials: 'include' })
+                .then(r => r.json()).then(d => {
                     if (d.success && Array.isArray(d.tiers) && d.tiers.length) tierOrder = d.tiers;
-                } catch {}
-                loadTagStats._tiersFetched = true;
-            }
-            const res = await fetch(`/api/stats/tags?studentId=${currentStudentId}`, { credentials: 'include' });
+                }).catch(() => {}).finally(() => { loadTagStats._tiersFetched = true; });
+            const [res] = await Promise.all([fetch(`/api/stats/tags?studentId=${studentId}`, { credentials: 'include' }), tiers]);
             const data = await res.json();
-            if (!data.success) return;
+            if (!data.success || currentStudentId !== studentId) return;
 
-            renderTierRadars(data.stats);
             renderTagBars(data.stats);
+            drawWhenReady(() => { if (currentStudentId === studentId) renderTierRadars(data.stats); }, document.getElementById('radar-tier-grid'));
         } catch (e) {
             console.error('載入標籤統計失敗:', e);
         }
@@ -613,12 +627,13 @@
     // ========================================
     async function loadTimeAnalysis() {
         if (!currentStudentId) return;
+        const studentId = currentStudentId;
         try {
-            const res = await fetch(`/api/stats/time-analysis?studentId=${currentStudentId}`, { credentials: 'include' });
+            const res = await fetch(`/api/stats/time-analysis?studentId=${studentId}`, { credentials: 'include' });
             const data = await res.json();
-            if (!data.success) return;
+            if (!data.success || currentStudentId !== studentId) return;
 
-            renderTimeChart(data.timeAnalysis);
+            drawWhenReady(() => { if (currentStudentId === studentId) renderTimeChart(data.timeAnalysis); }, document.getElementById('time-chart-container'));
         } catch (e) {
             console.error('載入時間分析失敗:', e);
         }
