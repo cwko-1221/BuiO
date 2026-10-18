@@ -283,6 +283,7 @@ router.post('/register-students-batch', requireTeacher, async (req, res, next) =
       const hashes = new Map();
       for (const s of toCreate) hashes.set(s.studentId, await passwords.hash(s.password || '123456', 10));
       for (const s of toUpdate) if (s.passwordProvided) hashes.set(s.studentId, await passwords.hash(s.password, 10));
+      await academicYears.ensureSchema();
       await withTransaction(async client => {
         for (const s of toCreate) {
           const passwordHash = hashes.get(s.studentId);

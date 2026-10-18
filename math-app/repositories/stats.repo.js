@@ -17,13 +17,12 @@ const UPSERT_SQL = `
 
 async function ensureTagsForStudent(studentId, allTags, { client } = {}) {
   if (config.db.mode === 'postgres') {
+    if (!allTags.length) return;
     const runner = client || getPool();
-    for (const tag of allTags) {
-      await runner.query(`
-        INSERT INTO StudentStats (StudentID, Tag, TotalAttempted, TotalCorrect, AccuracyRate)
-        VALUES ($1, $2, 0, 0, 0.0)
-        ON CONFLICT (StudentID, Tag) DO NOTHING`, [studentId, tag]);
-    }
+    await runner.query(`
+      INSERT INTO StudentStats (StudentID, Tag, TotalAttempted, TotalCorrect, AccuracyRate)
+      SELECT $1, tag, 0, 0, 0.0 FROM unnest($2::text[]) AS tag
+      ON CONFLICT (StudentID, Tag) DO NOTHING`, [studentId, allTags]);
     return;
   }
   const d = store.load();
