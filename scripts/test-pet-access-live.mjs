@@ -57,6 +57,15 @@ try {
     contexts.push(context); pages.push(page); await page.goto('/pet');
   }
   const [tc, ac, bc] = contexts, [teacher, a, b] = pages;
+  let accessFault='',accessFailures=0;
+  const heldAccess=[];
+  await a.route('**/api/pet/access',route=>{
+    if(accessFault==='hold'){heldAccess.push(route);return;}
+    if(accessFault){accessFailures++;return route.fulfill({status:accessFault==='auth'?401:503,json:{success:false,message:'Access fixture failure'}});}
+    return route.continue();
+  });
+  const refreshAccess=async()=>{const response=a.waitForResponse(r=>new URL(r.url()).pathname==='/api/pet/access'&&r.status()===200);await a.evaluate(()=>window.dispatchEvent(new Event('online')));await response;};
+  const resumePractice=async()=>{await a.locator('[data-brawl="continue"]').click();await a.waitForFunction(()=>window.__petGame.scene.keys.Brawl.runtime.state.tick>0&&!document.querySelector('.brawl-modal'));};
   const anon = await browser.newContext({ baseURL });
   assert.equal((await anon.request.get('/api/pet/access')).status(), 401);
   assert.equal((await anon.request.get('/api/pet/teacher/access')).status(), 403);
@@ -83,6 +92,51 @@ try {
   await teacher.locator('[data-access-class][value="5A"]').check();
   await a.locator('[data-tab="brawl"]').click(); await a.locator('[data-brawl="mode"][data-id="practice"]').click();
   await a.locator('[data-brawl="start"]').first().click(); await a.waitForFunction(() => window.__petGame?.scene.keys.Brawl?.runtime?.state.tick > 5);
+  await refreshAccess();
+  const beforeFault=await tick(a);accessFault='503';await pause(7000);
+  assert.ok(accessFailures>=2,'multiple access polls actually failed');
+  assert.equal(await a.locator('.pet-access-overlay:not([hidden])').count(),0);
+  assert.ok(await tick(a)>beforeFault+100,'temporary status failures do not pause a running battle');
+  await shot(a,'00c-transient-failure-keeps-playing');
+  accessFault='';await refreshAccess();
+  pass('repeated transient access failures keep an already verified battle running without an overlay');
+
+  accessFault='hold';await a.evaluate(()=>window.dispatchEvent(new Event('online')));
+  await a.waitForTimeout(5500);
+  assert.ok(heldAccess.length>0,'a real status request reached its five-second deadline');
+  assert.equal(await a.locator('.pet-access-overlay:not([hidden])').count(),0);
+  const beforeReturn=await tick(a);
+  await a.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>false});document.dispatchEvent(new Event('visibilitychange'));});
+  assert.equal(await a.locator('.pet-access-overlay:not([hidden])').count(),0,'returning to a recently verified tab does not block before checking');
+  await pause(500);assert.ok(await tick(a)>beforeReturn);
+  accessFault='';for(const route of heldAccess.splice(0))await route.abort().catch(()=>{});
+  await a.evaluate(()=>window.dispatchEvent(new Event('online')));await pause(300);await refreshAccess();
+  pass('a timed-out request and foreground refresh do not interrupt recent verified access');
+
+  const unavailable=await ac.newPage();let initialBootstrap=false;
+  unavailable.on('request',r=>{if(new URL(r.url()).pathname==='/api/pet/bootstrap')initialBootstrap=true;});
+  await unavailable.route('**/api/pet/access',route=>route.fulfill({status:503,json:{success:false}}));
+  await unavailable.goto('/pet');await lockScreen(unavailable).waitFor();
+  await unavailable.waitForFunction(()=>document.querySelector('#petAccessTitle')?.textContent.includes('暫未能確認'));
+  assert.equal(initialBootstrap,false,'an unverified first visit never bootstraps');await unavailable.close();
+  pass('an initial access failure still blocks before any student bootstrap');
+
+  await refreshAccess();accessFault='503';
+  await lockScreen(a).waitFor({timeout:34000});
+  const expiredTick=await tick(a);await pause(500);assert.equal(await tick(a),expiredTick);
+  await shot(a,'00d-expired-verification-pauses');
+  accessFault='';await a.locator('[data-access-check]').click();await a.locator('.pet-access-overlay').waitFor({state:'hidden'});await resumePractice();
+  pass('persistent failures expire the thirty-second permission independently of retry backoff and recover the same battle');
+
+  const reservedStart=new Date(Date.now()+5000).toISOString(),reservedEnd=new Date(Date.now()+60000).toISOString();
+  assert.equal((await lockPost(tc,{action:'schedule',classes:['5A'],startsAt:reservedStart,endsAt:reservedEnd})).status(),200);
+  const scheduled=a.waitForResponse(async r=>new URL(r.url()).pathname==='/api/pet/access'&&r.status()===200&&(await r.json()).access.nextChangeAt===reservedStart);
+  await a.evaluate(()=>window.dispatchEvent(new Event('online')));await scheduled;accessFault='503';
+  await lockScreen(a).waitFor({timeout:7000});assert.equal(await a.locator('#app').evaluate(n=>n.inert),true);
+  accessFault='';await a.locator('[data-access-check]').click();await a.waitForFunction(()=>document.querySelector('#petAccessTitle')?.textContent==='樂園休息中');
+  assert.equal((await lockPost(tc,{action:'unlock',classes:['5A']})).status(),200);
+  await a.locator('.pet-access-overlay').waitFor({state:'hidden'});await resumePractice();
+  pass('known scheduled lock boundaries shorten the permission window even while status requests fail');
   await a.keyboard.down('KeyD');
   await teacher.locator('#petAccessDuration').selectOption('manual');
   await teacher.locator('#petAccessNote').fill('現在是數學課，請專心上課。');
@@ -119,7 +173,11 @@ try {
   await lockedPage.goto('/pet'); await lockScreen(lockedPage).waitFor();
   assert.ok(!opened.includes('/api/pet/bootstrap')); assert.equal(await lockedPage.locator('[data-tab="home"]').count(), 0);
   await shot(lockedPage, '03-locked-on-entry-mobile');
+  accessFault='hold';await a.evaluate(()=>window.dispatchEvent(new Event('online')));
+  const heldDeadline=Date.now()+4000;while(!heldAccess.length&&Date.now()<heldDeadline)await pause(50);assert.ok(heldAccess.length);
   await teacher.locator('[data-access="unlock"]').click(); await a.locator('.pet-access-overlay').waitFor({ state: 'hidden' });
+  accessFault='';for(const route of heldAccess.splice(0))await route.abort().catch(()=>{});
+  await pause(300);assert.equal(await a.locator('.pet-access-overlay:not([hidden])').count(),0,'late pre-unlock HTTP failure cannot replace a newer unlock');
   await lockedPage.locator('[data-tab="home"]').waitFor();
   await a.locator('[data-brawl="continue"]').click(); await a.waitForFunction(before => window.__petGame.scene.keys.Brawl.runtime.state.tick > before, stopped);
   pass('locked page cannot bootstrap after reload; teacher unlock automatically restores access and saved practice can resume');
@@ -194,6 +252,11 @@ try {
   await a.locator('.pet-access-overlay').waitFor({state:'hidden'});
   await a.waitForFunction(balance=>Number(document.querySelector('#coinBalance').textContent.replaceAll(',',''))===balance,duelBefore[0]);
   pass('locking either player cancels a live paid duel and refunds exactly 500 coins to each player');
+  accessFault='auth';await a.evaluate(()=>window.dispatchEvent(new Event('online')));
+  await lockScreen(a).waitFor();assert.ok((await a.locator('.pet-access-lock-note').innerText()).includes('登入已到期'));
+  assert.equal(await a.locator('#app').evaluate(n=>n.inert),true);
+  accessFault='';await a.locator('[data-access-check]').click();await a.locator('.pet-access-overlay').waitFor({state:'hidden'});
+  pass('authentication rejection blocks immediately instead of using the transient permission window');
   assert.deepEqual(errors, []);
   await fs.writeFile(path.join(out, 'results.json'), JSON.stringify({ pass: true, checks, errors, browser: 'Chrome', physicalIpadVerified: false, postgresVerified: false }, null, 2));
 } catch (error) {
