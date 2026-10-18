@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api, ApiError } from './api';
 import type { PetAccessStatus } from './access-types';
 import type { Locale } from './types';
 import { accessLockIcon, escapeAccessHtml as esc, hkTime } from './access-ui';
@@ -16,6 +16,9 @@ export class PetAccessGate {
   private abort = new AbortController();
   private signature = '';
   private failures = 0;
+  private verifiedUntil = 0;
+  private validityTimer?: number;
+  private authenticationRequired = false;
   constructor(private app: HTMLElement, private locale: Locale, private startApp: () => Promise<void>, private setLocked: (locked: boolean) => void) {
     this.root.className = 'pet-access-overlay'; this.root.setAttribute('role', 'dialog');
     this.root.setAttribute('aria-modal', 'true'); this.root.setAttribute('aria-labelledby', 'petAccessTitle');
@@ -38,12 +41,18 @@ export class PetAccessGate {
       }
     };
     ['keydown', 'keyup', 'pointerdown', 'pointerup', 'pointermove', 'click', 'touchstart', 'touchmove'].forEach(type => window.addEventListener(type, preventGameInput, { signal, capture: true, passive: false }));
-    window.addEventListener('pet:access', event => { this.revision++; void this.apply((event as CustomEvent<PetAccessStatus>).detail); }, { signal });
+    window.addEventListener('pet:access', event => {
+      const access=(event as CustomEvent<PetAccessStatus>).detail;
+      if(!this.validStatus(access))return;
+      this.revision++;
+      if(this.authenticationRequired&&!access.locked){void this.check();return;}
+      void this.apply(access);
+    }, { signal });
     window.addEventListener('online', () => void this.check(), { signal });
     window.addEventListener('pageshow', () => void this.check(), { signal });
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) clearTimeout(this.timer);
-      else { this.setBlocked(true); void this.check(); }
+      else { if(!this.started||!this.verifiedOpen())this.setBlocked(true); void this.check(); }
     }, { signal });
     this.root.addEventListener('click', event => { if ((event.target as HTMLElement).closest('[data-access-check]')) void this.check(); }, { signal });
     window.addEventListener('pagehide', event => { if (!event.persisted) this.dispose(); }, { signal });
@@ -69,17 +78,38 @@ export class PetAccessGate {
     this.root.innerHTML = `<div class="pet-access-lock-card"><div class="pet-access-lock-art">${accessLockIcon}<i>✦</i><i>✧</i></div><p class="eyebrow">PET PARADISE</p><h1 id="petAccessTitle">${esc(title)}</h1><p class="pet-access-lock-note">${esc(description)}</p>${kind === 'locked' ? `<div class="pet-access-lock-time"><b>${esc(this.access?.className || this.t('你的班級', 'Your class'))}</b><span>${this.access?.endsAt ? this.t(`預計 ${hkTime(this.access.endsAt, this.locale)} 自動開放`, `Automatically reopens ${hkTime(this.access.endsAt, this.locale)}`) : this.t('等待老師解鎖', 'Waiting for your teacher to unlock')}</span><small>${this.t('時間以香港時間為準 · 開放後本頁會自動更新', 'Hong Kong time · This page updates automatically')}</small></div>` : ''}<div class="pet-access-lock-actions"><a class="primary" href="/">${this.t('返回學習平台', 'Back to learning')}</a><button type="button" class="secondary" data-access-check>${this.t('檢查開放狀態', 'Check access')}</button></div><p class="pet-access-lock-status" role="status" aria-live="polite"></p></div>`;
     this.root.querySelector<HTMLButtonElement>('button')?.focus({ preventScroll: true });
   }
-  private async apply(access: PetAccessStatus) {
+  private validStatus(access: PetAccessStatus) {
+    return access&&typeof access.locked==='boolean'&&Number.isFinite(access.serverNow);
+  }
+  private verifiedOpen() {
+    return !this.authenticationRequired&&this.access?.locked===false&&performance.now()<this.verifiedUntil;
+  }
+  private remember(access: PetAccessStatus, checkedAt: number) {
+    this.access=access;this.failures=0;
+    clearTimeout(this.validityTimer);
+    if(access.locked){this.verifiedUntil=0;return;}
+    // Brief transport failures do not revoke a confirmed permission. Bound it
+    // independently of retries, and never carry it past a known lock boundary.
+    const boundary=access.nextChangeAt?Date.parse(access.nextChangeAt)-access.serverNow:Infinity;
+    this.verifiedUntil=checkedAt+Math.max(0,Math.min(30000,Number.isFinite(boundary)?boundary:Infinity));
+    this.validityTimer=window.setTimeout(()=>{
+      if(this.abort.signal.aborted||this.access?.locked||this.authenticationRequired)return;
+      this.setBlocked(true);this.render('checking');void this.check();
+    },Math.max(0,this.verifiedUntil-performance.now()));
+  }
+  private async apply(access: PetAccessStatus, checkedAt=performance.now()) {
     if (this.abort.signal.aborted) return;
-    this.access = access;
+    this.remember(access,checkedAt);
     if (access.locked) { this.setBlocked(true); this.render('locked'); return; }
+    if(!this.verifiedOpen()){this.setBlocked(true);this.render('checking');return;}
     if (!this.started) {
       if (this.starting) return;
       this.starting = true; this.setBlocked(true); this.render('checking');
       try {
         await this.startApp(); this.started = true;
         if (this.access?.locked) { this.setBlocked(true); this.render('locked'); }
-        else this.setBlocked(false);
+        else if(this.verifiedOpen())this.setBlocked(false);
+        else {this.setBlocked(true);this.render('checking');}
       } catch (error) {
         // A bootstrap rejected mid-start publishes the authoritative lock through api.ts.
         if (this.access?.locked) this.render('locked'); else this.render('error', (error as Error).message);
@@ -89,24 +119,31 @@ export class PetAccessGate {
   private async check() {
     if (this.checking || this.abort.signal.aborted || document.hidden) return;
     this.checking = true; clearTimeout(this.timer);
-    const revision = this.revision;
+    const revision = this.revision,checkedAt=performance.now();
     try {
       const { access } = await api.petAccess();
-      this.failures = 0;
-      if (revision === this.revision) await this.apply(access);
+      if(revision!==this.revision||this.abort.signal.aborted)return;
+      if(!this.validStatus(access))throw new Error('Invalid access status');
+      this.authenticationRequired=false;
+      await this.apply(access,checkedAt);
       const status = this.root.querySelector('.pet-access-lock-status');
       if (status) status.textContent = access.locked ? this.t('已檢查：仍在鎖定中。', 'Checked: still locked.') : '';
-    } catch {
+    } catch (error) {
+      // A late HTTP failure must not replace a newer socket/API decision.
+      if(revision!==this.revision||this.abort.signal.aborted)return;
       this.failures++;
-      if (this.access?.locked) {
+      if(error instanceof ApiError&&[401,403].includes(error.status)){
+        this.authenticationRequired=true;this.verifiedUntil=0;clearTimeout(this.validityTimer);
+        this.setBlocked(true);this.render('error',this.t('登入已到期，請返回學習平台重新登入。','Your sign-in has expired. Return to learning and sign in again.'));
+      } else if (this.access?.locked) {
         const status = this.root.querySelector('.pet-access-lock-status');
         if (status) status.textContent = this.t('正在重新連線，請稍候。', 'Reconnecting. Please wait.');
-      } else { this.setBlocked(true); this.render('error'); }
+      } else if(!this.started||!this.verifiedOpen()){this.setBlocked(true);this.render('error');}
     } finally {
       this.checking = false;
       if (!this.abort.signal.aborted && !document.hidden) this.timer = window.setTimeout(() => void this.check(),
         Math.min(30000, 2000 * 2 ** Math.min(this.failures, 4)) + Math.random() * 500);
     }
   }
-  private dispose() { this.abort.abort(); clearTimeout(this.timer); }
+  private dispose() { this.abort.abort(); clearTimeout(this.timer); clearTimeout(this.validityTimer); }
 }
