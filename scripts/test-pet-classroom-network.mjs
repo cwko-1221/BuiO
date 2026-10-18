@@ -10,7 +10,10 @@ import { createRequire } from 'node:module';
 const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'buio-classroom-network-'));
 process.env.BUIO_JSON_DB_FILE = path.join(temp, 'db.json');
 process.env.SUPABASE_DB_URL = '';
-const ids = Array.from({ length: 25 }, (_, i) => `QA${i + 1}`);
+const studentCount = Number(process.env.QA_CLASSROOM_STUDENTS || 25);
+assert.ok(Number.isInteger(studentCount) && studentCount >= 25 && studentCount <= 100);
+const matchCount = Math.floor(studentCount / 2);
+const ids = Array.from({ length: studentCount }, (_, i) => `QA${i + 1}`);
 await fs.writeFile(process.env.BUIO_JSON_DB_FILE, JSON.stringify({
   users: ids.map(studentid => ({ studentid, name: studentid, classname: '5A', role: 'student' })),
   studentStats: [], questionLogs: [], _logId: 0,
@@ -26,7 +29,11 @@ ids.forEach((id, i) => {
     xp: 0, stage: 1, equippedSkills: [], equippedWearables: [] });
 });
 store.save();
-const server = http.createServer(), io = new Server(server), sockets = [], events = [];
+// Match the production transport: per-connection frame compression competes
+// for CPU too, and must not be omitted from the classroom workload.
+const server = http.createServer(), io = new Server(server, {
+  perMessageDeflate: { threshold: 512 }, pingInterval: 4000, pingTimeout: 20000,
+}), sockets = [], events = [];
 io.engine.use((req, _res, next) => { req.session = { studentId: req.headers['x-qa-student'], role: 'student' }; next(); });
 const duels = require('../pet-app/server/duel')(io, { countdownMs: 0 });
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -48,13 +55,13 @@ try {
   await wait(2200);
   const unchangedPackets = events.flat().filter(e => e.event === 'duel:peers').length;
   assert.equal(unchangedPackets, 0, 'unchanged rosters should not download repeatedly');
-  assert.equal((await emit(sockets[0], 'duel:presence', { active: true, busy: false })).peers.length, 24);
-  assert.equal((await emit(sockets[24], 'duel:presence', { active: false, busy: false })).success, true);
+  assert.equal((await emit(sockets[0], 'duel:presence', { active: true, busy: false })).peers.length, studentCount - 1);
+  assert.equal((await emit(sockets[studentCount - 1], 'duel:presence', { active: false, busy: false })).success, true);
   await wait(60);
-  assert.equal(events[0].filter(e => e.event === 'duel:peers').at(-1).data.peers.length, 23);
-  await emit(sockets[24], 'duel:presence', { active: true, busy: false });
+  assert.equal(events[0].filter(e => e.event === 'duel:peers').at(-1).data.peers.length, studentCount - 2);
+  await emit(sockets[studentCount - 1], 'duel:presence', { active: true, busy: false });
 
-  const rooms = await Promise.all(Array.from({ length: 12 }, async (_, pair) => {
+  const rooms = await Promise.all(Array.from({ length: matchCount }, async (_, pair) => {
     const i = pair * 2;
     const invitation = await emit(sockets[i], 'duel:invite', { targetId: ids[i + 1], petId: petIds[i],
       stageId: 'sunny-training', key: randomUUID() });
@@ -70,17 +77,24 @@ try {
   events.forEach(list => list.length = 0);
   const before = rooms.map(r => r.state.tick);
   await wait(1200);
-  const counts = events.slice(0, 24).map(list => list.filter(e => e.event === 'duel:frame').length);
+  const counts = events.slice(0, matchCount * 2).map(list => list.filter(e => e.event === 'duel:frame').length);
   assert.ok(counts.every(n => n >= 32 && n <= 40), JSON.stringify(counts));
-  assert.ok(rooms.every((r, i) => r.state.tick - before[i] >= 55), 'all 12 authoritative simulations progress');
+  assert.ok(rooms.every((r, i) => r.state.tick - before[i] >= 55), `all ${matchCount} authoritative simulations progress`);
 
   // Inject actual server transport backpressure: frames drop instead of queuing.
   const serverSocket = [...io.of('/pet-brawl').sockets.values()].find(s => s.data.profile.id === ids[0]);
+  assert.match(serverSocket.conn.transport.socket.extensions, /permessage-deflate/);
   const transport = serverSocket.conn.transport;
-  await wait(30); const buffered = serverSocket.conn.writeBuffer.length;
+  // Let an already-compressing write drain before blocking the transport. A
+  // reliable Engine.IO ping may queue during this interval; only display frames
+  // are disposable and must never build a backlog behind that control packet.
+  for (let tries = 0; serverSocket.conn.writeBuffer.length && tries < 100; tries++) await wait(2);
+  assert.equal(serverSocket.conn.writeBuffer.length, 0);
+  const queuedFrames = () => serverSocket.conn.writeBuffer.filter(packet =>
+    packet.type === 'message' && String(packet.data).includes('duel:frame')).length;
   transport.writable = false;
   await wait(320);
-  assert.equal(serverSocket.conn.writeBuffer.length, buffered, 'old display states do not accumulate');
+  assert.equal(queuedFrames(), 0, 'old display states do not accumulate');
   transport.writable = true;
   events[0].length = 0; await wait(100);
   assert.ok(events[0].some(e => e.event === 'duel:frame'), 'latest display resumes after congestion');
@@ -88,7 +102,8 @@ try {
   assert.equal((await emit(sockets[0], 'duel:leave', { matchId: room.meta.id })).success, true);
   await wait(60);
   assert.equal(events[1].filter(e => e.event === 'duel:result').at(-1).data.match.status, 'finished');
-  console.log(JSON.stringify({ passed: true, students: 25, simultaneousMatches: 12,
+  console.log(JSON.stringify({ passed: true, students: studentCount, simultaneousMatches: matchCount,
+    productionWebSocketCompression: true,
     unchangedRosterPacketsOver2200Ms: unchangedPackets, framesPer1200Ms: counts,
     congestedTransportQueuedFrames: 0, reliableResultVerified: true }));
 } finally {

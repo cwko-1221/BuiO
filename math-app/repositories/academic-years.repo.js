@@ -110,10 +110,10 @@ function ensureJsonData() {
   return data;
 }
 
-async function getCurrentAcademicYear() {
+async function getCurrentAcademicYear({ client } = {}) {
   await ensureSchema();
   if (config.db.mode === 'postgres') {
-    const { rows } = await getPool().query(
+    const { rows } = await (client || getPool()).query(
       `SELECT SettingValue AS value FROM PlatformSettings WHERE SettingKey='currentAcademicYear'`
     );
     return rows[0]?.value || INITIAL_ACADEMIC_YEAR;
@@ -190,7 +190,7 @@ async function listStudentClasses(academicYear) {
 
 async function upsertCurrentStudent(user, opts = {}) {
   await ensureSchema();
-  const academicYear = await getCurrentAcademicYear();
+  const academicYear = await getCurrentAcademicYear(opts);
   if (config.db.mode === 'postgres') {
     const runner = opts.client || getPool();
     await runner.query(`INSERT INTO StudentAcademicYears

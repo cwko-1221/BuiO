@@ -84,6 +84,7 @@
     "check:school-upgrade": "node --test tests/school-upgrade.test.cjs",
     "check:loading": "node scripts/test-loading-live.mjs",
     "check:classroom-performance": "node --test pet-app/tests/classroom-verifier.test.cjs tests/password-worker.test.cjs tests/password-auth.test.cjs && node scripts/test-pet-classroom-network.mjs",
+    "check:classroom-hot-paths": "node --test tests/classroom-hot-paths.test.cjs",
     "check:game-latency-live": "node scripts/test-game-latency-live.mjs",
     "check:pet-latency-live": "node scripts/test-pet-latency-live.cjs"
   },

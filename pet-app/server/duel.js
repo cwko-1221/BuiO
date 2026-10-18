@@ -4,6 +4,7 @@ const repo=require('../repositories/brawl-duel.repo');
 const ranking=require('../repositories/brawl-ranking.repo');
 const accessLocks=require('../repositories/access-lock.repo');
 const config=require('../../config');
+const {presenceView}=require('./duel-presence.cjs');
 const rules=Promise.all([import('../lib/brawl/catalog.mjs'),import('../lib/brawl/simulation.mjs')]);
 const fail=(message,status=409)=>{throw Object.assign(new Error(message),{status});};
 const terminal=s=>['finished','cancelled'].includes(s.status);
@@ -19,9 +20,11 @@ module.exports=function register(io,options={}){
   const available=id=>online(id)&&!all(id).some(m=>m.busy)&&![...rooms.values()].some(r=>!terminal(r.meta)&&r.meta.players.some(p=>p.id===id));
   const studentRoom=id=>'student:'+id;
   const send=(id,event,payload)=>ns.to(studentRoom(id)).emit(event,payload);
-  function publicPeers(id){const peers=new Map(),own=all(id)[0]?.profile;for(const m of members.values()){const p=m.profile;if(p.id===id||!online(p.id))continue;peers.set(p.id,{id:p.id,name:p.name,className:p.className,rank:p.rank,rankTerms:own?.rank&&p.rank?ranking.quote([own.rank,p.rank]):undefined,available:available(p.id)&&!reserved.has(p.id)&&p.pets.length>0,hasFighter:p.pets.length>0});}return [...peers.values()].sort((a,b)=>a.className.localeCompare(b.className)||a.name.localeCompare(b.name));}
+  const currentPresence=()=>presenceView(members,rooms,reserved,now(),ranking.quote);
+  function publicPeers(id){return currentPresence().peersFor(id);}
   const peerSnapshots=new Map();
-  function presence(){const ids=new Set([...members.values()].map(m=>m.profile.id));for(const id of peerSnapshots.keys())if(!ids.has(id))peerSnapshots.delete(id);for(const id of ids){const payload={peers:publicPeers(id),fee:repo.FEE},signature=JSON.stringify(payload);if(peerSnapshots.get(id)!==signature){peerSnapshots.set(id,signature);send(id,'duel:peers',payload);}}}
+  let presenceSignature;
+  function presence(){const view=currentPresence();if(view.signature===presenceSignature)return;presenceSignature=view.signature;for(const id of peerSnapshots.keys())if(!view.ids.has(id))peerSnapshots.delete(id);for(const id of view.ids){const payload={peers:view.peersFor(id),fee:repo.FEE},signature=JSON.stringify(payload);if(peerSnapshots.get(id)!==signature){peerSnapshots.set(id,signature);send(id,'duel:peers',payload);}}}
   function noticeInvite(inv){for(const id of [inv.from.id,inv.to.id])send(id,'duel:invitation',inv);}
   function closeInvite(inv,status,message){if(inv.status!=='pending')return;inv.status=status;inv.message=message;inv.closedAt=now();for(const id of [inv.from.id,inv.to.id])if(reserved.get(id)===inv.id)reserved.delete(id);noticeInvite(inv);presence();}
   function info(r,id){return {match:r.meta,playerIndex:r.meta.players.findIndex(p=>p.id===id),phase:r.phase,startAt:r.startAt||0,state:r.state};}
