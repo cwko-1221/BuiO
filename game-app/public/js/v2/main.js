@@ -1,5 +1,5 @@
 import { buildCourse, validateCourse } from './course.js?v=20260907-ipad-perf-3';
-import { GameScene } from './GameScene.js?v=20261007-jump-energy-5';
+import { GameScene } from './GameScene.js?v=20261018-latency-1';
 import { PlayerStateThrottle } from './PlayerStateThrottle.js?v=20261005-no-ghosts-1';
 import { GameAudio } from './GameAudio.js?v=20260717-louder-2';
 import { normaliseAvatar } from './avatar.js?v=20260907-side-climber-1';
@@ -27,6 +27,12 @@ let scene = null;
 let frozen = false;
 let roomsTimer = null;
 let joining = false;
+let networkPaused = false;
+let joinRetryTimer = null;
+let requestedRoom = null;
+let questionRetry = null;
+let questionAttempt = 0;
+let currentQuestionId = null;
 let stateThrottle = new PlayerStateThrottle();
 let lastHudAt = -Infinity;
 let lastFrame = null;
@@ -45,6 +51,13 @@ const previewAltitude = previewParams.has('altitude') ? Number(previewParams.get
 const previewX = previewParams.has('x') ? Number(previewParams.get('x')) : NaN;
 const previewInfiniteEnergy = preview && previewParams.get('infiniteEnergy') === '1';
 const previewAutoplay = preview && previewParams.get('autoplay') === '1';
+
+function requestSocket(event, payload) {
+  return new Promise((resolve, reject) => {
+    if (!socket.connected && event!=='player:join') return reject(new Error('Connection unavailable'));
+    socket.timeout(6000).emit(event, payload, (error, result) => error ? reject(error) : resolve(result));
+  });
+}
 
 function show(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -95,15 +108,40 @@ function startRoomPolling(){loadRooms();clearInterval(roomsTimer);roomsTimer=set
 
 async function joinRoom(code){
   if(joining)return; joining=true; $('joinError').textContent=''; await meReady;
-  socket.emit('player:join',{code,name:me.name||t('g.playerFallback'),studentId:me.studentId,avatar:selectedAvatar},res=>{
-    joining=false;
-    if(!res?.ok){$('joinError').textContent=serverText(res?.message)||t('g.joinFailed');loadRooms();return;}
-    clearInterval(roomsTimer); startMeta={code,playerKey:res.playerKey||`s:${me.studentId}`};
+  requestedRoom=code;
+  clearTimeout(joinRetryTimer);
+  try {
+    const res=await requestSocket('player:join',{code,name:me.name||t('g.playerFallback'),studentId:me.studentId,avatar:selectedAvatar});
+    if(!res?.ok){
+      if(networkPaused){
+        phaserGame?.destroy(true);phaserGame=null;scene=null;closeQuestion();
+        networkPaused=false;startMeta=null;requestedRoom=null;show('joinScreen');startRoomPolling();
+      }
+      $('joinError').textContent=serverText(res?.message)||t('g.joinFailed');loadRooms();return;
+    }
+    clearInterval(roomsTimer); startMeta={...(startMeta||{}),code,playerKey:res.playerKey||`s:${me.studentId}`,seed:res.seed,durationSec:res.durationSec,startedAt:res.startedAt};
     selectedAvatar=normaliseAvatar(res.avatar||selectedAvatar);
     $('lobbySetTitle').textContent=res.setTitle||t('g.preparing'); $('lobbyHostName').textContent=t('g.hostRoom',{teacher:teacherLabel(res.hostName)});
-    if(res.phase==='playing')startGame(res.seed,res.durationSec,res.startedAt,res.resume,res.settings); else show('lobbyScreen');
-  });
+    networkPaused=false;
+    if(res.phase==='playing'&&scene&&JSON.stringify(scene.avatar)===JSON.stringify(selectedAvatar)){
+      if(res.resume?.stateSeq!==0&&Number.isFinite(res.resume?.x)&&Number.isFinite(res.resume?.y))scene.setPlayerPosition(res.resume.x,res.resume.y);
+      scene.setEnergy(res.resume?.energy??scene.energy);
+      setAnswerCooldown(res.resume?.answerPenalty?.cooldownMs||0);
+      questionRetry?.();
+    }else if(res.phase==='playing')startGame(res.seed,res.durationSec,res.startedAt,res.resume,res.settings); else show('lobbyScreen');
+  } catch {
+    $('joinError').textContent=t('g.connectionWait');
+    if(startMeta&&socket.connected)joinRetryTimer=setTimeout(()=>joinRoom(code),3000);
+    else loadRooms();
+  } finally { joining=false; }
 }
+
+socket.on('disconnect',()=>{
+  if(!startMeta||preview)return;
+  networkPaused=true;scene?.resumeControl();
+  toast(t('g.connectionWait'));
+});
+socket.on('connect',()=>{if(requestedRoom&&!preview)void joinRoom(requestedRoom);});
 
 socket.on('game:start',({seed,durationSec,startedAt,settings})=>startGame(seed,durationSec,startedAt,null,settings));
 socket.on('game:crumble',({id})=>scene?.triggerCrumble(id,false));
@@ -141,7 +179,9 @@ function startGame(seed,durationSec,startedAt,resume,settings){
       window.__routeAutoplay=result;
       document.documentElement.dataset.routeAutoplay=JSON.stringify(result);
     },
-    isFrozen:()=>frozen,
+    isFrozen:()=>frozen||networkPaused,
+    onLoadError:()=>window.BuiLoading?.recover(new Error('Game asset loading'),()=>preview
+      ? startGame(seed,durationSec,startedAt,resume,settings) : joinRoom(startMeta.code)),
     onSound:type=>gameAudio.play(type),
     onCrumble:id=>{if(!preview)socket.emit('game:crumble',{id});},
     onCheckpoint:cp=>toast(t('g.checkpoint',{name:cp.name||cp.zoneName}),true),
@@ -152,7 +192,7 @@ function startGame(seed,durationSec,startedAt,resume,settings){
     },
     onReady:s=>{
       scene=s;
-      if(Number.isFinite(resume?.x)&&Number.isFinite(resume?.y))s.setPlayerPosition(resume.x,resume.y);
+      if(resume?.stateSeq!==0&&Number.isFinite(resume?.x)&&Number.isFinite(resume?.y))s.setPlayerPosition(resume.x,resume.y);
       else if(preview&&Number.isFinite(previewAltitude)) {
         const checkpoint=course.checkpoints.sort((a,b)=>Math.abs(a.altitude-previewAltitude)-Math.abs(b.altitude-previewAltitude))[0];
         const node=course.nodes.filter(item=>item.route==='main').sort((a,b)=>{
@@ -183,6 +223,7 @@ function startGame(seed,durationSec,startedAt,resume,settings){
     // only thing behind the canvas is #gameScreen's black. A transparent canvas buys nothing
     // and costs a per-frame blend against the page on every device — iOS Safari most of all.
     type:Phaser.AUTO,parent:'gameCanvas',backgroundColor:'#8edcff',
+    loader:{maxParallelDownloads:4,timeout:15000,maxRetries:1},
     scale:{mode:Phaser.Scale.RESIZE,width:window.innerWidth,height:window.innerHeight,autoCenter:Phaser.Scale.CENTER_BOTH},
     render:{antialias:true,roundPixels:false,pixelArt:false},
     physics:{default:'matter',matter:{gravity:{y:1.45},enableSleeping:true,debug:new URLSearchParams(location.search).has('physics')}},
@@ -316,6 +357,8 @@ function showQuestionCooldown(res){
 function openQuestion(){
   if(!scene||frozen||scene.finished||performance.now()<answerCooldownUntil)return;
   const request=++questionRequest;
+  const requestId=crypto.randomUUID();
+  currentQuestionId=null;
   frozen=true;scene.resumeControl();
   clearTimeout(questionCloseTimer);questionCloseTimer=null;
   delete $('qFeedback').dataset.penalty;
@@ -323,13 +366,30 @@ function openQuestion(){
   if(preview)return renderQuestion({question:t('g.qSample'),choices:['48','54','56','64']});
   $('qText').textContent='';$('qChoices').innerHTML=`<div class="muted" style="grid-column:1/-1;text-align:center">${escapeHtml(t('g.qLoading'))}</div>`;
   questionLayout.fit();
-  socket.emit('player:question',res=>{
-    if(request!==questionRequest||!scene||!frozen)return;
+  questionRetry=()=>requestQuestion(request,requestId);
+  void questionRetry();
+}
+async function requestQuestion(request,requestId){
+  const attempt=++questionAttempt;
+  try{
+    const res=await requestSocket('player:question',{requestId});
+    if(attempt!==questionAttempt||request!==questionRequest||!scene||!frozen)return;
+    questionRetry=null;
     if(res?.reason==='answer-cooldown')return showQuestionCooldown(res);
     if(!res?.ok)return closeQuestion();renderQuestion(res);
-  });
+  }catch{if(attempt===questionAttempt&&request===questionRequest&&frozen)questionError(()=>requestQuestion(request,requestId),true);}
+}
+function questionError(retry,canClose){
+  questionRetry=retry;
+  $('qFeedback').textContent=t('g.connectionWait');
+  $('qFeedback').className='q-feedback';
+  const button=document.createElement('button');button.type='button';button.className='q-choice';button.textContent=t('g.retry');
+  button.onclick=()=>{button.disabled=true;void retry();};
+  $('qChoices').replaceChildren(button);$('qClose').style.display=canClose?'':'none';questionLayout.fit();
 }
 function renderQuestion(res){
+  currentQuestionId=res.questionId;
+  $('qFeedback').textContent='';$('qFeedback').className='q-feedback';$('qClose').style.display='none';
   $('qText').textContent=res.question;
   const image=$('qImage');
   image.hidden=!res.image;
@@ -353,11 +413,19 @@ function answer(choice){
     infiniteEnergy:gameSettings.infiniteEnergy,
     ...previewPenalty.recordAnswer(choice===2,performance.now()),
   },choice,buttons);
-  socket.emit('player:answer',{choice},res=>{
-    if(request!==questionRequest||!scene||!frozen)return;
-    if(res?.reason==='answer-cooldown')return showQuestionCooldown(res);
-    if(!res?.ok)return closeQuestion();applyAnswer(res,choice,buttons);
-  });
+  const payload={choice,questionId:currentQuestionId};
+  const submit=async()=>{
+    const attempt=++questionAttempt;
+    try{
+      const res=await requestSocket('player:answer',payload);
+      if(attempt!==questionAttempt||request!==questionRequest||!scene||!frozen)return;
+      questionRetry=null;
+      if(res?.reason==='answer-cooldown')return showQuestionCooldown(res);
+      if(!res?.ok)return closeQuestion();
+      $('qChoices').replaceChildren(...buttons);applyAnswer(res,choice,buttons);
+    }catch{if(attempt===questionAttempt&&request===questionRequest&&frozen)questionError(submit,false);}
+  };
+  questionRetry=submit;void submit();
 }
 function applyAnswer(res,choice,buttons){
   gameAudio.play(res.correct?'correct':'wrong');
@@ -373,6 +441,7 @@ function applyAnswer(res,choice,buttons){
 }
 function closeQuestion(){
   questionRequest++;
+  questionAttempt++;questionRetry=null;currentQuestionId=null;
   clearTimeout(questionCloseTimer);questionCloseTimer=null;
   $('qOverlay').classList.remove('open');frozen=false;scene?.resumeControl();
   if(document.activeElement instanceof HTMLElement)document.activeElement.blur();

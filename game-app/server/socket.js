@@ -13,6 +13,7 @@
 //   - recording summit finishes and building the final leaderboard
 
 const setsRepo = require('../repositories/questionSets.repo');
+const { randomUUID } = require('node:crypto');
 const petRepo = require('../../pet-app/repositories/pet.repo');
 const demoSet = require('../lib/demoSet');
 const crystalSet = require('../../tower-defense-app/lib/defaultQuestions');
@@ -353,6 +354,7 @@ module.exports = function (io, app) {
         resume: room.phase === 'playing' && !isNewPlayer
           ? {
               x: player.x, y: player.y, energy: player.energy,
+              stateSeq: player.stateSeq,
               bestProgress: player.bestProgress ?? player.bestHeight,
               bestHeight: player.bestProgress ?? player.bestHeight,
               altitude: player.altitude || 0,
@@ -375,34 +377,42 @@ module.exports = function (io, app) {
       ack?.({ ok: true, avatar: player.avatar });
     });
 
-    // Serve the next question: choices shuffled per request, the correct
-    // answer index is remembered server-side only.
-    socket.on('player:question', (ack) => {
+    // A retried request gets the same question and order. Keep the callback-only
+    // protocol for older open pages; new pages supply a request ID.
+    socket.on('player:question', (body, ack) => {
+      if (typeof body === 'function') { ack = body; body = {}; }
       const room = rooms.get(socket.data.code);
       const player = room?.players.get(socket.data.playerKey);
       if (!room || !player || room.phase !== 'playing') return ack?.({ ok: false });
       const penalty = player.questionPenalty.snapshot();
       if (penalty.cooldownMs) return ack?.({ ok: false, reason: 'answer-cooldown', ...penalty });
-
-      const q = room.questions[Math.floor(Math.random() * room.questions.length)];
-      const order = shuffled(q.choices.map((_, i) => i));
-      player.pendingQuestion = { qRef: q, order };
+      const requestId = typeof body?.requestId === 'string' ? body.requestId.slice(0, 80) : null;
+      if (!requestId || player.pendingQuestion?.requestId !== requestId) {
+        const q = room.questions[Math.floor(Math.random() * room.questions.length)];
+        player.pendingQuestion = { qRef: q, order: shuffled(q.choices.map((_, i) => i)), requestId, id: randomUUID() };
+      }
+      const { qRef: q, order, id } = player.pendingQuestion;
       ack?.({
         ok: true,
+        questionId: id,
         question: q.question,
         image: q.image || null,
         choices: order.map(i => q.choices[i]),
       });
     });
 
-    socket.on('player:answer', ({ choice }, ack) => {
+    socket.on('player:answer', ({ choice, questionId } = {}, ack) => {
       const room = rooms.get(socket.data.code);
       const player = room?.players.get(socket.data.playerKey);
       if (!room || !player || room.phase !== 'playing') return ack?.({ ok: false });
+      const previous = questionId && player.answerReceipts?.get(questionId);
+      if (previous) return ack?.(previous.choice === Number(choice)
+        ? { ...previous.result, energy: player.energy, ...player.questionPenalty.snapshot() }
+        : { ok: false, reason: 'question-answered' });
       const penalty = player.questionPenalty.snapshot();
       if (penalty.cooldownMs) return ack?.({ ok: false, reason: 'answer-cooldown', ...penalty });
       const pending = player.pendingQuestion;
-      if (!pending) return ack?.({ ok: false });
+      if (!pending || (questionId && questionId !== pending.id)) return ack?.({ ok: false });
       const selected = Number(choice);
       if (!Number.isInteger(selected) || selected < 0 || selected >= pending.order.length) return ack?.({ ok: false });
       player.pendingQuestion = null;
@@ -421,8 +431,9 @@ module.exports = function (io, app) {
         player.wrong++;
         player.streak = 0;
       }
-      ack?.({
+      const result = {
         ok: true,
+        questionId: pending.id,
         correct,
         gain,
         energy: player.energy,
@@ -431,7 +442,11 @@ module.exports = function (io, app) {
         infiniteEnergy: room.settings.infiniteEnergy,
         correctChoice: pending.order.indexOf(pending.qRef.correctIndex),
         ...player.questionPenalty.recordAnswer(correct),
-      });
+      };
+      player.answerReceipts ||= new Map();
+      player.answerReceipts.set(pending.id, { choice: selected, result });
+      if (player.answerReceipts.size > 32) player.answerReceipts.delete(player.answerReceipts.keys().next().value);
+      ack?.(result);
     });
 
     // Client physics is authoritative for position (fine for a classroom);

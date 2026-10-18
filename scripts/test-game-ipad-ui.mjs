@@ -22,10 +22,10 @@ const question = {
   image: '/qa/tall-picture.svg',
 };
 const app = express();
-app.get(['/game/preview', '/game'], (_req, res) => res.sendFile(resolve(root, 'game-app/public/play.html')));
+app.get(['/game/preview', '/game'], (_req, res) => res.sendFile('play.html', { root: resolve(root, 'game-app/public') }));
 app.use('/game', express.static(resolve(root, 'game-app/public')));
 app.use('/shared', express.static(resolve(root, 'shared')));
-app.get('/vendor/phaser/4.2.1/phaser.min.js', (_req, res) => res.sendFile(resolve(root, 'node_modules/phaser/dist/phaser.min.js')));
+app.get('/vendor/phaser/4.2.1/phaser.min.js', (_req, res) => res.sendFile('phaser.min.js', { root: resolve(root, 'node_modules/phaser/dist') }));
 app.get('/api/auth/me', (_req, res) => res.json({ student: { id: 'fixture-only', name: 'UI QA' } }));
 app.get('/api/game/my-pet', (_req, res) => res.json({ pet: null }));
 app.get('/api/game/sessions', (_req, res) => res.json({ sessions: [] }));
@@ -38,7 +38,7 @@ const counts = { answers: 0, questions: 0 };
 room.on('connection', socket => {
   socket.on('player:join', (_payload, ack) => ack({ ok: true, phase: 'playing', seed: 20260711,
     durationSec: 480, startedAt: Date.now(), settings: { maxEnergy: 100 }, avatar: { character: 'blue' } }));
-  socket.on('player:question', ack => { counts.questions++; setTimeout(() => ack({ ok: true, ...question }), 350); });
+  socket.on('player:question', (_payload, ack) => { counts.questions++; setTimeout(() => ack({ ok: true, ...question }), 350); });
   socket.on('player:answer', ({ choice }, ack) => { counts.answers++; setTimeout(() => ack({ ok: true,
     correct: choice === 2, correctChoice: 2, energy: 40, gain: 25, streak: 0 }), 650); });
 });

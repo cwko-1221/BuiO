@@ -54,6 +54,8 @@ BuiI18n.register({
 
   // --- question modal ---------------------------------------------------
   'g.qLoading':      { 'zh-HK': '載入中…', 'en-US': 'Loading…' },
+  'g.connectionWait': { 'zh-HK': '正在等候連線，請稍候或再試一次。', 'en-US': 'Waiting for a connection. Please wait or try again.' },
+  'g.retry':          { 'zh-HK': '再試一次', 'en-US': 'Try again' },
   'g.qSample':       { 'zh-HK': '7 × 8 等於多少？', 'en-US': 'What is 7 × 8?' },
   'g.qRightInfinite': { 'zh-HK': '答啱喇！無限能量保持開啟 ⚡', 'en-US': 'Correct! Unlimited energy stays on ⚡' },
   'g.qRight':        { 'zh-HK': '答啱喇！能量 +{gain} ⚡', 'en-US': 'Correct! Energy +{gain} ⚡' },
