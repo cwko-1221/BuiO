@@ -48,6 +48,9 @@ const EXACT = new Map(Object.entries({
   // --- quiz / stats (math-app) ------------------------------------------
   '沒有進行中的測驗': 'No quiz is in progress',
   '沒有進行中的測驗，請先取得題目': 'No quiz in progress — fetch some questions first',
+  '答案資料格式不正確，請重試。': 'The answer format is invalid. Please try again.',
+  '測驗已更改，請重新載入。': 'The quiz has changed. Please reload.',
+  '找不到這一題，請重新載入。': 'This question is unavailable. Please reload.',
   '請提供答案陣列': 'Please supply the answers array',
   '答案已提交': 'Answers submitted',
   '此題型不在你的年級範圍。': 'That question type is outside your year level.',

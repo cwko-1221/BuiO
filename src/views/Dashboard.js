@@ -49,6 +49,9 @@ function renderStudentDashboard() {
 }
 
 function renderHomeworkReminder() {
+  if (!state.homeworkPendingLoaded || state.homeworkPendingError) {
+    return `<div class="homework-reminder" role="status">${t(state.homeworkPendingError ? 'homework_unavailable' : 'homework_loading')}</div>`;
+  }
   const pending = uniqueHomeworkReminders(state.homeworkPending || []);
   const history = uniqueHomeworkReminders(state.homeworkHistory || []);
   const allRecords = uniqueHomeworkReminders([...pending, ...history])

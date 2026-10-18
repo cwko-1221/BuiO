@@ -25,6 +25,66 @@ const PORT = config.port;
 // ----------------------------------------------------------------
 // Middleware
 // ----------------------------------------------------------------
+// Start before body parsing so a stalled upload is included in request timing.
+// Give every request a safe correlation id. Request bodies,
+// query strings and cookies are intentionally excluded because they may contain
+// student identifiers or credentials. Login requests are always logged; APIs and
+// main documents are logged when slow, on server errors, or in the sample.
+app.use((req, res, next) => {
+  const requestId = crypto.randomUUID();
+  const started = process.hrtime.bigint();
+  req.requestId = requestId;
+  const metrics = { requestId, sqlCount: 0, sqlMs: 0, poolWaitMs: 0, phases: {} };
+  res.setHeader('X-Request-ID', requestId);
+  const writeHead = res.writeHead;
+  res.writeHead = function (...args) {
+    if (!res.headersSent) res.setHeader('Server-Timing', 'app;dur=' + (Number(process.hrtime.bigint() - started) / 1e6).toFixed(1));
+    return writeHead.apply(this, args);
+  };
+
+  const isApiRequest = req.path.startsWith('/api/');
+  const isNavigation = ['/', '/math', '/quiz.html', '/dashboard.html'].includes(req.path);
+  const isLoginRequest = req.path === '/api/auth/login';
+  const safePath = req.path.startsWith('/api/room-type/') ? '/api/room-type/:roomId' : isLoginRequest
+    ? req.path
+    : req.path.split('/').slice(0, 4).join('/') || '/';
+  req.logPath = safePath;
+
+  res.on('finish', () => {
+    if (!isApiRequest && !isNavigation) return;
+    const durationMs = Math.round(Number(process.hrtime.bigint() - started) / 1e6);
+    const rate = Number(process.env.REQUEST_METRICS_SAMPLE_RATE ?? '0.02');
+    if (isLoginRequest || res.statusCode >= 500 || durationMs >= 1000 || Math.random() < Math.max(0, Math.min(1, rate || 0))) {
+      console.log('[request]', JSON.stringify({
+        requestId,
+        method: req.method,
+        path: safePath,
+        status: res.statusCode,
+        durationMs,
+        responseBytes: Number(res.getHeader('Content-Length')) || null,
+        sqlCount: metrics.sqlCount,
+        sqlMs: Math.round(metrics.sqlMs),
+        poolWaitMs: Math.round(metrics.poolWaitMs),
+        phases: Object.fromEntries(Object.entries(metrics.phases).map(([key, value]) => [key, Math.round(value)])),
+      }));
+    }
+  });
+
+  res.on('close', () => {
+    if ((!isApiRequest && !isNavigation) || res.writableEnded) return;
+    const durationMs = Math.round(Number(process.hrtime.bigint() - started) / 1e6);
+    console.warn('[request]', JSON.stringify({
+      event: 'aborted',
+      requestId,
+      method: req.method,
+      path: safePath,
+      durationMs,
+    }));
+  });
+
+  requests.run(metrics, next);
+});
+
 // Compress text assets on the way out; already-compressed WebP/audio are skipped by the middleware.
 // Rapier's large physics WASM is served from its build-time Brotli sidecar below, with gzip as fallback.
 app.use(compression());
@@ -57,59 +117,6 @@ app.use('/api', (req, res, next) => {
     return res.status(403).json({ success: false, code: 'ACCOUNT_CHANGED', message: '登入帳戶已變更，請重新載入。' });
   }
   next();
-});
-
-// Give every request a safe correlation id and record API latency. Request bodies,
-// query strings and cookies are intentionally excluded because they may contain
-// student identifiers or credentials. Slow login requests are always logged; other
-// API requests are logged when slow or unsuccessful.
-app.use((req, res, next) => {
-  const requestId = crypto.randomUUID();
-  const started = process.hrtime.bigint();
-  req.requestId = requestId;
-  const metrics = { requestId, sqlCount: 0, sqlMs: 0, poolWaitMs: 0, phases: {} };
-  res.setHeader('X-Request-ID', requestId);
-
-  const isApiRequest = req.path.startsWith('/api/');
-  const isLoginRequest = req.path === '/api/auth/login';
-  const safePath = req.path.startsWith('/api/room-type/') ? '/api/room-type/:roomId' : isLoginRequest
-    ? req.path
-    : req.path.split('/').slice(0, 4).join('/') || '/';
-  req.logPath = safePath;
-
-  res.on('finish', () => {
-    if (!isApiRequest) return;
-    const durationMs = Math.round(Number(process.hrtime.bigint() - started) / 1e6);
-    const rate = Number(process.env.REQUEST_METRICS_SAMPLE_RATE ?? '0.02');
-    if (isLoginRequest || res.statusCode >= 500 || durationMs >= 1000 || Math.random() < Math.max(0, Math.min(1, rate || 0))) {
-      console.log('[request]', JSON.stringify({
-        requestId,
-        method: req.method,
-        path: safePath,
-        status: res.statusCode,
-        durationMs,
-        responseBytes: Number(res.getHeader('Content-Length')) || null,
-        sqlCount: metrics.sqlCount,
-        sqlMs: Math.round(metrics.sqlMs),
-        poolWaitMs: Math.round(metrics.poolWaitMs),
-        phases: Object.fromEntries(Object.entries(metrics.phases).map(([key, value]) => [key, Math.round(value)])),
-      }));
-    }
-  });
-
-  res.on('close', () => {
-    if (!isApiRequest || res.writableEnded) return;
-    const durationMs = Math.round(Number(process.hrtime.bigint() - started) / 1e6);
-    console.warn('[request]', JSON.stringify({
-      event: 'aborted',
-      requestId,
-      method: req.method,
-      path: safePath,
-      durationMs,
-    }));
-  });
-
-  requests.run(metrics, next);
 });
 
 // Every route below answers in Chinese. When the reader has chosen English,
@@ -187,6 +194,7 @@ const io = new Server(httpServer, {
 // Share the signed login session with Socket.IO so whiteboard classroom events
 // can be tied to the same student account used by Pet Park rewards.
 io.engine.use(sessionMiddleware);
+require('./math-app/server/quiz-socket')(io);
 const whiteboard = require('./whiteboard-app/server/socket')(io, app);
 const { requireAuth } = require('./math-app/middleware/auth');
 app.get('/api/classroom/sessions', requireAuth, async (req, res, next) => {
@@ -305,6 +313,7 @@ const CACHE_APP    = { maxAge: 0, setHeaders: res => res.setHeader('Cache-Contro
 app.use('/shared', assetStatic(path.join(__dirname, 'shared'), CACHE_APP));
 app.use('/src', assetStatic(path.join(__dirname, 'src'), CACHE_APP));
 app.use('/vendor', assetStatic(path.join(__dirname, 'node_modules', 'exceljs', 'dist'), CACHE_VENDOR));
+app.use('/vendor/chart.js/4.4.7', assetStatic(path.join(__dirname, 'node_modules', 'chart.js', 'dist'), CACHE_VENDOR));
 app.use('/vendor/phaser/4.2.1', assetStatic(path.join(__dirname, 'node_modules', 'phaser', 'dist'), CACHE_VENDOR));
 
 app.use('/math-app/css', assetStatic(path.join(__dirname, 'math-app', 'public', 'css'), CACHE_APP));

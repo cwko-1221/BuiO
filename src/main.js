@@ -359,8 +359,8 @@ function bindEvents() {
           loginLoading: false,
           adminUnlocked: false
         });
-        await fetchHomeworkInfo();
         render();
+        refreshHomework();
       } else {
         updateState({ loginError: data.message || t('login_failed'), loginLoading: false });
         render();
@@ -796,6 +796,7 @@ function bindEvents() {
     state.homeworkPending = [];
     state.homeworkHistory = [];
     state.homeworkPendingLoaded = false;
+    state.homeworkPendingError = false;
     state.adminUnlocked = false;
     state.studentsLoaded = false;
     clearSession();
@@ -857,4 +858,12 @@ function render() {
 
 // index.html 已預先顯示 boot splash；等 checkSession 回來才 render，
 // 避免已登入的學生先看到閃過的登入頁再切換到首頁。
-checkSession().finally(() => render());
+function refreshHomework() {
+  if (!state.loggedIn) return;
+  const accountId = state.currentUser.id;
+  // Do not replace a settings/admin form opened while these reads were pending.
+  fetchHomeworkInfo().finally(() => {
+    if (state.loggedIn && state.currentUser?.id === accountId && ['dashboard', 'modules'].includes(state.activeView)) render();
+  });
+}
+checkSession().finally(() => { render(); refreshHomework(); });

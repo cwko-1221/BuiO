@@ -27,6 +27,65 @@
     let fractionAnswerType = 'fraction';
     let fractionPart = 0;
     let decimalAnswerMode = false;
+    let gradeSocket = null;
+    let socketLibrary = null;
+    let pageLeaving = false;
+
+    function connectFeedback() {
+        gradeSocket?.disconnect(); gradeSocket = null;
+        const expectedQuiz = quizId;
+        // Progressive enhancement: questions and HTTP feedback do not wait for
+        // this library or handshake. Every answer is still graded by the server.
+        if (!socketLibrary) socketLibrary = new Promise((resolve, reject) => {
+            if (typeof window.io === 'function') { resolve(); return; }
+            const script = document.createElement('script');
+            script.dataset.buiOptional = '';
+            script.src = '/socket.io/socket.io.min.js'; script.async = true;
+            script.onload = resolve;
+            script.onerror = () => { script.remove(); socketLibrary = null; reject(Error('Socket unavailable')); };
+            document.head.append(script);
+        });
+        socketLibrary.then(() => {
+            if (pageLeaving || quizId !== expectedQuiz) return;
+            gradeSocket = window.io('/math-quiz', {
+                auth: { quizId: expectedQuiz }, withCredentials: true, forceNew: true,
+                transports: ['websocket', 'polling'], tryAllTransports: true,
+                timeout: 4000, reconnectionAttempts: 2,
+            });
+        }).catch(() => {});
+    }
+
+    async function gradeOverHttp(attempt) {
+        // /grade is a pure read, unlike /submit. It can safely retry once if a
+        // response is lost; never apply this retry policy to saving the results.
+        for (let tries = 0; ; tries++) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 2500);
+            try {
+                const response = await fetch('/api/quiz/grade', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include', signal: controller.signal,
+                    body: JSON.stringify({ ...attempt, quizId }),
+                });
+                const data = await response.json();
+                if (response.ok || ![408,429,500,502,503,504].includes(response.status) || tries > 0) return data;
+            } catch (error) { if (tries > 0 || pageLeaving) throw error; }
+            finally { clearTimeout(timeout); }
+        }
+    }
+
+    async function gradeFeedback(attempt) {
+        const request = async () => {
+            if (gradeSocket?.connected) {
+                const data = await new Promise(resolve => gradeSocket.timeout(1200).emit('quiz:grade', { ...attempt, quizId }, (error, data) => resolve(error ? null : data)));
+                if (data && (data.success || (data.status < 500 && ![408,429].includes(data.status)))) return data;
+            }
+            return gradeOverHttp(attempt);
+        };
+        return window.BuiLoading ? window.BuiLoading.run(request) : request();
+    }
+    window.addEventListener('pagehide', () => { pageLeaving = true; gradeSocket?.disconnect(); });
+    window.addEventListener('pageshow', event => { if (event.persisted) { pageLeaving = false; if (quizId) connectFeedback(); } });
 
     // ========================================
     // DOM Elements  
@@ -550,6 +609,7 @@
 
             questions = data.questions;
             quizId = data.quizId || null;
+            if (quizId) connectFeedback();
             answers = new Array(questions.length).fill(null);
             currentIndex = 0;
             totalQuizTime = 0;
@@ -842,14 +902,8 @@
         };
 
         try {
-            const response = await fetch('/api/quiz/grade', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(attempt),
-            });
-            const data = await response.json();
-            if (!response.ok || !data.success) {
+            const data = await gradeFeedback(attempt);
+            if (!data.success) {
                 throw new Error(data.message || t('m.gradeFailed'));
             }
 
