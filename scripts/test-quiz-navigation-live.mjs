@@ -21,7 +21,7 @@ const port = 3191, baseURL = `http://127.0.0.1:${port}`;
 const child = spawn(process.execPath, ['server.js'], { cwd: root, env: { ...process.env, PORT: String(port), BUIO_JSON_DB_FILE: file, SUPABASE_DB_URL: '', NODE_ENV: 'test', SESSION_SECRET: 'quiz-fixture-only', GOOGLE_API_KEY: '', GOOGLE_CREDENTIALS_JSON: '' }, stdio: ['ignore', 'pipe', 'pipe'] });
 let serverLog = '', browser;
 child.stdout.on('data', chunk => serverLog += chunk); child.stderr.on('data', chunk => serverLog += chunk);
-const checks = [], timings = {}, errors = [];
+const checks = [], timings = {}, errors = [], dialogs = [];
 const pass = name => { checks.push(name); console.log('PASS', name); };
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const until = async (condition, timeout = 5000) => { const end = Date.now() + timeout; while (!condition()) { if (Date.now() > end) throw Error('Fixture condition timed out'); await pause(30); } };
@@ -36,7 +36,8 @@ try {
   const page = await context.newPage(); page.on('pageerror', e => errors.push(e.message));
   const externalFonts = [];
   await page.route('https://fonts.googleapis.com/**', route => externalFonts.push(route));
-  page.on('dialog', dialog => dialog.dismiss());
+  const recordDialog = dialog => { dialogs.push(dialog.message()); return dialog.dismiss(); };
+  page.on('dialog', recordDialog);
   await login(context);
 
   const heldHomework = [];
@@ -79,7 +80,7 @@ try {
   pass('logout/login isolates late homework replies from the previous account');
 
   await login(context);
-  let gradeHttp = 0, gradeMode = 'healthy', socketReady = false, delayAcknowledgements = false;
+  let gradeHttp = 0, gradeMode = 'healthy', socketReady = false, delayAcknowledgements = false, dropAcknowledgements = false;
   let quizData;
   page.on('response', async response => { if (new URL(response.url()).pathname === '/api/quiz/questions' && response.ok()) quizData = await response.json(); });
   const heldGrades = [];
@@ -93,6 +94,7 @@ try {
     server.onMessage(message => {
       const text = String(message);
       if (text.startsWith('40/math-quiz,')) socketReady = true;
+      if (dropAcknowledgements && text.startsWith('43/math-quiz,')) return;
       if (delayAcknowledgements && text.startsWith('43/math-quiz,')) { setTimeout(() => { try { route.send(message); } catch {} }, 2500); return; }
       route.send(message);
     });
@@ -123,7 +125,7 @@ try {
   assert.match(await page.locator('#question-number').innerText(), /3/);
   pass('a delayed socket acknowledgement falls back to HTTP once and cannot skip a later question');
 
-  gradeMode = 'stall-first'; gradeHttp = 0;
+  gradeMode = 'stall-first'; gradeHttp = 0; dropAcknowledgements = true;
   timings.lostHttpFallbackMs = await fillAndSubmit(answer(quizData.questions[2].questionText), 4);
   assert.equal(gradeHttp, 2, 'only the read-only feedback retries');
   for (const route of heldGrades.splice(0)) await route.abort().catch(() => {});
@@ -132,16 +134,25 @@ try {
   gradeMode = 'stall'; gradeHttp = 0;
   const retained = answer(quizData.questions[3].questionText);
   await enterAnswer(retained);
+  await pause(1200);
+  const thinkingTime = Number(await page.locator('#timer-value').innerText());
   await page.locator('#submit-answer-btn').click();
-  await page.waitForFunction(() => !document.querySelector('#submit-answer-btn').disabled, null, { timeout: 10000 });
+  await page.waitForFunction(() => !document.querySelector('#submit-answer-btn').disabled, null, { timeout: 20000 });
   assert.equal(await page.locator('#answer-input').inputValue(), retained);
   assert.match(await page.locator('#question-number').innerText(), /4/);
   assert.equal(gradeHttp, 2);
   assert.equal((await saved()).questionLogs.length, 0);
+  assert.match(await page.locator('#grade-status').innerText(), /重試判分/);
+  assert.equal(await page.locator('#submit-answer-btn').innerText(), '重試判分');
+  assert.deepEqual(dialogs, [], 'transport failure never opens a native technical-error dialog');
+  await page.locator('#buio-loading-status').waitFor({ state: 'hidden', timeout: 1500 });
+  await pause(150);
+  assert.ok(Number(await page.locator('#timer-value').innerText()) >= thinkingTime, 'retry preserves the existing thinking time');
+  await page.screenshot({ path: path.join(out, '05-feedback-failure-keeps-answer.png') });
   for (const route of heldGrades.splice(0)) await route.abort().catch(() => {});
   pass('when both transports fail, the answer stays editable and the UI never invents a grade');
 
-  gradeMode = 'healthy'; delayAcknowledgements = false;
+  gradeMode = 'healthy'; delayAcknowledgements = false; dropAcknowledgements = false;
   for (let i = 3; i < 6; i++) {
     await enterAnswer(i === 5 ? '999' : answer(quizData.questions[i].questionText));
     await page.locator('#submit-answer-btn').click();
@@ -151,6 +162,7 @@ try {
   assert.equal((await saved()).questionLogs.length, 6);
   assert.equal((await saved()).questionLogs.filter(q => q.iscorrect).length, 5);
   assert.equal((await saved()).operationReceipts.length, 1);
+  assert.ok((await saved()).questionLogs[3].timespent >= 1, 'a retry does not reset the saved thinking time');
   pass('the completed set is regraded and persisted exactly once, including an intentionally wrong answer');
 
   let heldChart;
@@ -214,8 +226,54 @@ try {
   assert.equal(await noSocketPage.locator('.buio-loading-floating').count(), 0, 'optional transport failure never adds a whole-page recovery prompt');
   await noSocketPage.close();
   pass('a missing Socket.IO library still permits normal HTTP grading and never prevents entry');
+  const slowPage = await context.newPage(); slowPage.on('pageerror', e => errors.push(e.message)); slowPage.on('dialog', recordDialog);
+  await slowPage.route('**/socket.io/socket.io.min.js', route => route.abort());
+  let slowRequests = 0, slowPrimary; const slowBackups = [];
+  await slowPage.route('**/api/quiz/grade', async route => {
+    if (++slowRequests > 1) { slowBackups.push(route); return; }
+    slowPrimary = route.request(); await pause(3500); await route.continue();
+  });
+  const slowQuestions = slowPage.waitForResponse(r => new URL(r.url()).pathname === '/api/quiz/questions' && r.ok());
+  await slowPage.goto('/quiz.html'); const slowQuiz = await (await slowQuestions).json();
+  await slowPage.locator('#quiz-state').waitFor({ state: 'visible' });
+  for (const digit of answer(slowQuiz.questions[0].questionText)) await slowPage.locator(`[data-key="${digit}"]`).click();
+  const slowStart = performance.now(); await slowPage.locator('#submit-answer-btn').click();
+  await slowPage.waitForFunction(() => document.querySelector('#question-number').textContent.includes('2'), null, { timeout: 8000 });
+  timings.slowValidHttpMs = Math.round(performance.now() - slowStart);
+  assert.equal(slowRequests, 2, 'one read-only backup starts without cancelling the primary');
+  assert.equal(slowPrimary.failure(), null, 'the slow primary finishes normally');
+  assert.equal(await slowPage.locator('#grade-status').isVisible(), false);
+  for (const route of slowBackups) await route.abort().catch(() => {});
+  await slowPage.close();
+  pass('a valid 3.5-second HTTP reply is accepted once without a premature abort or dialog');
+
+  const latePage = await context.newPage(); latePage.on('pageerror', e => errors.push(e.message)); latePage.on('dialog', recordDialog);
+  let lateReady = false; const lateHttp = [];
+  await latePage.route('**/api/quiz/grade', route => lateHttp.push(route));
+  await latePage.routeWebSocket('**/socket.io/**', route => {
+    const server = route.connectToServer();
+    server.onMessage(message => {
+      const text = String(message);
+      if (text.startsWith('40/math-quiz,')) lateReady = true;
+      if (text.startsWith('43/math-quiz,')) { setTimeout(() => { try { route.send(message); } catch {} }, 3500); return; }
+      route.send(message);
+    });
+  });
+  const lateQuestions = latePage.waitForResponse(r => new URL(r.url()).pathname === '/api/quiz/questions' && r.ok());
+  await latePage.goto('/quiz.html'); const lateQuiz = await (await lateQuestions).json();
+  await latePage.locator('#quiz-state').waitFor({ state: 'visible' }); await until(() => lateReady);
+  for (const digit of answer(lateQuiz.questions[0].questionText)) await latePage.locator(`[data-key="${digit}"]`).click();
+  const lateStart = performance.now(); await latePage.locator('#submit-answer-btn').click();
+  await latePage.waitForFunction(() => document.querySelector('#question-number').textContent.includes('2'), null, { timeout: 8000 });
+  timings.lateSocketWithStalledHttpMs = Math.round(performance.now() - lateStart);
+  assert.ok(lateHttp.length >= 1 && lateHttp.length <= 2, 'HTTP fallback stays bounded while the socket reply is delayed');
+  assert.equal(await latePage.locator('#grade-status').isVisible(), false);
+  for (const route of lateHttp) await route.abort().catch(() => {});
+  await latePage.close();
+  pass('a late valid socket reply wins while HTTP is stalled and cancels only the redundant request');
+  assert.deepEqual(dialogs, []);
   assert.deepEqual(errors, []);
-  await fs.writeFile(path.join(out, 'results.json'), JSON.stringify({ pass: true, checks, timings, errors, fixture: 'isolated local JSON; not production classroom timings' }, null, 2));
+  await fs.writeFile(path.join(out, 'results.json'), JSON.stringify({ pass: true, checks, timings, errors, dialogs, fixture: 'isolated local JSON; not production classroom timings' }, null, 2));
   console.log(JSON.stringify(timings, null, 2));
 } catch (error) {
   await fs.writeFile(path.join(out, 'failure.json'), JSON.stringify({ error: error.stack, checks, timings, errors, serverLog: serverLog.slice(-5000) }, null, 2));

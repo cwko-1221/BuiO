@@ -4,6 +4,13 @@
    ======================================== */
 
 /* Page initialization must not wait for an external font stylesheet. */
+.grade-status {
+    max-width: 280px;
+    margin-top: 12px;
+    color: var(--accent-amber);
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
 
 /* ========================================
    CSS Variables (Design Tokens)
