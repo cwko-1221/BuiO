@@ -1,6 +1,7 @@
 'use strict';
 
 const config = require('../../config');
+const { createHash } = require('node:crypto');
 const store = require('../../db/jsonStore');
 const { getPool } = require('../../math-app/db/database');
 const academicYears = require('../../math-app/repositories/academic-years.repo');
@@ -302,6 +303,7 @@ function mapRecord(row) {
     date, homeworks: normalizeStoredHomeworks(row.homeworks),
     createdBy: row.createdBy || row.createdby, submittedAt: row.submittedAt || row.submittedat,
     updatedBy: row.updatedBy || row.updatedby, updatedAt: row.updatedAt || row.updatedat,
+    version: row.version || createHash('sha256').update(JSON.stringify([Number(row.id), row.homeworks])).digest('hex'),
   };
 }
 
@@ -310,7 +312,7 @@ async function findRecord({ academicYear, className, subject, date }, { client }
   if (config.db.mode === 'postgres') {
     const { rows } = await (client || getPool()).query(`SELECT ID AS id, AcademicYear AS "academicYear", ClassName AS "className",
       Subject AS subject, RecordDate AS date, Homeworks AS homeworks, CreatedBy AS "createdBy",
-      SubmittedAt AS "submittedAt", UpdatedBy AS "updatedBy", UpdatedAt AS "updatedAt"
+      SubmittedAt AS "submittedAt", UpdatedBy AS "updatedBy", UpdatedAt AS "updatedAt", md5(ID::text || ':' || Homeworks::text) AS version
       FROM HomeworkRecords WHERE AcademicYear=$1 AND ClassName=$2 AND Subject=$3 AND RecordDate=$4`, [academicYear, className, subject, date]);
     return mapRecord(rows[0]);
   }
@@ -334,17 +336,23 @@ async function createRecord(payload, { client } = {}) {
   return findRecord(payload);
 }
 
-async function updateRecord(payload, { client } = {}) {
+async function updateRecord(payload, { client, expectedVersion } = {}) {
   await ensureSchema();
   if (config.db.mode === 'postgres') {
     const result = await (client || getPool()).query(`UPDATE HomeworkRecords SET Homeworks=$1::jsonb, UpdatedBy=$2, UpdatedAt=NOW()
-      WHERE AcademicYear=$3 AND ClassName=$4 AND Subject=$5 AND RecordDate=$6`,
-      [JSON.stringify(payload.homeworks), payload.updatedBy, payload.academicYear, payload.className, payload.subject, payload.date]);
-    if (!result.rowCount) return null;
+      WHERE AcademicYear=$3 AND ClassName=$4 AND Subject=$5 AND RecordDate=$6
+        AND ($7::text IS NULL OR md5(ID::text || ':' || Homeworks::text)=$7 OR Homeworks=$1::jsonb)`,
+      [JSON.stringify(payload.homeworks), payload.updatedBy, payload.academicYear, payload.className, payload.subject, payload.date, expectedVersion ?? null]);
+    if (!result.rowCount) {
+      const record = await findRecord(payload, { client });
+      if (record && expectedVersion != null) throw Object.assign(new Error('功課記錄已被更新，請核對最新記錄後再儲存。'), { code: 'HOMEWORK_CHANGED', record });
+      return null;
+    }
     return findRecord(payload, { client });
   }
   const row = jsonData().homeworkRecords.find(item => item.academicYear === payload.academicYear && item.className === payload.className && item.subject === payload.subject && item.date === payload.date);
   if (!row) return null;
+  if (expectedVersion != null && mapRecord(row).version !== expectedVersion && JSON.stringify(row.homeworks) !== JSON.stringify(payload.homeworks)) throw Object.assign(new Error('功課記錄已被更新，請核對最新記錄後再儲存。'), { code: 'HOMEWORK_CHANGED', record: mapRecord(row) });
   row.homeworks = payload.homeworks;
   row.updatedBy = payload.updatedBy;
   row.updatedAt = new Date().toISOString();

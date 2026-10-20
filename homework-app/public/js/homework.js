@@ -13,12 +13,68 @@ const subjectsFor = grade => state.meta.subjects.filter(subject => !subject.grad
 const api = async (path, options = {}) => {
   const response = await (window.BuiReliable?.request || fetch)(`/api/homework${path}`, { credentials: 'include', ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
   const data = await response.json().catch(() => ({ success: false, message: t('h.badResponse') }));
-  if (!response.ok || !data.success) throw Object.assign(new Error(data.message || t('h.actionFailed')), { status: response.status });
+  if (!response.ok || !data.success) throw Object.assign(new Error(data.message || t('h.actionFailed')), { status: response.status, data });
   return data;
 };
 const options = (items, selected, label = value => value, value = item => item) => items.map(item => `<option value="${escapeHtml(value(item))}" ${value(item) === selected ? 'selected' : ''}>${escapeHtml(label(item))}</option>`).join('');
 const notice = () => state.readRecovery ? '<div data-homework-read-status></div>' : state.message ? `<div class="notice ${state.messageType}">${escapeHtml(state.message)}</div>` : '';
 function setMessage(message, type = 'success') { if (type === 'error' && window.BuiLoading?.notify(message)) return; state.message = message; state.messageType = type; render(); }
+
+const recordResource = scope => '/api/homework/records:' + [scope.academicYear, scope.className, scope.subject, scope.date].join(':');
+const editorScope = () => state.meta?.role === 'teacher' ? { ...filterState.records } : { ...state.studentAssignment, date: state.studentDate };
+async function restoreDraft(scope, revision) {
+  state.localDraft = null;
+  const drafts = await window.BuiReliable?.homeworkDrafts().catch(() => []);
+  if (revision !== state.recordRequest) return;
+  const draft = drafts?.find(row => row.resource === recordResource(scope));
+  if (!draft) return;
+  const body = JSON.parse(draft.body.value);
+  if (!Array.isArray(body.homeworks)) return;
+  state.homeworks = body.homeworks.map(homework => ({ ...homework, statuses: state.roster.map(student => ({
+    ...(homework.statuses || []).find(row => row.studentId === student.id), studentId: student.id,
+  })) }));
+  state.localDraft = { errorMessage: draft.errorMessage, conflict: Boolean(state.record) };
+}
+function draftNotice() {
+  if (!state.localDraft) return '';
+  const past = state.meta.role !== 'teacher' && state.studentDate !== today;
+  const message = past ? t('h.draftPastDate') : t(state.record ? 'h.draftWithSavedRecord' : 'h.draftRestored');
+  const comparison = state.record ? `<details class="draft-comparison"><summary>${escapeHtml(t('h.viewSavedRecord'))}</summary>${state.record.homeworks.map(homework => `<h3>${escapeHtml(homework.title)}</h3><div class="table-wrap"><table><thead><tr><th>${escapeHtml(t('h.student'))}</th><th>${escapeHtml(t('h.status'))}</th></tr></thead><tbody>${homework.statuses.map(row => `<tr><td>${escapeHtml(state.roster.find(student => student.id === row.studentId)?.name || row.studentId)}</td><td>${escapeHtml(statusLabels[row.status] || '—')}${row.madeUp ? ` · ${escapeHtml(t('h.madeUp'))}` : ''}</td></tr>`).join('')}</tbody></table></div>`).join('')}</details>` : '';
+  return `<div class="notice draft-recovery" role="status">${escapeHtml(message)}${state.localDraft.errorMessage ? `<p>${escapeHtml(state.localDraft.errorMessage)}</p>` : ''}${comparison}</div>`;
+}
+async function saveEditor() {
+  if (state.saving) return;
+  syncEditor();
+  const blank = state.homeworks.findIndex(homework => !String(homework.title || '').trim());
+  if (blank >= 0) return setMessage(t('h.homeworkNameRequired', { n: blank + 1 }), 'error');
+  if (state.meta.role !== 'teacher' && studentStatusesIncomplete()) return setMessage(t('h.allStudentsNeedStatus'), 'error');
+  const scope = editorScope(), resource = recordResource(scope), revision = state.recordRequest;
+  const homeworks = structuredClone(state.homeworks), method = state.record ? 'PUT' : 'POST';
+  const body = { ...scope, homeworks, ...(state.record?.version ? { baseVersion: state.record.version } : {}) };
+  state.saving = true;
+  for (const button of document.querySelectorAll('#submitRecord, #saveRecord')) { button.disabled = true; button.textContent = t('h.saving'); }
+  try {
+    const result = await api('/records', { method, body: JSON.stringify(body) });
+    if (revision !== state.recordRequest || resource !== recordResource(editorScope())) return;
+    syncEditor();
+    const unchanged = JSON.stringify(state.homeworks) === JSON.stringify(homeworks);
+    state.record = result.record;
+    state.localDraft = null;
+    if (unchanged) state.homeworks = structuredClone(result.record.homeworks);
+    state.message = unchanged ? result.message : t('h.savedWithNewEdits'); state.messageType = 'success';
+  } catch (error) {
+    if (revision !== state.recordRequest || resource !== recordResource(editorScope())) return;
+    syncEditor();
+    if (error.status === 409) {
+      const result = error.data?.record ? error.data : await api('/records?' + new URLSearchParams(scope)).catch(() => null);
+      if (revision !== state.recordRequest || resource !== recordResource(editorScope())) return;
+      if (result?.record) state.record = result.record;
+      state.localDraft = { conflict: true };
+      state.message = t('h.recordConflict');
+    } else state.message = error.status ? error.message : t('h.saveUnconfirmed');
+    state.messageType = 'error';
+  } finally { state.saving = false; render(); }
+}
 
 function shell(content, { messagePosition = 'top' } = {}) {
   const teacher = state.meta.role === 'teacher';
@@ -91,16 +147,24 @@ function renderMonitors() {
 
 async function loadTeacherRecord() {
   const f = filterState.records;
+  const revision = state.recordRequest = (state.recordRequest || 0) + 1;
+  state.localDraft = null;
+  state.loadingRecord = true;
+  render();
   try {
     const [roster, result] = await Promise.all([
       api(`/roster?academicYear=${encodeURIComponent(f.academicYear)}&className=${f.className}&subject=${f.subject}`),
       api(`/records?academicYear=${encodeURIComponent(f.academicYear)}&className=${f.className}&subject=${f.subject}&date=${f.date}`),
     ]);
+    if (revision !== state.recordRequest) return;
     state.roster = roster.students;
     state.record = result.record;
     state.homeworks = result.record?.homeworks ? structuredClone(result.record.homeworks) : [];
+    await restoreDraft(f, revision);
+    if (revision !== state.recordRequest) return;
     state.message = ''; state.readRecovery = null;
-  } catch (error) { state.record = null; state.homeworks = []; state.message = ''; state.readRecovery = { error, retry: loadTeacherRecord }; }
+  } catch (error) { if (revision !== state.recordRequest) return; state.record = null; state.homeworks = []; state.message = ''; state.readRecovery = { error, retry: loadTeacherRecord }; }
+  state.loadingRecord = false;
   render();
 }
 
@@ -174,8 +238,8 @@ function renderRecords() {
     <div class="panel-head"><div><h2>${escapeHtml(t('h.recordsTitle'))}</h2><p class="hint">${escapeHtml(t('h.recordsHint'))}</p></div><div class="actions"><button class="button secondary" id="printRecord" ${!state.record ? 'disabled' : ''}>${escapeHtml(t('h.downloadPdf'))}</button></div></div>
     ${filterHtml('record', f, true)}
   </section>
-  <section class="panel">${state.record || editingNewRecord
-    ? `${editingNewRecord ? `<div class="notice">${escapeHtml(t('h.newRecordNotice'))}</div>` : ''}${homeworkCards({ teacher: true })}<div class="actions" style="margin-top:20px"><button class="button secondary" id="addTeacherHomework">${escapeHtml(t('h.addHomework'))}</button><button class="button primary" id="saveRecord">${escapeHtml(t(editingNewRecord ? 'h.saveRecord' : 'h.saveChanges'))}</button>${state.record ? `<button class="button danger" id="deleteRecord" style="margin-left:auto">${escapeHtml(t('h.deleteRecord'))}</button>` : ''}</div>`
+  <section class="panel">${state.loadingRecord ? `<div class="loading-inline" role="status">${escapeHtml(t('h.booting'))}</div>` : state.record || editingNewRecord
+    ? `${draftNotice()}${editingNewRecord ? `<div class="notice">${escapeHtml(t('h.newRecordNotice'))}</div>` : ''}${homeworkCards({ teacher: true })}<div class="actions" style="margin-top:20px"><button class="button secondary" id="addTeacherHomework">${escapeHtml(t('h.addHomework'))}</button><button class="button primary" id="saveRecord" ${state.saving ? 'disabled' : ''}>${escapeHtml(t(state.saving ? 'h.saving' : editingNewRecord ? 'h.saveRecord' : 'h.saveChanges'))}</button>${state.record ? `<button class="button danger" id="deleteRecord" style="margin-left:auto">${escapeHtml(t('h.deleteRecord'))}</button>` : ''}</div>`
     : `<div class="empty">${escapeHtml(t('h.noRecordForDay'))}<div class="actions empty-actions"><button class="button primary" id="createTeacherRecord">${escapeHtml(t('h.newRecord'))}</button></div></div>`}</section>`);
 }
 
@@ -396,14 +460,23 @@ function emptyHomework(roster, defaultStatus = '') {
 async function loadStudentRecord() {
   const assignment = state.studentAssignment;
   if (!assignment) return;
+  const scope = { ...assignment, date: state.studentDate };
+  const revision = state.recordRequest = (state.recordRequest || 0) + 1;
+  state.localDraft = null;
+  state.loadingRecord = true;
+  render();
   try {
     const query = `academicYear=${encodeURIComponent(assignment.academicYear)}&className=${assignment.className}&subject=${assignment.subject}`;
     const [roster, result] = await Promise.all([api(`/roster?${query}`), api(`/records?${query}&date=${state.studentDate}`)]);
+    if (revision !== state.recordRequest) return;
     state.roster = roster.students;
     state.record = result.record;
     state.homeworks = result.record?.homeworks ? structuredClone(result.record.homeworks) : (state.studentDate === today ? [emptyHomework(roster.students)] : []);
+    await restoreDraft(scope, revision);
+    if (revision !== state.recordRequest) return;
     state.message = ''; state.readRecovery = null;
-  } catch (error) { state.record = null; state.homeworks = []; state.message = ''; state.readRecovery = { error, retry: loadStudentRecord }; }
+  } catch (error) { if (revision !== state.recordRequest) return; state.record = null; state.homeworks = []; state.message = ''; state.readRecovery = { error, retry: loadStudentRecord }; }
+  state.loadingRecord = false;
   render();
 }
 
@@ -413,12 +486,12 @@ function renderStudent() {
   return shell(`<section class="panel">
     <div class="panel-head"><div><h2>${escapeHtml(t('h.monitorTitle'))}</h2><p class="hint">${escapeHtml(t('h.monitorHint'))}</p></div>${assignment ? `<span class="assignment">${assignment.className} · ${escapeHtml(subjectName(assignment.subject))}</span>` : ''}</div>
     <div class="filters three">
-      <div class="field"><label for="studentAssignment">${escapeHtml(t('h.mySubject'))}</label><select id="studentAssignment">${options(state.meta.assignments, assignment?.id, item => `${item.className} · ${subjectName(item.subject)}`, item => String(item.id))}</select></div>
+      <div class="field"><label for="studentAssignment">${escapeHtml(t('h.mySubject'))}</label><select id="studentAssignment">${options(state.meta.assignments, String(assignment?.id ?? ''), item => `${item.className} · ${subjectName(item.subject)}`, item => String(item.id))}</select></div>
       <div class="field"><label for="studentDate">${escapeHtml(t('h.date'))}</label><input id="studentDate" type="date" value="${state.studentDate}" max="${today}"></div><div></div>
     </div>
-    ${locked ? `<div class="notice" style="margin-top:18px">${escapeHtml(t('h.lockedNotice'))}</div>` : state.record ? `<div class="notice" style="margin-top:18px">${escapeHtml(t('h.savedNotice'))}</div>` : ''}
+    ${locked ? `<div class="notice" style="margin-top:18px">${escapeHtml(t('h.lockedNotice'))}</div>` : state.record && !state.localDraft && !state.loadingRecord ? `<div class="notice" style="margin-top:18px">${escapeHtml(t('h.savedNotice'))}</div>` : ''}
   </section>
-  <section class="panel">${state.homeworks.length ? `${homeworkCards({ locked })}<div class="actions" style="margin-top:20px">${!locked ? `<button class="button secondary" id="addHomework">${escapeHtml(t('h.addHomework'))}</button><button class="button primary" id="submitRecord">${escapeHtml(t(state.record ? 'h.saveChanges' : 'h.saveShort'))}</button>` : ''}</div>` : `<div class="empty">${escapeHtml(t('h.noRecordDate'))}</div>`}</section>`, { messagePosition: 'bottom' });
+  <section class="panel">${state.loadingRecord ? `<div class="loading-inline" role="status">${escapeHtml(t('h.booting'))}</div>` : `${draftNotice()}${state.homeworks.length ? `${homeworkCards({ locked })}<div class="actions" style="margin-top:20px">${!locked ? `<button class="button secondary" id="addHomework">${escapeHtml(t('h.addHomework'))}</button><button class="button primary" id="submitRecord" ${state.saving ? 'disabled' : ''}>${escapeHtml(t(state.saving ? 'h.saving' : state.record ? 'h.saveChanges' : 'h.saveShort'))}</button>` : ''}</div>` : `<div class="empty">${escapeHtml(t('h.noRecordDate'))}</div>`}`}</section>`, { messagePosition: 'bottom' });
 }
 
 function syncEditor() {
@@ -523,15 +596,7 @@ function bindTeacher() {
       state.homeworks.push(emptyHomework(state.roster, 'complete'));
       render();
     });
-    document.getElementById('saveRecord')?.addEventListener('click', async () => {
-      syncEditor();
-      try {
-        const result = await api('/records', { method: state.record ? 'PUT' : 'POST', body: JSON.stringify({ ...filterState.records, homeworks: state.homeworks }) });
-        state.record = result.record;
-        state.homeworks = structuredClone(result.record.homeworks);
-        setMessage(result.message);
-      } catch (error) { setMessage(error.message, 'error'); }
-    });
+    document.getElementById('saveRecord')?.addEventListener('click', saveEditor);
     // Deleting takes the day away from everyone who might still read it, and there is no undo, so
     // the confirmation names the record rather than asking a bare "are you sure".
     document.getElementById('deleteRecord')?.addEventListener('click', async () => {
@@ -635,15 +700,7 @@ function bindStudent() {
   studentAssignment.onchange = () => { state.studentAssignment = state.meta.assignments.find(item => String(item.id) === studentAssignment.value); loadStudentRecord(); };
   studentDate.onchange = () => { state.studentDate = studentDate.value; loadStudentRecord(); };
   document.getElementById('addHomework')?.addEventListener('click', () => { syncEditor(); state.homeworks.push(emptyHomework(state.roster)); render(); });
-  document.getElementById('submitRecord')?.addEventListener('click', async () => {
-    syncEditor();
-    if (studentStatusesIncomplete()) {
-      setMessage(t('h.allStudentsNeedStatus'), 'error');
-      return;
-    }
-    try { const result = await api('/records', { method: state.record ? 'PUT' : 'POST', body: JSON.stringify({ ...state.studentAssignment, date: state.studentDate, homeworks: state.homeworks }) }); state.record = result.record; state.homeworks = structuredClone(result.record.homeworks); setMessage(result.message); }
-    catch (error) { setMessage(error.message, 'error'); }
-  });
+  document.getElementById('submitRecord')?.addEventListener('click', saveEditor);
 }
 
 function render() {
@@ -658,21 +715,44 @@ function render() {
 
 async function boot() {
   try {
-    if (window.BuiReliable) {
-      const session = await fetch('/api/auth/me', { credentials: 'include' }).then(response => response.json());
-      if (session.student?.id) { window.BuiReliable.remember(session.student.id); await window.BuiReliable.resume().catch(() => {}); }
-    }
-    state.meta = await api('/meta');
+    const [session, meta] = await Promise.all([
+      fetch('/api/auth/me', { credentials: 'include', cache: 'no-store' }).then(response => response.json()), api('/meta'),
+    ]);
+    if (session.student?.id) window.BuiReliable?.remember(session.student.id);
+    state.meta = meta;
     if (!state.meta.canAccess) throw new Error(t('h.notMonitor'));
     filterState.monitors.academicYear = filterState.records.academicYear = filterState.analysis.academicYear = filterState.classAnalysis.academicYear = state.meta.currentAcademicYear;
     filterState.classAnalysis.dateFrom = `${state.meta.currentAcademicYear.slice(0, 4)}-09-01`;
     filterState.summaryExport.academicYear = state.meta.currentAcademicYear;
     Object.assign(filterState.summaryExport, defaultWeekPeriod(state.meta.currentAcademicYear, today));
     state.teacherClassYear = state.meta.currentAcademicYear;
-    if (state.meta.role === 'teacher') await loadMonitorRoster();
-    else {
-      state.studentAssignment = state.meta.assignments[0]; state.studentDate = today; await loadStudentRecord();
+    const drafts = await window.BuiReliable?.homeworkDrafts().catch(() => []) || [];
+    const requested = new URLSearchParams(location.search).get('draft');
+    const preferred = drafts.find(draft => draft.resource === requested) || drafts.find(draft => draft.blocked) || drafts[0];
+    const draftScope = preferred ? JSON.parse(preferred.body.value) : null;
+    if (state.meta.role === 'teacher') {
+      if (draftScope) {
+        filterState.records = { academicYear: draftScope.academicYear, className: draftScope.className, subject: draftScope.subject, date: draftScope.date };
+        state.view = 'records'; await loadTeacherRecord();
+      } else await loadMonitorRoster();
     }
+    else {
+      state.studentAssignment = state.meta.assignments.find(item => draftScope && recordResource({ ...item, date: draftScope.date }) === preferred.resource) || state.meta.assignments[0];
+      state.studentDate = draftScope && state.studentAssignment && recordResource({ ...state.studentAssignment, date: draftScope.date }) === preferred.resource ? draftScope.date : today;
+      await loadStudentRecord();
+    }
+    // Recovery must not hold the whole module behind a network timeout.
+    window.BuiReliable?.resume().catch(() => {});
   } catch (error) { window.BuiLoading.recover(error, undefined, app); }
 }
+window.addEventListener('buio:homework-synced', event => {
+  if (!state.meta || state.saving || state.loadingRecord || (state.meta.role === 'teacher' && state.view !== 'records')) return;
+  if (event.detail.resource !== recordResource(editorScope())) return;
+  syncEditor();
+  state.record = event.detail.result.record;
+  if (JSON.stringify(state.homeworks) === JSON.stringify(event.detail.body.homeworks)) {
+    state.localDraft = null; state.message = event.detail.result.message; state.messageType = 'success';
+  }
+  render();
+});
 boot();

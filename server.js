@@ -54,12 +54,14 @@ app.use((req, res, next) => {
     if (!isApiRequest && !isNavigation) return;
     const durationMs = Math.round(Number(process.hrtime.bigint() - started) / 1e6);
     const rate = Number(process.env.REQUEST_METRICS_SAMPLE_RATE ?? '0.02');
-    if (isLoginRequest || res.statusCode >= 500 || durationMs >= 1000 || Math.random() < Math.max(0, Math.min(1, rate || 0))) {
+    const homeworkRejected = safePath === '/api/homework/records' && ['POST', 'PUT'].includes(req.method) && res.statusCode >= 400;
+    if (isLoginRequest || homeworkRejected || res.statusCode >= 500 || durationMs >= 1000 || Math.random() < Math.max(0, Math.min(1, rate || 0))) {
       console.log('[request]', JSON.stringify({
         requestId,
         method: req.method,
         path: safePath,
         status: res.statusCode,
+        ...(homeworkRejected ? { failureCode: res.locals.homeworkFailure || 'HOMEWORK_REQUEST_REJECTED' } : {}),
         durationMs,
         responseBytes: Number(res.getHeader('Content-Length')) || null,
         sqlCount: metrics.sqlCount,
