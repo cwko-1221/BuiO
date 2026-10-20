@@ -176,6 +176,8 @@ const EXACT = new Map(Object.entries({
   '減法': 'Subtraction',
   '乘法': 'Multiplication',
   '除法': 'Division',
+  '功課記錄已被更新，請核對最新記錄後再儲存。': 'This homework record has changed. Review the latest saved record before saving again.',
+  '記錄版本不正確': 'The record version is invalid',
   '混合': 'Mixed',
   '其他': 'Other',
   '未知': 'Unknown',

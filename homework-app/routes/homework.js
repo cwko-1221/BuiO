@@ -16,7 +16,14 @@ const {
 
 router.use(requireAuth);
 
-const fail = (res, status, message) => res.status(status).json({ success: false, message });
+const fail = (res, status, message, code = `HOMEWORK_${status}`) => {
+  res.locals.homeworkFailure = code;
+  return res.status(status).json({ success: false, message, code });
+};
+const conflict = (res, record) => {
+  res.locals.homeworkFailure = 'HOMEWORK_CHANGED';
+  return res.status(409).json({ success: false, code: 'HOMEWORK_CHANGED', message: '功課記錄已被更新，請核對最新記錄後再儲存。', record });
+};
 const text = (value, max = 100) => String(value || '').trim().slice(0, max);
 
 function pdfHex(value) {
@@ -386,7 +393,7 @@ function normalizeHomeworks(homeworks, rosterIds, statuses, { allowMadeUp = fals
   for (let index = 0; index < homeworks.length; index++) {
     const id = text(homeworks[index]?.id, 50) || `hw-${Date.now()}-${index + 1}`;
     const title = text(homeworks[index]?.title, 150);
-    if (!title) return { error: `請填寫第 ${index + 1} 份功課名稱` };
+    if (!title) return { error: `請填寫第 ${index + 1} 份功課名稱`, code: 'HOMEWORK_TITLE_REQUIRED' };
     const incoming = Array.isArray(homeworks[index]?.statuses) ? homeworks[index].statuses : [];
     const statusMap = new Map();
     const seenStudents = new Set();
@@ -399,7 +406,7 @@ function normalizeHomeworks(homeworks, rosterIds, statuses, { allowMadeUp = fals
       if (!allowedStatuses.has(status)) return { error: '學生狀態資料不正確' };
       statusMap.set(studentId, status);
     }
-    if (requireAllStatuses && statusMap.size !== rosterIds.length) return { error: '請為所有學生選擇狀態' };
+    if (requireAllStatuses && statusMap.size !== rosterIds.length) return { error: '請為所有學生選擇狀態', code: 'HOMEWORK_STATUS_REQUIRED' };
     normalized.push({
       id,
       title,
@@ -434,7 +441,8 @@ router.post('/records', async (req, res, next) => {
     const op = key ? receipts.operation(req.session.studentId, key, 'homework_create', req.body) : null;
     const cached = op ? await receipts.read(op) : null;
     if (cached) return res.status(201).json(cached);
-    if (await repo.findRecord({ ...assignment, date })) return fail(res, 409, '此日期的記錄已建立，請使用修改功能');
+    const existing = await repo.findRecord({ ...assignment, date });
+    if (existing) return conflict(res, existing);
     const roster = await repo.listStudents(assignment.academicYear, assignment.className, assignment.subject);
     const result = normalizeHomeworks(
       req.body.homeworks,
@@ -442,7 +450,7 @@ router.post('/records', async (req, res, next) => {
       isTeacher ? TEACHER_STATUSES : STUDENT_STATUSES,
       { allowMadeUp: isTeacher, requireAllStatuses: !isTeacher },
     );
-    if (result.error) return fail(res, 400, result.error);
+    if (result.error) return fail(res, 400, result.error, result.code);
     const persist = async client => ({ success: true, message: isTeacher ? '老師記錄已新增' : '欠交功課記錄已儲存',
       record: await repo.createRecord({ ...assignment, date, homeworks: result.homeworks, createdBy: req.session.studentId }, { client }) });
     res.status(201).json(op ? await receipts.run(op, persist) : await persist(null));
@@ -479,11 +487,19 @@ router.put('/records', async (req, res, next) => {
       isTeacher ? TEACHER_STATUSES : STUDENT_STATUSES,
       { allowMadeUp: isTeacher, preservedHomeworks: isTeacher ? [] : existing.homeworks, requireAllStatuses: !isTeacher },
     );
-    if (result.error) return fail(res, 400, result.error);
-    const persist = async client => ({ success: true, message: '記錄已更新',
-      record: await repo.updateRecord({ ...assignment, date, homeworks: result.homeworks, updatedBy: req.session.studentId }, { client }) });
+    if (result.error) return fail(res, 400, result.error, result.code);
+    if (req.body.baseVersion != null && !/^(?:[a-f0-9]{32}|[a-f0-9]{64})$/.test(req.body.baseVersion)) return fail(res, 400, '記錄版本不正確');
+    const persist = async client => {
+      const record = await repo.updateRecord({ ...assignment, date, homeworks: result.homeworks, updatedBy: req.session.studentId }, { client, expectedVersion: req.body.baseVersion });
+      if (!record) throw Object.assign(new Error('找不到記錄'), { code: 'HOMEWORK_MISSING' });
+      return { success: true, message: '記錄已更新', record };
+    };
     res.json(op ? await receipts.run(op, persist) : await persist(null));
-  } catch (error) { next(error); }
+  } catch (error) {
+    if (error.code === 'HOMEWORK_CHANGED') return conflict(res, error.record);
+    if (error.code === 'HOMEWORK_MISSING') return fail(res, 404, error.message, error.code);
+    next(error);
+  }
 });
 
 /**

@@ -20,6 +20,7 @@
     "check:tower-defense": "node scripts/test-tower-defense.mjs",
     "check:tower-defense-start": "node scripts/test-tower-defense-start.mjs",
     "check:homework": "node scripts/test-homework-module.mjs",
+    "check:homework-recovery": "node scripts/test-homework-recovery-live.mjs",
     "check:quiz-navigation": "node scripts/test-quiz-navigation-live.mjs",
     "check:homework-excel": "node scripts/test-homework-excel.mjs",
     "check:homework-report-postgres": "node scripts/test-homework-report-postgres.mjs",

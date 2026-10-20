@@ -571,6 +571,13 @@ button { cursor: pointer; }
   *::after { scroll-behavior: auto !important; transition: none !important; }
 }
 
+.draft-recovery { margin-bottom: 18px; }
+.draft-recovery p { margin: 8px 0 0; }
+.draft-comparison { margin-top: 12px; }
+.draft-comparison summary { cursor: pointer; font-weight: 700; }
+.draft-comparison table { width: 100%; border-collapse: collapse; }
+.draft-comparison th, .draft-comparison td { padding: 8px; text-align: left; border-bottom: 1px solid var(--line, #dce5df); }
+
 @media print {
   body { background: white; }
   .side,

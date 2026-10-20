@@ -116,6 +116,29 @@ test('Postgres queries preserve ordering, ownership, repeat creation and batch r
   }
 });
 
+test('homework version guards reject stale snapshots atomically and preserve receipt rollback', async t => {
+  const f = await fixture(t), homework = load('homework-app/repositories/homework.repo.js', f.api), receipts = load('shared/operation-receipts.js', f.api);
+  const scope = { academicYear: '2025-26', className: 'P1', subject: 'science', date: '2026-10-20' };
+  const homeworks = [{ id: 'hw-1', title: 'Original', statuses: [{ studentId: 'S1', status: 'missing', madeUp: false }] }];
+  const first = await homework.createRecord({ ...scope, homeworks, createdBy: 'S1' });
+  assert.match(first.version, /^[a-f0-9]{32}$/);
+  assert.equal((await homework.findRecord(scope)).version, first.version);
+  const teacherBody = { ...scope, homeworks: [{ ...homeworks[0], title: 'Teacher update' }], updatedBy: 'T1' };
+  const latest = await homework.updateRecord(teacherBody, { expectedVersion: first.version });
+  assert.notEqual(latest.version, first.version);
+  const alreadySaved = await homework.updateRecord(teacherBody, { expectedVersion: first.version });
+  assert.equal(alreadySaved.version, latest.version, 'a manual save racing an identical background save must acknowledge the already saved content');
+  const stale = receipts.operation('S1', 'stale-homework-write', 'homework_update', homeworks);
+  await assert.rejects(receipts.run(stale, client => homework.updateRecord({ ...scope, homeworks, updatedBy: 'S1' }, { client, expectedVersion: first.version })), error => error.code === 'HOMEWORK_CHANGED' && error.record.version === latest.version);
+  assert.equal(await receipts.read(stale), null, 'a rejected version must not create a success receipt');
+  assert.equal((await homework.findRecord(scope)).homeworks[0].title, 'Teacher update');
+  const corrected = receipts.operation('S1', 'reviewed-homework-write', 'homework_update', homeworks);
+  const saved = await receipts.run(corrected, client => homework.updateRecord({ ...scope, homeworks, updatedBy: 'S1' }, { client, expectedVersion: latest.version }));
+  const replay = await receipts.run(corrected, () => { throw Error('acknowledgement retry must not repeat the update'); });
+  assert.equal(replay.version, saved.version);
+  assert.equal((await f.db.query('SELECT count(*)::int AS n FROM homeworkrecords')).rows[0].n, 1);
+});
+
 test('migration closes anonymous tables while preserving backend and future defaults', async t => {
   const f = await fixture(t);
   await f.db.exec('GRANT ALL ON ALL TABLES IN SCHEMA public TO anon,authenticated; GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon,authenticated;');
