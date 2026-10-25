@@ -4,8 +4,10 @@
   "fighters": {
     "starpatch-cat": {
       "pages": [
-        "/pet/assets/art/brawl/starpatch-cat-a-515bbd9c0360.webp",
-        "/pet/assets/art/brawl/starpatch-cat-b-891c91e1bc26.webp"
+        "/pet/assets/art/brawl/starpatch-cat-runtime-3de80874308c.webp",
+        "/pet/assets/art/brawl/starpatch-cat-casts-fe51562ec17b.webp",
+        "/pet/assets/art/brawl/starpatch-cat-normal-ground-b346cfb2349b.webp",
+        "/pet/assets/art/brawl/starpatch-cat-normal-finish-air-7b8961e95703.webp"
       ],
       "clips": {
         "idle": {
@@ -24,76 +26,181 @@
           "count": 8
         },
         "attack1": {
-          "page": 0,
-          "start": 24,
-          "count": 8
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 2
         },
         "attack2": {
-          "page": 0,
-          "start": 32,
-          "count": 8
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 2
         },
         "attack3": {
-          "page": 1,
-          "start": 40,
-          "count": 8
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 3
         },
         "jump": {
           "page": 0,
-          "start": 40,
-          "count": 8
-        },
-        "air": {
-          "page": 0,
-          "start": 48,
-          "count": 8
-        },
-        "guard": {
-          "page": 1,
-          "start": 0,
-          "count": 4
-        },
-        "break": {
-          "page": 1,
-          "start": 4,
-          "count": 4
-        },
-        "hit": {
-          "page": 1,
-          "start": 8,
-          "count": 4
-        },
-        "fall": {
-          "page": 1,
-          "start": 12,
-          "count": 4
-        },
-        "rise": {
-          "page": 1,
-          "start": 16,
-          "count": 4
-        },
-        "skill1": {
-          "page": 1,
           "start": 24,
           "count": 8
         },
-        "skill2": {
-          "page": 1,
+        "air": {
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 3
+        },
+        "guard": {
+          "page": 0,
           "start": 32,
-          "count": 8
+          "count": 4
+        },
+        "break": {
+          "page": 0,
+          "start": 36,
+          "count": 4
+        },
+        "hit": {
+          "page": 0,
+          "start": 40,
+          "count": 4
+        },
+        "fall": {
+          "page": 0,
+          "start": 44,
+          "count": 4
+        },
+        "rise": {
+          "page": 0,
+          "start": 48,
+          "count": 4
+        },
+        "skill1": {
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 270,
+          "originY": 0.9322916666666666,
+          "emitterRole": "claws",
+          "emitters": [
+            {
+              "x": 60.86,
+              "y": -31.2
+            },
+            {
+              "x": 46.82,
+              "y": -26.24
+            },
+            {
+              "x": 44.39,
+              "y": -40.92
+            },
+            {
+              "x": 58.85,
+              "y": -46.24
+            },
+            {
+              "x": 124.74,
+              "y": -43.88
+            },
+            {
+              "x": 107.32,
+              "y": -36.78
+            },
+            {
+              "x": 31.2,
+              "y": -11.93
+            },
+            {
+              "x": 56.67,
+              "y": -34.94
+            }
+          ],
+          "page": 1
+        },
+        "skill2": {
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 270,
+          "originY": 0.9322916666666666,
+          "emitterRole": "claws",
+          "emitters": [
+            {
+              "x": 42.45,
+              "y": -51.09
+            },
+            {
+              "x": 51.98,
+              "y": -43.8
+            },
+            {
+              "x": 22.27,
+              "y": -62.1
+            },
+            {
+              "x": 67.81,
+              "y": -48.89
+            },
+            {
+              "x": 106.77,
+              "y": -44.09
+            },
+            {
+              "x": 72.79,
+              "y": -18.69
+            },
+            {
+              "x": 95.07,
+              "y": -22.43
+            },
+            {
+              "x": 50.91,
+              "y": -32.76
+            }
+          ],
+          "page": 1
         },
         "win": {
-          "page": 1,
-          "start": 48,
+          "page": 0,
+          "start": 52,
           "count": 8
         }
-      }
+      },
+      "pageLayouts": {
+        "1": {
+          "frameWidth": 384,
+          "frameHeight": 384
+        },
+        "2": {
+          "frameWidth": 384,
+          "frameHeight": 384
+        },
+        "3": {
+          "frameWidth": 384,
+          "frameHeight": 384
+        }
+      },
+      "runtimePacked": true
     },
     "cloud-ear-dog": {
       "pages": [
-        "/pet/assets/art/brawl/cloud-ear-dog-a-f5de038000c9.webp",
-        "/pet/assets/art/brawl/cloud-ear-dog-b-f60dda8fb9e1.webp"
+        "/pet/assets/art/brawl/cloud-ear-dog-runtime-db1e16f188d3.webp",
+        "/pet/assets/art/brawl/cloud-ear-dog-casts-f261df00d6b6.webp",
+        "/pet/assets/art/brawl/cloud-ear-dog-normal-ground-a264612e45a4.webp",
+        "/pet/assets/art/brawl/cloud-ear-dog-normal-finish-air-87315d686f68.webp"
       ],
       "clips": {
         "idle": {
@@ -112,76 +219,181 @@
           "count": 8
         },
         "attack1": {
-          "page": 0,
-          "start": 24,
-          "count": 8
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 2
         },
         "attack2": {
-          "page": 0,
-          "start": 32,
-          "count": 8
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 2
         },
         "attack3": {
-          "page": 1,
-          "start": 40,
-          "count": 8
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 3
         },
         "jump": {
           "page": 0,
-          "start": 48,
-          "count": 8
-        },
-        "air": {
-          "page": 0,
-          "start": 56,
-          "count": 8
-        },
-        "guard": {
-          "page": 1,
-          "start": 0,
-          "count": 4
-        },
-        "break": {
-          "page": 1,
-          "start": 4,
-          "count": 4
-        },
-        "hit": {
-          "page": 1,
-          "start": 8,
-          "count": 4
-        },
-        "fall": {
-          "page": 1,
-          "start": 12,
-          "count": 4
-        },
-        "rise": {
-          "page": 1,
-          "start": 16,
-          "count": 4
-        },
-        "skill1": {
-          "page": 1,
           "start": 24,
           "count": 8
         },
-        "skill2": {
-          "page": 1,
+        "air": {
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 3
+        },
+        "guard": {
+          "page": 0,
           "start": 32,
-          "count": 8
+          "count": 4
+        },
+        "break": {
+          "page": 0,
+          "start": 36,
+          "count": 4
+        },
+        "hit": {
+          "page": 0,
+          "start": 40,
+          "count": 4
+        },
+        "fall": {
+          "page": 0,
+          "start": 44,
+          "count": 4
+        },
+        "rise": {
+          "page": 0,
+          "start": 48,
+          "count": 4
+        },
+        "skill1": {
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 180,
+          "originY": 0.8984375,
+          "emitterRole": "mouth",
+          "emitters": [
+            {
+              "x": 45.41,
+              "y": -93.48
+            },
+            {
+              "x": 39.89,
+              "y": -93.62
+            },
+            {
+              "x": 47.08,
+              "y": -92.28
+            },
+            {
+              "x": 59.86,
+              "y": -80.25
+            },
+            {
+              "x": 62.71,
+              "y": -56.2
+            },
+            {
+              "x": 57.66,
+              "y": -61.82
+            },
+            {
+              "x": 69.01,
+              "y": -65.83
+            },
+            {
+              "x": 59.93,
+              "y": -75.25
+            }
+          ],
+          "page": 1
+        },
+        "skill2": {
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 180,
+          "originY": 0.8984375,
+          "emitterRole": "mouth",
+          "emitters": [
+            {
+              "x": 58.55,
+              "y": -39.55
+            },
+            {
+              "x": 53.54,
+              "y": -47.79
+            },
+            {
+              "x": 56.03,
+              "y": -75.46
+            },
+            {
+              "x": 31.33,
+              "y": -102.84
+            },
+            {
+              "x": 51.82,
+              "y": -103.78
+            },
+            {
+              "x": 54.58,
+              "y": -107.41
+            },
+            {
+              "x": 66.13,
+              "y": -67.76
+            },
+            {
+              "x": 57.27,
+              "y": -77.44
+            }
+          ],
+          "page": 1
         },
         "win": {
-          "page": 1,
-          "start": 56,
+          "page": 0,
+          "start": 52,
           "count": 8
         }
-      }
+      },
+      "pageLayouts": {
+        "1": {
+          "frameWidth": 256,
+          "frameHeight": 256
+        },
+        "2": {
+          "frameWidth": 384,
+          "frameHeight": 384
+        },
+        "3": {
+          "frameWidth": 384,
+          "frameHeight": 384
+        }
+      },
+      "runtimePacked": true
     },
     "pudding-pig": {
       "pages": [
-        "/pet/assets/art/brawl/pudding-pig-a-d88bdea4b117.webp",
-        "/pet/assets/art/brawl/pudding-pig-b-32107c17646d.webp"
+        "/pet/assets/art/brawl/pudding-pig-runtime-bea4684ecc1b.webp",
+        "/pet/assets/art/brawl/pudding-pig-casts-f6d5290afd7c.webp",
+        "/pet/assets/art/brawl/pudding-pig-normal-ground-54bb9aa95d4c.webp",
+        "/pet/assets/art/brawl/pudding-pig-normal-finish-air-7fd40b4689d8.webp"
       ],
       "clips": {
         "idle": {
@@ -200,71 +412,174 @@
           "count": 8
         },
         "attack1": {
-          "page": 0,
-          "start": 24,
-          "count": 8
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 2
         },
         "attack2": {
-          "page": 0,
-          "start": 32,
-          "count": 8
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 2
         },
         "attack3": {
-          "page": 1,
-          "start": 40,
-          "count": 8
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 3
         },
         "jump": {
           "page": 0,
-          "start": 48,
-          "count": 8
-        },
-        "air": {
-          "page": 0,
-          "start": 56,
-          "count": 8
-        },
-        "guard": {
-          "page": 1,
-          "start": 0,
-          "count": 4
-        },
-        "break": {
-          "page": 1,
-          "start": 4,
-          "count": 4
-        },
-        "hit": {
-          "page": 1,
-          "start": 8,
-          "count": 4
-        },
-        "fall": {
-          "page": 1,
-          "start": 12,
-          "count": 4
-        },
-        "rise": {
-          "page": 1,
-          "start": 16,
-          "count": 4
-        },
-        "skill1": {
-          "page": 1,
           "start": 24,
           "count": 8
         },
-        "skill2": {
-          "page": 1,
+        "air": {
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "strike",
+          "displaySize": 270,
+          "originY": 0.9333333333333333,
+          "page": 3
+        },
+        "guard": {
+          "page": 0,
           "start": 32,
-          "count": 8
+          "count": 4
+        },
+        "break": {
+          "page": 0,
+          "start": 36,
+          "count": 4
+        },
+        "hit": {
+          "page": 0,
+          "start": 40,
+          "count": 4
+        },
+        "fall": {
+          "page": 0,
+          "start": 44,
+          "count": 4
+        },
+        "rise": {
+          "page": 0,
+          "start": 48,
+          "count": 4
+        },
+        "skill1": {
+          "start": 0,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 270,
+          "originY": 0.9322916666666666,
+          "emitterRole": "ground",
+          "emitters": [
+            {
+              "x": 62.1,
+              "y": 0
+            },
+            {
+              "x": 69.22,
+              "y": 0
+            },
+            {
+              "x": 68.31,
+              "y": 0
+            },
+            {
+              "x": 53.42,
+              "y": 0
+            },
+            {
+              "x": 53.96,
+              "y": 0
+            },
+            {
+              "x": 48.57,
+              "y": 0
+            },
+            {
+              "x": 48.45,
+              "y": 0
+            },
+            {
+              "x": 57.52,
+              "y": 0
+            }
+          ],
+          "page": 1
+        },
+        "skill2": {
+          "start": 8,
+          "count": 8,
+          "poseTimeline": "cast",
+          "displaySize": 270,
+          "originY": 0.9322916666666666,
+          "emitterRole": "mouth",
+          "emitters": [
+            {
+              "x": 60.57,
+              "y": -55.96
+            },
+            {
+              "x": 61.14,
+              "y": -67.37
+            },
+            {
+              "x": 60.44,
+              "y": -97.68
+            },
+            {
+              "x": 72.24,
+              "y": -94.57
+            },
+            {
+              "x": 74.57,
+              "y": -85.86
+            },
+            {
+              "x": 55.43,
+              "y": -111.19
+            },
+            {
+              "x": 62.86,
+              "y": -74.5
+            },
+            {
+              "x": 58.92,
+              "y": -57.61
+            }
+          ],
+          "page": 1
         },
         "win": {
-          "page": 1,
-          "start": 56,
+          "page": 0,
+          "start": 52,
           "count": 8
         }
-      }
+      },
+      "pageLayouts": {
+        "1": {
+          "frameWidth": 384,
+          "frameHeight": 384
+        },
+        "2": {
+          "frameWidth": 384,
+          "frameHeight": 384
+        },
+        "3": {
+          "frameWidth": 384,
+          "frameHeight": 384
+        }
+      },
+      "runtimePacked": true
     }
   },
   "enemies": {
@@ -1380,279 +1695,6 @@
         }
       }
     ],
-    "starpatch-cat": {
-      "url": "/pet/assets/art/brawl/starpatch-cat-casts-fe51562ec17b.webp",
-      "frameWidth": 384,
-      "frameHeight": 384,
-      "clips": {
-        "skill1": {
-          "start": 0,
-          "count": 8,
-          "poseTimeline": "cast",
-          "displaySize": 270,
-          "originY": 0.9322916666666666,
-          "emitterRole": "claws",
-          "emitters": [
-            {
-              "x": 60.86,
-              "y": -31.2
-            },
-            {
-              "x": 46.82,
-              "y": -26.24
-            },
-            {
-              "x": 44.39,
-              "y": -40.92
-            },
-            {
-              "x": 58.85,
-              "y": -46.24
-            },
-            {
-              "x": 124.74,
-              "y": -43.88
-            },
-            {
-              "x": 107.32,
-              "y": -36.78
-            },
-            {
-              "x": 31.2,
-              "y": -11.93
-            },
-            {
-              "x": 56.67,
-              "y": -34.94
-            }
-          ]
-        },
-        "skill2": {
-          "start": 8,
-          "count": 8,
-          "poseTimeline": "cast",
-          "displaySize": 270,
-          "originY": 0.9322916666666666,
-          "emitterRole": "claws",
-          "emitters": [
-            {
-              "x": 42.45,
-              "y": -51.09
-            },
-            {
-              "x": 51.98,
-              "y": -43.8
-            },
-            {
-              "x": 22.27,
-              "y": -62.1
-            },
-            {
-              "x": 67.81,
-              "y": -48.89
-            },
-            {
-              "x": 106.77,
-              "y": -44.09
-            },
-            {
-              "x": 72.79,
-              "y": -18.69
-            },
-            {
-              "x": 95.07,
-              "y": -22.43
-            },
-            {
-              "x": 50.91,
-              "y": -32.76
-            }
-          ]
-        }
-      }
-    },
-    "cloud-ear-dog": {
-      "url": "/pet/assets/art/brawl/cloud-ear-dog-casts-f261df00d6b6.webp",
-      "frameWidth": 256,
-      "frameHeight": 256,
-      "clips": {
-        "skill1": {
-          "start": 0,
-          "count": 8,
-          "poseTimeline": "cast",
-          "displaySize": 180,
-          "originY": 0.8984375,
-          "emitterRole": "mouth",
-          "emitters": [
-            {
-              "x": 45.41,
-              "y": -93.48
-            },
-            {
-              "x": 39.89,
-              "y": -93.62
-            },
-            {
-              "x": 47.08,
-              "y": -92.28
-            },
-            {
-              "x": 59.86,
-              "y": -80.25
-            },
-            {
-              "x": 62.71,
-              "y": -56.2
-            },
-            {
-              "x": 57.66,
-              "y": -61.82
-            },
-            {
-              "x": 69.01,
-              "y": -65.83
-            },
-            {
-              "x": 59.93,
-              "y": -75.25
-            }
-          ]
-        },
-        "skill2": {
-          "start": 8,
-          "count": 8,
-          "poseTimeline": "cast",
-          "displaySize": 180,
-          "originY": 0.8984375,
-          "emitterRole": "mouth",
-          "emitters": [
-            {
-              "x": 58.55,
-              "y": -39.55
-            },
-            {
-              "x": 53.54,
-              "y": -47.79
-            },
-            {
-              "x": 56.03,
-              "y": -75.46
-            },
-            {
-              "x": 31.33,
-              "y": -102.84
-            },
-            {
-              "x": 51.82,
-              "y": -103.78
-            },
-            {
-              "x": 54.58,
-              "y": -107.41
-            },
-            {
-              "x": 66.13,
-              "y": -67.76
-            },
-            {
-              "x": 57.27,
-              "y": -77.44
-            }
-          ]
-        }
-      }
-    },
-    "pudding-pig": {
-      "url": "/pet/assets/art/brawl/pudding-pig-casts-f6d5290afd7c.webp",
-      "frameWidth": 384,
-      "frameHeight": 384,
-      "clips": {
-        "skill1": {
-          "start": 0,
-          "count": 8,
-          "poseTimeline": "cast",
-          "displaySize": 270,
-          "originY": 0.9322916666666666,
-          "emitterRole": "ground",
-          "emitters": [
-            {
-              "x": 62.1,
-              "y": 0
-            },
-            {
-              "x": 69.22,
-              "y": 0
-            },
-            {
-              "x": 68.31,
-              "y": 0
-            },
-            {
-              "x": 53.42,
-              "y": 0
-            },
-            {
-              "x": 53.96,
-              "y": 0
-            },
-            {
-              "x": 48.57,
-              "y": 0
-            },
-            {
-              "x": 48.45,
-              "y": 0
-            },
-            {
-              "x": 57.52,
-              "y": 0
-            }
-          ]
-        },
-        "skill2": {
-          "start": 8,
-          "count": 8,
-          "poseTimeline": "cast",
-          "displaySize": 270,
-          "originY": 0.9322916666666666,
-          "emitterRole": "mouth",
-          "emitters": [
-            {
-              "x": 60.57,
-              "y": -55.96
-            },
-            {
-              "x": 61.14,
-              "y": -67.37
-            },
-            {
-              "x": 60.44,
-              "y": -97.68
-            },
-            {
-              "x": 72.24,
-              "y": -94.57
-            },
-            {
-              "x": 74.57,
-              "y": -85.86
-            },
-            {
-              "x": 55.43,
-              "y": -111.19
-            },
-            {
-              "x": 62.86,
-              "y": -74.5
-            },
-            {
-              "x": 58.92,
-              "y": -57.61
-            }
-          ]
-        }
-      }
-    },
     "golden-retriever-dog": {
       "url": "/pet/assets/art/brawl/golden-retriever-dog-casts-ff2ba2a3021f.webp",
       "frameWidth": 256,
@@ -3902,138 +3944,6 @@
     }
   },
   "fighterAttackAnimations": {
-    "starpatch-cat": [
-      {
-        "url": "/pet/assets/art/brawl/starpatch-cat-normal-ground-b346cfb2349b.webp",
-        "frameWidth": 384,
-        "frameHeight": 384,
-        "clips": {
-          "attack1": {
-            "start": 0,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          },
-          "attack2": {
-            "start": 8,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          }
-        }
-      },
-      {
-        "url": "/pet/assets/art/brawl/starpatch-cat-normal-finish-air-7b8961e95703.webp",
-        "frameWidth": 384,
-        "frameHeight": 384,
-        "clips": {
-          "attack3": {
-            "start": 0,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          },
-          "air": {
-            "start": 8,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          }
-        }
-      }
-    ],
-    "cloud-ear-dog": [
-      {
-        "url": "/pet/assets/art/brawl/cloud-ear-dog-normal-ground-a264612e45a4.webp",
-        "frameWidth": 384,
-        "frameHeight": 384,
-        "clips": {
-          "attack1": {
-            "start": 0,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          },
-          "attack2": {
-            "start": 8,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          }
-        }
-      },
-      {
-        "url": "/pet/assets/art/brawl/cloud-ear-dog-normal-finish-air-87315d686f68.webp",
-        "frameWidth": 384,
-        "frameHeight": 384,
-        "clips": {
-          "attack3": {
-            "start": 0,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          },
-          "air": {
-            "start": 8,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          }
-        }
-      }
-    ],
-    "pudding-pig": [
-      {
-        "url": "/pet/assets/art/brawl/pudding-pig-normal-ground-54bb9aa95d4c.webp",
-        "frameWidth": 384,
-        "frameHeight": 384,
-        "clips": {
-          "attack1": {
-            "start": 0,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          },
-          "attack2": {
-            "start": 8,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          }
-        }
-      },
-      {
-        "url": "/pet/assets/art/brawl/pudding-pig-normal-finish-air-7fd40b4689d8.webp",
-        "frameWidth": 384,
-        "frameHeight": 384,
-        "clips": {
-          "attack3": {
-            "start": 0,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          },
-          "air": {
-            "start": 8,
-            "count": 8,
-            "poseTimeline": "strike",
-            "displaySize": 270,
-            "originY": 0.9333333333333333
-          }
-        }
-      }
-    ],
     "golden-retriever-dog": [
       {
         "url": "/pet/assets/art/brawl/golden-retriever-dog-normal-ground-f854479f2280.webp",

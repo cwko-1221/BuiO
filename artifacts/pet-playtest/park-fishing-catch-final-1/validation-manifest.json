@@ -1,0 +1,1090 @@
+{
+  "pass": true,
+  "build": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\park-fishing-catch-build-2",
+  "htmlSha256": "25542d41247c2249d2f2ecd1b8b9a368c9a9918721eca25e6cf90415ada64321",
+  "checks": {
+    "typescript": true,
+    "parkTests": 70,
+    "productionArtifactTests": 4,
+    "petModule": true,
+    "fullScreenCatchTouch": true,
+    "fiveViewports": true,
+    "serverClockPaused": true,
+    "continueAndPackUp": true,
+    "teacherLockCleanup": true,
+    "marketAndQuestFlow": "pre-integration source build 1",
+    "adventureSmoke": true,
+    "httpDistribution": true,
+    "physicalIpad": false
+  },
+  "fingerprints": [
+    {
+      "file": "artifacts/pet-playtest/park-fishing-catch-live-1/catch-fullscreen-phone-landscape.png",
+      "sha256": "0bce22c34ec2626c8ea388781ed5ffe9dbb441898a5a5dca298f56689227cddf"
+    },
+    {
+      "file": "artifacts/pet-playtest/park-fishing-catch-live-1/catch-fullscreen-tablet-landscape.png",
+      "sha256": "ea289fe63866020ea1ee5dd9cdc161fd8398e79d54b69f0b2b8bdc161748ea7c"
+    },
+    {
+      "file": "artifacts/pet-playtest/park-fishing-catch-live-1/report.json",
+      "sha256": "d7d3135da03f6cea35ba1140c5875a10fb33506d99204f520503563cd0a30903"
+    },
+    {
+      "file": "docs/pet-outdoor-park.md",
+      "sha256": "836a6f215804aa9cbe27ce28651248e70a96d44689cb7e43d7f7a4afa7d43400"
+    },
+    {
+      "file": "docs/pet-park-adventure-v2.md",
+      "sha256": "b87d5e863d0591751d24a10458a1745c58adeb463c1230d99e183c41547886d0"
+    },
+    {
+      "file": "docs/pet-park-art-sample.md",
+      "sha256": "afc726d86100243b1d82a27b844f2e1ad514d711442b3230c1337f8fae0bc80e"
+    },
+    {
+      "file": "docs/pet-park-community-v1.md",
+      "sha256": "b755f1c3e7124c8f0f68188dd1b90f43adac3c3670bf31560cd0bb2de5a4081f"
+    },
+    {
+      "file": "docs/pet-park-economy-v2.md",
+      "sha256": "705cf91fb7368d95cacdddc27cc8ca2615e83af0f5fe8ef75f8a70a1d38bad94"
+    },
+    {
+      "file": "docs/pet-park-fishing-catch-fullscreen.md",
+      "sha256": "b800042b8f340172365c2c3fd40b5603a45ce1f3f8c21ec1637a55f4813758af"
+    },
+    {
+      "file": "docs/pet-park-fishing-v2.md",
+      "sha256": "3693c1d83dfd8d92b9adac1c6d6c51ab1cbcf4698adee76149eec7e4d639f7e1"
+    },
+    {
+      "file": "docs/pet-park-garden.md",
+      "sha256": "7b25af4e185a695773350511efb4629e1c01c63a278e15dbc1ea30aeabc8064e"
+    },
+    {
+      "file": "docs/pet-park-leisure-v1.md",
+      "sha256": "cdaee1452bde3a92a1bdaca3455ee8f08da990db612c0352e6af6d0a7b87e623"
+    },
+    {
+      "file": "docs/pet-park-market-v1.md",
+      "sha256": "35591e731c8773bee617ed95c78302a863aeb35f79a25a13ef30bf4719cd66af"
+    },
+    {
+      "file": "docs/pet-park-release-art-review.md",
+      "sha256": "002c67c58b66d1adf07daa39fcaad348d80cf0819687016364117cc51ecdd505"
+    },
+    {
+      "file": "docs/pet-park-release-plan.md",
+      "sha256": "a20327f4c5c1aaddb37e9658b772c4eda4df779feedb2933ad631c8e7dafe8a0"
+    },
+    {
+      "file": "docs/pet-park-social.md",
+      "sha256": "d6daab42b43c0bfae7990e48f9167d46b6980242134bd95c74aaa9c9560ec523"
+    },
+    {
+      "file": "docs/pet-park-storybook-v3.md",
+      "sha256": "36544c080df21943d8943f16b1f8f547f2bc232db74908b07e50ac935fbb1b7a"
+    },
+    {
+      "file": "docs/pet-park-v4.md",
+      "sha256": "04fc9930b3896761fb2ce98302b7a8e8529d76f4561777171b66441665012f09"
+    },
+    {
+      "file": "docs/pet-park-walkmesh.md",
+      "sha256": "b4a14582234dcd2a68e67244e0fb62f39e67ae58006971a9208317dad5ba7d26"
+    },
+    {
+      "file": "docs/pet-park-world-art.md",
+      "sha256": "58c306ad5c61848a9edecf8826c94b2c0276c439f59b8b80aa560ae47f8135b8"
+    },
+    {
+      "file": "docs/pet-sky-patrol-ipad-performance.md",
+      "sha256": "89679863a9768481e951304223f11bc4c0fe10dff12ac24c8465d25769898dc8"
+    },
+    {
+      "file": "docs/pet-sky-patrol-v2-plan.md",
+      "sha256": "d69cf58f051cce25bd05d1455616ea196200100c428d85d3547abc35cfa05f50"
+    },
+    {
+      "file": "docs/pet-sky-patrol-v2-review.md",
+      "sha256": "03a14fe0b6ecc5f94df23f7b6e16ae0bd656304d1f22a0de0d0a3150568d96cf"
+    },
+    {
+      "file": "docs/pet-sky-patrol-v2.md",
+      "sha256": "7eea9065199a029d2943eebcf57f759a1855963606517fa949dca4ffe1048027"
+    },
+    {
+      "file": "package.json",
+      "sha256": "57bc159e7b8c762bdaa4f7c5ee5d50de63cc29c9aed94e4c6c3493b2e6c2c464"
+    },
+    {
+      "file": "pet-app/README.md",
+      "sha256": "3fd0e835ad2256d4ade2e8eefa20fd8211e6fd95890a55ebeb848f02f2e405f2"
+    },
+    {
+      "file": "pet-app/index.html",
+      "sha256": "c2222156c56795d00311ac334729c85ba09d2c1807d6626426b5c3b6366e673b"
+    },
+    {
+      "file": "pet-app/lib/fishing-sound.d.mts",
+      "sha256": "5d3c4058165624478726c135b10ff26b9288f6d100859666eaeeacc7bb03ee2e"
+    },
+    {
+      "file": "pet-app/lib/fishing-sound.mjs",
+      "sha256": "7be87b7c9807630afd4a9a53cb6691bb7332f41008abf97d3e800ccc6f40d1a1"
+    },
+    {
+      "file": "pet-app/lib/park-activities.d.mts",
+      "sha256": "84aa335f75b3614c1b344f274f0416080791e5390cd5d2a4dd55eba1f7e8a1a1"
+    },
+    {
+      "file": "pet-app/lib/park-activities.mjs",
+      "sha256": "513a6cd5292e877fed57db2cc4ee8969fbfc744b4bca3e4ac1557938ad5bd944"
+    },
+    {
+      "file": "pet-app/lib/park-economy.d.mts",
+      "sha256": "a449ec2422e02be14c8c28830140eea53b075557699cba501bfdf99f9236c7d0"
+    },
+    {
+      "file": "pet-app/lib/park-economy.mjs",
+      "sha256": "11313170b3e437a91673a506aaf53d2a07afd63d9c8b2715b555b9a3bedfff5d"
+    },
+    {
+      "file": "pet-app/lib/park-games.d.mts",
+      "sha256": "d60c8e7289e9a50921a22ddbed2a05036075441aea6d1c7f640fc97d96cf0ecc"
+    },
+    {
+      "file": "pet-app/lib/park-games.mjs",
+      "sha256": "02acdf80598cf5e6daf3e4adee1e2ca830a2980dadb40bfbf23bbdbf846cd42a"
+    },
+    {
+      "file": "pet-app/lib/park-garden.d.mts",
+      "sha256": "2628473990e3dc66abb52380e657fce2ca38cbbfec5948089989ff2ebf056898"
+    },
+    {
+      "file": "pet-app/lib/park-garden.mjs",
+      "sha256": "4f14fc293223d45595efd74aeb067f074a108c0e3b9f6043bd13d4599a470850"
+    },
+    {
+      "file": "pet-app/lib/park-landscape.d.mts",
+      "sha256": "e3d94fe29f1b95440eb8dde2c396c4209f41b27fb7199c073cfbe00865d20696"
+    },
+    {
+      "file": "pet-app/lib/park-landscape.mjs",
+      "sha256": "8404d82b534cdfeee264561f7441ec930336be0291cfff87096576056dab261f"
+    },
+    {
+      "file": "pet-app/lib/park-layout-v4.d.mts",
+      "sha256": "769d5ca0947f40e6c694e89f6e88963dcd003859c62a4e0038e52a01089212f4"
+    },
+    {
+      "file": "pet-app/lib/park-layout-v4.mjs",
+      "sha256": "e79e135c465f3ed65c7a7078046bfce33412cfa64e8da754872e28d702f28e9b"
+    },
+    {
+      "file": "pet-app/lib/park-leisure.d.mts",
+      "sha256": "6b4c5c393f5109563c49f732a2e4ecc58e5aaedeab85fdfa8b18a82cd43d6117"
+    },
+    {
+      "file": "pet-app/lib/park-leisure.mjs",
+      "sha256": "f29173e03a683f433ca9cdfd00c28a9108ced1b1f0d3b394387d63c5da0f7f0b"
+    },
+    {
+      "file": "pet-app/lib/park-market.d.mts",
+      "sha256": "17b53cc47efe9b1b88302b9fe214f2ee20bec367e346621b7de845c3a74bcdb0"
+    },
+    {
+      "file": "pet-app/lib/park-market.mjs",
+      "sha256": "4e5ac66a883a30f29a195b25a56e44197aa8333d7972ccdd9d58f8fca116ecb3"
+    },
+    {
+      "file": "pet-app/lib/park-projects.d.mts",
+      "sha256": "22d7fd400f364aa04508aff8dc299b0ccbcda81fc41b99bc6375c08856371a28"
+    },
+    {
+      "file": "pet-app/lib/park-projects.mjs",
+      "sha256": "af0d659155949a17a7c68bc0adaa50b63d9ecaa08bf69549551f533f5a721e2e"
+    },
+    {
+      "file": "pet-app/lib/park-social.d.mts",
+      "sha256": "994b78e80ec7e0a80c4cd1e27572ed389e85f3972f84688899483e983bf50454"
+    },
+    {
+      "file": "pet-app/lib/park-social.mjs",
+      "sha256": "3cbc5b2b7af7db96e17cf200e0e619118c5770765f632d4ef12ad8481a3e416a"
+    },
+    {
+      "file": "pet-app/lib/park-walkmesh.d.mts",
+      "sha256": "98bf672a4718b80c8f29e361ca821c698e5a38bc0709339cd59f471f80bdb093"
+    },
+    {
+      "file": "pet-app/lib/park-walkmesh.mjs",
+      "sha256": "7bf42d0e10819bf15debe85917834dc0be84b1712ce141dc2d032dff2014a4cc"
+    },
+    {
+      "file": "pet-app/lib/park-world.d.mts",
+      "sha256": "ad61167e664cbd3d5f54b2436a0f58a18235ef27fa38bf1fa644a25e5569618e"
+    },
+    {
+      "file": "pet-app/lib/park-world.mjs",
+      "sha256": "c3b7c012320f185843e23844b803defdf6ecf3ff9ded2219e1cbbff0a24a9b4d"
+    },
+    {
+      "file": "pet-app/lib/sky-sound.d.mts",
+      "sha256": "06768a4271ea622f7f7801030db1131909d815193495374f35d052729eb3fdc4"
+    },
+    {
+      "file": "pet-app/lib/sky-sound.mjs",
+      "sha256": "bc6fc132a9c8edd8dbb3dd2ea06a2fe23772e9c56be227382860ac32d6d59018"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/adventure-v2/banana-e2b0dd80f21c.webp",
+      "sha256": "e2b0dd80f21c09055f6dc792ae4578aa67b4b43657e1bb61be6c47734ff8545b"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/adventure-v2/banana-stand-f5f377f9a26e.webp",
+      "sha256": "f5f377f9a26e9986f6955fe736b49d0a4eec1387782086f5c9ce8d9df8e14d1a"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/adventure-v2/meadow-1381dcab5b4d.webp",
+      "sha256": "1381dcab5b4d767e183a4a82de8ac845f3b72dfaf95edb22c729dc79493d8043"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/adventure-v2/sky-stand-0669c73030c2.webp",
+      "sha256": "0669c73030c2b525ed0c6c5595efb029ee925e460a35d90d0c0e3d8347d8e7e2"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/community-v1/garden-bed-2095dce46082.webp",
+      "sha256": "2095dce4608221261701a25c51770471059a775f98d74abff5c10ed6c26c2c5a"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/community-v1/garland-6fc916e4b8c1.webp",
+      "sha256": "6fc916e4b8c1100bc4fd1a59061db22582ec340f7ee174c0347fba127c6e5ba0"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/community-v1/lantern-4ceec4c2745c.webp",
+      "sha256": "4ceec4c2745c6a123ffa2c08d9cd3be338866e5821f65baa0fc129a66eed4d67"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/community-v1/lily-7a2214282987.webp",
+      "sha256": "7a221428298793bf0643d525bb005e5279d7f024c150f17e3ac56ab63980055c"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/community-v1/stone-deck-a18261350f6b.webp",
+      "sha256": "a18261350f6b4c20ae60cb916967dabd9bda73d7ac05ee052bfbc63c2e752ca4"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/community-v1/stone-rail-a2342dee1abe.webp",
+      "sha256": "a2342dee1abed012c2cfc033343f6f53fd83d6a5a3a4cb7059319ce8cfa8a263"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/community-v1/wood-deck-d319e87c6fa5.webp",
+      "sha256": "d319e87c6fa517ce39773faa9f2ffec1e85bc9c3d2bc90a4e43decd7f460326d"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/community-v1/wood-rail-cf0f32e664a2.webp",
+      "sha256": "cf0f32e664a2f626d161138486f24e3dadaedd199823fa32a1763f845b77a2ee"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/fishing-v2/bobber-b659192c3d27.webp",
+      "sha256": "b659192c3d27d22a0cc4f686ae46a2d127c747b1b5aa90febfbfc19805cb29eb"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/fishing-v2/fish-blue-171a83fead8d.webp",
+      "sha256": "171a83fead8d3b044997237e2e7a6b8dd3e316441e997eae72bc36a33657bb7b"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/fishing-v2/fish-gold-2cb22b115066.webp",
+      "sha256": "2cb22b11506620c82a5c1d979fa87d2d44aeeebdf2200f86adf23ef1b0ef09b1"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/fishing-v2/fish-mint-95cbd9f9e177.webp",
+      "sha256": "95cbd9f9e17778fb46b7a8af178455fd2e61c2e996fd97547bc628cfdae9a696"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/fishing-v2/fish-moon-8995319f0fc2.webp",
+      "sha256": "8995319f0fc24264d849c55cb98289ef294ce8daa25f97cf60e0f0ff9ca71c60"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/fishing-v2/fish-peach-d8d351e7d2c9.webp",
+      "sha256": "d8d351e7d2c9a43b4688f35e88a0d07cbd54734d514dec4d43381c5bb49522ce"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/fishing-v2/fish-sunny-cb9ace63a943.webp",
+      "sha256": "cb9ace63a9438dd5067fb1c62bac609e8e5c8ed88250eda2616d26fa892cced2"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/fishing-v2/rod-0dda24bc94a6.webp",
+      "sha256": "0dda24bc94a60fbd535fa31aca5d26ddbacaf922dad9a13540b44e372954049c"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/fishing-v2/splash-874f6ae594b2.webp",
+      "sha256": "874f6ae594b2d6698ba1c1f5b68d334b41fd2ce94b791a58772b1a3cd46e127c"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/acorn-v1-848948d81a90.webp",
+      "sha256": "848948d81a903dba3a14ffa0c18f2c68eb2e06250a503bc8abbe3a95452fc147"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/apple-v1-47402d1641cd.webp",
+      "sha256": "47402d1641cdd245728ae75c73c6c6907f1e7c15b0c6ff5103b85bad7e970ed1"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/bush-v1-10d833f11884.webp",
+      "sha256": "10d833f118844dfaf59b1a128fef965d73d6122eb7ee028a4474a10383851640"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/conifer-v1-387c9ba3753a.webp",
+      "sha256": "387c9ba3753a41741a8572a5ed825ff4b872a8deeb14a28412709b16481d701c"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/daisies-v1-6f82603fb890.webp",
+      "sha256": "6f82603fb8900c7be26b1ee5afc8f8bc56e34e30aaa1842ce262749c2a923869"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/deer-v1-2241619442b8.webp",
+      "sha256": "2241619442b8582507b86232dc1849ce8d6b20d93d6f3d3d2828a82443a96cd7"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/forest-ground-v1-5bd07ab33747.webp",
+      "sha256": "5bd07ab337471b490969ed8cf80c4907c6c5d8709398ea6af55fb20f5cf9fc1d"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/garden-ground-v1-c6fc27e944c1.webp",
+      "sha256": "c6fc27e944c197a1923fba2e837a9d3a02bde57d8a9bd6d3d2a020f9acaf5d37"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/grass-v1-cdac26186685.webp",
+      "sha256": "cdac26186685fdd2ba545652b302bb3801aca05205f74001a3b8ab68d936d710"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/hollow-v1-efa432e899e9.webp",
+      "sha256": "efa432e899e960a046613b0aeb0195c05f6f374afad839ef8125b9f1f47b4bea"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/home-ground-v1-8d40a3d8f916.webp",
+      "sha256": "8d40a3d8f916e1bf7e82ae844b3a66c6539a64144df326b679b870c03e2111d9"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/house-v1-945eeb59e505.webp",
+      "sha256": "945eeb59e505151c20a3bb678bf01d7cd1ecf095e05e1c902b0086c3eefdde90"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/litter-v1-2450fd6de205.webp",
+      "sha256": "2450fd6de2055eed4203863cb0c8fa1f5517fcd07fb1cfe3d6207652d235d462"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/log-v1-ad818c0ce1d6.webp",
+      "sha256": "ad818c0ce1d68242d209bc87ee26e418451b17137095fea503149a169f230bc4"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/mailbox-v1-2ef6c23634a8.webp",
+      "sha256": "2ef6c23634a8a3094e6b6adcb3e0cdef4a746b173d6519af789d4c75683b3208"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/manifest.json",
+      "sha256": "6fb4b09cf62c47f4640bc66dce3b8b6516f5a78351c85a7d727f73dddb442d04"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/mushrooms-v1-a5d19e26a83a.webp",
+      "sha256": "a5d19e26a83a3491668448e952a39050d34c65e8ee277b220768838ccc318d23"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/paving-v1-243d3f326564.webp",
+      "sha256": "243d3f3265640a40e967934e573b7143b72318165fc513a0d6b9321ab4eb2aee"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/pond-v1-80c8dafac9e9.webp",
+      "sha256": "80c8dafac9e92bf29a44e24166621889a8118e7e89ef0ccfbf27a20956c5f6b9"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/portal-v1-3068c5e2b18e.webp",
+      "sha256": "3068c5e2b18e24eb7c9bb6bc861d887230078240376701cb4b5060f209d3cd3f"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/rabbit-v1-8c168dd8efb6.webp",
+      "sha256": "8c168dd8efb6bea0de2b6ddcd1e8b1055e6e1447407881c4857b06cb1f5732f2"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/sign-v1-8e0ddae9f88a.webp",
+      "sha256": "8e0ddae9f88a7237eef394636c0d5d82edb0c048c3e3f4f1708cad5feb2d5e17"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/squirrel-v1-bc758f3eb8c5.webp",
+      "sha256": "bc758f3eb8c565c3df13f1c7e0c31b49f354295e3671c0362cc58e6d368c85a2"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/sunflowers-v1-070dfd1a1d01.webp",
+      "sha256": "070dfd1a1d01d124e06855851dfccf5982140cb8e3e0c8002ab03f840e7bb12e"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/full-park-v1/tulips-v1-d10f3ab7ac5d.webp",
+      "sha256": "d10f3ab7ac5dd1a4d31c407f11e5fe8949e9f34726a504efc8f60ed46ae6ef86"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/leisure-v1/meadow-8c400a805ec3.webp",
+      "sha256": "8c400a805ec32bb7bbb467653f77435dba81f554fa9f7abbc282f0697935a611"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/leisure-v1/pond-4fbb2206c4ca.webp",
+      "sha256": "4fbb2206c4ca1376424d2284484a5d93a707be2546941b56442be9e669b8aea6"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/apple-f498d4fdabf3.webp",
+      "sha256": "f498d4fdabf35a3dfc2bc8dd234161192a872d33c8c99c639f783575bad37feb"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/eco-117efc92780c.webp",
+      "sha256": "117efc92780cc23bab031f1726c9c4394918b13d483bc3ada3d8a4dc2e96dc20"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-arowana-9efdafec994b.webp",
+      "sha256": "9efdafec994b55ab4ff7c483e2d9d62b0dccb90ffc8c7687ea1ba4868eb11acc"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-bass-1685925cb08a.webp",
+      "sha256": "1685925cb08ac1c4c7e517524788578f0c540e140e468e5256cdab0af9d3a6fd"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-betta-246387b0064d.webp",
+      "sha256": "246387b0064dcb26e0c62e7b34a24a97c11d3a98c4eea1cfc61c118543ab1620"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-bitterling-bc28d76b6b84.webp",
+      "sha256": "bc28d76b6b84a78a915a94b727161f9b1efe332a1d8b71f207c865ce15106364"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-catfish-5f7d7105adae.webp",
+      "sha256": "5f7d7105adae135ed0fbaf0ebf81f6818d46382ff7c7c4ec234b8083bdbfe8c2"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-chub-bd2f2f02a585.webp",
+      "sha256": "bd2f2f02a58510a1360408504dbb7e3c49e3e05a3155cbe82df9cd8c42fb9ced"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-crucian-2f32f199ce2c.webp",
+      "sha256": "2f32f199ce2c2a695e9fc3b42ac69ed07046aa4f24f4ac4d7beaa820c6680a4b"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-crystal-decc62d6d2cb.webp",
+      "sha256": "decc62d6d2cb66462210c84e2dfcee90179cf076d81ae884a7ddd3f2403f585d"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-koi-32d5ea332d34.webp",
+      "sha256": "32d5ea332d348587f5cf7c01f978fe8d30a968c6f9643661996844117aa66b63"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-loach-181c1b33e859.webp",
+      "sha256": "181c1b33e85951e7ac3fd1ef87f8011a9b59c6671f9dfb7a32aae94f52e64017"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-perch-bf5fe6d17c43.webp",
+      "sha256": "bf5fe6d17c43d53cc04f19d6ccb6c54aa7458bf63a84b624efb742c417575f11"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-rainbow-22b228b4e51e.webp",
+      "sha256": "22b228b4e51e88dfe773d48bd79ad7ccd0cca3cecf89217cedf5f82909ba9a25"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-sturgeon-3dfa5d2a9a42.webp",
+      "sha256": "3dfa5d2a9a421c08716964664d963363d3a139611d8ee2ce29bfca50e9b259ab"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/fish-tilapia-719fc8948597.webp",
+      "sha256": "719fc894859716718c4510f2be335fc4f990a12be8e0237a1a877109f8292fa7"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/flowers-9da849d3fee5.webp",
+      "sha256": "9da849d3fee55aaf9aee7e4cbdeec47e1ce31b58ed70037d8c39713f4abde536"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/merchant-23535e0b46bb.webp",
+      "sha256": "23535e0b46bbab469fd1dae995803ed351a40fa42235df7c5812686c7bc6bae1"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/trash-bottle-28de8e88f710.webp",
+      "sha256": "28de8e88f7100dc86b80968ef4ea76272e5b9a0e47f15a0656b41b649a85eb2d"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/trash-can-b2b4e5b9ad4e.webp",
+      "sha256": "b2b4e5b9ad4e3f48149ba44a89a0613e9f82efb6084a2210bc5b1ca20a6a90e2"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/market-v1/trash-paper-bd710e1336b5.webp",
+      "sha256": "bd710e1336b51630c59f6c45e6ef42336edfaa0298b0e9469a6d104bd9c05264"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/bank-rocks-890f50c0c371.webp",
+      "sha256": "890f50c0c3713b7afc9de9dd7983a15b1eb4fd6c8b90496454ec4485d05519c2"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/border-flowers-e205d0960b6e.webp",
+      "sha256": "e205d0960b6e15913dc53176978a237d7c6eb3434004f436acf9fb163f6a84ae"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/border-lavender-1a18044af4c6.webp",
+      "sha256": "1a18044af4c6d5ce1ed8fb49f545c2e2cf3648ce6e3ef3017e6e890a8eb291f7"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/crop-daisies-ee12d632c906.webp",
+      "sha256": "ee12d632c906ef2118c9a812e09188ec6bfcf658edaa4a833750b32495162447"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/crop-sunflowers-0b56d19560ec.webp",
+      "sha256": "0b56d19560ecf66aee19635b2b4ba4e0207418079cc7d6d4205464093024c23d"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/crop-tulips-f1d19fddf136.webp",
+      "sha256": "f1d19fddf136224964b9f098c7e80e982980fbad98167aefeb86d8ed127429db"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/grass-3d163a8a28fd.webp",
+      "sha256": "3d163a8a28fd22174ae90d8315c6191ec2ee685d1392c16b12a4c0bbbb372f91"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/soil-19e5b56f65c4.webp",
+      "sha256": "19e5b56f65c4e3844039f50e068f60d1a2a427552f9f83b094bc0cac39afb0b2"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/sprout-e14740248979.webp",
+      "sha256": "e147402489790ee673769ff7563a45e5d6916c8ac6ed20614ee28ae62250c33c"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/stone-ab409dc6b737.webp",
+      "sha256": "ab409dc6b737878ce965022b9eb8b16f5de63b78a87e3aa858dc84973910d7e1"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/water-d2b0d36d505d.webp",
+      "sha256": "d2b0d36d505dda4d7617857f21931f87877ebeb90a1a41b3db89e523c1f8884b"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/modular-v4/waterworks-a0e54d530f0a.webp",
+      "sha256": "a0e54d530f0ada03389b6493a732627431a3532320eed7a2dd85dc25d3fcf5d7"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/sky-patrol-v2/basket-0cf80ca64f6e.webp",
+      "sha256": "0cf80ca64f6e387286abe68c71f5547b4f4883f54a1431267ff2c00bc050ee54"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/sky-patrol-v2/bomber-e62f0be6d821.webp",
+      "sha256": "e62f0be6d82152367e1591e0d263de3151dd7bf5b8ee291dee738bfa4ed613ba"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/sky-patrol-v2/boss-eb4646d16639.webp",
+      "sha256": "eb4646d16639729c094d824cae3d3c9101c51f40f0bf02cd8adbb0504cef9958"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/sky-patrol-v2/cloud-b40e8cd83ae9.webp",
+      "sha256": "b40e8cd83ae99cfa8ffc9e39fc890869e58c10efc08795ee022989bd1e2dafcd"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/sky-patrol-v2/grove-22064992cf3d.webp",
+      "sha256": "22064992cf3df24c29582e5ccf6c5c971a382aeedbdf9ce8bf974829ace1b5fe"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/sky-patrol-v2/interceptor-13d806b068c2.webp",
+      "sha256": "13d806b068c28d179c198965f32f3420b1b9771a5d868bfdc05e4f4be77ee5ce"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/sky-patrol-v2/nova-b6390f86947c.webp",
+      "sha256": "b6390f86947c90c789570b303f710658a8d87ac1e9cafe41634b76c4f5bc4a58"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/sky-patrol-v2/petal-7c69f129873f.webp",
+      "sha256": "7c69f129873f51bc575ad4ad28f5b2faef803102e7d539d67ea164041d88fc4e"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/sky-patrol-v2/scout-7b8842383f49.webp",
+      "sha256": "7b8842383f49e6b13e9d860788ac9332678a866bbbb1c3f14df1582d8a6e7b86"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/sky-patrol-v2/swift-665f02f4416e.webp",
+      "sha256": "665f02f4416e04a3b06cd087354726ed9ddcb68a7387230cb0e4ecadd78ac744"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/sky-patrol-v2/valley-c12ba39d140b.webp",
+      "sha256": "c12ba39d140b5eee3a4869dc4c90cf0de99a3baf663c27d0ab4387ab8e606341"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/storybook-v3/garden-terrain-a825ea9795da.webp",
+      "sha256": "a825ea9795daba2a24d03d90b8377dfdf5fc730381cf3e604027b33e72f749b5"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/storybook-v3/garden-terrain-ad9318fad2b9.webp",
+      "sha256": "ad9318fad2b927b123739bcbdda7273dde40d2296889fefa0d4f35d5340b44cf"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/wish-plaza-v1/bear-v1-0ce5c2bca51d.webp",
+      "sha256": "0ce5c2bca51d6b1c9f8eb6ac4b79ea238d0cb229376c6ffd26774d876b848b93"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/wish-plaza-v1/bell-v1-170f01c7c0ea.webp",
+      "sha256": "170f01c7c0eafa0d5e5d7c2bc85075d4477f4727337ed35ca12f783099eede8c"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/wish-plaza-v1/bench-v1-e74c08041c8a.webp",
+      "sha256": "e74c08041c8a2d2328e85637513ec6bbb1effcd56123863b7e2b8dc55c3f5045"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/wish-plaza-v1/board-v1-879df93830a1.webp",
+      "sha256": "879df93830a1a506640165e213839f65c75a2f57dbe4e4c2a717a5aba2a7feab"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/wish-plaza-v1/chime-v1-d7e77417b5a2.webp",
+      "sha256": "d7e77417b5a2d8236261c27bd8516282ad8f10a523f7564699b43a914b01248c"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/wish-plaza-v1/drum-v1-77e78761741d.webp",
+      "sha256": "77e78761741daf743d9bb51cbcc422d94925a8993dcb67489558e8eb9649c45d"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/wish-plaza-v1/fountain-v1-01ce0c907674.webp",
+      "sha256": "01ce0c90767498907bb1712dd60a49c4678f9568349761c764f4a56c814c12be"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/wish-plaza-v1/ground-v1-644668151f96.webp",
+      "sha256": "644668151f9627ac9955253043d9fb9260085c6c8617722089de24c22ce1cf17"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/wish-plaza-v1/manifest.json",
+      "sha256": "69937d72b4a0b709898a7ad5fc16a7edafd8080071ab044044fbce636f9c382c"
+    },
+    {
+      "file": "pet-app/public/assets/art/park/wish-plaza-v1/tree-v1-5989bba75649.webp",
+      "sha256": "5989bba75649ea1dc6e5136e9f7c9cb9ebb824c1dd264249ef956155f8bcbc59"
+    },
+    {
+      "file": "pet-app/repositories/park-garden.repo.js",
+      "sha256": "80784935fb2f08fee9e554cbed7e4d6c3f7eeda8cc959c41f83bc616975d2487"
+    },
+    {
+      "file": "pet-app/repositories/park.repo.js",
+      "sha256": "8ce6d0b37b45cc61821c5463a465678540563d81873767be83a4d83e37206ac7"
+    },
+    {
+      "file": "pet-app/repositories/pet.repo.js",
+      "sha256": "6af5c45ebb451c7aca8707a7b54ceecfd742068d01719c932186f073d287499f"
+    },
+    {
+      "file": "pet-app/routes/pet.js",
+      "sha256": "1404aae39ac8e6c325f99c06c651801289b047230cfbfd9df8b81ee520a6227b"
+    },
+    {
+      "file": "pet-app/server/park-garden.js",
+      "sha256": "5bd8bddcfa46a1e6e841d071b90097f5ca1bc3d812b53996818c7513ca13bd6f"
+    },
+    {
+      "file": "pet-app/server/park-market.js",
+      "sha256": "61efd8e0b2fc68cf7534e0d898567369cadfaebae497674b0cc4fd7cdaa68788"
+    },
+    {
+      "file": "pet-app/server/park-social.js",
+      "sha256": "392aa69a3de36e596b8875239d62442d90a5b889f3274c994db5763ff06e3c6c"
+    },
+    {
+      "file": "pet-app/server/park.js",
+      "sha256": "14d268fa11da51cfffddaa39ff4ef072f3fb1cce3f8ec044bc58ce68ad94ab8d"
+    },
+    {
+      "file": "pet-app/src/api.ts",
+      "sha256": "1ad91e78df13e63c511c35f0894e9b437732fedbc44c0eb8f2451af4d6dddfec"
+    },
+    {
+      "file": "pet-app/src/audio.ts",
+      "sha256": "2e28a2ab309e5b713e80fd911688481ac65f86fec57de377fa99520c27901df2"
+    },
+    {
+      "file": "pet-app/src/game/BedroomScene.ts",
+      "sha256": "b0e23c60a400ccd455f323936c638e49e79d7201d1b66cc520b4a3f1cb436d51"
+    },
+    {
+      "file": "pet-app/src/game/PetAvatar.ts",
+      "sha256": "bc258aa04723c5862896c888f6a37afbfa9d25808dc1ce9bd637564e4dd2463b"
+    },
+    {
+      "file": "pet-app/src/main.ts",
+      "sha256": "ddb9170af2179e660cb141e4c2cf9f1f283eaaba47ef7cf20cf5cc818a579212"
+    },
+    {
+      "file": "pet-app/src/park/activities.ts",
+      "sha256": "b6f1bc528fc77733b82095c60f062278214dcba0037c407fb1e5cbe3dafe0211"
+    },
+    {
+      "file": "pet-app/src/park/adventure-art-assets.json",
+      "sha256": "4721ffca0a21a4c1b697e8d9d1acc92f46949afbf8146e35330f5c2d01db7be7"
+    },
+    {
+      "file": "pet-app/src/park/art.ts",
+      "sha256": "afe6214a7df01d525c0a98a84f69bdb16511921ad66455ebe01adb3f39e7b825"
+    },
+    {
+      "file": "pet-app/src/park/client.ts",
+      "sha256": "4244c62420a40d183b003fbc894c18b7f3ce4ffedc5fe3fef08893a35030592b"
+    },
+    {
+      "file": "pet-app/src/park/community-art-assets.json",
+      "sha256": "1012bf609e6dd64d893d31c1ce224ecc96b89cc8a53fd3a3087ff637c9168b12"
+    },
+    {
+      "file": "pet-app/src/park/controller.ts",
+      "sha256": "eb0f6dffd38f4d1360a8005a1339d7a410a8ec0a1ba4e66f875c634d0cf95494"
+    },
+    {
+      "file": "pet-app/src/park/fishing-art-assets.json",
+      "sha256": "99f83ccef1a372deae2d4a61fcaa45c552333fd0ce30242363759798028150b6"
+    },
+    {
+      "file": "pet-app/src/park/fishing-catch.css",
+      "sha256": "39f79d24b9f6c664a06fe23f94fa738e0fb64628933feb577105ef18d0d9bd07"
+    },
+    {
+      "file": "pet-app/src/park/fishing-catch.ts",
+      "sha256": "cd4729e8ead6b8068d257a19590fb8c8d0752615048af080494b9e24cd1c52f5"
+    },
+    {
+      "file": "pet-app/src/park/fishing-view.ts",
+      "sha256": "d5b4bfdb89203c4ad05eeb9be7cebdd3defa2066c7a9c9f1a9dbc31c6ef0635c"
+    },
+    {
+      "file": "pet-app/src/park/garden.css",
+      "sha256": "b4d81cc413118f0c046cab53ece3c67b968b487e76ddad0df035d59ba0f67826"
+    },
+    {
+      "file": "pet-app/src/park/garden.ts",
+      "sha256": "b7ff4388fa7ee3fbe92744c390f67c40cfc2175d3eaeda0234a33c23e81344f9"
+    },
+    {
+      "file": "pet-app/src/park/leisure-art-assets.json",
+      "sha256": "b1f6b992e9b6dd205a7bf5834a29317c98ee09665fea55f1c8e38612f6b04467"
+    },
+    {
+      "file": "pet-app/src/park/leisure-games.css",
+      "sha256": "d87a3c3ebedb6e7935c0a071f05f489c8e2e2d572b1dda7283541d453e660a48"
+    },
+    {
+      "file": "pet-app/src/park/leisure-games.ts",
+      "sha256": "b7430e48d613c8bfa7add867b51ba1f1fa7f0f3a3f2f3ef2eedffd6caaff11dd"
+    },
+    {
+      "file": "pet-app/src/park/market-art-assets.json",
+      "sha256": "1573ab21aa274831110223e6d45222a4eb1cb7ec04b893bfb1e8fe9dcfc2c11b"
+    },
+    {
+      "file": "pet-app/src/park/market.css",
+      "sha256": "e9baf219d9a7ebe6c27ea50233d3800adab328f5f44ae6efa28d164f17445af7"
+    },
+    {
+      "file": "pet-app/src/park/market.ts",
+      "sha256": "2d5d69813e6741e3e05b844edbdd1df66ec53f3d87e13e2118059983519da162"
+    },
+    {
+      "file": "pet-app/src/park/mini-game-scene.ts",
+      "sha256": "0c335d8adc9853df70bd9e985e0548322af3a26453898ecfe7c687d203d0a200"
+    },
+    {
+      "file": "pet-app/src/park/mini-games.css",
+      "sha256": "097bb0a52384877fd2df0641ecbf77cad0814e4b6d86c411af1153fb1a453d62"
+    },
+    {
+      "file": "pet-app/src/park/mini-games.ts",
+      "sha256": "60aeb95e250b0bd0c248608b149e640b30c0b38d101c85f1a558ac76458a413d"
+    },
+    {
+      "file": "pet-app/src/park/modular-art-assets.json",
+      "sha256": "bf0a74904600efa66ea419209e60fdeddbf7cd8ae560ef9c35be66470547abf0"
+    },
+    {
+      "file": "pet-app/src/park/park.css",
+      "sha256": "a916e047a8bd71676154df39542dd085001298590b4d1d30009ec5b95f294f06"
+    },
+    {
+      "file": "pet-app/src/park/release.css",
+      "sha256": "ca30e734be336f1b0ff5da662261c0271f328e3e14340e85641e140dba09ae0b"
+    },
+    {
+      "file": "pet-app/src/park/scene-project-art.ts",
+      "sha256": "1b684aabcf2311510477ce18f2d08dfd840c1129b760b672f89dc5c60dbda790"
+    },
+    {
+      "file": "pet-app/src/park/scene.ts",
+      "sha256": "a8e68983d323d413be2fbdf525b5fd7ff06808c48cf6902fe62592ad5a990991"
+    },
+    {
+      "file": "pet-app/src/park/sky-art-assets.json",
+      "sha256": "54453f9b4fe924553aa8a0492c9d477a70a6b38b9231b0c11b39253c749b4ab8"
+    },
+    {
+      "file": "pet-app/src/park/social.css",
+      "sha256": "2385981c9b7b636fee011c4a78ea0ea6aba9453f2554fa53f3ee476b8c409338"
+    },
+    {
+      "file": "pet-app/src/park/social.ts",
+      "sha256": "e5c23fc7a64df19861ad92c932aa578f4b2a688011717c9b6bc73016831960db"
+    },
+    {
+      "file": "pet-app/src/park/storybook-art-assets.json",
+      "sha256": "b328a66880d7b8665b5080068a97bd382f9a6add1b7089baffc404ef1d9e62a4"
+    },
+    {
+      "file": "pet-app/src/park/terrain.ts",
+      "sha256": "acaf01c65a9d22feb178a76f52913544081645e15048e3b77eee85d4c4c70925"
+    },
+    {
+      "file": "pet-app/src/park/types.ts",
+      "sha256": "c605208c25930d9e9619ea9a2450546e89773803ceb802a96a91f877f2e86b5a"
+    },
+    {
+      "file": "pet-app/src/park/venue.ts",
+      "sha256": "e669761fb5b9862175ddca4c8b0fd02fae4a06361ef34852afab1f7f0c4c69d2"
+    },
+    {
+      "file": "pet-app/src/park/wish-plaza-assets.json",
+      "sha256": "7e3153377eee68edade1eeb0633506118805a3ce71a170372fd843bdc55ca7b7"
+    },
+    {
+      "file": "pet-app/src/park/wish-plaza.ts",
+      "sha256": "db2a320aa89d797a7c479580503c26600f70eb88f11963e53805fabc38e5286d"
+    },
+    {
+      "file": "pet-app/src/park/world-art-assets.json",
+      "sha256": "6fb4b09cf62c47f4640bc66dce3b8b6516f5a78351c85a7d727f73dddb442d04"
+    },
+    {
+      "file": "pet-app/src/park/world-art.ts",
+      "sha256": "c499f39a56b5454bc9430c914c0fb00c60487fa8ea7610010c4fb30be9220eb4"
+    },
+    {
+      "file": "pet-app/src/styles/main.css",
+      "sha256": "35616e499a892021b025597af23dbbf587eb77048036457b97ec257da8adf63d"
+    },
+    {
+      "file": "pet-app/src/teacher/ParkSettings.ts",
+      "sha256": "6331198f27cf6a8db272fdb30792e390f1a028efacb98bbc5e9ce300b417230f"
+    },
+    {
+      "file": "pet-app/tests/park-activities.test.cjs",
+      "sha256": "48c2b12aa6d71c282b1502f9b8c612d3cce7758128f35a7f75913bba19b17d66"
+    },
+    {
+      "file": "pet-app/tests/park-economy-postgres.test.cjs",
+      "sha256": "be92f224d29b9857c1b63fef34329df905b7b474b6df9b6915e6316b5c818af7"
+    },
+    {
+      "file": "pet-app/tests/park-economy.test.cjs",
+      "sha256": "4a6dad152e22c2c8c602c62211a0375a38ba59004965b08a12e8871fb85a1228"
+    },
+    {
+      "file": "pet-app/tests/park-fishing.test.cjs",
+      "sha256": "fe33ee0246776af1452f1909b828a98b41643754c35fb2e7e0a6191496d32539"
+    },
+    {
+      "file": "pet-app/tests/park-garden-live.mjs",
+      "sha256": "c63f3ee0f1eedf1275476426e53dfce2d6bf23e17bf26334784e1813339529ac"
+    },
+    {
+      "file": "pet-app/tests/park-garden-postgres.test.cjs",
+      "sha256": "51f843a2e8f2e7ffa0da7d1a50de133efba635592949d6c16fc7a5f0b5196619"
+    },
+    {
+      "file": "pet-app/tests/park-garden.test.cjs",
+      "sha256": "85a93987e1b702f636011134dd8a61abad980fad1e436d8b527daff58f34cf44"
+    },
+    {
+      "file": "pet-app/tests/park-leisure.test.cjs",
+      "sha256": "f07726e2621e1b6e397739412667c7c19d663c0eb9b6e523d804091fe89c077e"
+    },
+    {
+      "file": "pet-app/tests/park-market-postgres.test.cjs",
+      "sha256": "456c7d2324113fcb2b4ceb87e480c2fbba6add06f84998c3784a187aef0691db"
+    },
+    {
+      "file": "pet-app/tests/park-market.test.cjs",
+      "sha256": "946653e16ec58e7798c60952c05ae0873f0fe411979e69d9640d45ffbfa65837"
+    },
+    {
+      "file": "pet-app/tests/park-movement-runtime.test.cjs",
+      "sha256": "73232f0c16bac368bdd710796c34649886dbe81cfebd85146bd3d2809ccb057e"
+    },
+    {
+      "file": "pet-app/tests/park-postgres.test.cjs",
+      "sha256": "c8005d5631c47bf086aded0a2c7c0dfba2dfe5d28599caafee3879b50d3c0688"
+    },
+    {
+      "file": "pet-app/tests/park-projects.test.cjs",
+      "sha256": "66eb8749153d596da262270894e16c503788e3ca347c2b7f764dd8368d6c04bb"
+    },
+    {
+      "file": "pet-app/tests/park-social-live.mjs",
+      "sha256": "0cb052bd51911b7606c456756f1f4e9bce81bf0be4345356ab7bbf917c533838"
+    },
+    {
+      "file": "pet-app/tests/park-social.test.cjs",
+      "sha256": "994131f13760c2bb2c9daf8e3728deed8fdbd58b5a71e50c4b10cb211caf4dec"
+    },
+    {
+      "file": "pet-app/tests/park-walkmesh.test.cjs",
+      "sha256": "9c46449cc0c76e23f8cbf7c60a7384497fc916be8c83e4ecb07a8636cd4777ac"
+    },
+    {
+      "file": "pet-app/tests/park.test.cjs",
+      "sha256": "0be292a1227ef510d1dc7e8c70054efe8217dc7cee9fbbd74cec1323941cf15d"
+    },
+    {
+      "file": "pet-app/tests/sky-patrol-v2.test.cjs",
+      "sha256": "0f735b17cdfff610faac04b41e33705fc1e2cc73b294167dab51914fce0a3d75"
+    },
+    {
+      "file": "scripts/adventure-image-jobs.mjs",
+      "sha256": "3cb457cb5b3c9b94ac2ebcd7258d9cc918bca49eba9edcbbea15775347057dd2"
+    },
+    {
+      "file": "scripts/build-pet-park-adventure-art.mjs",
+      "sha256": "64578c618efe621d7f30f675bee0fd6cac59377b39960f14c056108cd87a8e96"
+    },
+    {
+      "file": "scripts/build-pet-park-art.mjs",
+      "sha256": "95b03b7a4f3d2321deec30a5f301f2a1403ddb8717dc77f56f185370696a4e49"
+    },
+    {
+      "file": "scripts/build-pet-park-world-art.mjs",
+      "sha256": "71e31659a6cd31ea9e6afc46e16d6a2130eea7d4ed05090c8ac17c8fccd5055d"
+    },
+    {
+      "file": "scripts/export-sky-patrol-audio.mjs",
+      "sha256": "db11d4aed79e960791c72baca31b5b40a6b485d674a9d8a0c95ac66e5690bc06"
+    },
+    {
+      "file": "scripts/lib/leisure-golf-planner.mjs",
+      "sha256": "6b5b5f3beb11613865a3313dbdbf0062128eda08b1902b244785c0db3b4e10e3"
+    },
+    {
+      "file": "scripts/package-park-community-art.mjs",
+      "sha256": "92cb119da1ba876c59e724cd6ab554af3b0b46fe68f112faf6695a9c4d5c7fe1"
+    },
+    {
+      "file": "scripts/package-park-fishing-art.mjs",
+      "sha256": "b5c56530943fa7a12ac902d25c9c780119b0c1790d494692d706b0f9ec05bfe8"
+    },
+    {
+      "file": "scripts/package-park-leisure-art.mjs",
+      "sha256": "ed41a9a5470df7e979b4ecad52b500726d66fdfda65596d820852f1fda8563ed"
+    },
+    {
+      "file": "scripts/package-park-market-art.mjs",
+      "sha256": "3190d8f28f2e0e699f32ed2d239a2d90fbc15b4400473f249174583ea335211f"
+    },
+    {
+      "file": "scripts/package-pet-park-modular.mjs",
+      "sha256": "03188bd61a8431ab95a852834502a90779d333203b663658f1e8101ac705f730"
+    },
+    {
+      "file": "scripts/package-pet-park-storybook.mjs",
+      "sha256": "a0591ce2f09db6de3d92ea1440c6b08079824ef10dfbd0cebb03fec14a1a4958"
+    },
+    {
+      "file": "scripts/package-sky-patrol-v2.mjs",
+      "sha256": "bf375c710a3a7a762e48f5a376c8993fcd41c0584f0a051957f76a7d46550234"
+    },
+    {
+      "file": "scripts/plan-pet-park-landscape.mjs",
+      "sha256": "586821c9dda9a30788e6688ad6ed8ae50e1c5b4ab50883decc6de5afac892b55"
+    },
+    {
+      "file": "scripts/prepare-adventure-animation-jobs.mjs",
+      "sha256": "a9877664ca1516149fd3878b8fe7ebb780273f05fc2bdc6914e9e79a9ca6ecb1"
+    },
+    {
+      "file": "scripts/record-adventure-image.mjs",
+      "sha256": "252da3934f5dccb7f3587a7dda0d7e8a9fcaa49c07a1b38b6d6800eac0f3180d"
+    },
+    {
+      "file": "scripts/test-park-community-live.mjs",
+      "sha256": "415338ebe606abe339d1f4e5714ff86166dd28a2830f936cdabae84abff9bdd1"
+    },
+    {
+      "file": "scripts/test-park-fishing-catch-live.mjs",
+      "sha256": "1f62392a7c5d0b396d48df0ad905ad38e3c6faa82a216206fb194b36c5afaa37"
+    },
+    {
+      "file": "scripts/test-park-leisure-live.mjs",
+      "sha256": "6be141d95b1ec7ab514dedcf801ada134d92e1238dd2cf739b00de436d13100c"
+    },
+    {
+      "file": "scripts/test-park-market-live.mjs",
+      "sha256": "e83928504baa0e2ebba4c390ace7b4fe7b5516029219005b2cd6d874bb4f2128"
+    },
+    {
+      "file": "scripts/test-pet-park-adventure-live.mjs",
+      "sha256": "cfff2b708d58de061ff28660bea8013ace1c981e0fe0dd545993deec53cc957d"
+    },
+    {
+      "file": "scripts/test-pet-park-art-live.mjs",
+      "sha256": "08ed7382072c694e0ee832b66c47505e4c3abfe2b5aedc4af399318bfb9867b3"
+    },
+    {
+      "file": "scripts/test-pet-park-bridge-release-live.mjs",
+      "sha256": "07a562f957de82e20f6330a7d36b3e98dd46144215326d8c04d9724d339c54dc"
+    },
+    {
+      "file": "scripts/test-pet-park-live.mjs",
+      "sha256": "608e45f012b544b88dc69de46b09dd088356a5ef10c188cfdcc8d3707b9ee67c"
+    },
+    {
+      "file": "scripts/test-pet-park-release-ui-live.mjs",
+      "sha256": "9985d1d34cd1971fb62cf8436a52e4e61749c42390f87a27803de57f6e0a108d"
+    },
+    {
+      "file": "scripts/test-pet-park-world-art-live.mjs",
+      "sha256": "6f684c29c2a784021df7a56531083a1fdfd0b5302d12318bab1c91856e45e7fe"
+    },
+    {
+      "file": "scripts/test-sky-patrol-input-live.mjs",
+      "sha256": "fa926451f3110afe9fb5c29792a4553c8243959fe9c10140ac4d327b60232b4d"
+    },
+    {
+      "file": "scripts/test-sky-patrol-v2-live.mjs",
+      "sha256": "6742611f2bf04e4b30a0c2b199b498e029c285dab7c9731030d23f0ddb08333a"
+    },
+    {
+      "file": "server.js",
+      "sha256": "bb1f46be3368bd117aae88263d97824c01d9f9a92e61e7724361ba596f43249f"
+    },
+    {
+      "file": "shared/loading.js",
+      "sha256": "00dc8e67b7edf9d1a41d406deadd03598732e054adf6d192f13ffdca7ca05853"
+    },
+    {
+      "file": "scripts/sync-pet-preview-build.mjs",
+      "sha256": "fe219b896af0323fcfeb0527861a04b7f7f5e93f609b906d6f73a61aaeec8e9b"
+    },
+    {
+      "file": "scripts/export-fishing-audio.mjs",
+      "sha256": "4833f3f2db8ca01bc51fdce4bdf3c402a001ca9b714f29cbc5bdde6c8420f297"
+    },
+    {
+      "file": "artifacts/pet-playtest/park-fishing-catch-live-2/report.json",
+      "sha256": "96989f57bf48c61033a779e4b5b61009092d5ac93f99a2cd2b5ff51575cb42b9"
+    },
+    {
+      "file": "artifacts/pet-playtest/park-fishing-catch-regression-2/smoke-report.json",
+      "sha256": "64c05eaaa2f663c2c7371e8a9b38550b98d1f39ecc12998d45bd7dca0f356d6b"
+    },
+    {
+      "file": "artifacts/pet-playtest/park-fishing-catch-market-2/report.json",
+      "sha256": "10691e27d118aa8eb6cda32a913aff30ae75264ade1d9851b36fd7de4910b71c"
+    },
+    {
+      "file": "artifacts\\pet-playtest\\park-fishing-catch-final-1/unit-tests.tap",
+      "sha256": "8751af3d3b6223bb63094e34f400b2264b8ac7bb0aff7df1921b80c2b5c5b37c"
+    },
+    {
+      "file": "artifacts\\pet-playtest\\park-fishing-catch-final-1/artifact-tests.tap",
+      "sha256": "60c51575055afa747d9e9be89107c196c73dbe37071c20d6cd2a1599aa2b15e7"
+    },
+    {
+      "file": "artifacts\\pet-playtest\\park-fishing-catch-final-1/pet-module-tests.log",
+      "sha256": "aaad4da158606d00471eecb1ba60b372db3f826de3467c30b0ab4fb336350e42"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+const root=path.resolve('.'),build=path.join(root,'artifacts/park-fishing-catch-build-2'),out=path.join(root,'artifacts/pet-playtest/park-fishing-catch-final-1'),base='http://localhost:3000';
+const deadline=Date.now()+30000;while(true){try{if((await fetch(base+'/health')).ok)break;}catch{}if(Date.now()>deadline)throw Error('Preview server did not become ready');await new Promise(resolve=>setTimeout(resolve,500));}
+const sha=data=>createHash('sha256').update(data).digest('hex');
+const manifests=[['wish-plaza-assets.json','wish-plaza-v1'],['world-art-assets.json','full-park-v1'],['adventure-art-assets.json','adventure-v2'],['storybook-art-assets.json','storybook-v3'],['modular-art-assets.json','modular-v4'],['sky-art-assets.json','sky-patrol-v2'],['leisure-art-assets.json','leisure-v1'],['community-art-assets.json','community-v1'],['fishing-art-assets.json','fishing-v2'],['market-art-assets.json','market-v1']];
+const files=['index.html',...(await fs.readdir(path.join(build,'assets'),{withFileTypes:true})).filter(e=>e.isFile()&&/\.(?:js|css|webp|wasm|glb)$/i.test(e.name)).map(e=>'assets/'+e.name)];
+for(const[manifest,directory]of manifests){const data=JSON.parse(await fs.readFile(path.join(root,'pet-app/src/park',manifest),'utf8'));for(const asset of Object.values(data.assets))files.push(`assets/art/park/${directory}/${asset.file}`);}
+const battleManifest='assets/art/brawl/manifest.json',battle=JSON.parse(await fs.readFile(path.join(build,battleManifest),'utf8'));files.push(battleManifest);for(const fighter of Object.values(battle.fighters||{}))if(fighter.runtimePacked)for(const url of fighter.pages){assert.ok(url.startsWith('/pet/assets/art/brawl/'));files.push(url.slice('/pet/'.length));}
+const checked=[];
+for(let i=0,unique=[...new Set(files)];i<unique.length;i+=8){
+ const batch=await Promise.allSettled(unique.slice(i,i+8).map(async file=>{const expected=await fs.readFile(path.join(build,file));if(file==='index.html'||file===battleManifest){const actual=await fs.readFile(path.join(root,'pet-app/dist',file));assert.equal(sha(actual),sha(expected),'published entry differs from verified build');return{file,checkedVia:'published filesystem entry',bytes:actual.length,sha256:sha(actual)};}const url=base+'/pet/'+file,response=await fetch(url);assert.equal(response.status,200,url);const actual=Buffer.from(await response.arrayBuffer());assert.equal(sha(actual),sha(expected),url+' does not match verified build');return{file,checkedVia:'HTTP',bytes:actual.length,sha256:sha(actual)};}));
+ for(const result of batch){if(result.status!=='fulfilled')throw result.reason;checked.push(result.value);}
+}
+assert.equal((await fetch(base+'/health')).status,200);
+const unauthenticatedPetStatus=(await fetch(base+'/pet',{redirect:'manual'})).status;assert.equal(unauthenticatedPetStatus,302,'the park still requires a login session');
+const report={pass:true,checkedAt:new Date().toISOString(),preview:base+'/pet',build,unauthenticatedPetStatus,htmlSha256:checked.find(f=>f.file==='index.html').sha256,files:checked.length,marketImages:checked.filter(f=>f.file.includes('/market-v1/')).length,marketBytes:checked.filter(f=>f.file.includes('/market-v1/')).reduce((n,f)=>n+f.bytes,0),fishingImages:checked.filter(f=>f.file.includes('/fishing-v2/')).length,fishingBytes:checked.filter(f=>f.file.includes('/fishing-v2/')).reduce((n,f)=>n+f.bytes,0),communityImages:checked.filter(f=>f.file.includes('/community-v1/')).length,communityBytes:checked.filter(f=>f.file.includes('/community-v1/')).reduce((n,f)=>n+f.bytes,0),checked};
+await fs.writeFile(path.join(out,'preview-verification.json'),JSON.stringify(report,null,2));
+const sources=JSON.parse(await fs.readFile(path.join(out,'staged-source-files.json'),'utf8'));sources.push('scripts/sync-pet-preview-build.mjs','scripts/export-fishing-audio.mjs');
+const evidence=['artifacts/pet-playtest/park-fishing-catch-live-2/report.json','artifacts/pet-playtest/park-fishing-catch-regression-2/smoke-report.json','artifacts/pet-playtest/park-fishing-catch-market-2/report.json',out.slice(root.length+1)+'/unit-tests.tap',out.slice(root.length+1)+'/artifact-tests.tap',out.slice(root.length+1)+'/pet-module-tests.log'];
+const fingerprints=await Promise.all([...new Set([...sources,...evidence])].map(async file=>({file,sha256:sha(await fs.readFile(path.join(root,file)))})));
+await fs.writeFile(path.join(out,'validation-manifest.json'),JSON.stringify({pass:true,build,htmlSha256:report.htmlSha256,checks:{typescript:true,parkTests:70,productionArtifactTests:4,petModule:true,fullScreenCatchTouch:true,fiveViewports:true,serverClockPaused:true,continueAndPackUp:true,teacherLockCleanup:true,marketAndQuestFlow:'pre-integration source build 1',adventureSmoke:true,httpDistribution:true,physicalIpad:false},fingerprints},null,2));
+console.log(JSON.stringify({pass:true,files:checked.length,htmlSha256:report.htmlSha256,preview:report.preview}));
