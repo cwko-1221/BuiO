@@ -1,0 +1,89 @@
+/* Release map: compact edge HUD, readable controls, and an unobstructed playfield. */
+.pet-shell[data-screen="park"] { min-height: 0; padding: 0; gap: 0; }
+.pet-shell[data-screen="park"] .pet-topbar { height: 56px; min-height: 56px; padding: 7px 18px; }
+.pet-shell[data-screen="park"] .pet-nav { display: none; }
+.pet-main[data-mode="park"] .play-surface { border-radius: 0; }
+.park-root { --park-paper: #fff9eaf2; --park-ink: #385b4d; --park-accent: #6b8c70; }
+.park-heading { left: 18px; top: 16px; padding: 10px 15px; border-radius: 13px; box-shadow: 0 3px 12px #2f473318; }
+.park-heading strong { font-size: 19px; letter-spacing: .5px; }
+.park-eyebrow { display: none; }
+.park-live { font-size: 11px; }
+.park-objective { top: 88px; left: 18px; padding: 9px 12px; max-width: 290px; min-height: 46px; gap: 8px; }
+.park-objective-icon { font-size: 22px; }
+.park-objective small { display: none; }
+.park-objective b { font-size: 12px; line-height: 1.5; }
+.park-overview { top: 16px; right: 18px; width: 138px; }
+.park-map-button canvas { height: 78px; }
+.park-map-button span { font-size: 11px; }
+.park-peer-button { font-size: 12px !important; min-height: 40px; padding: 7px; }
+.park-hint { display: none; }
+.park-bottom-tools { left: 18px; bottom: 18px; transform: none; gap: 3px; padding: 4px; background: var(--park-paper); }
+.park-bottom-tools button { min-width: 44px; min-height: 44px; padding: 8px 10px; }
+.park-bottom-tools button span { font-size: 12px; }
+.park-interact { right: 18px; bottom: 18px; min-height: 50px; padding: 10px 14px; }
+.park-interact b { font-size: 13px; }
+.park-notice { bottom: 88px; max-width: min(480px, calc(100% - 32px)); }
+@media (min-width: 701px) and (max-width: 1100px) {
+  .park-overview { width: 116px; }
+  .park-map-button canvas { display: none; }
+  .park-map-button { padding: 9px 6px; }
+  .park-map-button span { font-size: 12px; }
+}
+@media (pointer: coarse) and (min-width: 701px) {
+  .park-bottom-tools { bottom: 134px; }
+}
+@media (max-width: 700px) {
+  .pet-shell[data-screen="park"] .pet-topbar { height: 48px; min-height: 48px; padding: 5px 10px; }
+  .park-heading { left: 12px; top: 12px; padding: 8px 12px; max-width: calc(100% - 140px); }
+  .park-heading strong { font-size: 17px; }
+  .park-live { font-size: 10px; }
+  .park-objective { top: 81px; left: 12px; min-height: 40px; padding: 7px 10px; max-width: calc(100% - 140px); }
+  .park-objective b { font-size: 12px; }
+  .park-objective-count { font-size: 10px; }
+  .park-overview { width: 106px; top: 12px; right: 12px; }
+  .park-map-button { min-height: 40px; padding: 7px 5px; }
+  .park-map-button canvas { display: none; }
+  .park-map-button span { font-size: 12px; padding: 2px 0; }
+  .park-peer-button { margin-top: 6px; font-size: 11px !important; min-height: 38px; }
+  .park-bottom-tools { left: auto; right: 12px; bottom: 92px; padding: 3px; gap: 0; border-radius: 13px; }
+  .park-bottom-tools button { width: 40px; min-width: 40px; height: 40px; min-height: 40px; padding: 6px; }
+  .park-bottom-tools button span { display: none; }
+  .park-joystick { left: 16px; bottom: 22px; }
+  .park-interact { right: 12px; bottom: 22px; padding: 10px 12px; max-width: 164px; min-height: 48px; }
+  .park-interact b { font-size: 12px; }
+  .park-interact kbd { display: none; }
+  .park-notice { bottom: 150px; font-size: 12px; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .pet-shell[data-screen="park"] .pet-topbar { display: none; }
+  .park-heading { top: 10px; left: 12px; padding: 7px 11px; }
+  .park-heading strong { font-size: 16px; }.park-live { display: none; }
+  .park-objective { top: 54px; left: 12px; min-height: 36px; padding: 6px 9px; max-width: 240px; }
+  .park-objective b { font-size: 12px; }.park-objective-icon { display: none; }
+  .park-overview { top: 10px; right: 12px; width: 106px; }
+  .park-map-button { min-height: 36px; padding: 6px; }.park-map-button canvas { display: none; }.park-map-button span { font-size: 12px; padding: 0; }
+  .park-peer-button { min-height: 36px; margin-top: 5px; font-size: 11px !important; }
+  .park-bottom-tools { left: auto; right: 12px; bottom: 78px; padding: 3px; gap: 0; }
+  .park-bottom-tools button { width: 40px; min-width: 40px; min-height: 40px; height: 40px; padding: 6px; }.park-bottom-tools button span { display: none; }
+  .park-joystick { left: 16px; bottom: 16px; width: 88px; height: 88px; }.park-joystick i { left: 20px; top: 20px; }
+  .park-interact { right: 12px; bottom: 16px; min-height: 46px; padding: 9px 12px; }.park-interact kbd { display: none; }
+  .park-notice { bottom: 122px; }
+}
+.park-hud button { min-width: 44px; min-height: 44px; }
+@media (max-height: 500px) and (orientation: landscape) {
+  .park-social-game:has(.park-social-partners) { display: grid; grid-template-columns: minmax(210px,.9fr) minmax(300px,1.3fr); grid-template-areas: 'header header' 'top top' 'partners timing' 'partners feedback' 'partners pads' 'history history'; gap: 5px 14px; padding: 12px 18px; }
+  .park-social-game:has(.park-social-partners) header { grid-area: header; margin-bottom: 0; }.park-social-game header h2 { font-size: 21px; }
+  .park-social-game-top { grid-area: top; padding: 0; font-size: 12px; }
+  .park-social-partners { grid-area: partners; margin: 0; gap: 8px; }.park-social-partners>div { padding: 7px; border-radius: 13px; }
+  .park-social-partners .park-social-pet,.park-social-partners .park-social-initial { width: 48px; height: 48px; }.park-social-partners b { font-size: 12px; margin: 2px 0 4px; }.park-social-partners span:not(.park-social-initial) { font-size: 14px; }.park-social-partners small { margin-top: 3px; }
+  .park-social-timing { grid-area: timing; height: 25px; margin: 5px 9px 0; }.park-social-feedback { grid-area: feedback; margin: 2px 0; min-height: 18px; font-size: 12px; }
+  .park-social-pads { grid-area: pads; margin: 0; gap: 7px; }.park-social-pads button { min-height: 66px; padding: 7px; gap: 2px; }.park-social-pads button>span { font-size: 25px; }.park-social-pads kbd { display: none; }
+  .park-social-history { grid-area: history; margin: 5px 0 0; }.park-social-rules,.park-social-leave { display: none; }
+  .park-garden-panel { display: grid; grid-template-columns: minmax(150px,.7fr) minmax(250px,1.3fr); gap: 8px 15px; padding: 13px 18px; width: min(720px,100%); }
+  .park-garden-panel header { grid-column: 1/-1; }.park-garden-panel h2 { font-size: 21px; }.park-garden-intro { display: none; }
+  .park-garden-today { grid-column: 1; grid-row: 2/5; padding: 10px; gap: 9px; }.park-garden-today>span { font-size: 30px; }.park-garden-today b { font-size: 28px; }
+  .park-garden-progress { grid-column: 2; margin: 0; }.park-garden-progress>span { font-size: 19px; }.park-garden-progress small { margin-top: 1px; }
+  .park-garden-panel h3 { grid-column: 2; margin: 0; font-size: 14px; }.park-garden-seeds,.park-garden-status { grid-column: 2; margin: 0; }
+  .park-garden-seeds button { min-height: 62px; padding: 5px; }.park-garden-seeds span { font-size: 22px; margin-bottom: 2px; }.park-garden-status { font-size: 12px; line-height: 1.5; }
+  .park-garden-action { grid-column: 1/-1; min-height: 44px; padding: 10px; }.park-garden-contributors,.park-garden-last { grid-column: 1/-1; padding-top: 7px; margin-top: 0; }.park-garden-contributors p { margin: 3px 0; }
+}

@@ -6,6 +6,8 @@ import { CoinPusherSettlementRetries, coinPusherPayoutEventId, rejectCoinPusherP
 import { lockCoinPusherBrowserInteractions } from './game/CoinPusherBrowserInteractions';
 import { CoinPusherTeacherSettings } from './teacher/CoinPusherSettings';
 import { PetAccessTeacherSettings } from './teacher/PetAccessSettings';
+import { ParkTeacherSettings } from './teacher/ParkSettings';
+import type { ParkController } from './park/controller';
 import { PetAccessGate } from './PetAccessGate';
 import { QuietRoom } from './quiet-room';
 import { prizeIcon, prizeLabel, type ArcadePrize } from './game/ArcadePrizes';
@@ -72,7 +74,7 @@ if (localStorage.getItem('pet-reduced-motion') === '1') document.documentElement
 
 const UI = {
   'zh-HK': {
-    title:'寵物樂園', home:'我的房間', collection:'寵物圖鑑', shop:'魔法商店', coinPusher:'推銀仔', brawl:'大亂鬥', visit:'同班參觀', settings:'設定',
+    title:'寵物樂園', home:'我的房間', park:'戶外樂園', collection:'寵物圖鑑', shop:'魔法商店', coinPusher:'推銀仔', brawl:'大亂鬥', visit:'同班參觀', settings:'設定',
     coins:'金幣', dust:'星塵', feed:'餵食', play:'一起玩', sleep:'休息', decorate:'佈置房間', save:'儲存佈置', private:'私人房間', class:'開放同班參觀',
     hatchTitle:'你的第一顆蛋正在等待！', hatchCopy:'蛋內藏着三隻完成版寵物之一。首次孵化完全免費。', hatch:'開始孵化',
     owned:'已擁有', locked:'未擁有', active:'主寵', choose:'選為主寵', buy:'購買', visitRoom:'參觀房間', back:'返回房間',
@@ -80,7 +82,7 @@ const UI = {
     empty:'暫時沒有內容。', daily:'今日經驗', probability:'目前開放 12 隻完成版寵物', pity:'保底', randomEgg:'隨機寵物蛋', directPet:'指定寵物',
   },
   'en-US': {
-    title:'Pet Paradise', home:'My Room', collection:'Pet Collection', shop:'Magic Shop', coinPusher:'Coin Pusher', brawl:'Pet Brawl', visit:'Class Visits', settings:'Settings',
+    title:'Pet Paradise', home:'My Room', park:'Pet Town', collection:'Pet Collection', shop:'Magic Shop', coinPusher:'Coin Pusher', brawl:'Pet Brawl', visit:'Class Visits', settings:'Settings',
     coins:'Coins', dust:'Stardust', feed:'Feed', play:'Play', sleep:'Rest', decorate:'Decorate', save:'Save room', private:'Private room', class:'Open to class',
     hatchTitle:'Your first egg is waiting!', hatchCopy:'One of the three completed pets is inside. Your first hatch is free.', hatch:'Hatch now',
     owned:'Owned', locked:'Not owned', active:'Active', choose:'Make active', buy:'Buy', visitRoom:'Visit room', back:'Back to room',
@@ -138,6 +140,9 @@ const REFUSALS: Record<string, string> = {
 };
 
 class StudentApp {
+  private parkController?: ParkController;
+  private parkGeneration = 0;
+  private restoreParkWhenAllowed = false;
   private accessLocked = false;
   private pvp?:PvPClient;
   private brawlController?: BrawlController;
@@ -201,6 +206,8 @@ class StudentApp {
   constructor(identity: Identity) { this.identity = identity; this.locale = identity.language || 'zh-HK'; }
   setAccessLocked(locked: boolean) {
     this.accessLocked = locked;
+    this.parkController?.setAccessLocked(locked);
+    if (!locked && this.restoreParkWhenAllowed && this.state) { this.restoreParkWhenAllowed = false; queueMicrotask(() => { if (!this.accessLocked) this.openTab('park'); }); }
     this.pvp?.setAccessLocked(locked);
     this.brawlController?.setAccessLocked(locked);
     this.coinPusherView?.setAccessLocked(locked);
@@ -253,6 +260,9 @@ class StudentApp {
     this.roomPlacements = this.state.room.placements.map((item) => ({...item})); this.renderShell();
     if (!this.state.profile.starterEggClaimed) this.renderHatch(); else {
       this.openHome();
+      if (sessionStorage.getItem('pet-park-open:' + this.identity.id) === '1') {
+        if (this.accessLocked) this.restoreParkWhenAllowed = true; else this.openTab('park');
+      }
       // A failed WASM/module evaluation is cached by the browser. An explicit retry therefore
       // reloads the app once, preserving the student's session and returning directly to the
       // arcade instead of repeating the same failed module evaluation in-place.
@@ -275,12 +285,12 @@ class StudentApp {
       <main class="pet-main" id="petMain" data-layout="room">
         <section class="room-stage">
           <div class="room-bar" id="roomBar"></div>
-          <section class="play-surface" id="playSurface"><div id="game-root"></div><div id="coin-pusher-root"></div><div id="gameHud" class="game-hud"></div><div id="celebrationLayer" class="celebration-layer" aria-hidden="true"></div></section>
+          <section class="play-surface" id="playSurface"><div id="game-root"></div><div id="coin-pusher-root"></div><div id="park-root" hidden></div><div id="gameHud" class="game-hud"></div><div id="celebrationLayer" class="celebration-layer" aria-hidden="true"></div></section>
         </section>
         <aside class="side-panel" id="sidePanel"></aside>
       </main>
       <nav class="pet-nav" aria-label="Pet Paradise">
-        ${[['home','home'],['collection','collection'],['shop','shop'],['coinPusher','coin-pusher'],['brawl','brawl'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span>${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
+        ${[['home','home'],['park','visit'],['collection','collection'],['shop','shop'],['coinPusher','coin-pusher'],['brawl','brawl'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span>${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
       </nav>
       <div class="toast-stack" id="toasts" aria-live="polite"></div>
       <div class="modal-root" id="modalRoot"></div>
@@ -527,10 +537,37 @@ class StudentApp {
   private openTab(tab: string) {
     if(this.pvp?.session&&!['finished','cancelled'].includes(this.pvp.session.phase)&&tab!=='brawl'){this.toast(this.locale==='zh-HK'?'請先完成或投降本次同學對戰。':'Finish or surrender your live duel first.');return;}
     this.pvp?.setBusy(tab==='coinPusher');
+    this.destroyPark(tab !== 'park');
     if(tab!=='brawl'){this.brawlGeneration++;this.brawlController?.destroy();this.brawlController=undefined;}
     if(tab!=='coinPusher')this.cancelCoinPusherPreload();
     this.tab=tab;document.querySelectorAll('[data-tab]').forEach((item)=>{const on=(item as HTMLElement).dataset.tab===tab;item.classList.toggle('active',on);item.setAttribute('aria-current',on?'page':'false');});
-    if(tab==='home')this.openHome();else if(tab==='collection')this.renderCollection();else if(tab==='shop')this.renderShop('eggs');else if(tab==='coinPusher')this.renderCoinPusher();else if(tab==='brawl')void this.renderBrawl();else if(tab==='visit')this.renderVisits();else this.renderSettings();
+    if(tab==='park')void this.openPark();else if(tab==='home')this.openHome();else if(tab==='collection')this.renderCollection();else if(tab==='shop')this.renderShop('eggs');else if(tab==='coinPusher')this.renderCoinPusher();else if(tab==='brawl')void this.renderBrawl();else if(tab==='visit')this.renderVisits();else this.renderSettings();
+  }
+  private destroyPark(clearRestore = true) {
+    this.parkGeneration++; this.parkController?.destroy(); this.parkController = undefined;
+    const root = document.querySelector<HTMLElement>('#park-root'); if (root) { root.hidden = true; root.innerHTML = ''; }
+    if (clearRestore) sessionStorage.removeItem('pet-park-open:' + this.identity.id);
+  }
+  private async openPark() {
+    if (this.accessLocked) return;
+    if (!this.activePet()) { this.toast(this.locale === 'zh-HK' ? '先孵出寵物，再一起出門吧！' : 'Hatch your pet before heading outside!'); this.openTab('home'); return; }
+    const generation = this.parkGeneration;
+    this.destroyCoinPusher(true); this.game?.scene.stop('Bedroom'); this.setLayout('room');
+    document.querySelector('#petMain')?.setAttribute('data-mode', 'park');
+    document.querySelector('.pet-shell')?.setAttribute('data-screen', 'park');
+    document.querySelector('#roomBar')!.innerHTML = ''; document.querySelector('#gameHud')!.innerHTML = '';
+    const root = document.querySelector<HTMLElement>('#park-root')!; root.hidden = false;
+    sessionStorage.setItem('pet-park-open:' + this.identity.id, '1');
+    try {
+      const { ParkController } = await import('./park/controller');
+      if (generation !== this.parkGeneration || this.tab !== 'park') return;
+      this.parkController = new ParkController(root, this.state, this.identity, {
+        home: () => this.openTab('home'), retry: () => this.openTab('park'),
+        wallet: balance => { this.state.wallet.balance = balance; this.updateWallet(); }, online: () => this.pvp?.peers || [],
+      });
+      await this.parkController.open();
+      if (this.accessLocked) this.parkController?.setAccessLocked(true);
+    } catch (error) { if (generation === this.parkGeneration) { this.toast((error as Error).message); this.openTab('home'); } }
   }
   private async openLiveDuel(){
     if(this.accessLocked)return;
@@ -585,6 +622,7 @@ class StudentApp {
     // browser checks reach the live scene through here to assert what is actually on screen.
     (window as unknown as { __petGame?: Phaser.Game }).__petGame = this.game;
     this.game.scene.add('Bedroom',BedroomScene,false);
+    this.game.events.on('room:exit-park', () => { if (!this.accessLocked && this.tab === 'home' && !this.visiting) this.openTab('park'); });
     this.game.events.on(Phaser.Core.Events.READY,()=>{if(this.accessLocked)this.game?.loop.sleep();});
     document.addEventListener('visibilitychange',()=>{if(this.accessLocked)this.game?.loop.sleep();});
     this.game.events.on('room:placements',(placements:RoomPlacement[])=>{this.roomPlacements=placements.map((item)=>({...item}));this.refreshDecorStrip();});
@@ -631,13 +669,15 @@ class StudentApp {
       surface.style.backgroundPosition='center';
       surface.style.backgroundRepeat='no-repeat';
     }
-    this.game!.scene.stop('Bedroom');this.game!.scene.start('Bedroom',{bootstrap:this.state,activePet:pet,petDefinition:definition});
+    this.game!.scene.stop('Bedroom');this.game!.scene.start('Bedroom',{bootstrap:this.state,activePet:pet,petDefinition:definition,allowParkExit:!roomOverride&&this.tab==='home',locale:this.locale});
     // The canvas is sized from its container. If anything started the scene while the stage
     // was still hidden the canvas would be zero-sized, so re-measure once it is on screen.
     this.refreshStage();
     if(roomOverride)this.state.room=originalRoom;audio.setTheme('bedroom');
   }
   private openHome() {
+    // A refresh restores the park after the initial bedroom bootstrap; explicit navigation clears it in openTab.
+    this.destroyPark(false);
     this.brawlGeneration++;this.brawlController?.destroy();this.brawlController=undefined;
     if(!this.state.profile.starterEggClaimed&&!this.state.pets.length){this.tab='home';this.destroyCoinPusher();this.renderHatch();return;}
     this.visiting=undefined;this.tab='home';
@@ -2210,6 +2250,7 @@ class StudentApp {
 type RosterFilterField = 'className' | 'chineseGroup' | 'englishGroup' | 'mathGroup';
 
 class TeacherApp {
+  private parkSettings?: ParkTeacherSettings;
   quietRoom?:QuietRoom;
   private coinPusherSettings?:CoinPusherTeacherSettings;
   private accessSettings?:PetAccessTeacherSettings;
@@ -2235,6 +2276,7 @@ class TeacherApp {
     this.quietRoom=undefined;
     this.coinPusherSettings=undefined;
     this.accessSettings?.dispose();this.accessSettings=undefined;
+    this.parkSettings=undefined;
     const zh=this.zh();
     app.innerHTML=`<div class="teacher-shell">
       <header class="teacher-header">
@@ -2284,18 +2326,22 @@ class TeacherApp {
       <main id="teacherQuietMain" class="teacher-quiet-main" hidden></main>
       <main id="teacherArcadeMain" class="teacher-arcade-main" hidden></main>
       <main id="teacherAccessMain" class="teacher-access-main" hidden></main>
+      <main id="teacherParkMain" class="teacher-arcade-main" hidden></main>
       <div class="modal-root" id="modalRoot"></div>
     </div>`;
+    app.querySelector('.teacher-tool-tabs')!.insertAdjacentHTML('beforeend', `<button type="button" data-teacher-tool="park" aria-pressed="false">${zh?'戶外樂園設定':'Outdoor park settings'}</button>`);
     this.bind();this.updateSummary();
     document.querySelectorAll<HTMLButtonElement>('[data-teacher-tool]').forEach(button=>button.addEventListener('click',()=>{
       const quiet=button.dataset.teacherTool==='quiet';
       const arcade=button.dataset.teacherTool==='arcade';
       const access=button.dataset.teacherTool==='access';
+      const park=button.dataset.teacherTool==='park';
       document.querySelectorAll<HTMLElement>('[data-teacher-tool]').forEach(item=>{item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));});
-      document.querySelector<HTMLElement>('#teacherCoinMain')!.hidden=quiet||arcade||access;
+      document.querySelector<HTMLElement>('#teacherCoinMain')!.hidden=quiet||arcade||access||park;
       document.querySelector<HTMLElement>('#teacherQuietMain')!.hidden=!quiet;
       document.querySelector<HTMLElement>('#teacherArcadeMain')!.hidden=!arcade;
       document.querySelector<HTMLElement>('#teacherAccessMain')!.hidden=!access;
+      document.querySelector<HTMLElement>('#teacherParkMain')!.hidden=!park;
       if(!quiet)this.quietRoom?.hide();
       if(quiet&&!this.quietRoom){
         this.quietRoom=new QuietRoom(document.querySelector<HTMLElement>('#teacherQuietMain')!,this.roster,this.locale,async()=>{
@@ -2308,6 +2354,7 @@ class TeacherApp {
         void this.coinPusherSettings.init();
       }
       if(access&&!this.accessSettings){this.accessSettings=new PetAccessTeacherSettings(document.querySelector<HTMLElement>('#teacherAccessMain')!,this.locale);void this.accessSettings.init();}
+      if(park&&!this.parkSettings){this.parkSettings=new ParkTeacherSettings(document.querySelector<HTMLElement>('#teacherParkMain')!,this.locale);void this.parkSettings.init();}
     }));
   }
   studentRows(){return this.filteredStudents().map((student:any)=>{

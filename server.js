@@ -212,6 +212,7 @@ app.get('/api/classroom/sessions', requireAuth, async (req, res, next) => {
 require('./game-app/server/socket')(io, app);   // namespace /game
 require('./tower-defense-app/server/socket')(io, app); // namespace /tower-defense
 require('./pet-app/server/duel')(io); // student presence, invitations and authoritative duels
+require('./pet-app/server/park')(io); // shared outdoor park and verified NPC interactions
 
 // ----------------------------------------------------------------
 // Health / debug

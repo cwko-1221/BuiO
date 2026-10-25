@@ -383,6 +383,10 @@ img { max-width: 100%; }
   transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
 .pet-nav button > span { white-space: nowrap; }
+@media (max-width: 700px) {
+  .pet-nav { justify-content: flex-start; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
+  .pet-nav button { flex: 0 0 76px; }
+}
 .pet-nav button:hover { background: var(--chip); }
 .pet-nav button.active {
   background: #fff0dc; color: #8f3b22; /* 6.66:1 */

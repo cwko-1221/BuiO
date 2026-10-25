@@ -1057,6 +1057,7 @@ async function acknowledgeTeacherGrants(studentId, transactionIds) {
 // a grant record belongs to the student who received it.
 function purgeJsonStudent(studentId) {
   const data = ensureJsonData();
+  if (Array.isArray(data.petParkProgress)) data.petParkProgress = data.petParkProgress.filter(row => row.studentId !== studentId);
   const ownedByStudentId = ['petProfiles', 'petWallets', 'petCurrencyLedger', 'petInstances', 'petInventory', 'petRoomLayouts', 'petCoinPusherPlays', 'petCoinPusherPayouts', 'petArcadePrizes', 'petBrawlRuns', 'petBrawlProgress', 'petBrawlDailyRewards', 'petBrawlRanks'];
   for (const key of ownedByStudentId) data[key] = data[key].filter((row) => row.studentId !== studentId);
   // Idempotency records are namespaced by the actor that created them.

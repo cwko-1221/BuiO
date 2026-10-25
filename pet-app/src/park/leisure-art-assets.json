@@ -1,0 +1,18 @@
+{
+  "version": "leisure-v1",
+  "generator": "Built-in ImageGen; resize and WebP packaging only",
+  "assets": {
+    "pond": {
+      "file": "pond-4fbb2206c4ca.webp",
+      "bytes": 318524,
+      "width": 1200,
+      "height": 800
+    },
+    "meadow": {
+      "file": "meadow-8c400a805ec3.webp",
+      "bytes": 203336,
+      "width": 1200,
+      "height": 800
+    }
+  }
+}

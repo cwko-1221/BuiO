@@ -1,11 +1,16 @@
 type SoundName = 'brawlBlock' | 'brawlHeavy' | 'brawlWarning' | 'tap' | 'buy' | 'coin' | 'arcadeDrop' | 'arcadeLand' | 'arcadeRattle' | 'arcadeTiming' | 'arcadePayout' | 'arcadeKeepsake' | 'arcadeStroke' | 'hatch' | 'evolve' | 'feed' | 'happy' | 'step' | 'attack' | 'skill' | 'hurt' | 'win' | 'lose' | 'decorate' | 'reaction';
 
 import {brawlSound} from '../lib/brawl/sound.mjs';
+import {skySound,SKY_CUES} from '../lib/sky-sound.mjs';
+import {fishingSound,FISHING_CUES} from '../lib/fishing-sound.mjs';
 const THEMES: Record<string, { tempo: number; root: number; scale: number[]; pattern: number[] }> = {
   brawl: { tempo: 118, root: 55, scale: [0,2,3,7,9], pattern: [0,0,3,2,4,3,2,1] },
   bedroom: { tempo: 92, root: 60, scale: [0,2,4,7,9], pattern: [0,2,4,2,1,3,4,3] },
   shop: { tempo: 116, root: 65, scale: [0,2,4,7,9], pattern: [0,1,2,4,3,2,1,3] },
   arcade: { tempo: 128, root: 72, scale: [0,2,4,7,9], pattern: [0,4,2,3,4,2,1,3] },
+  flight: { tempo: 124, root: 62, scale: [0,3,5,7,10], pattern: [0,2,4,3,2,1,3,4,0,2,3,4,2,1,0,3] },
+  banana: { tempo: 106, root: 65, scale: [0,2,4,7,9], pattern: [0,3,2,1,4,2,3,1] },
+  fishing: { tempo: 72, root: 60, scale: [0,2,4,7,9], pattern: [0,2,4,2,1,3,2,1] },
 };
 
 export class AudioEngine {
@@ -17,6 +22,37 @@ export class AudioEngine {
   private step = 0;
   private theme = 'bedroom';
   private accessLocked = false;
+  private musicPaused = false;
+  private skyBuffers = new Map<string,AudioBuffer>();
+  private skyBus?:DynamicsCompressorNode;
+  private skyVoices = new Set<AudioBufferSourceNode>();
+  skySoundsPlayed = 0;
+  private fishingBuffers=new Map<string,AudioBuffer>();
+  private fishingVoices=new Set<AudioBufferSourceNode>();
+  fishingSoundsPlayed=0;
+  prepareFishingSounds(){const c=this.context;if(!c)return;for(const cue of FISHING_CUES)if(!this.fishingBuffers.has(cue)){const samples=fishingSound(cue,c.sampleRate),buffer=c.createBuffer(1,samples.length,c.sampleRate);buffer.copyToChannel(samples,0);this.fishingBuffers.set(cue,buffer);}}
+  fishing(cue:string){const c=this.context,b=this.fishingBuffers.get(cue);if(!c||!b||!this.sfxGain||c.state!=='running'||!this.enabled||this.isDocumentHidden()||this.sfxLevel<=0||this.fishingVoices.size>=8)return;const source=c.createBufferSource();source.buffer=b;source.connect(this.sfxGain);this.fishingVoices.add(source);this.fishingSoundsPlayed++;source.onended=()=>{this.fishingVoices.delete(source);source.disconnect();};source.start();}
+  stopFishingSounds(){for(const source of this.fishingVoices){try{source.stop();}catch{}}this.fishingVoices.clear();}
+  getTheme() { return this.theme; }
+  setMusicPaused(paused:boolean) { this.musicPaused=paused; this.updateLevels(); this.syncMusicLoop(); }
+  stopSkySounds() { for(const voice of this.skyVoices) { try { voice.stop(); } catch { /* Already ended. */ } } this.skyVoices.clear(); }
+  async prepareSkySounds() {
+    const context=this.context;if(!context)return;
+    for(const cue of SKY_CUES)if(!this.skyBuffers.has(cue)){
+      const samples=skySound(cue,context.sampleRate),buffer=context.createBuffer(1,samples.length,context.sampleRate);buffer.copyToChannel(samples,0);this.skyBuffers.set(cue,buffer);
+      await new Promise<void>(resolve=>window.setTimeout(resolve,0));
+    }
+  }
+  sky(cue:string,pan=0,level=1) {
+    const context=this.context,destination=this.sfxGain;
+    if(!context||!destination||context.state!=='running'||!this.enabled||this.isDocumentHidden()||this.sfxLevel<=0||this.skyVoices.size>=18)return;
+    let buffer=this.skyBuffers.get(cue);
+    if(!buffer){const samples=skySound(cue,context.sampleRate);buffer=context.createBuffer(1,samples.length,context.sampleRate);buffer.copyToChannel(samples,0);this.skyBuffers.set(cue,buffer);}
+    if(!this.skyBus){this.skyBus=context.createDynamicsCompressor();this.skyBus.threshold.value=-18;this.skyBus.knee.value=12;this.skyBus.ratio.value=8;this.skyBus.attack.value=.003;this.skyBus.release.value=.12;this.skyBus.connect(destination);}
+    const source=context.createBufferSource(),gain=context.createGain(),panner=context.createStereoPanner();source.buffer=buffer;
+    gain.gain.value=Math.max(0,Math.min(.8,level*.48));panner.pan.value=Math.max(-.7,Math.min(.7,pan));source.connect(gain).connect(panner).connect(this.skyBus);this.skyVoices.add(source);this.skySoundsPlayed++;
+    source.onended=()=>{this.skyVoices.delete(source);source.disconnect();gain.disconnect();panner.disconnect();};source.start();
+  }
   setAccessLocked(locked: boolean) { this.accessLocked = locked; this.updateLevels(); this.syncMusicLoop(); }
   private brawlBuffers=new Map<string,AudioBuffer>();
   private brawlVoices=0;
@@ -49,6 +85,7 @@ export class AudioEngine {
     const canPlay = !!this.context
       && this.context.state === 'running'
       && this.enabled
+      && !this.musicPaused
       && this.musicLevel > 0
       && !this.isDocumentHidden();
     if (canPlay) {
@@ -60,7 +97,9 @@ export class AudioEngine {
 
   async unlock() {
     if (!this.context) {
-      this.context = new AudioContext();
+      const Context=window.AudioContext||(window as Window&{webkitAudioContext?:typeof AudioContext}).webkitAudioContext;
+      if(!Context)return;
+      this.context = new Context();
       this.context.addEventListener('statechange', this.onAudioStateChange);
       this.master = this.context.createGain(); this.music = this.context.createGain(); this.sfxGain = this.context.createGain();
       this.master.connect(this.context.destination); this.music.connect(this.master); this.sfxGain.connect(this.master);
@@ -87,11 +126,11 @@ export class AudioEngine {
   private updateLevels() {
     if (!this.master || !this.music || !this.sfxGain) return;
     this.master.gain.value = this.enabled && !this.isDocumentHidden() ? .85 : 0;
-    this.music.gain.value = this.musicLevel;
+    this.music.gain.value = this.musicPaused ? 0 : this.musicLevel;
     this.sfxGain.gain.value = this.sfxLevel;
   }
 
-  setTheme(theme: string) { this.theme = THEMES[theme] ? theme : 'bedroom'; this.step = 0; }
+  setTheme(theme: string) { const next=THEMES[theme]?theme:'bedroom';if(next===this.theme)return;this.stopMusicLoop();this.theme=next;this.step=0;this.syncMusicLoop(); }
   brawl(cue:string,pan=0,level=1){
     const context=this.context,destination=this.sfxGain;
     if(!context||!destination||context.state!=='running'||!this.enabled||this.isDocumentHidden()||this.brawlVoices>=24)return;
@@ -103,10 +142,10 @@ export class AudioEngine {
     source.onended=()=>{this.brawlVoices--;source.disconnect();gain.disconnect();panner.disconnect();};source.start();
   }
   private startLoop() {
-    if (!this.context || !this.enabled || this.musicLevel <= 0 || this.isDocumentHidden()) return;
+    if (!this.context || !this.enabled || this.musicPaused || this.musicLevel <= 0 || this.isDocumentHidden()) return;
     const tick = () => {
       this.timer = 0;
-      if (!this.context || !this.enabled || this.musicLevel <= 0 || this.isDocumentHidden()) return;
+      if (!this.context || !this.enabled || this.musicPaused || this.musicLevel <= 0 || this.isDocumentHidden()) return;
       const theme = THEMES[this.theme];
       const duration = 60 / theme.tempo / 2;
       const index = theme.pattern[this.step % theme.pattern.length];
@@ -119,6 +158,11 @@ export class AudioEngine {
         if(this.step%4===2)this.noise(.09,.075,this.music);
         this.noise(.018,.026,this.music);
         if(this.step%8===0)for(const offset of [0,3,7])this.tone(440*Math.pow(2,(theme.root+offset-69)/12),duration*5,'triangle',.035,this.music);
+      }
+      if(this.theme==='flight'){
+        if(this.step%4===0)for(const offset of [0,3,7])this.tone(440*Math.pow(2,(theme.root+offset-69)/12),duration*3.5,'sine',.024,this.music);
+        if(this.step%2===0)this.tone(78,duration*.85,'sine',.045,this.music);
+        if(this.step%4===2)this.noise(.055,.026,this.music);
       }
       this.step += 1;
       this.timer = window.setTimeout(tick, duration * 1000);

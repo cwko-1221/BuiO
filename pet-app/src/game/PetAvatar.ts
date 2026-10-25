@@ -62,6 +62,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   private motion?: Int8Array;
   private ambient?: number;
   private fullOutfit = false;
+  private groundOrigin = FOOT_ORIGIN;
   private worn: {
     image: Phaser.GameObjects.Image; shade?: Phaser.GameObjects.Image; overlay?: Phaser.GameObjects.Image; slotKey: string;
     box: ContentBox; behind: boolean; views: Record<string, { key: string; box: ContentBox; overlayKey?: string }>;
@@ -309,6 +310,8 @@ export class PetAvatar extends Phaser.GameObjects.Container {
       layout?: AnimationLayout | null; fallbackTexture?: string; scale?: number;
       wearables?: WearableDefinition[]; ambient?: number; outfitAtlases?: Record<string, string>;
       redrawnWearables?: Record<string, RedrawnWearableAtlas>;
+      /** In a collision-driven world, x/y must be the actual paw baseline. Defaults preserve room placement. */
+      feetOnOrigin?: boolean;
     } = {},
   ) {
     super(scene, x, y);
@@ -316,13 +319,18 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     // constructs an avatar directly will still use the temporary Stage 1 art-release gate.
     const displayPet = petForDisplay(pet);
     const stage = displayPet.stage;
+    if (options.feetOnOrigin) {
+      const anchors = definition.anchors?.[stage - 1], facings = definition.facingAnchors?.[stage - 1];
+      const bottoms = [anchors?.bottom, ...Object.values(facings || {}).map(a => a?.bottom)].filter((n): n is number => typeof n === 'number' && n >= .5 && n <= 1);
+      this.groundOrigin = Math.max(.96, ...bottoms);
+    }
     const { layout, fallbackTexture, scale = 1, wearables, ambient, outfitAtlases, redrawnWearables } = options;
     this.ambient = ambient;
     this.layout = layout;
     this.reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
       || localStorage.getItem('pet-reduced-motion') === '1';
 
-    this.shadow = scene.add.ellipse(0, 30, 112, 30, 0x263547, 0.18);
+    this.shadow = scene.add.ellipse(0, options.feetOnOrigin ? 0 : 30, 112, 30, 0x263547, 0.18);
     this.add(this.shadow);
 
     const outfitUrl = PetAvatar.fullOutfitUrl(definition, stage, displayPet.equippedWearables, outfitAtlases);
@@ -351,14 +359,14 @@ export class PetAvatar extends Phaser.GameObjects.Container {
       // frame numbers but must never share cached Phaser animations backed by different art.
       this.animationPrefix = key;
       this.registerAnimations(definition, stage, layout);
-      this.sprite = scene.add.sprite(0, 0, key, 0).setOrigin(0.5, FOOT_ORIGIN);
+      this.sprite = scene.add.sprite(0, 0, key, 0).setOrigin(0.5, this.groundOrigin);
       // Atlas cells are authored small so the sheets stay manageable; scale to stage presence.
       this.sprite.setScale((250 / layout.frameHeight) * (1 + (stage - 1) * 0.06));
       if (ambient !== undefined) this.sprite.setTint(ambient);
       this.add(this.sprite);
     } else {
       this.staticArt = fallbackTexture && scene.textures.exists(fallbackTexture)
-        ? scene.add.image(0, 0, fallbackTexture).setOrigin(0.5, 0.82)
+        ? scene.add.image(0, 0, fallbackTexture).setOrigin(0.5, options.feetOnOrigin ? this.groundOrigin : 0.82)
         : this.fallbackBody(definition, stage);
       if (this.staticArt instanceof Phaser.GameObjects.Image) {
         const max = Math.max(this.staticArt.width, this.staticArt.height);
@@ -619,7 +627,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     const cellWidth = this.sprite && this.layout ? this.layout.frameWidth : this.staticArtSize().width;
     const cellHeight = this.sprite && this.layout ? this.layout.frameHeight : this.staticArtSize().height;
     const scale = this.sprite ? this.sprite.scaleY : this.staticArtScale();
-    const origin = this.sprite ? FOOT_ORIGIN : 0.82;
+    const origin = this.sprite ? this.sprite.originY : this.staticArt instanceof Phaser.GameObjects.Image ? this.staticArt.originY : 0.82;
 
     // The track holds this frame's drift from the resting pose in cell pixels, plus how much the
     // body has stretched, so the landmarks move and breathe along with the creature.

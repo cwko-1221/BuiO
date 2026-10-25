@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { PetAvatar } from './PetAvatar';
+import parkArt from '../park/world-art-assets.json';
 import { DISPLAY_PET_STAGE, petForDisplay } from './petDisplay';
 import { sizedFootprint, SIZE_STEPS } from '../furniture-size';
 import type { Bootstrap, FurnitureDefinition, PetDefinition, PetFacing, PetInstance, RoomPlacement } from '../types';
 
-interface BedroomData { bootstrap: Bootstrap; activePet: PetInstance; petDefinition: PetDefinition; editing?: boolean }
+interface BedroomData { bootstrap: Bootstrap; activePet: PetInstance; petDefinition: PetDefinition; editing?: boolean; allowParkExit?: boolean; locale?: 'zh-HK' | 'en-US' }
 
 type FurnitureHitArea = {
   tile: Phaser.Geom.Polygon;
@@ -157,6 +158,8 @@ const PET_SCALE = .86;
 const AMBIENT_STRENGTH = 0.12;
 
 export class BedroomScene extends Phaser.Scene {
+  private exitPending = false;
+  private parkExit?: Phaser.GameObjects.Container;
   model!: BedroomData;
   avatar?: PetAvatar;
   placements: RoomPlacement[] = [];
@@ -184,6 +187,7 @@ export class BedroomScene extends Phaser.Scene {
   constructor() { super('Bedroom'); }
   init(data: BedroomData) {
     this.model = data;
+    this.exitPending = false; this.parkExit = undefined;
     this.placements = data.bootstrap.room.placements.map((item) => ({ ...item }));
     this.editing = !!data.editing;
     // Phaser reuses the scene instance across stop/start, so these fields survive a restart.
@@ -199,6 +203,7 @@ export class BedroomScene extends Phaser.Scene {
   }
   preload() {
     (window as any).BuiLoading?.watchScene(this);
+    if (this.model.allowParkExit && !this.textures.exists('park:room-exit')) this.load.image('park:room-exit', '/pet/assets/art/park/full-park-v1/' + parkArt.assets.portal.file);
     const catalog = this.model.bootstrap.catalog;
     const room = catalog.rooms.find((entry) => entry.id === this.model.bootstrap.room.themeId);
     // Key textures by identity, never by role. Phaser skips any load whose key is already in
@@ -267,6 +272,14 @@ export class BedroomScene extends Phaser.Scene {
     });
     this.seatPet(this.petSpot);
     this.ghost = this.add.graphics().setDepth(15);
+    if (this.model.allowParkExit) {
+      const x = 1120, y = 555;
+      const arch = this.add.image(0, 14, 'park:room-exit').setOrigin(.5, .95).setDisplaySize(126, 186);
+      const title = this.add.text(0, 49, this.model.locale === 'en-US' ? 'Pet Town →' : '出去樂園 →', { fontFamily: '"Microsoft JhengHei", sans-serif', fontSize: '18px', color: '#416750', backgroundColor: '#fff5dfeF', padding: { x: 13, y: 8 } }).setOrigin(.5);
+      this.parkExit = this.add.container(x, y, [arch, title]).setDepth(9000).setSize(150, 300);
+      this.parkExit.setInteractive(new Phaser.Geom.Rectangle(0, 0, 150, 300), Phaser.Geom.Rectangle.Contains);
+      this.parkExit.on('pointerup', (pointer: Phaser.Input.Pointer) => { if (!this.editing && pointer.getDistance() < 18) this.requestParkExit(); });
+    }
     // A tap that hits no furniture is a tap on the floor, which is where the child wants the pet.
     this.input.on('pointerup', (pointer: Phaser.Input.Pointer, targets: Phaser.GameObjects.GameObject[]) => {
       if (this.editing || targets.length) return;
@@ -702,6 +715,7 @@ export class BedroomScene extends Phaser.Scene {
     return container;
   }
   private setEditing(value: boolean) {
+    this.exitPending = false; this.parkExit?.setVisible(!value);
     if (value) this.haltWalk();
     this.editing = value;
     this.grid?.setVisible(value);
@@ -824,7 +838,13 @@ export class BedroomScene extends Phaser.Scene {
    * trot over is the whole difference between watching an aquarium and playing with a pet, and a
    * creature already walking somewhere of its own accord makes the tap feel ignored.
    */
-  private walkTo(point: { x: number; y: number }) {
+  private requestParkExit() {
+    for (const x of [12.5, 11.5, 10.5, 9.5, 8.5, 7.5, 6.5]) {
+      this.walkTo({ x, y: 8.8 }, true); if (this.exitPending) return;
+    }
+  }
+  private walkTo(point: { x: number; y: number }, exit = false) {
+    this.exitPending = false;
     if (this.editing || !this.avatar) return;
     const target = this.onFloor(point);
     const blocked = this.blockedCells();
@@ -843,6 +863,7 @@ export class BedroomScene extends Phaser.Scene {
       }
     }
     if (!legs) return;
+    this.exitPending = exit;
     this.petStep?.stop();
     this.petLegs = legs;
     this.walkNextLeg();
@@ -855,6 +876,7 @@ export class BedroomScene extends Phaser.Scene {
       this.petLegs = undefined;
       this.petStep = undefined;
       avatar?.play('idle');
+      if (this.exitPending) { this.exitPending = false; this.game.events.emit('room:exit-park'); }
       return;
     }
     const from = this.petCentre(this.petSpot);
@@ -880,6 +902,7 @@ export class BedroomScene extends Phaser.Scene {
   }
   /** Stop where it stands. Used while decorating, and while a one-shot reaction plays. */
   private haltWalk() {
+    this.exitPending = false;
     this.petStep?.stop();
     this.petStep = undefined;
     this.petLegs = undefined;

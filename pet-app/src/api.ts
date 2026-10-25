@@ -49,6 +49,8 @@ async function quietRequest<T>(url: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
+  parkSettings: () => request<{ dailyCap: number }>('/api/pet/teacher/park/settings'),
+  saveParkSettings: (dailyCap: number) => request<{ dailyCap: number }>('/api/pet/teacher/park/settings', { method: 'PUT', body: JSON.stringify({ dailyCap }) }),
   brawlRanking: () => request<import('./brawl/ranking-types').RankedOverview>('/api/pet/brawl/ranking'),
   petAccess: () => quietRequest<{ access: PetAccessStatus }>('/api/pet/access'),
   teacherAccess: () => request<PetAccessSettings>('/api/pet/teacher/access'),

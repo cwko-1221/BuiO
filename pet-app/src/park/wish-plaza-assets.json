@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "assets": {
+    "ground": {
+      "file": "ground-v1-644668151f96.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 813996
+    },
+    "fountain": {
+      "file": "fountain-v1-01ce0c907674.webp",
+      "width": 860,
+      "height": 619,
+      "bytes": 210116
+    },
+    "tree": {
+      "file": "tree-v1-5989bba75649.webp",
+      "width": 900,
+      "height": 883,
+      "bytes": 404406
+    },
+    "bear": {
+      "file": "bear-v1-0ce5c2bca51d.webp",
+      "width": 239,
+      "height": 384,
+      "bytes": 41094
+    },
+    "board": {
+      "file": "board-v1-879df93830a1.webp",
+      "width": 456,
+      "height": 512,
+      "bytes": 94420
+    },
+    "bench": {
+      "file": "bench-v1-e74c08041c8a.webp",
+      "width": 640,
+      "height": 298,
+      "bytes": 72798
+    },
+    "chime": {
+      "file": "chime-v1-d7e77417b5a2.webp",
+      "width": 442,
+      "height": 448,
+      "bytes": 90668
+    },
+    "drum": {
+      "file": "drum-v1-77e78761741d.webp",
+      "width": 384,
+      "height": 351,
+      "bytes": 57958
+    },
+    "bell": {
+      "file": "bell-v1-170f01c7c0ea.webp",
+      "width": 439,
+      "height": 448,
+      "bytes": 78228
+    }
+  }
+}

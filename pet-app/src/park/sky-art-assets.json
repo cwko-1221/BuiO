@@ -1,0 +1,94 @@
+{
+  "version": "sky-patrol-v2",
+  "generator": "Built-in ImageGen; trim/downscale and WebP packaging only",
+  "assets": {
+    "swift": {
+      "file": "swift-665f02f4416e.webp",
+      "width": 512,
+      "height": 547,
+      "bytes": 71094,
+      "sourceWidth": 1199,
+      "sourceHeight": 1312
+    },
+    "petal": {
+      "file": "petal-7c69f129873f.webp",
+      "width": 512,
+      "height": 375,
+      "bytes": 68342,
+      "sourceWidth": 1227,
+      "sourceHeight": 1282
+    },
+    "nova": {
+      "file": "nova-b6390f86947c.webp",
+      "width": 512,
+      "height": 509,
+      "bytes": 80310,
+      "sourceWidth": 1242,
+      "sourceHeight": 1266
+    },
+    "valley": {
+      "file": "valley-c12ba39d140b.webp",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 777940,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536
+    },
+    "scout": {
+      "file": "scout-7b8842383f49.webp",
+      "width": 512,
+      "height": 523,
+      "bytes": 68008,
+      "sourceWidth": 1219,
+      "sourceHeight": 1290
+    },
+    "interceptor": {
+      "file": "interceptor-13d806b068c2.webp",
+      "width": 512,
+      "height": 415,
+      "bytes": 62938,
+      "sourceWidth": 1374,
+      "sourceHeight": 1145
+    },
+    "bomber": {
+      "file": "bomber-e62f0be6d821.webp",
+      "width": 512,
+      "height": 307,
+      "bytes": 50024,
+      "sourceWidth": 1536,
+      "sourceHeight": 1024
+    },
+    "boss": {
+      "file": "boss-eb4646d16639.webp",
+      "width": 768,
+      "height": 456,
+      "bytes": 126750,
+      "sourceWidth": 1586,
+      "sourceHeight": 992
+    },
+    "cloud": {
+      "file": "cloud-b40e8cd83ae9.webp",
+      "width": 640,
+      "height": 182,
+      "bytes": 52468,
+      "sourceWidth": 2172,
+      "sourceHeight": 724
+    },
+    "basket": {
+      "file": "basket-0cf80ca64f6e.webp",
+      "width": 512,
+      "height": 294,
+      "bytes": 75820,
+      "sourceWidth": 1536,
+      "sourceHeight": 1024
+    },
+    "grove": {
+      "file": "grove-22064992cf3d.webp",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 566998,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536
+    }
+  }
+}

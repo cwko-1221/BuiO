@@ -1,0 +1,149 @@
+{
+  "pass": true,
+  "build": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\park-fishing-catch-build-1",
+  "htmlSha256": "e3c5e9872c075139193e7b3a3237e533695135046ca43ab59703268a8258c0bf",
+  "checks": [
+    "a real catch fills the complete viewport on desktop, tablet and phone in both orientations; large artwork and accessible controls stay in view while the server clock is frozen",
+    "Continue resumes the same catch without replaying it; the next catch opens a fresh full-screen reveal and Pack up saves exactly two fish with one settlement",
+    "teacher lock removes the full-screen portal and restores input state; reconnect preserves the already saved catch inventory"
+  ],
+  "profiles": [
+    {
+      "name": "tablet-landscape",
+      "x": 0,
+      "y": 0,
+      "w": 1024,
+      "h": 768,
+      "viewport": [
+        1024,
+        768
+      ],
+      "overflow": false,
+      "buttons": [
+        {
+          "w": 244,
+          "h": 52,
+          "top": 604.59375,
+          "bottom": 656.59375
+        },
+        {
+          "w": 244,
+          "h": 52,
+          "top": 604.59375,
+          "bottom": 656.59375
+        }
+      ],
+      "coversCenter": true
+    },
+    {
+      "name": "tablet-portrait",
+      "x": 0,
+      "y": 0,
+      "w": 768,
+      "h": 1024,
+      "viewport": [
+        768,
+        1024
+      ],
+      "overflow": false,
+      "buttons": [
+        {
+          "w": 244,
+          "h": 52,
+          "top": 741.953125,
+          "bottom": 793.953125
+        },
+        {
+          "w": 244,
+          "h": 52,
+          "top": 741.953125,
+          "bottom": 793.953125
+        }
+      ],
+      "coversCenter": true
+    },
+    {
+      "name": "desktop",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 960,
+      "viewport": [
+        1440,
+        960
+      ],
+      "overflow": false,
+      "buttons": [
+        {
+          "w": 244,
+          "h": 52,
+          "top": 716.1875,
+          "bottom": 768.1875
+        },
+        {
+          "w": 244,
+          "h": 52,
+          "top": 716.1875,
+          "bottom": 768.1875
+        }
+      ],
+      "coversCenter": true
+    },
+    {
+      "name": "phone",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "viewport": [
+        390,
+        844
+      ],
+      "overflow": false,
+      "buttons": [
+        {
+          "w": 340,
+          "h": 48.5,
+          "top": 588.4375,
+          "bottom": 636.9375
+        },
+        {
+          "w": 340,
+          "h": 48.5,
+          "top": 646.9375,
+          "bottom": 695.4375
+        }
+      ],
+      "coversCenter": true
+    },
+    {
+      "name": "phone-landscape",
+      "x": 0,
+      "y": 0,
+      "w": 844,
+      "h": 390,
+      "viewport": [
+        844,
+        390
+      ],
+      "overflow": false,
+      "buttons": [
+        {
+          "w": 189,
+          "h": 46,
+          "top": 253.296875,
+          "bottom": 299.296875
+        },
+        {
+          "w": 189,
+          "h": 46,
+          "top": 253.296875,
+          "bottom": 299.296875
+        }
+      ],
+      "coversCenter": true
+    }
+  ],
+  "errors": [],
+  "scope": "Windows Chrome with authenticated emulated touch, keyboard focus, portrait/landscape rotation and teacher lock; physical iPad not tested"
+}
