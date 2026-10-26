@@ -24,7 +24,7 @@ function publicBuiltin(set) {
     title: set.title,
     questionCount: set.questions.length,
     builtin: true,
-    games: ['climb', 'tower-defense'],
+    games: ['climb', 'tower-defense', 'quiz'],
   };
 }
 
@@ -40,7 +40,7 @@ router.get('/sets', requireTeacherOrPreview, async (req, res, next) => {
         return {
           ...row,
           builtin: false,
-          games: supportsTowerDefense ? ['climb', 'tower-defense'] : ['climb'],
+          games: supportsTowerDefense ? ['climb', 'tower-defense', 'quiz'] : ['climb'],
         };
       }));
       available.push(...detailed);

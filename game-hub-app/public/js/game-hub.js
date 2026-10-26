@@ -56,7 +56,7 @@ async function loadQuestionSets(preselectId=null){
     const response=await fetch('/api/games/sets',{credentials:'include',headers:previewHeaders});
     const data=await response.json();if(!response.ok||!data.success)throw new Error(data.message||t('gh.setsFailed'));
     questionSets=data.sets;
-    list.innerHTML=questionSets.map(set=>`<article class="hub-set-row" data-set-row="${escapeHtml(set.id)}"><button class="hub-set" type="button" data-select-set="${escapeHtml(set.id)}"><span class="set-orb">?</span><span><b>${escapeHtml(set.title)}</b><small>${escapeHtml(t('gh.questionCount',{count:set.questionCount}))}${set.builtin?escapeHtml(t('gh.builtinSuffix')):''}</small></span><em>${escapeHtml(t(set.games.length===2?'gh.bothGames':'gh.climbOnly'))}</em></button>${set.builtin?'':`<div class="set-actions"><button type="button" data-edit-set="${escapeHtml(set.id)}" aria-label="${escapeHtml(t('gh.editNamed',{title:set.title}))}">${escapeHtml(t('gh.edit'))}</button><button class="danger" type="button" data-delete-set="${escapeHtml(set.id)}" aria-label="${escapeHtml(t('gh.deleteNamed',{title:set.title}))}">${escapeHtml(t('gh.delete'))}</button></div>`}</article>`).join('');
+    list.innerHTML=questionSets.map(set=>`<article class="hub-set-row" data-set-row="${escapeHtml(set.id)}"><button class="hub-set" type="button" data-select-set="${escapeHtml(set.id)}"><span class="set-orb">?</span><span><b>${escapeHtml(set.title)}</b><small>${escapeHtml(t('gh.questionCount',{count:set.questionCount}))}${set.builtin?escapeHtml(t('gh.builtinSuffix')):''}</small></span><em>${escapeHtml(t(set.games.length===3?'gh.allGames':set.games.length===2?'gh.bothGames':'gh.climbOnly'))}</em></button>${set.builtin?'':`<div class="set-actions"><button type="button" data-edit-set="${escapeHtml(set.id)}" aria-label="${escapeHtml(t('gh.editNamed',{title:set.title}))}">${escapeHtml(t('gh.edit'))}</button><button class="danger" type="button" data-delete-set="${escapeHtml(set.id)}" aria-label="${escapeHtml(t('gh.deleteNamed',{title:set.title}))}">${escapeHtml(t('gh.delete'))}</button></div>`}</article>`).join('');
     list.querySelectorAll('[data-select-set]').forEach(button=>button.addEventListener('click',()=>{
       const set=questionSets.find(item=>String(item.id)===button.dataset.selectSet);if(set)selectSet(set,button);
     }));
@@ -77,14 +77,14 @@ function selectSet(set,button){
   $('gameStep').classList.remove('locked');$('settingsStep').classList.add('locked');
   document.querySelectorAll('[data-game]').forEach(item=>{item.classList.remove('selected');item.disabled=!set.games.includes(item.dataset.game);});
   $('compatibilityNote').textContent=t(set.games.includes('tower-defense')?'gh.compatBoth':'gh.compatClimb');
-  $('climbSettings').hidden=true;$('towerSettings').hidden=true;$('createGameBtn').disabled=true;
+  $('climbSettings').hidden=true;$('towerSettings').hidden=true;$('quizSettings').hidden=true;$('createGameBtn').disabled=true;
 }
 
 function resetSelection(){
   selectedSet=null;selectedGame=null;
   $('gameStep').classList.add('locked');$('settingsStep').classList.add('locked');
   document.querySelectorAll('[data-game]').forEach(item=>{item.disabled=true;item.classList.remove('selected');});
-  $('climbSettings').hidden=true;$('towerSettings').hidden=true;$('createGameBtn').disabled=true;
+  $('climbSettings').hidden=true;$('towerSettings').hidden=true;$('quizSettings').hidden=true;$('createGameBtn').disabled=true;
 }
 
 async function deleteSet(setId){
@@ -262,7 +262,8 @@ document.querySelectorAll('[data-game]').forEach(button=>button.addEventListener
   if(button.disabled||!selectedSet)return;selectedGame=button.dataset.game;
   document.querySelectorAll('[data-game]').forEach(item=>item.classList.toggle('selected',item===button));
   $('settingsStep').classList.remove('locked');$('climbSettings').hidden=selectedGame!=='climb';$('towerSettings').hidden=selectedGame!=='tower-defense';
-  $('settingsDescription').textContent=t(selectedGame==='climb'?'gh.climbSettingsLead':'gh.towerSettingsLead');
+  $('quizSettings').hidden=selectedGame!=='quiz';
+  $('settingsDescription').textContent=t(selectedGame==='quiz'?'gh.quizSettingsLead':selectedGame==='climb'?'gh.climbSettingsLead':'gh.towerSettingsLead');
   $('createGameBtn').disabled=false;$('createGameBtn').querySelector('small').textContent=t('gh.bankPrefix',{title:selectedSet.title});
 }));
 
@@ -280,17 +281,21 @@ $('createGameBtn').addEventListener('click',()=>{
     if(energyPerCorrect<1||energyPerCorrect>maxEnergy){$('teacherHubError').textContent=t('gh.energyRange',{max:maxEnergy});return;}
     params.set('durationSec',$('durationSelect').value);params.set('maxEnergy',String(maxEnergy));params.set('energyPerCorrect',String(energyPerCorrect));params.set('infiniteEnergy',$('infiniteEnergyToggle').checked?'1':'0');
     location.href=preview?`/game/host/preview?${params}`:`/game/host?${params}`;
+  }else if(selectedGame==='quiz'){
+    params.set('seconds',$('quizSecondsInput').value);params.set('limit',$('quizLimitInput').value);
+    location.href=preview?`/quiz-mode/host/preview?${params}`:`/quiz-mode/host?${params}`;
   }else location.href=preview?`/tower-defense/teacher/preview?${params}`:`/tower-defense/teacher?${params}`;
 });
 
 async function loadRooms(){
   try{
-    const [climbResponse,towerResponse]=await Promise.all([
+    const [climbResponse,towerResponse,quizResponse]=await Promise.all([
       fetch('/api/game/sessions',{credentials:'include'}),
       fetch('/api/tower-defense/sessions',{credentials:'include',headers:previewHeaders}),
+      fetch('/api/quiz-mode/sessions',{credentials:'include',headers:previewHeaders}),
     ]);
-    const climbData=await climbResponse.json(),towerData=await towerResponse.json();
-    rooms=[...(climbData.sessions||[]).map(room=>({...room,game:'climb'})),...(towerData.sessions||[]).map(room=>({...room,game:'tower-defense'}))];
+    const climbData=await climbResponse.json(),towerData=await towerResponse.json(),quizData=quizResponse.ok?await quizResponse.json():{sessions:[]};
+    rooms=[...(climbData.sessions||[]).map(room=>({...room,game:'climb'})),...(towerData.sessions||[]).map(room=>({...room,game:'tower-defense'})),...(quizData.sessions||[]).map(room=>({...room,game:'quiz'}))];
     renderRooms();
   }catch(error){$('unifiedRoomList').innerHTML=`<div class="empty-state error">${escapeHtml(t('gh.roomsFailed'))}</div>`;}
 }
@@ -303,8 +308,8 @@ function renderRooms(){
   const visible=filter==='all'?rooms:rooms.filter(room=>room.game===filter),list=$('unifiedRoomList');
   if(!visible.length){list.innerHTML=`<div class="empty-state"><i></i>${escapeHtml(t('gh.noRooms'))}</div>`;return;}
   list.innerHTML=visible.map(room=>{
-    const climb=room.game==='climb';
-    return `<button class="unified-room ${climb?'climb':'defence'}" data-room-code="${escapeHtml(room.code)}" data-room-game="${room.game}"><span class="room-game-mark">${climb?'↑':'◇'}</span><span class="room-details"><small>${escapeHtml(t(climb?'gh.climbName':'gh.towerName'))}</small><b>${escapeHtml(teacherLabel(room.hostName))}</b><em>${escapeHtml(room.setTitle||t('gh.classBank'))} · ${escapeHtml(t('gh.playerCount',{count:room.players}))}</em></span><span class="room-state"><i></i>${escapeHtml(t(room.phase==='lobby'?'gh.phaseLobby':'gh.phaseLive'))}</span><strong>${escapeHtml(t('gh.join'))}</strong></button>`;
+    const climb=room.game==='climb',quiz=room.game==='quiz';
+    return `<button class="unified-room ${quiz?'quiz-mode':climb?'climb':'defence'}" data-room-code="${escapeHtml(room.code)}" data-room-game="${room.game}"><span class="room-game-mark">${quiz?'?':climb?'↑':'◇'}</span><span class="room-details"><small>${escapeHtml(t(quiz?'gh.quizName':climb?'gh.climbName':'gh.towerName'))}</small><b>${escapeHtml(teacherLabel(room.hostName))}</b><em>${escapeHtml(room.setTitle||t('gh.classBank'))} · ${escapeHtml(t('gh.playerCount',{count:room.players}))}</em></span><span class="room-state"><i></i>${escapeHtml(t(room.phase==='lobby'?'gh.phaseLobby':'gh.phaseLive'))}</span><strong>${escapeHtml(t('gh.join'))}</strong></button>`;
   }).join('');
   document.querySelectorAll('[data-room-code]').forEach(button=>button.addEventListener('click',()=>joinRoom(button.dataset.roomGame,button.dataset.roomCode)));
 }
@@ -312,6 +317,7 @@ function renderRooms(){
 function joinRoom(game,code){
   clearInterval(roomsTimer);const params=new URLSearchParams({room:code,autojoin:'1'});
   if(game==='climb')location.href=preview?`/game/preview?${params}`:`/game?${params}`;
+  else if(game==='quiz')location.href=preview?`/quiz-mode/preview?${params}`:`/quiz-mode?${params}`;
   else location.href=preview?`/tower-defense/preview?classroom=1&${params}`:`/tower-defense?${params}`;
 }
 

@@ -8,7 +8,7 @@ BuiI18n.register({
   'gh.roleTeacher':    { 'zh-HK': '老師模式', 'en-US': 'Teacher mode' },
   'gh.roleStudent':    { 'zh-HK': '學生模式', 'en-US': 'Student mode' },
 
-  'gh.heroTitle':      { 'zh-HK': '一個題庫，<em>兩種冒險</em>', 'en-US': 'One question bank, <em>two adventures</em>' },
+  'gh.heroTitle':      { 'zh-HK': '一個題庫，<em>三種玩法</em>', 'en-US': 'One question bank, <em>three ways to play</em>' },
   'gh.heroLead':       { 'zh-HK': '依次選擇題庫、遊戲和課堂規則，然後進入該遊戲原有老師等待室。', 'en-US': 'Pick a question bank, a game, then the class rules — and step into that game’s own teacher lobby.' },
 
   'gh.step1Title':     { 'zh-HK': '選擇題庫', 'en-US': 'Choose a question bank' },
@@ -18,7 +18,14 @@ BuiI18n.register({
   'gh.newBankHint':    { 'zh-HK': '手動輸入或 Excel 匯入', 'en-US': 'Type them in or import from Excel' },
 
   'gh.step2Title':     { 'zh-HK': '選擇遊戲', 'en-US': 'Choose a game' },
-  'gh.step2Lead':      { 'zh-HK': '兩款遊戲沿用各自的等待和遊玩介面', 'en-US': 'Each game keeps its own lobby and play screens' },
+  'gh.step2Lead':      { 'zh-HK': '選擇今次課堂的遊戲模式', 'en-US': 'Choose a game mode for this class' },
+  'gh.quizName':       { 'zh-HK': '問答模式', 'en-US': 'Live Quiz' },
+  'gh.quizTag':        { 'zh-HK': '大屏幕同步問答競賽', 'en-US': 'A big-screen classroom quiz' },
+  'gh.quizTime':       { 'zh-HK': '每題作答時間', 'en-US': 'Time per question' },
+  'gh.quizCount':      { 'zh-HK': '題數', 'en-US': 'Question count' },
+  'gh.quizAll':        { 'zh-HK': '全部題目', 'en-US': 'All questions' },
+  'gh.quizSettingsLead': { 'zh-HK': '設定問答課堂', 'en-US': 'Set up the live quiz' },
+  'gh.allGames':       { 'zh-HK': '三款遊戲', 'en-US': 'All three games' },
   'gh.climbName':      { 'zh-HK': '唔好望落嚟', 'en-US': 'Don’t Look Down' },
   'gh.climbTag':       { 'zh-HK': '全班同步攀登競速', 'en-US': 'A whole-class climbing race' },
   'gh.towerName':      { 'zh-HK': '晶核守衛戰', 'en-US': 'Crystal Bastion' },
@@ -69,7 +76,7 @@ BuiI18n.register({
 
   'gh.editorNew':      { 'zh-HK': '新增題庫', 'en-US': 'New question bank' },
   'gh.editorEdit':     { 'zh-HK': '編輯題庫', 'en-US': 'Edit question bank' },
-  'gh.editorLead':     { 'zh-HK': '所有題目均使用四選一格式，兩款遊戲都可直接使用。', 'en-US': 'Every question uses four choices, so both games can run it as is.' },
+  'gh.editorLead':     { 'zh-HK': '所有題目均使用四選一格式，三款遊戲都可直接使用。', 'en-US': 'Four-choice questions work with all three games.' },
   'gh.editorClose':    { 'zh-HK': '關閉題庫編輯器', 'en-US': 'Close the question bank editor' },
   'gh.bankName':       { 'zh-HK': '題庫名稱', 'en-US': 'Bank name' },
   'gh.bankNamePh':     { 'zh-HK': '例如：中一數學溫習', 'en-US': 'e.g. Form 1 maths revision' },
@@ -102,7 +109,7 @@ BuiI18n.register({
   'gh.deleteNamed':    { 'zh-HK': '刪除 {title}', 'en-US': 'Delete {title}' },
   'gh.banksSaved':     { 'zh-HK': '自訂題庫會安全儲存在老師帳戶。', 'en-US': 'Custom banks are saved safely to your teacher account.' },
   'gh.banksNotSaved':  { 'zh-HK': '預覽／本機資料庫未連接時可試用編輯器，但無法儲存。', 'en-US': 'You can try the editor without a database connected, but nothing will be saved.' },
-  'gh.compatBoth':     { 'zh-HK': '此題庫支援兩款遊戲。', 'en-US': 'This bank works with both games.' },
+  'gh.compatBoth':     { 'zh-HK': '此題庫支援三款遊戲。', 'en-US': 'This bank works with all three games.' },
   'gh.compatClimb':    { 'zh-HK': '此題庫含少於四個選項的題目，因此只支援「唔好望落嚟」。', 'en-US': 'This bank has questions with fewer than four choices, so only Don’t Look Down can use it.' },
   'gh.confirmDelete':  { 'zh-HK': '確定刪除「{title}」？此操作無法復原。', 'en-US': 'Delete “{title}”? This cannot be undone.' },
   'gh.deleteFailed':   { 'zh-HK': '刪除失敗。', 'en-US': 'Delete failed.' },

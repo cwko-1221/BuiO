@@ -212,6 +212,7 @@ app.get('/api/classroom/sessions', requireAuth, async (req, res, next) => {
 });
 require('./game-app/server/socket')(io, app);   // namespace /game
 require('./tower-defense-app/server/socket')(io, app); // namespace /tower-defense
+require('./quiz-app/server/socket')(io, app); // namespace /quiz, big-screen live quiz
 require('./pet-app/server/duel')(io); // student presence, invitations and authoritative duels
 require('./pet-app/server/park')(io); // shared outdoor park and verified NPC interactions
 
@@ -408,6 +409,22 @@ app.get('/games/preview', (req, res, next) => {
 });
 app.get('/games', requireSession, (_req, res) => {
   res.sendFile(path.join('game-hub-app', 'public', 'index.html'), { root: __dirname });
+});
+
+// Projector-led live quiz and student controllers
+app.use('/quiz-mode/css', assetStatic(path.join(__dirname, 'quiz-app', 'public', 'css'), CACHE_APP));
+app.use('/quiz-mode/js', assetStatic(path.join(__dirname, 'quiz-app', 'public', 'js'), CACHE_APP));
+app.get(['/quiz-mode/preview', '/quiz-mode/host/preview'], (req, res, next) => {
+  if (config.isProd || !config.isExplicitDevelopment) return next();
+  res.set('Cache-Control', 'no-store').sendFile(path.join('quiz-app', 'public', 'index.html'), { root: __dirname });
+});
+app.get('/quiz-mode/host', requireSession, (req, res) => {
+  if (req.session.role !== 'teacher') return res.redirect('/quiz-mode');
+  res.set('Cache-Control', 'no-store').sendFile(path.join('quiz-app', 'public', 'index.html'), { root: __dirname });
+});
+app.get('/quiz-mode', requireSession, (req, res) => {
+  if (req.session.role === 'teacher') return res.redirect('/quiz-mode/host');
+  res.set('Cache-Control', 'no-store').sendFile(path.join('quiz-app', 'public', 'index.html'), { root: __dirname });
 });
 
 // Tower defense module
