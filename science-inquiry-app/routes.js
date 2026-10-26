@@ -21,7 +21,7 @@ const parser = multer({storage:multer.diskStorage({destination:(req,_file,cb)=>c
 router.use(requireAuth);
 router.use((_req,res,next)=>{res.set('Cache-Control','private, no-store'); next();});
 router.get('/meta',(req,res)=>res.json({success:true,role:req.session.role,studentId:req.session.studentId,
-  maxBytes:video.MAX_BYTES,maxDuration:video.MAX_DURATION}));
+  maxBytes:video.MAX_BYTES,maxDuration:video.MAX_DURATION,approvalReward:repo.APPROVAL_REWARD}));
 router.get('/videos',async(req,res)=>res.json({success:true,...await repo.list(req.session,req.query)}));
 
 router.post('/videos',async(req,res)=>{
@@ -58,6 +58,7 @@ router.post('/videos',async(req,res)=>{
 });
 router.put('/videos/:id/like',async(req,res)=>res.json({success:true,...await repo.like(req.params.id,req.session,req.body?.liked)}));
 router.post('/videos/:id/review',requireTeacher,async(req,res)=>res.json({success:true,item:await repo.review(req.params.id,req.session,req.body || {})}));
+router.post('/videos/:id/comments',requireTeacher,async(req,res)=>res.json({success:true,item:await repo.addComment(req.params.id,req.session,req.body || {})}));
 
 async function media(req,res,poster) {
   const row = await repo.accessible(req.params.id,req.session);

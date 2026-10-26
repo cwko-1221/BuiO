@@ -18,6 +18,7 @@
       <div class="hero-art" aria-hidden="true"><svg viewBox="0 0 360 250" fill="none"><ellipse cx="181" cy="214" rx="128" ry="13" fill="#0f2d27"/><circle cx="184" cy="122" r="92" stroke="#7baf94" stroke-dasharray="4 9"/><ellipse cx="184" cy="122" rx="137" ry="45" transform="rotate(-28 184 122)" stroke="#7baf94"/><rect x="115" y="72" width="138" height="112" rx="26" transform="rotate(-8 115 72)" fill="#d4eed0"/><path d="m152 70 9-19 44-6 14 15" fill="#b0d8ad"/><circle cx="185" cy="117" r="36" fill="#224d40"/><circle cx="185" cy="117" r="25" fill="#568d70"/><path d="m181 102 19 12-16 16-3-28Z" fill="#e8f8b1"/><circle cx="230" cy="78" r="5" fill="#6b9c72"/><path d="M77 134c-18-5-23-19-19-31 17 1 25 11 19 31Z" fill="#d6ee92"/><path d="M278 166c-9-13-4-27 7-33 12 12 11 23-7 33Z" fill="#b9dbab"/><circle cx="83" cy="75" r="9" fill="#f4c77e"/><path d="M283 62v22m-11-11h22" stroke="#d6ee92" stroke-width="3" stroke-linecap="round"/><path d="M100 190v12m-6-6h12" stroke="#d6ee92" stroke-width="2" stroke-linecap="round"/><circle cx="266" cy="201" r="4" fill="#f4c77e"/></svg><span class="art-caption">OBSERVE. WONDER. DISCOVER.</span></div>
     </section>
     <div class="journey" id="journey"><span><b>01</b> 留心觀察</span><i>→</i><span><b>02</b> 拍片提問</span><i>→</i><span><b>03</b> 審核後分享</span></div>
+    <p class="reward-banner" id="rewardInfo">每段影片首次通過老師審核，即可獲得 1,000 個寵物樂園金幣。</p>
     <section class="workspace" aria-label="科學探究影片">
       <div class="workspace-head"><div class="tabs" id="tabs" role="tablist" aria-label="影片分類"></div><button class="refresh" id="refresh" type="button">↻ 重新整理</button></div>
       <div class="review-filters" id="reviewFilters" hidden></div>
@@ -36,7 +37,7 @@
       <fieldset class="kind-field"><legend id="kindLegend">這次我想分享…</legend><label><input type="radio" name="kind" value="observation" checked><span id="observationLabel">科學發現</span></label><label><input type="radio" name="kind" value="question"><span id="questionLabel">科學疑問</span></label></fieldset>
       <label class="field" for="videoTitle"><span id="titleLabel">給發現一個標題（選填）</span><input id="videoTitle" name="title" maxlength="100" placeholder="例如：為甚麼冰水杯外面會出現水珠？"></label>
       <label class="field" for="description"><span id="descriptionLabel">說說你的觀察或疑問（選填）</span><textarea id="description" name="description" maxlength="2000" rows="3" placeholder="我觀察到… 我想知道…"></textarea></label>
-      <p class="privacy-hint" id="privacyHint">拍攝時請注意安全，避免拍到他人的樣貌或個人資料。系統會在保留清晰度的同時壓縮影片；老師審核發佈後，同學才會看到。</p>
+      <p class="privacy-hint" id="privacyHint">拍攝時請注意安全，避免拍到他人的樣貌或個人資料。系統會在保留清晰度的同時壓縮影片；老師審核發佈後，同學才會看到。每段影片首次通過審核，可獲得 1,000 個寵物樂園金幣。</p>
       <div class="upload-progress" id="uploadProgress" hidden><progress id="progress" max="100" value="0"></progress><p id="progressText" role="status"></p></div><p class="form-error" id="uploadError" role="alert" hidden></p>
       <div class="dialog-actions"><button class="secondary" type="button" id="cancelUpload">取消</button><button class="primary" id="submitUpload" type="submit">提交老師審核 ↗</button></div>
     </form>

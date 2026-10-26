@@ -19,6 +19,7 @@ const root = path.resolve(__dirname,'..');
 
 async function fixture(t,mode) {
   const data = { scienceInquiryVideos:[],scienceInquiryLikes:[] };
+  let failSave = false;
   let db;
   let transaction = Promise.resolve();
   if (mode === 'postgres') {
@@ -32,17 +33,106 @@ async function fixture(t,mode) {
     const work=transaction.then(()=>db.transaction(tx=>fn({query:(text,values)=>query(tx,text,values)})));
     transaction=work.catch(()=>{});return work;
   } };
-  const filename=path.join(root,'science-inquiry-app/repository.js');
-  const native=createRequire(filename),module={exports:{}};
-  vm.runInNewContext(fs.readFileSync(filename,'utf8'),{module,exports:module.exports,__dirname:path.dirname(filename),
-    require:id=>id==='../config'?{db:{mode}}:id==='../db/jsonStore'?{load:()=>data,save:()=>{}}:id==='../math-app/db/database'?database:native(id),
-    console,Date,structuredClone,process,Buffer},{filename});
-  return { repo:module.exports,data,db };
+  let pets;
+  function load(file) {
+    const filename=path.join(root,file),native=createRequire(filename),module={exports:{}};
+    vm.runInNewContext(fs.readFileSync(filename,'utf8'),{module,exports:module.exports,__dirname:path.dirname(filename),
+      require:id=>id.endsWith('/config')?{db:{mode}}:id.endsWith('/db/jsonStore')?{load:()=>data,save:()=>{
+        if(failSave){failSave=false;throw Error('Injected JSON persistence failure');}
+      }}:id.endsWith('/db/database')?database:id==='../pet-app/repositories/pet.repo'?pets:native(id),
+      console,Date,structuredClone,process,Buffer},{filename});
+    return module.exports;
+  }
+  pets=load('pet-app/repositories/pet.repo.js');
+  return { repo:load('science-inquiry-app/repository.js'),pets,data,db,failNextSave:()=>{failSave=true;} };
 }
 const input = (overrides={}) => {const id=randomUUID();return {id,authorName:'科學同學',title:'杯外的水珠',description:'水是從哪裡來的？',kind:'question',
   storageKey:`${id}/video.mp4`,posterKey:`${id}/poster.jpg`,duration:2,originalBytes:1000,videoBytes:500,width:640,height:360,...overrides};};
 
 for (const mode of ['json','postgres']) {
+  test(`${mode}: public teacher replies appear with published videos, stay distinct from private feedback and cannot duplicate rewards`,async t=>{
+    const {repo,pets,db}=await fixture(t,mode);
+    const author={...teacher,studentName:'科學老師'};
+    const video=await repo.create(student,input());
+    const draftId=randomUUID();
+    await assert.rejects(repo.addComment(video.id,student,{message:'學生假扮老師',commentId:draftId}),error=>error.status===403);
+    await assert.rejects(repo.addComment(video.id,author,{message:' ',commentId:draftId}),error=>error.status===400);
+    await assert.rejects(repo.addComment(video.id,author,{message:'字'.repeat(2001),commentId:draftId}),error=>error.status===400);
+    await repo.addComment(video.id,author,{message:'這是一個有趣的觀察。',commentId:draftId});
+    assert.equal((await repo.list(other)).items.length,0);
+    assert.equal((await repo.list(student,{scope:'mine'})).items[0].comments.length,1);
+    assert.equal((await pets.walletBalances([student.studentId])).get(student.studentId)||0,0);
+    const approved=await repo.review(video.id,author,{status:'published',revision:0,note:'只供上傳者查看的審核意見',
+      publicComment:'空氣中的水蒸氣遇冷會凝結成水珠。',commentId:randomUUID()});
+    assert.equal(approved.rewardGranted,1000);assert.equal(approved.comments.length,2);
+    const feed=(await repo.list(other)).items[0];
+    assert.equal(feed.comments[1].teacherName,'科學老師');assert.equal(feed.reviewNote,undefined);
+    assert.equal(feed.comments[1].message,'空氣中的水蒸氣遇冷會凝結成水珠。');
+    const reply={message:'可以比較室溫水和冰水。',commentId:randomUUID()};
+    await Promise.all(Array.from({length:8},()=>repo.addComment(video.id,author,reply)));
+    assert.equal((await repo.list(other)).items[0].comments.length,3);
+    await assert.rejects(repo.addComment(video.id,author,{...reply,message:'同一編號不能改寫另一則回應'}),error=>error.status===409);
+    assert.equal((await pets.walletBalances([student.studentId])).get(student.studentId),1000);
+    assert.equal((await repo.list(student,{scope:'mine'})).items[0].reviewNote,'只供上傳者查看的審核意見');
+    const second=await repo.create(student,input());
+    await assert.rejects(repo.review(second.id,author,{status:'published',revision:0,publicComment:'重用已存在的回應編號',commentId:draftId}),error=>error.status===409);
+    assert.equal((await repo.accessible(second.id,student)).status,'pending');
+    assert.equal((await pets.walletBalances([student.studentId])).get(student.studentId),1000,'a failed reply must roll back the approval payment');
+    await repo.review(video.id,author,{status:'rejected',revision:1,note:'暫時下架'});
+    assert.equal((await repo.list(other)).items.length,0);
+    assert.equal((await repo.list(student,{scope:'mine'})).items.find(row=>row.id===video.id).comments.length,3);
+    if(db)assert.equal((await db.query("SELECT has_table_privilege('anon','scienceinquirycomments','SELECT') AS allowed")).rows[0].allowed,false);
+  });
+  test(`${mode}: first approval pays the uploader 1000 pet coins once, including concurrent reviews and republishing`,async t=>{
+    const {repo,pets,data,db}=await fixture(t,mode);
+    // Exercise the additive reward migration against the previous module schema.
+    if(db) await db.exec(fs.readFileSync(path.join(root,'db/migrations/20261026_science_inquiry.sql'),'utf8'));
+    await pets.ensureStudent(student.studentId);
+    if(db) await db.query('UPDATE PetWallets SET Balance=17 WHERE StudentID=$1',[student.studentId]);
+    else data.petWallets.find(row=>row.studentId===student.studentId).balance=17;
+    const balance=async id=>(await pets.walletBalances([id])).get(id)||0;
+    const count=async()=>db ? Number((await db.query('SELECT count(*) AS n FROM PetCurrencyLedger')).rows[0].n) : data.petCurrencyLedger.length;
+    const pending=await repo.create(student,input({rewardedAt:new Date().toISOString()}));
+    assert.equal(pending.rewardAmount,0);assert.equal(pending.rewardedAt,null);assert.equal(await balance(student.studentId),17);
+    await assert.rejects(repo.review(pending.id,other,{status:'published',revision:0}),error=>error.status===403);
+    const approvals=await Promise.allSettled(Array.from({length:12},()=>repo.review(pending.id,teacher,{status:'published',revision:0,rewardAmount:999999})));
+    assert.equal(approvals.filter(item=>item.status==='fulfilled').length,1);
+    assert.equal(approvals.filter(item=>item.status==='rejected'&&item.reason.status===409).length,11);
+    const first=approvals.find(item=>item.status==='fulfilled').value;
+    assert.equal(first.rewardGranted,1000);assert.equal(first.rewardAmount,1000);assert.ok(first.rewardedAt);
+    assert.equal(await balance(student.studentId),1017);assert.equal(await balance(other.studentId),0);assert.equal(await count(),1);
+    assert.equal((await pets.listUnseenTeacherGrants(student.studentId))[0].amount,1000);
+    assert.ok((await pets.listUnseenTeacherGrants(student.studentId))[0].reason.includes('科學探究閣'));
+    assert.equal((await repo.list(other)).items[0].rewardAmount,undefined);
+    await repo.review(pending.id,teacher,{status:'rejected',revision:1,note:'請重新確認拍攝內容。'});
+    const again=await repo.review(pending.id,teacher,{status:'published',revision:2});
+    assert.equal(again.rewardGranted,0);assert.equal(again.rewardAmount,1000);assert.equal(new Date(again.rewardedAt).getTime(),new Date(first.rewardedAt).getTime());
+    assert.equal(await balance(student.studentId),1017);assert.equal(await count(),1);
+    const second=await repo.create(student,input());await repo.review(second.id,teacher,{status:'published',revision:0});
+    assert.equal(await balance(student.studentId),2017);assert.equal(await count(),2);
+    const third=await repo.create(other,input());await repo.review(third.id,teacher,{status:'published',revision:0});
+    assert.equal(await balance(other.studentId),1000);assert.equal(await balance(student.studentId),2017);assert.equal(await balance(teacher.studentId),0);
+  });
+  test(`${mode}: failed coin payment rolls back publication, reward marker and ledger, then retries safely`,async t=>{
+    const {repo,pets,data,db,failNextSave}=await fixture(t,mode);
+    await pets.ensureStudent(student.studentId);
+    const pending=await repo.create(student,input());
+    if(db) await db.query('UPDATE PetWallets SET Balance=2147483647 WHERE StudentID=$1',[student.studentId]);
+    else failNextSave();
+    const approval={status:'published',revision:0,publicComment:'回應與審核一同儲存',commentId:randomUUID()};
+    await assert.rejects(repo.review(pending.id,teacher,approval));
+    const unchanged=await repo.accessible(pending.id,student);
+    assert.equal(unchanged.status,'pending');assert.equal(unchanged.revision,0);assert.equal(unchanged.rewardedAt,null);
+    assert.equal((await repo.list(student,{scope:'mine'})).items[0].comments.length,0);
+    const ledgerCount=db ? Number((await db.query('SELECT count(*) AS n FROM PetCurrencyLedger')).rows[0].n) : data.petCurrencyLedger.length;
+    assert.equal(ledgerCount,0);
+    assert.equal((await pets.walletBalances([student.studentId])).get(student.studentId),db?2147483647:0);
+    if(db) await db.query('UPDATE PetWallets SET Balance=0 WHERE StudentID=$1',[student.studentId]);
+    const retry=await repo.review(pending.id,teacher,approval);
+    assert.equal(retry.rewardGranted,1000);assert.equal(retry.status,'published');
+    assert.equal(retry.comments.length,1);
+    assert.equal((await pets.walletBalances([student.studentId])).get(student.studentId),1000);
+  });
   test(`${mode}: student upload text is optional, including missing and whitespace-only fields`,async t=>{
     const {repo}=await fixture(t,mode);
     for(const fields of [{title:undefined,description:undefined},{title:null,description:null},{title:'  ',description:'\n\t'}]) {

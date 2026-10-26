@@ -24,13 +24,14 @@
       backLink:tr('返回學習平台 ↗','Learning platform ↗'),pageTitle:`${tr('科學探究閣','Science Inquiry Corner')}<span class="title-dot">.</span>`,
       heroDescription:tr('每一個「為甚麼」，都是發現的開始。<br>拍下生活中的小發現，一起探索大世界。','Every “why” is the start of a discovery.<br>Film a little wonder. Explore a bigger world.'),
       openUpload:tr('＋ 分享我的發現','＋ Share a discovery'), teacherLead:tr('看看同學的觀察，讓每一份好奇心被看見。','Help students share their curiosity with the school.'),
+      rewardInfo:tr('每段影片首次通過老師審核，即可獲得 1,000 個寵物樂園金幣。','Earn 1,000 Pet Paradise coins the first time each video is approved by a teacher.'),
       refresh:tr('↻ 重新整理','↻ Refresh'),footerHint:tr('保護自己和同學的私隱；安全觀察，讓好奇心帶路。','Protect everyone’s privacy. Observe safely and follow your curiosity.'),
       uploadTitle:tr('分享我的發現','Share my discovery'),uploadLead:tr('你看到了甚麼有趣的現象？有甚麼想和同學一起研究？','What did you notice? What would you like to explore with your classmates?'),
       filePrompt:tr('用影片記錄你的發現','Capture your discovery'),fileLimit:tr('MP4、MOV、WebM · 最長 1 分鐘 · 最大 250 MB','MP4, MOV, WebM · Up to 1 minute · Max 250 MB'),
       chooseLabel:tr('選擇影片','Choose a video'),cameraLabel:tr('拍攝影片','Film a video'),recordVideo:tr('開啟鏡頭錄影','Record with camera'),stopRecording:tr('停止錄影','Stop recording'),
       kindLegend:tr('這次我想分享…','I would like to share…'),observationLabel:tr('科學發現','A discovery'),questionLabel:tr('科學疑問','A question'),
       titleLabel:tr('給發現一個標題（選填）','Give it a title (optional)'),descriptionLabel:tr('說說你的觀察或疑問（選填）','Describe your observation or question (optional)'),
-      privacyHint:tr('拍攝時請注意安全，避免拍到他人的樣貌或個人資料。系統會在保留清晰度的同時壓縮影片；老師審核發佈後，同學才會看到。','Film safely and avoid showing other people or personal details. We compress your video while keeping it clear. Classmates can see it after a teacher approves it.'),
+      privacyHint:tr('拍攝時請注意安全，避免拍到他人的樣貌或個人資料。系統會在保留清晰度的同時壓縮影片；老師審核發佈後，同學才會看到。每段影片首次通過審核，可獲得 1,000 個寵物樂園金幣。','Film safely and avoid showing other people or personal details. We compress your video while keeping it clear. Classmates can see it after a teacher approves it. Each video earns 1,000 Pet Paradise coins on its first approval.'),
       cancelUpload:tr('取消','Cancel'),submitUpload:tr('提交老師審核 ↗','Submit for review ↗'),loadMore:tr('載入更多','Load more'),
     };
     for (const [id,value] of Object.entries(entries)) $(id).innerHTML=value;
@@ -49,10 +50,20 @@
     $('sectionDescription').textContent=state.scope==='mine'?tr('查看你的影片、審核進度和老師的回饋。','Your videos, review progress, and teacher feedback.'):state.scope==='review'?tr('先觀看影片，再審核內容與私隱；發佈後，全校同學便能觀看。','Watch each video and check its content and privacy before publishing it for the school.'):tr('看看同學眼中的奇妙現象，為你喜歡的科學探究點個讚。','Explore your classmates’ discoveries and like the inquiries that inspire you.');
   }
   const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg>';
+function renderTeacherComments(comments){
+  if(!comments?.length)return '';
+  return `<section class="teacher-comments" aria-label="${tr('老師回應','Teacher replies')}"><h4>${tr('老師回應','Teacher replies')}</h4>${comments.map(comment=>`<div class="teacher-comment"><div class="comment-author"><strong>${esc(comment.teacherName)}</strong><time>${date(comment.createdAt)}</time></div><p>${esc(comment.message)}</p></div>`).join('')}</section>`;
+}
+function renderCommentEditor(id){
+  return `<div class="public-comment-editor"><label for="comment-${id}">${tr('公開回應（選填，會顯示在發現廣場）','Public reply (optional, shown in Discover)')}</label><textarea id="comment-${id}" data-comment maxlength="2000" rows="3" placeholder="${tr('回答同學的疑問，或給一點探究建議…','Answer the question or suggest something to investigate…')}"></textarea><button type="button" class="secondary" data-add-comment>${tr('發佈回應','Post reply')}</button></div>`;
+}
   function card(item) {
     const review=state.scope==='review';
     const title=item.title||tr('未命名的探究','Untitled inquiry');
-    return `<article class="video-card" data-id="${esc(item.id)}"><div class="video-wrap"><video controls playsinline preload="none" poster="${esc(item.posterUrl)}" src="${esc(item.videoUrl)}" aria-label="${esc(title)}"></video><span class="duration">${duration(item.duration)}</span></div><div class="card-content"><div class="card-top"><span class="kind-badge ${item.kind==='question'?'question':''}">${kindName(item.kind)}</span>${state.scope!=='published'?`<span class="status-badge ${item.status}">${statusName(item.status)}</span>`:''}</div><h3>${esc(title)}</h3>${item.description ? `<p class="video-description">${esc(item.description)}</p>` : ''}<div class="card-bottom"><div class="author">${esc(item.authorName)}${item.own?` · ${tr('我','Me')}`:''}<small>${date(item.publishedAt||item.createdAt)} · ${size(item.videoBytes)}</small></div>${item.status==='published'?`<button class="like" data-like="${esc(item.id)}" aria-label="${item.liked?tr('取消點讚','Unlike'):tr('點讚','Like')}" aria-pressed="${item.liked}" ${state.role==='teacher'?'disabled':''}>${heart}<span>${item.likeCount}</span></button>`:''}</div>${item.reviewNote?`<p class="review-note"><strong>${tr('老師回饋：','Teacher feedback: ')}</strong>${esc(item.reviewNote)}</p>`:''}${review?`<div class="review-box"><label for="note-${item.id}">${tr('審核意見（退回時必填）','Review note (required when returning)')}</label><textarea id="note-${item.id}" data-note maxlength="500" rows="2" placeholder="${tr('給同學一點建議…','Leave a suggestion…')}"></textarea><div class="review-actions">${item.status!=='published'?`<button class="primary" data-review="published">${tr('審核通過並發佈','Approve & publish')}</button>`:''}${item.status!=='rejected'?`<button class="danger" data-review="rejected">${item.status==='published'?tr('下架並退回','Unpublish & return'):tr('退回修改','Return for changes')}</button>`:''}${item.status==='rejected'?`<button class="secondary" data-review="pending">${tr('重新審核','Review again')}</button>`:''}</div></div>`:''}</div></article>`;
+    const comments=renderTeacherComments(item.comments);
+    const commentEditor=review?renderCommentEditor(item.id):'';
+    const rewardBadge=item.rewardAmount?`<span class="reward-badge">${tr('已獲得 1,000 金幣','1,000 coins awarded')}</span>`:'';
+    return `<article class="video-card" data-id="${esc(item.id)}"><div class="video-wrap"><video controls playsinline preload="none" poster="${esc(item.posterUrl)}" src="${esc(item.videoUrl)}" aria-label="${esc(title)}"></video><span class="duration">${duration(item.duration)}</span></div><div class="card-content"><div class="card-top"><span class="kind-badge ${item.kind==='question'?'question':''}">${kindName(item.kind)}</span>${rewardBadge}${state.scope!=='published'?`<span class="status-badge ${item.status}">${statusName(item.status)}</span>`:''}</div><h3>${esc(title)}</h3>${item.description ? `<p class="video-description">${esc(item.description)}</p>` : ''}${comments}<div class="card-bottom"><div class="author">${esc(item.authorName)}${item.own?` · ${tr('我','Me')}`:''}<small>${date(item.publishedAt||item.createdAt)} · ${size(item.videoBytes)}</small></div>${item.status==='published'?`<button class="like" data-like="${esc(item.id)}" aria-label="${item.liked?tr('取消點讚','Unlike'):tr('點讚','Like')}" aria-pressed="${item.liked}" ${state.role==='teacher'?'disabled':''}>${heart}<span>${item.likeCount}</span></button>`:''}</div>${item.reviewNote?`<p class="review-note"><strong>${tr('老師回饋：','Teacher feedback: ')}</strong>${esc(item.reviewNote)}</p>`:''}${review?`<div class="review-box">${commentEditor}<label for="note-${item.id}">${tr('審核意見（只供上傳學生查看，退回時必填）','Private review note (required when returning)')}</label><textarea id="note-${item.id}" data-note maxlength="500" rows="2" placeholder="${tr('給同學一點建議…','Leave a suggestion…')}"></textarea><div class="review-actions">${item.status!=='published'?`<button class="primary" data-review="published">${tr('審核通過並發佈','Approve & publish')}</button>`:''}${item.status!=='rejected'?`<button class="danger" data-review="rejected">${item.status==='published'?tr('下架並退回','Unpublish & return'):tr('退回修改','Return for changes')}</button>`:''}${item.status==='rejected'?`<button class="secondary" data-review="pending">${tr('重新審核','Review again')}</button>`:''}</div></div>`:''}</div></article>`;
   }
   function renderVideos() {
     $('videos').innerHTML=state.items.length?state.items.map(card).join(''):`<div class="empty"><span class="empty-symbol" aria-hidden="true">✧</span><strong>${state.scope==='mine'?tr('第一個發現，由你開始','Your first discovery starts here'):state.scope==='review'?tr('這裡暫時沒有影片','No videos here yet'):tr('好奇的眼睛，準備好了嗎？','Ready to get curious?')}</strong>${state.scope==='mine'?tr('拍下你的科學觀察或疑問，提交老師審核。','Film an observation or question and submit it for review.'):state.scope==='review'?tr('學生上傳影片後，便會出現在「審核中」。','New student uploads will appear under “Under review”.'):tr('老師審核發佈的科學探究影片，會在這裡和大家見面。','Teacher-approved discoveries will appear here for everyone to explore.')}</div>`;
@@ -160,15 +171,29 @@
   window.addEventListener('beforeunload',event=>{if(state.saving||state.recording){event.preventDefault();event.returnValue='';}});
   window.addEventListener('pagehide',stopStream);
   $('videos').addEventListener('play',event=>{if(event.target.tagName==='VIDEO')$('videos').querySelectorAll('video').forEach(video=>{if(video!==event.target)video.pause();});},true);
-  $('videos').addEventListener('click',async event=>{
-    const like=event.target.closest('[data-like]'),review=event.target.closest('[data-review]');if(!like&&!review)return;
-    const element=event.target.closest('[data-id]');const item=state.items.find(row=>row.id===element.dataset.id);if(!item)return;
-    const controls=like?[like]:[...element.querySelectorAll('button,textarea')];controls.forEach(control=>control.disabled=true);
-    try {
-      if(like){const result=await api(`/videos/${item.id}/like`,{method:'PUT',body:JSON.stringify({liked:!item.liked})});Object.assign(item,result);like.setAttribute('aria-pressed',String(item.liked));like.setAttribute('aria-label',item.liked?tr('取消點讚','Unlike'):tr('點讚','Like'));like.querySelector('span').textContent=item.likeCount;}
-      else{const note=element.querySelector('[data-note]').value.trim();if(review.dataset.review==='rejected'&&!note)throw new Error(tr('請先填寫退回原因。','Please explain why the video is being returned.'));await api(`/videos/${item.id}/review`,{method:'POST',body:JSON.stringify({status:review.dataset.review,note,revision:item.revision})});await load();notice(tr('審核結果已儲存。','Review saved.'));}
-    }catch(error){notice(error.message,true);}finally{controls.forEach(control=>control.disabled=false);}
-  });
+  $('videos').addEventListener('click',async function handleCardAction(event){
+  const like=event.target.closest('[data-like]'),review=event.target.closest('[data-review]'),commentButton=event.target.closest('[data-add-comment]');
+  if(!like&&!review&&!commentButton)return;
+  const element=event.target.closest('[data-id]'),item=state.items.find(row=>row.id===element.dataset.id);if(!item)return;
+  const controls=like?[like]:[...element.querySelectorAll('button,textarea')];controls.forEach(control=>control.disabled=true);
+  try{
+    if(like){const result=await api(`/videos/${item.id}/like`,{method:'PUT',body:JSON.stringify({liked:!item.liked})});Object.assign(item,result);like.setAttribute('aria-pressed',String(item.liked));like.setAttribute('aria-label',item.liked?tr('取消點讚','Unlike'):tr('點讚','Like'));like.querySelector('span').textContent=item.likeCount;}
+    else{
+      const draft=element.querySelector('[data-comment]'),publicComment=draft.value.trim();
+      const commentId=publicComment?(draft.dataset.commentId||=crypto.randomUUID()):undefined;
+      if(commentButton){
+        if(!publicComment)throw new Error(tr('請先輸入老師回應。','Please write a reply first.'));
+        await api(`/videos/${item.id}/comments`,{method:'POST',body:JSON.stringify({message:publicComment,commentId})});
+        await load();notice(item.status==='published'?tr('老師回應已發佈。','Teacher reply posted.'):tr('老師回應已儲存，影片發佈後會顯示在發現廣場。','Reply saved. It will appear in Discover when the video is published.'));
+      }else{
+        const note=element.querySelector('[data-note]').value.trim();
+        if(review.dataset.review==='rejected'&&!note)throw new Error(tr('請先填寫退回原因。','Please explain why the video is being returned.'));
+        const result=await api(`/videos/${item.id}/review`,{method:'POST',body:JSON.stringify({status:review.dataset.review,note,revision:item.revision,publicComment,commentId})});
+        await load();notice(tr('審核結果已儲存。','Review saved.')+(result.item.rewardGranted?tr('已向學生發放 1,000 個寵物樂園金幣。',' The student received 1,000 Pet Paradise coins.'):''));
+      }
+    }
+  }catch(error){notice(error.message,true);}finally{controls.forEach(control=>control.disabled=false);}
+});
   async function boot() {
     translateStatic();
     try{const result=await api('/meta');state.role=result.role;state.account=result.studentId;$('roleLabel').textContent=state.role==='teacher'?tr('老師模式','Teacher mode'):tr('學生模式','Student mode');$('openUpload').hidden=state.role!=='student';$('teacherLead').hidden=state.role!=='teacher';renderTabs();await load();}

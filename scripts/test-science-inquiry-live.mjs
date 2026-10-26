@@ -45,6 +45,13 @@ try {
   for(const context of [student,other,teacher])context.on('page',page=>{page.on('pageerror',error=>errors.push(error.message));page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});});
   await login(student,'S001');await login(other,'S002');await login(teacher,'T001');
   assert.equal((await (await student.request.get(`${base}/api/science-inquiry/meta`)).json()).maxDuration,60);
+  assert.equal((await (await student.request.get(`${base}/api/science-inquiry/meta`)).json()).approvalReward,1000);
+  const petBalance=async context=>{
+    const response=await context.request.get(`${base}/api/pet/bootstrap`);assert.equal(response.status(),200,await response.text());
+    return (await response.json()).wallet.balance;
+  };
+  const startingBalance=await petBalance(student);
+  const otherStartingBalance=await petBalance(other);
   const studentPage=await student.newPage();await studentPage.goto(base);
   await studentPage.locator('[data-open-module="science-inquiry"]').waitFor();
   await studentPage.locator('[data-open-module="science-inquiry"]').click();
@@ -63,6 +70,7 @@ try {
   await studentPage.getByRole('button',{name:'提交老師審核 ↗'}).click();
   const uploadResponse=await uploaded;assert.equal(uploadResponse.status(),201,await uploadResponse.text());
   const {item}=await uploadResponse.json();assert.equal(item.status,'pending');assert.ok(item.videoBytes<item.originalBytes*.6);
+  assert.equal(await petBalance(student),startingBalance);
   await studentPage.locator('#uploadDialog').waitFor({state:'hidden'});
   await studentPage.locator('.status-badge.pending').waitFor();
   await studentPage.screenshot({path:path.join(qa,'03-student-pending-phone.png'),fullPage:true,animations:'disabled'});
@@ -84,9 +92,16 @@ try {
   await teacherPage.waitForFunction(()=>document.querySelector('#videos video')?.currentTime>0,{},{timeout:10000});
   await teacherPage.locator('#videos video').evaluate(video=>video.pause());
   await teacherPage.locator('[data-note]').fill('留心觀察生活中的變化，做得很好！');
+  await teacherPage.locator('[data-comment]').fill('杯外的水珠來自空氣中的水蒸氣，遇到冰冷的杯面凝結成小水珠。');
   await teacherPage.getByRole('button',{name:'審核通過並發佈'}).click();await teacherPage.locator('#notice').filter({hasText:'審核結果已儲存'}).waitFor();
+  assert.ok((await teacherPage.locator('#notice').textContent()).includes('1,000'));
+  assert.equal(await petBalance(student),startingBalance+1000);
+  assert.equal(await petBalance(other),otherStartingBalance);
   const otherPage=await other.newPage();await otherPage.goto(`${base}/science-inquiry`);
   await otherPage.locator('.video-card').waitFor();await noOverflow(otherPage);
+  assert.ok((await otherPage.locator('.teacher-comments').textContent()).includes('科學老師'));
+  assert.ok((await otherPage.locator('.teacher-comments').textContent()).includes('空氣中的水蒸氣'));
+  assert.equal(await otherPage.locator('.review-note').count(),0,'private review notes must not appear in Discover');
   await otherPage.locator('[data-like]').click();await otherPage.locator('[data-like][aria-pressed="true"]').waitFor();
   assert.equal(await otherPage.locator('[data-like] span').textContent(),'1');
   await otherPage.reload();await otherPage.locator('[data-like][aria-pressed="true"]').waitFor();
@@ -97,6 +112,12 @@ try {
   await otherPage.screenshot({path:path.join(qa,'05-published-ipad.png'),fullPage:true,animations:'disabled'});
   const streamed=await request.get(`${base}${item.videoUrl}`,{headers:{Range:'bytes=0-1023'}});assert.equal(streamed.status(),206);assert.equal(streamed.headers()['cache-control'],'private, no-store');assert.equal((await streamed.body()).length,1024);
   await teacherPage.getByRole('button',{name:'已發佈',exact:true}).click();await teacherPage.locator('.video-card').waitFor();
+  await teacherPage.locator('[data-comment]').fill('可以比較室溫水和冰水，看看哪個杯子外面較多水珠。');
+  await teacherPage.getByRole('button',{name:'發佈回應',exact:true}).click();
+  await teacherPage.locator('#notice').filter({hasText:'老師回應已發佈'}).waitFor();
+  assert.equal(await petBalance(student),startingBalance+1000,'new comments must not issue another reward');
+  await otherPage.reload();await otherPage.locator('.teacher-comment').nth(1).waitFor();
+  assert.ok((await otherPage.locator('.teacher-comments').textContent()).includes('比較室溫水和冰水'));
   await teacherPage.locator('[data-note]').fill('請先遮蓋畫面中的姓名，再重新拍攝。');
   await teacherPage.getByRole('button',{name:'下架並退回'}).click();await teacherPage.locator('#notice').filter({hasText:'審核結果已儲存'}).waitFor();
   assert.equal((await request.get(`${base}${item.videoUrl}`,{headers:{Range:'bytes=1024-2047'}})).status(),404);
@@ -104,6 +125,8 @@ try {
   await otherPage.reload();await otherPage.locator('.empty').filter({hasText:'好奇的眼睛'}).waitFor();
   await studentPage.getByRole('button',{name:'重新整理'}).click();await studentPage.locator('.status-badge.rejected').waitFor();
   assert.ok((await studentPage.locator('.review-note').textContent()).includes('請先遮蓋畫面中的姓名'));
+  assert.ok((await studentPage.locator('.reward-badge').textContent()).includes('1,000'));
+  assert.equal(await petBalance(student),startingBalance+1000);
   await studentPage.screenshot({path:path.join(qa,'06-student-feedback-phone.png'),fullPage:true,animations:'disabled'});
   // Exercise the browser's real MediaRecorder output, which has no WebM duration header.
   await studentPage.getByRole('button',{name:'＋ 分享我的發現'}).click();
@@ -122,6 +145,13 @@ try {
   assert.equal(recordedItem.title,'');assert.equal(recordedItem.description,'');
   await studentPage.locator('#uploadDialog').waitFor({state:'hidden'});
   await studentPage.locator(`[data-id="${recordedItem.id}"] h3`).filter({hasText:'未命名的探究'}).waitFor();
+  assert.equal(await petBalance(student),startingBalance+1000,'pending recordings must not earn coins');
+  const republished=await teacher.request.post(`${base}/api/science-inquiry/videos/${item.id}/review`,{data:{status:'published',revision:2}});
+  assert.equal(republished.status(),200,await republished.text());assert.equal((await republished.json()).item.rewardGranted,0);
+  assert.equal(await petBalance(student),startingBalance+1000,'republishing must not pay again');
+  const secondApproved=await teacher.request.post(`${base}/api/science-inquiry/videos/${recordedItem.id}/review`,{data:{status:'published',revision:0}});
+  assert.equal(secondApproved.status(),200,await secondApproved.text());assert.equal((await secondApproved.json()).item.rewardGranted,1000);
+  assert.equal(await petBalance(student),startingBalance+2000,'each distinct approved video earns its own reward');
   // Check language follows the platform, plus malformed uploads have no media side effects.
   await otherPage.goto(`${base}/science-inquiry?lang=en`);await otherPage.getByRole('tab',{name:'Discover',exact:true}).waitFor();await noOverflow(otherPage);
   const bad=await student.request.post(`${base}/api/science-inquiry/videos`,{multipart:{title:'壞的影片',description:'這不是影片',kind:'question',video:{name:'invalid.mp4',mimeType:'video/mp4',buffer:Buffer.from('not a video')}}});assert.equal(bad.status(),400);
@@ -129,8 +159,8 @@ try {
   // Media access errors from deliberately rejected requests above are API-only; browser pages stay clean.
   assert.deepEqual(errors,[]);
   await writeFile(path.join(qa,'result.json'),JSON.stringify({success:true,compression:{originalBytes:item.originalBytes,videoBytes:item.videoBytes},
-    checks:['student upload','phone layout','teacher playback','approval','private pending media','published range streaming','likes persist/unlike','unpublish revokes media','teacher feedback','browser camera recording','English UI','invalid video cleanup'],browserErrors:errors},null,2));
-  console.log('✓ Science Inquiry: real upload → compression → private pending → teacher playback/publish → classmate like/unlike → unpublish → feedback; live camera; desktop/iPad/phone; English; invalid media cleanup.');
+    checks:['student upload','phone layout','teacher playback','approval','public reply with approval','later teacher comments visible to classmates','private review notes stay private','1000 pet coins on first approval','no reward for comments or repeated approval','separate reward for each approved video','private pending media','published range streaming','likes persist/unlike','unpublish revokes media','teacher feedback','browser camera recording','English UI','invalid video cleanup'],browserErrors:errors},null,2));
+  console.log('✓ Science Inquiry: upload → compress → review → publish + 1000 Pet Paradise coins; no duplicate rewards on republish; separate videos rewarded; private media; likes; camera; desktop/iPad/phone; English; invalid media cleanup.');
   await writeFile(path.join(qa,'server.log'),logs);
   console.log(`QA evidence: ${qa}`);
 } catch(error){await writeFile(path.join(qa,'server.log'),logs);throw error;}

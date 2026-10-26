@@ -6,6 +6,8 @@
 - 影片處理及儲存成功後顯示「審核中」；待審核與退回影片只限上傳者及老師觀看。學生可在「我的探究」查看狀態和老師回饋。
 - 老師在「影片審核」觀看影片，可通過並發佈、填寫原因退回，或將已發佈影片下架。審核使用版本檢查，避免兩位老師互相覆蓋決定。
 - 已發佈影片可供所有登入學生觀看、點讚及取消點讚，每名學生每段影片只計一次；點讚操作可安全重送。
+- 每段影片首次通過老師審核時，自動向上傳學生發放 1,000 個寵物樂園金幣。影片發佈、錢包入帳與金幣紀錄一同儲存；發放失敗時不會發佈影片。每段影片只獎勵一次，重複請求、多人審核、下架後重新發佈均不會重複發放。老師及上傳學生可在影片卡查看已發放狀態，學生在寵物樂園也會看到金幣通知。
+- 老師審核時可填寫選填的「公開回應」，與審核及金幣獎勵一同儲存；也可稍後新增回應。已發佈影片會在發現廣場顯示老師姓名、日期及回應內容。退回原因／審核意見只供老師及上傳學生查看，與公開回應分開。回應可安全重送而不會重複，新增回應不會再發放金幣。
 
 ## 影片處理
 
@@ -17,7 +19,7 @@ FFmpeg 隨 `ffmpeg-static` 安裝，ffprobe 隨 `@ffprobe-installer/ffprobe` 安
 
 ## 資料及私人儲存
 
-正式環境沿用 `SUPABASE_DB_URL`，首次讀取自動執行可重複套用的 `db/migrations/20261026_science_inquiry.sql`，建立影片表、點讚表及索引，啟用 RLS 並撤銷 anon/authenticated 的直接存取。使用平台現有的伺服器資料庫角色，該角色需具備建表及後端存取權限；也可在部署前透過既有 migration 流程套用 SQL。
+正式環境沿用 `SUPABASE_DB_URL`，首次讀取自動執行可重複套用的 `db/migrations/20261026_science_inquiry.sql`、`db/migrations/20261027_science_inquiry_rewards.sql` 及 `db/migrations/20261027_science_inquiry_comments.sql`，建立影片、點讚及老師回應表和索引，並加入首次獎勵時間欄位；啟用 RLS 並撤銷 anon/authenticated 的直接存取。使用平台現有的伺服器資料庫角色，該角色需具備建表及後端存取權限；也可在部署前透過既有 migration 流程套用 SQL。
 
 沿用 `SUPABASE_URL`（或 `NEXT_PUBLIC_SUPABASE_URL`）及 `SUPABASE_SECRET_KEY`（或 `SUPABASE_SERVICE_ROLE_KEY`）。首次上傳時自動建立／確認 `science-inquiry` 私人 bucket，限制 MP4/JPEG 及 48 MiB。Supabase 專案本身的檔案上限亦須允許該大小。**不會**在 PostgreSQL 模式退回伺服器的暫時磁碟儲存。若未設定儲存服務，上傳會明確失敗。
 
