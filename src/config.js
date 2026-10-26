@@ -65,6 +65,18 @@ export const MODULES = [
     roleAccess: ['student', 'teacher']
   },
   {
+    id: 'science-inquiry',
+    name: 'module_inquiry_name',
+    shortName: 'Science Inquiry',
+    description: 'module_inquiry_desc',
+    accent: 'mint',
+    icon: 'flask',
+    url: '/science-inquiry',
+    metric: 'module_inquiry_metric',
+    status: 'module_inquiry_status',
+    roleAccess: ['student', 'teacher']
+  },
+  {
     id: 'pet',
     name: 'module_pet_name',
     shortName: 'Pet Paradise',

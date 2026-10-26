@@ -10,6 +10,7 @@ __pycache__/
 
 # Data files
 data/*.json
+data/science-inquiry-media/
 
 # Logs
 *.log

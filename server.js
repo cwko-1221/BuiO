@@ -164,6 +164,7 @@ app.use('/api/tower-defense', require('./tower-defense-app/routes/questions'));
 // Persistent pet raising, room decoration and teacher-issued currency
 app.use('/api/pet', require('./pet-app/routes/pet'));
 app.use('/api/buzzer', require('./buzzer-app/routes'));
+app.use('/api/science-inquiry', require('./science-inquiry-app/routes'));
 
 // Whiteboard — HTTP + Socket.io. Build httpServer/io now so the whiteboard
 // module can register its /api/whiteboard/* routes BEFORE the catch-all
@@ -556,6 +557,13 @@ app.get(['/science-lab', '/science-lab/'], requireSession, (_req, res) => {
   setScienceLabHeaders(res, { document: true });
   res.set('Cache-Control', 'no-store');
   res.sendFile('index.html', { root: scienceLabDist });
+});
+
+app.use('/science-inquiry', requireSession, assetStatic(path.join(__dirname, 'science-inquiry-app', 'public'), {
+  setHeaders: res => res.set('Cache-Control', 'private, no-store'),
+}));
+app.get(['/science-inquiry', '/science-inquiry/'], requireSession, (_req, res) => {
+  res.set('Cache-Control', 'private, no-store').sendFile('index.html', { root: path.join(__dirname, 'science-inquiry-app', 'public') });
 });
 
 app.get('/login.html',     (req, res) => res.sendFile(path.join('math-app', 'public', 'login.html'), { root: __dirname }));

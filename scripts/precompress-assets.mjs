@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { brotliCompressSync, gzipSync, constants } from 'node:zlib';
 const root = path.resolve(import.meta.dirname, '..');
-const folders = ['src', 'shared/i18n', 'report-app/js', 'report-app/css', 'buzzer-app/public',
+const folders = ['src', 'shared/i18n', 'report-app/js', 'report-app/css', 'buzzer-app/public', 'science-inquiry-app/public',
   'math-app/public/js', 'math-app/public/css', 'multiplication-app/public/js', 'multiplication-app/public/css',
   'chinese-app/public/js', 'chinese-app/public/css', 'english-app/public/js', 'english-app/public/css',
   'phonics-app/public/js', 'phonics-app/public/css', 'homework-app/public/js', 'homework-app/public/css',

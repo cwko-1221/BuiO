@@ -281,6 +281,9 @@ async function openModule(moduleId, mode) {
   } else if (moduleId === 'science-lab') {
     window.location.href = '/science-lab';
 
+  } else if (moduleId === 'science-inquiry') {
+    window.location.href = '/science-inquiry';
+
   } else if (moduleId === 'pet') {
     window.location.href = '/pet';
 

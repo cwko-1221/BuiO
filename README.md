@@ -12,6 +12,7 @@
 - 多人闖關遊戲：`/game`
 - 晶核守衛塔防：`/tower-defense`
 - 奇趣科學島 3D 模擬實驗室：`/science-lab`
+- 科學探究閣：`/science-inquiry`（學生影片分享、壓縮及老師審核）
 - 寵物樂園養成與俯視冒險：`/pet`
 
 Mario Kart／Quiz Kart 實驗模組已移除，`/kart/*` 不再是有效路由。
@@ -69,3 +70,5 @@ npm run check:security
 科學實驗室以 `npm run build:science-lab` 建立正式資源；`npm run check:science-lab` 驗證 5 個探究、科學安全、狀態保存及資源預算，`npm run check:science-lab-live` 驗證觸控版面、登入保護及非 WebGL 後備模式，`npm run check:science-lab-physics` 則以真實指標手勢回歸碰撞、浮力、摩擦、接線及其他科學狀態。
 
 寵物樂園以 `npm run build:pet` 建立正式資源；`npm run check:pet` 驗證養成、經濟、素材及安全規則，`npm run check:pet-live` 則在桌面、iPad 橫向及手機尺寸驗收學生與老師完整流程。詳細內容見 `pet-app/README.md`。
+
+科學探究閣以 `npm run check:science-inquiry` 驗證 JSON/PostgreSQL 審核、點讚及真實影片壓縮；`npm run check:science-inquiry-live` 在獨立測試資料庫啟動服務，驗證瀏覽器上傳、鏡頭錄影、老師發佈及下架、影片存取權限和手機版面。設定及限制見 `science-inquiry-app/README.md`。
