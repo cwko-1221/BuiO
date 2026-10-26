@@ -11,7 +11,7 @@ const run=(s,n,mask=0,other=0)=>{const events=[];for(let i=0;i<n;i++){stepBattle
 const wait=(s,condition,limit=400,mask=0,other=0)=>{const events=[];while(!condition()&&limit-->0){stepBattle(s,mask,other);events.push(...s.events);}assert.ok(condition(),'condition completed within its tick budget');return events;};
 const arena=(fighter,opponent='dragon-ball-goku')=>createBattle({mode:'pvp',fighterId:fighter,opponentId:opponent});
 const pass=text=>console.log('✓ '+text);
-assert.equal(VERSION,'brawl-v14');
+assert.equal(VERSION,'brawl-v15');
 
 // These isolated fixtures change starting positions, never damage results. All
 // effects below are produced by the real input and shared simulation paths.
@@ -108,4 +108,4 @@ for(const name of ['gum-pistol','gum-gatling']){
  }
 }
 pass('Both redrawn Luffy effects contain eight full transparent frames with clean gutters and iPad-sized textures');
-assert.equal(FIGHTERS.length,28);
+assert.equal(FIGHTERS.length,29);

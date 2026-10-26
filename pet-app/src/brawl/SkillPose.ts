@@ -21,6 +21,10 @@ export function skillPose(a:Actor,k:any,assets:BrawlAssets,tick=0){
   let release=k?.kind==='blink'||k?.kind==='flurry'?6:k?.mechanic==='sky-shot'?wind+Math.floor((duration-wind-8)*.45):wind;
   let index=0;
   if(k?.kind==='flurry')index=t<6?Math.min(3,Math.floor(t/6*4)):t<16?3:t<23?4:t<30?5:t<34?6:7;
+  else if(k?.kind==='rx-beam-rifle'){
+    const q=t-release,last=(Number(k.volleys||3)-1)*Number(k.interval||14);
+    index=q<0?Math.min(3,Math.floor(t/release*4)):q<=last+7?(q%Number(k.interval||14)<4?4:5):t<duration-6?6:7;
+  }
   else if(t<release)index=Math.min(3,Math.floor(t/release*4));
   else if(t>=duration-5)index=7;
   else if(k?.mechanic==='hug')index=t<release+4?4:t<release+Number(k.period||20)?5:6;

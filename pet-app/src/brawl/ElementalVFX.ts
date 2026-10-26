@@ -135,7 +135,7 @@ export class ElementalVFX {
     }
     if(k.mechanic==='weapon-combo'&&this.hasAtlas(k.kind)){
       const phase=Math.floor((a.actionTick-Number(k.windup||12))/Number(k.period||4)),last=Number(k.pulses||1)-1;
-      const finishing=phase>=last,frame=finishing?6:3+phase%2,fade=Math.min(1,(a.actionDuration-a.actionTick-4)/10);
+      const finishing=phase>=last,frame=finishing?(k.kind==='rx-beam-saber'?5:6):3+phase%2,fade=Math.min(1,(a.actionDuration-a.actionTick-4)/10);
       this.atlas(k.kind,frame,x,y,Math.max(80,range),k.effect==='spear'?(finishing?145:105):(finishing?185:155),Math.max(0,fade),face<0);return;
     }
     if(k.mechanic!=='stretch'&&this.hasAtlas(k.kind)){
@@ -200,11 +200,12 @@ export class ElementalVFX {
       if(a.wetUntil>s.tick)for(let n=0;n<3;n++)this.g.fillStyle(C.water,.8).fillEllipse(x-27+n*27,y-40+(time*50+n*17)%40,7,14);
       if(a.shield>0&&a.shieldUntil>s.tick){const ward=fighter?.skills.find(k=>k.mechanic==='buff'&&(k.shield||k.counter)),color=C[String(ward?.element||'nature')]||C.nature;if(ward&&this.atlas(ward.kind,Math.floor(s.tick/6)%2?5:2,x+a.facing*32,y-70,150,175,.85))continue;this.g.fillStyle(color,.1).fillEllipse(x,y-70,140,190).lineStyle(4,color,.75).strokeEllipse(x,y-70,140,190);}
     }
-    for(const p of s.projectiles){if(!p.skill?.element)continue;const k=p.skill;let x=p.x/100,y=p.y/100-p.z/100-(k.effect==='wave'?0:38);
+    for(const p of s.projectiles){if(!p.skill?.element)continue;const k=p.skill;let x=p.x/100,y=p.y/100-p.z/100-(k.effect==='wave'?0:Number(k.visualHeight||38));
       if(!this.launches.has(p.id)){const caster=s.actors.find(a=>a.id===p.owner);if(caster&&caster.action.startsWith('skill')&&caster.skill>=0){const origin=this.source(caster,k);this.launches.set(p.id,{tick:s.tick,x:origin.x-x,y:origin.y-y});}}
       const launch=this.launches.get(p.id);if(launch){const q=Math.max(0,1-(s.tick-launch.tick)/8),fade=q*q*(3-2*q);x+=launch.x*fade;y+=launch.y*fade;}
       const dir=Math.sign(p.dx)||(p.toX<p.fromX?-1:1),color=C[k.element]||C.physical,size=k.size||35;
       if(k.kind==='banana-prank'&&this.atlas(k.kind,2,x,y,105,100,1,dir<0))continue;
+      if(k.kind==='rx-beam-rifle'&&this.atlas(k.kind,3+Math.floor(s.tick/4)%3,x,y,Math.max(150,size*3.2),undefined,1,dir<0))continue;
       if(this.atlas(k.kind,(p as any).visualFrame??2+Math.floor(s.tick/5)%2,x,y,k.effect==='wave'?260:k.kind==='serious-punch'?250:Math.max(90,size*(k.orb?2.4:2.9)),undefined,1,dir<0))continue;
       if(['ball','power-ball'].includes(k.effect)){if(k.effect==='power-ball')this.sprite('fireball',x-dir*45,y,160,95,.9,dir<0);this.ball(x,y,size*.75,color,time);}
       else if(k.effect==='bubble'){this.g.fillStyle(C.water,.12).fillCircle(x,y,size).lineStyle(4,C.water,.9).strokeCircle(x,y,size).lineStyle(2,0xffffff,.9).beginPath().arc(x-4,y-4,size*.8,3.2,4.9).strokePath();}
@@ -220,7 +221,7 @@ export class ElementalVFX {
     for(const f of s.fields||[])this.field(f,s,time);
     for(const b of this.bursts){b.age+=dt;const e=b.event,q=b.age/b.life,color=C[e.element]||C.light,alpha=1-q;
       if(this.hasAtlas(e.kind)){
-        const ground=this.assets.skillFx?.[e.kind].anchor==='ground',caster=s.actors.find(a=>a.id===e.actor),face=e.facing??caster?.facing??1,frame=Math.min(7,3+Math.floor(q*5));
+        const ground=this.assets.skillFx?.[e.kind].anchor==='ground',caster=s.actors.find(a=>a.id===e.actor),face=e.facing??caster?.facing??1,frame=e.kind==='rx-beam-rifle'?(e.type==='abilityPulse'?6+Math.min(1,Math.floor(q*2)):Math.min(2,Math.floor(q*3))):Math.min(7,3+Math.floor(q*5));
         // Releases are small flashes; damaging fields/projectiles own the large visual.
         const size=e.type==='cloneSmoke'?170:e.type==='catStrike'?160:e.type==='abilityPulse'?Math.min(310,(e.size||90)*2):e.mechanic==='scan'?220:e.mechanic==='buff'?170:95;
         if(e.type==='wardBlock')this.atlas(e.kind,6,e.x,e.y-35,110,100,alpha,face<0);

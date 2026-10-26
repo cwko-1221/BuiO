@@ -26,7 +26,7 @@ try{
   const baseURL=`http://127.0.0.1:${port}`;for(let n=0;n<200;n++){try{if((await fetch(baseURL+'/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   browser=await chromium.launch({channel:'chrome',headless:true});context=await browser.newContext({baseURL,viewport:{width:1024,height:768},hasTouch:true,recordVideo:{dir:path.join(out,'video'),size:{width:1024,height:768}}});
   assert.equal((await context.request.post('/api/auth/login',{data:{studentId:'S001',password:'test'}})).status(),200);
-  const catalog=await (await context.request.get('/api/pet/brawl/catalog')).json();assert.equal(catalog.fighters.length,27);
+  const catalog=await (await context.request.get('/api/pet/brawl/catalog')).json();assert.equal(catalog.fighters.length,29);
   for(const fighter of FIGHTERS.filter(f=>f.rarity==='epic')){const pet=d.petInstances.find(p=>p.speciesId===fighter.id);assert.equal((await context.request.post('/api/pet/brawl/access',{data:{petId:pet.petId,fighterId:fighter.id,mode:'practice'}})).status(),200);}
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('requestfailed',r=>{if(!r.failure()?.errorText.includes('ERR_ABORTED'))failed.push(r.url());});page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   await page.goto('/pet');await page.locator('[data-tab="brawl"]').click();await page.locator('.brawl-fighter').first().waitFor();assert.equal(await page.locator('.brawl-fighter').count(),27);

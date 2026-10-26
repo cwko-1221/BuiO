@@ -2,6 +2,9 @@ const L=(zh,en)=>({'zh-HK':zh,'en-US':en});
 const k=(zh,en,description,english,kind,mechanic,damage,mp,cooldown,range,extra={})=>({name:L(zh,en),description:L(description,english),kind,mechanic,damage,mp:Math.ceil(mp*1.25),cooldown,range,...extra});
 // v8 budgets stronger elemental utility with 25% higher MP costs.
 export const ELEMENTAL_KITS={
+  'gundam-rx-78-2':[
+    k('光束步槍連射','Beam Rifle Salvo','舉槍瞄準後，向前連射三發粉紅光束，每發 12 傷害。射程遠，但可換路線避開；出招時不能移動。','Brace and fire three pink beam bolts for twelve damage each. Long range, but opponents can dodge into another lane; firing roots you in place.','rx-beam-rifle','projectile',12,28,330,740,{volleys:3,interval:14,speed:900,size:62,knock:3,windup:20,duration:72,effect:'beam-rifle',element:'light',visualHeight:65}),
+    k('光束軍刀三連斬','Beam Saber Combination','原地拔出光束軍刀，向前下斬、反手上斬，再突刺收招，共 32 傷害；最後一擊擊倒。可被攻擊打斷。','Draw a beam saber for a downward slash, rising cut and finishing thrust: thirty-two damage total with a final knockdown. Attacks can interrupt the sequence.','rx-beam-saber','weapon-combo',8,36,480,210,{pulses:3,period:12,finisher:16,windup:20,duration:68,depth:48,knock:2,effect:'beam-saber',element:'light'})],
   'monchhichi':[
     k('蕉皮惡作劇','Banana Peel Prank','拋出香蕉皮，落地後保留 4 秒；敵人踩中會受 18 傷害、滑倒及減速 1.5 秒，蕉皮隨即消失。','Toss a banana peel that waits for four seconds after landing. One enemy who steps on it takes eighteen damage, trips and slows for 1.5 seconds; the peel is consumed.','banana-prank','peel-trap',18,26,300,310,{flight:32,height:115,radius:72,life:240,arm:12,slowTicks:90,windup:16,duration:52,effect:'banana',element:'physical'}),
     k('絨毛抱抱','Plush Hug','原地抱住前方一名近敵，兩段傷害共 22；抱抱完成才回復 12 HP，末擊擊倒。可被打斷，對 Boss 的束縛較短。','Embrace one nearby foe without moving for two hits totalling twenty-two damage. Only a completed hug heals twelve HP and knocks down; attacks can interrupt it, and bosses resist the hold.','plush-hug','hug',8,40,540,160,{finisher:14,heal:12,rootTicks:42,windup:16,duration:58,period:20,depth:42,effect:'hug',element:'light'})],
@@ -96,5 +99,6 @@ export const ELEMENTAL_ROLES={
   'coral-seal':L('潮汐支援','Tidal guardian'),'dragon-ball-goku':L('巨型氣功','Ki powerhouse'),
   'naruto-uzumaki':L('分身螺旋','Clone vortex'),'doraemon':L('空中砲手','Aerial artillery'),
   'nezuko-kamado':L('血焰術士','Bloodflame caster'),'pikachu':L('電球雷暴','Electric storm'),
-  'one-punch-saitama':L('拳壓風暴','Pressure striker')
+  'one-punch-saitama':L('拳壓風暴','Pressure striker'),
+  'gundam-rx-78-2':L('光束射擊・軍刀連斬','Beam rifle / saber specialist')
 };

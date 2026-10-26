@@ -83,6 +83,8 @@
     "fit": "node scripts/fit-preview.mjs",
     "check:chinese-tone": "node scripts/test-chinese-tone.mjs",
     "check:pet-brawl-roster": "node scripts/test-pet-brawl-roster.mjs",
+    "check:pet-brawl-gundam": "node scripts/test-pet-brawl-gundam.mjs",
+    "check:pet-brawl-gundam-live": "node scripts/test-pet-brawl-gundam-live.mjs",
     "check:pet-brawl-roster-live": "node scripts/test-pet-brawl-roster-live.mjs",
     "check:pet-brawl-elemental": "node scripts/test-pet-brawl-elemental.mjs",
     "check:pet-brawl-elemental-live": "node scripts/test-pet-brawl-elemental-live.mjs",

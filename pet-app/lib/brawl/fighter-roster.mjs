@@ -25,4 +25,5 @@ export const EXTRA_FIGHTERS=Object.freeze([
   {id:'monchhichi',name:{'zh-HK':'Monchhichi','en-US':'Monchhichi'},rarity:'epic',hp:110,speed:220,damage:[8,8,13],airDamage:13,color:0xe5a746,role:ELEMENTAL_ROLES.monchhichi,skills:ELEMENTAL_KITS.monchhichi},
   {id:'dynasty-warriors-zhao-yun',name:{'zh-HK':'趙雲','en-US':'Zhao Yun'},rarity:'epic',hp:116,speed:205,damage:[9,9,14],airDamage:14,color:0x64c7ed,role:ELEMENTAL_ROLES['dynasty-warriors-zhao-yun'],skills:ELEMENTAL_KITS['dynasty-warriors-zhao-yun']},
   {id:'sword-art-online-kirito',name:{'zh-HK':'桐人','en-US':'Kirito'},rarity:'epic',hp:100,speed:245,damage:[8,8,13],airDamage:13,color:0x64dac9,role:ELEMENTAL_ROLES['sword-art-online-kirito'],skills:ELEMENTAL_KITS['sword-art-online-kirito']},
+  {id:'gundam-rx-78-2',name:{'zh-HK':'元祖高達','en-US':'RX-78-2 Gundam'},rarity:'epic',hp:118,speed:195,damage:[8,9,14],airDamage:14,color:0xff76ca,role:ELEMENTAL_ROLES['gundam-rx-78-2'],skills:ELEMENTAL_KITS['gundam-rx-78-2']},
 ]);

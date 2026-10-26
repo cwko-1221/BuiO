@@ -1596,6 +1596,28 @@
       "originX": 0.5,
       "originY": 0.5,
       "anchor": "center"
+    },
+    "rx-beam-rifle": {
+      "url": "/pet/assets/art/brawl/gundam-rx-78-2-rifle-fx-f016a8408d96.webp",
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "frames": 8,
+      "widthRatio": 0.9,
+      "heightRatio": 0.9,
+      "originX": 0.5,
+      "originY": 0.5,
+      "anchor": "center"
+    },
+    "rx-beam-saber": {
+      "url": "/pet/assets/art/brawl/gundam-rx-78-2-saber-fx-bf9a38e26713.webp",
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "frames": 8,
+      "widthRatio": 0.9,
+      "heightRatio": 0.9,
+      "originX": 0.15,
+      "originY": 0.5,
+      "anchor": "center"
     }
   },
   "fighterSkillAnimations": {
@@ -3819,7 +3841,107 @@
           ]
         }
       }
-    }
+    },
+    "gundam-rx-78-2": [
+      {
+        "url": "/pet/assets/art/brawl/gundam-rx-78-2-rifle-poses-f44ae378308d.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "skill1": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "cast",
+            "emitters": [
+              {
+                "x": 49.19,
+                "y": -9.05
+              },
+              {
+                "x": 85.95,
+                "y": -107.76
+              },
+              {
+                "x": 88.38,
+                "y": -94.01
+              },
+              {
+                "x": 89.88,
+                "y": -94.01
+              },
+              {
+                "x": 66.5,
+                "y": -109.1
+              },
+              {
+                "x": 88.14,
+                "y": -97.35
+              },
+              {
+                "x": 60.27,
+                "y": -31.12
+              },
+              {
+                "x": 48.07,
+                "y": -12.32
+              }
+            ],
+            "emitterRole": "weapon",
+            "displaySize": 432,
+            "originY": 0.9245000000000001
+          }
+        }
+      },
+      {
+        "url": "/pet/assets/art/brawl/gundam-rx-78-2-saber-poses-94b9b9d42f43.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "skill2": {
+            "start": 0,
+            "count": 8,
+            "poseTimeline": "cast",
+            "emitters": [
+              {
+                "x": -26.39,
+                "y": -40.65
+              },
+              {
+                "x": -34.7,
+                "y": -83.31
+              },
+              {
+                "x": -29.11,
+                "y": -124.04
+              },
+              {
+                "x": -24.12,
+                "y": -147.31
+              },
+              {
+                "x": 2.38,
+                "y": -37.14
+              },
+              {
+                "x": 6.8,
+                "y": -70.55
+              },
+              {
+                "x": 71.41,
+                "y": -69.05
+              },
+              {
+                "x": -20.3,
+                "y": -21
+              }
+            ],
+            "emitterRole": "weapon",
+            "displaySize": 432,
+            "originY": 0.9245000000000001
+          }
+        }
+      }
+    ]
   },
   "panoramas": {
     "sunny-training": {
@@ -4996,6 +5118,83 @@
             "poseTimeline": "strike",
             "displaySize": 432,
             "originY": 0.9297083333333334
+          }
+        }
+      }
+    ],
+    "gundam-rx-78-2": [
+      {
+        "url": "/pet/assets/art/brawl/gundam-rx-78-2-saber-poses-94b9b9d42f43.webp",
+        "frameWidth": 384,
+        "frameHeight": 384,
+        "clips": {
+          "attack1": {
+            "start": 0,
+            "count": 8,
+            "frames": [
+              0,
+              1,
+              2,
+              4,
+              4,
+              6,
+              7,
+              0
+            ],
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9245000000000001
+          },
+          "attack2": {
+            "start": 0,
+            "count": 8,
+            "frames": [
+              0,
+              1,
+              3,
+              5,
+              5,
+              6,
+              7,
+              0
+            ],
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9245000000000001
+          },
+          "attack3": {
+            "start": 0,
+            "count": 8,
+            "frames": [
+              0,
+              1,
+              2,
+              6,
+              6,
+              4,
+              7,
+              0
+            ],
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9245000000000001
+          },
+          "air": {
+            "start": 0,
+            "count": 8,
+            "frames": [
+              0,
+              2,
+              3,
+              4,
+              4,
+              6,
+              7,
+              0
+            ],
+            "poseTimeline": "strike",
+            "displaySize": 432,
+            "originY": 0.9245000000000001
           }
         }
       }
