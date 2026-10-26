@@ -6,7 +6,7 @@ import crypto from 'node:crypto';
 import sharp from 'sharp';
 import {connectedPoses, upperCentre} from './pet-art/generated-character-source.mjs';
 const root=path.resolve(import.meta.dirname,'..');
-const ids=new Set(['dynasty-warriors-zhao-yun','sword-art-online-kirito']);
+const ids=new Set(['dynasty-warriors-zhao-yun','sword-art-online-kirito','gundam-rx-78-2']);
 assert(process.argv[2],'Pass a model selection JSON array');
 const selections=JSON.parse(await fs.readFile(path.resolve(process.argv[2]),'utf8'));
 for(const {id,path:input,prompt} of selections){

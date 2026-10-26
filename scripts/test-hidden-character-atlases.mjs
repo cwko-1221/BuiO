@@ -6,11 +6,17 @@ import {createRequire} from 'node:module';
 import sharp from 'sharp';
 import {HIDDEN_CHARACTERS,renderHiddenCharacter} from './pet-art/hidden-character-rigs.mjs';
 import {oppositeZhaoLegs} from './pet-art/zhao-yun-opposite-legs.mjs';
+import {oppositeGundamLegs} from './pet-art/gundam-opposite-legs.mjs';
+import {checkGundamGait} from './pet-art/gundam-gait-qa.mjs';
+import {connectedPoses} from './pet-art/generated-character-source.mjs';
 const ROOT=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url);
 const {catalog}=require('../pet-app/lib/catalog.js');
 const sha=buffer=>crypto.createHash('sha256').update(buffer).digest('hex');
-for(const character of [...HIDDEN_CHARACTERS,{id:'monchhichi'},
- {id:'dynasty-warriors-zhao-yun'},{id:'sword-art-online-kirito'}]) {
+const selected=process.argv.find(a=>a.startsWith('--pet='))?.slice(6);
+const characters=[...HIDDEN_CHARACTERS,{id:'monchhichi'},
+ {id:'dynasty-warriors-zhao-yun'},{id:'sword-art-online-kirito'},{id:'gundam-rx-78-2'}];
+assert(!selected||characters.some(c=>c.id===selected),'Unknown selected character');
+for(const character of characters.filter(c=>!selected||c.id===selected)) {
  const generated=character.id!=='pikachu';
  const source=path.join(ROOT,'pet-app/art-source/imagegen/baked-wearables',character.id+(generated?'-perfect-v2':'-native-v1'));
  const artifact=path.join(ROOT,'artifacts/premium-character-atlases',character.id,generated?'generated-v2':'');
@@ -19,6 +25,18 @@ for(const character of [...HIDDEN_CHARACTERS,{id:'monchhichi'},
  assert.equal(meta.width,4096);assert.equal(meta.height,4096);assert.equal(meta.channels,4);assert(meta.hasAlpha);
  const report=JSON.parse(await fs.readFile(path.join(artifact,'build-report.json'),'utf8'));
  assert.equal(report.atlasHash,sha(atlas));
+ if(character.id==='gundam-rx-78-2'){
+  const before=await fs.readFile(path.join(source,'processed','04-before-opposite.png'));
+  assert.equal(sha(before),report.frames[4].oppositeLegCorrection.inputHash);
+  const corrected=await oppositeGundamLegs(before);
+  assert.equal(sha(corrected),report.frames[4].hash);
+  const a=await sharp(before).ensureAlpha().raw().toBuffer();
+  const b=await sharp(corrected).ensureAlpha().raw().toBuffer();
+  assert(a.subarray(0,317*512*4).equals(b.subarray(0,317*512*4)),'Helmet, chest or identity changed');
+  const tiles=await Promise.all(Array.from({length:37},(_,i)=>fs.readFile(path.join(source,'processed',String(i).padStart(2,'0')+'.png'))));
+  for(const [i,tile] of tiles.entries())await connectedPoses(tile,1);
+  assert.deepEqual(await checkGundamGait(tiles),report.gundamGait);
+ }
  if(character.id==='dynasty-warriors-zhao-yun')for(const frame of [4,5]){
   const before=await fs.readFile(path.join(source,'processed',String(frame).padStart(2,'0')+'-before-opposite.png'));
   assert.equal(sha(before),report.frames[frame].oppositeLegCorrection.inputHash);

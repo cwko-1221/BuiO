@@ -48,6 +48,7 @@ const MYSTERY_PET_IDS = new Set([
   'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
   'monchhichi',
   'dynasty-warriors-zhao-yun', 'sword-art-online-kirito',
+  'gundam-rx-78-2',
 ]);
 const COIN_PUSHER_DROP_COST = 1;
 type CoinPusherRewardOrigin = { x: number; y: number };

@@ -6,9 +6,11 @@ import sharp from 'sharp';
 import {connectedPoses,upperCentre,bounds} from './pet-art/generated-character-source.mjs';
 import {oppositeSaitamaLegs} from './pet-art/saitama-opposite-legs.mjs';
 import {oppositeZhaoLegs} from './pet-art/zhao-yun-opposite-legs.mjs';
+import {oppositeGundamLegs} from './pet-art/gundam-opposite-legs.mjs';
+import {checkGundamGait} from './pet-art/gundam-gait-qa.mjs';
 
 const ROOT=path.resolve(import.meta.dirname,'..'),CELL=512;
-const IDS=['dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi','dynasty-warriors-zhao-yun','sword-art-online-kirito'];
+const IDS=['dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi','dynasty-warriors-zhao-yun','sword-art-online-kirito','gundam-rx-78-2'];
 const GROUPS=['front-walk','right-walk','back-walk','front-idle','specials'];
 const WALK=[475,478,475,472,475,478,475,472];
 // Whole-sheet generation can return otherwise coherent poses out of temporal order.
@@ -48,9 +50,9 @@ async function supportSide(tile) {
  }
  return {left,right,sign:Math.sign(left-right)};
 }
-async function tile(frame,scale,baseline,label) {
+async function tile(frame,scale,baseline,label,centreOverride) {
  const width=Math.round(frame.width*scale),height=Math.round(frame.height*scale);
- const left=Math.round(256-await upperCentre(frame.buffer)*scale),top=baseline-height;
+ const left=Math.round(256-(centreOverride??await upperCentre(frame.buffer))*scale),top=baseline-height;
  assert(left>=16&&top>=16&&left+width<=496&&top+height<=496,label+': pose exceeds safety gutter');
  const input=await sharp(frame.buffer).resize(width,height).png().toBuffer(),target=Math.floor(baseline*160/512);
  for(const correction of [0,-1,1,-2,2,-3,3,-4,4]){
@@ -90,7 +92,9 @@ for(const id of IDS.filter(id=>!selected||id===selected)){
   // the page's single pixel density to the approved 500px logical standing height;
   // every pose on that page retains the same conversion (never individual fitting).
   const gutterCalibration=['dynasty-warriors-zhao-yun','sword-art-online-kirito'].includes(id)&&name==='right-walk';
-  const density=name==='specials'?1:gutterCalibration?500/median(poses.frames.map(f=>f.height)):1024/poses.sourceHeight;
+  // Gundam pages use different generated raster resolutions; calibrate each whole
+  // page to the same approved standing height, never resize individual poses.
+  const density=name==='specials'?1:(gutterCalibration||id==='gundam-rx-78-2')?500/median(poses.frames.map(f=>f.height)):1024/poses.sourceHeight;
   const order=FRAME_ORDERS[id]?.[name]??poses.frames.map((_,i)=>i);
   assert.equal(new Set(order).size,poses.frames.length,'Invalid complete-pose ordering');
   const frames=await Promise.all(order.map(async sourcePhase=>{
@@ -104,11 +108,12 @@ for(const id of IDS.filter(id=>!selected||id===selected)){
  const referenceHeight=id==='dynasty-warriors-zhao-yun'?508:0;
  const motionScale=Math.min(430/Math.max(referenceHeight,...motion.map(f=>f.height)),238/Math.max(...extents));
  const upright=groups[4].frames.filter((_,i)=>[0,1,4].includes(i));
- const specialExtents=await Promise.all(groups[4].frames.map(async f=>{const c=await upperCentre(f.buffer);return Math.max(c,f.width-c);}));
+ const specialExtents=await Promise.all(groups[4].frames.map(async (f,i)=>{const c=id==='gundam-rx-78-2'&&i===2?f.width/2:await upperCentre(f.buffer);return Math.max(c,f.width-c);}));
  const specialScale=Math.min(median(groups[0].frames.map(f=>f.height))*motionScale/median(upright.map(f=>f.height)),238/Math.max(...specialExtents),430/Math.max(...groups[4].frames.map(f=>f.height)));
  const frames=[];
  for(let row=0;row<5;row++)for(let phase=0;phase<groups[row].frames.length;phase++){
-  const normalized=await tile(groups[row].frames[phase],row===4?specialScale:motionScale,row<3?WALK[phase]:478,id+' '+GROUPS[row]+' '+phase);
+  const centredSleep=id==='gundam-rx-78-2'&&row===4&&phase===2?groups[row].frames[phase].width/2:undefined;
+  const normalized=await tile(groups[row].frames[phase],row===4?specialScale:motionScale,row<3?WALK[phase]:478,id+' '+GROUPS[row]+' '+phase,centredSleep);
   const index=row*8+phase;frames.push({...normalized,index,group:GROUPS[row],sourcePhase:groups[row].frames[phase].sourcePhase,sourceBounds:groups[row].frames[phase].sourceBounds});
   await fs.writeFile(path.join(source,'processed',String(index).padStart(2,'0')+'.png'),normalized.tile);
  }
@@ -128,10 +133,18 @@ for(const id of IDS.filter(id=>!selected||id===selected)){
   f.hash=hash(f.tile);f.oppositeLegCorrection={method:'symmetric trouser/knee-guard seam',upperUnchangedThrough:385,axisTwice:500,inputHash};
   await fs.writeFile(path.join(source,'processed',String(index).padStart(2,'0')+'.png'),f.tile);
  }
+ if(id==='gundam-rx-78-2'){
+  const f=frames[4],inputHash=hash(f.tile);
+  await fs.writeFile(path.join(source,'processed','04-before-opposite.png'),f.tile);
+  f.tile=await oppositeGundamLegs(f.tile);
+  f.bounds=await bounds(f.tile);f.runtime=await bounds(await sharp(f.tile).resize(160,160).png().toBuffer(),16);
+  f.hash=hash(f.tile);f.oppositeLegCorrection={method:'symmetric lower skirt seam, excluding hands',upperUnchangedThrough:316,axisTwice:528,inputHash};
+  await fs.writeFile(path.join(source,'processed','04.png'),f.tile);
+ }
  for(let row=0;row<5;row++)await review(frames.filter(f=>f.group===GROUPS[row]),row===4?5:4,path.join(artifact,GROUPS[row]+'.png'),GROUPS[row]);
  await review(frames,8,path.join(artifact,'contact-sheet.png'),id);
  const idle=await Promise.all(frames.slice(24,32).map(f=>idleShape(f.tile)));
- const front=['monchhichi','dynasty-warriors-zhao-yun','sword-art-online-kirito'].includes(id)?await Promise.all(frames.slice(0,8).map(f=>idleShape(f.tile))):null;
+ const front=['monchhichi','dynasty-warriors-zhao-yun','sword-art-online-kirito','gundam-rx-78-2'].includes(id)?await Promise.all(frames.slice(0,8).map(f=>idleShape(f.tile))):null;
  const spread=k=>Math.max(...idle.map(f=>f[k]))-Math.min(...idle.map(f=>f[k]));
  const errors=[];
  if(front){
@@ -165,6 +178,7 @@ for(const id of IDS.filter(id=>!selected||id===selected)){
  for(let stage=1;stage<=4;stage++)await fs.writeFile(path.join(artifact,'import','pet-'+id+'-'+stage+'.png'),atlas);
  await fs.writeFile(path.join(artifact,'preview.html'),preview(id));
  const report={id,source:'Built-in image_gen whole-sheet edits of one approved three-view raster model',motionScale,specialScale,atlasHash:hash(atlas),modelHash:hash(await fs.readFile(path.join(source,'model-reference.png'))),promptHash:hash(await fs.readFile(path.join(source,'generation-prompts.json'))),groups:groups.map(({frames,...g})=>g),idle,supportChecks,errors,frames:frames.map(({tile,...f})=>f)};
+ if(id==='gundam-rx-78-2')report.gundamGait=await checkGundamGait(frames.map(f=>f.tile));
  await fs.writeFile(path.join(artifact,'build-report.json'),JSON.stringify(report,null,2)+'\n');
  assert.deepEqual(errors,[],id+': inspect previews and regenerate inconsistent source set');
  console.log('✓ '+id+': complete 37-pose raster atlas, fixed idle baseline, retained source hashes '+hash(atlas).slice(0,12));

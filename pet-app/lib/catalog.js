@@ -255,6 +255,7 @@ const PET_LIBRARY = [
   ['monchhichi','epic','friendship',['Monchhichi','Monchhichi','Monchhichi','Monchhichi'],['Monchhichi','Monchhichi','Monchhichi','Monchhichi'],'絨毛擁抱','Fluffy Hug','#965c36','monchhichi',9999],
   ['dynasty-warriors-zhao-yun','epic','warrior',['趙雲','趙雲','趙雲','趙雲'],['Zhao Yun','Zhao Yun','Zhao Yun','Zhao Yun'],'常山銀龍','Silver Dragon','#497ec7','zhao-yun',9999],
   ['sword-art-online-kirito','epic','swordsman',['桐人','桐人','桐人','桐人'],['Kirito','Kirito','Kirito','Kirito'],'黑衣劍士','Black Swordsman','#353641','kirito',9999],
+  ['gundam-rx-78-2','epic','mecha',['元祖高達','元祖高達','元祖高達','元祖高達'],['RX-78-2 Gundam','RX-78-2 Gundam','RX-78-2 Gundam','RX-78-2 Gundam'],'白色機甲','White Mobile Suit','#3975bb','gundam',9999],
 ].map(([id, rarity, element, namesZh, namesEn, talentZh, talentEn, color, body, directPrice]) => ({
   id, rarity, element, names: { 'zh-HK': namesZh, 'en-US': namesEn },
   talent: { 'zh-HK': talentZh, 'en-US': talentEn }, color, body,
@@ -286,6 +287,7 @@ const RELEASED_PET_IDS = new Set([
   'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
   'monchhichi',
   'dynasty-warriors-zhao-yun', 'sword-art-online-kirito',
+  'gundam-rx-78-2',
 ]);
 const PETS = PET_LIBRARY.filter((pet) => RELEASED_PET_IDS.has(pet.id));
 

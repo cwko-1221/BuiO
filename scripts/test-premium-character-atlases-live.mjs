@@ -16,12 +16,13 @@ const PET_IDS = [
   'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
   'monchhichi',
   'dynasty-warriors-zhao-yun', 'sword-art-online-kirito',
+  'gundam-rx-78-2',
 ];
 const selectedPet = process.argv.find((arg) => arg.startsWith('--pet='))?.slice(6);
 const selectedPets = process.argv.find((arg) => arg.startsWith('--pets='))?.slice(7).split(',');
 const RUN_PET_IDS = selectedPets || (selectedPet ? [selectedPet] : PET_IDS);
 assert(RUN_PET_IDS.length && RUN_PET_IDS.every(id=>PET_IDS.includes(id)), 'Unknown premium character selection');
-const NEW_PET_IDS = new Set(['pikachu','dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi','dynasty-warriors-zhao-yun','sword-art-online-kirito']);
+const NEW_PET_IDS = new Set(['pikachu','dragon-ball-frieza','one-piece-luffy','spy-family-anya','one-punch-saitama','naruto-uzumaki','monchhichi','dynasty-warriors-zhao-yun','sword-art-online-kirito','gundam-rx-78-2']);
 const reservePort = () => new Promise((resolve, reject) => {
   const socket = net.createServer(); socket.once('error', reject);
   socket.listen(0, '127.0.0.1', () => {

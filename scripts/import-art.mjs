@@ -94,6 +94,7 @@ const PREMIUM_PET_IDS = [
   'dragon-ball-frieza', 'one-piece-luffy', 'spy-family-anya', 'one-punch-saitama', 'naruto-uzumaki',
   'monchhichi',
   'dynasty-warriors-zhao-yun', 'sword-art-online-kirito',
+  'gundam-rx-78-2',
 ];
 const PREMIUM_PET_LAYOUT = {
   columns: 8, rows: 5, cell: ATLAS_CELL, fps: 10,
