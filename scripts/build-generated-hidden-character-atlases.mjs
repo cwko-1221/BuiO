@@ -6,7 +6,7 @@ import sharp from 'sharp';
 import {connectedPoses,upperCentre,bounds} from './pet-art/generated-character-source.mjs';
 import {oppositeSaitamaLegs} from './pet-art/saitama-opposite-legs.mjs';
 import {oppositeZhaoLegs} from './pet-art/zhao-yun-opposite-legs.mjs';
-import {oppositeGundamLegs} from './pet-art/gundam-opposite-legs.mjs';
+import {oppositeGundamLegs} from './pet-art/gundam-contralateral-legs.mjs';
 import {checkGundamGait} from './pet-art/gundam-gait-qa.mjs';
 
 const ROOT=path.resolve(import.meta.dirname,'..'),CELL=512;
@@ -16,6 +16,7 @@ const WALK=[475,478,475,472,475,478,475,472];
 // Whole-sheet generation can return otherwise coherent poses out of temporal order.
 // Reorder complete poses, never crop/mirror costume details to conceal a bad gait.
 const FRAME_ORDERS={
+ 'gundam-rx-78-2':{'front-walk':[0,1,2,7,4,5,6,3]},
  'dynasty-warriors-zhao-yun':{'back-walk':[0,5,2,3,4,1,6,7]},
  'sword-art-online-kirito':{'back-walk':[0,1,2,7,4,5,6,3]},
  'monchhichi':{'back-walk':[0,1,2,7,4,5,6,3]},
@@ -133,13 +134,15 @@ for(const id of IDS.filter(id=>!selected||id===selected)){
   f.hash=hash(f.tile);f.oppositeLegCorrection={method:'symmetric trouser/knee-guard seam',upperUnchangedThrough:385,axisTwice:500,inputHash};
   await fs.writeFile(path.join(source,'processed',String(index).padStart(2,'0')+'.png'),f.tile);
  }
- if(id==='gundam-rx-78-2'){
-  const f=frames[4],inputHash=hash(f.tile);
-  await fs.writeFile(path.join(source,'processed','04-before-opposite.png'),f.tile);
+ // Reordered push-off poses and contact 4 already have contralateral limbs.
+ // Reflect only the other symmetric lower bodies; preserve every original arm.
+ if(id==='gundam-rx-78-2')for(const index of [0,1,2,5,6]){
+  const f=frames[index],inputHash=hash(f.tile),stem=String(index).padStart(2,'0');
+  await fs.writeFile(path.join(source,'processed',stem+'-before-opposite.png'),f.tile);
   f.tile=await oppositeGundamLegs(f.tile);
   f.bounds=await bounds(f.tile);f.runtime=await bounds(await sharp(f.tile).resize(160,160).png().toBuffer(),16);
-  f.hash=hash(f.tile);f.oppositeLegCorrection={method:'symmetric lower skirt seam, excluding hands',upperUnchangedThrough:316,axisTwice:528,inputHash};
-  await fs.writeFile(path.join(source,'processed','04.png'),f.tile);
+  f.hash=hash(f.tile);f.oppositeLegCorrection={method:'component-isolated lower skirt seam, preserving hands and whole boots',upperUnchangedThrough:316,axisTwice:528,inputHash};
+  await fs.writeFile(path.join(source,'processed',stem+'.png'),f.tile);
  }
  for(let row=0;row<5;row++)await review(frames.filter(f=>f.group===GROUPS[row]),row===4?5:4,path.join(artifact,GROUPS[row]+'.png'),GROUPS[row]);
  await review(frames,8,path.join(artifact,'contact-sheet.png'),id);

@@ -18,9 +18,12 @@ normalization and real production-browser frame capture.
   shared scale; no pose-by-pose fitting. Idle feet retain one runtime baseline.
 - The first profile draft repeated arm/leg identity and was rejected. The selected
   profile tracks bright near limbs and shaded far limbs through opposite contacts.
-- Front frame 4 needed a deterministic opposite-leg pass below a symmetric lower
-  skirt seam. The original frame is retained. Helmet, V-fin, chest vents, emblem,
-  hands and backpack remain unchanged; the test verifies the upper-body bytes.
+- Front push-off poses are put in whole-pose order `[0,1,2,7,4,5,6,3]`.
+  Frames 0-2 and 5-6 need an opposite-leg pass below a symmetric lower skirt
+  seam to counter-swing with the unchanged generated arms. Contact 4 and the
+  reordered push-offs already have the correct feet. Corrected originals are retained.
+  Helmet, V-fin, chest vents, emblem, hands and backpack remain unchanged;
+  the test verifies the upper-body bytes and the leading glove/boot opposition.
 - Sleep uses the same special-pose scale as other specials and is centred by its
   full horizontal body width so its helmet anchor cannot shrink the whole set.
 

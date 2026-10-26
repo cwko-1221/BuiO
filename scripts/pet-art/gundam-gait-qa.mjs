@@ -3,6 +3,22 @@ import sharp from 'sharp';
 
 // Track limb identity through the stride instead of counting different pictures.
 export async function checkGundamGait(frames) {
+  const frontContacts=[];
+  for(const index of [0,4]){
+    const data=await sharp(frames[index]).ensureAlpha().raw().toBuffer();
+    const gloves=[0,0],soles=[0,0];
+    for(let y=0;y<512;y++)for(let x=0;x<512;x++){
+      const p=(y*512+x)*4,r=data[p],g=data[p+1],b=data[p+2];
+      if(data[p+3]<=128)continue;
+      if(y>=230&&y<315&&r<100&&g<110&&b<130){
+        if(x<200)gloves[0]++;if(x>330)gloves[1]++;
+      }
+      if(y>400&&r<90&&g<90&&b<110)soles[x<264?0:1]++;
+    }
+    assert(Math.sign(gloves[0]-gloves[1])===-Math.sign(soles[0]-soles[1]),
+      'Front contact swings the same-side glove and leading boot');
+    frontContacts.push({index,gloves,soles});
+  }
   const profile=[];
   for(const input of frames.slice(8,16)){
     const {data}=await sharp(input).ensureAlpha().raw().toBuffer({resolveWithObject:true});
@@ -34,5 +50,5 @@ export async function checkGundamGait(frames) {
   }
   assert(sensors[0]>100&&sensors[4]<sensors[0]*.12,'Sensor blink missing');
   assert(sensors[6]>sensors[0]*.7,'Sensors do not wake after blink');
-  return {profile,sensors};
+  return {frontContacts,profile,sensors};
 }

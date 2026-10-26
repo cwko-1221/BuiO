@@ -6,7 +6,7 @@ import {createRequire} from 'node:module';
 import sharp from 'sharp';
 import {HIDDEN_CHARACTERS,renderHiddenCharacter} from './pet-art/hidden-character-rigs.mjs';
 import {oppositeZhaoLegs} from './pet-art/zhao-yun-opposite-legs.mjs';
-import {oppositeGundamLegs} from './pet-art/gundam-opposite-legs.mjs';
+import {oppositeGundamLegs} from './pet-art/gundam-contralateral-legs.mjs';
 import {checkGundamGait} from './pet-art/gundam-gait-qa.mjs';
 import {connectedPoses} from './pet-art/generated-character-source.mjs';
 const ROOT=path.resolve(import.meta.dirname,'..'),require=createRequire(import.meta.url);
@@ -26,13 +26,15 @@ for(const character of characters.filter(c=>!selected||c.id===selected)) {
  const report=JSON.parse(await fs.readFile(path.join(artifact,'build-report.json'),'utf8'));
  assert.equal(report.atlasHash,sha(atlas));
  if(character.id==='gundam-rx-78-2'){
-  const before=await fs.readFile(path.join(source,'processed','04-before-opposite.png'));
-  assert.equal(sha(before),report.frames[4].oppositeLegCorrection.inputHash);
+  for(const index of [0,1,2,5,6]){
+  const before=await fs.readFile(path.join(source,'processed',String(index).padStart(2,'0')+'-before-opposite.png'));
+  assert.equal(sha(before),report.frames[index].oppositeLegCorrection.inputHash);
   const corrected=await oppositeGundamLegs(before);
-  assert.equal(sha(corrected),report.frames[4].hash);
+  assert.equal(sha(corrected),report.frames[index].hash);
   const a=await sharp(before).ensureAlpha().raw().toBuffer();
   const b=await sharp(corrected).ensureAlpha().raw().toBuffer();
   assert(a.subarray(0,317*512*4).equals(b.subarray(0,317*512*4)),'Helmet, chest or identity changed');
+  }
   const tiles=await Promise.all(Array.from({length:37},(_,i)=>fs.readFile(path.join(source,'processed',String(i).padStart(2,'0')+'.png'))));
   for(const [i,tile] of tiles.entries())await connectedPoses(tile,1);
   assert.deepEqual(await checkGundamGait(tiles),report.gundamGait);
