@@ -318,6 +318,7 @@ const CACHE_APP    = { maxAge: 0, setHeaders: res => res.setHeader('Cache-Contro
 app.use('/shared', assetStatic(path.join(__dirname, 'shared'), CACHE_APP));
 app.use('/src', assetStatic(path.join(__dirname, 'src'), CACHE_APP));
 app.use('/vendor', assetStatic(path.join(__dirname, 'node_modules', 'exceljs', 'dist'), CACHE_VENDOR));
+app.use('/vendor/jszip/3.10.1', assetStatic(path.join(__dirname, 'node_modules', 'jszip', 'dist'), CACHE_VENDOR));
 app.use('/vendor/chart.js/4.4.7', assetStatic(path.join(__dirname, 'node_modules', 'chart.js', 'dist'), CACHE_VENDOR));
 app.use('/vendor/phaser/4.2.1', assetStatic(path.join(__dirname, 'node_modules', 'phaser', 'dist'), CACHE_VENDOR));
 
@@ -414,6 +415,7 @@ app.get('/games', requireSession, (_req, res) => {
 // Projector-led live quiz and student controllers
 app.use('/quiz-mode/css', assetStatic(path.join(__dirname, 'quiz-app', 'public', 'css'), CACHE_APP));
 app.use('/quiz-mode/js', assetStatic(path.join(__dirname, 'quiz-app', 'public', 'js'), CACHE_APP));
+app.use('/quiz-mode/assets', assetStatic(path.join(__dirname, 'quiz-app', 'public', 'assets'), CACHE_MEDIA));
 app.get(['/quiz-mode/preview', '/quiz-mode/host/preview'], (req, res, next) => {
   if (config.isProd || !config.isExplicitDevelopment) return next();
   res.set('Cache-Control', 'no-store').sendFile(path.join('quiz-app', 'public', 'index.html'), { root: __dirname });

@@ -14,3 +14,5 @@ Correct answers earn up to 1,000 points: responses under 500ms earn 1,000; other
 Equal scores sort by correct count, total correct-answer time, then join order. Both teacher and student reconnects restore the current round. A host has two minutes to reconnect; a room expires after two hours. Room state is in memory, like the existing game classrooms, and does not survive server restarts. Results can be downloaded as UTF-8 CSV before closing the room.
 
 Run `node scripts/test-quiz-mode.mjs` and `node scripts/test-quiz-mode-live.mjs`. The live test starts an isolated fixture server and does not change the real database or any student's results.
+
+The teacher's Audio menu controls original synthesized lobby/question music, sound effects and volume. Student music is off by default. Browser audio is unlocked by a pointer or keyboard gesture; hidden/offline screens pause playback. Stage transitions, growing result bars, score counting and bounded celebration effects respect reduced-motion preferences. Teachers can switch between answer statistics and the original question/image without losing the selected voter list.

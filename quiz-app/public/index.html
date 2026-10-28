@@ -6,20 +6,21 @@
   <meta name="theme-color" content="#152b28">
   <title data-i18n="qm.title">問答模式 | BuiO</title>
   <script src="/shared/i18n.js?v=20260910-1"></script>
-  <script src="/shared/i18n/quiz-mode.js?v=20261026-1"></script>
-  <link rel="stylesheet" href="/quiz-mode/css/quiz.css?v=20261026-1">
+  <script src="/shared/i18n/quiz-mode.js?v=20261029-showtime-1"></script>
+  <link rel="stylesheet" href="/quiz-mode/css/quiz.css?v=20261028-1">
+  <link rel="stylesheet" href="/quiz-mode/css/showtime.css?v=20261029-2">
 </head>
 <body>
   <header class="topbar">
     <a id="backLink" class="brand" href="/games"><span class="brand-mark">B</span><span data-i18n="qm.title">問答模式</span></a>
     <div id="roomPin" class="room-pin" hidden><span data-i18n="qm.code">房間號碼</span><strong id="pinValue"></strong></div>
-    <div class="header-actions"><span id="identity"></span><button id="fullscreenBtn" class="secondary" type="button" data-i18n="qm.fullscreen">全螢幕</button></div>
+    <div class="header-actions"><span id="identity"></span><details id="audioSettings" class="audio-settings"><summary class="secondary" data-i18n="qm.audio">音訊</summary><div class="audio-options"><label><span data-i18n="qm.music">背景音樂</span><input id="musicToggle" type="checkbox"></label><label><span data-i18n="qm.effects">音效</span><input id="effectsToggle" type="checkbox"></label><label class="volume-setting"><span data-i18n="qm.volume">音量</span><input id="volumeSlider" type="range" min="0" max="100" step="5" value="45" data-i18n-attr="aria-label:qm.volume"></label></div></details><button id="fullscreenBtn" class="secondary" type="button" data-i18n="qm.fullscreen">全螢幕</button></div>
   </header>
   <div id="connectionStatus" class="connection-status" role="status" hidden></div>
   <main id="main" class="main"><div class="waiting-state" data-i18n="qm.loading">正在連接課堂…</div></main>
   <footer id="controls" class="controls" hidden></footer>
   <div id="error" class="error" role="alert" hidden></div>
   <script src="/socket.io/socket.io.js"></script>
-  <script type="module" src="/quiz-mode/js/main.js?v=20261026-1"></script>
+  <script type="module" src="/quiz-mode/js/main.js?v=20261029-showtime-1"></script>
 </body>
 </html>

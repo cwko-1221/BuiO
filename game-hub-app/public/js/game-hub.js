@@ -1,4 +1,4 @@
-
+import { normalizeQuestionImage as compressQuestionImage, readQuestionWorkbook } from './question-import.js?v=20261028-1';
 // The shared language runtime loads blocking in <head>, so it is already
 // resolved by the time this module runs.
 const { t, lang: uiLang } = window.BuiI18n;
@@ -6,6 +6,18 @@ const { t, lang: uiLang } = window.BuiI18n;
 // ExcelJS is ~926KB and only teachers importing or exporting a spreadsheet ever need it, yet
 // it was loaded eagerly on the portal for every student on every visit. Fetch it on demand.
 let excelJsPromise = null;
+let zipPromise = null;
+function loadJsZip() {
+  if (window.JSZip) return Promise.resolve(window.JSZip);
+  if (!zipPromise) zipPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = '/vendor/jszip/3.10.1/jszip.min.js';
+    script.onload = () => resolve(window.JSZip);
+    script.onerror = () => { zipPromise = null; reject(new Error(t('gh.excelLoadFailed'))); };
+    document.head.appendChild(script);
+  });
+  return zipPromise;
+}
 function loadExcelJs() {
   if (window.ExcelJS) return Promise.resolve(window.ExcelJS);
   if (!excelJsPromise) {
@@ -26,6 +38,7 @@ const previewHeaders=preview?{'x-buio-preview':'1'}:{};
 let role=previewRole==='teacher'?'teacher':previewRole==='student'?'student':null;
 let selectedSet=null,selectedGame=null,rooms=[],filter='all',roomsTimer=null;
 let questionSets=[],editingSetId=null,questionSequence=0;
+let importSequence=0;
 
 function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));}
 function show(id){document.querySelectorAll('.hub-view').forEach(view=>view.classList.toggle('active',view.id===id));}
@@ -98,29 +111,7 @@ async function deleteSet(setId){
   }catch(error){$('teacherHubError').textContent=error.message||t('gh.deleteFailed');}
 }
 
-const QUESTION_IMAGE_MAX_BYTES=256*1024;
-const QUESTION_IMAGE_MAX_SOURCE_BYTES=16*1024*1024;
-
-async function normalizeQuestionImage(blob){
-  if(!blob||blob.size>QUESTION_IMAGE_MAX_SOURCE_BYTES)throw new Error(t('gh.imageTooLarge'));
-  const objectUrl=URL.createObjectURL(blob);
-  try{
-    const image=new Image();
-    const loaded=new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error(t('gh.imageInvalid')));});
-    image.src=objectUrl;await loaded;
-    let scale=Math.min(1,1280/image.naturalWidth,960/image.naturalHeight);
-    for(let resize=0;resize<5;resize++,scale*=.82){
-      const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
-      const context=canvas.getContext('2d');if(!context)throw new Error(t('gh.imageInvalid'));
-      context.fillStyle='#fff';context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(image,0,0,canvas.width,canvas.height);
-      for(const quality of [.86,.78,.7,.62,.54]){
-        const dataUrl=canvas.toDataURL('image/jpeg',quality),base64=dataUrl.slice(dataUrl.indexOf(',')+1);
-        if(Math.floor(base64.length*3/4)<=QUESTION_IMAGE_MAX_BYTES)return dataUrl;
-      }
-    }
-    throw new Error(t('gh.imageTooLarge'));
-  }finally{URL.revokeObjectURL(objectUrl);}
-}
+const normalizeQuestionImage=blob=>compressQuestionImage(blob,t);
 
 function questionBlock(question={}){
   const block=document.createElement('article');
@@ -152,6 +143,7 @@ function renumberQuestions(){
 function addQuestion(question){$('editorQuestions').appendChild(questionBlock(question));renumberQuestions();}
 
 function closeEditor(){
+  importSequence++;$('excelImportBtn').disabled=false;$('saveSetBtn').disabled=false;
   $('questionBankModal').hidden=true;document.body.classList.remove('modal-open');editingSetId=null;
 }
 
@@ -173,30 +165,39 @@ async function openEditor(setId=null){
 function excelCellText(cell){
   const value=cell?.value;if(value==null)return'';
   if(typeof value==='object'){
-    if(Array.isArray(value.richText))return value.richText.map(part=>part.text||'').join('').trim();
-    if(value.text!=null)return String(value.text).trim();if(value.result!=null)return String(value.result).trim();
+    if(Array.isArray(value.richText))return value.richText.map(part=>part.text||'').join('').replace(/[\r\n]+/g,' ').trim();
+    if(value.text!=null)return String(value.text).replace(/[\r\n]+/g,' ').trim();if(value.result!=null)return String(value.result).replace(/[\r\n]+/g,' ').trim();
   }
-  return String(value).trim();
+  return String(value).replace(/[\r\n]+/g,' ').trim();
 }
 
 async function importExcelQuestions(event){
   const file=event.target.files?.[0];event.target.value='';if(!file)return;
+  const sequence=++importSequence;
+  $('excelImportBtn').disabled=true;$('saveSetBtn').disabled=true;
   $('editorError').textContent='';$('excelImportStatus').textContent=t('gh.excelReading',{name:file.name});
   try{
-    await loadExcelJs();
-    const workbook=new ExcelJS.Workbook();await workbook.xlsx.load(await file.arrayBuffer());const sheet=workbook.worksheets[0];
+    const [ExcelJS,JSZip]=await Promise.all([loadExcelJs(),loadJsZip()]);
+    const {workbook,images,inCellImages}=await readQuestionWorkbook(file,{ExcelJS,JSZip,t});const sheet=workbook.worksheets[0];
+    if(sequence!==importSequence)return;
     if(!sheet)throw new Error(t('gh.excelNoSheet'));
     const headers=new Map();sheet.getRow(1).eachCell((cell,column)=>headers.set(excelCellText(cell).toLowerCase(),column));
     const hasHeader=headers.has('question');
     const columns={question:headers.get('question')||1,optionA:headers.get('optiona')||2,optionB:headers.get('optionb')||3,optionC:headers.get('optionc')||4,optionD:headers.get('optiond')||5,correctAnswer:headers.get('correctanswer')||6,image:headers.get('image')||headers.get('picture')||headers.get('圖片')||7};
     const firstDataRow=hasHeader?2:1,imageByRow=new Map();
-    for(const embedded of sheet.getImages()){
-      const imageRow=Math.floor(embedded.range.tl.row)+1,imageColumn=Math.floor(embedded.range.tl.col)+1;
-      if(imageColumn!==columns.image)continue;
-      const media=workbook.getImage(Number(embedded.imageId)),mime={jpeg:'image/jpeg',png:'image/png',gif:'image/gif'}[media.extension];
-      const imageBlob=media.buffer?new Blob([media.buffer],{type:mime}):media.base64?await(await fetch(`data:${mime};base64,${media.base64}`)).blob():null;
-      if(!imageBlob)throw new Error(t('gh.excelImageInvalid',{row:imageRow}));
-      imageByRow.set(imageRow,await normalizeQuestionImage(imageBlob));
+    for(const address of inCellImages){
+      const match=address?.match(/^([A-Z]+)(\d+)$/);if(!match)continue;
+      const column=[...match[1]].reduce((n,letter)=>n*26+letter.charCodeAt(0)-64,0);
+      if(column===columns.image)throw new Error(t('gh.excelInCellImage',{row:match[2]}));
+    }
+    for(const embedded of images){
+      if(embedded.column!==columns.image||embedded.row<firstDataRow)continue;
+      if(imageByRow.has(embedded.row))throw new Error(t('gh.excelMultipleImages',{row:embedded.row}));
+      $('excelImportStatus').textContent=t('gh.excelCompressing',{row:embedded.row});
+      try{imageByRow.set(embedded.row,await normalizeQuestionImage(await embedded.blob()));}
+      catch(error){throw new Error(t('gh.excelImageRowFailed',{row:embedded.row})+' '+(error?.message||t('gh.imageInvalid')));}
+      if(sequence!==importSequence)return;
+      await new Promise(resolve=>setTimeout(resolve,0));
     }
     const questions=[];
     for(let rowNumber=firstDataRow;rowNumber<=sheet.rowCount;rowNumber++){
@@ -212,7 +213,12 @@ async function importExcelQuestions(event){
     $('editorQuestions').innerHTML='';questions.forEach(addQuestion);
     if(!$('editorSetTitle').value.trim())$('editorSetTitle').value=file.name.replace(/\.xlsx$/i,'').slice(0,60);
     $('excelImportStatus').textContent=t('gh.excelImported',{count:questions.length});
-  }catch(error){$('excelImportStatus').textContent=t('gh.excelFailed');$('editorError').textContent=error.message||t('gh.excelUnreadable');}
+  }catch(error){
+    if(sequence!==importSequence)return;
+    $('excelImportStatus').textContent=t('gh.excelFailed');
+    const message=error?.message;
+    $('editorError').textContent=message&&!/undefined|TypeError|Invalid workbook XML|External workbook relationship|zip file|central directory/i.test(message)?message:t('gh.excelUnreadable');
+  }finally{if(sequence===importSequence){$('excelImportBtn').disabled=false;$('saveSetBtn').disabled=false;}}
 }
 
 async function downloadExcelTemplate(){
