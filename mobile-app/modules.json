@@ -1,0 +1,18 @@
+[
+  { "id": "math", "name": "數學練習", "path": "/math", "roles": ["student", "teacher"] },
+  { "id": "multiplication-checklist", "name": "乘數表", "path": "/multiplication-checklist", "roles": ["teacher"] },
+  { "id": "homework", "name": "功課管理", "path": "/homework", "roles": ["student", "teacher"] },
+  { "id": "report", "name": "學習報告", "path": "/report.html", "roles": ["teacher"] },
+  { "id": "chinese", "name": "中文學習", "path": "/chinese", "roles": ["student", "teacher"] },
+  { "id": "english", "name": "英文學習", "path": "/english", "roles": ["student", "teacher"] },
+  { "id": "phonics", "name": "Phonics", "path": "/phonics", "roles": ["student", "teacher"] },
+  { "id": "whiteboard", "name": "互動白板", "path": "/whiteboard", "roles": ["student", "teacher"] },
+  { "id": "buzzer", "name": "搶答器", "path": "/buzzer", "roles": ["student", "teacher"] },
+  { "id": "quiz-mode", "name": "即時測驗", "path": "/quiz-mode", "roles": ["student", "teacher"] },
+  { "id": "games", "name": "遊戲中心", "path": "/games", "roles": ["student", "teacher"] },
+  { "id": "game", "name": "多人闖關", "path": "/game", "roles": ["student", "teacher"] },
+  { "id": "tower-defense", "name": "晶核守衛", "path": "/tower-defense", "roles": ["student", "teacher"] },
+  { "id": "pet", "name": "寵物樂園及對戰", "path": "/pet", "roles": ["student", "teacher"] },
+  { "id": "science-lab", "name": "科學實驗室", "path": "/science-lab", "roles": ["student", "teacher"] },
+  { "id": "science-inquiry", "name": "科學探究閣", "path": "/science-inquiry", "roles": ["student", "teacher"] }
+]

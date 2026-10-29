@@ -1,0 +1,58 @@
+name: BuiO iOS pilot compile
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/capacitor-ios-pilot]
+    paths:
+      - mobile-app/**
+      - .github/workflows/buio-ios-pilot.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: buio-ios-pilot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simulator:
+    name: Compile iOS without signing
+    runs-on: macos-15
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: mobile-app
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: mobile-app
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+      - name: Select installed Xcode 26 or newer
+        run: node ci/select-xcode.mjs
+      - name: Install mobile dependencies only
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Prepare and validate the app
+        run: |
+          npm run prepare:app
+          npx cap sync ios
+          npm test
+      - name: Compile actual iOS simulator target
+        id: compile
+        run: node scripts/ios-simulator.mjs
+      - name: Record result
+        if: always()
+        env:
+          BUILD_RESULT: ${{ steps.compile.outcome }}
+        run: |
+          {
+            echo '### BuiO iOS native compilation'
+            echo "Compilation outcome: ${BUILD_RESULT}"
+            echo 'This workflow does not sign an app, produce an installable IPA, upload to Apple, or invite testers.'
+            echo 'An Apple Developer team and signing setup are still required for installation through TestFlight.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
