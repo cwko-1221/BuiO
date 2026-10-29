@@ -44,15 +44,30 @@ jobs:
       - name: Compile actual iOS simulator target
         id: compile
         run: node scripts/ios-simulator.mjs
+      - name: Build unsigned IPA for physical iPhone and iPad
+        id: device
+        run: node scripts/ios-device.mjs
+      - name: Save unsigned IPA for personal signing on Windows
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: buio-ios-device-unsigned
+          path: |
+            mobile-app/releases/*-unsigned.ipa
+            mobile-app/releases/*.ipa.sha256
+            mobile-app/releases/device-build.json
+          if-no-files-found: error
+          retention-days: 1
       - name: Record result
         if: always()
         env:
           BUILD_RESULT: ${{ steps.compile.outcome }}
+          DEVICE_RESULT: ${{ steps.device.outcome }}
         run: |
           {
             echo '### BuiO iOS native compilation'
             echo "Compilation outcome: ${BUILD_RESULT}"
-            echo 'This workflow does not sign an app, produce an installable IPA, upload to Apple, or invite testers.'
-            echo 'An Apple Developer team and signing setup are still required for installation through TestFlight.'
+            echo "Physical-device unsigned IPA outcome: ${DEVICE_RESULT}"
+            echo 'The device IPA requires personal signing before installation; it is not directly installable or a TestFlight build.'
+            echo 'This workflow does not contain Apple credentials, sign apps, upload to Apple, or invite testers.'
           } >> "$GITHUB_STEP_SUMMARY"
 

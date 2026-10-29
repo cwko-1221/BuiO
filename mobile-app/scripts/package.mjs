@@ -7,7 +7,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const excluded = new Set(['node_modules', '.git', '.gradle', '.idea', 'build', 'Pods', 'DerivedData', 'xcuserdata',
   'test-results', 'releases', 'capacitor-cordova-android-plugins', 'capacitor-cordova-ios-plugins']);
 const allowedRoots = new Set(['android', 'ios', 'scripts', 'tests', 'web', 'www', 'artwork', 'ci']);
-const allowedFiles = new Set(['package.json', 'package-lock.json', 'mobile.config.json', 'modules.json', 'capacitor.config.json', '.gitignore', 'README.md', 'VALIDATION.md', 'CLOUD-INSTALL.md']);
+const allowedFiles = new Set(['package.json', 'package-lock.json', 'mobile.config.json', 'modules.json', 'capacitor.config.json', '.gitignore', 'README.md', 'VALIDATION.md', 'CLOUD-INSTALL.md', 'WINDOWS-INSTALL.md']);
 const zip = new JSZip();
 const prefix = 'buio-mobile/';
 let count = 0;

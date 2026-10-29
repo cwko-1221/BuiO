@@ -1,6 +1,8 @@
 # 沒有 Mac 時，如何安裝到 iPhone／iPad
 
-建議路線：**GitHub 的雲端 Mac 建置 → Apple 簽署及 App Store Connect → TestFlight → iPhone／iPad**。你可以繼續使用 Windows；編譯工作由雲端 Mac 處理。
+個人試用已選擇 **雲端 Mac 建置 → Windows 以普通 Apple ID 側載 → 自己的 iPhone／iPad**，詳見 [Windows 個人試用指引](WINDOWS-INSTALL.md)。這條路不需要付費開發者會員，仍須先為 IPA 簽署。
+
+日後學校分發可走 **GitHub 的雲端 Mac 建置 → Apple 簽署及 App Store Connect → TestFlight → iPhone／iPad**。你可以繼續使用 Windows；編譯工作由雲端 Mac 處理。
 
 ## 已準備的雲端檢查
 
@@ -9,8 +11,11 @@
 1. 使用 GitHub 標準 `macos-15` runner，挑選已安裝的 Xcode 26+。
 2. 只安裝 `mobile-app` 的套件，執行設定與模組覆蓋測試。
 3. 實際編譯 iOS simulator target，確認 Swift／Xcode 專案是否可建置。
+4. 另編譯實機 ARM64 target，核對 Mach-O 的平台為 iOS（不是模擬器），打包未簽署 IPA、SHA-256 及建置資料。這些 artifacts 在 GitHub 保留 1 日，取回本機後可繼續使用。
 
-**此階段不需要 Apple 簽署資料，但輸出不是可安裝的 IPA。** 不會上傳至 Apple 或發出 TestFlight 邀請。此工作流程不儲存 build artifacts 或 Actions cache，只保留執行日誌／摘要。
+**此階段不需要 Apple 簽署資料，但 IPA 仍要經個人簽署才能安裝。** 不會上傳至 Apple 或發出 TestFlight 邀請。新版流程會短期儲存上述 IPA artifacts，不建立 Actions cache。
+
+2026-10-30 已完成首次雲端編譯：[執行紀錄](https://github.com/cwko-1221/BuiO/actions/runs/40913058740)，Xcode 26.3，結果 `BUILD SUCCEEDED`。這次由獨立分支的 push 啟動；手動 workflow_dispatch 需該流程可被 GitHub 從預設分支識別。
 
 目前杯澳倉庫是公開倉庫；GitHub 的[標準 runner 在公開倉庫的運算免費](https://docs.github.com/en/billing/concepts/product-billing/github-actions)。這不代表所有雲端方案、較大型 runner 或儲存用量均免費。
 
@@ -35,4 +40,4 @@ Apple Developer Program 的標準費用為每會員年度 99 USD，所在地價�
 
 ## 目前仍待完成
 
-確認開發者帳戶及簽署方式後，才能把「雲端編譯通過」推進到「手機可安裝」。目前沒有簽署後的 IPA，也沒有 TestFlight 安裝連結。這版仍是在線相容性試用版，尚未完成素材離線化或對戰延遲改善。
+目前先以普通 Apple ID 在 Windows 完成個人簽署及 USB 安裝；日後 TestFlight 分發才需確認付費／獲豁免的開發者會員及相關簽署方式。目前沒有簽署後的 IPA，也沒有 TestFlight 安裝連結。這版仍是在線相容性試用版，尚未完成素材離線化或對戰延遲改善。

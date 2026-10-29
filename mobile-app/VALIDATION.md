@@ -1,5 +1,14 @@
 # 0.1.0 驗證紀錄（2026-10-29，香港時間）
 
+## 2026-10-30 雲端原生編譯補充
+
+- [GitHub Actions 執行結果](https://github.com/cwko-1221/BuiO/actions/runs/40913058740)：completed／success。
+- 分支 `codex/capacitor-ios-pilot`，驗證 commit `ccef4aa77fa1e468d1f385611e87ab4297d4ec90`。
+- GitHub 標準 macOS runner，Xcode 26.3（17C529），實際執行 iOS Simulator target 建置，日誌確認 `BUILD SUCCEEDED`。
+- 此編譯不需 Apple 憑證，未簽署、未輸出可供實體裝置安裝的 IPA、未上傳 App Store Connect／TestFlight。雲端編譯通過不等於實機功能驗收。
+- Workflow 不上傳 artifacts、不建立套件 cache；只保留 CI 日誌及摘要。沒有變更正式網站分支或部署後端。
+- 沒有 Mac 的後續安裝路線已記在 [CLOUD-INSTALL.md](CLOUD-INSTALL.md)，仍待確認 Apple Developer Program 帳戶及簽署方式。
+
 ## 已執行
 
 - Capacitor 8.6.0 建立 iOS Swift Package Manager 及 Android 專案，`npm run sync` 成功。
@@ -16,7 +25,7 @@
 
 ## 尚未執行
 
-- Windows 沒有 Xcode，未編譯 Swift／原生 iOS app，未簽署、未產生 IPA、未安裝至 iPhone／iPad、未上傳 TestFlight。
+- Windows 本機沒有 Xcode；iOS 模擬器原生編譯已於上列雲端執行成功。仍未簽署、未產生可安裝的 IPA、未安裝至 iPhone／iPad、未上傳 TestFlight。
 - 沒有 JDK／Android SDK，未編譯、簽署或安裝 APK。
 - 桌面 WebKit 的 viewport 檢查不能代表 WKWebView 的系統權限、背景生命週期、實機 GPU 或觸控表現。
 - 模組路由覆蓋不是所有模組完整功能驗收。錄音／錄影、檔案匯出、白板、雙機對戰及背景恢復仍待實機測試。
@@ -26,4 +35,4 @@
 
 在 Mac 執行 `npm ci && npm run sync`，用 Xcode 開啟 `ios/App/App.xcodeproj`，選擇可用的開發團隊及實體裝置後 Run。可先用 `npm run ios:simulator` 做不需簽署的模擬器建置，但模擬器 build 不能安裝到實體 iPhone。
 
-這些 Mac／簽署步驟未在本 Windows 工作環境執行，不應當成已完成。
+雲端原生編譯已完成；上述簽署及實機安裝步驟尚未完成。不使用 Mac 的安裝方式見 CLOUD-INSTALL.md。
