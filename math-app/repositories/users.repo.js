@@ -189,6 +189,20 @@ async function updateLanguage(studentId, language) {
   if (u) { u.language = language; store.save(); }
 }
 
+async function updateTeacherPasswordHash(teacherId, passwordHash) {
+  if (config.db.mode === 'postgres') {
+    const { rowCount } = await getPool().query(
+      "UPDATE Users SET PasswordHash = $1 WHERE StudentID = $2 AND Role = 'teacher' RETURNING StudentID",
+      [passwordHash, teacherId]);
+    return rowCount > 0;
+  }
+  const teacher = store.load().users.find(user => user.studentid === teacherId && user.role === 'teacher');
+  if (!teacher) return false;
+  teacher.passwordhash = passwordHash;
+  store.save();
+  return true;
+}
+
 async function deleteById(studentId) {
   await require('../../pet-app/repositories/brawl-duel.repo').cancelForStudent(studentId);
   if (config.db.mode === 'postgres') {
@@ -296,6 +310,7 @@ module.exports = {
   updateStudentProfile,
   updateField,
   updateLanguage,
+  updateTeacherPasswordHash,
   deleteById,
   upgradeAllStudents,
   listForTeacher,

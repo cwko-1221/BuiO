@@ -259,19 +259,29 @@ export function renderAdminPage() {
       <h2>${t('students_list_title')}</h2>
       <div class="student-table">
         ${state.studentsList.filter(s => s.role === 'teacher').map(s => `
-          <div class="student-row" style="grid-template-columns: 1fr auto;">
+          <div class="student-row teacher-account-row">
             <div>
               <div style="display:flex; align-items:baseline; gap:8px;">
-                <strong style="font-size:1.05em;">${s.name}</strong>
-                <span style="color:var(--text-muted); font-size:0.9em;">${s.id}</span>
+                <strong style="font-size:1.05em;">${escapeHtml(s.name)}</strong>
+                <span style="color:var(--text-muted); font-size:0.9em;">${escapeHtml(s.id)}</span>
               </div>
               <div style="margin-top:6px;">
                 <span style="background:var(--teal); color:white; padding:3px 8px; border-radius:12px; font-size:0.8em; display:inline-block;">${t('role_teacher')}</span>
               </div>
             </div>
-            <div>
-              <button class="danger-action delete-student-btn" data-id="${s.id}">${t('delete_btn')}</button>
+            <div class="teacher-account-actions">
+              <button type="button" class="secondary-action teacher-password-toggle" aria-expanded="false">${t('teacher_password_btn')}</button>
+              <button class="danger-action delete-student-btn" data-id="${escapeHtml(s.id)}">${t('delete_btn')}</button>
             </div>
+            <form class="login-form teacher-password-form" data-id="${escapeHtml(s.id)}" hidden>
+              <label>${t('teacher_new_password')}<input name="password" type="password" minlength="6" maxlength="72" autocomplete="new-password" required></label>
+              <label>${t('teacher_confirm_password')}<input name="confirmPassword" type="password" minlength="6" maxlength="72" autocomplete="new-password" required></label>
+              <div class="teacher-account-actions">
+                <button type="submit" class="primary-action">${t('teacher_password_save')}</button>
+                <button type="button" class="secondary-action teacher-password-cancel">${t('teacher_password_cancel')}</button>
+              </div>
+            </form>
+            <div class="teacher-password-message" role="status" aria-live="polite" hidden></div>
           </div>
         `).join('') || `<div style="padding:1rem; color:var(--text-muted)">${t('no_teachers')}</div>`}
       </div>

@@ -690,6 +690,65 @@ function bindEvents() {
     }
   });
 
+  document.querySelectorAll('.teacher-account-row').forEach(row => {
+    const form = row.querySelector('.teacher-password-form');
+    const toggle = row.querySelector('.teacher-password-toggle');
+    const cancel = row.querySelector('.teacher-password-cancel');
+    const save = form.querySelector('[type="submit"]');
+    const message = row.querySelector('.teacher-password-message');
+    const close = () => {
+      form.reset();
+      form.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.focus();
+    };
+    toggle.addEventListener('click', () => {
+      message.hidden = true;
+      if (!form.hidden) return close();
+      form.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+      form.elements.password.focus();
+    });
+    cancel.addEventListener('click', () => { message.hidden = true; close(); });
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      message.hidden = true;
+      message.classList.add('is-error');
+      if (form.elements.password.value !== form.elements.confirmPassword.value) {
+        message.textContent = t('teacher_password_mismatch');
+        message.hidden = false;
+        form.elements.confirmPassword.focus();
+        return;
+      }
+      save.disabled = cancel.disabled = toggle.disabled = true;
+      save.textContent = t('teacher_password_saving');
+      try {
+        const response = await fetch('/api/auth/change-teacher-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            teacherId: form.dataset.id,
+            password: form.elements.password.value,
+            confirmPassword: form.elements.confirmPassword.value,
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || t('teacher_password_failed'));
+        close();
+        message.classList.remove('is-error');
+        message.textContent = t('teacher_password_saved');
+      } catch (error) {
+        message.textContent = error.message || t('teacher_password_failed');
+      } finally {
+        message.hidden = false;
+        save.disabled = cancel.disabled = toggle.disabled = false;
+        save.textContent = t('teacher_password_save');
+        if (form.hidden) toggle.focus();
+      }
+    });
+  });
+
   // 學生管理：刪除
   document.querySelectorAll('.delete-student-btn').forEach(btn => {
     btn.addEventListener('click', async () => {

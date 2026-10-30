@@ -335,6 +335,32 @@ router.delete('/delete-student/:studentId', requireTeacher, async (req, res, nex
 });
 
 // ----------------------------------------------------------------
+// POST /change-teacher-password (unlocked Admin only)
+// ----------------------------------------------------------------
+router.post('/change-teacher-password', requireTeacher, requireAdminUnlocked, async (req, res, next) => {
+  try {
+    const { teacherId, password, confirmPassword } = req.body || {};
+    if (typeof teacherId !== 'string' || !isValidStudentId(normalizeStudentId(teacherId))) {
+      return res.status(400).json({ success: false, message: '請提供有效的教師編號' });
+    }
+    if (typeof password !== 'string' || password.length < 6 || !password.trim()) {
+      return res.status(400).json({ success: false, message: '密碼最少需要 6 個字元' });
+    }
+    if (Buffer.byteLength(password, 'utf8') > 72) {
+      return res.status(400).json({ success: false, message: '密碼過長，請使用不超過 72 位元組的密碼' });
+    }
+    if (password !== confirmPassword) {
+      return res.status(400).json({ success: false, message: '兩次輸入的新密碼不一致' });
+    }
+    const passwordHash = await passwords.hash(password, 10);
+    if (!await users.updateTeacherPasswordHash(normalizeStudentId(teacherId), passwordHash)) {
+      return res.status(404).json({ success: false, message: '找不到該教師帳戶' });
+    }
+    res.json({ success: true, message: '教師密碼已更新' });
+  } catch (e) { next(e); }
+});
+
+// ----------------------------------------------------------------
 // POST /update-student
 // ----------------------------------------------------------------
 router.post('/update-student', requireTeacher, async (req, res, next) => {

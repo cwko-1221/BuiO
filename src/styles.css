@@ -1275,6 +1275,16 @@ input:focus {
   font-size: 0.9rem;
 }
 
+.teacher-account-row { grid-template-columns: minmax(0, 1fr) auto; }
+.teacher-account-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.teacher-password-form { grid-column: 1 / -1; width: 100%; max-width: 400px; }
+.teacher-password-form[hidden], .teacher-password-message[hidden] { display: none; }
+.teacher-password-message { grid-column: 1 / -1; color: var(--teal); overflow-wrap: anywhere; }
+.teacher-password-message.is-error { color: var(--coral); }
+@media (max-width: 640px) {
+  .teacher-account-row { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* Missing-homework subject teacher assignment panel. */
 .subject-teacher-head {
   display: flex;

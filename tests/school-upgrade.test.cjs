@@ -281,3 +281,81 @@ test('admin unlock requires teacher, rejects old revisions and limits failed gue
   const limited = await post('new-fixture-secret'); assert.equal(limited.status, 429); assert.ok(Number(limited.headers.get('retry-after')) > 0);
   config.adminPassword = null; assert.equal((await post('new-fixture-secret')).status, 503);
 });
+
+test('Admin changes teacher passwords with validation, role checks and persistent hashes', async t => {
+  const bcrypt = require('bcryptjs');
+  for (const mode of ['json', 'postgres']) await t.test(mode, async t => {
+    const config = { adminPassword: 'fixture-admin', session: { secret: 'fixture-session', maxAge: 100000 }, db: { mode } };
+    const oldHash = await bcrypt.hash('old-password', 10);
+    let repo, readUser;
+    if (mode === 'postgres') {
+      const f = await fixture(t);
+      await f.db.query('UPDATE users SET passwordhash=$1', [oldHash]);
+      const api = { ...f.api, queryWithRetry: (sql, values) => f.api.getPool().query(sql, values) };
+      repo = load('math-app/repositories/users.repo.js', api);
+      readUser = async id => (await f.db.query('SELECT * FROM users WHERE studentid=$1', [id])).rows[0];
+    } else {
+      const data = { users: [
+        { studentid: 'T1', name: 'One', role: 'teacher', passwordhash: oldHash },
+        { studentid: 'T2', name: 'Two', role: 'teacher', passwordhash: oldHash },
+        { studentid: 'S1', name: 'Student', role: 'student', passwordhash: oldHash },
+      ] };
+      let saved = structuredClone(data);
+      repo = load('math-app/repositories/users.repo.js', {}, {
+        '../../config': config, '../../db/jsonStore': { load: () => data, save: () => { saved = structuredClone(data); } },
+      });
+      readUser = async id => saved.users.find(user => user.studentid === id);
+    }
+    const admin = load('shared/admin-auth.js', {}, { '../config': config });
+    const router = load('math-app/routes/auth.js', {}, {
+      '../../config': config, '../../shared/admin-auth': admin, '../repositories/users.repo': repo,
+    });
+    const app = require('express')(); app.use(require('express').json());
+    app.use((req, res, next) => {
+      const access = req.get('x-access') || 'unlocked';
+      req.session = access === 'anonymous' ? {} : {
+        studentId: access === 'student' ? 'S1' : 'T1', role: access === 'student' ? 'student' : 'teacher',
+        adminUnlocked: access !== 'locked', adminRevision: access === 'stale' ? 'old-revision' : admin.revision(),
+      };
+      next();
+    });
+    app.use(router);
+    const server = app.listen(0, '127.0.0.1'); await new Promise(resolve => server.once('listening', resolve));
+    t.after(() => new Promise(resolve => server.close(resolve)));
+    const base = 'http://127.0.0.1:' + server.address().port;
+    const post = (endpoint, body, access = 'unlocked') => fetch(base + endpoint, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-access': access }, body: JSON.stringify(body),
+    });
+    const valid = { teacherId: 'T2', password: 'new-password', confirmPassword: 'new-password' };
+    for (const access of ['anonymous', 'student', 'locked', 'stale']) {
+      assert.equal((await post('/change-teacher-password', valid, access)).status, 403, access);
+    }
+    for (const body of [
+      {}, { ...valid, teacherId: [] }, { ...valid, teacherId: 'invalid id' },
+      { ...valid, password: 'short' }, { ...valid, password: 123456 },
+      { ...valid, password: '      ', confirmPassword: '      ' },
+      { ...valid, confirmPassword: 'different-password' },
+      { ...valid, password: 'a'.repeat(73), confirmPassword: 'a'.repeat(73) },
+      { ...valid, password: '密'.repeat(25), confirmPassword: '密'.repeat(25) },
+    ]) assert.equal((await post('/change-teacher-password', body)).status, 400);
+    for (const teacherId of ['S1', 'MISSING']) {
+      assert.equal((await post('/change-teacher-password', { ...valid, teacherId })).status, 404);
+    }
+    assert.equal((await readUser('T2')).passwordhash, oldHash);
+    assert.equal((await readUser('S1')).passwordhash, oldHash);
+    for (const teacherId of ['T2', 'T1']) {
+      const before = await readUser(teacherId);
+      const response = await post('/change-teacher-password', { ...valid, teacherId: teacherId.toLowerCase() });
+      assert.equal(response.status, 200);
+      const result = await response.json();
+      assert.equal(result.success, true); assert.equal(JSON.stringify(result).includes(valid.password), false);
+      const after = await readUser(teacherId);
+      assert.notEqual(after.passwordhash, valid.password);
+      assert.equal(await bcrypt.compare(valid.password, after.passwordhash), true);
+      assert.deepEqual({ ...after, passwordhash: oldHash }, { ...before, passwordhash: oldHash });
+      assert.equal((await post('/login', { studentId: teacherId, password: 'old-password' })).status, 401);
+      assert.equal((await post('/login', { studentId: teacherId, password: valid.password })).status, 200);
+    }
+    assert.equal((await readUser('S1')).passwordhash, oldHash);
+  });
+});
