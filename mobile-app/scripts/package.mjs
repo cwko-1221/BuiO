@@ -30,7 +30,8 @@ async function collect(directory, relative = '') {
 await collect(root);
 const output = path.join(root, 'releases');
 await mkdir(output, { recursive: true });
-const file = path.join(output, 'buio-mobile-0.1.0-source.zip');
+const settings = JSON.parse(await readFile(path.join(root, 'mobile.config.json'), 'utf8'));
+const file = path.join(output, `buio-mobile-${settings.version}-source.zip`);
 const data = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', platform: 'UNIX' });
 await writeFile(file, data);
 console.log(`Packaged ${count} files, ${data.length} bytes: ${file}`);

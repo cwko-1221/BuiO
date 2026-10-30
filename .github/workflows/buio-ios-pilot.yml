@@ -57,6 +57,16 @@ jobs:
             mobile-app/releases/device-build.json
           if-no-files-found: error
           retention-days: 1
+      - name: Check real WKWebView viewport on iPhone and iPad simulators
+        run: node ci/native-viewport.mjs
+      - name: Save native layout evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: buio-ios-layout-check
+          path: mobile-app/test-results/native-viewport/
+          if-no-files-found: warn
+          retention-days: 1
       - name: Record result
         if: always()
         env:

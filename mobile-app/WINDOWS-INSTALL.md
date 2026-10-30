@@ -6,6 +6,8 @@
 
 ## 等待接駁裝置前可以準備
 
+實機 IPA 已由[雲端建置成功](https://github.com/cwko-1221/BuiO/actions/runs/40915067680)，並已保存到 `releases/buio-pilot-0.1.0-unsigned.ipa`。在 Windows 已核對 ZIP CRC、ARM64 和 iOS device 平台，以及 SHA-256。它尚未簽署，亦未在實體裝置安裝。
+
 - 下載本次提供的 `buio-pilot-0.1.0-unsigned.ipa`。它必須先經簽署，不能在 iPhone 的 Files 裡點開便安裝。
 - 從 [Sideloadly 官方網站](https://sideloadly.io/) 下載 Windows 版。這是第三方簽署工具，並非 Apple 官方程式。
 - 按 Sideloadly 官方的 Windows 要求準備相容的 iTunes／iCloud 元件。網站目前要求非 Microsoft Store 版本；如電腦已有其他版本，先核對安裝狀態，避免直接覆蓋或移除既有軟件。

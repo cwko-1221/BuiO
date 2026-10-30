@@ -6,10 +6,29 @@
 - 分支 `codex/capacitor-ios-pilot`，驗證 commit `ccef4aa77fa1e468d1f385611e87ab4297d4ec90`。
 - GitHub 標準 macOS runner，Xcode 26.3（17C529），實際執行 iOS Simulator target 建置，日誌確認 `BUILD SUCCEEDED`。
 - 此編譯不需 Apple 憑證，未簽署、未輸出可供實體裝置安裝的 IPA、未上傳 App Store Connect／TestFlight。雲端編譯通過不等於實機功能驗收。
-- Workflow 不上傳 artifacts、不建立套件 cache；只保留 CI 日誌及摘要。沒有變更正式網站分支或部署後端。
+- 首次模擬器編譯流程當時不上傳 artifacts、不建立套件 cache；只保留 CI 日誌及摘要。後續實機 IPA 流程短期保存 artifacts 1 日。沒有變更正式網站分支或部署後端。
 - 沒有 Mac 的後續安裝路線已記在 [CLOUD-INSTALL.md](CLOUD-INSTALL.md)，仍待確認 Apple Developer Program 帳戶及簽署方式。
 
+## 2026-10-30 Windows 個人側載準備
+
+- 用戶確認沒有付費開發者會員，選擇普通 Apple ID＋Windows 側載，並表示稍後才可 USB 接駁裝置。
+- [第二次雲端建置](https://github.com/cwko-1221/BuiO/actions/runs/40915067680) completed／success；commit `9eb34f9df1e631b5b47b3d90cb74a330892e26c2`。
+- 除模擬器檢查外，實際以 `iphoneos` SDK、Release、ARM64 編譯並打包 `buio-pilot-0.1.0-unsigned.ipa`；沒有 Apple 憑證或簽署。
+- 已下載到 `mobile-app/releases/buio-pilot-0.1.0-unsigned.ipa`，444,946 bytes。SHA-256：`3fb12a713fe9e81f59fcb47f89decb3e0760fbb899fddb3cc75ecf3cbf05b885`。
+- 在 Windows 再以 `node scripts/verify-ipa.mjs` 驗證 ZIP CRC、Mach-O ARM64 CPU type、LC_BUILD_VERSION 的平台為真實 iOS（2），確認不是模擬器 build。沒有 embedded.mobileprovision，安裝前仍需個人簽署。
+- 從 Sideloadly 官方下載了 Windows 安裝程式到 `releases/installers/SideloadlySetup64.exe`；未執行或安裝，未輸入任何 Apple ID。下載檔為 PE installer，Authenticode 顯示 NotSigned，未宣稱已通過發行者數位簽章驗證。
+- 尚未接駁裝置、簽署、安裝或完成實機功能測試。步驟已整理到 [WINDOWS-INSTALL.md](WINDOWS-INSTALL.md)。
+
 ## 已執行
+
+### 2026-10-30 首次 iPhone 側載
+
+- Windows 已識別 USB 接駁的 iPhone；安裝 iTunes 後，Apple Mobile Device Service 已啟動，Sideloadly 已偵測到裝置。
+- iTunes／iCloud 安裝檔由 Apple 官方網址下載，兩者 Authenticode 驗證有效，簽署者為 Apple Inc.；本次確認完成安裝的是 iTunes。
+- Sideloadly 0.71.2 已安裝，載入上述已驗證的實機 IPA。Apple ID 登入及驗證由用戶自行處理，憑證未寫入專案。
+- Sideloadly 狀態顯示 `Done.`／`100%`，用戶亦確認安裝成功。首次開啟提示未受信任／需要開發者模式；已提供手機設定步驟，由用戶自行確認，尚未確認平台登入畫面。
+
+### 自動化與建置檢查
 
 - Capacitor 8.6.0 建立 iOS Swift Package Manager 及 Android 專案，`npm run sync` 成功。
 - `npm test`：5 項通過，包括 HTTPS／導覽範圍、危險 URL 拒絕、模組覆蓋、iOS 權限與實際 storyboard 接線、打包內容界線。
@@ -25,7 +44,7 @@
 
 ## 尚未執行
 
-- Windows 本機沒有 Xcode；iOS 模擬器原生編譯已於上列雲端執行成功。仍未簽署、未產生可安裝的 IPA、未安裝至 iPhone／iPad、未上傳 TestFlight。
+- Windows 本機沒有 Xcode；iOS 模擬器及實機 ARM64 原生編譯已於雲端執行成功。Sideloadly 已回報 iPhone 個人簽署及安裝完成，尚未完成實機功能驗收，未上傳 TestFlight。
 - 沒有 JDK／Android SDK，未編譯、簽署或安裝 APK。
 - 桌面 WebKit 的 viewport 檢查不能代表 WKWebView 的系統權限、背景生命週期、實機 GPU 或觸控表現。
 - 模組路由覆蓋不是所有模組完整功能驗收。錄音／錄影、檔案匯出、白板、雙機對戰及背景恢復仍待實機測試。
@@ -33,6 +52,6 @@
 
 ## 下一個實機步驟
 
-在 Mac 執行 `npm ci && npm run sync`，用 Xcode 開啟 `ios/App/App.xcodeproj`，選擇可用的開發團隊及實體裝置後 Run。可先用 `npm run ios:simulator` 做不需簽署的模擬器建置，但模擬器 build 不能安裝到實體 iPhone。
+在 iPhone 開啟「杯澳學習平台」，如有提示，由用戶完成開發者信任及開發者模式，再確認可看到登入畫面。隨後才進行平台登入、模組及雙機對戰測試。見 WINDOWS-INSTALL.md。
 
-雲端原生編譯已完成；上述簽署及實機安裝步驟尚未完成。不使用 Mac 的安裝方式見 CLOUD-INSTALL.md。
+雲端原生編譯、實機 IPA 及工具回報的個人簽署／安裝已完成；實機開啟及功能驗收待確認。TestFlight 分發仍是日後學校開發者帳戶的選項。

@@ -48,17 +48,41 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 // custom cookie stores or changes to the game's simulation/network timing.
 @objc(BuiOViewController)
 class BuiOViewController: CAPBridgeViewController {
+    override func capacitorDidLoad() {
+        super.capacitorDidLoad()
+        guard let webView = webView else { return }
+
+        // Size the viewport itself, rather than adding scroll insets to a
+        // full-screen viewport. Fixed controls and 100vh game canvases then
+        // agree on the usable size in portrait, landscape and with a keyboard.
+        let container = UIView(frame: webView.frame)
+        container.backgroundColor = .systemBackground
+        view = container
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(webView)
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: container.safeAreaLayoutGuide.topAnchor),
+            webView.leadingAnchor.constraint(equalTo: container.safeAreaLayoutGuide.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: container.safeAreaLayoutGuide.trailingAnchor),
+            webView.bottomAnchor.constraint(equalTo: container.keyboardLayoutGuide.topAnchor)
+        ])
+
+        // Capacitor replaces the configuration's userContentController when
+        // creating its bridge. Install our script on the final controller,
+        // before viewDidLoad starts the first navigation.
+        if let url = Bundle.main.url(forResource: "runtime", withExtension: "js", subdirectory: "public"),
+           let source = try? String(contentsOf: url, encoding: .utf8) {
+            webView.configuration.userContentController.addUserScript(WKUserScript(
+                source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        }
+    }
+
     override func webViewConfiguration(for instanceConfiguration: InstanceConfiguration) -> WKWebViewConfiguration {
         let configuration = super.webViewConfiguration(for: instanceConfiguration)
         configuration.websiteDataStore = .default()
         configuration.allowsInlineMediaPlayback = true
         // Follow normal iOS audio rules: learning audio starts with a gesture.
         configuration.mediaTypesRequiringUserActionForPlayback = .audio
-        if let url = Bundle.main.url(forResource: "runtime", withExtension: "js", subdirectory: "public"),
-           let source = try? String(contentsOf: url, encoding: .utf8) {
-            configuration.userContentController.addUserScript(WKUserScript(
-                source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true))
-        }
         return configuration
     }
 }

@@ -33,7 +33,9 @@ export async function configuration({ backendUrl, development = false } = {}) {
         errorPath: 'offline.html'
       },
       ios: {
-        contentInset: 'automatic',
+        // The native container owns safe-area and keyboard layout. Do not
+        // also inset a full-size web viewport inside its scroll view.
+        contentInset: 'never',
         preferredContentMode: 'mobile',
         scrollEnabled: true,
         limitsNavigationsToAppBoundDomains: false,

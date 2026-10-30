@@ -10,6 +10,7 @@ test('pilot stays on one explicit HTTPS backend and does not enable HTTP interce
   assert.equal(capacitor.server.cleartext, false);
   assert.equal(capacitor.android.allowMixedContent, false);
   assert.equal(capacitor.ios.webContentsDebuggingEnabled, false);
+  assert.equal(capacitor.ios.contentInset, 'never');
   assert.equal(capacitor.plugins?.CapacitorHttp, undefined);
   assert.deepEqual(capacitor.includePlugins, ['@capacitor/app']);
 });
@@ -48,6 +49,8 @@ test('iOS permissions, persistent website data and native runtime are wired into
   const swift = await readFile(new URL('../ios/App/App/AppDelegate.swift', import.meta.url), 'utf8');
   assert.ok(swift.includes('configuration.websiteDataStore = .default()'));
   assert.ok(swift.includes('injectionTime: .atDocumentStart'));
+  assert.ok(swift.includes('override func capacitorDidLoad()'));
+  assert.ok(swift.includes('webView.configuration.userContentController.addUserScript'));
 });
 
 test('prepared local fallback contains no account data and is explicit about online-only modules', async () => {

@@ -61,25 +61,56 @@ try {
   const fallback = `http://127.0.0.1:${staticServer.address().port}/offline.html`;
 
   for (const [engine, browserType, viewport] of [
-    ['chromium-iphone', chromium, { width: 390, height: 844 }],
-    ['webkit-ipad', webkit, { width: 1024, height: 768 }]
+    ['chromium-iphone', chromium, { width: 390, height: 750 }],
+    ['webkit-iphone', webkit, { width: 390, height: 750 }],
+    ['webkit-iphone-landscape', webkit, { width: 750, height: 369 }],
+    ['webkit-ipad', webkit, { width: 1024, height: 720 }],
+    ['webkit-ipad-portrait', webkit, { width: 768, height: 976 }]
   ]) {
     const browser = await browserType.launch({ headless: true });
     try {
       const context = await browser.newContext({ viewport, hasTouch: true });
+      await context.addInitScript({ path: path.join(webRoot, 'runtime.js') });
       const page = await context.newPage();
+      const assertFits = async label => {
+        const geometry = await page.evaluate(() => ({
+          width: innerWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+          textAdjust: getComputedStyle(document.documentElement).webkitTextSizeAdjust,
+          app: window.BuiOMobile?.version,
+          overflow: [...document.querySelectorAll('body *')].filter(element => {
+            const box = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return box.width > 0 && box.right > innerWidth + 1 && style.position !== 'absolute' && style.position !== 'fixed';
+          }).slice(0, 5).map(element => element.className)
+        }));
+        assert.equal(geometry.app, '0.1.1', `${engine} ${label}: document-start helper`);
+        assert.ok(geometry.scrollWidth <= geometry.width + 1, `${engine} ${label}: ${JSON.stringify(geometry)}`);
+      };
       await page.goto(fallback);
       await page.getByRole('heading', { name: '暫時未能連接平台' }).waitFor();
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
       await page.screenshot({ path: path.join(output, `${engine}-offline.png`), fullPage: true });
       await Promise.all([page.waitForURL(backend + '/'), page.getByRole('button', { name: /重新連接/ }).click()]);
+      await page.locator('#loginForm').waitFor();
+      await assertFits('login');
+      const loginGeometry = await page.locator('#loginForm button[type=submit]').boundingBox();
+      if (viewport.height >= 600 && viewport.width <= 500) {
+        assert.ok(loginGeometry.y + loginGeometry.height <= viewport.height, `${engine}: login action must be on the initial phone screen`);
+      }
+      await page.screenshot({ path: path.join(output, `${engine}-login.png`), fullPage: true });
       await page.locator('#userIdInput').fill('MOBILESTUDENT');
       await page.locator('#passwordInput').fill('pilot-fixture-only');
       await page.locator('#loginForm button[type=submit]').click();
       await page.waitForFunction(() => !document.querySelector('#loginForm'), { timeout: 15000 });
       const me = await page.evaluate(() => fetch('/api/auth/me', { credentials: 'include' }).then(response => response.json()));
       assert.equal(me.student.id, 'MOBILESTUDENT');
+      await assertFits('student home');
       await page.screenshot({ path: path.join(output, `${engine}-student.png`), fullPage: true });
+      await page.locator('[data-view="modules"]').click();
+      await page.locator('.modules-page').waitFor();
+      await assertFits('module menu');
+      await page.screenshot({ path: path.join(output, `${engine}-modules.png`), fullPage: true });
       for (const module of modules.filter(module => module.roles.includes('student'))) {
         const response = await context.request.get(backend + module.path);
         assert.equal(response.status(), 200, `${engine} student ${module.path}`);
@@ -90,6 +121,7 @@ try {
       await page.waitForFunction(() => document.body.innerText.includes('寵物'), { timeout: 20000 });
       assert.ok(!page.url().endsWith('/'));
       await page.screenshot({ path: path.join(output, `${engine}-pet.png`), fullPage: true });
+      await assertFits('pet entry');
       const studentReport = await context.request.get(backend + '/report.html', { maxRedirects: 0 });
       assert.equal(studentReport.status(), 302, 'Teacher report remains protected');
       await context.request.post(backend + '/api/auth/logout');

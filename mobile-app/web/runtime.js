@@ -4,8 +4,43 @@
   'use strict';
   if (window.BuiOMobile) return;
   Object.defineProperty(window, 'BuiOMobile', { value: Object.freeze({
-    platform: 'ios', mode: 'online-compatibility-pilot', version: '0.1.0'
+    platform: 'ios', mode: 'online-compatibility-pilot', version: '0.1.1',
+    viewport: 'native-safe-area'
   }), writable: false });
+  const mobileCSS = /* BUIO_MOBILE_CSS */ '';
+  const setupLayout = () => {
+    if (!document.documentElement || !document.head) return false;
+    const root = document.documentElement;
+    root.setAttribute('data-buio-app', 'ios');
+    root.setAttribute('data-buio-page', /^\/(?:index\.html)?$/.test(location.pathname) ? 'hub' : 'module');
+    // Keep text zoom available; remove old scale caps on learning pages. The
+    // native frame already excludes the notch and home indicator on all sides.
+    let viewports = [...document.querySelectorAll('meta[name="viewport"]')];
+    if (!viewports.length) {
+      const viewport = document.createElement('meta');
+      viewport.name = 'viewport';
+      document.head.append(viewport);
+      viewports = [viewport];
+    }
+    const content = 'width=device-width, initial-scale=1, viewport-fit=cover';
+    for (const viewport of viewports) if (viewport.content !== content) viewport.content = content;
+    if (!document.getElementById('buio-mobile-layout')) {
+      const style = document.createElement('style');
+      style.id = 'buio-mobile-layout';
+      style.textContent = mobileCSS;
+      document.head.append(style);
+    }
+    return true;
+  };
+  // At document start <head> may not exist yet. Watch only the initial parse;
+  // do not observe the changing game DOM for the lifetime of a match.
+  const layoutObserver = new MutationObserver(setupLayout);
+  layoutObserver.observe(document, { childList: true, subtree: true });
+  setupLayout();
+  document.addEventListener('DOMContentLoaded', () => {
+    setupLayout();
+    layoutObserver.disconnect();
+  }, { once: true });
   let notice;
   const refresh = () => {
     if (!document.body) return;
