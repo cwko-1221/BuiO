@@ -52,6 +52,7 @@ class BuiOViewController: CAPBridgeViewController {
     private var landscapeModule = false
     private var immersive = false
     private var returnOrientation: UIInterfaceOrientation = .portrait
+    private var lastInsets = ""
 
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
@@ -108,6 +109,7 @@ class BuiOViewController: CAPBridgeViewController {
               let body = message.body as? [String: Any] else { return }
         let science = url.path == "/science-lab" || url.path.hasPrefix("/science-lab/")
         let game = ["/pet", "/pet/", "/game", "/game/", "/tower-defense"].contains(url.path)
+        let forceLandscape = science || (game && !url.path.hasPrefix("/pet") && (body["landscape"] as? Bool == true))
         immersive = science || (game && (body["immersive"] as? Bool == true))
         setStatusBarVisible(!immersive)
         setStatusBarStyle(body["lightStatus"] as? Bool == true ? .lightContent : .darkContent)
@@ -120,14 +122,15 @@ class BuiOViewController: CAPBridgeViewController {
             webView?.backgroundColor = color
             webView?.scrollView.backgroundColor = color
         }
-        if landscapeModule != science {
-            if science {
+        if landscapeModule != forceLandscape {
+            if forceLandscape {
                 returnOrientation = view.window?.windowScene?.interfaceOrientation ?? .portrait
                 if returnOrientation == .unknown { returnOrientation = .portrait }
             }
-            landscapeModule = science
+            landscapeModule = forceLandscape
             updateOrientation()
         }
+        publishLayout(force: true)
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
@@ -144,10 +147,20 @@ class BuiOViewController: CAPBridgeViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        publishLayout()
+    }
+
+    private func publishLayout(force: Bool = false) {
+        guard let webView = webView else { return }
+        let insets = view.safeAreaInsets
+        let edges: [String: Double] = ["top": Double(insets.top), "right": Double(insets.right),
+            "bottom": keyboardBottom?.constant == 0 ? Double(insets.bottom) : 0, "left": Double(insets.left)]
+        guard let data = try? JSONSerialization.data(withJSONObject: edges, options: .sortedKeys),
+              let json = String(data: data, encoding: .utf8) else { return }
+        var script = "window.BuiOApplyInsets?.(\(json));"
         #if DEBUG
         // Anonymous loopback CI fixture only; absent from the release app.
-        if bridge?.config.serverURL.host == "127.0.0.1", let webView = webView {
-            let insets = webView.safeAreaInsets
+        if bridge?.config.serverURL.host == "127.0.0.1" {
             let values: [String: Double] = [
                 "containerWidth": Double(view.bounds.width), "containerHeight": Double(view.bounds.height),
                 "width": Double(webView.bounds.width), "height": Double(webView.bounds.height),
@@ -156,10 +169,14 @@ class BuiOViewController: CAPBridgeViewController {
                 "bottom": Double(insets.bottom), "left": Double(insets.left)
             ]
             if let data = try? JSONSerialization.data(withJSONObject: values), let json = String(data: data, encoding: .utf8) {
-                webView.evaluateJavaScript("window.BuiONativeLayout=\(json);window.dispatchEvent(new Event('buio:native-layout'));")
+                script += "window.BuiONativeLayout=\(json);window.dispatchEvent(new Event('buio:native-layout'));"
             }
         }
         #endif
+        if force || json != lastInsets {
+            lastInsets = json
+            webView.evaluateJavaScript(script)
+        }
     }
 
     private func updateOrientation() {

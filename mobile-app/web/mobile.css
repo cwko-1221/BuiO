@@ -54,10 +54,36 @@ html[data-buio-module="pet"] .modal-root {
 html[data-buio-module="science-lab"] .topbar {
   padding-inline: max(12px, var(--buio-safe-left)) max(12px, var(--buio-safe-right));
 }
+html[data-buio-module="science-lab"] .portal-link { display: inline-flex !important; align-items: center; padding: 8px 10px; white-space: nowrap; }
+html[data-buio-module="science-lab"] :is(.lab-heading, .view-controls) { left: max(12px, var(--buio-safe-left)); }
+html[data-buio-module="science-lab"] .mission-panel { right: max(12px, var(--buio-safe-right)); }
+html[data-buio-module="science-lab"] :is(.view-controls, .variable-control, .observation-strip, .record-panel, .phenomenon-caption) { bottom: max(12px, var(--buio-safe-bottom)); }
+html[data-buio-module="science-lab"] .stage-screen {
+  padding: max(12px, var(--buio-safe-top)) max(16px, var(--buio-safe-right)) max(12px, var(--buio-safe-bottom)) max(16px, var(--buio-safe-left));
+}
+html[data-buio-module="science-lab"] .stage-inner { max-height: calc(100dvh - var(--buio-safe-top) - var(--buio-safe-bottom) - 24px); }
 html[data-buio-module="science-lab"] :is(.lab-screen, .catalog-screen) {
   padding-left: max(12px, var(--buio-safe-left));
   padding-right: max(12px, var(--buio-safe-right));
   padding-bottom: max(12px, var(--buio-safe-bottom));
+}
+
+html[data-buio-module="whiteboard"] #root {
+  height: 100dvh;
+  box-sizing: border-box;
+  padding: var(--buio-safe-top) var(--buio-safe-right) var(--buio-safe-bottom) var(--buio-safe-left);
+}
+html[data-buio-module="whiteboard"] #root > :first-child {
+  height: calc(100dvh - var(--buio-safe-top) - var(--buio-safe-bottom)) !important;
+  min-height: calc(100dvh - var(--buio-safe-top) - var(--buio-safe-bottom)) !important;
+}
+html[data-buio-module="game"] .hud {
+  padding-left: max(12px, var(--buio-safe-left));
+  padding-right: max(12px, var(--buio-safe-right));
+}
+html[data-buio-module="game"] .screen:not(#gameScreen) {
+  box-sizing: border-box;
+  padding: var(--buio-safe-top) var(--buio-safe-right) var(--buio-safe-bottom) var(--buio-safe-left);
 }
 
 /* iOS zooms focused form fields with small fonts. Keep form text readable
@@ -221,4 +247,8 @@ html[data-buio-app] .pet-nav [data-buio-more] { display: none; }
     grid-template-columns: minmax(0, 1fr) minmax(300px, 1fr) !important;
     align-items: start;
   }
+}
+@media (max-height: 740px) and (max-width: 500px) {
+  html[data-buio-page="hub"] .login-visual .lv-center-content { display: none; }
+  html[data-buio-page="hub"] .login-visual { padding: 12px !important; }
 }

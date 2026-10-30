@@ -12,6 +12,7 @@
     "android:debug": "node scripts/android-build.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:browser": "node tests/browser.mjs",
+    "test:app-ui": "node tests/browser.mjs --deep",
     "package": "npm run sync && node scripts/package.mjs",
     "ios:simulator": "npm run sync && node scripts/ios-simulator.mjs",
     "ios:device": "npm run sync && node scripts/ios-device.mjs"

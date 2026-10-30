@@ -12,6 +12,7 @@ const require = createRequire(path.join(root, 'package.json'));
 const { chromium, webkit } = require('playwright');
 const bcrypt = require('bcryptjs');
 const output = path.join(root, 'mobile-app/test-results');
+const deep = process.argv.includes('--deep');
 await mkdir(output, { recursive: true });
 const fixture = path.join(output, 'fixture.json');
 const users = [
@@ -61,16 +62,28 @@ try {
   const fallback = `http://127.0.0.1:${staticServer.address().port}/offline.html`;
 
   for (const [engine, browserType, viewport] of [
-    ['chromium-iphone', chromium, { width: 390, height: 750 }],
-    ['webkit-iphone', webkit, { width: 390, height: 750 }],
-    ['webkit-iphone-landscape', webkit, { width: 750, height: 369 }],
-    ['webkit-ipad', webkit, { width: 1024, height: 720 }],
-    ['webkit-ipad-portrait', webkit, { width: 768, height: 976 }]
+    ['chromium-iphone', chromium, { width: 390, height: 844 }],
+    ['webkit-iphone', webkit, { width: 402, height: 874 }],
+    ['webkit-iphone-landscape', webkit, { width: 874, height: 402 }],
+    ['webkit-ipad', webkit, { width: 1024, height: 768 }],
+    ['webkit-ipad-portrait', webkit, { width: 768, height: 1024 }],
+    ['webkit-iphone-small', webkit, { width: 375, height: 667 }],
+    ['webkit-ipad-split', webkit, { width: 600, height: 900 }]
   ]) {
+    if (deep && !['chromium-iphone', 'webkit-ipad'].includes(engine)) continue;
     const browser = await browserType.launch({ headless: true });
     try {
       const context = await browser.newContext({ viewport, hasTouch: true });
       await context.addInitScript({ path: path.join(webRoot, 'runtime.js') });
+      await context.addInitScript(({ tablet, small }) => {
+        const updateInsets = () => {
+          const landscape = innerWidth > innerHeight;
+          const insets = tablet ? [24, 0, 20, 0] : small ? [20, 0, 0, 0] : landscape ? [0, 62, 21, 62] : [62, 0, 34, 0];
+          ['top', 'right', 'bottom', 'left'].forEach((edge, index) => document.documentElement.style.setProperty('--buio-safe-' + edge, insets[index] + 'px'));
+        };
+        document.addEventListener('DOMContentLoaded', updateInsets);
+        addEventListener('resize', updateInsets);
+      }, { tablet: engine.includes('ipad'), small: engine.includes('small') });
       const page = await context.newPage();
       const assertFits = async label => {
         const geometry = await page.evaluate(() => ({
@@ -107,6 +120,14 @@ try {
       assert.equal(me.student.id, 'MOBILESTUDENT');
       await assertFits('student home');
       await page.screenshot({ path: path.join(output, `${engine}-student.png`), fullPage: true });
+      await page.screenshot({ path: path.join(output, `${engine}-home-screen.png`) });
+      if (viewport.width < 900) {
+        const tabBar = await page.locator('.side-nav').boundingBox();
+        assert.ok(Math.abs(tabBar.y + tabBar.height - viewport.height) <= 1, 'Phone tabs stay at the window bottom');
+        await page.evaluate(() => scrollTo(0, document.scrollingElement.scrollHeight));
+        const scrolledTabBar = await page.locator('.side-nav').boundingBox();
+        assert.ok(Math.abs(scrolledTabBar.y + scrolledTabBar.height - viewport.height) <= 1, 'Phone tabs remain reachable after scrolling');
+      }
       await page.locator('[data-view="modules"]').click();
       await page.locator('.modules-page').waitFor();
       await assertFits('module menu');
@@ -119,9 +140,84 @@ try {
       // Actual client navigation, not just HTML availability.
       await page.goto(backend + '/pet');
       await page.waitForFunction(() => document.body.innerText.includes('寵物'), { timeout: 20000 });
+      await page.locator('.pet-nav').waitFor();
+      if (viewport.width < 900) {
+        await page.locator('[data-buio-more]').waitFor();
+        assert.equal(await page.locator('.pet-nav > button:visible').count(), 5);
+        const navSize = await page.locator('.pet-nav').evaluate(nav => ({ client: nav.clientWidth, scroll: nav.scrollWidth }));
+        assert.ok(navSize.scroll <= navSize.client + 1, 'Pet navigation fits five phone destinations');
+        await page.locator('[data-buio-more]').click();
+        await page.locator('[data-buio-sheet][open]').waitFor();
+        assert.equal(await page.locator('[data-buio-sheet] [data-tab]').count(), 4, 'All secondary pet modules remain available');
+        await page.screenshot({ path: path.join(output, `${engine}-pet-more.png`) });
+        await page.locator('[data-buio-sheet] [data-tab="settings"]').click();
+        await page.locator('.pet-nav [data-tab="settings"].active').waitFor({ state: 'attached' });
+        await page.locator('.pet-nav [data-tab="home"]').click();
+      }
       assert.ok(!page.url().endsWith('/'));
       await page.screenshot({ path: path.join(output, `${engine}-pet.png`), fullPage: true });
       await assertFits('pet entry');
+      if (deep) {
+        const petTab = async tab => {
+          const direct = page.locator(`.pet-nav > [data-tab="${tab}"]`);
+          if (await direct.isVisible()) await direct.click();
+          else {
+            await page.locator('[data-buio-more]').click();
+            await page.locator(`[data-buio-sheet] [data-tab="${tab}"]`).click();
+          }
+        };
+        if (await page.locator('[data-action="hatch"]').count()) {
+          await page.locator('[data-action="hatch"]').click();
+          await page.locator('.reveal-card').waitFor();
+          await page.locator('.modal-card [data-action="back-home"]').click();
+        }
+        await page.locator('#game-root canvas').waitFor();
+        await petTab('collection'); await page.locator('.pet-card').first().waitFor();
+        await page.screenshot({ path: path.join(output, `${engine}-pet-collection.png`) });
+        await petTab('shop'); await page.locator('.shop-feature').waitFor();
+        await page.screenshot({ path: path.join(output, `${engine}-pet-shop.png`) });
+        await petTab('brawl'); await page.locator('[data-brawl="mode"][data-id="practice"]').click();
+        await page.locator('[data-brawl="start"]:enabled').first().click();
+        await page.waitForFunction(() => window.__petGame?.scene.isActive('Brawl') && !document.querySelector('.brawl-loading'), { timeout: 45000 });
+        await page.screenshot({ path: path.join(output, `${engine}-pet-battle.png`) });
+        await assertFits('pet battle');
+        const controls = await page.locator('.brawl-controls').boundingBox();
+        assert.ok(controls && controls.y + controls.height <= viewport.height, 'Battle touch controls stay on screen');
+        await page.keyboard.press('Escape');
+        await page.locator('[data-brawl="lobby"]').click();
+        await petTab('home');
+        await page.waitForFunction(() => window.__petGame?.scene.isActive('Bedroom'));
+        console.log(`${engine}: hatch, collection, shop, practice battle and return passed`);
+
+        const { experiments } = await import('../../science-lab-app/public/js/data/experiments.js');
+        if (viewport.height > viewport.width) await page.setViewportSize({ width: viewport.height, height: viewport.width });
+        await page.goto(backend + '/science-lab#' + experiments[0].id);
+        await page.locator('#stageScreen:not([hidden])').waitFor();
+        for (let step = 0; step < 16; step++) {
+          if (await page.locator('#stageScreen').getAttribute('data-slide') === 'hypothesis') break;
+          if (await page.locator('#stageNext:not([hidden]):not([disabled])').count()) await page.locator('#stageNext').click();
+          await page.waitForTimeout(650);
+        }
+        await page.locator('[data-prediction]').first().waitFor();
+        await page.screenshot({ path: path.join(output, `${engine}-science-prediction.png`) });
+        await page.locator('[data-prediction]').first().click();
+        await page.locator('#stageNext').click();
+        await page.locator('#stageScreen').waitFor({ state: 'hidden' });
+        await page.locator('#missionPanel.collapsed').waitFor();
+        await page.screenshot({ path: path.join(output, `${engine}-science-apparatus.png`) });
+        await page.locator('#missionPanelToggle').click();
+        await page.screenshot({ path: path.join(output, `${engine}-science-task.png`) });
+        await assertFits('science experiment');
+        await page.locator('#settingsButton').click();
+        const settings = await page.locator('#settingsDialog').boundingBox();
+        const current = page.viewportSize();
+        assert.ok(settings && settings.y >= 0 && settings.y + settings.height <= current.height, 'Science settings stay on screen');
+        await page.screenshot({ path: path.join(output, `${engine}-science-settings.png`) });
+        await page.keyboard.press('Escape');
+        await page.locator('.portal-link').click(); await page.waitForURL(backend + '/');
+        await page.setViewportSize(viewport);
+        console.log(`${engine}: science prediction, apparatus, task, settings and exit passed`);
+      }
       const studentReport = await context.request.get(backend + '/report.html', { maxRedirects: 0 });
       assert.equal(studentReport.status(), 302, 'Teacher report remains protected');
       await context.request.post(backend + '/api/auth/logout');
@@ -135,11 +231,15 @@ try {
         assert.match(response.headers()['content-type'], /text\/html/);
       }
       const layoutIssues = [];
-      if (engine.startsWith('webkit-iphone')) {
+      if (!deep && ['webkit-iphone', 'webkit-iphone-landscape', 'webkit-ipad'].includes(engine)) {
         for (const module of modules) {
           console.log(`${engine}: layout ${module.id}`);
           const modulePage = await context.newPage();
           await modulePage.goto(backend + module.path, { waitUntil: 'load' });
+          if (module.id === 'science-lab' && viewport.height > viewport.width) {
+            // The native simulator separately proves automatic scene rotation.
+            await modulePage.setViewportSize({ width: viewport.height, height: viewport.width });
+          }
           if (['chinese', 'english'].includes(module.id)) await modulePage.waitForURL(/\/teacher$/);
           await modulePage.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
           await modulePage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
@@ -171,7 +271,7 @@ try {
       report.checks.push({ engine, login: 'passed', modules: modules.length, permissions: 'role checks passed', fallback: 'passed', reconnectNotice: 'passed' });
     } finally { await Promise.race([browser.close(), new Promise(resolve => setTimeout(resolve, 10000))]); }
   }
-  await writeFile(path.join(output, 'browser-report.json'), JSON.stringify(report, null, 2));
+  await writeFile(path.join(output, deep ? 'deep-report.json' : 'browser-report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } finally {
   if (staticServer) await new Promise(resolve => staticServer.close(resolve));

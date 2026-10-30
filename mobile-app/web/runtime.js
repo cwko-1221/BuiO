@@ -8,10 +8,21 @@
     viewport: 'edge-to-edge'
   }), writable: false });
   const mobileCSS = /* BUIO_MOBILE_CSS */ '';
+  let nativeInsets;
+  const applyInsets = insets => {
+    nativeInsets = insets;
+    if (!document.documentElement) return;
+    for (const edge of ['top', 'right', 'bottom', 'left']) {
+      const value = Number(insets[edge]);
+      if (Number.isFinite(value) && value >= 0) document.documentElement.style.setProperty('--buio-safe-' + edge, value + 'px');
+    }
+  };
+  Object.defineProperty(window, 'BuiOApplyInsets', { value: applyInsets });
   const setupLayout = () => {
     if (!document.documentElement || !document.head) return false;
     const root = document.documentElement;
     root.setAttribute('data-buio-app', 'ios');
+    if (nativeInsets) applyInsets(nativeInsets);
     root.setAttribute('data-buio-page', /^\/(?:index\.html)?$/.test(location.pathname) ? 'hub' : 'module');
     const section = location.pathname.split('/')[1].replace(/\.html$/, '');
     root.setAttribute('data-buio-module', ['math', 'login', 'quiz', 'dashboard', 'teacher-topics', 'tag-picker'].includes(section) ? 'math' : section);
@@ -40,6 +51,27 @@
   layoutObserver.observe(document, { childList: true, subtree: true });
   setupLayout();
   const formSelector = 'input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea';
+  const processedSheets = new WeakSet();
+  const rewriteSafeAreas = sheet => {
+    if (!sheet || processedSheets.has(sheet)) return;
+    try {
+      const visit = rules => {
+        for (const rule of rules) {
+          if (rule.cssRules) visit(rule.cssRules);
+          if (!rule.style) continue;
+          for (const property of [...rule.style]) {
+            if (property.startsWith('--buio-safe-')) continue;
+            const value = rule.style.getPropertyValue(property);
+            if (!value.includes('env(safe-area-inset-')) continue;
+            const next = value.replace(/env\(\s*safe-area-inset-(top|right|bottom|left)\s*(?:,\s*([^)]*))?\)/g,
+              (_, edge, fallback) => 'var(--buio-safe-' + edge + ',' + (fallback || '0px') + ')');
+            rule.style.setProperty(property, next, rule.style.getPropertyPriority(property));
+          }
+        }
+      };
+      visit(sheet.cssRules); processedSheets.add(sheet);
+    } catch { /* Cross-origin sheets keep their normal browser behavior. */ }
+  };
   const fitFormField = field => {
     if (field?.matches(formSelector) && matchMedia('(max-width: 1100px)').matches &&
         parseFloat(getComputedStyle(field).fontSize) < 16) {
@@ -51,14 +83,36 @@
     const style = document.getElementById('buio-mobile-layout');
     // Preserve each module's authored spacing while adding system safe areas.
     // Read once after its stylesheets load, before enabling document insets.
+    [...document.styleSheets].forEach(rewriteSafeAreas);
+    const insetValues = {};
+    for (const edge of ['top', 'right', 'bottom', 'left']) {
+      insetValues[edge] = document.documentElement.style.getPropertyValue('--buio-safe-' + edge);
+      document.documentElement.style.setProperty('--buio-safe-' + edge, '0px');
+    }
     style.disabled = true;
     const bodyStyle = getComputedStyle(document.body);
     for (const edge of ['Top', 'Right', 'Bottom', 'Left']) {
       document.documentElement.style.setProperty('--buio-body-pad-' + edge.toLowerCase(), bodyStyle['padding' + edge]);
     }
     style.disabled = false;
+    for (const edge of ['top', 'right', 'bottom', 'left']) {
+      if (insetValues[edge]) document.documentElement.style.setProperty('--buio-safe-' + edge, insetValues[edge]);
+      else document.documentElement.style.removeProperty('--buio-safe-' + edge);
+    }
     document.querySelectorAll(formSelector).forEach(fitFormField);
     layoutObserver.disconnect();
+    new MutationObserver(records => {
+      for (const record of records) {
+        const nodes = [record.target, ...record.addedNodes];
+        for (const node of nodes) {
+          if (node.tagName === 'STYLE') { processedSheets.delete(node.sheet); rewriteSafeAreas(node.sheet); }
+          if (node.tagName === 'LINK' && node.rel === 'stylesheet') {
+            rewriteSafeAreas(node.sheet);
+            node.addEventListener('load', () => rewriteSafeAreas(node.sheet), { once: true });
+          }
+        }
+      }
+    }).observe(document.head, { childList: true, subtree: true });
     updatePresentation();
     if (document.documentElement.getAttribute('data-buio-module') === 'pet') {
       const attach = () => {
@@ -134,7 +188,8 @@
     const background = palette[module] || '#f6f8fb';
     const immersive = module === 'science-lab' || (module === 'pet' && ['park', 'coin-pusher'].includes(petScreen));
     root.setAttribute('data-buio-immersive', String(immersive));
-    const message = { immersive, background, lightStatus: ['math', 'games', 'game', 'tower-defense', 'science-lab'].includes(module) };
+    const landscape = module === 'science-lab' || Boolean(document.querySelector('#rotateNotice, #gameCanvas'));
+    const message = { immersive, landscape, background, lightStatus: ['math', 'games', 'game', 'tower-defense', 'science-lab'].includes(module) };
     const serialized = JSON.stringify(message);
     if (serialized !== lastPresentation) {
       window.webkit?.messageHandlers?.buioLayout?.postMessage(message);
