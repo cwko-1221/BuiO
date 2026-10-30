@@ -6,7 +6,7 @@ const { requireAuth, requireTeacher } = require('../../math-app/middleware/auth'
 const MAX_BUZZER_DISPLAY_COUNT = 12;
 const MIN_BUZZER_DURATION_SECONDS = 10;
 const MAX_BUZZER_DURATION_SECONDS = 300;
-const TEACHER_RECONNECT_GRACE_MS = 10 * 60 * 1000;
+const TEACHER_RECONNECT_GRACE_MS = 2 * 60 * 1000;
 
 module.exports = function(io, app, {
   teacherReconnectGraceMs = TEACHER_RECONNECT_GRACE_MS,
@@ -102,14 +102,21 @@ module.exports = function(io, app, {
     const room = rooms.get(roomId);
     const snapshot = room?.studentBoards.get(participantKey);
     if (!room || !snapshot) return;
-    const payload = { studentId: participantKey, ...snapshot };
-    if (room.teacherSocket) io.to(room.teacherSocket).emit('student-board-snapshot', payload);
-    if (studentSocketId) io.to(studentSocketId).emit('student-board-snapshot', payload);
+    // Teachers render the finished PNG; only a returning student needs the
+    // editable vector history and base image. PNG is already compressed.
+    if (room.teacherSocket) io.to(room.teacherSocket).compress(false).emit('student-board-snapshot', {
+      studentId: participantKey, imageData: snapshot.imageData, shapes: snapshot.shapes,
+    });
+    if (studentSocketId) io.to(studentSocketId).compress(false).emit('student-board-snapshot', {
+      studentId: participantKey, ...snapshot,
+    });
   }
 
   function emitBoardSnapshotToSocket(roomId, participantKey, socketId) {
     const snapshot = rooms.get(roomId)?.studentBoards.get(participantKey);
-    if (snapshot) io.to(socketId).emit('student-board-snapshot', { studentId: participantKey, ...snapshot });
+    if (snapshot) io.to(socketId).compress(false).emit('student-board-snapshot', {
+      studentId: participantKey, imageData: snapshot.imageData, shapes: snapshot.shapes,
+    });
   }
 
   function normalizeBoardShapes(shapes) {
@@ -479,8 +486,10 @@ module.exports = function(io, app, {
       const roomId = socket.data.roomId;
       const room = roomId ? rooms.get(roomId) : null;
       const participantKey = room?.studentSocketKeys.get(socket.id);
-      if (roomId && !socket.data.isTeacher && participantKey) {
-        socket.to(roomId).emit('draw', {
+      if (room?.teacherSocket && !socket.data.isTeacher && participantKey) {
+        // Students display their own board only. Broadcasting each pointer
+        // movement to every classmate multiplied the live traffic by class size.
+        io.to(room.teacherSocket).compress(false).emit('draw', {
           ...data,
           studentId: participantKey,
           studentName: room.students.get(participantKey)?.name || socket.data.name,
@@ -521,11 +530,14 @@ module.exports = function(io, app, {
       }
     });
 
-    socket.on('student-board-snapshot', (data) => {
+    socket.on('student-board-snapshot', (data, ack) => {
       const roomId = socket.data.roomId;
       const room = roomId ? rooms.get(roomId) : null;
       const participantKey = room?.studentSocketKeys.get(socket.id);
-      if (!room || socket.data.isTeacher || !participantKey || !isPngSnapshot(data?.imageData)) return;
+      if (!room || socket.data.isTeacher || !participantKey || !isPngSnapshot(data?.imageData)) {
+        if (typeof ack === 'function') ack({ success: false });
+        return;
+      }
 
       const hasVectorState = Array.isArray(data.strokes)
         && (data.baseImageData === null
@@ -539,6 +551,7 @@ module.exports = function(io, app, {
       // Keep the teacher's offscreen board aligned with the last completed
       // student edit; other tabs restore the snapshot when they join.
       emitBoardSnapshot(roomId, participantKey);
+      if (typeof ack === 'function') ack({ success: true });
     });
 
     socket.on('student-clear', () => {
@@ -547,7 +560,9 @@ module.exports = function(io, app, {
       const participantKey = room?.studentSocketKeys.get(socket.id);
       if (roomId && !socket.data.isTeacher && participantKey) {
         room.studentBoards.delete(participantKey);
-        socket.to(roomId).emit('student-clear', { studentId: participantKey, studentName: socket.data.name });
+        if (room.teacherSocket) io.to(room.teacherSocket).emit('student-clear', {
+          studentId: participantKey, studentName: socket.data.name,
+        });
       }
     });
 

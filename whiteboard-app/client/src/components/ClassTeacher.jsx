@@ -97,24 +97,6 @@ export default function ClassTeacher() {
         teacherOffscreenRef.current = { canvas, ctx };
     }, []);
 
-    // End the class on tab close so the portal flips back to 開啟白板課堂
-    // immediately instead of waiting for the WebSocket ping timeout.
-    useEffect(() => {
-        if (!roomId) return;
-        const end = () => {
-            try {
-                const blob = new Blob([JSON.stringify({ roomId })], { type: 'application/json' });
-                navigator.sendBeacon('/api/whiteboard/sessions/end', blob);
-            } catch (e) { /* ignore */ }
-        };
-        window.addEventListener('pagehide', end);
-        window.addEventListener('beforeunload', end);
-        return () => {
-            window.removeEventListener('pagehide', end);
-            window.removeEventListener('beforeunload', end);
-        };
-    }, [roomId]);
-
     useEffect(() => {
         let disposed = false;
         fetch('/api/pet/teacher/roster', { credentials: 'include' })
@@ -166,11 +148,15 @@ export default function ClassTeacher() {
             }
         });
 
-        socketRef.current.on('draw', (data) => {
+        const draw = (data) => {
             const { studentId, id, x, y, state, shape, startX, startY, endX, endY, color, size, isEraser } = data;
             if (!studentId) return;
 
             const offscreen = getOrCreateOffscreen(studentId);
+            if (offscreen.pendingDraws) {
+                offscreen.pendingDraws.push(data);
+                return;
+            }
             const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
 
             if (state === 'shape' && shape) {
@@ -194,11 +180,9 @@ export default function ClassTeacher() {
             const localX = x * OFFSCREEN_WIDTH;
             const localY = y * OFFSCREEN_HEIGHT;
 
-            if (state === 'start') {
-                ctx.beginPath();
-                ctx.moveTo(localX, localY);
-                drawStateRef.current.set(studentId, { drawing: true });
-            } else if (state === 'move') {
+            if (state === 'start' || state === 'move' || state === 'end') {
+                const previous = drawStateRef.current.get(studentId);
+                ctx.save();
                 if (isEraser) {
                     ctx.globalCompositeOperation = 'destination-out';
                     ctx.lineWidth = size * 2;
@@ -207,12 +191,18 @@ export default function ClassTeacher() {
                     ctx.strokeStyle = color;
                     ctx.lineWidth = size;
                 }
+                // Draw just the new segment. Re-stroking the entire growing
+                // path costs progressively more and can repaint erased pixels.
+                ctx.beginPath();
+                ctx.moveTo(state === 'start' || !previous ? localX : previous.x,
+                    state === 'start' || !previous ? localY : previous.y);
                 ctx.lineTo(localX, localY);
                 ctx.stroke();
-            } else if (state === 'end') {
-                drawStateRef.current.set(studentId, { drawing: false });
+                ctx.restore();
+                drawStateRef.current.set(studentId, { x: localX, y: localY });
             }
-        });
+        };
+        socketRef.current.on('draw', draw);
 
         socketRef.current.on('student-board-snapshot', ({ studentId, imageData, shapes }) => {
             imageData = pngFromWire(imageData);
@@ -220,16 +210,27 @@ export default function ClassTeacher() {
             const offscreen = getOrCreateOffscreen(studentId);
             const version = (offscreen.snapshotVersion || 0) + 1;
             offscreen.snapshotVersion = version;
-            offscreen.ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
-            offscreen.shapes = Array.isArray(shapes) ? shapes.map((shape) => ({ ...shape })) : [];
-            renderShapeLayer(offscreen.shapeCtx, offscreen.shapeCanvas, offscreen.shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
-
             if (typeof imageData !== 'string' || !imageData.startsWith('data:image/png;base64,')) return;
+            // Decoding PNG is asynchronous. Keep later live edits in order so
+            // an older checkpoint cannot paint over a more recent stroke.
+            offscreen.pendingDraws = [];
+            const replay = () => {
+                const pending = offscreen.pendingDraws || [];
+                offscreen.pendingDraws = null;
+                for (const event of pending) draw(event);
+            };
             const image = new Image();
             image.onload = () => {
                 if (offscreenCanvasesRef.current.get(studentId) !== offscreen || offscreen.snapshotVersion !== version) return;
+                offscreen.ctx.globalCompositeOperation = 'source-over';
                 offscreen.ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 offscreen.ctx.drawImage(image, 0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                offscreen.shapes = Array.isArray(shapes) ? shapes.map((shape) => ({ ...shape })) : [];
+                renderShapeLayer(offscreen.shapeCtx, offscreen.shapeCanvas, offscreen.shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                replay();
+            };
+            image.onerror = () => {
+                if (offscreenCanvasesRef.current.get(studentId) === offscreen && offscreen.snapshotVersion === version) replay();
             };
             image.src = imageData;
         });
@@ -239,6 +240,7 @@ export default function ClassTeacher() {
                 const offscreen = offscreenCanvasesRef.current.get(studentId);
                 const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
                 offscreen.snapshotVersion = (offscreen.snapshotVersion || 0) + 1;
+                offscreen.pendingDraws = null;
                 ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 // Only clear strokes — bg image is composited separately in render loop
                 shapes.length = 0;
@@ -247,7 +249,11 @@ export default function ClassTeacher() {
         });
 
         socketRef.current.on('clear-board', () => {
-            for (const [, { ctx, shapeCanvas, shapeCtx, shapes }] of offscreenCanvasesRef.current) {
+            drawStateRef.current.clear();
+            for (const [, offscreen] of offscreenCanvasesRef.current) {
+                const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
+                offscreen.snapshotVersion = (offscreen.snapshotVersion || 0) + 1;
+                offscreen.pendingDraws = null;
                 ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 // Only clear strokes — bg image is composited separately in render loop
                 shapes.length = 0;

@@ -7,6 +7,7 @@ import { drawShape, shapeContainsPoint } from '../utils/drawing';
 import { watchRoomConnection } from '../utils/roomConnection';
 import ConnectionNotice from './ConnectionNotice';
 import { pngToWire, pngFromWire } from '../utils/pngWire';
+import { createBoardSnapshots } from '../utils/boardSnapshots.mjs';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 const PEN_COLORS = ['#111827', '#ef4444', '#f97316', '#eab308', '#22c55e', '#0ea5e9', '#2563eb', '#7c3aed', '#ec4899'];
@@ -80,6 +81,7 @@ export default function ClassStudent() {
     const pendingBoardSnapshotRef = useRef(null);
     const boardRestoreVersionRef = useRef(0);
     const boardRestoringRef = useRef(false);
+    const snapshotsRef = useRef(null);
 
     useEffect(() => { activeToolRef.current = activeTool; }, [activeTool]);
     useEffect(() => { penColorRef.current = penColor; }, [penColor]);
@@ -219,7 +221,7 @@ export default function ClassStudent() {
         image.src = baseDrawingImageDataRef.current;
     }, []);
 
-    const publishBoardSnapshot = useCallback(() => {
+    const buildBoardSnapshot = useCallback(() => {
         const canvas = canvasRef.current;
         if (!canvas || !socketRef.current || !joinedRef.current) return;
         try {
@@ -230,16 +232,18 @@ export default function ClassStudent() {
             }));
             const vectorPointCount = strokes.reduce((total, stroke) => total + stroke.points.length, 0);
             const useRasterFallback = strokes.length > 2_000 || vectorPointCount > 60_000;
-            socketRef.current.emit('student-board-snapshot', {
+            return {
                 imageData: pngToWire(imageData),
                 baseImageData: pngToWire(useRasterFallback ? imageData : baseDrawingImageDataRef.current),
                 strokes: useRasterFallback ? [] : strokes,
                 shapes: shapeObjectsRef.current.map((shape) => ({ ...shape })),
-            });
+            };
         } catch (error) {
             console.warn('[WB] Could not save student board snapshot:', error);
         }
     }, []);
+
+    const publishBoardSnapshot = useCallback(() => snapshotsRef.current?.changed(), []);
 
     // Initialize Socket and Canvas
     useEffect(() => {
@@ -247,7 +251,23 @@ export default function ClassStudent() {
 
         const socket = io(SERVER_URL);
         socketRef.current = socket;
+        const snapshots = createBoardSnapshots({
+            build: buildBoardSnapshot,
+            // Socket.IO's timeout also removes its internal acknowledgement
+            // callback if the connection loses a response.
+            send: (snapshot, ack) => socket.timeout(5000).emit('student-board-snapshot', snapshot,
+                (error, result) => ack(error ? null : result)),
+        });
+        snapshotsRef.current = snapshots;
         const stopWatchingConnection = watchRoomConnection(socket, setConnectionStatus);
+        socket.on('disconnect', () => snapshots.disconnected());
+        // The socket connects before room membership is restored. Send the
+        // latest local board only after the server confirms the room join.
+        socket.on('teacher-connection', () => snapshots.connected());
+        const flush = () => snapshots.flush();
+        const onVisibility = () => { if (document.visibilityState === 'hidden') flush(); };
+        window.addEventListener('pagehide', flush);
+        document.addEventListener('visibilitychange', onVisibility);
 
         socket.on('connect', () => {
             socket.emit('join-room', { roomId, name, isTeacher: false });
@@ -259,7 +279,9 @@ export default function ClassStudent() {
         });
 
         socket.on('student-board-snapshot', (snapshot) => {
-            restoreBoardSnapshot(snapshot);
+            // A stale saved checkpoint must not erase edits made while offline
+            // or while the previous checkpoint's acknowledgement was lost.
+            if (!snapshots.pending()) restoreBoardSnapshot(snapshot);
         });
 
         socket.on('buzzer-player-state', (state) => {
@@ -285,6 +307,7 @@ export default function ClassStudent() {
 
         // Handle teacher clearing ALL boards — only clear the drawing layer
         socket.on('clear-board', () => {
+            snapshots.reset();
             boardRestoreVersionRef.current += 1;
             boardRestoringRef.current = false;
             pendingBoardSnapshotRef.current = null;
@@ -382,6 +405,7 @@ export default function ClassStudent() {
         // teacher and student canvases having different aspect ratios.
         socket.on('teacher-board-sync', ({ imageData }) => {
             if (typeof imageData !== 'string' || !imageData.startsWith('data:image/png;base64,')) return;
+            snapshots.reset();
 
             const syncToken = latestTeacherSync.current + 1;
             latestTeacherSync.current = syncToken;
@@ -484,13 +508,17 @@ export default function ClassStudent() {
 
         return () => {
             stopWatchingConnection();
+            window.removeEventListener('pagehide', flush);
+            document.removeEventListener('visibilitychange', onVisibility);
+            snapshots.close();
+            if (snapshotsRef.current === snapshots) snapshotsRef.current = null;
             if (resizeObserver) resizeObserver.disconnect();
             if (handleResize) {
                 window.removeEventListener('resize', handleResize);
             }
             socket.disconnect();
         };
-    }, [joined, roomId, name, drawBackground, loadAndDrawImage, restoreBoardSnapshot]);
+    }, [joined, roomId, name, drawBackground, loadAndDrawImage, restoreBoardSnapshot, buildBoardSnapshot]);
 
     const getCoordinates = useCallback((e) => {
         if (!canvasRef.current) return { x: 0, y: 0 };
@@ -525,7 +553,7 @@ export default function ClassStudent() {
     }, []);
 
     const emitDrawEvent = useCallback((state, point) => {
-        if (socketRef.current && joinedRef.current) {
+        if (socketRef.current?.connected && joinedRef.current) {
             socketRef.current.emit('draw', {
                 x: point.x,
                 y: point.y,
@@ -535,7 +563,7 @@ export default function ClassStudent() {
                 isEraser: activeToolRef.current === 'eraser'
             });
         }
-        if (state === 'end') publishBoardSnapshot();
+        publishBoardSnapshot();
     }, [publishBoardSnapshot]);
 
     const renderShapes = useCallback((preview = null) => {
@@ -649,7 +677,7 @@ export default function ClassStudent() {
     const emitShapeEvent = useCallback((shapeObject) => {
         if (!socketRef.current || !joinedRef.current) return;
 
-        socketRef.current.emit('draw', {
+        if (socketRef.current.connected) socketRef.current.emit('draw', {
             state: 'shape',
             ...shapeObject,
             isEraser: false
@@ -660,7 +688,7 @@ export default function ClassStudent() {
     const emitShapeMoveEvent = useCallback((shapeObject) => {
         if (!socketRef.current || !joinedRef.current) return;
 
-        socketRef.current.emit('draw', {
+        if (socketRef.current.connected) socketRef.current.emit('draw', {
             state: 'shape-move',
             ...shapeObject,
             isEraser: false
@@ -879,6 +907,7 @@ export default function ClassStudent() {
     const [clearProgress, setClearProgress] = useState(0);
 
     const clearCanvas = () => {
+        snapshotsRef.current?.reset();
         const ctx = contextRef.current;
         const canvas = canvasRef.current;
         if (ctx && canvas) {
@@ -903,7 +932,8 @@ export default function ClassStudent() {
             shapeCtx.restore();
         }
         if (socketRef.current) {
-            socketRef.current.emit('student-clear');
+            if (socketRef.current.connected) socketRef.current.emit('student-clear');
+            publishBoardSnapshot();
         }
         setClearProgress(0); // Reset slider
     };
@@ -934,6 +964,7 @@ export default function ClassStudent() {
         shapeDragRef.current = null;
         setBuzzerPending(true);
         setBuzzerNotice('');
+        snapshotsRef.current?.flush();
         socketRef.current?.emit('buzzer-press');
     };
 

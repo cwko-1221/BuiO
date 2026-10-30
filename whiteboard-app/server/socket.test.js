@@ -25,7 +25,7 @@ function nextEvent(socket, event, predicate = () => true) {
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function fixture(t, teacherReconnectGraceMs = 2000) {
+async function fixture(t, teacherReconnectGraceMs, serverOptions = {}) {
   const app = express();
   app.use(express.json());
   app.use((req, _res, next) => {
@@ -33,7 +33,7 @@ async function fixture(t, teacherReconnectGraceMs = 2000) {
     next();
   });
   const server = createServer(app);
-  const io = new Server(server);
+  const io = new Server(server, serverOptions);
   // Use test identities only; production obtains these from signed sessions.
   io.use((socket, next) => {
     socket.request.session = socket.handshake.auth;
@@ -94,6 +94,88 @@ async function fixture(t, teacherReconnectGraceMs = 2000) {
   return { api, client, join, baseUrl };
 }
 
+test('teacher disconnect defaults to two minutes without ending the classroom immediately', async t => {
+  const f = await fixture(t);
+  const teacher = await f.join('teacher', 'T1');
+  const student = await f.join();
+  const notice = nextEvent(student, 'teacher-connection', state => state.reconnecting);
+  const before = Date.now();
+  teacher.io.engine.close();
+  const state = await notice;
+  assert.ok(state.reconnectUntil >= before + 119_000 && state.reconnectUntil <= Date.now() + 120_000);
+  assert.equal((await f.api('/api/whiteboard/sessions')).sessions.length, 1);
+  assert.equal(student.received.some(item => item.event === 'error'), false);
+});
+
+test('a closed teacher tab expires without relying on any browser exit notification', async t => {
+  const f = await fixture(t, 200);
+  const teacher = await f.join('teacher', 'T1');
+  const student = await f.join();
+  const offline = nextEvent(student, 'teacher-connection', state => !state.connected);
+  teacher.io.engine.close();
+  await offline;
+  const ended = nextEvent(student, 'error');
+  await delay(30);
+  assert.equal((await f.api('/api/whiteboard/sessions')).sessions.length, 1);
+  assert.match(await ended, /老師連線中斷超過保留時間/);
+  assert.equal((await f.api('/api/whiteboard/sessions')).sessions.length, 0);
+});
+
+test('reload cancels expiry and preserves the original room and student boards', async t => {
+  const f = await fixture(t, 200);
+  const teacher = await f.join('teacher', 'T1');
+  const student = await f.join();
+  const saved = nextEvent(teacher, 'student-board-snapshot');
+  student.emit('student-board-snapshot', snapshot);
+  await saved;
+  const original = (await f.api('/api/whiteboard/sessions')).sessions[0];
+  teacher.io.engine.close();
+  const resumed = await f.join('teacher', 'T1');
+  await delay(250);
+  const session = (await f.api('/api/whiteboard/sessions')).sessions[0];
+  assert.equal(session.startTime, original.startTime);
+  assert.equal(session.teacherConnected, true);
+  assert.equal(resumed.received.find(item => item.event === 'student-board-snapshot').value.imageData, snapshot.imageData);
+  assert.equal(student.received.some(item => ['clear-board', 'error'].includes(item.event)), false);
+});
+
+test('28 simultaneous writers send live strokes only to the teacher and restore 14 disconnected boards', async t => {
+  const f = await fixture(t, 2000, { perMessageDeflate: { threshold: 512 } });
+  const teacher = await f.join('teacher', 'T1');
+  const students = await Promise.all(Array.from({ length: 28 }, (_, i) => f.join('student', `LOAD${i}`)));
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jm1cAAAAASUVORK5CYII=', 'base64');
+  const count = 120;
+  const allDraws = new Promise((resolve, reject) => {
+    let received = 0;
+    const timeout = setTimeout(() => reject(Error('Teacher missed live points')), 5000);
+    teacher.on('draw', () => { if (++received === count * 28) { clearTimeout(timeout); resolve(); } });
+  });
+  for (let point = 0; point < count; point++) {
+    for (const student of students) student.emit('draw', { state: point === 0 ? 'start' : point === count - 1 ? 'end' : 'move', x: point / count, y: 0.5, color: '#111827', size: 1.5 });
+    if (point % 8 === 0) await delay(2);
+  }
+  await allDraws;
+  const boards = students.map((_, i) => ({ imageData: png, baseImageData: null, strokes: [{ color: '#111827', size: 3, points: [{ x: i / 28, y: 0.5 }] }], shapes: [] }));
+  await Promise.all(students.map((student, i) => new Promise(resolve => student.emit('student-board-snapshot', boards[i], result => { assert.equal(result.success, true); resolve(); }))));
+  await delay(50);
+  assert.equal(teacher.received.filter(item => item.event === 'draw').length, count * 28);
+  for (const student of students) {
+    assert.equal(student.connected, true);
+    assert.equal(student.received.filter(item => item.event === 'draw').length, 0, 'classmates must receive no unnecessary pen traffic');
+  }
+  const checkpoint = teacher.received.find(item => item.event === 'student-board-snapshot').value;
+  assert.deepEqual(Object.keys(checkpoint).sort(), ['imageData', 'shapes', 'studentId']);
+  for (let i = 0; i < 14; i++) students[i].io.engine.close();
+  await delay(30);
+  const restored = await Promise.all(Array.from({ length: 14 }, (_, i) => f.join('student', `LOAD${i}`)));
+  for (let i = 0; i < restored.length; i++) {
+    const board = restored[i].received.find(item => item.event === 'student-board-snapshot').value;
+    assert.deepEqual(Buffer.from(board.imageData), png);
+    assert.deepEqual(board.strokes, boards[i].strokes.map(stroke => ({ ...stroke, isEraser: false })));
+  }
+  t.diagnostic(`${count * 28} live points delivered once each; previous room broadcast would deliver ${count * 28 * 28} copies (96.4% fewer); all 14 boards restored`);
+});
+
 test('anonymous sockets and HTTP requests cannot create or list classrooms', async t => {
   const f = await fixture(t);
   assert.equal((await f.api('/api/whiteboard/sessions',undefined,{role:'anonymous'})).status,401);
@@ -152,7 +234,7 @@ test('teacher transport loss preserves the room, boards, image, lock and buzzer 
   const resumed = await f.join('teacher', 'T1');
   await online;
   assert.equal(resumed.received.find(item => item.event === 'room-image').value, 'data:image/png;base64,lesson');
-  assert.deepEqual(resumed.received.find(item => item.event === 'student-board-snapshot').value.strokes, snapshot.strokes);
+  assert.equal(resumed.received.find(item => item.event === 'student-board-snapshot').value.imageData, snapshot.imageData);
   const restoredRound = resumed.received.find(item => item.event === 'buzzer-teacher-state').value;
   assert.equal(restoredRound.roundId, round.roundId);
   assert.equal(restoredRound.responseCount, 1);
@@ -298,7 +380,7 @@ test('visibility changes apply immediately and survive teacher reconnect; cleari
   const resumed = await f.join('teacher', 'T1', []);
   await delay(20);
   assert.deepEqual(resumed.received.find(item => item.event === 'room-audience').value.audienceRules, rules);
-  assert.deepEqual(resumed.received.find(item => item.event === 'student-board-snapshot').value.strokes, snapshot.strokes);
+  assert.equal(resumed.received.find(item => item.event === 'student-board-snapshot').value.imageData, snapshot.imageData);
   assert.equal((await f.api('/api/whiteboard/sessions', undefined, { role: 'student', studentId: 'S2' })).sessions.length, 0);
   await f.api('/api/whiteboard/sessions/lesson/audience', { audienceRules: [] }, { method: 'PUT' });
   assert.equal((await f.api('/api/whiteboard/sessions', undefined, { role: 'student', studentId: 'S2' })).sessions.length, 1);
